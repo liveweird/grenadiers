@@ -52,9 +52,10 @@ explicit public projection and phase events, completing M2 before the server ada
 [ADR 0008](decisions/0008-gameplay-protocol.md) and the [gameplay contract](game/protocol.md)
 define anonymous first-frame authentication, control/lifecycle messages, and bounded public
 snapshot/event wire shapes. Explicit fallible adapters check public domain state and bounded
-report windows before wire publication; they do not add gameplay routes or session handlers.
+report windows before wire publication. `POST /api/v1/game/session` now issues bounded,
+short-lived anonymous credentials using OS randomness; gameplay socket/room handlers follow.
 
-Map generation, lag compensation, room admission, authentication, and matchmaking
+Map generation, lag compensation, room admission, socket authentication, and matchmaking
 still need implementation at their planned milestones. Add focused ADRs before
 dependent work; preserve the specified lifecycle and gameplay rules.
 

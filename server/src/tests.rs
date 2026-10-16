@@ -99,11 +99,20 @@ fn openapi_declares_every_implemented_http_status() {
         ("/api/v1/health", ["200"].as_slice()),
         ("/api/v1/ready", ["200", "503"].as_slice()),
         ("/api/v1/ws", ["101", "400", "403", "503"].as_slice()),
+        (
+            "/api/v1/game/session",
+            ["201", "400", "403", "429", "503"].as_slice(),
+        ),
     ];
     for (path, statuses) in cases {
         for status in statuses {
+            let method = if path == "/api/v1/game/session" {
+                "post"
+            } else {
+                "get"
+            };
             assert!(
-                contract["paths"][path]["get"]["responses"]
+                contract["paths"][path][method]["responses"]
                     .get(*status)
                     .is_some(),
                 "{path} is missing status {status}"

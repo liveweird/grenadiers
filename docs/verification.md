@@ -1,5 +1,28 @@
 # Repository verification
 
+## M3 anonymous session issuance — 2026-10-17
+
+The integrated locked server gate passes **126 core tests, 24 server tests, and 1 doctest**.
+Rust coverage passes the unchanged 80% floor at **1,868/2,012 lines, 92.84%**. The complete
+web gate passes **46 tests**, all contract generation/lint/build checks, and unchanged coverage
+of **95.34% statements, 90% branches, 100% functions, 96.05% lines**. The E2E static gate passes
+with two documented scenarios, including the new real browser issuance checks.
+
+Deterministic server tests cover canonical unique credentials, inclusive expiry, atomic concurrent
+capacity, burst/refill boundaries, collisions, entropy failure, generic responses, exact/duplicate/
+non-UTF-8/null Origin handling, and tracing that excludes credential-bearing query strings.
+Independent review caught null-Origin configuration and out-of-order timestamp refill defects;
+both are fixed with regressions. Registry time now clamps under its mutex for consistent
+expiry and rate accounting. HTTP issuance grants no room/seat and no socket handler yet.
+
+A clean committed-tree build produces
+`sha256:6ee60a78bfac63db543f10577577332b65d35b86c1871d4da6137f50f847cca4`.
+Compose and ready local Kubernetes use this exact image. Separate health/readiness checks pass;
+the exact candidate browser suite passes **both scenarios** through each deployment path:
+actual session issuance/Origin/query/cache policy and independent diagnostic roundtrips/Axe.
+Strict schemas pass with 3 valid resources; pinned socket-free Trivy reports zero HIGH/CRITICAL
+vulnerabilities. Temporary deployments, port-forwards, exports, and archives are removed.
+
 ## M3 checked domain projection — 2026-10-17
 
 The locked server gate passes with **126 core unit tests, 9 server tests, and 1 doctest**.

@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.1.10 — 2026-10-17
+
+- Add `POST /api/v1/game/session` for anonymous 256-bit credentials, with exact Origin checks,
+  closed no-store responses, a bounded in-memory registry, and five-minute unclaimed expiry.
+- Limit issuance bursts/rate, handle entropy failures and collisions safely, and omit query
+  strings from HTTP tracing.
+- Document the real HTTP operation and exercise it through deterministic server tests and
+  blackbox browser requests.
+
+Tokens do not yet authenticate a gameplay socket or reserve a room/seat. Gameplay WebSocket
+handlers follow in the next increment; existing diagnostic transport remains available.
+
 ## 0.1.9 — 2026-10-17
 
 - Add explicit fallible conversion from public simulation state to bounded gameplay wire DTOs.

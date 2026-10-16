@@ -24,11 +24,7 @@ pub(crate) async fn issue_session(
         );
     }
 
-    let mut origins = headers.get_all(ORIGIN).iter();
-    let origin = origins.next().and_then(|value| value.to_str().ok());
-    if origins.next().is_some()
-        || origin.is_none_or(|value| value == "null" || !state.allowed_origins.contains(value))
-    {
+    if !origin_allowed(&headers, &state) {
         return with_no_store(
             Problem::new(StatusCode::FORBIDDEN, "Forbidden", "Origin is not allowed").response(),
         );
@@ -66,4 +62,11 @@ pub(crate) async fn issue_session(
             .response(),
         ),
     }
+}
+
+pub(super) fn origin_allowed(headers: &HeaderMap, state: &AppState) -> bool {
+    let mut origins = headers.get_all(ORIGIN).iter();
+    let origin = origins.next().and_then(|value| value.to_str().ok());
+    origins.next().is_none()
+        && origin.is_some_and(|value| value != "null" && state.allowed_origins.contains(value))
 }

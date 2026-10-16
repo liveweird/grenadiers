@@ -64,6 +64,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/game/ws": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Connect an authenticated gameplay WebSocket
+         * @description Upgrades to the gameplay protocol. The first application frame must authenticate with a credential created by POST /api/v1/game/session. Credentials are never accepted in URLs.
+         */
+        get: operations["connectGame"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/ws": {
         parameters: {
             query?: never;
@@ -212,6 +232,66 @@ export interface operations {
                 };
             };
             /** @description Session registry capacity exhausted or credential generation unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+        };
+    };
+    connectGame: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Exact non-null browser origin from ALLOWED_ORIGINS. */
+                Origin: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Switching protocols; client must send an authenticate frame first. */
+            101: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Query parameters are unsupported or the WebSocket handshake is malformed. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                    "text/plain": string;
+                };
+            };
+            /** @description Missing, duplicated, null, malformed, or disallowed Origin */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Global gameplay connection rate exceeded */
+            429: {
+                headers: {
+                    /** @description Minimum delay in seconds before retrying. */
+                    "Retry-After"?: 1;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Shared WebSocket connection capacity exhausted */
             503: {
                 headers: {
                     [name: string]: unknown;

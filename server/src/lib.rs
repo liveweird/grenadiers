@@ -25,7 +25,7 @@ use tokio::{
 
 mod game;
 
-use game::{GameSessions, issue_session};
+use game::{GameSessions, game_websocket, issue_session};
 use tower_http::{
     services::{ServeDir, ServeFile},
     trace::TraceLayer,
@@ -152,6 +152,7 @@ pub fn app(state: AppState, web_dist_dir: Option<PathBuf>) -> Router {
         .route("/api/v1/ready", get(ready))
         .route("/api/v1/ws", get(websocket))
         .route("/api/v1/game/session", post(issue_session))
+        .route("/api/v1/game/ws", get(game_websocket))
         .route("/api", any(api_not_found))
         .route("/api/", any(api_not_found))
         .route("/api/{*path}", any(api_not_found))
@@ -316,5 +317,8 @@ async fn api_not_found() -> Response {
 #[cfg(test)]
 #[path = "game/http_tests.rs"]
 mod game_http_tests;
+#[cfg(test)]
+#[path = "game/socket_tests.rs"]
+mod game_socket_tests;
 #[cfg(test)]
 mod tests;

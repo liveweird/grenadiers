@@ -1,5 +1,28 @@
 # Repository verification
 
+## M3 bounded-schema prerequisite — 2026-10-17
+
+The complete web gate passes after a clean locked npm install: generated diagnostic types
+remain byte-identical; API lint/drift, ESLint, Knip, shuffled Vitest coverage, and production
+build pass. **31 web/tooling tests** pass, including 8 generator tests. Application coverage
+remains **95.34% statements, 90% branches, 100% functions, 96.05% lines** against unchanged
+85% floors. Independent review and targeted AJV Unicode-pattern parity checks pass.
+
+The version-aligned Rust server gate also passes: **97 core unit tests, 9 server tests,
+1 doctest**; coverage remains **1,321/1,406 lines, 93.95%**. No dependencies or current wire
+contracts change. Invalid bounds, malformed patterns, and misplaced/unknown keywords remain
+rejected rather than silently generating misleading types. Runtime AJV, rather than ordinary
+TypeScript string/array types, enforces the newly admitted constraints.
+
+
+A clean Git-tree image build passes for
+`sha256:19d8588a227e4f36f1a6b53e704a9f3333481392359f5aa48fdace614b662919`.
+Compose and ready local Kubernetes use that image. Health/readiness and actual two-context
+WebSocket/Axe browser checks pass through both paths; strict schemas report 3 valid resources.
+Pinned socket-free Trivy passes with zero fixable HIGH/CRITICAL findings. Temporary runtime
+resources and archives are removed. Rebase onto completed M2 changes documentation only;
+application and package inputs match the tested candidate.
+
 ## M2D public projection and phase events — 2026-10-17
 
 The locked server gate passes with **97 core unit tests, 9 server tests, and 1 public API

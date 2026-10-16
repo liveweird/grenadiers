@@ -6,12 +6,18 @@ const supportedKeywords = new Set([
   'const',
   'enum',
   'items',
+  'maxItems',
+  'maxLength',
   'maximum',
+  'minItems',
+  'minLength',
   'minimum',
   'oneOf',
+  'pattern',
   'properties',
   'required',
   'type',
+  'uniqueItems',
 ])
 const reservedTypeNames = new Set([
   'Record',
@@ -154,6 +160,21 @@ function assertOnlyKeywords(schema, allowed, path) {
   }
 }
 
+function validateBoundedCount(schema, minimumKeyword, maximumKeyword, path) {
+  for (const keyword of [minimumKeyword, maximumKeyword]) {
+    if (keyword in schema && (!Number.isSafeInteger(schema[keyword]) || schema[keyword] < 0)) {
+      fail(path, `${keyword} must be a non-negative safe integer`)
+    }
+  }
+  if (
+    minimumKeyword in schema &&
+    maximumKeyword in schema &&
+    schema[minimumKeyword] > schema[maximumKeyword]
+  ) {
+    fail(path, `${minimumKeyword} must not exceed ${maximumKeyword}`)
+  }
+}
+
 function validateSchema(schema, definitions, path) {
   assertRecord(schema, path)
   assertKnownKeywords(schema, path)
@@ -189,8 +210,12 @@ function validateSchema(schema, definitions, path) {
     fail(path, `type ${JSON.stringify(schema.type)}`)
   }
   if (schema.type === 'array') {
-    assertOnlyKeywords(schema, new Set(['type', 'items']), path)
+    assertOnlyKeywords(schema, new Set(['type', 'items', 'minItems', 'maxItems', 'uniqueItems']), path)
     if (!('items' in schema)) fail(path, 'arrays require items')
+    validateBoundedCount(schema, 'minItems', 'maxItems', path)
+    if ('uniqueItems' in schema && typeof schema.uniqueItems !== 'boolean') {
+      fail(path, 'uniqueItems must be a boolean')
+    }
     validateSchema(schema.items, definitions, `${path}.items`)
   } else if (schema.type === 'object') {
     assertOnlyKeywords(schema, new Set(['type', 'additionalProperties', 'properties', 'required']), path)
@@ -253,10 +278,21 @@ function rejectUnguardedAliasCycles(definitions) {
 }
 
 function validatePrimitive(schema, path) {
-  const allowed = ['integer', 'number'].includes(schema.type)
-    ? new Set(['type', 'minimum', 'maximum'])
-    : new Set(['type'])
+  let allowed = new Set(['type'])
+  if (['integer', 'number'].includes(schema.type)) allowed = new Set(['type', 'minimum', 'maximum'])
+  if (schema.type === 'string') allowed = new Set(['type', 'minLength', 'maxLength', 'pattern'])
   assertOnlyKeywords(schema, allowed, path)
+  if (schema.type === 'string') {
+    validateBoundedCount(schema, 'minLength', 'maxLength', path)
+    if ('pattern' in schema) {
+      if (typeof schema.pattern !== 'string') fail(path, 'pattern must be a string')
+      try {
+        new RegExp(schema.pattern, 'u')
+      } catch {
+        fail(path, 'pattern must be a valid ECMAScript Unicode regular expression')
+      }
+    }
+  }
   for (const keyword of ['minimum', 'maximum']) {
     if (keyword in schema && typeof schema[keyword] !== 'number') fail(path, `${keyword} must be a number`)
   }

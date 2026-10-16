@@ -12,8 +12,8 @@ Origin headers. Cover readiness failure, invalid payloads, denied origins, conne
 and API/SPA separation. Keep tests independent and use bounded timeouts rather than sleeps.
 
 `cargo test --workspace --locked` runs the suite. Clippy denies warnings. Coverage uses
-`cargo-llvm-cov` **0.9.1** and an initial **80% line floor**, enforced in CI. This initial floor
-is a policy target pending the first runnable Rust measurement, not a measured claim.
+`cargo-llvm-cov` **0.9.1** and an **80% line floor**, enforced in CI. Current measurements
+and candidate evidence are recorded in [verification](verification.md).
 Install with `cargo install cargo-llvm-cov --version 0.9.1 --locked`, then
 `rustup component add llvm-tools-preview` and `scripts/gates.sh coverage`.
 Stable branch coverage equivalent to Flow's Kover gate is not configured.
@@ -40,6 +40,12 @@ Vitest also discovers `web/scripts/*.test.mjs`: generator tests compile represen
 TypeScript assignments, API linter tests prove rule enforcement, and Kubernetes checker tests
 exercise rendered YAML invariants.
 These run in the shared web gate; the coverage floor measures application code in `src/`.
+
+The realtime generator supports explicit string `minLength`/`maxLength`/`pattern` and array
+`minItems`/`maxItems`/`uniqueItems`. Bounds must be ordered nonnegative safe integers; patterns
+must compile as ECMAScript Unicode regular expressions. Unknown and misplaced keywords fail
+closed. Generated TypeScript remains ordinary string/array types; AJV enforces runtime bounds
+and patterns. Keep generator tests and actual schema validation alongside contract changes.
 
 ## Browser and security
 

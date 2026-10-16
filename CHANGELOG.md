@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.1.6 — 2026-10-17
+
+- Support bounded strings, Unicode regular-expression patterns, bounded arrays, and
+  uniqueness constraints in the explicit realtime type generator.
+- Reject malformed, reversed, unsafe, or misplaced constraints while preserving existing
+  fail-closed schema handling and byte-identical diagnostic types.
+- Add nested contract compilation and validation regressions for gameplay credentials
+  and bounded snapshots. Runtime AJV validation continues to enforce these constraints.
+
+This tooling prerequisite starts M3; gameplay endpoints and browser play follow separately.
+
 ## 0.1.5 — 2026-10-17
 
 - Add explicit public-state DTOs for the arena, players, bombs, flames, timer, and result,

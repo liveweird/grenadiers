@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.1.11 — 2026-10-17
+
+- Add a pure headless two-seat room lifecycle for occupancy, readiness, the exact 180-tick
+  countdown, running updates, results, and preview interruptions.
+- Fence canceled countdowns with increasing round attempts, clear readiness consistently,
+  and preserve terminal outcomes after either explicit departure or transport loss.
+- Precheck clock/deadline/attempt arithmetic so errors leave lifecycle state unchanged.
+
+This domain API does not create networked rooms. Authenticated gameplay sockets and room
+ownership/routing follow separately.
+
 ## 0.1.10 — 2026-10-17
 
 - Add `POST /api/v1/game/session` for anonymous 256-bit credentials, with exact Origin checks,

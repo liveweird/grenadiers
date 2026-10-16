@@ -8,7 +8,8 @@ Status: **working baseline**, with numerical tuning still subject to playtesting
 playable target remains two human players. M1 implements the
 [headless world and movement model](movement.md); M2 adds [bombs, flames, damage, and round
 outcomes](combat.md), including explicit public projections/events. M2 is complete;
-networked browser integration follows in M3.
+M3 implements [gameplay contracts](protocol.md), anonymous HTTP sessions, and the pure
+[room lifecycle](rooms.md); authenticated sockets and playable browser integration follow.
 
 Start with [the rules specification](rules.md) and the
 [implementation and release plan](implementation-plan.md). Historical examples and optional extensions
@@ -27,5 +28,5 @@ a particular release and platform; “Bomberman” and “Dyna Blaster” do not
 
 The release plan defines the maintained milestone dependencies, work packages, RULE coverage,
 and release gates. The near-term sequence is verified foundation, playable two-browser duel,
-classic match progression, then reconnect resilience and playtest hardening. All milestones
-remain planned until their exit evidence exists in the maintained plan and verification record.
+classic match progression, then reconnect resilience and playtest hardening. Mark a milestone complete only when its exit evidence exists in the maintained plan and
+verification record.

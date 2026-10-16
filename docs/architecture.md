@@ -55,6 +55,10 @@ snapshot/event wire shapes. Explicit fallible adapters check public domain state
 report windows before wire publication. `POST /api/v1/game/session` now issues bounded,
 short-lived anonymous credentials using OS randomness; gameplay socket/room handlers follow.
 
+[ADR 0009](decisions/0009-room-lifecycle.md) keeps the implemented headless two-seat
+[lifecycle](game/rooms.md) in `core::room`. Credentials, discovery, binding generations,
+publication, and the asynchronous room owner stay outside that pure state machine.
+
 Map generation, lag compensation, room admission, socket authentication, and matchmaking
 still need implementation at their planned milestones. Add focused ADRs before
 dependent work; preserve the specified lifecycle and gameplay rules.

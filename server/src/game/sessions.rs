@@ -63,6 +63,7 @@ impl GameSessions {
             .registry
             .lock()
             .unwrap_or_else(|error| error.into_inner());
+        let now = registry.effective_now(now);
         registry.prune(now);
         registry.rate_limit.refill(now);
 
@@ -103,6 +104,7 @@ impl GameSessions {
 struct Registry {
     sessions: HashMap<SessionToken, Instant>,
     rate_limit: MintBucket,
+    latest_now: Instant,
 }
 
 impl Registry {
@@ -113,7 +115,15 @@ impl Registry {
                 available: MINT_BURST,
                 updated_at: now,
             },
+            latest_now: now,
         }
+    }
+
+    // Requests capture time before taking the mutex. Clamp that value once so
+    // every registry operation observes the same nondecreasing timeline.
+    fn effective_now(&mut self, captured_now: Instant) -> Instant {
+        self.latest_now = self.latest_now.max(captured_now);
+        self.latest_now
     }
 
     fn prune(&mut self, now: Instant) {
@@ -128,7 +138,9 @@ struct MintBucket {
 
 impl MintBucket {
     fn refill(&mut self, now: Instant) {
-        let elapsed = now.saturating_duration_since(self.updated_at);
+        let Some(elapsed) = now.checked_duration_since(self.updated_at) else {
+            return;
+        };
         self.available =
             (self.available + elapsed.as_secs_f64() * MINTS_PER_SECOND).min(MINT_BURST);
         self.updated_at = now;

@@ -26,7 +26,8 @@ pub(crate) async fn issue_session(
 
     let mut origins = headers.get_all(ORIGIN).iter();
     let origin = origins.next().and_then(|value| value.to_str().ok());
-    if origins.next().is_some() || origin.is_none_or(|value| !state.allowed_origins.contains(value))
+    if origins.next().is_some()
+        || origin.is_none_or(|value| value == "null" || !state.allowed_origins.contains(value))
     {
         return with_no_store(
             Problem::new(StatusCode::FORBIDDEN, "Forbidden", "Origin is not allowed").response(),

@@ -103,6 +103,14 @@ async fn session_route_requires_an_exact_allowed_origin() {
         let body = assert_problem(response, StatusCode::FORBIDDEN, "Origin is not allowed").await;
         assert_eq!(body, expected);
     }
+
+    let response = issue(
+        AppState::without_database(["null".to_owned()]),
+        Some("null"),
+    )
+    .await;
+    let body = assert_problem(response, StatusCode::FORBIDDEN, "Origin is not allowed").await;
+    assert_eq!(body, expected);
 }
 
 #[tokio::test]

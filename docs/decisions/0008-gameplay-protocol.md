@@ -1,7 +1,7 @@
 # ADR 0008: Anonymous gameplay protocol and single-round preview boundary
 
 Status: accepted; control/lifecycle, snapshot/event definitions, and checked domain adapters
-are implemented. Runtime handlers follow.
+and anonymous HTTP session issuance are implemented. Gameplay socket/room handlers follow.
 
 ## Decision
 
@@ -10,7 +10,7 @@ and planned `/api/v1/game/ws` endpoint. Product, diagnostic, gameplay, and rules
 independent. Validate the first authentication frame before any seat/room mutation; a bounded
 unsupported version receives an explicit incompatibility response before credential lookup.
 
-The planned session endpoint issues a 256-bit OS-random token. Keep it in tab memory and send
+The session endpoint issues a 256-bit OS-random token. Keep it in tab memory and send
 it only in the first socket frame, never a URL or log. Redact token Debug output and discard
 payload-bearing parser errors. One live connection owns a credential. Exact Origin checks
 remain required but do not establish identity; the server binds connections to seats.

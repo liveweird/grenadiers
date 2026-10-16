@@ -61,6 +61,44 @@ fn rate_limit_has_burst_of_32_and_refills_fractionally() {
 }
 
 #[test]
+fn out_of_order_captured_time_credits_each_refill_interval_once() {
+    let start = Instant::now();
+    let sessions = deterministic_sessions(start);
+    for _ in 0..32 {
+        sessions.issue(start).unwrap();
+    }
+
+    let later = start + Duration::from_millis(125);
+    sessions.issue(later).unwrap();
+    assert!(matches!(
+        sessions.issue(start),
+        Err(SessionIssueError::RateLimited)
+    ));
+    assert!(matches!(
+        sessions.issue(later),
+        Err(SessionIssueError::RateLimited)
+    ));
+}
+
+#[test]
+fn out_of_order_issuance_uses_effective_time_for_expiry() {
+    let start = Instant::now();
+    let later = start + Duration::from_secs(1);
+    let sessions = deterministic_sessions(start);
+    sessions.issue(later).unwrap();
+    sessions.issue(start).unwrap();
+
+    let registry = sessions.registry.lock().unwrap();
+    assert_eq!(registry.sessions.len(), 2);
+    assert!(
+        registry
+            .sessions
+            .values()
+            .all(|expires_at| *expires_at == later + SESSION_LIFETIME)
+    );
+}
+
+#[test]
 fn capacity_is_128_and_expiry_is_inclusive() {
     let start = Instant::now();
     let sessions = deterministic_sessions(start);

@@ -1,14 +1,26 @@
 # Gameplay protocol
 
-Status: control/lifecycle, snapshot/event contracts, and checked domain conversion. `api/gameplay.schema.json`, independent Rust
+Status: gameplay contracts, checked domain conversion, and HTTP session issuance. `api/gameplay.schema.json`, independent Rust
 `core::protocol` types, and generated `web/src/game/schema.ts` define messages; gameplay
-endpoints, room handlers, and browser controls remain planned.
+gameplay WebSocket endpoint, room handlers, and browser controls remain planned.
 Diagnostic `/api/v1/ws` and `api/realtime.schema.json` remain unchanged.
 
 ## Authentication and compatibility
 
-The planned gameplay socket is `/api/v1/game/ws`; session issuance will arrive with its HTTP
-handler and OpenAPI operation. The first application frame is:
+`POST /api/v1/game/session` issues an anonymous credential. Send exactly one configured
+`Origin` header and no query parameters; no request body is needed. The 201 response is a
+closed JSON object `{"token":"<64 lowercase hex characters>"}` with `Cache-Control: no-store`.
+No cookie or Location is set. An unclaimed credential expires after 300 seconds and grants no
+room or seat. Restart discards all credentials.
+
+Issuance is bounded to 128 live credentials, with a global burst of 32 and refill of eight
+per second. Disallowed/missing/duplicate Origin returns 403; a nonempty query returns 400;
+rate exhaustion returns 429 with `Retry-After: 1`; capacity/entropy failure returns a generic
+503 problem. Every handler response disables caching. HTTP tracing records method/path,
+excluding query strings. The operation and failures are defined in `api/openapi.json`.
+
+The planned gameplay socket is `/api/v1/game/ws`; its handler is not implemented yet.
+Its first application frame will be:
 
 ```json
 {"type":"authenticate","protocolVersion":1,"token":"0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"}

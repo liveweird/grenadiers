@@ -11,6 +11,7 @@ pub struct RulesConfig {
     bomb_capacity: u16,
     bomb_range: u16,
     bomb_fuse_ticks: u64,
+    flame_ticks: u64,
 }
 
 impl RulesConfig {
@@ -25,6 +26,7 @@ impl RulesConfig {
             bomb_capacity: 1,
             bomb_range: 2,
             bomb_fuse_ticks: 180,
+            flame_ticks: 30,
         }
     }
 
@@ -66,6 +68,11 @@ impl RulesConfig {
     #[must_use]
     pub const fn bomb_fuse_ticks(self) -> u64 {
         self.bomb_fuse_ticks
+    }
+
+    #[must_use]
+    pub const fn flame_ticks(self) -> u64 {
+        self.flame_ticks
     }
 }
 

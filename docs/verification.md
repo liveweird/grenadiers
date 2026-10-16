@@ -1,5 +1,28 @@
 # Repository verification
 
+## M2B explosions and flames — 2026-10-17
+
+The explosion increment passes the locked server gate. The final suite has **78 core unit
+tests, 9 server tests, and 1 public API doctest**. Rust line coverage passes the unchanged
+80% floor at **1,125/1,216 lines, 92.52%**. Independent review has no remaining actionable
+findings after strengthening the shared-block snapshot and same-tick placement-chain tests.
+
+Evidence covers exact fuse/expiry boundaries, wall/block/bomb obstruction, complete-chain
+occupancy, repeated triggers, bomb-ID permutations, overlapping flames, active-fire ignition,
+soft-block removal, grace cleanup, and capacity becoming available on the following tick.
+This core-only increment changes no dependencies, wire contracts, browser behavior, or
+deployment manifests. Actor damage and round results remain deferred.
+
+
+A clean Git-tree image build passes. The tested image is
+`sha256:3efcdc07674e7b8eb1a5271eadce170b87fa90584abd1f75a4e7fcdeeefd35bc`.
+Compose and a ready local Kubernetes rollout use that image; health/readiness and the
+actual two-context WebSocket/Axe browser scenario pass through both deployment paths.
+Strict schemas pass with 3 valid resources. Pinned Trivy's archive-input scan finds zero
+fixable HIGH/CRITICAL vulnerabilities under the unchanged policy. Temporary runtime
+resources and archives are cleaned up. Rebase onto v0.1.2 changes documentation only;
+reviewed Rust/package/application inputs remain byte-identical.
+
 ## M2A owned bomb placement — 2026-10-17
 
 The placement increment passes `scripts/gates.sh server` with **63 core unit tests,

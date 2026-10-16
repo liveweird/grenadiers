@@ -48,7 +48,8 @@ transport layer will still need authentication, sequencing, expiry, and queue/ra
 `InputAction::PlaceBomb` requests one bomb in the actor's cell after movement. Each actor
 starts with capacity one and range two. A bomb captures owner, range, placement tick, and
 a deadline 180 ticks later. `World::bombs()` exposes complete records; `live_bomb_count(seat)`
-derives ownership counts. Fuse execution, explosions, and damage follow in later M2 increments.
+derives ownership counts. Fuses and flames now execute; [combat phases](combat.md) describe
+their timing and immutable occupancy rules. Player damage follows in the next increment.
 
 Requests are one-shot and coalesced per seat; `Clear` cancels earlier requests in the same
 batch. Placement requires capacity and an unblocked floor cell without an existing bomb.
@@ -58,7 +59,8 @@ Distinct placements commit in seat order. Failure consumes neither an ID nor cap
 Every overlapping actor receives an exemption and can leave. Exact boundary clearance
 revokes that exemption before any further segment; re-entry or crossing another bomb is blocked.
 The earlier `add_bomb_obstacle` API is retired; collision fixtures use test-only owned bombs.
-Pickup and hazard layers do not yet apply effects. See [ADR 0004](../decisions/0004-bomb-placement.md)
+Pickups remain inert until M4. Hazards now carry exclusive flame expiry ticks and can ignite
+bombs; actors are not yet damaged. See [ADR 0004](../decisions/0004-bomb-placement.md)
 for placement ordering, identity allocation, and compatibility decisions.
 
 ## Verification and next integration
@@ -67,6 +69,6 @@ Run `cargo test -p grenadiers-core --locked` for arena, input, geometry, movemen
 determinism tests, plus the public API example. The workspace gate and coverage floor still
 apply: `scripts/gates.sh server` and `scripts/gates.sh coverage`.
 
-M2 will consume the traces for combat and extend the same state transition. M3 will introduce
+The remaining M2 work will consume the traces for damage and add round results. M3 will introduce
 versioned public gameplay contracts and [PixiJS rendering](../decisions/0003-arena-rendering.md).
 Identical input logs must reproduce complete states independently of browser frame rate.

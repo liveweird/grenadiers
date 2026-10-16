@@ -151,9 +151,11 @@ selects PixiJS for M3; M1 installs no graphics dependency. The next bounded task
 
 **Depends on:** M1.
 
-Progress: owned bomb placement is implemented for v0.1.2. Remaining slices are explosions/flames,
-damage/round finalization, and explicit public projections/events. Fuse deadlines are recorded
-but not executed by the placement increment. See [ADR 0004](../decisions/0004-bomb-placement.md).
+Progress: v0.1.2 implements owned bomb placement; v0.1.3 adds fuse execution, immutable chain
+planning, block destruction, and timed flames. Remaining slices are damage/round finalization
+and explicit public projections/events. See [combat phases](combat.md),
+[ADR 0004](../decisions/0004-bomb-placement.md), and
+[ADR 0005](../decisions/0005-explosion-snapshot.md).
 
 Work packages:
 

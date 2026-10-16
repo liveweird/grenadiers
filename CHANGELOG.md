@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.1.3 — 2026-10-17
+
+- Execute bomb fuses and same-tick chains against one immutable occupancy snapshot.
+- Stop cardinal blast rays at walls, soft blocks, and other bombs; remove hit soft blocks
+  after planning the complete chain.
+- Add 30-tick flames with exclusive expiry, overlapping lifetime extension, and bomb ignition.
+- Release bomb capacity once, available for placement on the following tick.
+
+This headless increment adds explosions and flames. Player damage, round outcomes,
+public gameplay snapshots, and browser play follow separately.
+
 ## 0.1.2 — 2026-10-17
 
 - Add owned bomb placement after movement, one live bomb per player, captured range,

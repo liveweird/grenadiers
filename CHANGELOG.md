@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.1.5 — 2026-10-17
+
+- Add explicit public-state DTOs for the arena, players, bombs, flames, timer, and result,
+  excluding private input, movement bookkeeping, collision grace, and allocator state.
+- Emit deterministic placement, detonation, elimination, and round-end events in actual
+  phase order, preserving placement and explosion within the same tick.
+- Complete the headless M2 combat boundary for the future gameplay transport.
+
+Networked rooms and browser gameplay follow in M3. Domain DTOs are independent of
+wire schemas and do not serialize the internal world directly.
+
 ## 0.1.4 — 2026-10-17
 
 - Add swept contact damage from existing fire and final-footprint damage from new explosions.

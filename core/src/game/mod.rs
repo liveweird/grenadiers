@@ -26,6 +26,7 @@
 
 pub mod arena;
 pub mod bombs;
+pub mod events;
 mod explosions;
 pub mod fixtures;
 pub mod geometry;
@@ -36,10 +37,12 @@ pub mod simulation;
 #[cfg(test)]
 pub(crate) mod test_support;
 pub mod types;
+pub mod view;
 pub mod world;
 
 pub use arena::{Arena, ArenaError, Terrain};
 pub use bombs::Bomb;
+pub use events::{StepEvent, StepEventKind};
 pub use fixtures::fixed_arena;
 pub use geometry::{MovementSegment, MovementTrace};
 pub use input::{Direction, HeldDirections};
@@ -49,4 +52,5 @@ pub use simulation::{
     StepError, StepReport,
 };
 pub use types::{CellId, EntityId, Position, SeatId, SpeedLevel, Tick};
+pub use view::{ActorView, ArenaView, BombView, FlameView, PublicState};
 pub use world::World;

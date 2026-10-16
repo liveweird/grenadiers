@@ -46,9 +46,27 @@ After finalization, actor state, world layers, the running counter, and result r
 Input-size and clock-overflow validation still applies atomically. See
 [ADR 0006](../decisions/0006-round-finalization.md).
 
+## Public state and events
+
+`State::public_view()` returns an owned `PublicState`: rules version, absolute tick, Running
+and remaining updates, row-major terrain, sorted soft blocks, seat-ordered actors, bombs,
+flames, and result. `ArenaView`, `ActorView`, `BombView`, and `FlameView` copy visible values.
+Private input priority, movement fractions, pending turns, collision grace, allocator state,
+and future concealed item contents are excluded.
+
+`StepReport::events` contains completed-tick `StepEvent` records. `StepEventKind` covers
+`BombPlaced`, `BombDetonated`, `ActorEliminated`, and `RoundEnded` in actual phase order.
+Placement and elimination use seat order; detonations use entity-ID order. A bomb placed and
+exploded in one tick produces both complete bomb records, even though no bomb remains in the
+snapshot. Failed requests and test fixture insertion emit nothing; finalized rounds produce
+no repeated events. See [ADR 0007](../decisions/0007-public-state-events.md).
+
+These are domain DTOs, independent of Serde and network schemas. M3 will convert this explicit
+boundary into reviewed wire messages; it must not serialize the internal world wholesale.
+
 ## Current scope and checks
 
-Public projection/events complete M2 next. Pickups and generated arenas belong to M4.
+The headless M2 boundary is implemented. Pickups and generated arenas belong to M4.
 Server scheduling, gameplay transport, and PixiJS rendering begin in M3; the browser still
 shows transport diagnostics. Match scoring, countdowns, and rematches follow in M5.
 

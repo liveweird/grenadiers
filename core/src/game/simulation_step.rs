@@ -3,10 +3,12 @@ use std::collections::BTreeMap;
 use super::{InputAction, RoundResult, SeatInput, State, StepError, StepReport};
 use crate::game::arena::Terrain;
 use crate::game::bombs::Bomb;
+use crate::game::events::{StepEvent, StepEventKind};
 use crate::game::geometry::MovementTrace;
 use crate::game::movement;
 use crate::game::simulation::DrawReason;
 use crate::game::types::{CellId, EntityId, SeatId, Tick};
+use crate::game::view::BombView;
 
 impl State {
     pub fn step(&mut self, inputs: &[SeatInput]) -> Result<StepReport, StepError> {
@@ -22,22 +24,27 @@ impl State {
             return Ok(StepReport {
                 tick: next_tick,
                 traces: self.stationary_traces(),
+                events: Vec::new(),
             });
         }
 
+        let mut events = Vec::new();
         self.expire_flames(next_tick);
         let placement_requests = self.apply_inputs(inputs);
         let traces = self.move_living();
-        self.kill_on_existing_flames(&traces);
-        self.resolve_placements(placement_requests, next_tick);
-        self.resolve_explosions(next_tick);
-        self.kill_on_final_flames();
+        self.kill_on_existing_flames(&traces, next_tick, &mut events);
+        self.resolve_placements(placement_requests, next_tick, &mut events);
+        self.resolve_explosions(next_tick, &mut events);
+        self.kill_on_final_flames(next_tick, &mut events);
         self.running_updates += 1;
-        self.decide_result();
+        if let Some(result) = self.decide_result() {
+            events.push(StepEvent::new(next_tick, StepEventKind::RoundEnded(result)));
+        }
         self.tick = next_tick;
         Ok(StepReport {
             tick: next_tick,
             traces,
+            events,
         })
     }
 
@@ -80,15 +87,27 @@ impl State {
         })
     }
 
-    fn kill_on_existing_flames(&mut self, traces: &[MovementTrace; 2]) {
+    fn kill_on_existing_flames(
+        &mut self,
+        traces: &[MovementTrace; 2],
+        tick: Tick,
+        events: &mut Vec<StepEvent>,
+    ) {
         for (actor, trace) in self.actors.iter_mut().zip(traces) {
             if actor.alive && trace_hits_hazards(trace, &self.world.hazards) {
                 actor.kill();
+                events.push(StepEvent::new(
+                    tick,
+                    StepEventKind::ActorEliminated {
+                        id: actor.id,
+                        seat: actor.seat,
+                    },
+                ));
             }
         }
     }
 
-    fn kill_on_final_flames(&mut self) {
+    fn kill_on_final_flames(&mut self, tick: Tick, events: &mut Vec<StepEvent>) {
         for actor in &mut self.actors {
             if actor.alive
                 && self
@@ -98,11 +117,18 @@ impl State {
                     .any(|cell| movement::position_overlaps_cell(actor.position, *cell))
             {
                 actor.kill();
+                events.push(StepEvent::new(
+                    tick,
+                    StepEventKind::ActorEliminated {
+                        id: actor.id,
+                        seat: actor.seat,
+                    },
+                ));
             }
         }
     }
 
-    fn resolve_placements(&mut self, requests: [bool; 2], tick: Tick) {
+    fn resolve_placements(&mut self, requests: [bool; 2], tick: Tick, events: &mut Vec<StepEvent>) {
         let mut targets = [None; 2];
         for seat in SeatId::ALL {
             let actor = &self.actors[seat.index()];
@@ -132,14 +158,19 @@ impl State {
                 continue;
             };
             let actor = &self.actors[seat.index()];
-            self.insert_bomb(Bomb {
+            let bomb = Bomb {
                 id,
                 cell,
                 owner: actor.id,
                 range: actor.range,
                 placed_at: tick,
                 detonates_at,
-            });
+            };
+            self.insert_bomb(bomb);
+            events.push(StepEvent::new(
+                tick,
+                StepEventKind::BombPlaced(BombView::from(bomb)),
+            ));
         }
     }
 
@@ -169,7 +200,7 @@ impl State {
         }
     }
 
-    fn decide_result(&mut self) {
+    fn decide_result(&mut self) -> Option<RoundResult> {
         self.result = match [self.actors[0].alive, self.actors[1].alive] {
             [true, false] => Some(RoundResult::Winner(SeatId::One)),
             [false, true] => Some(RoundResult::Winner(SeatId::Two)),
@@ -179,6 +210,7 @@ impl State {
             }
             [true, true] => None,
         };
+        self.result
     }
 
     fn stationary_traces(&self) -> [MovementTrace; 2] {

@@ -1,5 +1,19 @@
 # Repository verification
 
+## M2D public projection and phase events — 2026-10-17
+
+The locked server gate passes with **97 core unit tests, 9 server tests, and 1 public API
+doctest**. Rust line coverage passes the unchanged 80% floor at **1,321/1,406 lines, 93.95%**.
+Independent review reports no actionable findings or material coverage gaps. No dependencies,
+wire contracts, browser behavior, or deployment manifests change.
+
+Projection tests verify visible layers, ownership counts, timer/result values, stable ordering,
+and equality despite different private movement/input/grace/allocator bookkeeping. Event tests
+prove same-tick placement/detonation remains observable, old-fire elimination precedes survivor
+placement, canonical seat/ID ordering, and no failed-placement, fixture, or repeated terminal
+events. Earlier movement, combat, timeout, and atomic-error regressions remain passing.
+
+
 ## M2C damage and one-round outcomes — 2026-10-17
 
 The locked server gate passes with **90 core unit tests, 9 server tests, and 1 public API

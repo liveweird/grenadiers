@@ -1,7 +1,8 @@
 # Grenadiers Implementation and Release Plan
 
 Status: **execution plan**. M0 is complete and locally verified on 2026-10-16; M1 is complete
-and locally verified on 2026-10-17. M2 is in progress; M3–M8 remain planned.
+and locally verified on 2026-10-17. M2 implementation is complete and undergoing final
+release verification; M3–M8 remain planned.
 Published engineering prereleases are listed in `CHANGELOG.md` and GitHub Releases.
 
 The first product goal is a reliable, browser-based survival match between two humans. Build
@@ -154,7 +155,8 @@ selects PixiJS for M3; M1 installs no graphics dependency. The next bounded task
 
 Progress: v0.1.2 implements owned bomb placement; v0.1.3 adds fuse execution, immutable chain
 planning, block destruction, and timed flames. v0.1.4 adds damage, exact timeout, and immutable
-round outcomes. Explicit public projections/events remain before M2 is complete. See [combat phases](combat.md),
+round outcomes. v0.1.5 adds explicit public projections and actual-phase events, completing
+the headless implementation. See [combat phases](combat.md),
 [ADR 0004](../decisions/0004-bomb-placement.md), and
 [ADR 0005](../decisions/0005-explosion-snapshot.md).
 

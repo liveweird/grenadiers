@@ -1,5 +1,36 @@
 # Repository verification
 
+## M3 authenticated gameplay WebSocket — 2026-10-17
+
+The integrated locked server gate passes **136 core tests, 37 server tests, and 2 doctests**.
+Rust coverage passes the unchanged 80% floor at **2,340/2,550 lines, 91.76%**. The full web
+gate passes **46 tests**, generated API/schema checks, lint, Knip, coverage, and build with
+unchanged web percentages/floors. The E2E static gate passes three documented scenarios.
+Independent review reports no actionable findings.
+
+A synchronized 16-thread race proves one live claim winner and 15 rejected duplicates, with
+permanent credential revocation after release. Real diagnostic/gameplay sockets exhaust the
+same final semaphore slot in both directions, then demonstrate reuse after close. Abrupt
+transport drop releases both the credential lease and connection permit. Live tests cover
+compatibility-before-claim, replay/semantic ordering, invalid/binary input, upgrade rejection,
+and a five-second authentication deadline that control frames cannot extend.
+
+Inactivity, absolute unseated expiry, and input-rate boundaries use deterministic private
+policy tests directly coupled to the driver. Explicit checks run after every receive/select
+wake-up so a ready input cannot defeat an expired deadline. A tiny authentication-response
+send failure cannot be forced reliably over loopback; the abrupt live-driver disconnect test
+covers its shared RAII cleanup ownership without adding test-only production interfaces.
+No rooms or gameplay snapshots are fabricated by this transport increment.
+
+A clean committed-tree build produces
+`sha256:4e5f9dd3ffadf4db2833092b069fa45e4b598924716cec5ec2da526da922460b`.
+Compose and ready local Kubernetes use the exact image. Separate health/readiness checks
+and all **three candidate browser scenarios** pass through both paths, including actual native
+gameplay authentication, compatibility-before-claim, duplicate-owner protection, and replay
+rejection. Strict schemas pass with 3 valid resources; pinned socket-free Trivy reports zero
+HIGH/CRITICAL vulnerabilities. Temporary deployment/export/archive/forward/symlink resources
+are removed; the candidate image is retained.
+
 ## M3 pure room lifecycle — 2026-10-17
 
 The locked server gate passes **136 core tests, 24 server tests, and 2 doctests**. Rust

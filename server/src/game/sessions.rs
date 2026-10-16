@@ -36,13 +36,31 @@ pub(crate) enum SessionIssueError {
 
 pub(crate) struct GameSessions {
     registry: Mutex<Registry>,
+    upgrade_limit: Mutex<MintBucket>,
     random_fill: Arc<RandomFill>,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+struct ConnectionId(u64);
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) enum SessionClaimError {
+    AuthenticationFailed,
+    ConnectionInUse,
+    CapacityReached,
+}
+
+pub(crate) struct SessionLease {
+    sessions: Arc<GameSessions>,
+    token: SessionToken,
+    connection_id: ConnectionId,
 }
 
 impl GameSessions {
     pub(crate) fn new(now: Instant) -> Self {
         Self {
             registry: Mutex::new(Registry::new(now)),
+            upgrade_limit: Mutex::new(MintBucket::new(now, MINT_BURST)),
             random_fill: Arc::new(|bytes| getrandom::fill(bytes).map_err(|_| ())),
         }
     }
@@ -54,8 +72,47 @@ impl GameSessions {
     ) -> Self {
         Self {
             registry: Mutex::new(Registry::new(now)),
+            upgrade_limit: Mutex::new(MintBucket::new(now, MINT_BURST)),
             random_fill: Arc::new(random_fill),
         }
+    }
+
+    pub(crate) fn allow_upgrade(&self, now: Instant) -> bool {
+        self.upgrade_limit
+            .lock()
+            .unwrap_or_else(|error| error.into_inner())
+            .take(now, MINTS_PER_SECOND)
+    }
+
+    pub(crate) fn claim(
+        self: &Arc<Self>,
+        token: &SessionToken,
+        now: Instant,
+    ) -> Result<SessionLease, SessionClaimError> {
+        let mut registry = self
+            .registry
+            .lock()
+            .unwrap_or_else(|error| error.into_inner());
+        let now = registry.effective_now(now);
+        registry.prune(now);
+        match registry.sessions.get(token) {
+            None => return Err(SessionClaimError::AuthenticationFailed),
+            Some(SessionState::Claimed { .. }) => return Err(SessionClaimError::ConnectionInUse),
+            Some(SessionState::Issued { .. }) => {}
+        }
+        let connection_id = ConnectionId(registry.next_connection_id);
+        registry.next_connection_id = registry
+            .next_connection_id
+            .checked_add(1)
+            .ok_or(SessionClaimError::CapacityReached)?;
+        registry
+            .sessions
+            .insert(token.clone(), SessionState::Claimed { connection_id });
+        Ok(SessionLease {
+            sessions: Arc::clone(self),
+            token: token.clone(),
+            connection_id,
+        })
     }
 
     pub(crate) fn issue(&self, now: Instant) -> Result<SessionResponse, SessionIssueError> {
@@ -65,12 +122,9 @@ impl GameSessions {
             .unwrap_or_else(|error| error.into_inner());
         let now = registry.effective_now(now);
         registry.prune(now);
-        registry.rate_limit.refill(now);
-
-        if registry.rate_limit.available < 1.0 {
+        if !registry.rate_limit.take(now, MINTS_PER_SECOND) {
             return Err(SessionIssueError::RateLimited);
         }
-        registry.rate_limit.available -= 1.0;
 
         if registry.sessions.len() >= MAX_ISSUED_SESSIONS {
             return Err(SessionIssueError::CapacityReached);
@@ -79,9 +133,12 @@ impl GameSessions {
         for _ in 0..MAX_COLLISION_RETRIES {
             let token = self.generate_token()?;
             if !registry.sessions.contains_key(&token) {
-                registry
-                    .sessions
-                    .insert(token.clone(), now + SESSION_LIFETIME);
+                registry.sessions.insert(
+                    token.clone(),
+                    SessionState::Issued {
+                        expires_at: now + SESSION_LIFETIME,
+                    },
+                );
                 return Ok(SessionResponse::new(token));
             }
         }
@@ -102,20 +159,24 @@ impl GameSessions {
 }
 
 struct Registry {
-    sessions: HashMap<SessionToken, Instant>,
+    sessions: HashMap<SessionToken, SessionState>,
     rate_limit: MintBucket,
     latest_now: Instant,
+    next_connection_id: u64,
+}
+
+enum SessionState {
+    Issued { expires_at: Instant },
+    Claimed { connection_id: ConnectionId },
 }
 
 impl Registry {
     fn new(now: Instant) -> Self {
         Self {
             sessions: HashMap::new(),
-            rate_limit: MintBucket {
-                available: MINT_BURST,
-                updated_at: now,
-            },
+            rate_limit: MintBucket::new(now, MINT_BURST),
             latest_now: now,
+            next_connection_id: 1,
         }
     }
 
@@ -127,7 +188,10 @@ impl Registry {
     }
 
     fn prune(&mut self, now: Instant) {
-        self.sessions.retain(|_, expires_at| *expires_at > now);
+        self.sessions.retain(|_, state| match state {
+            SessionState::Issued { expires_at } => *expires_at > now,
+            SessionState::Claimed { .. } => true,
+        });
     }
 }
 
@@ -137,13 +201,45 @@ struct MintBucket {
 }
 
 impl MintBucket {
-    fn refill(&mut self, now: Instant) {
+    fn new(now: Instant, available: f64) -> Self {
+        Self {
+            available,
+            updated_at: now,
+        }
+    }
+
+    fn take(&mut self, now: Instant, per_second: f64) -> bool {
+        self.refill(now, per_second);
+        if self.available < 1.0 {
+            false
+        } else {
+            self.available -= 1.0;
+            true
+        }
+    }
+
+    fn refill(&mut self, now: Instant, per_second: f64) {
         let Some(elapsed) = now.checked_duration_since(self.updated_at) else {
             return;
         };
-        self.available =
-            (self.available + elapsed.as_secs_f64() * MINTS_PER_SECOND).min(MINT_BURST);
+        self.available = (self.available + elapsed.as_secs_f64() * per_second).min(MINT_BURST);
         self.updated_at = now;
+    }
+}
+
+impl Drop for SessionLease {
+    fn drop(&mut self) {
+        let mut registry = self
+            .sessions
+            .registry
+            .lock()
+            .unwrap_or_else(|error| error.into_inner());
+        if matches!(
+            registry.sessions.get(&self.token),
+            Some(SessionState::Claimed { connection_id }) if *connection_id == self.connection_id
+        ) {
+            registry.sessions.remove(&self.token);
+        }
     }
 }
 

@@ -5,5 +5,6 @@ These Playwright tests treat the deployed app as a black box. They require a com
 Run `npm ci`, `npm run install:browsers`, then `npm test`. Every `test(...)` title must have an exact `## Scenario:` counterpart under `scenarios/`; `npm run check:scenarios` enforces the pairing. Also run `npm run typecheck`, `npm run lint`, and `npm run knip` after editing the suite.
 
 The suite covers independent diagnostic sockets and real browser session issuance, including
-Origin and cache policy. Gameplay sockets and rendered duel scenarios are added with their
-implemented milestones.
+Origin and cache policy. A gameplay socket scenario proves compatibility-before-claim,
+duplicate-owner protection, and sequence replay rejection. Rendered duel scenarios follow
+with their implemented milestone.

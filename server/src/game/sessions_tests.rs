@@ -1,7 +1,8 @@
 use std::{
     sync::{
-        Arc,
+        Arc, Barrier,
         atomic::{AtomicU8, Ordering},
+        mpsc,
     },
     thread,
     time::{Duration, Instant},
@@ -90,12 +91,11 @@ fn out_of_order_issuance_uses_effective_time_for_expiry() {
 
     let registry = sessions.registry.lock().unwrap();
     assert_eq!(registry.sessions.len(), 2);
-    assert!(
-        registry
-            .sessions
-            .values()
-            .all(|expires_at| *expires_at == later + SESSION_LIFETIME)
-    );
+    assert!(registry.sessions.values().all(|state| matches!(
+        state,
+        SessionState::Issued { expires_at }
+            if *expires_at == later + SESSION_LIFETIME
+    )));
 }
 
 #[test]
@@ -198,8 +198,120 @@ fn random_failures_consume_rate_limit_without_mutating_existing_session() {
 
     let registry = sessions.registry.lock().unwrap();
     assert_eq!(registry.sessions.len(), 1);
-    assert_eq!(
+    assert!(matches!(
         registry.sessions.get(&issued.token),
-        Some(&(now + SESSION_LIFETIME))
+        Some(SessionState::Issued { expires_at }) if *expires_at == now + SESSION_LIFETIME
+    ));
+}
+
+#[test]
+fn claim_is_exclusive_and_lease_drop_permanently_consumes_token() {
+    let now = Instant::now();
+    let sessions = Arc::new(deterministic_sessions(now));
+    let issued = sessions.issue(now).unwrap();
+    let lease = sessions.claim(&issued.token, now).unwrap();
+    assert!(matches!(
+        sessions.claim(&issued.token, now),
+        Err(SessionClaimError::ConnectionInUse)
+    ));
+    drop(lease);
+    assert!(matches!(
+        sessions.claim(&issued.token, now),
+        Err(SessionClaimError::AuthenticationFailed)
+    ));
+}
+
+#[test]
+fn concurrent_claim_has_one_live_owner_and_cannot_be_revoked_by_losers() {
+    const CLAIMANTS: usize = 16;
+
+    let now = Instant::now();
+    let sessions = Arc::new(deterministic_sessions(now));
+    let token = sessions.issue(now).unwrap().token;
+    let start = Arc::new(Barrier::new(CLAIMANTS + 1));
+    let release_owner = Arc::new(Barrier::new(CLAIMANTS + 1));
+    let (outcomes, received) = mpsc::channel();
+
+    let handles = (0..CLAIMANTS)
+        .map(|_| {
+            let sessions = Arc::clone(&sessions);
+            let token = token.clone();
+            let start = Arc::clone(&start);
+            let release_owner = Arc::clone(&release_owner);
+            let outcomes = outcomes.clone();
+            thread::spawn(move || {
+                start.wait();
+                let claim = sessions.claim(&token, now);
+                outcomes
+                    .send(claim.as_ref().map(|_| ()).map_err(|error| *error))
+                    .unwrap();
+                release_owner.wait();
+                drop(claim);
+            })
+        })
+        .collect::<Vec<_>>();
+    drop(outcomes);
+
+    start.wait();
+    let outcomes = received.iter().take(CLAIMANTS).collect::<Vec<_>>();
+    let winners = outcomes.iter().filter(|outcome| outcome.is_ok()).count();
+    let in_use = outcomes
+        .iter()
+        .filter(|outcome| matches!(outcome, Err(SessionClaimError::ConnectionInUse)))
+        .count();
+    let owner_is_live = matches!(
+        sessions.registry.lock().unwrap().sessions.get(&token),
+        Some(SessionState::Claimed { .. })
     );
+
+    release_owner.wait();
+    for handle in handles {
+        handle.join().unwrap();
+    }
+    assert_eq!(winners, 1);
+    assert_eq!(in_use, CLAIMANTS - 1);
+    assert!(owner_is_live);
+    assert!(matches!(
+        sessions.claim(&token, now),
+        Err(SessionClaimError::AuthenticationFailed)
+    ));
+}
+
+#[test]
+fn claim_prunes_expired_tokens_and_fails_closed_on_id_exhaustion() {
+    let now = Instant::now();
+    let sessions = Arc::new(deterministic_sessions(now));
+    let expired = sessions.issue(now).unwrap();
+    assert!(matches!(
+        sessions.claim(&expired.token, now + SESSION_LIFETIME),
+        Err(SessionClaimError::AuthenticationFailed)
+    ));
+
+    let issued = sessions.issue(now + SESSION_LIFETIME).unwrap();
+    sessions.registry.lock().unwrap().next_connection_id = u64::MAX;
+    assert!(matches!(
+        sessions.claim(&issued.token, now + SESSION_LIFETIME),
+        Err(SessionClaimError::CapacityReached)
+    ));
+    assert!(matches!(
+        sessions
+            .registry
+            .lock()
+            .unwrap()
+            .sessions
+            .get(&issued.token),
+        Some(SessionState::Issued { .. })
+    ));
+}
+
+#[test]
+fn upgrade_admission_has_independent_burst_and_refill() {
+    let now = Instant::now();
+    let sessions = GameSessions::new(now);
+    for _ in 0..32 {
+        assert!(sessions.allow_upgrade(now));
+    }
+    assert!(!sessions.allow_upgrade(now));
+    assert!(!sessions.allow_upgrade(now + Duration::from_millis(124)));
+    assert!(sessions.allow_upgrade(now + Duration::from_millis(125)));
 }

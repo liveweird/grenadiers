@@ -100,6 +100,10 @@ fn openapi_declares_every_implemented_http_status() {
         ("/api/v1/ready", ["200", "503"].as_slice()),
         ("/api/v1/ws", ["101", "400", "403", "503"].as_slice()),
         (
+            "/api/v1/game/ws",
+            ["101", "400", "403", "429", "503"].as_slice(),
+        ),
+        (
             "/api/v1/game/session",
             ["201", "400", "403", "429", "503"].as_slice(),
         ),

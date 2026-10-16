@@ -180,6 +180,87 @@
         }
       }
     },
+    "/api/v1/game/ws": {
+      "get": {
+        "operationId": "connectGame",
+        "summary": "Connect an authenticated gameplay WebSocket",
+        "description": "Upgrades to the gameplay protocol. The first application frame must authenticate with a credential created by POST /api/v1/game/session. Credentials are never accepted in URLs.",
+        "tags": [
+          "game"
+        ],
+        "parameters": [
+          {
+            "name": "Origin",
+            "in": "header",
+            "required": true,
+            "description": "Exact non-null browser origin from ALLOWED_ORIGINS.",
+            "schema": {
+              "type": "string",
+              "format": "uri"
+            }
+          }
+        ],
+        "responses": {
+          "101": {
+            "description": "Switching protocols; client must send an authenticate frame first."
+          },
+          "400": {
+            "description": "Query parameters are unsupported or the WebSocket handshake is malformed.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Missing, duplicated, null, malformed, or disallowed Origin",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Global gameplay connection rate exceeded",
+            "headers": {
+              "Retry-After": {
+                "description": "Minimum delay in seconds before retrying.",
+                "schema": {
+                  "type": "integer",
+                  "enum": [1]
+                }
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Shared WebSocket connection capacity exhausted",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/ws": {
       "get": {
         "operationId": "connectRealtime",

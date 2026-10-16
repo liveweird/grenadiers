@@ -41,3 +41,10 @@ or shared mutable state before those decisions are documented and tested.
 Map generation, rendering technology (DOM/canvas/WebGL), tick rate, movement, bomb rules,
 lag compensation, disconnect grace periods, room admission, authentication, and matchmaking
 remain open. Add focused ADRs when choosing them; do not encode guesses in the scaffold.
+
+
+The [draft game specification](game/README.md) proposes a two-player ruleset and catalogs
+classic mechanics and optional extensions. Its values and policies are discussion proposals;
+they do not change the implemented scaffold or settle the deferred architecture decisions above.
+The [implementation plan](game/implementation-plan.md) identifies when each dependent decision
+must be recorded and how the two-player baseline will be delivered and verified.

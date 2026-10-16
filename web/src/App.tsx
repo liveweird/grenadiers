@@ -85,7 +85,7 @@ export function App() {
               <Paper withBorder p="lg">
                 <Group justify="space-between">
                   <Text fw={700}>{t('app.health')}</Text>
-                  <Badge color={health === 'available' ? 'green' : health === 'unavailable' ? 'red' : 'gray'}>
+                  <Badge color={health === 'available' ? 'green.8' : health === 'unavailable' ? 'red.8' : 'gray.8'}>
                     {t(`app.${health}`)}
                   </Badge>
                 </Group>
@@ -94,11 +94,11 @@ export function App() {
                 <Stack>
                   <Group justify="space-between">
                     <Text fw={700}>{t('app.realtime')}</Text>
-                    <Badge color={realtime === 'connected' ? 'green' : realtime === 'connecting' ? 'yellow' : 'gray'}>
+                    <Badge color={realtime === 'connected' ? 'green.8' : realtime === 'connecting' ? 'yellow.8' : 'gray.8'}>
                       {t(`app.${realtime}`)}
                     </Badge>
                   </Group>
-                  <Text aria-live="polite" c="dimmed">{detail}</Text>
+                  <Text aria-live="polite">{detail}</Text>
                   <Group>
                     {realtime === 'disconnected' ? (
                       <Button onClick={connect}>{t('app.connect')}</Button>

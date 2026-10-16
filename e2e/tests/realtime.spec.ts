@@ -9,6 +9,9 @@ test('two browsers complete independent realtime roundtrips', async ({ browser }
     await Promise.all(pages.map((page) => expect(page.getByRole('heading', { name: 'Grenadiers' })).toBeVisible()))
     await Promise.all(pages.map((page) => expect(page.getByText('Available')).toBeVisible()))
 
+    const disconnectedAccessibility = await new AxeBuilder({ page: pages[0] }).analyze()
+    expect(disconnectedAccessibility.violations).toEqual([])
+
     await Promise.all(pages.map((page) => page.getByRole('button', { name: 'Connect' }).click()))
     await Promise.all(pages.map((page) => expect(page.getByText('Protocol v1 · up to 2 players')).toBeVisible()))
     await Promise.all(pages.map((page) => page.getByRole('button', { name: 'Send ping' }).click()))

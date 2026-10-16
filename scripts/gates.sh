@@ -37,18 +37,18 @@ e2e() {
 }
 k8s() {
   command -v kubectl >/dev/null || { echo 'kubectl is required to render k8s/' >&2; exit 1; }
+  K8S_RENDERED_FILE="$(mktemp "${TMPDIR:-/tmp}/grenadiers-k8s.XXXXXX")"
+  trap 'rm -f "$K8S_RENDERED_FILE"' EXIT
+  trap 'rm -f "$K8S_RENDERED_FILE"; exit 129' HUP
+  trap 'rm -f "$K8S_RENDERED_FILE"; exit 130' INT
+  trap 'rm -f "$K8S_RENDERED_FILE"; exit 143' TERM
+
+  kubectl kustomize k8s > "$K8S_RENDERED_FILE"
+  node web/scripts/check-k8s.mjs "$K8S_RENDERED_FILE"
   command -v kubeconform >/dev/null || { echo 'kubeconform 0.8.0 is required; see docs/deployment.md' >&2; exit 1; }
-  test "$(grep -cE '^  replicas: 1$' k8s/deployment.yaml)" = 1
-  if ! grep -qE '^    type: Recreate$' k8s/deployment.yaml; then
-    echo 'The deployment must use Recreate to avoid overlapping match-owner processes.' >&2
-    exit 1
-  fi
-  if grep -Rl 'kind: HorizontalPodAutoscaler' k8s; then
-    echo 'Single-process match ownership does not permit an autoscaler yet.' >&2
-    exit 1
-  fi
-  kubectl kustomize k8s | kubeconform -strict -summary -kubernetes-version 1.33.0 \
-    -schema-location 'https://raw.githubusercontent.com/yannh/kubernetes-json-schema/8df8a883b68a24a104b4a9e43c1288090ae60b3b/{{.NormalizedKubernetesVersion}}-standalone{{.StrictSuffix}}/{{.ResourceKind}}{{.KindSuffix}}.json'
+  kubeconform -strict -summary -kubernetes-version 1.33.0 \
+    -schema-location 'https://raw.githubusercontent.com/yannh/kubernetes-json-schema/8df8a883b68a24a104b4a9e43c1288090ae60b3b/{{.NormalizedKubernetesVersion}}-standalone{{.StrictSuffix}}/{{.ResourceKind}}{{.KindSuffix}}.json' \
+    < "$K8S_RENDERED_FILE"
 }
 security() {
   require_lock

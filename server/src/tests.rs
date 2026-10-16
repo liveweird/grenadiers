@@ -63,6 +63,35 @@ fn blank_database_url_disables_postgres() {
     assert!(database_pool(Some(" \t ".to_owned())).unwrap().is_none());
 }
 
+#[tokio::test]
+async fn app_state_configuration_uses_defaults_and_normalizes_overrides() {
+    let defaults = AppState::from_configuration(None, None).unwrap();
+    assert_eq!(
+        defaults.allowed_origins.as_ref(),
+        &DEFAULT_ORIGINS
+            .iter()
+            .map(ToString::to_string)
+            .collect::<HashSet<_>>()
+    );
+    assert!(defaults.database.is_none());
+
+    let configured = AppState::from_configuration(
+        Some(" https://game.example, ,https://admin.example ".to_owned()),
+        Some(" postgres://postgres:postgres@localhost/grenadiers ".to_owned()),
+    )
+    .unwrap();
+    assert_eq!(
+        configured.allowed_origins.as_ref(),
+        &["https://game.example", "https://admin.example"]
+            .into_iter()
+            .map(ToString::to_string)
+            .collect::<HashSet<_>>()
+    );
+    assert!(configured.database.is_some());
+
+    assert!(AppState::from_configuration(None, Some("not a postgres URL".to_owned())).is_err());
+}
+
 #[test]
 fn openapi_declares_every_implemented_http_status() {
     let contract: Value = serde_json::from_str(include_str!("../../api/openapi.json")).unwrap();
@@ -200,7 +229,7 @@ async fn rejected_handshake(
             .insert(header::ORIGIN, origin.parse().unwrap());
     }
     match within(connect_async(request)).await {
-        Err(WebSocketError::Http(response)) => response,
+        Err(WebSocketError::Http(response)) => *response,
         Err(error) => panic!("expected HTTP rejection, got {error}"),
         Ok(_) => panic!("expected HTTP rejection, got an upgraded WebSocket"),
     }
@@ -243,6 +272,26 @@ async fn live_sockets_are_concurrent_and_enforce_the_protocol() {
     let pong = next_json(&mut first).await;
     assert_eq!(pong, json!({"type": "pong", "sequence": 42}));
     assert_valid(&contract, &pong);
+
+    within(first.send(TungsteniteMessage::Ping(vec![1, 2, 3].into())))
+        .await
+        .unwrap();
+    match within(first.next()).await {
+        Some(Ok(TungsteniteMessage::Pong(data))) => assert_eq!(data.as_ref(), &[1, 2, 3]),
+        other => panic!("expected protocol pong, got {other:?}"),
+    }
+    within(first.send(TungsteniteMessage::Pong(Vec::new().into())))
+        .await
+        .unwrap();
+    within(first.send(TungsteniteMessage::Text(
+        json!({"type": "ping", "sequence": 43}).to_string().into(),
+    )))
+    .await
+    .unwrap();
+    assert_eq!(
+        next_json(&mut first).await,
+        json!({"type": "pong", "sequence": 43})
+    );
 
     within(second.send(TungsteniteMessage::Text("not json".into())))
         .await

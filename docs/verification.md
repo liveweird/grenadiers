@@ -1,78 +1,71 @@
-# Scaffold verification
+# Foundation verification
 
-Rechecked 2026-10-16. This records observed results, not a claim that the full stack is validated.
+Verified locally on **2026-10-16**, macOS ARM64 with OrbStack Docker/Kubernetes.
+Earlier network/socket/Git denials were resolved through permitted sandbox escalation.
+This record covers the diagnostic scaffold; gameplay is not implemented.
 
-## Passed
+## Required gates
 
-- Both npm packages installed from their own repository lockfiles with actual offline `npm ci`
-  under Node 24.21.0, using the available npm cache.
-- `scripts/gates.sh repository`: toolchain agreement, exact npm dependency pins, lock roots,
-  and source-size limits.
-- `scripts/gates.sh web`: Spectral, HTTP/realtime generated-type drift, ESLint, Knip,
-  shuffled coverage tests, and production build.
-- Frontend: **4 test files, 10 tests**. Coverage: **95.34% statements, 90% branches,
-  100% functions, 96.05% lines**; every configured floor is 85%.
-- `scripts/gates.sh e2e`: lint, dead-code checks, TypeScript, and scenario/spec parity
-  for the one documented two-browser smoke scenario.
-- `bash -n scripts/gates.sh` and `docker compose config --quiet`.
-- `kubectl kustomize k8s` renders the Namespace, Service, and single-replica Deployment.
-  This validates composition, not Kubernetes schemas or live execution.
-- `cargo +stable fmt --all -- --check` and
-  `cargo +stable metadata --offline --no-deps --format-version 1`.
-  The installed stable compiler reports Rust 1.99.1, matching the intended toolchain pin;
-  installing/selecting a separately named 1.99.1 toolchain requires unavailable network access.
+| Check | Observed result |
+| --- | --- |
+| `scripts/gates.sh all` | Passed: repository pins/source sizes, locked Rust fmt/Clippy/tests/build, contracts, web lint/Knip/coverage/build, E2E static checks. |
+| Rust tests | 11 passed (2 core, 9 server), including real ephemeral WebSocket sockets. |
+| `scripts/gates.sh coverage` | Passed unchanged 80% line floor: **214/265 lines, 80.75%**. Core 100%; server library 93.37%; binary entry point 0%. |
+| Web tests | **7 files, 29 tests passed**, including generated-type compilation, Spectral rule enforcement, and rendered Kubernetes invariants. |
+| Web coverage | 95.34% statements, 90% branches, 100% functions, 96.05% lines; configured floors remain 85%. |
+| `scripts/gates.sh security` | Passed. cargo-deny advisories/bans/licenses/sources passed; both npm audits reported **zero vulnerabilities**. |
+| `scripts/gates.sh k8s` | Passed rendered invariants and strict schemas: 3 resources valid, none invalid, errored, or skipped. |
+| `scripts/gates.sh browser` | Passed against both Compose and Kubernetes Service port-forward: two independent browser contexts, real WebSocket roundtrips, disconnected/connected Axe checks. |
+| CI-configured Trivy scan | Passed: no fixable HIGH/CRITICAL findings under the configured filter. Debian runtime scanning complements Rust/npm dependency checks. |
 
-## Current overall result
+Tools: Rust **1.99.1**, Node **24.21.0**, cargo-llvm-cov **0.9.1**, cargo-deny
+**0.20.2**, kubeconform **0.8.0**, kubectl **1.33.9**, Docker **29.8.2**, and
+digest-pinned Trivy **0.74.0**. Kubernetes schemas target **1.33.0** as configured in CI.
 
-`scripts/gates.sh all` **fails** after repository checks because `Cargo.lock` is missing.
-The coverage and security targets fail at the same prerequisite. No claim that all tests or
-all guardrails pass is warranted. The latest direct offline Rust build also exits 101 at
-missing `serde`, before compilation.
+## Runtime evidence
 
-## Blocked or not executed
+- `docker compose build app` built the locked Rust/React image. Rust and runtime base-image
+  manifest indexes are now resolved and pinned. Runtime apt security updates repaired the
+  inherited `perl-base` findings; no audit threshold or scanner policy was weakened.
+- A clean staged Git-tree export built successfully using Docker's layer cache. Its runtime
+  filesystem layers match the tested image, without relying on untracked local source files.
+- The final tested image is
+  `sha256:97aec4259fd0f931e92080d504fd389cc740c32a938b7f8a9b863b93dc89e2fe`.
+  Kubernetes reported that same image digest, a successful rollout, and a ready container.
+- The database-free app started successfully. Configured local PostgreSQL readiness returned
+  200; stopping that database changed readiness to 503 Problem JSON while liveness stayed 200;
+  restarting PostgreSQL restored readiness to 200.
+- Through the Kubernetes Service port-forward, health/readiness returned 200 with `no-store`,
+  an unknown frontend route returned the SPA index, and an unknown API route returned 404
+  Problem JSON. Browser execution also loaded the actual built assets.
+- Independent review covered the generator, rendered-manifest guardrails, Rust/configuration
+  fixes, Spectral wrapper, dependency changes, and contrast correction. Reported defects were
+  fixed and regression-tested; no actionable findings remain in those reviewed changes.
+- Temporary Compose containers/database volume, Kubernetes namespace, and port-forward were
+  removed after verification. The locally built images remain available for development.
 
-- crates.io DNS is unavailable and the Cargo registry cache is empty. Offline tests stop at
-  unresolved `serde`; **Rust compilation, Clippy, tests, and coverage are unverified**.
-- No `Cargo.lock` was fabricated. `cargo generate-lockfile` must run with registry access;
-  review and commit the result before the normal locked gates or Docker build can succeed.
-  CI intentionally fails its initial lockfile check until that happens.
-- The original `AGENTS.md` is outdated (empty-workspace instructions); it was preserved under
-  the initial explicit do-not-modify instruction. Current conventions live in `CONTRIBUTING.md`.
-- The OrbStack Kubernetes API at `127.0.0.1:26443` rejects access with `operation not permitted`.
-  Neither a live apply nor rollout/probe/WebSocket validation ran. `scripts/gates.sh k8s`
-  additionally requires unavailable kubeconform 0.8.0 and access to pinned schema resources;
-  its strict schema check is configured in CI but not verified locally.
-- Docker daemon access is denied. Container builds/startup and the real Playwright scenario
-  were not executed. Compose syntax/configuration validation does not validate runtime behavior.
-- cargo-deny, npm online audits, and the Trivy image scan were not executed in this environment.
-- Rust/runtime image digest resolution remains outstanding. Node/PostgreSQL and CI/scanner
-  pins were inherited from the local Flow reference, not newly resolved here.
+## Reproduce
 
-## Complete validation with network and Docker access
+Install the pinned tools described in [testing.md](testing.md) and
+[deployment.md](deployment.md), then run:
 
 ```sh
-mise install
-cargo generate-lockfile
-# Review and commit Cargo.lock before running the normal locked build.
 npm --prefix web ci
 npm --prefix e2e ci
 scripts/gates.sh all
-cargo install cargo-llvm-cov --version 0.9.1 --locked
-rustup component add llvm-tools-preview
 scripts/gates.sh coverage
-cargo install cargo-deny --version 0.20.2 --locked
 scripts/gates.sh security
-scripts/gates.sh k8s  # Requires kubectl, kubeconform 0.8.0, and pinned schema access.
+scripts/gates.sh k8s
 docker compose up --build -d
 npm --prefix e2e run install:browsers
 scripts/gates.sh browser
 docker compose down
 ```
 
-Resolve any first-compilation, measured Rust coverage, dependency-policy, or browser failures
-before treating this scaffold as a release baseline. The CI workflow contains the image scan.
+Use the exact scanner command in `.github/workflows/ci.yml` for the image scan. Deploy the
+same tested image using [deployment.md](deployment.md), port-forward the Service to 8085,
+and rerun the browser gate. No game, load, multi-node, or recovery guarantee follows from
+these scaffold checks. These are local results; hosted CI status is separate evidence.
 
-The repository has since been initialized on `master`, with `origin` configured as
-`git@github.com:liveweird/grenadiers.git`. Use `git log` and `git status` for current
-commit and push status; initialization does not resolve the validation limits above.
-Local Kubernetes build/apply commands are in [deployment.md](deployment.md).
+The original `AGENTS.md` remains unchanged under the explicit preservation instruction;
+current engineering conventions live in `CONTRIBUTING.md`.

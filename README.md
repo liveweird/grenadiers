@@ -5,7 +5,10 @@ The first playable milestone will support two human players. Bots and larger mat
 
 This is the **engineering scaffold**, not a playable game. It provides a React shell, HTTP probes,
 and a versioned WebSocket diagnostic exchange. Rooms, controls, maps, bombs, authentication,
-matchmaking, stats, and simulation rules are deliberately awaiting a separate design.
+matchmaking, stats, and simulation remain unimplemented. The [draft game specification](docs/game/README.md)
+describes the classic reference and proposed rules. The
+[implementation and release plan](docs/game/implementation-plan.md) breaks delivery into
+verified foundation, playable duel, classic matches, and resilient playtest releases.
 
 ## Stack and layout
 
@@ -23,6 +26,7 @@ matchmaking, stats, and simulation rules are deliberately awaiting a separate de
 
 See [architecture](docs/architecture.md), [Flow equivalents](docs/decisions/0001-stack.md),
 [testing](docs/testing.md), [deployment](docs/deployment.md), and [contributing](CONTRIBUTING.md).
+Product versioning and candidate checks are documented in [releases](docs/releases.md).
 
 ## Prerequisites
 
@@ -30,13 +34,9 @@ Use `mise install` for Node **24.21.0** and Rust **1.99.1**, then `mise exec -- 
 or activate mise in your shell. `rust-toolchain.toml` also selects the Rust toolchain.
 Docker is optional for local development and required for the complete Compose stack.
 
-**Bootstrap limitation:** the authoring environment could not reach crates.io, so a resolved
-`Cargo.lock` could not be generated or reviewed. On a network-enabled machine run
-`cargo generate-lockfile`, review and commit `Cargo.lock`, then run the locked checks below.
-CI intentionally requires that lockfile; it never silently resolves dependencies during a normal build.
+Cargo and npm dependencies are resolved in repository lockfiles. Normal builds use locked
+dependencies; review lockfile changes together with dependency updates.
 See [verification status](docs/verification.md) for checks actually performed.
-
-After completing that initial lock resolution:
 
 ```sh
 npm --prefix web ci
@@ -66,8 +66,8 @@ Open <http://localhost:8085>. The server serves the built SPA and API. Stop with
 `docker compose down`; add `--volumes` only when you intend to delete local database data.
 
 For local Kubernetes, use the manifests under `k8s/` after building and loading the application
-image. See [deployment instructions](docs/deployment.md). Rendering succeeds locally; live
-container and cluster startup remain unverified in the restricted authoring environment.
+image. See [deployment instructions](docs/deployment.md) and the
+[verification record](docs/verification.md) for runtime results.
 
 ## Optional PostgreSQL
 

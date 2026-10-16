@@ -29,9 +29,17 @@ as `*.test.ts` or `*.test.tsx`. Mock the browser boundary for component tests; r
 listeners, and timers after each test. Keep default test isolation. The shared gate shuffles
 test order and enforces coverage thresholds declared in `web/vite.config.ts`.
 
-`lint:api` checks OpenAPI with Spectral; `check:api` and `check:realtime` compare generated
+`lint:api` checks the fixed OpenAPI file with Spectral's programmatic API and
+`api-guidelines/spectral.yaml`; it retains the standard and custom rules without the CLI's
+glob dependency. Parser/load errors and error-severity diagnostics fail the command.
+`check:api` and `check:realtime` compare generated
 contracts without modifying them. AJV validates runtime WebSocket payloads. EN/PL locale
 parity is tested. ESLint/SonarJS and Knip must report no findings.
+
+Vitest also discovers `web/scripts/*.test.mjs`: generator tests compile representative
+TypeScript assignments, API linter tests prove rule enforcement, and Kubernetes checker tests
+exercise rendered YAML invariants.
+These run in the shared web gate; the coverage floor measures application code in `src/`.
 
 ## Browser and security
 

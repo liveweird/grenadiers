@@ -31,8 +31,9 @@ Flow's product features and accumulated exceptions are not part of this foundati
 These are equivalents of responsibility, not identical tools. Stable Rust coverage does
 not provide Kover-equivalent branch coverage here. Cargo lock checksums do not authenticate
 publishers. PostgreSQL Testcontainers will arrive with persistence tests, not before a
-schema exists. Kubernetes, mail, admin/auth features, worker processes, charts, and Flow's
-Jira domain are excluded. Mature-suite performance tweaks and coverage percentages are
+schema exists. Local Kubernetes manifests are included for deployment verification; production
+cluster provisioning, mail, admin/auth features, worker processes, charts, and Flow's Jira
+domain are excluded. Mature-suite performance tweaks and coverage percentages are
 not copied without measurement.
 
 Source references: Flow `CLAUDE.md`, `.claude/docs/testing.md`,

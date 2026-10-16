@@ -5,7 +5,12 @@ import { createRoot } from 'react-dom/client'
 import './i18n'
 import { App } from './App'
 
-const theme = createTheme({ primaryColor: 'orange', defaultRadius: 'md' })
+const theme = createTheme({
+  primaryColor: 'orange',
+  defaultRadius: 'md',
+  autoContrast: true,
+  luminanceThreshold: 0.179,
+})
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

@@ -57,8 +57,18 @@ impl AppState {
     }
 
     pub fn from_environment() -> Result<Self, sqlx::Error> {
-        let allowed_origins = std::env::var("ALLOWED_ORIGINS").map_or_else(
-            |_| DEFAULT_ORIGINS.iter().map(ToString::to_string).collect(),
+        Self::from_configuration(
+            std::env::var("ALLOWED_ORIGINS").ok(),
+            std::env::var("DATABASE_URL").ok(),
+        )
+    }
+
+    fn from_configuration(
+        allowed_origins: Option<String>,
+        database_url: Option<String>,
+    ) -> Result<Self, sqlx::Error> {
+        let allowed_origins = allowed_origins.map_or_else(
+            || DEFAULT_ORIGINS.iter().map(ToString::to_string).collect(),
             |value| {
                 value
                     .split(',')
@@ -68,7 +78,7 @@ impl AppState {
                     .collect()
             },
         );
-        let database = database_pool(std::env::var("DATABASE_URL").ok())?;
+        let database = database_pool(database_url)?;
         Ok(Self {
             database,
             allowed_origins: Arc::new(allowed_origins),
@@ -129,7 +139,6 @@ impl Problem {
     }
 }
 
-#[must_use]
 pub fn app(state: AppState, web_dist_dir: Option<PathBuf>) -> Router {
     let router = Router::new()
         .route("/api/v1/health", get(health))

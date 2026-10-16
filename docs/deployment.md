@@ -7,11 +7,9 @@ horizontal scaling and recovery require match routing and persistence designs fi
 
 ## Docker Compose
 
-The image build requires a committed `Cargo.lock`. Generate and review it from a networked
-environment before building:
+The image build uses the repository's reviewed `Cargo.lock` and pinned base-image digests:
 
 ```sh
-cargo generate-lockfile
 docker compose up --build -d
 curl --fail http://127.0.0.1:8085/api/v1/health
 curl --fail http://127.0.0.1:8085/api/v1/ready
@@ -52,8 +50,10 @@ composition only; image startup, probes, WebSockets, and cluster policy still re
 
 `scripts/gates.sh k8s` renders Kustomize and validates the rendered resources with
 **kubeconform 0.8.0**, strict Kubernetes **1.33.0** schemas from a pinned schema-repository
-commit. Install `kubectl` and kubeconform first. The CI workflow downloads the Linux
+commit. Install `kubectl`, kubeconform, and the web package's locked npm dependencies first.
+The CI workflow downloads the Linux
 kubeconform archive and verifies its SHA-256 inherited from Flow before running this gate.
-The gate also enforces the base Deployment's single replica, Recreate strategy, and absence
-of an autoscaler. Local installations require the appropriate platform binary. Schema validation may require
+The gate checks the same rendered YAML for one replica, the Recreate strategy, absence
+of an autoscaler targeting the game Deployment, and consistent Service routing. It rejects
+duplicate YAML keys. Local installations require the appropriate platform binary. Schema validation may require
 network access to the pinned schemas; successful rendering alone does not pass this gate.

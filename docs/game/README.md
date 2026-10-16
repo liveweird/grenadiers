@@ -1,0 +1,28 @@
+# Grenadiers game specification
+
+This design describes the classic Bomberman-style game loop and a proposed, implementable
+Grenadiers ruleset. It covers player abilities, arena contents, bombs, damage, power-ups,
+enemies, bots, modes, timing, and acceptance scenarios.
+
+Status: **draft for discussion**. The first implementation target remains two human players.
+No gameplay in this directory is implemented by the current transport scaffold.
+
+Start with [the rules specification](rules.md) and the
+[implementation and release plan](implementation-plan.md). Historical examples and optional extensions
+are distinguished from the proposed initial rules. Exact historical fidelity requires choosing
+a particular release and platform; “Bomberman” and “Dyna Blaster” do not identify one universal ruleset.
+
+## Suggested reading
+
+- [Modes and objectives](rules.md#modes-and-objectives) and [initial defaults](rules.md#initial-grenadiers-rules-and-defaults).
+- [Tile behavior](rules.md#tile-and-object-behavior), [bomb placement](rules.md#bomb-placement-and-ownership), and [explosions](rules.md#explosions-and-chain-reactions).
+- [Upgrades and effects](rules.md#upgrades-and-temporary-effects), [weapon extensions](rules.md#weapon-and-bomb-extension-catalog), and [mobs](rules.md#mobs-and-campaign-creatures).
+- [Bot competitors](rules.md#bot-competitors), [round lifecycle](rules.md#round-and-match-life-cycle), and [disconnects](rules.md#disconnects-and-browser-behavior).
+- [Event order](rules.md#authoritative-timing-and-event-order) and [acceptance scenarios](rules.md#acceptance-scenarios).
+
+## Implementation sequence
+
+The release plan defines the maintained milestone dependencies, work packages, RULE coverage,
+and release gates. The near-term sequence is verified foundation, playable two-browser duel,
+classic match progression, then reconnect resilience and playtest hardening. All milestones
+remain planned until their exit evidence exists.

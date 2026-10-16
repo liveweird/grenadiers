@@ -26,6 +26,7 @@
 
 pub mod arena;
 pub mod bombs;
+mod explosions;
 pub mod fixtures;
 pub mod geometry;
 pub mod input;

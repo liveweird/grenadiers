@@ -246,6 +246,7 @@ impl State {
             });
         }
         let next_tick = Tick(self.tick.0.checked_add(1).ok_or(StepError::TickOverflow)?);
+        self.expire_flames(next_tick);
 
         let mut placement_requests = [false; 2];
         for input in inputs {
@@ -274,6 +275,7 @@ impl State {
             .each_mut()
             .map(|actor| movement::advance_actor(&self.world, actor));
         self.resolve_placements(placement_requests, next_tick);
+        self.resolve_explosions(next_tick);
         self.tick = next_tick;
         Ok(StepReport {
             tick: next_tick,
@@ -370,6 +372,11 @@ impl Actor {
 #[cfg(test)]
 #[path = "simulation_constructor_tests.rs"]
 mod constructor_tests;
+#[path = "simulation_explosions.rs"]
+mod explosion_step;
+#[cfg(test)]
+#[path = "flame_tests.rs"]
+mod flame_tests;
 #[cfg(test)]
 #[path = "placement_tests.rs"]
 mod placement_tests;

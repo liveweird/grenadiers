@@ -12,4 +12,5 @@ fn classic_v1_exposes_the_fixed_geometry_and_tick_parameters() {
     assert_eq!(rules.bomb_capacity(), 1);
     assert_eq!(rules.bomb_range(), 2);
     assert_eq!(rules.bomb_fuse_ticks(), 180);
+    assert_eq!(rules.flame_ticks(), 30);
 }

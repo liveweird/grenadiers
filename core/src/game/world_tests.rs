@@ -33,9 +33,9 @@ fn layers_can_share_a_floor_cell_without_becoming_the_same_state() {
 
     world.bombs.insert(bomb.id(), bomb);
     world.pickups.insert(cell);
-    world.hazards.insert(cell);
+    world.hazards.insert(cell, Tick(31));
 
     assert_eq!(world.bombs().get(&EntityId(9)), Some(&bomb));
     assert!(world.pickups().contains(&cell));
-    assert!(world.hazards().contains(&cell));
+    assert_eq!(world.hazards().get(&cell), Some(&Tick(31)));
 }

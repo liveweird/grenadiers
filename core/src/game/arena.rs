@@ -71,6 +71,10 @@ impl Arena {
         self.spawns
     }
 
+    pub(crate) fn remove_blocks(&mut self, removed: &BTreeSet<CellId>) {
+        self.blocks.retain(|cell| !removed.contains(cell));
+    }
+
     fn validate(&self) -> Result<(), ArenaError> {
         for column in 0..ARENA_WIDTH {
             self.require_border_wall(CellId::new(column, 0))?;

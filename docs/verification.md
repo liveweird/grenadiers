@@ -1,5 +1,19 @@
 # Repository verification
 
+## M2B explosions and flames — 2026-10-17
+
+The explosion increment passes the locked server gate. The final suite has **78 core unit
+tests, 9 server tests, and 1 public API doctest**. Rust line coverage passes the unchanged
+80% floor at **1,125/1,216 lines, 92.52%**. Independent review has no remaining actionable
+findings after strengthening the shared-block snapshot and same-tick placement-chain tests.
+
+Evidence covers exact fuse/expiry boundaries, wall/block/bomb obstruction, complete-chain
+occupancy, repeated triggers, bomb-ID permutations, overlapping flames, active-fire ignition,
+soft-block removal, grace cleanup, and capacity becoming available on the following tick.
+This core-only increment changes no dependencies, wire contracts, browser behavior, or
+deployment manifests. Actor damage and round results remain deferred.
+
+
 ## M2A owned bomb placement — 2026-10-17
 
 The placement increment passes `scripts/gates.sh server` with **63 core unit tests,

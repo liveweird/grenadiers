@@ -9,7 +9,8 @@ playable target remains two human players. M1 implements the
 [headless world and movement model](movement.md); M2 adds [bombs, flames, damage, and round
 outcomes](combat.md), including explicit public projections/events. M2 is complete;
 M3 implements [gameplay contracts](protocol.md), anonymous HTTP sessions, and the pure
-[room lifecycle](rooms.md); authenticated sockets and playable browser integration follow.
+[room lifecycle](rooms.md), and authenticated sockets; networked rooms and playable browser
+integration follow.
 
 Start with [the rules specification](rules.md) and the
 [implementation and release plan](implementation-plan.md). Historical examples and optional extensions

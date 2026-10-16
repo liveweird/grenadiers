@@ -1,7 +1,8 @@
 use std::{
     sync::{
-        Arc,
+        Arc, Barrier,
         atomic::{AtomicU8, Ordering},
+        mpsc,
     },
     thread,
     time::{Duration, Instant},
@@ -216,6 +217,62 @@ fn claim_is_exclusive_and_lease_drop_permanently_consumes_token() {
     drop(lease);
     assert!(matches!(
         sessions.claim(&issued.token, now),
+        Err(SessionClaimError::AuthenticationFailed)
+    ));
+}
+
+#[test]
+fn concurrent_claim_has_one_live_owner_and_cannot_be_revoked_by_losers() {
+    const CLAIMANTS: usize = 16;
+
+    let now = Instant::now();
+    let sessions = Arc::new(deterministic_sessions(now));
+    let token = sessions.issue(now).unwrap().token;
+    let start = Arc::new(Barrier::new(CLAIMANTS + 1));
+    let release_owner = Arc::new(Barrier::new(CLAIMANTS + 1));
+    let (outcomes, received) = mpsc::channel();
+
+    let handles = (0..CLAIMANTS)
+        .map(|_| {
+            let sessions = Arc::clone(&sessions);
+            let token = token.clone();
+            let start = Arc::clone(&start);
+            let release_owner = Arc::clone(&release_owner);
+            let outcomes = outcomes.clone();
+            thread::spawn(move || {
+                start.wait();
+                let claim = sessions.claim(&token, now);
+                outcomes
+                    .send(claim.as_ref().map(|_| ()).map_err(|error| *error))
+                    .unwrap();
+                release_owner.wait();
+                drop(claim);
+            })
+        })
+        .collect::<Vec<_>>();
+    drop(outcomes);
+
+    start.wait();
+    let outcomes = received.iter().take(CLAIMANTS).collect::<Vec<_>>();
+    let winners = outcomes.iter().filter(|outcome| outcome.is_ok()).count();
+    let in_use = outcomes
+        .iter()
+        .filter(|outcome| matches!(outcome, Err(SessionClaimError::ConnectionInUse)))
+        .count();
+    let owner_is_live = matches!(
+        sessions.registry.lock().unwrap().sessions.get(&token),
+        Some(SessionState::Claimed { .. })
+    );
+
+    release_owner.wait();
+    for handle in handles {
+        handle.join().unwrap();
+    }
+    assert_eq!(winners, 1);
+    assert_eq!(in_use, CLAIMANTS - 1);
+    assert!(owner_is_live);
+    assert!(matches!(
+        sessions.claim(&token, now),
         Err(SessionClaimError::AuthenticationFailed)
     ));
 }

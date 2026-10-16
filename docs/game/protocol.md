@@ -1,10 +1,10 @@
 # Gameplay protocol
 
-Status: gameplay contracts, checked domain conversion, and HTTP session issuance are
-implemented. `api/gameplay.schema.json`, independent Rust `core::protocol` types, and generated
-`web/src/game/schema.ts` define socket messages. The gameplay WebSocket endpoint, room handlers,
-and browser controls remain planned. Diagnostic `/api/v1/ws` and `api/realtime.schema.json`
-remain unchanged.
+Status: gameplay contracts, checked domain conversion, HTTP session issuance, and authenticated
+gameplay WebSockets are implemented. `api/gameplay.schema.json`, independent Rust
+`core::protocol` types, and generated `web/src/game/schema.ts` define socket messages.
+Networked rooms and browser controls remain planned. Diagnostic `/api/v1/ws` and
+`api/realtime.schema.json` remain unchanged.
 
 ## Authentication and compatibility
 
@@ -14,14 +14,14 @@ closed JSON object `{"token":"<64 lowercase hex characters>"}` with `Cache-Contr
 No cookie or Location is set. An unclaimed credential expires after 300 seconds and grants no
 room or seat. Restart discards all credentials.
 
-Issuance is bounded to 128 live credentials, with a global burst of 32 and refill of eight
+The registry is bounded to 128 issued or claimed credentials, with a global burst of 32 and refill of eight
 per second. Disallowed/missing/duplicate or null Origin returns 403; a nonempty query returns 400;
 rate exhaustion returns 429 with `Retry-After: 1`; capacity/entropy failure returns a generic
 503 problem. Every handler response disables caching. HTTP tracing records method/path,
 excluding query strings. The operation and failures are defined in `api/openapi.json`.
 
-The planned gameplay socket is `/api/v1/game/ws`; its handler is not implemented yet.
-Its first application frame will be:
+Connect to `/api/v1/game/ws` with one configured non-null Origin and no query parameters.
+Its first application frame must be:
 
 ```json
 {"type":"authenticate","protocolVersion":1,"token":"0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"}
@@ -32,6 +32,25 @@ It never belongs in a URL or log. A syntactically valid unsupported version is p
 server can return `incompatibleProtocol` before credential binding. Supported gameplay version
 is 1, independently of the product release and diagnostic protocol. Parser failures expose
 only a generic error; token Debug formatting is redacted.
+
+A successful claim atomically binds one connection. Duplicate claims receive `connectionInUse`
+and cannot displace the owner. Unknown/expired/revoked credentials receive `authenticationFailed`.
+Closing or canceling the owner revokes its credential; issue a new token for a new connection.
+Claimed credentials do not expire under the unclaimed-token timer. Gameplay and diagnostic
+sockets share one 128-connection semaphore, including sockets awaiting authentication.
+
+Authentication has an absolute five-second deadline; Ping/Pong cannot extend it. Upgrades use
+a global 32-token burst with eight-per-second refill. Each socket admits a burst of 30 inbound
+messages with 60-per-second refill, including control frames. Client frames/messages are at
+most 4 KiB; encoded server messages are at most 64 KiB with finite write buffering. Sends have
+a five-second deadline. Server Ping runs every ten seconds, no inbound activity for 30 seconds
+closes the socket, and unseated authentication expires after an absolute five minutes.
+
+Malformed/binary input, failed authentication, repeated authentication, or rate exhaustion
+closes the offending socket with fixed reasons. Structurally valid room commands currently
+return `invalidPhase` for create/join and `notInRoom` for room-bound commands, preserving the
+connection. Fresh sequences are consumed before semantic rejection; replay returns
+`staleSequence`. Rooms are not fabricated while their handler is pending.
 
 ## Commands and responses
 

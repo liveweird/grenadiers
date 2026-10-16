@@ -45,6 +45,19 @@ async fn start_server(state: AppState) -> (String, JoinHandle<()>) {
     (format!("ws://{address}/api/v1/game/ws"), task)
 }
 
+fn diagnostic_url(game_url: &str) -> String {
+    game_url.replace("/api/v1/game/ws", "/api/v1/ws")
+}
+
+async fn wait_for_available_connection(state: &AppState) {
+    within(async {
+        while state.connections.available_permits() == 0 {
+            tokio::task::yield_now().await;
+        }
+    })
+    .await;
+}
+
 async fn connect(url: &str) -> ClientSocket {
     let mut request = url.into_client_request().unwrap();
     request
@@ -247,6 +260,78 @@ async fn game_upgrade_rejects_query_origin_and_shared_capacity() {
     assert_eq!(
         rejected(&url, &[ORIGIN]).await,
         axum::http::StatusCode::SERVICE_UNAVAILABLE
+    );
+    server.abort();
+}
+
+#[tokio::test]
+async fn diagnostic_and_authenticated_game_sockets_share_capacity_both_directions() {
+    let app_state = state();
+    let token = issue_token(&app_state);
+    let _reserved = app_state
+        .connections
+        .clone()
+        .acquire_many_owned((MAX_CONNECTIONS - 1) as u32)
+        .await
+        .unwrap();
+    let (game_url, server) = start_server(app_state.clone()).await;
+    let diagnostic_url = diagnostic_url(&game_url);
+
+    let mut diagnostic = connect(&diagnostic_url).await;
+    assert_eq!(next_json(&mut diagnostic).await["type"], "welcome");
+    assert_eq!(
+        rejected(&game_url, &[ORIGIN]).await,
+        axum::http::StatusCode::SERVICE_UNAVAILABLE
+    );
+
+    diagnostic.close(None).await.unwrap();
+    wait_for_available_connection(&app_state).await;
+    let mut game = connect(&game_url).await;
+    assert_eq!(
+        authenticate(&mut game, &token, 1).await["type"],
+        "authenticated"
+    );
+    assert_eq!(
+        rejected(&diagnostic_url, &[ORIGIN]).await,
+        axum::http::StatusCode::SERVICE_UNAVAILABLE
+    );
+
+    game.close(None).await.unwrap();
+    wait_for_available_connection(&app_state).await;
+    let mut replacement_diagnostic = connect(&diagnostic_url).await;
+    assert_eq!(
+        next_json(&mut replacement_diagnostic).await["type"],
+        "welcome"
+    );
+    server.abort();
+}
+
+#[tokio::test]
+async fn abrupt_authenticated_disconnect_releases_lease_and_connection_permit() {
+    let app_state = state();
+    let token = issue_token(&app_state);
+    let (url, server) = start_server(app_state.clone()).await;
+    let mut socket = connect(&url).await;
+    assert_eq!(
+        authenticate(&mut socket, &token, 1).await["type"],
+        "authenticated"
+    );
+    assert_eq!(
+        app_state.connections.available_permits(),
+        MAX_CONNECTIONS - 1
+    );
+
+    drop(socket);
+    within(async {
+        while app_state.connections.available_permits() != MAX_CONNECTIONS {
+            tokio::task::yield_now().await;
+        }
+    })
+    .await;
+    let mut retry = connect(&url).await;
+    assert_eq!(
+        authenticate(&mut retry, &token, 1).await["code"],
+        "authenticationFailed"
     );
     server.abort();
 }

@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.1.12 — 2026-10-17
+
+- Add authenticated gameplay WebSockets with compatibility checks before credential lookup,
+  atomic single-owner claims, and credential revocation when the owning connection ends.
+- Share the existing connection limit with diagnostics and bound upgrades, input, frames,
+  buffers, sends, authentication, inactivity, and absolute unseated lifetime.
+- Reject replayed command sequences and expose typed unseated command errors without
+  fabricating rooms or gameplay state.
+
+Room ownership/admission and authoritative gameplay scheduling follow separately. This
+preview does not support reconnecting with a previously claimed credential.
+
 ## 0.1.11 — 2026-10-17
 
 - Add a pure headless two-seat room lifecycle for occupancy, readiness, the exact 180-tick

@@ -21,6 +21,14 @@ dependency; jsonschema remains dev-only, with no new external package or version
 wire types, gameplay routes, HTTP session issuance, and runtime rooms remain future slices.
 
 
+A clean Git-tree image build passes for
+`sha256:c8aea33bb438685f6d66b0a385226218e1d9fc44f95c157f946996cfbfff0d8f`.
+Compose and ready local Kubernetes use that image. Health/readiness, actual two-context
+WebSocket/Axe browser scenarios through both paths, strict Kubernetes schemas (3 resources),
+and pinned Trivy's socket-free image scan pass. The unchanged scan policy reports zero fixable
+HIGH/CRITICAL findings. Temporary runtime resources and archives are removed. Runtime acceptance
+still exercises diagnostics because this increment defines contracts without gameplay handlers.
+
 ## M3 bounded-schema prerequisite — 2026-10-17
 
 The complete web gate passes after a clean locked npm install: generated diagnostic types

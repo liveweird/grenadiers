@@ -2,8 +2,9 @@
 
 The implemented vertical slice is diagnostic transport: HTTP liveness/readiness and a
 WebSocket welcome/ping/pong exchange. The React shell exercises it. There is no game session,
-player allocation, authentication, combat, or persistence model yet. A separate headless
-world/movement model now lives in `core::game`; the diagnostic routes do not run it.
+player allocation, authentication, or persistence model yet. A separate headless simulation
+in `core::game` implements movement, owned bombs, flames, damage, and one-round outcomes;
+the diagnostic routes do not run it.
 
 ## Boundaries
 
@@ -44,13 +45,16 @@ The [headless API](game/movement.md) covers its state, collision, and determinis
 [ADR 0003](decisions/0003-arena-rendering.md) selects PixiJS for the future arena and React for
 menus/HUD. No renderer dependency is installed yet.
 
-Map generation, combat, lag compensation, room admission, authentication, and matchmaking
+[Combat phases](game/combat.md) and ADRs 0004–0006 define owned placement, immutable explosion
+occupancy, and round finality. Public projections/events complete M2 before the server adapter.
+
+Map generation, lag compensation, room admission, authentication, and matchmaking
 still need implementation decisions at their planned milestones. Add focused ADRs before
 dependent work; preserve the specified lifecycle and gameplay rules.
 
 
-The [draft game specification](game/README.md) proposes a two-player ruleset and catalogs
-classic mechanics and optional extensions. Its values and policies are discussion proposals;
-they do not change the implemented scaffold or settle the deferred architecture decisions above.
+The [game specification](game/README.md) is the working two-player baseline and catalogs
+classic mechanics and optional extensions. Its initial profile drives the simulation; tuning
+remains subject to playtesting. Optional extensions do not become baseline requirements.
 The [implementation plan](game/implementation-plan.md) identifies when each dependent decision
 must be recorded and how the two-player baseline will be delivered and verified.

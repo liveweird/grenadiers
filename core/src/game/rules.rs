@@ -12,6 +12,7 @@ pub struct RulesConfig {
     bomb_range: u16,
     bomb_fuse_ticks: u64,
     flame_ticks: u64,
+    round_ticks: u64,
 }
 
 impl RulesConfig {
@@ -27,6 +28,7 @@ impl RulesConfig {
             bomb_range: 2,
             bomb_fuse_ticks: 180,
             flame_ticks: 30,
+            round_ticks: 10_800,
         }
     }
 
@@ -73,6 +75,11 @@ impl RulesConfig {
     #[must_use]
     pub const fn flame_ticks(self) -> u64 {
         self.flame_ticks
+    }
+
+    #[must_use]
+    pub const fn round_ticks(self) -> u64 {
+        self.round_ticks
     }
 }
 

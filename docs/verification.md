@@ -1,5 +1,28 @@
 # Repository verification
 
+## M2C damage and one-round outcomes — 2026-10-17
+
+The locked server gate passes with **90 core unit tests, 9 server tests, and 1 public API
+doctest**. Rust line coverage passes the unchanged 80% floor at **1,206/1,297 lines, 92.98%**.
+Independent review finds no actionable production defects. The existing same-tick planted-bomb
+chain fixture now explicitly verifies its owner dies later that update without suppressing
+the bomb's effect.
+
+New evidence covers stationary/edge/swept and turn-correction fire contact, expiry before
+damage, new-fire non-retroactivity, pre-placement death, self/mutual elimination, complete-chain
+result ordering, all 10,800 updates from a fresh round, final-update elimination precedence,
+immutable outcomes, stationary post-result reports, and atomic errors after finalization.
+Dependencies, wire contracts, browser behavior, and deployment manifests remain unchanged.
+
+
+A clean Git-tree image build passes for
+`sha256:741cb9fac0c7924cc98419edcb53a565e995d1cc09d6d6523ac091191e39f25a`.
+Compose and the ready local Kubernetes Pod use that image; health/readiness and the actual
+two-context WebSocket/Axe browser scenario pass through both paths. Strict Kubernetes
+validation passes with 3 valid resources. Pinned Trivy's socket-free archive scan passes
+with zero fixable HIGH/CRITICAL findings. Temporary deployment resources and archives
+are removed. Documentation-only release evidence does not change the tested image inputs.
+
 ## M2B explosions and flames — 2026-10-17
 
 The explosion increment passes the locked server gate. The final suite has **78 core unit

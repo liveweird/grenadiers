@@ -19,8 +19,9 @@ code, without waiting for every optional feature or an exact historical port to 
 The repository contains diagnostic HTTP/WebSocket transport, a React diagnostics page,
 contracts and generators, automated gates, CI, Compose packaging, and Kubernetes manifests.
 M1 adds a headless deterministic arena/movement simulation in `core::game`, including bomb
-collision exemptions and movement traces for later combat. There is no playable browser arena,
-explosion/damage resolution, room admission, or match lifecycle yet.
+collision exemptions and movement traces. M2 now implements owned bombs, flames, damage, and
+one-round outcomes; explicit public projections/events remain. There is no playable browser
+arena, room admission, or match lifecycle yet.
 
 The [verification record](../verification.md) now contains passing locked Rust builds, tests,
 coverage, dependency audits, Compose execution, strict Kubernetes validation and live rollout,
@@ -152,8 +153,8 @@ selects PixiJS for M3; M1 installs no graphics dependency. The next bounded task
 **Depends on:** M1.
 
 Progress: v0.1.2 implements owned bomb placement; v0.1.3 adds fuse execution, immutable chain
-planning, block destruction, and timed flames. Remaining slices are damage/round finalization
-and explicit public projections/events. See [combat phases](combat.md),
+planning, block destruction, and timed flames. v0.1.4 adds damage, exact timeout, and immutable
+round outcomes. Explicit public projections/events remain before M2 is complete. See [combat phases](combat.md),
 [ADR 0004](../decisions/0004-bomb-placement.md), and
 [ADR 0005](../decisions/0005-explosion-snapshot.md).
 

@@ -1,10 +1,13 @@
 mod client;
+mod events;
 mod scalars;
 mod server;
+mod snapshot;
 
 use std::fmt;
 
 pub use client::GameClientMessage;
+pub use events::{EventKind, MAX_EVENT_INDEX, MAX_SNAPSHOT_EVENTS, WireEvent};
 pub use scalars::{
     Cell, Counter, Direction, EntityId, GAMEPLAY_PROTOCOL_VERSION, GameplayVersion, InvalidScalar,
     MAX_COUNTER, MAX_SAFE_TICK, MapId, Position, ProtocolVersionInput, RULES_VERSION, RoomCode,
@@ -13,6 +16,10 @@ pub use scalars::{
 pub use server::{
     DrawReason, ErrorCode, GameServerMessage, InterruptReason, RoomPhase, RoomView, SeatStatus,
     WireRoundResult,
+};
+pub use snapshot::{
+    ARENA_TERRAIN_CELLS, ActorView, ArenaView, BombView, FlameView, GameState, MAX_BLOCKS,
+    MAX_BOMBS, MAX_FLAMES, MAX_RUNNING_UPDATES, Terrain,
 };
 
 pub const MAX_CLIENT_MESSAGE_BYTES: usize = 4_096;
@@ -77,3 +84,6 @@ mod client_tests;
 #[cfg(test)]
 #[path = "server_tests.rs"]
 mod server_tests;
+#[cfg(test)]
+#[path = "snapshot_tests.rs"]
+mod snapshot_tests;

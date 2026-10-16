@@ -95,6 +95,79 @@ export interface RoomView {
   "phase": RoomPhase;
 }
 
+export type Terrain = "floor" | "wall"
+
+export interface GameState {
+  "runningUpdates": number;
+  "remainingTicks": number;
+  "arena": ArenaView;
+  "actors": ActorView[];
+  "bombs": BombView[];
+  "flames": FlameView[];
+}
+
+export interface ArenaView {
+  "width": 15;
+  "height": 13;
+  "terrain": Terrain[];
+  "blocks": Cell[];
+}
+
+export interface ActorView {
+  "id": EntityId;
+  "seat": Seat;
+  "position": Position;
+  "heading": Direction;
+  "speedLevel": number;
+  "alive": boolean;
+  "bombCapacity": number;
+  "bombRange": number;
+  "liveBombCount": number;
+}
+
+export interface BombView {
+  "id": EntityId;
+  "cell": Cell;
+  "owner": EntityId;
+  "range": number;
+  "placedAt": Tick;
+  "detonatesAt": Tick;
+}
+
+export interface FlameView {
+  "cell": Cell;
+  "expiresAt": Tick;
+}
+
+export interface WireEvent {
+  "tick": Tick;
+  "index": number;
+  "kind": EventKind;
+}
+
+export type EventKind = BombPlacedEvent | BombDetonatedEvent | ActorEliminatedEvent | RoundEndedEvent
+
+export interface BombPlacedEvent {
+  "type": "bombPlaced";
+  "bomb": BombView;
+}
+
+export interface BombDetonatedEvent {
+  "type": "bombDetonated";
+  "bomb": BombView;
+}
+
+export interface ActorEliminatedEvent {
+  "type": "actorEliminated";
+  "id": EntityId;
+  "seat": Seat;
+}
+
+export interface RoundEndedEvent {
+  "type": "roundEnded";
+  "result": RoundResult;
+}
+
 export type GameClientMessage = Authenticate | CreateRoom | JoinRoom | Ready | Movement | PlaceBomb | LeaveRoom
 
 export interface Authenticate {
@@ -145,7 +218,7 @@ export interface LeaveRoom {
   "roundId": Counter;
 }
 
-export type GameServerMessage = Authenticated | IncompatibleProtocol | RoomState | LeftRoom | Error
+export type GameServerMessage = Authenticated | IncompatibleProtocol | RoomState | Snapshot | LeftRoom | Error
 
 export interface Authenticated {
   "type": "authenticated";
@@ -161,6 +234,13 @@ export interface RoomState {
   "type": "roomState";
   "room": RoomView;
   "youSeat": Seat;
+}
+
+export interface Snapshot {
+  "type": "snapshot";
+  "room": RoomView;
+  "state": GameState;
+  "events": WireEvent[];
 }
 
 export interface LeftRoom {

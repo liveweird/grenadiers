@@ -2,6 +2,9 @@
 
 ## M3 snapshot/event contract — 2026-10-17
 
+The locked server gate passes with **115 core unit tests, 9 server tests, and 1 doctest**.
+Rust coverage passes the unchanged 80% floor at **1,474/1,604 lines, 91.90%**.
+
 The complete web gate passes with **46 web/tooling tests** and unchanged coverage of
 **95.34% statements, 90% branches, 100% functions, 96.05% lines**. Generated gameplay and
 diagnostic drift checks, nested AJV validation, ESLint, Knip, TypeScript, and production build

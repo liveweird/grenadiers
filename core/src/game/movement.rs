@@ -207,7 +207,12 @@ fn blocking_cells(world: &World) -> impl Iterator<Item = (CellId, Option<EntityI
             .then_some((cell, None))
         })
     });
-    terrain.chain(world.bombs.values().map(|bomb| (bomb.cell, Some(bomb.id))))
+    terrain.chain(
+        world
+            .bombs
+            .values()
+            .map(|bomb| (bomb.cell(), Some(bomb.id()))),
+    )
 }
 
 fn prune_bomb_grace(world: &World, actor: &mut Actor) {
@@ -215,7 +220,7 @@ fn prune_bomb_grace(world: &World, actor: &mut Actor) {
         world
             .bombs
             .get(id)
-            .is_some_and(|bomb| position_overlaps_cell(actor.position, bomb.cell))
+            .is_some_and(|bomb| position_overlaps_cell(actor.position, bomb.cell()))
     });
 }
 

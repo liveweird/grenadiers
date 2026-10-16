@@ -5,6 +5,7 @@ use crate::game::fixtures::fixed_arena;
 use crate::game::input::Direction;
 use crate::game::rules::RulesConfig;
 use crate::game::simulation::{ActorInit, InputAction, SeatInput, State, StateError};
+use crate::game::test_support::add_test_bomb;
 use crate::game::types::{
     CellId, EntityId, HALF_FOOTPRINT, Position, SeatId, SpeedLevel, UNITS_PER_CELL,
 };
@@ -105,7 +106,7 @@ fn maximum_speed_clamps_to_bomb_boundaries_on_every_axis() {
 
     for (direction, start, obstacle, expected, horizontal) in cases {
         let mut state = state(Position::center(start), direction);
-        state.add_bomb_obstacle(EntityId(90), obstacle).unwrap();
+        add_test_bomb(&mut state, EntityId(90), obstacle, EntityId(1)).unwrap();
         state
             .step(&[SeatInput {
                 seat: SeatId::One,
@@ -173,12 +174,10 @@ fn stopped_partial_turn_replans_and_pending_axis_can_reverse() {
 #[test]
 fn bomb_and_actor_identity_errors_leave_state_unchanged() {
     let mut original = state(Position::center(CellId::new(2, 5)), Direction::East);
-    original
-        .add_bomb_obstacle(EntityId(90), CellId::new(8, 5))
-        .unwrap();
+    add_test_bomb(&mut original, EntityId(90), CellId::new(8, 5), EntityId(1)).unwrap();
     let before = original.clone();
     assert_eq!(
-        original.add_bomb_obstacle(EntityId(90), CellId::new(9, 5)),
+        add_test_bomb(&mut original, EntityId(90), CellId::new(9, 5), EntityId(1),),
         Err(StateError::DuplicateEntityId(EntityId(90)))
     );
     assert_eq!(original, before);

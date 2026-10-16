@@ -25,16 +25,20 @@
 //! ```
 
 pub mod arena;
+pub mod bombs;
 pub mod fixtures;
 pub mod geometry;
 pub mod input;
 mod movement;
 pub mod rules;
 pub mod simulation;
+#[cfg(test)]
+pub(crate) mod test_support;
 pub mod types;
 pub mod world;
 
 pub use arena::{Arena, ArenaError, Terrain};
+pub use bombs::Bomb;
 pub use fixtures::fixed_arena;
 pub use geometry::{MovementSegment, MovementTrace};
 pub use input::{Direction, HeldDirections};
@@ -43,4 +47,4 @@ pub use simulation::{
     Actor, ActorInit, InputAction, SeatInput, State, StateError, StepError, StepReport,
 };
 pub use types::{CellId, EntityId, Position, SeatId, SpeedLevel, Tick};
-pub use world::{BombObstacle, World};
+pub use world::World;

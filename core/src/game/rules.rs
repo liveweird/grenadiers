@@ -8,6 +8,9 @@ pub struct RulesConfig {
     units_per_cell: i32,
     half_footprint: i32,
     turn_assist: i32,
+    bomb_capacity: u16,
+    bomb_range: u16,
+    bomb_fuse_ticks: u64,
 }
 
 impl RulesConfig {
@@ -19,6 +22,9 @@ impl RulesConfig {
             units_per_cell: UNITS_PER_CELL,
             half_footprint: HALF_FOOTPRINT,
             turn_assist: TURN_ASSIST,
+            bomb_capacity: 1,
+            bomb_range: 2,
+            bomb_fuse_ticks: 180,
         }
     }
 
@@ -45,6 +51,21 @@ impl RulesConfig {
     #[must_use]
     pub const fn turn_assist(self) -> i32 {
         self.turn_assist
+    }
+
+    #[must_use]
+    pub const fn bomb_capacity(self) -> u16 {
+        self.bomb_capacity
+    }
+
+    #[must_use]
+    pub const fn bomb_range(self) -> u16 {
+        self.bomb_range
+    }
+
+    #[must_use]
+    pub const fn bomb_fuse_ticks(self) -> u64 {
+        self.bomb_fuse_ticks
     }
 }
 

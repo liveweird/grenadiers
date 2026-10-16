@@ -1,5 +1,35 @@
 # Repository verification
 
+## M2A owned bomb placement — 2026-10-17
+
+The placement increment passes `scripts/gates.sh server` with **63 core unit tests,
+9 server tests, and 1 public API doctest**. The unchanged Rust coverage gate passes at
+**990/1,083 lines, 91.41%**. No dependencies, wire contracts, frontend behavior, or deployment
+manifests change. Independent review found no remaining actionable issues after constructor
+regression coverage and the retired obstacle API documentation were corrected.
+
+Tests exercise post-movement cells, ownership/range/deadline snapshots, derived capacity,
+same-cell conflicts, invalid-request isolation, ordered cancellation, all-actor exit grace,
+ID/deadline exhaustion, and reconstruction from a nonempty owned-bomb world. Actor IDs at
+`u32::MAX` do not exhaust lower unused bomb IDs. Fuse execution and damage remain deferred.
+
+
+Runtime verification uses candidate image
+`sha256:62a27015d91eabda211e4ce038fb5782521e9dbc5446cfb6e6d8b55b91c89233`:
+
+- Compose starts without PostgreSQL; health/readiness return 200. The actual two-context
+  WebSocket/Axe browser scenario passes against the built app.
+- The same image rolls out ready in local Kubernetes. Health/readiness, SPA fallback,
+  unknown API 404, and the browser scenario pass through the Service port-forward.
+- Strict rendered Kubernetes validation passes: 3 valid resources, no errors or skips.
+- Digest-pinned Trivy 0.74.0 passes the unchanged fixable HIGH/CRITICAL filter with zero
+  findings. The local scan reads a `docker image save` archive through `--input` and a
+  read-only archive mount, without exposing the Docker socket to the scanner container.
+- A clean Git-tree export builds successfully; its runtime filesystem layers exactly match
+  the tested candidate. Attestation/manifest identities can differ between builds.
+- Temporary Compose containers, Kubernetes namespace, port-forward, and scan archive
+  are removed after verification; local images remain available.
+
 ## M1 world and movement — 2026-10-17
 
 The integrated headless domain passes `scripts/gates.sh server`: exact repository pins,

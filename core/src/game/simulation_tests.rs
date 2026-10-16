@@ -4,6 +4,7 @@ use super::{ActorInit, InputAction, MAX_INPUTS_PER_TICK, SeatInput, State, State
 use crate::game::arena::{ARENA_CELL_COUNT, ARENA_HEIGHT, ARENA_WIDTH, Arena, Terrain};
 use crate::game::input::Direction;
 use crate::game::rules::RulesConfig;
+use crate::game::test_support::add_test_bomb;
 use crate::game::types::{
     CellId, EntityId, HALF_FOOTPRINT, Position, SeatId, SpeedLevel, Tick, UNITS_PER_CELL,
 };
@@ -305,9 +306,7 @@ fn changing_intent_cancels_partial_turn_and_replans() {
 fn bombs_block_sweeps_and_grace_ends_after_leaving() {
     let start = Position::center(CellId::new(2, 5));
     let mut blocked = state_at(start, Direction::East, SpeedLevel::Four);
-    blocked
-        .add_bomb_obstacle(EntityId(90), CellId::new(3, 5))
-        .unwrap();
+    add_test_bomb(&mut blocked, EntityId(90), CellId::new(3, 5), EntityId(10)).unwrap();
     blocked
         .step(&[input(SeatId::One, InputAction::Press(Direction::East))])
         .unwrap();
@@ -326,9 +325,7 @@ fn bombs_block_sweeps_and_grace_ends_after_leaving() {
         ],
     )
     .unwrap();
-    grace
-        .add_bomb_obstacle(EntityId(91), CellId::new(2, 5))
-        .unwrap();
+    add_test_bomb(&mut grace, EntityId(91), CellId::new(2, 5), EntityId(1)).unwrap();
     grace
         .step(&[
             input(SeatId::One, InputAction::Press(Direction::West)),

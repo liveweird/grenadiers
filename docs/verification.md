@@ -14,6 +14,15 @@ This core-only increment changes no dependencies, wire contracts, browser behavi
 deployment manifests. Actor damage and round results remain deferred.
 
 
+A clean Git-tree image build passes. The tested image is
+`sha256:3efcdc07674e7b8eb1a5271eadce170b87fa90584abd1f75a4e7fcdeeefd35bc`.
+Compose and a ready local Kubernetes rollout use that image; health/readiness and the
+actual two-context WebSocket/Axe browser scenario pass through both deployment paths.
+Strict schemas pass with 3 valid resources. Pinned Trivy's archive-input scan finds zero
+fixable HIGH/CRITICAL vulnerabilities under the unchanged policy. Temporary runtime
+resources and archives are cleaned up. Rebase onto v0.1.2 changes documentation only;
+reviewed Rust/package/application inputs remain byte-identical.
+
 ## M2A owned bomb placement — 2026-10-17
 
 The placement increment passes `scripts/gates.sh server` with **63 core unit tests,

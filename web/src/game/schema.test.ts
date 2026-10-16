@@ -59,15 +59,11 @@ const wrongVersion: GameServerMessage = {
 // @ts-expect-error error sequence is required even when it is null
 const missingErrorSequence: GameServerMessage = { type: 'error', code: 'invalidMessage' }
 
-// @ts-expect-error snapshots are introduced only with the complete M3.1b payload
-const prematureSnapshot: GameServerMessage = { type: 'snapshot' }
-
 const compileTimeExamples = [
   missingDirection,
   wrongDirection,
   wrongVersion,
   missingErrorSequence,
-  prematureSnapshot,
 ]
 
 const ajv = new Ajv({ allErrors: true }).addSchema(gameplaySchema)
@@ -98,7 +94,7 @@ function withRoom(overrides: Record<string, unknown>): Record<string, unknown> {
 
 describe('gameplay client schema', () => {
   it('keeps compile-time negative examples in the checked module', () => {
-    expect(compileTimeExamples).toHaveLength(5)
+    expect(compileTimeExamples).toHaveLength(4)
   })
 
   it('accepts every command and requires every declared field', () => {
@@ -168,7 +164,7 @@ describe('gameplay client schema', () => {
 })
 
 describe('gameplay server schema', () => {
-  it('accepts every response and rejects missing, extra, and mistyped top-level fields', () => {
+  it('accepts every lifecycle response and rejects missing, extra, and mistyped top-level fields', () => {
     for (const message of servers) {
       expect(valid(validateServer, message), JSON.stringify(validateServer.errors)).toBe(true)
       for (const property of Object.keys(message)) {

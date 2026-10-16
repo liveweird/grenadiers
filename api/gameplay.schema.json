@@ -196,6 +196,155 @@
         "phase": { "$ref": "#/$defs/RoomPhase" }
       }
     },
+    "Terrain": {
+      "enum": ["floor", "wall"]
+    },
+    "GameState": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["runningUpdates", "remainingTicks", "arena", "actors", "bombs", "flames"],
+      "properties": {
+        "runningUpdates": { "type": "integer", "minimum": 0, "maximum": 10800 },
+        "remainingTicks": { "type": "integer", "minimum": 0, "maximum": 10800 },
+        "arena": { "$ref": "#/$defs/ArenaView" },
+        "actors": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": { "$ref": "#/$defs/ActorView" }
+        },
+        "bombs": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 16,
+          "items": { "$ref": "#/$defs/BombView" }
+        },
+        "flames": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 195,
+          "items": { "$ref": "#/$defs/FlameView" }
+        }
+      }
+    },
+    "ArenaView": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["width", "height", "terrain", "blocks"],
+      "properties": {
+        "width": { "const": 15 },
+        "height": { "const": 13 },
+        "terrain": {
+          "type": "array",
+          "minItems": 195,
+          "maxItems": 195,
+          "items": { "$ref": "#/$defs/Terrain" }
+        },
+        "blocks": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 195,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/Cell" }
+        }
+      }
+    },
+    "ActorView": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id", "seat", "position", "heading", "speedLevel", "alive",
+        "bombCapacity", "bombRange", "liveBombCount"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/EntityId" },
+        "seat": { "$ref": "#/$defs/Seat" },
+        "position": { "$ref": "#/$defs/Position" },
+        "heading": { "$ref": "#/$defs/Direction" },
+        "speedLevel": { "type": "integer", "minimum": 0, "maximum": 4 },
+        "alive": { "type": "boolean" },
+        "bombCapacity": { "type": "integer", "minimum": 1, "maximum": 8 },
+        "bombRange": { "type": "integer", "minimum": 1, "maximum": 8 },
+        "liveBombCount": { "type": "integer", "minimum": 0, "maximum": 8 }
+      }
+    },
+    "BombView": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "cell", "owner", "range", "placedAt", "detonatesAt"],
+      "properties": {
+        "id": { "$ref": "#/$defs/EntityId" },
+        "cell": { "$ref": "#/$defs/Cell" },
+        "owner": { "$ref": "#/$defs/EntityId" },
+        "range": { "type": "integer", "minimum": 1, "maximum": 8 },
+        "placedAt": { "$ref": "#/$defs/Tick" },
+        "detonatesAt": { "$ref": "#/$defs/Tick" }
+      }
+    },
+    "FlameView": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cell", "expiresAt"],
+      "properties": {
+        "cell": { "$ref": "#/$defs/Cell" },
+        "expiresAt": { "$ref": "#/$defs/Tick" }
+      }
+    },
+    "WireEvent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["tick", "index", "kind"],
+      "properties": {
+        "tick": { "$ref": "#/$defs/Tick" },
+        "index": { "type": "integer", "minimum": 0, "maximum": 63 },
+        "kind": { "$ref": "#/$defs/EventKind" }
+      }
+    },
+    "EventKind": {
+      "oneOf": [
+        { "$ref": "#/$defs/BombPlacedEvent" },
+        { "$ref": "#/$defs/BombDetonatedEvent" },
+        { "$ref": "#/$defs/ActorEliminatedEvent" },
+        { "$ref": "#/$defs/RoundEndedEvent" }
+      ]
+    },
+    "BombPlacedEvent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "bomb"],
+      "properties": {
+        "type": { "const": "bombPlaced" },
+        "bomb": { "$ref": "#/$defs/BombView" }
+      }
+    },
+    "BombDetonatedEvent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "bomb"],
+      "properties": {
+        "type": { "const": "bombDetonated" },
+        "bomb": { "$ref": "#/$defs/BombView" }
+      }
+    },
+    "ActorEliminatedEvent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "id", "seat"],
+      "properties": {
+        "type": { "const": "actorEliminated" },
+        "id": { "$ref": "#/$defs/EntityId" },
+        "seat": { "$ref": "#/$defs/Seat" }
+      }
+    },
+    "RoundEndedEvent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "result"],
+      "properties": {
+        "type": { "const": "roundEnded" },
+        "result": { "$ref": "#/$defs/RoundResult" }
+      }
+    },
     "GameClientMessage": {
       "oneOf": [
         { "$ref": "#/$defs/Authenticate" },
@@ -293,6 +442,7 @@
         { "$ref": "#/$defs/Authenticated" },
         { "$ref": "#/$defs/IncompatibleProtocol" },
         { "$ref": "#/$defs/RoomState" },
+        { "$ref": "#/$defs/Snapshot" },
         { "$ref": "#/$defs/LeftRoom" },
         { "$ref": "#/$defs/Error" }
       ]
@@ -323,6 +473,22 @@
         "type": { "const": "roomState" },
         "room": { "$ref": "#/$defs/RoomView" },
         "youSeat": { "$ref": "#/$defs/Seat" }
+      }
+    },
+    "Snapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "room", "state", "events"],
+      "properties": {
+        "type": { "const": "snapshot" },
+        "room": { "$ref": "#/$defs/RoomView" },
+        "state": { "$ref": "#/$defs/GameState" },
+        "events": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 64,
+          "items": { "$ref": "#/$defs/WireEvent" }
+        }
       }
     },
     "LeftRoom": {

@@ -1,6 +1,8 @@
 use serde::Serialize;
 
+use super::events::WireEvent;
 use super::scalars::{Counter, GameplayVersion, MapId, RoomCode, RoomId, RulesVersion, Seat, Tick};
+use super::snapshot::GameState;
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize)]
 #[serde(tag = "type", rename_all = "camelCase", deny_unknown_fields)]
@@ -17,6 +19,11 @@ pub enum GameServerMessage {
         room: RoomView,
         #[serde(rename = "youSeat")]
         you_seat: Seat,
+    },
+    Snapshot {
+        room: RoomView,
+        state: GameState,
+        events: Vec<WireEvent>,
     },
     LeftRoom {
         #[serde(rename = "roomId")]

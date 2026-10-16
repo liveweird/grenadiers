@@ -1,8 +1,8 @@
 # Gameplay protocol
 
-Status: control/lifecycle contract foundation. `api/gameplay.schema.json`, independent Rust
+Status: control/lifecycle and snapshot/event contracts. `api/gameplay.schema.json`, independent Rust
 `core::protocol` types, and generated `web/src/game/schema.ts` define messages; gameplay
-endpoints, room handlers, and browser controls are not implemented by this increment.
+endpoints, checked domain conversion, room handlers, and browser controls remain planned.
 Diagnostic `/api/v1/ws` and `api/realtime.schema.json` remain unchanged.
 
 ## Authentication and compatibility
@@ -41,9 +41,31 @@ All listed fields are required; objects reject extra fields. Counter values are 
 | `roomState` | `room`, personalized `youSeat` |
 | `leftRoom` | `roomId`, acknowledged `sequence` |
 | `error` | typed `code`, `sequence` (counter or explicit null) |
+| `snapshot` | public `room`, `state`, and `events` |
 
-The future snapshot/event contract extends this foundation separately; no untyped placeholder
-payload is exposed. HTTP session responses are separate from socket messages.
+HTTP session responses are separate from socket messages.
+
+## Public snapshots and events
+
+A snapshot is identical for both seats; only admission `roomState` includes `youSeat`.
+`state` contains `runningUpdates` and `remainingTicks` (each 0–10,800), the arena, exactly two
+actors, up to 16 bombs, and up to 195 flames. The arena has width 15, height 13, exactly 195
+row-major floor/wall terrain entries, and up to 195 unique soft-block cells.
+
+Actors expose ID, seat, fixed-point position, heading, speed level (0–4), alive status,
+capacity/range (1–8), and live-bomb count (0–8). Bombs include ID, cell, owner, captured range,
+placement tick, and detonation tick. Flames include cell and exclusive expiry tick. Room metadata
+carries tick, rules/map versions, and outcome; these are not duplicated in game state.
+Private held input, movement fractions, collision grace, allocator state, and hidden contents
+are excluded. The checked domain adapter will enforce canonical ordering and cross-field
+invariants before runtime publication.
+
+Each snapshot carries 0–64 events with absolute `tick`, per-tick `index` (0–63), and tagged
+`kind`: `bombPlaced`/`bombDetonated` carry a full bomb record; `actorEliminated` carries ID/seat;
+`roundEnded` carries the result. Identity is `(roomId, roundId, tick, index)`. Placement and
+explosion within one update remain separate events. Events are best-effort presentation cues;
+full snapshots remain authoritative. The planned 20 Hz publisher accumulates at most three
+completed 60 Hz updates per normal snapshot.
 
 ## Identity, ordering, and lifecycle
 
@@ -73,5 +95,7 @@ snapshot. See [ADR 0008](../decisions/0008-gameplay-protocol.md).
 without writing. The shared web gate runs this alongside existing diagnostic checks and AJV
 validation tests. Rust conformance tests compare strict parsing and serialization with the same
 schema, including missing/null fields, scalar boundaries, integer-valued number forms, version
-rejection responses, and credential redaction. TypeScript types do not enforce string patterns
+rejection responses, credential redaction, all event variants, nested bounds, and real
+frame-size enforcement. A maximal structural snapshot encodes to 33,989 UTF-8 bytes against
+the inclusive 65,536-byte server limit; an actual oversized snapshot is rejected. TypeScript types do not enforce string patterns
 or numeric/array bounds at runtime; AJV and Rust validation do.

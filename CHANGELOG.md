@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.1.8 — 2026-10-17
+
+- Define bounded public snapshots for the fixed arena, two actors, owned bombs, and flames
+  in Rust, JSON Schema, and generated TypeScript.
+- Include indexed placement, detonation, elimination, and round-end events without private
+  simulation bookkeeping or concealed future contents.
+- Validate full nested messages, collection/scalar limits, and actual encoded frame sizes.
+
+This completes the snapshot/event wire shape. Checked domain conversion, authenticated
+transport, rooms, and browser play follow separately.
+
 ## 0.1.7 — 2026-10-17
 
 - Define strict gameplay authentication, room control, movement/bomb intent, lifecycle,

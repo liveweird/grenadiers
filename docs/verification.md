@@ -1,5 +1,29 @@
 # Repository verification
 
+## M2D public projection and phase events — 2026-10-17
+
+The locked server gate passes with **97 core unit tests, 9 server tests, and 1 public API
+doctest**. Rust line coverage passes the unchanged 80% floor at **1,321/1,406 lines, 93.95%**.
+Independent review reports no actionable findings or material coverage gaps. No dependencies,
+wire contracts, browser behavior, or deployment manifests change.
+
+Projection tests verify visible layers, ownership counts, timer/result values, stable ordering,
+and equality despite different private movement/input/grace/allocator bookkeeping. Event tests
+prove same-tick placement/detonation remains observable, old-fire elimination precedes survivor
+placement, canonical seat/ID ordering, and no failed-placement, fixture, or repeated terminal
+events. Earlier movement, combat, timeout, and atomic-error regressions remain passing.
+
+
+A clean Git-tree image build passes for
+`sha256:4e081ed9475a1bd40ae8a2a6937ec44795167b9e3105e57d954317ff5052dd38`.
+Compose and local Kubernetes use that image; health/readiness, ready rollout, and the actual
+two-context WebSocket/Axe browser scenario pass through both deployment paths. Strict schemas
+pass with 3 valid resources. Pinned Trivy's archive-input scan passes with zero fixable
+HIGH/CRITICAL findings. Temporary runtime resources and archives are removed.
+
+This completes M2's headless world/combat/result/public-boundary exit. It does not implement
+networked player sessions, rendered gameplay, generated maps, pickups, or match scoring.
+
 ## M2C damage and one-round outcomes — 2026-10-17
 
 The locked server gate passes with **90 core unit tests, 9 server tests, and 1 public API

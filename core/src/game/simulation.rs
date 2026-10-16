@@ -4,6 +4,7 @@ use std::collections::BTreeSet;
 use super::arena::Terrain;
 #[cfg(test)]
 use super::bombs::Bomb;
+use super::events::StepEvent;
 use super::geometry::MovementTrace;
 use super::input::{Direction, HeldDirections};
 use super::movement;
@@ -134,6 +135,7 @@ pub enum StepError {
 pub struct StepReport {
     pub tick: Tick,
     pub traces: [MovementTrace; 2],
+    pub events: Vec<StepEvent>,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -307,10 +309,16 @@ mod flame_tests;
 #[path = "placement_tests.rs"]
 mod placement_tests;
 #[cfg(test)]
+#[path = "projection_tests.rs"]
+mod projection_tests;
+#[cfg(test)]
 #[path = "round_result_tests.rs"]
 mod round_result_tests;
 #[path = "simulation_step.rs"]
 mod step;
+#[cfg(test)]
+#[path = "step_event_tests.rs"]
+mod step_event_tests;
 #[cfg(test)]
 #[path = "simulation_tests.rs"]
 mod tests;

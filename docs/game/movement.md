@@ -35,7 +35,7 @@ turn needs an offset of at most 128 units and a fully clear correction path. Ali
 the normal distance budget and can span ticks; forward travel starts after alignment completes.
 The last committed heading remains authoritative while a correction is pending or rejected.
 
-`StepReport` contains the completed tick and two movement traces in seat order. Each trace
+`StepReport` contains the completed tick, two movement traces in seat order, and phase events. Each trace
 retains the starting footprint and up to two actual cardinal segments, including turning
 correction. `overlaps_cell` uses positive-area contact for swept damage against existing fire.
 It must not replace the piecewise path with a diagonal bounding rectangle.
@@ -69,6 +69,6 @@ Run `cargo test -p grenadiers-core --locked` for arena, input, geometry, movemen
 determinism tests, plus the public API example. The workspace gate and coverage floor still
 apply: `scripts/gates.sh server` and `scripts/gates.sh coverage`.
 
-The remaining M2 work adds explicit public projections and phase events. M3 will introduce
+M2 adds combat, explicit public projections, and phase events through the same state transition. M3 will introduce
 versioned public gameplay contracts and [PixiJS rendering](../decisions/0003-arena-rendering.md).
 Identical input logs must reproduce complete states independently of browser frame rate.

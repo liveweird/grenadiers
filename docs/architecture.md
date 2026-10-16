@@ -46,7 +46,8 @@ The [headless API](game/movement.md) covers its state, collision, and determinis
 menus/HUD. No renderer dependency is installed yet.
 
 [Combat phases](game/combat.md) and ADRs 0004–0006 define owned placement, immutable explosion
-occupancy, and round finality. Public projections/events complete M2 before the server adapter.
+occupancy, and round finality. [ADR 0007](decisions/0007-public-state-events.md) defines the
+explicit public projection and phase events, completing M2 before the server adapter.
 
 Map generation, lag compensation, room admission, authentication, and matchmaking
 still need implementation decisions at their planned milestones. Add focused ADRs before

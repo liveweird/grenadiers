@@ -5,7 +5,8 @@ The first playable milestone will support two human players. Bots and larger mat
 
 This is the **engineering scaffold and headless simulation**, not a playable game.
 It provides a React diagnostic shell, HTTP probes, a versioned WebSocket diagnostic exchange,
-and a deterministic Rust simulation with movement, bombs, flames, damage, and one-round results.
+and a deterministic Rust simulation with movement, bombs, flames, damage, one-round results,
+and explicit public snapshots/events.
 Playable rendering, rooms, authentication, matchmaking, and stats remain unimplemented. The [game specification](docs/game/README.md)
 describes the classic reference and proposed rules. The
 [implementation and release plan](docs/game/implementation-plan.md) breaks delivery into

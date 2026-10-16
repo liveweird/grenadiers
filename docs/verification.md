@@ -22,6 +22,15 @@ send failure cannot be forced reliably over loopback; the abrupt live-driver dis
 covers its shared RAII cleanup ownership without adding test-only production interfaces.
 No rooms or gameplay snapshots are fabricated by this transport increment.
 
+A clean committed-tree build produces
+`sha256:4e5f9dd3ffadf4db2833092b069fa45e4b598924716cec5ec2da526da922460b`.
+Compose and ready local Kubernetes use the exact image. Separate health/readiness checks
+and all **three candidate browser scenarios** pass through both paths, including actual native
+gameplay authentication, compatibility-before-claim, duplicate-owner protection, and replay
+rejection. Strict schemas pass with 3 valid resources; pinned socket-free Trivy reports zero
+HIGH/CRITICAL vulnerabilities. Temporary deployment/export/archive/forward/symlink resources
+are removed; the candidate image is retained.
+
 ## M3 pure room lifecycle — 2026-10-17
 
 The locked server gate passes **136 core tests, 24 server tests, and 2 doctests**. Rust

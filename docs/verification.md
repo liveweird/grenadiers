@@ -15,6 +15,14 @@ Independent review caught null-Origin configuration and out-of-order timestamp r
 both are fixed with regressions. Registry time now clamps under its mutex for consistent
 expiry and rate accounting. HTTP issuance grants no room/seat and no socket handler yet.
 
+A clean committed-tree build produces
+`sha256:6ee60a78bfac63db543f10577577332b65d35b86c1871d4da6137f50f847cca4`.
+Compose and ready local Kubernetes use this exact image. Separate health/readiness checks pass;
+the exact candidate browser suite passes **both scenarios** through each deployment path:
+actual session issuance/Origin/query/cache policy and independent diagnostic roundtrips/Axe.
+Strict schemas pass with 3 valid resources; pinned socket-free Trivy reports zero HIGH/CRITICAL
+vulnerabilities. Temporary deployments, port-forwards, exports, and archives are removed.
+
 ## M3 checked domain projection — 2026-10-17
 
 The locked server gate passes with **126 core unit tests, 9 server tests, and 1 doctest**.

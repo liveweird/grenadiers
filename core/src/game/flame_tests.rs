@@ -126,20 +126,7 @@ fn overlapping_flames_keep_the_latest_expiry_and_expire_at_the_boundary() {
 }
 
 #[test]
-fn bomb_placed_in_active_flame_detonates_in_the_placement_tick() {
-    let cell = CellId::new(4, 5);
-    let mut state = state_at(cell, CellId::new(12, 5));
-    state.world.hazards.insert(cell, Tick(10));
-
-    state.step(&[place(SeatId::One)]).unwrap();
-
-    assert!(state.world().bombs().is_empty());
-    assert_eq!(state.live_bomb_count(SeatId::One), 0);
-    assert_eq!(state.world().hazards().get(&cell), Some(&Tick(31)));
-}
-
-#[test]
-fn newly_placed_bomb_joins_a_same_tick_due_bomb_chain() {
+fn newly_placed_bomb_chains_when_its_owner_dies_later_that_tick() {
     let placement_cell = CellId::new(5, 5);
     let safe_second_actor = CellId::new(12, 10);
     let mut state = state_at(placement_cell, safe_second_actor);
@@ -163,6 +150,12 @@ fn newly_placed_bomb_joins_a_same_tick_due_bomb_chain() {
     assert_eq!(state.live_bomb_count(SeatId::Two), 0);
     assert!(state.world().hazards().contains_key(&CellId::new(5, 7)));
     assert!(!state.world().hazards().contains_key(&safe_second_actor));
+    assert!(!state.actors()[0].alive());
+    assert!(state.actors()[1].alive());
+    assert_eq!(
+        state.result(),
+        Some(super::RoundResult::Winner(SeatId::Two))
+    );
 }
 
 #[test]

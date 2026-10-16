@@ -29,7 +29,7 @@ events in authoritative order. New presses take priority; repeat presses do not.
 the winner resumes the last held direction. Clearing or releasing the last direction stops
 movement and clears its fraction immediately, including within a multi-event tick batch.
 
-Each successful call advances one 60 Hz tick. All five speed levels retain fractional travel
+Each successful call advances one absolute 60 Hz tick; active rounds also count Running updates. All five speed levels retain fractional travel
 between updates. There is no accumulated movement burst after hitting a wall. A perpendicular
 turn needs an offset of at most 128 units and a fully clear correction path. Alignment consumes
 the normal distance budget and can span ticks; forward travel starts after alignment completes.
@@ -37,7 +37,7 @@ The last committed heading remains authoritative while a correction is pending o
 
 `StepReport` contains the completed tick and two movement traces in seat order. Each trace
 retains the starting footprint and up to two actual cardinal segments, including turning
-correction. `overlaps_cell` uses positive-area contact and supports M2's later hazard checks.
+correction. `overlaps_cell` uses positive-area contact for swept damage against existing fire.
 It must not replace the piecewise path with a diagonal bounding rectangle.
 
 More than 64 inputs or tick overflow rejects the whole step without mutating state. The
@@ -49,7 +49,7 @@ transport layer will still need authentication, sequencing, expiry, and queue/ra
 starts with capacity one and range two. A bomb captures owner, range, placement tick, and
 a deadline 180 ticks later. `World::bombs()` exposes complete records; `live_bomb_count(seat)`
 derives ownership counts. Fuses and flames now execute; [combat phases](combat.md) describe
-their timing and immutable occupancy rules. Player damage follows in the next increment.
+their timing, damage ordering, results, and immutable occupancy rules.
 
 Requests are one-shot and coalesced per seat; `Clear` cancels earlier requests in the same
 batch. Placement requires capacity and an unblocked floor cell without an existing bomb.
@@ -60,7 +60,7 @@ Every overlapping actor receives an exemption and can leave. Exact boundary clea
 revokes that exemption before any further segment; re-entry or crossing another bomb is blocked.
 The earlier `add_bomb_obstacle` API is retired; collision fixtures use test-only owned bombs.
 Pickups remain inert until M4. Hazards now carry exclusive flame expiry ticks and can ignite
-bombs; actors are not yet damaged. See [ADR 0004](../decisions/0004-bomb-placement.md)
+bombs and damage actors through the documented combat phases. See [ADR 0004](../decisions/0004-bomb-placement.md)
 for placement ordering, identity allocation, and compatibility decisions.
 
 ## Verification and next integration
@@ -69,6 +69,6 @@ Run `cargo test -p grenadiers-core --locked` for arena, input, geometry, movemen
 determinism tests, plus the public API example. The workspace gate and coverage floor still
 apply: `scripts/gates.sh server` and `scripts/gates.sh coverage`.
 
-The remaining M2 work will consume the traces for damage and add round results. M3 will introduce
+The remaining M2 work adds explicit public projections and phase events. M3 will introduce
 versioned public gameplay contracts and [PixiJS rendering](../decisions/0003-arena-rendering.md).
 Identical input logs must reproduce complete states independently of browser frame rate.

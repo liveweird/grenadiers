@@ -1,6 +1,8 @@
 use std::collections::BTreeSet;
 
+#[cfg(test)]
 use super::arena::Terrain;
+#[cfg(test)]
 use super::bombs::Bomb;
 use super::geometry::MovementTrace;
 use super::input::{Direction, HeldDirections};
@@ -53,6 +55,7 @@ pub struct Actor {
     pub(crate) bomb_grace: BTreeSet<EntityId>,
     capacity: u16,
     range: u16,
+    alive: bool,
 }
 
 impl Actor {
@@ -90,6 +93,23 @@ impl Actor {
     pub const fn bomb_range(&self) -> u16 {
         self.range
     }
+
+    #[must_use]
+    pub const fn alive(&self) -> bool {
+        self.alive
+    }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum DrawReason {
+    MutualElimination,
+    Timeout,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum RoundResult {
+    Winner(SeatId),
+    Draw(DrawReason),
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -123,6 +143,8 @@ pub struct State {
     actors: [Actor; 2],
     tick: Tick,
     next_entity_id: u64,
+    running_updates: u64,
+    result: Option<RoundResult>,
 }
 
 impl State {
@@ -169,6 +191,8 @@ impl State {
             actors: canonical.map(|actor| Actor::new(actor, rules)),
             tick: Tick(0),
             next_entity_id,
+            running_updates: 0,
+            result: None,
         })
     }
 
@@ -190,6 +214,16 @@ impl State {
     #[must_use]
     pub const fn tick(&self) -> Tick {
         self.tick
+    }
+
+    #[must_use]
+    pub const fn running_updates(&self) -> u64 {
+        self.running_updates
+    }
+
+    #[must_use]
+    pub const fn result(&self) -> Option<RoundResult> {
+        self.result
     }
 
     #[must_use]
@@ -237,118 +271,6 @@ impl State {
         });
         Ok(())
     }
-
-    pub fn step(&mut self, inputs: &[SeatInput]) -> Result<StepReport, StepError> {
-        if inputs.len() > MAX_INPUTS_PER_TICK {
-            return Err(StepError::TooManyInputs {
-                count: inputs.len(),
-                maximum: MAX_INPUTS_PER_TICK,
-            });
-        }
-        let next_tick = Tick(self.tick.0.checked_add(1).ok_or(StepError::TickOverflow)?);
-        self.expire_flames(next_tick);
-
-        let mut placement_requests = [false; 2];
-        for input in inputs {
-            let actor = &mut self.actors[input.seat.index()];
-            let previous = actor.held.active();
-            match input.action {
-                InputAction::Press(direction) => actor.held.press(direction),
-                InputAction::Release(direction) => actor.held.release(direction),
-                InputAction::Clear => {
-                    actor.held.clear();
-                    actor.pending_turn = None;
-                    actor.residual = 0;
-                    placement_requests[input.seat.index()] = false;
-                }
-                InputAction::PlaceBomb => placement_requests[input.seat.index()] = true,
-            }
-            if actor.held.active() != previous {
-                actor.pending_turn = None;
-            }
-            if actor.held.active().is_none() {
-                actor.residual = 0;
-            }
-        }
-        let traces = self
-            .actors
-            .each_mut()
-            .map(|actor| movement::advance_actor(&self.world, actor));
-        self.resolve_placements(placement_requests, next_tick);
-        self.resolve_explosions(next_tick);
-        self.tick = next_tick;
-        Ok(StepReport {
-            tick: next_tick,
-            traces,
-        })
-    }
-
-    fn resolve_placements(&mut self, requests: [bool; 2], tick: Tick) {
-        let mut targets = [None; 2];
-        for seat in SeatId::ALL {
-            let actor = &self.actors[seat.index()];
-            let Some(cell) = actor.position.cell() else {
-                continue;
-            };
-            let has_capacity = self.live_bomb_count(seat) < usize::from(actor.capacity);
-            let cell_is_free = self.world.arena.terrain(cell) == Some(Terrain::Floor)
-                && !self.world.arena.blocks().contains(&cell)
-                && !self.world.bombs.values().any(|bomb| bomb.cell() == cell);
-            if requests[seat.index()] && has_capacity && cell_is_free {
-                targets[seat.index()] = Some(cell);
-            }
-        }
-        if targets[0].is_some() && targets[0] == targets[1] {
-            return;
-        }
-        for seat in SeatId::ALL {
-            let Some(cell) = targets[seat.index()] else {
-                continue;
-            };
-            let Some(detonates_at) = tick.0.checked_add(self.rules.bomb_fuse_ticks()).map(Tick)
-            else {
-                continue;
-            };
-            let Some(id) = self.next_bomb_id() else {
-                continue;
-            };
-            let actor = &self.actors[seat.index()];
-            self.insert_bomb(Bomb {
-                id,
-                cell,
-                owner: actor.id,
-                range: actor.range,
-                placed_at: tick,
-                detonates_at,
-            });
-        }
-    }
-
-    fn next_bomb_id(&self) -> Option<EntityId> {
-        let mut candidate = self.next_entity_id;
-        while let Ok(raw) = u32::try_from(candidate) {
-            let id = EntityId(raw);
-            if !self.actors.iter().any(|actor| actor.id == id)
-                && !self.world.bombs.contains_key(&id)
-            {
-                return Some(id);
-            }
-            candidate += 1;
-        }
-        None
-    }
-
-    fn insert_bomb(&mut self, bomb: Bomb) {
-        let id = bomb.id();
-        let cell = bomb.cell();
-        self.world.bombs.insert(id, bomb);
-        self.next_entity_id = self.next_entity_id.max(u64::from(id.0) + 1);
-        for actor in &mut self.actors {
-            if movement::position_overlaps_cell(actor.position, cell) {
-                actor.bomb_grace.insert(id);
-            }
-        }
-    }
 }
 
 impl Actor {
@@ -365,6 +287,7 @@ impl Actor {
             bomb_grace: BTreeSet::new(),
             capacity: rules.bomb_capacity(),
             range: rules.bomb_range(),
+            alive: true,
         }
     }
 }
@@ -372,6 +295,9 @@ impl Actor {
 #[cfg(test)]
 #[path = "simulation_constructor_tests.rs"]
 mod constructor_tests;
+#[cfg(test)]
+#[path = "damage_tests.rs"]
+mod damage_tests;
 #[path = "simulation_explosions.rs"]
 mod explosion_step;
 #[cfg(test)]
@@ -380,6 +306,11 @@ mod flame_tests;
 #[cfg(test)]
 #[path = "placement_tests.rs"]
 mod placement_tests;
+#[cfg(test)]
+#[path = "round_result_tests.rs"]
+mod round_result_tests;
+#[path = "simulation_step.rs"]
+mod step;
 #[cfg(test)]
 #[path = "simulation_tests.rs"]
 mod tests;

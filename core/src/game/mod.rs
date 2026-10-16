@@ -45,7 +45,8 @@ pub use geometry::{MovementSegment, MovementTrace};
 pub use input::{Direction, HeldDirections};
 pub use rules::RulesConfig;
 pub use simulation::{
-    Actor, ActorInit, InputAction, SeatInput, State, StateError, StepError, StepReport,
+    Actor, ActorInit, DrawReason, InputAction, RoundResult, SeatInput, State, StateError,
+    StepError, StepReport,
 };
 pub use types::{CellId, EntityId, Position, SeatId, SpeedLevel, Tick};
 pub use world::World;

@@ -244,13 +244,10 @@ fn touching_a_corner_glides_past_without_clipping_into_the_wall() {
 }
 
 #[test]
-fn pickups_and_hazards_do_not_block_movement() {
+fn pickups_do_not_block_movement() {
     let mut world = open_world();
     let destination = CellId::new(3, 5);
     world.pickups.insert(destination);
-    world
-        .hazards
-        .insert(destination, crate::game::types::Tick(30));
     let start = Position::center(CellId::new(2, 5));
     let mut state = state_in_world(world, start, Direction::East);
     move_for(&mut state, Direction::East, 12);

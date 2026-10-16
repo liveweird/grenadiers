@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.1.4 — 2026-10-17
+
+- Add swept contact damage from existing fire and final-footprint damage from new explosions.
+- Prevent eliminated players from moving or planting; keep their existing bombs active
+  until the round resolves.
+- Decide sole-survivor wins, mutual-elimination draws, and the exact 10,800-update timeout
+  after all same-tick damage, with elimination taking precedence over timeout.
+- Freeze gameplay after a result while the absolute simulation clock continues.
+
+This remains headless: public gameplay projections and events are the last M2 slice;
+networked rooms and the playable browser arena follow in M3.
+
 ## 0.1.3 — 2026-10-17
 
 - Execute bomb fuses and same-tick chains against one immutable occupancy snapshot.

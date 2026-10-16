@@ -1,5 +1,26 @@
 # Repository verification
 
+## M3 pure room lifecycle — 2026-10-17
+
+The locked server gate passes **136 core tests, 24 server tests, and 2 doctests**. Rust
+coverage passes the unchanged 80% floor at **2,038/2,190 lines, 93.06%**. Independent review
+reports no actionable findings. No dependency, schema, generated client, socket handler,
+or browser behavior changes; the documented core API is intentionally headless.
+
+Ten lifecycle tests cover either seat completing readiness, the exact 179/180 countdown
+boundary, cancellation/readiness clearing/attempt fencing, vacant and terminal operations,
+repetition, deterministic sequences, and atomic tick/deadline/attempt overflows. Completed
+results survive both departure reasons; Interrupted cannot become Result. Result clocks
+advance with a fixed end tick while Interrupted clocks remain frozen. Scheduler ownership,
+connection binding, and network room creation remain future integration.
+
+A clean committed-tree build produces
+`sha256:bb571d5c54c8311be1e9793055dfbcdde14280dfeda192046c8d5d416c769489`.
+Compose and ready local Kubernetes use this exact image; separate health/readiness checks
+and both candidate browser scenarios pass through each deployment path. Strict schemas pass
+with 3 valid resources; pinned socket-free Trivy reports zero HIGH/CRITICAL vulnerabilities.
+Temporary deployments, exports, archives, port-forwards, and dependency symlinks are removed.
+
 ## M3 anonymous session issuance — 2026-10-17
 
 The integrated locked server gate passes **126 core tests, 24 server tests, and 1 doctest**.

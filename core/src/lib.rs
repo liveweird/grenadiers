@@ -2,6 +2,7 @@
 
 pub mod game;
 pub mod protocol;
+pub mod room;
 
 use serde::{Deserialize, Deserializer, Serialize, de::Error as _};
 

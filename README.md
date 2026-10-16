@@ -6,9 +6,9 @@ The first playable milestone will support two human players. Bots and larger mat
 This is the **engineering scaffold and headless simulation**, not a playable game.
 It provides a React diagnostic shell, HTTP probes, a versioned WebSocket diagnostic exchange,
 and a deterministic Rust simulation with movement, bombs, flames, damage, one-round results,
-and explicit public snapshots/events.
+and explicit public snapshots/events, plus a headless two-seat room lifecycle.
 Anonymous session issuance is available; gameplay socket authentication, playable rendering,
-rooms, matchmaking, and stats remain unimplemented. The [game specification](docs/game/README.md)
+networked rooms, matchmaking, and stats remain unimplemented. The [game specification](docs/game/README.md)
 describes the classic reference and proposed rules. The
 [implementation and release plan](docs/game/implementation-plan.md) breaks delivery into
 verified foundation, playable duel, classic matches, and resilient playtest releases.
@@ -17,7 +17,7 @@ verified foundation, playable duel, classic matches, and resilient playtest rele
 
 | Directory | Responsibility |
 | --- | --- |
-| `core/` | Rust wire types and deterministic world/movement rules, independent of I/O |
+| `core/` | Rust wire types, deterministic game rules, and room lifecycle, independent of I/O |
 | `server/` | Axum/Tokio HTTP and WebSocket adapters, tracing, optional SQLx readiness |
 | `web/` | React, TypeScript, Vite, Mantine, EN/PL localization |
 | `api/` | Authoritative OpenAPI and realtime JSON Schema contracts |

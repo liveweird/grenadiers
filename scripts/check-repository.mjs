@@ -15,6 +15,16 @@ assert((await read('rust-toolchain.toml')).includes(`channel = "${rustVersion}"`
 const dockerfile = await read('Dockerfile')
 assert(dockerfile.includes(`node:${nodeVersion}-`), 'Docker Node version must match mise.toml')
 assert(dockerfile.includes(`rust:${rustVersion}-`), 'Docker Rust version must match mise.toml')
+const cargo = await read('Cargo.toml')
+const productVersion = /^\[workspace\.package\]\nversion = "(\d+\.\d+\.\d+)"$/m.exec(cargo)?.[1]
+assert(productVersion, 'Cargo workspace must declare the product release version')
+assert(cargo.includes(`grenadiers-core = { path = "core", version = "=${productVersion}" }`),
+  'Local core dependency must match the product version')
+const cargoLock = await read('Cargo.lock')
+for (const name of ['grenadiers-core', 'grenadiers-server']) {
+  const version = new RegExp(`^name = "${name}"\\nversion = "([^"]+)"$`, 'm').exec(cargoLock)?.[1]
+  assert.equal(version, productVersion, `${name} lock must match the product version`)
+}
 for (const workspace of ['web', 'e2e']) {
   const pkg = JSON.parse(await read(`${workspace}/package.json`))
   assert.equal(pkg.engines?.node, nodeVersion, `${workspace} must pin the same Node version`)
@@ -41,4 +51,4 @@ async function checkSize(directory) {
   }
 }
 for (const directory of ['core/src', 'server/src', 'web/src', 'e2e/tests']) await checkSize(directory)
-console.log('Repository pins, npm lock roots, exact dependencies, and source sizes agree.')
+console.log('Repository pins, product version, lock roots, exact dependencies, and source sizes agree.')

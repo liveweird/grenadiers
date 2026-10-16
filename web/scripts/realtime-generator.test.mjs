@@ -16,10 +16,10 @@ test('current realtime contract remains byte-for-byte reproducible', async () =>
   assert.equal(generateRealtime(schema), await readFile(generatedUrl, 'utf8'))
 })
 
-test('nested objects and union arrays retain their TypeScript constraints', async () => {
+test('nested bounded strings and arrays through references and unions retain their TypeScript constraints', async () => {
   const schema = {
     $defs: {
-      Identifier: { type: 'string' },
+      Identifier: { type: 'string', minLength: 0, maxLength: 64, pattern: '^[\\p{L}\\p{N}_-]+$' },
       Empty: { type: 'object', additionalProperties: false },
       Envelope: {
         type: 'object',
@@ -36,7 +36,13 @@ test('nested objects and union arrays retain their TypeScript constraints', asyn
               state: { enum: ['ready', 'waiting'] },
             },
           },
-          values: { type: 'array', items: { oneOf: [{ type: 'string' }, { type: 'number' }] } },
+          values: {
+            type: 'array',
+            minItems: 0,
+            maxItems: 10,
+            uniqueItems: true,
+            items: { oneOf: [{ type: 'string', maxLength: 20 }, { type: 'number' }] },
+          },
           empty: { type: 'object', additionalProperties: false, properties: {} },
           note: { type: 'string' },
         },
@@ -109,6 +115,73 @@ test('unsupported schema constructs fail instead of widening generated types', (
         },
       }),
     /only closed objects with additionalProperties: false are supported/,
+  )
+})
+
+test('invalid string and array constraints fail closed', () => {
+  for (const [keyword, value] of [
+    ['minLength', -1],
+    ['minLength', 1.5],
+    ['minLength', '1'],
+    ['maxLength', Number.MAX_SAFE_INTEGER + 1],
+  ]) {
+    assert.throws(
+      () => generateRealtime({ $defs: { Value: { type: 'string', [keyword]: value } } }),
+      new RegExp(`${keyword} must be a non-negative safe integer`),
+    )
+  }
+  for (const [keyword, value] of [
+    ['minItems', -1],
+    ['minItems', 1.5],
+    ['minItems', '1'],
+    ['maxItems', Number.MAX_SAFE_INTEGER + 1],
+  ]) {
+    assert.throws(
+      () => generateRealtime({ $defs: { Value: { type: 'array', items: { type: 'string' }, [keyword]: value } } }),
+      new RegExp(`${keyword} must be a non-negative safe integer`),
+    )
+  }
+  assert.throws(
+    () => generateRealtime({ $defs: { Value: { type: 'string', minLength: 2, maxLength: 1 } } }),
+    /minLength must not exceed maxLength/,
+  )
+  assert.throws(
+    () =>
+      generateRealtime({
+        $defs: { Value: { type: 'array', items: { type: 'string' }, minItems: 2, maxItems: 1 } },
+      }),
+    /minItems must not exceed maxItems/,
+  )
+  assert.throws(
+    () => generateRealtime({ $defs: { Value: { type: 'string', pattern: 1 } } }),
+    /pattern must be a string/,
+  )
+  assert.throws(
+    () => generateRealtime({ $defs: { Value: { type: 'string', pattern: '\\a' } } }),
+    /pattern must be a valid ECMAScript Unicode regular expression/,
+  )
+  assert.throws(
+    () => generateRealtime({ $defs: { Value: { type: 'array', items: { type: 'string' }, uniqueItems: 1 } } }),
+    /uniqueItems must be a boolean/,
+  )
+})
+
+test('constraint keywords are rejected on the wrong schema shape', () => {
+  for (const [type, constraint] of [
+    ['number', { minLength: 1 }],
+    ['string', { minItems: 1 }],
+    ['boolean', { pattern: 'true' }],
+    ['object', { maxLength: 1, additionalProperties: false }],
+  ]) {
+    const keyword = Object.keys(constraint)[0]
+    assert.throws(
+      () => generateRealtime({ $defs: { Value: { type, ...constraint } } }),
+      new RegExp(`keyword "${keyword}" is not supported for this schema shape`),
+    )
+  }
+  assert.throws(
+    () => generateRealtime({ $defs: { Value: { $ref: '#/$defs/Target', minItems: 1 }, Target: { type: 'string' } } }),
+    /keyword "minItems" is not supported for this schema shape/,
   )
 })
 

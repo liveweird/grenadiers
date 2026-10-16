@@ -12,7 +12,7 @@ Spawns and their inward neighbors must be clear; the underlying floor must remai
 when blocks are ignored. `fixed_arena()` supplies the symmetric hand-authored preview fixture,
 including three-cell opening routes. It is not the future random map generator.
 
-`World` keeps the arena, bomb obstacles, pickup cells, and hazard cells separate. `State::new`
+`World` keeps the arena, owned bombs, pickup cells, and hazard cells separate. `State::new`
 validates two `ActorInit` values and canonicalizes their order by seat. Their IDs must be
 unique and their full footprints legal. Actors may share positions or pass through one another.
 Read-only accessors expose domain state; this internal model is not a public network snapshot.
@@ -24,7 +24,7 @@ face but cannot overlap its interior.
 
 ## Advancing one tick
 
-Call `State::step(&[SeatInput])` with already-accepted logical `Press`, `Release`, and `Clear`
+Call `State::step(&[SeatInput])` with already-accepted logical `Press`, `Release`, `Clear`, and `PlaceBomb`
 events in authoritative order. New presses take priority; repeat presses do not. Releasing
 the winner resumes the last held direction. Clearing or releasing the last direction stops
 movement and clears its fraction immediately, including within a multi-event tick batch.
@@ -43,13 +43,23 @@ It must not replace the piecewise path with a diagonal bounding rectangle.
 More than 64 inputs or tick overflow rejects the whole step without mutating state. The
 transport layer will still need authentication, sequencing, expiry, and queue/rate limits.
 
-## Bomb collision interface and scope
+## Bomb placement and collision
 
-`State::add_bomb_obstacle` inserts a validated collision record with a unique entity ID.
-Every overlapping actor receives its own exemption and can leave. Exact boundary clearance
+`InputAction::PlaceBomb` requests one bomb in the actor's cell after movement. Each actor
+starts with capacity one and range two. A bomb captures owner, range, placement tick, and
+a deadline 180 ticks later. `World::bombs()` exposes complete records; `live_bomb_count(seat)`
+derives ownership counts. Fuse execution, explosions, and damage follow in later M2 increments.
+
+Requests are one-shot and coalesced per seat; `Clear` cancels earlier requests in the same
+batch. Placement requires capacity and an unblocked floor cell without an existing bomb.
+Two eligible requests for one cell both fail; an ineligible request cannot deny its opponent.
+Distinct placements commit in seat order. Failure consumes neither an ID nor capacity.
+
+Every overlapping actor receives an exemption and can leave. Exact boundary clearance
 revokes that exemption before any further segment; re-entry or crossing another bomb is blocked.
-This method does not implement player bomb placement, capacity, fuses, explosions, or damage.
-Pickup and hazard layers do not yet apply effects. Those mechanics belong to M2/M4.
+The earlier `add_bomb_obstacle` API is retired; collision fixtures use test-only owned bombs.
+Pickup and hazard layers do not yet apply effects. See [ADR 0004](../decisions/0004-bomb-placement.md)
+for placement ordering, identity allocation, and compatibility decisions.
 
 ## Verification and next integration
 

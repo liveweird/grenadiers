@@ -2,20 +2,15 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use super::{
     arena::Arena,
+    bombs::Bomb,
     types::{CellId, EntityId},
 };
-
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub struct BombObstacle {
-    pub id: EntityId,
-    pub cell: CellId,
-}
 
 /// The independent spatial layers used by deterministic simulation.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct World {
     pub(crate) arena: Arena,
-    pub(crate) bombs: BTreeMap<EntityId, BombObstacle>,
+    pub(crate) bombs: BTreeMap<EntityId, Bomb>,
     pub(crate) pickups: BTreeSet<CellId>,
     pub(crate) hazards: BTreeSet<CellId>,
 }
@@ -37,7 +32,7 @@ impl World {
     }
 
     #[must_use]
-    pub const fn bombs(&self) -> &BTreeMap<EntityId, BombObstacle> {
+    pub const fn bombs(&self) -> &BTreeMap<EntityId, Bomb> {
         &self.bombs
     }
 

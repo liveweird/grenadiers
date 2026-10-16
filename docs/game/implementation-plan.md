@@ -1,8 +1,8 @@
 # Grenadiers Implementation and Release Plan
 
 Status: **execution plan**. M0 is complete and locally verified on 2026-10-16; M1 is complete
-and locally verified on 2026-10-17. M2–M8 remain planned. These are engineering checkpoints,
-not published releases or version tags.
+and locally verified on 2026-10-17. M2 is in progress; M3–M8 remain planned.
+Published engineering prereleases are listed in `CHANGELOG.md` and GitHub Releases.
 
 The first product goal is a reliable, browser-based survival match between two humans. Build
 on the existing Rust/React scaffold, prove combat in two independent browsers early, then
@@ -20,7 +20,7 @@ The repository contains diagnostic HTTP/WebSocket transport, a React diagnostics
 contracts and generators, automated gates, CI, Compose packaging, and Kubernetes manifests.
 M1 adds a headless deterministic arena/movement simulation in `core::game`, including bomb
 collision exemptions and movement traces for later combat. There is no playable browser arena,
-combat, room admission, or match lifecycle yet.
+explosion/damage resolution, room admission, or match lifecycle yet.
 
 The [verification record](../verification.md) now contains passing locked Rust builds, tests,
 coverage, dependency audits, Compose execution, strict Kubernetes validation and live rollout,
@@ -37,8 +37,9 @@ procedure are documented in [releases](../releases.md).
 
 ## Planned releases
 
-These are future release labels, not existing tags or a calendar commitment. Current Cargo
-and npm manifest versions are scaffold metadata, not proof that a release has shipped.
+These are milestone release labels, not a calendar commitment. Headless work ships in small
+`0.1.x` prereleases before the playable `0.2.0` preview. GitHub Releases records published tags;
+Cargo tracks the product candidate and private npm package versions remain build metadata.
 
 | Release | User-visible or engineering outcome | Milestones |
 | --- | --- | --- |
@@ -149,6 +150,10 @@ selects PixiJS for M3; M1 installs no graphics dependency. The next bounded task
 ## M2 Implement bombs and one-round combat
 
 **Depends on:** M1.
+
+Progress: owned bomb placement is implemented for v0.1.2. Remaining slices are explosions/flames,
+damage/round finalization, and explicit public projections/events. Fuse deadlines are recorded
+but not executed by the placement increment. See [ADR 0004](../decisions/0004-bomb-placement.md).
 
 Work packages:
 

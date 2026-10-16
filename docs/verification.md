@@ -1,5 +1,19 @@
 # Repository verification
 
+## M2A owned bomb placement — 2026-10-17
+
+The placement increment passes `scripts/gates.sh server` with **63 core unit tests,
+9 server tests, and 1 public API doctest**. The unchanged Rust coverage gate passes at
+**990/1,083 lines, 91.41%**. No dependencies, wire contracts, frontend behavior, or deployment
+manifests change. Independent review found no remaining actionable issues after constructor
+regression coverage and the retired obstacle API documentation were corrected.
+
+Tests exercise post-movement cells, ownership/range/deadline snapshots, derived capacity,
+same-cell conflicts, invalid-request isolation, ordered cancellation, all-actor exit grace,
+ID/deadline exhaustion, and reconstruction from a nonempty owned-bomb world. Actor IDs at
+`u32::MAX` do not exhaust lower unused bomb IDs. Fuse execution and damage remain deferred.
+
+
 ## M1 world and movement — 2026-10-17
 
 The integrated headless domain passes `scripts/gates.sh server`: exact repository pins,

@@ -13,7 +13,7 @@ use axum::{
         header::{CACHE_CONTROL, CONTENT_TYPE, ORIGIN},
     },
     response::{IntoResponse, Response},
-    routing::{any, get},
+    routing::{any, get, post},
 };
 use grenadiers_core::{ClientMessage, ServerMessage};
 use serde::Serialize;
@@ -22,6 +22,10 @@ use tokio::{
     sync::{OwnedSemaphorePermit, Semaphore},
     time::timeout,
 };
+
+mod game;
+
+use game::{GameSessions, issue_session};
 use tower_http::{
     services::{ServeDir, ServeFile},
     trace::TraceLayer,
@@ -44,6 +48,7 @@ pub struct AppState {
     database: Option<PgPool>,
     allowed_origins: Arc<HashSet<String>>,
     connections: Arc<Semaphore>,
+    game_sessions: Arc<GameSessions>,
 }
 
 impl AppState {
@@ -53,6 +58,7 @@ impl AppState {
             database: None,
             allowed_origins: Arc::new(allowed_origins.into_iter().collect()),
             connections: Arc::new(Semaphore::new(MAX_CONNECTIONS)),
+            game_sessions: Arc::new(GameSessions::new(std::time::Instant::now())),
         }
     }
 
@@ -83,6 +89,7 @@ impl AppState {
             database,
             allowed_origins: Arc::new(allowed_origins),
             connections: Arc::new(Semaphore::new(MAX_CONNECTIONS)),
+            game_sessions: Arc::new(GameSessions::new(std::time::Instant::now())),
         })
     }
 }
@@ -144,10 +151,14 @@ pub fn app(state: AppState, web_dist_dir: Option<PathBuf>) -> Router {
         .route("/api/v1/health", get(health))
         .route("/api/v1/ready", get(ready))
         .route("/api/v1/ws", get(websocket))
+        .route("/api/v1/game/session", post(issue_session))
         .route("/api", any(api_not_found))
         .route("/api/", any(api_not_found))
         .route("/api/{*path}", any(api_not_found))
-        .layer(TraceLayer::new_for_http())
+        .layer(
+            TraceLayer::new_for_http()
+                .make_span_with(|request: &axum::http::Request<_>| http_request_span(request)),
+        )
         .with_state(state);
 
     match web_dist_dir {
@@ -156,6 +167,14 @@ pub fn app(state: AppState, web_dist_dir: Option<PathBuf>) -> Router {
         ),
         None => router,
     }
+}
+
+fn http_request_span<B>(request: &axum::http::Request<B>) -> tracing::Span {
+    tracing::info_span!(
+        "http.request",
+        method = %request.method(),
+        path = request.uri().path()
+    )
 }
 
 async fn health() -> Response {
@@ -294,5 +313,8 @@ async fn api_not_found() -> Response {
     .response()
 }
 
+#[cfg(test)]
+#[path = "game/http_tests.rs"]
+mod game_http_tests;
 #[cfg(test)]
 mod tests;

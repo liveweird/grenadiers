@@ -484,6 +484,7 @@ version = "0.1.9"
 dependencies = [
  "axum",
  "futures-util",
+ "getrandom 0.3.4",
  "grenadiers-core",
  "http-body-util",
  "jsonschema",

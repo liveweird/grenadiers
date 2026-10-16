@@ -1,0 +1,186 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Grenadiers HTTP API",
+    "version": "0.1.0",
+    "description": "Contract-first scaffold. No authentication or gameplay API exists yet.",
+    "contact": {
+      "name": "Grenadiers contributors"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8085",
+      "description": "Local development"
+    }
+  ],
+  "security": [],
+  "tags": [
+    {
+      "name": "system",
+      "description": "Liveness and readiness probes"
+    },
+    {
+      "name": "realtime",
+      "description": "Diagnostic WebSocket transport"
+    }
+  ],
+  "paths": {
+    "/api/v1/health": {
+      "get": {
+        "operationId": "getHealth",
+        "summary": "Check process liveness",
+        "description": "Independent of optional PostgreSQL availability.",
+        "tags": [
+          "system"
+        ],
+        "responses": {
+          "200": {
+            "description": "Process is alive",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Status"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/ready": {
+      "get": {
+        "operationId": "getReadiness",
+        "summary": "Check required dependencies",
+        "description": "With no DATABASE_URL the database is optional. With it set, readiness requires a successful database query.",
+        "tags": [
+          "system"
+        ],
+        "responses": {
+          "200": {
+            "description": "Ready to accept traffic",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Status"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Configured PostgreSQL is unavailable",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/ws": {
+      "get": {
+        "operationId": "connectRealtime",
+        "summary": "Upgrade to the version 1 diagnostic WebSocket",
+        "description": "Browser Origin must match the configured allowlist. Messages follow api/realtime.schema.json; this scaffold does not create rooms or reserve player seats. Invalid upgrades are rejected by Axum.",
+        "tags": [
+          "realtime"
+        ],
+        "parameters": [
+          {
+            "name": "Origin",
+            "in": "header",
+            "required": true,
+            "description": "Exact browser origin from ALLOWED_ORIGINS.",
+            "schema": {
+              "type": "string",
+              "format": "uri"
+            }
+          }
+        ],
+        "responses": {
+          "101": {
+            "description": "Switching protocols; server sends a welcome message."
+          },
+          "400": {
+            "description": "Malformed WebSocket handshake; framework-generated rejection (plain text).",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Missing or disallowed Origin",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "WebSocket connection capacity exhausted",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Status": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "status"
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "ok"
+            ]
+          }
+        }
+      },
+      "Problem": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "type",
+          "title",
+          "status",
+          "detail"
+        ],
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "status": {
+            "type": "integer",
+            "minimum": 400,
+            "maximum": 599
+          },
+          "detail": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

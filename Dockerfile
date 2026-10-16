@@ -1,0 +1,27 @@
+# Node digest inherited from Flow; Rust/runtime digest resolution awaits registry access.
+FROM node:24.21.0-alpine@sha256:ebfe2f90462722a7a4de65e91990e97fe0d401c70e0e762c5b53302f905ec1c1 AS web
+WORKDIR /build/web
+COPY web/package.json web/package-lock.json web/.npmrc ./
+RUN npm ci
+COPY web/ ./
+COPY api/ /build/api/
+RUN npm run build
+
+FROM rust:1.99.1-bookworm AS server
+WORKDIR /build
+COPY Cargo.toml Cargo.lock rust-toolchain.toml ./
+COPY core/ core/
+COPY server/ server/
+COPY api/ api/
+RUN cargo build --release --locked -p grenadiers-server
+
+FROM debian:bookworm-slim AS runtime
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+WORKDIR /app
+COPY --from=server /build/target/release/grenadiers-server /app/grenadiers-server
+COPY --from=web /build/web/dist /app/web/dist
+ENV SERVER_ADDR=0.0.0.0:8085 WEB_DIST_DIR=/app/web/dist RUST_LOG=grenadiers_server=info
+USER 65532:65532
+EXPOSE 8085
+ENTRYPOINT ["/app/grenadiers-server"]

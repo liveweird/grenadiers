@@ -1,0 +1,42 @@
+extends: [spectral:oas]
+rules:
+  # No project license has been chosen; do not invent one for contract metadata.
+  info-license: off
+  # Spectral's built-in excludes 101; the replacement accepts WebSocket upgrades.
+  operation-success-response: off
+  operation-description: error
+  operation-operationId: error
+  operation-tags: error
+  versioned-paths:
+    description: API-VER-001 — HTTP operations use an explicit major version.
+    severity: error
+    given: $.paths
+    then:
+      field: '@key'
+      function: pattern
+      functionOptions:
+        match: '^/api/v[0-9]+/'
+  success-objects:
+    description: API-STRUCT-001 — JSON responses use object envelopes.
+    severity: error
+    given: $..responses[*].content[application/json].schema
+    then:
+      field: type
+      function: pattern
+      functionOptions:
+        notMatch: '^array$'
+  declared-success:
+    description: API-DOC-001 — document an actual success, including switching protocols.
+    severity: error
+    given: $.paths[*].get.responses
+    then:
+      function: schema
+      functionOptions:
+        schema:
+          type: object
+          anyOf:
+            - required: ['101']
+            - required: ['200']
+            - required: ['201']
+            - required: ['202']
+            - required: ['204']

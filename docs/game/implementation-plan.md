@@ -21,7 +21,7 @@ The repository contains diagnostic HTTP/WebSocket transport, a React diagnostics
 contracts and generators, automated gates, CI, Compose packaging, and Kubernetes manifests.
 M1 adds a headless deterministic arena/movement simulation in `core::game`, including bomb
 collision exemptions and movement traces. M2 now implements owned bombs, flames, damage, and
-one-round outcomes; explicit public projections/events remain. There is no playable browser
+one-round outcomes and explicit public projections/events. There is no playable browser
 arena, room admission, or match lifecycle yet.
 
 The [verification record](../verification.md) now contains passing locked Rust builds, tests,
@@ -187,8 +187,8 @@ and deadline/expiry boundaries. The round result is decided after complete damag
 **Release:** v0.2.0. **Depends on:** M2 and reviewed gameplay contracts.
 
 Progress: v0.1.6 adds bounded-schema generation; v0.1.7 defines strict gameplay control/lifecycle
-messages in Rust, JSON Schema, and generated TypeScript. Snapshot/event definitions and checked
-projection follow before authenticated transport, rooms/readiness, authoritative scheduling,
+messages in Rust, JSON Schema, and generated TypeScript. v0.1.8 adds bounded snapshots/events;
+checked projection follows before authenticated transport, rooms/readiness, authoritative scheduling,
 browser controls/rendering, and two-browser duel acceptance. See the
 [protocol boundary](protocol.md). Diagnostic transport stays independently supported.
 

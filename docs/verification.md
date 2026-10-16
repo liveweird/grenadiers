@@ -1,5 +1,18 @@
 # Repository verification
 
+## M3 snapshot/event contract — 2026-10-17
+
+The complete web gate passes with **46 web/tooling tests** and unchanged coverage of
+**95.34% statements, 90% branches, 100% functions, 96.05% lines**. Generated gameplay and
+diagnostic drift checks, nested AJV validation, ESLint, Knip, TypeScript, and production build
+pass. The independent contract review reports no actionable findings.
+
+Rust tests cover schema-conforming full snapshots, all four events and round outcomes,
+JavaScript-safe tick limits, and actual frame encoding. The maximal structural fixture is
+**33,989 UTF-8 bytes** with 16 bombs, 195 blocks, 195 flames, and 64 events; a real oversized
+snapshot is rejected. No dependency, diagnostic contract, route, or runtime behavior changes.
+Checked projection of domain values and canonical cross-field invariants is the next slice.
+
 ## M3 control/lifecycle contract — 2026-10-17
 
 The integrated locked server gate passes with **111 core unit tests, 9 server tests, and

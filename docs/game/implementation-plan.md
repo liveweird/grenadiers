@@ -1,8 +1,8 @@
 # Grenadiers Implementation and Release Plan
 
 Status: **execution plan**. M0 is complete and locally verified on 2026-10-16; M1 is complete
-and locally verified on 2026-10-17. M2 implementation is complete and undergoing final
-release verification; M3–M8 remain planned.
+and locally verified on 2026-10-17. M2 is complete and locally verified
+on 2026-10-17; M3–M8 remain planned.
 Published engineering prereleases are listed in `CHANGELOG.md` and GitHub Releases.
 
 The first product goal is a reliable, browser-based survival match between two humans. Build
@@ -172,6 +172,11 @@ Work packages:
   as a browser snapshot.
 
 **Ownership:** `core/`, with fixtures/tests independent of server scheduling.
+
+**Completion evidence:** 97 core unit tests plus a public API doctest pass; workspace line
+coverage is 93.95% with the unchanged floor. Independent review, clean image build, Compose,
+live Kubernetes, browser diagnostics, strict schemas, and image scan pass. See
+[verification](../verification.md).
 
 **Exit:** a headless two-player round can finish deterministically. Golden scenarios prove
 chain order independence, simultaneous wall hits, placement/grace behavior, self-elimination,

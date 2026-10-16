@@ -32,7 +32,7 @@ test order and enforces coverage thresholds declared in `web/vite.config.ts`.
 `lint:api` checks the fixed OpenAPI file with Spectral's programmatic API and
 `api-guidelines/spectral.yaml`; it retains the standard and custom rules without the CLI's
 glob dependency. Parser/load errors and error-severity diagnostics fail the command.
-`check:api` and `check:realtime` compare generated
+`check:api`, `check:realtime`, and `check:gameplay` compare generated
 contracts without modifying them. AJV validates runtime WebSocket payloads. EN/PL locale
 parity is tested. ESLint/SonarJS and Knip must report no findings.
 

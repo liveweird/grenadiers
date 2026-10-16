@@ -1,0 +1,354 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://grenadiers.local/schemas/gameplay-v1.json",
+  "title": "Grenadiers gameplay protocol v1",
+  "description": "Anonymous single-round gameplay control and lifecycle contract. Rules v1 uses 60 ticks per second and 1024 position units per cell.",
+  "$ref": "#/$defs/GameServerMessage",
+  "$defs": {
+    "ProtocolVersionInput": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 65535
+    },
+    "GameplayVersion": {
+      "const": 1
+    },
+    "RulesVersion": {
+      "const": 1
+    },
+    "MapId": {
+      "const": "fixed_v1"
+    },
+    "SessionToken": {
+      "type": "string",
+      "minLength": 64,
+      "maxLength": 64,
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "RoomId": {
+      "type": "string",
+      "minLength": 32,
+      "maxLength": 32,
+      "pattern": "^[0-9a-f]{32}$"
+    },
+    "RoomCode": {
+      "type": "string",
+      "minLength": 8,
+      "maxLength": 8,
+      "pattern": "^[A-HJ-NP-Z2-9]{8}$"
+    },
+    "Counter": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 2147483647
+    },
+    "EntityId": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 4294967295
+    },
+    "Tick": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "Seat": {
+      "enum": ["one", "two"]
+    },
+    "Direction": {
+      "enum": ["north", "east", "south", "west"]
+    },
+    "Cell": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["column", "row"],
+      "properties": {
+        "column": { "type": "integer", "minimum": 0, "maximum": 14 },
+        "row": { "type": "integer", "minimum": 0, "maximum": 12 }
+      }
+    },
+    "Position": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["x", "y"],
+      "properties": {
+        "x": { "type": "integer", "minimum": 0, "maximum": 15359 },
+        "y": { "type": "integer", "minimum": 0, "maximum": 13311 }
+      }
+    },
+    "ErrorCode": {
+      "enum": [
+        "invalidMessage", "authenticationFailed", "connectionInUse", "notAuthenticated",
+        "alreadyAuthenticated", "alreadyInRoom", "notInRoom", "roomNotFound", "roomFull",
+        "staleRoom", "invalidPhase", "staleSequence", "duplicateAction", "rateLimited",
+        "capacityReached"
+      ]
+    },
+    "InterruptReason": {
+      "enum": [
+        "participantLeft", "connectionLost", "serverOverloaded", "serverStopped", "internalError"
+      ]
+    },
+    "RoundResult": {
+      "oneOf": [
+        { "$ref": "#/$defs/WinnerResult" },
+        { "$ref": "#/$defs/DrawResult" }
+      ]
+    },
+    "WinnerResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "seat"],
+      "properties": {
+        "type": { "const": "winner" },
+        "seat": { "$ref": "#/$defs/Seat" }
+      }
+    },
+    "DrawResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "reason"],
+      "properties": {
+        "type": { "const": "draw" },
+        "reason": { "enum": ["mutualElimination", "timeout"] }
+      }
+    },
+    "SeatStatus": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["seat", "occupied", "ready"],
+      "properties": {
+        "seat": { "$ref": "#/$defs/Seat" },
+        "occupied": { "type": "boolean" },
+        "ready": { "type": "boolean" }
+      }
+    },
+    "RoomPhase": {
+      "oneOf": [
+        { "$ref": "#/$defs/WaitingPhase" },
+        { "$ref": "#/$defs/CountdownPhase" },
+        { "$ref": "#/$defs/RunningPhase" },
+        { "$ref": "#/$defs/ResultPhase" },
+        { "$ref": "#/$defs/InterruptedPhase" }
+      ]
+    },
+    "WaitingPhase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type"],
+      "properties": { "type": { "const": "waiting" } }
+    },
+    "CountdownPhase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "endsAt"],
+      "properties": {
+        "type": { "const": "countdown" },
+        "endsAt": { "$ref": "#/$defs/Tick" }
+      }
+    },
+    "RunningPhase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type"],
+      "properties": { "type": { "const": "running" } }
+    },
+    "ResultPhase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "endedAt", "result"],
+      "properties": {
+        "type": { "const": "result" },
+        "endedAt": { "$ref": "#/$defs/Tick" },
+        "result": { "$ref": "#/$defs/RoundResult" }
+      }
+    },
+    "InterruptedPhase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "endedAt", "reason"],
+      "properties": {
+        "type": { "const": "interrupted" },
+        "endedAt": { "$ref": "#/$defs/Tick" },
+        "reason": { "$ref": "#/$defs/InterruptReason" }
+      }
+    },
+    "RoomView": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "roomId", "roomCode", "roundId", "revision", "tick", "rulesVersion", "mapId", "seats", "phase"
+      ],
+      "properties": {
+        "roomId": { "$ref": "#/$defs/RoomId" },
+        "roomCode": { "$ref": "#/$defs/RoomCode" },
+        "roundId": { "$ref": "#/$defs/Counter" },
+        "revision": { "$ref": "#/$defs/Counter" },
+        "tick": { "$ref": "#/$defs/Tick" },
+        "rulesVersion": { "$ref": "#/$defs/RulesVersion" },
+        "mapId": { "$ref": "#/$defs/MapId" },
+        "seats": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": { "$ref": "#/$defs/SeatStatus" }
+        },
+        "phase": { "$ref": "#/$defs/RoomPhase" }
+      }
+    },
+    "GameClientMessage": {
+      "oneOf": [
+        { "$ref": "#/$defs/Authenticate" },
+        { "$ref": "#/$defs/CreateRoom" },
+        { "$ref": "#/$defs/JoinRoom" },
+        { "$ref": "#/$defs/Ready" },
+        { "$ref": "#/$defs/Movement" },
+        { "$ref": "#/$defs/PlaceBomb" },
+        { "$ref": "#/$defs/LeaveRoom" }
+      ]
+    },
+    "Authenticate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "protocolVersion", "token"],
+      "properties": {
+        "type": { "const": "authenticate" },
+        "protocolVersion": { "$ref": "#/$defs/ProtocolVersionInput" },
+        "token": { "$ref": "#/$defs/SessionToken" }
+      }
+    },
+    "CreateRoom": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "sequence"],
+      "properties": {
+        "type": { "const": "createRoom" },
+        "sequence": { "$ref": "#/$defs/Counter" }
+      }
+    },
+    "JoinRoom": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "sequence", "roomCode"],
+      "properties": {
+        "type": { "const": "joinRoom" },
+        "sequence": { "$ref": "#/$defs/Counter" },
+        "roomCode": { "$ref": "#/$defs/RoomCode" }
+      }
+    },
+    "Ready": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "sequence", "roomId", "roundId", "ready"],
+      "properties": {
+        "type": { "const": "ready" },
+        "sequence": { "$ref": "#/$defs/Counter" },
+        "roomId": { "$ref": "#/$defs/RoomId" },
+        "roundId": { "$ref": "#/$defs/Counter" },
+        "ready": { "type": "boolean" }
+      }
+    },
+    "Movement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "sequence", "roomId", "roundId", "direction"],
+      "properties": {
+        "type": { "const": "movement" },
+        "sequence": { "$ref": "#/$defs/Counter" },
+        "roomId": { "$ref": "#/$defs/RoomId" },
+        "roundId": { "$ref": "#/$defs/Counter" },
+        "direction": {
+          "oneOf": [
+            { "$ref": "#/$defs/Direction" },
+            { "type": "null" }
+          ]
+        }
+      }
+    },
+    "PlaceBomb": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "sequence", "roomId", "roundId", "actionId"],
+      "properties": {
+        "type": { "const": "placeBomb" },
+        "sequence": { "$ref": "#/$defs/Counter" },
+        "roomId": { "$ref": "#/$defs/RoomId" },
+        "roundId": { "$ref": "#/$defs/Counter" },
+        "actionId": { "$ref": "#/$defs/Counter" }
+      }
+    },
+    "LeaveRoom": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "sequence", "roomId", "roundId"],
+      "properties": {
+        "type": { "const": "leaveRoom" },
+        "sequence": { "$ref": "#/$defs/Counter" },
+        "roomId": { "$ref": "#/$defs/RoomId" },
+        "roundId": { "$ref": "#/$defs/Counter" }
+      }
+    },
+    "GameServerMessage": {
+      "oneOf": [
+        { "$ref": "#/$defs/Authenticated" },
+        { "$ref": "#/$defs/IncompatibleProtocol" },
+        { "$ref": "#/$defs/RoomState" },
+        { "$ref": "#/$defs/LeftRoom" },
+        { "$ref": "#/$defs/Error" }
+      ]
+    },
+    "Authenticated": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "protocolVersion"],
+      "properties": {
+        "type": { "const": "authenticated" },
+        "protocolVersion": { "$ref": "#/$defs/GameplayVersion" }
+      }
+    },
+    "IncompatibleProtocol": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "supportedVersion"],
+      "properties": {
+        "type": { "const": "incompatibleProtocol" },
+        "supportedVersion": { "$ref": "#/$defs/GameplayVersion" }
+      }
+    },
+    "RoomState": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "room", "youSeat"],
+      "properties": {
+        "type": { "const": "roomState" },
+        "room": { "$ref": "#/$defs/RoomView" },
+        "youSeat": { "$ref": "#/$defs/Seat" }
+      }
+    },
+    "LeftRoom": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "roomId", "sequence"],
+      "properties": {
+        "type": { "const": "leftRoom" },
+        "roomId": { "$ref": "#/$defs/RoomId" },
+        "sequence": { "$ref": "#/$defs/Counter" }
+      }
+    },
+    "Error": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "code", "sequence"],
+      "properties": {
+        "type": { "const": "error" },
+        "code": { "$ref": "#/$defs/ErrorCode" },
+        "sequence": {
+          "oneOf": [
+            { "$ref": "#/$defs/Counter" },
+            { "type": "null" }
+          ]
+        }
+      }
+    }
+  }
+}

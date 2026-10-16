@@ -7,7 +7,7 @@ import tseslint from 'typescript-eslint'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
-  globalIgnores(['dist', 'coverage', 'src/api/schema.ts', 'src/realtime/schema.ts']),
+  globalIgnores(['dist', 'coverage', 'src/api/schema.ts', 'src/realtime/schema.ts', 'src/game/schema.ts']),
   {
     files: ['**/*.{ts,tsx,mjs}'],
     extends: [

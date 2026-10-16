@@ -16,6 +16,14 @@ test('current realtime contract remains byte-for-byte reproducible', async () =>
   assert.equal(generateRealtime(schema), await readFile(generatedUrl, 'utf8'))
 })
 
+test('a source label changes only the generated provenance header', async () => {
+  const schema = JSON.parse(await readFile(schemaUrl, 'utf8'))
+  const diagnostic = generateRealtime(schema)
+  const gameplay = generateRealtime(schema, 'api/gameplay.schema.json')
+  assert.match(gameplay, /^\/\/ This file was auto-generated from api\/gameplay\.schema\.json\. Do not edit\.\n/)
+  assert.equal(gameplay.split('\n').slice(2).join('\n'), diagnostic.split('\n').slice(2).join('\n'))
+})
+
 test('nested bounded strings and arrays through references and unions retain their TypeScript constraints', async () => {
   const schema = {
     $defs: {

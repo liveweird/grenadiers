@@ -24,6 +24,7 @@ web() {
   npm --prefix web run lint:api
   npm --prefix web run check:api
   npm --prefix web run check:realtime
+  npm --prefix web run check:gameplay
   npm --prefix web run lint
   npm --prefix web run knip
   npm --prefix web run test:coverage -- --sequence.shuffle

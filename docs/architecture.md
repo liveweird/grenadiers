@@ -1,8 +1,8 @@
 # Architecture
 
 The implemented vertical slice is diagnostic transport: HTTP liveness/readiness and a
-WebSocket welcome/ping/pong exchange. The React shell exercises it. There is no game session,
-player allocation, authentication, or persistence model yet. A separate headless simulation
+WebSocket welcome/ping/pong exchange. The React shell exercises it. The server does not yet
+allocate player sessions, authenticate gameplay connections, or persist user data. A separate headless simulation
 in `core::game` implements movement, owned bombs, flames, damage, and one-round outcomes;
 the diagnostic routes do not run it.
 
@@ -49,8 +49,12 @@ menus/HUD. No renderer dependency is installed yet.
 occupancy, and round finality. [ADR 0007](decisions/0007-public-state-events.md) defines the
 explicit public projection and phase events, completing M2 before the server adapter.
 
+[ADR 0008](decisions/0008-gameplay-protocol.md) and the [gameplay contract](game/protocol.md)
+define anonymous first-frame authentication and control/lifecycle messages. They do not yet
+add gameplay routes or session handlers.
+
 Map generation, lag compensation, room admission, authentication, and matchmaking
-still need implementation decisions at their planned milestones. Add focused ADRs before
+still need implementation at their planned milestones. Add focused ADRs before
 dependent work; preserve the specified lifecycle and gameplay rules.
 
 

@@ -363,8 +363,8 @@ function validateDocument(schema) {
   return definitions
 }
 
-export function generateRealtime(schema) {
+export function generateRealtime(schema, sourceLabel = 'api/realtime.schema.json') {
   const definitions = validateDocument(schema)
   const generatedDefinitions = Object.entries(definitions).map(([name, value]) => definition(name, value, definitions))
-  return `// This file was auto-generated from api/realtime.schema.json. Do not edit.\n\n${generatedDefinitions.join('\n')}`
+  return `// This file was auto-generated from ${sourceLabel}. Do not edit.\n\n${generatedDefinitions.join('\n')}`
 }

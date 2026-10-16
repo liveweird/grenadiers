@@ -24,6 +24,7 @@ export default defineConfig({
       include: ['src/**/*.{ts,tsx}'],
       exclude: [
         'src/api/schema.ts',
+        'src/game/schema.ts',
         'src/realtime/schema.ts',
         'src/**/*.test.{ts,tsx}',
         'src/test/**',

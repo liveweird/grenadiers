@@ -1,6 +1,7 @@
 #![forbid(unsafe_code)]
 
 pub mod game;
+pub mod protocol;
 
 use serde::{Deserialize, Deserializer, Serialize, de::Error as _};
 

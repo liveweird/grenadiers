@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.1.7 — 2026-10-17
+
+- Define strict gameplay authentication, room control, movement/bomb intent, lifecycle,
+  result, and typed error messages in one JSON Schema with Rust and generated TS types.
+- Add canonical identifiers, bounded integer parsing, required nullable movement, token
+  Debug redaction, payload-free errors, and message byte limits.
+- Check gameplay type drift in the shared web gate and compare Rust/AJV conformance.
+
+This is the control/lifecycle contract foundation. Snapshot/event wire types and gameplay
+endpoints follow separately; the existing diagnostic protocol remains unchanged.
+
 ## 0.1.6 — 2026-10-17
 
 - Support bounded strings, Unicode regular-expression patterns, bounded arrays, and

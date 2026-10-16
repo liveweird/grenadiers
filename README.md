@@ -102,7 +102,9 @@ scripts/gates.sh coverage      # cargo-llvm-cov line coverage floor
 ```
 
 Generate frontend contracts with `npm --prefix web run gen:api` and
-`npm --prefix web run gen:realtime`; commit generated files with contract changes.
+`npm --prefix web run gen:realtime`; gameplay controls use `npm --prefix web run gen:gameplay`.
+Commit generated files with contract changes. The [gameplay protocol](docs/game/protocol.md)
+currently defines control/lifecycle messages; gameplay endpoints follow separately.
 Coverage tooling installation and test conventions are in [docs/testing.md](docs/testing.md).
 
 ## Configuration

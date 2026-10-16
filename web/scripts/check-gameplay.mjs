@@ -1,0 +1,13 @@
+import { readFile } from 'node:fs/promises'
+import { generateRealtime } from './realtime-generator.mjs'
+
+const spec = new URL('../../api/gameplay.schema.json', import.meta.url)
+const target = new URL('../src/game/schema.ts', import.meta.url)
+const schema = JSON.parse(await readFile(spec, 'utf8'))
+
+if (generateRealtime(schema, 'api/gameplay.schema.json') !== await readFile(target, 'utf8')) {
+  console.error('Gameplay types are stale. Run cd web && npm run gen:gameplay.')
+  process.exitCode = 1
+} else {
+  console.log('Gameplay types match api/gameplay.schema.json.')
+}

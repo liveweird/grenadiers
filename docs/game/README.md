@@ -6,8 +6,8 @@ enemies, bots, modes, timing, and acceptance scenarios.
 
 Status: **working baseline**, with numerical tuning still subject to playtesting. The first
 playable target remains two human players. M1 implements the
-[headless world and movement model](movement.md); M2 adds [owned bombs, explosions, and flames](combat.md). Damage, round outcomes,
-and browser gameplay follow in separate increments.
+[headless world and movement model](movement.md); M2 adds [bombs, flames, damage, and round
+outcomes](combat.md). Public gameplay projections/events and browser integration follow next.
 
 Start with [the rules specification](rules.md) and the
 [implementation and release plan](implementation-plan.md). Historical examples and optional extensions

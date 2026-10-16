@@ -15,6 +15,14 @@ immutable outcomes, stationary post-result reports, and atomic errors after fina
 Dependencies, wire contracts, browser behavior, and deployment manifests remain unchanged.
 
 
+A clean Git-tree image build passes for
+`sha256:741cb9fac0c7924cc98419edcb53a565e995d1cc09d6d6523ac091191e39f25a`.
+Compose and the ready local Kubernetes Pod use that image; health/readiness and the actual
+two-context WebSocket/Axe browser scenario pass through both paths. Strict Kubernetes
+validation passes with 3 valid resources. Pinned Trivy's socket-free archive scan passes
+with zero fixable HIGH/CRITICAL findings. Temporary deployment resources and archives
+are removed. Documentation-only release evidence does not change the tested image inputs.
+
 ## M2B explosions and flames — 2026-10-17
 
 The explosion increment passes the locked server gate. The final suite has **78 core unit

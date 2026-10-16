@@ -128,14 +128,27 @@ fn chain_report_projects_every_phase_event_in_original_order() {
 fn three_consecutive_reports_are_accepted_and_indices_restart_per_tick() {
     let mut state = state_at(CellId::new(2, 5), CellId::new(12, 10));
     let first = state.step(&[place_one()]).unwrap();
-    let second = state.step(&[]).unwrap();
+    let second = state
+        .step(&[SeatInput {
+            seat: SeatId::Two,
+            action: InputAction::PlaceBomb,
+        }])
+        .unwrap();
     let third = state.step(&[]).unwrap();
 
     let events = project_events(&[first, second, third]).unwrap();
 
-    assert_eq!(events.len(), 1);
-    assert_eq!(events[0].tick.get(), 1);
-    assert_eq!(events[0].index, 0);
+    assert_eq!(
+        events
+            .iter()
+            .map(|event| event.tick.get())
+            .collect::<Vec<_>>(),
+        vec![1, 2]
+    );
+    assert_eq!(
+        events.iter().map(|event| event.index).collect::<Vec<_>>(),
+        vec![0, 0]
+    );
 }
 
 #[test]

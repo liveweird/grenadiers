@@ -1,6 +1,7 @@
 # ADR 0008: Anonymous gameplay protocol and single-round preview boundary
 
-Status: accepted; control/lifecycle wire definitions land first. Runtime handlers follow.
+Status: accepted; control/lifecycle, snapshot/event definitions, and checked domain adapters
+are implemented. Runtime handlers follow.
 
 ## Decision
 

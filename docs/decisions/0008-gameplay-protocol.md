@@ -1,6 +1,6 @@
 # ADR 0008: Anonymous gameplay protocol and single-round preview boundary
 
-Status: accepted; control/lifecycle, snapshot/event definitions, and checked domain adapters
+Status: accepted; control/lifecycle and snapshot/event definitions, checked domain adapters,
 and anonymous HTTP session issuance are implemented. Gameplay socket/room handlers follow.
 
 ## Decision

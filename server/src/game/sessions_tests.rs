@@ -107,9 +107,15 @@ fn capacity_is_128_and_expiry_is_inclusive() {
             .issue(start + Duration::from_millis(index * 125))
             .unwrap();
     }
+    for _ in 0..32 {
+        assert!(matches!(
+            sessions.issue(start + Duration::from_secs(16)),
+            Err(SessionIssueError::CapacityReached)
+        ));
+    }
     assert!(matches!(
         sessions.issue(start + Duration::from_secs(16)),
-        Err(SessionIssueError::CapacityReached)
+        Err(SessionIssueError::RateLimited)
     ));
     sessions
         .issue(start + Duration::from_secs(300))
@@ -164,11 +170,36 @@ fn concurrent_issuance_never_exceeds_capacity() {
 }
 
 #[test]
-fn random_failure_is_an_unavailable_error() {
+fn random_failures_consume_rate_limit_without_mutating_existing_session() {
     let now = Instant::now();
-    let sessions = GameSessions::with_random_fill(now, |_| Err(()));
+    let calls = Arc::new(AtomicU8::new(0));
+    let observed_calls = Arc::clone(&calls);
+    let sessions = GameSessions::with_random_fill(now, move |bytes| {
+        if observed_calls.fetch_add(1, Ordering::Relaxed) == 0 {
+            bytes.fill(9);
+            Ok(())
+        } else {
+            Err(())
+        }
+    });
+    let issued = sessions.issue(now).unwrap();
+    for _ in 0..31 {
+        assert!(matches!(
+            sessions.issue(now),
+            Err(SessionIssueError::CreationUnavailable)
+        ));
+    }
+    assert_eq!(calls.load(Ordering::Relaxed), 32);
     assert!(matches!(
         sessions.issue(now),
-        Err(SessionIssueError::CreationUnavailable)
+        Err(SessionIssueError::RateLimited)
     ));
+    assert_eq!(calls.load(Ordering::Relaxed), 32);
+
+    let registry = sessions.registry.lock().unwrap();
+    assert_eq!(registry.sessions.len(), 1);
+    assert_eq!(
+        registry.sessions.get(&issued.token),
+        Some(&(now + SESSION_LIFETIME))
+    );
 }

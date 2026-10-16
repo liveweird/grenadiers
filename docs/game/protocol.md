@@ -1,9 +1,10 @@
 # Gameplay protocol
 
-Status: gameplay contracts, checked domain conversion, and HTTP session issuance. `api/gameplay.schema.json`, independent Rust
-`core::protocol` types, and generated `web/src/game/schema.ts` define messages; gameplay
-gameplay WebSocket endpoint, room handlers, and browser controls remain planned.
-Diagnostic `/api/v1/ws` and `api/realtime.schema.json` remain unchanged.
+Status: gameplay contracts, checked domain conversion, and HTTP session issuance are
+implemented. `api/gameplay.schema.json`, independent Rust `core::protocol` types, and generated
+`web/src/game/schema.ts` define socket messages. The gameplay WebSocket endpoint, room handlers,
+and browser controls remain planned. Diagnostic `/api/v1/ws` and `api/realtime.schema.json`
+remain unchanged.
 
 ## Authentication and compatibility
 
@@ -14,7 +15,7 @@ No cookie or Location is set. An unclaimed credential expires after 300 seconds 
 room or seat. Restart discards all credentials.
 
 Issuance is bounded to 128 live credentials, with a global burst of 32 and refill of eight
-per second. Disallowed/missing/duplicate Origin returns 403; a nonempty query returns 400;
+per second. Disallowed/missing/duplicate or null Origin returns 403; a nonempty query returns 400;
 rate exhaustion returns 429 with `Retry-After: 1`; capacity/entropy failure returns a generic
 503 problem. Every handler response disables caching. HTTP tracing records method/path,
 excluding query strings. The operation and failures are defined in `api/openapi.json`.

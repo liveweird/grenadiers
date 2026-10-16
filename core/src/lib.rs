@@ -1,5 +1,7 @@
 #![forbid(unsafe_code)]
 
+pub mod game;
+
 use serde::{Deserialize, Deserializer, Serialize, de::Error as _};
 
 /// Protocol version understood by this server.

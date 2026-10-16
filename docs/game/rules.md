@@ -193,9 +193,13 @@ Hard walls, borders, soft blocks, and bombs block ordinary movement. Players do 
 another initially: they can cross or overlap. Pickups, flames, and spawn markers do not block
 movement. Flames are dangerous even though they are walkable.
 
-Turning into a perpendicular corridor is allowed when the player's center is within `0.125`
-cell of that corridor's centerline. Snap the perpendicular coordinate only if the entire
-swept correction is legal. The correction is part of movement for collision and hazard tests. Solid obstacles can
+Turning to a perpendicular heading is allowed when the player's center is within `0.125`
+cell of that corridor's centerline, including the boundary. Otherwise that intent produces
+no movement until a legal heading is requested. Align the perpendicular coordinate only if
+the entire swept correction is legal. Alignment consumes the normal movement budget and may
+span several ticks; commit the new heading only after alignment completes. Changing the
+winning direction or stopping cancels a pending correction. The correction is part of
+movement for collision and hazard tests. Solid obstacles can
 prevent the correction; flames do not prevent it. Crossing active flame during a permitted
 correction kills through the same swept hazard rule as ordinary movement. Assistance must
 not silently protect the player from a dangerous turn.

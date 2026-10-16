@@ -2,11 +2,12 @@
 
 The implemented vertical slice is diagnostic transport: HTTP liveness/readiness and a
 WebSocket welcome/ping/pong exchange. The React shell exercises it. There is no game session,
-player allocation, authentication, simulation, or persistence model yet.
+player allocation, authentication, combat, or persistence model yet. A separate headless
+world/movement model now lives in `core::game`; the diagnostic routes do not run it.
 
 ## Boundaries
 
-`core` holds serializable transport types and later pure game rules. `server` owns all I/O:
+`core` holds diagnostic transport types and pure game rules. `server` owns all I/O:
 Axum routes, WebSocket lifecycles, configuration, optional PostgreSQL connectivity, and tracing.
 `web` handles presentation and input. `api` is the source of truth for wire formats.
 Clients must validate untrusted server messages as well as servers validating client messages.
@@ -38,9 +39,14 @@ or shared mutable state before those decisions are documented and tested.
 
 ## Deferred decisions
 
-Map generation, rendering technology (DOM/canvas/WebGL), tick rate, movement, bomb rules,
-lag compensation, disconnect grace periods, room admission, authentication, and matchmaking
-remain open. Add focused ADRs when choosing them; do not encode guesses in the scaffold.
+M1 fixes the integer 60 Hz movement model in [ADR 0002](decisions/0002-deterministic-movement.md).
+The [headless API](game/movement.md) covers its state, collision, and deterministic input boundary.
+[ADR 0003](decisions/0003-arena-rendering.md) selects PixiJS for the future arena and React for
+menus/HUD. No renderer dependency is installed yet.
+
+Map generation, combat, lag compensation, room admission, authentication, and matchmaking
+still need implementation decisions at their planned milestones. Add focused ADRs before
+dependent work; preserve the specified lifecycle and gameplay rules.
 
 
 The [draft game specification](game/README.md) proposes a two-player ruleset and catalogs

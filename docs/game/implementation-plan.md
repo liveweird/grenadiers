@@ -1,7 +1,8 @@
 # Grenadiers Implementation and Release Plan
 
-Status: **execution plan**. M0 is complete and locally verified on 2026-10-16; M1–M8 remain
-planned. This records an engineering checkpoint, not a published release or version tag.
+Status: **execution plan**. M0 is complete and locally verified on 2026-10-16; M1 is complete
+and locally verified on 2026-10-17. M2–M8 remain planned. These are engineering checkpoints,
+not published releases or version tags.
 
 The first product goal is a reliable, browser-based survival match between two humans. Build
 on the existing Rust/React scaffold, prove combat in two independent browsers early, then
@@ -17,7 +18,9 @@ code, without waiting for every optional feature or an exact historical port to 
 
 The repository contains diagnostic HTTP/WebSocket transport, a React diagnostics page,
 contracts and generators, automated gates, CI, Compose packaging, and Kubernetes manifests.
-There is no game simulation, playable arena, room admission, or match lifecycle yet.
+M1 adds a headless deterministic arena/movement simulation in `core::game`, including bomb
+collision exemptions and movement traces for later combat. There is no playable browser arena,
+combat, room admission, or match lifecycle yet.
 
 The [verification record](../verification.md) now contains passing locked Rust builds, tests,
 coverage, dependency audits, Compose execution, strict Kubernetes validation and live rollout,
@@ -28,7 +31,8 @@ two-browser scenarios through both deployment paths, and the configured image sc
 
 M0 also hardened nested realtime type generation, rendered Kubernetes invariants, API linting,
 and text contrast, with independent review and regression tests. The shared gate passes
-11 Rust and 29 web/tooling tests. Product/package/protocol version ownership and the candidate
+11 Rust and 29 web/tooling tests at that checkpoint. M1 extends the workspace to 58 Rust unit
+tests and one API documentation test. Product/package/protocol version ownership and the candidate
 procedure are documented in [releases](../releases.md).
 
 ## Planned releases
@@ -108,8 +112,8 @@ open; configuration rendering alone does not satisfy runtime acceptance.
 and Rust tests passing with locked dependencies before building a new simulation. Core
 implementation may proceed once this prerequisite passes, even if deployment validation is
 still running. Compose/Kubernetes runtime checks remain requirements for every release claim;
-M0 now has this local evidence too. The next bounded task is M1's domain decisions and movement
-fixtures, followed by the pure simulation implementation.
+M0 now has this local evidence too. M1 has since supplied the domain decisions, fixtures,
+and pure movement implementation below.
 
 ## M1 Build the world and movement model
 
@@ -134,6 +138,13 @@ Work packages:
 **Exit:** deterministic movement tests cover walls, corners, reversal, boundary positions,
 maximum speed, and overlapping players. A repeated input sequence yields identical positions.
 No renderer or network service is required to run these tests.
+
+**Completed evidence:** [ADR 0002](../decisions/0002-deterministic-movement.md) records integer
+geometry, fractional travel, strict turn eligibility, and ordered inputs. The
+[headless API](movement.md) has 49 core unit tests plus a runnable documentation example;
+the workspace Rust gate and unchanged coverage floor pass at 90.07% lines. Independent review
+findings were fixed and regression-tested. [ADR 0003](../decisions/0003-arena-rendering.md)
+selects PixiJS for M3; M1 installs no graphics dependency. The next bounded task is M2 combat.
 
 ## M2 Implement bombs and one-round combat
 
@@ -338,7 +349,7 @@ covered in more than one layer; all 42 must be implemented and passing by M6.
 | Public domain projection and transport schema | M3 | Keep secret map/item data out; generate and validate wire types. |
 | Gameplay protocol version and compatibility | M3 | Reject unsupported clients before admission; preserve or separate diagnostic v1. |
 | Anonymous seat credentials and admission | M3 | Server-validated ownership; no credentials in URLs; two seats per room. |
-| Arena renderer and input presentation | M3 | Choose a simple implementation that supports authoritative interpolation and readable tests. |
+| Arena renderer and input presentation | M3 integration | PixiJS arena plus React/Mantine HUD selected in ADR 0003; pin the dependency and verify integration in M3. |
 | Tick overload and snapshot cadence | M3 | Bound work/backpressure; measure before optimizing or adding prediction. |
 | RNG and generator version | M4 | Explicit, reproducible algorithm and pair order; private active item seeds. |
 | Reconnect identity and lifecycle replay format | M6 | Preserve seat and deadlines across match states; include external events. |

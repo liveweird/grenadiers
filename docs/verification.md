@@ -1,10 +1,29 @@
-# Foundation verification
+# Repository verification
+
+## M1 world and movement — 2026-10-17
+
+The integrated headless domain passes `scripts/gates.sh server`: exact repository pins,
+400-line source ceiling, rustfmt, Clippy with warnings denied, locked tests, and build.
+Tests pass: **49 core unit tests, 9 server regression tests, and 1 public API doctest**.
+`scripts/gates.sh coverage` passes the unchanged 80% line floor with **825/916 lines, 90.07%**.
+
+Evidence includes all five movement speeds, exact obstacle faces, corner gliding, multi-tick
+turn correction and cancellation, held-input priority, actor overlap, bomb exemption exit/re-entry,
+stationary/piecewise traces, invalid-coordinate rejection, atomic errors, and repeated logs
+producing equal full states. Independent review found no remaining actionable issues after
+the reported defects and evidence gaps were fixed.
+
+M1 adds no dependencies and changes no wire contracts, browser behavior, or deployment manifests.
+The diagnostic UI remains the browser experience. Combat and rendered gameplay are future
+milestones; [ADR 0003](decisions/0003-arena-rendering.md) records the PixiJS direction for M3.
+
+## M0 foundation — 2026-10-16
 
 Verified locally on **2026-10-16**, macOS ARM64 with OrbStack Docker/Kubernetes.
 Earlier network/socket/Git denials were resolved through permitted sandbox escalation.
 This record covers the diagnostic scaffold; gameplay is not implemented.
 
-## Required gates
+### Required gates
 
 | Check | Observed result |
 | --- | --- |
@@ -22,7 +41,7 @@ Tools: Rust **1.99.1**, Node **24.21.0**, cargo-llvm-cov **0.9.1**, cargo-deny
 **0.20.2**, kubeconform **0.8.0**, kubectl **1.33.9**, Docker **29.8.2**, and
 digest-pinned Trivy **0.74.0**. Kubernetes schemas target **1.33.0** as configured in CI.
 
-## Runtime evidence
+### Runtime evidence
 
 - `docker compose build app` built the locked Rust/React image. Rust and runtime base-image
   manifest indexes are now resolved and pinned. Runtime apt security updates repaired the
@@ -44,7 +63,7 @@ digest-pinned Trivy **0.74.0**. Kubernetes schemas target **1.33.0** as configur
 - Temporary Compose containers/database volume, Kubernetes namespace, and port-forward were
   removed after verification. The locally built images remain available for development.
 
-## Reproduce
+### Reproduce
 
 Install the pinned tools described in [testing.md](testing.md) and
 [deployment.md](deployment.md), then run:

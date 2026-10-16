@@ -3,9 +3,10 @@
 A browser-based multiplayer game inspired by classic Bomberman/Dynablaster.
 The first playable milestone will support two human players. Bots and larger matches follow later.
 
-This is the **engineering scaffold**, not a playable game. It provides a React shell, HTTP probes,
-and a versioned WebSocket diagnostic exchange. Rooms, controls, maps, bombs, authentication,
-matchmaking, stats, and simulation remain unimplemented. The [draft game specification](docs/game/README.md)
+This is the **engineering scaffold and headless movement model**, not a playable game.
+It provides a React diagnostic shell, HTTP probes, a versioned WebSocket diagnostic exchange,
+and a deterministic Rust world/movement API. Playable rendering, rooms, combat, authentication,
+matchmaking, and stats remain unimplemented. The [game specification](docs/game/README.md)
 describes the classic reference and proposed rules. The
 [implementation and release plan](docs/game/implementation-plan.md) breaks delivery into
 verified foundation, playable duel, classic matches, and resilient playtest releases.
@@ -14,7 +15,7 @@ verified foundation, playable duel, classic matches, and resilient playtest rele
 
 | Directory | Responsibility |
 | --- | --- |
-| `core/` | Rust wire types; future deterministic game rules, independent of I/O |
+| `core/` | Rust wire types and deterministic world/movement rules, independent of I/O |
 | `server/` | Axum/Tokio HTTP and WebSocket adapters, tracing, optional SQLx readiness |
 | `web/` | React, TypeScript, Vite, Mantine, EN/PL localization |
 | `api/` | Authoritative OpenAPI and realtime JSON Schema contracts |
@@ -27,6 +28,8 @@ verified foundation, playable duel, classic matches, and resilient playtest rele
 See [architecture](docs/architecture.md), [Flow equivalents](docs/decisions/0001-stack.md),
 [testing](docs/testing.md), [deployment](docs/deployment.md), and [contributing](CONTRIBUTING.md).
 Product versioning and candidate checks are documented in [releases](docs/releases.md).
+The [headless movement API](docs/game/movement.md) documents M1; the arena will use
+[PixiJS alongside React](docs/decisions/0003-arena-rendering.md) when M3 becomes playable.
 
 ## Prerequisites
 

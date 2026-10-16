@@ -4,8 +4,9 @@ This design describes the classic Bomberman-style game loop and a proposed, impl
 Grenadiers ruleset. It covers player abilities, arena contents, bombs, damage, power-ups,
 enemies, bots, modes, timing, and acceptance scenarios.
 
-Status: **draft for discussion**. The first implementation target remains two human players.
-No gameplay in this directory is implemented by the current transport scaffold.
+Status: **working baseline**, with numerical tuning still subject to playtesting. The first
+playable target remains two human players. M1 implements the
+[headless world and movement model](movement.md); combat and browser gameplay follow later.
 
 Start with [the rules specification](rules.md) and the
 [implementation and release plan](implementation-plan.md). Historical examples and optional extensions
@@ -25,4 +26,4 @@ a particular release and platform; “Bomberman” and “Dyna Blaster” do not
 The release plan defines the maintained milestone dependencies, work packages, RULE coverage,
 and release gates. The near-term sequence is verified foundation, playable two-browser duel,
 classic match progression, then reconnect resilience and playtest hardening. All milestones
-remain planned until their exit evidence exists.
+remain planned until their exit evidence exists in the maintained plan and verification record.

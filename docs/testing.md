@@ -1,7 +1,7 @@
 # Testing and checks
 
 `scripts/gates.sh` is the shared local/CI interface. Install both npm packages with `npm ci`
-and resolve/commit the initial Cargo lock before running all gates. Tests must exercise
+and use the repository's committed Cargo lockfile. Tests must exercise
 behavior and observable contracts rather than merely repeat implementation constants.
 
 ## Rust

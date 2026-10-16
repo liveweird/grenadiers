@@ -16,6 +16,15 @@ JavaScript-safe tick limits, and actual frame encoding. The maximal structural f
 snapshot is rejected. No dependency, diagnostic contract, route, or runtime behavior changes.
 Checked projection of domain values and canonical cross-field invariants is the next slice.
 
+A clean committed-tree build produces
+`sha256:340a4a16b3624bbb0076248cea8193c9b3e832508647e036dde66a31e27e360d`.
+Compose and local Kubernetes use this exact image; health/readiness and actual two-context
+WebSocket/Axe browser checks pass through both deployment paths. The first Kubernetes browser
+launch hit macOS sandbox denial before assertions; rerunning the correct browser gate with
+native-browser access passes. Strict schemas pass with 3 valid resources; pinned socket-free
+Trivy reports zero HIGH/CRITICAL vulnerabilities. Temporary runtime resources and archives
+are removed; the tested image is retained.
+
 ## M3 control/lifecycle contract — 2026-10-17
 
 The integrated locked server gate passes with **111 core unit tests, 9 server tests, and

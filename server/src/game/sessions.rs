@@ -41,7 +41,7 @@ pub(crate) struct GameSessions {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-struct ConnectionId(u64);
+pub(crate) struct ConnectionId(pub(crate) u64);
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) enum SessionClaimError {
@@ -54,6 +54,12 @@ pub(crate) struct SessionLease {
     sessions: Arc<GameSessions>,
     token: SessionToken,
     connection_id: ConnectionId,
+}
+
+impl SessionLease {
+    pub(crate) const fn connection_id(&self) -> ConnectionId {
+        self.connection_id
+    }
 }
 
 impl GameSessions {

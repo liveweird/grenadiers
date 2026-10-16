@@ -25,7 +25,7 @@ use tokio::{
 
 mod game;
 
-use game::{GameSessions, game_websocket, issue_session};
+use game::{GameRooms, GameSessions, game_websocket, issue_session};
 use tower_http::{
     services::{ServeDir, ServeFile},
     trace::TraceLayer,
@@ -49,6 +49,7 @@ pub struct AppState {
     allowed_origins: Arc<HashSet<String>>,
     connections: Arc<Semaphore>,
     game_sessions: Arc<GameSessions>,
+    game_rooms: Arc<GameRooms>,
 }
 
 impl AppState {
@@ -59,6 +60,7 @@ impl AppState {
             allowed_origins: Arc::new(allowed_origins.into_iter().collect()),
             connections: Arc::new(Semaphore::new(MAX_CONNECTIONS)),
             game_sessions: Arc::new(GameSessions::new(std::time::Instant::now())),
+            game_rooms: GameRooms::new(std::time::Instant::now()),
         }
     }
 
@@ -90,6 +92,7 @@ impl AppState {
             allowed_origins: Arc::new(allowed_origins),
             connections: Arc::new(Semaphore::new(MAX_CONNECTIONS)),
             game_sessions: Arc::new(GameSessions::new(std::time::Instant::now())),
+            game_rooms: GameRooms::new(std::time::Instant::now()),
         })
     }
 }

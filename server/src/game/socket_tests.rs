@@ -105,7 +105,7 @@ async fn authenticate(socket: &mut ClientSocket, token: &str, version: u16) -> V
 }
 
 #[tokio::test]
-async fn authenticates_and_consumes_fresh_sequences_before_semantic_errors() {
+async fn authenticates_and_consumes_fresh_sequences_before_semantics() {
     let state = state();
     let token = issue_token(&state);
     let (url, server) = start_server(state).await;
@@ -116,10 +116,7 @@ async fn authenticates_and_consumes_fresh_sequences_before_semantic_errors() {
     );
 
     send_json(&mut socket, json!({"type":"createRoom", "sequence":1})).await;
-    assert_eq!(
-        next_json(&mut socket).await,
-        json!({"type":"error", "code":"invalidPhase", "sequence":1})
-    );
+    assert_eq!(next_json(&mut socket).await["type"], "roomState");
     send_json(&mut socket, json!({"type":"createRoom", "sequence":1})).await;
     assert_eq!(
         next_json(&mut socket).await,
@@ -162,7 +159,7 @@ async fn version_precedes_claim_and_duplicate_cannot_revoke_owner() {
         "connectionInUse"
     );
     send_json(&mut owner, json!({"type":"createRoom", "sequence":1})).await;
-    assert_eq!(next_json(&mut owner).await["code"], "invalidPhase");
+    assert_eq!(next_json(&mut owner).await["type"], "roomState");
     owner.close(None).await.unwrap();
 
     tokio::task::yield_now().await;

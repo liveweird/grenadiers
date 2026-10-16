@@ -15,6 +15,14 @@ rejected rather than silently generating misleading types. Runtime AJV, rather t
 TypeScript string/array types, enforces the newly admitted constraints.
 
 
+A clean Git-tree image build passes for
+`sha256:19d8588a227e4f36f1a6b53e704a9f3333481392359f5aa48fdace614b662919`.
+Compose and ready local Kubernetes use that image. Health/readiness and actual two-context
+WebSocket/Axe browser checks pass through both paths; strict schemas report 3 valid resources.
+Pinned socket-free Trivy passes with zero fixable HIGH/CRITICAL findings. Temporary runtime
+resources and archives are removed. Rebase onto completed M2 changes documentation only;
+application and package inputs match the tested candidate.
+
 ## M2D public projection and phase events — 2026-10-17
 
 The locked server gate passes with **97 core unit tests, 9 server tests, and 1 public API

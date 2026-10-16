@@ -2,7 +2,7 @@
 
 Status: **execution plan**. M0 is complete and locally verified on 2026-10-16; M1 is complete
 and locally verified on 2026-10-17. M2 is complete and locally verified
-on 2026-10-17; M3–M8 remain planned.
+on 2026-10-17. M3 contract groundwork is in progress; M4–M8 remain planned.
 Published engineering prereleases are listed in `CHANGELOG.md` and GitHub Releases.
 
 The first product goal is a reliable, browser-based survival match between two humans. Build
@@ -185,6 +185,10 @@ and deadline/expiry boundaries. The round result is decided after complete damag
 ## M3 Make the duel playable in two browsers
 
 **Release:** v0.2.0. **Depends on:** M2 and reviewed gameplay contracts.
+
+Progress: v0.1.6 adds the bounded-schema generator prerequisite. Gameplay contract definitions,
+authenticated transport, rooms/readiness, authoritative scheduling, browser controls/rendering,
+and two-browser duel acceptance remain. Diagnostic transport stays independently supported.
 
 Work packages:
 

@@ -1,8 +1,8 @@
 # Gameplay protocol
 
-Status: control/lifecycle and snapshot/event contracts. `api/gameplay.schema.json`, independent Rust
+Status: control/lifecycle, snapshot/event contracts, and checked domain conversion. `api/gameplay.schema.json`, independent Rust
 `core::protocol` types, and generated `web/src/game/schema.ts` define messages; gameplay
-endpoints, checked domain conversion, room handlers, and browser controls remain planned.
+endpoints, room handlers, and browser controls remain planned.
 Diagnostic `/api/v1/ws` and `api/realtime.schema.json` remain unchanged.
 
 ## Authentication and compatibility
@@ -57,8 +57,8 @@ capacity/range (1–8), and live-bomb count (0–8). Bombs include ID, cell, own
 placement tick, and detonation tick. Flames include cell and exclusive expiry tick. Room metadata
 carries tick, rules/map versions, and outcome; these are not duplicated in game state.
 Private held input, movement fractions, collision grace, allocator state, and hidden contents
-are excluded. The checked domain adapter will enforce canonical ordering and cross-field
-invariants before runtime publication.
+are excluded. The checked domain adapter enforces canonical ordering and cross-field invariants before
+runtime publication.
 
 Each snapshot carries 0–64 events with absolute `tick`, per-tick `index` (0–63), and tagged
 `kind`: `bombPlaced`/`bombDetonated` carry a full bomb record; `actorEliminated` carries ID/seat;
@@ -66,6 +66,24 @@ Each snapshot carries 0–64 events with absolute `tick`, per-tick `index` (0–
 explosion within one update remain separate events. Events are best-effort presentation cues;
 full snapshots remain authoritative. The planned 20 Hz publisher accumulates at most three
 completed 60 Hz updates per normal snapshot.
+
+## Checked domain conversion
+
+Use `core::protocol::project_state(&public_state)` to obtain a `ProjectedRound` containing
+checked absolute tick, optional wire outcome, and game state. It validates the fixed rules/map
+dimensions, clock sum, seat/ID order, positions, upgrades, unique occupied cells, bomb owners,
+actual live-bomb counts, and outcome/liveness consistency. Conversion errors contain fixed
+categories rather than payloads. No direct serialization of internal `World` or `State` exists.
+
+`project_events(&reports)` accepts at most three consecutive completed updates and 64 events.
+Each event must belong to its report tick; indices restart at zero per tick and preserve actual
+phase order. Placement and detonation within the same tick remain observable. Result states
+freeze world contents while the absolute clock advances, so old bomb/flame deadlines remain
+valid in frozen projections. Conversion neither clamps values nor advances the simulation.
+
+The future room publisher must combine these checked values with matching room tick/phase,
+apply the encoder's frame limit, and bound delivery. The adapter alone does not create rooms
+or validate transport ownership.
 
 ## Identity, ordering, and lifecycle
 

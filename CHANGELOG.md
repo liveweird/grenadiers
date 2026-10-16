@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.1.9 — 2026-10-17
+
+- Add explicit fallible conversion from public simulation state to bounded gameplay wire DTOs.
+- Reject invalid clocks, dimensions, identities, ownership counts, ordering, positions,
+  upgrades, deadlines, and outcomes without exposing private simulation bookkeeping.
+- Convert up to three consecutive update reports into stable indexed events, preserving
+  same-tick placement/detonation and accepting legitimate frozen result snapshots.
+
+Authenticated session issuance and gameplay transport follow separately. This adapter
+introduces no network route, room, or browser gameplay.
+
 ## 0.1.8 — 2026-10-17
 
 - Define bounded public snapshots for the fixed arena, two actors, owned bombs, and flames

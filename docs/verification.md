@@ -1,5 +1,27 @@
 # Repository verification
 
+## M3 checked domain projection — 2026-10-17
+
+The locked server gate passes with **126 core unit tests, 9 server tests, and 1 doctest**.
+Rust coverage passes the unchanged 80% floor at **1,744/1,887 lines, 92.42%**.
+Independent review finds no production defect. The wire schema, generated frontend types,
+dependencies, network routes, and diagnostic behavior remain unchanged.
+
+Tests project actual initial, active, chain/result, and late frozen states, validate the
+resulting wire shapes, and reject malformed clocks, dimensions, identities, owners, ordering,
+counts, positions, deadlines, outcomes, event ticks, and report windows. Frozen results accept
+old bomb/flame deadlines as the absolute clock advances. Three-report event conversion
+preserves phase order and same-tick placement/detonation; per-tick indexing is exercised
+across multiple eventful updates.
+
+A clean committed-tree build produces
+`sha256:149b66e34170c8dd8b861e888601578dff757867c533dc0b766ad30734aad857`.
+Compose and ready local Kubernetes use that exact image. Separate health/readiness requests
+and actual two-context WebSocket/Axe browser checks pass through both deployment paths with
+required native-browser access. Strict schemas pass with 3 valid resources; pinned socket-free
+Trivy reports zero HIGH/CRITICAL vulnerabilities. Temporary deployments, exports, and archives
+are removed; the verified image remains available.
+
 ## M3 snapshot/event contract — 2026-10-17
 
 The locked server gate passes with **115 core unit tests, 9 server tests, and 1 doctest**.

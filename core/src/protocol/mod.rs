@@ -1,5 +1,7 @@
 mod client;
+mod event_projection;
 mod events;
+mod projection;
 mod scalars;
 mod server;
 mod snapshot;
@@ -7,7 +9,9 @@ mod snapshot;
 use std::fmt;
 
 pub use client::GameClientMessage;
+pub use event_projection::project_events;
 pub use events::{EventKind, MAX_EVENT_INDEX, MAX_SNAPSHOT_EVENTS, WireEvent};
+pub use projection::{ProjectedRound, ProjectionError, project_state};
 pub use scalars::{
     Cell, Counter, Direction, EntityId, GAMEPLAY_PROTOCOL_VERSION, GameplayVersion, InvalidScalar,
     MAX_COUNTER, MAX_SAFE_TICK, MapId, Position, ProtocolVersionInput, RULES_VERSION, RoomCode,
@@ -81,6 +85,12 @@ fn enforce_server_message_size(encoded: String) -> Result<String, EncodeServerMe
 #[cfg(test)]
 #[path = "client_tests.rs"]
 mod client_tests;
+#[cfg(test)]
+#[path = "event_projection_tests.rs"]
+mod event_projection_tests;
+#[cfg(test)]
+#[path = "projection_tests.rs"]
+mod projection_tests;
 #[cfg(test)]
 #[path = "server_tests.rs"]
 mod server_tests;

@@ -187,9 +187,9 @@ and deadline/expiry boundaries. The round result is decided after complete damag
 **Release:** v0.2.0. **Depends on:** M2 and reviewed gameplay contracts.
 
 Progress: v0.1.6 adds bounded-schema generation; v0.1.7 defines strict gameplay control/lifecycle
-messages in Rust, JSON Schema, and generated TypeScript. v0.1.8 adds bounded snapshots/events;
-checked projection follows before authenticated transport, rooms/readiness, authoritative scheduling,
-browser controls/rendering, and two-browser duel acceptance. See the
+messages in Rust, JSON Schema, and generated TypeScript. v0.1.8 adds bounded snapshots/events,
+and v0.1.9 checks domain-to-wire conversion. Next come authenticated transport, rooms/readiness,
+authoritative scheduling, browser controls/rendering, and two-browser duel acceptance. See the
 [protocol boundary](protocol.md). Diagnostic transport stays independently supported.
 
 Work packages:

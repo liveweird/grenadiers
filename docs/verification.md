@@ -28,7 +28,19 @@ scenario with retries disabled: real shared-bomb draw, three actual wins, automa
 rounds, alternating spawns/base upgrades, final hold, vote withdrawal/consensus, one-epoch
 rematch reset, fresh readiness, and action-ID reset on the same sockets. Axe and horizontal
 containment checks pass in English and Polish at desktop and 320 pixels. Actual compositor
-screenshots were visually inspected. Exact-image Compose/Kubernetes acceptance remains pending.
+screenshots were visually inspected.
+
+A clean committed-tree build of `6b18f8609278af7eb7de4e69ea40c104d392e596` produces
+`sha256:aebaffdc8bf122bc49bf879709eb52d0979c0003610ec99a451b90657e2b5ae4`.
+Compose and local Kubernetes use that exact image. Each path passes actual API health/readiness
+JSON, all six default scenarios, the separate pickup fixture, and the complete match/rematch
+fixture, with fixture retries disabled. Both fixture mounts are read-only; Kubernetes uses a
+temporary 0444 Secret readable by UID/GID 65532. Pod image ID matches the accepted image.
+Strict schemas validate all three resources; archive-only pinned Trivy reports zero fixable
+HIGH/CRITICAL findings. `/app` contains no seed files. Non-root/read-only-root/drop-ALL/no-new-
+privileges/RuntimeDefault settings remain enforced. Temporary stacks, namespace/Secrets,
+forwards, exports, and scan archive are removed; logs and reviewed screenshots remain.
+Later acceptance-driver/documentation commits retain identical Docker build inputs.
 
 ## Dormant bounded match owner — 2026-10-17
 

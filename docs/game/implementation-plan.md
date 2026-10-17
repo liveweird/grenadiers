@@ -4,8 +4,9 @@ Status: **execution plan**. M0 is complete and locally verified on 2026-10-16; M
 and locally verified on 2026-10-17. M2 is complete and locally verified
 on 2026-10-17. M3’s fixed-map two-browser duel is implemented and locally verified;
 M4 generated rounds and upgrades are complete and locally verified on 2026-10-17;
-M5 series/lifecycle, v3 contracts/projection, runtime, browser, and bounded ownership are
-implemented. Coordinated v0.3.0 activation is undergoing final runtime acceptance. M6–M8 remain planned.
+M5 is complete and locally verified on 2026-10-17: v3 contracts, real match ownership,
+first-to-three progression, and rematches pass exact-image Compose/Kubernetes acceptance.
+M6–M8 remain planned.
 Published engineering prereleases are listed in `CHANGELOG.md` and GitHub Releases.
 
 The first product goal is a reliable, browser-based survival match between two humans. Build
@@ -274,7 +275,7 @@ v0.2.9 adds the dormant [v3 structural contract](protocol-v3.md); v0.2.10 adds c
 projection and semantic validation. v0.2.11 adds the dormant real simulation adapter;
 v0.2.12 adds the dormant browser client/panel; v0.2.13 adds bounded ownership and shutdown.
 v0.3.0 activates production routing and bounded process drain. Full two-browser first-to-three/rematch
-acceptance is the final release check, following [ADR 0015](../decisions/0015-match-series-and-staged-progression.md).
+acceptance passes through Compose and Kubernetes, following [ADR 0015](../decisions/0015-match-series-and-staged-progression.md).
 
 **Release:** v0.3.0. **Depends on:** M4.
 

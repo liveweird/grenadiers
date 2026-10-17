@@ -1,7 +1,7 @@
 # Pure match lifecycle
 
 `core::room::MatchLifecycle` composes occupancy, readiness, the absolute clock, command epochs,
-and `MatchSeries`. The production v4 match owner and runtime use this lifecycle. The archived
+and `MatchSeries`. The production v6 match owner and runtime use this lifecycle. The archived
 `RoomLifecycle` remains covered for the historical single-round model. This API owns no
 physics or I/O.
 
@@ -13,7 +13,8 @@ the deadline; the owner constructs fresh physics at that tick before its first u
 During Running, commit each accepted update with `complete_running_tick(result)`. A nonfinal
 result enters a 180-tick hold, then automatically advances the epoch and starts the next
 180-tick countdown. Its start advances actual round assignment. Physics supplies round timeout;
-the lifecycle does not fabricate results. The third win enters MatchResult immediately.
+the lifecycle does not fabricate results. Reaching the configured win target enters MatchResult
+immediately; the default target is three.
 
 Pass departures from one authoritative tick together to `depart_batch`, after that tick's
 simulation/scoring. Explicit departures before the first start cancel admission/countdown;
@@ -37,7 +38,7 @@ consuming an actual round, and preserves the completed round and original hold d
 both participants return, the next idle tick starts a fresh full countdown. Running callers
 commit physics and scoring first, then pass the whole departure batch and settle expiry. Idle
 callers pass loss before the idle transition and settle expiry after it. This ordering lets a
-third win precede expiry and prevents a partial loss batch from fabricating a forfeit.
+winning round precede expiry and prevents a partial loss batch from fabricating a forfeit.
 
 Global time continues while awaiting rematch. After `rematch_at`, occupied players may set or
 withdraw rematch votes. Departures invalidate their votes; vacant opponents cannot complete

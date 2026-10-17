@@ -1,6 +1,6 @@
 # Gameplay and presentation backlog
 
-Status: **TURN shipped as v0.3.16; initial CONFIG implemented in the v0.3.17 candidate**.
+Status: **TURN shipped as v0.3.16; initial CONFIG implemented in v0.3.17**.
 Other items remain requested work, not implemented.
 Updated 2026-10-17 after playtest feedback. Release acceptance is recorded in
 [verification](../verification.md).

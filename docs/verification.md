@@ -1,5 +1,44 @@
 # Repository verification
 
+## Shared room settings / gameplay v6 — 2026-10-17
+
+Clean image source `cf82db46477e0fddc8b9b0e137e5ffb64bb3ec56` builds
+`sha256:2a95de3f2252c63a59a293a672454509aca3261d78b0cff627e049c503028ccd`.
+Accepted test source `50228642ab9bf9d91faaeaaf343df327d2051e5b` changes only the Polish match
+assertion; all Docker application inputs are byte-identical. The same image passes **24/24
+scenarios in Compose and 24/24 in Kubernetes, retries zero**: eight default cases, pickup,
+match/rematch, two reconnect cases, controls, headed visibility, audio and nine latency cases.
+The latency suite includes seven queue/observer regressions and two native measurement profiles.
+All sixteen result files report passed with no failed tests.
+
+The new native two-browser scenario applies starting speed level four (5 cells/s), turn
+tolerance 64/1,024, one win and a 60-tick fuse. Both peers observe the accepted settings;
+actual actor speed, bomb lifetime, one-win match completion and retained rematch rules agree.
+English/Polish result copy reflects the configured target. Live Axe caught a heading-order
+defect, fixed before final acceptance with a regression; stale result-copy assertions were
+corrected without weakening the product checks. Earlier candidates remain diagnostic evidence.
+
+317 core and 163 server tests plus two doctests pass; four dedicated performance profiles
+remain intentionally ignored. Rust line coverage is **94.10%**, above the unchanged 80% floor.
+All **226 web tests**, contracts, lint, Knip, build and E2E static/24-scenario parity pass.
+Cargo-deny and both npm audits pass, with zero npm vulnerabilities. Independent behavioral
+review is clear after replay action-profile and minimum-tolerance findings were resolved.
+Strict pinned Kubernetes 1.33 schemas validate all three resources.
+
+Both paths return healthy/ready and run as 65532 with read-only roots, dropped capabilities
+and no privilege escalation. Kubernetes retains RuntimeDefault, 500m/256Mi limits, the exact
+image digest and a mode-0444 seed; no seed is baked into `/app`. Archive-only pinned Trivy
+passes the existing HIGH/CRITICAL `--ignore-unfixed` policy; this is a filtered release check.
+
+Observed latency maxima are Compose **49.466 ms local / 161.413 ms shaped** and Kubernetes
+**46.800 ms local / 180.287 ms shaped**, with zero samples above 250 ms. No Kubernetes CPU
+throttling was recorded. These bounded page-delivery samples are not WAN or human-playtest
+guarantees. Actual desktop and 320-pixel Polish [settings captures](screenshots/settings.md)
+pass visual inspection and overflow checks. Evidence is retained at
+`/tmp/grenadiers-v0317-acceptance`; owned projects, namespace, helpers and forwarding were
+removed while unrelated workloads remained. Later documentation commits preserve identical
+application build inputs.
+
 ## Forgiving turns / gameplay v5 — 2026-10-17
 
 Clean git-archive candidate `14ded36ac84ce09ef770ed5ba5bb8e2eab9d7b6f` builds image

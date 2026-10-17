@@ -1,6 +1,6 @@
 # Gameplay and presentation backlog
 
-Status: **TURN shipped as v0.3.16; CONFIG and ART implemented in the v0.3.17/v0.3.18 candidates**.
+Status: **TURN shipped as v0.3.16; CONFIG implemented in v0.3.17; ART implemented in the v0.3.18 candidate**.
 Equipment, buffs, curses and weapons remain requested work, not implemented. ART has passed
 independent code/visual review; live acceptance remains required. See [pixel-art presentation](pixel-art.md).
 Updated 2026-10-17 after playtest feedback. Release acceptance is recorded in

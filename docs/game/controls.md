@@ -1,6 +1,6 @@
 # Configurable keyboard controls
 
-The active v4 browser keeps keyboard preferences locally. Defaults remain the arrow keys and
+The active browser keeps keyboard preferences locally. Defaults remain the arrow keys and
 W A S D for movement, with Space for bombs. **Keyboard controls** opens a localized dialog
 outside the arena. Choosing **Change** for North, East, South, West, or Bomb replaces that
 action's aliases with one physical key. **Restore defaults** restores every original alias.

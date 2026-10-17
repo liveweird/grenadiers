@@ -1,11 +1,11 @@
-# Active reconnect contract
+# Archived v4 reconnect contract
 
-Historical v4 reference. Gameplay v5 now serves the endpoint; see [the migration note](protocol-v5.md).
-The v4 schema and generated types remain archived; the active Rust/browser implementation moved to v5.
+Historical v4 reference. Gameplay v6 now serves the endpoint; see [the migration note](protocol-v6.md).
+The v4 schema and generated types remain archived; the active Rust/browser implementation uses v6.
 
 Gameplay v4 is defined in `api/gameplay-v4.schema.json`, Rust `core::protocol::v4`, and generated
-`web/src/game/v4/schema.ts`. The existing gameplay endpoint and its single owner/runtime use v4;
-there is no alternate endpoint or runtime selector. Diagnostic v1, classic-v2 physics, and
+`web/src/game/v4/schema.ts`. At activation the existing gameplay endpoint and its single
+owner/runtime used v4, without an alternate endpoint or runtime selector. Diagnostic v1, classic-v2 physics, and
 generator-v1 are unchanged. V2 and v3 remain historical contracts.
 
 A new distinct, redacted ResumeToken is a 64-character lowercase-hex seat capability. Ordinary

@@ -618,8 +618,8 @@ Apply these deadline rules to an unfinished match:
 - If both deadlines expire without reconnection, record abandonment with no winner.
 
 Evaluate same-tick gameplay deaths and round scoring before disconnect outcomes. Only a
-finalized match result suppresses a pending forfeit: winning a first or second round does not
-cancel it, while legitimately reaching the third win ends the match first. Preserve both the
+finalized match result suppresses a pending forfeit: winning a nonfinal round does not
+cancel it, while reaching the configured win target (three by default) ends the match first. Preserve both the
 actual round result and the distinct match-forfeit result. These checks execute even when
 that tick transitions out of Running.
 

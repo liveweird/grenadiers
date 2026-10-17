@@ -1,7 +1,8 @@
 # Architecture
 
 The server provides HTTP liveness/readiness, diagnostic WebSockets, anonymous credentials,
-and authenticated authoritative two-seat first-to-three matches. React/Mantine provides room admission and
+and authenticated authoritative two-seat matches with a configurable win target (three by
+default). React/Mantine provides room admission and
 the HUD; PixiJS renders public game snapshots.
 A separate deterministic simulation in `core::game` implements movement, owned bombs,
 flames, damage, and one-round outcomes. Room owners advance that simulation at a fixed
@@ -85,7 +86,8 @@ must be recorded and how the two-player baseline will be delivered and verified.
 
 [ADR 0015](decisions/0015-match-series-and-staged-progression.md) separates implemented
 [headless match-series facts](game/match-series.md) and the pure [automatic lifecycle](game/match-lifecycle.md)
-from transport integration. The live generated match supports first-to-three play.
+from transport integration. Shared room settings now select one to nine wins; Classic defaults
+to three. Settings remain immutable through automatic rounds.
 
 [ADR 0016](decisions/0016-dormant-gameplay-v3-contract.md) records the earlier namespaced
 [gameplay-v3 contract](game/protocol-v3.md) separately from archived v2. Gameplay v4 extends

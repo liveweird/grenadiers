@@ -37,6 +37,7 @@ impl State {
         self.resolve_placements(placement_requests, next_tick, &mut events);
         self.resolve_explosions(next_tick, &mut events);
         self.kill_on_final_flames(next_tick, &mut events);
+        self.collect_pickups(next_tick, &mut events);
         self.running_updates += 1;
         if let Some(result) = self.decide_result() {
             events.push(StepEvent::new(next_tick, StepEventKind::RoundEnded(result)));

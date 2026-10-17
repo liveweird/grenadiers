@@ -58,6 +58,10 @@ fn absolute_tick_constructor_keeps_round_update_clock_at_zero() {
 
     assert_eq!(state.tick(), Tick(180));
     assert_eq!(state.running_updates(), 0);
+    assert_eq!(
+        state.round_assignment(),
+        crate::game::RoundAssignment::first()
+    );
     assert_eq!(state.step(&[]).unwrap().tick, Tick(181));
     assert_eq!(state.running_updates(), 1);
 }

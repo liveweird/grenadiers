@@ -2,6 +2,7 @@ use std::collections::BTreeSet;
 
 #[cfg(test)]
 use super::arena::Terrain;
+use super::assignment::RoundAssignment;
 #[cfg(test)]
 use super::bombs::Bomb;
 use super::events::StepEvent;
@@ -147,6 +148,7 @@ pub struct State {
     next_entity_id: u64,
     running_updates: u64,
     result: Option<RoundResult>,
+    assignment: RoundAssignment,
 }
 
 impl State {
@@ -166,6 +168,17 @@ impl State {
         world: World,
         actors: [ActorInit; 2],
         tick: Tick,
+    ) -> Result<Self, StateError> {
+        Self::new_at_tick_with_assignment(rules, world, actors, tick, RoundAssignment::first())
+    }
+
+    /// Creates a round at an absolute room tick with explicit parity-based roles.
+    pub fn new_at_tick_with_assignment(
+        rules: RulesConfig,
+        world: World,
+        actors: [ActorInit; 2],
+        tick: Tick,
+        assignment: RoundAssignment,
     ) -> Result<Self, StateError> {
         if actors[0].id == actors[1].id {
             return Err(StateError::DuplicateActorId(actors[0].id));
@@ -207,6 +220,7 @@ impl State {
             next_entity_id,
             running_updates: 0,
             result: None,
+            assignment,
         })
     }
 
@@ -238,6 +252,11 @@ impl State {
     #[must_use]
     pub const fn result(&self) -> Option<RoundResult> {
         self.result
+    }
+
+    #[must_use]
+    pub const fn round_assignment(&self) -> RoundAssignment {
+        self.assignment
     }
 
     #[must_use]
@@ -317,6 +336,8 @@ mod explosion_step;
 #[cfg(test)]
 #[path = "flame_tests.rs"]
 mod flame_tests;
+#[path = "simulation_pickups.rs"]
+mod pickup_step;
 #[cfg(test)]
 #[path = "pickup_tests.rs"]
 mod pickup_tests;
@@ -337,3 +358,6 @@ mod step_event_tests;
 #[cfg(test)]
 #[path = "simulation_tests.rs"]
 mod tests;
+#[cfg(test)]
+#[path = "upgrade_tests.rs"]
+mod upgrade_tests;

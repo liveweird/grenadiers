@@ -51,6 +51,9 @@ pub fn project_events(reports: &[game::StepReport]) -> Result<Vec<WireEvent>, Pr
                     id: EntityId::new(id.0),
                     seat: wire_seat(seat),
                 },
+                game::StepEventKind::PickupCollected { .. } => {
+                    return Err(ProjectionError::InvalidEvent);
+                }
                 game::StepEventKind::RoundEnded(result) => EventKind::RoundEnded {
                     result: project_result(Some(result)).ok_or(ProjectionError::InvalidEvent)?,
                 },

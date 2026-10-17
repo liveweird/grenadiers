@@ -1,5 +1,19 @@
 # Repository verification
 
+## M5 headless first-to-three series — 2026-10-17
+
+The locked server gate passes **194 core tests, 85 server tests, and 2 doctests**.
+Rust line coverage passes the unchanged 80% floor at **4,275/4,592 lines, 93.10%**.
+Independent review identified a stale-time readiness inconsistency after rematch; it is fixed
+and the regression independently verified. No findings remain in the series component.
+
+Tests cover win/draw score sequences, actual-round parity across epoch gaps, exact hold
+boundaries, completed-round versus match outcomes, batched forfeits/abandonment/interruption,
+final-match precedence, idempotent/withdrawable votes, retained rematch epoch/time high-water,
+and atomic tick/deadline/round-number failures. Storage remains bounded to one latest round.
+This is a pure headless API; live generated gameplay remains single-round v2. Lifecycle,
+contracts, server adapters, and browser progression follow as separate focused releases.
+
 ## M4 headless compositor diagnosis and correction — 2026-10-17
 
 Hosted trace profiling finally isolated the repeated native-key overshoot: Chromium's hybrid

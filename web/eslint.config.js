@@ -14,6 +14,7 @@ export default defineConfig([
     'src/realtime/schema.ts',
     'src/game/schema.ts',
     'src/game/v3/schema.ts',
+    'src/game/v4/schema.ts',
   ]),
   {
     files: ['**/*.{ts,tsx,mjs}'],

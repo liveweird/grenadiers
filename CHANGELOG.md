@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.3.5 — 2026-10-17
+
+- Stage the closed gameplay-v4 reconnect contract with distinct redacted resume capabilities,
+  personal admitted baselines/action high-water, shared room updates, and connection status.
+- Add strict Rust/AJV conformance, three-version generated-type drift checks, physical v3
+  parity, and maximal complete-frame bounds for snapshots and private admissions.
+
+The contract is dormant. Active gameplay remains v3 until checked projection and coordinated
+server/browser reconnect activation are verified.
+
 ## 0.3.4 — 2026-10-17
 
 - Integrate reserved-seat grace into the pure match lifecycle with atomic two-seat loss and

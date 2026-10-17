@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.3.8 — 2026-10-17
+
+- Stage the v4 browser with private in-memory seat capability, bounded fresh-session retries,
+  generation fences, full admission baselines, and preserved bomb-action high-water.
+- Present localized connection/grace/held-result status and disable controls before recovery.
+- Retain authority after rejected leave and return to a usable lobby after terminal recovery.
+
+The panel remains dormant; active gameplay switches with the coordinated server release.
+
 ## 0.3.7 — 2026-10-17
 
 - Stage private, independently minted resume capabilities with bounded collision retries and

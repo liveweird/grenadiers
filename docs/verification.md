@@ -1,5 +1,37 @@
 # Repository verification
 
+## M6 dormant reconnect browser — 2026-10-17
+
+The complete Node 24.21.0 web gate passes **163 tests**, with **94.74% statements, 88.22%
+branches, 95.47% functions, and 97.50% lines**. Schema drift, Spectral, ESLint, Knip,
+shuffled coverage and production build pass. The combined locked server gate passes
+**294 core tests, 136 server tests, and 2 doctests**; Rust implementation is unchanged from
+the preceding private-helper checkpoint.
+
+Independent review caught unbound arena callbacks, premature capability loss after rejected
+leave, and unusable stale ownership after terminal recovery. All three are fixed and closure
+review passes, including **51 focused v4 cases**. The panel invokes movement, release and bomb
+callbacks with their correct receiver. Rejected leave retains updates and resume authority;
+matching acknowledgement clears identity. Transport loss during pending explicit leave exits
+locally without blind resume. Replacement, rejected capability or exhausted retries stop and
+return to a usable lobby. Offline rematch controls are disabled.
+
+Tests cover fresh-session bounded retries, callback/timer fences, full private baselines,
+action floors/exhaustion, stale shared frames, no buffered actions, identity privacy, and
+localized grace/held-result status. Active App and v3 remain unchanged. Real reconnect/takeover
+browser acceptance belongs to coordinated activation; exact-image acceptance is separate.
+
+A clean committed-tree build of `5865ca3c0b36b4aba9b74bcca7afa4cdc4c057dc` produces
+`sha256:d457710f0a86af74e102f26b5e38873da5f38cc42aa3dd8419d6fe0deca94c3a`.
+Compose and local Kubernetes run that exact image. Each passes real JSON health/readiness,
+six default browser scenarios, one pickup scenario and one full-match/rematch scenario;
+fixtures disable retries. Strict Kubernetes 1.33 schemas pass 3/3; pinned archive-only Trivy
+reports zero fixable HIGH/CRITICAL findings. Runtime checks verify non-root UID/GID 65532,
+read-only root, dropped capabilities, seccomp/probes and read-only mode-0444 fixture mounts;
+no seed file exists under `/app`. Final immutable client `cdcaa516` and exact hashes,
+logs and screenshots are retained in `/tmp/grenadiers-v038-acceptance`. Temporary stacks,
+namespaces, Secrets, forwards, exports and scan archives are cleaned; the image remains.
+
 ## M6 private resume credential/binding helpers — 2026-10-17
 
 The combined locked server gate passes **294 core tests, 136 server tests, and 2 doctests**.

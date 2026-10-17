@@ -32,6 +32,8 @@
     "ready": "Gotowy",
     "alive": "W grze",
     "eliminated": "Wyeliminowany",
+    "disconnected": "Utracono połączenie — miejsce zarezerwowane",
+    "expired": "Czas na ponowne połączenie minął",
     "rematchReady": "Chce rewanżu",
     "rematchNotReady": "Rozważa rewanż"
   },
@@ -78,7 +80,14 @@
     "disconnected": "Wybierz sposób wejścia do pokoju.",
     "connecting": "Otwieranie bezpiecznej sesji gry…",
     "authenticating": "Łączenie z serwerem gry…",
-    "authenticated": "Połączono. Oczekiwanie na pokój…"
+    "authenticated": "Połączono. Oczekiwanie na pokój…",
+    "reconnecting": "Przywracanie miejsca w meczu…"
+  },
+  "reconnect": {
+    "title": "Połączenie zostało przerwane",
+    "retrying": "Dziedziniec pozostaje w ostatnim znanym stanie. Sterowanie wróci po odebraniu aktualnego stanu gry.",
+    "grace": "Połącz się ponownie w ciągu {{time}}",
+    "resultHeld": "Następna runda poczeka na ponowne połączenie obu graczy."
   },
   "arena": {
     "label": "Dziedziniec Grenadiers",
@@ -107,6 +116,8 @@
     "staleSequence": "Polecenie dotarło w złej kolejności.",
     "duplicateAction": "Ta bomba została już odebrana.",
     "rateLimited": "Polecenia przychodzą zbyt szybko.",
-    "capacityReached": "Brak miejsca na kolejny mecz."
+    "capacityReached": "Brak miejsca na kolejny mecz.",
+    "resumeRejected": "Zarezerwowane miejsce nie jest już dostępne.",
+    "seatReplaced": "To miejsce wznowiono w innej karcie."
   }
 }

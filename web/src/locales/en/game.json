@@ -32,6 +32,8 @@
     "ready": "Ready",
     "alive": "Alive",
     "eliminated": "Eliminated",
+    "disconnected": "Connection lost — seat reserved",
+    "expired": "Reconnect window ended",
     "rematchReady": "Wants a rematch",
     "rematchNotReady": "Considering rematch"
   },
@@ -78,7 +80,14 @@
     "disconnected": "Choose how to enter a room.",
     "connecting": "Opening a secure game session…",
     "authenticating": "Joining the game server…",
-    "authenticated": "Connected. Waiting for the room…"
+    "authenticated": "Connected. Waiting for the room…",
+    "reconnecting": "Restoring your place in the match…"
+  },
+  "reconnect": {
+    "title": "Connection interrupted",
+    "retrying": "The courtyard remains as you last saw it while your seat is restored. Controls will return after a fresh game state arrives.",
+    "grace": "Reconnect within {{time}}",
+    "resultHeld": "The next round will wait for both players to reconnect."
   },
   "arena": {
     "label": "Grenadiers courtyard",
@@ -107,6 +116,8 @@
     "staleSequence": "That command arrived out of order.",
     "duplicateAction": "That bomb action was already received.",
     "rateLimited": "Commands arrived too quickly.",
-    "capacityReached": "The server has no room for another match."
+    "capacityReached": "The server has no room for another match.",
+    "resumeRejected": "This reserved seat is no longer available.",
+    "seatReplaced": "This seat was resumed in another tab."
   }
 }

@@ -1,7 +1,12 @@
 import { readFile, writeFile } from 'node:fs/promises'
 import { generateRealtime } from './realtime-generator.mjs'
 
-const spec = new URL('../../api/gameplay.schema.json', import.meta.url)
-const target = new URL('../src/game/schema.ts', import.meta.url)
-const schema = JSON.parse(await readFile(spec, 'utf8'))
-await writeFile(target, generateRealtime(schema, 'api/gameplay.schema.json'))
+const contracts = [
+  ['../../api/gameplay.schema.json', '../src/game/schema.ts', 'api/gameplay.schema.json'],
+  ['../../api/gameplay-v3.schema.json', '../src/game/v3/schema.ts', 'api/gameplay-v3.schema.json'],
+]
+
+for (const [specPath, targetPath, sourceLabel] of contracts) {
+  const schema = JSON.parse(await readFile(new URL(specPath, import.meta.url), 'utf8'))
+  await writeFile(new URL(targetPath, import.meta.url), generateRealtime(schema, sourceLabel))
+}

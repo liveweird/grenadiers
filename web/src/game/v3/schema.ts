@@ -1,0 +1,324 @@
+// This file was auto-generated from api/gameplay-v3.schema.json. Do not edit.
+
+export type ProtocolVersionInput = number
+
+export type GameplayVersion = 3
+
+export type RulesVersion = 1 | 2
+
+export type MapId = "fixed_v1" | "generated_v1"
+
+export type PickupKind = "bombCapacity" | "blastRange" | "movementSpeed"
+
+export type SessionToken = string
+
+export type RoomId = string
+
+export type RoomCode = string
+
+export type Counter = number
+
+export type EntityId = number
+
+export type Tick = number
+
+export type Seat = "one" | "two"
+
+export type Direction = "north" | "east" | "south" | "west"
+
+export interface Cell {
+  "column": number;
+  "row": number;
+}
+
+export interface Position {
+  "x": number;
+  "y": number;
+}
+
+export type ErrorCode = "invalidMessage" | "authenticationFailed" | "connectionInUse" | "notAuthenticated" | "alreadyAuthenticated" | "alreadyInRoom" | "notInRoom" | "roomNotFound" | "roomFull" | "staleRoom" | "invalidPhase" | "staleSequence" | "duplicateAction" | "rateLimited" | "capacityReached"
+
+export type RoundResult = WinnerResult | DrawResult
+
+export interface WinnerResult {
+  "type": "winner";
+  "seat": Seat;
+}
+
+export interface DrawResult {
+  "type": "draw";
+  "reason": "mutualElimination" | "timeout";
+}
+
+export interface SeatStatus {
+  "seat": Seat;
+  "occupied": boolean;
+  "ready": boolean;
+  "rematchReady": boolean;
+}
+
+export type RoomPhase = WaitingPhase | CountdownPhase | RunningPhase | ResultPhase | MatchResultPhase | InterruptedPhase
+
+export interface WaitingPhase {
+  "type": "waiting";
+}
+
+export interface CountdownPhase {
+  "type": "countdown";
+  "kind": "initial" | "interRound";
+  "endsAt": Tick;
+}
+
+export interface RunningPhase {
+  "type": "running";
+}
+
+export interface ResultPhase {
+  "type": "result";
+  "nextCountdownAt": Tick;
+}
+
+export interface InterruptedPhase {
+  "type": "interrupted";
+  "endedAt": Tick;
+  "reason": MatchInterruptReason;
+}
+
+export interface RoomView {
+  "roomId": RoomId;
+  "roomCode": RoomCode;
+  "roundId": Counter;
+  "revision": Counter;
+  "tick": Tick;
+  "rulesVersion": RulesVersion;
+  "mapId": MapId;
+  "roundNumber": RoundCount;
+  "scores": Scores;
+  "lastRound": CompletedRound | null;
+  "seats": SeatStatus[];
+  "phase": RoomPhase;
+}
+
+export type Terrain = "floor" | "wall"
+
+export interface GameState {
+  "runningUpdates": number;
+  "remainingTicks": number;
+  "arena": ArenaView;
+  "actors": ActorView[];
+  "bombs": BombView[];
+  "flames": FlameView[];
+  "pickups": PickupView[];
+}
+
+export interface PickupView {
+  "cell": Cell;
+  "kind": PickupKind;
+}
+
+export interface ArenaView {
+  "width": 15;
+  "height": 13;
+  "terrain": Terrain[];
+  "blocks": Cell[];
+}
+
+export interface ActorView {
+  "id": EntityId;
+  "seat": Seat;
+  "position": Position;
+  "heading": Direction;
+  "speedLevel": number;
+  "alive": boolean;
+  "bombCapacity": number;
+  "bombRange": number;
+  "liveBombCount": number;
+}
+
+export interface BombView {
+  "id": EntityId;
+  "cell": Cell;
+  "owner": EntityId;
+  "range": number;
+  "placedAt": Tick;
+  "detonatesAt": Tick;
+}
+
+export interface FlameView {
+  "cell": Cell;
+  "expiresAt": Tick;
+}
+
+export interface WireEvent {
+  "tick": Tick;
+  "index": number;
+  "kind": EventKind;
+}
+
+export type EventKind = BombPlacedEvent | BombDetonatedEvent | ActorEliminatedEvent | RoundEndedEvent | PickupCollectedEventKind
+
+export interface BombPlacedEvent {
+  "type": "bombPlaced";
+  "bomb": BombView;
+}
+
+export interface BombDetonatedEvent {
+  "type": "bombDetonated";
+  "bomb": BombView;
+}
+
+export interface ActorEliminatedEvent {
+  "type": "actorEliminated";
+  "id": EntityId;
+  "seat": Seat;
+}
+
+export interface RoundEndedEvent {
+  "type": "roundEnded";
+  "result": RoundResult;
+}
+
+export interface PickupCollectedEventKind {
+  "type": "pickupCollected";
+  "id": EntityId;
+  "seat": Seat;
+  "cell": Cell;
+  "kind": PickupKind;
+}
+
+export type GameClientMessage = Authenticate | CreateRoom | JoinRoom | Ready | Movement | PlaceBomb | LeaveRoom | Rematch
+
+export interface Authenticate {
+  "type": "authenticate";
+  "protocolVersion": ProtocolVersionInput;
+  "token": SessionToken;
+}
+
+export interface CreateRoom {
+  "type": "createRoom";
+  "sequence": Counter;
+}
+
+export interface JoinRoom {
+  "type": "joinRoom";
+  "sequence": Counter;
+  "roomCode": RoomCode;
+}
+
+export interface Ready {
+  "type": "ready";
+  "sequence": Counter;
+  "roomId": RoomId;
+  "roundId": Counter;
+  "ready": boolean;
+}
+
+export interface Movement {
+  "type": "movement";
+  "sequence": Counter;
+  "roomId": RoomId;
+  "roundId": Counter;
+  "direction": Direction | null;
+}
+
+export interface PlaceBomb {
+  "type": "placeBomb";
+  "sequence": Counter;
+  "roomId": RoomId;
+  "roundId": Counter;
+  "actionId": Counter;
+}
+
+export interface LeaveRoom {
+  "type": "leaveRoom";
+  "sequence": Counter;
+  "roomId": RoomId;
+  "roundId": Counter;
+}
+
+export type GameServerMessage = Authenticated | IncompatibleProtocol | RoomState | Snapshot | LeftRoom | Error
+
+export interface Authenticated {
+  "type": "authenticated";
+  "protocolVersion": GameplayVersion;
+}
+
+export interface IncompatibleProtocol {
+  "type": "incompatibleProtocol";
+  "supportedVersion": ProtocolVersionInput;
+}
+
+export interface RoomState {
+  "type": "roomState";
+  "room": RoomView;
+  "youSeat": Seat;
+}
+
+export interface Snapshot {
+  "type": "snapshot";
+  "room": RoomView;
+  "state": GameState;
+  "events": WireEvent[];
+}
+
+export interface LeftRoom {
+  "type": "leftRoom";
+  "roomId": RoomId;
+  "sequence": Counter;
+}
+
+export interface Error {
+  "type": "error";
+  "code": ErrorCode;
+  "sequence": Counter | null;
+}
+
+export type RoundCount = number
+
+export type Wins = number
+
+export interface Scores {
+  "one": Wins;
+  "two": Wins;
+}
+
+export type MatchInterruptReason = "connectionLost" | "serverOverloaded" | "serverStopped" | "internalError"
+
+export type MatchResult = MatchWinnerResult | AbandonedMatchResult | InterruptedMatchResult
+
+export interface MatchWinnerResult {
+  "type": "winner";
+  "seat": Seat;
+  "reason": "roundWins" | "forfeit";
+}
+
+export interface AbandonedMatchResult {
+  "type": "abandoned";
+}
+
+export interface InterruptedMatchResult {
+  "type": "interrupted";
+  "reason": MatchInterruptReason;
+}
+
+export interface CompletedRound {
+  "roundId": Counter;
+  "roundNumber": Counter;
+  "endedAt": Tick;
+  "result": RoundResult;
+}
+
+export interface MatchResultPhase {
+  "type": "matchResult";
+  "endedAt": Tick;
+  "result": MatchResult;
+  "rematchAt": Tick;
+}
+
+export interface Rematch {
+  "type": "rematch";
+  "sequence": Counter;
+  "roomId": RoomId;
+  "roundId": Counter;
+  "ready": boolean;
+}

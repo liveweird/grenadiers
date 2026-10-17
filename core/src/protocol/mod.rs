@@ -5,6 +5,7 @@ mod projection;
 mod scalars;
 mod server;
 mod snapshot;
+pub mod v3;
 
 use std::fmt;
 

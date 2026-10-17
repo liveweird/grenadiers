@@ -107,7 +107,7 @@ test('two browsers finish a drawn round, first-to-three match, and consensual re
     expect(final.phase).toMatchObject({ type: 'matchResult', result: { type: 'winner', seat: 'two', reason: 'roundWins' } })
     await expect(one.getByRole('button', { name: 'Play again', exact: true })).not.toBeVisible()
     await Promise.all(pages.map((page) =>
-      expect(page.getByRole('status')).toHaveText('Player two wins the match with three round wins.'),
+      expect(page.getByRole('status')).toHaveText('Player two wins the match with 3 round wins.'),
     ))
     await Promise.all(pages.map((page) => expect(page.getByRole('button', { name: 'Play again', exact: true })).toBeVisible()))
     for (const page of pages) {

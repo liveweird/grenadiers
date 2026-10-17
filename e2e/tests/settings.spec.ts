@@ -45,6 +45,8 @@ test('two browsers share configured rules that drive speed, fuse and match targe
     await Promise.all(games.map((game) => expect.poll(() => latestRoom(game)?.phase.type).toBe('matchResult')))
     expect(latestRoom(games[0])?.scores).toEqual({ one: 0, two: 1 })
     expect(latestRoom(games[0])?.settings).toEqual(expected)
+    await Promise.all([one, two].map((page) => expect(page.getByRole('status'))
+      .toHaveText('Player two wins the match with one round win.')))
 
     await Promise.all([one, two].map((page) =>
       expect(page.getByRole('button', { name: 'Play again', exact: true })).toBeEnabled({ timeout: 10_000 })))

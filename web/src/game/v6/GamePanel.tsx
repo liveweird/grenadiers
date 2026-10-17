@@ -60,9 +60,12 @@ function RoundOutcome({ copy, result }: { copy: V6Copy; result: RoundResult }) {
   return <Text role="status">{copy.roundResult[result.reason]}</Text>
 }
 
-function MatchOutcome({ copy, result }: { copy: V6Copy; result: MatchResult }) {
+function MatchOutcome({ copy, result, wins }: { copy: V6Copy; result: MatchResult; wins: number }) {
   if (result.type === 'winner') {
-    return <Text role="status">{format(copy.matchResult[result.reason], { player: copy.player[result.seat] })}</Text>
+    const template = result.reason === 'roundWins'
+      ? copy.matchResult[wins === 1 ? 'roundWinConfigured' : 'roundWinsConfigured']
+      : copy.matchResult.forfeit
+    return <Text role="status">{format(template, { player: copy.player[result.seat], wins })}</Text>
   }
   if (result.type === 'abandoned') return <Text role="status">{copy.matchResult.abandoned}</Text>
   return <Text role="status">{format(copy.matchResult.interrupted, { reason: reasonText(copy, result.reason) })}</Text>
@@ -72,7 +75,7 @@ function AuthoritativeOutcome({ state, copy }: { state: GameClientState; copy: V
   const room = state.room
   if (!room) return null
   if (room.phase.type === 'result' && room.lastRound) return <RoundOutcome copy={copy} result={room.lastRound.result} />
-  if (room.phase.type === 'matchResult') return <MatchOutcome copy={copy} result={room.phase.result} />
+  if (room.phase.type === 'matchResult') return <MatchOutcome copy={copy} result={room.phase.result} wins={room.settings.winsToFinish} />
   if (room.phase.type === 'interrupted') return <Text role="status">{reasonText(copy, room.phase.reason)}</Text>
   return null
 }

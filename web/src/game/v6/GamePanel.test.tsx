@@ -150,6 +150,27 @@ describe('v6 reconnect presentation', () => {
     expect(screen.getByRole('button', { name: 'Play again' })).toBeDisabled()
   })
 
+  it.each([
+    ['en', 1, 'Player one wins the match with one round win.'],
+    ['en', 3, 'Player one wins the match with 3 round wins.'],
+    ['en', 9, 'Player one wins the match with 9 round wins.'],
+    ['pl', 1, 'Gracz pierwszy wygrywa mecz po jednej wygranej rundzie.'],
+    ['pl', 3, 'Gracz pierwszy wygrywa mecz (wygrane rundy: 3).'],
+    ['pl', 9, 'Gracz pierwszy wygrywa mecz (wygrane rundy: 9).'],
+  ] as const)('reports the configured winning target in %s at %s wins', async (language, wins, text) => {
+    await i18n.changeLanguage(language)
+    const current = state()
+    current.room = room(200, {
+      type: 'matchResult', endedAt: 20, rematchAt: 200,
+      result: { type: 'winner', seat: 'one', reason: 'roundWins' },
+    }, wins)
+    current.room.settings.winsToFinish = wins
+    current.room.scores.one = wins
+    current.snapshot!.room = current.room
+    renderPanel(current)
+    expect(screen.getByRole('status')).toHaveTextContent(text)
+  })
+
   it('captures unique physical keys, cancels with Escape, and restores defaults', () => {
     renderPanel(state())
     const arena = screen.getByRole('region', { name: 'Grenadiers courtyard' })

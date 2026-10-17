@@ -62,7 +62,9 @@
     "roundWins": "{{player}} wygrywa mecz.",
     "forfeit": "{{player}} wygrywa mecz walkowerem.",
     "abandoned": "Mecz zakończył się po odejściu obu graczy.",
-    "interrupted": "Mecz nie może być kontynuowany: {{reason}}"
+    "interrupted": "Mecz nie może być kontynuowany: {{reason}}",
+    "roundWinsConfigured": "{{player}} wygrywa mecz (wygrane rundy: {{wins}}).",
+    "roundWinConfigured": "{{player}} wygrywa mecz po jednej wygranej rundzie."
   },
   "interruption": {
     "connectionLost": "gracz stracił połączenie",

@@ -62,7 +62,9 @@
     "roundWins": "{{player}} wins the match.",
     "forfeit": "{{player}} wins the match by forfeit.",
     "abandoned": "The match ended after both players left.",
-    "interrupted": "The match could not continue: {{reason}}"
+    "interrupted": "The match could not continue: {{reason}}",
+    "roundWinsConfigured": "{{player}} wins the match with {{wins}} round wins.",
+    "roundWinConfigured": "{{player}} wins the match with one round win."
   },
   "interruption": {
     "connectionLost": "a player lost their connection",

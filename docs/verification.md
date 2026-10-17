@@ -16,6 +16,16 @@ lines per file. The four-update loop/yield bound is statically checked and fairn
 a direct deterministic exact-yield test is not present. Production routing and process/socket
 draining remain activation checks; this owner is deliberately test-only until that switch.
 
+A clean committed-tree build of `c73986376b01fea0b8947995125ae0fc787920e1` produces
+`sha256:0e16c2da99dd620b7bc38662e3c2ceaafd1048882fba6937a0ea1923f96516b1`.
+Compose and ready local Kubernetes use that exact image. Each path passes health/readiness,
+all six default browser scenarios and the separate read-only pickup-fixture scenario. Strict
+schemas validate all three resources. Pinned archive-only Trivy reports zero fixable
+HIGH/CRITICAL findings; `/app` contains no seed files. Kubernetes retains UID/GID 65532,
+a read-only root, dropped capabilities, no privilege escalation, RuntimeDefault, and a
+read-only 0444 fixture Secret. Temporary resources and exports are removed; logs and
+screenshots remain. This evidence update leaves production routing unchanged.
+
 ## Dormant v3 browser client and match panel — 2026-10-17
 
 The complete web gate passes **120 tests** with **94.88% statements, 89.47% branches,

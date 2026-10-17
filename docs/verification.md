@@ -1,5 +1,21 @@
 # Repository verification
 
+## M6 dormant gameplay-v4 structural contract — 2026-10-17
+
+The combined locked server gate passes **280 core tests, 132 server tests, and 2 doctests**.
+Rust coverage is **6,807/7,287 lines, 93.41%**, above the unchanged 80% floor. Independent
+review reports no actionable structural-contract findings. Fifteen focused Rust cases plus
+AJV/TypeScript conformance verify every closed variant, required nullable fields, nested extras,
+credential validation/redaction, namespace separation, local references, and exact physical
+v3 parity. Complete maximal structural Snapshot and Admitted frames measure **44,874** and
+**31,444 UTF-8 bytes**, respectively, below the unchanged 65,536 cap; oversized output fails.
+Client parsing retains its inclusive 4,096-byte cap.
+
+The full web gate passes **119 tests** with **96.83% statements, 92.68% branches, 98.87%
+functions, and 98.94% lines**. Three-version generation/drift, lint, Knip, and build pass.
+Active endpoint/client remain v3, and the diagnostic contract remains v1. Semantic checked
+projection, network reconnect activation, and exact-image acceptance are separate checks.
+
 ## M6 grace-aware pure match lifecycle — 2026-10-17
 
 The combined locked server gate passes **265 core tests, 132 server tests, and 2 doctests**.

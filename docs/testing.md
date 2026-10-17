@@ -34,7 +34,7 @@ test order and enforces coverage thresholds declared in `web/vite.config.ts`.
 glob dependency. Parser/load errors and error-severity diagnostics fail the command.
 `check:api`, `check:realtime`, and `check:gameplay` compare generated
 contracts without modifying them. Gameplay generation/drift checks cover active v6 and historical
-v2/v3; parity tests compare unchanged physical definitions. AJV validates runtime WebSocket payloads. EN/PL locale
+v2–v5; parity tests compare unchanged physical definitions. AJV validates runtime WebSocket payloads. EN/PL locale
 parity is tested. ESLint/SonarJS and Knip must report no findings.
 
 Vitest also discovers `web/scripts/*.test.mjs`: generator tests compile representative
@@ -56,6 +56,13 @@ with `npm --prefix e2e run install:browsers`, start Compose, then run
 and spec titles must agree verbatim. E2E static checks run on every pull request; browser
 smoke runs in CI against Compose.
 
+The default suite uses one worker in CI and two locally; `E2E_WORKERS` explicitly overrides
+that choice. Each multiplayer case already owns two browser contexts. Serial CI execution
+keeps software WebGL within the two-player reference on two-core runners; specialized suites
+also use one worker. Existing deadlines and assertions remain strict. Frozen-result checks
+select retained snapshots by round and revision so automatic progression cannot change the
+round being compared.
+
 Install cargo-deny with `cargo install cargo-deny --version 0.20.2 --locked` for
 `scripts/gates.sh security`. Rust advisory/license/source checks and full npm audits run
 separately so external advisory outages do not obscure unit-test results. Document any
@@ -67,7 +74,7 @@ screenshots, public reports, and bounded redacted command/snapshot summaries rem
 
 ### Generated pickup acceptance
 
-The default six scenarios run against random generated maps and rely only on safe openings.
+The default eight scenarios run against random generated maps and rely only on safe openings.
 A separate `test:pickups` command uses the explicit read-only operator fixture setup in
 [deployment.md](deployment.md#reproduce-a-generated-pickup-round). It fails without
 `E2E_PICKUP_FIXTURE=arena-v1-pickups`; it never silently skips. Run both modes against the same

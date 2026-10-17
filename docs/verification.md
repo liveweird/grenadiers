@@ -35,6 +35,21 @@ Independent evidence audit is clear. Evidence remains at `/tmp/grenadiers-v0318-
 owned containers, namespace, helpers and forwarding were removed, with unrelated workloads
 preserved. Integration/documentation commits retain byte-identical application build inputs.
 
+The final harness source is `9a7cb77d1f5ca2161b3c9d5026cb4c821c37a88d`. A CI run exposed
+two pre-existing harness flakes also reproduced on the pre-art settings head: an unbound
+latest-snapshot read could cross the three-second result hold, and two workers overcommitted
+software WebGL on a two-core runner. Result assertions now capture the earliest and later
+same-round snapshots and the peer's exact revision. CI defaults to one worker; local and
+explicit overrides remain. Assertions and deadlines are unchanged; independent closure
+review is clear.
+
+The corrected eight default cases pass again through **both deployment paths, retries zero**,
+on the exact accepted image. Only two E2E files differ; application build inputs are identical.
+The previously accepted seeded sixteen cases are unchanged, giving a final rollup of 24/24
+per path. Recheck health/readiness, exact image identity, limits and cleanup are audited in
+`/tmp/grenadiers-v0318-harness-recheck`; the original acceptance retains scan, security,
+latency and visual evidence. All owned recheck resources were removed.
+
 ## Shared room settings / gameplay v6 — 2026-10-17
 
 Clean image source `cf82db46477e0fddc8b9b0e137e5ffb64bb3ec56` builds

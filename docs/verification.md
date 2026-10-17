@@ -1,5 +1,21 @@
 # Repository verification
 
+## Dormant bounded match owner — 2026-10-17
+
+The locked server gate passes **243 core tests, 134 server tests, and 2 doctests**.
+Rust line coverage is **6,333/6,799 lines, 93.15%**, above the unchanged 80% floor.
+Independent review and follow-up closure report no outstanding findings. Twenty-seven owner
+cases cover real match finality, departure batching and generation fences, queue bounds,
+seed/start boundaries, expired/canceled admission, input fencing, 20 Hz publication, overload,
+lobby/rematch deadlines, nonfinal retention, command fairness, and sticky shutdown.
+
+Review fixes make shutdown/overload atomically apply pending departures before one final
+publication, preserving reports, vacancy, final outcome, and prompt leave acknowledgments.
+Canceled queued admission causes no occupancy/revision mutation. Source remains below 400
+lines per file. The four-update loop/yield bound is statically checked and fairness tested;
+a direct deterministic exact-yield test is not present. Production routing and process/socket
+draining remain activation checks; this owner is deliberately test-only until that switch.
+
 ## Dormant v3 browser client and match panel — 2026-10-17
 
 The complete web gate passes **120 tests** with **94.88% statements, 89.47% branches,

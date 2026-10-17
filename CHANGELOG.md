@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.2.13 — 2026-10-17
+
+- Add the dormant bounded match owner with generation-fenced admissions, two-seat departure
+  batches, fixed-tick scheduling, lobby/rematch deadlines, and final-match retirement.
+- Signal shutdown independently of the command queue and retain one checked final publication
+  with actual vacancy, pending reports, and preserved match finality.
+- Reject canceled admissions before mutation and settle overloaded prematch leaves promptly.
+
+Production registry/socket wiring and coordinated browser activation follow in v0.3.0.
+
 ## 0.2.12 — 2026-10-17
 
 - Stage the protocol3 browser client, match scores/timers, completed-round and final-match

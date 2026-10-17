@@ -1,0 +1,27 @@
+# Dormant bounded match owner
+
+Status: implemented and independently reviewed under test compilation. Production still uses
+the v2 owner until the coordinated registry/socket/browser activation.
+
+One task owns the real MatchRuntime, a 32-command queue, two generation-bound seats, and at
+most two pending departures/leave replies. Submissions never await inside the owner. A leave
+is validated and its seat's input fenced immediately; occupancy and acknowledgment change
+only when the scheduled batch commits. Pending seats cannot issue further commands, and
+pending departures block admission/rematch. The first accepted reason per seat is retained.
+
+Running boundaries commit physics and scoring before departures; all idle phases apply
+departures before automatic transitions, stamped at the last completed tick. Countdown-boundary
+leaves therefore consume no new actual round or entropy. Final match outcomes remain final.
+
+Scheduling retains absolute 60 Hz deadlines, 20 Hz publication, four-update catch-up batches,
+and a 500 ms overload limit. The 300-second lobby deadline applies before the first actual
+start and restarts after rematch; long matches survive their creation deadline. Only final
+matches/prematch interruptions begin fixed 30-second retirement; nonfinal results do not.
+
+Sticky shutdown bypasses full queues. Shutdown/overload atomically interrupt, apply pending
+departures, and publish once, preserving reports, vacancy, and prior match finality. Leave
+replies complete only after that checked publication. The watch retains `Closing {last, reason}`
+for slow readers. Cleanup is guarded before spawning, including abort-before-first-poll.
+
+Socket delivery and the bounded process drain are activation responsibilities. The adapter
+never duplicates authentication or introduces a selectable protocol/production testing flag.

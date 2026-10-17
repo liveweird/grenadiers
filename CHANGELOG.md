@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.2.0 — 2026-10-17
+
+- Make the fixed-map two-player duel playable through Create/Join, readiness, countdown,
+  keyboard movement, bombs, destruction, elimination, and a shared round result.
+- Render the authoritative arena with pinned PixiJS 8.22.0 alongside the React/Mantine HUD,
+  English/Polish controls, reduced motion, scoped keyboard focus, and retained diagnostics.
+- Validate incoming gameplay frames, fence stale async connection work, and keep credentials
+  in tab memory. Release graphics contexts, tickers, observers, and listeners on teardown.
+- Verify actual WebGL pixels and desktop/narrow layouts in a complete two-browser duel.
+
+This completes M3’s first playable preview. It requires a keyboard and supports one fixed-map
+round; generated upgrades, complete match scoring, touch controls, and reconnect follow later.
+
 ## 0.1.14 — 2026-10-17
 
 - Run real two-player rounds with readiness, exact countdown, authoritative 60 Hz updates,

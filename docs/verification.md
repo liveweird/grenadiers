@@ -21,6 +21,17 @@ action floors/exhaustion, stale shared frames, no buffered actions, identity pri
 localized grace/held-result status. Active App and v3 remain unchanged. Real reconnect/takeover
 browser acceptance belongs to coordinated activation; exact-image acceptance is separate.
 
+A clean committed-tree build of `5865ca3c0b36b4aba9b74bcca7afa4cdc4c057dc` produces
+`sha256:d457710f0a86af74e102f26b5e38873da5f38cc42aa3dd8419d6fe0deca94c3a`.
+Compose and local Kubernetes run that exact image. Each passes real JSON health/readiness,
+six default browser scenarios, one pickup scenario and one full-match/rematch scenario;
+fixtures disable retries. Strict Kubernetes 1.33 schemas pass 3/3; pinned archive-only Trivy
+reports zero fixable HIGH/CRITICAL findings. Runtime checks verify non-root UID/GID 65532,
+read-only root, dropped capabilities, seccomp/probes and read-only mode-0444 fixture mounts;
+no seed file exists under `/app`. Final immutable client `cdcaa516` and exact hashes,
+logs and screenshots are retained in `/tmp/grenadiers-v038-acceptance`. Temporary stacks,
+namespaces, Secrets, forwards, exports and scan archives are cleaned; the image remains.
+
 ## M6 private resume credential/binding helpers — 2026-10-17
 
 The combined locked server gate passes **294 core tests, 136 server tests, and 2 doctests**.

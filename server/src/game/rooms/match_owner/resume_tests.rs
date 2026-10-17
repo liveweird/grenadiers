@@ -1,6 +1,9 @@
-use grenadiers_core::protocol::{
-    Counter, MAX_COUNTER,
-    v8::{ConnectionStatus, ResumeToken},
+use grenadiers_core::{
+    game::Direction,
+    protocol::{
+        Counter, MAX_COUNTER,
+        v8::{ConnectionStatus, ResumeToken},
+    },
 };
 use tokio::sync::oneshot;
 
@@ -61,6 +64,19 @@ async fn connected_takeover_fences_old_binding_and_drop_then_restore_keeps_priva
             .unwrap(),
         Err(RoomError::StaleRoom)
     ));
+    assert_eq!(
+        value
+            .handle
+            .action(
+                replacement_binding,
+                replacement.room_id.clone(),
+                replacement.round_id,
+                MatchAction::Movement(Some(Direction::East)),
+            )
+            .await
+            .unwrap(),
+        Ok(())
+    );
 
     drop(first.guard);
     advance_ticks(1).await;
@@ -68,11 +84,24 @@ async fn connected_takeover_fences_old_binding_and_drop_then_restore_keeps_priva
         publication(&value.notices).room.seats[0].connection,
         ConnectionStatus::Connected
     );
+    assert_eq!(
+        value
+            .handle
+            .action(
+                replacement_binding,
+                replacement.room_id.clone(),
+                replacement.round_id,
+                MatchAction::Movement(None),
+            )
+            .await
+            .unwrap(),
+        Ok(())
+    );
 
     let token = replacement.resume_token.clone();
     let room_id = replacement.room_id.clone();
-    drop(replacement);
-    advance_ticks(1).await;
+    drop(replacement.guard);
+    advance_ticks(2).await;
     assert!(matches!(
         publication(&value.notices).room.seats[0].connection,
         ConnectionStatus::Disconnected { .. }
@@ -88,6 +117,8 @@ async fn connected_takeover_fences_old_binding_and_drop_then_restore_keeps_priva
         ConnectionStatus::Connected
     );
     assert_eq!(restored.last_bomb_action_id, Some(sequence(MAX_COUNTER)));
+    let restored_frame: serde_json::Value = serde_json::from_str(&restored.personal_frame).unwrap();
+    assert!(!restored_frame["state"].is_null());
     drop(restored);
     drop(second);
 }

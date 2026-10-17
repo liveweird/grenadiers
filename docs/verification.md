@@ -1,5 +1,48 @@
 # Repository verification
 
+## M6 v0.3.10 exact-image deployment acceptance — 2026-10-17
+
+A clean Git export of `df9886ff17a662fdfccc19d0769153c091b5d9d2` produces
+`sha256:54988e9f3d4bf0d345c4fe7e25e6d3d6a136c75a7390461f006a6342c6448cf7`.
+Compose and isolated Kubernetes run that same image, confirmed from the actual Pod image ID.
+Each path passes **10/10 browser scenarios on the first run, with retries disabled**: six
+default, one pickup, one full match/rematch, and two reconnect cases. Node is exactly 24.21.0;
+every fixture rollout is followed by real JSON health/readiness polling before browser tests.
+
+Strict Kubernetes 1.33 schemas report **3 valid resources** with no invalid/error/skipped results.
+Inspection confirms UID/GID 65532, read-only root, all capabilities dropped, no privilege
+escalation, RuntimeDefault seccomp in Kubernetes, read-only fixture Secret mode 0444, correct
+probes, and no seed under `/app`. Pinned archive-only Trivy 0.74.0 reports **zero HIGH/CRITICAL
+findings**. Its default database mirror first returned an upstream 404; that diagnostic is
+preserved, and the same pinned scanner passes with the explicit official GHCR database. No
+Docker socket is mounted. Actual desktop/320-pixel Polish screenshots were visually inspected.
+
+Evidence: `/tmp/grenadiers-v0310-acceptance`. Temporary Compose/namespace/Secret, forward,
+source export and scan archive are removed; the accepted image remains. Later documentation
+changes preserve the application tree. Together with the independently reviewed 42-rule matrix,
+real v4 recovery and private replay assertions, this completes M6 engineering exit evidence.
+M7 measured browser/latency support and human playtesting remain separate.
+
+## M6 complete baseline rule assertions — 2026-10-17
+
+Independent source/assertion audit and closure review cover **all 42 baseline rules** in the
+[traceability matrix](game/rule-coverage.md). Three new regressions compare complete stepped
+chain results after bomb-order permutation, preserve a disconnected actor's original fuse and
+vulnerability while fencing input, and prove a previously safe assisted turn enters fire and
+kills without canceling its movement. No production behavior changed.
+
+The final v0.3.10 locked server gate passes **296 core tests, 148 server tests and 2 doctests**;
+Rust coverage is **7,955/8,491 lines, 93.69%**, above the unchanged 80% floor. Formatting,
+all-target Clippy with warnings denied, locked build, complete web gate, all ten documented E2E
+static checks and dependency policies pass. Both npm audits report zero vulnerabilities.
+The web suite remains **163 tests**, with **94.82% statements, 89.43% branches, 94.42%
+functions and 97.60% lines**. Exact-image runtime checks are recorded separately before release.
+
+The rule matrix includes composed and conditional lower-layer evidence honestly; RULE12 does
+not invent a normal actor placement into already lethal fire. Measured latency, real background-tab
+recovery, broader browser support and human playtesting remain M7 work. Complete rule assertions
+alone do not establish v0.4.0 readiness.
+
 ## M6 v0.3.9 exact-image deployment acceptance — 2026-10-17
 
 A clean Git export of `ead3f3fc9c67caea7aea9866bfa5c4970d9d80ed` produces

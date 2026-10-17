@@ -157,6 +157,39 @@ fn turn_correction_contact_kills_even_when_the_final_footprint_is_safe() {
 }
 
 #[test]
+fn safe_assisted_turn_into_active_fire_moves_then_eliminates() {
+    let flame = CellId::new(4, 4);
+    let start = Position {
+        x: Position::center(CellId::new(4, 5)).x + 50,
+        y: 5 * UNITS_PER_CELL + HALF_FOOTPRINT + 20,
+    };
+    assert!(!super::movement::position_overlaps_cell(start, flame));
+    let safe = Position::center(CellId::new(12, 10));
+    let mut control = state(start, safe);
+    let mut exposed = state(start, safe);
+    exposed.world.hazards.insert(flame, Tick(10));
+    let inputs = [
+        input(SeatId::One, InputAction::Press(Direction::North)),
+        input(SeatId::One, InputAction::PlaceBomb),
+    ];
+
+    let control_report = control.step(&inputs).unwrap();
+    let exposed_report = exposed.step(&inputs).unwrap();
+
+    assert_eq!(exposed_report.traces[0].len(), 2);
+    assert_eq!(exposed_report.traces[0], control_report.traces[0]);
+    assert_eq!(
+        exposed.actors()[0].position(),
+        control.actors()[0].position()
+    );
+    assert!(exposed_report.traces[0].overlaps_cell(flame));
+    assert!(!exposed.actors()[0].alive());
+    assert!(control.actors()[0].alive());
+    assert!(exposed.world().bombs().is_empty());
+    assert_eq!(control.world().bombs().len(), 1);
+}
+
+#[test]
 fn piecewise_trace_does_not_damage_through_the_diagonal_gap() {
     let start = Position { x: 512, y: 512 };
     let corner = Position { x: 512, y: 1536 };

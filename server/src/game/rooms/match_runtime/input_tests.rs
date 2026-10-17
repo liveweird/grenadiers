@@ -1,4 +1,7 @@
-use grenadiers_core::game::{Direction, SeatId};
+use grenadiers_core::{
+    game::{Direction, RoundResult, SeatId},
+    room::{DepartureReason, MatchPhase, reconnect::ReservationState},
+};
 
 use super::test_support::*;
 use super::{MatchAction, MatchRuntimeError};
@@ -107,4 +110,94 @@ fn exhausted_revision_fails_before_advancing_physics() {
     assert_eq!(runtime.tick(), Err(MatchRuntimeError::CapacityReached));
     assert_eq!(runtime.sim().unwrap().state.tick(), tick);
     assert_eq!(runtime.lifecycle().tick(), tick);
+}
+
+#[test]
+fn transport_loss_fences_input_but_preserves_fuse_damage_and_grace() {
+    let mut runtime = fixed_runtime();
+    start_first_round(&mut runtime);
+    let epoch = runtime.lifecycle().round_attempt();
+    runtime
+        .action(
+            SeatId::One,
+            epoch,
+            MatchAction::Movement(Some(Direction::East)),
+        )
+        .unwrap();
+    runtime
+        .action(SeatId::One, epoch, MatchAction::Bomb(1))
+        .unwrap();
+    runtime.tick().unwrap();
+    let sim = runtime.sim().unwrap();
+    let planted = *sim.state.world().bombs().values().next().unwrap();
+    let stopped_at = sim.state.actors()[0].position();
+    assert!(planted.detonates_at().0 > sim.state.tick().0);
+
+    runtime
+        .action(
+            SeatId::One,
+            epoch,
+            MatchAction::Movement(Some(Direction::West)),
+        )
+        .unwrap();
+    runtime
+        .action(SeatId::One, epoch, MatchAction::Bomb(2))
+        .unwrap();
+    runtime.stop_seat_inputs(SeatId::One);
+    runtime
+        .settle_boundary([Some(DepartureReason::TransportLoss), None])
+        .unwrap();
+
+    let disconnected_at = runtime.lifecycle().tick();
+    let ReservationState::Disconnected { expires_at } =
+        runtime.lifecycle().reconnect_grace().seat(SeatId::One)
+    else {
+        panic!("transport loss did not reserve the seat");
+    };
+    assert_eq!(expires_at.0, disconnected_at.0 + 600);
+    assert_eq!(
+        runtime.sim().unwrap().state.actors()[0].position(),
+        stopped_at
+    );
+    assert_eq!(runtime.sim().unwrap().state.world().bombs().len(), 1);
+    assert_eq!(
+        runtime
+            .sim()
+            .unwrap()
+            .state
+            .world()
+            .bombs()
+            .get(&planted.id()),
+        Some(&planted)
+    );
+
+    while runtime.lifecycle().tick().0 + 1 < planted.detonates_at().0 {
+        runtime.tick().unwrap();
+        assert_eq!(
+            runtime.sim().unwrap().state.actors()[0].position(),
+            stopped_at
+        );
+        assert!(runtime.sim().unwrap().state.actors()[0].alive());
+        assert_eq!(runtime.sim().unwrap().state.world().bombs().len(), 1);
+        assert_eq!(runtime.lifecycle().phase(), MatchPhase::Running);
+    }
+    runtime.tick().unwrap();
+
+    let sim = runtime.sim().unwrap();
+    assert_eq!(sim.state.tick(), planted.detonates_at());
+    assert!(sim.state.world().bombs().is_empty());
+    assert!(sim.state.world().hazards().contains_key(&planted.cell()));
+    assert!(!sim.state.actors()[0].alive());
+    assert!(sim.state.actors()[1].alive());
+    assert_eq!(sim.state.result(), Some(RoundResult::Winner(SeatId::Two)));
+    assert_eq!(runtime.lifecycle().series().scores(), [0, 1]);
+    assert!(matches!(
+        runtime.lifecycle().phase(),
+        MatchPhase::Result { .. }
+    ));
+    assert_eq!(
+        runtime.lifecycle().reconnect_grace().seat(SeatId::One),
+        ReservationState::Disconnected { expires_at }
+    );
+    assert!(runtime.lifecycle().tick().0 < expires_at.0);
 }

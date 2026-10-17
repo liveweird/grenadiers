@@ -33,3 +33,5 @@ The release plan defines the maintained milestone dependencies, work packages, R
 and release gates. The near-term sequence is verified foundation, playable two-browser duel,
 classic match progression, then reconnect resilience and playtest hardening. Mark a milestone complete only when its exit evidence exists in the maintained plan and
 verification record.
+
+[Baseline rule coverage](rule-coverage.md) maps all 42 acceptance rules to concrete automated assertions.

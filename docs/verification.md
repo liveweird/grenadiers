@@ -14,6 +14,14 @@ exposed-only public ordering, private Debug output, generated-world adaptation, 
 terminal layers. Collection, upgrade application, and wire projection remain explicit next
 slices rather than claimed behavior of these typed components.
 
+A clean committed-tree build produces
+`sha256:2b26a573390b8be4f900f0031a5156aea2e80283d96fccd73be9bc0ba7b0a1d4`.
+Compose and ready local Kubernetes use this exact image. Health/readiness and all **six
+candidate browser scenarios** pass through both deployments. Strict schemas pass with 3
+valid resources; pinned socket-free Trivy reports zero HIGH/CRITICAL vulnerabilities.
+Temporary runtime resources are removed; the image is retained. This evidence update changes
+documentation only.
+
 ## M4 deterministic generator groundwork — 2026-10-17
 
 The integrated locked server gate passes **146 core tests, 67 server tests, and 2 doctests**.

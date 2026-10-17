@@ -6,8 +6,8 @@ on 2026-10-17. M3’s fixed-map two-browser duel is implemented and locally veri
 M4 generated rounds and upgrades are complete and locally verified on 2026-10-17;
 M5 is complete and locally verified on 2026-10-17: v3 contracts, real match ownership,
 first-to-three progression, and rematches pass exact-image Compose/Kubernetes acceptance.
-M6 reconnect/replay is implemented; its complete RULE mapping and final exit evidence are
-under verification. M7–M8 remain planned.
+M6 reconnect/replay is implemented with all 42 baseline rules mapped to automated assertions.
+Final deployment exit evidence remains under verification. M7 hardening has started; M8 remains planned.
 Published engineering prereleases are listed in `CHANGELOG.md` and GitHub Releases.
 
 The first product goal is a reliable, browser-based survival match between two humans. Build
@@ -308,8 +308,9 @@ checked [room/state/admission projection](protocol-v4.md) against the real lifec
 v0.3.7 stages private [resume credential and binding helpers](resume-bindings.md).
 v0.3.8 stages the dormant [v4 reconnect browser](reconnect-browser.md).
 v0.3.9 activates both adapters with settled owner scheduling, strict grace, full admission
-baselines, takeover fences, and profile-2 private capture/replay. Exact-image and complete RULE
-coverage evidence remain required for the M6 exit; M7 playtest work follows.
+baselines, takeover fences, and profile-2 private capture/replay. v0.3.10 closes three integrated
+coverage gaps and publishes the complete [42-rule matrix](rule-coverage.md). Final exact-image
+acceptance remains required for the M6 exit; measured M7 playtest/hardening is separate.
 
 **Depends on:** M5.
 

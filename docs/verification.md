@@ -1,5 +1,25 @@
 # Repository verification
 
+## M6 complete baseline rule assertions — 2026-10-17
+
+Independent source/assertion audit and closure review cover **all 42 baseline rules** in the
+[traceability matrix](game/rule-coverage.md). Three new regressions compare complete stepped
+chain results after bomb-order permutation, preserve a disconnected actor's original fuse and
+vulnerability while fencing input, and prove a previously safe assisted turn enters fire and
+kills without canceling its movement. No production behavior changed.
+
+The final v0.3.10 locked server gate passes **296 core tests, 148 server tests and 2 doctests**;
+Rust coverage is **7,955/8,491 lines, 93.69%**, above the unchanged 80% floor. Formatting,
+all-target Clippy with warnings denied, locked build, complete web gate, all ten documented E2E
+static checks and dependency policies pass. Both npm audits report zero vulnerabilities.
+The web suite remains **163 tests**, with **94.82% statements, 89.43% branches, 94.42%
+functions and 97.60% lines**. Exact-image runtime checks are recorded separately before release.
+
+The rule matrix includes composed and conditional lower-layer evidence honestly; RULE12 does
+not invent a normal actor placement into already lethal fire. Measured latency, real background-tab
+recovery, broader browser support and human playtesting remain M7 work. Complete rule assertions
+alone do not establish v0.4.0 readiness.
+
 ## M6 v0.3.9 exact-image deployment acceptance — 2026-10-17
 
 A clean Git export of `ead3f3fc9c67caea7aea9866bfa5c4970d9d80ed` produces

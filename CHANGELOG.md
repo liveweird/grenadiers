@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.10 — 2026-10-17
+
+- Close integrated baseline rule coverage for explosion-order independence, disconnected-player
+  vulnerability through the original bomb fuse, and safe assisted turns into active fire.
+- Publish a 42-rule traceability matrix with concrete assertions and explicit evidence limits.
+- Keep production behavior unchanged; measured M7 playtest and latency work remains separate.
+
 ## 0.3.9 — 2026-10-17
 
 - Activate gameplay v4 with private reserved-seat capabilities, strict ten-second grace, full

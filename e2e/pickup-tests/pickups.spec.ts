@@ -102,8 +102,8 @@ async function escapeBomb(
   page: Page,
   game: ObservedGame,
   legs: readonly {
-    key: 'ArrowRight' | 'ArrowDown'
-    direction: 'east' | 'south'
+    key: 'ArrowLeft' | 'ArrowRight' | 'ArrowUp' | 'ArrowDown'
+    direction: 'west' | 'east' | 'north' | 'south'
     safelyClear: () => boolean
   }[],
   destination: Cell,
@@ -166,8 +166,11 @@ test('two browsers collect generated upgrades while old bombs keep their capture
 
     await moveTo(one, games[0], { column: 2, row: 1 })
     await plant(one, games[0])
-    await moveTo(one, games[0], { column: 1, row: 1 })
     await escapeBomb(one, games[0], [{
+      key: 'ArrowLeft',
+      direction: 'west',
+      safelyClear: () => actor(games[0]).position.x <= 1_728,
+    }, {
       key: 'ArrowDown',
       direction: 'south',
       safelyClear: () => actor(games[0]).position.y >= 2_560,
@@ -182,8 +185,11 @@ test('two browsers collect generated upgrades while old bombs keep their capture
     await moveTo(one, games[0], { column: 1, row: 1 })
     await moveTo(one, games[0], { column: 1, row: 2 })
     await plant(one, games[0])
-    await moveTo(one, games[0], { column: 1, row: 1 }, ['y', 'x'])
     await escapeBomb(one, games[0], [{
+      key: 'ArrowUp',
+      direction: 'north',
+      safelyClear: () => actor(games[0]).position.y <= 1_728,
+    }, {
       key: 'ArrowRight',
       direction: 'east',
       safelyClear: () => actor(games[0]).position.x >= 2_944,

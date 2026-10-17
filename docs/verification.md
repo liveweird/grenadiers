@@ -1,5 +1,19 @@
 # Repository verification
 
+## M4 live-fuse corner-turn follow-up — 2026-10-17
+
+Hosted `c86668b` exposed the remaining delay before the safe leg: exact centering at the
+corner still consumed the live fuse. Both escape routes now use native key holds throughout:
+West until `x <= 1728` before South, or North until `y <= 1728` before East. These bounds
+place the actor's 320-unit half footprint entirely outside the adjacent blocked/bomb column
+or row before turning. Exact centering runs after real hazards clear. No precise-position,
+pickup, HUD, bomb-range/identity, event, or two-client assertion is removed.
+
+Independent geometry and cleanup review is clear. Final native Chromium passes **3/3** with
+retries disabled (`/tmp/grenadiers-m4-corner-native.log`), and the full seven-scenario E2E
+static gate passes. The application artifact and real fuse remain unchanged. Hosted checks
+are required at the final head before merge.
+
 ## M4 pickup escape safety follow-up — 2026-10-17
 
 Hosted CI at `071a952` still caught a first-escape death despite passing local pulse-controller

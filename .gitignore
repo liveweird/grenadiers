@@ -16,3 +16,6 @@ e2e/pickup-test-results/
 
 e2e/playwright-match-report/
 e2e/match-test-results/
+
+e2e/playwright-reconnect-report/
+e2e/reconnect-test-results/

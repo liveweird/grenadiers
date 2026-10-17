@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { gameFrames, openGame, roomFrame, sendGame } from './support/game'
+import { admissionFrame, gameFrames, openGame, roomFrame, sendGame } from './support/game'
 
 test('rooms bind two independent players and preserve authentication after leaving', async ({ browser }) => {
   const contexts = await Promise.all(Array.from({ length: 3 }, () => browser.newContext()))
@@ -7,7 +7,7 @@ test('rooms bind two independent players and preserve authentication after leavi
     const [one, two, third] = await Promise.all(contexts.map((context) => context.newPage()))
     await Promise.all([one, two, third].map(openGame))
     await sendGame(one, { type: 'createRoom' })
-    const created = await roomFrame(one)
+    const created = await admissionFrame(one)
     expect(created.youSeat).toBe('one')
     expect(created.room.roomId).toMatch(/^[0-9a-f]{32}$/)
     expect(created.room.roomCode).toMatch(/^[A-HJ-NP-Z2-9]{8}$/)
@@ -15,10 +15,12 @@ test('rooms bind two independent players and preserve authentication after leavi
     expect(created.room.seats.map((seat) => seat.occupied)).toEqual([true, false])
 
     await sendGame(two, { type: 'joinRoom', roomCode: created.room.roomCode })
-    const joined = await roomFrame(two)
+    const joined = await admissionFrame(two)
     const shared = await roomFrame(one, created.room.revision)
     expect(joined.youSeat).toBe('two')
-    expect(shared.youSeat).toBe('one')
+    expect(shared.type).toBe('roomState')
+    expect(shared).not.toHaveProperty('youSeat')
+    expect(shared).not.toHaveProperty('resumeToken')
     expect(joined.room).toEqual(shared.room)
     expect(joined.room.seats.map((seat) => seat.occupied)).toEqual([true, true])
 
@@ -35,15 +37,15 @@ test('rooms bind two independent players and preserve authentication after leavi
     const vacancy = await roomFrame(one, joined.room.revision)
     expect(vacancy.room.seats.map((seat) => seat.occupied)).toEqual([true, false])
     await sendGame(third, { type: 'joinRoom', roomCode: created.room.roomCode })
-    const replacement = await roomFrame(third)
+    const replacement = await admissionFrame(third)
     expect(replacement.youSeat).toBe('two')
     expect(replacement.room.roomId).toBe(created.room.roomId)
 
     await sendGame(two, { type: 'createRoom' })
     await expect.poll(async () => (await gameFrames(two)).some((message) =>
-      message.type === 'roomState' && message.room.roomId !== created.room.roomId,
+      message.type === 'admitted' && message.room.roomId !== created.room.roomId,
     )).toBe(true)
-    const nextRoom = await roomFrame(two)
+    const nextRoom = await admissionFrame(two)
     expect(nextRoom.youSeat).toBe('one')
     expect(nextRoom.room.roomId).not.toBe(created.room.roomId)
   } finally {

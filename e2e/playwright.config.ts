@@ -19,7 +19,10 @@ export default defineConfig({
     launchOptions: process.env.CI && process.platform === 'linux'
       ? { args: ['--enable-gpu', '--use-gl=angle', '--use-angle=swiftshader'] }
       : undefined,
-    trace: 'retain-on-failure',
+    // V4 personal frames contain stable seat capabilities. Native trace capture
+    // observes them before application/test redaction, so keep public reports
+    // and failure screenshots without persisting credential-bearing traffic.
+    trace: 'off',
     screenshot: 'only-on-failure',
     video: 'off',
   },

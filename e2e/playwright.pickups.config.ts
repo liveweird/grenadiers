@@ -9,9 +9,9 @@ export default defineConfig({
   timeout: 90_000,
   use: {
     ...base.use,
-    // Explicit visual checkpoints and failure screenshots remain. Capturing a
-    // DOM/compositor snapshot per key pulse distorts real-time escape on CI.
-    trace: { mode: 'retain-on-failure', snapshots: false, screenshots: false, sources: true },
+    // Personal v4 admission frames must never persist in native traces. Explicit
+    // checkpoints, failure screenshots and redacted public summaries remain.
+    trace: 'off',
   },
   reporter: [['list'], ['html', { open: 'never', outputFolder: 'playwright-pickup-report' }]],
   outputDir: 'pickup-test-results',

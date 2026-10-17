@@ -30,6 +30,12 @@ terrain, and destructible blocks. The harness applies the authoritative 1,024-un
 live bomb and retain at least 128 units of unobstructed clearance in the commanded direction. This
 prevents a wall or block collision from masquerading as successful release.
 
+Before every native keydown, the harness compares east and west clearance at the latest delivered
+position, selects the larger collision-free interval, and requires at least one full cell of runway.
+Direction is therefore driven by current public geometry rather than a fixed alternating pattern;
+variable publication timing cannot accumulate several unequal legs into the spawn-side wall. The
+chosen position, direction, and both clearance values are retained in the public report.
+
 Before release, two fresh page-delivered revisions must show unobstructed movement. The harness then
 records the actual delayed null-command dispatch to the server. A stable pair counts only when both
 revisions entered the server-to-client route after that dispatch and were subsequently delivered to
@@ -52,7 +58,7 @@ quota on an eighteen-visible-core environment observed 284–300ms maxima. A lat
 reported 113.05ms, but its observer watched Playwright's pre-delay network socket rather than actual
 page delivery and therefore cannot support the envelope.
 
-The corrected retries-zero reference used Node 24.21.0, Playwright 1.63.0, pinned Chromium 1243,
+The corrected retries-zero reference used Node 24.21.0, Playwright 1.63.0, pinned Playwright Chromium revision 1243,
 accepted application image `sha256:b1cee9317f0d30cee36d05c9a32a7d2933a4394f08c83a324cb713f5846b13ee`,
 and Linux containers restricted to CPUs 0–1 by affinity with `cpu.max` unlimited and no observed CFS
 throttling at startup. All eight cases passed in 19.4 seconds. Twenty unshaped observations measured

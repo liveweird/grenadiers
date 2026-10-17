@@ -24,6 +24,7 @@ type PageObservation =
 const UNITS_PER_CELL = 1_024
 const HALF_FOOTPRINT = 320
 const MIN_FORWARD_CLEARANCE = 128
+const MIN_MEASUREMENT_RUNWAY = UNITS_PER_CELL
 
 export type PublicSnapshotTiming = {
   endpoint: string
@@ -44,6 +45,13 @@ export type LatencySample = {
   observedAt: number
   confirmedAt?: number
   latencyMs: number
+}
+
+export type TrajectoryChoice = {
+  direction: 'east' | 'west'
+  position: Position
+  eastClearance: number
+  westClearance: number
 }
 
 export class LatencyObserver implements DelayBridgeObserver {
@@ -236,6 +244,19 @@ export class LatencyObserver implements DelayBridgeObserver {
     const snapshot = this.snapshots.filter((value) => value.endpoint === endpoint).at(-1)
     if (!snapshot) throw new Error(`No public snapshot observed for ${endpoint}`)
     return snapshot
+  }
+
+  safestHorizontalDirection(endpoint: string): TrajectoryChoice {
+    const snapshot = this.latestSnapshot(endpoint)
+    const arena = this.arenas.get(endpoint)
+    if (!arena) throw new Error(`No public arena observed for ${endpoint}`)
+    const eastClearance = horizontalClearance(arena, snapshot.position, 'east')
+    const westClearance = horizontalClearance(arena, snapshot.position, 'west')
+    const direction = eastClearance >= westClearance ? 'east' : 'west'
+    if (Math.max(eastClearance, westClearance) < MIN_MEASUREMENT_RUNWAY) {
+      throw new Error('No horizontal direction has one cell of collision-free measurement runway')
+    }
+    return { direction, position: snapshot.position, eastClearance, westClearance }
   }
 
   publicFactsAreMonotonic(endpoint: string): boolean {

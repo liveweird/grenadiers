@@ -37,6 +37,12 @@ The harness derives horizontal clearance from the public arena walls, blocks, fi
 and actor footprint. Equal positions at collision distance cannot witness a null-command stop; every
 measured witness retains at least 128 units of forward clearance and has no live bomb.
 
+## Scenario: trajectory chooses the greatest public collision-free clearance
+
+Before each native movement, the harness derives east and west clearance from the latest delivered
+public position and selects the larger interval, requiring at least one full cell of runway. Variable
+publication timing can therefore change leg length without accumulating drift into a wall.
+
 ## Scenario: native controls publish twenty unshaped local latency observations
 
 Two real clients enter the generated open corridor. Ten native movement and release cycles produce

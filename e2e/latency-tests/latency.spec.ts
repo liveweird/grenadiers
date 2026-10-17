@@ -5,7 +5,7 @@ import {
 } from '../tests/support/delayed-websocket'
 import {
   distribution, domKeyTimings, installDomKeyTimings, LatencyObserver,
-  sample, type LatencySample,
+  sample, type LatencySample, type TrajectoryChoice,
 } from '../tests/support/latency-observer'
 
 type Profile = { name: 'local' | 'delay-50ms'; baseMs: number; jitterMs: readonly number[]; budget: boolean }
@@ -79,10 +79,11 @@ type ReportInput = {
   samples: LatencySample[]
   domTimings: Awaited<ReturnType<typeof domKeyTimings>>
   handles: DelayBridgeHandle[]
+  trajectory: TrajectoryChoice[]
 }
 
 async function attachReport(input: ReportInput): Promise<void> {
-  const { testInfo, profile, observer, samples, domTimings, handles } = input
+  const { testInfo, profile, observer, samples, domTimings, handles, trajectory } = input
   const exceedances = samples.filter((value) => value.latencyMs > BUDGET_MS)
   const summary = {
     profile: profile.name,
@@ -92,6 +93,7 @@ async function attachReport(input: ReportInput): Promise<void> {
       routeAfterKeyMs: value.outgoingAt - value.keyStart,
       publicAfterRouteMs: value.observedAt - value.outgoingAt,
       confirmationLagMs: value.confirmedAt === undefined ? undefined : value.confirmedAt - value.observedAt })),
+    trajectory,
     queuePeaks: handles.map((handle) => handle.summary()),
   }
   console.log(`LATENCY_PUBLIC_SUMMARY ${JSON.stringify(summary)}`)
@@ -102,6 +104,7 @@ async function attachReport(input: ReportInput): Promise<void> {
       budgetMs: BUDGET_MS,
       stableReleaseMethod: 'two page-delivered moving revisions, null server dispatch, then two page-delivered stable revisions whose route ingress followed dispatch',
       distribution: distribution(samples), samples, exceedances,
+      trajectory,
       domClock: { independentFromNodeClock: true, timings: domTimings },
       routedFrames: publicFrames(observer.frames),
       forwardedFrames: publicFrames(observer.forwardedFrames),
@@ -119,6 +122,7 @@ async function runProfile(browser: Browser, testInfo: TestInfo, profile: Profile
   const observer = new LatencyObserver()
   const samples: LatencySample[] = []
   const handles: DelayBridgeHandle[] = []
+  const trajectory: TrajectoryChoice[] = []
   let domTimings: Awaited<ReturnType<typeof domKeyTimings>> = []
   let reportAttached = false
   try {
@@ -139,8 +143,9 @@ async function runProfile(browser: Browser, testInfo: TestInfo, profile: Profile
     const arena = one.getByRole('region', { name: 'Grenadiers courtyard', exact: true })
     await arena.click()
     for (let index = 0; index < 10; index += 1) {
-      const direction: 'east' | 'west' = index % 2 === 0 ? 'east' : 'west'
-      samples.push(...await observeMovement(one, observer, direction))
+      const choice = observer.safestHorizontalDirection('peer')
+      trajectory.push(choice)
+      samples.push(...await observeMovement(one, observer, choice.direction))
     }
     domTimings = await domKeyTimings(one)
     expect(domTimings.filter((timing) => timing.key === 'ArrowRight' || timing.key === 'ArrowLeft')).toHaveLength(20)
@@ -168,11 +173,13 @@ async function runProfile(browser: Browser, testInfo: TestInfo, profile: Profile
     expect(observer.everyPageSnapshotFollowedRouteDispatch('peer')).toBe(true)
     expect(samples).toHaveLength(20)
     const exceedances = samples.filter((value) => value.latencyMs > BUDGET_MS)
-    await attachReport({ testInfo, profile, observer, samples, domTimings, handles })
+    await attachReport({ testInfo, profile, observer, samples, domTimings, handles, trajectory })
     reportAttached = true
     if (profile.budget) expect(exceedances).toEqual([])
   } catch (error) {
-    if (!reportAttached) await attachReport({ testInfo, profile, observer, samples, domTimings, handles })
+    if (!reportAttached) {
+      await attachReport({ testInfo, profile, observer, samples, domTimings, handles, trajectory })
+    }
     throw error
   } finally {
     handles.forEach((handle) => handle.close())

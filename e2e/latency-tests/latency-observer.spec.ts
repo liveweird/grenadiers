@@ -66,3 +66,21 @@ test('release evidence rejects a stable pair at a wall boundary', async () => {
     observed: delivered(4, 1_536, 107), confirmed: delivered(5, 1_536, 108),
   })
 })
+
+test('trajectory chooses the greatest public collision-free clearance', () => {
+  const observer = new LatencyObserver()
+  const corridor = arena()
+  corridor.blocks.push({ column: 7, row: 1 })
+  observer.arenas.set('peer', corridor)
+  observer.snapshots.push(delivered(10, 1_792, 100))
+  expect(observer.safestHorizontalDirection('peer')).toEqual({
+    direction: 'east', position: { x: 1_792, y: 1_536 },
+    eastClearance: 5_056, westClearance: 448,
+  })
+
+  observer.snapshots.push(delivered(11, 6_000, 101))
+  expect(observer.safestHorizontalDirection('peer')).toEqual({
+    direction: 'west', position: { x: 6_000, y: 1_536 },
+    eastClearance: 848, westClearance: 4_656,
+  })
+})

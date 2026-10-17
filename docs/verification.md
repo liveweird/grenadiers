@@ -1,5 +1,24 @@
 # Repository verification
 
+## M7 exact-image trajectory correction — 2026-10-17
+
+The first v0.3.14 Compose latency attempt passed the shaped profile (20 observations,
+maximum 148.829 ms) but failed unshaped release observation after five cycles. The public report
+shows accumulated forced-alternation drift: x=1536→1945→1587→1843→1485→1792, then the sixth
+westward leg reaches x=1344 at the wall. The unchanged collision predicate correctly rejects
+zero clearance. This is a test-trajectory failure, not a passing reference or network failure.
+The failing log and public attachment remain in `/tmp/grenadiers-v0314-acceptance` and
+`/tmp/grenadiers-v0314-local-summary.json`; no retry conceals the result.
+
+The reviewed correction selects whichever horizontal direction has more public collision-free
+runway and requires at least 1,024 units before each native keydown. All twenty observations,
+128-unit witness clearance, causal dispatch checks, FIFO limits and the fixed 250 ms budget remain
+mandatory. Ten bounded public trajectory records explain each choice. The new regression proves
+both corridor-side choices; all seven pure tests and 21 scenario static checks pass. Independent
+closure review clears geometry, trajectory and evidence. Application/Docker inputs are unchanged
+from the clean accepted-image build candidate `e7b222fff45efa1fdf9c34c223f938c427c3b5de`.
+Final same-image acceptance uses the corrected, clean committed harness separately.
+
 ## M7 causal ordered-WebSocket reference — 2026-10-17
 
 Independent review fixed three test-validity defects: the original observer watched pre-delay
@@ -16,7 +35,7 @@ Unshaped 20 observations: median **39.39 ms**, observed p95/max **54.47 ms**. Sh
 per direction: median **145.82 ms**, observed p95/max **157.30 ms**, zero 250 ms exceedances.
 The maximum shaped queue is two frames/7,204 bytes; closing cancels pending frames without late
 delivery. Application prototype image is the accepted v0.3.9 image; final integrated image
-acceptance is separate. Node 24.21.0, Playwright 1.63.0 and Chromium 1243 are pinned; app/browser
+acceptance is separate. Node 24.21.0, Playwright 1.63.0 and Playwright Chromium revision 1243 are pinned; app/browser
 use CPUs 0–1 affinity with unlimited cpu.max and no CFS throttling observed at startup.
 
 Evidence: `/tmp/grenadiers-m7-latency-corrected-reference.log`, SHA-256

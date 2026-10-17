@@ -15,6 +15,14 @@ simulation executes the first-bomb escape route and survives. The structural val
 both mirrored openings; the executable escape trace currently exercises seat one. No active
 network seed or concealed content is exposed; live rooms remain on the fixed preview.
 
+A clean committed-tree build produces
+`sha256:21f8ba9f0920e214dbcc32096c82f4f712f35eacac9b5448aa26dc8db0bb2f47`.
+Compose and ready local Kubernetes use this exact image. Health/readiness and all **six
+candidate browser scenarios** pass through both deployments, preserving the playable fixed
+preview. Strict schemas pass with 3 valid resources; pinned socket-free Trivy reports zero
+HIGH/CRITICAL vulnerabilities. Temporary runtime resources are removed; the image is retained.
+The post-acceptance rebase preserves the tested tree; this evidence update changes docs only.
+
 ## M3 playable browser duel — 2026-10-17
 
 The version-aligned server gate passes **137 core tests, 67 server tests, and 2 doctests**,

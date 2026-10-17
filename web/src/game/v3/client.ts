@@ -59,6 +59,13 @@ type RoomCommand =
   | { type: 'placeBomb'; actionId: number }
   | { type: 'rematch'; ready: boolean }
 
+type ControlCommand = {
+  sequence: number
+  roomId: string
+  roundId: number
+  revision: number
+}
+
 export class GameClient {
   private state = initialGameClientState()
   private generation = 0
@@ -69,6 +76,8 @@ export class GameClient {
   private admission: AdmissionIntent | null = null
   private admissionSequence: number | null = null
   private leaveSequence: number | null = null
+  private sentControls: ControlCommand[] = []
+  private controlFailure: (ControlCommand & { code: ErrorCode }) | null = null
   private readonly onChange: (state: GameClientState) => void
   private readonly dependencies: Dependencies
 
@@ -150,6 +159,8 @@ export class GameClient {
     this.admission = null
     this.admissionSequence = null
     this.leaveSequence = null
+    this.sentControls = []
+    this.controlFailure = null
     this.nextSequence = 1
     this.nextAction = 1
     this.state = { ...initialGameClientState(), failure: this.state.failure }
@@ -221,7 +232,10 @@ export class GameClient {
       if (!this.newerRoom(room, current) || youSeat !== this.state.youSeat) return
       const epochChanged = room.roundId > current.roundId
       if (epochChanged) this.nextAction = 1
-      this.update({ room, snapshot: epochChanged ? null : this.state.snapshot })
+      this.update({
+        room, snapshot: epochChanged ? null : this.state.snapshot,
+        ...this.clearObsoleteControlFailure(room),
+      })
       return
     }
     if (this.state.connection !== 'authenticated' || !this.admission || this.admissionSequence === null) return
@@ -234,7 +248,10 @@ export class GameClient {
     const current = this.state.room
     if (!current || !this.state.youSeat || !this.newerRoom(message.room, current)) return
     if (message.room.roundId > current.roundId) this.nextAction = 1
-    this.update({ room: message.room, snapshot: message })
+    this.update({
+      room: message.room, snapshot: message,
+      ...this.clearObsoleteControlFailure(message.room),
+    })
   }
 
   private newerRoom(next: RoomView, current: RoomView): boolean {
@@ -247,10 +264,13 @@ export class GameClient {
     if (sequence !== this.leaveSequence || roomId !== this.state.room?.roomId) return
     this.leaveSequence = null
     this.nextAction = 1
+    this.sentControls = []
+    this.controlFailure = null
     this.update({ room: null, snapshot: null, youSeat: null, leavePending: false, failure: null })
   }
 
   private acceptError(code: ErrorCode, sequence: number | null): void {
+    this.controlFailure = null
     if (sequence === this.admissionSequence) {
       this.admission = null
       this.admissionSequence = null
@@ -259,6 +279,18 @@ export class GameClient {
     if (sequence === this.leaveSequence) {
       this.leaveSequence = null
       this.update({ leavePending: false })
+    }
+    const control = sequence === null
+      ? undefined
+      : this.sentControls.find((candidate) => candidate.sequence === sequence)
+    if (control) {
+      this.sentControls = this.sentControls.filter((candidate) => candidate.sequence !== sequence)
+      if ((code === 'invalidPhase' || code === 'staleRoom') && this.controlIsObsolete(control, this.state.room)) {
+        return
+      }
+      if (code === 'invalidPhase' || code === 'staleRoom') {
+        this.controlFailure = { ...control, code }
+      }
     }
     this.update({ failure: code })
   }
@@ -283,7 +315,27 @@ export class GameClient {
     const room = this.state.room
     const sequence = this.sequence()
     if (!room || sequence === null) return false
-    return this.send({ ...command, sequence, roomId: room.roomId, roundId: room.roundId } as GameClientMessage)
+    if (!this.send({ ...command, sequence, roomId: room.roomId, roundId: room.roundId } as GameClientMessage)) return false
+    if (command.type === 'movement') {
+      this.sentControls.push({
+        sequence, roomId: room.roomId,
+        roundId: room.roundId, revision: room.revision,
+      })
+      if (this.sentControls.length > 64) this.sentControls.shift()
+    }
+    return true
+  }
+
+  private clearObsoleteControlFailure(room: RoomView): { failure?: null } {
+    const failure = this.controlFailure
+    if (!failure || this.state.failure !== failure.code || !this.controlIsObsolete(failure, room)) return {}
+    this.controlFailure = null
+    return { failure: null }
+  }
+
+  private controlIsObsolete(control: ControlCommand, room: RoomView | null): boolean {
+    return Boolean(room && room.roomId === control.roomId && room.revision > control.revision
+      && (room.roundId > control.roundId || room.phase.type !== 'running'))
   }
 
   private sequence(): number | null {
@@ -310,6 +362,8 @@ export class GameClient {
     this.admission = null
     this.admissionSequence = null
     this.leaveSequence = null
+    this.sentControls = []
+    this.controlFailure = null
     this.nextSequence = 1
     this.nextAction = 1
     this.update({

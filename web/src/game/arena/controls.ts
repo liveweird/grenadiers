@@ -63,7 +63,9 @@ export class ArenaControls {
   }
 
   refresh(): void {
-    if (this.configuration.enabled && this.focused) this.configuration.onDirection(this.direction)
+    if (this.configuration.enabled && this.focused && this.direction !== null) {
+      this.configuration.onDirection(this.direction)
+    }
   }
 
   clear(): void {

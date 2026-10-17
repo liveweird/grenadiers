@@ -1,5 +1,28 @@
 # Repository verification
 
+## M6 v0.3.9 exact-image deployment acceptance — 2026-10-17
+
+A clean Git export of `ead3f3fc9c67caea7aea9866bfa5c4970d9d80ed` produces
+`sha256:b1cee9317f0d30cee36d05c9a32a7d2933a4394f08c83a324cb713f5846b13ee`.
+Compose and isolated local Kubernetes use that same image, confirmed from the actual Pod image ID.
+Each path passes **10/10 first-run browser scenarios with retries disabled**: six default,
+one pickup, one complete match/rematch, and two real reconnect/takeover/late-rejection cases.
+Node is exactly 24.21.0. Both paths return real 200 JSON health/readiness before testing.
+
+Runtime inspection confirms UID/GID 65532, a read-only root, all capabilities dropped,
+no privilege escalation, and the Kubernetes RuntimeDefault seccomp profile. Fixture Secret files
+are read-only with mode 0444; probes retain their actual API paths, and no seed is packaged under
+`/app`. Strict Kubernetes 1.33 validation reports **3 valid resources**, with no errors/skips.
+Pinned Trivy 0.74.0 scans a saved image archive without a Docker socket and reports
+**zero HIGH/CRITICAL findings**. Desktop and 320-pixel Polish screenshots were visually inspected;
+board, status, controls, localization and diagnostics have no clipping or overflow.
+
+Evidence remains in `/tmp/grenadiers-v039-acceptance`; temporary Compose/namespace/Secret,
+forward, source export and scan archive are removed. The accepted image remains available.
+Later release-evidence commits change documentation only. This completes deployment evidence
+for coordinated activation; the independent full rule matrix follows in v0.3.10, while M7
+measured playtests and broader support remain separate.
+
 ## M6 coordinated reconnect activation — 2026-10-17
 
 The locked server gate passes **294 core tests, 147 server tests, and 2 doctests**.

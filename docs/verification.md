@@ -1,5 +1,19 @@
 # Repository verification
 
+## Dormant v3 browser client and match panel — 2026-10-17
+
+The complete web gate passes **108 tests** with **92.23% statements, 86.24% branches,
+93.69% functions, and 96.19% lines**, above unchanged coverage floors. Independent review
+and terminal-vacancy follow-up report no outstanding findings. Cases cover authenticated v3,
+strict schema validation, revision/epoch ordering, direct coalesced new-round snapshots,
+control/action reset with retained sequence, bounded counters, initial-only readiness,
+authoritative rematch holds/votes, cleanup, localized match/round facts, and vacant seats
+alongside frozen live/dead actors. Both generated contracts, lint, Knip, and production build
+pass. The existing Pixi arena is shared through a narrow presentation boundary.
+
+The panel remains dormant. No visual/WebGL or live match acceptance is claimed until the
+coordinated endpoint/client activation.
+
 ## Dormant authoritative match runtime — 2026-10-17
 
 The integrated locked server gate passes **243 core tests, 107 server tests, and 2 doctests**.

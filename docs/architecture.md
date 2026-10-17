@@ -97,3 +97,7 @@ rejects semantically impossible bounded DTOs before server adapters publish them
 The dormant `match_runtime` server adapter owns real per-round physics, assignment-aware
 generation, epoch-fenced input, and checked v3 publication. Result physics freezes while the
 lifecycle clock advances; inter-round/rematch boundaries clear worlds and report windows.
+
+The dormant v3 client/panel shares the Pixi presentation boundary, validates v3 messages,
+tracks monotonic room epochs/revisions, and renders scores/rematch from authoritative room
+facts. Live v2 routing remains until coordinated activation. See [match browser](game/match-browser.md).

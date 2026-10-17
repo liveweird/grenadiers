@@ -1,6 +1,6 @@
 import AxeBuilder from '@axe-core/playwright'
 import { expect, test } from '@playwright/test'
-import { expectPaintedCanvas, latestSnapshot, observeGame } from './support/duel'
+import { visibleActor, expectPaintedCanvas, latestSnapshot, observeGame } from './support/duel'
 
 test('two players complete a rendered keyboard duel with shared authoritative results', async ({ browser }, testInfo) => {
   test.setTimeout(60_000)
@@ -57,7 +57,7 @@ test('two players complete a rendered keyboard duel with shared authoritative re
       expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([])
     }
     const arena = one.getByRole('region', { name: 'Grenadiers courtyard' })
-    const actor = () => latestSnapshot(games[0])?.state.actors.find((candidate) => candidate.seat === 'one')
+    const actor = () => visibleActor(latestSnapshot(games[0]), 'one')
     await arena.click()
     await one.keyboard.down('ArrowRight')
     await expect.poll(() => actor()?.position.x, { intervals: [20] }).toBeGreaterThan(1900)
@@ -78,7 +78,7 @@ test('two players complete a rendered keyboard duel with shared authoritative re
     await one.keyboard.up('ArrowRight')
     await one.keyboard.down('Space')
     await one.keyboard.down('Space')
-    await expect.poll(() => games[0].commands.filter((command) => command.type === 'placeBomb')).toEqual([{ type: 'placeBomb', actionId: 1 }])
+    await expect.poll(() => games[0].commands.filter((command) => command.type === 'manualAction')).toEqual([{ type: 'manualAction', action: 'bomb', actionId: 1 }])
     await expect.poll(() => latestSnapshot(games[0])?.state.bombs.length).toBe(1)
     for (const page of [one, two]) {
       await expect(page.getByLabel('Player one upgrades').locator('dd')).toHaveText(['0', '1', '2', '1'])
@@ -123,7 +123,7 @@ test('two players complete a rendered keyboard duel with shared authoritative re
       expect(secondSnapshots.find((other) => other.room.revision === frame.room.revision)).toEqual(frame)
     }
     expect(games.map((game) => game.sockets)).toEqual([1, 1])
-    expect(games[0].commands.filter((command) => command.type === 'placeBomb')).toEqual([{ type: 'placeBomb', actionId: 1 }])
+    expect(games[0].commands.filter((command) => command.type === 'manualAction')).toEqual([{ type: 'manualAction', action: 'bomb', actionId: 1 }])
     expect(pageErrors).toEqual([])
   } finally {
     await Promise.all(contexts.map((context) => context.close()))

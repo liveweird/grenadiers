@@ -1,7 +1,7 @@
 import AxeBuilder from '@axe-core/playwright'
 import { setTimeout as delay } from 'node:timers/promises'
 import { expect, test, type Page, type Route, type TestInfo } from '@playwright/test'
-import { latestSnapshot, observeGame, type ObservedGame } from '../tests/support/duel'
+import { visibleActor, latestSnapshot, observeGame, type ObservedGame } from '../tests/support/duel'
 import { moveTo } from '../tests/support/movement'
 import {
   admissionBaseline, disconnectTransport, installTransportProbe, invalidResume,
@@ -67,7 +67,7 @@ test('a browser restores its full live world and action floor before a fenced ta
     await arena.click()
     await moveTo(one, games[0], { column: 5, row: 1 })
     const before = latestSnapshot(games[0])!
-    const position = before.state.actors.find((actor) => actor.seat === 'one')!.position
+    const position = visibleActor(before, 'one')!.position
     release = await holdSessions(one)
     await one.keyboard.press('Space')
     await expect.poll(() => latestSnapshot(games[0])!.state.bombs.length, { intervals: [15] }).toBe(1)
@@ -89,7 +89,7 @@ test('a browser restores its full live world and action floor before a fenced ta
     await arena.click()
     await one.keyboard.down('ArrowLeft')
     try {
-      await expect.poll(() => latestSnapshot(games[0])!.state.actors[0].position.x, { intervals: [15] })
+      await expect.poll(() => visibleActor(latestSnapshot(games[0]), 'one')!.position.x, { intervals: [15] })
         .toBeLessThanOrEqual(2_560)
     } finally { await one.keyboard.up('ArrowLeft') }
     await expect.poll(() => {
@@ -108,7 +108,7 @@ test('a browser restores its full live world and action floor before a fenced ta
     await one.keyboard.up('ArrowRight')
     await arena.click()
     await one.keyboard.press('Space')
-    await expect.poll(() => games[0].commands.filter((command) => command.type === 'placeBomb').map((command) => command.actionId))
+    await expect.poll(() => games[0].commands.filter((command) => command.type === 'manualAction').map((command) => command.actionId))
       .toEqual([1, 2])
     expect(games[0].commands.filter((command) => command.type === 'resumeRoom')).toHaveLength(1)
     expect(await invalidResume(one, 'wrongCapability')).toBe('resumeRejected')

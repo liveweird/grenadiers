@@ -2,7 +2,7 @@ use grenadiers_core::{
     game::{
         BombTrigger, BombView, CellId, EntityId, RoundAssignment, SeatId, StepEvent, StepEventKind,
     },
-    protocol::v6::RoomPhase,
+    protocol::v7::RoomPhase,
     room::{InterruptReason, MatchLifecycle, MatchPhase},
 };
 
@@ -71,7 +71,7 @@ fn generated_snapshot_redacts_seed_generation_record_and_assignment() {
         Ok(())
     }));
     let notice = start_first_round(&mut runtime);
-    let encoded = notice.snapshot.as_ref().unwrap();
+    let encoded = notice.frame(SeatId::One).unwrap();
 
     assert!(runtime.sim().unwrap().generation_record.is_some());
     for private in [
@@ -107,8 +107,8 @@ fn entropy_failure_interrupts_with_view_only_and_no_simulation_record() {
     assert!(matches!(
         terminal.room.phase,
         RoomPhase::MatchResult {
-            result: grenadiers_core::protocol::v6::MatchResult::Interrupted {
-                reason: grenadiers_core::protocol::v6::MatchInterruptReason::InternalError
+            result: grenadiers_core::protocol::v7::MatchResult::Interrupted {
+                reason: grenadiers_core::protocol::v7::MatchInterruptReason::InternalError
             },
             ..
         }

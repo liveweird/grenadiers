@@ -60,7 +60,7 @@ test('native sound gesture creates Web Audio cues and mute prevents later playba
     await one.keyboard.up('ArrowRight')
     await expect.poll(() => firstGame.commands.slice(movementStart)
       .some((command) => command.type === 'movement' && command.direction === null)).toBe(true)
-    expect(firstGame.commands.slice(movementStart).filter((command) => command.type === 'placeBomb')).toEqual([])
+    expect(firstGame.commands.slice(movementStart).filter((command) => command.type === 'manualAction')).toEqual([])
     await one.getByRole('button', { name: 'Enable sound', exact: true }).click()
     await expect.poll(() => contexts.find((context) => context.contextId === contextId)?.contextState)
       .toBe('running')
@@ -68,7 +68,7 @@ test('native sound gesture creates Web Audio cues and mute prevents later playba
     const oscillatorCount = (): number => nodes.filter((node) => node.nodeType.includes('Oscillator')).length
     const beforeBomb = oscillatorCount()
     await one.keyboard.press('Space')
-    await expect.poll(() => firstGame.commands.filter((command) => command.type === 'placeBomb').length).toBe(1)
+    await expect.poll(() => firstGame.commands.filter((command) => command.type === 'manualAction').length).toBe(1)
     await expect.poll(() => firstGame.frames.some((frame) => frame.type === 'snapshot'
       && frame.state.bombs.length === 1
       && frame.events.some((event) => event.kind.type === 'bombPlaced')), { intervals: [15] }).toBe(true)

@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { admitted, authenticate, harness, messages, room, roomId, snapshot, SocketStub } from './testSupport'
 
-describe('v6 session and admission failures', () => {
+describe('v7 session and admission failures', () => {
   beforeEach(() => vi.stubGlobal('WebSocket', { OPEN: SocketStub.OPEN }))
 
   it.each([
@@ -39,8 +39,8 @@ describe('v6 session and admission failures', () => {
     await vi.waitFor(() => expect(value.sockets).toHaveLength(1))
     const socket = value.sockets[0]
     socket.emit('open')
-    socket.message({ type: 'authenticated', protocolVersion: 6 })
-    socket.message({ type: 'authenticated', protocolVersion: 6 })
+    socket.message({ type: 'authenticated', protocolVersion: 7 })
+    socket.message({ type: 'authenticated', protocolVersion: 7 })
     expect(messages(socket).filter((message) => message.type === 'createRoom')).toHaveLength(1)
     socket.message({ ...admitted(), sequence: 2 })
     expect(value.client.getState().room).toBeNull()
@@ -75,7 +75,7 @@ describe('v6 session and admission failures', () => {
   })
 })
 
-describe('v6 authoritative updates and controls', () => {
+describe('v7 authoritative updates and controls', () => {
   beforeEach(() => vi.stubGlobal('WebSocket', { OPEN: SocketStub.OPEN }))
 
   it('accepts only newer same-room nonregressing shared facts', async () => {
@@ -193,9 +193,57 @@ describe('v6 authoritative updates and controls', () => {
     expect(value.client.movement('north')).toBe(false)
     expect(value.client.getState().failure).toBe('sequenceExhausted')
   })
+
+  it.each([
+    ['hidden own actor', (next: ReturnType<typeof snapshot>) => {
+      next.state.actors[0] = { type: 'hidden', id: 1, seat: 'one', alive: true }
+    }],
+    ['malformed hidden rival', (next: ReturnType<typeof snapshot>) => {
+      next.state.actors[1] = {
+        type: 'hidden', id: 2, seat: 'two', alive: true, position: { x: 1, y: 1 },
+      } as never
+    }],
+    ['duplicate ordinary effects', (next: ReturnType<typeof snapshot>) => {
+      const actor = next.state.actors[0]
+      if (actor.type !== 'visible') throw new Error('expected visible actor')
+      actor.effects = [
+        { kind: 'shield', remainingTicks: 300 },
+        { kind: 'shield', remainingTicks: 1 },
+      ]
+    }],
+    ['duplicate actor IDs', (next: ReturnType<typeof snapshot>) => {
+      next.state.actors[1].id = next.state.actors[0].id
+    }],
+    ['duplicate entity IDs', (next: ReturnType<typeof snapshot>) => {
+      next.state.bombs = [{
+        id: next.state.actors[0].id, cell: { column: 1, row: 1 }, owner: next.state.actors[0].id,
+        range: 1, placedAt: 1, trigger: { type: 'remote' }, blast: 'standard',
+      }]
+    }],
+    ['duplicate room seats', (next: ReturnType<typeof snapshot>) => {
+      next.room.seats[1].seat = 'one'
+    }],
+    ['unsupported available items', (next: ReturnType<typeof snapshot>) => {
+      next.room.availableItems = ['heart']
+    }],
+    ['unsupported item pickup', (next: ReturnType<typeof snapshot>) => {
+      next.state.pickups = [{ cell: { column: 1, row: 1 }, kind: 'heart' }]
+    }],
+  ])('rejects %s before installing recipient state', async (_label, mutate) => {
+    const value = harness()
+    const socket = await authenticate(value)
+    socket.message(admitted())
+    const next = snapshot(99)
+    mutate(next)
+    socket.message(next)
+    expect(value.states.some((candidate) => candidate.room?.revision === 99)).toBe(false)
+    expect(value.client.getState()).toMatchObject({
+      connection: 'disconnected', room: null, snapshot: null, failure: 'invalidServerMessage',
+    })
+  })
 })
 
-describe('v6 retry callback fences', () => {
+describe('v7 retry callback fences', () => {
   beforeEach(() => vi.stubGlobal('WebSocket', { OPEN: SocketStub.OPEN }))
 
   it('does not run a canceled reconnect timer after explicit disconnect', async () => {

@@ -2,8 +2,8 @@ use std::{future::pending, sync::Arc, time::Duration};
 
 use axum::extract::ws::{Message, WebSocket};
 use grenadiers_core::protocol::Counter;
-use grenadiers_core::protocol::v6::{
-    GameClientMessage, GameServerMessage, V6ErrorCode as ErrorCode, parse_client_message,
+use grenadiers_core::protocol::v7::{
+    GameClientMessage, GameServerMessage, V7ErrorCode as ErrorCode, parse_client_message,
 };
 use tokio::time::{Instant, MissedTickBehavior, interval_at, sleep_until, timeout};
 
@@ -111,13 +111,13 @@ pub(super) async fn authenticated_loop(
                     continue;
                 };
                 let notice = member.admission.notices.borrow_and_update().clone();
-                match notice {
-                    RoomNotice::Publication(notice) => {
+                match route_member_notice(member, notice) {
+                    MemberDelivery::Publication(notice) => {
                         if send_notice(socket, notice).await.is_err() {
                             return;
                         }
                     }
-                    RoomNotice::Closing { last, reason } => {
+                    MemberDelivery::Closing { last, reason } => {
                         finish_closing(socket, last, reason).await;
                         return;
                     }
@@ -126,7 +126,9 @@ pub(super) async fn authenticated_loop(
             Event::Member(MemberEvent::Notice(Err(_))) => {
                 if let Some(member) = state.membership.as_ref() {
                     let retained = member.admission.notices.borrow().clone();
-                    if let RoomNotice::Closing { last, reason } = retained {
+                    if let MemberDelivery::Closing { last, reason } =
+                        route_member_notice(member, retained)
+                    {
                         finish_closing(socket, last, reason).await;
                         return;
                     }
@@ -164,18 +166,43 @@ pub(super) async fn authenticated_loop(
     }
 }
 
-async fn send_notice(socket: &mut WebSocket, notice: super::rooms::MatchNotice) -> Result<(), ()> {
-    match notice.snapshot {
+#[derive(Debug, PartialEq, Eq)]
+struct PreparedNotice {
+    room: grenadiers_core::protocol::v7::RoomView,
+    frame: Option<Arc<str>>,
+}
+
+#[derive(Debug, PartialEq, Eq)]
+enum MemberDelivery {
+    Publication(PreparedNotice),
+    Closing {
+        last: PreparedNotice,
+        reason: ClosingReason,
+    },
+}
+
+fn route_member_notice(member: &Membership, notice: RoomNotice) -> MemberDelivery {
+    let prepare = |notice: super::rooms::MatchNotice| PreparedNotice {
+        frame: notice.frame(domain_seat(member.admission.seat)),
+        room: notice.room,
+    };
+    match notice {
+        RoomNotice::Publication(notice) => MemberDelivery::Publication(prepare(notice)),
+        RoomNotice::Closing { last, reason } => MemberDelivery::Closing {
+            last: prepare(last),
+            reason,
+        },
+    }
+}
+
+async fn send_notice(socket: &mut WebSocket, notice: PreparedNotice) -> Result<(), ()> {
+    match notice.frame {
         Some(snapshot) => send_raw(socket, Message::Text(snapshot.to_string().into())).await,
         None => send_game(socket, &GameServerMessage::RoomState { room: notice.room }).await,
     }
 }
 
-async fn finish_closing(
-    socket: &mut WebSocket,
-    last: super::rooms::MatchNotice,
-    reason: ClosingReason,
-) {
+async fn finish_closing(socket: &mut WebSocket, last: PreparedNotice, reason: ClosingReason) {
     let _ = timeout(Duration::from_secs(5), async {
         let _ = send_notice(socket, last).await;
         match reason {
@@ -189,6 +216,13 @@ async fn finish_closing(
         }
     })
     .await;
+}
+
+const fn domain_seat(seat: grenadiers_core::protocol::Seat) -> grenadiers_core::game::SeatId {
+    match seat {
+        grenadiers_core::protocol::Seat::One => grenadiers_core::game::SeatId::One,
+        grenadiers_core::protocol::Seat::Two => grenadiers_core::game::SeatId::Two,
+    }
 }
 
 async fn handle_message(
@@ -267,5 +301,69 @@ async fn unseated_shutdown(
         Ok(())
     } else {
         shutdown.changed().await
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::game::rooms::GameRooms;
+
+    #[tokio::test(flavor = "current_thread", start_paused = true)]
+    async fn seat_two_membership_routes_marked_normal_retained_and_shutdown_frames() {
+        let next = std::sync::atomic::AtomicU8::new(1);
+        let rooms = GameRooms::with_random_fill(std::time::Instant::now(), move |bytes| {
+            bytes.fill(next.fetch_add(1, std::sync::atomic::Ordering::Relaxed));
+            Ok(())
+        });
+        let one_binding = BindingKey {
+            connection_id: ConnectionId(1),
+            generation: 1,
+        };
+        let two_binding = BindingKey {
+            connection_id: ConnectionId(2),
+            generation: 1,
+        };
+        let first = rooms
+            .create(one_binding, std::time::Instant::now())
+            .await
+            .unwrap();
+        let second = rooms
+            .join(
+                &first.room.room_code,
+                two_binding,
+                std::time::Instant::now(),
+            )
+            .await
+            .unwrap();
+        let mut marked = match &*second.notices.borrow() {
+            RoomNotice::Publication(notice) => notice.clone(),
+            RoomNotice::Closing { .. } => panic!("new room is open"),
+        };
+        marked.replace_frames_for_test(["seat-one", "seat-two"]);
+        let member = Membership {
+            admission: second,
+            binding: two_binding,
+            replacement_closed: false,
+        };
+        let notices = [
+            RoomNotice::Publication(marked.clone()),
+            RoomNotice::Closing {
+                last: marked.clone(),
+                reason: ClosingReason::Expired,
+            },
+            RoomNotice::Closing {
+                last: marked,
+                reason: ClosingReason::ServerStopped,
+            },
+        ];
+        for notice in notices {
+            let prepared = match route_member_notice(&member, notice) {
+                MemberDelivery::Publication(prepared)
+                | MemberDelivery::Closing { last: prepared, .. } => prepared,
+            };
+            assert_eq!(prepared.frame.as_deref(), Some("seat-two"));
+        }
+        drop(first);
     }
 }

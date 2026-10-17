@@ -1,6 +1,6 @@
 use grenadiers_core::protocol::{
     Counter, MAX_COUNTER,
-    v6::{ConnectionStatus, ResumeToken},
+    v7::{ConnectionStatus, ResumeToken},
 };
 use tokio::sync::oneshot;
 
@@ -42,7 +42,8 @@ async fn connected_takeover_fences_old_binding_and_drop_then_restore_keeps_priva
     assert_eq!(first.replaced.await, Ok(()));
     assert_eq!(replacement.resume_token, first.resume_token);
     assert_eq!(replacement.last_bomb_action_id, Some(sequence(MAX_COUNTER)));
-    assert!(replacement.state.is_some());
+    let admitted: serde_json::Value = serde_json::from_str(&replacement.personal_frame).unwrap();
+    assert!(!admitted["state"].is_null());
     assert_eq!(
         replacement.room.seats[0].connection,
         ConnectionStatus::Connected

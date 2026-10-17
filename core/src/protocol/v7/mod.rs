@@ -2,11 +2,13 @@ mod client;
 mod effects;
 mod events;
 mod items;
+mod projection_admission;
 mod projection_binding;
 mod projection_capture;
 mod projection_facts;
 mod projection_items;
 mod projection_recipient;
+mod projection_room;
 mod projection_validation;
 mod scalars;
 mod server;
@@ -19,12 +21,14 @@ pub use client::{GameClientMessage, ManualActionKind};
 pub use effects::{EffectKind, EffectValidationError, EffectView, EffectViews, validate_effects};
 pub use events::{DamagePreventionSource, EventIndex, EventKind, SnapshotEvents, WireEvent};
 pub use items::{EquipmentId, InventoryView, ItemId, ItemMask, ItemSet, PickupKind, WeaponId};
+pub use projection_admission::prepare_classic_admission;
 pub use projection_binding::bind_classic;
 pub use projection_capture::capture_classic;
 pub use projection_facts::{
     BoundPublication, ClassicCapture, ProjectionError, ValidatedReports, ValidatedWorld,
 };
 pub use projection_recipient::prepare_snapshot_pair;
+pub use projection_room::{RoomMetadata, classic_settings, project_classic_room};
 pub use scalars::{GameplayVersion, ResumeToken, RoundCount, Wins};
 pub use server::{
     CompletedRound, ConnectionStatus, CountdownKind, GameServerMessage, MatchInterruptReason,
@@ -76,6 +80,8 @@ mod frame_bound_tests;
 #[cfg(test)]
 #[path = "max_frame_tests.rs"]
 mod max_frame_tests;
+#[cfg(test)]
+mod projection_admission_tests;
 #[cfg(test)]
 mod projection_elimination_tests;
 #[cfg(test)]

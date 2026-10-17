@@ -4,9 +4,9 @@ import userEvent from '@testing-library/user-event'
 import { StrictMode } from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import i18n from '../../i18n'
-import type { GameClientState } from '../v6/client'
-import { useV6Copy } from '../v6/locale'
-import { snapshot } from '../v6/testSupport'
+import type { GameClientState } from '../client/client'
+import { useGameCopy } from '../client/locale'
+import { snapshot } from '../client/testSupport'
 import { SoundControl } from './SoundControl'
 
 function state(): GameClientState {
@@ -14,12 +14,12 @@ function state(): GameClientState {
   return {
     connection: 'authenticated', room: current.room, snapshot: current, youSeat: 'one', failure: null,
     admissionPending: false, leavePending: false, settingsPending: false, reconnectAttempt: 0,
-    admissionBaseline: { roomId: current.room.roomId, revision: 20, tick: 20 },
+    admissionBaseline: { roomId: current.room.roomId, revision: 20, tick: 20, physicalTick: 20 },
   }
 }
 
 function Subject({ current = state() }: { current?: GameClientState }) {
-  return <SoundControl state={current} copy={useV6Copy()} />
+  return <SoundControl state={current} copy={useGameCopy()} />
 }
 
 function view(element = <Subject />) {
@@ -75,6 +75,7 @@ describe('sound control gesture and localization', () => {
     later.room!.tick = 21
     later.snapshot!.room.revision = 21
     later.snapshot!.room.tick = 21
+    later.snapshot!.state.physicalTick = 21
     later.snapshot!.events = [{
       tick: 21, index: 0,
       kind: { type: 'bombPlaced', bomb: {} as never },

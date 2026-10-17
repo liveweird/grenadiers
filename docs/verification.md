@@ -1,5 +1,24 @@
 # Repository verification
 
+## Live gameplay-v7 candidate — 2026-10-18 — local checks only
+
+The v0.3.24 integration passes **375 core tests, 174 server tests and two doctests**;
+four dedicated performance profiles remain intentionally ignored. Rust line coverage is
+**93.27%** (10,568/11,331 lines), above the unchanged 80% floor. All **262 web tests**,
+contracts, lint, Knip, builds and E2E static checks pass, with **25 documented scenarios**.
+Dependency audits and strict pinned Kubernetes schemas pass. Independent backend and
+frontend reviews are clear.
+
+The server and browser now use gameplay-v7 together. Admission and both recipient frames
+are encoded before transactional state changes. Routing tests use a real Seat Two membership
+and cover publication, retained closing and server shutdown. Regressions also cover invalid
+room provenance, failed admission rollback, previous-version rejection before credential claim,
+and unsupported equipment actions without consuming the manual-action identifier.
+
+This candidate retains Classic rules and empty optional-item availability. The inventory and
+effect presentation is infrastructure; no new pickup is playable. This is local verification
+only: no v0.3.24 image, Compose/Kubernetes acceptance or release has been completed.
+
 ## Canonical projection candidate — 2026-10-18 — local checks only
 
 The v0.3.23 candidate passes **373 core tests, 170 server tests and two doctests**, with four

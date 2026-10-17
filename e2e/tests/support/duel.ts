@@ -1,10 +1,10 @@
 import { expect, type Page } from '@playwright/test'
-import type { Direction, GameServerMessage } from '../../../web/src/game/v6/schema'
+import type { ActorView, Direction, GameServerMessage, Seat } from '../../../web/src/game/v7/schema'
 
 type Snapshot = Extract<GameServerMessage, { type: 'snapshot' }>
 export type ObservedGame = {
   frames: GameServerMessage[]
-  commands: { type: string; actionId?: number; direction?: Direction | null }[]
+  commands: { type: string; action?: 'bomb' | 'equipment'; actionId?: number; direction?: Direction | null }[]
   sockets: number
 }
 
@@ -17,6 +17,7 @@ export function observeGame(page: Page): ObservedGame {
       const command = JSON.parse(payload.toString()) as {
         type: string
         actionId?: number
+        action?: unknown
         direction?: unknown
       }
       if (command.type !== 'authenticate') {
@@ -31,6 +32,9 @@ export function observeGame(page: Page): ObservedGame {
           actionId: command.actionId,
         }
         if (command.type === 'movement') summary.direction = direction
+        if (command.type === 'manualAction' && (command.action === 'bomb' || command.action === 'equipment')) {
+          summary.action = command.action
+        }
         observed.commands.push(summary)
       }
     })
@@ -46,6 +50,11 @@ export function observeGame(page: Page): ObservedGame {
 
 export function latestSnapshot(game: ObservedGame): Snapshot | undefined {
   return game.frames.filter((frame) => frame.type === 'snapshot').at(-1)
+}
+
+export function visibleActor(snapshot: Snapshot | undefined, seat: Seat) {
+  return snapshot?.state.actors.find((actor): actor is Extract<ActorView, { type: 'visible' }> =>
+    actor.seat === seat && actor.type === 'visible')
 }
 
 export async function expectPaintedCanvas(page: Page): Promise<void> {

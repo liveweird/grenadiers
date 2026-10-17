@@ -1,8 +1,8 @@
 import { Button, Group, NativeSelect, SimpleGrid, Text, Title } from '@mantine/core'
 import { useMemo, useState } from 'react'
 import { sameGameSettings } from './clientProtocol'
-import type { V6Copy } from './locale'
-import type { GameSettings, RoomView, Seat } from './schema'
+import type { GameCopy } from './locale'
+import type { GameSettings, RoomView, Seat } from '../v7/schema'
 
 const SPEEDS = [0, 1, 2, 3, 4] as const
 const TURN_ASSISTS = [64, 128, 192, 256] as const
@@ -10,6 +10,7 @@ const WINS = [1, 2, 3, 4, 5, 6, 7, 8, 9] as const
 const FUSES = [60, 90, 120, 150, 180, 210, 240, 270, 300] as const
 const DEFAULT_SETTINGS: GameSettings = {
   startingSpeedLevel: 0, turnAssistUnits: 256, winsToFinish: 3, bombFuseTicks: 180,
+  enabledItems: [],
 }
 
 const speedText = (level: number): string => `${3 + level * 0.5}`
@@ -21,7 +22,7 @@ interface Props {
   room: RoomView
   youSeat: Seat | null
   pending: boolean
-  copy: V6Copy
+  copy: GameCopy
   onApply(settings: GameSettings): boolean
 }
 

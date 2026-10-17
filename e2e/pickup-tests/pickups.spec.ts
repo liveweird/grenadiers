@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test'
 import { moveTo } from '../tests/support/movement'
-import { expectPaintedCanvas, latestSnapshot, observeGame, type ObservedGame } from '../tests/support/duel'
+import { visibleActor, expectPaintedCanvas, latestSnapshot, observeGame, type ObservedGame } from '../tests/support/duel'
 
 test.beforeAll(() => {
   expect(process.env.E2E_PICKUP_FIXTURE, 'Configure the documented server seed fixture before pickup acceptance')
@@ -10,7 +10,7 @@ test.beforeAll(() => {
 type Cell = { column: number; row: number }
 
 function actor(game: ObservedGame) {
-  const value = latestSnapshot(game)?.state.actors.find((candidate) => candidate.seat === 'one')
+  const value = visibleActor(latestSnapshot(game), 'one')
   if (!value?.alive) throw new Error('Fixture route requires a living first player')
   return value
 }
@@ -66,7 +66,7 @@ async function escapeBomb(
       await expect.poll(() => {
         const frames = game.frames.filter((frame) => frame.type === 'snapshot').slice(-2)
         if (frames.length !== 2 || frames[0].room.revision <= releasedRevision) return false
-        const positions = frames.map((frame) => frame.state.actors.find((value) => value.seat === 'one')!.position)
+        const positions = frames.map((frame) => visibleActor(frame, 'one')!.position)
         return positions.every((value) => value.x === positions[0].x && value.y === positions[0].y)
       }, { intervals: [15] }).toBe(true)
       await moveTo(page, game, leg.centerTurn)

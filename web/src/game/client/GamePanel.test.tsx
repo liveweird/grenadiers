@@ -30,7 +30,10 @@ function state(connection: GameClientState['connection'] = 'authenticated'): Gam
   const current = snapshot(20)
   return {
     connection, room: current.room, snapshot: current, youSeat: 'one', failure: null,
-    admissionBaseline: { roomId: current.room.roomId, revision: current.room.revision, tick: current.room.tick },
+    admissionBaseline: {
+      roomId: current.room.roomId, revision: current.room.revision, tick: current.room.tick,
+      physicalTick: current.state.physicalTick,
+    },
     admissionPending: connection !== 'authenticated', leavePending: false, settingsPending: false,
     reconnectAttempt: connection === 'reconnecting' ? 1 : 0,
   }
@@ -40,9 +43,9 @@ function renderPanel(current: GameClientState) {
   render(<MantineProvider env="test"><GamePanelView state={current} actions={actions()} /></MantineProvider>)
 }
 
-describe('v6 reconnect presentation', () => {
-  beforeEach(async () => { localStorage.clear(); await i18n.changeLanguage('en') })
+beforeEach(async () => { localStorage.clear(); await i18n.changeLanguage('en') })
 
+describe('v7 reconnect presentation', () => {
   it('exposes the dormant hook-backed panel without activating it in App', () => {
     render(<MantineProvider env="test"><GamePanel /></MantineProvider>)
     expect(screen.getByRole('button', { name: 'Create room' })).toBeVisible()
@@ -64,7 +67,57 @@ describe('v6 reconnect presentation', () => {
     renderPanel(state('authenticated'))
     expect(screen.getByRole('region', { name: 'Grenadiers courtyard' })).toHaveAttribute('data-enabled', 'true')
   })
+})
 
+describe('v7 private-state presentation', () => {
+  it('removes hidden rival stats and accessibility details until a fresh reveal', () => {
+    const current = state()
+    const view = render(<MantineProvider env="test">
+      <GamePanelView state={current} actions={actions()} />
+    </MantineProvider>)
+    expect(screen.getByLabelText('Player two upgrades')).toBeVisible()
+
+    current.snapshot!.state.actors[1] = { type: 'hidden', id: 2, seat: 'two', alive: true }
+    view.rerender(<MantineProvider env="test">
+      <GamePanelView state={{ ...current }} actions={actions()} />
+    </MantineProvider>)
+    expect(screen.queryByLabelText('Player two upgrades')).not.toBeInTheDocument()
+
+    current.snapshot!.state.actors[1] = {
+      type: 'visible', id: 2, seat: 'two', position: { x: 4096, y: 3072 }, heading: 'north',
+      speedLevel: 2, alive: true, bombCapacity: 3, bombRange: 4, liveBombCount: 1,
+      inventory: { equipment: null, weapon: null }, effects: [], damageGraceRemainingTicks: 0,
+    }
+    view.rerender(<MantineProvider env="test">
+      <GamePanelView state={{ ...current }} actions={actions()} />
+    </MantineProvider>)
+    expect(screen.getByLabelText('Player two upgrades')).toHaveTextContent('Blast range4')
+  })
+
+  it('shows bounded authoritative inventory, effect timers, grace, and bomb counts as static stats', () => {
+    const current = state()
+    const actor = current.snapshot!.state.actors[0]
+    if (actor.type !== 'visible') throw new Error('expected visible own actor')
+    actor.bombCapacity = 4
+    actor.liveBombCount = 3
+    actor.inventory = { equipment: 'heart', weapon: 'remoteBomb' }
+    actor.effects = [{ kind: 'shield', remainingTicks: 120 }]
+    actor.damageGraceRemainingTicks = 60
+    renderPanel(current)
+
+    const stats = screen.getByLabelText('Player one upgrades')
+    expect(stats).toHaveTextContent('Bombs available1')
+    expect(stats).toHaveTextContent('EquipmentHeart')
+    expect(stats).toHaveTextContent('Bomb typeRemote bomb')
+    expect(stats).toHaveTextContent('EffectsShield (0:02)')
+    expect(stats).toHaveTextContent('Damage grace0:01')
+    expect(stats).not.toHaveAttribute('role', 'status')
+    expect(stats.closest('[aria-live]')).toBeNull()
+    expect(screen.getByText('Round in progress')).toHaveAttribute('aria-live', 'polite')
+  })
+})
+
+describe('v7 room controls', () => {
   it('blocks readiness and rule edits while an update awaits authority', () => {
     const current = state()
     current.room = room(20, { type: 'waiting' }, 1)
@@ -88,7 +141,7 @@ describe('v6 reconnect presentation', () => {
     fireEvent.change(screen.getByLabelText('Round wins needed'), { target: { value: '1' } })
     fireEvent.click(screen.getByRole('button', { name: 'Apply rules' }))
     expect(received).toEqual([[currentActions, {
-      startingSpeedLevel: 0, turnAssistUnits: 256, winsToFinish: 1, bombFuseTicks: 180,
+      startingSpeedLevel: 0, turnAssistUnits: 256, winsToFinish: 1, bombFuseTicks: 180, enabledItems: [],
     }]])
   })
 

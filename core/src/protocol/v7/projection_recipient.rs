@@ -15,6 +15,17 @@ pub fn prepare_snapshot_pair(
 }
 
 fn prepare(publication: &BoundPublication, recipient: Seat) -> Result<String, ProjectionError> {
+    let state = recipient_state(publication, recipient);
+    let events = recipient_events(publication, recipient)?;
+    let message = GameServerMessage::Snapshot {
+        room: publication.room.clone(),
+        state,
+        events,
+    };
+    super::encode_server_message(&message).map_err(|_| ProjectionError::EncodingFailed)
+}
+
+pub(super) fn recipient_state(publication: &BoundPublication, recipient: Seat) -> GameState {
     let facts = &publication.world.0;
     let recipient_actor = &facts.actors[seat_index(recipient)];
     let hides_bombs = has_effect(recipient_actor, EffectKind::InvisibleBombs);
@@ -30,6 +41,26 @@ fn prepare(publication: &BoundPublication, recipient: Seat) -> Result<String, Pr
             ActorView::from(actor)
         }
     });
+    GameState {
+        running_updates: facts.running_updates,
+        remaining_ticks: facts.remaining_ticks,
+        physical_tick: facts.physical_tick,
+        arena: facts.arena.clone(),
+        actors,
+        bombs: if hides_bombs {
+            Vec::new()
+        } else {
+            facts.bombs.clone()
+        },
+        flames: facts.flames.clone(),
+        pickups: facts.pickups.clone(),
+    }
+}
+
+fn recipient_events(
+    publication: &BoundPublication,
+    recipient: Seat,
+) -> Result<SnapshotEvents, ProjectionError> {
     let events = publication
         .reports
         .0
@@ -52,25 +83,7 @@ fn prepare(publication: &BoundPublication, recipient: Seat) -> Result<String, Pr
                 })
         })
         .collect::<Result<Vec<_>, ProjectionError>>()?;
-    let message = GameServerMessage::Snapshot {
-        room: publication.room.clone(),
-        state: GameState {
-            running_updates: facts.running_updates,
-            remaining_ticks: facts.remaining_ticks,
-            physical_tick: facts.physical_tick,
-            arena: facts.arena.clone(),
-            actors,
-            bombs: if hides_bombs {
-                Vec::new()
-            } else {
-                facts.bombs.clone()
-            },
-            flames: facts.flames.clone(),
-            pickups: facts.pickups.clone(),
-        },
-        events: SnapshotEvents::new(events).map_err(|_| ProjectionError::InvalidReports)?,
-    };
-    super::encode_server_message(&message).map_err(|_| ProjectionError::EncodingFailed)
+    SnapshotEvents::new(events).map_err(|_| ProjectionError::InvalidReports)
 }
 
 fn has_effect(actor: &super::VisibleActorView, kind: EffectKind) -> bool {

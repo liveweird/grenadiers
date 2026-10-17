@@ -2,13 +2,11 @@ import { performance } from 'node:perf_hooks'
 import { expect, type Page } from '@playwright/test'
 import type {
   ArenaView, Cell, Direction, GameServerMessage, Position, Terrain,
-} from '../../../web/src/game/v6/schema'
+} from '../../../web/src/game/v7/schema'
 import type {
   DelayBridgeObserver, DelayBridgeSummary, RoutedFrameSummary, SanitizedSnapshot,
 } from './delayed-websocket'
 
-type DomKeyTiming = { type: 'keydown' | 'keyup'; key: string; at: number }
-type TimingWindow = Window & { grenadiersKeyTimings?: DomKeyTiming[] }
 export type SanitizedArena = {
   width: number
   height: number
@@ -19,7 +17,16 @@ type PageSnapshot = SanitizedSnapshot & { arena?: SanitizedArena }
 type PageObservation =
   | { kind: 'installed' }
   | { kind: 'socket' }
-  | { kind: 'snapshot'; snapshot: PageSnapshot }
+  | { kind: 'movementSend'; timing: Omit<PageMovementSendTiming, 'endpoint'> }
+  | { kind: 'snapshot'; snapshot: PageSnapshot; pageAt: number; pageTimeOrigin: number }
+
+export type PageMovementSendTiming = {
+  endpoint: string
+  at: number
+  timeOrigin: number
+  direction: Direction | null
+  sequence: number
+}
 
 const UNITS_PER_CELL = 1_024
 const HALF_FOOTPRINT = 320
@@ -34,6 +41,8 @@ export type PublicSnapshotTiming = {
   roundId: number
   position: Position
   bombIds: number[]
+  pageAt?: number
+  pageTimeOrigin?: number
 }
 
 export type LatencySample = {
@@ -58,6 +67,7 @@ export class LatencyObserver implements DelayBridgeObserver {
   readonly frames: RoutedFrameSummary[] = []
   readonly forwardedFrames: RoutedFrameSummary[] = []
   readonly snapshots: PublicSnapshotTiming[] = []
+  readonly pageMovementSends: PageMovementSendTiming[] = []
   readonly bridges: DelayBridgeSummary[] = []
   readonly failures: string[] = []
   readonly installedEndpoints = new Set<string>()
@@ -88,6 +98,11 @@ export class LatencyObserver implements DelayBridgeObserver {
         this.pageSocketCounts.set(endpoint, (this.pageSocketCounts.get(endpoint) ?? 0) + 1)
         return
       }
+      if (observation.kind === 'movementSend') {
+        this.pageMovementSends.push({ endpoint, ...observation.timing })
+        if (this.pageMovementSends.length > 2_048) this.pageMovementSends.shift()
+        return
+      }
       const snapshot = observation.snapshot
       const { arena, ...publicSnapshot } = snapshot
       if (arena) this.arenas.set(endpoint, arena)
@@ -97,7 +112,10 @@ export class LatencyObserver implements DelayBridgeObserver {
       if (!dispatch || at < dispatch.at) {
         this.failure(`Page snapshot ${endpoint}/${snapshot.revision} lacked a prior route dispatch`)
       }
-      this.snapshots.push({ endpoint, at, ...publicSnapshot })
+      this.snapshots.push({
+        endpoint, at, ...publicSnapshot,
+        pageAt: observation.pageAt, pageTimeOrigin: observation.pageTimeOrigin,
+      })
       if (this.snapshots.length > 2_048) this.snapshots.shift()
     })
     await page.addInitScript(({ bindingName }) => {
@@ -115,6 +133,7 @@ export class LatencyObserver implements DelayBridgeObserver {
             else super(url, protocols)
             report({ kind: 'socket' })
             this.addEventListener('message', (event) => {
+              const pageAt = performance.now()
               if (typeof event.data !== 'string') return
               try {
                 const message = JSON.parse(event.data) as GameServerMessage
@@ -123,7 +142,7 @@ export class LatencyObserver implements DelayBridgeObserver {
                 for (const candidate of message.state.actors) {
                   if (candidate.seat === 'one') actor = candidate
                 }
-                if (!actor) return
+                if (!actor || actor.type !== 'visible') return
                 const bombIds: number[] = []
                 for (const bomb of message.state.bombs) bombIds.push(bomb.id)
                 let arena: ArenaView | undefined
@@ -137,12 +156,29 @@ export class LatencyObserver implements DelayBridgeObserver {
                   }
                   arenaSent = true
                 }
-                report({ kind: 'snapshot', snapshot: {
+                report({ kind: 'snapshot', pageAt, pageTimeOrigin: performance.timeOrigin, snapshot: {
                   revision: message.room.revision, tick: message.room.tick, roundId: message.room.roundId,
                   position: actor.position, bombIds, arena,
                 } })
               } catch { /* Non-snapshot frames remain private to the application. */ }
             })
+          }
+
+          override send(data: string | ArrayBuffer | Blob | ArrayBufferView<ArrayBuffer>): void {
+            const at = performance.now()
+            super.send(data)
+            if (typeof data !== 'string') return
+            try {
+              const message = JSON.parse(data) as { type?: unknown; direction?: unknown; sequence?: unknown }
+              const validDirection = message.direction === null
+                || ['north', 'east', 'south', 'west'].includes(String(message.direction))
+              if (message.type === 'movement' && validDirection && Number.isSafeInteger(message.sequence)) {
+                report({ kind: 'movementSend', timing: {
+                  at, timeOrigin: performance.timeOrigin,
+                  direction: message.direction as Direction | null, sequence: message.sequence as number,
+                } })
+              }
+            } catch { /* Only sanitized movement metadata is retained. */ }
           }
         }
         window.WebSocket = ObservedWebSocket
@@ -302,24 +338,6 @@ function horizontalClearance(
     }
   }
   return Math.max(0, clearance)
-}
-
-export async function installDomKeyTimings(page: Page): Promise<void> {
-  await page.addInitScript(() => {
-    const observed = window as TimingWindow
-    observed.grenadiersKeyTimings = []
-    for (const type of ['keydown', 'keyup'] as const) {
-      addEventListener(type, (event) => {
-        const timings = observed.grenadiersKeyTimings
-        timings?.push({ type, key: event.key, at: performance.now() })
-        if (timings && timings.length > 1_024) timings.shift()
-      })
-    }
-  })
-}
-
-export async function domKeyTimings(page: Page): Promise<DomKeyTiming[]> {
-  return page.evaluate(() => (window as TimingWindow).grenadiersKeyTimings ?? [])
 }
 
 export function distribution(samples: LatencySample[]) {

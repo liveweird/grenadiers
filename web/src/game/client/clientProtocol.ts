@@ -1,6 +1,5 @@
-import Ajv from 'ajv'
-import gameplaySchema from '../../../../api/gameplay-v6.schema.json'
-import type { Direction, GameServerMessage, GameSettings, RoomView, Seat, V6ErrorCode } from './schema'
+import type { Direction, GameServerMessage, GameSettings, RoomView, Seat, V7ErrorCode } from '../v7/schema'
+import { validateGameplayV7ServerMessage } from '../v7/validation'
 
 export const MAX_COUNTER = 2_147_483_647
 export const MAX_RECONNECT_ATTEMPTS = 3
@@ -17,7 +16,7 @@ export type Capability = { roomId: string; seat: Seat; token: string }
 export type RoomCommand =
   | { type: 'ready'; ready: boolean; settingsRevision: number }
   | { type: 'movement'; direction: Direction | null }
-  | { type: 'placeBomb'; actionId: number }
+  | { type: 'manualAction'; actionId: number; action: 'bomb' }
   | { type: 'rematch'; ready: boolean }
 export type ControlCommand = { sequence: number; roomId: string; roundId: number; revision: number }
 export type PendingSettings = {
@@ -26,11 +25,39 @@ export type PendingSettings = {
   settingsRevision: number
   settings: GameSettings
 }
-export type ControlFailure = ControlCommand & { code: V6ErrorCode }
+export type ControlFailure = ControlCommand & { code: V7ErrorCode }
 
 const TOKEN_PATTERN = /^[0-9a-f]{64}$/
-const ajv = new Ajv({ allErrors: true })
-export const validateServerMessage = ajv.compile<GameServerMessage>(gameplaySchema)
+function unique<T>(values: readonly T[]): boolean {
+  return new Set(values).size === values.length
+}
+
+function stateRecipientValid(message: GameServerMessage, expectedSeat: Seat | null): boolean {
+  if (message.type !== 'snapshot' && message.type !== 'admitted') return true
+  const state = message.state
+  if (!state) return true
+  const actorIds = state.actors.map((actor) => actor.id)
+  const actorSeats = state.actors.map((actor) => actor.seat)
+  const entityIds = [...actorIds, ...state.bombs.map((bomb) => bomb.id)]
+  if (!unique(entityIds) || !unique(actorSeats)) return false
+  if (state.pickups.some((pickup) => !['bombCapacity', 'blastRange', 'movementSpeed'].includes(pickup.kind))) {
+    return false
+  }
+  const ownSeat = message.type === 'admitted' ? message.youSeat : expectedSeat
+  return ownSeat === null || state.actors.some((actor) => actor.seat === ownSeat && actor.type === 'visible')
+}
+
+function roomRecipientValid(message: GameServerMessage): boolean {
+  if (message.type !== 'snapshot' && message.type !== 'admitted' && message.type !== 'roomState') return true
+  return unique(message.room.seats.map((seat) => seat.seat))
+    && message.room.availableItems.length === 0
+    && message.room.settings.enabledItems.length === 0
+}
+
+export function validateServerMessage(value: unknown, expectedSeat: Seat | null): value is GameServerMessage {
+  const result = validateGameplayV7ServerMessage(value)
+  return result.valid && roomRecipientValid(result.value) && stateRecipientValid(result.value, expectedSeat)
+}
 
 export function dependenciesWithDefaults(overrides?: Partial<Dependencies>): Dependencies {
   return {
@@ -59,6 +86,8 @@ export function sameGameSettings(left: GameSettings, right: GameSettings): boole
     && left.turnAssistUnits === right.turnAssistUnits
     && left.winsToFinish === right.winsToFinish
     && left.bombFuseTicks === right.bombFuseTicks
+    && left.enabledItems.length === right.enabledItems.length
+    && left.enabledItems.every((item, index) => item === right.enabledItems[index])
 }
 
 export function settlesPendingSettings(

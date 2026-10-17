@@ -1,6 +1,6 @@
 import AxeBuilder from '@axe-core/playwright'
 import { expect, test, type Page } from '@playwright/test'
-import type { RoomView } from '../../web/src/game/v6/schema'
+import type { RoomView } from '../../web/src/game/v7/schema'
 import { expectPaintedCanvas, latestSnapshot, observeGame, type ObservedGame } from '../tests/support/duel'
 import { moveTo } from '../tests/support/movement'
 
@@ -27,7 +27,8 @@ async function running(games: ObservedGame[], roundNumber: number) {
     expect(frame.state.pickups).toEqual([])
     expect(frame.state.remainingTicks).toBeGreaterThan(10_600)
     for (const actor of frame.state.actors) {
-      expect(actor).toMatchObject({ alive: true, bombCapacity: 1, bombRange: 2, speedLevel: 0, liveBombCount: 0 })
+      expect(actor).toMatchObject({ type: 'visible', alive: true, bombCapacity: 1, bombRange: 2, speedLevel: 0, liveBombCount: 0 })
+      if (actor.type !== 'visible') throw new Error('Classic fixture actors must remain visible')
       const northwest = (actor.seat === 'one') === (roundNumber % 2 === 1)
       expect(actor.position).toEqual(northwest ? { x: 1536, y: 1536 } : { x: 13_824, y: 11_776 })
     }
@@ -145,7 +146,7 @@ test('two browsers finish a drawn round, first-to-three match, and consensual re
     await Promise.all(pages.map((page) => page.getByRole('button', { name: 'Ready', exact: true }).click()))
     await running(games, 1)
     await plant(one, games[0])
-    expect(games[0].commands.filter((command) => command.type === 'placeBomb').map((command) => command.actionId))
+    expect(games[0].commands.filter((command) => command.type === 'manualAction').map((command) => command.actionId))
       .toEqual([1, 1, 1, 1, 1])
     expect(games.map((game) => game.sockets)).toEqual([1, 1])
     for (const page of pages) await expect(page.getByRole('alert')).not.toBeVisible()

@@ -2,8 +2,9 @@
 
 Status: gameplay contracts, checked domain conversion, HTTP session issuance, and authenticated
 gameplay WebSockets with authoritative configurable two-seat matches are implemented.
-`api/gameplay-v6.schema.json`, Rust `core::protocol::v6`, and generated
-`web/src/game/v6/schema.ts` define active socket messages. V2 through v5 remain historical. V6 preserves reconnect semantics and adds configurable rules; see [the migration note](protocol-v6.md).
+`api/gameplay-v7.schema.json`, Rust `core::protocol::v7`, and generated
+`web/src/game/v7/schema.ts` define active socket messages. V2 through v6 remain historical.
+V7 adds checked recipient perspectives while retaining Classic rules; see [the migration note](protocol-v7.md).
 The browser validates these messages and drives the playable generated-map match. Diagnostic `/api/v1/ws` and
 `api/realtime.schema.json` remain unchanged.
 
@@ -25,13 +26,13 @@ Connect to `/api/v1/game/ws` with one configured non-null Origin and no query pa
 Its first application frame must be:
 
 ```json
-{"type":"authenticate","protocolVersion":6,"token":"0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"}
+{"type":"authenticate","protocolVersion":7,"token":"0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"}
 ```
 
 The token is a secret 64-character lowercase hexadecimal credential, held only in tab memory.
 It never belongs in a URL or log. A syntactically valid unsupported version is parsed so the
 server can return `incompatibleProtocol` before credential binding. Supported gameplay version
-is 6, independently of the product release and diagnostic protocol. Parser failures expose
+is 7, independently of the product release and diagnostic protocol. Parser failures expose
 only a generic error; token Debug formatting is redacted.
 
 A successful claim atomically binds one connection. Duplicate claims receive `connectionInUse`
@@ -74,15 +75,15 @@ All listed fields are required; objects reject extra fields. Counter values are 
 | `ready` | `sequence`, `roomId`, `roundId`, `settingsRevision`, `ready` |
 | `updateSettings` | `sequence`, `roomId`, `roundId`, `settingsRevision`, complete `settings` |
 | `movement` | `sequence`, `roomId`, `roundId`, `direction` (cardinal direction or explicit null) |
-| `placeBomb` | `sequence`, `roomId`, `roundId`, `actionId` |
+| `manualAction` | `sequence`, `roomId`, `roundId`, `actionId`, `action` (`bomb` or currently unsupported `equipment`) |
 | `leaveRoom` | `sequence`, `roomId`, `roundId` |
 | `rematch` | `sequence`, `roomId`, `roundId`, `ready` |
 
 | Server type | Additional fields |
 | --- | --- |
-| `authenticated` | `protocolVersion: 6` |
-| `incompatibleProtocol` | `supportedVersion` (0–65,535; this server emits 6) |
-| `admitted` | acknowledged `sequence`, shared `room`, `youSeat`, private `resumeToken`, nullable `lastBombActionId`, nullable `state` |
+| `authenticated` | `protocolVersion: 7` |
+| `incompatibleProtocol` | `supportedVersion` (0–65,535; this server emits 7) |
+| `admitted` | acknowledged `sequence`, shared `room`, `youSeat`, private `resumeToken`, nullable `lastActionId`, nullable `state` |
 | `roomState` | shared `room` only |
 | `seatReplaced` | `roomId`; old binding closes with code 4001 |
 | `leftRoom` | `roomId`, acknowledged `sequence` |
@@ -93,51 +94,59 @@ HTTP session responses are separate from socket messages.
 
 ## Public snapshots and events
 
-A snapshot and shared room state are identical for both seats. Only personal `admitted` carries
-seat identity, capability, action floor, and an optional full state baseline; it carries no events.
-`state` contains `runningUpdates` and `remainingTicks` (each 0–10,800), the arena, exactly two
+Room metadata is shared; physical snapshots are prepared separately for each authenticated seat.
+Classic currently produces equal perspectives because optional items remain disabled. Personal
+`admitted` carries seat identity, capability, action floor and an optional recipient baseline,
+without historical events. `state` contains `physicalTick`, `runningUpdates` and `remainingTicks`
+(each running counter 0–10,800), the arena, exactly two
 actors, up to 16 bombs, up to 195 flames, and up to 195 exposed pickups. The arena has width 15, height 13, exactly 195
 row-major floor/wall terrain entries, and up to 195 unique soft-block cells.
 
-Actors expose ID, seat, fixed-point position, heading, speed level (0–4), alive status,
-capacity/range (1–8), and live-bomb count (0–8). Bombs include ID, cell, owner, captured range,
-placement tick, and detonation tick. Flames include cell and exclusive expiry tick. Room metadata carries the global tick, rules/map versions, scores, actual round number,
+Visible actors expose ID, seat, position, heading, speed (0–4), alive status, capacity/range
+(1–8), authoritative owned-bomb count, inventory, effects and remaining damage grace. Hidden
+actors contain only ID, seat and alive status; owners always receive their own visible actor.
+Bombs carry ID, cell, owner, range, placement tick, blast mode and a typed trigger. Timed
+triggers report remaining ticks at `physicalTick` and pause state; no untimed deadline is invented.
+Classic uses only Standard, unpaused Timed bombs. Flames include cell and exclusive expiry tick.
+Room metadata carries the global tick, rules/map versions, scores, actual round number,
 latest completed round, and independent match outcome; these are not duplicated in game state.
 The required `pickups` array contains closed `{cell, kind}` entries with kind `bombCapacity`,
 `blastRange`, or `movementSpeed`. Empty means no exposed items. Concealed and pending items,
 round assignments, generation records, and seeds never enter these messages.
-Private held input, movement fractions, collision grace, allocator state, and hidden contents
+Private held input, movement fractions, bomb-exit grace, allocator state, and hidden contents
 are excluded. The checked domain adapter enforces canonical ordering and cross-field invariants before
 runtime publication. Pickups must be unique, row-major, on floor without blocks or flames;
 bomb and actor overlap is permitted.
 
-Each snapshot carries 0–64 events with absolute `tick`, per-tick `index` (0–63), and tagged
+Each snapshot carries 0–96 events with absolute `tick`, per-tick `index` (0–95), and tagged
 `kind`: `bombPlaced`/`bombDetonated` carry a full bomb record; `actorEliminated` carries ID/seat;
-`pickupCollected` carries collector ID/seat, cell, and kind; `roundEnded` carries the result. Identity is `(roomId, roundId, tick, index)`. Placement and
+`pickupCollected` carries collector ID/seat, cell, and kind; `roundEnded` carries the result.
+The contract also defines `damagePrevented`, reserved for later protection-item activation. Identity is `(roomId, roundId, tick, index)`. Placement and
 explosion within one update remain separate events. Events are best-effort presentation cues;
 full snapshots remain authoritative. The 20 Hz publisher accumulates at most three
 completed 60 Hz updates per normal snapshot.
 
 ## Checked domain conversion
 
-Use `core::protocol::project_state(&public_state)` to obtain a `ProjectedRound` containing
-checked absolute tick, supported rules version, optional wire outcome, and game state. It validates the fixed arena
-dimensions, clock sum, seat/ID order, positions, upgrades, unique occupied cells, bomb owners,
-actual live-bomb counts, and outcome/liveness consistency. Conversion errors contain fixed
-categories rather than payloads. No direct serialization of internal `World` or `State` exists.
+Use `core::protocol::v7::capture_classic` to observe the complete State and reports, then
+`bind_classic` to certify the exact room profile, settings, lifecycle epoch and physical tick.
+Opaque captures cannot be serialized directly. Raw server DTO fields alone do not establish
+canonical validity. Validate every actor, bomb, ownership count, effect and event before filtering;
+a malformed hidden record fails the whole operation. Classic binding rejects optional state even
+when a caller provides matching enabled/available arrays.
 
-`project_events(&reports)` accepts at most three consecutive completed updates and 64 events.
-Each event must belong to its report tick; indices restart at zero per tick and preserve actual
-phase order. Placement and detonation within the same tick remain observable. Result and MatchResult hold physics completely frozen while the room clock advances.
-The final partial report window is published once; later hold snapshots contain no repeated events.
-Conversion neither clamps values nor advances the simulation.
+`prepare_snapshot_pair` builds both recipient encodings before either can be published. Only
+then may the runtime advance revision, record one report flush and clear reports once. Report
+windows contain at most three consecutive updates and 96 unfiltered events. Capture audiences
+at emission, filter before assigning contiguous recipient-local indexes per tick, and never
+truncate. Historical event records need not exist in the final world. Admission prepares a
+recipient-specific event-free body before ownership/replacement commit.
 
-The runtime checks Running physics tick against the room tick. A completed frozen world
-must match its own latest completed-round epoch/result/end tick. An unfinished terminal
-world keeps no round result and freezes at the independent match outcome tick. A completed
-hold followed by forfeit still binds physics to the earlier completed-round tick. Inter-round
-countdowns publish room views without an old world. The encoder enforces the frame limit;
-these adapters do not create rooms or validate transport ownership.
+Running physical time equals room time. Result and MatchResult bodies remain frozen at their
+own completed-round epoch/result/end tick while room time advances; unfinished terminal bodies
+bind to the independent match outcome. A later forfeit cannot replace the earlier completed
+physics tick. Inter-round countdowns publish room views without an old world. Encoders retain
+the 64 KiB ceiling. Conversion neither clamps invalid timestamps nor advances simulation.
 
 ## Identity, ordering, and lifecycle
 
@@ -146,11 +155,12 @@ eight canonical characters from `A-HJ-NP-Z2-9`. Neither proves seat ownership. T
 server binding supplies the seat; no client command includes a seat, position, damage, or result.
 
 Sequence numbers increase across create/join/resume/leave and gameplay commands on one connection.
-A structurally valid command consumes its sequence before semantic handling. Bomb action IDs
+A structurally valid command consumes its sequence before semantic handling. Manual action IDs
 increase independently per seat/round and remain consumed after an unsuccessful placement.
 Invalid room/round bindings cannot mutate another seat's high-water marks. Resume reports the
-accepted floor; the next bomb ID must be greater. A floor of 2,147,483,647 exhausts bomb actions
-for that epoch.
+accepted floor; the next admitted manual action ID must be greater. A floor of 2,147,483,647 exhausts bomb actions
+for that epoch. Unsupported equipment commands consume only the connection sequence,
+not the manual high-water, mailbox budget or journal; a later bomb may reuse that action ID.
 
 `RoomView` carries identity/code, independent command epoch `roundId`, revision, global tick,
 rules/map versions, actual `roundNumber`, scores (0..9 per seat, bounded by the selected target), nullable `lastRound`, two
@@ -161,7 +171,8 @@ countdown, and resets on rematch. Epochs also advance across cancellation and re
 spawn/tie assignment uses actual round count rather than command epoch.
 
 Shared room views and snapshot metadata also carry the complete checked `settings`,
-`settingsRevision` and nullable original `settingsEditor` seat. Only actual changes increment
+`settingsRevision`, nullable original `settingsEditor`, and `availableItems`. Settings also
+carry `enabledItems`; both item arrays are empty in current Classic rooms. Only actual changes increment
 the settings revision and clear readiness; Ready commands acknowledge that exact revision.
 See [v6 settings and authority](protocol-v6.md) for bounds, no-op acknowledgements and edit locks.
 
@@ -194,9 +205,9 @@ rejects state whose checked rules version disagrees with that profile. Productio
 empty pickup array because contents are concealed; only exposed items become public.
 Fixed-classic-v1 remains an explicit unit fixture, not a production selector.
 
-Gameplay v6 is incompatible with earlier versions. Reload clients when upgrading the single server. Both
+Gameplay v7 is incompatible with earlier versions. Reload clients when upgrading the single server. Both
 old and future versions are rejected before credential lookup, so rejection cannot claim or
-revoke a token. `supportedVersion` accepts the bounded input range rather than only v6,
+revoke a token. `supportedVersion` accepts the bounded input range rather than only v7,
 allowing a new client to understand an older server's incompatibility response.
 See [ADR 0013](../decisions/0013-gameplay-v2-and-room-profiles.md).
 
@@ -207,21 +218,23 @@ without writing. The shared web gate runs this alongside existing diagnostic che
 validation tests. Rust conformance tests compare strict parsing and serialization with the same
 schema, including missing/null fields, scalar boundaries, integer-valued number forms, version
 rejection responses, credential redaction, all event variants, nested bounds, and real
-frame-size enforcement. Maximal structural v6 Snapshot and Admitted fixtures fit the inclusive
-65,536-byte server limit; an actual oversized message is rejected. These fixtures prove structural
-bounds rather than reachable gameplay size. TypeScript types do not enforce string patterns
+frame-size enforcement. A serialization-based conservative v7 proof bounds Snapshot at
+61,586 bytes and Admitted at 36,472 bytes, below the inclusive 65,536-byte ceiling. Separate
+schema-valid representatives and oversize rejection tests remain. These are structural bounds,
+not reachable gameplay claims. TypeScript types do not enforce string patterns
 or numeric/array bounds at runtime; AJV and Rust validation do.
 
 ## Graceful shutdown
 
 A sticky stop signal bypasses command queues. Owners interrupt unfinished matches with
 ServerStopped, atomically settle pending departures, and retain one final checked publication
-with the closing reason. Existing final matches remain final. Members receive that publication
+with the closing reason. Existing final matches remain final. Members receive their authenticated
+seat perspective of that publication
 before close; unseated and authenticating sockets close directly. Delivery is best effort
 within a five-second bound. The process explicitly drains upgraded game/diagnostic sessions
 and room cleanup before runtime exit; HTTP graceful shutdown alone does not await upgrades.
 
-## Typed domain bombs and retained wire compatibility
+## Archived wire compatibility
 
 Core bomb views/events distinguish Timed, Remote and Contact triggers. This internal Rust
 representation does not change gameplay-v6 or its archived wire DTOs: wire bombs retain
@@ -229,4 +242,4 @@ mandatory `detonatesAt`. Shared checked projection accepts Timed records and rej
 untimed variant, including event-only records. One unsupported record fails the complete
 snapshot/report window; it is never omitted or assigned a substitute deadline. Publication
 failure does not advance revision or discard reports. Current rules admit only Timed bombs;
-untimed transport awaits gameplay-v7 and later weapon activation.
+v7 represents untimed triggers explicitly, but current gameplay still rejects them until weapon activation.

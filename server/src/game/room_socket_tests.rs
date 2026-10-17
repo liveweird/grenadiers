@@ -49,7 +49,7 @@ async fn connect(url: &str, token: &str) -> ClientSocket {
     send(
         &mut socket,
         json!({
-            "type":"authenticate", "protocolVersion":6, "token":token
+            "type":"authenticate", "protocolVersion":7, "token":token
         }),
     )
     .await;
@@ -103,9 +103,10 @@ async fn two_members_receive_personalized_admission_and_live_waiting_updates() {
         created["room"]["settings"],
         json!({
             "startingSpeedLevel":0, "turnAssistUnits":256,
-            "winsToFinish":3, "bombFuseTicks":180
+            "winsToFinish":3, "bombFuseTicks":180, "enabledItems":[]
         })
     );
+    assert_eq!(created["room"]["availableItems"], json!([]));
     let code = created["room"]["roomCode"].clone();
     let room_id = created["room"]["roomId"].clone();
 
@@ -125,7 +126,7 @@ async fn two_members_receive_personalized_admission_and_live_waiting_updates() {
 
     let settings = json!({
         "startingSpeedLevel":2, "turnAssistUnits":64,
-        "winsToFinish":2, "bombFuseTicks":90
+        "winsToFinish":2, "bombFuseTicks":90, "enabledItems":[]
     });
     send(
         &mut two,
@@ -188,8 +189,17 @@ async fn two_members_receive_personalized_admission_and_live_waiting_updates() {
     send(
         &mut one,
         json!({
-            "type":"placeBomb", "sequence":5, "roomId":room_id,
-            "roundId":1, "actionId":1
+            "type":"manualAction", "sequence":5, "roomId":room_id.clone(),
+            "roundId":1, "actionId":1, "action":"equipment"
+        }),
+    )
+    .await;
+    assert_eq!(next(&mut one).await["code"], "invalidMessage");
+    send(
+        &mut one,
+        json!({
+            "type":"manualAction", "sequence":6, "roomId":room_id,
+            "roundId":1, "actionId":1, "action":"bomb"
         }),
     )
     .await;
@@ -197,7 +207,7 @@ async fn two_members_receive_personalized_admission_and_live_waiting_updates() {
     send(
         &mut one,
         json!({
-            "type":"rematch", "sequence":6, "roomId":room_id,
+            "type":"rematch", "sequence":7, "roomId":room_id,
             "roundId":1, "ready":true
         }),
     )

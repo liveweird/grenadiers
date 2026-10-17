@@ -39,7 +39,8 @@ async fn retained_admission_blocks_late_commands_until_all_overdue_ticks_settle(
         late_bomb.await.unwrap(),
         Err(RoomError::StaleRoom)
     ));
-    assert!(replacement.state.as_ref().unwrap().bombs.is_empty());
+    let admitted: serde_json::Value = serde_json::from_str(&replacement.personal_frame).unwrap();
+    assert!(admitted["state"]["bombs"].as_array().unwrap().is_empty());
     drop(replacement);
     drop(second);
 }

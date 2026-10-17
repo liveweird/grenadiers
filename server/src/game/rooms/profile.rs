@@ -48,7 +48,9 @@ impl RoomProfile {
     }
 
     pub(super) fn initial_settings(self) -> RoomSettings {
-        grenadiers_core::protocol::v6::GameSettings::for_rules(self.rules_version()).domain()
+        let settings = grenadiers_core::protocol::v7::GameSettings::for_rules(self.rules_version());
+        grenadiers_core::protocol::v7::classic_settings(settings)
+            .expect("classic defaults contain no items")
     }
 
     pub(super) const fn initial_editor(self) -> Option<SeatId> {

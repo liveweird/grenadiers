@@ -47,7 +47,10 @@ fn creator_updates_are_revision_fenced_atomic_and_clear_both_readiness_flags() {
         .unwrap()
         .unwrap();
     assert_eq!(changed.room.settings_revision.get(), 2);
-    assert_eq!(changed.room.settings.domain(), replacement);
+    assert_eq!(
+        grenadiers_core::protocol::v7::classic_settings(changed.room.settings).unwrap(),
+        replacement
+    );
     assert!(changed.room.seats.iter().all(|seat| !seat.ready));
 
     let unchanged_revision = changed.room.revision;

@@ -1,15 +1,47 @@
-import type { GameState } from '../schema'
 import type { KeyboardBindings } from './bindings'
 
-// Validated wire versions share this presentation boundary. The arena does not
-// interpret scores, match outcomes, event envelopes, or transport versions.
+export type RenderablePickupKind = 'bombCapacity' | 'blastRange' | 'movementSpeed'
+interface PresentedActor {
+  id: number
+  seat: Seat
+  position: { x: number; y: number }
+  heading: Direction
+  alive: boolean
+}
+interface PresentedBomb {
+  id: number
+  cell: { column: number; row: number }
+  owner: number
+  range: number
+  placedAt: number
+  trigger?:
+    | { type: 'timed'; remainingTicks: number; paused: boolean }
+    | { type: 'remote' }
+    | { type: 'contact' }
+  blast?: 'standard' | 'piercing' | 'power'
+}
+
 export interface SnapshotMessage {
   room: {
     roomId: string
     roundId: number
     phase: { type: string }
+    presentationBaseline?: string
   }
-  state: GameState
+  state: {
+    physicalTick?: number
+    runningUpdates?: number
+    arena: {
+      width: 15
+      height: 13
+      terrain: Array<'floor' | 'wall'>
+      blocks: Array<{ column: number; row: number }>
+    }
+    actors: PresentedActor[]
+    bombs: PresentedBomb[]
+    flames: Array<{ cell: { column: number; row: number }; expiresAt: number }>
+    pickups: Array<{ cell: { column: number; row: number }; kind: RenderablePickupKind }>
+  }
 }
 export type Seat = 'one' | 'two'
 export type Direction = 'north' | 'east' | 'south' | 'west'

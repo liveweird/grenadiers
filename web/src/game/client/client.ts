@@ -1,24 +1,12 @@
-import type { Direction, GameClientMessage, GameServerMessage, GameSettings, RoomView, Snapshot, V6ErrorCode } from './schema'
+import type { Direction, GameClientMessage, GameServerMessage, GameSettings, RoomView, Snapshot, V7ErrorCode } from '../v7/schema'
 import { initialGameClientState, type AdmissionIntent, type GameClientState, type GameFailure } from './clientTypes'
 export { initialGameClientState, type AdmissionIntent, type GameClientState, type GameFailure } from './clientTypes'
 import {
-  acceptableBaseline,
-  controlIsObsolete,
-  dependenciesWithDefaults,
-  gameplayUrl,
-  isCurrentConnection,
-  MAX_COUNTER,
-  MAX_RECONNECT_ATTEMPTS,
-  newerRoom,
-  sessionToken,
-  settlesPendingSettings,
-  validateServerMessage,
-  type Capability,
-  type ControlCommand,
-  type ControlFailure,
-  type Dependencies,
-  type PendingSettings,
-  type RoomCommand,
+  acceptableBaseline, controlIsObsolete, dependenciesWithDefaults, gameplayUrl,
+  isCurrentConnection, MAX_COUNTER, MAX_RECONNECT_ATTEMPTS, newerRoom, sessionToken,
+  settlesPendingSettings, validateServerMessage,
+  type Capability, type ControlCommand, type ControlFailure, type Dependencies,
+  type PendingSettings, type RoomCommand,
 } from './clientProtocol'
 export { gameplayUrl } from './clientProtocol'
 
@@ -67,7 +55,8 @@ export class GameClient {
   updateSettings(settings: GameSettings): boolean {
     const room = this.state.room
     const own = room?.seats.find((seat) => seat.seat === this.state.youSeat)
-    if (!room || room.phase.type !== 'waiting' || room.settingsEditor !== this.state.youSeat
+    if (settings.enabledItems.length !== 0 || !room || room.availableItems.length !== 0
+      || room.phase.type !== 'waiting' || room.settingsEditor !== this.state.youSeat
       || own?.connection.type !== 'connected' || own.ready || this.state.admissionPending
       || this.state.leavePending || this.state.settingsPending) return false
     const sequence = this.sequence()
@@ -98,7 +87,7 @@ export class GameClient {
       return false
     }
     const actionId = this.nextAction
-    if (!this.sendRoomCommand({ type: 'placeBomb', actionId })) return false
+    if (!this.sendRoomCommand({ type: 'manualAction', actionId, action: 'bomb' })) return false
     this.nextAction += 1
     return true
   }
@@ -163,7 +152,7 @@ export class GameClient {
     socket.addEventListener('open', () => {
       if (!isCurrentConnection(generation, socket, this.generation, this.socket)) return
       this.update({ connection: 'authenticating' })
-      socket.send(JSON.stringify({ type: 'authenticate', protocolVersion: 6, token: credential }))
+      socket.send(JSON.stringify({ type: 'authenticate', protocolVersion: 7, token: credential }))
       credential = ''
     })
     socket.addEventListener('message', (event) => this.receive(generation, socket, event.data))
@@ -174,7 +163,9 @@ export class GameClient {
     if (!isCurrentConnection(generation, socket, this.generation, this.socket)) return
     try {
       const parsed: unknown = typeof raw === 'string' ? JSON.parse(raw) : undefined
-      if (!validateServerMessage(parsed)) { this.terminal('invalidServerMessage', true); return }
+      if (!validateServerMessage(parsed, this.capability?.seat ?? null)) {
+        this.terminal('invalidServerMessage', true); return
+      }
       this.handle(parsed)
     } catch { this.terminal('invalidServerMessage', true) }
   }
@@ -204,7 +195,7 @@ export class GameClient {
     this.capability = { roomId: message.room.roomId, seat: message.youSeat, token: message.resumeToken }
     this.admission = null
     this.admissionSequence = null
-    this.nextAction = message.lastBombActionId === null ? 1 : message.lastBombActionId + 1
+    this.nextAction = message.lastActionId === null ? 1 : message.lastActionId + 1
     this.sentControls = []
     this.controlFailure = null
     this.settingsSequence = null
@@ -212,7 +203,10 @@ export class GameClient {
     this.update({
       room: message.room, youSeat: message.youSeat,
       snapshot: message.state ? { type: 'snapshot', room: message.room, state: message.state, events: [] } : null,
-      admissionBaseline: { roomId: message.room.roomId, revision: message.room.revision, tick: message.room.tick },
+      admissionBaseline: {
+        roomId: message.room.roomId, revision: message.room.revision, tick: message.room.tick,
+        physicalTick: message.state?.physicalTick ?? null,
+      },
       admissionPending: false, settingsPending: false, reconnectAttempt: 0, failure: null,
     })
   }
@@ -257,7 +251,7 @@ export class GameClient {
     this.update({ room: null, snapshot: null, youSeat: null, admissionBaseline: null,
       leavePending: false, settingsPending: false, failure: null })
   }
-  private acceptError(code: V6ErrorCode, sequence: number | null): void {
+  private acceptError(code: V7ErrorCode, sequence: number | null): void {
     if (code === 'resumeRejected' && sequence === this.admissionSequence && this.capability) {
       this.terminal('resumeRejected', true)
       return
@@ -315,8 +309,8 @@ export class GameClient {
     if (this.state.connection !== 'authenticated' || this.state.admissionPending
       || this.state.leavePending || this.state.room?.phase.type !== 'running') return false
     const seat = this.state.youSeat
-    return Boolean(this.ownConnected() && seat
-      && this.state.snapshot?.state.actors.find((actor) => actor.seat === seat)?.alive)
+    const actor = this.state.snapshot?.state.actors.find((candidate) => candidate.seat === seat)
+    return Boolean(this.ownConnected() && seat && actor?.type === 'visible' && actor.alive)
   }
   private ownConnected(): boolean {
     return this.state.room?.seats.find((seat) => seat.seat === this.state.youSeat)?.connection.type === 'connected'

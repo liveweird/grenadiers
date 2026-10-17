@@ -152,6 +152,109 @@ async fn canceled_queued_join_does_not_mutate_before_the_next_join_in_the_same_b
 }
 
 #[tokio::test(flavor = "current_thread", start_paused = true)]
+async fn failed_personal_encoding_rolls_back_join_and_connected_replacement() {
+    let value = started();
+    super::driver::admissions::fail_next_admission_encoding();
+    assert!(matches!(
+        value.handle.join(binding(1, 1)).await.unwrap(),
+        Err(RoomError::CapacityReached)
+    ));
+    let first_binding = binding(2, 1);
+    let first = join(&value.handle, first_binding).await;
+    assert_eq!(first.seat, grenadiers_core::protocol::Seat::One);
+    assert_eq!(first.room.revision.get(), 2);
+
+    super::driver::admissions::fail_next_admission_encoding();
+    assert!(matches!(
+        value
+            .handle
+            .resume(
+                binding(3, 1),
+                grenadiers_core::protocol::Counter::new(2).unwrap(),
+                first.room_id.clone(),
+                first.resume_token.clone(),
+            )
+            .await
+            .unwrap(),
+        Err(RoomError::ResumeRejected)
+    ));
+    assert_eq!(
+        value
+            .handle
+            .action(
+                first_binding,
+                first.room_id.clone(),
+                first.round_id,
+                MatchAction::Ready(true),
+            )
+            .await
+            .unwrap(),
+        Ok(())
+    );
+    value.task.abort();
+}
+
+#[tokio::test(flavor = "current_thread", start_paused = true)]
+async fn failed_replacement_encoding_preserves_pending_reports_and_revision() {
+    let value = started();
+    let (first, second, one, _) = start_round(&value.handle).await;
+    value
+        .handle
+        .action(
+            one,
+            first.room_id.clone(),
+            first.round_id,
+            MatchAction::Bomb(1),
+        )
+        .await
+        .unwrap()
+        .unwrap();
+    advance_ticks(1).await;
+    let revision = publication(&value.notices).room.revision;
+
+    super::driver::admissions::fail_next_admission_encoding();
+    assert!(matches!(
+        value
+            .handle
+            .resume(
+                binding(3, 1),
+                grenadiers_core::protocol::Counter::new(2).unwrap(),
+                first.room_id.clone(),
+                first.resume_token.clone(),
+            )
+            .await
+            .unwrap(),
+        Err(RoomError::ResumeRejected)
+    ));
+    assert_eq!(publication(&value.notices).room.revision, revision);
+    value
+        .handle
+        .action(
+            one,
+            first.room_id.clone(),
+            first.round_id,
+            MatchAction::Movement(None),
+        )
+        .await
+        .unwrap()
+        .unwrap();
+    advance_ticks(2).await;
+    let frame = publication(&value.notices)
+        .frame(grenadiers_core::game::SeatId::One)
+        .unwrap();
+    let snapshot: serde_json::Value = serde_json::from_str(&frame).unwrap();
+    assert!(
+        snapshot["events"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|event| { event["kind"]["type"] == "bombPlaced" })
+    );
+    drop(second);
+    value.task.abort();
+}
+
+#[tokio::test(flavor = "current_thread", start_paused = true)]
 async fn abort_before_first_poll_runs_cleanup_exactly_once() {
     let (handle, owner, _shutdown) = prepared();
     drop(handle);

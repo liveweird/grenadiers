@@ -119,7 +119,7 @@ describe('React arena ownership and keyboard scope', () => {
     const view = render(<GameArena {...options} />)
     await imports()
     const newer = structuredClone(options.snapshot!)
-    newer.state.runningUpdates += 3
+    newer.state.physicalTick = (newer.state.physicalTick ?? 0) + 3
     view.rerender(<GameArena {...options} snapshot={newer} />)
     const renderer = instance()
     await act(async () => { resolve(renderer) })

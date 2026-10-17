@@ -1,9 +1,9 @@
-use std::sync::Arc;
-
 use grenadiers_core::{
     game::SeatId,
-    protocol::v6::{GameServerMessage, RoomView, encode_server_message, validate_admission},
-    protocol::{Counter, GameState, project_state},
+    protocol::{
+        Counter,
+        v7::{ClassicCapture, RoomView, capture_classic},
+    },
     room::{MatchLifecycle, reconnect::ReservationState},
 };
 
@@ -22,7 +22,8 @@ pub(in crate::game::rooms) struct PreparedRuntimeAdmission {
     seat: SeatId,
     kind: AdmissionKind,
     pub(in crate::game::rooms) room: RoomView,
-    pub(in crate::game::rooms) state: Option<GameState>,
+    pub(in crate::game::rooms) state_epoch: Option<Counter>,
+    pub(in crate::game::rooms) capture: Option<ClassicCapture>,
     pub(in crate::game::rooms) last_bomb_action_id: Option<Counter>,
     pub(in crate::game::rooms) notice: MatchNotice,
 }
@@ -82,20 +83,14 @@ impl MatchRuntime {
         }) {
             return Err(MatchRuntimeError::Publication);
         }
-        let projected = self
+        let body = self
             .sim
             .as_ref()
-            .filter(|_| publication::phase_has_body(&room.phase))
-            .map(|sim| {
-                project_state(&sim.state.public_view())
-                    .map(|projected| (sim.epoch, projected))
-                    .map_err(|_| MatchRuntimeError::Publication)
-            })
+            .filter(|_| publication::phase_has_body(&room.phase));
+        let capture = body
+            .map(|sim| capture_classic(&sim.state, &[]).map_err(|_| MatchRuntimeError::Publication))
             .transpose()?;
-        let state_epoch = projected
-            .as_ref()
-            .map(|(epoch, _)| wire_counter(*epoch))
-            .transpose()?;
+        let state_epoch = body.map(|sim| wire_counter(sim.epoch)).transpose()?;
         let last_bomb_action_id = if state_epoch == Some(room.round_id) {
             self.inputs
                 .last_bomb_action(seat)
@@ -104,30 +99,20 @@ impl MatchRuntime {
         } else {
             None
         };
-        validate_admission(
-            &room,
-            publication::wire_seat(seat),
-            state_epoch,
-            projected.as_ref().map(|(_, projected)| projected),
-            last_bomb_action_id,
-        )
-        .map_err(|_| MatchRuntimeError::Publication)?;
-        let state = projected.map(|(_, projected)| projected.state);
-        let notice = if let Some(state) = state.clone() {
-            let encoded = encode_server_message(&GameServerMessage::Snapshot {
-                room: room.clone(),
-                state,
-                events: Vec::new(),
-            })
-            .map_err(|_| MatchRuntimeError::Publication)?;
-            MatchNotice {
-                room: room.clone(),
-                snapshot: Some(Arc::from(encoded)),
-            }
+        let notice = if let Some(sim) = body {
+            publication::snapshot(
+                &self.identity,
+                &lifecycle,
+                revision,
+                self.settings_revision,
+                self.settings_editor,
+                sim,
+                &[],
+            )?
         } else {
             MatchNotice {
                 room: room.clone(),
-                snapshot: None,
+                frames: None,
             }
         };
         Ok(PreparedRuntimeAdmission {
@@ -136,7 +121,8 @@ impl MatchRuntime {
             seat,
             kind,
             room,
-            state,
+            state_epoch,
+            capture,
             last_bomb_action_id,
             notice,
         })

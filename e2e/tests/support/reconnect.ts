@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test'
-import type { GameServerMessage, Seat } from '../../../web/src/game/v6/schema'
+import type { GameServerMessage, Seat } from '../../../web/src/game/v7/schema'
 
 type Admission = Extract<GameServerMessage, { type: 'admitted' }>
 export type PublicAdmission = {
@@ -33,9 +33,10 @@ export async function installTransportProbe(page: Page): Promise<void> {
     function publicAdmission(message: Admission, stableCapability: boolean): PublicAdmission {
       return {
         roomId: message.room.roomId, seat: message.youSeat,
-        actionFloor: message.lastBombActionId, tick: message.room.tick,
+        actionFloor: message.lastActionId, tick: message.room.tick,
         hasState: message.state !== null,
-        positions: message.state?.actors.map((actor) => ({ seat: actor.seat, ...actor.position })) ?? [],
+        positions: message.state?.actors.flatMap((actor) => actor.type === 'visible'
+          ? [{ seat: actor.seat, ...actor.position }] : []) ?? [],
         bombIds: message.state?.bombs.map((bomb) => bomb.id) ?? [], stableCapability,
       }
     }
@@ -96,7 +97,7 @@ export async function installTransportProbe(page: Page): Promise<void> {
         socket.addEventListener('close', fail, { once: true })
         socket.addEventListener('open', () => {
           stage = 'open'
-          socket.send(JSON.stringify({ type: 'authenticate', protocolVersion: 6, token: session.token }))
+          socket.send(JSON.stringify({ type: 'authenticate', protocolVersion: 7, token: session.token }))
         }, { once: true })
         socket.addEventListener('message', (event: MessageEvent) => {
           const message = JSON.parse(String(event.data)) as GameServerMessage

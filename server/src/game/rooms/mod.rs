@@ -14,7 +14,6 @@ mod input;
 mod match_owner;
 mod match_runtime;
 mod profile;
-#[cfg(test)]
 mod replay;
 mod types;
 

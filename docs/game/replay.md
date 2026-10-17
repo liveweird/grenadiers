@@ -1,19 +1,19 @@
 # Private deterministic replay evidence
 
-The test-only `server::game::rooms::replay` module replays semantic operations through the
-real MatchRuntime, InputMailbox, generated-world profile, and entropy seam. It does not run
-a second simulator. Live capture is a separate increment; no endpoint or persistent journal
-is available in this release.
+The production MatchRuntime records accepted semantic operations in a private in-memory
+journal. The test-only replay runner drives the real MatchRuntime, InputMailbox, generated-world
+profile, and entropy seam; it does not run a second simulator. Replay inspection remains
+test-only. No endpoint, public export, or persistent journal is available.
 
 A versioned header identifies format 1, M5 lifecycle semantics, classic-v2 physics,
 generator-v1, initial occupied seats, and initial absolute tick zero. Operations record the
 authoritative tick and increasing order within that tick: occupation, accepted readiness/
 movement/bomb/rematch, immediate input fencing, tick advancement, committed departure batches,
-and interruption. Actual-start markers contain the real epoch, assignment, and private
+and interruption, including one atomic interrupt-plus-depart operation. Actual-start markers contain the real epoch, assignment, and private
 GenerationRecord. Outcomes are recomputed, never injected.
 
 The runner rejects unsupported profiles, time/order errors, invalid bomb action bounds,
-missing/extra seeds, mismatched assignments, missing start markers, and truncated journals.
+missing/extra seeds, mismatched assignments, missing start markers, and truncated/incomplete journals.
 Every actual round consumes its own recorded seed; canceled countdowns consume none.
 Movement refreshes and immediate input clearing are significant: recording only a later
 lifecycle departure cannot reproduce a vulnerable running character or queued bomb.
@@ -28,8 +28,23 @@ journal storage budget.
 Records contain no session/resume credentials, raw frames, socket IDs, or public room codes.
 Generation records retain private seeds; their Debug output is redacted. Journal Debug shows
 only header, record count, and status. Private test checkpoints compare complete State,
-MatchLifecycle/series, input mailbox contents, pending StepReports, and revision.
+MatchLifecycle/series, input mailbox contents, and pending StepReports. Transport publication
+revision is excluded: initial/final notices may advance it without changing gameplay. Current
+uncaptured publication callers operate with empty reports; future callers must preserve that
+invariant or record their report-clearing operation.
 
 Run `cargo test -p grenadiers-server game::rooms::replay`, then `scripts/gates.sh server`
 and `scripts/gates.sh coverage`. Fixtures exercise generated draws, three real wins, rematch,
 cancellation, interruption, TTL refresh, and input-fence ordering, plus malformed journals.
+
+Capture happens only after successful semantic mutation, including unchanged readiness and
+same-direction TTL refreshes. Wrong epoch/phase, rate-limited, duplicate, and out-of-wire-range
+bomb commands create no records. Input fencing remains separate from later boundary departure.
+Replay disables its own capture privately to avoid recursive journals.
+
+The profile construction API reports unavailable entropy or failed construction as the same
+absence. Capture therefore marks `Incomplete { reason: RoundConstruction }` after the truthful
+interrupted tick; replay refuses completeness instead of inventing a seed or world. Fixed-v1
+unit fixtures are explicitly unsupported. Journal overhead plus actual allocated record
+capacity measures 3,840,056 bytes on the verification target. Owner destruction frees it;
+32 bounded rooms retain below 128 MiB of journal storage. No restart recovery is promised.

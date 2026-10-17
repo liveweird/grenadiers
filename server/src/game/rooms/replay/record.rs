@@ -12,7 +12,7 @@ pub(super) const GENERATED_V1: u16 = 1;
 pub(super) const MAX_RECORDS: usize = 60_000;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub(super) struct Header {
+pub(in crate::game::rooms) struct Header {
     pub(super) format_version: u16,
     pub(super) lifecycle_profile: u16,
     pub(super) rules_version: u16,
@@ -22,7 +22,7 @@ pub(super) struct Header {
 }
 
 impl Header {
-    pub(super) const fn m5(initial_seats: [bool; 2]) -> Self {
+    pub(in crate::game::rooms) const fn m5(initial_seats: [bool; 2]) -> Self {
         Self {
             format_version: FORMAT_VERSION,
             lifecycle_profile: M5_LIFECYCLE_PROFILE,
@@ -35,7 +35,7 @@ impl Header {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub(super) enum ReplayAction {
+pub(in crate::game::rooms) enum ReplayAction {
     Ready(bool),
     Movement(Option<Direction>),
     Bomb(u32),
@@ -43,7 +43,7 @@ pub(super) enum ReplayAction {
 }
 
 #[derive(Clone, Copy, PartialEq, Eq)]
-pub(super) enum Operation {
+pub(in crate::game::rooms) enum Operation {
     Occupy(SeatId),
     Action {
         seat: SeatId,
@@ -54,6 +54,10 @@ pub(super) enum Operation {
     Tick,
     Depart([Option<DepartureReason>; 2]),
     Interrupt(InterruptReason),
+    InterruptAndDepart {
+        reason: InterruptReason,
+        departures: [Option<DepartureReason>; 2],
+    },
     RoundStarted {
         epoch: u64,
         assignment: RoundAssignment,
@@ -74,17 +78,30 @@ const _: () = assert!(MAX_RECORDS * size_of::<Record>() < 4 * 1024 * 1024);
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(super) enum ReplayStatus {
     Complete,
-    Truncated { last_complete_index: u32 },
+    Truncated {
+        last_complete_index: u32,
+    },
+    Incomplete {
+        last_complete_index: Option<u32>,
+        reason: IncompleteReason,
+    },
+    #[cfg(test)]
+    UnsupportedProfile,
 }
 
-pub(super) struct Journal {
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(super) enum IncompleteReason {
+    RoundConstruction,
+}
+
+pub(in crate::game::rooms) struct Journal {
     pub(super) header: Header,
     pub(super) records: Vec<Record>,
     pub(super) status: ReplayStatus,
 }
 
 impl Journal {
-    pub(super) fn new(header: Header) -> Self {
+    pub(in crate::game::rooms) fn new(header: Header) -> Self {
         Self {
             header,
             records: Vec::with_capacity(MAX_RECORDS),
@@ -92,7 +109,16 @@ impl Journal {
         }
     }
 
-    pub(super) fn record(&mut self, tick: Tick, operation: Operation) -> bool {
+    #[cfg(test)]
+    pub(in crate::game::rooms) fn unsupported_profile() -> Self {
+        Self {
+            header: Header::m5([false; 2]),
+            records: Vec::new(),
+            status: ReplayStatus::UnsupportedProfile,
+        }
+    }
+
+    pub(in crate::game::rooms) fn record(&mut self, tick: Tick, operation: Operation) -> bool {
         if self.status != ReplayStatus::Complete {
             return false;
         }
@@ -118,12 +144,32 @@ impl Journal {
         true
     }
 
+    pub(in crate::game::rooms) fn mark_round_construction_incomplete(&mut self) {
+        if self.status == ReplayStatus::Complete {
+            self.status = ReplayStatus::Incomplete {
+                last_complete_index: self
+                    .records
+                    .len()
+                    .checked_sub(1)
+                    .and_then(|index| u32::try_from(index).ok()),
+                reason: IncompleteReason::RoundConstruction,
+            };
+        }
+    }
+
+    #[cfg(test)]
     pub(super) const fn status(&self) -> ReplayStatus {
         self.status
     }
 
+    #[cfg(test)]
     pub(super) fn len(&self) -> usize {
         self.records.len()
+    }
+
+    #[cfg(test)]
+    pub(super) fn allocated_bytes(&self) -> usize {
+        size_of::<Self>() + self.records.capacity() * size_of::<Record>()
     }
 }
 

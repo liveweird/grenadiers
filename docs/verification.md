@@ -1,5 +1,34 @@
 # Repository verification
 
+## M6 accepted-operation capture — 2026-10-17
+
+The locked server gate passes **251 core tests, 132 server tests, and 2 doctests**.
+Rust coverage is **6,496/6,926 lines, 93.79%**, above the unchanged 80% floor. Independent
+review reports no actionable capture/privacy/bounds findings. Seven replay cases compare
+complete semantic private checkpoints from actual captured generated matches, including
+cancellation, draws, three wins, rematch, TTL refresh, immediate fences, and atomic shutdown
+with pending departure. Wrong phase/epoch, rate-limit, duplicate, and wire-bound rejections
+produce no records. No-op accepted readiness and refreshes remain recorded.
+
+Journal allocation plus header measures **3,840,056 bytes** and never grows past its cap.
+Truncation leaves later gameplay checkpoints unchanged; construction failure is explicitly
+incomplete and cannot certify a replay. Production capture retains no credential/frame/binding
+identity. Current unrecorded notice callers have empty reports; future notice changes must
+preserve that invariant or record their effect. Transport revision is excluded from semantic
+comparison. Replay inspection remains test-only, with no public export or restart persistence.
+Exact-image deployment acceptance is recorded below.
+
+A clean committed-tree build of `cc616e3e459514dc156d95b36fe6abff02fc2628` produces
+`sha256:a66fdfde941675c7dd8cc26829a6b4e7a1e867e373f95c0386895ebae95781e3`.
+Both Compose and local Kubernetes run that same artifact and pass real JSON health/ready
+probes, six default browser scenarios, one pickup scenario and one full-match scenario.
+Fixture suites disable retries. Strict Kubernetes 1.33 schemas pass 3/3; pinned archive-only
+Trivy reports zero fixable HIGH/CRITICAL findings. Runtime checks verify UID/GID 65532,
+read-only root, dropped capabilities, seccomp/probes, and read-only mode-0444 fixture mounts;
+no seed file exists under `/app`. Immutable client `817cd78` and complete image/build hashes,
+logs and screenshots are retained in `/tmp/grenadiers-v033-acceptance`. Temporary stacks,
+namespaces, Secrets, forwards, exports and scan archives are cleaned; the image remains.
+
 ## M6 private replay-runner foundation — 2026-10-17
 
 The locked server gate passes **251 core tests, 129 server tests, and 2 doctests**.

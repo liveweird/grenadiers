@@ -22,44 +22,26 @@ use crate::round_seed::RoundSeedSource;
 
 struct RecordingRuntime {
     runtime: MatchRuntime,
-    journal: Journal,
 }
 
 impl RecordingRuntime {
     fn new(seeds: impl IntoIterator<Item = [u8; 32]>) -> Self {
         let seeds = Arc::new(Mutex::new(seeds.into_iter().collect::<VecDeque<_>>()));
         let source = Arc::clone(&seeds);
-        Self {
-            runtime: MatchRuntime::new(
-                identity(),
-                RoundSeedSource::with_entropy(move |bytes| {
-                    let seed = source.lock().map_err(|_| ())?.pop_front().ok_or(())?;
-                    bytes.copy_from_slice(&seed);
-                    Ok(())
-                }),
-            ),
-            journal: Journal::new(Header::m5([false; 2])),
-        }
+        let mut runtime = MatchRuntime::new(
+            identity(),
+            RoundSeedSource::with_entropy(move |bytes| {
+                let seed = source.lock().map_err(|_| ())?.pop_front().ok_or(())?;
+                bytes.copy_from_slice(&seed);
+                Ok(())
+            }),
+        );
+        runtime.initial_notice().unwrap();
+        Self { runtime }
     }
 
     fn append(&mut self, operation: Operation) {
-        let tick = self.runtime.lifecycle().tick();
-        let before = self.runtime.lifecycle().phase();
         apply(&mut self.runtime, operation).unwrap();
-        assert!(self.journal.record(tick, operation));
-        if before != MatchPhase::Running && self.runtime.lifecycle().phase() == MatchPhase::Running
-        {
-            let inspection = self.runtime.replay_inspection();
-            let simulation = inspection.simulation.unwrap();
-            assert!(self.journal.record(
-                self.runtime.lifecycle().tick(),
-                Operation::RoundStarted {
-                    epoch: simulation.epoch,
-                    assignment: simulation.state.round_assignment(),
-                    generation: simulation.generation.unwrap(),
-                },
-            ));
-        }
     }
 
     fn action(&mut self, seat: SeatId, action: ReplayAction) {
@@ -141,9 +123,9 @@ fn generated_match_replays_cancellation_wins_rematch_draw_and_interruption() {
     recording.finish(&[SeatId::One, SeatId::Two]);
     recording.append(Operation::Interrupt(InterruptReason::ServerStopped));
 
-    let replayed = replay(&recording.journal).unwrap();
+    let replayed = replay(recording.runtime.replay_journal()).unwrap();
     assert_eq!(replayed, recording.checkpoint());
-    assert!(recording.journal.len() < MAX_RECORDS);
+    assert!(recording.runtime.replay_journal().len() < MAX_RECORDS);
 }
 
 #[test]
@@ -161,7 +143,10 @@ fn movement_refresh_and_predeparture_fence_preserve_input_semantics() {
     let refreshed = recording.checkpoint();
     assert!(refreshed.inputs.contains("direction: Some(East)"));
     assert!(!refreshed.reports.is_empty());
-    assert_eq!(replay(&recording.journal).unwrap(), refreshed);
+    assert_eq!(
+        replay(recording.runtime.replay_journal()).unwrap(),
+        refreshed
+    );
     recording.action(SeatId::One, ReplayAction::Bomb(1));
     recording.append(Operation::InputFence(SeatId::One));
     recording.append(Operation::Tick);
@@ -181,7 +166,10 @@ fn movement_refresh_and_predeparture_fence_preserve_input_semantics() {
             .bombs()
             .is_empty()
     );
-    assert_eq!(replay(&recording.journal).unwrap(), expected);
+    assert_eq!(
+        replay(recording.runtime.replay_journal()).unwrap(),
+        expected
+    );
 }
 
 #[test]
@@ -218,7 +206,8 @@ fn malformed_versions_order_bounds_and_round_metadata_fail_closed() {
     let mut recording = occupied([[9; 32]]);
     recording.start();
     let marker = recording
-        .journal
+        .runtime
+        .replay_journal_mut()
         .records
         .iter_mut()
         .find(|record| matches!(record.operation, Operation::RoundStarted { .. }))
@@ -227,30 +216,40 @@ fn malformed_versions_order_bounds_and_round_metadata_fail_closed() {
         *assignment = RoundAssignment::new(NonZeroU32::new(2).unwrap());
     }
     assert_eq!(
-        replay(&recording.journal),
+        replay(recording.runtime.replay_journal()),
         Err(ReplayError::RoundStartMismatch)
     );
 
     let mut action_bound = occupied([[10; 32]]);
     action_bound.start();
     action_bound.action(SeatId::One, ReplayAction::Bomb(MAX_COUNTER));
-    assert!(replay(&action_bound.journal).is_ok());
-    if let Operation::Action { action, .. } =
-        &mut action_bound.journal.records.last_mut().unwrap().operation
+    assert!(replay(action_bound.runtime.replay_journal()).is_ok());
+    if let Operation::Action { action, .. } = &mut action_bound
+        .runtime
+        .replay_journal_mut()
+        .records
+        .last_mut()
+        .unwrap()
+        .operation
     {
         *action = ReplayAction::Bomb(MAX_COUNTER + 1);
     }
     assert_eq!(
-        replay(&action_bound.journal),
+        replay(action_bound.runtime.replay_journal()),
         Err(ReplayError::InvalidBounds)
     );
-    if let Operation::Action { action, .. } =
-        &mut action_bound.journal.records.last_mut().unwrap().operation
+    if let Operation::Action { action, .. } = &mut action_bound
+        .runtime
+        .replay_journal_mut()
+        .records
+        .last_mut()
+        .unwrap()
+        .operation
     {
         *action = ReplayAction::Bomb(u32::MAX);
     }
     assert_eq!(
-        replay(&action_bound.journal),
+        replay(action_bound.runtime.replay_journal()),
         Err(ReplayError::InvalidBounds)
     );
 }
@@ -260,10 +259,14 @@ fn missing_extra_seed_and_truncation_are_never_complete_replays() {
     let mut missing = occupied([[1; 32]]);
     missing.start();
     missing
-        .journal
+        .runtime
+        .replay_journal_mut()
         .records
         .retain(|record| !matches!(record.operation, Operation::RoundStarted { .. }));
-    assert_eq!(replay(&missing.journal), Err(ReplayError::MissingSeed));
+    assert_eq!(
+        replay(missing.runtime.replay_journal()),
+        Err(ReplayError::MissingSeed)
+    );
 
     let mut extra = Journal::new(Header::m5([false; 2]));
     let generated = grenadiers_core::game::generate_arena([2; 32]).record();

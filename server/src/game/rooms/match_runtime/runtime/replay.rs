@@ -8,7 +8,6 @@ use super::MatchRuntime;
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub(in crate::game::rooms) struct RuntimeInspection {
     pub(in crate::game::rooms) lifecycle: MatchLifecycle,
-    pub(in crate::game::rooms) revision: u32,
     pub(in crate::game::rooms) simulation: Option<SimulationInspection>,
     pub(in crate::game::rooms) inputs: String,
     pub(in crate::game::rooms) reports: Vec<StepReport>,
@@ -25,7 +24,6 @@ impl MatchRuntime {
     pub(in crate::game::rooms) fn replay_inspection(&self) -> RuntimeInspection {
         RuntimeInspection {
             lifecycle: self.lifecycle.clone(),
-            revision: self.revision,
             simulation: self.sim.as_ref().map(|sim| SimulationInspection {
                 epoch: sim.epoch,
                 state: sim.state.clone(),

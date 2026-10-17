@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.3.21 — 2026-10-17
+## 0.3.21 — 2026-10-18
 
 - Represent domain bomb triggers explicitly as timed, remote or contact, without invented
   deadlines for untimed variants. Current rules still accept timed bombs only.
@@ -9,13 +9,14 @@
 - Retain Classic physics, archived replay outcomes and gameplay-v6 compatibility. No remote
   bomb, landmine or other new item is activated by this foundation.
 
-## 0.3.20 — 2026-10-17
+## 0.3.20 — 2026-10-18
 
 - Retain accepted manual bomb actions in bounded ordered queues through server admission
   and core input processing, ready for later remote-bomb commands.
 - Preserve Classic simultaneous placement claims, raw-core Clear cancellation, server
   movement-before-actions ordering, reconnect action IDs and private replay completeness.
 - Keep new items disabled and preserve gameplay-v6, existing rules and journal formats.
+- Add bounded, secret-free reconnect probe diagnostics with unchanged deadlines and assertions.
 
 ## 0.3.19 — 2026-10-17
 

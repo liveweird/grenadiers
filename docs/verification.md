@@ -1,5 +1,80 @@
 # Repository verification
 
+## Typed domain bomb triggers — 2026-10-18
+
+Clean archive source `82fe88c299b8e74a410d231b24cb3aad92e7e242` builds image
+`sha256:68ed7ca87c1434c6b309b3894ee5814fa77453c022bc62ad2b99e5bde0f729f4`.
+Application inputs match reviewed source `8653522543c4ff964128597a4261170dc019863c`;
+the accepted harness includes the bounded reconnect diagnostics from v0.3.20.
+The same image passes **24/24 scenarios in Compose and 24/24 in Kubernetes, retries zero**:
+eight default, pickup, match/rematch, two reconnect, controls, headed visibility, audio and
+nine latency cases. All sixteen result files pass. Independent evidence audit is clear.
+Evidence is at `/tmp/grenadiers-v0321-acceptance`.
+
+346 core tests, 170 server tests and two doctests pass; four dedicated performance profiles
+remain intentionally ignored. All **230 web tests**, contract checks, lint, Knip, builds and
+E2E static/24-scenario parity pass. Rust line coverage is **94.22%**, above the unchanged 80% floor.
+Independent code review is clear. Regression tests cover checked trigger construction, Classic
+rejection before mutation, exact timed behavior, unsupported event-only projection and
+publication failure preserving revisions and reports.
+
+Dependency audits pass with zero npm vulnerabilities. Strict pinned Kubernetes 1.33 schemas
+validate all three resources. Pinned archive-only Trivy passes the existing HIGH/CRITICAL
+`--ignore-unfixed` filter. Both deployments use UID/GID 65532, read-only roots, dropped ALL
+capabilities and no privilege escalation; Kubernetes retains RuntimeDefault and 500m/256Mi.
+Every seeded run uses an external mode-0444 fixture, root-owned in Kubernetes; no seed is baked
+into the image. Correct `/api/v1/health` and `/api/v1/ready` probes return HTTP 200,
+`application/json`, status ok and `Cache-Control: no-store`.
+
+Observed local/shaped latency maxima are Compose **50.388/173.047 ms**, Kubernetes
+**89.947/161.098 ms**, with zero samples above 250 ms and zero Kubernetes CPU throttles.
+These are bounded public-state delivery measurements, not pixel latency, FPS or WAN guarantees.
+All owned deployments, namespaces, ports and browser containers were removed.
+Integration/documentation changes preserve accepted application inputs. Current gameplay-v6,
+Classic rules and journal formats remain unchanged; Remote/Contact triggers are not activated.
+
+## Ordered manual actions — 2026-10-18
+
+Clean archive source `305a5844f3d1add8dff95eca26090c3f21918671` builds image
+`sha256:961c04ee26ef79a3bac4459dbb9397a0291db18e882d692503ae2ea2870584a5`.
+The same image passes **24/24 scenarios in Compose and 24/24 in Kubernetes, retries zero**:
+eight default, pickup, match/rematch, two reconnect, controls, headed visibility, audio and
+nine latency cases. Seven latency cases cover queues/observers; two measure native input.
+All sixteen deployment result files pass. Evidence is at `/tmp/grenadiers-v0320-acceptance`.
+
+An initial PR browser run timed out in the private connected-takeover probe. Its peer CI run
+passed all 24 cases on identical source. Sanitized histories ended in Running at room ticks
+653 and 677 with both seats connected; they do not retain state ticks or arbitrary error frames.
+The cause remains unproven. No product change, retry, deadline or assertion relaxation was made.
+Test source `bd83619e9af68146f4609197530e4414733cd035` adds bounded diagnostics containing only
+stage, socket state, public message count/type and elapsed time, with a closed message-type list.
+
+Both reconnect cases pass again through each deployment on the accepted image, retries zero;
+Compose takes 38.4 seconds and Kubernetes 40.0 seconds. The other 22 cases are unchanged, retaining
+a final rollup of 24 per path. Recheck evidence is at `/tmp/grenadiers-v0320-reconnect-recheck`.
+Application build inputs remain identical to the clean image source. The independent matrix
+audit and coordinator recheck audit are clear; the initial CI failure remains diagnostic evidence.
+
+336 core tests, 169 server tests and two doctests pass; four dedicated performance profiles
+remain intentionally ignored. All **230 web tests**, contract checks, lint, Knip, builds and
+E2E static/24-scenario parity pass. Rust line coverage is **94.24%** above the unchanged 80% floor.
+Independent code review is clear. Tests cover retained commands, raw Clear versus server fencing,
+A/B/A shared-cell conflicts, admission limits/high-water IDs, reconnect and complete replay queues.
+
+Cargo-deny and both npm audits pass with zero npm vulnerabilities. Strict pinned Kubernetes
+1.33 schemas validate all three resources. Pinned archive-only Trivy passes the existing
+HIGH/CRITICAL `--ignore-unfixed` release filter without a Docker socket. Both paths use UID/GID
+65532, read-only roots, dropped ALL capabilities and no privilege escalation; Kubernetes keeps
+RuntimeDefault and 500m/256Mi limits. All seeded runs use external mode-0444 fixtures, with a
+root-owned Kubernetes projection; no seed is baked into the image. Correct `/api/v1/health`
+and `/api/v1/ready` probes return HTTP 200, JSON status ok and `Cache-Control: no-store`.
+
+Observed local/shaped latency maxima are Compose **46.857/159.602 ms**, Kubernetes
+**54.549/143.498 ms**, with zero samples above 250 ms and zero Kubernetes CPU throttles.
+These are bounded public-state delivery measurements, not pixel latency, FPS or WAN guarantees.
+All owned matrix/recheck projects, namespaces, ports and browser containers were removed.
+No new item, equipment action, rules profile or wire field is activated by this release.
+
 ## Expanded item core foundations — 2026-10-17
 
 Clean archive source `88ac9842be3f32c7c29189feb19a19f4883d24ea` builds image

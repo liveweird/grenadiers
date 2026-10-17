@@ -3,7 +3,7 @@
 Status: gameplay contracts, checked domain conversion, HTTP session issuance, and authenticated
 gameplay WebSockets with authoritative two-seat rounds are implemented. `api/gameplay.schema.json`, independent Rust
 `core::protocol` types, and generated `web/src/game/schema.ts` define socket messages.
-The browser validates these messages and drives the playable fixed-map duel. Diagnostic `/api/v1/ws` and
+The browser validates these messages and drives the playable generated-map duel. Diagnostic `/api/v1/ws` and
 `api/realtime.schema.json` remain unchanged.
 
 ## Authentication and compatibility
@@ -148,9 +148,9 @@ snapshot. See [ADR 0008](../decisions/0008-gameplay-protocol.md).
 ## Profile and version evolution
 
 An immutable server room profile owns state construction and its rules/map labels. Publication
-rejects state whose checked rules version disagrees with that profile. The current profile
-still uses classic-v1 rules, the fixed map, and an empty pickup array; schema support for
-classic-v2/generated-v1 does not activate generated rounds.
+rejects state whose checked rules version disagrees with that profile. Production now uses classic-v2 rules and generated-v1 arenas. Snapshots initially have an
+empty pickup array because contents are concealed; only exposed items become public.
+Fixed-classic-v1 remains an explicit unit fixture, not a production selector.
 
 Gameplay v2 is incompatible with v1. Reload clients when upgrading the single server. Both
 old and future versions are rejected before credential lookup, so rejection cannot claim or

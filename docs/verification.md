@@ -1,5 +1,23 @@
 # Repository verification
 
+## M4 live generated rounds — 2026-10-17
+
+The locked server gate passes **178 core tests, 85 server tests, and 2 doctests**.
+Rust line coverage passes the unchanged 80% floor at **4,030/4,340 lines, 92.86%**.
+Independent review reports no actionable seed/profile/activation findings. Tests cover strict
+bounded file parsing, read-once reproduction, startup redaction, independent authentication/
+discovery entropy, actual-start-only generation, canceled countdowns, profile/state agreement,
+no substitute world after entropy failure, private retained records, and explicit snapshot
+seed/private-key absence. A malformed-seed native process exits with a redacted RoundSeed
+error before trying an already occupied listener.
+
+Native Chromium passes all **six generated-map smoke scenarios** and the separate **two-browser
+pickup acceptance**. The latter reveals and collects capacity/range through keyboard/public
+positions, updates both HUDs, and proves simultaneous range-2/range-3 bombs. A core fixture
+trace independently survives that route at tick 631. CI runs random smoke before recreating
+the same image with the read-only fixture; the fixture command fails without explicit setup.
+Exact-image default-random and fixture deployment acceptance follows before merge.
+
 ## M4 exposed-item rendering and upgrade HUD — 2026-10-17
 
 The complete web gate passes **83 tests** with **96.80% statements, 92.08% branches,

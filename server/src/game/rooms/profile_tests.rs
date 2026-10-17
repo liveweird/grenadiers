@@ -86,6 +86,17 @@ fn generated_profile_constructs_classic_v2_with_assignment_spawns_and_private_re
     let value: serde_json::Value = serde_json::from_str(&encoded).unwrap();
     assert_eq!(value["room"]["rulesVersion"], 2);
     assert_eq!(value["room"]["mapId"], "generated_v1");
+    assert_eq!(value["state"]["pickups"], serde_json::json!([]));
+    assert!(!encoded.contains(&"13".repeat(32)));
+    for private in [
+        "seed",
+        "generationRecord",
+        "concealed",
+        "pending",
+        "assignment",
+    ] {
+        assert!(!encoded.contains(&format!("\"{private}\"")));
+    }
 }
 
 #[test]

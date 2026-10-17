@@ -12,7 +12,7 @@ never advances the simulation or predicts a different outcome.
 4. When the round starts, select the courtyard to give it keyboard focus. Move with arrows
    or W/A/S/D; press Space once per bomb. Hold a direction to keep moving.
 5. A surviving player wins; simultaneous elimination or the round timeout draws. Choose
-   **Leave room** to return to room admission. This preview plays one fixed-map round.
+   **Leave room** to return to room admission. This preview plays one generated classic-v2 round.
 
 The invitation discovers a room; it is not a secret credential. Each tab requests a separate
 anonymous session and keeps its credential only in memory. Closing the game socket ends
@@ -48,7 +48,7 @@ lobby, waiting, running, and result. See [verification](../verification.md) for 
 
 English and Polish are available without reconnecting the game session. **Connection
 diagnostics** expands the separate diagnostic transport controls; its socket is not a seat.
-No touch controller, audio, generated upgrades, scoring series, or reconnect UI is included
+No touch controller, audio, scoring series, or reconnect UI is included
 in this first duel preview. A narrow viewport is supported for layout and spectating;
 playing currently requires a keyboard.
 
@@ -62,4 +62,4 @@ replaced, or reset. The UI performs no collection simulation.
 Both player rows show available bombs (capacity minus live bombs), capacity, range, and speed
 levels 1–5 from authoritative actors. Running/result rows show alive or eliminated; pre-start
 rows show readiness. Labels are localized in English and Polish. The existing single-column
-layout bounds the upgrade rows at narrow widths. Generated-room activation is separate.
+layout bounds the upgrade rows at narrow widths. Generated classic-v2 rooms supply the live pickup and upgrade changes.

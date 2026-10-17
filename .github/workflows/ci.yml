@@ -81,6 +81,15 @@ jobs:
           docker compose logs app
           exit 1
       - run: scripts/gates.sh browser
+      - name: Verify deterministic pickups using the same built image
+        run: |
+          docker compose -f docker-compose.yaml -f docker-compose.pickups.yaml up -d --no-build --force-recreate app
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent http://127.0.0.1:8085/api/v1/ready; then break; fi
+            sleep 1
+          done
+          curl --fail --silent http://127.0.0.1:8085/api/v1/ready
+          E2E_PICKUP_FIXTURE=arena-v1-pickups npm --prefix e2e run test:pickups
       - name: Scan built image for fixable high or critical vulnerabilities
         run: |
           docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
@@ -97,7 +106,9 @@ jobs:
         if: failure()
         with:
           name: playwright-report
-          path: e2e/playwright-report/
+          path: |
+            e2e/playwright-report/
+            e2e/playwright-pickup-report/
           retention-days: 7
 
   kubernetes:

@@ -67,9 +67,10 @@ publications. [ADR 0010](decisions/0010-authoritative-room-loop.md) fixes schedu
 budgets, result ordering, and retention.
 
 [ADR 0011](decisions/0011-deterministic-arena-generation.md) defines the implemented headless
-[generator](game/generation.md); live rooms still use the fixed preview. Pickup integration,
-generated-room activation, lag compensation, complete match progression, and matchmaking
-still need implementation at their planned milestones. Add focused ADRs before
+[generator](game/generation.md). [ADR 0014](decisions/0014-private-round-seeds-and-live-generation.md)
+activates generated classic-v2 rooms with private round seeds and retained records. Lag
+compensation, complete match progression, and matchmaking still need implementation at their
+planned milestones. Add focused ADRs before
 dependent work; preserve the specified lifecycle and gameplay rules.
 
 

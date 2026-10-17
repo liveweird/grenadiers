@@ -3,7 +3,7 @@
 A browser-based multiplayer game inspired by classic Bomberman/Dynablaster.
 The first playable milestone will support two human players. Bots and larger matches follow later.
 
-The **two-player fixed-map duel preview is playable**. Create a room, share its invitation,
+The **two-player generated-map duel preview is playable**. Create a room, share its invitation,
 join from another browser, and both choose Ready. Select the courtyard to move with arrows
 or W/A/S/D and plant bombs with Space. Rust owns the 60 Hz simulation; PixiJS draws public
 20 Hz snapshots while React/Mantine provides the room controls, timer, and result.

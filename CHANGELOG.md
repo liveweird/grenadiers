@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.2.6 — 2026-10-17
+
+- Activate private generated-v1 arenas with classic-v2 pickups and upgrades in live rooms.
+- Draw fresh round entropy only at an actual start; retain private generation records and
+  keep authentication/discovery randomness independent.
+- Add a strict read-once operator seed-file mode that fails startup on invalid configuration.
+- Prove generated-map smoke behavior and deterministic keyboard collection in real browsers,
+  including simultaneous old-range/new-range bombs and both authoritative upgrade HUDs.
+
+The two-player preview still supports a single round. Complete match scoring/rematch is M5.
+
 ## 0.2.5 — 2026-10-17
 
 - Draw exposed capacity, range, and speed items as distinct retained Pixi graphics, with

@@ -20,6 +20,7 @@
 //! ```
 
 pub mod match_lifecycle;
+pub mod reconnect;
 pub mod series;
 
 pub use match_lifecycle::{CountdownKind, MatchChange, MatchError, MatchLifecycle, MatchPhase};

@@ -297,6 +297,9 @@ countdown with retained scores, simultaneous explicit departures, and server int
 
 ## M6 Implement reconnect resilience and complete replay evidence
 
+Progress: v0.3.1 adds the independently reviewed pure [two-seat grace model](reconnect-grace.md).
+Live gameplay remains v3 with transport-loss interruption until coordinated reconnect activation.
+
 **Depends on:** M5.
 
 Work packages:

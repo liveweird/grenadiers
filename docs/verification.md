@@ -1,5 +1,27 @@
 # Repository verification
 
+## M6 pure reconnect-grace foundation — 2026-10-17
+
+The locked server gate passes **251 core tests, 125 server tests, and 2 doctests**.
+Rust coverage is **6,142/6,566 lines, 93.54%**, above the unchanged 80% floor. Independent
+review reports no actionable findings. Seven focused cases exercise exact 599/600-tick
+eligibility, original duplicate-loss deadlines, staggered and simultaneous expiry, rejected
+expired resumes, successful no-op clock advancement, stale calls, and atomic errors/overflow.
+The two-seat component returns bounded reservation/expiry facts and never fabricates outcomes.
+
+This is a pure API release. Active v3 transport-loss interruption, credentials, publication,
+and browser behavior are unchanged. Lifecycle and coordinated reconnect activation follow.
+A clean committed-tree build of `53d42fe95819d1252c17004cb3aa04b426ead796` produces
+`sha256:b9b753d049ee7e933e2b2afe18843e4ad58b431ca98e00cc5e6c0a8b2b57d648`.
+Compose and local Kubernetes use that exact image. Each passes the real JSON health/ready
+probes, **six default browser scenarios, one pickup scenario, and one full-match scenario**.
+Both fixture suites disable retries. Strict Kubernetes 1.33 schemas pass **3/3**; runtime
+inspection confirms UID/GID 65532, read-only root, dropped capabilities and seccomp settings.
+Read-only fixture Secrets use mode 0444; no seed file appears under `/app`. Pinned archive-only
+Trivy reports zero fixable HIGH/CRITICAL findings. The immutable accepted client is `3456e48`;
+its exact hashes and screenshots are recorded with the image evidence. Temporary stacks,
+namespaces, Secrets, forwards, exports and scan archives are cleaned; images and logs remain.
+
 ## M5 coordinated classic matches — 2026-10-17
 
 The active endpoint/browser use gameplay protocol 3 and the real MatchLifecycle, MatchRuntime,

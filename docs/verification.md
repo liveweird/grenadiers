@@ -16,7 +16,18 @@ incomplete and cannot certify a replay. Production capture retains no credential
 identity. Current unrecorded notice callers have empty reports; future notice changes must
 preserve that invariant or record their effect. Transport revision is excluded from semantic
 comparison. Replay inspection remains test-only, with no public export or restart persistence.
-Exact-image deployment acceptance remains pending.
+Exact-image deployment acceptance is recorded below.
+
+A clean committed-tree build of `cc616e3e459514dc156d95b36fe6abff02fc2628` produces
+`sha256:a66fdfde941675c7dd8cc26829a6b4e7a1e867e373f95c0386895ebae95781e3`.
+Both Compose and local Kubernetes run that same artifact and pass real JSON health/ready
+probes, six default browser scenarios, one pickup scenario and one full-match scenario.
+Fixture suites disable retries. Strict Kubernetes 1.33 schemas pass 3/3; pinned archive-only
+Trivy reports zero fixable HIGH/CRITICAL findings. Runtime checks verify UID/GID 65532,
+read-only root, dropped capabilities, seccomp/probes, and read-only mode-0444 fixture mounts;
+no seed file exists under `/app`. Immutable client `817cd78` and complete image/build hashes,
+logs and screenshots are retained in `/tmp/grenadiers-v033-acceptance`. Temporary stacks,
+namespaces, Secrets, forwards, exports and scan archives are cleaned; the image remains.
 
 ## M6 private replay-runner foundation — 2026-10-17
 

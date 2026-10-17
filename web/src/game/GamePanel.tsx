@@ -12,8 +12,7 @@ const CODE_PATTERN = /^[A-HJ-NP-Z2-9]{8}$/
 function timerTicks(state: GameClientState): number | null {
   const phase = state.room?.phase
   if (phase?.type === 'countdown') return Math.max(0, phase.endsAt - (state.room?.tick ?? 0))
-  if (phase?.type === 'running') return state.snapshot?.state.remainingTicks ?? null
-  if (phase?.type === 'result') return 0
+  if (phase?.type === 'running' || phase?.type === 'result') return state.snapshot?.state.remainingTicks ?? null
   return null
 }
 

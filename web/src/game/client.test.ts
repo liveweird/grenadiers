@@ -348,3 +348,18 @@ it('derives secure and local gameplay URLs', () => {
   expect(gameplayUrl({ protocol: 'https:', host: 'game.test' } as Location)).toBe('wss://game.test/api/v1/game/ws')
   expect(gameplayUrl({ protocol: 'http:', host: 'localhost:5177' } as Location)).toBe('ws://localhost:5177/api/v1/game/ws')
 })
+
+it('keeps the Window receiver when using the native fetch dependency', async () => {
+  const fetcher = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ token }) })
+  vi.stubGlobal('fetch', fetcher)
+  const socketFactory = vi.fn(() => new GameSocketStub('ws://test') as unknown as WebSocket)
+  const client = new GameClient(() => undefined, { socket: socketFactory })
+  try {
+    client.admit({ type: 'create' })
+    await vi.waitFor(() => expect(socketFactory).toHaveBeenCalledOnce())
+    expect(fetcher.mock.contexts).toEqual([globalThis])
+  } finally {
+    client.dispose()
+    vi.unstubAllGlobals()
+  }
+})

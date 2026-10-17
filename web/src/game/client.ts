@@ -77,7 +77,7 @@ export class GameClient {
   ) {
     this.onChange = onChange
     this.dependencies = {
-      fetch: dependencies?.fetch ?? globalThis.fetch,
+      fetch: dependencies?.fetch ?? globalThis.fetch.bind(globalThis),
       socket: dependencies?.socket ?? ((url) => new WebSocket(url)),
       location: dependencies?.location ?? window.location,
     }

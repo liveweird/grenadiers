@@ -183,6 +183,25 @@ describe('App game flow', () => {
     expect(await screen.findByText('Draw: time ran out.')).toBeVisible()
   })
 
+  it('freezes the authoritative remaining time when elimination ends a round', async () => {
+    const user = userEvent.setup()
+    renderApp()
+    const socket = await beginRoom(user)
+    act(() => socket.message({ type: 'roomState', room: room(1, { type: 'running' }), youSeat: 'one' }))
+    const finished = snapshot(2, {
+      type: 'result', endedAt: 300, result: { type: 'winner', seat: 'two' },
+    })
+    finished.state.runningUpdates = 300
+    finished.state.remainingTicks = 10_500
+    finished.state.actors[0].alive = false
+    finished.room.tick = 300
+    act(() => socket.message(finished))
+    expect(await screen.findByText('Player two wins the round.')).toBeVisible()
+    expect(screen.getByLabelText('Round time remaining')).toHaveTextContent('2:55')
+    act(() => socket.message({ ...finished, room: { ...finished.room, revision: 3, tick: 303 } }))
+    expect(screen.getByLabelText('Round time remaining')).toHaveTextContent('2:55')
+  })
+
   it('shows a pre-start interruption without inventing a winner', async () => {
     const user = userEvent.setup()
     renderApp()

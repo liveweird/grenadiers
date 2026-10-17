@@ -1,6 +1,6 @@
 # ADR 0003: PixiJS arena with a React interface
 
-Status: accepted direction for M3; no rendering dependency is installed in M1.
+Status: implemented in M3 with exact PixiJS 8.22.0; M1 remained headless.
 
 ## Context
 
@@ -12,7 +12,7 @@ the surrounding interface, localization, and accessible controls.
 
 Use **PixiJS** for the arena and keep menus, room controls, timer, score, connection state,
 and settings in React/Mantine. Prefer WebGL for the initial tested browser path; WebGPU can
-be evaluated separately. Select and pin an exact audited PixiJS version when M3 integrates it.
+be evaluated separately. PixiJS 8.22.0 is pinned in the real npm lockfile and included in dependency audits.
 
 One React-owned arena component will create and destroy the Pixi application, including its
 ticker, listeners, and textures. Update retained scene objects from public server snapshots;
@@ -33,8 +33,10 @@ meaningful status and controls available in HTML rather than only inside the can
 - **DOM tiles** are easy to inspect, but we choose a dedicated rendering surface for arena
   objects and effects. Browser performance budgets still require measurement in M7.
 
-M1 remains headless. M3 must verify mounting/unmounting, resizing, snapshot interpolation,
-focus handling, reduced effects, and readable player identity in the actual browser stack.
+M1 remained headless. The [browser implementation](../game/browser.md) documents retained
+layers, 50 ms interpolation, focus/visibility clearing, reduced motion, device-pixel-ratio
+bounds, and deterministic graphics-context teardown. Actual browser acceptance and limits
+are recorded in [verification](../verification.md).
 
 References: [PixiJS introduction](https://pixijs.com/8.x/guides/getting-started/intro),
 [render loop](https://pixijs.com/8.x/guides/concepts/render-loop), and

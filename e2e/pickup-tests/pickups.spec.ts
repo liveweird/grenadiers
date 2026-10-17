@@ -9,6 +9,7 @@ test.beforeAll(() => {
 type Cell = { column: number; row: number }
 const CENTER = 512
 const CELL = 1024
+const RELEASE_LEAD = 640
 
 function actor(game: ObservedGame) {
   const value = latestSnapshot(game)?.state.actors.find((candidate) => candidate.seat === 'one')
@@ -16,30 +17,74 @@ function actor(game: ObservedGame) {
   return value
 }
 
-async function moveTo(page: Page, game: ObservedGame, cell: Cell) {
+async function moveTo(
+  page: Page,
+  game: ObservedGame,
+  cell: Cell,
+  axisOrder: readonly ('x' | 'y')[] = ['x', 'y'],
+) {
   const target = { x: cell.column * CELL + CENTER, y: cell.row * CELL + CENTER }
-  for (const axis of ['x', 'y'] as const) {
-    for (let attempt = 0; attempt < 10; attempt += 1) {
-      const delta = target[axis] - actor(game).position[axis]
-      if (Math.abs(delta) <= 128) break
-      const keys = axis === 'x' ? ['ArrowLeft', 'ArrowRight'] : ['ArrowUp', 'ArrowDown']
-      const key = keys[Number(delta > 0)]
-      // Bound each native input pulse: slow software rendering can deliver the
-      // next snapshot after a held key has already crossed the target center.
-      const duration = Math.min(80, Math.max(25, Math.abs(delta) / 3.072 / 2))
-      await page.keyboard.press(key, { delay: duration })
-      const stoppedRevision = latestSnapshot(game)!.room.revision
-      await expect.poll(() => latestSnapshot(game)!.room.revision, { intervals: [15] })
-        .toBeGreaterThan(stoppedRevision + 1)
+  for (let attempt = 0; attempt < 20; attempt += 1) {
+    const position = actor(game).position
+    const differences = { x: target.x - position.x, y: target.y - position.y }
+    if (Math.abs(differences.x) <= 128 && Math.abs(differences.y) <= 128) break
+    const axis = axisOrder.find((candidate) => Math.abs(differences[candidate]) > 128)!
+    const delta = differences[axis]
+    const keys = axis === 'x' ? ['ArrowLeft', 'ArrowRight'] : ['ArrowUp', 'ArrowDown']
+    const directions = axis === 'x' ? ['west', 'east'] : ['north', 'south']
+    const key = keys[Number(delta >= 0)]
+    const direction = directions[Number(delta >= 0)]
+    const startRevision = latestSnapshot(game)!.room.revision
+    const startPosition = position[axis]
+    const commandCount = game.commands.length
+    if (Math.abs(delta) <= RELEASE_LEAD) {
+      // Span at least one 60 Hz update. A zero-duration native press can publish
+      // direction and stop before either reaches the simulation on a fast host.
+      await page.keyboard.press(key, { delay: 34 })
+    } else {
+      await page.keyboard.down(key)
+      await expect.poll(() => game.commands.slice(commandCount)
+        .some((command) => command.type === 'movement' && command.direction === direction))
+        .toBe(true)
+      try {
+        const sign = Math.sign(delta)
+        await expect.poll(() => {
+          const remaining = target[axis] - actor(game).position[axis]
+          return Math.abs(remaining) <= RELEASE_LEAD || Math.sign(remaining) !== sign
+        }, { intervals: [15] }).toBe(true)
+      } finally {
+        await page.keyboard.up(key)
+      }
     }
-    expect(Math.abs(target[axis] - actor(game).position[axis])).toBeLessThanOrEqual(128)
+    await expect.poll(() => {
+      const commands = game.commands.slice(commandCount)
+      const movement = commands.findIndex((command) => command.type === 'movement'
+        && command.direction === direction)
+      return movement >= 0 && commands.slice(movement + 1)
+        .some((command) => command.type === 'movement' && command.direction === null)
+    }, { intervals: [15] })
+      .toBe(true)
+    // Do not mistake snapshots queued before the input for proof of key-up. The
+    // accepted direction must move the actor before stationary frames can settle
+    // the pulse; this also prevents an opposite correction from being queued.
+    await expect.poll(() => actor(game).position[axis], { intervals: [15] })
+      .not.toBe(startPosition)
+    const movedRevision = latestSnapshot(game)!.room.revision
+    await expect.poll(() => {
+      const frames = game.frames.filter((frame) => frame.type === 'snapshot').slice(-3)
+      if (frames.length !== 3 || frames[0].room.revision <= Math.max(startRevision, movedRevision)) return false
+      const positions = frames.map((frame) => frame.state.actors.find((value) => value.seat === 'one')!.position)
+      return positions.every((value) => value.x === positions[0].x && value.y === positions[0].y)
+    }, { intervals: [15] }).toBe(true)
   }
+  expect(Math.abs(target.x - actor(game).position.x)).toBeLessThanOrEqual(128)
+  expect(Math.abs(target.y - actor(game).position.y)).toBeLessThanOrEqual(128)
 }
 
 async function plant(page: Page, game: ObservedGame) {
   const previous = latestSnapshot(game)!.state.bombs.map((bomb) => bomb.id)
   await page.keyboard.press('Space')
-  await expect.poll(() => latestSnapshot(game)!.state.bombs.some((bomb) => !previous.includes(bomb.id))).toBe(true)
+  await expect.poll(() => latestSnapshot(game)!.state.bombs.some((bomb) => !previous.includes(bomb.id)), { intervals: [15] }).toBe(true)
   return latestSnapshot(game)!.state.bombs.find((bomb) => !previous.includes(bomb.id))!
 }
 
@@ -83,7 +128,6 @@ test('two browsers collect generated upgrades while old bombs keep their capture
 
     await moveTo(one, games[0], { column: 2, row: 1 })
     await plant(one, games[0])
-    await moveTo(one, games[0], { column: 1, row: 1 })
     await moveTo(one, games[0], { column: 1, row: 2 })
     await clearHazards(games[0])
     await expect.poll(() => latestSnapshot(games[0])!.state.pickups)
@@ -96,8 +140,7 @@ test('two browsers collect generated upgrades while old bombs keep their capture
     await moveTo(one, games[0], { column: 1, row: 1 })
     await moveTo(one, games[0], { column: 1, row: 2 })
     await plant(one, games[0])
-    await moveTo(one, games[0], { column: 1, row: 1 })
-    await moveTo(one, games[0], { column: 2, row: 1 })
+    await moveTo(one, games[0], { column: 2, row: 1 }, ['y', 'x'])
     await clearHazards(games[0])
     await expect.poll(() => latestSnapshot(games[0])!.state.pickups)
       .toContainEqual({ cell: { column: 1, row: 3 }, kind: 'blastRange' })

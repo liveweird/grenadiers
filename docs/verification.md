@@ -31,18 +31,21 @@ under `/app`. Actual fixture screenshots were visually inspected; both HUDs show
 Temporary stacks, namespace/Secret, forwards, exports, and archives are removed. The image and
 logs/screenshots remain available.
 
-Linux CI exposed test-harness timing sensitivity: snapshot-driven held keys overshot, then
-sequential screenshots consumed the old bomb fuse before the second client assertion. The
-final harness uses bounded native key pulses and concurrent two-client live assertions before
-screenshots; all bomb/HUD/event assertions and physics timings remain intact. Revised fixture
-tests at `ec1d9c00aedd6e1ef5662ab45a72605d8c725c57` pass through both Compose and Kubernetes
-against the accepted image above. Application inputs and all runtime layers are unchanged;
-a rebuild differs only in the Compose project label. The recorded accepted image is retained.
-Two consecutive fixture runs also pass in official Linux Playwright 1.63 Chromium with retries
-disabled (18.7/18.5 seconds). Per-action DOM/compositor tracing is disabled only for this
-real-time fixture; it otherwise consumes real fuse time on software rendering. Action/source
-traces, failure screenshots, explicit checkpoints, and bounded redacted WebSocket summaries
-remain. Default smoke tracing and every gameplay assertion are unchanged.
+Linux CI exposed controller timing sensitivity. The final controller records sanitized
+movement direction/stop summaries, waits for actual public actor movement, then requires
+three newer stationary snapshots before another correction. Coarse movement releases early;
+34 ms fine native presses prevent down/up collapsing before a simulation update on fast hosts.
+Both axes must settle within the existing 128-unit turn-assist tolerance. Direct safe escape
+waypoints and concurrent live assertions avoid spending bomb fuse time on unnecessary stops
+or screenshots; production physics and every bomb/HUD/event assertion remain unchanged.
+
+The final controller passes **six consecutive official Linux Playwright 1.63 Chromium runs**
+under a two-CPU limit and **three native macOS Chromium runs**, all with retries disabled.
+Linux durations are 26.1–34.6 seconds; native durations are 21.0–21.4 seconds. Per-action
+DOM/compositor tracing is disabled only for this real-time fixture. Action/source traces,
+failure screenshots, explicit visual checkpoints, and bounded redacted WebSocket summaries
+remain. Default smoke tracing is unchanged. Application build inputs and runtime layers are
+unchanged; the accepted image above is retained.
 
 ## M4 exposed-item rendering and upgrade HUD — 2026-10-17
 

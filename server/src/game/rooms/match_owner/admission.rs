@@ -60,4 +60,13 @@ impl MatchOwnerHandle {
         }
         response
     }
+
+    #[cfg(test)]
+    pub(in crate::game::rooms) fn submit_canceled_join(&self, binding: BindingKey) {
+        let (reply, response) = oneshot::channel();
+        drop(response);
+        let _ = self
+            .commands
+            .try_send(OwnerCommand::Join { binding, reply });
+    }
 }

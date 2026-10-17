@@ -59,8 +59,8 @@ describe('v3 GamePanel authoritative match presentation', () => {
     }
     renderPanel(current)
 
-    expect(screen.getByText('Player one · 1')).toBeVisible()
-    expect(screen.getByText('0 · Player two')).toBeVisible()
+    expect(screen.getByLabelText('Round wins for Player one')).toHaveTextContent('1')
+    expect(screen.getByLabelText('Round wins for Player two')).toHaveTextContent('0')
     expect(screen.getByText(/Round 2/)).toBeVisible()
     expect(screen.getByRole('status')).toHaveTextContent('Player one wins the round.')
     expect(screen.getByLabelText('Phase time remaining')).toHaveTextContent('0:03')

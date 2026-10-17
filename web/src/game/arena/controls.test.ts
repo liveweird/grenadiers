@@ -35,6 +35,17 @@ describe('arena keyboard ownership', () => {
     expect(onDirection.mock.calls.map(([direction]) => direction)).toEqual(['north', 'north', null])
   })
 
+  it('refreshes a held direction without resending an idle stop', () => {
+    const { controls, onDirection } = setup()
+    controls.refresh()
+    expect(onDirection).not.toHaveBeenCalled()
+    controls.keyDown(key('ArrowRight'))
+    controls.refresh()
+    controls.keyUp(key('ArrowRight'))
+    controls.refresh()
+    expect(onDirection.mock.calls.map(([direction]) => direction)).toEqual(['east', 'east', null])
+  })
+
   it('accepts a fresh Space once and keeps unrelated keys native', () => {
     const { controls, onBomb } = setup()
     const space = key('Space')

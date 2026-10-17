@@ -82,3 +82,27 @@ with `defaultMode: 0444`, and set the environment variable to that path. UID 655
 able to read it. Retain base probes, one replica, and all security restrictions; use the same
 image digest, wait for rollout/readiness, port-forward, and run the same fixture command.
 Remove the temporary Secret/namespace afterward. No seed is sent through an API or browser flag.
+
+## Reproduce a complete classic match
+
+Reuse the same image after default and pickup acceptance, with the tracked open-corridor
+fixture. This is the same strict read-once seed-file mechanism, with a different public seed.
+
+```sh
+docker compose -f docker-compose.yaml -f docker-compose.matches.yaml up -d --no-build --force-recreate app
+curl --fail http://127.0.0.1:8085/api/v1/ready
+E2E_MATCH_FIXTURE=arena-v1-matches npm --prefix e2e run test:matches
+docker compose -f docker-compose.yaml -f docker-compose.matches.yaml down
+```
+
+Poll readiness before tests. The fixture requires explicit acknowledgement and proves a real
+draw, three wins, resets, and rematch over two existing sockets. Kubernetes reproduction uses
+the same temporary read-only 0444 Secret procedure with `arena-v1-matches.seed`. The seed is
+never packaged into the runtime image or sent to a browser.
+
+## Graceful stop
+
+SIGTERM/Ctrl+C signal unfinished rooms with ServerStopped while preserving already-final match
+outcomes. The process explicitly waits up to five seconds for upgraded game/diagnostic
+sessions and room cleanup; final publication/close is best effort. Keep Compose's ten-second
+and Kubernetes' fifteen-second stop grace periods. Restart recovery/reconnect remain future work.

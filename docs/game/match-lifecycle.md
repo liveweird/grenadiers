@@ -1,13 +1,14 @@
 # Pure match lifecycle
 
 `core::room::MatchLifecycle` composes occupancy, readiness, the absolute clock, command epochs,
-and `MatchSeries`. It is staged alongside `RoomLifecycle`; production still uses the latter's
-single-round preview until coordinated v3 activation. This API owns no physics or I/O.
+and `MatchSeries`. The production v3 match owner and runtime use this lifecycle. The archived
+`RoomLifecycle` remains covered for the historical single-round model. This API owns no
+physics or I/O.
 
 Occupy both seats and call `set_ready`. Two ready players start an initial 180-tick countdown.
 Changing readiness cancels it, clears both votes, and advances the command epoch once without
 consuming an actual round. `advance_idle_tick()` returns `RoundStarted(assignment)` exactly at
-the deadline; the future owner constructs fresh physics at that tick before its first update.
+the deadline; the owner constructs fresh physics at that tick before its first update.
 
 During Running, commit each accepted update with `complete_running_tick(result)`. A nonfinal
 result enters a 180-tick hold, then automatically advances the epoch and starts the next

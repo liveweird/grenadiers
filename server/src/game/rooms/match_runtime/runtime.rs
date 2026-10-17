@@ -16,7 +16,7 @@ mod owner_helpers;
 const REPORTS_PER_SNAPSHOT: usize = 3;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub(in crate::game::rooms) enum MatchAction {
+pub(crate) enum MatchAction {
     Ready(bool),
     Movement(Option<Direction>),
     Bomb(u32),
@@ -24,9 +24,9 @@ pub(in crate::game::rooms) enum MatchAction {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub(in crate::game::rooms) struct MatchNotice {
-    pub(in crate::game::rooms) room: RoomView,
-    pub(in crate::game::rooms) snapshot: Option<Arc<str>>,
+pub(crate) struct MatchNotice {
+    pub(crate) room: RoomView,
+    pub(crate) snapshot: Option<Arc<str>>,
 }
 
 pub(in crate::game::rooms) struct MatchRuntime {
@@ -61,6 +61,7 @@ impl MatchRuntime {
         }
     }
 
+    #[cfg(test)]
     pub(super) fn sim(&self) -> Option<&SimRound> {
         self.sim.as_ref()
     }

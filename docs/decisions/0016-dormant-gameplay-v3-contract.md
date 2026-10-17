@@ -1,6 +1,9 @@
 # ADR 0016: Dormant gameplay-v3 match contract
 
-Status: structural schema/DTOs and checked room projection implemented; production activation follows.
+Status: accepted and active in v0.3.0.
+
+The staging decision below was implemented in v0.2.9–v0.2.10. Gameplay now authenticates
+only version 3; the archived v2 schema and parity fixtures remain for compatibility checks.
 
 ## Decision
 

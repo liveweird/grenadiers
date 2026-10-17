@@ -1,4 +1,4 @@
-use super::super::{publication, types::RoomIdentity};
+use super::super::types::RoomIdentity;
 use super::*;
 use grenadiers_core::{
     game::RoundAssignment,
@@ -47,14 +47,6 @@ fn fixed_profile_constructs_the_rules_it_publishes_without_consuming_entropy() {
     assert_eq!(initial.state.rules().version(), 1);
     assert_eq!(initial.state.tick(), lifecycle.tick());
     assert_eq!(initial.state.running_updates(), 0);
-    let (view, encoded) =
-        publication::snapshot(&identity, &lifecycle, 1, &initial.state, &[]).unwrap();
-    assert_eq!(view.rules_version, RulesVersion::ClassicV1);
-    assert_eq!(view.map_id, MapId::FixedV1);
-    let value: serde_json::Value = serde_json::from_str(&encoded).unwrap();
-    assert_eq!(value["room"]["rulesVersion"], 1);
-    assert_eq!(value["room"]["mapId"], "fixed_v1");
-    assert_eq!(value["state"]["pickups"], serde_json::json!([]));
 }
 
 #[test]
@@ -82,25 +74,6 @@ fn generated_profile_constructs_classic_v2_with_assignment_spawns_and_private_re
     }
     assert_eq!(initial.state.actors()[0].heading(), Direction::East);
     assert_eq!(initial.state.actors()[1].heading(), Direction::West);
-
-    let (view, encoded) =
-        publication::snapshot(&identity, &lifecycle, 1, &initial.state, &[]).unwrap();
-    assert_eq!(view.rules_version, RulesVersion::ClassicV2);
-    assert_eq!(view.map_id, MapId::GeneratedV1);
-    let value: serde_json::Value = serde_json::from_str(&encoded).unwrap();
-    assert_eq!(value["room"]["rulesVersion"], 2);
-    assert_eq!(value["room"]["mapId"], "generated_v1");
-    assert_eq!(value["state"]["pickups"], serde_json::json!([]));
-    assert!(!encoded.contains(&"13".repeat(32)));
-    for private in [
-        "seed",
-        "generationRecord",
-        "concealed",
-        "pending",
-        "assignment",
-    ] {
-        assert!(!encoded.contains(&format!("\"{private}\"")));
-    }
 }
 
 #[test]
@@ -125,22 +98,4 @@ fn profile_honors_later_round_assignment_for_spawns_and_facing() {
     }
     assert_eq!(initial.state.actors()[0].heading(), Direction::West);
     assert_eq!(initial.state.actors()[1].heading(), Direction::East);
-}
-
-#[test]
-fn publication_rejects_a_classic_v1_state_for_the_generated_profile() {
-    let lifecycle = running();
-    let generated_identity = identity(RoomProfile::GeneratedClassicV2);
-    let fixed = RoomProfile::FixedClassicV1
-        .initial_round(
-            lifecycle.tick(),
-            RoundAssignment::first(),
-            &RoundSeedSource::with_entropy(|_| panic!("fixed profile requested entropy")),
-        )
-        .unwrap();
-
-    assert_eq!(
-        publication::snapshot(&generated_identity, &lifecycle, 1, &fixed.state, &[]),
-        Err(publication::PublicationError)
-    );
 }

@@ -3,13 +3,6 @@ use grenadiers_core::game::{Direction, InputAction, SeatId, SeatInput, Tick};
 pub(super) const COMMANDS_PER_UPDATE: u8 = 8;
 pub(super) const MOVEMENT_TTL_TICKS: u64 = 15;
 
-#[derive(Clone, Copy, Debug)]
-pub(crate) enum RoomAction {
-    Ready(bool),
-    Movement(Option<Direction>),
-    Bomb(u32),
-}
-
 #[derive(Clone, Debug, Default)]
 pub(super) struct InputMailbox {
     seats: [SeatMailbox; 2],
@@ -124,7 +117,6 @@ impl InputMailbox {
         }
     }
 
-    #[cfg(test)]
     pub(super) fn stop(&mut self, seat: SeatId) {
         let mailbox = &mut self.seats[seat.index()];
         mailbox.direction = None;

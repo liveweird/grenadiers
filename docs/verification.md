@@ -1,5 +1,47 @@
 # Repository verification
 
+## M5 coordinated classic matches — 2026-10-17
+
+The active endpoint/browser use gameplay protocol 3 and the real MatchLifecycle, MatchRuntime,
+and bounded MatchOwner. Independent frontend, acceptance-design, and backend reviews report
+no outstanding findings. The locked server gate passes **244 core tests, 125 server tests,
+and 2 doctests**. Rust coverage is **6,049/6,453 lines, 93.74%**, above the unchanged 80% floor.
+The complete web gate passes **112 tests**, with **96.83% statements, 92.68% branches,
+98.87% functions, and 98.94% lines**. Schema drift, Spectral, lint, Knip, build, and E2E static
+checks pass; eight scenarios match their documentation. Dependency-security checks pass;
+both npm audits report zero vulnerabilities.
+
+A real main-process SIGTERM probe, separate from library tests, starts a two-player Running
+match and observes identical final checked serverStopped physical snapshots before both member
+sockets close with 1001. Unauthenticated gameplay and diagnostic sockets also receive 1001.
+The process exits code 0 in the measured 2 ms run, and its listener is released. AppState
+regressions separately cover the full five-second hung-permit deadline, retained prior final
+outcomes, stop-time admission rejection, room cleanup, and sticky shutdown. This explicit drain
+is required because Axum's upgraded callbacks run independently of HTTP connection shutdown.
+
+The first full-match browser run completed a draw, three real wins, and rematch/reset, then
+caught a persistent phase-boundary movement error. The client now correlates only movement
+errors with bounded command context and newer authoritative phase/epoch progress; bomb and
+current-phase failures remain visible. Idle controls no longer refresh null input. Regression
+tests cover both error/state orderings. Native Chromium now passes the full two-browser
+scenario with retries disabled: real shared-bomb draw, three actual wins, automatic fresh
+rounds, alternating spawns/base upgrades, final hold, vote withdrawal/consensus, one-epoch
+rematch reset, fresh readiness, and action-ID reset on the same sockets. Axe and horizontal
+containment checks pass in English and Polish at desktop and 320 pixels. Actual compositor
+screenshots were visually inspected.
+
+A clean committed-tree build of `6b18f8609278af7eb7de4e69ea40c104d392e596` produces
+`sha256:aebaffdc8bf122bc49bf879709eb52d0979c0003610ec99a451b90657e2b5ae4`.
+Compose and local Kubernetes use that exact image. Each path passes actual API health/readiness
+JSON, all six default scenarios, the separate pickup fixture, and the complete match/rematch
+fixture, with fixture retries disabled. Both fixture mounts are read-only; Kubernetes uses a
+temporary 0444 Secret readable by UID/GID 65532. Pod image ID matches the accepted image.
+Strict schemas validate all three resources; archive-only pinned Trivy reports zero fixable
+HIGH/CRITICAL findings. `/app` contains no seed files. Non-root/read-only-root/drop-ALL/no-new-
+privileges/RuntimeDefault settings remain enforced. Temporary stacks, namespace/Secrets,
+forwards, exports, and scan archive are removed; logs and reviewed screenshots remain.
+Later acceptance-driver/documentation commits retain identical Docker build inputs.
+
 ## Dormant bounded match owner — 2026-10-17
 
 The locked server gate passes **243 core tests, 134 server tests, and 2 doctests**.

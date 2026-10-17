@@ -4,8 +4,9 @@ Status: **execution plan**. M0 is complete and locally verified on 2026-10-16; M
 and locally verified on 2026-10-17. M2 is complete and locally verified
 on 2026-10-17. M3’s fixed-map two-browser duel is implemented and locally verified;
 M4 generated rounds and upgrades are complete and locally verified on 2026-10-17;
-M5 series/lifecycle, v3 contracts/projection, and dormant runtime/browser adapters are implemented;
-bounded ownership is implemented; coordinated activation remains. M6–M8 remain planned.
+M5 is complete and locally verified on 2026-10-17: v3 contracts, real match ownership,
+first-to-three progression, and rematches pass exact-image Compose/Kubernetes acceptance.
+M6–M8 remain planned.
 Published engineering prereleases are listed in `CHANGELOG.md` and GitHub Releases.
 
 The first product goal is a reliable, browser-based survival match between two humans. Build
@@ -24,8 +25,7 @@ The repository contains versioned HTTP/WebSocket contracts, anonymous sessions, 
 two-seat rooms, authoritative 60 Hz simulation, and checked public snapshots/events. M1–M2
 provide movement, owned bombs, flames, damage, and round finality. M3 adds readiness/countdown
 and a playable PixiJS arena with React controls, native keyboard handling, and EN/PL localization.
-Automated gates, CI, Compose, and Kubernetes validate the stack. M4 adds generated arenas, private seeds, and upgrades. Complete series scoring and reconnect
-remain later milestones.
+Automated gates, CI, Compose, and Kubernetes validate the stack. M4 adds generated arenas, private seeds, and upgrades. M5 adds series scoring and rematches; reconnect remains a later milestone.
 
 The [verification record](../verification.md) now contains passing locked Rust builds, tests,
 coverage, dependency audits, Compose execution, strict Kubernetes validation and live rollout,
@@ -269,13 +269,13 @@ new bomb while an older bomb retains its original range.
 ## M5 Complete classic match progression
 
 Progress: v0.2.7 adds the headless [match-series component](match-series.md), bounded score/
-record/outcome facts, holds, batched departures, and rematch votes. Live gameplay remains the
+record/outcome facts, holds, batched departures, and rematch votes. This staged release retains the
 single-round v2 preview. v0.2.8 adds the pure [automatic match lifecycle](match-lifecycle.md).
 v0.2.9 adds the dormant [v3 structural contract](protocol-v3.md); v0.2.10 adds checked room
 projection and semantic validation. v0.2.11 adds the dormant real simulation adapter;
 v0.2.12 adds the dormant browser client/panel; v0.2.13 adds bounded ownership and shutdown.
-Production routing, the bounded process drain, and full two-browser first-to-three/rematch
-acceptance remain, following [ADR 0015](../decisions/0015-match-series-and-staged-progression.md).
+v0.3.0 activates production routing and bounded process drain. Full two-browser first-to-three/rematch
+acceptance passes through Compose and Kubernetes, following [ADR 0015](../decisions/0015-match-series-and-staged-progression.md).
 
 **Release:** v0.3.0. **Depends on:** M4.
 

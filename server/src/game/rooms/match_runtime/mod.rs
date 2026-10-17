@@ -3,7 +3,8 @@ mod publication;
 mod runtime;
 
 pub(super) use error::MatchRuntimeError;
-pub(super) use runtime::{MatchAction, MatchNotice, MatchRuntime};
+pub(super) use runtime::MatchRuntime;
+pub(crate) use runtime::{MatchAction, MatchNotice};
 
 #[cfg(test)]
 #[path = "input_tests.rs"]

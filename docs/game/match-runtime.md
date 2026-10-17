@@ -1,7 +1,7 @@
-# Dormant authoritative match runtime
+# Authoritative match runtime
 
-Status: implemented and independently reviewed under test compilation; the live endpoint still
-uses the single-round v2 owner. No alternate endpoint or runtime feature flag is exposed.
+Status: active behind the v3 endpoint and bounded match owner. No alternate endpoint or
+runtime feature flag is exposed.
 
 `MatchRuntime` composes the pure `MatchLifecycle`, immutable room profile/identity, private seed
 source, input mailbox, optional simulation, checked revision, and at most three tick reports.
@@ -22,5 +22,5 @@ world. Rematch consensus clears state and returns occupied players to unready Wa
 Checked v3 room projection, physical projection, profile agreement, and the 65,536-byte
 encoder guard publication. Seeds, generation records, concealed contents, pending inputs,
 and assignment bookkeeping remain private. Entropy/construction failure publishes an
-InternalError interruption without a substitute world. Bounded owner scheduling, admission,
-departure batching, retention, shutdown delivery, and endpoint activation follow separately.
+InternalError interruption without a substitute world. The [bounded owner](match-owner.md) supplies scheduling, admission, departure batching,
+retention, and shutdown. The process explicitly drains upgraded sockets before runtime exit.

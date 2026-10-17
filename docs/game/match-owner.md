@@ -1,7 +1,7 @@
-# Dormant bounded match owner
+# Bounded match owner
 
-Status: implemented and independently reviewed under test compilation. Production still uses
-the v2 owner until the coordinated registry/socket/browser activation.
+Status: active in the existing registry and v3 endpoint. Authentication, sequence ownership,
+and connection generations remain in their original transport boundaries.
 
 One task owns the real MatchRuntime, a 32-command queue, two generation-bound seats, and at
 most two pending departures/leave replies. Submissions never await inside the owner. A leave
@@ -23,5 +23,6 @@ departures, and publish once, preserving reports, vacancy, and prior match final
 replies complete only after that checked publication. The watch retains `Closing {last, reason}`
 for slow readers. Cleanup is guarded before spawning, including abort-before-first-poll.
 
-Socket delivery and the bounded process drain are activation responsibilities. The adapter
+Sockets deliver the retained closing publication before close, best effort within five seconds.
+The process explicitly drains upgraded game/diagnostic sockets and room cleanup before exit. The adapter
 never duplicates authentication or introduces a selectable protocol/production testing flag.

@@ -13,8 +13,9 @@ remain `0.0.0`: they are build inputs and are not separately published or produc
 The WebSocket `protocolVersion` is an independent compatibility contract, not a release number.
 
 Each shipped feature PR bumps the product version and records its scope in `CHANGELOG.md`.
-Use `0.1.x` patch releases for headless engineering increments; `0.2.0` remains the first
-playable duel preview. Keep PRs focused on one behavior and its tests. Merge passing,
+Use patch releases within the current milestone for bounded engineering increments.
+`0.2.0` is the first playable duel preview; `0.3.0` adds classic match progression. Subsequent
+`0.3.x` increments prepare reconnect support; `0.4.0` remains the resilient playtest milestone. Keep PRs focused on one behavior and its tests. Merge passing,
 independently reviewed candidates, then publish the corresponding prerelease tag.
 The repository gate checks that both local Cargo packages and their dependency agree.
 
@@ -34,6 +35,7 @@ The repository gate checks that both local Cargo packages and their dependency a
 ## Upgrade and rollback
 
 The initial deployment uses one replica and `Recreate`. In-memory matches cannot survive
-restart or rollback. Schedule downtime and communicate interruption once gameplay exists.
+restart or rollback. Plan upgrades around active matches; a graceful stop publishes the final
+interrupted state but cannot preserve process-local matches or credentials.
 Keep the previous immutable image reference for rollback; database migration compatibility
 must be designed when durable application data is introduced.

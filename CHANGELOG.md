@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.3.0 — 2026-10-17
+
+- Activate authoritative two-player first-to-three matches over gameplay protocol 3.
+- Carry scores and completed-round history through automatic result holds, fresh worlds,
+  alternating spawns, and inter-round countdowns; draws award no score.
+- Add consensual rematches with withdrawable votes, fresh scores/readiness, and retained
+  connection sequencing; distinguish round results from final forfeits and interruptions.
+- Activate localized accessible match scores, phase clocks, final outcomes, and rematch controls.
+- Drain upgraded game and diagnostic sockets explicitly on shutdown, delivering the final
+  checked match view before close within a bounded deadline.
+- Add an isolated generated-map browser fixture for a real draw, three wins, and rematch.
+
 ## 0.2.13 — 2026-10-17
 
 - Add the dormant bounded match owner with generation-fenced admissions, two-seat departure

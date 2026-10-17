@@ -5,7 +5,7 @@ import tseslint from 'typescript-eslint'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
-  globalIgnores(['node_modules', 'playwright-report', 'test-results', 'playwright-pickup-report', 'pickup-test-results', '.playwright']),
+  globalIgnores(['node_modules', 'playwright-report', 'test-results', 'playwright-pickup-report', 'pickup-test-results', 'playwright-match-report', 'match-test-results', '.playwright']),
   {
     files: ['**/*.{ts,mjs}'],
     extends: [js.configs.recommended, tseslint.configs.recommended, sonarjs.configs.recommended],

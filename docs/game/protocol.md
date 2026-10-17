@@ -1,9 +1,10 @@
 # Gameplay protocol
 
 Status: gameplay contracts, checked domain conversion, HTTP session issuance, and authenticated
-gameplay WebSockets with authoritative two-seat rounds are implemented. `api/gameplay.schema.json`, independent Rust
-`core::protocol` types, and generated `web/src/game/schema.ts` define socket messages.
-The browser validates these messages and drives the playable generated-map duel. Diagnostic `/api/v1/ws` and
+gameplay WebSockets with authoritative two-seat first-to-three matches are implemented.
+`api/gameplay-v3.schema.json`, Rust `core::protocol::v3`, and generated
+`web/src/game/v3/schema.ts` define active socket messages.
+The browser validates these messages and drives the playable generated-map match. Diagnostic `/api/v1/ws` and
 `api/realtime.schema.json` remain unchanged.
 
 ## Authentication and compatibility
@@ -24,13 +25,13 @@ Connect to `/api/v1/game/ws` with one configured non-null Origin and no query pa
 Its first application frame must be:
 
 ```json
-{"type":"authenticate","protocolVersion":2,"token":"0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"}
+{"type":"authenticate","protocolVersion":3,"token":"0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"}
 ```
 
 The token is a secret 64-character lowercase hexadecimal credential, held only in tab memory.
 It never belongs in a URL or log. A syntactically valid unsupported version is parsed so the
 server can return `incompatibleProtocol` before credential binding. Supported gameplay version
-is 2, independently of the product release and diagnostic protocol. Parser failures expose
+is 3, independently of the product release and diagnostic protocol. Parser failures expose
 only a generic error; token Debug formatting is redacted.
 
 A successful claim atomically binds one connection. Duplicate claims receive `connectionInUse`
@@ -50,7 +51,7 @@ Malformed/binary input, failed authentication, repeated authentication, or rate 
 closes the offending socket with fixed reasons. Create/join now bind one of two room seats;
 already-bound admission returns `alreadyInRoom`, full rooms return `roomFull`, and unknown
 codes return `roomNotFound`. Unbound room commands return `notInRoom`; mismatched ownership
-or attempts return `staleRoom`. Ready applies in Waiting/Countdown; movement/bombs require
+or attempts return `staleRoom`. Ready applies in Waiting/initial Countdown; movement/bombs require
 Running. Other phases return `invalidPhase`. Fresh sequences are consumed before semantic rejection; replay returns
 `staleSequence`. See [room admission](rooms.md#network-admission) for lifetime and queue bounds.
 
@@ -67,11 +68,12 @@ All listed fields are required; objects reject extra fields. Counter values are 
 | `movement` | `sequence`, `roomId`, `roundId`, `direction` (cardinal direction or explicit null) |
 | `placeBomb` | `sequence`, `roomId`, `roundId`, `actionId` |
 | `leaveRoom` | `sequence`, `roomId`, `roundId` |
+| `rematch` | `sequence`, `roomId`, `roundId`, `ready` |
 
 | Server type | Additional fields |
 | --- | --- |
-| `authenticated` | `protocolVersion: 2` |
-| `incompatibleProtocol` | `supportedVersion` (0–65,535; this server emits 2) |
+| `authenticated` | `protocolVersion: 3` |
+| `incompatibleProtocol` | `supportedVersion` (0–65,535; this server emits 3) |
 | `roomState` | `room`, personalized `youSeat` |
 | `leftRoom` | `roomId`, acknowledged `sequence` |
 | `error` | typed `code`, `sequence` (counter or explicit null) |
@@ -88,8 +90,8 @@ row-major floor/wall terrain entries, and up to 195 unique soft-block cells.
 
 Actors expose ID, seat, fixed-point position, heading, speed level (0–4), alive status,
 capacity/range (1–8), and live-bomb count (0–8). Bombs include ID, cell, owner, captured range,
-placement tick, and detonation tick. Flames include cell and exclusive expiry tick. Room metadata
-carries tick, rules/map versions, and outcome; these are not duplicated in game state.
+placement tick, and detonation tick. Flames include cell and exclusive expiry tick. Room metadata carries the global tick, rules/map versions, scores, actual round number,
+latest completed round, and independent match outcome; these are not duplicated in game state.
 The required `pickups` array contains closed `{cell, kind}` entries with kind `bombCapacity`,
 `blastRange`, or `movementSpeed`. Empty means no exposed items. Concealed and pending items,
 round assignments, generation records, and seeds never enter these messages.
@@ -115,13 +117,16 @@ categories rather than payloads. No direct serialization of internal `World` or 
 
 `project_events(&reports)` accepts at most three consecutive completed updates and 64 events.
 Each event must belong to its report tick; indices restart at zero per tick and preserve actual
-phase order. Placement and detonation within the same tick remain observable. Result states
-freeze world contents while the absolute clock advances, so old bomb/flame deadlines remain
-valid in frozen projections. Conversion neither clamps values nor advances the simulation.
+phase order. Placement and detonation within the same tick remain observable. Result and MatchResult hold physics completely frozen while the room clock advances.
+The final partial report window is published once; later hold snapshots contain no repeated events.
+Conversion neither clamps values nor advances the simulation.
 
-The room publisher combines these checked values with matching room tick/phase, applies
-the encoder's frame limit, and bounds delivery. The adapter alone does not create rooms
-or validate transport ownership.
+The runtime checks Running physics tick against the room tick. A completed frozen world
+must match its own latest completed-round epoch/result/end tick. An unfinished terminal
+world keeps no round result and freezes at the independent match outcome tick. A completed
+hold followed by forfeit still binds physics to the earlier completed-round tick. Inter-round
+countdowns publish room views without an old world. The encoder enforces the frame limit;
+these adapters do not create rooms or validate transport ownership.
 
 ## Identity, ordering, and lifecycle
 
@@ -134,16 +139,30 @@ A structurally valid command consumes its sequence before semantic handling. Bom
 increase independently per seat/round and remain consumed after an unsuccessful placement.
 Invalid room/round bindings cannot mutate another seat's high-water marks.
 
-`RoomView` carries identity/code, round attempt, revision, absolute tick, rules version (1 or 2),
-map identity (`fixed_v1` or `generated_v1`), two canonical seat statuses, and a tagged phase. Phases are Waiting,
-Countdown with deadline, Running, Result with fixed outcome/time, or Interrupted with reason/time.
-An interrupted preview has no fabricated winner. Ticks are nonnegative JavaScript-safe integers.
+`RoomView` carries identity/code, independent command epoch `roundId`, revision, global tick,
+rules/map versions, actual `roundNumber`, scores (0..3 per seat), nullable `lastRound`, two
+canonical seat statuses (occupancy/readiness/rematch consent), and a tagged phase. Actual
+round count increases only on starts, remains on the preceding round during inter-round
+countdown, and resets on rematch. Epochs also advance across cancellation and rematch, so
+spawn/tie assignment uses actual round count rather than command epoch.
 
-The runtime cancels countdown on unready/departure, clears readiness, and advances the
-round-attempt ID. Leaving acknowledges removal while retaining an authenticated unseated
-socket. Both same-socket rejoining and replacement sockets invalidate old queued bindings.
-Public revisions order state across outbound channels; admission precedes a recipient's first
-snapshot. See [ADR 0008](../decisions/0008-gameplay-protocol.md).
+Phases are Waiting; initial/inter-round Countdown with deadline; Running; nonfinal Result
+with `nextCountdownAt`; MatchResult with independent outcome, end time, and `rematchAt`;
+or prematch Interrupted with reason/end time. Holds last 180 ticks, followed by a 180-tick
+inter-round countdown. Draws award no score. Last-round records persist across later rounds,
+forfeits, and interruptions; rematch clears them. See [v3 field reference](protocol-v3.md).
+
+Two occupied players may set/withdraw rematch votes after the final hold. Consensus advances
+one epoch and returns occupied, unready Waiting without changing transport sequence or room
+revision ownership. Countdown cancellation advances epoch without consuming an actual round
+or seed. A newer-epoch snapshot can be accepted directly when an intermediate room view is
+coalesced. Old room/epoch/revision data cannot overwrite newer state.
+
+Leaving acknowledges removal while retaining an authenticated unseated socket. Running
+boundaries commit physics/scoring before batched departures; idle phases apply departure
+before automatic transitions. Explicit leave forfeits, two explicit leaves abandon, and any
+transport loss interrupts; already-final match outcomes retain precedence. Ownership is
+bound to connection generation, never to invitation code. See [bounded owner](match-owner.md).
 
 ## Profile and version evolution
 
@@ -152,9 +171,9 @@ rejects state whose checked rules version disagrees with that profile. Productio
 empty pickup array because contents are concealed; only exposed items become public.
 Fixed-classic-v1 remains an explicit unit fixture, not a production selector.
 
-Gameplay v2 is incompatible with v1. Reload clients when upgrading the single server. Both
+Gameplay v3 is incompatible with earlier versions. Reload clients when upgrading the single server. Both
 old and future versions are rejected before credential lookup, so rejection cannot claim or
-revoke a token. `supportedVersion` accepts the bounded input range rather than only v2,
+revoke a token. `supportedVersion` accepts the bounded input range rather than only v3,
 allowing a new client to understand an older server's incompatibility response.
 See [ADR 0013](../decisions/0013-gameplay-v2-and-room-profiles.md).
 
@@ -165,6 +184,15 @@ without writing. The shared web gate runs this alongside existing diagnostic che
 validation tests. Rust conformance tests compare strict parsing and serialization with the same
 schema, including missing/null fields, scalar boundaries, integer-valued number forms, version
 rejection responses, credential redaction, all event variants, nested bounds, and real
-frame-size enforcement. A maximal structural v2 snapshot encodes to 44,466 UTF-8 bytes against
+frame-size enforcement. A maximal-body/worst-metadata v3 snapshot encodes to 44,742 UTF-8 bytes against
 the inclusive 65,536-byte server limit; an actual oversized snapshot is rejected. TypeScript types do not enforce string patterns
 or numeric/array bounds at runtime; AJV and Rust validation do.
+
+## Graceful shutdown
+
+A sticky stop signal bypasses command queues. Owners interrupt unfinished matches with
+ServerStopped, atomically settle pending departures, and retain one final checked publication
+with the closing reason. Existing final matches remain final. Members receive that publication
+before close; unseated and authenticating sockets close directly. Delivery is best effort
+within a five-second bound. The process explicitly drains upgraded game/diagnostic sessions
+and room cleanup before runtime exit; HTTP graceful shutdown alone does not await upgrades.

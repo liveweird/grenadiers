@@ -1,8 +1,8 @@
 # Headless match-series API
 
 `core::room::series::MatchSeries` records trusted accepted rounds and match outcomes. It does
-not own occupancy, countdown scheduling, worlds, or sockets; live rooms remain single-round
-until those adapters are activated.
+not own occupancy, countdown scheduling, worlds, or sockets. Production MatchLifecycle,
+MatchRuntime, and MatchOwner compose it into first-to-three matches.
 
 Call `start_round(epoch, tick)` only at an actual Running boundary. The returned existing
 `game::RoundAssignment` counts actual starts, independently of epoch gaps. Commit a simulation

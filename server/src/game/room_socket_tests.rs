@@ -49,7 +49,7 @@ async fn connect(url: &str, token: &str) -> ClientSocket {
     send(
         &mut socket,
         json!({
-            "type":"authenticate", "protocolVersion":2, "token":token
+            "type":"authenticate", "protocolVersion":3, "token":token
         }),
     )
     .await;
@@ -90,7 +90,11 @@ async fn two_members_receive_personalized_admission_and_live_waiting_updates() {
     send(&mut one, json!({"type":"createRoom", "sequence":1})).await;
     let created = next(&mut one).await;
     assert_eq!(created["youSeat"], "one");
-    assert_eq!(created["room"]["revision"], 1);
+    assert_eq!(created["room"]["revision"], 2);
+    assert_eq!(created["room"]["roundNumber"], 0);
+    assert_eq!(created["room"]["scores"], json!({"one":0,"two":0}));
+    assert!(created["room"]["lastRound"].is_null());
+    assert_eq!(created["room"]["phase"]["type"], "waiting");
     assert_eq!(created["room"]["seats"][0]["occupied"], true);
     let code = created["room"]["roomCode"].clone();
     let room_id = created["room"]["roomId"].clone();
@@ -102,7 +106,7 @@ async fn two_members_receive_personalized_admission_and_live_waiting_updates() {
     .await;
     let joined = next(&mut two).await;
     assert_eq!(joined["youSeat"], "two");
-    assert_eq!(joined["room"]["revision"], 2);
+    assert_eq!(joined["room"]["revision"], 3);
     assert_eq!(joined["room"]["seats"][0]["occupied"], true);
     assert_eq!(joined["room"]["seats"][1]["occupied"], true);
     let update = next(&mut one).await;
@@ -144,6 +148,15 @@ async fn two_members_receive_personalized_admission_and_live_waiting_updates() {
     )
     .await;
     assert_eq!(next(&mut one).await["code"], "invalidPhase");
+    send(
+        &mut one,
+        json!({
+            "type":"rematch", "sequence":5, "roomId":room_id,
+            "roundId":1, "ready":true
+        }),
+    )
+    .await;
+    assert_eq!(next(&mut one).await["code"], "invalidPhase");
     server.abort();
 }
 
@@ -175,7 +188,7 @@ async fn binding_checks_precede_placeholder_phase_and_leave_allows_rejoin() {
     )
     .await;
     assert_eq!(next(&mut unbound).await["youSeat"], "two");
-    assert_eq!(next(&mut owner).await["room"]["revision"], 2);
+    assert_eq!(next(&mut owner).await["room"]["revision"], 3);
 
     send(
         &mut owner,
@@ -194,7 +207,7 @@ async fn binding_checks_precede_placeholder_phase_and_leave_allows_rejoin() {
     )
     .await;
     assert_eq!(next(&mut owner).await["type"], "leftRoom");
-    assert_eq!(next(&mut unbound).await["room"]["revision"], 3);
+    assert_eq!(next(&mut unbound).await["room"]["revision"], 4);
 
     send(
         &mut owner,
@@ -202,7 +215,7 @@ async fn binding_checks_precede_placeholder_phase_and_leave_allows_rejoin() {
     )
     .await;
     assert_eq!(next(&mut owner).await["youSeat"], "one");
-    assert_eq!(next(&mut unbound).await["room"]["revision"], 4);
+    assert_eq!(next(&mut unbound).await["room"]["revision"], 5);
     send(&mut owner, json!({"type":"createRoom", "sequence":5})).await;
     assert_eq!(next(&mut owner).await["code"], "alreadyInRoom");
     server.abort();
@@ -230,6 +243,6 @@ async fn disconnect_removes_seat_even_when_no_more_commands_arrive() {
     two.close(None).await.unwrap();
     let update = next(&mut one).await;
     assert_eq!(update["room"]["seats"][1]["occupied"], false);
-    assert_eq!(update["room"]["revision"], 3);
+    assert_eq!(update["room"]["revision"], 4);
     server.abort();
 }

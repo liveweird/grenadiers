@@ -1,11 +1,15 @@
 {
-  "label": "Two-player duel",
-  "timer": "Round time remaining",
+  "label": "Two-player match",
+  "timer": "Phase time remaining",
   "you": "(you)",
-  "player": { "one": "Player one", "two": "Player two" },
+  "player": {
+    "one": "Player one",
+    "two": "Player two"
+  },
+  "scoreLabel": "Round wins for {{player}}",
   "lobby": {
     "title": "Meet in the courtyard",
-    "explanation": "Create a room and share its invitation, or enter the code from your friend.",
+    "explanation": "Create a room and share its invitation, or enter the code from your friend. Win three rounds to take the match.",
     "create": "Create room",
     "or": "or",
     "code": "Room code",
@@ -18,14 +22,18 @@
     "players": "Players",
     "ready": "Ready",
     "cancelReady": "Not ready",
-    "leave": "Leave room"
+    "leave": "Leave room",
+    "round": "Round {{round}}",
+    "beforeFirstRound": "Match awaiting first round"
   },
   "seat": {
     "open": "Waiting for a player",
     "notReady": "Not ready",
     "ready": "Ready",
     "alive": "Alive",
-    "eliminated": "Eliminated"
+    "eliminated": "Eliminated",
+    "rematchReady": "Wants a rematch",
+    "rematchNotReady": "Considering rematch"
   },
   "stats": {
     "label": "{{player}} upgrades",
@@ -36,22 +44,35 @@
   },
   "phase": {
     "waiting": "Waiting for both players",
-    "countdown": "Round starting",
+    "initialCountdown": "First round starting",
+    "interRoundCountdown": "Next round starting",
     "running": "Round in progress",
     "result": "Round complete",
-    "interrupted": "Round interrupted"
+    "matchResult": "Match complete",
+    "interrupted": "Match interrupted"
   },
-  "result": {
+  "roundResult": {
     "winner": "{{player}} wins the round.",
     "mutualElimination": "Draw: both players were eliminated.",
     "timeout": "Draw: time ran out."
   },
+  "matchResult": {
+    "roundWins": "{{player}} wins the match with three round wins.",
+    "forfeit": "{{player}} wins the match by forfeit.",
+    "abandoned": "The match ended after both players left.",
+    "interrupted": "The match could not continue: {{reason}}"
+  },
   "interruption": {
-    "participantLeft": "The other player left the room.",
-    "connectionLost": "The other player lost their connection.",
-    "serverOverloaded": "The round stopped because the server is busy.",
-    "serverStopped": "The server stopped the round.",
-    "internalError": "The round stopped because of a server error."
+    "connectionLost": "a player lost their connection",
+    "serverOverloaded": "the server is busy",
+    "serverStopped": "the server stopped",
+    "internalError": "a server error occurred"
+  },
+  "rematch": {
+    "ready": "Play again",
+    "withdraw": "Withdraw rematch vote",
+    "locked": "Rematch opens after the result hold.",
+    "needsPlayers": "Both players must be present for a rematch."
   },
   "connection": {
     "disconnected": "Choose how to enter a room.",
@@ -67,25 +88,25 @@
   },
   "error": {
     "title": "Could not complete that action",
-    "connectionFailed": "The game connection ended. Create or join a room to try again.",
+    "connectionFailed": "The game connection ended. Try again.",
     "invalidServerMessage": "The server sent game data this version cannot use.",
     "sessionFailed": "A game session could not be created. Try again.",
     "sequenceExhausted": "This connection reached its command limit. Start a new session.",
     "incompatibleProtocol": "This game version is not supported by the server.",
     "invalidMessage": "The server could not understand that command.",
-    "authenticationFailed": "This game session is no longer valid. Start a new one.",
-    "connectionInUse": "This game session is already open elsewhere.",
-    "notAuthenticated": "The game connection is not ready yet.",
+    "authenticationFailed": "This game session is no longer valid.",
+    "connectionInUse": "This session is already open elsewhere.",
+    "notAuthenticated": "The connection is not ready.",
     "alreadyAuthenticated": "This connection is already signed in.",
-    "alreadyInRoom": "Leave the current room before joining another.",
-    "notInRoom": "Join a room before using that control.",
+    "alreadyInRoom": "Leave the current room first.",
+    "notInRoom": "Join a room first.",
     "roomNotFound": "That room is no longer available.",
-    "roomFull": "Both seats in that room are occupied.",
-    "staleRoom": "The room changed before that command arrived.",
-    "invalidPhase": "That action is not available at this point in the round.",
-    "staleSequence": "That command arrived out of order. Try the action again.",
+    "roomFull": "Both seats are occupied.",
+    "staleRoom": "The room changed before the command arrived.",
+    "invalidPhase": "That action is unavailable now.",
+    "staleSequence": "That command arrived out of order.",
     "duplicateAction": "That bomb action was already received.",
-    "rateLimited": "Commands are arriving too quickly. The connection was stopped.",
-    "capacityReached": "The server has no room for another game right now."
+    "rateLimited": "Commands arrived too quickly.",
+    "capacityReached": "The server has no room for another match."
   }
 }

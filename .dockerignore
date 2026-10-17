@@ -14,3 +14,5 @@ target
 **/pickup-test-results
 **/playwright-controls-report
 **/controls-test-results
+**/playwright-audio-report
+**/audio-test-results

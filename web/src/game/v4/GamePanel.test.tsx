@@ -29,6 +29,7 @@ function state(connection: GameClientState['connection'] = 'authenticated'): Gam
   const current = snapshot(20)
   return {
     connection, room: current.room, snapshot: current, youSeat: 'one', failure: null,
+    admissionBaseline: { roomId: current.room.roomId, revision: current.room.revision, tick: current.room.tick },
     admissionPending: connection !== 'authenticated', leavePending: false,
     reconnectAttempt: connection === 'reconnecting' ? 1 : 0,
   }

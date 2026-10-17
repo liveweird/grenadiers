@@ -22,7 +22,8 @@
     "test:matches": "playwright test --config playwright.matches.config.ts",
     "test:reconnect": "playwright test --config playwright.reconnect.config.ts",
     "test:hardening": "playwright test --config playwright.hardening.config.ts",
-    "test:latency": "playwright test --config playwright.latency.config.ts"
+    "test:latency": "playwright test --config playwright.latency.config.ts",
+    "test:audio": "playwright test --config playwright.audio.config.ts"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.13.0",

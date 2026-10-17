@@ -16,6 +16,7 @@ type LocalFailure =
 
 export type GameFailure = V4ErrorCode | LocalFailure | 'incompatibleProtocol' | 'seatReplaced'
 export type AdmissionIntent = { type: 'create' } | { type: 'join'; roomCode: string }
+type AdmissionBaseline = { roomId: string; revision: number; tick: number }
 
 export interface GameClientState {
   connection: GameConnection
@@ -26,9 +27,11 @@ export interface GameClientState {
   admissionPending: boolean
   leavePending: boolean
   reconnectAttempt: number
+  admissionBaseline: AdmissionBaseline | null
 }
 
 export const initialGameClientState = (): GameClientState => ({
   connection: 'disconnected', room: null, snapshot: null, youSeat: null, failure: null,
   admissionPending: false, leavePending: false, reconnectAttempt: 0,
+  admissionBaseline: null,
 })

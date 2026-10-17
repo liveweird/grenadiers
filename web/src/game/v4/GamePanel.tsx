@@ -10,6 +10,7 @@ import { useGameClient } from './useGameClient'
 import { ControlsDialog } from './ControlsDialog'
 import { bindingsSummary } from './controlLabels'
 import { loadControlBindings, saveControlBindings } from './controlPreferences'
+import { SoundControl } from '../audio/SoundControl'
 
 const CODE_PATTERN = /^[A-HJ-NP-Z2-9]{8}$/
 
@@ -221,8 +222,11 @@ export function GamePanelView({ state, actions }: { state: GameClientState; acti
           bindings={bindings}
           onDirection={(direction) => actions.movement(direction)} onBomb={() => actions.placeBomb()} />
         <p id="v4-game-instructions" className="game-instructions">{bindingsSummary(bindings, copy)}</p>
-        <Button className="controls-button" variant="subtle" color="dark" size="compact-sm"
-          onClick={() => setControlsOpen(true)}>{copy.controls.open}</Button>
+        <div className="local-controls">
+          <Button className="controls-button" variant="subtle" color="dark" size="compact-sm"
+            onClick={() => setControlsOpen(true)}>{copy.controls.open}</Button>
+          <SoundControl state={state} copy={copy} />
+        </div>
       </div>
       <aside className="control-column" aria-live="polite">
         {reconnecting && <Alert color="yellow" title={copy.reconnect.title}>{copy.reconnect.retrying}</Alert>}

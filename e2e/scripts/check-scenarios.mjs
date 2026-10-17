@@ -16,6 +16,7 @@ const testDirectories = [
   new URL('../reconnect-tests/', import.meta.url),
   new URL('../hardening-tests/', import.meta.url),
   new URL('../latency-tests/', import.meta.url),
+  new URL('../audio-tests/', import.meta.url),
 ]
 const testText = (await Promise.all(testDirectories.map(async (directory) =>
   (await Promise.all((await files(directory, '.ts')).map((name) => readFile(new URL(name, directory), 'utf8')))).join('\n'),

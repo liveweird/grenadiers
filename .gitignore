@@ -22,3 +22,6 @@ e2e/reconnect-test-results/
 
 e2e/playwright-controls-report/
 e2e/controls-test-results/
+
+e2e/playwright-audio-report/
+e2e/audio-test-results/

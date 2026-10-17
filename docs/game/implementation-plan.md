@@ -27,7 +27,11 @@ The repository contains versioned HTTP/WebSocket contracts, anonymous sessions, 
 two-seat rooms, authoritative 60 Hz simulation, and checked public snapshots/events. M1–M2
 provide movement, owned bombs, flames, damage, and round finality. M3 adds readiness/countdown
 and a playable PixiJS arena with React controls, native keyboard handling, and EN/PL localization.
-Automated gates, CI, Compose, and Kubernetes validate the stack. M4 adds generated arenas, private seeds, and upgrades. M5 adds series scoring and rematches; v0.3.9 activates v4 reconnect and private replay.
+Automated gates, CI, Compose, and Kubernetes validate the stack. M4 adds generated arenas,
+private seeds, and upgrades. M5 adds series scoring and rematches; v0.3.9 activates v4 reconnect
+and private replay. M7 adds measured runtime/ordered-message-delay references, real visibility
+recovery, persistent keyboard remapping and optional gesture-enabled sound. Human playtesting
+and the broader browser/network support decision remain open.
 
 The [verification record](../verification.md) now contains passing locked Rust builds, tests,
 coverage, dependency audits, Compose execution, strict Kubernetes validation and live rollout,
@@ -348,7 +352,8 @@ v0.3.12 adds real headed Chromium hidden-tab/return acceptance with unchanged se
 native input release; owned process cleanup is bounded. v0.3.13 adds [persistent keyboard
 remapping](controls.md), held-input clearing and localized accessible settings. v0.3.14 adds
 [ordered WebSocket delay measurements](websocket-latency.md) with causal page-delivery and collision
-proofs. Broader network/browser support and human playability remain open.
+proofs. v0.3.15 adds [optional procedural sound](audio.md), gesture-only activation, bounded voices
+and replay-free hidden/visible recovery. Broader network/browser support and human playability remain open.
 
 **Release:** v0.4.0. **Depends on:** M6.
 

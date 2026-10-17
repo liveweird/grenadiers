@@ -62,9 +62,14 @@ English and Polish are available without reconnecting the game session. **Connec
 diagnostics** expands the separate diagnostic transport controls; its socket is not a seat.
 The panel shows recovery, disconnected/expired seats, and the grace countdown. `seatReplaced`,
 close code 4001, `resumeRejected`, and exhausted retries stop recovery and return to admission.
-No touch controller or audio is included. A narrow viewport is supported for layout and spectating;
+No touch controller is included. A narrow viewport is supported for layout and spectating;
 playing currently requires a keyboard. The five keyboard actions can be changed and restored
 through the localized [controls dialog](controls.md); the validated preference stays in this browser.
+
+Optional [procedural sound](audio.md) starts muted. **Enable sound** below the arena creates
+audio only from that gesture; placement, detonation, pickup and elimination cues follow accepted
+public events. Essential information stays visual. Muting, hiding, disconnecting or leaving stops
+voices. Returning from a hidden tab requires **Resume sound**; old events are discarded.
 
 ## Exposed items and player upgrades
 

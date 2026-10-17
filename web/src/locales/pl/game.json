@@ -126,6 +126,15 @@
     },
     "instructions": "Ruch: {{movement}}. Bomba: {{bomb}}. Sterowanie działa tylko podczas rundy."
   },
+  "audio": {
+    "enable": "Włącz dźwięk",
+    "mute": "Wycisz dźwięk",
+    "resume": "Wznów dźwięk",
+    "off": "Dźwięk wyłączony",
+    "on": "Dźwięk włączony",
+    "paused": "Dźwięk wstrzymany",
+    "unavailable": "Dźwięk niedostępny"
+  },
   "error": {
     "title": "Nie udało się wykonać działania",
     "connectionFailed": "Połączenie z grą zostało zakończone.",

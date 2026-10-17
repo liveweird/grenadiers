@@ -41,3 +41,7 @@ verification record.
 [Browser hardening](browser-hardening.md) records real visibility recovery and its tested scope.
 
 [Keyboard controls](controls.md) describes defaults, safe remapping and non-secret preference storage.
+
+[Ordered WebSocket delay](websocket-latency.md) defines the measured profile, causal observations and limits.
+
+[Procedural sound](audio.md) explains gesture activation, mute, visibility recovery and event baselines.

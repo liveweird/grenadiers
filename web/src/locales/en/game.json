@@ -126,6 +126,15 @@
     },
     "instructions": "Move with {{movement}}. Place a bomb with {{bomb}}. Controls work only during a live round."
   },
+  "audio": {
+    "enable": "Enable sound",
+    "mute": "Mute sound",
+    "resume": "Resume sound",
+    "off": "Sound off",
+    "on": "Sound on",
+    "paused": "Sound paused",
+    "unavailable": "Sound unavailable"
+  },
   "error": {
     "title": "Could not complete that action",
     "connectionFailed": "The game connection ended. Try again.",

@@ -209,6 +209,7 @@ export class GameClient {
     this.update({
       room: message.room, youSeat: message.youSeat,
       snapshot: message.state ? { type: 'snapshot', room: message.room, state: message.state, events: [] } : null,
+      admissionBaseline: { roomId: message.room.roomId, revision: message.room.revision, tick: message.room.tick },
       admissionPending: false, reconnectAttempt: 0, failure: null,
     })
   }
@@ -240,7 +241,8 @@ export class GameClient {
     this.nextAction = 1
     this.sentControls = []
     this.controlFailure = null
-    this.update({ room: null, snapshot: null, youSeat: null, leavePending: false, failure: null })
+    this.update({ room: null, snapshot: null, youSeat: null, admissionBaseline: null,
+      leavePending: false, failure: null })
   }
   private acceptError(code: V4ErrorCode, sequence: number | null): void {
     if (code === 'resumeRejected' && sequence === this.admissionSequence && this.capability) {
@@ -360,6 +362,7 @@ export class GameClient {
     if (close) socket?.close()
     this.update({
       connection: 'disconnected', room: null, snapshot: null, youSeat: null,
+      admissionBaseline: null,
       admissionPending: false, leavePending: false, reconnectAttempt: 0, failure,
     })
   }

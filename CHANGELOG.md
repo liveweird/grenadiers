@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.3.15 — 2026-10-17
+
+- Add original procedural bomb placement/detonation, pickup and elimination cues, default muted,
+  with explicit gesture activation, validated non-secret preferences and localized sound controls.
+- Bound voices and discard old event history across admission, rounds, mute and visibility;
+  hidden return requires a fresh gesture. Keep all essential information visual.
+- Verify real Chromium audio context/node activity and hidden/visible resume without replay;
+  fix StrictMode engine ownership and stale asynchronous activation with behavioral regressions.
+
 ## 0.3.14 — 2026-10-17
 
 - Add bounded reliable ordered WebSocket delay with deterministic 50±10ms jitter per direction.

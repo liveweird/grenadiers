@@ -36,7 +36,7 @@ there are no dummy tables or empty migrations in this scaffold. Adopt append-onl
 migrations with the first real schema; do not mutate applied migration files.
 
 Redis is unnecessary initially. Multiple server replicas would require match routing,
-single-owner guarantees, reconnect semantics, and deployment draining. Do not add replicas
+cross-process capability routing, single-owner guarantees, and deployment draining. Do not add replicas
 or shared mutable state before those decisions are documented and tested.
 
 ## Implemented domain and presentation decisions
@@ -68,8 +68,8 @@ budgets, result ordering, and retention.
 
 [ADR 0011](decisions/0011-deterministic-arena-generation.md) defines the implemented headless
 [generator](game/generation.md). [ADR 0014](decisions/0014-private-round-seeds-and-live-generation.md)
-activates generated classic-v2 rooms with private round seeds and retained records. Lag
-compensation, reconnect, and matchmaking still need implementation at their
+activates generated classic-v2 rooms with private round seeds and retained records. Reconnect is
+implemented for one process lifetime; lag compensation and matchmaking still need their
 planned milestones. Add focused ADRs before
 dependent work; preserve the specified lifecycle and gameplay rules.
 
@@ -84,23 +84,24 @@ must be recorded and how the two-player baseline will be delivered and verified.
 [pickup layers](game/pickups.md) with classic-v2 collection/upgrades and explicit round-number spawn/tie assignment.
 
 [ADR 0015](decisions/0015-match-series-and-staged-progression.md) separates implemented
-[headless match-series facts](game/match-series.md) and the pure [automatic lifecycle](game/match-lifecycle.md) from staged
-v3 server/browser integration. The live generated preview now supports first-to-three matches.
+[headless match-series facts](game/match-series.md) and the pure [automatic lifecycle](game/match-lifecycle.md)
+from transport integration. The live generated match supports first-to-three play.
 
-[ADR 0016](decisions/0016-dormant-gameplay-v3-contract.md) stages explicit namespaced
-[gameplay-v3 contracts](game/protocol-v3.md) separately from archived v2. The production
-owner now supplies real match facts; generated types never fabricate scores.
+[ADR 0016](decisions/0016-dormant-gameplay-v3-contract.md) records the earlier namespaced
+[gameplay-v3 contract](game/protocol-v3.md) separately from archived v2. Gameplay v4 extends
+that physical contract with resumable admissions; generated types never fabricate scores.
 
-V3 checked room projection derives facts directly from `MatchLifecycle`; its public validator
+V4 checked room projection derives facts directly from `MatchLifecycle`; its public validator
 rejects semantically impossible bounded DTOs before server adapters publish them.
 
 The active `match_runtime` server adapter owns real per-round physics, assignment-aware
-generation, epoch-fenced input, and checked v3 publication. Result physics freezes while the
-lifecycle clock advances; inter-round/rematch boundaries clear worlds and report windows.
+generation, epoch-fenced input, settled reconnect grace, and checked v4 publication. Result
+physics freezes while the global lifecycle clock and reservation deadlines advance.
 
-The active v3 client/panel shares the Pixi presentation boundary, validates v3 messages,
-tracks monotonic room epochs/revisions, and renders scores/rematch from authoritative room
-facts. Production routing uses v3. See [match browser](game/match-browser.md).
+The active v4 client/panel shares the Pixi presentation boundary, validates v4 messages, keeps
+the resume capability only in tab memory, and renders scores, recovery, grace, and rematch from
+authoritative facts. Production routing uses v4 on the existing endpoint. See
+[reconnect browser](game/reconnect-browser.md).
 
 The active [bounded match owner](game/match-owner.md) adds generation-fenced admission,
 scheduled departure batches, absolute deadlines, retention, and sticky shutdown. Its closing

@@ -1,8 +1,9 @@
-# Dormant reconnect contract
+# Active reconnect contract
 
-Gameplay v4 is staged in `api/gameplay-v4.schema.json`, Rust `core::protocol::v4`, and generated
-`web/src/game/v4/schema.ts`. Active gameplay remains v3; no alternate endpoint or runtime
-protocol selector is introduced. Diagnostic v1, classic-v2 physics, and generator-v1 are unchanged.
+Gameplay v4 is defined in `api/gameplay-v4.schema.json`, Rust `core::protocol::v4`, and generated
+`web/src/game/v4/schema.ts`. The existing gameplay endpoint and its single owner/runtime use v4;
+there is no alternate endpoint or runtime selector. Diagnostic v1, classic-v2 physics, and
+generator-v1 are unchanged. V2 and v3 remain historical contracts.
 
 A new distinct, redacted ResumeToken is a 64-character lowercase-hex seat capability. Ordinary
 session authentication precedes `resumeRoom {sequence, roomId, resumeToken}`. Only personal
@@ -26,7 +27,7 @@ fixtures encode a complete Snapshot to 44,874 bytes and Admitted to 31,444 bytes
 widest scalar metadata, full arrays, capability, seat and action high-water. These are structural
 bounds, not reachable gameplay claims. Oversized encoding is rejected.
 
-Run `npm --prefix web run gen:gameplay` / `check:gameplay` for all three archived/staged versions,
+Run `npm --prefix web run gen:gameplay` / `check:gameplay` for all three retained versions,
 plus `cargo test -p grenadiers-core protocol::v4`. Rust and AJV tests cover every variant,
 credentials/redaction, missing/null/extra fields, physical parity and complete frame bounds.
-Semantic projection and coordinated reconnect activation are separate increments.
+Semantic projection, server publication, and browser validation are active together.

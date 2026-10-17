@@ -33,7 +33,8 @@ test order and enforces coverage thresholds declared in `web/vite.config.ts`.
 `api-guidelines/spectral.yaml`; it retains the standard and custom rules without the CLI's
 glob dependency. Parser/load errors and error-severity diagnostics fail the command.
 `check:api`, `check:realtime`, and `check:gameplay` compare generated
-contracts without modifying them. Gameplay generation/drift checks cover active v3 and historical v2; parity tests compare unchanged physical definitions. AJV validates runtime WebSocket payloads. EN/PL locale
+contracts without modifying them. Gameplay generation/drift checks cover active v4 and historical
+v2/v3; parity tests compare unchanged physical definitions. AJV validates runtime WebSocket payloads. EN/PL locale
 parity is tested. ESLint/SonarJS and Knip must report no findings.
 
 Vitest also discovers `web/scripts/*.test.mjs`: generator tests compile representative
@@ -60,6 +61,10 @@ Install cargo-deny with `cargo install cargo-deny --version 0.20.2 --locked` for
 separately so external advisory outages do not obscure unit-test results. Document any
 reviewed exception with its reason and removal condition; never add blanket suppressions.
 
+All activated-v4 Playwright configurations disable framework trace capture. Raw traces can retain
+personal `admitted` frames and private resume capabilities before test-side redaction. Failure
+screenshots, public reports, and bounded redacted command/snapshot summaries remain available.
+
 ### Generated pickup acceptance
 
 The default six scenarios run against random generated maps and rely only on safe openings.
@@ -68,7 +73,10 @@ A separate `test:pickups` command uses the explicit read-only operator fixture s
 `E2E_PICKUP_FIXTURE=arena-v1-pickups`; it never silently skips. Run both modes against the same
 image. CI performs default smoke, recreates the image with the fixture override, then exercises
 native keyboard collection, both HUDs, and coexisting old/new bomb ranges. The public fixture
-also has a deterministic core simulation trace; concealed data never enters browser assets. The pickup runner retains action/source traces but disables per-key DOM/compositor capture, whose overhead distorts real-time escape on software-rendered Linux. On failure it attaches bounded, redacted command/snapshot summaries; failure screenshots and explicit visual checkpoints remain. Default smoke tracing is unchanged.
+also has a deterministic core simulation trace; concealed data never enters browser assets. The
+pickup runner retains bounded test-side action/source summaries but disables per-key DOM/compositor
+capture, whose overhead distorts real-time escape on software-rendered Linux. On failure it attaches
+redacted command/snapshot summaries; failure screenshots and explicit visual checkpoints remain.
 
 ### Complete-match acceptance
 
@@ -78,3 +86,11 @@ walk the core-proven corridor, draw with one shared bomb, complete three round w
 fresh worlds/assignments, withdraw a vote, and consent to rematch over the same sockets.
 The same image runs default, pickup, and full-match modes in CI. Retained reports include
 redacted public histories; screenshots and Axe cover desktop and 320-pixel final results.
+
+### Reconnect acceptance
+
+`E2E_MATCH_FIXTURE=arena-v1-matches npm --prefix e2e run test:reconnect` runs two reconnect
+scenarios against the same match fixture and uses zero retries. It covers transport restore and
+connected takeover with real browsers and sockets. Together with six default, one pickup, and one
+complete-match scenario, scenario parity covers ten documented cases. These checks do not by
+themselves claim exact-image or hosted-environment acceptance.

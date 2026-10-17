@@ -1,9 +1,8 @@
 # Private resume credentials and binding fences
 
-Status: dormant server foundation. These helpers are test-compiled until the coordinated v4
-activation. They do not change the active v3 endpoint, room registry, owner, sockets, or replay.
+Status: active in the v4 room owner and gameplay socket.
 
-Each occupied seat will receive an independently generated 32-byte resume capability. The bytes
+Each occupied seat receives an independently generated 32-byte resume capability. The bytes
 are encoded through the v4 `ResumeToken` type as exactly 64 lowercase hexadecimal characters.
 Minting draws fresh entropy and compares the candidate only with the other seat's credential. It
 tries at most three candidates. Entropy failure and collision exhaustion return an error before a
@@ -20,6 +19,7 @@ It accepts a command or replacement only when both `ConnectionId` and generation
 binding exactly. A stale replacement attempt leaves the current key unchanged. This prevents old
 queued commands and delayed connection drops from affecting a replacement binding.
 
-The activation package will place these values in the owner's two bounded seat slots and perform
-admission commit, replacement notification, and disconnect handling. This foundation intentionally
-contains no registry, owner, transport, or protocol dispatch behavior.
+The owner stores these values in its two bounded seat slots. Admission is prepared before the
+reply, committed without awaiting after a successful reply send, and only then notifies a replaced
+binding. The old socket receives `seatReplaced` and closes with code 4001. A canceled admission
+does not rotate credentials, fence input, change occupancy, or evict the old binding.

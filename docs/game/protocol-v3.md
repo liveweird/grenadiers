@@ -1,8 +1,8 @@
 # Gameplay-v3 match contract
 
-Status: active at `/api/v1/game/ws`, with checked room/physical projection and the real match
-owner. See the [protocol guide](protocol.md). Historical v2 contracts remain for regression
-and physical parity checks; there is no alternate endpoint.
+Status: historical contract retained for regression and physical parity checks. The existing
+`/api/v1/game/ws` endpoint accepts only [gameplay v4](protocol-v4.md); there is no alternate
+version-selectable endpoint. See the current [protocol guide](protocol.md).
 
 V3 keeps existing commands and physical snapshot/event shapes, adding
 `rematch {sequence, roomId, roundId, ready}`. Authentication success is fixed to 3;
@@ -31,9 +31,9 @@ The schema enforces structure and bounds. `project_room_view(RoomMetadata, &Matc
 `validate_room_view` checks independently constructed DTOs. These enforce canonical seats,
 phase/score/history consistency, time relationships, consent transitions, and epoch chronology.
 Forfeit losers must be vacant; later winner departure remains valid. Draws award no score.
-The active server adapter checks physical-state/profile agreement and private-state separation. No hidden items, seeds, generation records, or assignment bookkeeping enter DTOs.
+The v3 server adapter checked physical-state/profile agreement and private-state separation. No hidden items, seeds, generation records, or assignment bookkeeping entered DTOs.
 
-`npm --prefix web run gen:gameplay` and `check:gameplay` cover both versions. Rust/AJV tests
+`npm --prefix web run gen:gameplay` and `check:gameplay` cover all retained versions. Rust/AJV tests
 exercise strict fields, variants, scalar boundaries, physical parity, and frame limits.
 The maximal-body/worst-metadata fixture is 44,742 bytes against the unchanged 65,536-byte cap.
 See [ADR 0016](../decisions/0016-dormant-gameplay-v3-contract.md).

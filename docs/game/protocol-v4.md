@@ -1,7 +1,7 @@
 # Gameplay v4 resumable match contract
 
-Status: dormant. The active gameplay WebSocket still uses v3. V4 defines the checked contract
-for reconnect grace and stable seat capabilities; it does not add an endpoint or feature flag.
+Status: active on the existing gameplay WebSocket. V4 defines the checked contract for reconnect
+grace and stable seat capabilities; it adds no endpoint or feature flag.
 
 V4 retains the v3 physical `GameState` and event definitions. Authentication success is fixed
 to protocol version 4, while authentication input remains bounded to 0..65,535 for negotiation.
@@ -59,5 +59,4 @@ body belongs to the current command epoch. Its numeric value comes from the owne
 the validator deliberately does not infer it from public bombs.
 
 The schema enforces closed wire structure and numeric bounds. Semantic projection and validation
-enforce lifecycle meaning. V4 remains inactive until the server owner and browser client adopt
-these contracts together.
+enforce lifecycle meaning. The server owner and browser client use these contracts together.

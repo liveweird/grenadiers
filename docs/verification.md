@@ -1,5 +1,32 @@
 # Repository verification
 
+## M6 coordinated reconnect activation — 2026-10-17
+
+The locked server gate passes **294 core tests, 147 server tests, and 2 doctests**.
+Rust line coverage is **7,954/8,491 lines, 93.68%**, above the unchanged 80% floor.
+Independent owner/runtime, replay, browser and acceptance-source reviews are clear. Closure
+checks include unavailable-room rejection, deferred admission during catch-up, canceled replacement
+receivers, transactional takeover input fencing, maximal action floors, and legacy replay facts.
+The Node 24.21.0 web gate passes **163 tests**, with **94.82% statements, 89.43% branches,
+94.42% functions, and 97.60% lines**. Contract checks, ESLint, Knip, shuffled coverage, build,
+all ten documented E2E scenarios, and locked dependency policies pass; both npm audits report zero
+vulnerabilities. Initial-countdown App fixtures now satisfy connected-and-ready semantics.
+
+Native Chromium acceptance passes six default scenarios, the complete match/rematch, and two
+reconnect scenarios. Recovery preserves the live bomb, physical position, private seat identity,
+capability and action floor; native input escapes the real fuse and subsequent bomb IDs advance.
+Connected takeover ends the old UI without a retry contest; wrong room/capability are uniformly
+rejected. Dual transport loss followed by eleven real seconds produces terminal rejection and
+usable lobbies. These native runs preceded the final owner scheduling/error fixes; exact-image
+acceptance of the final committed source is a separate required check. Browser fixtures use no
+physics, outcome or clock injection. Native traces are disabled because personal v4 frames carry
+capabilities; public screenshots, redacted summaries and reports remain. Desktop and 320-pixel
+Polish match-result screenshots were visually inspected; accessibility and containment pass.
+
+The independent 42-rule audit finds 39 covered and three partial integration cases (RULE06,
+RULE28, RULE38). Their bounded follow-up tests precede complete M6 exit evidence. M7 measured
+playtest/hardening remains outstanding; this activation is not the v0.4.0 milestone.
+
 ## M6 dormant reconnect browser — 2026-10-17
 
 The complete Node 24.21.0 web gate passes **163 tests**, with **94.74% statements, 88.22%

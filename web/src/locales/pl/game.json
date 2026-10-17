@@ -1,11 +1,15 @@
 {
-  "label": "Pojedynek dla dwóch graczy",
-  "timer": "Czas pozostały do końca rundy",
+  "label": "Mecz dla dwóch graczy",
+  "timer": "Czas pozostały w bieżącej fazie",
   "you": "(ty)",
-  "player": { "one": "Gracz pierwszy", "two": "Gracz drugi" },
+  "player": {
+    "one": "Gracz pierwszy",
+    "two": "Gracz drugi"
+  },
+  "scoreLabel": "Wygrane rundy: {{player}}",
   "lobby": {
     "title": "Spotkajcie się na dziedzińcu",
-    "explanation": "Utwórz pokój i udostępnij zaproszenie albo wpisz kod otrzymany od znajomego.",
+    "explanation": "Utwórz pokój i udostępnij zaproszenie albo wpisz kod otrzymany od znajomego. Wygraj trzy rundy, aby zwyciężyć w meczu.",
     "create": "Utwórz pokój",
     "or": "lub",
     "code": "Kod pokoju",
@@ -18,14 +22,18 @@
     "players": "Gracze",
     "ready": "Gotowy",
     "cancelReady": "Jeszcze nie",
-    "leave": "Opuść pokój"
+    "leave": "Opuść pokój",
+    "round": "Runda {{round}}",
+    "beforeFirstRound": "Oczekiwanie na pierwszą rundę"
   },
   "seat": {
     "open": "Oczekiwanie na gracza",
     "notReady": "Brak gotowości",
     "ready": "Gotowy",
     "alive": "W grze",
-    "eliminated": "Wyeliminowany"
+    "eliminated": "Wyeliminowany",
+    "rematchReady": "Chce rewanżu",
+    "rematchNotReady": "Rozważa rewanż"
   },
   "stats": {
     "label": "Ulepszenia: {{player}}",
@@ -36,22 +44,35 @@
   },
   "phase": {
     "waiting": "Oczekiwanie na obu graczy",
-    "countdown": "Runda zaraz się rozpocznie",
+    "initialCountdown": "Pierwsza runda zaraz się rozpocznie",
+    "interRoundCountdown": "Następna runda zaraz się rozpocznie",
     "running": "Runda trwa",
     "result": "Runda zakończona",
-    "interrupted": "Runda przerwana"
+    "matchResult": "Mecz zakończony",
+    "interrupted": "Mecz przerwany"
   },
-  "result": {
+  "roundResult": {
     "winner": "{{player}} wygrywa rundę.",
     "mutualElimination": "Remis: obaj gracze zostali wyeliminowani.",
     "timeout": "Remis: upłynął czas."
   },
+  "matchResult": {
+    "roundWins": "{{player}} wygrywa mecz trzema rundami.",
+    "forfeit": "{{player}} wygrywa mecz walkowerem.",
+    "abandoned": "Mecz zakończył się po odejściu obu graczy.",
+    "interrupted": "Mecz nie może być kontynuowany: {{reason}}"
+  },
   "interruption": {
-    "participantLeft": "Drugi gracz opuścił pokój.",
-    "connectionLost": "Drugi gracz stracił połączenie.",
-    "serverOverloaded": "Runda zatrzymała się z powodu obciążenia serwera.",
-    "serverStopped": "Serwer zatrzymał rundę.",
-    "internalError": "Runda zatrzymała się z powodu błędu serwera."
+    "connectionLost": "gracz stracił połączenie",
+    "serverOverloaded": "serwer jest przeciążony",
+    "serverStopped": "serwer został zatrzymany",
+    "internalError": "wystąpił błąd serwera"
+  },
+  "rematch": {
+    "ready": "Zagraj ponownie",
+    "withdraw": "Wycofaj głos za rewanż",
+    "locked": "Rewanż będzie dostępny po prezentacji wyniku.",
+    "needsPlayers": "Do rewanżu potrzebni są obaj gracze."
   },
   "connection": {
     "disconnected": "Wybierz sposób wejścia do pokoju.",
@@ -61,31 +82,31 @@
   },
   "arena": {
     "label": "Dziedziniec Grenadiers",
-    "failure": "Nie udało się wyświetlić dziedzińca. Opuść pokój i spróbuj ponownie.",
+    "failure": "Nie udało się wyświetlić dziedzińca.",
     "focusHint": "Wybierz dziedziniec, aby sterować graczem.",
     "instructions": "Poruszaj się strzałkami lub klawiszami W A S D. Podłóż bombę spacją. Sterowanie działa tylko podczas rundy."
   },
   "error": {
     "title": "Nie udało się wykonać działania",
-    "connectionFailed": "Połączenie z grą zostało zakończone. Utwórz pokój lub dołącz ponownie.",
-    "invalidServerMessage": "Serwer wysłał dane gry nieobsługiwane przez tę wersję.",
-    "sessionFailed": "Nie udało się utworzyć sesji gry. Spróbuj ponownie.",
-    "sequenceExhausted": "To połączenie osiągnęło limit poleceń. Rozpocznij nową sesję.",
-    "incompatibleProtocol": "Ta wersja gry nie jest obsługiwana przez serwer.",
-    "invalidMessage": "Serwer nie zrozumiał tego polecenia.",
-    "authenticationFailed": "Ta sesja gry straciła ważność. Rozpocznij nową.",
-    "connectionInUse": "Ta sesja gry jest już otwarta w innym miejscu.",
-    "notAuthenticated": "Połączenie z grą nie jest jeszcze gotowe.",
-    "alreadyAuthenticated": "To połączenie jest już uwierzytelnione.",
-    "alreadyInRoom": "Opuść bieżący pokój przed dołączeniem do innego.",
-    "notInRoom": "Dołącz do pokoju, aby użyć tego sterowania.",
-    "roomNotFound": "Ten pokój nie jest już dostępny.",
-    "roomFull": "Oba miejsca w tym pokoju są zajęte.",
-    "staleRoom": "Pokój zmienił się przed dotarciem polecenia.",
-    "invalidPhase": "To działanie nie jest dostępne na tym etapie rundy.",
-    "staleSequence": "Polecenie dotarło w złej kolejności. Spróbuj ponownie.",
-    "duplicateAction": "Ta próba podłożenia bomby została już odebrana.",
-    "rateLimited": "Polecenia przychodzą zbyt szybko. Połączenie zostało zatrzymane.",
-    "capacityReached": "Serwer nie ma teraz miejsca na kolejną grę."
+    "connectionFailed": "Połączenie z grą zostało zakończone.",
+    "invalidServerMessage": "Serwer wysłał dane nieobsługiwane przez tę wersję.",
+    "sessionFailed": "Nie udało się utworzyć sesji gry.",
+    "sequenceExhausted": "Osiągnięto limit poleceń.",
+    "incompatibleProtocol": "Serwer nie obsługuje tej wersji gry.",
+    "invalidMessage": "Serwer nie zrozumiał polecenia.",
+    "authenticationFailed": "Sesja gry straciła ważność.",
+    "connectionInUse": "Sesja jest otwarta gdzie indziej.",
+    "notAuthenticated": "Połączenie nie jest gotowe.",
+    "alreadyAuthenticated": "Połączenie jest już uwierzytelnione.",
+    "alreadyInRoom": "Najpierw opuść bieżący pokój.",
+    "notInRoom": "Najpierw dołącz do pokoju.",
+    "roomNotFound": "Pokój nie jest już dostępny.",
+    "roomFull": "Oba miejsca są zajęte.",
+    "staleRoom": "Pokój zmienił się przed poleceniem.",
+    "invalidPhase": "Ta akcja jest teraz niedostępna.",
+    "staleSequence": "Polecenie dotarło w złej kolejności.",
+    "duplicateAction": "Ta bomba została już odebrana.",
+    "rateLimited": "Polecenia przychodzą zbyt szybko.",
+    "capacityReached": "Brak miejsca na kolejny mecz."
   }
 }

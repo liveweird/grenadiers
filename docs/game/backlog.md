@@ -90,7 +90,8 @@ PixiJS renderer. Keep server collision and simulation independent of artwork.
 
 The [expanded item implementation plan](expanded-items.md) records the staged architecture,
 bounded state, interactions and activation acceptance. The v0.3.19 foundation does not expose
-item pickups or controls; Classic remains the default while contracts and transport are extended.
+item pickups or controls. Classic remains the default; later increments will extend contracts
+and transport before activation.
 
 Keep the existing capacity/range/speed upgrades. Add these independent categories:
 

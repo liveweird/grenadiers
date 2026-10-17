@@ -3,6 +3,7 @@ use std::collections::BTreeMap;
 use super::{InputAction, RoundResult, SeatInput, State, StepError, StepReport};
 use crate::game::arena::Terrain;
 use crate::game::bombs::Bomb;
+use crate::game::damage::{DamageOutcome, apply_damage};
 use crate::game::events::{StepEvent, StepEventKind};
 use crate::game::geometry::MovementTrace;
 use crate::game::movement;
@@ -30,6 +31,7 @@ impl State {
 
         let mut events = Vec::new();
         self.expire_flames(next_tick);
+        self.expire_actor_effects(next_tick);
         self.world.expose_flame_free_pickups();
         let placement_requests = self.apply_inputs(inputs);
         let traces = self.move_living();
@@ -96,39 +98,56 @@ impl State {
         tick: Tick,
         events: &mut Vec<StepEvent>,
     ) {
-        for (actor, trace) in self.actors.iter_mut().zip(traces) {
-            if actor.alive && trace_hits_hazards(trace, &self.world.hazards) {
-                actor.kill();
-                events.push(StepEvent::new(
-                    tick,
-                    StepEventKind::ActorEliminated {
-                        id: actor.id,
-                        seat: actor.seat,
-                    },
-                ));
+        for (index, trace) in traces.iter().enumerate() {
+            if self.actors[index].alive && trace_hits_hazards(trace, &self.world.hazards) {
+                self.damage_actor(index, tick, events);
             }
         }
     }
 
     fn kill_on_final_flames(&mut self, tick: Tick, events: &mut Vec<StepEvent>) {
-        for actor in &mut self.actors {
-            if actor.alive
-                && self
-                    .world
-                    .hazards
-                    .keys()
-                    .any(|cell| movement::position_overlaps_cell(actor.position, *cell))
+        for index in 0..self.actors.len() {
+            if self.actors[index].alive
+                && self.world.hazards.keys().any(|cell| {
+                    movement::position_overlaps_cell(self.actors[index].position, *cell)
+                })
             {
-                actor.kill();
-                events.push(StepEvent::new(
-                    tick,
-                    StepEventKind::ActorEliminated {
-                        id: actor.id,
-                        seat: actor.seat,
-                    },
-                ));
+                self.damage_actor(index, tick, events);
             }
         }
+    }
+
+    fn expire_actor_effects(&mut self, tick: Tick) {
+        for actor in &mut self.actors {
+            actor.effects.expire(tick);
+            if actor
+                .damage_grace
+                .is_some_and(|grace| !grace.is_active(tick))
+            {
+                actor.damage_grace = None;
+            }
+        }
+    }
+
+    fn damage_actor(&mut self, index: usize, tick: Tick, events: &mut Vec<StepEvent>) {
+        let actor = &mut self.actors[index];
+        let outcome = apply_damage(
+            &mut actor.inventory,
+            &actor.effects,
+            &mut actor.damage_grace,
+            tick,
+        );
+        if outcome != DamageOutcome::Eliminated {
+            return;
+        }
+        actor.kill();
+        events.push(StepEvent::new(
+            tick,
+            StepEventKind::ActorEliminated {
+                id: actor.id,
+                seat: actor.seat,
+            },
+        ));
     }
 
     fn resolve_placements(&mut self, requests: [bool; 2], tick: Tick, events: &mut Vec<StepEvent>) {
@@ -153,19 +172,24 @@ impl State {
             let Some(cell) = targets[seat.index()] else {
                 continue;
             };
-            let Some(detonates_at) = tick.0.checked_add(self.rules.bomb_fuse_ticks()).map(Tick)
+            let actor = &self.actors[seat.index()];
+            let Some(fuse_ticks) = actor
+                .effects
+                .bomb_fuse_ticks(self.rules.bomb_fuse_ticks(), tick)
             else {
+                continue;
+            };
+            let Some(detonates_at) = tick.0.checked_add(fuse_ticks).map(Tick) else {
                 continue;
             };
             let Some(id) = self.next_bomb_id() else {
                 continue;
             };
-            let actor = &self.actors[seat.index()];
             let bomb = Bomb {
                 id,
                 cell,
                 owner: actor.id,
-                range: actor.range,
+                range: actor.effective_bomb_range(tick),
                 placed_at: tick,
                 detonates_at,
             };
@@ -233,5 +257,8 @@ impl super::Actor {
         self.held.clear();
         self.residual = 0;
         self.pending_turn = None;
+        self.inventory.clear();
+        self.effects.clear();
+        self.damage_grace = None;
     }
 }

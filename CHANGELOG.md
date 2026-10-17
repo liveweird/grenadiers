@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.3.19 — 2026-10-17
+
+- Establish independent replaceable equipment/weapon slots and bounded timed effects in the
+  deterministic core, with exact expiry, refresh and independently expiring Slow-foot stacks.
+- Derive temporary range/fuse/speed capabilities separately from base upgrades; unify flame
+  damage resolution with Shield priority, consumable Heart protection and exact damage grace.
+- Document the optional expanded-item activation sequence and interaction/visibility policies.
+  Items remain unavailable in live rooms; Classic rules and public contracts are unchanged.
+
 ## 0.3.18 — 2026-10-17
 
 - Replace smooth placeholder geometry with original detailed pixel art: weathered courtyard

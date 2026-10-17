@@ -38,7 +38,8 @@ verification record.
 
 [Gameplay and presentation backlog](backlog.md) records playtest requests for forgiving turns,
 shared room settings, detailed pixel art, equipment, timed effects and single-use weapons.
-These requests are planned work, separate from the implemented classic baseline.
+Forgiving turns, shared settings and the first pixel-art slice are available. New item activation
+and remaining presentation work are planned extensions to the implemented Classic baseline.
 
 [Runtime reference measurements](performance.md) documents bounded workloads, selected budgets and evidence limits.
 
@@ -49,6 +50,9 @@ These requests are planned work, separate from the implemented classic baseline.
 [Room settings](settings.md) covers shared starting speed, turn tolerance, match target and fuse.
 
 [Pixel-art presentation](pixel-art.md) describes original artwork, animation and resource bounds.
+
+[Expanded item implementation](expanded-items.md) records the optional inventory, effects,
+weapons, visibility and incremental activation decisions; these items are not enabled yet.
 
 [Ordered WebSocket delay](websocket-latency.md) defines the measured profile, causal observations and limits.
 

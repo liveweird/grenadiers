@@ -1,5 +1,21 @@
 # Repository verification
 
+## M4 gameplay-v2 contract and room profiles — 2026-10-17
+
+The locked server gate passes **177 core tests, 69 server tests, and 2 doctests**.
+Rust line coverage passes the unchanged 80% floor at **3,861/4,171 lines, 92.57%**.
+The complete web gate passes **82 tests** with **96.64% statements, 91.66% branches,
+98.61% functions, and 98.77% lines**, including contract drift, Spectral, ESLint, Knip,
+shuffled coverage, and production build. E2E static checks and dependency policies pass;
+npm reports zero vulnerabilities.
+
+Independent schema/browser and Rust/server reviews report no actionable findings. Tests
+cover old/future versions before credential claims, full bounded incompatibility responses,
+strict pickup/event shapes, visibility and occupancy checks, same-update collection/result
+ordering, fixed-profile construction and mismatch rejection. The maximal structural v2
+snapshot is **44,466 bytes** against the unchanged **65,536-byte** limit. Diagnostic v1
+serialization is unchanged. Live rooms retain fixed-v1 rules/map and empty pickups.
+
 ## M4 collection and permanent upgrades — 2026-10-17
 
 The locked server gate passes **169 core tests, 67 server tests, and 2 doctests**.

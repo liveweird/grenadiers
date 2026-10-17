@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use grenadiers_core::{
     game::StepReport,
-    protocol::v3::{
+    protocol::v4::{
         GameServerMessage, RoomMetadata, RoomView, encode_server_message, project_room_view,
     },
     protocol::{project_events, project_state},
@@ -12,8 +12,7 @@ use grenadiers_core::{
 use super::super::types::RoomIdentity;
 use super::error::MatchRuntimeError;
 use super::runtime::{MatchNotice, SimRound};
-#[cfg(test)]
-use grenadiers_core::protocol::v3::RoomPhase;
+use grenadiers_core::protocol::v4::RoomPhase;
 
 pub(super) fn room_view(
     identity: &RoomIdentity,
@@ -33,6 +32,22 @@ pub(super) fn room_view(
         lifecycle,
     )
     .map_err(|_| MatchRuntimeError::Publication)
+}
+
+pub(super) const fn wire_seat(
+    seat: grenadiers_core::game::SeatId,
+) -> grenadiers_core::protocol::Seat {
+    match seat {
+        grenadiers_core::game::SeatId::One => grenadiers_core::protocol::Seat::One,
+        grenadiers_core::game::SeatId::Two => grenadiers_core::protocol::Seat::Two,
+    }
+}
+
+pub(super) const fn phase_has_body(phase: &RoomPhase) -> bool {
+    matches!(
+        phase,
+        RoomPhase::Running | RoomPhase::Result { .. } | RoomPhase::MatchResult { .. }
+    )
 }
 
 pub(super) fn snapshot(

@@ -1,9 +1,9 @@
 use grenadiers_core::{
     game::{GenerationRecord, State, StepReport},
-    room::MatchLifecycle,
+    room::{DepartureReason, MatchChange, MatchLifecycle, MatchPhase},
 };
 
-use super::MatchRuntime;
+use super::{MatchRuntime, MatchRuntimeError, map_lifecycle_error};
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub(in crate::game::rooms) struct RuntimeInspection {
@@ -21,6 +21,14 @@ pub(in crate::game::rooms) struct SimulationInspection {
 }
 
 impl MatchRuntime {
+    pub(in crate::game::rooms) fn sim(&self) -> Option<&super::SimRound> {
+        self.sim.as_ref()
+    }
+
+    pub(in crate::game::rooms) fn set_revision(&mut self, revision: u32) {
+        self.revision = revision;
+    }
+
     pub(in crate::game::rooms) fn replay_inspection(&self) -> RuntimeInspection {
         RuntimeInspection {
             lifecycle: self.lifecycle.clone(),
@@ -32,5 +40,46 @@ impl MatchRuntime {
             inputs: format!("{:?}", self.inputs),
             reports: self.reports.clone(),
         }
+    }
+
+    pub(in crate::game::rooms) fn replay_tick_profile(
+        &mut self,
+        profile: u16,
+    ) -> Result<(), MatchRuntimeError> {
+        let previous = self.lifecycle.phase();
+        self.ensure_revision()?;
+        let publish = match previous {
+            MatchPhase::Running => self.running_tick()?,
+            MatchPhase::Interrupted { .. } => false,
+            phase => self.idle_tick(phase)?,
+        };
+        if profile == crate::game::rooms::replay::M5_LIFECYCLE_PROFILE
+            && matches!(previous, MatchPhase::Result { .. })
+            && matches!(self.lifecycle.phase(), MatchPhase::Countdown { .. })
+        {
+            self.clear_round();
+        }
+        if profile == crate::game::rooms::replay::M5_LIFECYCLE_PROFILE && publish {
+            self.publish_current()?;
+        }
+        Ok(())
+    }
+
+    pub(in crate::game::rooms) fn replay_grace_depart(
+        &mut self,
+        departures: [Option<DepartureReason>; 2],
+    ) -> Result<(), MatchRuntimeError> {
+        self.apply_grace_departures(departures).map(|_| ())
+    }
+
+    pub(in crate::game::rooms) fn replay_expiry(&mut self) -> Result<(), MatchRuntimeError> {
+        self.lifecycle
+            .expire_reconnect_grace()
+            .map_err(map_lifecycle_error)
+            .map(|_: MatchChange| ())
+    }
+
+    pub(in crate::game::rooms) fn replay_report_flush(&mut self) -> Result<(), MatchRuntimeError> {
+        self.publish_current().map(|_| ())
     }
 }

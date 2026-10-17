@@ -3,6 +3,8 @@ mod record;
 mod runner;
 
 #[cfg(test)]
+pub(in crate::game::rooms) use record::M5_LIFECYCLE_PROFILE;
+#[cfg(test)]
 use record::ReplayStatus;
 pub(in crate::game::rooms) use record::{Header, Journal, Operation, ReplayAction};
 #[cfg(test)]

@@ -49,4 +49,5 @@ pub(crate) enum RoomError {
     StaleRoom,
     InvalidPhase,
     DuplicateAction,
+    ResumeRejected,
 }

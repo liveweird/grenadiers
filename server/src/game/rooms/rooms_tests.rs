@@ -12,9 +12,11 @@ fn deterministic_rooms(now: StdInstant) -> Arc<GameRooms> {
     GameRooms::with_random_fill(now, move |bytes| {
         if bytes.len() == 8 {
             bytes.copy_from_slice(&0x1234_5678_9abc_def0_u64.to_be_bytes());
-        } else {
+        } else if bytes.len() == 5 {
             let value = codes.fetch_add(1, Ordering::Relaxed).to_be_bytes();
             bytes.copy_from_slice(&value[3..]);
+        } else {
+            bytes.fill(codes.fetch_add(1, Ordering::Relaxed) as u8);
         }
         Ok(())
     })
@@ -43,9 +45,9 @@ async fn identifiers_are_canonical_and_last_seat_has_one_winner() {
     let rooms = deterministic_rooms(now);
     let owner = rooms.create(binding(1, 1), now).await.unwrap();
     assert_eq!(owner.room_id.as_str(), "123456789abcdef00000000000000001");
-    assert_eq!(owner.view.room_code.as_str().len(), 8);
+    assert_eq!(owner.room.room_code.as_str().len(), 8);
     assert_eq!(owner.seat, Seat::One);
-    let code = owner.view.room_code.clone();
+    let code = owner.room.room_code.clone();
 
     let (left, right) = tokio::join!(
         rooms.join(&code, binding(2, 1), now),
@@ -96,10 +98,10 @@ async fn token_room_and_round_randomness_are_independent() {
     let admission = rooms.create(binding(1, 1), now).await.unwrap();
 
     assert_eq!(token_calls.load(Ordering::SeqCst), 1);
-    assert_eq!(room_calls.load(Ordering::SeqCst), 2);
+    assert_eq!(room_calls.load(Ordering::SeqCst), 3);
     assert_eq!(seed_calls.load(Ordering::SeqCst), 0);
-    assert_eq!(admission.view.rules_version.get(), 2);
-    assert_eq!(admission.view.map_id, MapId::GeneratedV1);
+    assert_eq!(admission.room.rules_version.get(), 2);
+    assert_eq!(admission.room.map_id, MapId::GeneratedV1);
 }
 
 #[tokio::test]
@@ -112,12 +114,12 @@ async fn canceled_join_before_mutation_does_not_claim_the_last_seat() {
     tokio::task::yield_now().await;
 
     let joined = rooms
-        .join(&owner.view.room_code, binding(3, 1), now)
+        .join(&owner.room.room_code, binding(3, 1), now)
         .await
         .unwrap();
     assert_eq!(joined.seat, Seat::Two);
-    assert_eq!(owner.view.revision.get(), 2);
-    assert_eq!(joined.view.revision.get(), 3);
+    assert_eq!(owner.room.revision.get(), 2);
+    assert_eq!(joined.room.revision.get(), 3);
 }
 
 #[tokio::test(start_paused = true)]
@@ -141,7 +143,7 @@ async fn exact_expiry_publishes_expired_and_removes_both_lookups() {
     let rooms = deterministic_rooms(now);
     let admission = rooms.create(binding(1, 1), now).await.unwrap();
     let id = admission.room_id.clone();
-    let code = admission.view.room_code.clone();
+    let code = admission.room.room_code.clone();
     let mut notices = admission.notices.clone();
 
     tokio::time::advance(std::time::Duration::from_secs(300)).await;
@@ -246,7 +248,7 @@ async fn live_code_collisions_preserve_existing_mapping_and_fail_after_retry_bou
         Ok(())
     });
     let existing = rooms.create(binding(1, 1), now).await.unwrap();
-    let code = existing.view.room_code.clone();
+    let code = existing.room.room_code.clone();
     let id = existing.room_id.clone();
 
     assert!(matches!(
@@ -265,7 +267,7 @@ async fn stale_binding_is_rejected_after_leave_and_rejoin_in_same_round() {
     let rooms = deterministic_rooms(now);
     let first = rooms.create(binding(1, 1), now).await.unwrap();
     let second = rooms
-        .join(&first.view.room_code, binding(2, 1), now)
+        .join(&first.room.room_code, binding(2, 1), now)
         .await
         .unwrap();
     rooms
@@ -273,7 +275,7 @@ async fn stale_binding_is_rejected_after_leave_and_rejoin_in_same_round() {
         .await
         .unwrap();
     let rejoined = rooms
-        .join(&first.view.room_code, binding(1, 2), now)
+        .join(&first.room.room_code, binding(1, 2), now)
         .await
         .unwrap();
 
@@ -309,7 +311,7 @@ async fn scheduler_catches_up_four_due_ticks_without_skipping() {
     let rooms = deterministic_rooms(now);
     let mut one = rooms.create(binding(1, 1), now).await.unwrap();
     let two = rooms
-        .join(&one.view.room_code, binding(2, 1), now)
+        .join(&one.room.room_code, binding(2, 1), now)
         .await
         .unwrap();
     rooms
@@ -360,7 +362,7 @@ async fn excessive_lag_interrupts_then_terminal_retention_releases_registration(
     let rooms = deterministic_rooms(now);
     let mut admission = rooms.create(binding(1, 1), now).await.unwrap();
     let id = admission.room_id.clone();
-    let code = admission.view.room_code.clone();
+    let code = admission.room.room_code.clone();
 
     tokio::time::advance(std::time::Duration::from_millis(517)).await;
     admission.notices.changed().await.unwrap();
@@ -370,8 +372,8 @@ async fn excessive_lag_interrupts_then_terminal_retention_releases_registration(
     let view = notice.room;
     assert!(matches!(
         view.phase,
-        grenadiers_core::protocol::v3::RoomPhase::Interrupted {
-            reason: grenadiers_core::protocol::v3::MatchInterruptReason::ServerOverloaded,
+        grenadiers_core::protocol::v4::RoomPhase::Interrupted {
+            reason: grenadiers_core::protocol::v4::MatchInterruptReason::ServerOverloaded,
             ..
         }
     ));

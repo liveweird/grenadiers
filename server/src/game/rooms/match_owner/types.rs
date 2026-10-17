@@ -1,6 +1,6 @@
 use grenadiers_core::{
     game::SeatId,
-    protocol::{RoomId, Seat, v3::RoomView},
+    protocol::{Counter, GameState, RoomId, Seat, v4::ResumeToken},
     room::DepartureReason,
 };
 use tokio::{
@@ -11,9 +11,11 @@ use tokio::{
 
 use super::super::{
     match_runtime::{MatchAction, MatchNotice, MatchRuntimeError},
+    resume::{BindingFence, ResumeCredential},
     types::{BindingKey, DepartureGuard, RoomError, RoomIdentity},
 };
-use crate::round_seed::RoundSeedSource;
+use crate::{game::rooms::RandomFill, round_seed::RoundSeedSource};
+use std::sync::Arc;
 
 pub(super) const COMMAND_CAPACITY: usize = 32;
 pub(in crate::game::rooms) type ShutdownState = bool;
@@ -40,14 +42,27 @@ pub(crate) struct MatchAdmission {
     pub(crate) room_id: RoomId,
     pub(crate) round_id: u64,
     pub(crate) seat: Seat,
-    pub(crate) view: RoomView,
+    pub(crate) sequence: Counter,
+    pub(crate) room: grenadiers_core::protocol::v4::RoomView,
+    pub(crate) resume_token: ResumeToken,
+    pub(crate) last_bomb_action_id: Option<Counter>,
+    pub(crate) state: Option<GameState>,
     pub(crate) notices: watch::Receiver<MatchOwnerNotice>,
     pub(crate) guard: DepartureGuard,
+    pub(crate) replaced: oneshot::Receiver<()>,
 }
 
 pub(super) enum OwnerCommand {
     Join {
         binding: BindingKey,
+        sequence: Counter,
+        reply: oneshot::Sender<Result<MatchAdmission, RoomError>>,
+    },
+    Resume {
+        binding: BindingKey,
+        sequence: Counter,
+        room_id: RoomId,
+        token: ResumeToken,
         reply: oneshot::Sender<Result<MatchAdmission, RoomError>>,
     },
     Action {
@@ -66,14 +81,27 @@ pub(super) enum OwnerCommand {
 }
 
 impl OwnerCommand {
+    pub(super) const fn is_admission(&self) -> bool {
+        matches!(self, Self::Join { .. } | Self::Resume { .. })
+    }
+
     pub(super) fn reject(self, error: RoomError) {
         match self {
-            Self::Join { reply, .. } => {
+            Self::Join { reply, .. } | Self::Resume { reply, .. } => {
                 let _ = reply.send(Err(error));
             }
             Self::Action { reply, .. } | Self::Leave { reply, .. } => {
                 let _ = reply.send(Err(error));
             }
+        }
+    }
+
+    pub(super) fn reject_unavailable(self) {
+        match self {
+            Self::Resume { reply, .. } => {
+                let _ = reply.send(Err(RoomError::ResumeRejected));
+            }
+            command => command.reject(RoomError::RoomNotFound),
         }
     }
 }
@@ -89,6 +117,7 @@ pub(in crate::game::rooms) struct PreparedMatchOwner {
     pub(super) notices: watch::Sender<MatchOwnerNotice>,
     pub(super) initial: MatchNotice,
     pub(super) runtime: super::super::match_runtime::MatchRuntime,
+    pub(super) random_fill: Arc<RandomFill>,
     pub(super) shutdown: watch::Receiver<ShutdownState>,
 }
 
@@ -97,6 +126,7 @@ impl PreparedMatchOwner {
         identity: RoomIdentity,
         created_at: Instant,
         seeds: RoundSeedSource,
+        random_fill: Arc<RandomFill>,
         shutdown: watch::Receiver<ShutdownState>,
     ) -> Result<(MatchOwnerHandle, Self), MatchRuntimeError> {
         let mut runtime =
@@ -113,6 +143,7 @@ impl PreparedMatchOwner {
                 notices,
                 initial,
                 runtime,
+                random_fill,
                 shutdown,
             },
         ))
@@ -147,8 +178,14 @@ pub(super) struct PendingDeparture {
 }
 
 pub(super) struct SeatSlot {
-    pub(super) binding: BindingKey,
+    pub(super) credential: Option<ResumeCredential>,
+    pub(super) live: Option<LiveBinding>,
+}
+
+pub(super) struct LiveBinding {
+    pub(super) fence: BindingFence,
     pub(super) departure: oneshot::Receiver<DepartureReason>,
+    pub(super) replaced: Option<oneshot::Sender<()>>,
     pub(super) pending: Option<PendingDeparture>,
 }
 

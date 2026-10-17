@@ -4,6 +4,7 @@ mod runtime;
 
 pub(super) use error::MatchRuntimeError;
 pub(super) use runtime::MatchRuntime;
+pub(super) use runtime::admission::ResumeKind;
 #[cfg(test)]
 pub(super) use runtime::replay::RuntimeInspection;
 pub(crate) use runtime::{MatchAction, MatchNotice};

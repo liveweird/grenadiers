@@ -18,8 +18,8 @@ use super::super::{
     types::RoomIdentity,
 };
 use super::record::{
-    CLASSIC_V2_RULES, FORMAT_VERSION, GENERATED_V1, Journal, M5_LIFECYCLE_PROFILE, Operation,
-    ReplayAction, ReplayStatus,
+    CLASSIC_V2_RULES, FORMAT_VERSION, GENERATED_V1, Journal, M5_LIFECYCLE_PROFILE,
+    M6_LIFECYCLE_PROFILE, Operation, ReplayAction, ReplayStatus,
 };
 use crate::round_seed::RoundSeedSource;
 
@@ -106,7 +106,7 @@ pub(super) fn replay(journal: &Journal) -> Result<RuntimeInspection, ReplayError
                 }
                 validate_bounds(operation)?;
                 let before = runtime.lifecycle().phase();
-                apply(&mut runtime, operation)?;
+                apply_profile(&mut runtime, operation, journal.header.lifecycle_profile)?;
                 if matches!(operation, Operation::Tick) {
                     if missing_seed.swap(false, Ordering::Relaxed) {
                         return Err(ReplayError::MissingSeed);
@@ -147,7 +147,10 @@ fn validate_header(journal: &Journal) -> Result<(), ReplayError> {
     if header.format_version != FORMAT_VERSION {
         return Err(ReplayError::UnsupportedFormat);
     }
-    if header.lifecycle_profile != M5_LIFECYCLE_PROFILE {
+    if !matches!(
+        header.lifecycle_profile,
+        M5_LIFECYCLE_PROFILE | M6_LIFECYCLE_PROFILE
+    ) {
         return Err(ReplayError::UnsupportedLifecycle);
     }
     if header.rules_version != CLASSIC_V2_RULES
@@ -192,6 +195,17 @@ fn validate_bounds(operation: Operation) -> Result<(), ReplayError> {
 }
 
 pub(super) fn apply(runtime: &mut MatchRuntime, operation: Operation) -> Result<(), ReplayError> {
+    if matches!(operation, Operation::Tick) {
+        return runtime.tick().map(|_| ()).map_err(|_| ReplayError::Runtime);
+    }
+    apply_profile(runtime, operation, M6_LIFECYCLE_PROFILE)
+}
+
+fn apply_profile(
+    runtime: &mut MatchRuntime,
+    operation: Operation,
+    profile: u16,
+) -> Result<(), ReplayError> {
     match operation {
         Operation::Occupy(seat) => runtime.occupy(seat).map(|_| ()),
         Operation::Action {
@@ -214,8 +228,19 @@ pub(super) fn apply(runtime: &mut MatchRuntime, operation: Operation) -> Result<
             runtime.stop_seat_inputs(seat);
             Ok(())
         }
-        Operation::Tick => runtime.tick().map(|_| ()),
+        Operation::Tick => runtime.replay_tick_profile(profile),
         Operation::Depart(departures) => runtime.depart_batch(departures).map(|_| ()),
+        Operation::GraceDepart(departures) => runtime.replay_grace_depart(departures),
+        Operation::Resume { seat, kind } => {
+            let prepared = runtime
+                .prepare_resume(seat)
+                .map_err(|_| ReplayError::Runtime)?;
+            (runtime.commit_admission(prepared) == kind)
+                .then_some(())
+                .ok_or(crate::game::rooms::match_runtime::MatchRuntimeError::Publication)
+        }
+        Operation::Expiry => runtime.replay_expiry(),
+        Operation::ReportFlush => runtime.replay_report_flush(),
         Operation::Interrupt(reason) => runtime.interrupt(reason).map(|_| ()),
         Operation::InterruptAndDepart { reason, departures } => {
             runtime.interrupt_and_depart(reason, departures).map(|_| ())

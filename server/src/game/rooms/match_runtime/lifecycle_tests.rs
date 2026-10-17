@@ -5,7 +5,7 @@ use std::sync::{
 
 use grenadiers_core::{
     game::{Direction, RoundAssignment, SeatId, SpeedLevel},
-    protocol::v3::{MatchResult, MatchWinnerReason, RoomPhase},
+    protocol::v4::{MatchResult, MatchWinnerReason, RoomPhase},
     room::{DepartureReason, MatchPhase},
 };
 
@@ -59,7 +59,7 @@ fn three_real_round_wins_use_parity_assignments_and_fresh_state() {
             assert!(matches!(result.room.phase, RoomPhase::Result { .. }));
             let countdown = advance_to_inter_round(&mut runtime);
             assert_view_only(&countdown);
-            assert!(runtime.sim().is_none());
+            assert!(runtime.sim().is_some());
             let next = tick_until_running(&mut runtime);
             assert_snapshot(&next);
         }
@@ -217,19 +217,19 @@ fn completed_hold_forfeit_keeps_the_earlier_completed_world() {
 }
 
 #[test]
-fn inter_round_departure_has_no_old_world_snapshot() {
+fn inter_round_keeps_old_world_private_and_terminal_can_bind_completed_round() {
     let mut runtime = fixed_runtime();
     start_first_round(&mut runtime);
     finish_round_with_bombs(&mut runtime, &[SeatId::Two]);
     let countdown = advance_to_inter_round(&mut runtime);
     assert_view_only(&countdown);
-    assert!(runtime.sim().is_none());
+    assert!(runtime.sim().is_some());
 
     let terminal = runtime
         .depart_batch([Some(DepartureReason::Explicit), None])
         .unwrap()
         .unwrap();
-    assert_view_only(&terminal);
+    assert_snapshot(&terminal);
     assert!(matches!(terminal.room.phase, RoomPhase::MatchResult { .. }));
 }
 

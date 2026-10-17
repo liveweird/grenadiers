@@ -11,7 +11,11 @@ pub(super) use types::{MatchOwnerHandle, PreparedMatchOwner};
 #[cfg(test)]
 mod admission_tests;
 #[cfg(test)]
+mod catchup_tests;
+#[cfg(test)]
 mod departure_tests;
+#[cfg(test)]
+mod resume_tests;
 #[cfg(test)]
 mod round_tests;
 #[cfg(test)]

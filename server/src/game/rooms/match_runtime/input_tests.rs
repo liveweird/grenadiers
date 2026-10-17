@@ -79,6 +79,25 @@ fn bomb_deduplication_resets_for_a_fresh_actual_round() {
 }
 
 #[test]
+fn canceled_connected_resume_preflight_does_not_fence_accepted_inputs() {
+    let mut runtime = fixed_runtime();
+    start_first_round(&mut runtime);
+    let start = runtime.sim().unwrap().state.actors()[0].position();
+    runtime
+        .action(SeatId::One, 1, MatchAction::Movement(Some(Direction::East)))
+        .unwrap();
+    runtime
+        .action(SeatId::One, 1, MatchAction::Bomb(9))
+        .unwrap();
+
+    drop(runtime.prepare_resume(SeatId::One).unwrap());
+    runtime.tick().unwrap();
+
+    assert!(runtime.sim().unwrap().state.actors()[0].position().x > start.x);
+    assert_eq!(runtime.sim().unwrap().state.live_bomb_count(SeatId::One), 1);
+}
+
+#[test]
 fn exhausted_revision_fails_before_advancing_physics() {
     let mut runtime = fixed_runtime();
     start_first_round(&mut runtime);

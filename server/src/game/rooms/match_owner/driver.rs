@@ -3,16 +3,19 @@ use grenadiers_core::{
     protocol::RoomId,
     room::{DepartureReason, InterruptReason, MatchPhase},
 };
+use std::sync::Arc;
 use tokio::sync::{oneshot, watch};
 use tokio::time::Instant;
 
 use super::super::{
+    RandomFill,
     match_runtime::{MatchAction, MatchNotice, MatchRuntime, MatchRuntimeError},
-    types::{BindingKey, DepartureGuard, RoomError},
+    types::{BindingKey, RoomError},
 };
+mod admissions;
+
 use super::types::{
-    ClosingReason, MatchAdmission, MatchOwnerNotice, OwnerCommand, PendingDeparture, SeatSlot,
-    map_runtime_error, wire_seat,
+    ClosingReason, MatchOwnerNotice, OwnerCommand, PendingDeparture, SeatSlot, map_runtime_error,
 };
 
 pub(super) struct Driver {
@@ -23,6 +26,7 @@ pub(super) struct Driver {
     pub(super) seats: [Option<SeatSlot>; 2],
     pub(super) terminal_at: Option<Instant>,
     pub(super) lobby_deadline: Option<Instant>,
+    random_fill: Arc<RandomFill>,
 }
 
 impl Driver {
@@ -31,6 +35,7 @@ impl Driver {
         initial: MatchNotice,
         notices: watch::Sender<MatchOwnerNotice>,
         lobby_deadline: Instant,
+        random_fill: Arc<RandomFill>,
     ) -> Self {
         Self {
             runtime,
@@ -40,6 +45,7 @@ impl Driver {
             seats: [None, None],
             terminal_at: None,
             lobby_deadline: Some(lobby_deadline),
+            random_fill,
         }
     }
 
@@ -49,7 +55,18 @@ impl Driver {
         now: Instant,
     ) -> Result<(), MatchRuntimeError> {
         match command {
-            OwnerCommand::Join { binding, reply } => self.join(binding, reply),
+            OwnerCommand::Join {
+                binding,
+                sequence,
+                reply,
+            } => self.join(binding, sequence, reply),
+            OwnerCommand::Resume {
+                binding,
+                sequence,
+                room_id,
+                token,
+                reply,
+            } => self.resume(binding, sequence, &room_id, &token, reply),
             OwnerCommand::Action {
                 binding,
                 room_id,
@@ -83,57 +100,6 @@ impl Driver {
                 Ok(())
             }
         }
-    }
-
-    fn join(
-        &mut self,
-        binding: BindingKey,
-        reply: oneshot::Sender<Result<MatchAdmission, RoomError>>,
-    ) -> Result<(), MatchRuntimeError> {
-        if reply.is_closed() {
-            return Ok(());
-        }
-        if self.has_pending()
-            || self
-                .seats
-                .iter()
-                .flatten()
-                .any(|slot| slot.binding == binding)
-        {
-            let _ = reply.send(Err(RoomError::RoomFull));
-            return Ok(());
-        }
-        let Some(index) = self.seats.iter().position(Option::is_none) else {
-            let _ = reply.send(Err(RoomError::RoomFull));
-            return Ok(());
-        };
-        let seat = SeatId::ALL[index];
-        let notice = match self.runtime.occupy(seat) {
-            Ok(notice) => notice,
-            Err(error) => {
-                let _ = reply.send(Err(map_runtime_error(error)));
-                return if fatal(error) { Err(error) } else { Ok(()) };
-            }
-        };
-        let (departure_sender, departure) = oneshot::channel();
-        self.seats[index] = Some(SeatSlot {
-            binding,
-            departure,
-            pending: None,
-        });
-        self.publish(notice.clone());
-        let admission = MatchAdmission {
-            room_id: self.room_id.clone(),
-            round_id: notice.room.round_id.get() as u64,
-            seat: wire_seat(seat),
-            view: notice.room,
-            notices: self.notices.subscribe(),
-            guard: DepartureGuard::new(departure_sender),
-        };
-        if let Err(admission) = reply.send(Ok(admission)) {
-            drop(admission);
-        }
-        Ok(())
     }
 
     fn action(
@@ -186,7 +152,8 @@ impl Driver {
         self.runtime.stop_seat_inputs(seat);
         self.seats[seat.index()]
             .as_mut()
-            .expect("validated slot")
+            .and_then(|slot| slot.live.as_mut())
+            .expect("validated live binding")
             .pending = Some(PendingDeparture {
             binding,
             reason: DepartureReason::Explicit,
@@ -208,7 +175,8 @@ impl Driver {
             .enumerate()
             .find_map(|(index, slot)| {
                 slot.as_ref()
-                    .filter(|slot| slot.binding == binding && slot.pending.is_none())
+                    .and_then(|slot| slot.live.as_ref())
+                    .filter(|live| live.fence.matches(binding) && live.pending.is_none())
                     .map(|_| SeatId::ALL[index])
             })
             .ok_or(RoomError::StaleRoom)
@@ -216,15 +184,17 @@ impl Driver {
 
     pub(super) fn inspect_departures(&mut self) {
         for (index, slot) in self.seats.iter_mut().enumerate() {
-            let Some(slot) = slot.as_mut() else { continue };
-            if slot.pending.is_some() {
+            let Some(live) = slot.as_mut().and_then(|slot| slot.live.as_mut()) else {
+                continue;
+            };
+            if live.pending.is_some() {
                 continue;
             }
-            match slot.departure.try_recv() {
+            match live.departure.try_recv() {
                 Ok(reason) => {
                     self.runtime.stop_seat_inputs(SeatId::ALL[index]);
-                    slot.pending = Some(PendingDeparture {
-                        binding: slot.binding,
+                    live.pending = Some(PendingDeparture {
+                        binding: live.fence.current(),
                         reason,
                         reply: None,
                     });
@@ -233,19 +203,6 @@ impl Driver {
                 }
             }
         }
-    }
-
-    pub(super) fn commit_departures(&mut self, now: Instant) -> Result<bool, MatchRuntimeError> {
-        if !self.has_pending() {
-            return Ok(false);
-        }
-        let departures = self.pending_reasons();
-        if let Some(notice) = self.runtime.depart_batch(departures)? {
-            self.publish(notice);
-        }
-        self.finish_pending();
-        self.observe_phase(now);
-        Ok(true)
     }
 
     pub(super) fn interrupt_and_commit(
@@ -268,28 +225,43 @@ impl Driver {
     fn pending_reasons(&self) -> [Option<DepartureReason>; 2] {
         self.seats.each_ref().map(|slot| {
             slot.as_ref()
-                .and_then(|slot| slot.pending.as_ref().map(|pending| pending.reason))
+                .and_then(|slot| slot.live.as_ref())
+                .and_then(|live| live.pending.as_ref().map(|pending| pending.reason))
         })
     }
 
     fn finish_pending(&mut self) {
         for slot in &mut self.seats {
-            let remove = slot.as_ref().is_some_and(|slot| slot.pending.is_some());
-            if remove {
-                let mut removed = slot.take().expect("pending slot");
-                let pending = removed.pending.take().expect("pending departure");
-                debug_assert_eq!(pending.binding, removed.binding);
-                if let Some(reply) = pending.reply {
-                    let _ = reply.send(Ok(()));
-                }
+            let Some(reason) = slot
+                .as_ref()
+                .and_then(|slot| slot.live.as_ref())
+                .and_then(|live| live.pending.as_ref())
+                .map(|pending| pending.reason)
+            else {
+                continue;
+            };
+            let mut live = slot
+                .as_mut()
+                .and_then(|slot| slot.live.take())
+                .expect("pending live binding");
+            let pending = live.pending.take().expect("pending departure");
+            debug_assert_eq!(pending.binding, live.fence.current());
+            if let Some(reply) = pending.reply {
+                let _ = reply.send(Ok(()));
+            }
+            if reason == DepartureReason::Explicit {
+                *slot = None;
             }
         }
     }
 
     pub(super) fn tick(&mut self, now: Instant) -> Result<(), MatchRuntimeError> {
-        if let Some(notice) = self.runtime.tick()? {
+        let departures = self.pending_reasons();
+        if let Some(notice) = self.runtime.settle_boundary(departures)? {
             self.publish(notice);
         }
+        self.finish_pending();
+        self.drop_expired_credentials();
         self.observe_phase(now);
         Ok(())
     }
@@ -338,10 +310,11 @@ impl Driver {
     }
 
     pub(super) fn has_pending(&self) -> bool {
-        self.seats
-            .iter()
-            .flatten()
-            .any(|slot| slot.pending.is_some())
+        self.seats.iter().flatten().any(|slot| {
+            slot.live
+                .as_ref()
+                .is_some_and(|live| live.pending.is_some())
+        })
     }
 
     pub(super) fn is_empty(&self) -> bool {
@@ -375,10 +348,30 @@ impl Driver {
 
     fn reject_waiters(&mut self, error: RoomError) {
         for slot in self.seats.iter_mut().flatten() {
-            if let Some(mut pending) = slot.pending.take()
+            if let Some(mut pending) = slot.live.as_mut().and_then(|live| live.pending.take())
                 && let Some(reply) = pending.reply.take()
             {
                 let _ = reply.send(Err(error));
+            }
+        }
+    }
+
+    fn drop_expired_credentials(&mut self) {
+        use grenadiers_core::room::reconnect::ReservationState;
+        for (index, slot) in self.seats.iter_mut().enumerate() {
+            if matches!(
+                self.runtime.lifecycle().reconnect_grace().seats()[index],
+                ReservationState::Expired
+            ) && let Some(slot) = slot.as_mut()
+            {
+                slot.credential = None;
+                slot.live = None;
+            }
+            if matches!(
+                self.runtime.lifecycle().reconnect_grace().seats()[index],
+                ReservationState::Vacant
+            ) {
+                *slot = None;
             }
         }
     }

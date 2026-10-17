@@ -1,8 +1,10 @@
 use std::sync::Arc;
 
 use axum::extract::ws::WebSocket;
-use grenadiers_core::protocol::v3::{GameClientMessage, GameServerMessage};
-use grenadiers_core::protocol::{Counter, Direction as WireDirection, ErrorCode, RoomId};
+use grenadiers_core::protocol::v4::{
+    GameClientMessage, GameServerMessage, V4ErrorCode as ErrorCode,
+};
+use grenadiers_core::protocol::{Counter, Direction as WireDirection, RoomId};
 use tokio::time::Instant;
 
 use super::{
@@ -30,7 +32,9 @@ pub(super) async fn dispatch(
                 connection_id: state.connection_id,
                 generation: next_generation,
             };
-            let result = rooms.create(binding, std::time::Instant::now()).await;
+            let result = rooms
+                .create_sequenced(binding, sequence, std::time::Instant::now())
+                .await;
             admit(socket, result, binding, state, sequence).await
         }
         GameClientMessage::JoinRoom { room_code, .. } => {
@@ -45,7 +49,33 @@ pub(super) async fn dispatch(
                 generation: next_generation,
             };
             let result = rooms
-                .join(&room_code, binding, std::time::Instant::now())
+                .join_sequenced(&room_code, binding, sequence, std::time::Instant::now())
+                .await;
+            admit(socket, result, binding, state, sequence).await
+        }
+        GameClientMessage::ResumeRoom {
+            room_id,
+            resume_token,
+            ..
+        } => {
+            if state.membership.is_some() {
+                return reply_error(socket, ErrorCode::AlreadyInRoom, sequence).await;
+            }
+            let Some(next_generation) = state.generation.checked_add(1) else {
+                return reply_error(socket, ErrorCode::CapacityReached, sequence).await;
+            };
+            let binding = BindingKey {
+                connection_id: state.connection_id,
+                generation: next_generation,
+            };
+            let result = rooms
+                .resume(
+                    room_id,
+                    binding,
+                    sequence,
+                    resume_token,
+                    std::time::Instant::now(),
+                )
                 .await;
             admit(socket, result, binding, state, sequence).await
         }
@@ -143,16 +173,24 @@ async fn admit(
 ) -> bool {
     match result {
         Ok(admission) => {
-            debug_assert_eq!(admission.round_id, u64::from(admission.view.round_id.get()));
-            let message = GameServerMessage::RoomState {
-                room: admission.view.clone(),
+            debug_assert_eq!(admission.round_id, u64::from(admission.room.round_id.get()));
+            let message = GameServerMessage::Admitted {
+                sequence: admission.sequence,
+                room: admission.room.clone(),
                 you_seat: admission.seat,
+                resume_token: admission.resume_token.clone(),
+                last_bomb_action_id: admission.last_bomb_action_id,
+                state: admission.state.clone(),
             };
             if send_game(socket, &message).await.is_err() {
                 return false;
             }
             state.generation = binding.generation;
-            state.membership = Some(Membership { admission, binding });
+            state.membership = Some(Membership {
+                admission,
+                binding,
+                replacement_closed: false,
+            });
             true
         }
         Err(error) => room_error(socket, error, sequence).await,
@@ -223,6 +261,7 @@ async fn room_error(socket: &mut WebSocket, error: RoomError, sequence: Counter)
         RoomError::StaleRoom => (ErrorCode::StaleRoom, false),
         RoomError::InvalidPhase => (ErrorCode::InvalidPhase, false),
         RoomError::DuplicateAction => (ErrorCode::DuplicateAction, false),
+        RoomError::ResumeRejected => (ErrorCode::ResumeRejected, false),
     };
     if close_after {
         fail_and_close(socket, code, Some(sequence)).await;

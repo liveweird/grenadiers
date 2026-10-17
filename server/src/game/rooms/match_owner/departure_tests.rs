@@ -1,6 +1,6 @@
 use grenadiers_core::protocol::{
     Seat,
-    v3::{MatchInterruptReason, MatchResult, MatchWinnerReason, RoomPhase},
+    v4::{MatchResult, MatchWinnerReason, RoomPhase},
 };
 use tokio::sync::oneshot;
 
@@ -56,7 +56,7 @@ async fn both_explicit_departures_commit_together_and_ack_after_one_boundary() {
 }
 
 #[tokio::test(flavor = "current_thread", start_paused = true)]
-async fn mixed_explicit_and_transport_departures_interrupt_and_preserve_the_explicit_ack() {
+async fn mixed_explicit_and_transport_departures_forfeit_to_reserved_opponent_and_ack() {
     let value = started();
     let (first, second, one, _two) = start_round(&value.handle).await;
     let reply = value
@@ -70,8 +70,9 @@ async fn mixed_explicit_and_transport_departures_interrupt_and_preserve_the_expl
     assert!(matches!(
         publication(&value.notices).room.phase,
         RoomPhase::MatchResult {
-            result: MatchResult::Interrupted {
-                reason: MatchInterruptReason::ConnectionLost
+            result: MatchResult::Winner {
+                seat: Seat::Two,
+                reason: MatchWinnerReason::Forfeit
             },
             ..
         }

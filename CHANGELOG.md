@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.14 — 2026-10-17
+
+- Add bounded reliable ordered WebSocket delay with deterministic 50±10ms jitter per direction.
+- Measure native input through actual page delivery, enforce causal moving/stable witnesses and
+  public collision clearance, and retain only sanitized timing/public-state evidence.
+- Record the corrected two-CPU-affinity reference and fixed 250ms observed envelope; invalidate
+  earlier pre-delay observer results and keep twenty-sample, WAN and human-playability limits clear.
+
 ## 0.3.13 — 2026-10-17
 
 - Add localized, accessible keyboard remapping with validated persistent non-secret preferences,

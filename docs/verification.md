@@ -1,5 +1,91 @@
 # Repository verification
 
+## M7 v0.3.14 exact-image delayed-message acceptance — 2026-10-17
+
+Application build source `e7b222fff45efa1fdf9c34c223f938c427c3b5de` produces
+`sha256:b62b840b695aeb5177d30f47f64f818503ae6334f1f0ea7f96662c8deae7827d`.
+The corrected clean harness is `c50af54d2b5b12322a435fa7ebd67813c86b3e80`; Docker/application
+input comparison between those commits is empty. That same image passes **21/21 cases through
+each of Compose and Kubernetes**, retries disabled: six default, pickup, match/rematch, two
+reconnect, controls, headed visibility and nine latency cases (seven pure plus two native profiles).
+The original failed forced-alternation run remains separate; the reviewed trajectory correction
+then passes once on both paths without weakening observations, clearance or the fixed budget.
+
+| Deployment | Unshaped 20: median/max | Shaped 20: median/max | Above 250 ms |
+| --- | --- | --- | --- |
+| Compose | 41.057 / 57.953 ms | 148.672 / 161.787 ms | 0 |
+| Kubernetes | 36.191 / 51.095 ms | 147.674 / 160.793 ms | 0 |
+
+Both browser helpers use Node 24.21.0, Playwright 1.63.0, pinned Chromium revision 1243,
+CPUs 0–1 affinity and unlimited cpu.max, with no observed CFS throttling. Compose's app also
+uses that two-core/no-quota profile. Kubernetes retains the committed **500m/256Mi** resources:
+app CPUs 0–17 are scheduler-managed, cpu.max is 50000/100000, and observed throttling remains
+0→0 across 107 periods (71,787 µs CPU used). These are explicitly different deployment CPU
+profiles; twenty observations per path establish no tail, WAN or human-playability guarantee.
+
+Actual probes return 200/ok after each rollout. The Pod uses the same image digest, is ready
+1/1 with zero restarts, and passes nonroot UID/GID 65532, read-only root, dropped capabilities,
+no escalation, RuntimeDefault, read-only fixture Secret 0444, correct probes and no `/app` seeds.
+Compose security inspection also passes. Strict Kubernetes 1.33 validation reports three valid
+resources; pinned archive-only Trivy reports zero fixable HIGH/CRITICAL findings. Actual desktop
+and 320-pixel Polish controls screenshots pass visual inspection/containment. Evidence remains
+at `/tmp/grenadiers-v0314-acceptance`; owned namespace, Compose project, helpers, forward,
+source export and scan archive are removed. Accepted images remain. M7/v0.4.0 stays open.
+
+## M7 exact-image trajectory correction — 2026-10-17
+
+The first v0.3.14 Compose latency attempt passed the shaped profile (20 observations,
+maximum 148.829 ms) but failed unshaped release observation after five cycles. The public report
+shows accumulated forced-alternation drift: x=1536→1945→1587→1843→1485→1792, then the sixth
+westward leg reaches x=1344 at the wall. The unchanged collision predicate correctly rejects
+zero clearance. This is a test-trajectory failure, not a passing reference or network failure.
+The failing log and public attachment remain in `/tmp/grenadiers-v0314-acceptance` and
+`/tmp/grenadiers-v0314-local-summary.json`; no retry conceals the result.
+
+The reviewed correction selects whichever horizontal direction has more public collision-free
+runway and requires at least 1,024 units before each native keydown. All twenty observations,
+128-unit witness clearance, causal dispatch checks, FIFO limits and the fixed 250 ms budget remain
+mandatory. Ten bounded public trajectory records explain each choice. The new regression proves
+both corridor-side choices; all seven pure tests and 21 scenario static checks pass. Independent
+closure review clears geometry, trajectory and evidence. Application/Docker inputs are unchanged
+from the clean accepted-image build candidate `e7b222fff45efa1fdf9c34c223f938c427c3b5de`.
+Final same-image acceptance uses the corrected, clean committed harness separately.
+
+## M7 causal ordered-WebSocket reference — 2026-10-17
+
+Independent review fixed three test-validity defects: the original observer watched pre-delay
+network traffic; old queued snapshots could mimic release; and a wall collision could mimic
+stopping. The final observer receives sanitized facts from actual page-side WebSocket delivery,
+requires a prior downlink dispatch, and ties advancing/stable revisions to actual command forwarding.
+Both movement and release witnesses retain at least 128 units of forward clearance in public
+geometry, with no live bomb. Setup fails closed unless both page wrappers are installed and see
+exactly one socket. Context ownership and finally cleanup are explicit and buffers bounded.
+
+The corrected Linux reference passes **8/8 cases, retries zero, in 19.4 seconds**: six pure
+queue/observer regressions and two real profiles, each with ten native movement/release cycles.
+Unshaped 20 observations: median **39.39 ms**, observed p95/max **54.47 ms**. Shaped 50±10 ms
+per direction: median **145.82 ms**, observed p95/max **157.30 ms**, zero 250 ms exceedances.
+The maximum shaped queue is two frames/7,204 bytes; closing cancels pending frames without late
+delivery. Application prototype image is the accepted v0.3.9 image; final integrated image
+acceptance is separate. Node 24.21.0, Playwright 1.63.0 and Playwright Chromium revision 1243 are pinned; app/browser
+use CPUs 0–1 affinity with unlimited cpu.max and no CFS throttling observed at startup.
+
+Evidence: `/tmp/grenadiers-m7-latency-corrected-reference.log`, SHA-256
+`4a1bc6373490c3d56e4d54258b9814976d4143a2abc16d35d7a7f82cd89f72c0`.
+The dirty-source manifest is retained alongside it; source is committed unchanged for integration.
+Earlier 284–300 ms quota diagnostics and the 113.05 ms pre-delay observer run are explicitly
+invalid measurement evidence. Independent closure review passes; six pure regressions and all
+19 scenario static checks passed before controls integration. After controls integration, the v0.3.14 server gate passes 296 core tests, 149 server tests and
+two doctests, with four optimized reference profiles intentionally ignored. The first sandboxed
+attempt denied ephemeral binds; the unchanged gate passes with permitted loopback access. All
+20 documented E2E scenarios pass typecheck/lint/Knip/parity. Dependency policies pass and both
+npm audits report zero vulnerabilities. Web production source is identical to the accepted
+v0.3.13 180-test/94.85% statement coverage reference; Rust implementation remains the v0.3.11
+93.56% line coverage reference. Version changes only the two local package records and dependency.
+
+This is reliable ordered message delay, not TCP/WAN simulation, a twenty-sample tail guarantee
+or human playtest approval. M7 remains open.
+
 ## M7 v0.3.13 exact-image controls acceptance — 2026-10-17
 
 A clean export of `02fb8a699fe55436704d6f5ef2d29ab43d1e9368` produces

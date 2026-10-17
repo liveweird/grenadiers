@@ -31,6 +31,16 @@ The production build reports a 516.85 kB entry chunk warning; the Pixi renderer 
 separately. No warning threshold or coverage rule is relaxed. Performance budgets remain M7
 work; no measured frame-rate or touch-control guarantee is claimed.
 
+A clean committed-tree build produces
+`sha256:84fa6ac094f1816ec05c2e86cef5527ed50ccc1ea44667db325163b421223dad`.
+Compose and ready local Kubernetes use this exact image. Separate health/readiness checks
+and all **six candidate browser scenarios** pass through both paths, including the actual
+rendered Pixi duel. Exact-image desktop/narrow Running and Result screenshots were inspected;
+the result retains its authoritative remaining clock. Strict schemas pass with 3 valid
+resources; pinned socket-free Trivy reports zero HIGH/CRITICAL vulnerabilities. Temporary
+runtime resources are removed, with image/screenshots retained. This evidence update changes
+documentation only.
+
 ## M3 authoritative room loop — 2026-10-17
 
 The locked server gate passes **137 core tests, 67 server tests, and 2 doctests**. Rust

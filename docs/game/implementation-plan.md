@@ -345,7 +345,9 @@ v0.3.11 adds the [optimized runtime/owner reference harness](performance.md), in
 queue pressure and exact artifact provenance. Clean native and Linux references pass selected
 budgets at one/eight rooms; exact-image application acceptance remains a separate release check.
 v0.3.12 adds real headed Chromium hidden-tab/return acceptance with unchanged server time and
-native input release; owned process cleanup is bounded. Broader playability/latency work remains open.
+native input release; owned process cleanup is bounded. v0.3.13 adds [persistent keyboard
+remapping](controls.md), held-input clearing and localized accessible settings. Broader playability/latency
+work remains open.
 
 **Release:** v0.4.0. **Depends on:** M6.
 

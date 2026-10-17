@@ -39,3 +39,5 @@ verification record.
 [Runtime reference measurements](performance.md) documents bounded workloads, selected budgets and evidence limits.
 
 [Browser hardening](browser-hardening.md) records real visibility recovery and its tested scope.
+
+[Keyboard controls](controls.md) describes defaults, safe remapping and non-secret preference storage.

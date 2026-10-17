@@ -1,5 +1,35 @@
 # Repository verification
 
+## M7 persistent configurable controls — 2026-10-17
+
+The active v4 panel now offers five-action EN/PL keyboard remapping with unchanged arrows,
+WASD and Space defaults. It validates bounded, globally unique physical-code aliases and stores
+only the non-secret preference under `grenadiers.controls.v1`; invalid/unavailable storage falls
+back safely. Opening settings or changing mappings releases held direction through the old
+callback before new bindings install. Still-held keys remain fenced until key-up. Repeats,
+modifiers, unrelated shortcuts, native Tab navigation and editable inputs retain their contracts.
+
+Independent review found ambiguous accessible names, consumed rejected shortcuts, within-action
+stored duplicates and missing generated-output ignores. All four are fixed and closure review
+passes. Remap/capture names identify the action in both locales; regression tests inspect native
+`defaultPrevented` behavior. Dynamic instructions use their own controls template, preserving
+archived raw instructions; that integration correction also passes independent inspection.
+
+The combined Node 24.21.0 web gate passes **180 tests** with **94.85% statements, 89.62%
+branches, 95.07% functions and 97.67% lines**. Schema, lint, Knip, shuffled coverage and build
+pass. E2E static checks confirm **12** documented scenarios. The locked server gate passes
+**296 core tests, 149 server tests and 2 doctests**, with four separate optimized reference
+profiles intentionally ignored in ordinary CI. Rust implementation is unchanged from the v0.3.11
+93.56% coverage reference. Both dependency audits report zero vulnerabilities.
+
+Native Chromium against the candidate frontend passes real UI remapping, old-key rejection,
+new-key movement and exactly-once bomb input, reload persistence and default reset (1/1 first run).
+Desktop and 320-pixel Polish screenshots pass Axe/containment and coordinator visual inspection;
+all five controls and actions are readable. Evidence is retained in
+`/tmp/grenadiers-m7-controls-evidence`; its port-8097 server is stopped. Exact final-image
+Compose/Kubernetes acceptance follows before release. This does not alter authoritative rules or
+complete the remaining M7 latency/human-playtest work.
+
 ## M7 v0.3.12 exact-image visibility acceptance — 2026-10-17
 
 A clean Git export of `ded5749dc345556fa75e06d5fcf3a0d2137486a1` produces

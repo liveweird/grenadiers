@@ -50,6 +50,9 @@ These requests are planned work, separate from the implemented classic baseline.
 
 [Pixel-art presentation](pixel-art.md) describes original artwork, animation and resource bounds.
 
+[Expanded item implementation](expanded-items.md) records the optional inventory, effects,
+weapons, visibility and incremental activation decisions; these items are not enabled yet.
+
 [Ordered WebSocket delay](websocket-latency.md) defines the measured profile, causal observations and limits.
 
 [Procedural sound](audio.md) explains gesture activation, mute, visibility recovery and event baselines.

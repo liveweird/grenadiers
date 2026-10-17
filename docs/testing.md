@@ -94,3 +94,12 @@ scenarios against the same match fixture and uses zero retries. It covers transp
 connected takeover with real browsers and sockets. Together with six default, one pickup, and one
 complete-match scenario, scenario parity covers ten documented cases. These checks do not by
 themselves claim exact-image or hosted-environment acceptance.
+
+## Ordered WebSocket delay
+
+With the documented matches fixture running, use
+`E2E_MATCH_FIXTURE=arena-v1-matches npm --prefix e2e run test:latency`.
+The fixture keeps text/binary frames unchanged, bounds both FIFO queues and tests real native
+movement/release through actual page delivery. The [method and reference](game/websocket-latency.md)
+define the fixed budget, CPU-affinity profile and evidence limits; twenty observations do not
+establish WAN behavior or a tail guarantee. Gameplay traces remain disabled.

@@ -1,5 +1,40 @@
 # Repository verification
 
+## M7 causal ordered-WebSocket reference — 2026-10-17
+
+Independent review fixed three test-validity defects: the original observer watched pre-delay
+network traffic; old queued snapshots could mimic release; and a wall collision could mimic
+stopping. The final observer receives sanitized facts from actual page-side WebSocket delivery,
+requires a prior downlink dispatch, and ties advancing/stable revisions to actual command forwarding.
+Both movement and release witnesses retain at least 128 units of forward clearance in public
+geometry, with no live bomb. Setup fails closed unless both page wrappers are installed and see
+exactly one socket. Context ownership and finally cleanup are explicit and buffers bounded.
+
+The corrected Linux reference passes **8/8 cases, retries zero, in 19.4 seconds**: six pure
+queue/observer regressions and two real profiles, each with ten native movement/release cycles.
+Unshaped 20 observations: median **39.39 ms**, observed p95/max **54.47 ms**. Shaped 50±10 ms
+per direction: median **145.82 ms**, observed p95/max **157.30 ms**, zero 250 ms exceedances.
+The maximum shaped queue is two frames/7,204 bytes; closing cancels pending frames without late
+delivery. Application prototype image is the accepted v0.3.9 image; final integrated image
+acceptance is separate. Node 24.21.0, Playwright 1.63.0 and Chromium 1243 are pinned; app/browser
+use CPUs 0–1 affinity with unlimited cpu.max and no CFS throttling observed at startup.
+
+Evidence: `/tmp/grenadiers-m7-latency-corrected-reference.log`, SHA-256
+`4a1bc6373490c3d56e4d54258b9814976d4143a2abc16d35d7a7f82cd89f72c0`.
+The dirty-source manifest is retained alongside it; source is committed unchanged for integration.
+Earlier 284–300 ms quota diagnostics and the 113.05 ms pre-delay observer run are explicitly
+invalid measurement evidence. Independent closure review passes; six pure regressions and all
+19 scenario static checks passed before controls integration. After controls integration, the v0.3.14 server gate passes 296 core tests, 149 server tests and
+two doctests, with four optimized reference profiles intentionally ignored. The first sandboxed
+attempt denied ephemeral binds; the unchanged gate passes with permitted loopback access. All
+20 documented E2E scenarios pass typecheck/lint/Knip/parity. Dependency policies pass and both
+npm audits report zero vulnerabilities. Web production source is identical to the accepted
+v0.3.13 180-test/94.85% statement coverage reference; Rust implementation remains the v0.3.11
+93.56% line coverage reference. Version changes only the two local package records and dependency.
+
+This is reliable ordered message delay, not TCP/WAN simulation, a twenty-sample tail guarantee
+or human playtest approval. M7 remains open.
+
 ## M7 v0.3.13 exact-image controls acceptance — 2026-10-17
 
 A clean export of `02fb8a699fe55436704d6f5ef2d29ab43d1e9368` produces

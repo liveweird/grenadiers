@@ -1,0 +1,78 @@
+{
+  "label": "Two-player duel",
+  "timer": "Round time remaining",
+  "you": "(you)",
+  "player": { "one": "Player one", "two": "Player two" },
+  "lobby": {
+    "title": "Meet in the courtyard",
+    "explanation": "Create a room and share its invitation, or enter the code from your friend.",
+    "create": "Create room",
+    "or": "or",
+    "code": "Room code",
+    "codeHint": "Use eight letters or digits from the invitation.",
+    "join": "Join room"
+  },
+  "room": {
+    "invitation": "Room invitation",
+    "codeLabel": "Room invitation code",
+    "players": "Players",
+    "ready": "Ready",
+    "cancelReady": "Not ready",
+    "leave": "Leave room"
+  },
+  "seat": { "open": "Waiting for a player", "notReady": "Not ready", "ready": "Ready" },
+  "phase": {
+    "waiting": "Waiting for both players",
+    "countdown": "Round starting",
+    "running": "Round in progress",
+    "result": "Round complete",
+    "interrupted": "Round interrupted"
+  },
+  "result": {
+    "winner": "{{player}} wins the round.",
+    "mutualElimination": "Draw: both players were eliminated.",
+    "timeout": "Draw: time ran out."
+  },
+  "interruption": {
+    "participantLeft": "The other player left the room.",
+    "connectionLost": "The other player lost their connection.",
+    "serverOverloaded": "The round stopped because the server is busy.",
+    "serverStopped": "The server stopped the round.",
+    "internalError": "The round stopped because of a server error."
+  },
+  "connection": {
+    "disconnected": "Choose how to enter a room.",
+    "connecting": "Opening a secure game session…",
+    "authenticating": "Joining the game server…",
+    "authenticated": "Connected. Waiting for the room…"
+  },
+  "arena": {
+    "label": "Grenadiers courtyard",
+    "failure": "The courtyard could not be drawn. Leave the room and try again.",
+    "focusHint": "Select the courtyard to control your player.",
+    "instructions": "Move with the arrow keys or W A S D. Place a bomb with Space. Controls work only during a live round."
+  },
+  "error": {
+    "title": "Could not complete that action",
+    "connectionFailed": "The game connection ended. Create or join a room to try again.",
+    "invalidServerMessage": "The server sent game data this version cannot use.",
+    "sessionFailed": "A game session could not be created. Try again.",
+    "sequenceExhausted": "This connection reached its command limit. Start a new session.",
+    "incompatibleProtocol": "This game version is not supported by the server.",
+    "invalidMessage": "The server could not understand that command.",
+    "authenticationFailed": "This game session is no longer valid. Start a new one.",
+    "connectionInUse": "This game session is already open elsewhere.",
+    "notAuthenticated": "The game connection is not ready yet.",
+    "alreadyAuthenticated": "This connection is already signed in.",
+    "alreadyInRoom": "Leave the current room before joining another.",
+    "notInRoom": "Join a room before using that control.",
+    "roomNotFound": "That room is no longer available.",
+    "roomFull": "Both seats in that room are occupied.",
+    "staleRoom": "The room changed before that command arrived.",
+    "invalidPhase": "That action is not available at this point in the round.",
+    "staleSequence": "That command arrived out of order. Try the action again.",
+    "duplicateAction": "That bomb action was already received.",
+    "rateLimited": "Commands are arriving too quickly. The connection was stopped.",
+    "capacityReached": "The server has no room for another game right now."
+  }
+}

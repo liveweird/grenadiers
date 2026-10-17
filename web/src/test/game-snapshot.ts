@@ -1,0 +1,36 @@
+import type { SnapshotMessage } from '../game/arena/types'
+
+export function gameSnapshot(): SnapshotMessage {
+  return {
+    type: 'snapshot',
+    room: {
+      roomId: 'a'.repeat(32), roomCode: 'ABCDEFGH', roundId: 1, revision: 2, tick: 100,
+      rulesVersion: 1, mapId: 'fixed_v1', phase: { type: 'running' },
+      seats: [
+        { seat: 'one', occupied: true, ready: false },
+        { seat: 'two', occupied: true, ready: false },
+      ],
+    },
+    state: {
+      runningUpdates: 100, remainingTicks: 10_700,
+      arena: {
+        width: 15, height: 13,
+        terrain: Array.from({ length: 195 }, (_, index) => {
+          const column = index % 15
+          const row = Math.floor(index / 15)
+          return column === 0 || column === 14 || row === 0 || row === 12 ? 'wall' : 'floor'
+        }),
+        blocks: [{ column: 4, row: 1 }],
+      },
+      actors: [
+        { id: 10, seat: 'one', position: { x: 1536, y: 1536 }, heading: 'east', speedLevel: 0,
+          alive: true, bombCapacity: 1, bombRange: 2, liveBombCount: 1 },
+        { id: 20, seat: 'two', position: { x: 13_824, y: 11_776 }, heading: 'west', speedLevel: 0,
+          alive: true, bombCapacity: 1, bombRange: 2, liveBombCount: 0 },
+      ],
+      bombs: [{ id: 30, cell: { column: 1, row: 1 }, owner: 10, range: 2, placedAt: 1, detonatesAt: 181 }],
+      flames: [{ cell: { column: 3, row: 3 }, expiresAt: 130 }],
+    },
+    events: [],
+  }
+}

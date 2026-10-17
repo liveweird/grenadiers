@@ -3,16 +3,15 @@
 A browser-based multiplayer game inspired by classic Bomberman/Dynablaster.
 The first playable milestone will support two human players. Bots and larger matches follow later.
 
-This is the **engineering scaffold and headless simulation**, not a playable game.
-It provides a React diagnostic shell, HTTP probes, a versioned WebSocket diagnostic exchange,
-and a deterministic Rust simulation with movement, bombs, flames, damage, one-round results,
-and explicit public snapshots/events, plus a headless two-seat room lifecycle.
-Anonymous sessions, gameplay authentication, bounded two-seat rooms, and authoritative
-fixed-map rounds are available through native sockets. Playable rendering, matchmaking,
-and stats remain unimplemented. The [game specification](docs/game/README.md)
-describes the classic reference and proposed rules. The
-[implementation and release plan](docs/game/implementation-plan.md) breaks delivery into
-verified foundation, playable duel, classic matches, and resilient playtest releases.
+The **two-player fixed-map duel preview is playable**. Create a room, share its invitation,
+join from another browser, and both choose Ready. Select the courtyard to move with arrows
+or W/A/S/D and plant bombs with Space. Rust owns the 60 Hz simulation; PixiJS draws public
+20 Hz snapshots while React/Mantine provides the room controls, timer, and result.
+
+This preview plays one round, requires a keyboard, and keeps active state in memory.
+Generated arenas/upgrades, complete match scoring, reconnect, matchmaking, and stats follow
+later. Read the [browser guide](docs/game/browser.md), [game specification](docs/game/README.md),
+and [implementation/release plan](docs/game/implementation-plan.md) for behavior and scope.
 
 ## Stack and layout
 
@@ -20,7 +19,7 @@ verified foundation, playable duel, classic matches, and resilient playtest rele
 | --- | --- |
 | `core/` | Rust wire types, deterministic game rules, and room lifecycle, independent of I/O |
 | `server/` | Axum/Tokio HTTP and WebSocket adapters, tracing, optional SQLx readiness |
-| `web/` | React, TypeScript, Vite, Mantine, EN/PL localization |
+| `web/` | React, TypeScript, Vite, Mantine, PixiJS arena, EN/PL localization |
 | `api/` | Authoritative OpenAPI and realtime JSON Schema contracts |
 | `api-guidelines/` | Stable API rules and Spectral configuration |
 | `e2e/` | Standalone Playwright blackbox tests and matching scenario documents |
@@ -32,8 +31,8 @@ See [architecture](docs/architecture.md), [Flow equivalents](docs/decisions/0001
 [testing](docs/testing.md), [deployment](docs/deployment.md), and [contributing](CONTRIBUTING.md).
 Product versioning and candidate checks are documented in [releases](docs/releases.md).
 The [headless movement API](docs/game/movement.md) and [combat phases](docs/game/combat.md)
-document the current headless increments; the arena will use
-[PixiJS alongside React](docs/decisions/0003-arena-rendering.md) when M3 becomes playable.
+document the deterministic domain; the arena uses
+[PixiJS alongside React](docs/decisions/0003-arena-rendering.md).
 
 ## Prerequisites
 
@@ -107,7 +106,7 @@ Generate frontend contracts with `npm --prefix web run gen:api` and
 `npm --prefix web run gen:realtime`; gameplay controls use `npm --prefix web run gen:gameplay`.
 Commit generated files with contract changes. The [gameplay protocol](docs/game/protocol.md)
 defines authentication, room controls, and public snapshot/event messages. Session issuance,
-authenticated sockets, and Waiting-room admission are implemented.
+authenticated sockets, room admission, authoritative rounds, and browser controls are implemented.
 Coverage tooling installation and test conventions are in [docs/testing.md](docs/testing.md).
 
 ## Configuration

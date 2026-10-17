@@ -1,0 +1,59 @@
+import { expect, type Page } from '@playwright/test'
+import type { GameServerMessage } from '../../../web/src/game/schema'
+
+type Snapshot = Extract<GameServerMessage, { type: 'snapshot' }>
+export type ObservedGame = {
+  frames: GameServerMessage[]
+  commands: { type: string; actionId?: number }[]
+  sockets: number
+}
+
+export function observeGame(page: Page): ObservedGame {
+  const observed: ObservedGame = { frames: [], commands: [], sockets: 0 }
+  page.on('websocket', (socket) => {
+    if (!new URL(socket.url()).pathname.endsWith('/game/ws')) return
+    observed.sockets += 1
+    socket.on('framesent', ({ payload }) => {
+      const command = JSON.parse(payload.toString()) as { type: string; actionId?: number }
+      if (command.type !== 'authenticate') {
+        observed.commands.push({ type: command.type, actionId: command.actionId })
+      }
+    })
+    socket.on('framereceived', ({ payload }) => {
+      const frame = JSON.parse(payload.toString()) as GameServerMessage
+      observed.frames.push(frame)
+      if (observed.frames.length > 512) observed.frames.shift()
+    })
+  })
+  return observed
+}
+
+export function latestSnapshot(game: ObservedGame): Snapshot | undefined {
+  return game.frames.filter((frame) => frame.type === 'snapshot').at(-1)
+}
+
+export async function expectPaintedCanvas(page: Page): Promise<void> {
+  const canvas = page.locator('.game-arena canvas')
+  await expect(canvas).toBeVisible()
+  const screenshot = await canvas.screenshot()
+  // Decode a compositor screenshot: reading the WebGL drawing buffer after presentation
+  // can legitimately return cleared pixels when preserveDrawingBuffer is false.
+  const colors = await page.evaluate(async (png) => {
+    const image = new Image()
+    image.src = `data:image/png;base64,${png}`
+    await image.decode()
+    const sample = document.createElement('canvas')
+    sample.width = image.width
+    sample.height = image.height
+    const context = sample.getContext('2d')
+    if (!context) throw new Error('Screenshot decoder unavailable')
+    context.drawImage(image, 0, 0)
+    const pixels = context.getImageData(0, 0, sample.width, sample.height).data
+    const distinct = new Set<string>()
+    for (let index = 0; index < pixels.length; index += 16) {
+      distinct.add(`${pixels[index]},${pixels[index + 1]},${pixels[index + 2]}`)
+    }
+    return distinct.size
+  }, screenshot.toString('base64'))
+  expect(colors).toBeGreaterThan(10)
+}

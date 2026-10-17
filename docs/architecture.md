@@ -1,9 +1,11 @@
 # Architecture
 
 The server provides HTTP liveness/readiness, diagnostic WebSockets, anonymous credentials,
-and authenticated authoritative two-seat rounds. The React shell currently exposes diagnostics.
+and authenticated authoritative two-seat rounds. React/Mantine provides room admission and
+the HUD; PixiJS renders public game snapshots.
 A separate deterministic simulation in `core::game` implements movement, owned bombs,
-flames, damage, and one-round outcomes. Room owners now advance that simulation at a fixed server-controlled tick.
+flames, damage, and one-round outcomes. Room owners advance that simulation at a fixed
+server-controlled tick.
 
 ## Boundaries
 
@@ -19,12 +21,13 @@ readiness checks optional PostgreSQL only when configured.
 
 ## Match-state decision
 
-One in-process task owns each room and advances a server-controlled fixed tick. Human and future bot adapters will submit the same commands
-through bounded queues; clients will not submit authoritative positions, damage, or outcomes.
+One in-process task owns each room and advances a server-controlled fixed tick. Human inputs
+arrive through bounded queues; future bot adapters must use the same command boundary.
+Clients do not submit authoritative positions, damage, or outcomes.
 The owner executes bounded logical intentions; public snapshots carry the accepted results.
 
 Start with two players per match. Transport sockets are not player seats; the diagnostic
-welcome's `maxPlayers: 2` describes the planned initial match capacity. Support for more
+welcome's `maxPlayers: 2` describes the initial match capacity. Support for more
 players and AI must be designed around match configuration rather than global connections.
 
 Active state belongs in memory. Process restarts will end active matches until recovery is
@@ -36,12 +39,12 @@ Redis is unnecessary initially. Multiple server replicas would require match rou
 single-owner guarantees, reconnect semantics, and deployment draining. Do not add replicas
 or shared mutable state before those decisions are documented and tested.
 
-## Deferred decisions
+## Implemented domain and presentation decisions
 
 M1 fixes the integer 60 Hz movement model in [ADR 0002](decisions/0002-deterministic-movement.md).
 The [headless API](game/movement.md) covers its state, collision, and deterministic input boundary.
-[ADR 0003](decisions/0003-arena-rendering.md) selects PixiJS for the future arena and React for
-menus/HUD. No renderer dependency is installed yet.
+[ADR 0003](decisions/0003-arena-rendering.md) selects exact PixiJS 8.22.0 for the arena and React for
+menus/HUD. [Browser behavior](game/browser.md) documents input, interpolation, and teardown.
 
 [Combat phases](game/combat.md) and ADRs 0004–0006 define owned placement, immutable explosion
 occupancy, and round finality. [ADR 0007](decisions/0007-public-state-events.md) defines the
@@ -58,9 +61,11 @@ policy. A bounded room registry now routes code-based admission to one owner tas
 [ADR 0009](decisions/0009-room-lifecycle.md) keeps the implemented headless two-seat
 [lifecycle](game/rooms.md) in `core::room`. Credentials, discovery, binding generations,
 publication, and the asynchronous room owner stay outside that pure state machine. The server
-implements discovery, generation-bound membership, departure cleanup, and Waiting views.
+implements discovery, generation-bound membership, departure cleanup, countdown, and running
+publications. [ADR 0010](decisions/0010-authoritative-room-loop.md) fixes scheduling, input
+budgets, result ordering, and retention.
 
-Map generation, lag compensation, the playable browser interface, and matchmaking
+Map generation, lag compensation, complete match progression, and matchmaking
 still need implementation at their planned milestones. Add focused ADRs before
 dependent work; preserve the specified lifecycle and gameplay rules.
 

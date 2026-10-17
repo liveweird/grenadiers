@@ -2,7 +2,8 @@
 
 Status: **execution plan**. M0 is complete and locally verified on 2026-10-16; M1 is complete
 and locally verified on 2026-10-17. M2 is complete and locally verified
-on 2026-10-17. M3 contract groundwork is in progress; M4–M8 remain planned.
+on 2026-10-17. M3’s fixed-map two-browser duel is implemented and locally verified;
+M4–M8 remain planned.
 Published engineering prereleases are listed in `CHANGELOG.md` and GitHub Releases.
 
 The first product goal is a reliable, browser-based survival match between two humans. Build
@@ -17,12 +18,12 @@ code, without waiting for every optional feature or an exact historical port to 
 
 ## Current starting point
 
-The repository contains diagnostic HTTP/WebSocket transport, a React diagnostics page,
-contracts and generators, automated gates, CI, Compose packaging, and Kubernetes manifests.
-M1 adds a headless deterministic arena/movement simulation in `core::game`, including bomb
-collision exemptions and movement traces. M2 now implements owned bombs, flames, damage, and
-one-round outcomes and explicit public projections/events. There is no playable browser
-arena, room admission, or match lifecycle yet.
+The repository contains versioned HTTP/WebSocket contracts, anonymous sessions, bounded
+two-seat rooms, authoritative 60 Hz simulation, and checked public snapshots/events. M1–M2
+provide movement, owned bombs, flames, damage, and round finality. M3 adds readiness/countdown
+and a playable PixiJS arena with React controls, native keyboard handling, and EN/PL localization.
+Automated gates, CI, Compose, and Kubernetes validate the stack. Generated upgrades, complete
+series scoring, and reconnect remain later milestones.
 
 The [verification record](../verification.md) now contains passing locked Rust builds, tests,
 coverage, dependency audits, Compose execution, strict Kubernetes validation and live rollout,
@@ -191,8 +192,8 @@ messages in Rust, JSON Schema, and generated TypeScript. v0.1.8 adds bounded sna
 and v0.1.9 checks domain-to-wire conversion. v0.1.10 adds bounded anonymous HTTP sessions.
 v0.1.11 adds the headless room lifecycle; v0.1.12 authenticates gameplay sockets; v0.1.13 adds
 bounded networked room ownership/admission. v0.1.14 runs authoritative fixed-map rounds with
-bounded input and checked publication. Next come browser controls/rendering and
-two-browser duel acceptance. See the
+bounded input and checked publication. v0.2.0 adds the playable PixiJS/React interface and
+actual two-browser duel acceptance. See the
 [protocol boundary](protocol.md). Diagnostic transport stays independently supported.
 
 Work packages:

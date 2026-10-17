@@ -2,11 +2,13 @@ import i18n from 'i18next'
 import LanguageDetector from 'i18next-browser-languagedetector'
 import { initReactI18next } from 'react-i18next'
 import enApp from './locales/en/app.json'
+import enGame from './locales/en/game.json'
 import plApp from './locales/pl/app.json'
+import plGame from './locales/pl/game.json'
 
 /** @public Used by the i18next type augmentation. */
-export const en = { app: enApp }
-const resources = { en: { translation: en }, pl: { translation: { app: plApp } } }
+export const en = { app: enApp, game: enGame }
+const resources = { en: { translation: en }, pl: { translation: { app: plApp, game: plGame } } }
 
 void i18n.use(LanguageDetector).use(initReactI18next).init({
   resources,

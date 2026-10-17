@@ -1,5 +1,46 @@
 # Repository verification
 
+## M3 playable browser duel — 2026-10-17
+
+The version-aligned server gate passes **137 core tests, 67 server tests, and 2 doctests**,
+with unchanged Rust coverage **3,355/3,668 lines, 91.47%**. Locked dependency audits pass with
+zero npm vulnerabilities and all cargo-deny policies satisfied.
+
+The full web gate passes **80 tests**, generated API/gameplay/diagnostic drift checks, lint,
+Knip, coverage, and production build. Coverage is **96.64% statements, 91.66% branches,
+98.61% functions, 98.77% lines**, against unchanged 85% floors. E2E static checks pass six
+documented scenarios. Independent reviews cover the client, renderer/input, and acceptance
+assertions with no actionable findings remaining. PixiJS is exactly 8.22.0 in the real lockfile.
+
+All **six integrated native-browser scenarios** pass against the compiled authoritative
+server. The rendered duel creates/joins through the UI, changes EN/PL without reconnecting,
+readies both seats, draws actual WebGL pixels, moves through native keyboard input, clears
+movement on blur, plants exactly one sent bomb despite repeated Space, destroys a previously
+present block, and displays the same authoritative winner and frozen remaining clock.
+Common public snapshot revisions are identical; no browser page errors occur.
+
+Axe reports zero violations across lobby, waiting, Running, and Result. Desktop 1440 px and
+narrow 390 px screenshots were inspected, with actual vertically stacked controls, usable
+arena width, and no horizontal overflow. The narrow context uses reduced motion. Manual
+lobby/waiting checks at 320 px also pass Axe and overflow checks. Renderer tests cover async
+StrictMode/unmount, resizing, interpolation, reduced motion, input focus, and deterministic
+owned GraphicsContext teardown. Native testing found and fixed the Window fetch receiver
+and terminal timer display defects before release.
+
+The production build reports a 516.85 kB entry chunk warning; the Pixi renderer is lazy-loaded
+separately. No warning threshold or coverage rule is relaxed. Performance budgets remain M7
+work; no measured frame-rate or touch-control guarantee is claimed.
+
+A clean committed-tree build produces
+`sha256:84fa6ac094f1816ec05c2e86cef5527ed50ccc1ea44667db325163b421223dad`.
+Compose and ready local Kubernetes use this exact image. Separate health/readiness checks
+and all **six candidate browser scenarios** pass through both paths, including the actual
+rendered Pixi duel. Exact-image desktop/narrow Running and Result screenshots were inspected;
+the result retains its authoritative remaining clock. Strict schemas pass with 3 valid
+resources; pinned socket-free Trivy reports zero HIGH/CRITICAL vulnerabilities. Temporary
+runtime resources are removed, with image/screenshots retained. This evidence update changes
+documentation only.
+
 ## M3 authoritative room loop — 2026-10-17
 
 The locked server gate passes **137 core tests, 67 server tests, and 2 doctests**. Rust

@@ -3,7 +3,7 @@
 Status: gameplay contracts, checked domain conversion, HTTP session issuance, and authenticated
 gameplay WebSockets with authoritative two-seat rounds are implemented. `api/gameplay.schema.json`, independent Rust
 `core::protocol` types, and generated `web/src/game/schema.ts` define socket messages.
-The playable browser interface remains the next increment. Diagnostic `/api/v1/ws` and
+The browser validates these messages and drives the playable fixed-map duel. Diagnostic `/api/v1/ws` and
 `api/realtime.schema.json` remain unchanged.
 
 ## Authentication and compatibility

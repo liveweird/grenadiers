@@ -1,7 +1,6 @@
 {
-  "eyebrow": "Arena czasu rzeczywistego",
   "title": "Grenadiers",
-  "intro": "Powstaje arena dla dwóch graczy. Użyj diagnostyki, aby sprawdzić serwer przed pierwszym meczem.",
+  "intro": "Otwórz drogę. Przetrwaj rundę.",
   "health": "Usługa HTTP",
   "realtime": "Usługa czasu rzeczywistego",
   "diagnostics": "Diagnostyka połączenia",

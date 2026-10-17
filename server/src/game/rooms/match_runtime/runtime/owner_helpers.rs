@@ -24,6 +24,10 @@ impl MatchRuntime {
 
     pub(in crate::game::rooms) fn stop_seat_inputs(&mut self, seat: SeatId) {
         self.inputs.stop(seat);
+        self.capture(
+            self.lifecycle.tick(),
+            crate::game::rooms::replay::Operation::InputFence(seat),
+        );
     }
 
     pub(in crate::game::rooms) fn interrupt_and_depart(
@@ -31,6 +35,7 @@ impl MatchRuntime {
         reason: InterruptReason,
         departures: [Option<DepartureReason>; 2],
     ) -> Result<MatchNotice, MatchRuntimeError> {
+        let tick = self.lifecycle.tick();
         self.ensure_revision()?;
         self.lifecycle
             .interrupt(reason)
@@ -44,6 +49,11 @@ impl MatchRuntime {
                 self.inputs.stop(seat);
             }
         }
-        self.publish_current()
+        let notice = self.publish_current()?;
+        self.capture(
+            tick,
+            crate::game::rooms::replay::Operation::InterruptAndDepart { reason, departures },
+        );
+        Ok(notice)
     }
 }

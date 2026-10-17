@@ -1,6 +1,9 @@
 use std::{
     collections::VecDeque,
-    sync::{Arc, Mutex},
+    sync::{
+        Arc, Mutex,
+        atomic::{AtomicBool, Ordering},
+    },
 };
 
 use grenadiers_core::{
@@ -23,6 +26,8 @@ use crate::round_seed::RoundSeedSource;
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(super) enum ReplayError {
     Truncated,
+    UnsupportedProfile,
+    Incomplete,
     UnsupportedFormat,
     UnsupportedLifecycle,
     UnsupportedRules,
@@ -45,28 +50,30 @@ pub(super) fn replay(journal: &Journal) -> Result<RuntimeInspection, ReplayError
         .records
         .iter()
         .filter_map(|record| match record.operation {
-            Operation::RoundStarted { generation, .. } => Some(generation.seed()),
+            Operation::RoundStarted { generation, .. } => Some(Some(generation.seed())),
             _ => None,
         })
         .collect::<VecDeque<_>>();
     let remaining = Arc::new(Mutex::new(seeds));
     let source_remaining = Arc::clone(&remaining);
+    let missing_seed = Arc::new(AtomicBool::new(false));
+    let source_missing_seed = Arc::clone(&missing_seed);
     let source = RoundSeedSource::with_entropy(move |bytes| {
-        let seed = source_remaining
-            .lock()
-            .map_err(|_| ())?
-            .pop_front()
-            .ok_or(())?;
+        let outcome = source_remaining.lock().map_err(|_| ())?.pop_front();
+        if outcome.is_none() {
+            source_missing_seed.store(true, Ordering::Relaxed);
+        }
+        let seed = outcome.flatten().ok_or(())?;
         bytes.copy_from_slice(&seed);
         Ok(())
     });
-    let mut runtime = MatchRuntime::new(identity(), source);
+    let mut runtime = MatchRuntime::new_without_replay(identity(), source);
     for seat in SeatId::ALL {
         if journal.header.initial_seats[seat.index()] {
             runtime.occupy(seat).map_err(|_| ReplayError::Runtime)?;
         }
     }
-    let mut awaiting_start = false;
+    let mut awaiting_start = None;
     for record in &journal.records {
         if record.tick != runtime.lifecycle().tick() {
             return Err(ReplayError::WrongTick);
@@ -77,7 +84,7 @@ pub(super) fn replay(journal: &Journal) -> Result<RuntimeInspection, ReplayError
                 assignment,
                 generation,
             } => {
-                if !awaiting_start {
+                if awaiting_start != Some(RoundBoundary::Started) {
                     return Err(ReplayError::ExtraSeed);
                 }
                 let inspection = runtime.replay_inspection();
@@ -91,35 +98,31 @@ pub(super) fn replay(journal: &Journal) -> Result<RuntimeInspection, ReplayError
                 {
                     return Err(ReplayError::RoundStartMismatch);
                 }
-                awaiting_start = false;
+                awaiting_start = None;
             }
             operation => {
-                if awaiting_start {
+                if awaiting_start.is_some() {
                     return Err(ReplayError::MissingRoundStart);
                 }
                 validate_bounds(operation)?;
                 let before = runtime.lifecycle().phase();
                 apply(&mut runtime, operation)?;
-                awaiting_start = before != MatchPhase::Running
-                    && runtime.lifecycle().phase() == MatchPhase::Running;
-                let phase = runtime.lifecycle().phase();
-                let entropy_failed = matches!(
-                    phase,
-                    MatchPhase::Interrupted {
-                        reason: grenadiers_core::room::InterruptReason::InternalError,
-                        ..
+                if matches!(operation, Operation::Tick) {
+                    if missing_seed.swap(false, Ordering::Relaxed) {
+                        return Err(ReplayError::MissingSeed);
                     }
-                ) || matches!(phase, MatchPhase::MatchResult { outcome, .. }
-                if matches!(outcome.result(), grenadiers_core::room::series::MatchResult::Interrupted(
-                    grenadiers_core::room::InterruptReason::InternalError
-                )));
-                if matches!(before, MatchPhase::Countdown { .. }) && entropy_failed {
-                    return Err(ReplayError::MissingSeed);
+                    awaiting_start = if before != MatchPhase::Running
+                        && runtime.lifecycle().phase() == MatchPhase::Running
+                    {
+                        Some(RoundBoundary::Started)
+                    } else {
+                        None
+                    };
                 }
             }
         }
     }
-    if awaiting_start {
+    if awaiting_start.is_some() {
         return Err(ReplayError::MissingRoundStart);
     }
     if !remaining
@@ -133,8 +136,12 @@ pub(super) fn replay(journal: &Journal) -> Result<RuntimeInspection, ReplayError
 }
 
 fn validate_header(journal: &Journal) -> Result<(), ReplayError> {
-    if journal.status != ReplayStatus::Complete {
-        return Err(ReplayError::Truncated);
+    match journal.status {
+        ReplayStatus::Complete => {}
+        ReplayStatus::Truncated { .. } => return Err(ReplayError::Truncated),
+        ReplayStatus::Incomplete { .. } => return Err(ReplayError::Incomplete),
+        #[cfg(test)]
+        ReplayStatus::UnsupportedProfile => return Err(ReplayError::UnsupportedProfile),
     }
     let header = journal.header;
     if header.format_version != FORMAT_VERSION {
@@ -210,9 +217,17 @@ pub(super) fn apply(runtime: &mut MatchRuntime, operation: Operation) -> Result<
         Operation::Tick => runtime.tick().map(|_| ()),
         Operation::Depart(departures) => runtime.depart_batch(departures).map(|_| ()),
         Operation::Interrupt(reason) => runtime.interrupt(reason).map(|_| ()),
+        Operation::InterruptAndDepart { reason, departures } => {
+            runtime.interrupt_and_depart(reason, departures).map(|_| ())
+        }
         Operation::RoundStarted { .. } => unreachable!("round starts are validation records"),
     }
     .map_err(|_| ReplayError::Runtime)
+}
+
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum RoundBoundary {
+    Started,
 }
 
 pub(super) fn identity() -> RoomIdentity {

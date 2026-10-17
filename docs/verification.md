@@ -1,13 +1,13 @@
 # Repository verification
 
-## Dormant v7 contract candidate — 2026-10-18 — acceptance blocked
+## Dormant v7 contract — 2026-10-18
 
 Clean archive source `456f47b33d808691295d48688d7b8c3ce916a01e` builds image
 `sha256:29ee6050fecc543be326bf30b650bf24bc4074bfba2eb111c5e4710a9b813490`.
-The same image passes **24/24 Compose scenarios**, but **23/24 Kubernetes scenarios**.
+The initial evaluation passes **24/24 Compose scenarios**, but **23/24 Kubernetes scenarios**.
 No retries were performed. Kubernetes passes all fifteen functional cases and eight of nine
 latency cases; one shaped-network west action takes **305.948 ms**, exceeding the unchanged
-250 ms budget. This candidate has not passed release acceptance.
+250 ms budget. That initial evaluation failed release acceptance.
 
 The failed action records key start 14363.782990, key finish 14388.211900, outgoing message
 14515.360157 and observed state 14669.730949 ms. Kubernetes CPU throttling is zero; that does
@@ -23,11 +23,38 @@ configured outgoing delay **50.281 ms**, command forwarding to moved-snapshot in
 **55.378 ms**. Nearby runner timers are up to **145.951 ms** late. This establishes delayed
 measurement callbacks, without establishing their root cause or actual server send timing.
 Active server and v6 client input sources are unchanged from v0.3.21. A bounded instrumented
-comparison of both exact images is planned; budgets, assertions and the original failure remain.
+comparison of both exact images passes two live latency profiles per image without reproducing
+the spike. That comparison is diagnostic evidence, not release acceptance or a demonstrated fix.
+
+A separately planned instrumented evaluation uses the same candidate image and harness source
+`215adfa562cffd62fb6d2eb2194ae96d1f9d2a00`. Compose passes **25/25 scenarios**, retries zero,
+with local/shaped maxima **51.576/155.392 ms** and zero exceedances. Kubernetes passes the
+default eight cases, then the pickup case fails at initial navigation: the seed rollout replaced
+the pod, terminating its existing port-forward. A failed readiness request did not halt that
+outer orchestration. The remaining sixteen cases were not run and no failed case was retried.
+Evidence remains at `/tmp/grenadiers-v0322-instrumented-acceptance`; its outcome is failed and
+incomplete. All owned resources were removed. A corrected fail-fast orchestration evaluation
+will create a new port-forward after every rollout and require both probes before Playwright.
+This transport correction does not explain or fix the original latency observation.
+
+The corrected Kubernetes evaluation passes **25/25 scenarios**, retries zero, using the same
+candidate image and harness. It stops and waits for each old forward before rollout, records
+each new ready pod/UID, starts a fresh pod-bound forward, and requires strict health/readiness
+before browser execution. The accepted rollup is retained **Compose 25/25** plus corrected
+**Kubernetes 25/25**, with an independent evidence audit clear. No assertion, sample count,
+250 ms budget or retry policy changed. Prior failed evaluations remain failed and preserved.
+
+Corrected Kubernetes local/shaped maxima are **190.340/165.235 ms**, with twenty samples per
+profile, zero exceedances and zero CPU throttles. Its Node event-loop maxima are
+86.180/35.095 ms; page DOM-key/send absolute gaps are at most 1.7/1.3 ms. These diagnostics
+do not establish the original spike's root cause. That **305.948 ms observation remains an
+unresolved latency risk**, accepted explicitly alongside the new passing evaluation rather
+than described as fixed. Corrected evidence is at
+`/tmp/grenadiers-v0322-portforward-fix-acceptance`; all owned resources and listeners are gone.
 
 Local gates pass 356 core tests, 170 server tests and two doctests; four dedicated performance
 profiles remain intentionally ignored. All **247 web tests**, contracts, ESLint, Knip, builds,
-E2E static/24-scenario parity, dependency audits and strict pinned Kubernetes schemas pass.
+E2E static/25-scenario parity, dependency audits and strict pinned Kubernetes schemas pass.
 Rust line coverage is **93.40%**, above the unchanged 80% floor. Independent contract review and
 conservative serialized-frame proof review are clear: Snapshot at most 61,586 bytes, personal
 admission 36,472 bytes, below the unchanged 65,536-byte ceiling. A separate schema-valid
@@ -39,7 +66,8 @@ Seeded cases use external mode-0444 fixtures, root-owned in Kubernetes, with no 
 Pinned archive-only Trivy reports zero fixable HIGH/CRITICAL findings under existing policy.
 All owned resources, namespaces, ports and browser containers were removed. Application inputs
 remain identical through integration. The v7 contract is dormant; v6 remains active and no new
-pickup is enabled. The failed latency gate blocks publication pending investigation.
+pickup is enabled. The new passing evaluation supports release while retaining the original
+unexplained observation and both failed evaluations as material limitations.
 
 ## Typed domain bomb triggers — 2026-10-18
 

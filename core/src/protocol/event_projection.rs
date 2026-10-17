@@ -26,7 +26,10 @@ pub fn project_events(reports: &[game::StepReport]) -> Result<Vec<WireEvent>, Pr
     for report in reports {
         let tick = wire_tick(report.tick)?;
         for (index, event) in report.events.iter().enumerate() {
-            if event.tick != report.tick || index > usize::from(MAX_EVENT_INDEX) {
+            if event.tick != report.tick
+                || event.audience != game::EventAudience::Both
+                || index > usize::from(MAX_EVENT_INDEX)
+            {
                 return Err(ProjectionError::InvalidEvent);
             }
             let kind = match event.kind {

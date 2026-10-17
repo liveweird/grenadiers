@@ -51,7 +51,7 @@ pub use assignment::RoundAssignment;
 pub use bombs::{Bomb, BombError, BombTrigger};
 pub use damage::{DamageGrace, DamageOutcome};
 pub use effects::{EffectApplication, EffectError, EffectKind, EffectiveSpeed, TimedEffects};
-pub use events::{StepEvent, StepEventKind};
+pub use events::{EventAudience, StepEvent, StepEventKind};
 pub use fixtures::fixed_arena;
 pub use generation::{GENERATOR_VERSION, GeneratedArena, GenerationRecord, generate_arena};
 pub use geometry::{MovementSegment, MovementTrace};

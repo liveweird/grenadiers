@@ -4,6 +4,10 @@ use crate::game::bombs::{Bomb, BombTrigger};
 use crate::game::types::{CellId, EntityId, Tick};
 
 impl State {
+    pub(crate) fn insert_test_flame(&mut self, cell: CellId, expires_at: Tick) {
+        self.world.hazards.insert(cell, expires_at);
+    }
+
     pub(crate) fn insert_test_bomb(
         &mut self,
         id: EntityId,

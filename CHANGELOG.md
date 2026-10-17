@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.3.23 — 2026-10-18
+
+- Validate complete physical world and event observations before recipient filtering; keep
+  future-item projection fixtures separate from strict Classic room certification.
+- Capture event audiences at emission and prepare both recipient encodings atomically,
+  preserving authoritative capacity counts and exact physical-clock effect observations.
+- Retain active gameplay-v6, archived replay behavior and disabled optional pickups; live
+  server/browser migration and Heart activation remain separate increments.
+
 ## 0.3.22 — 2026-10-18
 
 - Stage a dormant gameplay-v7 contract for inventory, timed effects, typed bombs, hidden

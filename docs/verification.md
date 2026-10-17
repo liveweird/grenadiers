@@ -1,5 +1,26 @@
 # Repository verification
 
+## Canonical projection candidate — 2026-10-18 — local checks only
+
+The v0.3.23 candidate passes **373 core tests, 170 server tests and two doctests**, with four
+dedicated performance profiles intentionally ignored. Rust line coverage is **92.25%**
+(10,207/11,064 lines), above the unchanged 80% floor. All **247 web tests**, contract checks,
+ESLint, Knip, builds, E2E static checks, dependency audits and strict pinned Kubernetes schemas
+pass. The application still uses gameplay-v6; optional items remain disabled.
+
+Independent review is clear. Regression tests establish complete-world validation before
+filtering, hidden record and ownership checks, exact event/world fuse consistency, paused
+Stopwatch provenance, eliminated actor cleanup, historical pickup geometry, captured audiences,
+recipient-local indexes, bounded reports and atomic two-perspective encoding. The active legacy
+projector directly rejects non-public audiences without partial encoding. Read-only observations
+preserve physical-clock expiry and frozen-result behavior. Archived contracts and replay records
+are unchanged.
+
+This record claims local verification only. No v0.3.23 image or Compose/Kubernetes acceptance
+has been completed. It remains stacked on the dormant contract candidate; that prerequisite's
+Kubernetes latency failure is being investigated separately. Publication requires final
+integration, independent deployment evidence and all final-head checks.
+
 ## Expanded item core foundations — 2026-10-17
 
 Clean archive source `88ac9842be3f32c7c29189feb19a19f4883d24ea` builds image

@@ -63,7 +63,8 @@ diagnostics** expands the separate diagnostic transport controls; its socket is 
 The panel shows recovery, disconnected/expired seats, and the grace countdown. `seatReplaced`,
 close code 4001, `resumeRejected`, and exhausted retries stop recovery and return to admission.
 No touch controller or audio is included. A narrow viewport is supported for layout and spectating;
-playing currently requires a keyboard.
+playing currently requires a keyboard. The five keyboard actions can be changed and restored
+through the localized [controls dialog](controls.md); the validated preference stays in this browser.
 
 ## Exposed items and player upgrades
 

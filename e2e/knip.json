@@ -3,6 +3,7 @@
   "entry": [
     "tests/**/*.spec.ts",
     "pickup-tests/**/*.spec.ts",
+    "controls-tests/**/*.spec.ts",
     "match-tests/**/*.spec.ts",
     "reconnect-tests/**/*.spec.ts",
     "hardening-tests/**/*.spec.ts",

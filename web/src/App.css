@@ -65,6 +65,20 @@ main { min-height: 100vh; }
   text-align: center;
 }
 .game-instructions { margin: .75rem 0 0; color: #40586c; font-size: .95rem; }
+.controls-button { margin-top: .35rem; padding-inline: 0; }
+.controls-description { color: #40586c; }
+.control-bindings { margin-top: 1.15rem; }
+.control-binding {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: .8rem;
+  border-bottom: 1px solid #b7c5cc;
+  padding: .65rem .25rem;
+}
+.control-binding:first-child { border-top: 1px solid #b7c5cc; }
+.control-binding > div { display: grid; gap: .1rem; }
+.control-binding.is-capturing { border-color: var(--cobalt); background: #eaf1fb; }
 .control-column {
   min-height: 24rem;
   border: 2px solid var(--ink);

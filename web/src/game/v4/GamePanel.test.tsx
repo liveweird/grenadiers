@@ -8,8 +8,9 @@ import { GamePanel, GamePanelView, type GameActions } from './GamePanel'
 import { room, snapshot } from './testSupport'
 
 vi.mock('../arena/GameArena', () => ({
-  GameArena: ({ label, enabled, snapshot: current, onDirection, onBomb }: GameArenaProps) => (
-    <div role="region" aria-label={label} data-enabled={String(enabled)} data-world={String(Boolean(current))}>
+  GameArena: ({ label, enabled, bindings, snapshot: current, onDirection, onBomb }: GameArenaProps) => (
+    <div role="region" aria-label={label} data-enabled={String(enabled)} data-world={String(Boolean(current))}
+      data-north={bindings?.north.join(',')} data-bomb={bindings?.bomb.join(',')}>
       <button onClick={() => onDirection('east')}>Move in test arena</button>
       <button onClick={() => onDirection(null)}>Release in test arena</button>
       <button onClick={() => onBomb()}>Bomb in test arena</button>
@@ -38,7 +39,7 @@ function renderPanel(current: GameClientState) {
 }
 
 describe('v4 reconnect presentation', () => {
-  beforeEach(async () => { await i18n.changeLanguage('en') })
+  beforeEach(async () => { localStorage.clear(); await i18n.changeLanguage('en') })
 
   it('exposes the dormant hook-backed panel without activating it in App', () => {
     render(<MantineProvider env="test"><GamePanel /></MantineProvider>)
@@ -118,5 +119,59 @@ describe('v4 reconnect presentation', () => {
     current.snapshot!.room = current.room
     renderPanel(current)
     expect(screen.getByRole('button', { name: 'Play again' })).toBeDisabled()
+  })
+
+  it('captures unique physical keys, cancels with Escape, and restores defaults', () => {
+    renderPanel(state())
+    const arena = screen.getByRole('region', { name: 'Grenadiers courtyard' })
+    fireEvent.click(screen.getByRole('button', { name: 'Keyboard controls' }))
+    expect(arena).toHaveAttribute('data-enabled', 'false')
+    for (const action of ['North', 'East', 'South', 'West', 'Bomb']) {
+      expect(screen.getByRole('button', { name: `Change ${action}` })).toBeVisible()
+    }
+    fireEvent.click(screen.getByRole('button', { name: 'Change North' }))
+    expect(screen.getByRole('button', { name: 'Press a key for North' })).toHaveAttribute('aria-pressed', 'true')
+    for (const rejected of [
+      new KeyboardEvent('keydown', { code: 'F5', key: 'F5', cancelable: true }),
+      new KeyboardEvent('keydown', { code: 'KeyL', key: 'l', ctrlKey: true, cancelable: true }),
+      new KeyboardEvent('keydown', { code: 'KeyR', key: 'r', ctrlKey: true, cancelable: true }),
+    ]) {
+      window.dispatchEvent(rejected)
+      expect(rejected.defaultPrevented).toBe(false)
+    }
+    fireEvent.keyDown(window, { code: 'ArrowRight', key: 'ArrowRight' })
+    expect(screen.getByRole('alert')).toHaveTextContent('That key already controls East.')
+    expect(arena).toHaveAttribute('data-north', 'ArrowUp,KeyW')
+    fireEvent.keyDown(window, { code: 'KeyI', key: 'i' })
+    expect(arena).toHaveAttribute('data-north', 'KeyI')
+    expect(screen.getByText(/North: I/)).toBeVisible()
+    fireEvent.click(screen.getByRole('button', { name: 'Change East' }))
+    fireEvent.keyDown(window, { code: 'Escape', key: 'Escape' })
+    expect(screen.queryByText('Press an allowed key, or Escape to cancel. Tab still moves focus.')).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Restore defaults' }))
+    expect(arena).toHaveAttribute('data-north', 'ArrowUp,KeyW')
+    fireEvent.click(screen.getByRole('button', { name: 'Done' }))
+    expect(arena).toHaveAttribute('data-enabled', 'true')
+  })
+
+  it('persists a remap across remount and localizes settings in Polish', async () => {
+    const view = render(<MantineProvider env="test"><GamePanelView state={state()} actions={actions()} /></MantineProvider>)
+    fireEvent.click(screen.getByRole('button', { name: 'Keyboard controls' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Change Bomb' }))
+    fireEvent.keyDown(window, { code: 'Enter', key: 'Enter' })
+    expect(screen.getByRole('region', { name: 'Grenadiers courtyard' })).toHaveAttribute('data-bomb', 'Enter')
+    view.unmount()
+    await i18n.changeLanguage('pl')
+    render(<MantineProvider env="test"><GamePanelView state={state()} actions={actions()} /></MantineProvider>)
+    expect(screen.getByRole('region', { name: 'Dziedziniec Grenadiers' })).toHaveAttribute('data-bomb', 'Enter')
+    fireEvent.click(screen.getByRole('button', { name: 'Sterowanie klawiaturą' }))
+    expect(screen.getByRole('dialog', { name: 'Sterowanie klawiaturą' })).toHaveTextContent('Północ')
+    for (const action of ['Północ', 'Wschód', 'Południe', 'Zachód', 'Bomba']) {
+      expect(screen.getByRole('button', { name: `Zmień: ${action}` })).toBeVisible()
+    }
+    fireEvent.click(screen.getByRole('button', { name: 'Zmień: Północ' }))
+    expect(screen.getByRole('button', { name: 'Naciśnij klawisz dla akcji: Północ' }))
+      .toHaveAttribute('aria-pressed', 'true')
+    expect(screen.getByText(/Bomba: Enter/)).toBeVisible()
   })
 })

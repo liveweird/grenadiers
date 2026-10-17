@@ -19,3 +19,6 @@ e2e/match-test-results/
 
 e2e/playwright-reconnect-report/
 e2e/reconnect-test-results/
+
+e2e/playwright-controls-report/
+e2e/controls-test-results/

@@ -93,7 +93,37 @@
     "label": "Grenadiers courtyard",
     "failure": "The courtyard could not be drawn. Leave the room and try again.",
     "focusHint": "Select the courtyard to control your player.",
-    "instructions": "Move with the arrow keys or W A S D. Place a bomb with Space. Controls work only during a live round."
+    "instructions": "Move with {{movement}}. Place a bomb with {{bomb}}. Controls work only during a live round."
+  },
+  "controls": {
+    "open": "Keyboard controls",
+    "title": "Keyboard controls",
+    "close": "Close keyboard controls",
+    "explanation": "Choose Change, then press one physical key. Custom controls are saved in this browser.",
+    "change": "Change",
+    "listening": "Press a key…",
+    "changeAction": "Change {{action}}",
+    "listeningAction": "Press a key for {{action}}",
+    "captureHint": "Press an allowed key, or Escape to cancel. Tab still moves focus.",
+    "duplicate": "That key already controls {{action}}.",
+    "unsupported": "Use an arrow, letter, number, Space, or Enter without modifier keys.",
+    "restore": "Restore defaults",
+    "done": "Done",
+    "actions": {
+      "north": "North",
+      "east": "East",
+      "south": "South",
+      "west": "West",
+      "bomb": "Bomb"
+    },
+    "keys": {
+      "ArrowUp": "Up arrow",
+      "ArrowRight": "Right arrow",
+      "ArrowDown": "Down arrow",
+      "ArrowLeft": "Left arrow",
+      "Space": "Space",
+      "Enter": "Enter"
+    }
   },
   "error": {
     "title": "Could not complete that action",

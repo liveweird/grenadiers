@@ -12,3 +12,5 @@ target
 
 **/playwright-pickup-report
 **/pickup-test-results
+**/playwright-controls-report
+**/controls-test-results

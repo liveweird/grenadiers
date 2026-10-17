@@ -93,7 +93,37 @@
     "label": "Dziedziniec Grenadiers",
     "failure": "Nie udało się wyświetlić dziedzińca.",
     "focusHint": "Wybierz dziedziniec, aby sterować graczem.",
-    "instructions": "Poruszaj się strzałkami lub klawiszami W A S D. Podłóż bombę spacją. Sterowanie działa tylko podczas rundy."
+    "instructions": "Ruch: {{movement}}. Bomba: {{bomb}}. Sterowanie działa tylko podczas rundy."
+  },
+  "controls": {
+    "open": "Sterowanie klawiaturą",
+    "title": "Sterowanie klawiaturą",
+    "close": "Zamknij sterowanie klawiaturą",
+    "explanation": "Wybierz Zmień, a następnie naciśnij jeden klawisz fizyczny. Ustawienia zostaną zapisane w tej przeglądarce.",
+    "change": "Zmień",
+    "listening": "Naciśnij klawisz…",
+    "changeAction": "Zmień: {{action}}",
+    "listeningAction": "Naciśnij klawisz dla akcji: {{action}}",
+    "captureHint": "Naciśnij dozwolony klawisz lub Escape, aby anulować. Tab nadal przenosi fokus.",
+    "duplicate": "Ten klawisz steruje już akcją: {{action}}.",
+    "unsupported": "Użyj strzałki, litery, cyfry, spacji lub Enter bez klawiszy modyfikujących.",
+    "restore": "Domyślne",
+    "done": "Gotowe",
+    "actions": {
+      "north": "Północ",
+      "east": "Wschód",
+      "south": "Południe",
+      "west": "Zachód",
+      "bomb": "Bomba"
+    },
+    "keys": {
+      "ArrowUp": "Strzałka w górę",
+      "ArrowRight": "Strzałka w prawo",
+      "ArrowDown": "Strzałka w dół",
+      "ArrowLeft": "Strzałka w lewo",
+      "Space": "Spacja",
+      "Enter": "Enter"
+    }
   },
   "error": {
     "title": "Nie udało się wykonać działania",

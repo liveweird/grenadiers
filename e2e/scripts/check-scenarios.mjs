@@ -11,6 +11,7 @@ const scenarioText = (await Promise.all((await files(scenarioDirectory, '.md')).
 const testDirectories = [
   testDirectory,
   new URL('../pickup-tests/', import.meta.url),
+  new URL('../controls-tests/', import.meta.url),
   new URL('../match-tests/', import.meta.url),
   new URL('../reconnect-tests/', import.meta.url),
   new URL('../hardening-tests/', import.meta.url),

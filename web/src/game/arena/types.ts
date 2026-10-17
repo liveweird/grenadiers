@@ -1,4 +1,5 @@
 import type { GameState } from '../schema'
+import type { KeyboardBindings } from './bindings'
 
 // Validated wire versions share this presentation boundary. The arena does not
 // interpret scores, match outcomes, event envelopes, or transport versions.
@@ -22,6 +23,7 @@ export interface GameArenaProps {
   snapshot: SnapshotMessage | null
   youSeat: Seat | null
   enabled: boolean
+  bindings?: KeyboardBindings
   onDirection: (direction: Direction | null) => void
   onBomb: () => void
 }

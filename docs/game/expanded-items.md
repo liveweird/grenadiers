@@ -1,6 +1,6 @@
 # Expanded item implementation plan
 
-Status: **v0.3.19 foundation implemented; no items activated**. Classic remains
+Status: **inventory/effects v0.3.19 and ordered actions v0.3.20 implemented; no items activated**. Classic remains
 the default. This optional track follows the [backlog](backlog.md), shared settings and
 pixel-art increments. The historical catalog in [rules](rules.md) is not an implementation
 claim. Each activation requires its own reviewed behavior, UI, documentation and acceptance.
@@ -118,7 +118,7 @@ With two humans there is only one possible rival; random target selection waits 
 
 ## Ordered-action foundation
 
-The v0.3.20 candidate retains individual accepted manual actions through server admission and
+The v0.3.20 foundation retains individual accepted manual actions through server admission and
 core input processing. Classic still resolves one simultaneous placement claim per seat;
 sequential retries must not let duplicate requests defeat a shared-cell conflict. Raw-core
 Clear cancels earlier actions; server movement clearing and TTL expiry preserve accepted
@@ -134,7 +134,7 @@ Replay checkpoints compare the complete pending queue; journal records and publi
 ## Release sequence and acceptance
 
 1. Pure core inventory/effects/damage foundation; retain classic traces and protocol behavior.
-2. Ordered manual commands with a Classic simultaneous-placement adapter (v0.3.20 candidate).
+2. Ordered manual commands with a Classic simultaneous-placement adapter (v0.3.20).
 3. Typed bomb triggers and a checked legacy projection boundary, then forced-contact helpers.
 4. Gameplay-v7 schema/projections, followed by per-seat transport and browser inventory/status UI.
 5. Expanded configuration/generation, then Heart and Shield as separate activations.

@@ -1,6 +1,8 @@
 import { Container, Graphics } from 'pixi.js'
-import { headingRotation, makeActor, makeBlock, makeBomb, makeFlame, makePickup, paintTerrain, TILE } from './drawing'
-import type { ActorDrawing } from './drawing'
+import {
+  makeActor, makeBlock, makeBomb, makeFlame, makePickup, paintTerrain, setActorPose, TILE,
+  type ActorDrawing, type BombDrawing, type FlameDrawing,
+} from './drawing'
 import type { PickupKind } from '../schema'
 import type { SnapshotMessage } from './types'
 
@@ -20,8 +22,8 @@ export class ArenaScene {
   private readonly actorsLayer = new Container()
   private readonly blocks = new Map<string, Graphics>()
   private readonly pickups = new Map<string, PickupDrawing>()
-  private readonly bombs = new Map<number, Container>()
-  private readonly flames = new Map<string, Graphics>()
+  private readonly bombs = new Map<number, BombDrawing>()
+  private readonly flames = new Map<string, FlameDrawing>()
   private readonly actors = new Map<number, ActorDrawing>()
   private readonly motions = new Map<number, Motion>()
   private identity = ''
@@ -70,10 +72,16 @@ export class ArenaScene {
     }
     const effects = this.running && !this.reducedMotion
     for (const [id, bomb] of this.bombs) {
-      bomb.scale.set(effects ? 1 + Math.sin(now / 160 + id) * 0.025 : 1)
+      bomb.spark.visible = !effects || (Math.floor(now / 90) + id) % 2 === 0
     }
     for (const flame of this.flames.values()) {
-      flame.alpha = effects ? 0.93 + Math.sin(now / 70) * 0.07 : 1
+      const frame = effects ? Math.floor(now / 80) % 2 : 0
+      flame.frames[0].visible = frame === 0
+      flame.frames[1].visible = frame === 1
+    }
+    for (const [id, actor] of this.actors) {
+      const frame = effects && actor.moving && (Math.floor(now / 110) + id) % 2 === 1 ? 1 : 0
+      setActorPose(actor, actor.direction, frame)
     }
   }
 
@@ -94,13 +102,13 @@ export class ArenaScene {
   private updateBombs(rows: SnapshotMessage['state']['bombs']): void {
     const present = new Set(rows.map((bomb) => bomb.id))
     for (const [id, drawing] of this.bombs) {
-      if (!present.has(id)) { drawing.destroy({ children: true, context: true }); this.bombs.delete(id) }
+      if (!present.has(id)) { drawing.root.destroy({ children: true, context: true }); this.bombs.delete(id) }
     }
     for (const bomb of rows) {
       if (this.bombs.has(bomb.id)) continue
       const drawing = makeBomb()
-      drawing.position.set((bomb.cell.column + 0.5) * TILE, (bomb.cell.row + 0.5) * TILE)
-      this.bombsLayer.addChild(drawing)
+      drawing.root.position.set((bomb.cell.column + 0.5) * TILE, (bomb.cell.row + 0.5) * TILE)
+      this.bombsLayer.addChild(drawing.root)
       this.bombs.set(bomb.id, drawing)
     }
   }
@@ -125,13 +133,13 @@ export class ArenaScene {
   private updateFlames(rows: SnapshotMessage['state']['flames']): void {
     const present = new Set(rows.map((flame) => key(flame.cell)))
     for (const [id, drawing] of this.flames) {
-      if (!present.has(id)) { drawing.destroy(); this.flames.delete(id) }
+      if (!present.has(id)) { drawing.root.destroy({ children: true, context: true }); this.flames.delete(id) }
     }
     for (const flame of rows) {
       if (this.flames.has(key(flame.cell))) continue
       const drawing = makeFlame()
-      drawing.position.set(flame.cell.column * TILE, flame.cell.row * TILE)
-      this.flamesLayer.addChild(drawing)
+      drawing.root.position.set(flame.cell.column * TILE, flame.cell.row * TILE)
+      this.flamesLayer.addChild(drawing.root)
       this.flames.set(key(flame.cell), drawing)
     }
   }
@@ -143,6 +151,7 @@ export class ArenaScene {
     }
     for (const actor of rows) {
       let drawing = this.actors.get(actor.id)
+      const previousMotion = this.motions.get(actor.id)
       const toX = unitsToPixels(actor.position.x)
       const toY = unitsToPixels(actor.position.y)
       if (!drawing) {
@@ -155,15 +164,17 @@ export class ArenaScene {
         fromX: reset ? toX : drawing.root.x, fromY: reset ? toY : drawing.root.y, toX, toY,
       })
       drawing.root.visible = actor.alive
-      drawing.body.rotation = headingRotation(actor.heading)
+      drawing.moving = Boolean(!reset && previousMotion
+        && (previousMotion.toX !== toX || previousMotion.toY !== toY))
+      setActorPose(drawing, actor.heading, 0)
     }
   }
 
   private clearLayers(): void {
     for (const drawing of this.blocks.values()) drawing.destroy()
     for (const pickup of this.pickups.values()) pickup.drawing.destroy()
-    for (const drawing of this.bombs.values()) drawing.destroy({ children: true, context: true })
-    for (const drawing of this.flames.values()) drawing.destroy()
+    for (const drawing of this.bombs.values()) drawing.root.destroy({ children: true, context: true })
+    for (const drawing of this.flames.values()) drawing.root.destroy({ children: true, context: true })
     for (const drawing of this.actors.values()) drawing.root.destroy({ children: true, context: true })
     this.blocks.clear(); this.pickups.clear(); this.bombs.clear(); this.flames.clear(); this.actors.clear()
     this.motions.clear()

@@ -1,0 +1,33 @@
+# Retro pixel-art courtyard
+
+Status: v0.3.18 implementation candidate; live acceptance is required before release.
+
+The PixiJS arena uses original code-native pixel artwork. Weathered stone tiles, mossy
+masonry, layered brickwork and small brass highlights establish a courtyard palette; bright
+warm flames and gold/blue uniforms keep hazards and competitors distinguishable.
+
+Terrain variation comes only from public cell coordinates, never private generation seeds.
+Players have front, back and side poses, two walking frames, and different helmet marks.
+Bombs have stepped shell highlights and fuse sparks; pickups use distinct beveled symbols.
+Connected flame cells retain continuous rays. Artwork can extend beyond a collider without
+changing the server's fixed footprint or damage rules.
+
+The logical surface stays 720×624 with the existing 15:13 aspect ratio. CSS pixelated scaling
+fits the available space; Pixi uses no antialiasing and caps resolution at device-pixel ratio
+two. Resizing no longer rebuilds scene geometry. Interpolation still stops at authoritative
+targets and never predicts movement or damage.
+
+Terrain is retained until its public layout changes. Each actor owns eight fixed pose drawings
+and one shadow; bombs own three drawings, flames two frames, and blocks/pickups one drawing
+each. Visibility toggles animate existing objects instead of allocating frames. Unchanged
+authoritative targets stop walking; terminal state and reduced motion stop decorative frames.
+Removed entities and round resets destroy owned child graphics contexts.
+
+Sources: `web/src/game/arena/terrainArt.ts`, `actorArt.ts`, `entityArt.ts`, `palette.ts` and
+`pixel.ts`. All patterns were authored for this repository; no franchise sprites, external
+texture packs, downloaded fonts or new rendering dependency are included.
+
+Geometry/resource-bound, retention, removal, interpolation, reduced-motion and StrictMode
+tests accompany the artwork. Desktop and 320-pixel visual studies guide review; actual
+application captures and same-image browser/deployment evidence belong in
+[verification](../verification.md) before release.

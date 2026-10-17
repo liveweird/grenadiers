@@ -8,6 +8,9 @@ join from another browser, and both choose Ready. Select the courtyard to move w
 or W/A/S/D and plant bombs with Space. Rust owns the 60 Hz simulation; PixiJS draws public
 20 Hz snapshots while React/Mantine provides the room controls, scores, phase timers, results, and rematch.
 
+The [retro pixel-art arena](docs/game/pixel-art.md) adds original weathered terrain, directional
+characters, animated grenades/flames and distinct item symbols, with reduced-motion support.
+
 Default rooms allow turns within a quarter tile of a corridor centerline, including natural
 wall stops. The creator can adjust starting speed, turning tolerance, wins needed and fuse
 time in the lobby's shared [gameplay settings](docs/game/settings.md). Gameplay v6 requires

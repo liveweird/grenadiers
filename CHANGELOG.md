@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.18 — 2026-10-17
+
+- Replace smooth placeholder geometry with original detailed pixel art: weathered courtyard
+  floors, mossy masonry, layered brick blocks, grenades, connected flames and beveled pickups.
+- Add distinct gold/blue directional character poses and bounded walking/spark/flame frames.
+- Keep crisp responsive pixel scaling, authoritative interpolation, reduced-motion static
+  frames and retained-object cleanup; simulation and gameplay contracts are unchanged.
+
 ## 0.3.17 — 2026-10-17
 
 - Add shared, creator-managed lobby settings for starting speed, corner tolerance, wins to

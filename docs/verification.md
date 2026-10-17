@@ -16,7 +16,20 @@ pickup acceptance**. The latter reveals and collects capacity/range through keyb
 positions, updates both HUDs, and proves simultaneous range-2/range-3 bombs. A core fixture
 trace independently survives that route at tick 631. CI runs random smoke before recreating
 the same image with the read-only fixture; the fixture command fails without explicit setup.
-Exact-image default-random and fixture deployment acceptance follows before merge.
+The complete web gate passes 83 tests with 96.80% statement, 92.08% branch, 98.64%
+function, and 98.82% line coverage. Contract/lint/unused-code/build, E2E static parity, and
+dependency policies pass; npm audits report zero vulnerabilities.
+
+A clean committed-tree build of `483346a3191d90a66f0701de9b84b2fb79ce47ef` produces
+`sha256:01740d0eaf194b0d85daba3cc54937dc8a6912a153c4e3c82cd8a3554995a209`.
+Both Compose and ready local Kubernetes use that exact image. Each path passes health/
+readiness, all six default-random smoke scenarios, then the separate pickup scenario after
+read-only fixture recreation. Kubernetes uses a temporary Secret readable by UID 65532 while
+preserving probes and security settings. Strict schemas report 3 valid resources and pinned
+archive-only Trivy reports zero HIGH/CRITICAL findings. Runtime inspection finds no seed files
+under `/app`. Actual fixture screenshots were visually inspected; both HUDs show the upgrades.
+Temporary stacks, namespace/Secret, forwards, exports, and archives are removed. The image and
+logs/screenshots remain available. This evidence update changes only documentation.
 
 ## M4 exposed-item rendering and upgrade HUD — 2026-10-17
 

@@ -3,7 +3,7 @@
 Status: **execution plan**. M0 is complete and locally verified on 2026-10-16; M1 is complete
 and locally verified on 2026-10-17. M2 is complete and locally verified
 on 2026-10-17. M3’s fixed-map two-browser duel is implemented and locally verified;
-M4 generated rounds and upgrades are implemented, with final release acceptance in progress;
+M4 generated rounds and upgrades are complete and locally verified on 2026-10-17;
 M5–M8 remain planned.
 Published engineering prereleases are listed in `CHANGELOG.md` and GitHub Releases.
 

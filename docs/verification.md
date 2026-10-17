@@ -16,6 +16,17 @@ functions, and 98.94% lines**. Three-version generation/drift, lint, Knip, and b
 Active endpoint/client remain v3, and the diagnostic contract remains v1. Semantic checked
 projection, network reconnect activation, and exact-image acceptance are separate checks.
 
+A clean committed-tree build of `943413cec21e9ecbf4ce18ccf85177ca95488819` produces
+`sha256:4418f66b9298998bc6da4a5f3f2c90d6cd8b1e2b229001b8befbac73f21f12ed`.
+Both Compose and local Kubernetes run that same artifact and pass real JSON health/ready
+probes, six default browser scenarios, one pickup scenario and one full-match scenario.
+Fixture suites disable retries. Strict Kubernetes 1.33 schemas pass 3/3; pinned archive-only
+Trivy reports zero fixable HIGH/CRITICAL findings. Runtime checks verify UID/GID 65532,
+read-only root, dropped capabilities, seccomp/probes, and read-only mode-0444 fixture mounts;
+no seed file exists under `/app`. Immutable client `817cd78` and complete image/build hashes,
+logs and screenshots are retained in `/tmp/grenadiers-v035-acceptance`. Temporary stacks,
+namespaces, Secrets, forwards, exports and scan archives are cleaned; the image remains.
+
 ## M6 grace-aware pure match lifecycle — 2026-10-17
 
 The combined locked server gate passes **265 core tests, 132 server tests, and 2 doctests**.

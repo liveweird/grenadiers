@@ -14,6 +14,15 @@ and atomic tick/deadline/round-number failures. Storage remains bounded to one l
 This is a pure headless API; live generated gameplay remains single-round v2. Lifecycle,
 contracts, server adapters, and browser progression follow as separate focused releases.
 
+A clean committed-tree build of `10320666a7b6d4aaa56b48983f36047bac743133` produces
+`sha256:6e470d7505bab6778601b53a3c39f6489252e1a943f290dbeb15194b4498389e`.
+Compose and ready local Kubernetes use that same image. Both paths pass health/readiness,
+six default-random browser scenarios, and the separate read-only fixture scenario. Strict
+schemas report 3 valid resources; pinned archive-only Trivy reports zero HIGH/CRITICAL findings.
+The Linux steering correction changes only the browser harness, not application inputs; both
+fixture paths also pass using the revised `dba46766688fe00d1a39de4d291a6d0d8d5aab18` tests against
+this image. Temporary runtime resources are removed; the image and evidence logs remain.
+
 ## M4 headless compositor diagnosis and correction — 2026-10-17
 
 Hosted trace profiling finally isolated the repeated native-key overshoot: Chromium's hybrid

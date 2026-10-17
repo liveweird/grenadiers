@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.2.2 — 2026-10-17
+
+- Replace inert pickup cells with checked typed concealed, pending, and exposed layers.
+- Reveal destroyed-block contents after flames clear; burn exposed items without shielding
+  downstream blasts, and preserve revealing-blast immunity for pending contents.
+- Add generated-world construction with separate private generation records and exposed-only
+  public domain views. Freeze every pickup transition after a result.
+
+Collection, upgrades, wire/client support, and generated network rounds follow separately.
+The fixed-map playable preview remains unchanged.
+
 ## 0.2.1 — 2026-10-17
 
 - Add a versioned deterministic arena API with canonical mirrored soft blocks and typed

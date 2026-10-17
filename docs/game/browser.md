@@ -91,3 +91,5 @@ reset presentation directly even if an intermediate room view was coalesced.
 The separate complete-match fixture uses native keyboard controls to prove a real draw,
 three wins, fresh round/spawn assignments, consent withdrawal, and rematch over the same
 two sockets. See [deployment](../deployment.md) for explicit read-only fixture setup.
+
+Reviewed [desktop and 320-pixel Polish captures](../screenshots/reconnect.md) show the active v4 interface.

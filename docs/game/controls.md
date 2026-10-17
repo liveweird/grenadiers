@@ -59,3 +59,5 @@ It remaps through the interface, reloads the preference, uses real native keys i
 proves the old key is inactive and the new key moves, places one bomb per press, restores defaults,
 and checks Axe plus desktop and 320-pixel Polish containment. Playwright traces remain disabled
 because v4 admission traffic contains private resume capabilities.
+
+Reviewed [desktop and 320-pixel Polish screenshots](../screenshots/controls.md) show the actual interface.

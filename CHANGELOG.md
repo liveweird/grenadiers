@@ -1,6 +1,15 @@
 # Changelog
 
-## 0.3.21 — 2026-10-17
+## 0.3.22 — 2026-10-18
+
+- Stage a dormant gameplay-v7 contract for inventory, timed effects, typed bombs, hidden
+  actors and shared manual-action IDs, while keeping the active v6 endpoint unchanged.
+- Add checked item masks, effect multiplicity and contextual availability validation with
+  shared Rust/browser fixtures; distinguish structural schema checks from semantic checks.
+- Bound event windows and encoded frames for the expanded contract. Canonical projections,
+  recipient filtering, runtime migration and playable item activation remain follow-up work.
+
+## 0.3.21 — 2026-10-18
 
 - Represent domain bomb triggers explicitly as timed, remote or contact, without invented
   deadlines for untimed variants. Current rules still accept timed bombs only.
@@ -9,7 +18,7 @@
 - Retain Classic physics, archived replay outcomes and gameplay-v6 compatibility. No remote
   bomb, landmine or other new item is activated by this foundation.
 
-## 0.3.20 — 2026-10-17
+## 0.3.20 — 2026-10-18
 
 - Retain accepted manual bomb actions in bounded ordered queues through server admission
   and core input processing, ready for later remote-bomb commands.

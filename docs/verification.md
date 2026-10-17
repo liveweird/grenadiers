@@ -23,8 +23,12 @@ The first full-match browser run completed a draw, three real wins, and rematch/
 caught a persistent phase-boundary movement error. The client now correlates only movement
 errors with bounded command context and newer authoritative phase/epoch progress; bomb and
 current-phase failures remain visible. Idle controls no longer refresh null input. Regression
-tests cover both error/state orderings. Final live browser and exact-image deployment
-acceptance are still pending; this record does not claim those checks have passed.
+tests cover both error/state orderings. Native Chromium now passes the full two-browser
+scenario with retries disabled: real shared-bomb draw, three actual wins, automatic fresh
+rounds, alternating spawns/base upgrades, final hold, vote withdrawal/consensus, one-epoch
+rematch reset, fresh readiness, and action-ID reset on the same sockets. Axe and horizontal
+containment checks pass in English and Polish at desktop and 320 pixels. Actual compositor
+screenshots were visually inspected. Exact-image Compose/Kubernetes acceptance remains pending.
 
 ## Dormant bounded match owner — 2026-10-17
 

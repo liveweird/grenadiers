@@ -119,13 +119,13 @@ test('two browsers finish a drawn round, first-to-three match, and consensual re
       page.screenshot({ path: testInfo.outputPath(`match-result-${index}.png`), fullPage: true }),
     ))
 
-    await two.getByRole('radio', { name: 'Polski', exact: true }).click()
+    await two.getByText('Polski', { exact: true }).click()
     await expect(two.getByRole('status')).toHaveText('Gracz drugi wygrywa mecz trzema rundami.')
     await expect(two.getByLabel('Wygrane rundy: Gracz drugi')).toContainText('3')
     expect(await two.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false)
     expect((await new AxeBuilder({ page: two }).analyze()).violations).toEqual([])
     await two.screenshot({ path: testInfo.outputPath('match-result-polish-mobile.png'), fullPage: true })
-    await two.getByRole('radio', { name: 'English', exact: true }).click()
+    await two.getByText('English', { exact: true }).click()
 
     await one.getByRole('button', { name: 'Play again', exact: true }).click()
     await expect.poll(() => latestRoom(games[1])?.seats[0].rematchReady).toBe(true)

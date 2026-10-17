@@ -13,3 +13,6 @@
 
 e2e/playwright-pickup-report/
 e2e/pickup-test-results/
+
+e2e/playwright-match-report/
+e2e/match-test-results/

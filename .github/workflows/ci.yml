@@ -90,6 +90,15 @@ jobs:
           done
           curl --fail --silent http://127.0.0.1:8085/api/v1/ready
           E2E_PICKUP_FIXTURE=arena-v1-pickups npm --prefix e2e run test:pickups
+      - name: Verify a full classic match and rematch using the same image
+        run: |
+          docker compose -f docker-compose.yaml -f docker-compose.matches.yaml up -d --no-build --force-recreate app
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent http://127.0.0.1:8085/api/v1/ready; then break; fi
+            sleep 1
+          done
+          curl --fail --silent http://127.0.0.1:8085/api/v1/ready
+          E2E_MATCH_FIXTURE=arena-v1-matches npm --prefix e2e run test:matches
       - name: Scan built image for fixable high or critical vulnerabilities
         run: |
           docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
@@ -109,6 +118,7 @@ jobs:
           path: |
             e2e/playwright-report/
             e2e/playwright-pickup-report/
+            e2e/playwright-match-report/
           retention-days: 7
 
   kubernetes:

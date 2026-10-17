@@ -5,7 +5,9 @@
   "license": "UNLICENSED",
   "description": "Browser black-box tests against the complete Grenadiers stack",
   "type": "module",
-  "engines": { "node": "24.21.0" },
+  "engines": {
+    "node": "24.21.0"
+  },
   "scripts": {
     "test": "playwright test",
     "test:pickups": "playwright test --config playwright.pickups.config.ts",
@@ -15,7 +17,8 @@
     "typecheck": "tsc --noEmit",
     "check:scenarios": "node scripts/check-scenarios.mjs",
     "lint": "eslint . --max-warnings 0",
-    "knip": "knip"
+    "knip": "knip",
+    "test:matches": "playwright test --config playwright.matches.config.ts"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.13.0",

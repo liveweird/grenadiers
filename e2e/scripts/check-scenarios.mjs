@@ -8,7 +8,7 @@ async function files(directory, suffix) {
 }
 
 const scenarioText = (await Promise.all((await files(scenarioDirectory, '.md')).map((name) => readFile(new URL(name, scenarioDirectory), 'utf8')))).join('\n')
-const testDirectories = [testDirectory, new URL('../pickup-tests/', import.meta.url)]
+const testDirectories = [testDirectory, new URL('../pickup-tests/', import.meta.url), new URL('../match-tests/', import.meta.url)]
 const testText = (await Promise.all(testDirectories.map(async (directory) =>
   (await Promise.all((await files(directory, '.ts')).map((name) => readFile(new URL(name, directory), 'utf8')))).join('\n'),
 ))).join('\n')

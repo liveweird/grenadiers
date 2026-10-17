@@ -9,7 +9,7 @@ and captures process resource usage with the platform `time` tool. A selected bu
 missing result exits nonzero.
 
 These tests exercise production `MatchRuntime` capture, checked projection, JSON encoding, and
-`PreparedMatchOwner` scheduling. They do not include HTTP, WebSocket, network, browser, container,
+`PreparedMatchOwner` scheduling. They do not include HTTP, WebSocket, network, browser, container-startup,
 or database costs and do not establish capacity at the configured 32-room ceiling.
 
 ## Selected budgets
@@ -43,27 +43,71 @@ task and cleanup callback to complete. A fourth, separate process fills all 32 c
 requires the next submission to return `rateLimited`. Its allocations cannot affect the one-room
 process's resident-set peak.
 
-## Reference recording status
+## Reproduce a constrained Linux reference
 
-Earlier measurements came from an uncommitted harness and are provisional, so this document does
-not publish them as a source reference. After the harness is committed, regenerate a clean native
-record and a Linux record constrained to two allocated CPUs. Keep each run's `environment.txt`,
-`results.jsonl`, and `*.time.txt` files together.
+Use pinned Node 24.21.0 on PATH (or `NODE24_BIN`) for native runs. To prebuild the same
+optimized harness in its pinned development image, then measure without network/build overhead:
 
-Every record includes the source commit, whether the source was clean, dirty, or a Git-free export,
-the exact test binary's SHA-256, and an image identity. Native runs default to
-`none-native`; image runs must set `MEASUREMENT_IMAGE_IDENTITY` to the immutable image reference.
-A Git-free clean export must also set `MEASUREMENT_SOURCE_COMMIT` to its 40-character commit ID.
-The runner uses the repository's pinned Node 24 executable; `NODE24_BIN` may point to that same
-version inside a reference image.
+```sh
+reference_commit=$(git rev-parse HEAD)
+docker build -f scripts/Dockerfile.measurements \
+  --build-arg MEASUREMENT_SOURCE_COMMIT="$reference_commit" -t grenadiers-reference:local .
+reference_image=$(docker image inspect grenadiers-reference:local --format '{{.Id}}')
+docker run --name grenadiers-reference --cpuset-cpus=2,3 --memory=512m --memory-swap=512m \
+  --pids-limit=128 --network=none -e CARGO_NET_OFFLINE=true \
+  -e MEASUREMENT_IMAGE_IDENTITY="$reference_image" grenadiers-reference:local
+docker cp grenadiers-reference:/build/target/m7-measurements ./target/linux-reference
+docker rm grenadiers-reference
+```
 
-Exact JSON and resource output is retained under `target/m7-measurements/` for this worktree. It
-must be regenerated for a source revision because build artifacts are not committed. Process RSS
-includes the test binary and runtime. Each normal-load profile and the queue-pressure check has a
-separate process peak; none is a per-room heap estimate. Do not compare results across machines as
-if they were the same capacity claim.
+Choose two valid CPU IDs on the reference host and record them. Build from a clean committed
+checkout/export; `MEASUREMENT_SOURCE_COMMIT` identifies that source, including the harness. This
+is a development measurement image, separate from the application's runtime image.
 
-The private replay journal separately caps its record storage below 4 MiB. That bound does not
-describe total room memory. A Linux reference with two allocated CPUs and explicit cgroup limits,
-followed by exact-image browser acceptance, remains required before making deployment capacity or
-playability claims.
+## Recorded clean references
+
+Both references use source `f1678dfc9d9255504fce8b0c8dcafdb2ac07f96f`, optimized Rust 1.99.1,
+Node 24.21.0 and two Tokio workers. Native is a clean checkout on Darwin 27.0.0, arm64,
+Apple M5 Max, 18 visible logical CPUs and 128 GB physical memory, without harness affinity or
+memory constraints. Linux is a clean Git export on OrbStack Linux 7.2.9/aarch64 on the same host:
+18 CPUs visible to `getconf`, **two allocated via affinity/cpuset 2–3**, no CFS quota,
+512 MiB memory limit with swap disabled, 128 PID limit, and no network. Its reference image is
+`sha256:b5629e98174e72e4ab2c1a510d2a80c1dc5659b4a94ad4b6b96c78e807a13607`.
+
+| Observation | Native | Linux, two allocated CPUs |
+| --- | ---: | ---: |
+| Runtime all ticks, p99 / max (541 samples) | 15 / 63 µs | 6 / 29 µs |
+| Publishing ticks, p99 / max (183 samples) | 39 / 63 µs | 11 / 29 µs |
+| Phase/round transitions, max (3 samples) | 63 µs | 29 µs |
+| One-room action round trip, p99 / max | 47 / 88 µs | 84 / 148 µs |
+| One-room observed publication lag, p99 / max | 3.938 / 4.210 ms | 8.898 / 10.143 ms |
+| Eight-room action round trip, p99 / max | 165 / 8,857 µs | 47 / 99 µs |
+| Eight-room observed publication lag, p99 / max | 3.713 / 12.114 ms | 5.113 / 26.896 ms |
+
+All chosen budgets pass. Each owner advances exactly 1,800 ticks during its 30-second window;
+rooms start sequentially and the JSON records each starting tick. Largest runtime snapshot is
+4,824 bytes; observed one/eight-room frames are 3,724/4,001 bytes. One/eight-room watch changes
+are 601/4,808; these may coalesce. Observed interval p99 is native 52.314/51.655 ms and Linux
+56.533/53.132 ms. Sampled normal-load queue occupancy is one; the separate pressure process
+fills 32 slots, rejects command 33, and completes shutdown. Every owner cleanup completes.
+
+| Separate process peak RSS | Native BSD `time`, bytes | Linux GNU `time`, KiB |
+| --- | ---: | ---: |
+| Runtime | 8,323,072 | 5,324 |
+| One owner | 9,650,176 | 6,828 |
+| Eight owners | 14,237,696 | 9,608 |
+| Queue pressure | 8,306,688 | 6,336 |
+
+RSS includes the test binary/runtime, not only room data; do not divide these process peaks into
+per-room heap estimates. Displayed microseconds are integer-truncated; zero medians in raw records
+mean below one microsecond. Three transition samples describe these observations, not a tail
+reliability guarantee. The private journal's separate <4 MiB record-storage bound is not a
+whole-room memory bound.
+
+Every record includes exact source commit, clean/dirty/export state, binary SHA-256 and image
+identity. Native defaults to `none-native`; Git-free exports require a 40-hex source commit and
+image runs provide their immutable image identity. Both binary hashes, environments, all eight
+records, process timing files and container inspection are retained in
+`/tmp/grenadiers-v0311-reference`. The source/image/provenance and RSS units were independently
+reviewed. These developer references exclude HTTP/WebSocket/network/browser costs and human
+playability; exact-image application acceptance and the rest of M7 remain separate.

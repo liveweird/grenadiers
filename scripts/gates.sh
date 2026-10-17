@@ -15,6 +15,8 @@ repository() {
 }
 server() {
   require_lock
+  bash -n scripts/measure-game.sh
+  node --test scripts/measure-game-artifact.test.mjs
   cargo fmt --all -- --check
   cargo clippy --workspace --all-targets --locked -- -D warnings
   cargo test --workspace --locked

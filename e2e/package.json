@@ -19,7 +19,8 @@
     "lint": "eslint . --max-warnings 0",
     "knip": "knip",
     "test:matches": "playwright test --config playwright.matches.config.ts",
-    "test:reconnect": "playwright test --config playwright.reconnect.config.ts"
+    "test:reconnect": "playwright test --config playwright.reconnect.config.ts",
+    "test:hardening": "playwright test --config playwright.hardening.config.ts"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.13.0",

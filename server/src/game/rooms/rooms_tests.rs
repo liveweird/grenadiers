@@ -130,7 +130,14 @@ async fn exact_expiry_publishes_expired_and_removes_both_lookups() {
         Err(RoomError::RoomNotFound)
     ));
     assert!(matches!(
-        rooms.leave(&admission, binding(1, 1)).await,
+        rooms
+            .leave(
+                &admission,
+                binding(1, 1),
+                admission.room_id.clone(),
+                admission.round_id,
+            )
+            .await,
         Err(RoomError::RoomNotFound)
     ));
     wait_until_empty(&rooms).await;
@@ -233,7 +240,10 @@ async fn stale_binding_is_rejected_after_leave_and_rejoin_in_same_round() {
         .join(&first.view.room_code, binding(2, 1), now)
         .await
         .unwrap();
-    rooms.leave(&first, binding(1, 1)).await.unwrap();
+    rooms
+        .leave(&first, binding(1, 1), first.room_id.clone(), first.round_id)
+        .await
+        .unwrap();
     let rejoined = rooms
         .join(&first.view.room_code, binding(1, 2), now)
         .await
@@ -242,23 +252,106 @@ async fn stale_binding_is_rejected_after_leave_and_rejoin_in_same_round() {
     assert_eq!(rejoined.round_id, first.round_id);
     assert!(matches!(
         rooms
-            .validate(
+            .action(
                 &rejoined,
                 binding(1, 1),
                 rejoined.room_id.clone(),
                 rejoined.round_id,
+                RoomAction::Ready(false),
             )
             .await,
         Err(RoomError::StaleRoom)
     ));
     rooms
-        .validate(
+        .action(
             &rejoined,
             binding(1, 2),
             rejoined.room_id.clone(),
             rejoined.round_id,
+            RoomAction::Ready(false),
         )
         .await
         .unwrap();
     drop(second);
+}
+
+#[tokio::test(start_paused = true)]
+async fn scheduler_catches_up_four_due_ticks_without_skipping() {
+    let now = StdInstant::now();
+    let rooms = deterministic_rooms(now);
+    let mut one = rooms.create(binding(1, 1), now).await.unwrap();
+    let two = rooms
+        .join(&one.view.room_code, binding(2, 1), now)
+        .await
+        .unwrap();
+    rooms
+        .action(
+            &one,
+            binding(1, 1),
+            one.room_id.clone(),
+            1,
+            RoomAction::Ready(true),
+        )
+        .await
+        .unwrap();
+    rooms
+        .action(
+            &two,
+            binding(2, 1),
+            two.room_id.clone(),
+            1,
+            RoomAction::Ready(true),
+        )
+        .await
+        .unwrap();
+
+    tokio::time::advance(std::time::Duration::from_millis(67)).await;
+    tokio::task::yield_now().await;
+    rooms
+        .action(
+            &one,
+            binding(1, 1),
+            one.room_id.clone(),
+            1,
+            RoomAction::Ready(false),
+        )
+        .await
+        .unwrap();
+    one.notices.changed().await.unwrap();
+    let RoomNotice::View(view) = one.notices.borrow_and_update().clone() else {
+        panic!("expected waiting view");
+    };
+    assert_eq!(view.tick.get(), 4);
+    assert_eq!(view.round_id.get(), 2);
+}
+
+#[tokio::test(start_paused = true)]
+async fn excessive_lag_interrupts_then_terminal_retention_releases_registration() {
+    let now = StdInstant::now();
+    let rooms = deterministic_rooms(now);
+    let mut admission = rooms.create(binding(1, 1), now).await.unwrap();
+    let id = admission.room_id.clone();
+    let code = admission.view.room_code.clone();
+
+    tokio::time::advance(std::time::Duration::from_millis(517)).await;
+    admission.notices.changed().await.unwrap();
+    let RoomNotice::View(view) = admission.notices.borrow_and_update().clone() else {
+        panic!("expected interruption view");
+    };
+    assert!(matches!(
+        view.phase,
+        grenadiers_core::protocol::RoomPhase::Interrupted {
+            reason: grenadiers_core::protocol::InterruptReason::ServerOverloaded,
+            ..
+        }
+    ));
+    assert!(rooms.lock().rooms.contains_key(&id));
+
+    tokio::time::advance(std::time::Duration::from_secs(30)).await;
+    admission.notices.changed().await.unwrap();
+    assert_eq!(*admission.notices.borrow_and_update(), RoomNotice::Retired);
+    wait_until_empty(&rooms).await;
+    let registry = rooms.lock();
+    assert!(!registry.rooms.contains_key(&id));
+    assert!(!registry.codes.contains_key(&code));
 }

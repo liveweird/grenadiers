@@ -155,6 +155,18 @@ impl State {
         world: World,
         actors: [ActorInit; 2],
     ) -> Result<Self, StateError> {
+        Self::new_at_tick(rules, world, actors, Tick(0))
+    }
+
+    /// Creates a round at an existing absolute room tick.
+    ///
+    /// The round-local running update count always starts at zero.
+    pub fn new_at_tick(
+        rules: RulesConfig,
+        world: World,
+        actors: [ActorInit; 2],
+        tick: Tick,
+    ) -> Result<Self, StateError> {
         if actors[0].id == actors[1].id {
             return Err(StateError::DuplicateActorId(actors[0].id));
         }
@@ -191,7 +203,7 @@ impl State {
             rules,
             world,
             actors: canonical.map(|actor| Actor::new(actor, rules)),
-            tick: Tick(0),
+            tick,
             next_entity_id,
             running_updates: 0,
             result: None,

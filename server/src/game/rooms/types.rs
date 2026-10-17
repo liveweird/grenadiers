@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use grenadiers_core::protocol::{RoomCode, RoomId, RoomView, Seat};
 use tokio::sync::{oneshot, watch};
 
@@ -12,7 +14,9 @@ pub(crate) struct BindingKey {
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub(crate) enum RoomNotice {
     View(RoomView),
+    Snapshot(Arc<str>),
     Expired,
+    Retired,
 }
 
 pub(crate) struct DepartureGuard {
@@ -61,4 +65,6 @@ pub(crate) enum RoomError {
     RoomNotFound,
     RoomFull,
     StaleRoom,
+    InvalidPhase,
+    DuplicateAction,
 }

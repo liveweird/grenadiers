@@ -14,14 +14,14 @@ Use deployment-specific origins outside local development.
 The diagnostic and gameplay WebSockets bound message/frame size, connection count, idle time,
 queues, commands, and sends.
 Malformed text messages yield a typed error and policy close. Control frames remain protocol
-control frames. The diagnostic envelope remains v1; authenticated gameplay requires v5.
+control frames. The diagnostic envelope remains v1; authenticated gameplay requires v6.
 
 Resume capabilities are independent 32-byte random values encoded as lowercase hexadecimal. They
 exist only in the room owner and the admitted browser tab, remain stable across restore/takeover,
 and are never placed in URLs, shared room state, logs, replay journals, local/session storage, or
 database fields. Browser retries obtain a fresh ordinary session before presenting the capability.
 Explicit leave clears it only after acknowledgement; `resumeRejected`, replacement, and exhausted
-retry terminate recovery. Active-v5 Playwright traces are disabled because raw framework traces can
+retry terminate recovery. Active-v6 Playwright traces are disabled because raw framework traces can
 capture personal admission frames before redaction. Screenshots, public reports, and bounded
 redacted summaries remain suitable artifacts.
 

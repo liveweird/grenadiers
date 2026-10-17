@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.3.17 — 2026-10-17
+
+- Add shared, creator-managed lobby settings for starting speed, corner tolerance, wins to
+  finish and bomb fuse, with validated choices and EN/PL controls.
+- Bind readiness to the accepted settings revision; genuine changes clear readiness, match
+  rounds retain settings, and rematches allow editing again.
+- Activate configurable rules v4 and gameplay v6; carry exact settings through room views,
+  personal admission and private replay while preserving archived profiles.
+
 ## 0.3.16 — 2026-10-17
 
 - Double lane-centering tolerance from one eighth to one quarter tile in classic-v3 rooms,

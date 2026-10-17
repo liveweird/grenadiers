@@ -1,4 +1,6 @@
 use super::RulesConfig;
+use crate::game::SpeedLevel;
+use crate::room::RoomSettings;
 
 #[test]
 fn classic_v1_exposes_the_fixed_geometry_and_tick_parameters() {
@@ -50,4 +52,26 @@ fn classic_v3_only_widens_the_turn_assist_window() {
     assert_eq!(third.bomb_fuse_ticks(), second.bomb_fuse_ticks());
     assert_eq!(third.flame_ticks(), second.flame_ticks());
     assert_eq!(third.round_ticks(), second.round_ticks());
+}
+
+#[test]
+fn configurable_v4_applies_only_simulation_owned_room_settings() {
+    let settings = RoomSettings::new(SpeedLevel::Four, 64, 9, 60).unwrap();
+    let third = RulesConfig::classic_v3();
+    let fourth = RulesConfig::configurable_v4(settings);
+
+    assert_eq!(fourth.version(), 4);
+    assert_eq!(fourth.turn_assist(), 64);
+    assert_eq!(fourth.bomb_fuse_ticks(), 60);
+    assert_eq!(fourth.tick_rate(), third.tick_rate());
+    assert_eq!(fourth.units_per_cell(), third.units_per_cell());
+    assert_eq!(fourth.half_footprint(), third.half_footprint());
+    assert_eq!(fourth.pickup_collection(), third.pickup_collection());
+    assert_eq!(fourth.bomb_capacity(), third.bomb_capacity());
+    assert_eq!(fourth.bomb_range(), third.bomb_range());
+    assert_eq!(fourth.flame_ticks(), third.flame_ticks());
+    assert_eq!(fourth.round_ticks(), third.round_ticks());
+
+    assert_eq!(settings.starting_speed(), SpeedLevel::Four);
+    assert_eq!(settings.wins_to_finish(), 9);
 }

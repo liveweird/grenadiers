@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import type { GameServerMessage } from '../../web/src/game/v5/schema'
+import type { GameServerMessage } from '../../web/src/game/v6/schema'
 import { gameFrames, openGame, roomFrame, sendGame } from './support/game'
 
 type Snapshot = Extract<GameServerMessage, { type: 'snapshot' }>
@@ -18,12 +18,12 @@ test('two native gameplay sockets finish one authoritative generated classic rou
     await sendGame(two, { type: 'joinRoom', roomCode: created.room.roomCode })
     const joined = await roomFrame(two)
     const binding = { roomId: created.room.roomId, roundId: joined.room.roundId }
-    await sendGame(one, { type: 'ready', ...binding, ready: true })
-    await sendGame(two, { type: 'ready', ...binding, ready: true })
+    await sendGame(one, { type: 'ready', ...binding, ready: true, settingsRevision: joined.room.settingsRevision })
+    await sendGame(two, { type: 'ready', ...binding, ready: true, settingsRevision: joined.room.settingsRevision })
     await expect.poll(async () => snapshot(await gameFrames(one))?.room.phase.type).toBe('running')
     await expect.poll(async () => snapshot(await gameFrames(two))?.room.phase.type).toBe('running')
     const firstRunning = snapshot(await gameFrames(one))!
-    expect(firstRunning.room).toMatchObject({ rulesVersion: 3, mapId: 'generated_v1' })
+    expect(firstRunning.room).toMatchObject({ rulesVersion: 4, mapId: 'generated_v1' })
     expect(firstRunning.state.pickups).toEqual([])
     const blocks = firstRunning.state.arena.blocks
     for (const block of blocks) {

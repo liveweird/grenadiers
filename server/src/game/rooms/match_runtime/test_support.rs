@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use grenadiers_core::{
     game::{Direction, SeatId},
-    protocol::v5::RoomPhase,
+    protocol::v6::RoomPhase,
     protocol::{RoomCode, RoomId},
     room::MatchPhase,
 };
@@ -28,6 +28,10 @@ pub(super) fn fixed_runtime() -> MatchRuntime {
 
 pub(super) fn generated_runtime(source: RoundSeedSource) -> MatchRuntime {
     MatchRuntime::new(identity(RoomProfile::GeneratedClassicV2), source)
+}
+
+pub(super) fn configurable_runtime(source: RoundSeedSource) -> MatchRuntime {
+    MatchRuntime::new(identity(RoomProfile::GeneratedConfigurableV4), source)
 }
 
 pub(super) fn occupy_both(runtime: &mut MatchRuntime) {

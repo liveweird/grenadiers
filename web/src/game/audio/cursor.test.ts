@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
-import type { GameClientState } from '../v5/client'
-import type { EventKind, WireEvent } from '../v5/schema'
-import { snapshot } from '../v5/testSupport'
+import type { GameClientState } from '../v6/client'
+import type { EventKind, WireEvent } from '../v6/schema'
+import { snapshot } from '../v6/testSupport'
 import { AudioCursor } from './cursor'
 
 const baseline = { roomId: 'b'.repeat(32), revision: 20, tick: 20 }
@@ -21,7 +21,7 @@ function state(revision: number, events: WireEvent[] = [], roundId = 1): GameCli
   current.events = events
   return {
     connection: 'authenticated', room: current.room, snapshot: current, youSeat: 'one', failure: null,
-    admissionPending: false, leavePending: false, reconnectAttempt: 0,
+    admissionPending: false, leavePending: false, settingsPending: false, reconnectAttempt: 0,
     admissionBaseline: baseline,
   }
 }

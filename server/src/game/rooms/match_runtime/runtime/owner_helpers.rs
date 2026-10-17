@@ -13,7 +13,19 @@ impl MatchRuntime {
     pub(in crate::game::rooms) fn initial_notice(
         &mut self,
     ) -> Result<MatchNotice, MatchRuntimeError> {
-        self.publish_view()
+        let next = self.next_revision()?;
+        let room = super::super::publication::room_view(
+            &self.identity,
+            &self.lifecycle,
+            next,
+            self.settings_revision,
+            None,
+        )?;
+        self.revision = next;
+        Ok(MatchNotice {
+            room,
+            snapshot: None,
+        })
     }
 
     pub(in crate::game::rooms) fn current_notice(
@@ -44,6 +56,7 @@ impl MatchRuntime {
         self.lifecycle
             .depart_batch(departures)
             .map_err(map_lifecycle_error)?;
+        self.release_departed_editor(departures);
         for (seat, departure) in SeatId::ALL.into_iter().zip(departures) {
             if departure.is_some() {
                 self.inputs.stop(seat);
@@ -67,6 +80,7 @@ impl MatchRuntime {
             .lifecycle
             .depart_batch(departures)
             .map_err(map_lifecycle_error)?;
+        self.release_departed_editor(departures);
         for (seat, departure) in SeatId::ALL.into_iter().zip(departures) {
             if departure.is_some() {
                 self.inputs.stop(seat);

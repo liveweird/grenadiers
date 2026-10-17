@@ -198,3 +198,59 @@ fn forgiving_turns_still_respect_blockers_and_swept_flame_damage() {
     press_and_step(&mut burning, Direction::North, 20);
     assert!(!burning.actors()[0].alive());
 }
+
+#[test]
+fn every_configurable_speed_and_tolerance_can_turn_at_the_adjacent_intersection() {
+    let center = Position::center(CellId::new(5, 5));
+    for speed in [
+        SpeedLevel::Base,
+        SpeedLevel::One,
+        SpeedLevel::Two,
+        SpeedLevel::Three,
+        SpeedLevel::Four,
+    ] {
+        for tolerance in [64, 128, 192, 256] {
+            let settings = crate::room::RoomSettings::new(speed, tolerance, 3, 180).unwrap();
+            for (travel, turn) in [
+                (Direction::East, Direction::North),
+                (Direction::West, Direction::South),
+                (Direction::North, Direction::West),
+                (Direction::South, Direction::East),
+            ] {
+                let horizontal = matches!(travel, Direction::East | Direction::West);
+                let sign = if matches!(travel, Direction::East | Direction::South) {
+                    1
+                } else {
+                    -1
+                };
+                let coordinate =
+                    |position: Position| if horizontal { position.x } else { position.y };
+                let target = coordinate(center) + sign * UNITS_PER_CELL;
+                let mut moving = state(
+                    World::new(open_arena(BTreeSet::new())),
+                    center,
+                    travel,
+                    speed,
+                    RulesConfig::configurable_v4(settings),
+                );
+                press_and_step(&mut moving, travel, 1);
+                let mut closest = moving.clone();
+                for _ in 0..24 {
+                    moving.step(&[]).unwrap();
+                    if (coordinate(moving.actors()[0].position()) - target).abs()
+                        < (coordinate(closest.actors()[0].position()) - target).abs()
+                    {
+                        closest = moving.clone();
+                    }
+                }
+                assert!((coordinate(closest.actors()[0].position()) - target).abs() <= tolerance);
+                let start = closest.actors()[0].position();
+                press_and_step(&mut closest, turn, 8);
+                let actor = &closest.actors()[0];
+                assert_eq!(actor.heading(), turn, "{speed:?}/{tolerance}/{travel:?}");
+                assert_eq!(coordinate(actor.position()), target);
+                assert_ne!(actor.position(), start);
+            }
+        }
+    }
+}

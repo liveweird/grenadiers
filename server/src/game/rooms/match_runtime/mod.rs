@@ -22,5 +22,8 @@ mod performance_tests;
 #[path = "publication_tests.rs"]
 mod publication_tests;
 #[cfg(test)]
+#[path = "settings_tests.rs"]
+mod settings_tests;
+#[cfg(test)]
 #[path = "test_support.rs"]
 mod test_support;

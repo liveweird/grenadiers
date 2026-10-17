@@ -74,7 +74,7 @@ async fn next(socket: &mut ClientSocket) -> Message {
 async fn authenticate(socket: &mut ClientSocket, token: &str) {
     send(
         socket,
-        json!({"type":"authenticate", "protocolVersion":5, "token":token}),
+        json!({"type":"authenticate", "protocolVersion":6, "token":token}),
     )
     .await;
     let Message::Text(text) = next(socket).await else {
@@ -194,9 +194,9 @@ async fn app_shutdown_interrupts_a_running_room_with_its_real_frozen_snapshot() 
     assert!(last.snapshot.is_some());
     assert!(matches!(
         last.room.phase,
-        grenadiers_core::protocol::v5::RoomPhase::MatchResult {
-            result: grenadiers_core::protocol::v5::MatchResult::Interrupted {
-                reason: grenadiers_core::protocol::v5::MatchInterruptReason::ServerStopped
+        grenadiers_core::protocol::v6::RoomPhase::MatchResult {
+            result: grenadiers_core::protocol::v6::MatchResult::Interrupted {
+                reason: grenadiers_core::protocol::v6::MatchInterruptReason::ServerStopped
             },
             ..
         }
@@ -227,9 +227,9 @@ async fn app_shutdown_preserves_an_already_final_forfeit_outcome() {
     };
     assert!(matches!(
         last.room.phase,
-        grenadiers_core::protocol::v5::RoomPhase::MatchResult {
-            result: grenadiers_core::protocol::v5::MatchResult::Winner {
-                reason: grenadiers_core::protocol::v5::MatchWinnerReason::Forfeit,
+        grenadiers_core::protocol::v6::RoomPhase::MatchResult {
+            result: grenadiers_core::protocol::v6::MatchResult::Winner {
+                reason: grenadiers_core::protocol::v6::MatchWinnerReason::Forfeit,
                 ..
             },
             ..

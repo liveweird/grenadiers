@@ -1,9 +1,9 @@
 # Gameplay protocol
 
 Status: gameplay contracts, checked domain conversion, HTTP session issuance, and authenticated
-gameplay WebSockets with authoritative two-seat first-to-three matches are implemented.
-`api/gameplay-v5.schema.json`, Rust `core::protocol::v5`, and generated
-`web/src/game/v5/schema.ts` define active socket messages. V2, v3 and v4 remain historical. V5 preserves v4 reconnect semantics and adds classic-v3 turning; see [the migration note](protocol-v5.md).
+gameplay WebSockets with authoritative configurable two-seat matches are implemented.
+`api/gameplay-v6.schema.json`, Rust `core::protocol::v6`, and generated
+`web/src/game/v6/schema.ts` define active socket messages. V2 through v5 remain historical. V6 preserves reconnect semantics and adds configurable rules; see [the migration note](protocol-v6.md).
 The browser validates these messages and drives the playable generated-map match. Diagnostic `/api/v1/ws` and
 `api/realtime.schema.json` remain unchanged.
 
@@ -25,13 +25,13 @@ Connect to `/api/v1/game/ws` with one configured non-null Origin and no query pa
 Its first application frame must be:
 
 ```json
-{"type":"authenticate","protocolVersion":5,"token":"0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"}
+{"type":"authenticate","protocolVersion":6,"token":"0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"}
 ```
 
 The token is a secret 64-character lowercase hexadecimal credential, held only in tab memory.
 It never belongs in a URL or log. A syntactically valid unsupported version is parsed so the
 server can return `incompatibleProtocol` before credential binding. Supported gameplay version
-is 5, independently of the product release and diagnostic protocol. Parser failures expose
+is 6, independently of the product release and diagnostic protocol. Parser failures expose
 only a generic error; token Debug formatting is redacted.
 
 A successful claim atomically binds one connection. Duplicate claims receive `connectionInUse`
@@ -71,7 +71,8 @@ All listed fields are required; objects reject extra fields. Counter values are 
 | `createRoom` | `sequence` |
 | `joinRoom` | `sequence`, `roomCode` |
 | `resumeRoom` | `sequence`, `roomId`, private `resumeToken` |
-| `ready` | `sequence`, `roomId`, `roundId`, `ready` |
+| `ready` | `sequence`, `roomId`, `roundId`, `settingsRevision`, `ready` |
+| `updateSettings` | `sequence`, `roomId`, `roundId`, `settingsRevision`, complete `settings` |
 | `movement` | `sequence`, `roomId`, `roundId`, `direction` (cardinal direction or explicit null) |
 | `placeBomb` | `sequence`, `roomId`, `roundId`, `actionId` |
 | `leaveRoom` | `sequence`, `roomId`, `roundId` |
@@ -79,8 +80,8 @@ All listed fields are required; objects reject extra fields. Counter values are 
 
 | Server type | Additional fields |
 | --- | --- |
-| `authenticated` | `protocolVersion: 4` |
-| `incompatibleProtocol` | `supportedVersion` (0–65,535; this server emits 4) |
+| `authenticated` | `protocolVersion: 6` |
+| `incompatibleProtocol` | `supportedVersion` (0–65,535; this server emits 6) |
 | `admitted` | acknowledged `sequence`, shared `room`, `youSeat`, private `resumeToken`, nullable `lastBombActionId`, nullable `state` |
 | `roomState` | shared `room` only |
 | `seatReplaced` | `roomId`; old binding closes with code 4001 |
@@ -152,12 +153,17 @@ accepted floor; the next bomb ID must be greater. A floor of 2,147,483,647 exhau
 for that epoch.
 
 `RoomView` carries identity/code, independent command epoch `roundId`, revision, global tick,
-rules/map versions, actual `roundNumber`, scores (0..3 per seat), nullable `lastRound`, two
+rules/map versions, actual `roundNumber`, scores (0..9 per seat, bounded by the selected target), nullable `lastRound`, two
 canonical seat statuses (connection, occupancy/readiness/rematch consent), and a tagged phase. A
 connection is vacant, connected, disconnected with exclusive `expiresAt`, or expired. Actual
 round count increases only on starts, remains on the preceding round during inter-round
 countdown, and resets on rematch. Epochs also advance across cancellation and rematch, so
 spawn/tie assignment uses actual round count rather than command epoch.
+
+Shared room views and snapshot metadata also carry the complete checked `settings`,
+`settingsRevision` and nullable original `settingsEditor` seat. Only actual changes increment
+the settings revision and clear readiness; Ready commands acknowledge that exact revision.
+See [v6 settings and authority](protocol-v6.md) for bounds, no-op acknowledgements and edit locks.
 
 Phases are Waiting; initial/inter-round Countdown with deadline; Running; nonfinal Result
 with `holdUntil`; MatchResult with independent outcome, end time, and `rematchAt`;
@@ -177,20 +183,20 @@ pending, the browser honors the explicit local departure instead of retrying. Ru
 boundaries commit physics/scoring before batched departures; idle phases apply departure
 before automatic transitions. Explicit leave forfeits and two explicit leaves abandon. Eligible
 transport loss reserves the seat for 600 global ticks; one expiry forfeits to an eligible opponent,
-both expiry abandons, and a disconnected opponent delays the decision until settled. Third-win and
+both expiry abandons, and a disconnected opponent delays the decision until settled. Configured-target and
 already-final outcomes retain precedence. Ownership is bound to connection generation and private
 capability, never to invitation code. See [bounded owner](match-owner.md).
 
 ## Profile and version evolution
 
 An immutable server room profile owns state construction and its rules/map labels. Publication
-rejects state whose checked rules version disagrees with that profile. Production now uses classic-v3 rules and generated-v1 arenas. Snapshots initially have an
+rejects state whose checked rules version disagrees with that profile. Production now uses configurable-v4 rules and generated-v1 arenas. Snapshots initially have an
 empty pickup array because contents are concealed; only exposed items become public.
 Fixed-classic-v1 remains an explicit unit fixture, not a production selector.
 
-Gameplay v5 is incompatible with earlier versions. Reload clients when upgrading the single server. Both
+Gameplay v6 is incompatible with earlier versions. Reload clients when upgrading the single server. Both
 old and future versions are rejected before credential lookup, so rejection cannot claim or
-revoke a token. `supportedVersion` accepts the bounded input range rather than only v5,
+revoke a token. `supportedVersion` accepts the bounded input range rather than only v6,
 allowing a new client to understand an older server's incompatibility response.
 See [ADR 0013](../decisions/0013-gameplay-v2-and-room-profiles.md).
 
@@ -201,7 +207,7 @@ without writing. The shared web gate runs this alongside existing diagnostic che
 validation tests. Rust conformance tests compare strict parsing and serialization with the same
 schema, including missing/null fields, scalar boundaries, integer-valued number forms, version
 rejection responses, credential redaction, all event variants, nested bounds, and real
-frame-size enforcement. Maximal structural v5 Snapshot and Admitted fixtures fit the inclusive
+frame-size enforcement. Maximal structural v6 Snapshot and Admitted fixtures fit the inclusive
 65,536-byte server limit; an actual oversized message is rejected. These fixtures prove structural
 bounds rather than reachable gameplay size. TypeScript types do not enforce string patterns
 or numeric/array bounds at runtime; AJV and Rust validation do.

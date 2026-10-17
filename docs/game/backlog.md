@@ -1,6 +1,7 @@
 # Gameplay and presentation backlog
 
-Status: **TURN implemented and locally verified for v0.3.16; other items requested, not implemented**.
+Status: **TURN shipped as v0.3.16; initial CONFIG implemented in v0.3.17**.
+Other items remain requested work, not implemented.
 Updated 2026-10-17 after playtest feedback. Release acceptance is recorded in
 [verification](../verification.md).
 The [implementation plan](implementation-plan.md) remains the milestone/release reference;
@@ -39,6 +40,9 @@ expose tolerance in CONFIG and adjust further against playtest evidence.
   before adding a separately specified buffered-turn mechanic.
 
 ## CONFIG: shared gameplay configuration panel
+
+Initial implementation: starting speed, turn tolerance (1/16–¼ tile), wins to finish and
+bomb fuse. See [settings](settings.md). The remaining controls below are follow-up work.
 
 Add a room/lobby panel for the following playability settings, with units, defaults, validated
 ranges, contextual explanations and a restore-defaults action. Existing keyboard/audio settings

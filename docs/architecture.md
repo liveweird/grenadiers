@@ -1,7 +1,8 @@
 # Architecture
 
 The server provides HTTP liveness/readiness, diagnostic WebSockets, anonymous credentials,
-and authenticated authoritative two-seat first-to-three matches. React/Mantine provides room admission and
+and authenticated authoritative two-seat matches with a configurable win target (three by
+default). React/Mantine provides room admission and
 the HUD; PixiJS renders public game snapshots.
 A separate deterministic simulation in `core::game` implements movement, owned bombs,
 flames, damage, and one-round outcomes. Room owners advance that simulation at a fixed
@@ -85,7 +86,8 @@ must be recorded and how the two-player baseline will be delivered and verified.
 
 [ADR 0015](decisions/0015-match-series-and-staged-progression.md) separates implemented
 [headless match-series facts](game/match-series.md) and the pure [automatic lifecycle](game/match-lifecycle.md)
-from transport integration. The live generated match supports first-to-three play.
+from transport integration. Shared room settings now select one to nine wins; Classic defaults
+to three. Settings remain immutable through automatic rounds.
 
 [ADR 0016](decisions/0016-dormant-gameplay-v3-contract.md) records the earlier namespaced
 [gameplay-v3 contract](game/protocol-v3.md) separately from archived v2. Gameplay v4 extends
@@ -95,12 +97,12 @@ V4 checked room projection derives facts directly from `MatchLifecycle`; its pub
 rejects semantically impossible bounded DTOs before server adapters publish them.
 
 The active `match_runtime` server adapter owns real per-round physics, assignment-aware
-generation, epoch-fenced input, settled reconnect grace, and checked v5 publication. Result
+generation, epoch-fenced input, settled reconnect grace, and checked v6 publication. Result
 physics freezes while the global lifecycle clock and reservation deadlines advance.
 
-The active v5 client/panel shares the Pixi presentation boundary, validates v5 messages, keeps
+The active v6 client/panel shares the Pixi presentation boundary, validates v6 messages, keeps
 the resume capability only in tab memory, and renders scores, recovery, grace, and rematch from
-authoritative facts. Production routing uses v5 on the existing endpoint. See
+authoritative facts. Production routing uses v6 on the existing endpoint. See
 [reconnect browser](game/reconnect-browser.md).
 
 The active [bounded match owner](game/match-owner.md) adds generation-fenced admission,

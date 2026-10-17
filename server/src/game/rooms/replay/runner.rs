@@ -18,8 +18,8 @@ use super::super::{
     types::RoomIdentity,
 };
 use super::record::{
-    CLASSIC_V2_RULES, CLASSIC_V3_RULES, FORMAT_VERSION, GENERATED_V1, Journal,
-    M5_LIFECYCLE_PROFILE, M6_LIFECYCLE_PROFILE, Operation, ReplayAction, ReplayStatus,
+    CLASSIC_V2_RULES, CLASSIC_V3_RULES, CONFIGURABLE_V4_RULES, FORMAT_VERSION, GENERATED_V1,
+    Journal, M5_LIFECYCLE_PROFILE, M6_LIFECYCLE_PROFILE, Operation, ReplayAction, ReplayStatus,
 };
 use crate::round_seed::RoundSeedSource;
 
@@ -36,6 +36,7 @@ pub(super) enum ReplayError {
     InvalidOrder,
     WrongTick,
     InvalidBounds,
+    InvalidActionProfile,
     MissingSeed,
     MissingRoundStart,
     RoundStartMismatch,
@@ -67,8 +68,13 @@ pub(super) fn replay(journal: &Journal) -> Result<RuntimeInspection, ReplayError
         bytes.copy_from_slice(&seed);
         Ok(())
     });
-    let mut runtime =
-        MatchRuntime::new_without_replay(identity_for_rules(journal.header.rules_version)?, source);
+    let mut runtime = MatchRuntime::new_without_replay(
+        identity_for_rules(journal.header.rules_version)?,
+        source,
+        journal.header.initial_settings,
+        journal.header.initial_settings_revision,
+        journal.header.initial_settings_editor,
+    );
     for seat in SeatId::ALL {
         if journal.header.initial_seats[seat.index()] {
             runtime.occupy(seat).map_err(|_| ReplayError::Runtime)?;
@@ -105,7 +111,7 @@ pub(super) fn replay(journal: &Journal) -> Result<RuntimeInspection, ReplayError
                 if awaiting_start.is_some() {
                     return Err(ReplayError::MissingRoundStart);
                 }
-                validate_bounds(operation)?;
+                validate_operation(operation, journal.header.rules_version)?;
                 let before = runtime.lifecycle().phase();
                 apply_profile(&mut runtime, operation, journal.header.lifecycle_profile)?;
                 if matches!(operation, Operation::Tick) {
@@ -154,16 +160,36 @@ fn validate_header(journal: &Journal) -> Result<(), ReplayError> {
     ) {
         return Err(ReplayError::UnsupportedLifecycle);
     }
-    if !matches!(header.rules_version, CLASSIC_V2_RULES | CLASSIC_V3_RULES)
-        || RulesVersion::try_from(header.rules_version).is_err()
+    if !matches!(
+        header.rules_version,
+        CLASSIC_V2_RULES | CLASSIC_V3_RULES | CONFIGURABLE_V4_RULES
+    ) || RulesVersion::try_from(header.rules_version).is_err()
     {
         return Err(ReplayError::UnsupportedRules);
+    }
+    if header.lifecycle_profile == M5_LIFECYCLE_PROFILE && header.rules_version != CLASSIC_V2_RULES
+    {
+        return Err(ReplayError::UnsupportedLifecycle);
     }
     if header.generator_version != GENERATED_V1 || header.generator_version != GENERATOR_VERSION {
         return Err(ReplayError::UnsupportedGenerator);
     }
     if header.initial_tick.0 != 0 {
         return Err(ReplayError::UnsupportedInitialTick);
+    }
+    let invalid_configuration = if header.rules_version == CONFIGURABLE_V4_RULES {
+        header.initial_settings_editor != Some(SeatId::One)
+    } else {
+        header.initial_settings
+            != grenadiers_core::protocol::v6::GameSettings::for_rules(
+                RulesVersion::try_from(header.rules_version)
+                    .map_err(|_| ReplayError::UnsupportedRules)?,
+            )
+            .domain()
+            || header.initial_settings_editor.is_some()
+    };
+    if header.initial_settings_revision != 1 || invalid_configuration {
+        return Err(ReplayError::UnsupportedRules);
     }
     Ok(())
 }
@@ -184,13 +210,38 @@ fn validate_order(records: &[super::record::Record]) -> Result<(), ReplayError> 
     Ok(())
 }
 
-fn validate_bounds(operation: Operation) -> Result<(), ReplayError> {
+fn validate_operation(operation: Operation, rules_version: u16) -> Result<(), ReplayError> {
+    if let Operation::Action { action, .. } = operation {
+        let valid_for_profile = match rules_version {
+            CLASSIC_V2_RULES | CLASSIC_V3_RULES => !matches!(
+                action,
+                ReplayAction::ReadyChecked { .. } | ReplayAction::UpdateSettings { .. }
+            ),
+            CONFIGURABLE_V4_RULES => !matches!(action, ReplayAction::Ready(_)),
+            _ => false,
+        };
+        if !valid_for_profile {
+            return Err(ReplayError::InvalidActionProfile);
+        }
+    }
     match operation {
         Operation::Action { epoch: 0, .. } => Err(ReplayError::InvalidBounds),
         Operation::Action {
             action: ReplayAction::Bomb(action_id),
             ..
         } if action_id == 0 || action_id > MAX_COUNTER => Err(ReplayError::InvalidBounds),
+        Operation::Action {
+            action:
+                ReplayAction::ReadyChecked {
+                    settings_revision: 0,
+                    ..
+                }
+                | ReplayAction::UpdateSettings {
+                    settings_revision: 0,
+                    ..
+                },
+            ..
+        } => Err(ReplayError::InvalidBounds),
         _ => Ok(()),
     }
 }
@@ -219,6 +270,20 @@ fn apply_profile(
                 epoch,
                 match action {
                     ReplayAction::Ready(value) => MatchAction::Ready(value),
+                    ReplayAction::ReadyChecked {
+                        ready,
+                        settings_revision,
+                    } => MatchAction::ReadyChecked {
+                        ready,
+                        settings_revision,
+                    },
+                    ReplayAction::UpdateSettings {
+                        settings_revision,
+                        settings,
+                    } => MatchAction::UpdateSettings {
+                        settings_revision,
+                        settings,
+                    },
                     ReplayAction::Movement(value) => MatchAction::Movement(value),
                     ReplayAction::Bomb(value) => MatchAction::Bomb(value),
                     ReplayAction::Rematch(value) => MatchAction::Rematch(value),
@@ -264,6 +329,7 @@ fn identity_for_rules(rules_version: u16) -> Result<RoomIdentity, ReplayError> {
     let profile = match RulesVersion::try_from(rules_version) {
         Ok(RulesVersion::ClassicV2) => RoomProfile::GeneratedClassicV2,
         Ok(RulesVersion::ClassicV3) => RoomProfile::GeneratedClassicV3,
+        Ok(RulesVersion::ConfigurableV4) => RoomProfile::GeneratedConfigurableV4,
         _ => return Err(ReplayError::UnsupportedRules),
     };
     Ok(identity_for_profile(profile))

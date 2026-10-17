@@ -4,7 +4,7 @@ use crate::game::{RoundAssignment, RoundResult, SeatId, Tick};
 
 use super::reconnect::{ReconnectError, ReconnectGrace};
 use super::series::{MatchOutcome, MatchSeries, RematchStatus, SeriesError};
-use super::{COUNTDOWN_TICKS, DepartureReason, InterruptReason, SeatState};
+use super::{COUNTDOWN_TICKS, DepartureReason, InterruptReason, RoomSettings, SeatState};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum CountdownKind {
@@ -78,6 +78,7 @@ impl From<ReconnectError> for MatchError {
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct MatchLifecycle {
+    settings: RoomSettings,
     tick: Tick,
     round_attempt: u64,
     phase: MatchPhase,
@@ -95,7 +96,13 @@ impl Default for MatchLifecycle {
 impl MatchLifecycle {
     #[must_use]
     pub const fn new() -> Self {
+        Self::with_settings(RoomSettings::DEFAULT)
+    }
+
+    #[must_use]
+    pub const fn with_settings(settings: RoomSettings) -> Self {
         Self {
+            settings,
             tick: Tick(0),
             round_attempt: 1,
             phase: MatchPhase::Waiting,
@@ -103,7 +110,7 @@ impl MatchLifecycle {
                 occupied: false,
                 ready: false,
             }; 2],
-            series: MatchSeries::new(),
+            series: MatchSeries::with_settings(settings),
             reconnect: ReconnectGrace::new(),
         }
     }
@@ -144,6 +151,10 @@ impl MatchLifecycle {
 
     pub fn set_ready(&mut self, seat: SeatId, ready: bool) -> Result<MatchChange, MatchError> {
         self.transact(|next| next.set_ready_inner(seat, ready))
+    }
+
+    pub fn set_settings(&mut self, settings: RoomSettings) -> Result<MatchChange, MatchError> {
+        self.transact(|next| next.set_settings_inner(settings))
     }
 
     pub fn advance_idle_tick(&mut self) -> Result<MatchChange, MatchError> {
@@ -351,6 +362,9 @@ mod clock;
 #[path = "match_lifecycle_operations.rs"]
 mod operations;
 
+#[path = "match_lifecycle_settings.rs"]
+mod settings;
+
 #[path = "match_lifecycle_reconnect.rs"]
 mod reconnect;
 
@@ -373,3 +387,7 @@ mod reconnect_tests;
 #[cfg(test)]
 #[path = "match_lifecycle_reconnect_terminal_tests.rs"]
 mod reconnect_terminal_tests;
+
+#[cfg(test)]
+#[path = "match_lifecycle_settings_tests.rs"]
+mod settings_tests;

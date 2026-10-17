@@ -1,8 +1,8 @@
 use std::{fmt, mem::size_of};
 
 use grenadiers_core::{
-    game::{Direction, GenerationRecord, RoundAssignment, SeatId, Tick},
-    room::{DepartureReason, InterruptReason},
+    game::{Direction, GenerationRecord, RoundAssignment, SeatId, SpeedLevel, Tick},
+    room::{DepartureReason, InterruptReason, RoomSettings},
 };
 
 pub(super) const FORMAT_VERSION: u16 = 1;
@@ -10,6 +10,7 @@ pub(in crate::game::rooms) const M5_LIFECYCLE_PROFILE: u16 = 1;
 pub(super) const M6_LIFECYCLE_PROFILE: u16 = 2;
 pub(super) const CLASSIC_V2_RULES: u16 = 2;
 pub(super) const CLASSIC_V3_RULES: u16 = 3;
+pub(super) const CONFIGURABLE_V4_RULES: u16 = 4;
 pub(super) const GENERATED_V1: u16 = 1;
 pub(super) const MAX_RECORDS: usize = 60_000;
 
@@ -21,10 +22,13 @@ pub(in crate::game::rooms) struct Header {
     pub(super) generator_version: u16,
     pub(super) initial_seats: [bool; 2],
     pub(super) initial_tick: Tick,
+    pub(super) initial_settings: RoomSettings,
+    pub(super) initial_settings_revision: u32,
+    pub(super) initial_settings_editor: Option<SeatId>,
 }
 
 impl Header {
-    pub(in crate::game::rooms) const fn m5(initial_seats: [bool; 2]) -> Self {
+    pub(in crate::game::rooms) fn m5(initial_seats: [bool; 2]) -> Self {
         Self {
             format_version: FORMAT_VERSION,
             lifecycle_profile: M5_LIFECYCLE_PROFILE,
@@ -32,20 +36,34 @@ impl Header {
             generator_version: GENERATED_V1,
             initial_seats,
             initial_tick: Tick(0),
+            initial_settings: RoomSettings::new(SpeedLevel::Base, 128, 3, 180)
+                .expect("valid classic v2 settings"),
+            initial_settings_revision: 1,
+            initial_settings_editor: None,
         }
     }
 
-    pub(in crate::game::rooms) const fn m6(initial_seats: [bool; 2]) -> Self {
+    pub(in crate::game::rooms) fn m6(initial_seats: [bool; 2]) -> Self {
         Self {
             lifecycle_profile: M6_LIFECYCLE_PROFILE,
             ..Self::m5(initial_seats)
         }
     }
 
-    pub(in crate::game::rooms) const fn m6_v3(initial_seats: [bool; 2]) -> Self {
+    pub(in crate::game::rooms) fn m6_v3(initial_seats: [bool; 2]) -> Self {
         Self {
             rules_version: CLASSIC_V3_RULES,
+            initial_settings: RoomSettings::DEFAULT,
             ..Self::m6(initial_seats)
+        }
+    }
+
+    pub(in crate::game::rooms) fn configurable_v4() -> Self {
+        Self {
+            rules_version: CONFIGURABLE_V4_RULES,
+            initial_settings: RoomSettings::DEFAULT,
+            initial_settings_editor: Some(SeatId::One),
+            ..Self::m6([false; 2])
         }
     }
 }
@@ -53,6 +71,14 @@ impl Header {
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(in crate::game::rooms) enum ReplayAction {
     Ready(bool),
+    ReadyChecked {
+        ready: bool,
+        settings_revision: u32,
+    },
+    UpdateSettings {
+        settings_revision: u32,
+        settings: RoomSettings,
+    },
     Movement(Option<Direction>),
     Bomb(u32),
     Rematch(bool),

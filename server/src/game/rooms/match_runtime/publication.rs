@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use grenadiers_core::{
     game::StepReport,
-    protocol::v5::{
+    protocol::v6::{
         GameServerMessage, RoomMetadata, RoomView, encode_server_message, project_room_view,
     },
     protocol::{project_events, project_state},
@@ -12,17 +12,25 @@ use grenadiers_core::{
 use super::super::types::RoomIdentity;
 use super::error::MatchRuntimeError;
 use super::runtime::{MatchNotice, SimRound};
-use grenadiers_core::protocol::v5::RoomPhase;
+use grenadiers_core::protocol::v6::RoomPhase;
 
 pub(super) fn room_view(
     identity: &RoomIdentity,
     lifecycle: &MatchLifecycle,
     revision: u32,
+    settings_revision: u32,
+    settings_editor: Option<grenadiers_core::game::SeatId>,
 ) -> Result<RoomView, MatchRuntimeError> {
     let revision = grenadiers_core::protocol::Counter::new(revision)
         .map_err(|_| MatchRuntimeError::CapacityReached)?;
     project_room_view(
         RoomMetadata {
+            settings: grenadiers_core::protocol::v6::GameSettings::from_domain(
+                lifecycle.settings(),
+            ),
+            settings_revision: grenadiers_core::protocol::Counter::new(settings_revision)
+                .map_err(|_| MatchRuntimeError::CapacityReached)?,
+            settings_editor: settings_editor.map(wire_seat),
             room_id: identity.id.clone(),
             room_code: identity.code.clone(),
             revision,
@@ -54,6 +62,8 @@ pub(super) fn snapshot(
     identity: &RoomIdentity,
     lifecycle: &MatchLifecycle,
     revision: u32,
+    settings_revision: u32,
+    settings_editor: Option<grenadiers_core::game::SeatId>,
     sim: &SimRound,
     reports: &[StepReport],
 ) -> Result<MatchNotice, MatchRuntimeError> {
@@ -61,15 +71,27 @@ pub(super) fn snapshot(
         #[cfg(test)]
         super::super::profile::RoomProfile::FixedClassicV1 => sim.generation_record.is_none(),
         super::super::profile::RoomProfile::GeneratedClassicV2
-        | super::super::profile::RoomProfile::GeneratedClassicV3 => sim.generation_record.is_some(),
+        | super::super::profile::RoomProfile::GeneratedClassicV3
+        | super::super::profile::RoomProfile::GeneratedConfigurableV4 => {
+            sim.generation_record.is_some()
+        }
     };
     if !generation_record_matches {
         return Err(MatchRuntimeError::Publication);
     }
-    let room = room_view(identity, lifecycle, revision)?;
+    let room = room_view(
+        identity,
+        lifecycle,
+        revision,
+        settings_revision,
+        settings_editor,
+    )?;
     let projected =
         project_state(&sim.state.public_view()).map_err(|_| MatchRuntimeError::Publication)?;
     if projected.rules_version != identity.profile.rules_version() {
+        return Err(MatchRuntimeError::Publication);
+    }
+    if sim.state.rules() != &identity.profile.rules_config(lifecycle.settings()) {
         return Err(MatchRuntimeError::Publication);
     }
     validate_state(lifecycle, &room, sim, projected.tick, projected.result)?;

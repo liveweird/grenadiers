@@ -1,6 +1,6 @@
 use std::sync::atomic::Ordering;
 
-use grenadiers_core::protocol::RoomId;
+use grenadiers_core::{game::SpeedLevel, protocol::RoomId, room::RoomSettings};
 
 use super::super::{match_runtime::MatchAction, types::RoomError};
 use super::test_support::*;
@@ -74,6 +74,51 @@ async fn admission_validates_room_epoch_binding_and_generation() {
 
     value.task.abort();
     let _ = value.task.await;
+}
+
+#[tokio::test(flavor = "current_thread", start_paused = true)]
+async fn settings_update_rejects_a_forged_binding_before_editor_authorization() {
+    let (handle, owner, shutdown) = prepared_with(
+        super::super::profile::RoomProfile::GeneratedConfigurableV4,
+        crate::round_seed::RoundSeedSource::with_entropy(|bytes| {
+            bytes.fill(9);
+            Ok(())
+        }),
+    );
+    let value = start_prepared(handle, owner, shutdown);
+    let creator_binding = binding(1, 7);
+    let creator = join(&value.handle, creator_binding).await;
+    let action = MatchAction::UpdateSettings {
+        settings_revision: 1,
+        settings: RoomSettings::new(SpeedLevel::One, 192, 2, 150).unwrap(),
+    };
+    assert_eq!(
+        value
+            .handle
+            .action(
+                binding(1, 6),
+                creator.room_id.clone(),
+                creator.round_id,
+                action,
+            )
+            .await
+            .unwrap(),
+        Err(RoomError::StaleRoom)
+    );
+    assert_eq!(
+        value
+            .handle
+            .action(
+                creator_binding,
+                creator.room_id.clone(),
+                creator.round_id,
+                action,
+            )
+            .await
+            .unwrap(),
+        Ok(())
+    );
+    value.task.abort();
 }
 
 #[tokio::test(flavor = "current_thread", start_paused = true)]

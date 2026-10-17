@@ -8,11 +8,12 @@ never advances the simulation or predicts a different outcome.
 
 1. Open the application, choose **Create room**, and share its eight-character invitation.
 2. The second player enters that code and chooses **Join room** in another browser/tab.
-3. Both players choose **Ready**. Either can cancel readiness during the three-second countdown.
+3. The creator can [configure gameplay](settings.md) while unready. Both choose **Ready**;
+   either can cancel readiness during the three-second countdown.
 4. When the round starts, select the courtyard to give it keyboard focus. Move with arrows
    or W/A/S/D; press Space once per bomb. Hold a direction to keep moving.
 5. A surviving player wins the round; simultaneous elimination or the round timeout draws.
-   Win three rounds to take the match. Nonfinal rounds hold their result for three seconds,
+   Reach the selected win target (three by default) to take the match. Nonfinal rounds hold their result for three seconds,
    then start a three-second automatic countdown with a fresh world and base upgrades.
 6. After the final three-second hold, **Play again** records rematch consent. Either player
    can withdraw it. Both votes return the same connected players to an unready lobby with
@@ -53,7 +54,7 @@ Run the deployed-stack acceptance with `scripts/gates.sh browser`; its duel scen
 actual native sockets, keyboard events, and compositor screenshots, plus Axe checks across
 lobby, waiting, running, and result. See [verification](../verification.md) for observed results.
 
-All active-v5 Playwright configurations disable raw framework traces because personal admission
+All active-v6 Playwright configurations disable raw framework traces because personal admission
 frames contain capabilities. Failure screenshots, public reports, and redacted summaries remain.
 Run reconnect acceptance separately with
 `E2E_MATCH_FIXTURE=arena-v1-matches npm --prefix e2e run test:reconnect`.
@@ -73,7 +74,7 @@ voices. Returning from a hidden tab requires **Resume sound**; old events are di
 
 ## Exposed items and player upgrades
 
-Gameplay-v5 snapshots supply visible pickup cells and kinds under classic-v3 rules. Pixi draws distinct bomb,
+Gameplay-v6 snapshots supply visible pickup cells and kinds under configurable-v4 rules. Pixi draws distinct bomb,
 cross/range, and speed marks above blocks and below bombs/flames/actors; it never guesses
 concealed contents. Retained drawings are reused while unchanged and destroyed when removed,
 replaced, or reset. The UI performs no collection simulation.
@@ -81,7 +82,7 @@ replaced, or reset. The UI performs no collection simulation.
 Both player rows show available bombs (capacity minus live bombs), capacity, range, and speed
 levels 1–5 from authoritative actors. Running/nonfinal-result rows show alive or eliminated; pre-start rows show readiness. Final
 match rows show rematch consent, and authoritative vacant seats remain open despite frozen actors. Labels are localized in English and Polish. The existing single-column
-layout bounds the upgrade rows at narrow widths. Generated classic-v3 rooms supply the live pickup and upgrade changes.
+layout bounds the upgrade rows at narrow widths. Generated configurable-v4 rooms supply the live pickup and upgrade changes.
 
 ## Match facts and timers
 
@@ -90,7 +91,7 @@ deadlines during countdown/result/rematch holds and remaining Running time durin
 Result physics freezes while the room clock advances. Inter-round countdowns clear the old
 world from shared presentation, though the server retains a completed body for a canceled
 countdown. A lone expiry forfeits to the eligible opponent; both expired seats abandon, while an
-offline opponent can delay settlement until its own deadline. A third win already committed at a
+offline opponent can delay settlement until its own deadline. A target-reaching win already committed at a
 boundary takes precedence over expiry. Rematch clears scores and completed-round history. A newer-epoch snapshot can
 reset presentation directly even if an intermediate room view was coalesced.
 
@@ -98,4 +99,5 @@ The separate complete-match fixture uses native keyboard controls to prove a rea
 three wins, fresh round/spawn assignments, consent withdrawal, and rematch over the same
 two sockets. See [deployment](../deployment.md) for explicit read-only fixture setup.
 
-Reviewed [desktop and 320-pixel Polish captures](../screenshots/reconnect.md) record the v4 interface before the v5 rules migration; layout is unchanged.
+Historical [desktop and 320-pixel Polish captures](../screenshots/reconnect.md) record the v4
+interface; the shared gameplay settings panel is added in v6.

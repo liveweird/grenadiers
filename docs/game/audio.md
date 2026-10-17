@@ -1,6 +1,6 @@
 # Optional procedural sound
 
-The active v4 browser can synthesize four short cues from accepted public events: bomb placement,
+The active browser can synthesize four short cues from accepted public events: bomb placement,
 detonation, pickup collection, and actor elimination. Sound is off by default. It has no music,
 countdown warning, spatial positioning, inferred destruction, victory cue, or attribution. All
 essential game state and warnings remain visual.

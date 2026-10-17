@@ -16,6 +16,7 @@ pub(super) fn journal(profile: RoomProfile) -> Journal {
     match profile {
         RoomProfile::GeneratedClassicV2 => Journal::new(Header::m6([false; 2])),
         RoomProfile::GeneratedClassicV3 => Journal::new(Header::m6_v3([false; 2])),
+        RoomProfile::GeneratedConfigurableV4 => Journal::new(Header::configurable_v4()),
         #[cfg(test)]
         RoomProfile::FixedClassicV1 => Journal::unsupported_profile(),
     }
@@ -27,10 +28,32 @@ impl MatchRuntime {
         round_seed_source: RoundSeedSource,
         journal: Journal,
     ) -> Self {
+        let settings = identity.profile.initial_settings();
+        let settings_editor = identity.profile.initial_editor();
+        Self::with_configuration(
+            identity,
+            round_seed_source,
+            journal,
+            settings,
+            1,
+            settings_editor,
+        )
+    }
+
+    fn with_configuration(
+        identity: RoomIdentity,
+        round_seed_source: RoundSeedSource,
+        journal: Journal,
+        settings: grenadiers_core::room::RoomSettings,
+        settings_revision: u32,
+        settings_editor: Option<SeatId>,
+    ) -> Self {
         Self {
             identity,
-            lifecycle: MatchLifecycle::new(),
+            lifecycle: MatchLifecycle::with_settings(settings),
             revision: 0,
+            settings_revision,
+            settings_editor,
             round_seed_source,
             inputs: InputMailbox::default(),
             sim: None,
@@ -52,6 +75,20 @@ impl MatchRuntime {
     ) {
         let action = match action {
             MatchAction::Ready(value) => ReplayAction::Ready(value),
+            MatchAction::ReadyChecked {
+                ready,
+                settings_revision,
+            } => ReplayAction::ReadyChecked {
+                ready,
+                settings_revision,
+            },
+            MatchAction::UpdateSettings {
+                settings_revision,
+                settings,
+            } => ReplayAction::UpdateSettings {
+                settings_revision,
+                settings,
+            },
             MatchAction::Movement(value) => ReplayAction::Movement(value),
             MatchAction::Bomb(value) => ReplayAction::Bomb(value),
             MatchAction::Rematch(value) => ReplayAction::Rematch(value),
@@ -107,8 +144,18 @@ impl MatchRuntime {
     pub(in crate::game::rooms) fn new_without_replay(
         identity: RoomIdentity,
         round_seed_source: RoundSeedSource,
+        settings: grenadiers_core::room::RoomSettings,
+        settings_revision: u32,
+        settings_editor: Option<SeatId>,
     ) -> Self {
-        Self::with_journal(identity, round_seed_source, Journal::unsupported_profile())
+        Self::with_configuration(
+            identity,
+            round_seed_source,
+            Journal::unsupported_profile(),
+            settings,
+            settings_revision,
+            settings_editor,
+        )
     }
 }
 

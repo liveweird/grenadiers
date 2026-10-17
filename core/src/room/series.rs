@@ -185,7 +185,8 @@ impl MatchSeries {
 
     #[must_use]
     pub fn ready_for_next(&self, tick: Tick) -> bool {
-        self.active.is_none()
+        tick >= self.latest_tick
+            && self.active.is_none()
             && self.outcome.is_none()
             && self.hold_deadline.is_none_or(|deadline| tick >= deadline)
     }

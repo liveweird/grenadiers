@@ -320,6 +320,8 @@ fn both_rematch_votes_reset_match_facts_but_retain_round_epoch_and_time() {
     assert_eq!(series.outcome(), None);
     assert_eq!(series.rematch_votes(), [false; 2]);
     assert_eq!(series.last_command_epoch(), last_epoch);
+    assert!(!series.ready_for_next(ready_at));
+    assert!(series.ready_for_next(Tick(ready_at.0 + 1)));
     let before = series.clone();
     assert_eq!(
         series.start_round(last_epoch + 1, ready_at),

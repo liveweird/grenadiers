@@ -1,5 +1,15 @@
 # Repository verification
 
+## M6 private resume credential/binding helpers — 2026-10-17
+
+The combined locked server gate passes **294 core tests, 136 server tests, and 2 doctests**.
+Rust coverage is **7,373/7,913 lines, 93.18%**, above the unchanged 80% floor.
+Independent review reports no actionable helper findings. Four focused cases cover independent
+32-byte entropy, exact three-attempt collision bounds, failure atomicity, stable capability
+matching, fully redacted diagnostics, and exact connection/generation replacement fences.
+The module remains test-compiled; staging publication atomically and supplying fresh binding
+generations remain coordinated activation duties. Exact-image acceptance is separate.
+
 ## M6 checked gameplay-v4 projection — 2026-10-17
 
 The locked server gate passes **294 core tests, 132 server tests, and 2 doctests**.

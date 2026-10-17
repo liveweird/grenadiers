@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.7 — 2026-10-17
+
+- Stage private, independently minted resume capabilities with bounded collision retries and
+  redacted diagnostics, plus exact connection/generation binding fences.
+- Verify entropy/collision failure atomicity and stable seat capability matching.
+
+Helpers remain test-compiled until coordinated owner/socket activation.
+
 ## 0.3.6 — 2026-10-17
 
 - Check v4 room projection against actual lifecycle connectivity, grace, scores, and history.

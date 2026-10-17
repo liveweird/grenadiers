@@ -304,6 +304,7 @@ production operations with explicit incomplete/truncated evidence.
 v0.3.4 integrates the grace-aware pure lifecycle; production still uses legacy v3 departures.
 v0.3.5 stages the closed [v4 reconnect contract](reconnect-contract.md); v0.3.6 adds
 checked [room/state/admission projection](protocol-v4.md) against the real lifecycle.
+v0.3.7 stages private [resume credential and binding helpers](resume-bindings.md).
 
 **Depends on:** M5.
 

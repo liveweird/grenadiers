@@ -66,8 +66,9 @@ Separate browser acceptance covers generated pickups, full match/rematch, full-s
 connected takeover and late rejection through Compose and Kubernetes. Personal capability frames
 are excluded from persisted traces; public screenshots and redacted diagnostics remain available.
 
-Hidden-document input clearing has component coverage; real-browser background/return and measured
-performance/latency are explicit M7 work. The implementation plan's release checklist remains
+Hidden-document input clearing has component coverage and v0.3.12 adds actual headed Chromium
+hidden/visible transitions, authoritative stopping and fresh-input recovery. Long-term background
+throttling, suspension, delayed-network support and human playability remain separate M7 work. The implementation plan's release checklist remains
 required even when every rule row has a test. Replay comparisons inspect private world, lifecycle,
 input and pending-report facts, with explicit incomplete/truncated evidence; they do not claim
 exhaustive exploration of every possible command history.

@@ -1,5 +1,36 @@
 # Repository verification
 
+## M7 natural hidden-tab recovery — 2026-10-17
+
+The new headed Chromium scenario observes actual `hidden` and `visible` transitions in one
+natural browser window. Native held movement emits a null command and stops in fresh peer
+snapshots; authoritative time advances by more than 50 ticks during at least one second hidden.
+Transport count stays stable. Return replays neither movement nor a bomb, and fresh native
+movement, peer HUD and snapshots work. Production code, visibility APIs and game clocks are
+unchanged; no fake events or direct control clearing are used.
+
+The pinned Linux/Node 24.21.0/Playwright 1.63.0/Chromium 153 reference initially exposed
+Playwright's focus emulation, which holds a capturer and forces pages visible. Manually spawning
+fresh Chromium and connecting with supported `noDefaults: true` in its default context restores
+real visibility. No window manager or lifecycle injection is required. The gameplay scenario
+passes an initial run and three repeats with retries disabled; after the final cleanup-only
+correction it passes another first-run acceptance. Failure diagnostics remain public and bounded;
+capabilities/private CDP endpoints and network traces are not persisted.
+
+Independent review found cleanup gaps; the owner now observes exit from spawn, bounds CDP close,
+TERM and KILL, signals only its owned process group, and removes the profile after exit. The test's
+finally directly reaches that bounded owner cleanup, with no preliminary unbounded CDP calls.
+A forced SIGSTOP/endpoint wedge completes in 13 seconds and leaves no Chromium or profile; normal
+fixture containers/network are removed. Coordinator closure inspection confirms the final path.
+The locked server gate passes **296 core tests, 149 server tests and 2 doctests**, with four
+separate reference profiles intentionally ignored in ordinary runs. Full E2E static checks and
+all **11** documented scenarios pass. Rust production source is unchanged from v0.3.11's
+93.56% coverage reference. Same-image Compose/Kubernetes acceptance follows separately.
+
+This is one-second focus/visibility recovery on the stated Chromium profile, not long-term
+throttling, suspension, mobile eviction, delayed-network support or human playtest evidence.
+M7 and v0.4.0 remain open.
+
 ## M7 v0.3.11 exact-image application acceptance — 2026-10-17
 
 Clean source `8e8ca124917b516e85e5a232fa8ff147b73c81e6` produces application image

@@ -37,3 +37,5 @@ verification record.
 [Baseline rule coverage](rule-coverage.md) maps all 42 acceptance rules to concrete automated assertions.
 
 [Runtime reference measurements](performance.md) documents bounded workloads, selected budgets and evidence limits.
+
+[Browser hardening](browser-hardening.md) records real visibility recovery and its tested scope.

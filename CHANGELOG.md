@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.12 — 2026-10-17
+
+- Add real headed Chromium hidden/visible acceptance with native held-input clearing, continued
+  authoritative time, stable transport, no replay on return, and fresh movement recovery.
+- Use a natural default browser context without forced focus emulation; keep CDP private,
+  traces disabled, and owned browser/profile cleanup bounded through TERM/KILL escalation.
+- Run the visibility scenario against the same matches-fixture image in browser CI.
+
 ## 0.3.11 — 2026-10-17
 
 - Add optimized reference measurements for the real runtime, journal, projection and encoding,

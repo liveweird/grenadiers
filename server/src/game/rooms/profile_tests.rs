@@ -41,7 +41,7 @@ fn fixed_profile_constructs_the_rules_it_publishes_without_consuming_entropy() {
     let source = RoundSeedSource::with_entropy(|_| panic!("fixed profile requested entropy"));
     let initial = identity
         .profile
-        .initial_round(lifecycle.tick(), &source)
+        .initial_round(lifecycle.tick(), RoundAssignment::first(), &source)
         .unwrap();
     assert!(initial.generation_record.is_none());
     assert_eq!(initial.state.rules().version(), 1);
@@ -63,7 +63,11 @@ fn generated_profile_constructs_classic_v2_with_assignment_spawns_and_private_re
     let identity = identity(RoomProfile::GeneratedClassicV2);
     let initial = identity
         .profile
-        .initial_round(lifecycle.tick(), &fixed_seed([19; 32]))
+        .initial_round(
+            lifecycle.tick(),
+            RoundAssignment::first(),
+            &fixed_seed([19; 32]),
+        )
         .unwrap();
     let record = initial.generation_record.expect("generated record");
     assert_eq!(record.seed(), [19; 32]);
@@ -100,12 +104,37 @@ fn generated_profile_constructs_classic_v2_with_assignment_spawns_and_private_re
 }
 
 #[test]
+fn profile_honors_later_round_assignment_for_spawns_and_facing() {
+    let lifecycle = running();
+    let assignment = RoundAssignment::new(std::num::NonZeroU32::new(2).unwrap());
+    let initial = RoomProfile::FixedClassicV1
+        .initial_round(
+            lifecycle.tick(),
+            assignment,
+            &RoundSeedSource::with_entropy(|_| panic!("fixed profile requested entropy")),
+        )
+        .unwrap();
+    let assigned = assignment.spawns(initial.state.world().arena());
+
+    assert_eq!(initial.state.round_assignment(), assignment);
+    for actor in initial.state.actors() {
+        assert_eq!(
+            actor.position(),
+            Position::center(assigned[actor.seat().index()])
+        );
+    }
+    assert_eq!(initial.state.actors()[0].heading(), Direction::West);
+    assert_eq!(initial.state.actors()[1].heading(), Direction::East);
+}
+
+#[test]
 fn publication_rejects_a_classic_v1_state_for_the_generated_profile() {
     let lifecycle = running();
     let generated_identity = identity(RoomProfile::GeneratedClassicV2);
     let fixed = RoomProfile::FixedClassicV1
         .initial_round(
             lifecycle.tick(),
+            RoundAssignment::first(),
             &RoundSeedSource::with_entropy(|_| panic!("fixed profile requested entropy")),
         )
         .unwrap();

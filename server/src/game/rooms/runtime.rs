@@ -249,11 +249,11 @@ impl Runtime {
                     }
                 };
                 if change == grenadiers_core::room::Change::Started {
-                    let Some(initial) = self
-                        .identity
-                        .profile
-                        .initial_round(self.lifecycle.tick(), &self.round_seed_source)
-                    else {
+                    let Some(initial) = self.identity.profile.initial_round(
+                        self.lifecycle.tick(),
+                        grenadiers_core::game::RoundAssignment::first(),
+                        &self.round_seed_source,
+                    ) else {
                         self.interrupt(InterruptReason::InternalError);
                         return true;
                     };

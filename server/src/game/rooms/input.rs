@@ -124,6 +124,20 @@ impl InputMailbox {
         }
     }
 
+    #[cfg(test)]
+    pub(super) fn stop(&mut self, seat: SeatId) {
+        let mailbox = &mut self.seats[seat.index()];
+        mailbox.direction = None;
+        mailbox.expires_at = None;
+        mailbox.inputs.clear();
+        mailbox.inputs.push(SeatInput {
+            seat,
+            action: InputAction::Clear,
+        });
+        mailbox.place_bomb = false;
+        mailbox.admitted = 0;
+    }
+
     pub(super) fn reset_round(&mut self) {
         self.clear_pending();
         for mailbox in &mut self.seats {

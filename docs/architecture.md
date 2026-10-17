@@ -93,3 +93,7 @@ never activate match behavior or fabricate scores.
 
 V3 checked room projection derives facts directly from `MatchLifecycle`; its public validator
 rejects semantically impossible bounded DTOs before server adapters publish them.
+
+The dormant `match_runtime` server adapter owns real per-round physics, assignment-aware
+generation, epoch-fenced input, and checked v3 publication. Result physics freezes while the
+lifecycle clock advances; inter-round/rematch boundaries clear worlds and report windows.

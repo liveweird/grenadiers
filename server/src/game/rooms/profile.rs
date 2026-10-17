@@ -41,13 +41,13 @@ impl RoomProfile {
     pub(super) fn initial_round(
         self,
         tick: Tick,
+        assignment: RoundAssignment,
         round_seed_source: &RoundSeedSource,
     ) -> Option<InitialRound> {
         match self {
             #[cfg(test)]
             Self::FixedClassicV1 => {
                 let arena = grenadiers_core::game::fixed_arena();
-                let assignment = RoundAssignment::first();
                 let actors = actors_at_assignment_spawns(&arena, assignment);
                 State::new_at_tick_with_assignment(
                     RulesConfig::classic_v1(),
@@ -66,7 +66,6 @@ impl RoomProfile {
                 let seed = round_seed_source.next_seed().ok()?;
                 let (world, generation_record) =
                     World::from_generated(generate_arena(seed)).ok()?;
-                let assignment = RoundAssignment::first();
                 let actors = actors_at_assignment_spawns(world.arena(), assignment);
                 State::new_at_tick_with_assignment(
                     RulesConfig::classic_v2(),

@@ -103,6 +103,7 @@ jobs:
           E2E_MATCH_FIXTURE=arena-v1-matches npm --prefix e2e run test:latency
           E2E_MATCH_FIXTURE=arena-v1-matches xvfb-run -a npm --prefix e2e run test:hardening
           npm --prefix e2e run test:controls
+          xvfb-run -a npm --prefix e2e run test:audio
       - name: Scan built image for fixable high or critical vulnerabilities
         run: |
           docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
@@ -125,6 +126,7 @@ jobs:
             e2e/playwright-match-report/
             e2e/playwright-reconnect-report/
             e2e/playwright-controls-report/
+            e2e/playwright-audio-report/
           retention-days: 7
 
   kubernetes:

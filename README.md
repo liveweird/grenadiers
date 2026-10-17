@@ -12,6 +12,9 @@ Use **Keyboard controls** below the arena to remap movement and bombs or restore
 stay in this browser. Opening settings, losing focus, or hiding the tab releases held movement;
 returning requires a fresh key press. See the [keyboard guide](docs/game/controls.md).
 
+Optional [sound cues](docs/game/audio.md) start muted. Select **Enable sound** below the arena;
+returning from a hidden tab requires **Resume sound**. Essential game information stays visual.
+
 Win three rounds to take the match. Draws award no score; automatic countdowns reset the
 world between rounds, and both players can consent to a rematch. A dropped tab can restore its
 reserved seat for 600 server ticks using a private in-memory capability; a connected takeover

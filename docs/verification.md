@@ -1,5 +1,40 @@
 # Repository verification
 
+## M7 optional procedural sound — 2026-10-17
+
+The active v4 frontend adds four original synthesized public-event cues, default muted, explicit
+native-gesture activation and EN/PL sound status. Preferences contain only a validated bounded
+boolean/version. One context and at most four voices are owned explicitly; no sound asset,
+new dependency, wire change or authoritative-rule change is introduced. Accepted public state
+and a fresh non-secret admission marker prevent React-batched reconnects from replaying history.
+Mute, hidden, disconnected and room/epoch boundaries advance/discard the cursor without queues.
+
+Independent review found a StrictMode effect-rehearsal bug that disposed the retained engine.
+Each effect now owns a fresh engine/ref generation; stale callbacks and pending resumes cannot
+activate the replacement. A real userEvent StrictMode test clicks Resume, observes enabled state
+and a new accepted-event oscillator. Engine tests prove old disposed activation stays false.
+Closure review clears lifecycle, cursor, admission, preference, privacy and bounded-resource behavior.
+
+The pinned full web gate passes **194 tests** with **94.47% statements, 89.70% branches,
+94.21% functions and 97.33% lines**; lint, Knip, contract drift and build pass. Before integration,
+all 13 E2E scenario static checks pass. Native Chromium passes the final scenario **1/1 at retries
+zero in 15.9 seconds**: no context before gesture, real running context and public bombPlaced
+before oscillator creation, mute suppression, no replay on re-enable, actual hidden suspension,
+visible paused state and explicit Resume to running without old nodes. Sound-button focus releases
+held movement without planting. Axe and actual desktop/320-pixel Polish captures pass containment
+and coordinator visual inspection.
+
+The diagnostic attempt to observe contextWillBeDestroyed after navigation did not receive that
+CDP event; it is retained and no destruction observation is claimed. Explicit close/disposal has
+unit evidence; owned browser/profile teardown is bounded separately. Graph processing does not
+prove hardware audibility, comfortable volume or listening quality. Evidence remains at
+`/tmp/grenadiers-m7-audio-evidence`; final integrated exact-image acceptance follows separately.
+The integrated v0.3.15 server gate passes **296 core tests, 149 server tests and two doctests**,
+with four optimized reference profiles intentionally ignored. E2E typecheck/lint/Knip/parity
+pass after the additive manifest merge. Dependency policies pass and both npm audits report zero
+vulnerabilities. Web source is byte-identical to the independently reviewed 194-test candidate.
+M7/v0.4.0 and human playtesting remain open.
+
 ## M7 v0.3.14 exact-image delayed-message acceptance — 2026-10-17
 
 Application build source `e7b222fff45efa1fdf9c34c223f938c427c3b5de` produces

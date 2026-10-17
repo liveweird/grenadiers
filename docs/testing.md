@@ -103,3 +103,10 @@ The fixture keeps text/binary frames unchanged, bounds both FIFO queues and test
 movement/release through actual page delivery. The [method and reference](game/websocket-latency.md)
 define the fixed budget, CPU-affinity profile and evidence limits; twenty observations do not
 establish WAN behavior or a tail guarantee. Gameplay traces remain disabled.
+
+## Procedural sound
+
+`xvfb-run -a npm --prefix e2e run test:audio` runs the natural headed Chromium sound scenario
+on Linux; macOS needs no Xvfb wrapper. The [sound guide](game/audio.md) records gesture, mute,
+visibility and cleanup evidence. CDP context/node observations establish browser processing,
+not hardware audibility or listening quality; final context disposal is unit-tested separately.

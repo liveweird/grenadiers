@@ -348,7 +348,8 @@ v0.3.12 adds real headed Chromium hidden-tab/return acceptance with unchanged se
 native input release; owned process cleanup is bounded. v0.3.13 adds [persistent keyboard
 remapping](controls.md), held-input clearing and localized accessible settings. v0.3.14 adds
 [ordered WebSocket delay measurements](websocket-latency.md) with causal page-delivery and collision
-proofs. Broader network/browser support and human playability remain open.
+proofs. v0.3.15 adds [optional procedural sound](audio.md), gesture-only activation, bounded voices
+and replay-free hidden/visible recovery. Broader network/browser support and human playability remain open.
 
 **Release:** v0.4.0. **Depends on:** M6.
 

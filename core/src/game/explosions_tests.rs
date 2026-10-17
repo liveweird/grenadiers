@@ -1,8 +1,8 @@
 use std::collections::{BTreeMap, BTreeSet};
 
-use super::plan;
+use super::{ExplosionError, plan};
 use crate::game::arena::{ARENA_CELL_COUNT, ARENA_HEIGHT, ARENA_WIDTH, Arena, Terrain};
-use crate::game::bombs::Bomb;
+use crate::game::bombs::{Bomb, BombTrigger};
 use crate::game::types::{CellId, EntityId, Tick};
 use crate::game::world::World;
 
@@ -36,14 +36,17 @@ fn add_bomb(world: &mut World, id: u32, cell: CellId, range: u16, deadline: u64)
     let id = EntityId(id);
     world.bombs.insert(
         id,
-        Bomb {
+        Bomb::new(
             id,
             cell,
-            owner: EntityId(100),
+            EntityId(100),
             range,
-            placed_at: Tick(0),
-            detonates_at: Tick(deadline),
-        },
+            Tick(0),
+            BombTrigger::Timed {
+                detonates_at: Tick(deadline),
+            },
+        )
+        .unwrap(),
     );
 }
 
@@ -52,7 +55,7 @@ fn clear_range_two_blast_has_center_and_eight_ray_cells() {
     let mut world = world_with(&[], &[]);
     add_bomb(&mut world, 1, CellId::new(7, 6), 2, 1);
 
-    let result = plan(&world, Tick(1));
+    let result = plan(&world, Tick(1)).unwrap();
     let expected = BTreeSet::from([
         CellId::new(7, 6),
         CellId::new(7, 5),
@@ -76,7 +79,7 @@ fn hard_walls_exclude_flame_while_soft_blocks_burn_and_stop_rays() {
     let mut world = world_with(&[wall], &[block]);
     add_bomb(&mut world, 1, CellId::new(7, 6), 3, 1);
 
-    let result = plan(&world, Tick(1));
+    let result = plan(&world, Tick(1)).unwrap();
     assert!(!result.flames.contains(&wall));
     assert!(result.flames.contains(&block));
     assert!(!result.flames.contains(&CellId::new(5, 6)));
@@ -90,7 +93,7 @@ fn three_bomb_chain_detonates_each_bomb_once_despite_repeated_triggers() {
     add_bomb(&mut world, 20, CellId::new(5, 6), 2, 999);
     add_bomb(&mut world, 30, CellId::new(7, 6), 2, 1);
 
-    let result = plan(&world, Tick(1));
+    let result = plan(&world, Tick(1)).unwrap();
     assert_eq!(
         result.detonated,
         BTreeSet::from([EntityId(10), EntityId(20), EntityId(30)])
@@ -103,7 +106,7 @@ fn processed_bombs_still_stop_later_rays_in_the_snapshot() {
     add_bomb(&mut world, 1, CellId::new(5, 6), 0, 1);
     add_bomb(&mut world, 2, CellId::new(3, 6), 4, 1);
 
-    let result = plan(&world, Tick(1));
+    let result = plan(&world, Tick(1)).unwrap();
     assert!(result.flames.contains(&CellId::new(5, 6)));
     assert!(!result.flames.contains(&CellId::new(6, 6)));
     assert!(!result.flames.contains(&CellId::new(7, 6)));
@@ -116,7 +119,7 @@ fn simultaneous_blasts_share_a_soft_block_without_removing_its_obstruction() {
     add_bomb(&mut world, 1, CellId::new(3, 5), 4, 1);
     add_bomb(&mut world, 2, CellId::new(5, 3), 4, 1);
 
-    let result = plan(&world, Tick(1));
+    let result = plan(&world, Tick(1)).unwrap();
     assert_eq!(result.destroyed_blocks, BTreeSet::from([block]));
     assert_eq!(result.detonated.len(), 2);
     for behind_block in [
@@ -141,7 +144,7 @@ fn geometry_is_unchanged_when_entity_ids_are_permuted() {
         ] {
             add_bomb(&mut world, id, cell, 2, deadline);
         }
-        let result = plan(&world, Tick(1));
+        let result = plan(&world, Tick(1)).unwrap();
         (result.flames, result.destroyed_blocks)
     }
 
@@ -153,11 +156,33 @@ fn active_flame_seeds_a_bomb_without_repropagating_on_its_own() {
     let cell = CellId::new(7, 6);
     let mut empty = world_with(&[], &[]);
     empty.hazards = BTreeMap::from([(cell, Tick(10))]);
-    assert_eq!(plan(&empty, Tick(1)), Default::default());
+    assert_eq!(plan(&empty, Tick(1)).unwrap(), Default::default());
 
     add_bomb(&mut empty, 1, cell, 1, 999);
     assert_eq!(
-        plan(&empty, Tick(1)).detonated,
+        plan(&empty, Tick(1)).unwrap().detonated,
         BTreeSet::from([EntityId(1)])
     );
+}
+
+#[test]
+fn classic_planner_rejects_every_untimed_trigger_before_planning() {
+    for trigger in [BombTrigger::Remote, BombTrigger::Contact] {
+        let mut world = world_with(&[], &[]);
+        let bomb = Bomb::new(
+            EntityId(1),
+            CellId::new(7, 6),
+            EntityId(100),
+            2,
+            Tick(0),
+            trigger,
+        )
+        .unwrap();
+        world.bombs.insert(bomb.id(), bomb);
+
+        assert_eq!(
+            plan(&world, Tick(1)),
+            Err(ExplosionError::UnsupportedBombTrigger(EntityId(1)))
+        );
+    }
 }

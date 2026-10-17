@@ -2,6 +2,7 @@ use std::collections::BTreeSet;
 
 use super::{ActorInit, RoundResult, State, TurnAssist};
 use crate::game::arena::{ARENA_CELL_COUNT, ARENA_HEIGHT, ARENA_WIDTH, Arena, Terrain};
+use crate::game::bombs::BombTrigger;
 use crate::game::fixtures::fixed_arena;
 use crate::game::input::Direction;
 use crate::game::pickups::{Pickup, PickupKind};
@@ -107,7 +108,12 @@ fn public_view_copies_visible_round_state() {
     assert_eq!(view.bombs[0].owner, EntityId(10));
     assert_eq!(view.bombs[0].range, 3);
     assert_eq!(view.bombs[0].placed_at, Tick(0));
-    assert_eq!(view.bombs[0].detonates_at, Tick(99));
+    assert_eq!(
+        view.bombs[0].trigger,
+        BombTrigger::Timed {
+            detonates_at: Tick(99)
+        }
+    );
     assert_eq!(view.flames[0].cell, CellId::new(1, 1));
     assert_eq!(view.flames[0].expires_at, Tick(10));
     assert_eq!(view.flames[1].cell, CellId::new(7, 6));

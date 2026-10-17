@@ -1,6 +1,6 @@
 use super::{InputAction, MAX_INPUTS_PER_TICK, SeatInput, State};
 use crate::game::arena::Terrain;
-use crate::game::bombs::Bomb;
+use crate::game::bombs::{Bomb, BombTrigger};
 use crate::game::events::{StepEvent, StepEventKind};
 use crate::game::movement;
 use crate::game::types::{EntityId, SeatId, Tick};
@@ -143,13 +143,15 @@ impl State {
             let Some(id) = self.next_bomb_id() else {
                 continue;
             };
-            let bomb = Bomb {
+            let Ok(bomb) = Bomb::new(
                 id,
                 cell,
-                owner: actor.id,
-                range: actor.effective_bomb_range(tick),
-                placed_at: tick,
-                detonates_at,
+                actor.id,
+                actor.effective_bomb_range(tick),
+                tick,
+                BombTrigger::Timed { detonates_at },
+            ) else {
+                continue;
             };
             self.insert_bomb(bomb);
             events.push(StepEvent::new(

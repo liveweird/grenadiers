@@ -1,4 +1,5 @@
 use super::{
+    bombs::BombTrigger,
     rules::RulesConfig,
     simulation::{State, StateError},
     types::{CellId, EntityId, Tick},
@@ -31,5 +32,25 @@ pub(crate) fn add_test_bomb_with_deadline(
     placed_at: Tick,
     detonates_at: Tick,
 ) -> Result<(), StateError> {
-    state.insert_test_bomb(id, cell, owner, range, placed_at, detonates_at)
+    add_test_bomb_with_trigger(
+        state,
+        id,
+        cell,
+        owner,
+        range,
+        placed_at,
+        BombTrigger::Timed { detonates_at },
+    )
+}
+
+pub(crate) fn add_test_bomb_with_trigger(
+    state: &mut State,
+    id: EntityId,
+    cell: CellId,
+    owner: EntityId,
+    range: u16,
+    placed_at: Tick,
+    trigger: BombTrigger,
+) -> Result<(), StateError> {
+    state.insert_test_bomb(id, cell, owner, range, placed_at, trigger)
 }

@@ -4,6 +4,7 @@ use jsonschema::validator_for;
 use serde_json::{Value, json};
 
 use super::{EventKind, ProjectionError, Seat, project_events};
+use crate::game::BombTrigger;
 use crate::game::arena::{ARENA_CELL_COUNT, ARENA_HEIGHT, ARENA_WIDTH, Arena, Terrain};
 use crate::game::input::Direction;
 use crate::game::pickups::PickupKind;
@@ -117,6 +118,17 @@ fn chain_report_projects_every_phase_event_in_original_order() {
         EventKind::ActorEliminated { .. }
     ));
     assert!(matches!(projected[5].kind, EventKind::RoundEnded { .. }));
+    assert_eq!(
+        serde_json::to_value(&projected[0]).unwrap()["kind"]["bomb"],
+        json!({
+            "id": 31,
+            "cell": { "column": 5, "row": 5 },
+            "owner": 10,
+            "range": 2,
+            "placedAt": 1,
+            "detonatesAt": 181
+        })
+    );
     let schema = event_schema();
     assert!(
         projected
@@ -216,7 +228,9 @@ fn rejects_mismatched_ticks_and_invalid_embedded_bombs() {
         panic!("expected detonation");
     };
     bomb.placed_at = Tick(2);
-    bomb.detonates_at = Tick(2);
+    bomb.trigger = BombTrigger::Timed {
+        detonates_at: Tick(2),
+    };
     assert_eq!(
         project_events(&[future_detonation]),
         Err(ProjectionError::InvalidEvent)
@@ -230,6 +244,47 @@ fn rejects_mismatched_ticks_and_invalid_embedded_bombs() {
     bomb.range = 0;
     assert_eq!(
         project_events(&[invalid_range]),
+        Err(ProjectionError::InvalidEvent)
+    );
+}
+
+#[test]
+fn rejects_untimed_placement_and_detonation_events_even_without_final_state_bombs() {
+    for trigger in [BombTrigger::Remote, BombTrigger::Contact] {
+        let original = chain_report();
+        for event_index in [0, 1] {
+            let mut report = original.clone();
+            let bomb = match &mut report.events[event_index].kind {
+                crate::game::StepEventKind::BombPlaced(bomb)
+                | crate::game::StepEventKind::BombDetonated(bomb) => bomb,
+                _ => panic!("expected bomb event"),
+            };
+            bomb.trigger = trigger;
+            assert_eq!(
+                project_events(&[report]),
+                Err(ProjectionError::InvalidEvent)
+            );
+        }
+    }
+}
+
+#[test]
+fn mixed_valid_and_unsupported_report_window_fails_as_a_whole() {
+    let mut state = state_at(CellId::new(2, 5), CellId::new(12, 10));
+    let valid = state.step(&[place_one()]).unwrap();
+    let mut unsupported = state.step(&[]).unwrap();
+    let mut bomb = match valid.events[0].kind {
+        crate::game::StepEventKind::BombPlaced(bomb) => bomb,
+        _ => panic!("expected placement"),
+    };
+    bomb.trigger = BombTrigger::Remote;
+    unsupported.events.push(crate::game::StepEvent {
+        tick: unsupported.tick,
+        kind: crate::game::StepEventKind::BombDetonated(bomb),
+    });
+
+    assert_eq!(
+        project_events(&[valid, unsupported]),
         Err(ProjectionError::InvalidEvent)
     );
 }

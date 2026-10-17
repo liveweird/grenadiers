@@ -26,6 +26,7 @@ pub enum ProjectionError {
     InvalidArena,
     InvalidActors,
     InvalidBombs,
+    UnsupportedBombTrigger,
     InvalidFlames,
     InvalidPickups,
     InvalidResult,
@@ -42,6 +43,7 @@ impl fmt::Display for ProjectionError {
             Self::InvalidArena => "invalid arena projection",
             Self::InvalidActors => "invalid actor projection",
             Self::InvalidBombs => "invalid bomb projection",
+            Self::UnsupportedBombTrigger => "unsupported bomb trigger",
             Self::InvalidFlames => "invalid flame projection",
             Self::InvalidPickups => "invalid pickup projection",
             Self::InvalidResult => "invalid round result projection",
@@ -179,17 +181,17 @@ fn project_bombs(
     let mut owner_counts = BTreeMap::new();
     let mut bombs = Vec::with_capacity(view.bombs.len());
     for &bomb in &view.bombs {
+        let projected = project_bomb_record(bomb)?;
         if actor_ids.contains(&bomb.id)
             || !actor_ids.contains(&bomb.owner)
             || !bomb_cells.insert(bomb.cell)
             || block_cells.contains(&bomb.cell)
             || terrain_at(&view.arena, bomb.cell) != Some(game::Terrain::Floor)
             || bomb.placed_at.0 > view.tick.0
-            || (view.result.is_none() && bomb.detonates_at.0 <= view.tick.0)
+            || (view.result.is_none() && projected.detonates_at.get() <= view.tick.0)
         {
             return Err(ProjectionError::InvalidBombs);
         }
-        let projected = project_bomb_record(bomb)?;
         *owner_counts.entry(bomb.owner).or_insert(0_usize) += 1;
         bombs.push(projected);
     }
@@ -254,7 +256,13 @@ fn validate_result(
 }
 
 pub(super) fn project_bomb_record(bomb: game::BombView) -> Result<BombView, ProjectionError> {
-    if !(1..=8).contains(&bomb.range) || bomb.placed_at.0 > bomb.detonates_at.0 {
+    let detonates_at = match bomb.trigger {
+        game::BombTrigger::Timed { detonates_at } => detonates_at,
+        game::BombTrigger::Remote | game::BombTrigger::Contact => {
+            return Err(ProjectionError::UnsupportedBombTrigger);
+        }
+    };
+    if !(1..=8).contains(&bomb.range) || bomb.placed_at.0 > detonates_at.0 {
         return Err(ProjectionError::InvalidBombs);
     }
     Ok(BombView {
@@ -263,7 +271,7 @@ pub(super) fn project_bomb_record(bomb: game::BombView) -> Result<BombView, Proj
         owner: EntityId::new(bomb.owner.0),
         range: bomb.range as u8,
         placed_at: wire_tick(bomb.placed_at)?,
-        detonates_at: wire_tick(bomb.detonates_at)?,
+        detonates_at: wire_tick(detonates_at)?,
     })
 }
 

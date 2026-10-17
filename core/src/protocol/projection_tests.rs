@@ -4,6 +4,7 @@ use jsonschema::validator_for;
 use serde_json::{Value, json};
 
 use super::{DrawReason, MAX_SAFE_TICK, ProjectionError, Seat, WireRoundResult, project_state};
+use crate::game::BombTrigger;
 use crate::game::arena::{ARENA_CELL_COUNT, ARENA_HEIGHT, ARENA_WIDTH, Arena, Terrain};
 use crate::game::input::Direction;
 use crate::game::rules::RulesConfig;
@@ -82,6 +83,17 @@ fn initial_and_active_domain_states_project_to_schema_valid_game_state() {
     assert_eq!(active.state.bombs.len(), 1);
     assert_eq!(active.state.actors[0].live_bomb_count, 1);
     assert_eq!(active.state.bombs[0].owner.get(), 10);
+    assert_eq!(
+        serde_json::to_value(active.state.bombs[0]).unwrap(),
+        json!({
+            "id": 0,
+            "cell": { "column": 1, "row": 1 },
+            "owner": 10,
+            "range": 2,
+            "placedAt": 1,
+            "detonatesAt": 181
+        })
+    );
     assert!(schema_for("GameState").is_valid(&serde_json::to_value(&active.state).unwrap()));
 }
 
@@ -255,7 +267,9 @@ fn rejects_bomb_and_flame_bounds_identity_order_and_deadline_failures() {
     view.bombs[0].range = 0;
     assert_eq!(project_state(&view), Err(ProjectionError::InvalidBombs));
     let mut view = active.clone();
-    view.bombs[0].detonates_at = Tick(0);
+    view.bombs[0].trigger = BombTrigger::Timed {
+        detonates_at: Tick(0),
+    };
     assert_eq!(project_state(&view), Err(ProjectionError::InvalidBombs));
     let mut view = active.clone();
     view.actors[0].live_bomb_count = 0;
@@ -278,7 +292,9 @@ fn rejects_bomb_and_flame_bounds_identity_order_and_deadline_failures() {
     view.bombs.push(second);
     assert_eq!(project_state(&view), Err(ProjectionError::InvalidBombs));
     let mut view = active.clone();
-    view.bombs[0].detonates_at = Tick(MAX_SAFE_TICK + 1);
+    view.bombs[0].trigger = BombTrigger::Timed {
+        detonates_at: Tick(MAX_SAFE_TICK + 1),
+    };
     assert_eq!(project_state(&view), Err(ProjectionError::InvalidTick));
 
     let mut view = initial_view();
@@ -311,6 +327,26 @@ fn rejects_bomb_and_flame_bounds_identity_order_and_deadline_failures() {
         expires_at: Tick(MAX_SAFE_TICK + 1),
     }];
     assert_eq!(project_state(&view), Err(ProjectionError::InvalidTick));
+}
+
+#[test]
+fn rejects_each_untimed_bomb_trigger_without_legacy_wire_substitution() {
+    let mut state = state_at(CellId::new(1, 1), CellId::new(13, 11));
+    state
+        .step(&[crate::game::SeatInput {
+            seat: SeatId::One,
+            action: crate::game::InputAction::PlaceBomb,
+        }])
+        .unwrap();
+
+    for trigger in [BombTrigger::Remote, BombTrigger::Contact] {
+        let mut view = state.public_view();
+        view.bombs[0].trigger = trigger;
+        assert_eq!(
+            project_state(&view),
+            Err(ProjectionError::UnsupportedBombTrigger)
+        );
+    }
 }
 
 #[test]

@@ -1,5 +1,17 @@
 use super::types::{CellId, EntityId, Tick};
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum BombTrigger {
+    Timed { detonates_at: Tick },
+    Remote,
+    Contact,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum BombError {
+    DeadlineBeforePlacement,
+}
+
 /// An owned bomb with placement-time properties captured for later detonation.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Bomb {
@@ -8,10 +20,33 @@ pub struct Bomb {
     pub(crate) owner: EntityId,
     pub(crate) range: u16,
     pub(crate) placed_at: Tick,
-    pub(crate) detonates_at: Tick,
+    pub(crate) trigger: BombTrigger,
 }
 
 impl Bomb {
+    pub(crate) const fn new(
+        id: EntityId,
+        cell: CellId,
+        owner: EntityId,
+        range: u16,
+        placed_at: Tick,
+        trigger: BombTrigger,
+    ) -> Result<Self, BombError> {
+        if let BombTrigger::Timed { detonates_at } = trigger
+            && detonates_at.0 < placed_at.0
+        {
+            return Err(BombError::DeadlineBeforePlacement);
+        }
+        Ok(Self {
+            id,
+            cell,
+            owner,
+            range,
+            placed_at,
+            trigger,
+        })
+    }
+
     #[must_use]
     pub const fn id(self) -> EntityId {
         self.id
@@ -38,7 +73,19 @@ impl Bomb {
     }
 
     #[must_use]
-    pub const fn detonates_at(self) -> Tick {
-        self.detonates_at
+    pub const fn trigger(self) -> BombTrigger {
+        self.trigger
+    }
+
+    #[must_use]
+    pub const fn detonates_at(self) -> Option<Tick> {
+        match self.trigger {
+            BombTrigger::Timed { detonates_at } => Some(detonates_at),
+            BombTrigger::Remote | BombTrigger::Contact => None,
+        }
     }
 }
+
+#[cfg(test)]
+#[path = "bombs_tests.rs"]
+mod tests;

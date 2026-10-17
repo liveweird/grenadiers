@@ -2,6 +2,7 @@ use std::collections::BTreeSet;
 
 use super::{ActorInit, InputAction, SeatInput, State};
 use crate::game::arena::{ARENA_CELL_COUNT, ARENA_HEIGHT, ARENA_WIDTH, Arena, Terrain};
+use crate::game::bombs::BombTrigger;
 use crate::game::fixtures::fixed_arena;
 use crate::game::input::Direction;
 use crate::game::rules::RulesConfig;
@@ -74,7 +75,7 @@ fn ordinary_fuse_detonates_at_exactly_placement_plus_180() {
             .next()
             .unwrap()
             .detonates_at(),
-        Tick(181)
+        Some(Tick(181))
     );
 
     step_to(&mut state, 180);
@@ -245,12 +246,9 @@ fn detonation_removes_bomb_grace_from_every_actor() {
 fn final_tick_flame_expiry_uses_a_saturating_terminal_value() {
     let mut state = state_at(CellId::new(2, 5), CellId::new(12, 5));
     add_test_bomb(&mut state, EntityId(30), CellId::new(8, 5), EntityId(10)).unwrap();
-    state
-        .world
-        .bombs
-        .get_mut(&EntityId(30))
-        .unwrap()
-        .detonates_at = Tick(u64::MAX);
+    state.world.bombs.get_mut(&EntityId(30)).unwrap().trigger = BombTrigger::Timed {
+        detonates_at: Tick(u64::MAX),
+    };
     state.tick = Tick(u64::MAX - 1);
 
     state.step(&[]).unwrap();

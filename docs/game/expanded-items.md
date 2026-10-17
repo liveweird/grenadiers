@@ -131,11 +131,25 @@ versioned private admission policy. Preserve the core's separate 64-logical-inpu
 Typed untimed bombs and new equipment controls are not part of this preservation increment.
 Replay checkpoints compare the complete pending queue; journal records and public v6 stay unchanged.
 
+## Typed domain bomb foundation
+
+The v0.3.21 candidate distinguishes Timed, Remote and Contact triggers in core bomb records
+and domain views/events. Untimed records have no deadline. Current State construction,
+stepping and Classic explosion planning reject unsupported triggers before simulation mutation;
+production placement still creates only Timed bombs with checked fuse arithmetic.
+
+Legacy wire bomb records retain mandatory `detonatesAt`. Their shared checked projection
+rejects Remote/Contact in both snapshots and event windows, including events for bombs absent
+from final state. One unsupported record fails the whole window; no timestamp is invented and
+no event is dropped. Failed publication preserves revision and pending reports. These changes
+do not activate remote control, mine contact/destruction, fuse pausing or bomb movement.
+
 ## Release sequence and acceptance
 
 1. Pure core inventory/effects/damage foundation; retain classic traces and protocol behavior.
 2. Ordered manual commands with a Classic simultaneous-placement adapter (v0.3.20 candidate).
-3. Typed bomb triggers and a checked legacy projection boundary, then forced-contact helpers.
+3. Typed domain triggers and checked legacy wire projection (v0.3.21 candidate). Forced-contact
+   helpers follow playable protection items rather than delaying them.
 4. Gameplay-v7 schema/projections, followed by per-seat transport and browser inventory/status UI.
 5. Expanded configuration/generation, then Heart and Shield as separate activations.
 6. Individual stat modifiers, Reverse/Diarrhea, special bombs, movement equipment, Stopwatch,

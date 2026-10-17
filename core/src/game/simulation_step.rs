@@ -1,6 +1,7 @@
 use std::collections::BTreeMap;
 
 use super::{RoundResult, SeatInput, State, StepError, StepReport};
+use crate::game::bombs::BombTrigger;
 use crate::game::damage::{DamageOutcome, apply_damage};
 use crate::game::events::{StepEvent, StepEventKind};
 use crate::game::geometry::MovementTrace;
@@ -17,6 +18,11 @@ impl State {
             });
         }
         let next_tick = Tick(self.tick.0.checked_add(1).ok_or(StepError::TickOverflow)?);
+        if let Some(id) = self.world.bombs.values().find_map(|bomb| {
+            (!matches!(bomb.trigger(), BombTrigger::Timed { .. })).then_some(bomb.id())
+        }) {
+            return Err(StepError::UnsupportedBombTrigger(id));
+        }
         if self.result.is_some() {
             self.tick = next_tick;
             return Ok(StepReport {
@@ -34,7 +40,7 @@ impl State {
         let traces = self.move_living();
         self.kill_on_existing_flames(&traces, next_tick, &mut events);
         self.resolve_classic_manual_actions(&manual_actions, next_tick, &mut events);
-        self.resolve_explosions(next_tick, &mut events);
+        self.resolve_explosions(next_tick, &mut events)?;
         self.kill_on_final_flames(next_tick, &mut events);
         self.collect_pickups(next_tick, &mut events);
         self.running_updates += 1;

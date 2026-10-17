@@ -71,7 +71,7 @@ fn placement_snapshots_owner_range_and_default_deadline() {
     assert_eq!(bomb.owner(), EntityId(10));
     assert_eq!(bomb.range(), 2);
     assert_eq!(bomb.placed_at(), Tick(1));
-    assert_eq!(bomb.detonates_at(), Tick(181));
+    assert_eq!(bomb.detonates_at(), Some(Tick(181)));
     assert_eq!(state.actors()[0].bomb_capacity(), 1);
     assert_eq!(state.actors()[0].bomb_range(), 2);
     assert_eq!(state.live_bomb_count(SeatId::One), 1);

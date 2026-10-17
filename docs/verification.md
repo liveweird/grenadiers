@@ -16,6 +16,14 @@ ordering, fixed-profile construction and mismatch rejection. The maximal structu
 snapshot is **44,466 bytes** against the unchanged **65,536-byte** limit. Diagnostic v1
 serialization is unchanged. Live rooms retain fixed-v1 rules/map and empty pickups.
 
+A clean committed-tree build of `5ec3243c65b2226fa41805562cfa5ad5a1bff76d` produces
+`sha256:fdc3910e21878b091512bcd07c2bfeaedcbe5cfb88f263c5be5680c71557dc3b`.
+Compose and ready local Kubernetes use this exact image. Candidate-source health/readiness
+and all **six browser scenarios** pass through both deployments. Strict schemas report 3
+valid resources; pinned socket-free Trivy reports zero HIGH/CRITICAL vulnerabilities.
+Temporary runtime resources are removed; the image is retained. This evidence update changes
+only documentation.
+
 ## M4 collection and permanent upgrades — 2026-10-17
 
 The locked server gate passes **169 core tests, 67 server tests, and 2 doctests**.

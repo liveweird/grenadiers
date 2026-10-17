@@ -84,7 +84,7 @@ fn round_completion_and_interround_deadline_overflows_are_atomic() {
     );
     assert_eq!(completion, before);
 
-    let mut countdown = MatchLifecycle::new();
+    let mut countdown = occupied();
     countdown.tick = Tick(u64::MAX - 101);
     countdown.phase = MatchPhase::Result {
         next_countdown_at: Tick(u64::MAX - 100),

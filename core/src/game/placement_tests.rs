@@ -1,6 +1,6 @@
 use std::collections::BTreeSet;
 
-use super::{ActorInit, InputAction, SeatInput, State};
+use super::{ActorInit, InputAction, MAX_INPUTS_PER_TICK, SeatInput, State};
 use crate::game::arena::{ARENA_CELL_COUNT, ARENA_HEIGHT, ARENA_WIDTH, Arena, Terrain};
 use crate::game::input::Direction;
 use crate::game::pickups::{Pickup, PickupKind};
@@ -160,14 +160,14 @@ fn same_cell_conflict_ignores_an_ineligible_capacity_claimant() {
     let shared = Position::center(CellId::new(5, 5));
     let mut both_eligible = state_at(shared, shared);
     both_eligible
-        .step(&[place(SeatId::One), place(SeatId::Two)])
+        .step(&[place(SeatId::One), place(SeatId::Two), place(SeatId::One)])
         .unwrap();
     assert!(both_eligible.world().bombs().is_empty());
 
     let mut one_full = state_at(shared, shared);
     add_test_bomb(&mut one_full, EntityId(90), CellId::new(8, 5), EntityId(10)).unwrap();
     one_full
-        .step(&[place(SeatId::One), place(SeatId::Two)])
+        .step(&[place(SeatId::One), place(SeatId::Two), place(SeatId::One)])
         .unwrap();
     assert_eq!(one_full.world().bombs().len(), 2);
     assert!(
@@ -200,10 +200,10 @@ fn duplicate_requests_are_one_shot_and_clear_obeys_batch_order() {
     let one = Position::center(CellId::new(2, 5));
     let two = Position::center(CellId::new(12, 5));
     let mut duplicate = state_at(one, two);
-    duplicate
-        .step(&[place(SeatId::One), place(SeatId::One)])
-        .unwrap();
+    let requests = vec![place(SeatId::One); MAX_INPUTS_PER_TICK];
+    duplicate.step(&requests).unwrap();
     assert_eq!(duplicate.world().bombs().len(), 1);
+    assert_eq!(duplicate.next_entity_id, 1);
 
     let mut cancelled = state_at(one, two);
     cancelled

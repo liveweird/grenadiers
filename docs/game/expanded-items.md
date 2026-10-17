@@ -116,13 +116,29 @@ consume without swapping. Preserve heading, clear movement residual/turn intent 
 another destination pickup that tick. Simultaneous pickups cause one priority-resolved swap.
 With two humans there is only one possible rival; random target selection waits for more seats.
 
+## Ordered-action foundation
+
+The v0.3.20 candidate retains individual accepted manual actions through server admission and
+core input processing. Classic still resolves one simultaneous placement claim per seat;
+sequential retries must not let duplicate requests defeat a shared-cell conflict. Raw-core
+Clear cancels earlier actions; server movement clearing and TTL expiry preserve accepted
+manual actions because movement is drained first. Fences discard queued actions but retain
+the admitted action high-water. New round construction resets it.
+
+The existing eight-command allowance applies to a pending mailbox batch and resets on drain
+or fence. A stricter cumulative budget across same-tick replacements needs a separate,
+versioned private admission policy. Preserve the core's separate 64-logical-input limit.
+Typed untimed bombs and new equipment controls are not part of this preservation increment.
+Replay checkpoints compare the complete pending queue; journal records and public v6 stay unchanged.
+
 ## Release sequence and acceptance
 
 1. Pure core inventory/effects/damage foundation; retain classic traces and protocol behavior.
-2. Typed bomb triggers, ordered commands and bounded forced-contact helpers.
-3. Gameplay-v7 schema/projections, followed by per-seat transport and browser inventory/status UI.
-4. Expanded configuration/generation, then Heart and Shield as separate activations.
-5. Individual stat modifiers, Reverse/Diarrhea, special bombs, movement equipment, Stopwatch,
+2. Ordered manual commands with a Classic simultaneous-placement adapter (v0.3.20 candidate).
+3. Typed bomb triggers and a checked legacy projection boundary, then forced-contact helpers.
+4. Gameplay-v7 schema/projections, followed by per-seat transport and browser inventory/status UI.
+5. Expanded configuration/generation, then Heart and Shield as separate activations.
+6. Individual stat modifiers, Reverse/Diarrhea, special bombs, movement equipment, Stopwatch,
    visibility effects, Oil and Teleporter, with interaction tests at each activation.
 
 Each release needs a version bump, focused PR, independent review and existing gates. Test

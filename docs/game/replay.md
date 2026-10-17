@@ -30,7 +30,9 @@ journal storage budget.
 Records contain no session/resume credentials, raw frames, socket IDs, or public room codes.
 Generation records retain private seeds; their Debug output is redacted. Journal Debug shows
 only header, record count, and status. Private test checkpoints compare complete State,
-MatchLifecycle/series, input mailbox contents, and pending StepReports. Transport publication
+MatchLifecycle/series, input mailbox contents, and pending StepReports. Checkpoints retain
+complete ordered pending manual queues, including repeated requests; the test-only inspection
+representation is not a serialized journal contract. Transport publication
 revision is excluded: initial/final notices may advance it without changing gameplay. Profile 2
 records every report-clearing publication as `ReportFlush`; personal admission does not consume
 reports.

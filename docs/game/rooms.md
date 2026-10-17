@@ -85,12 +85,15 @@ arena at the room's absolute tick with zero running updates; physics starts on t
 Canceling clears both flags and advances the attempt. Commands, including Leave, validate
 the current attempt rather than an admission-time copy. No input carries into another attempt.
 
-Each seat can admit eight movement/bomb commands per update. A ninth rate-limits the offender;
-the other seat keeps its own budget. Unchanged direction refreshes preserve fractional movement.
+Each seat's pending input batch admits up to eight movement/bomb commands. A ninth rate-limits
+the offender; the other seat keeps its own budget. Unchanged direction refreshes preserve fractional movement.
 Fresh directions press before releasing the previous direction. Held input lasts 15 updates
 without refresh; null clears it. Fresh monotonic bomb action IDs are consumed on admission,
-including coalesced or unsuccessful placements. At most one placement intent per seat/update
-runs after all movement/clear inputs, so a same-tick stop cannot cancel an accepted bomb.
+including repeated or unsuccessful placements. Accepted manual actions remain in order and
+are drained after movement/clear inputs, so a same-tick stop cannot cancel an accepted bomb.
+The Classic simulator then derives at most one simultaneous placement claim per seat/update.
+Draining or fencing the mailbox restarts its admission budget; a stricter cumulative limit
+across same-tick connection replacements is separate follow-up work.
 
 The owner commits a completed simulation result before handling departures that arrived during
 that accepted update. Running applies physics/scoring before the complete loss batch and expiry;

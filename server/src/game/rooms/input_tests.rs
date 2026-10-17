@@ -102,6 +102,91 @@ fn every_movement_action_precedes_canonical_bomb_intents() {
 }
 
 #[test]
+fn eight_bomb_actions_are_retained_and_drained_in_order() {
+    let mut mailbox = InputMailbox::default();
+    for action_id in 1..=u32::from(COMMANDS_PER_UPDATE) {
+        mailbox.bomb(SeatId::One, action_id).unwrap();
+    }
+
+    assert_eq!(
+        mailbox.take(Tick(1)),
+        vec![
+            SeatInput {
+                seat: SeatId::One,
+                action: InputAction::PlaceBomb,
+            };
+            usize::from(COMMANDS_PER_UPDATE)
+        ]
+    );
+    assert_eq!(
+        mailbox.last_bomb_action(SeatId::One),
+        Some(u32::from(COMMANDS_PER_UPDATE))
+    );
+}
+
+#[test]
+fn movement_and_manual_actions_share_budget_without_advancing_rejected_high_water() {
+    let mut mailbox = InputMailbox::default();
+    mailbox
+        .movement(SeatId::One, Some(Direction::East), Tick(0))
+        .unwrap();
+    for action_id in 1..u32::from(COMMANDS_PER_UPDATE) {
+        mailbox.bomb(SeatId::One, action_id).unwrap();
+    }
+
+    assert_eq!(
+        mailbox.bomb(SeatId::One, u32::from(COMMANDS_PER_UPDATE)),
+        Err(InputError::RateLimited)
+    );
+    assert_eq!(
+        mailbox.last_bomb_action(SeatId::One),
+        Some(u32::from(COMMANDS_PER_UPDATE) - 1)
+    );
+    let drained = mailbox.take(Tick(1));
+    assert!(matches!(
+        drained.first(),
+        Some(SeatInput {
+            action: InputAction::Press(Direction::East),
+            ..
+        })
+    ));
+    assert_eq!(
+        drained[1..]
+            .iter()
+            .filter(|input| input.action == InputAction::PlaceBomb)
+            .count(),
+        usize::from(COMMANDS_PER_UPDATE) - 1
+    );
+}
+
+#[test]
+fn movement_expiry_preserves_queued_manual_actions() {
+    let mut mailbox = InputMailbox::default();
+    mailbox
+        .movement(SeatId::One, Some(Direction::East), Tick(0))
+        .unwrap();
+    mailbox.take(Tick(1));
+    for tick in 2..16 {
+        assert!(mailbox.take(Tick(tick)).is_empty());
+    }
+    mailbox.bomb(SeatId::One, 1).unwrap();
+
+    assert_eq!(
+        mailbox.take(Tick(16)),
+        vec![
+            SeatInput {
+                seat: SeatId::One,
+                action: InputAction::Clear,
+            },
+            SeatInput {
+                seat: SeatId::One,
+                action: InputAction::PlaceBomb,
+            },
+        ]
+    );
+}
+
+#[test]
 fn admitted_command_budget_is_independent_per_seat() {
     let mut mailbox = InputMailbox::default();
     for _ in 0..COMMANDS_PER_UPDATE {

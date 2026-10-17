@@ -108,6 +108,53 @@ fn capture_keeps_accepted_noops_and_excludes_every_rejected_command() {
 }
 
 #[test]
+fn capture_and_replay_retain_ordered_manual_actions_until_a_fence() {
+    let mut runtime = generated(RoundSeedSource::with_entropy(|bytes| {
+        bytes.fill(18);
+        Ok(())
+    }));
+    start(&mut runtime);
+    let epoch = runtime.lifecycle().round_attempt();
+    runtime
+        .action(
+            SeatId::One,
+            epoch,
+            MatchAction::Movement(Some(Direction::East)),
+        )
+        .unwrap();
+    runtime
+        .action(SeatId::One, epoch, MatchAction::Bomb(1))
+        .unwrap();
+    let one_pending = runtime.replay_inspection();
+    runtime
+        .action(SeatId::One, epoch, MatchAction::Bomb(2))
+        .unwrap();
+    assert_eq!(
+        runtime.action(SeatId::One, epoch, MatchAction::Bomb(2)),
+        Err(MatchRuntimeError::DuplicateAction)
+    );
+    runtime
+        .action(SeatId::One, epoch, MatchAction::Movement(None))
+        .unwrap();
+    let two_pending = runtime.replay_inspection();
+
+    assert_ne!(one_pending.inputs, two_pending.inputs);
+    assert!(
+        two_pending
+            .inputs
+            .contains("manual_actions: [PlaceBomb, PlaceBomb]")
+    );
+    assert!(two_pending.inputs.contains("action: Clear"));
+    assert_eq!(replay(runtime.replay_journal()).unwrap(), two_pending);
+
+    runtime.stop_seat_inputs(SeatId::One);
+    let fenced = runtime.replay_inspection();
+    assert!(fenced.inputs.contains("manual_actions: []"));
+    assert!(fenced.inputs.contains("manual_action_high_water: Some(2)"));
+    assert_eq!(replay(runtime.replay_journal()).unwrap(), fenced);
+}
+
+#[test]
 fn atomic_interrupt_departure_replays_and_construction_failure_is_incomplete() {
     let mut atomic = generated(RoundSeedSource::with_entropy(|bytes| {
         bytes.fill(4);

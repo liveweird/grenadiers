@@ -29,7 +29,11 @@ fn register_owner_in(
     registry: &mut Registry,
 ) -> (RoomHandle, PreparedOwner, RoomIdentity) {
     let identity = rooms.generate_identity(registry).unwrap();
-    let (commands, owner) = PreparedOwner::new(identity.clone(), Instant::now());
+    let round_seed_source = crate::round_seed::RoundSeedSource::with_entropy(|bytes| {
+        bytes.fill(0);
+        Ok(())
+    });
+    let (commands, owner) = PreparedOwner::new(identity.clone(), Instant::now(), round_seed_source);
     let handle = RoomHandle { commands };
     registry
         .codes

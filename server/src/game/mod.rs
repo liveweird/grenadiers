@@ -7,7 +7,11 @@ mod sessions;
 mod socket;
 
 pub(crate) use http::issue_session;
+#[cfg(test)]
+pub(crate) use rooms::BindingKey;
 pub(crate) use rooms::GameRooms;
+#[cfg(test)]
+pub(crate) use sessions::ConnectionId;
 pub(crate) use sessions::GameSessions;
 pub(crate) use socket::game_websocket;
 

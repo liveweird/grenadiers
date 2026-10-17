@@ -14,13 +14,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         )
         .init();
 
+    let state = AppState::from_environment()?;
     let address: SocketAddr = std::env::var("SERVER_ADDR")
         .unwrap_or_else(|_| "127.0.0.1:8085".to_owned())
         .parse()?;
     let web_dist_dir = std::env::var_os("WEB_DIST_DIR").map(PathBuf::from);
     let listener = TcpListener::bind(address).await?;
     tracing::info!(%address, "server listening");
-    axum::serve(listener, app(AppState::from_environment()?, web_dist_dir))
+    axum::serve(listener, app(state, web_dist_dir))
         .with_graceful_shutdown(shutdown_signal())
         .await?;
     Ok(())

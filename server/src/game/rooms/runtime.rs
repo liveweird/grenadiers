@@ -1,5 +1,5 @@
 use grenadiers_core::{
-    game::{SeatId, State, Tick},
+    game::{GenerationRecord, SeatId, State, Tick},
     protocol::RoomId,
     room::{DepartureReason, InterruptReason, Phase, RoomLifecycle},
 };
@@ -8,6 +8,7 @@ use tokio::time::Instant;
 
 use super::owner::RoomCommand;
 use super::{input::*, publication, types::*};
+use crate::round_seed::RoundSeedSource;
 
 pub(super) struct Runtime {
     pub(super) identity: RoomIdentity,
@@ -18,13 +19,19 @@ pub(super) struct Runtime {
     pub(super) notices: watch::Sender<RoomNotice>,
     pub(super) inputs: InputMailbox,
     pub(super) state: Option<State>,
+    pub(super) generation_record: Option<GenerationRecord>,
     pub(super) reports: Vec<grenadiers_core::game::StepReport>,
     pub(super) terminal_at: Option<Instant>,
     pub(super) failed: bool,
+    round_seed_source: RoundSeedSource,
 }
 
 impl Runtime {
-    pub(super) fn new(identity: RoomIdentity, notices: watch::Sender<RoomNotice>) -> Self {
+    pub(super) fn new(
+        identity: RoomIdentity,
+        notices: watch::Sender<RoomNotice>,
+        round_seed_source: RoundSeedSource,
+    ) -> Self {
         Self {
             identity,
             lifecycle: RoomLifecycle::new(),
@@ -34,9 +41,11 @@ impl Runtime {
             notices,
             inputs: InputMailbox::default(),
             state: None,
+            generation_record: None,
             reports: Vec::new(),
             terminal_at: None,
             failed: false,
+            round_seed_source,
         }
     }
 
@@ -240,12 +249,16 @@ impl Runtime {
                     }
                 };
                 if change == grenadiers_core::room::Change::Started {
-                    let Some(state) = self.identity.profile.initial_state(self.lifecycle.tick())
+                    let Some(initial) = self
+                        .identity
+                        .profile
+                        .initial_round(self.lifecycle.tick(), &self.round_seed_source)
                     else {
                         self.interrupt(InterruptReason::InternalError);
                         return true;
                     };
-                    self.state = Some(state);
+                    self.state = Some(initial.state);
+                    self.generation_record = initial.generation_record;
                     self.publish_snapshot()
                 } else if matches!(self.lifecycle.phase(), Phase::Countdown { .. })
                     && self.lifecycle.tick().0.is_multiple_of(3)

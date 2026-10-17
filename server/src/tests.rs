@@ -65,7 +65,7 @@ fn blank_database_url_disables_postgres() {
 
 #[tokio::test]
 async fn app_state_configuration_uses_defaults_and_normalizes_overrides() {
-    let defaults = AppState::from_configuration(None, None).unwrap();
+    let defaults = AppState::from_configuration(None, None, None).unwrap();
     assert_eq!(
         defaults.allowed_origins.as_ref(),
         &DEFAULT_ORIGINS
@@ -78,6 +78,7 @@ async fn app_state_configuration_uses_defaults_and_normalizes_overrides() {
     let configured = AppState::from_configuration(
         Some(" https://game.example, ,https://admin.example ".to_owned()),
         Some(" postgres://postgres:postgres@localhost/grenadiers ".to_owned()),
+        None,
     )
     .unwrap();
     assert_eq!(
@@ -89,7 +90,9 @@ async fn app_state_configuration_uses_defaults_and_normalizes_overrides() {
     );
     assert!(configured.database.is_some());
 
-    assert!(AppState::from_configuration(None, Some("not a postgres URL".to_owned())).is_err());
+    assert!(
+        AppState::from_configuration(None, Some("not a postgres URL".to_owned()), None).is_err()
+    );
 }
 
 #[test]

@@ -1,5 +1,16 @@
 # Repository verification
 
+## Dormant authoritative match runtime — 2026-10-17
+
+The integrated locked server gate passes **243 core tests, 107 server tests, and 2 doctests**.
+Rust line coverage is **5,607/6,019 lines, 93.16%**, above the unchanged 80% floor.
+Independent runtime review reports no actionable findings. Twenty focused adapter cases
+exercise real wins/draws/timeouts, fresh assignment/entropy/upgrades, forfeits during running
+and completed holds, rematch reset, stale controls/deduplication, finite input TTL, bounded
+report windows, frozen publication, privacy, profile mismatch, frame bounds, and exhaustion.
+The active v2 caller retains its explicit first-round assignment. The new adapter remains
+test-only: scheduling, shutdown, and actual endpoint/browser activation are later checks.
+
 ## Checked v3 room projection — 2026-10-17
 
 The locked server gate passes **243 core tests, 85 server tests, and 2 doctests**.

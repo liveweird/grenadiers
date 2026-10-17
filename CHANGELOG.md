@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.2.11 — 2026-10-17
+
+- Add a dormant authoritative adapter for real multi-round simulation and checked v3 publication.
+- Build fresh worlds and input state per actual assignment, flush bounded report windows,
+  and freeze physics during result/rematch holds while retaining the authoritative room clock.
+- Fence stale input before action IDs, preserve private generation records, and publish
+  truthful interruptions when round construction fails.
+
+The adapter is test-only until the bounded owner and coordinated browser/server switch land.
+
 ## 0.2.10 — 2026-10-17
 
 - Add checked v3 room projection from actual match lifecycle facts.

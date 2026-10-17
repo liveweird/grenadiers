@@ -299,7 +299,8 @@ countdown with retained scores, simultaneous explicit departures, and server int
 
 Progress: v0.3.1 adds the independently reviewed pure [two-seat grace model](reconnect-grace.md).
 Live gameplay remains v3 with transport-loss interruption until coordinated reconnect activation.
-v0.3.2 adds a bounded private [semantic replay runner](replay.md); live capture follows separately.
+v0.3.2 adds a bounded private [semantic replay runner](replay.md); v0.3.3 captures accepted
+production operations with explicit incomplete/truncated evidence.
 
 **Depends on:** M5.
 

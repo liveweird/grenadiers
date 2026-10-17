@@ -1,5 +1,23 @@
 # Repository verification
 
+## M6 accepted-operation capture — 2026-10-17
+
+The locked server gate passes **251 core tests, 132 server tests, and 2 doctests**.
+Rust coverage is **6,496/6,926 lines, 93.79%**, above the unchanged 80% floor. Independent
+review reports no actionable capture/privacy/bounds findings. Seven replay cases compare
+complete semantic private checkpoints from actual captured generated matches, including
+cancellation, draws, three wins, rematch, TTL refresh, immediate fences, and atomic shutdown
+with pending departure. Wrong phase/epoch, rate-limit, duplicate, and wire-bound rejections
+produce no records. No-op accepted readiness and refreshes remain recorded.
+
+Journal allocation plus header measures **3,840,056 bytes** and never grows past its cap.
+Truncation leaves later gameplay checkpoints unchanged; construction failure is explicitly
+incomplete and cannot certify a replay. Production capture retains no credential/frame/binding
+identity. Current unrecorded notice callers have empty reports; future notice changes must
+preserve that invariant or record their effect. Transport revision is excluded from semantic
+comparison. Replay inspection remains test-only, with no public export or restart persistence.
+Exact-image deployment acceptance remains pending.
+
 ## M6 private replay-runner foundation — 2026-10-17
 
 The locked server gate passes **251 core tests, 129 server tests, and 2 doctests**.

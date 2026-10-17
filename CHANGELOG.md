@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.3.3 — 2026-10-17
+
+- Capture accepted production match operations in private bounded in-memory journals.
+- Preserve immediate input fences, TTL refreshes, actual round seeds, and atomic shutdown/
+  departure ordering; rejected commands never enter the journal.
+- Mark construction failures incomplete and capacity exhaustion truncated without changing
+  gameplay. Replay refuses to certify either as a complete record.
+
+Journals are process-local evidence, released with their owner. Replay/inspection are test-only;
+there is no public export, durable storage, credential recording, or reconnect activation.
+
 ## 0.3.2 — 2026-10-17
 
 - Add a private, bounded semantic replay journal and runner using the real match runtime.

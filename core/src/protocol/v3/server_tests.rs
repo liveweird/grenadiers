@@ -2,10 +2,10 @@ use jsonschema::{Validator, validator_for};
 use serde_json::{Value, json};
 
 use super::super::{
-    ARENA_TERRAIN_CELLS, ActorView, ArenaView, BombView, Cell, Counter, Direction, EntityId,
-    ErrorCode, EventKind, FlameView, GameState, MAX_COUNTER, MapId, PickupKind, PickupView,
-    Position, ProtocolVersionInput, RoomCode, RoomId, RulesVersion, Seat, Terrain, Tick, WireEvent,
-    WireRoundResult,
+    ARENA_TERRAIN_CELLS, ActorView, ArenaView, BombView, Cell, Counter, Direction, DrawReason,
+    EntityId, ErrorCode, EventKind, FlameView, GameState, MAX_COUNTER, MapId, PickupKind,
+    PickupView, Position, ProtocolVersionInput, RoomCode, RoomId, RulesVersion, Seat, Terrain,
+    Tick, WireEvent, WireRoundResult,
 };
 use super::{
     CompletedRound, CountdownKind, GameServerMessage, GameplayVersion, MatchInterruptReason,
@@ -275,11 +275,25 @@ fn maximal_snapshot() -> GameServerMessage {
     });
     room.round_id = Counter::new(MAX_COUNTER).unwrap();
     room.revision = Counter::new(MAX_COUNTER).unwrap();
+    room.tick = tick;
     room.round_number = RoundCount::new(MAX_COUNTER).unwrap();
     room.scores = Scores {
         one: Wins::new(3).unwrap(),
         two: Wins::new(3).unwrap(),
     };
+    room.last_round = Some(CompletedRound {
+        round_id: Counter::new(MAX_COUNTER).unwrap(),
+        round_number: Counter::new(MAX_COUNTER).unwrap(),
+        ended_at: tick,
+        result: WireRoundResult::Draw {
+            reason: DrawReason::MutualElimination,
+        },
+    });
+    for seat in &mut room.seats {
+        seat.occupied = false;
+        seat.ready = false;
+        seat.rematch_ready = false;
+    }
     GameServerMessage::Snapshot {
         room,
         state,
@@ -296,11 +310,27 @@ fn maximal_snapshot() -> GameServerMessage {
 
 #[test]
 fn maximal_v3_structure_with_pickups_and_events_fits_the_frame() {
+    let winner = MatchResult::Winner {
+        seat: Seat::Two,
+        reason: MatchWinnerReason::RoundWins,
+    };
+    let interrupted = MatchResult::Interrupted {
+        reason: MatchInterruptReason::ServerOverloaded,
+    };
+    assert!(
+        serde_json::to_string(&winner).unwrap().len()
+            > serde_json::to_string(&interrupted).unwrap().len()
+    );
+
     let message = maximal_snapshot();
     let encoded = encode_server_message(&message).unwrap();
     let value: Value = serde_json::from_str(&encoded).unwrap();
     assert!(server_schema().is_valid(&value));
     assert_eq!(value["state"]["pickups"].as_array().unwrap().len(), 195);
     assert_eq!(value["events"].as_array().unwrap().len(), 64);
+    eprintln!(
+        "Maximal tested v3 structural snapshot: {} UTF-8 bytes",
+        encoded.len()
+    );
     assert!(encoded.len() <= 65_536, "encoded {} bytes", encoded.len());
 }

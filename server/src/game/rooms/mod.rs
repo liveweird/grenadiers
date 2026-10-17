@@ -13,12 +13,13 @@ use tokio::{
 mod input;
 mod match_owner;
 mod match_runtime;
+#[cfg(test)]
+mod measurement;
 mod profile;
 mod rate_limit;
 mod replay;
 mod resume;
 mod types;
-
 use crate::round_seed::RoundSeedSource;
 pub(crate) use match_owner::{
     ClosingReason, MatchAdmission as Admission, MatchOwnerNotice as RoomNotice,

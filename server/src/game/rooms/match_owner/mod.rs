@@ -15,6 +15,8 @@ mod catchup_tests;
 #[cfg(test)]
 mod departure_tests;
 #[cfg(test)]
+mod performance_tests;
+#[cfg(test)]
 mod resume_tests;
 #[cfg(test)]
 mod round_tests;

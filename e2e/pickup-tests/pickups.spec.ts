@@ -7,6 +7,8 @@ test.beforeAll(() => {
     .toBe('arena-v1-pickups')
 })
 
+type Cell = { column: number; row: number }
+
 function actor(game: ObservedGame) {
   const value = latestSnapshot(game)?.state.actors.find((candidate) => candidate.seat === 'one')
   if (!value?.alive) throw new Error('Fixture route requires a living first player')

@@ -87,18 +87,25 @@ test('two players complete a rendered keyboard duel with shared authoritative re
     await expect.poll(() => latestSnapshot(games[0])?.room.phase.type).toBe('result')
     await one.keyboard.up('Space')
     await expect.poll(() => latestSnapshot(games[1])?.room.phase.type).toBe('result')
-    for (const [index, page] of [one, two].entries()) {
+    // Result holds last three seconds. Assert both clients before expensive
+    // compositor/accessibility work; automatic progression must keep running.
+    await Promise.all([one, two].map(async (page, index) => {
       const result = latestSnapshot(games[index])!
-      expect(result.room.phase).toMatchObject({ type: 'result', result: { type: 'winner', seat: 'two' } })
+      expect(result.room.phase.type).toBe('result')
+      expect(result.room.lastRound?.result).toEqual({ type: 'winner', seat: 'two' })
+      expect(result.room.scores).toEqual({ one: 0, two: 1 })
       expect(result.state.actors.find((candidate) => candidate.seat === 'one')?.alive).toBe(false)
-      const seconds = Math.ceil(result.state.remainingTicks / 60)
-      await expect(page.getByLabel('Round time remaining')).toHaveText(`${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`)
+      await expect(page.getByLabel('Phase time remaining')).toHaveText(/^0:0[123]$/)
       await expect(page.getByRole('status')).toContainText('Player two wins the round.')
       await expect(page.getByLabel('Player one upgrades').locator('dd')).toHaveText(['1', '1', '2', '1'])
       await expect(page.locator('.seat-one small')).toHaveText('Eliminated')
       await expect(page.locator('.seat-two small')).toHaveText('Alive')
+    }))
+    await Promise.all([one, two].map((page, index) =>
+      page.screenshot({ path: testInfo.outputPath(`result-${index}.png`), fullPage: true }),
+    ))
+    for (const page of [one, two]) {
       expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([])
-      await page.screenshot({ path: testInfo.outputPath(`result-${index}.png`), fullPage: true })
     }
     await two.setViewportSize({ width: 320, height: 844 })
     expect(await two.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false)

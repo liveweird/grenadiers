@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import type { GameServerMessage } from '../../web/src/game/schema'
+import type { GameServerMessage } from '../../web/src/game/v3/schema'
 import { gameFrames, openGame, roomFrame, sendGame } from './support/game'
 
 type Snapshot = Extract<GameServerMessage, { type: 'snapshot' }>
@@ -45,7 +45,9 @@ test('two native gameplay sockets finish one authoritative generated classic rou
     await expect.poll(async () => snapshot(await gameFrames(one))?.room.phase.type).toBe('result')
     await expect.poll(async () => snapshot(await gameFrames(two))?.room.phase.type).toBe('result')
     const first = snapshot(await gameFrames(one))!
-    expect(first.room.phase).toMatchObject({ type: 'result', result: { type: 'winner', seat: 'two' } })
+    expect(first.room.phase.type).toBe('result')
+    expect(first.room.lastRound?.result).toEqual({ type: 'winner', seat: 'two' })
+    expect(first.room.scores).toEqual({ one: 0, two: 1 })
     expect(first.state.actors[0].alive).toBe(false)
     await expect.poll(async () => snapshot(await gameFrames(one))!.room.revision).toBeGreaterThan(first.room.revision + 2)
     expect(snapshot(await gameFrames(one))!.state).toEqual(first.state)

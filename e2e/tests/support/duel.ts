@@ -1,5 +1,5 @@
 import { expect, type Page } from '@playwright/test'
-import type { Direction, GameServerMessage } from '../../../web/src/game/schema'
+import type { Direction, GameServerMessage } from '../../../web/src/game/v3/schema'
 
 type Snapshot = Extract<GameServerMessage, { type: 'snapshot' }>
 export type ObservedGame = {

@@ -1,6 +1,6 @@
 # ADR 0009: Pure room lifecycle before transport ownership
 
-Status: accepted; the headless lifecycle is implemented. Server room ownership follows.
+Status: implemented in the headless domain and authoritative server room owner.
 
 ## Decision
 
@@ -14,7 +14,10 @@ entering Running performs no physics update. The first completed simulation upda
 to the following tick. Canceling Countdown clears both readiness flags and advances the
 attempt once, allowing the future transport to reject delayed commands from old attempts.
 
-Record a completed running result before processing pending departures. A Running departure
+An already-observed departure may interrupt before the next simulation update is accepted.
+Once accepted, complete `State::step` and record its lifecycle result synchronously, without
+an await or departure handling between them. Then process departures received during that
+update. A completed result takes precedence over those pending departures. A Running departure
 interrupts the preview without inventing a winner. Result and Interrupted are immutable;
 terminal departures only remove occupancy. Result clocks may advance while their end tick
 stays fixed; Interrupted freezes. Checked additions occur before mutation.

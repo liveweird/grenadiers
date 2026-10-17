@@ -263,3 +263,34 @@ fn completed_timeout_result_survives_later_departure() {
     runtime.depart(0, DepartureReason::TransportLoss);
     assert_eq!(runtime.lifecycle.phase(), result);
 }
+
+#[test]
+fn countdown_updates_public_time_at_twenty_hertz_while_waiting_stays_quiet() {
+    let mut runtime = runtime();
+    let one = join(&mut runtime, binding(1));
+    let waiting_revision = runtime.revision;
+    for _ in 0..6 {
+        assert!(runtime.tick());
+    }
+    assert_eq!(runtime.revision, waiting_revision);
+    let _two = join(&mut runtime, binding(2));
+    action(&mut runtime, binding(1), 1, RoomAction::Ready(true)).unwrap();
+    action(&mut runtime, binding(2), 1, RoomAction::Ready(true)).unwrap();
+    let started_revision = runtime.revision;
+    for tick in 7..=12 {
+        assert!(runtime.tick());
+        assert_eq!(runtime.revision, started_revision + ((tick - 6) / 3) as u32);
+        if tick % 3 == 0 {
+            let RoomNotice::View(view) = one.notices.borrow().clone() else {
+                panic!("countdown must publish a room view");
+            };
+            assert_eq!(view.tick.get(), tick);
+            assert_eq!(
+                view.phase,
+                grenadiers_core::protocol::RoomPhase::Countdown {
+                    ends_at: grenadiers_core::protocol::Tick::new(186).unwrap(),
+                }
+            );
+        }
+    }
+}

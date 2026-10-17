@@ -1,9 +1,9 @@
 # Gameplay protocol
 
 Status: gameplay contracts, checked domain conversion, HTTP session issuance, and authenticated
-gameplay WebSockets with Waiting-room admission are implemented. `api/gameplay.schema.json`, independent Rust
+gameplay WebSockets with authoritative two-seat rounds are implemented. `api/gameplay.schema.json`, independent Rust
 `core::protocol` types, and generated `web/src/game/schema.ts` define socket messages.
-Authoritative scheduling and browser controls remain planned. Diagnostic `/api/v1/ws` and
+The playable browser interface remains the next increment. Diagnostic `/api/v1/ws` and
 `api/realtime.schema.json` remain unchanged.
 
 ## Authentication and compatibility
@@ -50,8 +50,8 @@ Malformed/binary input, failed authentication, repeated authentication, or rate 
 closes the offending socket with fixed reasons. Create/join now bind one of two room seats;
 already-bound admission returns `alreadyInRoom`, full rooms return `roomFull`, and unknown
 codes return `roomNotFound`. Unbound room commands return `notInRoom`; mismatched ownership
-or attempts return `staleRoom`. Correctly bound readiness/movement/bombs currently return
-`invalidPhase`. Fresh sequences are consumed before semantic rejection; replay returns
+or attempts return `staleRoom`. Ready applies in Waiting/Countdown; movement/bombs require
+Running. Other phases return `invalidPhase`. Fresh sequences are consumed before semantic rejection; replay returns
 `staleSequence`. See [room admission](rooms.md#network-admission) for lifetime and queue bounds.
 
 ## Commands and responses
@@ -115,8 +115,8 @@ phase order. Placement and detonation within the same tick remain observable. Re
 freeze world contents while the absolute clock advances, so old bomb/flame deadlines remain
 valid in frozen projections. Conversion neither clamps values nor advances the simulation.
 
-The future room publisher must combine these checked values with matching room tick/phase,
-apply the encoder's frame limit, and bound delivery. The adapter alone does not create rooms
+The room publisher combines these checked values with matching room tick/phase, applies
+the encoder's frame limit, and bounds delivery. The adapter alone does not create rooms
 or validate transport ownership.
 
 ## Identity, ordering, and lifecycle

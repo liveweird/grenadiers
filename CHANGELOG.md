@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.1.14 — 2026-10-17
+
+- Run real two-player rounds with readiness, exact countdown, authoritative 60 Hz updates,
+  and checked public snapshots/events published at 20 Hz.
+- Bind logical movement and bomb actions to the current seat/attempt; expire stale held
+  input, reject duplicate bomb IDs, and bound each player’s admitted work per update.
+- Preserve completed results, interrupt live rounds on departure or overload, and retire
+  terminal rooms after a fixed retention window.
+
+The protocol now supports a full fixed-map round through native sockets. The playable
+browser interface and real graphics acceptance follow in the duel preview.
+
 ## 0.1.13 — 2026-10-17
 
 - Add bounded room creation and code-based joining with two authenticated seat owners.

@@ -249,6 +249,10 @@ impl Runtime {
                     };
                     self.state = Some(state);
                     self.publish_snapshot()
+                } else if matches!(self.lifecycle.phase(), Phase::Countdown { .. })
+                    && self.lifecycle.tick().0.is_multiple_of(3)
+                {
+                    self.publish_view().is_some()
                 } else {
                     true
                 }

@@ -471,7 +471,7 @@ dependencies = [
 
 [[package]]
 name = "grenadiers-core"
-version = "0.1.13"
+version = "0.1.14"
 dependencies = [
  "jsonschema",
  "serde",
@@ -480,7 +480,7 @@ dependencies = [
 
 [[package]]
 name = "grenadiers-server"
-version = "0.1.13"
+version = "0.1.14"
 dependencies = [
  "axum",
  "futures-util",

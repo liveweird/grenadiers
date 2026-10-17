@@ -1,5 +1,31 @@
 # Repository verification
 
+## Release-profile connected takeover correction — 2026-10-18 — acceptance pending
+
+The release-profile owner regression fails on the earlier candidate: binding replacement was
+performed inside `debug_assert!`, so release builds omitted the mutation. Debug tests and a
+browser probe that only read the admission baseline did not detect this. The correction performs
+the mutation unconditionally and asserts its result separately. Focused release and debug
+regressions now pass, including replacement commands, stale binding rejection, stale guard
+cleanup, genuine disconnect and private baseline/action-floor restoration.
+
+The browser takeover scenario now requires a real scoped movement command from the replacement
+socket to change the peer's authoritative observation before stopping. The original watchdog,
+action-floor assertion and rejection checks remain. The server gate now runs the complete Rust
+workspace suite in debug and release profiles. Full gates pass **356 core tests, 170 server
+tests and two doctests in each profile**, with four dedicated performance profiles ignored.
+Rust line coverage is **93.40%** (9,289/9,945 lines). Fresh native image acceptance remains
+pending; the pre-fix image below does not certify this correction.
+
+The mutation defect does not explain the earlier missing-admission timeout: the admission
+reply precedes the faulty expression. Final-head CI also recorded a separate audio visibility
+failure. Both logs remain at `/tmp/grenadiers-v0322-ci-{pr,push}-failure.log`; neither is described
+as fixed. Bounded browser diagnostics now retain per-socket control history, current-document
+focus/visibility, long tasks, scheduling gaps and Node event-loop delay without changing
+assertions, timers, input order, latency budgets or retry policy. Independent review is clear;
+the focused Chromium lifecycle, secret-allowlist and diagnostic fault-injection scenario passes.
+The E2E static gates and scenario parity pass for **26 scenarios**.
+
 ## Dormant v7 contract — 2026-10-18
 
 Clean archive source `456f47b33d808691295d48688d7b8c3ce916a01e` builds image
@@ -40,7 +66,7 @@ This transport correction does not explain or fix the original latency observati
 The corrected Kubernetes evaluation passes **25/25 scenarios**, retries zero, using the same
 candidate image and harness. It stops and waits for each old forward before rollout, records
 each new ready pod/UID, starts a fresh pod-bound forward, and requires strict health/readiness
-before browser execution. The accepted rollup is retained **Compose 25/25** plus corrected
+before browser execution. The pre-fix rollup is retained **Compose 25/25** plus corrected
 **Kubernetes 25/25**, with an independent evidence audit clear. No assertion, sample count,
 250 ms budget or retry policy changed. Prior failed evaluations remain failed and preserved.
 
@@ -66,8 +92,9 @@ Seeded cases use external mode-0444 fixtures, root-owned in Kubernetes, with no 
 Pinned archive-only Trivy reports zero fixable HIGH/CRITICAL findings under existing policy.
 All owned resources, namespaces, ports and browser containers were removed. Application inputs
 remain identical through integration. The v7 contract is dormant; v6 remains active and no new
-pickup is enabled. The new passing evaluation supports release while retaining the original
-unexplained observation and both failed evaluations as material limitations.
+pickup is enabled. That evaluation retains the original unexplained observation and both
+failed evaluations as material limitations. Current acceptance also requires the takeover
+correction and fresh gates described above.
 
 ## Typed domain bomb triggers — 2026-10-18
 

@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test'
-import type { GameServerMessage, Seat } from '../../../web/src/game/v6/schema'
+import type { Direction, GameServerMessage, Seat } from '../../../web/src/game/v6/schema'
 
 type Admission = Extract<GameServerMessage, { type: 'admitted' }>
 export type PublicAdmission = {
@@ -17,6 +17,8 @@ type TransportProbe = {
   disconnect: () => void
   baseline: () => PublicAdmission | null
   takeover: () => Promise<PublicAdmission>
+  moveTakeover: (direction: Direction) => void
+  stopTakeover: () => void
   invalidResume: (kind: 'wrongRoom' | 'wrongCapability') => Promise<string>
   leakedSharedFields: () => boolean
 }
@@ -28,6 +30,7 @@ export async function installTransportProbe(page: Page): Promise<void> {
     let appSocket: WebSocket | null = null
     let credential: { roomId: string; seat: Seat; token: string } | null = null
     let admitted: PublicAdmission | null = null
+    let takeoverBinding: { socket: WebSocket; roomId: string; roundId: number; sequence: number } | null = null
     let sharedLeak = false
 
     function publicAdmission(message: Admission, stableCapability: boolean): PublicAdmission {
@@ -120,6 +123,11 @@ export async function installTransportProbe(page: Page): Promise<void> {
               socket.close()
               resolve(message.code)
             } else {
+              if (kind === undefined) {
+                takeoverBinding = {
+                  socket, roomId: message.room.roomId, roundId: message.room.roundId, sequence: 2,
+                }
+              }
               resolve(publicAdmission(message, message.resumeToken === capability.token))
             }
           }
@@ -134,6 +142,26 @@ export async function installTransportProbe(page: Page): Promise<void> {
         const result = await resume()
         if (typeof result === 'string') throw new Error(`Takeover rejected: ${result}`)
         return result
+      },
+      moveTakeover(direction) {
+        if (!takeoverBinding || takeoverBinding.socket.readyState !== NativeSocket.OPEN) {
+          throw new Error('No admitted takeover socket is available')
+        }
+        const binding = takeoverBinding
+        binding.socket.send(JSON.stringify({
+          type: 'movement', sequence: binding.sequence++, roomId: binding.roomId,
+          roundId: binding.roundId, direction,
+        }))
+      },
+      stopTakeover() {
+        if (!takeoverBinding || takeoverBinding.socket.readyState !== NativeSocket.OPEN) {
+          throw new Error('No admitted takeover socket is available')
+        }
+        const binding = takeoverBinding
+        binding.socket.send(JSON.stringify({
+          type: 'movement', sequence: binding.sequence++, roomId: binding.roomId,
+          roundId: binding.roundId, direction: null,
+        }))
       },
       async invalidResume(kind) {
         const result = await resume(kind)
@@ -162,6 +190,22 @@ export async function takeover(page: Page): Promise<PublicAdmission> {
     const probe = (window as ProbeWindow).grenadiersAcceptanceTransport
     if (!probe) throw new Error('Transport probe is not installed')
     return probe.takeover()
+  })
+}
+
+export async function moveTakeover(page: Page, direction: Direction): Promise<void> {
+  await page.evaluate((value) => {
+    const probe = (window as ProbeWindow).grenadiersAcceptanceTransport
+    if (!probe) throw new Error('Transport probe is not installed')
+    probe.moveTakeover(value)
+  }, direction)
+}
+
+export async function stopTakeover(page: Page): Promise<void> {
+  await page.evaluate(() => {
+    const probe = (window as ProbeWindow).grenadiersAcceptanceTransport
+    if (!probe) throw new Error('Transport probe is not installed')
+    probe.stopTakeover()
   })
 }
 

@@ -1,12 +1,14 @@
 import { setTimeout as delay } from 'node:timers/promises'
 import AxeBuilder from '@axe-core/playwright'
 import { expect, test } from '@playwright/test'
+import { startBrowserStallDiagnostics } from '../tests/support/browser-stall-diagnostics'
 import { latestSnapshot, observeGame } from '../tests/support/duel'
 import { expectVisibility, launchNaturalVisibilityBrowser } from '../tests/support/visibility'
 
 test('native sound gesture creates Web Audio cues and mute prevents later playback', async ({ browserName }, testInfo) => {
   expect(browserName).toBe('chromium')
   const launched = await launchNaturalVisibilityBrowser()
+  const diagnostics = startBrowserStallDiagnostics()
   try {
     const peerContext = await launched.browser.newContext({
       viewport: { width: 320, height: 844 }, reducedMotion: 'reduce',
@@ -14,6 +16,8 @@ test('native sound gesture creates Web Audio cues and mute prevents later playba
     const one = launched.context.pages()[0]
     await one.setViewportSize({ width: 1440, height: 1050 })
     const two = await peerContext.newPage()
+    await diagnostics.observePage(one, 'audio-primary')
+    await diagnostics.observePage(two, 'audio-peer')
     const firstGame = observeGame(one)
     const secondGame = observeGame(two)
     const cdp = await launched.context.newCDPSession(one)
@@ -88,6 +92,7 @@ test('native sound gesture creates Web Audio cues and mute prevents later playba
     await delay(250)
     expect(nodes).toHaveLength(mutedNodes)
     const cover = await launched.context.newPage()
+    await diagnostics.observePage(cover, 'visibility-cover')
     await cover.setContent('<title>Audio visibility cover</title>')
     await cover.bringToFront()
     await expectVisibility(one, 'hidden')
@@ -103,6 +108,9 @@ test('native sound gesture creates Web Audio cues and mute prevents later playba
     await delay(250)
     expect(nodes).toHaveLength(hiddenNodes)
   } finally {
-    await launched.close()
+    try { await launched.close() } finally {
+      diagnostics.stop()
+      await diagnostics.attach(testInfo, 'audio-browser-stall-diagnostics')
+    }
   }
 })

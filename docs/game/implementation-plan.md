@@ -9,7 +9,8 @@ first-to-three progression, and rematches pass exact-image Compose/Kubernetes ac
 M6 reconnect/replay is implemented with all 42 baseline rules mapped to automated assertions.
 M6 is complete and locally verified on 2026-10-17, including exact-image deployment acceptance.
 M7 hardening has started; M8 remains planned.
-The v0.3.16 candidate adds classic-v3 forgiving turns and explicit gameplay-v5 compatibility.
+The v0.3.16 increment adds classic-v3 forgiving turns and explicit gameplay-v5 compatibility,
+locally verified through both deployment paths on 2026-10-17.
 Published engineering prereleases are listed in `CHANGELOG.md` and GitHub Releases.
 
 New playtest requests and expansion work are tracked in the [gameplay and presentation

@@ -1,6 +1,6 @@
 # Gameplay and presentation backlog
 
-Status: **TURN implemented in the v0.3.16 candidate; other items requested, not implemented**.
+Status: **TURN implemented and locally verified for v0.3.16; other items requested, not implemented**.
 Updated 2026-10-17 after playtest feedback. Release acceptance is recorded in
 [verification](../verification.md).
 The [implementation plan](implementation-plan.md) remains the milestone/release reference;

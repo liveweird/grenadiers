@@ -1,5 +1,42 @@
 # Repository verification
 
+## Forgiving turns / gameplay v5 — 2026-10-17
+
+Clean git-archive candidate `14ded36ac84ce09ef770ed5ba5bb8e2eab9d7b6f` builds image
+`sha256:7ced5869efeb7e107b64ce5c2821d81a0adaf601470c744e9345d2af3cccfbf7`.
+The same image passes **23/23 scenarios in Compose and 23/23 in Kubernetes, retries zero**:
+seven default cases including the new native wall-stop turn, pickup, complete match, two
+reconnect cases, controls, natural headed visibility/audio and nine latency cases. The latency
+suite includes seven queue/observer regressions and two native measurement profiles.
+All sixteen suite result files report passed with no failed tests.
+
+The new browser case moves to the physical west-wall stop at x=1,344, 192 units off center,
+then turns south to x=1,536 through the reserved opening. Both players observe the living,
+aligned actor. Classic-v3 accepts that offset; legacy classic-v1/v2 retain 128-unit tolerance.
+Domain tests cover all four requested directions and all five speed levels at ±256 units,
+out-of-window rejection, blockers and swept fire. A same-seed/input server regression proves
+v2/v3 movement differs and both replay exactly with their recorded rules.
+
+303 core and 151 server tests plus two doctests pass; the four dedicated performance profiles
+remain intentionally ignored in the ordinary suite. Rust line coverage is **93.61%**, above the
+unchanged 80% floor. All 202 web tests, lint, contracts, Knip, build and E2E static/parity checks
+pass. Cargo-deny and both npm audits pass (zero npm vulnerabilities). Independent review found
+no actionable issue. Strict pinned Kubernetes 1.33 schemas validate all three resources.
+
+Both deployment paths return healthy/ready and run as 65532 with read-only roots, dropped
+capabilities and no privilege escalation. Kubernetes retains RuntimeDefault, 500m/256Mi limits,
+the exact image digest, and a read-only mode-0444 seed; no seed is baked into `/app`.
+Pinned archive-only Trivy passes the existing HIGH/CRITICAL `--ignore-unfixed` release policy;
+this filtered result does not assert an advisory-free image.
+
+Observed latency maxima: Compose local **51.152 ms**, shaped **167.763 ms**; Kubernetes local
+**57.610 ms**, shaped **232.816 ms**. No sample exceeds the existing 250 ms reference envelope.
+These are bounded page-delivery measurements, not WAN or human-playability guarantees.
+Evidence is retained at `/tmp/grenadiers-v0316-acceptance`. Two pre-execution harness setup
+diagnostics were corrected only in temporary helpers; final suites pass without retries.
+Owned projects, namespace, helpers and forwards were removed; unrelated workloads remain.
+Later documentation-only commits must preserve byte-identical Docker application inputs.
+
 ## M7 optional procedural sound — 2026-10-17
 
 Final clean-export candidate `cd7813c0c1951be486e30da7deaf2e917b1b8069` builds image

@@ -3,16 +3,17 @@ use std::fmt;
 
 use crate::game;
 
-use super::scalars::{Cell, Direction, EntityId, Position, RULES_VERSION, Seat, Tick};
+use super::scalars::{Cell, Direction, EntityId, Position, RulesVersion, Seat, Tick};
 use super::server::{DrawReason, WireRoundResult};
 use super::snapshot::{
     ARENA_TERRAIN_CELLS, ActorView, ArenaView, BombView, FlameView, GameState, MAX_BLOCKS,
-    MAX_BOMBS, MAX_FLAMES, MAX_RUNNING_UPDATES, Terrain,
+    MAX_BOMBS, MAX_FLAMES, MAX_PICKUPS, MAX_RUNNING_UPDATES, PickupKind, PickupView, Terrain,
 };
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct ProjectedRound {
     pub tick: Tick,
+    pub rules_version: RulesVersion,
     pub result: Option<WireRoundResult>,
     pub state: GameState,
 }
@@ -26,6 +27,7 @@ pub enum ProjectionError {
     InvalidActors,
     InvalidBombs,
     InvalidFlames,
+    InvalidPickups,
     InvalidResult,
     InvalidReportWindow,
     InvalidEvent,
@@ -41,6 +43,7 @@ impl fmt::Display for ProjectionError {
             Self::InvalidActors => "invalid actor projection",
             Self::InvalidBombs => "invalid bomb projection",
             Self::InvalidFlames => "invalid flame projection",
+            Self::InvalidPickups => "invalid pickup projection",
             Self::InvalidResult => "invalid round result projection",
             Self::InvalidReportWindow => "invalid event report window",
             Self::InvalidEvent => "invalid projected event",
@@ -51,9 +54,8 @@ impl fmt::Display for ProjectionError {
 impl std::error::Error for ProjectionError {}
 
 pub fn project_state(view: &game::PublicState) -> Result<ProjectedRound, ProjectionError> {
-    if view.rules_version != RULES_VERSION {
-        return Err(ProjectionError::UnsupportedRulesVersion);
-    }
+    let rules_version = RulesVersion::try_from(view.rules_version)
+        .map_err(|_| ProjectionError::UnsupportedRulesVersion)?;
     let tick = wire_tick(view.tick)?;
     let running_updates =
         u16::try_from(view.running_updates).map_err(|_| ProjectionError::InvalidRunningClock)?;
@@ -70,11 +72,13 @@ pub fn project_state(view: &game::PublicState) -> Result<ProjectedRound, Project
     let actors = project_actors(view)?;
     let bombs = project_bombs(view, &actors)?;
     let flames = project_flames(view)?;
+    let pickups = project_pickups(view)?;
     let result = project_result(view.result);
     validate_result(view, result)?;
 
     Ok(ProjectedRound {
         tick,
+        rules_version,
         result,
         state: GameState {
             running_updates,
@@ -83,6 +87,7 @@ pub fn project_state(view: &game::PublicState) -> Result<ProjectedRound, Project
             actors,
             bombs,
             flames,
+            pickups,
         },
     })
 }
@@ -280,7 +285,7 @@ pub(super) fn wire_tick(tick: game::Tick) -> Result<Tick, ProjectionError> {
     Tick::new(tick.0).map_err(|_| ProjectionError::InvalidTick)
 }
 
-fn wire_cell(cell: game::CellId) -> Result<Cell, ProjectionError> {
+pub(super) fn wire_cell(cell: game::CellId) -> Result<Cell, ProjectionError> {
     let column = u8::try_from(cell.column).map_err(|_| ProjectionError::InvalidArena)?;
     let row = u8::try_from(cell.row).map_err(|_| ProjectionError::InvalidArena)?;
     Cell::new(column, row).map_err(|_| ProjectionError::InvalidArena)
@@ -314,4 +319,41 @@ fn terrain_at(arena: &game::ArenaView, cell: game::CellId) -> Option<game::Terra
 
 fn strictly_sorted<T: Ord>(values: &[T]) -> bool {
     values.windows(2).all(|pair| pair[0] < pair[1])
+}
+
+fn project_pickups(view: &game::PublicState) -> Result<Vec<PickupView>, ProjectionError> {
+    if view.pickups.len() > MAX_PICKUPS
+        || !view
+            .pickups
+            .windows(2)
+            .all(|pair| pair[0].cell < pair[1].cell)
+    {
+        return Err(ProjectionError::InvalidPickups);
+    }
+    view.pickups
+        .iter()
+        .map(|pickup| {
+            if terrain_at(&view.arena, pickup.cell) != Some(game::Terrain::Floor)
+                || view.arena.blocks.binary_search(&pickup.cell).is_ok()
+                || view
+                    .flames
+                    .binary_search_by_key(&pickup.cell, |flame| flame.cell)
+                    .is_ok()
+            {
+                return Err(ProjectionError::InvalidPickups);
+            }
+            Ok(PickupView {
+                cell: wire_cell(pickup.cell).map_err(|_| ProjectionError::InvalidPickups)?,
+                kind: wire_pickup_kind(pickup.kind),
+            })
+        })
+        .collect()
+}
+
+pub(super) const fn wire_pickup_kind(kind: game::PickupKind) -> PickupKind {
+    match kind {
+        game::PickupKind::BombCapacity => PickupKind::BombCapacity,
+        game::PickupKind::BlastRange => PickupKind::BlastRange,
+        game::PickupKind::MovementSpeed => PickupKind::MovementSpeed,
+    }
 }

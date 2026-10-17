@@ -241,7 +241,7 @@ describe('GameClient session and connection lifecycle', () => {
     malformedSocket.emit('message', '{')
     expect(malformed.client.getState().failure).toBe('invalidServerMessage')
 
-    for (const supportedVersion of [1, 3]) {
+    for (const supportedVersion of [0, 1, 3, 65_535]) {
       const incompatible = harness()
       const incompatibleSocket = await authenticate(incompatible)
       incompatibleSocket.message({ type: 'incompatibleProtocol', supportedVersion })

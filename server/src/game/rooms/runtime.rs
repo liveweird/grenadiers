@@ -1,8 +1,5 @@
 use grenadiers_core::{
-    game::{
-        ActorInit, Direction, EntityId, Position, RulesConfig, SeatId, SpeedLevel, State, Tick,
-        World, fixed_arena,
-    },
+    game::{SeatId, State, Tick},
     protocol::RoomId,
     room::{DepartureReason, InterruptReason, Phase, RoomLifecycle},
 };
@@ -243,7 +240,8 @@ impl Runtime {
                     }
                 };
                 if change == grenadiers_core::room::Change::Started {
-                    let Some(state) = initial_state(self.lifecycle.tick()) else {
+                    let Some(state) = self.identity.profile.initial_state(self.lifecycle.tick())
+                    else {
                         self.interrupt(InterruptReason::InternalError);
                         return true;
                     };
@@ -354,28 +352,6 @@ impl Runtime {
         self.notices.send_replace(RoomNotice::Snapshot(encoded));
         true
     }
-}
-
-fn initial_state(tick: Tick) -> Option<State> {
-    let arena = fixed_arena();
-    let spawns = arena.spawns();
-    let actors = [
-        ActorInit {
-            id: EntityId(1),
-            seat: SeatId::One,
-            position: Position::center(spawns[0]),
-            heading: Direction::East,
-            speed: SpeedLevel::Base,
-        },
-        ActorInit {
-            id: EntityId(2),
-            seat: SeatId::Two,
-            position: Position::center(spawns[1]),
-            heading: Direction::West,
-            speed: SpeedLevel::Base,
-        },
-    ];
-    State::new_at_tick(RulesConfig::classic_v1(), World::new(arena), actors, tick).ok()
 }
 
 fn input_error(error: InputError) -> RoomError {

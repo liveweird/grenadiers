@@ -3,9 +3,9 @@ use serde_json::{Value, json};
 
 use super::{
     Cell, Counter, DrawReason, EncodeServerMessageError, EntityId, ErrorCode, GameServerMessage,
-    GameplayVersion, InterruptReason, MapId, Position, RoomCode, RoomId, RoomPhase, RoomView,
-    RulesVersion, Seat, SeatStatus, Tick, WireRoundResult, encode_server_message,
-    enforce_server_message_size,
+    GameplayVersion, InterruptReason, MapId, Position, ProtocolVersionInput, RoomCode, RoomId,
+    RoomPhase, RoomView, RulesVersion, Seat, SeatStatus, Tick, WireRoundResult,
+    encode_server_message, enforce_server_message_size,
 };
 
 fn server_schema() -> Validator {
@@ -28,8 +28,8 @@ fn room(phase: RoomPhase) -> RoomView {
         round_id: Counter::new(1).unwrap(),
         revision: Counter::new(2).unwrap(),
         tick: Tick::new(90).unwrap(),
-        rules_version: RulesVersion,
-        map_id: MapId,
+        rules_version: RulesVersion::ClassicV1,
+        map_id: MapId::FixedV1,
         seats: [
             SeatStatus {
                 seat: Seat::One,
@@ -62,9 +62,9 @@ fn every_server_lifecycle_variant_conforms_to_the_schema() {
         protocol_version: GameplayVersion,
     });
     let incompatible = assert_server_valid(&GameServerMessage::IncompatibleProtocol {
-        supported_version: GameplayVersion,
+        supported_version: ProtocolVersionInput::new(super::GAMEPLAY_PROTOCOL_VERSION),
     });
-    assert_eq!(incompatible["supportedVersion"], 1);
+    assert_eq!(incompatible["supportedVersion"], 2);
     assert_server_valid(&GameServerMessage::RoomState {
         room: room(RoomPhase::Waiting),
         you_seat: Seat::One,
@@ -205,3 +205,6 @@ fn outbound_size_guard_uses_utf8_bytes() {
         Err(EncodeServerMessageError::MessageTooLarge)
     );
 }
+
+#[path = "v2_contract_tests.rs"]
+mod v2;

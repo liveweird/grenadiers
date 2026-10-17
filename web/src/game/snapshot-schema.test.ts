@@ -173,6 +173,21 @@ describe('gameplay snapshot schema', () => {
     }
   })
 
+  it('separates pickup uniqueness and maximum length and closes collection payloads', () => {
+    const pickup = { cell: { column: 1, row: 1 }, kind: 'bombCapacity' as const }
+    expectInvalid({ ...copy(), state: { ...copy().state, pickups: [pickup, pickup] } })
+    const unique: Array<{ cell: { column: number; row: number }; kind: 'bombCapacity' | 'blastRange' }> = cells(195).map((cell) => ({ cell, kind: 'bombCapacity' }))
+    unique.push({ cell: { column: 0, row: 0 }, kind: 'blastRange' })
+    expectInvalid({ ...copy(), state: { ...copy().state, pickups: unique } })
+    const collection = { type: 'pickupCollected', id: 10, seat: 'one', cell: pickup.cell, kind: 'bombCapacity' }
+    for (const field of Object.keys(collection)) {
+      const missing = { ...collection }
+      Reflect.deleteProperty(missing, field)
+      expectInvalid({ ...copy(), events: [{ tick: 40, index: 0, kind: missing }] })
+    }
+    expectInvalid({ ...copy(), events: [{ tick: 40, index: 0, kind: { ...collection, seed: 1 } }] })
+  })
+
   it('rejects missing and extra fields throughout the nested snapshot', () => {
     for (const field of Object.keys(snapshot)) {
       const missing = copy()

@@ -3,7 +3,7 @@ use std::collections::{BTreeMap, BTreeSet};
 use jsonschema::validator_for;
 use serde_json::{Value, json};
 
-use super::{EventKind, ProjectionError, project_events};
+use super::{EventKind, ProjectionError, Seat, project_events};
 use crate::game::arena::{ARENA_CELL_COUNT, ARENA_HEIGHT, ARENA_WIDTH, Arena, Terrain};
 use crate::game::input::Direction;
 use crate::game::pickups::PickupKind;
@@ -235,7 +235,7 @@ fn rejects_mismatched_ticks_and_invalid_embedded_bombs() {
 }
 
 #[test]
-fn version_one_event_projection_rejects_pickup_collection() {
+fn projects_real_version_two_pickup_collection() {
     let target = CellId::new(5, 5);
     let world = World::with_pickups(
         open_world().arena().clone(),
@@ -267,8 +267,8 @@ fn version_one_event_projection_rejects_pickup_collection() {
         report.events[0].kind,
         crate::game::StepEventKind::PickupCollected { .. }
     ));
-    assert_eq!(
-        project_events(&[report]),
-        Err(ProjectionError::InvalidEvent)
-    );
+    let projected = project_events(&[report]).unwrap();
+    assert!(matches!(projected[0].kind, EventKind::PickupCollected {
+        id, seat: Seat::One, cell, kind: super::PickupKind::BombCapacity,
+    } if id.get() == 10 && cell.column() == 5 && cell.row() == 5));
 }

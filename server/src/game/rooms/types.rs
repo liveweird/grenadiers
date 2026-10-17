@@ -56,6 +56,7 @@ pub(crate) struct Admission {
 pub(super) struct RoomIdentity {
     pub(super) id: RoomId,
     pub(super) code: RoomCode,
+    pub(super) profile: super::profile::RoomProfile,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

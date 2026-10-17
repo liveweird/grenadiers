@@ -6,6 +6,7 @@ pub const ARENA_TERRAIN_CELLS: usize = 195;
 pub const MAX_BLOCKS: usize = 195;
 pub const MAX_BOMBS: usize = 16;
 pub const MAX_FLAMES: usize = 195;
+pub const MAX_PICKUPS: usize = 195;
 pub const MAX_RUNNING_UPDATES: u16 = 10_800;
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize)]
@@ -17,6 +18,7 @@ pub struct GameState {
     pub actors: [ActorView; 2],
     pub bombs: Vec<BombView>,
     pub flames: Vec<FlameView>,
+    pub pickups: Vec<PickupView>,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize)]
@@ -65,4 +67,19 @@ pub struct FlameView {
 pub enum Terrain {
     Floor,
     Wall,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct PickupView {
+    pub cell: Cell,
+    pub kind: PickupKind,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub enum PickupKind {
+    BombCapacity,
+    BlastRange,
+    MovementSpeed,
 }

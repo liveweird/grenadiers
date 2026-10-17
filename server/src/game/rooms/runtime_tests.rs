@@ -6,11 +6,13 @@ use tokio::sync::{oneshot, watch};
 
 use super::*;
 use crate::game::{rooms::owner::RoomCommand, sessions::ConnectionId};
+use grenadiers_core::game::Direction;
 
 fn identity() -> RoomIdentity {
     RoomIdentity {
         id: RoomId::new("00000000000000000000000000000001").unwrap(),
         code: RoomCode::new("ABCDEFGH").unwrap(),
+        profile: super::super::profile::RoomProfile::FixedClassicV1,
     }
 }
 

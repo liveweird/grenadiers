@@ -3,8 +3,7 @@ use std::fmt;
 use serde::de::{self, Visitor};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
-pub const GAMEPLAY_PROTOCOL_VERSION: u16 = 1;
-pub const RULES_VERSION: u16 = 1;
+pub const GAMEPLAY_PROTOCOL_VERSION: u16 = 2;
 pub const MAX_COUNTER: u32 = 2_147_483_647;
 pub const MAX_SAFE_TICK: u64 = 9_007_199_254_740_991;
 
@@ -92,6 +91,11 @@ impl fmt::Debug for RoomCode {
 pub struct ProtocolVersionInput(u16);
 
 impl ProtocolVersionInput {
+    #[must_use]
+    pub const fn new(value: u16) -> Self {
+        Self(value)
+    }
+
     #[must_use]
     pub const fn get(self) -> u16 {
         self.0
@@ -266,27 +270,46 @@ impl Serialize for GameplayVersion {
 }
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
-pub struct RulesVersion;
+pub enum RulesVersion {
+    #[default]
+    ClassicV1,
+    ClassicV2,
+}
 
-impl Serialize for RulesVersion {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        serializer.serialize_u16(RULES_VERSION)
+impl RulesVersion {
+    #[must_use]
+    pub const fn get(self) -> u16 {
+        match self {
+            Self::ClassicV1 => 1,
+            Self::ClassicV2 => 2,
+        }
     }
 }
 
-#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
-pub struct MapId;
-
-impl Serialize for MapId {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        serializer.serialize_str("fixed_v1")
+impl TryFrom<u16> for RulesVersion {
+    type Error = InvalidScalar;
+    fn try_from(value: u16) -> Result<Self, Self::Error> {
+        match value {
+            1 => Ok(Self::ClassicV1),
+            2 => Ok(Self::ClassicV2),
+            _ => Err(InvalidScalar),
+        }
     }
+}
+
+impl Serialize for RulesVersion {
+    fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        serializer.serialize_u16(self.get())
+    }
+}
+
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize)]
+pub enum MapId {
+    #[default]
+    #[serde(rename = "fixed_v1")]
+    FixedV1,
+    #[serde(rename = "generated_v1")]
+    GeneratedV1,
 }
 
 fn deserialize_bounded<'de, D>(

@@ -22,6 +22,9 @@ test('two native gameplay sockets finish one authoritative fixed-map round', asy
     await sendGame(two, { type: 'ready', ...binding, ready: true })
     await expect.poll(async () => snapshot(await gameFrames(one))?.room.phase.type).toBe('running')
     await expect.poll(async () => snapshot(await gameFrames(two))?.room.phase.type).toBe('running')
+    const firstRunning = snapshot(await gameFrames(one))!
+    expect(firstRunning.room).toMatchObject({ rulesVersion: 1, mapId: 'fixed_v1' })
+    expect(firstRunning.state.pickups).toEqual([])
     await expect.poll(async () => {
       await sendGame(one, { type: 'movement', ...binding, direction: 'east' })
       return snapshot(await gameFrames(one))?.state.actors[0].position.x ?? 0

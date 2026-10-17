@@ -10,7 +10,8 @@ use axum::{
 };
 use grenadiers_core::protocol::{
     Counter, ErrorCode, GAMEPLAY_PROTOCOL_VERSION, GameClientMessage, GameServerMessage,
-    GameplayVersion, MAX_CLIENT_MESSAGE_BYTES, encode_server_message, parse_client_message,
+    GameplayVersion, MAX_CLIENT_MESSAGE_BYTES, ProtocolVersionInput, encode_server_message,
+    parse_client_message,
 };
 use tokio::{
     sync::OwnedSemaphorePermit,
@@ -136,7 +137,7 @@ async fn game_session(
                     let _ = send_game(
                         &mut socket,
                         &GameServerMessage::IncompatibleProtocol {
-                            supported_version: GameplayVersion,
+                            supported_version: ProtocolVersionInput::new(GAMEPLAY_PROTOCOL_VERSION),
                         },
                     )
                     .await;

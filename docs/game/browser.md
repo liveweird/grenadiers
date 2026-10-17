@@ -51,3 +51,15 @@ diagnostics** expands the separate diagnostic transport controls; its socket is 
 No touch controller, audio, generated upgrades, scoring series, or reconnect UI is included
 in this first duel preview. A narrow viewport is supported for layout and spectating;
 playing currently requires a keyboard.
+
+## Exposed items and player upgrades
+
+Gameplay-v2 snapshots supply visible pickup cells and kinds. Pixi draws distinct bomb,
+cross/range, and speed marks above blocks and below bombs/flames/actors; it never guesses
+concealed contents. Retained drawings are reused while unchanged and destroyed when removed,
+replaced, or reset. The UI performs no collection simulation.
+
+Both player rows show available bombs (capacity minus live bombs), capacity, range, and speed
+levels 1–5 from authoritative actors. Running/result rows show alive or eliminated; pre-start
+rows show readiness. Labels are localized in English and Polish. The existing single-column
+layout bounds the upgrade rows at narrow widths. Generated-room activation is separate.

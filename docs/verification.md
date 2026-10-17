@@ -1,5 +1,18 @@
 # Repository verification
 
+## M4 exposed-item rendering and upgrade HUD — 2026-10-17
+
+The complete web gate passes **83 tests** with **96.80% statements, 92.08% branches,
+98.64% functions, and 98.82% lines**. Contract drift, Spectral, ESLint, Knip, shuffled coverage,
+and the TypeScript/Vite production build pass. E2E lint, Knip, types, and scenario parity pass.
+Independent review reports no actionable renderer findings. Tests cover all three item
+symbols, retained reuse, replacement/removal/reset cleanup, layer order, capped displayed
+levels, authoritative live-bomb availability, status, and localization.
+
+The duel scenario now checks both clients' upgrade HUD before/during/after a bomb, result
+liveness, and containment at 320 pixels. Actual image/runtime acceptance follows before merge.
+The immutable server profile remains fixed-v1; visible generated items are not yet activated.
+
 ## M4 gameplay-v2 contract and room profiles — 2026-10-17
 
 The locked server gate passes **177 core tests, 69 server tests, and 2 doctests**.

@@ -49,6 +49,11 @@ test('two players complete a rendered keyboard duel with shared authoritative re
     await expect.poll(() => latestSnapshot(games[1])?.room.phase.type).toBe('running')
     await Promise.all([one, two].map(expectPaintedCanvas))
     for (const page of [one, two]) {
+      for (const player of ['one', 'two']) {
+        await expect(page.getByLabel(`Player ${player} upgrades`).locator('dd')).toHaveText(['1', '1', '2', '1'])
+      }
+    }
+    for (const page of [one, two]) {
       expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([])
     }
     const arena = one.getByRole('region', { name: 'Grenadiers courtyard' })
@@ -76,6 +81,9 @@ test('two players complete a rendered keyboard duel with shared authoritative re
     await one.keyboard.down('Space')
     await expect.poll(() => games[0].commands.filter((command) => command.type === 'placeBomb')).toEqual([{ type: 'placeBomb', actionId: 1 }])
     await expect.poll(() => latestSnapshot(games[0])?.state.bombs.length).toBe(1)
+    for (const page of [one, two]) {
+      await expect(page.getByLabel('Player one upgrades').locator('dd')).toHaveText(['0', '1', '2', '1'])
+    }
     await one.screenshot({ path: testInfo.outputPath('running-bomb.png'), fullPage: true })
     await expect.poll(() => latestSnapshot(games[0])?.room.phase.type).toBe('result')
     await one.keyboard.up('Space')
@@ -88,9 +96,20 @@ test('two players complete a rendered keyboard duel with shared authoritative re
       const seconds = Math.ceil(result.state.remainingTicks / 60)
       await expect(page.getByLabel('Round time remaining')).toHaveText(`${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`)
       await expect(page.getByRole('status')).toContainText('Player two wins the round.')
+      await expect(page.getByLabel('Player one upgrades').locator('dd')).toHaveText(['1', '1', '2', '1'])
+      await expect(page.locator('.seat-one small')).toHaveText('Eliminated')
+      await expect(page.locator('.seat-two small')).toHaveText('Alive')
       expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([])
       await page.screenshot({ path: testInfo.outputPath(`result-${index}.png`), fullPage: true })
     }
+    await two.setViewportSize({ width: 320, height: 844 })
+    expect(await two.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false)
+    for (const stats of await two.locator('.actor-stats').all()) {
+      const bounds = await stats.boundingBox()
+      expect(bounds!.x).toBeGreaterThanOrEqual(0)
+      expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(320)
+    }
+    await two.screenshot({ path: testInfo.outputPath('result-320.png'), fullPage: true })
     const firstSnapshots = games[0].frames.filter((frame) => frame.type === 'snapshot')
     const secondSnapshots = games[1].frames.filter((frame) => frame.type === 'snapshot')
     const shared = firstSnapshots.filter((frame) => secondSnapshots.some((other) => other.room.revision === frame.room.revision))

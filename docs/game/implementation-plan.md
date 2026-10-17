@@ -243,8 +243,8 @@ Progress: v0.2.1 adds the explicit [versioned generator](generation.md), private
 contents, deterministic fallback, and opening validation. Live rooms still use the fixed
 preview. v0.2.2 adds checked [pickup layers](pickups.md), reveal/destruction, and private
 world construction. v0.2.3 adds headless collection, capped upgrades, and explicit round-number
-spawn/tie assignment. v0.2.4 coordinates gameplay v2 and immutable room profiles. Next come
-item rendering and generated-round activation with real-browser acceptance.
+spawn/tie assignment. v0.2.4 coordinates gameplay v2 and immutable room profiles. v0.2.5 adds retained item graphics and localized authoritative upgrade HUDs. Next comes
+generated-round activation with real-browser pickup acceptance.
 
 Work packages:
 

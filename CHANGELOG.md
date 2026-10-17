@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.2.5 — 2026-10-17
+
+- Draw exposed capacity, range, and speed items as distinct retained Pixi graphics, with
+  owned-resource cleanup on replacement, removal, and room reset.
+- Show authoritative available bombs, capacity, range, and speed levels for both players;
+  distinguish alive/eliminated status from lobby readiness in English and Polish.
+- Exercise actual HUD updates and bounded layouts down to 320 pixels in the rendered duel.
+
+Generated live rounds and real pickup collection acceptance follow in the activation release.
+
 ## 0.2.4 — 2026-10-17
 
 - Coordinate gameplay protocol v2 across schema, Rust, server, and browser authentication.

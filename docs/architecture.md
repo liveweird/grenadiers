@@ -86,3 +86,7 @@ must be recorded and how the two-player baseline will be delivered and verified.
 [ADR 0015](decisions/0015-match-series-and-staged-progression.md) separates implemented
 [headless match-series facts](game/match-series.md) and the pure [automatic lifecycle](game/match-lifecycle.md) from staged
 v3 server/browser integration. The live generated preview remains single-round until activation.
+
+[ADR 0016](decisions/0016-dormant-gameplay-v3-contract.md) stages explicit namespaced
+[gameplay-v3 contracts](game/protocol-v3.md) alongside active v2. Generated types and DTOs alone
+never activate match behavior or fabricate scores.

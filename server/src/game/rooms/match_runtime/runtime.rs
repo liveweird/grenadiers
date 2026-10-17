@@ -12,6 +12,8 @@ use super::publication;
 use crate::round_seed::RoundSeedSource;
 
 mod owner_helpers;
+#[cfg(test)]
+pub(super) mod replay;
 
 const REPORTS_PER_SNAPSHOT: usize = 3;
 

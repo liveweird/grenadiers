@@ -9,7 +9,7 @@ playable target remains two human players. M1 implements the
 [headless world and movement model](movement.md); M2 adds [bombs, flames, damage, and round
 outcomes](combat.md), including explicit public projections/events. M3 completes
 [gameplay contracts](protocol.md), anonymous sessions, authenticated [rooms](rooms.md),
-authoritative scheduling, and the [playable browser duel](browser.md). The fixed-map preview
+authoritative scheduling, and the [playable browser duel](browser.md). The current preview
 plays generated classic-v2 first-to-three matches with upgrades, automatic round resets,
 and consensual rematch. Reconnect, bots, larger matches, matchmaking, and durable stats follow.
 

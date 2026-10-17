@@ -1,4 +1,6 @@
-import type { SnapshotMessage } from '../game/arena/types'
+import type { GameServerMessage } from '../game/schema'
+
+type SnapshotMessage = Extract<GameServerMessage, { type: 'snapshot' }>
 
 export function gameSnapshot(): SnapshotMessage {
   return {

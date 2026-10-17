@@ -74,28 +74,44 @@ export async function installTransportProbe(page: Page): Promise<void> {
       endpoint.protocol = location.protocol === 'https:' ? 'wss:' : 'ws:'
       const socket = new NativeSocket(endpoint)
       return new Promise((resolve, reject) => {
+        let stage: 'created' | 'open' | 'authenticated' | 'resumeSent' = 'created'
+        let publicMessageCount = 0
+        let lastPublicMessageType = 'none'
+        const startedAt = performance.now()
+        const failure = (message: string): Error => new Error(
+          `${message} (stage=${stage} readyState=${socket.readyState} `
+          + `publicMessages=${publicMessageCount} lastPublicMessage=${lastPublicMessageType} `
+          + `elapsedMs=${Math.max(0, Math.round(performance.now() - startedAt))})`,
+        )
         const timer = setTimeout(() => {
+          const error = failure('Private resume probe timed out')
           socket.close()
-          reject(new Error('Private resume probe timed out'))
+          reject(error)
         }, 10_000)
         const fail = (): void => {
           clearTimeout(timer)
-          reject(new Error('Private resume probe closed before admission'))
+          reject(failure('Private resume probe closed before admission'))
         }
         socket.addEventListener('error', fail, { once: true })
         socket.addEventListener('close', fail, { once: true })
         socket.addEventListener('open', () => {
+          stage = 'open'
           socket.send(JSON.stringify({ type: 'authenticate', protocolVersion: 6, token: session.token }))
         }, { once: true })
         socket.addEventListener('message', (event: MessageEvent) => {
           const message = JSON.parse(String(event.data)) as GameServerMessage
+          publicMessageCount += 1
+          lastPublicMessageType = ['authenticated', 'admitted', 'error', 'roomState', 'snapshot'].includes(message.type)
+            ? message.type : 'other'
           if (message.type === 'authenticated') {
+            stage = 'authenticated'
             const altered = `${capability.token[0] === '0' ? '1' : '0'}${capability.token.slice(1)}`
             socket.send(JSON.stringify({
               type: 'resumeRoom', sequence: 1,
               roomId: kind === 'wrongRoom' ? 'f'.repeat(32) : capability.roomId,
               resumeToken: kind === 'wrongCapability' ? altered : capability.token,
             }))
+            stage = 'resumeSent'
           } else if (message.type === 'admitted' || message.type === 'error') {
             clearTimeout(timer)
             socket.removeEventListener('close', fail)

@@ -17,6 +17,16 @@ pass. The existing Pixi arena is shared through a narrow presentation boundary.
 The panel remains dormant. No visual/WebGL or live match acceptance is claimed until the
 coordinated endpoint/client activation.
 
+A clean committed-tree build of `c8de0537b8298cbef9d99b8f9e1e22973a6e2591` produces
+`sha256:68e7c577cd618feca1f40f2f5221fb30ec67d8349a827a4faab228d50cc46646`.
+Compose and ready local Kubernetes use that exact image. Each path passes health/readiness,
+all six default browser scenarios and the separate read-only fixture scenario. Strict schemas
+validate all three resources. Pinned archive-only Trivy reports zero fixed HIGH/CRITICAL
+findings; `/app` contains no seed files. Kubernetes retains non-root UID/GID 65532, read-only
+root, dropped capabilities, no privilege escalation, RuntimeDefault, and a read-only 0444
+fixture Secret. Temporary resources and exports are removed; logs/screenshots remain.
+This documentation-only evidence update does not activate the dormant implementation.
+
 ## Dormant authoritative match runtime — 2026-10-17
 
 The integrated locked server gate passes **243 core tests, 107 server tests, and 2 doctests**.

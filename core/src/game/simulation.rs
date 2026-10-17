@@ -5,9 +5,12 @@ use super::arena::Terrain;
 use super::assignment::RoundAssignment;
 #[cfg(test)]
 use super::bombs::Bomb;
+use super::damage::DamageGrace;
+use super::effects::{EffectiveSpeed, TimedEffects};
 use super::events::StepEvent;
 use super::geometry::MovementTrace;
 use super::input::{Direction, HeldDirections};
+use super::inventory::Inventory;
 use super::movement;
 use super::rules::RulesConfig;
 use super::types::{CellId, EntityId, Position, SeatId, SpeedLevel, Tick};
@@ -58,6 +61,9 @@ pub struct Actor {
     capacity: u16,
     range: u16,
     alive: bool,
+    inventory: Inventory,
+    effects: TimedEffects,
+    damage_grace: Option<DamageGrace>,
 }
 
 impl Actor {
@@ -99,6 +105,26 @@ impl Actor {
     #[must_use]
     pub const fn alive(&self) -> bool {
         self.alive
+    }
+
+    #[must_use]
+    pub const fn inventory(&self) -> &Inventory {
+        &self.inventory
+    }
+
+    #[must_use]
+    pub const fn effects(&self) -> &TimedEffects {
+        &self.effects
+    }
+
+    #[must_use]
+    pub fn effective_speed(&self, at: Tick) -> EffectiveSpeed {
+        self.effects.effective_speed(self.speed, at)
+    }
+
+    #[must_use]
+    pub fn effective_bomb_range(&self, at: Tick) -> u16 {
+        self.effects.bomb_range(self.range, at)
     }
 }
 
@@ -321,6 +347,9 @@ impl Actor {
             capacity: rules.bomb_capacity(),
             range: rules.bomb_range(),
             alive: true,
+            inventory: Inventory::default(),
+            effects: TimedEffects::default(),
+            damage_grace: None,
         }
     }
 }
@@ -339,6 +368,9 @@ mod explosion_step;
 #[cfg(test)]
 #[path = "flame_tests.rs"]
 mod flame_tests;
+#[cfg(test)]
+#[path = "item_foundation_tests.rs"]
+mod item_foundation_tests;
 #[path = "simulation_pickups.rs"]
 mod pickup_step;
 #[cfg(test)]

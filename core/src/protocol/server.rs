@@ -1,7 +1,10 @@
 use serde::Serialize;
 
 use super::events::WireEvent;
-use super::scalars::{Counter, GameplayVersion, MapId, RoomCode, RoomId, RulesVersion, Seat, Tick};
+use super::scalars::{
+    Counter, GameplayVersion, MapId, ProtocolVersionInput, RoomCode, RoomId, RulesVersion, Seat,
+    Tick,
+};
 use super::snapshot::GameState;
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize)]
@@ -13,7 +16,7 @@ pub enum GameServerMessage {
     },
     IncompatibleProtocol {
         #[serde(rename = "supportedVersion")]
-        supported_version: GameplayVersion,
+        supported_version: ProtocolVersionInput,
     },
     RoomState {
         room: RoomView,

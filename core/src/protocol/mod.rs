@@ -14,8 +14,8 @@ pub use events::{EventKind, MAX_EVENT_INDEX, MAX_SNAPSHOT_EVENTS, WireEvent};
 pub use projection::{ProjectedRound, ProjectionError, project_state};
 pub use scalars::{
     Cell, Counter, Direction, EntityId, GAMEPLAY_PROTOCOL_VERSION, GameplayVersion, InvalidScalar,
-    MAX_COUNTER, MAX_SAFE_TICK, MapId, Position, ProtocolVersionInput, RULES_VERSION, RoomCode,
-    RoomId, RulesVersion, Seat, SessionToken, Tick,
+    MAX_COUNTER, MAX_SAFE_TICK, MapId, Position, ProtocolVersionInput, RoomCode, RoomId,
+    RulesVersion, Seat, SessionToken, Tick,
 };
 pub use server::{
     DrawReason, ErrorCode, GameServerMessage, InterruptReason, RoomPhase, RoomView, SeatStatus,
@@ -23,7 +23,7 @@ pub use server::{
 };
 pub use snapshot::{
     ARENA_TERRAIN_CELLS, ActorView, ArenaView, BombView, FlameView, GameState, MAX_BLOCKS,
-    MAX_BOMBS, MAX_FLAMES, MAX_RUNNING_UPDATES, Terrain,
+    MAX_BOMBS, MAX_FLAMES, MAX_PICKUPS, MAX_RUNNING_UPDATES, PickupKind, PickupView, Terrain,
 };
 
 pub const MAX_CLIENT_MESSAGE_BYTES: usize = 4_096;

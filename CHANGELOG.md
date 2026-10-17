@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.2.4 — 2026-10-17
+
+- Coordinate gameplay protocol v2 across schema, Rust, server, and browser authentication.
+- Transmit exposed typed pickups and collection events with checked rules/map identifiers;
+  preserve bounded frames and keep concealed/pending contents and seeds private.
+- Bind construction and publication labels to an immutable room profile; retain the fixed
+  classic-v1 live preview until generated-room activation.
+
+Gameplay v1 clients must reload with the matching v2 server. Diagnostics remain protocol v1.
+
 ## 0.2.3 — 2026-10-17
 
 - Collect exposed pickups after damage using final actor positions and deterministic ties.

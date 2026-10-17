@@ -34,7 +34,7 @@ const room: Extract<GameServerMessage, { type: 'roomState' }>['room'] = {
 }
 
 const servers = [
-  { type: 'authenticated', protocolVersion: 1 },
+  { type: 'authenticated', protocolVersion: 2 },
   { type: 'incompatibleProtocol', supportedVersion: 1 },
   { type: 'roomState', room, youSeat: 'one' },
   { type: 'leftRoom', roomId, sequence: 1 },
@@ -52,8 +52,8 @@ const wrongDirection: GameClientMessage = {
 
 const wrongVersion: GameServerMessage = {
   type: 'incompatibleProtocol',
-  // @ts-expect-error the advertised supported gameplay version is fixed at one
-  supportedVersion: 2,
+  // @ts-expect-error protocol versions are bounded integers, not strings
+  supportedVersion: '2',
 }
 
 // @ts-expect-error error sequence is required even when it is null
@@ -173,8 +173,8 @@ describe('gameplay server schema', () => {
       expect(valid(validateServer, { ...message, unexpected: true })).toBe(false)
       expect(valid(validateServer, { ...message, type: 'unknown' })).toBe(false)
     }
-    expect(valid(validateServer, { type: 'authenticated', protocolVersion: 2 })).toBe(false)
-    expect(valid(validateServer, { type: 'incompatibleProtocol', supportedVersion: 2 })).toBe(false)
+    expect(valid(validateServer, { type: 'authenticated', protocolVersion: 1 })).toBe(false)
+    expect(valid(validateServer, { type: 'incompatibleProtocol', supportedVersion: 65_536 })).toBe(false)
   })
 
   it('validates every room phase, both draw reasons, and interruption without a result', () => {
@@ -199,6 +199,16 @@ describe('gameplay server schema', () => {
       type: 'roomState', room: withRoom({ phase: { ...phases[6], result: { type: 'winner', seat: 'one' } } }),
       youSeat: 'one',
     })).toBe(false)
+  })
+
+  it('accepts both rules and map versions while rejecting unknown values', () => {
+    for (const rulesVersion of [1, 2]) {
+      for (const mapId of ['fixed_v1', 'generated_v1']) {
+        expect(valid(validateServer, { type: 'roomState', room: withRoom({ rulesVersion, mapId }), youSeat: 'one' })).toBe(true)
+      }
+    }
+    expect(valid(validateServer, { type: 'roomState', room: withRoom({ rulesVersion: 3 }), youSeat: 'one' })).toBe(false)
+    expect(valid(validateServer, { type: 'roomState', room: withRoom({ mapId: 'unknown' }), youSeat: 'one' })).toBe(false)
   })
 
   it('rejects missing and extra nested fields, invalid bounds, and invalid room collections', () => {

@@ -2,11 +2,13 @@
 
 export type ProtocolVersionInput = number
 
-export type GameplayVersion = 1
+export type GameplayVersion = 2
 
-export type RulesVersion = 1
+export type RulesVersion = 1 | 2
 
-export type MapId = "fixed_v1"
+export type MapId = "fixed_v1" | "generated_v1"
+
+export type PickupKind = "bombCapacity" | "blastRange" | "movementSpeed"
 
 export type SessionToken = string
 
@@ -104,6 +106,12 @@ export interface GameState {
   "actors": ActorView[];
   "bombs": BombView[];
   "flames": FlameView[];
+  "pickups": PickupView[];
+}
+
+export interface PickupView {
+  "cell": Cell;
+  "kind": PickupKind;
 }
 
 export interface ArenaView {
@@ -145,7 +153,7 @@ export interface WireEvent {
   "kind": EventKind;
 }
 
-export type EventKind = BombPlacedEvent | BombDetonatedEvent | ActorEliminatedEvent | RoundEndedEvent
+export type EventKind = BombPlacedEvent | BombDetonatedEvent | ActorEliminatedEvent | RoundEndedEvent | PickupCollectedEventKind
 
 export interface BombPlacedEvent {
   "type": "bombPlaced";
@@ -166,6 +174,14 @@ export interface ActorEliminatedEvent {
 export interface RoundEndedEvent {
   "type": "roundEnded";
   "result": RoundResult;
+}
+
+export interface PickupCollectedEventKind {
+  "type": "pickupCollected";
+  "id": EntityId;
+  "seat": Seat;
+  "cell": Cell;
+  "kind": PickupKind;
 }
 
 export type GameClientMessage = Authenticate | CreateRoom | JoinRoom | Ready | Movement | PlaceBomb | LeaveRoom
@@ -227,7 +243,7 @@ export interface Authenticated {
 
 export interface IncompatibleProtocol {
   "type": "incompatibleProtocol";
-  "supportedVersion": GameplayVersion;
+  "supportedVersion": ProtocolVersionInput;
 }
 
 export interface RoomState {

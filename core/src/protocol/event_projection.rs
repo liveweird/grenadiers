@@ -2,7 +2,8 @@ use crate::game;
 
 use super::events::{EventKind, MAX_EVENT_INDEX, MAX_SNAPSHOT_EVENTS, WireEvent};
 use super::projection::{
-    ProjectionError, project_bomb_record, project_result, wire_seat, wire_tick,
+    ProjectionError, project_bomb_record, project_result, wire_cell, wire_pickup_kind, wire_seat,
+    wire_tick,
 };
 use super::scalars::EntityId;
 
@@ -51,9 +52,17 @@ pub fn project_events(reports: &[game::StepReport]) -> Result<Vec<WireEvent>, Pr
                     id: EntityId::new(id.0),
                     seat: wire_seat(seat),
                 },
-                game::StepEventKind::PickupCollected { .. } => {
-                    return Err(ProjectionError::InvalidEvent);
-                }
+                game::StepEventKind::PickupCollected {
+                    id,
+                    seat,
+                    cell,
+                    kind,
+                } => EventKind::PickupCollected {
+                    id: EntityId::new(id.0),
+                    seat: wire_seat(seat),
+                    cell: wire_cell(cell).map_err(|_| ProjectionError::InvalidEvent)?,
+                    kind: wire_pickup_kind(kind),
+                },
                 game::StepEventKind::RoundEnded(result) => EventKind::RoundEnded {
                     result: project_result(Some(result)).ok_or(ProjectionError::InvalidEvent)?,
                 },

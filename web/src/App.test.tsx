@@ -79,6 +79,7 @@ function snapshot(revision: number, phase: RoomPhase = { type: 'running' }): Sna
       ],
       bombs: [],
       flames: [],
+      pickups: [],
     },
     events: [],
   }
@@ -97,8 +98,8 @@ async function beginRoom(user: ReturnType<typeof userEvent.setup>, action: 'crea
   await waitFor(() => expect(appSockets.filter((socket) => socket.url.endsWith('/api/v1/game/ws'))).toHaveLength(1))
   const socket = appSockets.find((candidate) => candidate.url.endsWith('/api/v1/game/ws'))!
   act(() => socket.emit('open'))
-  expect(JSON.parse(socket.sent[0])).toEqual({ type: 'authenticate', protocolVersion: 1, token })
-  act(() => socket.message({ type: 'authenticated', protocolVersion: 1 }))
+  expect(JSON.parse(socket.sent[0])).toEqual({ type: 'authenticate', protocolVersion: 2, token })
+  act(() => socket.message({ type: 'authenticated', protocolVersion: 2 }))
   return socket
 }
 

@@ -12,6 +12,7 @@ use tokio::{
 
 mod input;
 mod owner;
+mod profile;
 mod publication;
 mod runtime;
 mod types;
@@ -211,7 +212,11 @@ impl GameRooms {
                 let id = RoomId::new(&format!("{prefix:016x}{serial:016x}"))
                     .map_err(|_| RoomError::CapacityReached)?;
                 registry.next_serial = next_serial;
-                return Ok(RoomIdentity { id, code });
+                return Ok(RoomIdentity {
+                    id,
+                    code,
+                    profile: profile::RoomProfile::FixedClassicV1,
+                });
             }
         }
         Err(RoomError::CapacityReached)

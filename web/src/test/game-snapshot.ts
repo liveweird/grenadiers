@@ -30,6 +30,7 @@ export function gameSnapshot(): SnapshotMessage {
       ],
       bombs: [{ id: 30, cell: { column: 1, row: 1 }, owner: 10, range: 2, placedAt: 1, detonatesAt: 181 }],
       flames: [{ cell: { column: 3, row: 3 }, expiresAt: 130 }],
+      pickups: [],
     },
     events: [],
   }

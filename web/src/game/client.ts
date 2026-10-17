@@ -191,7 +191,7 @@ export class GameClient {
     socket.addEventListener('open', () => {
       if (!this.current(generation, socket)) return
       this.update({ connection: 'authenticating' })
-      socket.send(JSON.stringify({ type: 'authenticate', protocolVersion: 1, token: credential }))
+      socket.send(JSON.stringify({ type: 'authenticate', protocolVersion: 2, token: credential }))
       credential = ''
     })
     socket.addEventListener('message', (event) => this.receive(generation, socket, event.data))

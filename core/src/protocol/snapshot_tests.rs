@@ -4,8 +4,9 @@ use serde_json::Value;
 use super::{
     ARENA_TERRAIN_CELLS, ActorView, ArenaView, BombView, Cell, Counter, Direction, DrawReason,
     EncodeServerMessageError, EntityId, EventKind, FlameView, GameServerMessage, GameState,
-    MAX_COUNTER, MapId, Position, RoomCode, RoomId, RoomPhase, RoomView, RulesVersion, Seat,
-    SeatStatus, Terrain, Tick, WireEvent, WireRoundResult, encode_server_message,
+    MAX_COUNTER, MapId, PickupKind, PickupView, Position, RoomCode, RoomId, RoomPhase, RoomView,
+    RulesVersion, Seat, SeatStatus, Terrain, Tick, WireEvent, WireRoundResult,
+    encode_server_message,
 };
 
 fn server_schema() -> Validator {
@@ -21,8 +22,8 @@ fn room(phase: RoomPhase, tick: Tick) -> RoomView {
         round_id: Counter::new(1).unwrap(),
         revision: Counter::new(2).unwrap(),
         tick,
-        rules_version: RulesVersion,
-        map_id: MapId,
+        rules_version: RulesVersion::ClassicV1,
+        map_id: MapId::FixedV1,
         seats: [
             SeatStatus {
                 seat: Seat::One,
@@ -80,6 +81,7 @@ fn state() -> GameState {
             cell: Cell::new(6, 5).unwrap(),
             expires_at: Tick::new(130).unwrap(),
         }],
+        pickups: Vec::new(),
     }
 }
 
@@ -199,12 +201,20 @@ fn maximal_structural_snapshot() -> GameServerMessage {
             position: Position::new(15_359, 13_311).unwrap(),
             heading: Direction::North,
             speed_level: 4,
-            alive: true,
+            alive: false,
             bomb_capacity: 8,
             bomb_range: 8,
             live_bomb_count: 8,
         }),
         bombs: (0..16).map(|_| maximal_bomb()).collect(),
+        pickups: cells
+            .iter()
+            .copied()
+            .map(|cell| PickupView {
+                cell,
+                kind: PickupKind::MovementSpeed,
+            })
+            .collect(),
         flames: cells
             .into_iter()
             .map(|cell| FlameView {
@@ -222,15 +232,21 @@ fn maximal_structural_snapshot() -> GameServerMessage {
         },
         tick,
     );
+    room.rules_version = RulesVersion::ClassicV2;
+    room.map_id = MapId::GeneratedV1;
+    for seat in &mut room.seats {
+        seat.occupied = false;
+        seat.ready = false;
+    }
     room.round_id = Counter::new(MAX_COUNTER).unwrap();
     room.revision = Counter::new(MAX_COUNTER).unwrap();
     GameServerMessage::Snapshot {
         room,
         state,
         events: (0..64)
-            .map(|index| WireEvent {
+            .map(|_| WireEvent {
                 tick,
-                index,
+                index: 63,
                 kind: EventKind::BombDetonated {
                     bomb: maximal_bomb(),
                 },
@@ -244,6 +260,7 @@ fn maximal_bounded_structure_conforms_and_fits_the_frame_budget() {
     let message = maximal_structural_snapshot();
     let (_, encoded_bytes) = assert_valid(&message);
 
+    eprintln!("Maximal v2 structural snapshot: {encoded_bytes} UTF-8 bytes");
     assert!(encoded_bytes <= 65_536, "encoded {encoded_bytes} bytes");
 }
 

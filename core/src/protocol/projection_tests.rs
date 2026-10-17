@@ -173,7 +173,7 @@ fn explicit_speed_and_result_mappings_cover_every_domain_variant() {
 #[test]
 fn rejects_rules_tick_clock_and_arena_shape_failures() {
     let mut view = initial_view();
-    view.rules_version = 2;
+    view.rules_version = 3;
     assert_eq!(
         project_state(&view),
         Err(ProjectionError::UnsupportedRulesVersion)
@@ -327,3 +327,6 @@ fn rejects_results_that_disagree_with_life_and_running_clock() {
     view.result = Some(RoundResult::Draw(crate::game::DrawReason::Timeout));
     assert_eq!(project_state(&view), Err(ProjectionError::InvalidResult));
 }
+
+#[path = "pickup_projection_tests.rs"]
+mod pickups;

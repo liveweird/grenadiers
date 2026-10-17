@@ -3,9 +3,8 @@ use std::sync::Arc;
 use grenadiers_core::{
     game::{State, StepReport},
     protocol::{
-        Counter, GameServerMessage, InterruptReason as WireInterrupt, MapId, RoomPhase, RoomView,
-        RulesVersion, Seat, SeatStatus, Tick, WireRoundResult, encode_server_message,
-        project_events, project_state,
+        Counter, GameServerMessage, InterruptReason as WireInterrupt, RoomPhase, RoomView, Seat,
+        SeatStatus, Tick, WireRoundResult, encode_server_message, project_events, project_state,
     },
     room::{InterruptReason, Phase, RoomLifecycle},
 };
@@ -58,8 +57,8 @@ pub(super) fn room_view(
         .map_err(|_| PublicationError)?,
         revision: Counter::new(revision).map_err(|_| PublicationError)?,
         tick: wire_tick(lifecycle.tick())?,
-        rules_version: RulesVersion,
-        map_id: MapId,
+        rules_version: identity.profile.rules_version(),
+        map_id: identity.profile.map_id(),
         seats,
         phase,
     })
@@ -74,7 +73,8 @@ pub(super) fn snapshot(
 ) -> Result<(RoomView, Arc<str>), PublicationError> {
     let room = room_view(identity, lifecycle, revision)?;
     let projected = project_state(&state.public_view()).map_err(|_| PublicationError)?;
-    if projected.tick.get() != lifecycle.tick().0
+    if projected.rules_version != identity.profile.rules_version()
+        || projected.tick.get() != lifecycle.tick().0
         || projected.result != lifecycle_result(lifecycle.phase())
     {
         return Err(PublicationError);

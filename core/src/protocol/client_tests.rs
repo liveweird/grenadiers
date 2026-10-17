@@ -161,16 +161,16 @@ fn canonical_secret_room_and_invitation_strings_are_enforced() {
 }
 
 #[test]
-fn version_two_is_structurally_available_for_compatibility_handling() {
+fn older_version_is_structurally_available_for_compatibility_handling() {
     let parsed = assert_valid(&format!(
-        r#"{{"type":"authenticate","protocolVersion":2,"token":"{TOKEN}"}}"#
+        r#"{{"type":"authenticate","protocolVersion":1,"token":"{TOKEN}"}}"#
     ));
     assert!(matches!(
         parsed,
         GameClientMessage::Authenticate {
             protocol_version,
             ..
-        } if protocol_version.get() == 2
+        } if protocol_version.get() == 1
     ));
 }
 

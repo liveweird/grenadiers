@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://grenadiers.local/schemas/gameplay-v1.json",
-  "title": "Grenadiers gameplay protocol v1",
+  "$id": "https://grenadiers.local/schemas/gameplay-v2.json",
+  "title": "Grenadiers gameplay protocol v2",
   "description": "Anonymous single-round gameplay control and lifecycle contract. Rules v1 uses 60 ticks per second and 1024 position units per cell.",
   "$ref": "#/$defs/GameServerMessage",
   "$defs": {
@@ -10,15 +10,14 @@
       "minimum": 0,
       "maximum": 65535
     },
-    "GameplayVersion": {
-      "const": 1
-    },
+    "GameplayVersion": { "const": 2 },
     "RulesVersion": {
-      "const": 1
+      "enum": [1, 2]
     },
     "MapId": {
-      "const": "fixed_v1"
+      "enum": ["fixed_v1", "generated_v1"]
     },
+    "PickupKind": { "enum": ["bombCapacity", "blastRange", "movementSpeed"] },
     "SessionToken": {
       "type": "string",
       "minLength": 64,
@@ -202,7 +201,7 @@
     "GameState": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["runningUpdates", "remainingTicks", "arena", "actors", "bombs", "flames"],
+      "required": ["runningUpdates", "remainingTicks", "arena", "actors", "bombs", "flames", "pickups"],
       "properties": {
         "runningUpdates": { "type": "integer", "minimum": 0, "maximum": 10800 },
         "remainingTicks": { "type": "integer", "minimum": 0, "maximum": 10800 },
@@ -224,7 +223,23 @@
           "minItems": 0,
           "maxItems": 195,
           "items": { "$ref": "#/$defs/FlameView" }
+        },
+        "pickups": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 195,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/PickupView" }
         }
+      }
+    },
+    "PickupView": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cell", "kind"],
+      "properties": {
+        "cell": { "$ref": "#/$defs/Cell" },
+        "kind": { "$ref": "#/$defs/PickupKind" }
       }
     },
     "ArenaView": {
@@ -305,7 +320,8 @@
         { "$ref": "#/$defs/BombPlacedEvent" },
         { "$ref": "#/$defs/BombDetonatedEvent" },
         { "$ref": "#/$defs/ActorEliminatedEvent" },
-        { "$ref": "#/$defs/RoundEndedEvent" }
+        { "$ref": "#/$defs/RoundEndedEvent" },
+        { "$ref": "#/$defs/PickupCollectedEventKind" }
       ]
     },
     "BombPlacedEvent": {
@@ -343,6 +359,18 @@
       "properties": {
         "type": { "const": "roundEnded" },
         "result": { "$ref": "#/$defs/RoundResult" }
+      }
+    },
+    "PickupCollectedEventKind": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "id", "seat", "cell", "kind"],
+      "properties": {
+        "type": { "const": "pickupCollected" },
+        "id": { "$ref": "#/$defs/EntityId" },
+        "seat": { "$ref": "#/$defs/Seat" },
+        "cell": { "$ref": "#/$defs/Cell" },
+        "kind": { "$ref": "#/$defs/PickupKind" }
       }
     },
     "GameClientMessage": {
@@ -462,7 +490,7 @@
       "required": ["type", "supportedVersion"],
       "properties": {
         "type": { "const": "incompatibleProtocol" },
-        "supportedVersion": { "$ref": "#/$defs/GameplayVersion" }
+        "supportedVersion": { "$ref": "#/$defs/ProtocolVersionInput" }
       }
     },
     "RoomState": {

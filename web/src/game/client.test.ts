@@ -62,7 +62,7 @@ async function authenticate(value: Harness, intent: AdmissionIntent = { type: 'c
   await vi.waitFor(() => expect(value.sockets).toHaveLength(1))
   const socket = value.sockets[0]
   socket.emit('open')
-  socket.message({ type: 'authenticated', protocolVersion: 1 })
+  socket.message({ type: 'authenticated', protocolVersion: 2 })
   return socket
 }
 
@@ -104,6 +104,7 @@ function snapshot(revision: number, roundId = 1, alive = true): Snapshot {
       ],
       bombs: [],
       flames: [],
+      pickups: [],
     },
     events: [],
   }
@@ -130,7 +131,7 @@ describe('GameClient session and connection lifecycle', () => {
     expect(socket.url).toBe('wss://play.test/api/v1/game/ws')
     expect(socket.url).not.toContain(token)
     expect(messages(socket)).toEqual([
-      { type: 'authenticate', protocolVersion: 1, token },
+      { type: 'authenticate', protocolVersion: 2, token },
       { type: 'joinRoom', sequence: 1, roomCode: 'ABCDEFGH' },
     ])
     expect(localStorage).toHaveLength(0)
@@ -173,7 +174,7 @@ describe('GameClient session and connection lifecycle', () => {
     stale.emit('open')
     value.client.disconnect()
     expect(stale.close).toHaveBeenCalled()
-    stale.message({ type: 'authenticated', protocolVersion: 1 })
+    stale.message({ type: 'authenticated', protocolVersion: 2 })
     stale.emit('close')
     expect(value.client.getState().connection).toBe('disconnected')
   })
@@ -208,10 +209,10 @@ describe('GameClient session and connection lifecycle', () => {
 
     socket.message({ type: 'roomState', room: room(1), youSeat: 'one' })
     expect(value.client.getState().room).toBeNull()
-    socket.message({ type: 'authenticated', protocolVersion: 1 })
-    socket.message({ type: 'authenticated', protocolVersion: 1 })
+    socket.message({ type: 'authenticated', protocolVersion: 2 })
+    socket.message({ type: 'authenticated', protocolVersion: 2 })
     expect(messages(socket)).toEqual([
-      { type: 'authenticate', protocolVersion: 1, token },
+      { type: 'authenticate', protocolVersion: 2, token },
       { type: 'createRoom', sequence: 1 },
     ])
 
@@ -240,11 +241,13 @@ describe('GameClient session and connection lifecycle', () => {
     malformedSocket.emit('message', '{')
     expect(malformed.client.getState().failure).toBe('invalidServerMessage')
 
-    const incompatible = harness()
-    const incompatibleSocket = await authenticate(incompatible)
-    incompatibleSocket.message({ type: 'incompatibleProtocol', supportedVersion: 1 })
-    expect(incompatible.client.getState().failure).toBe('incompatibleProtocol')
-    expect(incompatibleSocket.close).toHaveBeenCalled()
+    for (const supportedVersion of [1, 3]) {
+      const incompatible = harness()
+      const incompatibleSocket = await authenticate(incompatible)
+      incompatibleSocket.message({ type: 'incompatibleProtocol', supportedVersion })
+      expect(incompatible.client.getState().failure).toBe('incompatibleProtocol')
+      expect(incompatibleSocket.close).toHaveBeenCalled()
+    }
   })
 })
 

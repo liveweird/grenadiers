@@ -70,6 +70,7 @@ const snapshot: SnapshotMessage = {
     ],
     bombs: [bomb],
     flames: [{ cell: { column: 3, row: 5 }, expiresAt: maximumTick }],
+    pickups: [],
   },
   events: [
     { tick: 40, index: 0, kind: { type: 'bombPlaced', bomb } },
@@ -165,6 +166,11 @@ describe('gameplay snapshot schema', () => {
     expect(snapshot.events[0].tick).toBe(snapshot.events[1].tick)
     expect(snapshot.events[0].kind.type).toBe('bombPlaced')
     expect(snapshot.events[1].kind.type).toBe('bombDetonated')
+    for (const kind of ['bombCapacity', 'blastRange', 'movementSpeed'] as const) {
+      expect(valid({ ...copy(), state: { ...copy().state, pickups: [{ cell: { column: 1, row: 1 }, kind }] }, events: [
+        { tick: 40, index: 0, kind: { type: 'pickupCollected', id: 10, seat: 'one', cell: { column: 1, row: 1 }, kind } },
+      ] })).toBe(true)
+    }
   })
 
   it('rejects missing and extra fields throughout the nested snapshot', () => {
@@ -185,6 +191,12 @@ describe('gameplay snapshot schema', () => {
     expectInvalid({ ...copy(), youSeat: 'one' })
     expectInvalid({ ...copy(), state: { ...copy().state, score: 1 } })
     expectInvalid({ ...copy(), state: { ...copy().state, items: [] } })
+    expectInvalid({ ...copy(), state: { ...copy().state, pickups: undefined } })
+    expectInvalid({ ...copy(), state: { ...copy().state, pickups: null } })
+    expectInvalid({ ...copy(), state: { ...copy().state, pickups: Array.from({ length: 196 }, () => ({ cell: { column: 1, row: 1 }, kind: 'bombCapacity' })) } })
+    expectInvalid({ ...copy(), state: { ...copy().state, pickups: [{ cell: { column: 15, row: 1 }, kind: 'bombCapacity' }] } })
+    expectInvalid({ ...copy(), state: { ...copy().state, pickups: [{ cell: { column: 1, row: 1 }, kind: 'unknown' }] } })
+    expectInvalid({ ...copy(), state: { ...copy().state, pickups: [{ cell: { column: 1, row: 1 }, kind: 'bombCapacity', seed: 1 }] } })
     expectInvalid({ ...copy(), state: { ...copy().state, arena: { ...copy().state.arena, seed: 1 } } })
     const event = copy().events[0]
     expectInvalid({ ...copy(), events: [{ ...event, kind: { ...event.kind, extra: true } }] })

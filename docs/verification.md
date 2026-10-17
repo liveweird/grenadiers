@@ -1,5 +1,31 @@
 # Repository verification
 
+## Dormant bounded match owner — 2026-10-17
+
+The locked server gate passes **243 core tests, 134 server tests, and 2 doctests**.
+Rust line coverage is **6,333/6,799 lines, 93.15%**, above the unchanged 80% floor.
+Independent review and follow-up closure report no outstanding findings. Twenty-seven owner
+cases cover real match finality, departure batching and generation fences, queue bounds,
+seed/start boundaries, expired/canceled admission, input fencing, 20 Hz publication, overload,
+lobby/rematch deadlines, nonfinal retention, command fairness, and sticky shutdown.
+
+Review fixes make shutdown/overload atomically apply pending departures before one final
+publication, preserving reports, vacancy, final outcome, and prompt leave acknowledgments.
+Canceled queued admission causes no occupancy/revision mutation. Source remains below 400
+lines per file. The four-update loop/yield bound is statically checked and fairness tested;
+a direct deterministic exact-yield test is not present. Production routing and process/socket
+draining remain activation checks; this owner is deliberately test-only until that switch.
+
+A clean committed-tree build of `c73986376b01fea0b8947995125ae0fc787920e1` produces
+`sha256:0e16c2da99dd620b7bc38662e3c2ceaafd1048882fba6937a0ea1923f96516b1`.
+Compose and ready local Kubernetes use that exact image. Each path passes health/readiness,
+all six default browser scenarios and the separate read-only pickup-fixture scenario. Strict
+schemas validate all three resources. Pinned archive-only Trivy reports zero fixable
+HIGH/CRITICAL findings; `/app` contains no seed files. Kubernetes retains UID/GID 65532,
+a read-only root, dropped capabilities, no privilege escalation, RuntimeDefault, and a
+read-only 0444 fixture Secret. Temporary resources and exports are removed; logs and
+screenshots remain. This evidence update leaves production routing unchanged.
+
 ## Dormant v3 browser client and match panel — 2026-10-17
 
 The complete web gate passes **120 tests** with **94.88% statements, 89.47% branches,

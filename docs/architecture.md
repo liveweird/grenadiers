@@ -101,3 +101,7 @@ lifecycle clock advances; inter-round/rematch boundaries clear worlds and report
 The dormant v3 client/panel shares the Pixi presentation boundary, validates v3 messages,
 tracks monotonic room epochs/revisions, and renders scores/rematch from authoritative room
 facts. Live v2 routing remains until coordinated activation. See [match browser](game/match-browser.md).
+
+The dormant [bounded match owner](game/match-owner.md) adds generation-fenced admission,
+scheduled departure batches, absolute deadlines, retention, and sticky shutdown. Its closing
+watch value retains the final checked publication; endpoint activation supplies socket draining.

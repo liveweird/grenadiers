@@ -2,6 +2,9 @@
 
 ## 0.3.22 — 2026-10-18
 
+- Fix connected takeover in production release builds by executing the binding-fence update
+  outside debug assertions; verify replacement commands and stale-connection cleanup.
+- Require both debug and release workspace test suites in the server gate.
 - Stage a dormant gameplay-v7 contract for inventory, timed effects, typed bombs, hidden
   actors and shared manual-action IDs, while keeping the active v6 endpoint unchanged.
 - Add checked item masks, effect multiplicity and contextual availability validation with

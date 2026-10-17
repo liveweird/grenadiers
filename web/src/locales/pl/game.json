@@ -1,0 +1,78 @@
+{
+  "label": "Pojedynek dla dwóch graczy",
+  "timer": "Czas pozostały do końca rundy",
+  "you": "(ty)",
+  "player": { "one": "Gracz pierwszy", "two": "Gracz drugi" },
+  "lobby": {
+    "title": "Spotkajcie się na dziedzińcu",
+    "explanation": "Utwórz pokój i udostępnij zaproszenie albo wpisz kod otrzymany od znajomego.",
+    "create": "Utwórz pokój",
+    "or": "lub",
+    "code": "Kod pokoju",
+    "codeHint": "Wpisz osiem liter lub cyfr z zaproszenia.",
+    "join": "Dołącz do pokoju"
+  },
+  "room": {
+    "invitation": "Zaproszenie do pokoju",
+    "codeLabel": "Kod zaproszenia do pokoju",
+    "players": "Gracze",
+    "ready": "Gotowy",
+    "cancelReady": "Jeszcze nie",
+    "leave": "Opuść pokój"
+  },
+  "seat": { "open": "Oczekiwanie na gracza", "notReady": "Brak gotowości", "ready": "Gotowy" },
+  "phase": {
+    "waiting": "Oczekiwanie na obu graczy",
+    "countdown": "Runda zaraz się rozpocznie",
+    "running": "Runda trwa",
+    "result": "Runda zakończona",
+    "interrupted": "Runda przerwana"
+  },
+  "result": {
+    "winner": "{{player}} wygrywa rundę.",
+    "mutualElimination": "Remis: obaj gracze zostali wyeliminowani.",
+    "timeout": "Remis: upłynął czas."
+  },
+  "interruption": {
+    "participantLeft": "Drugi gracz opuścił pokój.",
+    "connectionLost": "Drugi gracz stracił połączenie.",
+    "serverOverloaded": "Runda zatrzymała się z powodu obciążenia serwera.",
+    "serverStopped": "Serwer zatrzymał rundę.",
+    "internalError": "Runda zatrzymała się z powodu błędu serwera."
+  },
+  "connection": {
+    "disconnected": "Wybierz sposób wejścia do pokoju.",
+    "connecting": "Otwieranie bezpiecznej sesji gry…",
+    "authenticating": "Łączenie z serwerem gry…",
+    "authenticated": "Połączono. Oczekiwanie na pokój…"
+  },
+  "arena": {
+    "label": "Dziedziniec Grenadiers",
+    "failure": "Nie udało się wyświetlić dziedzińca. Opuść pokój i spróbuj ponownie.",
+    "focusHint": "Wybierz dziedziniec, aby sterować graczem.",
+    "instructions": "Poruszaj się strzałkami lub klawiszami W A S D. Podłóż bombę spacją. Sterowanie działa tylko podczas rundy."
+  },
+  "error": {
+    "title": "Nie udało się wykonać działania",
+    "connectionFailed": "Połączenie z grą zostało zakończone. Utwórz pokój lub dołącz ponownie.",
+    "invalidServerMessage": "Serwer wysłał dane gry nieobsługiwane przez tę wersję.",
+    "sessionFailed": "Nie udało się utworzyć sesji gry. Spróbuj ponownie.",
+    "sequenceExhausted": "To połączenie osiągnęło limit poleceń. Rozpocznij nową sesję.",
+    "incompatibleProtocol": "Ta wersja gry nie jest obsługiwana przez serwer.",
+    "invalidMessage": "Serwer nie zrozumiał tego polecenia.",
+    "authenticationFailed": "Ta sesja gry straciła ważność. Rozpocznij nową.",
+    "connectionInUse": "Ta sesja gry jest już otwarta w innym miejscu.",
+    "notAuthenticated": "Połączenie z grą nie jest jeszcze gotowe.",
+    "alreadyAuthenticated": "To połączenie jest już uwierzytelnione.",
+    "alreadyInRoom": "Opuść bieżący pokój przed dołączeniem do innego.",
+    "notInRoom": "Dołącz do pokoju, aby użyć tego sterowania.",
+    "roomNotFound": "Ten pokój nie jest już dostępny.",
+    "roomFull": "Oba miejsca w tym pokoju są zajęte.",
+    "staleRoom": "Pokój zmienił się przed dotarciem polecenia.",
+    "invalidPhase": "To działanie nie jest dostępne na tym etapie rundy.",
+    "staleSequence": "Polecenie dotarło w złej kolejności. Spróbuj ponownie.",
+    "duplicateAction": "Ta próba podłożenia bomby została już odebrana.",
+    "rateLimited": "Polecenia przychodzą zbyt szybko. Połączenie zostało zatrzymane.",
+    "capacityReached": "Serwer nie ma teraz miejsca na kolejną grę."
+  }
+}

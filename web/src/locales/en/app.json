@@ -1,7 +1,6 @@
 {
-  "eyebrow": "Realtime arena",
   "title": "Grenadiers",
-  "intro": "A two-player arena is taking shape. Use these diagnostics to verify the server before the first match.",
+  "intro": "Clear a path. Survive the round.",
   "health": "HTTP service",
   "realtime": "Realtime service",
   "diagnostics": "Connection diagnostics",

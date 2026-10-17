@@ -1,4 +1,106 @@
-:root { color-scheme: dark; background: #111827; }
-body { margin: 0; min-width: 320px; min-height: 100vh; background: radial-gradient(circle at 20% 10%, #26344d, #111827 55%); }
-main { min-height: 100vh; padding-top: clamp(2rem, 8vh, 7rem); }
-.eyebrow { color: var(--mantine-color-orange-4); font-size: .75rem; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
+:root {
+  color-scheme: light;
+  --sky: #dcecf3;
+  --ink: #20354a;
+  --stone: #778b9a;
+  --ground: #b7d0c3;
+  --ochre: #c48308;
+  --cobalt: #385fa8;
+  --paper: #f8fbfa;
+  background: var(--sky);
+  color: var(--ink);
+  font-family: "Trebuchet MS", "Avenir Next", sans-serif;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; min-width: 320px; min-height: 100vh; background: var(--sky); }
+button, input, summary { font: inherit; }
+button:focus-visible, input:focus-visible, summary:focus-visible, [tabindex]:focus-visible {
+  outline: 3px solid #152f75;
+  outline-offset: 3px;
+}
+main { min-height: 100vh; }
+.page-frame { padding-block: clamp(1rem, 4vw, 2.75rem); }
+.site-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding-bottom: clamp(1.25rem, 3vw, 2.25rem);
+}
+.site-header h1 {
+  color: var(--ink);
+  font-size: clamp(2rem, 5vw, 3.6rem);
+  font-weight: 900;
+  letter-spacing: -.055em;
+  line-height: .92;
+}
+.site-header p { margin-top: .6rem; max-width: 32rem; color: #40586c; font-size: clamp(1rem, 2vw, 1.2rem); }
+.game-shell {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(16rem, 21rem);
+  gap: clamp(1rem, 3vw, 2rem);
+  align-items: start;
+}
+.arena-column { min-width: 0; }
+.match-strip {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: .75rem;
+  margin-bottom: .6rem;
+  color: var(--ink);
+  font-weight: 800;
+}
+.match-strip span:last-child { text-align: right; }
+.match-strip time {
+  min-width: 5ch;
+  color: #142e45;
+  font-size: clamp(1.4rem, 3vw, 2rem);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+.game-instructions { margin: .75rem 0 0; color: #40586c; font-size: .95rem; }
+.control-column {
+  min-height: 24rem;
+  border: 2px solid var(--ink);
+  border-top-width: .55rem;
+  background: var(--paper);
+  box-shadow: .5rem .5rem 0 rgb(32 53 74 / 12%);
+  padding: clamp(1rem, 3vw, 1.5rem);
+}
+.lobby-controls, .room-controls { display: flex; flex-direction: column; gap: 1rem; }
+.lobby-controls h2 { color: var(--ink); font-size: 1.55rem; line-height: 1.1; }
+.lobby-controls > p { color: #40586c; line-height: 1.55; }
+.join-rule { display: flex; align-items: center; gap: .75rem; color: #52697c; font-size: .9rem; }
+.join-rule::before, .join-rule::after { content: ""; height: 1px; flex: 1; background: #b7c5cc; }
+.room-code { color: var(--ink); font-size: clamp(1.75rem, 5vw, 2.35rem); font-weight: 900; letter-spacing: .1em; }
+.phase-line { border-block: 1px solid #b7c5cc; padding-block: .75rem; color: #40586c; font-weight: 700; }
+.seat-list { display: grid; gap: .6rem; margin: 0; padding: 0; list-style: none; }
+.seat-line { display: flex; align-items: center; gap: .7rem; }
+.seat-line span:last-child { display: grid; }
+.seat-line small { color: #52697c; }
+.player-mark { width: 1rem; height: 1rem; border: 2px solid var(--ink); border-radius: 50%; }
+.seat-one .player-mark { background: #edb94b; }
+.seat-two .player-mark { border-radius: .15rem; background: var(--cobalt); }
+.connection-note { margin-top: 1rem; color: #52697c; }
+.connection-dot { width: .55rem; height: .55rem; border-radius: 50%; background: var(--cobalt); }
+.diagnostics { margin-top: clamp(2rem, 5vw, 4rem); border-top: 1px solid #9cafb8; padding-block: 1.25rem 2rem; color: #40586c; }
+.diagnostics summary { width: fit-content; cursor: pointer; color: var(--ink); font-weight: 800; }
+.diagnostics > div { max-width: 38rem; }
+.diagnostic-realtime { border-top: 1px solid #c3d0d5; padding-top: 1rem; }
+
+@media (max-width: 760px) {
+  .site-header { align-items: stretch; flex-direction: column; }
+  .site-header > div:last-child { align-self: flex-start; }
+  .game-shell { grid-template-columns: 1fr; }
+  .control-column { min-height: 0; box-shadow: .3rem .3rem 0 rgb(32 53 74 / 12%); }
+}
+@media (max-width: 390px) {
+  .page-frame { padding-inline: .75rem; }
+  .match-strip { font-size: .85rem; }
+  .room-code { letter-spacing: .055em; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; }
+}

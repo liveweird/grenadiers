@@ -1,0 +1,40 @@
+.game-arena {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 15 / 13;
+  overflow: hidden;
+  border: 6px solid #20354a;
+  border-radius: 10px;
+  background: #b7d0c3;
+  box-shadow: 0 6px 0 #9badb7;
+  outline-offset: 5px;
+  touch-action: manipulation;
+}
+.game-arena:focus-visible { outline: 3px solid #385fa8; }
+.game-arena__canvas { position: absolute; inset: 0; }
+.game-arena__message {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  margin: 0;
+  padding: 2rem;
+  color: #20354a;
+  text-align: center;
+  font-weight: 700;
+  background: repeating-linear-gradient(0deg, transparent, transparent 47px, #20354a0a 48px);
+}
+.game-arena__focus {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 4px 10px;
+  border-radius: 5px;
+  background: #20354a;
+  color: white;
+  font-size: 0.8rem;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.game-arena:focus-within .game-arena__focus { display: none; }

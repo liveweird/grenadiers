@@ -1,5 +1,21 @@
 # Repository verification
 
+## M6 private replay-runner foundation — 2026-10-17
+
+The locked server gate passes **251 core tests, 129 server tests, and 2 doctests**.
+Rust coverage is **6,356/6,787 lines, 93.65%**, above the unchanged 80% floor. Independent
+review and malformed-action follow-up report no outstanding findings. Four replay cases
+exercise real generated worlds through cancellation, three wins, rematch, shared-bomb draw,
+interruption, TTL refresh, immediate input fencing, and nonempty report windows. Complete
+private world/lifecycle/input/report/revision checkpoints match.
+
+Mutation checks reject unsupported versions/profiles, time/order errors, missing/extra seeds,
+wrong actual-start metadata, zero/above-wire-bound bomb actions, and truncation. The exact
+maximum bomb action ID is accepted. Records measure 64 bytes on this target; preallocated
+60,000-record capacity is 3,840,000 bytes and stops growing at truncation. Debug output does
+not expose private generation seeds. This module remains test-only; automatic live capture
+and exact-image deployment acceptance are separate checks, not claimed here.
+
 ## M6 pure reconnect-grace foundation — 2026-10-17
 
 The locked server gate passes **251 core tests, 125 server tests, and 2 doctests**.

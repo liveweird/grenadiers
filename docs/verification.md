@@ -1,5 +1,31 @@
 # Repository verification
 
+## M5 coordinated classic matches — 2026-10-17
+
+The active endpoint/browser use gameplay protocol 3 and the real MatchLifecycle, MatchRuntime,
+and bounded MatchOwner. Independent frontend, acceptance-design, and backend reviews report
+no outstanding findings. The locked server gate passes **244 core tests, 125 server tests,
+and 2 doctests**. Rust coverage is **6,049/6,453 lines, 93.74%**, above the unchanged 80% floor.
+The complete web gate passes **112 tests**, with **96.83% statements, 92.68% branches,
+98.87% functions, and 98.94% lines**. Schema drift, Spectral, lint, Knip, build, and E2E static
+checks pass; eight scenarios match their documentation. Dependency-security checks pass;
+both npm audits report zero vulnerabilities.
+
+A real main-process SIGTERM probe, separate from library tests, starts a two-player Running
+match and observes identical final checked serverStopped physical snapshots before both member
+sockets close with 1001. Unauthenticated gameplay and diagnostic sockets also receive 1001.
+The process exits code 0 in the measured 2 ms run, and its listener is released. AppState
+regressions separately cover the full five-second hung-permit deadline, retained prior final
+outcomes, stop-time admission rejection, room cleanup, and sticky shutdown. This explicit drain
+is required because Axum's upgraded callbacks run independently of HTTP connection shutdown.
+
+The first full-match browser run completed a draw, three real wins, and rematch/reset, then
+caught a persistent phase-boundary movement error. The client now correlates only movement
+errors with bounded command context and newer authoritative phase/epoch progress; bomb and
+current-phase failures remain visible. Idle controls no longer refresh null input. Regression
+tests cover both error/state orderings. Final live browser and exact-image deployment
+acceptance are still pending; this record does not claim those checks have passed.
+
 ## Dormant bounded match owner — 2026-10-17
 
 The locked server gate passes **243 core tests, 134 server tests, and 2 doctests**.

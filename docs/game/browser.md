@@ -1,4 +1,4 @@
-# Browser duel
+# Browser matches
 
 The browser combines a React/Mantine room interface with a PixiJS 8.22 WebGL arena.
 Rust owns movement, collision, bomb placement, explosions, damage, and results. Rendering
@@ -11,13 +11,18 @@ never advances the simulation or predicts a different outcome.
 3. Both players choose **Ready**. Either can cancel readiness during the three-second countdown.
 4. When the round starts, select the courtyard to give it keyboard focus. Move with arrows
    or W/A/S/D; press Space once per bomb. Hold a direction to keep moving.
-5. A surviving player wins; simultaneous elimination or the round timeout draws. Choose
-   **Leave room** to return to room admission. This preview plays one generated classic-v2 round.
+5. A surviving player wins the round; simultaneous elimination or the round timeout draws.
+   Win three rounds to take the match. Nonfinal rounds hold their result for three seconds,
+   then start a three-second automatic countdown with a fresh world and base upgrades.
+6. After the final three-second hold, **Play again** records rematch consent. Either player
+   can withdraw it. Both votes return the same connected players to an unready lobby with
+   zero scores; both choose **Ready** to start a new match. **Leave room** returns to admission.
 
 The invitation discovers a room; it is not a secret credential. Each tab requests a separate
 anonymous session and keeps its credential only in memory. Closing the game socket ends
-its ownership; this preview cannot reconnect to a claimed credential. A participant leaving
-or losing transport during live play interrupts the other player's round.
+its ownership; this preview cannot reconnect to a claimed credential. An explicit live departure forfeits the match; two same-tick departures abandon it. Transport
+loss interrupts the match until reconnect support is implemented. Completed-round records
+remain visible independently of a later forfeit/interruption; an already-final match stays final.
 
 ## Input and presentation
 
@@ -48,18 +53,29 @@ lobby, waiting, running, and result. See [verification](../verification.md) for 
 
 English and Polish are available without reconnecting the game session. **Connection
 diagnostics** expands the separate diagnostic transport controls; its socket is not a seat.
-No touch controller, audio, scoring series, or reconnect UI is included
-in this first duel preview. A narrow viewport is supported for layout and spectating;
+No touch controller, audio, or reconnect UI is included in this preview. A narrow viewport is supported for layout and spectating;
 playing currently requires a keyboard.
 
 ## Exposed items and player upgrades
 
-Gameplay-v2 snapshots supply visible pickup cells and kinds. Pixi draws distinct bomb,
+Gameplay-v3 snapshots supply visible pickup cells and kinds under classic-v2 rules. Pixi draws distinct bomb,
 cross/range, and speed marks above blocks and below bombs/flames/actors; it never guesses
 concealed contents. Retained drawings are reused while unchanged and destroyed when removed,
 replaced, or reset. The UI performs no collection simulation.
 
 Both player rows show available bombs (capacity minus live bombs), capacity, range, and speed
-levels 1–5 from authoritative actors. Running/result rows show alive or eliminated; pre-start
-rows show readiness. Labels are localized in English and Polish. The existing single-column
+levels 1–5 from authoritative actors. Running/nonfinal-result rows show alive or eliminated; pre-start rows show readiness. Final
+match rows show rematch consent, and authoritative vacant seats remain open despite frozen actors. Labels are localized in English and Polish. The existing single-column
 layout bounds the upgrade rows at narrow widths. Generated classic-v2 rooms supply the live pickup and upgrade changes.
+
+## Match facts and timers
+
+The header shows round wins and actual round number. The clock uses authoritative room
+deadlines during countdown/result/rematch holds and remaining Running time during play.
+Result physics freezes while the room clock advances. Inter-round countdowns clear the old
+world; rematch also clears scores and completed-round history. A newer-epoch snapshot can
+reset presentation directly even if an intermediate room view was coalesced.
+
+The separate complete-match fixture uses native keyboard controls to prove a real draw,
+three wins, fresh round/spawn assignments, consent withdrawal, and rematch over the same
+two sockets. See [deployment](../deployment.md) for explicit read-only fixture setup.

@@ -1,7 +1,7 @@
 # Architecture
 
 The server provides HTTP liveness/readiness, diagnostic WebSockets, anonymous credentials,
-and authenticated authoritative two-seat rounds. React/Mantine provides room admission and
+and authenticated authoritative two-seat first-to-three matches. React/Mantine provides room admission and
 the HUD; PixiJS renders public game snapshots.
 A separate deterministic simulation in `core::game` implements movement, owned bombs,
 flames, damage, and one-round outcomes. Room owners advance that simulation at a fixed
@@ -69,7 +69,7 @@ budgets, result ordering, and retention.
 [ADR 0011](decisions/0011-deterministic-arena-generation.md) defines the implemented headless
 [generator](game/generation.md). [ADR 0014](decisions/0014-private-round-seeds-and-live-generation.md)
 activates generated classic-v2 rooms with private round seeds and retained records. Lag
-compensation, complete match progression, and matchmaking still need implementation at their
+compensation, reconnect, and matchmaking still need implementation at their
 planned milestones. Add focused ADRs before
 dependent work; preserve the specified lifecycle and gameplay rules.
 
@@ -85,23 +85,24 @@ must be recorded and how the two-player baseline will be delivered and verified.
 
 [ADR 0015](decisions/0015-match-series-and-staged-progression.md) separates implemented
 [headless match-series facts](game/match-series.md) and the pure [automatic lifecycle](game/match-lifecycle.md) from staged
-v3 server/browser integration. The live generated preview remains single-round until activation.
+v3 server/browser integration. The live generated preview now supports first-to-three matches.
 
 [ADR 0016](decisions/0016-dormant-gameplay-v3-contract.md) stages explicit namespaced
-[gameplay-v3 contracts](game/protocol-v3.md) alongside active v2. Generated types and DTOs alone
-never activate match behavior or fabricate scores.
+[gameplay-v3 contracts](game/protocol-v3.md) separately from archived v2. The production
+owner now supplies real match facts; generated types never fabricate scores.
 
 V3 checked room projection derives facts directly from `MatchLifecycle`; its public validator
 rejects semantically impossible bounded DTOs before server adapters publish them.
 
-The dormant `match_runtime` server adapter owns real per-round physics, assignment-aware
+The active `match_runtime` server adapter owns real per-round physics, assignment-aware
 generation, epoch-fenced input, and checked v3 publication. Result physics freezes while the
 lifecycle clock advances; inter-round/rematch boundaries clear worlds and report windows.
 
-The dormant v3 client/panel shares the Pixi presentation boundary, validates v3 messages,
+The active v3 client/panel shares the Pixi presentation boundary, validates v3 messages,
 tracks monotonic room epochs/revisions, and renders scores/rematch from authoritative room
-facts. Live v2 routing remains until coordinated activation. See [match browser](game/match-browser.md).
+facts. Production routing uses v3. See [match browser](game/match-browser.md).
 
-The dormant [bounded match owner](game/match-owner.md) adds generation-fenced admission,
+The active [bounded match owner](game/match-owner.md) adds generation-fenced admission,
 scheduled departure batches, absolute deadlines, retention, and sticky shutdown. Its closing
-watch value retains the final checked publication; endpoint activation supplies socket draining.
+watch value retains the final checked publication. On shutdown, member sockets send it before
+closing, and the process waits up to five seconds for all socket permits and room cleanup.

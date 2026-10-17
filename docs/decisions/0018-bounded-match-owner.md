@@ -1,6 +1,6 @@
 # ADR 0018: Bounded match ownership and departure boundaries
 
-Status: dormant owner implemented; coordinated production activation follows.
+Status: implemented and active with registry/socket wiring and bounded process draining.
 
 ## Decision
 

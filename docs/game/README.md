@@ -10,7 +10,8 @@ playable target remains two human players. M1 implements the
 outcomes](combat.md), including explicit public projections/events. M3 completes
 [gameplay contracts](protocol.md), anonymous sessions, authenticated [rooms](rooms.md),
 authoritative scheduling, and the [playable browser duel](browser.md). The fixed-map preview
-plays one round; generated upgrades, complete match progression, and reconnect follow.
+plays generated classic-v2 first-to-three matches with upgrades, automatic round resets,
+and consensual rematch. Reconnect, bots, larger matches, matchmaking, and durable stats follow.
 
 Start with [the rules specification](rules.md) and the
 [implementation and release plan](implementation-plan.md). Historical examples and optional extensions

@@ -1,5 +1,10 @@
 # Room lifecycle
 
+This document retains the original single-round domain model. Production now composes the
+[match lifecycle](match-lifecycle.md) and [bounded match owner](match-owner.md) using
+[gameplay v3](protocol.md); their match-result, rematch, and retention rules take precedence.
+
+
 Status: public `core::room` lifecycle plus server-owned networked two-player rounds. Anonymous
 HTTP credentials are separate from occupancy; a successful create/join binds a seat.
 

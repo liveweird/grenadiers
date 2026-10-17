@@ -1,7 +1,7 @@
-# Dormant browser match client
+# Browser match client
 
-Status: implemented and independently reviewed; the active app still uses gameplay v2.
-No separate route or selectable protocol mode is exposed.
+Status: active in the application alongside the v3 server. No separate route or selectable
+protocol mode is exposed.
 
 The v3 client validates every message against its schema and authenticates with version 3.
 Room updates require the same room, a strictly newer revision, and a nondecreasing command
@@ -21,6 +21,6 @@ never derives a fabricated round result from frozen physics. Authoritative vacan
 precedence over stale live/dead actors in a terminal snapshot. The Pixi renderer is shared
 through its narrow presentation boundary and resets on room/epoch changes.
 
-Unit/conformance/build checks exercise the dormant stack. Actual browser screenshots,
-accessibility checks, and full first-to-three/rematch acceptance belong to activation;
-unit coverage alone does not establish live visual behavior.
+Unit/conformance/build checks exercise transport and presentation. Actual browser screenshots,
+accessibility checks, and full first-to-three/rematch acceptance complement those checks;
+[verification](../verification.md) records observed evidence.

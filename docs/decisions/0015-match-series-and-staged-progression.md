@@ -1,6 +1,9 @@
 # ADR 0015: Match facts and staged first-to-three progression
 
-Status: headless MatchSeries and MatchLifecycle implemented; contract/runtime/browser integration follows.
+Status: accepted and active in v0.3.0, after the staged v0.2.7–v0.2.13 implementation.
+
+The staging steps below record the integration order. Production now composes the series,
+lifecycle, v3 contract, runtime, owner, and browser panel.
 
 ## Decision
 

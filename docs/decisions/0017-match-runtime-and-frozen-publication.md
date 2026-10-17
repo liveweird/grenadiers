@@ -1,13 +1,14 @@
 # ADR 0017: Authoritative match runtime and frozen publication
 
-Status: dormant simulation adapter implemented; bounded owner and activation follow.
+Status: implemented and active with the bounded match owner and v3 endpoint.
 
 ## Decision
 
 Compose the actual pure match lifecycle and simulation rather than synthesize match facts
 from the single-round owner. Retain immutable construction/publication profiles and draw
 fresh private entropy only at actual starts. Pass each lifecycle assignment into world
-construction; the active v2 adapter explicitly retains its first-round assignment.
+construction. During staging, the old v2 adapter retained its first-round assignment; the
+coordinated activation now replaces that adapter.
 
 Freeze physics during Result and MatchResult while the room clock continues. A completed
 snapshot must match its own completed-round epoch, end tick, and result. Unfinished terminal
@@ -21,6 +22,7 @@ fallible projection, and private generation records. Construction failure interr
 
 ## Staging
 
-Compile the adapter only with tests until the bounded owner and browser can activate together.
+The adapter compiled only with tests until the bounded owner and browser activated together
+in v0.3.0.
 No alternate endpoint, feature flag, fabricated round result, or duplicate authentication is
 introduced. Owner timing/departure/shutdown semantics are a separate reviewed increment.

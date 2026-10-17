@@ -1,7 +1,8 @@
-# Staged gameplay-v3 contract
+# Gameplay-v3 match contract
 
-Status: structural contract and checked room projection implemented; production activation follows. `/api/v1/game/ws` still serves [gameplay v2](protocol.md).
-V3 DTOs and generated types do not activate match play or a second endpoint.
+Status: active at `/api/v1/game/ws`, with checked room/physical projection and the real match
+owner. See the [protocol guide](protocol.md). Historical v2 contracts remain for regression
+and physical parity checks; there is no alternate endpoint.
 
 V3 keeps existing commands and physical snapshot/event shapes, adding
 `rematch {sequence, roomId, roundId, ready}`. Authentication success is fixed to 3;
@@ -30,7 +31,7 @@ The schema enforces structure and bounds. `project_room_view(RoomMetadata, &Matc
 `validate_room_view` checks independently constructed DTOs. These enforce canonical seats,
 phase/score/history consistency, time relationships, consent transitions, and epoch chronology.
 Forfeit losers must be vacant; later winner departure remains valid. Draws award no score.
-Server adapters still own physical-state/profile agreement and private-state separation. No hidden items, seeds, generation records, or assignment bookkeeping enter DTOs.
+The active server adapter checks physical-state/profile agreement and private-state separation. No hidden items, seeds, generation records, or assignment bookkeeping enter DTOs.
 
 `npm --prefix web run gen:gameplay` and `check:gameplay` cover both versions. Rust/AJV tests
 exercise strict fields, variants, scalar boundaries, physical parity, and frame limits.

@@ -20,7 +20,20 @@
     "cancelReady": "Jeszcze nie",
     "leave": "Opuść pokój"
   },
-  "seat": { "open": "Oczekiwanie na gracza", "notReady": "Brak gotowości", "ready": "Gotowy" },
+  "seat": {
+    "open": "Oczekiwanie na gracza",
+    "notReady": "Brak gotowości",
+    "ready": "Gotowy",
+    "alive": "W grze",
+    "eliminated": "Wyeliminowany"
+  },
+  "stats": {
+    "label": "Ulepszenia: {{player}}",
+    "available": "Dostępne bomby",
+    "capacity": "Limit bomb",
+    "range": "Zasięg wybuchu",
+    "speed": "Poziom szybkości"
+  },
   "phase": {
     "waiting": "Oczekiwanie na obu graczy",
     "countdown": "Runda zaraz się rozpocznie",

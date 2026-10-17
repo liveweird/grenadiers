@@ -1,10 +1,12 @@
 import { Container, Graphics } from 'pixi.js'
-import { headingRotation, makeActor, makeBlock, makeBomb, makeFlame, paintTerrain, TILE } from './drawing'
+import { headingRotation, makeActor, makeBlock, makeBomb, makeFlame, makePickup, paintTerrain, TILE } from './drawing'
 import type { ActorDrawing } from './drawing'
+import type { PickupKind } from '../schema'
 import type { SnapshotMessage } from './types'
 
 type Cell = { column: number; row: number }
 type Motion = { fromX: number; fromY: number; toX: number; toY: number }
+type PickupDrawing = { kind: PickupKind; drawing: Graphics }
 const key = (cell: Cell): string => `${cell.column},${cell.row}`
 const unitsToPixels = (units: number): number => units * TILE / 1024
 
@@ -12,10 +14,12 @@ export class ArenaScene {
   readonly root = new Container()
   private readonly terrain = new Graphics()
   private readonly blocksLayer = new Container()
+  private readonly pickupsLayer = new Container()
   private readonly bombsLayer = new Container()
   private readonly flamesLayer = new Container()
   private readonly actorsLayer = new Container()
   private readonly blocks = new Map<string, Graphics>()
+  private readonly pickups = new Map<string, PickupDrawing>()
   private readonly bombs = new Map<number, Container>()
   private readonly flames = new Map<string, Graphics>()
   private readonly actors = new Map<number, ActorDrawing>()
@@ -27,7 +31,9 @@ export class ArenaScene {
   private reducedMotion = false
 
   constructor() {
-    this.root.addChild(this.terrain, this.blocksLayer, this.bombsLayer, this.flamesLayer, this.actorsLayer)
+    this.root.addChild(
+      this.terrain, this.blocksLayer, this.pickupsLayer, this.bombsLayer, this.flamesLayer, this.actorsLayer,
+    )
   }
 
   update(snapshot: SnapshotMessage, now: number): void {
@@ -43,6 +49,7 @@ export class ArenaScene {
       this.terrainKey = terrainKey
     }
     this.updateBlocks(snapshot.state.arena.blocks)
+    this.updatePickups(snapshot.state.pickups)
     this.updateBombs(snapshot.state.bombs)
     this.updateFlames(snapshot.state.flames)
     this.updateActors(snapshot.state.actors, reset)
@@ -98,6 +105,23 @@ export class ArenaScene {
     }
   }
 
+  private updatePickups(rows: SnapshotMessage['state']['pickups']): void {
+    const present = new Set(rows.map((pickup) => key(pickup.cell)))
+    for (const [id, pickup] of this.pickups) {
+      if (!present.has(id)) { pickup.drawing.destroy(); this.pickups.delete(id) }
+    }
+    for (const pickup of rows) {
+      const id = key(pickup.cell)
+      const current = this.pickups.get(id)
+      if (current?.kind === pickup.kind) continue
+      if (current) { current.drawing.destroy(); this.pickups.delete(id) }
+      const drawing = makePickup(pickup.kind)
+      drawing.position.set(pickup.cell.column * TILE, pickup.cell.row * TILE)
+      this.pickupsLayer.addChild(drawing)
+      this.pickups.set(id, { kind: pickup.kind, drawing })
+    }
+  }
+
   private updateFlames(rows: SnapshotMessage['state']['flames']): void {
     const present = new Set(rows.map((flame) => key(flame.cell)))
     for (const [id, drawing] of this.flames) {
@@ -137,10 +161,12 @@ export class ArenaScene {
 
   private clearLayers(): void {
     for (const drawing of this.blocks.values()) drawing.destroy()
+    for (const pickup of this.pickups.values()) pickup.drawing.destroy()
     for (const drawing of this.bombs.values()) drawing.destroy({ children: true, context: true })
     for (const drawing of this.flames.values()) drawing.destroy()
     for (const drawing of this.actors.values()) drawing.root.destroy({ children: true, context: true })
-    this.blocks.clear(); this.bombs.clear(); this.flames.clear(); this.actors.clear(); this.motions.clear()
+    this.blocks.clear(); this.pickups.clear(); this.bombs.clear(); this.flames.clear(); this.actors.clear()
+    this.motions.clear()
     this.terrainKey = ''
   }
 }

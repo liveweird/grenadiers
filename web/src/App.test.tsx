@@ -1,5 +1,5 @@
 import { MantineProvider } from '@mantine/core'
-import { act, render, screen, waitFor } from '@testing-library/react'
+import { act, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { GameArenaProps } from './game/arena/types'
@@ -166,9 +166,18 @@ describe('App game flow', () => {
     renderApp()
     const socket = await beginRoom(user)
     act(() => socket.message({ type: 'roomState', room: room(1, { type: 'running' }), youSeat: 'one' }))
-    act(() => socket.message(snapshot(2)))
+    const live = snapshot(2)
+    Object.assign(live.state.actors[0], { bombCapacity: 8, bombRange: 8, liveBombCount: 3, speedLevel: 4 })
+    act(() => socket.message(live))
     expect(await screen.findByLabelText('Round time remaining')).toHaveTextContent('3:00')
     expect(screen.getByRole('region', { name: 'Grenadiers courtyard' })).toHaveAttribute('data-enabled', 'true')
+    expect(screen.getAllByText('Alive')).toHaveLength(2)
+    expect(screen.queryByText('Not ready')).not.toBeInTheDocument()
+    const upgrades = screen.getByLabelText('Player one upgrades')
+    expect(within(upgrades).getByText('Bombs available').nextElementSibling).toHaveTextContent('5')
+    expect(within(upgrades).getByText('Bomb capacity').nextElementSibling).toHaveTextContent('8')
+    expect(within(upgrades).getByText('Blast range').nextElementSibling).toHaveTextContent('8')
+    expect(within(upgrades).getByText('Speed level').nextElementSibling).toHaveTextContent('5')
     await user.click(screen.getByRole('button', { name: 'Test move' }))
     await user.click(screen.getByRole('button', { name: 'Test bomb' }))
     expect(JSON.parse(socket.sent.at(-2)!)).toMatchObject({ type: 'movement', direction: 'north' })
@@ -198,9 +207,27 @@ describe('App game flow', () => {
     finished.room.tick = 300
     act(() => socket.message(finished))
     expect(await screen.findByText('Player two wins the round.')).toBeVisible()
+    expect(screen.getByText('Eliminated')).toBeVisible()
+    expect(screen.getByText('Alive')).toBeVisible()
     expect(screen.getByLabelText('Round time remaining')).toHaveTextContent('2:55')
     act(() => socket.message({ ...finished, room: { ...finished.room, revision: 3, tick: 303 } }))
     expect(screen.getByLabelText('Round time remaining')).toHaveTextContent('2:55')
+  })
+
+  it('localizes authoritative actor status and upgrade labels without reconnecting', async () => {
+    const user = userEvent.setup()
+    renderApp()
+    const socket = await beginRoom(user)
+    act(() => socket.message({ type: 'roomState', room: room(1, { type: 'running' }), youSeat: 'one' }))
+    act(() => socket.message(snapshot(2)))
+    await user.click(screen.getByRole('radio', { name: 'Polski' }))
+    expect(await screen.findAllByText('W grze')).toHaveLength(2)
+    const upgrades = screen.getByLabelText('Ulepszenia: Gracz pierwszy')
+    expect(within(upgrades).getByText('Dostępne bomby')).toBeVisible()
+    expect(within(upgrades).getByText('Limit bomb')).toBeVisible()
+    expect(within(upgrades).getByText('Zasięg wybuchu')).toBeVisible()
+    expect(within(upgrades).getByText('Poziom szybkości')).toBeVisible()
+    expect(socket.close).not.toHaveBeenCalled()
   })
 
   it('shows a pre-start interruption without inventing a winner', async () => {

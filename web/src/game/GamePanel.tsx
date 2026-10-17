@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { GameArena } from './arena/GameArena'
 import type { Direction } from './arena/types'
 import type { GameClientState, GameFailure } from './client'
-import type { RoomPhase, RoomView, Seat } from './schema'
+import type { RoomPhase, Seat } from './schema'
 import { useGameClient } from './useGameClient'
 
 const CODE_PATTERN = /^[A-HJ-NP-Z2-9]{8}$/
@@ -46,17 +46,33 @@ function RoomOutcome({ phase }: { phase: RoomPhase }) {
   return null
 }
 
-function SeatLine({ room, seat, youSeat }: { room: RoomView; seat: Seat; youSeat: Seat | null }) {
+function SeatLine({ state, seat }: { state: GameClientState; seat: Seat }) {
   const { t } = useTranslation()
+  const room = state.room!
   const status = room.seats.find((candidate) => candidate.seat === seat)
-  const state = status?.occupied ? (status.ready ? 'ready' : 'notReady') : 'open'
+  const actor = room.phase.type === 'waiting' || room.phase.type === 'countdown'
+    ? undefined
+    : state.snapshot?.state.actors.find((candidate) => candidate.seat === seat)
+  const seatState = actor
+    ? (actor.alive ? 'alive' : 'eliminated')
+    : status?.occupied ? (status.ready ? 'ready' : 'notReady') : 'open'
   return (
     <li className={`seat-line seat-${seat}`}>
       <span className="player-mark" aria-hidden="true" />
-      <span>
-        <strong>{t(`game.player.${seat}`)}</strong>{youSeat === seat ? ` ${t('game.you')}` : ''}
-        <small>{t(`game.seat.${state}`)}</small>
-      </span>
+      <div className="seat-details">
+        <span>
+          <strong>{t(`game.player.${seat}`)}</strong>{state.youSeat === seat ? ` ${t('game.you')}` : ''}
+          <small>{t(`game.seat.${seatState}`)}</small>
+        </span>
+        {actor && status?.occupied && (
+          <dl className="actor-stats" aria-label={t('game.stats.label', { player: t(`game.player.${seat}`) })}>
+            <div><dt>{t('game.stats.available')}</dt><dd>{actor.bombCapacity - actor.liveBombCount}</dd></div>
+            <div><dt>{t('game.stats.capacity')}</dt><dd>{actor.bombCapacity}</dd></div>
+            <div><dt>{t('game.stats.range')}</dt><dd>{actor.bombRange}</dd></div>
+            <div><dt>{t('game.stats.speed')}</dt><dd>{actor.speedLevel + 1}</dd></div>
+          </dl>
+        )}
+      </div>
     </li>
   )
 }
@@ -109,8 +125,8 @@ function RoomControls({ state, onReady, onLeave }: {
       </div>
       <Text className="phase-line">{t(phaseKey(room.phase))}</Text>
       <ol className="seat-list" aria-label={t('game.room.players')}>
-        <SeatLine room={room} seat="one" youSeat={state.youSeat} />
-        <SeatLine room={room} seat="two" youSeat={state.youSeat} />
+        <SeatLine state={state} seat="one" />
+        <SeatLine state={state} seat="two" />
       </ol>
       <RoomOutcome phase={room.phase} />
       <Stack gap="sm">

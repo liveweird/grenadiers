@@ -1,4 +1,5 @@
 import { Container, Graphics } from 'pixi.js'
+import type { PickupKind } from '../schema'
 import type { Direction, Seat, SnapshotMessage } from './types'
 
 export const TILE = 48
@@ -50,6 +51,28 @@ export function makeFlame(): Graphics {
     .roundRect(14, 3, 20, 42, 8).fill(0xf27831)
     .roundRect(7, 19, 34, 10, 5).fill(0xffe29a)
     .roundRect(19, 7, 10, 34, 5).fill(0xffe29a)
+}
+
+export function makePickup(kind: PickupKind): Graphics {
+  const drawing = new Graphics()
+    .ellipse(24, 39, 15, 4).fill({ color: INK, alpha: 0.2 })
+    .roundRect(8, 7, 32, 32, 8).fill(0xf8fbfa)
+    .stroke({ color: INK, width: 2 })
+  if (kind === 'bombCapacity') {
+    return drawing.circle(23, 24, 10).fill(INK)
+      .circle(20, 21, 3).fill(0x778b9a)
+      .moveTo(29, 16).lineTo(33, 11).lineTo(37, 13)
+      .stroke({ color: 0xedb94b, width: 3 })
+  }
+  if (kind === 'blastRange') {
+    return drawing.roundRect(20, 12, 8, 24, 3).fill(0xf27831)
+      .roundRect(12, 20, 24, 8, 3).fill(0xf27831)
+      .circle(24, 24, 4).fill(0xffe29a)
+  }
+  return drawing
+    .poly([12, 18, 24, 18, 19, 12, 23, 12, 31, 22, 23, 32, 19, 32, 24, 26, 12, 26])
+    .fill(0x385fa8)
+    .poly([27, 17, 36, 22, 27, 27]).fill(0xedb94b)
 }
 
 export interface ActorDrawing {

@@ -1,5 +1,28 @@
 # Repository verification
 
+## M6 v0.3.10 exact-image deployment acceptance — 2026-10-17
+
+A clean Git export of `df9886ff17a662fdfccc19d0769153c091b5d9d2` produces
+`sha256:54988e9f3d4bf0d345c4fe7e25e6d3d6a136c75a7390461f006a6342c6448cf7`.
+Compose and isolated Kubernetes run that same image, confirmed from the actual Pod image ID.
+Each path passes **10/10 browser scenarios on the first run, with retries disabled**: six
+default, one pickup, one full match/rematch, and two reconnect cases. Node is exactly 24.21.0;
+every fixture rollout is followed by real JSON health/readiness polling before browser tests.
+
+Strict Kubernetes 1.33 schemas report **3 valid resources** with no invalid/error/skipped results.
+Inspection confirms UID/GID 65532, read-only root, all capabilities dropped, no privilege
+escalation, RuntimeDefault seccomp in Kubernetes, read-only fixture Secret mode 0444, correct
+probes, and no seed under `/app`. Pinned archive-only Trivy 0.74.0 reports **zero HIGH/CRITICAL
+findings**. Its default database mirror first returned an upstream 404; that diagnostic is
+preserved, and the same pinned scanner passes with the explicit official GHCR database. No
+Docker socket is mounted. Actual desktop/320-pixel Polish screenshots were visually inspected.
+
+Evidence: `/tmp/grenadiers-v0310-acceptance`. Temporary Compose/namespace/Secret, forward,
+source export and scan archive are removed; the accepted image remains. Later documentation
+changes preserve the application tree. Together with the independently reviewed 42-rule matrix,
+real v4 recovery and private replay assertions, this completes M6 engineering exit evidence.
+M7 measured browser/latency support and human playtesting remain separate.
+
 ## M6 complete baseline rule assertions — 2026-10-17
 
 Independent source/assertion audit and closure review cover **all 42 baseline rules** in the

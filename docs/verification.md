@@ -1,5 +1,20 @@
 # Repository verification
 
+## M5 pure automatic match lifecycle — 2026-10-17
+
+The locked server gate passes **214 core tests, 85 server tests, and 2 doctests**.
+Rust line coverage passes the unchanged 80% floor at **4,585/4,914 lines, 93.30%**.
+Independent review found stale rematch consent after a participant departed. Departures now
+clear that vote and vacant opponents cannot complete consensus; both seat orders are covered.
+The correction is independently verified, with no remaining lifecycle findings.
+
+Tests cover initial cancellation, automatic inter-round countdowns, exact hold/start
+boundaries, actual-round parity across epoch gaps, first-to-three including draws, long
+global time, prematch versus match interruption, batched departure precedence, terminal
+finality, rematch readiness/reset, and transactional clock/epoch/series overflow. The new pure
+lifecycle remains dormant alongside the live single-round v2 owner; activation follows after
+truthful contracts and real server/browser adapters are verified.
+
 ## M5 headless first-to-three series — 2026-10-17
 
 The locked server gate passes **194 core tests, 85 server tests, and 2 doctests**.

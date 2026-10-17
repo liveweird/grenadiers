@@ -1,6 +1,6 @@
 # ADR 0015: Match facts and staged first-to-three progression
 
-Status: headless MatchSeries implemented; lifecycle/contract/runtime/browser integration follows.
+Status: headless MatchSeries and MatchLifecycle implemented; contract/runtime/browser integration follows.
 
 ## Decision
 
@@ -15,7 +15,7 @@ are separate monotonic fences: gaps and canceled countdowns consume no actual ro
 Preserve the last started epoch across rematch. Checked time/epoch/number failures are atomic.
 Readiness queries respect the retained absolute-time high-water.
 
-Hold results for 180 authoritative ticks. A future MatchLifecycle owns the following automatic
+Hold results for 180 authoritative ticks. The pure MatchLifecycle owns the following automatic
 180-tick countdown. Rematch votes are idempotent and withdrawable, rejected before the terminal
 hold expires. Both eligible votes reset series facts; the owner advances the room epoch once
 and returns occupied but unready seats to Waiting. Socket sequences and bindings remain intact.

@@ -1,5 +1,28 @@
 # Repository verification
 
+## M4 deterministic generator groundwork — 2026-10-17
+
+The integrated locked server gate passes **146 core tests, 67 server tests, and 2 doctests**.
+Rust coverage passes the unchanged 80% floor at **3,547/3,861 lines, 91.87%**. Independent
+review reports no actionable findings. Dependency audits pass: all cargo-deny policies and
+zero npm vulnerabilities. The direct rand_chacha 0.9.0 edge adds no package/version to the
+lockfile. Browser/schema/deployment inputs remain those of the playable v0.2.0 baseline.
+
+Generator tests lock exact seeded outputs and conditional random consumption, threshold
+boundaries, center handling, half-turn symmetry, reserved openings, bounded rejection,
+invalid-map fallback, redacted records, and unchanged fixed-arena fixtures. A dense-layout
+simulation executes the first-bomb escape route and survives. The structural validator checks
+both mirrored openings; the executable escape trace currently exercises seat one. No active
+network seed or concealed content is exposed; live rooms remain on the fixed preview.
+
+A clean committed-tree build produces
+`sha256:21f8ba9f0920e214dbcc32096c82f4f712f35eacac9b5448aa26dc8db0bb2f47`.
+Compose and ready local Kubernetes use this exact image. Health/readiness and all **six
+candidate browser scenarios** pass through both deployments, preserving the playable fixed
+preview. Strict schemas pass with 3 valid resources; pinned socket-free Trivy reports zero
+HIGH/CRITICAL vulnerabilities. Temporary runtime resources are removed; the image is retained.
+The post-acceptance rebase preserves the tested tree; this evidence update changes docs only.
+
 ## M3 playable browser duel — 2026-10-17
 
 The version-aligned server gate passes **137 core tests, 67 server tests, and 2 doctests**,

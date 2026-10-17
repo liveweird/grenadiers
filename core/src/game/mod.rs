@@ -29,9 +29,11 @@ pub mod bombs;
 pub mod events;
 mod explosions;
 pub mod fixtures;
+pub mod generation;
 pub mod geometry;
 pub mod input;
 mod movement;
+pub mod pickups;
 pub mod rules;
 pub mod simulation;
 #[cfg(test)]
@@ -44,8 +46,10 @@ pub use arena::{Arena, ArenaError, Terrain};
 pub use bombs::Bomb;
 pub use events::{StepEvent, StepEventKind};
 pub use fixtures::fixed_arena;
+pub use generation::{GENERATOR_VERSION, GeneratedArena, GenerationRecord, generate_arena};
 pub use geometry::{MovementSegment, MovementTrace};
 pub use input::{Direction, HeldDirections};
+pub use pickups::PickupKind;
 pub use rules::RulesConfig;
 pub use simulation::{
     Actor, ActorInit, DrawReason, InputAction, RoundResult, SeatInput, State, StateError,

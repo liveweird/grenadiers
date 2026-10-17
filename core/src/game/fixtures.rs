@@ -75,6 +75,15 @@ const SOFT_BLOCKS: [CellId; 30] = [
 /// soft blocks. Each spawn has a clear three-cell outer-corridor route.
 #[must_use]
 pub fn fixed_arena() -> Arena {
+    Arena::new(
+        classic_terrain(),
+        BTreeSet::from(SOFT_BLOCKS),
+        classic_spawns(),
+    )
+    .expect("the fixed arena fixture must remain valid")
+}
+
+pub(crate) fn classic_terrain() -> [Terrain; ARENA_CELL_COUNT] {
     let mut terrain = [Terrain::Floor; ARENA_CELL_COUNT];
     for row in 0..ARENA_HEIGHT {
         for column in 0..ARENA_WIDTH {
@@ -86,13 +95,11 @@ pub fn fixed_arena() -> Arena {
     for pillar in PILLARS {
         terrain[index(pillar)] = Terrain::Wall;
     }
+    terrain
+}
 
-    Arena::new(
-        terrain,
-        BTreeSet::from(SOFT_BLOCKS),
-        [CellId::new(1, 1), CellId::new(13, 11)],
-    )
-    .expect("the fixed arena fixture must remain valid")
+pub(crate) const fn classic_spawns() -> [CellId; 2] {
+    [CellId::new(1, 1), CellId::new(13, 11)]
 }
 
 fn index(cell: CellId) -> usize {

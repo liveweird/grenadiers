@@ -29,6 +29,16 @@ pub(crate) async fn issue_session(
             Problem::new(StatusCode::FORBIDDEN, "Forbidden", "Origin is not allowed").response(),
         );
     }
+    if state.game_rooms.is_stopping() {
+        return with_no_store(
+            Problem::new(
+                StatusCode::SERVICE_UNAVAILABLE,
+                "Service Unavailable",
+                "Server is shutting down",
+            )
+            .response(),
+        );
+    }
 
     match state.game_sessions.issue(std::time::Instant::now()) {
         Ok(session) => with_no_store((StatusCode::CREATED, Json(session)).into_response()),

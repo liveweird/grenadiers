@@ -1,9 +1,8 @@
 use std::sync::Arc;
 
 use axum::extract::ws::WebSocket;
-use grenadiers_core::protocol::{
-    Counter, Direction as WireDirection, ErrorCode, GameClientMessage, GameServerMessage, RoomId,
-};
+use grenadiers_core::protocol::v3::{GameClientMessage, GameServerMessage};
+use grenadiers_core::protocol::{Counter, Direction as WireDirection, ErrorCode, RoomId};
 use tokio::time::Instant;
 
 use super::{
@@ -109,6 +108,23 @@ pub(super) async fn dispatch(
                 room_id,
                 u64::from(round_id.get()),
                 RoomAction::Bomb(action_id.get()),
+                state,
+                sequence,
+            )
+            .await
+        }
+        GameClientMessage::Rematch {
+            room_id,
+            round_id,
+            ready,
+            ..
+        } => {
+            action(
+                socket,
+                rooms,
+                room_id,
+                u64::from(round_id.get()),
+                RoomAction::Rematch(ready),
                 state,
                 sequence,
             )

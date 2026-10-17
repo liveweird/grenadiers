@@ -4,25 +4,19 @@ use std::{collections::HashSet, fmt, path::PathBuf, sync::Arc, time::Duration};
 
 use axum::{
     Json, Router,
-    extract::{
-        State, WebSocketUpgrade,
-        ws::{CloseFrame, Message, WebSocket},
-    },
+    extract::State,
     http::{
-        HeaderMap, StatusCode,
-        header::{CACHE_CONTROL, CONTENT_TYPE, ORIGIN},
+        StatusCode,
+        header::{CACHE_CONTROL, CONTENT_TYPE},
     },
     response::{IntoResponse, Response},
     routing::{any, get, post},
 };
-use grenadiers_core::{ClientMessage, ServerMessage};
 use serde::Serialize;
 use sqlx::{PgPool, postgres::PgPoolOptions};
-use tokio::{
-    sync::{OwnedSemaphorePermit, Semaphore},
-    time::timeout,
-};
+use tokio::{sync::Semaphore, time::timeout};
 
+mod diagnostics;
 mod game;
 mod round_seed;
 
@@ -39,11 +33,10 @@ const DEFAULT_ORIGINS: [&str; 4] = [
     "http://localhost:8085",
     "http://127.0.0.1:8085",
 ];
-const MAX_CONNECTIONS: usize = 128;
+pub(crate) const MAX_CONNECTIONS: usize = 128;
 const MAX_MESSAGE_BYTES: usize = 4096;
 const READINESS_TIMEOUT: Duration = Duration::from_secs(2);
-const INACTIVITY_TIMEOUT: Duration = Duration::from_secs(30);
-const SEND_TIMEOUT: Duration = Duration::from_secs(5);
+const SHUTDOWN_DRAIN_TIMEOUT: Duration = Duration::from_secs(5);
 
 #[derive(Clone)]
 pub struct AppState {
@@ -102,6 +95,23 @@ impl AppState {
             game_sessions: Arc::new(GameSessions::new(std::time::Instant::now())),
             game_rooms: GameRooms::new(std::time::Instant::now(), round_seed_source),
         })
+    }
+
+    pub fn begin_shutdown(&self) {
+        self.game_rooms.stop();
+    }
+
+    pub async fn wait_for_shutdown(&self) -> bool {
+        timeout(SHUTDOWN_DRAIN_TIMEOUT, async {
+            let permits = self
+                .connections
+                .clone()
+                .acquire_many_owned(MAX_CONNECTIONS as u32);
+            let (permits, ()) = tokio::join!(permits, self.game_rooms.wait_empty());
+            drop(permits.expect("connection semaphore remains open"));
+        })
+        .await
+        .is_ok()
     }
 }
 
@@ -187,7 +197,7 @@ pub fn app(state: AppState, web_dist_dir: Option<PathBuf>) -> Router {
     let router = Router::new()
         .route("/api/v1/health", get(health))
         .route("/api/v1/ready", get(ready))
-        .route("/api/v1/ws", get(websocket))
+        .route("/api/v1/ws", get(diagnostics::websocket))
         .route("/api/v1/game/session", post(issue_session))
         .route("/api/v1/game/ws", get(game_websocket))
         .route("/api", any(api_not_found))
@@ -220,6 +230,16 @@ async fn health() -> Response {
 }
 
 async fn ready(State(state): State<AppState>) -> Response {
+    if state.game_rooms.is_stopping() {
+        return with_no_store(
+            Problem::new(
+                StatusCode::SERVICE_UNAVAILABLE,
+                "Service Unavailable",
+                "Server is shutting down",
+            )
+            .response(),
+        );
+    }
     let Some(database) = state.database else {
         return status_response();
     };
@@ -252,96 +272,6 @@ fn with_no_store(mut response: Response) -> Response {
     response
 }
 
-async fn websocket(
-    State(state): State<AppState>,
-    headers: HeaderMap,
-    upgrade: WebSocketUpgrade,
-) -> Response {
-    let origin = headers.get(ORIGIN).and_then(|value| value.to_str().ok());
-    if origin.is_none_or(|value| !state.allowed_origins.contains(value)) {
-        return Problem::new(StatusCode::FORBIDDEN, "Forbidden", "Origin is not allowed")
-            .response();
-    }
-    let Ok(permit) = state.connections.clone().try_acquire_owned() else {
-        return Problem::new(
-            StatusCode::SERVICE_UNAVAILABLE,
-            "Service Unavailable",
-            "WebSocket connection limit reached",
-        )
-        .response();
-    };
-    upgrade
-        .max_frame_size(MAX_MESSAGE_BYTES)
-        .max_message_size(MAX_MESSAGE_BYTES)
-        .on_upgrade(move |socket| websocket_session(socket, permit))
-}
-
-async fn websocket_session(mut socket: WebSocket, _permit: OwnedSemaphorePermit) {
-    if send_json(&mut socket, &ServerMessage::welcome())
-        .await
-        .is_err()
-    {
-        return;
-    }
-    loop {
-        let Ok(incoming) = timeout(INACTIVITY_TIMEOUT, socket.recv()).await else {
-            close_policy(&mut socket, "Connection inactive").await;
-            return;
-        };
-        match incoming {
-            Some(Ok(Message::Text(text))) => match serde_json::from_str::<ClientMessage>(&text) {
-                Ok(ClientMessage::Ping { sequence }) => {
-                    if send_json(&mut socket, &ServerMessage::Pong { sequence })
-                        .await
-                        .is_err()
-                    {
-                        return;
-                    }
-                }
-                Err(_) => {
-                    let _ = send_json(&mut socket, &ServerMessage::invalid_message()).await;
-                    close_policy(&mut socket, "Invalid client message").await;
-                    return;
-                }
-            },
-            Some(Ok(Message::Ping(data))) => {
-                if !matches!(
-                    timeout(SEND_TIMEOUT, socket.send(Message::Pong(data))).await,
-                    Ok(Ok(()))
-                ) {
-                    return;
-                }
-            }
-            Some(Ok(Message::Pong(_))) => {}
-            Some(Ok(Message::Close(_))) | None | Some(Err(_)) => return,
-            Some(Ok(Message::Binary(_))) => {
-                let _ = send_json(&mut socket, &ServerMessage::invalid_message()).await;
-                close_policy(&mut socket, "Invalid client message").await;
-                return;
-            }
-        }
-    }
-}
-
-async fn send_json(socket: &mut WebSocket, message: &ServerMessage) -> Result<(), ()> {
-    let text = serde_json::to_string(message).map_err(|_| ())?;
-    timeout(SEND_TIMEOUT, socket.send(Message::Text(text.into())))
-        .await
-        .map_err(|_| ())?
-        .map_err(|_| ())
-}
-
-async fn close_policy(socket: &mut WebSocket, reason: &'static str) {
-    let _ = timeout(
-        SEND_TIMEOUT,
-        socket.send(Message::Close(Some(CloseFrame {
-            code: 1008,
-            reason: reason.into(),
-        }))),
-    )
-    .await;
-}
-
 async fn api_not_found() -> Response {
     Problem::new(
         StatusCode::NOT_FOUND,
@@ -359,6 +289,8 @@ mod game_http_tests;
 mod game_socket_tests;
 #[cfg(test)]
 mod round_seed_tests;
+#[cfg(test)]
+mod shutdown_tests;
 #[cfg(test)]
 mod startup_tests;
 #[cfg(test)]

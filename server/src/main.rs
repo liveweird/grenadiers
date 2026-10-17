@@ -21,13 +21,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let web_dist_dir = std::env::var_os("WEB_DIST_DIR").map(PathBuf::from);
     let listener = TcpListener::bind(address).await?;
     tracing::info!(%address, "server listening");
-    axum::serve(listener, app(state, web_dist_dir))
-        .with_graceful_shutdown(shutdown_signal())
+    axum::serve(listener, app(state.clone(), web_dist_dir))
+        .with_graceful_shutdown(shutdown_signal(state.clone()))
         .await?;
+    if !state.wait_for_shutdown().await {
+        tracing::warn!("shutdown drain deadline elapsed");
+    }
     Ok(())
 }
 
-async fn shutdown_signal() {
+async fn shutdown_signal(state: AppState) {
     let ctrl_c = async {
         tokio::signal::ctrl_c()
             .await
@@ -47,4 +50,5 @@ async fn shutdown_signal() {
         () = ctrl_c => {},
         () = terminate => {},
     }
+    state.begin_shutdown();
 }

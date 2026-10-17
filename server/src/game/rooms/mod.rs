@@ -6,25 +6,24 @@ use std::{
 
 use grenadiers_core::protocol::{RoomCode, RoomId};
 use tokio::{
-    sync::{mpsc, oneshot},
+    sync::{Notify, watch},
     time::Instant,
 };
 
 mod input;
-#[cfg(test)]
 mod match_owner;
-#[cfg(test)]
 mod match_runtime;
-mod owner;
 mod profile;
-mod publication;
-mod runtime;
 mod types;
 
 use crate::round_seed::RoundSeedSource;
-pub(crate) use input::RoomAction;
+pub(crate) use match_owner::{
+    ClosingReason, MatchAdmission as Admission, MatchOwnerNotice as RoomNotice,
+};
+pub(crate) use match_runtime::MatchAction as RoomAction;
+pub(crate) use match_runtime::MatchNotice;
 use types::RoomIdentity;
-pub(crate) use types::{Admission, BindingKey, RoomError, RoomNotice};
+pub(crate) use types::{BindingKey, RoomError};
 
 const MAX_ROOMS: usize = 32;
 const OPERATION_BURST: f64 = 32.0;
@@ -39,11 +38,13 @@ pub(crate) struct GameRooms {
     random_fill: Arc<RandomFill>,
     round_seed_source: RoundSeedSource,
     profile: profile::RoomProfile,
+    shutdown: watch::Sender<bool>,
+    empty: Notify,
 }
 
 #[derive(Clone)]
 struct RoomHandle {
-    commands: mpsc::Sender<owner::RoomCommand>,
+    owner: match_owner::MatchOwnerHandle,
 }
 
 struct Registry {
@@ -56,6 +57,7 @@ struct Registry {
 
 impl GameRooms {
     pub(crate) fn new(now: StdInstant, round_seed_source: RoundSeedSource) -> Arc<Self> {
+        let (shutdown, _) = watch::channel(false);
         Arc::new(Self {
             registry: Mutex::new(Registry {
                 rooms: HashMap::new(),
@@ -67,6 +69,8 @@ impl GameRooms {
             random_fill: Arc::new(|bytes| getrandom::fill(bytes).map_err(|_| ())),
             round_seed_source,
             profile: profile::RoomProfile::GeneratedClassicV2,
+            shutdown,
+            empty: Notify::new(),
         })
     }
 
@@ -75,6 +79,7 @@ impl GameRooms {
         now: StdInstant,
         fill: impl Fn(&mut [u8]) -> Result<(), ()> + Send + Sync + 'static,
     ) -> Arc<Self> {
+        let (shutdown, _) = watch::channel(false);
         Self {
             registry: Mutex::new(Registry {
                 rooms: HashMap::new(),
@@ -87,6 +92,8 @@ impl GameRooms {
             round_seed_source: RoundSeedSource::from_optional_path(None)
                 .expect("OS entropy source construction cannot fail"),
             profile: profile::RoomProfile::FixedClassicV1,
+            shutdown,
+            empty: Notify::new(),
         }
         .into()
     }
@@ -97,6 +104,7 @@ impl GameRooms {
         fill: impl Fn(&mut [u8]) -> Result<(), ()> + Send + Sync + 'static,
         round_seed_source: RoundSeedSource,
     ) -> Arc<Self> {
+        let (shutdown, _) = watch::channel(false);
         Self {
             registry: Mutex::new(Registry {
                 rooms: HashMap::new(),
@@ -108,6 +116,8 @@ impl GameRooms {
             random_fill: Arc::new(fill),
             round_seed_source,
             profile: profile::RoomProfile::GeneratedClassicV2,
+            shutdown,
+            empty: Notify::new(),
         }
         .into()
     }
@@ -117,8 +127,11 @@ impl GameRooms {
         binding: BindingKey,
         now: StdInstant,
     ) -> Result<Admission, RoomError> {
-        let (handle, owner) = {
+        let (handle, owner, id, code) = {
             let mut registry = self.lock();
+            if self.is_stopping() {
+                return Err(RoomError::RoomNotFound);
+            }
             if !registry.operations.take(now) {
                 return Err(RoomError::RateLimited);
             }
@@ -126,19 +139,30 @@ impl GameRooms {
                 return Err(RoomError::CapacityReached);
             }
             let identity = self.generate_identity(&mut registry)?;
-            let (commands, owner) = owner::PreparedOwner::new(
+            let cleanup_id = identity.id.clone();
+            let cleanup_code = identity.code.clone();
+            let (owner_handle, owner) = match_owner::PreparedMatchOwner::new(
                 identity.clone(),
                 Instant::now(),
                 self.round_seed_source.clone(),
-            );
-            let handle = RoomHandle { commands };
+                self.shutdown(),
+            )
+            .map_err(|_| RoomError::CapacityReached)?;
+            let handle = RoomHandle {
+                owner: owner_handle,
+            };
             registry
                 .codes
                 .insert(identity.code.clone(), identity.id.clone());
             registry.rooms.insert(identity.id.clone(), handle.clone());
-            (handle, owner)
+            (handle, owner, cleanup_id, cleanup_code)
         };
-        drop(owner.start(Arc::downgrade(self)));
+        let registry = Arc::downgrade(self);
+        drop(owner.start(move || {
+            if let Some(registry) = registry.upgrade() {
+                registry.cleanup(&id, &code);
+            }
+        }));
         self.admit(handle, binding).await
     }
 
@@ -150,6 +174,9 @@ impl GameRooms {
     ) -> Result<Admission, RoomError> {
         let handle = {
             let mut registry = self.lock();
+            if self.is_stopping() {
+                return Err(RoomError::RoomNotFound);
+            }
             if !registry.operations.take(now) {
                 return Err(RoomError::RateLimited);
             }
@@ -178,17 +205,11 @@ impl GameRooms {
                 .cloned()
                 .ok_or(RoomError::RoomNotFound)?
         };
-        let (reply, response) = oneshot::channel();
         handle
-            .commands
-            .try_send(owner::RoomCommand::Leave {
-                binding,
-                room_id,
-                round_id,
-                reply,
-            })
-            .map_err(map_send_error)?;
-        response.await.unwrap_or(Err(RoomError::RoomNotFound))
+            .owner
+            .leave(binding, room_id, round_id)
+            .await
+            .unwrap_or(Err(RoomError::RoomNotFound))
     }
 
     pub(crate) async fn action(
@@ -207,27 +228,19 @@ impl GameRooms {
                 .cloned()
                 .ok_or(RoomError::RoomNotFound)?
         };
-        let (reply, response) = oneshot::channel();
         handle
-            .commands
-            .try_send(owner::RoomCommand::Action {
-                binding,
-                room_id,
-                round_id,
-                action,
-                reply,
-            })
-            .map_err(map_send_error)?;
-        response.await.unwrap_or(Err(RoomError::RoomNotFound))
+            .owner
+            .action(binding, room_id, round_id, action)
+            .await
+            .unwrap_or(Err(RoomError::RoomNotFound))
     }
 
     async fn admit(&self, handle: RoomHandle, binding: BindingKey) -> Result<Admission, RoomError> {
-        let (reply, response) = oneshot::channel();
         handle
-            .commands
-            .try_send(owner::RoomCommand::Join { binding, reply })
-            .map_err(map_send_error)?;
-        response.await.unwrap_or(Err(RoomError::RoomNotFound))
+            .owner
+            .join(binding)
+            .await
+            .unwrap_or(Err(RoomError::RoomNotFound))
     }
 
     fn generate_identity(&self, registry: &mut Registry) -> Result<RoomIdentity, RoomError> {
@@ -274,6 +287,31 @@ impl GameRooms {
         if registry.codes.get(code) == Some(id) && registry.rooms.contains_key(id) {
             registry.codes.remove(code);
             registry.rooms.remove(id);
+            if registry.rooms.is_empty() {
+                self.empty.notify_waiters();
+            }
+        }
+    }
+
+    pub(crate) fn shutdown(&self) -> watch::Receiver<bool> {
+        self.shutdown.subscribe()
+    }
+
+    pub(crate) fn is_stopping(&self) -> bool {
+        *self.shutdown.borrow()
+    }
+
+    pub(crate) fn stop(&self) {
+        self.shutdown.send_replace(true);
+    }
+
+    pub(crate) async fn wait_empty(&self) {
+        loop {
+            let notified = self.empty.notified();
+            if self.lock().rooms.is_empty() {
+                return;
+            }
+            notified.await;
         }
     }
 
@@ -281,13 +319,6 @@ impl GameRooms {
         self.registry
             .lock()
             .unwrap_or_else(|error| error.into_inner())
-    }
-}
-
-fn map_send_error<T>(error: mpsc::error::TrySendError<T>) -> RoomError {
-    match error {
-        mpsc::error::TrySendError::Full(_) => RoomError::RateLimited,
-        mpsc::error::TrySendError::Closed(_) => RoomError::RoomNotFound,
     }
 }
 

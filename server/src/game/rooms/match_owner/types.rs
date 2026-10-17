@@ -20,7 +20,7 @@ pub(in crate::game::rooms) type ShutdownState = bool;
 pub(super) type Reply<T> = oneshot::Receiver<Result<T, RoomError>>;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub(in crate::game::rooms) enum ClosingReason {
+pub(crate) enum ClosingReason {
     Expired,
     Retired,
     ServerStopped,
@@ -28,7 +28,7 @@ pub(in crate::game::rooms) enum ClosingReason {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub(in crate::game::rooms) enum MatchOwnerNotice {
+pub(crate) enum MatchOwnerNotice {
     Publication(MatchNotice),
     Closing {
         last: MatchNotice,
@@ -36,13 +36,13 @@ pub(in crate::game::rooms) enum MatchOwnerNotice {
     },
 }
 
-pub(in crate::game::rooms) struct MatchAdmission {
-    pub(in crate::game::rooms) room_id: RoomId,
-    pub(in crate::game::rooms) round_id: u64,
-    pub(in crate::game::rooms) seat: Seat,
-    pub(in crate::game::rooms) view: RoomView,
-    pub(in crate::game::rooms) notices: watch::Receiver<MatchOwnerNotice>,
-    pub(in crate::game::rooms) guard: DepartureGuard,
+pub(crate) struct MatchAdmission {
+    pub(crate) room_id: RoomId,
+    pub(crate) round_id: u64,
+    pub(crate) seat: Seat,
+    pub(crate) view: RoomView,
+    pub(crate) notices: watch::Receiver<MatchOwnerNotice>,
+    pub(crate) guard: DepartureGuard,
 }
 
 pub(super) enum OwnerCommand {

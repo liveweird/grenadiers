@@ -3,11 +3,9 @@ use std::sync::{
     atomic::{AtomicU64, AtomicUsize, Ordering},
 };
 
-use grenadiers_core::protocol::{MapId, RoomCode, Seat};
-use tokio::sync::oneshot;
-
 use super::*;
 use crate::game::sessions::{ConnectionId, GameSessions};
+use grenadiers_core::protocol::{MapId, RoomCode, Seat};
 
 fn deterministic_rooms(now: StdInstant) -> Arc<GameRooms> {
     let codes = AtomicU64::new(0);
@@ -110,15 +108,7 @@ async fn canceled_join_before_mutation_does_not_claim_the_last_seat() {
     let rooms = deterministic_rooms(now);
     let owner = rooms.create(binding(1, 1), now).await.unwrap();
     let handle = rooms.lock().rooms.get(&owner.room_id).unwrap().clone();
-    let (reply, canceled) = oneshot::channel();
-    drop(canceled);
-    handle
-        .commands
-        .try_send(owner::RoomCommand::Join {
-            binding: binding(2, 1),
-            reply,
-        })
-        .unwrap();
+    handle.owner.submit_canceled_join(binding(2, 1));
     tokio::task::yield_now().await;
 
     let joined = rooms
@@ -126,28 +116,22 @@ async fn canceled_join_before_mutation_does_not_claim_the_last_seat() {
         .await
         .unwrap();
     assert_eq!(joined.seat, Seat::Two);
-    assert_eq!(joined.view.revision.get(), 2);
+    assert_eq!(owner.view.revision.get(), 2);
+    assert_eq!(joined.view.revision.get(), 3);
 }
 
-#[tokio::test]
+#[tokio::test(start_paused = true)]
 async fn dropped_admission_cleans_an_empty_room_even_with_a_full_command_queue() {
     let now = StdInstant::now();
     let rooms = deterministic_rooms(now);
     let admission = rooms.create(binding(1, 1), now).await.unwrap();
     let handle = rooms.lock().rooms.get(&admission.room_id).unwrap().clone();
-    for connection in 2..=owner::COMMAND_CAPACITY as u64 + 1 {
-        let (reply, response) = oneshot::channel();
-        drop(response);
-        handle
-            .commands
-            .try_send(owner::RoomCommand::Join {
-                binding: binding(connection, 1),
-                reply,
-            })
-            .unwrap();
+    for connection in 2..=33 {
+        drop(handle.owner.join(binding(connection, 1)));
     }
 
     drop(admission);
+    tokio::time::advance(std::time::Duration::from_millis(17)).await;
     wait_until_empty(&rooms).await;
 }
 
@@ -160,9 +144,15 @@ async fn exact_expiry_publishes_expired_and_removes_both_lookups() {
     let code = admission.view.room_code.clone();
     let mut notices = admission.notices.clone();
 
-    tokio::time::advance(owner::ROOM_LIFETIME).await;
+    tokio::time::advance(std::time::Duration::from_secs(300)).await;
     notices.changed().await.unwrap();
-    assert_eq!(*notices.borrow_and_update(), RoomNotice::Expired);
+    assert!(matches!(
+        &*notices.borrow_and_update(),
+        RoomNotice::Closing {
+            reason: ClosingReason::Expired,
+            ..
+        }
+    ));
     assert!(matches!(
         rooms.join(&code, binding(2, 1), now).await,
         Err(RoomError::RoomNotFound)
@@ -356,9 +346,10 @@ async fn scheduler_catches_up_four_due_ticks_without_skipping() {
         .await
         .unwrap();
     one.notices.changed().await.unwrap();
-    let RoomNotice::View(view) = one.notices.borrow_and_update().clone() else {
+    let RoomNotice::Publication(notice) = one.notices.borrow_and_update().clone() else {
         panic!("expected waiting view");
     };
+    let view = notice.room;
     assert_eq!(view.tick.get(), 4);
     assert_eq!(view.round_id.get(), 2);
 }
@@ -373,13 +364,14 @@ async fn excessive_lag_interrupts_then_terminal_retention_releases_registration(
 
     tokio::time::advance(std::time::Duration::from_millis(517)).await;
     admission.notices.changed().await.unwrap();
-    let RoomNotice::View(view) = admission.notices.borrow_and_update().clone() else {
+    let RoomNotice::Publication(notice) = admission.notices.borrow_and_update().clone() else {
         panic!("expected interruption view");
     };
+    let view = notice.room;
     assert!(matches!(
         view.phase,
-        grenadiers_core::protocol::RoomPhase::Interrupted {
-            reason: grenadiers_core::protocol::InterruptReason::ServerOverloaded,
+        grenadiers_core::protocol::v3::RoomPhase::Interrupted {
+            reason: grenadiers_core::protocol::v3::MatchInterruptReason::ServerOverloaded,
             ..
         }
     ));
@@ -387,7 +379,13 @@ async fn excessive_lag_interrupts_then_terminal_retention_releases_registration(
 
     tokio::time::advance(std::time::Duration::from_secs(30)).await;
     admission.notices.changed().await.unwrap();
-    assert_eq!(*admission.notices.borrow_and_update(), RoomNotice::Retired);
+    assert!(matches!(
+        &*admission.notices.borrow_and_update(),
+        RoomNotice::Closing {
+            reason: ClosingReason::Retired,
+            ..
+        }
+    ));
     wait_until_empty(&rooms).await;
     let registry = rooms.lock();
     assert!(!registry.rooms.contains_key(&id));

@@ -1,7 +1,5 @@
-use std::sync::Arc;
-
-use grenadiers_core::protocol::{RoomCode, RoomId, RoomView, Seat};
-use tokio::sync::{oneshot, watch};
+use grenadiers_core::protocol::{RoomCode, RoomId};
+use tokio::sync::oneshot;
 
 use super::super::sessions::ConnectionId;
 
@@ -9,14 +7,6 @@ use super::super::sessions::ConnectionId;
 pub(crate) struct BindingKey {
     pub(crate) connection_id: ConnectionId,
     pub(crate) generation: u64,
-}
-
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub(crate) enum RoomNotice {
-    View(RoomView),
-    Snapshot(Arc<str>),
-    Expired,
-    Retired,
 }
 
 pub(crate) struct DepartureGuard {
@@ -41,15 +31,6 @@ impl Drop for DepartureGuard {
             let _ = sender.send(grenadiers_core::room::DepartureReason::TransportLoss);
         }
     }
-}
-
-pub(crate) struct Admission {
-    pub(crate) room_id: RoomId,
-    pub(crate) round_id: u64,
-    pub(crate) seat: Seat,
-    pub(crate) view: RoomView,
-    pub(crate) notices: watch::Receiver<RoomNotice>,
-    pub(crate) guard: DepartureGuard,
 }
 
 #[derive(Clone)]

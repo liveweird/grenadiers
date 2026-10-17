@@ -1,14 +1,13 @@
 use std::{future::pending, sync::Arc, time::Duration};
 
 use axum::extract::ws::{Message, WebSocket};
-use grenadiers_core::protocol::{
-    Counter, ErrorCode, GameClientMessage, GameServerMessage, parse_client_message,
-};
-use tokio::time::{Instant, MissedTickBehavior, interval_at, sleep_until};
+use grenadiers_core::protocol::v3::{GameClientMessage, GameServerMessage, parse_client_message};
+use grenadiers_core::protocol::{Counter, ErrorCode};
+use tokio::time::{Instant, MissedTickBehavior, interval_at, sleep_until, timeout};
 
 use super::{
     limits::{InboundLimit, SessionDeadline, SessionDeadlines},
-    rooms::{Admission, BindingKey, GameRooms, RoomNotice},
+    rooms::{Admission, BindingKey, ClosingReason, GameRooms, RoomNotice},
     sessions::ConnectionId,
     socket::{close, command_sequence, fail_and_close, send_error, send_game, send_raw},
 };
@@ -44,6 +43,7 @@ pub(super) async fn authenticated_loop(
     };
     let mut pings = interval_at(started + PING_INTERVAL, PING_INTERVAL);
     pings.set_missed_tick_behavior(MissedTickBehavior::Delay);
+    let mut shutdown = rooms.shutdown();
     loop {
         enum Event {
             Incoming(Option<Message>),
@@ -51,6 +51,7 @@ pub(super) async fn authenticated_loop(
             Ping,
             Inactive,
             Expired,
+            Shutdown,
         }
         let is_member = state.membership.is_some();
         let event = tokio::select! {
@@ -59,6 +60,10 @@ pub(super) async fn authenticated_loop(
             _ = pings.tick() => Event::Ping,
             () = sleep_until(state.deadlines.inactivity_at()) => Event::Inactive,
             () = unseated_expiry(&state.deadlines, is_member) => Event::Expired,
+            changed = unseated_shutdown(&mut shutdown, is_member) => {
+                let _ = changed;
+                Event::Shutdown
+            },
         };
         let now = Instant::now();
         let status = if state.membership.is_some() {
@@ -94,48 +99,37 @@ pub(super) async fn authenticated_loop(
                 close(socket, 1000, "Session expired").await;
                 return;
             }
+            Event::Shutdown => {
+                close(socket, 1001, "Server shutting down").await;
+                return;
+            }
             Event::Notice(Ok(())) => {
                 let Some(member) = state.membership.as_mut() else {
                     continue;
                 };
                 let notice = member.admission.notices.borrow_and_update().clone();
                 match notice {
-                    RoomNotice::View(room) => {
-                        if send_game(
-                            socket,
-                            &GameServerMessage::RoomState {
-                                room,
-                                you_seat: member.admission.seat,
-                            },
-                        )
-                        .await
-                        .is_err()
-                        {
-                            return;
-                        }
-                    }
-                    RoomNotice::Snapshot(snapshot) => {
-                        if send_raw(socket, Message::Text(snapshot.to_string().into()))
+                    RoomNotice::Publication(notice) => {
+                        if send_notice(socket, notice, member.admission.seat)
                             .await
                             .is_err()
                         {
                             return;
                         }
                     }
-                    RoomNotice::Expired => {
-                        let _ = send_error(socket, ErrorCode::RoomNotFound, None).await;
-                        close(socket, 1000, "Room expired").await;
-                        return;
-                    }
-                    RoomNotice::Retired => {
-                        close(socket, 1000, "Room retired").await;
+                    RoomNotice::Closing { last, reason } => {
+                        finish_closing(socket, last, member.admission.seat, reason).await;
                         return;
                     }
                 }
             }
             Event::Notice(Err(_)) => {
                 if let Some(member) = state.membership.as_ref() {
-                    rooms.cleanup(&member.admission.room_id, &member.admission.view.room_code);
+                    let retained = member.admission.notices.borrow().clone();
+                    if let RoomNotice::Closing { last, reason } = retained {
+                        finish_closing(socket, last, member.admission.seat, reason).await;
+                        return;
+                    }
                 }
                 close(socket, 1000, "Room unavailable").await;
                 return;
@@ -153,6 +147,47 @@ pub(super) async fn authenticated_loop(
             }
         }
     }
+}
+
+async fn send_notice(
+    socket: &mut WebSocket,
+    notice: super::rooms::MatchNotice,
+    seat: grenadiers_core::protocol::Seat,
+) -> Result<(), ()> {
+    match notice.snapshot {
+        Some(snapshot) => send_raw(socket, Message::Text(snapshot.to_string().into())).await,
+        None => {
+            send_game(
+                socket,
+                &GameServerMessage::RoomState {
+                    room: notice.room,
+                    you_seat: seat,
+                },
+            )
+            .await
+        }
+    }
+}
+
+async fn finish_closing(
+    socket: &mut WebSocket,
+    last: super::rooms::MatchNotice,
+    seat: grenadiers_core::protocol::Seat,
+    reason: ClosingReason,
+) {
+    let _ = timeout(Duration::from_secs(5), async {
+        let _ = send_notice(socket, last, seat).await;
+        match reason {
+            ClosingReason::Expired => {
+                let _ = send_error(socket, ErrorCode::RoomNotFound, None).await;
+                close(socket, 1000, "Room expired").await;
+            }
+            ClosingReason::Retired => close(socket, 1000, "Room retired").await,
+            ClosingReason::ServerStopped => close(socket, 1001, "Server shutting down").await,
+            ClosingReason::InternalFailure => close(socket, 1011, "Room unavailable").await,
+        }
+    })
+    .await;
 }
 
 async fn handle_message(
@@ -204,5 +239,18 @@ async fn unseated_expiry(deadlines: &SessionDeadlines, is_member: bool) {
         pending().await
     } else {
         sleep_until(deadlines.expires_at()).await
+    }
+}
+
+async fn unseated_shutdown(
+    shutdown: &mut tokio::sync::watch::Receiver<bool>,
+    is_member: bool,
+) -> Result<(), tokio::sync::watch::error::RecvError> {
+    if is_member {
+        pending().await
+    } else if *shutdown.borrow_and_update() {
+        Ok(())
+    } else {
+        shutdown.changed().await
     }
 }

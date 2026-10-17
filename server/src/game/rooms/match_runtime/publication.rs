@@ -3,8 +3,7 @@ use std::sync::Arc;
 use grenadiers_core::{
     game::StepReport,
     protocol::v3::{
-        GameServerMessage, RoomMetadata, RoomPhase, RoomView, encode_server_message,
-        project_room_view,
+        GameServerMessage, RoomMetadata, RoomView, encode_server_message, project_room_view,
     },
     protocol::{project_events, project_state},
     room::{MatchLifecycle, MatchPhase},
@@ -13,6 +12,8 @@ use grenadiers_core::{
 use super::super::types::RoomIdentity;
 use super::error::MatchRuntimeError;
 use super::runtime::{MatchNotice, SimRound};
+#[cfg(test)]
+use grenadiers_core::protocol::v3::RoomPhase;
 
 pub(super) fn room_view(
     identity: &RoomIdentity,
@@ -41,6 +42,14 @@ pub(super) fn snapshot(
     sim: &SimRound,
     reports: &[StepReport],
 ) -> Result<MatchNotice, MatchRuntimeError> {
+    let generation_record_matches = match identity.profile {
+        #[cfg(test)]
+        super::super::profile::RoomProfile::FixedClassicV1 => sim.generation_record.is_none(),
+        super::super::profile::RoomProfile::GeneratedClassicV2 => sim.generation_record.is_some(),
+    };
+    if !generation_record_matches {
+        return Err(MatchRuntimeError::Publication);
+    }
     let room = room_view(identity, lifecycle, revision)?;
     let projected =
         project_state(&sim.state.public_view()).map_err(|_| MatchRuntimeError::Publication)?;

@@ -8,10 +8,12 @@ use axum::{
     http::{HeaderMap, StatusCode, Uri, header::RETRY_AFTER},
     response::Response,
 };
+use grenadiers_core::protocol::v3::{
+    GAMEPLAY_PROTOCOL_VERSION, GameClientMessage, GameServerMessage, GameplayVersion,
+    encode_server_message, parse_client_message,
+};
 use grenadiers_core::protocol::{
-    Counter, ErrorCode, GAMEPLAY_PROTOCOL_VERSION, GameClientMessage, GameServerMessage,
-    GameplayVersion, MAX_CLIENT_MESSAGE_BYTES, ProtocolVersionInput, encode_server_message,
-    parse_client_message,
+    Counter, ErrorCode, MAX_CLIENT_MESSAGE_BYTES, ProtocolVersionInput,
 };
 use tokio::{
     sync::OwnedSemaphorePermit,
@@ -46,6 +48,16 @@ pub(crate) async fn game_websocket(
             Problem::new(StatusCode::FORBIDDEN, "Forbidden", "Origin is not allowed").response(),
         );
     }
+    if state.game_rooms.is_stopping() {
+        return with_no_store(
+            Problem::new(
+                StatusCode::SERVICE_UNAVAILABLE,
+                "Service Unavailable",
+                "Server is shutting down",
+            )
+            .response(),
+        );
+    }
     if !state.game_sessions.allow_upgrade(StdInstant::now()) {
         let mut response = Problem::new(
             StatusCode::TOO_MANY_REQUESTS,
@@ -70,12 +82,13 @@ pub(crate) async fn game_websocket(
     };
     let sessions = state.game_sessions;
     let rooms = state.game_rooms;
+    let shutdown = rooms.shutdown();
     upgrade
         .max_frame_size(MAX_CLIENT_MESSAGE_BYTES)
         .max_message_size(MAX_CLIENT_MESSAGE_BYTES)
         .write_buffer_size(0)
         .max_write_buffer_size(MAX_WRITE_BUFFER)
-        .on_upgrade(move |socket| game_session(socket, permit, sessions, rooms))
+        .on_upgrade(move |socket| game_session(socket, permit, sessions, rooms, shutdown))
 }
 
 async fn game_session(
@@ -83,11 +96,23 @@ async fn game_session(
     _permit: OwnedSemaphorePermit,
     sessions: std::sync::Arc<super::sessions::GameSessions>,
     rooms: std::sync::Arc<super::rooms::GameRooms>,
+    mut shutdown: tokio::sync::watch::Receiver<bool>,
 ) {
     let mut inbound = InboundLimit::new(Instant::now());
     let deadline = Instant::now() + AUTH_TIMEOUT;
     let lease = loop {
-        let incoming = match timeout_at(deadline, socket.recv()).await {
+        if *shutdown.borrow() {
+            close(&mut socket, 1001, "Server shutting down").await;
+            return;
+        }
+        let incoming = match tokio::select! {
+            incoming = timeout_at(deadline, socket.recv()) => incoming,
+            changed = shutdown.changed() => {
+                let _ = changed;
+                close(&mut socket, 1001, "Server shutting down").await;
+                return;
+            }
+        } {
             Ok(Some(Ok(message))) => message,
             Ok(Some(Err(_)) | None) => return,
             Err(_) => {
@@ -187,7 +212,8 @@ pub(super) fn command_sequence(message: &GameClientMessage) -> Option<Counter> {
         | GameClientMessage::Ready { sequence, .. }
         | GameClientMessage::Movement { sequence, .. }
         | GameClientMessage::PlaceBomb { sequence, .. }
-        | GameClientMessage::LeaveRoom { sequence, .. } => Some(*sequence),
+        | GameClientMessage::LeaveRoom { sequence, .. }
+        | GameClientMessage::Rematch { sequence, .. } => Some(*sequence),
     }
 }
 

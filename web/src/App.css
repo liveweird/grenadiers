@@ -66,6 +66,10 @@ main { min-height: 100vh; }
 }
 .game-instructions { margin: .75rem 0 0; color: #40586c; font-size: .95rem; }
 .controls-button { margin-top: .35rem; padding-inline: 0; }
+.local-controls { display: flex; flex-wrap: wrap; align-items: center; gap: .25rem 1rem; }
+.sound-control { display: flex; align-items: center; gap: .35rem; }
+.sound-control button { padding-inline: 0; }
+.sound-control span { color: #40586c; }
 .controls-description { color: #40586c; }
 .control-bindings { margin-top: 1.15rem; }
 .control-binding {

@@ -73,6 +73,7 @@ describe('v4 admission and authoritative baselines', () => {
     const value = harness()
     const socket = await authenticate(value)
     socket.message(admitted(5))
+    const originalBaseline = value.client.getState().admissionBaseline
     const retained = value.client.getState().snapshot
     socket.emit('close')
     value.scheduled.shift()!()
@@ -93,8 +94,12 @@ describe('v4 admission and authoritative baselines', () => {
     resumed.message({ ...admitted(8), sequence: 99 })
     expect(value.client.getState().admissionPending).toBe(true)
     resumed.message(admitted(8))
-    expect(value.client.getState().room?.revision).toBe(8)
+    resumed.message(snapshot(9))
+    expect(value.client.getState().room?.revision).toBe(9)
     expect(value.client.getState().admissionPending).toBe(false)
+    expect(value.client.getState().snapshot?.room.revision).toBe(9)
+    expect(value.client.getState().admissionBaseline).toEqual({ roomId, revision: 8, tick: 8 })
+    expect(value.client.getState().admissionBaseline).not.toBe(originalBaseline)
   })
 })
 

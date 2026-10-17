@@ -49,6 +49,16 @@ Before each native movement, the harness derives east and west clearance from th
 public position and selects the larger interval, requiring at least one full cell of runway. Variable
 publication timing can therefore change leg length without accumulating drift into a wall.
 
+## Scenario: game control diagnostics stay bounded and exclude transport secrets
+
+Synthetic credential-bearing authentication, admission, error, and snapshot frames prove that the
+Node-side recorder retains at most 256 allowlisted control events and 64 socket summaries. Six
+hundred snapshots update only the socket's latest public tick and revision, so they cannot evict
+admission, replacement, or close evidence. The report excludes tokens, capabilities, socket URLs,
+and arbitrary error messages. The same isolated test proves the page collector survives a
+`setContent` document replacement with per-document clock origins, while setup and attachment
+failures produce only bounded fixed-label metadata and cannot fail the acceptance scenario.
+
 ## Scenario: native controls publish twenty unshaped local latency observations
 
 Two real clients enter the generated open corridor. Ten native movement and release cycles produce

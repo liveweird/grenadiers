@@ -3,9 +3,10 @@ import { setTimeout as delay } from 'node:timers/promises'
 import { expect, test, type Page, type Route, type TestInfo } from '@playwright/test'
 import { visibleActor, latestSnapshot, observeGame, type ObservedGame } from '../tests/support/duel'
 import { moveTo } from '../tests/support/movement'
+import { startBrowserStallDiagnostics } from '../tests/support/browser-stall-diagnostics'
 import {
   admissionBaseline, disconnectTransport, installTransportProbe, invalidResume,
-  sharedFieldsArePrivate, takeover,
+  moveTakeover, sharedFieldsArePrivate, stopTakeover, takeover,
 } from '../tests/support/reconnect'
 
 test.beforeAll(() => {
@@ -43,6 +44,7 @@ async function attachPublicSummary(testInfo: TestInfo, games: ObservedGame[]) {
     contentType: 'application/json',
     body: JSON.stringify(games.map((game) => ({
       sockets: game.sockets,
+      control: game.control,
       commands: game.commands.slice(-128),
       rooms: game.frames.filter((frame) => frame.type === 'roomState' || frame.type === 'snapshot' || frame.type === 'admitted')
         .slice(-60).map((frame) => ({ type: frame.type, room: frame.room })),
@@ -57,9 +59,13 @@ test('a browser restores its full live world and action floor before a fenced ta
   ])
   let release: (() => void) | undefined
   const games: ObservedGame[] = []
+  const diagnostics = startBrowserStallDiagnostics()
   try {
     const pages = await Promise.all(contexts.map((context) => context.newPage()))
     await Promise.all(pages.map(installTransportProbe))
+    await Promise.all(pages.map((page, index) => diagnostics.observePage(
+      page, index === 0 ? 'reconnect-primary' : 'reconnect-peer',
+    )))
     games.push(...pages.map(observeGame))
     const [one] = pages
     await joinMatch(pages, games)
@@ -118,6 +124,23 @@ test('a browser restores its full live world and action floor before a fenced ta
     expect(replacement.seat).toBe('one')
     expect(replacement.actionFloor).toBe(2)
     expect(replacement.stableCapability).toBe(true)
+    const takeoverPosition = replacement.positions.find((actor) => actor.seat === 'one')!
+    expect(takeoverPosition.y).toBe(1_536)
+    expect(takeoverPosition.x).toBeGreaterThanOrEqual(1_536)
+    expect(takeoverPosition.x).toBeLessThanOrEqual(5_632)
+    const takeoverDirection = takeoverPosition.x <= 1_664 ? 'east' : 'west'
+    await moveTakeover(one, takeoverDirection)
+    try {
+      await expect.poll(() => {
+        const current = latestSnapshot(games[1])!.state.actors
+          .find((actor) => actor.seat === 'one')
+        return current?.type === 'visible' && (takeoverDirection === 'east'
+          ? current.position.x > takeoverPosition.x
+          : current.position.x < takeoverPosition.x)
+      }, { intervals: [15] }).toBe(true)
+    } finally {
+      await stopTakeover(one)
+    }
     await expect(one.getByText('This seat was resumed in another tab.', { exact: true })).toBeVisible()
     await expect(one.getByRole('button', { name: 'Create room', exact: true })).toBeEnabled()
     const socketCount = games[0].sockets
@@ -136,8 +159,14 @@ test('a browser restores its full live world and action floor before a fenced ta
     await attachPublicSummary(testInfo, games)
     throw error
   } finally {
-    if (release) await release()
-    await Promise.all(contexts.map((context) => context.close()))
+    try {
+      if (release) await release()
+    } finally {
+      try { await Promise.all(contexts.map((context) => context.close())) } finally {
+        diagnostics.stop()
+        await diagnostics.attach(testInfo, 'reconnect-browser-stall-diagnostics')
+      }
+    }
   }
 })
 

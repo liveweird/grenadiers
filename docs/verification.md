@@ -2,10 +2,10 @@
 
 ## Live gameplay-v7 candidate — 2026-10-18 — local checks only
 
-The v0.3.24 integration passes **375 core tests, 174 server tests and two doctests**;
+The v0.3.24 integration passes **375 core tests, 174 server tests and two doctests in each debug and release profile**;
 four dedicated performance profiles remain intentionally ignored. Rust line coverage is
 **93.27%** (10,568/11,331 lines), above the unchanged 80% floor. All **262 web tests**,
-contracts, lint, Knip, builds and E2E static checks pass, with **25 documented scenarios**.
+contracts, lint, Knip, builds and E2E static checks pass, with **26 documented scenarios**.
 Dependency audits and strict pinned Kubernetes schemas pass. Independent backend and
 frontend reviews are clear.
 
@@ -21,7 +21,7 @@ only: no v0.3.24 image, Compose/Kubernetes acceptance or release has been comple
 
 ## Canonical projection candidate — 2026-10-18 — local checks only
 
-The v0.3.23 candidate passes **373 core tests, 170 server tests and two doctests**, with four
+The v0.3.23 candidate passes **373 core tests, 170 server tests and two doctests in each debug and release profile**, with four
 dedicated performance profiles intentionally ignored. Rust line coverage is **92.25%**
 (10,207/11,064 lines), above the unchanged 80% floor. All **247 web tests**, contract checks,
 ESLint, Knip, builds, E2E static checks, dependency audits and strict pinned Kubernetes schemas
@@ -35,10 +35,183 @@ projector directly rejects non-public audiences without partial encoding. Read-o
 preserve physical-clock expiry and frozen-result behavior. Archived contracts and replay records
 are unchanged.
 
-This record claims local verification only. No v0.3.23 image or Compose/Kubernetes acceptance
-has been completed. It remains stacked on the dormant contract candidate; that prerequisite's
-Kubernetes latency failure is being investigated separately. Publication requires final
-integration, independent deployment evidence and all final-head checks.
+The pre-correction image `sha256:1b5b5e39a78178c50df3de226621c0307249d8003baffc33ab170db0826eb3e7`
+passed Compose 25/25 and Kubernetes functional 15/15 with zero retries. Kubernetes latency was
+not run: the evaluation was interrupted after confirming the release-profile takeover defect.
+Evidence remains at `/tmp/grenadiers-v0323-acceptance`; that image does not certify the fix.
+The fix and strengthened acceptance are integrated, and full debug/release gates pass. Fresh
+image acceptance and final-head CI remain required before publication.
+
+## Release-profile connected takeover correction — 2026-10-18 — acceptance pending
+
+The release-profile owner regression fails on the earlier candidate: binding replacement was
+performed inside `debug_assert!`, so release builds omitted the mutation. Debug tests and a
+browser probe that only read the admission baseline did not detect this. The correction performs
+the mutation unconditionally and asserts its result separately. Focused release and debug
+regressions now pass, including replacement commands, stale binding rejection, stale guard
+cleanup, genuine disconnect and private baseline/action-floor restoration.
+
+The browser takeover scenario now requires a real scoped movement command from the replacement
+socket to change the peer's authoritative observation before stopping. The original watchdog,
+action-floor assertion and rejection checks remain. The server gate now runs the complete Rust
+workspace suite in debug and release profiles. Full gates pass **356 core tests, 170 server
+tests and two doctests in each profile**, with four dedicated performance profiles ignored.
+Rust line coverage is **93.40%** (9,289/9,945 lines). Fresh native image acceptance remains
+pending; the pre-fix image below does not certify this correction.
+
+The mutation defect does not explain the earlier missing-admission timeout: the admission
+reply precedes the faulty expression. Final-head CI also recorded a separate audio visibility
+failure. Both logs remain at `/tmp/grenadiers-v0322-ci-{pr,push}-failure.log`; neither is described
+as fixed. Bounded browser diagnostics now retain per-socket control history, current-document
+focus/visibility, long tasks, scheduling gaps and Node event-loop delay without changing
+assertions, timers, input order, latency budgets or retry policy. Independent review is clear;
+the focused Chromium lifecycle, secret-allowlist and diagnostic fault-injection scenario passes.
+The E2E static gates and scenario parity pass for **26 scenarios**.
+
+## Dormant v7 contract — 2026-10-18
+
+Clean archive source `456f47b33d808691295d48688d7b8c3ce916a01e` builds image
+`sha256:29ee6050fecc543be326bf30b650bf24bc4074bfba2eb111c5e4710a9b813490`.
+The initial evaluation passes **24/24 Compose scenarios**, but **23/24 Kubernetes scenarios**.
+No retries were performed. Kubernetes passes all fifteen functional cases and eight of nine
+latency cases; one shaped-network west action takes **305.948 ms**, exceeding the unchanged
+250 ms budget. That initial evaluation failed release acceptance.
+
+The failed action records key start 14363.782990, key finish 14388.211900, outgoing message
+14515.360157 and observed state 14669.730949 ms. Kubernetes CPU throttling is zero; that does
+not establish the cause of the spike. Original logs and failure attachments remain at
+`/tmp/grenadiers-v0322-acceptance`; investigation must preserve this result. Compose local/shaped
+maxima are **49.899/157.624 ms**, zero exceedances. Kubernetes local maximum is **54.463 ms**;
+its shaped maximum is **305.948 ms**, with one exceedance. These measure public-state delivery,
+not FPS, pixel latency or WAN guarantees.
+
+Artifact analysis splits the failed sample into key start to bridge ingress **101.296 ms**,
+configured outgoing delay **50.281 ms**, command forwarding to moved-snapshot ingress
+**41.816 ms**, incoming queue **57.177 ms**, and dispatch to page-observation binding
+**55.378 ms**. Nearby runner timers are up to **145.951 ms** late. This establishes delayed
+measurement callbacks, without establishing their root cause or actual server send timing.
+Active server and v6 client input sources are unchanged from v0.3.21. A bounded instrumented
+comparison of both exact images passes two live latency profiles per image without reproducing
+the spike. That comparison is diagnostic evidence, not release acceptance or a demonstrated fix.
+
+A separately planned instrumented evaluation uses the same candidate image and harness source
+`215adfa562cffd62fb6d2eb2194ae96d1f9d2a00`. Compose passes **25/25 scenarios**, retries zero,
+with local/shaped maxima **51.576/155.392 ms** and zero exceedances. Kubernetes passes the
+default eight cases, then the pickup case fails at initial navigation: the seed rollout replaced
+the pod, terminating its existing port-forward. A failed readiness request did not halt that
+outer orchestration. The remaining sixteen cases were not run and no failed case was retried.
+Evidence remains at `/tmp/grenadiers-v0322-instrumented-acceptance`; its outcome is failed and
+incomplete. All owned resources were removed. A corrected fail-fast orchestration evaluation
+will create a new port-forward after every rollout and require both probes before Playwright.
+This transport correction does not explain or fix the original latency observation.
+
+The corrected Kubernetes evaluation passes **25/25 scenarios**, retries zero, using the same
+candidate image and harness. It stops and waits for each old forward before rollout, records
+each new ready pod/UID, starts a fresh pod-bound forward, and requires strict health/readiness
+before browser execution. The pre-fix rollup is retained **Compose 25/25** plus corrected
+**Kubernetes 25/25**, with an independent evidence audit clear. No assertion, sample count,
+250 ms budget or retry policy changed. Prior failed evaluations remain failed and preserved.
+
+Corrected Kubernetes local/shaped maxima are **190.340/165.235 ms**, with twenty samples per
+profile, zero exceedances and zero CPU throttles. Its Node event-loop maxima are
+86.180/35.095 ms; page DOM-key/send absolute gaps are at most 1.7/1.3 ms. These diagnostics
+do not establish the original spike's root cause. That **305.948 ms observation remains an
+unresolved latency risk**, accepted explicitly alongside the new passing evaluation rather
+than described as fixed. Corrected evidence is at
+`/tmp/grenadiers-v0322-portforward-fix-acceptance`; all owned resources and listeners are gone.
+
+Local gates pass 356 core tests, 170 server tests and two doctests; four dedicated performance
+profiles remain intentionally ignored. All **247 web tests**, contracts, ESLint, Knip, builds,
+E2E static/25-scenario parity, dependency audits and strict pinned Kubernetes schemas pass.
+Rust line coverage is **93.40%**, above the unchanged 80% floor. Independent contract review and
+conservative serialized-frame proof review are clear: Snapshot at most 61,586 bytes, personal
+admission 36,472 bytes, below the unchanged 65,536-byte ceiling. A separate schema-valid
+representative and explicit oversize rejection tests remain.
+
+Correct API health/readiness, UID/GID 65532, read-only roots, dropped capabilities and no
+privilege escalation pass on both deployments. Kubernetes retains RuntimeDefault and 500m/256Mi.
+Seeded cases use external mode-0444 fixtures, root-owned in Kubernetes, with no seed in the image.
+Pinned archive-only Trivy reports zero fixable HIGH/CRITICAL findings under existing policy.
+All owned resources, namespaces, ports and browser containers were removed. Application inputs
+remain identical through integration. The v7 contract is dormant; v6 remains active and no new
+pickup is enabled. That evaluation retains the original unexplained observation and both
+failed evaluations as material limitations. Current acceptance also requires the takeover
+correction and fresh gates described above.
+
+## Typed domain bomb triggers — 2026-10-18
+
+Clean archive source `82fe88c299b8e74a410d231b24cb3aad92e7e242` builds image
+`sha256:68ed7ca87c1434c6b309b3894ee5814fa77453c022bc62ad2b99e5bde0f729f4`.
+Application inputs match reviewed source `8653522543c4ff964128597a4261170dc019863c`;
+the accepted harness includes the bounded reconnect diagnostics from v0.3.20.
+The same image passes **24/24 scenarios in Compose and 24/24 in Kubernetes, retries zero**:
+eight default, pickup, match/rematch, two reconnect, controls, headed visibility, audio and
+nine latency cases. All sixteen result files pass. Independent evidence audit is clear.
+Evidence is at `/tmp/grenadiers-v0321-acceptance`.
+
+346 core tests, 170 server tests and two doctests pass; four dedicated performance profiles
+remain intentionally ignored. All **230 web tests**, contract checks, lint, Knip, builds and
+E2E static/24-scenario parity pass. Rust line coverage is **94.22%**, above the unchanged 80% floor.
+Independent code review is clear. Regression tests cover checked trigger construction, Classic
+rejection before mutation, exact timed behavior, unsupported event-only projection and
+publication failure preserving revisions and reports.
+
+Dependency audits pass with zero npm vulnerabilities. Strict pinned Kubernetes 1.33 schemas
+validate all three resources. Pinned archive-only Trivy passes the existing HIGH/CRITICAL
+`--ignore-unfixed` filter. Both deployments use UID/GID 65532, read-only roots, dropped ALL
+capabilities and no privilege escalation; Kubernetes retains RuntimeDefault and 500m/256Mi.
+Every seeded run uses an external mode-0444 fixture, root-owned in Kubernetes; no seed is baked
+into the image. Correct `/api/v1/health` and `/api/v1/ready` probes return HTTP 200,
+`application/json`, status ok and `Cache-Control: no-store`.
+
+Observed local/shaped latency maxima are Compose **50.388/173.047 ms**, Kubernetes
+**89.947/161.098 ms**, with zero samples above 250 ms and zero Kubernetes CPU throttles.
+These are bounded public-state delivery measurements, not pixel latency, FPS or WAN guarantees.
+All owned deployments, namespaces, ports and browser containers were removed.
+Integration/documentation changes preserve accepted application inputs. Current gameplay-v6,
+Classic rules and journal formats remain unchanged; Remote/Contact triggers are not activated.
+
+## Ordered manual actions — 2026-10-18
+
+Clean archive source `305a5844f3d1add8dff95eca26090c3f21918671` builds image
+`sha256:961c04ee26ef79a3bac4459dbb9397a0291db18e882d692503ae2ea2870584a5`.
+The same image passes **24/24 scenarios in Compose and 24/24 in Kubernetes, retries zero**:
+eight default, pickup, match/rematch, two reconnect, controls, headed visibility, audio and
+nine latency cases. Seven latency cases cover queues/observers; two measure native input.
+All sixteen deployment result files pass. Evidence is at `/tmp/grenadiers-v0320-acceptance`.
+
+An initial PR browser run timed out in the private connected-takeover probe. Its peer CI run
+passed all 24 cases on identical source. Sanitized histories ended in Running at room ticks
+653 and 677 with both seats connected; they do not retain state ticks or arbitrary error frames.
+The cause remains unproven. No product change, retry, deadline or assertion relaxation was made.
+Test source `bd83619e9af68146f4609197530e4414733cd035` adds bounded diagnostics containing only
+stage, socket state, public message count/type and elapsed time, with a closed message-type list.
+
+Both reconnect cases pass again through each deployment on the accepted image, retries zero;
+Compose takes 38.4 seconds and Kubernetes 40.0 seconds. The other 22 cases are unchanged, retaining
+a final rollup of 24 per path. Recheck evidence is at `/tmp/grenadiers-v0320-reconnect-recheck`.
+Application build inputs remain identical to the clean image source. The independent matrix
+audit and coordinator recheck audit are clear; the initial CI failure remains diagnostic evidence.
+
+336 core tests, 169 server tests and two doctests pass; four dedicated performance profiles
+remain intentionally ignored. All **230 web tests**, contract checks, lint, Knip, builds and
+E2E static/24-scenario parity pass. Rust line coverage is **94.24%** above the unchanged 80% floor.
+Independent code review is clear. Tests cover retained commands, raw Clear versus server fencing,
+A/B/A shared-cell conflicts, admission limits/high-water IDs, reconnect and complete replay queues.
+
+Cargo-deny and both npm audits pass with zero npm vulnerabilities. Strict pinned Kubernetes
+1.33 schemas validate all three resources. Pinned archive-only Trivy passes the existing
+HIGH/CRITICAL `--ignore-unfixed` release filter without a Docker socket. Both paths use UID/GID
+65532, read-only roots, dropped ALL capabilities and no privilege escalation; Kubernetes keeps
+RuntimeDefault and 500m/256Mi limits. All seeded runs use external mode-0444 fixtures, with a
+root-owned Kubernetes projection; no seed is baked into the image. Correct `/api/v1/health`
+and `/api/v1/ready` probes return HTTP 200, JSON status ok and `Cache-Control: no-store`.
+
+Observed local/shaped latency maxima are Compose **46.857/159.602 ms**, Kubernetes
+**54.549/143.498 ms**, with zero samples above 250 ms and zero Kubernetes CPU throttles.
+These are bounded public-state delivery measurements, not pixel latency, FPS or WAN guarantees.
+All owned matrix/recheck projects, namespaces, ports and browser containers were removed.
+No new item, equipment action, rules profile or wire field is activated by this release.
 
 ## Expanded item core foundations — 2026-10-17
 

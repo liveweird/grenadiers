@@ -1,5 +1,23 @@
 # Repository verification
 
+## M7 v0.3.11 exact-image application acceptance — 2026-10-17
+
+Clean source `8e8ca124917b516e85e5a232fa8ff147b73c81e6` produces application image
+`sha256:dd271415652b92e00669547268aba5cb5820a5a93cc835c15d7542bc793cda39`.
+Compose and Kubernetes, confirmed from actual Pod image ID, each pass **10/10 first-run browser
+scenarios with retries disabled**: six default, pickup, full match/rematch and two reconnect cases.
+Actual JSON health/readiness is polled before every default/fixture run; Node is exactly 24.21.0.
+Strict Kubernetes schemas report **3 valid resources**. Nonroot UID/GID 65532, read-only root,
+all capabilities dropped, no escalation, RuntimeDefault seccomp, read-only mode-0444 fixture
+Secrets, actual probe paths and absence of `/app/*.seed` pass runtime inspection. Pinned Trivy
+0.74.0 scans a saved archive with the official database and no Docker socket: **0 HIGH/CRITICAL**.
+
+Actual desktop and 320-pixel Polish screenshots are visually inspected without clipping/overlap.
+Evidence remains at `/tmp/grenadiers-v0311-acceptance`; temporary project/namespace/Secret,
+forward, source export and scan archive are removed. The accepted application image and separate
+optimized reference image/bundle remain. This completes this engineering increment's deployment
+check; later evidence changes affect docs only and M7 playtesting remains open.
+
 ## M7 optimized reference harness — 2026-10-17
 
 The clean committed harness at `f1678dfc9d9255504fce8b0c8dcafdb2ac07f96f` passes all four

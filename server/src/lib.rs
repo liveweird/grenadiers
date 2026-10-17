@@ -24,6 +24,7 @@ use tokio::{
 };
 
 mod game;
+mod round_seed;
 
 use game::{GameRooms, GameSessions, game_websocket, issue_session};
 use tower_http::{
@@ -323,5 +324,7 @@ mod game_http_tests;
 #[cfg(test)]
 #[path = "game/socket_tests.rs"]
 mod game_socket_tests;
+#[cfg(test)]
+mod round_seed_tests;
 #[cfg(test)]
 mod tests;

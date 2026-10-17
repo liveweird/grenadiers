@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { admitted, authenticate, harness, messages, room, roomId, snapshot, SocketStub } from './testSupport'
 
-describe('v7 session and admission failures', () => {
+describe('v8 session and admission failures', () => {
   beforeEach(() => vi.stubGlobal('WebSocket', { OPEN: SocketStub.OPEN }))
 
   it.each([
@@ -39,8 +39,8 @@ describe('v7 session and admission failures', () => {
     await vi.waitFor(() => expect(value.sockets).toHaveLength(1))
     const socket = value.sockets[0]
     socket.emit('open')
-    socket.message({ type: 'authenticated', protocolVersion: 7 })
-    socket.message({ type: 'authenticated', protocolVersion: 7 })
+    socket.message({ type: 'authenticated', protocolVersion: 8 })
+    socket.message({ type: 'authenticated', protocolVersion: 8 })
     expect(messages(socket).filter((message) => message.type === 'createRoom')).toHaveLength(1)
     socket.message({ ...admitted(), sequence: 2 })
     expect(value.client.getState().room).toBeNull()
@@ -75,7 +75,7 @@ describe('v7 session and admission failures', () => {
   })
 })
 
-describe('v7 authoritative updates and controls', () => {
+describe('v8 authoritative updates and controls', () => {
   beforeEach(() => vi.stubGlobal('WebSocket', { OPEN: SocketStub.OPEN }))
 
   it('accepts only newer same-room nonregressing shared facts', async () => {
@@ -224,9 +224,13 @@ describe('v7 authoritative updates and controls', () => {
       next.room.seats[1].seat = 'one'
     }],
     ['unsupported available items', (next: ReturnType<typeof snapshot>) => {
-      next.room.availableItems = ['heart']
+      next.room.availableItems = ['teleporter']
     }],
     ['unsupported item pickup', (next: ReturnType<typeof snapshot>) => {
+      next.state.pickups = [{ cell: { column: 1, row: 1 }, kind: 'shield' }]
+    }],
+    ['heart pickup while disabled', (next: ReturnType<typeof snapshot>) => {
+      next.room.settings.enabledItems = []
       next.state.pickups = [{ cell: { column: 1, row: 1 }, kind: 'heart' }]
     }],
   ])('rejects %s before installing recipient state', async (_label, mutate) => {
@@ -243,7 +247,7 @@ describe('v7 authoritative updates and controls', () => {
   })
 })
 
-describe('v7 retry callback fences', () => {
+describe('v8 retry callback fences', () => {
   beforeEach(() => vi.stubGlobal('WebSocket', { OPEN: SocketStub.OPEN }))
 
   it('does not run a canceled reconnect timer after explicit disconnect', async () => {

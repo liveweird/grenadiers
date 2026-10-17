@@ -77,6 +77,23 @@ impl RulesConfig {
         }
     }
 
+    /// Expanded room profile with its item set bound into the rules identity.
+    #[must_use]
+    pub const fn expanded_v5(settings: RoomSettings) -> Self {
+        Self {
+            version: 5,
+            ..Self::configurable_v4(settings)
+        }
+    }
+
+    #[must_use]
+    pub const fn enabled_items(self) -> crate::game::EnabledItems {
+        match self.room_settings {
+            Some(settings) if self.version >= 5 => settings.enabled_items(),
+            _ => crate::game::EnabledItems::EMPTY,
+        }
+    }
+
     #[must_use]
     pub const fn version(self) -> u16 {
         self.version

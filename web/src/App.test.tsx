@@ -3,7 +3,7 @@ import { act, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { GameArenaProps } from './game/arena/types'
-import type { GameState, RoomPhase, RoomView, Snapshot } from './game/v7/schema'
+import type { GameState, RoomPhase, RoomView, Snapshot } from './game/v8/schema'
 import i18n from './i18n'
 import { App } from './App'
 
@@ -50,8 +50,8 @@ function room(revision: number, phase: RoomPhase = { type: 'waiting' }): RoomVie
     roundId: 1,
     revision,
     tick: revision,
-    rulesVersion: 4,
-    mapId: 'fixed_v1',
+    rulesVersion: 5,
+    mapId: 'generated_v2',
     roundNumber: ['running', 'result', 'matchResult'].includes(phase.type) ? 1 : 0,
     scores: { one: 0, two: phase.type === 'result' ? 1 : 0 },
     lastRound: phase.type === 'result' ? {
@@ -59,9 +59,10 @@ function room(revision: number, phase: RoomPhase = { type: 'waiting' }): RoomVie
       result: { type: 'winner', seat: 'two' },
     } : null,
     settings: {
-      startingSpeedLevel: 0, turnAssistUnits: 256, winsToFinish: 3, bombFuseTicks: 180, enabledItems: [],
+      startingSpeedLevel: 0, turnAssistUnits: 256, winsToFinish: 3, bombFuseTicks: 180,
+      enabledItems: ['heart'],
     },
-    availableItems: [],
+    availableItems: ['heart'],
     settingsRevision: 1,
     settingsEditor: 'one',
     seats: [
@@ -123,8 +124,8 @@ async function beginRoom(user: ReturnType<typeof userEvent.setup>, action: 'crea
   await waitFor(() => expect(appSockets.filter((socket) => socket.url.endsWith('/api/v1/game/ws'))).toHaveLength(1))
   const socket = appSockets.find((candidate) => candidate.url.endsWith('/api/v1/game/ws'))!
   act(() => socket.emit('open'))
-  expect(JSON.parse(socket.sent[0])).toEqual({ type: 'authenticate', protocolVersion: 7, token })
-  act(() => socket.message({ type: 'authenticated', protocolVersion: 7 }))
+  expect(JSON.parse(socket.sent[0])).toEqual({ type: 'authenticate', protocolVersion: 8, token })
+  act(() => socket.message({ type: 'authenticated', protocolVersion: 8 }))
   return socket
 }
 

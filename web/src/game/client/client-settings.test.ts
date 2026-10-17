@@ -9,7 +9,7 @@ const changed = {
   enabledItems: [],
 }
 
-describe('v7 authoritative gameplay settings', () => {
+describe('v8 authoritative gameplay settings', () => {
   beforeEach(() => vi.stubGlobal('WebSocket', { OPEN: SocketStub.OPEN }))
 
   it('sends an atomic revision-fenced update and fences readiness until acceptance', async () => {
@@ -101,7 +101,7 @@ describe('v7 authoritative gameplay settings', () => {
     expect(value.client.getState().snapshot).toBeNull()
   })
 
-  it('does not send dormant item configuration before activation', async () => {
+  it('sends Heart toggles but rejects unavailable item configuration', async () => {
     const value = harness()
     const socket = await authenticate(value)
     const baseline = admitted()
@@ -110,8 +110,12 @@ describe('v7 authoritative gameplay settings', () => {
     socket.message(baseline)
     const sent = socket.sent.length
 
-    expect(value.client.updateSettings({ ...baseline.room.settings, enabledItems: ['heart'] })).toBe(false)
-    expect(socket.sent).toHaveLength(sent)
-    expect(value.client.getState().settingsPending).toBe(false)
+    expect(value.client.updateSettings({ ...baseline.room.settings, enabledItems: [] })).toBe(true)
+    expect(socket.sent).toHaveLength(sent + 1)
+    socket.message({ type: 'error', code: 'staleSettings', sequence: 2 })
+    expect(value.client.updateSettings({
+      ...baseline.room.settings, enabledItems: ['teleporter'],
+    })).toBe(false)
+    expect(socket.sent).toHaveLength(sent + 1)
   })
 })

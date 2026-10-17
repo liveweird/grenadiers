@@ -12,6 +12,8 @@ target
 
 **/playwright-pickup-report
 **/pickup-test-results
+**/playwright-heart-report
+**/heart-test-results
 **/playwright-controls-report
 **/controls-test-results
 **/playwright-audio-report

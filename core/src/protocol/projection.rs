@@ -352,16 +352,17 @@ fn project_pickups(view: &game::PublicState) -> Result<Vec<PickupView>, Projecti
             }
             Ok(PickupView {
                 cell: wire_cell(pickup.cell).map_err(|_| ProjectionError::InvalidPickups)?,
-                kind: wire_pickup_kind(pickup.kind),
+                kind: wire_pickup_kind(pickup.kind).ok_or(ProjectionError::InvalidPickups)?,
             })
         })
         .collect()
 }
 
-pub(super) const fn wire_pickup_kind(kind: game::PickupKind) -> PickupKind {
+pub(super) const fn wire_pickup_kind(kind: game::PickupKind) -> Option<PickupKind> {
     match kind {
-        game::PickupKind::BombCapacity => PickupKind::BombCapacity,
-        game::PickupKind::BlastRange => PickupKind::BlastRange,
-        game::PickupKind::MovementSpeed => PickupKind::MovementSpeed,
+        game::PickupKind::BombCapacity => Some(PickupKind::BombCapacity),
+        game::PickupKind::BlastRange => Some(PickupKind::BlastRange),
+        game::PickupKind::MovementSpeed => Some(PickupKind::MovementSpeed),
+        game::PickupKind::Heart => None,
     }
 }

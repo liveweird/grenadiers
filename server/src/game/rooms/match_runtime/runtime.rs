@@ -1,6 +1,6 @@
 use grenadiers_core::{
     game::{Direction, GenerationRecord, SeatId, State, StepReport, Tick},
-    protocol::v7::RoomView,
+    protocol::v8::RoomView,
     room::{
         DepartureReason, InterruptReason, MatchChange, MatchLifecycle, MatchPhase, RoomSettings,
     },

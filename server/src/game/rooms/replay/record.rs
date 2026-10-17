@@ -6,12 +6,15 @@ use grenadiers_core::{
 };
 
 pub(super) const FORMAT_VERSION: u16 = 1;
+pub(super) const EXPANDED_FORMAT_VERSION: u16 = 2;
 pub(in crate::game::rooms) const M5_LIFECYCLE_PROFILE: u16 = 1;
 pub(super) const M6_LIFECYCLE_PROFILE: u16 = 2;
 pub(super) const CLASSIC_V2_RULES: u16 = 2;
 pub(super) const CLASSIC_V3_RULES: u16 = 3;
 pub(super) const CONFIGURABLE_V4_RULES: u16 = 4;
+pub(super) const EXPANDED_V5_RULES: u16 = 5;
 pub(super) const GENERATED_V1: u16 = 1;
+pub(super) const GENERATED_V2: u16 = 2;
 pub(super) const MAX_RECORDS: usize = 60_000;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -64,6 +67,21 @@ impl Header {
             initial_settings: RoomSettings::DEFAULT,
             initial_settings_editor: Some(SeatId::One),
             ..Self::m6([false; 2])
+        }
+    }
+
+    pub(in crate::game::rooms) fn expanded_v5() -> Self {
+        Self {
+            format_version: EXPANDED_FORMAT_VERSION,
+            lifecycle_profile: M6_LIFECYCLE_PROFILE,
+            rules_version: EXPANDED_V5_RULES,
+            generator_version: GENERATED_V2,
+            initial_seats: [false; 2],
+            initial_tick: Tick(0),
+            initial_settings: RoomSettings::DEFAULT
+                .with_enabled_items(grenadiers_core::game::EnabledItems::HEART),
+            initial_settings_revision: 1,
+            initial_settings_editor: Some(SeatId::One),
         }
     }
 }

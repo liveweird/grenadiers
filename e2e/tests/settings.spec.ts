@@ -1,3 +1,4 @@
+import { selectClassicSettings } from './support/settings'
 import { expect, test } from '@playwright/test'
 import { latestSnapshot, observeGame, type ObservedGame } from './support/duel'
 
@@ -13,6 +14,7 @@ test('two browsers share configured rules that drive speed, fuse and match targe
     const games = [observeGame(one), observeGame(two)]
     await Promise.all([one, two].map((page) => page.goto('/')))
     await one.getByRole('button', { name: 'Create room', exact: true }).click()
+    await selectClassicSettings(one, games[0])
     const invitation = one.getByLabel('Room invitation code', { exact: true })
     await expect(invitation).toHaveText(/^[A-HJ-NP-Z2-9]{8}$/)
     await two.getByRole('textbox', { name: 'Room code', exact: true }).fill(await invitation.innerText())
@@ -33,7 +35,7 @@ test('two browsers share configured rules that drive speed, fuse and match targe
     await Promise.all([one, two].map((page) => page.getByRole('button', { name: 'Ready', exact: true }).click()))
     await Promise.all(games.map((game) => expect.poll(() => latestSnapshot(game)?.room.phase.type).toBe('running')))
     for (const game of games) {
-      expect(latestSnapshot(game)!.room).toMatchObject({ rulesVersion: 4, settings: expected })
+      expect(latestSnapshot(game)!.room).toMatchObject({ rulesVersion: 5, settings: expected })
       expect(latestSnapshot(game)!.state.actors.map((actor) => actor.type === 'visible' ? actor.speedLevel : null))
         .toEqual([4, 4])
     }

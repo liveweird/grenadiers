@@ -1,5 +1,5 @@
-import type { Direction, GameServerMessage, GameSettings, RoomView, Seat, V7ErrorCode } from '../v7/schema'
-import { validateGameplayV7ServerMessage } from '../v7/validation'
+import type { Direction, GameServerMessage, GameSettings, RoomView, Seat, V8ErrorCode } from '../v8/schema'
+import { validateGameplayV8ServerMessage } from '../v8/validation'
 
 export const MAX_COUNTER = 2_147_483_647
 export const MAX_RECONNECT_ATTEMPTS = 3
@@ -25,7 +25,7 @@ export type PendingSettings = {
   settingsRevision: number
   settings: GameSettings
 }
-export type ControlFailure = ControlCommand & { code: V7ErrorCode }
+export type ControlFailure = ControlCommand & { code: V8ErrorCode }
 
 const TOKEN_PATTERN = /^[0-9a-f]{64}$/
 function unique<T>(values: readonly T[]): boolean {
@@ -40,9 +40,6 @@ function stateRecipientValid(message: GameServerMessage, expectedSeat: Seat | nu
   const actorSeats = state.actors.map((actor) => actor.seat)
   const entityIds = [...actorIds, ...state.bombs.map((bomb) => bomb.id)]
   if (!unique(entityIds) || !unique(actorSeats)) return false
-  if (state.pickups.some((pickup) => !['bombCapacity', 'blastRange', 'movementSpeed'].includes(pickup.kind))) {
-    return false
-  }
   const ownSeat = message.type === 'admitted' ? message.youSeat : expectedSeat
   return ownSeat === null || state.actors.some((actor) => actor.seat === ownSeat && actor.type === 'visible')
 }
@@ -50,12 +47,10 @@ function stateRecipientValid(message: GameServerMessage, expectedSeat: Seat | nu
 function roomRecipientValid(message: GameServerMessage): boolean {
   if (message.type !== 'snapshot' && message.type !== 'admitted' && message.type !== 'roomState') return true
   return unique(message.room.seats.map((seat) => seat.seat))
-    && message.room.availableItems.length === 0
-    && message.room.settings.enabledItems.length === 0
 }
 
 export function validateServerMessage(value: unknown, expectedSeat: Seat | null): value is GameServerMessage {
-  const result = validateGameplayV7ServerMessage(value)
+  const result = validateGameplayV8ServerMessage(value)
   return result.valid && roomRecipientValid(result.value) && stateRecipientValid(result.value, expectedSeat)
 }
 

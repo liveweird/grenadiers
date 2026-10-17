@@ -1,6 +1,7 @@
+import { selectClassicSettings } from '../tests/support/settings'
 import AxeBuilder from '@axe-core/playwright'
 import { expect, test, type Page } from '@playwright/test'
-import type { RoomView } from '../../web/src/game/v7/schema'
+import type { RoomView } from '../../web/src/game/v8/schema'
 import { expectPaintedCanvas, latestSnapshot, observeGame, type ObservedGame } from '../tests/support/duel'
 import { moveTo } from '../tests/support/movement'
 
@@ -21,7 +22,7 @@ async function running(games: ObservedGame[], roundNumber: number) {
   }).toBe(roundNumber)))
   for (const game of games) {
     const frame = latestSnapshot(game)!
-    expect(frame.room).toMatchObject({ rulesVersion: 4, mapId: 'generated_v1' })
+    expect(frame.room).toMatchObject({ rulesVersion: 5, mapId: 'generated_v2' })
     expect(frame.state.bombs).toEqual([])
     expect(frame.state.flames).toEqual([])
     expect(frame.state.pickups).toEqual([])
@@ -66,6 +67,7 @@ test('two browsers finish a drawn round, first-to-three match, and consensual re
     games.push(...pages.map(observeGame))
     await Promise.all(pages.map((page) => page.goto('/')))
     await one.getByRole('button', { name: 'Create room', exact: true }).click()
+    await selectClassicSettings(one, games[0])
     const code = one.getByLabel('Room invitation code', { exact: true })
     await expect(code).toHaveText(/^[A-HJ-NP-Z2-9]{8}$/)
     await two.getByRole('textbox', { name: 'Room code', exact: true }).fill(await code.innerText())

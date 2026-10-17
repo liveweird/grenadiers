@@ -1,4 +1,4 @@
-use crate::game::SpeedLevel;
+use crate::game::{EnabledItems, SpeedLevel};
 
 pub const MIN_TURN_ASSIST_UNITS: i32 = 64;
 pub const MAX_TURN_ASSIST_UNITS: i32 = 256;
@@ -30,7 +30,8 @@ pub struct RoomSettings {
     starting_speed: SpeedLevel,
     turn_assist_units: i32,
     wins_to_finish: u8,
-    bomb_fuse_ticks: u64,
+    bomb_fuse_ticks: u16,
+    enabled_items: EnabledItems,
 }
 
 impl RoomSettings {
@@ -39,6 +40,7 @@ impl RoomSettings {
         turn_assist_units: MAX_TURN_ASSIST_UNITS,
         wins_to_finish: 3,
         bomb_fuse_ticks: 180,
+        enabled_items: EnabledItems::EMPTY,
     };
 
     pub fn new(
@@ -64,8 +66,15 @@ impl RoomSettings {
             starting_speed,
             turn_assist_units,
             wins_to_finish,
-            bomb_fuse_ticks,
+            bomb_fuse_ticks: bomb_fuse_ticks as u16,
+            enabled_items: EnabledItems::EMPTY,
         })
+    }
+
+    #[must_use]
+    pub const fn with_enabled_items(mut self, enabled_items: EnabledItems) -> Self {
+        self.enabled_items = enabled_items;
+        self
     }
 
     #[must_use]
@@ -85,7 +94,12 @@ impl RoomSettings {
 
     #[must_use]
     pub const fn bomb_fuse_ticks(self) -> u64 {
-        self.bomb_fuse_ticks
+        self.bomb_fuse_ticks as u64
+    }
+
+    #[must_use]
+    pub const fn enabled_items(self) -> EnabledItems {
+        self.enabled_items
     }
 }
 

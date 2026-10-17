@@ -29,6 +29,7 @@ pub mod assignment;
 pub mod bombs;
 pub mod damage;
 pub mod effects;
+pub mod enabled_items;
 pub mod events;
 mod explosions;
 pub mod fixtures;
@@ -49,11 +50,15 @@ pub mod world;
 pub use arena::{Arena, ArenaError, Terrain};
 pub use assignment::RoundAssignment;
 pub use bombs::{Bomb, BombError, BombTrigger};
-pub use damage::{DamageGrace, DamageOutcome};
+pub use damage::{DamageGrace, DamageOutcome, DamagePreventionSource};
 pub use effects::{EffectApplication, EffectError, EffectKind, EffectiveSpeed, TimedEffects};
+pub use enabled_items::EnabledItems;
 pub use events::{EventAudience, StepEvent, StepEventKind};
 pub use fixtures::fixed_arena;
-pub use generation::{GENERATOR_VERSION, GeneratedArena, GenerationRecord, generate_arena};
+pub use generation::{
+    EXPANDED_GENERATOR_VERSION, GENERATOR_VERSION, GeneratedArena, GenerationRecord,
+    generate_arena, generate_expanded_arena,
+};
 pub use geometry::{MovementSegment, MovementTrace};
 pub use input::{Direction, HeldDirections};
 pub use inventory::{Equipment, Inventory, SpecialWeapon};

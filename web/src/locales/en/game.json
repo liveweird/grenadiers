@@ -47,6 +47,7 @@
     "weapon": "Bomb type",
     "effects": "Effects",
     "damageGrace": "Damage grace",
+    "protected": "Protected from damage",
     "none": "None",
     "effectTimer": "{{item}} ({{time}})"
   },
@@ -105,8 +106,10 @@
     "tile": "tile",
     "seconds": "seconds",
     "speedCap": "Speed pickups add one level at a time, up to 5 cells/s.",
+    "heartDescription": "Absorbs one lethal blast, then grants a brief damage grace period.",
     "unapplied": "Apply these changes before readying up.",
     "restore": "Restore match defaults",
+    "classic": "Classic settings",
     "apply": "Apply rules",
     "editor": "{{player}} can edit while unready.",
     "noEditor": "No player",

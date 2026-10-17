@@ -8,9 +8,9 @@ use axum::{
     http::{HeaderMap, StatusCode, Uri, header::RETRY_AFTER},
     response::Response,
 };
-use grenadiers_core::protocol::v7::{
+use grenadiers_core::protocol::v8::{
     GAMEPLAY_PROTOCOL_VERSION, GameClientMessage, GameServerMessage, GameplayVersion,
-    V7ErrorCode as ErrorCode, encode_server_message, parse_client_message,
+    V8ErrorCode as ErrorCode, encode_server_message, parse_client_message,
 };
 use grenadiers_core::protocol::{Counter, MAX_CLIENT_MESSAGE_BYTES, ProtocolVersionInput};
 use tokio::{

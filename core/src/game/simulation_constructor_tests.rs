@@ -1,4 +1,4 @@
-use std::collections::BTreeSet;
+use std::collections::{BTreeMap, BTreeSet};
 
 use super::{ActorInit, InputAction, SeatInput, State, StateError};
 use crate::game::arena::{ARENA_CELL_COUNT, ARENA_HEIGHT, ARENA_WIDTH, Arena, Terrain};
@@ -8,8 +8,10 @@ use crate::game::rules::RulesConfig;
 use crate::game::test_support::add_test_bomb;
 use crate::game::types::{CellId, EntityId, Position, SeatId, SpeedLevel, Tick};
 use crate::game::world::World;
+use crate::game::{EnabledItems, PickupKind};
+use crate::room::RoomSettings;
 
-fn open_world() -> World {
+fn open_arena(blocks: BTreeSet<CellId>) -> Arena {
     let mut terrain = [Terrain::Floor; ARENA_CELL_COUNT];
     for row in 0..ARENA_HEIGHT {
         for column in 0..ARENA_WIDTH {
@@ -19,14 +21,11 @@ fn open_world() -> World {
             }
         }
     }
-    World::new(
-        Arena::new(
-            terrain,
-            BTreeSet::new(),
-            [CellId::new(1, 1), CellId::new(13, 11)],
-        )
-        .unwrap(),
-    )
+    Arena::new(terrain, blocks, [CellId::new(1, 1), CellId::new(13, 11)]).unwrap()
+}
+
+fn open_world() -> World {
+    World::new(open_arena(BTreeSet::new()))
 }
 
 fn actor(id: u32, seat: SeatId, cell: CellId) -> ActorInit {
@@ -151,4 +150,48 @@ fn constructor_rejects_a_bomb_whose_map_key_disagrees_with_its_id() {
             id: EntityId(90),
         })
     );
+}
+
+#[test]
+fn classic_rejects_enabled_settings_and_heart_in_every_pickup_layer() {
+    let settings = RoomSettings::DEFAULT.with_enabled_items(EnabledItems::HEART);
+    assert_eq!(
+        State::new(
+            RulesConfig::configurable_v4(settings),
+            open_world(),
+            actors(10, 20),
+        ),
+        Err(StateError::UnsupportedEnabledItems(EnabledItems::HEART))
+    );
+
+    for layer in 0..3 {
+        let cell = CellId::new(8, 5);
+        let heart = BTreeMap::from([(cell, PickupKind::Heart)]);
+        let world = World::with_pickups(
+            open_arena(if layer == 0 {
+                BTreeSet::from([cell])
+            } else {
+                BTreeSet::new()
+            }),
+            if layer == 0 {
+                heart.clone()
+            } else {
+                BTreeMap::new()
+            },
+            if layer == 1 {
+                heart.clone()
+            } else {
+                BTreeMap::new()
+            },
+            if layer == 2 { heart } else { BTreeMap::new() },
+        )
+        .unwrap();
+        assert_eq!(
+            State::new(RulesConfig::classic_v3(), world, actors(10, 20)),
+            Err(StateError::UnsupportedPickup {
+                cell,
+                kind: PickupKind::Heart,
+            })
+        );
+    }
 }

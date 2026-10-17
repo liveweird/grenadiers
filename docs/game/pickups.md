@@ -1,7 +1,7 @@
 # Typed pickup layers
 
-Status: headless visibility, collection, upgrades, and round assignment implemented.
-Generated classic-v2 live rooms integrate this behavior through gameplay v2 and Pixi.
+Status: visibility, collection, upgrades and round assignment are implemented. The v0.3.25
+candidate adds [Heart](heart.md) to Expanded-v5/generator-v2 rooms through gameplay-v8 and Pixi.
 
 `World::with_pickups(arena, concealed, pending, exposed)` checks typed cell maps and returns
 `PickupPlacementError` rather than a partial world. A concealed item must lie under a soft
@@ -11,7 +11,9 @@ all three maps. `World::new` still creates an item-free world.
 `World::from_generated(generated)` builds the concealed layer and returns the private
 `GenerationRecord` separately to the trusted caller. `exposed_pickups()` is the read-only
 visible layer. Public domain `PickupView { cell, kind }` entries are row-major and contain no
-concealed or pending information; Debug redacts those private layers. Gameplay v2 transmits only exposed items and collection events. The browser renders all three kinds and authoritative upgrade levels. Live generated rounds
+concealed or pending information; Debug redacts those private layers. Gameplay-v8 transmits only
+exposed items and collection events. The browser renders the three base upgrades and enabled
+Heart, with authoritative upgrade/inventory state. Live generated rounds
 keep private layers and seed records inside the server owner.
 
 A destroyed block moves its concealed item to Pending. The revealing explosion cannot burn
@@ -30,6 +32,11 @@ captures range when placed, including placement earlier in the collection update
 capacity helps later placements, and increased speed affects the next movement update without
 resetting fractional residuals. `PickupCollected` precedes any `RoundEnded` domain event.
 Classic-v1 deliberately keeps exposed items inert.
+
+Heart replaces the equipment slot and absorbs one lethal blast, followed by 60 physical ticks
+of damage grace. It never stacks charges. A recollection during grace equips a future charge
+without extending grace. State construction rejects Heart in any layer when Classic or disabled.
+Legacy state/event projections reject it explicitly rather than dropping or relabeling it.
 
 `RoundAssignment::new(NonZeroU32)` uses the actual match round: odd rounds assign seat one to
 the row-major first spawn and give it tie priority; even rounds reverse both. Constructors

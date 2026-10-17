@@ -5,6 +5,12 @@ use super::types::Tick;
 pub const HEART_GRACE_TICKS: u64 = 60;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum DamagePreventionSource {
+    Heart,
+    Shield,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct DamageGrace {
     received_at: Tick,
 }

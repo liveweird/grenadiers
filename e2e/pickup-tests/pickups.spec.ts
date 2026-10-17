@@ -1,3 +1,4 @@
+import { selectClassicSettings } from '../tests/support/settings'
 import { expect, test, type Page } from '@playwright/test'
 import { moveTo } from '../tests/support/movement'
 import { visibleActor, expectPaintedCanvas, latestSnapshot, observeGame, type ObservedGame } from '../tests/support/duel'
@@ -96,6 +97,7 @@ test('two browsers collect generated upgrades while old bombs keep their capture
     games.push(...pages.map(observeGame))
     await Promise.all(pages.map((page) => page.goto('/')))
     await one.getByRole('button', { name: 'Create room', exact: true }).click()
+    await selectClassicSettings(one, games[0])
     const code = one.getByLabel('Room invitation code', { exact: true })
     await expect(code).toHaveText(/^[A-HJ-NP-Z2-9]{8}$/)
     await two.getByRole('textbox', { name: 'Room code', exact: true }).fill(await code.innerText())
@@ -104,7 +106,7 @@ test('two browsers collect generated upgrades while old bombs keep their capture
     await two.getByRole('button', { name: 'Ready', exact: true }).click()
     await expect.poll(() => latestSnapshot(games[0])?.room.phase.type).toBe('running')
     await expect.poll(() => latestSnapshot(games[1])?.room.phase.type).toBe('running')
-    expect(latestSnapshot(games[0])!.room).toMatchObject({ rulesVersion: 4, mapId: 'generated_v1' })
+    expect(latestSnapshot(games[0])!.room).toMatchObject({ rulesVersion: 5, mapId: 'generated_v2' })
     expect(latestSnapshot(games[0])!.state.pickups).toEqual([])
     await Promise.all(pages.map(expectPaintedCanvas))
     await one.getByRole('region', { name: 'Grenadiers courtyard' }).click()

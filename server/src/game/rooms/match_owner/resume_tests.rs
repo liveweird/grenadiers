@@ -1,6 +1,6 @@
 use grenadiers_core::protocol::{
     Counter, MAX_COUNTER,
-    v7::{ConnectionStatus, ResumeToken},
+    v8::{ConnectionStatus, ResumeToken},
 };
 use tokio::sync::oneshot;
 

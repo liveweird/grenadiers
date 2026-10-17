@@ -11,9 +11,12 @@ use super::super::RulesVersion;
 pub struct GameSettings(RoomSettings);
 
 impl GameSettings {
-    #[must_use]
-    pub const fn from_domain(settings: RoomSettings) -> Self {
-        Self(settings)
+    pub const fn from_domain(settings: RoomSettings) -> Result<Self, super::super::InvalidScalar> {
+        if settings.enabled_items().bits() == 0 {
+            Ok(Self(settings))
+        } else {
+            Err(super::super::InvalidScalar)
+        }
     }
 
     #[must_use]

@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test'
-import type { GameServerMessage, Seat } from '../../../web/src/game/v7/schema'
+import type { GameServerMessage, Seat } from '../../../web/src/game/v8/schema'
 
 type Admission = Extract<GameServerMessage, { type: 'admitted' }>
 export type PublicAdmission = {
@@ -97,7 +97,7 @@ export async function installTransportProbe(page: Page): Promise<void> {
         socket.addEventListener('close', fail, { once: true })
         socket.addEventListener('open', () => {
           stage = 'open'
-          socket.send(JSON.stringify({ type: 'authenticate', protocolVersion: 7, token: session.token }))
+          socket.send(JSON.stringify({ type: 'authenticate', protocolVersion: 8, token: session.token }))
         }, { once: true })
         socket.addEventListener('message', (event: MessageEvent) => {
           const message = JSON.parse(String(event.data)) as GameServerMessage

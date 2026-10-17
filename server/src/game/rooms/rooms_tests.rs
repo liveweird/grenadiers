@@ -5,7 +5,7 @@ use std::sync::{
 
 use super::*;
 use crate::game::sessions::{ConnectionId, GameSessions};
-use grenadiers_core::protocol::{MapId, RoomCode, Seat};
+use grenadiers_core::protocol::{RoomCode, Seat, v8::MapId};
 
 fn deterministic_rooms(now: StdInstant) -> Arc<GameRooms> {
     let codes = AtomicU64::new(0);
@@ -100,8 +100,8 @@ async fn token_room_and_round_randomness_are_independent() {
     assert_eq!(token_calls.load(Ordering::SeqCst), 1);
     assert_eq!(room_calls.load(Ordering::SeqCst), 3);
     assert_eq!(seed_calls.load(Ordering::SeqCst), 0);
-    assert_eq!(admission.room.rules_version.get(), 4);
-    assert_eq!(admission.room.map_id, MapId::GeneratedV1);
+    assert_eq!(admission.room.rules_version.get(), 5);
+    assert_eq!(admission.room.map_id, MapId::GeneratedV2);
 }
 
 #[tokio::test]
@@ -372,8 +372,8 @@ async fn excessive_lag_interrupts_then_terminal_retention_releases_registration(
     let view = notice.room;
     assert!(matches!(
         view.phase,
-        grenadiers_core::protocol::v7::RoomPhase::Interrupted {
-            reason: grenadiers_core::protocol::v7::MatchInterruptReason::ServerOverloaded,
+        grenadiers_core::protocol::v8::RoomPhase::Interrupted {
+            reason: grenadiers_core::protocol::v8::MatchInterruptReason::ServerOverloaded,
             ..
         }
     ));

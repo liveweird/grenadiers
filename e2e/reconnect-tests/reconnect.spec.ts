@@ -1,3 +1,4 @@
+import { selectClassicSettings } from '../tests/support/settings'
 import AxeBuilder from '@axe-core/playwright'
 import { setTimeout as delay } from 'node:timers/promises'
 import { expect, test, type Page, type Route, type TestInfo } from '@playwright/test'
@@ -17,6 +18,7 @@ async function joinMatch(pages: Page[], games: ObservedGame[]) {
   const [one, two] = pages
   await Promise.all(pages.map((page) => page.goto('/')))
   await one.getByRole('button', { name: 'Create room', exact: true }).click()
+  await selectClassicSettings(one, games[0])
   const code = one.getByLabel('Room invitation code', { exact: true })
   await expect(code).toHaveText(/^[A-HJ-NP-Z2-9]{8}$/)
   await two.getByRole('textbox', { name: 'Room code', exact: true }).fill(await code.innerText())

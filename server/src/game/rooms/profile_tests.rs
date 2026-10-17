@@ -1,9 +1,9 @@
 use super::super::types::RoomIdentity;
 use super::*;
 use grenadiers_core::{
-    game::RoundAssignment,
+    game::{EnabledItems, RoundAssignment, RulesConfig},
     protocol::{RoomCode, RoomId},
-    room::RoomLifecycle,
+    room::{RoomLifecycle, RoomSettings},
 };
 
 fn running() -> RoomLifecycle {
@@ -90,6 +90,24 @@ fn current_generated_profile_constructs_classic_v3_with_wider_turning() {
     assert_eq!(initial.state.rules().version(), 3);
     assert_eq!(initial.state.rules().turn_assist(), 256);
     assert_eq!(initial.generation_record.unwrap().seed(), [23; 32]);
+}
+
+#[test]
+fn expanded_profile_binds_settings_to_v5_and_generator_v2() {
+    let lifecycle = running();
+    for enabled in [EnabledItems::EMPTY, EnabledItems::HEART] {
+        let settings = RoomSettings::DEFAULT.with_enabled_items(enabled);
+        let initial = RoomProfile::ExpandedV5
+            .initial_round_with_settings(
+                settings,
+                lifecycle.tick(),
+                RoundAssignment::first(),
+                &fixed_seed([3; 32]),
+            )
+            .unwrap();
+        assert_eq!(initial.state.rules(), &RulesConfig::expanded_v5(settings));
+        assert_eq!(initial.generation_record.unwrap().version(), 2);
+    }
 }
 
 #[test]

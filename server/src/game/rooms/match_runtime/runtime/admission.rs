@@ -2,7 +2,7 @@ use grenadiers_core::{
     game::SeatId,
     protocol::{
         Counter,
-        v7::{ClassicCapture, RoomView, capture_classic},
+        v8::{ExpandedCapture, RoomView, capture_expanded},
     },
     room::{MatchLifecycle, reconnect::ReservationState},
 };
@@ -23,7 +23,8 @@ pub(in crate::game::rooms) struct PreparedRuntimeAdmission {
     kind: AdmissionKind,
     pub(in crate::game::rooms) room: RoomView,
     pub(in crate::game::rooms) state_epoch: Option<Counter>,
-    pub(in crate::game::rooms) capture: Option<ClassicCapture>,
+    pub(in crate::game::rooms) capture: Option<ExpandedCapture>,
+    pub(in crate::game::rooms) generation: Option<grenadiers_core::game::GenerationRecord>,
     pub(in crate::game::rooms) last_bomb_action_id: Option<Counter>,
     pub(in crate::game::rooms) notice: MatchNotice,
 }
@@ -88,8 +89,11 @@ impl MatchRuntime {
             .as_ref()
             .filter(|_| publication::phase_has_body(&room.phase));
         let capture = body
-            .map(|sim| capture_classic(&sim.state, &[]).map_err(|_| MatchRuntimeError::Publication))
+            .map(|sim| {
+                capture_expanded(&sim.state, &[]).map_err(|_| MatchRuntimeError::Publication)
+            })
             .transpose()?;
+        let generation = body.and_then(|sim| sim.generation_record);
         let state_epoch = body.map(|sim| wire_counter(sim.epoch)).transpose()?;
         let last_bomb_action_id = if state_epoch == Some(room.round_id) {
             self.inputs
@@ -123,6 +127,7 @@ impl MatchRuntime {
             room,
             state_epoch,
             capture,
+            generation,
             last_bomb_action_id,
             notice,
         })

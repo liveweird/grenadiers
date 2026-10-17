@@ -5,12 +5,15 @@ use rand_chacha::ChaCha20Rng;
 use rand_chacha::rand_core::{RngCore, SeedableRng};
 
 use super::arena::{ARENA_HEIGHT, ARENA_WIDTH, Arena, Terrain};
+use super::enabled_items::EnabledItems;
 use super::fixtures::{classic_spawns, classic_terrain};
 use super::pickups::PickupKind;
 use super::types::CellId;
 
 /// The algorithm version recorded with arenas produced by this module.
 pub const GENERATOR_VERSION: u16 = 1;
+/// Generator identity for expanded item-aware arenas.
+pub const EXPANDED_GENERATOR_VERSION: u16 = 2;
 const SAMPLE_LIMIT: u32 = 4_294_967_200;
 const MAX_DRAWS_PER_SAMPLE: usize = 16;
 
@@ -100,6 +103,15 @@ pub fn generate_arena(seed: [u8; 32]) -> GeneratedArena {
     generate_with_source(seed, &mut ChaChaWords(rng), classic_terrain())
 }
 
+/// Generates the version-two arena with the selected expanded item weights.
+#[must_use]
+pub fn generate_expanded_arena(seed: [u8; 32], enabled: EnabledItems) -> GeneratedArena {
+    let mut rng = ChaCha20Rng::from_seed(seed);
+    rng.set_stream(0);
+    rng.set_word_pos(0);
+    generate_expanded_with_source(seed, &mut ChaChaWords(rng), classic_terrain(), enabled)
+}
+
 trait RandomWords {
     fn next_u32(&mut self) -> Option<u32>;
 }
@@ -117,7 +129,32 @@ fn generate_with_source(
     source: &mut impl RandomWords,
     terrain: [Terrain; super::arena::ARENA_CELL_COUNT],
 ) -> GeneratedArena {
-    let generated = generate_layers(source).and_then(|(blocks, concealed)| {
+    generate_versioned(
+        seed,
+        source,
+        terrain,
+        EnabledItems::EMPTY,
+        GENERATOR_VERSION,
+    )
+}
+
+fn generate_expanded_with_source(
+    seed: [u8; 32],
+    source: &mut impl RandomWords,
+    terrain: [Terrain; super::arena::ARENA_CELL_COUNT],
+    enabled: EnabledItems,
+) -> GeneratedArena {
+    generate_versioned(seed, source, terrain, enabled, EXPANDED_GENERATOR_VERSION)
+}
+
+fn generate_versioned(
+    seed: [u8; 32],
+    source: &mut impl RandomWords,
+    terrain: [Terrain; super::arena::ARENA_CELL_COUNT],
+    enabled: EnabledItems,
+    version: u16,
+) -> GeneratedArena {
+    let generated = generate_layers(source, enabled).and_then(|(blocks, concealed)| {
         let arena = Arena::new(terrain, blocks, classic_spawns()).ok()?;
         validate_generated(&arena, &concealed).then_some((arena, concealed))
     });
@@ -129,7 +166,7 @@ fn generate_with_source(
         arena,
         concealed_pickups,
         record: GenerationRecord {
-            version: GENERATOR_VERSION,
+            version,
             seed,
             fallback_used,
         },
@@ -138,6 +175,7 @@ fn generate_with_source(
 
 fn generate_layers(
     source: &mut impl RandomWords,
+    enabled: EnabledItems,
 ) -> Option<(BTreeSet<CellId>, BTreeMap<CellId, PickupKind>)> {
     let mut blocks = BTreeSet::new();
     let mut concealed = BTreeMap::new();
@@ -150,15 +188,36 @@ fn generate_layers(
         if sample_percent(source)? >= 30 {
             continue;
         }
-        let kind = match sample_percent(source)? {
-            0..40 => PickupKind::BombCapacity,
-            40..80 => PickupKind::BlastRange,
-            _ => PickupKind::MovementSpeed,
-        };
+        let kind = sample_pickup(source, enabled)?;
         concealed.insert(cell, kind);
         concealed.insert(mirror, kind);
     }
     Some((blocks, concealed))
+}
+
+fn sample_pickup(source: &mut impl RandomWords, enabled: EnabledItems) -> Option<PickupKind> {
+    let value = if enabled.contains_heart() {
+        sample_below(source, 125)?
+    } else {
+        sample_percent(source)?
+    };
+    Some(match value {
+        0..40 => PickupKind::BombCapacity,
+        40..80 => PickupKind::BlastRange,
+        80..100 => PickupKind::MovementSpeed,
+        _ => PickupKind::Heart,
+    })
+}
+
+fn sample_below(source: &mut impl RandomWords, bound: u32) -> Option<u32> {
+    let limit = u32::MAX - u32::MAX % bound;
+    for _ in 0..MAX_DRAWS_PER_SAMPLE {
+        let value = source.next_u32()?;
+        if value < limit {
+            return Some(value % bound);
+        }
+    }
+    None
 }
 
 fn sample_percent(source: &mut impl RandomWords) -> Option<u32> {

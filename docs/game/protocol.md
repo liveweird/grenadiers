@@ -2,9 +2,9 @@
 
 Status: gameplay contracts, checked domain conversion, HTTP session issuance, and authenticated
 gameplay WebSockets with authoritative configurable two-seat matches are implemented.
-`api/gameplay-v7.schema.json`, Rust `core::protocol::v7`, and generated
-`web/src/game/v7/schema.ts` define active socket messages. V2 through v6 remain historical.
-V7 adds checked recipient perspectives while retaining Classic rules; see [the migration note](protocol-v7.md).
+`api/gameplay-v8.schema.json`, Rust `core::protocol::v8`, and generated
+`web/src/game/v8/schema.ts` define active socket messages. V2 through v7 remain historical.
+V8 adds Expanded v5/generator v2 identity and Heart activation; see [compatibility](protocol-v8.md).
 The browser validates these messages and drives the playable generated-map match. Diagnostic `/api/v1/ws` and
 `api/realtime.schema.json` remain unchanged.
 
@@ -95,7 +95,7 @@ HTTP session responses are separate from socket messages.
 ## Public snapshots and events
 
 Room metadata is shared; physical snapshots are prepared separately for each authenticated seat.
-Classic currently produces equal perspectives because optional items remain disabled. Personal
+The current Heart-only loadout produces equal perspectives. Personal
 `admitted` carries seat identity, capability, action floor and an optional recipient baseline,
 without historical events. `state` contains `physicalTick`, `runningUpdates` and `remainingTicks`
 (each running counter 0–10,800), the arena, exactly two
@@ -107,11 +107,11 @@ Visible actors expose ID, seat, position, heading, speed (0–4), alive status, 
 actors contain only ID, seat and alive status; owners always receive their own visible actor.
 Bombs carry ID, cell, owner, range, placement tick, blast mode and a typed trigger. Timed
 triggers report remaining ticks at `physicalTick` and pause state; no untimed deadline is invented.
-Classic uses only Standard, unpaused Timed bombs. Flames include cell and exclusive expiry tick.
+Current rooms use only Standard, unpaused Timed bombs. Flames include cell and exclusive expiry tick.
 Room metadata carries the global tick, rules/map versions, scores, actual round number,
 latest completed round, and independent match outcome; these are not duplicated in game state.
 The required `pickups` array contains closed `{cell, kind}` entries with kind `bombCapacity`,
-`blastRange`, or `movementSpeed`. Empty means no exposed items. Concealed and pending items,
+`blastRange`, `movementSpeed`, or enabled `heart`. Empty means no exposed items. Concealed and pending items,
 round assignments, generation records, and seeds never enter these messages.
 Private held input, movement fractions, bomb-exit grace, allocator state, and hidden contents
 are excluded. The checked domain adapter enforces canonical ordering and cross-field invariants before
@@ -121,19 +121,21 @@ bomb and actor overlap is permitted.
 Each snapshot carries 0–96 events with absolute `tick`, per-tick `index` (0–95), and tagged
 `kind`: `bombPlaced`/`bombDetonated` carry a full bomb record; `actorEliminated` carries ID/seat;
 `pickupCollected` carries collector ID/seat, cell, and kind; `roundEnded` carries the result.
-The contract also defines `damagePrevented`, reserved for later protection-item activation. Identity is `(roomId, roundId, tick, index)`. Placement and
+`damagePrevented` reports a consumed Heart with source `heart`. Identity is
+`(roomId, roundId, tick, index)`. Placement and
 explosion within one update remain separate events. Events are best-effort presentation cues;
 full snapshots remain authoritative. The 20 Hz publisher accumulates at most three
 completed 60 Hz updates per normal snapshot.
 
 ## Checked domain conversion
 
-Use `core::protocol::v7::capture_classic` to observe the complete State and reports, then
-`bind_classic` to certify the exact room profile, settings, lifecycle epoch and physical tick.
+Use `core::protocol::v8::capture_expanded` to observe the complete State and reports, then
+`bind_expanded` to certify the room profile, settings, lifecycle epoch, physical tick and
+trusted round generation record.
 Opaque captures cannot be serialized directly. Raw server DTO fields alone do not establish
 canonical validity. Validate every actor, bomb, ownership count, effect and event before filtering;
-a malformed hidden record fails the whole operation. Classic binding rejects optional state even
-when a caller provides matching enabled/available arrays.
+a malformed hidden record fails the whole operation. Binding rejects unsupported optional state
+even when a caller provides matching enabled/available arrays. Archived Classic binding remains strict.
 
 `prepare_snapshot_pair` builds both recipient encodings before either can be published. Only
 then may the runtime advance revision, record one report flush and clear reports once. Report
@@ -172,7 +174,8 @@ spawn/tie assignment uses actual round count rather than command epoch.
 
 Shared room views and snapshot metadata also carry the complete checked `settings`,
 `settingsRevision`, nullable original `settingsEditor`, and `availableItems`. Settings also
-carry `enabledItems`; both item arrays are empty in current Classic rooms. Only actual changes increment
+carry `enabledItems`; availability is Heart-only, enabled by default and optionally empty.
+Only actual changes increment
 the settings revision and clear readiness; Ready commands acknowledge that exact revision.
 See [v6 settings and authority](protocol-v6.md) for bounds, no-op acknowledgements and edit locks.
 
@@ -201,13 +204,14 @@ capability, never to invitation code. See [bounded owner](match-owner.md).
 ## Profile and version evolution
 
 An immutable server room profile owns state construction and its rules/map labels. Publication
-rejects state whose checked rules version disagrees with that profile. Production now uses configurable-v4 rules and generated-v1 arenas. Snapshots initially have an
+rejects state whose checked rules version disagrees with that profile. Production uses Expanded-v5
+rules and generated-v2 arenas. Snapshots initially have an
 empty pickup array because contents are concealed; only exposed items become public.
 Fixed-classic-v1 remains an explicit unit fixture, not a production selector.
 
-Gameplay v7 is incompatible with earlier versions. Reload clients when upgrading the single server. Both
+Gameplay v8 is incompatible with earlier versions. Reload clients when upgrading the single server. Both
 old and future versions are rejected before credential lookup, so rejection cannot claim or
-revoke a token. `supportedVersion` accepts the bounded input range rather than only v7,
+revoke a token. `supportedVersion` accepts the bounded input range rather than only v8,
 allowing a new client to understand an older server's incompatibility response.
 See [ADR 0013](../decisions/0013-gameplay-v2-and-room-profiles.md).
 
@@ -242,4 +246,4 @@ mandatory `detonatesAt`. Shared checked projection accepts Timed records and rej
 untimed variant, including event-only records. One unsupported record fails the complete
 snapshot/report window; it is never omitted or assigned a substitute deadline. Publication
 failure does not advance revision or discard reports. Current rules admit only Timed bombs;
-v7 represents untimed triggers explicitly, but current gameplay still rejects them until weapon activation.
+V8 represents untimed triggers explicitly, but current gameplay still rejects them until weapon activation.

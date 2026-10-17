@@ -64,11 +64,12 @@ fn room_projection_binds_configurable_settings_and_target_to_lifecycle() {
     let lifecycle = occupied();
     let mut metadata = metadata();
     metadata.rules_version = crate::protocol::RulesVersion::ConfigurableV4;
-    metadata.settings = GameSettings::from_domain(lifecycle.settings());
+    metadata.settings = GameSettings::from_domain(lifecycle.settings()).unwrap();
     let mut room = super::project_room_view(metadata.clone(), &lifecycle).unwrap();
     metadata.settings = GameSettings::from_domain(
         crate::room::settings::RoomSettings::new(crate::game::SpeedLevel::Four, 64, 9, 60).unwrap(),
-    );
+    )
+    .unwrap();
     assert_eq!(
         super::project_room_view(metadata, &lifecycle),
         Err(RoomProjectionError::InvalidSettings)
@@ -107,4 +108,11 @@ fn configurable_round_identity_includes_starting_speed_and_match_target() {
         assert_eq!(other.turn_assist(), configured.turn_assist());
         assert_ne!(other, configured);
     }
+}
+
+#[test]
+fn legacy_settings_conversion_rejects_enabled_items() {
+    let settings =
+        crate::room::RoomSettings::DEFAULT.with_enabled_items(crate::game::EnabledItems::HEART);
+    assert!(GameSettings::from_domain(settings).is_err());
 }

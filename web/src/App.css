@@ -108,6 +108,8 @@ main { min-height: 100vh; }
 .settings-heading { display: grid; gap: .2rem; }
 .settings-heading h3 { color: var(--ink); font-size: 1.15rem; }
 .settings-heading p, .settings-note { color: #40586c; line-height: 1.4; }
+.item-setting { display: grid; gap: .2rem; border-left: 3px solid #a92d43; padding-left: .65rem; }
+.item-setting p { color: #40586c; line-height: 1.4; }
 .settings-lock { border-left: 3px solid var(--ochre); padding-left: .55rem; color: #684b12; }
 .game-settings select { font-variant-numeric: tabular-nums; }
 .seat-list { display: grid; gap: .6rem; margin: 0; padding: 0; list-style: none; }
@@ -125,6 +127,8 @@ main { min-height: 100vh; }
 .actor-stats div { min-width: 0; border-left: 2px solid #c7d2d7; padding-left: .3rem; }
 .actor-stats dt { color: #52697c; line-height: 1.1; }
 .actor-stats dd { margin: .1rem 0 0; color: var(--ink); font-size: .95rem; font-weight: 800; }
+.actor-stats .grace-active { border-left-color: #a92d43; background: #f9e6e8; }
+.actor-stats .grace-active dd { color: #8b2137; }
 .player-mark { width: 1rem; height: 1rem; border: 2px solid var(--ink); border-radius: 50%; }
 .seat-one .player-mark { background: #edb94b; }
 .seat-two .player-mark { border-radius: .15rem; background: var(--cobalt); }

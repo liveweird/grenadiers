@@ -70,6 +70,10 @@ impl super::Actor {
                 self.range = self.range.saturating_add(1).min(rules.bomb_range_cap());
             }
             PickupKind::MovementSpeed => self.speed = self.speed.next(),
+            PickupKind::Heart => {
+                self.inventory
+                    .replace_equipment(crate::game::Equipment::Heart);
+            }
         }
     }
 }

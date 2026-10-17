@@ -10,6 +10,7 @@ pub enum PickupKind {
     BombCapacity,
     BlastRange,
     MovementSpeed,
+    Heart,
 }
 
 /// A typed pickup component stored in one spatial layer.
@@ -66,6 +67,14 @@ impl fmt::Debug for PickupLayers {
 }
 
 impl PickupLayers {
+    pub(crate) fn iter(&self) -> impl Iterator<Item = (CellId, PickupKind)> + '_ {
+        self.concealed
+            .iter()
+            .chain(&self.pending)
+            .chain(&self.exposed)
+            .map(|(&cell, pickup)| (cell, pickup.kind()))
+    }
+
     pub(crate) fn try_new(
         arena: &Arena,
         concealed: BTreeMap<CellId, PickupKind>,

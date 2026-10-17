@@ -3,7 +3,7 @@ use grenadiers_core::{
         ActorInit, Direction, EntityId, GenerationRecord, Position, RoundAssignment, RulesConfig,
         SeatId, SpeedLevel, State, Tick, World, generate_arena,
     },
-    protocol::{MapId, RulesVersion},
+    protocol::v8::{MapId, RulesVersion},
     room::RoomSettings,
 };
 
@@ -18,7 +18,9 @@ pub(super) enum RoomProfile {
     GeneratedClassicV2,
     #[cfg_attr(not(test), allow(dead_code))]
     GeneratedClassicV3,
+    #[cfg_attr(not(test), allow(dead_code))]
     GeneratedConfigurableV4,
+    ExpandedV5,
 }
 
 pub(super) struct InitialRound {
@@ -34,6 +36,7 @@ impl RoomProfile {
             Self::GeneratedClassicV2 => RulesVersion::ClassicV2,
             Self::GeneratedClassicV3 => RulesVersion::ClassicV3,
             Self::GeneratedConfigurableV4 => RulesVersion::ConfigurableV4,
+            Self::ExpandedV5 => RulesVersion::ExpandedV5,
         }
     }
 
@@ -44,18 +47,19 @@ impl RoomProfile {
             Self::GeneratedClassicV2 | Self::GeneratedClassicV3 | Self::GeneratedConfigurableV4 => {
                 MapId::GeneratedV1
             }
+            Self::ExpandedV5 => MapId::GeneratedV2,
         }
     }
 
     pub(super) fn initial_settings(self) -> RoomSettings {
-        let settings = grenadiers_core::protocol::v7::GameSettings::for_rules(self.rules_version());
-        grenadiers_core::protocol::v7::classic_settings(settings)
-            .expect("classic defaults contain no items")
+        let settings = grenadiers_core::protocol::v8::GameSettings::for_rules(self.rules_version());
+        grenadiers_core::protocol::v8::expanded_settings(settings)
+            .expect("profile defaults contain supported items")
     }
 
     pub(super) const fn initial_editor(self) -> Option<SeatId> {
         match self {
-            Self::GeneratedConfigurableV4 => Some(SeatId::One),
+            Self::GeneratedConfigurableV4 | Self::ExpandedV5 => Some(SeatId::One),
             #[cfg(test)]
             Self::FixedClassicV1 => None,
             Self::GeneratedClassicV2 | Self::GeneratedClassicV3 => None,
@@ -69,6 +73,7 @@ impl RoomProfile {
             Self::GeneratedClassicV2 => RulesConfig::classic_v2(),
             Self::GeneratedClassicV3 => RulesConfig::classic_v3(),
             Self::GeneratedConfigurableV4 => RulesConfig::configurable_v4(settings),
+            Self::ExpandedV5 => RulesConfig::expanded_v5(settings),
         }
     }
 
@@ -128,6 +133,30 @@ impl RoomProfile {
                         state,
                         generation_record: Some(generation_record),
                     })
+            }
+            Self::ExpandedV5 => {
+                let seed = round_seed_source.next_seed().ok()?;
+                let (world, generation_record) = World::from_generated(
+                    grenadiers_core::game::generate_expanded_arena(seed, settings.enabled_items()),
+                )
+                .ok()?;
+                let actors = actors_at_assignment_spawns(
+                    world.arena(),
+                    assignment,
+                    settings.starting_speed(),
+                );
+                State::new_at_tick_with_assignment(
+                    RulesConfig::expanded_v5(settings),
+                    world,
+                    actors,
+                    tick,
+                    assignment,
+                )
+                .ok()
+                .map(|state| InitialRound {
+                    state,
+                    generation_record: Some(generation_record),
+                })
             }
         }
     }

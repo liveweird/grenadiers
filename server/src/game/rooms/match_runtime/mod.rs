@@ -13,6 +13,9 @@ pub(super) use runtime::replay::RuntimeInspection;
 pub(crate) use runtime::{MatchAction, MatchNotice};
 
 #[cfg(test)]
+#[path = "heart_tests.rs"]
+mod heart_tests;
+#[cfg(test)]
 #[path = "input_tests.rs"]
 mod input_tests;
 #[cfg(test)]
@@ -30,3 +33,8 @@ mod settings_tests;
 #[cfg(test)]
 #[path = "test_support.rs"]
 mod test_support;
+#[cfg(test)]
+pub(in crate::game::rooms) use test_support::{
+    absorb_generated_heart, collect_generated_heart, expanded_heart_runtime,
+    start_expanded_heart_round, wait_clear,
+};

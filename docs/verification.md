@@ -1,5 +1,27 @@
 # Repository verification
 
+## Heart activation candidate — 2026-10-18 — local checks only
+
+The v0.3.25 candidate passes **401 core tests, 179 server tests and two doctests** in the
+debug profile; four dedicated performance profiles remain intentionally ignored. Rust line
+coverage is **90.94%** (11,949/13,139 lines), above the unchanged 80% floor. All **274 web tests**,
+contracts, lint, Knip, production build, E2E static checks and **26-scenario parity** pass.
+Dependency audits and strict pinned Kubernetes schemas pass. Independent gameplay/browser
+and backend reviews are clear after the forged legacy replay-mask and socket-version issues
+were fixed.
+
+Regression evidence covers generated Heart reveal/collection through ordinary controls,
+one-charge absorption, overlapping hazard cells and both damage passes, exact grace expiry,
+damage before collection, replacement without stacking, overflow, disabled/Classic rejection,
+real owner replacement/restore, quiet baselines and complete deterministic replay. Archived
+contracts remain byte-unchanged; journal records retain their 64-byte and allocation bounds.
+
+No v0.3.25 native image or deployment acceptance is claimed. A separate investigation found an
+inherited connected-takeover mutation inside a debug assertion; its release-mode regression
+fails on the earlier foundation source. The fix and debug/release gate are being integrated
+before this candidate's release-profile and native acceptance. Prior debug success does not
+certify that production behavior.
+
 ## Live gameplay-v7 candidate — 2026-10-18 — local checks only
 
 The v0.3.24 integration passes **375 core tests, 174 server tests and two doctests**;

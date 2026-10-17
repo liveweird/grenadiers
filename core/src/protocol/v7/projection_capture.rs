@@ -8,9 +8,9 @@ use super::projection_facts::{
 };
 use super::projection_validation::{validate_reports, validate_world};
 use super::{
-    ArenaView, BlastKind, BombTrigger, BombView, DamageGraceTicks, EffectKind, EffectView,
-    EffectViews, EquipmentId, EventKind, FlameView, InventoryView, ItemSet, PickupKind, PickupView,
-    Terrain, VisibleActorView, WeaponId,
+    ArenaView, BlastKind, BombTrigger, BombView, DamageGraceTicks, DamagePreventionSource,
+    EffectKind, EffectView, EffectViews, EquipmentId, EventKind, FlameView, InventoryView, ItemSet,
+    PickupKind, PickupView, Terrain, VisibleActorView, WeaponId,
 };
 
 pub fn capture_classic(
@@ -231,6 +231,20 @@ fn capture_report(report: &game::StepReport) -> Result<ReportFacts, ProjectionEr
                     game::StepEventKind::RoundEnded(result) => EventKind::RoundEnded {
                         result: wire_result(Some(result)).ok_or(ProjectionError::InvalidEvent)?,
                     },
+                    game::StepEventKind::DamagePrevented { id, seat, source } => {
+                        EventKind::DamagePrevented {
+                            id: EntityId::new(id.0),
+                            seat: wire_seat(seat),
+                            source: match source {
+                                game::DamagePreventionSource::Heart => {
+                                    DamagePreventionSource::Heart
+                                }
+                                game::DamagePreventionSource::Shield => {
+                                    DamagePreventionSource::Shield
+                                }
+                            },
+                        }
+                    }
                 };
                 Ok(EventFacts {
                     tick: wire_tick(event.tick)?,
@@ -300,6 +314,7 @@ fn wire_pickup(value: game::PickupKind) -> PickupKind {
         game::PickupKind::BombCapacity => PickupKind::BombCapacity,
         game::PickupKind::BlastRange => PickupKind::BlastRange,
         game::PickupKind::MovementSpeed => PickupKind::MovementSpeed,
+        game::PickupKind::Heart => PickupKind::Heart,
     }
 }
 fn wire_equipment(value: game::Equipment) -> EquipmentId {

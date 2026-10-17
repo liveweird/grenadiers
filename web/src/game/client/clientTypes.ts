@@ -1,5 +1,5 @@
-import type { RoomView, Seat, V7ErrorCode } from '../v7/schema'
-import type { Snapshot } from '../v7/schema'
+import type { RoomView, Seat, V8ErrorCode } from '../v8/schema'
+import type { Snapshot } from '../v8/schema'
 
 type GameConnection =
   | 'disconnected'
@@ -14,7 +14,7 @@ type LocalFailure =
   | 'sessionFailed'
   | 'sequenceExhausted'
 
-export type GameFailure = V7ErrorCode | LocalFailure | 'incompatibleProtocol' | 'seatReplaced'
+export type GameFailure = V8ErrorCode | LocalFailure | 'incompatibleProtocol' | 'seatReplaced'
 export type AdmissionIntent = { type: 'create' } | { type: 'join'; roomCode: string }
 type AdmissionBaseline = { roomId: string; revision: number; tick: number; physicalTick: number | null }
 

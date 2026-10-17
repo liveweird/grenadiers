@@ -8,7 +8,9 @@ fn defaults_match_the_first_configurable_profile() {
     assert_eq!(settings.turn_assist_units(), 256);
     assert_eq!(settings.wins_to_finish(), 3);
     assert_eq!(settings.bomb_fuse_ticks(), 180);
+    assert_eq!(settings.enabled_items(), EnabledItems::EMPTY);
     assert_eq!(settings, RoomSettings::DEFAULT);
+    assert!(std::mem::size_of::<RoomSettings>() <= 16);
 }
 
 #[test]
@@ -29,13 +31,24 @@ fn every_boundary_and_discrete_step_is_accepted() {
                             starting_speed: speed,
                             turn_assist_units: turn_assist,
                             wins_to_finish: wins,
-                            bomb_fuse_ticks: fuse,
+                            bomb_fuse_ticks: fuse as u16,
+                            enabled_items: EnabledItems::EMPTY,
                         })
                     );
                 }
             }
         }
     }
+}
+
+#[test]
+fn enabled_items_are_added_without_weakening_validated_settings() {
+    let settings = RoomSettings::new(SpeedLevel::Two, 128, 5, 240)
+        .unwrap()
+        .with_enabled_items(EnabledItems::HEART);
+
+    assert_eq!(settings.enabled_items(), EnabledItems::HEART);
+    assert_eq!(settings.bomb_fuse_ticks(), 240);
 }
 
 #[test]

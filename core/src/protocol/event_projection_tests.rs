@@ -309,6 +309,35 @@ fn mixed_valid_and_unsupported_report_window_fails_as_a_whole() {
 }
 
 #[test]
+fn legacy_event_projection_rejects_heart_even_when_absent_from_final_state() {
+    let mut state = state_at(CellId::new(2, 5), CellId::new(12, 10));
+    for kind in [
+        crate::game::StepEventKind::PickupCollected {
+            id: EntityId(10),
+            seat: SeatId::One,
+            cell: CellId::new(2, 5),
+            kind: PickupKind::Heart,
+        },
+        crate::game::StepEventKind::DamagePrevented {
+            id: EntityId(10),
+            seat: SeatId::One,
+            source: crate::game::DamagePreventionSource::Heart,
+        },
+    ] {
+        let mut report = state.step(&[]).unwrap();
+        report.events.push(crate::game::StepEvent {
+            tick: report.tick,
+            audience: crate::game::EventAudience::Both,
+            kind,
+        });
+        assert_eq!(
+            project_events(&[report]),
+            Err(ProjectionError::InvalidEvent)
+        );
+    }
+}
+
+#[test]
 fn projects_real_version_two_pickup_collection() {
     let target = CellId::new(5, 5);
     let world = World::with_pickups(

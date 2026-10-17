@@ -1,6 +1,6 @@
 # Reconnect browser
 
-Status: active. The application uses the v7 client against the existing gameplay endpoint.
+Status: active. The application uses the v8 client against the existing gameplay endpoint.
 V7 retains the reconnect lifecycle introduced in v4 and adds [shared settings](settings.md).
 
 ## Private admission state
@@ -47,5 +47,5 @@ held beyond its normal deadline while a reserved player is away. Scores and the 
 authoritative; connected-only controls stay disabled during recovery. English and Polish copy use
 the same keys and describe the action available to the player.
 
-The server parser and application client use v7 together. V2–v6 remain archived and are not
+The server parser and application client use v8 together. V2–v7 remain archived and are not
 accepted by the active authenticated gameplay socket.

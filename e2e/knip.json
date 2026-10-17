@@ -5,6 +5,7 @@
     "pickup-tests/**/*.spec.ts",
     "match-tests/**/*.spec.ts",
     "reconnect-tests/**/*.spec.ts",
+    "hardening-tests/**/*.spec.ts",
     "scripts/*.mjs"
   ]
 }

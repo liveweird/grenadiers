@@ -17,3 +17,11 @@ capabilities. Keep failure screenshots, public HTML reports, explicit compositor
 and bounded redacted summaries; never print or attach authentication/resume payloads. The
 reconnect probe closes real native transports and authenticates normally without changing
 the authoritative simulation clock, state, or outcomes.
+
+## Natural headed visibility
+
+With the matches fixture ready, run `E2E_MATCH_FIXTURE=arena-v1-matches xvfb-run -a npm --prefix e2e run test:hardening`
+on Linux. The dedicated harness launches fresh Chromium and uses the existing default context
+with `connectOverCDP({ noDefaults: true })`; default Playwright focus emulation forces all targets
+visible and cannot establish a genuine hidden tab. The scenario observes actual visibility events.
+Owned processes/profiles have bounded cleanup; private CDP endpoints and capabilities are not attached.

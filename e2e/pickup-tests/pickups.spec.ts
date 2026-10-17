@@ -61,10 +61,11 @@ test('two browsers collect generated upgrades while old bombs keep their capture
     browser.newContext({ viewport: { width: 1440, height: 1050 } }),
     browser.newContext({ viewport: { width: 390, height: 844 }, reducedMotion: 'reduce' }),
   ])
+  const games: ObservedGame[] = []
   try {
     const pages = await Promise.all(contexts.map((context) => context.newPage()))
     const [one, two] = pages
-    const games = pages.map(observeGame)
+    games.push(...pages.map(observeGame))
     await Promise.all(pages.map((page) => page.goto('/')))
     await one.getByRole('button', { name: 'Create room', exact: true }).click()
     const code = one.getByLabel('Room invitation code', { exact: true })
@@ -125,6 +126,29 @@ test('two browsers collect generated upgrades while old bombs keep their capture
       expect.objectContaining({ type: 'pickupCollected', kind: 'bombCapacity' }),
       expect.objectContaining({ type: 'pickupCollected', kind: 'blastRange' }),
     ]))
+  } catch (error) {
+    // Trace DOM snapshots are disabled for real-time input. Preserve bounded,
+    // redacted transport evidence after failure, without authentication frames.
+    await testInfo.attach('pickup-websocket-summary', {
+      contentType: 'application/json',
+      body: JSON.stringify(games.map((game) => ({
+        sockets: game.sockets,
+        commands: game.commands.slice(-128),
+        snapshots: game.frames.filter((frame) => frame.type === 'snapshot').slice(-120)
+          .map((frame) => ({
+            revision: frame.room.revision,
+            roundId: frame.room.roundId,
+            phase: frame.room.phase,
+            tick: frame.room.tick,
+            actors: frame.state.actors,
+            bombs: frame.state.bombs,
+            pickups: frame.state.pickups,
+            flameCount: frame.state.flames.length,
+            events: frame.events,
+          })),
+      }))),
+    })
+    throw error
   } finally {
     await Promise.all(contexts.map((context) => context.close()))
   }

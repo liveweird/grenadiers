@@ -38,7 +38,11 @@ screenshots; all bomb/HUD/event assertions and physics timings remain intact. Re
 tests at `ec1d9c00aedd6e1ef5662ab45a72605d8c725c57` pass through both Compose and Kubernetes
 against the accepted image above. Application inputs and all runtime layers are unchanged;
 a rebuild differs only in the Compose project label. The recorded accepted image is retained.
-This final evidence update changes documentation only.
+Two consecutive fixture runs also pass in official Linux Playwright 1.63 Chromium with retries
+disabled (18.7/18.5 seconds). Per-action DOM/compositor tracing is disabled only for this
+real-time fixture; it otherwise consumes real fuse time on software rendering. Action/source
+traces, failure screenshots, explicit checkpoints, and bounded redacted WebSocket summaries
+remain. Default smoke tracing and every gameplay assertion are unchanged.
 
 ## M4 exposed-item rendering and upgrade HUD — 2026-10-17
 

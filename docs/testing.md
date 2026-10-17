@@ -68,4 +68,4 @@ A separate `test:pickups` command uses the explicit read-only operator fixture s
 `E2E_PICKUP_FIXTURE=arena-v1-pickups`; it never silently skips. Run both modes against the same
 image. CI performs default smoke, recreates the image with the fixture override, then exercises
 native keyboard collection, both HUDs, and coexisting old/new bomb ranges. The public fixture
-also has a deterministic core simulation trace; concealed data never enters browser assets.
+also has a deterministic core simulation trace; concealed data never enters browser assets. The pickup runner retains action/source traces but disables per-key DOM/compositor capture, whose overhead distorts real-time escape on software-rendered Linux. On failure it attaches bounded, redacted command/snapshot summaries; failure screenshots and explicit visual checkpoints remain. Default smoke tracing is unchanged.

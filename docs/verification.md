@@ -29,7 +29,16 @@ preserving probes and security settings. Strict schemas report 3 valid resources
 archive-only Trivy reports zero HIGH/CRITICAL findings. Runtime inspection finds no seed files
 under `/app`. Actual fixture screenshots were visually inspected; both HUDs show the upgrades.
 Temporary stacks, namespace/Secret, forwards, exports, and archives are removed. The image and
-logs/screenshots remain available. This evidence update changes only documentation.
+logs/screenshots remain available.
+
+Linux CI exposed test-harness timing sensitivity: snapshot-driven held keys overshot, then
+sequential screenshots consumed the old bomb fuse before the second client assertion. The
+final harness uses bounded native key pulses and concurrent two-client live assertions before
+screenshots; all bomb/HUD/event assertions and physics timings remain intact. Revised fixture
+tests at `ec1d9c00aedd6e1ef5662ab45a72605d8c725c57` pass through both Compose and Kubernetes
+against the accepted image above. Application inputs and all runtime layers are unchanged;
+a rebuild differs only in the Compose project label. The recorded accepted image is retained.
+This final evidence update changes documentation only.
 
 ## M4 exposed-item rendering and upgrade HUD — 2026-10-17
 

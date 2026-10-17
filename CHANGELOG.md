@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.2.3 — 2026-10-17
+
+- Collect exposed pickups after damage using final actor positions and deterministic ties.
+- Apply permanent capacity/range upgrades up to eight and five speed levels; preserve
+  placement-time bomb range and movement residuals. Consume items even at the cap.
+- Add explicit round-number spawn and tie-priority assignment, independent of canceled
+  countdown attempts. Keep classic-v1 and the fixed live preview unchanged.
+
+Gameplay wire support, browser items, and generated-room activation follow separately.
+
 ## 0.2.2 — 2026-10-17
 
 - Replace inert pickup cells with checked typed concealed, pending, and exposed layers.

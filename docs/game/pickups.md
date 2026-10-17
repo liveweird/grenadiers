@@ -1,7 +1,7 @@
 # Typed pickup layers
 
-Status: headless visibility/reveal/destruction behavior. Collection and upgrade application
-follow separately; live rooms remain on the fixed map without pickups.
+Status: headless visibility, collection, upgrades, and round assignment implemented.
+Live rooms remain on the fixed map without pickups until wire/client activation.
 
 `World::with_pickups(arena, concealed, pending, exposed)` checks typed cell maps and returns
 `PickupPlacementError` rather than a partial world. A concealed item must lie under a soft
@@ -21,7 +21,23 @@ extends the wait. An exposed item hit by a later blast disappears without stoppi
 Reveal happens before actions, so a new blast in the reveal update can destroy the item.
 Pickups are nonblocking. Completed rounds freeze every layer.
 
-Run `cargo test -p grenadiers-core pickup --locked` for layer validation, reveal/overlap/expiry,
-same-update burn, public privacy, nonblocking movement, and frozen-result regressions.
-[ADR 0012](../decisions/0012-pickup-phases-and-upgrades.md) fixes these phases and the upcoming
-collection/upgrade boundary.
+With `RulesConfig::classic_v2()`, collection runs after every fire-damage phase and before
+round-result determination. A living actor's final center must occupy the exposed item's cell.
+The nearer center wins a contested item; exact ties use `RoundAssignment::priority_seat()`.
+Collection under a bomb is allowed. An item disappears even if its upgrade is already capped.
+
+Capacity and range increase to at most eight; speed advances through five levels. A bomb
+captures range when placed, including placement earlier in the collection update. Increased
+capacity helps later placements, and increased speed affects the next movement update without
+resetting fractional residuals. `PickupCollected` precedes any `RoundEnded` domain event.
+Classic-v1 deliberately keeps exposed items inert.
+
+`RoundAssignment::new(NonZeroU32)` uses the actual match round: odd rounds assign seat one to
+the row-major first spawn and give it tie priority; even rounds reverse both. Constructors
+without an assignment use round one. Explicit assignments never relocate supplied fixture
+actors; the match owner selects their spawn positions. Canceled countdowns do not advance rounds.
+
+Run `cargo test -p grenadiers-core --locked` for layer validation, reveal/overlap/expiry,
+same-update burn, public privacy, collection order/ties, upgrade caps, preserved old-bomb range,
+movement residuals, assignment parity, nonblocking movement, and frozen-result regressions.
+[ADR 0012](../decisions/0012-pickup-phases-and-upgrades.md) documents these phases and the collection/upgrade boundary.

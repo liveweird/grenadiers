@@ -1,6 +1,6 @@
 # ADR 0012: Pickup visibility, collection, and upgrades
 
-Status: visibility/reveal/destruction layers implemented; collection is the next slice.
+Status: headless visibility, collection, upgrades, and round assignment implemented.
 
 ## Visibility and damage phases
 
@@ -19,8 +19,8 @@ Completed results freeze these transitions with the rest of the world.
 
 ## Collection decision
 
-The following collection contract is fixed before its dependent implementation. Enable it
-through distinct `classic_v2` rules, preserving the fixed preview's `classic_v1` behavior.
+The collection contract is enabled through distinct `classic_v2` rules, preserving the fixed
+preview's `classic_v1` behavior.
 After all fire damage and before final result determination, eligible living actors collect
 items only when their final centers lie in the item's cell. Choose the smaller squared
 integer distance to the cell center; use explicit round-seat priority for exact ties.

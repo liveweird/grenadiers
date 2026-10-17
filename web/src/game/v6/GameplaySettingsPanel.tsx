@@ -42,7 +42,7 @@ export function GameplaySettingsPanel({ room, youSeat, pending, copy, onApply }:
   return (
     <section className="game-settings" aria-labelledby="game-settings-title">
       <div className="settings-heading">
-        <Title order={3} id="game-settings-title">{copy.settings.title}</Title>
+        <Title order={2} id="game-settings-title">{copy.settings.title}</Title>
         <Text size="sm">{copy.settings.explanation}</Text>
       </div>
       <SimpleGrid cols={{ base: 1, xs: 2 }} spacing="sm">

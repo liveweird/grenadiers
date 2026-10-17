@@ -16,6 +16,7 @@ describe('gameplay settings panel', () => {
     render(<MantineProvider env="test"><GameplaySettingsPanel room={room(1)} youSeat="one"
       pending={false} copy={en} onApply={apply} /></MantineProvider>)
 
+    expect(screen.getByRole('heading', { name: 'Match rules', level: 2 })).toBeVisible()
     expect(screen.getByRole('option', { name: '3 cells/s' })).toBeVisible()
     expect(screen.getByRole('option', { name: '1/4 tile' })).toBeVisible()
     expect(screen.getByRole('option', { name: '3 seconds' })).toBeVisible()

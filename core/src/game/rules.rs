@@ -10,6 +10,9 @@ pub struct RulesConfig {
     turn_assist: i32,
     bomb_capacity: u16,
     bomb_range: u16,
+    pickup_collection: bool,
+    bomb_capacity_cap: u16,
+    bomb_range_cap: u16,
     bomb_fuse_ticks: u64,
     flame_ticks: u64,
     round_ticks: u64,
@@ -26,9 +29,21 @@ impl RulesConfig {
             turn_assist: TURN_ASSIST,
             bomb_capacity: 1,
             bomb_range: 2,
+            pickup_collection: false,
+            bomb_capacity_cap: 8,
+            bomb_range_cap: 8,
             bomb_fuse_ticks: 180,
             flame_ticks: 30,
             round_ticks: 10_800,
+        }
+    }
+
+    #[must_use]
+    pub const fn classic_v2() -> Self {
+        Self {
+            version: 2,
+            pickup_collection: true,
+            ..Self::classic_v1()
         }
     }
 
@@ -65,6 +80,21 @@ impl RulesConfig {
     #[must_use]
     pub const fn bomb_range(self) -> u16 {
         self.bomb_range
+    }
+
+    #[must_use]
+    pub const fn pickup_collection(self) -> bool {
+        self.pickup_collection
+    }
+
+    #[must_use]
+    pub const fn bomb_capacity_cap(self) -> u16 {
+        self.bomb_capacity_cap
+    }
+
+    #[must_use]
+    pub const fn bomb_range_cap(self) -> u16 {
+        self.bomb_range_cap
     }
 
     #[must_use]

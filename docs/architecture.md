@@ -79,4 +79,4 @@ The [implementation plan](game/implementation-plan.md) identifies when each depe
 must be recorded and how the two-player baseline will be delivered and verified.
 
 [ADR 0012](decisions/0012-pickup-phases-and-upgrades.md) defines the implemented typed
-[pickup layers](game/pickups.md) and fixes the next collection/upgrade phase boundary.
+[pickup layers](game/pickups.md) with classic-v2 collection/upgrades and explicit round-number spawn/tie assignment.

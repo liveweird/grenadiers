@@ -60,4 +60,9 @@ fn speed_levels_use_exact_fixed_point_values() {
     assert_eq!(SpeedLevel::Two.units_per_second(), 4_096);
     assert_eq!(SpeedLevel::Three.units_per_second(), 4_608);
     assert_eq!(SpeedLevel::Four.units_per_second(), 5_120);
+    assert_eq!(SpeedLevel::Base.next(), SpeedLevel::One);
+    assert_eq!(SpeedLevel::One.next(), SpeedLevel::Two);
+    assert_eq!(SpeedLevel::Two.next(), SpeedLevel::Three);
+    assert_eq!(SpeedLevel::Three.next(), SpeedLevel::Four);
+    assert_eq!(SpeedLevel::Four.next(), SpeedLevel::Four);
 }

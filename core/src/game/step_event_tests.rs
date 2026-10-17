@@ -1,9 +1,10 @@
-use std::collections::BTreeSet;
+use std::collections::{BTreeMap, BTreeSet};
 
 use super::{ActorInit, DrawReason, InputAction, RoundResult, SeatInput, State};
 use crate::game::arena::{ARENA_CELL_COUNT, ARENA_HEIGHT, ARENA_WIDTH, Arena, Terrain};
 use crate::game::events::StepEventKind;
 use crate::game::input::Direction;
+use crate::game::pickups::PickupKind;
 use crate::game::rules::RulesConfig;
 use crate::game::test_support::add_test_bomb_with_deadline;
 use crate::game::types::{CellId, EntityId, Position, SeatId, SpeedLevel, Tick};
@@ -189,5 +190,48 @@ fn canonical_events_ignore_actor_and_distinct_input_order() {
     assert!(matches!(
         left.events[1].kind,
         StepEventKind::BombPlaced(bomb) if bomb.owner == EntityId(20)
+    ));
+}
+
+#[test]
+fn pickup_events_use_cell_order_and_canonical_actor_identity() {
+    let first_cell = CellId::new(9, 4);
+    let second_cell = CellId::new(3, 8);
+    let world = World::with_pickups(
+        open_world().arena().clone(),
+        BTreeMap::new(),
+        BTreeMap::new(),
+        BTreeMap::from([
+            (second_cell, PickupKind::MovementSpeed),
+            (first_cell, PickupKind::BombCapacity),
+        ]),
+    )
+    .unwrap();
+    let inits = [
+        actor(10, SeatId::One, first_cell),
+        actor(20, SeatId::Two, second_cell),
+    ];
+    let mut state = State::new(RulesConfig::classic_v2(), world, [inits[1], inits[0]]).unwrap();
+
+    let report = state.step(&[]).unwrap();
+
+    assert_eq!(report.events.len(), 2);
+    assert!(matches!(
+        report.events[0].kind,
+        StepEventKind::PickupCollected {
+            id: EntityId(10),
+            seat: SeatId::One,
+            cell,
+            kind: PickupKind::BombCapacity,
+        } if cell == first_cell
+    ));
+    assert!(matches!(
+        report.events[1].kind,
+        StepEventKind::PickupCollected {
+            id: EntityId(20),
+            seat: SeatId::Two,
+            cell,
+            kind: PickupKind::MovementSpeed,
+        } if cell == second_cell
     ));
 }

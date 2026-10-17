@@ -1,4 +1,4 @@
-use std::collections::BTreeSet;
+use std::collections::{BTreeMap, BTreeSet};
 
 use jsonschema::validator_for;
 use serde_json::{Value, json};
@@ -6,6 +6,7 @@ use serde_json::{Value, json};
 use super::{EventKind, ProjectionError, project_events};
 use crate::game::arena::{ARENA_CELL_COUNT, ARENA_HEIGHT, ARENA_WIDTH, Arena, Terrain};
 use crate::game::input::Direction;
+use crate::game::pickups::PickupKind;
 use crate::game::rules::RulesConfig;
 use crate::game::simulation::{ActorInit, InputAction, SeatInput, State};
 use crate::game::test_support::add_test_bomb_with_deadline;
@@ -229,6 +230,45 @@ fn rejects_mismatched_ticks_and_invalid_embedded_bombs() {
     bomb.range = 0;
     assert_eq!(
         project_events(&[invalid_range]),
+        Err(ProjectionError::InvalidEvent)
+    );
+}
+
+#[test]
+fn version_one_event_projection_rejects_pickup_collection() {
+    let target = CellId::new(5, 5);
+    let world = World::with_pickups(
+        open_world().arena().clone(),
+        BTreeMap::new(),
+        BTreeMap::new(),
+        BTreeMap::from([(target, PickupKind::BombCapacity)]),
+    )
+    .unwrap();
+    let actor = |id, seat, cell| ActorInit {
+        id: EntityId(id),
+        seat,
+        position: Position::center(cell),
+        heading: Direction::East,
+        speed: SpeedLevel::Base,
+    };
+    let mut state = State::new(
+        RulesConfig::classic_v2(),
+        world,
+        [
+            actor(10, SeatId::One, target),
+            actor(20, SeatId::Two, CellId::new(12, 10)),
+        ],
+    )
+    .unwrap();
+
+    let report = state.step(&[]).unwrap();
+
+    assert!(matches!(
+        report.events[0].kind,
+        crate::game::StepEventKind::PickupCollected { .. }
+    ));
+    assert_eq!(
+        project_events(&[report]),
         Err(ProjectionError::InvalidEvent)
     );
 }

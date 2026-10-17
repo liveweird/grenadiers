@@ -102,6 +102,16 @@ impl SpeedLevel {
             Self::Four => 5_120,
         }
     }
+
+    #[must_use]
+    pub const fn next(self) -> Self {
+        match self {
+            Self::Base => Self::One,
+            Self::One => Self::Two,
+            Self::Two => Self::Three,
+            Self::Three | Self::Four => Self::Four,
+        }
+    }
 }
 
 #[cfg(test)]

@@ -1,5 +1,24 @@
 # Repository verification
 
+## M4 collection and permanent upgrades — 2026-10-17
+
+The locked server gate passes **169 core tests, 67 server tests, and 2 doctests**.
+Rust line coverage passes the unchanged 80% floor at **3,796/4,115 lines, 92.25%**.
+Independent review reports no actionable findings. Tests exercise damage-before-collection,
+final-center eligibility, distance/tie priority, row-major event order, collection at caps and
+under bombs, old/new bomb range coexistence, next-update speed with preserved residuals,
+round-number spawn parity, canceled-attempt independence, and classic-v1 compatibility.
+
+This release adds headless classic-v2 behavior. Live rooms still use the fixed classic-v1
+preview; gameplay protocol/client support and generated activation remain separate slices.
+
+A clean committed-tree build of `b30f9528a542eb26572c57dd0a1e92d2801b504b` produces
+`sha256:a3f985a351968f0e1a706ee3380e97e846c7419910727c8967c72c9d08b09046`.
+Compose and ready local Kubernetes use this exact image. Health/readiness and all **six
+browser scenarios** pass through both deployments. Strict schemas report 3 valid resources;
+pinned socket-free Trivy reports zero HIGH/CRITICAL vulnerabilities. Temporary runtime
+resources are removed; the image is retained. This evidence update changes documentation only.
+
 ## M4 typed pickup visibility layers — 2026-10-17
 
 The integrated locked server gate passes **155 core tests, 67 server tests, and 2 doctests**.

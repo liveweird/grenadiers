@@ -25,6 +25,7 @@
 //! ```
 
 pub mod arena;
+pub mod assignment;
 pub mod bombs;
 pub mod events;
 mod explosions;
@@ -43,6 +44,7 @@ pub mod view;
 pub mod world;
 
 pub use arena::{Arena, ArenaError, Terrain};
+pub use assignment::RoundAssignment;
 pub use bombs::Bomb;
 pub use events::{StepEvent, StepEventKind};
 pub use fixtures::fixed_arena;

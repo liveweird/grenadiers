@@ -14,6 +14,7 @@ locally verified through both deployment paths on 2026-10-17.
 The v0.3.17 increment adds four shared gameplay settings with configurable-v4 rules and
 gameplay-v6 compatibility, locally verified through both deployment paths on 2026-10-17;
 wider arena/item configuration remains backlog work.
+v0.3.18 adds the first detailed retro pixel-art slice, verified through both deployment paths.
 Published engineering prereleases are listed in `CHANGELOG.md` and GitHub Releases.
 
 New playtest requests and expansion work are tracked in the [gameplay and presentation

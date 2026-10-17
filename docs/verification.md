@@ -1,5 +1,40 @@
 # Repository verification
 
+## Retro pixel-art courtyard — 2026-10-17
+
+Clean archive source `1f591c2e86c78e19e4af1fb12a020f3ecd72c1ed` builds image
+`sha256:d8a99fef496cd0cb719308e62d77914945d4f695d04ec718354922db6c0b1967`.
+That exact image passes **24/24 scenarios in Compose and 24/24 in Kubernetes, retries zero**:
+eight default, pickup, match/rematch, two reconnect, controls, headed visibility, audio and
+nine latency cases. Seven latency cases exercise queues/observers and two measure native input.
+All sixteen deployment result files pass with no failed tests. A separate native visual helper
+passes 1/1; it is additional capture evidence, outside that matrix.
+
+Actual running-bomb and exposed-pickup desktop frames, plus a Polish 320-pixel terminal-flame
+result frame, pass visual inspection and overflow checks. [Committed captures](screenshots/pixel-art.md)
+show the application rather than the earlier art studies. The narrow flame frame is a retained
+RoundEnded result, with decorative animation stopped. New item icons and richer transition
+effects remain follow-up artwork; this increment delivers the existing arena/entity set.
+
+The integrated gates pass 317 core tests, 163 server tests and two doctests; four dedicated
+performance profiles remain intentionally ignored. All **230 web tests** pass with coverage
+above unchanged floors, together with contracts, lint, Knip, build and E2E static/parity checks.
+Independent rendering/lifecycle review is clear. Rust behavior and public contracts are unchanged.
+Dependency audits pass; strict pinned Kubernetes 1.33 schemas validate all three resources.
+
+Both paths run as UID/GID 65532 with a read-only root, dropped capabilities and no privilege
+escalation. Kubernetes retains RuntimeDefault, 500m/256Mi, the exact image digest and root-owned
+mode-0444 seed projection; Compose mounts its seed read-only at 0444. No seed is baked into
+the runtime image. Pinned archive-only Trivy reports zero vulnerabilities under the existing
+HIGH/CRITICAL `--ignore-unfixed` release filter, without a Docker socket.
+
+Observed local/shaped latency maxima: Compose **58.633/157.695 ms**, Kubernetes
+**122.876/165.744 ms**, zero samples above 250 ms and zero Kubernetes CPU throttles. These are
+bounded public-state delivery measurements, not FPS, pixel latency or WAN guarantees.
+Independent evidence audit is clear. Evidence remains at `/tmp/grenadiers-v0318-acceptance`;
+owned containers, namespace, helpers and forwarding were removed, with unrelated workloads
+preserved. Integration/documentation commits retain byte-identical application build inputs.
+
 ## Shared room settings / gameplay v6 — 2026-10-17
 
 Clean image source `cf82db46477e0fddc8b9b0e137e5ffb64bb3ec56` builds

@@ -1,6 +1,7 @@
 # Retro pixel-art courtyard
 
-Status: v0.3.18 implementation candidate; live acceptance is required before release.
+Implemented in v0.3.18. [Actual application captures](../screenshots/pixel-art.md) and the
+[verification record](../verification.md) cover both deployment paths.
 
 The PixiJS arena uses original code-native pixel artwork. Weathered stone tiles, mossy
 masonry, layered brickwork and small brass highlights establish a courtyard palette; bright
@@ -28,6 +29,7 @@ Sources: `web/src/game/arena/terrainArt.ts`, `actorArt.ts`, `entityArt.ts`, `pal
 texture packs, downloaded fonts or new rendering dependency are included.
 
 Geometry/resource-bound, retention, removal, interpolation, reduced-motion and StrictMode
-tests accompany the artwork. Desktop and 320-pixel visual studies guide review; actual
-application captures and same-image browser/deployment evidence belong in
-[verification](../verification.md) before release.
+tests accompany the artwork. Independent code and visual review is clear. The same image
+passes 24 scenarios each through Compose and Kubernetes, plus a separate native capture case.
+This first visual slice covers terrain, actors, bombs, flames and the existing three pickups;
+new item icons and richer death/destruction/collection transitions remain follow-up artwork.

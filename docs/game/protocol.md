@@ -183,8 +183,8 @@ pending, the browser honors the explicit local departure instead of retrying. Ru
 boundaries commit physics/scoring before batched departures; idle phases apply departure
 before automatic transitions. Explicit leave forfeits and two explicit leaves abandon. Eligible
 transport loss reserves the seat for 600 global ticks; one expiry forfeits to an eligible opponent,
-both expiry abandons, and a disconnected opponent delays the decision until settled. Configured-target and
-already-final outcomes retain precedence. Ownership is bound to connection generation and private
+both expiry abandons, and a disconnected opponent delays the decision until settled. Reaching the
+configured win target and already final outcomes take precedence. Ownership is bound to connection generation and private
 capability, never to invitation code. See [bounded owner](match-owner.md).
 
 ## Profile and version evolution

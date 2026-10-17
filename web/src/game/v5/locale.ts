@@ -2,9 +2,9 @@ import { useTranslation } from 'react-i18next'
 import en from '../../locales/en/game.json'
 import pl from '../../locales/pl/game.json'
 
-export type V4Copy = typeof en | typeof pl
+export type V5Copy = typeof en | typeof pl
 
-export function useV4Copy(): V4Copy {
+export function useV5Copy(): V5Copy {
   const { i18n } = useTranslation()
   return i18n.resolvedLanguage?.startsWith('pl') ? pl : en
 }

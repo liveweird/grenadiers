@@ -8,6 +8,10 @@ join from another browser, and both choose Ready. Select the courtyard to move w
 or W/A/S/D and plant bombs with Space. Rust owns the 60 Hz simulation; PixiJS draws public
 20 Hz snapshots while React/Mantine provides the room controls, scores, phase timers, results, and rematch.
 
+Classic-v3 rooms allow turns within a quarter tile of a corridor centerline, including natural
+wall stops. Gameplay v5 requires reloading older browser clients after an upgrade; see the
+[compatibility note](docs/game/protocol-v5.md).
+
 Use **Keyboard controls** below the arena to remap movement and bombs or restore defaults. Preferences
 stay in this browser. Opening settings, losing focus, or hiding the tab releases held movement;
 returning requires a fresh key press. See the [keyboard guide](docs/game/controls.md).

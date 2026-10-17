@@ -4,7 +4,7 @@ import type { KeyboardBindings } from '../arena/bindings'
 import { GameArena } from '../arena/GameArena'
 import type { Direction } from '../arena/types'
 import type { AdmissionIntent, GameClientState } from './client'
-import { format, useV4Copy, type V4Copy } from './locale'
+import { format, useV5Copy, type V5Copy } from './locale'
 import type { MatchInterruptReason, MatchResult, RoomPhase, RoundResult, Seat } from './schema'
 import { useGameClient } from './useGameClient'
 import { ControlsDialog } from './ControlsDialog'
@@ -40,25 +40,25 @@ function clock(ticks: number | null): string {
   return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`
 }
 
-function phaseText(copy: V4Copy, phase: RoomPhase): string {
+function phaseText(copy: V5Copy, phase: RoomPhase): string {
   if (phase.type === 'countdown') {
     return phase.kind === 'initial' ? copy.phase.initialCountdown : copy.phase.interRoundCountdown
   }
   return copy.phase[phase.type]
 }
 
-function reasonText(copy: V4Copy, reason: MatchInterruptReason): string {
+function reasonText(copy: V5Copy, reason: MatchInterruptReason): string {
   return copy.interruption[reason]
 }
 
-function RoundOutcome({ copy, result }: { copy: V4Copy; result: RoundResult }) {
+function RoundOutcome({ copy, result }: { copy: V5Copy; result: RoundResult }) {
   if (result.type === 'winner') {
     return <Text role="status">{format(copy.roundResult.winner, { player: copy.player[result.seat] })}</Text>
   }
   return <Text role="status">{copy.roundResult[result.reason]}</Text>
 }
 
-function MatchOutcome({ copy, result }: { copy: V4Copy; result: MatchResult }) {
+function MatchOutcome({ copy, result }: { copy: V5Copy; result: MatchResult }) {
   if (result.type === 'winner') {
     return <Text role="status">{format(copy.matchResult[result.reason], { player: copy.player[result.seat] })}</Text>
   }
@@ -66,7 +66,7 @@ function MatchOutcome({ copy, result }: { copy: V4Copy; result: MatchResult }) {
   return <Text role="status">{format(copy.matchResult.interrupted, { reason: reasonText(copy, result.reason) })}</Text>
 }
 
-function AuthoritativeOutcome({ state, copy }: { state: GameClientState; copy: V4Copy }) {
+function AuthoritativeOutcome({ state, copy }: { state: GameClientState; copy: V5Copy }) {
   const room = state.room
   if (!room) return null
   if (room.phase.type === 'result' && room.lastRound) return <RoundOutcome copy={copy} result={room.lastRound.result} />
@@ -75,7 +75,7 @@ function AuthoritativeOutcome({ state, copy }: { state: GameClientState; copy: V
   return null
 }
 
-function seatDescription(state: GameClientState, seat: Seat): keyof V4Copy['seat'] {
+function seatDescription(state: GameClientState, seat: Seat): keyof V5Copy['seat'] {
   const room = state.room!
   const status = room.seats.find((candidate) => candidate.seat === seat)
   const actor = state.snapshot?.state.actors.find((candidate) => candidate.seat === seat)
@@ -89,7 +89,7 @@ function seatDescription(state: GameClientState, seat: Seat): keyof V4Copy['seat
   return 'open'
 }
 
-function SeatLine({ state, seat, copy }: { state: GameClientState; seat: Seat; copy: V4Copy }) {
+function SeatLine({ state, seat, copy }: { state: GameClientState; seat: Seat; copy: V5Copy }) {
   const room = state.room!
   const status = room.seats.find((candidate) => candidate.seat === seat)
   const actor = state.snapshot?.state.actors.find((candidate) => candidate.seat === seat)
@@ -118,7 +118,7 @@ function SeatLine({ state, seat, copy }: { state: GameClientState; seat: Seat; c
   )
 }
 
-function LobbyControls({ state, actions, copy }: { state: GameClientState; actions: GameActions; copy: V4Copy }) {
+function LobbyControls({ state, actions, copy }: { state: GameClientState; actions: GameActions; copy: V5Copy }) {
   const [code, setCode] = useState('')
   const busy = state.connection !== 'disconnected' || state.admissionPending
   return (
@@ -138,7 +138,7 @@ function LobbyControls({ state, actions, copy }: { state: GameClientState; actio
   )
 }
 
-function RematchControl({ state, actions, copy }: { state: GameClientState; actions: GameActions; copy: V4Copy }) {
+function RematchControl({ state, actions, copy }: { state: GameClientState; actions: GameActions; copy: V5Copy }) {
   const room = state.room!
   if (room.phase.type !== 'matchResult') return null
   const own = room.seats.find((seat) => seat.seat === state.youSeat)
@@ -153,7 +153,7 @@ function RematchControl({ state, actions, copy }: { state: GameClientState; acti
   )
 }
 
-function RoomControls({ state, actions, copy }: { state: GameClientState; actions: GameActions; copy: V4Copy }) {
+function RoomControls({ state, actions, copy }: { state: GameClientState; actions: GameActions; copy: V5Copy }) {
   const room = state.room!
   const own = room.seats.find((seat) => seat.seat === state.youSeat)
   const connected = own?.connection.type === 'connected' && state.connection === 'authenticated'
@@ -193,7 +193,7 @@ function gameInputEnabled(state: GameClientState): boolean {
 }
 
 export function GamePanelView({ state, actions }: { state: GameClientState; actions: GameActions }) {
-  const copy = useV4Copy()
+  const copy = useV5Copy()
   const [bindings, setBindings] = useState(loadControlBindings)
   const [controlsOpen, setControlsOpen] = useState(false)
   const failureText = state.failure ? copy.error[state.failure as keyof typeof copy.error] : ''
@@ -217,11 +217,11 @@ export function GamePanelView({ state, actions }: { state: GameClientState; acti
             <span>{copy.player.two}</span><strong>{state.room?.scores.two ?? 0}</strong></span>
         </div>
         <GameArena label={copy.arena.label} waitingText={waitingText} failureText={copy.arena.failure}
-          focusHint={copy.arena.focusHint} instructionsId="v4-game-instructions" snapshot={state.snapshot}
+          focusHint={copy.arena.focusHint} instructionsId="v5-game-instructions" snapshot={state.snapshot}
           youSeat={state.youSeat} enabled={Boolean(enabled)}
           bindings={bindings}
           onDirection={(direction) => actions.movement(direction)} onBomb={() => actions.placeBomb()} />
-        <p id="v4-game-instructions" className="game-instructions">{bindingsSummary(bindings, copy)}</p>
+        <p id="v5-game-instructions" className="game-instructions">{bindingsSummary(bindings, copy)}</p>
         <div className="local-controls">
           <Button className="controls-button" variant="subtle" color="dark" size="compact-sm"
             onClick={() => setControlsOpen(true)}>{copy.controls.open}</Button>

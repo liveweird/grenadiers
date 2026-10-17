@@ -40,6 +40,14 @@ pub fn parse_client_message(input: &str) -> Result<GameClientMessage, ParseClien
 pub fn encode_server_message(
     message: &GameServerMessage,
 ) -> Result<String, super::EncodeServerMessageError> {
+    match message {
+        GameServerMessage::RoomState { room, .. } | GameServerMessage::Snapshot { room, .. }
+            if room.rules_version == super::RulesVersion::ClassicV3 =>
+        {
+            return Err(super::EncodeServerMessageError::EncodingFailed);
+        }
+        _ => {}
+    }
     let encoded = serde_json::to_string(message)
         .map_err(|_| super::EncodeServerMessageError::EncodingFailed)?;
     super::enforce_server_message_size(encoded)

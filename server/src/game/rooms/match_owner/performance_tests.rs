@@ -6,7 +6,7 @@ use std::time::Duration;
 
 use grenadiers_core::{
     game::Direction,
-    protocol::{RoomCode, RoomId, v4::GameServerMessage},
+    protocol::{RoomCode, RoomId, v5::GameServerMessage},
 };
 use serde_json::json;
 use tokio::{
@@ -165,7 +165,7 @@ async fn run_owner_profile(room_count: usize) {
     for room in &rooms {
         assert!(matches!(
             current_notice(room).room.phase,
-            grenadiers_core::protocol::v4::RoomPhase::Running
+            grenadiers_core::protocol::v5::RoomPhase::Running
         ));
     }
 
@@ -246,7 +246,7 @@ async fn start_room(index: usize) -> MeasuredRoom {
         loop {
             if matches!(
                 notice(&running).room.phase,
-                grenadiers_core::protocol::v4::RoomPhase::Running
+                grenadiers_core::protocol::v5::RoomPhase::Running
             ) {
                 break;
             }
@@ -281,7 +281,7 @@ fn observe(
             let lag = received.saturating_duration_since(expected);
             let bytes = current.snapshot.as_ref().map_or_else(
                 || {
-                    grenadiers_core::protocol::v4::encode_server_message(
+                    grenadiers_core::protocol::v5::encode_server_message(
                         &GameServerMessage::RoomState {
                             room: current.room.clone(),
                         },

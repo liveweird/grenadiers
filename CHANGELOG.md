@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.3.16 — 2026-10-17
+
+- Double lane-centering tolerance from one eighth to one quarter tile in classic-v3 rooms,
+  allowing turns from natural wall stops while retaining swept collision, flame damage and
+  the normal movement budget. Preserve classic-v1/v2 physics for deterministic replay.
+- Activate gameplay v5 so older browser contracts are rejected before credential binding;
+  retain archived schemas, shared match/reconnect semantics and private replay provenance.
+- Add native keyboard acceptance for a 192-unit off-center turn visible to both players.
+- Record the requested settings, pixel-art, equipment, buff, curse and weapon backlog.
+
 ## 0.3.15 — 2026-10-17
 
 - Add original procedural bomb placement/detonation, pickup and elimination cues, default muted,

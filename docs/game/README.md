@@ -10,7 +10,7 @@ playable target remains two human players. M1 implements the
 outcomes](combat.md), including explicit public projections/events. M3 completes
 [gameplay contracts](protocol.md), anonymous sessions, authenticated [rooms](rooms.md),
 authoritative scheduling, and the [playable browser duel](browser.md). The current preview
-plays generated classic-v2 first-to-three matches with upgrades, automatic round resets,
+plays generated classic-v3 first-to-three matches with upgrades, automatic round resets,
 consensual rematch, and process-local reserved-seat reconnect. Bots, larger matches,
 matchmaking, cross-process recovery, and durable stats follow.
 
@@ -35,6 +35,10 @@ classic match progression, then reconnect resilience and playtest hardening. Mar
 verification record.
 
 [Baseline rule coverage](rule-coverage.md) maps all 42 acceptance rules to concrete automated assertions.
+
+[Gameplay and presentation backlog](backlog.md) records playtest requests for forgiving turns,
+shared room settings, detailed pixel art, equipment, timed effects and single-use weapons.
+These requests are planned work, separate from the implemented classic baseline.
 
 [Runtime reference measurements](performance.md) documents bounded workloads, selected budgets and evidence limits.
 

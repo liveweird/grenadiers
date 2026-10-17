@@ -16,11 +16,11 @@ pub use projection_validation::validate_room_view;
 pub use scalars::{GameplayVersion, ResumeToken, RoundCount, Wins};
 pub use server::{
     CompletedRound, ConnectionStatus, CountdownKind, GameServerMessage, MatchInterruptReason,
-    MatchResult, MatchWinnerReason, RoomPhase, RoomView, Scores, SeatStatus, V4ErrorCode,
+    MatchResult, MatchWinnerReason, RoomPhase, RoomView, Scores, SeatStatus, V5ErrorCode,
 };
 pub use state_binding::{validate_admission, validate_state_binding};
 
-pub const GAMEPLAY_PROTOCOL_VERSION: u16 = 4;
+pub const GAMEPLAY_PROTOCOL_VERSION: u16 = 5;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum ParseClientMessageError {
@@ -29,7 +29,7 @@ pub enum ParseClientMessageError {
 
 impl fmt::Display for ParseClientMessageError {
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
-        formatter.write_str("invalid gameplay v4 client message")
+        formatter.write_str("invalid gameplay v5 client message")
     }
 }
 

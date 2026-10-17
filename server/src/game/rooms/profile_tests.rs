@@ -77,6 +77,22 @@ fn generated_profile_constructs_classic_v2_with_assignment_spawns_and_private_re
 }
 
 #[test]
+fn current_generated_profile_constructs_classic_v3_with_wider_turning() {
+    let lifecycle = running();
+    let initial = RoomProfile::GeneratedClassicV3
+        .initial_round(
+            lifecycle.tick(),
+            RoundAssignment::first(),
+            &fixed_seed([23; 32]),
+        )
+        .unwrap();
+
+    assert_eq!(initial.state.rules().version(), 3);
+    assert_eq!(initial.state.rules().turn_assist(), 256);
+    assert_eq!(initial.generation_record.unwrap().seed(), [23; 32]);
+}
+
+#[test]
 fn profile_honors_later_round_assignment_for_spawns_and_facing() {
     let lifecycle = running();
     let assignment = RoundAssignment::new(std::num::NonZeroU32::new(2).unwrap());

@@ -4,9 +4,9 @@ import userEvent from '@testing-library/user-event'
 import { StrictMode } from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import i18n from '../../i18n'
-import type { GameClientState } from '../v4/client'
-import { useV4Copy } from '../v4/locale'
-import { snapshot } from '../v4/testSupport'
+import type { GameClientState } from '../v5/client'
+import { useV5Copy } from '../v5/locale'
+import { snapshot } from '../v5/testSupport'
 import { SoundControl } from './SoundControl'
 
 function state(): GameClientState {
@@ -19,7 +19,7 @@ function state(): GameClientState {
 }
 
 function Subject({ current = state() }: { current?: GameClientState }) {
-  return <SoundControl state={current} copy={useV4Copy()} />
+  return <SoundControl state={current} copy={useV5Copy()} />
 }
 
 function view(element = <Subject />) {

@@ -39,7 +39,7 @@ function renderPanel(current: GameClientState) {
   render(<MantineProvider env="test"><GamePanelView state={current} actions={actions()} /></MantineProvider>)
 }
 
-describe('v4 reconnect presentation', () => {
+describe('v5 reconnect presentation', () => {
   beforeEach(async () => { localStorage.clear(); await i18n.changeLanguage('en') })
 
   it('exposes the dormant hook-backed panel without activating it in App', () => {

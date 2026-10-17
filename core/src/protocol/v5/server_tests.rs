@@ -9,12 +9,12 @@ use super::super::{
 use super::{
     CompletedRound, ConnectionStatus, CountdownKind, GameServerMessage, GameplayVersion,
     MatchInterruptReason, MatchResult, MatchWinnerReason, ResumeToken, RoomPhase, RoomView,
-    RoundCount, Scores, SeatStatus, V4ErrorCode, Wins, encode_server_message,
+    RoundCount, Scores, SeatStatus, V5ErrorCode, Wins, encode_server_message,
 };
 
 fn server_schema() -> Validator {
     let schema: Value =
-        serde_json::from_str(include_str!("../../../../api/gameplay-v4.schema.json")).unwrap();
+        serde_json::from_str(include_str!("../../../../api/gameplay-v5.schema.json")).unwrap();
     validator_for(&schema).unwrap()
 }
 
@@ -95,11 +95,11 @@ fn assert_valid(message: &GameServerMessage) -> Value {
 }
 
 #[test]
-fn server_envelope_variants_and_fixed_v4_authentication_conform() {
+fn server_envelope_variants_and_fixed_v5_authentication_conform() {
     let authenticated = assert_valid(&GameServerMessage::Authenticated {
         protocol_version: GameplayVersion,
     });
-    assert_eq!(authenticated["protocolVersion"], 4);
+    assert_eq!(authenticated["protocolVersion"], 5);
     for version in [0, 3, 4, u16::MAX] {
         assert_valid(&GameServerMessage::IncompatibleProtocol {
             supported_version: ProtocolVersionInput::new(version),
@@ -126,7 +126,7 @@ fn server_envelope_variants_and_fixed_v4_authentication_conform() {
         sequence: Counter::new(1).unwrap(),
     });
     assert_valid(&GameServerMessage::Error {
-        code: V4ErrorCode::InvalidMessage,
+        code: V5ErrorCode::InvalidMessage,
         sequence: None,
     });
     assert_valid(&GameServerMessage::SeatReplaced {
@@ -167,7 +167,7 @@ fn personal_admission_requires_nullable_fields_and_shared_room_has_no_identity()
 }
 
 #[test]
-fn every_connection_and_v4_error_code_conforms() {
+fn every_connection_and_v5_error_code_conforms() {
     for connection in [
         ConnectionStatus::Vacant,
         ConnectionStatus::Connected,
@@ -181,22 +181,22 @@ fn every_connection_and_v4_error_code_conforms() {
         assert_valid(&GameServerMessage::RoomState { room: view });
     }
     for code in [
-        V4ErrorCode::InvalidMessage,
-        V4ErrorCode::AuthenticationFailed,
-        V4ErrorCode::ConnectionInUse,
-        V4ErrorCode::NotAuthenticated,
-        V4ErrorCode::AlreadyAuthenticated,
-        V4ErrorCode::AlreadyInRoom,
-        V4ErrorCode::NotInRoom,
-        V4ErrorCode::RoomNotFound,
-        V4ErrorCode::RoomFull,
-        V4ErrorCode::StaleRoom,
-        V4ErrorCode::InvalidPhase,
-        V4ErrorCode::StaleSequence,
-        V4ErrorCode::DuplicateAction,
-        V4ErrorCode::RateLimited,
-        V4ErrorCode::CapacityReached,
-        V4ErrorCode::ResumeRejected,
+        V5ErrorCode::InvalidMessage,
+        V5ErrorCode::AuthenticationFailed,
+        V5ErrorCode::ConnectionInUse,
+        V5ErrorCode::NotAuthenticated,
+        V5ErrorCode::AlreadyAuthenticated,
+        V5ErrorCode::AlreadyInRoom,
+        V5ErrorCode::NotInRoom,
+        V5ErrorCode::RoomNotFound,
+        V5ErrorCode::RoomFull,
+        V5ErrorCode::StaleRoom,
+        V5ErrorCode::InvalidPhase,
+        V5ErrorCode::StaleSequence,
+        V5ErrorCode::DuplicateAction,
+        V5ErrorCode::RateLimited,
+        V5ErrorCode::CapacityReached,
+        V5ErrorCode::ResumeRejected,
     ] {
         assert_valid(&GameServerMessage::Error {
             code,

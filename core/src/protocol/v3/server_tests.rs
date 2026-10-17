@@ -19,6 +19,23 @@ fn server_schema() -> Validator {
     validator_for(&schema).unwrap()
 }
 
+#[test]
+fn legacy_room_projection_and_encoding_reject_new_rules() {
+    let mut room = room(RoomPhase::Waiting);
+    room.rules_version = RulesVersion::ClassicV3;
+    assert_eq!(
+        super::validate_room_view(&room),
+        Err(super::RoomProjectionError::UnsupportedRulesVersion)
+    );
+    assert_eq!(
+        encode_server_message(&GameServerMessage::RoomState {
+            room,
+            you_seat: Seat::One
+        }),
+        Err(super::super::EncodeServerMessageError::EncodingFailed)
+    );
+}
+
 fn room(phase: RoomPhase) -> RoomView {
     RoomView {
         room_id: RoomId::new("0123456789abcdef0123456789abcdef").unwrap(),

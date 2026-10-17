@@ -4,13 +4,13 @@ import {
   controlActions, defaultKeyboardBindings, isAllowedControlCode, replaceBinding,
   type ControlAction, type KeyboardBindings,
 } from '../arena/bindings'
-import { format, type V4Copy } from './locale'
+import { format, type V5Copy } from './locale'
 import { keyLabel } from './controlLabels'
 
 type Props = {
   opened: boolean
   bindings: KeyboardBindings
-  copy: V4Copy
+  copy: V5Copy
   onChange: (bindings: KeyboardBindings) => void
   onClose: () => void
 }

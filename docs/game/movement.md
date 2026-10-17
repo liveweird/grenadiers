@@ -31,7 +31,7 @@ movement and clears its fraction immediately, including within a multi-event tic
 
 Each successful call advances one absolute 60 Hz tick; active rounds also count Running updates. All five speed levels retain fractional travel
 between updates. There is no accumulated movement burst after hitting a wall. A perpendicular
-turn needs an offset of at most 128 units and a fully clear correction path. Alignment consumes
+turn needs an offset of at most 256 units (¼ tile) in the active classic-v3 profile and a fully clear correction path. Historical classic-v1/v2 profiles retain 128 units (⅛ tile). Alignment consumes
 the normal distance budget and can span ticks; forward travel starts after alignment completes.
 The last committed heading remains authoritative while a correction is pending or rejected.
 

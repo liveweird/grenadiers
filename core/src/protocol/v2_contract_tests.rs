@@ -7,7 +7,9 @@ fn map_and_rules_variants_conform_and_unknown_values_fail() {
         assert!(definition_schema("RulesVersion").is_valid(&serde_json::to_value(rules).unwrap()));
         assert_eq!(RulesVersion::try_from(rules.get()), Ok(rules));
     }
-    for value in [0, 3, u16::MAX] {
+    assert_eq!(RulesVersion::try_from(3), Ok(RulesVersion::ClassicV3));
+    assert!(!definition_schema("RulesVersion").is_valid(&json!(3)));
+    for value in [0, 4, u16::MAX] {
         assert!(RulesVersion::try_from(value).is_err());
         assert!(!definition_schema("RulesVersion").is_valid(&json!(value)));
     }

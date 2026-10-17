@@ -13,7 +13,9 @@ use crate::round_seed::RoundSeedSource;
 pub(super) enum RoomProfile {
     #[cfg(test)]
     FixedClassicV1,
+    #[cfg_attr(not(test), allow(dead_code))]
     GeneratedClassicV2,
+    GeneratedClassicV3,
 }
 
 pub(super) struct InitialRound {
@@ -27,6 +29,7 @@ impl RoomProfile {
             #[cfg(test)]
             Self::FixedClassicV1 => RulesVersion::ClassicV1,
             Self::GeneratedClassicV2 => RulesVersion::ClassicV2,
+            Self::GeneratedClassicV3 => RulesVersion::ClassicV3,
         }
     }
 
@@ -34,7 +37,7 @@ impl RoomProfile {
         match self {
             #[cfg(test)]
             Self::FixedClassicV1 => MapId::FixedV1,
-            Self::GeneratedClassicV2 => MapId::GeneratedV1,
+            Self::GeneratedClassicV2 | Self::GeneratedClassicV3 => MapId::GeneratedV1,
         }
     }
 
@@ -62,23 +65,23 @@ impl RoomProfile {
                     generation_record: None,
                 })
             }
-            Self::GeneratedClassicV2 => {
+            Self::GeneratedClassicV2 | Self::GeneratedClassicV3 => {
                 let seed = round_seed_source.next_seed().ok()?;
                 let (world, generation_record) =
                     World::from_generated(generate_arena(seed)).ok()?;
                 let actors = actors_at_assignment_spawns(world.arena(), assignment);
-                State::new_at_tick_with_assignment(
-                    RulesConfig::classic_v2(),
-                    world,
-                    actors,
-                    tick,
-                    assignment,
-                )
-                .ok()
-                .map(|state| InitialRound {
-                    state,
-                    generation_record: Some(generation_record),
-                })
+                let rules = match self {
+                    Self::GeneratedClassicV2 => RulesConfig::classic_v2(),
+                    Self::GeneratedClassicV3 => RulesConfig::classic_v3(),
+                    #[cfg(test)]
+                    Self::FixedClassicV1 => unreachable!("fixed profile handled above"),
+                };
+                State::new_at_tick_with_assignment(rules, world, actors, tick, assignment)
+                    .ok()
+                    .map(|state| InitialRound {
+                        state,
+                        generation_record: Some(generation_record),
+                    })
             }
         }
     }

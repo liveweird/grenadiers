@@ -18,8 +18,8 @@ use super::super::{
     types::RoomIdentity,
 };
 use super::record::{
-    CLASSIC_V2_RULES, FORMAT_VERSION, GENERATED_V1, Journal, M5_LIFECYCLE_PROFILE,
-    M6_LIFECYCLE_PROFILE, Operation, ReplayAction, ReplayStatus,
+    CLASSIC_V2_RULES, CLASSIC_V3_RULES, FORMAT_VERSION, GENERATED_V1, Journal,
+    M5_LIFECYCLE_PROFILE, M6_LIFECYCLE_PROFILE, Operation, ReplayAction, ReplayStatus,
 };
 use crate::round_seed::RoundSeedSource;
 
@@ -67,7 +67,8 @@ pub(super) fn replay(journal: &Journal) -> Result<RuntimeInspection, ReplayError
         bytes.copy_from_slice(&seed);
         Ok(())
     });
-    let mut runtime = MatchRuntime::new_without_replay(identity(), source);
+    let mut runtime =
+        MatchRuntime::new_without_replay(identity_for_rules(journal.header.rules_version)?, source);
     for seat in SeatId::ALL {
         if journal.header.initial_seats[seat.index()] {
             runtime.occupy(seat).map_err(|_| ReplayError::Runtime)?;
@@ -153,8 +154,8 @@ fn validate_header(journal: &Journal) -> Result<(), ReplayError> {
     ) {
         return Err(ReplayError::UnsupportedLifecycle);
     }
-    if header.rules_version != CLASSIC_V2_RULES
-        || RulesVersion::try_from(header.rules_version) != Ok(RulesVersion::ClassicV2)
+    if !matches!(header.rules_version, CLASSIC_V2_RULES | CLASSIC_V3_RULES)
+        || RulesVersion::try_from(header.rules_version).is_err()
     {
         return Err(ReplayError::UnsupportedRules);
     }
@@ -256,9 +257,22 @@ enum RoundBoundary {
 }
 
 pub(super) fn identity() -> RoomIdentity {
+    identity_for_profile(RoomProfile::GeneratedClassicV2)
+}
+
+fn identity_for_rules(rules_version: u16) -> Result<RoomIdentity, ReplayError> {
+    let profile = match RulesVersion::try_from(rules_version) {
+        Ok(RulesVersion::ClassicV2) => RoomProfile::GeneratedClassicV2,
+        Ok(RulesVersion::ClassicV3) => RoomProfile::GeneratedClassicV3,
+        _ => return Err(ReplayError::UnsupportedRules),
+    };
+    Ok(identity_for_profile(profile))
+}
+
+pub(super) fn identity_for_profile(profile: RoomProfile) -> RoomIdentity {
     RoomIdentity {
         id: RoomId::new("00000000000000000000000000000001").expect("static room id"),
         code: RoomCode::new("ABCDEFGH").expect("static room code"),
-        profile: RoomProfile::GeneratedClassicV2,
+        profile,
     }
 }

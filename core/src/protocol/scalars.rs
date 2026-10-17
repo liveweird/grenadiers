@@ -274,6 +274,7 @@ pub enum RulesVersion {
     #[default]
     ClassicV1,
     ClassicV2,
+    ClassicV3,
 }
 
 impl RulesVersion {
@@ -282,6 +283,7 @@ impl RulesVersion {
         match self {
             Self::ClassicV1 => 1,
             Self::ClassicV2 => 2,
+            Self::ClassicV3 => 3,
         }
     }
 }
@@ -292,6 +294,7 @@ impl TryFrom<u16> for RulesVersion {
         match value {
             1 => Ok(Self::ClassicV1),
             2 => Ok(Self::ClassicV2),
+            3 => Ok(Self::ClassicV3),
             _ => Err(InvalidScalar),
         }
     }

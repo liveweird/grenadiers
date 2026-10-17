@@ -1,4 +1,4 @@
-import type { RoomView, Seat, V4ErrorCode } from './schema'
+import type { RoomView, Seat, V5ErrorCode } from './schema'
 import type { Snapshot } from './schema'
 
 type GameConnection =
@@ -14,7 +14,7 @@ type LocalFailure =
   | 'sessionFailed'
   | 'sequenceExhausted'
 
-export type GameFailure = V4ErrorCode | LocalFailure | 'incompatibleProtocol' | 'seatReplaced'
+export type GameFailure = V5ErrorCode | LocalFailure | 'incompatibleProtocol' | 'seatReplaced'
 export type AdmissionIntent = { type: 'create' } | { type: 'join'; roomCode: string }
 type AdmissionBaseline = { roomId: string; revision: number; tick: number }
 

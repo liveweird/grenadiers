@@ -168,7 +168,7 @@ pub(super) async fn finish_round(
         advance_ticks(1).await;
         if !matches!(
             publication(notices).room.phase,
-            grenadiers_core::protocol::v4::RoomPhase::Running
+            grenadiers_core::protocol::v5::RoomPhase::Running
         ) {
             return;
         }
@@ -181,7 +181,7 @@ pub(super) async fn advance_to_running(notices: &watch::Receiver<MatchOwnerNotic
         advance_ticks(1).await;
         if matches!(
             publication(notices).room.phase,
-            grenadiers_core::protocol::v4::RoomPhase::Running
+            grenadiers_core::protocol::v5::RoomPhase::Running
         ) {
             return;
         }
@@ -200,6 +200,6 @@ pub(super) fn publication(receiver: &watch::Receiver<MatchOwnerNotice>) -> Match
 pub(super) fn assert_running(receiver: &watch::Receiver<MatchOwnerNotice>) {
     assert_eq!(
         publication(receiver).room.phase,
-        grenadiers_core::protocol::v4::RoomPhase::Running
+        grenadiers_core::protocol::v5::RoomPhase::Running
     );
 }

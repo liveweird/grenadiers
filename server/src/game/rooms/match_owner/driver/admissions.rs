@@ -1,6 +1,6 @@
 use grenadiers_core::{
     game::SeatId,
-    protocol::{Counter, RoomId, v4::ResumeToken},
+    protocol::{Counter, RoomId, v5::ResumeToken},
 };
 use tokio::sync::oneshot;
 

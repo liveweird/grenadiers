@@ -173,7 +173,7 @@ fn explicit_speed_and_result_mappings_cover_every_domain_variant() {
 #[test]
 fn rejects_rules_tick_clock_and_arena_shape_failures() {
     let mut view = initial_view();
-    view.rules_version = 3;
+    view.rules_version = 4;
     assert_eq!(
         project_state(&view),
         Err(ProjectionError::UnsupportedRulesVersion)

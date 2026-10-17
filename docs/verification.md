@@ -1,5 +1,16 @@
 # Repository verification
 
+## Checked v3 room projection — 2026-10-17
+
+The locked server gate passes **243 core tests, 85 server tests, and 2 doctests**.
+Rust line coverage is **5,091/5,484 lines, 92.83%**, above the unchanged 80% floor.
+Independent review and follow-up closure report no actionable projection findings.
+The 18 focused cases exercise real draw/three-win flows, cancellation gaps, initial and
+inter-round countdowns, independent forfeits/interruption/abandonment, rematch reset, and
+post-final departure. Mutation regressions reject impossible consent, draw-awarded wins,
+invalid epoch chronology, and occupied forfeit losers. The adapter remains dormant; live
+protocol and browser behavior are unchanged.
+
 ## Dormant gameplay-v3 contract — 2026-10-17
 
 The locked server gate passes **225 core tests, 85 server tests, and 2 doctests**.

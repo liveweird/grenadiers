@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.2.10 — 2026-10-17
+
+- Add checked v3 room projection from actual match lifecycle facts.
+- Validate canonical seats, readiness phases, score/history budgets, epoch chronology,
+  result holds, rematch eligibility, and independent forfeit/interruption outcomes.
+- Reject impossible unanimous-consent snapshots and occupied forfeit losers.
+
+This adapter is dormant; production gameplay remains v2 until runtime/browser activation.
+
 ## 0.2.9 — 2026-10-17
 
 - Stage a self-contained gameplay-v3 contract for truthful match scores, actual round count,

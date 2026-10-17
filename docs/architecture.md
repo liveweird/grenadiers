@@ -90,3 +90,6 @@ v3 server/browser integration. The live generated preview remains single-round u
 [ADR 0016](decisions/0016-dormant-gameplay-v3-contract.md) stages explicit namespaced
 [gameplay-v3 contracts](game/protocol-v3.md) alongside active v2. Generated types and DTOs alone
 never activate match behavior or fabricate scores.
+
+V3 checked room projection derives facts directly from `MatchLifecycle`; its public validator
+rejects semantically impossible bounded DTOs before server adapters publish them.

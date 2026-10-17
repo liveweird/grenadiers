@@ -270,7 +270,8 @@ new bomb while an older bomb retains its original range.
 Progress: v0.2.7 adds the headless [match-series component](match-series.md), bounded score/
 record/outcome facts, holds, batched departures, and rematch votes. Live gameplay remains the
 single-round v2 preview. v0.2.8 adds the pure [automatic match lifecycle](match-lifecycle.md).
-v0.2.9 adds the dormant [v3 structural contract](protocol-v3.md). Checked projection,
+v0.2.9 adds the dormant [v3 structural contract](protocol-v3.md); v0.2.10 adds checked room
+projection and semantic validation. Real runtime,
 server/browser adapters, and
 coordinated first-to-three activation follow [ADR 0015](../decisions/0015-match-series-and-staged-progression.md).
 

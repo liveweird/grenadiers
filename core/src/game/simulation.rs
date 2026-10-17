@@ -326,6 +326,9 @@ impl Actor {
 }
 
 #[cfg(test)]
+#[path = "bomb_order_acceptance_tests.rs"]
+mod bomb_order_acceptance_tests;
+#[cfg(test)]
 #[path = "simulation_constructor_tests.rs"]
 mod constructor_tests;
 #[cfg(test)]

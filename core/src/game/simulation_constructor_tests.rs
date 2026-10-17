@@ -47,6 +47,22 @@ fn actors(one: u32, two: u32) -> [ActorInit; 2] {
 }
 
 #[test]
+fn absolute_tick_constructor_keeps_round_update_clock_at_zero() {
+    let mut state = State::new_at_tick(
+        RulesConfig::classic_v1(),
+        open_world(),
+        actors(10, 20),
+        Tick(180),
+    )
+    .unwrap();
+
+    assert_eq!(state.tick(), Tick(180));
+    assert_eq!(state.running_updates(), 0);
+    assert_eq!(state.step(&[]).unwrap().tick, Tick(181));
+    assert_eq!(state.running_updates(), 1);
+}
+
+#[test]
 fn cloned_nonempty_world_accepts_known_owner_and_seeds_allocator_above_bombs() {
     let mut source = State::new(RulesConfig::classic_v1(), open_world(), actors(10, 20)).unwrap();
     add_test_bomb(&mut source, EntityId(90), CellId::new(8, 5), EntityId(10)).unwrap();

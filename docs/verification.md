@@ -1,5 +1,29 @@
 # Repository verification
 
+## M3 authoritative room loop — 2026-10-17
+
+The locked server gate passes **137 core tests, 67 server tests, and 2 doctests**. Rust
+coverage passes the unchanged 80% floor at **3,355/3,668 lines, 91.47%**. The E2E static
+gate passes five documented scenarios. Independent review reports no actionable findings.
+Review found and resolved missing 20 Hz Countdown views with a public-clock regression.
+
+Controlled-time/runtime tests cover the exact countdown boundary and zero-update first
+snapshot, canceled-attempt fencing/current-round Leave, identical encoded frames, movement
+expiry/ordering, bomb deduplication/coalescing, per-seat budgets, accepted-result finality,
+catch-up/overload, and terminal retention. Real native browser sockets complete a fixed-map
+round with movement, duplicate-action rejection, block destruction, elimination, actual events,
+identical public result, and frozen later world state. Long waiting expiry and terminal
+retirement remain controlled-time actor tests rather than multi-minute browser waits.
+
+A clean committed-tree build produces
+`sha256:3ba01e6038a03ca0abedc67efc229eb2677bbcd522dffcec398c96b879b09c0b`.
+Compose and ready local Kubernetes use this exact image. Separate health/readiness checks
+and all **five candidate browser scenarios** pass through both paths, including the complete
+native-socket round. Strict schemas pass with 3 valid resources; pinned socket-free Trivy
+reports zero HIGH/CRITICAL vulnerabilities. Temporary deployment/export/archive/forward/
+symlink resources are removed; the candidate image is retained. This evidence update changes
+documentation only.
+
 ## M3 network room admission — 2026-10-17
 
 The locked server gate passes **136 core tests, 51 server tests, and 2 doctests**. Rust

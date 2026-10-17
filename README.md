@@ -7,8 +7,9 @@ This is the **engineering scaffold and headless simulation**, not a playable gam
 It provides a React diagnostic shell, HTTP probes, a versioned WebSocket diagnostic exchange,
 and a deterministic Rust simulation with movement, bombs, flames, damage, one-round results,
 and explicit public snapshots/events, plus a headless two-seat room lifecycle.
-Anonymous sessions, gameplay authentication, and bounded two-seat networked rooms are available.
-Authoritative room gameplay, playable rendering, matchmaking, and stats remain unimplemented. The [game specification](docs/game/README.md)
+Anonymous sessions, gameplay authentication, bounded two-seat rooms, and authoritative
+fixed-map rounds are available through native sockets. Playable rendering, matchmaking,
+and stats remain unimplemented. The [game specification](docs/game/README.md)
 describes the classic reference and proposed rules. The
 [implementation and release plan](docs/game/implementation-plan.md) breaks delivery into
 verified foundation, playable duel, classic matches, and resilient playtest releases.

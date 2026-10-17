@@ -2,30 +2,30 @@ use std::{future::pending, sync::Arc, time::Duration};
 
 use axum::extract::ws::{Message, WebSocket};
 use grenadiers_core::protocol::{
-    Counter, ErrorCode, GameClientMessage, GameServerMessage, RoomId, parse_client_message,
+    Counter, ErrorCode, GameClientMessage, GameServerMessage, parse_client_message,
 };
 use tokio::time::{Instant, MissedTickBehavior, interval_at, sleep_until};
 
 use super::{
     limits::{InboundLimit, SessionDeadline, SessionDeadlines},
-    rooms::{Admission, BindingKey, GameRooms, RoomError, RoomNotice},
+    rooms::{Admission, BindingKey, GameRooms, RoomNotice},
     sessions::ConnectionId,
     socket::{close, command_sequence, fail_and_close, send_error, send_game, send_raw},
 };
 
 const PING_INTERVAL: Duration = Duration::from_secs(10);
 
-struct Membership {
-    admission: Admission,
-    binding: BindingKey,
+pub(super) struct Membership {
+    pub(super) admission: Admission,
+    pub(super) binding: BindingKey,
 }
 
-struct ConnectionState {
-    connection_id: ConnectionId,
-    generation: u64,
-    membership: Option<Membership>,
-    highwater: Option<Counter>,
-    deadlines: SessionDeadlines,
+pub(super) struct ConnectionState {
+    pub(super) connection_id: ConnectionId,
+    pub(super) generation: u64,
+    pub(super) membership: Option<Membership>,
+    pub(super) highwater: Option<Counter>,
+    pub(super) deadlines: SessionDeadlines,
 }
 
 pub(super) async fn authenticated_loop(
@@ -114,9 +114,21 @@ pub(super) async fn authenticated_loop(
                             return;
                         }
                     }
+                    RoomNotice::Snapshot(snapshot) => {
+                        if send_raw(socket, Message::Text(snapshot.to_string().into()))
+                            .await
+                            .is_err()
+                        {
+                            return;
+                        }
+                    }
                     RoomNotice::Expired => {
                         let _ = send_error(socket, ErrorCode::RoomNotFound, None).await;
                         close(socket, 1000, "Room expired").await;
+                        return;
+                    }
+                    RoomNotice::Retired => {
+                        close(socket, 1000, "Room retired").await;
                         return;
                     }
                 }
@@ -173,178 +185,9 @@ async fn handle_message(
                     .is_ok();
             }
             state.highwater = Some(sequence);
-            dispatch(socket, message, sequence, rooms, state).await
+            super::dispatcher::dispatch(socket, message, sequence, rooms, state).await
         }
     }
-}
-
-async fn dispatch(
-    socket: &mut WebSocket,
-    message: GameClientMessage,
-    sequence: Counter,
-    rooms: &Arc<GameRooms>,
-    state: &mut ConnectionState,
-) -> bool {
-    match message {
-        GameClientMessage::CreateRoom { .. } => {
-            if state.membership.is_some() {
-                return reply_error(socket, ErrorCode::AlreadyInRoom, sequence).await;
-            }
-            let Some(next_generation) = state.generation.checked_add(1) else {
-                return reply_error(socket, ErrorCode::CapacityReached, sequence).await;
-            };
-            let binding = BindingKey {
-                connection_id: state.connection_id,
-                generation: next_generation,
-            };
-            let result = rooms.create(binding, std::time::Instant::now()).await;
-            admit(socket, result, binding, state, sequence).await
-        }
-        GameClientMessage::JoinRoom { room_code, .. } => {
-            if state.membership.is_some() {
-                return reply_error(socket, ErrorCode::AlreadyInRoom, sequence).await;
-            }
-            let Some(next_generation) = state.generation.checked_add(1) else {
-                return reply_error(socket, ErrorCode::CapacityReached, sequence).await;
-            };
-            let binding = BindingKey {
-                connection_id: state.connection_id,
-                generation: next_generation,
-            };
-            let result = rooms
-                .join(&room_code, binding, std::time::Instant::now())
-                .await;
-            admit(socket, result, binding, state, sequence).await
-        }
-        GameClientMessage::LeaveRoom {
-            room_id, round_id, ..
-        } => {
-            leave(
-                socket,
-                rooms,
-                room_id,
-                u64::from(round_id.get()),
-                state,
-                sequence,
-            )
-            .await
-        }
-        GameClientMessage::Ready {
-            room_id, round_id, ..
-        }
-        | GameClientMessage::Movement {
-            room_id, round_id, ..
-        }
-        | GameClientMessage::PlaceBomb {
-            room_id, round_id, ..
-        } => {
-            placeholder(
-                socket,
-                rooms,
-                room_id,
-                u64::from(round_id.get()),
-                state,
-                sequence,
-            )
-            .await
-        }
-        GameClientMessage::Authenticate { .. } => unreachable!(),
-    }
-}
-
-async fn admit(
-    socket: &mut WebSocket,
-    result: Result<Admission, RoomError>,
-    binding: BindingKey,
-    state: &mut ConnectionState,
-    sequence: Counter,
-) -> bool {
-    match result {
-        Ok(admission) => {
-            let message = GameServerMessage::RoomState {
-                room: admission.view.clone(),
-                you_seat: admission.seat,
-            };
-            if send_game(socket, &message).await.is_err() {
-                return false;
-            }
-            state.generation = binding.generation;
-            state.membership = Some(Membership { admission, binding });
-            true
-        }
-        Err(error) => room_error(socket, error, sequence).await,
-    }
-}
-
-async fn leave(
-    socket: &mut WebSocket,
-    rooms: &GameRooms,
-    room_id: RoomId,
-    round_id: u64,
-    state: &mut ConnectionState,
-    sequence: Counter,
-) -> bool {
-    let Some(member) = state.membership.as_ref() else {
-        return reply_error(socket, ErrorCode::NotInRoom, sequence).await;
-    };
-    if member.admission.room_id != room_id || member.admission.round_id != round_id {
-        return reply_error(socket, ErrorCode::StaleRoom, sequence).await;
-    }
-    let Some(next_generation) = state.generation.checked_add(1) else {
-        return reply_error(socket, ErrorCode::CapacityReached, sequence).await;
-    };
-    match rooms.leave(&member.admission, member.binding).await {
-        Ok(()) => {
-            let mut member = state.membership.take().expect("membership exists");
-            member.admission.guard.disarm();
-            state.generation = next_generation;
-            state.deadlines.restart_unseated(Instant::now());
-            send_game(socket, &GameServerMessage::LeftRoom { room_id, sequence })
-                .await
-                .is_ok()
-        }
-        Err(error) => room_error(socket, error, sequence).await,
-    }
-}
-
-async fn placeholder(
-    socket: &mut WebSocket,
-    rooms: &GameRooms,
-    room_id: RoomId,
-    round_id: u64,
-    state: &ConnectionState,
-    sequence: Counter,
-) -> bool {
-    let Some(member) = state.membership.as_ref() else {
-        return reply_error(socket, ErrorCode::NotInRoom, sequence).await;
-    };
-    match rooms
-        .validate(&member.admission, member.binding, room_id, round_id)
-        .await
-    {
-        Ok(()) => reply_error(socket, ErrorCode::InvalidPhase, sequence).await,
-        Err(error) => room_error(socket, error, sequence).await,
-    }
-}
-
-async fn room_error(socket: &mut WebSocket, error: RoomError, sequence: Counter) -> bool {
-    let (code, close_after) = match error {
-        RoomError::RateLimited => (ErrorCode::RateLimited, true),
-        RoomError::CapacityReached => (ErrorCode::CapacityReached, false),
-        RoomError::RoomNotFound => (ErrorCode::RoomNotFound, false),
-        RoomError::RoomFull => (ErrorCode::RoomFull, false),
-        RoomError::StaleRoom => (ErrorCode::StaleRoom, false),
-    };
-    if close_after {
-        fail_and_close(socket, code, Some(sequence)).await;
-        false
-    } else {
-        reply_error(socket, code, sequence).await
-    }
-}
-
-async fn reply_error(socket: &mut WebSocket, code: ErrorCode, sequence: Counter) -> bool {
-    send_error(socket, code, Some(sequence)).await.is_ok()
 }
 
 async fn notice_changed(

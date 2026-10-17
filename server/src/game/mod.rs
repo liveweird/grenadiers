@@ -1,4 +1,5 @@
 mod connection;
+mod dispatcher;
 mod http;
 mod limits;
 mod rooms;

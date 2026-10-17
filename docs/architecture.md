@@ -1,9 +1,9 @@
 # Architecture
 
 The server provides HTTP liveness/readiness, diagnostic WebSockets, anonymous credentials,
-and authenticated two-seat Waiting rooms. The React shell currently exposes diagnostics.
+and authenticated authoritative two-seat rounds. The React shell currently exposes diagnostics.
 A separate deterministic simulation in `core::game` implements movement, owned bombs,
-flames, damage, and one-round outcomes. Room owners do not run that simulation yet.
+flames, damage, and one-round outcomes. Room owners now advance that simulation at a fixed server-controlled tick.
 
 ## Boundaries
 
@@ -19,10 +19,9 @@ readiness checks optional PostgreSQL only when configured.
 
 ## Match-state decision
 
-One in-process task owns each room; authoritative simulation scheduling is the next slice.
-For playable rounds it will advance a server-controlled fixed tick. Human and future bot adapters will submit the same commands
+One in-process task owns each room and advances a server-controlled fixed tick. Human and future bot adapters will submit the same commands
 through bounded queues; clients will not submit authoritative positions, damage, or outcomes.
-The bounded admission owner exists; gameplay command execution remains planned.
+The owner executes bounded logical intentions; public snapshots carry the accepted results.
 
 Start with two players per match. Transport sockets are not player seats; the diagnostic
 welcome's `maxPlayers: 2` describes the planned initial match capacity. Support for more
@@ -61,7 +60,7 @@ policy. A bounded room registry now routes code-based admission to one owner tas
 publication, and the asynchronous room owner stay outside that pure state machine. The server
 implements discovery, generation-bound membership, departure cleanup, and Waiting views.
 
-Map generation, lag compensation, authoritative room gameplay, and matchmaking
+Map generation, lag compensation, the playable browser interface, and matchmaking
 still need implementation at their planned milestones. Add focused ADRs before
 dependent work; preserve the specified lifecycle and gameplay rules.
 

@@ -1,6 +1,6 @@
 # Room lifecycle
 
-Status: public `core::room` lifecycle plus server-owned networked Waiting rooms. Anonymous
+Status: public `core::room` lifecycle plus server-owned networked two-player rounds. Anonymous
 HTTP credentials are separate from occupancy; a successful create/join binds a seat.
 
 ## Admission and readiness
@@ -33,10 +33,10 @@ seat to authenticated connection ownership; domain seat arguments are not client
 
 ## Integration boundary
 
-The future room owner must complete and record an accepted simulation update before handling
+The room owner completes and records an accepted simulation update before handling
 pending Running departures. Process admitted cancellation before the countdown boundary.
-Keep discovery, credentials, membership generations, input deduplication, bounded channels,
-60 Hz scheduling, and 20 Hz publication outside this pure state machine. See
+Discovery, credentials, membership generations, input deduplication, bounded channels,
+60 Hz scheduling, and 20 Hz publication remain outside this pure state machine. See
 [ADR 0009](../decisions/0009-room-lifecycle.md) and the [protocol](protocol.md).
 
 ## Network admission
@@ -47,7 +47,7 @@ Both sockets observe the same room view; only `youSeat` differs. Admission arriv
 subsequent membership updates. Codes are public discovery identifiers, not credentials.
 
 The process holds at most 32 rooms. Create/join share a burst of 32 operations refilling at
-eight per second. Each owner has an eight-command mailbox; slow sockets consume only the
+eight per second. Each owner has a 32-command mailbox; slow sockets consume only the
 latest watch update. OS randomness supplies codes and a process ID prefix, with bounded
 collision retries and checked serials. No room state is persisted or shared across replicas.
 
@@ -57,7 +57,40 @@ socket can create/join again. Transport loss has an independent departure channe
 command queue cannot strand a seat. Empty rooms release discovery immediately. Registry
 cleanup also runs when an owner task is canceled or panics.
 
-Waiting rooms expire 300 seconds after creation, independent of activity. Expiry sends an
+Waiting/Countdown rooms expire 300 seconds after creation, independent of activity; entering
+Running removes that creation deadline. Expiry sends an
 uncorrelated `roomNotFound` error and closes the socket; it never fabricates `leftRoom`.
-Bound readiness/movement/bomb commands currently return `invalidPhase`; authoritative
-countdown and simulation integration follow separately.
+Bound readiness controls Waiting/Countdown. Movement and bomb intents require Running;
+invalid phases return `invalidPhase`. Join only admits Waiting rooms.
+
+## Authoritative scheduling and input
+
+One owner task uses absolute rational 60 Hz deadlines. It drains bounded admitted work,
+completes at most four overdue updates before yielding, and never skips a simulation tick.
+More than 500 ms behind the next deadline interrupts a nonterminal round with
+`serverOverloaded`. Result finality survives lag. Waiting membership/readiness changes publish
+immediately; Countdown views and Running/Result snapshots publish every three ticks, with
+immediate phase transitions. A single prechecked encoded snapshot is shared by both seats.
+
+Both Ready starts 180 countdown ticks. At the exact boundary the owner constructs the fixed
+arena at the room's absolute tick with zero running updates; physics starts on the next tick.
+Canceling clears both flags and advances the attempt. Commands, including Leave, validate
+the current attempt rather than an admission-time copy. No input carries into another attempt.
+
+Each seat can admit eight movement/bomb commands per update. A ninth rate-limits the offender;
+the other seat keeps its own budget. Unchanged direction refreshes preserve fractional movement.
+Fresh directions press before releasing the previous direction. Held input lasts 15 updates
+without refresh; null clears it. Fresh monotonic bomb action IDs are consumed on admission,
+including coalesced or unsuccessful placements. At most one placement intent per seat/update
+runs after all movement/clear inputs, so a same-tick stop cannot cancel an accepted bomb.
+
+The owner commits a completed simulation result before handling departures that arrived during
+that accepted update. An already-observed departure may interrupt before accepting the next
+update. Result worlds freeze while their room clock advances; Interrupted freezes entirely.
+Terminal rooms retire after 30 seconds without activity extending retention. Empty rooms
+release immediately. Terminal retirement closes normally without inventing an expiry error.
+
+Publication validates the next revision, matching lifecycle/state tick and result, at most
+three consecutive reports/64 events, and the 64 KiB encoder limit before replacing the watch
+value. Failures preserve the last valid publication and retire the unavailable owner; events
+are never truncated to make a frame fit.

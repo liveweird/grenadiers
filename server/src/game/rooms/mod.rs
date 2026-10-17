@@ -10,9 +10,13 @@ use tokio::{
     time::Instant,
 };
 
+mod input;
 mod owner;
+mod publication;
+mod runtime;
 mod types;
 
+pub(crate) use input::RoomAction;
 use types::RoomIdentity;
 pub(crate) use types::{Admission, BindingKey, RoomError, RoomNotice};
 
@@ -125,32 +129,6 @@ impl GameRooms {
         &self,
         admission: &Admission,
         binding: BindingKey,
-    ) -> Result<(), RoomError> {
-        let handle = {
-            let registry = self.lock();
-            registry
-                .rooms
-                .get(&admission.room_id)
-                .cloned()
-                .ok_or(RoomError::RoomNotFound)?
-        };
-        let (reply, response) = oneshot::channel();
-        handle
-            .commands
-            .try_send(owner::RoomCommand::Leave {
-                binding,
-                room_id: admission.room_id.clone(),
-                round_id: admission.round_id,
-                reply,
-            })
-            .map_err(map_send_error)?;
-        response.await.unwrap_or(Err(RoomError::RoomNotFound))
-    }
-
-    pub(crate) async fn validate(
-        &self,
-        admission: &Admission,
-        binding: BindingKey,
         room_id: RoomId,
         round_id: u64,
     ) -> Result<(), RoomError> {
@@ -165,10 +143,40 @@ impl GameRooms {
         let (reply, response) = oneshot::channel();
         handle
             .commands
-            .try_send(owner::RoomCommand::Validate {
+            .try_send(owner::RoomCommand::Leave {
                 binding,
                 room_id,
                 round_id,
+                reply,
+            })
+            .map_err(map_send_error)?;
+        response.await.unwrap_or(Err(RoomError::RoomNotFound))
+    }
+
+    pub(crate) async fn action(
+        &self,
+        admission: &Admission,
+        binding: BindingKey,
+        room_id: RoomId,
+        round_id: u64,
+        action: RoomAction,
+    ) -> Result<(), RoomError> {
+        let handle = {
+            let registry = self.lock();
+            registry
+                .rooms
+                .get(&admission.room_id)
+                .cloned()
+                .ok_or(RoomError::RoomNotFound)?
+        };
+        let (reply, response) = oneshot::channel();
+        handle
+            .commands
+            .try_send(owner::RoomCommand::Action {
+                binding,
+                room_id,
+                round_id,
+                action,
                 reply,
             })
             .map_err(map_send_error)?;

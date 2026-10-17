@@ -1,6 +1,6 @@
 use grenadiers_core::{
     game::{RoundAssignment, SeatId},
-    protocol::v5::RoomPhase,
+    protocol::v6::RoomPhase,
     room::{InterruptReason, MatchLifecycle, MatchPhase},
 };
 
@@ -105,8 +105,8 @@ fn entropy_failure_interrupts_with_view_only_and_no_simulation_record() {
     assert!(matches!(
         terminal.room.phase,
         RoomPhase::MatchResult {
-            result: grenadiers_core::protocol::v5::MatchResult::Interrupted {
-                reason: grenadiers_core::protocol::v5::MatchInterruptReason::InternalError
+            result: grenadiers_core::protocol::v6::MatchResult::Interrupted {
+                reason: grenadiers_core::protocol::v6::MatchInterruptReason::InternalError
             },
             ..
         }
@@ -123,6 +123,8 @@ fn publication_rejects_profile_rule_mismatch_and_oversized_report_window() {
             &generated_identity,
             runtime.lifecycle(),
             99,
+            1,
+            None,
             runtime.sim().unwrap(),
             &[],
         ),
@@ -158,7 +160,7 @@ fn publication_rejects_profile_rule_mismatch_and_oversized_report_window() {
         generation_record: None,
     };
     assert_eq!(
-        publication::snapshot(&identity, &lifecycle, 100, &sim, &reports),
+        publication::snapshot(&identity, &lifecycle, 100, 1, None, &sim, &reports),
         Err(MatchRuntimeError::Publication)
     );
 }

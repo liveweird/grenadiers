@@ -6,7 +6,7 @@ mod scalars;
 mod server;
 mod snapshot;
 pub mod v3;
-pub mod v5;
+pub mod v6;
 
 use std::fmt;
 
@@ -73,7 +73,7 @@ pub fn encode_server_message(
 ) -> Result<String, EncodeServerMessageError> {
     match message {
         GameServerMessage::RoomState { room, .. } | GameServerMessage::Snapshot { room, .. }
-            if room.rules_version == RulesVersion::ClassicV3 =>
+            if room.rules_version.get() > 2 =>
         {
             return Err(EncodeServerMessageError::EncodingFailed);
         }

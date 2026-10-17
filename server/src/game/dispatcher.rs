@@ -1,8 +1,8 @@
 use std::sync::Arc;
 
 use axum::extract::ws::WebSocket;
-use grenadiers_core::protocol::v5::{
-    GameClientMessage, GameServerMessage, V5ErrorCode as ErrorCode,
+use grenadiers_core::protocol::v6::{
+    GameClientMessage, GameServerMessage, V6ErrorCode as ErrorCode,
 };
 use grenadiers_core::protocol::{Counter, Direction as WireDirection, RoomId};
 use tokio::time::Instant;
@@ -96,6 +96,7 @@ pub(super) async fn dispatch(
             room_id,
             round_id,
             ready,
+            settings_revision,
             ..
         } => {
             action(
@@ -103,7 +104,31 @@ pub(super) async fn dispatch(
                 rooms,
                 room_id,
                 u64::from(round_id.get()),
-                RoomAction::Ready(ready),
+                RoomAction::ReadyChecked {
+                    ready,
+                    settings_revision: settings_revision.get(),
+                },
+                state,
+                sequence,
+            )
+            .await
+        }
+        GameClientMessage::UpdateSettings {
+            room_id,
+            round_id,
+            settings_revision,
+            settings,
+            ..
+        } => {
+            action(
+                socket,
+                rooms,
+                room_id,
+                u64::from(round_id.get()),
+                RoomAction::UpdateSettings {
+                    settings_revision: settings_revision.get(),
+                    settings: settings.domain(),
+                },
                 state,
                 sequence,
             )
@@ -259,6 +284,8 @@ async fn room_error(socket: &mut WebSocket, error: RoomError, sequence: Counter)
         RoomError::RoomNotFound => (ErrorCode::RoomNotFound, false),
         RoomError::RoomFull => (ErrorCode::RoomFull, false),
         RoomError::StaleRoom => (ErrorCode::StaleRoom, false),
+        RoomError::StaleSettings => (ErrorCode::StaleSettings, false),
+        RoomError::SettingsLocked => (ErrorCode::SettingsLocked, false),
         RoomError::InvalidPhase => (ErrorCode::InvalidPhase, false),
         RoomError::DuplicateAction => (ErrorCode::DuplicateAction, false),
         RoomError::ResumeRejected => (ErrorCode::ResumeRejected, false),

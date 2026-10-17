@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use grenadiers_core::{
     game::SeatId,
-    protocol::v5::{GameServerMessage, RoomView, encode_server_message, validate_admission},
+    protocol::v6::{GameServerMessage, RoomView, encode_server_message, validate_admission},
     protocol::{Counter, GameState, project_state},
     room::{MatchLifecycle, reconnect::ReservationState},
 };
@@ -70,7 +70,18 @@ impl MatchRuntime {
         kind: AdmissionKind,
     ) -> Result<PreparedRuntimeAdmission, MatchRuntimeError> {
         let revision = self.next_revision()?;
-        let room = publication::room_view(&self.identity, &lifecycle, revision)?;
+        let room = publication::room_view(
+            &self.identity,
+            &lifecycle,
+            revision,
+            self.settings_revision,
+            self.settings_editor,
+        )?;
+        if self.sim.as_ref().is_some_and(|sim| {
+            sim.state.rules() != &self.identity.profile.rules_config(lifecycle.settings())
+        }) {
+            return Err(MatchRuntimeError::Publication);
+        }
         let projected = self
             .sim
             .as_ref()

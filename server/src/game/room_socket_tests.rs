@@ -49,7 +49,7 @@ async fn connect(url: &str, token: &str) -> ClientSocket {
     send(
         &mut socket,
         json!({
-            "type":"authenticate", "protocolVersion":5, "token":token
+            "type":"authenticate", "protocolVersion":6, "token":token
         }),
     )
     .await;
@@ -96,6 +96,16 @@ async fn two_members_receive_personalized_admission_and_live_waiting_updates() {
     assert!(created["room"]["lastRound"].is_null());
     assert_eq!(created["room"]["phase"]["type"], "waiting");
     assert_eq!(created["room"]["seats"][0]["occupied"], true);
+    assert_eq!(created["room"]["rulesVersion"], 4);
+    assert_eq!(created["room"]["settingsRevision"], 1);
+    assert_eq!(created["room"]["settingsEditor"], "one");
+    assert_eq!(
+        created["room"]["settings"],
+        json!({
+            "startingSpeedLevel":0, "turnAssistUnits":256,
+            "winsToFinish":3, "bombFuseTicks":180
+        })
+    );
     let code = created["room"]["roomCode"].clone();
     let room_id = created["room"]["roomId"].clone();
 
@@ -113,6 +123,42 @@ async fn two_members_receive_personalized_admission_and_live_waiting_updates() {
     assert!(update.get("youSeat").is_none());
     assert_eq!(update["room"], joined["room"]);
 
+    let settings = json!({
+        "startingSpeedLevel":2, "turnAssistUnits":64,
+        "winsToFinish":2, "bombFuseTicks":90
+    });
+    send(
+        &mut two,
+        json!({
+            "type":"updateSettings", "sequence":2, "roomId":room_id.clone(),
+            "roundId":1, "settingsRevision":1, "settings":settings.clone()
+        }),
+    )
+    .await;
+    assert_eq!(next(&mut two).await["code"], "settingsLocked");
+    send(
+        &mut two,
+        json!({
+            "type":"ready", "sequence":3, "roomId":room_id.clone(),
+            "roundId":1, "ready":true, "settingsRevision":1
+        }),
+    )
+    .await;
+    assert_eq!(next(&mut two).await["type"], "roomState");
+    next(&mut one).await;
+    send(
+        &mut one,
+        json!({
+            "type":"updateSettings", "sequence":2, "roomId":room_id.clone(),
+            "roundId":1, "settingsRevision":1, "settings":settings
+        }),
+    )
+    .await;
+    let configured = next(&mut one).await;
+    assert_eq!(configured["room"]["settingsRevision"], 2);
+    assert_eq!(configured["room"]["seats"][1]["ready"], false);
+    assert_eq!(next(&mut two).await["room"], configured["room"]);
+
     send(
         &mut third,
         json!({"type":"joinRoom", "sequence":1, "roomCode":code}),
@@ -123,8 +169,8 @@ async fn two_members_receive_personalized_admission_and_live_waiting_updates() {
     send(
         &mut one,
         json!({
-            "type":"ready", "sequence":2, "roomId":room_id.clone(),
-            "roundId":1, "ready":true
+            "type":"ready", "sequence":3, "roomId":room_id.clone(),
+            "roundId":1, "ready":true, "settingsRevision":2
         }),
     )
     .await;
@@ -133,7 +179,7 @@ async fn two_members_receive_personalized_admission_and_live_waiting_updates() {
     send(
         &mut one,
         json!({
-            "type":"movement", "sequence":3, "roomId":room_id.clone(),
+            "type":"movement", "sequence":4, "roomId":room_id.clone(),
             "roundId":1, "direction":null
         }),
     )
@@ -142,7 +188,7 @@ async fn two_members_receive_personalized_admission_and_live_waiting_updates() {
     send(
         &mut one,
         json!({
-            "type":"placeBomb", "sequence":4, "roomId":room_id,
+            "type":"placeBomb", "sequence":5, "roomId":room_id,
             "roundId":1, "actionId":1
         }),
     )
@@ -151,7 +197,7 @@ async fn two_members_receive_personalized_admission_and_live_waiting_updates() {
     send(
         &mut one,
         json!({
-            "type":"rematch", "sequence":5, "roomId":room_id,
+            "type":"rematch", "sequence":6, "roomId":room_id,
             "roundId":1, "ready":true
         }),
     )
@@ -176,7 +222,7 @@ async fn binding_checks_precede_placeholder_phase_and_leave_allows_rejoin() {
         &mut unbound,
         json!({
             "type":"ready", "sequence":1, "roomId":room_id,
-            "roundId":1, "ready":true
+            "roundId":1, "ready":true, "settingsRevision":1
         }),
     )
     .await;

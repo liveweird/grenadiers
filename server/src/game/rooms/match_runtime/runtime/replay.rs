@@ -1,6 +1,6 @@
 use grenadiers_core::{
     game::{GenerationRecord, State, StepReport},
-    room::{DepartureReason, MatchChange, MatchLifecycle, MatchPhase},
+    room::{DepartureReason, MatchLifecycle, MatchPhase, RoomSettings},
 };
 
 use super::{MatchRuntime, MatchRuntimeError, map_lifecycle_error};
@@ -11,6 +11,9 @@ pub(in crate::game::rooms) struct RuntimeInspection {
     pub(in crate::game::rooms) simulation: Option<SimulationInspection>,
     pub(in crate::game::rooms) inputs: String,
     pub(in crate::game::rooms) reports: Vec<StepReport>,
+    pub(in crate::game::rooms) settings: RoomSettings,
+    pub(in crate::game::rooms) settings_revision: u32,
+    pub(in crate::game::rooms) settings_editor: Option<grenadiers_core::game::SeatId>,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -29,6 +32,10 @@ impl MatchRuntime {
         self.revision = revision;
     }
 
+    pub(in crate::game::rooms) fn set_settings_revision(&mut self, revision: u32) {
+        self.settings_revision = revision;
+    }
+
     pub(in crate::game::rooms) fn replay_inspection(&self) -> RuntimeInspection {
         RuntimeInspection {
             lifecycle: self.lifecycle.clone(),
@@ -39,6 +46,9 @@ impl MatchRuntime {
             }),
             inputs: format!("{:?}", self.inputs),
             reports: self.reports.clone(),
+            settings: self.lifecycle.settings(),
+            settings_revision: self.settings_revision,
+            settings_editor: self.settings_editor,
         }
     }
 
@@ -75,8 +85,9 @@ impl MatchRuntime {
     pub(in crate::game::rooms) fn replay_expiry(&mut self) -> Result<(), MatchRuntimeError> {
         self.lifecycle
             .expire_reconnect_grace()
-            .map_err(map_lifecycle_error)
-            .map(|_: MatchChange| ())
+            .map_err(map_lifecycle_error)?;
+        self.release_expired_editor();
+        Ok(())
     }
 
     pub(in crate::game::rooms) fn replay_report_flush(&mut self) -> Result<(), MatchRuntimeError> {

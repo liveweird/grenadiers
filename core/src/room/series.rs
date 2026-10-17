@@ -3,6 +3,7 @@
 use crate::game::{RoundAssignment, RoundResult, SeatId, Tick};
 
 use super::{DepartureReason, InterruptReason};
+use crate::room::RoomSettings;
 
 pub const RESULT_HOLD_TICKS: u64 = 180;
 pub const WINS_TO_FINISH: u8 = 3;
@@ -88,6 +89,7 @@ pub enum SeriesError {
     TickOverflow,
     RoundNumberOverflow,
     RematchUnavailable,
+    SettingsUnavailable,
 }
 
 impl std::fmt::Display for SeriesError {
@@ -107,6 +109,7 @@ struct ActiveRound {
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct MatchSeries {
+    wins_to_finish: u8,
     scores: [u8; 2],
     actual_round_number: u32,
     last_command_epoch: u64,
@@ -127,7 +130,13 @@ impl Default for MatchSeries {
 impl MatchSeries {
     #[must_use]
     pub const fn new() -> Self {
+        Self::with_settings(RoomSettings::DEFAULT)
+    }
+
+    #[must_use]
+    pub const fn with_settings(settings: RoomSettings) -> Self {
         Self {
+            wins_to_finish: settings.wins_to_finish(),
             scores: [0, 0],
             actual_round_number: 0,
             last_command_epoch: 0,
@@ -138,6 +147,11 @@ impl MatchSeries {
             outcome: None,
             rematch_votes: [false; 2],
         }
+    }
+
+    #[must_use]
+    pub const fn wins_to_finish(&self) -> u8 {
+        self.wins_to_finish
     }
 
     #[must_use]
@@ -253,7 +267,7 @@ impl MatchSeries {
             *score = score
                 .checked_add(1)
                 .ok_or(SeriesError::RoundNumberOverflow)?;
-            (*score == WINS_TO_FINISH).then_some(MatchOutcome {
+            (*score == self.wins_to_finish).then_some(MatchOutcome {
                 ended_at,
                 result: MatchResult::ScoreWinner(seat),
             })
@@ -310,6 +324,21 @@ impl MatchSeries {
         self.rematch_votes = [false; 2];
     }
 
+    pub(in crate::room) fn configure_unstarted(
+        &mut self,
+        settings: RoomSettings,
+    ) -> Result<(), SeriesError> {
+        if self.actual_round_number != 0
+            || self.active.is_some()
+            || self.latest_completed.is_some()
+            || self.outcome.is_some()
+        {
+            return Err(SeriesError::SettingsUnavailable);
+        }
+        self.wins_to_finish = settings.wins_to_finish();
+        Ok(())
+    }
+
     fn check_new_epoch(&self, received: u64) -> Result<(), SeriesError> {
         if received == 0 {
             return Err(SeriesError::ZeroCommandEpoch);
@@ -344,3 +373,7 @@ mod tests;
 #[cfg(test)]
 #[path = "series_terminal_tests.rs"]
 mod terminal_tests;
+
+#[cfg(test)]
+#[path = "series_settings_tests.rs"]
+mod settings_tests;

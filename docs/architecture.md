@@ -95,12 +95,12 @@ V4 checked room projection derives facts directly from `MatchLifecycle`; its pub
 rejects semantically impossible bounded DTOs before server adapters publish them.
 
 The active `match_runtime` server adapter owns real per-round physics, assignment-aware
-generation, epoch-fenced input, settled reconnect grace, and checked v5 publication. Result
+generation, epoch-fenced input, settled reconnect grace, and checked v6 publication. Result
 physics freezes while the global lifecycle clock and reservation deadlines advance.
 
-The active v5 client/panel shares the Pixi presentation boundary, validates v5 messages, keeps
+The active v6 client/panel shares the Pixi presentation boundary, validates v6 messages, keeps
 the resume capability only in tab memory, and renders scores, recovery, grace, and rematch from
-authoritative facts. Production routing uses v5 on the existing endpoint. See
+authoritative facts. Production routing uses v6 on the existing endpoint. See
 [reconnect browser](game/reconnect-browser.md).
 
 The active [bounded match owner](game/match-owner.md) adds generation-fenced admission,

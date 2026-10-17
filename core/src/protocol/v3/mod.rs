@@ -42,7 +42,7 @@ pub fn encode_server_message(
 ) -> Result<String, super::EncodeServerMessageError> {
     match message {
         GameServerMessage::RoomState { room, .. } | GameServerMessage::Snapshot { room, .. }
-            if room.rules_version == super::RulesVersion::ClassicV3 =>
+            if room.rules_version.get() > 2 =>
         {
             return Err(super::EncodeServerMessageError::EncodingFailed);
         }

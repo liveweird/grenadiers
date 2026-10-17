@@ -5,7 +5,7 @@ use super::{
 };
 
 pub fn validate_room_view(room: &RoomView) -> Result<(), RoomProjectionError> {
-    if room.rules_version == super::super::RulesVersion::ClassicV3 {
+    if room.rules_version.get() > 2 {
         return Err(RoomProjectionError::UnsupportedRulesVersion);
     }
     if room.round_id.get() < room.round_number.get() {

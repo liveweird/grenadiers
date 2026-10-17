@@ -1,6 +1,6 @@
 import AxeBuilder from '@axe-core/playwright'
 import { expect, test, type Page } from '@playwright/test'
-import type { RoomView } from '../../web/src/game/v5/schema'
+import type { RoomView } from '../../web/src/game/v6/schema'
 import { expectPaintedCanvas, latestSnapshot, observeGame, type ObservedGame } from '../tests/support/duel'
 import { moveTo } from '../tests/support/movement'
 
@@ -21,7 +21,7 @@ async function running(games: ObservedGame[], roundNumber: number) {
   }).toBe(roundNumber)))
   for (const game of games) {
     const frame = latestSnapshot(game)!
-    expect(frame.room).toMatchObject({ rulesVersion: 3, mapId: 'generated_v1' })
+    expect(frame.room).toMatchObject({ rulesVersion: 4, mapId: 'generated_v1' })
     expect(frame.state.bombs).toEqual([])
     expect(frame.state.flames).toEqual([])
     expect(frame.state.pickups).toEqual([])
@@ -107,7 +107,7 @@ test('two browsers finish a drawn round, first-to-three match, and consensual re
     expect(final.phase).toMatchObject({ type: 'matchResult', result: { type: 'winner', seat: 'two', reason: 'roundWins' } })
     await expect(one.getByRole('button', { name: 'Play again', exact: true })).not.toBeVisible()
     await Promise.all(pages.map((page) =>
-      expect(page.getByRole('status')).toHaveText('Player two wins the match with three round wins.'),
+      expect(page.getByRole('status')).toHaveText('Player two wins the match with 3 round wins.'),
     ))
     await Promise.all(pages.map((page) => expect(page.getByRole('button', { name: 'Play again', exact: true })).toBeVisible()))
     for (const page of pages) {
@@ -120,7 +120,7 @@ test('two browsers finish a drawn round, first-to-three match, and consensual re
     ))
 
     await two.getByText('Polski', { exact: true }).click()
-    await expect(two.getByRole('status')).toHaveText('Gracz drugi wygrywa mecz trzema rundami.')
+    await expect(two.getByRole('status')).toHaveText('Gracz drugi wygrywa mecz (wygrane rundy: 3).')
     await expect(two.getByLabel('Wygrane rundy: Gracz drugi')).toContainText('3')
     expect(await two.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false)
     expect((await new AxeBuilder({ page: two }).analyze()).violations).toEqual([])

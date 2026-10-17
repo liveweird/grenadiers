@@ -1,6 +1,6 @@
 use grenadiers_core::{
     game::SeatId,
-    protocol::{Counter, GameState, RoomId, Seat, v5::ResumeToken},
+    protocol::{Counter, GameState, RoomId, Seat, v6::ResumeToken},
     room::DepartureReason,
 };
 use tokio::{
@@ -43,7 +43,7 @@ pub(crate) struct MatchAdmission {
     pub(crate) round_id: u64,
     pub(crate) seat: Seat,
     pub(crate) sequence: Counter,
-    pub(crate) room: grenadiers_core::protocol::v5::RoomView,
+    pub(crate) room: grenadiers_core::protocol::v6::RoomView,
     pub(crate) resume_token: ResumeToken,
     pub(crate) last_bomb_action_id: Option<Counter>,
     pub(crate) state: Option<GameState>,
@@ -204,6 +204,8 @@ pub(super) fn map_runtime_error(error: MatchRuntimeError) -> RoomError {
             RoomError::CapacityReached
         }
         MatchRuntimeError::StaleEpoch | MatchRuntimeError::VacantSeat => RoomError::StaleRoom,
+        MatchRuntimeError::StaleSettings => RoomError::StaleSettings,
+        MatchRuntimeError::SettingsLocked => RoomError::SettingsLocked,
         MatchRuntimeError::InvalidPhase | MatchRuntimeError::InvalidInterrupt => {
             RoomError::InvalidPhase
         }

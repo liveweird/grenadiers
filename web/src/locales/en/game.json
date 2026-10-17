@@ -9,7 +9,7 @@
   "scoreLabel": "Round wins for {{player}}",
   "lobby": {
     "title": "Meet in the courtyard",
-    "explanation": "Create a room and share its invitation, or enter the code from your friend. Win three rounds to take the match.",
+    "explanation": "Create a room and share its invitation, or enter the code from your friend. Set the rules together before the match.",
     "create": "Create room",
     "or": "or",
     "code": "Room code",
@@ -59,10 +59,12 @@
     "timeout": "Draw: time ran out."
   },
   "matchResult": {
-    "roundWins": "{{player}} wins the match with three round wins.",
+    "roundWins": "{{player}} wins the match.",
     "forfeit": "{{player}} wins the match by forfeit.",
     "abandoned": "The match ended after both players left.",
-    "interrupted": "The match could not continue: {{reason}}"
+    "interrupted": "The match could not continue: {{reason}}",
+    "roundWinsConfigured": "{{player}} wins the match with {{wins}} round wins.",
+    "roundWinConfigured": "{{player}} wins the match with one round win."
   },
   "interruption": {
     "connectionLost": "a player lost their connection",
@@ -75,6 +77,25 @@
     "withdraw": "Withdraw rematch vote",
     "locked": "Rematch opens after the result hold.",
     "needsPlayers": "Both players must be present for a rematch."
+  },
+  "settings": {
+    "title": "Match rules",
+    "explanation": "These rules apply to both players and every round in this match.",
+    "speed": "Starting speed",
+    "turnAssist": "Turning tolerance",
+    "wins": "Round wins needed",
+    "fuse": "Bomb fuse",
+    "cellsPerSecond": "cells/s",
+    "tile": "tile",
+    "seconds": "seconds",
+    "speedCap": "Speed pickups add one level at a time, up to 5 cells/s.",
+    "unapplied": "Apply these changes before readying up.",
+    "restore": "Restore match defaults",
+    "apply": "Apply rules",
+    "editor": "{{player}} can edit while unready.",
+    "noEditor": "No player",
+    "lockedReady": "Become not ready to edit the rules.",
+    "lockedMatch": "Rules are locked after the match starts."
   },
   "connection": {
     "disconnected": "Choose how to enter a room.",
@@ -158,6 +179,8 @@
     "rateLimited": "Commands arrived too quickly.",
     "capacityReached": "The server has no room for another match.",
     "resumeRejected": "This reserved seat is no longer available.",
+    "staleSettings": "The match rules changed. Review the latest values and try again.",
+    "settingsLocked": "Only the current rules editor can change settings before the match.",
     "seatReplaced": "This seat was resumed in another tab."
   }
 }

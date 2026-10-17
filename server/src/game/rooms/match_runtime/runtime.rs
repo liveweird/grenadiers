@@ -2,8 +2,10 @@ use std::sync::Arc;
 
 use grenadiers_core::{
     game::{Direction, GenerationRecord, SeatId, State, StepReport, Tick},
-    protocol::v5::RoomView,
-    room::{DepartureReason, InterruptReason, MatchChange, MatchLifecycle, MatchPhase},
+    protocol::v6::RoomView,
+    room::{
+        DepartureReason, InterruptReason, MatchChange, MatchLifecycle, MatchPhase, RoomSettings,
+    },
 };
 
 use super::super::{input::InputMailbox, types::RoomIdentity};
@@ -17,12 +19,22 @@ mod maintenance;
 mod owner_helpers;
 #[cfg(test)]
 pub(super) mod replay;
+mod settings;
 
 const REPORTS_PER_SNAPSHOT: usize = 3;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) enum MatchAction {
+    #[cfg_attr(not(test), allow(dead_code))]
     Ready(bool),
+    ReadyChecked {
+        ready: bool,
+        settings_revision: u32,
+    },
+    UpdateSettings {
+        settings_revision: u32,
+        settings: RoomSettings,
+    },
     Movement(Option<Direction>),
     Bomb(u32),
     Rematch(bool),
@@ -38,6 +50,8 @@ pub(in crate::game::rooms) struct MatchRuntime {
     identity: RoomIdentity,
     lifecycle: MatchLifecycle,
     revision: u32,
+    settings_revision: u32,
+    settings_editor: Option<SeatId>,
     round_seed_source: RoundSeedSource,
     inputs: InputMailbox,
     sim: Option<SimRound>,
@@ -87,6 +101,14 @@ impl MatchRuntime {
         let tick = self.lifecycle.tick();
         let result = match action {
             MatchAction::Ready(ready) => self.ready(seat, ready),
+            MatchAction::ReadyChecked {
+                ready,
+                settings_revision,
+            } => self.ready_checked(seat, ready, settings_revision),
+            MatchAction::UpdateSettings {
+                settings_revision,
+                settings,
+            } => self.update_settings(seat, settings_revision, settings),
             MatchAction::Movement(direction) => {
                 self.require_running()?;
                 self.inputs
@@ -105,53 +127,6 @@ impl MatchRuntime {
             self.capture_action(tick, seat, expected_epoch, action);
         }
         result
-    }
-
-    fn ready(
-        &mut self,
-        seat: SeatId,
-        ready: bool,
-    ) -> Result<Option<MatchNotice>, MatchRuntimeError> {
-        if !matches!(
-            self.lifecycle.phase(),
-            MatchPhase::Waiting
-                | MatchPhase::Countdown {
-                    kind: grenadiers_core::room::CountdownKind::Initial,
-                    ..
-                }
-        ) {
-            return Err(MatchRuntimeError::InvalidPhase);
-        }
-        self.ensure_revision()?;
-        let previous_epoch = self.lifecycle.round_attempt();
-        let change = self
-            .lifecycle
-            .set_ready(seat, ready)
-            .map_err(map_lifecycle_error)?;
-        if previous_epoch != self.lifecycle.round_attempt() {
-            self.inputs.reset_round();
-        }
-        self.notice_for_change(change, false)
-    }
-
-    fn rematch(
-        &mut self,
-        seat: SeatId,
-        ready: bool,
-    ) -> Result<Option<MatchNotice>, MatchRuntimeError> {
-        if !matches!(self.lifecycle.phase(), MatchPhase::MatchResult { .. }) {
-            return Err(MatchRuntimeError::InvalidPhase);
-        }
-        self.ensure_revision()?;
-        let change = self
-            .lifecycle
-            .set_rematch_vote(seat, ready)
-            .map_err(map_lifecycle_error)?;
-        if change == MatchChange::RematchStarted {
-            self.clear_round();
-            return self.publish_view().map(Some);
-        }
-        self.notice_for_change(change, true)
     }
 
     #[cfg(test)]
@@ -185,6 +160,7 @@ impl MatchRuntime {
             .lifecycle
             .expire_reconnect_grace()
             .map_err(map_lifecycle_error)?;
+        self.release_expired_editor();
         self.capture(
             self.lifecycle.tick(),
             super::super::replay::Operation::Expiry,
@@ -270,7 +246,8 @@ impl MatchRuntime {
         if !self.reports.is_empty() {
             return self.fail_round_construction();
         }
-        let Some(initial) = self.identity.profile.initial_round(
+        let Some(initial) = self.identity.profile.initial_round_with_settings(
+            self.lifecycle.settings(),
             self.lifecycle.tick(),
             assignment,
             &self.round_seed_source,
@@ -313,6 +290,7 @@ impl MatchRuntime {
             .lifecycle
             .depart_with_grace(departures)
             .map_err(map_lifecycle_error)?;
+        self.release_departed_editor(departures);
         for (seat, departure) in SeatId::ALL.into_iter().zip(departures) {
             if departure.is_some() {
                 self.inputs.stop(seat);
@@ -370,7 +348,13 @@ impl MatchRuntime {
 
     fn publish_view(&mut self) -> Result<MatchNotice, MatchRuntimeError> {
         let next = self.next_revision()?;
-        let room = publication::room_view(&self.identity, &self.lifecycle, next)?;
+        let room = publication::room_view(
+            &self.identity,
+            &self.lifecycle,
+            next,
+            self.settings_revision,
+            self.settings_editor,
+        )?;
         self.revision = next;
         Ok(MatchNotice {
             room,
@@ -381,8 +365,15 @@ impl MatchRuntime {
     fn publish_snapshot(&mut self) -> Result<MatchNotice, MatchRuntimeError> {
         let next = self.next_revision()?;
         let sim = self.sim.as_ref().ok_or(MatchRuntimeError::Publication)?;
-        let notice =
-            publication::snapshot(&self.identity, &self.lifecycle, next, sim, &self.reports)?;
+        let notice = publication::snapshot(
+            &self.identity,
+            &self.lifecycle,
+            next,
+            self.settings_revision,
+            self.settings_editor,
+            sim,
+            &self.reports,
+        )?;
         self.revision = next;
         if !self.reports.is_empty() {
             self.capture(

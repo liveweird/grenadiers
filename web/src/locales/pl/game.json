@@ -9,7 +9,7 @@
   "scoreLabel": "Wygrane rundy: {{player}}",
   "lobby": {
     "title": "Spotkajcie się na dziedzińcu",
-    "explanation": "Utwórz pokój i udostępnij zaproszenie albo wpisz kod otrzymany od znajomego. Wygraj trzy rundy, aby zwyciężyć w meczu.",
+    "explanation": "Utwórz pokój i udostępnij zaproszenie albo wpisz kod otrzymany od znajomego. Ustalcie zasady przed meczem.",
     "create": "Utwórz pokój",
     "or": "lub",
     "code": "Kod pokoju",
@@ -59,7 +59,7 @@
     "timeout": "Remis: upłynął czas."
   },
   "matchResult": {
-    "roundWins": "{{player}} wygrywa mecz trzema rundami.",
+    "roundWins": "{{player}} wygrywa mecz.",
     "forfeit": "{{player}} wygrywa mecz walkowerem.",
     "abandoned": "Mecz zakończył się po odejściu obu graczy.",
     "interrupted": "Mecz nie może być kontynuowany: {{reason}}"
@@ -75,6 +75,25 @@
     "withdraw": "Wycofaj głos za rewanż",
     "locked": "Rewanż będzie dostępny po prezentacji wyniku.",
     "needsPlayers": "Do rewanżu potrzebni są obaj gracze."
+  },
+  "settings": {
+    "title": "Zasady meczu",
+    "explanation": "Te zasady obowiązują obu graczy we wszystkich rundach meczu.",
+    "speed": "Prędkość początkowa",
+    "turnAssist": "Tolerancja skrętu",
+    "wins": "Wygrane rundy do zwycięstwa",
+    "fuse": "Zapalnik bomby",
+    "cellsPerSecond": "pola/s",
+    "tile": "pola",
+    "seconds": "sekundy",
+    "speedCap": "Premie prędkości dodają po jednym poziomie, maksymalnie do 5 pól/s.",
+    "unapplied": "Zastosuj te zmiany przed zgłoszeniem gotowości.",
+    "restore": "Przywróć domyślne zasady",
+    "apply": "Zastosuj zasady",
+    "editor": "{{player}} może edytować przed zgłoszeniem gotowości.",
+    "noEditor": "Brak gracza",
+    "lockedReady": "Wycofaj gotowość, aby edytować zasady.",
+    "lockedMatch": "Po rozpoczęciu meczu zasady są zablokowane."
   },
   "connection": {
     "disconnected": "Wybierz sposób wejścia do pokoju.",
@@ -158,6 +177,8 @@
     "rateLimited": "Polecenia przychodzą zbyt szybko.",
     "capacityReached": "Brak miejsca na kolejny mecz.",
     "resumeRejected": "Zarezerwowane miejsce nie jest już dostępne.",
+    "staleSettings": "Zasady meczu uległy zmianie. Sprawdź nowe wartości i spróbuj ponownie.",
+    "settingsLocked": "Tylko bieżący edytor może zmieniać zasady przed meczem.",
     "seatReplaced": "To miejsce wznowiono w innej karcie."
   }
 }

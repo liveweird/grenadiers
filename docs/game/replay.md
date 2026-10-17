@@ -5,7 +5,7 @@ journal. The test-only replay runner drives the real MatchRuntime, InputMailbox,
 profile, and entropy seam; it does not run a second simulator. Replay inspection remains
 test-only. No endpoint, public export, or persistent journal is available.
 
-A versioned header identifies format 1, lifecycle profile 2, classic-v3 physics (classic-v2 for archived journals), generator-v1,
+A versioned header identifies format 1, lifecycle profile 2, configurable-v4 physics (classic-v2/v3 for archived journals), generator-v1,
 initial occupied seats, and initial absolute tick zero. Operations record the
 authoritative tick and increasing order within that tick: occupation, accepted readiness/
 movement/bomb/rematch, immediate input fencing, tick advancement, committed departure batches,
@@ -51,3 +51,8 @@ interrupted tick; replay refuses completeness instead of inventing a seed or wor
 unit fixtures are explicitly unsupported. Journal overhead plus actual allocated record
 capacity measures 3,840,056 bytes on the verification target. Owner destruction frees it;
 32 bounded rooms retain below 128 MiB of journal storage. No restart recovery is promised.
+
+Configurable journals also retain initial settings, settings revision and editor identity. Accepted
+revision-fenced readiness/settings actions and permanent authority release replay deterministically.
+Legacy journals reject v6-only actions; configurable journals reject legacy unfenced readiness.
+Snapshot publication and personal admission bind the complete immutable settings identity.

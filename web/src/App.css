@@ -98,6 +98,18 @@ main { min-height: 100vh; }
 .join-rule::before, .join-rule::after { content: ""; height: 1px; flex: 1; background: #b7c5cc; }
 .room-code { color: var(--ink); font-size: clamp(1.75rem, 5vw, 2.35rem); font-weight: 900; letter-spacing: .1em; }
 .phase-line { border-block: 1px solid #b7c5cc; padding-block: .75rem; color: #40586c; font-weight: 700; }
+.game-settings {
+  display: grid;
+  gap: .75rem;
+  border-block: 1px solid #b7c5cc;
+  background: #eef5ef;
+  padding: .9rem;
+}
+.settings-heading { display: grid; gap: .2rem; }
+.settings-heading h3 { color: var(--ink); font-size: 1.15rem; }
+.settings-heading p, .settings-note { color: #40586c; line-height: 1.4; }
+.settings-lock { border-left: 3px solid var(--ochre); padding-left: .55rem; color: #684b12; }
+.game-settings select { font-variant-numeric: tabular-nums; }
 .seat-list { display: grid; gap: .6rem; margin: 0; padding: 0; list-style: none; }
 .seat-line { display: flex; align-items: center; gap: .7rem; }
 .seat-details { display: grid; min-width: 0; flex: 1; gap: .35rem; }

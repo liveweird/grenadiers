@@ -47,6 +47,8 @@ pub(crate) enum RoomError {
     RoomNotFound,
     RoomFull,
     StaleRoom,
+    StaleSettings,
+    SettingsLocked,
     InvalidPhase,
     DuplicateAction,
     ResumeRejected,

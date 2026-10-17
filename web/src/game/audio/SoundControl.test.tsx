@@ -4,22 +4,22 @@ import userEvent from '@testing-library/user-event'
 import { StrictMode } from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import i18n from '../../i18n'
-import type { GameClientState } from '../v5/client'
-import { useV5Copy } from '../v5/locale'
-import { snapshot } from '../v5/testSupport'
+import type { GameClientState } from '../v6/client'
+import { useV6Copy } from '../v6/locale'
+import { snapshot } from '../v6/testSupport'
 import { SoundControl } from './SoundControl'
 
 function state(): GameClientState {
   const current = snapshot(20)
   return {
     connection: 'authenticated', room: current.room, snapshot: current, youSeat: 'one', failure: null,
-    admissionPending: false, leavePending: false, reconnectAttempt: 0,
+    admissionPending: false, leavePending: false, settingsPending: false, reconnectAttempt: 0,
     admissionBaseline: { roomId: current.room.roomId, revision: 20, tick: 20 },
   }
 }
 
 function Subject({ current = state() }: { current?: GameClientState }) {
-  return <SoundControl state={current} copy={useV5Copy()} />
+  return <SoundControl state={current} copy={useV6Copy()} />
 }
 
 function view(element = <Subject />) {

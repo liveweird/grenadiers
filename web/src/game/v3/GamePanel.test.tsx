@@ -181,7 +181,7 @@ describe('v3 GamePanel authoritative match presentation', () => {
     })
     current.tick = 181
     renderPanel(current)
-    expect(screen.getByRole('status')).toHaveTextContent('Gracz drugi wygrywa mecz trzema rundami.')
+    expect(screen.getByRole('status')).toHaveTextContent('Gracz drugi wygrywa mecz.')
     expect(screen.getByRole('button', { name: 'Zagraj ponownie' })).toBeVisible()
   })
 })

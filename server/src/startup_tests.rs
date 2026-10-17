@@ -8,7 +8,7 @@ use crate::{
 };
 
 #[tokio::test]
-async fn default_configuration_creates_generated_classic_v3_rooms() {
+async fn default_configuration_creates_configurable_v4_rooms() {
     let state = AppState::from_configuration(None, None, None).unwrap();
 
     let admission = state
@@ -23,7 +23,7 @@ async fn default_configuration_creates_generated_classic_v3_rooms() {
         .await
         .unwrap();
 
-    assert_eq!(admission.room.rules_version, RulesVersion::ClassicV3);
+    assert_eq!(admission.room.rules_version, RulesVersion::ConfigurableV4);
     assert_eq!(admission.room.map_id, MapId::GeneratedV1);
 }
 

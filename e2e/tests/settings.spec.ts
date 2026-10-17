@@ -1,0 +1,57 @@
+import { expect, test } from '@playwright/test'
+import { latestSnapshot, observeGame, type ObservedGame } from './support/duel'
+
+function latestRoom(game: ObservedGame) {
+  return game.frames.filter((frame) =>
+    frame.type === 'roomState' || frame.type === 'snapshot' || frame.type === 'admitted').at(-1)?.room
+}
+
+test('two browsers share configured rules that drive speed, fuse and match target', async ({ browser }) => {
+  const contexts = await Promise.all([browser.newContext(), browser.newContext()])
+  try {
+    const [one, two] = await Promise.all(contexts.map((context) => context.newPage()))
+    const games = [observeGame(one), observeGame(two)]
+    await Promise.all([one, two].map((page) => page.goto('/')))
+    await one.getByRole('button', { name: 'Create room', exact: true }).click()
+    const invitation = one.getByLabel('Room invitation code', { exact: true })
+    await expect(invitation).toHaveText(/^[A-HJ-NP-Z2-9]{8}$/)
+    await two.getByRole('textbox', { name: 'Room code', exact: true }).fill(await invitation.innerText())
+    await two.getByRole('button', { name: 'Join room', exact: true }).click()
+
+    await one.getByLabel('Starting speed').selectOption('4')
+    await one.getByLabel('Turning tolerance').selectOption('64')
+    await one.getByLabel('Round wins needed').selectOption('1')
+    await one.getByLabel('Bomb fuse').selectOption('60')
+    await one.getByRole('button', { name: 'Apply rules', exact: true }).click()
+    const expected = {
+      startingSpeedLevel: 4, turnAssistUnits: 64, winsToFinish: 1, bombFuseTicks: 60,
+    }
+    await Promise.all(games.map((game) => expect.poll(() => latestRoom(game)?.settings).toEqual(expected)))
+    await expect(two.getByLabel('Starting speed')).toHaveValue('4')
+    await expect(two.getByLabel('Bomb fuse')).toHaveValue('60')
+
+    await Promise.all([one, two].map((page) => page.getByRole('button', { name: 'Ready', exact: true }).click()))
+    await Promise.all(games.map((game) => expect.poll(() => latestSnapshot(game)?.room.phase.type).toBe('running')))
+    for (const game of games) {
+      expect(latestSnapshot(game)!.room).toMatchObject({ rulesVersion: 4, settings: expected })
+      expect(latestSnapshot(game)!.state.actors.map((actor) => actor.speedLevel)).toEqual([4, 4])
+    }
+
+    await one.getByRole('region', { name: 'Grenadiers courtyard' }).click()
+    await one.keyboard.press('Space')
+    await expect.poll(() => latestSnapshot(games[0])?.state.bombs.at(0)).toBeTruthy()
+    const bomb = latestSnapshot(games[0])!.state.bombs[0]
+    expect(bomb.detonatesAt - bomb.placedAt).toBe(60)
+    await Promise.all(games.map((game) => expect.poll(() => latestRoom(game)?.phase.type).toBe('matchResult')))
+    expect(latestRoom(games[0])?.scores).toEqual({ one: 0, two: 1 })
+    expect(latestRoom(games[0])?.settings).toEqual(expected)
+
+    await Promise.all([one, two].map((page) =>
+      expect(page.getByRole('button', { name: 'Play again', exact: true })).toBeEnabled({ timeout: 10_000 })))
+    await Promise.all([one, two].map((page) => page.getByRole('button', { name: 'Play again', exact: true }).click()))
+    await Promise.all(games.map((game) => expect.poll(() => latestRoom(game)?.phase.type).toBe('waiting')))
+    expect(latestRoom(games[0])?.settings).toEqual(expected)
+  } finally {
+    await Promise.all(contexts.map((context) => context.close()))
+  }
+})

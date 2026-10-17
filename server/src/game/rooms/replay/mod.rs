@@ -13,4 +13,6 @@ use runner::{ReplayError, replay};
 #[cfg(test)]
 mod capture_tests;
 #[cfg(test)]
+mod settings_tests;
+#[cfg(test)]
 mod tests;

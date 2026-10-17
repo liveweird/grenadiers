@@ -1,10 +1,12 @@
 use super::types::{HALF_FOOTPRINT, TICKS_PER_SECOND, TURN_ASSIST, UNITS_PER_CELL};
+use crate::room::RoomSettings;
 
 const FORGIVING_TURN_ASSIST: i32 = 256;
 
 /// Immutable parameters for the initial deterministic rules profile.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct RulesConfig {
+    room_settings: Option<RoomSettings>,
     version: u16,
     tick_rate: u16,
     units_per_cell: i32,
@@ -24,6 +26,7 @@ impl RulesConfig {
     #[must_use]
     pub const fn classic_v1() -> Self {
         Self {
+            room_settings: None,
             version: 1,
             tick_rate: TICKS_PER_SECOND,
             units_per_cell: UNITS_PER_CELL,
@@ -62,9 +65,27 @@ impl RulesConfig {
         }
     }
 
+    /// The configurable room profile. Validation is owned by `RoomSettings`.
+    #[must_use]
+    pub const fn configurable_v4(settings: RoomSettings) -> Self {
+        Self {
+            room_settings: Some(settings),
+            version: 4,
+            turn_assist: settings.turn_assist_units(),
+            bomb_fuse_ticks: settings.bomb_fuse_ticks(),
+            ..Self::classic_v3()
+        }
+    }
+
     #[must_use]
     pub const fn version(self) -> u16 {
         self.version
+    }
+
+    /// Complete immutable settings identity for configurable rounds.
+    #[must_use]
+    pub const fn room_settings(self) -> Option<RoomSettings> {
+        self.room_settings
     }
 
     #[must_use]

@@ -278,7 +278,7 @@ fn malformed_versions_order_bounds_and_round_metadata_fail_closed() {
     journal.header.lifecycle_profile += 2;
     assert_eq!(replay(&journal), Err(ReplayError::UnsupportedLifecycle));
     journal.header = Header::m5([false; 2]);
-    journal.header.rules_version += 2;
+    journal.header.rules_version += 3;
     assert_eq!(replay(&journal), Err(ReplayError::UnsupportedRules));
     journal.header = Header::m5([false; 2]);
     journal.header.generator_version += 1;

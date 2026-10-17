@@ -275,6 +275,7 @@ pub enum RulesVersion {
     ClassicV1,
     ClassicV2,
     ClassicV3,
+    ConfigurableV4,
 }
 
 impl RulesVersion {
@@ -284,6 +285,7 @@ impl RulesVersion {
             Self::ClassicV1 => 1,
             Self::ClassicV2 => 2,
             Self::ClassicV3 => 3,
+            Self::ConfigurableV4 => 4,
         }
     }
 }
@@ -295,6 +297,7 @@ impl TryFrom<u16> for RulesVersion {
             1 => Ok(Self::ClassicV1),
             2 => Ok(Self::ClassicV2),
             3 => Ok(Self::ClassicV3),
+            4 => Ok(Self::ConfigurableV4),
             _ => Err(InvalidScalar),
         }
     }

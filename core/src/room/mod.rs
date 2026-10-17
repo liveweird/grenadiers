@@ -22,8 +22,10 @@
 pub mod match_lifecycle;
 pub mod reconnect;
 pub mod series;
+pub mod settings;
 
 pub use match_lifecycle::{CountdownKind, MatchChange, MatchError, MatchLifecycle, MatchPhase};
+pub use settings::{RoomSettings, SettingsError};
 
 use crate::game::{RoundResult, SeatId, Tick};
 

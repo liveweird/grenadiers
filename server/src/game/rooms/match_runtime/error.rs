@@ -5,6 +5,8 @@ use super::super::input::InputError;
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(in crate::game::rooms) enum MatchRuntimeError {
     StaleEpoch,
+    StaleSettings,
+    SettingsLocked,
     VacantSeat,
     InvalidPhase,
     RateLimited,

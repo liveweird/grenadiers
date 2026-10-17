@@ -10,7 +10,7 @@ playable target remains two human players. M1 implements the
 outcomes](combat.md), including explicit public projections/events. M3 completes
 [gameplay contracts](protocol.md), anonymous sessions, authenticated [rooms](rooms.md),
 authoritative scheduling, and the [playable browser duel](browser.md). The current preview
-plays generated classic-v3 first-to-three matches with upgrades, automatic round resets,
+plays generated configurable-v4 matches (first to three by default) with upgrades, automatic round resets,
 consensual rematch, and process-local reserved-seat reconnect. Bots, larger matches,
 matchmaking, cross-process recovery, and durable stats follow.
 
@@ -45,6 +45,8 @@ These requests are planned work, separate from the implemented classic baseline.
 [Browser hardening](browser-hardening.md) records real visibility recovery and its tested scope.
 
 [Keyboard controls](controls.md) describes defaults, safe remapping and non-secret preference storage.
+
+[Room settings](settings.md) covers shared starting speed, turn tolerance, match target and fuse.
 
 [Ordered WebSocket delay](websocket-latency.md) defines the measured profile, causal observations and limits.
 

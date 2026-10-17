@@ -1,7 +1,7 @@
 import { Container, Group, SegmentedControl, Text, Title } from '@mantine/core'
 import { useTranslation } from 'react-i18next'
 import { Diagnostics } from './Diagnostics'
-import { GamePanel } from './game/v5/GamePanel'
+import { GamePanel } from './game/v6/GamePanel'
 import './App.css'
 
 export function App() {

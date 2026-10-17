@@ -8,9 +8,9 @@ use axum::{
     http::{HeaderMap, StatusCode, Uri, header::RETRY_AFTER},
     response::Response,
 };
-use grenadiers_core::protocol::v5::{
+use grenadiers_core::protocol::v6::{
     GAMEPLAY_PROTOCOL_VERSION, GameClientMessage, GameServerMessage, GameplayVersion,
-    V5ErrorCode as ErrorCode, encode_server_message, parse_client_message,
+    V6ErrorCode as ErrorCode, encode_server_message, parse_client_message,
 };
 use grenadiers_core::protocol::{Counter, MAX_CLIENT_MESSAGE_BYTES, ProtocolVersionInput};
 use tokio::{
@@ -209,6 +209,7 @@ pub(super) fn command_sequence(message: &GameClientMessage) -> Option<Counter> {
         | GameClientMessage::JoinRoom { sequence, .. }
         | GameClientMessage::ResumeRoom { sequence, .. }
         | GameClientMessage::Ready { sequence, .. }
+        | GameClientMessage::UpdateSettings { sequence, .. }
         | GameClientMessage::Movement { sequence, .. }
         | GameClientMessage::PlaceBomb { sequence, .. }
         | GameClientMessage::LeaveRoom { sequence, .. }

@@ -4,7 +4,7 @@ use std::{
     time::Instant as StdInstant,
 };
 
-use grenadiers_core::protocol::{Counter, RoomCode, RoomId, v5::ResumeToken};
+use grenadiers_core::protocol::{Counter, RoomCode, RoomId, v6::ResumeToken};
 use tokio::{
     sync::{Notify, watch},
     time::Instant,
@@ -73,7 +73,7 @@ impl GameRooms {
             }),
             random_fill: Arc::new(|bytes| getrandom::fill(bytes).map_err(|_| ())),
             round_seed_source,
-            profile: profile::RoomProfile::GeneratedClassicV3,
+            profile: profile::RoomProfile::GeneratedConfigurableV4,
             shutdown,
             empty: Notify::new(),
         })
@@ -120,7 +120,7 @@ impl GameRooms {
             }),
             random_fill: Arc::new(fill),
             round_seed_source,
-            profile: profile::RoomProfile::GeneratedClassicV3,
+            profile: profile::RoomProfile::GeneratedConfigurableV4,
             shutdown,
             empty: Notify::new(),
         }

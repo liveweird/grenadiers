@@ -1,5 +1,18 @@
 # Repository verification
 
+## M6 pure reconnect-grace foundation — 2026-10-17
+
+The locked server gate passes **251 core tests, 125 server tests, and 2 doctests**.
+Rust coverage is **6,142/6,566 lines, 93.54%**, above the unchanged 80% floor. Independent
+review reports no actionable findings. Seven focused cases exercise exact 599/600-tick
+eligibility, original duplicate-loss deadlines, staggered and simultaneous expiry, rejected
+expired resumes, successful no-op clock advancement, stale calls, and atomic errors/overflow.
+The two-seat component returns bounded reservation/expiry facts and never fabricates outcomes.
+
+This is a pure API release. Active v3 transport-loss interruption, credentials, publication,
+and browser behavior are unchanged. Lifecycle and coordinated reconnect activation follow.
+Exact-image deployment acceptance is still pending.
+
 ## M5 coordinated classic matches — 2026-10-17
 
 The active endpoint/browser use gameplay protocol 3 and the real MatchLifecycle, MatchRuntime,

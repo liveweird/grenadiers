@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.3.1 — 2026-10-17
+
+- Add a pure bounded two-seat reconnect-grace model with checked 600-tick deadlines.
+- Reject expired/stale resumes atomically, retain original duplicate-loss deadlines, and expose
+  batched expiry facts without deciding match outcomes.
+
+This is a reconnect foundation. Active gameplay v3 still interrupts on transport loss;
+credential, lifecycle, server, and browser activation follow separately.
+
 ## 0.3.0 — 2026-10-17
 
 - Activate authoritative two-player first-to-three matches over gameplay protocol 3.

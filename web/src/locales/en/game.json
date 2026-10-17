@@ -20,7 +20,20 @@
     "cancelReady": "Not ready",
     "leave": "Leave room"
   },
-  "seat": { "open": "Waiting for a player", "notReady": "Not ready", "ready": "Ready" },
+  "seat": {
+    "open": "Waiting for a player",
+    "notReady": "Not ready",
+    "ready": "Ready",
+    "alive": "Alive",
+    "eliminated": "Eliminated"
+  },
+  "stats": {
+    "label": "{{player}} upgrades",
+    "available": "Bombs available",
+    "capacity": "Bomb capacity",
+    "range": "Blast range",
+    "speed": "Speed level"
+  },
   "phase": {
     "waiting": "Waiting for both players",
     "countdown": "Round starting",

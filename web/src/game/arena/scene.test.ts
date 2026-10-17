@@ -58,18 +58,34 @@ describe('retained public arena scene', () => {
   it('draws every public layer and retains unchanged objects between snapshots', () => {
     const scene = new ArenaScene()
     const snapshot = gameSnapshot()
+    snapshot.state.pickups = [
+      { cell: { column: 2, row: 2 }, kind: 'bombCapacity' },
+      { cell: { column: 3, row: 2 }, kind: 'blastRange' },
+      { cell: { column: 4, row: 2 }, kind: 'movementSpeed' },
+    ]
     scene.update(snapshot, 0)
-    const [terrain, blocks, bombs, flames, actors] = layers(scene)
+    const [terrain, blocks, pickups, bombs, flames, actors] = layers(scene)
     expect(terrain.shapes.filter((shape) => shape === 'rect').length).toBeGreaterThan(195)
     expect(blocks.children).toHaveLength(1)
+    expect(pickups.children).toHaveLength(3)
     expect(bombs.children).toHaveLength(1)
     expect(flames.children).toHaveLength(1)
     expect(actors.children).toHaveLength(2)
     expect(actors.children.map(({ x, y }) => [x, y])).toEqual([[72, 72], [648, 552]])
     expect(bombs.children[0]).toMatchObject({ x: 72, y: 72 })
-    const retained = [blocks.children[0], bombs.children[0], flames.children[0], ...actors.children]
+    expect(pickups.children.map(({ x, y }) => [x, y])).toEqual([[96, 96], [144, 96], [192, 96]])
+    expect(pickups.children.map(({ shapes }) => shapes)).toEqual([
+      ['ellipse', 'roundRect', 'circle', 'circle'],
+      ['ellipse', 'roundRect', 'roundRect', 'roundRect', 'circle'],
+      ['ellipse', 'roundRect', 'poly', 'poly'],
+    ])
+    const retained = [
+      blocks.children[0], ...pickups.children, bombs.children[0], flames.children[0], ...actors.children,
+    ]
     scene.update(snapshot, 50)
-    expect([blocks.children[0], bombs.children[0], flames.children[0], ...actors.children]).toEqual(retained)
+    expect([
+      blocks.children[0], ...pickups.children, bombs.children[0], flames.children[0], ...actors.children,
+    ]).toEqual(retained)
     const oneHelmet = actors.children[0].children[1]
     const twoHelmet = actors.children[1].children[1]
     expect(oneHelmet.shapes).not.toContain('poly')
@@ -86,7 +102,7 @@ describe('retained public arena scene', () => {
     snapshot.room.revision += 1
     snapshot.state.actors[0].position.x += 1024
     scene.update(snapshot, 100)
-    const actor = layers(scene)[4].children[0]
+    const actor = layers(scene)[5].children[0]
     expect(actor.x).toBe(72)
     scene.render(125)
     expect(actor.x).toBe(96)
@@ -98,22 +114,29 @@ describe('retained public arena scene', () => {
     expect(actor.x).toBe(72)
   })
 
-  it('removes destroyed blocks, detonated bombs, expired flames and retired actor graphics', () => {
+  it('removes absent public entities and replaces a changed pickup kind at the same cell', () => {
     const scene = new ArenaScene()
     const snapshot = gameSnapshot()
+    snapshot.state.pickups = [{ cell: { column: 2, row: 2 }, kind: 'bombCapacity' }]
     scene.update(snapshot, 0)
-    const [, blocks, bombs, flames, actors] = layers(scene)
-    const removed = [blocks.children[0], bombs.children[0], flames.children[0], actors.children[0]]
+    const [, blocks, pickups, bombs, flames, actors] = layers(scene)
+    const firstPickup = pickups.children[0]
+    snapshot.state.pickups[0].kind = 'movementSpeed'
+    scene.update(snapshot, 25)
+    expect(firstPickup.destroyed).toBe(true)
+    expect(pickups.children[0].shapes).toEqual(['ellipse', 'roundRect', 'poly', 'poly'])
+    const removed = [blocks.children[0], pickups.children[0], bombs.children[0], flames.children[0], actors.children[0]]
     const ownedGraphics = [...bombs.children[0].children, ...actors.children[0].children]
     snapshot.state.arena.blocks = []
+    snapshot.state.pickups = []
     snapshot.state.bombs = []
     snapshot.state.flames = []
     snapshot.state.actors[0].id = 11
     scene.update(snapshot, 50)
     expect(removed.every((drawing) => drawing.destroyed)).toBe(true)
     expect(ownedGraphics.every((drawing) => drawing.releasedContext)).toBe(true)
-    expect([blocks.children.length, bombs.children.length, flames.children.length, actors.children.length])
-      .toEqual([0, 0, 0, 2])
+    expect([blocks.children.length, pickups.children.length, bombs.children.length, flames.children.length, actors.children.length])
+      .toEqual([0, 0, 0, 0, 2])
   })
 
   it('snaps terminal states, hides eliminated actors, and freezes decorative effects', () => {
@@ -121,7 +144,7 @@ describe('retained public arena scene', () => {
     const snapshot = gameSnapshot()
     scene.update(snapshot, 0)
     scene.render(25)
-    const [, , bombs, flames, actors] = layers(scene)
+    const [, , , bombs, flames, actors] = layers(scene)
     expect(bombs.children[0].scaleValue).not.toBe(1)
     snapshot.room.phase = { type: 'result', endedAt: 101, result: { type: 'winner', seat: 'one' } }
     snapshot.state.actors[0].position.x += 1024
@@ -136,20 +159,24 @@ describe('retained public arena scene', () => {
   it('respects reduced effects and resets interpolation across room/round identities', () => {
     const scene = new ArenaScene()
     const snapshot = gameSnapshot()
+    snapshot.state.pickups = [{ cell: { column: 2, row: 2 }, kind: 'blastRange' }]
     scene.update(snapshot, 0)
     scene.setReducedMotion(true)
     snapshot.state.actors[0].position.y += 1024
     scene.update(snapshot, 50)
-    const oldActors = [...layers(scene)[4].children]
+    const oldActors = [...layers(scene)[5].children]
+    const oldPickup = layers(scene)[2].children[0]
     expect(oldActors[0].y).toBe(120)
-    expect(layers(scene)[2].children[0].scaleValue).toBe(1)
+    expect(layers(scene)[3].children[0].scaleValue).toBe(1)
     scene.setReducedMotion(false)
     snapshot.room.roundId += 1
     snapshot.state.actors[0].position.x = 1536
     snapshot.state.actors[0].heading = 'north'
     scene.update(snapshot, 100)
     expect(oldActors.every((actor) => actor.destroyed)).toBe(true)
-    expect(layers(scene)[4].children[0]).toMatchObject({ x: 72, y: 120 })
-    expect(layers(scene)[4].children[0].children[1].rotation).toBe(Math.PI)
+    expect(oldPickup.destroyed).toBe(true)
+    expect(layers(scene)[2].children[0]).not.toBe(oldPickup)
+    expect(layers(scene)[5].children[0]).toMatchObject({ x: 72, y: 120 })
+    expect(layers(scene)[5].children[0].children[1].rotation).toBe(Math.PI)
   })
 })

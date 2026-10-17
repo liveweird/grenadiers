@@ -78,8 +78,19 @@ main { min-height: 100vh; }
 .phase-line { border-block: 1px solid #b7c5cc; padding-block: .75rem; color: #40586c; font-weight: 700; }
 .seat-list { display: grid; gap: .6rem; margin: 0; padding: 0; list-style: none; }
 .seat-line { display: flex; align-items: center; gap: .7rem; }
-.seat-line span:last-child { display: grid; }
+.seat-details { display: grid; min-width: 0; flex: 1; gap: .35rem; }
+.seat-details > span { display: grid; }
 .seat-line small { color: #52697c; }
+.actor-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: .25rem;
+  margin: 0;
+  font-size: .72rem;
+}
+.actor-stats div { min-width: 0; border-left: 2px solid #c7d2d7; padding-left: .3rem; }
+.actor-stats dt { color: #52697c; line-height: 1.1; }
+.actor-stats dd { margin: .1rem 0 0; color: var(--ink); font-size: .95rem; font-weight: 800; }
 .player-mark { width: 1rem; height: 1rem; border: 2px solid var(--ink); border-radius: 50%; }
 .seat-one .player-mark { background: #edb94b; }
 .seat-two .player-mark { border-radius: .15rem; background: var(--cobalt); }

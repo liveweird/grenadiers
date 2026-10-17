@@ -1,5 +1,30 @@
 # Repository verification
 
+## M7 v0.3.12 exact-image visibility acceptance — 2026-10-17
+
+A clean Git export of `ded5749dc345556fa75e06d5fcf3a0d2137486a1` produces
+`sha256:61ea43aa86f1089fa2331a0149c5c831750e5bddeef2ddfc832f952a252ca3a5`.
+Compose and an isolated Kubernetes namespace use that exact image, confirmed from the Pod image ID.
+Each path passes **11/11 scenarios with retries disabled**: six default, pickup, full match/rematch,
+two reconnect cases, and real headed Linux/Xvfb hidden/visible recovery. The helper pins Node
+24.21.0, Playwright 1.63.0 and Chromium; no private capabilities or CDP endpoints enter artifacts.
+
+Two setup diagnostics remain recorded: an Xvfb wrapper without a container init did not launch
+npm, and the `.app` hostname caused Chromium HSTS upgrade before game interaction. The isolated
+helper uses `--init` and the reserved `grenadiers.test` alias; Kubernetes uses the explicitly allowed
+host-forward origin. These corrections change neither browser/game semantics nor assertions.
+All fixture rollouts are followed by actual JSON health/readiness polling, returning 200/ok.
+
+Strict Kubernetes 1.33 schemas validate all three resources. Both runtimes pass nonroot/read-only,
+dropped-capability, no-escalation, probe, read-only 0444 fixture Secret and no-`/app`-seed checks;
+Kubernetes uses RuntimeDefault seccomp. The pinned archive-only Trivy scan reports zero fixable
+HIGH/CRITICAL findings. Desktop/320-pixel Polish screenshots pass containment and visual inspection.
+Evidence remains at `/tmp/grenadiers-v0312-acceptance`; owned containers, namespace, forward,
+source export, scan archive and temporary tools are removed. Accepted images remain.
+
+This verifies the specified short visibility transition, not long suspension, mobile eviction,
+network latency or human playability. M7 and v0.4.0 remain open.
+
 ## M7 natural hidden-tab recovery — 2026-10-17
 
 The new headed Chromium scenario observes actual `hidden` and `visible` transitions in one
@@ -25,7 +50,7 @@ fixture containers/network are removed. Coordinator closure inspection confirms 
 The locked server gate passes **296 core tests, 149 server tests and 2 doctests**, with four
 separate reference profiles intentionally ignored in ordinary runs. Full E2E static checks and
 all **11** documented scenarios pass. Rust production source is unchanged from v0.3.11's
-93.56% coverage reference. Same-image Compose/Kubernetes acceptance follows separately.
+93.56% coverage reference. Same-image Compose/Kubernetes acceptance passes as recorded above.
 
 This is one-second focus/visibility recovery on the stated Chromium profile, not long-term
 throttling, suspension, mobile eviction, delayed-network support or human playtest evidence.

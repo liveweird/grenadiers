@@ -8,6 +8,7 @@
     "reconnect-tests/**/*.spec.ts",
     "hardening-tests/**/*.spec.ts",
     "latency-tests/**/*.spec.ts",
+    "audio-tests/**/*.spec.ts",
     "scripts/*.mjs"
   ]
 }

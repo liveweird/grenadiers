@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use grenadiers_core::{
     game::{Direction, SeatId},
-    protocol::v3::RoomPhase,
+    protocol::v4::RoomPhase,
     protocol::{RoomCode, RoomId},
     room::MatchPhase,
 };

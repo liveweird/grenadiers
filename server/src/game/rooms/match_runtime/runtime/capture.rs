@@ -14,7 +14,7 @@ use crate::round_seed::RoundSeedSource;
 
 pub(super) fn journal(profile: RoomProfile) -> Journal {
     match profile {
-        RoomProfile::GeneratedClassicV2 => Journal::new(Header::m5([false; 2])),
+        RoomProfile::GeneratedClassicV2 => Journal::new(Header::m6([false; 2])),
         #[cfg(test)]
         RoomProfile::FixedClassicV1 => Journal::unsupported_profile(),
     }

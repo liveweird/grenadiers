@@ -15,7 +15,7 @@ The WebSocket `protocolVersion` is an independent compatibility contract, not a 
 Each shipped feature PR bumps the product version and records its scope in `CHANGELOG.md`.
 Use patch releases within the current milestone for bounded engineering increments.
 `0.2.0` is the first playable duel preview; `0.3.0` adds classic match progression. Subsequent
-`0.3.x` increments prepare reconnect support; `0.4.0` remains the resilient playtest milestone. Keep PRs focused on one behavior and its tests. Merge passing,
+`0.3.x` increments stage reconnect support and activate it at `0.3.9`; `0.4.0` remains the resilient playtest milestone. Keep PRs focused on one behavior and its tests. Merge passing,
 independently reviewed candidates, then publish the corresponding prerelease tag.
 The repository gate checks that both local Cargo packages and their dependency agree.
 

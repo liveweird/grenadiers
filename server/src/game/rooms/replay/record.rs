@@ -6,7 +6,8 @@ use grenadiers_core::{
 };
 
 pub(super) const FORMAT_VERSION: u16 = 1;
-pub(super) const M5_LIFECYCLE_PROFILE: u16 = 1;
+pub(in crate::game::rooms) const M5_LIFECYCLE_PROFILE: u16 = 1;
+pub(super) const M6_LIFECYCLE_PROFILE: u16 = 2;
 pub(super) const CLASSIC_V2_RULES: u16 = 2;
 pub(super) const GENERATED_V1: u16 = 1;
 pub(super) const MAX_RECORDS: usize = 60_000;
@@ -32,6 +33,13 @@ impl Header {
             initial_tick: Tick(0),
         }
     }
+
+    pub(in crate::game::rooms) const fn m6(initial_seats: [bool; 2]) -> Self {
+        Self {
+            lifecycle_profile: M6_LIFECYCLE_PROFILE,
+            ..Self::m5(initial_seats)
+        }
+    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -52,7 +60,15 @@ pub(in crate::game::rooms) enum Operation {
     },
     InputFence(SeatId),
     Tick,
+    #[cfg(test)]
     Depart([Option<DepartureReason>; 2]),
+    GraceDepart([Option<DepartureReason>; 2]),
+    Resume {
+        seat: SeatId,
+        kind: crate::game::rooms::match_runtime::ResumeKind,
+    },
+    Expiry,
+    ReportFlush,
     Interrupt(InterruptReason),
     InterruptAndDepart {
         reason: InterruptReason,

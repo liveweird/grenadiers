@@ -19,9 +19,11 @@ never advances the simulation or predicts a different outcome.
    zero scores; both choose **Ready** to start a new match. **Leave room** returns to admission.
 
 The invitation discovers a room; it is not a secret credential. Each tab requests a separate
-anonymous session and keeps its credential only in memory. Closing the game socket ends
-its ownership; this preview cannot reconnect to a claimed credential. An explicit live departure forfeits the match; two same-tick departures abandon it. Transport
-loss interrupts the match until reconnect support is implemented. Completed-round records
+anonymous session. Personal `admitted` state gives that tab a distinct resume capability kept only
+in memory. An unexpected socket loss reserves the seat for 600 authoritative ticks and triggers at
+most three attempts, each with a fresh HTTP session and socket authentication. The latest world
+stays visible but controls remain disabled until a full personal baseline returns. Explicit live
+departure forfeits the match; two same-boundary departures abandon it. Completed-round records
 remain visible independently of a later forfeit/interruption; an already-final match stays final.
 
 ## Input and presentation
@@ -51,14 +53,21 @@ Run the deployed-stack acceptance with `scripts/gates.sh browser`; its duel scen
 actual native sockets, keyboard events, and compositor screenshots, plus Axe checks across
 lobby, waiting, running, and result. See [verification](../verification.md) for observed results.
 
+All active-v4 Playwright configurations disable raw framework traces because personal admission
+frames contain capabilities. Failure screenshots, public reports, and redacted summaries remain.
+Run reconnect acceptance separately with
+`E2E_MATCH_FIXTURE=arena-v1-matches npm --prefix e2e run test:reconnect`.
+
 English and Polish are available without reconnecting the game session. **Connection
 diagnostics** expands the separate diagnostic transport controls; its socket is not a seat.
-No touch controller, audio, or reconnect UI is included in this preview. A narrow viewport is supported for layout and spectating;
+The panel shows recovery, disconnected/expired seats, and the grace countdown. `seatReplaced`,
+close code 4001, `resumeRejected`, and exhausted retries stop recovery and return to admission.
+No touch controller or audio is included. A narrow viewport is supported for layout and spectating;
 playing currently requires a keyboard.
 
 ## Exposed items and player upgrades
 
-Gameplay-v3 snapshots supply visible pickup cells and kinds under classic-v2 rules. Pixi draws distinct bomb,
+Gameplay-v4 snapshots supply visible pickup cells and kinds under classic-v2 rules. Pixi draws distinct bomb,
 cross/range, and speed marks above blocks and below bombs/flames/actors; it never guesses
 concealed contents. Retained drawings are reused while unchanged and destroyed when removed,
 replaced, or reset. The UI performs no collection simulation.
@@ -73,9 +82,14 @@ layout bounds the upgrade rows at narrow widths. Generated classic-v2 rooms supp
 The header shows round wins and actual round number. The clock uses authoritative room
 deadlines during countdown/result/rematch holds and remaining Running time during play.
 Result physics freezes while the room clock advances. Inter-round countdowns clear the old
-world; rematch also clears scores and completed-round history. A newer-epoch snapshot can
+world from shared presentation, though the server retains a completed body for a canceled
+countdown. A lone expiry forfeits to the eligible opponent; both expired seats abandon, while an
+offline opponent can delay settlement until its own deadline. A third win already committed at a
+boundary takes precedence over expiry. Rematch clears scores and completed-round history. A newer-epoch snapshot can
 reset presentation directly even if an intermediate room view was coalesced.
 
 The separate complete-match fixture uses native keyboard controls to prove a real draw,
 three wins, fresh round/spawn assignments, consent withdrawal, and rematch over the same
 two sockets. See [deployment](../deployment.md) for explicit read-only fixture setup.
+
+Reviewed [desktop and 320-pixel Polish captures](../screenshots/reconnect.md) show the active v4 interface.

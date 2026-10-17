@@ -1,5 +1,5 @@
 import { expect, type Page } from '@playwright/test'
-import type { Direction, GameServerMessage } from '../../../web/src/game/v3/schema'
+import type { Direction, GameServerMessage } from '../../../web/src/game/v4/schema'
 
 type Snapshot = Extract<GameServerMessage, { type: 'snapshot' }>
 export type ObservedGame = {
@@ -36,6 +36,7 @@ export function observeGame(page: Page): ObservedGame {
     })
     socket.on('framereceived', ({ payload }) => {
       const frame = JSON.parse(payload.toString()) as GameServerMessage
+      if (frame.type === 'admitted') frame.resumeToken = '[redacted]'
       observed.frames.push(frame)
       if (observed.frames.length > 512) observed.frames.shift()
     })

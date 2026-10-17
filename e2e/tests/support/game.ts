@@ -1,7 +1,8 @@
 import { expect, type Page } from '@playwright/test'
-import type { GameServerMessage } from '../../../web/src/game/v3/schema'
+import type { GameServerMessage } from '../../../web/src/game/v4/schema'
 
-type RoomFrame = Extract<GameServerMessage, { type: 'roomState' }>
+type RoomFrame = Extract<GameServerMessage, { type: 'roomState' | 'admitted' }>
+type AdmissionFrame = Extract<GameServerMessage, { type: 'admitted' }>
 type TestGame = {
   frames: GameServerMessage[]
   send: (command: Record<string, unknown>) => number
@@ -26,7 +27,7 @@ export async function openGame(page: Page): Promise<void> {
     const first = new Promise<GameServerMessage>((resolve, reject) => {
       const timer = setTimeout(() => reject(new Error('Authentication timed out')), 10_000)
       socket.addEventListener('open', () => {
-        socket.send(JSON.stringify({ type: 'authenticate', protocolVersion: 3, token: session.token }))
+        socket.send(JSON.stringify({ type: 'authenticate', protocolVersion: 4, token: session.token }))
       }, { once: true })
       socket.addEventListener('error', () => {
         clearTimeout(timer)
@@ -35,6 +36,8 @@ export async function openGame(page: Page): Promise<void> {
       socket.addEventListener('message', (event: MessageEvent) => {
         if (typeof event.data !== 'string') throw new Error('Unexpected game frame')
         const message = JSON.parse(event.data) as GameServerMessage
+        // Personal capabilities must never enter trace-visible evaluate results.
+        if (message.type === 'admitted') message.resumeToken = '[redacted]'
         frames.push(message)
         if (frames.length > 256) frames.shift()
         clearTimeout(timer)
@@ -53,7 +56,7 @@ export async function openGame(page: Page): Promise<void> {
     }
     return first
   })
-  expect(authenticated).toEqual({ type: 'authenticated', protocolVersion: 3 })
+  expect(authenticated).toEqual({ type: 'authenticated', protocolVersion: 4 })
 }
 
 export async function sendGame(page: Page, command: Record<string, unknown>): Promise<number> {
@@ -70,9 +73,17 @@ export async function gameFrames(page: Page): Promise<GameServerMessage[]> {
 
 export async function roomFrame(page: Page, afterRevision = 0): Promise<RoomFrame> {
   const latest = async (): Promise<RoomFrame | undefined> =>
-    (await gameFrames(page)).filter((message) => message.type === 'roomState').at(-1)
+    (await gameFrames(page)).filter((message) => message.type === 'roomState' || message.type === 'admitted').at(-1)
   await expect.poll(async () => (await latest())?.room.revision ?? 0).toBeGreaterThan(afterRevision)
   const frame = await latest()
   if (!frame) throw new Error('No room state was received')
+  return frame
+}
+
+export async function admissionFrame(page: Page): Promise<AdmissionFrame> {
+  const latest = async () => (await gameFrames(page)).filter((message) => message.type === 'admitted').at(-1)
+  await expect.poll(async () => Boolean(await latest())).toBe(true)
+  const frame = await latest()
+  if (!frame) throw new Error('No personal admission was received')
   return frame
 }

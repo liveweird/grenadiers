@@ -8,7 +8,9 @@ use std::{
 use grenadiers_core::{
     game::{Direction, RoundAssignment, SeatId, Tick},
     protocol::MAX_COUNTER,
-    room::{CountdownKind, DepartureReason, InterruptReason, MatchPhase},
+    room::{
+        CountdownKind, DepartureReason, InterruptReason, MatchPhase, reconnect::ReservationState,
+    },
 };
 
 use super::super::match_runtime::{MatchRuntime, RuntimeInspection};
@@ -129,6 +131,51 @@ fn generated_match_replays_cancellation_wins_rematch_draw_and_interruption() {
 }
 
 #[test]
+fn archived_profile_one_replays_a_complete_physics_result_fixture() {
+    let mut recording = occupied([[6; 32]]);
+    recording.start();
+    recording.action(SeatId::One, ReplayAction::Movement(Some(Direction::East)));
+    for _ in 0..12 {
+        recording.append(Operation::Tick);
+    }
+    recording.action(SeatId::One, ReplayAction::Movement(None));
+    recording.finish(&[SeatId::One, SeatId::Two]);
+    recording.append(Operation::Interrupt(InterruptReason::ServerStopped));
+
+    let mut archived = Journal::new(Header::m5([false; 2]));
+    for record in &recording.runtime.replay_journal().records {
+        if !matches!(record.operation, Operation::ReportFlush | Operation::Expiry) {
+            archived.record(record.tick, record.operation);
+        }
+    }
+    assert!(archived.records.iter().all(|record| !matches!(
+        record.operation,
+        Operation::GraceDepart(_)
+            | Operation::Resume { .. }
+            | Operation::Expiry
+            | Operation::ReportFlush
+    )));
+    let replayed = replay(&archived).unwrap();
+    let expected = recording.checkpoint();
+    assert_eq!(replayed.lifecycle.tick(), expected.lifecycle.tick());
+    assert_eq!(
+        replayed.lifecycle.round_attempt(),
+        expected.lifecycle.round_attempt()
+    );
+    assert_eq!(replayed.lifecycle.phase(), expected.lifecycle.phase());
+    assert_eq!(replayed.lifecycle.seats(), expected.lifecycle.seats());
+    assert_eq!(replayed.lifecycle.series(), expected.lifecycle.series());
+    assert_eq!(replayed.simulation, expected.simulation);
+    assert_eq!(replayed.inputs, expected.inputs);
+    assert_eq!(replayed.reports, expected.reports);
+    assert_eq!(replayed.lifecycle.reconnect_grace().latest_tick(), Tick(0));
+    assert_eq!(
+        replayed.lifecycle.reconnect_grace().seats(),
+        &[ReservationState::Connected; 2]
+    );
+}
+
+#[test]
 fn movement_refresh_and_predeparture_fence_preserve_input_semantics() {
     let mut recording = occupied([[7; 32]]);
     recording.start();
@@ -178,7 +225,7 @@ fn malformed_versions_order_bounds_and_round_metadata_fail_closed() {
     journal.header.format_version += 1;
     assert_eq!(replay(&journal), Err(ReplayError::UnsupportedFormat));
     journal.header = Header::m5([false; 2]);
-    journal.header.lifecycle_profile += 1;
+    journal.header.lifecycle_profile += 2;
     assert_eq!(replay(&journal), Err(ReplayError::UnsupportedLifecycle));
     journal.header = Header::m5([false; 2]);
     journal.header.rules_version += 1;
@@ -263,6 +310,16 @@ fn missing_extra_seed_and_truncation_are_never_complete_replays() {
         .replay_journal_mut()
         .records
         .retain(|record| !matches!(record.operation, Operation::RoundStarted { .. }));
+    let mut previous_tick = None;
+    let mut order = 0;
+    for record in &mut missing.runtime.replay_journal_mut().records {
+        if previous_tick != Some(record.tick) {
+            order = 0;
+        }
+        record.order = order;
+        order += 1;
+        previous_tick = Some(record.tick);
+    }
     assert_eq!(
         replay(missing.runtime.replay_journal()),
         Err(ReplayError::MissingSeed)

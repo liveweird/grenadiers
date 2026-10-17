@@ -63,8 +63,20 @@ pub(super) fn prepared_with(
     watch::Sender<ShutdownState>,
 ) {
     let (shutdown, shutdown_rx) = watch::channel(false);
-    let (handle, owner) =
-        PreparedMatchOwner::new(identity(profile), Instant::now(), source, shutdown_rx).unwrap();
+    let (handle, owner) = PreparedMatchOwner::new(
+        identity(profile),
+        Instant::now(),
+        source,
+        std::sync::Arc::new({
+            let next = std::sync::atomic::AtomicU8::new(42);
+            move |bytes: &mut [u8]| {
+                bytes.fill(next.fetch_add(1, std::sync::atomic::Ordering::Relaxed));
+                Ok(())
+            }
+        }),
+        shutdown_rx,
+    )
+    .unwrap();
     (handle, owner, shutdown)
 }
 
@@ -156,7 +168,7 @@ pub(super) async fn finish_round(
         advance_ticks(1).await;
         if !matches!(
             publication(notices).room.phase,
-            grenadiers_core::protocol::v3::RoomPhase::Running
+            grenadiers_core::protocol::v4::RoomPhase::Running
         ) {
             return;
         }
@@ -169,7 +181,7 @@ pub(super) async fn advance_to_running(notices: &watch::Receiver<MatchOwnerNotic
         advance_ticks(1).await;
         if matches!(
             publication(notices).room.phase,
-            grenadiers_core::protocol::v3::RoomPhase::Running
+            grenadiers_core::protocol::v4::RoomPhase::Running
         ) {
             return;
         }
@@ -188,6 +200,6 @@ pub(super) fn publication(receiver: &watch::Receiver<MatchOwnerNotice>) -> Match
 pub(super) fn assert_running(receiver: &watch::Receiver<MatchOwnerNotice>) {
     assert_eq!(
         publication(receiver).room.phase,
-        grenadiers_core::protocol::v3::RoomPhase::Running
+        grenadiers_core::protocol::v4::RoomPhase::Running
     );
 }

@@ -1,5 +1,60 @@
 # Repository verification
 
+## M6 v0.3.9 exact-image deployment acceptance — 2026-10-17
+
+A clean Git export of `ead3f3fc9c67caea7aea9866bfa5c4970d9d80ed` produces
+`sha256:b1cee9317f0d30cee36d05c9a32a7d2933a4394f08c83a324cb713f5846b13ee`.
+Compose and isolated local Kubernetes use that same image, confirmed from the actual Pod image ID.
+Each path passes **10/10 first-run browser scenarios with retries disabled**: six default,
+one pickup, one complete match/rematch, and two real reconnect/takeover/late-rejection cases.
+Node is exactly 24.21.0. Both paths return real 200 JSON health/readiness before testing.
+
+Runtime inspection confirms UID/GID 65532, a read-only root, all capabilities dropped,
+no privilege escalation, and the Kubernetes RuntimeDefault seccomp profile. Fixture Secret files
+are read-only with mode 0444; probes retain their actual API paths, and no seed is packaged under
+`/app`. Strict Kubernetes 1.33 validation reports **3 valid resources**, with no errors/skips.
+Pinned Trivy 0.74.0 scans a saved image archive without a Docker socket and reports
+**zero HIGH/CRITICAL findings**. Desktop and 320-pixel Polish screenshots were visually inspected;
+board, status, controls, localization and diagnostics have no clipping or overflow.
+
+Evidence remains in `/tmp/grenadiers-v039-acceptance`; temporary Compose/namespace/Secret,
+forward, source export and scan archive are removed. The accepted image remains available.
+Later release-evidence commits change documentation only. This completes deployment evidence
+for coordinated activation; the independent full rule matrix follows in v0.3.10, while M7
+measured playtests and broader support remain separate.
+
+## M6 coordinated reconnect activation — 2026-10-17
+
+The locked server gate passes **294 core tests, 147 server tests, and 2 doctests**.
+Rust line coverage is **7,954/8,491 lines, 93.68%**, above the unchanged 80% floor.
+Independent owner/runtime, replay, browser and acceptance-source reviews are clear. Closure
+checks include unavailable-room rejection, deferred admission during catch-up, canceled replacement
+receivers, transactional takeover input fencing, maximal action floors, and legacy replay facts.
+The Node 24.21.0 web gate passes **163 tests**, with **94.82% statements, 89.43% branches,
+94.42% functions, and 97.60% lines**. Contract checks, ESLint, Knip, shuffled coverage, build,
+all ten documented E2E scenarios, and locked dependency policies pass; both npm audits report zero
+vulnerabilities. Initial-countdown App fixtures now satisfy connected-and-ready semantics.
+
+Native Chromium acceptance passes six default scenarios, the complete match/rematch, and two
+reconnect scenarios. Recovery preserves the live bomb, physical position, private seat identity,
+capability and action floor; native input escapes the real fuse and subsequent bomb IDs advance.
+Connected takeover ends the old UI without a retry contest; wrong room/capability are uniformly
+rejected. Dual transport loss followed by eleven real seconds produces terminal rejection and
+usable lobbies. These native runs preceded the final owner scheduling/error fixes; exact-image
+acceptance of the final committed source is a separate required check. Browser fixtures use no
+physics, outcome or clock injection. Native traces are disabled because personal v4 frames carry
+capabilities; public screenshots, redacted summaries and reports remain. Desktop and 320-pixel
+Polish match-result screenshots were visually inspected; accessibility and containment pass.
+
+A final-source native process probe also passes: two room members receive identical full
+ServerStopped terminal snapshots; both members, an unauthenticated game socket and a diagnostic
+socket close cleanly with code 1001. SIGTERM drains and exits with code 0 in 2 ms, and the
+isolated listener is released. Evidence: `/tmp/grenadiers-v039-native-shutdown.json`.
+
+The independent 42-rule audit finds 39 covered and three partial integration cases (RULE06,
+RULE28, RULE38). Their bounded follow-up tests precede complete M6 exit evidence. M7 measured
+playtest/hardening remains outstanding; this activation is not the v0.4.0 milestone.
+
 ## M6 dormant reconnect browser — 2026-10-17
 
 The complete Node 24.21.0 web gate passes **163 tests**, with **94.74% statements, 88.22%

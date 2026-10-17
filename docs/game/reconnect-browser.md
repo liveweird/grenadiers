@@ -1,8 +1,7 @@
-# Dormant v4 reconnect browser
+# V4 reconnect browser
 
-Status: dormant. The application continues to import the v3 panel. This package prepares the
-browser half of coordinated v4 activation without adding a protocol switch, alternate endpoint,
-or a second simulation.
+Status: active. The application imports the v4 panel against the existing gameplay endpoint,
+without a protocol switch, alternate endpoint, or second simulation.
 
 ## Private admission state
 
@@ -13,8 +12,8 @@ client turns an admitted physical body into a snapshot with an empty event list;
 not replayed. Shared `roomState` frames cannot establish identity.
 
 The resume capability exists only in the `GameClient` instance. It is absent from public React
-state, URLs, logs, local storage and session storage. Explicit leave acknowledgement, disconnect,
-and disposal clear it. A normal epoch change resets bomb action IDs; a resumed baseline instead
+state, URLs, logs, local storage and session storage. Explicit leave acknowledgement, terminal
+recovery failure, and disposal clear it. A normal epoch change resets bomb action IDs; a resumed baseline instead
 continues above `lastBombActionId`. A high-water of `2147483647` leaves bomb actions exhausted for
 that epoch. Commands sent before a disconnect are never buffered or resent.
 
@@ -42,11 +41,11 @@ obsolete movement-error protections remain.
 
 ## Presentation
 
-The dormant panel reuses the existing Pixi courtyard and match layout. It renders disconnected and
+The active panel reuses the existing Pixi courtyard and match layout. It renders disconnected and
 expired seat facts, an accessible grace timer, a reconnect status, and a completed result that is
 held beyond its normal deadline while a reserved player is away. Scores and the last world remain
 authoritative; connected-only controls stay disabled during recovery. English and Polish copy use
 the same keys and describe the action available to the player.
 
-Activation must switch the server parser and application panel to v4 together. Until that release,
-v3 remains the only active browser and server gameplay protocol.
+The server parser and application panel use v4 together. V3 remains documented for historical
+compatibility and is not accepted by the active authenticated gameplay socket.

@@ -5,12 +5,14 @@ journal. The test-only replay runner drives the real MatchRuntime, InputMailbox,
 profile, and entropy seam; it does not run a second simulator. Replay inspection remains
 test-only. No endpoint, public export, or persistent journal is available.
 
-A versioned header identifies format 1, M5 lifecycle semantics, classic-v2 physics,
-generator-v1, initial occupied seats, and initial absolute tick zero. Operations record the
+A versioned header identifies format 1, lifecycle profile 2, classic-v2 physics, generator-v1,
+initial occupied seats, and initial absolute tick zero. Operations record the
 authoritative tick and increasing order within that tick: occupation, accepted readiness/
 movement/bomb/rematch, immediate input fencing, tick advancement, committed departure batches,
-and interruption, including one atomic interrupt-plus-depart operation. Actual-start markers contain the real epoch, assignment, and private
-GenerationRecord. Outcomes are recomputed, never injected.
+grace departure, restore/replace, expiry, explicit report flush, and interruption, including one
+atomic interrupt-plus-depart operation. Actual-start markers contain the real epoch, assignment,
+and private GenerationRecord. Outcomes are recomputed, never injected. A test-only profile-1
+adapter replays archived journals through the same runtime and physics helpers.
 
 The runner rejects unsupported profiles, time/order errors, invalid bomb action bounds,
 missing/extra seeds, mismatched assignments, missing start markers, and truncated/incomplete journals.
@@ -29,13 +31,14 @@ Records contain no session/resume credentials, raw frames, socket IDs, or public
 Generation records retain private seeds; their Debug output is redacted. Journal Debug shows
 only header, record count, and status. Private test checkpoints compare complete State,
 MatchLifecycle/series, input mailbox contents, and pending StepReports. Transport publication
-revision is excluded: initial/final notices may advance it without changing gameplay. Current
-uncaptured publication callers operate with empty reports; future callers must preserve that
-invariant or record their report-clearing operation.
+revision is excluded: initial/final notices may advance it without changing gameplay. Profile 2
+records every report-clearing publication as `ReportFlush`; personal admission does not consume
+reports.
 
 Run `cargo test -p grenadiers-server game::rooms::replay`, then `scripts/gates.sh server`
 and `scripts/gates.sh coverage`. Fixtures exercise generated draws, three real wins, rematch,
-cancellation, interruption, TTL refresh, and input-fence ordering, plus malformed journals.
+cancellation, interruption, grace restore/expiry, TTL refresh, input-fence ordering, and an
+archived profile-1 gameplay result, plus malformed journals.
 
 Capture happens only after successful semantic mutation, including unchanged readiness and
 same-direction TTL refreshes. Wrong epoch/phase, rate-limited, duplicate, and out-of-wire-range

@@ -49,7 +49,7 @@ async fn connect(url: &str, token: &str) -> ClientSocket {
     send(
         &mut socket,
         json!({
-            "type":"authenticate", "protocolVersion":3, "token":token
+            "type":"authenticate", "protocolVersion":4, "token":token
         }),
     )
     .await;
@@ -110,7 +110,7 @@ async fn two_members_receive_personalized_admission_and_live_waiting_updates() {
     assert_eq!(joined["room"]["seats"][0]["occupied"], true);
     assert_eq!(joined["room"]["seats"][1]["occupied"], true);
     let update = next(&mut one).await;
-    assert_eq!(update["youSeat"], "one");
+    assert!(update.get("youSeat").is_none());
     assert_eq!(update["room"], joined["room"]);
 
     send(
@@ -244,5 +244,60 @@ async fn disconnect_removes_seat_even_when_no_more_commands_arrive() {
     let update = next(&mut one).await;
     assert_eq!(update["room"]["seats"][1]["occupied"], false);
     assert_eq!(update["room"]["revision"], 4);
+    server.abort();
+}
+
+#[tokio::test]
+async fn connected_resume_replaces_old_socket_with_private_admission_and_close_4001() {
+    let state = AppState::without_database([ORIGIN.to_owned()]);
+    let tokens = [issue_token(&state), issue_token(&state)];
+    let (url, server) = start_server(state).await;
+    let mut original = connect(&url, &tokens[0]).await;
+    send(&mut original, json!({"type":"createRoom", "sequence":1})).await;
+    let created = next(&mut original).await;
+    let room_id = created["room"]["roomId"].clone();
+    let resume_token = created["resumeToken"].clone();
+
+    let mut replacement = connect(&url, &tokens[1]).await;
+    send(
+        &mut replacement,
+        json!({
+            "type":"resumeRoom", "sequence":1,
+            "roomId":room_id, "resumeToken":resume_token
+        }),
+    )
+    .await;
+    let admitted = next(&mut replacement).await;
+    assert_eq!(admitted["type"], "admitted");
+    assert_eq!(admitted["youSeat"], "one");
+    assert_eq!(admitted["resumeToken"], created["resumeToken"]);
+
+    let replaced = next(&mut original).await;
+    assert_eq!(replaced, json!({"type":"seatReplaced", "roomId":room_id}));
+    let close = within(original.next()).await.unwrap().unwrap();
+    assert!(matches!(close, Message::Close(Some(frame)) if u16::from(frame.code) == 4001));
+    server.abort();
+}
+
+#[tokio::test]
+async fn unavailable_resume_is_uniformly_rejected_on_the_wire() {
+    let state = AppState::without_database([ORIGIN.to_owned()]);
+    let token = issue_token(&state);
+    let (url, server) = start_server(state).await;
+    let mut socket = connect(&url, &token).await;
+    send(
+        &mut socket,
+        json!({
+            "type":"resumeRoom", "sequence":1,
+            "roomId":"00000000000000000000000000000001",
+            "resumeToken":"0000000000000000000000000000000000000000000000000000000000000000"
+        }),
+    )
+    .await;
+
+    let rejected = next(&mut socket).await;
+    assert_eq!(rejected["type"], "error");
+    assert_eq!(rejected["code"], "resumeRejected");
+    assert_eq!(rejected["sequence"], 1);
     server.abort();
 }

@@ -11,7 +11,7 @@ async fn admission_validates_room_epoch_binding_and_generation() {
     let first_binding = binding(1, 7);
     let first = join(&value.handle, first_binding).await;
     assert_eq!(first.seat, grenadiers_core::protocol::Seat::One);
-    assert_eq!(first.view.room_id, first.room_id);
+    assert_eq!(first.room.room_id, first.room_id);
     assert!(matches!(
         &*first.notices.borrow(),
         super::MatchOwnerNotice::Publication(_)
@@ -98,9 +98,9 @@ async fn canceled_queued_join_does_not_mutate_before_the_next_join_in_the_same_b
 
     let admission = accepted.await.unwrap().unwrap();
     assert_eq!(admission.seat, grenadiers_core::protocol::Seat::One);
-    assert_eq!(admission.view.revision.get(), 2);
-    assert!(admission.view.seats[0].occupied);
-    assert!(!admission.view.seats[1].occupied);
+    assert_eq!(admission.room.revision.get(), 2);
+    assert!(admission.room.seats[0].occupied);
+    assert!(!admission.room.seats[1].occupied);
 
     task.abort();
     let _ = task.await;

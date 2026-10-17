@@ -18,7 +18,8 @@
     "check:scenarios": "node scripts/check-scenarios.mjs",
     "lint": "eslint . --max-warnings 0",
     "knip": "knip",
-    "test:matches": "playwright test --config playwright.matches.config.ts"
+    "test:matches": "playwright test --config playwright.matches.config.ts",
+    "test:reconnect": "playwright test --config playwright.reconnect.config.ts"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.13.0",

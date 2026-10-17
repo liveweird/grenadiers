@@ -11,7 +11,8 @@ outcomes](combat.md), including explicit public projections/events. M3 completes
 [gameplay contracts](protocol.md), anonymous sessions, authenticated [rooms](rooms.md),
 authoritative scheduling, and the [playable browser duel](browser.md). The current preview
 plays generated classic-v2 first-to-three matches with upgrades, automatic round resets,
-and consensual rematch. Reconnect, bots, larger matches, matchmaking, and durable stats follow.
+consensual rematch, and process-local reserved-seat reconnect. Bots, larger matches,
+matchmaking, cross-process recovery, and durable stats follow.
 
 Start with [the rules specification](rules.md) and the
 [implementation and release plan](implementation-plan.md). Historical examples and optional extensions

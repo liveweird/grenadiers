@@ -3,15 +3,17 @@
 A browser-based multiplayer game inspired by classic Bomberman/Dynablaster.
 The initial playable profile supports two human players. Bots and larger matches follow later.
 
-The **two-player classic match preview is playable**. Create a room, share its invitation,
+The **two-player classic match is playable**. Create a room, share its invitation,
 join from another browser, and both choose Ready. Select the courtyard to move with arrows
 or W/A/S/D and plant bombs with Space. Rust owns the 60 Hz simulation; PixiJS draws public
 20 Hz snapshots while React/Mantine provides the room controls, scores, phase timers, results, and rematch.
 
 Win three rounds to take the match. Draws award no score; automatic countdowns reset the
-world between rounds, and both players can consent to a rematch. The preview requires a
-keyboard and keeps active state in memory. Reconnect, matchmaking, durable stats, bots, and
-larger matches follow later. Read the [browser guide](docs/game/browser.md), [game specification](docs/game/README.md),
+world between rounds, and both players can consent to a rematch. A dropped tab can restore its
+reserved seat for 600 server ticks using a private in-memory capability; a connected takeover
+fences the old tab. The match requires a keyboard and keeps active state and capabilities in
+one server process and browser memory. Matchmaking, durable stats, bots, and larger matches
+follow later. Read the [browser guide](docs/game/browser.md), [game specification](docs/game/README.md),
 and [implementation/release plan](docs/game/implementation-plan.md) for behavior and scope.
 
 ## Stack and layout
@@ -97,7 +99,7 @@ scripts/gates.sh all           # Rust, contracts, web, and E2E static gates
 scripts/gates.sh server        # rustfmt, Clippy, tests, build (locked)
 scripts/gates.sh web           # contract drift, lint, dead code, coverage, build
 scripts/gates.sh e2e           # lint, typecheck, dead code, scenario parity
-scripts/gates.sh browser       # Playwright; requires the running composed stack
+scripts/gates.sh browser       # default Playwright scenarios; requires the composed stack
 scripts/gates.sh k8s           # Kustomize render + strict Kubernetes schema validation
 scripts/gates.sh security      # cargo-deny and npm dependency audits
 scripts/gates.sh coverage      # cargo-llvm-cov line coverage floor
@@ -108,6 +110,8 @@ Generate frontend contracts with `npm --prefix web run gen:api` and
 Commit generated files with contract changes. The [gameplay protocol](docs/game/protocol.md)
 defines authentication, room controls, and public snapshot/event messages. Session issuance,
 authenticated sockets, room admission, authoritative rounds, and browser controls are implemented.
+Reconnect acceptance runs separately with
+`E2E_MATCH_FIXTURE=arena-v1-matches npm --prefix e2e run test:reconnect`.
 Coverage tooling installation and test conventions are in [docs/testing.md](docs/testing.md).
 
 ## Configuration

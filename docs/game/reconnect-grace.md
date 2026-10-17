@@ -2,8 +2,8 @@
 
 `core::room::reconnect::ReconnectGrace` records two seats as Vacant, Connected,
 Disconnected with an absolute expiry tick, or Expired. This component has no sockets,
-credentials, serialization, or match-outcome policy. Active gameplay v3 still interrupts
-on transport loss until coordinated reconnect activation.
+credentials, serialization, or match-outcome policy. The active v4 owner integrates these facts
+with private capabilities, lifecycle outcomes, and settled publication.
 
 Occupy a vacant seat at the authoritative global tick. Its first `disconnect(seat, tick)`
 sets a checked `tick + 600` deadline; repeated loss retains that deadline. `resume` succeeds

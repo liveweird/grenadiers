@@ -1,6 +1,6 @@
 # ADR 0019: Reserved-seat reconnect and private replay evidence
 
-Status: accepted, staged in v0.3.1–v0.3.5; active transport remains v3 until coordinated activation.
+Status: accepted; staged in v0.3.1–v0.3.8 and activated with gameplay v4 in v0.3.9.
 
 ## Decision
 
@@ -19,13 +19,14 @@ disconnected opponent can win after explicit abandonment. Prematch loss releases
 Hold completed rounds while disconnected; canceled inter-countdowns advance only command epoch.
 Return starts a fresh countdown on the next idle tick. Preexisting terminal reservations keep
 their original deadline; new post-final losses create no new grace. Rematch requires both
-connected. Keep the legacy v3 interruption path until the v4 server/browser switch.
+connected. The coordinated v4 server/browser switch replaces the legacy v3 interruption path; v3 DTOs
+remain historical compatibility references.
 
 Capture accepted semantic operations privately, including immediate input fences, actual round
 seeds and boundary lifecycle events. Replay uses the real runtime. The 60,000-record journal
 stays below 4 MiB per room; truncation and irreproducible construction failures are explicit
 and cannot certify a complete replay. Compare full semantic private checkpoints, excluding
-transport-only publication revision. Future report-draining operations must be recorded.
+transport-only publication revision. Profile 2 explicitly records report-draining operations; profile 1 retains its original flush semantics.
 
 ## Consequences
 

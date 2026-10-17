@@ -26,6 +26,10 @@ pub(super) enum InputError {
 }
 
 impl InputMailbox {
+    pub(super) fn last_bomb_action(&self, seat: SeatId) -> Option<u32> {
+        self.seats[seat.index()].last_bomb_action
+    }
+
     pub(super) fn movement(
         &mut self,
         seat: SeatId,

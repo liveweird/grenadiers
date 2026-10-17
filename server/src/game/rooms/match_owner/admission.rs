@@ -1,4 +1,4 @@
-use grenadiers_core::protocol::RoomId;
+use grenadiers_core::protocol::{Counter, RoomId, v4::ResumeToken};
 use tokio::sync::oneshot;
 
 use super::super::{
@@ -8,8 +8,37 @@ use super::super::{
 use super::types::{MatchAdmission, MatchOwnerHandle, OwnerCommand, Reply};
 
 impl MatchOwnerHandle {
+    pub(in crate::game::rooms) fn join_sequenced(
+        &self,
+        binding: BindingKey,
+        sequence: Counter,
+    ) -> Reply<MatchAdmission> {
+        self.submit(|reply| OwnerCommand::Join {
+            binding,
+            sequence,
+            reply,
+        })
+    }
+
+    #[cfg(test)]
     pub(in crate::game::rooms) fn join(&self, binding: BindingKey) -> Reply<MatchAdmission> {
-        self.submit(|reply| OwnerCommand::Join { binding, reply })
+        self.join_sequenced(binding, Counter::new(1).expect("test sequence"))
+    }
+
+    pub(in crate::game::rooms) fn resume(
+        &self,
+        binding: BindingKey,
+        sequence: Counter,
+        room_id: RoomId,
+        token: ResumeToken,
+    ) -> Reply<MatchAdmission> {
+        self.submit(|reply| OwnerCommand::Resume {
+            binding,
+            sequence,
+            room_id,
+            token,
+            reply,
+        })
     }
 
     pub(in crate::game::rooms) fn action(
@@ -54,7 +83,7 @@ impl MatchOwnerHandle {
                     command.reject(RoomError::RateLimited);
                 }
                 tokio::sync::mpsc::error::TrySendError::Closed(command) => {
-                    command.reject(RoomError::RoomNotFound);
+                    command.reject_unavailable();
                 }
             }
         }
@@ -65,8 +94,10 @@ impl MatchOwnerHandle {
     pub(in crate::game::rooms) fn submit_canceled_join(&self, binding: BindingKey) {
         let (reply, response) = oneshot::channel();
         drop(response);
-        let _ = self
-            .commands
-            .try_send(OwnerCommand::Join { binding, reply });
+        let _ = self.commands.try_send(OwnerCommand::Join {
+            binding,
+            sequence: Counter::new(1).expect("test sequence"),
+            reply,
+        });
     }
 }

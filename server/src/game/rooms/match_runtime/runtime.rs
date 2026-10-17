@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use grenadiers_core::{
     game::{Direction, GenerationRecord, SeatId, State, StepReport, Tick},
-    protocol::v3::RoomView,
+    protocol::v4::RoomView,
     room::{DepartureReason, InterruptReason, MatchChange, MatchLifecycle, MatchPhase},
 };
 
@@ -11,6 +11,7 @@ use super::error::{MatchRuntimeError, map_input_error, map_lifecycle_error};
 use super::publication;
 use crate::round_seed::RoundSeedSource;
 
+pub(super) mod admission;
 mod capture;
 mod maintenance;
 mod owner_helpers;
@@ -44,10 +45,10 @@ pub(in crate::game::rooms) struct MatchRuntime {
     journal: super::super::replay::Journal,
 }
 
-pub(super) struct SimRound {
-    pub(super) epoch: u64,
-    pub(super) state: State,
-    pub(super) generation_record: Option<GenerationRecord>,
+pub(in crate::game::rooms) struct SimRound {
+    pub(in crate::game::rooms) epoch: u64,
+    pub(in crate::game::rooms) state: State,
+    pub(in crate::game::rooms) generation_record: Option<GenerationRecord>,
 }
 
 impl MatchRuntime {
@@ -60,15 +61,6 @@ impl MatchRuntime {
     }
 
     #[cfg(test)]
-    pub(super) fn sim(&self) -> Option<&SimRound> {
-        self.sim.as_ref()
-    }
-
-    #[cfg(test)]
-    pub(super) fn set_revision(&mut self, revision: u32) {
-        self.revision = revision;
-    }
-
     pub(in crate::game::rooms) fn occupy(
         &mut self,
         seat: SeatId,
@@ -162,24 +154,50 @@ impl MatchRuntime {
         self.notice_for_change(change, true)
     }
 
+    #[cfg(test)]
     pub(in crate::game::rooms) fn tick(
         &mut self,
+    ) -> Result<Option<MatchNotice>, MatchRuntimeError> {
+        self.settle_boundary([None; 2])
+    }
+
+    pub(in crate::game::rooms) fn settle_boundary(
+        &mut self,
+        departures: [Option<DepartureReason>; 2],
     ) -> Result<Option<MatchNotice>, MatchRuntimeError> {
         let tick = self.lifecycle.tick();
         let previous_phase = self.lifecycle.phase();
         self.ensure_revision()?;
-        let result = match previous_phase {
-            MatchPhase::Running => self.running_tick(),
-            MatchPhase::Interrupted { .. } => Ok(None),
-            phase => self.idle_tick(phase),
-        };
-        if result.is_ok() {
+        let has_departures = departures.iter().any(Option::is_some);
+        let mut publish = false;
+        if previous_phase == MatchPhase::Running {
+            publish |= self.running_tick()?;
             self.capture_tick(tick, previous_phase);
+            publish |= self.apply_grace_departures(departures)?;
+        } else if !matches!(previous_phase, MatchPhase::Interrupted { .. }) {
+            publish |= self.apply_grace_departures(departures)?;
+            publish |= self.idle_tick(previous_phase)?;
+            self.capture_tick(tick, previous_phase);
+        } else {
+            return Ok(None);
         }
-        result
+        let expiry = self
+            .lifecycle
+            .expire_reconnect_grace()
+            .map_err(map_lifecycle_error)?;
+        self.capture(
+            self.lifecycle.tick(),
+            super::super::replay::Operation::Expiry,
+        );
+        publish |= expiry != MatchChange::Unchanged || has_departures;
+        if publish {
+            self.publish_current().map(Some)
+        } else {
+            Ok(None)
+        }
     }
 
-    fn running_tick(&mut self) -> Result<Option<MatchNotice>, MatchRuntimeError> {
+    fn running_tick(&mut self) -> Result<bool, MatchRuntimeError> {
         let next_tick = self
             .lifecycle
             .tick()
@@ -204,32 +222,32 @@ impl MatchRuntime {
         self.reports.push(report);
         if result.is_some() {
             self.inputs.clear_pending();
-            return self.publish_snapshot().map(Some);
+            return Ok(true);
         }
         if self.reports.len() == REPORTS_PER_SNAPSHOT {
-            self.publish_snapshot().map(Some)
+            Ok(true)
         } else if matches!(change, MatchChange::Changed) {
-            Ok(None)
+            Ok(false)
         } else {
             Err(MatchRuntimeError::Publication)
         }
     }
 
-    fn idle_tick(
-        &mut self,
-        previous_phase: MatchPhase,
-    ) -> Result<Option<MatchNotice>, MatchRuntimeError> {
+    fn idle_tick(&mut self, previous_phase: MatchPhase) -> Result<bool, MatchRuntimeError> {
         let change = self
             .lifecycle
             .advance_idle_tick()
             .map_err(map_lifecycle_error)?;
         match change {
-            MatchChange::RoundStarted(assignment) => self.start_round(assignment).map(Some),
+            MatchChange::RoundStarted(assignment) => {
+                self.start_round(assignment)?;
+                Ok(true)
+            }
             MatchChange::CountdownStarted
                 if matches!(previous_phase, MatchPhase::Result { .. }) =>
             {
-                self.clear_round();
-                self.publish_view().map(Some)
+                self.inputs.clear_pending();
+                Ok(true)
             }
             _ if self.lifecycle.tick().0.is_multiple_of(3)
                 && matches!(
@@ -239,16 +257,16 @@ impl MatchRuntime {
                         | MatchPhase::MatchResult { .. }
                 ) =>
             {
-                self.publish_current().map(Some)
+                Ok(true)
             }
-            _ => Ok(None),
+            _ => Ok(false),
         }
     }
 
     fn start_round(
         &mut self,
         assignment: grenadiers_core::game::RoundAssignment,
-    ) -> Result<MatchNotice, MatchRuntimeError> {
+    ) -> Result<(), MatchRuntimeError> {
         if !self.reports.is_empty() {
             return self.fail_round_construction();
         }
@@ -271,53 +289,40 @@ impl MatchRuntime {
             state: initial.state,
             generation_record: initial.generation_record,
         });
-        self.publish_snapshot()
+        Ok(())
     }
 
-    fn fail_round_construction(&mut self) -> Result<MatchNotice, MatchRuntimeError> {
+    fn fail_round_construction(&mut self) -> Result<(), MatchRuntimeError> {
         self.sim = None;
         self.reports.clear();
         self.inputs.clear_pending();
         self.lifecycle
             .interrupt(InterruptReason::InternalError)
             .map_err(map_lifecycle_error)?;
-        self.publish_view()
+        Ok(())
     }
 
-    pub(in crate::game::rooms) fn depart_batch(
+    fn apply_grace_departures(
         &mut self,
         departures: [Option<DepartureReason>; 2],
-    ) -> Result<Option<MatchNotice>, MatchRuntimeError> {
-        let tick = self.lifecycle.tick();
-        self.ensure_revision()?;
+    ) -> Result<bool, MatchRuntimeError> {
+        if departures.iter().all(Option::is_none) {
+            return Ok(false);
+        }
         let change = self
             .lifecycle
-            .depart_batch(departures)
+            .depart_with_grace(departures)
             .map_err(map_lifecycle_error)?;
         for (seat, departure) in SeatId::ALL.into_iter().zip(departures) {
             if departure.is_some() {
                 self.inputs.stop(seat);
             }
         }
-        let notice = self.notice_for_change(change, true)?;
-        self.capture(tick, super::super::replay::Operation::Depart(departures));
-        Ok(notice)
-    }
-
-    pub(in crate::game::rooms) fn interrupt(
-        &mut self,
-        reason: InterruptReason,
-    ) -> Result<Option<MatchNotice>, MatchRuntimeError> {
-        let tick = self.lifecycle.tick();
-        self.ensure_revision()?;
-        let change = self
-            .lifecycle
-            .interrupt(reason)
-            .map_err(map_lifecycle_error)?;
-        self.inputs.clear_pending();
-        let notice = self.notice_for_change(change, true)?;
-        self.capture(tick, super::super::replay::Operation::Interrupt(reason));
-        Ok(notice)
+        self.capture(
+            self.lifecycle.tick(),
+            super::super::replay::Operation::GraceDepart(departures),
+        );
+        Ok(change != MatchChange::Unchanged)
     }
 
     fn validate_actor(&self, seat: SeatId, expected_epoch: u64) -> Result<(), MatchRuntimeError> {
@@ -351,7 +356,12 @@ impl MatchRuntime {
     }
 
     fn publish_current(&mut self) -> Result<MatchNotice, MatchRuntimeError> {
-        if self.sim.is_some() {
+        if self.sim.is_some()
+            && matches!(
+                self.lifecycle.phase(),
+                MatchPhase::Running | MatchPhase::Result { .. } | MatchPhase::MatchResult { .. }
+            )
+        {
             self.publish_snapshot()
         } else {
             self.publish_view()
@@ -374,6 +384,12 @@ impl MatchRuntime {
         let notice =
             publication::snapshot(&self.identity, &self.lifecycle, next, sim, &self.reports)?;
         self.revision = next;
+        if !self.reports.is_empty() {
+            self.capture(
+                self.lifecycle.tick(),
+                super::super::replay::Operation::ReportFlush,
+            );
+        }
         self.reports.clear();
         Ok(notice)
     }

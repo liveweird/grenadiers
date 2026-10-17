@@ -1,7 +1,7 @@
 # Pure match lifecycle
 
 `core::room::MatchLifecycle` composes occupancy, readiness, the absolute clock, command epochs,
-and `MatchSeries`. The production v3 match owner and runtime use this lifecycle. The archived
+and `MatchSeries`. The production v4 match owner and runtime use this lifecycle. The archived
 `RoomLifecycle` remains covered for the historical single-round model. This API owns no
 physics or I/O.
 
@@ -21,7 +21,7 @@ afterward they forfeit or abandon, while transport loss interrupts. A finalized 
 final. `interrupt` handles the four nonparticipant error/shutdown reasons; explicit departures
 must use the batch API. Prematch interruption has no invented match outcome.
 
-The dormant reconnect path uses `depart_with_grace` with the complete two-seat boundary batch.
+The active reconnect path uses `depart_with_grace` with the complete two-seat boundary batch.
 Before the first actual start, every departure releases its seat immediately. After start,
 transport loss reserves the participant for 600 authoritative ticks and duplicate loss keeps
 the original deadline. `resume_connection` succeeds strictly before that seat's deadline.
@@ -29,7 +29,7 @@ the original deadline. `resume_connection` succeeds strictly before that seat's 
 table without inventing a round result: a connected opponent wins a single expiry, two expired
 participants abandon, and an expired participant waits while the opponent remains eligible but
 disconnected. Explicit departure requires a connected seat; an eligible disconnected opponent
-still wins that forfeit. Existing `depart_batch` retains the v3 interruption policy.
+still wins that forfeit. The historical `depart_batch` behavior remains covered by profile-1 replay.
 
 Result holds last at least 180 ticks and remain in Result while either reservation is not
 connected. Inter-round loss cancels the countdown once, advances the command epoch without

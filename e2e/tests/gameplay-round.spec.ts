@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import type { GameServerMessage } from '../../web/src/game/v3/schema'
+import type { GameServerMessage } from '../../web/src/game/v4/schema'
 import { gameFrames, openGame, roomFrame, sendGame } from './support/game'
 
 type Snapshot = Extract<GameServerMessage, { type: 'snapshot' }>

@@ -1,4 +1,4 @@
-use std::{future::pending, time::Duration};
+use std::{collections::VecDeque, future::pending, time::Duration};
 
 use grenadiers_core::room::MatchPhase;
 use tokio::time::{Instant, sleep_until};
@@ -17,10 +17,13 @@ pub(super) async fn run(mut owner: PreparedMatchOwner) {
         owner.initial,
         owner.notices,
         owner.created_at + LOBBY_LIFETIME,
+        owner.random_fill,
     );
+    let mut admissions = VecDeque::with_capacity(COMMAND_CAPACITY);
+    let mut catching_up = false;
     loop {
         if shutdown_requested(&mut owner.shutdown) {
-            stop_for_shutdown(&mut driver, &mut owner.receiver);
+            stop_for_shutdown(&mut driver, &mut owner.receiver, &mut admissions);
             return;
         }
         if close_at_boundaries(&mut driver) {
@@ -36,7 +39,7 @@ pub(super) async fn run(mut owner: PreparedMatchOwner) {
             Deadline,
         }
         let wake = tokio::select! {
-            command = owner.receiver.recv() => Wake::Command(command),
+            command = receive_commands(&mut owner.receiver, !catching_up) => Wake::Command(command),
             changed = owner.shutdown.changed() => {
                 let _ = changed;
                 Wake::Shutdown
@@ -47,7 +50,7 @@ pub(super) async fn run(mut owner: PreparedMatchOwner) {
         };
 
         if matches!(wake, Wake::Shutdown) || shutdown_requested(&mut owner.shutdown) {
-            stop_for_shutdown(&mut driver, &mut owner.receiver);
+            stop_for_shutdown(&mut driver, &mut owner.receiver, &mut admissions);
             return;
         }
         if close_at_boundaries(&mut driver) {
@@ -55,11 +58,14 @@ pub(super) async fn run(mut owner: PreparedMatchOwner) {
         }
         match wake {
             Wake::Command(None) => {
+                reject_admissions(&mut admissions);
                 driver.fail();
                 return;
             }
             Wake::Command(Some(command)) => {
-                if driver.command(command, Instant::now()).is_err() {
+                if command.is_admission() {
+                    stage_admission(&mut admissions, command);
+                } else if driver.command(command, Instant::now()).is_err() {
                     driver.fail();
                     return;
                 }
@@ -67,8 +73,11 @@ pub(super) async fn run(mut owner: PreparedMatchOwner) {
             Wake::Clock | Wake::Deadline | Wake::Shutdown => {}
         }
         for _ in 1..COMMAND_CAPACITY {
+            if catching_up {
+                break;
+            }
             if shutdown_requested(&mut owner.shutdown) {
-                stop_for_shutdown(&mut driver, &mut owner.receiver);
+                stop_for_shutdown(&mut driver, &mut owner.receiver, &mut admissions);
                 return;
             }
             if close_at_boundaries(&mut driver) {
@@ -76,7 +85,9 @@ pub(super) async fn run(mut owner: PreparedMatchOwner) {
             }
             match owner.receiver.try_recv() {
                 Ok(command) => {
-                    if driver.command(command, Instant::now()).is_err() {
+                    if command.is_admission() {
+                        stage_admission(&mut admissions, command);
+                    } else if driver.command(command, Instant::now()).is_err() {
                         driver.fail();
                         return;
                     }
@@ -92,6 +103,7 @@ pub(super) async fn run(mut owner: PreparedMatchOwner) {
             driver.runtime.lifecycle().phase(),
             MatchPhase::Interrupted { .. }
         ) {
+            reject_admissions(&mut admissions);
             continue;
         }
 
@@ -104,12 +116,15 @@ pub(super) async fn run(mut owner: PreparedMatchOwner) {
                 )
                 .is_err()
             {
+                reject_admissions(&mut admissions);
                 driver.fail();
                 return;
             }
             if driver.is_empty() {
+                reject_admissions(&mut admissions);
                 return;
             }
+            reject_admissions(&mut admissions);
             continue;
         }
         let mut completed = 0;
@@ -118,26 +133,15 @@ pub(super) async fn run(mut owner: PreparedMatchOwner) {
                 >= tick_deadline(owner.created_at, driver.runtime.lifecycle().tick().0 + 1)
         {
             if shutdown_requested(&mut owner.shutdown) {
-                stop_for_shutdown(&mut driver, &mut owner.receiver);
+                stop_for_shutdown(&mut driver, &mut owner.receiver, &mut admissions);
                 return;
             }
-            let running = driver.runtime.lifecycle().phase() == MatchPhase::Running;
-            let result = if running {
-                driver
-                    .tick(Instant::now())
-                    .and_then(|()| driver.commit_departures(Instant::now()).map(|_| ()))
-            } else {
-                match driver.commit_departures(Instant::now()) {
-                    Ok(committed) if committed && driver.is_empty() => return,
-                    Ok(_) => driver.tick(Instant::now()),
-                    Err(error) => Err(error),
-                }
-            };
+            let result = driver.tick(Instant::now());
             if result.is_err() {
                 driver.fail();
                 return;
             }
-            if running && driver.is_empty() {
+            if driver.is_empty() {
                 return;
             }
             completed += 1;
@@ -151,9 +155,49 @@ pub(super) async fn run(mut owner: PreparedMatchOwner) {
                 return;
             }
         }
-        if completed == MAX_CATCH_UP {
+        if completed == MAX_CATCH_UP
+            && Instant::now()
+                >= tick_deadline(owner.created_at, driver.runtime.lifecycle().tick().0 + 1)
+        {
+            catching_up = true;
             tokio::task::yield_now().await;
+            continue;
         }
+        catching_up = false;
+        if !driver.has_pending() {
+            while let Some(command) = admissions.pop_front() {
+                if driver.command(command, Instant::now()).is_err() {
+                    reject_admissions(&mut admissions);
+                    driver.fail();
+                    return;
+                }
+            }
+        }
+    }
+}
+
+pub(super) fn stage_admission(admissions: &mut VecDeque<OwnerCommand>, command: OwnerCommand) {
+    if admissions.len() == COMMAND_CAPACITY {
+        command.reject(super::super::types::RoomError::RateLimited);
+    } else {
+        admissions.push_back(command);
+    }
+}
+
+async fn receive_commands(
+    receiver: &mut tokio::sync::mpsc::Receiver<OwnerCommand>,
+    enabled: bool,
+) -> Option<OwnerCommand> {
+    if enabled {
+        receiver.recv().await
+    } else {
+        pending().await
+    }
+}
+
+fn reject_admissions(admissions: &mut VecDeque<OwnerCommand>) {
+    while let Some(command) = admissions.pop_front() {
+        command.reject_unavailable();
     }
 }
 
@@ -179,8 +223,12 @@ fn close_at_boundaries(driver: &mut Driver) -> bool {
 fn stop_for_shutdown(
     driver: &mut Driver,
     receiver: &mut tokio::sync::mpsc::Receiver<OwnerCommand>,
+    admissions: &mut VecDeque<OwnerCommand>,
 ) {
     driver.settle_shutdown(Instant::now());
+    while let Some(command) = admissions.pop_front() {
+        command.reject(super::super::types::RoomError::RoomNotFound);
+    }
     while let Ok(command) = receiver.try_recv() {
         command.reject(super::super::types::RoomError::RoomNotFound);
     }

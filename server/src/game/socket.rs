@@ -8,13 +8,11 @@ use axum::{
     http::{HeaderMap, StatusCode, Uri, header::RETRY_AFTER},
     response::Response,
 };
-use grenadiers_core::protocol::v3::{
+use grenadiers_core::protocol::v4::{
     GAMEPLAY_PROTOCOL_VERSION, GameClientMessage, GameServerMessage, GameplayVersion,
-    encode_server_message, parse_client_message,
+    V4ErrorCode as ErrorCode, encode_server_message, parse_client_message,
 };
-use grenadiers_core::protocol::{
-    Counter, ErrorCode, MAX_CLIENT_MESSAGE_BYTES, ProtocolVersionInput,
-};
+use grenadiers_core::protocol::{Counter, MAX_CLIENT_MESSAGE_BYTES, ProtocolVersionInput};
 use tokio::{
     sync::OwnedSemaphorePermit,
     time::{Instant, timeout, timeout_at},
@@ -209,6 +207,7 @@ pub(super) fn command_sequence(message: &GameClientMessage) -> Option<Counter> {
         GameClientMessage::Authenticate { .. } => None,
         GameClientMessage::CreateRoom { sequence }
         | GameClientMessage::JoinRoom { sequence, .. }
+        | GameClientMessage::ResumeRoom { sequence, .. }
         | GameClientMessage::Ready { sequence, .. }
         | GameClientMessage::Movement { sequence, .. }
         | GameClientMessage::PlaceBomb { sequence, .. }

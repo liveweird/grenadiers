@@ -56,4 +56,46 @@ impl MatchRuntime {
         );
         Ok(notice)
     }
+    #[cfg(test)]
+    pub(in crate::game::rooms) fn depart_batch(
+        &mut self,
+        departures: [Option<DepartureReason>; 2],
+    ) -> Result<Option<MatchNotice>, MatchRuntimeError> {
+        let tick = self.lifecycle.tick();
+        self.ensure_revision()?;
+        let change = self
+            .lifecycle
+            .depart_batch(departures)
+            .map_err(map_lifecycle_error)?;
+        for (seat, departure) in SeatId::ALL.into_iter().zip(departures) {
+            if departure.is_some() {
+                self.inputs.stop(seat);
+            }
+        }
+        let notice = self.notice_for_change(change, true)?;
+        self.capture(
+            tick,
+            crate::game::rooms::replay::Operation::Depart(departures),
+        );
+        Ok(notice)
+    }
+
+    pub(in crate::game::rooms) fn interrupt(
+        &mut self,
+        reason: InterruptReason,
+    ) -> Result<Option<MatchNotice>, MatchRuntimeError> {
+        let tick = self.lifecycle.tick();
+        self.ensure_revision()?;
+        let change = self
+            .lifecycle
+            .interrupt(reason)
+            .map_err(map_lifecycle_error)?;
+        self.inputs.clear_pending();
+        let notice = self.notice_for_change(change, true)?;
+        self.capture(
+            tick,
+            crate::game::rooms::replay::Operation::Interrupt(reason),
+        );
+        Ok(notice)
+    }
 }

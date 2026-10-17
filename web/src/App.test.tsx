@@ -3,7 +3,7 @@ import { act, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { GameArenaProps } from './game/arena/types'
-import type { RoomPhase, RoomView, Snapshot } from './game/v3/schema'
+import type { GameState, RoomPhase, RoomView, Snapshot } from './game/v4/schema'
 import i18n from './i18n'
 import { App } from './App'
 
@@ -18,6 +18,7 @@ vi.mock('./game/arena/GameArena', () => ({
 }))
 
 const token = 'a'.repeat(64)
+const resumeToken = 'c'.repeat(64)
 const roomId = 'b'.repeat(32)
 
 class AppSocketStub {
@@ -54,12 +55,12 @@ function room(revision: number, phase: RoomPhase = { type: 'waiting' }): RoomVie
     roundNumber: ['running', 'result', 'matchResult'].includes(phase.type) ? 1 : 0,
     scores: { one: 0, two: phase.type === 'result' ? 1 : 0 },
     lastRound: phase.type === 'result' ? {
-      roundId: 1, roundNumber: 1, endedAt: phase.nextCountdownAt - 180,
+      roundId: 1, roundNumber: 1, endedAt: phase.holdUntil - 180,
       result: { type: 'winner', seat: 'two' },
     } : null,
     seats: [
-      { seat: 'one', occupied: true, ready: false, rematchReady: false },
-      { seat: 'two', occupied: true, ready: false, rematchReady: false },
+      { seat: 'one', occupied: true, ready: false, rematchReady: false, connection: { type: 'connected' } },
+      { seat: 'two', occupied: true, ready: false, rematchReady: false, connection: { type: 'connected' } },
     ],
     phase,
   }
@@ -91,6 +92,13 @@ function snapshot(revision: number, phase: RoomPhase = { type: 'running' }): Sna
   }
 }
 
+function admit(socket: AppSocketStub, currentRoom: RoomView, state: GameState | null = null) {
+  socket.message({
+    type: 'admitted', sequence: 1, room: currentRoom, youSeat: 'one', resumeToken,
+    lastBombActionId: null, state,
+  })
+}
+
 function renderApp() {
   return render(<MantineProvider env="test"><App /></MantineProvider>)
 }
@@ -104,8 +112,8 @@ async function beginRoom(user: ReturnType<typeof userEvent.setup>, action: 'crea
   await waitFor(() => expect(appSockets.filter((socket) => socket.url.endsWith('/api/v1/game/ws'))).toHaveLength(1))
   const socket = appSockets.find((candidate) => candidate.url.endsWith('/api/v1/game/ws'))!
   act(() => socket.emit('open'))
-  expect(JSON.parse(socket.sent[0])).toEqual({ type: 'authenticate', protocolVersion: 3, token })
-  act(() => socket.message({ type: 'authenticated', protocolVersion: 3 }))
+  expect(JSON.parse(socket.sent[0])).toEqual({ type: 'authenticate', protocolVersion: 4, token })
+  act(() => socket.message({ type: 'authenticated', protocolVersion: 4 }))
   return socket
 }
 
@@ -128,23 +136,25 @@ describe('App game flow', () => {
     const socket = await beginRoom(user)
     expect(JSON.parse(socket.sent[1])).toEqual({ type: 'createRoom', sequence: 1 })
 
-    act(() => socket.message({ type: 'roomState', room: room(1), youSeat: 'one' }))
+    act(() => admit(socket, room(1)))
     expect(await screen.findByLabelText('Room invitation code')).toHaveTextContent('ABCDEFGH')
-    expect(within(screen.getByRole('list', { name: 'Players' })).getByText('Player one')).toBeVisible()
+    const players = screen.getByRole('list', { name: 'Players' })
+    expect(within(players).getByText('Player one')).toBeVisible()
+    expect(within(players).getAllByText('Not ready')).toHaveLength(2)
     expect(screen.getByLabelText('Round wins for Player one')).toHaveTextContent('0')
     await user.click(screen.getByRole('button', { name: 'Ready' }))
     expect(JSON.parse(socket.sent[2])).toEqual({
       type: 'ready', ready: true, sequence: 2, roomId, roundId: 1,
     })
-    act(() => socket.message({
-      type: 'roomState', room: room(2, { type: 'countdown', kind: 'initial', endsAt: 182 }), youSeat: 'one',
-    }))
+    const countdown = room(2, { type: 'countdown', kind: 'initial', endsAt: 182 })
+    countdown.seats.forEach((seat) => { seat.ready = true })
+    act(() => socket.message({ type: 'roomState', room: countdown }))
     expect(screen.getByLabelText('Phase time remaining')).toHaveTextContent('0:03')
-    expect(screen.getAllByText('Not ready')).toHaveLength(2)
+    expect(within(players).getAllByText('Ready')).toHaveLength(2)
 
     await user.click(screen.getByRole('button', { name: 'Leave room' }))
     const leave = JSON.parse(socket.sent[3]) as { sequence: number }
-    expect(screen.getByRole('button', { name: 'Ready' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Leave room' })).toBeDisabled()
     act(() => socket.message({ type: 'leftRoom', roomId, sequence: leave.sequence + 1 }))
     expect(screen.getByLabelText('Room invitation code')).toBeVisible()
     act(() => socket.message({ type: 'leftRoom', roomId, sequence: leave.sequence }))
@@ -172,7 +182,7 @@ describe('App game flow', () => {
     const user = userEvent.setup()
     renderApp()
     const socket = await beginRoom(user)
-    act(() => socket.message({ type: 'roomState', room: room(1, { type: 'running' }), youSeat: 'one' }))
+    act(() => admit(socket, room(1)))
     const live = snapshot(2)
     Object.assign(live.state.actors[0], { bombCapacity: 8, bombRange: 8, liveBombCount: 3, speedLevel: 4 })
     act(() => socket.message(live))
@@ -194,7 +204,7 @@ describe('App game flow', () => {
     expect(screen.getByRole('region', { name: 'Grenadiers courtyard' })).toHaveAttribute('data-enabled', 'false')
     expect(screen.queryByRole('button', { name: 'Test move' })).not.toBeInTheDocument()
 
-    const draw = snapshot(3, { type: 'result', nextCountdownAt: 183 })
+    const draw = snapshot(3, { type: 'result', holdUntil: 183 })
     draw.room.lastRound!.result = { type: 'draw', reason: 'timeout' }
     draw.room.scores.two = 0
     act(() => socket.message(draw))
@@ -205,9 +215,9 @@ describe('App game flow', () => {
     const user = userEvent.setup()
     renderApp()
     const socket = await beginRoom(user)
-    act(() => socket.message({ type: 'roomState', room: room(1, { type: 'running' }), youSeat: 'one' }))
+    act(() => admit(socket, room(1)))
     const finished = snapshot(2, {
-      type: 'result', nextCountdownAt: 480,
+      type: 'result', holdUntil: 480,
     })
     finished.state.runningUpdates = 300
     finished.state.remainingTicks = 10_500
@@ -227,7 +237,7 @@ describe('App game flow', () => {
     const user = userEvent.setup()
     renderApp()
     const socket = await beginRoom(user)
-    act(() => socket.message({ type: 'roomState', room: room(1, { type: 'running' }), youSeat: 'one' }))
+    act(() => admit(socket, room(1)))
     act(() => socket.message(snapshot(2)))
     await user.click(screen.getByRole('radio', { name: 'Polski' }))
     expect(await screen.findAllByText('W grze')).toHaveLength(2)
@@ -243,11 +253,7 @@ describe('App game flow', () => {
     const user = userEvent.setup()
     renderApp()
     const socket = await beginRoom(user)
-    act(() => socket.message({
-      type: 'roomState',
-      room: room(1, { type: 'interrupted', endedAt: 1, reason: 'connectionLost' }),
-      youSeat: 'one',
-    }))
+    act(() => admit(socket, room(1, { type: 'interrupted', endedAt: 1, reason: 'connectionLost' })))
     expect(await screen.findByText('a player lost their connection')).toBeVisible()
     expect(screen.queryByText(/wins the round/)).not.toBeInTheDocument()
   })

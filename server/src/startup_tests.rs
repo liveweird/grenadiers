@@ -23,8 +23,8 @@ async fn default_configuration_creates_generated_classic_v2_rooms() {
         .await
         .unwrap();
 
-    assert_eq!(admission.view.rules_version, RulesVersion::ClassicV2);
-    assert_eq!(admission.view.map_id, MapId::GeneratedV1);
+    assert_eq!(admission.room.rules_version, RulesVersion::ClassicV2);
+    assert_eq!(admission.room.map_id, MapId::GeneratedV1);
 }
 
 #[test]

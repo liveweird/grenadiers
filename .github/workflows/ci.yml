@@ -99,6 +99,7 @@ jobs:
           done
           curl --fail --silent http://127.0.0.1:8085/api/v1/ready
           E2E_MATCH_FIXTURE=arena-v1-matches npm --prefix e2e run test:matches
+          E2E_MATCH_FIXTURE=arena-v1-matches npm --prefix e2e run test:reconnect
       - name: Scan built image for fixable high or critical vulnerabilities
         run: |
           docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
@@ -119,6 +120,7 @@ jobs:
             e2e/playwright-report/
             e2e/playwright-pickup-report/
             e2e/playwright-match-report/
+            e2e/playwright-reconnect-report/
           retention-days: 7
 
   kubernetes:

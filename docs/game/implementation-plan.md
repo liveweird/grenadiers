@@ -6,7 +6,8 @@ on 2026-10-17. M3’s fixed-map two-browser duel is implemented and locally veri
 M4 generated rounds and upgrades are complete and locally verified on 2026-10-17;
 M5 is complete and locally verified on 2026-10-17: v3 contracts, real match ownership,
 first-to-three progression, and rematches pass exact-image Compose/Kubernetes acceptance.
-M6–M8 remain planned.
+M6 reconnect/replay is implemented; its complete RULE mapping and final exit evidence are
+under verification. M7–M8 remain planned.
 Published engineering prereleases are listed in `CHANGELOG.md` and GitHub Releases.
 
 The first product goal is a reliable, browser-based survival match between two humans. Build
@@ -25,7 +26,7 @@ The repository contains versioned HTTP/WebSocket contracts, anonymous sessions, 
 two-seat rooms, authoritative 60 Hz simulation, and checked public snapshots/events. M1–M2
 provide movement, owned bombs, flames, damage, and round finality. M3 adds readiness/countdown
 and a playable PixiJS arena with React controls, native keyboard handling, and EN/PL localization.
-Automated gates, CI, Compose, and Kubernetes validate the stack. M4 adds generated arenas, private seeds, and upgrades. M5 adds series scoring and rematches; reconnect remains a later milestone.
+Automated gates, CI, Compose, and Kubernetes validate the stack. M4 adds generated arenas, private seeds, and upgrades. M5 adds series scoring and rematches; v0.3.9 activates v4 reconnect and private replay.
 
 The [verification record](../verification.md) now contains passing locked Rust builds, tests,
 coverage, dependency audits, Compose execution, strict Kubernetes validation and live rollout,
@@ -54,10 +55,10 @@ Cargo tracks the product candidate and private npm package versions remain build
 | **v0.4.0 Resilient playtest alpha** | Reconnect/forfeit correctness, complete baseline rule coverage, deterministic replay evidence, and measured two-player playability. | M6, M7 |
 | **v1.0.0 Stable two-player game** | The baseline survives the agreed playtest, operational, compatibility, and release gates. | M8 |
 
-v0.2 and v0.3 are explicitly limited previews. Until M6, a lost connection ends the current
-preview match as **interrupted**, without awarding a win. Do not advertise the draft's ten-second
-reconnection guarantee before it exists. Test and document this temporary profile; replace it
-with the specified lifecycle in v0.4. All earlier release capabilities remain regression-tested.
+v0.2 and v0.3 are explicitly limited previews. Before v0.3.9, transport loss interrupts a
+match. v0.3.9 activates a strict 600-tick reserved-seat grace with same-process full-state
+recovery; process restart/deployment still loses rooms and capabilities. All earlier gameplay
+capabilities remain regression-tested; v0.4 waits for M7 playtest/hardening evidence.
 
 The first playable checkpoint occurs in M3; do not postpone browser integration until all
 simulation features, final artwork, or reconnect support are finished.
@@ -298,7 +299,7 @@ countdown with retained scores, simultaneous explicit departures, and server int
 ## M6 Implement reconnect resilience and complete replay evidence
 
 Progress: v0.3.1 adds the independently reviewed pure [two-seat grace model](reconnect-grace.md).
-Live gameplay remains v3 with transport-loss interruption until coordinated reconnect activation.
+These foundations were dormant until v0.3.9 coordinated activation.
 v0.3.2 adds a bounded private [semantic replay runner](replay.md); v0.3.3 captures accepted
 production operations with explicit incomplete/truncated evidence.
 v0.3.4 integrates the grace-aware pure lifecycle; production still uses legacy v3 departures.
@@ -306,6 +307,9 @@ v0.3.5 stages the closed [v4 reconnect contract](reconnect-contract.md); v0.3.6 
 checked [room/state/admission projection](protocol-v4.md) against the real lifecycle.
 v0.3.7 stages private [resume credential and binding helpers](resume-bindings.md).
 v0.3.8 stages the dormant [v4 reconnect browser](reconnect-browser.md).
+v0.3.9 activates both adapters with settled owner scheduling, strict grace, full admission
+baselines, takeover fences, and profile-2 private capture/replay. Exact-image and complete RULE
+coverage evidence remain required for the M6 exit; M7 playtest work follows.
 
 **Depends on:** M5.
 

@@ -4,7 +4,7 @@ use std::{
     time::Instant as StdInstant,
 };
 
-use grenadiers_core::protocol::{RoomCode, RoomId};
+use grenadiers_core::protocol::{Counter, RoomCode, RoomId, v4::ResumeToken};
 use tokio::{
     sync::{Notify, watch},
     time::Instant,
@@ -14,8 +14,8 @@ mod input;
 mod match_owner;
 mod match_runtime;
 mod profile;
+mod rate_limit;
 mod replay;
-#[cfg(test)]
 mod resume;
 mod types;
 
@@ -25,6 +25,7 @@ pub(crate) use match_owner::{
 };
 pub(crate) use match_runtime::MatchAction as RoomAction;
 pub(crate) use match_runtime::MatchNotice;
+use rate_limit::Bucket;
 use types::RoomIdentity;
 pub(crate) use types::{BindingKey, RoomError};
 
@@ -34,7 +35,7 @@ const OPERATIONS_PER_SECOND: f64 = 8.0;
 const COLLISION_RETRIES: usize = 3;
 const CODE_ALPHABET: &[u8; 32] = b"ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 
-type RandomFill = dyn Fn(&mut [u8]) -> Result<(), ()> + Send + Sync;
+pub(super) type RandomFill = dyn Fn(&mut [u8]) -> Result<(), ()> + Send + Sync;
 
 pub(crate) struct GameRooms {
     registry: Mutex<Registry>,
@@ -125,9 +126,10 @@ impl GameRooms {
         .into()
     }
 
-    pub(crate) async fn create(
+    pub(crate) async fn create_sequenced(
         self: &Arc<Self>,
         binding: BindingKey,
+        sequence: Counter,
         now: StdInstant,
     ) -> Result<Admission, RoomError> {
         let (handle, owner, id, code) = {
@@ -148,6 +150,7 @@ impl GameRooms {
                 identity.clone(),
                 Instant::now(),
                 self.round_seed_source.clone(),
+                Arc::clone(&self.random_fill),
                 self.shutdown(),
             )
             .map_err(|_| RoomError::CapacityReached)?;
@@ -161,18 +164,25 @@ impl GameRooms {
             (handle, owner, cleanup_id, cleanup_code)
         };
         let registry = Arc::downgrade(self);
+        let cleanup_id = id.clone();
+        let cleanup_code = code.clone();
         drop(owner.start(move || {
             if let Some(registry) = registry.upgrade() {
                 registry.cleanup(&id, &code);
             }
         }));
-        self.admit(handle, binding).await
+        let result = self.admit(handle, binding, sequence).await;
+        if result.is_err() {
+            self.cleanup(&cleanup_id, &cleanup_code);
+        }
+        result
     }
 
-    pub(crate) async fn join(
+    pub(crate) async fn join_sequenced(
         &self,
         code: &RoomCode,
         binding: BindingKey,
+        sequence: Counter,
         now: StdInstant,
     ) -> Result<Admission, RoomError> {
         let handle = {
@@ -190,7 +200,59 @@ impl GameRooms {
                 .cloned()
                 .ok_or(RoomError::RoomNotFound)?
         };
-        self.admit(handle, binding).await
+        self.admit(handle, binding, sequence).await
+    }
+
+    #[cfg(test)]
+    pub(crate) async fn create(
+        self: &Arc<Self>,
+        binding: BindingKey,
+        now: StdInstant,
+    ) -> Result<Admission, RoomError> {
+        self.create_sequenced(binding, Counter::new(1).expect("test sequence"), now)
+            .await
+    }
+
+    #[cfg(test)]
+    pub(crate) async fn join(
+        &self,
+        code: &RoomCode,
+        binding: BindingKey,
+        now: StdInstant,
+    ) -> Result<Admission, RoomError> {
+        self.join_sequenced(code, binding, Counter::new(1).expect("test sequence"), now)
+            .await
+    }
+
+    pub(crate) async fn resume(
+        &self,
+        room_id: RoomId,
+        binding: BindingKey,
+        sequence: Counter,
+        token: ResumeToken,
+        now: StdInstant,
+    ) -> Result<Admission, RoomError> {
+        let handle = {
+            let mut registry = self.lock();
+            if self.is_stopping() {
+                return Err(RoomError::RoomNotFound);
+            }
+            if !registry.operations.take(now) {
+                return Err(RoomError::RateLimited);
+            }
+            registry
+                .rooms
+                .get(&room_id)
+                .cloned()
+                .ok_or(RoomError::ResumeRejected)?
+        };
+        let mut admission = handle
+            .owner
+            .resume(binding, sequence, room_id, token)
+            .await
+            .unwrap_or(Err(RoomError::ResumeRejected))?;
+        admission.notices.borrow_and_update();
+        Ok(admission)
     }
 
     pub(crate) async fn leave(
@@ -238,12 +300,19 @@ impl GameRooms {
             .unwrap_or(Err(RoomError::RoomNotFound))
     }
 
-    async fn admit(&self, handle: RoomHandle, binding: BindingKey) -> Result<Admission, RoomError> {
-        handle
+    async fn admit(
+        &self,
+        handle: RoomHandle,
+        binding: BindingKey,
+        sequence: Counter,
+    ) -> Result<Admission, RoomError> {
+        let mut admission = handle
             .owner
-            .join(binding)
+            .join_sequenced(binding, sequence)
             .await
-            .unwrap_or(Err(RoomError::RoomNotFound))
+            .unwrap_or(Err(RoomError::RoomNotFound))?;
+        admission.notices.borrow_and_update();
+        Ok(admission)
     }
 
     fn generate_identity(&self, registry: &mut Registry) -> Result<RoomIdentity, RoomError> {
@@ -322,33 +391,6 @@ impl GameRooms {
         self.registry
             .lock()
             .unwrap_or_else(|error| error.into_inner())
-    }
-}
-
-struct Bucket {
-    available: f64,
-    updated_at: StdInstant,
-}
-
-impl Bucket {
-    fn new(now: StdInstant) -> Self {
-        Self {
-            available: OPERATION_BURST,
-            updated_at: now,
-        }
-    }
-
-    fn take(&mut self, now: StdInstant) -> bool {
-        let elapsed = now.saturating_duration_since(self.updated_at);
-        self.available =
-            (self.available + elapsed.as_secs_f64() * OPERATIONS_PER_SECOND).min(OPERATION_BURST);
-        self.updated_at = self.updated_at.max(now);
-        if self.available < 1.0 {
-            false
-        } else {
-            self.available -= 1.0;
-            true
-        }
     }
 }
 

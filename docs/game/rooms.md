@@ -2,7 +2,7 @@
 
 This document retains the original single-round domain model. Production now composes the
 [match lifecycle](match-lifecycle.md) and [bounded match owner](match-owner.md) using
-[gameplay v3](protocol.md); their match-result, rematch, and retention rules take precedence.
+[gameplay v4](protocol.md); their match-result, reconnect, rematch, and retention rules take precedence.
 
 
 Status: public `core::room` lifecycle plus server-owned networked two-player rounds. Anonymous
@@ -46,21 +46,23 @@ Discovery, credentials, membership generations, input deduplication, bounded cha
 
 ## Network admission
 
-After gameplay authentication, `createRoom` claims seat one and returns a personalized
-`roomState`. `joinRoom` uses the public eight-character code and claims the vacant seat.
-Both sockets observe the same room view; only `youSeat` differs. Admission arrives before
-subsequent membership updates. Codes are public discovery identifiers, not credentials.
+After gameplay authentication, `createRoom` claims seat one and returns a personal `admitted`
+baseline. `joinRoom` uses the public eight-character code and claims the vacant seat. Admission
+carries `youSeat`, the stable private resume capability, nullable current physics, and bomb action
+high-water. Shared `roomState` contains no identity or capability. Codes are public discovery
+identifiers, not credentials.
 
 The process holds at most 32 rooms. Create/join share a burst of 32 operations refilling at
 eight per second. Each owner has a 32-command mailbox; slow sockets consume only the
 latest watch update. OS randomness supplies codes and a process ID prefix, with bounded
 collision retries and checked serials. No room state is persisted or shared across replicas.
 
-Connection ID plus admission generation fences membership. Explicit `leaveRoom` validates
-the room/attempt, removes occupancy, then sends the correlated `leftRoom`; the authenticated
-socket can create/join again. Transport loss has an independent departure channel, so a full
-command queue cannot strand a seat. Empty rooms release discovery immediately. Registry
-cleanup also runs when an owner task is canceled or panics.
+Connection ID plus admission generation fences membership. Explicit `leaveRoom` validates the
+room/attempt, removes occupancy, then sends correlated `leftRoom`; only that acknowledgement
+clears the browser capability. A rejected leave retains authority. Transport loss while leave is
+pending honors the explicit local departure and does not blindly retry. Other transport losses use
+an independent departure channel and reserve eligible seats for 600 ticks. Empty rooms release
+discovery immediately. Registry cleanup also runs when an owner task is canceled or panics.
 
 Waiting/Countdown rooms expire 300 seconds after creation, independent of activity; entering
 Running removes that creation deadline. Expiry sends an
@@ -70,8 +72,9 @@ invalid phases return `invalidPhase`. Join only admits Waiting rooms.
 
 ## Authoritative scheduling and input
 
-One owner task uses absolute rational 60 Hz deadlines. It drains bounded admitted work,
-completes at most four overdue updates before yielding, and never skips a simulation tick.
+One owner task uses absolute rational 60 Hz deadlines. It drains one bounded 32-command batch,
+completes at most four overdue updates before yielding, retains that same batch across the yield,
+and never skips a simulation tick or accepts late commands into overdue ticks.
 More than 500 ms behind the next deadline interrupts a nonterminal round with
 `serverOverloaded`. Result finality survives lag. Waiting membership/readiness changes publish
 immediately; Countdown views and Running/Result snapshots publish every three ticks, with
@@ -90,8 +93,10 @@ including coalesced or unsuccessful placements. At most one placement intent per
 runs after all movement/clear inputs, so a same-tick stop cannot cancel an accepted bomb.
 
 The owner commits a completed simulation result before handling departures that arrived during
-that accepted update. An already-observed departure may interrupt before accepting the next
-update. Result worlds freeze while their room clock advances; Interrupted freezes entirely.
+that accepted update. Running applies physics/scoring before the complete loss batch and expiry;
+idle phases apply loss before advancing the clock and expiry afterward. Result worlds freeze while
+their global room clock and grace deadlines advance. A completed world remains private through an
+inter-round countdown and can return if disconnection cancels that countdown. Interrupted freezes.
 Terminal rooms retire after 30 seconds without activity extending retention. Empty rooms
 release immediately. Terminal retirement closes normally without inventing an expiry error.
 

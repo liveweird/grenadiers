@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.3.9 — 2026-10-17
+
+- Activate gameplay v4 with private reserved-seat capabilities, strict ten-second grace, full
+  state recovery, stable bomb-action floors, and generation-fenced connected takeover.
+- Settle physics, batched departures, and expiry before publication/admission; hold completed
+  worlds across canceled countdowns and preserve scoring/forfeit precedence.
+- Capture profile-2 grace, restore/replacement, expiry, and report flushes for deterministic
+  private replay; retain the archived profile-1 adapter and explicit truncation/incompleteness.
+- Activate localized reconnect/grace UI with bounded fresh-session retries, truthful disabled
+  controls, explicit leave handling, and usable terminal recovery.
+- Add real browser live-world/bomb recovery, takeover, late dual rejection, and privacy checks.
+  Keep stable capabilities out of persisted Playwright traces and public diagnostics.
+
 ## 0.3.8 — 2026-10-17
 
 - Stage the v4 browser with private in-memory seat capability, bounded fresh-session retries,

@@ -100,6 +100,7 @@ jobs:
           curl --fail --silent http://127.0.0.1:8085/api/v1/ready
           E2E_MATCH_FIXTURE=arena-v1-matches npm --prefix e2e run test:matches
           E2E_MATCH_FIXTURE=arena-v1-matches npm --prefix e2e run test:reconnect
+          E2E_MATCH_FIXTURE=arena-v1-matches npm --prefix e2e run test:latency
           E2E_MATCH_FIXTURE=arena-v1-matches xvfb-run -a npm --prefix e2e run test:hardening
           npm --prefix e2e run test:controls
       - name: Scan built image for fixable high or critical vulnerabilities

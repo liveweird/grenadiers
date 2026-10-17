@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
-import type { GameClientState } from '../v4/client'
-import type { EventKind, WireEvent } from '../v4/schema'
-import { snapshot } from '../v4/testSupport'
+import type { GameClientState } from '../v5/client'
+import type { EventKind, WireEvent } from '../v5/schema'
+import { snapshot } from '../v5/testSupport'
 import { AudioCursor } from './cursor'
 
 const baseline = { roomId: 'b'.repeat(32), revision: 20, tick: 20 }

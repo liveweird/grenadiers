@@ -1,7 +1,7 @@
 import Ajv from 'ajv'
-import gameplaySchema from '../../../../api/gameplay-v4.schema.json'
+import gameplaySchema from '../../../../api/gameplay-v5.schema.json'
 import type {
-  Direction, GameClientMessage, GameServerMessage, RoomView, Seat, Snapshot, V4ErrorCode,
+  Direction, GameClientMessage, GameServerMessage, RoomView, Seat, Snapshot, V5ErrorCode,
 } from './schema'
 import {
   initialGameClientState,
@@ -52,7 +52,7 @@ export class GameClient {
   private admissionSequence: number | null = null
   private leaveSequence: number | null = null
   private sentControls: ControlCommand[] = []
-  private controlFailure: (ControlCommand & { code: V4ErrorCode }) | null = null
+  private controlFailure: (ControlCommand & { code: V5ErrorCode }) | null = null
   private stopped = false
   private readonly onChange: (state: GameClientState) => void
   private readonly dependencies: Dependencies
@@ -162,7 +162,7 @@ export class GameClient {
     socket.addEventListener('open', () => {
       if (!this.current(generation, socket)) return
       this.update({ connection: 'authenticating' })
-      socket.send(JSON.stringify({ type: 'authenticate', protocolVersion: 4, token: credential }))
+      socket.send(JSON.stringify({ type: 'authenticate', protocolVersion: 5, token: credential }))
       credential = ''
     })
     socket.addEventListener('message', (event) => this.receive(generation, socket, event.data))
@@ -244,7 +244,7 @@ export class GameClient {
     this.update({ room: null, snapshot: null, youSeat: null, admissionBaseline: null,
       leavePending: false, failure: null })
   }
-  private acceptError(code: V4ErrorCode, sequence: number | null): void {
+  private acceptError(code: V5ErrorCode, sequence: number | null): void {
     if (code === 'resumeRejected' && sequence === this.admissionSequence && this.capability) {
       this.terminal('resumeRejected', true)
       return

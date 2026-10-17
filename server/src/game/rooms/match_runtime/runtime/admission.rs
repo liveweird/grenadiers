@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use grenadiers_core::{
     game::SeatId,
-    protocol::v4::{GameServerMessage, RoomView, encode_server_message, validate_admission},
+    protocol::v5::{GameServerMessage, RoomView, encode_server_message, validate_admission},
     protocol::{Counter, GameState, project_state},
     room::{MatchLifecycle, reconnect::ReservationState},
 };

@@ -1,5 +1,7 @@
 use super::types::{HALF_FOOTPRINT, TICKS_PER_SECOND, TURN_ASSIST, UNITS_PER_CELL};
 
+const FORGIVING_TURN_ASSIST: i32 = 256;
+
 /// Immutable parameters for the initial deterministic rules profile.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct RulesConfig {
@@ -44,6 +46,19 @@ impl RulesConfig {
             version: 2,
             pickup_collection: true,
             ..Self::classic_v1()
+        }
+    }
+
+    /// The generated-arena profile with a wider lane-centering window.
+    ///
+    /// Earlier profiles retain their original turn tolerance so recorded input
+    /// streams continue to produce the same movement traces.
+    #[must_use]
+    pub const fn classic_v3() -> Self {
+        Self {
+            version: 3,
+            turn_assist: FORGIVING_TURN_ASSIST,
+            ..Self::classic_v2()
         }
     }
 

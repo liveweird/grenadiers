@@ -1,6 +1,6 @@
 use grenadiers_core::{
     game::{RoundAssignment, SeatId},
-    protocol::v4::RoomPhase,
+    protocol::v5::RoomPhase,
     room::{InterruptReason, MatchLifecycle, MatchPhase},
 };
 
@@ -105,8 +105,8 @@ fn entropy_failure_interrupts_with_view_only_and_no_simulation_record() {
     assert!(matches!(
         terminal.room.phase,
         RoomPhase::MatchResult {
-            result: grenadiers_core::protocol::v4::MatchResult::Interrupted {
-                reason: grenadiers_core::protocol::v4::MatchInterruptReason::InternalError
+            result: grenadiers_core::protocol::v5::MatchResult::Interrupted {
+                reason: grenadiers_core::protocol::v5::MatchInterruptReason::InternalError
             },
             ..
         }

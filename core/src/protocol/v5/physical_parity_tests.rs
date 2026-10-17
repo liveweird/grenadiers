@@ -1,13 +1,12 @@
 use serde_json::Value;
 
 #[test]
-fn v4_duplicates_unchanged_v3_physical_definitions_exactly() {
-    let v4: Value =
-        serde_json::from_str(include_str!("../../../../api/gameplay-v4.schema.json")).unwrap();
+fn v5_duplicates_unchanged_v3_physical_definitions_exactly() {
+    let v5: Value =
+        serde_json::from_str(include_str!("../../../../api/gameplay-v5.schema.json")).unwrap();
     let v3: Value =
         serde_json::from_str(include_str!("../../../../api/gameplay-v3.schema.json")).unwrap();
     for name in [
-        "RulesVersion",
         "MapId",
         "PickupKind",
         "EntityId",
@@ -34,12 +33,30 @@ fn v4_duplicates_unchanged_v3_physical_definitions_exactly() {
         "RoundEndedEvent",
         "PickupCollectedEventKind",
     ] {
-        assert_eq!(v4["$defs"][name], v3["$defs"][name], "{name} drifted");
+        assert_eq!(v5["$defs"][name], v3["$defs"][name], "{name} drifted");
     }
 }
 
 #[test]
-fn v4_schema_references_only_its_local_definitions() {
+fn v5_adds_forgiving_rules_without_changing_archived_rules_contracts() {
+    let v5: Value =
+        serde_json::from_str(include_str!("../../../../api/gameplay-v5.schema.json")).unwrap();
+    let v4: Value =
+        serde_json::from_str(include_str!("../../../../api/gameplay-v4.schema.json")).unwrap();
+    assert_eq!(
+        v5["$defs"]["RulesVersion"]["enum"],
+        serde_json::json!([1, 2, 3])
+    );
+    assert_eq!(
+        v4["$defs"]["RulesVersion"]["enum"],
+        serde_json::json!([1, 2])
+    );
+    assert_eq!(v5["$defs"]["GameplayVersion"]["const"], 5);
+    assert_eq!(v4["$defs"]["GameplayVersion"]["const"], 4);
+}
+
+#[test]
+fn v5_schema_references_only_its_local_definitions() {
     fn visit(value: &Value) {
         match value {
             Value::Object(object) => {
@@ -53,14 +70,14 @@ fn v4_schema_references_only_its_local_definitions() {
         }
     }
     let schema: Value =
-        serde_json::from_str(include_str!("../../../../api/gameplay-v4.schema.json")).unwrap();
+        serde_json::from_str(include_str!("../../../../api/gameplay-v5.schema.json")).unwrap();
     visit(&schema);
 }
 
 #[test]
-fn every_v4_object_definition_is_closed_and_requires_all_properties() {
+fn every_v5_object_definition_is_closed_and_requires_all_properties() {
     let schema: Value =
-        serde_json::from_str(include_str!("../../../../api/gameplay-v4.schema.json")).unwrap();
+        serde_json::from_str(include_str!("../../../../api/gameplay-v5.schema.json")).unwrap();
     for (name, definition) in schema["$defs"].as_object().unwrap() {
         if definition["type"] != "object" {
             continue;

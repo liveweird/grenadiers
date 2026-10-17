@@ -27,6 +27,7 @@ pub struct RoomMetadata {
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum RoomProjectionError {
+    UnsupportedRulesVersion,
     InvalidCounter,
     InvalidTick,
     InvalidScores,

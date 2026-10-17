@@ -13,12 +13,15 @@ use grenadiers_core::{
     },
 };
 
-use super::super::match_runtime::{MatchRuntime, RuntimeInspection};
+use super::super::{
+    match_runtime::{MatchRuntime, RuntimeInspection},
+    profile::RoomProfile,
+};
 use super::{
     Header, Journal, Operation, ReplayAction, ReplayError, ReplayStatus,
     record::{MAX_RECORDS, Record},
     replay,
-    runner::{apply, identity},
+    runner::{apply, identity_for_profile},
 };
 use crate::round_seed::RoundSeedSource;
 
@@ -28,10 +31,14 @@ struct RecordingRuntime {
 
 impl RecordingRuntime {
     fn new(seeds: impl IntoIterator<Item = [u8; 32]>) -> Self {
+        Self::new_with_profile(RoomProfile::GeneratedClassicV2, seeds)
+    }
+
+    fn new_with_profile(profile: RoomProfile, seeds: impl IntoIterator<Item = [u8; 32]>) -> Self {
         let seeds = Arc::new(Mutex::new(seeds.into_iter().collect::<VecDeque<_>>()));
         let source = Arc::clone(&seeds);
         let mut runtime = MatchRuntime::new(
-            identity(),
+            identity_for_profile(profile),
             RoundSeedSource::with_entropy(move |bytes| {
                 let seed = source.lock().map_err(|_| ())?.pop_front().ok_or(())?;
                 bytes.copy_from_slice(&seed);
@@ -80,6 +87,13 @@ impl RecordingRuntime {
 
 fn occupied(seeds: impl IntoIterator<Item = [u8; 32]>) -> RecordingRuntime {
     let mut recording = RecordingRuntime::new(seeds);
+    recording.append(Operation::Occupy(SeatId::One));
+    recording.append(Operation::Occupy(SeatId::Two));
+    recording
+}
+
+fn occupied_with_profile(profile: RoomProfile, seed: [u8; 32]) -> RecordingRuntime {
+    let mut recording = RecordingRuntime::new_with_profile(profile, [seed]);
     recording.append(Operation::Occupy(SeatId::One));
     recording.append(Operation::Occupy(SeatId::Two));
     recording
@@ -176,6 +190,42 @@ fn archived_profile_one_replays_a_complete_physics_result_fixture() {
 }
 
 #[test]
+fn replay_selects_the_recorded_turning_rules_for_v2_and_v3() {
+    let mut legacy = occupied_with_profile(RoomProfile::GeneratedClassicV2, [31; 32]);
+    let mut current = occupied_with_profile(RoomProfile::GeneratedClassicV3, [31; 32]);
+    legacy.start();
+    current.start();
+    let start = legacy.runtime.sim().unwrap().state.actors()[0].position();
+
+    for recording in [&mut legacy, &mut current] {
+        recording.action(SeatId::One, ReplayAction::Movement(Some(Direction::East)));
+        for _ in 0..4 {
+            recording.append(Operation::Tick);
+        }
+        recording.action(SeatId::One, ReplayAction::Movement(Some(Direction::South)));
+        for _ in 0..8 {
+            recording.append(Operation::Tick);
+        }
+    }
+
+    let legacy_position = legacy.runtime.sim().unwrap().state.actors()[0].position();
+    let current_position = current.runtime.sim().unwrap().state.actors()[0].position();
+    assert_eq!(legacy.runtime.replay_journal().header.rules_version, 2);
+    assert_eq!(current.runtime.replay_journal().header.rules_version, 3);
+    assert_eq!(legacy_position.y, start.y);
+    assert!(current_position.y > start.y);
+    assert_ne!(current_position, legacy_position);
+    assert_eq!(
+        replay(legacy.runtime.replay_journal()).unwrap(),
+        legacy.checkpoint()
+    );
+    assert_eq!(
+        replay(current.runtime.replay_journal()).unwrap(),
+        current.checkpoint()
+    );
+}
+
+#[test]
 fn movement_refresh_and_predeparture_fence_preserve_input_semantics() {
     let mut recording = occupied([[7; 32]]);
     recording.start();
@@ -228,7 +278,7 @@ fn malformed_versions_order_bounds_and_round_metadata_fail_closed() {
     journal.header.lifecycle_profile += 2;
     assert_eq!(replay(&journal), Err(ReplayError::UnsupportedLifecycle));
     journal.header = Header::m5([false; 2]);
-    journal.header.rules_version += 1;
+    journal.header.rules_version += 2;
     assert_eq!(replay(&journal), Err(ReplayError::UnsupportedRules));
     journal.header = Header::m5([false; 2]);
     journal.header.generator_version += 1;

@@ -1,4 +1,4 @@
-import type { GameClientState } from '../v4/client'
+import type { GameClientState } from '../v5/client'
 
 export type AudioCue = 'placement' | 'detonation' | 'pickup' | 'elimination'
 const priority: readonly AudioCue[] = ['elimination', 'detonation', 'pickup', 'placement']

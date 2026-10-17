@@ -193,8 +193,8 @@ Hard walls, borders, soft blocks, and bombs block ordinary movement. Players do 
 another initially: they can cross or overlap. Pickups, flames, and spawn markers do not block
 movement. Flames are dangerous even though they are walkable.
 
-Turning to a perpendicular heading is allowed when the player's center is within `0.125`
-cell of that corridor's centerline, including the boundary. Otherwise that intent produces
+Turning to a perpendicular heading is allowed when the player's center is within `0.25`
+cell in classic-v3 (`0.125` cell in historical classic-v1/v2) of that corridor's centerline, including the boundary. Otherwise that intent produces
 no movement until a legal heading is requested. Align the perpendicular coordinate only if
 the entire swept correction is legal. Alignment consumes the normal movement budget and may
 span several ticks; commit the new heading only after alignment completes. Changing the

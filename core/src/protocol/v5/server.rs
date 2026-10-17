@@ -46,7 +46,7 @@ pub enum GameServerMessage {
         room_id: RoomId,
     },
     Error {
-        code: V4ErrorCode,
+        code: V5ErrorCode,
         sequence: Option<Counter>,
     },
 }
@@ -179,7 +179,7 @@ pub enum MatchInterruptReason {
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub enum V4ErrorCode {
+pub enum V5ErrorCode {
     InvalidMessage,
     AuthenticationFailed,
     ConnectionInUse,

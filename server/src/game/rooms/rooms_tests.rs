@@ -100,7 +100,7 @@ async fn token_room_and_round_randomness_are_independent() {
     assert_eq!(token_calls.load(Ordering::SeqCst), 1);
     assert_eq!(room_calls.load(Ordering::SeqCst), 3);
     assert_eq!(seed_calls.load(Ordering::SeqCst), 0);
-    assert_eq!(admission.room.rules_version.get(), 2);
+    assert_eq!(admission.room.rules_version.get(), 3);
     assert_eq!(admission.room.map_id, MapId::GeneratedV1);
 }
 
@@ -372,8 +372,8 @@ async fn excessive_lag_interrupts_then_terminal_retention_releases_registration(
     let view = notice.room;
     assert!(matches!(
         view.phase,
-        grenadiers_core::protocol::v4::RoomPhase::Interrupted {
-            reason: grenadiers_core::protocol::v4::MatchInterruptReason::ServerOverloaded,
+        grenadiers_core::protocol::v5::RoomPhase::Interrupted {
+            reason: grenadiers_core::protocol::v5::MatchInterruptReason::ServerOverloaded,
             ..
         }
     ));

@@ -15,7 +15,7 @@ use super::{
 
 fn server_schema() -> Validator {
     let schema: Value =
-        serde_json::from_str(include_str!("../../../../api/gameplay-v4.schema.json")).unwrap();
+        serde_json::from_str(include_str!("../../../../api/gameplay-v5.schema.json")).unwrap();
     validator_for(&schema).unwrap()
 }
 
@@ -126,7 +126,7 @@ fn assert_frame(message: &GameServerMessage, label: &str) -> usize {
         encoded.len()
     );
     eprintln!(
-        "Maximal tested v4 structural {label}: {} UTF-8 bytes",
+        "Maximal tested v5 structural {label}: {} UTF-8 bytes",
         encoded.len()
     );
     encoded.len()

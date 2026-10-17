@@ -9,6 +9,7 @@ pub(super) const FORMAT_VERSION: u16 = 1;
 pub(in crate::game::rooms) const M5_LIFECYCLE_PROFILE: u16 = 1;
 pub(super) const M6_LIFECYCLE_PROFILE: u16 = 2;
 pub(super) const CLASSIC_V2_RULES: u16 = 2;
+pub(super) const CLASSIC_V3_RULES: u16 = 3;
 pub(super) const GENERATED_V1: u16 = 1;
 pub(super) const MAX_RECORDS: usize = 60_000;
 
@@ -38,6 +39,13 @@ impl Header {
         Self {
             lifecycle_profile: M6_LIFECYCLE_PROFILE,
             ..Self::m5(initial_seats)
+        }
+    }
+
+    pub(in crate::game::rooms) const fn m6_v3(initial_seats: [bool; 2]) -> Self {
+        Self {
+            rules_version: CLASSIC_V3_RULES,
+            ..Self::m6(initial_seats)
         }
     }
 }

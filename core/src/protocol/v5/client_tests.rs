@@ -9,7 +9,7 @@ const ROOM_ID: &str = "0123456789abcdef0123456789abcdef";
 
 fn client_schema() -> Validator {
     let mut schema: Value =
-        serde_json::from_str(include_str!("../../../../api/gameplay-v4.schema.json")).unwrap();
+        serde_json::from_str(include_str!("../../../../api/gameplay-v5.schema.json")).unwrap();
     schema["$ref"] = json!("#/$defs/GameClientMessage");
     validator_for(&schema).unwrap()
 }
@@ -29,7 +29,7 @@ fn assert_invalid(value: &Value) {
 
 fn messages() -> [Value; 9] {
     [
-        json!({"type":"authenticate", "protocolVersion":4, "token":SESSION_TOKEN}),
+        json!({"type":"authenticate", "protocolVersion":5, "token":SESSION_TOKEN}),
         json!({"type":"createRoom", "sequence":1}),
         json!({"type":"joinRoom", "sequence":2, "roomCode":"ABCDEFGH"}),
         json!({"type":"resumeRoom", "sequence":3, "roomId":ROOM_ID, "resumeToken":RESUME_TOKEN}),

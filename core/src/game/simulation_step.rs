@@ -80,9 +80,10 @@ impl State {
     }
 
     fn move_living(&mut self) -> [MovementTrace; 2] {
+        let turn_assist = self.rules.turn_assist();
         self.actors.each_mut().map(|actor| {
             if actor.alive {
-                movement::advance_actor(&self.world, actor)
+                movement::advance_actor(&self.world, actor, turn_assist)
             } else {
                 MovementTrace::new(actor.position)
             }

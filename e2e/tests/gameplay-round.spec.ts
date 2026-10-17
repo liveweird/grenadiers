@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import type { GameServerMessage } from '../../web/src/game/v4/schema'
+import type { GameServerMessage } from '../../web/src/game/v5/schema'
 import { gameFrames, openGame, roomFrame, sendGame } from './support/game'
 
 type Snapshot = Extract<GameServerMessage, { type: 'snapshot' }>
@@ -23,7 +23,7 @@ test('two native gameplay sockets finish one authoritative generated classic rou
     await expect.poll(async () => snapshot(await gameFrames(one))?.room.phase.type).toBe('running')
     await expect.poll(async () => snapshot(await gameFrames(two))?.room.phase.type).toBe('running')
     const firstRunning = snapshot(await gameFrames(one))!
-    expect(firstRunning.room).toMatchObject({ rulesVersion: 2, mapId: 'generated_v1' })
+    expect(firstRunning.room).toMatchObject({ rulesVersion: 3, mapId: 'generated_v1' })
     expect(firstRunning.state.pickups).toEqual([])
     const blocks = firstRunning.state.arena.blocks
     for (const block of blocks) {

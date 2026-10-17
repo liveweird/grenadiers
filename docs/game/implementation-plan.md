@@ -9,7 +9,14 @@ first-to-three progression, and rematches pass exact-image Compose/Kubernetes ac
 M6 reconnect/replay is implemented with all 42 baseline rules mapped to automated assertions.
 M6 is complete and locally verified on 2026-10-17, including exact-image deployment acceptance.
 M7 hardening has started; M8 remains planned.
+The v0.3.16 increment adds classic-v3 forgiving turns and explicit gameplay-v5 compatibility,
+locally verified through both deployment paths on 2026-10-17.
 Published engineering prereleases are listed in `CHANGELOG.md` and GitHub Releases.
+
+New playtest requests and expansion work are tracked in the [gameplay and presentation
+backlog](backlog.md): forgiving turns first, shared gameplay settings, detailed retro pixel art,
+then equipment, timed buffs/curses and single-use weapons. TURN is M7 playability work;
+expanded item mechanics are optional ruleset tracks, not additional classic release blockers.
 
 The first product goal is a reliable, browser-based survival match between two humans. Build
 on the existing Rust/React scaffold, prove combat in two independent browsers early, then
@@ -355,6 +362,11 @@ remapping](controls.md), held-input clearing and localized accessible settings. 
 proofs. v0.3.15 adds [optional procedural sound](audio.md), gesture-only activation, bounded voices
 and replay-free hidden/visible recovery. Broader network/browser support and human playability remain open.
 
+The next playability increment widens turn assistance to a quarter tile with classic-v3,
+historical replay selection and gameplay-v5 compatibility. Native keyboard acceptance covers
+a natural wall stop 192 units from center, outside the legacy turn window. Wider configuration
+and the requested art/item expansion follow the [detailed backlog](backlog.md).
+
 **Release:** v0.4.0. **Depends on:** M6.
 
 Work packages:
@@ -457,6 +469,10 @@ validation. Release automation should make this full checklist mechanical as the
 release is prepared.
 
 ## Expansion tracks after the two-player baseline
+
+The [detailed backlog](backlog.md) records the requested configuration/art work and exact item
+roster, slot rules, priorities and interaction decisions. Schedule bounded releases from that
+backlog; the table below remains the broader expansion map.
 
 Choose release numbers and priority after the first playtests. Each track gets a separate
 ruleset increment and acceptance matrix; none is silently included in the initial milestone.

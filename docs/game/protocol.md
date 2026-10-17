@@ -2,8 +2,8 @@
 
 Status: gameplay contracts, checked domain conversion, HTTP session issuance, and authenticated
 gameplay WebSockets with authoritative two-seat first-to-three matches are implemented.
-`api/gameplay-v4.schema.json`, Rust `core::protocol::v4`, and generated
-`web/src/game/v4/schema.ts` define active socket messages. V2 and v3 remain historical.
+`api/gameplay-v5.schema.json`, Rust `core::protocol::v5`, and generated
+`web/src/game/v5/schema.ts` define active socket messages. V2, v3 and v4 remain historical. V5 preserves v4 reconnect semantics and adds classic-v3 turning; see [the migration note](protocol-v5.md).
 The browser validates these messages and drives the playable generated-map match. Diagnostic `/api/v1/ws` and
 `api/realtime.schema.json` remain unchanged.
 
@@ -25,13 +25,13 @@ Connect to `/api/v1/game/ws` with one configured non-null Origin and no query pa
 Its first application frame must be:
 
 ```json
-{"type":"authenticate","protocolVersion":4,"token":"0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"}
+{"type":"authenticate","protocolVersion":5,"token":"0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"}
 ```
 
 The token is a secret 64-character lowercase hexadecimal credential, held only in tab memory.
 It never belongs in a URL or log. A syntactically valid unsupported version is parsed so the
 server can return `incompatibleProtocol` before credential binding. Supported gameplay version
-is 4, independently of the product release and diagnostic protocol. Parser failures expose
+is 5, independently of the product release and diagnostic protocol. Parser failures expose
 only a generic error; token Debug formatting is redacted.
 
 A successful claim atomically binds one connection. Duplicate claims receive `connectionInUse`
@@ -184,13 +184,13 @@ capability, never to invitation code. See [bounded owner](match-owner.md).
 ## Profile and version evolution
 
 An immutable server room profile owns state construction and its rules/map labels. Publication
-rejects state whose checked rules version disagrees with that profile. Production now uses classic-v2 rules and generated-v1 arenas. Snapshots initially have an
+rejects state whose checked rules version disagrees with that profile. Production now uses classic-v3 rules and generated-v1 arenas. Snapshots initially have an
 empty pickup array because contents are concealed; only exposed items become public.
 Fixed-classic-v1 remains an explicit unit fixture, not a production selector.
 
-Gameplay v4 is incompatible with earlier versions. Reload clients when upgrading the single server. Both
+Gameplay v5 is incompatible with earlier versions. Reload clients when upgrading the single server. Both
 old and future versions are rejected before credential lookup, so rejection cannot claim or
-revoke a token. `supportedVersion` accepts the bounded input range rather than only v4,
+revoke a token. `supportedVersion` accepts the bounded input range rather than only v5,
 allowing a new client to understand an older server's incompatibility response.
 See [ADR 0013](../decisions/0013-gameplay-v2-and-room-profiles.md).
 
@@ -201,7 +201,7 @@ without writing. The shared web gate runs this alongside existing diagnostic che
 validation tests. Rust conformance tests compare strict parsing and serialization with the same
 schema, including missing/null fields, scalar boundaries, integer-valued number forms, version
 rejection responses, credential redaction, all event variants, nested bounds, and real
-frame-size enforcement. Maximal structural v4 Snapshot and Admitted fixtures fit the inclusive
+frame-size enforcement. Maximal structural v5 Snapshot and Admitted fixtures fit the inclusive
 65,536-byte server limit; an actual oversized message is rejected. These fixtures prove structural
 bounds rather than reachable gameplay size. TypeScript types do not enforce string patterns
 or numeric/array bounds at runtime; AJV and Rust validation do.

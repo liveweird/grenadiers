@@ -33,7 +33,7 @@ test order and enforces coverage thresholds declared in `web/vite.config.ts`.
 `api-guidelines/spectral.yaml`; it retains the standard and custom rules without the CLI's
 glob dependency. Parser/load errors and error-severity diagnostics fail the command.
 `check:api`, `check:realtime`, and `check:gameplay` compare generated
-contracts without modifying them. Gameplay generation/drift checks cover active v4 and historical
+contracts without modifying them. Gameplay generation/drift checks cover active v5 and historical
 v2/v3; parity tests compare unchanged physical definitions. AJV validates runtime WebSocket payloads. EN/PL locale
 parity is tested. ESLint/SonarJS and Knip must report no findings.
 
@@ -61,7 +61,7 @@ Install cargo-deny with `cargo install cargo-deny --version 0.20.2 --locked` for
 separately so external advisory outages do not obscure unit-test results. Document any
 reviewed exception with its reason and removal condition; never add blanket suppressions.
 
-All activated-v4 Playwright configurations disable framework trace capture. Raw traces can retain
+All activated-v5 Playwright configurations disable framework trace capture. Raw traces can retain
 personal `admitted` frames and private resume capabilities before test-side redaction. Failure
 screenshots, public reports, and bounded redacted command/snapshot summaries remain available.
 

@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use grenadiers_core::{
     game::StepReport,
-    protocol::v4::{
+    protocol::v5::{
         GameServerMessage, RoomMetadata, RoomView, encode_server_message, project_room_view,
     },
     protocol::{project_events, project_state},
@@ -12,7 +12,7 @@ use grenadiers_core::{
 use super::super::types::RoomIdentity;
 use super::error::MatchRuntimeError;
 use super::runtime::{MatchNotice, SimRound};
-use grenadiers_core::protocol::v4::RoomPhase;
+use grenadiers_core::protocol::v5::RoomPhase;
 
 pub(super) fn room_view(
     identity: &RoomIdentity,
@@ -60,7 +60,8 @@ pub(super) fn snapshot(
     let generation_record_matches = match identity.profile {
         #[cfg(test)]
         super::super::profile::RoomProfile::FixedClassicV1 => sim.generation_record.is_none(),
-        super::super::profile::RoomProfile::GeneratedClassicV2 => sim.generation_record.is_some(),
+        super::super::profile::RoomProfile::GeneratedClassicV2
+        | super::super::profile::RoomProfile::GeneratedClassicV3 => sim.generation_record.is_some(),
     };
     if !generation_record_matches {
         return Err(MatchRuntimeError::Publication);

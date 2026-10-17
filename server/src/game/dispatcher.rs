@@ -1,8 +1,8 @@
 use std::sync::Arc;
 
 use axum::extract::ws::WebSocket;
-use grenadiers_core::protocol::v4::{
-    GameClientMessage, GameServerMessage, V4ErrorCode as ErrorCode,
+use grenadiers_core::protocol::v5::{
+    GameClientMessage, GameServerMessage, V5ErrorCode as ErrorCode,
 };
 use grenadiers_core::protocol::{Counter, Direction as WireDirection, RoomId};
 use tokio::time::Instant;

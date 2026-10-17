@@ -21,6 +21,19 @@ fn definition_schema(name: &str) -> Validator {
     validator_for(&schema).unwrap()
 }
 
+#[test]
+fn legacy_encoder_rejects_rules_outside_its_closed_contract() {
+    let mut room = room(RoomPhase::Waiting);
+    room.rules_version = RulesVersion::ClassicV3;
+    assert_eq!(
+        encode_server_message(&GameServerMessage::RoomState {
+            room,
+            you_seat: Seat::One
+        }),
+        Err(EncodeServerMessageError::EncodingFailed)
+    );
+}
+
 fn room(phase: RoomPhase) -> RoomView {
     RoomView {
         room_id: RoomId::new("0123456789abcdef0123456789abcdef").unwrap(),

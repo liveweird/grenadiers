@@ -2,8 +2,8 @@ use std::{future::pending, sync::Arc, time::Duration};
 
 use axum::extract::ws::{Message, WebSocket};
 use grenadiers_core::protocol::Counter;
-use grenadiers_core::protocol::v4::{
-    GameClientMessage, GameServerMessage, V4ErrorCode as ErrorCode, parse_client_message,
+use grenadiers_core::protocol::v5::{
+    GameClientMessage, GameServerMessage, V5ErrorCode as ErrorCode, parse_client_message,
 };
 use tokio::time::{Instant, MissedTickBehavior, interval_at, sleep_until, timeout};
 

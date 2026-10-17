@@ -32,3 +32,22 @@ fn classic_v2_only_enables_domain_pickup_collection() {
     assert_eq!(second.flame_ticks(), first.flame_ticks());
     assert_eq!(second.round_ticks(), first.round_ticks());
 }
+
+#[test]
+fn classic_v3_only_widens_the_turn_assist_window() {
+    let second = RulesConfig::classic_v2();
+    let third = RulesConfig::classic_v3();
+
+    assert_eq!(third.version(), 3);
+    assert_eq!(third.turn_assist(), 256);
+    assert_eq!(second.turn_assist(), 128);
+    assert_eq!(third.tick_rate(), second.tick_rate());
+    assert_eq!(third.units_per_cell(), second.units_per_cell());
+    assert_eq!(third.half_footprint(), second.half_footprint());
+    assert_eq!(third.pickup_collection(), second.pickup_collection());
+    assert_eq!(third.bomb_capacity(), second.bomb_capacity());
+    assert_eq!(third.bomb_range(), second.bomb_range());
+    assert_eq!(third.bomb_fuse_ticks(), second.bomb_fuse_ticks());
+    assert_eq!(third.flame_ticks(), second.flame_ticks());
+    assert_eq!(third.round_ticks(), second.round_ticks());
+}

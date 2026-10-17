@@ -5,7 +5,7 @@ journal. The test-only replay runner drives the real MatchRuntime, InputMailbox,
 profile, and entropy seam; it does not run a second simulator. Replay inspection remains
 test-only. No endpoint, public export, or persistent journal is available.
 
-A versioned header identifies format 1, lifecycle profile 2, classic-v2 physics, generator-v1,
+A versioned header identifies format 1, lifecycle profile 2, classic-v3 physics (classic-v2 for archived journals), generator-v1,
 initial occupied seats, and initial absolute tick zero. Operations record the
 authoritative tick and increasing order within that tick: occupation, accepted readiness/
 movement/bomb/rematch, immediate input fencing, tick advancement, committed departure batches,

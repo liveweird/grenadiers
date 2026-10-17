@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { setTimeout as delay } from 'node:timers/promises'
 import { chromium, expect, type Browser, type BrowserContext, type Page } from '@playwright/test'
-import type { GameServerMessage, Position, Seat } from '../../../web/src/game/v4/schema'
+import type { GameServerMessage, Position, Seat } from '../../../web/src/game/v5/schema'
 import { latestSnapshot, type ObservedGame } from './duel'
 
 type Snapshot = Extract<GameServerMessage, { type: 'snapshot' }>

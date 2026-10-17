@@ -6,7 +6,7 @@ mod scalars;
 mod server;
 mod snapshot;
 pub mod v3;
-pub mod v4;
+pub mod v5;
 
 use std::fmt;
 
@@ -71,6 +71,14 @@ impl std::error::Error for EncodeServerMessageError {}
 pub fn encode_server_message(
     message: &GameServerMessage,
 ) -> Result<String, EncodeServerMessageError> {
+    match message {
+        GameServerMessage::RoomState { room, .. } | GameServerMessage::Snapshot { room, .. }
+            if room.rules_version == RulesVersion::ClassicV3 =>
+        {
+            return Err(EncodeServerMessageError::EncodingFailed);
+        }
+        _ => {}
+    }
     let encoded =
         serde_json::to_string(message).map_err(|_| EncodeServerMessageError::EncodingFailed)?;
     enforce_server_message_size(encoded)

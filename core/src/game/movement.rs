@@ -4,12 +4,10 @@ use super::arena::{ARENA_HEIGHT, ARENA_WIDTH, Terrain};
 use super::geometry::{MovementSegment, MovementTrace};
 use super::input::Direction;
 use super::simulation::{Actor, TurnAssist};
-use super::types::{
-    CellId, EntityId, HALF_FOOTPRINT, Position, TICKS_PER_SECOND, TURN_ASSIST, UNITS_PER_CELL,
-};
+use super::types::{CellId, EntityId, HALF_FOOTPRINT, Position, TICKS_PER_SECOND, UNITS_PER_CELL};
 use super::world::World;
 
-pub(crate) fn advance_actor(world: &World, actor: &mut Actor) -> MovementTrace {
+pub(crate) fn advance_actor(world: &World, actor: &mut Actor, turn_assist: i32) -> MovementTrace {
     let mut trace = MovementTrace::new(actor.position);
     let Some(direction) = actor.held.active() else {
         actor.residual = 0;
@@ -39,7 +37,7 @@ pub(crate) fn advance_actor(world: &World, actor: &mut Actor) -> MovementTrace {
 
     let coordinate = alignment_coordinate(direction, actor.position);
     let target = nearest_center(coordinate);
-    if (coordinate - target).abs() > TURN_ASSIST {
+    if (coordinate - target).abs() > turn_assist {
         return trace;
     }
     let correction = target - coordinate;
@@ -281,3 +279,7 @@ fn correction_direction(requested: Direction, correction: i32) -> Direction {
 #[cfg(test)]
 #[path = "movement_tests.rs"]
 mod tests;
+
+#[cfg(test)]
+#[path = "forgiving_turn_tests.rs"]
+mod forgiving_turn_tests;

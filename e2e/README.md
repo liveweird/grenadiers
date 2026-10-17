@@ -14,7 +14,7 @@ Run the dedicated configurable-controls acceptance with `npm run test:controls`;
 fixture and verifies persisted UI remapping with native keys against a live round.
 The reconnect suite reuses the full-match fixture; run it with
 `E2E_MATCH_FIXTURE=arena-v1-matches npm run test:reconnect` from this directory.
-Every suite disables native tracing because v4 personal frames contain stable private seat
+Every suite disables native tracing because v5 personal frames contain stable private seat
 capabilities. Keep failure screenshots, public HTML reports, explicit compositor checkpoints,
 and bounded redacted summaries; never print or attach authentication/resume payloads. The
 reconnect probe closes real native transports and authenticates normally without changing

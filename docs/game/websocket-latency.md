@@ -66,3 +66,16 @@ throttling at startup. All eight cases passed in 19.4 seconds. Twenty unshaped o
 measured 133.63ms minimum, 145.82ms median, and 157.30ms observed p95/maximum, with no 250ms
 exceedance. The shaped queues peaked at two frames and 7,204 bytes. These twenty observations describe
 this exact profile; they remain an observed envelope rather than a tail guarantee.
+
+## Final deployment reference
+
+The corrected greater-clearance trajectory passes all nine latency cases on each deployment,
+including all twenty mandatory observations per native profile. Compose's shaped median/max is
+148.672/161.787 ms; Kubernetes is 147.674/160.793 ms. Both remain below the unchanged 250 ms
+budget. The [exact-image record](../verification.md) identifies the clean application and harness
+sources, shared image, failed trajectory diagnostic and complete 21-case matrices.
+
+Browser helpers use two-core affinity with no CFS quota. Compose applies the same app affinity;
+Kubernetes keeps its committed 500m CPU limit and scheduler-managed CPUs. Actual Kubernetes app
+throttling remains zero across the observed window. These stated profiles do not imply identical
+CPU allocation or an unmeasured capacity/tail guarantee.

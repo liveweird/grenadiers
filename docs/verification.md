@@ -1,5 +1,37 @@
 # Repository verification
 
+## M7 v0.3.14 exact-image delayed-message acceptance — 2026-10-17
+
+Application build source `e7b222fff45efa1fdf9c34c223f938c427c3b5de` produces
+`sha256:b62b840b695aeb5177d30f47f64f818503ae6334f1f0ea7f96662c8deae7827d`.
+The corrected clean harness is `c50af54d2b5b12322a435fa7ebd67813c86b3e80`; Docker/application
+input comparison between those commits is empty. That same image passes **21/21 cases through
+each of Compose and Kubernetes**, retries disabled: six default, pickup, match/rematch, two
+reconnect, controls, headed visibility and nine latency cases (seven pure plus two native profiles).
+The original failed forced-alternation run remains separate; the reviewed trajectory correction
+then passes once on both paths without weakening observations, clearance or the fixed budget.
+
+| Deployment | Unshaped 20: median/max | Shaped 20: median/max | Above 250 ms |
+| --- | --- | --- | --- |
+| Compose | 41.057 / 57.953 ms | 148.672 / 161.787 ms | 0 |
+| Kubernetes | 36.191 / 51.095 ms | 147.674 / 160.793 ms | 0 |
+
+Both browser helpers use Node 24.21.0, Playwright 1.63.0, pinned Chromium revision 1243,
+CPUs 0–1 affinity and unlimited cpu.max, with no observed CFS throttling. Compose's app also
+uses that two-core/no-quota profile. Kubernetes retains the committed **500m/256Mi** resources:
+app CPUs 0–17 are scheduler-managed, cpu.max is 50000/100000, and observed throttling remains
+0→0 across 107 periods (71,787 µs CPU used). These are explicitly different deployment CPU
+profiles; twenty observations per path establish no tail, WAN or human-playability guarantee.
+
+Actual probes return 200/ok after each rollout. The Pod uses the same image digest, is ready
+1/1 with zero restarts, and passes nonroot UID/GID 65532, read-only root, dropped capabilities,
+no escalation, RuntimeDefault, read-only fixture Secret 0444, correct probes and no `/app` seeds.
+Compose security inspection also passes. Strict Kubernetes 1.33 validation reports three valid
+resources; pinned archive-only Trivy reports zero fixable HIGH/CRITICAL findings. Actual desktop
+and 320-pixel Polish controls screenshots pass visual inspection/containment. Evidence remains
+at `/tmp/grenadiers-v0314-acceptance`; owned namespace, Compose project, helpers, forward,
+source export and scan archive are removed. Accepted images remain. M7/v0.4.0 stays open.
+
 ## M7 exact-image trajectory correction — 2026-10-17
 
 The first v0.3.14 Compose latency attempt passed the shaped profile (20 observations,

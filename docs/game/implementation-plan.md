@@ -3,7 +3,7 @@
 Status: **execution plan**. M0 is complete and locally verified on 2026-10-16; M1 is complete
 and locally verified on 2026-10-17. M2 is complete and locally verified
 on 2026-10-17. M3’s fixed-map two-browser duel is implemented and locally verified;
-M4–M8 remain planned.
+M4 headless generation is implemented; its remaining slices and M5–M8 remain planned.
 Published engineering prereleases are listed in `CHANGELOG.md` and GitHub Releases.
 
 The first product goal is a reliable, browser-based survival match between two humans. Build
@@ -238,6 +238,11 @@ promise. These limits are visible in release notes and do not masquerade as full
 ## M4 Add generated arenas and the three initial upgrades
 
 **Depends on:** M3.
+
+Progress: v0.2.1 adds the explicit [versioned generator](generation.md), private concealed
+contents, deterministic fallback, and opening validation. Live rooms still use the fixed
+preview. Next come typed pickup layers, collection/upgrades, gameplay protocol compatibility,
+item rendering, and generated-round activation with real-browser acceptance.
 
 Work packages:
 

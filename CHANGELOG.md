@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.2.1 — 2026-10-17
+
+- Add a versioned deterministic arena API with canonical mirrored soft blocks and typed
+  concealed upgrades, clear spawn openings, and validated first-bomb escape routes.
+- Pin ChaCha20 initialization and bounded unbiased draw semantics; use a deterministic
+  empty fallback on validation or random-draw exhaustion.
+- Keep generation records and concealed locations outside public snapshots and redact
+  sensitive debug output. Promote the already-locked rand_chacha 0.9.0 dependency.
+
+This M4 groundwork does not activate generated network rooms or pickup behavior. The playable
+fixed-map preview remains unchanged while those dependent features are implemented.
+
 ## 0.2.0 — 2026-10-17
 
 - Make the fixed-map two-player duel playable through Create/Join, readiness, countdown,

@@ -1,10 +1,14 @@
 mod client;
+mod projection;
+mod projection_validation;
 mod scalars;
 mod server;
 
 use std::fmt;
 
 pub use client::GameClientMessage;
+pub use projection::{RoomMetadata, RoomProjectionError, project_room_view};
+pub use projection_validation::validate_room_view;
 pub use scalars::{GameplayVersion, RoundCount, Wins};
 pub use server::{
     CompletedRound, CountdownKind, GameServerMessage, MatchInterruptReason, MatchResult,

@@ -12,6 +12,13 @@ round-number spawn parity, canceled-attempt independence, and classic-v1 compati
 This release adds headless classic-v2 behavior. Live rooms still use the fixed classic-v1
 preview; gameplay protocol/client support and generated activation remain separate slices.
 
+A clean committed-tree build of `b30f9528a542eb26572c57dd0a1e92d2801b504b` produces
+`sha256:a3f985a351968f0e1a706ee3380e97e846c7419910727c8967c72c9d08b09046`.
+Compose and ready local Kubernetes use this exact image. Health/readiness and all **six
+browser scenarios** pass through both deployments. Strict schemas report 3 valid resources;
+pinned socket-free Trivy reports zero HIGH/CRITICAL vulnerabilities. Temporary runtime
+resources are removed; the image is retained. This evidence update changes documentation only.
+
 ## M4 typed pickup visibility layers — 2026-10-17
 
 The integrated locked server gate passes **155 core tests, 67 server tests, and 2 doctests**.

@@ -1,6 +1,6 @@
 # ADR 0016: Dormant gameplay-v3 match contract
 
-Status: structural schema/DTOs implemented; checked projection and production activation follow.
+Status: structural schema/DTOs and checked room projection implemented; production activation follows.
 
 ## Decision
 
@@ -35,3 +35,10 @@ Preserve closed required objects, scalar bounds, three reports, 64 events, and 6
 bytes. A worst-metadata fixture with 195 longest pickup entries and 64 largest physical events
 encodes to 44,742 bytes, leaving 20,794 bytes. Unsupported-version responses accept 0..65535
 so clients understand older/future peers. No extra physics version or gameplay event is added.
+
+## Checked room projection
+
+Derive v3 rooms from the pure lifecycle, then validate canonical seats, phase-specific consent,
+score/history and epoch chronology, exact hold deadlines, and independent match outcomes.
+A DTO validator rejects impossible consent consensus, draw-credited scores, pre-round epochs,
+and an occupied forfeit loser. Physical-state/profile agreement belongs to the server adapter.

@@ -35,3 +35,5 @@ classic match progression, then reconnect resilience and playtest hardening. Mar
 verification record.
 
 [Baseline rule coverage](rule-coverage.md) maps all 42 acceptance rules to concrete automated assertions.
+
+[Runtime reference measurements](performance.md) documents bounded workloads, selected budgets and evidence limits.

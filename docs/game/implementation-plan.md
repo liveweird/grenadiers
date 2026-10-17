@@ -341,6 +341,10 @@ their queues, timers, and seat credentials under bounded server lifecycle tests.
 
 ## M7 Playtest and harden the two-player game
 
+v0.3.11 adds the [optimized runtime/owner reference harness](performance.md), including separate
+queue pressure and exact artifact provenance. Recorded clean reference runs and exact-image
+acceptance are required before release; broader playability/latency work remains open.
+
 **Release:** v0.4.0. **Depends on:** M6.
 
 Work packages:

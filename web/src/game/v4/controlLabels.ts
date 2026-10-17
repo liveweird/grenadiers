@@ -11,7 +11,7 @@ export function bindingsSummary(bindings: KeyboardBindings, copy: V4Copy): strin
   const movements = (['north', 'east', 'south', 'west'] as const)
     .map((action) => `${copy.controls.actions[action]}: ${bindings[action].map((code) => keyLabel(code, copy)).join(' / ')}`)
     .join(', ')
-  return format(copy.arena.instructions, {
+  return format(copy.controls.instructions, {
     movement: movements,
     bomb: bindings.bomb.map((code) => keyLabel(code, copy)).join(' / '),
   })

@@ -93,7 +93,7 @@
     "label": "Dziedziniec Grenadiers",
     "failure": "Nie udało się wyświetlić dziedzińca.",
     "focusHint": "Wybierz dziedziniec, aby sterować graczem.",
-    "instructions": "Ruch: {{movement}}. Bomba: {{bomb}}. Sterowanie działa tylko podczas rundy."
+    "instructions": "Poruszaj się strzałkami lub klawiszami W A S D. Podłóż bombę spacją. Sterowanie działa tylko podczas rundy."
   },
   "controls": {
     "open": "Sterowanie klawiaturą",
@@ -123,7 +123,8 @@
       "ArrowLeft": "Strzałka w lewo",
       "Space": "Spacja",
       "Enter": "Enter"
-    }
+    },
+    "instructions": "Ruch: {{movement}}. Bomba: {{bomb}}. Sterowanie działa tylko podczas rundy."
   },
   "error": {
     "title": "Nie udało się wykonać działania",

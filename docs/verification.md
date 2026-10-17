@@ -11,7 +11,16 @@ The two-seat component returns bounded reservation/expiry facts and never fabric
 
 This is a pure API release. Active v3 transport-loss interruption, credentials, publication,
 and browser behavior are unchanged. Lifecycle and coordinated reconnect activation follow.
-Exact-image deployment acceptance is still pending.
+A clean committed-tree build of `53d42fe95819d1252c17004cb3aa04b426ead796` produces
+`sha256:b9b753d049ee7e933e2b2afe18843e4ad58b431ca98e00cc5e6c0a8b2b57d648`.
+Compose and local Kubernetes use that exact image. Each passes the real JSON health/ready
+probes, **six default browser scenarios, one pickup scenario, and one full-match scenario**.
+Both fixture suites disable retries. Strict Kubernetes 1.33 schemas pass **3/3**; runtime
+inspection confirms UID/GID 65532, read-only root, dropped capabilities and seccomp settings.
+Read-only fixture Secrets use mode 0444; no seed file appears under `/app`. Pinned archive-only
+Trivy reports zero fixable HIGH/CRITICAL findings. The immutable accepted client is `3456e48`;
+its exact hashes and screenshots are recorded with the image evidence. Temporary stacks,
+namespaces, Secrets, forwards, exports and scan archives are cleaned; images and logs remain.
 
 ## M5 coordinated classic matches — 2026-10-17
 

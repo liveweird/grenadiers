@@ -17,6 +17,7 @@ mod publication;
 mod runtime;
 mod types;
 
+use crate::round_seed::RoundSeedSource;
 pub(crate) use input::RoomAction;
 use types::RoomIdentity;
 pub(crate) use types::{Admission, BindingKey, RoomError, RoomNotice};
@@ -32,6 +33,8 @@ type RandomFill = dyn Fn(&mut [u8]) -> Result<(), ()> + Send + Sync;
 pub(crate) struct GameRooms {
     registry: Mutex<Registry>,
     random_fill: Arc<RandomFill>,
+    round_seed_source: RoundSeedSource,
+    profile: profile::RoomProfile,
 }
 
 #[derive(Clone)]
@@ -48,7 +51,7 @@ struct Registry {
 }
 
 impl GameRooms {
-    pub(crate) fn new(now: StdInstant) -> Arc<Self> {
+    pub(crate) fn new(now: StdInstant, round_seed_source: RoundSeedSource) -> Arc<Self> {
         Arc::new(Self {
             registry: Mutex::new(Registry {
                 rooms: HashMap::new(),
@@ -58,6 +61,8 @@ impl GameRooms {
                 operations: Bucket::new(now),
             }),
             random_fill: Arc::new(|bytes| getrandom::fill(bytes).map_err(|_| ())),
+            round_seed_source,
+            profile: profile::RoomProfile::GeneratedClassicV2,
         })
     }
 
@@ -75,6 +80,30 @@ impl GameRooms {
                 operations: Bucket::new(now),
             }),
             random_fill: Arc::new(fill),
+            round_seed_source: RoundSeedSource::from_optional_path(None)
+                .expect("OS entropy source construction cannot fail"),
+            profile: profile::RoomProfile::FixedClassicV1,
+        }
+        .into()
+    }
+
+    #[cfg(test)]
+    pub(crate) fn with_random_fill_and_round_seed(
+        now: StdInstant,
+        fill: impl Fn(&mut [u8]) -> Result<(), ()> + Send + Sync + 'static,
+        round_seed_source: RoundSeedSource,
+    ) -> Arc<Self> {
+        Self {
+            registry: Mutex::new(Registry {
+                rooms: HashMap::new(),
+                codes: HashMap::new(),
+                prefix: None,
+                next_serial: 1,
+                operations: Bucket::new(now),
+            }),
+            random_fill: Arc::new(fill),
+            round_seed_source,
+            profile: profile::RoomProfile::GeneratedClassicV2,
         }
         .into()
     }
@@ -93,7 +122,11 @@ impl GameRooms {
                 return Err(RoomError::CapacityReached);
             }
             let identity = self.generate_identity(&mut registry)?;
-            let (commands, owner) = owner::PreparedOwner::new(identity.clone(), Instant::now());
+            let (commands, owner) = owner::PreparedOwner::new(
+                identity.clone(),
+                Instant::now(),
+                self.round_seed_source.clone(),
+            );
             let handle = RoomHandle { commands };
             registry
                 .codes
@@ -215,7 +248,7 @@ impl GameRooms {
                 return Ok(RoomIdentity {
                     id,
                     code,
-                    profile: profile::RoomProfile::FixedClassicV1,
+                    profile: self.profile,
                 });
             }
         }

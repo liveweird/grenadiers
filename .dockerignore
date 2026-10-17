@@ -9,3 +9,6 @@
 **/test-results
 target
 .DS_Store
+
+**/playwright-pickup-report
+**/pickup-test-results

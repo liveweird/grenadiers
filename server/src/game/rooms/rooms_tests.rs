@@ -1,13 +1,13 @@
 use std::sync::{
     Arc,
-    atomic::{AtomicU64, Ordering},
+    atomic::{AtomicU64, AtomicUsize, Ordering},
 };
 
-use grenadiers_core::protocol::{RoomCode, Seat};
+use grenadiers_core::protocol::{MapId, RoomCode, Seat};
 use tokio::sync::oneshot;
 
 use super::*;
-use crate::game::sessions::ConnectionId;
+use crate::game::sessions::{ConnectionId, GameSessions};
 
 fn deterministic_rooms(now: StdInstant) -> Arc<GameRooms> {
     let codes = AtomicU64::new(0);
@@ -64,6 +64,44 @@ async fn identifiers_are_canonical_and_last_seat_has_one_winner() {
             | (Err(RoomError::RoomFull), Ok(admission))
             if admission.seat == Seat::Two
     ));
+}
+
+#[tokio::test]
+async fn token_room_and_round_randomness_are_independent() {
+    let now = StdInstant::now();
+    let token_calls = Arc::new(AtomicUsize::new(0));
+    let observed_tokens = Arc::clone(&token_calls);
+    let sessions = GameSessions::with_random_fill(now, move |bytes| {
+        observed_tokens.fetch_add(1, Ordering::SeqCst);
+        bytes.fill(7);
+        Ok(())
+    });
+    sessions.issue(now).unwrap();
+
+    let room_calls = Arc::new(AtomicUsize::new(0));
+    let observed_rooms = Arc::clone(&room_calls);
+    let seed_calls = Arc::new(AtomicUsize::new(0));
+    let observed_seeds = Arc::clone(&seed_calls);
+    let seed_source = crate::round_seed::RoundSeedSource::with_entropy(move |_| {
+        observed_seeds.fetch_add(1, Ordering::SeqCst);
+        Ok(())
+    });
+    let rooms = GameRooms::with_random_fill_and_round_seed(
+        now,
+        move |bytes| {
+            observed_rooms.fetch_add(1, Ordering::SeqCst);
+            bytes.fill(0);
+            Ok(())
+        },
+        seed_source,
+    );
+    let admission = rooms.create(binding(1, 1), now).await.unwrap();
+
+    assert_eq!(token_calls.load(Ordering::SeqCst), 1);
+    assert_eq!(room_calls.load(Ordering::SeqCst), 2);
+    assert_eq!(seed_calls.load(Ordering::SeqCst), 0);
+    assert_eq!(admission.view.rules_version.get(), 2);
+    assert_eq!(admission.view.map_id, MapId::GeneratedV1);
 }
 
 #[tokio::test]

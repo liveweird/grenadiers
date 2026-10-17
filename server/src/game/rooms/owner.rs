@@ -11,6 +11,7 @@ use tokio::{
 };
 
 use super::{GameRooms, input::RoomAction, publication, runtime::Runtime, types::*};
+use crate::round_seed::RoundSeedSource;
 
 pub(super) const COMMAND_CAPACITY: usize = 32;
 pub(super) const ROOM_LIFETIME: Duration = Duration::from_secs(300);
@@ -43,12 +44,14 @@ pub(super) struct PreparedOwner {
     created_at: Instant,
     receiver: mpsc::Receiver<RoomCommand>,
     notices: watch::Sender<RoomNotice>,
+    round_seed_source: RoundSeedSource,
 }
 
 impl PreparedOwner {
     pub(super) fn new(
         identity: RoomIdentity,
         created_at: Instant,
+        round_seed_source: RoundSeedSource,
     ) -> (mpsc::Sender<RoomCommand>, Self) {
         let (commands, receiver) = mpsc::channel(COMMAND_CAPACITY);
         let initial = RoomNotice::View(
@@ -63,6 +66,7 @@ impl PreparedOwner {
                 created_at,
                 receiver,
                 notices,
+                round_seed_source,
             },
         )
     }
@@ -90,7 +94,7 @@ impl Drop for RegistrationGuard {
 }
 
 async fn run(_guard: RegistrationGuard, mut owner: PreparedOwner) {
-    let mut runtime = Runtime::new(owner.identity, owner.notices);
+    let mut runtime = Runtime::new(owner.identity, owner.notices, owner.round_seed_source);
     loop {
         let deadline = tick_deadline(owner.created_at, runtime.lifecycle.tick().0 + 1);
         let retirement = runtime.terminal_at.map(|at| at + TERMINAL_LIFETIME);

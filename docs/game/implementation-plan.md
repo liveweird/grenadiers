@@ -3,7 +3,8 @@
 Status: **execution plan**. M0 is complete and locally verified on 2026-10-16; M1 is complete
 and locally verified on 2026-10-17. M2 is complete and locally verified
 on 2026-10-17. M3’s fixed-map two-browser duel is implemented and locally verified;
-M4 headless generation is implemented; its remaining slices and M5–M8 remain planned.
+M4 generated rounds and upgrades are complete and locally verified on 2026-10-17;
+M5–M8 remain planned.
 Published engineering prereleases are listed in `CHANGELOG.md` and GitHub Releases.
 
 The first product goal is a reliable, browser-based survival match between two humans. Build
@@ -22,8 +23,8 @@ The repository contains versioned HTTP/WebSocket contracts, anonymous sessions, 
 two-seat rooms, authoritative 60 Hz simulation, and checked public snapshots/events. M1–M2
 provide movement, owned bombs, flames, damage, and round finality. M3 adds readiness/countdown
 and a playable PixiJS arena with React controls, native keyboard handling, and EN/PL localization.
-Automated gates, CI, Compose, and Kubernetes validate the stack. Generated upgrades, complete
-series scoring, and reconnect remain later milestones.
+Automated gates, CI, Compose, and Kubernetes validate the stack. M4 adds generated arenas, private seeds, and upgrades. Complete series scoring and reconnect
+remain later milestones.
 
 The [verification record](../verification.md) now contains passing locked Rust builds, tests,
 coverage, dependency audits, Compose execution, strict Kubernetes validation and live rollout,
@@ -240,11 +241,11 @@ promise. These limits are visible in release notes and do not masquerade as full
 **Depends on:** M3.
 
 Progress: v0.2.1 adds the explicit [versioned generator](generation.md), private concealed
-contents, deterministic fallback, and opening validation. Live rooms still use the fixed
-preview. v0.2.2 adds checked [pickup layers](pickups.md), reveal/destruction, and private
+contents, deterministic fallback, and opening validation. v0.2.2 adds checked [pickup layers](pickups.md), reveal/destruction, and private
 world construction. v0.2.3 adds headless collection, capped upgrades, and explicit round-number
-spawn/tie assignment. v0.2.4 coordinates gameplay v2 and immutable room profiles. v0.2.5 adds retained item graphics and localized authoritative upgrade HUDs. Next comes
-generated-round activation with real-browser pickup acceptance.
+spawn/tie assignment. v0.2.4 coordinates gameplay v2 and immutable room profiles. v0.2.5 adds
+retained item graphics and localized authoritative upgrade HUDs. v0.2.6 activates generated
+classic-v2 rooms, private seed handling, and separate random/fixture browser acceptance.
 
 Work packages:
 

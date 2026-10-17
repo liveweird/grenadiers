@@ -1,6 +1,6 @@
 #![forbid(unsafe_code)]
 
-use std::{collections::HashSet, path::PathBuf, sync::Arc, time::Duration};
+use std::{collections::HashSet, fmt, path::PathBuf, sync::Arc, time::Duration};
 
 use axum::{
     Json, Router,
@@ -24,8 +24,10 @@ use tokio::{
 };
 
 mod game;
+mod round_seed;
 
 use game::{GameRooms, GameSessions, game_websocket, issue_session};
+use round_seed::RoundSeedSource;
 use tower_http::{
     services::{ServeDir, ServeFile},
     trace::TraceLayer,
@@ -55,26 +57,30 @@ pub struct AppState {
 impl AppState {
     #[must_use]
     pub fn without_database(allowed_origins: impl IntoIterator<Item = String>) -> Self {
+        let round_seed_source = RoundSeedSource::from_optional_path(None)
+            .expect("OS entropy source construction cannot fail");
         Self {
             database: None,
             allowed_origins: Arc::new(allowed_origins.into_iter().collect()),
             connections: Arc::new(Semaphore::new(MAX_CONNECTIONS)),
             game_sessions: Arc::new(GameSessions::new(std::time::Instant::now())),
-            game_rooms: GameRooms::new(std::time::Instant::now()),
+            game_rooms: GameRooms::new(std::time::Instant::now(), round_seed_source),
         }
     }
 
-    pub fn from_environment() -> Result<Self, sqlx::Error> {
+    pub fn from_environment() -> Result<Self, StartupError> {
         Self::from_configuration(
             std::env::var("ALLOWED_ORIGINS").ok(),
             std::env::var("DATABASE_URL").ok(),
+            std::env::var_os("GAME_ROUND_SEED_FILE").map(PathBuf::from),
         )
     }
 
     fn from_configuration(
         allowed_origins: Option<String>,
         database_url: Option<String>,
-    ) -> Result<Self, sqlx::Error> {
+        round_seed_file: Option<PathBuf>,
+    ) -> Result<Self, StartupError> {
         let allowed_origins = allowed_origins.map_or_else(
             || DEFAULT_ORIGINS.iter().map(ToString::to_string).collect(),
             |value| {
@@ -86,16 +92,44 @@ impl AppState {
                     .collect()
             },
         );
-        let database = database_pool(database_url)?;
+        let round_seed_source = RoundSeedSource::from_optional_path(round_seed_file.as_deref())
+            .map_err(|_| StartupError::RoundSeed)?;
+        let database = database_pool(database_url).map_err(|_| StartupError::Database)?;
         Ok(Self {
             database,
             allowed_origins: Arc::new(allowed_origins),
             connections: Arc::new(Semaphore::new(MAX_CONNECTIONS)),
             game_sessions: Arc::new(GameSessions::new(std::time::Instant::now())),
-            game_rooms: GameRooms::new(std::time::Instant::now()),
+            game_rooms: GameRooms::new(std::time::Instant::now(), round_seed_source),
         })
     }
 }
+
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub enum StartupError {
+    Database,
+    RoundSeed,
+}
+
+impl fmt::Debug for StartupError {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Database => formatter.write_str("StartupError::Database"),
+            Self::RoundSeed => formatter.write_str("StartupError::RoundSeed"),
+        }
+    }
+}
+
+impl fmt::Display for StartupError {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Database => formatter.write_str("database configuration failed"),
+            Self::RoundSeed => formatter.write_str("round seed configuration failed"),
+        }
+    }
+}
+
+impl std::error::Error for StartupError {}
 
 fn database_pool(database_url: Option<String>) -> Result<Option<PgPool>, sqlx::Error> {
     let Some(database_url) = database_url
@@ -323,5 +357,9 @@ mod game_http_tests;
 #[cfg(test)]
 #[path = "game/socket_tests.rs"]
 mod game_socket_tests;
+#[cfg(test)]
+mod round_seed_tests;
+#[cfg(test)]
+mod startup_tests;
 #[cfg(test)]
 mod tests;

@@ -1,7 +1,7 @@
 # Typed pickup layers
 
 Status: headless visibility, collection, upgrades, and round assignment implemented.
-Live rooms remain on the fixed map without pickups until wire/client activation.
+Generated classic-v2 live rooms integrate this behavior through gameplay v2 and Pixi.
 
 `World::with_pickups(arena, concealed, pending, exposed)` checks typed cell maps and returns
 `PickupPlacementError` rather than a partial world. A concealed item must lie under a soft
@@ -11,8 +11,8 @@ all three maps. `World::new` still creates an item-free world.
 `World::from_generated(generated)` builds the concealed layer and returns the private
 `GenerationRecord` separately to the trusted caller. `exposed_pickups()` is the read-only
 visible layer. Public domain `PickupView { cell, kind }` entries are row-major and contain no
-concealed or pending information; Debug redacts those private layers. Gameplay v2 transmits only exposed items and collection events. The browser renders all three kinds and authoritative upgrade levels; generated-room
-activation remains a separate release step.
+concealed or pending information; Debug redacts those private layers. Gameplay v2 transmits only exposed items and collection events. The browser renders all three kinds and authoritative upgrade levels. Live generated rounds
+keep private layers and seed records inside the server owner.
 
 A destroyed block moves its concealed item to Pending. The revealing explosion cannot burn
 that item. It becomes Exposed only after all flames on its cell expire; overlap or renewal

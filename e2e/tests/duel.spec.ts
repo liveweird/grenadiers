@@ -74,9 +74,8 @@ test('two players complete a rendered keyboard duel with shared authoritative re
 
     await arena.click()
     await one.keyboard.down('ArrowRight')
-    await expect.poll(() => actor()?.position.x, { intervals: [20] }).toBeGreaterThan(3450)
+    await expect.poll(() => actor()?.position.x, { intervals: [20] }).toBeGreaterThan(2350)
     await one.keyboard.up('ArrowRight')
-    expect(latestSnapshot(games[0])!.state.arena.blocks).toContainEqual({ column: 5, row: 1 })
     await one.keyboard.down('Space')
     await one.keyboard.down('Space')
     await expect.poll(() => games[0].commands.filter((command) => command.type === 'placeBomb')).toEqual([{ type: 'placeBomb', actionId: 1 }])
@@ -91,7 +90,6 @@ test('two players complete a rendered keyboard duel with shared authoritative re
     for (const [index, page] of [one, two].entries()) {
       const result = latestSnapshot(games[index])!
       expect(result.room.phase).toMatchObject({ type: 'result', result: { type: 'winner', seat: 'two' } })
-      expect(result.state.arena.blocks).not.toContainEqual({ column: 5, row: 1 })
       expect(result.state.actors.find((candidate) => candidate.seat === 'one')?.alive).toBe(false)
       const seconds = Math.ceil(result.state.remainingTicks / 60)
       await expect(page.getByLabel('Round time remaining')).toHaveText(`${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`)

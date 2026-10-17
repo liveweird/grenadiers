@@ -1,6 +1,6 @@
 # ADR 0011: Versioned symmetric arena generation
 
-Status: implemented as an explicit headless API; network rooms still use the fixed preview.
+Status: implemented and active in generated classic-v2 network rooms.
 
 ## Decision
 
@@ -30,8 +30,8 @@ Debug redacts the seed and reports only concealed count. Public snapshots remain
 of generation records. Retain the private record for future replay without exposing or
 ordinarily logging active seeds or unrevealed content.
 
-This release does not enable generated network rounds or pickups. Typed layers, collection,
-protocol compatibility, rendering, and real-stack acceptance precede activation. Successive
+Live activation follows [ADR 0014](0014-private-round-seeds-and-live-generation.md), after typed
+layers, collection, protocol compatibility, rendering, and real-stack acceptance. Successive
 round spawn rotation belongs to explicit round assignment; canceled countdown attempts do
 not determine round parity. See [generation API](../game/generation.md) and the
 [arena rules](../game/rules.md#arena-construction-and-fairness).

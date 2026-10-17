@@ -1,5 +1,125 @@
 # Repository verification
 
+## M4 headless compositor diagnosis and correction — 2026-10-17
+
+Hosted trace profiling finally isolated the repeated native-key overshoot: Chromium's hybrid
+software compositor synchronously called `GLES2::ReadPixels` during canvas commit, blocking
+its renderer thread 100–175 ms per frame. The baseline captured 38 readback stalls and a
+176 ms maximum commit; consistent ANGLE/SwiftShader compositing captured zero readback stalls
+and a 0.7 ms maximum commit. Native key-down acknowledgements improved from roughly 90 ms
+to 1–8 ms. React/AJV/Pixi JavaScript was not the dominant cost; changing game logic or pulse
+constants was not justified. Independent key-up scheduling was tested and rejected because
+one pulse collapsed to zero movement.
+
+The shared Playwright config now selects `--enable-gpu --use-gl=angle --use-angle=swiftshader`
+only for CI on Linux. Local macOS retains its existing hardware path. No browser security
+option, game code, tolerance, fuse, assertion, timeout or retry changes. The exact unchanged
+pickup source (`ab5a63d1a12175d9bd203bb28bee27fd7f84c069a5af841f4f88734a14f8188b`)
+passes the complete two-client scenario with retries disabled in 31.4 seconds. Independent
+configuration review and the full seven-scenario E2E static gate pass. Causal profiles and
+experiment logs are retained at `/tmp/grenadiers-m4-input-experiment/FINDINGS.md`.
+Both final hosted browser checks must pass before merge. The accepted application image is
+unchanged because this correction affects only browser execution configuration.
+
+## M4 settled turn alignment — 2026-10-17
+
+Exact Node 24.21.0 Linux reproduction exposed the last corner condition: native key-up can
+coast to the outer wall, 192 units from cell center, while the movement model accepts a
+perpendicular turn only within 128. The test now waits for two newer stationary public
+snapshots after key-up, then uses the unchanged precise helper for that bounded corner offset.
+It turns only after the existing <=128 assertion; the second native leg reaches blast safety
+before real hazards clear. A stale pre-key-up snapshot can no longer skip the correction.
+
+Independent source/model closure review is clear. Final exact-Node Linux Chromium passes
+**6/6**, native Chromium **3/3**, all with retries disabled. The full E2E static gate passes.
+Logs: `/tmp/grenadiers-m4-corner-settled-{linux,native,static}.log`. Physics, turn tolerance,
+fuse, precise position assertions, pickups, both HUDs, bomb ranges/IDs, and events are unchanged.
+Earlier failing Linux corner variants remain recorded as failures, not passing evidence.
+Final hosted checks must pass at this revision before release.
+
+## M4 live-fuse corner-turn follow-up — 2026-10-17
+
+Hosted `c86668b` exposed the remaining delay before the safe leg: exact centering at the
+corner still consumed the live fuse. Both escape routes now use native key holds throughout:
+West until `x <= 1728` before South, or North until `y <= 1728` before East. These bounds
+place the actor's 320-unit half footprint entirely outside the adjacent blocked/bomb column
+or row before turning. Exact centering runs after real hazards clear. No precise-position,
+pickup, HUD, bomb-range/identity, event, or two-client assertion is removed.
+
+Independent geometry and cleanup review is clear. Final native Chromium passes **3/3** with
+retries disabled (`/tmp/grenadiers-m4-corner-native.log`), and the full seven-scenario E2E
+static gate passes. The application artifact and real fuse remain unchanged. Hosted checks
+are required at the final head before merge.
+
+## M4 pickup escape safety follow-up — 2026-10-17
+
+Hosted CI at `071a952` still caught a first-escape death despite passing local pulse-controller
+runs. The pickup-only route now holds native South until the live public actor reaches
+`y >= 2560`, or East until `x >= 2944` for the second escape. Both exceed the actual 2368-unit
+blast-clear boundary. Key release runs in `finally`; real bombs/flames clear before exact
+centering resumes. Generic movement, the three-second fuse, physics, <=128 position bounds,
+pickups, both HUDs, captured bomb ranges, IDs, and collection events remain unchanged.
+
+Independent geometry/control review is clear. The pinned Playwright 1.63 Linux image with two
+affinity-limited CPUs and retries disabled passes **10/10**, followed by **6/6 on final bytes**.
+Native Chromium against the isolated Compose fixture passes **3/3** with retries disabled.
+Typecheck and zero-warning ESLint pass. Linux evidence is retained in
+`/tmp/grenadiers-m4-route-debug/e2e/linux-route-safety{,-final}.log`; the native result was
+observed directly, not saved to a separate log. Application build inputs are unchanged from
+the previously accepted exact image. Final hosted CI is required before merge.
+
+## M4 live generated rounds — 2026-10-17
+
+The locked server gate passes **178 core tests, 85 server tests, and 2 doctests**.
+Rust line coverage passes the unchanged 80% floor at **4,030/4,340 lines, 92.86%**.
+Independent review reports no actionable seed/profile/activation findings. Tests cover strict
+bounded file parsing, read-once reproduction, startup redaction, independent authentication/
+discovery entropy, actual-start-only generation, canceled countdowns, profile/state agreement,
+no substitute world after entropy failure, private retained records, and explicit snapshot
+seed/private-key absence. A malformed-seed native process exits with a redacted RoundSeed
+error before trying an already occupied listener.
+
+Native Chromium passes all **six generated-map smoke scenarios** and the separate **two-browser
+pickup acceptance**. The latter reveals and collects capacity/range through keyboard/public
+positions, updates both HUDs, and proves simultaneous range-2/range-3 bombs. A core fixture
+trace independently survives that route at tick 631. CI runs random smoke before recreating
+the same image with the read-only fixture; the fixture command fails without explicit setup.
+The complete web gate passes 83 tests with 96.80% statement, 92.08% branch, 98.64%
+function, and 98.82% line coverage. Contract/lint/unused-code/build, E2E static parity, and
+dependency policies pass; npm audits report zero vulnerabilities.
+
+A clean committed-tree build of `483346a3191d90a66f0701de9b84b2fb79ce47ef` produces
+`sha256:01740d0eaf194b0d85daba3cc54937dc8a6912a153c4e3c82cd8a3554995a209`.
+Both Compose and ready local Kubernetes use that exact image. Each path passes health/
+readiness, all six default-random smoke scenarios, then the separate pickup scenario after
+read-only fixture recreation. Kubernetes uses a temporary Secret readable by UID 65532 while
+preserving probes and security settings. Strict schemas report 3 valid resources and pinned
+archive-only Trivy reports zero HIGH/CRITICAL findings. Runtime inspection finds no seed files
+under `/app`. Actual fixture screenshots were visually inspected; both HUDs show the upgrades.
+Temporary stacks, namespace/Secret, forwards, exports, and archives are removed. The image and
+logs/screenshots remain available.
+
+Linux CI exposed controller timing sensitivity. The final controller records sanitized
+movement direction/stop summaries, requires actual public actor movement, then two newer
+identical stationary snapshots before another correction. Coarse movement releases early
+with key-up protected by `finally`; fine movement uses one native `keyboard.press` operation
+with a dynamic 34–60 ms pulse. Both axes retain the existing 128-unit turn-assist tolerance.
+Concurrent live assertions precede compositor screenshots; production physics, bomb fuses,
+and every bomb/HUD/event assertion remain unchanged.
+
+The final source passes **10/10 official Linux Playwright 1.63 Chromium runs** pinned to two
+CPU cores (`nproc=2`, unrestricted bandwidth), plus **3/3 native Compose** and **3/3 native
+Kubernetes** fixture runs against the accepted image above. Every run disables retries;
+the fixture config now also disables CI retries. A separate hard CPU-bandwidth-quota diagnostic
+was 7/10 and remains preserved, not counted as passing evidence. Runtime/render performance
+budgets under arbitrary throttling remain M7 work.
+
+Per-action DOM/compositor tracing is disabled only for this real-time fixture. Action/source
+traces, failure screenshots, explicit visual checkpoints, and bounded redacted WebSocket
+summaries remain. Default smoke tracing is unchanged. Application build inputs are unchanged;
+the accepted image is retained. Final stacks, namespace/Secret, forwards, debug projects,
+and exports are removed; acceptance logs and screenshots remain available.
+
 ## M4 exposed-item rendering and upgrade HUD — 2026-10-17
 
 The complete web gate passes **83 tests** with **96.80% statements, 92.08% branches,

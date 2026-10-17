@@ -1,3 +1,8 @@
+use std::sync::{
+    Arc,
+    atomic::{AtomicUsize, Ordering},
+};
+
 use grenadiers_core::{
     protocol::{RoomCode, RoomId},
     room::Phase,
@@ -9,20 +14,36 @@ use crate::game::{rooms::owner::RoomCommand, sessions::ConnectionId};
 use grenadiers_core::game::Direction;
 
 fn identity() -> RoomIdentity {
+    identity_with_profile(super::super::profile::RoomProfile::FixedClassicV1)
+}
+
+fn identity_with_profile(profile: super::super::profile::RoomProfile) -> RoomIdentity {
     RoomIdentity {
         id: RoomId::new("00000000000000000000000000000001").unwrap(),
         code: RoomCode::new("ABCDEFGH").unwrap(),
-        profile: super::super::profile::RoomProfile::FixedClassicV1,
+        profile,
     }
 }
 
 fn runtime() -> Runtime {
-    let identity = identity();
+    runtime_with(
+        identity(),
+        crate::round_seed::RoundSeedSource::with_entropy(|bytes| {
+            bytes.fill(0);
+            Ok(())
+        }),
+    )
+}
+
+fn runtime_with(
+    identity: RoomIdentity,
+    round_seed_source: crate::round_seed::RoundSeedSource,
+) -> Runtime {
     let initial =
         RoomNotice::View(publication::room_view(&identity, &RoomLifecycle::new(), 1).unwrap());
     let (notices, receiver) = watch::channel(initial);
     drop(receiver);
-    Runtime::new(identity, notices)
+    Runtime::new(identity, notices, round_seed_source)
 }
 
 fn binding(connection: u64) -> BindingKey {
@@ -295,4 +316,80 @@ fn countdown_updates_public_time_at_twenty_hertz_while_waiting_stays_quiet() {
             );
         }
     }
+}
+
+#[test]
+fn generated_round_consumes_one_seed_only_at_the_actual_start_boundary() {
+    let calls = Arc::new(AtomicUsize::new(0));
+    let observed = Arc::clone(&calls);
+    let source = crate::round_seed::RoundSeedSource::with_entropy(move |bytes| {
+        observed.fetch_add(1, Ordering::SeqCst);
+        bytes.fill(19);
+        Ok(())
+    });
+    let identity = identity_with_profile(super::super::profile::RoomProfile::GeneratedClassicV2);
+    let mut runtime = runtime_with(identity, source);
+
+    let (_one, _two) = ready_duel(&mut runtime);
+    assert_eq!(calls.load(Ordering::SeqCst), 0);
+    for _ in 0..179 {
+        assert!(runtime.tick());
+    }
+    assert_eq!(calls.load(Ordering::SeqCst), 0);
+    assert!(runtime.state.is_none());
+
+    assert!(runtime.tick());
+    assert_eq!(calls.load(Ordering::SeqCst), 1);
+    assert_eq!(
+        runtime.generation_record.expect("generation record").seed(),
+        [19; 32]
+    );
+    assert_eq!(runtime.state.as_ref().unwrap().rules().version(), 2);
+}
+
+#[test]
+fn canceled_countdown_does_not_consume_a_round_seed() {
+    let calls = Arc::new(AtomicUsize::new(0));
+    let observed = Arc::clone(&calls);
+    let source = crate::round_seed::RoundSeedSource::with_entropy(move |_| {
+        observed.fetch_add(1, Ordering::SeqCst);
+        Ok(())
+    });
+    let identity = identity_with_profile(super::super::profile::RoomProfile::GeneratedClassicV2);
+    let mut runtime = runtime_with(identity, source);
+    let (_one, _two) = ready_duel(&mut runtime);
+
+    for _ in 0..90 {
+        assert!(runtime.tick());
+    }
+    action(&mut runtime, binding(1), 1, RoomAction::Ready(false)).unwrap();
+    for _ in 0..180 {
+        assert!(runtime.tick());
+    }
+
+    assert_eq!(calls.load(Ordering::SeqCst), 0);
+    assert!(runtime.state.is_none());
+    assert!(runtime.generation_record.is_none());
+}
+
+#[test]
+fn entropy_failure_interrupts_without_constructing_a_world() {
+    let source = crate::round_seed::RoundSeedSource::with_entropy(|_| Err(()));
+    let identity = identity_with_profile(super::super::profile::RoomProfile::GeneratedClassicV2);
+    let mut runtime = runtime_with(identity, source);
+    let (_one, _two) = ready_duel(&mut runtime);
+
+    for _ in 0..180 {
+        assert!(runtime.tick());
+    }
+
+    assert!(matches!(
+        runtime.lifecycle.phase(),
+        Phase::Interrupted {
+            reason: InterruptReason::InternalError,
+            ..
+        }
+    ));
+    assert!(runtime.state.is_none());
+    assert!(runtime.generation_record.is_none());
 }

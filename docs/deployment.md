@@ -57,3 +57,28 @@ The gate checks the same rendered YAML for one replica, the Recreate strategy, a
 of an autoscaler targeting the game Deployment, and consistent Service routing. It rejects
 duplicate YAML keys. Local installations require the appropriate platform binary. Schema validation may require
 network access to the pinned schemas; successful rendering alone does not pass this gate.
+
+## Reproduce a generated pickup round
+
+Default rooms draw fresh private OS randomness only at an actual round start. For isolated
+reproduction, set `GAME_ROUND_SEED_FILE` to a readable file containing exactly 64 lowercase
+hex characters, optionally followed by one LF. Startup reads once before listening and fails
+on missing/unreadable/malformed/oversized input. The loaded seed repeats for every room/round;
+file edits require restart. Keep ordinary deployments in the default random mode.
+
+After the default browser gate, reuse the built image with the checked public fixture:
+
+```sh
+docker compose -f docker-compose.yaml -f docker-compose.pickups.yaml up -d --no-build --force-recreate app
+curl --fail http://127.0.0.1:8085/api/v1/ready
+E2E_PICKUP_FIXTURE=arena-v1-pickups npm --prefix e2e run test:pickups
+docker compose -f docker-compose.yaml -f docker-compose.pickups.yaml down
+```
+
+The override mounts `core/tests/fixtures/arena-v1-pickups.seed` read-only. That fixture is
+outside browser assets and the final runtime image. To reproduce in isolated Kubernetes,
+create a temporary Secret from the same file, mount its key at `/run/grenadiers/round.seed`
+with `defaultMode: 0444`, and set the environment variable to that path. UID 65532 must be
+able to read it. Retain base probes, one replica, and all security restrictions; use the same
+image digest, wait for rollout/readiness, port-forward, and run the same fixture command.
+Remove the temporary Secret/namespace afterward. No seed is sent through an API or browser flag.

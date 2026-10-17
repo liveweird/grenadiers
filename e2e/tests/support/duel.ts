@@ -1,10 +1,10 @@
 import { expect, type Page } from '@playwright/test'
-import type { GameServerMessage } from '../../../web/src/game/schema'
+import type { Direction, GameServerMessage } from '../../../web/src/game/schema'
 
 type Snapshot = Extract<GameServerMessage, { type: 'snapshot' }>
 export type ObservedGame = {
   frames: GameServerMessage[]
-  commands: { type: string; actionId?: number }[]
+  commands: { type: string; actionId?: number; direction?: Direction | null }[]
   sockets: number
 }
 
@@ -14,9 +14,24 @@ export function observeGame(page: Page): ObservedGame {
     if (!new URL(socket.url()).pathname.endsWith('/game/ws')) return
     observed.sockets += 1
     socket.on('framesent', ({ payload }) => {
-      const command = JSON.parse(payload.toString()) as { type: string; actionId?: number }
+      const command = JSON.parse(payload.toString()) as {
+        type: string
+        actionId?: number
+        direction?: unknown
+      }
       if (command.type !== 'authenticate') {
-        observed.commands.push({ type: command.type, actionId: command.actionId })
+        let direction: Direction | null | undefined
+        if (['north', 'east', 'south', 'west'].includes(String(command.direction))) {
+          direction = command.direction as Direction
+        } else if (command.direction === null) {
+          direction = null
+        }
+        const summary: ObservedGame['commands'][number] = {
+          type: command.type,
+          actionId: command.actionId,
+        }
+        if (command.type === 'movement') summary.direction = direction
+        observed.commands.push(summary)
       }
     })
     socket.on('framereceived', ({ payload }) => {

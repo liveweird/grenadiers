@@ -10,3 +10,6 @@
 !.env.example
 .DS_Store
 *.log
+
+e2e/playwright-pickup-report/
+e2e/pickup-test-results/

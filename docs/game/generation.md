@@ -1,6 +1,6 @@
 # Generated arena API
 
-Status: explicit headless generator groundwork. Live rooms continue using `fixed_arena()`.
+Status: generator-v1 is active in live classic-v2 rooms.
 
 `core::game::generate_arena([u8; 32])` produces `GeneratedArena`. Its getters expose the
 validated arena, concealed `BTreeMap<CellId, PickupKind>`, and private `GenerationRecord`.
@@ -22,5 +22,8 @@ invalid-map fallback, privacy checks, and simulation-level first-bomb escape sur
 Changing the algorithm or draw semantics requires a new generator version and reviewed
 replay/compatibility expectations. Do not replace the golden outputs merely to hide drift.
 
-The API does not place typed contents into an active world yet. Layer transitions, pickup
-collection/upgrades, the wire contract, item graphics, and server activation ship separately.
+The server constructs typed worlds at each actual round start and keeps the generation record
+private. Layer transitions, collection, gameplay-v2 projection, and item graphics are integrated.
+Default seeds use fresh OS entropy; [ADR 0014](../decisions/0014-private-round-seeds-and-live-generation.md)
+defines the optional read-once operator reproduction setting and real-browser acceptance.
+The preview has one round; alternating successive match rounds are integrated in M5.

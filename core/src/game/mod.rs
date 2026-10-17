@@ -60,3 +60,6 @@ pub use simulation::{
 pub use types::{CellId, EntityId, Position, SeatId, SpeedLevel, Tick};
 pub use view::{ActorView, ArenaView, BombView, FlameView, PickupView, PublicState};
 pub use world::World;
+
+#[cfg(test)]
+mod generated_upgrade_trace_tests;

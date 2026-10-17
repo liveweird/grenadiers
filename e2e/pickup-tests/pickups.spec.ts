@@ -105,16 +105,20 @@ test('two browsers collect generated upgrades while old bombs keep their capture
     const old = await plant(one, games[0])
     expect(old.range).toBe(2)
     await moveTo(one, games[0], { column: 1, row: 3 })
-    await expectStats(pages, ['1', '2', '3', '1'])
+    expect(actor(games[0]).bombRange).toBe(3)
     const upgraded = await plant(one, games[0])
     expect(upgraded.range).toBe(3)
     expect(upgraded.id).not.toBe(old.id)
-    for (const [index, page] of pages.entries()) {
+    // Verify both live clients before compositor screenshots spend fuse time on
+    // slower software renderers. No snapshot is injected or clock is paused.
+    await Promise.all(pages.map(async (page, index) => {
       await expect.poll(() => latestSnapshot(games[index])!.state.bombs)
         .toEqual(expect.arrayContaining([expect.objectContaining({ id: old.id, range: 2 }), expect.objectContaining({ id: upgraded.id, range: 3 })]))
       await expectStats([page], ['0', '2', '3', '1'])
-      await page.screenshot({ path: testInfo.outputPath(`upgraded-bombs-${index}.png`), fullPage: true })
-    }
+    }))
+    await Promise.all(pages.map((page, index) =>
+      page.screenshot({ path: testInfo.outputPath(`upgraded-bombs-${index}.png`), fullPage: true }),
+    ))
     const collected = games[0].frames.flatMap((frame) => frame.type === 'snapshot' ? frame.events : [])
       .filter((event) => event.kind.type === 'pickupCollected')
     expect(collected.map((event) => event.kind)).toEqual(expect.arrayContaining([

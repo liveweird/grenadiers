@@ -1,5 +1,54 @@
 # Repository verification
 
+## M7 v0.3.13 exact-image controls acceptance — 2026-10-17
+
+A clean export of `02fb8a699fe55436704d6f5ef2d29ab43d1e9368` produces
+`sha256:51eb91c570aaed8be84cf36af385611f574d26757d0367e3f2777e0a17739177`.
+Compose and Kubernetes use that exact image, including the actual Pod digest. Each path passes
+**12/12 scenarios with retries disabled**: six default, pickup, full match/rematch, two reconnect,
+real headed Linux visibility, and custom controls/persistence/reset. Node is exactly 24.21.0;
+every fixture rollout is followed by successful real JSON health/readiness polling.
+
+Both paths pass UID/GID 65532, read-only root, dropped capabilities, no-escalation, probe and
+no-`/app`-seed inspection. Kubernetes adds RuntimeDefault seccomp and a read-only fixture Secret
+mode 0444. Strict Kubernetes 1.33 schemas validate all three resources. Pinned archive-only Trivy
+reports zero fixable HIGH/CRITICAL findings without a Docker socket mount. Actual desktop and
+320-pixel Polish controls screenshots pass Axe, containment and visual inspection; all five
+bindings and modal actions remain readable. Evidence: `/tmp/grenadiers-v0313-acceptance`.
+Owned Compose/namespace/forward/export/archive/tools and listeners are removed; accepted images
+remain. Source prerelease distribution and candidate/rebase provenance limits are explicit in
+[releases.md](releases.md). These checks do not complete human playtesting or M7.
+
+## M7 persistent configurable controls — 2026-10-17
+
+The active v4 panel now offers five-action EN/PL keyboard remapping with unchanged arrows,
+WASD and Space defaults. It validates bounded, globally unique physical-code aliases and stores
+only the non-secret preference under `grenadiers.controls.v1`; invalid/unavailable storage falls
+back safely. Opening settings or changing mappings releases held direction through the old
+callback before new bindings install. Still-held keys remain fenced until key-up. Repeats,
+modifiers, unrelated shortcuts, native Tab navigation and editable inputs retain their contracts.
+
+Independent review found ambiguous accessible names, consumed rejected shortcuts, within-action
+stored duplicates and missing generated-output ignores. All four are fixed and closure review
+passes. Remap/capture names identify the action in both locales; regression tests inspect native
+`defaultPrevented` behavior. Dynamic instructions use their own controls template, preserving
+archived raw instructions; that integration correction also passes independent inspection.
+
+The combined Node 24.21.0 web gate passes **180 tests** with **94.85% statements, 89.62%
+branches, 95.07% functions and 97.67% lines**. Schema, lint, Knip, shuffled coverage and build
+pass. E2E static checks confirm **12** documented scenarios. The locked server gate passes
+**296 core tests, 149 server tests and 2 doctests**, with four separate optimized reference
+profiles intentionally ignored in ordinary CI. Rust implementation is unchanged from the v0.3.11
+93.56% coverage reference. Both dependency audits report zero vulnerabilities.
+
+Native Chromium against the candidate frontend passes real UI remapping, old-key rejection,
+new-key movement and exactly-once bomb input, reload persistence and default reset (1/1 first run).
+Desktop and 320-pixel Polish screenshots pass Axe/containment and coordinator visual inspection;
+all five controls and actions are readable. Evidence is retained in
+`/tmp/grenadiers-m7-controls-evidence`; its port-8097 server is stopped. Exact final-image
+Compose/Kubernetes acceptance passes as recorded above. This does not alter authoritative rules or
+complete the remaining M7 latency/human-playtest work.
+
 ## M7 v0.3.12 exact-image visibility acceptance — 2026-10-17
 
 A clean Git export of `ded5749dc345556fa75e06d5fcf3a0d2137486a1` produces

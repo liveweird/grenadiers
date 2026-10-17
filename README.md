@@ -8,6 +8,10 @@ join from another browser, and both choose Ready. Select the courtyard to move w
 or W/A/S/D and plant bombs with Space. Rust owns the 60 Hz simulation; PixiJS draws public
 20 Hz snapshots while React/Mantine provides the room controls, scores, phase timers, results, and rematch.
 
+Use **Keyboard controls** below the arena to remap movement and bombs or restore defaults. Preferences
+stay in this browser. Opening settings, losing focus, or hiding the tab releases held movement;
+returning requires a fresh key press. See the [keyboard guide](docs/game/controls.md).
+
 Win three rounds to take the match. Draws award no score; automatic countdowns reset the
 world between rounds, and both players can consent to a rematch. A dropped tab can restore its
 reserved seat for 600 server ticks using a private in-memory capability; a connected takeover

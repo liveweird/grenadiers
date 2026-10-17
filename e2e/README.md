@@ -10,6 +10,8 @@ duplicate-owner protection, and sequence replay rejection. Rendered duel scenari
 with their implemented milestone.
 
 The generated pickup and full-match fixtures run separately from random-map smoke tests.
+Run the dedicated configurable-controls acceptance with `npm run test:controls`; it needs no
+fixture and verifies persisted UI remapping with native keys against a live round.
 The reconnect suite reuses the full-match fixture; run it with
 `E2E_MATCH_FIXTURE=arena-v1-matches npm run test:reconnect` from this directory.
 Every suite disables native tracing because v4 personal frames contain stable private seat

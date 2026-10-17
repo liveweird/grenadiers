@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import { ArenaControls } from './controls'
+import { defaultKeyboardBindings, freezeBindings } from './bindings'
 
 function setup(enabled = true) {
   const onDirection = vi.fn()
@@ -101,5 +102,46 @@ describe('arena keyboard ownership', () => {
     controls.keyUp(new KeyboardEvent('keyup', { key: ' ' }))
     expect(replacement.mock.calls.map(([direction]) => direction)).toEqual(['east', null])
     expect(onBomb).toHaveBeenCalledOnce()
+  })
+
+  it('uses custom directions and bomb keys once per fresh physical press', () => {
+    const onDirection = vi.fn()
+    const onBomb = vi.fn()
+    const bindings = freezeBindings({
+      north: ['KeyI'], east: ['KeyL'], south: ['KeyK'], west: ['KeyJ'], bomb: ['Enter'],
+    })
+    const controls = new ArenaControls({ enabled: true, bindings, onDirection, onBomb })
+    controls.setFocused(true)
+    controls.keyDown(key('KeyL'))
+    controls.keyUp(key('KeyL'))
+    controls.keyDown(key('Enter'))
+    controls.keyDown(key('Enter', true))
+    controls.keyDown(key('Space'))
+    expect(onDirection.mock.calls.map(([direction]) => direction)).toEqual(['east', null])
+    expect(onBomb).toHaveBeenCalledOnce()
+  })
+
+  it('releases old input before installing bindings and waits for a held key to be released', () => {
+    const { controls, onDirection, onBomb } = setup()
+    controls.keyDown(key('KeyD'))
+    const replacement = vi.fn()
+    const bindings = freezeBindings({
+      north: ['KeyD'], east: ['KeyL'], south: ['KeyK'], west: ['KeyJ'], bomb: ['Enter'],
+    })
+    controls.configure({ enabled: true, bindings, onDirection: replacement, onBomb })
+    controls.keyDown(key('KeyD'))
+    controls.keyDown(key('KeyD', true))
+    expect(onDirection.mock.calls.map(([direction]) => direction)).toEqual(['east', null])
+    expect(replacement).not.toHaveBeenCalled()
+    controls.keyUp(key('KeyD'))
+    controls.keyDown(key('KeyD'))
+    expect(replacement).toHaveBeenLastCalledWith('north')
+  })
+
+  it('retains both default direction aliases', () => {
+    expect(defaultKeyboardBindings).toMatchObject({
+      north: ['ArrowUp', 'KeyW'], east: ['ArrowRight', 'KeyD'],
+      south: ['ArrowDown', 'KeyS'], west: ['ArrowLeft', 'KeyA'], bomb: ['Space'],
+    })
   })
 })

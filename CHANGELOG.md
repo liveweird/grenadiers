@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.13 — 2026-10-17
+
+- Add localized, accessible keyboard remapping with validated persistent non-secret preferences,
+  dynamic instructions, capture/cancel/reset, and unchanged arrow/WASD/Space defaults.
+- Stop held input before mapping changes or settings, keep old physical keys fenced until key-up,
+  and preserve unrelated shortcuts and native focus navigation.
+- Add real custom-key movement/bomb, reload persistence, reset, and desktop/320px Polish acceptance.
+
 ## 0.3.12 — 2026-10-17
 
 - Add real headed Chromium hidden/visible acceptance with native held-input clearing, continued

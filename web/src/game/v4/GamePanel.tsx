@@ -1,11 +1,15 @@
 import { Alert, Button, Group, Stack, Text, TextInput, Title } from '@mantine/core'
 import { useState } from 'react'
+import type { KeyboardBindings } from '../arena/bindings'
 import { GameArena } from '../arena/GameArena'
 import type { Direction } from '../arena/types'
 import type { AdmissionIntent, GameClientState } from './client'
 import { format, useV4Copy, type V4Copy } from './locale'
 import type { MatchInterruptReason, MatchResult, RoomPhase, RoundResult, Seat } from './schema'
 import { useGameClient } from './useGameClient'
+import { ControlsDialog } from './ControlsDialog'
+import { bindingsSummary } from './controlLabels'
+import { loadControlBindings, saveControlBindings } from './controlPreferences'
 
 const CODE_PATTERN = /^[A-HJ-NP-Z2-9]{8}$/
 
@@ -182,14 +186,24 @@ function ownActorAlive(state: GameClientState): boolean {
   return Boolean(state.youSeat && state.snapshot?.state.actors.find((actor) => actor.seat === state.youSeat)?.alive)
 }
 
+function gameInputEnabled(state: GameClientState): boolean {
+  return state.connection === 'authenticated' && !state.admissionPending && !state.leavePending
+    && state.room?.phase.type === 'running' && ownActorAlive(state)
+}
+
 export function GamePanelView({ state, actions }: { state: GameClientState; actions: GameActions }) {
   const copy = useV4Copy()
+  const [bindings, setBindings] = useState(loadControlBindings)
+  const [controlsOpen, setControlsOpen] = useState(false)
   const failureText = state.failure ? copy.error[state.failure as keyof typeof copy.error] : ''
-  const enabled = state.connection === 'authenticated' && !state.admissionPending && !state.leavePending
-    && state.room?.phase.type === 'running' && ownActorAlive(state)
+  const enabled = !controlsOpen && gameInputEnabled(state)
   const waitingText = state.room ? phaseText(copy, state.room.phase) : copy.connection[state.connection]
   const round = state.room?.roundNumber
   const reconnecting = state.room && ['reconnecting', 'connecting', 'authenticating'].includes(state.connection)
+  const updateBindings = (next: KeyboardBindings): void => {
+    setBindings(next)
+    saveControlBindings(next)
+  }
   return (
     <section className="game-shell" aria-label={copy.label}>
       <div className="arena-column">
@@ -204,8 +218,11 @@ export function GamePanelView({ state, actions }: { state: GameClientState; acti
         <GameArena label={copy.arena.label} waitingText={waitingText} failureText={copy.arena.failure}
           focusHint={copy.arena.focusHint} instructionsId="v4-game-instructions" snapshot={state.snapshot}
           youSeat={state.youSeat} enabled={Boolean(enabled)}
+          bindings={bindings}
           onDirection={(direction) => actions.movement(direction)} onBomb={() => actions.placeBomb()} />
-        <p id="v4-game-instructions" className="game-instructions">{copy.arena.instructions}</p>
+        <p id="v4-game-instructions" className="game-instructions">{bindingsSummary(bindings, copy)}</p>
+        <Button className="controls-button" variant="subtle" color="dark" size="compact-sm"
+          onClick={() => setControlsOpen(true)}>{copy.controls.open}</Button>
       </div>
       <aside className="control-column" aria-live="polite">
         {reconnecting && <Alert color="yellow" title={copy.reconnect.title}>{copy.reconnect.retrying}</Alert>}
@@ -216,6 +233,8 @@ export function GamePanelView({ state, actions }: { state: GameClientState; acti
           <span className="connection-dot" aria-hidden="true" /><Text size="sm">{copy.connection[state.connection]}</Text>
         </Group>}
       </aside>
+      <ControlsDialog opened={controlsOpen} bindings={bindings} copy={copy}
+        onChange={updateBindings} onClose={() => setControlsOpen(false)} />
     </section>
   )
 }

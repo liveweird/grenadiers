@@ -5,19 +5,19 @@ import type { GameArenaProps } from './types'
 import './arena.css'
 
 export function GameArena(props: GameArenaProps) {
-  const { snapshot, enabled, onDirection, onBomb } = props
+  const { snapshot, enabled, bindings, onDirection, onBomb } = props
   const host = useRef<HTMLDivElement>(null)
   const renderer = useRef<ArenaRenderer | null>(null)
   const latest = useRef(snapshot)
   const previousIdentity = useRef('')
   const [failed, setFailed] = useState(false)
-  const [controls] = useState(() => new ArenaControls({ enabled, onDirection, onBomb }))
+  const [controls] = useState(() => new ArenaControls({ enabled, bindings, onDirection, onBomb }))
   const hasSnapshot = snapshot !== null
   const active = enabled && !failed
 
   useLayoutEffect(() => {
-    controls.configure({ enabled: active, onDirection, onBomb })
-  }, [active, onDirection, onBomb, controls])
+    controls.configure({ enabled: active, bindings, onDirection, onBomb })
+  }, [active, bindings, onDirection, onBomb, controls])
 
   useLayoutEffect(() => {
     latest.current = snapshot
@@ -32,12 +32,15 @@ export function GameArena(props: GameArenaProps) {
   useEffect(() => {
     const blur = (): void => controls.setFocused(false)
     const visibility = (): void => { if (document.hidden) blur() }
+    const release = (event: KeyboardEvent): void => controls.releasePhysicalKey(event.code)
     const interval = window.setInterval(() => controls.refresh(), 100)
     window.addEventListener('blur', blur)
+    window.addEventListener('keyup', release)
     document.addEventListener('visibilitychange', visibility)
     return () => {
       window.clearInterval(interval)
       window.removeEventListener('blur', blur)
+      window.removeEventListener('keyup', release)
       document.removeEventListener('visibilitychange', visibility)
       controls.clear()
     }

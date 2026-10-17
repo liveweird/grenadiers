@@ -34,6 +34,7 @@
 - Preserve Classic simultaneous placement claims, raw-core Clear cancellation, server
   movement-before-actions ordering, reconnect action IDs and private replay completeness.
 - Keep new items disabled and preserve gameplay-v6, existing rules and journal formats.
+- Add bounded, secret-free reconnect probe diagnostics with unchanged deadlines and assertions.
 
 ## 0.3.19 — 2026-10-17
 

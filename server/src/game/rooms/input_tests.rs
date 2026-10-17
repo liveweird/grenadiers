@@ -113,3 +113,36 @@ fn admitted_command_budget_is_independent_per_seat() {
     );
     mailbox.movement(SeatId::Two, None, Tick(0)).unwrap();
 }
+
+#[test]
+fn stopping_one_seat_fences_controls_without_resetting_bomb_deduplication() {
+    let mut mailbox = InputMailbox::default();
+    mailbox
+        .movement(SeatId::One, Some(Direction::East), Tick(0))
+        .unwrap();
+    mailbox.bomb(SeatId::One, 7).unwrap();
+    mailbox
+        .movement(SeatId::Two, Some(Direction::West), Tick(0))
+        .unwrap();
+
+    mailbox.stop(SeatId::One);
+
+    assert_eq!(
+        mailbox.take(Tick(1)),
+        vec![
+            SeatInput {
+                seat: SeatId::One,
+                action: InputAction::Clear,
+            },
+            SeatInput {
+                seat: SeatId::Two,
+                action: InputAction::Press(Direction::West),
+            },
+        ]
+    );
+    assert_eq!(
+        mailbox.bomb(SeatId::One, 7),
+        Err(InputError::DuplicateAction)
+    );
+    mailbox.bomb(SeatId::One, 8).unwrap();
+}

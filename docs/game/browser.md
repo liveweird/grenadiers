@@ -42,9 +42,13 @@ colors, helmet shapes, and HTML seat names distinguish the two players. The canv
 is decorative to assistive technology; room controls, countdown/timer, and result remain HTML.
 
 The canvas resizes to the fixed 15:13 arena aspect ratio, with device pixel ratio capped at
-two. Initialization, resize observation, ticker ownership, listeners, and graphics contexts
+two. The fixed logical surface uses crisp pixelated CSS scaling. Initialization, ticker ownership, listeners, and graphics contexts
 are released on teardown, including React development StrictMode setup/cleanup. Rendering
 failure produces a localized explanation and disables game input.
+
+The [pixel-art courtyard](pixel-art.md) uses weathered terrain, original directional player
+poses, grenades, connected flame cells and distinct pickup symbols. Reduced motion fixes
+decorative animation frames while preserving authoritative position and hazard information.
 
 ## Development and verification
 

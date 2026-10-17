@@ -19,7 +19,10 @@
 //! );
 //! ```
 
+pub mod match_lifecycle;
 pub mod series;
+
+pub use match_lifecycle::{CountdownKind, MatchChange, MatchError, MatchLifecycle, MatchPhase};
 
 use crate::game::{RoundResult, SeatId, Tick};
 

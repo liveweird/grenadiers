@@ -1,5 +1,28 @@
 # Repository verification
 
+## Dormant gameplay-v3 contract — 2026-10-17
+
+The locked server gate passes **225 core tests, 85 server tests, and 2 doctests**.
+Rust line coverage is **4,615/5,001 lines, 92.28%**, above the unchanged 80% floor.
+Independent review reports no actionable contract findings. Strict Rust/AJV cases cover
+all new variants, scalar bounds, unknown-field rejection, physical v2/v3 parity, and the
+44,742-byte maximal-body fixture against the unchanged 65,536-byte limit.
+
+The complete web gate passes **90 tests** with **96.80% statements, 92.08% branches,
+98.64% functions, and 98.82% lines**. Both generated schemas pass drift checks; Spectral,
+ESLint, Knip, shuffled coverage, and the production build pass. The v3 contract is dormant;
+these results do not claim match runtime or browser activation.
+
+A clean committed-tree build of `14c93f9e5b97b03ffe6804495640b51203adaa2a` produces
+`sha256:568d7437899f4b215fe1bb9c26676629cfa3237ac257d8167e7b97f04c254307`.
+Compose and ready local Kubernetes run that exact image. Both paths pass health/readiness,
+all six default browser scenarios, then the separate read-only seed fixture scenario. Strict
+schemas validate all three resources; pinned archive-only Trivy reports zero fixed
+HIGH/CRITICAL findings. Kubernetes retains UID/GID 65532, read-only root, dropped capabilities,
+no privilege escalation, and a read-only 0444 temporary fixture Secret. No seed files exist
+under `/app`. Temporary resources/exports are removed; logs and screenshots remain.
+This evidence update changes documentation only.
+
 ## M5 pure automatic match lifecycle — 2026-10-17
 
 The locked server gate passes **214 core tests, 85 server tests, and 2 doctests**.

@@ -33,7 +33,8 @@ test order and enforces coverage thresholds declared in `web/vite.config.ts`.
 `api-guidelines/spectral.yaml`; it retains the standard and custom rules without the CLI's
 glob dependency. Parser/load errors and error-severity diagnostics fail the command.
 `check:api`, `check:realtime`, and `check:gameplay` compare generated
-contracts without modifying them. AJV validates runtime WebSocket payloads. EN/PL locale
+contracts without modifying them. Gameplay generation/drift checks cover both active v2 and
+dormant v3; parity tests compare unchanged physical definitions. AJV validates runtime WebSocket payloads. EN/PL locale
 parity is tested. ESLint/SonarJS and Knip must report no findings.
 
 Vitest also discovers `web/scripts/*.test.mjs`: generator tests compile representative

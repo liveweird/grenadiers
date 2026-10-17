@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.2.9 — 2026-10-17
+
+- Stage a self-contained gameplay-v3 contract for truthful match scores, actual round count,
+  completed-round records, automatic countdowns, match results, and rematch votes.
+- Add namespaced Rust DTOs and generated TypeScript, strict conformance/physical-parity
+  checks, and dual-version generation/drift checks.
+- Guard the new metadata/frame budget with a 44,742-byte maximal-body fixture.
+
+This contract is dormant. Live gameplay remains protocol v2 and diagnostics v1; checked
+projection, real adapters, and coordinated activation follow separately.
+
 ## 0.2.8 — 2026-10-17
 
 - Add a pure match lifecycle with initial and automatic inter-round countdowns, result holds,

@@ -1,3 +1,7 @@
 {
-  "$schema": "https://unpkg.com/knip@6/schema.json"
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "ignoreIssues": {
+    "src/game/schema.ts": ["exports", "types"],
+    "src/game/v3/schema.ts": ["exports", "types"]
+  }
 }

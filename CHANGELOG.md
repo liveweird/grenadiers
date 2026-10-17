@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.3.4 — 2026-10-17
+
+- Integrate reserved-seat grace into the pure match lifecycle with atomic two-seat loss and
+  expiry settlement, strict resume boundaries, and eligible-participant forfeits.
+- Hold completed rounds through disconnects, cancel inter-round countdowns without consuming
+  actual rounds, and start fresh countdowns after return.
+- Preserve round scoring before expiry, third-win finality, terminal reservations, and rematch
+  reset while retaining the legacy v3 transport-loss interruption path.
+
+The new APIs remain inactive in the network adapter until the v4 server/browser switch.
+
 ## 0.3.3 — 2026-10-17
 
 - Capture accepted production match operations in private bounded in-memory journals.

@@ -1,5 +1,31 @@
 # Repository verification
 
+## M6 grace-aware pure match lifecycle — 2026-10-17
+
+The combined locked server gate passes **265 core tests, 132 server tests, and 2 doctests**.
+Rust coverage is **6,748/7,186 lines, 93.90%**, above the unchanged 80% floor. Independent
+review reports no actionable lifecycle findings. Fourteen new cases cover exact grace
+boundaries, both seat orientations, staggered expiry, complete loss batches before expiry,
+first/second versus third-win finality, mixed departures, held/canceled countdowns, actual-round
+parity, terminal access, rematch, and atomic deadline/epoch/hold overflow.
+
+Running clock/scoring never settles grace before the complete loss batch. Held results retain
+their original completed record and earliest restart deadline; resumed players receive a fresh
+countdown on the next idle tick. Legacy v3 departures still interrupt and have no new-API
+call sites. Existing projection, owner, private capture, and native socket regressions pass.
+Network reconnect activation and exact-image deployment acceptance remain separate checks.
+
+A clean committed-tree build of `2d66e2af2e027dde9294ffec6092b4c60b1c0e44` produces
+`sha256:18d648aab0530c58fc4acbecff42f040ce128f988c3638a33e019cc78d2b320c`.
+Both Compose and local Kubernetes run that same artifact and pass real JSON health/ready
+probes, six default browser scenarios, one pickup scenario and one full-match scenario.
+Fixture suites disable retries. Strict Kubernetes 1.33 schemas pass 3/3; pinned archive-only
+Trivy reports zero fixable HIGH/CRITICAL findings. Runtime checks verify UID/GID 65532,
+read-only root, dropped capabilities, seccomp/probes, and read-only mode-0444 fixture mounts;
+no seed file exists under `/app`. Immutable client `817cd78` and complete image/build hashes,
+logs and screenshots are retained in `/tmp/grenadiers-v034-acceptance`. Temporary stacks,
+namespaces, Secrets, forwards, exports and scan archives are cleaned; the image remains.
+
 ## M6 accepted-operation capture — 2026-10-17
 
 The locked server gate passes **251 core tests, 132 server tests, and 2 doctests**.

@@ -2,6 +2,7 @@
 
 use crate::game::{RoundAssignment, RoundResult, SeatId, Tick};
 
+use super::reconnect::{ReconnectError, ReconnectGrace};
 use super::series::{MatchOutcome, MatchSeries, RematchStatus, SeriesError};
 use super::{COUNTDOWN_TICKS, DepartureReason, InterruptReason, SeatState};
 
@@ -52,6 +53,7 @@ pub enum MatchError {
     TickOverflow,
     RoundAttemptOverflow,
     Series(SeriesError),
+    Reconnect(ReconnectError),
 }
 
 impl std::fmt::Display for MatchError {
@@ -68,6 +70,12 @@ impl From<SeriesError> for MatchError {
     }
 }
 
+impl From<ReconnectError> for MatchError {
+    fn from(error: ReconnectError) -> Self {
+        Self::Reconnect(error)
+    }
+}
+
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct MatchLifecycle {
     tick: Tick,
@@ -75,6 +83,7 @@ pub struct MatchLifecycle {
     phase: MatchPhase,
     seats: [SeatState; 2],
     series: MatchSeries,
+    reconnect: ReconnectGrace,
 }
 
 impl Default for MatchLifecycle {
@@ -95,6 +104,7 @@ impl MatchLifecycle {
                 ready: false,
             }; 2],
             series: MatchSeries::new(),
+            reconnect: ReconnectGrace::new(),
         }
     }
 
@@ -123,6 +133,11 @@ impl MatchLifecycle {
         &self.series
     }
 
+    #[must_use]
+    pub const fn reconnect_grace(&self) -> &ReconnectGrace {
+        &self.reconnect
+    }
+
     pub fn occupy(&mut self, seat: SeatId) -> Result<MatchChange, MatchError> {
         self.transact(|next| next.occupy_inner(seat))
     }
@@ -149,6 +164,21 @@ impl MatchLifecycle {
         self.transact(|next| next.depart_batch_inner(departures))
     }
 
+    pub fn depart_with_grace(
+        &mut self,
+        departures: [Option<DepartureReason>; 2],
+    ) -> Result<MatchChange, MatchError> {
+        self.transact(|next| next.depart_with_grace_inner(departures))
+    }
+
+    pub fn resume_connection(&mut self, seat: SeatId) -> Result<MatchChange, MatchError> {
+        self.transact(|next| next.resume_connection_inner(seat))
+    }
+
+    pub fn expire_reconnect_grace(&mut self) -> Result<MatchChange, MatchError> {
+        self.transact(|next| next.depart_with_grace_inner([None; 2]))
+    }
+
     pub fn interrupt(&mut self, reason: InterruptReason) -> Result<MatchChange, MatchError> {
         self.transact(|next| next.interrupt_inner(reason))
     }
@@ -169,6 +199,7 @@ impl MatchLifecycle {
         if state.occupied {
             return Err(MatchError::SeatOccupied(seat));
         }
+        self.reconnect.occupy(seat, self.tick)?;
         state.occupied = true;
         Ok(MatchChange::Changed)
     }
@@ -188,6 +219,11 @@ impl MatchLifecycle {
         if !self.seats[index].occupied {
             return Err(MatchError::SeatVacant(seat));
         }
+        if !self.reconnect.seat(seat).connected() {
+            return Err(MatchError::Reconnect(ReconnectError::SeatNotConnected(
+                seat,
+            )));
+        }
         if self.seats[index].ready == ready {
             return Ok(MatchChange::Unchanged);
         }
@@ -199,11 +235,11 @@ impl MatchLifecycle {
             return Ok(MatchChange::Changed);
         }
 
-        let starts =
-            ready
-                && self.seats.iter().enumerate().all(|(candidate, state)| {
-                    state.occupied && (candidate == index || state.ready)
-                });
+        let starts = ready
+            && SeatId::ALL.into_iter().all(|candidate| {
+                self.reconnect.seat(candidate).connected()
+                    && (candidate == seat || self.seats[candidate.index()].ready)
+            });
         let ends_at = starts.then(|| self.deadline(COUNTDOWN_TICKS)).transpose()?;
         self.seats[index].ready = ready;
         if let Some(ends_at) = ends_at {
@@ -226,14 +262,18 @@ impl MatchLifecycle {
         }
         let next_tick = self.next_tick()?;
         match self.phase {
-            MatchPhase::Countdown { ends_at, .. } if next_tick == ends_at => {
+            MatchPhase::Countdown { ends_at, .. }
+                if next_tick == ends_at && self.both_connected() =>
+            {
                 let assignment = self.series.start_round(self.round_attempt, next_tick)?;
                 self.tick = next_tick;
                 self.clear_readiness();
                 self.phase = MatchPhase::Running;
                 Ok(MatchChange::RoundStarted(assignment))
             }
-            MatchPhase::Result { next_countdown_at } if next_tick == next_countdown_at => {
+            MatchPhase::Result { next_countdown_at }
+                if next_tick >= next_countdown_at && self.both_connected() =>
+            {
                 let next_attempt = self.next_attempt()?;
                 let ends_at = Tick(
                     next_tick
@@ -300,35 +340,19 @@ impl MatchLifecycle {
         Ok(result)
     }
 
-    fn next_tick(&self) -> Result<Tick, MatchError> {
-        self.tick
-            .0
-            .checked_add(1)
-            .map(Tick)
-            .ok_or(MatchError::TickOverflow)
-    }
-
-    fn deadline(&self, duration: u64) -> Result<Tick, MatchError> {
-        self.tick
-            .0
-            .checked_add(duration)
-            .map(Tick)
-            .ok_or(MatchError::TickOverflow)
-    }
-
-    fn next_attempt(&self) -> Result<u64, MatchError> {
-        self.round_attempt
-            .checked_add(1)
-            .ok_or(MatchError::RoundAttemptOverflow)
-    }
-
     fn clear_readiness(&mut self) {
         self.seats.iter_mut().for_each(|seat| seat.ready = false);
     }
 }
 
+#[path = "match_lifecycle_clock.rs"]
+mod clock;
+
 #[path = "match_lifecycle_operations.rs"]
 mod operations;
+
+#[path = "match_lifecycle_reconnect.rs"]
+mod reconnect;
 
 #[cfg(test)]
 #[path = "match_lifecycle_tests.rs"]
@@ -341,3 +365,11 @@ mod departure_tests;
 #[cfg(test)]
 #[path = "match_lifecycle_overflow_tests.rs"]
 mod overflow_tests;
+
+#[cfg(test)]
+#[path = "match_lifecycle_reconnect_tests.rs"]
+mod reconnect_tests;
+
+#[cfg(test)]
+#[path = "match_lifecycle_reconnect_terminal_tests.rs"]
+mod reconnect_terminal_tests;

@@ -1,5 +1,21 @@
 # Repository verification
 
+## M4 settled turn alignment — 2026-10-17
+
+Exact Node 24.21.0 Linux reproduction exposed the last corner condition: native key-up can
+coast to the outer wall, 192 units from cell center, while the movement model accepts a
+perpendicular turn only within 128. The test now waits for two newer stationary public
+snapshots after key-up, then uses the unchanged precise helper for that bounded corner offset.
+It turns only after the existing <=128 assertion; the second native leg reaches blast safety
+before real hazards clear. A stale pre-key-up snapshot can no longer skip the correction.
+
+Independent source/model closure review is clear. Final exact-Node Linux Chromium passes
+**6/6**, native Chromium **3/3**, all with retries disabled. The full E2E static gate passes.
+Logs: `/tmp/grenadiers-m4-corner-settled-{linux,native,static}.log`. Physics, turn tolerance,
+fuse, precise position assertions, pickups, both HUDs, bomb ranges/IDs, and events are unchanged.
+Earlier failing Linux corner variants remain recorded as failures, not passing evidence.
+Final hosted checks must pass at this revision before release.
+
 ## M4 live-fuse corner-turn follow-up — 2026-10-17
 
 Hosted `c86668b` exposed the remaining delay before the safe leg: exact centering at the

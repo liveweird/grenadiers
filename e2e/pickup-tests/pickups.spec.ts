@@ -105,6 +105,7 @@ async function escapeBomb(
     key: 'ArrowLeft' | 'ArrowRight' | 'ArrowUp' | 'ArrowDown'
     direction: 'west' | 'east' | 'north' | 'south'
     safelyClear: () => boolean
+    centerTurn?: Cell
   }[],
   destination: Cell,
 ) {
@@ -126,6 +127,19 @@ async function escapeBomb(
       return movement >= 0 && commands.slice(movement + 1)
         .some((command) => command.type === 'movement' && command.direction === null)
     }, { intervals: [15] }).toBe(true)
+    // A slow key-up can reach the outer wall (192 units from center). The
+    // simulation permits perpendicular turns only within 128, so correct that
+    // bounded corner offset before turning, rather than centering a whole cell.
+    if (leg.centerTurn) {
+      const releasedRevision = latestSnapshot(game)!.room.revision
+      await expect.poll(() => {
+        const frames = game.frames.filter((frame) => frame.type === 'snapshot').slice(-2)
+        if (frames.length !== 2 || frames[0].room.revision <= releasedRevision) return false
+        const positions = frames.map((frame) => frame.state.actors.find((value) => value.seat === 'one')!.position)
+        return positions.every((value) => value.x === positions[0].x && value.y === positions[0].y)
+      }, { intervals: [15] }).toBe(true)
+      await moveTo(page, game, leg.centerTurn)
+    }
   }
   // Once the actor is outside the blast footprint, let the real fuse and flames
   // finish before spending time on exact fixture-center assertions.
@@ -169,7 +183,8 @@ test('two browsers collect generated upgrades while old bombs keep their capture
     await escapeBomb(one, games[0], [{
       key: 'ArrowLeft',
       direction: 'west',
-      safelyClear: () => actor(games[0]).position.x <= 1_728,
+      safelyClear: () => actor(games[0]).position.x <= 1_664,
+      centerTurn: { column: 1, row: 1 },
     }, {
       key: 'ArrowDown',
       direction: 'south',
@@ -188,7 +203,8 @@ test('two browsers collect generated upgrades while old bombs keep their capture
     await escapeBomb(one, games[0], [{
       key: 'ArrowUp',
       direction: 'north',
-      safelyClear: () => actor(games[0]).position.y <= 1_728,
+      safelyClear: () => actor(games[0]).position.y <= 1_664,
+      centerTurn: { column: 1, row: 1 },
     }, {
       key: 'ArrowRight',
       direction: 'east',

@@ -12,6 +12,8 @@ use tokio::{
 
 mod input;
 #[cfg(test)]
+mod match_owner;
+#[cfg(test)]
 mod match_runtime;
 mod owner;
 mod profile;

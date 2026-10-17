@@ -11,6 +11,8 @@ use super::error::{MatchRuntimeError, map_input_error, map_lifecycle_error};
 use super::publication;
 use crate::round_seed::RoundSeedSource;
 
+mod owner_helpers;
+
 const REPORTS_PER_SNAPSHOT: usize = 3;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -57,10 +59,6 @@ impl MatchRuntime {
             sim: None,
             reports: Vec::new(),
         }
-    }
-
-    pub(super) const fn lifecycle(&self) -> &MatchLifecycle {
-        &self.lifecycle
     }
 
     pub(super) fn sim(&self) -> Option<&SimRound> {

@@ -11,7 +11,9 @@ Real WebSocket tests bind ephemeral listeners and connect over actual sockets wi
 Origin headers. Cover readiness failure, invalid payloads, denied origins, connection limits,
 and API/SPA separation. Keep tests independent and use bounded timeouts rather than sleeps.
 
-`cargo test --workspace --locked` runs the suite. Clippy denies warnings. Coverage uses
+`cargo test --workspace --locked` runs the debug suite; `cargo test --workspace --release --locked`
+runs the same behavior in the production profile. The server gate requires both: debug assertions
+must never perform required mutations. Clippy denies warnings. Coverage uses
 `cargo-llvm-cov` **0.9.1** and an **80% line floor**, enforced in CI. Current measurements
 and candidate evidence are recorded in [verification](verification.md).
 Install with `cargo install cargo-llvm-cov --version 0.9.1 --locked`, then

@@ -23,6 +23,11 @@ physics, outcome or clock injection. Native traces are disabled because personal
 capabilities; public screenshots, redacted summaries and reports remain. Desktop and 320-pixel
 Polish match-result screenshots were visually inspected; accessibility and containment pass.
 
+A final-source native process probe also passes: two room members receive identical full
+ServerStopped terminal snapshots; both members, an unauthenticated game socket and a diagnostic
+socket close cleanly with code 1001. SIGTERM drains and exits with code 0 in 2 ms, and the
+isolated listener is released. Evidence: `/tmp/grenadiers-v039-native-shutdown.json`.
+
 The independent 42-rule audit finds 39 covered and three partial integration cases (RULE06,
 RULE28, RULE38). Their bounded follow-up tests precede complete M6 exit evidence. M7 measured
 playtest/hardening remains outstanding; this activation is not the v0.4.0 milestone.

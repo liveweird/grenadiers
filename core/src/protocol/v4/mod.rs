@@ -1,15 +1,24 @@
 mod client;
+mod projection;
+mod projection_validation;
 mod scalars;
 mod server;
+mod state_binding;
+
+#[cfg(test)]
+mod projection_test_support;
 
 use std::fmt;
 
 pub use client::GameClientMessage;
+pub use projection::{RoomMetadata, RoomProjectionError, project_room_view};
+pub use projection_validation::validate_room_view;
 pub use scalars::{GameplayVersion, ResumeToken, RoundCount, Wins};
 pub use server::{
     CompletedRound, ConnectionStatus, CountdownKind, GameServerMessage, MatchInterruptReason,
     MatchResult, MatchWinnerReason, RoomPhase, RoomView, Scores, SeatStatus, V4ErrorCode,
 };
+pub use state_binding::{validate_admission, validate_state_binding};
 
 pub const GAMEPLAY_PROTOCOL_VERSION: u16 = 4;
 
@@ -51,5 +60,14 @@ mod max_frame_tests;
 #[path = "physical_parity_tests.rs"]
 mod physical_parity_tests;
 #[cfg(test)]
+#[path = "projection_tests.rs"]
+mod projection_tests;
+#[cfg(test)]
+#[path = "projection_validation_tests.rs"]
+mod projection_validation_tests;
+#[cfg(test)]
 #[path = "server_tests.rs"]
 mod server_tests;
+#[cfg(test)]
+#[path = "state_binding_tests.rs"]
+mod state_binding_tests;

@@ -302,7 +302,8 @@ Live gameplay remains v3 with transport-loss interruption until coordinated reco
 v0.3.2 adds a bounded private [semantic replay runner](replay.md); v0.3.3 captures accepted
 production operations with explicit incomplete/truncated evidence.
 v0.3.4 integrates the grace-aware pure lifecycle; production still uses legacy v3 departures.
-v0.3.5 stages the closed [v4 reconnect contract](reconnect-contract.md).
+v0.3.5 stages the closed [v4 reconnect contract](reconnect-contract.md); v0.3.6 adds
+checked [room/state/admission projection](protocol-v4.md) against the real lifecycle.
 
 **Depends on:** M5.
 

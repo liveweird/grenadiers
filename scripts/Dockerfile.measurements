@@ -1,0 +1,14 @@
+FROM node:24.21.0-bookworm-slim@sha256:d6aa754f16b3197301076f047b5def2f02ea1dbbc2ca920407d46d7ec7f87b20 AS node
+FROM rust:1.99.1-bookworm@sha256:e12566d5abc17a0da741628782cdb504b68b8961f5bfcf677936bf3e8b32de29
+RUN apt-get update && apt-get install -y --no-install-recommends time && rm -rf /var/lib/apt/lists/*
+COPY --from=node /usr/local/bin/node /usr/local/bin/node
+WORKDIR /build
+COPY Cargo.toml Cargo.lock rust-toolchain.toml ./
+COPY core/ core/
+COPY server/ server/
+COPY api/ api/
+COPY scripts/measure-game.sh scripts/measure-game-artifact.mjs scripts/
+RUN cargo test --release --locked -p grenadiers-server --lib --no-run
+ARG MEASUREMENT_SOURCE_COMMIT
+ENV NODE24_BIN=/usr/local/bin/node MEASUREMENT_SOURCE_COMMIT=${MEASUREMENT_SOURCE_COMMIT}
+ENTRYPOINT ["/build/scripts/measure-game.sh"]

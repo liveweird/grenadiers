@@ -16,6 +16,9 @@ mod input_tests;
 #[path = "lifecycle_tests.rs"]
 mod lifecycle_tests;
 #[cfg(test)]
+#[path = "performance_tests.rs"]
+mod performance_tests;
+#[cfg(test)]
 #[path = "publication_tests.rs"]
 mod publication_tests;
 #[cfg(test)]

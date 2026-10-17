@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.11 — 2026-10-17
+
+- Add optimized reference measurements for the real runtime, journal, projection and encoding,
+  plus real-clock one/eight-room owner profiles and separately isolated queue pressure.
+- Record exact source, binary, image and environment provenance; reject ambiguous artifacts and
+  unpinned Node before measurement. Keep observed cadence/queue/memory limits explicit.
+- Select runtime and publication-lag budgets; retain M7 playtesting and network scope separately.
+
 ## 0.3.10 — 2026-10-17
 
 - Close integrated baseline rule coverage for explosion-order independence, disconnected-player

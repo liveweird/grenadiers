@@ -1,5 +1,54 @@
 # Repository verification
 
+## M7 v0.3.11 exact-image application acceptance — 2026-10-17
+
+Clean source `8e8ca124917b516e85e5a232fa8ff147b73c81e6` produces application image
+`sha256:dd271415652b92e00669547268aba5cb5820a5a93cc835c15d7542bc793cda39`.
+Compose and Kubernetes, confirmed from actual Pod image ID, each pass **10/10 first-run browser
+scenarios with retries disabled**: six default, pickup, full match/rematch and two reconnect cases.
+Actual JSON health/readiness is polled before every default/fixture run; Node is exactly 24.21.0.
+Strict Kubernetes schemas report **3 valid resources**. Nonroot UID/GID 65532, read-only root,
+all capabilities dropped, no escalation, RuntimeDefault seccomp, read-only mode-0444 fixture
+Secrets, actual probe paths and absence of `/app/*.seed` pass runtime inspection. Pinned Trivy
+0.74.0 scans a saved archive with the official database and no Docker socket: **0 HIGH/CRITICAL**.
+
+Actual desktop and 320-pixel Polish screenshots are visually inspected without clipping/overlap.
+Evidence remains at `/tmp/grenadiers-v0311-acceptance`; temporary project/namespace/Secret,
+forward, source export and scan archive are removed. The accepted application image and separate
+optimized reference image/bundle remain. This completes this engineering increment's deployment
+check; later evidence changes affect docs only and M7 playtesting remains open.
+
+## M7 optimized reference harness — 2026-10-17
+
+The clean committed harness at `f1678dfc9d9255504fce8b0c8dcafdb2ac07f96f` passes all four
+optimized measurement profiles on native macOS and constrained Linux. The Linux development
+reference image is `sha256:b5629e98174e72e4ab2c1a510d2a80c1dc5659b4a94ad4b6b96c78e807a13607`;
+its isolated container exits 0 without OOM, with cpuset 2–3 (two allocated of 18 visible CPUs),
+512 MiB memory/swap-total limit, 128 PID limit, and no network. Each record identifies source
+state, exact binary SHA-256 and image. Both references and all limits/provenance/RSS units are
+independently reviewed; the [performance record](game/performance.md) preserves exact results.
+
+Linux runtime p99 is **6 µs**; one/eight-room observed publication-lag p99 is **8.898/5.113 ms**,
+within the selected 8.33 ms runtime and 50 ms lag budgets. Every normal owner advances 1,800
+ticks over its 30-second window, maximum encoded snapshot is 4,824 bytes, and all cleanup callbacks
+complete. Pressure runs separately: 32 slots fill, command 33 is rejected, cleanup completes.
+Watch observations can coalesce, sampled occupancy is not a true peak, and process RSS is not
+per-room memory. These measurements exclude HTTP/WebSocket/browser and human playability.
+
+Independent review caught stale executable/provenance selection, overlapping pressure RSS and
+user-specific/unverified Node selection; all are fixed and closure review passes. The normal
+server gate now runs the three artifact/provenance helper tests and shell syntax. It passes
+**296 core tests, 149 server tests, and 2 doctests**; four machine-specific measurements are
+explicitly ignored in ordinary CI and executed successfully through the reference runner.
+Rust coverage is **7,991/8,541 lines, 93.56%**, above the unchanged 80% floor. The complete web
+gate passes 163 tests; ten E2E static scenarios and dependency policies pass; both npm audits
+report zero vulnerabilities. Exact-image application deployment acceptance is recorded separately.
+
+Raw native/Linux JSON, environments, timing, build/run and container evidence remain at
+`/tmp/grenadiers-v0311-reference`; the isolated benchmark container is removed. M7 remains open
+for real visibility, delayed-network support and human playtests. This is not a capacity claim
+for the configured 32-room limit or a v0.4.0 release.
+
 ## M6 v0.3.10 exact-image deployment acceptance — 2026-10-17
 
 A clean Git export of `df9886ff17a662fdfccc19d0769153c091b5d9d2` produces

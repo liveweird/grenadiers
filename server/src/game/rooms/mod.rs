@@ -15,6 +15,8 @@ mod match_owner;
 mod match_runtime;
 mod profile;
 mod replay;
+#[cfg(test)]
+mod resume;
 mod types;
 
 use crate::round_seed::RoundSeedSource;

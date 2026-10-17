@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.3.2 — 2026-10-17
+
+- Add a private, bounded semantic replay journal and runner using the real match runtime.
+- Validate format/rules/generator versions, command chronology and bounds, exact round seeds
+  and assignments, missing/extra starts, and explicit truncation.
+- Compare full private world, lifecycle, input, reports, and revision checkpoints through real
+  generated draws, wins, rematch, cancellation, interruption, and immediate input fences.
+
+This runner is test-only. Live accepted-operation capture follows separately; no replay
+endpoint, durable storage, credential recording, or reconnect activation is introduced.
+
 ## 0.3.1 — 2026-10-17
 
 - Add a pure bounded two-seat reconnect-grace model with checked 600-tick deadlines.

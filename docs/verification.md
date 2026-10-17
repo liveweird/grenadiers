@@ -1,5 +1,32 @@
 # Repository verification
 
+## M6 private replay-runner foundation — 2026-10-17
+
+The locked server gate passes **251 core tests, 129 server tests, and 2 doctests**.
+Rust coverage is **6,356/6,787 lines, 93.65%**, above the unchanged 80% floor. Independent
+review and malformed-action follow-up report no outstanding findings. Four replay cases
+exercise real generated worlds through cancellation, three wins, rematch, shared-bomb draw,
+interruption, TTL refresh, immediate input fencing, and nonempty report windows. Complete
+private world/lifecycle/input/report/revision checkpoints match.
+
+Mutation checks reject unsupported versions/profiles, time/order errors, missing/extra seeds,
+wrong actual-start metadata, zero/above-wire-bound bomb actions, and truncation. The exact
+maximum bomb action ID is accepted. Records measure 64 bytes on this target; preallocated
+60,000-record capacity is 3,840,000 bytes and stops growing at truncation. Debug output does
+not expose private generation seeds. This module remains test-only; automatic live capture
+and exact-image deployment acceptance are separate checks, not claimed here.
+
+A clean committed-tree build of `e9eb97822ca4bdd3bd9c1ef24c5ae6e39bf3e186` produces
+`sha256:6967b11ec659e0f68161d8a128afbf4f29449de4f50f58bbe2f5c0bf72cec6f4`.
+Compose and local Kubernetes use that exact image. Each passes the real JSON health/ready
+probes, **six default browser scenarios, one pickup scenario, and one full-match scenario**.
+Both fixture suites disable retries. Strict Kubernetes 1.33 schemas pass **3/3**; runtime
+inspection confirms UID/GID 65532, read-only root, dropped capabilities and seccomp settings.
+Read-only fixture Secrets use mode 0444; no seed file appears under `/app`. Pinned archive-only
+Trivy reports zero fixable HIGH/CRITICAL findings. The immutable accepted client is `3456e48`;
+its exact hashes and screenshots are recorded with the image evidence. Temporary stacks,
+namespaces, Secrets, forwards, exports and scan archives are cleaned; images and logs remain.
+
 ## M6 pure reconnect-grace foundation — 2026-10-17
 
 The locked server gate passes **251 core tests, 125 server tests, and 2 doctests**.

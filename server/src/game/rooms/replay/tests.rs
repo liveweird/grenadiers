@@ -1,0 +1,290 @@
+use std::{
+    collections::VecDeque,
+    mem::size_of,
+    num::NonZeroU32,
+    sync::{Arc, Mutex},
+};
+
+use grenadiers_core::{
+    game::{Direction, RoundAssignment, SeatId, Tick},
+    protocol::MAX_COUNTER,
+    room::{CountdownKind, DepartureReason, InterruptReason, MatchPhase},
+};
+
+use super::super::match_runtime::{MatchRuntime, RuntimeInspection};
+use super::{
+    Header, Journal, Operation, ReplayAction, ReplayError, ReplayStatus,
+    record::{MAX_RECORDS, Record},
+    replay,
+    runner::{apply, identity},
+};
+use crate::round_seed::RoundSeedSource;
+
+struct RecordingRuntime {
+    runtime: MatchRuntime,
+    journal: Journal,
+}
+
+impl RecordingRuntime {
+    fn new(seeds: impl IntoIterator<Item = [u8; 32]>) -> Self {
+        let seeds = Arc::new(Mutex::new(seeds.into_iter().collect::<VecDeque<_>>()));
+        let source = Arc::clone(&seeds);
+        Self {
+            runtime: MatchRuntime::new(
+                identity(),
+                RoundSeedSource::with_entropy(move |bytes| {
+                    let seed = source.lock().map_err(|_| ())?.pop_front().ok_or(())?;
+                    bytes.copy_from_slice(&seed);
+                    Ok(())
+                }),
+            ),
+            journal: Journal::new(Header::m5([false; 2])),
+        }
+    }
+
+    fn append(&mut self, operation: Operation) {
+        let tick = self.runtime.lifecycle().tick();
+        let before = self.runtime.lifecycle().phase();
+        apply(&mut self.runtime, operation).unwrap();
+        assert!(self.journal.record(tick, operation));
+        if before != MatchPhase::Running && self.runtime.lifecycle().phase() == MatchPhase::Running
+        {
+            let inspection = self.runtime.replay_inspection();
+            let simulation = inspection.simulation.unwrap();
+            assert!(self.journal.record(
+                self.runtime.lifecycle().tick(),
+                Operation::RoundStarted {
+                    epoch: simulation.epoch,
+                    assignment: simulation.state.round_assignment(),
+                    generation: simulation.generation.unwrap(),
+                },
+            ));
+        }
+    }
+
+    fn action(&mut self, seat: SeatId, action: ReplayAction) {
+        self.append(Operation::Action {
+            seat,
+            epoch: self.runtime.lifecycle().round_attempt(),
+            action,
+        });
+    }
+
+    fn tick_until(&mut self, predicate: impl Fn(MatchPhase) -> bool) {
+        while !predicate(self.runtime.lifecycle().phase()) {
+            self.append(Operation::Tick);
+        }
+    }
+
+    fn start(&mut self) {
+        self.action(SeatId::One, ReplayAction::Ready(true));
+        self.action(SeatId::Two, ReplayAction::Ready(true));
+        self.tick_until(|phase| phase == MatchPhase::Running);
+    }
+
+    fn finish(&mut self, bombing: &[SeatId]) {
+        for &seat in bombing {
+            self.action(seat, ReplayAction::Bomb(1));
+        }
+        self.tick_until(|phase| phase != MatchPhase::Running);
+    }
+
+    fn checkpoint(&self) -> RuntimeInspection {
+        self.runtime.replay_inspection()
+    }
+}
+
+fn occupied(seeds: impl IntoIterator<Item = [u8; 32]>) -> RecordingRuntime {
+    let mut recording = RecordingRuntime::new(seeds);
+    recording.append(Operation::Occupy(SeatId::One));
+    recording.append(Operation::Occupy(SeatId::Two));
+    recording
+}
+
+#[test]
+fn generated_match_replays_cancellation_wins_rematch_draw_and_interruption() {
+    let mut recording = occupied((1..=5).map(|value| [value; 32]));
+    recording.action(SeatId::One, ReplayAction::Ready(true));
+    recording.action(SeatId::Two, ReplayAction::Ready(true));
+    for _ in 0..12 {
+        recording.append(Operation::Tick);
+    }
+    recording.action(SeatId::One, ReplayAction::Ready(false));
+    recording.start();
+
+    for round in 1..=3 {
+        recording.finish(&[SeatId::Two]);
+        if round < 3 {
+            recording.tick_until(|phase| {
+                matches!(
+                    phase,
+                    MatchPhase::Countdown {
+                        kind: CountdownKind::InterRound,
+                        ..
+                    }
+                )
+            });
+            recording.tick_until(|phase| phase == MatchPhase::Running);
+        }
+    }
+    loop {
+        if matches!(recording.runtime.lifecycle().phase(), MatchPhase::MatchResult { rematch_at, .. }
+            if recording.runtime.lifecycle().tick() >= rematch_at)
+        {
+            break;
+        }
+        recording.append(Operation::Tick);
+    }
+    recording.action(SeatId::One, ReplayAction::Rematch(true));
+    recording.action(SeatId::Two, ReplayAction::Rematch(true));
+    recording.start();
+    recording.finish(&[SeatId::One, SeatId::Two]);
+    recording.append(Operation::Interrupt(InterruptReason::ServerStopped));
+
+    let replayed = replay(&recording.journal).unwrap();
+    assert_eq!(replayed, recording.checkpoint());
+    assert!(recording.journal.len() < MAX_RECORDS);
+}
+
+#[test]
+fn movement_refresh_and_predeparture_fence_preserve_input_semantics() {
+    let mut recording = occupied([[7; 32]]);
+    recording.start();
+    recording.action(SeatId::One, ReplayAction::Movement(Some(Direction::East)));
+    for _ in 0..10 {
+        recording.append(Operation::Tick);
+    }
+    recording.action(SeatId::One, ReplayAction::Movement(Some(Direction::East)));
+    for _ in 0..10 {
+        recording.append(Operation::Tick);
+    }
+    let refreshed = recording.checkpoint();
+    assert!(refreshed.inputs.contains("direction: Some(East)"));
+    assert!(!refreshed.reports.is_empty());
+    assert_eq!(replay(&recording.journal).unwrap(), refreshed);
+    recording.action(SeatId::One, ReplayAction::Bomb(1));
+    recording.append(Operation::InputFence(SeatId::One));
+    recording.append(Operation::Tick);
+    recording.append(Operation::Depart([
+        Some(DepartureReason::TransportLoss),
+        None,
+    ]));
+
+    let expected = recording.checkpoint();
+    assert!(
+        expected
+            .simulation
+            .as_ref()
+            .unwrap()
+            .state
+            .world()
+            .bombs()
+            .is_empty()
+    );
+    assert_eq!(replay(&recording.journal).unwrap(), expected);
+}
+
+#[test]
+fn malformed_versions_order_bounds_and_round_metadata_fail_closed() {
+    let mut journal = Journal::new(Header::m5([false; 2]));
+    journal.header.format_version += 1;
+    assert_eq!(replay(&journal), Err(ReplayError::UnsupportedFormat));
+    journal.header = Header::m5([false; 2]);
+    journal.header.lifecycle_profile += 1;
+    assert_eq!(replay(&journal), Err(ReplayError::UnsupportedLifecycle));
+    journal.header = Header::m5([false; 2]);
+    journal.header.rules_version += 1;
+    assert_eq!(replay(&journal), Err(ReplayError::UnsupportedRules));
+    journal.header = Header::m5([false; 2]);
+    journal.header.generator_version += 1;
+    assert_eq!(replay(&journal), Err(ReplayError::UnsupportedGenerator));
+    journal.header = Header::m5([false; 2]);
+    journal.header.initial_tick = Tick(1);
+    assert_eq!(replay(&journal), Err(ReplayError::UnsupportedInitialTick));
+
+    let mut bounds = Journal::new(Header::m5([true, false]));
+    bounds.record(
+        Tick(0),
+        Operation::Action {
+            seat: SeatId::One,
+            epoch: 0,
+            action: ReplayAction::Ready(true),
+        },
+    );
+    assert_eq!(replay(&bounds), Err(ReplayError::InvalidBounds));
+    bounds.records[0].order = 3;
+    assert_eq!(replay(&bounds), Err(ReplayError::InvalidOrder));
+
+    let mut recording = occupied([[9; 32]]);
+    recording.start();
+    let marker = recording
+        .journal
+        .records
+        .iter_mut()
+        .find(|record| matches!(record.operation, Operation::RoundStarted { .. }))
+        .unwrap();
+    if let Operation::RoundStarted { assignment, .. } = &mut marker.operation {
+        *assignment = RoundAssignment::new(NonZeroU32::new(2).unwrap());
+    }
+    assert_eq!(
+        replay(&recording.journal),
+        Err(ReplayError::RoundStartMismatch)
+    );
+
+    let mut action_bound = occupied([[10; 32]]);
+    action_bound.start();
+    action_bound.action(SeatId::One, ReplayAction::Bomb(MAX_COUNTER));
+    assert!(replay(&action_bound.journal).is_ok());
+    if let Operation::Action { action, .. } =
+        &mut action_bound.journal.records.last_mut().unwrap().operation
+    {
+        *action = ReplayAction::Bomb(MAX_COUNTER + 1);
+    }
+    assert_eq!(
+        replay(&action_bound.journal),
+        Err(ReplayError::InvalidBounds)
+    );
+    if let Operation::Action { action, .. } =
+        &mut action_bound.journal.records.last_mut().unwrap().operation
+    {
+        *action = ReplayAction::Bomb(u32::MAX);
+    }
+    assert_eq!(
+        replay(&action_bound.journal),
+        Err(ReplayError::InvalidBounds)
+    );
+}
+
+#[test]
+fn missing_extra_seed_and_truncation_are_never_complete_replays() {
+    let mut missing = occupied([[1; 32]]);
+    missing.start();
+    missing
+        .journal
+        .records
+        .retain(|record| !matches!(record.operation, Operation::RoundStarted { .. }));
+    assert_eq!(replay(&missing.journal), Err(ReplayError::MissingSeed));
+
+    let mut extra = Journal::new(Header::m5([false; 2]));
+    let generated = grenadiers_core::game::generate_arena([2; 32]).record();
+    extra.record(
+        Tick(0),
+        Operation::RoundStarted {
+            epoch: 1,
+            assignment: RoundAssignment::first(),
+            generation: generated,
+        },
+    );
+    assert_eq!(replay(&extra), Err(ReplayError::ExtraSeed));
+
+    let mut truncated = Journal::new(Header::m5([false; 2]));
+    for _ in 0..MAX_RECORDS {
+        assert!(truncated.record(Tick(0), Operation::Tick));
+    }
+    assert!(!truncated.record(Tick(0), Operation::Tick));
+    assert!(matches!(truncated.status(), ReplayStatus::Truncated { .. }));
+    assert_eq!(replay(&truncated), Err(ReplayError::Truncated));
+    assert_eq!(size_of::<Record>(), 64);
+    assert!(MAX_RECORDS * size_of::<Record>() < 4 * 1024 * 1024);
+    assert!(!format!("{truncated:?}").contains("seed"));
+}

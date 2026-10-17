@@ -4,7 +4,7 @@ Status: **execution plan**. M0 is complete and locally verified on 2026-10-16; M
 and locally verified on 2026-10-17. M2 is complete and locally verified
 on 2026-10-17. M3’s fixed-map two-browser duel is implemented and locally verified;
 M4 generated rounds and upgrades are complete and locally verified on 2026-10-17;
-M5–M8 remain planned.
+M5 headless match-series facts are implemented; its remaining slices and M6–M8 remain planned.
 Published engineering prereleases are listed in `CHANGELOG.md` and GitHub Releases.
 
 The first product goal is a reliable, browser-based survival match between two humans. Build
@@ -266,6 +266,11 @@ nor active secret seeds. A two-browser scenario collects an item and proves its 
 new bomb while an older bomb retains its original range.
 
 ## M5 Complete classic match progression
+
+Progress: v0.2.7 adds the headless [match-series component](match-series.md), bounded score/
+record/outcome facts, holds, batched departures, and rematch votes. Live gameplay remains the
+single-round v2 preview. Pure lifecycle, dormant v3 contracts, server/browser adapters, and
+coordinated first-to-three activation follow [ADR 0015](../decisions/0015-match-series-and-staged-progression.md).
 
 **Release:** v0.3.0. **Depends on:** M4.
 

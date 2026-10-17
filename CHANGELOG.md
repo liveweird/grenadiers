@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.2.7 — 2026-10-17
+
+- Add bounded headless first-to-three match-series facts: scores, actual round assignment,
+  immutable latest completed round, and a separate final match outcome.
+- Preserve result holds, batched forfeit/abandonment/interruption precedence, and finality.
+- Add idempotent, withdrawable two-player rematch votes after the 180-tick hold, with retained
+  command-epoch/time high-water checks and atomic overflow failures.
+
+Live generated gameplay remains the single-round v2 preview. Automatic orchestration, v3
+contracts, browser match UI, and full first-to-three acceptance follow as focused increments.
+
 ## 0.2.6 — 2026-10-17
 
 - Activate private generated-v1 arenas with classic-v2 pickups and upgrades in live rooms.

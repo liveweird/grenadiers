@@ -82,3 +82,7 @@ must be recorded and how the two-player baseline will be delivered and verified.
 
 [ADR 0012](decisions/0012-pickup-phases-and-upgrades.md) defines the implemented typed
 [pickup layers](game/pickups.md) with classic-v2 collection/upgrades and explicit round-number spawn/tie assignment.
+
+[ADR 0015](decisions/0015-match-series-and-staged-progression.md) separates implemented
+[headless match-series facts](game/match-series.md) from the next pure lifecycle and staged
+v3 server/browser integration. The live generated preview remains single-round until activation.

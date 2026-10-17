@@ -19,6 +19,8 @@
 //! );
 //! ```
 
+pub mod series;
+
 use crate::game::{RoundResult, SeatId, Tick};
 
 pub const COUNTDOWN_TICKS: u64 = 180;

@@ -28,15 +28,8 @@ export async function createArenaRenderer(host: HTMLElement): Promise<ArenaRende
   app.canvas.style.width = '100%'
   app.canvas.style.height = '100%'
   app.canvas.style.display = 'block'
+  app.canvas.style.imageRendering = 'pixelated'
   host.appendChild(app.canvas)
-  function resize(): void {
-    const width = Math.max(1, Math.round(host.clientWidth))
-    app.renderer.resize(width, width * 13 / 15)
-    scene.root.scale.set(width / (15 * TILE))
-  }
-  const observer = new ResizeObserver(resize)
-  observer.observe(host)
-  resize()
   app.ticker.add(() => scene.render(performance.now()))
   let destroyed = false
   return {
@@ -45,7 +38,6 @@ export async function createArenaRenderer(host: HTMLElement): Promise<ArenaRende
     destroy() {
       if (destroyed) return
       destroyed = true
-      observer.disconnect()
       app.destroy({ removeView: true }, { children: true, context: true })
     },
   }

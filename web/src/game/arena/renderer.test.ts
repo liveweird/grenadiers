@@ -13,13 +13,11 @@ const hooks = vi.hoisted(() => ({
     ticker: { add: ReturnType<typeof vi.fn> }
   }>,
   scenes: [] as Array<{
-    root: { scale: { set: ReturnType<typeof vi.fn> } }
+    root: object
     update: ReturnType<typeof vi.fn>
     render: ReturnType<typeof vi.fn>
     setReducedMotion: ReturnType<typeof vi.fn>
   }>,
-  resized: [] as Array<() => void>,
-  disconnected: vi.fn(),
 }))
 
 vi.mock('pixi.js', () => ({
@@ -42,7 +40,7 @@ vi.mock('pixi.js', () => ({
 }))
 vi.mock('./scene', () => ({
   ArenaScene: class {
-    root = { scale: { set: vi.fn() } }
+    root = {}
     update = vi.fn()
     render = vi.fn()
     setReducedMotion = vi.fn()
@@ -55,31 +53,22 @@ beforeEach(() => {
   hooks.partial = true
   hooks.applications.length = 0
   hooks.scenes.length = 0
-  hooks.resized.length = 0
-  hooks.disconnected.mockClear()
-  vi.stubGlobal('ResizeObserver', class {
-    constructor(callback: () => void) { hooks.resized.push(callback) }
-    observe(): void { /* Browser resize delivery is triggered explicitly below. */ }
-    disconnect = hooks.disconnected
-  })
   Object.defineProperty(window, 'devicePixelRatio', { value: 3, configurable: true })
 })
 
 describe('Pixi application lifetime', () => {
-  it('sizes one canvas, updates the scene, and stops all work on idempotent destroy', async () => {
+  it('keeps a fixed pixel canvas, updates the scene, and stops all work on idempotent destroy', async () => {
     const host = document.createElement('div')
-    const width = vi.spyOn(host, 'clientWidth', 'get').mockReturnValue(720)
     const renderer = await createArenaRenderer(host)
     const app = hooks.applications[0]
     const scene = hooks.scenes[0]
     expect(host.querySelectorAll('canvas')).toHaveLength(1)
     expect(app.canvas).toHaveAttribute('aria-hidden', 'true')
-    expect(app.init).toHaveBeenCalledWith(expect.objectContaining({ preference: 'webgl', resolution: 2 }))
-    expect(app.renderer?.resize).toHaveBeenLastCalledWith(720, 624)
-    width.mockReturnValue(360)
-    hooks.resized[0]()
-    expect(app.renderer?.resize).toHaveBeenLastCalledWith(360, 312)
-    expect(scene.root.scale.set).toHaveBeenLastCalledWith(0.5)
+    expect(app.init).toHaveBeenCalledWith(expect.objectContaining({
+      preference: 'webgl', resolution: 2, width: 720, height: 624, antialias: false,
+    }))
+    expect(app.canvas.style.imageRendering).toBe('pixelated')
+    expect(app.renderer?.resize).not.toHaveBeenCalled()
     const snapshot = gameSnapshot()
     renderer.update(snapshot)
     renderer.setReducedMotion(true)
@@ -96,17 +85,16 @@ describe('Pixi application lifetime', () => {
     expect(app.destroy).toHaveBeenCalledExactlyOnceWith(
       { removeView: true }, { children: true, context: true },
     )
-    expect(hooks.disconnected).toHaveBeenCalledOnce()
     expect(scene.update).toHaveBeenCalledOnce()
     expect(scene.setReducedMotion).toHaveBeenCalledOnce()
   })
 
-  it('uses a safe minimum surface and releases partially initialized GPU resources on failure', async () => {
+  it('uses a safe DPR fallback and releases partially initialized GPU resources on failure', async () => {
     Object.defineProperty(window, 'devicePixelRatio', { value: 0, configurable: true })
     const host = document.createElement('div')
     const renderer = await createArenaRenderer(host)
     expect(hooks.applications[0].init).toHaveBeenCalledWith(expect.objectContaining({ resolution: 1 }))
-    expect(hooks.applications[0].renderer?.resize).toHaveBeenLastCalledWith(1, 13 / 15)
+    expect(hooks.applications[0].renderer?.resize).not.toHaveBeenCalled()
     renderer.destroy()
     hooks.fail = true
     await expect(createArenaRenderer(host)).rejects.toThrow('GPU unavailable')

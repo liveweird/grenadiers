@@ -7,6 +7,7 @@ use grenadiers_core::{
 };
 use tokio::{
     sync::{mpsc, oneshot, watch},
+    task::JoinHandle,
     time::{Instant, MissedTickBehavior, interval_at, sleep_until},
 };
 
@@ -35,22 +36,64 @@ pub(super) enum RoomCommand {
     },
 }
 
-pub(super) fn spawn(
-    registry: Weak<GameRooms>,
+pub(super) struct PreparedOwner {
     identity: RoomIdentity,
     created_at: Instant,
-) -> mpsc::Sender<RoomCommand> {
-    let (commands, receiver) = mpsc::channel(COMMAND_CAPACITY);
-    let initial =
-        RoomNotice::View(view(&identity, &RoomLifecycle::new(), 1).expect("initial view"));
-    let (notices, notice_receiver) = watch::channel(initial);
-    tokio::spawn(run(registry, identity, created_at, receiver, notices));
-    drop(notice_receiver);
-    commands
+    receiver: mpsc::Receiver<RoomCommand>,
+    notices: watch::Sender<RoomNotice>,
+}
+
+impl PreparedOwner {
+    pub(super) fn new(
+        identity: RoomIdentity,
+        created_at: Instant,
+    ) -> (mpsc::Sender<RoomCommand>, Self) {
+        let (commands, receiver) = mpsc::channel(COMMAND_CAPACITY);
+        let initial =
+            RoomNotice::View(view(&identity, &RoomLifecycle::new(), 1).expect("initial view"));
+        let (notices, notice_receiver) = watch::channel(initial);
+        drop(notice_receiver);
+        (
+            commands,
+            Self {
+                identity,
+                created_at,
+                receiver,
+                notices,
+            },
+        )
+    }
+
+    pub(super) fn start(self, registry: Weak<GameRooms>) -> JoinHandle<()> {
+        let registration = RegistrationGuard {
+            registry,
+            identity: self.identity.clone(),
+        };
+        tokio::spawn(run(
+            registration,
+            self.identity,
+            self.created_at,
+            self.receiver,
+            self.notices,
+        ))
+    }
+}
+
+struct RegistrationGuard {
+    registry: Weak<GameRooms>,
+    identity: RoomIdentity,
+}
+
+impl Drop for RegistrationGuard {
+    fn drop(&mut self) {
+        if let Some(registry) = self.registry.upgrade() {
+            registry.cleanup(&self.identity.id, &self.identity.code);
+        }
+    }
 }
 
 async fn run(
-    registry: Weak<GameRooms>,
+    _registration: RegistrationGuard,
     identity: RoomIdentity,
     created_at: Instant,
     mut commands: mpsc::Receiver<RoomCommand>,
@@ -86,7 +129,6 @@ async fn run(
         };
         if Instant::now() >= expires_at || matches!(event, Event::Expired) {
             let _ = notices.send(RoomNotice::Expired);
-            cleanup(&registry, &identity).await;
             return;
         }
         match event {
@@ -101,18 +143,15 @@ async fn run(
                     &notices,
                 );
                 if bindings.iter().all(Option::is_none) {
-                    cleanup(&registry, &identity).await;
                     return;
                 }
             }
             Event::Command(None) | Event::Expired => {
-                cleanup(&registry, &identity).await;
                 return;
             }
             Event::Tick => {
                 if lifecycle.advance_idle_tick().is_err() {
                     let _ = notices.send(RoomNotice::Expired);
-                    cleanup(&registry, &identity).await;
                     return;
                 }
             }
@@ -123,7 +162,6 @@ async fn run(
                 let _ = lifecycle.depart(seat, reason);
                 publish(&identity, &lifecycle, &mut revision, &notices);
                 if bindings.iter().all(Option::is_none) {
-                    cleanup(&registry, &identity).await;
                     return;
                 }
             }
@@ -289,8 +327,6 @@ async fn receive_departure(
     }
 }
 
-async fn cleanup(registry: &Weak<GameRooms>, identity: &RoomIdentity) {
-    if let Some(registry) = registry.upgrade() {
-        registry.cleanup(&identity.id, &identity.code);
-    }
-}
+#[cfg(test)]
+#[path = "owner_tests.rs"]
+mod tests;

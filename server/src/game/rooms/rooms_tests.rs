@@ -202,3 +202,63 @@ fn id_and_random_failures_preserve_registry_state() {
     assert!(registry.prefix.is_none());
     assert_eq!(registry.next_serial, 1);
 }
+
+#[tokio::test]
+async fn live_code_collisions_preserve_existing_mapping_and_fail_after_retry_bound() {
+    let now = StdInstant::now();
+    let rooms = GameRooms::with_random_fill(now, |bytes| {
+        bytes.fill(0);
+        Ok(())
+    });
+    let existing = rooms.create(binding(1, 1), now).await.unwrap();
+    let code = existing.view.room_code.clone();
+    let id = existing.room_id.clone();
+
+    assert!(matches!(
+        rooms.create(binding(2, 1), now).await,
+        Err(RoomError::CapacityReached)
+    ));
+    let registry = rooms.lock();
+    assert_eq!(registry.codes.get(&code), Some(&id));
+    assert!(registry.rooms.contains_key(&id));
+    assert_eq!(registry.rooms.len(), 1);
+}
+
+#[tokio::test]
+async fn stale_binding_is_rejected_after_leave_and_rejoin_in_same_round() {
+    let now = StdInstant::now();
+    let rooms = deterministic_rooms(now);
+    let first = rooms.create(binding(1, 1), now).await.unwrap();
+    let second = rooms
+        .join(&first.view.room_code, binding(2, 1), now)
+        .await
+        .unwrap();
+    rooms.leave(&first, binding(1, 1)).await.unwrap();
+    let rejoined = rooms
+        .join(&first.view.room_code, binding(1, 2), now)
+        .await
+        .unwrap();
+
+    assert_eq!(rejoined.round_id, first.round_id);
+    assert!(matches!(
+        rooms
+            .validate(
+                &rejoined,
+                binding(1, 1),
+                rejoined.room_id.clone(),
+                rejoined.round_id,
+            )
+            .await,
+        Err(RoomError::StaleRoom)
+    ));
+    rooms
+        .validate(
+            &rejoined,
+            binding(1, 2),
+            rejoined.room_id.clone(),
+            rejoined.round_id,
+        )
+        .await
+        .unwrap();
+    drop(second);
+}

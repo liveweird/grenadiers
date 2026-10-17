@@ -79,7 +79,7 @@ impl GameRooms {
         binding: BindingKey,
         now: StdInstant,
     ) -> Result<Admission, RoomError> {
-        let handle = {
+        let (handle, owner) = {
             let mut registry = self.lock();
             if !registry.operations.take(now) {
                 return Err(RoomError::RateLimited);
@@ -88,14 +88,15 @@ impl GameRooms {
                 return Err(RoomError::CapacityReached);
             }
             let identity = self.generate_identity(&mut registry)?;
-            let commands = owner::spawn(Arc::downgrade(self), identity.clone(), Instant::now());
+            let (commands, owner) = owner::PreparedOwner::new(identity.clone(), Instant::now());
             let handle = RoomHandle { commands };
             registry
                 .codes
                 .insert(identity.code.clone(), identity.id.clone());
             registry.rooms.insert(identity.id.clone(), handle.clone());
-            handle
+            (handle, owner)
         };
+        drop(owner.start(Arc::downgrade(self)));
         self.admit(handle, binding).await
     }
 

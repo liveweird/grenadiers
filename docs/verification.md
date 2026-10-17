@@ -2,6 +2,32 @@
 
 ## M7 optional procedural sound — 2026-10-17
 
+Final clean-export candidate `cd7813c0c1951be486e30da7deaf2e917b1b8069` builds image
+`sha256:0e9924ee1b21ef3406b1cf7c59ac7effe57a8ea7fc22839668c8f8ed7c321a62`.
+The **same image passes 22/22 scenarios in Compose and 22/22 in Kubernetes, all retries zero**:
+the six default cases, pickup, match, two reconnect cases, controls, natural headed visibility,
+natural headed audio and nine corrected latency cases. Node 24.21.0 and browser tooling are pinned.
+Health/readiness return `{status:ok}` after rollout; the final Pod uses the exact image and is
+ready 1/1 with zero restarts. Both paths run as 65532 with a read-only root, dropped capabilities
+and no privilege escalation; Kubernetes retains RuntimeDefault, its committed 500m/256Mi limits
+and the read-only mode-0444 seed Secret. No seed file is baked into `/app`.
+
+Compose local latency: 20 observations, median **38.919 ms**, maximum **45.995 ms**;
+50±10 ms per-direction shaping: median **145.299 ms**, maximum **160.615 ms**.
+Kubernetes local: median **40.941 ms**, maximum **53.206 ms**; shaped: median **149.096 ms**,
+maximum **159.909 ms**. All forty observations per deployment stay below 250 ms. Browser helpers
+use CPUs 0–1 without a CFS quota; Compose application affinity matches. The Kubernetes application
+keeps CPUs 0–17 and cpu.max=50000/100000; no throttled periods occur across 197 measured periods.
+These are page-delivered public-state observations, not pixel latency or a WAN guarantee.
+
+Strict Kubernetes 1.33 schemas validate all three resources. Pinned archive-only Trivy passes
+the committed HIGH/CRITICAL, `--ignore-unfixed` release policy. A separate broader diagnostic
+records 58 HIGH and one CRITICAL advisory excluded by that policy as unfixed/deferred/will-not-fix;
+the passing policy scan does not claim an advisory-free base image. Actual Kubernetes desktop
+and 320-pixel Polish sound captures pass visual inspection. Evidence, including both scan modes,
+is retained in `/tmp/grenadiers-v0315-acceptance`. Owned namespaces, Compose projects, helpers,
+forwarding, exports and archives are removed; the accepted image and evidence remain.
+
 The active v4 frontend adds four original synthesized public-event cues, default muted, explicit
 native-gesture activation and EN/PL sound status. Preferences contain only a validated bounded
 boolean/version. One context and at most four voices are owned explicitly; no sound asset,
@@ -28,7 +54,7 @@ The diagnostic attempt to observe contextWillBeDestroyed after navigation did no
 CDP event; it is retained and no destruction observation is claimed. Explicit close/disposal has
 unit evidence; owned browser/profile teardown is bounded separately. Graph processing does not
 prove hardware audibility, comfortable volume or listening quality. Evidence remains at
-`/tmp/grenadiers-m7-audio-evidence`; final integrated exact-image acceptance follows separately.
+`/tmp/grenadiers-m7-audio-evidence`; integrated deployment evidence is recorded below.
 The integrated v0.3.15 server gate passes **296 core tests, 149 server tests and two doctests**,
 with four optimized reference profiles intentionally ignored. E2E typecheck/lint/Knip/parity
 pass after the additive manifest merge. Dependency policies pass and both npm audits report zero

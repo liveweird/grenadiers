@@ -63,3 +63,6 @@ pub use world::World;
 
 #[cfg(test)]
 mod generated_upgrade_trace_tests;
+
+#[cfg(test)]
+mod generated_match_trace_tests;

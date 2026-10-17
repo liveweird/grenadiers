@@ -74,11 +74,9 @@ describe('retained public arena scene', () => {
     expect(actors.children.map(({ x, y }) => [x, y])).toEqual([[72, 72], [648, 552]])
     expect(bombs.children[0]).toMatchObject({ x: 72, y: 72 })
     expect(pickups.children.map(({ x, y }) => [x, y])).toEqual([[96, 96], [144, 96], [192, 96]])
-    expect(pickups.children.map(({ shapes }) => shapes)).toEqual([
-      ['ellipse', 'roundRect', 'circle', 'circle'],
-      ['ellipse', 'roundRect', 'roundRect', 'roundRect', 'circle'],
-      ['ellipse', 'roundRect', 'poly', 'poly'],
-    ])
+    expect(pickups.children.map(({ shapes }) => shapes.every((shape) => shape === 'rect')))
+      .toEqual([true, true, true])
+    expect(pickups.children.map(({ shapes }) => shapes.length)).toEqual([16, 14, 18])
     const retained = [
       blocks.children[0], ...pickups.children, bombs.children[0], flames.children[0], ...actors.children,
     ]
@@ -86,12 +84,11 @@ describe('retained public arena scene', () => {
     expect([
       blocks.children[0], ...pickups.children, bombs.children[0], flames.children[0], ...actors.children,
     ]).toEqual(retained)
-    const oneHelmet = actors.children[0].children[1]
-    const twoHelmet = actors.children[1].children[1]
-    expect(oneHelmet.shapes).not.toContain('poly')
-    expect(twoHelmet.shapes).toContain('poly')
-    expect(oneHelmet.rotation).toBe(-Math.PI / 2)
-    expect(twoHelmet.rotation).toBe(Math.PI / 2)
+    expect(actors.children.map((actor) => actor.children.length)).toEqual([9, 9])
+    expect(actors.children[0].children.map(({ visible }) => visible))
+      .toEqual([true, false, false, true, false, false, false, false, false])
+    expect(actors.children[1].children.map(({ visible }) => visible))
+      .toEqual([true, false, false, false, false, false, false, true, false])
   })
 
   it('interpolates only between public positions and never extrapolates past the target', () => {
@@ -106,12 +103,18 @@ describe('retained public arena scene', () => {
     expect(actor.x).toBe(72)
     scene.render(125)
     expect(actor.x).toBe(96)
+    expect(actor.children.map(({ visible }) => visible))
+      .toEqual([true, false, false, false, true, false, false, false, false])
     scene.render(150)
     expect(actor.x).toBe(120)
     scene.render(100_000)
     expect(actor.x).toBe(120)
     scene.render(90)
     expect(actor.x).toBe(72)
+    scene.update(snapshot, 200)
+    scene.render(325)
+    expect(actor.children.map(({ visible }) => visible))
+      .toEqual([true, false, false, true, false, false, false, false, false])
   })
 
   it('removes absent public entities and replaces a changed pickup kind at the same cell', () => {
@@ -124,7 +127,8 @@ describe('retained public arena scene', () => {
     snapshot.state.pickups[0].kind = 'movementSpeed'
     scene.update(snapshot, 25)
     expect(firstPickup.destroyed).toBe(true)
-    expect(pickups.children[0].shapes).toEqual(['ellipse', 'roundRect', 'poly', 'poly'])
+    expect(pickups.children[0].shapes).toHaveLength(18)
+    expect(pickups.children[0].shapes.every((shape) => shape === 'rect')).toBe(true)
     const removed = [blocks.children[0], pickups.children[0], bombs.children[0], flames.children[0], actors.children[0]]
     const ownedGraphics = [...bombs.children[0].children, ...actors.children[0].children]
     snapshot.state.arena.blocks = []
@@ -145,15 +149,18 @@ describe('retained public arena scene', () => {
     scene.update(snapshot, 0)
     scene.render(25)
     const [, , , bombs, flames, actors] = layers(scene)
-    expect(bombs.children[0].scaleValue).not.toBe(1)
+    const spark = bombs.children[0].children[2]
+    const firstSparkFrame = spark.visible
+    scene.render(115)
+    expect(spark.visible).not.toBe(firstSparkFrame)
     snapshot.room.phase = { type: 'result', endedAt: 101, result: { type: 'winner', seat: 'one' } }
     snapshot.state.actors[0].position.x += 1024
     snapshot.state.actors[1].alive = false
     scene.update(snapshot, 50)
     expect(actors.children[0].x).toBe(120)
     expect(actors.children[1].visible).toBe(false)
-    expect(bombs.children[0].scaleValue).toBe(1)
-    expect(flames.children[0].alpha).toBe(1)
+    expect(spark.visible).toBe(true)
+    expect(flames.children[0].children.map(({ visible }) => visible)).toEqual([true, false])
   })
 
   it('respects reduced effects and resets interpolation across room/round identities', () => {
@@ -167,7 +174,7 @@ describe('retained public arena scene', () => {
     const oldActors = [...layers(scene)[5].children]
     const oldPickup = layers(scene)[2].children[0]
     expect(oldActors[0].y).toBe(120)
-    expect(layers(scene)[3].children[0].scaleValue).toBe(1)
+    expect(layers(scene)[3].children[0].children[2].visible).toBe(true)
     scene.setReducedMotion(false)
     snapshot.room.roundId += 1
     snapshot.state.actors[0].position.x = 1536
@@ -177,6 +184,7 @@ describe('retained public arena scene', () => {
     expect(oldPickup.destroyed).toBe(true)
     expect(layers(scene)[2].children[0]).not.toBe(oldPickup)
     expect(layers(scene)[5].children[0]).toMatchObject({ x: 72, y: 120 })
-    expect(layers(scene)[5].children[0].children[1].rotation).toBe(Math.PI)
+    expect(layers(scene)[5].children[0].children.map(({ visible }) => visible))
+      .toEqual([true, true, false, false, false, false, false, false, false])
   })
 })

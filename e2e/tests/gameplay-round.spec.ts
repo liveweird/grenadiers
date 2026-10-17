@@ -8,6 +8,34 @@ function snapshot(frames: GameServerMessage[]): Snapshot | undefined {
   return frames.filter((frame) => frame.type === 'snapshot').at(-1)
 }
 
+function firstResultForRound(frames: GameServerMessage[], roundId: number): Snapshot | undefined {
+  return frames.find((frame): frame is Snapshot => frame.type === 'snapshot'
+    && frame.room.roundId === roundId
+    && frame.room.phase.type === 'result')
+}
+
+function laterResultForRound(
+  frames: GameServerMessage[],
+  roundId: number,
+  afterRevision: number,
+): Snapshot | undefined {
+  return frames.findLast((frame): frame is Snapshot => frame.type === 'snapshot'
+    && frame.room.roundId === roundId
+    && frame.room.phase.type === 'result'
+    && frame.room.revision > afterRevision)
+}
+
+function resultForRoundAtRevision(
+  frames: GameServerMessage[],
+  roundId: number,
+  revision: number,
+): Snapshot | undefined {
+  return frames.findLast((frame): frame is Snapshot => frame.type === 'snapshot'
+    && frame.room.roundId === roundId
+    && frame.room.phase.type === 'result'
+    && frame.room.revision === revision)
+}
+
 test('two native gameplay sockets finish one authoritative generated classic round', async ({ browser }) => {
   const contexts = await Promise.all([browser.newContext(), browser.newContext()])
   try {
@@ -42,18 +70,35 @@ test('two native gameplay sockets finish one authoritative generated classic rou
     await expect.poll(() => gameFrames(one)).toContainEqual({
       type: 'error', code: 'duplicateAction', sequence: duplicate,
     })
-    await expect.poll(async () => snapshot(await gameFrames(one))?.room.phase.type).toBe('result')
-    await expect.poll(async () => snapshot(await gameFrames(two))?.room.phase.type).toBe('result')
-    const first = snapshot(await gameFrames(one))!
-    expect(first.room.phase.type).toBe('result')
+    let firstResult: Snapshot | undefined
+    await expect.poll(async () => {
+      firstResult = firstResultForRound(await gameFrames(one), binding.roundId)
+      return Boolean(firstResult)
+    }).toBe(true)
+    if (!firstResult) throw new Error('No result snapshot was received for the active round')
+    const first = firstResult
     expect(first.room.lastRound?.result).toEqual({ type: 'winner', seat: 'two' })
     expect(first.room.scores).toEqual({ one: 0, two: 1 })
     expect(first.state.actors[0].alive).toBe(false)
-    await expect.poll(async () => snapshot(await gameFrames(one))!.room.revision).toBeGreaterThan(first.room.revision + 2)
-    expect(snapshot(await gameFrames(one))!.state).toEqual(first.state)
-    const other = (await gameFrames(two)).find((frame) =>
-      frame.type === 'snapshot' && frame.room.revision === first.room.revision,
-    )
+    let laterResult: Snapshot | undefined
+    await expect.poll(async () => {
+      laterResult = laterResultForRound(
+        await gameFrames(one),
+        first.room.roundId,
+        first.room.revision + 2,
+      )
+      return Boolean(laterResult)
+    }).toBe(true)
+    expect(laterResult?.state).toEqual(first.state)
+    let other: Snapshot | undefined
+    await expect.poll(async () => {
+      other = resultForRoundAtRevision(
+        await gameFrames(two),
+        first.room.roundId,
+        first.room.revision,
+      )
+      return Boolean(other)
+    }).toBe(true)
     expect(other).toEqual(first)
     const events = (await gameFrames(one)).flatMap((frame) => frame.type === 'snapshot' ? frame.events : [])
     expect(events.some((event) => event.kind.type === 'bombPlaced')).toBe(true)

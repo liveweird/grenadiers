@@ -48,6 +48,8 @@ These requests are planned work, separate from the implemented classic baseline.
 
 [Room settings](settings.md) covers shared starting speed, turn tolerance, match target and fuse.
 
+[Pixel-art presentation](pixel-art.md) describes original artwork, animation and resource bounds.
+
 [Ordered WebSocket delay](websocket-latency.md) defines the measured profile, causal observations and limits.
 
 [Procedural sound](audio.md) explains gesture activation, mute, visibility recovery and event baselines.

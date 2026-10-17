@@ -241,7 +241,8 @@ promise. These limits are visible in release notes and do not masquerade as full
 
 Progress: v0.2.1 adds the explicit [versioned generator](generation.md), private concealed
 contents, deterministic fallback, and opening validation. Live rooms still use the fixed
-preview. Next come typed pickup layers, collection/upgrades, gameplay protocol compatibility,
+preview. v0.2.2 adds checked [pickup layers](pickups.md), reveal/destruction, and private
+world construction. Next come collection/upgrades, gameplay protocol compatibility,
 item rendering, and generated-round activation with real-browser acceptance.
 
 Work packages:

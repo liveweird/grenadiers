@@ -1,6 +1,7 @@
 use super::arena::{ARENA_CELL_COUNT, ARENA_HEIGHT, ARENA_WIDTH, Terrain};
 use super::bombs::Bomb;
 use super::input::Direction;
+use super::pickups::PickupKind;
 use super::simulation::{RoundResult, State};
 use super::types::{CellId, EntityId, Position, SeatId, SpeedLevel, Tick};
 
@@ -14,6 +15,7 @@ pub struct PublicState {
     pub actors: [ActorView; 2],
     pub bombs: Vec<BombView>,
     pub flames: Vec<FlameView>,
+    pub pickups: Vec<PickupView>,
     pub result: Option<RoundResult>,
 }
 
@@ -65,6 +67,12 @@ impl From<Bomb> for BombView {
 pub struct FlameView {
     pub cell: CellId,
     pub expires_at: Tick,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct PickupView {
+    pub cell: CellId,
+    pub kind: PickupKind,
 }
 
 impl State {
@@ -122,6 +130,15 @@ impl State {
                 .hazards()
                 .iter()
                 .map(|(&cell, &expires_at)| FlameView { cell, expires_at })
+                .collect(),
+            pickups: self
+                .world()
+                .exposed_pickups()
+                .iter()
+                .map(|(&cell, &pickup)| PickupView {
+                    cell,
+                    kind: pickup.kind(),
+                })
                 .collect(),
             result: self.result(),
         }

@@ -49,12 +49,12 @@ pub use fixtures::fixed_arena;
 pub use generation::{GENERATOR_VERSION, GeneratedArena, GenerationRecord, generate_arena};
 pub use geometry::{MovementSegment, MovementTrace};
 pub use input::{Direction, HeldDirections};
-pub use pickups::PickupKind;
+pub use pickups::{Pickup, PickupKind, PickupLayer, PickupPlacementError};
 pub use rules::RulesConfig;
 pub use simulation::{
     Actor, ActorInit, DrawReason, InputAction, RoundResult, SeatInput, State, StateError,
     StepError, StepReport,
 };
 pub use types::{CellId, EntityId, Position, SeatId, SpeedLevel, Tick};
-pub use view::{ActorView, ArenaView, BombView, FlameView, PublicState};
+pub use view::{ActorView, ArenaView, BombView, FlameView, PickupView, PublicState};
 pub use world::World;

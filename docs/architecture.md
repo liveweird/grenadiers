@@ -77,3 +77,6 @@ classic mechanics and optional extensions. Its initial profile drives the simula
 remains subject to playtesting. Optional extensions do not become baseline requirements.
 The [implementation plan](game/implementation-plan.md) identifies when each dependent decision
 must be recorded and how the two-player baseline will be delivered and verified.
+
+[ADR 0012](decisions/0012-pickup-phases-and-upgrades.md) defines the implemented typed
+[pickup layers](game/pickups.md) and fixes the next collection/upgrade phase boundary.

@@ -1,5 +1,27 @@
 # Repository verification
 
+## M4 typed pickup visibility layers — 2026-10-17
+
+The integrated locked server gate passes **155 core tests, 67 server tests, and 2 doctests**.
+Rust coverage passes the unchanged 80% floor at **3,675/3,987 lines, 92.17%**. Independent
+review reports no actionable findings. No dependency, wire, browser, or deployment behavior
+changes; network rooms still use the item-free fixed preview.
+
+Tests cover checked layer construction and duplicate/invalid placement, concealed-to-pending
+blast transitions, revealing-blast immunity, exclusive flame expiry, renewed/overlapping
+flame delay, reveal followed by same-update burning, downstream rays, nonblocking movement,
+exposed-only public ordering, private Debug output, generated-world adaptation, and frozen
+terminal layers. Collection, upgrade application, and wire projection remain explicit next
+slices rather than claimed behavior of these typed components.
+
+A clean committed-tree build produces
+`sha256:2b26a573390b8be4f900f0031a5156aea2e80283d96fccd73be9bc0ba7b0a1d4`.
+Compose and ready local Kubernetes use this exact image. Health/readiness and all **six
+candidate browser scenarios** pass through both deployments. Strict schemas pass with 3
+valid resources; pinned socket-free Trivy reports zero HIGH/CRITICAL vulnerabilities.
+Temporary runtime resources are removed; the image is retained. This evidence update changes
+documentation only.
+
 ## M4 deterministic generator groundwork — 2026-10-17
 
 The integrated locked server gate passes **146 core tests, 67 server tests, and 2 doctests**.

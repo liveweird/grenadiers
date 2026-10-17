@@ -30,6 +30,7 @@ impl State {
 
         let mut events = Vec::new();
         self.expire_flames(next_tick);
+        self.world.expose_flame_free_pickups();
         let placement_requests = self.apply_inputs(inputs);
         let traces = self.move_living();
         self.kill_on_existing_flames(&traces, next_tick, &mut events);

@@ -4,6 +4,7 @@ use super::{ActorInit, RoundResult, State, TurnAssist};
 use crate::game::arena::{ARENA_CELL_COUNT, ARENA_HEIGHT, ARENA_WIDTH, Arena, Terrain};
 use crate::game::fixtures::fixed_arena;
 use crate::game::input::Direction;
+use crate::game::pickups::{Pickup, PickupKind};
 use crate::game::rules::RulesConfig;
 use crate::game::test_support::add_test_bomb_with_deadline;
 use crate::game::types::{CellId, EntityId, Position, SeatId, SpeedLevel, Tick};
@@ -110,6 +111,7 @@ fn public_view_copies_visible_round_state() {
     assert_eq!(view.flames[0].cell, CellId::new(1, 1));
     assert_eq!(view.flames[0].expires_at, Tick(10));
     assert_eq!(view.flames[1].cell, CellId::new(7, 6));
+    assert!(view.pickups.is_empty());
     assert_eq!(view.result, Some(RoundResult::Winner(SeatId::Two)));
 }
 
@@ -138,6 +140,16 @@ fn projected_collections_have_stable_domain_ordering() {
     .unwrap();
     state.world.hazards.insert(CellId::new(8, 6), Tick(20));
     state.world.hazards.insert(CellId::new(9, 5), Tick(20));
+    state
+        .world
+        .pickups
+        .exposed
+        .insert(CellId::new(8, 6), Pickup::new(PickupKind::MovementSpeed));
+    state
+        .world
+        .pickups
+        .exposed
+        .insert(CellId::new(9, 5), Pickup::new(PickupKind::BlastRange));
 
     let view = state.public_view();
 
@@ -151,6 +163,16 @@ fn projected_collections_have_stable_domain_ordering() {
             .map(|flame| flame.cell)
             .collect::<Vec<_>>(),
         [CellId::new(9, 5), CellId::new(8, 6)]
+    );
+    assert_eq!(
+        view.pickups
+            .iter()
+            .map(|pickup| (pickup.cell, pickup.kind))
+            .collect::<Vec<_>>(),
+        [
+            (CellId::new(9, 5), PickupKind::BlastRange),
+            (CellId::new(8, 6), PickupKind::MovementSpeed),
+        ]
     );
 }
 

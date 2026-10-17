@@ -1,6 +1,7 @@
 use super::State;
 use crate::game::events::{StepEvent, StepEventKind};
-use crate::game::explosions;
+use crate::game::explosions::{self, ExplosionError};
+use crate::game::simulation::StepError;
 use crate::game::types::Tick;
 use crate::game::view::BombView;
 
@@ -9,10 +10,16 @@ impl State {
         self.world.hazards.retain(|_, expiry| *expiry > tick);
     }
 
-    pub(super) fn resolve_explosions(&mut self, tick: Tick, events: &mut Vec<StepEvent>) {
-        let plan = explosions::plan(&self.world, tick);
+    pub(super) fn resolve_explosions(
+        &mut self,
+        tick: Tick,
+        events: &mut Vec<StepEvent>,
+    ) -> Result<(), StepError> {
+        let plan = explosions::plan(&self.world, tick).map_err(|error| match error {
+            ExplosionError::UnsupportedBombTrigger(id) => StepError::UnsupportedBombTrigger(id),
+        })?;
         if plan.detonated.is_empty() {
-            return;
+            return Ok(());
         }
 
         for id in &plan.detonated {
@@ -45,5 +52,6 @@ impl State {
                 .and_modify(|current| *current = (*current).max(expiry))
                 .or_insert(expiry);
         }
+        Ok(())
     }
 }

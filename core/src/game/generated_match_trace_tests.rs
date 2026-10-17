@@ -62,7 +62,8 @@ fn match_fixture_has_a_walkable_corridor_and_one_bomb_can_draw_both_players() {
         .values()
         .next()
         .unwrap()
-        .detonates_at();
+        .detonates_at()
+        .unwrap();
     while state.tick().0 < detonation.0 {
         assert!(state.actors().iter().all(|actor| actor.alive()));
         state.step(&[]).unwrap();

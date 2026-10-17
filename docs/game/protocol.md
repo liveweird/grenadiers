@@ -220,3 +220,13 @@ with the closing reason. Existing final matches remain final. Members receive th
 before close; unseated and authenticating sockets close directly. Delivery is best effort
 within a five-second bound. The process explicitly drains upgraded game/diagnostic sessions
 and room cleanup before runtime exit; HTTP graceful shutdown alone does not await upgrades.
+
+## Typed domain bombs and retained wire compatibility
+
+Core bomb views/events distinguish Timed, Remote and Contact triggers. This internal Rust
+representation does not change gameplay-v6 or its archived wire DTOs: wire bombs retain
+mandatory `detonatesAt`. Shared checked projection accepts Timed records and rejects either
+untimed variant, including event-only records. One unsupported record fails the complete
+snapshot/report window; it is never omitted or assigned a substitute deadline. Publication
+failure does not advance revision or discard reports. Current rules admit only Timed bombs;
+untimed transport awaits gameplay-v7 and later weapon activation.

@@ -2,7 +2,7 @@ use std::collections::BTreeSet;
 
 use super::{ActorInit, InputAction, SeatInput, State, StateError};
 use crate::game::arena::{ARENA_CELL_COUNT, ARENA_HEIGHT, ARENA_WIDTH, Arena, Terrain};
-use crate::game::bombs::Bomb;
+use crate::game::bombs::{Bomb, BombTrigger};
 use crate::game::input::Direction;
 use crate::game::rules::RulesConfig;
 use crate::game::test_support::add_test_bomb;
@@ -92,14 +92,17 @@ fn cloned_nonempty_world_accepts_known_owner_and_seeds_allocator_above_bombs() {
 #[test]
 fn constructor_rejects_a_bomb_owned_by_an_unknown_actor() {
     let mut world = open_world();
-    let bomb = Bomb {
-        id: EntityId(90),
-        cell: CellId::new(8, 5),
-        owner: EntityId(99),
-        range: 2,
-        placed_at: Tick(1),
-        detonates_at: Tick(181),
-    };
+    let bomb = Bomb::new(
+        EntityId(90),
+        CellId::new(8, 5),
+        EntityId(99),
+        2,
+        Tick(1),
+        BombTrigger::Timed {
+            detonates_at: Tick(181),
+        },
+    )
+    .unwrap();
     world.bombs.insert(bomb.id(), bomb);
 
     assert_eq!(
@@ -128,14 +131,17 @@ fn constructor_rejects_a_bomb_whose_map_key_disagrees_with_its_id() {
     let mut world = open_world();
     world.bombs.insert(
         EntityId(89),
-        Bomb {
-            id: EntityId(90),
-            cell: CellId::new(8, 5),
-            owner: EntityId(10),
-            range: 2,
-            placed_at: Tick(1),
-            detonates_at: Tick(181),
-        },
+        Bomb::new(
+            EntityId(90),
+            CellId::new(8, 5),
+            EntityId(10),
+            2,
+            Tick(1),
+            BombTrigger::Timed {
+                detonates_at: Tick(181),
+            },
+        )
+        .unwrap(),
     );
 
     assert_eq!(

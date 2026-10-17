@@ -108,7 +108,7 @@ fn derived_bomb_stats_are_captured_without_mutating_base_upgrades() {
         .unwrap();
     let bomb = state.world.bombs.values().next().unwrap();
     assert_eq!(bomb.range(), 1);
-    assert_eq!(bomb.detonates_at(), Tick(181));
+    assert_eq!(bomb.detonates_at(), Some(Tick(181)));
     assert_eq!(state.actors[0].bomb_range(), base_range);
 }
 

@@ -36,6 +36,14 @@ impl MatchRuntime {
         self.settings_revision = revision;
     }
 
+    pub(in crate::game::rooms) fn replace_reports_for_test(&mut self, reports: Vec<StepReport>) {
+        self.reports = reports;
+    }
+
+    pub(in crate::game::rooms) const fn publication_revision_for_test(&self) -> u32 {
+        self.revision
+    }
+
     pub(in crate::game::rooms) fn replay_inspection(&self) -> RuntimeInspection {
         RuntimeInspection {
             lifecycle: self.lifecycle.clone(),

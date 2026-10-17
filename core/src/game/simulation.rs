@@ -1,10 +1,7 @@
 use std::collections::BTreeSet;
 
-#[cfg(test)]
-use super::arena::Terrain;
 use super::assignment::RoundAssignment;
-#[cfg(test)]
-use super::bombs::Bomb;
+use super::bombs::BombTrigger;
 use super::damage::DamageGrace;
 use super::effects::{EffectiveSpeed, TimedEffects};
 use super::events::StepEvent;
@@ -149,12 +146,14 @@ pub enum StateError {
     OccupiedBombCell(CellId),
     UnknownBombOwner(EntityId),
     BombIdMismatch { key: EntityId, id: EntityId },
+    UnsupportedBombTrigger(EntityId),
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum StepError {
     TooManyInputs { count: usize, maximum: usize },
     TickOverflow,
+    UnsupportedBombTrigger(EntityId),
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -214,6 +213,9 @@ impl State {
         for (&key, bomb) in &world.bombs {
             if key != bomb.id() {
                 return Err(StateError::BombIdMismatch { key, id: bomb.id() });
+            }
+            if !matches!(bomb.trigger(), BombTrigger::Timed { .. }) {
+                return Err(StateError::UnsupportedBombTrigger(bomb.id()));
             }
         }
         for actor in actors {
@@ -293,42 +295,6 @@ impl State {
             .filter(|bomb| bomb.owner() == owner)
             .count()
     }
-
-    #[cfg(test)]
-    pub(crate) fn insert_test_bomb(
-        &mut self,
-        id: EntityId,
-        cell: CellId,
-        owner: EntityId,
-        range: u16,
-        placed_at: Tick,
-        detonates_at: Tick,
-    ) -> Result<(), StateError> {
-        if self.actors.iter().any(|actor| actor.id == id) || self.world.bombs.contains_key(&id) {
-            return Err(StateError::DuplicateEntityId(id));
-        }
-        if !self.actors.iter().any(|actor| actor.id == owner) {
-            return Err(StateError::UnknownBombOwner(owner));
-        }
-        if self.world.arena.terrain(cell) != Some(Terrain::Floor)
-            || self.world.arena.blocks().contains(&cell)
-        {
-            return Err(StateError::IllegalBombCell(cell));
-        }
-        if self.world.bombs.values().any(|bomb| bomb.cell == cell) {
-            return Err(StateError::OccupiedBombCell(cell));
-        }
-
-        self.insert_bomb(Bomb {
-            id,
-            cell,
-            owner,
-            range,
-            placed_at,
-            detonates_at,
-        });
-        Ok(())
-    }
 }
 
 impl Actor {
@@ -358,6 +324,9 @@ mod actions;
 #[cfg(test)]
 #[path = "bomb_order_acceptance_tests.rs"]
 mod bomb_order_acceptance_tests;
+#[cfg(test)]
+#[path = "bomb_trigger_tests.rs"]
+mod bomb_trigger_tests;
 #[cfg(test)]
 #[path = "simulation_constructor_tests.rs"]
 mod constructor_tests;
@@ -391,6 +360,9 @@ mod step;
 #[cfg(test)]
 #[path = "step_event_tests.rs"]
 mod step_event_tests;
+#[cfg(test)]
+#[path = "simulation_test_support.rs"]
+mod test_support;
 #[cfg(test)]
 #[path = "simulation_tests.rs"]
 mod tests;

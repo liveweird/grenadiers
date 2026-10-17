@@ -1,6 +1,7 @@
 use std::collections::{BTreeMap, BTreeSet};
 
 use super::arena::Terrain;
+use super::bombs::BombTrigger;
 use super::input::Direction;
 use super::types::{CellId, EntityId, Tick};
 use super::world::World;
@@ -12,7 +13,17 @@ pub(crate) struct ExplosionPlan {
     pub(crate) destroyed_blocks: BTreeSet<CellId>,
 }
 
-pub(crate) fn plan(world: &World, tick: Tick) -> ExplosionPlan {
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) enum ExplosionError {
+    UnsupportedBombTrigger(EntityId),
+}
+
+pub(crate) fn plan(world: &World, tick: Tick) -> Result<ExplosionPlan, ExplosionError> {
+    for bomb in world.bombs.values() {
+        if !matches!(bomb.trigger(), BombTrigger::Timed { .. }) {
+            return Err(ExplosionError::UnsupportedBombTrigger(bomb.id()));
+        }
+    }
     let bombs_by_cell: BTreeMap<_, _> = world
         .bombs
         .values()
@@ -21,12 +32,15 @@ pub(crate) fn plan(world: &World, tick: Tick) -> ExplosionPlan {
     let mut pending: BTreeSet<_> = world
         .bombs
         .values()
-        .filter(|bomb| {
-            bomb.detonates_at() <= tick
-                || world
-                    .hazards
-                    .get(&bomb.cell())
-                    .is_some_and(|expiry| *expiry > tick)
+        .filter(|bomb| match bomb.trigger() {
+            BombTrigger::Timed { detonates_at } => {
+                detonates_at <= tick
+                    || world
+                        .hazards
+                        .get(&bomb.cell())
+                        .is_some_and(|expiry| *expiry > tick)
+            }
+            BombTrigger::Remote | BombTrigger::Contact => false,
         })
         .map(|bomb| bomb.id())
         .collect();
@@ -57,7 +71,7 @@ pub(crate) fn plan(world: &World, tick: Tick) -> ExplosionPlan {
             );
         }
     }
-    result
+    Ok(result)
 }
 
 fn trace_ray(

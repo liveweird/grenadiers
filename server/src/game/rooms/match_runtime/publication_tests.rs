@@ -1,5 +1,7 @@
 use grenadiers_core::{
-    game::{RoundAssignment, SeatId},
+    game::{
+        BombTrigger, BombView, CellId, EntityId, RoundAssignment, SeatId, StepEvent, StepEventKind,
+    },
     protocol::v6::RoomPhase,
     room::{InterruptReason, MatchLifecycle, MatchPhase},
 };
@@ -163,6 +165,37 @@ fn publication_rejects_profile_rule_mismatch_and_oversized_report_window() {
         publication::snapshot(&identity, &lifecycle, 100, 1, None, &sim, &reports),
         Err(MatchRuntimeError::Publication)
     );
+}
+
+#[test]
+fn failed_unsupported_event_publication_keeps_revision_and_pending_reports() {
+    let mut runtime = fixed_runtime();
+    start_first_round(&mut runtime);
+    assert_eq!(runtime.tick(), Ok(None));
+
+    let mut reports = runtime.replay_inspection().reports;
+    assert_eq!(reports.len(), 1);
+    let tick = reports[0].tick;
+    reports[0].events.push(StepEvent {
+        tick,
+        kind: StepEventKind::BombPlaced(BombView {
+            id: EntityId(999),
+            cell: CellId::new(2, 2),
+            owner: EntityId(10),
+            range: 2,
+            placed_at: tick,
+            trigger: BombTrigger::Remote,
+        }),
+    });
+    runtime.replace_reports_for_test(reports.clone());
+    let revision = runtime.publication_revision_for_test();
+
+    assert_eq!(
+        runtime.replay_report_flush(),
+        Err(MatchRuntimeError::Publication)
+    );
+    assert_eq!(runtime.publication_revision_for_test(), revision);
+    assert_eq!(runtime.replay_inspection().reports, reports);
 }
 
 #[test]

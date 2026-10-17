@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.3.21 — 2026-10-18
+
+- Represent domain bomb triggers explicitly as timed, remote or contact, without invented
+  deadlines for untimed variants. Current rules still accept timed bombs only.
+- Keep legacy snapshot/event wire records unchanged and reject unsupported triggers as a
+  whole projection failure; preserve complete events and publication atomicity.
+- Retain Classic physics, archived replay outcomes and gameplay-v6 compatibility. No remote
+  bomb, landmine or other new item is activated by this foundation.
+
 ## 0.3.20 — 2026-10-18
 
 - Retain accepted manual bomb actions in bounded ordered queues through server admission

@@ -16,6 +16,7 @@ gameplay-v6 compatibility, locally verified through both deployment paths on 202
 wider arena/item configuration remains backlog work.
 v0.3.18 adds the first detailed retro pixel-art slice, verified through both deployment paths.
 v0.3.19 adds verified core inventory/effect/damage foundations; expanded items remain disabled.
+v0.3.21 adds typed bomb triggers and checked legacy projection without activating new weapons.
 v0.3.20 retains ordered manual actions while preserving Classic placement and private replay,
 verified through both deployment paths.
 Published engineering prereleases are listed in `CHANGELOG.md` and GitHub Releases.

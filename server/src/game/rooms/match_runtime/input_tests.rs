@@ -179,7 +179,7 @@ fn transport_loss_fences_input_but_preserves_fuse_damage_and_grace() {
     let sim = runtime.sim().unwrap();
     let planted = *sim.state.world().bombs().values().next().unwrap();
     let stopped_at = sim.state.actors()[0].position();
-    assert!(planted.detonates_at().0 > sim.state.tick().0);
+    assert!(planted.detonates_at().unwrap().0 > sim.state.tick().0);
 
     runtime
         .action(
@@ -219,7 +219,7 @@ fn transport_loss_fences_input_but_preserves_fuse_damage_and_grace() {
         Some(&planted)
     );
 
-    while runtime.lifecycle().tick().0 + 1 < planted.detonates_at().0 {
+    while runtime.lifecycle().tick().0 + 1 < planted.detonates_at().unwrap().0 {
         runtime.tick().unwrap();
         assert_eq!(
             runtime.sim().unwrap().state.actors()[0].position(),
@@ -232,7 +232,7 @@ fn transport_loss_fences_input_but_preserves_fuse_damage_and_grace() {
     runtime.tick().unwrap();
 
     let sim = runtime.sim().unwrap();
-    assert_eq!(sim.state.tick(), planted.detonates_at());
+    assert_eq!(sim.state.tick(), planted.detonates_at().unwrap());
     assert!(sim.state.world().bombs().is_empty());
     assert!(sim.state.world().hazards().contains_key(&planted.cell()));
     assert!(!sim.state.actors()[0].alive());

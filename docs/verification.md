@@ -1,5 +1,38 @@
 # Repository verification
 
+## Typed domain bomb triggers — 2026-10-18
+
+Clean archive source `82fe88c299b8e74a410d231b24cb3aad92e7e242` builds image
+`sha256:68ed7ca87c1434c6b309b3894ee5814fa77453c022bc62ad2b99e5bde0f729f4`.
+Application inputs match reviewed source `8653522543c4ff964128597a4261170dc019863c`;
+the accepted harness includes the bounded reconnect diagnostics from v0.3.20.
+The same image passes **24/24 scenarios in Compose and 24/24 in Kubernetes, retries zero**:
+eight default, pickup, match/rematch, two reconnect, controls, headed visibility, audio and
+nine latency cases. All sixteen result files pass. Independent evidence audit is clear.
+Evidence is at `/tmp/grenadiers-v0321-acceptance`.
+
+346 core tests, 170 server tests and two doctests pass; four dedicated performance profiles
+remain intentionally ignored. All **230 web tests**, contract checks, lint, Knip, builds and
+E2E static/24-scenario parity pass. Rust line coverage is **94.22%**, above the unchanged 80% floor.
+Independent code review is clear. Regression tests cover checked trigger construction, Classic
+rejection before mutation, exact timed behavior, unsupported event-only projection and
+publication failure preserving revisions and reports.
+
+Dependency audits pass with zero npm vulnerabilities. Strict pinned Kubernetes 1.33 schemas
+validate all three resources. Pinned archive-only Trivy passes the existing HIGH/CRITICAL
+`--ignore-unfixed` filter. Both deployments use UID/GID 65532, read-only roots, dropped ALL
+capabilities and no privilege escalation; Kubernetes retains RuntimeDefault and 500m/256Mi.
+Every seeded run uses an external mode-0444 fixture, root-owned in Kubernetes; no seed is baked
+into the image. Correct `/api/v1/health` and `/api/v1/ready` probes return HTTP 200,
+`application/json`, status ok and `Cache-Control: no-store`.
+
+Observed local/shaped latency maxima are Compose **50.388/173.047 ms**, Kubernetes
+**89.947/161.098 ms**, with zero samples above 250 ms and zero Kubernetes CPU throttles.
+These are bounded public-state delivery measurements, not pixel latency, FPS or WAN guarantees.
+All owned deployments, namespaces, ports and browser containers were removed.
+Integration/documentation changes preserve accepted application inputs. Current gameplay-v6,
+Classic rules and journal formats remain unchanged; Remote/Contact triggers are not activated.
+
 ## Ordered manual actions — 2026-10-18
 
 Clean archive source `305a5844f3d1add8dff95eca26090c3f21918671` builds image

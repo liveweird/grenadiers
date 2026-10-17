@@ -1,5 +1,5 @@
 use super::arena::{ARENA_CELL_COUNT, ARENA_HEIGHT, ARENA_WIDTH, Terrain};
-use super::bombs::Bomb;
+use super::bombs::{Bomb, BombTrigger};
 use super::input::Direction;
 use super::pickups::PickupKind;
 use super::simulation::{RoundResult, State};
@@ -47,7 +47,7 @@ pub struct BombView {
     pub owner: EntityId,
     pub range: u16,
     pub placed_at: Tick,
-    pub detonates_at: Tick,
+    pub trigger: BombTrigger,
 }
 
 impl From<Bomb> for BombView {
@@ -58,7 +58,7 @@ impl From<Bomb> for BombView {
             owner: bomb.owner(),
             range: bomb.range(),
             placed_at: bomb.placed_at(),
-            detonates_at: bomb.detonates_at(),
+            trigger: bomb.trigger(),
         }
     }
 }

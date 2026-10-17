@@ -50,7 +50,9 @@ More than 64 inputs or tick overflow rejects the whole step without mutating sta
 `InputAction::PlaceBomb` requests one bomb in the actor's cell after movement. Each actor
 starts with capacity one and range two. A bomb captures owner, range, placement tick, and
 the configured fuse deadline (180 ticks by default). `World::bombs()` exposes complete records;
-`live_bomb_count(seat)` derives ownership counts. Fuses and flames now execute; [combat phases](combat.md) describe
+`live_bomb_count(seat)` derives ownership counts. Domain records expose an explicit trigger;
+`detonates_at()` returns a deadline only for Timed bombs. Current rules reject Remote/Contact
+before simulation, so no untimed bomb can enter a live Classic world. Fuses and flames now execute; [combat phases](combat.md) describe
 their timing, damage ordering, results, and immutable occupancy rules.
 
 Accepted manual requests remain separate in bounded per-seat queues; raw-core `Clear`

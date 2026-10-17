@@ -198,7 +198,10 @@ fn ready_fence_and_configured_round_use_the_authoritative_settings() {
         .unwrap();
     runtime.tick().unwrap();
     let bomb = state_bomb(&runtime);
-    assert_eq!(bomb.detonates_at().0 - runtime.lifecycle().tick().0, 60);
+    assert_eq!(
+        bomb.detonates_at().unwrap().0 - runtime.lifecycle().tick().0,
+        60
+    );
 }
 
 #[test]

@@ -15,6 +15,15 @@ round with movement, duplicate-action rejection, block destruction, elimination,
 identical public result, and frozen later world state. Long waiting expiry and terminal
 retirement remain controlled-time actor tests rather than multi-minute browser waits.
 
+A clean committed-tree build produces
+`sha256:3ba01e6038a03ca0abedc67efc229eb2677bbcd522dffcec398c96b879b09c0b`.
+Compose and ready local Kubernetes use this exact image. Separate health/readiness checks
+and all **five candidate browser scenarios** pass through both paths, including the complete
+native-socket round. Strict schemas pass with 3 valid resources; pinned socket-free Trivy
+reports zero HIGH/CRITICAL vulnerabilities. Temporary deployment/export/archive/forward/
+symlink resources are removed; the candidate image is retained. This evidence update changes
+documentation only.
+
 ## M3 network room admission — 2026-10-17
 
 The locked server gate passes **136 core tests, 51 server tests, and 2 doctests**. Rust

@@ -1,5 +1,16 @@
 # Repository verification
 
+## M6 checked gameplay-v4 projection — 2026-10-17
+
+The locked server gate passes **294 core tests, 132 server tests, and 2 doctests**.
+Rust coverage is **7,315/7,854 lines, 93.14%**, above the unchanged 80% floor.
+Independent review reports no actionable findings. Twenty-nine focused v4 cases include real
+lifecycle traces and physical projection binding, settled grace, held/canceled completed worlds,
+terminal winner preservation, admission identity/nullability, and current-epoch action context.
+The existing v3 contract and active runtime regressions pass. All handwritten files remain
+below 400 lines. Actual capability ownership and numeric action provenance remain owner duties;
+network activation and exact-image deployment acceptance are separate checks.
+
 ## M6 dormant gameplay-v4 structural contract — 2026-10-17
 
 The combined locked server gate passes **280 core tests, 132 server tests, and 2 doctests**.

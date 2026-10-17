@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.6 — 2026-10-17
+
+- Check v4 room projection against actual lifecycle connectivity, grace, scores, and history.
+- Validate physical state epochs for held/canceled rounds and final outcomes, plus private
+  admission identity, full-state nullability, and bomb-action high-water context.
+
+These APIs are dormant; active gameplay remains v3 until coordinated reconnect activation.
+
 ## 0.3.5 — 2026-10-17
 
 - Stage the closed gameplay-v4 reconnect contract with distinct redacted resume capabilities,

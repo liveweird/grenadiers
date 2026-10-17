@@ -1,5 +1,24 @@
 # Repository verification
 
+## M7 v0.3.13 exact-image controls acceptance — 2026-10-17
+
+A clean export of `02fb8a699fe55436704d6f5ef2d29ab43d1e9368` produces
+`sha256:51eb91c570aaed8be84cf36af385611f574d26757d0367e3f2777e0a17739177`.
+Compose and Kubernetes use that exact image, including the actual Pod digest. Each path passes
+**12/12 scenarios with retries disabled**: six default, pickup, full match/rematch, two reconnect,
+real headed Linux visibility, and custom controls/persistence/reset. Node is exactly 24.21.0;
+every fixture rollout is followed by successful real JSON health/readiness polling.
+
+Both paths pass UID/GID 65532, read-only root, dropped capabilities, no-escalation, probe and
+no-`/app`-seed inspection. Kubernetes adds RuntimeDefault seccomp and a read-only fixture Secret
+mode 0444. Strict Kubernetes 1.33 schemas validate all three resources. Pinned archive-only Trivy
+reports zero fixable HIGH/CRITICAL findings without a Docker socket mount. Actual desktop and
+320-pixel Polish controls screenshots pass Axe, containment and visual inspection; all five
+bindings and modal actions remain readable. Evidence: `/tmp/grenadiers-v0313-acceptance`.
+Owned Compose/namespace/forward/export/archive/tools and listeners are removed; accepted images
+remain. Source prerelease distribution and candidate/rebase provenance limits are explicit in
+[releases.md](releases.md). These checks do not complete human playtesting or M7.
+
 ## M7 persistent configurable controls — 2026-10-17
 
 The active v4 panel now offers five-action EN/PL keyboard remapping with unchanged arrows,
@@ -27,7 +46,7 @@ new-key movement and exactly-once bomb input, reload persistence and default res
 Desktop and 320-pixel Polish screenshots pass Axe/containment and coordinator visual inspection;
 all five controls and actions are readable. Evidence is retained in
 `/tmp/grenadiers-m7-controls-evidence`; its port-8097 server is stopped. Exact final-image
-Compose/Kubernetes acceptance follows before release. This does not alter authoritative rules or
+Compose/Kubernetes acceptance passes as recorded above. This does not alter authoritative rules or
 complete the remaining M7 latency/human-playtest work.
 
 ## M7 v0.3.12 exact-image visibility acceptance — 2026-10-17

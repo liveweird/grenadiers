@@ -43,25 +43,29 @@ correction. `overlaps_cell` uses positive-area contact for swept damage against 
 It must not replace the piecewise path with a diagonal bounding rectangle.
 
 More than 64 inputs or tick overflow rejects the whole step without mutating state. The
-transport layer will still need authentication, sequencing, expiry, and queue/rate limits.
+[room transport](rooms.md) supplies authentication, sequencing, expiry and bounded admission.
 
 ## Bomb placement and collision
 
 `InputAction::PlaceBomb` requests one bomb in the actor's cell after movement. Each actor
 starts with capacity one and range two. A bomb captures owner, range, placement tick, and
-a deadline 180 ticks later. `World::bombs()` exposes complete records; `live_bomb_count(seat)`
-derives ownership counts. Fuses and flames now execute; [combat phases](combat.md) describe
+the configured fuse deadline (180 ticks by default). `World::bombs()` exposes complete records;
+`live_bomb_count(seat)` derives ownership counts. Fuses and flames now execute; [combat phases](combat.md) describe
 their timing, damage ordering, results, and immutable occupancy rules.
 
-Requests are one-shot and coalesced per seat; `Clear` cancels earlier requests in the same
-batch. Placement requires capacity and an unblocked floor cell without an existing bomb.
+Accepted manual requests remain separate in bounded per-seat queues; raw-core `Clear`
+cancels earlier requests for its seat in the same batch, while later requests survive.
+The Classic placement adapter derives one simultaneous claim per seat from those queues,
+so repeated requests never retry a failed placement or place extra bombs in one step. Placement
+requires capacity and an unblocked floor cell without an existing bomb.
 Two eligible requests for one cell both fail; an ineligible request cannot deny its opponent.
 Distinct placements commit in seat order. Failure consumes neither an ID nor capacity.
 
 Every overlapping actor receives an exemption and can leave. Exact boundary clearance
 revokes that exemption before any further segment; re-entry or crossing another bomb is blocked.
 The earlier `add_bomb_obstacle` API is retired; collision fixtures use test-only owned bombs.
-Pickups remain inert until M4. Hazards now carry exclusive flame expiry ticks and can ignite
+Capacity, range and speed pickups follow the implemented generated-round upgrade rules. Hazards
+carry exclusive flame expiry ticks and can ignite
 bombs and damage actors through the documented combat phases. See [ADR 0004](../decisions/0004-bomb-placement.md)
 for placement ordering, identity allocation, and compatibility decisions.
 

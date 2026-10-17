@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.3.20 — 2026-10-18
+
+- Retain accepted manual bomb actions in bounded ordered queues through server admission
+  and core input processing, ready for later remote-bomb commands.
+- Preserve Classic simultaneous placement claims, raw-core Clear cancellation, server
+  movement-before-actions ordering, reconnect action IDs and private replay completeness.
+- Keep new items disabled and preserve gameplay-v6, existing rules and journal formats.
+- Add bounded, secret-free reconnect probe diagnostics with unchanged deadlines and assertions.
+
 ## 0.3.19 — 2026-10-17
 
 - Establish independent replaceable equipment/weapon slots and bounded timed effects in the

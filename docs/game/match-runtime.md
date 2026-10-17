@@ -9,7 +9,10 @@ Only an actual round start requests entropy and constructs a fresh world with th
 spawn/tie assignment, base upgrades, entity allocator, and cleared input/action IDs.
 
 Seat, epoch, and phase checks precede input high-water mutation. Per-seat fencing removes
-pending input without resetting accepted bomb IDs. Simulation advances at 60 Hz; publication
+pending input without resetting accepted manual-action IDs. The wire baseline continues
+calling this high-water `lastBombActionId`. Separate bounded manual queues retain each accepted
+bomb request after all movement inputs; only the Classic simulator's placement adapter coalesces
+those requests into simultaneous per-seat claims. Simulation advances at 60 Hz; publication
 is every three running ticks or immediately at a lifecycle boundary. Final partial reports
 flush once; worlds/report windows never cross an inter-round or rematch boundary.
 

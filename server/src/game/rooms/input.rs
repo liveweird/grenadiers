@@ -13,9 +13,14 @@ struct SeatMailbox {
     direction: Option<Direction>,
     expires_at: Option<Tick>,
     inputs: Vec<SeatInput>,
-    place_bomb: bool,
-    last_bomb_action: Option<u32>,
+    manual_actions: Vec<ManualAction>,
+    manual_action_high_water: Option<u32>,
     admitted: u8,
+}
+
+#[derive(Clone, Copy, Debug)]
+enum ManualAction {
+    PlaceBomb,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -27,7 +32,7 @@ pub(super) enum InputError {
 
 impl InputMailbox {
     pub(super) fn last_bomb_action(&self, seat: SeatId) -> Option<u32> {
-        self.seats[seat.index()].last_bomb_action
+        self.seats[seat.index()].manual_action_high_water
     }
 
     pub(super) fn movement(
@@ -67,21 +72,29 @@ impl InputMailbox {
     }
 
     pub(super) fn bomb(&mut self, seat: SeatId, action_id: u32) -> Result<(), InputError> {
+        self.manual_action(seat, action_id, ManualAction::PlaceBomb)
+    }
+
+    fn manual_action(
+        &mut self,
+        seat: SeatId,
+        action_id: u32,
+        action: ManualAction,
+    ) -> Result<(), InputError> {
         if self.seats[seat.index()]
-            .last_bomb_action
+            .manual_action_high_water
             .is_some_and(|previous| action_id <= previous)
         {
             return Err(InputError::DuplicateAction);
         }
         let mailbox = self.admit(seat)?;
-        mailbox.last_bomb_action = Some(action_id);
-        mailbox.place_bomb = true;
+        mailbox.manual_action_high_water = Some(action_id);
+        mailbox.manual_actions.push(action);
         Ok(())
     }
 
     pub(super) fn take(&mut self, tick: Tick) -> Vec<SeatInput> {
         let mut inputs = Vec::new();
-        let mut placements = [false; 2];
         for seat in SeatId::ALL {
             let mailbox = &mut self.seats[seat.index()];
             if mailbox
@@ -96,16 +109,14 @@ impl InputMailbox {
                 });
             }
             inputs.append(&mut mailbox.inputs);
-            placements[seat.index()] = mailbox.place_bomb;
-            mailbox.place_bomb = false;
             mailbox.admitted = 0;
         }
         for seat in SeatId::ALL {
-            if placements[seat.index()] {
-                inputs.push(SeatInput {
-                    seat,
-                    action: InputAction::PlaceBomb,
-                });
+            for action in self.seats[seat.index()].manual_actions.drain(..) {
+                let action = match action {
+                    ManualAction::PlaceBomb => InputAction::PlaceBomb,
+                };
+                inputs.push(SeatInput { seat, action });
             }
         }
         inputs
@@ -116,7 +127,7 @@ impl InputMailbox {
             mailbox.direction = None;
             mailbox.expires_at = None;
             mailbox.inputs.clear();
-            mailbox.place_bomb = false;
+            mailbox.manual_actions.clear();
             mailbox.admitted = 0;
         }
     }
@@ -130,14 +141,14 @@ impl InputMailbox {
             seat,
             action: InputAction::Clear,
         });
-        mailbox.place_bomb = false;
+        mailbox.manual_actions.clear();
         mailbox.admitted = 0;
     }
 
     pub(super) fn reset_round(&mut self) {
         self.clear_pending();
         for mailbox in &mut self.seats {
-            mailbox.last_bomb_action = None;
+            mailbox.manual_action_high_water = None;
         }
     }
 

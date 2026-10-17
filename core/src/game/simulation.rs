@@ -17,7 +17,6 @@ use super::types::{CellId, EntityId, Position, SeatId, SpeedLevel, Tick};
 use super::world::World;
 
 pub const MAX_INPUTS_PER_TICK: usize = 64;
-
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct ActorInit {
     pub id: EntityId,
@@ -354,6 +353,8 @@ impl Actor {
     }
 }
 
+#[path = "simulation_actions.rs"]
+mod actions;
 #[cfg(test)]
 #[path = "bomb_order_acceptance_tests.rs"]
 mod bomb_order_acceptance_tests;

@@ -1,5 +1,6 @@
 use grenadiers_core::{
     game::{Direction, RoundResult, SeatId},
+    protocol::{Counter, MAX_COUNTER},
     room::{DepartureReason, MatchPhase, reconnect::ReservationState},
 };
 
@@ -25,6 +26,10 @@ fn stale_epoch_and_invalid_phase_do_not_consume_bomb_high_water() {
     assert_eq!(
         runtime.action(SeatId::One, 0, MatchAction::Bomb(7)),
         Err(MatchRuntimeError::StaleEpoch)
+    );
+    assert_eq!(
+        runtime.action(SeatId::One, 1, MatchAction::Bomb(MAX_COUNTER + 1)),
+        Err(MatchRuntimeError::DuplicateAction)
     );
     runtime
         .action(SeatId::One, 1, MatchAction::Bomb(7))
@@ -98,6 +103,49 @@ fn canceled_connected_resume_preflight_does_not_fence_accepted_inputs() {
 
     assert!(runtime.sim().unwrap().state.actors()[0].position().x > start.x);
     assert_eq!(runtime.sim().unwrap().state.live_bomb_count(SeatId::One), 1);
+}
+
+#[test]
+fn connected_replacement_drops_queued_actions_but_preserves_the_baseline() {
+    let mut runtime = fixed_runtime();
+    start_first_round(&mut runtime);
+    runtime
+        .action(SeatId::One, 1, MatchAction::Bomb(5))
+        .unwrap();
+    runtime
+        .action(SeatId::One, 1, MatchAction::Bomb(6))
+        .unwrap();
+
+    let prepared = runtime.prepare_resume(SeatId::One).unwrap();
+    assert_eq!(prepared.last_bomb_action_id, Some(Counter::new(6).unwrap()));
+    runtime.commit_admission(prepared);
+    runtime.tick().unwrap();
+
+    assert_eq!(runtime.sim().unwrap().state.live_bomb_count(SeatId::One), 0);
+    assert_eq!(
+        runtime.action(SeatId::One, 1, MatchAction::Bomb(6)),
+        Err(MatchRuntimeError::DuplicateAction)
+    );
+    runtime
+        .action(SeatId::One, 1, MatchAction::Bomb(7))
+        .unwrap();
+}
+
+#[test]
+fn failed_gameplay_placement_keeps_the_admitted_action_baseline() {
+    let mut runtime = fixed_runtime();
+    start_first_round(&mut runtime);
+    runtime
+        .action(SeatId::One, 1, MatchAction::Bomb(1))
+        .unwrap();
+    runtime
+        .action(SeatId::One, 1, MatchAction::Bomb(2))
+        .unwrap();
+    runtime.tick().unwrap();
+
+    assert_eq!(runtime.sim().unwrap().state.live_bomb_count(SeatId::One), 1);
+    let prepared = runtime.prepare_resume(SeatId::One).unwrap();
+    assert_eq!(prepared.last_bomb_action_id, Some(Counter::new(2).unwrap()));
 }
 
 #[test]

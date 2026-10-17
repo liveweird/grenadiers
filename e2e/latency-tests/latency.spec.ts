@@ -3,10 +3,13 @@ import { expect, test, type Browser, type BrowserContext, type Page, type TestIn
 import {
   installDelayedWebSocket, type DelayBridgeHandle, type RoutedFrameSummary,
 } from '../tests/support/delayed-websocket'
+import { EventLoopDelayMonitor } from '../tests/support/event-loop-diagnostics'
 import {
-  distribution, domKeyTimings, installDomKeyTimings, LatencyObserver,
-  sample, type LatencySample, type TrajectoryChoice,
+  distribution, LatencyObserver, sample, type LatencySample, type TrajectoryChoice,
 } from '../tests/support/latency-observer'
+import {
+  domClockDiagnostics, installDomKeyTimings, type DomClockDiagnostics,
+} from '../tests/support/page-latency-diagnostics'
 
 type Profile = { name: 'local' | 'delay-50ms'; baseMs: number; jitterMs: readonly number[]; budget: boolean }
 const LOCAL: Profile = { name: 'local', baseMs: 0, jitterMs: [0], budget: false }
@@ -67,8 +70,11 @@ async function observeMovement(
 function publicFrames(frames: RoutedFrameSummary[]) {
   return frames.map((frame) => ({
     endpoint: frame.endpoint, direction: frame.direction, at: frame.at,
-    bytes: frame.bytes, type: frame.type, movement: frame.movement, actionId: frame.actionId,
+    bytes: frame.bytes, type: frame.type, movement: frame.movement,
+    movementSequence: frame.movementSequence, actionId: frame.actionId,
     snapshot: frame.snapshot,
+    enqueueAt: frame.enqueueAt, dueAt: frame.dueAt,
+    dispatchAt: frame.dispatchAt, timerLatenessMs: frame.timerLatenessMs,
   }))
 }
 
@@ -77,13 +83,14 @@ type ReportInput = {
   profile: Profile
   observer: LatencyObserver
   samples: LatencySample[]
-  domTimings: Awaited<ReturnType<typeof domKeyTimings>>
+  domClock: DomClockDiagnostics | undefined
+  eventLoop: EventLoopDelayMonitor
   handles: DelayBridgeHandle[]
   trajectory: TrajectoryChoice[]
 }
 
 async function attachReport(input: ReportInput): Promise<void> {
-  const { testInfo, profile, observer, samples, domTimings, handles, trajectory } = input
+  const { testInfo, profile, observer, samples, domClock, eventLoop, handles, trajectory } = input
   const exceedances = samples.filter((value) => value.latencyMs > BUDGET_MS)
   const summary = {
     profile: profile.name,
@@ -105,10 +112,16 @@ async function attachReport(input: ReportInput): Promise<void> {
       stableReleaseMethod: 'two page-delivered moving revisions, null server dispatch, then two page-delivered stable revisions whose route ingress followed dispatch',
       distribution: distribution(samples), samples, exceedances,
       trajectory,
-      domClock: { independentFromNodeClock: true, timings: domTimings },
+      nodeEventLoop: eventLoop.summary(),
+      domClock: {
+        independentFromNodeClock: true,
+        timeOrigin: domClock?.timeOrigin ?? null,
+        timings: domClock?.timings ?? [],
+      },
+      pageMovementSends: observer.pageMovementSends,
       routedFrames: publicFrames(observer.frames),
       forwardedFrames: publicFrames(observer.forwardedFrames),
-      publicSnapshots: observer.snapshots.slice(-80),
+      publicSnapshots: observer.snapshots.slice(-512),
       publicArenas: Object.fromEntries(observer.arenas),
       queues: handles.map((handle) => handle.summary()),
       closedBridges: observer.bridges,
@@ -123,7 +136,8 @@ async function runProfile(browser: Browser, testInfo: TestInfo, profile: Profile
   const samples: LatencySample[] = []
   const handles: DelayBridgeHandle[] = []
   const trajectory: TrajectoryChoice[] = []
-  let domTimings: Awaited<ReturnType<typeof domKeyTimings>> = []
+  const eventLoop = new EventLoopDelayMonitor()
+  let domClock: DomClockDiagnostics | undefined
   let reportAttached = false
   try {
     contexts.push(await browser.newContext())
@@ -147,8 +161,9 @@ async function runProfile(browser: Browser, testInfo: TestInfo, profile: Profile
       trajectory.push(choice)
       samples.push(...await observeMovement(one, observer, choice.direction))
     }
-    domTimings = await domKeyTimings(one)
-    expect(domTimings.filter((timing) => timing.key === 'ArrowRight' || timing.key === 'ArrowLeft')).toHaveLength(20)
+    domClock = await domClockDiagnostics(one)
+    expect(domClock.timings.filter((timing) => timing.key === 'ArrowRight'
+      || timing.key === 'ArrowLeft')).toHaveLength(20)
 
     const bombIndex = observer.forwardedFrames.length
     await one.keyboard.press('Space')
@@ -173,17 +188,18 @@ async function runProfile(browser: Browser, testInfo: TestInfo, profile: Profile
     expect(observer.everyPageSnapshotFollowedRouteDispatch('peer')).toBe(true)
     expect(samples).toHaveLength(20)
     const exceedances = samples.filter((value) => value.latencyMs > BUDGET_MS)
-    await attachReport({ testInfo, profile, observer, samples, domTimings, handles, trajectory })
+    await attachReport({ testInfo, profile, observer, samples, domClock, eventLoop, handles, trajectory })
     reportAttached = true
     if (profile.budget) expect(exceedances).toEqual([])
   } catch (error) {
     if (!reportAttached) {
-      await attachReport({ testInfo, profile, observer, samples, domTimings, handles, trajectory })
+      await attachReport({ testInfo, profile, observer, samples, domClock, eventLoop, handles, trajectory })
     }
     throw error
   } finally {
     handles.forEach((handle) => handle.close())
     await Promise.all(contexts.map((context) => context.close().catch(() => undefined)))
+    eventLoop.stop()
   }
 }
 

@@ -15,9 +15,16 @@ export type DelayQueueStats = {
   peakBytes: number
 }
 
+export type DelayTiming = {
+  enqueueAt: number
+  dueAt: number
+  dispatchAt: number
+  timerLatenessMs: number
+}
+
 export class QueueOverflowError extends Error {}
 
-type Pending<T> = { value: T; bytes: number; due: number }
+type Pending<T> = { value: T; bytes: number; enqueueAt: number; dueAt: number }
 type DelayQueueOptions = { scheduler?: DelayScheduler; maxFrames?: number; maxBytes?: number }
 
 export class DelayedFifo<T> {
@@ -29,7 +36,7 @@ export class DelayedFifo<T> {
   private closed = false
   private readonly baseMs: number
   private readonly jitterMs: readonly number[]
-  private readonly deliver: (value: T) => void
+  private readonly deliver: (value: T, timing: DelayTiming) => void
   private readonly scheduler: DelayScheduler
   private readonly maxFrames: number
   private readonly maxBytes: number
@@ -38,7 +45,7 @@ export class DelayedFifo<T> {
   constructor(
     baseMs: number,
     jitterMs: readonly number[],
-    deliver: (value: T) => void,
+    deliver: (value: T, timing: DelayTiming) => void,
     options: DelayQueueOptions = {},
   ) {
     const { scheduler = realScheduler, maxFrames = 64, maxBytes = 1_048_576 } = options
@@ -58,7 +65,7 @@ export class DelayedFifo<T> {
     this.maxBytes = maxBytes
   }
 
-  push(value: T, bytes: number): void {
+  push(value: T, bytes: number): Pick<DelayTiming, 'enqueueAt' | 'dueAt'> {
     if (this.closed) throw new Error('Delay queue is closed')
     if (!Number.isSafeInteger(bytes) || bytes < 0 || this.pending.length >= this.maxFrames
       || this.bytes + bytes > this.maxBytes) {
@@ -66,13 +73,15 @@ export class DelayedFifo<T> {
     }
     const jitter = this.jitterMs[this.jitterIndex % this.jitterMs.length]
     this.jitterIndex += 1
-    const due = Math.max(this.previousDue, this.scheduler.now() + this.baseMs + jitter)
-    this.previousDue = due
-    this.pending.push({ value, bytes, due })
+    const enqueueAt = this.scheduler.now()
+    const dueAt = Math.max(this.previousDue, enqueueAt + this.baseMs + jitter)
+    this.previousDue = dueAt
+    this.pending.push({ value, bytes, enqueueAt, dueAt })
     this.bytes += bytes
     this.stats.peakFrames = Math.max(this.stats.peakFrames, this.pending.length)
     this.stats.peakBytes = Math.max(this.stats.peakBytes, this.bytes)
     this.schedule()
+    return { enqueueAt, dueAt }
   }
 
   cancel(): void {
@@ -87,17 +96,22 @@ export class DelayedFifo<T> {
 
   private schedule(): void {
     if (this.timer !== undefined || this.pending.length === 0) return
-    const wait = Math.max(0, this.pending[0].due - this.scheduler.now())
+    const wait = Math.max(0, this.pending[0].dueAt - this.scheduler.now())
     this.timer = this.scheduler.setTimer(() => this.drain(), wait)
   }
 
   private drain(): void {
     this.timer = undefined
     const now = this.scheduler.now()
-    while (this.pending[0]?.due <= now) {
+    while (this.pending[0]?.dueAt <= now) {
       const next = this.pending.shift()!
       this.bytes -= next.bytes
-      this.deliver(next.value)
+      this.deliver(next.value, {
+        enqueueAt: next.enqueueAt,
+        dueAt: next.dueAt,
+        dispatchAt: now,
+        timerLatenessMs: Math.max(0, now - next.dueAt),
+      })
       this.stats.delivered += 1
     }
     this.schedule()
@@ -118,7 +132,12 @@ export type RoutedFrameSummary = {
   type: string
   movement?: Direction | null
   actionId?: number
+  movementSequence?: number
   snapshot?: SanitizedSnapshot
+  enqueueAt?: number
+  dueAt?: number
+  dispatchAt?: number
+  timerLatenessMs?: number
 }
 
 export type SanitizedSnapshot = {
@@ -167,7 +186,11 @@ function frameSummary(
   const type = /"type"\s*:\s*"([^"]+)"/.exec(message)?.[1]
   summary.type = type ?? 'text'
   try {
-    const parsed = JSON.parse(message) as GameServerMessage & { direction?: unknown; actionId?: unknown }
+    const parsed = JSON.parse(message) as GameServerMessage & {
+      direction?: unknown
+      actionId?: unknown
+      sequence?: unknown
+    }
     if (direction === 'serverToClient' && parsed.type === 'snapshot') {
       const actor = parsed.state.actors.find((value) => value.seat === 'one')
       if (actor) summary.snapshot = {
@@ -179,6 +202,7 @@ function frameSummary(
     if (summary.type === 'movement'
       && (parsed.direction === null || ['north', 'east', 'south', 'west'].includes(String(parsed.direction)))) {
       summary.movement = parsed.direction as Direction | null
+      if (Number.isSafeInteger(parsed.sequence)) summary.movementSequence = parsed.sequence as number
     }
     if (summary.type === 'placeBomb' && Number.isSafeInteger(parsed.actionId)) {
       summary.actionId = parsed.actionId as number
@@ -202,15 +226,19 @@ export async function installDelayedWebSocket(
   await page.routeWebSocket((url) => url.pathname.endsWith('/game/ws'), (client) => {
     const server = client.connectToServer()
     let closed = false
-    const forward = (target: WebSocketRoute, delayed: DelayedMessage): void => {
-      observer.forwarded({ ...delayed.summary, at: performance.now() })
+    const forward = (target: WebSocketRoute, delayed: DelayedMessage, timing: DelayTiming): void => {
+      const at = performance.now()
+      observer.forwarded({
+        ...delayed.summary, ...timing, at, dispatchAt: at,
+        timerLatenessMs: Math.max(0, at - timing.dueAt),
+      })
       target.send(delayed.message)
     }
     const clientToServer = new DelayedFifo<DelayedMessage>(
-      profile.baseMs, profile.jitterMs, (delayed) => forward(server, delayed),
+      profile.baseMs, profile.jitterMs, (delayed, timing) => forward(server, delayed, timing),
     )
     const serverToClient = new DelayedFifo<DelayedMessage>(
-      profile.baseMs, profile.jitterMs, (delayed) => forward(client, delayed),
+      profile.baseMs, profile.jitterMs, (delayed, timing) => forward(client, delayed, timing),
     )
     const summary = (): DelayBridgeSummary => ({
       endpoint, closed, clientToServer: { ...clientToServer.stats }, serverToClient: { ...serverToClient.stats },
@@ -233,8 +261,12 @@ export async function installDelayedWebSocket(
       message: string | Buffer,
     ): void => {
       const summary = frameSummary(endpoint, direction, message)
-      observer.frame(summary)
-      try { queue.push({ message, summary }, frameSize(message)) } catch (error) {
+      try {
+        const delayed = { message, summary }
+        Object.assign(summary, queue.push(delayed, frameSize(message)))
+        observer.frame(summary)
+      } catch (error) {
+        observer.frame(summary)
         observer.failure(error instanceof Error ? error.message : 'Delayed WebSocket queue failed')
         shutdown(client, server, 1011, 'Bounded delay queue failed')
       }

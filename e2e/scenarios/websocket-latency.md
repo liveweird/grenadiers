@@ -20,6 +20,12 @@ The routed bridge treats overflow as a test failure and closes both endpoints.
 
 Closing a queue cancels its one timer, discards all pending values, and prevents any later delivery.
 
+## Scenario: the delay queue reports allocated deadlines and late timer dispatch without changing order
+
+Fake harness time stalls timer servicing beyond three allocated deadlines. Diagnostics retain each
+enqueue time, FIFO-clamped due time, common dispatch time, and exact nonnegative timer lateness while
+the original frame order remains unchanged.
+
 ## Scenario: page delivery evidence requires a prior delayed downlink dispatch
 
 The page-side observation cannot count until the bounded route has actually forwarded the matching

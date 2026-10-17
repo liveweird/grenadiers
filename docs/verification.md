@@ -17,6 +17,14 @@ maxima are **49.899/157.624 ms**, zero exceedances. Kubernetes local maximum is 
 its shaped maximum is **305.948 ms**, with one exceedance. These measure public-state delivery,
 not FPS, pixel latency or WAN guarantees.
 
+Artifact analysis splits the failed sample into key start to bridge ingress **101.296 ms**,
+configured outgoing delay **50.281 ms**, command forwarding to moved-snapshot ingress
+**41.816 ms**, incoming queue **57.177 ms**, and dispatch to page-observation binding
+**55.378 ms**. Nearby runner timers are up to **145.951 ms** late. This establishes delayed
+measurement callbacks, without establishing their root cause or actual server send timing.
+Active server and v6 client input sources are unchanged from v0.3.21. A bounded instrumented
+comparison of both exact images is planned; budgets, assertions and the original failure remain.
+
 Local gates pass 356 core tests, 170 server tests and two doctests; four dedicated performance
 profiles remain intentionally ignored. All **247 web tests**, contracts, ESLint, Knip, builds,
 E2E static/24-scenario parity, dependency audits and strict pinned Kubernetes schemas pass.

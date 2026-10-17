@@ -1,5 +1,26 @@
 # Repository verification
 
+## M6 dormant reconnect browser — 2026-10-17
+
+The complete Node 24.21.0 web gate passes **163 tests**, with **94.74% statements, 88.22%
+branches, 95.47% functions, and 97.50% lines**. Schema drift, Spectral, ESLint, Knip,
+shuffled coverage and production build pass. The combined locked server gate passes
+**294 core tests, 136 server tests, and 2 doctests**; Rust implementation is unchanged from
+the preceding private-helper checkpoint.
+
+Independent review caught unbound arena callbacks, premature capability loss after rejected
+leave, and unusable stale ownership after terminal recovery. All three are fixed and closure
+review passes, including **51 focused v4 cases**. The panel invokes movement, release and bomb
+callbacks with their correct receiver. Rejected leave retains updates and resume authority;
+matching acknowledgement clears identity. Transport loss during pending explicit leave exits
+locally without blind resume. Replacement, rejected capability or exhausted retries stop and
+return to a usable lobby. Offline rematch controls are disabled.
+
+Tests cover fresh-session bounded retries, callback/timer fences, full private baselines,
+action floors/exhaustion, stale shared frames, no buffered actions, identity privacy, and
+localized grace/held-result status. Active App and v3 remain unchanged. Real reconnect/takeover
+browser acceptance belongs to coordinated activation; exact-image acceptance is separate.
+
 ## M6 private resume credential/binding helpers — 2026-10-17
 
 The combined locked server gate passes **294 core tests, 136 server tests, and 2 doctests**.

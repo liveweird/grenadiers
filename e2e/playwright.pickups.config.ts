@@ -5,6 +5,7 @@ export default defineConfig({
   ...base,
   testDir: './pickup-tests',
   workers: 1,
+  retries: 0,
   timeout: 90_000,
   use: {
     ...base.use,

@@ -10,6 +10,7 @@ type Cell = { column: number; row: number }
 const CENTER = 512
 const CELL = 1024
 const RELEASE_LEAD = 640
+const BASE_SPEED = 3_072
 
 function actor(game: ObservedGame) {
   const value = latestSnapshot(game)?.state.actors.find((candidate) => candidate.seat === 'one')
@@ -38,15 +39,17 @@ async function moveTo(
     const startPosition = position[axis]
     const commandCount = game.commands.length
     if (Math.abs(delta) <= RELEASE_LEAD) {
-      // Span at least one 60 Hz update. A zero-duration native press can publish
-      // direction and stop before either reaches the simulation on a fast host.
-      await page.keyboard.press(key, { delay: 34 })
+      // Keep down, delay, and up in one Playwright operation: polling between
+      // them can lag behind a loaded browser and turn a fine correction into a
+      // full TTL movement. Cap the pulse below the final-position window.
+      const pulseMs = Math.max(34, Math.min(60, Math.round(Math.abs(delta) * 1_000 / BASE_SPEED)))
+      await page.keyboard.press(key, { delay: pulseMs })
     } else {
       await page.keyboard.down(key)
-      await expect.poll(() => game.commands.slice(commandCount)
-        .some((command) => command.type === 'movement' && command.direction === direction))
-        .toBe(true)
       try {
+        await expect.poll(() => game.commands.slice(commandCount)
+          .some((command) => command.type === 'movement' && command.direction === direction))
+          .toBe(true)
         const sign = Math.sign(delta)
         await expect.poll(() => {
           const remaining = target[axis] - actor(game).position[axis]
@@ -67,12 +70,12 @@ async function moveTo(
     // Do not mistake snapshots queued before the input for proof of key-up. The
     // accepted direction must move the actor before stationary frames can settle
     // the pulse; this also prevents an opposite correction from being queued.
-    await expect.poll(() => actor(game).position[axis], { intervals: [15] })
+    await expect.poll(() => actor(game).position[axis], { intervals: [15], timeout: 1_000 })
       .not.toBe(startPosition)
     const movedRevision = latestSnapshot(game)!.room.revision
     await expect.poll(() => {
-      const frames = game.frames.filter((frame) => frame.type === 'snapshot').slice(-3)
-      if (frames.length !== 3 || frames[0].room.revision <= Math.max(startRevision, movedRevision)) return false
+      const frames = game.frames.filter((frame) => frame.type === 'snapshot').slice(-2)
+      if (frames.length !== 2 || frames[0].room.revision <= Math.max(startRevision, movedRevision)) return false
       const positions = frames.map((frame) => frame.state.actors.find((value) => value.seat === 'one')!.position)
       return positions.every((value) => value.x === positions[0].x && value.y === positions[0].y)
     }, { intervals: [15] }).toBe(true)

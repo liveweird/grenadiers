@@ -32,20 +32,25 @@ Temporary stacks, namespace/Secret, forwards, exports, and archives are removed.
 logs/screenshots remain available.
 
 Linux CI exposed controller timing sensitivity. The final controller records sanitized
-movement direction/stop summaries, waits for actual public actor movement, then requires
-three newer stationary snapshots before another correction. Coarse movement releases early;
-34 ms fine native presses prevent down/up collapsing before a simulation update on fast hosts.
-Both axes must settle within the existing 128-unit turn-assist tolerance. Direct safe escape
-waypoints and concurrent live assertions avoid spending bomb fuse time on unnecessary stops
-or screenshots; production physics and every bomb/HUD/event assertion remain unchanged.
+movement direction/stop summaries, requires actual public actor movement, then two newer
+identical stationary snapshots before another correction. Coarse movement releases early
+with key-up protected by `finally`; fine movement uses one native `keyboard.press` operation
+with a dynamic 34–60 ms pulse. Both axes retain the existing 128-unit turn-assist tolerance.
+Concurrent live assertions precede compositor screenshots; production physics, bomb fuses,
+and every bomb/HUD/event assertion remain unchanged.
 
-The final controller passes **six consecutive official Linux Playwright 1.63 Chromium runs**
-under a two-CPU limit and **three native macOS Chromium runs**, all with retries disabled.
-Linux durations are 26.1–34.6 seconds; native durations are 21.0–21.4 seconds. Per-action
-DOM/compositor tracing is disabled only for this real-time fixture. Action/source traces,
-failure screenshots, explicit visual checkpoints, and bounded redacted WebSocket summaries
-remain. Default smoke tracing is unchanged. Application build inputs and runtime layers are
-unchanged; the accepted image above is retained.
+The final source passes **10/10 official Linux Playwright 1.63 Chromium runs** pinned to two
+CPU cores (`nproc=2`, unrestricted bandwidth), plus **3/3 native Compose** and **3/3 native
+Kubernetes** fixture runs against the accepted image above. Every run disables retries;
+the fixture config now also disables CI retries. A separate hard CPU-bandwidth-quota diagnostic
+was 7/10 and remains preserved, not counted as passing evidence. Runtime/render performance
+budgets under arbitrary throttling remain M7 work.
+
+Per-action DOM/compositor tracing is disabled only for this real-time fixture. Action/source
+traces, failure screenshots, explicit visual checkpoints, and bounded redacted WebSocket
+summaries remain. Default smoke tracing is unchanged. Application build inputs are unchanged;
+the accepted image is retained. Final stacks, namespace/Secret, forwards, debug projects,
+and exports are removed; acceptance logs and screenshots remain available.
 
 ## M4 exposed-item rendering and upgrade HUD — 2026-10-17
 

@@ -74,14 +74,14 @@ export class GameClient {
 
   constructor(
     onChange: (state: GameClientState) => void,
-    dependencies: Dependencies = {
-      fetch: globalThis.fetch.bind(globalThis),
-      socket: (url) => new WebSocket(url),
-      location: window.location,
-    },
+    dependencies?: Partial<Dependencies>,
   ) {
     this.onChange = onChange
-    this.dependencies = dependencies
+    this.dependencies = {
+      fetch: dependencies?.fetch ?? globalThis.fetch.bind(globalThis),
+      socket: dependencies?.socket ?? ((url) => new WebSocket(url)),
+      location: dependencies?.location ?? window.location,
+    }
   }
 
   getState(): GameClientState { return this.state }

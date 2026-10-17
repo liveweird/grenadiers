@@ -2,13 +2,16 @@
 
 ## Dormant v3 browser client and match panel — 2026-10-17
 
-The complete web gate passes **108 tests** with **92.23% statements, 86.24% branches,
-93.69% functions, and 96.19% lines**, above unchanged coverage floors. Independent review
+The complete web gate passes **120 tests** with **94.88% statements, 89.47% branches,
+94.53% functions, and 97.76% lines**, above unchanged coverage floors. Independent review
 and terminal-vacancy follow-up report no outstanding findings. Cases cover authenticated v3,
 strict schema validation, revision/epoch ordering, direct coalesced new-round snapshots,
 control/action reset with retained sequence, bounded counters, initial-only readiness,
 authoritative rematch holds/votes, cleanup, localized match/round facts, and vacant seats
-alongside frozen live/dead actors. Both generated contracts, lint, Knip, and production build
+alongside frozen live/dead actors. Twelve ported security/transport regressions preserve token,
+stale-generation, admission, malformed-frame, counter, leave, cleanup, and native fetch receiver
+behavior; partial dependency overrides retain the existing defaults. Both generated contracts,
+lint, Knip, and production build
 pass. The existing Pixi arena is shared through a narrow presentation boundary.
 
 The panel remains dormant. No visual/WebGL or live match acceptance is claimed until the

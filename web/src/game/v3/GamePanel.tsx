@@ -198,12 +198,16 @@ export function GamePanelView({ state, actions }: { state: GameClientState; acti
     <section className="game-shell" aria-label={copy.label}>
       <div className="arena-column">
         <div className="match-strip">
-          <span>{copy.player.one} · {state.room?.scores.one ?? 0}</span>
-          <span>
-            <time aria-label={copy.timer}>{clock(timerTicks(state))}</time>
-            {' · '}{round ? interpolate(copy.room.round, { round }) : copy.room.beforeFirstRound}
+          <span className="match-score" role="group" aria-label={interpolate(copy.scoreLabel, { player: copy.player.one })}>
+            <span>{copy.player.one}</span><strong>{state.room?.scores.one ?? 0}</strong>
           </span>
-          <span>{state.room?.scores.two ?? 0} · {copy.player.two}</span>
+          <span className="match-clock">
+            <time aria-label={copy.timer}>{clock(timerTicks(state))}</time>
+            <small>{round ? interpolate(copy.room.round, { round }) : copy.room.beforeFirstRound}</small>
+          </span>
+          <span className="match-score" role="group" aria-label={interpolate(copy.scoreLabel, { player: copy.player.two })}>
+            <span>{copy.player.two}</span><strong>{state.room?.scores.two ?? 0}</strong>
+          </span>
         </div>
         <GameArena
           label={copy.arena.label} waitingText={waitingText} failureText={copy.arena.failure}

@@ -3,9 +3,10 @@ import { useTranslation } from 'react-i18next'
 const en = {
   label: 'Two-player match', timer: 'Phase time remaining', you: '(you)',
   player: { one: 'Player one', two: 'Player two' },
+  scoreLabel: 'Round wins for {{player}}',
   lobby: {
     title: 'Meet in the courtyard',
-    explanation: 'Create a room and share its invitation, or enter the code from your friend.',
+    explanation: 'Create a room and share its invitation, or enter the code from your friend. Win three rounds to take the match.',
     create: 'Create room', or: 'or', code: 'Room code',
     codeHint: 'Use eight letters or digits from the invitation.', join: 'Join room',
   },
@@ -75,9 +76,10 @@ const en = {
 const pl = {
   label: 'Mecz dla dwóch graczy', timer: 'Czas pozostały w bieżącej fazie', you: '(ty)',
   player: { one: 'Gracz pierwszy', two: 'Gracz drugi' },
+  scoreLabel: 'Wygrane rundy: {{player}}',
   lobby: {
     title: 'Spotkajcie się na dziedzińcu',
-    explanation: 'Utwórz pokój i udostępnij zaproszenie albo wpisz kod otrzymany od znajomego.',
+    explanation: 'Utwórz pokój i udostępnij zaproszenie albo wpisz kod otrzymany od znajomego. Wygraj trzy rundy, aby zwyciężyć w meczu.',
     create: 'Utwórz pokój', or: 'lub', code: 'Kod pokoju',
     codeHint: 'Wpisz osiem liter lub cyfr z zaproszenia.', join: 'Dołącz do pokoju',
   },

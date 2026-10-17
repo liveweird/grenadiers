@@ -3,7 +3,7 @@ import { act, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { GameArenaProps } from './game/arena/types'
-import type { RoomPhase, RoomView, Snapshot } from './game/schema'
+import type { RoomPhase, RoomView, Snapshot } from './game/v3/schema'
 import i18n from './i18n'
 import { App } from './App'
 
@@ -51,9 +51,15 @@ function room(revision: number, phase: RoomPhase = { type: 'waiting' }): RoomVie
     tick: revision,
     rulesVersion: 1,
     mapId: 'fixed_v1',
+    roundNumber: ['running', 'result', 'matchResult'].includes(phase.type) ? 1 : 0,
+    scores: { one: 0, two: phase.type === 'result' ? 1 : 0 },
+    lastRound: phase.type === 'result' ? {
+      roundId: 1, roundNumber: 1, endedAt: phase.nextCountdownAt - 180,
+      result: { type: 'winner', seat: 'two' },
+    } : null,
     seats: [
-      { seat: 'one', occupied: true, ready: false },
-      { seat: 'two', occupied: true, ready: false },
+      { seat: 'one', occupied: true, ready: false, rematchReady: false },
+      { seat: 'two', occupied: true, ready: false, rematchReady: false },
     ],
     phase,
   }
@@ -98,8 +104,8 @@ async function beginRoom(user: ReturnType<typeof userEvent.setup>, action: 'crea
   await waitFor(() => expect(appSockets.filter((socket) => socket.url.endsWith('/api/v1/game/ws'))).toHaveLength(1))
   const socket = appSockets.find((candidate) => candidate.url.endsWith('/api/v1/game/ws'))!
   act(() => socket.emit('open'))
-  expect(JSON.parse(socket.sent[0])).toEqual({ type: 'authenticate', protocolVersion: 2, token })
-  act(() => socket.message({ type: 'authenticated', protocolVersion: 2 }))
+  expect(JSON.parse(socket.sent[0])).toEqual({ type: 'authenticate', protocolVersion: 3, token })
+  act(() => socket.message({ type: 'authenticated', protocolVersion: 3 }))
   return socket
 }
 
@@ -124,20 +130,21 @@ describe('App game flow', () => {
 
     act(() => socket.message({ type: 'roomState', room: room(1), youSeat: 'one' }))
     expect(await screen.findByLabelText('Room invitation code')).toHaveTextContent('ABCDEFGH')
-    expect(screen.getAllByText('Player one')).toHaveLength(2)
+    expect(within(screen.getByRole('list', { name: 'Players' })).getByText('Player one')).toBeVisible()
+    expect(screen.getByLabelText('Round wins for Player one')).toHaveTextContent('0')
     await user.click(screen.getByRole('button', { name: 'Ready' }))
     expect(JSON.parse(socket.sent[2])).toEqual({
       type: 'ready', ready: true, sequence: 2, roomId, roundId: 1,
     })
     act(() => socket.message({
-      type: 'roomState', room: room(2, { type: 'countdown', endsAt: 182 }), youSeat: 'one',
+      type: 'roomState', room: room(2, { type: 'countdown', kind: 'initial', endsAt: 182 }), youSeat: 'one',
     }))
-    expect(screen.getByLabelText('Round time remaining')).toHaveTextContent('0:03')
+    expect(screen.getByLabelText('Phase time remaining')).toHaveTextContent('0:03')
     expect(screen.getAllByText('Not ready')).toHaveLength(2)
 
     await user.click(screen.getByRole('button', { name: 'Leave room' }))
     const leave = JSON.parse(socket.sent[3]) as { sequence: number }
-    expect(screen.queryByRole('button', { name: 'Ready' })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Ready' })).toBeDisabled()
     act(() => socket.message({ type: 'leftRoom', roomId, sequence: leave.sequence + 1 }))
     expect(screen.getByLabelText('Room invitation code')).toBeVisible()
     act(() => socket.message({ type: 'leftRoom', roomId, sequence: leave.sequence }))
@@ -154,10 +161,10 @@ describe('App game flow', () => {
     expect(JSON.parse(socket.sent[1])).toEqual({ type: 'joinRoom', sequence: 1, roomCode: 'ABCDEFGH' })
 
     act(() => socket.message({ type: 'error', code: 'roomFull', sequence: 1 }))
-    expect(await screen.findByText('Both seats in that room are occupied.')).toBeVisible()
+    expect(await screen.findByText('Both seats are occupied.')).toBeVisible()
     await user.click(screen.getByRole('radio', { name: 'Polski' }))
     expect(await screen.findByRole('button', { name: 'Utwórz pokój' })).toBeVisible()
-    expect(screen.getByText('Oba miejsca w tym pokoju są zajęte.')).toBeVisible()
+    expect(screen.getByText('Oba miejsca są zajęte.')).toBeVisible()
     expect(socket.close).not.toHaveBeenCalled()
   })
 
@@ -169,7 +176,7 @@ describe('App game flow', () => {
     const live = snapshot(2)
     Object.assign(live.state.actors[0], { bombCapacity: 8, bombRange: 8, liveBombCount: 3, speedLevel: 4 })
     act(() => socket.message(live))
-    expect(await screen.findByLabelText('Round time remaining')).toHaveTextContent('3:00')
+    expect(await screen.findByLabelText('Phase time remaining')).toHaveTextContent('3:00')
     expect(screen.getByRole('region', { name: 'Grenadiers courtyard' })).toHaveAttribute('data-enabled', 'true')
     expect(screen.getAllByText('Alive')).toHaveLength(2)
     expect(screen.queryByText('Not ready')).not.toBeInTheDocument()
@@ -187,19 +194,20 @@ describe('App game flow', () => {
     expect(screen.getByRole('region', { name: 'Grenadiers courtyard' })).toHaveAttribute('data-enabled', 'false')
     expect(screen.queryByRole('button', { name: 'Test move' })).not.toBeInTheDocument()
 
-    act(() => socket.message(snapshot(3, {
-      type: 'result', endedAt: 3, result: { type: 'draw', reason: 'timeout' },
-    })))
+    const draw = snapshot(3, { type: 'result', nextCountdownAt: 183 })
+    draw.room.lastRound!.result = { type: 'draw', reason: 'timeout' }
+    draw.room.scores.two = 0
+    act(() => socket.message(draw))
     expect(await screen.findByText('Draw: time ran out.')).toBeVisible()
   })
 
-  it('freezes the authoritative remaining time when elimination ends a round', async () => {
+  it('keeps frozen round physics while the authoritative result-hold clock advances', async () => {
     const user = userEvent.setup()
     renderApp()
     const socket = await beginRoom(user)
     act(() => socket.message({ type: 'roomState', room: room(1, { type: 'running' }), youSeat: 'one' }))
     const finished = snapshot(2, {
-      type: 'result', endedAt: 300, result: { type: 'winner', seat: 'two' },
+      type: 'result', nextCountdownAt: 480,
     })
     finished.state.runningUpdates = 300
     finished.state.remainingTicks = 10_500
@@ -209,9 +217,10 @@ describe('App game flow', () => {
     expect(await screen.findByText('Player two wins the round.')).toBeVisible()
     expect(screen.getByText('Eliminated')).toBeVisible()
     expect(screen.getByText('Alive')).toBeVisible()
-    expect(screen.getByLabelText('Round time remaining')).toHaveTextContent('2:55')
-    act(() => socket.message({ ...finished, room: { ...finished.room, revision: 3, tick: 303 } }))
-    expect(screen.getByLabelText('Round time remaining')).toHaveTextContent('2:55')
+    expect(screen.getByLabelText('Phase time remaining')).toHaveTextContent('0:03')
+    act(() => socket.message({ ...finished, room: { ...finished.room, revision: 3, tick: 360 } }))
+    expect(screen.getByLabelText('Phase time remaining')).toHaveTextContent('0:02')
+    expect(finished.state.remainingTicks).toBe(10_500)
   })
 
   it('localizes authoritative actor status and upgrade labels without reconnecting', async () => {
@@ -239,7 +248,7 @@ describe('App game flow', () => {
       room: room(1, { type: 'interrupted', endedAt: 1, reason: 'connectionLost' }),
       youSeat: 'one',
     }))
-    expect(await screen.findByText('The other player lost their connection.')).toBeVisible()
+    expect(await screen.findByText('a player lost their connection')).toBeVisible()
     expect(screen.queryByText(/wins the round/)).not.toBeInTheDocument()
   })
 

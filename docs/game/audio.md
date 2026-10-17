@@ -39,3 +39,5 @@ volume suitability, or listening quality. The owned-browser helper bounds teardo
 contexts, the process, and its temporary profile. Because closing that browser also closes the CDP
 target, final context destruction is not claimed as observable protocol evidence; unit tests cover
 explicit disposal and `AudioContext.close()`.
+
+Reviewed [desktop and 320-pixel Polish screenshots](../screenshots/audio.md) show the actual interface.

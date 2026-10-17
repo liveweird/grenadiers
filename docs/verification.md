@@ -11,6 +11,16 @@ post-final departure. Mutation regressions reject impossible consent, draw-award
 invalid epoch chronology, and occupied forfeit losers. The adapter remains dormant; live
 protocol and browser behavior are unchanged.
 
+A clean committed-tree build of `4e6633c416a249d246056acb7eef06e3892a18c9` produces
+`sha256:8f25752f6a59ca26ebdec4ef1da7a8f3dd103bc51711f6400400b7f99a218e11`.
+Compose and ready local Kubernetes run that exact image. Both paths pass health/readiness,
+all six default browser scenarios, then the separate read-only seed fixture scenario. Strict
+schemas validate all three resources; pinned archive-only Trivy reports zero fixed
+HIGH/CRITICAL findings. Kubernetes retains UID/GID 65532, read-only root, dropped capabilities,
+no privilege escalation, and a read-only 0444 temporary fixture Secret. No seed files exist
+under `/app`. Temporary resources/exports are removed; logs and screenshots remain.
+This evidence update changes documentation only.
+
 ## Dormant gameplay-v3 contract — 2026-10-17
 
 The locked server gate passes **225 core tests, 85 server tests, and 2 doctests**.

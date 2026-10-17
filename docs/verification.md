@@ -11,6 +11,16 @@ report windows, frozen publication, privacy, profile mismatch, frame bounds, and
 The active v2 caller retains its explicit first-round assignment. The new adapter remains
 test-only: scheduling, shutdown, and actual endpoint/browser activation are later checks.
 
+A clean committed-tree build of `49b142e13b62640dbb08331cedc8ef39ad1bc276` produces
+`sha256:c63b2b4a8ae61bae66e8a79ea1b7be2f4934a869ec0da8e40e06c6f220bcb429`.
+Compose and ready local Kubernetes use that exact image. Each path passes health/readiness,
+all six default browser scenarios and the separate read-only fixture scenario. Strict schemas
+validate all three resources. Pinned archive-only Trivy reports zero fixed HIGH/CRITICAL
+findings; `/app` contains no seed files. Kubernetes retains non-root UID/GID 65532, read-only
+root, dropped capabilities, no privilege escalation, RuntimeDefault, and a read-only 0444
+fixture Secret. Temporary resources and exports are removed; logs/screenshots remain.
+This documentation-only evidence update does not activate the dormant implementation.
+
 ## Checked v3 room projection — 2026-10-17
 
 The locked server gate passes **243 core tests, 85 server tests, and 2 doctests**.

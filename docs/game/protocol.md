@@ -1,9 +1,9 @@
 # Gameplay protocol
 
 Status: gameplay contracts, checked domain conversion, HTTP session issuance, and authenticated
-gameplay WebSockets are implemented. `api/gameplay.schema.json`, independent Rust
+gameplay WebSockets with Waiting-room admission are implemented. `api/gameplay.schema.json`, independent Rust
 `core::protocol` types, and generated `web/src/game/schema.ts` define socket messages.
-Networked rooms and browser controls remain planned. Diagnostic `/api/v1/ws` and
+Authoritative scheduling and browser controls remain planned. Diagnostic `/api/v1/ws` and
 `api/realtime.schema.json` remain unchanged.
 
 ## Authentication and compatibility
@@ -47,10 +47,12 @@ a five-second deadline. Server Ping runs every ten seconds, no inbound activity 
 closes the socket, and unseated authentication expires after an absolute five minutes.
 
 Malformed/binary input, failed authentication, repeated authentication, or rate exhaustion
-closes the offending socket with fixed reasons. Structurally valid room commands currently
-return `invalidPhase` for create/join and `notInRoom` for room-bound commands, preserving the
-connection. Fresh sequences are consumed before semantic rejection; replay returns
-`staleSequence`. Rooms are not fabricated while their handler is pending.
+closes the offending socket with fixed reasons. Create/join now bind one of two room seats;
+already-bound admission returns `alreadyInRoom`, full rooms return `roomFull`, and unknown
+codes return `roomNotFound`. Unbound room commands return `notInRoom`; mismatched ownership
+or attempts return `staleRoom`. Correctly bound readiness/movement/bombs currently return
+`invalidPhase`. Fresh sequences are consumed before semantic rejection; replay returns
+`staleSequence`. See [room admission](rooms.md#network-admission) for lifetime and queue bounds.
 
 ## Commands and responses
 

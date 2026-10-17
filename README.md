@@ -7,8 +7,8 @@ This is the **engineering scaffold and headless simulation**, not a playable gam
 It provides a React diagnostic shell, HTTP probes, a versioned WebSocket diagnostic exchange,
 and a deterministic Rust simulation with movement, bombs, flames, damage, one-round results,
 and explicit public snapshots/events, plus a headless two-seat room lifecycle.
-Anonymous session issuance and gameplay socket authentication are available. Playable
-rendering, networked rooms, matchmaking, and stats remain unimplemented. The [game specification](docs/game/README.md)
+Anonymous sessions, gameplay authentication, and bounded two-seat networked rooms are available.
+Authoritative room gameplay, playable rendering, matchmaking, and stats remain unimplemented. The [game specification](docs/game/README.md)
 describes the classic reference and proposed rules. The
 [implementation and release plan](docs/game/implementation-plan.md) breaks delivery into
 verified foundation, playable duel, classic matches, and resilient playtest releases.
@@ -105,7 +105,8 @@ scripts/gates.sh coverage      # cargo-llvm-cov line coverage floor
 Generate frontend contracts with `npm --prefix web run gen:api` and
 `npm --prefix web run gen:realtime`; gameplay controls use `npm --prefix web run gen:gameplay`.
 Commit generated files with contract changes. The [gameplay protocol](docs/game/protocol.md)
-currently defines control/lifecycle messages; gameplay endpoints follow separately.
+defines authentication, room controls, and public snapshot/event messages. Session issuance,
+authenticated sockets, and Waiting-room admission are implemented.
 Coverage tooling installation and test conventions are in [docs/testing.md](docs/testing.md).
 
 ## Configuration

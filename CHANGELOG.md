@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.1.13 — 2026-10-17
+
+- Add bounded room creation and code-based joining with two authenticated seat owners.
+- Publish personalized admission and shared membership views, reject full/stale bindings,
+  and acknowledge explicit departures before allowing another room on the same connection.
+- Bound discovery, actor queues, identifiers, and waiting lifetime; release registry entries
+  even when an owner task is canceled before its first poll.
+
+Rooms remain in Waiting in this increment. Readiness, authoritative simulation scheduling,
+public snapshots, and the browser game interface follow separately.
+
 ## 0.1.12 — 2026-10-17
 
 - Add authenticated gameplay WebSockets with compatibility checks before credential lookup,

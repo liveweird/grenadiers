@@ -1,5 +1,28 @@
 # Repository verification
 
+## M3 network room admission — 2026-10-17
+
+The locked server gate passes **136 core tests, 51 server tests, and 2 doctests**. Rust
+coverage passes the unchanged 80% floor at **2,957/3,218 lines, 91.89%**. The E2E static
+gate passes four documented scenarios. Independent review reports no actionable findings.
+The browser application and contracts are unchanged from v0.1.12.
+
+Tests exercise personalized two-seat admission, full/unknown rooms, explicit and abrupt
+departure, vacancy/rejoin, generation fencing, capacity/rate/identifier failures, fixed expiry,
+and exact discovery cleanup. Owner cancellation before the first poll and after admission
+releases the registry synchronously. Controlled-time owner tests cover the five-minute
+boundary; the live socket expiry path shares this notification handling but is not held open
+for five minutes in browser acceptance. No countdown or gameplay execution is claimed.
+
+A clean committed-tree build produces
+`sha256:4532c6b48d24baf645de2040ada5d59c45b54ecd8ee08f4afa980eb7edd64794`.
+Compose and ready local Kubernetes use this exact image. Separate health/readiness checks
+and all **four candidate browser scenarios** pass through both paths, including actual
+create/join/full/leave/rejoin behavior and authentication retention. Strict schemas pass with
+3 valid resources; pinned socket-free Trivy reports zero HIGH/CRITICAL vulnerabilities.
+Temporary deployment/export/archive/forward/symlink resources are removed; the candidate
+image is retained. This evidence update changes documentation only.
+
 ## M3 authenticated gameplay WebSocket — 2026-10-17
 
 The integrated locked server gate passes **136 core tests, 37 server tests, and 2 doctests**.

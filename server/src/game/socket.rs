@@ -14,19 +14,14 @@ use grenadiers_core::protocol::{
 };
 use tokio::{
     sync::OwnedSemaphorePermit,
-    time::{Instant, MissedTickBehavior, interval_at, sleep_until, timeout, timeout_at},
+    time::{Instant, timeout, timeout_at},
 };
 
-use super::{
-    http::origin_allowed,
-    limits::{InboundLimit, SessionDeadline, SessionDeadlines},
-    sessions::SessionClaimError,
-};
+use super::{http::origin_allowed, limits::InboundLimit, sessions::SessionClaimError};
 use crate::{AppState, Problem, with_no_store};
 
 const AUTH_TIMEOUT: Duration = Duration::from_secs(5);
 const SEND_TIMEOUT: Duration = Duration::from_secs(5);
-const PING_INTERVAL: Duration = Duration::from_secs(10);
 const MAX_WRITE_BUFFER: usize = 131_072;
 
 pub(crate) async fn game_websocket(
@@ -73,18 +68,20 @@ pub(crate) async fn game_websocket(
         );
     };
     let sessions = state.game_sessions;
+    let rooms = state.game_rooms;
     upgrade
         .max_frame_size(MAX_CLIENT_MESSAGE_BYTES)
         .max_message_size(MAX_CLIENT_MESSAGE_BYTES)
         .write_buffer_size(0)
         .max_write_buffer_size(MAX_WRITE_BUFFER)
-        .on_upgrade(move |socket| game_session(socket, permit, sessions))
+        .on_upgrade(move |socket| game_session(socket, permit, sessions, rooms))
 }
 
 async fn game_session(
     mut socket: WebSocket,
     _permit: OwnedSemaphorePermit,
     sessions: std::sync::Arc<super::sessions::GameSessions>,
+    rooms: std::sync::Arc<super::rooms::GameRooms>,
 ) {
     let mut inbound = InboundLimit::new(Instant::now());
     let deadline = Instant::now() + AUTH_TIMEOUT;
@@ -176,113 +173,12 @@ async fn game_session(
             }
         }
     };
-    authenticated_loop(&mut socket, &mut inbound).await;
+    super::connection::authenticated_loop(&mut socket, &mut inbound, lease.connection_id(), rooms)
+        .await;
     drop(lease);
 }
 
-async fn authenticated_loop(socket: &mut WebSocket, inbound: &mut InboundLimit) {
-    let started = Instant::now();
-    let mut deadlines = SessionDeadlines::new(started);
-    let mut highwater: Option<Counter> = None;
-    let mut pings = interval_at(started + PING_INTERVAL, PING_INTERVAL);
-    pings.set_missed_tick_behavior(MissedTickBehavior::Delay);
-    loop {
-        enum Event {
-            Incoming(Option<Message>),
-            Ping,
-            Inactive,
-            Expired,
-        }
-        let event = tokio::select! {
-            incoming = socket.recv() => Event::Incoming(incoming.and_then(Result::ok)),
-            _ = pings.tick() => Event::Ping,
-            () = sleep_until(deadlines.inactivity_at()) => Event::Inactive,
-            () = sleep_until(deadlines.expires_at()) => Event::Expired,
-        };
-        let now = Instant::now();
-        match deadlines.classify(now) {
-            SessionDeadline::Expired => {
-                close(socket, 1000, "Session expired").await;
-                return;
-            }
-            SessionDeadline::Inactive => {
-                close(socket, 1000, "Connection inactive").await;
-                return;
-            }
-            SessionDeadline::Active => {}
-        }
-        match event {
-            Event::Ping => {
-                if send_raw(socket, Message::Ping(Vec::new().into()))
-                    .await
-                    .is_err()
-                {
-                    return;
-                }
-            }
-            Event::Inactive => {
-                close(socket, 1000, "Connection inactive").await;
-                return;
-            }
-            Event::Expired => {
-                close(socket, 1000, "Session expired").await;
-                return;
-            }
-            Event::Incoming(None | Some(Message::Close(_))) => return,
-            Event::Incoming(Some(message)) => {
-                deadlines.record_inbound(now);
-                if !inbound.take(now) {
-                    fail_and_close(socket, ErrorCode::RateLimited, None).await;
-                    return;
-                }
-                match message {
-                    Message::Ping(data) => {
-                        if send_raw(socket, Message::Pong(data)).await.is_err() {
-                            return;
-                        }
-                    }
-                    Message::Pong(_) => {}
-                    Message::Binary(_) => {
-                        fail_and_close(socket, ErrorCode::InvalidMessage, None).await;
-                        return;
-                    }
-                    Message::Text(text) => {
-                        let Ok(message) = parse_client_message(&text) else {
-                            fail_and_close(socket, ErrorCode::InvalidMessage, None).await;
-                            return;
-                        };
-                        if matches!(message, GameClientMessage::Authenticate { .. }) {
-                            fail_and_close(socket, ErrorCode::AlreadyAuthenticated, None).await;
-                            return;
-                        }
-                        let sequence = command_sequence(&message).expect("command has sequence");
-                        if highwater.is_some_and(|seen| sequence <= seen) {
-                            if send_error(socket, ErrorCode::StaleSequence, Some(sequence))
-                                .await
-                                .is_err()
-                            {
-                                return;
-                            }
-                            continue;
-                        }
-                        highwater = Some(sequence);
-                        let code = match message {
-                            GameClientMessage::CreateRoom { .. }
-                            | GameClientMessage::JoinRoom { .. } => ErrorCode::InvalidPhase,
-                            _ => ErrorCode::NotInRoom,
-                        };
-                        if send_error(socket, code, Some(sequence)).await.is_err() {
-                            return;
-                        }
-                    }
-                    Message::Close(_) => return,
-                }
-            }
-        }
-    }
-}
-
-fn command_sequence(message: &GameClientMessage) -> Option<Counter> {
+pub(super) fn command_sequence(message: &GameClientMessage) -> Option<Counter> {
     match message {
         GameClientMessage::Authenticate { .. } => None,
         GameClientMessage::CreateRoom { sequence }
@@ -294,7 +190,7 @@ fn command_sequence(message: &GameClientMessage) -> Option<Counter> {
     }
 }
 
-async fn send_error(
+pub(super) async fn send_error(
     socket: &mut WebSocket,
     code: ErrorCode,
     sequence: Option<Counter>,
@@ -302,24 +198,31 @@ async fn send_error(
     send_game(socket, &GameServerMessage::Error { code, sequence }).await
 }
 
-async fn fail_and_close(socket: &mut WebSocket, code: ErrorCode, sequence: Option<Counter>) {
+pub(super) async fn fail_and_close(
+    socket: &mut WebSocket,
+    code: ErrorCode,
+    sequence: Option<Counter>,
+) {
     let _ = send_error(socket, code, sequence).await;
     close(socket, 1008, "Policy violation").await;
 }
 
-async fn send_game(socket: &mut WebSocket, message: &GameServerMessage) -> Result<(), ()> {
+pub(super) async fn send_game(
+    socket: &mut WebSocket,
+    message: &GameServerMessage,
+) -> Result<(), ()> {
     let text = encode_server_message(message).map_err(|_| ())?;
     send_raw(socket, Message::Text(text.into())).await
 }
 
-async fn send_raw(socket: &mut WebSocket, message: Message) -> Result<(), ()> {
+pub(super) async fn send_raw(socket: &mut WebSocket, message: Message) -> Result<(), ()> {
     timeout(SEND_TIMEOUT, socket.send(message))
         .await
         .map_err(|_| ())?
         .map_err(|_| ())
 }
 
-async fn close(socket: &mut WebSocket, code: u16, reason: &'static str) {
+pub(super) async fn close(socket: &mut WebSocket, code: u16, reason: &'static str) {
     let _ = send_raw(
         socket,
         Message::Close(Some(CloseFrame {

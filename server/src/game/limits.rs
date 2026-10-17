@@ -58,6 +58,10 @@ impl SessionDeadlines {
         self.last_inbound = self.last_inbound.max(now);
     }
 
+    pub(super) fn restart_unseated(&mut self, now: Instant) {
+        self.expires_at = now + UNSEATED_LIFETIME;
+    }
+
     pub(super) fn inactivity_at(&self) -> Instant {
         self.last_inbound + INACTIVITY_TIMEOUT
     }
@@ -70,6 +74,14 @@ impl SessionDeadlines {
         if now >= self.expires_at {
             SessionDeadline::Expired
         } else if now >= self.inactivity_at() {
+            SessionDeadline::Inactive
+        } else {
+            SessionDeadline::Active
+        }
+    }
+
+    pub(super) fn classify_member(&self, now: Instant) -> SessionDeadline {
+        if now >= self.inactivity_at() {
             SessionDeadline::Inactive
         } else {
             SessionDeadline::Active
@@ -111,6 +123,29 @@ mod tests {
         deadlines.record_inbound(started + Duration::from_secs(299));
         assert_eq!(
             deadlines.classify(started + Duration::from_secs(300)),
+            SessionDeadline::Expired
+        );
+    }
+
+    #[test]
+    fn membership_disables_old_expiry_and_leave_starts_a_fresh_window() {
+        let started = Instant::now();
+        let mut deadlines = SessionDeadlines::new(started);
+        let later = started + Duration::from_secs(299);
+        deadlines.record_inbound(later);
+        assert_eq!(
+            deadlines.classify_member(started + UNSEATED_LIFETIME),
+            SessionDeadline::Active
+        );
+
+        deadlines.restart_unseated(later);
+        assert_eq!(
+            deadlines.classify(later + UNSEATED_LIFETIME - Duration::from_nanos(1)),
+            SessionDeadline::Inactive
+        );
+        deadlines.record_inbound(later + Duration::from_secs(299));
+        assert_eq!(
+            deadlines.classify(later + UNSEATED_LIFETIME),
             SessionDeadline::Expired
         );
     }

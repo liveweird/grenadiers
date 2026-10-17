@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.2.8 — 2026-10-17
+
+- Add a pure match lifecycle with initial and automatic inter-round countdowns, result holds,
+  actual-round assignment, first-to-three termination, and consensual rematch reset.
+- Separate prematch interruption from post-start match outcomes, batch same-tick departures,
+  retain the global clock, and make transition failures transactional.
+- Invalidate departed players' rematch consent and reject consensus with a vacant opponent.
+
+The lifecycle is staged alongside the live single-round runtime. Gameplay v2 remains active;
+truthful v3 contracts/adapters and coordinated activation follow separately.
+
 ## 0.2.7 — 2026-10-17
 
 - Add bounded headless first-to-three match-series facts: scores, actual round assignment,

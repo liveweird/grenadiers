@@ -1,5 +1,30 @@
 # Repository verification
 
+## M5 pure automatic match lifecycle — 2026-10-17
+
+The locked server gate passes **214 core tests, 85 server tests, and 2 doctests**.
+Rust line coverage passes the unchanged 80% floor at **4,585/4,914 lines, 93.30%**.
+Independent review found stale rematch consent after a participant departed. Departures now
+clear that vote and vacant opponents cannot complete consensus; both seat orders are covered.
+The correction is independently verified, with no remaining lifecycle findings.
+
+Tests cover initial cancellation, automatic inter-round countdowns, exact hold/start
+boundaries, actual-round parity across epoch gaps, first-to-three including draws, long
+global time, prematch versus match interruption, batched departure precedence, terminal
+finality, rematch readiness/reset, and transactional clock/epoch/series overflow. The new pure
+lifecycle remains dormant alongside the live single-round v2 owner; activation follows after
+truthful contracts and real server/browser adapters are verified.
+
+A clean committed-tree build of `c2e76e6b1b27ae74c322c56e9e795acf353c2230` produces
+`sha256:d46a8911d0d1ecf94d4cd073ac62f987c6a13e5e6b632769bc228973e93b19b2`.
+Compose and ready local Kubernetes run that exact image. Both paths pass health/readiness,
+all six default browser scenarios, then the separate read-only seed fixture scenario. Strict
+schemas validate all three resources; pinned archive-only Trivy reports zero fixed
+HIGH/CRITICAL findings. Kubernetes retains UID/GID 65532, read-only root, dropped capabilities,
+no privilege escalation, and a read-only 0444 temporary fixture Secret. No seed files exist
+under `/app`. Temporary resources/exports are removed; logs and screenshots remain.
+This evidence update changes documentation only.
+
 ## M5 headless first-to-three series — 2026-10-17
 
 The locked server gate passes **194 core tests, 85 server tests, and 2 doctests**.

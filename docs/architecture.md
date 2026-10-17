@@ -84,5 +84,5 @@ must be recorded and how the two-player baseline will be delivered and verified.
 [pickup layers](game/pickups.md) with classic-v2 collection/upgrades and explicit round-number spawn/tie assignment.
 
 [ADR 0015](decisions/0015-match-series-and-staged-progression.md) separates implemented
-[headless match-series facts](game/match-series.md) from the next pure lifecycle and staged
+[headless match-series facts](game/match-series.md) and the pure [automatic lifecycle](game/match-lifecycle.md) from staged
 v3 server/browser integration. The live generated preview remains single-round until activation.

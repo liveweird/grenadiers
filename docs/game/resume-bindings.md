@@ -1,9 +1,9 @@
 # Private resume credentials and binding fences
 
-Status: active in the v4 room owner and gameplay socket.
+Status: active in the v6 room owner and gameplay socket.
 
 Each occupied seat receives an independently generated 32-byte resume capability. The bytes
-are encoded through the v4 `ResumeToken` type as exactly 64 lowercase hexadecimal characters.
+are encoded through the active `ResumeToken` type as exactly 64 lowercase hexadecimal characters.
 Minting draws fresh entropy and compares the candidate only with the other seat's credential. It
 tries at most three candidates. Entropy failure and collision exhaustion return an error before a
 caller changes its seat slot, so an existing credential and live binding remain intact.

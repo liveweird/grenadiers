@@ -80,8 +80,8 @@ All listed fields are required; objects reject extra fields. Counter values are 
 
 | Server type | Additional fields |
 | --- | --- |
-| `authenticated` | `protocolVersion: 4` |
-| `incompatibleProtocol` | `supportedVersion` (0–65,535; this server emits 4) |
+| `authenticated` | `protocolVersion: 6` |
+| `incompatibleProtocol` | `supportedVersion` (0–65,535; this server emits 6) |
 | `admitted` | acknowledged `sequence`, shared `room`, `youSeat`, private `resumeToken`, nullable `lastBombActionId`, nullable `state` |
 | `roomState` | shared `room` only |
 | `seatReplaced` | `roomId`; old binding closes with code 4001 |
@@ -153,12 +153,17 @@ accepted floor; the next bomb ID must be greater. A floor of 2,147,483,647 exhau
 for that epoch.
 
 `RoomView` carries identity/code, independent command epoch `roundId`, revision, global tick,
-rules/map versions, actual `roundNumber`, scores (0..3 per seat), nullable `lastRound`, two
+rules/map versions, actual `roundNumber`, scores (0..9 per seat, bounded by the selected target), nullable `lastRound`, two
 canonical seat statuses (connection, occupancy/readiness/rematch consent), and a tagged phase. A
 connection is vacant, connected, disconnected with exclusive `expiresAt`, or expired. Actual
 round count increases only on starts, remains on the preceding round during inter-round
 countdown, and resets on rematch. Epochs also advance across cancellation and rematch, so
 spawn/tie assignment uses actual round count rather than command epoch.
+
+Shared room views and snapshot metadata also carry the complete checked `settings`,
+`settingsRevision` and nullable original `settingsEditor` seat. Only actual changes increment
+the settings revision and clear readiness; Ready commands acknowledge that exact revision.
+See [v6 settings and authority](protocol-v6.md) for bounds, no-op acknowledgements and edit locks.
 
 Phases are Waiting; initial/inter-round Countdown with deadline; Running; nonfinal Result
 with `holdUntil`; MatchResult with independent outcome, end time, and `rematchAt`;
@@ -178,8 +183,8 @@ pending, the browser honors the explicit local departure instead of retrying. Ru
 boundaries commit physics/scoring before batched departures; idle phases apply departure
 before automatic transitions. Explicit leave forfeits and two explicit leaves abandon. Eligible
 transport loss reserves the seat for 600 global ticks; one expiry forfeits to an eligible opponent,
-both expiry abandons, and a disconnected opponent delays the decision until settled. Third-win and
-already-final outcomes retain precedence. Ownership is bound to connection generation and private
+both expiry abandons, and a disconnected opponent delays the decision until settled. Reaching the
+configured win target and already final outcomes take precedence. Ownership is bound to connection generation and private
 capability, never to invitation code. See [bounded owner](match-owner.md).
 
 ## Profile and version evolution

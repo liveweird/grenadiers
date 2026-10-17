@@ -11,8 +11,11 @@ M6 is complete and locally verified on 2026-10-17, including exact-image deploym
 M7 hardening has started; M8 remains planned.
 The v0.3.16 increment adds classic-v3 forgiving turns and explicit gameplay-v5 compatibility,
 locally verified through both deployment paths on 2026-10-17.
-The v0.3.17 candidate adds four shared gameplay settings with configurable-v4 rules and
-gameplay-v6 compatibility; wider arena/item configuration remains backlog work.
+The v0.3.17 increment adds four shared gameplay settings with configurable-v4 rules and
+gameplay-v6 compatibility, locally verified through both deployment paths on 2026-10-17;
+wider arena/item configuration remains backlog work.
+v0.3.18 adds the first detailed retro pixel-art slice, verified through both deployment paths.
+v0.3.19 adds verified core inventory/effect/damage foundations; expanded items remain disabled.
 Published engineering prereleases are listed in `CHANGELOG.md` and GitHub Releases.
 
 New playtest requests and expansion work are tracked in the [gameplay and presentation

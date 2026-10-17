@@ -1,9 +1,9 @@
 # Gameplay and presentation backlog
 
-Status: **TURN shipped as v0.3.16; CONFIG and ART implemented in the v0.3.17/v0.3.18 candidates**.
-Equipment/effect core foundations are in progress for v0.3.19; no requested items are enabled
-in live rooms. ART has passed
-independent code/visual review; live acceptance remains required. See [pixel-art presentation](pixel-art.md).
+Status: **TURN v0.3.16, CONFIG v0.3.17 and the first ART slice v0.3.18 are shipped**.
+The v0.3.19 equipment/effect core foundation is implemented and verified; no requested
+items are enabled in live rooms. Richer transitions and new item artwork remain follow-up
+work. See [pixel-art presentation](pixel-art.md) and [expanded item implementation](expanded-items.md).
 Updated 2026-10-17 after playtest feedback. Release acceptance is recorded in
 [verification](../verification.md).
 The [implementation plan](implementation-plan.md) remains the milestone/release reference;
@@ -29,7 +29,7 @@ when scheduling; continue focused PRs, version bumps and the existing release ga
 ## TURN: forgiving movement and corner alignment
 
 Reported issue: players get stuck when requesting a perpendicular turn outside the inclusive
-128/1,024-cell-unit window (one eighth of a tile). The candidate widens this to 256 units
+128/1,024-cell-unit window (one eighth of a tile). v0.3.16 widens this to 256 units
 (one quarter) in classic-v3 while retaining historical profiles. Regression and native keyboard
 acceptance cover the natural wall-stop offset of 192 units. Human tuning remains open;
 expose tolerance in CONFIG and adjust further against playtest evidence.

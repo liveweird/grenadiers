@@ -1,11 +1,11 @@
 # Expanded item implementation plan
 
-Status: **v0.3.19 foundation candidate; no items activated**. Classic remains
+Status: **v0.3.19 foundation implemented; no items activated**. Classic remains
 the default. This optional track follows the [backlog](backlog.md), shared settings and
 pixel-art increments. The historical catalog in [rules](rules.md) is not an implementation
 claim. Each activation requires its own reviewed behavior, UI, documentation and acceptance.
 
-The candidate implements `core::game::{inventory,effects,damage}` and immutable Actor inventory,
+The foundation implements `core::game::{inventory,effects,damage}` and immutable Actor inventory,
 effect and derived-stat access. Production cannot inject items into State yet. Both fire checks
 share the damage gateway; effects/grace expire before movement and new bombs capture derived
 range/fuse. Slow-foot exposes an exact speed ratio but does not change movement before activation.
@@ -14,8 +14,10 @@ No item pickup, equipment action, visible effect, new rules profile or wire fiel
 Independent review is clear after replacing overflow-prone Heart expiry with checked elapsed
 grace. The integrated gates pass 334 core tests, 163 server tests, two doctests and 230 web tests;
 four dedicated performance profiles remain intentionally ignored. Rust line coverage is 94.21%
-above the unchanged 80% floor. Dependency audits and strict Kubernetes schemas pass. Live
-same-image deployment acceptance remains required before release.
+above the unchanged 80% floor. Dependency audits and strict Kubernetes schemas pass. The same
+image passes 24/24 scenarios through Compose and 24/24 through Kubernetes, retries zero,
+including a recheck of the corrected default browser harness. See [verification](../verification.md)
+for image identity, the final evidence rollup and its limits.
 
 ## State and timing
 

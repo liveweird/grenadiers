@@ -16,6 +16,8 @@
 - Add distinct gold/blue directional character poses and bounded walking/spark/flame frames.
 - Keep crisp responsive pixel scaling, authoritative interpolation, reduced-motion static
   frames and retained-object cleanup; simulation and gameplay contracts are unchanged.
+- Fix pre-existing browser acceptance races by correlating retained round results; serialize
+  CI browser workers within the two-player reference while preserving assertions and deadlines.
 
 ## 0.3.17 — 2026-10-17
 

@@ -1,7 +1,7 @@
 # Room gameplay settings
 
-Status: implementation candidate; see [ADR 0020](../decisions/0020-shared-gameplay-settings.md).
-The active release remains unchanged until candidate acceptance and activation are complete.
+Implemented in v0.3.17; see [ADR 0020](../decisions/0020-shared-gameplay-settings.md) and
+the [verification record](../verification.md) for accepted deployment evidence.
 
 The creator can configure these rules before either starts the match:
 

@@ -1,5 +1,138 @@
 # Repository verification
 
+## Expanded item core foundations — 2026-10-17
+
+Clean archive source `88ac9842be3f32c7c29189feb19a19f4883d24ea` builds image
+`sha256:2ba39fe1a0c1faa82e87169a3e1e85169b29d56bcd6cf5cde15f01e90f32384b`.
+The same image passes a final rollup of **24/24 scenarios in Compose and 24/24 in Kubernetes,
+retries zero**: eight default, pickup, match/rematch, two reconnect, controls, headed visibility,
+audio and nine latency cases. Seven latency cases cover queues/observers; two measure native input.
+
+The corrected browser harness source is `9a7cb77d1f5ca2161b3c9d5026cb4c821c37a88d`.
+All eight default cases pass again through each deployment using round/revision-correlated
+result assertions and one worker. The accepted seeded sixteen cases are unchanged. Original
+matrix evidence remains at `/tmp/grenadiers-v0319-acceptance`; recheck evidence is at
+`/tmp/grenadiers-v0319-harness-recheck`. Application build inputs remain identical to the clean
+image source through integration/documentation commits.
+
+The initial seeded Compose harness mounted a read-only file with host mode 0644. That run is
+invalidated and excluded: all sixteen seeded Compose scenarios were rerun with explicit mode
+0444 external fixture copies. The random default eight had no seed mount and were unaffected.
+Kubernetes used a root-owned mode-0444 projection throughout. No application source or image
+changed during either harness correction. Both final matrix and recheck evidence audits are clear.
+
+334 core tests, 163 server tests and two doctests pass; four dedicated performance profiles
+remain intentionally ignored. Rust line coverage is **94.21%**, above the unchanged 80% floor.
+All **230 web tests**, contracts, lint, Knip, builds and E2E static/24-scenario parity pass.
+Independent code review is clear after Heart grace was changed to checked elapsed time;
+tests cover its exact 60-tick boundary, repeated damage at the tick horizon and atomic step
+overflow, plus expiry, modifier interactions, stack caps and transient-state cleanup.
+
+Cargo-deny and both npm audits pass with zero npm vulnerabilities. Strict pinned Kubernetes
+1.33 schemas validate all three resources. Both deployment paths retain UID/GID 65532,
+read-only roots, dropped capabilities and no privilege escalation. Kubernetes keeps
+RuntimeDefault and 500m/256Mi limits. No seed is baked into the image. Archive-only pinned
+Trivy passes the existing HIGH/CRITICAL `--ignore-unfixed` filter without a Docker socket.
+
+Observed local/shaped latency maxima are Compose **47.049/159.419 ms** and Kubernetes
+**148.334/163.423 ms**, with zero samples above 250 ms and zero Kubernetes CPU throttles.
+These are bounded public-state delivery measurements, not pixel latency, FPS or WAN guarantees.
+All owned matrix/recheck projects, namespaces, helpers and forwarding were removed;
+unrelated workloads were preserved.
+
+The release establishes inventory/effect/damage state only. No new item pickup, equipment
+action, effect visibility, expanded profile or wire field is activated. Classic gameplay
+remains the live experience; [expanded-item decisions](game/expanded-items.md) define the next steps.
+
+## Retro pixel-art courtyard — 2026-10-17
+
+Clean archive source `1f591c2e86c78e19e4af1fb12a020f3ecd72c1ed` builds image
+`sha256:d8a99fef496cd0cb719308e62d77914945d4f695d04ec718354922db6c0b1967`.
+That exact image passes **24/24 scenarios in Compose and 24/24 in Kubernetes, retries zero**:
+eight default, pickup, match/rematch, two reconnect, controls, headed visibility, audio and
+nine latency cases. Seven latency cases exercise queues/observers and two measure native input.
+All sixteen deployment result files pass with no failed tests. A separate native visual helper
+passes 1/1; it is additional capture evidence, outside that matrix.
+
+Actual running-bomb and exposed-pickup desktop frames, plus a Polish 320-pixel terminal-flame
+result frame, pass visual inspection and overflow checks. [Committed captures](screenshots/pixel-art.md)
+show the application rather than the earlier art studies. The narrow flame frame is a retained
+RoundEnded result, with decorative animation stopped. New item icons and richer transition
+effects remain follow-up artwork; this increment delivers the existing arena/entity set.
+
+The integrated gates pass 317 core tests, 163 server tests and two doctests; four dedicated
+performance profiles remain intentionally ignored. All **230 web tests** pass with coverage
+above unchanged floors, together with contracts, lint, Knip, build and E2E static/parity checks.
+Independent rendering/lifecycle review is clear. Rust behavior and public contracts are unchanged.
+Dependency audits pass; strict pinned Kubernetes 1.33 schemas validate all three resources.
+
+Both paths run as UID/GID 65532 with a read-only root, dropped capabilities and no privilege
+escalation. Kubernetes retains RuntimeDefault, 500m/256Mi, the exact image digest and root-owned
+mode-0444 seed projection; Compose mounts its seed read-only at 0444. No seed is baked into
+the runtime image. Pinned archive-only Trivy reports zero vulnerabilities under the existing
+HIGH/CRITICAL `--ignore-unfixed` release filter, without a Docker socket.
+
+Observed local/shaped latency maxima: Compose **58.633/157.695 ms**, Kubernetes
+**122.876/165.744 ms**, zero samples above 250 ms and zero Kubernetes CPU throttles. These are
+bounded public-state delivery measurements, not FPS, pixel latency or WAN guarantees.
+Independent evidence audit is clear. Evidence remains at `/tmp/grenadiers-v0318-acceptance`;
+owned containers, namespace, helpers and forwarding were removed, with unrelated workloads
+preserved. Integration/documentation commits retain byte-identical application build inputs.
+
+The final harness source is `9a7cb77d1f5ca2161b3c9d5026cb4c821c37a88d`. A CI run exposed
+two pre-existing harness flakes also reproduced on the pre-art settings head: an unbound
+latest-snapshot read could cross the three-second result hold, and two workers overcommitted
+software WebGL on a two-core runner. Result assertions now capture the earliest and later
+same-round snapshots and the peer's exact revision. CI defaults to one worker; local and
+explicit overrides remain. Assertions and deadlines are unchanged; independent closure
+review is clear.
+
+The corrected eight default cases pass again through **both deployment paths, retries zero**,
+on the exact accepted image. Only two E2E files differ; application build inputs are identical.
+The previously accepted seeded sixteen cases are unchanged, giving a final rollup of 24/24
+per path. Recheck health/readiness, exact image identity, limits and cleanup are audited in
+`/tmp/grenadiers-v0318-harness-recheck`; the original acceptance retains scan, security,
+latency and visual evidence. All owned recheck resources were removed.
+
+## Shared room settings / gameplay v6 — 2026-10-17
+
+Clean image source `cf82db46477e0fddc8b9b0e137e5ffb64bb3ec56` builds
+`sha256:2a95de3f2252c63a59a293a672454509aca3261d78b0cff627e049c503028ccd`.
+Accepted test source `50228642ab9bf9d91faaeaaf343df327d2051e5b` changes only the Polish match
+assertion; all Docker application inputs are byte-identical. The same image passes **24/24
+scenarios in Compose and 24/24 in Kubernetes, retries zero**: eight default cases, pickup,
+match/rematch, two reconnect cases, controls, headed visibility, audio and nine latency cases.
+The latency suite includes seven queue/observer regressions and two native measurement profiles.
+All sixteen result files report passed with no failed tests.
+
+The new native two-browser scenario applies starting speed level four (5 cells/s), turn
+tolerance 64/1,024, one win and a 60-tick fuse. Both peers observe the accepted settings;
+actual actor speed, bomb lifetime, one-win match completion and retained rematch rules agree.
+English/Polish result copy reflects the configured target. Live Axe caught a heading-order
+defect, fixed before final acceptance with a regression; stale result-copy assertions were
+corrected without weakening the product checks. Earlier candidates remain diagnostic evidence.
+
+317 core and 163 server tests plus two doctests pass; four dedicated performance profiles
+remain intentionally ignored. Rust line coverage is **94.10%**, above the unchanged 80% floor.
+All **226 web tests**, contracts, lint, Knip, build and E2E static/24-scenario parity pass.
+Cargo-deny and both npm audits pass, with zero npm vulnerabilities. Independent behavioral
+review is clear after replay action-profile and minimum-tolerance findings were resolved.
+Strict pinned Kubernetes 1.33 schemas validate all three resources.
+
+Both paths return healthy/ready and run as 65532 with read-only roots, dropped capabilities
+and no privilege escalation. Kubernetes retains RuntimeDefault, 500m/256Mi limits, the exact
+image digest and a mode-0444 seed; no seed is baked into `/app`. Archive-only pinned Trivy
+passes the existing HIGH/CRITICAL `--ignore-unfixed` policy; this is a filtered release check.
+
+Observed latency maxima are Compose **49.466 ms local / 161.413 ms shaped** and Kubernetes
+**46.800 ms local / 180.287 ms shaped**, with zero samples above 250 ms. No Kubernetes CPU
+throttling was recorded. These bounded page-delivery samples are not WAN or human-playtest
+guarantees. Actual desktop and 320-pixel Polish [settings captures](screenshots/settings.md)
+pass visual inspection and overflow checks. Evidence is retained at
+`/tmp/grenadiers-v0317-acceptance`; owned projects, namespace, helpers and forwarding were
+removed while unrelated workloads remained. Later documentation commits preserve identical
+application build inputs.
+
 ## Forgiving turns / gameplay v5 — 2026-10-17
 
 Clean git-archive candidate `14ded36ac84ce09ef770ed5ba5bb8e2eab9d7b6f` builds image

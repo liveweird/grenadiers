@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.2.12 — 2026-10-17
+
+- Stage the protocol3 browser client, match scores/timers, completed-round and final-match
+  presentation, and authoritative two-player rematch consent.
+- Accept newer-epoch snapshots even when intermediate room views are coalesced; reset
+  controls/action IDs while preserving transport sequencing.
+- Share the existing Pixi arena and preserve authoritative vacancy over frozen actors.
+
+The new client/panel remains dormant until the bounded owner and coordinated activation land.
+
 ## 0.2.11 — 2026-10-17
 
 - Add a dormant authoritative adapter for real multi-round simulation and checked v3 publication.

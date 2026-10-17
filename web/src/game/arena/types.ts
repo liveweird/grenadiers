@@ -1,6 +1,15 @@
-import type { GameServerMessage } from '../schema'
+import type { GameState } from '../schema'
 
-export type SnapshotMessage = Extract<GameServerMessage, { type: 'snapshot' }>
+// Validated wire versions share this presentation boundary. The arena does not
+// interpret scores, match outcomes, event envelopes, or transport versions.
+export interface SnapshotMessage {
+  room: {
+    roomId: string
+    roundId: number
+    phase: { type: string }
+  }
+  state: GameState
+}
 export type Seat = 'one' | 'two'
 export type Direction = 'north' | 'east' | 'south' | 'west'
 

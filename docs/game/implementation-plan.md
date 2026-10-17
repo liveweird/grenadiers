@@ -4,7 +4,8 @@ Status: **execution plan**. M0 is complete and locally verified on 2026-10-16; M
 and locally verified on 2026-10-17. M2 is complete and locally verified
 on 2026-10-17. M3’s fixed-map two-browser duel is implemented and locally verified;
 M4 generated rounds and upgrades are complete and locally verified on 2026-10-17;
-M5 headless series/lifecycle are implemented; its remaining slices and M6–M8 remain planned.
+M5 series/lifecycle, v3 contracts/projection, and dormant runtime/browser adapters are implemented;
+bounded ownership and coordinated activation remain. M6–M8 remain planned.
 Published engineering prereleases are listed in `CHANGELOG.md` and GitHub Releases.
 
 The first product goal is a reliable, browser-based survival match between two humans. Build
@@ -271,8 +272,8 @@ Progress: v0.2.7 adds the headless [match-series component](match-series.md), bo
 record/outcome facts, holds, batched departures, and rematch votes. Live gameplay remains the
 single-round v2 preview. v0.2.8 adds the pure [automatic match lifecycle](match-lifecycle.md).
 v0.2.9 adds the dormant [v3 structural contract](protocol-v3.md); v0.2.10 adds checked room
-projection and semantic validation. v0.2.11 adds the dormant real simulation adapter. Bounded
-owner,
+projection and semantic validation. v0.2.11 adds the dormant real simulation adapter;
+v0.2.12 adds the dormant browser client/panel. Bounded owner,
 server/browser adapters, and
 coordinated first-to-three activation follow [ADR 0015](../decisions/0015-match-series-and-staged-progression.md).
 

@@ -13,6 +13,12 @@ export default defineConfig({
   expect: { timeout: 10_000 },
   use: {
     baseURL: BASE_URL,
+    // Keep headless Linux WebGL and compositing on the same ANGLE backend.
+    // Hybrid software compositing synchronously reads back each canvas frame
+    // and can delay native key events beyond the real game's turn window.
+    launchOptions: process.env.CI && process.platform === 'linux'
+      ? { args: ['--enable-gpu', '--use-gl=angle', '--use-angle=swiftshader'] }
+      : undefined,
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
     video: 'off',

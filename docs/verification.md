@@ -1,5 +1,26 @@
 # Repository verification
 
+## M4 headless compositor diagnosis and correction — 2026-10-17
+
+Hosted trace profiling finally isolated the repeated native-key overshoot: Chromium's hybrid
+software compositor synchronously called `GLES2::ReadPixels` during canvas commit, blocking
+its renderer thread 100–175 ms per frame. The baseline captured 38 readback stalls and a
+176 ms maximum commit; consistent ANGLE/SwiftShader compositing captured zero readback stalls
+and a 0.7 ms maximum commit. Native key-down acknowledgements improved from roughly 90 ms
+to 1–8 ms. React/AJV/Pixi JavaScript was not the dominant cost; changing game logic or pulse
+constants was not justified. Independent key-up scheduling was tested and rejected because
+one pulse collapsed to zero movement.
+
+The shared Playwright config now selects `--enable-gpu --use-gl=angle --use-angle=swiftshader`
+only for CI on Linux. Local macOS retains its existing hardware path. No browser security
+option, game code, tolerance, fuse, assertion, timeout or retry changes. The exact unchanged
+pickup source (`ab5a63d1a12175d9bd203bb28bee27fd7f84c069a5af841f4f88734a14f8188b`)
+passes the complete two-client scenario with retries disabled in 31.4 seconds. Independent
+configuration review and the full seven-scenario E2E static gate pass. Causal profiles and
+experiment logs are retained at `/tmp/grenadiers-m4-input-experiment/FINDINGS.md`.
+Both final hosted browser checks must pass before merge. The accepted application image is
+unchanged because this correction affects only browser execution configuration.
+
 ## M4 settled turn alignment — 2026-10-17
 
 Exact Node 24.21.0 Linux reproduction exposed the last corner condition: native key-up can

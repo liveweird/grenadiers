@@ -1,5 +1,20 @@
 # Repository verification
 
+## M6 grace-aware pure match lifecycle — 2026-10-17
+
+The combined locked server gate passes **265 core tests, 132 server tests, and 2 doctests**.
+Rust coverage is **6,748/7,186 lines, 93.90%**, above the unchanged 80% floor. Independent
+review reports no actionable lifecycle findings. Fourteen new cases cover exact grace
+boundaries, both seat orientations, staggered expiry, complete loss batches before expiry,
+first/second versus third-win finality, mixed departures, held/canceled countdowns, actual-round
+parity, terminal access, rematch, and atomic deadline/epoch/hold overflow.
+
+Running clock/scoring never settles grace before the complete loss batch. Held results retain
+their original completed record and earliest restart deadline; resumed players receive a fresh
+countdown on the next idle tick. Legacy v3 departures still interrupt and have no new-API
+call sites. Existing projection, owner, private capture, and native socket regressions pass.
+Network reconnect activation and exact-image deployment acceptance remain separate checks.
+
 ## M6 accepted-operation capture — 2026-10-17
 
 The locked server gate passes **251 core tests, 132 server tests, and 2 doctests**.

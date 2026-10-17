@@ -30,6 +30,9 @@ impl State {
         for actor in &mut self.actors {
             actor.bomb_grace.retain(|id| !plan.detonated.contains(id));
         }
+        self.world
+            .pickups
+            .apply_explosion(&plan.destroyed_blocks, &plan.flames);
         self.world.arena.remove_blocks(&plan.destroyed_blocks);
 
         // Tick is bounded by u64. On its final representable value there can be

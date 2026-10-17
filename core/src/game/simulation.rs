@@ -318,6 +318,9 @@ mod explosion_step;
 #[path = "flame_tests.rs"]
 mod flame_tests;
 #[cfg(test)]
+#[path = "pickup_tests.rs"]
+mod pickup_tests;
+#[cfg(test)]
 #[path = "placement_tests.rs"]
 mod placement_tests;
 #[cfg(test)]

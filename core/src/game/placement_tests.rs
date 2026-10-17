@@ -3,6 +3,7 @@ use std::collections::BTreeSet;
 use super::{ActorInit, InputAction, SeatInput, State};
 use crate::game::arena::{ARENA_CELL_COUNT, ARENA_HEIGHT, ARENA_WIDTH, Arena, Terrain};
 use crate::game::input::Direction;
+use crate::game::pickups::{Pickup, PickupKind};
 use crate::game::rules::RulesConfig;
 use crate::game::test_support::add_test_bomb;
 use crate::game::types::{CellId, EntityId, Position, SeatId, SpeedLevel, Tick, UNITS_PER_CELL};
@@ -137,7 +138,11 @@ fn capacity_is_derived_and_pickups_do_not_block_placement() {
     let one = Position::center(CellId::new(2, 5));
     let mut state = state_at(one, Position::center(CellId::new(12, 5)));
     add_test_bomb(&mut state, EntityId(90), CellId::new(8, 5), EntityId(10)).unwrap();
-    state.world.pickups.insert(CellId::new(2, 5));
+    state
+        .world
+        .pickups
+        .exposed
+        .insert(CellId::new(2, 5), Pickup::new(PickupKind::BombCapacity));
     state.step(&[place(SeatId::One)]).unwrap();
     assert_eq!(state.world().bombs().len(), 1);
 

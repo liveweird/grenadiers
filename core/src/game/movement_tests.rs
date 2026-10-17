@@ -3,6 +3,7 @@ use std::collections::BTreeSet;
 use crate::game::arena::{ARENA_CELL_COUNT, ARENA_HEIGHT, ARENA_WIDTH, Arena, Terrain};
 use crate::game::fixtures::fixed_arena;
 use crate::game::input::Direction;
+use crate::game::pickups::{Pickup, PickupKind};
 use crate::game::rules::RulesConfig;
 use crate::game::simulation::{ActorInit, InputAction, SeatInput, State, StateError};
 use crate::game::test_support::add_test_bomb;
@@ -247,10 +248,15 @@ fn touching_a_corner_glides_past_without_clipping_into_the_wall() {
 fn pickups_do_not_block_movement() {
     let mut world = open_world();
     let destination = CellId::new(3, 5);
-    world.pickups.insert(destination);
+    world
+        .pickups
+        .exposed
+        .insert(destination, Pickup::new(PickupKind::MovementSpeed));
     let start = Position::center(CellId::new(2, 5));
     let mut state = state_in_world(world, start, Direction::East);
     move_for(&mut state, Direction::East, 12);
 
     assert_eq!(state.actors()[0].position(), Position::center(destination));
+    assert!(state.world().exposed_pickups().contains_key(&destination));
+    assert_eq!(state.actors()[0].bomb_capacity(), 1);
 }

@@ -189,8 +189,8 @@ and deadline/expiry boundaries. The round result is decided after complete damag
 Progress: v0.1.6 adds bounded-schema generation; v0.1.7 defines strict gameplay control/lifecycle
 messages in Rust, JSON Schema, and generated TypeScript. v0.1.8 adds bounded snapshots/events,
 and v0.1.9 checks domain-to-wire conversion. v0.1.10 adds bounded anonymous HTTP sessions.
-v0.1.11 adds the headless room lifecycle; v0.1.12 authenticates gameplay sockets. Next come
-networked room ownership/routing, authoritative scheduling, browser controls/rendering, and
+v0.1.11 adds the headless room lifecycle; v0.1.12 authenticates gameplay sockets; v0.1.13 adds
+bounded networked room ownership/admission. Next come authoritative scheduling, browser controls/rendering, and
 two-browser duel acceptance. See the
 [protocol boundary](protocol.md). Diagnostic transport stays independently supported.
 

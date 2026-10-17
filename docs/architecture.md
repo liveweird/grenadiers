@@ -1,10 +1,9 @@
 # Architecture
 
-The implemented vertical slice is diagnostic transport: HTTP liveness/readiness and a
-WebSocket welcome/ping/pong exchange. The React shell exercises it. The server does not yet
-allocate player sessions, authenticate gameplay connections, or persist user data. A separate headless simulation
-in `core::game` implements movement, owned bombs, flames, damage, and one-round outcomes;
-the diagnostic routes do not run it.
+The server provides HTTP liveness/readiness, diagnostic WebSockets, anonymous credentials,
+and authenticated two-seat Waiting rooms. The React shell currently exposes diagnostics.
+A separate deterministic simulation in `core::game` implements movement, owned bombs,
+flames, damage, and one-round outcomes. Room owners do not run that simulation yet.
 
 ## Boundaries
 
@@ -20,10 +19,10 @@ readiness checks optional PostgreSQL only when configured.
 
 ## Match-state decision
 
-For the first playable version, one in-process owner will hold each match and advance a
-server-controlled fixed tick. Human and future bot adapters will submit the same commands
+One in-process task owns each room; authoritative simulation scheduling is the next slice.
+For playable rounds it will advance a server-controlled fixed tick. Human and future bot adapters will submit the same commands
 through bounded queues; clients will not submit authoritative positions, damage, or outcomes.
-These are architectural constraints for the next phase, not implemented gameplay.
+The bounded admission owner exists; gameplay command execution remains planned.
 
 Start with two players per match. Transport sockets are not player seats; the diagnostic
 welcome's `maxPlayers: 2` describes the planned initial match capacity. Support for more
@@ -55,13 +54,14 @@ snapshot/event wire shapes. Explicit fallible adapters check public domain state
 report windows before wire publication. `POST /api/v1/game/session` now issues bounded,
 short-lived anonymous credentials using OS randomness. The gameplay WebSocket handler
 atomically claims one owner, shares diagnostic capacity, and enforces bounded connection
-policy; networked room ownership follows.
+policy. A bounded room registry now routes code-based admission to one owner task per room.
 
 [ADR 0009](decisions/0009-room-lifecycle.md) keeps the implemented headless two-seat
 [lifecycle](game/rooms.md) in `core::room`. Credentials, discovery, binding generations,
-publication, and the asynchronous room owner stay outside that pure state machine.
+publication, and the asynchronous room owner stay outside that pure state machine. The server
+implements discovery, generation-bound membership, departure cleanup, and Waiting views.
 
-Map generation, lag compensation, network room admission and matchmaking
+Map generation, lag compensation, authoritative room gameplay, and matchmaking
 still need implementation at their planned milestones. Add focused ADRs before
 dependent work; preserve the specified lifecycle and gameplay rules.
 

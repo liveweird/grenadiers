@@ -14,6 +14,15 @@ releases the registry synchronously. Controlled-time owner tests cover the five-
 boundary; the live socket expiry path shares this notification handling but is not held open
 for five minutes in browser acceptance. No countdown or gameplay execution is claimed.
 
+A clean committed-tree build produces
+`sha256:4532c6b48d24baf645de2040ada5d59c45b54ecd8ee08f4afa980eb7edd64794`.
+Compose and ready local Kubernetes use this exact image. Separate health/readiness checks
+and all **four candidate browser scenarios** pass through both paths, including actual
+create/join/full/leave/rejoin behavior and authentication retention. Strict schemas pass with
+3 valid resources; pinned socket-free Trivy reports zero HIGH/CRITICAL vulnerabilities.
+Temporary deployment/export/archive/forward/symlink resources are removed; the candidate
+image is retained. This evidence update changes documentation only.
+
 ## M3 authenticated gameplay WebSocket — 2026-10-17
 
 The integrated locked server gate passes **136 core tests, 37 server tests, and 2 doctests**.

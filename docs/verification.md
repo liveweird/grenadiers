@@ -1,5 +1,22 @@
 # Repository verification
 
+## M4 pickup escape safety follow-up — 2026-10-17
+
+Hosted CI at `071a952` still caught a first-escape death despite passing local pulse-controller
+runs. The pickup-only route now holds native South until the live public actor reaches
+`y >= 2560`, or East until `x >= 2944` for the second escape. Both exceed the actual 2368-unit
+blast-clear boundary. Key release runs in `finally`; real bombs/flames clear before exact
+centering resumes. Generic movement, the three-second fuse, physics, <=128 position bounds,
+pickups, both HUDs, captured bomb ranges, IDs, and collection events remain unchanged.
+
+Independent geometry/control review is clear. The pinned Playwright 1.63 Linux image with two
+affinity-limited CPUs and retries disabled passes **10/10**, followed by **6/6 on final bytes**.
+Native Chromium against the isolated Compose fixture passes **3/3** with retries disabled.
+Typecheck and zero-warning ESLint pass. Linux evidence is retained in
+`/tmp/grenadiers-m4-route-debug/e2e/linux-route-safety{,-final}.log`; the native result was
+observed directly, not saved to a separate log. Application build inputs are unchanged from
+the previously accepted exact image. Final hosted CI is required before merge.
+
 ## M4 live generated rounds — 2026-10-17
 
 The locked server gate passes **178 core tests, 85 server tests, and 2 doctests**.

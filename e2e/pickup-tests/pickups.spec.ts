@@ -98,6 +98,41 @@ async function clearHazards(game: ObservedGame) {
   }, { intervals: [30] }).toBe(0)
 }
 
+async function escapeBomb(
+  page: Page,
+  game: ObservedGame,
+  legs: readonly {
+    key: 'ArrowRight' | 'ArrowDown'
+    direction: 'east' | 'south'
+    safelyClear: () => boolean
+  }[],
+  destination: Cell,
+) {
+  for (const leg of legs) {
+    const commandCount = game.commands.length
+    await page.keyboard.down(leg.key)
+    try {
+      await expect.poll(() => game.commands.slice(commandCount)
+        .some((command) => command.type === 'movement' && command.direction === leg.direction))
+        .toBe(true)
+      await expect.poll(() => leg.safelyClear(), { intervals: [15] }).toBe(true)
+    } finally {
+      await page.keyboard.up(leg.key)
+    }
+    await expect.poll(() => {
+      const commands = game.commands.slice(commandCount)
+      const movement = commands.findIndex((command) => command.type === 'movement'
+        && command.direction === leg.direction)
+      return movement >= 0 && commands.slice(movement + 1)
+        .some((command) => command.type === 'movement' && command.direction === null)
+    }, { intervals: [15] }).toBe(true)
+  }
+  // Once the actor is outside the blast footprint, let the real fuse and flames
+  // finish before spending time on exact fixture-center assertions.
+  await clearHazards(game)
+  await moveTo(page, game, destination)
+}
+
 async function expectStats(pages: Page[], values: string[]) {
   for (const page of pages) {
     await expect(page.getByLabel('Player one upgrades').locator('dd')).toHaveText(values)
@@ -131,8 +166,12 @@ test('two browsers collect generated upgrades while old bombs keep their capture
 
     await moveTo(one, games[0], { column: 2, row: 1 })
     await plant(one, games[0])
-    await moveTo(one, games[0], { column: 1, row: 2 })
-    await clearHazards(games[0])
+    await moveTo(one, games[0], { column: 1, row: 1 })
+    await escapeBomb(one, games[0], [{
+      key: 'ArrowDown',
+      direction: 'south',
+      safelyClear: () => actor(games[0]).position.y >= 2_560,
+    }], { column: 1, row: 2 })
     await expect.poll(() => latestSnapshot(games[0])!.state.pickups)
       .toContainEqual({ cell: { column: 3, row: 1 }, kind: 'bombCapacity' })
     await one.screenshot({ path: testInfo.outputPath('capacity-revealed.png'), fullPage: true })
@@ -143,8 +182,12 @@ test('two browsers collect generated upgrades while old bombs keep their capture
     await moveTo(one, games[0], { column: 1, row: 1 })
     await moveTo(one, games[0], { column: 1, row: 2 })
     await plant(one, games[0])
-    await moveTo(one, games[0], { column: 2, row: 1 }, ['y', 'x'])
-    await clearHazards(games[0])
+    await moveTo(one, games[0], { column: 1, row: 1 }, ['y', 'x'])
+    await escapeBomb(one, games[0], [{
+      key: 'ArrowRight',
+      direction: 'east',
+      safelyClear: () => actor(games[0]).position.x >= 2_944,
+    }], { column: 3, row: 1 })
     await expect.poll(() => latestSnapshot(games[0])!.state.pickups)
       .toContainEqual({ cell: { column: 1, row: 3 }, kind: 'blastRange' })
     await moveTo(one, games[0], { column: 1, row: 1 })

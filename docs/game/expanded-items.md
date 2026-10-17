@@ -118,7 +118,7 @@ With two humans there is only one possible rival; random target selection waits 
 
 ## Ordered-action foundation
 
-The v0.3.20 candidate retains individual accepted manual actions through server admission and
+The v0.3.20 foundation retains individual accepted manual actions through server admission and
 core input processing. Classic still resolves one simultaneous placement claim per seat;
 sequential retries must not let duplicate requests defeat a shared-cell conflict. Raw-core
 Clear cancels earlier actions; server movement clearing and TTL expiry preserve accepted
@@ -133,7 +133,7 @@ Replay checkpoints compare the complete pending queue; journal records and publi
 
 ## Typed domain bomb foundation
 
-The v0.3.21 candidate distinguishes Timed, Remote and Contact triggers in core bomb records
+The v0.3.21 foundation distinguishes Timed, Remote and Contact triggers in core bomb records
 and domain views/events. Untimed records have no deadline. Current State construction,
 stepping and Classic explosion planning reject unsupported triggers before simulation mutation;
 production placement still creates only Timed bombs with checked fuse arithmetic.
@@ -165,8 +165,8 @@ live transport/browser migration are separate increments. See [v7 contract](prot
 ## Release sequence and acceptance
 
 1. Pure core inventory/effects/damage foundation; retain classic traces and protocol behavior.
-2. Ordered manual commands with a Classic simultaneous-placement adapter (v0.3.20 candidate).
-3. Typed domain triggers and checked legacy wire projection (v0.3.21 candidate). Forced-contact
+2. Ordered manual commands with a Classic simultaneous-placement adapter (v0.3.20).
+3. Typed domain triggers and checked legacy wire projection (v0.3.21). Forced-contact
    helpers follow playable protection items rather than delaying them.
 4. Dormant gameplay-v7 schema/DTOs/checked values (v0.3.22 candidate), then canonical validation
    and recipient projections, followed by integrated server/browser migration.

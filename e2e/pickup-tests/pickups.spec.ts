@@ -24,12 +24,10 @@ async function moveTo(page: Page, game: ObservedGame, cell: Cell) {
       if (Math.abs(delta) <= 128) break
       const keys = axis === 'x' ? ['ArrowLeft', 'ArrowRight'] : ['ArrowUp', 'ArrowDown']
       const key = keys[Number(delta > 0)]
-      const sign = Math.sign(delta)
-      await page.keyboard.down(key)
-      await expect.poll(() => sign * (target[axis] - actor(game).position[axis]), {
-        intervals: [10], timeout: 2_000,
-      }).toBeLessThanOrEqual(128)
-      await page.keyboard.up(key)
+      // Bound each native input pulse: slow software rendering can deliver the
+      // next snapshot after a held key has already crossed the target center.
+      const duration = Math.min(80, Math.max(25, Math.abs(delta) / 3.072 / 2))
+      await page.keyboard.press(key, { delay: duration })
       const stoppedRevision = latestSnapshot(game)!.room.revision
       await expect.poll(() => latestSnapshot(game)!.room.revision, { intervals: [15] })
         .toBeGreaterThan(stoppedRevision + 1)
@@ -102,9 +100,10 @@ test('two browsers collect generated upgrades while old bombs keep their capture
     await clearHazards(games[0])
     await expect.poll(() => latestSnapshot(games[0])!.state.pickups)
       .toContainEqual({ cell: { column: 1, row: 3 }, kind: 'blastRange' })
+    await moveTo(one, games[0], { column: 1, row: 1 })
+    await moveTo(one, games[0], { column: 1, row: 2 })
     const old = await plant(one, games[0])
     expect(old.range).toBe(2)
-    await moveTo(one, games[0], { column: 1, row: 1 })
     await moveTo(one, games[0], { column: 1, row: 3 })
     await expectStats(pages, ['1', '2', '3', '1'])
     const upgraded = await plant(one, games[0])

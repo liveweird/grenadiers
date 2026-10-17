@@ -5,6 +5,9 @@ use super::{
 };
 
 pub fn validate_room_view(room: &RoomView) -> Result<(), RoomProjectionError> {
+    if room.round_id.get() < room.round_number.get() {
+        return Err(RoomProjectionError::InvalidCounter);
+    }
     validate_seats(room)?;
     validate_last_round(room)?;
     match &room.phase {
@@ -62,20 +65,29 @@ fn validate_last_round(room: &RoomView) -> Result<(), RoomProjectionError> {
     if last.ended_at > room.tick
         || last.round_number.get() > round_number
         || last.round_id > room.round_id
+        || last.round_id.get() < last.round_number.get()
         || score_sum > last.round_number.get()
     {
         return Err(RoomProjectionError::InvalidCompletedRound);
     }
-    if let WireRoundResult::Winner { seat } = last.result
-        && score(room, seat) == 0
-    {
-        return Err(RoomProjectionError::InvalidScores);
+    match last.result {
+        WireRoundResult::Winner { seat } if score(room, seat) == 0 => {
+            return Err(RoomProjectionError::InvalidScores);
+        }
+        WireRoundResult::Draw { .. } if score_sum >= last.round_number.get() => {
+            return Err(RoomProjectionError::InvalidScores);
+        }
+        _ => {}
     }
     Ok(())
 }
 
 fn validate_waiting(room: &RoomView) -> Result<(), RoomProjectionError> {
-    if room.round_number.get() != 0 || !scores_are(room, 0, 0) || room.last_round.is_some() {
+    if room.round_number.get() != 0
+        || !scores_are(room, 0, 0)
+        || room.last_round.is_some()
+        || (both_occupied(&room.seats) && room.seats.iter().all(|seat| seat.ready))
+    {
         return Err(RoomProjectionError::InvalidPhase);
     }
     no_rematch_votes(&room.seats)
@@ -162,6 +174,7 @@ fn validate_match_result(
         || deadline(ended_at, 180) != Some(rematch_at)
         || room.seats.iter().any(|seat| seat.ready)
         || (room.tick < rematch_at && room.seats.iter().any(|seat| seat.rematch_ready))
+        || (both_occupied(&room.seats) && room.seats.iter().all(|seat| seat.rematch_ready))
         || room.last_round.is_some_and(|last| last.ended_at > ended_at)
     {
         return Err(RoomProjectionError::InvalidPhase);
@@ -172,12 +185,23 @@ fn validate_match_result(
             reason: MatchWinnerReason::RoundWins,
         } => validate_score_winner(room, seat, ended_at),
         MatchResult::Winner {
+            seat,
             reason: MatchWinnerReason::Forfeit,
-            ..
-        }
-        | MatchResult::Interrupted { .. } => validate_non_score_terminal(room, false),
+        } => validate_forfeit(room, seat),
+        MatchResult::Interrupted { .. } => validate_non_score_terminal(room, false),
         MatchResult::Abandoned => validate_non_score_terminal(room, true),
     }
+}
+
+fn validate_forfeit(room: &RoomView, winner: Seat) -> Result<(), RoomProjectionError> {
+    let loser = match winner {
+        Seat::One => &room.seats[1],
+        Seat::Two => &room.seats[0],
+    };
+    if loser.occupied {
+        return Err(RoomProjectionError::InvalidMatchResult);
+    }
+    validate_non_score_terminal(room, false)
 }
 
 fn validate_score_winner(

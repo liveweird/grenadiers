@@ -1,9 +1,10 @@
+use crate::game::{RoundResult, SeatId};
 use crate::protocol::{Counter, Seat, Tick};
 
 use super::super::{RoomPhase, RoundCount, Wins};
 use super::test_support::{
-    first_running_view, initial_countdown_view, inter_countdown_view, later_running_view,
-    result_view, score_terminal_lifecycle, waiting_view,
+    first_running_view, initial_countdown_view, inter_countdown_view, later_running_view, occupied,
+    project, result_view, score_terminal_lifecycle, start_initial, start_next, waiting_view,
 };
 use super::{RoomProjectionError, project_room_view, validate_room_view};
 
@@ -50,6 +51,13 @@ fn waiting_requires_fresh_match_facts() {
     let mut room = waiting_view();
     room.last_round = result_view().last_round;
     assert_error(room, RoomProjectionError::InvalidCompletedRound);
+
+    let mut lifecycle = occupied();
+    lifecycle.set_ready(SeatId::One, true).unwrap();
+    let mut room = project(&lifecycle);
+    assert!(validate_room_view(&room).is_ok());
+    room.seats[1].ready = true;
+    assert_error(room, RoomProjectionError::InvalidPhase);
 }
 
 #[test]
@@ -204,4 +212,39 @@ fn global_completed_round_bounds_reject_future_gap_and_impossible_score_history(
     let mut room = base;
     room.scores.two = Wins::new(1).unwrap();
     assert_error(room, RoomProjectionError::InvalidCompletedRound);
+}
+
+#[test]
+fn global_round_ids_cannot_trail_their_actual_round_numbers() {
+    let mut room = later_running_view();
+    room.round_id = Counter::new(1).unwrap();
+    assert_error(room, RoomProjectionError::InvalidCounter);
+
+    let mut lifecycle = occupied();
+    for _ in 0..2 {
+        lifecycle.set_ready(SeatId::One, true).unwrap();
+        lifecycle.set_ready(SeatId::Two, true).unwrap();
+        lifecycle.set_ready(SeatId::One, false).unwrap();
+    }
+    start_initial(&mut lifecycle);
+    lifecycle
+        .complete_running_tick(Some(RoundResult::Winner(SeatId::One)))
+        .unwrap();
+    start_next(&mut lifecycle);
+    lifecycle
+        .complete_running_tick(Some(RoundResult::Winner(SeatId::Two)))
+        .unwrap();
+    start_next(&mut lifecycle);
+    let mut room = project(&lifecycle);
+    assert!(validate_room_view(&room).is_ok());
+    room.last_round.as_mut().unwrap().round_id = Counter::new(1).unwrap();
+    assert_error(room, RoomProjectionError::InvalidCompletedRound);
+}
+
+#[test]
+fn latest_draw_cannot_account_for_a_point_in_its_round() {
+    let mut room = inter_countdown_view();
+    assert!(validate_room_view(&room).is_ok());
+    room.scores.one = Wins::new(1).unwrap();
+    assert_error(room, RoomProjectionError::InvalidScores);
 }

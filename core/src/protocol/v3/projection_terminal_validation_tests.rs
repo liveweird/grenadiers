@@ -68,11 +68,11 @@ fn score_terminal_requires_exact_third_win_record_and_timing() {
     room.last_round.as_mut().unwrap().result = WireRoundResult::Draw {
         reason: crate::protocol::DrawReason::Timeout,
     };
-    assert_error(room, RoomProjectionError::InvalidMatchResult);
+    assert_error(room, RoomProjectionError::InvalidScores);
 
     let mut room = base.clone();
     room.last_round.as_mut().unwrap().round_id = Counter::new(room.round_id.get() - 1).unwrap();
-    assert_error(room, RoomProjectionError::InvalidMatchResult);
+    assert_error(room, RoomProjectionError::InvalidCompletedRound);
 
     let mut room = base.clone();
     room.phase = RoomPhase::MatchResult {
@@ -99,7 +99,7 @@ fn non_score_terminal_allows_only_current_or_immediately_prior_record() {
 
     let mut room = later_running_forfeit_view();
     room.round_number = RoundCount::new(3).unwrap();
-    assert_error(room, RoomProjectionError::InvalidCompletedRound);
+    assert_error(room, RoomProjectionError::InvalidCounter);
 
     let mut room = later_running_forfeit_view();
     room.last_round.as_mut().unwrap().round_id = room.round_id;
@@ -138,6 +138,25 @@ fn abandonment_requires_both_seats_vacant() {
 }
 
 #[test]
+fn forfeit_requires_the_named_loser_vacant_but_allows_later_winner_departure() {
+    let mut invalid = forfeit_terminal_view();
+    invalid.seats[0].occupied = true;
+    assert_error(invalid, RoomProjectionError::InvalidMatchResult);
+
+    let mut lifecycle = occupied();
+    start_initial(&mut lifecycle);
+    lifecycle
+        .depart_batch([Some(DepartureReason::Explicit), None])
+        .unwrap();
+    lifecycle
+        .depart_batch([None, Some(DepartureReason::Explicit)])
+        .unwrap();
+    let room = project(&lifecycle);
+    assert!(room.seats.iter().all(|seat| !seat.occupied));
+    assert!(validate_room_view(&room).is_ok());
+}
+
+#[test]
 fn terminal_rematch_flags_require_elapsed_hold_and_occupied_seats() {
     let mut lifecycle = score_terminal_lifecycle();
     let mut early = project(&lifecycle);
@@ -153,6 +172,10 @@ fn terminal_rematch_flags_require_elapsed_hold_and_occupied_seats() {
     let mut invalid = voted;
     invalid.seats[0].occupied = false;
     assert_error(invalid, RoomProjectionError::InvalidSeats);
+
+    let mut impossible_consensus = project(&lifecycle);
+    impossible_consensus.seats[1].rematch_ready = true;
+    assert_error(impossible_consensus, RoomProjectionError::InvalidPhase);
 }
 
 #[test]

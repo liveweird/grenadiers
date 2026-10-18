@@ -1,5 +1,45 @@
 # Repository verification
 
+## Isolated renderer matrix — 2026-10-18 — non-reproduction
+
+Clean source `232eba28401af0eb9e50ce3f9649e879e4ecca72`, archive SHA-256
+`189468834f21f9d2fa8d031b862abac0494ad716b3b84d4aeb106b4ab057ec48`, runs the predeclared
+six-cell matrix once. All six cases pass on their first attempts with zero retries. The pinned
+browser is `66b346...a91c`, Node24.21.0 and Playwright1.63.0; browser cpuset0,1 has no CPU quota
+and Docker networking is disabled. All11 fixture assets match manifest SHA-256
+`afbee68eb81b1886a0fe8ecd383fb4306e6de85d9dbe14fcc7d13b28662541ea`.
+
+| Primary/peer | Capture command, ms |
+| --- | ---: |
+| Empty/empty |104.066|
+| Active/empty |645.068|
+| Suspended/empty |60.704|
+| Empty/active |547.537|
+| Active/active |654.718|
+| Suspended/active |552.255|
+
+All54 stage pairs complete successfully, with no pending stage or diagnostic failure.
+Pre/post state checks preserve canvas identity, visibility, mode and actual update histories.
+Both planned active/suspended comparisons have different delivered ordinal histories, so
+neither qualifies as a matched contrast. No multi-second capture reproduces. The experiment
+is stopped without enlargement or rerun; no GPU cause or production lifecycle remedy follows.
+
+Independent evidence review validates source, assets, reports, histories, isolation arguments,
+probes and cleanup. Inputs are read-only bind mounts; the container root and temporary paths
+remain writable. No cross-origin requests or WebSockets are observed; same-origin requests
+are permitted and are not independently logged. These limits correct broader original summary
+wording in a preserved audit addendum. Evidence: `/tmp/grenadiers-pixi-lifecycle-acceptance`;
+original622-file manifest SHA-256 `07c6f63142938a5af0aa5a1d0d511db359d9206b358fc457f8af7411cfe0ffc7`,
+audit17-file manifest `7f044086a30e360f12e06036eeedf8e8e1b1c1567bdd97cdd4ce2e5c1a0d1dd2`.
+
+The final attribution task profiles the original natural reconnect case with explicitly
+opt-in, bounded GL submission counters, public scene counts and canvas geometry, process CPU
+deltas and an arguments-stripped browser trace around its first audit/capture. Production
+rendering and release assertions remain unchanged. One native profile is planned; only if
+capture stays below one second may one predeclared hosted evaluation follow. Incomplete or
+unsupported profiling cannot establish absent work. This packet must select a measured code
+change or record the unresolved blocker and return to independent gameplay implementation.
+
 ## Hosted capture attribution — 2026-10-18 — isolated reproduction pending
 
 Exact instrumented head `482c8ba59ce4c2e0de413ecae7c020cf68ade51b` fails both browser jobs
@@ -77,7 +117,8 @@ at **26/26 per target,52/52 total**: four stage-diagnostic cases, two fresh audi
 unaffected retained cases. Evidence and scope addenda remain under
 `/tmp/grenadiers-v0322-audio-closure-acceptance`. The native composite does not establish that
 the hosted capture timeout is resolved; the next exact-head CI evaluation supplies new
-screenshot-substage observations. No application or E2E input changes follow this acceptance.
+screenshot-substage observations. That evidence-only update changes neither application nor
+E2E inputs; later diagnostic changes are recorded separately above.
 
 ## Screenshot substage diagnostics — 2026-10-18 — native attributed
 

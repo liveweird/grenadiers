@@ -1,13 +1,46 @@
 # Repository verification
 
-## Live-v7 terrain cache integration — 2026-10-18 — refreshed native acceptance pending
+## Live-v7 HUD wrapping correction — 2026-10-18 — refreshed image acceptance pending
 
-The current terrain-cache/shared-diagnostics integration passes all 275 web tests, with coverage
-of 95.08/90.80/94.68/97.56% above the unchanged 85% floors, production and diagnostic-fixture builds, and E2E
-static checks with 27 documented scenarios. Core, server, version and API content are unchanged
-by this integration. The native record below certifies the earlier source
-`893c150fcfcfdcd065418deb1349cb7852106df0`; it excludes
-the terrain cache. Fresh native acceptance and final-head CI remain required for this tree.
+Visual review of the passing native baseline exposed overlapping Polish HUD labels at 320px.
+Labels and values now wrap without hiding or truncating the eight named fields. The real
+Polish 320px match scenario checks text-range containment and cross-cell overlap for both seats.
+Independent review and all 275 web tests, coverage, builds and E2E static parity 27 pass. A new image and complete fresh acceptance
+are required before publication. The audited 52/52 record below certifies source `b1d0340`
+only; it does not certify this later layout correction.
+
+## Pre-layout live-v7 terrain-cache baseline — 2026-10-18 — native 52/52
+
+Clean source `b1d0340e66300057e11de1a3dbcf57950850a793`, archive SHA-256
+`1b752f0619592091bf54ed88dfa4b636625714ea028ee4355df0de0e7ee638ea`, builds one image:
+`sha256:8f420bbf1cd7a1c6a6632d6dbb79b0eae7d0b2a91c670d1ff3e08bb3e6098e23`.
+Its saved archive hashes to `e7125cea23b212ecc5a39a94645a5f72eb4f9f8aba8815482d2a4d3041e91d5d`.
+Fresh ordinary acceptance passes **26/26 Compose and 26/26 Kubernetes**, all first attempts,
+retries zero, one worker. This is a complete fresh run, with no carried cases. All eight HUD
+fields, live-v7 bindings, original browser assertions and budgets are preserved. Capture
+profiling is unset; normal failure capture and all 42 configured screenshots are retained.
+
+Each target passes 15 functional and 11 latency cases. Four profiles have 20 samples each,
+zero exceedances and zero CPU throttling. Local/shaped maxima are **47.241/161.882ms Compose**
+and **126.458/162.159ms Kubernetes**. Strict exact-200 JSON/no-store probes, runtime hardening,
+external mode-0444 seed fixtures, three fresh Kubernetes pod UIDs, serial direct-pod forwarding
+in one recorded harness invocation and complete cleanup pass. Pinned archive-only Trivy finds
+zero fixable HIGH/CRITICAL vulnerabilities; strict Kubernetes 1.33 validates all three resources.
+Initial forwarding-not-ready probes remain preserved before successful strict probes; no
+browser scenario was retried. Quiet acknowledgements cover the named local workers and do not
+claim global host idleness.
+
+All **275 web tests** pass with coverage **95.08/90.80/94.68/97.56%**; production/diagnostic
+builds, contracts, lint, Knip and E2E static parity 27 pass. Backend checks remain **375 core,
+174 server and two doctests in each debug/release profile**, with Rust line coverage **93.27%**.
+Independent implementation/integration and complete native-evidence reviews are clear.
+Final-head CI and publication remain required. Live rooms use v7; optional pickups
+remain disabled. The final evidence update changes documentation only after the accepted source.
+
+Evidence: `/tmp/grenadiers-v0324-terrain-native-acceptance`, 949-file manifest SHA-256
+`1068113a6564ebb80c2b72463c7d5ee35dab4deb8e821cd308304dfd5adc9482`.
+
+## Earlier live-v7 verification records
 
 ## Live-v7 HUD acceptance — 2026-10-18 — native verified, publication pending
 

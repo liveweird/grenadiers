@@ -5,7 +5,7 @@ use crate::game::inventory::{Equipment, SpecialWeapon};
 use crate::game::rules::RulesConfig;
 use crate::game::test_support::add_test_bomb_with_deadline;
 use crate::game::types::{EntityId, Position, SeatId, SpeedLevel, Tick};
-use crate::game::{StepError, World, fixed_arena};
+use crate::game::{DamagePreventionSource, StepError, StepEventKind, World, fixed_arena};
 
 fn state_at(tick: Tick) -> State {
     let arena = fixed_arena();
@@ -43,7 +43,20 @@ fn heart_absorbs_both_fire_passes_and_shield_preserves_heart() {
     let grace = heart.actors[0].damage_grace.unwrap();
     assert!(grace.is_active(Tick(1)));
     assert_eq!(grace.remaining_ticks(Tick(1)), 60);
-    assert!(report.events.is_empty());
+    assert_eq!(
+        report
+            .events
+            .iter()
+            .filter(|event| matches!(
+                &event.kind,
+                StepEventKind::DamagePrevented {
+                    source: DamagePreventionSource::Heart,
+                    ..
+                }
+            ))
+            .count(),
+        1
+    );
 
     let mut shield = state_at(Tick(0));
     shield.actors[0]

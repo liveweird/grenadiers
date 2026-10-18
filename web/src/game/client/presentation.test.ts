@@ -17,7 +17,7 @@ function state(): GameClientState {
   }
 }
 
-describe('v7 arena presentation', () => {
+describe('v8 arena presentation', () => {
   it('removes hidden actors and reveals them only at their new public position', () => {
     const current = state()
     expect(presentSnapshot(current)?.state.actors.map((actor) => actor.seat)).toEqual(['one', 'two'])

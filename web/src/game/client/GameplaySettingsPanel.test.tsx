@@ -28,7 +28,8 @@ describe('gameplay settings panel', () => {
     await user.click(screen.getByRole('button', { name: 'Apply rules' }))
 
     expect(apply).toHaveBeenCalledWith({
-      startingSpeedLevel: 4, turnAssistUnits: 64, winsToFinish: 1, bombFuseTicks: 60, enabledItems: [],
+      startingSpeedLevel: 4, turnAssistUnits: 64, winsToFinish: 1, bombFuseTicks: 60,
+      enabledItems: ['heart'],
     })
   })
 
@@ -61,7 +62,33 @@ describe('gameplay settings panel', () => {
     expect(apply).not.toHaveBeenCalled()
     await user.click(screen.getByRole('button', { name: 'Apply rules' }))
     expect(apply).toHaveBeenCalledWith({
-      startingSpeedLevel: 0, turnAssistUnits: 256, winsToFinish: 3, bombFuseTicks: 180, enabledItems: [],
+      startingSpeedLevel: 0, turnAssistUnits: 256, winsToFinish: 3, bombFuseTicks: 180,
+      enabledItems: ['heart'],
     })
+  })
+
+  it('offers an availability-driven Heart toggle and a distinct Classic preset', async () => {
+    const apply = vi.fn(() => true)
+    const user = userEvent.setup()
+    const view = render(<MantineProvider env="test"><GameplaySettingsPanel room={room(1)} youSeat="one"
+      pending={false} copy={en} onApply={apply} /></MantineProvider>)
+
+    expect(screen.getByRole('checkbox', { name: 'Heart' })).toBeChecked()
+    expect(screen.getByText(/Absorbs one lethal blast/)).toBeVisible()
+    await user.click(screen.getByRole('button', { name: 'Classic settings' }))
+    expect(screen.getByRole('checkbox', { name: 'Heart' })).not.toBeChecked()
+    await user.click(screen.getByRole('button', { name: 'Apply rules' }))
+    expect(apply).toHaveBeenLastCalledWith({
+      startingSpeedLevel: 0, turnAssistUnits: 256, winsToFinish: 3,
+      bombFuseTicks: 180, enabledItems: [],
+    })
+
+    const unavailable = room(2)
+    unavailable.availableItems = []
+    unavailable.settings.enabledItems = []
+    view.rerender(<MantineProvider env="test"><GameplaySettingsPanel room={unavailable} youSeat="one"
+      pending={false} copy={pl} onApply={apply} /></MantineProvider>)
+    expect(screen.queryByRole('checkbox', { name: 'Serce' })).not.toBeInTheDocument()
+    expect(pl.settings.heartDescription).toMatch(/śmiertelnym wybuchem/)
   })
 })

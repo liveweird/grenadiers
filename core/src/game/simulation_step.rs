@@ -2,7 +2,7 @@ use std::collections::BTreeMap;
 
 use super::{RoundResult, SeatInput, State, StepError, StepReport};
 use crate::game::bombs::BombTrigger;
-use crate::game::damage::{DamageOutcome, apply_damage};
+use crate::game::damage::{DamageOutcome, DamagePreventionSource, apply_damage};
 use crate::game::events::{EventAudience, StepEvent, StepEventKind};
 use crate::game::geometry::MovementTrace;
 use crate::game::movement;
@@ -115,8 +115,33 @@ impl State {
             &mut actor.damage_grace,
             tick,
         );
-        if outcome != DamageOutcome::Eliminated {
-            return;
+        match outcome {
+            DamageOutcome::IgnoredGrace => return,
+            DamageOutcome::AbsorbedShield => {
+                events.push(StepEvent::new(
+                    tick,
+                    EventAudience::Both,
+                    StepEventKind::DamagePrevented {
+                        id: actor.id,
+                        seat: actor.seat,
+                        source: DamagePreventionSource::Shield,
+                    },
+                ));
+                return;
+            }
+            DamageOutcome::AbsorbedHeart { .. } => {
+                events.push(StepEvent::new(
+                    tick,
+                    EventAudience::Both,
+                    StepEventKind::DamagePrevented {
+                        id: actor.id,
+                        seat: actor.seat,
+                        source: DamagePreventionSource::Heart,
+                    },
+                ));
+                return;
+            }
+            DamageOutcome::Eliminated => {}
         }
         actor.kill();
         events.push(StepEvent::new(

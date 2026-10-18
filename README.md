@@ -3,7 +3,7 @@
 A browser-based multiplayer game inspired by classic Bomberman/Dynablaster.
 The initial playable profile supports two human players. Bots and larger matches follow later.
 
-The **two-player classic match is playable**. Create a room, share its invitation,
+The **two-player arena match is playable**. Create a room, share its invitation,
 join from another browser, and both choose Ready. Select the courtyard to move with arrows
 or W/A/S/D and plant bombs with Space. Rust owns the 60 Hz simulation; PixiJS draws public
 20 Hz snapshots while React/Mantine provides the room controls, scores, phase timers, results, and rematch.
@@ -13,8 +13,10 @@ characters, animated grenades/flames and distinct item symbols, with reduced-mot
 
 Default rooms allow turns within a quarter tile of a corridor centerline, including natural
 wall stops. The creator can adjust starting speed, turning tolerance, wins needed and fuse
-time in the lobby's shared [gameplay settings](docs/game/settings.md). Gameplay v7 requires
-reloading older browser clients after an upgrade; see the [compatibility note](docs/game/protocol-v7.md).
+time in the lobby's shared [gameplay settings](docs/game/settings.md). New rooms enable the
+[Heart pickup](docs/game/heart.md), which absorbs one lethal blast. Disable it or choose the
+Classic settings preset for the original loadout. Gameplay v8 requires reloading older browser
+clients after an upgrade; see the [compatibility note](docs/game/protocol-v8.md).
 
 Use **Keyboard controls** below the arena to remap movement and bombs or restore defaults. Preferences
 stay in this browser. Opening settings, losing focus, or hiding the tab releases held movement;

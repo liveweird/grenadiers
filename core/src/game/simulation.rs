@@ -22,7 +22,6 @@ pub struct ActorInit {
     pub heading: Direction,
     pub speed: SpeedLevel,
 }
-
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum InputAction {
     Press(Direction),
@@ -145,8 +144,16 @@ pub enum StateError {
     IllegalBombCell(CellId),
     OccupiedBombCell(CellId),
     UnknownBombOwner(EntityId),
-    BombIdMismatch { key: EntityId, id: EntityId },
+    BombIdMismatch {
+        key: EntityId,
+        id: EntityId,
+    },
     UnsupportedBombTrigger(EntityId),
+    UnsupportedEnabledItems(crate::game::EnabledItems),
+    UnsupportedPickup {
+        cell: CellId,
+        kind: crate::game::PickupKind,
+    },
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -206,6 +213,23 @@ impl State {
     ) -> Result<Self, StateError> {
         if actors[0].id == actors[1].id {
             return Err(StateError::DuplicateActorId(actors[0].id));
+        }
+        if rules.version() < 5
+            && rules.room_settings().is_some_and(|settings| {
+                settings.enabled_items() != crate::game::EnabledItems::EMPTY
+            })
+        {
+            return Err(StateError::UnsupportedEnabledItems(
+                rules
+                    .room_settings()
+                    .expect("checked above")
+                    .enabled_items(),
+            ));
+        }
+        for (cell, pickup) in world.pickups.iter() {
+            if pickup == crate::game::PickupKind::Heart && !rules.enabled_items().contains_heart() {
+                return Err(StateError::UnsupportedPickup { cell, kind: pickup });
+            }
         }
         if actors[0].seat == actors[1].seat {
             return Err(StateError::DuplicateSeat(actors[0].seat));

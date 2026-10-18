@@ -1,3 +1,4 @@
+import { selectClassicSettings } from '../tests/support/settings'
 import { setTimeout as delay } from 'node:timers/promises'
 import { expect, test, type BrowserContext, type Page, type TestInfo } from '@playwright/test'
 import { latestSnapshot, observeGame, type ObservedGame } from '../tests/support/duel'
@@ -16,6 +17,7 @@ async function joinRunning(pages: Page[], games: ObservedGame[]): Promise<void> 
   const baseUrl = process.env.E2E_BASE_URL ?? 'http://127.0.0.1:8085'
   await Promise.all(pages.map((page) => page.goto(new URL('/', baseUrl).href)))
   await one.getByRole('button', { name: 'Create room', exact: true }).click()
+  await selectClassicSettings(one, games[0])
   const code = one.getByLabel('Room invitation code', { exact: true })
   await expect(code).toHaveText(/^[A-HJ-NP-Z2-9]{8}$/)
   await two.getByRole('textbox', { name: 'Room code', exact: true }).fill(await code.innerText())

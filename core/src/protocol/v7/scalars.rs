@@ -96,7 +96,7 @@ macro_rules! bounded_scalar {
 bounded_scalar!(RoundCount, u32, MAX_ROUND_COUNT, "invalid round count");
 bounded_scalar!(Wins, u8, MAX_WINS, "invalid wins");
 
-pub(super) fn deserialize_bounded<'de, D>(
+pub(crate) fn deserialize_bounded<'de, D>(
     deserializer: D,
     maximum: u64,
     expectation: &'static str,

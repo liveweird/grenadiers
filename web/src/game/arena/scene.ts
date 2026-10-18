@@ -115,6 +115,8 @@ export class ArenaScene {
     for (const [id, actor] of this.actors) {
       const frame = effects && actor.moving && (Math.floor(now / 110) + id) % 2 === 1 ? 1 : 0
       setActorPose(actor, actor.direction, frame)
+      actor.protection.visible = actor.protected
+      actor.protection.alpha = effects && actor.protected ? 0.65 + (Math.floor(now / 120) % 2) * 0.35 : 1
     }
   }
 
@@ -197,6 +199,7 @@ export class ArenaScene {
         fromX: reset ? toX : drawing.root.x, fromY: reset ? toY : drawing.root.y, toX, toY,
       })
       drawing.root.visible = actor.alive
+      drawing.protected = (actor.damageGraceRemainingTicks ?? 0) > 0
       drawing.moving = Boolean(!reset && previousMotion
         && (previousMotion.toX !== toX || previousMotion.toY !== toY))
       drawing.direction = actor.heading

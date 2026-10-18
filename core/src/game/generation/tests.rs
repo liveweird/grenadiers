@@ -179,6 +179,54 @@ fn generated_layers_are_symmetric_reserved_and_concealed_only_under_blocks() {
 }
 
 #[test]
+fn empty_expanded_generation_matches_v1_except_for_metadata() {
+    for seed in [[0; 32], [1; 32], [37; 32]] {
+        let legacy = generate_arena(seed);
+        let expanded = generate_expanded_arena(seed, EnabledItems::EMPTY);
+        assert_eq!(legacy.arena(), expanded.arena());
+        assert_eq!(legacy.concealed_pickups(), expanded.concealed_pickups());
+        assert_eq!(expanded.record().version(), EXPANDED_GENERATOR_VERSION);
+        assert_eq!(
+            legacy.record().fallback_used(),
+            expanded.record().fallback_used()
+        );
+    }
+}
+
+#[test]
+fn seeded_outputs_match_version_two_heart_goldens() {
+    assert_eq!(
+        signature(&generate_expanded_arena([0; 32], EnabledItems::HEART)),
+        "..##.##C.#.#./.X#X#X#X#X.X./.#.#.##S#.H##/CX#XRX#X#X.X#/####.##R..#CR/RXCX.X.X.XCXR/RC#..R##.####/#X.X#X#XRX#XC/##H.#S##.#.#./.X.X#X#X#X#X./.#.#.C##.##.."
+    );
+    assert_eq!(
+        signature(&generate_expanded_arena([1; 32], EnabledItems::HEART)),
+        "..#..#.#.#.SH/.X#XCX#X.X#X#/H##S.#.##..#R/.X.X.X#X#X.X./.######.#..../.XCX.X#X.XCX./....#.######./.X.X#X#X.X.X./R#..##.#.S##H/#X#X.X#XCX#X./HS.#.#.#..#.."
+    );
+}
+
+#[test]
+fn enabled_heart_has_fixed_weight_boundaries_and_symmetric_placement() {
+    let words = [64, 29, 99, 64, 29, 100, 64, 29, 124];
+    let mut source = Sequence::new(words, Some(99));
+    let generated =
+        generate_expanded_with_source([4; 32], &mut source, classic_terrain(), EnabledItems::HEART);
+
+    assert_eq!(
+        generated.concealed_pickups().get(&CellId::new(3, 1)),
+        Some(&PickupKind::MovementSpeed)
+    );
+    assert_eq!(
+        generated.concealed_pickups().get(&CellId::new(4, 1)),
+        Some(&PickupKind::Heart)
+    );
+    assert_eq!(
+        generated.concealed_pickups().get(&CellId::new(5, 1)),
+        Some(&PickupKind::Heart)
+    );
+}
+
+#[test]
 fn dense_generated_layout_survives_first_bomb_via_the_reserved_escape_route() {
     let mut source = Sequence::new([], Some(0));
     let generated = generate_with_source([0; 32], &mut source, classic_terrain());
@@ -266,6 +314,7 @@ fn signature(generated: &GeneratedArena) -> String {
                 Some(PickupKind::BombCapacity) => 'C',
                 Some(PickupKind::BlastRange) => 'R',
                 Some(PickupKind::MovementSpeed) => 'S',
+                Some(PickupKind::Heart) => 'H',
                 None if generated.arena().blocks().contains(&cell) => '#',
                 None if generated.arena().terrain(cell) == Some(Terrain::Wall) => 'X',
                 None => '.',

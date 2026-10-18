@@ -1,6 +1,6 @@
 use grenadiers_core::{
     game::{SeatId, SpeedLevel},
-    protocol::{RulesVersion, Seat},
+    protocol::{Seat, v8::RulesVersion},
     room::{DepartureReason, MatchPhase, RoomSettings},
 };
 
@@ -48,7 +48,7 @@ fn creator_updates_are_revision_fenced_atomic_and_clear_both_readiness_flags() {
         .unwrap();
     assert_eq!(changed.room.settings_revision.get(), 2);
     assert_eq!(
-        grenadiers_core::protocol::v7::classic_settings(changed.room.settings).unwrap(),
+        grenadiers_core::protocol::v8::expanded_settings(changed.room.settings).unwrap(),
         replacement
     );
     assert!(changed.room.seats.iter().all(|seat| !seat.ready));

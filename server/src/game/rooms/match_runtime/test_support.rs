@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use grenadiers_core::{
     game::{Direction, SeatId},
-    protocol::v7::RoomPhase,
+    protocol::v8::RoomPhase,
     protocol::{RoomCode, RoomId},
     room::MatchPhase,
 };
@@ -32,6 +32,68 @@ pub(super) fn generated_runtime(source: RoundSeedSource) -> MatchRuntime {
 
 pub(super) fn configurable_runtime(source: RoundSeedSource) -> MatchRuntime {
     MatchRuntime::new(identity(RoomProfile::GeneratedConfigurableV4), source)
+}
+
+pub(in crate::game::rooms) fn expanded_heart_runtime() -> MatchRuntime {
+    MatchRuntime::new(
+        identity(RoomProfile::ExpandedV5),
+        RoundSeedSource::with_entropy(|bytes| {
+            bytes.fill(3);
+            Ok(())
+        }),
+    )
+}
+
+pub(in crate::game::rooms) fn start_expanded_heart_round(runtime: &mut MatchRuntime) {
+    occupy_both(runtime);
+    for seat in SeatId::ALL {
+        runtime
+            .action(
+                seat,
+                1,
+                MatchAction::ReadyChecked {
+                    ready: true,
+                    settings_revision: 1,
+                },
+            )
+            .unwrap();
+    }
+    tick_until_running(runtime);
+}
+
+pub(in crate::game::rooms) fn collect_generated_heart(runtime: &mut MatchRuntime) {
+    move_cells(runtime, Direction::East, 1);
+    plant(runtime, 1);
+    move_cells(runtime, Direction::West, 1);
+    move_cells(runtime, Direction::South, 1);
+    wait_clear(runtime);
+    move_cells(runtime, Direction::North, 1);
+    move_cells(runtime, Direction::East, 2);
+    assert_eq!(
+        runtime.sim().unwrap().state.actors()[0]
+            .inventory()
+            .equipment(),
+        Some(grenadiers_core::game::Equipment::Heart)
+    );
+}
+
+pub(in crate::game::rooms) fn absorb_generated_heart(runtime: &mut MatchRuntime) {
+    runtime
+        .action(
+            SeatId::One,
+            runtime.lifecycle().round_attempt(),
+            MatchAction::Bomb(2),
+        )
+        .unwrap();
+    for _ in 0..=180 {
+        runtime.tick().unwrap();
+        let actor = &runtime.sim().unwrap().state.actors()[0];
+        assert!(actor.alive());
+        if actor.inventory().equipment().is_none() {
+            return;
+        }
+    }
+    panic!("generated Heart was not consumed by ordinary bomb damage");
 }
 
 pub(super) fn occupy_both(runtime: &mut MatchRuntime) {
@@ -172,7 +234,7 @@ pub(super) fn plant(runtime: &mut MatchRuntime, action_id: u32) {
     runtime.tick().unwrap();
 }
 
-pub(super) fn wait_clear(runtime: &mut MatchRuntime) {
+pub(in crate::game::rooms) fn wait_clear(runtime: &mut MatchRuntime) {
     for _ in 0..240 {
         let world = runtime.sim().unwrap().state.world();
         if world.bombs().is_empty() && world.hazards().is_empty() {

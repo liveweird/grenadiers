@@ -39,6 +39,11 @@ manifests. The explicit rollout restart recreates the Pod after reusing the muta
 tag; applying unchanged manifests alone would leave the previous binary running. Then open <http://localhost:8085> or call the health endpoints above. The WebSocket
 origin allowlist accepts the `localhost:8085` and `127.0.0.1:8085` port-forward URLs.
 
+A port-forward remains attached to the selected pod even when started through a Service.
+After any rollout or fixture change, stop the old forward, wait for the replacement pod,
+start a new forward, and require successful health/readiness responses before opening the
+game or running browser tests. A healthy replacement does not repair an old forward.
+
 The base manifests contain no credentials or PostgreSQL resources. If durable data is introduced,
 supply `DATABASE_URL` from a Kubernetes Secret and deploy the database separately. Readiness has a
 three-second probe timeout because a configured database check may take up to two seconds.
@@ -83,7 +88,27 @@ able to read it. Retain base probes, one replica, and all security restrictions;
 image digest, wait for rollout/readiness, port-forward, and run the same fixture command.
 Remove the temporary Secret/namespace afterward. No seed is sent through an API or browser flag.
 
+## Reproduce Heart collection and protection
+
+Use the same built image and the explicit Heart fixture:
+
+```sh
+chmod 444 core/tests/fixtures/arena-v2-heart.seed
+docker compose -f docker-compose.yaml -f docker-compose.heart.yaml up -d --no-build --force-recreate app
+curl --fail http://127.0.0.1:8085/api/v1/ready
+E2E_HEART_FIXTURE=arena-v2-heart npm --prefix e2e run test:heart
+docker compose -f docker-compose.yaml -f docker-compose.heart.yaml down
+```
+
+Wait for readiness before running the scenario. It retains the default Heart-enabled settings,
+reveals and collects a generated Heart through ordinary controls, absorbs one blast, then proves
+the charge is gone with a later lethal blast. Kubernetes uses the same isolated Secret procedure
+and a fresh port-forward after every rollout. Keep this seed outside the final runtime image.
+
 ## Reproduce a complete classic match
+
+The existing seeded scenarios select the Classic settings preset before readiness, keeping
+their original generated layouts while the room retains Expanded-v5/generator-v2 identity.
 
 Reuse the same image after default and pickup acceptance, with the tracked open-corridor
 fixture. This is the same strict read-once seed-file mechanism, with a different public seed.

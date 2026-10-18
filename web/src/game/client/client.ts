@@ -1,4 +1,4 @@
-import type { Direction, GameClientMessage, GameServerMessage, GameSettings, RoomView, Snapshot, V7ErrorCode } from '../v7/schema'
+import type { Direction, GameClientMessage, GameServerMessage, GameSettings, RoomView, Snapshot, V8ErrorCode } from '../v8/schema'
 import { initialGameClientState, type AdmissionIntent, type GameClientState, type GameFailure } from './clientTypes'
 export { initialGameClientState, type AdmissionIntent, type GameClientState, type GameFailure } from './clientTypes'
 import {
@@ -55,7 +55,8 @@ export class GameClient {
   updateSettings(settings: GameSettings): boolean {
     const room = this.state.room
     const own = room?.seats.find((seat) => seat.seat === this.state.youSeat)
-    if (settings.enabledItems.length !== 0 || !room || room.availableItems.length !== 0
+    if (!room || settings.enabledItems.length > 1
+      || settings.enabledItems.some((item) => !room.availableItems.includes(item))
       || room.phase.type !== 'waiting' || room.settingsEditor !== this.state.youSeat
       || own?.connection.type !== 'connected' || own.ready || this.state.admissionPending
       || this.state.leavePending || this.state.settingsPending) return false
@@ -152,7 +153,7 @@ export class GameClient {
     socket.addEventListener('open', () => {
       if (!isCurrentConnection(generation, socket, this.generation, this.socket)) return
       this.update({ connection: 'authenticating' })
-      socket.send(JSON.stringify({ type: 'authenticate', protocolVersion: 7, token: credential }))
+      socket.send(JSON.stringify({ type: 'authenticate', protocolVersion: 8, token: credential }))
       credential = ''
     })
     socket.addEventListener('message', (event) => this.receive(generation, socket, event.data))
@@ -251,7 +252,7 @@ export class GameClient {
     this.update({ room: null, snapshot: null, youSeat: null, admissionBaseline: null,
       leavePending: false, settingsPending: false, failure: null })
   }
-  private acceptError(code: V7ErrorCode, sequence: number | null): void {
+  private acceptError(code: V8ErrorCode, sequence: number | null): void {
     if (code === 'resumeRejected' && sequence === this.admissionSequence && this.capability) {
       this.terminal('resumeRejected', true)
       return

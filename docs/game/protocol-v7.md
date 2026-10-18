@@ -1,10 +1,11 @@
 # Gameplay v7: recipient state and manual actions
 
-V7 is the live gameplay contract. The closed schema is `api/gameplay-v7.schema.json`;
+This is the archived v7 reference. The live contract is [gameplay-v8](protocol-v8.md).
+The closed v7 schema is `api/gameplay-v7.schema.json`;
 generated browser types are `web/src/game/v7/schema.ts`, with the active client in
 `web/src/game/client`. Server and browser migrate together; there is no live v6 fallback.
 
-Current Classic rooms advertise empty available/enabled item sets. Optional pickups and
+V7 Classic rooms advertise empty available/enabled item sets. Optional pickups and
 nonempty item settings are rejected. Timed/Standard bombs and existing three upgrades remain
 the playable loadout; this migration does not activate equipment, buffs, curses or special weapons.
 

@@ -1,5 +1,5 @@
 import { expect, type Page } from '@playwright/test'
-import type { GameServerMessage } from '../../../web/src/game/v7/schema'
+import type { GameServerMessage } from '../../../web/src/game/v8/schema'
 
 type RoomFrame = Extract<GameServerMessage, { type: 'roomState' | 'admitted' }>
 type AdmissionFrame = Extract<GameServerMessage, { type: 'admitted' }>
@@ -27,7 +27,7 @@ export async function openGame(page: Page): Promise<void> {
     const first = new Promise<GameServerMessage>((resolve, reject) => {
       const timer = setTimeout(() => reject(new Error('Authentication timed out')), 10_000)
       socket.addEventListener('open', () => {
-        socket.send(JSON.stringify({ type: 'authenticate', protocolVersion: 7, token: session.token }))
+        socket.send(JSON.stringify({ type: 'authenticate', protocolVersion: 8, token: session.token }))
       }, { once: true })
       socket.addEventListener('error', () => {
         clearTimeout(timer)
@@ -56,7 +56,7 @@ export async function openGame(page: Page): Promise<void> {
     }
     return first
   })
-  expect(authenticated).toEqual({ type: 'authenticated', protocolVersion: 7 })
+  expect(authenticated).toEqual({ type: 'authenticated', protocolVersion: 8 })
 }
 
 export async function sendGame(page: Page, command: Record<string, unknown>): Promise<number> {

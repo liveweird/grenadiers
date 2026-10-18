@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use grenadiers_core::protocol::{MapId, RulesVersion};
+use grenadiers_core::protocol::v8::{MapId, RulesVersion};
 
 use crate::{
     AppState, StartupError,
@@ -8,7 +8,7 @@ use crate::{
 };
 
 #[tokio::test]
-async fn default_configuration_creates_configurable_v4_rooms() {
+async fn default_configuration_creates_expanded_v5_rooms() {
     let state = AppState::from_configuration(None, None, None).unwrap();
 
     let admission = state
@@ -23,8 +23,8 @@ async fn default_configuration_creates_configurable_v4_rooms() {
         .await
         .unwrap();
 
-    assert_eq!(admission.room.rules_version, RulesVersion::ConfigurableV4);
-    assert_eq!(admission.room.map_id, MapId::GeneratedV1);
+    assert_eq!(admission.room.rules_version, RulesVersion::ExpandedV5);
+    assert_eq!(admission.room.map_id, MapId::GeneratedV2);
 }
 
 #[test]

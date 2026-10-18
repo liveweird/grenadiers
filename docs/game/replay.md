@@ -5,7 +5,9 @@ journal. The test-only replay runner drives the real MatchRuntime, InputMailbox,
 profile, and entropy seam; it does not run a second simulator. Replay inspection remains
 test-only. No endpoint, public export, or persistent journal is available.
 
-A versioned header identifies format 1, lifecycle profile 2, configurable-v4 physics (classic-v2/v3 for archived journals), generator-v1,
+A versioned header identifies format 2, lifecycle profile 2, Expanded-v5 physics and generator-v2.
+Archived format-1 journals retain configurable-v4/classic-v2/v3 physics and generator-v1.
+Both formats retain
 initial occupied seats, and initial absolute tick zero. Operations record the
 authoritative tick and increasing order within that tick: occupation, accepted readiness/
 movement/bomb/rematch, immediate input fencing, tick advancement, committed departure batches,
@@ -58,3 +60,10 @@ Configurable journals also retain initial settings, settings revision and editor
 revision-fenced readiness/settings actions and permanent authority release replay deterministically.
 Legacy journals reject v6-only actions; configurable journals reject legacy unfenced readiness.
 Snapshot publication and personal admission bind the complete immutable settings identity.
+
+Expanded journals retain the enabled-item mask inside complete settings. They do not add a
+duplicate mask to round-start generation records. Format 2 accepts only the supported rules-5,
+generator-2 and M6 lifecycle tuple; older profiles require format 1 and empty item masks.
+Replay regenerates from the recorded seed and accepted configuration and compares the actual
+generation record. Heart enable/disable, reveal, collection, consumption and later elimination
+must reproduce the complete state, grace and event reports.

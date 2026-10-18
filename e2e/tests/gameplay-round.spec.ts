@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import type { GameServerMessage } from '../../web/src/game/v7/schema'
+import type { GameServerMessage } from '../../web/src/game/v8/schema'
 import { gameFrames, openGame, roomFrame, sendGame } from './support/game'
 import { visibleActor } from './support/duel'
 
@@ -47,13 +47,20 @@ test('two native gameplay sockets finish one authoritative generated classic rou
     await sendGame(two, { type: 'joinRoom', roomCode: created.room.roomCode })
     const joined = await roomFrame(two)
     const binding = { roomId: created.room.roomId, roundId: joined.room.roundId }
-    await sendGame(one, { type: 'ready', ...binding, ready: true, settingsRevision: joined.room.settingsRevision })
-    await sendGame(two, { type: 'ready', ...binding, ready: true, settingsRevision: joined.room.settingsRevision })
+    expect(joined.room.settings.enabledItems).toEqual(['heart'])
+    await sendGame(one, {
+      type: 'updateSettings', ...binding, settingsRevision: joined.room.settingsRevision,
+      settings: { ...joined.room.settings, enabledItems: [] },
+    })
+    const configured = await roomFrame(one, joined.room.revision)
+    expect(configured.room.settings.enabledItems).toEqual([])
+    await sendGame(one, { type: 'ready', ...binding, ready: true, settingsRevision: configured.room.settingsRevision })
+    await sendGame(two, { type: 'ready', ...binding, ready: true, settingsRevision: configured.room.settingsRevision })
     await expect.poll(async () => snapshot(await gameFrames(one))?.room.phase.type).toBe('running')
     await expect.poll(async () => snapshot(await gameFrames(two))?.room.phase.type).toBe('running')
     const firstRunning = snapshot(await gameFrames(one))!
-    expect(firstRunning.room).toMatchObject({ rulesVersion: 4, mapId: 'generated_v1' })
-    expect(firstRunning.room.availableItems).toEqual([])
+    expect(firstRunning.room).toMatchObject({ rulesVersion: 5, mapId: 'generated_v2' })
+    expect(firstRunning.room.availableItems).toEqual(['heart'])
     expect(firstRunning.room.settings.enabledItems).toEqual([])
     for (const actor of firstRunning.state.actors) {
       expect(actor).toMatchObject({

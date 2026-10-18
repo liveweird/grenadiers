@@ -64,11 +64,14 @@ pub fn project_events(reports: &[game::StepReport]) -> Result<Vec<WireEvent>, Pr
                     id: EntityId::new(id.0),
                     seat: wire_seat(seat),
                     cell: wire_cell(cell).map_err(|_| ProjectionError::InvalidEvent)?,
-                    kind: wire_pickup_kind(kind),
+                    kind: wire_pickup_kind(kind).ok_or(ProjectionError::InvalidEvent)?,
                 },
                 game::StepEventKind::RoundEnded(result) => EventKind::RoundEnded {
                     result: project_result(Some(result)).ok_or(ProjectionError::InvalidEvent)?,
                 },
+                game::StepEventKind::DamagePrevented { .. } => {
+                    return Err(ProjectionError::InvalidEvent);
+                }
             };
             projected.push(WireEvent {
                 tick,

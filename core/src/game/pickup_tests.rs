@@ -8,8 +8,13 @@ use crate::game::rules::RulesConfig;
 use crate::game::test_support::add_test_bomb_with_deadline;
 use crate::game::types::{CellId, EntityId, Position, SeatId, SpeedLevel, Tick};
 use crate::game::world::World;
+use crate::game::{DamagePreventionSource, EnabledItems, Equipment, StepEventKind};
+use crate::room::RoomSettings;
 
 const TARGET: CellId = CellId::new(5, 5);
+
+#[path = "heart_damage_tests.rs"]
+mod heart_damage_tests;
 
 fn arena_with_blocks(blocks: BTreeSet<CellId>) -> Arena {
     let mut terrain = [Terrain::Floor; ARENA_CELL_COUNT];
@@ -39,6 +44,18 @@ fn state_in(world: World) -> State {
         world,
         [
             actor(10, SeatId::One, CellId::new(1, 1)),
+            actor(20, SeatId::Two, CellId::new(13, 11)),
+        ],
+    )
+    .unwrap()
+}
+
+fn expanded_state_in(world: World, first_cell: CellId) -> State {
+    State::new(
+        RulesConfig::expanded_v5(RoomSettings::DEFAULT.with_enabled_items(EnabledItems::HEART)),
+        world,
+        [
+            actor(10, SeatId::One, first_cell),
             actor(20, SeatId::Two, CellId::new(13, 11)),
         ],
     )
@@ -226,5 +243,89 @@ fn completed_result_freezes_pending_reveal_and_exposed_burn() {
             .world()
             .exposed_pickups()
             .contains_key(&CellId::new(6, 5))
+    );
+}
+
+#[test]
+fn ordinary_heart_pickup_replaces_equipment_and_is_consumed_once() {
+    let cell = CellId::new(5, 5);
+    let world = World::with_pickups(
+        arena_with_blocks(BTreeSet::new()),
+        BTreeMap::new(),
+        BTreeMap::new(),
+        BTreeMap::from([(cell, PickupKind::Heart)]),
+    )
+    .unwrap();
+    let mut state = expanded_state_in(world, cell);
+    state.actors[0].inventory.replace_equipment(Equipment::Kick);
+
+    let collected = state.step(&[]).unwrap();
+    assert!(collected.events.iter().any(|event| matches!(
+        &event.kind,
+        StepEventKind::PickupCollected {
+            kind: PickupKind::Heart,
+            ..
+        }
+    )));
+    assert_eq!(
+        state.actors()[0].inventory().equipment(),
+        Some(Equipment::Heart)
+    );
+
+    state.world.hazards.insert(cell, Tick(100));
+    let absorbed = state.step(&[]).unwrap();
+    assert!(state.actors()[0].alive());
+    assert_eq!(state.actors()[0].inventory().equipment(), None);
+    assert_eq!(
+        absorbed
+            .events
+            .iter()
+            .filter(|event| matches!(
+                &event.kind,
+                StepEventKind::DamagePrevented {
+                    source: DamagePreventionSource::Heart,
+                    ..
+                }
+            ))
+            .count(),
+        1
+    );
+}
+
+#[test]
+fn second_heart_during_grace_does_not_extend_or_repeat_prevention() {
+    let cell = CellId::new(5, 5);
+    let mut state = expanded_state_in(
+        World::with_pickups(
+            arena_with_blocks(BTreeSet::new()),
+            BTreeMap::new(),
+            BTreeMap::new(),
+            BTreeMap::from([(cell, PickupKind::Heart)]),
+        )
+        .unwrap(),
+        cell,
+    );
+    state.step(&[]).unwrap();
+    state.world.hazards.insert(cell, Tick(100));
+    state.step(&[]).unwrap();
+    let original = state.actors[0].damage_grace.unwrap();
+    state
+        .world
+        .pickups
+        .exposed
+        .insert(cell, crate::game::Pickup::new(PickupKind::Heart));
+
+    let report = state.step(&[]).unwrap();
+
+    assert_eq!(state.actors[0].damage_grace, Some(original));
+    assert_eq!(
+        state.actors()[0].inventory().equipment(),
+        Some(Equipment::Heart)
+    );
+    assert!(
+        !report
+            .events
+            .iter()
+            .any(|event| matches!(&event.kind, StepEventKind::DamagePrevented { .. }))
     );
 }

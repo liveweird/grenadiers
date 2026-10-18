@@ -1,5 +1,5 @@
 use super::RulesConfig;
-use crate::game::SpeedLevel;
+use crate::game::{EnabledItems, SpeedLevel};
 use crate::room::RoomSettings;
 
 #[test]
@@ -19,6 +19,17 @@ fn classic_v1_exposes_the_fixed_geometry_and_tick_parameters() {
     assert_eq!(rules.bomb_fuse_ticks(), 180);
     assert_eq!(rules.flame_ticks(), 30);
     assert_eq!(rules.round_ticks(), 10_800);
+}
+
+#[test]
+fn expanded_profile_binds_enabled_items_at_version_five() {
+    let settings = RoomSettings::DEFAULT.with_enabled_items(EnabledItems::HEART);
+    let classic = RulesConfig::configurable_v4(settings);
+    let expanded = RulesConfig::expanded_v5(settings);
+
+    assert_eq!(classic.enabled_items(), EnabledItems::EMPTY);
+    assert_eq!(expanded.version(), 5);
+    assert_eq!(expanded.enabled_items(), EnabledItems::HEART);
 }
 
 #[test]

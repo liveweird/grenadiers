@@ -16,3 +16,6 @@ mod capture_tests;
 mod settings_tests;
 #[cfg(test)]
 mod tests;
+
+#[cfg(test)]
+mod shield_tests;

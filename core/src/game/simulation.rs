@@ -161,6 +161,7 @@ pub enum StepError {
     TooManyInputs { count: usize, maximum: usize },
     TickOverflow,
     UnsupportedBombTrigger(EntityId),
+    EffectExpiryOverflow(super::effects::EffectKind),
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -227,7 +228,7 @@ impl State {
             ));
         }
         for (cell, pickup) in world.pickups.iter() {
-            if pickup == crate::game::PickupKind::Heart && !rules.enabled_items().contains_heart() {
+            if !pickup.enabled_by(rules.enabled_items()) {
                 return Err(StateError::UnsupportedPickup { cell, kind: pickup });
             }
         }

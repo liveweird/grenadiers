@@ -3,6 +3,7 @@ use std::collections::BTreeMap;
 use super::{RoundResult, SeatInput, State, StepError, StepReport};
 use crate::game::bombs::BombTrigger;
 use crate::game::damage::{DamageOutcome, DamagePreventionSource, apply_damage};
+use crate::game::effects::{EffectKind, SHIELD_TICKS};
 use crate::game::events::{EventAudience, StepEvent, StepEventKind};
 use crate::game::geometry::MovementTrace;
 use crate::game::movement;
@@ -32,17 +33,34 @@ impl State {
             });
         }
 
+        // A Shield collection is the only fallible mutation in a running step. Near the
+        // absolute tick horizon, retain a transaction snapshot only when that failure is
+        // possible, rather than cloning every deterministic update.
+        let rollback = (next_tick.0.checked_add(SHIELD_TICKS).is_none()
+            && self
+                .world
+                .pickups
+                .iter()
+                .any(|(_, kind)| kind == crate::game::PickupKind::Shield))
+        .then(|| self.clone());
         let mut events = Vec::new();
+        let mut shield_prevented = [false; 2];
         self.expire_flames(next_tick);
         self.expire_actor_effects(next_tick);
         self.world.expose_flame_free_pickups();
         let manual_actions = self.apply_inputs(inputs);
         let traces = self.move_living();
-        self.kill_on_existing_flames(&traces, next_tick, &mut events);
+        self.kill_on_existing_flames(&traces, next_tick, &mut events, &mut shield_prevented);
         self.resolve_classic_manual_actions(&manual_actions, next_tick, &mut events);
         self.resolve_explosions(next_tick, &mut events)?;
-        self.kill_on_final_flames(next_tick, &mut events);
-        self.collect_pickups(next_tick, &mut events);
+        self.kill_on_final_flames(next_tick, &mut events, &mut shield_prevented);
+        if let Err(error) = self.collect_pickups(next_tick, &mut events) {
+            debug_assert_eq!(error, StepError::EffectExpiryOverflow(EffectKind::Shield));
+            if let Some(snapshot) = rollback {
+                *self = snapshot;
+            }
+            return Err(error);
+        }
         self.running_updates += 1;
         if let Some(result) = self.decide_result() {
             events.push(StepEvent::new(
@@ -75,22 +93,28 @@ impl State {
         traces: &[MovementTrace; 2],
         tick: Tick,
         events: &mut Vec<StepEvent>,
+        shield_prevented: &mut [bool; 2],
     ) {
         for (index, trace) in traces.iter().enumerate() {
             if self.actors[index].alive && trace_hits_hazards(trace, &self.world.hazards) {
-                self.damage_actor(index, tick, events);
+                self.damage_actor(index, tick, events, shield_prevented);
             }
         }
     }
 
-    fn kill_on_final_flames(&mut self, tick: Tick, events: &mut Vec<StepEvent>) {
+    fn kill_on_final_flames(
+        &mut self,
+        tick: Tick,
+        events: &mut Vec<StepEvent>,
+        shield_prevented: &mut [bool; 2],
+    ) {
         for index in 0..self.actors.len() {
             if self.actors[index].alive
                 && self.world.hazards.keys().any(|cell| {
                     movement::position_overlaps_cell(self.actors[index].position, *cell)
                 })
             {
-                self.damage_actor(index, tick, events);
+                self.damage_actor(index, tick, events, shield_prevented);
             }
         }
     }
@@ -107,7 +131,13 @@ impl State {
         }
     }
 
-    fn damage_actor(&mut self, index: usize, tick: Tick, events: &mut Vec<StepEvent>) {
+    fn damage_actor(
+        &mut self,
+        index: usize,
+        tick: Tick,
+        events: &mut Vec<StepEvent>,
+        shield_prevented: &mut [bool; 2],
+    ) {
         let actor = &mut self.actors[index];
         let outcome = apply_damage(
             &mut actor.inventory,
@@ -118,15 +148,18 @@ impl State {
         match outcome {
             DamageOutcome::IgnoredGrace => return,
             DamageOutcome::AbsorbedShield => {
-                events.push(StepEvent::new(
-                    tick,
-                    EventAudience::Both,
-                    StepEventKind::DamagePrevented {
-                        id: actor.id,
-                        seat: actor.seat,
-                        source: DamagePreventionSource::Shield,
-                    },
-                ));
+                if !shield_prevented[index] {
+                    events.push(StepEvent::new(
+                        tick,
+                        EventAudience::Both,
+                        StepEventKind::DamagePrevented {
+                            id: actor.id,
+                            seat: actor.seat,
+                            source: DamagePreventionSource::Shield,
+                        },
+                    ));
+                    shield_prevented[index] = true;
+                }
                 return;
             }
             DamageOutcome::AbsorbedHeart { .. } => {

@@ -70,7 +70,7 @@ export function makePickup(kind: RenderablePickupKind): Graphics {
     pixels(drawing, PALETTE.blue, [[13, 18, 14, 7], [18, 14, 10, 15], [24, 21, 11, 6], [29, 18, 7, 5]])
     pixels(drawing, PALETTE.blueLight, [[16, 17, 9, 3], [29, 20, 4, 3]])
     pixels(drawing, PALETTE.deepInk, [[12, 28, 14, 4], [28, 27, 9, 4]])
-  } else {
+  } else if (kind === 'heart') {
     pixels(drawing, PALETTE.deepInk, [
       [15, 16, 8, 4], [26, 16, 8, 4], [12, 20, 25, 8],
       [15, 28, 19, 4], [19, 32, 11, 4], [22, 36, 5, 4],
@@ -79,6 +79,14 @@ export function makePickup(kind: RenderablePickupKind): Graphics {
       [17, 19, 5, 5], [27, 19, 5, 5], [15, 23, 19, 5], [18, 28, 13, 4], [21, 32, 7, 4],
     ])
     pixels(drawing, PALETTE.brickLight, [[18, 20, 4, 3], [16, 23, 4, 3]])
+  } else {
+    pixels(drawing, PALETTE.deepInk, [
+      [16, 15, 17, 3], [13, 18, 23, 7], [15, 25, 19, 7], [18, 32, 13, 4], [22, 36, 5, 3],
+    ])
+    pixels(drawing, PALETTE.blue, [
+      [17, 18, 15, 4], [16, 22, 17, 6], [18, 28, 13, 4], [21, 32, 7, 3],
+    ])
+    pixels(drawing, PALETTE.blueLight, [[18, 19, 9, 3], [18, 22, 4, 5]])
   }
   return drawing
 }

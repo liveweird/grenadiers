@@ -5,6 +5,8 @@ pub struct EnabledItems(u32);
 impl EnabledItems {
     pub const EMPTY: Self = Self(0);
     pub const HEART: Self = Self(1 << 4);
+    pub const SHIELD: Self = Self(1 << 9);
+    pub const HEART_AND_SHIELD: Self = Self(Self::HEART.0 | Self::SHIELD.0);
 
     #[must_use]
     pub const fn bits(self) -> u32 {
@@ -14,7 +16,7 @@ impl EnabledItems {
     #[must_use]
     pub const fn from_bits(bits: u32) -> Option<Self> {
         match bits {
-            0 | 16 => Some(Self(bits)),
+            0 | 16 | 512 | 528 => Some(Self(bits)),
             _ => None,
         }
     }
@@ -23,6 +25,11 @@ impl EnabledItems {
     pub const fn contains_heart(self) -> bool {
         self.0 & Self::HEART.0 != 0
     }
+
+    #[must_use]
+    pub const fn contains_shield(self) -> bool {
+        self.0 & Self::SHIELD.0 != 0
+    }
 }
 
 #[cfg(test)]
@@ -30,12 +37,22 @@ mod tests {
     use super::EnabledItems;
 
     #[test]
-    fn only_empty_and_heart_masks_are_canonical() {
+    fn only_supported_item_combinations_are_canonical() {
         assert_eq!(EnabledItems::from_bits(0), Some(EnabledItems::EMPTY));
         assert_eq!(EnabledItems::from_bits(16), Some(EnabledItems::HEART));
+        assert_eq!(EnabledItems::from_bits(512), Some(EnabledItems::SHIELD));
+        assert_eq!(
+            EnabledItems::from_bits(528),
+            Some(EnabledItems::HEART_AND_SHIELD)
+        );
         assert_eq!(EnabledItems::from_bits(1), None);
         assert_eq!(EnabledItems::from_bits(17), None);
+        assert_eq!(EnabledItems::from_bits(1 << 10), None);
         assert!(!EnabledItems::EMPTY.contains_heart());
         assert!(EnabledItems::HEART.contains_heart());
+        assert!(!EnabledItems::HEART.contains_shield());
+        assert!(EnabledItems::SHIELD.contains_shield());
+        assert!(EnabledItems::HEART_AND_SHIELD.contains_heart());
+        assert!(EnabledItems::HEART_AND_SHIELD.contains_shield());
     }
 }

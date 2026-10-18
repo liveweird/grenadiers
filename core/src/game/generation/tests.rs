@@ -315,6 +315,7 @@ fn signature(generated: &GeneratedArena) -> String {
                 Some(PickupKind::BlastRange) => 'R',
                 Some(PickupKind::MovementSpeed) => 'S',
                 Some(PickupKind::Heart) => 'H',
+                Some(PickupKind::Shield) => 'D',
                 None if generated.arena().blocks().contains(&cell) => '#',
                 None if generated.arena().terrain(cell) == Some(Terrain::Wall) => 'X',
                 None => '.',

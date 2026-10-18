@@ -315,6 +315,7 @@ fn wire_pickup(value: game::PickupKind) -> PickupKind {
         game::PickupKind::BlastRange => PickupKind::BlastRange,
         game::PickupKind::MovementSpeed => PickupKind::MovementSpeed,
         game::PickupKind::Heart => PickupKind::Heart,
+        game::PickupKind::Shield => PickupKind::Shield,
     }
 }
 fn wire_equipment(value: game::Equipment) -> EquipmentId {

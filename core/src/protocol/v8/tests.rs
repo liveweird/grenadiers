@@ -36,7 +36,10 @@ fn v8_identity_and_settings_accept_only_canonical_expanded_tuples() {
     let room = project_expanded_room(metadata(settings), &lifecycle).unwrap();
     assert_eq!(room.rules_version, RulesVersion::ExpandedV5);
     assert_eq!(room.map_id, MapId::GeneratedV2);
-    assert_eq!(room.available_items, heart);
+    assert_eq!(
+        room.available_items,
+        super::projection_binding::expanded_items()
+    );
 
     let mut crossed = room.clone();
     crossed.map_id = MapId::GeneratedV1;
@@ -51,7 +54,7 @@ fn v8_identity_and_settings_accept_only_canonical_expanded_tuples() {
         Err(ProjectionError::InvalidExpandedBinding)
     );
 
-    let unsupported = ItemSet::new([ItemId::Shield]).unwrap();
+    let unsupported = ItemSet::new([ItemId::Stopwatch]).unwrap();
     assert_eq!(
         expanded_settings(wire_settings(unsupported)),
         Err(ProjectionError::InvalidItems)
@@ -66,7 +69,10 @@ fn empty_v5_preset_keeps_expanded_identity_and_generator() {
         project_expanded_room(metadata(wire_settings(ItemSet::empty())), &lifecycle).unwrap();
     assert_eq!(room.rules_version, RulesVersion::ExpandedV5);
     assert_eq!(room.map_id, MapId::GeneratedV2);
-    assert_eq!(room.available_items, ItemSet::new([ItemId::Heart]).unwrap());
+    assert_eq!(
+        room.available_items,
+        super::projection_binding::expanded_items()
+    );
     assert_eq!(room.settings.enabled_items(), ItemSet::empty());
 }
 
@@ -123,7 +129,7 @@ fn forged_waiting_room() -> RoomView {
         settings: wire_settings(heart),
         settings_revision: Counter::new(1).unwrap(),
         settings_editor: None,
-        available_items: heart,
+        available_items: super::projection_binding::expanded_items(),
         room_id: RoomId::new("0123456789abcdef0123456789abcdef").unwrap(),
         room_code: RoomCode::new("ABCDEFGH").unwrap(),
         round_id: Counter::new(1).unwrap(),
@@ -346,3 +352,6 @@ fn v8_binding_rejects_overdue_frozen_bombs_and_accepts_the_deadline() {
         );
     }
 }
+
+#[path = "shield_tests.rs"]
+mod shield_tests;

@@ -309,7 +309,7 @@ fn mixed_valid_and_unsupported_report_window_fails_as_a_whole() {
 }
 
 #[test]
-fn legacy_event_projection_rejects_heart_even_when_absent_from_final_state() {
+fn legacy_event_projection_rejects_expanded_items_even_when_absent_from_final_state() {
     let mut state = state_at(CellId::new(2, 5), CellId::new(12, 10));
     for kind in [
         crate::game::StepEventKind::PickupCollected {
@@ -322,6 +322,17 @@ fn legacy_event_projection_rejects_heart_even_when_absent_from_final_state() {
             id: EntityId(10),
             seat: SeatId::One,
             source: crate::game::DamagePreventionSource::Heart,
+        },
+        crate::game::StepEventKind::PickupCollected {
+            id: EntityId(10),
+            seat: SeatId::One,
+            cell: CellId::new(2, 5),
+            kind: PickupKind::Shield,
+        },
+        crate::game::StepEventKind::DamagePrevented {
+            id: EntityId(10),
+            seat: SeatId::One,
+            source: crate::game::DamagePreventionSource::Shield,
         },
     ] {
         let mut report = state.step(&[]).unwrap();

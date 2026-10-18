@@ -55,7 +55,8 @@ export class GameClient {
   updateSettings(settings: GameSettings): boolean {
     const room = this.state.room
     const own = room?.seats.find((seat) => seat.seat === this.state.youSeat)
-    if (!room || settings.enabledItems.length > 1
+    if (!room || settings.enabledItems.length > 2
+      || new Set(settings.enabledItems).size !== settings.enabledItems.length
       || settings.enabledItems.some((item) => !room.availableItems.includes(item))
       || room.phase.type !== 'waiting' || room.settingsEditor !== this.state.youSeat
       || own?.connection.type !== 'connected' || own.ready || this.state.admissionPending

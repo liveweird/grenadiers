@@ -63,6 +63,8 @@ and [Polish 320px](../screenshots/gameplay-v7-polish-320.png). Narrow screens us
 columns; desktop retains four. All eight labels and values wrap within their own cells.
 Accepted Heart examples: [exposed pickup on desktop](../screenshots/heart-desktop.png) and
 [equipped Heart in Polish at 320px](../screenshots/heart-polish-320.png).
+Accepted Shield examples: [exposed pickup on desktop](../screenshots/shield-desktop.png) and
+[active immunity in Polish at 320px](../screenshots/shield-polish-320.png).
 
 All active-v8 Playwright configurations disable raw framework traces because personal admission
 frames contain capabilities. Failure screenshots, public reports, and redacted summaries remain.
@@ -85,7 +87,7 @@ voices. Returning from a hidden tab requires **Resume sound**; old events are di
 ## Exposed items and player upgrades
 
 Gameplay-v8 snapshots supply visible pickup cells and kinds under Expanded-v5 rules. Pixi draws distinct bomb,
-cross/range, speed and Heart marks above blocks and below bombs/flames/actors; it never guesses
+cross/range, speed, Heart and Shield marks above blocks and below bombs/flames/actors; it never guesses
 concealed contents. Retained drawings are reused while unchanged and destroyed when removed,
 replaced, or reset. The UI performs no collection simulation.
 
@@ -93,7 +95,7 @@ Both player rows show available bombs (capacity minus live bombs), capacity, ran
 levels 1–5 from authoritative actors. Running/nonfinal-result rows show alive or eliminated; pre-start rows show readiness. Final
 match rows show rematch consent, and authoritative vacant seats remain open despite frozen actors. Labels are localized in English and Polish. Player cards stack at narrow widths, with two columns inside each
 stat grid. Expanded-v5 rooms also show current equipment
-and physical-tick damage grace. A bounded corner aura marks Heart protection; reduced motion
+and physical-tick damage grace. A bounded corner aura marks Heart grace; a separate shield ring marks timed immunity; reduced motion
 keeps it static. Reconnecting renders current protection without replaying its consumption.
 
 ## Match facts and timers

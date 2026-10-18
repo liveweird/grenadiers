@@ -15,7 +15,8 @@ Default rooms allow turns within a quarter tile of a corridor centerline, includ
 wall stops. The creator can adjust starting speed, turning tolerance, wins needed and fuse
 time in the lobby's shared [gameplay settings](docs/game/settings.md). New rooms enable the
 [Heart pickup](docs/game/heart.md), which absorbs one lethal blast. Disable it or choose the
-Classic settings preset for the original loadout. Gameplay v8 requires reloading older browser
+Classic settings preset for the original loadout. Enable the optional [Shield](docs/game/shield.md)
+for five seconds of immunity; its timer refreshes on collection. Gameplay v8 requires reloading older browser
 clients after an upgrade; see the [compatibility note](docs/game/protocol-v8.md).
 
 Use **Keyboard controls** below the arena to remap movement and bombs or restore defaults. Preferences

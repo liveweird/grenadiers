@@ -113,9 +113,21 @@ test('a browser restores its full live world and action floor before a fenced ta
       .some((command) => command.type === 'movement' && command.direction === null)).toBe(true)
     await one.keyboard.up('ArrowRight')
     await arena.click()
+    await moveTo(one, games[0], { column: 2, row: 1 })
     await one.keyboard.press('Space')
     await expect.poll(() => games[0].commands.filter((command) => command.type === 'placeBomb').map((command) => command.actionId))
       .toEqual([1, 2])
+    await expect.poll(() => latestSnapshot(games[0])!.state.bombs).toContainEqual(
+      expect.objectContaining({ cell: { column: 2, row: 1 }, range: 2 }),
+    )
+    // Keep the second takeover's authority check independent of the bomb's fuse.
+    await moveTo(one, games[0], { column: 5, row: 1 })
+    await expect.poll(() => {
+      const state = latestSnapshot(games[0])!.state
+      return state.bombs.length + state.flames.length
+    }).toBe(0)
+    expect(latestSnapshot(games[0])!.room.phase.type).toBe('running')
+    expect(latestSnapshot(games[0])!.state.actors[0].alive).toBe(true)
     expect(games[0].commands.filter((command) => command.type === 'resumeRoom')).toHaveLength(1)
     expect(await invalidResume(one, 'wrongCapability')).toBe('resumeRejected')
     expect(await invalidResume(one, 'wrongRoom')).toBe('resumeRejected')
@@ -138,9 +150,13 @@ test('a browser restores its full live world and action floor before a fenced ta
           ? current > takeoverPosition.x
           : current < takeoverPosition.x
       }, { intervals: [15] }).toBe(true)
-    } finally {
-      await stopTakeover(one)
+    } catch (error) {
+      try { await stopTakeover(one) } catch {
+        testInfo.annotations.push({ type: 'takeover-cleanup', description: 'stop-failed-after-movement-error' })
+      }
+      throw error
     }
+    await stopTakeover(one)
     await expect(one.getByText('This seat was resumed in another tab.', { exact: true })).toBeVisible()
     await expect(one.getByRole('button', { name: 'Create room', exact: true })).toBeEnabled()
     const socketCount = games[0].sockets

@@ -26,6 +26,27 @@ assertions, timers, input order, latency budgets or retry policy. Independent re
 the focused Chromium lifecycle, secret-allowlist and diagnostic fault-injection scenario passes.
 The E2E static gates and scenario parity pass for **26 scenarios**.
 
+A further exact-head CI evaluation at `8ca66863d51dde294818c5b8fd0a7946500db1b0` fails
+its strengthened takeover scenario. Per-page diagnostics show concurrent 3.954/3.736-second
+long tasks while Node event-loop delay remains below 25 ms. The admission succeeds, but a live
+second bomb ends the round before the replacement's movement is sent; it receives `invalidPhase`.
+The probe's still-attached admission listener then closes that socket on the later error, and
+stop cleanup masks the original movement failure. The scenario now escapes and clears the
+second bomb before the authority check; the first disconnected restore still validates a live
+bomb. Settled admission listeners detach, and cleanup preserves primary failures. These are
+test lifecycle corrections, not a claimed explanation or fix for the observed browser stalls.
+The companion push run records a 16.038-second primary-page long task, while Node delay
+remains below 30 ms; server admission is observed before that stall. Its later movement is
+stale after natural round advancement. Both failures are retained under
+`/tmp/grenadiers-v0322-fixed-ci-{pr,push}-*`.
+
+Fresh image source `8ca6686` passes Compose functional **15/15**. Kubernetes passes default
+8/8, pickups 1/1 and match 1/1; reconnect has **one failure and one pass**, matching the
+confirmed test hazard/cleanup defect. Remaining Kubernetes functional groups and both latency
+groups are unrun. Evidence is preserved at `/tmp/grenadiers-v0322-fixed-acceptance`; this is
+partial, failed acceptance. The fixture/listener/cleanup correction has independent review
+clear and all E2E static gates pass; fresh changed-scenario acceptance remains pending.
+
 ## Dormant v7 contract — 2026-10-18
 
 Clean archive source `456f47b33d808691295d48688d7b8c3ce916a01e` builds image

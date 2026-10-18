@@ -45,7 +45,7 @@ function renderPanel(current: GameClientState) {
 
 beforeEach(async () => { localStorage.clear(); await i18n.changeLanguage('en') })
 
-describe('v8 reconnect presentation', () => {
+describe('v9 reconnect presentation', () => {
   it('exposes the dormant hook-backed panel without activating it in App', () => {
     render(<MantineProvider env="test"><GamePanel /></MantineProvider>)
     expect(screen.getByRole('button', { name: 'Create room' })).toBeVisible()
@@ -69,7 +69,7 @@ describe('v8 reconnect presentation', () => {
   })
 })
 
-describe('v8 private-state presentation', () => {
+describe('v9 private-state presentation', () => {
   it('removes hidden rival stats and accessibility details until a fresh reveal', () => {
     const current = state()
     const view = render(<MantineProvider env="test">
@@ -86,7 +86,7 @@ describe('v8 private-state presentation', () => {
     current.snapshot!.state.actors[1] = {
       type: 'visible', id: 2, seat: 'two', position: { x: 4096, y: 3072 }, heading: 'north',
       speedLevel: 2, alive: true, bombCapacity: 3, bombRange: 4, liveBombCount: 1,
-      inventory: { equipment: null, weapon: null }, effects: [], damageGraceRemainingTicks: 0,
+      inventory: { equipment: null, weapon: null }, effects: [], damageGraceRemainingTicks: 0, voluntaryActionsFrozen: false,
     }
     view.rerender(<MantineProvider env="test">
       <GamePanelView state={{ ...current }} actions={actions()} />
@@ -166,7 +166,7 @@ describe('v8 private-state presentation', () => {
   })
 })
 
-describe('v8 room controls', () => {
+describe('v9 room controls', () => {
   it('blocks readiness and rule edits while an update awaits authority', () => {
     const current = state()
     current.room = room(20, { type: 'waiting' }, 1)

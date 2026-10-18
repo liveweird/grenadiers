@@ -30,10 +30,12 @@ its indicator static.
 
 The enabled weight is 15, appended after Golden Flame. All eight previous item-pool masks
 retain their exact generation paths. All sixteen subsets of Heart, Shield, Golden Flame and
-Short Fuse are supported; the default remains Heart-only.
+Short Fuse were supported at introduction and remain valid; later items join the
+[current catalog](settings.md). The default remains Heart-only.
 
-Rules version 5, generator version 2, gameplay-v8 and journal format 2 remain unchanged.
-Deploy the paired server/browser build together: older v8 clients reject the extended
-availability list and need a reload. Bomb projections accept either the ordinary configured
+Rules version 5, generator version 2 and journal format 2 remain unchanged. The active
+wire contract is [gameplay-v9](protocol-v9.md).
+Deploy the paired server/browser build together: older clients require a reload for the current
+wire contract and availability list. Bomb projections accept either the ordinary configured
 fuse or its captured halved value when Short Fuse is enabled, independently of the owner's
 current effect. Arbitrary durations and overdue deadlines are rejected.

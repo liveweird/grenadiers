@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { BombView } from './schema'
-import { snapshot } from '../client/testSupport'
+import { snapshot } from './testSupport'
 import { validateGameplayV8ServerMessage } from './validation'
 
 function landmineMessage() {

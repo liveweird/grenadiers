@@ -1,6 +1,6 @@
 use grenadiers_core::{
     game::{EffectKind, SeatId},
-    protocol::{Counter, Seat, v8::ResumeToken},
+    protocol::{Counter, Seat, v9::ResumeToken},
     room::DepartureReason,
 };
 
@@ -11,7 +11,7 @@ use crate::game::rooms::match_runtime::{
 
 fn personal_state(runtime: &super::super::match_runtime::MatchRuntime) -> serde_json::Value {
     let prepared = runtime.prepare_resume(SeatId::One).unwrap();
-    let encoded = grenadiers_core::protocol::v8::prepare_expanded_admission(
+    let encoded = grenadiers_core::protocol::v9::prepare_expanded_admission(
         &prepared.room,
         prepared.state_epoch,
         prepared.capture.as_ref(),

@@ -19,7 +19,8 @@ bombs are always ordinary and never inspect or consume the stored charge.
 
 ## Compatibility
 
-Piercing Bomb uses catalog bit 6 and generator weight 15 after Slow foot. Expanded v5 supports all
-1024 subsets while preserving every prior 512-mask generator path. Gameplay wire version 8, rules
-version 5, generator version 2, and journal format 2 remain unchanged. The exact ten-item v8
-availability array requires a coordinated server and web deployment followed by browser reloads.
+Piercing Bomb uses catalog bit 6 and generator weight 15 after Slow foot. Its initial catalog
+supported all 1024 subsets and preserved every earlier 512-mask path; later items join the
+[current catalog](settings.md). Rules version 5, generator version 2 and journal format 2 remain
+unchanged. Current [gameplay-v9](protocol-v9.md) requires paired server/web deployment and a
+browser reload.

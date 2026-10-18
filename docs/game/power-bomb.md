@@ -23,7 +23,8 @@ Diarrhea bombs are always ordinary and never inspect or consume the stored charg
 
 ## Compatibility
 
-Power Bomb uses catalog bit 7 and generator weight 15 after Piercing Bomb. Expanded v5 supports
-all 2048 subsets while preserving every prior 1024-mask generator path. Gameplay wire version 8,
-rules version 5, generator version 2, and journal format 2 remain unchanged. The exact eleven-item
-v8 availability array requires a coordinated server and web deployment followed by browser reloads.
+Power Bomb uses catalog bit 7 and generator weight 15 after Piercing Bomb. Its initial catalog
+supported all 2048 subsets and preserved every earlier 1024-mask path; later items join the
+[current catalog](settings.md). Rules version 5, generator version 2 and journal format 2 remain
+unchanged. Current [gameplay-v9](protocol-v9.md) requires paired server/web deployment and a
+browser reload.

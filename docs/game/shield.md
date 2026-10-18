@@ -27,13 +27,14 @@ both timed protection and equipment.
 
 ## Generation and compatibility
 
-Shield uses bit 9 in the checked optional-item mask. Supported masks are 0, 16 (Heart), 512
-(Shield), and 528 (both). Available items are ordered `heart`, `shield`; no other catalog item
-is available. Default and empty/Heart-only seeded generation remain unchanged.
+Shield uses bit 9 in the checked optional-item mask. Its initial release supported masks
+0, 16 (Heart), 512 (Shield), and 528 (both); those masks retain their generation paths.
+The [current catalog](settings.md) also supports later items. Default and empty/Heart-only
+seeded generation remain unchanged.
 
-Rules 5 / generator 2 sample enabled items with weights 40 capacity, 40 range, 20 speed,
-25 Heart and 15 Shield. Disabled items contribute no weight or additional random draw.
-Gameplay v8 and private journal format 2 remain current; older contracts and journal format-1
+With only Heart and Shield enabled, rules 5 / generator 2 sample weights 40 capacity,
+40 range, 20 speed, 25 Heart and 15 Shield. Disabled items contribute no weight or additional random draw.
+Gameplay v9 and private journal format 2 are current; older contracts and journal format-1
 rules retain their original behavior. Checked timer overflow fails the step atomically.
 
 See [the seeded browser scenario](../../e2e/scenarios/shield.md), [deployment reproduction](../deployment.md),

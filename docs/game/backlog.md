@@ -1,6 +1,6 @@
 # Gameplay and presentation backlog
 
-TURN, CONFIG and the first ART slice are implemented. This v0.3.38 candidate contains fourteen
+TURN, CONFIG and the first ART slice are implemented. This v0.3.39 candidate contains fourteen
 optional pickups: Heart, Shield, Golden Flame, Short Fuse, Short Flame, Long Fuse, Reverse
 Controls, Diarrhea, Slow-foot, Piercing Bomb, Power Bomb, Remote Bomb, Landmine and Invisibility
 Cloak. Local checks are recorded as they complete; this candidate still requires independent
@@ -136,6 +136,7 @@ needs remappable controls, input sequencing, replay and connection-generation fe
 | BUFF-SHIELD / shield | Temporary immunity to bomb blasts, monsters and other configured damage. | Damage-class coverage, duration, expiry while in danger and interaction with Heart. |
 | BUFF-CLOCK / stopwatch | Temporarily freeze bomb fuses, monsters and enemy players. | Affected owners/entities, existing versus newly spawned bombs, multiple clocks, thaw/input handling; freeze selected gameplay entities without stopping server ticks, round deadlines or reconnect grace. |
 | BUFF-CLOAK / invisibility cloak | **Prepared in v0.3.38.** Opponents receive only identity, seat and alive status for 600 physical ticks. | Event-time private cues, complete actor-root removal, current-position reveal, reconnect deadline preservation and paired checked publication are covered locally; native acceptance remains pending. |
+| BUFF-STOPWATCH / stopwatch | **Protocol foundation in v0.3.39; gameplay unavailable.** V9 adds a required visible-actor freeze flag that remains false. | Activation later adds collection, voluntary-action freezing, timed-fuse pausing and presentation without changing the Expanded-v5 room identity. |
 | BUFF-GOLD / golden flame | New bombs use maximum blast radius while active. | Maximum derives from the selected ruleset; define precedence with Short-flame and expiry. |
 | BUFF-FUSE / short fuse | Decrease new bombs' detonation delay by 50%. | Integer-tick rounding/minimum, repeated pickups and composition with Long fuse. |
 

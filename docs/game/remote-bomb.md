@@ -24,7 +24,8 @@ while the owner has an armed bomb.
 
 ## Compatibility
 
-Remote Bomb uses catalog bit 5 and generator weight 15 after Power Bomb. Expanded v5 supports all
-4096 subsets while preserving every prior 2048-mask generator path. Gameplay wire version 8,
-rules version 5, generator version 2, and journal format 2 remain unchanged. The exact twelve-item
-v8 availability array requires a coordinated server and web deployment followed by browser reloads.
+Remote Bomb uses catalog bit 5 and generator weight 15 after Power Bomb. Its initial release
+supported all 4096 subsets and preserved every earlier 2048-mask generator path; those paths
+remain stable as later items join the [current catalog](settings.md). Rules version 5, generator
+version 2 and journal format 2 remain unchanged. Current deployments use [gameplay-v9](protocol-v9.md)
+and require the paired server/web assets plus a browser reload.

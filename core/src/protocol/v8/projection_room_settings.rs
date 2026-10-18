@@ -1,9 +1,12 @@
 use crate::protocol::Seat;
 
-use super::{ConnectionStatus, GameSettings, ProjectionError, RoomView, RulesVersion};
+use super::{ConnectionStatus, GameSettings, ItemSet, ProjectionError, RoomView, RulesVersion};
 
-pub(super) fn validate_settings(room: &RoomView) -> Result<(), ProjectionError> {
-    super::expanded_settings(room.settings)?;
+pub(super) fn validate_settings(
+    room: &RoomView,
+    supported_items: ItemSet,
+) -> Result<(), ProjectionError> {
+    super::projection_room::expanded_settings_for_items(room.settings, supported_items)?;
     let target = room.settings.wins_to_finish();
     if room.scores.one.get() > target || room.scores.two.get() > target {
         return Err(ProjectionError::InvalidExpandedBinding);

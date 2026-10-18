@@ -2,7 +2,7 @@ import { Button, Checkbox, Group, NativeSelect, SimpleGrid, Text, Title } from '
 import { useMemo, useState } from 'react'
 import { sameGameSettings } from './clientProtocol'
 import type { GameCopy } from './locale'
-import type { GameSettings, RoomView, Seat } from '../v8/schema'
+import type { GameSettings, RoomView, Seat } from '../v9/schema'
 
 const SPEEDS = [0, 1, 2, 3, 4] as const
 const TURN_ASSISTS = [64, 128, 192, 256] as const

@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import type { GameServerMessage } from '../../web/src/game/v8/schema'
+import type { GameServerMessage } from '../../web/src/game/v9/schema'
 import { gameFrames, openGame, roomFrame, sendGame } from './support/game'
 import { visibleActor } from './support/duel'
 

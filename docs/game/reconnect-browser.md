@@ -1,12 +1,12 @@
 # Reconnect browser
 
-Status: active. The application uses the v8 client against the existing gameplay endpoint.
-V7 retains the reconnect lifecycle introduced in v4 and adds [shared settings](settings.md).
+Status: active. The application uses the v9 client against the existing gameplay endpoint.
+The client retains the reconnect lifecycle introduced in v4 and [shared settings](settings.md).
 
 ## Private admission state
 
 The client first obtains a normal single-use HTTP session and authenticates a WebSocket with
-protocol version 7. A personal `admitted` frame establishes the seat, stable resume capability,
+protocol version 9. A personal `admitted` frame establishes the seat, stable resume capability,
 authoritative room view, nullable full physical state, and accepted bomb-action high-water. The
 client turns an admitted physical body into a snapshot with an empty event list; missed events are
 not replayed. Shared `roomState` frames cannot establish identity.

@@ -4,7 +4,7 @@ use std::{
     time::Instant as StdInstant,
 };
 
-use grenadiers_core::protocol::{Counter, RoomCode, RoomId, v8::ResumeToken};
+use grenadiers_core::protocol::{Counter, RoomCode, RoomId, v9::ResumeToken};
 use tokio::{
     sync::{Notify, watch},
     time::Instant,

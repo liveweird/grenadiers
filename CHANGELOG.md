@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.39 — 2026-10-18
+
+- Add the paired gameplay-v9 server/browser contract. Visible actors now require
+  `voluntaryActionsFrozen`, published as `false` until Stopwatch activation; hidden actors retain
+  their exact privacy-preserving shape.
+- Preserve Expanded-v5/generated-v2/journal-v2 identity, all fourteen available items, all 16,384
+  masks and existing simulation behavior. Gameplay-v8 remains archived and rejects v9 connections.
+
 ## 0.3.38 — 2026-10-18
 
 - Add opt-in Invisibility Cloak with a 600-physical-tick refreshable actor-privacy effect.

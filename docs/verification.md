@@ -3,6 +3,48 @@
 Records below are frozen against their named sources. Publication and later CI status are
 recorded in [release notes](https://github.com/liveweird/grenadiers/releases).
 
+## Gameplay v9 foundation candidate — 2026-10-18 — local checks complete
+
+The v0.3.39 candidate moves the paired server/browser endpoint to gameplay v9 without changing the
+Expanded-v5 rules identity, generated-v2 arenas, journal format 2, fourteen-item catalog, 16,384
+enabled-item masks or simulation behavior. Every visible actor now carries the required
+`voluntaryActionsFrozen` boolean; production capture emits false and foundation validation rejects
+true. Hidden actors retain their exact identity/seat/alive shape. Stopwatch and paused Timed bombs
+remain unavailable, while existing enabled Remote and Contact bombs retain their untimed behavior.
+
+Focused Rust and browser checks cover version-9 authentication, archived-v8 actor shape, the new
+visible/hidden union, false-only semantics, unavailable Stopwatch, paused-bomb rejection, generated
+contract drift and unchanged frame bounds. An active-v9 contract regression validates every one of
+the 16,384 subsets of its independently pinned fourteen-item catalog. Production server, browser
+and E2E helpers now use v9; archived v8 validation fixtures remain separate. Rust policy tests
+exercise all 22 reserved item IDs against independently pinned v8 and v9 fourteen-item catalogs.
+
+Debug and release suites pass **627 core tests, 195 server tests and two doctests**; four dedicated
+performance profiles remain ignored. Rust line coverage is **92.27% (13,162/14,265)**, above the
+unchanged 80% floor. All **33,176 web tests** across 57 files pass with statement/branch/function/
+line coverage of **95.38/91.08/95.82/97.77%**. Formatting, all-target Clippy with warnings denied,
+repository limits, generated contracts, lint, Knip, production and renderer-diagnostic builds,
+E2E static checks and **41-scenario parity** pass. Cargo-deny and both cached offline npm audits pass;
+strict pinned Kubernetes schemas validate all three resources.
+
+Independent core/server and browser/schema reviews are clear after correcting explicit archived-v8
+catalog pinning, v9 policy propagation through binding, production-sized false boolean bounds and
+active documentation references. A differing thirteen-item internal policy regression proves that
+binding uses the selected catalog rather than the archived one. Archived v8 recipient test helpers
+are independent fixtures rather than a shipping old client; active v9 production guards retain
+separate duplicate-entity and privacy tests. No focused asymmetric second-recipient serialization
+failure injection was added; paired preparation still structurally precedes transaction commit.
+
+The final instrumented tests pass. Their first report write failed because the external Cargo target
+left the ignored local `target/` output directory absent. Creating that directory and completing the
+report-only stage produced the coverage result above without rerunning tests or changing source.
+
+The first full web gate exposed missing generated-file lint and Knip entries for the new v9 output;
+the corrected complete gate passes. The first Rust coverage and Kubernetes schema attempts reached
+expected sandbox listener and DNS restrictions; their preserved logs precede authorized reruns of
+the identical gates, which pass. No native browser run, candidate image, hosted CI result,
+Stopwatch activation or publication is claimed.
+
 ## Invisibility Cloak candidate — 2026-10-18 — local checks complete
 
 The v0.3.38 candidate activates an opt-in 600-physical-tick Invisibility Cloak. Owners receive

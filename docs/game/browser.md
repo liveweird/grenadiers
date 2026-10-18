@@ -62,7 +62,7 @@ Accepted Classic-v7 HUD examples: [English desktop](../screenshots/gameplay-v7-d
 and [Polish 320px](../screenshots/gameplay-v7-polish-320.png). Narrow screens use two stat
 columns; desktop retains four. All eight labels and values wrap within their own cells.
 
-All active-v8 Playwright configurations disable raw framework traces because personal admission
+All active-v9 Playwright configurations disable raw framework traces because personal admission
 frames contain capabilities. Failure screenshots, public reports, and redacted summaries remain.
 Run reconnect acceptance separately with
 `E2E_MATCH_FIXTURE=arena-v1-matches npm --prefix e2e run test:reconnect`.
@@ -82,7 +82,7 @@ voices. Returning from a hidden tab requires **Resume sound**; old events are di
 
 ## Exposed items and player upgrades
 
-Gameplay-v8 snapshots supply visible pickup cells and kinds under Expanded-v5 rules. Pixi draws distinct bomb,
+Gameplay-v9 snapshots supply visible pickup cells and kinds under Expanded-v5 rules. Pixi draws distinct bomb,
 cross/range, speed, Heart and Shield marks above blocks and below bombs/flames/actors; it never guesses
 concealed contents. Retained drawings are reused while unchanged and destroyed when removed,
 replaced, or reset. The UI performs no collection simulation.

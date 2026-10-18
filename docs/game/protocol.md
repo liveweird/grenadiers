@@ -2,9 +2,10 @@
 
 Status: gameplay contracts, checked domain conversion, HTTP session issuance, and authenticated
 gameplay WebSockets with authoritative configurable two-seat matches are implemented.
-`api/gameplay-v8.schema.json`, Rust `core::protocol::v8`, and generated
-`web/src/game/v8/schema.ts` define active socket messages. V2 through v7 remain historical.
-V8 adds Expanded v5/generator v2 identity and Heart activation; see [compatibility](protocol-v8.md).
+`api/gameplay-v9.schema.json`, Rust `core::protocol::v9`, and generated
+`web/src/game/v9/schema.ts` define active socket messages. V2 through v8 remain historical.
+V9 keeps Expanded v5/generator v2 identity while adding the required, currently false
+`voluntaryActionsFrozen` visible-actor field; see [compatibility](protocol-v9.md).
 The browser validates these messages and drives the playable generated-map match. Diagnostic `/api/v1/ws` and
 `api/realtime.schema.json` remain unchanged.
 
@@ -26,13 +27,13 @@ Connect to `/api/v1/game/ws` with one configured non-null Origin and no query pa
 Its first application frame must be:
 
 ```json
-{"type":"authenticate","protocolVersion":7,"token":"0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"}
+{"type":"authenticate","protocolVersion":9,"token":"0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"}
 ```
 
 The token is a secret 64-character lowercase hexadecimal credential, held only in tab memory.
 It never belongs in a URL or log. A syntactically valid unsupported version is parsed so the
 server can return `incompatibleProtocol` before credential binding. Supported gameplay version
-is 7, independently of the product release and diagnostic protocol. Parser failures expose
+is 9, independently of the product release and diagnostic protocol. Parser failures expose
 only a generic error; token Debug formatting is redacted.
 
 A successful claim atomically binds one connection. Duplicate claims receive `connectionInUse`
@@ -81,8 +82,8 @@ All listed fields are required; objects reject extra fields. Counter values are 
 
 | Server type | Additional fields |
 | --- | --- |
-| `authenticated` | `protocolVersion: 7` |
-| `incompatibleProtocol` | `supportedVersion` (0–65,535; this server emits 7) |
+| `authenticated` | `protocolVersion: 9` |
+| `incompatibleProtocol` | `supportedVersion` (0–65,535; this server emits 9) |
 | `admitted` | acknowledged `sequence`, shared `room`, `youSeat`, private `resumeToken`, nullable `lastActionId`, nullable `state` |
 | `roomState` | shared `room` only |
 | `seatReplaced` | `roomId`; old binding closes with code 4001 |
@@ -95,7 +96,7 @@ HTTP session responses are separate from socket messages.
 ## Public snapshots and events
 
 Room metadata is shared; physical snapshots are prepared separately for each authenticated seat.
-The current Heart-only loadout produces equal perspectives. Personal
+The default Heart-only enabled set produces equal perspectives. Personal
 `admitted` carries seat identity, capability, action floor and an optional recipient baseline,
 without historical events. `state` contains `physicalTick`, `runningUpdates` and `remainingTicks`
 (each running counter 0–10,800), the arena, exactly two
@@ -103,7 +104,8 @@ actors, up to 16 bombs, up to 195 flames, and up to 195 exposed pickups. The are
 row-major floor/wall terrain entries, and up to 195 unique soft-block cells.
 
 Visible actors expose ID, seat, position, heading, speed (0–4), alive status, capacity/range
-(1–8), authoritative owned-bomb count, inventory, effects and remaining damage grace. Hidden
+(1–8), authoritative owned-bomb count, inventory, effects, remaining damage grace and the required
+`voluntaryActionsFrozen` boolean, which is always false in the v0.3.39 foundation. Hidden
 actors contain only ID, seat and alive status; owners always receive their own visible actor.
 Bombs carry ID, cell, owner, range, placement tick, blast mode and a typed trigger. Timed
 triggers report remaining ticks at `physicalTick` and pause state; no untimed deadline is invented.
@@ -132,7 +134,7 @@ completed 60 Hz updates per normal snapshot.
 
 ## Checked domain conversion
 
-Use `core::protocol::v8::capture_expanded` to observe the complete State and reports, then
+Use `core::protocol::v9::capture_expanded` to observe the complete State and reports, then
 `bind_expanded` to certify the room profile, settings, lifecycle epoch, physical tick and
 trusted round generation record.
 Opaque captures cannot be serialized directly. Raw server DTO fields alone do not establish
@@ -177,7 +179,8 @@ spawn/tie assignment uses actual round count rather than command epoch.
 
 Shared room views and snapshot metadata also carry the complete checked `settings`,
 `settingsRevision`, nullable original `settingsEditor`, and `availableItems`. Settings also
-carry `enabledItems`; availability is Heart-only, enabled by default and optionally empty.
+carry `enabledItems`; availability is the exact fourteen-item v8/v9 foundation catalog, with Heart
+enabled by default and every supported subset allowed.
 Only actual changes increment
 the settings revision and clear readiness; Ready commands acknowledge that exact revision.
 See [v6 settings and authority](protocol-v6.md) for bounds, no-op acknowledgements and edit locks.
@@ -212,9 +215,9 @@ rules and generated-v2 arenas. Snapshots initially have an
 empty pickup array because contents are concealed; only exposed items become public.
 Fixed-classic-v1 remains an explicit unit fixture, not a production selector.
 
-Gameplay v8 is incompatible with earlier versions. Reload clients when upgrading the single server. Both
+Gameplay v9 is incompatible with earlier versions. Reload clients when upgrading the single server. Both
 old and future versions are rejected before credential lookup, so rejection cannot claim or
-revoke a token. `supportedVersion` accepts the bounded input range rather than only v8,
+revoke a token. `supportedVersion` accepts the bounded input range rather than only v9,
 allowing a new client to understand an older server's incompatibility response.
 See [ADR 0013](../decisions/0013-gameplay-v2-and-room-profiles.md).
 
@@ -245,8 +248,9 @@ and room cleanup before runtime exit; HTTP graceful shutdown alone does not awai
 
 Core bomb views/events distinguish Timed, Remote and Contact triggers. This internal Rust
 representation does not change gameplay-v6 or its archived wire DTOs: wire bombs retain
-mandatory `detonatesAt`. Shared checked projection accepts Timed records and rejects either
+mandatory `detonatesAt`. The v6 checked projection accepts Timed records and rejects either
 untimed variant, including event-only records. One unsupported record fails the complete
 snapshot/report window; it is never omitted or assigned a substitute deadline. Publication
-failure does not advance revision or discard reports. Current rules admit only Timed bombs;
-V8 represents untimed triggers explicitly, but current gameplay still rejects them until weapon activation.
+failure does not advance revision or discard reports. Current Expanded rules also admit Remote
+and Contact bombs when their corresponding items are enabled; archived v6 continues to reject
+untimed live and event-only records.

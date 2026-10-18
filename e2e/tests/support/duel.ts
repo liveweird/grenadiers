@@ -1,6 +1,6 @@
 import { expect, type Page } from '@playwright/test'
 import { performance } from 'node:perf_hooks'
-import type { ActorView, Direction, GameServerMessage, Seat, V8ErrorCode } from '../../../web/src/game/v8/schema'
+import type { ActorView, Direction, GameServerMessage, Seat, V9ErrorCode } from '../../../web/src/game/v9/schema'
 
 type Snapshot = Extract<GameServerMessage, { type: 'snapshot' }>
 const CONTROL_LIMIT = 256
@@ -13,7 +13,7 @@ const COMMAND_TYPES = new Set([...CLIENT_TYPES, 'movement', 'manualAction'])
 const SERVER_TYPES = new Set([
   'authenticated', 'incompatibleProtocol', 'admitted', 'roomState', 'leftRoom', 'seatReplaced', 'error',
 ])
-const ERROR_CODES = new Set<V8ErrorCode>([
+const ERROR_CODES = new Set<V9ErrorCode>([
   'invalidMessage', 'authenticationFailed', 'connectionInUse', 'notAuthenticated',
   'alreadyAuthenticated', 'alreadyInRoom', 'notInRoom', 'roomNotFound', 'roomFull', 'staleRoom',
   'invalidPhase', 'staleSequence', 'duplicateAction', 'rateLimited', 'capacityReached',
@@ -26,7 +26,7 @@ export type GameControlEvent = {
   direction: 'sent' | 'received' | 'transport'
   type: string
   sequence?: number | null
-  errorCode?: V8ErrorCode
+  errorCode?: V9ErrorCode
   admitted?: true
   seatReplaced?: true
 }
@@ -107,7 +107,7 @@ export class GameControlRecorder {
     if (frame.type === 'admitted') event.admitted = true
     if (frame.type === 'seatReplaced') event.seatReplaced = true
     if (frame.type === 'error' && typeof frame.code === 'string'
-      && ERROR_CODES.has(frame.code as V8ErrorCode)) event.errorCode = frame.code as V8ErrorCode
+      && ERROR_CODES.has(frame.code as V9ErrorCode)) event.errorCode = frame.code as V9ErrorCode
     this.push(event)
   }
 

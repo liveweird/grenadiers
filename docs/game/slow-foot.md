@@ -23,6 +23,7 @@ before distance and tie arbitration, allowing an eligible rival to collect it. I
 capped, the pickup remains and no collection event is emitted. Expiry frees capacity before pickup
 collection on that tick; the replacement stack affects movement on the next tick.
 
-Slow foot uses catalog bit 15 and a final generator weight of 15 after Diarrhea. The expanded
-catalog supports all 512 subsets while preserving every prior 256-mask generator path. Gameplay
-wire version 8, rules version 5, generator version 2, and journal format 2 remain unchanged.
+Slow foot uses catalog bit 15 and generator weight 15 after Diarrhea. Its initial catalog
+supported all 512 subsets and preserved every earlier 256-mask path; later items join the
+[current catalog](settings.md). Rules version 5, generator version 2 and journal format 2 remain
+unchanged. Current paired server/browser deployments use [gameplay-v9](protocol-v9.md).

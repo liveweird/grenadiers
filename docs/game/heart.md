@@ -37,7 +37,7 @@ terrain, blocks and concealed upgrades; only its recorded generator identity dif
 Generator v1, earlier rules and archived replays retain their original behavior. Future
 disabled items must introduce neither random draws nor pickup weights.
 
-Gameplay-v8 carries the new identities. Earlier socket versions are rejected before credential
+Gameplay-v9 carries the identities. Earlier socket versions are rejected before credential
 claim. Legacy state and event projections reject Heart instead of omitting or relabeling it.
 Private replay format 2 records Expanded v5/generator v2 with the existing lifecycle policy;
 complete settings already carry the enabled mask, so generation records need no extra field.

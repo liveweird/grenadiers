@@ -1,7 +1,7 @@
 # Typed pickup layers
 
-Status: visibility, collection, upgrades and round assignment are implemented. The v0.3.25
-candidate adds [Heart](heart.md) to Expanded-v5/generator-v2 rooms through gameplay-v8 and Pixi.
+Status: visibility, collection, upgrades and round assignment are implemented. [Heart](heart.md)
+was introduced in v0.3.25. Current Expanded-v5/generator-v2 rooms use gameplay-v9 and Pixi.
 
 `World::with_pickups(arena, concealed, pending, exposed)` checks typed cell maps and returns
 `PickupPlacementError` rather than a partial world. A concealed item must lie under a soft
@@ -11,9 +11,9 @@ all three maps. `World::new` still creates an item-free world.
 `World::from_generated(generated)` builds the concealed layer and returns the private
 `GenerationRecord` separately to the trusted caller. `exposed_pickups()` is the read-only
 visible layer. Public domain `PickupView { cell, kind }` entries are row-major and contain no
-concealed or pending information; Debug redacts those private layers. Gameplay-v8 transmits only
-exposed items and collection events. The browser renders the three base upgrades and enabled
-Heart, with authoritative upgrade/inventory state. Live generated rounds
+concealed or pending information; Debug redacts those private layers. Gameplay-v9 transmits only
+exposed items and collection events. The browser renders the three base upgrades and enabled optional items, with authoritative
+upgrade, inventory and effect state; see the [current catalog](settings.md). Live generated rounds
 keep private layers and seed records inside the server owner.
 
 A destroyed block moves its concealed item to Pending. The revealing explosion cannot burn

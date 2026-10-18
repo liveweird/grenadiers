@@ -3,6 +3,110 @@
 Records below are frozen against their named sources. Publication and later CI status are
 recorded in [release notes](https://github.com/liveweird/grenadiers/releases).
 
+## Golden Flame corrected native acceptance — 2026-10-18 — fresh 58/58
+
+Clean source `b39f1b915aa4dc2b37707136af03224802d4347a`, archive SHA-256
+`86ed52ab0c4e6f5a7dc8a15ddf4eb9f1102a0b5fe14424599a5626295216fd52`, builds image
+`sha256:673f674f97f529a1dce143935c65d5aa8f7e525ff3f2ea9ae6f50e3154a124b0`.
+The saved image archive hashes to
+`806359661d891fc87a647145754b2c0b34824055234c8358e1be1ae7b7f6ad46`.
+Fresh acceptance passes **29/29 Compose and 29/29 Kubernetes**, first test attempts, one
+worker, zero retries and no carried results. Both targets retain all previous 26 cases plus
+Heart, Shield and Golden Flame. The Golden case proves ordinary generated collection,
+captured radius eight, natural detonation, reconnect, exact physical expiry and later base range.
+
+Four latency profiles retain 20 samples each, zero exceedances and zero CPU throttling.
+Local/shaped maxima are **49.836/167.982ms Compose** and **48.635/166.754ms Kubernetes**.
+Strict exact-200 JSON/no-store readiness probes, hardened runtime, external mode-0444 fixtures,
+six fresh pod UIDs, serial direct-pod forwarding and complete cleanup pass. Bounded initial
+transport-readiness probes retry until ready; the no-retry claim concerns browser test cases.
+Pinned archive-only Trivy finds zero fixable HIGH/CRITICAL vulnerabilities; strict Kubernetes
+1.33 validates all three resources. Scoped quiet acknowledgements concern named workers.
+
+All 22 reports and 58 configured PNGs verify, with no failure captures. Root visually checked
+the exposed desktop flame pickup and active Polish 320px view: clear icon and timer, contained
+stat labels and no overlap. The minor English desktop Equipment final-letter wrap remains a
+readability follow-up. Committed Golden screenshots are exact accepted copies. Independent
+final source/image/runtime/report/evidence audit is clear. The sealed 1,205-entry manifest
+hashes to `a3f3c3b31bc067e55c6863059d1d88d15d0b414cff66b14365a272071eb4dbff` under
+`/tmp/grenadiers-v0327-corrected-native-acceptance`; its 685-entry preparation manifest is intact.
+
+Local baseline remains **426 core, 181 server and two doctests** in each Rust profile, **91.39%**
+Rust line coverage; **320 web tests**, coverage **95.07/90.72/95.47/97.53%**, production/fixture
+builds and 30-scenario static parity pass. Independent implementation/integration reviews are
+clear. Exact-head CI and publication remain required. This post-acceptance update changes only
+documentation and screenshot copies. The failed catalog attempt below remains separate.
+
+## Golden Flame shared catalog correction — 2026-10-18 — fresh acceptance pending
+
+The first native attempt against source `8cec8e89702e903f15c9a2d160a9d9543743ced9`
+passed seven default Compose cases and failed the eighth: the shared round scenario still
+expected the earlier Heart/Shield catalog, while the server correctly advertised Golden Flame
+as well. The dedicated Golden Flame scenario already expected the correct three-item catalog.
+The corrected shared scenario retains an exact ordered catalog assertion and the independent
+empty enabled-item settings assertion. No production behavior, timeout or retry policy changes. E2E lint, Knip, type checking,
+repository guards and 30-scenario static parity pass.
+
+No later Compose group, Kubernetes or latency case ran. The failed first attempt remains sealed
+at `/tmp/grenadiers-v0327-native-acceptance`, 742-entry manifest SHA-256
+`fb3bfe8eed1669168f18792a470aa1b33af80fd95c48ca0caa8f055b40963714`. Its seven passes
+are not carried forward. A complete fresh 58-case native matrix is required for the correction.
+
+## Golden Flame native timing hardening — 2026-10-18 — fresh acceptance pending
+
+A confirmed native Shield failure showed that language switching and full-page screenshots can
+consume several seconds of a ten-second effect window. Golden Flame now captures the narrow
+Polish pickup layout before collection, then plants, verifies the captured range, escapes, and
+observes the natural blast before checking the effect is still active and taking the active
+screenshot. Exact expiry, reconnect, later base-range damage, timeouts, and zero retries remain
+unchanged. E2E lint, Knip, type checking, repository guards, and 30-scenario static parity pass;
+the hardened native scenario remains pending and no native pass is claimed.
+
+## Golden Flame terrain cache integration — 2026-10-18 — refreshed native acceptance pending
+
+The current terrain-cache/shared-diagnostics integration passes all 320 web tests, with coverage
+of 95.07/90.72/95.47/97.53% above the unchanged 85% floors, production and diagnostic-fixture builds, and E2E
+static checks with 30 documented scenarios. Core, server, version and API content are unchanged
+by this integration. Golden Flame has no completed native baseline. The inherited Heart-only record
+below certifies source `00d76ac9cc08e7bb4627caf7897e02c3f15a43d2`; it includes neither
+Golden Flame, Shield nor the terrain cache. Fresh native acceptance and final-head CI remain required for this tree.
+
+## Golden Flame candidate — 2026-10-18 — native acceptance pending
+
+The v0.3.27 candidate implements opt-in Golden Flame with a 600-physical-tick refreshable
+timer and captured radius eight on newly placed bombs. Defaults remain Heart-only, Classic
+clears optional items, and all eight supported pools retain canonical ordering. Existing four
+item-pool generation paths stay byte-for-byte stable; the new enabled weight is 15. Repeated
+seed byte31 gives the ordinary generated pickup at(3,1).
+
+Independent domain and frontend/protocol/server/E2E reviews are clear. Core debug/release
+passes **426 unit tests and two doctests** each; server debug/release passes **181 tests** each
+(four dedicated performance profiles ignored). Workspace clippy and formatting pass. The first
+server gate exposed a stale two-item admission expectation; the updated three-item expectation
+and both complete server suites pass. Generated collection, captured range, connected replacement,
+disconnected restore, exact expiry, base range restoration, next-round settings and journal replay
+are exercised through ordinary runtime actions.
+
+All **319 web tests** pass across 39 files, with statement/branch/function/line coverage
+**95.04/90.73/95.45/97.52%**. Contracts, lint, Knip, builds, both dependency audits and strict
+Kubernetes schemas3/3 pass. E2E static parity passes **29 scenarios**. Rust line coverage is
+**91.39% (12,142/13,286)**. Coverage tests passed initially; report output failed because an
+external target directory left the local output parent absent. Creating that parent and reporting
+the existing data succeeds without rerunning tests.
+
+A production-seed browser scenario is registered for range-eight placement, ordinary escape,
+reconnect action floor and unchanged effect deadline, exact expiry and later radius-two death.
+Its actual browser playthrough, screenshots, fresh same-image Compose/Kubernetes29+29 acceptance
+and final-head CI remain pending. Prior candidate image results do not certify this item.
+
+## Golden Flame responsive-HUD integration — 2026-10-18 — native acceptance pending
+
+The inherited two-column narrow HUD and real text-geometry regression are integrated. Core,
+server, Cargo, API, Golden Flame client/protocol/locales and dedicated item scenarios remain
+unchanged from the reviewed Golden Flame candidate. Its unit baseline remains unchanged;
+the production build and E2E static checks pass for this responsive integration.
+Fresh native Compose/Kubernetes acceptance and exact-head CI remain pending.
+
 ## Shield corrected native acceptance — 2026-10-18 — fresh 56/56
 
 Clean source `be44b8aeae88249b5635ed4424d3f04f7fa33f84`, archive SHA-256

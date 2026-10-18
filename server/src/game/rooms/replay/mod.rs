@@ -19,3 +19,6 @@ mod tests;
 
 #[cfg(test)]
 mod shield_tests;
+
+#[cfg(test)]
+mod golden_flame_tests;

@@ -158,6 +158,10 @@ fn legacy_profiles_reject_enabled_settings_and_opt_in_items_in_every_layer() {
         EnabledItems::HEART,
         EnabledItems::SHIELD,
         EnabledItems::HEART_AND_SHIELD,
+        EnabledItems::GOLDEN_FLAME,
+        EnabledItems::HEART_AND_GOLDEN_FLAME,
+        EnabledItems::SHIELD_AND_GOLDEN_FLAME,
+        EnabledItems::ALL,
     ] {
         let settings = RoomSettings::DEFAULT.with_enabled_items(enabled);
         assert_eq!(
@@ -170,7 +174,11 @@ fn legacy_profiles_reject_enabled_settings_and_opt_in_items_in_every_layer() {
         );
     }
 
-    for kind in [PickupKind::Heart, PickupKind::Shield] {
+    for kind in [
+        PickupKind::Heart,
+        PickupKind::Shield,
+        PickupKind::GoldenFlame,
+    ] {
         for layer in 0..3 {
             let cell = CellId::new(8, 5);
             let pickup = BTreeMap::from([(cell, kind)]);

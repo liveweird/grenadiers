@@ -151,3 +151,19 @@ outcomes. The process explicitly waits up to five seconds for upgraded game/diag
 sessions and room cleanup; final publication/close is best effort. Keep Compose's ten-second
 and Kubernetes' fifteen-second stop grace periods. Transport reconnect reserves a seat for 600 authoritative ticks while this process remains alive.
 A process restart still discards matches and capabilities; this is not restart recovery.
+
+## Reproduce opt-in Golden Flame range
+
+Use the same built image with the separate production fixture:
+
+```sh
+chmod 444 core/tests/fixtures/arena-v2-golden-flame.seed
+docker compose -f docker-compose.yaml -f docker-compose.golden-flame.yaml up -d --no-build --force-recreate app
+# Wait for /api/v1/ready before running the scenario.
+E2E_GOLDEN_FLAME_FIXTURE=arena-v2-golden-flame npm --prefix e2e run test:golden-flame
+docker compose -f docker-compose.yaml -f docker-compose.golden-flame.yaml down
+```
+
+The scenario enables Golden Flame through shared settings, reveals and collects its generated
+pickup, escapes a radius-eight blast, resumes with the same deadline and verifies base range
+after exact expiry. The seed file stays external to the image and must remain read-only.

@@ -65,6 +65,8 @@ Accepted Heart examples: [exposed pickup on desktop](../screenshots/heart-deskto
 [equipped Heart in Polish at 320px](../screenshots/heart-polish-320.png).
 Accepted Shield examples: [exposed pickup on desktop](../screenshots/shield-desktop.png) and
 [active immunity in Polish at 320px](../screenshots/shield-polish-320.png).
+Accepted Golden Flame examples: [exposed pickup on desktop](../screenshots/golden-flame-desktop.png)
+and [active effect in Polish at 320px](../screenshots/golden-flame-polish-320.png).
 
 All active-v8 Playwright configurations disable raw framework traces because personal admission
 frames contain capabilities. Failure screenshots, public reports, and redacted summaries remain.

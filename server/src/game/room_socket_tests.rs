@@ -108,7 +108,7 @@ async fn two_members_receive_personalized_admission_and_live_waiting_updates() {
     );
     assert_eq!(
         created["room"]["availableItems"],
-        json!(["heart", "shield"])
+        json!(["heart", "shield", "goldenFlame"])
     );
     let code = created["room"]["roomCode"].clone();
     let room_id = created["room"]["roomId"].clone();

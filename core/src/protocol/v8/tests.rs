@@ -355,3 +355,6 @@ fn v8_binding_rejects_overdue_frozen_bombs_and_accepts_the_deadline() {
 
 #[path = "shield_tests.rs"]
 mod shield_tests;
+
+#[path = "golden_flame_tests.rs"]
+mod golden_flame_tests;

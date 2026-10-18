@@ -67,4 +67,20 @@ describe('v8 arena presentation', () => {
     expect(presented.state.actors[0].shieldRemainingTicks).toBe(299)
     expect(presented.state.pickups).toEqual(current.snapshot!.state.pickups)
   })
+
+  it('presents Golden Flame pickups and its reconnect-safe authoritative clock', () => {
+    const current = state()
+    const own = current.snapshot!.state.actors[0]
+    if (own.type !== 'visible') throw new Error('expected visible own actor')
+    own.effects = [
+      { kind: 'shield', remainingTicks: 120 },
+      { kind: 'goldenFlame', remainingTicks: 599 },
+    ]
+    current.snapshot!.state.pickups = [{ cell: { column: 2, row: 2 }, kind: 'goldenFlame' }]
+    const presented = presentSnapshot(current)!
+    expect(presented.state.actors[0]).toMatchObject({
+      shieldRemainingTicks: 120, goldenFlameRemainingTicks: 599,
+    })
+    expect(presented.state.pickups).toEqual(current.snapshot!.state.pickups)
+  })
 })

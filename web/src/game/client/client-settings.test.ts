@@ -101,7 +101,7 @@ describe('v8 authoritative gameplay settings', () => {
     expect(value.client.getState().snapshot).toBeNull()
   })
 
-  it('sends independent Heart and Shield toggles but rejects unavailable item configuration', async () => {
+  it('sends independent optional-item masks but rejects unavailable item configuration', async () => {
     const value = harness()
     const socket = await authenticate(value)
     const baseline = admitted()
@@ -111,15 +111,24 @@ describe('v8 authoritative gameplay settings', () => {
     const sent = socket.sent.length
 
     expect(value.client.updateSettings({
-      ...baseline.room.settings, enabledItems: ['heart', 'shield'],
+      ...baseline.room.settings, enabledItems: ['heart', 'shield', 'goldenFlame'],
     })).toBe(true)
     expect(socket.sent).toHaveLength(sent + 1)
     socket.message({ type: 'error', code: 'staleSettings', sequence: 2 })
-    expect(value.client.updateSettings({ ...baseline.room.settings, enabledItems: ['shield'] })).toBe(true)
+    expect(value.client.updateSettings({
+      ...baseline.room.settings, enabledItems: ['shield', 'goldenFlame'],
+    })).toBe(true)
     socket.message({ type: 'error', code: 'staleSettings', sequence: 3 })
+    expect(value.client.updateSettings({
+      ...baseline.room.settings, enabledItems: ['goldenFlame'],
+    })).toBe(true)
+    socket.message({ type: 'error', code: 'staleSettings', sequence: 4 })
+    expect(value.client.updateSettings({
+      ...baseline.room.settings, enabledItems: ['goldenFlame', 'heart'],
+    })).toBe(false)
     expect(value.client.updateSettings({
       ...baseline.room.settings, enabledItems: ['teleporter'],
     })).toBe(false)
-    expect(socket.sent).toHaveLength(sent + 2)
+    expect(socket.sent).toHaveLength(sent + 3)
   })
 })

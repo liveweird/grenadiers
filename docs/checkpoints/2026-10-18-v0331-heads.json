@@ -1,0 +1,24 @@
+{
+  "time": "2026-10-18T10:51:47.741014+00:00",
+  "source": "ba4aa61a16488d3f39d5ee0bd69d2b3956f68f3d",
+  "integrated": "7cf5a5e86f190789103529e7a810bc7586d6e7d8",
+  "backup": "refs/backup/grenadiers/v0331-integrated-attempt2",
+  "normalized": "042a07ba5ff3a152aeaa0823b7189ba48e062a4b",
+  "normalizedParent": "894d6fe45a33aada83ca0862c265817220f31db1",
+  "previousIntegrated": "6cd809fea81a9eceef06b2f0a2e7ff7ebeb6b9ef",
+  "previousTreeEqualsPublishedMaster": true,
+  "candidateTree": "8726781380f2e3ac3eb41d6112ec604eca2e41ad",
+  "integratedNormalizedTreeEqual": true,
+  "archiveRef": "refs/heads/checkpoint/2026-10-18/v0.3.31-integrated",
+  "archiveHead": "dabc3b5511ab0184cae404239eb3642340b928c3",
+  "archiveSourceHead": "7cf5a5e86f190789103529e7a810bc7586d6e7d8",
+  "archiveSingleParent": true,
+  "independentEvidenceReview": "CLEAR",
+  "remoteArchiveVerified": true,
+  "remoteFeatureVerified": true,
+  "pr": "https://github.com/liveweird/grenadiers/pull/77",
+  "candidateRuns": [
+    39120943388,
+    39120940237
+  ]
+}

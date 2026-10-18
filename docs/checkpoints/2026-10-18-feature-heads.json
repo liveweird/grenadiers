@@ -1,0 +1,99 @@
+{
+  "createdAt": "2026-10-18T10:32:48.093179+00:00",
+  "purpose": "Unreleased archival checkpoints; no release or CI-pass claim. Original feature branches unchanged. Same-tree metadata tip uses documented skip-ci only for archive refs; normal release CI remains required.",
+  "githubPolicy": "https://docs.github.com/en/actions/how-tos/manage-workflow-runs/skip-workflow-runs",
+  "records": [
+    {
+      "version": "0.3.32",
+      "sourceBranch": "feat/playable-diarrhea",
+      "sourceHead": "2f189f968f337a80a08725f76bff4e487a1c4a67",
+      "sourceTree": "89024dbde68889fd4fe397a33683b1b9d23a0ac2",
+      "checkpointRef": "refs/heads/checkpoint/2026-10-18/v0.3.32",
+      "checkpointHead": "3847a361a0eab760a823ce69addd4c1de96affa8",
+      "releaseReady": false
+    },
+    {
+      "version": "0.3.33",
+      "sourceBranch": "feat/playable-slow-foot",
+      "sourceHead": "39223c9f2157e1b5b3940c23b04372ae2ed07e12",
+      "sourceTree": "22a5c3ea5360d73ef9e5b5522d482dfa9306cbdd",
+      "checkpointRef": "refs/heads/checkpoint/2026-10-18/v0.3.33",
+      "checkpointHead": "8be59412721e516108f9d5d9ea72ab5bc0c00e98",
+      "releaseReady": false
+    },
+    {
+      "version": "0.3.34",
+      "sourceBranch": "feat/playable-piercing-bomb",
+      "sourceHead": "d1b635fb501336495fa2819392fcc8bc246f25ea",
+      "sourceTree": "5aae62e3ac3d2ee6d2b6c57d0e36435f84c80200",
+      "checkpointRef": "refs/heads/checkpoint/2026-10-18/v0.3.34",
+      "checkpointHead": "c6351b1d40bff6eea5426b445a704da2146d1beb",
+      "releaseReady": false
+    },
+    {
+      "version": "0.3.35",
+      "sourceBranch": "feat/playable-power-bomb",
+      "sourceHead": "bd50c7eda3f6a44d88e3c6be67704e7b0f21597d",
+      "sourceTree": "cfd85aed7d2f3b027c7ef52cedd55896f4d5e5f3",
+      "checkpointRef": "refs/heads/checkpoint/2026-10-18/v0.3.35",
+      "checkpointHead": "4066b0f8c751e95a89e538e66daed285f768cbfa",
+      "releaseReady": false
+    },
+    {
+      "version": "0.3.36",
+      "sourceBranch": "feat/playable-remote-bomb",
+      "sourceHead": "50018e24f3ec89df01e8793eb21f4b5226f63cb3",
+      "sourceTree": "cd1bbd9d0ae82cd69a802ad06f2a66b6bf0b0793",
+      "checkpointRef": "refs/heads/checkpoint/2026-10-18/v0.3.36",
+      "checkpointHead": "c2fd2481bd32c4fc8fc81bf19c1df7f39a7971fc",
+      "releaseReady": false
+    },
+    {
+      "version": "0.3.37",
+      "sourceBranch": "feat/playable-landmine",
+      "sourceHead": "700d153a30ce189a37728716224818c50beb2be4",
+      "sourceTree": "15f416a16a76868543441aa6e1aaf7c02c6eae6f",
+      "checkpointRef": "refs/heads/checkpoint/2026-10-18/v0.3.37",
+      "checkpointHead": "c75be66538aee91a0aa399fc4c22a940d2e0abf0",
+      "releaseReady": false
+    },
+    {
+      "version": "0.3.38",
+      "sourceBranch": "feat/playable-cloak",
+      "sourceHead": "a3545278784d148f785e535cd58b6c799e249476",
+      "sourceTree": "d1efc5458b990415ddb09fe51b8de92b8fa7d3eb",
+      "checkpointRef": "refs/heads/checkpoint/2026-10-18/v0.3.38",
+      "checkpointHead": "658903622476e2a8c1766d8c05ac78690167196e",
+      "releaseReady": false
+    },
+    {
+      "version": "0.3.39",
+      "sourceBranch": "feat/gameplay-v9-foundation",
+      "sourceHead": "a7c0e6cb925996025c7dc077a94d32f1f72edfab",
+      "sourceTree": "500d7e7ab3e263d1cc6653512a5063caa1fc9d3b",
+      "checkpointRef": "refs/heads/checkpoint/2026-10-18/v0.3.39",
+      "checkpointHead": "c81dbcb7182ba9ec4bfff24fe6ac07747315e3d3",
+      "releaseReady": false
+    },
+    {
+      "version": "0.3.40",
+      "sourceBranch": "feat/playable-stopwatch",
+      "sourceHead": "4aafbd49d3209c32793c64ef9b337693db4ba49b",
+      "sourceTree": "c3abc2bcda4e76410a1d406ddf68f444628e3497",
+      "checkpointRef": "refs/heads/checkpoint/2026-10-18/v0.3.40",
+      "checkpointHead": "f919f5da5b58428158d0a0982da227e82195a6e3",
+      "releaseReady": false
+    },
+    {
+      "version": "0.3.41",
+      "sourceBranch": "feat/playable-invisible-bombs",
+      "sourceHead": "a2c6c0c783437786752f7e5b3af4712ec39c6ee3",
+      "sourceTree": "d05cf71f17923f74c2af74242ad672ab32423056",
+      "checkpointRef": "refs/heads/checkpoint/2026-10-18/v0.3.41",
+      "checkpointHead": "489757aebee1f8844e39f95875fb2d7781586a32",
+      "releaseReady": false
+    }
+  ],
+  "remoteVerifiedAt": "2026-10-18T10:32:54.561149+00:00",
+  "allRemoteHeadsVerified": true
+}

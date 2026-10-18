@@ -14,6 +14,7 @@ pub enum PickupKind {
     Shield,
     GoldenFlame,
     ShortFuse,
+    ShortFlame,
 }
 
 impl PickupKind {
@@ -23,6 +24,7 @@ impl PickupKind {
             Self::Shield => enabled.contains_shield(),
             Self::GoldenFlame => enabled.contains_golden_flame(),
             Self::ShortFuse => enabled.contains_short_fuse(),
+            Self::ShortFlame => enabled.contains_short_flame(),
             _ => true,
         }
     }
@@ -32,6 +34,7 @@ impl PickupKind {
             Self::Shield => Some(super::EffectKind::Shield),
             Self::GoldenFlame => Some(super::EffectKind::GoldenFlame),
             Self::ShortFuse => Some(super::EffectKind::ShortFuse),
+            Self::ShortFlame => Some(super::EffectKind::ShortFlame),
             _ => None,
         }
     }

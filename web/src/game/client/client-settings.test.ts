@@ -111,16 +111,17 @@ describe('v8 authoritative gameplay settings', () => {
     const sent = socket.sent.length
 
     expect(value.client.updateSettings({
-      ...baseline.room.settings, enabledItems: ['heart', 'shield', 'goldenFlame', 'shortFuse'],
+      ...baseline.room.settings,
+      enabledItems: ['heart', 'shield', 'goldenFlame', 'shortFuse', 'shortFlame'],
     })).toBe(true)
     expect(socket.sent).toHaveLength(sent + 1)
     socket.message({ type: 'error', code: 'staleSettings', sequence: 2 })
     expect(value.client.updateSettings({
-      ...baseline.room.settings, enabledItems: ['goldenFlame', 'shortFuse'],
+      ...baseline.room.settings, enabledItems: ['goldenFlame', 'shortFuse', 'shortFlame'],
     })).toBe(true)
     socket.message({ type: 'error', code: 'staleSettings', sequence: 3 })
     expect(value.client.updateSettings({
-      ...baseline.room.settings, enabledItems: ['shortFuse'],
+      ...baseline.room.settings, enabledItems: ['shortFlame'],
     })).toBe(true)
     socket.message({ type: 'error', code: 'staleSettings', sequence: 4 })
     expect(value.client.updateSettings({

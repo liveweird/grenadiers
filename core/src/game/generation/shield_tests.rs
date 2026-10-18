@@ -100,6 +100,7 @@ fn signature(generated: &GeneratedArena) -> String {
                 Some(PickupKind::Shield) => 'D',
                 Some(PickupKind::GoldenFlame) => 'G',
                 Some(PickupKind::ShortFuse) => 'F',
+                Some(PickupKind::ShortFlame) => 'L',
                 None if generated.arena().blocks().contains(&cell) => '#',
                 None if generated.arena().terrain(cell) == Some(Terrain::Wall) => 'X',
                 None => '.',

@@ -26,7 +26,7 @@ export function itemSetSemanticError(
   return enabledItems.every((item) => available.has(item)) ? null : 'unavailableItem'
 }
 
-const supportedItems = ['heart', 'shield', 'goldenFlame', 'shortFuse'] as const
+const supportedItems = ['heart', 'shield', 'goldenFlame', 'shortFuse', 'shortFlame'] as const
 
 function supportedItem(kind: string, enabled: ReadonlySet<ItemId>): boolean {
   return ['bombCapacity', 'blastRange', 'movementSpeed'].includes(kind)
@@ -43,7 +43,8 @@ function supportedState(state: GameState | null, enabled: ReadonlySet<ItemId>): 
     && actor.effects.every((effect) =>
       (effect.kind === 'shield' && enabled.has('shield') && effect.remainingTicks <= 300)
       || (effect.kind === 'goldenFlame' && enabled.has('goldenFlame') && effect.remainingTicks <= 600)
-      || (effect.kind === 'shortFuse' && enabled.has('shortFuse') && effect.remainingTicks <= 600))
+      || (effect.kind === 'shortFuse' && enabled.has('shortFuse') && effect.remainingTicks <= 600)
+      || (effect.kind === 'shortFlame' && enabled.has('shortFlame') && effect.remainingTicks <= 600))
     && (enabled.has('heart') || actor.damageGraceRemainingTicks === 0)
   ))
 }

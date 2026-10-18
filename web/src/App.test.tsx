@@ -62,7 +62,7 @@ function room(revision: number, phase: RoomPhase = { type: 'waiting' }): RoomVie
       startingSpeedLevel: 0, turnAssistUnits: 256, winsToFinish: 3, bombFuseTicks: 180,
       enabledItems: ['heart'],
     },
-    availableItems: ['heart', 'shield', 'goldenFlame', 'shortFuse'],
+    availableItems: ['heart', 'shield', 'goldenFlame', 'shortFuse', 'shortFlame'],
     settingsRevision: 1,
     settingsEditor: 'one',
     seats: [

@@ -110,6 +110,7 @@
     "shieldDescription": "Zapewnia 5 sekund odporności na obrażenia. Kolejna Tarcza odnawia ten czas.",
     "goldenFlameDescription": "Maksymalizuje zasięg nowych bomb na 10 sekund. Kolejny Złoty płomień odnawia ten czas.",
     "shortFuseDescription": "Skraca o połowę lont nowych bomb przez 10 sekund. Kolejny Krótki lont odnawia ten czas.",
+    "shortFlameDescription": "Ogranicza zasięg nowych bomb do 1 pola przez 10 sekund, zastępując Złoty płomień. Podłożone bomby się nie zmieniają, premie do zasięgu wracają później, a kolejny przedmiot odnawia ten czas.",
     "unapplied": "Zastosuj te zmiany przed zgłoszeniem gotowości.",
     "restore": "Przywróć domyślne zasady",
     "classic": "Ustawienia klasyczne",

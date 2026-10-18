@@ -24,6 +24,7 @@ fn short_fuse_weight_is_appended_after_every_preexisting_item() {
         );
     }
 
+    let old_all = EnabledItems::from_bits(12_816).unwrap();
     let mut all = Sequence([99, 100, 124, 125, 139, 140, 154, 155, 169].into());
     for expected in [
         PickupKind::MovementSpeed,
@@ -36,7 +37,7 @@ fn short_fuse_weight_is_appended_after_every_preexisting_item() {
         PickupKind::ShortFuse,
         PickupKind::ShortFuse,
     ] {
-        assert_eq!(sample_pickup(&mut all, EnabledItems::ALL), Some(expected));
+        assert_eq!(sample_pickup(&mut all, old_all), Some(expected));
     }
 }
 
@@ -86,6 +87,7 @@ fn signature(generated: &GeneratedArena) -> String {
                 Some(PickupKind::Shield) => 'D',
                 Some(PickupKind::GoldenFlame) => 'G',
                 Some(PickupKind::ShortFuse) => 'F',
+                Some(PickupKind::ShortFlame) => 'L',
                 None if generated.arena().blocks().contains(&cell) => '#',
                 None if generated.arena().terrain(cell) == Some(Terrain::Wall) => 'X',
                 None => '.',

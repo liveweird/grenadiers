@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.29 — 2026-10-18
+
+- Add opt-in Short Flame curses: ten seconds of refreshable range-one captures for newly
+  planted bombs, overriding Golden Flame while retaining independent effect timers.
+- Preserve base upgrades, existing bomb ranges, Heart-only defaults and every previous
+  seeded item-pool path; add settings, pixel cues, English/Polish text and acceptance scenario.
+
 ## 0.3.28 — 2026-10-18
 
 - Add opt-in Short Fuse pickups: ten seconds of refreshable half-length fuses for newly

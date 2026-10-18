@@ -111,3 +111,31 @@ records, process timing files and container inspection are retained in
 `/tmp/grenadiers-v0311-reference`. The source/image/provenance and RSS units were independently
 reviewed. These developer references exclude HTTP/WebSocket/network/browser costs and human
 playability; exact-image application acceptance and the rest of M7 remain separate.
+
+## Static arena terrain
+
+The Pixi scene caches only terrain as a texture at the initialized renderer's actual resolution
+(DPR capped at two), with nearest sampling and antialiasing disabled. Blocks, pickups, bombs,
+flames and actors remain live. The cache rebuilds when terrain dimensions/cells change, on a
+new room/round or reset, and after WebGL context restoration. Identical snapshots and animation
+ticks reuse it. Reset releases the cache; final renderer destruction removes the restoration
+listener and releases GPU resources. A resumed renderer paints the current baseline before reveal.
+
+The development-only exact-pixel regression compares this scene with an uncached terrain painter
+at DPR one and two through initial paint, repaint, reset and actual context loss/restoration:
+
+```sh
+npm --prefix web run build:renderer-diagnostics
+npm --prefix e2e run test:terrain-pixels
+```
+
+Use the pinned browser for reference results. Its separate config does not run the stopped
+six-cell lifecycle experiment. All four phases require zero differing bytes at each resolution;
+the development entries are excluded from the ordinary production build.
+
+This optimization follows complete CPU-side submission measurements from the original reconnect
+workload; its lossy browser trace did not establish a screenshot-delay cause. Evaluate the changed
+workload using [the opt-in observer](renderer-diagnostics.md), reporting indices per observed
+animation callback or per measured interval. Callbacks are not rendered frames, source-span bounds
+are not actual uploads, and absolute CPU totals from different-duration windows are not comparable
+per-frame costs. Final-head CI and native application acceptance remain separate requirements.

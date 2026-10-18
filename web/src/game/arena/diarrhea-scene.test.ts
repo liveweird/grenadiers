@@ -11,9 +11,13 @@ vi.mock('pixi.js', () => {
     visible = true
     alpha = 1
     rotation = 0
+    cached = false
     scaleValue = 1
     position = { set: (x: number, y: number) => { this.x = x; this.y = y } }
     scale = { set: (value: number) => { this.scaleValue = value } }
+    get isCachedAsTexture(): boolean { return this.cached }
+    cacheAsTexture(value: false | object): void { this.cached = value !== false }
+    updateCacheTexture(): void {}
     addChild(...nodes: Node[]): Node {
       for (const node of nodes) { node.parent = this; this.children.push(node) }
       return nodes[0]
@@ -42,7 +46,7 @@ vi.mock('pixi.js', () => {
 type NodeView = { children: NodeView[]; visible: boolean; alpha: number; shapes: string[] }
 
 it('draws a bomb-drop Diarrhea cue and preserves older cues through expiry', () => {
-  const scene = new ArenaScene()
+  const scene = new ArenaScene(1)
   const snapshot = gameSnapshot()
   snapshot.state.pickups = [{ cell: { column: 2, row: 2 }, kind: 'diarrhea' }]
   Object.assign(snapshot.state.actors[0], {

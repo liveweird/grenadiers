@@ -1,5 +1,14 @@
 # Repository verification
 
+## Diarrhea terrain cache integration — 2026-10-18 — refreshed native acceptance pending
+
+The current terrain-cache/shared-diagnostics integration passes all 617 web tests across 43 files, with coverage
+of 95.24/91.03/95.53/97.63% above the unchanged 85% floors, production and diagnostic-fixture builds, and E2E
+static checks with 35 documented scenarios. Core, server, version and API content are unchanged
+by this integration. Diarrhea has no completed native baseline. The inherited Heart-only record
+below certifies source `00d76ac9cc08e7bb4627caf7897e02c3f15a43d2`; it includes neither
+Diarrhea, Reverse Controls, Long Fuse, Short Flame, Short Fuse, Golden Flame, Shield nor the terrain cache. Fresh native acceptance and final-head CI remain required for this tree.
+
 ## Diarrhea candidate — 2026-10-18 — local checks complete
 
 The v0.3.32 candidate activates opt-in Diarrhea for exactly 600 physical ticks. Each seat selects
@@ -68,6 +77,33 @@ Independent backend and frontend/protocol/browser-scenario review is clear after
 resume, malformed-effect and screenshot-order regressions. The native Long Fuse playthrough
 and screenshots, final candidate-image acceptance, and final-head CI remain pending. No release or shipped status is claimed.
 
+## Short Flame candidate — 2026-10-18 — native acceptance pending
+
+The v0.3.29 candidate activates the opt-in Short Flame curse. Collection refreshes
+600 physical ticks of range-one captures for new bombs, with precedence over Golden Flame
+and independent effect timers. Existing bombs and base upgrades retain their values. The new
+weight is 15; all 32 supported masks preserve the sixteen previous generation paths and
+Heart-only defaults. The ordinary single-item seed fixture pins pickup cell (3,1).
+
+Independent domain and integration reviews are clear. Both profiles pass **457 core tests,
+183 server tests and two doctests**, with four dedicated performance profiles ignored.
+Formatting, Clippy and production build pass. Rust line coverage is **91.46% (12,203/13,342)**.
+All **367 web tests** across 39 files pass; statement/branch/function/line coverage is
+**95.11/90.83/95.47/97.56%**. Contract checks, lint, Knip, dependency audits, strict Kubernetes
+schemas 3/3 and E2E static parity **31 scenarios** pass. The first server-gate invocation was
+rejected by the Node pin guard; the complete gate passes with the required Node 24.21.0.
+An initial protocol test compile lacked its Tick import; the corrected focused and full suites
+pass. The frontend's first lint run found excessive settings-panel complexity; rendering its
+canonical item list resolves it, with the complete web gate passing afterward.
+
+Tests cover both Golden Flame expiry orders, fixed old/new bomb ranges, base upgrades,
+Short Fuse independence, blocker/chain geometry, all-layer transactional overflow and ordinary
+generated collection. Server replay compares full state while a cursed bomb is live before
+and after effect expiry, then again after round reset. The registered production-seed browser
+scenario checks actual one-cell fire reach, unchanged fuse timing on both peers, reconnect,
+exact expiry and later base-range damage. Its native playthrough, screenshots, same-image
+Compose/Kubernetes **31+31** acceptance and final-head CI remain pending. No release is claimed.
+
 ## Short Fuse candidate — 2026-10-18 — native acceptance pending
 
 The v0.3.28 candidate adds opt-in Short Fuse: a refreshable 600-physical-tick effect that
@@ -124,8 +160,8 @@ and final-head CI remain pending. Prior candidate image results do not certify t
 
 The v0.3.26 working candidate passes **413 core tests, 180 server tests and two doctests in each
 debug/release profile**, with four dedicated performance profiles intentionally ignored.
-Rust line coverage is **91.23%** (12,084/13,245 lines); all **301 web tests** pass with
-statement/branch/function/line coverage of **95.00/90.66/95.41/97.50%**. Contracts, lint,
+Rust line coverage is **91.23%** (12,084/13,245 lines); all **303 web tests** pass with
+statement/branch/function/line coverage of **95.00/90.68/95.41/97.50%**. Contracts, lint,
 Knip, builds, dependency audits, strict Kubernetes
 schemas (3/3), E2E static checks and **28-scenario parity** pass. Independent domain/protocol
 review is clear. Browser review identified an expiry-assertion gap; acceptance now derives the
@@ -142,12 +178,37 @@ focused run verifies the strengthened bomb-placement assertion in both build pro
 No v0.3.26 native image, full browser scenario run or release is claimed. Native Compose and
 Kubernetes acceptance, visual inspection and exact final-head CI remain required.
 
-## Heart activation candidate — 2026-10-18 — local checks only
+## Heart activation candidate — 2026-10-18 — native baseline 54/54
+
+Clean source `00d76ac9cc08e7bb4627caf7897e02c3f15a43d2`, source archive SHA-256
+`cb60d03dd51e9793463191657448529ec119694656a4fca7f8ab0a943814aa61`, passes all 54 native
+cases: 27 Compose/27 Kubernetes, each first attempt with zero retries. The single built image is
+`sha256:35bf3678b5940149dd82acde55ada77f091d1bed70563db7f77b3dcbaafb0293`, saved archive
+SHA-256 `72d0303d00c25cc7dff53ab501a2f0695364c5bc2c21be2f225b7f2a830a1d52`.
+Pinned reference Chromium/Node 24.21/Playwright 1.63 runs every browser group. Heart itself passes
+in 30.2s Compose/30.6s Kubernetes with external mode-0444 `arena-v2-heart`, ordinary controls and unchanged
+assertions. All 18 reports have no failures or retries.
+
+Each of four latency profiles retains 20 samples with zero exceedances; maxima are
+51.860/172.306ms Compose local/shaped and 53.304/158.520ms Kubernetes. Throttling deltas are zero.
+Strict probes, UID/GID 65532, zero capabilities, no-new-privileges, read-only roots, RuntimeDefault,
+Kubernetes 500m/256Mi and direct fresh-pod port-forward liveness/stop/wait/cleanup pass. Four fixture
+rollouts use distinct pod UIDs. Owned Compose containers/network and Kubernetes namespace are gone.
+
+Independent evidence review confirms all 54 results and the frozen 1030-file final manifest
+`6e8587290fc441f1310711391b2147d2486f61d5dd94ba87161782d0bcaeea5b` under
+`/tmp/grenadiers-v0325-acceptance`. A preparation count-file path had become stale after its
+recorded recheck; a sealed addendum preserves historical bytes and replays the original 630
+preparation entries via the preserved count copy. Its ten-file audit manifest is
+`8fd0932bd5d8e7eab1057a41169a9ffa97cb241a5b30f989481fc380aafe75a1`; independent re-review is clear.
+This native baseline excludes the separately evaluated upstream terrain-cache candidate.
+Final-head CI, integration and publication remain outstanding.
 
 The v0.3.25 candidate passes **401 core tests, 179 server tests and two doctests** in both
 debug and release profiles; four dedicated performance profiles remain intentionally ignored. Rust line
-coverage is **90.94%** (11,950/13,140 lines), above the unchanged 80% floor. All **274 web tests**,
-contracts, lint, Knip, production build, E2E static checks and **27-scenario parity** pass.
+coverage is **90.94%** (11,950/13,140 lines), above the unchanged 80% floor. All **286 web tests**
+pass with statement/branch/function/line coverage of **94.76/90.36/94.70/97.30%**. Contracts,
+lint, Knip, production build, E2E static checks and **27-scenario parity** pass.
 Dependency audits and strict pinned Kubernetes schemas pass. Independent gameplay/browser
 and backend reviews are clear after the forged legacy replay-mask and socket-version issues
 were fixed.
@@ -158,17 +219,56 @@ damage before collection, replacement without stacking, overflow, disabled/Class
 real owner replacement/restore, quiet baselines and complete deterministic replay. Archived
 contracts remain byte-unchanged; journal records retain their 64-byte and allocation bounds.
 
-No v0.3.25 native image or deployment acceptance is claimed. The inherited connected-takeover
-release-build defect is corrected; full debug and release gates pass. Strengthened acceptance
-requires actual movement from the replacement binding. Fresh native acceptance and final-head
-CI remain required before publication.
+The inherited connected-takeover release-build defect is corrected; full debug and release gates
+pass. Native acceptance requires actual movement from the replacement binding and now passes
+at the source/image recorded above. Final-head CI remains required before publication.
+
+## Live-v7 HUD acceptance — 2026-10-18 — native verified, publication pending
+
+Clean source `0dde9142375ab495970f0031ef88fc10a25da499`, archive SHA-256
+`91b0d98f37812b2f0d344e969ae5e07d53fba15eafb24cf5918bcba87b372412`, builds production image
+`sha256:d4624da23bd07f0f28fad2807973ae7fe81b15b2725a95fa91e46fcd9d233daa`.
+Pinned Trivy reports zero fixable HIGH/CRITICAL vulnerabilities; strict Kubernetes schemas
+validate3/3. The first Compose default group passes7 cases and fails the rendered duel:
+its old four-value HUD assertion finds eight values because the live-v7 HUD now also shows
+equipment, bomb type, effects and damage grace. That initial attempt leaves44 cases unrun, with zero retries and no
+latency samples. Runtime hardening, strict probes and cleanup pass. Original failure artifacts
+remain sealed in `/tmp/grenadiers-v0324-acceptance`; no Kubernetes runtime was started.
+
+The corrected duel and generated-upgrade assertions check all eight named fields, including
+the original four upgrade values and empty inventory/effects/grace. Complete label/value
+arrays preserve field association and avoid adding many serial browser calls during a live
+fuse. Product sources, screenshot options, deadlines, retry policy and gameplay are unchanged.
+Independent implementation review and all E2E static gates/parity26 pass. This corrects the
+HUD probe and does not explain the separate v0.3.22 hosted screenshot timeout.
+
+Clean corrected source `893c150fcfcfdcd065418deb1349cb7852106df0`, archive SHA-256
+`4019fd20ffdc6e2e6a99f8d8b54549a1e068d129c06ee75eef36420638431ef3`, has identical production
+inputs to the image source above. The continuation passes **19/19 fresh Compose and26/26 fresh
+Kubernetes cases**, all first attempts with zero retries. Seven default Compose cases retain
+byte-identical transitive inputs, closing the explicit composite at **26/26 per target,52/52**.
+Four latency profiles have20 samples each, zero exceedances and zero CPU throttling; local/
+shaped maxima are48.491/133.364 ms Compose and48.906/160.071 ms Kubernetes. All32 strict
+pre-browser probe pairs return200 JSON/no-store. Runtime hardening, external/projected0444
+fixtures, fresh pod identities, direct-pod forward stop/wait ordering and cleanup pass.
+
+Independent evidence review is clear. Source blobs, all16 embedded reports, retained test
+inputs, immutable image/scan/schema references and both evidence manifests verify. Evidence:
+`/tmp/grenadiers-v0324-hud-acceptance`; its374-file manifest SHA-256 is
+`dbcc7b920f90fbc04bcb58afe947b6deb34f669f90ffdc2c1b50b0924b089d70`.
+The preserved initial-failure90-file manifest SHA-256 is
+`143eb7a3b7f0e3c847a3697d7059da822ba3b485c8716f0095af77d9df729a9f`.
+Saved process records establish PID ordering/liveness and waited cleanup, without independently
+proving literal PTY ownership or ambient quiet. Exact publication-head CI and upstream release
+integration remain pending; this candidate is not yet merged or released.
 
 ## Live gameplay-v7 candidate — 2026-10-18 — local checks only
 
 The v0.3.24 integration passes **375 core tests, 174 server tests and two doctests in each debug and release profile**;
 four dedicated performance profiles remain intentionally ignored. Rust line coverage is
-**93.27%** (10,568/11,331 lines), above the unchanged 80% floor. All **262 web tests**,
-contracts, lint, Knip, builds and E2E static checks pass, with **26 documented scenarios**.
+**93.27%** (10,568/11,331 lines), above the unchanged 80% floor. All **274 web tests** pass
+with statement/branch/function/line coverage of **95.05/90.81/94.66/97.55%**. Contracts,
+lint, Knip, builds and E2E static checks pass, with **26 documented scenarios**.
 Dependency audits and strict pinned Kubernetes schemas pass. Independent backend and
 frontend reviews are clear.
 
@@ -179,16 +279,19 @@ room provenance, failed admission rollback, previous-version rejection before cr
 and unsupported equipment actions without consuming the manual-action identifier.
 
 This candidate retains Classic rules and empty optional-item availability. The inventory and
-effect presentation is infrastructure; no new pickup is playable. This is local verification
-only: no v0.3.24 image, Compose/Kubernetes acceptance or release has been completed.
+effect presentation is infrastructure; no new pickup is playable. These results describe the
+initial local verification. The later image and native acceptance are recorded above; exact-head
+acceptance for the terrain-cache integration remains pending.
 
-## Canonical projection candidate — 2026-10-18 — local checks only
+## Canonical projection history — 2026-10-18 — native verified
 
 The v0.3.23 candidate passes **373 core tests, 170 server tests and two doctests in each debug and release profile**, with four
 dedicated performance profiles intentionally ignored. Rust line coverage is **92.25%**
-(10,207/11,064 lines), above the unchanged 80% floor. All **247 web tests**, contract checks,
+(10,207/11,064 lines), above the unchanged 80% floor. All **259 web tests**, contract checks,
 ESLint, Knip, builds, E2E static checks, dependency audits and strict pinned Kubernetes schemas
-pass. The application still uses gameplay-v6; optional items remain disabled.
+pass. The application still uses gameplay-v6; optional items remain disabled. The reviewed renderer
+lifetime correction is integrated; web statement/branch/function/line coverage is
+**94.81/90.08/94.90/97.42%**, and all 26 E2E static scenarios match.
 
 Independent review is clear. Regression tests establish complete-world validation before
 filtering, hidden record and ownership checks, exact event/world fuse consistency, paused
@@ -202,8 +305,325 @@ The pre-correction image `sha256:1b5b5e39a78178c50df3de226621c0307249d8003baffc3
 passed Compose 25/25 and Kubernetes functional 15/15 with zero retries. Kubernetes latency was
 not run: the evaluation was interrupted after confirming the release-profile takeover defect.
 Evidence remains at `/tmp/grenadiers-v0323-acceptance`; that image does not certify the fix.
-The fix and strengthened acceptance are integrated, and full debug/release gates pass. Fresh
-image acceptance and final-head CI remain required before publication.
+The fix and strengthened acceptance are integrated, and full debug/release gates pass.
+
+Clean source `fc37bbf996ca3fbed5ff2c085702a26ede47b8ea`, archive SHA-256
+`d42dc6a3a9edd29bd9ccf4a6ba8c6c987d79023deaed5159644f0cca6395b178`, builds fresh image
+`sha256:9e3d9611f5430b91002ec15fc2ef79941570862476a0a577510d264d40da29c9`.
+The image archive hashes to `39ac9b8792a07fb3b4123cf3449e11d5a44998012e28711a35fc5ca99d92f69c`.
+Fresh first-attempt acceptance passes **26/26 Compose and 26/26 Kubernetes**, retries zero,
+with independent evidence review clear. Local/shaped maxima are **56.641/142.426 ms** in
+Compose and **49.553/159.893 ms** in Kubernetes; each profile has 20 samples, zero exceedances
+and zero CPU throttling. Pinned archive-only Trivy finds zero fixable HIGH/CRITICAL findings;
+strict Kubernetes schemas validate 3/3. Runtime hardening, strict no-store probes, external
+mode-0444 fixtures, fresh pod/forward lifecycles and cleanup pass.
+
+Evidence is `/tmp/grenadiers-v0323-guarded-acceptance`; its summary SHA-256 is
+`810e04c5015119d58782276afc07b4ac42b1b2e00f8c9b886cbea693fe0d602a`. The selective evidence
+manifest verifies; it does not hash every raw report. The post-success shell wrapper variable
+failure, wrong preparation arity, missing generated dependency and sandbox-blocked schema fetch
+remain preserved as setup-only failures, before any browser scenario. No scenario failed or
+was retried. Saved files prove approval-gate ordering and continuous direct-pod forwarding;
+the coordinator ACK content and literal PTY attachment remain external to those logs. Runtime
+seed modes are recorded, but their hashes were not independently read inside containers.
+
+This certifies local native acceptance, without a hosted-CI or production-deployment claim.
+Publication requires exact-head hosted gates after the predecessor is merged. Later changes
+to application or browser test inputs require their corresponding evidence to be refreshed.
+
+## Original capture workload — 2026-10-18 — attribution stopped
+
+Clean observer `4fcef4ba32fed92ce3324b09d2f815bf9f4aea7d`, archive SHA-256
+`0530df46dcbb8d2806161d7e608a3d12e7172ca6e3bf2dc960d842f8447beb73`, passes the original
+first reconnect case once, first attempt/retry 0, 47.529s. Pinned Linux pure fixtures pass 1/1
+and all E2E static checks/scenario parity 26 pass. The native profile deliberately reuses original
+production image `57f16c...3853`: application source/dependencies/build are unchanged, while
+development-only fixture/script additions mean the whole Docker input context differs.
+
+The first/second intended capture commands take 11,452.465/17,169.343ms. All eighteen stage
+pairs complete; no pending stage, diagnostic failure or temporary page remains. Automatic failure
+screenshots are disabled only in the opt-in profiler; explicit captures, assertions, natural
+inputs, seed, 120-second scenario budget and zero retries remain unchanged.
+
+Over the first audit/capture observation window, the primary submits no GL draws; the peer
+submits 1,426 draws/13,167,684 indices and no wrapped uploads, with untruncated counters.
+These are CPU submissions/callbacks, not completed frames. GPU-process CPU increases 24.53s
+across the wider trace-start-through-shutdown CPU bracket; this is not utilization over the
+11.873s Node window. The 195-cell/47-block public snapshot is not a per-canvas visible inventory.
+
+Trace commands, fixed clock marker, CPU snapshots and detach succeed, but Chrome reports data
+loss, bounded samples truncate and five flow IDs are unsupported. Retained PNG encoding 31.175ms
+is positive evidence only; missing trace data cannot establish exact causality or absent work.
+Attribution stops. The native capture exceeds one second, so no hosted profiling follow-up is
+authorized by this packet. Original baseline/matrix reruns and tracing expansion are excluded.
+
+Complete CPU/submission evidence separately justifies one terrain-only texture-cache package,
+with exact-pixel/lifecycle tests and one changed-image original-workload confirmation. This is
+a rendering-efficiency change, not proof of the capture cause. No block/dynamic caching, ticker
+change or gate relaxation belongs in it. Final-head CI/publication remains outstanding.
+
+Independent evidence review is clear. Strict probes, app hardening/0444 seed and cleanup pass; owned browser/app containers and
+network are absent. Frozen evidence: `/tmp/grenadiers-v0322-capture-profile-acceptance`, 595-file
+manifest SHA-256 `2863e684890909fce79e5e769f72e838c88862dfddbf4eb34e6cc60b6ec39c48`.
+
+## Isolated renderer matrix — 2026-10-18 — non-reproduction
+
+Clean source `232eba28401af0eb9e50ce3f9649e879e4ecca72`, archive SHA-256
+`189468834f21f9d2fa8d031b862abac0494ad716b3b84d4aeb106b4ab057ec48`, runs the predeclared
+six-cell matrix once. All six cases pass on their first attempts with zero retries. The pinned
+browser is `66b346...a91c`, Node24.21.0 and Playwright1.63.0; browser cpuset0,1 has no CPU quota
+and Docker networking is disabled. All11 fixture assets match manifest SHA-256
+`afbee68eb81b1886a0fe8ecd383fb4306e6de85d9dbe14fcc7d13b28662541ea`.
+
+| Primary/peer | Capture command, ms |
+| --- | ---: |
+| Empty/empty |104.066|
+| Active/empty |645.068|
+| Suspended/empty |60.704|
+| Empty/active |547.537|
+| Active/active |654.718|
+| Suspended/active |552.255|
+
+All54 stage pairs complete successfully, with no pending stage or diagnostic failure.
+Pre/post state checks preserve canvas identity, visibility, mode and actual update histories.
+Both planned active/suspended comparisons have different delivered ordinal histories, so
+neither qualifies as a matched contrast. No multi-second capture reproduces. The experiment
+is stopped without enlargement or rerun; no GPU cause or production lifecycle remedy follows.
+
+Independent evidence review validates source, assets, reports, histories, isolation arguments,
+probes and cleanup. Inputs are read-only bind mounts; the container root and temporary paths
+remain writable. No cross-origin requests or WebSockets are observed; same-origin requests
+are permitted and are not independently logged. These limits correct broader original summary
+wording in a preserved audit addendum. Evidence: `/tmp/grenadiers-pixi-lifecycle-acceptance`;
+original622-file manifest SHA-256 `07c6f63142938a5af0aa5a1d0d511db359d9206b358fc457f8af7411cfe0ffc7`,
+audit17-file manifest `7f044086a30e360f12e06036eeedf8e8e1b1c1567bdd97cdd4ce2e5c1a0d1dd2`.
+
+The final attribution task subsequently profiled the original natural reconnect case with explicitly
+opt-in, bounded GL submission counters, public scene counts and canvas geometry, process CPU
+deltas and an arguments-stripped browser trace around its first audit/capture. Production
+rendering and release assertions remained unchanged. Its completed result, interpretation limits and
+separate terrain-only optimization decision are recorded above. No hosted profile follows.
+
+## Hosted capture attribution — 2026-10-18 — prior evaluation
+
+Exact instrumented head `482c8ba59ce4c2e0de413ecae7c020cf68ade51b` fails both browser jobs
+(`39089475906` PR, `39089473104` push); the eight other jobs pass. Both intended primary
+captures have successful `Page.captureScreenshot` boundaries lasting **109,047/110,097 ms**,
+with every surrounding stage below20 ms. Capture and restoration finish after the120-second
+test budget is exhausted; the following peer audit is then aborted. Both results are first
+attempts with zero retries. Captured-page heartbeats continue near one second, and Node
+event-loop maxima are78.7/102.0 ms; this does not identify a Chromium/Pixi cause.
+
+Default, pickup, match and the second reconnect case pass. Later latency, hardening, controls,
+audio and the image scan do not run after the reconnect failure. Raw artifacts, decoded tests
+and fixed-metadata stage summaries remain at `/tmp/grenadiers-v22-capture-ci-{pr,push}-*`.
+No unchanged workflow is restarted.
+
+Review finds a diagnostic attribution defect: an automatic failure screenshot starts before
+the explicit screenshot's outer promise returns, so its later preparation events reuse the
+same capture ordinal. The first canonical capture duration above is independently confirmed;
+the automatic tail is not another intended sample. The repair stops recording before any
+secondary pipeline while forwarding all original operations unchanged and retaining pending
+first-pipeline starts without invented finishes. Independent review is clear; full E2E static
+gates/parity26 and the pure Chromium diagnostic pass1/1 in3.2 seconds. An initial synthetic
+fixture receiver error is corrected before the passing run; native timeout-path validation
+of the cutoff remains pending.
+
+The separate [renderer lifecycle experiment](game/renderer-diagnostics.md) was prepared to compare six
+predeclared pristine/active/suspended two-context cells using the actual Pixi renderer and
+synthetic public presentation data. It does not modify production rendering, game authority,
+release screenshot options, deadlines or retries. Its completed non-reproduction is recorded
+above. Independent fixture review is clear after correcting
+warm-up error propagation, shared initialization/warm-up/treatment barriers, actual history
+and reduced-motion evidence, post-capture invariants and cleanup precedence. Final E2E static,
+fixture lint/typecheck/build and ordinary-production marker isolation pass. Normal web gates
+pass259 tests with94.81/90.08/94.90/97.42% statement/branch/function/line coverage. The initial
+diagnostic build finds a nullable-host type error; a checked host accessor fixes it. No matrix
+cell had run at this preparation boundary. The fixture and its output remain separate from normal production assets.
+
+## Screenshot capture attribution — 2026-10-18 — CI blocked
+
+Clean diagnostic source `b2d966647310924257cb591625abe4478199d107` passes the changed
+reconnect and pure-diagnostic cases **2/2 Compose and 2/2 Kubernetes**, first attempts with
+zero retries, against the unchanged production image `57f16c...3853`. Original screenshot
+stage timings localize the multi-second wait to completed `Page.captureScreenshot` calls:
+Compose12,780.635/17,782.816 ms and Kubernetes5,368.567/14,757.926 ms. Every surrounding
+stage finishes below9 ms. Heartbeats continue during captures, with zero temporary pages,
+diagnostic failures or pending stages. Strict probes, runtime hardening, external fixtures,
+continuous direct-pod forwarding and cleanup pass. Evidence remains in
+`/tmp/grenadiers-v0322-screenshot-stage-acceptance`. This localizes a command boundary
+without identifying its cause or resolving the CI timeout.
+
+A separately reviewed foreground experiment at `f770970ee080189164750e1ede1917558c718020`
+activates each page before its audit, width assertion and unchanged full-page capture. Its
+static gates/parity26 and pure Chromium diagnostic pass; fresh native cases pass2/2 per target.
+Activation takes0.4–1.6 ms, but captures still take13.0/18.1 seconds in Compose and12.1/16.9
+seconds in Kubernetes. This does not support foregrounding as a remedy. The experiment is
+withdrawn; browser test inputs return exactly to the stage-diagnostic source above. Negative
+evidence remains in `/tmp/grenadiers-v0322-foreground-acceptance`.
+
+Evidence review corrects both native summaries: reconnect has a120-second budget, while the
+pure diagnostic has60 seconds. Two retained audio cases also execute the changed diagnostic
+helper, so they require fresh acceptance. That evaluation's strict rollup is **50/52**, consisting
+of four fresh cases and46 unaffected retained cases; earlier52/52 generated status files are
+superseded by audit addenda. Initial HTTP000/not-ready probes establish no transport cause.
+An expanded manifest now seals the source archive, runner, raw reports, probes, fixture modes,
+runtime/security and cleanup evidence while preserving earlier manifests. Fresh
+audio acceptance closes that gap below. No assertion, screenshot option, deadline or retry is relaxed.
+
+Clean documentation head `6e11870f40bdc6da222f30449c7723ebb5ff9ff2`, archive SHA-256
+`3ac713930e83ed8edd91d2e87d5cd4a469111a43026b36ccd5246fa04e88277f`, has byte-identical
+E2E inputs to `b2d9666` and identical production inputs to `954b0ad`. Fresh headed audio
+passes **1/1 Compose and 1/1 Kubernetes**, first attempts with zero retries and the original
+60-second budget. Strict probes, runtime hardening, external/projected0444 fixtures, fresh
+pod identity, continuous direct-pod forwarding and cleanup pass. This closes the composite
+at **26/26 per target,52/52 total**: four stage-diagnostic cases, two fresh audio cases and46
+unaffected retained cases. Evidence and scope addenda remain under
+`/tmp/grenadiers-v0322-audio-closure-acceptance`. The native composite does not establish that
+the hosted capture timeout is resolved; the next exact-head CI evaluation supplies new
+screenshot-substage observations. That evidence-only update changes neither application nor
+E2E inputs; later diagnostic changes are recorded separately above.
+
+## Screenshot substage diagnostics — 2026-10-18 — native attributed
+
+Exact guarded-audit head `1549e8fe75c3ea2e0bb97abc90714b93f304d42d` fails the browser job in
+both hosted evaluations (`39087361314` push, `39087363884` PR); the eight other checks pass.
+Both audits and width checks complete promptly with zero temporary-page events. Push width
+commands take29.1/7.3 ms; screenshot intervals are34.0/88.8 seconds before timeout. PR width
+commands take11.1/20.4 ms; screenshot intervals are66.0/155.0 seconds before the timed-out
+result. High-level returned boundaries also run on errors and do not prove successful capture.
+Retained heartbeats continue promptly, while Node event-loop maxima stay94.7/113.2 ms.
+Artifacts and decoded steps remain under `/tmp/grenadiers-v22-guarded-ci-{push,pr}-*`.
+
+The next E2E-only probe uses pinned Playwright1.63.0 instance-local hooks to time original
+viewport, preparation, font-progress, full-page-size, layout-metrics, capture and restoration
+stages. It records only fixed labels, ordinals, clocks and success/error flags in a separate
+128-event buffer. Arguments, results, metadata, error text, screenshot bytes and paths are not
+retained. Original method receiver, arguments, return/promise identity and errors pass through.
+Cleanup restores descriptors/listeners and deactivates recording before pending work settles.
+Unsupported versions or private shapes fail explicitly; production sources are unchanged.
+
+Independent review is clear after closing a late-promise-recording lifecycle defect. Regressions
+prove pending resolve/reject and retained listener callbacks cannot mutate the stopped buffer.
+Full E2E static gates and parity26 pass; the existing pure Chromium case passes1/1 in3.1 seconds,
+including an actual safe static full-page screenshot with all nine stage labels. The initial
+sandbox launch failure occurs before test execution; the permitted run is recorded separately.
+Existing screenshot options, ordering, gameplay/accessibility assertions,120-second deadline
+and zero retries remain unchanged. The native attribution result is recorded above; earlier
+high-level timings alone do not establish a screenshot substage or browser cause.
+
+
+## Guarded single-frame accessibility experiment — 2026-10-18 — native verified
+
+Only the reconnect accessibility audits switch to Axe's legacy single-document path, avoiding
+its partial-run temporary pages. The helper subscribes before its initial frame check, requires
+one frame before and after analysis, and rejects any frame attachment during the audit. Cleanup
+removes its listener and preserves the original audit failure. The original rules, violation
+assertions, operation order, width expression, screenshots, 120-second deadline and zero retries
+remain unchanged. Application sources and the tested production image remain identical.
+
+The existing pure Chromium diagnostic now compares normalized violation-rule IDs against the
+current Axe mode on a controlled fixture and proves both report an unlabeled button. It also
+covers an existing iframe, a transient frame and cleanup/error precedence. E2E typecheck, lint,
+Knip and parity26 pass; the focused Chromium case passes1/1 in2.8 seconds. Its initial sandbox
+launch fails before test execution; a later implementation test finds an invalid Set matcher,
+which is corrected to `.size` before the passing run. Independent implementation review is clear.
+
+Clean source `96c4608454b69d92b08961cdff0cc3d81d882e24`, archive SHA-256
+`aea9f1b215d057e7977f1e10a48aa6e8315c582395356f9c97bf95ea7a134f75`, retains identical
+production Docker inputs and uses the same tested `57f16c...3853` image. Changed reconnect
+and pure-diagnostic cases pass **2/2 in each target** on their first actual invocation;
+48 distinct unaffected cases are retained, giving **26/26 Compose and 26/26 Kubernetes**,
+52 total with zero retries. Latency profiles retain 20 samples each, zero exceedances and zero
+throttling. The new pure-test prefix followed by those profiles has not run as one current-source
+native sequence; the prefix closes its isolated context, and no residue defect was found.
+Runtime hardening, strict probes, external fixtures, continuous direct-pod forwarding
+and cleanup pass. A sandbox-denied read-only preflight is preserved before any browser launch.
+Evidence: `/tmp/grenadiers-v0322-guarded-axe-acceptance`; independent evidence audit is clear.
+
+Both reconnect traces contain zero temporary-page events and diagnostic failures. Width
+commands take **2.25–26.42 ms**, with callback entry within 0.78–9.73 ms and actual reads 0–0.1 ms.
+Heartbeat delivery stays below 14.2 ms, without the prior 90–109-second backlog. Screenshot
+phases instead take **12.5–18.4 seconds**, compared with 0.36–0.98 seconds in the preceding
+native run; overall improvement is not claimed. This supports the bounded audit-path change
+without establishing a Chromium/Axe root cause or resolving every screenshot delay.
+
+Hosted gates must pass on the exact publication head before merge; local acceptance does not
+substitute for those checks. Earlier failed evaluations remain preserved. The later evidence-only
+commit changes neither application inputs nor the native-tested browser code.
+
+
+## Post-audit browser phase diagnostics — 2026-10-18 — native verified, CI blocked
+
+The reconnect probe now records bounded Node command boundaries around the existing Axe,
+width and screenshot operations, page-clock markers around the unchanged width expression,
+one heartbeat per second on the existing collector interval, and ordinal-only temporary-page
+lifecycle events. Diagnostics attach before context teardown and retain the original test
+failure if cleanup also fails. Gameplay, accessibility, overflow and screenshot assertions,
+the 120-second deadline, and zero retries remain unchanged.
+
+Independent review is clear. E2E typecheck, lint, Knip and scenario parity26 pass; the existing
+pure Chromium diagnostic passes1/1 in2.8 seconds. Its initial sandboxed launch failed before
+test execution; the permitted launch and its result are recorded separately. No production
+source changes accompany these diagnostics. Page timestamps describe event creation, while Node timestamps
+include asynchronous binding/IPC delivery and scheduling. Missing markers or heartbeats alone
+cannot identify a layout stall; no cause is claimed for the post-audit CI failures below.
+
+Exact source `31be38d2708d91fcc36b3d93ba5179b492d3b73a` has byte-identical production Docker
+inputs to `954b0ad`, so acceptance reuses image
+`sha256:57f16c866bff370640fe99edd367ee3378e5a7f17983a1cdcb5fd87dc6373853`.
+Changed Compose cases pass **2/2**; retained cases supply 24 distinct passes. Changed/remaining
+Kubernetes cases pass **15/15**; retained cases supply 11 distinct passes. The transparent rollup
+is **26/26 per target, 52/52 total**, retries zero, with an independent evidence audit.
+Kubernetes local/shaped maxima are **51.901/158.792 ms**, 20 samples per profile, zero
+exceedances and zero throttling. Strict probes, hardening, mode-0444 external fixtures,
+continuous direct-pod forwarding and cleanup pass. The initial evidence-runner URL-variable
+collision fails before reaching the app; its failed setup and the earlier actual position
+failure remain preserved. Evidence: `/tmp/grenadiers-v0322-phase-acceptance`.
+Literal PTY attachment and the content of the coordinator quiet acknowledgment cannot be
+independently established by saved process logs; the continuous PID lifecycle and gate order
+are recorded. This rollup combines retained and fresh cases against the same production image.
+
+Both exact-head CI runs fail the browser job (`39085949336` PR, `39085946734` push); the eight
+other checks pass. Push primary Axe passes, then width evaluation remains unresolved for
+109.347 seconds before `Test ended`. Retained heartbeats were created after command submission
+but delivered in a teardown burst 90–109 seconds later. Missing markers do not prove that page
+execution stopped, since marker delivery shares that backlog. In the PR, the peer width
+command takes 20.115 seconds while its actual read takes 0.1 ms; this observed delay precedes
+callback entry. PR activity arrays fill their 256-event bounds, so absent earlier markers may
+have been evicted. The primary width/screenshot take 49.054/25.192 seconds; the peer screenshot
+spans115.951 seconds before the test reports its 120-second timeout. Node event-loop maxima are
+136.6/165.0 ms. Artifact and decoded step prefixes are `/tmp/grenadiers-v22-phase-ci-{push,pr}-*`.
+The local successful width reads take 0–0.1 ms, with 11.4–12.8 seconds before callback entry.
+This narrows the measured delay without attributing a browser, protocol or Axe defect.
+
+## Takeover position restoration probe correction — 2026-10-18 — acceptance pending
+
+Clean pose candidate `954b0ad551293e95a5cfc33ea876f476ec05225b` builds image
+`sha256:57f16c866bff370640fe99edd367ee3378e5a7f17983a1cdcb5fd87dc6373853`. Pinned scan finds
+zero fixable HIGH/CRITICAL vulnerabilities; strict Kubernetes schemas validate3/3. Compose
+passes26/26. Kubernetes passes11 cases, fails the first reconnect case and leaves14 unrun.
+The failed takeover position is x5680, exceeding an artificial center bound of5632 by48.
+The movement helper explicitly accepts positions within128 units of the target center. No
+production movement or browser stall failure is observed in that assertion: retained primary/
+peer long-task maxima are270/263 ms, with no measured slowGL call. Cleanup and frozen harness
+checks pass. Evidence remains `/tmp/grenadiers-v0322-pose-acceptance`.
+
+The corrected probe verifies the intended safe cell(5,1) before takeover and exact equality
+between that stationary public position and the replacement admission. Actual replacement
+movement, action floor, canvas lifetime, budgets, deadlines and retries remain unchanged.
+Independent review and E2E static parity26 are clear; fresh changed-scenario/remaining acceptance
+is pending. Earlier failed
+runs remain preserved; this correction does not explain the previously recorded13-second task.
+
+Exact pose-head PR/push CI (`39084363475`/`39084360049`) both fail the unchanged120-second
+reconnect budget after passing takeover and new-room checks. The primary accessibility audit passes in both; the push also completes the peer audit.
+In the PR, the subsequent width evaluation never returns; in the push it takes65,888 ms,
+then6,085 ms for its screenshot. The peer width read takes17,786 ms and its screenshot19,730 ms
+before timeout. Completed page long tasks peak around209–217 ms with no measured slowGL call.
+Cleanup errors follow the original blockage. This differs from the earlier13-second peer task;
+post-audit command/context scheduling versus native layout remain to be attributed. Artifacts
+and decoded steps are preserved under `/tmp/grenadiers-v22-pose-ci-{pr,push}-*`.
 
 ## Idempotent actor pose correction — 2026-10-18 — acceptance pending
 
@@ -219,7 +639,6 @@ All **259 web tests** across 37 files pass; statement/branch/function/line cover
 **94.81/90.08/94.90/97.42%**. Contract checks, lint, Knip and production build pass. This fixes
 confirmed unnecessary work; it does not attribute the separate 12,928 ms peer task below.
 Independent review is clear. A rebuilt image, fresh native acceptance and final-head CI remain required.
-
 ## Historical v22 arena renderer lifetime correction — 2026-10-18
 
 The single instrumented Linux run of clean harness `1bf4d74` passes its reconnect case in
@@ -235,7 +654,7 @@ worlds, paints the latest baseline before reveal, and releases it on final compo
 Async ownership, StrictMode cancellation and later-activation initialization retries are explicit.
 Native reconnect acceptance also checks that the original canvas survives restore and remains
 connected but hidden after terminal takeover. Deadlines and retry policy remain unchanged.
-The v22 renderer candidate's web verification passed **257 tests** across 36 files, with statement/branch/function/line
+The v0.3.22 renderer verification passes **257 tests** across 36 files, with statement/branch/function/line
 coverage of **94.81/90.05/94.90/97.42%**. Lint, TypeScript, Knip, production build and contract
 checks pass. Focused lifecycle coverage includes first-paint and suspension failures, bounded
 activation retries and recovery after an initialization completes while no world is active.
@@ -268,6 +687,7 @@ with 20 samples per profile, zero exceedances and zero Kubernetes throttling. Th
 Kubernetes process owns its forward in one PTY through strict probes and all checks. See
 `/tmp/grenadiers-v0322-k8s-lifetime-acceptance` and `/tmp/grenadiers-v22-final-native-audit.md`.
 All prior failed evaluations remain preserved. No registry image or production deployment is claimed.
+
 ## Release-profile connected takeover correction — 2026-10-18 — acceptance pending
 
 The release-profile owner regression fails on the earlier candidate: binding replacement was

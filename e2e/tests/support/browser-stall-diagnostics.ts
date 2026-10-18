@@ -1,25 +1,37 @@
 import { performance } from 'node:perf_hooks'
 import type { Page, TestInfo } from '@playwright/test'
 import { EventLoopDelayMonitor, type EventLoopDelaySummary } from './event-loop-diagnostics'
+import {
+  installPageCollector, type CollectorEventLabel, type PageCollectorEvent,
+} from './page-stall-collector'
 
 const STATE_LIMIT = 128
 const ACTIVITY_LIMIT = 256
+const GL_CALL_LIMIT = 64
 const FAILURE_LIMIT = 32
 const SCHEDULER_INTERVAL_MS = 100
 const REPORTING_GAP_MS = 50
+const SLOW_GL_CALL_MS = 50
+const GL_METHODS = new Set([
+  'useProgram', 'deleteBuffer', 'deleteProgram', 'deleteShader', 'deleteTexture',
+  'deleteFramebuffer', 'deleteRenderbuffer', 'deleteVertexArray', 'drawArrays',
+  'drawElements', 'drawArraysInstanced', 'drawElementsInstanced', 'clear', 'getExtension',
+  'deleteQuery', 'deleteSampler', 'deleteSync', 'deleteTransformFeedback',
+  'drawRangeElements', 'loseContext',
+])
 
-type PageEventLabel = 'initialized' | 'visible' | 'hidden' | 'focused' | 'blurred'
-  | 'longTask' | 'schedulingGap' | 'bindingDuration'
-
-type PageEvent = {
-  label: PageEventLabel
+type RetainedPageEvent = PageCollectorEvent & { nodeAt: number }
+type GlCallTiming = {
+  method: string
+  contextOrdinal: number
+  callCount: number
   pageAt: number
   documentOrdinal: number
   timeOrigin: number
-  duration?: number
+  duration: number
+  nodeAt: number
+  stack: Array<{ functionName: string; asset: string; line: number; column: number }>
 }
-
-type RetainedPageEvent = PageEvent & { nodeAt: number }
 
 export type BrowserPageDiagnostics = {
   ordinal: number
@@ -28,6 +40,7 @@ export type BrowserPageDiagnostics = {
   installDurationMs: number
   stateEvents: RetainedPageEvent[]
   activityEvents: RetainedPageEvent[]
+  glCalls: GlCallTiming[]
   failures: DiagnosticFailure[]
   chromeWindowId?: number
   closedAt?: number
@@ -39,11 +52,6 @@ export type BrowserStallSummary = {
   failures: DiagnosticFailure[]
 }
 
-type DiagnosticBinding = (event: PageEvent) => Promise<void>
-type DiagnosticWindow = Window & {
-  grenadiersStallDiagnostic?: DiagnosticBinding
-  grenadiersStallCollectorInstalled?: true
-}
 export type BrowserPageLabel = 'audio-primary' | 'audio-peer' | 'visibility-cover'
   | 'reconnect-primary' | 'reconnect-peer'
 type DiagnosticFailureStage = 'bindingSetup' | 'futureDocumentSetup' | 'currentDocumentSetup'
@@ -56,58 +64,73 @@ function retain<T>(values: T[], value: T, limit: number): void {
   if (values.length > limit) values.shift()
 }
 
-function installPageCollector(input: { intervalMs: number; reportingGapMs: number }): void {
-  const observed = window as DiagnosticWindow
-  const binding = observed.grenadiersStallDiagnostic
-  if (!binding || observed.grenadiersStallCollectorInstalled) return
-  observed.grenadiersStallCollectorInstalled = true
-  let documentOrdinal = 0
-  let observedRoot: Element | null = null
-  const send = (event: Omit<PageEvent, 'documentOrdinal' | 'timeOrigin'>): void => {
-    const started = performance.now()
-    const contextual = {
-      ...event, documentOrdinal, timeOrigin: performance.timeOrigin,
-    }
-    void binding(contextual).then(() => binding({
-      label: 'bindingDuration', pageAt: performance.now(),
-      documentOrdinal, timeOrigin: performance.timeOrigin,
-      duration: performance.now() - started,
-    })).catch(() => undefined)
-  }
-  const state = (): void => send({
-    label: document.visibilityState === 'visible' ? 'visible' : 'hidden',
-    pageAt: performance.now(),
+function sanitizeStack(value: unknown): GlCallTiming['stack'] {
+  if (!Array.isArray(value)) return []
+  return value.slice(0, 8).flatMap((raw): GlCallTiming['stack'] => {
+    if (typeof raw !== 'object' || raw === null) return []
+    const candidate = raw as Record<string, unknown>
+    const rawFunction = typeof candidate.functionName === 'string'
+      ? candidate.functionName.slice(0, 256) : ''
+    const functionName = /^[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*)*$/.test(rawFunction)
+      ? rawFunction.slice(0, 64) : 'anonymous'
+    const rawAsset = typeof candidate.asset === 'string'
+      ? candidate.asset.slice(0, 2_048).split(/[?#]/, 1)[0]
+        .replaceAll('\\', '/').split('/').at(-1) ?? '' : ''
+    const asset = /^[A-Za-z0-9._-]+$/.test(rawAsset) ? rawAsset.slice(0, 64) : 'anonymous'
+    const boundedInteger = (number: unknown): number => typeof number === 'number'
+      && Number.isInteger(number) ? Math.min(1_000_000_000, Math.max(0, number)) : 0
+    return [{
+      functionName, asset,
+      line: boundedInteger(candidate.line), column: boundedInteger(candidate.column),
+    }]
   })
-  const initializeDocument = (): void => {
-    documentOrdinal += 1
-    observedRoot = document.documentElement
-    send({ label: 'initialized', pageAt: performance.now() })
-    state()
-    document.addEventListener('visibilitychange', state)
+}
+
+function finiteNumber(value: unknown): value is number {
+  return typeof value === 'number' && Number.isFinite(value)
+}
+
+function positiveInteger(value: unknown): value is number {
+  return finiteNumber(value) && Number.isInteger(value) && value >= 1
+}
+
+function glCall(candidate: Record<string, unknown>, nodeAt: number): GlCallTiming | undefined {
+  if (candidate.label !== 'glCall'
+    || typeof candidate.method !== 'string' || !GL_METHODS.has(candidate.method)
+    || !positiveInteger(candidate.contextOrdinal) || !positiveInteger(candidate.callCount)
+    || !finiteNumber(candidate.pageAt) || !positiveInteger(candidate.documentOrdinal)
+    || !finiteNumber(candidate.timeOrigin) || !finiteNumber(candidate.duration)
+    || candidate.duration < SLOW_GL_CALL_MS) return undefined
+  return {
+    method: candidate.method,
+    contextOrdinal: candidate.contextOrdinal,
+    callCount: candidate.callCount,
+    pageAt: candidate.pageAt,
+    documentOrdinal: candidate.documentOrdinal,
+    timeOrigin: candidate.timeOrigin,
+    duration: candidate.duration,
+    nodeAt,
+    stack: sanitizeStack(candidate.stack),
   }
-  initializeDocument()
-  send({ label: document.hasFocus() ? 'focused' : 'blurred', pageAt: performance.now() })
-  addEventListener('focus', () => send({ label: 'focused', pageAt: performance.now() }))
-  addEventListener('blur', () => send({ label: 'blurred', pageAt: performance.now() }))
-  if ('PerformanceObserver' in window) {
-    try {
-      new PerformanceObserver((list) => {
-        for (const entry of list.getEntries()) {
-          send({ label: 'longTask', pageAt: entry.startTime, duration: entry.duration })
-        }
-      }).observe({ type: 'longtask', buffered: true })
-    } catch { /* Long-task observation is optional in this browser. */ }
+}
+
+function pageEvent(candidate: Record<string, unknown>, nodeAt: number): RetainedPageEvent | undefined {
+  const allowed: CollectorEventLabel[] = [
+    'initialized', 'visible', 'hidden', 'focused', 'blurred',
+    'longTask', 'schedulingGap', 'bindingDuration',
+  ]
+  if (!allowed.includes(candidate.label as CollectorEventLabel)
+    || !finiteNumber(candidate.pageAt) || !finiteNumber(candidate.documentOrdinal)
+    || !finiteNumber(candidate.timeOrigin)) return undefined
+  const event: RetainedPageEvent = {
+    label: candidate.label as CollectorEventLabel,
+    pageAt: candidate.pageAt,
+    documentOrdinal: candidate.documentOrdinal,
+    timeOrigin: candidate.timeOrigin,
+    nodeAt,
   }
-  let expected = performance.now() + input.intervalMs
-  setInterval(() => {
-    const now = performance.now()
-    if (observedRoot !== document.documentElement) initializeDocument()
-    const gap = Math.max(0, now - expected)
-    if (gap >= input.reportingGapMs) {
-      send({ label: 'schedulingGap', pageAt: now, duration: gap })
-    }
-    expected = now + input.intervalMs
-  }, input.intervalMs)
+  if (finiteNumber(candidate.duration)) event.duration = Math.max(0, candidate.duration)
+  return event
 }
 
 export class BrowserStallDiagnostics {
@@ -132,6 +155,7 @@ export class BrowserStallDiagnostics {
       installDurationMs: 0,
       stateEvents: [],
       activityEvents: [],
+      glCalls: [],
       failures: [],
     }
     this.pages.push(pageSummary)
@@ -139,24 +163,14 @@ export class BrowserStallDiagnostics {
       await page.exposeBinding('grenadiersStallDiagnostic', (_source, value: unknown) => {
         if (this.stopped || typeof value !== 'object' || value === null) return
         const candidate = value as Record<string, unknown>
-        const allowed: PageEventLabel[] = [
-          'initialized', 'visible', 'hidden', 'focused', 'blurred',
-          'longTask', 'schedulingGap', 'bindingDuration',
-        ]
-        if (!allowed.includes(candidate.label as PageEventLabel)
-          || typeof candidate.pageAt !== 'number' || !Number.isFinite(candidate.pageAt)
-          || typeof candidate.documentOrdinal !== 'number' || !Number.isFinite(candidate.documentOrdinal)
-          || typeof candidate.timeOrigin !== 'number' || !Number.isFinite(candidate.timeOrigin)) return
-        const event: RetainedPageEvent = {
-          label: candidate.label as PageEventLabel,
-          pageAt: candidate.pageAt,
-          documentOrdinal: candidate.documentOrdinal,
-          timeOrigin: candidate.timeOrigin,
-          nodeAt: performance.now(),
+        const arrival = performance.now()
+        const retainedGlCall = glCall(candidate, arrival)
+        if (retainedGlCall) {
+          retain(pageSummary.glCalls, retainedGlCall, GL_CALL_LIMIT)
+          return
         }
-        if (typeof candidate.duration === 'number' && Number.isFinite(candidate.duration)) {
-          event.duration = Math.max(0, candidate.duration)
-        }
+        const event = pageEvent(candidate, arrival)
+        if (!event) return
         const target = ['initialized', 'visible', 'hidden', 'focused', 'blurred'].includes(event.label)
           ? pageSummary.stateEvents : pageSummary.activityEvents
         retain(target, event, target === pageSummary.stateEvents ? STATE_LIMIT : ACTIVITY_LIMIT)
@@ -168,6 +182,7 @@ export class BrowserStallDiagnostics {
     }
     const collectorInput = {
       intervalMs: SCHEDULER_INTERVAL_MS, reportingGapMs: REPORTING_GAP_MS,
+      slowGlCallMs: SLOW_GL_CALL_MS,
     }
     try { await page.addInitScript(installPageCollector, collectorInput) } catch {
       retain(pageSummary.failures, { stage: 'futureDocumentSetup', at: performance.now() }, FAILURE_LIMIT)

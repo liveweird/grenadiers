@@ -73,3 +73,9 @@ Every native action and release must reach the peer's authoritative public state
 250ms budget. Two fresh moving revisions precede release. Both stable revisions must enter the route
 after the delayed null command is dispatched and then reach the page; the second confirms the first
 stable timestamp and is recorded separately.
+
+Browser diagnostics also time existing allowlisted WebGL calls without invoking additional GL
+work. The focused diagnostic scenario checks native call transparency, extension identity,
+exception preservation, complete draw/delete method coverage, a 64-event slow-call ring, and
+sanitized caller frames. This instrumentation observes the reconnect/audio scenarios and does
+not change latency budgets or identify a cause until a slow call is captured.

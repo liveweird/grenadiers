@@ -146,8 +146,8 @@ do not activate remote control, mine contact/destruction, fuse pausing or bomb m
 
 ## Dormant v7 contract
 
-The v0.3.22 candidate stages schema, generated browser types, Rust wire DTOs and checked-value
-helpers only. Active gameplay-v6 and its archived contracts remain unchanged. The contract
+The v0.3.22 increment stages schema, generated browser types, Rust wire DTOs and checked-value
+helpers only. The then-active gameplay-v6 and its archived contracts remain unchanged. The contract
 includes inventory, 11 timed effect kinds (at most 16 entries), explicit bomb triggers, a
 visible/hidden actor union, available/enabled items and shared manual action IDs.
 
@@ -171,7 +171,8 @@ live transport/browser migration are separate increments. See [v7 contract](prot
 4. Dormant gameplay-v7 schema/DTOs/checked values (v0.3.22 candidate).
 5. Canonical validation and recipient projections (v0.3.23 candidate), with strict Classic
    binding and event-time audience capture; no live endpoint or item activation.
-6. Integrated server/browser v7 migration, including recipient-specific admission and routing.
+6. Integrated server/browser v7 migration (v0.3.24 candidate), including recipient-specific
+   admission and routing; Classic still has empty item availability.
 7. Expanded configuration/generation with Heart activation, then Shield in a separate increment.
 8. Individual stat modifiers, Reverse/Diarrhea, special bombs, movement equipment, Stopwatch,
    visibility effects, Oil and Teleporter, with interaction tests at each activation.

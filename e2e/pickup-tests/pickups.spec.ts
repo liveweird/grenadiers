@@ -1,6 +1,9 @@
 import { expect, test, type Page } from '@playwright/test'
+import {
+  EMPTY_ACTIVE_ACTOR_STATS, expectActorStats, type ActorStatsExpectation,
+} from '../tests/support/actor-stats'
 import { moveTo } from '../tests/support/movement'
-import { expectPaintedCanvas, latestSnapshot, observeGame, type ObservedGame } from '../tests/support/duel'
+import { visibleActor, expectPaintedCanvas, latestSnapshot, observeGame, type ObservedGame } from '../tests/support/duel'
 
 test.beforeAll(() => {
   expect(process.env.E2E_PICKUP_FIXTURE, 'Configure the documented server seed fixture before pickup acceptance')
@@ -10,7 +13,7 @@ test.beforeAll(() => {
 type Cell = { column: number; row: number }
 
 function actor(game: ObservedGame) {
-  const value = latestSnapshot(game)?.state.actors.find((candidate) => candidate.seat === 'one')
+  const value = visibleActor(latestSnapshot(game), 'one')
   if (!value?.alive) throw new Error('Fixture route requires a living first player')
   return value
 }
@@ -66,7 +69,7 @@ async function escapeBomb(
       await expect.poll(() => {
         const frames = game.frames.filter((frame) => frame.type === 'snapshot').slice(-2)
         if (frames.length !== 2 || frames[0].room.revision <= releasedRevision) return false
-        const positions = frames.map((frame) => frame.state.actors.find((value) => value.seat === 'one')!.position)
+        const positions = frames.map((frame) => visibleActor(frame, 'one')!.position)
         return positions.every((value) => value.x === positions[0].x && value.y === positions[0].y)
       }, { intervals: [15] }).toBe(true)
       await moveTo(page, game, leg.centerTurn)
@@ -78,9 +81,10 @@ async function escapeBomb(
   await moveTo(page, game, destination)
 }
 
-async function expectStats(pages: Page[], values: string[]) {
+async function expectStats(pages: Page[],
+  values: Pick<ActorStatsExpectation, 'available' | 'capacity' | 'range' | 'speed'>) {
   for (const page of pages) {
-    await expect(page.getByLabel('Player one upgrades').locator('dd')).toHaveText(values)
+    await expectActorStats(page, 'one', { ...values, ...EMPTY_ACTIVE_ACTOR_STATS })
   }
 }
 
@@ -126,7 +130,7 @@ test('two browsers collect generated upgrades while old bombs keep their capture
     await one.screenshot({ path: testInfo.outputPath('capacity-revealed.png'), fullPage: true })
     await moveTo(one, games[0], { column: 1, row: 1 })
     await moveTo(one, games[0], { column: 3, row: 1 })
-    await expectStats(pages, ['2', '2', '2', '1'])
+    await expectStats(pages, { available: '2', capacity: '2', range: '2', speed: '1' })
 
     await moveTo(one, games[0], { column: 1, row: 1 })
     await moveTo(one, games[0], { column: 1, row: 2 })
@@ -157,7 +161,7 @@ test('two browsers collect generated upgrades while old bombs keep their capture
     await Promise.all(pages.map(async (page, index) => {
       await expect.poll(() => latestSnapshot(games[index])!.state.bombs)
         .toEqual(expect.arrayContaining([expect.objectContaining({ id: old.id, range: 2 }), expect.objectContaining({ id: upgraded.id, range: 3 })]))
-      await expectStats([page], ['0', '2', '3', '1'])
+      await expectStats([page], { available: '0', capacity: '2', range: '3', speed: '1' })
     }))
     await Promise.all(pages.map((page, index) =>
       page.screenshot({ path: testInfo.outputPath(`upgraded-bombs-${index}.png`), fullPage: true }),

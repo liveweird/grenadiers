@@ -58,7 +58,11 @@ Run the deployed-stack acceptance with `scripts/gates.sh browser`; its duel scen
 actual native sockets, keyboard events, and compositor screenshots, plus Axe checks across
 lobby, waiting, running, and result. See [verification](../verification.md) for observed results.
 
-All active-v6 Playwright configurations disable raw framework traces because personal admission
+Accepted Classic-v7 HUD examples: [English desktop](../screenshots/gameplay-v7-desktop.png)
+and [Polish 320px](../screenshots/gameplay-v7-polish-320.png). Narrow screens use two stat
+columns; desktop retains four. All eight labels and values wrap within their own cells.
+
+All active-v7 Playwright configurations disable raw framework traces because personal admission
 frames contain capabilities. Failure screenshots, public reports, and redacted summaries remain.
 Run reconnect acceptance separately with
 `E2E_MATCH_FIXTURE=arena-v1-matches npm --prefix e2e run test:reconnect`.
@@ -78,7 +82,7 @@ voices. Returning from a hidden tab requires **Resume sound**; old events are di
 
 ## Exposed items and player upgrades
 
-Gameplay-v6 snapshots supply visible pickup cells and kinds under configurable-v4 rules. Pixi draws distinct bomb,
+Gameplay-v7 snapshots supply visible pickup cells and kinds under configurable-v4 rules. Pixi draws distinct bomb,
 cross/range, and speed marks above blocks and below bombs/flames/actors; it never guesses
 concealed contents. Retained drawings are reused while unchanged and destroyed when removed,
 replaced, or reset. The UI performs no collection simulation.
@@ -104,7 +108,7 @@ three wins, fresh round/spawn assignments, consent withdrawal, and rematch over 
 two sockets. See [deployment](../deployment.md) for explicit read-only fixture setup.
 
 Historical [desktop and 320-pixel Polish captures](../screenshots/reconnect.md) record the v4
-interface; the shared gameplay settings panel is added in v6.
+interface. The active shared settings panel retains the revision fencing introduced in v6.
 
 ## Arena renderer ownership
 

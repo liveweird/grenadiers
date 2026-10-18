@@ -1,9 +1,12 @@
 mod error;
+mod frames;
 mod publication;
 mod runtime;
 
 pub(super) use error::MatchRuntimeError;
+pub(crate) use frames::SeatFrames;
 pub(super) use runtime::MatchRuntime;
+pub(super) use runtime::admission::PreparedRuntimeAdmission;
 pub(super) use runtime::admission::ResumeKind;
 #[cfg(test)]
 pub(super) use runtime::replay::RuntimeInspection;

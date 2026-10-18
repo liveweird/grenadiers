@@ -1,6 +1,6 @@
 # Authoritative match runtime
 
-Status: active behind the v6 endpoint and bounded match owner. No alternate endpoint or
+Status: active behind the v7 endpoint and bounded match owner. No alternate endpoint or
 runtime feature flag is exposed.
 
 `MatchRuntime` composes the pure `MatchLifecycle`, immutable room profile/identity, private seed
@@ -9,8 +9,8 @@ Only an actual round start requests entropy and constructs a fresh world with th
 spawn/tie assignment, base upgrades, entity allocator, and cleared input/action IDs.
 
 Seat, epoch, and phase checks precede input high-water mutation. Per-seat fencing removes
-pending input without resetting accepted manual-action IDs. The wire baseline continues
-calling this high-water `lastBombActionId`. Separate bounded manual queues retain each accepted
+pending input without resetting accepted manual-action IDs. The wire baseline exposes
+this high-water as `lastActionId`. Separate bounded manual queues retain each accepted
 bomb request after all movement inputs; only the Classic simulator's placement adapter coalesces
 those requests into simultaneous per-seat claims. Simulation advances at 60 Hz; publication
 is every three running ticks or immediately at a lifecycle boundary. Final partial reports
@@ -18,7 +18,7 @@ flush once; worlds/report windows never cross an inter-round or rematch boundary
 
 During result and match-result holds the lifecycle clock advances, but physics freezes.
 Completed worlds bind to their own completed-round epoch/result/end tick. An unfinished
-forfeit/interruption retains `GameState.result = null` and freezes at the match outcome tick;
+forfeit/interruption keeps no domain round result and freezes at the match outcome tick;
 it never fabricates a round result. Inter-round countdowns publish room views without an old
 world, while retaining the completed world privately so a reconnect cancellation can republish
 the correctly bound result. A new actual round or rematch replaces it. Rematch consensus clears

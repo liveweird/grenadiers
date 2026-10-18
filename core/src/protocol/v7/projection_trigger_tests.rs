@@ -160,6 +160,21 @@ fn classic_binding_rejects_overdue_frozen_world_bombs_but_accepts_exact_boundary
             bind_classic(&result_room, result_room.round_id, &capture).is_ok(),
             expected
         );
+        if expected {
+            let encoded = prepare_classic_admission(
+                &result_room,
+                Some(result_room.round_id),
+                Some(&capture),
+                crate::protocol::Seat::One,
+                None,
+                crate::protocol::Counter::new(1).unwrap(),
+                ResumeToken::new("c".repeat(64)).unwrap(),
+            )
+            .unwrap();
+            assert!(
+                !serde_json::from_str::<serde_json::Value>(&encoded).unwrap()["state"].is_null()
+            );
+        }
     }
 }
 

@@ -3,12 +3,11 @@ import {
   makeActor, makeBlock, makeBomb, makeFlame, makePickup, paintTerrain, setActorPose, TILE,
   type ActorDrawing, type BombDrawing, type FlameDrawing,
 } from './drawing'
-import type { PickupKind } from '../schema'
-import type { SnapshotMessage } from './types'
+import type { RenderablePickupKind, SnapshotMessage } from './types'
 
 type Cell = { column: number; row: number }
 type Motion = { fromX: number; fromY: number; toX: number; toY: number }
-type PickupDrawing = { kind: PickupKind; drawing: Graphics }
+type PickupDrawing = { kind: RenderablePickupKind; drawing: Graphics }
 const key = (cell: Cell): string => `${cell.column},${cell.row}`
 const unitsToPixels = (units: number): number => units * TILE / 1024
 
@@ -30,6 +29,8 @@ export class ArenaScene {
   private identity = ''
   private terrainKey = ''
   private receivedAt = 0
+  private physicalTick = -1
+  private motionDuration = 50
   private running = false
   private reducedMotion = false
 
@@ -41,11 +42,15 @@ export class ArenaScene {
   }
 
   update(snapshot: SnapshotMessage, now: number): void {
-    const identity = `${snapshot.room.roomId}:${snapshot.room.roundId}`
-    const reset = identity !== this.identity
+    const identity = `${snapshot.room.roomId}:${snapshot.room.roundId}:${snapshot.room.presentationBaseline ?? 'legacy'}`
+    const physicalTick = snapshot.state.physicalTick ?? snapshot.state.runningUpdates ?? 0
+    const tickDelta = physicalTick - this.physicalTick
+    const reset = identity !== this.identity || tickDelta < 0
     if (reset) this.reset()
     this.identity = identity
     this.receivedAt = now
+    this.motionDuration = Math.max(1000 / 60, Math.min(100, tickDelta * 1000 / 60))
+    this.physicalTick = physicalTick
     this.running = snapshot.room.phase.type === 'running'
     const terrainKey = [
       snapshot.state.arena.width, snapshot.state.arena.height, ...snapshot.state.arena.terrain,
@@ -80,6 +85,8 @@ export class ArenaScene {
     this.terrainKey = ''
     this.receivedAt = 0
     this.running = false
+    this.physicalTick = -1
+    this.motionDuration = 50
   }
 
   restoreContext(): void {
@@ -88,7 +95,7 @@ export class ArenaScene {
 
   render(now: number): void {
     const progress = this.reducedMotion || !this.running ? 1
-      : Math.max(0, Math.min(1, (now - this.receivedAt) / 50))
+      : Math.max(0, Math.min(1, (now - this.receivedAt) / this.motionDuration))
     for (const [id, drawing] of this.actors) {
       const motion = this.motions.get(id)!
       drawing.root.position.set(

@@ -1,12 +1,12 @@
 # Reconnect browser
 
-Status: active. The application uses the v6 panel against the existing gameplay endpoint.
-V6 retains the reconnect lifecycle introduced in v4 and adds [shared settings](settings.md).
+Status: active. The application uses the v7 client against the existing gameplay endpoint.
+V7 retains the reconnect lifecycle introduced in v4 and adds [shared settings](settings.md).
 
 ## Private admission state
 
 The client first obtains a normal single-use HTTP session and authenticates a WebSocket with
-protocol version 6. A personal `admitted` frame establishes the seat, stable resume capability,
+protocol version 7. A personal `admitted` frame establishes the seat, stable resume capability,
 authoritative room view, nullable full physical state, and accepted bomb-action high-water. The
 client turns an admitted physical body into a snapshot with an empty event list; missed events are
 not replayed. Shared `roomState` frames cannot establish identity.
@@ -14,7 +14,7 @@ not replayed. Shared `roomState` frames cannot establish identity.
 The resume capability exists only in the `GameClient` instance. It is absent from public React
 state, URLs, logs, local storage and session storage. Explicit leave acknowledgement, terminal
 recovery failure, and disposal clear it. A normal epoch change resets bomb action IDs; a resumed baseline instead
-continues above `lastBombActionId`. A high-water of `2147483647` leaves bomb actions exhausted for
+continues above `lastActionId`. A high-water of `2147483647` leaves bomb actions exhausted for
 that epoch. Commands sent before a disconnect are never buffered or resent.
 
 ## Recovery and fencing
@@ -47,5 +47,5 @@ held beyond its normal deadline while a reserved player is away. Scores and the 
 authoritative; connected-only controls stay disabled during recovery. English and Polish copy use
 the same keys and describe the action available to the player.
 
-The server parser and application panel use v6 together. V2–v5 remain archived and are not
+The server parser and application client use v7 together. V2–v6 remain archived and are not
 accepted by the active authenticated gameplay socket.

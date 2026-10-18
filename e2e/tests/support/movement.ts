@@ -1,5 +1,5 @@
 import { expect, type Page } from '@playwright/test'
-import { latestSnapshot, type ObservedGame } from './duel'
+import { visibleActor, latestSnapshot, type ObservedGame } from './duel'
 
 type Cell = { column: number; row: number }
 const CENTER = 512
@@ -8,7 +8,7 @@ const RELEASE_LEAD = 640
 const BASE_SPEED = 3_072
 
 function actor(game: ObservedGame) {
-  const value = latestSnapshot(game)?.state.actors.find((candidate) => candidate.seat === 'one')
+  const value = visibleActor(latestSnapshot(game), 'one')
   if (!value?.alive) throw new Error('Fixture route requires a living first player')
   return value
 }
@@ -71,7 +71,7 @@ export async function moveTo(
     await expect.poll(() => {
       const frames = game.frames.filter((frame) => frame.type === 'snapshot').slice(-2)
       if (frames.length !== 2 || frames[0].room.revision <= Math.max(startRevision, movedRevision)) return false
-      const positions = frames.map((frame) => frame.state.actors.find((value) => value.seat === 'one')!.position)
+      const positions = frames.map((frame) => visibleActor(frame, 'one')!.position)
       return positions.every((value) => value.x === positions[0].x && value.y === positions[0].y)
     }, { intervals: [15] }).toBe(true)
   }

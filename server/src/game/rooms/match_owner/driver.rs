@@ -12,7 +12,7 @@ use super::super::{
     match_runtime::{MatchAction, MatchNotice, MatchRuntime, MatchRuntimeError},
     types::{BindingKey, RoomError},
 };
-mod admissions;
+pub(super) mod admissions;
 
 use super::types::{
     ClosingReason, MatchOwnerNotice, OwnerCommand, PendingDeparture, SeatSlot, map_runtime_error,

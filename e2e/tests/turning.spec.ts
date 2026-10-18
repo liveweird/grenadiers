@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { latestSnapshot, observeGame } from './support/duel'
+import { visibleActor, latestSnapshot, observeGame } from './support/duel'
 
 test('native keyboard turns recover from a wall stop outside the legacy alignment window', async ({ browser }) => {
   const contexts = await Promise.all([browser.newContext(), browser.newContext()])
@@ -17,7 +17,7 @@ test('native keyboard turns recover from a wall stop outside the legacy alignmen
     await expect.poll(() => latestSnapshot(games[0])?.room.phase.type).toBe('running')
     expect(latestSnapshot(games[0])!.room.rulesVersion).toBe(4)
 
-    const actor = (index: number) => latestSnapshot(games[index])?.state.actors[0]
+    const actor = (index: number) => visibleActor(latestSnapshot(games[index]), 'one')
     await one.getByRole('region', { name: 'Grenadiers courtyard' }).click()
     await one.keyboard.down('ArrowLeft')
     // The border stops the footprint at 1,344: 192 units short of center.

@@ -116,8 +116,7 @@ describe('retained public arena scene', () => {
     const scene = new ArenaScene(1)
     const snapshot = gameSnapshot()
     scene.update(snapshot, 0)
-    snapshot.room.tick += 3
-    snapshot.room.revision += 1
+    snapshot.state.physicalTick = (snapshot.state.physicalTick ?? 0) + 3
     snapshot.state.actors[0].position.x += 1024
     scene.update(snapshot, 100)
     const actor = layers(scene)[5].children[0]
@@ -142,16 +141,14 @@ describe('retained public arena scene', () => {
     const scene = new ArenaScene(1)
     const snapshot = gameSnapshot()
     scene.update(snapshot, 0)
-    snapshot.room.tick += 3
-    snapshot.room.revision += 1
+    snapshot.state.physicalTick = (snapshot.state.physicalTick ?? 0) + 3
     snapshot.state.actors[0].position.x += 1024
     scene.update(snapshot, 100)
     scene.render(120)
     const poses = layers(scene)[5].children[0].children.slice(1)
     for (const pose of poses) pose.visibleChanges = 0
 
-    snapshot.room.tick += 1
-    snapshot.room.revision += 1
+    snapshot.state.physicalTick = (snapshot.state.physicalTick ?? 0) + 1
     snapshot.state.actors[0].position.x += 1024
     scene.update(snapshot, 120)
 
@@ -195,7 +192,7 @@ describe('retained public arena scene', () => {
     const firstSparkFrame = spark.visible
     scene.render(115)
     expect(spark.visible).not.toBe(firstSparkFrame)
-    snapshot.room.phase = { type: 'result', endedAt: 101, result: { type: 'winner', seat: 'one' } }
+    snapshot.room.phase = { type: 'result' }
     snapshot.state.actors[0].position.x += 1024
     snapshot.state.actors[1].alive = false
     scene.update(snapshot, 50)
@@ -204,7 +201,9 @@ describe('retained public arena scene', () => {
     expect(spark.visible).toBe(true)
     expect(flames.children[0].children.map(({ visible }) => visible)).toEqual([true, false])
   })
+})
 
+describe('arena scene transitions and retained state', () => {
   it('respects reduced effects and resets interpolation across room/round identities', () => {
     const scene = new ArenaScene(1)
     const snapshot = gameSnapshot()
@@ -233,9 +232,31 @@ describe('retained public arena scene', () => {
     expect(layers(scene)[5].children[0].children.map(({ visible }) => visible))
       .toEqual([true, true, false, false, false, false, false, false, false])
   })
-})
 
-describe('terrain cache lifetime', () => {
+  it('deletes hidden actor motion and snaps a later reveal to its current position', () => {
+    const scene = new ArenaScene(1)
+    const snapshot = gameSnapshot()
+    scene.update(snapshot, 0)
+    const actors = layers(scene)[5]
+    const removed = actors.children[1]
+
+    snapshot.state.physicalTick = 2
+    snapshot.state.actors = [snapshot.state.actors[0]]
+    scene.update(snapshot, 20)
+    expect(removed.destroyed).toBe(true)
+    expect(actors.children).toHaveLength(1)
+
+    snapshot.state.physicalTick = 3
+    snapshot.state.actors.push({
+      id: 20, seat: 'two', position: { x: 4096, y: 3072 }, heading: 'north', alive: true,
+    })
+    scene.update(snapshot, 40)
+    expect(actors.children).toHaveLength(2)
+    expect(actors.children[1]).toMatchObject({ x: 192, y: 144 })
+    scene.render(41)
+    expect(actors.children[1]).toMatchObject({ x: 192, y: 144 })
+  })
+
   it('resets retained state idempotently and snaps the same identity to a fresh baseline', () => {
     const scene = new ArenaScene(1)
     const snapshot = gameSnapshot()

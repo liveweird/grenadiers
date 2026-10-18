@@ -1,6 +1,6 @@
 import { setTimeout as delay } from 'node:timers/promises'
 import { expect, test, type Page, type Route, type TestInfo } from '@playwright/test'
-import { latestSnapshot, observeGame, type ObservedGame } from '../tests/support/duel'
+import { visibleActor, latestSnapshot, observeGame, type ObservedGame } from '../tests/support/duel'
 import { readViewportFits } from '../tests/support/diagnostic-phases'
 import { runGuardedLegacyAxeAudit } from '../tests/support/guarded-axe-audit'
 import { moveTo } from '../tests/support/movement'
@@ -106,7 +106,7 @@ test('a browser restores its full live world and action floor before a fenced ta
     await arena.click()
     await moveTo(one, games[0], { column: 5, row: 1 })
     const before = latestSnapshot(games[0])!
-    const position = before.state.actors.find((actor) => actor.seat === 'one')!.position
+    const position = visibleActor(before, 'one')!.position
     release = await holdSessions(one)
     await one.keyboard.press('Space')
     await expect.poll(() => latestSnapshot(games[0])!.state.bombs.length, { intervals: [15] }).toBe(1)
@@ -130,7 +130,7 @@ test('a browser restores its full live world and action floor before a fenced ta
     await arena.click()
     await one.keyboard.down('ArrowLeft')
     try {
-      await expect.poll(() => latestSnapshot(games[0])!.state.actors[0].position.x, { intervals: [15] })
+      await expect.poll(() => visibleActor(latestSnapshot(games[0]), 'one')!.position.x, { intervals: [15] })
         .toBeLessThanOrEqual(2_560)
     } finally { await one.keyboard.up('ArrowLeft') }
     await expect.poll(() => {
@@ -150,7 +150,7 @@ test('a browser restores its full live world and action floor before a fenced ta
     await arena.click()
     await moveTo(one, games[0], { column: 2, row: 1 })
     await one.keyboard.press('Space')
-    await expect.poll(() => games[0].commands.filter((command) => command.type === 'placeBomb').map((command) => command.actionId))
+    await expect.poll(() => games[0].commands.filter((command) => command.type === 'manualAction').map((command) => command.actionId))
       .toEqual([1, 2])
     await expect.poll(() => latestSnapshot(games[0])!.state.bombs).toContainEqual(
       expect.objectContaining({ cell: { column: 2, row: 1 }, range: 2 }),
@@ -167,7 +167,7 @@ test('a browser restores its full live world and action floor before a fenced ta
     expect(await invalidResume(one, 'wrongCapability')).toBe('resumeRejected')
     expect(await invalidResume(one, 'wrongRoom')).toBe('resumeRejected')
     const beforeTakeoverPosition = {
-      ...latestSnapshot(games[0])!.state.actors.find((actor) => actor.seat === 'one')!.position,
+      ...visibleActor(latestSnapshot(games[0]), 'one')!.position,
     }
     expect(Math.floor(beforeTakeoverPosition.x / 1_024)).toBe(5)
     expect(Math.floor(beforeTakeoverPosition.y / 1_024)).toBe(1)
@@ -182,11 +182,10 @@ test('a browser restores its full live world and action floor before a fenced ta
     await moveTakeover(one, takeoverDirection)
     try {
       await expect.poll(() => {
-        const current = latestSnapshot(games[1])!.state.actors
-          .find((actor) => actor.seat === 'one')!.position.x
-        return takeoverDirection === 'east'
+        const current = visibleActor(latestSnapshot(games[1]), 'one')?.position.x
+        return current !== undefined && (takeoverDirection === 'east'
           ? current > takeoverPosition.x
-          : current < takeoverPosition.x
+          : current < takeoverPosition.x)
       }, { intervals: [15] }).toBe(true)
     } catch (error) {
       try { await stopTakeover(one) } catch {

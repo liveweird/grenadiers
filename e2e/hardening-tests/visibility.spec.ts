@@ -87,7 +87,7 @@ test('a hidden gameplay tab clears held input and recovers on a fresh native act
     const returned = await expectStableFreshPosition(games[1], 'one', hiddenStable.revision)
     expect(returned.position).toEqual(stopped.position)
     expect(games[0].commands.slice(commandStart)
-      .filter((command) => command.type === 'placeBomb')).toEqual([])
+      .filter((command) => command.type === 'manualAction')).toEqual([])
 
     await arena.click()
     const freshStart = games[0].commands.length

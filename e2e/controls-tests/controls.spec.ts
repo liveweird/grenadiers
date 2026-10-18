@@ -1,6 +1,6 @@
 import AxeBuilder from '@axe-core/playwright'
 import { expect, test, type Page } from '@playwright/test'
-import { latestSnapshot, observeGame, type ObservedGame } from '../tests/support/duel'
+import { visibleActor, latestSnapshot, observeGame, type ObservedGame } from '../tests/support/duel'
 
 async function changeKey(page: Page, action: string, key: string): Promise<void> {
   await page.getByRole('button', { name: `Change ${action}`, exact: true }).click()
@@ -8,7 +8,7 @@ async function changeKey(page: Page, action: string, key: string): Promise<void>
 }
 
 function firstActor(game: ObservedGame) {
-  const actor = latestSnapshot(game)?.state.actors.find((candidate) => candidate.seat === 'one')
+  const actor = visibleActor(latestSnapshot(game), 'one')
   if (!actor) throw new Error('First actor is unavailable')
   return actor
 }
@@ -66,8 +66,8 @@ test('custom controls persist and drive only their assigned native keys', async 
     await one.keyboard.up('KeyL')
     await one.keyboard.down('Enter')
     await one.keyboard.down('Enter')
-    await expect.poll(() => games[0].commands.filter((command) => command.type === 'placeBomb'))
-      .toEqual([{ type: 'placeBomb', actionId: 1 }])
+    await expect.poll(() => games[0].commands.filter((command) => command.type === 'manualAction'))
+      .toEqual([{ type: 'manualAction', action: 'bomb', actionId: 1 }])
     await one.keyboard.up('Enter')
 
     await one.getByRole('button', { name: 'Keyboard controls', exact: true }).click()

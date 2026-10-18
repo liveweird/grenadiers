@@ -1,6 +1,6 @@
 import { performance } from 'node:perf_hooks'
 import type { Page, WebSocketRoute } from '@playwright/test'
-import type { Direction, GameServerMessage, Position } from '../../../web/src/game/v6/schema'
+import type { Direction, GameServerMessage, Position } from '../../../web/src/game/v7/schema'
 
 export type DelayScheduler = {
   now: () => number
@@ -193,7 +193,7 @@ function frameSummary(
     }
     if (direction === 'serverToClient' && parsed.type === 'snapshot') {
       const actor = parsed.state.actors.find((value) => value.seat === 'one')
-      if (actor) summary.snapshot = {
+      if (actor?.type === 'visible') summary.snapshot = {
         revision: parsed.room.revision, tick: parsed.room.tick, roundId: parsed.room.roundId,
         position: actor.position, bombIds: parsed.state.bombs.map((bomb) => bomb.id),
       }
@@ -204,7 +204,7 @@ function frameSummary(
       summary.movement = parsed.direction as Direction | null
       if (Number.isSafeInteger(parsed.sequence)) summary.movementSequence = parsed.sequence as number
     }
-    if (summary.type === 'placeBomb' && Number.isSafeInteger(parsed.actionId)) {
+    if (summary.type === 'manualAction' && Number.isSafeInteger(parsed.actionId)) {
       summary.actionId = parsed.actionId as number
     }
   } catch { /* The original opaque text is still forwarded unchanged. */ }

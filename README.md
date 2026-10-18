@@ -13,8 +13,8 @@ characters, animated grenades/flames and distinct item symbols, with reduced-mot
 
 Default rooms allow turns within a quarter tile of a corridor centerline, including natural
 wall stops. The creator can adjust starting speed, turning tolerance, wins needed and fuse
-time in the lobby's shared [gameplay settings](docs/game/settings.md). Gameplay v6 requires
-reloading older browser clients after an upgrade; see the [compatibility note](docs/game/protocol-v6.md).
+time in the lobby's shared [gameplay settings](docs/game/settings.md). Gameplay v7 requires
+reloading older browser clients after an upgrade; see the [compatibility note](docs/game/protocol-v7.md).
 
 Use **Keyboard controls** below the arena to remap movement and bombs or restore defaults. Preferences
 stay in this browser. Opening settings, losing focus, or hiding the tab releases held movement;

@@ -42,7 +42,23 @@
     "available": "Bombs available",
     "capacity": "Bomb capacity",
     "range": "Blast range",
-    "speed": "Speed level"
+    "speed": "Speed level",
+    "equipment": "Equipment",
+    "weapon": "Bomb type",
+    "effects": "Effects",
+    "damageGrace": "Damage grace",
+    "none": "None",
+    "effectTimer": "{{item}} ({{time}})"
+  },
+  "items": {
+    "kick": "Kick", "punch": "Punch", "bracelet": "Bracelet", "wallPass": "Wall pass",
+    "heart": "Heart", "remoteBomb": "Remote bomb", "piercingBomb": "Piercing bomb",
+    "powerBomb": "Power bomb", "landmine": "Landmine", "shield": "Shield",
+    "stopwatch": "Stopwatch", "invisibilityCloak": "Invisibility cloak",
+    "goldenFlame": "Golden flame", "shortFuse": "Short fuse", "diarrhea": "Diarrhea",
+    "slowFoot": "Slow foot", "shortFlame": "Short flame", "longFuse": "Long fuse",
+    "reverseControls": "Reverse controls", "invisibleBombs": "Invisible bombs",
+    "oilBarrel": "Oil barrel", "teleporter": "Teleporter"
   },
   "phase": {
     "waiting": "Waiting for both players",
@@ -175,7 +191,7 @@
     "staleRoom": "The room changed before the command arrived.",
     "invalidPhase": "That action is unavailable now.",
     "staleSequence": "That command arrived out of order.",
-    "duplicateAction": "That bomb action was already received.",
+    "duplicateAction": "That action was already received.",
     "rateLimited": "Commands arrived too quickly.",
     "capacityReached": "The server has no room for another match.",
     "resumeRejected": "This reserved seat is no longer available.",

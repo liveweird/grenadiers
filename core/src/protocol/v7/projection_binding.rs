@@ -25,9 +25,7 @@ pub fn bind_classic(
     {
         return Err(ProjectionError::InvalidClassicBinding);
     }
-    let legacy_room = legacy_room(room)?;
-    crate::protocol::v6::validate_room_view(&legacy_room)
-        .map_err(|_| ProjectionError::InvalidClassicBinding)?;
+    let legacy_room = validate_classic_room(room)?;
     crate::protocol::v6::validate_state_binding(&legacy_room, state_epoch, &capture.legacy)
         .map_err(|_| ProjectionError::InvalidClassicBinding)?;
     Ok(BoundPublication {
@@ -35,6 +33,21 @@ pub fn bind_classic(
         world: capture.world.clone(),
         reports: capture.reports.clone(),
     })
+}
+
+pub(super) fn validate_classic_room(
+    room: &RoomView,
+) -> Result<crate::protocol::v6::RoomView, ProjectionError> {
+    if room.available_items != super::ItemSet::empty()
+        || room.settings.enabled_items() != super::ItemSet::empty()
+        || room.map_id != expected_map(room.rules_version)
+    {
+        return Err(ProjectionError::InvalidClassicBinding);
+    }
+    let legacy = legacy_room(room)?;
+    crate::protocol::v6::validate_room_view(&legacy)
+        .map_err(|_| ProjectionError::InvalidClassicBinding)?;
+    Ok(legacy)
 }
 
 fn classic_world(capture: &ClassicCapture, fuse_ticks: u64) -> bool {

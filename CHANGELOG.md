@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.3.24 — 2026-10-18
+
+- Migrate the live server and browser together to gameplay-v7, with checked Classic room
+  projection, personal admission and two prepared recipient perspectives.
+- Route every publication and retained closing notice by the authenticated seat; preserve
+  transactional admission, reconnect action floors and private replay behavior.
+- Add explicit visible-actor presentation and inventory/effect status while retaining Classic
+  gameplay and empty optional item availability. Heart activation remains the next increment.
+- Wrap player HUD labels and values, with two columns on narrow screens and four on desktop;
+  verify all eight labels remain visible inside their own cells without overlapping.
+
 ## 0.3.23 — 2026-10-18
 
 - Validate complete physical world and event observations before recipient filtering; keep

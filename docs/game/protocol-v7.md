@@ -1,10 +1,12 @@
-# Gameplay v7: dormant physical items contract
+# Gameplay v7: recipient state and manual actions
 
-V7 freezes the wire representation needed for expanded physical items while the live gameplay
-endpoint remains on v6. The complete closed contract is `api/gameplay-v7.schema.json`; generated
-browser types are checked in at `web/src/game/v7/schema.ts`. This version does not select v7 at
-runtime. Canonical and per-recipient projection helpers are staged below; live routing and
-item activation remain separate increments.
+V7 is the live gameplay contract. The closed schema is `api/gameplay-v7.schema.json`;
+generated browser types are `web/src/game/v7/schema.ts`, with the active client in
+`web/src/game/client`. Server and browser migrate together; there is no live v6 fallback.
+
+Current Classic rooms advertise empty available/enabled item sets. Optional pickups and
+nonempty item settings are rejected. Timed/Standard bombs and existing three upgrades remain
+the playable loadout; this migration does not activate equipment, buffs, curses or special weapons.
 
 Successful authentication is fixed to protocol version 7. Authentication input remains the
 bounded cross-version integer. The v7 `manualAction` command replaces `placeBomb` and carries the
@@ -65,7 +67,7 @@ known IDs. The other four settings fields keep their v6 bounds.
 
 Validation intentionally has two levels. JSON Schema/AJV checks closed shapes, required nulls,
 unions, scalar and timer ranges, array bounds, known IDs and item-array uniqueness. After AJV
-succeeds, the dormant semantic helper checks that each ordinary effect occurs at most once, at
+succeeds, the semantic helper checks that each ordinary effect occurs at most once, at
 most six independent `slowFoot` effects occur (equal durations are valid), and every enabled item
 belongs to the containing room's available set. Raw AJV cannot prove these cross-entry and
 room-context rules. The shared valid-input semantic cases live in
@@ -99,8 +101,10 @@ contiguous recipient-local indexes within each tick.
 
 Reject nonconsecutive reports, more than three reports or 96 unfiltered events without truncation.
 Prepare both recipient encodings before returning a pair; failure returns neither and performs
-no revision advance or report clearing. Live routing, admission, resume and browser migration
-remain a separate increment. Until that migration, the endpoint continues to use v6.
+no revision advance or report clearing. Live routing, admission, resume and browser handling
+are integrated in the live owner/socket transaction. Every retained or closing notice selects
+the authenticated seat perspective; personal admissions are preencoded before ownership or
+replacement commits. Projection failure advances no revision and clears no reports.
 
 ## Frame bounds
 
@@ -109,3 +113,21 @@ to their schema maxima, relaxing uniqueness and cross-object constraints to over
 valid messages. Snapshot is at most 61,586 bytes and personal admission 36,472 bytes, below
 the unchanged 65,536-byte ceiling. A separate schema-valid representative measures 60,400
 and 35,382 bytes. Encoding still rejects oversize frames without truncation.
+
+
+## Compatibility and unsupported equipment
+
+Reload older clients after upgrading. Version 6 is rejected before a credential is claimed, so
+the same credential can still authenticate using version 7. Successful admission restores the
+shared manual action floor as `lastActionId` without replaying historical events or audio.
+
+`manualAction` with `action: "bomb"` retains ordinary bomb behavior. Equipment is not available
+yet: `action: "equipment"` receives correlated `invalidMessage`. Only its connection sequence
+is consumed; manual high-water, mailbox allowance and journal remain unchanged. A later bomb
+may use that action ID with a fresh sequence.
+
+The client validates structural and semantic input before updating state, requires its own
+actor to be visible, and removes hidden actors/bombs from presentation rather than fabricating
+positions or fuse deadlines. World interpolation, effects and audio use `physicalTick`;
+lifecycle countdowns use the independent room tick. Inventory, effects and grace have static
+EN/PL status labels without replaying hidden spatial cues or announcing every timer update.

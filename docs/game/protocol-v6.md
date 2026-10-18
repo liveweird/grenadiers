@@ -1,8 +1,10 @@
 # Gameplay v6: shared room rules
 
-V6 adds revision-bound gameplay configuration to the v5 match/reconnect contract. The complete
-closed contract is `api/gameplay-v6.schema.json`; Rust uses `core::protocol::v6` and the active
-browser uses generated `web/src/game/v6/schema.ts`. Earlier schemas remain archived.
+Archived reference; the live endpoint uses [v7](protocol-v7.md).
+
+V6 added revision-bound gameplay configuration to the v5 match/reconnect contract. The complete
+closed contract is `api/gameplay-v6.schema.json`; Rust uses `core::protocol::v6` and generated
+browser types remain at `web/src/game/v6/schema.ts`. Earlier schemas remain archived.
 
 Every room view, shared snapshot and personal admission now includes:
 

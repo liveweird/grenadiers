@@ -28,7 +28,7 @@ describe('gameplay settings panel', () => {
     await user.click(screen.getByRole('button', { name: 'Apply rules' }))
 
     expect(apply).toHaveBeenCalledWith({
-      startingSpeedLevel: 4, turnAssistUnits: 64, winsToFinish: 1, bombFuseTicks: 60,
+      startingSpeedLevel: 4, turnAssistUnits: 64, winsToFinish: 1, bombFuseTicks: 60, enabledItems: [],
     })
   })
 
@@ -52,7 +52,7 @@ describe('gameplay settings panel', () => {
     const user = userEvent.setup()
     const custom = room(2)
     custom.settings = {
-      startingSpeedLevel: 4, turnAssistUnits: 64, winsToFinish: 1, bombFuseTicks: 60,
+      startingSpeedLevel: 4, turnAssistUnits: 64, winsToFinish: 1, bombFuseTicks: 60, enabledItems: [],
     }
     render(<MantineProvider env="test"><GameplaySettingsPanel room={custom} youSeat="one"
       pending={false} copy={en} onApply={apply} /></MantineProvider>)
@@ -61,7 +61,7 @@ describe('gameplay settings panel', () => {
     expect(apply).not.toHaveBeenCalled()
     await user.click(screen.getByRole('button', { name: 'Apply rules' }))
     expect(apply).toHaveBeenCalledWith({
-      startingSpeedLevel: 0, turnAssistUnits: 256, winsToFinish: 3, bombFuseTicks: 180,
+      startingSpeedLevel: 0, turnAssistUnits: 256, winsToFinish: 3, bombFuseTicks: 180, enabledItems: [],
     })
   })
 })

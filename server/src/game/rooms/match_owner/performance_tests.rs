@@ -6,7 +6,7 @@ use std::time::Duration;
 
 use grenadiers_core::{
     game::Direction,
-    protocol::{RoomCode, RoomId, v6::GameServerMessage},
+    protocol::{RoomCode, RoomId, v7::GameServerMessage},
 };
 use serde_json::json;
 use tokio::{
@@ -165,7 +165,7 @@ async fn run_owner_profile(room_count: usize) {
     for room in &rooms {
         assert!(matches!(
             current_notice(room).room.phase,
-            grenadiers_core::protocol::v6::RoomPhase::Running
+            grenadiers_core::protocol::v7::RoomPhase::Running
         ));
     }
 
@@ -246,7 +246,7 @@ async fn start_room(index: usize) -> MeasuredRoom {
         loop {
             if matches!(
                 notice(&running).room.phase,
-                grenadiers_core::protocol::v6::RoomPhase::Running
+                grenadiers_core::protocol::v7::RoomPhase::Running
             ) {
                 break;
             }
@@ -279,18 +279,21 @@ fn observe(
             let tick = current.room.tick.get();
             let expected = tick_deadline(created_at, tick);
             let lag = received.saturating_duration_since(expected);
-            let bytes = current.snapshot.as_ref().map_or_else(
-                || {
-                    grenadiers_core::protocol::v6::encode_server_message(
-                        &GameServerMessage::RoomState {
-                            room: current.room.clone(),
-                        },
-                    )
-                    .unwrap()
-                    .len()
-                },
-                |snapshot| snapshot.len(),
-            );
+            let bytes = current
+                .frame(grenadiers_core::game::SeatId::One)
+                .as_ref()
+                .map_or_else(
+                    || {
+                        grenadiers_core::protocol::v7::encode_server_message(
+                            &GameServerMessage::RoomState {
+                                room: current.room.clone(),
+                            },
+                        )
+                        .unwrap()
+                        .len()
+                    },
+                    |snapshot| snapshot.len(),
+                );
             let mut data = data.lock().unwrap();
             data.deadline_lag.push(lag);
             if let Some(previous) = previous.replace(received) {

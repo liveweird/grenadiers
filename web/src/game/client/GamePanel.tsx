@@ -1,17 +1,20 @@
 import { Alert, Button, Group, Stack, Text, TextInput, Title } from '@mantine/core'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import type { KeyboardBindings } from '../arena/bindings'
 import { GameArena } from '../arena/GameArena'
 import type { Direction } from '../arena/types'
 import type { AdmissionIntent, GameClientState } from './client'
-import { format, useV6Copy, type V6Copy } from './locale'
-import type { GameSettings, MatchInterruptReason, MatchResult, RoomPhase, RoundResult, Seat } from './schema'
+import { format, useGameCopy, type GameCopy } from './locale'
+import type {
+  GameSettings, MatchInterruptReason, MatchResult, RoomPhase, RoundResult, Seat, VisibleActorView,
+} from '../v7/schema'
 import { useGameClient } from './useGameClient'
 import { ControlsDialog } from './ControlsDialog'
 import { bindingsSummary } from './controlLabels'
 import { loadControlBindings, saveControlBindings } from './controlPreferences'
 import { SoundControl } from '../audio/SoundControl'
 import { GameplaySettingsPanel } from './GameplaySettingsPanel'
+import { presentSnapshot } from './presentation'
 
 const CODE_PATTERN = /^[A-HJ-NP-Z2-9]{8}$/
 
@@ -42,25 +45,25 @@ function clock(ticks: number | null): string {
   return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`
 }
 
-function phaseText(copy: V6Copy, phase: RoomPhase): string {
+function phaseText(copy: GameCopy, phase: RoomPhase): string {
   if (phase.type === 'countdown') {
     return phase.kind === 'initial' ? copy.phase.initialCountdown : copy.phase.interRoundCountdown
   }
   return copy.phase[phase.type]
 }
 
-function reasonText(copy: V6Copy, reason: MatchInterruptReason): string {
+function reasonText(copy: GameCopy, reason: MatchInterruptReason): string {
   return copy.interruption[reason]
 }
 
-function RoundOutcome({ copy, result }: { copy: V6Copy; result: RoundResult }) {
+function RoundOutcome({ copy, result }: { copy: GameCopy; result: RoundResult }) {
   if (result.type === 'winner') {
     return <Text role="status">{format(copy.roundResult.winner, { player: copy.player[result.seat] })}</Text>
   }
   return <Text role="status">{copy.roundResult[result.reason]}</Text>
 }
 
-function MatchOutcome({ copy, result, wins }: { copy: V6Copy; result: MatchResult; wins: number }) {
+function MatchOutcome({ copy, result, wins }: { copy: GameCopy; result: MatchResult; wins: number }) {
   if (result.type === 'winner') {
     const template = result.reason === 'roundWins'
       ? copy.matchResult[wins === 1 ? 'roundWinConfigured' : 'roundWinsConfigured']
@@ -71,7 +74,7 @@ function MatchOutcome({ copy, result, wins }: { copy: V6Copy; result: MatchResul
   return <Text role="status">{format(copy.matchResult.interrupted, { reason: reasonText(copy, result.reason) })}</Text>
 }
 
-function AuthoritativeOutcome({ state, copy }: { state: GameClientState; copy: V6Copy }) {
+function AuthoritativeOutcome({ state, copy }: { state: GameClientState; copy: GameCopy }) {
   const room = state.room
   if (!room) return null
   if (room.phase.type === 'result' && room.lastRound) return <RoundOutcome copy={copy} result={room.lastRound.result} />
@@ -80,7 +83,7 @@ function AuthoritativeOutcome({ state, copy }: { state: GameClientState; copy: V
   return null
 }
 
-function seatDescription(state: GameClientState, seat: Seat): keyof V6Copy['seat'] {
+function seatDescription(state: GameClientState, seat: Seat): keyof GameCopy['seat'] {
   const room = state.room!
   const status = room.seats.find((candidate) => candidate.seat === seat)
   const actor = state.snapshot?.state.actors.find((candidate) => candidate.seat === seat)
@@ -94,10 +97,34 @@ function seatDescription(state: GameClientState, seat: Seat): keyof V6Copy['seat
   return 'open'
 }
 
-function SeatLine({ state, seat, copy }: { state: GameClientState; seat: Seat; copy: V6Copy }) {
+function visibleActor(state: GameClientState, seat: Seat): VisibleActorView | null {
+  const actor = state.snapshot?.state.actors.find((candidate) => candidate.seat === seat)
+  return actor?.type === 'visible' ? actor : null
+}
+
+function ActorDetails({ actor, copy }: { actor: VisibleActorView; copy: GameCopy }) {
+  const equipment = actor.inventory.equipment ? copy.items[actor.inventory.equipment] : copy.stats.none
+  const weapon = actor.inventory.weapon ? copy.items[actor.inventory.weapon] : copy.stats.none
+  const effects = actor.effects.length === 0 ? copy.stats.none : actor.effects
+    .map((effect) => format(copy.stats.effectTimer, {
+      item: copy.items[effect.kind], time: clock(effect.remainingTicks),
+    })).join(', ')
+  return <>
+    <div><dt>{copy.stats.available}</dt><dd>{actor.bombCapacity - actor.liveBombCount}</dd></div>
+    <div><dt>{copy.stats.capacity}</dt><dd>{actor.bombCapacity}</dd></div>
+    <div><dt>{copy.stats.range}</dt><dd>{actor.bombRange}</dd></div>
+    <div><dt>{copy.stats.speed}</dt><dd>{actor.speedLevel + 1}</dd></div>
+    <div><dt>{copy.stats.equipment}</dt><dd>{equipment}</dd></div>
+    <div><dt>{copy.stats.weapon}</dt><dd>{weapon}</dd></div>
+    <div><dt>{copy.stats.effects}</dt><dd>{effects}</dd></div>
+    <div><dt>{copy.stats.damageGrace}</dt><dd>{clock(actor.damageGraceRemainingTicks)}</dd></div>
+  </>
+}
+
+function SeatLine({ state, seat, copy }: { state: GameClientState; seat: Seat; copy: GameCopy }) {
   const room = state.room!
   const status = room.seats.find((candidate) => candidate.seat === seat)
-  const actor = state.snapshot?.state.actors.find((candidate) => candidate.seat === seat)
+  const actor = visibleActor(state, seat)
   const seatState = seatDescription(state, seat)
   const grace = status?.connection.type === 'disconnected'
     ? clock(Math.max(0, status.connection.expiresAt - room.tick)) : null
@@ -112,10 +139,7 @@ function SeatLine({ state, seat, copy }: { state: GameClientState; seat: Seat; c
         </span>
         {actor && status?.occupied && (
           <dl className="actor-stats" aria-label={format(copy.stats.label, { player: copy.player[seat] })}>
-            <div><dt>{copy.stats.available}</dt><dd>{actor.bombCapacity - actor.liveBombCount}</dd></div>
-            <div><dt>{copy.stats.capacity}</dt><dd>{actor.bombCapacity}</dd></div>
-            <div><dt>{copy.stats.range}</dt><dd>{actor.bombRange}</dd></div>
-            <div><dt>{copy.stats.speed}</dt><dd>{actor.speedLevel + 1}</dd></div>
+            <ActorDetails actor={actor} copy={copy} />
           </dl>
         )}
       </div>
@@ -123,7 +147,7 @@ function SeatLine({ state, seat, copy }: { state: GameClientState; seat: Seat; c
   )
 }
 
-function LobbyControls({ state, actions, copy }: { state: GameClientState; actions: GameActions; copy: V6Copy }) {
+function LobbyControls({ state, actions, copy }: { state: GameClientState; actions: GameActions; copy: GameCopy }) {
   const [code, setCode] = useState('')
   const busy = state.connection !== 'disconnected' || state.admissionPending
   return (
@@ -143,7 +167,7 @@ function LobbyControls({ state, actions, copy }: { state: GameClientState; actio
   )
 }
 
-function RematchControl({ state, actions, copy }: { state: GameClientState; actions: GameActions; copy: V6Copy }) {
+function RematchControl({ state, actions, copy }: { state: GameClientState; actions: GameActions; copy: GameCopy }) {
   const room = state.room!
   if (room.phase.type !== 'matchResult') return null
   const own = room.seats.find((seat) => seat.seat === state.youSeat)
@@ -158,7 +182,7 @@ function RematchControl({ state, actions, copy }: { state: GameClientState; acti
   )
 }
 
-function RoomControls({ state, actions, copy }: { state: GameClientState; actions: GameActions; copy: V6Copy }) {
+function RoomControls({ state, actions, copy }: { state: GameClientState; actions: GameActions; copy: GameCopy }) {
   const room = state.room!
   const own = room.seats.find((seat) => seat.seat === state.youSeat)
   const connected = own?.connection.type === 'connected' && state.connection === 'authenticated'
@@ -170,7 +194,7 @@ function RoomControls({ state, actions, copy }: { state: GameClientState; action
     <div className="room-controls">
       <div><Text size="sm">{copy.room.invitation}</Text>
         <Text className="room-code" aria-label={copy.room.codeLabel}>{room.roomCode}</Text></div>
-      <Text className="phase-line">{phaseText(copy, room.phase)}</Text>
+      <Text className="phase-line" aria-live="polite">{phaseText(copy, room.phase)}</Text>
       {held && <Text role="status">{copy.reconnect.resultHeld}</Text>}
       <ol className="seat-list" aria-label={copy.room.players}>
         <SeatLine state={state} seat="one" copy={copy} />
@@ -193,7 +217,7 @@ function RoomControls({ state, actions, copy }: { state: GameClientState; action
 }
 
 function ownActorAlive(state: GameClientState): boolean {
-  return Boolean(state.youSeat && state.snapshot?.state.actors.find((actor) => actor.seat === state.youSeat)?.alive)
+  return Boolean(state.youSeat && visibleActor(state, state.youSeat)?.alive)
 }
 
 function gameInputEnabled(state: GameClientState): boolean {
@@ -202,7 +226,7 @@ function gameInputEnabled(state: GameClientState): boolean {
 }
 
 export function GamePanelView({ state, actions }: { state: GameClientState; actions: GameActions }) {
-  const copy = useV6Copy()
+  const copy = useGameCopy()
   const [bindings, setBindings] = useState(loadControlBindings)
   const [controlsOpen, setControlsOpen] = useState(false)
   const failureText = state.failure ? copy.error[state.failure as keyof typeof copy.error] : ''
@@ -210,6 +234,7 @@ export function GamePanelView({ state, actions }: { state: GameClientState; acti
   const waitingText = state.room ? phaseText(copy, state.room.phase) : copy.connection[state.connection]
   const round = state.room?.roundNumber
   const reconnecting = state.room && ['reconnecting', 'connecting', 'authenticating'].includes(state.connection)
+  const arenaSnapshot = useMemo(() => presentSnapshot(state), [state])
   const updateBindings = (next: KeyboardBindings): void => {
     setBindings(next)
     saveControlBindings(next)
@@ -226,18 +251,18 @@ export function GamePanelView({ state, actions }: { state: GameClientState; acti
             <span>{copy.player.two}</span><strong>{state.room?.scores.two ?? 0}</strong></span>
         </div>
         <GameArena label={copy.arena.label} waitingText={waitingText} failureText={copy.arena.failure}
-          focusHint={copy.arena.focusHint} instructionsId="v6-game-instructions" snapshot={state.snapshot}
+          focusHint={copy.arena.focusHint} instructionsId="game-instructions" snapshot={arenaSnapshot}
           youSeat={state.youSeat} enabled={Boolean(enabled)}
           bindings={bindings}
           onDirection={(direction) => actions.movement(direction)} onBomb={() => actions.placeBomb()} />
-        <p id="v6-game-instructions" className="game-instructions">{bindingsSummary(bindings, copy)}</p>
+        <p id="game-instructions" className="game-instructions">{bindingsSummary(bindings, copy)}</p>
         <div className="local-controls">
           <Button className="controls-button" variant="subtle" color="dark" size="compact-sm"
             onClick={() => setControlsOpen(true)}>{copy.controls.open}</Button>
           <SoundControl state={state} copy={copy} />
         </div>
       </div>
-      <aside className="control-column" aria-live="polite">
+      <aside className="control-column">
         {reconnecting && <Alert color="yellow" title={copy.reconnect.title}>{copy.reconnect.retrying}</Alert>}
         {failureText && <Alert color="red" title={copy.error.title}>{failureText}</Alert>}
         {state.room ? <RoomControls state={state} actions={actions} copy={copy} />

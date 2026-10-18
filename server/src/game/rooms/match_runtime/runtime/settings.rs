@@ -68,10 +68,7 @@ impl MatchRuntime {
                 self.settings_revision,
                 self.settings_editor,
             )?;
-            return Ok(Some(MatchNotice {
-                room,
-                snapshot: None,
-            }));
+            return Ok(Some(MatchNotice { room, frames: None }));
         }
         self.ensure_revision()?;
         let next_settings_revision = self

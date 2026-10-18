@@ -6,9 +6,10 @@ const changed = {
   turnAssistUnits: 64 as const,
   winsToFinish: 1,
   bombFuseTicks: 60 as const,
+  enabledItems: [],
 }
 
-describe('v6 authoritative gameplay settings', () => {
+describe('v7 authoritative gameplay settings', () => {
   beforeEach(() => vi.stubGlobal('WebSocket', { OPEN: SocketStub.OPEN }))
 
   it('sends an atomic revision-fenced update and fences readiness until acceptance', async () => {
@@ -98,5 +99,19 @@ describe('v6 authoritative gameplay settings', () => {
     expect(value.client.getState().room).toBe(accepted)
     expect(value.client.getState().room?.tick).toBe(baseline.room.tick)
     expect(value.client.getState().snapshot).toBeNull()
+  })
+
+  it('does not send dormant item configuration before activation', async () => {
+    const value = harness()
+    const socket = await authenticate(value)
+    const baseline = admitted()
+    baseline.room = room(1)
+    baseline.state = null
+    socket.message(baseline)
+    const sent = socket.sent.length
+
+    expect(value.client.updateSettings({ ...baseline.room.settings, enabledItems: ['heart'] })).toBe(false)
+    expect(socket.sent).toHaveLength(sent)
+    expect(value.client.getState().settingsPending).toBe(false)
   })
 })

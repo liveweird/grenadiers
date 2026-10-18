@@ -2,7 +2,7 @@ use std::time::Instant;
 
 use grenadiers_core::{
     game::{Direction, SeatId},
-    protocol::v6::RoomPhase,
+    protocol::v7::RoomPhase,
     room::MatchPhase,
 };
 use serde_json::json;
@@ -53,7 +53,8 @@ fn runtime_reference_measurement() {
         measured_ticks += 1;
         if let Some(notice) = &notice {
             publishing.push(elapsed);
-            max_frame_bytes = max_frame_bytes.max(notice.snapshot.as_ref().map_or(0, |s| s.len()));
+            max_frame_bytes =
+                max_frame_bytes.max(notice.frame(SeatId::One).as_ref().map_or(0, |s| s.len()));
         } else {
             ordinary.push(elapsed);
         }

@@ -168,11 +168,11 @@ async function runProfile(browser: Browser, testInfo: TestInfo, profile: Profile
     const bombIndex = observer.forwardedFrames.length
     await one.keyboard.press('Space')
     await expect.poll(() => observer.forwardedFrames.slice(bombIndex).filter((frame) => frame.endpoint === 'actor'
-      && frame.direction === 'clientToServer' && frame.type === 'placeBomb').length).toBe(1)
+      && frame.direction === 'clientToServer' && frame.type === 'manualAction').length).toBe(1)
     await expect.poll(() => observer.latestSnapshot('actor').bombIds.length).toBe(1)
     await expect.poll(() => observer.latestSnapshot('peer').bombIds).toEqual(observer.latestSnapshot('actor').bombIds)
     const bombCommands = observer.forwardedFrames.slice(bombIndex).filter((frame) => frame.endpoint === 'actor'
-      && frame.direction === 'clientToServer' && frame.type === 'placeBomb')
+      && frame.direction === 'clientToServer' && frame.type === 'manualAction')
     expect(bombCommands.map((frame) => frame.actionId)).toEqual([1])
     expect(observer.latestSnapshot('peer')).toMatchObject({
       roundId: observer.latestSnapshot('actor').roundId,

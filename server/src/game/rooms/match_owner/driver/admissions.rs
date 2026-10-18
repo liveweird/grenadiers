@@ -1,6 +1,6 @@
 use grenadiers_core::{
     game::SeatId,
-    protocol::{Counter, RoomId, v6::ResumeToken},
+    protocol::{Counter, RoomId, v7::ResumeToken},
 };
 use tokio::sync::oneshot;
 
@@ -59,15 +59,21 @@ impl Driver {
         };
         let (departure_sender, departure) = oneshot::channel();
         let (replaced, replaced_receiver) = oneshot::channel();
+        let personal_frame = match admission_frame(&prepared, seat, sequence, credential.token()) {
+            Ok(frame) => frame,
+            Err(error) => {
+                let _ = reply.send(Err(map_runtime_error(error)));
+                return Ok(());
+            }
+        };
         let admission = MatchAdmission {
             room_id: self.room_id.clone(),
             round_id: u64::from(prepared.room.round_id.get()),
             seat: wire_seat(seat),
-            sequence,
             room: prepared.room.clone(),
             resume_token: credential.token(),
             last_bomb_action_id: prepared.last_bomb_action_id,
-            state: prepared.state.clone(),
+            personal_frame,
             notices: self.notices.subscribe(),
             guard: DepartureGuard::new(departure_sender),
             replaced: replaced_receiver,
@@ -124,15 +130,21 @@ impl Driver {
             .as_ref()
             .and_then(|slot| slot.credential.as_ref())
             .expect("matched credential");
+        let personal_frame = match admission_frame(&prepared, seat, sequence, credential.token()) {
+            Ok(frame) => frame,
+            Err(_error) => {
+                let _ = reply.send(Err(RoomError::ResumeRejected));
+                return Ok(());
+            }
+        };
         let admission = MatchAdmission {
             room_id: self.room_id.clone(),
             round_id: u64::from(prepared.room.round_id.get()),
             seat: wire_seat(seat),
-            sequence,
             room: prepared.room.clone(),
             resume_token: credential.token(),
             last_bomb_action_id: prepared.last_bomb_action_id,
-            state: prepared.state.clone(),
+            personal_frame,
             notices: self.notices.subscribe(),
             guard: DepartureGuard::new(departure_sender),
             replaced: replaced_receiver,
@@ -163,4 +175,37 @@ impl Driver {
         self.publish(notice);
         Ok(())
     }
+}
+
+fn admission_frame(
+    prepared: &crate::game::rooms::match_runtime::PreparedRuntimeAdmission,
+    seat: SeatId,
+    sequence: Counter,
+    token: ResumeToken,
+) -> Result<std::sync::Arc<str>, MatchRuntimeError> {
+    #[cfg(test)]
+    if FAIL_NEXT_ADMISSION_ENCODING.with(|fail| fail.replace(false)) {
+        return Err(MatchRuntimeError::Publication);
+    }
+    grenadiers_core::protocol::v7::prepare_classic_admission(
+        &prepared.room,
+        prepared.state_epoch,
+        prepared.capture.as_ref(),
+        wire_seat(seat),
+        prepared.last_bomb_action_id,
+        sequence,
+        token,
+    )
+    .map(std::sync::Arc::from)
+    .map_err(|_| MatchRuntimeError::Publication)
+}
+
+#[cfg(test)]
+thread_local! {
+    static FAIL_NEXT_ADMISSION_ENCODING: std::cell::Cell<bool> = const { std::cell::Cell::new(false) };
+}
+
+#[cfg(test)]
+pub(crate) fn fail_next_admission_encoding() {
+    FAIL_NEXT_ADMISSION_ENCODING.with(|fail| fail.set(true));
 }

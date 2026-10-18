@@ -29,5 +29,11 @@
       "exports",
       "types"
     ]
-  }
+  },
+  "entry": [
+    "src/main.tsx",
+    "renderer-diagnostics/main.ts",
+    "renderer-diagnostics/terrain-pixel.ts",
+    "vite.renderer-diagnostics.config.ts"
+  ]
 }

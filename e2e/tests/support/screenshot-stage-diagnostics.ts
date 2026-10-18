@@ -42,6 +42,8 @@ type CaptureContext = {
   pageOrdinal: number
   captureOrdinal: number
   active: boolean
+  pipelineStarted: boolean
+  takingMessageSeen: boolean
 }
 
 const require = createRequire(import.meta.url)
@@ -137,7 +139,10 @@ export function resolveScreenshotServerPage(page: Page): ServerPage {
 export function installScreenshotStageDiagnostics(serverPageValue: unknown,
   values: ScreenshotStageEvent[], pageOrdinal: number, captureOrdinal: number): () => void {
   const serverPage = validateServerPage(serverPageValue)
-  const context = { values, pageOrdinal, captureOrdinal, active: true }
+  const context = {
+    values, pageOrdinal, captureOrdinal, active: true,
+    pipelineStarted: false, takingMessageSeen: false,
+  }
   const restorers: Array<() => void> = []
   let listenerInstalled = false
   let cleaned = false
@@ -152,6 +157,13 @@ export function installScreenshotStageDiagnostics(serverPageValue: unknown,
         ? (sdkObject as { attribution?: { page?: unknown } }).attribution?.page : undefined
       const stage = typeof message === 'string' ? progressStages.get(message) : undefined
       if (attributedPage !== serverPage || !stage) return
+      if (stage === 'takingPageScreenshot') {
+        if (context.takingMessageSeen) {
+          context.active = false
+          return
+        }
+        context.takingMessageSeen = true
+      }
       record(context, stage, 'started', false, false)
       record(context, stage, 'finished', true, false)
     },
@@ -170,7 +182,14 @@ export function installScreenshotStageDiagnostics(serverPageValue: unknown,
   try {
     const screenshotter = serverPage.screenshotter
     restorers.push(replaceMethod(screenshotter, '_originalViewportSize', 'originalViewportSize',
-      context))
+      context, () => {
+        if (!context.pipelineStarted) {
+          context.pipelineStarted = true
+          return true
+        }
+        context.active = false
+        return false
+      }))
     restorers.push(replaceMethod(screenshotter, '_preparePageForScreenshot',
       'preparePageForScreenshot', context))
     restorers.push(replaceMethod(screenshotter, '_fullPageSize', 'fullPageSize',

@@ -1,5 +1,46 @@
 # Repository verification
 
+## Static terrain cache — 2026-10-18 — native 52/52, final CI pending
+
+Clean source `a9619e6a033e8956081bb7d4804078d61e4ae69c`, source archive SHA-256
+`6505637293a5e172f11b229ecc854a0571c4a71677d2172c924b0b4d41abfb07`, builds one image:
+`sha256:4c936d86c563c05ab3b6192a15da6975e6c6e0a9803cba0f51931dd581011f47`.
+Its saved archive hashes to `c0c4348851d208d7b07418fd0c5a79b71a4d171d322129227f60f357fd8fb47f`.
+Full fresh acceptance passes **26/26 Compose and 26/26 Kubernetes**, first attempts, retries zero.
+All ordinary assertions and budgets remain unchanged; the optional profiler is absent and normal
+failure screenshots are enabled. The 42 configured PNGs are retained.
+
+Each of four latency profiles has 20 samples and zero exceedances/throttling. Local/shaped maxima
+are **58.617/159.317ms Compose** and **63.426/159.126ms Kubernetes**. Strict health/readiness,
+UID/GID 65532, zero capabilities, no-new-privileges, read-only roots, external mode-0444 fixtures,
+RuntimeDefault/500m/256Mi, three fresh pod UIDs and direct-pod forwarding lifecycles pass.
+The isolated diagnostic-shell HTTP000 is preserved separately; the same-host gate and actual
+runner preflights return exact 200 JSON/no-store. Owned containers, network, namespace, forwards
+and listeners are gone. The frozen image scan has zero fixable HIGH/CRITICAL findings and pinned
+Kubernetes schemas validate 3/3; neither build nor scan was repeated.
+
+The separately bounded original-workload confirmation passes once in 22.031s. Captures take
+2.710/1.885s versus the frozen 11.452/17.169s baseline, as one observation. Submitted indices per
+observed animation callback fall from 9,234 to 2,718 (70.57%); draws fall from 1 to 0.5. The cache
+also introduces 0.5 wrapped buffer uploads/callback, with an 86,976-byte supplied-source upper
+bound/callback. These are CPU-side measurements; callbacks are not frames, source spans are not
+actual upload sizes, and different-duration CPU totals do not establish per-frame efficiency or
+the CI timeout's cause. Independent code, pixel and one-run evidence reviews are clear.
+
+All 260 web tests and unchanged coverage thresholds pass, alongside contracts, lint, Knip,
+production/fixture builds and E2E static parity 27. Isolated exact-pixel tests pass at DPR 1 and 2
+through paint, repaint, reset and real context restoration. The first fixture's raw restore call
+timed out; its preserved correction uses Pixi's deferred forced-loss restoration path. The passing
+list report and retained exact assertions establish zero differing bytes in each phase; attachment
+bodies were not separately persisted. The stopped six-cell matrix was not rerun.
+
+Independent full-native evidence review is clear. Evidence:
+`/tmp/grenadiers-v0322-terrain-native-acceptance`, 922-file manifest SHA-256
+`8f9818480cf59c0e3c2cc2c237ef9e418c60933d5a46555686f674938128eda9`.
+One-case evidence: `/tmp/grenadiers-v0322-terrain-capture-acceptance`, 645-file manifest
+`422bb4077a082ae21c4505e42f8e20557844174ab7ad6045abd6adde4e18937a`.
+Final-head hosted CI and publication remain separate requirements; live rooms still use gameplay-v6.
+
 ## Original capture workload — 2026-10-18 — attribution stopped
 
 Clean observer `4fcef4ba32fed92ce3324b09d2f815bf9f4aea7d`, archive SHA-256

@@ -1,5 +1,5 @@
 import { performance } from 'node:perf_hooks'
-import type { Page, TestInfo } from '@playwright/test'
+import type { BrowserContext, Page, TestInfo } from '@playwright/test'
 import { EventLoopDelayMonitor, type EventLoopDelaySummary } from './event-loop-diagnostics'
 import {
   installPageCollector, type CollectorEventLabel, type PageCollectorEvent,
@@ -9,9 +9,12 @@ const STATE_LIMIT = 128
 const ACTIVITY_LIMIT = 256
 const GL_CALL_LIMIT = 64
 const FAILURE_LIMIT = 32
+const PHASE_LIMIT = 128
+const TEMP_PAGE_LIMIT = 64
 const SCHEDULER_INTERVAL_MS = 100
 const REPORTING_GAP_MS = 50
 const SLOW_GL_CALL_MS = 50
+const HEARTBEAT_MS = 1_000
 const GL_METHODS = new Set([
   'useProgram', 'deleteBuffer', 'deleteProgram', 'deleteShader', 'deleteTexture',
   'deleteFramebuffer', 'deleteRenderbuffer', 'deleteVertexArray', 'drawArrays',
@@ -20,6 +23,8 @@ const GL_METHODS = new Set([
   'drawRangeElements', 'loseContext',
 ])
 
+// Page clocks mark creation; nodeAt marks binding arrival. Their delta can include
+// page scheduling, binding queuing, IPC delivery, and Node scheduling.
 type RetainedPageEvent = PageCollectorEvent & { nodeAt: number }
 type GlCallTiming = {
   method: string
@@ -49,13 +54,28 @@ export type BrowserPageDiagnostics = {
 export type BrowserStallSummary = {
   nodeClock: { timeOrigin: number; capturedAt: number; eventLoop: EventLoopDelaySummary }
   pages: BrowserPageDiagnostics[]
+  phases: DiagnosticPhaseEvent[]
+  temporaryPages: TemporaryPageEvent[]
   failures: DiagnosticFailure[]
 }
 
 export type BrowserPageLabel = 'audio-primary' | 'audio-peer' | 'visibility-cover'
   | 'reconnect-primary' | 'reconnect-peer'
+export type DiagnosticPhaseLabel = 'axe' | 'width' | 'screenshot'
+export type DiagnosticPhaseEvent = {
+  label: DiagnosticPhaseLabel
+  boundary: 'sent' | 'returned'
+  pageOrdinal: number
+  nodeAt: number
+}
+export type TemporaryPageEvent = {
+  ordinal: number
+  boundary: 'opened' | 'closed'
+  nodeAt: number
+}
 type DiagnosticFailureStage = 'bindingSetup' | 'futureDocumentSetup' | 'currentDocumentSetup'
   | 'windowAssociation' | 'closeListenerSetup' | 'listenerCleanup' | 'observeAfterStop'
+  | 'contextListenerSetup' | 'contextListenerCleanup' | 'temporaryPageListenerSetup'
   | 'eventLoopCleanup'
 export type DiagnosticFailure = { stage: DiagnosticFailureStage; at: number }
 
@@ -117,7 +137,8 @@ function glCall(candidate: Record<string, unknown>, nodeAt: number): GlCallTimin
 function pageEvent(candidate: Record<string, unknown>, nodeAt: number): RetainedPageEvent | undefined {
   const allowed: CollectorEventLabel[] = [
     'initialized', 'visible', 'hidden', 'focused', 'blurred',
-    'longTask', 'schedulingGap', 'bindingDuration',
+    'longTask', 'schedulingGap', 'bindingDuration', 'heartbeat', 'page-enter',
+    'read-start', 'read-end',
   ]
   if (!allowed.includes(candidate.label as CollectorEventLabel)
     || !finiteNumber(candidate.pageAt) || !finiteNumber(candidate.documentOrdinal)
@@ -136,17 +157,70 @@ function pageEvent(candidate: Record<string, unknown>, nodeAt: number): Retained
 export class BrowserStallDiagnostics {
   private readonly eventLoop = new EventLoopDelayMonitor()
   private readonly pages: BrowserPageDiagnostics[] = []
+  private readonly phases: DiagnosticPhaseEvent[] = []
+  private readonly temporaryPages: TemporaryPageEvent[] = []
   private readonly failures: DiagnosticFailure[] = []
+  private readonly observedPages = new Set<Page>()
   private readonly closeListeners: Array<{
     page: Page; listener: () => void; summary: BrowserPageDiagnostics
   }> = []
+  private readonly contextListeners: Array<{
+    context: BrowserContext; listener: (page: Page) => void
+  }> = []
+  private readonly observedContexts = new Set<BrowserContext>()
+  private nextTemporaryPageOrdinal = 1
   private stopped = false
+
+  async phase<T>(label: DiagnosticPhaseLabel, pageOrdinal: number,
+    action: () => Promise<T>): Promise<T> {
+    retain(this.phases, { label, boundary: 'sent', pageOrdinal, nodeAt: performance.now() }, PHASE_LIMIT)
+    try {
+      return await action()
+    } finally {
+      retain(this.phases, {
+        label, boundary: 'returned', pageOrdinal, nodeAt: performance.now(),
+      }, PHASE_LIMIT)
+    }
+  }
+
+  private observeContext(context: BrowserContext): void {
+    if (this.observedContexts.has(context)) return
+    this.observedContexts.add(context)
+    const listener = (page: Page): void => {
+      if (this.stopped || this.observedPages.has(page)) return
+      const ordinal = this.nextTemporaryPageOrdinal
+      this.nextTemporaryPageOrdinal += 1
+      retain(this.temporaryPages, {
+        ordinal, boundary: 'opened', nodeAt: performance.now(),
+      }, TEMP_PAGE_LIMIT)
+      try {
+        page.once('close', () => {
+          if (this.stopped) return
+          retain(this.temporaryPages, {
+            ordinal, boundary: 'closed', nodeAt: performance.now(),
+          }, TEMP_PAGE_LIMIT)
+        })
+      } catch {
+        retain(this.failures, {
+          stage: 'temporaryPageListenerSetup', at: performance.now(),
+        }, FAILURE_LIMIT)
+      }
+    }
+    try {
+      context.on('page', listener)
+      this.contextListeners.push({ context, listener })
+    } catch {
+      retain(this.failures, { stage: 'contextListenerSetup', at: performance.now() }, FAILURE_LIMIT)
+    }
+  }
 
   async observePage(page: Page, label: BrowserPageLabel): Promise<void> {
     if (this.stopped) {
       retain(this.failures, { stage: 'observeAfterStop', at: performance.now() }, FAILURE_LIMIT)
       return
     }
+    this.observedPages.add(page)
+    this.observeContext(page.context())
     const startedAt = performance.now()
     const pageSummary: BrowserPageDiagnostics = {
       ordinal: this.pages.length + 1,
@@ -182,7 +256,7 @@ export class BrowserStallDiagnostics {
     }
     const collectorInput = {
       intervalMs: SCHEDULER_INTERVAL_MS, reportingGapMs: REPORTING_GAP_MS,
-      slowGlCallMs: SLOW_GL_CALL_MS,
+      slowGlCallMs: SLOW_GL_CALL_MS, heartbeatMs: HEARTBEAT_MS,
     }
     try { await page.addInitScript(installPageCollector, collectorInput) } catch {
       retain(pageSummary.failures, { stage: 'futureDocumentSetup', at: performance.now() }, FAILURE_LIMIT)
@@ -217,6 +291,8 @@ export class BrowserStallDiagnostics {
         eventLoop: this.eventLoop.summary(),
       },
       pages: this.pages,
+      phases: this.phases,
+      temporaryPages: this.temporaryPages,
       failures: this.failures,
     }
   }
@@ -244,6 +320,12 @@ export class BrowserStallDiagnostics {
       }
     }
     this.closeListeners.length = 0
+    for (const { context, listener } of this.contextListeners) {
+      try { context.off('page', listener) } catch {
+        retain(this.failures, { stage: 'contextListenerCleanup', at: performance.now() }, FAILURE_LIMIT)
+      }
+    }
+    this.contextListeners.length = 0
     try { this.eventLoop.stop() } catch {
       retain(this.failures, { stage: 'eventLoopCleanup', at: performance.now() }, FAILURE_LIMIT)
     }

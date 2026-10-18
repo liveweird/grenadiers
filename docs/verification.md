@@ -43,16 +43,44 @@ focused run verifies the strengthened bomb-placement assertion in both build pro
 No v0.3.26 native image, full browser scenario run or release is claimed. Native Compose and
 Kubernetes acceptance, visual inspection and exact final-head CI remain required.
 
-## Heart responsive-HUD integration — 2026-10-18 — fresh native acceptance pending
+## Heart responsive-HUD integration — 2026-10-18 — fresh native 54/54
 
-The accepted parent's two-column narrow HUD and real text-geometry regression are integrated.
-Core, server, Cargo, API, Heart client/protocol/locales and all dedicated item scenarios remain
-unchanged from the independently reviewed Heart cache candidate. Its **287 web tests** and
-coverage **94.80/90.36/94.72/97.31%** remain the local unit baseline. The new production build
-and E2E lint, Knip, typecheck and 28-scenario static parity pass. Fresh image acceptance and exact-head CI remain
-required for this tree. The inherited Heart source `00d76ac9cc08e7bb4627caf7897e02c3f15a43d2`
-certifies Heart only and excludes terrain caching and responsive layout; the parent v7 result
-below does not certify Heart.
+Clean source `2f86fc96f4f562871ed962052c1f0f1b74d53881`, archive SHA-256
+`7fa83c1139e1e0487b91ef2328db7d05d932146f3ff55b39d4f1a47123c95579`, builds the new image
+`sha256:e8de9c77597e5c94fe5c406994d55ab7e776c0696b5ec3333f9f46273166ea09`.
+Its saved archive hashes to `93c50da1b8f0a5d25b351778aa346b83abce89fb2235df1ee20f45f9f37e79de`.
+Fresh acceptance passes **27/27 Compose and 27/27 Kubernetes**, first attempts, one worker,
+retries zero and no carried results. Both runtimes include all previous 26 cases plus Heart.
+
+Four latency profiles retain 20 samples each, zero exceedances and zero CPU throttling.
+Local/shaped maxima are **51.386/160.103ms Compose** and **52.320/160.583ms Kubernetes**.
+Strict exact-200 JSON/no-store probes, hardened runtime, external mode-0444 fixtures, four
+fresh pod UIDs, serial direct-pod forwarding and complete cleanup pass. Pinned archive-only
+Trivy finds zero fixable HIGH/CRITICAL vulnerabilities; strict Kubernetes 1.33 validates three
+resources. Quiet acknowledgements cover named local workers, without a global host-idle claim.
+
+All 18 reports pass and 46 fresh PNGs remain. Capture profiling is unset and normal failure
+capture is preserved. Root visually checked the readable Polish 320px equipment/protection HUD
+and English desktop pickup. English desktop Equipment wraps its last letter; this minor label
+readability follow-up does not cause overlap. Committed Heart screenshots are exact accepted
+PNG copies. Independent final source/image/report/evidence audit is clear. The sealed 1,062-entry manifest hashes
+to `fd296568303671e0c44736e0ba480e9334414ed4660a892a71845c70695185d5` under
+`/tmp/grenadiers-v0325-fresh-responsive-acceptance`.
+
+Core/server/Cargo/API and dedicated item scenarios remain unchanged from the reviewed Heart
+cache candidate: **401 core, 179 server and two doctests** in each Rust profile, line coverage
+**90.94%**. Its **287 web tests**, coverage **94.80/90.36/94.72/97.31%**, production/fixture
+builds and 28-scenario static checks pass. Fresh responsive production build/static checks pass.
+Exact-head CI and publication remain required. The post-acceptance update changes documentation
+and screenshot copies only.
+
+An earlier attempt paired the new source archive with the historical `35bf3678` image by
+mistake. It is **invalid**, with no candidate passes or failures counted. Its observed match
+geometry failure and cleanup are preserved separately in
+`/tmp/grenadiers-v0325-responsive-native-acceptance`, 698-entry partial manifest
+`f6b5ec3a6cc0c2dabd62f816e19c39bd549f05fd294afbbb3085eb66b5d2f75f`.
+The complete run above builds and uses the correct new image throughout. Setup-only corrections
+before that browser launch are retained in its evidence; no valid browser case was rerun.
 
 ## Heart activation candidate — 2026-10-18 — native baseline 54/54
 

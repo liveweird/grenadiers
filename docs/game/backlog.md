@@ -2,7 +2,7 @@
 
 Status: **TURN v0.3.16, CONFIG v0.3.17 and the first ART slice v0.3.18 are shipped**.
 The v0.3.19 equipment/effect core foundation is implemented and verified; no requested
-items are enabled in the published v0.3.21 rooms. The v0.3.25 Heart candidate now has domain,
+items are enabled in the published v0.3.24 rooms. The v0.3.25 Heart candidate now has domain,
 server, browser and pixel-art implementation with debug/release gates, independent reviews and
 native Compose/Kubernetes acceptance 54/54 clear. Final-head CI/publication remain pending;
 the v0.3.26 Shield candidate adds opt-in timed immunity and independent settings with local

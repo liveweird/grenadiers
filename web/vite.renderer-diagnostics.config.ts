@@ -7,6 +7,12 @@ export default defineConfig({
   build: {
     outDir: resolve(import.meta.dirname, 'renderer-diagnostics-dist'),
     emptyOutDir: true,
+    rollupOptions: {
+      input: {
+        lifecycle: resolve(import.meta.dirname, 'renderer-diagnostics/index.html'),
+        terrainPixel: resolve(import.meta.dirname, 'renderer-diagnostics/terrain-pixel.html'),
+      },
+    },
   },
   preview: {
     host: '0.0.0.0',

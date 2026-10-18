@@ -10,6 +10,7 @@
     "latency-tests/**/*.spec.ts",
     "audio-tests/**/*.spec.ts",
     "scripts/*.mjs",
-    "renderer-diagnostic-tests/**/*.spec.ts"
+    "renderer-diagnostic-tests/**/*.spec.ts",
+    "terrain-pixel-tests/**/*.spec.ts"
   ]
 }

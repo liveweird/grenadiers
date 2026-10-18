@@ -8,6 +8,8 @@
 - Guard reconnect accessibility audits to one document while preserving rule coverage,
   screenshots, deadlines and zero retries; retain bounded browser phase diagnostics.
 - Avoid redundant actor pose visibility changes on unchanged frames and moving snapshots.
+- Cache immutable terrain at the initialized renderer's resolution with nearest sampling;
+  refresh on terrain changes, new worlds and WebGL restoration while keeping dynamic layers live.
 - Retain one arena renderer across room and reconnect transitions; suspend and clear it
   between authoritative worlds, then paint the new baseline before revealing the canvas.
 - Stage a dormant gameplay-v7 contract for inventory, timed effects, typed bombs, hidden

@@ -65,6 +65,7 @@ export type BrowserStallSummary = {
 }
 
 export type BrowserPageLabel = 'audio-primary' | 'audio-peer' | 'visibility-cover'
+  | 'renderer-primary' | 'renderer-peer'
   | 'reconnect-primary' | 'reconnect-peer'
 export type DiagnosticPhaseLabel = 'axe' | 'width' | 'screenshot'
 export type DiagnosticPhaseEvent = {

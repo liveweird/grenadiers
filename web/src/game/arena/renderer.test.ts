@@ -10,7 +10,7 @@ const hooks = vi.hoisted(() => ({
     init: ReturnType<typeof vi.fn>
     destroy: ReturnType<typeof vi.fn>
     render: ReturnType<typeof vi.fn>
-    renderer: { resize: ReturnType<typeof vi.fn> } | undefined
+    renderer: { resize: ReturnType<typeof vi.fn>; resolution: number } | undefined
     ticker: {
       add: ReturnType<typeof vi.fn>
       start: ReturnType<typeof vi.fn>
@@ -22,7 +22,9 @@ const hooks = vi.hoisted(() => ({
     update: ReturnType<typeof vi.fn>
     render: ReturnType<typeof vi.fn>
     reset: ReturnType<typeof vi.fn>
+    restoreContext: ReturnType<typeof vi.fn>
     setReducedMotion: ReturnType<typeof vi.fn>
+    resolution: number
   }>,
 }))
 
@@ -30,7 +32,9 @@ vi.mock('pixi.js', () => ({
   Application: class {
     canvas = document.createElement('canvas')
     stage = { addChild: vi.fn() }
-    renderer: { resize: ReturnType<typeof vi.fn> } | undefined = { resize: vi.fn() }
+    renderer: { resize: ReturnType<typeof vi.fn>; resolution: number } | undefined = {
+      resize: vi.fn(), resolution: 2,
+    }
     ticker = { add: vi.fn(), start: vi.fn(), stop: vi.fn() }
     render = vi.fn()
     init = vi.fn(async () => {
@@ -51,8 +55,10 @@ vi.mock('./scene', () => ({
     update = vi.fn()
     render = vi.fn()
     reset = vi.fn()
+    restoreContext = vi.fn()
     setReducedMotion = vi.fn()
-    constructor() { hooks.scenes.push(this) }
+    resolution: number
+    constructor(resolution: number) { this.resolution = resolution; hooks.scenes.push(this) }
   },
 }))
 
@@ -78,6 +84,7 @@ describe('Pixi application lifetime', () => {
     }))
     expect(app.canvas.style.imageRendering).toBe('pixelated')
     expect(app.canvas.style.visibility).toBe('hidden')
+    expect(scene.resolution).toBe(2)
     expect(app.renderer?.resize).not.toHaveBeenCalled()
     const snapshot = gameSnapshot()
     renderer.update(snapshot)
@@ -91,6 +98,9 @@ describe('Pixi application lifetime', () => {
     tick()
     expect(scene.render).toHaveBeenCalledOnce()
     expect(scene.setReducedMotion).toHaveBeenCalledWith(true)
+    app.canvas.dispatchEvent(new Event('webglcontextrestored'))
+    expect(scene.restoreContext).toHaveBeenCalledOnce()
+    expect(app.render).toHaveBeenCalledTimes(2)
     renderer.suspend()
     renderer.suspend()
     expect(app.canvas.style.visibility).toBe('hidden')
@@ -100,9 +110,12 @@ describe('Pixi application lifetime', () => {
     expect(host.querySelectorAll('canvas')).toHaveLength(1)
     renderer.update(snapshot)
     expect(scene.update).toHaveBeenCalledTimes(2)
-    expect(app.render).toHaveBeenCalledTimes(2)
+    expect(app.render).toHaveBeenCalledTimes(3)
     expect(app.ticker.start).toHaveBeenCalledTimes(2)
     expect(host.querySelectorAll('canvas')).toHaveLength(1)
+    app.canvas.dispatchEvent(new Event('webglcontextrestored'))
+    expect(scene.restoreContext).toHaveBeenCalledTimes(2)
+    expect(app.render).toHaveBeenCalledTimes(4)
     renderer.destroy()
     renderer.destroy()
     renderer.update(snapshot)
@@ -115,6 +128,8 @@ describe('Pixi application lifetime', () => {
     expect(scene.update).toHaveBeenCalledTimes(2)
     expect(scene.setReducedMotion).toHaveBeenCalledOnce()
     expect(scene.reset).toHaveBeenCalledTimes(2)
+    app.canvas.dispatchEvent(new Event('webglcontextrestored'))
+    expect(scene.restoreContext).toHaveBeenCalledTimes(2)
   })
 
   it('uses a safe DPR fallback and releases partially initialized GPU resources on failure', async () => {

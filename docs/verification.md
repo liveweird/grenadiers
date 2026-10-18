@@ -1,6 +1,6 @@
 # Repository verification
 
-## Live-v7 HUD acceptance correction — 2026-10-18 — evaluation pending
+## Live-v7 HUD acceptance — 2026-10-18 — native verified, publication pending
 
 Clean source `0dde9142375ab495970f0031ef88fc10a25da499`, archive SHA-256
 `91b0d98f37812b2f0d344e969ae5e07d53fba15eafb24cf5918bcba87b372412`, builds production image
@@ -8,7 +8,7 @@ Clean source `0dde9142375ab495970f0031ef88fc10a25da499`, archive SHA-256
 Pinned Trivy reports zero fixable HIGH/CRITICAL vulnerabilities; strict Kubernetes schemas
 validate3/3. The first Compose default group passes7 cases and fails the rendered duel:
 its old four-value HUD assertion finds eight values because the live-v7 HUD now also shows
-equipment, bomb type, effects and damage grace. There are44 unrun cases, zero retries and no
+equipment, bomb type, effects and damage grace. That initial attempt leaves44 cases unrun, with zero retries and no
 latency samples. Runtime hardening, strict probes and cleanup pass. Original failure artifacts
 remain sealed in `/tmp/grenadiers-v0324-acceptance`; no Kubernetes runtime was started.
 
@@ -16,9 +16,28 @@ The corrected duel and generated-upgrade assertions check all eight named fields
 the original four upgrade values and empty inventory/effects/grace. Complete label/value
 arrays preserve field association and avoid adding many serial browser calls during a live
 fuse. Product sources, screenshot options, deadlines, retry policy and gameplay are unchanged.
-Independent review and all E2E static gates/parity26 pass. Fresh changed/remaining acceptance
-is pending; this does not explain the separate
-v0.3.22 hosted screenshot timeout.
+Independent implementation review and all E2E static gates/parity26 pass. This corrects the
+HUD probe and does not explain the separate v0.3.22 hosted screenshot timeout.
+
+Clean corrected source `893c150fcfcfdcd065418deb1349cb7852106df0`, archive SHA-256
+`4019fd20ffdc6e2e6a99f8d8b54549a1e068d129c06ee75eef36420638431ef3`, has identical production
+inputs to the image source above. The continuation passes **19/19 fresh Compose and26/26 fresh
+Kubernetes cases**, all first attempts with zero retries. Seven default Compose cases retain
+byte-identical transitive inputs, closing the explicit composite at **26/26 per target,52/52**.
+Four latency profiles have20 samples each, zero exceedances and zero CPU throttling; local/
+shaped maxima are48.491/133.364 ms Compose and48.906/160.071 ms Kubernetes. All32 strict
+pre-browser probe pairs return200 JSON/no-store. Runtime hardening, external/projected0444
+fixtures, fresh pod identities, direct-pod forward stop/wait ordering and cleanup pass.
+
+Independent evidence review is clear. Source blobs, all16 embedded reports, retained test
+inputs, immutable image/scan/schema references and both evidence manifests verify. Evidence:
+`/tmp/grenadiers-v0324-hud-acceptance`; its374-file manifest SHA-256 is
+`dbcc7b920f90fbc04bcb58afe947b6deb34f669f90ffdc2c1b50b0924b089d70`.
+The preserved initial-failure90-file manifest SHA-256 is
+`143eb7a3b7f0e3c847a3697d7059da822ba3b485c8716f0095af77d9df729a9f`.
+Saved process records establish PID ordering/liveness and waited cleanup, without independently
+proving literal PTY ownership or ambient quiet. Exact publication-head CI and upstream release
+integration remain pending; this candidate is not yet merged or released.
 
 ## Live gameplay-v7 candidate — 2026-10-18 — local checks only
 

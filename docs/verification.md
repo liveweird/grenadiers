@@ -69,6 +69,34 @@ effect presentation is infrastructure; no new pickup is playable. These results 
 initial local verification. The later image and native acceptance are recorded above; exact-head
 acceptance for the terrain-cache integration remains pending.
 
+## Parent canonical projections with terrain cache — 2026-10-18 — native 52/52, final CI pending
+
+Clean source `20793428554458e69fe7014232d8d08e7ea089bc`, archive SHA-256
+`4e490088c7a5f8eaadecdd6414642c4c9c453286772b2fcf00c35750a97f6303`, builds one image:
+`sha256:2b4384501ffbd7ac990c7be0f7f609ac9278da61c2afd04f8415a9833cc83258`.
+Its saved archive hashes to `39067add856a3f383e658b98d1544f413a95258ff9abd453c1c96661346cfe42`.
+Fresh acceptance passes **26/26 Compose and 26/26 Kubernetes**, first attempts, retries zero,
+one worker. All ordinary assertions and budgets remain unchanged. The optional capture profiler
+is unset; normal failure capture and all 42 configured screenshots are retained.
+
+Each runtime passes 15 functional and 11 latency cases. Four latency profiles retain 20 samples
+each, zero exceedances and zero CPU throttling. Local/shaped maxima are **43.964/163.239ms Compose**
+and **56.008/163.934ms Kubernetes**. Runtime security, strict exact-200 JSON/no-store probes,
+mode-0444 external fixtures, three fresh Kubernetes pod UIDs, direct forwarding in one long-lived
+runner and complete cleanup pass. Pinned Trivy archive-only scanning reports zero fixable
+HIGH/CRITICAL findings; strict Kubernetes 1.33 validation passes three resources. A setup-only
+schema invocation omitted Node from PATH and exited 127 before any scenario; its correction and
+initial forwarding-not-ready probes remain preserved. No substantive test was retried.
+
+All **260 web tests** pass; coverage is **94.85/90.08/94.92/97.44%**, above unchanged floors.
+Production and diagnostic-fixture builds, contract checks, lint, Knip and E2E static parity 27
+pass. This final verification update changes documentation only after the accepted source.
+Independent code/integration and complete native-evidence reviews are clear. Final-head hosted
+CI and publication remain required. Live rooms still use v6; optional pickups remain disabled.
+
+Evidence: `/tmp/grenadiers-v0323-terrain-native-acceptance`, 945-file final manifest SHA-256
+`c68bc0f99c5568e1edf90c9e3e16fe38072703d0222d61c0cdf35bb44f9b4b92`.
+
 ## Canonical projection history — 2026-10-18 — native verified
 
 The v0.3.23 candidate passes **373 core tests, 170 server tests and two doctests in each debug and release profile**, with four
@@ -116,6 +144,47 @@ seed modes are recorded, but their hashes were not independently read inside con
 This certifies local native acceptance, without a hosted-CI or production-deployment claim.
 Publication requires exact-head hosted gates after the predecessor is merged. Later changes
 to application or browser test inputs require their corresponding evidence to be refreshed.
+
+## Static terrain cache — 2026-10-18 — native 52/52, final CI pending
+
+Clean source `a9619e6a033e8956081bb7d4804078d61e4ae69c`, source archive SHA-256
+`6505637293a5e172f11b229ecc854a0571c4a71677d2172c924b0b4d41abfb07`, builds one image:
+`sha256:4c936d86c563c05ab3b6192a15da6975e6c6e0a9803cba0f51931dd581011f47`.
+Its saved archive hashes to `c0c4348851d208d7b07418fd0c5a79b71a4d171d322129227f60f357fd8fb47f`.
+Full fresh acceptance passes **26/26 Compose and 26/26 Kubernetes**, first attempts, retries zero.
+All ordinary assertions and budgets remain unchanged; the optional profiler is absent and normal
+failure screenshots are enabled. The 42 configured PNGs are retained.
+
+Each of four latency profiles has 20 samples and zero exceedances/throttling. Local/shaped maxima
+are **58.617/159.317ms Compose** and **63.426/159.126ms Kubernetes**. Strict health/readiness,
+UID/GID 65532, zero capabilities, no-new-privileges, read-only roots, external mode-0444 fixtures,
+RuntimeDefault/500m/256Mi, three fresh pod UIDs and direct-pod forwarding lifecycles pass.
+The isolated diagnostic-shell HTTP000 is preserved separately; the same-host gate and actual
+runner preflights return exact 200 JSON/no-store. Owned containers, network, namespace, forwards
+and listeners are gone. The frozen image scan has zero fixable HIGH/CRITICAL findings and pinned
+Kubernetes schemas validate 3/3; neither build nor scan was repeated.
+
+The separately bounded original-workload confirmation passes once in 22.031s. Captures take
+2.710/1.885s versus the frozen 11.452/17.169s baseline, as one observation. Submitted indices per
+observed animation callback fall from 9,234 to 2,718 (70.57%); draws fall from 1 to 0.5. The cache
+also introduces 0.5 wrapped buffer uploads/callback, with an 86,976-byte supplied-source upper
+bound/callback. These are CPU-side measurements; callbacks are not frames, source spans are not
+actual upload sizes, and different-duration CPU totals do not establish per-frame efficiency or
+the CI timeout's cause. Independent code, pixel and one-run evidence reviews are clear.
+
+All 260 web tests and unchanged coverage thresholds pass, alongside contracts, lint, Knip,
+production/fixture builds and E2E static parity 27. Isolated exact-pixel tests pass at DPR 1 and 2
+through paint, repaint, reset and real context restoration. The first fixture's raw restore call
+timed out; its preserved correction uses Pixi's deferred forced-loss restoration path. The passing
+list report and retained exact assertions establish zero differing bytes in each phase; attachment
+bodies were not separately persisted. The stopped six-cell matrix was not rerun.
+
+Independent full-native evidence review is clear. Evidence:
+`/tmp/grenadiers-v0322-terrain-native-acceptance`, 922-file manifest SHA-256
+`8f9818480cf59c0e3c2cc2c237ef9e418c60933d5a46555686f674938128eda9`.
+One-case evidence: `/tmp/grenadiers-v0322-terrain-capture-acceptance`, 645-file manifest
+`422bb4077a082ae21c4505e42f8e20557844174ab7ad6045abd6adde4e18937a`.
+Final-head hosted CI and publication remain separate requirements; live rooms still use gameplay-v6.
 
 ## Original capture workload — 2026-10-18 — attribution stopped
 

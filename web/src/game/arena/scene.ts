@@ -10,6 +10,18 @@ type Motion = { fromX: number; fromY: number; toX: number; toY: number }
 type PickupDrawing = { kind: RenderablePickupKind; drawing: Graphics }
 const key = (cell: Cell): string => `${cell.column},${cell.row}`
 const unitsToPixels = (units: number): number => units * TILE / 1024
+function renderActor(drawing: ActorDrawing, id: number, effects: boolean, now: number): void {
+  const frame = effects && drawing.moving && (Math.floor(now / 110) + id) % 2 === 1 ? 1 : 0
+  setActorPose(drawing, drawing.direction, frame)
+  drawing.protection.visible = drawing.protected
+  drawing.protection.alpha = effects && drawing.protected ? 0.65 + (Math.floor(now / 120) % 2) * 0.35 : 1
+  drawing.shield.visible = drawing.shielded
+  drawing.shield.alpha = effects && drawing.shielded ? 0.75 + (Math.floor(now / 160) % 2) * 0.25 : 1
+  drawing.goldenFlame.visible = drawing.golden
+  drawing.goldenFlame.alpha = effects && drawing.golden ? 0.7 + (Math.floor(now / 100) % 2) * 0.3 : 1
+  drawing.shortFuse.visible = drawing.shortFused
+  drawing.shortFuse.alpha = effects && drawing.shortFused ? 0.65 + (Math.floor(now / 75) % 2) * 0.35 : 1
+}
 
 export class ArenaScene {
   readonly root = new Container()
@@ -102,14 +114,7 @@ export class ArenaScene {
       flame.frames[1].visible = frame === 1
     }
     for (const [id, actor] of this.actors) {
-      const frame = effects && actor.moving && (Math.floor(now / 110) + id) % 2 === 1 ? 1 : 0
-      setActorPose(actor, actor.direction, frame)
-      actor.protection.visible = actor.protected
-      actor.protection.alpha = effects && actor.protected ? 0.65 + (Math.floor(now / 120) % 2) * 0.35 : 1
-      actor.shield.visible = actor.shielded
-      actor.shield.alpha = effects && actor.shielded ? 0.75 + (Math.floor(now / 160) % 2) * 0.25 : 1
-      actor.goldenFlame.visible = actor.golden
-      actor.goldenFlame.alpha = effects && actor.golden ? 0.7 + (Math.floor(now / 100) % 2) * 0.3 : 1
+      renderActor(actor, id, effects, now)
     }
   }
 
@@ -195,6 +200,7 @@ export class ArenaScene {
       drawing.protected = (actor.damageGraceRemainingTicks ?? 0) > 0
       drawing.shielded = (actor.shieldRemainingTicks ?? 0) > 0
       drawing.golden = (actor.goldenFlameRemainingTicks ?? 0) > 0
+      drawing.shortFused = (actor.shortFuseRemainingTicks ?? 0) > 0
       drawing.moving = Boolean(!reset && previousMotion
         && (previousMotion.toX !== toX || previousMotion.toY !== toY))
       drawing.direction = actor.heading

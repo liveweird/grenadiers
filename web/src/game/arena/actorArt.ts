@@ -9,12 +9,14 @@ export interface ActorDrawing {
   protection: Graphics
   shield: Graphics
   goldenFlame: Graphics
+  shortFuse: Graphics
   poses: Record<Direction, PoseFrames>
   direction: Direction
   moving: boolean
   protected: boolean
   shielded: boolean
   golden: boolean
+  shortFused: boolean
 }
 
 function legs(drawing: Graphics, frame: number, side: boolean): void {
@@ -108,16 +110,21 @@ export function makeActor(seat: Seat): ActorDrawing {
   pixels(goldenFlame, PALETTE.flameLight, [[-3, -31, 6, 7], [0, -35, 2, 6]])
   pixels(goldenFlame, PALETTE.flameCore, [[-1, -29, 3, 5]])
   goldenFlame.visible = false
+  const shortFuse = new Graphics()
+  pixels(shortFuse, PALETTE.deepInk, [[13, -15, 10, 3], [20, -18, 3, 5]])
+  pixels(shortFuse, PALETTE.flame, [[22, -23, 4, 5], [26, -20, 4, 4], [18, -23, 3, 3]])
+  pixels(shortFuse, PALETTE.flameCore, [[23, -21, 3, 3]])
+  shortFuse.visible = false
   const poses = {
     north: [frontOrBack(seat, 'north', 0), frontOrBack(seat, 'north', 1)],
     east: [sidePose(seat, 'east', 0), sidePose(seat, 'east', 1)],
     south: [frontOrBack(seat, 'south', 0), frontOrBack(seat, 'south', 1)],
     west: [sidePose(seat, 'west', 0), sidePose(seat, 'west', 1)],
   } satisfies Record<Direction, PoseFrames>
-  root.addChild(shadow, protection, shield, goldenFlame, ...Object.values(poses).flat())
+  root.addChild(shadow, protection, shield, goldenFlame, shortFuse, ...Object.values(poses).flat())
   const drawing = {
-    root, protection, shield, goldenFlame, poses, direction: 'south' as Direction, moving: false,
-    protected: false, shielded: false, golden: false,
+    root, protection, shield, goldenFlame, shortFuse, poses, direction: 'south' as Direction, moving: false,
+    protected: false, shielded: false, golden: false, shortFused: false,
   }
   setActorPose(drawing, 'south', 0)
   return drawing

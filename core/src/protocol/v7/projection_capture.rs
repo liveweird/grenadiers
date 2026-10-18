@@ -317,6 +317,7 @@ fn wire_pickup(value: game::PickupKind) -> PickupKind {
         game::PickupKind::Heart => PickupKind::Heart,
         game::PickupKind::Shield => PickupKind::Shield,
         game::PickupKind::GoldenFlame => PickupKind::GoldenFlame,
+        game::PickupKind::ShortFuse => PickupKind::ShortFuse,
     }
 }
 fn wire_equipment(value: game::Equipment) -> EquipmentId {

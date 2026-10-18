@@ -187,8 +187,10 @@ fn configurable_rules_reject_the_legacy_lifecycle_profile() {
 
 #[test]
 fn expanded_item_masks_and_disabled_preset_replay_deterministically() {
-    for enabled in
-        [0, 16, 512, 528, 4096, 4112, 4608, 4624].map(|bits| EnabledItems::from_bits(bits).unwrap())
+    for enabled in [
+        0, 16, 512, 528, 4096, 4112, 4608, 4624, 8192, 8208, 8704, 8720, 12288, 12304, 12800, 12816,
+    ]
+    .map(|bits| EnabledItems::from_bits(bits).unwrap())
     {
         let mut runtime = MatchRuntime::new(
             identity_for_profile(RoomProfile::ExpandedV5),

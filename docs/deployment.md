@@ -167,3 +167,22 @@ docker compose -f docker-compose.yaml -f docker-compose.golden-flame.yaml down
 The scenario enables Golden Flame through shared settings, reveals and collects its generated
 pickup, escapes a radius-eight blast, resumes with the same deadline and verifies base range
 after exact expiry. The seed file stays external to the image and must remain read-only.
+
+## Reproduce opt-in Short Fuse timing
+
+Use the paired candidate image with its separate production-seed fixture:
+
+```sh
+chmod 444 core/tests/fixtures/arena-v2-short-fuse.seed
+docker compose -f docker-compose.yaml -f docker-compose.short-fuse.yaml up -d --no-build --force-recreate app
+# Wait for /api/v1/ready to return 200 before running the scenario.
+E2E_SHORT_FUSE_FIXTURE=arena-v2-short-fuse npm --prefix e2e run test:short-fuse
+docker compose -f docker-compose.yaml -f docker-compose.short-fuse.yaml down
+```
+
+The scenario enables only Short Fuse and a five-second base fuse through the actual shared
+settings, reveals and collects the pickup, checks shortened deadlines and detonation on both
+peers, reconnects, and checks expiry followed by ordinary timing. The fixture remains external;
+never bake it into the application image. Equivalent Kubernetes acceptance mounts the same
+mode-0444 seed and runs the scenario through the Service port-forward. Recorded acceptance
+status remains in [verification](verification.md); these reproduction commands do not imply a pass.

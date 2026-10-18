@@ -161,6 +161,8 @@ fn legacy_profiles_reject_enabled_settings_and_opt_in_items_in_every_layer() {
         EnabledItems::GOLDEN_FLAME,
         EnabledItems::HEART_AND_GOLDEN_FLAME,
         EnabledItems::SHIELD_AND_GOLDEN_FLAME,
+        EnabledItems::from_bits(4624).unwrap(),
+        EnabledItems::SHORT_FUSE,
         EnabledItems::ALL,
     ] {
         let settings = RoomSettings::DEFAULT.with_enabled_items(enabled);
@@ -178,6 +180,7 @@ fn legacy_profiles_reject_enabled_settings_and_opt_in_items_in_every_layer() {
         PickupKind::Heart,
         PickupKind::Shield,
         PickupKind::GoldenFlame,
+        PickupKind::ShortFuse,
     ] {
         for layer in 0..3 {
             let cell = CellId::new(8, 5);

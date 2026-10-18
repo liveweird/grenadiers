@@ -9,12 +9,12 @@ claim or revoke the credential needed for a version-8 connection.
 
 V8 adds rules version **5** and map ID **`generated_v2`**. Its own rules/map types leave the
 shared enums and schemas for earlier protocols unchanged. New production rooms are always
-Expanded v5/generator v2. They advertise `availableItems: ["heart", "shield", "goldenFlame"]` and initially enable
-`settings.enabledItems: ["heart"]`. All eight subsets of those three available items are supported configurations.
+Expanded v5/generator v2. They advertise `availableItems: ["heart", "shield", "goldenFlame", "shortFuse"]` and initially enable
+`settings.enabledItems: ["heart"]`. All sixteen subsets of those four available items are supported configurations.
 Other catalog IDs remain unavailable.
 
 The Classic settings preset disables optional items and restores the four ordinary settings.
-It does not change a room's immutable rules/map identity. With both optional items disabled, v2 generation
+It does not change a room's immutable rules/map identity. With all optional items disabled, v2 generation
 reproduces v1 terrain, blocks and concealed upgrades for the same seed. Legacy rules and
 generator v1 continue to reject nonempty masks; archived traces retain their behavior.
 
@@ -63,3 +63,10 @@ tick, or 75 in a three-report publication window, below the existing 96-event li
 Golden Flame adds or refreshes a 600-physical-tick effect. Actor `bombRange` stays the base
 upgrade value; each planted bomb exposes its captured range. Older v8 clients must reload to
 accept the extended availability list; deploy the paired server/browser build together.
+
+Short Fuse adds or refreshes a 600-physical-tick effect. Timed bombs capture the configured
+fuse or its ceiling-half when this item is enabled, even after its owner's effect expires.
+World, placement and detonation projections enforce the captured duration independently of
+current effects. Actual overdue deadlines fail capture before remaining-time conversion;
+an exact-deadline frozen bomb may expose zero remaining ticks. Paused/remote/contact triggers
+remain unavailable. No schema or archived protocol is changed.

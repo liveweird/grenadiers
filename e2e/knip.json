@@ -6,6 +6,7 @@
     "heart-tests/**/*.spec.ts",
     "shield-tests/**/*.spec.ts",
     "golden-flame-tests/**/*.spec.ts",
+    "short-fuse-tests/**/*.spec.ts",
     "controls-tests/**/*.spec.ts",
     "match-tests/**/*.spec.ts",
     "reconnect-tests/**/*.spec.ts",

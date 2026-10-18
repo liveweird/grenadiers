@@ -85,7 +85,7 @@ impl super::Actor {
                 self.inventory
                     .replace_equipment(crate::game::Equipment::Heart);
             }
-            PickupKind::Shield | PickupKind::GoldenFlame => {
+            PickupKind::Shield | PickupKind::GoldenFlame | PickupKind::ShortFuse => {
                 let effect = pickup
                     .kind()
                     .timed_effect()

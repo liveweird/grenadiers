@@ -1,5 +1,29 @@
 # Repository verification
 
+## Short Fuse candidate — 2026-10-18 — native acceptance pending
+
+The v0.3.28 candidate adds opt-in Short Fuse: a refreshable 600-physical-tick effect that
+captures the ceiling-half of the configured fuse for new bombs. Defaults remain Heart-only;
+all 16 supported masks preserve canonical ordering and the eight prior generation paths.
+The new weight is 15. Published v0.3.21 still has no optional pickups.
+
+Independent domain, frontend/protocol and server/browser scenario reviews are clear. Both debug/release profiles pass **442 core tests, 182 server tests
+and two doctests**, with four dedicated performance profiles ignored. Formatting and Clippy
+pass. Rust line coverage is **91.42% (12,172/13,314)**. All **338 web tests** across 39 files pass;
+statement/branch/function/line coverage is **95.08/90.80/95.48/97.54%**. Contracts, lint, Knip,
+production build, both dependency audits and strict Kubernetes schemas 3/3 pass. E2E static
+checks and documented parity pass **30 scenarios**.
+
+Ordinary generated collection, connected replacement, disconnected restore, a shortened bomb
+that outlives effect expiry, a later ordinary-fuse bomb, round reset and exact journal replay
+(including checkpoints while a shortened bomb is live, before and after buff expiry) are exercised by server tests. Projection regressions cover odd half-fuses, effect-independent
+captured timing, invalid/disabled timing and overdue deadlines before remaining-time clamping.
+The first server test compile attempted crate-private effect observation; the final test uses
+public wire state without expanding APIs. The new browser scenario covers captured deadlines,
+actual natural detonation, reconnect and exact expiry. Its native playthrough, screenshots,
+fresh same-image Compose/Kubernetes 30+30 acceptance and final-head CI remain pending.
+
+
 ## Golden Flame candidate — 2026-10-18 — native acceptance pending
 
 The v0.3.27 candidate implements opt-in Golden Flame with a 600-physical-tick refreshable

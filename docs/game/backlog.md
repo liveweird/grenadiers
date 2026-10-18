@@ -5,8 +5,9 @@ The v0.3.19 equipment/effect core foundation is implemented and verified; no req
 items are enabled in the published v0.3.21 rooms. The v0.3.25 Heart candidate now has domain,
 server, browser and pixel-art implementation with local checks and independent reviews clear;
 both debug/release profiles pass and native release acceptance is pending. The v0.3.26 Shield
-candidate adds opt-in timed immunity and independent settings with local checks underway.
-The v0.3.27 candidate is implementing opt-in Golden Flame. The other 19 requested pickups
+candidate adds opt-in timed immunity. The v0.3.27 Golden Flame and v0.3.28 Short Fuse
+candidates also pass local checks; native acceptance and final-head CI remain pending.
+The other 18 requested pickups
 remain unimplemented. Richer transitions and further item artwork remain follow-up
 work. See [pixel-art presentation](pixel-art.md) and [expanded item implementation](expanded-items.md).
 Updated 2026-10-18 after playtest feedback. Release acceptance is recorded in

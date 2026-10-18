@@ -363,6 +363,9 @@ pub(super) const fn wire_pickup_kind(kind: game::PickupKind) -> Option<PickupKin
         game::PickupKind::BombCapacity => Some(PickupKind::BombCapacity),
         game::PickupKind::BlastRange => Some(PickupKind::BlastRange),
         game::PickupKind::MovementSpeed => Some(PickupKind::MovementSpeed),
-        game::PickupKind::Heart | game::PickupKind::Shield | game::PickupKind::GoldenFlame => None,
+        game::PickupKind::Heart
+        | game::PickupKind::Shield
+        | game::PickupKind::GoldenFlame
+        | game::PickupKind::ShortFuse => None,
     }
 }

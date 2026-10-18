@@ -26,7 +26,9 @@
     "test:hardening": "playwright test --config playwright.hardening.config.ts",
     "test:latency": "playwright test --config playwright.latency.config.ts",
     "test:audio": "playwright test --config playwright.audio.config.ts",
-    "test:golden-flame": "playwright test --config playwright.golden-flame.config.ts"
+    "test:golden-flame": "playwright test --config playwright.golden-flame.config.ts",
+    "test:renderer-diagnostics": "playwright test --config playwright.renderer-diagnostics.config.ts",
+    "test:terrain-pixels": "playwright test --config playwright.terrain-pixels.config.ts"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.13.0",

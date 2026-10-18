@@ -24,7 +24,7 @@ export default defineConfig({
     // observes them before application/test redaction, so keep public reports
     // and failure screenshots without persisting credential-bearing traffic.
     trace: 'off',
-    screenshot: 'only-on-failure',
+    screenshot: process.env.E2E_CAPTURE_PROFILE === '1' ? 'off' : 'only-on-failure',
     video: 'off',
   },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],

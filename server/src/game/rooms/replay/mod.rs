@@ -22,3 +22,6 @@ mod shield_tests;
 
 #[cfg(test)]
 mod golden_flame_tests;
+
+#[cfg(test)]
+mod short_fuse_tests;

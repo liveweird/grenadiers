@@ -105,11 +105,11 @@ describe('retained public arena scene', () => {
     expect([
       blocks.children[0], ...pickups.children, bombs.children[0], flames.children[0], ...actors.children,
     ]).toEqual(retained)
-    expect(actors.children.map((actor) => actor.children.length)).toEqual([12, 12])
+    expect(actors.children.map((actor) => actor.children.length)).toEqual([13, 13])
     expect(actors.children[0].children.map(({ visible }) => visible))
-      .toEqual([true, false, false, false, false, false, true, false, false, false, false, false])
+      .toEqual([true, false, false, false, false, false, false, true, false, false, false, false, false])
     expect(actors.children[1].children.map(({ visible }) => visible))
-      .toEqual([true, false, false, false, false, false, false, false, false, false, true, false])
+      .toEqual([true, false, false, false, false, false, false, false, false, false, false, true, false])
   })
 
   it('interpolates only between public positions and never extrapolates past the target', () => {
@@ -124,7 +124,7 @@ describe('retained public arena scene', () => {
     scene.render(125)
     expect(actor.x).toBe(96)
     expect(actor.children.map(({ visible }) => visible))
-      .toEqual([true, false, false, false, false, false, false, true, false, false, false, false])
+      .toEqual([true, false, false, false, false, false, false, false, true, false, false, false, false])
     scene.render(150)
     expect(actor.x).toBe(120)
     scene.render(100_000)
@@ -134,7 +134,7 @@ describe('retained public arena scene', () => {
     scene.update(snapshot, 200)
     scene.render(325)
     expect(actor.children.map(({ visible }) => visible))
-      .toEqual([true, false, false, false, false, false, true, false, false, false, false, false])
+      .toEqual([true, false, false, false, false, false, false, true, false, false, false, false, false])
   })
 
   it('keeps a selected frame stable when another moving snapshot arrives in that frame', () => {
@@ -230,7 +230,7 @@ describe('arena scene transitions and optional-item presentation', () => {
     expect(layers(scene)[2].children[0]).not.toBe(oldPickup)
     expect(layers(scene)[5].children[0]).toMatchObject({ x: 72, y: 120 })
     expect(layers(scene)[5].children[0].children.map(({ visible }) => visible))
-      .toEqual([true, false, false, false, true, false, false, false, false, false, false, false])
+      .toEqual([true, false, false, false, false, true, false, false, false, false, false, false, false])
   })
 
   it('deletes hidden actor motion and snaps a later reveal to its current position', () => {
@@ -308,6 +308,27 @@ describe('arena scene transitions and optional-item presentation', () => {
       .toMatchObject([{ alpha: 1 }, { alpha: 1 }, { alpha: 1 }])
     snapshot.room.presentationBaseline = 'resumed-with-golden-flame'; scene.update(snapshot, 600)
     expect(actors.children[0].children[3]).toMatchObject({ visible: true, alpha: 1 })
+  })
+
+  it('draws a distinct Short Fuse spark that coexists and stays static after reconnect', () => {
+    const scene = new ArenaScene(1)
+    const snapshot = gameSnapshot()
+    snapshot.state.pickups = [{ cell: { column: 2, row: 2 }, kind: 'shortFuse' }]
+    snapshot.state.actors[0].damageGraceRemainingTicks = 60
+    snapshot.state.actors[0].shieldRemainingTicks = 300
+    snapshot.state.actors[0].goldenFlameRemainingTicks = 600
+    snapshot.state.actors[0].shortFuseRemainingTicks = 600
+    scene.update(snapshot, 0); const [, , pickups, , , actors] = layers(scene)
+    expect(pickups.children[0].shapes).toHaveLength(21)
+    expect(actors.children[0].children.slice(1, 5)).toMatchObject([
+      { visible: true }, { visible: true }, { visible: true }, { visible: true, alpha: 0.65 },
+    ])
+
+    scene.setReducedMotion(true); scene.render(500)
+    expect(actors.children[0].children.slice(1, 5))
+      .toMatchObject([{ alpha: 1 }, { alpha: 1 }, { alpha: 1 }, { alpha: 1 }])
+    snapshot.room.presentationBaseline = 'resumed-with-short-fuse'; scene.update(snapshot, 600)
+    expect(actors.children[0].children[4]).toMatchObject({ visible: true, alpha: 1 })
   })
 
   it('resets retained state idempotently and snaps the same identity to a fresh baseline', () => {

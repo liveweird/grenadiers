@@ -13,6 +13,7 @@ pub enum PickupKind {
     Heart,
     Shield,
     GoldenFlame,
+    ShortFuse,
 }
 
 impl PickupKind {
@@ -21,6 +22,7 @@ impl PickupKind {
             Self::Heart => enabled.contains_heart(),
             Self::Shield => enabled.contains_shield(),
             Self::GoldenFlame => enabled.contains_golden_flame(),
+            Self::ShortFuse => enabled.contains_short_fuse(),
             _ => true,
         }
     }
@@ -29,6 +31,7 @@ impl PickupKind {
         match self {
             Self::Shield => Some(super::EffectKind::Shield),
             Self::GoldenFlame => Some(super::EffectKind::GoldenFlame),
+            Self::ShortFuse => Some(super::EffectKind::ShortFuse),
             _ => None,
         }
     }

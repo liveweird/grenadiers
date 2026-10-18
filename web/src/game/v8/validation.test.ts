@@ -30,10 +30,18 @@ describe('gameplay v8 validation and active profile', () => {
     [['heart']],
     [['shield']],
     [['goldenFlame']],
+    [['shortFuse']],
     [['heart', 'shield']],
     [['heart', 'goldenFlame']],
+    [['heart', 'shortFuse']],
     [['shield', 'goldenFlame']],
+    [['shield', 'shortFuse']],
+    [['goldenFlame', 'shortFuse']],
     [['heart', 'shield', 'goldenFlame']],
+    [['heart', 'shield', 'shortFuse']],
+    [['heart', 'goldenFlame', 'shortFuse']],
+    [['shield', 'goldenFlame', 'shortFuse']],
+    [['heart', 'shield', 'goldenFlame', 'shortFuse']],
   ] as const)(
     'accepts the supported enabled-item set %j', (enabledItems) => {
       const message = snapshot(2)
@@ -81,6 +89,28 @@ describe('gameplay v8 validation and active profile', () => {
       expect(validateGameplayV8ServerMessage(message)).toEqual({ valid: true, value: message })
     },
   )
+
+  it.each([1, 600])(
+    'accepts Short Fuse collection and effect at %s ticks alongside other timed effects', (remainingTicks) => {
+      const message = snapshot(3)
+      message.room.settings.enabledItems = ['shield', 'goldenFlame', 'shortFuse']
+      const actor = message.state.actors[0]
+      if (actor.type !== 'visible') throw new Error('expected visible actor')
+      actor.effects = [
+        { kind: 'shield', remainingTicks: 300 },
+        { kind: 'goldenFlame', remainingTicks: 600 },
+        { kind: 'shortFuse', remainingTicks },
+      ]
+      message.state.pickups = [{ cell: { column: 2, row: 2 }, kind: 'shortFuse' }]
+      message.events = [{
+        tick: 1, index: 0, kind: {
+          type: 'pickupCollected', id: actor.id, seat: actor.seat,
+          cell: { column: 2, row: 2 }, kind: 'shortFuse',
+        },
+      }]
+      expect(validateGameplayV8ServerMessage(message)).toEqual({ valid: true, value: message })
+    },
+  )
 })
 
 describe('gameplay v8 expanded-profile rejection', () => {
@@ -116,6 +146,17 @@ describe('gameplay v8 expanded-profile rejection', () => {
         },
       }]
     }],
+    ['disabled Short Fuse pickup', (message: ReturnType<typeof snapshot>) => {
+      message.state.pickups = [{ cell: { column: 2, row: 2 }, kind: 'shortFuse' }]
+    }],
+    ['disabled Short Fuse collection', (message: ReturnType<typeof snapshot>) => {
+      message.events = [{
+        tick: 1, index: 0, kind: {
+          type: 'pickupCollected', id: 1, seat: 'one',
+          cell: { column: 2, row: 2 }, kind: 'shortFuse',
+        },
+      }]
+    }],
     ['future equipment', (message: ReturnType<typeof snapshot>) => {
       const actor = message.state.actors[0]
       if (actor.type === 'visible') actor.inventory.equipment = 'kick'
@@ -135,6 +176,10 @@ describe('gameplay v8 expanded-profile rejection', () => {
     ['Golden Flame effect while disabled', (message: ReturnType<typeof snapshot>) => {
       const actor = message.state.actors[0]
       if (actor.type === 'visible') actor.effects = [{ kind: 'goldenFlame', remainingTicks: 1 }]
+    }],
+    ['Short Fuse effect while disabled', (message: ReturnType<typeof snapshot>) => {
+      const actor = message.state.actors[0]
+      if (actor.type === 'visible') actor.effects = [{ kind: 'shortFuse', remainingTicks: 1 }]
     }],
     ['disabled Heart grace', (message: ReturnType<typeof snapshot>) => {
       message.room.settings.enabledItems = []
@@ -187,6 +232,29 @@ describe('gameplay v8 expanded-profile rejection', () => {
     actor.effects = [
       { kind: 'goldenFlame', remainingTicks: 600 },
       { kind: 'goldenFlame', remainingTicks: 1 },
+    ]
+    expect(validateGameplayV8ServerMessage(message)).toMatchObject({
+      valid: false, source: 'semantics', error: 'duplicateEffect',
+    })
+  })
+
+  it.each([0, 601])('rejects Short Fuse effect duration %s during structural validation', (remainingTicks) => {
+    const message = snapshot(4)
+    message.room.settings.enabledItems = ['shortFuse']
+    const actor = message.state.actors[0]
+    if (actor.type !== 'visible') throw new Error('expected visible actor')
+    actor.effects = [{ kind: 'shortFuse', remainingTicks }]
+    expect(validateGameplayV8ServerMessage(message)).toMatchObject({ valid: false, source: 'schema' })
+  })
+
+  it('rejects duplicate Short Fuse effects semantically', () => {
+    const message = snapshot(4)
+    message.room.settings.enabledItems = ['shortFuse']
+    const actor = message.state.actors[0]
+    if (actor.type !== 'visible') throw new Error('expected visible actor')
+    actor.effects = [
+      { kind: 'shortFuse', remainingTicks: 600 },
+      { kind: 'shortFuse', remainingTicks: 1 },
     ]
     expect(validateGameplayV8ServerMessage(message)).toMatchObject({
       valid: false, source: 'semantics', error: 'duplicateEffect',

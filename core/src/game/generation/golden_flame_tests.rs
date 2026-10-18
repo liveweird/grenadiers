@@ -48,7 +48,7 @@ fn golden_flame_weight_is_appended_after_every_preexisting_item() {
             ],
         ),
         (
-            EnabledItems::ALL,
+            EnabledItems::from_bits(4624).unwrap(),
             vec![
                 (99, PickupKind::MovementSpeed),
                 (100, PickupKind::Heart),
@@ -75,7 +75,7 @@ fn golden_enabled_generation_is_seeded_and_places_only_enabled_special_items() {
         EnabledItems::GOLDEN_FLAME,
         EnabledItems::HEART_AND_GOLDEN_FLAME,
         EnabledItems::SHIELD_AND_GOLDEN_FLAME,
-        EnabledItems::ALL,
+        EnabledItems::from_bits(4624).unwrap(),
     ] {
         let first = generate_expanded_arena([0; 32], enabled);
         let second = generate_expanded_arena([0; 32], enabled);
@@ -84,6 +84,7 @@ fn golden_enabled_generation_is_seeded_and_places_only_enabled_special_items() {
             PickupKind::Heart => enabled.contains_heart(),
             PickupKind::Shield => enabled.contains_shield(),
             PickupKind::GoldenFlame => enabled.contains_golden_flame(),
+            PickupKind::ShortFuse => enabled.contains_short_fuse(),
             _ => true,
         }));
     }
@@ -133,6 +134,7 @@ fn signature(generated: &GeneratedArena) -> String {
                 Some(PickupKind::Heart) => 'H',
                 Some(PickupKind::Shield) => 'D',
                 Some(PickupKind::GoldenFlame) => 'G',
+                Some(PickupKind::ShortFuse) => 'F',
                 None if generated.arena().blocks().contains(&cell) => '#',
                 None if generated.arena().terrain(cell) == Some(Terrain::Wall) => 'X',
                 None => '.',

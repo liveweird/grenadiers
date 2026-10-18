@@ -311,7 +311,7 @@ fn v8_binding_allows_positive_remaining_fuse_for_chain_detonation() {
 }
 
 #[test]
-fn v8_binding_rejects_overdue_frozen_bombs_and_accepts_the_deadline() {
+fn v8_capture_and_binding_reject_overdue_frozen_bombs_and_accept_the_deadline() {
     let mut finished = classic_state_at(180);
     for seat in crate::game::SeatId::ALL {
         let cell = finished.actors()[seat.index()].position().cell().unwrap();
@@ -345,11 +345,9 @@ fn v8_binding_rejects_overdue_frozen_bombs_and_accepts_the_deadline() {
             crate::game::Tick(placed_at + 180),
         )
         .unwrap();
-        let capture = capture_expanded(&state, &[]).unwrap();
-        assert_eq!(
-            bind_expanded(&room, room.round_id, &capture, None).is_ok(),
-            expected
-        );
+        let publication = capture_expanded(&state, &[])
+            .and_then(|capture| bind_expanded(&room, room.round_id, &capture, None));
+        assert_eq!(publication.is_ok(), expected);
     }
 }
 
@@ -358,3 +356,6 @@ mod shield_tests;
 
 #[path = "golden_flame_tests.rs"]
 mod golden_flame_tests;
+
+#[path = "short_fuse_tests.rs"]
+mod short_fuse_tests;

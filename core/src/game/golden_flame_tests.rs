@@ -40,7 +40,9 @@ fn actor(id: u32, seat: SeatId, cell: CellId) -> ActorInit {
 
 fn state_with(world: World, tick: Tick, one: CellId) -> State {
     State::new_at_tick(
-        RulesConfig::expanded_v5(RoomSettings::DEFAULT.with_enabled_items(EnabledItems::ALL)),
+        RulesConfig::expanded_v5(
+            RoomSettings::DEFAULT.with_enabled_items(EnabledItems::from_bits(4624).unwrap()),
+        ),
         world,
         [
             actor(10, SeatId::One, one),

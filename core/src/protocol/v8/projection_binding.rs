@@ -61,18 +61,21 @@ pub(super) fn validate_expanded_room(room: &RoomView) -> Result<(), ProjectionEr
 fn canonical_gameplay(version: RulesVersion, capture: &ExpandedCapture, fuse_ticks: u64) -> bool {
     let world = &capture.world.0;
     let classic = version != RulesVersion::ExpandedV5;
-    world.bombs.iter().all(|bomb| {
-        bomb.blast == BlastKind::Standard && timed_fuse_at(world.physical_tick, *bomb, fuse_ticks)
-    }) && (!classic
-        || (world.actors.iter().all(|actor| {
-            actor.inventory.equipment.is_none()
-                && actor.inventory.weapon.is_none()
-                && actor.effects.as_slice().is_empty()
-                && actor.damage_grace_remaining_ticks.get() == 0
-        }) && world
-            .pickups
-            .iter()
-            .all(|pickup| classic_pickup(pickup.kind))))
+    let short_fuse = !classic && world.enabled_items.contains(ItemId::ShortFuse);
+    world
+        .bombs
+        .iter()
+        .all(|bomb| canonical_bomb(world.physical_tick, *bomb, fuse_ticks, short_fuse))
+        && (!classic
+            || (world.actors.iter().all(|actor| {
+                actor.inventory.equipment.is_none()
+                    && actor.inventory.weapon.is_none()
+                    && actor.effects.as_slice().is_empty()
+                    && actor.damage_grace_remaining_ticks.get() == 0
+            }) && world
+                .pickups
+                .iter()
+                .all(|pickup| classic_pickup(pickup.kind))))
         && capture
             .reports
             .0
@@ -82,18 +85,27 @@ fn canonical_gameplay(version: RulesVersion, capture: &ExpandedCapture, fuse_tic
                 (!classic || event.audience == crate::game::EventAudience::Both)
                     && match event.kind {
                         EventKind::BombPlaced { bomb } => {
-                            bomb.blast == BlastKind::Standard
-                                && timed_fuse_at(event.tick, bomb, fuse_ticks)
+                            canonical_bomb(event.tick, bomb, fuse_ticks, short_fuse)
                         }
                         EventKind::BombDetonated { bomb } => {
-                            bomb.blast == BlastKind::Standard
-                                && timed_fuse_at(event.tick, bomb, fuse_ticks)
+                            canonical_bomb(event.tick, bomb, fuse_ticks, short_fuse)
                         }
                         EventKind::PickupCollected { kind, .. } => !classic || classic_pickup(kind),
                         EventKind::DamagePrevented { .. } => !classic,
                         EventKind::ActorEliminated { .. } | EventKind::RoundEnded { .. } => true,
                     }
             })
+}
+
+fn canonical_bomb(
+    at: crate::protocol::Tick,
+    bomb: super::BombView,
+    base_fuse: u64,
+    short_fuse: bool,
+) -> bool {
+    bomb.blast == BlastKind::Standard
+        && (timed_fuse_at(at, bomb, base_fuse)
+            || (short_fuse && timed_fuse_at(at, bomb, base_fuse.div_ceil(2).max(1))))
 }
 
 fn timed_fuse_at(at: crate::protocol::Tick, bomb: super::BombView, fuse_ticks: u64) -> bool {
@@ -166,8 +178,13 @@ pub(super) fn phase_allows_null_body(phase: &RoomPhase) -> bool {
 }
 
 pub(super) fn expanded_items() -> ItemSet {
-    ItemSet::new([ItemId::Heart, ItemId::Shield, ItemId::GoldenFlame])
-        .expect("expanded items are canonical")
+    ItemSet::new([
+        ItemId::Heart,
+        ItemId::Shield,
+        ItemId::GoldenFlame,
+        ItemId::ShortFuse,
+    ])
+    .expect("expanded items are canonical")
 }
 
 pub(super) fn available_items(version: RulesVersion) -> ItemSet {

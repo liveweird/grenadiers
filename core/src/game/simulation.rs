@@ -192,8 +192,6 @@ impl State {
         Self::new_at_tick(rules, world, actors, Tick(0))
     }
 
-    /// Creates a round at an existing absolute room tick.
-    /// The round-local running update count always starts at zero.
     pub fn new_at_tick(
         rules: RulesConfig,
         world: World,
@@ -203,7 +201,6 @@ impl State {
         Self::new_at_tick_with_assignment(rules, world, actors, tick, RoundAssignment::first())
     }
 
-    /// Creates a round at an absolute room tick with explicit parity-based roles.
     pub fn new_at_tick_with_assignment(
         rules: RulesConfig,
         world: World,
@@ -384,6 +381,9 @@ mod projection_tests;
 #[cfg(test)]
 #[path = "round_result_tests.rs"]
 mod round_result_tests;
+#[cfg(test)]
+#[path = "short_fuse_tests.rs"]
+mod short_fuse_tests;
 #[path = "simulation_step.rs"]
 mod step;
 #[cfg(test)]

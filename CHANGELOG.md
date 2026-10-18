@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.28 — 2026-10-18
+
+- Add opt-in Short Fuse pickups: ten seconds of refreshable half-length fuses for newly
+  planted bombs, independent of other effects and preserving every captured bomb schedule.
+- Validate only ordinary or enabled short schedules, rejecting overdue frozen bombs before
+  zero-remaining observations can alias another duration; retain archived contracts and defaults.
+
 ## 0.3.27 — 2026-10-18
 
 - Add opt-in Golden Flame pickups: ten seconds of refreshable maximum blast range for newly

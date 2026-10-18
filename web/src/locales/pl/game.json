@@ -47,6 +47,7 @@
     "weapon": "Rodzaj bomby",
     "effects": "Efekty",
     "damageGrace": "Ochrona przed obrażeniami",
+    "protected": "Ochrona przed obrażeniami jest aktywna",
     "none": "Brak",
     "effectTimer": "{{item}} ({{time}})"
   },
@@ -105,8 +106,10 @@
     "tile": "pola",
     "seconds": "sekundy",
     "speedCap": "Premie prędkości dodają po jednym poziomie, maksymalnie do 5 pól/s.",
+    "heartDescription": "Chroni przed jednym śmiertelnym wybuchem, a potem na krótko przed obrażeniami.",
     "unapplied": "Zastosuj te zmiany przed zgłoszeniem gotowości.",
     "restore": "Przywróć domyślne zasady",
+    "classic": "Ustawienia klasyczne",
     "apply": "Zastosuj zasady",
     "editor": "{{player}} może edytować przed zgłoszeniem gotowości.",
     "noEditor": "Brak gracza",

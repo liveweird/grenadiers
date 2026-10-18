@@ -49,7 +49,7 @@ async fn connect(url: &str, token: &str) -> ClientSocket {
     send(
         &mut socket,
         json!({
-            "type":"authenticate", "protocolVersion":7, "token":token
+            "type":"authenticate", "protocolVersion":8, "token":token
         }),
     )
     .await;
@@ -96,17 +96,17 @@ async fn two_members_receive_personalized_admission_and_live_waiting_updates() {
     assert!(created["room"]["lastRound"].is_null());
     assert_eq!(created["room"]["phase"]["type"], "waiting");
     assert_eq!(created["room"]["seats"][0]["occupied"], true);
-    assert_eq!(created["room"]["rulesVersion"], 4);
+    assert_eq!(created["room"]["rulesVersion"], 5);
     assert_eq!(created["room"]["settingsRevision"], 1);
     assert_eq!(created["room"]["settingsEditor"], "one");
     assert_eq!(
         created["room"]["settings"],
         json!({
             "startingSpeedLevel":0, "turnAssistUnits":256,
-            "winsToFinish":3, "bombFuseTicks":180, "enabledItems":[]
+            "winsToFinish":3, "bombFuseTicks":180, "enabledItems":["heart"]
         })
     );
-    assert_eq!(created["room"]["availableItems"], json!([]));
+    assert_eq!(created["room"]["availableItems"], json!(["heart"]));
     let code = created["room"]["roomCode"].clone();
     let room_id = created["room"]["roomId"].clone();
 

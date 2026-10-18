@@ -186,7 +186,7 @@ test('game control diagnostics stay bounded and exclude transport secrets', asyn
   const socketUrl = `wss://example.invalid/game/ws?token=${credential}`
 
   recorder.recordSent(socket, JSON.stringify({
-    type: 'authenticate', protocolVersion: 7, token: credential, socketUrl,
+    type: 'authenticate', protocolVersion: 8, token: credential, socketUrl,
   }))
   for (let sequence = 1; sequence <= 300; sequence += 1) {
     recorder.recordSent(socket, JSON.stringify({

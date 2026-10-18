@@ -180,7 +180,8 @@ fn legacy_room(room: &RoomView) -> Result<crate::protocol::v6::RoomView, Project
     )
     .map_err(|_| ProjectionError::InvalidClassicBinding)?;
     Ok(crate::protocol::v6::RoomView {
-        settings: crate::protocol::v6::GameSettings::from_domain(domain_settings),
+        settings: crate::protocol::v6::GameSettings::from_domain(domain_settings)
+            .map_err(|_| ProjectionError::InvalidClassicBinding)?,
         settings_revision: room.settings_revision,
         settings_editor: room.settings_editor,
         room_id: room.room_id.clone(),

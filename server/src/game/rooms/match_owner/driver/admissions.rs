@@ -1,6 +1,6 @@
 use grenadiers_core::{
     game::SeatId,
-    protocol::{Counter, RoomId, v7::ResumeToken},
+    protocol::{Counter, RoomId, v8::ResumeToken},
 };
 use tokio::sync::oneshot;
 
@@ -187,10 +187,11 @@ fn admission_frame(
     if FAIL_NEXT_ADMISSION_ENCODING.with(|fail| fail.replace(false)) {
         return Err(MatchRuntimeError::Publication);
     }
-    grenadiers_core::protocol::v7::prepare_classic_admission(
+    grenadiers_core::protocol::v8::prepare_expanded_admission(
         &prepared.room,
         prepared.state_epoch,
         prepared.capture.as_ref(),
+        prepared.generation,
         wire_seat(seat),
         prepared.last_bomb_action_id,
         sequence,

@@ -1,7 +1,7 @@
 use grenadiers_core::{
     game::StepReport,
-    protocol::v7::{
-        RoomMetadata, RoomView, capture_classic, prepare_snapshot_pair, project_classic_room,
+    protocol::v8::{
+        RoomMetadata, RoomView, capture_expanded, prepare_snapshot_pair, project_expanded_room,
     },
     room::MatchLifecycle,
 };
@@ -12,7 +12,7 @@ use super::{
     SeatFrames,
     runtime::{MatchNotice, SimRound},
 };
-use grenadiers_core::protocol::v7::RoomPhase;
+use grenadiers_core::protocol::v8::RoomPhase;
 
 pub(super) fn room_view(
     identity: &RoomIdentity,
@@ -23,7 +23,7 @@ pub(super) fn room_view(
 ) -> Result<RoomView, MatchRuntimeError> {
     let revision = grenadiers_core::protocol::Counter::new(revision)
         .map_err(|_| MatchRuntimeError::CapacityReached)?;
-    project_classic_room(
+    project_expanded_room(
         RoomMetadata {
             settings: wire_settings(lifecycle.settings())?,
             settings_revision: grenadiers_core::protocol::Counter::new(settings_revision)
@@ -70,9 +70,8 @@ pub(super) fn snapshot(
         super::super::profile::RoomProfile::FixedClassicV1 => sim.generation_record.is_none(),
         super::super::profile::RoomProfile::GeneratedClassicV2
         | super::super::profile::RoomProfile::GeneratedClassicV3
-        | super::super::profile::RoomProfile::GeneratedConfigurableV4 => {
-            sim.generation_record.is_some()
-        }
+        | super::super::profile::RoomProfile::GeneratedConfigurableV4
+        | super::super::profile::RoomProfile::ExpandedV5 => sim.generation_record.is_some(),
     };
     if !generation_record_matches {
         return Err(MatchRuntimeError::Publication);
@@ -88,13 +87,14 @@ pub(super) fn snapshot(
         return Err(MatchRuntimeError::Publication);
     }
     let capture =
-        capture_classic(&sim.state, reports).map_err(|_| MatchRuntimeError::Publication)?;
+        capture_expanded(&sim.state, reports).map_err(|_| MatchRuntimeError::Publication)?;
     let epoch = grenadiers_core::protocol::Counter::new(
         u32::try_from(sim.epoch).map_err(|_| MatchRuntimeError::CapacityReached)?,
     )
     .map_err(|_| MatchRuntimeError::CapacityReached)?;
-    let bound = grenadiers_core::protocol::v7::bind_classic(&room, epoch, &capture)
-        .map_err(|_| MatchRuntimeError::Publication)?;
+    let bound =
+        grenadiers_core::protocol::v8::bind_expanded(&room, epoch, &capture, sim.generation_record)
+            .map_err(|_| MatchRuntimeError::Publication)?;
     let encoded = prepare_snapshot_pair(&bound).map_err(|_| MatchRuntimeError::Publication)?;
     Ok(MatchNotice {
         room,
@@ -104,13 +104,16 @@ pub(super) fn snapshot(
 
 fn wire_settings(
     settings: grenadiers_core::room::RoomSettings,
-) -> Result<grenadiers_core::protocol::v7::GameSettings, MatchRuntimeError> {
-    grenadiers_core::protocol::v7::GameSettings::new(
+) -> Result<grenadiers_core::protocol::v8::GameSettings, MatchRuntimeError> {
+    grenadiers_core::protocol::v8::GameSettings::new(
         speed_level(settings.starting_speed()),
         settings.turn_assist_units(),
         settings.wins_to_finish(),
         u16::try_from(settings.bomb_fuse_ticks()).map_err(|_| MatchRuntimeError::Publication)?,
-        grenadiers_core::protocol::v7::ItemSet::empty(),
+        grenadiers_core::protocol::v8::ItemSet::from_mask(
+            grenadiers_core::protocol::v8::ItemMask::new(settings.enabled_items().bits())
+                .map_err(|_| MatchRuntimeError::Publication)?,
+        ),
     )
     .map_err(|_| MatchRuntimeError::Publication)
 }

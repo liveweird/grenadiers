@@ -1,5 +1,5 @@
 use grenadiers_core::{
-    game::{SeatId, SpeedLevel},
+    game::{EnabledItems, SeatId, SpeedLevel},
     room::{DepartureReason, MatchPhase, RoomSettings},
 };
 
@@ -10,7 +10,10 @@ use super::{
 };
 use crate::{
     game::rooms::{
-        match_runtime::{MatchAction, MatchRuntime},
+        match_runtime::{
+            MatchAction, MatchRuntime, absorb_generated_heart, collect_generated_heart,
+            expanded_heart_runtime, start_expanded_heart_round, wait_clear,
+        },
         profile::RoomProfile,
     },
     round_seed::RoundSeedSource,
@@ -179,5 +182,110 @@ fn configurable_rules_reject_the_legacy_lifecycle_profile() {
     assert_eq!(
         replay(&Journal::new(header)),
         Err(ReplayError::UnsupportedLifecycle)
+    );
+}
+
+#[test]
+fn expanded_heart_mask_and_disabled_preset_replay_deterministically() {
+    for enabled in [EnabledItems::HEART, EnabledItems::EMPTY] {
+        let mut runtime = MatchRuntime::new(
+            identity_for_profile(RoomProfile::ExpandedV5),
+            RoundSeedSource::with_entropy(|bytes| {
+                bytes.fill(3);
+                Ok(())
+            }),
+        );
+        runtime.initial_notice().unwrap();
+        runtime.occupy(SeatId::One).unwrap();
+        runtime.occupy(SeatId::Two).unwrap();
+        if enabled == EnabledItems::EMPTY {
+            runtime
+                .action(
+                    SeatId::One,
+                    1,
+                    MatchAction::UpdateSettings {
+                        settings_revision: 1,
+                        settings: RoomSettings::DEFAULT,
+                    },
+                )
+                .unwrap();
+        }
+        for seat in SeatId::ALL {
+            runtime
+                .action(
+                    seat,
+                    1,
+                    MatchAction::ReadyChecked {
+                        ready: true,
+                        settings_revision: if enabled == EnabledItems::EMPTY { 2 } else { 1 },
+                    },
+                )
+                .unwrap();
+        }
+        while runtime.lifecycle().phase() != MatchPhase::Running {
+            runtime.tick().unwrap();
+        }
+        let journal = runtime.replay_journal();
+        assert_eq!(journal.header.format_version, 2);
+        assert_eq!(journal.header.rules_version, 5);
+        assert_eq!(journal.header.generator_version, 2);
+        assert_eq!(runtime.lifecycle().settings().enabled_items(), enabled);
+        assert_eq!(replay(journal).unwrap(), runtime.replay_inspection());
+    }
+}
+
+#[test]
+fn generated_heart_collection_absorption_and_later_elimination_replay_exactly() {
+    let mut runtime = expanded_heart_runtime();
+    start_expanded_heart_round(&mut runtime);
+    collect_generated_heart(&mut runtime);
+    absorb_generated_heart(&mut runtime);
+    wait_clear(&mut runtime);
+
+    runtime
+        .action(SeatId::One, 1, MatchAction::Bomb(3))
+        .unwrap();
+    while runtime.sim().unwrap().state.actors()[0].alive() {
+        runtime.tick().unwrap();
+    }
+
+    assert_eq!(
+        replay(runtime.replay_journal()).unwrap(),
+        runtime.replay_inspection()
+    );
+}
+
+#[test]
+fn replay_rejects_crossed_legacy_and_expanded_identity_tuples() {
+    let mut expanded_as_legacy = Header::expanded_v5();
+    expanded_as_legacy.format_version = 1;
+    assert_eq!(
+        replay(&Journal::new(expanded_as_legacy)),
+        Err(ReplayError::UnsupportedRules)
+    );
+
+    let mut legacy_with_items = Header::configurable_v4();
+    legacy_with_items.initial_settings =
+        RoomSettings::DEFAULT.with_enabled_items(EnabledItems::HEART);
+    assert_eq!(
+        replay(&Journal::new(legacy_with_items)),
+        Err(ReplayError::UnsupportedRules)
+    );
+
+    let mut legacy_update_with_items = Journal::new(Header::configurable_v4());
+    legacy_update_with_items.record(
+        grenadiers_core::game::Tick(0),
+        Operation::Action {
+            seat: SeatId::One,
+            epoch: 1,
+            action: ReplayAction::UpdateSettings {
+                settings_revision: 1,
+                settings: RoomSettings::DEFAULT.with_enabled_items(EnabledItems::HEART),
+            },
+        },
+    );
+    assert_eq!(
+        replay(&legacy_update_with_items),
+        Err(ReplayError::InvalidActionProfile)
     );
 }

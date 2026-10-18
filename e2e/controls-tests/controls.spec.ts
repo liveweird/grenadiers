@@ -1,3 +1,4 @@
+import { selectClassicSettings } from '../tests/support/settings'
 import AxeBuilder from '@axe-core/playwright'
 import { expect, test, type Page } from '@playwright/test'
 import { visibleActor, latestSnapshot, observeGame, type ObservedGame } from '../tests/support/duel'
@@ -46,6 +47,7 @@ test('custom controls persist and drive only their assigned native keys', async 
     await two.getByRole('button', { name: 'Gotowe', exact: true }).click()
 
     await one.getByRole('button', { name: 'Create room', exact: true }).click()
+    await selectClassicSettings(one, games[0])
     const invitation = one.getByLabel('Room invitation code', { exact: true })
     await expect(invitation).toHaveText(/^[A-HJ-NP-Z2-9]{8}$/)
     await two.getByRole('textbox', { name: 'Kod pokoju', exact: true }).fill(await invitation.innerText())

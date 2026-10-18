@@ -1,3 +1,4 @@
+import { selectClassicSettings } from './support/settings'
 import { expect, test } from '@playwright/test'
 import { visibleActor, latestSnapshot, observeGame } from './support/duel'
 
@@ -8,6 +9,7 @@ test('native keyboard turns recover from a wall stop outside the legacy alignmen
     const games = [observeGame(one), observeGame(two)]
     await Promise.all([one, two].map((page) => page.goto('/')))
     await one.getByRole('button', { name: 'Create room', exact: true }).click()
+    await selectClassicSettings(one, games[0])
     const invitation = one.getByLabel('Room invitation code', { exact: true })
     await expect(invitation).toHaveText(/^[A-HJ-NP-Z2-9]{8}$/)
     await two.getByRole('textbox', { name: 'Room code', exact: true }).fill(await invitation.innerText())
@@ -15,7 +17,7 @@ test('native keyboard turns recover from a wall stop outside the legacy alignmen
     await one.getByRole('button', { name: 'Ready', exact: true }).click()
     await two.getByRole('button', { name: 'Ready', exact: true }).click()
     await expect.poll(() => latestSnapshot(games[0])?.room.phase.type).toBe('running')
-    expect(latestSnapshot(games[0])!.room.rulesVersion).toBe(4)
+    expect(latestSnapshot(games[0])!.room.rulesVersion).toBe(5)
 
     const actor = (index: number) => visibleActor(latestSnapshot(games[index]), 'one')
     await one.getByRole('region', { name: 'Grenadiers courtyard' }).click()

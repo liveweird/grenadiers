@@ -6,9 +6,11 @@ import { pixels } from './pixel'
 type PoseFrames = readonly [Graphics, Graphics]
 export interface ActorDrawing {
   root: Container
+  protection: Graphics
   poses: Record<Direction, PoseFrames>
   direction: Direction
   moving: boolean
+  protected: boolean
 }
 
 function legs(drawing: Graphics, frame: number, side: boolean): void {
@@ -77,14 +79,21 @@ export function makeActor(seat: Seat): ActorDrawing {
   const shadow = new Graphics()
   pixels(shadow, PALETTE.deepInk, [[-13, 15, 26, 4], [-9, 19, 18, 2]])
   shadow.alpha = 0.3
+  const protection = new Graphics()
+  pixels(protection, PALETTE.blueLight, [
+    [-18, -24, 10, 3], [-21, -21, 3, 10], [8, -24, 10, 3], [18, -21, 3, 10],
+    [-21, 11, 3, 10], [-18, 21, 10, 3], [18, 11, 3, 10], [8, 21, 10, 3],
+  ])
+  pixels(protection, PALETTE.white, [[-18, -21, 3, 5], [15, -21, 3, 5], [-18, 16, 3, 5], [15, 16, 3, 5]])
+  protection.visible = false
   const poses = {
     north: [frontOrBack(seat, 'north', 0), frontOrBack(seat, 'north', 1)],
     east: [sidePose(seat, 'east', 0), sidePose(seat, 'east', 1)],
     south: [frontOrBack(seat, 'south', 0), frontOrBack(seat, 'south', 1)],
     west: [sidePose(seat, 'west', 0), sidePose(seat, 'west', 1)],
   } satisfies Record<Direction, PoseFrames>
-  root.addChild(shadow, ...Object.values(poses).flat())
-  const drawing = { root, poses, direction: 'south' as Direction, moving: false }
+  root.addChild(shadow, protection, ...Object.values(poses).flat())
+  const drawing = { root, protection, poses, direction: 'south' as Direction, moving: false, protected: false }
   setActorPose(drawing, 'south', 0)
   return drawing
 }

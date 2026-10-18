@@ -45,7 +45,7 @@ function renderPanel(current: GameClientState) {
 
 beforeEach(async () => { localStorage.clear(); await i18n.changeLanguage('en') })
 
-describe('v7 reconnect presentation', () => {
+describe('v8 reconnect presentation', () => {
   it('exposes the dormant hook-backed panel without activating it in App', () => {
     render(<MantineProvider env="test"><GamePanel /></MantineProvider>)
     expect(screen.getByRole('button', { name: 'Create room' })).toBeVisible()
@@ -69,7 +69,7 @@ describe('v7 reconnect presentation', () => {
   })
 })
 
-describe('v7 private-state presentation', () => {
+describe('v8 private-state presentation', () => {
   it('removes hidden rival stats and accessibility details until a fresh reveal', () => {
     const current = state()
     const view = render(<MantineProvider env="test">
@@ -111,13 +111,14 @@ describe('v7 private-state presentation', () => {
     expect(stats).toHaveTextContent('Bomb typeRemote bomb')
     expect(stats).toHaveTextContent('EffectsShield (0:02)')
     expect(stats).toHaveTextContent('Damage grace0:01')
+    expect(screen.getByLabelText('Protected from damage')).toHaveTextContent('0:01')
     expect(stats).not.toHaveAttribute('role', 'status')
     expect(stats.closest('[aria-live]')).toBeNull()
     expect(screen.getByText('Round in progress')).toHaveAttribute('aria-live', 'polite')
   })
 })
 
-describe('v7 room controls', () => {
+describe('v8 room controls', () => {
   it('blocks readiness and rule edits while an update awaits authority', () => {
     const current = state()
     current.room = room(20, { type: 'waiting' }, 1)
@@ -141,7 +142,8 @@ describe('v7 room controls', () => {
     fireEvent.change(screen.getByLabelText('Round wins needed'), { target: { value: '1' } })
     fireEvent.click(screen.getByRole('button', { name: 'Apply rules' }))
     expect(received).toEqual([[currentActions, {
-      startingSpeedLevel: 0, turnAssistUnits: 256, winsToFinish: 1, bombFuseTicks: 180, enabledItems: [],
+      startingSpeedLevel: 0, turnAssistUnits: 256, winsToFinish: 1, bombFuseTicks: 180,
+      enabledItems: ['heart'],
     }]])
   })
 

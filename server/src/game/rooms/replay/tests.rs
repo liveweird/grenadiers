@@ -273,7 +273,7 @@ fn movement_refresh_and_predeparture_fence_preserve_input_semantics() {
 fn malformed_versions_order_bounds_and_round_metadata_fail_closed() {
     let mut journal = Journal::new(Header::m5([false; 2]));
     journal.header.format_version += 1;
-    assert_eq!(replay(&journal), Err(ReplayError::UnsupportedFormat));
+    assert_eq!(replay(&journal), Err(ReplayError::UnsupportedRules));
     journal.header = Header::m5([false; 2]);
     journal.header.lifecycle_profile += 2;
     assert_eq!(replay(&journal), Err(ReplayError::UnsupportedLifecycle));

@@ -2,8 +2,9 @@
 
 ## Scenario: two native gameplay sockets finish one authoritative generated classic round
 
-Two independent browser contexts authenticate, create/join one room, ready, and receive
-live public snapshots with generated-v1/configurable-v4 metadata, mirrored blocks, safe spawn
+Two independent browser contexts authenticate, create/join one room, disable optional items
+through revision-fenced settings, ready, and receive live public snapshots with
+generated-v2/Expanded-v5 metadata, the original Classic layouts, mirrored blocks, safe spawn
 openings, and no initially exposed pickups. Refreshed logical movement moves the first actor through its spawn
 opening. Unsupported equipment is rejected without consuming its manual action ID;
 a fresh bomb reuses that ID and is accepted and a repeated action ID is rejected. Its explosion

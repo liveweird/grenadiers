@@ -61,8 +61,10 @@ lobby, waiting, running, and result. See [verification](../verification.md) for 
 Accepted Classic-v7 HUD examples: [English desktop](../screenshots/gameplay-v7-desktop.png)
 and [Polish 320px](../screenshots/gameplay-v7-polish-320.png). Narrow screens use two stat
 columns; desktop retains four. All eight labels and values wrap within their own cells.
+Accepted Heart examples: [exposed pickup on desktop](../screenshots/heart-desktop.png) and
+[equipped Heart in Polish at 320px](../screenshots/heart-polish-320.png).
 
-All active-v7 Playwright configurations disable raw framework traces because personal admission
+All active-v8 Playwright configurations disable raw framework traces because personal admission
 frames contain capabilities. Failure screenshots, public reports, and redacted summaries remain.
 Run reconnect acceptance separately with
 `E2E_MATCH_FIXTURE=arena-v1-matches npm --prefix e2e run test:reconnect`.
@@ -82,15 +84,17 @@ voices. Returning from a hidden tab requires **Resume sound**; old events are di
 
 ## Exposed items and player upgrades
 
-Gameplay-v7 snapshots supply visible pickup cells and kinds under configurable-v4 rules. Pixi draws distinct bomb,
-cross/range, and speed marks above blocks and below bombs/flames/actors; it never guesses
+Gameplay-v8 snapshots supply visible pickup cells and kinds under Expanded-v5 rules. Pixi draws distinct bomb,
+cross/range, speed and Heart marks above blocks and below bombs/flames/actors; it never guesses
 concealed contents. Retained drawings are reused while unchanged and destroyed when removed,
 replaced, or reset. The UI performs no collection simulation.
 
 Both player rows show available bombs (capacity minus live bombs), capacity, range, and speed
 levels 1–5 from authoritative actors. Running/nonfinal-result rows show alive or eliminated; pre-start rows show readiness. Final
-match rows show rematch consent, and authoritative vacant seats remain open despite frozen actors. Labels are localized in English and Polish. The existing single-column
-layout bounds the upgrade rows at narrow widths. Generated configurable-v4 rooms supply the live pickup and upgrade changes.
+match rows show rematch consent, and authoritative vacant seats remain open despite frozen actors. Labels are localized in English and Polish. Player cards stack at narrow widths, with two columns inside each
+stat grid. Expanded-v5 rooms also show current equipment
+and physical-tick damage grace. A bounded corner aura marks Heart protection; reduced motion
+keeps it static. Reconnecting renders current protection without replaying its consumption.
 
 ## Match facts and timers
 

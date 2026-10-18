@@ -1,7 +1,9 @@
 # Expanded item implementation plan
 
-Status: **v0.3.19 foundation implemented; no items activated**. Classic remains
-the default. This optional track follows the [backlog](backlog.md), shared settings and
+Status: the **Heart activation candidate is implemented and locally verified**, with native
+release acceptance still pending. Published v0.3.21 has no new optional pickups. The candidate
+introduces Expanded-v5/generator-v2 rooms and gameplay-v8; see [Heart](heart.md).
+This optional track follows the [backlog](backlog.md), shared settings and
 pixel-art increments. The historical catalog in [rules](rules.md) is not an implementation
 claim. Each activation requires its own reviewed behavior, UI, documentation and acceptance.
 
@@ -9,7 +11,8 @@ The foundation implements `core::game::{inventory,effects,damage}` and immutable
 effect and derived-stat access. Production cannot inject items into State yet. Both fire checks
 share the damage gateway; effects/grace expire before movement and new bombs capture derived
 range/fuse. Slow-foot exposes an exact speed ratio but does not change movement before activation.
-No item pickup, equipment action, visible effect, new rules profile or wire field is enabled.
+That foundational release enabled no item pickup, equipment action, visible effect, new rules
+profile or wire field. Heart activation is the later candidate described above.
 
 Independent review is clear after replacing overflow-prone Heart expiry with checked elapsed
 grace. The integrated gates pass 334 core tests, 163 server tests, two doctests and 230 web tests;

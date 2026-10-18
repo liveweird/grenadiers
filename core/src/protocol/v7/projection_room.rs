@@ -48,7 +48,8 @@ pub fn project_classic_room(
     let settings = classic_settings(metadata.settings)?;
     let legacy = crate::protocol::v6::project_room_view(
         crate::protocol::v6::RoomMetadata {
-            settings: crate::protocol::v6::GameSettings::from_domain(settings),
+            settings: crate::protocol::v6::GameSettings::from_domain(settings)
+                .map_err(|_| ProjectionError::InvalidItems)?,
             settings_revision: metadata.settings_revision,
             settings_editor: metadata.settings_editor,
             room_id: metadata.room_id.clone(),

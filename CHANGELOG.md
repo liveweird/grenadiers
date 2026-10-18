@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.3.25 — 2026-10-18
+
+- Add the first optional pickup: Heart replaces the equipment slot and absorbs one lethal
+  blast, followed by exactly 60 physical ticks of damage grace.
+- Introduce Expanded v5 rooms and generator v2 with Heart enabled by default; expose its
+  toggle and an explicit Classic settings preset while preserving archived gameplay.
+- Move the coordinated live contract to gameplay-v8, retaining recipient validation,
+  transactional publication, deterministic replay and bounded messages.
+
 ## 0.3.24 — 2026-10-18
 
 - Migrate the live server and browser together to gameplay-v7, with checked Classic room

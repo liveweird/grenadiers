@@ -1,6 +1,6 @@
 # Authoritative match runtime
 
-Status: active behind the v7 endpoint and bounded match owner. No alternate endpoint or
+Status: active behind the v8 endpoint and bounded match owner. No alternate endpoint or
 runtime feature flag is exposed.
 
 `MatchRuntime` composes the pure `MatchLifecycle`, immutable room profile/identity, private seed

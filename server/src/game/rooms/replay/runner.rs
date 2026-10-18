@@ -7,8 +7,8 @@ use std::{
 };
 
 use grenadiers_core::{
-    game::{GENERATOR_VERSION, SeatId},
-    protocol::{MAX_COUNTER, RoomCode, RoomId, RulesVersion},
+    game::{EXPANDED_GENERATOR_VERSION, EnabledItems, GENERATOR_VERSION, SeatId},
+    protocol::{MAX_COUNTER, RoomCode, RoomId},
     room::MatchPhase,
 };
 
@@ -18,8 +18,9 @@ use super::super::{
     types::RoomIdentity,
 };
 use super::record::{
-    CLASSIC_V2_RULES, CLASSIC_V3_RULES, CONFIGURABLE_V4_RULES, FORMAT_VERSION, GENERATED_V1,
-    Journal, M5_LIFECYCLE_PROFILE, M6_LIFECYCLE_PROFILE, Operation, ReplayAction, ReplayStatus,
+    CLASSIC_V2_RULES, CLASSIC_V3_RULES, CONFIGURABLE_V4_RULES, EXPANDED_FORMAT_VERSION,
+    EXPANDED_V5_RULES, FORMAT_VERSION, GENERATED_V1, GENERATED_V2, Journal, M5_LIFECYCLE_PROFILE,
+    M6_LIFECYCLE_PROFILE, Operation, ReplayAction, ReplayStatus,
 };
 use crate::round_seed::RoundSeedSource;
 
@@ -151,7 +152,10 @@ fn validate_header(journal: &Journal) -> Result<(), ReplayError> {
         ReplayStatus::UnsupportedProfile => return Err(ReplayError::UnsupportedProfile),
     }
     let header = journal.header;
-    if header.format_version != FORMAT_VERSION {
+    if !matches!(
+        header.format_version,
+        FORMAT_VERSION | EXPANDED_FORMAT_VERSION
+    ) {
         return Err(ReplayError::UnsupportedFormat);
     }
     if !matches!(
@@ -160,32 +164,44 @@ fn validate_header(journal: &Journal) -> Result<(), ReplayError> {
     ) {
         return Err(ReplayError::UnsupportedLifecycle);
     }
-    if !matches!(
-        header.rules_version,
-        CLASSIC_V2_RULES | CLASSIC_V3_RULES | CONFIGURABLE_V4_RULES
-    ) || RulesVersion::try_from(header.rules_version).is_err()
-    {
+    let valid_rules = match header.format_version {
+        FORMAT_VERSION => matches!(
+            header.rules_version,
+            CLASSIC_V2_RULES | CLASSIC_V3_RULES | CONFIGURABLE_V4_RULES
+        ),
+        EXPANDED_FORMAT_VERSION => header.rules_version == EXPANDED_V5_RULES,
+        _ => false,
+    };
+    if !valid_rules {
         return Err(ReplayError::UnsupportedRules);
     }
     if header.lifecycle_profile == M5_LIFECYCLE_PROFILE && header.rules_version != CLASSIC_V2_RULES
     {
         return Err(ReplayError::UnsupportedLifecycle);
     }
-    if header.generator_version != GENERATED_V1 || header.generator_version != GENERATOR_VERSION {
+    let expected_generator = if header.format_version == FORMAT_VERSION {
+        GENERATED_V1
+    } else {
+        GENERATED_V2
+    };
+    if header.generator_version != expected_generator
+        || expected_generator == GENERATED_V1 && expected_generator != GENERATOR_VERSION
+        || expected_generator == GENERATED_V2 && expected_generator != EXPANDED_GENERATOR_VERSION
+    {
         return Err(ReplayError::UnsupportedGenerator);
     }
     if header.initial_tick.0 != 0 {
         return Err(ReplayError::UnsupportedInitialTick);
     }
-    let invalid_configuration = if header.rules_version == CONFIGURABLE_V4_RULES {
+    let invalid_configuration = if matches!(
+        header.rules_version,
+        CONFIGURABLE_V4_RULES | EXPANDED_V5_RULES
+    ) {
         header.initial_settings_editor != Some(SeatId::One)
+            || header.rules_version == CONFIGURABLE_V4_RULES
+                && header.initial_settings.enabled_items() != EnabledItems::EMPTY
     } else {
-        header.initial_settings
-            != grenadiers_core::protocol::v6::GameSettings::for_rules(
-                RulesVersion::try_from(header.rules_version)
-                    .map_err(|_| ReplayError::UnsupportedRules)?,
-            )
-            .domain()
+        header.initial_settings != legacy_default_settings(header.rules_version)?
             || header.initial_settings_editor.is_some()
     };
     if header.initial_settings_revision != 1 || invalid_configuration {
@@ -217,7 +233,14 @@ fn validate_operation(operation: Operation, rules_version: u16) -> Result<(), Re
                 action,
                 ReplayAction::ReadyChecked { .. } | ReplayAction::UpdateSettings { .. }
             ),
-            CONFIGURABLE_V4_RULES => !matches!(action, ReplayAction::Ready(_)),
+            CONFIGURABLE_V4_RULES => match action {
+                ReplayAction::Ready(_) => false,
+                ReplayAction::UpdateSettings { settings, .. } => {
+                    settings.enabled_items() == EnabledItems::EMPTY
+                }
+                _ => true,
+            },
+            EXPANDED_V5_RULES => !matches!(action, ReplayAction::Ready(_)),
             _ => false,
         };
         if !valid_for_profile {
@@ -326,13 +349,20 @@ pub(super) fn identity() -> RoomIdentity {
 }
 
 fn identity_for_rules(rules_version: u16) -> Result<RoomIdentity, ReplayError> {
-    let profile = match RulesVersion::try_from(rules_version) {
-        Ok(RulesVersion::ClassicV2) => RoomProfile::GeneratedClassicV2,
-        Ok(RulesVersion::ClassicV3) => RoomProfile::GeneratedClassicV3,
-        Ok(RulesVersion::ConfigurableV4) => RoomProfile::GeneratedConfigurableV4,
+    let profile = match rules_version {
+        CLASSIC_V2_RULES => RoomProfile::GeneratedClassicV2,
+        CLASSIC_V3_RULES => RoomProfile::GeneratedClassicV3,
+        CONFIGURABLE_V4_RULES => RoomProfile::GeneratedConfigurableV4,
+        EXPANDED_V5_RULES => RoomProfile::ExpandedV5,
         _ => return Err(ReplayError::UnsupportedRules),
     };
     Ok(identity_for_profile(profile))
+}
+
+fn legacy_default_settings(rules: u16) -> Result<grenadiers_core::room::RoomSettings, ReplayError> {
+    let version = grenadiers_core::protocol::RulesVersion::try_from(rules)
+        .map_err(|_| ReplayError::UnsupportedRules)?;
+    Ok(grenadiers_core::protocol::v6::GameSettings::for_rules(version).domain())
 }
 
 pub(super) fn identity_for_profile(profile: RoomProfile) -> RoomIdentity {

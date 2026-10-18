@@ -1,3 +1,5 @@
+import { selectClassicSettings } from '../tests/support/settings'
+import { observeGame } from '../tests/support/duel'
 import { performance } from 'node:perf_hooks'
 import { expect, test, type Browser, type BrowserContext, type Page, type TestInfo } from '@playwright/test'
 import {
@@ -23,9 +25,11 @@ test.beforeAll(() => {
 
 async function joinRunning(pages: Page[]): Promise<void> {
   const [one, two] = pages
+  const game = observeGame(one)
   const baseUrl = process.env.E2E_BASE_URL ?? 'http://127.0.0.1:8085'
   await Promise.all(pages.map((page) => page.goto(new URL('/', baseUrl).href)))
   await one.getByRole('button', { name: 'Create room', exact: true }).click()
+  await selectClassicSettings(one, game)
   const code = one.getByLabel('Room invitation code', { exact: true })
   await expect(code).toHaveText(/^[A-HJ-NP-Z2-9]{8}$/)
   await two.getByRole('textbox', { name: 'Room code', exact: true }).fill(await code.innerText())

@@ -1,3 +1,4 @@
+import { selectClassicSettings } from './support/settings'
 import AxeBuilder from '@axe-core/playwright'
 import { expect, test } from '@playwright/test'
 import { EMPTY_ACTIVE_ACTOR_STATS, expectActorStats } from './support/actor-stats'
@@ -19,6 +20,7 @@ test('two players complete a rendered keyboard duel with shared authoritative re
     await one.screenshot({ path: testInfo.outputPath('lobby-desktop.png'), fullPage: true })
 
     await one.getByRole('button', { name: 'Create room', exact: true }).click()
+    await selectClassicSettings(one, games[0])
     const invitation = one.getByLabel('Room invitation code', { exact: true })
     await expect(invitation).toHaveText(/^[A-HJ-NP-Z2-9]{8}$/)
     const code = await invitation.innerText()

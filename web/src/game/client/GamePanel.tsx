@@ -7,7 +7,7 @@ import type { AdmissionIntent, GameClientState } from './client'
 import { format, useGameCopy, type GameCopy } from './locale'
 import type {
   GameSettings, MatchInterruptReason, MatchResult, RoomPhase, RoundResult, Seat, VisibleActorView,
-} from '../v7/schema'
+} from '../v8/schema'
 import { useGameClient } from './useGameClient'
 import { ControlsDialog } from './ControlsDialog'
 import { bindingsSummary } from './controlLabels'
@@ -117,7 +117,12 @@ function ActorDetails({ actor, copy }: { actor: VisibleActorView; copy: GameCopy
     <div><dt>{copy.stats.equipment}</dt><dd>{equipment}</dd></div>
     <div><dt>{copy.stats.weapon}</dt><dd>{weapon}</dd></div>
     <div><dt>{copy.stats.effects}</dt><dd>{effects}</dd></div>
-    <div><dt>{copy.stats.damageGrace}</dt><dd>{clock(actor.damageGraceRemainingTicks)}</dd></div>
+    <div className={actor.damageGraceRemainingTicks > 0 ? 'grace-active' : undefined}>
+      <dt>{copy.stats.damageGrace}</dt>
+      <dd aria-label={actor.damageGraceRemainingTicks > 0 ? copy.stats.protected : undefined}>
+        {clock(actor.damageGraceRemainingTicks)}
+      </dd>
+    </div>
   </>
 }
 

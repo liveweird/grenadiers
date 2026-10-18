@@ -29,12 +29,14 @@ pub use projection_facts::{
 };
 pub use projection_recipient::prepare_snapshot_pair;
 pub use projection_room::{RoomMetadata, classic_settings, project_classic_room};
+pub(crate) use scalars::deserialize_bounded;
 pub use scalars::{GameplayVersion, ResumeToken, RoundCount, Wins};
 pub use server::{
     CompletedRound, ConnectionStatus, CountdownKind, GameServerMessage, MatchInterruptReason,
     MatchResult, MatchWinnerReason, RoomPhase, RoomView, Scores, SeatStatus, V7ErrorCode,
 };
 pub use settings::{GameSettings, SettingsContextError, validate_settings_context};
+pub(crate) use state::BombTriggerObservation;
 pub use state::{
     ARENA_TERRAIN_CELLS, ActorView, ArenaView, BlastKind, BombTrigger, BombView, DamageGraceTicks,
     FlameView, GameState, HiddenActorView, MAX_BLOCKS, MAX_BOMBS, MAX_FLAMES, MAX_PICKUPS,

@@ -1,3 +1,4 @@
+use super::damage::DamagePreventionSource;
 use super::pickups::PickupKind;
 use super::simulation::RoundResult;
 use super::types::{CellId, EntityId, SeatId, Tick};
@@ -45,6 +46,11 @@ pub enum StepEventKind {
     ActorEliminated {
         id: EntityId,
         seat: SeatId,
+    },
+    DamagePrevented {
+        id: EntityId,
+        seat: SeatId,
+        source: DamagePreventionSource,
     },
     PickupCollected {
         id: EntityId,

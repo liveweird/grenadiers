@@ -3,7 +3,91 @@
 Records below are frozen against their named sources. Publication and later CI status are
 recorded in [release notes](https://github.com/liveweird/grenadiers/releases).
 
-## Responsive live-v7 HUD — 2026-10-18 — native 52/52, final CI pending
+## Heart responsive-HUD integration — 2026-10-18 — fresh native 54/54
+
+Clean source `2f86fc96f4f562871ed962052c1f0f1b74d53881`, archive SHA-256
+`7fa83c1139e1e0487b91ef2328db7d05d932146f3ff55b39d4f1a47123c95579`, builds the new image
+`sha256:e8de9c77597e5c94fe5c406994d55ab7e776c0696b5ec3333f9f46273166ea09`.
+Its saved archive hashes to `93c50da1b8f0a5d25b351778aa346b83abce89fb2235df1ee20f45f9f37e79de`.
+Fresh acceptance passes **27/27 Compose and 27/27 Kubernetes**, first attempts, one worker,
+retries zero and no carried results. Both runtimes include all previous 26 cases plus Heart.
+
+Four latency profiles retain 20 samples each, zero exceedances and zero CPU throttling.
+Local/shaped maxima are **51.386/160.103ms Compose** and **52.320/160.583ms Kubernetes**.
+Strict exact-200 JSON/no-store probes, hardened runtime, external mode-0444 fixtures, four
+fresh pod UIDs, serial direct-pod forwarding and complete cleanup pass. Pinned archive-only
+Trivy finds zero fixable HIGH/CRITICAL vulnerabilities; strict Kubernetes 1.33 validates three
+resources. Quiet acknowledgements cover named local workers, without a global host-idle claim.
+
+All 18 reports pass and 46 fresh PNGs remain. Capture profiling is unset and normal failure
+capture is preserved. Root visually checked the readable Polish 320px equipment/protection HUD
+and English desktop pickup. English desktop Equipment wraps its last letter; this minor label
+readability follow-up does not cause overlap. Committed Heart screenshots are exact accepted
+PNG copies. Independent final source/image/report/evidence audit is clear. The sealed 1,062-entry manifest hashes
+to `fd296568303671e0c44736e0ba480e9334414ed4660a892a71845c70695185d5` under
+`/tmp/grenadiers-v0325-fresh-responsive-acceptance`.
+
+Core/server/Cargo/API and dedicated item scenarios remain unchanged from the reviewed Heart
+cache candidate: **401 core, 179 server and two doctests** in each Rust profile, line coverage
+**90.94%**. Its **287 web tests**, coverage **94.80/90.36/94.72/97.31%**, production/fixture
+builds and 28-scenario static checks pass. Fresh responsive production build/static checks pass.
+Exact-head CI and publication remain required. The post-acceptance update changes documentation
+and screenshot copies only.
+
+An earlier attempt paired the new source archive with the historical `35bf3678` image by
+mistake. It is **invalid**, with no candidate passes or failures counted. Its observed match
+geometry failure and cleanup are preserved separately in
+`/tmp/grenadiers-v0325-responsive-native-acceptance`, 698-entry partial manifest
+`f6b5ec3a6cc0c2dabd62f816e19c39bd549f05fd294afbbb3085eb66b5d2f75f`.
+The complete run above builds and uses the correct new image throughout. Setup-only corrections
+before that browser launch are retained in its evidence; no valid browser case was rerun.
+
+## Heart activation candidate — 2026-10-18 — native baseline 54/54
+
+Clean source `00d76ac9cc08e7bb4627caf7897e02c3f15a43d2`, source archive SHA-256
+`cb60d03dd51e9793463191657448529ec119694656a4fca7f8ab0a943814aa61`, passes all 54 native
+cases: 27 Compose/27 Kubernetes, each first attempt with zero retries. The single built image is
+`sha256:35bf3678b5940149dd82acde55ada77f091d1bed70563db7f77b3dcbaafb0293`, saved archive
+SHA-256 `72d0303d00c25cc7dff53ab501a2f0695364c5bc2c21be2f225b7f2a830a1d52`.
+Pinned reference Chromium/Node 24.21/Playwright 1.63 runs every browser group. Heart itself passes
+in 30.2s Compose/30.6s Kubernetes with external mode-0444 `arena-v2-heart`, ordinary controls and unchanged
+assertions. All 18 reports have no failures or retries.
+
+Each of four latency profiles retains 20 samples with zero exceedances; maxima are
+51.860/172.306ms Compose local/shaped and 53.304/158.520ms Kubernetes. Throttling deltas are zero.
+Strict probes, UID/GID 65532, zero capabilities, no-new-privileges, read-only roots, RuntimeDefault,
+Kubernetes 500m/256Mi and direct fresh-pod port-forward liveness/stop/wait/cleanup pass. Four fixture
+rollouts use distinct pod UIDs. Owned Compose containers/network and Kubernetes namespace are gone.
+
+Independent evidence review confirms all 54 results and the frozen 1030-file final manifest
+`6e8587290fc441f1310711391b2147d2486f61d5dd94ba87161782d0bcaeea5b` under
+`/tmp/grenadiers-v0325-acceptance`. A preparation count-file path had become stale after its
+recorded recheck; a sealed addendum preserves historical bytes and replays the original 630
+preparation entries via the preserved count copy. Its ten-file audit manifest is
+`8fd0932bd5d8e7eab1057a41169a9ffa97cb241a5b30f989481fc380aafe75a1`; independent re-review is clear.
+This native baseline excludes the separately evaluated upstream terrain-cache candidate.
+Final-head CI, integration and publication remain outstanding.
+
+The v0.3.25 candidate passes **401 core tests, 179 server tests and two doctests** in both
+debug and release profiles; four dedicated performance profiles remain intentionally ignored. Rust line
+coverage is **90.94%** (11,950/13,140 lines), above the unchanged 80% floor. All **286 web tests**
+pass with statement/branch/function/line coverage of **94.76/90.36/94.70/97.30%**. Contracts,
+lint, Knip, production build, E2E static checks and **27-scenario parity** pass.
+Dependency audits and strict pinned Kubernetes schemas pass. Independent gameplay/browser
+and backend reviews are clear after the forged legacy replay-mask and socket-version issues
+were fixed.
+
+Regression evidence covers generated Heart reveal/collection through ordinary controls,
+one-charge absorption, overlapping hazard cells and both damage passes, exact grace expiry,
+damage before collection, replacement without stacking, overflow, disabled/Classic rejection,
+real owner replacement/restore, quiet baselines and complete deterministic replay. Archived
+contracts remain byte-unchanged; journal records retain their 64-byte and allocation bounds.
+
+The inherited connected-takeover release-build defect is corrected; full debug and release gates
+pass. Native acceptance requires actual movement from the replacement binding and now passes
+at the source/image recorded above. Final-head CI remains required before publication.
+
+## Parent responsive live-v7 HUD — 2026-10-18 — native 52/52, final CI pending
 
 Clean source `695157bed0852835a16b3a9e9ee5dbcc5df61ad6`, archive SHA-256
 `071a0927fa4c2087af918bbf84e2d848d38118bc02a9eaa7af1c42774cdeeef5`, builds one image:

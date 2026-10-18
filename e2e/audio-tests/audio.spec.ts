@@ -1,3 +1,4 @@
+import { selectClassicSettings } from '../tests/support/settings'
 import { setTimeout as delay } from 'node:timers/promises'
 import AxeBuilder from '@axe-core/playwright'
 import { expect, test } from '@playwright/test'
@@ -47,6 +48,7 @@ test('native sound gesture creates Web Audio cues and mute prevents later playba
     await expect.poll(() => contexts[0]?.contextState).toBe('running')
     const contextId = contexts[0].contextId
     await one.getByRole('button', { name: 'Create room', exact: true }).click()
+    await selectClassicSettings(one, firstGame)
     const code = one.getByLabel('Room invitation code', { exact: true })
     await expect(code).toHaveText(/^[A-HJ-NP-Z2-9]{8}$/)
     await two.getByRole('textbox', { name: 'Kod pokoju', exact: true }).fill(await code.innerText())

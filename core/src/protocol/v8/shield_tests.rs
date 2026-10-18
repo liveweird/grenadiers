@@ -40,10 +40,16 @@ fn shield_room(tick: u64) -> RoomView {
 }
 
 #[test]
-fn expanded_settings_accept_all_sixteen_masks_without_enabling_future_items() {
-    for bits in [
-        0, 16, 512, 528, 4096, 4112, 4608, 4624, 8192, 8208, 8704, 8720, 12288, 12304, 12800, 12816,
-    ] {
+fn expanded_settings_accept_all_sixty_four_masks_without_enabling_future_items() {
+    let bits = [16_u32, 512, 4096, 8192, 65_536, 131_072];
+    for mask in 0_u32..64 {
+        let bits = bits.iter().enumerate().fold(0, |value, (index, bit)| {
+            if mask & (1 << index) == 0 {
+                value
+            } else {
+                value | bit
+            }
+        });
         let items = ItemSet::from_mask(ItemMask::new(bits).unwrap());
         let domain = expanded_settings(super::wire_settings(items)).unwrap();
         assert_eq!(domain.enabled_items().bits(), bits);

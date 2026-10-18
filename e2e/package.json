@@ -28,7 +28,8 @@
     "test:audio": "playwright test --config playwright.audio.config.ts",
     "test:golden-flame": "playwright test --config playwright.golden-flame.config.ts",
     "test:short-fuse": "playwright test --config playwright.short-fuse.config.ts",
-    "test:short-flame": "playwright test --config playwright.short-flame.config.ts"
+    "test:short-flame": "playwright test --config playwright.short-flame.config.ts",
+    "test:long-fuse": "playwright test --config playwright.long-fuse.config.ts"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.13.0",

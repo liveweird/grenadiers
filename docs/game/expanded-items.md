@@ -3,7 +3,7 @@
 Status: the **Heart activation candidate is implemented and locally verified**, with native
 release acceptance still pending. Published v0.3.21 has no new optional pickups. The candidate
 introduces Expanded-v5/generator-v2 rooms and gameplay-v8; see [Heart](heart.md).
-Separate candidates add opt-in [Shield](shield.md) [Golden Flame](golden-flame.md) [Short Fuse](short-fuse.md) and [Short Flame](short-flame.md),
+Separate candidates add opt-in [Shield](shield.md), [Golden Flame](golden-flame.md), [Short Fuse](short-fuse.md), [Short Flame](short-flame.md), and [Long Fuse](long-fuse.md),
 retaining the same protocol and identities.
 This optional track follows the [backlog](backlog.md), shared settings and
 pixel-art increments. The historical catalog in [rules](rules.md) is not an implementation
@@ -41,7 +41,7 @@ Damage passes share one gateway. Shield prevents damage before Heart is consider
 absorbs one lethal hit, consumes its equipment slot and grants 60 ticks of immunity, including
 both damage passes and overlapping flames. Collecting protection cannot undo earlier damage.
 
-Shield uses 300 physical ticks (five seconds); Golden Flame, Short Fuse and Short Flame use 600 (ten seconds), all
+Shield uses 300 physical ticks (five seconds); Golden Flame, Short Fuse, Short Flame, and Long Fuse use 600 (ten seconds), all
 refreshing on recollection. Proposed remaining durations: Stopwatch 180; other timed effects and each
 Slow-foot stack 600. These become versioned constants when activated, not new settings yet.
 Golden flame gives newly placed bombs radius eight; Short-flame overrides it with radius one.

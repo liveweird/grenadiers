@@ -7,13 +7,23 @@ use crate::room::RoomSettings;
 use super::super::*;
 
 fn state_at(at: u64, base: u16, enabled: EnabledItems, pickup: bool) -> State {
+    state_at_with_pickup(
+        at,
+        base,
+        enabled,
+        pickup.then_some(game::PickupKind::ShortFuse),
+    )
+}
+
+fn state_at_with_pickup(
+    at: u64,
+    base: u16,
+    enabled: EnabledItems,
+    pickup: Option<game::PickupKind>,
+) -> State {
     let arena = game::fixed_arena();
     let spawns = arena.spawns();
-    let exposed = if pickup {
-        BTreeMap::from([(spawns[0], game::PickupKind::ShortFuse)])
-    } else {
-        BTreeMap::new()
-    };
+    let exposed = pickup.map_or_else(BTreeMap::new, |kind| BTreeMap::from([(spawns[0], kind)]));
     let world = World::with_pickups(arena, BTreeMap::new(), BTreeMap::new(), exposed).unwrap();
     State::new_at_tick(
         RulesConfig::expanded_v5(
@@ -32,6 +42,33 @@ fn state_at(at: u64, base: u16, enabled: EnabledItems, pickup: bool) -> State {
         game::Tick(at),
     )
     .unwrap()
+}
+
+#[test]
+fn collected_long_fuse_publishes_doubled_capture_and_quiet_timer() {
+    let enabled = EnabledItems::LONG_FUSE;
+    let mut state = state_at_with_pickup(0, 120, enabled, Some(game::PickupKind::LongFuse));
+    let collection = state.step(&[]).unwrap();
+    let placement = state
+        .step(&[game::SeatInput {
+            seat: SeatId::One,
+            action: game::InputAction::PlaceBomb,
+        }])
+        .unwrap();
+    let publication = bind(&state, &[collection, placement], 120, enabled).unwrap();
+    for encoded in prepare_snapshot_pair(&publication).unwrap() {
+        let frame: serde_json::Value = serde_json::from_str(&encoded).unwrap();
+        assert_eq!(frame["state"]["bombs"][0]["trigger"]["remainingTicks"], 240);
+        assert_eq!(
+            frame["state"]["actors"][0]["effects"][0]["kind"],
+            "longFuse"
+        );
+        assert_eq!(
+            frame["state"]["actors"][0]["effects"][0]["remainingTicks"],
+            599
+        );
+        assert_eq!(frame["events"][0]["kind"]["kind"], "longFuse");
+    }
 }
 
 fn room(at: u64, base: u16, enabled: EnabledItems) -> RoomView {
@@ -139,6 +176,43 @@ fn normal_and_short_bombs_coexist_without_requiring_a_current_owner_effect() {
                 .all(|actor| actor.effect_observations().next().is_none())
         );
         assert!(bind(&state, &[], base, enabled).is_ok());
+    }
+}
+
+#[test]
+fn configured_long_and_mixed_historical_schedules_bind_after_effect_expiry() {
+    for (base, durations) in [(90_u16, [90_u64, 45, 180])] {
+        let enabled = EnabledItems::from_bits(
+            EnabledItems::SHORT_FUSE.bits() | EnabledItems::LONG_FUSE.bits(),
+        )
+        .unwrap();
+        for duration in durations {
+            let mut state = state_at(5000, base, enabled, false);
+            add_bomb(&mut state, 3, 0, 5000, 5000 + duration);
+            assert!(
+                state
+                    .actors()
+                    .iter()
+                    .all(|actor| actor.effect_observations().next().is_none())
+            );
+            assert!(bind(&state, &[], base, enabled).is_ok());
+        }
+    }
+}
+
+#[test]
+fn doubled_schedule_requires_long_fuse_and_rejects_arbitrary_duration() {
+    for (enabled, deadline) in [
+        (EnabledItems::EMPTY, 360),
+        (EnabledItems::SHORT_FUSE, 360),
+        (EnabledItems::LONG_FUSE, 359),
+    ] {
+        let mut state = state_at(10, 180, enabled, false);
+        add_bomb(&mut state, 3, 0, 0, deadline);
+        assert_eq!(
+            bind(&state, &[], 180, enabled),
+            Err(ProjectionError::InvalidExpandedBinding)
+        );
     }
 }
 

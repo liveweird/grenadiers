@@ -88,7 +88,8 @@ impl super::Actor {
             PickupKind::Shield
             | PickupKind::GoldenFlame
             | PickupKind::ShortFuse
-            | PickupKind::ShortFlame => {
+            | PickupKind::ShortFlame
+            | PickupKind::LongFuse => {
                 let effect = pickup
                     .kind()
                     .timed_effect()

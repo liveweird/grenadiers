@@ -8,7 +8,7 @@ const SPEEDS = [0, 1, 2, 3, 4] as const
 const TURN_ASSISTS = [64, 128, 192, 256] as const
 const WINS = [1, 2, 3, 4, 5, 6, 7, 8, 9] as const
 const FUSES = [60, 90, 120, 150, 180, 210, 240, 270, 300] as const
-const AVAILABLE_ITEMS = ['heart', 'shield', 'goldenFlame', 'shortFuse', 'shortFlame'] as const
+const AVAILABLE_ITEMS = ['heart', 'shield', 'goldenFlame', 'shortFuse', 'shortFlame', 'longFuse'] as const
 type AvailableItem = typeof AVAILABLE_ITEMS[number]
 const DEFAULT_SETTINGS: GameSettings = {
   startingSpeedLevel: 0, turnAssistUnits: 256, winsToFinish: 3, bombFuseTicks: 180,

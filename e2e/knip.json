@@ -8,6 +8,7 @@
     "golden-flame-tests/**/*.spec.ts",
     "short-fuse-tests/**/*.spec.ts",
     "short-flame-tests/**/*.spec.ts",
+    "long-fuse-tests/**/*.spec.ts",
     "controls-tests/**/*.spec.ts",
     "match-tests/**/*.spec.ts",
     "reconnect-tests/**/*.spec.ts",

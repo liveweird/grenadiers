@@ -204,3 +204,19 @@ pickup, observes an actual range-one blast in the cleared corridor, reconnects w
 extending the timer, and verifies base range after expiry. Equivalent Kubernetes acceptance
 mounts the same mode-0444 seed and runs through the Service port-forward. Never bake the seed
 into the application image. Consult [verification](verification.md) for actual candidate results.
+
+## Reproduce opt-in Long Fuse timing
+
+Use the paired candidate image with its separate external production seed:
+
+```sh
+chmod 444 core/tests/fixtures/arena-v2-long-fuse.seed
+docker compose -f docker-compose.yaml -f docker-compose.long-fuse.yaml up -d --no-build --force-recreate app
+# Wait for /api/v1/ready to return 200 before running the scenario.
+E2E_LONG_FUSE_FIXTURE=arena-v2-long-fuse npm --prefix e2e run test:long-fuse
+docker compose -f docker-compose.yaml -f docker-compose.long-fuse.yaml down
+```
+
+The real settings panel enables only Long Fuse with a 120-tick base. The scenario follows the
+ordinary generated pickup path, observes a captured 240-tick bomb on both peers, crosses the
+exact 600-tick expiry, and verifies restored 120-tick timing. Never bake the seed into the image.

@@ -15,6 +15,7 @@ pub enum PickupKind {
     GoldenFlame,
     ShortFuse,
     ShortFlame,
+    LongFuse,
 }
 
 impl PickupKind {
@@ -25,6 +26,7 @@ impl PickupKind {
             Self::GoldenFlame => enabled.contains_golden_flame(),
             Self::ShortFuse => enabled.contains_short_fuse(),
             Self::ShortFlame => enabled.contains_short_flame(),
+            Self::LongFuse => enabled.contains_long_fuse(),
             _ => true,
         }
     }
@@ -35,6 +37,7 @@ impl PickupKind {
             Self::GoldenFlame => Some(super::EffectKind::GoldenFlame),
             Self::ShortFuse => Some(super::EffectKind::ShortFuse),
             Self::ShortFlame => Some(super::EffectKind::ShortFlame),
+            Self::LongFuse => Some(super::EffectKind::LongFuse),
             _ => None,
         }
     }

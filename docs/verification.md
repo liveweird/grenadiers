@@ -1,31 +1,26 @@
 # Repository verification
 
-## Short Flame candidate — 2026-10-18 — native acceptance pending
+## Long Fuse candidate — 2026-10-18 — local checks complete
 
-The v0.3.29 candidate activates the opt-in Short Flame curse. Collection refreshes
-600 physical ticks of range-one captures for new bombs, with precedence over Golden Flame
-and independent effect timers. Existing bombs and base upgrades retain their values. The new
-weight is 15; all 32 supported masks preserve the sixteen previous generation paths and
-Heart-only defaults. The ordinary single-item seed fixture pins pickup cell (3,1).
+The v0.3.30 candidate prepares the opt-in Long Fuse curse. Collection refreshes a 600-physical-
+tick effect that doubles the configured fuse captured by newly placed ordinary bombs. Short Fuse
+and Long Fuse cancel for new placements while both independent timers remain active. Historical
+bomb schedules remain immutable across expiry, death, reconnect, and round transitions.
 
-Independent domain and integration reviews are clear. Both profiles pass **457 core tests,
-183 server tests and two doctests**, with four dedicated performance profiles ignored.
-Formatting, Clippy and production build pass. Rust line coverage is **91.46% (12,203/13,342)**.
-All **367 web tests** across 39 files pass; statement/branch/function/line coverage is
-**95.11/90.83/95.47/97.56%**. Contract checks, lint, Knip, dependency audits, strict Kubernetes
-schemas 3/3 and E2E static parity **31 scenarios** pass. The first server-gate invocation was
-rejected by the Node pin guard; the complete gate passes with the required Node 24.21.0.
-An initial protocol test compile lacked its Tick import; the corrected focused and full suites
-pass. The frontend's first lint run found excessive settings-panel complexity; rendering its
-canonical item list resolves it, with the complete web gate passing afterward.
+The new catalog bit is 17 and the conditional generation weight is 15. All 64 supported masks
+retain the 32 previous generation paths, Heart-only defaults, and canonical item ordering. The
+ordinary single-item seed fixture pins Long Fuse at cell (3,1). Protocol, server replay, web, and
+production-seed browser coverage are included locally.
 
-Tests cover both Golden Flame expiry orders, fixed old/new bomb ranges, base upgrades,
-Short Fuse independence, blocker/chain geometry, all-layer transactional overflow and ordinary
-generated collection. Server replay compares full state while a cursed bomb is live before
-and after effect expiry, then again after round reset. The registered production-seed browser
-scenario checks actual one-cell fire reach, unchanged fuse timing on both peers, reconnect,
-exact expiry and later base-range damage. Its native playthrough, screenshots, same-image
-Compose/Kubernetes **31+31** acceptance and final-head CI remain pending. No release is claimed.
+The repository/server gate passes formatting, Clippy with warnings denied, workspace build, and
+both debug and release profiles with **466 core tests, 184 server tests, and two doctests**;
+four dedicated performance profiles remain ignored. Rust coverage passes the unchanged 80% line
+floor. All **408 web tests** across 39 files pass with statement/branch/function/line coverage
+of **95.14/90.89/95.48/97.58%**, plus contracts, lint, Knip, and the production build. E2E lint,
+Knip, type checking, and **32-scenario parity** pass. Cargo-deny,
+both cached npm dependency audits, and strict Kubernetes schemas for all three resources pass.
+Independent review, the native Long Fuse playthrough and screenshots, final candidate-image
+acceptance, and final-head CI remain pending. No release or shipped status is claimed.
 
 ## Short Fuse candidate — 2026-10-18 — native acceptance pending
 

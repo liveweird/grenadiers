@@ -9,8 +9,8 @@ claim or revoke the credential needed for a version-8 connection.
 
 V8 adds rules version **5** and map ID **`generated_v2`**. Its own rules/map types leave the
 shared enums and schemas for earlier protocols unchanged. New production rooms are always
-Expanded v5/generator v2. They advertise `availableItems: ["heart", "shield", "goldenFlame", "shortFuse", "shortFlame"]` and initially enable
-`settings.enabledItems: ["heart"]`. All thirty-two subsets of those five available items are supported configurations.
+Expanded v5/generator v2. They advertise `availableItems: ["heart", "shield", "goldenFlame", "shortFuse", "shortFlame", "longFuse"]` and initially enable
+`settings.enabledItems: ["heart"]`. All 64 subsets of those six available items are supported configurations.
 Other catalog IDs remain unavailable.
 
 The Classic settings preset disables optional items and restores the four ordinary settings.
@@ -75,3 +75,7 @@ Short Flame adds or refreshes a 600-physical-tick effect. Actor `bombRange` rema
 upgrade value; bombs and events publish their actual captured range one. Historical range
 is independent of current owner effects, including after expiry or death. Golden Flame remains
 an independent timer underneath the curse. No schema or historical protocol is expanded.
+
+Long Fuse likewise adds or refreshes a 600-tick effect and doubles the configured
+fuse captured by new ordinary timed bombs. Short Fuse and Long Fuse cancel for new placements
+while both remain active; their independent timers and historical bomb deadlines remain visible.

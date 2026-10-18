@@ -22,6 +22,9 @@ mod input_tests;
 #[path = "invisibility_cloak_tests.rs"]
 mod invisibility_cloak_tests;
 #[cfg(test)]
+#[path = "invisible_bombs_tests.rs"]
+mod invisible_bombs_tests;
+#[cfg(test)]
 #[path = "lifecycle_tests.rs"]
 mod lifecycle_tests;
 #[cfg(test)]

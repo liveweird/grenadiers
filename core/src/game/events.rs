@@ -36,6 +36,16 @@ impl EventAudience {
             (Self::One | Self::Both, SeatId::One) | (Self::Two | Self::Both, SeatId::Two)
         )
     }
+
+    #[must_use]
+    pub const fn without(self, seat: SeatId) -> Self {
+        match (self, seat) {
+            (Self::Both, SeatId::One) => Self::Two,
+            (Self::Both, SeatId::Two) => Self::One,
+            (Self::One, SeatId::One) | (Self::Two, SeatId::Two) => Self::Neither,
+            _ => self,
+        }
+    }
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]

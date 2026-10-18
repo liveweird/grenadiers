@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.41 — 2026-10-18
+
+- Add opt-in Invisible Bombs with a 600-physical-tick refreshable curse that hides every live bomb from the affected recipient while preserving collision, capacity, chains and public flames.
+- Capture placement and detonation audiences at emission, intersecting Cloak ownership privacy with blinded seats, including events visible to neither recipient.
+- Add the sixteenth lobby switch, all 65,536 v9 settings masks, replay and archived-v8 guards, English/Polish cues, and a deterministic production-seed browser scenario source. Native acceptance and final CI remain pending.
+
 ## 0.3.40 — 2026-10-18
 
 - Add opt-in Stopwatch with a 180-physical-tick refreshable effect that freezes the living opponent's voluntary actions while ordinary simulation and network clocks continue.

@@ -3,6 +3,51 @@
 Records below are frozen against their named sources. Publication and later CI status are
 recorded in [release notes](https://github.com/liveweird/grenadiers/releases).
 
+## Invisible Bombs candidate — 2026-10-18 — local checks complete
+
+The v0.3.41 candidate activates the 600-physical-tick Invisible Bombs curse. Domain tests cover
+ordinary seed-31 collection, own and rival bombs, event-time Cloak/blindness audience intersections,
+exact expiry, current-state reveal, death ordering and overflow rollback. Gameplay v9 publishes an
+empty bomb list only to afflicted recipients while keeping live counts, flames, collision and full
+pre-filter validation authoritative; gameplay v8 remains pinned to its fourteen-item catalog.
+
+The required debug and release Rust suites pass 657 core tests and 198 server tests, with four
+explicit server performance tests ignored. The first sandboxed debug attempt is retained at
+`/tmp/grenadiers-v0341-core-server-debug.log`: 17 listener tests failed only because local binds
+returned `PermissionDenied`. The first authorized listener run then found one stale 15-item socket
+catalog assertion; after updating that exact assertion, debug and release pass at
+`/tmp/grenadiers-v0341-core-server-debug-final.log` and
+`/tmp/grenadiers-v0341-core-server-release.log`.
+
+The full shuffled web gate passes 59 files and 82,344 tests with 95.43% statements, 91.25%
+branches, 95.90% functions and 97.82% lines, plus production build, lint, Knip and generated
+contract checks (`/tmp/grenadiers-v0341-web-full-pass.log`). A later test-only uniqueness guard
+raises the focused v9 contract count to 65,545: all 65,536 masks plus nine focused guards pass.
+`/usr/bin/time -l` measured that exhaustive focused run at 2.59 seconds wall time and 793,378,816
+bytes maximum RSS (`/tmp/grenadiers-v0341-web-mask-final.log` and
+`/tmp/grenadiers-v0341-web-mask-cost.log`). A prior duplicate-catalog fixture caused a failed
+131,090-case reporter; its raw log and root stop record remain at
+`/tmp/grenadiers-v0341-web-focused-attempt2.log` and
+`/tmp/grenadiers-v0341-web-focused-attempt2-root-stop.log`. Its tee wrapper status is not treated
+as the child result. The new 16-entry/16-unique guard fails before future exhaustive enumeration.
+
+Rust coverage passes the 80% floor at 92.47% lines (13,527/14,629). E2E static checks pass 43
+scenario/spec pairs with typecheck and lint. Renderer diagnostics, repository size/pin checks,
+offline cargo-deny, offline npm audits, and strict validation of all three Kubernetes resources
+also pass. The source-only two-browser acceptance
+uses ordinary controls, EN desktop and PL 320px reduced motion, compositor crops and reconnect.
+It observes the domain T+600 expiry through the adjacent paired three-tick publication windows.
+Native Compose/Kubernetes execution and final CI remain pending.
+Independent browser review then corrected the source-only native proof without changing production
+code: blind P1 placement now derives its ID from P2's sighted stream while retaining P1's exact
+manual action, the compositor baseline is the same cell after pickup collection and before planting,
+and paired adjacent publication windows prove hidden-before/revealed-after state with the same
+current fuse. E2E typecheck, lint, Knip, 43-scenario parity, repository checks and diff checks pass
+after those corrections (`/tmp/grenadiers-v0341-review-e2e-static-final.log`). Independent final
+Rust/server and browser/API/E2E reviews are clear. Before freezing a native candidate, integrate
+the final Stopwatch release parent and all reviewed predecessor drivers; local feature checks
+do not certify an unintegrated release image.
+
 ## Stopwatch candidate — 2026-10-18 — local checks complete
 
 The v0.3.40 candidate activates an opt-in 180-physical-tick Stopwatch. A living holder freezes the

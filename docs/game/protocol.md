@@ -182,7 +182,7 @@ spawn/tie assignment uses actual round count rather than command epoch.
 Shared room views and snapshot metadata also carry the complete checked `settings`,
 `settingsRevision`, nullable original `settingsEditor`, and `availableItems`. Settings also
 carry `enabledItems`; v8 remains pinned to its fourteen-item Cloak catalog while active v9 has the
-fifteen-item Stopwatch catalog. Heart is enabled by default and every supported subset is allowed.
+sixteen-item Invisible-Bombs catalog. Heart is enabled by default and every supported subset is allowed.
 Only actual changes increment
 the settings revision and clear readiness; Ready commands acknowledge that exact revision.
 See [v6 settings and authority](protocol-v6.md) for bounds, no-op acknowledgements and edit locks.

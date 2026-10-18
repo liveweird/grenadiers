@@ -100,12 +100,12 @@ describe('original pixel-art geometry', () => {
     expect(flame.frames.map(({ visible }) => visible)).toEqual([true, false])
     const pickups = [
       'bombCapacity', 'blastRange', 'movementSpeed', 'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch', 'invisibilityCloak', 'goldenFlame', 'shortFuse',
-      'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls',
+      'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls', 'invisibleBombs',
     ] as const
     const counts = pickups.map((kind) => makePickup(kind) as unknown as Drawing)
       .map(({ rectangles = [] }) => rectangles.length)
-    expect(counts).toEqual([16, 14, 18, 23, 19, 17, 19, 16, 21, 15, 21, 22, 21, 20, 18, 22, 20, 21])
-    expect(Math.max(...counts)).toBeLessThanOrEqual(23)
+    expect(counts).toEqual([16, 14, 18, 23, 19, 17, 19, 16, 21, 15, 21, 22, 21, 20, 18, 22, 20, 21, 24])
+    expect(Math.max(...counts)).toBeLessThanOrEqual(24)
     const heart = makePickup('heart') as unknown as Drawing
     const colors = heart.rectangles?.map(({ color }) => color)
     expect(colors).toContain(PALETTE.brick)

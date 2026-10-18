@@ -1,9 +1,9 @@
 # Gameplay and presentation backlog
 
-TURN, CONFIG and the first ART slice are implemented. This v0.3.40 candidate contains fifteen
+TURN, CONFIG and the first ART slice are implemented. This v0.3.41 candidate contains sixteen
 optional pickups: Heart, Shield, Golden Flame, Short Fuse, Short Flame, Long Fuse, Reverse
 Controls, Diarrhea, Slow-foot, Piercing Bomb, Power Bomb, Remote Bomb, Landmine and Invisibility
-Cloak, plus Stopwatch. Local checks are recorded as they complete; this candidate still requires independent
+Cloak, Stopwatch and Invisible Bombs. Local checks are recorded as they complete; this candidate still requires independent
 reviews, fresh native acceptance and final CI. The other nine requested pickups remain outside this increment. Current publication status
 is recorded in [release notes](https://github.com/liveweird/grenadiers/releases), with source-bound
 acceptance records in [verification](../verification.md). Richer transitions and artwork remain

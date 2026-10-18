@@ -3,6 +3,40 @@
 Records below are frozen against their named sources. Publication and later CI status are
 recorded in [release notes](https://github.com/liveweird/grenadiers/releases).
 
+## Golden Flame corrected native acceptance — 2026-10-18 — fresh 58/58
+
+Clean source `b39f1b915aa4dc2b37707136af03224802d4347a`, archive SHA-256
+`86ed52ab0c4e6f5a7dc8a15ddf4eb9f1102a0b5fe14424599a5626295216fd52`, builds image
+`sha256:673f674f97f529a1dce143935c65d5aa8f7e525ff3f2ea9ae6f50e3154a124b0`.
+The saved image archive hashes to
+`806359661d891fc87a647145754b2c0b34824055234c8358e1be1ae7b7f6ad46`.
+Fresh acceptance passes **29/29 Compose and 29/29 Kubernetes**, first test attempts, one
+worker, zero retries and no carried results. Both targets retain all previous 26 cases plus
+Heart, Shield and Golden Flame. The Golden case proves ordinary generated collection,
+captured radius eight, natural detonation, reconnect, exact physical expiry and later base range.
+
+Four latency profiles retain 20 samples each, zero exceedances and zero CPU throttling.
+Local/shaped maxima are **49.836/167.982ms Compose** and **48.635/166.754ms Kubernetes**.
+Strict exact-200 JSON/no-store readiness probes, hardened runtime, external mode-0444 fixtures,
+six fresh pod UIDs, serial direct-pod forwarding and complete cleanup pass. Bounded initial
+transport-readiness probes retry until ready; the no-retry claim concerns browser test cases.
+Pinned archive-only Trivy finds zero fixable HIGH/CRITICAL vulnerabilities; strict Kubernetes
+1.33 validates all three resources. Scoped quiet acknowledgements concern named workers.
+
+All 22 reports and 58 configured PNGs verify, with no failure captures. Root visually checked
+the exposed desktop flame pickup and active Polish 320px view: clear icon and timer, contained
+stat labels and no overlap. The minor English desktop Equipment final-letter wrap remains a
+readability follow-up. Committed Golden screenshots are exact accepted copies. Independent
+final source/image/runtime/report/evidence audit is clear. The sealed 1,205-entry manifest
+hashes to `a3f3c3b31bc067e55c6863059d1d88d15d0b414cff66b14365a272071eb4dbff` under
+`/tmp/grenadiers-v0327-corrected-native-acceptance`; its 685-entry preparation manifest is intact.
+
+Local baseline remains **426 core, 181 server and two doctests** in each Rust profile, **91.39%**
+Rust line coverage; **320 web tests**, coverage **95.07/90.72/95.47/97.53%**, production/fixture
+builds and 30-scenario static parity pass. Independent implementation/integration reviews are
+clear. Exact-head CI and publication remain required. This post-acceptance update changes only
+documentation and screenshot copies. The failed catalog attempt below remains separate.
+
 ## Golden Flame shared catalog correction — 2026-10-18 — fresh acceptance pending
 
 The first native attempt against source `8cec8e89702e903f15c9a2d160a9d9543743ced9`

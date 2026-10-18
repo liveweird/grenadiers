@@ -63,6 +63,8 @@ and [Polish 320px](../screenshots/gameplay-v7-polish-320.png). Narrow screens us
 columns; desktop retains four. All eight labels and values wrap within their own cells.
 Accepted Heart examples: [exposed pickup on desktop](../screenshots/heart-desktop.png) and
 [equipped Heart in Polish at 320px](../screenshots/heart-polish-320.png).
+Accepted Shield examples: [exposed pickup on desktop](../screenshots/shield-desktop.png) and
+[active immunity in Polish at 320px](../screenshots/shield-polish-320.png).
 
 All active-v8 Playwright configurations disable raw framework traces because personal admission
 frames contain capabilities. Failure screenshots, public reports, and redacted summaries remain.

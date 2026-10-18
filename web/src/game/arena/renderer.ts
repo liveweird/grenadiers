@@ -24,7 +24,7 @@ export async function createArenaRenderer(host: HTMLElement): Promise<ArenaRende
     if (app.renderer) app.destroy({ removeView: true }, { children: true, context: true })
     throw error
   }
-  const scene = new ArenaScene()
+  const scene = new ArenaScene(app.renderer.resolution)
   app.stage.addChild(scene.root)
   app.canvas.setAttribute('aria-hidden', 'true')
   app.canvas.style.width = '100%'
@@ -33,9 +33,14 @@ export async function createArenaRenderer(host: HTMLElement): Promise<ArenaRende
   app.canvas.style.visibility = 'hidden'
   app.canvas.style.imageRendering = 'pixelated'
   host.appendChild(app.canvas)
-  app.ticker.add(() => scene.render(performance.now()))
   let destroyed = false
   let suspended = true
+  const restoreContext = (): void => {
+    scene.restoreContext()
+    if (!destroyed && !suspended) app.render()
+  }
+  app.canvas.addEventListener('webglcontextrestored', restoreContext)
+  app.ticker.add(() => scene.render(performance.now()))
   return {
     update(snapshot) {
       if (destroyed) return
@@ -59,6 +64,7 @@ export async function createArenaRenderer(host: HTMLElement): Promise<ArenaRende
       destroyed = true
       app.canvas.style.visibility = 'hidden'
       app.ticker.stop()
+      app.canvas.removeEventListener('webglcontextrestored', restoreContext)
       scene.reset()
       app.destroy({ removeView: true }, { children: true, context: true })
     },

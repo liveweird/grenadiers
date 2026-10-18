@@ -3,12 +3,12 @@
 Status: **TURN v0.3.16, CONFIG v0.3.17 and the first ART slice v0.3.18 are shipped**.
 The v0.3.19 equipment/effect core foundation is implemented and verified; no requested
 items are enabled in the published v0.3.21 rooms. The v0.3.25 Heart candidate now has domain,
-server, browser and pixel-art implementation with local checks and independent reviews clear;
-both debug/release profiles pass and native release acceptance is pending. The v0.3.26 Shield
-candidate adds opt-in timed immunity. The v0.3.27 Golden Flame and v0.3.28 Short Fuse
-candidates also pass local checks; native acceptance and final-head CI remain pending.
-The v0.3.29 Short Flame candidate also passes local checks and independent reviews; native acceptance is pending. The v0.3.30 Long Fuse candidate passes local checks and independent reviews; native acceptance remains pending. The other 16 requested pickups
-remain unimplemented. Richer transitions and further item artwork remain follow-up
+server, browser and pixel-art implementation with debug/release gates, independent reviews and
+native Compose/Kubernetes acceptance 54/54 clear. Final-head CI/publication remain pending;
+the v0.3.26 Shield, v0.3.27 Golden Flame, v0.3.28 Short Fuse, v0.3.29 Short Flame and
+v0.3.30 Long Fuse candidates pass local checks; native acceptance and final-head CI remain
+pending. The other 16 requested pickups remain unimplemented. Richer transitions and further
+item artwork remain follow-up
 work. See [pixel-art presentation](pixel-art.md) and [expanded item implementation](expanded-items.md).
 Updated 2026-10-18 after playtest feedback. Release acceptance is recorded in
 [verification](../verification.md).

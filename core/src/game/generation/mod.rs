@@ -196,18 +196,24 @@ fn generate_layers(
 }
 
 fn sample_pickup(source: &mut impl RandomWords, enabled: EnabledItems) -> Option<PickupKind> {
-    let value = match (enabled.contains_heart(), enabled.contains_shield()) {
-        (false, false) => sample_percent(source)?,
-        (true, false) => sample_below(source, 125)?,
-        (false, true) => sample_below(source, 115)?,
-        (true, true) => sample_below(source, 140)?,
+    let bound = 100
+        + u32::from(enabled.contains_heart()) * 25
+        + u32::from(enabled.contains_shield()) * 15
+        + u32::from(enabled.contains_golden_flame()) * 15;
+    let value = if bound == 100 {
+        sample_percent(source)?
+    } else {
+        sample_below(source, bound)?
     };
+    let heart_end = 100 + u32::from(enabled.contains_heart()) * 25;
+    let shield_end = heart_end + u32::from(enabled.contains_shield()) * 15;
     Some(match value {
         0..40 => PickupKind::BombCapacity,
         40..80 => PickupKind::BlastRange,
         80..100 => PickupKind::MovementSpeed,
-        100..125 if enabled.contains_heart() => PickupKind::Heart,
-        _ => PickupKind::Shield,
+        value if value < heart_end => PickupKind::Heart,
+        value if value < shield_end => PickupKind::Shield,
+        _ => PickupKind::GoldenFlame,
     })
 }
 
@@ -333,6 +339,9 @@ fn index(cell: CellId) -> usize {
     usize::from(cell.row) * usize::from(ARENA_WIDTH) + usize::from(cell.column)
 }
 
+#[cfg(test)]
+#[path = "golden_flame_tests.rs"]
+mod golden_flame_tests;
 #[cfg(test)]
 #[path = "shield_tests.rs"]
 mod shield_tests;

@@ -1,5 +1,4 @@
 use super::State;
-use crate::game::effects::EffectKind;
 use crate::game::events::{EventAudience, StepEvent, StepEventKind};
 use crate::game::pickups::{Pickup, PickupKind};
 use crate::game::simulation::StepError;
@@ -86,10 +85,14 @@ impl super::Actor {
                 self.inventory
                     .replace_equipment(crate::game::Equipment::Heart);
             }
-            PickupKind::Shield => {
+            PickupKind::Shield | PickupKind::GoldenFlame => {
+                let effect = pickup
+                    .kind()
+                    .timed_effect()
+                    .expect("timed pickups map to their effect");
                 self.effects
-                    .apply(EffectKind::Shield, tick)
-                    .map_err(|_| StepError::EffectExpiryOverflow(EffectKind::Shield))?;
+                    .apply(effect, tick)
+                    .map_err(|_| StepError::EffectExpiryOverflow(effect))?;
             }
         }
         Ok(())

@@ -12,6 +12,7 @@ pub enum PickupKind {
     MovementSpeed,
     Heart,
     Shield,
+    GoldenFlame,
 }
 
 impl PickupKind {
@@ -19,7 +20,16 @@ impl PickupKind {
         match self {
             Self::Heart => enabled.contains_heart(),
             Self::Shield => enabled.contains_shield(),
+            Self::GoldenFlame => enabled.contains_golden_flame(),
             _ => true,
+        }
+    }
+
+    pub(crate) const fn timed_effect(self) -> Option<super::EffectKind> {
+        match self {
+            Self::Shield => Some(super::EffectKind::Shield),
+            Self::GoldenFlame => Some(super::EffectKind::GoldenFlame),
+            _ => None,
         }
     }
 }

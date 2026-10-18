@@ -1,4 +1,4 @@
-# Gameplay v8: Expanded rooms, Heart and Shield
+# Gameplay v8: Expanded rooms and optional pickups
 
 The coordinated server/browser contract is `api/gameplay-v8.schema.json`, Rust
 `core::protocol::v8`, and generated `web/src/game/v8/schema.ts`. Reload older clients after
@@ -9,8 +9,8 @@ claim or revoke the credential needed for a version-8 connection.
 
 V8 adds rules version **5** and map ID **`generated_v2`**. Its own rules/map types leave the
 shared enums and schemas for earlier protocols unchanged. New production rooms are always
-Expanded v5/generator v2. They advertise `availableItems: ["heart", "shield"]` and initially enable
-`settings.enabledItems: ["heart"]`. Empty, Heart-only, Shield-only and combined sets are supported configurations.
+Expanded v5/generator v2. They advertise `availableItems: ["heart", "shield", "goldenFlame"]` and initially enable
+`settings.enabledItems: ["heart"]`. All eight subsets of those three available items are supported configurations.
 Other catalog IDs remain unavailable.
 
 The Classic settings preset disables optional items and restores the four ordinary settings.
@@ -59,3 +59,7 @@ masks fail validation. Record size remains at most 64 bytes and allocation below
 Message size remains 65,536 bytes, reports remain at most three consecutive updates, and
 oversize events/frames fail without truncation. Heart's conservative bound is 25 events per
 tick, or 75 in a three-report publication window, below the existing 96-event limit.
+
+Golden Flame adds or refreshes a 600-physical-tick effect. Actor `bombRange` stays the base
+upgrade value; each planted bomb exposes its captured range. Older v8 clients must reload to
+accept the extended availability list; deploy the paired server/browser build together.

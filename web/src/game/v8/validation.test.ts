@@ -25,7 +25,16 @@ describe('gameplay v8 validation and active profile', () => {
     expect(validateGameplayV8ServerMessage(message)).toEqual({ valid: true, value: message })
   })
 
-  it.each([[[]], [['heart']], [['shield']], [['heart', 'shield']]] as const)(
+  it.each([
+    [[]],
+    [['heart']],
+    [['shield']],
+    [['goldenFlame']],
+    [['heart', 'shield']],
+    [['heart', 'goldenFlame']],
+    [['shield', 'goldenFlame']],
+    [['heart', 'shield', 'goldenFlame']],
+  ] as const)(
     'accepts the supported enabled-item set %j', (enabledItems) => {
       const message = snapshot(2)
       message.room.settings.enabledItems = [...enabledItems]
@@ -52,11 +61,37 @@ describe('gameplay v8 validation and active profile', () => {
     expect(validateGameplayV8ServerMessage(message)).toEqual({ valid: true, value: message })
   })
 
+  it.each([1, 600])(
+    'accepts Golden Flame collection and effect at %s ticks alongside Shield', (remainingTicks) => {
+      const message = snapshot(3)
+      message.room.settings.enabledItems = ['shield', 'goldenFlame']
+      const actor = message.state.actors[0]
+      if (actor.type !== 'visible') throw new Error('expected visible actor')
+      actor.effects = [
+        { kind: 'shield', remainingTicks: 300 },
+        { kind: 'goldenFlame', remainingTicks },
+      ]
+      message.state.pickups = [{ cell: { column: 2, row: 2 }, kind: 'goldenFlame' }]
+      message.events = [{
+        tick: 1, index: 0, kind: {
+          type: 'pickupCollected', id: actor.id, seat: actor.seat,
+          cell: { column: 2, row: 2 }, kind: 'goldenFlame',
+        },
+      }]
+      expect(validateGameplayV8ServerMessage(message)).toEqual({ valid: true, value: message })
+    },
+  )
+})
+
+describe('gameplay v8 expanded-profile rejection', () => {
   it.each([
     ['wrong identities', (message: ReturnType<typeof snapshot>) => { message.room.rulesVersion = 4 }],
     ['unknown availability', (message: ReturnType<typeof snapshot>) => {
       message.room.availableItems = ['heart', 'stopwatch']
       message.room.settings.enabledItems = []
+    }],
+    ['noncanonical enabled order', (message: ReturnType<typeof snapshot>) => {
+      message.room.settings.enabledItems = ['goldenFlame', 'heart']
     }],
     ['disabled Heart pickup', (message: ReturnType<typeof snapshot>) => {
       message.room.settings.enabledItems = []
@@ -69,6 +104,17 @@ describe('gameplay v8 validation and active profile', () => {
     }],
     ['disabled Shield pickup', (message: ReturnType<typeof snapshot>) => {
       message.state.pickups = [{ cell: { column: 2, row: 2 }, kind: 'shield' }]
+    }],
+    ['disabled Golden Flame pickup', (message: ReturnType<typeof snapshot>) => {
+      message.state.pickups = [{ cell: { column: 2, row: 2 }, kind: 'goldenFlame' }]
+    }],
+    ['disabled Golden Flame collection', (message: ReturnType<typeof snapshot>) => {
+      message.events = [{
+        tick: 1, index: 0, kind: {
+          type: 'pickupCollected', id: 1, seat: 'one',
+          cell: { column: 2, row: 2 }, kind: 'goldenFlame',
+        },
+      }]
     }],
     ['future equipment', (message: ReturnType<typeof snapshot>) => {
       const actor = message.state.actors[0]
@@ -85,6 +131,10 @@ describe('gameplay v8 validation and active profile', () => {
     ['Shield effect while disabled', (message: ReturnType<typeof snapshot>) => {
       const actor = message.state.actors[0]
       if (actor.type === 'visible') actor.effects = [{ kind: 'shield', remainingTicks: 1 }]
+    }],
+    ['Golden Flame effect while disabled', (message: ReturnType<typeof snapshot>) => {
+      const actor = message.state.actors[0]
+      if (actor.type === 'visible') actor.effects = [{ kind: 'goldenFlame', remainingTicks: 1 }]
     }],
     ['disabled Heart grace', (message: ReturnType<typeof snapshot>) => {
       message.room.settings.enabledItems = []
@@ -118,5 +168,28 @@ describe('gameplay v8 validation and active profile', () => {
     if (actor.type !== 'visible') throw new Error('expected visible actor')
     actor.effects = [{ kind: 'shield', remainingTicks }]
     expect(validateGameplayV8ServerMessage(message)).toMatchObject({ valid: false, source: 'schema' })
+  })
+
+  it.each([0, 601])('rejects Golden Flame effect duration %s during structural validation', (remainingTicks) => {
+    const message = snapshot(4)
+    message.room.settings.enabledItems = ['goldenFlame']
+    const actor = message.state.actors[0]
+    if (actor.type !== 'visible') throw new Error('expected visible actor')
+    actor.effects = [{ kind: 'goldenFlame', remainingTicks }]
+    expect(validateGameplayV8ServerMessage(message)).toMatchObject({ valid: false, source: 'schema' })
+  })
+
+  it('rejects duplicate Golden Flame effects semantically', () => {
+    const message = snapshot(4)
+    message.room.settings.enabledItems = ['goldenFlame']
+    const actor = message.state.actors[0]
+    if (actor.type !== 'visible') throw new Error('expected visible actor')
+    actor.effects = [
+      { kind: 'goldenFlame', remainingTicks: 600 },
+      { kind: 'goldenFlame', remainingTicks: 1 },
+    ]
+    expect(validateGameplayV8ServerMessage(message)).toMatchObject({
+      valid: false, source: 'semantics', error: 'duplicateEffect',
+    })
   })
 })

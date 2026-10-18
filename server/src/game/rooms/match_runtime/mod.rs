@@ -36,5 +36,6 @@ mod test_support;
 #[cfg(test)]
 pub(in crate::game::rooms) use test_support::{
     absorb_generated_heart, collect_generated_heart, collect_generated_pickup,
-    expanded_heart_runtime, start_expanded_heart_round, start_shield_runtime, wait_clear,
+    expanded_heart_runtime, move_cells, plant, start_expanded_heart_round, start_optional_runtime,
+    start_shield_runtime, wait_clear,
 };

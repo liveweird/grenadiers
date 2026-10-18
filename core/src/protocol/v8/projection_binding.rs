@@ -166,7 +166,8 @@ pub(super) fn phase_allows_null_body(phase: &RoomPhase) -> bool {
 }
 
 pub(super) fn expanded_items() -> ItemSet {
-    ItemSet::new([ItemId::Heart, ItemId::Shield]).expect("expanded items are canonical")
+    ItemSet::new([ItemId::Heart, ItemId::Shield, ItemId::GoldenFlame])
+        .expect("expanded items are canonical")
 }
 
 pub(super) fn available_items(version: RulesVersion) -> ItemSet {

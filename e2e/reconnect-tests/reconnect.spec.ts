@@ -188,7 +188,7 @@ test('a browser restores its full live world and action floor before a fenced ta
         async () => runGuardedLegacyAxeAudit(page))).violations).toEqual([])
       expect(await diagnostics.phase('width', pageOrdinal,
         async () => readViewportFits(page))).toBe(true)
-      await diagnostics.phase('screenshot', pageOrdinal, async () => page.screenshot({
+      await diagnostics.screenshot(page, pageOrdinal, async () => page.screenshot({
         path: testInfo.outputPath(`recovery-${index}.png`), fullPage: true,
       }))
     }

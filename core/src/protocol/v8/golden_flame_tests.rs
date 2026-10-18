@@ -59,7 +59,7 @@ fn golden_flame_and_shield_publish_distinct_physical_timers_and_quiet_admission(
         let frame: serde_json::Value = serde_json::from_str(&frame).unwrap();
         assert_eq!(
             frame["room"]["availableItems"],
-            serde_json::json!(["heart", "shield", "goldenFlame", "shortFuse",])
+            serde_json::json!(["heart", "shield", "goldenFlame", "shortFuse", "shortFlame",])
         );
         assert_eq!(
             frame["state"]["actors"][0]["effects"],

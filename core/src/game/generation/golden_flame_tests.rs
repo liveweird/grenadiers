@@ -85,6 +85,7 @@ fn golden_enabled_generation_is_seeded_and_places_only_enabled_special_items() {
             PickupKind::Shield => enabled.contains_shield(),
             PickupKind::GoldenFlame => enabled.contains_golden_flame(),
             PickupKind::ShortFuse => enabled.contains_short_fuse(),
+            PickupKind::ShortFlame => enabled.contains_short_flame(),
             _ => true,
         }));
     }
@@ -135,6 +136,7 @@ fn signature(generated: &GeneratedArena) -> String {
                 Some(PickupKind::Shield) => 'D',
                 Some(PickupKind::GoldenFlame) => 'G',
                 Some(PickupKind::ShortFuse) => 'F',
+                Some(PickupKind::ShortFlame) => 'L',
                 None if generated.arena().blocks().contains(&cell) => '#',
                 None if generated.arena().terrain(cell) == Some(Terrain::Wall) => 'X',
                 None => '.',

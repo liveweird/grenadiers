@@ -105,6 +105,7 @@ describe('v8 private-state presentation', () => {
       { kind: 'shield', remainingTicks: 120 },
       { kind: 'goldenFlame', remainingTicks: 600 },
       { kind: 'shortFuse', remainingTicks: 599 },
+      { kind: 'shortFlame', remainingTicks: 1 },
     ]
     actor.damageGraceRemainingTicks = 60
     renderPanel(current)
@@ -116,6 +117,7 @@ describe('v8 private-state presentation', () => {
     expect(stats).toHaveTextContent('EffectsShield (0:02)')
     expect(stats).toHaveTextContent('Golden flame (0:10)')
     expect(stats).toHaveTextContent('Short fuse (0:10)')
+    expect(stats).toHaveTextContent('Short flame (0:01)')
     expect(stats).toHaveTextContent('Damage grace0:01')
     expect(screen.getByLabelText('Protected from damage')).toHaveTextContent('0:01')
     expect(stats).not.toHaveAttribute('role', 'status')

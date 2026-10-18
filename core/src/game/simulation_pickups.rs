@@ -85,7 +85,10 @@ impl super::Actor {
                 self.inventory
                     .replace_equipment(crate::game::Equipment::Heart);
             }
-            PickupKind::Shield | PickupKind::GoldenFlame | PickupKind::ShortFuse => {
+            PickupKind::Shield
+            | PickupKind::GoldenFlame
+            | PickupKind::ShortFuse
+            | PickupKind::ShortFlame => {
                 let effect = pickup
                     .kind()
                     .timed_effect()
@@ -98,3 +101,7 @@ impl super::Actor {
         Ok(())
     }
 }
+
+#[cfg(test)]
+#[path = "short_flame_tests.rs"]
+mod short_flame_tests;

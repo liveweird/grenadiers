@@ -106,4 +106,36 @@ describe('v8 arena presentation', () => {
     expect(presented.state.pickups).toEqual(current.snapshot!.state.pickups)
     expect(presented.room.presentationBaseline).toContain(':2:2:2')
   })
+
+  it('presents only current Short Flame state on a quiet reconnect snapshot', () => {
+    const current = state()
+    const own = current.snapshot!.state.actors[0]
+    if (own.type !== 'visible') throw new Error('expected visible own actor')
+    own.effects = [
+      { kind: 'goldenFlame', remainingTicks: 480 },
+      { kind: 'shortFlame', remainingTicks: 600 },
+    ]
+    current.snapshot!.state.pickups = [{ cell: { column: 2, row: 2 }, kind: 'shortFlame' }]
+    current.snapshot!.events = []
+    current.admissionBaseline = {
+      roomId: current.room!.roomId, revision: 9, tick: 42, physicalTick: 42,
+    }
+    const presented = presentSnapshot(current)!
+    expect(presented.state.actors[0]).toMatchObject({
+      goldenFlameRemainingTicks: 480, shortFlameRemainingTicks: 600,
+    })
+    expect(presented.state.pickups).toEqual(current.snapshot!.state.pickups)
+    expect(presented.room.presentationBaseline).toContain(':9:42:42')
+  })
+
+  it('does not turn historical collection events into a Short Flame cue', () => {
+    const current = state()
+    current.snapshot!.events = [{
+      tick: 1, index: 0, kind: {
+        type: 'pickupCollected', id: 1, seat: 'one',
+        cell: { column: 2, row: 2 }, kind: 'shortFlame',
+      },
+    }]
+    expect(presentSnapshot(current)?.state.actors[0].shortFlameRemainingTicks).toBe(0)
+  })
 })

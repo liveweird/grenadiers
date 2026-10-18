@@ -1,5 +1,32 @@
 # Repository verification
 
+## Short Flame candidate — 2026-10-18 — native acceptance pending
+
+The v0.3.29 candidate activates the opt-in Short Flame curse. Collection refreshes
+600 physical ticks of range-one captures for new bombs, with precedence over Golden Flame
+and independent effect timers. Existing bombs and base upgrades retain their values. The new
+weight is 15; all 32 supported masks preserve the sixteen previous generation paths and
+Heart-only defaults. The ordinary single-item seed fixture pins pickup cell (3,1).
+
+Independent domain and integration reviews are clear. Both profiles pass **457 core tests,
+183 server tests and two doctests**, with four dedicated performance profiles ignored.
+Formatting, Clippy and production build pass. Rust line coverage is **91.46% (12,203/13,342)**.
+All **367 web tests** across 39 files pass; statement/branch/function/line coverage is
+**95.11/90.83/95.47/97.56%**. Contract checks, lint, Knip, dependency audits, strict Kubernetes
+schemas 3/3 and E2E static parity **31 scenarios** pass. The first server-gate invocation was
+rejected by the Node pin guard; the complete gate passes with the required Node 24.21.0.
+An initial protocol test compile lacked its Tick import; the corrected focused and full suites
+pass. The frontend's first lint run found excessive settings-panel complexity; rendering its
+canonical item list resolves it, with the complete web gate passing afterward.
+
+Tests cover both Golden Flame expiry orders, fixed old/new bomb ranges, base upgrades,
+Short Fuse independence, blocker/chain geometry, all-layer transactional overflow and ordinary
+generated collection. Server replay compares full state while a cursed bomb is live before
+and after effect expiry, then again after round reset. The registered production-seed browser
+scenario checks actual one-cell fire reach, unchanged fuse timing on both peers, reconnect,
+exact expiry and later base-range damage. Its native playthrough, screenshots, same-image
+Compose/Kubernetes **31+31** acceptance and final-head CI remain pending. No release is claimed.
+
 ## Short Fuse candidate — 2026-10-18 — native acceptance pending
 
 The v0.3.28 candidate adds opt-in Short Fuse: a refreshable 600-physical-tick effect that

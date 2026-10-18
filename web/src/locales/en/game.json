@@ -110,6 +110,7 @@
     "shieldDescription": "Grants 5 seconds of damage immunity. Picking up another Shield refreshes it.",
     "goldenFlameDescription": "Maximizes new bomb blasts for 10 seconds. Picking up another Golden flame refreshes it.",
     "shortFuseDescription": "Halves the fuse of new bombs for 10 seconds. Picking up another Short fuse refreshes it.",
+    "shortFlameDescription": "Limits new bomb blasts to 1 tile for 10 seconds, overriding Golden flame. Existing bombs stay unchanged; range bonuses resume afterward. Another pickup refreshes it.",
     "unapplied": "Apply these changes before readying up.",
     "restore": "Restore match defaults",
     "classic": "Classic settings",

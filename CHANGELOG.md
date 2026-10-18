@@ -23,6 +23,7 @@
 - Fix connected takeover in production release builds by executing the binding-fence update
   outside debug assertions; verify replacement commands and stale-connection cleanup.
 - Require both debug and release workspace test suites in the server gate.
+- Avoid redundant actor pose visibility changes on unchanged frames and moving snapshots.
 - Retain one arena renderer across room and reconnect transitions; suspend and clear it
   between authoritative worlds, then paint the new baseline before revealing the canvas.
 - Stage a dormant gameplay-v7 contract for inventory, timed effects, typed bombs, hidden

@@ -188,7 +188,7 @@ export class ArenaScene {
       drawing.root.visible = actor.alive
       drawing.moving = Boolean(!reset && previousMotion
         && (previousMotion.toX !== toX || previousMotion.toY !== toY))
-      setActorPose(drawing, actor.heading, 0)
+      drawing.direction = actor.heading
     }
   }
 }

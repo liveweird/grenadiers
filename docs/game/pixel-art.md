@@ -36,3 +36,6 @@ tests accompany the artwork. Independent code and visual review is clear. The sa
 passes 24 scenarios each through Compose and Kubernetes, plus a separate native capture case.
 This first visual slice covers terrain, actors, bombs, flames and the existing three pickups;
 new item icons and richer death/destruction/collection transitions remain follow-up artwork.
+
+Actor pose visibility is assigned idempotently. Snapshot updates retain the current animation
+frame until rendering selects its final pose, avoiding intermediate visibility invalidations.

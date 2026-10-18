@@ -12,5 +12,7 @@ completed records, automatic countdowns, spawn parity, and fresh base world/upgr
 The final hold gates rematch. One player votes and withdraws, then both consent. The same
 two sockets return to occupied/unready Waiting with zero scores/count and no old world;
 readying again starts actual round one and resets bomb action IDs without replacing transport.
-Screenshots and Axe cover the actual desktop and 320-pixel match result. A core simulation
-trace separately proves the fixture's walkable corridor and same-tick shared-bomb draw.
+Screenshots and Axe cover the actual desktop and 320-pixel match result. Rendered text ranges for
+all eight HUD labels stay visible inside their own cells without overlapping, using four columns
+on the English desktop and two columns on the Polish 320-pixel view.
+A core simulation trace separately proves the fixture's walkable corridor and same-tick shared-bomb draw.

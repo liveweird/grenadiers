@@ -1,8 +1,19 @@
 # Repository verification
 
-## Short Flame terrain cache integration — 2026-10-18 — refreshed native acceptance pending
 Records below are frozen against their named sources. Publication and later CI status are
 recorded in [release notes](https://github.com/liveweird/grenadiers/releases).
+
+## Short Flame native timing hardening — 2026-10-18 — fresh acceptance pending
+
+A confirmed native Shield failure showed that language switching and full-page screenshots can
+consume several seconds of a ten-second effect window. Short Flame now captures the narrow Polish
+pickup layout before collection, then plants, proves the captured range, escapes, and observes the
+natural one-cell blast before checking the effect is still active and taking the active screenshot.
+Exact expiry, reconnect, later base-range damage, timeouts, and zero retries remain unchanged.
+E2E lint, Knip, type checking, repository guards, and 32-scenario static parity pass; the
+hardened native scenario remains pending and no native pass is claimed.
+
+## Short Flame terrain cache integration — 2026-10-18 — refreshed native acceptance pending
 
 The current terrain-cache/shared-diagnostics integration passes all 368 web tests, with coverage
 of 95.14/90.82/95.49/97.57% above the unchanged 85% floors, production and diagnostic-fixture builds, and E2E

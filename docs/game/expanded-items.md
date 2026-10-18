@@ -1,26 +1,29 @@
 # Expanded item implementation plan
 
-Status: the **Heart activation candidate is implemented and locally verified**, with native
-release acceptance still pending. Published v0.3.21 has no new optional pickups. The candidate
-introduces Expanded-v5/generator-v2 rooms and gameplay-v8; see [Heart](heart.md).
-Separate candidates add opt-in [Shield](shield.md) [Golden Flame](golden-flame.md) [Short Fuse](short-fuse.md) and [Short Flame](short-flame.md),
-retaining the same protocol and identities.
+Status: [Heart](heart.md), [Shield](shield.md) and [Golden Flame](golden-flame.md) are
+published through v0.3.27. The v0.3.28 [Short Fuse](short-fuse.md) candidate passes local
+checks, independent implementation/evidence reviews and fresh Compose/Kubernetes acceptance
+60/60. The v0.3.29 [Short Flame](short-flame.md) candidate passes domain, integration and
+final-parent checks; fresh native acceptance and final-head CI remain pending.
+Expanded-v5/generator-v2 rooms and gameplay-v8 are retained; see
+[verification](../verification.md) and
+[release notes](https://github.com/liveweird/grenadiers/releases).
 This optional track follows the [backlog](backlog.md), shared settings and
 pixel-art increments. The historical catalog in [rules](rules.md) is not an implementation
 claim. Each activation requires its own reviewed behavior, UI, documentation and acceptance.
 
-The foundation implements `core::game::{inventory,effects,damage}` and immutable Actor inventory,
-effect and derived-stat access. Production cannot inject items into State yet. Both fire checks
-share the damage gateway; effects/grace expire before movement and new bombs capture derived
+The v0.3.19 foundation introduced `core::game::{inventory,effects,damage}` and immutable Actor
+inventory, effect and derived-stat access. At that stage, production could not inject items into
+State. Both fire checks share the damage gateway; effects/grace expire before movement and new bombs capture derived
 range/fuse. Slow-foot exposes an exact speed ratio but does not change movement before activation.
 That foundational release enabled no item pickup, equipment action, visible effect, new rules
-profile or wire field. Heart activation is the later candidate described above.
+profile or wire field. Heart activation followed in v0.3.25.
 
-Independent review is clear after replacing overflow-prone Heart expiry with checked elapsed
-grace. The integrated gates pass 334 core tests, 163 server tests, two doctests and 230 web tests;
-four dedicated performance profiles remain intentionally ignored. Rust line coverage is 94.21%
-above the unchanged 80% floor. Dependency audits and strict Kubernetes schemas pass. The same
-image passes 24/24 scenarios through Compose and 24/24 through Kubernetes, retries zero,
+The historical foundation review cleared checked elapsed grace in place of overflow-prone Heart
+expiry. Its integrated gates passed 334 core tests, 163 server tests, two doctests and 230 web tests;
+four dedicated performance profiles were intentionally ignored. Rust line coverage was 94.21%
+above the unchanged 80% floor. Dependency audits and strict Kubernetes schemas passed. The same
+image passed 24/24 scenarios through Compose and 24/24 through Kubernetes, retries zero,
 including a recheck of the corrected default browser harness. See [verification](../verification.md)
 for image identity, the final evidence rollup and its limits.
 

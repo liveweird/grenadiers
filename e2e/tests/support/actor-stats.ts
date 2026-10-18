@@ -23,7 +23,7 @@ const LABELS: Record<keyof ActorStatsExpectation, string> = {
   capacity: 'Bomb capacity',
   range: 'Blast range',
   speed: 'Speed level',
-  equipment: 'Equipment',
+  equipment: 'Gear',
   weapon: 'Bomb type',
   effects: 'Effects',
   damageGrace: 'Damage grace',

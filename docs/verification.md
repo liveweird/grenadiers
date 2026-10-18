@@ -3,6 +3,21 @@
 Records below are frozen against their named sources. Publication and later CI status are
 recorded in [release notes](https://github.com/liveweird/grenadiers/releases).
 
+## Golden Flame shared catalog correction — 2026-10-18 — fresh acceptance pending
+
+The first native attempt against source `8cec8e89702e903f15c9a2d160a9d9543743ced9`
+passed seven default Compose cases and failed the eighth: the shared round scenario still
+expected the earlier Heart/Shield catalog, while the server correctly advertised Golden Flame
+as well. The dedicated Golden Flame scenario already expected the correct three-item catalog.
+The corrected shared scenario retains an exact ordered catalog assertion and the independent
+empty enabled-item settings assertion. No production behavior, timeout or retry policy changes. E2E lint, Knip, type checking,
+repository guards and 30-scenario static parity pass.
+
+No later Compose group, Kubernetes or latency case ran. The failed first attempt remains sealed
+at `/tmp/grenadiers-v0327-native-acceptance`, 742-entry manifest SHA-256
+`fb3bfe8eed1669168f18792a470aa1b33af80fd95c48ca0caa8f055b40963714`. Its seven passes
+are not carried forward. A complete fresh 58-case native matrix is required for the correction.
+
 ## Golden Flame native timing hardening — 2026-10-18 — fresh acceptance pending
 
 A confirmed native Shield failure showed that language switching and full-page screenshots can

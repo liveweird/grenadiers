@@ -1,5 +1,34 @@
 # Repository verification
 
+## Screenshot substage diagnostics — 2026-10-18 — attribution pending
+
+Exact guarded-audit head `1549e8fe75c3ea2e0bb97abc90714b93f304d42d` fails the browser job in
+both hosted evaluations (`39087361314` push, `39087363884` PR); the eight other checks pass.
+Both audits and width checks complete promptly with zero temporary-page events. Push width
+commands take29.1/7.3 ms; screenshot intervals are34.0/88.8 seconds before timeout. PR width
+commands take11.1/20.4 ms; screenshot intervals are66.0/155.0 seconds before the timed-out
+result. High-level returned boundaries also run on errors and do not prove successful capture.
+Retained heartbeats continue promptly, while Node event-loop maxima stay94.7/113.2 ms.
+Artifacts and decoded steps remain under `/tmp/grenadiers-v22-guarded-ci-{push,pr}-*`.
+
+The next E2E-only probe uses pinned Playwright1.63.0 instance-local hooks to time original
+viewport, preparation, font-progress, full-page-size, layout-metrics, capture and restoration
+stages. It records only fixed labels, ordinals, clocks and success/error flags in a separate
+128-event buffer. Arguments, results, metadata, error text, screenshot bytes and paths are not
+retained. Original method receiver, arguments, return/promise identity and errors pass through.
+Cleanup restores descriptors/listeners and deactivates recording before pending work settles.
+Unsupported versions or private shapes fail explicitly; production sources are unchanged.
+
+Independent review is clear after closing a late-promise-recording lifecycle defect. Regressions
+prove pending resolve/reject and retained listener callbacks cannot mutate the stopped buffer.
+Full E2E static gates and parity26 pass; the existing pure Chromium case passes1/1 in3.1 seconds,
+including an actual safe static full-page screenshot with all nine stage labels. The initial
+sandbox launch failure occurs before test execution; the permitted run is recorded separately.
+Existing screenshot options, ordering, gameplay/accessibility assertions,120-second deadline
+and zero retries remain unchanged. One native attribution evaluation is pending; no screenshot
+substage or cause is asserted from the high-level timing alone.
+
+
 ## Guarded single-frame accessibility experiment — 2026-10-18 — native verified
 
 Only the reconnect accessibility audits switch to Axe's legacy single-document path, avoiding

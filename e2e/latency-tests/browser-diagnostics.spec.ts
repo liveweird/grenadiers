@@ -4,6 +4,9 @@ import { startBrowserStallDiagnostics } from '../tests/support/browser-stall-dia
 import { readViewportFits } from '../tests/support/diagnostic-phases'
 import { GameControlRecorder } from '../tests/support/duel'
 import { runGuardedLegacyAxeAudit, type LegacyAxeAudit } from '../tests/support/guarded-axe-audit'
+import {
+  exerciseActualScreenshotStages, exerciseSyntheticScreenshotStages,
+} from './screenshot-stage-fixtures'
 
 function violationRuleIds(result: Awaited<ReturnType<AxeBuilder['analyze']>>): string[] {
   return result.violations.map((violation) => violation.id).sort()
@@ -173,6 +176,7 @@ async function publishSyntheticHeartbeats(page: Page, credential: string, socket
 
 test('game control diagnostics stay bounded and exclude transport secrets', async ({ browser }) => {
   await exerciseGuardedLegacyAudit(browser)
+  await exerciseSyntheticScreenshotStages()
   const recorder = new GameControlRecorder()
   for (let index = 0; index < 100; index += 1) recorder.addSocket()
   const socket = recorder.addSocket()
@@ -217,10 +221,8 @@ test('game control diagnostics stay bounded and exclude transport secrets', asyn
     tick: 700, revision: 600,
   })
   const publicReport = JSON.stringify(recorder.diagnostics)
-  expect(publicReport).not.toContain(credential)
-  expect(publicReport).not.toContain(capability)
-  expect(publicReport).not.toContain(socketUrl)
-  expect(publicReport).not.toContain('message')
+  for (const secret of [credential, capability, socketUrl, 'message'])
+    expect(publicReport).not.toContain(secret)
 
   const diagnostics = startBrowserStallDiagnostics()
   const context = await browser.newContext()
@@ -253,6 +255,8 @@ test('game control diagnostics stay bounded and exclude transport secrets', asyn
       { label: 'width', boundary: 'returned', pageOrdinal: 1 },
     ])
     expect(diagnostics.summary().phases.at(-2)!.nodeAt).toBeLessThanOrEqual(diagnostics.summary().phases.at(-1)!.nodeAt)
+
+    await exerciseActualScreenshotStages(page, diagnostics)
 
     const temporaryPage = await context.newPage()
     await temporaryPage.close()

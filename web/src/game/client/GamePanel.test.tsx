@@ -104,16 +104,18 @@ describe('v8 private-state presentation', () => {
     actor.effects = [
       { kind: 'shield', remainingTicks: 120 },
       { kind: 'goldenFlame', remainingTicks: 600 },
+      { kind: 'shortFuse', remainingTicks: 599 },
     ]
     actor.damageGraceRemainingTicks = 60
     renderPanel(current)
 
     const stats = screen.getByLabelText('Player one upgrades')
     expect(stats).toHaveTextContent('Bombs available1')
-    expect(stats).toHaveTextContent('EquipmentHeart')
+    expect(stats).toHaveTextContent('GearHeart')
     expect(stats).toHaveTextContent('Bomb typeRemote bomb')
     expect(stats).toHaveTextContent('EffectsShield (0:02)')
     expect(stats).toHaveTextContent('Golden flame (0:10)')
+    expect(stats).toHaveTextContent('Short fuse (0:10)')
     expect(stats).toHaveTextContent('Damage grace0:01')
     expect(screen.getByLabelText('Protected from damage')).toHaveTextContent('0:01')
     expect(stats).not.toHaveAttribute('role', 'status')

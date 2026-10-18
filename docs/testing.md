@@ -135,3 +135,11 @@ Golden Flame has a separate production-seed scenario:
 Use `docker-compose.golden-flame.yaml` with the same image and wait for readiness after
 recreating the service. It checks generated collection, captured maximum range, exact deadline,
 reconnect and restored base range. See [deployment](deployment.md#reproduce-opt-in-golden-flame-range).
+
+Short Fuse has a separate production-seed scenario:
+`E2E_SHORT_FUSE_FIXTURE=arena-v2-short-fuse npm --prefix e2e run test:short-fuse`.
+Use `docker-compose.short-fuse.yaml` with the same image and wait for readiness after
+recreation. The scenario selects a five-second base fuse, verifies a captured 150-tick
+shortened fuse on both peers and natural detonation, reconnects without extending the
+effect, and verifies a later ordinary 300-tick bomb after expiry.
+See [deployment](deployment.md#reproduce-opt-in-short-fuse-timing).

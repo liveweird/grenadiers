@@ -159,13 +159,12 @@ fn capture_arena(arena: &game::ArenaView) -> Result<ArenaView, ProjectionError> 
 fn capture_bomb(bomb: game::BombView, at: game::Tick) -> Result<BombView, ProjectionError> {
     let trigger = match bomb.trigger {
         game::BombTrigger::Timed { detonates_at } => {
-            let remaining = match detonates_at.0.cmp(&at.0) {
-                std::cmp::Ordering::Less | std::cmp::Ordering::Equal => 0,
-                std::cmp::Ordering::Greater => detonates_at
-                    .0
-                    .checked_sub(at.0)
-                    .ok_or(ProjectionError::InvalidBombs)?,
-            };
+            // Preserve the absolute deadline check before a zero observation can alias
+            // another allowed captured duration in a frozen result.
+            let remaining = detonates_at
+                .0
+                .checked_sub(at.0)
+                .ok_or(ProjectionError::InvalidBombs)?;
             BombTrigger::timed(
                 u16::try_from(remaining).map_err(|_| ProjectionError::InvalidBombs)?,
                 false,
@@ -320,6 +319,7 @@ fn wire_pickup(value: game::PickupKind) -> PickupKind {
         game::PickupKind::Heart => PickupKind::Heart,
         game::PickupKind::Shield => PickupKind::Shield,
         game::PickupKind::GoldenFlame => PickupKind::GoldenFlame,
+        game::PickupKind::ShortFuse => PickupKind::ShortFuse,
     }
 }
 

@@ -87,13 +87,21 @@ export function makePickup(kind: RenderablePickupKind): Graphics {
       [17, 18, 15, 4], [16, 22, 17, 6], [18, 28, 13, 4], [21, 32, 7, 3],
     ])
     pixels(drawing, PALETTE.blueLight, [[18, 19, 9, 3], [18, 22, 4, 5]])
-  } else {
+  } else if (kind === 'goldenFlame') {
     pixels(drawing, PALETTE.deepInk, [
       [16, 32, 17, 4], [13, 25, 23, 7], [17, 17, 15, 10], [22, 12, 7, 8],
     ])
     pixels(drawing, PALETTE.flame, [[16, 25, 17, 6], [19, 18, 11, 10], [23, 13, 5, 9]])
     pixels(drawing, PALETTE.flameLight, [[20, 24, 9, 5], [22, 18, 6, 9], [24, 15, 3, 7]])
     pixels(drawing, PALETTE.flameCore, [[23, 22, 4, 7], [24, 18, 2, 5]])
+  } else {
+    pixels(drawing, PALETTE.deepInk, [
+      [15, 22, 18, 13], [18, 18, 12, 20], [29, 16, 4, 8], [32, 13, 5, 5],
+    ])
+    pixels(drawing, PALETTE.ink, [[18, 22, 12, 12], [21, 19, 7, 4]])
+    pixels(drawing, PALETTE.blueLight, [[19, 23, 4, 5]])
+    pixels(drawing, PALETTE.flame, [[35, 10, 4, 5], [38, 14, 4, 4], [31, 10, 3, 3]])
+    pixels(drawing, PALETTE.flameCore, [[36, 12, 3, 3]])
   }
   return drawing
 }

@@ -362,3 +362,6 @@ fn short_fuse_pickups_are_rejected_in_every_layer_unless_enabled() {
         );
     }
 }
+
+#[path = "long_fuse_tests.rs"]
+mod long_fuse_tests;

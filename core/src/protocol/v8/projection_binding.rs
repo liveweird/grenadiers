@@ -62,20 +62,25 @@ fn canonical_gameplay(version: RulesVersion, capture: &ExpandedCapture, fuse_tic
     let world = &capture.world.0;
     let classic = version != RulesVersion::ExpandedV5;
     let short_fuse = !classic && world.enabled_items.contains(ItemId::ShortFuse);
-    world
-        .bombs
-        .iter()
-        .all(|bomb| canonical_bomb(world.physical_tick, *bomb, fuse_ticks, short_fuse))
-        && (!classic
-            || (world.actors.iter().all(|actor| {
-                actor.inventory.equipment.is_none()
-                    && actor.inventory.weapon.is_none()
-                    && actor.effects.as_slice().is_empty()
-                    && actor.damage_grace_remaining_ticks.get() == 0
-            }) && world
-                .pickups
-                .iter()
-                .all(|pickup| classic_pickup(pickup.kind))))
+    let long_fuse = !classic && world.enabled_items.contains(ItemId::LongFuse);
+    world.bombs.iter().all(|bomb| {
+        canonical_bomb(
+            world.physical_tick,
+            *bomb,
+            fuse_ticks,
+            short_fuse,
+            long_fuse,
+        )
+    }) && (!classic
+        || (world.actors.iter().all(|actor| {
+            actor.inventory.equipment.is_none()
+                && actor.inventory.weapon.is_none()
+                && actor.effects.as_slice().is_empty()
+                && actor.damage_grace_remaining_ticks.get() == 0
+        }) && world
+            .pickups
+            .iter()
+            .all(|pickup| classic_pickup(pickup.kind))))
         && capture
             .reports
             .0
@@ -85,10 +90,10 @@ fn canonical_gameplay(version: RulesVersion, capture: &ExpandedCapture, fuse_tic
                 (!classic || event.audience == crate::game::EventAudience::Both)
                     && match event.kind {
                         EventKind::BombPlaced { bomb } => {
-                            canonical_bomb(event.tick, bomb, fuse_ticks, short_fuse)
+                            canonical_bomb(event.tick, bomb, fuse_ticks, short_fuse, long_fuse)
                         }
                         EventKind::BombDetonated { bomb } => {
-                            canonical_bomb(event.tick, bomb, fuse_ticks, short_fuse)
+                            canonical_bomb(event.tick, bomb, fuse_ticks, short_fuse, long_fuse)
                         }
                         EventKind::PickupCollected { kind, .. } => !classic || classic_pickup(kind),
                         EventKind::DamagePrevented { .. } => !classic,
@@ -102,10 +107,15 @@ fn canonical_bomb(
     bomb: super::BombView,
     base_fuse: u64,
     short_fuse: bool,
+    long_fuse: bool,
 ) -> bool {
     bomb.blast == BlastKind::Standard
         && (timed_fuse_at(at, bomb, base_fuse)
-            || (short_fuse && timed_fuse_at(at, bomb, base_fuse.div_ceil(2).max(1))))
+            || (short_fuse && timed_fuse_at(at, bomb, base_fuse.div_ceil(2).max(1)))
+            || (long_fuse
+                && base_fuse
+                    .checked_mul(2)
+                    .is_some_and(|fuse| timed_fuse_at(at, bomb, fuse))))
 }
 
 fn timed_fuse_at(at: crate::protocol::Tick, bomb: super::BombView, fuse_ticks: u64) -> bool {
@@ -184,6 +194,7 @@ pub(super) fn expanded_items() -> ItemSet {
         ItemId::GoldenFlame,
         ItemId::ShortFuse,
         ItemId::ShortFlame,
+        ItemId::LongFuse,
     ])
     .expect("expanded items are canonical")
 }
@@ -218,5 +229,33 @@ pub(super) fn generation_matches(
         ) => record.version() == crate::game::GENERATOR_VERSION,
         (RulesVersion::ExpandedV5, Some(record)) => record.version() == EXPANDED_GENERATOR_VERSION,
         _ => false,
+    }
+}
+
+#[cfg(test)]
+mod fuse_policy_tests {
+    use super::canonical_bomb;
+    use crate::protocol::v8::{BlastKind, BombTrigger, BombView};
+    use crate::protocol::{Cell, EntityId, Tick};
+
+    fn bomb(duration: u16) -> BombView {
+        BombView {
+            id: EntityId::new(1),
+            cell: Cell::new(1, 1).unwrap(),
+            owner: EntityId::new(2),
+            range: 2,
+            placed_at: Tick::new(10).unwrap(),
+            trigger: BombTrigger::timed(duration, false).unwrap(),
+            blast: BlastKind::Standard,
+        }
+    }
+
+    #[test]
+    fn odd_policy_accepts_base_half_and_double_historical_captures() {
+        let at = Tick::new(10).unwrap();
+        assert!(canonical_bomb(at, bomb(181), 181, true, true));
+        assert!(canonical_bomb(at, bomb(91), 181, true, true));
+        assert!(canonical_bomb(at, bomb(362), 181, true, true));
+        assert!(!canonical_bomb(at, bomb(180), 181, true, true));
     }
 }

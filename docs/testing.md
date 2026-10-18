@@ -150,3 +150,9 @@ Use `docker-compose.short-flame.yaml` with the same image and wait for readiness
 recreation. It verifies range-one captures and actual fire stopping before the second cell
 of a known clear ray, independent ordinary fuse timing, reconnect, exact expiry and later
 base-range damage. See [deployment](deployment.md#reproduce-opt-in-short-flame-range).
+
+Long Fuse has a separate production-seed scenario:
+`E2E_LONG_FUSE_FIXTURE=arena-v2-long-fuse npm --prefix e2e run test:long-fuse`.
+Use `docker-compose.long-fuse.yaml` with the same image. It verifies generated collection,
+captured 240-tick timing from a 120-tick base, exact expiry, and restored ordinary timing.
+See [deployment](deployment.md#reproduce-opt-in-long-fuse-timing).

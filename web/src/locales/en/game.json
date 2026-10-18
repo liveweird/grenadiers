@@ -111,6 +111,7 @@
     "goldenFlameDescription": "Maximizes new bomb blasts for 10 seconds. Picking up another Golden flame refreshes it.",
     "shortFuseDescription": "Halves the fuse of new bombs for 10 seconds. Picking up another Short fuse refreshes it.",
     "shortFlameDescription": "Limits new bomb blasts to 1 tile for 10 seconds, overriding Golden flame. Existing bombs stay unchanged; range bonuses resume afterward. Another pickup refreshes it.",
+    "longFuseDescription": "Doubles the fuse of new bombs for 10 seconds. Short and Long fuse cancel while both are active; existing bombs stay unchanged. Another pickup refreshes it.",
     "unapplied": "Apply these changes before readying up.",
     "restore": "Restore match defaults",
     "classic": "Classic settings",

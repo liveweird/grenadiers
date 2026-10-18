@@ -102,13 +102,19 @@ export function makePickup(kind: RenderablePickupKind): Graphics {
     pixels(drawing, PALETTE.blueLight, [[19, 23, 4, 5]])
     pixels(drawing, PALETTE.flame, [[35, 10, 4, 5], [38, 14, 4, 4], [31, 10, 3, 3]])
     pixels(drawing, PALETTE.flameCore, [[36, 12, 3, 3]])
-  } else {
+  } else if (kind === 'shortFlame') {
     pixels(drawing, PALETTE.deepInk, [
       [16, 31, 17, 4], [18, 24, 13, 8], [21, 18, 7, 8], [23, 14, 3, 6],
     ])
     pixels(drawing, PALETTE.blue, [[19, 28, 11, 4], [21, 23, 7, 6], [23, 18, 3, 7]])
     pixels(drawing, PALETTE.blueLight, [[23, 25, 3, 4], [24, 20, 2, 4]])
     pixels(drawing, PALETTE.brick, [[14, 15, 4, 4], [31, 15, 4, 4], [13, 34, 23, 3]])
+  } else {
+    pixels(drawing, PALETTE.deepInk, [[11, 24, 22, 12], [15, 20, 14, 18], [28, 16, 5, 10], [31, 12, 9, 5]])
+    pixels(drawing, PALETTE.ink, [[14, 25, 16, 9], [18, 22, 9, 4]])
+    pixels(drawing, PALETTE.blueLight, [[16, 26, 4, 5]])
+    pixels(drawing, PALETTE.flame, [[39, 9, 4, 5], [42, 13, 4, 4]])
+    pixels(drawing, PALETTE.flameCore, [[40, 11, 3, 3]])
   }
   return drawing
 }

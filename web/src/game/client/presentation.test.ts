@@ -138,4 +138,21 @@ describe('v8 arena presentation', () => {
     }]
     expect(presentSnapshot(current)?.state.actors[0].shortFlameRemainingTicks).toBe(0)
   })
+
+  it('presents Long Fuse pickup and quiet authoritative timer independently', () => {
+    const current = state()
+    const own = current.snapshot!.state.actors[0]
+    if (own.type !== 'visible') throw new Error('expected visible own actor')
+    own.effects = [
+      { kind: 'shortFuse', remainingTicks: 120 },
+      { kind: 'longFuse', remainingTicks: 600 },
+    ]
+    current.snapshot!.state.pickups = [{ cell: { column: 2, row: 2 }, kind: 'longFuse' }]
+    current.snapshot!.events = []
+    const presented = presentSnapshot(current)!
+    expect(presented.state.actors[0]).toMatchObject({
+      shortFuseRemainingTicks: 120, longFuseRemainingTicks: 600,
+    })
+    expect(presented.state.pickups).toEqual(current.snapshot!.state.pickups)
+  })
 })

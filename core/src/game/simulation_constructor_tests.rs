@@ -183,6 +183,7 @@ fn legacy_profiles_reject_enabled_settings_and_opt_in_items_in_every_layer() {
         PickupKind::GoldenFlame,
         PickupKind::ShortFuse,
         PickupKind::ShortFlame,
+        PickupKind::LongFuse,
     ] {
         for layer in 0..3 {
             let cell = CellId::new(8, 5);

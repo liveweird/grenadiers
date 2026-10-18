@@ -69,6 +69,14 @@ pub(in crate::game::rooms) fn start_optional_runtime(
     enabled: grenadiers_core::game::EnabledItems,
     seed_byte: u8,
 ) -> MatchRuntime {
+    start_optional_runtime_with_fuse(enabled, seed_byte, 180)
+}
+
+pub(in crate::game::rooms) fn start_optional_runtime_with_fuse(
+    enabled: grenadiers_core::game::EnabledItems,
+    seed_byte: u8,
+    fuse_ticks: u64,
+) -> MatchRuntime {
     let mut runtime = MatchRuntime::new(
         identity(RoomProfile::ExpandedV5),
         RoundSeedSource::with_entropy(move |bytes| {
@@ -83,7 +91,14 @@ pub(in crate::game::rooms) fn start_optional_runtime(
             1,
             MatchAction::UpdateSettings {
                 settings_revision: 1,
-                settings: grenadiers_core::room::RoomSettings::DEFAULT.with_enabled_items(enabled),
+                settings: grenadiers_core::room::RoomSettings::new(
+                    grenadiers_core::game::SpeedLevel::Base,
+                    256,
+                    3,
+                    fuse_ticks,
+                )
+                .unwrap()
+                .with_enabled_items(enabled),
             },
         )
         .unwrap();

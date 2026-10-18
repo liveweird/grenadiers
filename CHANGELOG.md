@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.30 — 2026-10-18
+
+- Prepare the opt-in Long Fuse curse: generated pickups double the fuse captured by newly placed bombs for 10 seconds.
+- Keep planted bomb schedules immutable and make simultaneous Short Fuse and Long Fuse effects cancel for new placements while their timers remain independent.
+- Add Long Fuse lobby controls, English and Polish HUD presentation, protocol validation, and focused automated scenarios. Native acceptance and CI publication remain pending.
+
 ## 0.3.29 — 2026-10-18
 
 - Add opt-in Short Flame curses: ten seconds of refreshable range-one captures for newly

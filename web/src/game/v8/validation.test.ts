@@ -25,7 +25,7 @@ describe('gameplay v8 validation and active profile', () => {
     expect(validateGameplayV8ServerMessage(message)).toEqual({ valid: true, value: message })
   })
 
-  const supported = ['heart', 'shield', 'goldenFlame', 'shortFuse', 'shortFlame'] as const
+  const supported = ['heart', 'shield', 'goldenFlame', 'shortFuse', 'shortFlame', 'longFuse'] as const
   const subsets = Array.from({ length: 2 ** supported.length }, (_, mask) => [
     supported.filter((_, index) => (mask & (1 << index)) !== 0),
   ] as const)
@@ -123,6 +123,25 @@ describe('gameplay v8 validation and active profile', () => {
       expect(validateGameplayV8ServerMessage(message)).toEqual({ valid: true, value: message })
     },
   )
+
+  it.each([1, 600])(
+    'accepts Long Fuse collection and independent Short Fuse timers at %s ticks', (remainingTicks) => {
+      const message = snapshot(3)
+      message.room.settings.enabledItems = ['shortFuse', 'longFuse']
+      const actor = message.state.actors[0]
+      if (actor.type !== 'visible') throw new Error('expected visible actor')
+      actor.effects = [
+        { kind: 'shortFuse', remainingTicks: 240 },
+        { kind: 'longFuse', remainingTicks },
+      ]
+      message.state.pickups = [{ cell: { column: 2, row: 2 }, kind: 'longFuse' }]
+      message.events = [{ tick: 1, index: 0, kind: {
+        type: 'pickupCollected', id: actor.id, seat: actor.seat,
+        cell: { column: 2, row: 2 }, kind: 'longFuse',
+      } }]
+      expect(validateGameplayV8ServerMessage(message)).toEqual({ valid: true, value: message })
+    },
+  )
 })
 
 describe('gameplay v8 expanded-profile rejection', () => {
@@ -208,6 +227,10 @@ describe('gameplay v8 expanded-profile rejection', () => {
       const actor = message.state.actors[0]
       if (actor.type === 'visible') actor.effects = [{ kind: 'shortFlame', remainingTicks: 1 }]
     }],
+    ['Long Fuse effect while disabled', (message: ReturnType<typeof snapshot>) => {
+      const actor = message.state.actors[0]
+      if (actor.type === 'visible') actor.effects = [{ kind: 'longFuse', remainingTicks: 1 }]
+    }],
     ['disabled Heart grace', (message: ReturnType<typeof snapshot>) => {
       message.room.settings.enabledItems = []
       const actor = message.state.actors[0]
@@ -232,7 +255,9 @@ describe('gameplay v8 expanded-profile rejection', () => {
       valid: false, source: 'semantics', error: 'unsupportedProfile',
     })
   })
+})
 
+describe('gameplay v8 effect rejection', () => {
   it.each([0, 301])('rejects Shield effect duration %s during structural validation', (remainingTicks) => {
     const message = snapshot(4)
     message.room.settings.enabledItems = ['heart', 'shield']
@@ -241,7 +266,6 @@ describe('gameplay v8 expanded-profile rejection', () => {
     actor.effects = [{ kind: 'shield', remainingTicks }]
     expect(validateGameplayV8ServerMessage(message)).toMatchObject({ valid: false, source: 'schema' })
   })
-
   it.each([0, 601])('rejects Golden Flame effect duration %s during structural validation', (remainingTicks) => {
     const message = snapshot(4)
     message.room.settings.enabledItems = ['goldenFlame']
@@ -309,5 +333,36 @@ describe('gameplay v8 expanded-profile rejection', () => {
     expect(validateGameplayV8ServerMessage(message)).toMatchObject({
       valid: false, source: 'semantics', error: 'duplicateEffect',
     })
+  })
+
+  it.each([0, 601])('rejects Long Fuse effect duration %s during structural validation', (remainingTicks) => {
+    const message = snapshot(4)
+    message.room.settings.enabledItems = ['longFuse']
+    const actor = message.state.actors[0]
+    if (actor.type !== 'visible') throw new Error('expected visible actor')
+    actor.effects = [{ kind: 'longFuse', remainingTicks }]
+    expect(validateGameplayV8ServerMessage(message)).toMatchObject({ valid: false, source: 'schema' })
+  })
+
+  it('rejects duplicate Long Fuse effects semantically', () => {
+    const message = snapshot(4)
+    message.room.settings.enabledItems = ['longFuse']
+    const actor = message.state.actors[0]
+    if (actor.type !== 'visible') throw new Error('expected visible actor')
+    actor.effects = [
+      { kind: 'longFuse', remainingTicks: 600 },
+      { kind: 'longFuse', remainingTicks: 1 },
+    ]
+    expect(validateGameplayV8ServerMessage(message)).toMatchObject({
+      valid: false, source: 'semantics', error: 'duplicateEffect',
+    })
+  })
+})
+
+it('rejects a disabled Long Fuse pickup', () => {
+  const message = snapshot(3)
+  message.state.pickups = [{ cell: { column: 2, row: 2 }, kind: 'longFuse' }]
+  expect(validateGameplayV8ServerMessage(message)).toMatchObject({
+    valid: false, source: 'semantics', error: 'unsupportedProfile',
   })
 })

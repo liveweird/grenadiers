@@ -40,3 +40,6 @@ new item icons and richer death/destruction/collection transitions remain follow
 Golden Flame adds a bright pixel flame pickup and a separate crest above the actor, coexisting
 with Shield and Heart-grace indicators. Its current timer comes from the authoritative baseline;
 reduced motion keeps the crest static. Native screenshots are pending candidate acceptance.
+
+Actor pose visibility is assigned idempotently. Snapshot updates retain the current animation
+frame until rendering selects its final pose, avoiding intermediate visibility invalidations.

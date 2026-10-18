@@ -16,8 +16,8 @@ and both complete server suites pass. Generated collection, captured range, conn
 disconnected restore, exact expiry, base range restoration, next-round settings and journal replay
 are exercised through ordinary runtime actions.
 
-All **317 web tests** pass across 38 files, with statement/branch/function/line coverage
-**95.04/90.70/95.45/97.52%**. Contracts, lint, Knip, builds, both dependency audits and strict
+All **319 web tests** pass across 39 files, with statement/branch/function/line coverage
+**95.04/90.73/95.45/97.52%**. Contracts, lint, Knip, builds, both dependency audits and strict
 Kubernetes schemas3/3 pass. E2E static parity passes **29 scenarios**. Rust line coverage is
 **91.39% (12,142/13,286)**. Coverage tests passed initially; report output failed because an
 external target directory left the local output parent absent. Creating that parent and reporting
@@ -113,6 +113,21 @@ Evidence remains at `/tmp/grenadiers-v0323-acceptance`; that image does not cert
 The fix and strengthened acceptance are integrated, and full debug/release gates pass. Fresh
 image acceptance and final-head CI remain required before publication.
 
+## Idempotent actor pose correction — 2026-10-18 — acceptance pending
+
+The renderer's pose setter previously hid every frame then re-showed the selected one on
+all render ticks. Actual Pixi visibility setters invalidate the parent render-group structure,
+causing instruction rebuild and buffer upload pressure even for unchanged poses. Snapshot
+updates also transiently reset moving actors to frame zero before choosing frame one again.
+The candidate assigns final visibility directly and selects the frame once during rendering.
+Real-Pixi regressions fail before the correction and pass afterward, proving zero visibility
+changes for unchanged poses and repeated snapshots within the same walking frame.
+
+All **259 web tests** across 37 files pass; statement/branch/function/line coverage is
+**94.81/90.08/94.90/97.42%**. Contract checks, lint, Knip and production build pass. This fixes
+confirmed unnecessary work; it does not attribute the separate 12,928 ms peer task below.
+Independent review is clear. A rebuilt image, fresh native acceptance and final-head CI remain required.
+
 ## Historical v22 arena renderer lifetime correction — 2026-10-18
 
 The single instrumented Linux run of clean harness `1bf4d74` passes its reconnect case in
@@ -132,8 +147,26 @@ The v22 renderer candidate's web verification passed **257 tests** across 36 fil
 coverage of **94.81/90.05/94.90/97.42%**. Lint, TypeScript, Knip, production build and contract
 checks pass. Focused lifecycle coverage includes first-paint and suspension failures, bounded
 activation retries and recovery after an initialization completes while no world is active.
-Independent review is clear. A rebuilt image, complete native acceptance and exact final-head
-CI remain required. The earlier image's passing rollup below does not certify this renderer change.
+Independent review is clear. Exact source `96d6cade2ddc364986db489ee61caa93b7f654af` builds image
+`sha256:2054de0dd56ffd95fe8732db77763366ad382c2e4c384036dfef6ae3fbb81477`. Its fresh acceptance
+passes **26/26 Compose** and **26/26 Kubernetes**, retries zero, with an independent evidence
+audit. Pinned archive-only Trivy finds zero fixable HIGH/CRITICAL vulnerabilities; strict
+Kubernetes schemas validate 3/3 resources. Local/shaped maxima are **55.935/140.741 ms** in
+Compose and **74.746/158.153 ms** in Kubernetes, with 20 samples per profile, zero exceedances
+and zero throttling. Runtime hardening, strict probes, external mode-0444 fixtures, single-PTY
+port-forward ownership and cleanup pass. Initial PF probe attempts return HTTP000 before the
+second strict probe succeeds; PATH/DNS setup failures occurred before browser execution and
+remain preserved. Source comparison has no source-content differences, only generated/Git
+directories. Evidence: `/tmp/grenadiers-v0322-renderer-acceptance` and independent audit
+`/tmp/grenadiers-v22-renderer-native-audit.md`. This image predates the pose correction above.
+
+Exact-head PR CI `39083297027` passes all five checks. Push CI `39083293354` passes four;
+its browser job fails the replacement-movement observation after ten seconds. The peer has a
+**12,928 ms** long task covering Node-clock **13,346.3–26,274.3 ms**, beginning before takeover;
+primary snapshots continue while peer observations lag. Node event-loop maximum is 38.896 ms.
+No measured GL call exceeds 50 ms, but upload/program-compilation paths are not wrapped.
+This peer blockage remains unattributed. Failure logs/artifacts are preserved under
+`/tmp/grenadiers-v22-renderer-ci-push-*`; no retry or weakened assertion is used to replace it.
 
 Before the renderer change, the corrected `b062127` source passes all ten exact-head CI checks;
 both browser logs contain no retries, flaky results or failures. Native acceptance and its

@@ -125,9 +125,8 @@ export function makeActor(seat: Seat): ActorDrawing {
 
 export function setActorPose(drawing: ActorDrawing, direction: Direction, frame: 0 | 1): void {
   drawing.direction = direction
-  for (const poses of Object.values(drawing.poses)) {
-    poses[0].visible = false
-    poses[1].visible = false
+  for (const [poseDirection, poses] of Object.entries(drawing.poses)) {
+    poses[0].visible = poseDirection === direction && frame === 0
+    poses[1].visible = poseDirection === direction && frame === 1
   }
-  drawing.poses[direction][frame].visible = true
 }

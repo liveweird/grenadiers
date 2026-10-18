@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test'
-import type { GameServerMessage } from '../../web/src/game/v6/schema'
+import type { GameServerMessage } from '../../web/src/game/v7/schema'
 import { gameFrames, openGame, roomFrame, sendGame } from './support/game'
+import { visibleActor } from './support/duel'
 
 type Snapshot = Extract<GameServerMessage, { type: 'snapshot' }>
 
@@ -52,6 +53,14 @@ test('two native gameplay sockets finish one authoritative generated classic rou
     await expect.poll(async () => snapshot(await gameFrames(two))?.room.phase.type).toBe('running')
     const firstRunning = snapshot(await gameFrames(one))!
     expect(firstRunning.room).toMatchObject({ rulesVersion: 4, mapId: 'generated_v1' })
+    expect(firstRunning.room.availableItems).toEqual([])
+    expect(firstRunning.room.settings.enabledItems).toEqual([])
+    for (const actor of firstRunning.state.actors) {
+      expect(actor).toMatchObject({
+        type: 'visible', inventory: { equipment: null, weapon: null },
+        effects: [], damageGraceRemainingTicks: 0,
+      })
+    }
     expect(firstRunning.state.pickups).toEqual([])
     const blocks = firstRunning.state.arena.blocks
     for (const block of blocks) {
@@ -61,12 +70,16 @@ test('two native gameplay sockets finish one authoritative generated classic rou
     expect(blocks).not.toContainEqual({ column: 1, row: 2 })
     await expect.poll(async () => {
       await sendGame(one, { type: 'movement', ...binding, direction: 'east' })
-      return snapshot(await gameFrames(one))?.state.actors[0].position.x ?? 0
+      return visibleActor(snapshot(await gameFrames(one)), 'one')?.position.x ?? 0
     }, { intervals: [100] }).toBeGreaterThan(2350)
     await sendGame(one, { type: 'movement', ...binding, direction: null })
-    await sendGame(one, { type: 'placeBomb', ...binding, actionId: 1 })
+    const equipment = await sendGame(one, { type: 'manualAction', action: 'equipment', ...binding, actionId: 1 })
+    await expect.poll(() => gameFrames(one)).toContainEqual({
+      type: 'error', code: 'invalidMessage', sequence: equipment,
+    })
+    await sendGame(one, { type: 'manualAction', action: 'bomb', ...binding, actionId: 1 })
     await expect.poll(async () => snapshot(await gameFrames(one))?.state.bombs.length).toBe(1)
-    const duplicate = await sendGame(one, { type: 'placeBomb', ...binding, actionId: 1 })
+    const duplicate = await sendGame(one, { type: 'manualAction', action: 'bomb', ...binding, actionId: 1 })
     await expect.poll(() => gameFrames(one)).toContainEqual({
       type: 'error', code: 'duplicateAction', sequence: duplicate,
     })

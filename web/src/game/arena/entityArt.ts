@@ -1,5 +1,5 @@
 import { Container, Graphics } from 'pixi.js'
-import type { PickupKind } from '../schema'
+import type { RenderablePickupKind } from './types'
 import { PALETTE } from './palette'
 import { pixels } from './pixel'
 
@@ -57,7 +57,7 @@ function pickupFrame(): Graphics {
   return drawing
 }
 
-export function makePickup(kind: PickupKind): Graphics {
+export function makePickup(kind: RenderablePickupKind): Graphics {
   const drawing = pickupFrame()
   if (kind === 'bombCapacity') {
     pixels(drawing, PALETTE.deepInk, [[17, 18, 15, 13], [20, 15, 9, 19], [14, 21, 21, 7]])

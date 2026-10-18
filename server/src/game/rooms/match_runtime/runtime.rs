@@ -1,14 +1,13 @@
-use std::sync::Arc;
-
 use grenadiers_core::{
     game::{Direction, GenerationRecord, SeatId, State, StepReport, Tick},
-    protocol::v6::RoomView,
+    protocol::v7::RoomView,
     room::{
         DepartureReason, InterruptReason, MatchChange, MatchLifecycle, MatchPhase, RoomSettings,
     },
 };
 
 use super::super::{input::InputMailbox, types::RoomIdentity};
+use super::SeatFrames;
 use super::error::{MatchRuntimeError, map_input_error, map_lifecycle_error};
 use super::publication;
 use crate::round_seed::RoundSeedSource;
@@ -43,7 +42,18 @@ pub(crate) enum MatchAction {
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub(crate) struct MatchNotice {
     pub(crate) room: RoomView,
-    pub(crate) snapshot: Option<Arc<str>>,
+    pub(super) frames: Option<SeatFrames>,
+}
+
+impl MatchNotice {
+    pub(crate) fn frame(&self, seat: SeatId) -> Option<Arc<str>> {
+        self.frames.as_ref().map(|frames| frames.select(seat))
+    }
+
+    #[cfg(test)]
+    pub(crate) fn replace_frames_for_test(&mut self, frames: [&str; 2]) {
+        self.frames = Some(SeatFrames::new(frames.map(str::to_owned)));
+    }
 }
 
 pub(in crate::game::rooms) struct MatchRuntime {
@@ -356,10 +366,7 @@ impl MatchRuntime {
             self.settings_editor,
         )?;
         self.revision = next;
-        Ok(MatchNotice {
-            room,
-            snapshot: None,
-        })
+        Ok(MatchNotice { room, frames: None })
     }
 
     fn publish_snapshot(&mut self) -> Result<MatchNotice, MatchRuntimeError> {
@@ -385,3 +392,4 @@ impl MatchRuntime {
         Ok(notice)
     }
 }
+use std::sync::Arc;

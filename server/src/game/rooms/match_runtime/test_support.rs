@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use grenadiers_core::{
     game::{Direction, SeatId},
-    protocol::v6::RoomPhase,
+    protocol::v7::RoomPhase,
     protocol::{RoomCode, RoomId},
     room::MatchPhase,
 };
@@ -96,7 +96,7 @@ pub(super) fn advance_to_inter_round(runtime: &mut MatchRuntime) -> MatchNotice 
 }
 
 pub(super) fn snapshot_json(notice: &MatchNotice) -> serde_json::Value {
-    serde_json::from_str(notice.snapshot.as_ref().expect("snapshot notice")).unwrap()
+    serde_json::from_str(&notice.frame(SeatId::One).expect("snapshot notice")).unwrap()
 }
 
 pub(super) fn snapshot_state(notice: &MatchNotice) -> serde_json::Value {
@@ -104,11 +104,11 @@ pub(super) fn snapshot_state(notice: &MatchNotice) -> serde_json::Value {
 }
 
 pub(super) fn assert_view_only(notice: &MatchNotice) {
-    assert!(notice.snapshot.is_none());
+    assert!(notice.frame(SeatId::One).is_none());
 }
 
 pub(super) fn assert_snapshot(notice: &MatchNotice) {
-    assert!(notice.snapshot.is_some());
+    assert!(notice.frame(SeatId::One).is_some());
 }
 
 pub(super) fn phase_type(notice: &MatchNotice) -> &str {

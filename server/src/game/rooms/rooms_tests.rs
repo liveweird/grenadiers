@@ -372,8 +372,8 @@ async fn excessive_lag_interrupts_then_terminal_retention_releases_registration(
     let view = notice.room;
     assert!(matches!(
         view.phase,
-        grenadiers_core::protocol::v6::RoomPhase::Interrupted {
-            reason: grenadiers_core::protocol::v6::MatchInterruptReason::ServerOverloaded,
+        grenadiers_core::protocol::v7::RoomPhase::Interrupted {
+            reason: grenadiers_core::protocol::v7::MatchInterruptReason::ServerOverloaded,
             ..
         }
     ));

@@ -1,6 +1,6 @@
 use std::{sync::atomic::Ordering, time::Duration};
 
-use grenadiers_core::protocol::v6::{MatchInterruptReason, MatchResult, RoomPhase};
+use grenadiers_core::protocol::v7::{MatchInterruptReason, MatchResult, RoomPhase};
 use tokio::time::advance;
 
 use super::{ClosingReason, MatchOwnerNotice, test_support::*};
@@ -257,7 +257,7 @@ async fn shutdown_closing_retains_the_snapshot_that_flushes_pending_reports() {
         panic!("shutdown must retain a closing notice");
     };
     let snapshot: serde_json::Value = serde_json::from_str(
-        last.snapshot
+        last.frame(grenadiers_core::game::SeatId::One)
             .as_ref()
             .expect("shutdown flushes the live state"),
     )

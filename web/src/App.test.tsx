@@ -3,7 +3,7 @@ import { act, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { GameArenaProps } from './game/arena/types'
-import type { GameState, RoomPhase, RoomView, Snapshot } from './game/v6/schema'
+import type { GameState, RoomPhase, RoomView, Snapshot } from './game/v7/schema'
 import i18n from './i18n'
 import { App } from './App'
 
@@ -58,7 +58,10 @@ function room(revision: number, phase: RoomPhase = { type: 'waiting' }): RoomVie
       roundId: 1, roundNumber: 1, endedAt: phase.holdUntil - 180,
       result: { type: 'winner', seat: 'two' },
     } : null,
-    settings: { startingSpeedLevel: 0, turnAssistUnits: 256, winsToFinish: 3, bombFuseTicks: 180 },
+    settings: {
+      startingSpeedLevel: 0, turnAssistUnits: 256, winsToFinish: 3, bombFuseTicks: 180, enabledItems: [],
+    },
+    availableItems: [],
     settingsRevision: 1,
     settingsEditor: 'one',
     seats: [
@@ -76,15 +79,20 @@ function snapshot(revision: number, phase: RoomPhase = { type: 'running' }): Sna
     state: {
       runningUpdates: 1,
       remainingTicks: 10_800,
+      physicalTick: revision,
       arena: { width: 15, height: 13, terrain: Array.from({ length: 195 }, () => 'floor'), blocks: [] },
       actors: [
         {
+          type: 'visible',
           id: 1, seat: 'one', position: { x: 512, y: 512 }, heading: 'east', speedLevel: 0,
           alive: true, bombCapacity: 1, bombRange: 1, liveBombCount: 0,
+          inventory: { equipment: null, weapon: null }, effects: [], damageGraceRemainingTicks: 0,
         },
         {
+          type: 'visible',
           id: 2, seat: 'two', position: { x: 14_848, y: 12_800 }, heading: 'west', speedLevel: 0,
           alive: true, bombCapacity: 1, bombRange: 1, liveBombCount: 0,
+          inventory: { equipment: null, weapon: null }, effects: [], damageGraceRemainingTicks: 0,
         },
       ],
       bombs: [],
@@ -98,7 +106,7 @@ function snapshot(revision: number, phase: RoomPhase = { type: 'running' }): Sna
 function admit(socket: AppSocketStub, currentRoom: RoomView, state: GameState | null = null) {
   socket.message({
     type: 'admitted', sequence: 1, room: currentRoom, youSeat: 'one', resumeToken,
-    lastBombActionId: null, state,
+    lastActionId: null, state,
   })
 }
 
@@ -115,8 +123,8 @@ async function beginRoom(user: ReturnType<typeof userEvent.setup>, action: 'crea
   await waitFor(() => expect(appSockets.filter((socket) => socket.url.endsWith('/api/v1/game/ws'))).toHaveLength(1))
   const socket = appSockets.find((candidate) => candidate.url.endsWith('/api/v1/game/ws'))!
   act(() => socket.emit('open'))
-  expect(JSON.parse(socket.sent[0])).toEqual({ type: 'authenticate', protocolVersion: 6, token })
-  act(() => socket.message({ type: 'authenticated', protocolVersion: 6 }))
+  expect(JSON.parse(socket.sent[0])).toEqual({ type: 'authenticate', protocolVersion: 7, token })
+  act(() => socket.message({ type: 'authenticated', protocolVersion: 7 }))
   return socket
 }
 
@@ -201,7 +209,9 @@ describe('App game flow', () => {
     await user.click(screen.getByRole('button', { name: 'Test move' }))
     await user.click(screen.getByRole('button', { name: 'Test bomb' }))
     expect(JSON.parse(socket.sent.at(-2)!)).toMatchObject({ type: 'movement', direction: 'north' })
-    expect(JSON.parse(socket.sent.at(-1)!)).toMatchObject({ type: 'placeBomb', actionId: 1 })
+    expect(JSON.parse(socket.sent.at(-1)!)).toMatchObject({
+      type: 'manualAction', action: 'bomb', actionId: 1,
+    })
 
     await user.click(screen.getByRole('button', { name: 'Leave room' }))
     expect(screen.getByRole('region', { name: 'Grenadiers courtyard' })).toHaveAttribute('data-enabled', 'false')

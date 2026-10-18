@@ -1,8 +1,8 @@
 use std::sync::Arc;
 
-use axum::extract::ws::WebSocket;
-use grenadiers_core::protocol::v6::{
-    GameClientMessage, GameServerMessage, V6ErrorCode as ErrorCode,
+use axum::extract::ws::{Message, WebSocket};
+use grenadiers_core::protocol::v7::{
+    GameClientMessage, GameServerMessage, ManualActionKind, V7ErrorCode as ErrorCode,
 };
 use grenadiers_core::protocol::{Counter, Direction as WireDirection, RoomId};
 use tokio::time::Instant;
@@ -10,7 +10,7 @@ use tokio::time::Instant;
 use super::{
     connection::{ConnectionState, Membership},
     rooms::{Admission, BindingKey, GameRooms, RoomAction, RoomError},
-    socket::{fail_and_close, send_error, send_game},
+    socket::{fail_and_close, send_error, send_game, send_raw},
 };
 
 pub(super) async fn dispatch(
@@ -127,7 +127,12 @@ pub(super) async fn dispatch(
                 u64::from(round_id.get()),
                 RoomAction::UpdateSettings {
                     settings_revision: settings_revision.get(),
-                    settings: settings.domain(),
+                    settings: match grenadiers_core::protocol::v7::classic_settings(settings) {
+                        Ok(settings) => settings,
+                        Err(_) => {
+                            return reply_error(socket, ErrorCode::InvalidMessage, sequence).await;
+                        }
+                    },
                 },
                 state,
                 sequence,
@@ -151,23 +156,27 @@ pub(super) async fn dispatch(
             )
             .await
         }
-        GameClientMessage::PlaceBomb {
+        GameClientMessage::ManualAction {
             room_id,
             round_id,
             action_id,
+            action: manual,
             ..
-        } => {
-            action(
-                socket,
-                rooms,
-                room_id,
-                u64::from(round_id.get()),
-                RoomAction::Bomb(action_id.get()),
-                state,
-                sequence,
-            )
-            .await
-        }
+        } => match manual_room_action(manual, action_id) {
+            Some(manual) => {
+                action(
+                    socket,
+                    rooms,
+                    room_id,
+                    u64::from(round_id.get()),
+                    manual,
+                    state,
+                    sequence,
+                )
+                .await
+            }
+            None => reply_error(socket, ErrorCode::InvalidMessage, sequence).await,
+        },
         GameClientMessage::Rematch {
             room_id,
             round_id,
@@ -189,6 +198,13 @@ pub(super) async fn dispatch(
     }
 }
 
+const fn manual_room_action(kind: ManualActionKind, id: Counter) -> Option<RoomAction> {
+    match kind {
+        ManualActionKind::Bomb => Some(RoomAction::Bomb(id.get())),
+        ManualActionKind::Equipment => None,
+    }
+}
+
 async fn admit(
     socket: &mut WebSocket,
     result: Result<Admission, RoomError>,
@@ -199,15 +215,13 @@ async fn admit(
     match result {
         Ok(admission) => {
             debug_assert_eq!(admission.round_id, u64::from(admission.room.round_id.get()));
-            let message = GameServerMessage::Admitted {
-                sequence: admission.sequence,
-                room: admission.room.clone(),
-                you_seat: admission.seat,
-                resume_token: admission.resume_token.clone(),
-                last_bomb_action_id: admission.last_bomb_action_id,
-                state: admission.state.clone(),
-            };
-            if send_game(socket, &message).await.is_err() {
+            if send_raw(
+                socket,
+                Message::Text(admission.personal_frame.to_string().into()),
+            )
+            .await
+            .is_err()
+            {
                 return false;
             }
             state.generation = binding.generation;
@@ -309,4 +323,19 @@ const fn domain_direction(direction: WireDirection) -> grenadiers_core::game::Di
 
 async fn reply_error(socket: &mut WebSocket, code: ErrorCode, sequence: Counter) -> bool {
     send_error(socket, code, Some(sequence)).await.is_ok()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn equipment_never_reaches_room_budget_journal_or_action_high_water() {
+        let id = Counter::new(7).unwrap();
+        assert_eq!(manual_room_action(ManualActionKind::Equipment, id), None);
+        assert_eq!(
+            manual_room_action(ManualActionKind::Bomb, id),
+            Some(RoomAction::Bomb(7))
+        );
+    }
 }

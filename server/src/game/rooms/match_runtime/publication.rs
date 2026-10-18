@@ -1,18 +1,18 @@
-use std::sync::Arc;
-
 use grenadiers_core::{
     game::StepReport,
-    protocol::v6::{
-        GameServerMessage, RoomMetadata, RoomView, encode_server_message, project_room_view,
+    protocol::v7::{
+        RoomMetadata, RoomView, capture_classic, prepare_snapshot_pair, project_classic_room,
     },
-    protocol::{project_events, project_state},
-    room::{MatchLifecycle, MatchPhase},
+    room::MatchLifecycle,
 };
 
 use super::super::types::RoomIdentity;
 use super::error::MatchRuntimeError;
-use super::runtime::{MatchNotice, SimRound};
-use grenadiers_core::protocol::v6::RoomPhase;
+use super::{
+    SeatFrames,
+    runtime::{MatchNotice, SimRound},
+};
+use grenadiers_core::protocol::v7::RoomPhase;
 
 pub(super) fn room_view(
     identity: &RoomIdentity,
@@ -23,11 +23,9 @@ pub(super) fn room_view(
 ) -> Result<RoomView, MatchRuntimeError> {
     let revision = grenadiers_core::protocol::Counter::new(revision)
         .map_err(|_| MatchRuntimeError::CapacityReached)?;
-    project_room_view(
+    project_classic_room(
         RoomMetadata {
-            settings: grenadiers_core::protocol::v6::GameSettings::from_domain(
-                lifecycle.settings(),
-            ),
+            settings: wire_settings(lifecycle.settings())?,
             settings_revision: grenadiers_core::protocol::Counter::new(settings_revision)
                 .map_err(|_| MatchRuntimeError::CapacityReached)?,
             settings_editor: settings_editor.map(wire_seat),
@@ -86,78 +84,45 @@ pub(super) fn snapshot(
         settings_revision,
         settings_editor,
     )?;
-    let projected =
-        project_state(&sim.state.public_view()).map_err(|_| MatchRuntimeError::Publication)?;
-    if projected.rules_version != identity.profile.rules_version() {
-        return Err(MatchRuntimeError::Publication);
-    }
     if sim.state.rules() != &identity.profile.rules_config(lifecycle.settings()) {
         return Err(MatchRuntimeError::Publication);
     }
-    validate_state(lifecycle, &room, sim, projected.tick, projected.result)?;
-    let events = project_events(reports).map_err(|_| MatchRuntimeError::Publication)?;
-    let message = GameServerMessage::Snapshot {
-        room: room.clone(),
-        state: projected.state,
-        events,
-    };
-    let encoded = encode_server_message(&message).map_err(|_| MatchRuntimeError::Publication)?;
+    let capture =
+        capture_classic(&sim.state, reports).map_err(|_| MatchRuntimeError::Publication)?;
+    let epoch = grenadiers_core::protocol::Counter::new(
+        u32::try_from(sim.epoch).map_err(|_| MatchRuntimeError::CapacityReached)?,
+    )
+    .map_err(|_| MatchRuntimeError::CapacityReached)?;
+    let bound = grenadiers_core::protocol::v7::bind_classic(&room, epoch, &capture)
+        .map_err(|_| MatchRuntimeError::Publication)?;
+    let encoded = prepare_snapshot_pair(&bound).map_err(|_| MatchRuntimeError::Publication)?;
     Ok(MatchNotice {
         room,
-        snapshot: Some(Arc::from(encoded)),
+        frames: Some(SeatFrames::new(encoded)),
     })
 }
 
-fn validate_state(
-    lifecycle: &MatchLifecycle,
-    room: &RoomView,
-    sim: &SimRound,
-    state_tick: grenadiers_core::protocol::Tick,
-    state_result: Option<grenadiers_core::protocol::WireRoundResult>,
-) -> Result<(), MatchRuntimeError> {
-    if state_tick.get() > room.tick.get() {
-        return Err(MatchRuntimeError::Publication);
-    }
-    match lifecycle.phase() {
-        MatchPhase::Running => valid(
-            sim.epoch == lifecycle.round_attempt()
-                && state_tick.get() == lifecycle.tick().0
-                && state_result.is_none(),
-        ),
-        MatchPhase::Result { .. } => validate_completed(room, sim, state_tick, state_result),
-        MatchPhase::MatchResult { outcome, .. } if state_result.is_some() => {
-            validate_completed(room, sim, state_tick, state_result)?;
-            valid(state_tick.get() <= outcome.ended_at().0)
-        }
-        MatchPhase::MatchResult { outcome, .. } => valid(
-            sim.epoch == lifecycle.round_attempt()
-                && state_tick.get() == outcome.ended_at().0
-                && state_result.is_none(),
-        ),
-        _ => Err(MatchRuntimeError::Publication),
-    }
-}
-
-fn validate_completed(
-    room: &RoomView,
-    sim: &SimRound,
-    state_tick: grenadiers_core::protocol::Tick,
-    state_result: Option<grenadiers_core::protocol::WireRoundResult>,
-) -> Result<(), MatchRuntimeError> {
-    let Some(last) = room.last_round else {
-        return Err(MatchRuntimeError::Publication);
-    };
-    valid(
-        sim.epoch == u64::from(last.round_id.get())
-            && state_tick == last.ended_at
-            && state_result == Some(last.result),
+fn wire_settings(
+    settings: grenadiers_core::room::RoomSettings,
+) -> Result<grenadiers_core::protocol::v7::GameSettings, MatchRuntimeError> {
+    grenadiers_core::protocol::v7::GameSettings::new(
+        speed_level(settings.starting_speed()),
+        settings.turn_assist_units(),
+        settings.wins_to_finish(),
+        u16::try_from(settings.bomb_fuse_ticks()).map_err(|_| MatchRuntimeError::Publication)?,
+        grenadiers_core::protocol::v7::ItemSet::empty(),
     )
+    .map_err(|_| MatchRuntimeError::Publication)
 }
 
-fn valid(condition: bool) -> Result<(), MatchRuntimeError> {
-    condition
-        .then_some(())
-        .ok_or(MatchRuntimeError::Publication)
+const fn speed_level(speed: grenadiers_core::game::SpeedLevel) -> u8 {
+    match speed {
+        grenadiers_core::game::SpeedLevel::Base => 0,
+        grenadiers_core::game::SpeedLevel::One => 1,
+        grenadiers_core::game::SpeedLevel::Two => 2,
+        grenadiers_core::game::SpeedLevel::Three => 3,
+        grenadiers_core::game::SpeedLevel::Four => 4,
+    }
 }
 
 #[cfg(test)]

@@ -1,4 +1,4 @@
-import type { GameClientState } from '../v6/client'
+import type { GameClientState } from '../client/client'
 
 export type AudioCue = 'placement' | 'detonation' | 'pickup' | 'elimination'
 const priority: readonly AudioCue[] = ['elimination', 'detonation', 'pickup', 'placement']
@@ -13,7 +13,7 @@ function collectCues(state: GameClientState, previousTick: number): Set<AudioCue
   const snapshot = state.snapshot!
   for (const event of snapshot.events) {
     const identity = `${event.tick}:${event.index}`
-    if (event.tick <= previousTick || event.tick > snapshot.room.tick || identities.has(identity)) continue
+    if (event.tick <= previousTick || event.tick > snapshot.state.physicalTick || identities.has(identity)) continue
     identities.add(identity)
     const cue = cueByEvent[event.kind.type as keyof typeof cueByEvent]
     if (cue) found.add(cue)
@@ -41,15 +41,15 @@ export class AudioCursor {
       this.roundId = room.roundId
       this.baseline = state.admissionBaseline
       this.revision = Math.max(room.revision, snapshot?.room.revision ?? -1)
-      this.completedTick = changedRoom ? Math.max(room.tick, state.admissionBaseline?.tick ?? -1)
-        : Math.max(this.completedTick, room.tick, state.admissionBaseline?.tick ?? -1)
+      const physicalTick = snapshot?.state.physicalTick ?? state.admissionBaseline?.physicalTick ?? -1
+      this.completedTick = changedRoom ? physicalTick : Math.max(this.completedTick, physicalTick)
       return []
     }
     if (!snapshot || snapshot.room.roomId !== room.roomId || snapshot.room.roundId !== room.roundId
       || snapshot.room.revision <= this.revision) return []
     const previousTick = this.completedTick
     this.revision = snapshot.room.revision
-    this.completedTick = Math.max(this.completedTick, snapshot.room.tick)
+    this.completedTick = Math.max(this.completedTick, snapshot.state.physicalTick)
     const found = collectCues(state, previousTick)
     return audible ? priority.filter((cue) => found.has(cue)) : []
   }

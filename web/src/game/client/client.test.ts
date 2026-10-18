@@ -5,7 +5,7 @@ import {
 } from './testSupport'
 import { gameplayUrl } from './client'
 
-describe('v6 admission and authoritative baselines', () => {
+describe('v7 admission and authoritative baselines', () => {
   beforeEach(() => {
     vi.stubGlobal('WebSocket', { OPEN: SocketStub.OPEN })
     localStorage.clear()
@@ -19,11 +19,11 @@ describe('v6 admission and authoritative baselines', () => {
       .toBe('ws://localhost:5177/api/v1/game/ws')
   })
 
-  it('authenticates with v6 and keeps the seat capability out of public state and storage', async () => {
+  it('authenticates with v7 and keeps the seat capability out of public state and storage', async () => {
     const value = harness()
     const socket = await authenticate(value, { type: 'join', roomCode: 'ABCDEFGH' })
     expect(messages(socket)).toEqual([
-      { type: 'authenticate', protocolVersion: 6, token: sessionToken },
+      { type: 'authenticate', protocolVersion: 7, token: sessionToken },
       { type: 'joinRoom', sequence: 1, roomCode: 'ABCDEFGH' },
     ])
     socket.message(admitted())
@@ -39,17 +39,18 @@ describe('v6 admission and authoritative baselines', () => {
     const socket = await authenticate(value)
     const baseline = admitted(4, 41)
     baseline.state!.bombs.push({
-      id: 9, cell: { column: 1, row: 1 }, owner: 1, range: 2, placedAt: 1, detonatesAt: 181,
+      id: 9, cell: { column: 1, row: 1 }, owner: 1, range: 2, placedAt: 1,
+      trigger: { type: 'timed', remainingTicks: 180, paused: false }, blast: 'standard',
     })
     socket.message(baseline)
     expect(value.client.getState().snapshot).toEqual({
       type: 'snapshot', room: baseline.room, state: baseline.state, events: [],
     })
     expect(value.client.placeBomb()).toBe(true)
-    expect(messages(socket).at(-1)).toMatchObject({ type: 'placeBomb', actionId: 42 })
+    expect(messages(socket).at(-1)).toMatchObject({ type: 'manualAction', action: 'bomb', actionId: 42 })
   })
 
-  it('keeps MAX bomb action exhaustion and never resends an action after reconnect', async () => {
+  it('keeps MAX manual action exhaustion and never resends an action after reconnect', async () => {
     const value = harness()
     const socket = await authenticate(value)
     socket.message(admitted(1, 2_147_483_647))
@@ -61,12 +62,12 @@ describe('v6 admission and authoritative baselines', () => {
     await vi.waitFor(() => expect(value.sockets).toHaveLength(2))
     const resumed = value.sockets[1]
     resumed.emit('open')
-    resumed.message({ type: 'authenticated', protocolVersion: 6 })
+    resumed.message({ type: 'authenticated', protocolVersion: 7 })
     expect(messages(resumed)).toEqual([
-      { type: 'authenticate', protocolVersion: 6, token: sessionToken },
+      { type: 'authenticate', protocolVersion: 7, token: sessionToken },
       { type: 'resumeRoom', sequence: 1, roomId, resumeToken },
     ])
-    expect(messages(resumed).some((message) => message.type === 'placeBomb')).toBe(false)
+    expect(messages(resumed).some((message) => message.type === 'manualAction')).toBe(false)
   })
 
   it('rejects shared updates until the personal resume baseline and rejects stale admission facts', async () => {
@@ -80,7 +81,7 @@ describe('v6 admission and authoritative baselines', () => {
     await vi.waitFor(() => expect(value.sockets).toHaveLength(2))
     const resumed = value.sockets[1]
     resumed.emit('open')
-    resumed.message({ type: 'authenticated', protocolVersion: 6 })
+    resumed.message({ type: 'authenticated', protocolVersion: 7 })
     resumed.message({ type: 'roomState', room: room(6, { type: 'running' }) })
     resumed.message(snapshot(7))
     expect(value.client.getState().snapshot).toBe(retained)
@@ -98,12 +99,14 @@ describe('v6 admission and authoritative baselines', () => {
     expect(value.client.getState().room?.revision).toBe(9)
     expect(value.client.getState().admissionPending).toBe(false)
     expect(value.client.getState().snapshot?.room.revision).toBe(9)
-    expect(value.client.getState().admissionBaseline).toEqual({ roomId, revision: 8, tick: 8 })
+    expect(value.client.getState().admissionBaseline).toEqual({
+      roomId, revision: 8, tick: 8, physicalTick: 1,
+    })
     expect(value.client.getState().admissionBaseline).not.toBe(originalBaseline)
   })
 })
 
-describe('v6 recovery lifecycle', () => {
+describe('v7 recovery lifecycle', () => {
   beforeEach(() => vi.stubGlobal('WebSocket', { OPEN: SocketStub.OPEN }))
 
   it('uses a fresh single-use HTTP session on every bounded reconnect attempt', async () => {
@@ -164,7 +167,7 @@ describe('v6 recovery lifecycle', () => {
     await vi.waitFor(() => expect(value.sockets).toHaveLength(2))
     const resumed = value.sockets[1]
     resumed.emit('open')
-    resumed.message({ type: 'authenticated', protocolVersion: 6 })
+    resumed.message({ type: 'authenticated', protocolVersion: 7 })
     stop(resumed)
     expect(value.client.getState()).toMatchObject({
       connection: 'disconnected', room: null, snapshot: null, youSeat: null,

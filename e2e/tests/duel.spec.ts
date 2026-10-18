@@ -1,6 +1,7 @@
 import AxeBuilder from '@axe-core/playwright'
 import { expect, test } from '@playwright/test'
-import { expectPaintedCanvas, latestSnapshot, observeGame } from './support/duel'
+import { EMPTY_ACTIVE_ACTOR_STATS, expectActorStats } from './support/actor-stats'
+import { visibleActor, expectPaintedCanvas, latestSnapshot, observeGame } from './support/duel'
 
 test('two players complete a rendered keyboard duel with shared authoritative results', async ({ browser }, testInfo) => {
   test.setTimeout(60_000)
@@ -49,15 +50,18 @@ test('two players complete a rendered keyboard duel with shared authoritative re
     await expect.poll(() => latestSnapshot(games[1])?.room.phase.type).toBe('running')
     await Promise.all([one, two].map(expectPaintedCanvas))
     for (const page of [one, two]) {
-      for (const player of ['one', 'two']) {
-        await expect(page.getByLabel(`Player ${player} upgrades`).locator('dd')).toHaveText(['1', '1', '2', '1'])
+      for (const player of ['one', 'two'] as const) {
+        await expectActorStats(page, player, {
+          available: '1', capacity: '1', range: '2', speed: '1',
+          ...EMPTY_ACTIVE_ACTOR_STATS,
+        })
       }
     }
     for (const page of [one, two]) {
       expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([])
     }
     const arena = one.getByRole('region', { name: 'Grenadiers courtyard' })
-    const actor = () => latestSnapshot(games[0])?.state.actors.find((candidate) => candidate.seat === 'one')
+    const actor = () => visibleActor(latestSnapshot(games[0]), 'one')
     await arena.click()
     await one.keyboard.down('ArrowRight')
     await expect.poll(() => actor()?.position.x, { intervals: [20] }).toBeGreaterThan(1900)
@@ -78,10 +82,13 @@ test('two players complete a rendered keyboard duel with shared authoritative re
     await one.keyboard.up('ArrowRight')
     await one.keyboard.down('Space')
     await one.keyboard.down('Space')
-    await expect.poll(() => games[0].commands.filter((command) => command.type === 'placeBomb')).toEqual([{ type: 'placeBomb', actionId: 1 }])
+    await expect.poll(() => games[0].commands.filter((command) => command.type === 'manualAction')).toEqual([{ type: 'manualAction', action: 'bomb', actionId: 1 }])
     await expect.poll(() => latestSnapshot(games[0])?.state.bombs.length).toBe(1)
     for (const page of [one, two]) {
-      await expect(page.getByLabel('Player one upgrades').locator('dd')).toHaveText(['0', '1', '2', '1'])
+      await expectActorStats(page, 'one', {
+        available: '0', capacity: '1', range: '2', speed: '1',
+        ...EMPTY_ACTIVE_ACTOR_STATS,
+      })
     }
     await one.screenshot({ path: testInfo.outputPath('running-bomb.png'), fullPage: true })
     await expect.poll(() => latestSnapshot(games[0])?.room.phase.type).toBe('result')
@@ -97,7 +104,10 @@ test('two players complete a rendered keyboard duel with shared authoritative re
       expect(result.state.actors.find((candidate) => candidate.seat === 'one')?.alive).toBe(false)
       await expect(page.getByLabel('Phase time remaining')).toHaveText(/^0:0[123]$/)
       await expect(page.getByRole('status')).toContainText('Player two wins the round.')
-      await expect(page.getByLabel('Player one upgrades').locator('dd')).toHaveText(['1', '1', '2', '1'])
+      await expectActorStats(page, 'one', {
+        available: '1', capacity: '1', range: '2', speed: '1',
+        ...EMPTY_ACTIVE_ACTOR_STATS,
+      })
       await expect(page.locator('.seat-one small')).toHaveText('Eliminated')
       await expect(page.locator('.seat-two small')).toHaveText('Alive')
     }))
@@ -123,7 +133,7 @@ test('two players complete a rendered keyboard duel with shared authoritative re
       expect(secondSnapshots.find((other) => other.room.revision === frame.room.revision)).toEqual(frame)
     }
     expect(games.map((game) => game.sockets)).toEqual([1, 1])
-    expect(games[0].commands.filter((command) => command.type === 'placeBomb')).toEqual([{ type: 'placeBomb', actionId: 1 }])
+    expect(games[0].commands.filter((command) => command.type === 'manualAction')).toEqual([{ type: 'manualAction', action: 'bomb', actionId: 1 }])
     expect(pageErrors).toEqual([])
   } finally {
     await Promise.all(contexts.map((context) => context.close()))

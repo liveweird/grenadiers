@@ -42,7 +42,23 @@
     "available": "Dostępne bomby",
     "capacity": "Limit bomb",
     "range": "Zasięg wybuchu",
-    "speed": "Poziom szybkości"
+    "speed": "Poziom szybkości",
+    "equipment": "Wyposażenie",
+    "weapon": "Rodzaj bomby",
+    "effects": "Efekty",
+    "damageGrace": "Ochrona przed obrażeniami",
+    "none": "Brak",
+    "effectTimer": "{{item}} ({{time}})"
+  },
+  "items": {
+    "kick": "Kopnięcie", "punch": "Uderzenie", "bracelet": "Bransoleta", "wallPass": "Przejście przez ściany",
+    "heart": "Serce", "remoteBomb": "Bomba zdalna", "piercingBomb": "Bomba przebijająca",
+    "powerBomb": "Bomba mocy", "landmine": "Mina", "shield": "Tarcza",
+    "stopwatch": "Stoper", "invisibilityCloak": "Peleryna niewidzialności",
+    "goldenFlame": "Złoty płomień", "shortFuse": "Krótki lont", "diarrhea": "Biegunka",
+    "slowFoot": "Wolna stopa", "shortFlame": "Krótki płomień", "longFuse": "Długi lont",
+    "reverseControls": "Odwrócone sterowanie", "invisibleBombs": "Niewidzialne bomby",
+    "oilBarrel": "Beczka oleju", "teleporter": "Teleporter"
   },
   "phase": {
     "waiting": "Oczekiwanie na obu graczy",
@@ -175,7 +191,7 @@
     "staleRoom": "Pokój zmienił się przed poleceniem.",
     "invalidPhase": "Ta akcja jest teraz niedostępna.",
     "staleSequence": "Polecenie dotarło w złej kolejności.",
-    "duplicateAction": "Ta bomba została już odebrana.",
+    "duplicateAction": "Ta akcja została już odebrana.",
     "rateLimited": "Polecenia przychodzą zbyt szybko.",
     "capacityReached": "Brak miejsca na kolejny mecz.",
     "resumeRejected": "Zarezerwowane miejsce nie jest już dostępne.",

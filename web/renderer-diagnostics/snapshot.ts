@@ -35,8 +35,7 @@ export function diagnosticSnapshot(
       phase: { type: 'running' },
     },
     state: {
-      runningUpdates,
-      remainingTicks: 10_800 - runningUpdates,
+      physicalTick: runningUpdates,
       arena: {
         width: WIDTH,
         height: HEIGHT,
@@ -49,13 +48,11 @@ export function diagnosticSnapshot(
       actors: [
         {
           id: 10, seat: 'one', position: { x: 1_536 + actorMotion.offset, y: 1_536 },
-          heading: actorMotion.heading,
-          speedLevel: 0, alive: true, bombCapacity: 1, bombRange: 2, liveBombCount: 0,
+          heading: actorMotion.heading, alive: true,
         },
         {
           id: 20, seat: 'two', position: { x: 12_800 + actorMotion.offset, y: 11_776 },
-          heading: actorMotion.heading,
-          speedLevel: 0, alive: true, bombCapacity: 1, bombRange: 2, liveBombCount: 0,
+          heading: actorMotion.heading, alive: true,
         },
       ],
       bombs: [],

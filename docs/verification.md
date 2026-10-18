@@ -1,6 +1,146 @@
 # Repository verification
 
-## Canonical projections with terrain cache — 2026-10-18 — native 52/52, final CI pending
+Records below are frozen against their named sources. Publication and later CI status are
+recorded in [release notes](https://github.com/liveweird/grenadiers/releases).
+
+## Responsive live-v7 HUD — 2026-10-18 — native 52/52, final CI pending
+
+Clean source `695157bed0852835a16b3a9e9ee5dbcc5df61ad6`, archive SHA-256
+`071a0927fa4c2087af918bbf84e2d848d38118bc02a9eaa7af1c42774cdeeef5`, builds one image:
+`sha256:d68d1becb3d8ee9e710e0bf99af6429161b39160511d251f221c6f8af5fb644f`.
+Its saved archive hashes to `4be7f6f969f98c10e53df0459d104701b1eb4e943367afdcf64906ac8dd9b8b9`.
+Complete fresh acceptance passes **26/26 Compose and 26/26 Kubernetes**, first attempts,
+one worker, retries zero, with no carried cases. All ordinary budgets and prior assertions
+remain intact. Capture profiling is unset; normal failure capture and 42 screenshots remain.
+
+Both runtimes pass the real match's text-geometry regression: both seats retain eight visible
+labels with positive text fragments, four columns on English desktop and two on Polish 320px,
+no overflow or cross-cell overlap. Root visual review confirms intact readable Polish words.
+The committed desktop/narrow screenshots are byte-identical copies from this accepted run.
+
+Four latency profiles have 20 samples each, zero exceedances and zero CPU throttling.
+Local/shaped maxima are **51.492/161.999ms Compose** and **57.489/162.215ms Kubernetes**.
+Strict exact-200 JSON/no-store probes, runtime hardening, mode-0444 external seeds, three fresh
+Kubernetes pod UIDs, serial direct-pod forwarding in one recorded harness invocation, and complete
+cleanup pass. Pinned archive-only Trivy reports zero fixable HIGH/CRITICAL findings; strict
+Kubernetes 1.33 validates three resources. Quiet acknowledgements cover named local workers,
+without a global ambient-host-idleness claim.
+
+All **275 web tests** pass with coverage **95.08/90.80/94.68/97.56%**, plus production builds,
+contracts, lint, Knip and E2E static parity 27. Backend verification remains **375 core tests,
+174 server tests and two doctests in each debug/release profile**, Rust line coverage **93.27%**.
+Independent implementation/layout and complete final native-evidence reviews are clear;
+exact-head CI and publication remain required. Live rooms use v7 with optional pickups disabled.
+The final evidence/screenshot update changes documentation only after the accepted source.
+
+Evidence: `/tmp/grenadiers-v0324-responsive-hud-native-acceptance`, 949-file manifest SHA-256
+`4b86be3b665e748fa640b715cf13932bae6b71e0b7d0c10bbd265f058ff14436`.
+
+## Earlier HUD correction records
+
+Visual review of the pre-layout baseline exposed overlapping Polish labels at 320px. The
+intermediate wrap-only source `7dd97f2` passed **15/15 Compose functional cases**, including
+text-containment assertions. Visual review still found four-to-five-line word splitting, so
+that run stopped at the Compose latency gate. No latency or Kubernetes case ran; no result
+carries to the final layout. Its interrupted cleanup initially left an owned container/network;
+explicit cleanup removed them and final residue checks are empty. Partial evidence:
+`/tmp/grenadiers-v0324-hud-wrap-native-acceptance`, 750-file manifest
+`6f3ddef9a74c770d9ccba560ef2608075aa917b6a1b1e4d5254d9d371761186d`.
+
+## Pre-layout live-v7 terrain-cache baseline — 2026-10-18 — native 52/52
+
+Clean source `b1d0340e66300057e11de1a3dbcf57950850a793`, archive SHA-256
+`1b752f0619592091bf54ed88dfa4b636625714ea028ee4355df0de0e7ee638ea`, builds one image:
+`sha256:8f420bbf1cd7a1c6a6632d6dbb79b0eae7d0b2a91c670d1ff3e08bb3e6098e23`.
+Its saved archive hashes to `e7125cea23b212ecc5a39a94645a5f72eb4f9f8aba8815482d2a4d3041e91d5d`.
+Fresh ordinary acceptance passes **26/26 Compose and 26/26 Kubernetes**, all first attempts,
+retries zero, one worker. This is a complete fresh run, with no carried cases. All eight HUD
+fields, live-v7 bindings, original browser assertions and budgets are preserved. Capture
+profiling is unset; normal failure capture and all 42 configured screenshots are retained.
+
+Each target passes 15 functional and 11 latency cases. Four profiles have 20 samples each,
+zero exceedances and zero CPU throttling. Local/shaped maxima are **47.241/161.882ms Compose**
+and **126.458/162.159ms Kubernetes**. Strict exact-200 JSON/no-store probes, runtime hardening,
+external mode-0444 seed fixtures, three fresh Kubernetes pod UIDs, serial direct-pod forwarding
+in one recorded harness invocation and complete cleanup pass. Pinned archive-only Trivy finds
+zero fixable HIGH/CRITICAL vulnerabilities; strict Kubernetes 1.33 validates all three resources.
+Initial forwarding-not-ready probes remain preserved before successful strict probes; no
+browser scenario was retried. Quiet acknowledgements cover the named local workers and do not
+claim global host idleness.
+
+All **275 web tests** pass with coverage **95.08/90.80/94.68/97.56%**; production/diagnostic
+builds, contracts, lint, Knip and E2E static parity 27 pass. Backend checks remain **375 core,
+174 server and two doctests in each debug/release profile**, with Rust line coverage **93.27%**.
+Independent implementation/integration and complete native-evidence reviews are clear.
+Final-head CI and publication remain required. Live rooms use v7; optional pickups
+remain disabled. The final evidence update changes documentation only after the accepted source.
+
+Evidence: `/tmp/grenadiers-v0324-terrain-native-acceptance`, 949-file manifest SHA-256
+`1068113a6564ebb80c2b72463c7d5ee35dab4deb8e821cd308304dfd5adc9482`.
+
+## Earlier live-v7 verification records
+
+## Live-v7 HUD acceptance — 2026-10-18 — native verified, publication pending
+
+Clean source `0dde9142375ab495970f0031ef88fc10a25da499`, archive SHA-256
+`91b0d98f37812b2f0d344e969ae5e07d53fba15eafb24cf5918bcba87b372412`, builds production image
+`sha256:d4624da23bd07f0f28fad2807973ae7fe81b15b2725a95fa91e46fcd9d233daa`.
+Pinned Trivy reports zero fixable HIGH/CRITICAL vulnerabilities; strict Kubernetes schemas
+validate3/3. The first Compose default group passes7 cases and fails the rendered duel:
+its old four-value HUD assertion finds eight values because the live-v7 HUD now also shows
+equipment, bomb type, effects and damage grace. That initial attempt leaves44 cases unrun, with zero retries and no
+latency samples. Runtime hardening, strict probes and cleanup pass. Original failure artifacts
+remain sealed in `/tmp/grenadiers-v0324-acceptance`; no Kubernetes runtime was started.
+
+The corrected duel and generated-upgrade assertions check all eight named fields, including
+the original four upgrade values and empty inventory/effects/grace. Complete label/value
+arrays preserve field association and avoid adding many serial browser calls during a live
+fuse. Product sources, screenshot options, deadlines, retry policy and gameplay are unchanged.
+Independent implementation review and all E2E static gates/parity26 pass. This corrects the
+HUD probe and does not explain the separate v0.3.22 hosted screenshot timeout.
+
+Clean corrected source `893c150fcfcfdcd065418deb1349cb7852106df0`, archive SHA-256
+`4019fd20ffdc6e2e6a99f8d8b54549a1e068d129c06ee75eef36420638431ef3`, has identical production
+inputs to the image source above. The continuation passes **19/19 fresh Compose and26/26 fresh
+Kubernetes cases**, all first attempts with zero retries. Seven default Compose cases retain
+byte-identical transitive inputs, closing the explicit composite at **26/26 per target,52/52**.
+Four latency profiles have20 samples each, zero exceedances and zero CPU throttling; local/
+shaped maxima are48.491/133.364 ms Compose and48.906/160.071 ms Kubernetes. All32 strict
+pre-browser probe pairs return200 JSON/no-store. Runtime hardening, external/projected0444
+fixtures, fresh pod identities, direct-pod forward stop/wait ordering and cleanup pass.
+
+Independent evidence review is clear. Source blobs, all16 embedded reports, retained test
+inputs, immutable image/scan/schema references and both evidence manifests verify. Evidence:
+`/tmp/grenadiers-v0324-hud-acceptance`; its374-file manifest SHA-256 is
+`dbcc7b920f90fbc04bcb58afe947b6deb34f669f90ffdc2c1b50b0924b089d70`.
+The preserved initial-failure90-file manifest SHA-256 is
+`143eb7a3b7f0e3c847a3697d7059da822ba3b485c8716f0095af77d9df729a9f`.
+Saved process records establish PID ordering/liveness and waited cleanup, without independently
+proving literal PTY ownership or ambient quiet. Exact publication-head CI and upstream release
+integration remain pending; this candidate is not yet merged or released.
+
+## Live gameplay-v7 candidate — 2026-10-18 — local checks only
+
+The v0.3.24 integration passes **375 core tests, 174 server tests and two doctests in each debug and release profile**;
+four dedicated performance profiles remain intentionally ignored. Rust line coverage is
+**93.27%** (10,568/11,331 lines), above the unchanged 80% floor. All **274 web tests** pass
+with statement/branch/function/line coverage of **95.05/90.81/94.66/97.55%**. Contracts,
+lint, Knip, builds and E2E static checks pass, with **26 documented scenarios**.
+Dependency audits and strict pinned Kubernetes schemas pass. Independent backend and
+frontend reviews are clear.
+
+The server and browser now use gameplay-v7 together. Admission and both recipient frames
+are encoded before transactional state changes. Routing tests use a real Seat Two membership
+and cover publication, retained closing and server shutdown. Regressions also cover invalid
+room provenance, failed admission rollback, previous-version rejection before credential claim,
+and unsupported equipment actions without consuming the manual-action identifier.
+
+This candidate retains Classic rules and empty optional-item availability. The inventory and
+effect presentation is infrastructure; no new pickup is playable. These results describe the
+initial local verification. The later image and native acceptance are recorded above; exact-head
+acceptance for the terrain-cache integration remains pending.
+
+## Parent canonical projections with terrain cache — 2026-10-18 — native 52/52, final CI pending
 
 Clean source `20793428554458e69fe7014232d8d08e7ea089bc`, archive SHA-256
 `4e490088c7a5f8eaadecdd6414642c4c9c453286772b2fcf00c35750a97f6303`, builds one image:
@@ -28,7 +168,7 @@ CI and publication remain required. Live rooms still use v6; optional pickups re
 Evidence: `/tmp/grenadiers-v0323-terrain-native-acceptance`, 945-file final manifest SHA-256
 `c68bc0f99c5568e1edf90c9e3e16fe38072703d0222d61c0cdf35bb44f9b4b92`.
 
-## Earlier canonical projection verification
+## Canonical projection history — 2026-10-18 — native verified
 
 The v0.3.23 candidate passes **373 core tests, 170 server tests and two doctests in each debug and release profile**, with four
 dedicated performance profiles intentionally ignored. Rust line coverage is **92.25%**

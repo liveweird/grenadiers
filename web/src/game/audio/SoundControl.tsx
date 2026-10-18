@@ -1,12 +1,12 @@
 import { Button, Text } from '@mantine/core'
 import { useEffect, useRef, useState } from 'react'
-import type { GameClientState } from '../v6/client'
-import type { V6Copy } from '../v6/locale'
+import type { GameClientState } from '../client/client'
+import type { GameCopy } from '../client/locale'
 import { AudioCursor } from './cursor'
 import { GameAudio } from './engine'
 import { loadAudioPreference, saveAudioPreference } from './preferences'
 
-export function SoundControl({ state, copy }: { state: GameClientState; copy: V6Copy }) {
+export function SoundControl({ state, copy }: { state: GameClientState; copy: GameCopy }) {
   const [preferred, setPreferred] = useState(loadAudioPreference)
   const [engineRunning, setEngineRunning] = useState(false)
   const [visible, setVisible] = useState(() => document.visibilityState === 'visible')

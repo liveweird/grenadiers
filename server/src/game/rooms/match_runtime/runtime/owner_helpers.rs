@@ -22,10 +22,7 @@ impl MatchRuntime {
             None,
         )?;
         self.revision = next;
-        Ok(MatchNotice {
-            room,
-            snapshot: None,
-        })
+        Ok(MatchNotice { room, frames: None })
     }
 
     pub(in crate::game::rooms) fn current_notice(

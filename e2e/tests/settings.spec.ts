@@ -24,7 +24,7 @@ test('two browsers share configured rules that drive speed, fuse and match targe
     await one.getByLabel('Bomb fuse').selectOption('60')
     await one.getByRole('button', { name: 'Apply rules', exact: true }).click()
     const expected = {
-      startingSpeedLevel: 4, turnAssistUnits: 64, winsToFinish: 1, bombFuseTicks: 60,
+      startingSpeedLevel: 4, turnAssistUnits: 64, winsToFinish: 1, bombFuseTicks: 60, enabledItems: [],
     }
     await Promise.all(games.map((game) => expect.poll(() => latestRoom(game)?.settings).toEqual(expected)))
     await expect(two.getByLabel('Starting speed')).toHaveValue('4')
@@ -34,14 +34,18 @@ test('two browsers share configured rules that drive speed, fuse and match targe
     await Promise.all(games.map((game) => expect.poll(() => latestSnapshot(game)?.room.phase.type).toBe('running')))
     for (const game of games) {
       expect(latestSnapshot(game)!.room).toMatchObject({ rulesVersion: 4, settings: expected })
-      expect(latestSnapshot(game)!.state.actors.map((actor) => actor.speedLevel)).toEqual([4, 4])
+      expect(latestSnapshot(game)!.state.actors.map((actor) => actor.type === 'visible' ? actor.speedLevel : null))
+        .toEqual([4, 4])
     }
 
     await one.getByRole('region', { name: 'Grenadiers courtyard' }).click()
     await one.keyboard.press('Space')
     await expect.poll(() => latestSnapshot(games[0])?.state.bombs.at(0)).toBeTruthy()
-    const bomb = latestSnapshot(games[0])!.state.bombs[0]
-    expect(bomb.detonatesAt - bomb.placedAt).toBe(60)
+    const planted = latestSnapshot(games[0])!
+    const bomb = planted.state.bombs[0]
+    expect(bomb.trigger).toMatchObject({ type: 'timed', paused: false })
+    if (bomb.trigger.type !== 'timed') throw new Error('Configured Classic bomb must have a timed fuse')
+    expect(planted.state.physicalTick - bomb.placedAt + bomb.trigger.remainingTicks).toBe(60)
     await Promise.all(games.map((game) => expect.poll(() => latestRoom(game)?.phase.type).toBe('matchResult')))
     expect(latestRoom(games[0])?.scores).toEqual({ one: 0, two: 1 })
     expect(latestRoom(games[0])?.settings).toEqual(expected)

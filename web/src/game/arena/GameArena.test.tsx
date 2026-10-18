@@ -53,7 +53,7 @@ describe('React arena ownership and keyboard scope', () => {
     view.rerender(<GameArena {...options} snapshot={null} enabled={false} />)
     expect(renderer.suspend).toHaveBeenCalledOnce()
     const newer = structuredClone(options.snapshot!)
-    newer.state.runningUpdates += 1
+    newer.state.physicalTick = (newer.state.physicalTick ?? 0) + 1
     view.rerender(<GameArena {...options} snapshot={newer} />)
     expect(hooks.create).toHaveBeenCalledOnce()
     expect(renderer.update).toHaveBeenLastCalledWith(newer)
@@ -134,7 +134,7 @@ describe('React arena asynchronous renderer ownership', () => {
     const view = render(<GameArena {...options} />)
     await imports()
     const newer = structuredClone(options.snapshot!)
-    newer.state.runningUpdates += 3
+    newer.state.physicalTick = (newer.state.physicalTick ?? 0) + 3
     view.rerender(<GameArena {...options} snapshot={newer} />)
     const renderer = instance()
     await act(async () => { resolve(renderer) })
@@ -159,7 +159,7 @@ describe('React arena asynchronous renderer ownership', () => {
     await imports()
     view.rerender(<GameArena {...options} snapshot={null} />)
     const latest = structuredClone(options.snapshot!)
-    latest.state.runningUpdates += 7
+    latest.state.physicalTick = (latest.state.physicalTick ?? 0) + 7
     view.rerender(<GameArena {...options} snapshot={latest} />)
     const renderer = instance()
     await act(async () => { resolve(renderer) })
@@ -181,7 +181,7 @@ describe('React arena asynchronous renderer ownership', () => {
     await act(async () => { resolve(renderer) })
     expect(renderer.suspend).toHaveBeenCalledOnce()
     const next = structuredClone(options.snapshot!)
-    next.state.runningUpdates += 1
+    next.state.physicalTick = (next.state.physicalTick ?? 0) + 1
     view.rerender(<GameArena {...options} snapshot={next} />)
     expect(renderer.update).toHaveBeenCalledWith(next)
     expect(hooks.create).toHaveBeenCalledOnce()
@@ -204,7 +204,7 @@ describe('React arena initialization failure recovery', () => {
       expect(poisoned.destroy).toHaveBeenCalledOnce()
       expect(screen.getByRole('alert')).toHaveTextContent('Graphics unavailable')
       const revision = structuredClone(options.snapshot!)
-      revision.state.runningUpdates += 1
+      revision.state.physicalTick = (revision.state.physicalTick ?? 0) + 1
       view.rerender(<GameArena {...options} snapshot={revision} />)
       await imports()
       expect(hooks.create).toHaveBeenCalledOnce()
@@ -229,7 +229,7 @@ describe('React arena initialization failure recovery', () => {
     await imports()
     view.rerender(<GameArena {...options} snapshot={null} />)
     const latest = structuredClone(options.snapshot!)
-    latest.state.runningUpdates += 2
+    latest.state.physicalTick = (latest.state.physicalTick ?? 0) + 2
     view.rerender(<GameArena {...options} snapshot={latest} />)
     const poisoned = instance()
     vi.mocked(poisoned.update).mockImplementationOnce(() => { throw new Error('A paint failed') })
@@ -257,13 +257,13 @@ describe('React arena initialization failure recovery', () => {
     await act(async () => { resolveA(retained) })
     expect(retained.suspend).toHaveBeenCalledOnce()
     const stateB = structuredClone(options.snapshot!)
-    stateB.state.runningUpdates += 2
+    stateB.state.physicalTick = (stateB.state.physicalTick ?? 0) + 2
     expect(() => view.rerender(<GameArena {...options} snapshot={stateB} />)).not.toThrow()
     expect(retained.destroy).toHaveBeenCalledOnce()
     expect(screen.getByRole('alert')).toHaveTextContent('Graphics unavailable')
     expect(screen.getByRole('region')).toHaveAttribute('tabindex', '-1')
     const revisionB = structuredClone(stateB)
-    revisionB.state.runningUpdates += 1
+    revisionB.state.physicalTick = (revisionB.state.physicalTick ?? 0) + 1
     view.rerender(<GameArena {...options} snapshot={revisionB} />)
     await imports()
     expect(hooks.create).toHaveBeenCalledOnce()
@@ -305,7 +305,7 @@ describe('React arena initialization failure recovery', () => {
     fireEvent.keyDown(region, { code: 'Space' })
     expect(options.onBomb).not.toHaveBeenCalled()
     const revision = structuredClone(options.snapshot!)
-    revision.state.runningUpdates += 1
+    revision.state.physicalTick = (revision.state.physicalTick ?? 0) + 1
     view.rerender(<GameArena {...options} snapshot={revision} />)
     await imports()
     expect(hooks.create).toHaveBeenCalledOnce()
@@ -329,7 +329,7 @@ describe('React arena initialization failure recovery', () => {
     await imports()
     view.rerender(<GameArena {...options} snapshot={null} />)
     const latest = structuredClone(options.snapshot!)
-    latest.state.runningUpdates += 1
+    latest.state.physicalTick = (latest.state.physicalTick ?? 0) + 1
     view.rerender(<GameArena {...options} snapshot={latest} />)
     await act(async () => { rejectA(new Error('A failed')) })
     expect(hooks.create).toHaveBeenCalledTimes(2)

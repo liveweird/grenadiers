@@ -4,8 +4,8 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { setTimeout as delay } from 'node:timers/promises'
 import { chromium, expect, type Browser, type BrowserContext, type Page } from '@playwright/test'
-import type { GameServerMessage, Position, Seat } from '../../../web/src/game/v6/schema'
-import { latestSnapshot, type ObservedGame } from './duel'
+import type { GameServerMessage, Position, Seat } from '../../../web/src/game/v7/schema'
+import { visibleActor, latestSnapshot, type ObservedGame } from './duel'
 
 type Snapshot = Extract<GameServerMessage, { type: 'snapshot' }>
 type VisibilityWindow = Window & { grenadiersVisibilityChanges?: DocumentVisibilityState[] }
@@ -111,7 +111,7 @@ export async function launchNaturalVisibilityBrowser(): Promise<{
 }
 
 function actorPosition(game: ObservedGame, seat: Seat): Position {
-  const actor = latestSnapshot(game)?.state.actors.find((value) => value.seat === seat)
+  const actor = visibleActor(latestSnapshot(game), seat)
   if (!actor?.alive) throw new Error(`Visibility recovery requires living seat ${seat}`)
   return actor.position
 }
@@ -144,7 +144,7 @@ export async function expectStableFreshPosition(
     const frames = game.frames.filter((frame): frame is Snapshot => frame.type === 'snapshot'
       && frame.room.revision > afterRevision).slice(-3)
     if (frames.length !== 3) return false
-    const positions = frames.map((frame) => frame.state.actors.find((actor) => actor.seat === seat)?.position)
+    const positions = frames.map((frame) => visibleActor(frame, seat)?.position)
     const first = positions[0]
     return first !== undefined && positions.every((position) => position !== undefined
       && position.x === first.x && position.y === first.y)

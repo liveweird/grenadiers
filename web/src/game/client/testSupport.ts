@@ -1,6 +1,6 @@
 import { vi } from 'vitest'
 import { GameClient, type AdmissionIntent, type GameClientState } from './client'
-import type { Admitted, GameServerMessage, GameState, RoomPhase, RoomView, Snapshot } from './schema'
+import type { Admitted, GameServerMessage, GameState, RoomPhase, RoomView, Snapshot } from '../v7/schema'
 
 export const sessionToken = 'a'.repeat(64)
 export const resumeToken = 'c'.repeat(64)
@@ -60,7 +60,7 @@ export async function authenticate(value: Harness, intent: AdmissionIntent = { t
   await vi.waitFor(() => expect(value.sockets).toHaveLength(1))
   const socket = value.sockets.at(-1)!
   socket.emit('open')
-  socket.message({ type: 'authenticated', protocolVersion: 6 })
+  socket.message({ type: 'authenticated', protocolVersion: 7 })
   return socket
 }
 
@@ -69,7 +69,10 @@ export function room(revision: number, phase: RoomPhase = { type: 'waiting' }, r
     roomId, roomCode: 'ABCDEFGH', roundId, revision, tick: revision,
     rulesVersion: 4, mapId: 'fixed_v1', roundNumber: phase.type === 'running' ? 1 : 0,
     scores: { one: 0, two: 0 }, lastRound: null,
-    settings: { startingSpeedLevel: 0, turnAssistUnits: 256, winsToFinish: 3, bombFuseTicks: 180 },
+    settings: {
+      startingSpeedLevel: 0, turnAssistUnits: 256, winsToFinish: 3, bombFuseTicks: 180, enabledItems: [],
+    },
+    availableItems: [],
     settingsRevision: 1, settingsEditor: 'one',
     seats: [
       { seat: 'one', occupied: true, ready: false, rematchReady: false, connection: { type: 'connected' } },
@@ -81,26 +84,30 @@ export function room(revision: number, phase: RoomPhase = { type: 'waiting' }, r
 
 function gameState(alive = true): GameState {
   return {
-    runningUpdates: 1, remainingTicks: 10_799,
+    runningUpdates: 1, remainingTicks: 10_799, physicalTick: 1,
     arena: { width: 15 as const, height: 13 as const, terrain: Array.from({ length: 195 }, () => 'floor' as const), blocks: [] },
     actors: [
       {
+        type: 'visible',
         id: 1, seat: 'one' as const, position: { x: 512, y: 512 }, heading: 'east' as const,
         speedLevel: 0, alive, bombCapacity: 1, bombRange: 1, liveBombCount: 0,
+        inventory: { equipment: null, weapon: null }, effects: [], damageGraceRemainingTicks: 0,
       },
       {
+        type: 'visible',
         id: 2, seat: 'two' as const, position: { x: 14_848, y: 12_800 }, heading: 'west' as const,
         speedLevel: 0, alive: true, bombCapacity: 1, bombRange: 1, liveBombCount: 0,
+        inventory: { equipment: null, weapon: null }, effects: [], damageGraceRemainingTicks: 0,
       },
     ],
     bombs: [], flames: [], pickups: [],
   }
 }
 
-export function admitted(revision = 1, lastBombActionId: number | null = null): Admitted {
+export function admitted(revision = 1, lastActionId: number | null = null): Admitted {
   return {
     type: 'admitted' as const, sequence: 1, room: room(revision, { type: 'running' }),
-    youSeat: 'one' as const, resumeToken, lastBombActionId, state: gameState(),
+    youSeat: 'one' as const, resumeToken, lastActionId, state: gameState(),
   }
 }
 

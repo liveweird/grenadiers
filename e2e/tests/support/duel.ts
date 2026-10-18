@@ -1,6 +1,6 @@
 import { expect, type Page } from '@playwright/test'
 import { performance } from 'node:perf_hooks'
-import type { Direction, GameServerMessage, V6ErrorCode } from '../../../web/src/game/v6/schema'
+import type { ActorView, Direction, GameServerMessage, Seat, V7ErrorCode } from '../../../web/src/game/v7/schema'
 
 type Snapshot = Extract<GameServerMessage, { type: 'snapshot' }>
 const CONTROL_LIMIT = 256
@@ -9,11 +9,11 @@ const CLIENT_TYPES = new Set([
   'authenticate', 'createRoom', 'joinRoom', 'resumeRoom', 'ready', 'leaveRoom', 'rematch',
   'updateSettings',
 ])
-const COMMAND_TYPES = new Set([...CLIENT_TYPES, 'movement', 'placeBomb'])
+const COMMAND_TYPES = new Set([...CLIENT_TYPES, 'movement', 'manualAction'])
 const SERVER_TYPES = new Set([
   'authenticated', 'incompatibleProtocol', 'admitted', 'roomState', 'leftRoom', 'seatReplaced', 'error',
 ])
-const ERROR_CODES = new Set<V6ErrorCode>([
+const ERROR_CODES = new Set<V7ErrorCode>([
   'invalidMessage', 'authenticationFailed', 'connectionInUse', 'notAuthenticated',
   'alreadyAuthenticated', 'alreadyInRoom', 'notInRoom', 'roomNotFound', 'roomFull', 'staleRoom',
   'invalidPhase', 'staleSequence', 'duplicateAction', 'rateLimited', 'capacityReached',
@@ -26,7 +26,7 @@ export type GameControlEvent = {
   direction: 'sent' | 'received' | 'transport'
   type: string
   sequence?: number | null
-  errorCode?: V6ErrorCode
+  errorCode?: V7ErrorCode
   admitted?: true
   seatReplaced?: true
 }
@@ -46,7 +46,7 @@ export type GameControlDiagnostics = {
 
 export type ObservedGame = {
   frames: GameServerMessage[]
-  commands: { type: string; actionId?: number; direction?: Direction | null }[]
+  commands: { type: string; action?: 'bomb' | 'equipment'; actionId?: number; direction?: Direction | null }[]
   sockets: number
   control: GameControlDiagnostics
 }
@@ -107,7 +107,7 @@ export class GameControlRecorder {
     if (frame.type === 'admitted') event.admitted = true
     if (frame.type === 'seatReplaced') event.seatReplaced = true
     if (frame.type === 'error' && typeof frame.code === 'string'
-      && ERROR_CODES.has(frame.code as V6ErrorCode)) event.errorCode = frame.code as V6ErrorCode
+      && ERROR_CODES.has(frame.code as V7ErrorCode)) event.errorCode = frame.code as V7ErrorCode
     this.push(event)
   }
 
@@ -149,6 +149,9 @@ export function observeGame(page: Page): ObservedGame {
           actionId: typeof command.actionId === 'number' ? command.actionId : undefined,
         }
         if (command.type === 'movement') summary.direction = direction
+        if (command.type === 'manualAction' && (command.action === 'bomb' || command.action === 'equipment')) {
+          summary.action = command.action
+        }
         observed.commands.push(summary)
       }
     })
@@ -166,6 +169,11 @@ export function observeGame(page: Page): ObservedGame {
 
 export function latestSnapshot(game: ObservedGame): Snapshot | undefined {
   return game.frames.filter((frame) => frame.type === 'snapshot').at(-1)
+}
+
+export function visibleActor(snapshot: Snapshot | undefined, seat: Seat) {
+  return snapshot?.state.actors.find((actor): actor is Extract<ActorView, { type: 'visible' }> =>
+    actor.seat === seat && actor.type === 'visible')
 }
 
 export async function expectPaintedCanvas(page: Page): Promise<void> {

@@ -1,6 +1,6 @@
 use std::fmt;
 
-use grenadiers_core::protocol::v6::ResumeToken;
+use grenadiers_core::protocol::v7::ResumeToken;
 
 const CREDENTIAL_BYTES: usize = 32;
 const MAX_COLLISION_ATTEMPTS: usize = 3;

@@ -4,8 +4,9 @@
 
 The v0.3.25 candidate passes **401 core tests, 179 server tests and two doctests** in both
 debug and release profiles; four dedicated performance profiles remain intentionally ignored. Rust line
-coverage is **90.94%** (11,950/13,140 lines), above the unchanged 80% floor. All **274 web tests**,
-contracts, lint, Knip, production build, E2E static checks and **27-scenario parity** pass.
+coverage is **90.94%** (11,950/13,140 lines), above the unchanged 80% floor. All **284 web tests**
+pass with statement/branch/function/line coverage of **94.76/90.34/94.70/97.30%**. Contracts,
+lint, Knip, production build, E2E static checks and **27-scenario parity** pass.
 Dependency audits and strict pinned Kubernetes schemas pass. Independent gameplay/browser
 and backend reviews are clear after the forged legacy replay-mask and socket-version issues
 were fixed.
@@ -63,6 +64,36 @@ Evidence remains at `/tmp/grenadiers-v0323-acceptance`; that image does not cert
 The fix and strengthened acceptance are integrated, and full debug/release gates pass. Fresh
 image acceptance and final-head CI remain required before publication.
 
+## Historical v22 arena renderer lifetime correction — 2026-10-18
+
+The single instrumented Linux run of clean harness `1bf4d74` passes its reconnect case in
+27.7 seconds, without retries, using the unchanged `efb5c7f...` image. On the primary page,
+`WEBGL_lose_context.loseContext` takes **1,067.4 ms** inside a **1,071 ms** long task,
+covering **99.664%** of it. The sanitized caller chain reaches renderer destruction. This
+attributes that measured primary stall to context teardown. Peer long tasks of 1,921/779 ms
+have no corresponding slow wrapped GL call; their cause remains unproven. Diagnostics and
+source/probe/runtime evidence remain at `/tmp/grenadiers-v0322-gl-attribution`.
+
+The candidate retains one lazy renderer per mounted arena, suspends/hides/clears it between
+worlds, paints the latest baseline before reveal, and releases it on final component unmount.
+Async ownership, StrictMode cancellation and later-activation initialization retries are explicit.
+Native reconnect acceptance also checks that the original canvas survives restore and remains
+connected but hidden after terminal takeover. Deadlines and retry policy remain unchanged.
+The v22 renderer candidate's web verification passed **257 tests** across 36 files, with statement/branch/function/line
+coverage of **94.81/90.05/94.90/97.42%**. Lint, TypeScript, Knip, production build and contract
+checks pass. Focused lifecycle coverage includes first-paint and suspension failures, bounded
+activation retries and recovery after an initialization completes while no world is active.
+Independent review is clear. A rebuilt image, complete native acceptance and exact final-head
+CI remain required. The earlier image's passing rollup below does not certify this renderer change.
+
+Before the renderer change, the corrected `b062127` source passes all ten exact-head CI checks;
+both browser logs contain no retries, flaky results or failures. Native acceptance and its
+independent evidence audit support **26/26 Compose** and **26/26 Kubernetes** on the same
+image. Compose local/shaped maxima are **53.811/158.586 ms**; Kubernetes **50.276/158.226 ms**,
+with 20 samples per profile, zero exceedances and zero Kubernetes throttling. The final
+Kubernetes process owns its forward in one PTY through strict probes and all checks. See
+`/tmp/grenadiers-v0322-k8s-lifetime-acceptance` and `/tmp/grenadiers-v22-final-native-audit.md`.
+All prior failed evaluations remain preserved. No registry image or production deployment is claimed.
 ## Release-profile connected takeover correction — 2026-10-18 — acceptance pending
 
 The release-profile owner regression fails on the earlier candidate: binding replacement was

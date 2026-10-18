@@ -1,15 +1,25 @@
 # Gameplay and presentation backlog
 
-Status: **TURN v0.3.16, CONFIG v0.3.17 and the first ART slice v0.3.18 are shipped**.
-The v0.3.19 equipment/effect core foundation is implemented and verified; no requested
-items are enabled in the published v0.3.24 rooms. The v0.3.25 Heart candidate now has domain,
-server, browser and pixel-art implementation with local checks and independent reviews clear;
-both debug/release profiles and fresh native acceptance 54/54 pass; final publication remains pending. The v0.3.26 Shield
-candidate adds opt-in timed immunity. The v0.3.27 Golden Flame and v0.3.28 Short Fuse
-candidates also pass local checks; native acceptance and final-head CI remain pending.
-The v0.3.29 Short Flame and v0.3.30 Long Fuse candidates pass local checks and independent reviews; native acceptance remains pending. The v0.3.31 Reverse Controls candidate passes local checks and independent review. The v0.3.32 Diarrhea candidate passes local verification and independent reviews. The v0.3.33 Slow-foot candidate passes local checks and independent backend/frontend reviews; native acceptance remains pending. The v0.3.34 Piercing Bomb candidate passes local checks and independent reviews; native acceptance and final CI remain pending. The other 12 requested pickups
-remain unimplemented. Richer transitions and further item artwork remain follow-up
-work. See [pixel-art presentation](pixel-art.md) and [expanded item implementation](expanded-items.md).
+TURN v0.3.16, CONFIG v0.3.17 and the first ART slice v0.3.18 are shipped. Heart
+[v0.3.25](https://github.com/liveweird/grenadiers/releases/tag/v0.3.25), Shield
+[v0.3.26](https://github.com/liveweird/grenadiers/releases/tag/v0.3.26), Golden Flame
+[v0.3.27](https://github.com/liveweird/grenadiers/releases/tag/v0.3.27) and Short Fuse
+[v0.3.28](https://github.com/liveweird/grenadiers/releases/tag/v0.3.28), and Short Flame
+[v0.3.29](https://github.com/liveweird/grenadiers/releases/tag/v0.3.29) are published.
+The v0.3.30 Long Fuse increment passes local checks. An earlier named source passed fresh 64/64
+Compose/Kubernetes browser cases, but hosted CI exposed a bounded-history driver cursor defect.
+The corrected driver requires fresh native acceptance and final-head CI. Verification records
+the source-specific evidence and disclosed bookkeeping exception. The v0.3.31 Reverse Controls
+candidate also passes local checks and independent implementation reviews, but its earlier native run was interrupted before latency/optional/Kubernetes cases;
+fresh whole acceptance and final-head CI remain pending. The v0.3.32 Diarrhea
+candidate passes local checks and independent implementation reviews. The v0.3.33 Slow-foot
+candidate passes local checks and independent backend/frontend reviews; its final parent is now
+integrated into the v0.3.34 Piercing Bomb candidate. Piercing passes local checks and independent
+implementation reviews; fresh native acceptance and final-head CI remain pending. The other 12
+requested pickups remain outside this increment. Richer transitions
+and artwork remain follow-up work. See [pixel-art presentation](pixel-art.md),
+[expanded item implementation](expanded-items.md), and
+[release notes](https://github.com/liveweird/grenadiers/releases).
 Updated 2026-10-18 after playtest feedback. Release acceptance is recorded in
 [verification](../verification.md).
 The [implementation plan](implementation-plan.md) remains the milestone/release reference;

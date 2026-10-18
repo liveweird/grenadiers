@@ -7,5 +7,6 @@ and collect it via movement. Both peers observe the captured range-one bomb. Its
 reaches west into(2,1), stops before the known clear cell(1,1), and leaves the escaped actor alive.
 Reconnect preserves the action floor and the exact collectionTick+600 timer on every snapshot.
 After expiry, a newly planted ordinary range-two bomb eliminates the actor. Capture desktop
-and Polish320 reduced-motion screenshots. Use the external seed; no injected game state,
-relaxed budgets or retries.
+and Polish320 reduced-motion pickup layouts before collection. Plant and escape before screenshot
+work, then capture the Polish active-effect view after the natural one-cell blast proof confirms
+the effect remains active. Use the external seed; no injected game state, relaxed budgets or retries.

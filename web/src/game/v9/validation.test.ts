@@ -1,24 +1,41 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { validateServerMessage } from '../client/clientProtocol'
 import { snapshot } from '../client/testSupport'
 import { validateGameplayV8ServerMessage } from '../v8/validation'
 import { validateGameplayV9ServerMessage } from './validation'
 
-describe('gameplay v9 Stopwatch validation', () => {
-  const supported = [
-    'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch',
-    'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot',
-    'shortFlame', 'longFuse', 'reverseControls', 'invisibleBombs',
-  ] as const
+function checkedCatalogCases<const T extends readonly string[], R>(
+  catalog: T, enumerate: (catalog: T) => R,
+): R {
+  if (catalog.length !== 16) throw new Error(`gameplay v9 catalog must contain 16 items; got ${catalog.length}`)
+  if (new Set(catalog).size !== catalog.length) throw new Error('gameplay v9 catalog items must be unique')
+  return enumerate(catalog)
+}
 
+const supported = [
+  'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch',
+  'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot',
+  'shortFlame', 'longFuse', 'reverseControls', 'invisibleBombs',
+] as const
+const supportedCases = checkedCatalogCases(supported, (catalog) => Array.from(
+  { length: 2 ** catalog.length },
+  (_, mask) => [catalog.filter((_, index) => (mask & (1 << index)) !== 0)] as const,
+))
+
+describe('gameplay v9 Stopwatch validation', () => {
   it('pins sixteen unique catalog entries before enumerating every mask', () => {
     expect(supported).toHaveLength(16)
     expect(new Set(supported)).toHaveLength(16)
   })
 
-  it.each(Array.from({ length: 2 ** supported.length }, (_, mask) => [
-    supported.filter((_, index) => (mask & (1 << index)) !== 0),
-  ] as const))('accepts the pinned supported enabled-item set %j', (enabledItems) => {
+  it('rejects a duplicate catalog before calling the mask enumerator', () => {
+    const enumerate = vi.fn()
+    expect(() => checkedCatalogCases([...supported.slice(0, -1), 'reverseControls'], enumerate))
+      .toThrow('gameplay v9 catalog items must be unique')
+    expect(enumerate).not.toHaveBeenCalled()
+  })
+
+  it.each(supportedCases)('accepts the pinned supported enabled-item set %j', (enabledItems) => {
     const message = snapshot(1)
     message.room.settings.enabledItems = [...enabledItems]
     expect(validateGameplayV9ServerMessage(message)).toEqual({ valid: true, value: message })

@@ -21,15 +21,18 @@ catalog assertion; after updating that exact assertion, debug and release pass a
 
 The full shuffled web gate passes 59 files and 82,344 tests with 95.43% statements, 91.25%
 branches, 95.90% functions and 97.82% lines, plus production build, lint, Knip and generated
-contract checks (`/tmp/grenadiers-v0341-web-full-pass.log`). A later test-only uniqueness guard
-raises the focused v9 contract count to 65,545: all 65,536 masks plus nine focused guards pass.
+contract checks (`/tmp/grenadiers-v0341-web-full-pass.log`). A test-only uniqueness guard initially
+raised the focused v9 contract count to 65,545: all 65,536 masks plus nine focused guards passed.
 `/usr/bin/time -l` measured that exhaustive focused run at 2.59 seconds wall time and 793,378,816
 bytes maximum RSS (`/tmp/grenadiers-v0341-web-mask-final.log` and
 `/tmp/grenadiers-v0341-web-mask-cost.log`). A prior duplicate-catalog fixture caused a failed
 131,090-case reporter; its raw log and root stop record remain at
 `/tmp/grenadiers-v0341-web-focused-attempt2.log` and
 `/tmp/grenadiers-v0341-web-focused-attempt2-root-stop.log`. Its tee wrapper status is not treated
-as the child result. The new 16-entry/16-unique guard fails before future exhaustive enumeration.
+as the child result. Module initialization now checks the catalog's 16-entry length and uniqueness
+before constructing the parameter table; a negative fixture proves its enumerator is never called.
+The final focused run passes 65,546 tests, including that negative preflight proof
+(`/tmp/grenadiers-v0341-preflight-mask-focused.log`).
 
 Rust coverage passes the 80% floor at 92.47% lines (13,527/14,629). E2E static checks pass 43
 scenario/spec pairs with typecheck and lint. Renderer diagnostics, repository size/pin checks,

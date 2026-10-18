@@ -1,12 +1,18 @@
 use super::State;
+use crate::game::effects::EffectKind;
 use crate::game::events::{EventAudience, StepEvent, StepEventKind};
 use crate::game::pickups::{Pickup, PickupKind};
+use crate::game::simulation::StepError;
 use crate::game::types::{CellId, Position, SeatId, Tick};
 
 impl State {
-    pub(super) fn collect_pickups(&mut self, tick: Tick, events: &mut Vec<StepEvent>) {
+    pub(super) fn collect_pickups(
+        &mut self,
+        tick: Tick,
+        events: &mut Vec<StepEvent>,
+    ) -> Result<(), StepError> {
         if !self.rules.pickup_collection() {
-            return;
+            return Ok(());
         }
         let cells: Vec<_> = self.world.pickups.exposed.keys().copied().collect();
         for cell in cells {
@@ -20,7 +26,7 @@ impl State {
                 .remove(&cell)
                 .expect("collection candidates came from the exposed layer");
             let actor = &mut self.actors[seat.index()];
-            actor.apply_pickup(pickup, self.rules);
+            actor.apply_pickup(pickup, self.rules, tick)?;
             events.push(StepEvent::new(
                 tick,
                 EventAudience::Both,
@@ -32,6 +38,7 @@ impl State {
                 },
             ));
         }
+        Ok(())
     }
 
     fn collector_for(&self, cell: CellId) -> Option<SeatId> {
@@ -58,7 +65,12 @@ impl State {
 }
 
 impl super::Actor {
-    fn apply_pickup(&mut self, pickup: Pickup, rules: crate::game::RulesConfig) {
+    fn apply_pickup(
+        &mut self,
+        pickup: Pickup,
+        rules: crate::game::RulesConfig,
+        tick: Tick,
+    ) -> Result<(), StepError> {
         match pickup.kind() {
             PickupKind::BombCapacity => {
                 self.capacity = self
@@ -74,6 +86,12 @@ impl super::Actor {
                 self.inventory
                     .replace_equipment(crate::game::Equipment::Heart);
             }
+            PickupKind::Shield => {
+                self.effects
+                    .apply(EffectKind::Shield, tick)
+                    .map_err(|_| StepError::EffectExpiryOverflow(EffectKind::Shield))?;
+            }
         }
+        Ok(())
     }
 }

@@ -61,7 +61,53 @@ pub(in crate::game::rooms) fn start_expanded_heart_round(runtime: &mut MatchRunt
     tick_until_running(runtime);
 }
 
+pub(in crate::game::rooms) fn start_shield_runtime() -> MatchRuntime {
+    let mut runtime = MatchRuntime::new(
+        identity(RoomProfile::ExpandedV5),
+        RoundSeedSource::with_entropy(|bytes| {
+            bytes.fill(31);
+            Ok(())
+        }),
+    );
+    occupy_both(&mut runtime);
+    runtime
+        .action(
+            SeatId::One,
+            1,
+            MatchAction::UpdateSettings {
+                settings_revision: 1,
+                settings: grenadiers_core::room::RoomSettings::DEFAULT
+                    .with_enabled_items(grenadiers_core::game::EnabledItems::SHIELD),
+            },
+        )
+        .unwrap();
+    for seat in SeatId::ALL {
+        runtime
+            .action(
+                seat,
+                1,
+                MatchAction::ReadyChecked {
+                    ready: true,
+                    settings_revision: 2,
+                },
+            )
+            .unwrap();
+    }
+    tick_until_running(&mut runtime);
+    runtime
+}
+
 pub(in crate::game::rooms) fn collect_generated_heart(runtime: &mut MatchRuntime) {
+    collect_generated_pickup(runtime);
+    assert_eq!(
+        runtime.sim().unwrap().state.actors()[0]
+            .inventory()
+            .equipment(),
+        Some(grenadiers_core::game::Equipment::Heart)
+    );
+}
+
+pub(in crate::game::rooms) fn collect_generated_pickup(runtime: &mut MatchRuntime) {
     move_cells(runtime, Direction::East, 1);
     plant(runtime, 1);
     move_cells(runtime, Direction::West, 1);
@@ -69,12 +115,6 @@ pub(in crate::game::rooms) fn collect_generated_heart(runtime: &mut MatchRuntime
     wait_clear(runtime);
     move_cells(runtime, Direction::North, 1);
     move_cells(runtime, Direction::East, 2);
-    assert_eq!(
-        runtime.sim().unwrap().state.actors()[0]
-            .inventory()
-            .equipment(),
-        Some(grenadiers_core::game::Equipment::Heart)
-    );
 }
 
 pub(in crate::game::rooms) fn absorb_generated_heart(runtime: &mut MatchRuntime) {

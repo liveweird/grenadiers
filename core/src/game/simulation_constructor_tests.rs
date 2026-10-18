@@ -153,45 +153,94 @@ fn constructor_rejects_a_bomb_whose_map_key_disagrees_with_its_id() {
 }
 
 #[test]
-fn classic_rejects_enabled_settings_and_heart_in_every_pickup_layer() {
-    let settings = RoomSettings::DEFAULT.with_enabled_items(EnabledItems::HEART);
-    assert_eq!(
-        State::new(
-            RulesConfig::configurable_v4(settings),
-            open_world(),
-            actors(10, 20),
-        ),
-        Err(StateError::UnsupportedEnabledItems(EnabledItems::HEART))
-    );
-
-    for layer in 0..3 {
-        let cell = CellId::new(8, 5);
-        let heart = BTreeMap::from([(cell, PickupKind::Heart)]);
-        let world = World::with_pickups(
-            open_arena(if layer == 0 {
-                BTreeSet::from([cell])
-            } else {
-                BTreeSet::new()
-            }),
-            if layer == 0 {
-                heart.clone()
-            } else {
-                BTreeMap::new()
-            },
-            if layer == 1 {
-                heart.clone()
-            } else {
-                BTreeMap::new()
-            },
-            if layer == 2 { heart } else { BTreeMap::new() },
-        )
-        .unwrap();
+fn legacy_profiles_reject_enabled_settings_and_opt_in_items_in_every_layer() {
+    for enabled in [
+        EnabledItems::HEART,
+        EnabledItems::SHIELD,
+        EnabledItems::HEART_AND_SHIELD,
+    ] {
+        let settings = RoomSettings::DEFAULT.with_enabled_items(enabled);
         assert_eq!(
-            State::new(RulesConfig::classic_v3(), world, actors(10, 20)),
-            Err(StateError::UnsupportedPickup {
-                cell,
-                kind: PickupKind::Heart,
-            })
+            State::new(
+                RulesConfig::configurable_v4(settings),
+                open_world(),
+                actors(10, 20),
+            ),
+            Err(StateError::UnsupportedEnabledItems(enabled))
         );
+    }
+
+    for kind in [PickupKind::Heart, PickupKind::Shield] {
+        for layer in 0..3 {
+            let cell = CellId::new(8, 5);
+            let pickup = BTreeMap::from([(cell, kind)]);
+            let world = World::with_pickups(
+                open_arena(if layer == 0 {
+                    BTreeSet::from([cell])
+                } else {
+                    BTreeSet::new()
+                }),
+                if layer == 0 {
+                    pickup.clone()
+                } else {
+                    BTreeMap::new()
+                },
+                if layer == 1 {
+                    pickup.clone()
+                } else {
+                    BTreeMap::new()
+                },
+                if layer == 2 { pickup } else { BTreeMap::new() },
+            )
+            .unwrap();
+            for rules in [
+                RulesConfig::classic_v1(),
+                RulesConfig::classic_v2(),
+                RulesConfig::classic_v3(),
+                RulesConfig::configurable_v4(RoomSettings::DEFAULT),
+            ] {
+                assert_eq!(
+                    State::new(rules, world.clone(), actors(10, 20)),
+                    Err(StateError::UnsupportedPickup { cell, kind })
+                );
+            }
+        }
+    }
+}
+
+#[test]
+fn expanded_profile_rejects_shield_in_every_layer_unless_enabled() {
+    for enabled in [EnabledItems::EMPTY, EnabledItems::HEART] {
+        for layer in 0..3 {
+            let cell = CellId::new(8, 5);
+            let shield = BTreeMap::from([(cell, PickupKind::Shield)]);
+            let world = World::with_pickups(
+                open_arena(if layer == 0 {
+                    BTreeSet::from([cell])
+                } else {
+                    BTreeSet::new()
+                }),
+                if layer == 0 {
+                    shield.clone()
+                } else {
+                    BTreeMap::new()
+                },
+                if layer == 1 {
+                    shield.clone()
+                } else {
+                    BTreeMap::new()
+                },
+                if layer == 2 { shield } else { BTreeMap::new() },
+            )
+            .unwrap();
+            let rules = RulesConfig::expanded_v5(RoomSettings::DEFAULT.with_enabled_items(enabled));
+            assert_eq!(
+                State::new(rules, world, actors(10, 20)),
+                Err(StateError::UnsupportedPickup {
+                    cell,
+                    kind: PickupKind::Shield,
+                })
+            );
+        }
     }
 }

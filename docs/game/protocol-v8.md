@@ -1,4 +1,4 @@
-# Gameplay v8: Expanded rooms and Heart
+# Gameplay v8: Expanded rooms, Heart and Shield
 
 The coordinated server/browser contract is `api/gameplay-v8.schema.json`, Rust
 `core::protocol::v8`, and generated `web/src/game/v8/schema.ts`. Reload older clients after
@@ -9,12 +9,12 @@ claim or revoke the credential needed for a version-8 connection.
 
 V8 adds rules version **5** and map ID **`generated_v2`**. Its own rules/map types leave the
 shared enums and schemas for earlier protocols unchanged. New production rooms are always
-Expanded v5/generator v2. They advertise `availableItems: ["heart"]` and initially enable
-`settings.enabledItems: ["heart"]`. Empty and Heart-only sets are supported configurations.
+Expanded v5/generator v2. They advertise `availableItems: ["heart", "shield"]` and initially enable
+`settings.enabledItems: ["heart"]`. Empty, Heart-only, Shield-only and combined sets are supported configurations.
 Other catalog IDs remain unavailable.
 
 The Classic settings preset disables optional items and restores the four ordinary settings.
-It does not change a room's immutable rules/map identity. With Heart disabled, v2 generation
+It does not change a room's immutable rules/map identity. With both optional items disabled, v2 generation
 reproduces v1 terrain, blocks and concealed upgrades for the same seed. Legacy rules and
 generator v1 continue to reject nonempty masks; archived traces retain their behavior.
 
@@ -33,7 +33,10 @@ restores current state without historical event playback.
 
 `manualAction` with `action: "bomb"` retains ordinary placement. Heart is passive, so
 `action: "equipment"` remains unsupported and receives correlated `invalidMessage` without
-consuming its manual-action ID. Shield, untimed bombs, special blasts, concealment effects
+consuming its manual-action ID. Shield is also passive: collection adds or refreshes a 300-tick
+effect, and emits at most one `damagePrevented` with source `shield` per actor per physical tick.
+Its effect expires before damage at collection tick + 300; reconnect retains its remaining time.
+Untimed bombs, special blasts, concealment effects
 and other optional mechanics remain unavailable.
 
 ## Checked publication and replay

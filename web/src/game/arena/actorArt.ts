@@ -7,10 +7,12 @@ type PoseFrames = readonly [Graphics, Graphics]
 export interface ActorDrawing {
   root: Container
   protection: Graphics
+  shield: Graphics
   poses: Record<Direction, PoseFrames>
   direction: Direction
   moving: boolean
   protected: boolean
+  shielded: boolean
 }
 
 function legs(drawing: Graphics, frame: number, side: boolean): void {
@@ -86,14 +88,27 @@ export function makeActor(seat: Seat): ActorDrawing {
   ])
   pixels(protection, PALETTE.white, [[-18, -21, 3, 5], [15, -21, 3, 5], [-18, 16, 3, 5], [15, 16, 3, 5]])
   protection.visible = false
+  const shield = new Graphics()
+  pixels(shield, PALETTE.blue, [
+    [-15, -27, 30, 3], [-21, -24, 6, 3], [15, -24, 6, 3],
+    [-24, -21, 3, 9], [21, -21, 3, 9], [-27, -12, 3, 27], [24, -12, 3, 27],
+    [-24, 15, 3, 9], [21, 15, 3, 9], [-21, 24, 6, 3], [15, 24, 6, 3], [-15, 27, 30, 3],
+  ])
+  pixels(shield, PALETTE.blueLight, [
+    [-12, -24, 12, 3], [-24, -9, 3, 12], [21, -9, 3, 12], [0, 24, 12, 3],
+  ])
+  shield.visible = false
   const poses = {
     north: [frontOrBack(seat, 'north', 0), frontOrBack(seat, 'north', 1)],
     east: [sidePose(seat, 'east', 0), sidePose(seat, 'east', 1)],
     south: [frontOrBack(seat, 'south', 0), frontOrBack(seat, 'south', 1)],
     west: [sidePose(seat, 'west', 0), sidePose(seat, 'west', 1)],
   } satisfies Record<Direction, PoseFrames>
-  root.addChild(shadow, protection, ...Object.values(poses).flat())
-  const drawing = { root, protection, poses, direction: 'south' as Direction, moving: false, protected: false }
+  root.addChild(shadow, protection, shield, ...Object.values(poses).flat())
+  const drawing = {
+    root, protection, shield, poses, direction: 'south' as Direction, moving: false,
+    protected: false, shielded: false,
+  }
   setActorPose(drawing, 'south', 0)
   return drawing
 }

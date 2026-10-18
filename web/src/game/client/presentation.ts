@@ -1,7 +1,7 @@
 import type { SnapshotMessage } from '../arena/types'
 import type { GameClientState } from './clientTypes'
 
-const renderedPickups = new Set(['bombCapacity', 'blastRange', 'movementSpeed', 'heart'])
+const renderedPickups = new Set(['bombCapacity', 'blastRange', 'movementSpeed', 'heart', 'shield'])
 
 export function presentSnapshot(state: GameClientState): SnapshotMessage | null {
   const snapshot = state.snapshot
@@ -24,14 +24,15 @@ export function presentSnapshot(state: GameClientState): SnapshotMessage | null 
       arena: snapshot.state.arena,
       actors: snapshot.state.actors
         .filter((actor) => actor.type === 'visible')
-        .map(({ id, seat, position, heading, alive, damageGraceRemainingTicks }) => ({
+        .map(({ id, seat, position, heading, alive, damageGraceRemainingTicks, effects }) => ({
           id, seat, position, heading, alive, damageGraceRemainingTicks,
+          shieldRemainingTicks: effects.find((effect) => effect.kind === 'shield')?.remainingTicks ?? 0,
         })),
       bombs: bombsHidden ? [] : snapshot.state.bombs,
       flames: snapshot.state.flames,
       pickups: snapshot.state.pickups.filter(
         (pickup): pickup is typeof pickup & {
-          kind: 'bombCapacity' | 'blastRange' | 'movementSpeed' | 'heart'
+          kind: 'bombCapacity' | 'blastRange' | 'movementSpeed' | 'heart' | 'shield'
         } =>
           renderedPickups.has(pickup.kind),
       ),

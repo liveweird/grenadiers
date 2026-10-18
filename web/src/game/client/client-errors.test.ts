@@ -227,7 +227,7 @@ describe('v8 authoritative updates and controls', () => {
       next.room.availableItems = ['teleporter']
     }],
     ['unsupported item pickup', (next: ReturnType<typeof snapshot>) => {
-      next.state.pickups = [{ cell: { column: 1, row: 1 }, kind: 'shield' }]
+      next.state.pickups = [{ cell: { column: 1, row: 1 }, kind: 'stopwatch' }]
     }],
     ['heart pickup while disabled', (next: ReturnType<typeof snapshot>) => {
       next.room.settings.enabledItems = []

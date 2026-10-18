@@ -65,5 +65,5 @@ Expanded journals retain the enabled-item mask inside complete settings. They do
 duplicate mask to round-start generation records. Format 2 accepts only the supported rules-5,
 generator-2 and M6 lifecycle tuple; older profiles require format 1 and empty item masks.
 Replay regenerates from the recorded seed and accepted configuration and compares the actual
-generation record. Heart enable/disable, reveal, collection, consumption and later elimination
+generation record. Heart/Shield enablement, reveal, collection, immunity, consumption, expiry and later elimination
 must reproduce the complete state, grace and event reports.

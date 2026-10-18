@@ -15,6 +15,8 @@ const TARGET: CellId = CellId::new(5, 5);
 
 #[path = "heart_damage_tests.rs"]
 mod heart_damage_tests;
+#[path = "shield_damage_tests.rs"]
+mod shield_damage_tests;
 
 fn arena_with_blocks(blocks: BTreeSet<CellId>) -> Arena {
     let mut terrain = [Terrain::Floor; ARENA_CELL_COUNT];
@@ -51,8 +53,16 @@ fn state_in(world: World) -> State {
 }
 
 fn expanded_state_in(world: World, first_cell: CellId) -> State {
+    expanded_state_with_items(world, first_cell, EnabledItems::HEART)
+}
+
+fn expanded_state_with_items(
+    world: World,
+    first_cell: CellId,
+    enabled_items: EnabledItems,
+) -> State {
     State::new(
-        RulesConfig::expanded_v5(RoomSettings::DEFAULT.with_enabled_items(EnabledItems::HEART)),
+        RulesConfig::expanded_v5(RoomSettings::DEFAULT.with_enabled_items(enabled_items)),
         world,
         [
             actor(10, SeatId::One, first_cell),

@@ -106,7 +106,10 @@ async fn two_members_receive_personalized_admission_and_live_waiting_updates() {
             "winsToFinish":3, "bombFuseTicks":180, "enabledItems":["heart"]
         })
     );
-    assert_eq!(created["room"]["availableItems"], json!(["heart"]));
+    assert_eq!(
+        created["room"]["availableItems"],
+        json!(["heart", "shield"])
+    );
     let code = created["room"]["roomCode"].clone();
     let room_id = created["room"]["roomId"].clone();
 

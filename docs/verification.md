@@ -3,6 +3,94 @@
 Records below are frozen against their named sources. Publication and later CI status are
 recorded in [release notes](https://github.com/liveweird/grenadiers/releases).
 
+## Shield corrected native acceptance — 2026-10-18 — fresh 56/56
+
+Clean source `be44b8aeae88249b5635ed4424d3f04f7fa33f84`, archive SHA-256
+`62daff016257a425b67340aa0598a4818ab0960d73a4fb6a3f2501995f40d60f`, builds image
+`sha256:3751bcef474c7ca1d09ba30d46846309cfb72f783db36bce5e95be05c24391fb`.
+Its saved archive hashes to `6b3654c71aa2e1117ab5f2828645c9561615b72b031e1277b576233bb50d2890`.
+Fresh acceptance passes **28/28 Compose and 28/28 Kubernetes**, first attempts, one worker,
+zero retries and no carried results. Both targets include all previous 26 cases, Heart and Shield.
+The corrected test proves blast immunity, exact event-derived expiry and later lethal damage.
+
+All four latency profiles retain 20 samples, zero exceedances and zero CPU throttling.
+Local/shaped maxima are **54.531/141.873ms Compose** and **61.247/156.193ms Kubernetes**.
+Strict exact-200 JSON/no-store probes, hardened runtime, external mode-0444 fixtures, five
+fresh pod UIDs, serial direct-pod forwarding and complete cleanup pass. Pinned archive-only
+Trivy finds zero fixable HIGH/CRITICAL vulnerabilities; strict Kubernetes 1.33 validates 3/3
+resources. Quiet acknowledgements cover named workers, without a global host-idle claim.
+
+All 20 reports pass, with 52 fresh PNG checkpoints. Normal failure capture remains enabled;
+no failure PNGs are present. Root visually checked the exposed desktop and active Polish 320px
+Shield views: readable two-column narrow HUD, distinct glyph and timer, no overlap. The minor
+English desktop Equipment final-letter wrap remains a readability follow-up. Committed Shield
+screenshots are exact accepted copies. Independent final source/image/report/evidence audit is clear.
+The sealed 1,127-entry manifest hashes to
+`cc5b06b926398bd0b92c5a89a4c4c3b24675f51ab37d28e10aa53d6d7c3e4a50` under
+`/tmp/grenadiers-v0326-corrected-native-acceptance`; its preparation manifest remains intact.
+
+Local baseline: **413 core, 180 server and two doctests** in each Rust profile, **91.23%**
+Rust line coverage; **304 web tests**, coverage **95.03/90.68/95.43/97.51%**, production/fixture
+builds and 29-scenario static parity pass. Independent implementation and integration reviews
+are clear. Exact-head CI and publication remain required. This post-acceptance change contains
+only documentation and screenshot copies. The earlier failed attempt below remains separate.
+
+## Shield native scenario correction — 2026-10-18 — fresh acceptance pending
+
+The first responsive native attempt passed 27 Compose cases, then failed the Shield scenario;
+Kubernetes did not run. Both retained public streams establish derived collection tick 656, expiry 956,
+second-bomb placement 859 and detonation 1039. The player correctly died after Shield expired:
+language/screenshot work had consumed 203 ticks before placement. This is a scenario timing
+defect; no production simulation change is made. The corrected scenario captures exposed layouts
+before collection, plants immediately, checks detonation precedes the actual Shield deadline,
+and retains the active screenshot after both protection proofs. Existing expiry, survival,
+later death, assertions, timeouts and zero-retry policy remain intact. E2E lint, Knip, typecheck
+and 29-scenario static parity pass after the correction.
+
+Failed evidence remains sealed at `/tmp/grenadiers-v0326-responsive-native-acceptance`,
+886-entry manifest SHA-256 `51ca4c7ef6c1deb724a806335156b6c29b16aaf5832ac57bee3200177ee90d65`.
+No prior result counts toward the required complete fresh 56-case acceptance.
+
+## Shield responsive-HUD integration — 2026-10-18 — native acceptance pending
+
+The parent two-column narrow HUD and real text-geometry regression are integrated. Core,
+server, Cargo, API, Shield client/protocol/locales and dedicated item scenarios are unchanged
+from the reviewed Shield cache candidate. Its 304 web tests and coverage below remain the
+unit baseline. Production build and E2E lint, Knip, typecheck and 29-scenario static parity pass for this layout.
+No parent or historical Heart evidence certifies Shield. Fresh same-image Compose/Kubernetes
+acceptance and exact-head CI remain required.
+
+## Shield terrain cache integration — 2026-10-18 — refreshed native acceptance pending
+
+The current terrain-cache/shared-diagnostics integration passes all 304 web tests, with coverage
+of 95.03/90.68/95.43/97.51% above the unchanged 85% floors, production and diagnostic-fixture builds, and E2E
+static checks with 29 documented scenarios. Core, server, version and API content are unchanged
+by this integration. Shield has no completed native baseline. The inherited Heart-only record
+below certifies source `00d76ac9cc08e7bb4627caf7897e02c3f15a43d2`; it includes neither
+Shield nor the terrain cache. Fresh native acceptance and final-head CI remain required for this tree.
+
+## Shield activation candidate — 2026-10-18 — native acceptance pending
+
+The v0.3.26 working candidate passes **413 core tests, 180 server tests and two doctests in each
+debug/release profile**, with four dedicated performance profiles intentionally ignored.
+Rust line coverage is **91.23%** (12,084/13,245 lines); all **303 web tests** pass with
+statement/branch/function/line coverage of **95.00/90.68/95.41/97.50%**. Contracts, lint,
+Knip, builds, dependency audits, strict Kubernetes
+schemas (3/3), E2E static checks and **28-scenario parity** pass. Independent domain/protocol
+review is clear. Browser review identified an expiry-assertion gap; acceptance now derives the
+deadline from the real collection event and checks each retained authoritative timer against
+T+300, with observations before and after expiry. Coalesced delivery is allowed.
+
+Regression coverage includes opt-in masks, ordinary collection, refresh without stacking,
+Heart preservation, exact pre-damage expiry, both fire checks, one prevention event per player
+per tick, atomic overflow, legacy rejection and frozen prior seeded outputs. A seeded server
+scenario collects Shield, retains it through connected replacement and disconnected restore,
+survives an actual planted bomb, expires, dies to a later bomb and replays exactly. A final
+focused run verifies the strengthened bomb-placement assertion in both build profiles.
+
+No v0.3.26 native image, full browser scenario run or release is claimed. Native Compose and
+Kubernetes acceptance, visual inspection and exact final-head CI remain required.
+
 ## Heart responsive-HUD integration — 2026-10-18 — fresh native 54/54
 
 Clean source `2f86fc96f4f562871ed962052c1f0f1b74d53881`, archive SHA-256

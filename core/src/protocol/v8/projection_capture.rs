@@ -59,7 +59,7 @@ pub fn capture_expanded(
             })
             .collect::<Result<_, ProjectionError>>()?,
         available_items: if rules_version == RulesVersion::ExpandedV5 {
-            ItemSet::new([super::ItemId::Heart]).map_err(|_| ProjectionError::InvalidItems)?
+            super::projection_binding::expanded_items()
         } else {
             ItemSet::empty()
         },
@@ -318,6 +318,7 @@ fn wire_pickup(value: game::PickupKind) -> PickupKind {
         game::PickupKind::BlastRange => PickupKind::BlastRange,
         game::PickupKind::MovementSpeed => PickupKind::MovementSpeed,
         game::PickupKind::Heart => PickupKind::Heart,
+        game::PickupKind::Shield => PickupKind::Shield,
     }
 }
 

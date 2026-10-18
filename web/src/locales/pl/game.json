@@ -107,6 +107,7 @@
     "seconds": "sekundy",
     "speedCap": "Premie prędkości dodają po jednym poziomie, maksymalnie do 5 pól/s.",
     "heartDescription": "Chroni przed jednym śmiertelnym wybuchem, a potem na krótko przed obrażeniami.",
+    "shieldDescription": "Zapewnia 5 sekund odporności na obrażenia. Kolejna Tarcza odnawia ten czas.",
     "unapplied": "Zastosuj te zmiany przed zgłoszeniem gotowości.",
     "restore": "Przywróć domyślne zasady",
     "classic": "Ustawienia klasyczne",

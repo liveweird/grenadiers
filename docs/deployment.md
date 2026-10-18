@@ -105,6 +105,22 @@ reveals and collects a generated Heart through ordinary controls, absorbs one bl
 the charge is gone with a later lethal blast. Kubernetes uses the same isolated Secret procedure
 and a fresh port-forward after every rollout. Keep this seed outside the final runtime image.
 
+## Reproduce opt-in Shield protection
+
+Use the same built image with the separate Shield fixture:
+
+```sh
+chmod 444 core/tests/fixtures/arena-v2-shield.seed
+docker compose -f docker-compose.yaml -f docker-compose.shield.yaml up -d --no-build --force-recreate app
+curl --fail http://127.0.0.1:8085/api/v1/ready
+E2E_SHIELD_FIXTURE=arena-v2-shield npm --prefix e2e run test:shield
+docker compose -f docker-compose.yaml -f docker-compose.shield.yaml down
+```
+
+Wait for readiness after recreating the service. The scenario enables Shield through the real
+lobby, reveals and collects the generated pickup, survives a blast, waits for expiry, then
+proves a later blast is lethal. Mount fixtures externally and read-only; keep seeds out of images.
+
 ## Reproduce a complete classic match
 
 The existing seeded scenarios select the Classic settings preset before readiness, keeping

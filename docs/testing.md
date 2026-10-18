@@ -87,6 +87,16 @@ pickup runner retains bounded test-side action/source summaries but disables per
 capture, whose overhead distorts real-time escape on software-rendered Linux. On failure it attaches
 redacted command/snapshot summaries; failure screenshots and explicit visual checkpoints remain.
 
+### Expanded pickup acceptance
+
+Heart and Shield each have a separate production-seed scenario with ordinary movement/bombs:
+`E2E_HEART_FIXTURE=arena-v2-heart npm --prefix e2e run test:heart` and
+`E2E_SHIELD_FIXTURE=arena-v2-shield npm --prefix e2e run test:shield`.
+Use the matching Compose override and external mode-0444 fixture; wait for readiness after
+recreating the service. Heart retains defaults; Shield explicitly enables only Shield through
+the lobby. Tests observe both perspectives, capture desktop/Polish narrow-screen artwork,
+and prove protection ends before a later lethal blast. See [deployment](deployment.md).
+
 ### Complete-match acceptance
 
 `E2E_MATCH_FIXTURE=arena-v1-matches npm --prefix e2e run test:matches` runs separately after

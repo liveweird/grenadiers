@@ -77,7 +77,7 @@ describe('original pixel-art geometry', () => {
     const gold = makeActor('one')
     const blue = makeActor('two')
     for (const actor of [gold, blue]) {
-      expect(actor.root.children).toHaveLength(10)
+      expect(actor.root.children).toHaveLength(11)
       expect(Object.values(actor.poses).flat()).toHaveLength(8)
       expect(Object.values(actor.poses).flat().filter(({ visible }) => visible)).toHaveLength(1)
       setActorPose(actor, 'north', 1)
@@ -98,14 +98,18 @@ describe('original pixel-art geometry', () => {
     expect(bomb.root.children).toHaveLength(3)
     expect(flame.root.children).toHaveLength(2)
     expect(flame.frames.map(({ visible }) => visible)).toEqual([true, false])
-    const pickups = ['bombCapacity', 'blastRange', 'movementSpeed', 'heart'] as const
+    const pickups = ['bombCapacity', 'blastRange', 'movementSpeed', 'heart', 'shield'] as const
     const counts = pickups.map((kind) => makePickup(kind) as unknown as Drawing)
       .map(({ rectangles = [] }) => rectangles.length)
-    expect(counts).toEqual([16, 14, 18, 23])
+    expect(counts).toEqual([16, 14, 18, 23, 21])
     expect(Math.max(...counts)).toBeLessThanOrEqual(23)
     const heart = makePickup('heart') as unknown as Drawing
     const colors = heart.rectangles?.map(({ color }) => color)
     expect(colors).toContain(PALETTE.brick)
     expect(colors).toContain(PALETTE.brickLight)
+    const shield = makePickup('shield') as unknown as Drawing
+    const shieldColors = shield.rectangles?.map(({ color }) => color)
+    expect(shieldColors).toContain(PALETTE.blue)
+    expect(shieldColors).toContain(PALETTE.blueLight)
   })
 })

@@ -2,6 +2,7 @@ import AxeBuilder from '@axe-core/playwright'
 import { setTimeout as delay } from 'node:timers/promises'
 import { expect, test, type Page, type Route, type TestInfo } from '@playwright/test'
 import { latestSnapshot, observeGame, type ObservedGame } from '../tests/support/duel'
+import { readViewportFits } from '../tests/support/diagnostic-phases'
 import { moveTo } from '../tests/support/movement'
 import { startBrowserStallDiagnostics } from '../tests/support/browser-stall-diagnostics'
 import {
@@ -60,6 +61,10 @@ test('a browser restores its full live world and action floor before a fenced ta
   let release: (() => void) | undefined
   const games: ObservedGame[] = []
   const diagnostics = startBrowserStallDiagnostics()
+  let testFailed = false
+  let testFailure: unknown
+  let cleanupFailed = false
+  let cleanupFailure: unknown
   try {
     const pages = await Promise.all(contexts.map((context) => context.newPage()))
     await Promise.all(pages.map(installTransportProbe))
@@ -175,24 +180,40 @@ test('a browser restores its full live world and action floor before a fenced ta
     await one.getByRole('button', { name: 'Create room', exact: true }).click()
     await expect.poll(async () => (await admissionBaseline(one))?.roomId).not.toBe(before.room.roomId)
     for (const [index, page] of pages.entries()) {
-      expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([])
-      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
-      await page.screenshot({ path: testInfo.outputPath(`recovery-${index}.png`), fullPage: true })
+      const pageOrdinal = index + 1
+      expect((await diagnostics.phase('axe', pageOrdinal,
+        async () => new AxeBuilder({ page }).analyze())).violations).toEqual([])
+      expect(await diagnostics.phase('width', pageOrdinal,
+        async () => readViewportFits(page))).toBe(true)
+      await diagnostics.phase('screenshot', pageOrdinal, async () => page.screenshot({
+        path: testInfo.outputPath(`recovery-${index}.png`), fullPage: true,
+      }))
     }
     expect(games[0].commands.filter((command) => command.type === 'resumeRoom')).toHaveLength(4)
   } catch (error) {
-    await attachPublicSummary(testInfo, games)
-    throw error
-  } finally {
-    try {
-      if (release) await release()
-    } finally {
-      try { await Promise.all(contexts.map((context) => context.close())) } finally {
-        diagnostics.stop()
-        await diagnostics.attach(testInfo, 'reconnect-browser-stall-diagnostics')
-      }
+    testFailed = true
+    testFailure = error
+    try { await attachPublicSummary(testInfo, games) } catch {
+      testInfo.annotations.push({
+        type: 'reconnect-diagnostics', description: 'public-summary-attachment-failed',
+      })
     }
+  } finally {
+    try { if (release) await release() } catch (error) { cleanupFailed = true; cleanupFailure = error }
+    diagnostics.stop()
+    await diagnostics.attach(testInfo, 'reconnect-browser-stall-diagnostics')
+    const closed = await Promise.allSettled(contexts.map((context) => context.close()))
+    const rejectedClose = closed.find((result) => result.status === 'rejected')
+    if (!cleanupFailed && rejectedClose?.status === 'rejected') cleanupFailure = rejectedClose.reason
+    cleanupFailed ||= rejectedClose !== undefined
   }
+  if (testFailed) {
+    if (cleanupFailed) {
+      testInfo.annotations.push({ type: 'reconnect-cleanup', description: 'failed-after-test-error' })
+    }
+    throw testFailure
+  }
+  if (cleanupFailed) throw cleanupFailure
 })
 
 test('two offline tabs stop recovery after a late reserved-seat rejection', async ({ browser }, testInfo) => {

@@ -1,5 +1,22 @@
 # Repository verification
 
+## Post-audit browser phase diagnostics — 2026-10-18 — acceptance pending
+
+The reconnect probe now records bounded Node command boundaries around the existing Axe,
+width and screenshot operations, page-clock markers around the unchanged width expression,
+one heartbeat per second on the existing collector interval, and ordinal-only temporary-page
+lifecycle events. Diagnostics attach before context teardown and retain the original test
+failure if cleanup also fails. Gameplay, accessibility, overflow and screenshot assertions,
+the 120-second deadline, and zero retries remain unchanged.
+
+Independent review is clear. E2E typecheck, lint, Knip and scenario parity26 pass; the existing
+pure Chromium diagnostic passes1/1 in2.8 seconds. Its initial sandboxed launch failed before
+test execution; the permitted launch and its result are recorded separately. No production
+source changes accompany these diagnostics. Fresh instrumented native and exact-head CI
+results remain pending. Page timestamps describe event creation, while Node timestamps
+include asynchronous binding/IPC delivery and scheduling. Missing markers or heartbeats alone
+cannot identify a layout stall; no cause is claimed for the post-audit CI failures below.
+
 ## Takeover position restoration probe correction — 2026-10-18 — acceptance pending
 
 Clean pose candidate `954b0ad551293e95a5cfc33ea876f476ec05225b` builds image
@@ -20,7 +37,7 @@ is pending. Earlier failed
 runs remain preserved; this correction does not explain the previously recorded13-second task.
 
 Exact pose-head PR/push CI (`39084363475`/`39084360049`) both fail the unchanged120-second
-reconnect budget after passing takeover and new-room checks. Both accessibility assertions pass.
+reconnect budget after passing takeover and new-room checks. The primary accessibility audit passes in both; the push also completes the peer audit.
 In the PR, the subsequent width evaluation never returns; in the push it takes65,888 ms,
 then6,085 ms for its screenshot. The peer width read takes17,786 ms and its screenshot19,730 ms
 before timeout. Completed page long tasks peak around209–217 ms with no measured slowGL call.

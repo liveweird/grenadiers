@@ -1,5 +1,6 @@
 import { expect, test, type Page, type TestInfo } from '@playwright/test'
 import { startBrowserStallDiagnostics } from '../tests/support/browser-stall-diagnostics'
+import { readViewportFits } from '../tests/support/diagnostic-phases'
 import { GameControlRecorder } from '../tests/support/duel'
 
 async function installFakeGl(page: Page): Promise<void> {
@@ -96,6 +97,20 @@ async function publishSyntheticGl(page: Page, credential: string, socketUrl: str
   }, { rawCredential: credential, rawSocketUrl: socketUrl })
 }
 
+async function publishSyntheticHeartbeats(page: Page, credential: string, socketUrl: string): Promise<void> {
+  await page.evaluate(async ({ rawCredential, rawSocketUrl }) => {
+    const binding = (window as typeof window & {
+      grenadiersStallDiagnostic: (event: object) => Promise<void>
+    }).grenadiersStallDiagnostic
+    for (let index = 0; index < 300; index += 1) {
+      await binding({
+        label: 'heartbeat', pageAt: performance.now(), documentOrdinal: 2,
+        timeOrigin: performance.timeOrigin, rawCredential, rawSocketUrl,
+      })
+    }
+  }, { rawCredential: credential, rawSocketUrl: socketUrl })
+}
+
 test('game control diagnostics stay bounded and exclude transport secrets', async ({ browser }) => {
   const recorder = new GameControlRecorder()
   for (let index = 0; index < 100; index += 1) recorder.addSocket()
@@ -161,6 +176,31 @@ test('game control diagnostics stay bounded and exclude transport secrets', asyn
       .filter((event) => event.label === 'initialized')
     expect(initialized.map((event) => event.documentOrdinal)).toEqual([1, 2])
     expect(initialized.every((event) => event.timeOrigin > 0)).toBe(true)
+    await expect.poll(() => diagnostics.summary().pages[0].activityEvents
+      .some((event) => event.label === 'heartbeat')).toBe(true)
+
+    expect(await diagnostics.phase('width', 1, async () => readViewportFits(page))).toBe(true)
+    await expect.poll(() => diagnostics.summary().pages[0].activityEvents
+      .filter((event) => ['page-enter', 'read-start', 'read-end'].includes(event.label))
+      .map((event) => event.label)).toEqual(['page-enter', 'read-start', 'read-end'])
+    const widthPagePhases = diagnostics.summary().pages[0].activityEvents
+      .filter((event) => ['page-enter', 'read-start', 'read-end'].includes(event.label))
+    expect(widthPagePhases.every((event) => event.pageAt >= 0
+      && event.timeOrigin > 0 && event.nodeAt >= 0)).toBe(true)
+    expect(diagnostics.summary().phases.slice(-2)).toMatchObject([
+      { label: 'width', boundary: 'sent', pageOrdinal: 1 },
+      { label: 'width', boundary: 'returned', pageOrdinal: 1 },
+    ])
+    expect(diagnostics.summary().phases.at(-2)!.nodeAt)
+      .toBeLessThanOrEqual(diagnostics.summary().phases.at(-1)!.nodeAt)
+
+    const temporaryPage = await context.newPage()
+    await temporaryPage.close()
+    expect(diagnostics.summary().temporaryPages).toMatchObject([
+      { ordinal: 1, boundary: 'opened' }, { ordinal: 1, boundary: 'closed' },
+    ])
+    expect(diagnostics.summary().temporaryPages[0].nodeAt)
+      .toBeLessThanOrEqual(diagnostics.summary().temporaryPages[1].nodeAt)
     const transparency = await exerciseFakeGl(page)
     expect(transparency).toEqual({
       sameResult: true, expandedResults: true, sameException: true, clearResult: 17,
@@ -186,6 +226,30 @@ test('game control diagnostics stay bounded and exclude transport secrets', asyn
     expect(JSON.stringify(boundedGl)).not.toContain('token')
     expect(JSON.stringify(boundedGl)).not.toContain('http')
 
+    await publishSyntheticHeartbeats(page, credential, socketUrl)
+    const boundedActivity = diagnostics.summary().pages[0].activityEvents
+    expect(boundedActivity).toHaveLength(256)
+    expect(boundedActivity.filter((event) => event.label === 'heartbeat').length).toBeGreaterThanOrEqual(250)
+
+    for (let index = 0; index < 70; index += 1) {
+      await diagnostics.phase(index % 2 === 0 ? 'axe' : 'screenshot', 1, async () => undefined)
+    }
+    expect(diagnostics.summary().phases).toHaveLength(128)
+    expect(diagnostics.summary().phases.every((phase) => ['axe', 'width', 'screenshot']
+      .includes(phase.label) && ['sent', 'returned'].includes(phase.boundary))).toBe(true)
+    const phaseFailure = new Error('fixed-phase-failure')
+    let retainedPhaseFailure: unknown
+    try {
+      await diagnostics.phase('axe', 1, async () => { throw phaseFailure })
+    } catch (error) { retainedPhaseFailure = error }
+    expect(retainedPhaseFailure).toBe(phaseFailure)
+    expect(diagnostics.summary().phases.slice(-2)).toMatchObject([
+      { label: 'axe', boundary: 'sent' }, { label: 'axe', boundary: 'returned' },
+    ])
+    expect(JSON.stringify(diagnostics.summary())).not.toContain(credential)
+    expect(JSON.stringify(diagnostics.summary())).not.toContain(capability)
+    expect(JSON.stringify(diagnostics.summary())).not.toContain(socketUrl)
+
     const failingPage = {
       exposeBinding: async () => undefined,
       addInitScript: async () => { throw new Error(credential) },
@@ -209,6 +273,9 @@ test('game control diagnostics stay bounded and exclude transport secrets', asyn
     expect(annotations).toEqual([{
       type: 'browser-stall-diagnostics', description: 'attachment-failed',
     }])
+    diagnostics.stop()
+    await expect(diagnostics.observePage(failingPage, 'reconnect-peer')).resolves.toBeUndefined()
+    expect(diagnostics.summary().failures.at(-1)?.stage).toBe('observeAfterStop')
   } finally {
     await context.close()
     diagnostics.stop()

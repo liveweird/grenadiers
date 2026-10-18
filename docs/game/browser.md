@@ -67,6 +67,8 @@ Accepted Shield examples: [exposed pickup on desktop](../screenshots/shield-desk
 [active immunity in Polish at 320px](../screenshots/shield-polish-320.png).
 Accepted Golden Flame examples: [exposed pickup on desktop](../screenshots/golden-flame-desktop.png)
 and [active effect in Polish at 320px](../screenshots/golden-flame-polish-320.png).
+Accepted Short Fuse examples: [exposed pickup on desktop](../screenshots/short-fuse-desktop.png)
+and [active effect in Polish at 320px](../screenshots/short-fuse-polish-320.png).
 
 All active-v8 Playwright configurations disable raw framework traces because personal admission
 frames contain capabilities. Failure screenshots, public reports, and redacted summaries remain.

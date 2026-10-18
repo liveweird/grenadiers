@@ -89,12 +89,19 @@ export async function installTransportProbe(page: Page): Promise<void> {
         )
         const timer = setTimeout(() => {
           const error = failure('Private resume probe timed out')
+          cleanup()
           socket.close()
           reject(error)
         }, 10_000)
         const fail = (): void => {
-          clearTimeout(timer)
+          cleanup()
           reject(failure('Private resume probe closed before admission'))
+        }
+        function cleanup(): void {
+          clearTimeout(timer)
+          socket.removeEventListener('message', onMessage)
+          socket.removeEventListener('close', fail)
+          socket.removeEventListener('error', fail)
         }
         socket.addEventListener('error', fail, { once: true })
         socket.addEventListener('close', fail, { once: true })
@@ -102,7 +109,7 @@ export async function installTransportProbe(page: Page): Promise<void> {
           stage = 'open'
           socket.send(JSON.stringify({ type: 'authenticate', protocolVersion: 7, token: session.token }))
         }, { once: true })
-        socket.addEventListener('message', (event: MessageEvent) => {
+        const onMessage = (event: MessageEvent): void => {
           const message = JSON.parse(String(event.data)) as GameServerMessage
           publicMessageCount += 1
           lastPublicMessageType = ['authenticated', 'admitted', 'error', 'roomState', 'snapshot'].includes(message.type)
@@ -117,9 +124,7 @@ export async function installTransportProbe(page: Page): Promise<void> {
             }))
             stage = 'resumeSent'
           } else if (message.type === 'admitted' || message.type === 'error') {
-            clearTimeout(timer)
-            socket.removeEventListener('close', fail)
-            socket.removeEventListener('error', fail)
+            cleanup()
             if (message.type === 'error') {
               socket.close()
               resolve(message.code)
@@ -132,7 +137,8 @@ export async function installTransportProbe(page: Page): Promise<void> {
               resolve(publicAdmission(message, message.resumeToken === capability.token))
             }
           }
-        })
+        }
+        socket.addEventListener('message', onMessage)
       })
     }
 

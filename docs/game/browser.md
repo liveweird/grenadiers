@@ -58,6 +58,10 @@ Run the deployed-stack acceptance with `scripts/gates.sh browser`; its duel scen
 actual native sockets, keyboard events, and compositor screenshots, plus Axe checks across
 lobby, waiting, running, and result. See [verification](../verification.md) for observed results.
 
+Accepted Classic-v7 HUD examples: [English desktop](../screenshots/gameplay-v7-desktop.png)
+and [Polish 320px](../screenshots/gameplay-v7-polish-320.png). Narrow screens use two stat
+columns; desktop retains four. All eight labels and values wrap within their own cells.
+
 All active-v8 Playwright configurations disable raw framework traces because personal admission
 frames contain capabilities. Failure screenshots, public reports, and redacted summaries remain.
 Run reconnect acceptance separately with

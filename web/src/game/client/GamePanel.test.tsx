@@ -8,9 +8,9 @@ import { GamePanel, GamePanelView, type GameActions } from './GamePanel'
 import { room, snapshot } from './testSupport'
 
 vi.mock('../arena/GameArena', () => ({
-  GameArena: ({ label, enabled, bindings, snapshot: current, onDirection, onBomb }: GameArenaProps) => (
+  GameArena: ({ label, enabled, bindings, focusHint, snapshot: current, onDirection, onBomb }: GameArenaProps) => (
     <div role="region" aria-label={label} data-enabled={String(enabled)} data-world={String(Boolean(current))}
-      data-north={bindings?.north.join(',')} data-bomb={bindings?.bomb.join(',')}>
+      data-north={bindings?.north.join(',')} data-bomb={bindings?.bomb.join(',')} data-focus-hint={focusHint}>
       <button onClick={() => onDirection('east')}>Move in test arena</button>
       <button onClick={() => onDirection(null)}>Release in test arena</button>
       <button onClick={() => onBomb()}>Bomb in test arena</button>
@@ -126,6 +126,21 @@ describe('v8 private-state presentation', () => {
     expect(stats).not.toHaveAttribute('role', 'status')
     expect(stats.closest('[aria-live]')).toBeNull()
     expect(screen.getByText('Round in progress')).toHaveAttribute('aria-live', 'polite')
+  })
+
+  it('uses the existing bomb binding in the armed Remote detonation hint', () => {
+    const current = state()
+    const actor = current.snapshot!.state.actors[0]
+    if (actor.type !== 'visible') throw new Error('expected visible own actor')
+    current.snapshot!.state.bombs = [{
+      id: 7, owner: actor.id, cell: { column: 3, row: 1 }, range: 2, placedAt: 1,
+      trigger: { type: 'remote' }, blast: 'standard',
+    }]
+    renderPanel(current)
+    expect(screen.getByRole('region', { name: 'Grenadiers courtyard' })).toHaveAttribute(
+      'data-focus-hint', 'Remote bomb armed. Select the courtyard and press Space to detonate it.',
+    )
+    expect(screen.getByLabelText('Player one upgrades')).toHaveTextContent('Bomb typeNone')
   })
 
   it('groups all six Slow-foot timers in the eight-field HUD in English and Polish', async () => {

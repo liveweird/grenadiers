@@ -195,3 +195,14 @@ The two-peer scenario verifies natural collection, localized armed presentation,
 Power placement, fire and block destruction beyond a retained hard wall, a safe cell outside the
 Manhattan footprint, charge consumption, and a fresh ordinary placement fenced from both peers'
 earlier records. It is a native browser acceptance check and remains pending for the candidate.
+
+## Remote Bomb production-seed scenario
+
+Use `docker-compose.remote-bomb.yaml` with the v2 seed fixture and
+`E2E_REMOTE_BOMB_FIXTURE=arena-v2-remote-bomb npm --prefix e2e run test:remote-bomb`.
+The two-peer scenario reveals and collects the charge at (3,1), plants it there, captures safe
+localized armed views, and proves the same Remote ID survives beyond the ordinary 180-tick fuse.
+One fresh bomb action detonates it without placement and leaves the observed empty weapon slot
+empty. Focused core regressions prove that a held Piercing or Power charge survives the same
+trigger path. A fresh-ID Timed Standard bomb then proves ordinary placement and actual escape.
+Native execution remains a candidate gate.

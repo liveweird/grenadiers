@@ -1,15 +1,14 @@
 # Gameplay and presentation backlog
 
-Status: **TURN v0.3.16, CONFIG v0.3.17 and the first ART slice v0.3.18 are shipped**.
-The v0.3.19 equipment/effect core foundation is implemented and verified; no requested
-items are enabled in the published v0.3.24 rooms. The v0.3.25 Heart candidate now has domain,
-server, browser and pixel-art implementation with local checks and independent reviews clear;
-both debug/release profiles and fresh native acceptance 54/54 pass; final publication remains pending. The v0.3.26 Shield
-candidate adds opt-in timed immunity. The v0.3.27 Golden Flame and v0.3.28 Short Fuse
-candidates also pass local checks; native acceptance and final-head CI remain pending.
-The v0.3.29 Short Flame and v0.3.30 Long Fuse candidates pass local checks and independent reviews; native acceptance remains pending. The v0.3.31 Reverse Controls candidate passes local checks and independent review. The v0.3.32 Diarrhea candidate passes local verification and independent reviews. The v0.3.33 Slow-foot candidate passes local checks and independent backend/frontend reviews; native acceptance remains pending. The v0.3.34 Piercing Bomb and v0.3.35 Power Bomb candidates pass local checks and independent reviews; native acceptance and final CI remain pending. The other 11 requested pickups
-remain unimplemented. Richer transitions and further item artwork remain follow-up
-work. See [pixel-art presentation](pixel-art.md) and [expanded item implementation](expanded-items.md).
+TURN, CONFIG and the first ART slice are implemented. This v0.3.36 candidate contains twelve
+optional pickups: Heart, Shield, Golden Flame, Short Fuse, Short Flame, Long Fuse, Reverse
+Controls, Diarrhea, Slow-foot, Piercing Bomb, Power Bomb and Remote Bomb. Local checks and
+independent reviews are clear; this candidate still requires fresh native acceptance and final
+CI. The other ten requested pickups remain outside this increment. Current publication status
+is recorded in [release notes](https://github.com/liveweird/grenadiers/releases), with source-bound
+acceptance records in [verification](../verification.md). Richer transitions and artwork remain
+follow-up work; see [pixel-art presentation](pixel-art.md) and
+[expanded item implementation](expanded-items.md).
 Updated 2026-10-18 after playtest feedback. Release acceptance is recorded in
 [verification](../verification.md).
 The [implementation plan](implementation-plan.md) remains the milestone/release reference;
@@ -160,7 +159,7 @@ instant action. Keep both in this requested pickup family without forcing them i
 
 | ID / weapon | Requested behavior | Decisions / acceptance focus |
 | --- | --- | --- |
-| WPN-REMOTE / remote bomb | Next bomb is planted normally; the next bomb-button press detonates it instead of using a fuse. | Armed-remote state independent of consumed inventory; button priority, owner death/disconnect, chain ignition, freezing, capacity and inability to plant; no implicit safety fuse added without a decision. |
+| WPN-REMOTE / remote bomb | **Prepared in v0.3.36.** The next successful manual placement creates an untimed bomb; the next retained bomb action detonates it. | Independent stored weapon, one live Remote per owner, capacity/allocator independence, fire and chain ignition, reconnect and replay pass local checks and independent reviews; native acceptance remains pending. |
 | WPN-PIERCE / piercing bomb | **Prepared in v0.3.34.** The next successful manual bomb's blast continues through destructible blocks. | One-charge replacement, retained failures, ordinary automatic bombs, captured blast identity, immutable same-tick chain planning and hard-wall stopping are covered locally with independent review clear; native acceptance and final CI remain pending. |
 | WPN-POWER / power bomb | **Prepared in v0.3.35.** The next successful manual bomb damages every floor cell within its Manhattan blast radius, ignoring line of sight. | One-charge replacement, retained failures, hard-wall holes, complete block and bomb coverage, immutable mixed-chain planning, captured stats and distinct presentation pass local checks and independent reviews; native acceptance and final CI remain pending. |
 | WPN-MINE / landmine | Next placement explodes only when someone steps on it, never merely because time passes. | Arming/owner-exit grace, swept step detection, eligible actors, visibility, capacity and remote ownership; explicitly decide whether other blasts can trigger/destroy it without contradicting contact-only detonation. |

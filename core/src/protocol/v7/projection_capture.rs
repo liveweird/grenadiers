@@ -319,6 +319,7 @@ fn wire_pickup(value: game::PickupKind) -> PickupKind {
         game::PickupKind::BlastRange => PickupKind::BlastRange,
         game::PickupKind::MovementSpeed => PickupKind::MovementSpeed,
         game::PickupKind::Heart => PickupKind::Heart,
+        game::PickupKind::RemoteBomb => PickupKind::RemoteBomb,
         game::PickupKind::PiercingBomb => PickupKind::PiercingBomb,
         game::PickupKind::PowerBomb => PickupKind::PowerBomb,
         game::PickupKind::Shield => PickupKind::Shield,
@@ -365,25 +366,5 @@ fn wire_effect(value: game::EffectKind) -> EffectKind {
 }
 
 #[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn power_blast_is_captured_without_downgrading() {
-        let bomb = game::BombView {
-            id: game::EntityId(3),
-            cell: game::CellId::new(1, 1),
-            owner: game::EntityId(1),
-            range: 2,
-            placed_at: game::Tick(10),
-            trigger: game::BombTrigger::Timed {
-                detonates_at: game::Tick(190),
-            },
-            blast: game::BlastKind::Power,
-        };
-        assert_eq!(
-            capture_bomb(bomb, game::Tick(10)).unwrap().blast,
-            BlastKind::Power
-        );
-    }
-}
+#[path = "projection_capture_tests.rs"]
+mod tests;

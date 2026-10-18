@@ -108,6 +108,7 @@
     "seconds": "seconds",
     "speedCap": "Speed pickups add one level at a time, up to 5 cells/s.",
     "heartDescription": "Absorbs one lethal blast, then grants a brief damage grace period.",
+    "remoteBombDescription": "Stores one remotely triggered bomb. Place it with the bomb key, then press the same key later to detonate it.",
     "piercingBombDescription": "Stores one special bomb whose blast passes through breakable blocks. The charge is used only when you successfully place it.",
     "powerBombDescription": "Stores one special bomb whose blast fills a diamond-shaped area, ignoring obstruction while leaving hard walls intact. The charge is used only when you successfully place it.",
     "shieldDescription": "Grants 5 seconds of damage immunity. Picking up another Shield refreshes it.",
@@ -144,6 +145,7 @@
     "label": "Grenadiers courtyard",
     "failure": "The courtyard could not be drawn. Leave the room and try again.",
     "focusHint": "Select the courtyard to control your player.",
+    "remoteHint": "Remote bomb armed. Select the courtyard and press {{bomb}} to detonate it.",
     "instructions": "Move with the arrow keys or W A S D. Place a bomb with Space. Controls work only during a live round."
   },
   "controls": {

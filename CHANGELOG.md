@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.36 — 2026-10-18
+
+- Add opt-in Remote Bomb as a one-charge weapon whose placed bomb waits without a fuse for its owner's next manual bomb action.
+- Preserve fire and chain detonation, transactional action resolution, one armed bomb per owner, and independent replacement weapons.
+- Add the twelfth lobby switch, checked v8 state and events, replay coverage, English and Polish cues, and a deterministic production-seed browser scenario. Native acceptance and final CI remain pending.
+
 ## 0.3.35 — 2026-10-18
 
 - Prepare opt-in Power Bomb as a one-charge weapon consumed only by a successful manual placement.

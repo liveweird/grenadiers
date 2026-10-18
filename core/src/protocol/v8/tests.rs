@@ -385,6 +385,8 @@ mod diarrhea_tests;
 mod piercing_bomb_tests;
 #[path = "power_bomb_tests.rs"]
 mod power_bomb_tests;
+#[path = "remote_bomb_tests.rs"]
+mod remote_bomb_tests;
 #[path = "reverse_controls_tests.rs"]
 mod reverse_controls_tests;
 #[path = "short_flame_tests.rs"]

@@ -3,6 +3,47 @@
 Records below are frozen against their named sources. Publication and later CI status are
 recorded in [release notes](https://github.com/liveweird/grenadiers/releases).
 
+## Remote Bomb candidate — 2026-10-18 — local checks complete
+
+The v0.3.36 candidate activates an opt-in one-charge Remote Bomb. Successful manual placement
+captures a Standard bomb with no fuse; the owner's next retained bomb action detonates that same
+ID without another placement, entity allocation, capacity check, or stored-weapon consumption.
+Fire and chains still detonate it, while death, disconnect and reconnect invent no deadline. One
+live Remote per owner is enforced, and automatic Diarrhea placements remain ordinary Timed bombs.
+Catalog bit 5 and the final generator weight preserve all 2048 earlier paths while supporting all
+4096 subsets. The repeating byte-31 fixture places the pickup at (3,1) with safe routes through
+(2,1) and (1,2).
+
+Debug and release suites pass **577 core tests, 192 server tests and two doctests**; four dedicated
+performance profiles remain ignored. Rust line coverage is **91.89%** (12,576/13,686), above the
+unchanged 80% floor; this coverage baseline precedes the final test-only follow-ups, with Rust
+production code unchanged. All **4,487 web tests** across 51 files pass with statement/branch/function/
+line coverage of **95.53/91.50/95.64/97.83%**. Formatting, all-target Clippy with warnings denied,
+repository limits, generated contract checks, lint, Knip, production and renderer-diagnostic
+builds, E2E static checks and **39-scenario parity** pass. Cargo-deny and both cached offline npm
+audits pass with zero npm vulnerabilities; strict Kubernetes schemas validate all three resources.
+The initial full web gate exposed the previous client-side eleven-item request limit; raising that
+closed limit to the exact twelve-item catalog produced the recorded full-suite pass. The initial
+failure log was overwritten; the successful current full-suite log is retained.
+
+The first server and coverage runs reached the listener suites inside the restricted sandbox and
+failed only because localhost binds returned `PermissionDenied`; their preserved logs distinguish
+that environment failure. Authorized reruns pass without product changes. The first Kubernetes
+validation likewise preserved its sandbox DNS denial before the pinned-schema rerun validated all
+three resources. Independent backend and frontend/E2E reviews are clear. Native browser
+acceptance, candidate-image checks and exact-head CI remain pending.
+
+Backend review added direct regressions for manual Remote detonation with an exhausted entity
+allocator, full bomb capacity, overflowing timed-fuse path and an unrelated held weapon. A second
+regression publishes an old Remote detonation and a new live Remote for the same owner in one
+historical window to both recipients, while retaining duplicate-live-owner rejection.
+
+Frontend review added the missing live-bomb owner coherence guard. Live bombs now require an owner
+ID present in the authoritative actor list, including dead actors with empty inventory; historical
+events remain valid without a current owner record. The native scenario source now proves equal
+placement-event counts before and after the Remote trigger and limits its inventory claim to the
+observed empty slot. Held Piercing/Power preservation remains covered by focused core regressions.
+
 ## Power renderer and responsive-HUD integration — 2026-10-18 — native acceptance pending
 
 The reviewed terrain cache, diagnostics and responsive HUD are integrated into the Power Bomb

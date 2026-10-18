@@ -99,12 +99,12 @@ describe('original pixel-art geometry', () => {
     expect(flame.root.children).toHaveLength(2)
     expect(flame.frames.map(({ visible }) => visible)).toEqual([true, false])
     const pickups = [
-      'bombCapacity', 'blastRange', 'movementSpeed', 'heart', 'piercingBomb', 'powerBomb', 'shield', 'goldenFlame', 'shortFuse',
+      'bombCapacity', 'blastRange', 'movementSpeed', 'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'shield', 'goldenFlame', 'shortFuse',
       'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls',
     ] as const
     const counts = pickups.map((kind) => makePickup(kind) as unknown as Drawing)
       .map(({ rectangles = [] }) => rectangles.length)
-    expect(counts).toEqual([16, 14, 18, 23, 17, 19, 21, 22, 21, 20, 18, 22, 20, 21])
+    expect(counts).toEqual([16, 14, 18, 23, 19, 17, 19, 21, 22, 21, 20, 18, 22, 20, 21])
     expect(Math.max(...counts)).toBeLessThanOrEqual(23)
     const heart = makePickup('heart') as unknown as Drawing
     const colors = heart.rectangles?.map(({ color }) => color)
@@ -162,5 +162,17 @@ describe('original pixel-art geometry', () => {
     const power = makeBomb('power').root as unknown as Drawing
     expect(descendants(power).flatMap(({ rectangles = [] }) => rectangles))
       .not.toEqual(descendants(standard).flatMap(({ rectangles = [] }) => rectangles))
+  })
+
+  it('gives Remote pickups and armed bombs an antenna without a burning fuse', () => {
+    const pickup = makePickup('remoteBomb') as unknown as Drawing
+    expect(pickup.rectangles?.map(({ color }) => color)).toContain(PALETTE.brass)
+    expect(pickup.rectangles?.map(({ color }) => color)).toContain(PALETTE.brick)
+    const timed = makeBomb('standard', 'timed')
+    const remote = makeBomb('standard', 'remote')
+    expect(remote.remote).toBe(true)
+    expect(remote.spark.visible).toBe(false)
+    expect(descendants(remote.root as unknown as Drawing).flatMap(({ rectangles = [] }) => rectangles))
+      .not.toEqual(descendants(timed.root as unknown as Drawing).flatMap(({ rectangles = [] }) => rectangles))
   })
 })

@@ -3,6 +3,20 @@
 Records below are frozen against their named sources. Publication and later CI status are
 recorded in [release notes](https://github.com/liveweird/grenadiers/releases).
 
+## Short Fuse final-parent and HUD integration — 2026-10-18 — native acceptance pending
+
+The final audited Golden Flame parent is integrated, including the corrected Shield/Golden
+native timing proofs and accepted Heart/Shield/Golden screenshots. Production/core/server/API/
+Cargo inputs are unchanged by this parent merge. Its three predecessor item scenarios are
+byte-identical to the accepted parent apart from the exact four-item available catalog.
+E2E lint, Knip, type checking, repository guards and 31-scenario static parity pass.
+
+The English HUD label now reads Gear to avoid splitting Equipment's final letter in narrow
+desktop stat cells; Polish terminology and inventory behavior are unchanged. All 339 web tests
+and the production build pass, with coverage 95.11/90.80/95.50/97.56%. The existing inventory
+and native label assertions remain intact with the updated copy. Fresh 30+30 same-image native
+acceptance and final-head CI remain required; no preceding image result certifies Short Fuse.
+
 ## Short Fuse native timing hardening — 2026-10-18 — fresh acceptance pending
 
 A confirmed native Shield failure showed that language switching and full-page screenshots can
@@ -44,6 +58,66 @@ The first server test compile attempted crate-private effect observation; the fi
 public wire state without expanding APIs. The new browser scenario covers captured deadlines,
 actual natural detonation, reconnect and exact expiry. Its native playthrough, screenshots,
 fresh same-image Compose/Kubernetes 30+30 acceptance and final-head CI remain pending.
+
+
+## Golden Flame corrected native acceptance — 2026-10-18 — fresh 58/58
+
+Clean source `b39f1b915aa4dc2b37707136af03224802d4347a`, archive SHA-256
+`86ed52ab0c4e6f5a7dc8a15ddf4eb9f1102a0b5fe14424599a5626295216fd52`, builds image
+`sha256:673f674f97f529a1dce143935c65d5aa8f7e525ff3f2ea9ae6f50e3154a124b0`.
+The saved image archive hashes to
+`806359661d891fc87a647145754b2c0b34824055234c8358e1be1ae7b7f6ad46`.
+Fresh acceptance passes **29/29 Compose and 29/29 Kubernetes**, first test attempts, one
+worker, zero retries and no carried results. Both targets retain all previous 26 cases plus
+Heart, Shield and Golden Flame. The Golden case proves ordinary generated collection,
+captured radius eight, natural detonation, reconnect, exact physical expiry and later base range.
+
+Four latency profiles retain 20 samples each, zero exceedances and zero CPU throttling.
+Local/shaped maxima are **49.836/167.982ms Compose** and **48.635/166.754ms Kubernetes**.
+Strict exact-200 JSON/no-store readiness probes, hardened runtime, external mode-0444 fixtures,
+six fresh pod UIDs, serial direct-pod forwarding and complete cleanup pass. Bounded initial
+transport-readiness probes retry until ready; the no-retry claim concerns browser test cases.
+Pinned archive-only Trivy finds zero fixable HIGH/CRITICAL vulnerabilities; strict Kubernetes
+1.33 validates all three resources. Scoped quiet acknowledgements concern named workers.
+
+All 22 reports and 58 configured PNGs verify, with no failure captures. Root visually checked
+the exposed desktop flame pickup and active Polish 320px view: clear icon and timer, contained
+stat labels and no overlap. The minor English desktop Equipment final-letter wrap remains a
+readability follow-up. Committed Golden screenshots are exact accepted copies. Independent
+final source/image/runtime/report/evidence audit is clear. The sealed 1,205-entry manifest
+hashes to `a3f3c3b31bc067e55c6863059d1d88d15d0b414cff66b14365a272071eb4dbff` under
+`/tmp/grenadiers-v0327-corrected-native-acceptance`; its 685-entry preparation manifest is intact.
+
+Local baseline remains **426 core, 181 server and two doctests** in each Rust profile, **91.39%**
+Rust line coverage; **320 web tests**, coverage **95.07/90.72/95.47/97.53%**, production/fixture
+builds and 30-scenario static parity pass. Independent implementation/integration reviews are
+clear. Exact-head CI and publication remain required. This post-acceptance update changes only
+documentation and screenshot copies. The failed catalog attempt below remains separate.
+
+## Golden Flame shared catalog correction — 2026-10-18 — fresh acceptance pending
+
+The first native attempt against source `8cec8e89702e903f15c9a2d160a9d9543743ced9`
+passed seven default Compose cases and failed the eighth: the shared round scenario still
+expected the earlier Heart/Shield catalog, while the server correctly advertised Golden Flame
+as well. The dedicated Golden Flame scenario already expected the correct three-item catalog.
+The corrected shared scenario retains an exact ordered catalog assertion and the independent
+empty enabled-item settings assertion. No production behavior, timeout or retry policy changes. E2E lint, Knip, type checking,
+repository guards and 30-scenario static parity pass.
+
+No later Compose group, Kubernetes or latency case ran. The failed first attempt remains sealed
+at `/tmp/grenadiers-v0327-native-acceptance`, 742-entry manifest SHA-256
+`fb3bfe8eed1669168f18792a470aa1b33af80fd95c48ca0caa8f055b40963714`. Its seven passes
+are not carried forward. A complete fresh 58-case native matrix is required for the correction.
+
+## Golden Flame native timing hardening — 2026-10-18 — fresh acceptance pending
+
+A confirmed native Shield failure showed that language switching and full-page screenshots can
+consume several seconds of a ten-second effect window. Golden Flame now captures the narrow
+Polish pickup layout before collection, then plants, verifies the captured range, escapes, and
+observes the natural blast before checking the effect is still active and taking the active
+screenshot. Exact expiry, reconnect, later base-range damage, timeouts, and zero retries remain
+unchanged. E2E lint, Knip, type checking, repository guards, and 30-scenario static parity pass;
+the hardened native scenario remains pending and no native pass is claimed.
 
 ## Golden Flame terrain cache integration — 2026-10-18 — refreshed native acceptance pending
 
@@ -91,6 +165,54 @@ unchanged from the reviewed Golden Flame candidate. Its unit baseline remains un
 the production build and E2E static checks pass for this responsive integration.
 Fresh native Compose/Kubernetes acceptance and exact-head CI remain pending.
 
+## Shield corrected native acceptance — 2026-10-18 — fresh 56/56
+
+Clean source `be44b8aeae88249b5635ed4424d3f04f7fa33f84`, archive SHA-256
+`62daff016257a425b67340aa0598a4818ab0960d73a4fb6a3f2501995f40d60f`, builds image
+`sha256:3751bcef474c7ca1d09ba30d46846309cfb72f783db36bce5e95be05c24391fb`.
+Its saved archive hashes to `6b3654c71aa2e1117ab5f2828645c9561615b72b031e1277b576233bb50d2890`.
+Fresh acceptance passes **28/28 Compose and 28/28 Kubernetes**, first attempts, one worker,
+zero retries and no carried results. Both targets include all previous 26 cases, Heart and Shield.
+The corrected test proves blast immunity, exact event-derived expiry and later lethal damage.
+
+All four latency profiles retain 20 samples, zero exceedances and zero CPU throttling.
+Local/shaped maxima are **54.531/141.873ms Compose** and **61.247/156.193ms Kubernetes**.
+Strict exact-200 JSON/no-store probes, hardened runtime, external mode-0444 fixtures, five
+fresh pod UIDs, serial direct-pod forwarding and complete cleanup pass. Pinned archive-only
+Trivy finds zero fixable HIGH/CRITICAL vulnerabilities; strict Kubernetes 1.33 validates 3/3
+resources. Quiet acknowledgements cover named workers, without a global host-idle claim.
+
+All 20 reports pass, with 52 fresh PNG checkpoints. Normal failure capture remains enabled;
+no failure PNGs are present. Root visually checked the exposed desktop and active Polish 320px
+Shield views: readable two-column narrow HUD, distinct glyph and timer, no overlap. The minor
+English desktop Equipment final-letter wrap remains a readability follow-up. Committed Shield
+screenshots are exact accepted copies. Independent final source/image/report/evidence audit is clear.
+The sealed 1,127-entry manifest hashes to
+`cc5b06b926398bd0b92c5a89a4c4c3b24675f51ab37d28e10aa53d6d7c3e4a50` under
+`/tmp/grenadiers-v0326-corrected-native-acceptance`; its preparation manifest remains intact.
+
+Local baseline: **413 core, 180 server and two doctests** in each Rust profile, **91.23%**
+Rust line coverage; **304 web tests**, coverage **95.03/90.68/95.43/97.51%**, production/fixture
+builds and 29-scenario static parity pass. Independent implementation and integration reviews
+are clear. Exact-head CI and publication remain required. This post-acceptance change contains
+only documentation and screenshot copies. The earlier failed attempt below remains separate.
+
+## Shield native scenario correction — 2026-10-18 — fresh acceptance pending
+
+The first responsive native attempt passed 27 Compose cases, then failed the Shield scenario;
+Kubernetes did not run. Both retained public streams establish derived collection tick 656, expiry 956,
+second-bomb placement 859 and detonation 1039. The player correctly died after Shield expired:
+language/screenshot work had consumed 203 ticks before placement. This is a scenario timing
+defect; no production simulation change is made. The corrected scenario captures exposed layouts
+before collection, plants immediately, checks detonation precedes the actual Shield deadline,
+and retains the active screenshot after both protection proofs. Existing expiry, survival,
+later death, assertions, timeouts and zero-retry policy remain intact. E2E lint, Knip, typecheck
+and 29-scenario static parity pass after the correction.
+
+Failed evidence remains sealed at `/tmp/grenadiers-v0326-responsive-native-acceptance`,
+886-entry manifest SHA-256 `51ca4c7ef6c1deb724a806335156b6c29b16aaf5832ac57bee3200177ee90d65`.
+No prior result counts toward the required complete fresh 56-case acceptance.
+
 ## Shield responsive-HUD integration — 2026-10-18 — native acceptance pending
 
 The parent two-column narrow HUD and real text-geometry regression are integrated. Core,
@@ -131,16 +253,44 @@ focused run verifies the strengthened bomb-placement assertion in both build pro
 No v0.3.26 native image, full browser scenario run or release is claimed. Native Compose and
 Kubernetes acceptance, visual inspection and exact final-head CI remain required.
 
-## Heart responsive-HUD integration — 2026-10-18 — fresh native acceptance pending
+## Heart responsive-HUD integration — 2026-10-18 — fresh native 54/54
 
-The accepted parent's two-column narrow HUD and real text-geometry regression are integrated.
-Core, server, Cargo, API, Heart client/protocol/locales and all dedicated item scenarios remain
-unchanged from the independently reviewed Heart cache candidate. Its **287 web tests** and
-coverage **94.80/90.36/94.72/97.31%** remain the local unit baseline. The new production build
-and E2E lint, Knip, typecheck and 28-scenario static parity pass. Fresh image acceptance and exact-head CI remain
-required for this tree. The inherited Heart source `00d76ac9cc08e7bb4627caf7897e02c3f15a43d2`
-certifies Heart only and excludes terrain caching and responsive layout; the parent v7 result
-below does not certify Heart.
+Clean source `2f86fc96f4f562871ed962052c1f0f1b74d53881`, archive SHA-256
+`7fa83c1139e1e0487b91ef2328db7d05d932146f3ff55b39d4f1a47123c95579`, builds the new image
+`sha256:e8de9c77597e5c94fe5c406994d55ab7e776c0696b5ec3333f9f46273166ea09`.
+Its saved archive hashes to `93c50da1b8f0a5d25b351778aa346b83abce89fb2235df1ee20f45f9f37e79de`.
+Fresh acceptance passes **27/27 Compose and 27/27 Kubernetes**, first attempts, one worker,
+retries zero and no carried results. Both runtimes include all previous 26 cases plus Heart.
+
+Four latency profiles retain 20 samples each, zero exceedances and zero CPU throttling.
+Local/shaped maxima are **51.386/160.103ms Compose** and **52.320/160.583ms Kubernetes**.
+Strict exact-200 JSON/no-store probes, hardened runtime, external mode-0444 fixtures, four
+fresh pod UIDs, serial direct-pod forwarding and complete cleanup pass. Pinned archive-only
+Trivy finds zero fixable HIGH/CRITICAL vulnerabilities; strict Kubernetes 1.33 validates three
+resources. Quiet acknowledgements cover named local workers, without a global host-idle claim.
+
+All 18 reports pass and 46 fresh PNGs remain. Capture profiling is unset and normal failure
+capture is preserved. Root visually checked the readable Polish 320px equipment/protection HUD
+and English desktop pickup. English desktop Equipment wraps its last letter; this minor label
+readability follow-up does not cause overlap. Committed Heart screenshots are exact accepted
+PNG copies. Independent final source/image/report/evidence audit is clear. The sealed 1,062-entry manifest hashes
+to `fd296568303671e0c44736e0ba480e9334414ed4660a892a71845c70695185d5` under
+`/tmp/grenadiers-v0325-fresh-responsive-acceptance`.
+
+Core/server/Cargo/API and dedicated item scenarios remain unchanged from the reviewed Heart
+cache candidate: **401 core, 179 server and two doctests** in each Rust profile, line coverage
+**90.94%**. Its **287 web tests**, coverage **94.80/90.36/94.72/97.31%**, production/fixture
+builds and 28-scenario static checks pass. Fresh responsive production build/static checks pass.
+Exact-head CI and publication remain required. The post-acceptance update changes documentation
+and screenshot copies only.
+
+An earlier attempt paired the new source archive with the historical `35bf3678` image by
+mistake. It is **invalid**, with no candidate passes or failures counted. Its observed match
+geometry failure and cleanup are preserved separately in
+`/tmp/grenadiers-v0325-responsive-native-acceptance`, 698-entry partial manifest
+`f6b5ec3a6cc0c2dabd62f816e19c39bd549f05fd294afbbb3085eb66b5d2f75f`.
+The complete run above builds and uses the correct new image throughout. Setup-only corrections
+before that browser launch are retained in its evidence; no valid browser case was rerun.
 
 ## Heart activation candidate — 2026-10-18 — native baseline 54/54
 

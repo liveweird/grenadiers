@@ -1,13 +1,22 @@
 # Repository verification
 
-## Live-v7 HUD wrapping correction — 2026-10-18 — refreshed image acceptance pending
+## Responsive live-v7 HUD — 2026-10-18 — fresh image acceptance pending
 
-Visual review of the passing native baseline exposed overlapping Polish HUD labels at 320px.
-Labels and values now wrap without hiding or truncating the eight named fields. The real
-Polish 320px match scenario checks text-range containment and cross-cell overlap for both seats.
-Independent review and all 275 web tests, coverage, builds and E2E static parity 27 pass. A new image and complete fresh acceptance
-are required before publication. The audited 52/52 record below certifies source `b1d0340`
-only; it does not certify this later layout correction.
+Visual review exposed overlapping Polish HUD labels at 320px. Labels and values now wrap,
+and viewports up to 420px use two columns while desktop retains four. Both seats retain all
+eight named fields. The match scenario checks positive rendered text fragments, column counts,
+text containment and cross-cell overlap in English desktop and Polish 320px views. Independent
+review, all 275 web tests, coverage, builds and E2E static parity 27 pass. Complete fresh image
+acceptance and final-head CI are required before publication.
+
+The intermediate wrap-only source `7dd97f2` passed **15/15 Compose functional cases**, including
+its text-containment assertions. Visual review still found awkward four-to-five-line word
+splitting, so that run was stopped at the Compose latency gate. No latency or Kubernetes case
+ran, and no result carries to the new layout. Its interrupted cleanup initially left an owned
+container/network; explicit cleanup removed them and final residue checks are empty. Partial
+evidence: `/tmp/grenadiers-v0324-hud-wrap-native-acceptance`, 750-file manifest
+`6f3ddef9a74c770d9ccba560ef2608075aa917b6a1b1e4d5254d9d371761186d`.
+The earlier audited 52/52 baseline below excludes both later layout corrections.
 
 ## Pre-layout live-v7 terrain-cache baseline — 2026-10-18 — native 52/52
 

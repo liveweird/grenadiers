@@ -42,7 +42,7 @@ async function plant(page: Page, game: ObservedGame) {
   await expect.poll(() => latestSnapshot(game)?.state.bombs.length, { intervals: [15] }).toBe(1)
 }
 
-async function expectActorStatLabelsContained(page: Page) {
+async function expectActorStatLabelsContained(page: Page, expectedColumnCount: number) {
   const geometry = await page.locator('.actor-stats').evaluateAll((grids) => grids.map((grid) => {
     const cells = [...grid.querySelectorAll<HTMLElement>(':scope > div')]
     const labels = cells.map((cell, index) => {
@@ -63,11 +63,14 @@ async function expectActorStatLabelsContained(page: Page) {
         }
       }
     }
-    return { cellCount: cells.length, overflow, overlaps }
+    const columnCount = new Set(labels.map(({ cell }) => Math.round(cell.left * 2) / 2)).size
+    return { cellCount: cells.length, columnCount, fragmentCounts: labels.map(({ text }) => text.length), overflow, overlaps }
   }))
   expect(geometry).toHaveLength(2)
   for (const grid of geometry) {
-    expect(grid).toEqual({ cellCount: 8, overflow: [], overlaps: [] })
+    expect(grid).toMatchObject({ cellCount: 8, columnCount: expectedColumnCount, overflow: [], overlaps: [] })
+    expect(grid.fragmentCounts).toHaveLength(8)
+    expect(grid.fragmentCounts.every((count) => count > 0)).toBe(true)
   }
 }
 
@@ -145,6 +148,7 @@ test('two browsers finish a drawn round, first-to-three match, and consensual re
       expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([])
       await expect(page.getByLabel('Round wins for Player two')).toContainText('3')
     }
+    await expectActorStatLabelsContained(one, 4)
     await Promise.all(pages.map((page, index) =>
       page.screenshot({ path: testInfo.outputPath(`match-result-${index}.png`), fullPage: true }),
     ))
@@ -152,7 +156,7 @@ test('two browsers finish a drawn round, first-to-three match, and consensual re
     await two.getByText('Polski', { exact: true }).click()
     await expect(two.getByRole('status')).toHaveText('Gracz drugi wygrywa mecz (wygrane rundy: 3).')
     await expect(two.getByLabel('Wygrane rundy: Gracz drugi')).toContainText('3')
-    await expectActorStatLabelsContained(two)
+    await expectActorStatLabelsContained(two, 2)
     expect(await two.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false)
     expect((await new AxeBuilder({ page: two }).analyze()).violations).toEqual([])
     await two.screenshot({ path: testInfo.outputPath('match-result-polish-mobile.png'), fullPage: true })

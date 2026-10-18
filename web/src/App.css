@@ -142,6 +142,9 @@ main { min-height: 100vh; }
   .game-shell { grid-template-columns: 1fr; }
   .control-column { min-height: 0; box-shadow: .3rem .3rem 0 rgb(32 53 74 / 12%); }
 }
+@media (max-width: 420px) {
+  .actor-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
 @media (max-width: 390px) {
   .page-frame { padding-inline: .75rem; }
   .match-strip { font-size: .85rem; }

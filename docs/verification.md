@@ -37,8 +37,9 @@ room provenance, failed admission rollback, previous-version rejection before cr
 and unsupported equipment actions without consuming the manual-action identifier.
 
 This candidate retains Classic rules and empty optional-item availability. The inventory and
-effect presentation is infrastructure; no new pickup is playable. This is local verification
-only: no v0.3.24 image, Compose/Kubernetes acceptance or release has been completed.
+effect presentation is infrastructure; no new pickup is playable. These results describe the
+initial local verification. The later image and partial Compose attempt are recorded above;
+complete Compose/Kubernetes acceptance and publication remain pending.
 
 ## Canonical projection candidate — 2026-10-18 — local checks only
 

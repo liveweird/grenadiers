@@ -181,7 +181,10 @@ fn capture_bomb(bomb: game::BombView, at: game::Tick) -> Result<BombView, Projec
         range: u8::try_from(bomb.range).map_err(|_| ProjectionError::InvalidBombs)?,
         placed_at: wire_tick(bomb.placed_at)?,
         trigger,
-        blast: BlastKind::Standard,
+        blast: match bomb.blast {
+            game::BlastKind::Standard => BlastKind::Standard,
+            game::BlastKind::Piercing => BlastKind::Piercing,
+        },
     })
 }
 

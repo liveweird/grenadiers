@@ -1,7 +1,7 @@
 use std::collections::BTreeSet;
 
 use super::assignment::RoundAssignment;
-use super::bombs::BombTrigger;
+use super::bombs::{BlastKind, BombTrigger};
 use super::damage::DamageGrace;
 use super::effects::{EffectiveSpeed, TimedEffects};
 use super::events::StepEvent;
@@ -66,37 +66,30 @@ impl Actor {
     pub const fn id(&self) -> EntityId {
         self.id
     }
-
     #[must_use]
     pub const fn seat(&self) -> SeatId {
         self.seat
     }
-
     #[must_use]
     pub const fn position(&self) -> Position {
         self.position
     }
-
     #[must_use]
     pub const fn heading(&self) -> Direction {
         self.heading
     }
-
     #[must_use]
     pub const fn speed(&self) -> SpeedLevel {
         self.speed
     }
-
     #[must_use]
     pub const fn bomb_capacity(&self) -> u16 {
         self.capacity
     }
-
     #[must_use]
     pub const fn bomb_range(&self) -> u16 {
         self.range
     }
-
     #[must_use]
     pub const fn alive(&self) -> bool {
         self.alive
@@ -149,6 +142,7 @@ pub enum StateError {
         id: EntityId,
     },
     UnsupportedBombTrigger(EntityId),
+    UnsupportedBombBlast(EntityId),
     UnsupportedEnabledItems(crate::game::EnabledItems),
     UnsupportedPickup {
         cell: CellId,
@@ -161,6 +155,7 @@ pub enum StepError {
     TooManyInputs { count: usize, maximum: usize },
     TickOverflow,
     UnsupportedBombTrigger(EntityId),
+    UnsupportedBombBlast(EntityId),
     EffectExpiryOverflow(super::effects::EffectKind),
 }
 
@@ -191,7 +186,6 @@ impl State {
     ) -> Result<Self, StateError> {
         Self::new_at_tick(rules, world, actors, Tick(0))
     }
-
     pub fn new_at_tick(
         rules: RulesConfig,
         world: World,
@@ -200,7 +194,6 @@ impl State {
     ) -> Result<Self, StateError> {
         Self::new_at_tick_with_assignment(rules, world, actors, tick, RoundAssignment::first())
     }
-
     pub fn new_at_tick_with_assignment(
         rules: RulesConfig,
         world: World,
@@ -239,6 +232,11 @@ impl State {
                 return Err(StateError::UnsupportedBombTrigger(bomb.id()));
             }
         }
+        for bomb in world.bombs.values() {
+            if bomb.blast() != BlastKind::Standard {
+                return Err(StateError::UnsupportedBombBlast(bomb.id()));
+            }
+        }
         for actor in actors {
             if world.bombs.contains_key(&actor.id) {
                 return Err(StateError::DuplicateEntityId(actor.id));
@@ -271,12 +269,10 @@ impl State {
             assignment,
         })
     }
-
     #[must_use]
     pub const fn rules(&self) -> &RulesConfig {
         &self.rules
     }
-
     #[must_use]
     pub const fn world(&self) -> &World {
         &self.world

@@ -27,6 +27,7 @@ pub enum ProjectionError {
     InvalidActors,
     InvalidBombs,
     UnsupportedBombTrigger,
+    UnsupportedBombBlast,
     InvalidFlames,
     InvalidPickups,
     InvalidResult,
@@ -44,6 +45,7 @@ impl fmt::Display for ProjectionError {
             Self::InvalidActors => "invalid actor projection",
             Self::InvalidBombs => "invalid bomb projection",
             Self::UnsupportedBombTrigger => "unsupported bomb trigger",
+            Self::UnsupportedBombBlast => "unsupported bomb blast",
             Self::InvalidFlames => "invalid flame projection",
             Self::InvalidPickups => "invalid pickup projection",
             Self::InvalidResult => "invalid round result projection",
@@ -256,6 +258,9 @@ fn validate_result(
 }
 
 pub(super) fn project_bomb_record(bomb: game::BombView) -> Result<BombView, ProjectionError> {
+    if bomb.blast != game::BlastKind::Standard {
+        return Err(ProjectionError::UnsupportedBombBlast);
+    }
     let detonates_at = match bomb.trigger {
         game::BombTrigger::Timed { detonates_at } => detonates_at,
         game::BombTrigger::Remote | game::BombTrigger::Contact => {

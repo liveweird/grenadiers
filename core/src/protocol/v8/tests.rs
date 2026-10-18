@@ -252,6 +252,7 @@ fn bomb_report(
         trigger: crate::game::BombTrigger::Timed {
             detonates_at: crate::game::Tick(detonates_at),
         },
+        blast: crate::game::BlastKind::Standard,
     };
     crate::game::StepReport {
         tick,
@@ -298,6 +299,21 @@ fn v8_binding_checks_configured_fuse_for_world_and_event_bombs() {
     assert_eq!(
         bind_expanded(&room, room.round_id, &capture, None),
         Err(ProjectionError::InvalidExpandedBinding)
+    );
+}
+
+#[test]
+fn expanded_capture_rejects_piercing_event_until_the_item_is_available() {
+    let state = classic_state_at(10);
+    let mut report = bomb_report(&state, 10, 190, true);
+    let StepEventKind::BombPlaced(ref mut bomb) = report.events[0].kind else {
+        panic!("expected placement event");
+    };
+    bomb.blast = crate::game::BlastKind::Piercing;
+
+    assert_eq!(
+        capture_expanded(&state, &[report]),
+        Err(ProjectionError::InvalidItems)
     );
 }
 

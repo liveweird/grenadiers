@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 
 use super::{RoundResult, SeatInput, State, StepError, StepReport};
-use crate::game::bombs::BombTrigger;
+use crate::game::bombs::{BlastKind, BombTrigger};
 use crate::game::damage::{DamageOutcome, DamagePreventionSource, apply_damage};
 use crate::game::events::{EventAudience, StepEvent, StepEventKind};
 use crate::game::geometry::MovementTrace;
@@ -22,6 +22,14 @@ impl State {
             (!matches!(bomb.trigger(), BombTrigger::Timed { .. })).then_some(bomb.id())
         }) {
             return Err(StepError::UnsupportedBombTrigger(id));
+        }
+        if let Some(id) = self
+            .world
+            .bombs
+            .values()
+            .find_map(|bomb| (bomb.blast() != BlastKind::Standard).then_some(bomb.id()))
+        {
+            return Err(StepError::UnsupportedBombBlast(id));
         }
         if self.result.is_some() {
             self.tick = next_tick;

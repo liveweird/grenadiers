@@ -2,7 +2,7 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use super::{ExplosionError, plan};
 use crate::game::arena::{ARENA_CELL_COUNT, ARENA_HEIGHT, ARENA_WIDTH, Arena, Terrain};
-use crate::game::bombs::{Bomb, BombTrigger};
+use crate::game::bombs::{BlastKind, Bomb, BombTrigger};
 use crate::game::types::{CellId, EntityId, Tick};
 use crate::game::world::World;
 
@@ -33,10 +33,21 @@ fn world_with(walls: &[CellId], blocks: &[CellId]) -> World {
 }
 
 fn add_bomb(world: &mut World, id: u32, cell: CellId, range: u16, deadline: u64) {
+    add_bomb_with_blast(world, id, cell, range, deadline, BlastKind::Standard);
+}
+
+fn add_bomb_with_blast(
+    world: &mut World,
+    id: u32,
+    cell: CellId,
+    range: u16,
+    deadline: u64,
+    blast: BlastKind,
+) {
     let id = EntityId(id);
     world.bombs.insert(
         id,
-        Bomb::new(
+        Bomb::new_with_blast(
             id,
             cell,
             EntityId(100),
@@ -45,9 +56,67 @@ fn add_bomb(world: &mut World, id: u32, cell: CellId, range: u16, deadline: u64)
             BombTrigger::Timed {
                 detonates_at: Tick(deadline),
             },
+            blast,
         )
         .unwrap(),
     );
+}
+
+#[test]
+fn piercing_spends_range_while_crossing_consecutive_blocks() {
+    let blocks = [CellId::new(4, 5), CellId::new(5, 5)];
+    let mut world = world_with(&[], &blocks);
+    add_bomb_with_blast(&mut world, 1, CellId::new(3, 5), 3, 1, BlastKind::Piercing);
+
+    let result = plan(&world, Tick(1)).unwrap();
+    assert!(result.flames.contains(&CellId::new(6, 5)));
+    assert!(!result.flames.contains(&CellId::new(7, 5)));
+    assert_eq!(result.destroyed_blocks, BTreeSet::from(blocks));
+}
+
+#[test]
+fn piercing_still_stops_without_fire_at_hard_walls() {
+    let wall = CellId::new(5, 5);
+    let mut world = world_with(&[wall], &[]);
+    add_bomb_with_blast(&mut world, 1, CellId::new(3, 5), 4, 1, BlastKind::Piercing);
+
+    let result = plan(&world, Tick(1)).unwrap();
+    assert!(result.flames.contains(&CellId::new(4, 5)));
+    assert!(!result.flames.contains(&wall));
+    assert!(!result.flames.contains(&CellId::new(6, 5)));
+}
+
+#[test]
+fn chained_bomb_stops_incoming_ray_and_uses_its_own_piercing_blast() {
+    let blocks = [CellId::new(6, 5), CellId::new(7, 5)];
+    let mut world = world_with(&[], &blocks);
+    add_bomb(&mut world, 1, CellId::new(3, 5), 2, 1);
+    add_bomb_with_blast(
+        &mut world,
+        2,
+        CellId::new(5, 5),
+        3,
+        999,
+        BlastKind::Piercing,
+    );
+
+    let result = plan(&world, Tick(1)).unwrap();
+    assert_eq!(result.detonated, BTreeSet::from([EntityId(1), EntityId(2)]));
+    assert!(result.flames.contains(&CellId::new(8, 5)));
+    assert_eq!(result.destroyed_blocks, BTreeSet::from(blocks));
+}
+
+#[test]
+fn standard_ray_stops_at_block_already_marked_by_piercing_ray() {
+    let block = CellId::new(5, 5);
+    let mut world = world_with(&[], &[block]);
+    add_bomb_with_blast(&mut world, 1, CellId::new(5, 3), 3, 1, BlastKind::Piercing);
+    add_bomb(&mut world, 2, CellId::new(3, 5), 3, 1);
+
+    let result = plan(&world, Tick(1)).unwrap();
+    assert!(result.flames.contains(&CellId::new(5, 6)));
+    assert!(!result.flames.contains(&CellId::new(6, 5)));
+    assert_eq!(result.destroyed_blocks, BTreeSet::from([block]));
 }
 
 #[test]
@@ -104,7 +173,7 @@ fn three_bomb_chain_detonates_each_bomb_once_despite_repeated_triggers() {
 fn processed_bombs_still_stop_later_rays_in_the_snapshot() {
     let mut world = world_with(&[], &[]);
     add_bomb(&mut world, 1, CellId::new(5, 6), 0, 1);
-    add_bomb(&mut world, 2, CellId::new(3, 6), 4, 1);
+    add_bomb_with_blast(&mut world, 2, CellId::new(3, 6), 4, 1, BlastKind::Piercing);
 
     let result = plan(&world, Tick(1)).unwrap();
     assert!(result.flames.contains(&CellId::new(5, 6)));
@@ -137,12 +206,12 @@ fn geometry_is_unchanged_when_entity_ids_are_permuted() {
     fn planned(ids: [u32; 3]) -> (BTreeSet<CellId>, BTreeSet<CellId>) {
         let block = CellId::new(6, 5);
         let mut world = world_with(&[], &[block]);
-        for (id, cell, deadline) in [
-            (ids[0], CellId::new(3, 5), 1),
-            (ids[1], CellId::new(5, 5), 999),
-            (ids[2], CellId::new(5, 7), 1),
+        for (id, cell, deadline, blast) in [
+            (ids[0], CellId::new(3, 5), 1, BlastKind::Piercing),
+            (ids[1], CellId::new(5, 5), 999, BlastKind::Standard),
+            (ids[2], CellId::new(5, 7), 1, BlastKind::Standard),
         ] {
-            add_bomb(&mut world, id, cell, 2, deadline);
+            add_bomb_with_blast(&mut world, id, cell, 2, deadline, blast);
         }
         let result = plan(&world, Tick(1)).unwrap();
         (result.flames, result.destroyed_blocks)

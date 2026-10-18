@@ -1,4 +1,4 @@
-use super::{Bomb, BombError, BombTrigger};
+use super::{BlastKind, Bomb, BombError, BombTrigger};
 use crate::game::events::{EventAudience, StepEvent, StepEventKind};
 use crate::game::types::{CellId, EntityId, Tick};
 use crate::game::view::BombView;
@@ -12,6 +12,40 @@ fn bomb(placed_at: Tick, trigger: BombTrigger) -> Result<Bomb, BombError> {
         placed_at,
         trigger,
     )
+}
+
+#[test]
+fn default_and_explicit_constructors_capture_immutable_blast_kind() {
+    let trigger = BombTrigger::Timed {
+        detonates_at: Tick(6),
+    };
+    assert_eq!(bomb(Tick(5), trigger).unwrap().blast(), BlastKind::Standard);
+
+    let piercing = Bomb::new_with_blast(
+        EntityId(2),
+        CellId::new(3, 4),
+        EntityId(10),
+        3,
+        Tick(5),
+        trigger,
+        BlastKind::Piercing,
+    )
+    .unwrap();
+    assert_eq!(piercing.blast(), BlastKind::Piercing);
+
+    let view = BombView::from(piercing);
+    assert_eq!(view.blast, BlastKind::Piercing);
+    for kind in [
+        StepEventKind::BombPlaced(view),
+        StepEventKind::BombDetonated(view),
+    ] {
+        let event = StepEvent::new(Tick(6), EventAudience::Both, kind);
+        assert!(matches!(
+            event.kind,
+            StepEventKind::BombPlaced(bomb) | StepEventKind::BombDetonated(bomb)
+                if bomb.blast == BlastKind::Piercing
+        ));
+    }
 }
 
 #[test]

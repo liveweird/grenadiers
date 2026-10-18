@@ -9,7 +9,7 @@ This optional track follows the [backlog](backlog.md), shared settings and
 pixel-art increments. The historical catalog in [rules](rules.md) is not an implementation
 claim. Each activation requires its own reviewed behavior, UI, documentation and acceptance.
 
-The foundation implements `core::game::{inventory,effects,damage}` and immutable Actor inventory,
+The original foundation implements `core::game::{inventory,effects,damage}` and immutable Actor inventory,
 effect and derived-stat access. Production cannot inject items into State yet. Both fire checks
 share the damage gateway; effects/grace expire before movement and new bombs capture derived
 range/fuse. Slow-foot exposes an exact speed ratio but does not change movement before activation.
@@ -124,7 +124,7 @@ With two humans there is only one possible rival; random target selection waits 
 
 ## Ordered-action foundation
 
-The v0.3.20 candidate retains individual accepted manual actions through server admission and
+The v0.3.20 foundation retains individual accepted manual actions through server admission and
 core input processing. Classic still resolves one simultaneous placement claim per seat;
 sequential retries must not let duplicate requests defeat a shared-cell conflict. Raw-core
 Clear cancels earlier actions; server movement clearing and TTL expiry preserve accepted
@@ -139,7 +139,7 @@ Replay checkpoints compare the complete pending queue; journal records and publi
 
 ## Typed domain bomb foundation
 
-The v0.3.21 candidate distinguishes Timed, Remote and Contact triggers in core bomb records
+The v0.3.21 foundation distinguishes Timed, Remote and Contact triggers in core bomb records
 and domain views/events. Untimed records have no deadline. Current State construction,
 stepping and Classic explosion planning reject unsupported triggers before simulation mutation;
 production placement still creates only Timed bombs with checked fuse arithmetic.

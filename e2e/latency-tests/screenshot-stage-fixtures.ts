@@ -198,10 +198,152 @@ async function exerciseScreenshotStageCleanupQuiescence(): Promise<void> {
   }
 }
 
+async function exerciseFirstPipelineThenSecondary(): Promise<void> {
+  const fake = fakeServerPage()
+  const viewportResults = [Promise.resolve('first-viewport'), Promise.resolve('second-viewport')]
+  const prepareResults = [Promise.resolve('first-prepare'), Promise.resolve('second-prepare')]
+  const restoreResults = [Promise.resolve('first-restore'), Promise.resolve('second-restore')]
+  const viewportCalls: unknown[][] = []
+  const prepareCalls: unknown[][] = []
+  let restoreCallCount = 0
+  Object.defineProperty(fake.screenshotter, '_originalViewportSize', {
+    configurable: true, value(this: unknown, ...args: unknown[]) {
+      expect(this).toBe(fake.screenshotter)
+      viewportCalls.push(args)
+      return viewportResults[viewportCalls.length - 1]
+    },
+  })
+  Object.defineProperty(fake.screenshotter, '_preparePageForScreenshot', {
+    configurable: true, value(this: unknown, ...args: unknown[]) {
+      expect(this).toBe(fake.screenshotter)
+      prepareCalls.push(args)
+      return prepareResults[prepareCalls.length - 1]
+    },
+  })
+  Object.defineProperty(fake.screenshotter, '_restorePageAfterScreenshot', {
+    configurable: true, value: () => restoreResults[restoreCallCount++],
+  })
+  const values: ScreenshotStageEvent[] = []
+  const cleanup = installScreenshotStageDiagnostics(fake.serverPage, values, 6, 9)
+  const restore = fake.screenshotter._restorePageAfterScreenshot as () => Promise<string>
+  const firstViewport = (fake.screenshotter._originalViewportSize as (
+    ...args: unknown[]) => unknown)('first-viewport-argument')
+  expect(firstViewport).toBe(viewportResults[0])
+  await firstViewport
+  const firstPrepare = (fake.screenshotter._preparePageForScreenshot as (
+    ...args: unknown[]) => unknown)('first-prepare-argument')
+  expect(firstPrepare).toBe(prepareResults[0])
+  await firstPrepare
+  const firstRestore = restore()
+  expect(firstRestore).toBe(restoreResults[0])
+  await firstRestore
+  const retained = JSON.stringify(values)
+
+  const secondViewport = (fake.screenshotter._originalViewportSize as (
+    ...args: unknown[]) => unknown)('second-viewport-argument')
+  expect(secondViewport).toBe(viewportResults[1])
+  await secondViewport
+  const secondPrepare = (fake.screenshotter._preparePageForScreenshot as (
+    ...args: unknown[]) => unknown)('second-prepare-argument')
+  expect(secondPrepare).toBe(prepareResults[1])
+  await secondPrepare
+  const secondRestore = restore()
+  expect(secondRestore).toBe(restoreResults[1])
+  await secondRestore
+  expect(JSON.stringify(values)).toBe(retained)
+  expect(viewportCalls).toEqual([['first-viewport-argument'], ['second-viewport-argument']])
+  expect(prepareCalls).toEqual([['first-prepare-argument'], ['second-prepare-argument']])
+  expect(restoreCallCount).toBe(2)
+  cleanup()
+}
+
+async function exerciseFailedFirstPipelineThenSecondary(): Promise<void> {
+  const fake = fakeServerPage()
+  const firstFailure = new Error('fixed-first-prepare-failure')
+  const firstPrepare = Promise.reject(firstFailure)
+  const secondPrepare = Promise.resolve('fixed-secondary-prepare')
+  void firstPrepare.catch(() => undefined)
+  let prepareCallCount = 0
+  let restoreCallCount = 0
+  Object.defineProperty(fake.screenshotter, '_preparePageForScreenshot', {
+    configurable: true, value: () => [firstPrepare, secondPrepare][prepareCallCount++],
+  })
+  Object.defineProperty(fake.screenshotter, '_restorePageAfterScreenshot', {
+    configurable: true, value: () => {
+      restoreCallCount += 1
+      return Promise.resolve('fixed-restore')
+    },
+  })
+  const values: ScreenshotStageEvent[] = []
+  const cleanup = installScreenshotStageDiagnostics(fake.serverPage, values, 8, 10)
+  const prepare = fake.screenshotter._preparePageForScreenshot as () => Promise<unknown>
+  const restore = fake.screenshotter._restorePageAfterScreenshot as () => Promise<string>
+  await (fake.screenshotter._originalViewportSize as () => Promise<string>)()
+  for (const listener of fake.instrumentation.listeners)
+    listener.onCallLog(fake.serverPage, {}, 'api', 'taking page screenshot')
+  const firstResult = prepare()
+  expect(firstResult).toBe(firstPrepare)
+  await expect(firstResult).rejects.toBe(firstFailure)
+  expect(values).toEqual(expect.arrayContaining([
+    expect.objectContaining({ stage: 'preparePageForScreenshot', boundary: 'finished', error: true }),
+  ]))
+  await restore()
+  const retained = JSON.stringify(values)
+
+  for (const listener of fake.instrumentation.listeners)
+    listener.onCallLog(fake.serverPage, {}, 'api', 'taking page screenshot')
+  await (fake.screenshotter._originalViewportSize as () => Promise<string>)()
+  const secondResult = prepare()
+  expect(secondResult).toBe(secondPrepare)
+  await secondResult
+  await restore()
+  expect(prepareCallCount).toBe(2)
+  expect(restoreCallCount).toBe(2)
+  expect(JSON.stringify(values)).toBe(retained)
+  cleanup()
+}
+
+async function exercisePendingFirstPipelineThenSecondary(): Promise<void> {
+  const fake = fakeServerPage()
+  let resolveFirst!: (value: string) => void
+  const firstViewport = new Promise<string>((resolve) => { resolveFirst = resolve })
+  const secondViewport = Promise.resolve('fixed-secondary-viewport')
+  const calls: unknown[][] = []
+  Object.defineProperty(fake.screenshotter, '_originalViewportSize', {
+    configurable: true, value(this: unknown, ...args: unknown[]) {
+      expect(this).toBe(fake.screenshotter)
+      calls.push(args)
+      return calls.length === 1 ? firstViewport : secondViewport
+    },
+  })
+  const values: ScreenshotStageEvent[] = []
+  const cleanup = installScreenshotStageDiagnostics(fake.serverPage, values, 3, 12)
+  const firstResult = (fake.screenshotter._originalViewportSize as (
+    ...args: unknown[]) => Promise<string>)('first-pending')
+  expect(firstResult).toBe(firstViewport)
+  const secondResult = (fake.screenshotter._originalViewportSize as (
+    ...args: unknown[]) => Promise<string>)('secondary-while-pending')
+  expect(secondResult).toBe(secondViewport)
+  await expect(secondResult).resolves.toBe('fixed-secondary-viewport')
+  const retained = JSON.stringify(values)
+  resolveFirst('fixed-first-viewport')
+  await expect(firstResult).resolves.toBe('fixed-first-viewport')
+  await Promise.resolve()
+  expect(JSON.stringify(values)).toBe(retained)
+  expect(values).toMatchObject([{
+    stage: 'originalViewportSize', boundary: 'started', success: false, error: false,
+  }])
+  expect(calls).toEqual([['first-pending'], ['secondary-while-pending']])
+  cleanup()
+}
+
 export async function exerciseSyntheticScreenshotStages(): Promise<void> {
   await exerciseScreenshotStagePassThrough()
   await exerciseScreenshotStageBoundsAndUnsupported()
   await exerciseScreenshotStageCleanupQuiescence()
+  await exerciseFirstPipelineThenSecondary()
+  await exerciseFailedFirstPipelineThenSecondary()
+  await exercisePendingFirstPipelineThenSecondary()
 }
 
 export async function exerciseActualScreenshotStages(page: Page,

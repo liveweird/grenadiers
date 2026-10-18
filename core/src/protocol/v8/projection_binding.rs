@@ -193,6 +193,7 @@ pub(super) fn expanded_items() -> ItemSet {
         ItemId::Shield,
         ItemId::GoldenFlame,
         ItemId::ShortFuse,
+        ItemId::Diarrhea,
         ItemId::ShortFlame,
         ItemId::LongFuse,
         ItemId::ReverseControls,

@@ -110,6 +110,7 @@
     "shieldDescription": "Zapewnia 5 sekund odporności na obrażenia. Kolejna Tarcza odnawia ten czas.",
     "goldenFlameDescription": "Maksymalizuje zasięg nowych bomb na 10 sekund. Kolejny Złoty płomień odnawia ten czas.",
     "shortFuseDescription": "Skraca o połowę lont nowych bomb przez 10 sekund. Kolejny Krótki lont odnawia ten czas.",
+    "diarrheaDescription": "Automatycznie podkłada zwykłe bomby przez 10 sekund, gdy jest wolne pole i masz miejsce na kolejną. Kolejny przedmiot odnawia czas.",
     "shortFlameDescription": "Ogranicza zasięg nowych bomb do 1 pola przez 10 sekund, zastępując Złoty płomień. Podłożone bomby się nie zmieniają, premie do zasięgu wracają później, a kolejny przedmiot odnawia ten czas.",
     "longFuseDescription": "Podwaja lont nowych bomb przez 10 sekund. Krótki i Długi lont znoszą się, gdy oba są aktywne; podłożone bomby się nie zmieniają. Kolejny przedmiot odnawia ten czas.",
     "reverseControlsDescription": "Odwraca kierunki ruchu na 10 sekund. Wciśnięte klawisze pozostają wciśnięte, a kolejny przedmiot odnawia czas.",

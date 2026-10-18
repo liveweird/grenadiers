@@ -1,5 +1,26 @@
 # Repository verification
 
+## Diarrhea candidate — 2026-10-18 — local checks complete
+
+The v0.3.32 candidate activates opt-in Diarrhea for exactly 600 physical ticks. Each seat selects
+one retained manual request or one automatic ordinary intent, and both seats share the existing
+eligibility and conflict resolution. Collection begins automatic placement on the following tick;
+expiry suppresses it at the exact boundary. Catalog bit 14 and a final generator weight of 15
+preserve all 128 earlier item-mask paths while supporting all 256 subsets.
+
+Debug and release suites pass **495 core tests, 188 server tests and two doctests**; four
+dedicated performance profiles remain ignored. Rust line coverage is **91.58%**
+(12,312/13,444), above the unchanged 80% floor. All **616 web tests** across 43 files pass with
+statement/branch/function/line coverage of **95.21/91.03/95.51/97.62%**. Formatting, Clippy,
+repository limits, generated contract checks, lint, Knip, production builds, E2E static checks
+and **34-scenario parity** pass. Cargo-deny, both cached offline npm audits with zero
+vulnerabilities, and strict Kubernetes schemas for all three resources pass. Dependency lock
+graphs remain unchanged except for the two workspace package versions in `Cargo.lock`.
+Independent backend and frontend/browser-scenario reviews are clear. Review regressions verify
+the same automatic bomb and exact natural detonation on both peers without extra manual actions,
+then clear the curse on death. Focused settings and E2E static checks pass after the copy/assertion
+fixes. Native browser acceptance, candidate-image checks and final-head CI remain pending.
+
 ## Reverse Controls candidate — 2026-10-18 — local checks complete
 
 The v0.3.31 candidate activates opt-in Reverse Controls for exactly 600 physical ticks. Raw held

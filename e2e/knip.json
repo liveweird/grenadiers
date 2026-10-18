@@ -10,6 +10,7 @@
     "short-flame-tests/**/*.spec.ts",
     "long-fuse-tests/**/*.spec.ts",
     "reverse-controls-tests/**/*.spec.ts",
+    "diarrhea-tests/**/*.spec.ts",
     "controls-tests/**/*.spec.ts",
     "match-tests/**/*.spec.ts",
     "reconnect-tests/**/*.spec.ts",

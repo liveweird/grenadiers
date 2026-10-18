@@ -236,3 +236,18 @@ docker compose -f docker-compose.yaml -f docker-compose.reverse-controls.yaml do
 The real settings panel enables only Reverse Controls. The scenario holds a raw east key through
 ordinary approach, collection, reversed travel to the left wall, exact expiry and restored east
 movement. Both peers check the authoritative timer. Keep the seed external and read-only.
+
+## Reproduce opt-in Diarrhea automatic placement
+
+Use the already built candidate image and the pinned production seed:
+
+```sh
+chmod 444 core/tests/fixtures/arena-v2-diarrhea.seed
+docker compose -f docker-compose.yaml -f docker-compose.diarrhea.yaml up -d --no-build --force-recreate app
+E2E_DIARRHEA_FIXTURE=arena-v2-diarrhea npm --prefix e2e run test:diarrhea
+docker compose -f docker-compose.yaml -f docker-compose.diarrhea.yaml down
+```
+
+Deploy the v0.3.32 server and web assets together and reload connected browsers. The exact v8
+`availableItems` array grows to eight entries, so older v8 web clients reject the room even when
+Diarrhea is disabled. No storage migration is required; active matches remain process-local.

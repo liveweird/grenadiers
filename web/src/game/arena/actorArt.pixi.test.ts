@@ -29,6 +29,7 @@ describe('real Pixi actor pose visibility', () => {
     const cues = [
       actor.protection, actor.shield, actor.goldenFlame, actor.shortFuse, actor.shortFlame,
       actor.longFuse, actor.reverseControls,
+      actor.diarrhea,
     ]
     for (const cue of cues) cue.visible = true
     const changes: boolean[] = []

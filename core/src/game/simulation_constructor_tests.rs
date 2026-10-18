@@ -182,6 +182,7 @@ fn legacy_profiles_reject_enabled_settings_and_opt_in_items_in_every_layer() {
         PickupKind::Shield,
         PickupKind::GoldenFlame,
         PickupKind::ShortFuse,
+        PickupKind::Diarrhea,
         PickupKind::ShortFlame,
         PickupKind::LongFuse,
         PickupKind::ReverseControls,

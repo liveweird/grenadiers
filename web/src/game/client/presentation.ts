@@ -2,7 +2,7 @@ import type { SnapshotMessage } from '../arena/types'
 import type { GameClientState } from './clientTypes'
 
 const renderedPickups = new Set([
-  'bombCapacity', 'blastRange', 'movementSpeed', 'heart', 'shield', 'goldenFlame', 'shortFuse', 'shortFlame', 'longFuse',
+  'bombCapacity', 'blastRange', 'movementSpeed', 'heart', 'shield', 'goldenFlame', 'shortFuse', 'diarrhea', 'shortFlame', 'longFuse',
   'reverseControls',
 ])
 
@@ -34,6 +34,8 @@ export function presentSnapshot(state: GameClientState): SnapshotMessage | null 
             effects.find((effect) => effect.kind === 'goldenFlame')?.remainingTicks ?? 0,
           shortFuseRemainingTicks:
             effects.find((effect) => effect.kind === 'shortFuse')?.remainingTicks ?? 0,
+          diarrheaRemainingTicks:
+            effects.find((effect) => effect.kind === 'diarrhea')?.remainingTicks ?? 0,
           shortFlameRemainingTicks:
             effects.find((effect) => effect.kind === 'shortFlame')?.remainingTicks ?? 0,
           longFuseRemainingTicks:
@@ -46,7 +48,8 @@ export function presentSnapshot(state: GameClientState): SnapshotMessage | null 
       pickups: snapshot.state.pickups.filter(
         (pickup): pickup is typeof pickup & {
           kind: 'bombCapacity' | 'blastRange' | 'movementSpeed' | 'heart' | 'shield'
-            | 'goldenFlame' | 'shortFuse' | 'shortFlame' | 'longFuse' | 'reverseControls'
+            | 'goldenFlame' | 'shortFuse' | 'diarrhea' | 'shortFlame' | 'longFuse'
+            | 'reverseControls'
         } =>
           renderedPickups.has(pickup.kind),
       ),

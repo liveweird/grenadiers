@@ -7,7 +7,7 @@ server, browser and pixel-art implementation with local checks and independent r
 both debug/release profiles pass and native release acceptance is pending. The v0.3.26 Shield
 candidate adds opt-in timed immunity. The v0.3.27 Golden Flame and v0.3.28 Short Fuse
 candidates also pass local checks; native acceptance and final-head CI remain pending.
-The v0.3.29 Short Flame candidate also passes local checks and independent reviews; native acceptance is pending. The v0.3.30 Long Fuse candidate passes local checks and independent reviews; native acceptance remains pending. The other 16 requested pickups
+The v0.3.29 Short Flame and v0.3.30 Long Fuse candidates pass local checks and independent reviews; native acceptance remains pending. The v0.3.31 Reverse Controls candidate is implemented with local verification and independent review pending. The other 15 requested pickups
 remain unimplemented. Richer transitions and further item artwork remain follow-up
 work. See [pixel-art presentation](pixel-art.md) and [expanded item implementation](expanded-items.md).
 Updated 2026-10-18 after playtest feedback. Release acceptance is recorded in

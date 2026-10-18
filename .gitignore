@@ -42,3 +42,5 @@ e2e/short-flame-test-results/
 
 e2e/playwright-long-fuse-report/
 e2e/long-fuse-test-results/
+e2e/playwright-reverse-controls-report/
+e2e/reverse-controls-test-results/

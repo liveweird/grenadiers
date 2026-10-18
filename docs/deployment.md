@@ -220,3 +220,19 @@ docker compose -f docker-compose.yaml -f docker-compose.long-fuse.yaml down
 The real settings panel enables only Long Fuse with a 120-tick base. The scenario follows the
 ordinary generated pickup path, observes a captured 240-tick bomb on both peers, crosses the
 exact 600-tick expiry, and verifies restored 120-tick timing. Never bake the seed into the image.
+
+## Reproduce opt-in Reverse Controls movement
+
+Use the paired candidate image with its separate external production seed:
+
+```sh
+chmod 444 core/tests/fixtures/arena-v2-reverse-controls.seed
+docker compose -f docker-compose.yaml -f docker-compose.reverse-controls.yaml up -d --no-build --force-recreate app
+# Wait for /api/v1/ready to return 200 before running the scenario.
+E2E_REVERSE_CONTROLS_FIXTURE=arena-v2-reverse-controls npm --prefix e2e run test:reverse-controls
+docker compose -f docker-compose.yaml -f docker-compose.reverse-controls.yaml down
+```
+
+The real settings panel enables only Reverse Controls. The scenario holds a raw east key through
+ordinary approach, collection, reversed travel to the left wall, exact expiry and restored east
+movement. Both peers check the authoritative timer. Keep the seed external and read-only.

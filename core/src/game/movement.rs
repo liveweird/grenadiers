@@ -7,12 +7,22 @@ use super::simulation::{Actor, TurnAssist};
 use super::types::{CellId, EntityId, HALF_FOOTPRINT, Position, TICKS_PER_SECOND, UNITS_PER_CELL};
 use super::world::World;
 
-pub(crate) fn advance_actor(world: &World, actor: &mut Actor, turn_assist: i32) -> MovementTrace {
+pub(crate) fn advance_actor(
+    world: &World,
+    actor: &mut Actor,
+    turn_assist: i32,
+    tick: super::types::Tick,
+) -> MovementTrace {
     let mut trace = MovementTrace::new(actor.position);
-    let Some(direction) = actor.held.active() else {
+    let Some(raw_direction) = actor.held.active() else {
         actor.residual = 0;
         actor.pending_turn = None;
         return trace;
+    };
+    let direction = if actor.effects().reverses_controls(tick) {
+        opposite(raw_direction)
+    } else {
+        raw_direction
     };
 
     if actor
@@ -61,6 +71,15 @@ pub(crate) fn advance_actor(world: &World, actor: &mut Actor, turn_assist: i32) 
         move_actor(world, actor, direction, budget, &mut trace);
     }
     trace
+}
+
+const fn opposite(direction: Direction) -> Direction {
+    match direction {
+        Direction::North => Direction::South,
+        Direction::East => Direction::West,
+        Direction::South => Direction::North,
+        Direction::West => Direction::East,
+    }
 }
 
 fn continue_turn(

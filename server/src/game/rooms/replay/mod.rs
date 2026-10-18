@@ -31,3 +31,6 @@ mod short_flame_tests;
 
 #[cfg(test)]
 mod long_fuse_tests;
+
+#[cfg(test)]
+mod reverse_controls_tests;

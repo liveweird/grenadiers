@@ -156,3 +156,9 @@ Long Fuse has a separate production-seed scenario:
 Use `docker-compose.long-fuse.yaml` with the same image. It verifies generated collection,
 captured 240-tick timing from a 120-tick base, exact expiry, and restored ordinary timing.
 See [deployment](deployment.md#reproduce-opt-in-long-fuse-timing).
+
+Reverse Controls has a separate production-seed scenario:
+`E2E_REVERSE_CONTROLS_FIXTURE=arena-v2-reverse-controls npm --prefix e2e run test:reverse-controls`.
+Use `docker-compose.reverse-controls.yaml` with the same image. It holds one raw east input across
+collection and the exact 600-tick expiry, checks both peers, and captures screenshots only outside
+the timed window. See [deployment](deployment.md#reproduce-opt-in-reverse-controls-movement).

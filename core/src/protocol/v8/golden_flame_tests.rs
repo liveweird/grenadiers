@@ -66,6 +66,7 @@ fn golden_flame_and_shield_publish_distinct_physical_timers_and_quiet_admission(
                 "shortFuse",
                 "shortFlame",
                 "longFuse",
+                "reverseControls",
             ])
         );
         assert_eq!(

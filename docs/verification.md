@@ -1,5 +1,29 @@
 # Repository verification
 
+## Reverse Controls candidate — 2026-10-18 — local checks complete
+
+The v0.3.31 candidate activates opt-in Reverse Controls for exactly 600 physical ticks. Raw held
+directions and recency remain authoritative while simulation movement uses their opposite. The
+collection tick moves normally, the following tick starts inversion, and the exact expiry tick
+returns to ordinary movement. Pending turn assistance clears only when inversion state changes.
+
+Catalog bit 18 and a final weight of 15 preserve the previous 64 generation paths and extend the
+supported configuration set to all 128 subsets. The deterministic seed fixture places Reverse
+Controls at cell (3,1). Protocol, replay, web and browser-scenario coverage are included.
+
+Debug and release suites pass **479 core tests, 186 server tests and two doctests**; four
+dedicated performance profiles remain ignored. Rust line coverage is **91.56%**, above the
+unchanged 80% floor. All **481 web tests** across 41 files pass with statement/branch/function/
+line coverage of **95.17/90.95/95.49/97.60%**. Formatting, Clippy, repository limits, generated
+contract checks, lint, Knip, production builds, E2E static checks and **33-scenario parity** pass.
+Cargo-deny, both cached offline npm audits with zero vulnerabilities, and strict Kubernetes
+schemas for all three resources pass. Dependency lock graphs are unchanged except for the two
+workspace package versions in Cargo.lock. Independent backend and frontend/browser-scenario
+reviews are clear. Review fixes prove every held command remains raw east and key release stops
+both peers across three later snapshots spanning six physical ticks; focused Pixi/cue tests pass.
+The native Reverse Controls playthrough and screenshots, candidate-image acceptance, and
+final-head CI remain pending.
+
 ## Long Fuse candidate — 2026-10-18 — local checks complete
 
 The v0.3.30 candidate prepares the opt-in Long Fuse curse. Collection refreshes a 600-physical-

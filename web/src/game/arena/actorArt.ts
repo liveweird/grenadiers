@@ -12,6 +12,7 @@ export interface ActorDrawing {
   shortFuse: Graphics
   shortFlame: Graphics
   longFuse: Graphics
+  reverseControls: Graphics
   poses: Record<Direction, PoseFrames>
   direction: Direction
   moving: boolean
@@ -21,6 +22,7 @@ export interface ActorDrawing {
   shortFused: boolean
   shortFlamed: boolean
   longFused: boolean
+  reversed: boolean
 }
 
 function legs(drawing: Graphics, frame: number, side: boolean): void {
@@ -129,17 +131,31 @@ export function makeActor(seat: Seat): ActorDrawing {
   pixels(longFuse, PALETTE.flame, [[-10, -20, 4, 5], [-6, -17, 4, 4]])
   pixels(longFuse, PALETTE.flameCore, [[-9, -18, 3, 3]])
   longFuse.visible = false
+  const reverseControls = new Graphics()
+  pixels(reverseControls, PALETTE.deepInk, [
+    [-29, -7, 12, 3], [-29, 5, 12, 3], [17, -7, 12, 3], [17, 5, 12, 3],
+    [-29, -10, 3, 9], [26, 2, 3, 9],
+  ])
+  pixels(reverseControls, PALETTE.white, [
+    [-32, -7, 9, 3], [-29, -10, 3, 9], [23, 5, 9, 3], [26, 2, 3, 9],
+  ])
+  pixels(reverseControls, PALETTE.brick, [[17, -7, 9, 3], [-26, 5, 9, 3]])
+  reverseControls.visible = false
   const poses = {
     north: [frontOrBack(seat, 'north', 0), frontOrBack(seat, 'north', 1)],
     east: [sidePose(seat, 'east', 0), sidePose(seat, 'east', 1)],
     south: [frontOrBack(seat, 'south', 0), frontOrBack(seat, 'south', 1)],
     west: [sidePose(seat, 'west', 0), sidePose(seat, 'west', 1)],
   } satisfies Record<Direction, PoseFrames>
-  root.addChild(shadow, protection, shield, goldenFlame, shortFuse, shortFlame, longFuse, ...Object.values(poses).flat())
+  root.addChild(
+    shadow, protection, shield, goldenFlame, shortFuse, shortFlame, longFuse, reverseControls,
+    ...Object.values(poses).flat(),
+  )
   const drawing = {
-    root, protection, shield, goldenFlame, shortFuse, shortFlame, longFuse, poses,
+    root, protection, shield, goldenFlame, shortFuse, shortFlame, longFuse, reverseControls, poses,
     direction: 'south' as Direction, moving: false,
-    protected: false, shielded: false, golden: false, shortFused: false, shortFlamed: false, longFused: false,
+    protected: false, shielded: false, golden: false, shortFused: false, shortFlamed: false,
+    longFused: false, reversed: false,
   }
   setActorPose(drawing, 'south', 0)
   return drawing

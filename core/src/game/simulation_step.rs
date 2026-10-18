@@ -45,10 +45,10 @@ impl State {
         let mut events = Vec::new();
         let mut shield_prevented = [false; 2];
         self.expire_flames(next_tick);
-        self.expire_actor_effects(next_tick);
+        self.expire_actor_effects(self.tick, next_tick);
         self.world.expose_flame_free_pickups();
         let manual_actions = self.apply_inputs(inputs);
-        let traces = self.move_living();
+        let traces = self.move_living(next_tick);
         self.kill_on_existing_flames(&traces, next_tick, &mut events, &mut shield_prevented);
         self.resolve_classic_manual_actions(&manual_actions, next_tick, &mut events);
         self.resolve_explosions(next_tick, &mut events)?;
@@ -76,11 +76,11 @@ impl State {
         })
     }
 
-    fn move_living(&mut self) -> [MovementTrace; 2] {
+    fn move_living(&mut self, tick: Tick) -> [MovementTrace; 2] {
         let turn_assist = self.rules.turn_assist();
         self.actors.each_mut().map(|actor| {
             if actor.alive {
-                movement::advance_actor(&self.world, actor, turn_assist)
+                movement::advance_actor(&self.world, actor, turn_assist, tick)
             } else {
                 MovementTrace::new(actor.position)
             }
@@ -118,9 +118,14 @@ impl State {
         }
     }
 
-    fn expire_actor_effects(&mut self, tick: Tick) {
+    fn expire_actor_effects(&mut self, previous_tick: Tick, tick: Tick) {
         for actor in &mut self.actors {
+            let reversed_before = actor.effects.reverses_controls(previous_tick);
+            let reversed_after = actor.effects.reverses_controls(tick);
             actor.effects.expire(tick);
+            if reversed_before != reversed_after {
+                actor.pending_turn = None;
+            }
             if actor
                 .damage_grace
                 .is_some_and(|grace| !grace.is_active(tick))

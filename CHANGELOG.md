@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.31 — 2026-10-18
+
+- Prepare opt-in Reverse Controls: collecting the curse reverses raw held directions for exactly 600 physical ticks while preserving deterministic movement and input state.
+- Clear pending turn assistance when inversion starts or expires, retain refresh behavior, and restore ordinary movement on the exact expiry tick.
+- Add the seventh lobby item switch, English and Polish pixel presentation, checked v8 publication, replay coverage, and a deterministic browser scenario. Native acceptance and final CI remain pending.
+
 ## 0.3.30 — 2026-10-18
 
 - Prepare the opt-in Long Fuse curse: generated pickups double the fuse captured by newly placed bombs for 10 seconds.

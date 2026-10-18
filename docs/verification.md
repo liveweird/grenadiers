@@ -1,6 +1,28 @@
 # Repository verification
 
-## Screenshot substage diagnostics — 2026-10-18 — attribution pending
+## Foreground capture experiment — 2026-10-18 — evaluation pending
+
+Clean diagnostic source `b2d966647310924257cb591625abe4478199d107` passes the changed
+reconnect and pure-diagnostic cases **2/2 Compose and 2/2 Kubernetes**, first attempts with
+zero retries, against the unchanged production image `57f16c...3853`. Original screenshot
+stage timings localize the multi-second wait to completed `Page.captureScreenshot` calls:
+Compose12,780.635/17,782.816 ms and Kubernetes5,368.567/14,757.926 ms. Every surrounding
+stage finishes below9 ms. Heartbeats continue during captures, with zero temporary pages,
+diagnostic failures or pending stages. Strict probes, runtime hardening, external fixtures,
+continuous direct-pod forwarding and cleanup pass. Evidence remains in
+`/tmp/grenadiers-v0322-screenshot-stage-acceptance`; the other48 unaffected native cases
+are retained separately. This localizes a command boundary without identifying its cause.
+
+The next bounded E2E experiment activates each page with `bringToFront` before its audit,
+width assertion and unchanged full-page screenshot. A separate fixed `foreground` phase
+measures activation. Gameplay checks finish before this loop; assertions, audit/capture
+ordering, screenshot options,120-second deadline and zero retries remain unchanged.
+Application inputs are unchanged. Independent review is clear; E2E static gates and parity26
+pass, and the pure Chromium diagnostic passes1/1 in3.1 seconds. Its initial added assertions
+exceeded the function-size limit; extracting the existing width checks fixes that gate without
+dropping coverage. Native evaluation is pending; no improvement is claimed.
+
+## Screenshot substage diagnostics — 2026-10-18 — native attributed
 
 Exact guarded-audit head `1549e8fe75c3ea2e0bb97abc90714b93f304d42d` fails the browser job in
 both hosted evaluations (`39087361314` push, `39087363884` PR); the eight other checks pass.
@@ -25,8 +47,8 @@ Full E2E static gates and parity26 pass; the existing pure Chromium case passes1
 including an actual safe static full-page screenshot with all nine stage labels. The initial
 sandbox launch failure occurs before test execution; the permitted run is recorded separately.
 Existing screenshot options, ordering, gameplay/accessibility assertions,120-second deadline
-and zero retries remain unchanged. One native attribution evaluation is pending; no screenshot
-substage or cause is asserted from the high-level timing alone.
+and zero retries remain unchanged. The native attribution result is recorded above; earlier
+high-level timings alone do not establish a screenshot substage or browser cause.
 
 
 ## Guarded single-frame accessibility experiment — 2026-10-18 — native verified

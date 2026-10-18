@@ -26,6 +26,12 @@ audit fixture or game state is injected into this gameplay scenario. Screenshot 
 use version-checked instance-local hooks to retain bounded fixed stage timings for the original
 capture. They issue no extra browser commands and retain no arguments, results or image bytes.
 
+After native timing localized multi-second waits to `Page.captureScreenshot`, a separate
+experiment brings each page to the foreground before its accessibility audit, width check
+and original full-page capture. A fixed diagnostic phase measures that activation separately.
+All gameplay checks precede activation; audit/capture ordering, options, deadline and retries
+remain unchanged. This experiment does not establish a browser cause or a resolved delay.
+
 ## Scenario: two offline tabs stop recovery after a late reserved-seat rejection
 
 Both native transports close while fresh-session HTTP requests are held. After eleven real seconds, both resume attempts receive terminal reserved-seat rejection and return to a usable lobby without a retry loop. Exact599/600 expiry and abandonment precedence belong to deterministic core/server tests; this browser scenario verifies late network recovery behavior.

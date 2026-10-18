@@ -1,6 +1,6 @@
 # Repository verification
 
-## Guarded single-frame accessibility experiment — 2026-10-18 — acceptance pending
+## Guarded single-frame accessibility experiment — 2026-10-18 — native verified
 
 Only the reconnect accessibility audits switch to Axe's legacy single-document path, avoiding
 its partial-run temporary pages. The helper subscribes before its initial frame check, requires
@@ -14,9 +14,30 @@ current Axe mode on a controlled fixture and proves both report an unlabeled but
 covers an existing iframe, a transient frame and cleanup/error precedence. E2E typecheck, lint,
 Knip and parity26 pass; the focused Chromium case passes1/1 in2.8 seconds. Its initial sandbox
 launch fails before test execution; a later implementation test finds an invalid Set matcher,
-which is corrected to `.size` before the passing run. Independent review is clear; one changed-mode
-native/CI evaluation remains pending. This is a test-harness hypothesis, not a proven browser
-root cause or a claim that the earlier failures are resolved.
+which is corrected to `.size` before the passing run. Independent implementation review is clear.
+
+Clean source `96c4608454b69d92b08961cdff0cc3d81d882e24`, archive SHA-256
+`aea9f1b215d057e7977f1e10a48aa6e8315c582395356f9c97bf95ea7a134f75`, retains identical
+production Docker inputs and uses the same tested `57f16c...3853` image. Changed reconnect
+and pure-diagnostic cases pass **2/2 in each target** on their first actual invocation;
+48 distinct unaffected cases are retained, giving **26/26 Compose and 26/26 Kubernetes**,
+52 total with zero retries. Latency profiles retain 20 samples each, zero exceedances and zero
+throttling. The new pure-test prefix followed by those profiles has not run as one current-source
+native sequence; the prefix closes its isolated context, and no residue defect was found.
+Runtime hardening, strict probes, external fixtures, continuous direct-pod forwarding
+and cleanup pass. A sandbox-denied read-only preflight is preserved before any browser launch.
+Evidence: `/tmp/grenadiers-v0322-guarded-axe-acceptance`; independent evidence audit is clear.
+
+Both reconnect traces contain zero temporary-page events and diagnostic failures. Width
+commands take **2.25–26.42 ms**, with callback entry within 0.78–9.73 ms and actual reads 0–0.1 ms.
+Heartbeat delivery stays below 14.2 ms, without the prior 90–109-second backlog. Screenshot
+phases instead take **12.5–18.4 seconds**, compared with 0.36–0.98 seconds in the preceding
+native run; overall improvement is not claimed. This supports the bounded audit-path change
+without establishing a Chromium/Axe root cause or resolving every screenshot delay.
+
+Hosted gates must pass on the exact publication head before merge; local acceptance does not
+substitute for those checks. Earlier failed evaluations remain preserved. The later evidence-only
+commit changes neither application inputs nor the native-tested browser code.
 
 
 ## Post-audit browser phase diagnostics — 2026-10-18 — native verified, CI blocked

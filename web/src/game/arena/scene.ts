@@ -39,6 +39,7 @@ function renderActor(drawing: ActorDrawing, id: number, effects: boolean, now: n
 export class ArenaScene {
   readonly root = new Container()
   private readonly terrain = new Graphics()
+  private readonly terrainCacheOptions
   private readonly blocksLayer = new Container()
   private readonly pickupsLayer = new Container()
   private readonly bombsLayer = new Container()
@@ -58,7 +59,8 @@ export class ArenaScene {
   private running = false
   private reducedMotion = false
 
-  constructor() {
+  constructor(resolution: number) {
+    this.terrainCacheOptions = { resolution, antialias: false, scaleMode: 'nearest' as const }
     this.root.addChild(
       this.terrain, this.blocksLayer, this.pickupsLayer, this.bombsLayer, this.flamesLayer, this.actorsLayer,
     )
@@ -75,9 +77,13 @@ export class ArenaScene {
     this.motionDuration = Math.max(1000 / 60, Math.min(100, tickDelta * 1000 / 60))
     this.physicalTick = physicalTick
     this.running = snapshot.room.phase.type === 'running'
-    const terrainKey = snapshot.state.arena.terrain.join(',')
+    const terrainKey = [
+      snapshot.state.arena.width, snapshot.state.arena.height, ...snapshot.state.arena.terrain,
+    ].join(',')
     if (terrainKey !== this.terrainKey) {
+      if (!this.terrain.isCachedAsTexture) this.terrain.cacheAsTexture(this.terrainCacheOptions)
       paintTerrain(this.terrain, snapshot.state.arena)
+      this.terrain.updateCacheTexture()
       this.terrainKey = terrainKey
     }
     this.updateBlocks(snapshot.state.arena.blocks)
@@ -98,6 +104,7 @@ export class ArenaScene {
     for (const drawing of this.actors.values()) drawing.root.destroy({ children: true, context: true })
     this.blocks.clear(); this.pickups.clear(); this.bombs.clear(); this.flames.clear(); this.actors.clear()
     this.motions.clear()
+    if (this.terrain.isCachedAsTexture) this.terrain.cacheAsTexture(false)
     this.terrain.clear()
     this.identity = ''
     this.terrainKey = ''
@@ -105,6 +112,10 @@ export class ArenaScene {
     this.running = false
     this.physicalTick = -1
     this.motionDuration = 50
+  }
+
+  restoreContext(): void {
+    if (this.terrainKey) this.terrain.updateCacheTexture()
   }
 
   render(now: number): void {

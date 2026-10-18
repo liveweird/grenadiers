@@ -207,6 +207,10 @@ into the application image. Consult [verification](verification.md) for actual c
 
 ## Reproduce opt-in Long Fuse timing
 
+Fresh source `6b818f1e7b3663fa05a23ad6d77950f7d677bef7` passes 32/32 Compose and 32/32
+Kubernetes browser cases. See [verification](verification.md) for the exact image, disclosed
+post-run bookkeeping exception, independent evidence review and final CI/publication status.
+
 Use the paired candidate image with its separate external production seed:
 
 ```sh
@@ -224,7 +228,7 @@ verifies restored 120-tick timing. The first two escapes must retain the same ru
 living collector. Bomb identifiers are numeric and zero is valid; the placement poll therefore
 requires a defined ID rather than a truthy ID.
 
-The fresh source-`39e764a9a20fc0c25e663fd4921491c5268c8358` attempt passed 31 Compose
+The earlier source-`39e764a9a20fc0c25e663fd4921491c5268c8358` attempt passed 31 Compose
 cases before this truthiness defect rejected observed bomb ID `0`; Kubernetes was not started.
 It is sealed at `/tmp/grenadiers-v0330-ready-native-acceptance` with 14 reports, 37 PNGs,
 an unchanged 988-entry preparation-manifest SHA-256 of

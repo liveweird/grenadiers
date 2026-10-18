@@ -191,7 +191,7 @@ export class ArenaScene {
       drawing.protected = (actor.damageGraceRemainingTicks ?? 0) > 0
       drawing.moving = Boolean(!reset && previousMotion
         && (previousMotion.toX !== toX || previousMotion.toY !== toY))
-      setActorPose(drawing, actor.heading, 0)
+      drawing.direction = actor.heading
     }
   }
 }

@@ -200,7 +200,8 @@ fn sample_pickup(source: &mut impl RandomWords, enabled: EnabledItems) -> Option
         + u32::from(enabled.contains_heart()) * 25
         + u32::from(enabled.contains_shield()) * 15
         + u32::from(enabled.contains_golden_flame()) * 15
-        + u32::from(enabled.contains_short_fuse()) * 15;
+        + u32::from(enabled.contains_short_fuse()) * 15
+        + u32::from(enabled.contains_short_flame()) * 15;
     let value = if bound == 100 {
         sample_percent(source)?
     } else {
@@ -209,6 +210,7 @@ fn sample_pickup(source: &mut impl RandomWords, enabled: EnabledItems) -> Option
     let heart_end = 100 + u32::from(enabled.contains_heart()) * 25;
     let shield_end = heart_end + u32::from(enabled.contains_shield()) * 15;
     let golden_end = shield_end + u32::from(enabled.contains_golden_flame()) * 15;
+    let short_fuse_end = golden_end + u32::from(enabled.contains_short_fuse()) * 15;
     Some(match value {
         0..40 => PickupKind::BombCapacity,
         40..80 => PickupKind::BlastRange,
@@ -216,7 +218,8 @@ fn sample_pickup(source: &mut impl RandomWords, enabled: EnabledItems) -> Option
         value if value < heart_end => PickupKind::Heart,
         value if value < shield_end => PickupKind::Shield,
         value if value < golden_end => PickupKind::GoldenFlame,
-        _ => PickupKind::ShortFuse,
+        value if value < short_fuse_end => PickupKind::ShortFuse,
+        _ => PickupKind::ShortFlame,
     })
 }
 
@@ -348,6 +351,9 @@ mod golden_flame_tests;
 #[cfg(test)]
 #[path = "shield_tests.rs"]
 mod shield_tests;
+#[cfg(test)]
+#[path = "short_flame_tests.rs"]
+mod short_flame_tests;
 #[cfg(test)]
 #[path = "short_fuse_tests.rs"]
 mod short_fuse_tests;

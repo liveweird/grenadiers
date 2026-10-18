@@ -1,10 +1,11 @@
 # Expanded item implementation plan
 
-Status: [Heart](heart.md), [Shield](shield.md) and [Golden Flame](golden-flame.md) are
-published through v0.3.27. The v0.3.28 [Short Fuse](short-fuse.md) candidate passes local
-checks, independent implementation/evidence reviews and fresh Compose/Kubernetes acceptance
-60/60. Final CI remains pending. Expanded-v5/generator-v2 rooms and gameplay-v8 are retained;
-see [verification](../verification.md) and [release notes](https://github.com/liveweird/grenadiers/releases).
+Status: [Heart](heart.md), [Shield](shield.md), [Golden Flame](golden-flame.md) and
+[Short Fuse](short-fuse.md) are published through v0.3.28. The v0.3.29 [Short Flame](short-flame.md)
+candidate passes local checks, implementation reviews and fresh Compose/Kubernetes acceptance
+62/62. Independent final evidence review is clear; final CI remains pending. Expanded-v5/generator-v2 rooms and gameplay-v8
+are retained; see [verification](../verification.md) and
+[release notes](https://github.com/liveweird/grenadiers/releases).
 This optional track follows the [backlog](backlog.md), shared settings and
 pixel-art increments. The historical catalog in [rules](rules.md) is not an implementation
 claim. Each activation requires its own reviewed behavior, UI, documentation and acceptance.
@@ -41,7 +42,7 @@ Damage passes share one gateway. Shield prevents damage before Heart is consider
 absorbs one lethal hit, consumes its equipment slot and grants 60 ticks of immunity, including
 both damage passes and overlapping flames. Collecting protection cannot undo earlier damage.
 
-Shield uses 300 physical ticks (five seconds); Golden Flame and Short Fuse use 600 (ten seconds), all
+Shield uses 300 physical ticks (five seconds); Golden Flame, Short Fuse and Short Flame use 600 (ten seconds), all
 refreshing on recollection. Proposed remaining durations: Stopwatch 180; other timed effects and each
 Slow-foot stack 600. These become versioned constants when activated, not new settings yet.
 Golden flame gives newly placed bombs radius eight; Short-flame overrides it with radius one.

@@ -28,6 +28,7 @@
     "test:audio": "playwright test --config playwright.audio.config.ts",
     "test:golden-flame": "playwright test --config playwright.golden-flame.config.ts",
     "test:short-fuse": "playwright test --config playwright.short-fuse.config.ts",
+    "test:short-flame": "playwright test --config playwright.short-flame.config.ts",
     "test:renderer-diagnostics": "playwright test --config playwright.renderer-diagnostics.config.ts",
     "test:terrain-pixels": "playwright test --config playwright.terrain-pixels.config.ts"
   },

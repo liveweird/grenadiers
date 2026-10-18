@@ -183,6 +183,7 @@ pub(super) fn expanded_items() -> ItemSet {
         ItemId::Shield,
         ItemId::GoldenFlame,
         ItemId::ShortFuse,
+        ItemId::ShortFlame,
     ])
     .expect("expanded items are canonical")
 }

@@ -25,3 +25,6 @@ mod golden_flame_tests;
 
 #[cfg(test)]
 mod short_fuse_tests;
+
+#[cfg(test)]
+mod short_flame_tests;

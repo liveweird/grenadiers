@@ -94,7 +94,7 @@ export function makePickup(kind: RenderablePickupKind): Graphics {
     pixels(drawing, PALETTE.flame, [[16, 25, 17, 6], [19, 18, 11, 10], [23, 13, 5, 9]])
     pixels(drawing, PALETTE.flameLight, [[20, 24, 9, 5], [22, 18, 6, 9], [24, 15, 3, 7]])
     pixels(drawing, PALETTE.flameCore, [[23, 22, 4, 7], [24, 18, 2, 5]])
-  } else {
+  } else if (kind === 'shortFuse') {
     pixels(drawing, PALETTE.deepInk, [
       [15, 22, 18, 13], [18, 18, 12, 20], [29, 16, 4, 8], [32, 13, 5, 5],
     ])
@@ -102,6 +102,13 @@ export function makePickup(kind: RenderablePickupKind): Graphics {
     pixels(drawing, PALETTE.blueLight, [[19, 23, 4, 5]])
     pixels(drawing, PALETTE.flame, [[35, 10, 4, 5], [38, 14, 4, 4], [31, 10, 3, 3]])
     pixels(drawing, PALETTE.flameCore, [[36, 12, 3, 3]])
+  } else {
+    pixels(drawing, PALETTE.deepInk, [
+      [16, 31, 17, 4], [18, 24, 13, 8], [21, 18, 7, 8], [23, 14, 3, 6],
+    ])
+    pixels(drawing, PALETTE.blue, [[19, 28, 11, 4], [21, 23, 7, 6], [23, 18, 3, 7]])
+    pixels(drawing, PALETTE.blueLight, [[23, 25, 3, 4], [24, 20, 2, 4]])
+    pixels(drawing, PALETTE.brick, [[14, 15, 4, 4], [31, 15, 4, 4], [13, 34, 23, 3]])
   }
   return drawing
 }

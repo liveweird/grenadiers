@@ -186,3 +186,21 @@ peers, reconnects, and checks expiry followed by ordinary timing. The fixture re
 never bake it into the application image. Equivalent Kubernetes acceptance mounts the same
 mode-0444 seed and runs the scenario through the Service port-forward. Recorded acceptance
 status remains in [verification](verification.md); these reproduction commands do not imply a pass.
+
+## Reproduce opt-in Short Flame range
+
+Use the paired candidate image with its separate external production seed:
+
+```sh
+chmod 444 core/tests/fixtures/arena-v2-short-flame.seed
+docker compose -f docker-compose.yaml -f docker-compose.short-flame.yaml up -d --no-build --force-recreate app
+# Wait for /api/v1/ready to return 200 before running the scenario.
+E2E_SHORT_FLAME_FIXTURE=arena-v2-short-flame npm --prefix e2e run test:short-flame
+docker compose -f docker-compose.yaml -f docker-compose.short-flame.yaml down
+```
+
+The real settings panel enables only Short Flame. The scenario reveals and collects its
+pickup, observes an actual range-one blast in the cleared corridor, reconnects without
+extending the timer, and verifies base range after expiry. Equivalent Kubernetes acceptance
+mounts the same mode-0444 seed and runs through the Service port-forward. Never bake the seed
+into the application image. Consult [verification](verification.md) for actual candidate results.

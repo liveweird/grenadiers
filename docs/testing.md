@@ -143,3 +143,10 @@ recreation. The scenario selects a five-second base fuse, verifies a captured 15
 shortened fuse on both peers and natural detonation, reconnects without extending the
 effect, and verifies a later ordinary 300-tick bomb after expiry.
 See [deployment](deployment.md#reproduce-opt-in-short-fuse-timing).
+
+Short Flame has a separate production-seed scenario:
+`E2E_SHORT_FLAME_FIXTURE=arena-v2-short-flame npm --prefix e2e run test:short-flame`.
+Use `docker-compose.short-flame.yaml` with the same image and wait for readiness after
+recreation. It verifies range-one captures and actual fire stopping before the second cell
+of a known clear ray, independent ordinary fuse timing, reconnect, exact expiry and later
+base-range damage. See [deployment](deployment.md#reproduce-opt-in-short-flame-range).

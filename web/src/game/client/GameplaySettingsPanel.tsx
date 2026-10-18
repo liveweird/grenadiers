@@ -8,7 +8,7 @@ const SPEEDS = [0, 1, 2, 3, 4] as const
 const TURN_ASSISTS = [64, 128, 192, 256] as const
 const WINS = [1, 2, 3, 4, 5, 6, 7, 8, 9] as const
 const FUSES = [60, 90, 120, 150, 180, 210, 240, 270, 300] as const
-const AVAILABLE_ITEMS = ['heart', 'shield', 'goldenFlame', 'shortFuse'] as const
+const AVAILABLE_ITEMS = ['heart', 'shield', 'goldenFlame', 'shortFuse', 'shortFlame'] as const
 type AvailableItem = typeof AVAILABLE_ITEMS[number]
 const DEFAULT_SETTINGS: GameSettings = {
   startingSpeedLevel: 0, turnAssistUnits: 256, winsToFinish: 3, bombFuseTicks: 180,
@@ -106,18 +106,10 @@ export function GameplaySettingsPanel({ room, youSeat, pending, copy, onApply }:
           }))} />
       </SimpleGrid>
       <Text className="settings-note" size="xs">{copy.settings.speedCap}</Text>
-      <ItemSetting item="heart" visible={room.availableItems.includes('heart')}
-        checked={draft.enabledItems.includes('heart')} disabled={!editable || pending} copy={copy}
-        onChange={(enabled) => toggleItem('heart', enabled)} />
-      <ItemSetting item="shield" visible={room.availableItems.includes('shield')}
-        checked={draft.enabledItems.includes('shield')} disabled={!editable || pending} copy={copy}
-        onChange={(enabled) => toggleItem('shield', enabled)} />
-      <ItemSetting item="goldenFlame" visible={room.availableItems.includes('goldenFlame')}
-        checked={draft.enabledItems.includes('goldenFlame')} disabled={!editable || pending} copy={copy}
-        onChange={(enabled) => toggleItem('goldenFlame', enabled)} />
-      <ItemSetting item="shortFuse" visible={room.availableItems.includes('shortFuse')}
-        checked={draft.enabledItems.includes('shortFuse')} disabled={!editable || pending} copy={copy}
-        onChange={(enabled) => toggleItem('shortFuse', enabled)} />
+      {AVAILABLE_ITEMS.map((item) => <ItemSetting key={item} item={item}
+        visible={room.availableItems.includes(item)} checked={draft.enabledItems.includes(item)}
+        disabled={!editable || pending} copy={copy}
+        onChange={(enabled) => toggleItem(item, enabled)} />)}
       {dirty && <Text className="settings-lock" size="sm">{copy.settings.unapplied}</Text>}
       {lockText && <Text className="settings-lock" size="sm">{lockText}</Text>}
       <Group gap="sm">

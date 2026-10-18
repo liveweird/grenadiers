@@ -25,5 +25,10 @@
       "exports",
       "types"
     ]
-  }
+  },
+  "entry": [
+    "src/main.tsx",
+    "renderer-diagnostics/main.ts",
+    "vite.renderer-diagnostics.config.ts"
+  ]
 }

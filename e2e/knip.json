@@ -9,6 +9,7 @@
     "hardening-tests/**/*.spec.ts",
     "latency-tests/**/*.spec.ts",
     "audio-tests/**/*.spec.ts",
-    "scripts/*.mjs"
+    "scripts/*.mjs",
+    "renderer-diagnostic-tests/**/*.spec.ts"
   ]
 }

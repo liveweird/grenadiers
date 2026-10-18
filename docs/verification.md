@@ -1,5 +1,42 @@
 # Repository verification
 
+## Hosted capture attribution — 2026-10-18 — isolated reproduction pending
+
+Exact instrumented head `482c8ba59ce4c2e0de413ecae7c020cf68ade51b` fails both browser jobs
+(`39089475906` PR, `39089473104` push); the eight other jobs pass. Both intended primary
+captures have successful `Page.captureScreenshot` boundaries lasting **109,047/110,097 ms**,
+with every surrounding stage below20 ms. Capture and restoration finish after the120-second
+test budget is exhausted; the following peer audit is then aborted. Both results are first
+attempts with zero retries. Captured-page heartbeats continue near one second, and Node
+event-loop maxima are78.7/102.0 ms; this does not identify a Chromium/Pixi cause.
+
+Default, pickup, match and the second reconnect case pass. Later latency, hardening, controls,
+audio and the image scan do not run after the reconnect failure. Raw artifacts, decoded tests
+and fixed-metadata stage summaries remain at `/tmp/grenadiers-v22-capture-ci-{pr,push}-*`.
+No unchanged workflow is restarted.
+
+Review finds a diagnostic attribution defect: an automatic failure screenshot starts before
+the explicit screenshot's outer promise returns, so its later preparation events reuse the
+same capture ordinal. The first canonical capture duration above is independently confirmed;
+the automatic tail is not another intended sample. The repair stops recording before any
+secondary pipeline while forwarding all original operations unchanged and retaining pending
+first-pipeline starts without invented finishes. Independent review is clear; full E2E static
+gates/parity26 and the pure Chromium diagnostic pass1/1 in3.2 seconds. An initial synthetic
+fixture receiver error is corrected before the passing run; native timeout-path validation
+of the cutoff remains pending.
+
+The separate [renderer lifecycle experiment](game/renderer-diagnostics.md) will compare six
+predeclared pristine/active/suspended two-context cells using the actual Pixi renderer and
+synthetic public presentation data. It does not modify production rendering, game authority,
+release screenshot options, deadlines or retries. No reproduction or performance improvement
+is claimed before that experiment runs. Independent fixture review is clear after correcting
+warm-up error propagation, shared initialization/warm-up/treatment barriers, actual history
+and reduced-motion evidence, post-capture invariants and cleanup precedence. Final E2E static,
+fixture lint/typecheck/build and ordinary-production marker isolation pass. Normal web gates
+pass259 tests with94.81/90.08/94.90/97.42% statement/branch/function/line coverage. The initial
+diagnostic build finds a nullable-host type error; a checked host accessor fixes it. No matrix
+cell has run yet. The fixture and its output remain separate from normal production assets.
+
 ## Screenshot capture attribution — 2026-10-18 — CI blocked
 
 Clean diagnostic source `b2d966647310924257cb591625abe4478199d107` passes the changed

@@ -178,6 +178,7 @@ fn failed_unsupported_event_publication_keeps_revision_and_pending_reports() {
     let tick = reports[0].tick;
     reports[0].events.push(StepEvent {
         tick,
+        audience: grenadiers_core::game::EventAudience::Both,
         kind: StepEventKind::BombPlaced(BombView {
             id: EntityId(999),
             cell: CellId::new(2, 2),

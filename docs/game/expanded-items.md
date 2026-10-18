@@ -168,10 +168,12 @@ live transport/browser migration are separate increments. See [v7 contract](prot
 2. Ordered manual commands with a Classic simultaneous-placement adapter (v0.3.20).
 3. Typed domain triggers and checked legacy wire projection (v0.3.21). Forced-contact
    helpers follow playable protection items rather than delaying them.
-4. Dormant gameplay-v7 schema/DTOs/checked values (v0.3.22 candidate), then canonical validation
-   and recipient projections, followed by integrated server/browser migration.
-5. Expanded configuration/generation with Heart activation, then Shield in a separate increment.
-6. Individual stat modifiers, Reverse/Diarrhea, special bombs, movement equipment, Stopwatch,
+4. Dormant gameplay-v7 schema/DTOs/checked values (v0.3.22 candidate).
+5. Canonical validation and recipient projections (v0.3.23 candidate), with strict Classic
+   binding and event-time audience capture; no live endpoint or item activation.
+6. Integrated server/browser v7 migration, including recipient-specific admission and routing.
+7. Expanded configuration/generation with Heart activation, then Shield in a separate increment.
+8. Individual stat modifiers, Reverse/Diarrhea, special bombs, movement equipment, Stopwatch,
    visibility effects, Oil and Teleporter, with interaction tests at each activation.
 
 Each release needs a version bump, focused PR, independent review and existing gates. Test

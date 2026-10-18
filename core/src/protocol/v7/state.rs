@@ -148,6 +148,13 @@ enum BombTriggerWire {
     Contact,
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) enum BombTriggerObservation {
+    Timed { remaining_ticks: u16, paused: bool },
+    Remote,
+    Contact,
+}
+
 impl BombTrigger {
     pub const fn timed(
         remaining_ticks: u16,
@@ -169,6 +176,20 @@ impl BombTrigger {
     #[must_use]
     pub const fn contact() -> Self {
         Self(BombTriggerWire::Contact)
+    }
+
+    pub(crate) const fn observation(self) -> BombTriggerObservation {
+        match self.0 {
+            BombTriggerWire::Timed {
+                remaining_ticks,
+                paused,
+            } => BombTriggerObservation::Timed {
+                remaining_ticks,
+                paused,
+            },
+            BombTriggerWire::Remote => BombTriggerObservation::Remote,
+            BombTriggerWire::Contact => BombTriggerObservation::Contact,
+        }
     }
 }
 

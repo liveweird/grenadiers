@@ -341,6 +341,8 @@ mod flame_tests;
 #[cfg(test)]
 #[path = "item_foundation_tests.rs"]
 mod item_foundation_tests;
+#[path = "simulation_observations.rs"]
+mod observations;
 #[path = "simulation_pickups.rs"]
 mod pickup_step;
 #[cfg(test)]

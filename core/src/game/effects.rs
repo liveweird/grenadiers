@@ -73,6 +73,17 @@ pub struct TimedEffects {
 }
 
 impl TimedEffects {
+    pub(crate) fn observations(&self) -> impl Iterator<Item = (EffectKind, Tick)> + '_ {
+        self.ordinary
+            .iter()
+            .map(|(&kind, &expires_at)| (kind, expires_at))
+            .chain(
+                self.slow_foot
+                    .iter()
+                    .map(|&expires_at| (EffectKind::SlowFoot, expires_at)),
+            )
+    }
+
     pub fn apply(&mut self, kind: EffectKind, at: Tick) -> Result<EffectApplication, EffectError> {
         let expires_at = Tick(
             at.0.checked_add(kind.duration_ticks())

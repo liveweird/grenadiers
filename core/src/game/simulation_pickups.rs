@@ -1,5 +1,5 @@
 use super::State;
-use crate::game::events::{StepEvent, StepEventKind};
+use crate::game::events::{EventAudience, StepEvent, StepEventKind};
 use crate::game::pickups::{Pickup, PickupKind};
 use crate::game::types::{CellId, Position, SeatId, Tick};
 
@@ -23,6 +23,7 @@ impl State {
             actor.apply_pickup(pickup, self.rules);
             events.push(StepEvent::new(
                 tick,
+                EventAudience::Both,
                 StepEventKind::PickupCollected {
                     id: actor.id,
                     seat,

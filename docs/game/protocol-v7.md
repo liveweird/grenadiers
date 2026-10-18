@@ -3,7 +3,8 @@
 V7 freezes the wire representation needed for expanded physical items while the live gameplay
 endpoint remains on v6. The complete closed contract is `api/gameplay-v7.schema.json`; generated
 browser types are checked in at `web/src/game/v7/schema.ts`. This version does not select v7 at
-runtime and does not define canonical or per-recipient projection behavior.
+runtime. Canonical and per-recipient projection helpers are staged below; live routing and
+item activation remain separate increments.
 
 Successful authentication is fixed to protocol version 7. Authentication input remains the
 bounded cross-version integer. The v7 `manualAction` command replaces `placeBomb` and carries the
@@ -71,7 +72,35 @@ room-context rules. The shared valid-input semantic cases live in
 `api/fixtures/gameplay-v7-semantics.json` for Rust and browser parity.
 
 Rust deserializes incoming client messages and checked values; server DTOs are serialization-only.
-Owner visibility and canonical projections are checked by a later implementation increment.
+The canonical projection increment adds the stronger boundaries described below.
+
+## Canonical observations and recipient projections
+
+Validate the complete physical world and unfiltered report window before hiding anything.
+Check actor identities, effect semantics, arena geometry, bomb ownership and capacity,
+timestamps, results and event bounds. Contact bombs count against ownership limits. A malformed
+record fails validation even when that recipient would never see it.
+
+Opaque validated observations do not certify a playable rules profile. Future-item fixtures
+can exercise cloak, bomb blindness and untimed triggers through pure projections. Separate
+Classic room binding rejects all optional inventory, effects, grace, pickups, special triggers,
+blast modes, non-public audiences and nonempty item settings. Matching available/enabled arrays
+cannot make an unsupported Classic world valid. Expanded identities are introduced with activation.
+
+Observe effects, Heart grace and bomb fuses at the physical simulation tick. Frozen result
+bodies do not age with room time. Event bomb fuses use their event tick; a chain detonation
+may still have positive fuse remaining. Read-only capture adds no State injection interface.
+
+An owner always receives their complete actor. Cloak removes the rival's spatial actor state;
+bomb blindness removes every bomb record, including owned bombs. Owned counts remain complete
+and fire remains visible. Event audiences are captured at emission, before later expiry,
+elimination or reveal can change visibility. Filter those captured audiences before assigning
+contiguous recipient-local indexes within each tick.
+
+Reject nonconsecutive reports, more than three reports or 96 unfiltered events without truncation.
+Prepare both recipient encodings before returning a pair; failure returns neither and performs
+no revision advance or report clearing. Live routing, admission, resume and browser migration
+remain a separate increment. Until that migration, the endpoint continues to use v6.
 
 ## Frame bounds
 

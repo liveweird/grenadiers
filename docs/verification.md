@@ -5,12 +5,34 @@ recorded in [release notes](https://github.com/liveweird/grenadiers/releases).
 
 ## Long Fuse native scenario observation correction — 2026-10-18 — fresh acceptance pending
 
+The fresh whole-matrix attempt against source `39e764a9a20fc0c25e663fd4921491c5268c8358`
+passed 31 Compose cases and stopped on the Long Fuse case; Kubernetes was not started and no
+result is carried forward. Its failure-safe public attachment conclusively records manual action
+1, bomb ID `0` placed at tick 304 in cell (2,1) with a 120-tick fuse, and exact detonation at tick
+424 on both peers. The actor page remained focused on the courtyard, both actors remained alive,
+and the same round was running. The driver had observed the valid numeric ID `0` but tested it
+with a truthiness assertion, so the poll expired after ten seconds with `Received: 0`. The
+correction accepts any defined bomb ID, including zero; timers, timeouts, retries, product code,
+and the remaining assertions are unchanged.
+
+This attempt retains 31 passed and one failed Compose case, zero Kubernetes cases, 14 HTML
+reports, and 37 PNGs including two failure captures. The sealed evidence is at
+`/tmp/grenadiers-v0330-ready-native-acceptance`: its unchanged 988-entry preparation manifest
+hashes to `9e5b2ddc43d44f8fac51d78d071093c56ba93de5388673e5626636b61243bb95`, and its
+1,380-entry final manifest hashes to
+`0c782387e843cf3c9e8e40a22e9c767e35741c91a8ee8cba5dd3dd21a4aaad86`. Source,
+locks, external dependencies and image IDs matched before and after the run; cleanup passed.
+This is a confirmed driver defect, not a product failure, and fresh full 32+32 native acceptance
+from a new source archive and image remains required.
+
 The first whole native attempt against source `04b89a6257bd965ac93346c662f9e1c05f19af62`
 passed 31 Compose cases and then stopped at the first Long Fuse bomb placement poll; Kubernetes
 was not started. The report retained no command/frame summary, so it cannot distinguish a Space
 command that was not emitted or accepted from a 120-tick bomb that left the latest live state
 before the poll observed it. The final screenshots do not resolve that ambiguity. The failure is
-not attributed to a product focus defect, and none of its passes may be carried forward.
+not attributed to a product focus defect, and none of its passes may be carried forward. The
+later valid-zero-ID diagnosis does not retroactively prove the cause of this earlier attempt;
+its historical cause remains unproven.
 
 The corrected scenario keeps the 120-tick base, captured 240-tick Long Fuse, 600-tick effect,
 timeouts, zero retries and two intended screenshots per target. Each placement now proves the

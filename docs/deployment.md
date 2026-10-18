@@ -221,4 +221,16 @@ The real settings panel enables only Long Fuse with a 120-tick base. The scenari
 ordinary generated pickup path, proves each emitted manual bomb action against retained placement
 history, observes a captured 240-tick bomb on both peers, crosses the exact 600-tick expiry, and
 verifies restored 120-tick timing. The first two escapes must retain the same running round and a
-living collector. Never bake the seed into the image.
+living collector. Bomb identifiers are numeric and zero is valid; the placement poll therefore
+requires a defined ID rather than a truthy ID.
+
+The fresh source-`39e764a9a20fc0c25e663fd4921491c5268c8358` attempt passed 31 Compose
+cases before this truthiness defect rejected observed bomb ID `0`; Kubernetes was not started.
+It is sealed at `/tmp/grenadiers-v0330-ready-native-acceptance` with 14 reports, 37 PNGs,
+an unchanged 988-entry preparation-manifest SHA-256 of
+`9e5b2ddc43d44f8fac51d78d071093c56ba93de5388673e5626636b61243bb95`, and a
+1,380-entry final-manifest SHA-256 of
+`0c782387e843cf3c9e8e40a22e9c767e35741c91a8ee8cba5dd3dd21a4aaad86`. It has no
+accepted or carried matrix. The preceding source-`04b89a6` attempt lacked retained command/frame
+history, so its similar symptom remains historically unproven. Fresh full acceptance is required
+after this bounded driver correction. Never bake the seed into the image.

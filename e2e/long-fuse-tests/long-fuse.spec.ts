@@ -31,7 +31,7 @@ async function plant(page: Page, game: ObservedGame, expectedActionId: number): 
   await expect.poll(() => {
     const event = placedBomb(game, frameStart)
     return event?.type === 'bombPlaced' ? event.bomb.id : undefined
-  }).toBeTruthy()
+  }).toBeDefined()
   const event = placedBomb(game, frameStart)
   if (!event || event.type !== 'bombPlaced') throw new Error('Bomb placement event expected')
   expect(manualBombs(game)).toEqual(Array.from({ length: expectedActionId }, (_, index) => ({

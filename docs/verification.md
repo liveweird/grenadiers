@@ -89,6 +89,22 @@ groups are unrun. Evidence is preserved at `/tmp/grenadiers-v0322-fixed-acceptan
 partial, failed acceptance. The fixture/listener/cleanup correction has independent review
 clear and all E2E static gates pass; fresh changed-scenario acceptance remains pending.
 
+The corrected `b062127` harness passes its changed Compose reconnect case and all **11 latency
+cases**, with zero retries. Combining unchanged functional evidence gives **26/26 Compose**
+on the same immutable image. Local/shaped maxima are **53.811/158.586 ms**, with zero values
+above 250 ms. A Kubernetes setup attempt lost its forward when the setup shell exited; no
+application scenario completed in that attempt. Its failure is preserved separately, and a
+single-process orchestrator now owns the forward through preflight and browser invocation.
+Kubernetes acceptance remains pending.
+
+Optional diagnostics now time existing WebGL draw/delete/context calls, including requested
+`WEBGL_lose_context.loseContext`, without adding GL calls. Only calls taking at least 50 ms
+are retained (64 per page), with context ordinals and bounded sanitized caller frames. Native
+return values, receivers, arguments, exceptions and extension identity remain unchanged.
+Independent review, static gates and the focused real-Chromium transparency/bounds test pass.
+A separate instrumented Linux reconnect run is required before attributing any stall to teardown
+or rendering; the instrumentation itself is not a production fix.
+
 ## Dormant v7 contract — 2026-10-18
 
 Clean archive source `456f47b33d808691295d48688d7b8c3ce916a01e` builds image

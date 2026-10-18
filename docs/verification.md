@@ -3,6 +3,62 @@
 Records below are frozen against their named sources. Publication and later CI status are
 recorded in [release notes](https://github.com/liveweird/grenadiers/releases).
 
+## Short Flame native acceptance — 2026-10-18 — fresh 62/62
+
+Clean source `f3e7bac200115a453cf6819c220b0c4add389583`, archive SHA-256
+`a429ed9ba5dc9a3b1dec2c87eb6a76e132191ed1c0083ffa3f52e90aa824e909`, builds image
+`sha256:85beca611ec288e00e82952d49cde91d285965e9af6cce18b155d7122db5f5d7`.
+The saved image archive hashes to
+`4c0222a4477698c418373f07f84e805d99d8943dd8a69b6770b6acd21a61c25a`.
+Fresh acceptance passes **31/31 Compose and 31/31 Kubernetes**, first test attempts, one
+worker, zero retries, reruns or carried results. Each target retains 26 baseline cases plus
+Heart, Shield, Golden Flame, Short Fuse and Short Flame. The new case proves generated
+collection, real radius-one flames with the ordinary fuse, reconnect, exact physical expiry
+and later base-range damage. Its time-sensitive bomb proof precedes active screenshots.
+
+Four latency profiles retain 20 samples each, zero exceedances and zero CPU throttling.
+Local/shaped maxima are **55.871/159.265ms Compose** and **50.420/181.861ms Kubernetes**.
+Fresh root quiet acknowledgements concern named collaborating workers, not global host
+idleness. All 26 reports and 70 configured PNGs verify, without failure screenshots.
+Sixteen hardened runtime records use the same image: UID/GID 65532, no effective capabilities,
+no-new-privileges and read-only roots. Seven external mode-0444 seeds, eight distinct Kubernetes
+fixture UIDs and eight serial direct-pod forwarding lifecycles verify. Strict exact-200 JSON/
+no-store health/readiness probes and final cleanup of project, network, namespace and ports
+18176/18177 pass. Initial transport probes may repeat; browser test cases have zero retries.
+
+The frozen Kubernetes checker actually runs with Node 24.21 and locked YAML, emitting its
+required success message. Strict Kubernetes 1.33 validates all three resources; pinned archive-only
+Trivy reports zero fixable HIGH/CRITICAL issues. An early unmounted toolchain probe selected
+Playwright 1.64 and failed Chrome lookup before any browser case; the corrected isolated mount
+proves Node 24.21/Playwright 1.63/Chrome 153. Kubeconform's initial missing PATH entry was corrected
+with its checksum-pinned 0.8 archive. The first unmounted probe is described in the sealed
+correction narrative, but its raw command/stdout was not retained; its exact failure cannot be
+independently reconstructed. The corrected mounted toolchain and pre-run dependency proof
+are independently verifiable.
+
+Browser dependencies use an isolated read-only mount outside the writable evidence bind.
+The pre-run archive hashes to
+`af88d6f20f82b7e4f4c230d0dae4a72cc95fa8b553fe4083dc05fc245f283e00`.
+All 8,215 file hashes, 13 symlink targets, source files and lockfiles match before and after
+execution. All 132 installed dependency packages match frozen lock versions/resolved locations/
+integrity; 42 omitted packages are optional. This run records pre-execution dependency bytes,
+unlike the explicitly limited earlier post-run corroboration.
+
+The runtime probe overwrote preparation kubectl version JSON with equivalent plain output.
+The exact overwritten bytes remain separately preserved; reproducing the approved JSON yielded
+its original hash, and restoration is explicitly recorded. The unchanged 984-entry preparation
+manifest verifies, SHA-256
+`8016265ee0ee767ed6c6818a196fa4c41706c4139d24b029c2a3987d11e9e955`.
+No case, source, image, dependency, assertion or timeout changed, and no test was rerun.
+Future preparation uses collision-free `prep-*` version filenames.
+
+Root visually inspected the exposed desktop pickup and active Polish 320px view: clear blue
+pickup, contained Gear label and readable Krótki płomień (0:07), without overlap. Committed
+screenshots are exact accepted copies. Independent final source/image/runtime/evidence review is clear.
+The sealed 1,636-entry final manifest includes RESULT and hashes to
+`bccadc22fba458943fd14a3964124fba287190ad62790455056658a7e9bad90e` at
+`/tmp/grenadiers-v0329-native-acceptance`. Final-head CI remains required.
+
 ## Short Flame final-parent integration — 2026-10-18 — native acceptance pending
 
 The final audited Short Fuse parent is integrated, including accepted Heart, Shield, Golden

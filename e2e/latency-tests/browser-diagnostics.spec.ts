@@ -7,6 +7,7 @@ import { runGuardedLegacyAxeAudit, type LegacyAxeAudit } from '../tests/support/
 import {
   exerciseActualScreenshotStages, exerciseSyntheticScreenshotStages,
 } from './screenshot-stage-fixtures'
+import { exerciseCaptureProfileFixtures } from './capture-profile-fixtures'
 
 function violationRuleIds(result: Awaited<ReturnType<AxeBuilder['analyze']>>): string[] {
   return result.violations.map((violation) => violation.id).sort()
@@ -228,7 +229,7 @@ test('game control diagnostics stay bounded and exclude transport secrets', asyn
   const context = await browser.newContext()
   try {
     const page = await context.newPage()
-    await installFakeGl(page)
+    await exerciseCaptureProfileFixtures(page).then(() => installFakeGl(page))
     await diagnostics.observePage(page, 'visibility-cover')
     await expect.poll(() => diagnostics.summary().pages[0].stateEvents
       .filter((event) => event.label === 'initialized').length).toBe(1)

@@ -22,7 +22,9 @@ experiment against post-audit browser-control stalls. The helper checks for one 
 and after analysis and fails on any frame attachment during analysis. It retains the same
 rules, zero-violations assertion, width check, screenshots and deadline. A separate controlled
 fixture proves legacy/current rule-result parity and detection of an unlabeled button; no
-audit fixture or game state is injected into this gameplay scenario.
+audit fixture or game state is injected into this gameplay scenario. Screenshot diagnostics
+use version-checked instance-local hooks to retain bounded fixed stage timings for the original
+capture. They issue no extra browser commands and retain no arguments, results or image bytes.
 
 ## Scenario: two offline tabs stop recovery after a late reserved-seat rejection
 

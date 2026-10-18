@@ -19,8 +19,9 @@ floor. All **408 web tests** across 39 files pass with statement/branch/function
 of **95.14/90.89/95.48/97.58%**, plus contracts, lint, Knip, and the production build. E2E lint,
 Knip, type checking, and **32-scenario parity** pass. Cargo-deny,
 both cached npm dependency audits, and strict Kubernetes schemas for all three resources pass.
-Independent review, the native Long Fuse playthrough and screenshots, final candidate-image
-acceptance, and final-head CI remain pending. No release or shipped status is claimed.
+Independent backend and frontend/protocol/browser-scenario review is clear after expiry,
+resume, malformed-effect and screenshot-order regressions. The native Long Fuse playthrough
+and screenshots, final candidate-image acceptance, and final-head CI remain pending. No release or shipped status is claimed.
 
 ## Short Fuse candidate — 2026-10-18 — native acceptance pending
 

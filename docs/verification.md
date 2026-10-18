@@ -1,22 +1,51 @@
 # Repository verification
 
-## Responsive live-v7 HUD — 2026-10-18 — fresh image acceptance pending
+Records below are frozen against their named sources. Publication and later CI status are
+recorded in [release notes](https://github.com/liveweird/grenadiers/releases).
 
-Visual review exposed overlapping Polish HUD labels at 320px. Labels and values now wrap,
-and viewports up to 420px use two columns while desktop retains four. Both seats retain all
-eight named fields. The match scenario checks positive rendered text fragments, column counts,
-text containment and cross-cell overlap in English desktop and Polish 320px views. Independent
-review, all 275 web tests, coverage, builds and E2E static parity 27 pass. Complete fresh image
-acceptance and final-head CI are required before publication.
+## Responsive live-v7 HUD — 2026-10-18 — native 52/52, final CI pending
 
-The intermediate wrap-only source `7dd97f2` passed **15/15 Compose functional cases**, including
-its text-containment assertions. Visual review still found awkward four-to-five-line word
-splitting, so that run was stopped at the Compose latency gate. No latency or Kubernetes case
-ran, and no result carries to the new layout. Its interrupted cleanup initially left an owned
-container/network; explicit cleanup removed them and final residue checks are empty. Partial
-evidence: `/tmp/grenadiers-v0324-hud-wrap-native-acceptance`, 750-file manifest
+Clean source `695157bed0852835a16b3a9e9ee5dbcc5df61ad6`, archive SHA-256
+`071a0927fa4c2087af918bbf84e2d848d38118bc02a9eaa7af1c42774cdeeef5`, builds one image:
+`sha256:d68d1becb3d8ee9e710e0bf99af6429161b39160511d251f221c6f8af5fb644f`.
+Its saved archive hashes to `4be7f6f969f98c10e53df0459d104701b1eb4e943367afdcf64906ac8dd9b8b9`.
+Complete fresh acceptance passes **26/26 Compose and 26/26 Kubernetes**, first attempts,
+one worker, retries zero, with no carried cases. All ordinary budgets and prior assertions
+remain intact. Capture profiling is unset; normal failure capture and 42 screenshots remain.
+
+Both runtimes pass the real match's text-geometry regression: both seats retain eight visible
+labels with positive text fragments, four columns on English desktop and two on Polish 320px,
+no overflow or cross-cell overlap. Root visual review confirms intact readable Polish words.
+The committed desktop/narrow screenshots are byte-identical copies from this accepted run.
+
+Four latency profiles have 20 samples each, zero exceedances and zero CPU throttling.
+Local/shaped maxima are **51.492/161.999ms Compose** and **57.489/162.215ms Kubernetes**.
+Strict exact-200 JSON/no-store probes, runtime hardening, mode-0444 external seeds, three fresh
+Kubernetes pod UIDs, serial direct-pod forwarding in one recorded harness invocation, and complete
+cleanup pass. Pinned archive-only Trivy reports zero fixable HIGH/CRITICAL findings; strict
+Kubernetes 1.33 validates three resources. Quiet acknowledgements cover named local workers,
+without a global ambient-host-idleness claim.
+
+All **275 web tests** pass with coverage **95.08/90.80/94.68/97.56%**, plus production builds,
+contracts, lint, Knip and E2E static parity 27. Backend verification remains **375 core tests,
+174 server tests and two doctests in each debug/release profile**, Rust line coverage **93.27%**.
+Independent implementation/layout and complete final native-evidence reviews are clear;
+exact-head CI and publication remain required. Live rooms use v7 with optional pickups disabled.
+The final evidence/screenshot update changes documentation only after the accepted source.
+
+Evidence: `/tmp/grenadiers-v0324-responsive-hud-native-acceptance`, 949-file manifest SHA-256
+`4b86be3b665e748fa640b715cf13932bae6b71e0b7d0c10bbd265f058ff14436`.
+
+## Earlier HUD correction records
+
+Visual review of the pre-layout baseline exposed overlapping Polish labels at 320px. The
+intermediate wrap-only source `7dd97f2` passed **15/15 Compose functional cases**, including
+text-containment assertions. Visual review still found four-to-five-line word splitting, so
+that run stopped at the Compose latency gate. No latency or Kubernetes case ran; no result
+carries to the final layout. Its interrupted cleanup initially left an owned container/network;
+explicit cleanup removed them and final residue checks are empty. Partial evidence:
+`/tmp/grenadiers-v0324-hud-wrap-native-acceptance`, 750-file manifest
 `6f3ddef9a74c770d9ccba560ef2608075aa917b6a1b1e4d5254d9d371761186d`.
-The earlier audited 52/52 baseline below excludes both later layout corrections.
 
 ## Pre-layout live-v7 terrain-cache baseline — 2026-10-18 — native 52/52
 

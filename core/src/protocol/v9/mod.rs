@@ -30,7 +30,11 @@ pub fn capture_expanded(
     state: &crate::game::State,
     reports: &[crate::game::StepReport],
 ) -> Result<ExpandedCapture, ProjectionError> {
-    crate::protocol::v8::capture_expanded(state, reports)
+    crate::protocol::v8::projection_capture::capture_expanded_for_items(
+        state,
+        reports,
+        expanded_items(),
+    )
 }
 
 pub fn bind_expanded(
@@ -44,17 +48,17 @@ pub fn bind_expanded(
         state_epoch,
         capture,
         generation,
-        foundation_items(),
+        expanded_items(),
     )
 }
 
 pub fn expanded_settings(
     settings: GameSettings,
 ) -> Result<crate::room::RoomSettings, ProjectionError> {
-    crate::protocol::v8::projection_room::expanded_settings_for_items(settings, foundation_items())
+    crate::protocol::v8::projection_room::expanded_settings_for_items(settings, expanded_items())
 }
 
-fn foundation_items() -> ItemSet {
+fn expanded_items() -> ItemSet {
     ItemSet::new([
         ItemId::Heart,
         ItemId::RemoteBomb,
@@ -62,6 +66,7 @@ fn foundation_items() -> ItemSet {
         ItemId::PowerBomb,
         ItemId::Landmine,
         ItemId::Shield,
+        ItemId::Stopwatch,
         ItemId::InvisibilityCloak,
         ItemId::GoldenFlame,
         ItemId::ShortFuse,
@@ -71,7 +76,7 @@ fn foundation_items() -> ItemSet {
         ItemId::LongFuse,
         ItemId::ReverseControls,
     ])
-    .expect("gameplay v9 foundation items are canonical")
+    .expect("gameplay v9 expanded items are canonical")
 }
 
 pub fn project_expanded_room(
@@ -81,7 +86,7 @@ pub fn project_expanded_room(
     crate::protocol::v8::projection_room::project_expanded_room_for_items(
         metadata,
         lifecycle,
-        foundation_items(),
+        expanded_items(),
     )
 }
 
@@ -119,5 +124,7 @@ mod frame_bound_tests;
 #[cfg(test)]
 #[path = "max_frame_tests.rs"]
 mod max_frame_tests;
+#[cfg(test)]
+mod stopwatch_tests;
 #[cfg(test)]
 mod tests;

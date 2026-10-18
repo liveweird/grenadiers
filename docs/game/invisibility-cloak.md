@@ -16,8 +16,9 @@ Audience is captured at emission and is not recomputed from the final world in a
 Both complete recipient encodings are validated before either is published; legacy protocols reject
 the private semantics.
 
-Version 0.3.38 introduced Invisibility Cloak with generator weight 15 after Landmine. The expanded
-pool contains 320 entries and preserves every earlier 8192-mask path. Its fourteen-item catalog
-supports all 16384 subsets and is retained by [gameplay-v9](protocol-v9.md). Rules version 5,
-generator version 2 and journal format 2 remain unchanged. Reload older browsers when deploying
-the paired server/web upgrade.
+Version 0.3.38 introduced Invisibility Cloak with generator weight 15 after Landmine. Its expanded
+pool contained 320 entries and preserved every earlier 8192-mask path. That fourteen-item catalog
+supports all 16384 subsets and remains pinned by archived gameplay v8. Active
+[gameplay v9](protocol-v9.md) adds Stopwatch as the fifteenth item and supports all 32768 subsets.
+Rules version 5, generator version 2 and journal format 2 remain unchanged. Reload older browsers
+when deploying the paired server/web upgrade.

@@ -3,13 +3,14 @@ use std::collections::{BTreeMap, BTreeSet};
 use crate::protocol::{DrawReason, Seat, WireRoundResult};
 
 use super::BombTriggerObservation;
+use super::projection_event_validation::{validate_event, validate_timed_bomb};
 use super::projection_facts::{
-    EventFacts, ProjectionError, ReportFacts, ValidatedReports, ValidatedWorld, WorldFacts,
+    ProjectionError, ReportFacts, ValidatedReports, ValidatedWorld, WorldFacts,
 };
 use super::projection_items::{effect_item, equipment_item, pickup_item, push_item, weapon_item};
 use super::{
-    ARENA_TERRAIN_CELLS, BlastKind, BombView, EventKind, ItemId, MAX_BLOCKS, MAX_BOMBS, MAX_FLAMES,
-    MAX_PICKUPS, MAX_RUNNING_UPDATES, Terrain, validate_effects,
+    ARENA_TERRAIN_CELLS, BlastKind, ItemId, MAX_BLOCKS, MAX_BOMBS, MAX_FLAMES, MAX_PICKUPS,
+    MAX_RUNNING_UPDATES, Terrain, validate_effects,
 };
 
 pub(crate) fn validate_world(facts: WorldFacts) -> Result<ValidatedWorld, ProjectionError> {
@@ -112,6 +113,15 @@ fn validate_bombs(world: &WorldFacts) -> Result<(), ProjectionError> {
     let blocks = cell_set(&world.arena.blocks);
     let mut cells = BTreeSet::new();
     let mut counts = BTreeMap::new();
+    let mut timed_count = 0;
+    let paused_now = world.actors.iter().any(|actor| {
+        actor.alive
+            && actor
+                .effects
+                .as_slice()
+                .iter()
+                .any(|effect| effect.kind() == super::EffectKind::Stopwatch)
+    });
     for bomb in &world.bombs {
         if actor_ids.contains(&bomb.id.get())
             || !actor_ids.contains(&bomb.owner.get())
@@ -124,13 +134,43 @@ fn validate_bombs(world: &WorldFacts) -> Result<(), ProjectionError> {
                 bomb.trigger.observation(),
                 BombTriggerObservation::Timed {
                     remaining_ticks: 0,
-                    paused: false
+                    ..
                 }
             ) && world.result.is_none()
         {
             return Err(ProjectionError::InvalidBombs);
         }
+        match bomb.trigger.observation() {
+            BombTriggerObservation::Timed {
+                remaining_ticks, ..
+            } => {
+                timed_count += 1;
+                let Some(timing) = world.timed_bombs.get(&bomb.id).copied() else {
+                    return Err(ProjectionError::InvalidBombs);
+                };
+                validate_timed_bomb(
+                    world,
+                    *bomb,
+                    timing,
+                    world.physical_tick,
+                    u64::from(remaining_ticks),
+                    false,
+                )
+                .map_err(|_| ProjectionError::InvalidBombs)?;
+                if timing.paused != paused_now {
+                    return Err(ProjectionError::InvalidBombs);
+                }
+            }
+            BombTriggerObservation::Remote | BombTriggerObservation::Contact => {
+                if world.timed_bombs.contains_key(&bomb.id) {
+                    return Err(ProjectionError::InvalidBombs);
+                }
+            }
+        }
         *counts.entry(bomb.owner.get()).or_insert(0_u8) += 1;
+    }
+    if world.timed_bombs.len() != timed_count {
+        return Err(ProjectionError::InvalidBombs);
     }
     for actor in &world.actors {
         let count = counts.get(&actor.id.get()).copied().unwrap_or(0);
@@ -252,117 +292,7 @@ fn validate_items(world: &WorldFacts) -> Result<(), ProjectionError> {
     }
 }
 
-fn validate_event(
-    world: &WorldFacts,
-    report_tick: crate::protocol::Tick,
-    event: &EventFacts,
-) -> Result<(), ProjectionError> {
-    if event.tick != report_tick {
-        return Err(ProjectionError::InvalidEvent);
-    }
-    match event.kind {
-        EventKind::BombPlaced { bomb } => {
-            if bomb.placed_at != report_tick {
-                return Err(ProjectionError::InvalidEvent);
-            }
-            validate_event_bomb(world, report_tick, bomb)
-        }
-        EventKind::BombDetonated { bomb } => validate_event_bomb(world, report_tick, bomb),
-        EventKind::ActorEliminated { id, seat } => {
-            validate_actor_identity(world, id, seat)?;
-            world
-                .actors
-                .iter()
-                .find(|actor| actor.id == id)
-                .is_some_and(|actor| !actor.alive)
-                .then_some(())
-                .ok_or(ProjectionError::InvalidEvent)
-        }
-        EventKind::DamagePrevented { id, seat, source } => {
-            validate_actor_identity(world, id, seat)?;
-            let required = match source {
-                super::DamagePreventionSource::Heart => ItemId::Heart,
-                super::DamagePreventionSource::Shield => ItemId::Shield,
-            };
-            world
-                .enabled_items
-                .contains(required)
-                .then_some(())
-                .ok_or(ProjectionError::InvalidItems)
-        }
-        EventKind::PickupCollected {
-            id,
-            seat,
-            cell,
-            kind,
-        } => {
-            validate_actor_identity(world, id, seat)?;
-            if terrain_at(world, cell) != Some(Terrain::Floor) || world.arena.blocks.contains(&cell)
-            {
-                return Err(ProjectionError::InvalidEvent);
-            }
-            if let Some(item) = pickup_item(kind)
-                && !world.enabled_items.contains(item)
-            {
-                return Err(ProjectionError::InvalidItems);
-            }
-            Ok(())
-        }
-        EventKind::RoundEnded { result } => (world.result == Some(result))
-            .then_some(())
-            .ok_or(ProjectionError::InvalidEvent),
-    }
-}
-
-fn validate_event_bomb(
-    world: &WorldFacts,
-    tick: crate::protocol::Tick,
-    bomb: BombView,
-) -> Result<(), ProjectionError> {
-    if !(1..=8).contains(&bomb.range)
-        || bomb.placed_at > tick
-        || terrain_at(world, bomb.cell) != Some(Terrain::Floor)
-        || world.arena.blocks.contains(&bomb.cell)
-        || world.actors.iter().any(|actor| actor.id == bomb.id)
-        || !world.actors.iter().any(|actor| actor.id == bomb.owner)
-    {
-        return Err(ProjectionError::InvalidEvent);
-    }
-    let trigger_item = match bomb.trigger.observation() {
-        BombTriggerObservation::Timed { paused: true, .. } => Some(ItemId::Stopwatch),
-        BombTriggerObservation::Timed { paused: false, .. } => None,
-        BombTriggerObservation::Remote => Some(ItemId::RemoteBomb),
-        BombTriggerObservation::Contact => Some(ItemId::Landmine),
-    };
-    let blast_item = match bomb.blast {
-        BlastKind::Standard => None,
-        BlastKind::Piercing => Some(ItemId::PiercingBomb),
-        BlastKind::Power => Some(ItemId::PowerBomb),
-    };
-    if trigger_item
-        .into_iter()
-        .chain(blast_item)
-        .any(|item| !world.enabled_items.contains(item))
-    {
-        return Err(ProjectionError::InvalidItems);
-    }
-    Ok(())
-}
-
-fn validate_actor_identity(
-    world: &WorldFacts,
-    id: crate::protocol::EntityId,
-    seat: Seat,
-) -> Result<(), ProjectionError> {
-    world
-        .actors
-        .iter()
-        .any(|actor| actor.id == id && actor.seat == seat)
-        .then_some(())
-        .ok_or(ProjectionError::InvalidEvent)
-}
-
-fn terrain_at(world: &WorldFacts, cell: crate::protocol::Cell) -> Option<Terrain> {
+pub(super) fn terrain_at(world: &WorldFacts, cell: crate::protocol::Cell) -> Option<Terrain> {
     world
         .arena
         .terrain

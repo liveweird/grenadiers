@@ -3,7 +3,9 @@ import type { RenderablePickupKind } from './types'
 import { PALETTE } from './palette'
 import { pixels } from './pixel'
 
-export interface BombDrawing { root: Container; spark: Graphics; remote: boolean; contact: boolean }
+export interface BombDrawing {
+  root: Container; spark: Graphics; pause: Graphics; remote: boolean; contact: boolean; paused: boolean
+}
 export interface FlameDrawing { root: Container; frames: readonly [Graphics, Graphics] }
 
 export function makeBomb(
@@ -42,8 +44,11 @@ export function makeBomb(
   pixels(spark, PALETTE.flameCore, [[16, -25, 4, 4], [21, -21, 4, 4], [12, -21, 4, 4]])
   pixels(spark, PALETTE.flame, [[18, -29, 3, 4], [24, -24, 3, 3]])
   spark.visible = trigger === 'timed'
-  root.addChild(shadow, shell, spark)
-  return { root, spark, remote: trigger === 'remote', contact: trigger === 'contact' }
+  const pause = new Graphics()
+  pixels(pause, PALETTE.blueLight, [[-8, -7, 5, 15], [3, -7, 5, 15]])
+  pause.visible = false
+  root.addChild(shadow, shell, spark, pause)
+  return { root, spark, pause, remote: trigger === 'remote', contact: trigger === 'contact', paused: false }
 }
 
 function flameFrame(alternate: boolean): Graphics {
@@ -130,6 +135,10 @@ export function makePickup(kind: RenderablePickupKind): Graphics {
       [17, 18, 15, 4], [16, 22, 17, 6], [18, 28, 13, 4], [21, 32, 7, 3],
     ])
     pixels(drawing, PALETTE.blueLight, [[18, 19, 9, 3], [18, 22, 4, 5]])
+  } else if (kind === 'stopwatch') {
+    pixels(drawing, PALETTE.deepInk, [[16, 14, 17, 21], [20, 10, 9, 5]])
+    pixels(drawing, PALETTE.white, [[19, 17, 11, 15]])
+    pixels(drawing, PALETTE.blue, [[23, 19, 3, 9], [23, 26, 6, 3]])
   } else if (kind === 'invisibilityCloak') {
     pixels(drawing, PALETTE.deepInk, [
       [16, 14, 17, 4], [13, 18, 23, 5], [16, 23, 17, 13], [12, 34, 9, 4], [28, 34, 9, 4],

@@ -259,6 +259,27 @@ describe('v9 authoritative updates and controls', () => {
   })
 })
 
+describe('v9 live Timed bomb validation', () => {
+  beforeEach(() => vi.stubGlobal('WebSocket', { OPEN: SocketStub.OPEN }))
+  it.each([false, true])('closes on a zero-tick live Timed bomb with paused=%s', async (paused) => {
+    const value = harness()
+    const socket = await authenticate(value)
+    socket.message(admitted())
+    const next = snapshot(99)
+    next.room.settings.enabledItems = ['stopwatch']
+    next.state.bombs = [{
+      id: 3, cell: { column: 1, row: 1 }, owner: 1, range: 2, placedAt: 1,
+      trigger: { type: 'timed', remainingTicks: 0, paused }, blast: 'standard',
+    }]
+    const owner = next.state.actors[0]
+    if (owner.type !== 'visible') throw new Error('expected visible actor')
+    owner.liveBombCount = 1
+    socket.message(next)
+    expect(socket.close).toHaveBeenCalled()
+    expect(value.client.getState().failure).toBe('invalidServerMessage')
+  })
+})
+
 describe('v9 retry callback fences', () => {
   beforeEach(() => vi.stubGlobal('WebSocket', { OPEN: SocketStub.OPEN }))
 

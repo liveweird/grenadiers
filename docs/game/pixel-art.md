@@ -47,3 +47,7 @@ frame until rendering selects its final pose, avoiding intermediate visibility i
 Invisibility Cloak adds a distinct hooded pickup glyph. Recipient projection removes an opponent's
 complete actor root, including shadow, motion record and attached cues, while hidden; expiry paints
 the actor at the current authoritative position without a stale interpolation trail.
+
+Stopwatch adds a clock-face pickup and holder marker. A frozen visible actor receives static corner
+brackets, while a paused Timed bomb replaces its burning spark with a pause mark. Reduced motion
+keeps those cues visible without pulsing; Remote and Contact bombs retain their untimed art.

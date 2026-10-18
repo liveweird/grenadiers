@@ -5,11 +5,11 @@ application on port 8085. Active matches live in that process, so the initial de
 intentionally runs one replica with a `Recreate` update strategy. A restart ends active matches;
 horizontal scaling and recovery require match routing and persistence designs first.
 
-Deploy the v0.3.39 server and web assets together and reload connected browsers. Gameplay v9 adds
-the required `voluntaryActionsFrozen: false` field to every visible actor while retaining the exact
-fourteen-item catalog and Expanded-v5/generated-v2 identity. Gameplay-v8 clients fail version
-negotiation before credential lookup. No storage migration is required; active matches remain
-process-local. Stopwatch gameplay remains unavailable in this foundation release.
+Deploy the v0.3.40 server and web assets together and reload connected browsers. Gameplay v9 adds
+Stopwatch to its exact fifteen-item catalog and publishes authoritative voluntary freeze and Timed
+bomb pause state while retaining Expanded-v5/generated-v2 identity. Gameplay-v8 clients fail
+version negotiation before credential lookup. No storage migration is required; active matches
+remain process-local.
 
 ## Docker Compose
 
@@ -363,3 +363,17 @@ The scenario enables only Invisibility Cloak, captures localized views and empty
 pixels before collection, then verifies owner-visible and opponent-hidden rendering. Opponent
 reconnect neither refreshes the physical deadline nor replays private collection history; exact
 expiry reveals the actor at its current position. Native execution remains a candidate gate.
+
+## Reproduce opt-in Stopwatch action and fuse pausing
+
+```sh
+chmod 444 core/tests/fixtures/arena-v2-stopwatch.seed
+docker compose -f docker-compose.yaml -f docker-compose.stopwatch.yaml up -d --no-build --force-recreate app
+E2E_STOPWATCH_FIXTURE=arena-v2-stopwatch npm --prefix e2e run test:stopwatch
+docker compose -f docker-compose.yaml -f docker-compose.stopwatch.yaml down
+```
+
+The scenario enables only Stopwatch and follows the deterministic mirrored pickups with ordinary
+movement and bombs. Two sequential holder windows prove blocked voluntary actions, held-input thaw,
+constant paused fuses, full-fuse placement during a pause and exact natural detonation. Native
+execution remains a candidate gate.

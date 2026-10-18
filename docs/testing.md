@@ -226,3 +226,13 @@ actor while the opponent receives an exact hidden actor and no collection cue, a
 compositor pixels at (2,1). Opponent reconnect preserves privacy without replay or deadline refresh;
 the actor appears at the current cell at collection tick plus 600. Native execution remains a
 candidate gate.
+
+## Stopwatch production-seed scenario
+
+Use `docker-compose.stopwatch.yaml` with the v2 seed fixture and
+`E2E_STOPWATCH_FIXTURE=arena-v2-stopwatch npm --prefix e2e run test:stopwatch`.
+The two-peer scenario reveals both mirrored pickups with ordinary bombs and exercises two
+sequential 180-tick holder windows. It proves blocked movement and consumed manual actions,
+held-input thaw, one pause per physical update, full-fuse placement during a pause, and natural
+detonation after the exact accumulated pause. Both recipient streams must retain the same bomb IDs,
+pause facts and deadlines. Native execution remains a candidate gate.

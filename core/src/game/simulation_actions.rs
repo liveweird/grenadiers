@@ -1,3 +1,4 @@
+use super::stopwatch::StopwatchContext;
 use super::{InputAction, MAX_INPUTS_PER_TICK, SeatInput, State};
 use crate::game::arena::Terrain;
 use crate::game::bombs::{BlastKind, Bomb, BombTrigger};
@@ -103,12 +104,16 @@ impl State {
         &mut self,
         actions: &ManualActionQueues,
         tick: Tick,
+        stopwatch: StopwatchContext,
         events: &mut Vec<StepEvent>,
     ) -> [Option<EntityId>; 2] {
         let mut remote_targets = [None; 2];
         let requests = SeatId::ALL.map(|seat| {
             let actor = &self.actors[seat.index()];
-            if actions.for_seat(seat).first() == Some(ManualAction::PlaceBomb) && actor.alive {
+            if actions.for_seat(seat).first() == Some(ManualAction::PlaceBomb)
+                && actor.alive
+                && !stopwatch.frozen[seat.index()]
+            {
                 if let Some(id) = self.world.bombs.values().find_map(|bomb| {
                     (bomb.owner() == actor.id && matches!(bomb.trigger(), BombTrigger::Remote))
                         .then_some(bomb.id())
@@ -123,7 +128,7 @@ impl State {
                 None
             }
         });
-        self.resolve_classic_placements(requests, tick, events);
+        self.resolve_classic_placements(requests, tick, stopwatch.pause_timed, events);
         remote_targets
     }
 
@@ -131,6 +136,7 @@ impl State {
         &mut self,
         requests: [Option<PlacementOrigin>; 2],
         tick: Tick,
+        timed_paused: bool,
         events: &mut Vec<StepEvent>,
     ) {
         let mut targets = [None; 2];
@@ -230,10 +236,12 @@ impl State {
                 let consumed = self.actors[seat.index()].inventory.consume_weapon();
                 debug_assert_eq!(consumed, Some(weapon));
             }
-            events.push(StepEvent::new(
+            events.push(StepEvent::bomb(
                 tick,
                 self.event_audience_for(bomb.owner(), tick),
                 StepEventKind::BombPlaced(BombView::from(bomb)),
+                bomb,
+                timed_paused,
             ));
         }
     }

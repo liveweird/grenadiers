@@ -8,6 +8,8 @@ type NodeView = {
   children: NodeView[]
   x: number
   y: number
+  alpha: number
+  visible: boolean
   destroyed: boolean
 }
 
@@ -22,10 +24,13 @@ describe('Invisibility Cloak retained-scene privacy', () => {
     snapshot.state.actors[0].invisibilityCloakRemainingTicks = 600
     scene.update(snapshot, 0)
     const layer = actorLayer(scene)
-    expect(layer.children[0].children.at(-1)).toMatchObject({ visible: true, alpha: 0.7 })
+    const cloakDrawing = layer.children[0].children.find(
+      (child) => child.visible && child.alpha > 0.69 && child.alpha < 0.71,
+    )
+    expect(cloakDrawing).toBeDefined()
     scene.setReducedMotion(true)
     scene.render(1)
-    expect(layer.children[0].children.at(-1)).toMatchObject({ visible: true, alpha: 1 })
+    expect(cloakDrawing).toMatchObject({ visible: true, alpha: 1 })
     const hiddenRoot = layer.children[1]
     const hiddenChildren = [...hiddenRoot.children]
 

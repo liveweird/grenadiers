@@ -3,6 +3,14 @@ use super::pickups::PickupKind;
 use super::simulation::RoundResult;
 use super::types::{CellId, EntityId, SeatId, Tick};
 use super::view::BombView;
+use super::{Bomb, TimedBombHistory};
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) struct TimedBombEvent {
+    pub(crate) history: TimedBombHistory,
+    pub(crate) detonates_at: Tick,
+    pub(crate) paused: bool,
+}
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum EventAudience {
@@ -35,14 +43,39 @@ pub struct StepEvent {
     pub tick: Tick,
     pub audience: EventAudience,
     pub kind: StepEventKind,
+    pub(crate) timed_bomb: Option<TimedBombEvent>,
 }
 
 impl StepEvent {
-    pub(crate) const fn new(tick: Tick, audience: EventAudience, kind: StepEventKind) -> Self {
+    pub const fn new(tick: Tick, audience: EventAudience, kind: StepEventKind) -> Self {
         Self {
             tick,
             audience,
             kind,
+            timed_bomb: None,
+        }
+    }
+
+    pub(crate) const fn bomb(
+        tick: Tick,
+        audience: EventAudience,
+        kind: StepEventKind,
+        bomb: Bomb,
+        paused: bool,
+    ) -> Self {
+        let timed_bomb = match (bomb.timed_history(), bomb.detonates_at()) {
+            (Some(history), Some(detonates_at)) => Some(TimedBombEvent {
+                history,
+                detonates_at,
+                paused,
+            }),
+            _ => None,
+        };
+        Self {
+            tick,
+            audience,
+            kind,
+            timed_bomb,
         }
     }
 }

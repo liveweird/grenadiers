@@ -16,6 +16,7 @@ impl State {
         tick: Tick,
         remote_targets: [Option<EntityId>; 2],
         contact_targets: BTreeSet<EntityId>,
+        timed_paused: bool,
         events: &mut Vec<StepEvent>,
     ) -> Result<(), StepError> {
         let plan =
@@ -30,10 +31,12 @@ impl State {
                 .bombs
                 .get(id)
                 .expect("planned detonations reference existing bombs");
-            events.push(StepEvent::new(
+            events.push(StepEvent::bomb(
                 tick,
                 self.event_audience_for(bomb.owner(), tick),
                 StepEventKind::BombDetonated(BombView::from(bomb)),
+                bomb,
+                timed_paused,
             ));
             self.world.bombs.remove(id);
         }

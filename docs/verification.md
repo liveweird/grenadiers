@@ -3,6 +3,50 @@
 Records below are frozen against their named sources. Publication and later CI status are
 recorded in [release notes](https://github.com/liveweird/grenadiers/releases).
 
+## Stopwatch candidate — 2026-10-18 — local checks complete
+
+The v0.3.40 candidate activates an opt-in 180-physical-tick Stopwatch. A living holder freezes the
+opponent's voluntary movement and bomb actions while preserving admitted sequence high-water marks;
+held directions resume after thaw, while frozen bomb actions are discarded. Any living holder also
+pauses every Timed bomb exactly once per update. Fuse history is captured privately on live and
+historical bombs, remains immutable at event emission, and is validated before recipient filtering.
+Fire, effects, input expiry, Diarrhea, Remote chains, Landmine contact and round clocks continue.
+The v9 catalog now has fifteen items and all 32,768 subsets; archived v8 remains pinned to its
+fourteen-item Cloak-era catalog and rejects Stopwatch or paused/history-bearing Timed bombs.
+
+Debug and release suites pass **646 core tests, 196 server tests and two doctests**; four dedicated
+performance profiles remain ignored. Rust line coverage is **92.43% (13,485/14,590)**, above the
+unchanged 80% floor. All **49,569 web tests** across 58 files pass with statement/branch/function/
+line coverage of **95.41/91.21/95.88/97.81%**. Formatting, all-target Clippy with warnings denied,
+repository limits, generated contracts, lint, Knip, production and renderer-diagnostic builds,
+E2E static checks and **42-scenario parity** pass. Cargo-deny and both cached offline npm audits pass;
+strict pinned Kubernetes schemas validate all three resources.
+
+The repeating byte-31 pure-core route uses ordinary movement and bomb actions through two
+sequential holders. It proves both freeze windows, admitted-but-dropped actions, held-input thaw,
+exact pause accounting and resumed natural detonation. Generation regressions exhaust all 16,384
+pre-Stopwatch masks and assert fourteen unique prior mappings; active protocol and browser guards
+exhaust all 32,768 v9 masks while archived v8 retains all 16,384 prior masks. The isolated browser
+mask run completed in 1.59 seconds; peak RSS was unavailable because macOS denied the timing tool's
+`kern.clockrate` query, so no memory figure is claimed.
+
+The first repository gate exposed three files above existing source or complexity limits; narrow
+observation, projection-wire and event-validation helpers now keep those limits without changing
+contracts. The first full web run then exposed a stale Cloak overlay child-position assertion; the
+corrected test follows the active drawing across reduced-motion rendering. The first E2E static
+gate found the new Stopwatch scenario directory absent from parity discovery; the corrected gate
+finds all 42 scenarios. The restricted Rust rerun preserved 17 expected loopback
+`PermissionDenied` failures before the authorized identical run passed. Cargo-deny first reached a
+read-only advisory lock and Kubernetes validation first reached sandbox DNS denial; authorized
+reruns passed. No native browser run, candidate image, hosted CI result or publication is
+claimed. Independent browser review found and closed three bounded gaps: live Timed bombs now require
+positive remaining time without rejecting valid detonation history, the native source proves that
+the second frozen player's bomb action creates no placement during freeze or queued placement after
+thaw in either peer stream, and current v9/Stopwatch documentation no longer describes the v0.3.39
+false-only foundation or fourteen-item catalog as active. Independent core/server review and final
+browser re-review are clear. Native acceptance requires integration of the final preceding release
+and its reviewed predecessor drivers before freezing the image.
+
 ## Gameplay v9 foundation candidate — 2026-10-18 — local checks complete
 
 The v0.3.39 candidate moves the paired server/browser endpoint to gameplay v9 without changing the

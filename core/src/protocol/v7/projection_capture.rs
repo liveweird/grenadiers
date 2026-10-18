@@ -182,6 +182,7 @@ fn capture_bomb(bomb: game::BombView, at: game::Tick) -> Result<BombView, Projec
         blast: match bomb.blast {
             game::BlastKind::Standard => BlastKind::Standard,
             game::BlastKind::Piercing => BlastKind::Piercing,
+            game::BlastKind::Power => BlastKind::Power,
         },
     })
 }
@@ -358,5 +359,29 @@ fn wire_effect(value: game::EffectKind) -> EffectKind {
         game::EffectKind::LongFuse => EffectKind::LongFuse,
         game::EffectKind::ReverseControls => EffectKind::ReverseControls,
         game::EffectKind::InvisibleBombs => EffectKind::InvisibleBombs,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn power_blast_is_captured_without_downgrading() {
+        let bomb = game::BombView {
+            id: game::EntityId(3),
+            cell: game::CellId::new(1, 1),
+            owner: game::EntityId(1),
+            range: 2,
+            placed_at: game::Tick(10),
+            trigger: game::BombTrigger::Timed {
+                detonates_at: game::Tick(190),
+            },
+            blast: game::BlastKind::Power,
+        };
+        assert_eq!(
+            capture_bomb(bomb, game::Tick(10)).unwrap().blast,
+            BlastKind::Power
+        );
     }
 }

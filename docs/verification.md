@@ -3,6 +3,38 @@
 Records below are frozen against their named sources. Publication and later CI status are
 recorded in [release notes](https://github.com/liveweird/grenadiers/releases).
 
+## Shield corrected native acceptance — 2026-10-18 — fresh 56/56
+
+Clean source `be44b8aeae88249b5635ed4424d3f04f7fa33f84`, archive SHA-256
+`62daff016257a425b67340aa0598a4818ab0960d73a4fb6a3f2501995f40d60f`, builds image
+`sha256:3751bcef474c7ca1d09ba30d46846309cfb72f783db36bce5e95be05c24391fb`.
+Its saved archive hashes to `6b3654c71aa2e1117ab5f2828645c9561615b72b031e1277b576233bb50d2890`.
+Fresh acceptance passes **28/28 Compose and 28/28 Kubernetes**, first attempts, one worker,
+zero retries and no carried results. Both targets include all previous 26 cases, Heart and Shield.
+The corrected test proves blast immunity, exact event-derived expiry and later lethal damage.
+
+All four latency profiles retain 20 samples, zero exceedances and zero CPU throttling.
+Local/shaped maxima are **54.531/141.873ms Compose** and **61.247/156.193ms Kubernetes**.
+Strict exact-200 JSON/no-store probes, hardened runtime, external mode-0444 fixtures, five
+fresh pod UIDs, serial direct-pod forwarding and complete cleanup pass. Pinned archive-only
+Trivy finds zero fixable HIGH/CRITICAL vulnerabilities; strict Kubernetes 1.33 validates 3/3
+resources. Quiet acknowledgements cover named workers, without a global host-idle claim.
+
+All 20 reports pass, with 52 fresh PNG checkpoints. Normal failure capture remains enabled;
+no failure PNGs are present. Root visually checked the exposed desktop and active Polish 320px
+Shield views: readable two-column narrow HUD, distinct glyph and timer, no overlap. The minor
+English desktop Equipment final-letter wrap remains a readability follow-up. Committed Shield
+screenshots are exact accepted copies. Independent final source/image/report/evidence audit is clear.
+The sealed 1,127-entry manifest hashes to
+`cc5b06b926398bd0b92c5a89a4c4c3b24675f51ab37d28e10aa53d6d7c3e4a50` under
+`/tmp/grenadiers-v0326-corrected-native-acceptance`; its preparation manifest remains intact.
+
+Local baseline: **413 core, 180 server and two doctests** in each Rust profile, **91.23%**
+Rust line coverage; **304 web tests**, coverage **95.03/90.68/95.43/97.51%**, production/fixture
+builds and 29-scenario static parity pass. Independent implementation and integration reviews
+are clear. Exact-head CI and publication remain required. This post-acceptance change contains
+only documentation and screenshot copies. The earlier failed attempt below remains separate.
+
 ## Shield native scenario correction — 2026-10-18 — fresh acceptance pending
 
 The first responsive native attempt passed 27 Compose cases, then failed the Shield scenario;

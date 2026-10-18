@@ -1,5 +1,69 @@
 # Repository verification
 
+## Diarrhea bounded-history integration — 2026-10-18 — native acceptance pending
+
+Reviewed Reverse Controls source `13939505d58147d5e4b871cd617fbbbce076dad3` is integrated,
+including the Long Fuse stable round/tick placement cursor, source-specific CI/partial-run
+records, guide corrections and the two historical Long Fuse captures. The v0.3.32 version and
+canonical eight-item catalog remain. Product sources, API, Cargo inputs and every other test
+input are unchanged from `d3c1774`; predecessor scenarios match the reviewed parent apart from
+the canonical catalog. E2E lint, Knip, type checking, 35-scenario parity, repository and diff
+checks pass. Independent integration review is clear. Final Reverse Controls parent,
+fresh whole 34+34 native acceptance and exact-head CI remain required; historical parent or
+interrupted runs supply no carried acceptance.
+
+## Reverse Controls bounded-history integration — 2026-10-18 — native acceptance pending
+
+The reviewed Long Fuse cursor correction `e0ffd635f9aa0b25c1f2dc00a5d20d8fc00be831` is
+integrated. The inherited Long Fuse scenario matches that source except for the canonical
+seven-item catalog. Product sources, API, Cargo inputs, version and all other test inputs are
+byte-unchanged from `6ac0fc2`; the existing product checks remain applicable. E2E lint, Knip,
+type checking, 34-scenario parity, repository and diff checks pass. Independent integration
+review is clear. Long Fuse requires its corrected fresh native acceptance and final-head CI;
+Reverse Controls then requires that final parent and a new whole 33+33 run. The interrupted
+15-case record below supplies no carried acceptance.
+
+## Long Fuse bounded-history cursor correction — 2026-10-18 — fresh acceptance pending
+
+Candidate `fbc8593088de89dd60ed2457af508240994f83fa` failed both first hosted CI runs:
+PR run `39114204134` and push run `39114201841`. Each passed four non-browser jobs and
+14 browser cases, then failed Long Fuse; the later 17 classic-match/reconnect/latency/control/
+headed/audio cases and built-image scan were unattempted. Neither run was rerun.
+
+Both retained public attachments prove the third manual action placed bomb ID 4 and both peers
+observed its exact 120-tick detonation (PR ticks 2174→2294; push 1958→2078). The observer shifts
+its bounded 512-frame array, while the driver saved its length as a fixed slice index. Once full,
+`slice(512)` stays empty even when the placement event is retained. Placement now selects events
+strictly after the preceding physical tick in the same round, independently of array rotation.
+Manual IDs, valid-zero IDs, captured fuses, escapes, reconnect, expiry, timeouts, retries and
+remaining assertions are unchanged. Failure diagnostics also record the retained frame count.
+
+A focused proof executes the actual old/new helpers against a rotated 512-frame history: the
+old lookup misses a retained ID 0, the corrected lookup finds it, and prior-tick/different-round
+events remain excluded. E2E lint, Knip, type checking, repository checks and 33-scenario parity
+pass. The sealed hosted evidence at `/tmp/grenadiers-v0330-ci-failure` has 37 entries and manifest
+SHA-256 `9610fa8e390f24c1461b6ffc1e42b7b8916ed5bc8bf5d855d7c1b371087ed79c`.
+Fresh source, image, whole 32+32 native acceptance and final-head CI are required. The earlier
+64-case record below certifies only its named source, not this driver correction.
+
+The inherited Reverse Controls source `6ac0fc2` was stopped at its Compose latency gate before
+approving measurements or starting optional/Kubernetes cases. Fifteen Compose cases passed and
+none failed; the directed interruption returned 130. Its isolated evidence at
+`/tmp/grenadiers-v0331-native-acceptance` seals 1,207 entries with manifest SHA-256
+`2aeca61865b4e86fcbac13142518c7d1fdc6af4db2ace5fe035e13a7c4659156`.
+All post-run integrity and cleanup checks pass, but it has no accepted or carryable matrix.
+Reverse Controls requires the corrected final parent and a fresh whole 33+33 run.
+
+## Reverse Controls final-parent integration — 2026-10-18 — native acceptance pending
+
+The final audited Long Fuse parent `2ffb85fcd476bce0fdf1c5fbc979fd78234afc8b` is integrated,
+including all twelve accepted predecessor screenshots and the complete corrected timing drivers.
+The v0.3.31 version and canonical seven-item catalog remain. Product sources, API, Cargo inputs
+and every test input are byte-unchanged from the reviewed integration `9df6c3f`; its 482-test web
+and 34-scenario static gates therefore apply without rerunning them. Repository, diff and local
+document links pass. Long Fuse PR #76 final CI/publication is pending independently. Fresh
+33+33 same-image native acceptance and final-head CI are required for Reverse Controls.
+
 ## Diarrhea predecessor-driver integration — 2026-10-18 — acceptance pending
 
 Reviewed Reverse Controls predecessor source `9df6c3fe7026a5a03acc081e1988cde6697a7ef9`
@@ -98,6 +162,63 @@ reviews are clear. Review fixes prove every held command remains raw east and ke
 both peers across three later snapshots spanning six physical ticks; focused Pixi/cue tests pass.
 The native Reverse Controls playthrough and screenshots, candidate-image acceptance, and
 final-head CI remain pending.
+
+## Long Fuse native acceptance — 2026-10-18 — fresh 64/64
+
+Clean source `6b818f1e7b3663fa05a23ad6d77950f7d677bef7`, archive SHA-256
+`4de08782230881d6e9d8d6d25dfaf949bf68fc12529e8d04e0d3ec42ae0bac7e`, builds the fresh
+no-cache image `sha256:89a1158f3bbd726ecee2625353e2c1b03cd269b8e341089afc15a1ae228d16bd`.
+Its saved archive hashes to
+`1b85fdb53c229d719c82036e30289edb17e8ad2a8f713315df1e0b666c853e00`.
+That exact image passes **32/32 Compose and 32/32 Kubernetes** browser cases, first attempts
+with one worker and zero retries, reruns or carried passes. All 28 group exits are zero;
+28 reports retain exactly 74 configured PNGs and no failure captures. The six optional cases
+retain all predecessor coverage and add the ordinary generated Long Fuse pickup route.
+
+The run uses pinned Node 24.21.0, Playwright 1.63.0 and Chrome 153.0.8010.12. Eighteen runtime
+records verify UID/GID 65532, dropped capabilities, no privilege escalation and read-only roots.
+Eight external mode-0444 seeds drive nine fixture identities per target. Kubernetes has nine
+unique pod UIDs and nine direct-pod port-forward lifecycles, stopped and waited before each
+rollout. Strict probes, archive-only Trivy 0.74 scanning with zero fixable HIGH/CRITICAL findings,
+the frozen Node/YAML checker with its required success output, and strict Kubernetes 1.33
+validation for all three resources pass. The production image contains the current web assets;
+the corrected defined-ID assertion belongs to the separately mounted frozen E2E source.
+
+All four latency profiles retain 20 samples, zero exceedances and zero CPU throttling. Compose
+local/delay-50ms maxima are **55.800/145.273 ms**; Kubernetes maxima are **53.308/155.414 ms**.
+Separate root coordination records retain fresh scoped worker acknowledgments for each window.
+The initial sandboxed root process-existence probe was denied before writing any gate; the
+subsequent permitted read-only probe confirmed the current port-forward before K approval.
+
+Isolated read-only browser dependencies have pre-run file, symlink and archive snapshots:
+8,215 files, 13 symlinks, 132 exact lock entries and 42 optional entries. The pre-run tar hashes
+to `daccf3269e949a85682437e8ffdf9694ef4d63c8b465f12c2ce8a595c0afcf4b`; post-run files,
+symlinks and tar bytes match exactly. Source files, lock contents and image IDs also match.
+The original wrapper exited **1 after every case passed**, because pre/post lock records used
+relative versus absolute paths. Both raw records, original mismatch, unmodified wrapper and
+actual PTY exit remain preserved. A separate authorized comparison normalizes only the exact
+evidence prefix, verifies the three unique ordered paths and equal digests, and recomputes the
+actual lock hashes. Remaining image, preparation and cleanup checks then pass separately;
+no browser or harness case was rerun and the wrapper exit is not reported as zero.
+
+Evidence at `/tmp/grenadiers-v0330-zero-id-native-acceptance` seals 1,734 entries with final
+manifest SHA-256 `a9a3085c2371c1b75c3fa20585a46daba4a72ad711728b0f90e9a9eebabc47d6`.
+The unchanged 997-entry preparation manifest hashes to
+`b9b01d0bdace64e5d7e698f0d8f85424f2a18f6660a2c76f63097c178b93e40b`.
+A separate six-entry provenance correction at `/tmp/grenadiers-v0330-native-record-correction`
+hashes to `022b8ae3c46b730ec9ef49558004bbb669f52fb08b826935cd2125a15022e5f3` and corrects
+one original RESULT sentence that attributed the E2E assertion to the production image. The
+original sealed bundle remains unchanged. A preparation-only `google-chrome` command-name
+probe failed before any case and was corrected to the pinned browser's bundled executable;
+its raw failure remains retained. Earlier failed native attempts remain separate and uncarried.
+
+Root visually reviewed and copied the actual Compose [desktop pickup](screenshots/long-fuse-desktop.png)
+and [Polish 320px active curse](screenshots/long-fuse-polish-320.png). Their hashes are
+`1fadf789361cc3365cf745cc0a7f75f113de2bedd1d5afaec1181cbf720770a2` and
+`cdcf7266b724aa917dfc2690e044d6e887ffbd24f994eda0d1a7d9a334580f7a`.
+Independent final evidence review, including the separate provenance correction, is clear;
+final-head CI remains pending. Later changes in this
+increment are documentation and copied captures only; publication is recorded in release notes.
 
 Records below are frozen against their named sources. Publication and later CI status are
 recorded in [release notes](https://github.com/liveweird/grenadiers/releases).

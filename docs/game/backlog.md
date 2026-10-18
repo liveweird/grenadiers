@@ -1,15 +1,20 @@
 # Gameplay and presentation backlog
 
-TURN v0.3.16, CONFIG v0.3.17 and the first ART slice v0.3.18 are shipped. Heart,
-Shield, Golden Flame, Short Fuse and Short Flame are published through
-[v0.3.29](https://github.com/liveweird/grenadiers/releases/tag/v0.3.29).
-The v0.3.30 Long Fuse candidate passes local checks and awaits fresh native acceptance and
-final-head CI. The v0.3.31 Reverse Controls candidate passes local checks and independent backend
-and frontend/browser-scenario reviews; native acceptance and final-head CI remain pending.
-The v0.3.32 Diarrhea candidate passes local checks and independent implementation reviews;
-native acceptance and final-head CI remain pending. The other 14 requested pickups remain
-outside this increment. Richer transitions and artwork
-remain follow-up work. See [pixel-art presentation](pixel-art.md),
+TURN v0.3.16, CONFIG v0.3.17 and the first ART slice v0.3.18 are shipped. Heart
+[v0.3.25](https://github.com/liveweird/grenadiers/releases/tag/v0.3.25), Shield
+[v0.3.26](https://github.com/liveweird/grenadiers/releases/tag/v0.3.26), Golden Flame
+[v0.3.27](https://github.com/liveweird/grenadiers/releases/tag/v0.3.27) and Short Fuse
+[v0.3.28](https://github.com/liveweird/grenadiers/releases/tag/v0.3.28), and Short Flame
+[v0.3.29](https://github.com/liveweird/grenadiers/releases/tag/v0.3.29) are published.
+The v0.3.30 Long Fuse increment passes local checks. An earlier named source passed fresh 64/64
+Compose/Kubernetes browser cases, but hosted CI exposed a bounded-history driver cursor defect.
+The corrected driver requires fresh native acceptance and final-head CI. Verification records
+the source-specific evidence and disclosed bookkeeping exception. The v0.3.31 Reverse Controls
+candidate also passes local checks and independent implementation reviews, but its earlier native run was interrupted before latency/optional/Kubernetes cases;
+fresh whole acceptance and final-head CI remain pending. The v0.3.32 Diarrhea
+candidate passes local checks and independent implementation reviews; native acceptance and
+final-head CI remain pending. The other 14 requested pickups remain outside this increment. Richer transitions
+and artwork remain follow-up work. See [pixel-art presentation](pixel-art.md),
 [expanded item implementation](expanded-items.md), and
 [release notes](https://github.com/liveweird/grenadiers/releases).
 Updated 2026-10-18 after playtest feedback. Release acceptance is recorded in

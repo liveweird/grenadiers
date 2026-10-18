@@ -194,7 +194,7 @@ export class ArenaScene {
       drawing.shielded = (actor.shieldRemainingTicks ?? 0) > 0
       drawing.moving = Boolean(!reset && previousMotion
         && (previousMotion.toX !== toX || previousMotion.toY !== toY))
-      setActorPose(drawing, actor.heading, 0)
+      drawing.direction = actor.heading
     }
   }
 }

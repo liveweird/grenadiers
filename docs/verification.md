@@ -1,5 +1,33 @@
 # Repository verification
 
+## Takeover position restoration probe correction — 2026-10-18 — acceptance pending
+
+Clean pose candidate `954b0ad551293e95a5cfc33ea876f476ec05225b` builds image
+`sha256:57f16c866bff370640fe99edd367ee3378e5a7f17983a1cdcb5fd87dc6373853`. Pinned scan finds
+zero fixable HIGH/CRITICAL vulnerabilities; strict Kubernetes schemas validate3/3. Compose
+passes26/26. Kubernetes passes11 cases, fails the first reconnect case and leaves14 unrun.
+The failed takeover position is x5680, exceeding an artificial center bound of5632 by48.
+The movement helper explicitly accepts positions within128 units of the target center. No
+production movement or browser stall failure is observed in that assertion: retained primary/
+peer long-task maxima are270/263 ms, with no measured slowGL call. Cleanup and frozen harness
+checks pass. Evidence remains `/tmp/grenadiers-v0322-pose-acceptance`.
+
+The corrected probe verifies the intended safe cell(5,1) before takeover and exact equality
+between that stationary public position and the replacement admission. Actual replacement
+movement, action floor, canvas lifetime, budgets, deadlines and retries remain unchanged.
+Independent review and E2E static parity26 are clear; fresh changed-scenario/remaining acceptance
+is pending. Earlier failed
+runs remain preserved; this correction does not explain the previously recorded13-second task.
+
+Exact pose-head PR/push CI (`39084363475`/`39084360049`) both fail the unchanged120-second
+reconnect budget after passing takeover and new-room checks. Both accessibility assertions pass.
+In the PR, the subsequent width evaluation never returns; in the push it takes65,888 ms,
+then6,085 ms for its screenshot. The peer width read takes17,786 ms and its screenshot19,730 ms
+before timeout. Completed page long tasks peak around209–217 ms with no measured slowGL call.
+Cleanup errors follow the original blockage. This differs from the earlier13-second peer task;
+post-audit command/context scheduling versus native layout remain to be attributed. Artifacts
+and decoded steps are preserved under `/tmp/grenadiers-v22-pose-ci-{pr,push}-*`.
+
 ## Idempotent actor pose correction — 2026-10-18 — acceptance pending
 
 The renderer's pose setter previously hid every frame then re-showed the selected one on

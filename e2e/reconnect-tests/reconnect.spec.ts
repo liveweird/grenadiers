@@ -135,15 +135,18 @@ test('a browser restores its full live world and action floor before a fenced ta
     expect(games[0].commands.filter((command) => command.type === 'resumeRoom')).toHaveLength(1)
     expect(await invalidResume(one, 'wrongCapability')).toBe('resumeRejected')
     expect(await invalidResume(one, 'wrongRoom')).toBe('resumeRejected')
+    const beforeTakeoverPosition = {
+      ...latestSnapshot(games[0])!.state.actors.find((actor) => actor.seat === 'one')!.position,
+    }
+    expect(Math.floor(beforeTakeoverPosition.x / 1_024)).toBe(5)
+    expect(Math.floor(beforeTakeoverPosition.y / 1_024)).toBe(1)
     const replacement = await takeover(one)
     expect(replacement.roomId).toBe(before.room.roomId)
     expect(replacement.seat).toBe('one')
     expect(replacement.actionFloor).toBe(2)
     expect(replacement.stableCapability).toBe(true)
     const takeoverPosition = replacement.positions.find((actor) => actor.seat === 'one')!
-    expect(takeoverPosition.y).toBe(1_536)
-    expect(takeoverPosition.x).toBeGreaterThanOrEqual(1_536)
-    expect(takeoverPosition.x).toBeLessThanOrEqual(5_632)
+    expect(takeoverPosition).toEqual({ seat: 'one', ...beforeTakeoverPosition })
     const takeoverDirection = takeoverPosition.x <= 1_664 ? 'east' : 'west'
     await moveTakeover(one, takeoverDirection)
     try {

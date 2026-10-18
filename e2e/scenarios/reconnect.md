@@ -20,3 +20,7 @@ This verifies bounded renderer reuse while the existing live-world and authority
 ## Scenario: two offline tabs stop recovery after a late reserved-seat rejection
 
 Both native transports close while fresh-session HTTP requests are held. After eleven real seconds, both resume attempts receive terminal reserved-seat rejection and return to a usable lobby without a retry loop. Exact599/600 expiry and abandonment precedence belong to deterministic core/server tests; this browser scenario verifies late network recovery behavior.
+
+The safe second-bomb route ends in cell(5,1) using the movement helper's documented
+128-unit center tolerance. Connected takeover must preserve the exact stationary position
+from that route; no artificial one-sided center bound is imposed.

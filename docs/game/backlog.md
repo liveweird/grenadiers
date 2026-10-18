@@ -2,10 +2,10 @@
 
 Status: **TURN v0.3.16, CONFIG v0.3.17 and the first ART slice v0.3.18 are shipped**.
 The v0.3.19 equipment/effect core foundation is implemented and verified; no requested
-items are enabled in the published v0.3.21 rooms. The v0.3.25 Heart candidate now has domain,
+items are enabled in the published v0.3.24 rooms. The v0.3.25 Heart candidate now has domain,
 server, browser and pixel-art implementation with debug/release gates, independent reviews and
 native Compose/Kubernetes acceptance 54/54 clear. Final-head CI/publication remain pending;
-the published v0.3.21 rooms still enable none of the requested items. This Heart increment
+the published v0.3.24 rooms still enable none of the requested items. This Heart increment
 does not activate the other 21 pickups. Richer transitions and further item artwork remain follow-up
 work. See [pixel-art presentation](pixel-art.md) and [expanded item implementation](expanded-items.md).
 Updated 2026-10-18 after playtest feedback. Release acceptance is recorded in

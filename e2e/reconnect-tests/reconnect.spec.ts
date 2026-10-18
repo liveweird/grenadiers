@@ -5,6 +5,7 @@ import { readViewportFits } from '../tests/support/diagnostic-phases'
 import { runGuardedLegacyAxeAudit } from '../tests/support/guarded-axe-audit'
 import { moveTo } from '../tests/support/movement'
 import { startBrowserStallDiagnostics } from '../tests/support/browser-stall-diagnostics'
+import { startCaptureWorkloadProfile } from '../tests/support/capture-workload-profile'
 import {
   admissionBaseline, disconnectTransport, installTransportProbe, invalidResume,
   moveTakeover, sharedFieldsArePrivate, stopTakeover, takeover,
@@ -53,6 +54,29 @@ async function attachPublicSummary(testInfo: TestInfo, games: ObservedGame[]) {
   })
 }
 
+async function auditRecoveryPage(page: Page, index: number, game: ObservedGame,
+  instrumentation: {
+    diagnostics: ReturnType<typeof startBrowserStallDiagnostics>
+    captureProfile: ReturnType<typeof startCaptureWorkloadProfile>
+  }, testInfo: TestInfo): Promise<void> {
+  const { diagnostics, captureProfile } = instrumentation
+  const pageOrdinal = index + 1
+  if (index === 0) await captureProfile.begin(page, latestSnapshot(game)!)
+  let captureSucceeded = false
+  try {
+    expect((await diagnostics.phase('axe', pageOrdinal,
+      async () => runGuardedLegacyAxeAudit(page))).violations).toEqual([])
+    expect(await diagnostics.phase('width', pageOrdinal,
+      async () => readViewportFits(page))).toBe(true)
+    await diagnostics.screenshot(page, pageOrdinal, async () => page.screenshot({
+      path: testInfo.outputPath(`recovery-${index}.png`), fullPage: true,
+    }))
+    captureSucceeded = true
+  } finally {
+    if (index === 0) await captureProfile.end(captureSucceeded ? 'success' : 'error')
+  }
+}
+
 test('a browser restores its full live world and action floor before a fenced takeover', async ({ browser }, testInfo) => {
   const contexts = await Promise.all([
     browser.newContext({ viewport: { width: 1440, height: 1050 } }),
@@ -61,6 +85,7 @@ test('a browser restores its full live world and action floor before a fenced ta
   let release: (() => void) | undefined
   const games: ObservedGame[] = []
   const diagnostics = startBrowserStallDiagnostics()
+  const captureProfile = startCaptureWorkloadProfile()
   let testFailed = false
   let testFailure: unknown
   let cleanupFailed = false
@@ -71,6 +96,7 @@ test('a browser restores its full live world and action floor before a fenced ta
     await Promise.all(pages.map((page, index) => diagnostics.observePage(
       page, index === 0 ? 'reconnect-primary' : 'reconnect-peer',
     )))
+    await captureProfile.install(pages)
     games.push(...pages.map(observeGame))
     const [one] = pages
     await joinMatch(pages, games)
@@ -181,14 +207,7 @@ test('a browser restores its full live world and action floor before a fenced ta
     // Reconnect-only experiment: legacy Axe avoids partial-run temporary pages, while
     // the frame guard keeps these audits explicitly scoped to the current document.
     for (const [index, page] of pages.entries()) {
-      const pageOrdinal = index + 1
-      expect((await diagnostics.phase('axe', pageOrdinal,
-        async () => runGuardedLegacyAxeAudit(page))).violations).toEqual([])
-      expect(await diagnostics.phase('width', pageOrdinal,
-        async () => readViewportFits(page))).toBe(true)
-      await diagnostics.screenshot(page, pageOrdinal, async () => page.screenshot({
-        path: testInfo.outputPath(`recovery-${index}.png`), fullPage: true,
-      }))
+      await auditRecoveryPage(page, index, games[0], { diagnostics, captureProfile }, testInfo)
     }
     expect(games[0].commands.filter((command) => command.type === 'resumeRoom')).toHaveLength(4)
   } catch (error) {
@@ -201,6 +220,8 @@ test('a browser restores its full live world and action floor before a fenced ta
     }
   } finally {
     try { if (release) await release() } catch (error) { cleanupFailed = true; cleanupFailure = error }
+    await captureProfile.cleanup()
+    await captureProfile.attach(testInfo)
     diagnostics.stop()
     await diagnostics.attach(testInfo, 'reconnect-browser-stall-diagnostics')
     const closed = await Promise.allSettled(contexts.map((context) => context.close()))

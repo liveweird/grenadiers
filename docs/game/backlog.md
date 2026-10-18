@@ -1,7 +1,7 @@
 # Gameplay and presentation backlog
 
 Status: **TURN v0.3.16, CONFIG v0.3.17 and the first ART slice v0.3.18 are shipped**.
-The v0.3.19 equipment/effect core foundation is implemented and verified; no requested
+The v0.3.19 equipment/effect core and v0.3.20 ordered-action and v0.3.21 typed-trigger foundations are verified; no requested
 items are enabled in live rooms. Richer transitions and new item artwork remain follow-up
 work. See [pixel-art presentation](pixel-art.md) and [expanded item implementation](expanded-items.md).
 Updated 2026-10-17 after playtest feedback. Release acceptance is recorded in

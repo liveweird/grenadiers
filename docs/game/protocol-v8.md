@@ -9,8 +9,8 @@ claim or revoke the credential needed for a version-8 connection.
 
 V8 adds rules version **5** and map ID **`generated_v2`**. Its own rules/map types leave the
 shared enums and schemas for earlier protocols unchanged. New production rooms are always
-Expanded v5/generator v2. They advertise `availableItems: ["heart", "shield", "goldenFlame", "shortFuse", "shortFlame", "longFuse"]` and initially enable
-`settings.enabledItems: ["heart"]`. All 64 subsets of those six available items are supported configurations.
+Expanded v5/generator v2. They advertise `availableItems: ["heart", "shield", "goldenFlame", "shortFuse", "shortFlame", "longFuse", "reverseControls"]` and initially enable
+`settings.enabledItems: ["heart"]`. All 128 subsets of those seven available items are supported configurations.
 Other catalog IDs remain unavailable.
 
 The Classic settings preset disables optional items and restores the four ordinary settings.
@@ -79,3 +79,11 @@ an independent timer underneath the curse. No schema or historical protocol is e
 Long Fuse likewise adds or refreshes a 600-tick effect and doubles the configured
 fuse captured by new ordinary timed bombs. Short Fuse and Long Fuse cancel for new placements
 while both remain active; their independent timers and historical bomb deadlines remain visible.
+
+Reverse Controls adds or refreshes a 600-tick effect. Movement applies the opposite of the
+authoritative raw held direction beginning on the tick after collection. Expiry precedes movement,
+so the raw direction applies normally at the exact deadline. Browser controls and presented
+headings remain literal; only simulation movement is inverted.
+
+The seven-item availability array is exact v8 data. Deploy server and web together and reload
+older v8 clients: a client built for six items rejects the new room even when Reverse Controls is disabled.

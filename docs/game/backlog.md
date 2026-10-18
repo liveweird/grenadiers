@@ -9,8 +9,11 @@ TURN v0.3.16, CONFIG v0.3.17 and the first ART slice v0.3.18 are shipped. Heart
 The v0.3.30 Long Fuse increment passes local checks and fresh 64/64 Compose/Kubernetes browser
 cases against the corrected stable-cursor source, with wrapper exit zero and no retries or
 carried results. Independent final evidence review is clear; final-head CI remains pending.
-Verification retains the earlier CI failure and separate source-specific attempts. The other
-16 requested pickups remain outside this increment. Richer transitions
+Verification retains the earlier CI failure and separate source-specific attempts. The v0.3.31
+Reverse Controls candidate passes local checks and independent implementation reviews, but its
+earlier native run was interrupted before latency/optional/Kubernetes cases. Fresh whole
+acceptance and final-head CI remain pending. The other 15 requested pickups remain outside
+this increment. Richer transitions
 and artwork remain follow-up work. See [pixel-art presentation](pixel-art.md),
 [expanded item implementation](expanded-items.md), and
 [release notes](https://github.com/liveweird/grenadiers/releases).

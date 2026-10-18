@@ -26,7 +26,10 @@ describe('real Pixi actor pose visibility', () => {
 
   it('keeps simultaneous effect cues stable while selecting snapshot frame one', () => {
     const actor = makeActor('two')
-    const cues = [actor.protection, actor.shield, actor.goldenFlame, actor.shortFuse, actor.shortFlame]
+    const cues = [
+      actor.protection, actor.shield, actor.goldenFlame, actor.shortFuse, actor.shortFlame,
+      actor.longFuse, actor.reverseControls,
+    ]
     for (const cue of cues) cue.visible = true
     const changes: boolean[] = []
     for (const cue of cues) cue.on('visibleChanged', (visible) => changes.push(Boolean(visible)))

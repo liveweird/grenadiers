@@ -25,6 +25,8 @@ function renderActor(drawing: ActorDrawing, id: number, effects: boolean, now: n
   drawing.shortFlame.alpha = effects && drawing.shortFlamed ? 0.7 + (Math.floor(now / 130) % 2) * 0.3 : 1
   drawing.longFuse.visible = drawing.longFused
   drawing.longFuse.alpha = effects && drawing.longFused ? 0.65 + (Math.floor(now / 150) % 2) * 0.35 : 1
+  drawing.reverseControls.visible = drawing.reversed
+  drawing.reverseControls.alpha = effects && drawing.reversed ? 0.7 + (Math.floor(now / 140) % 2) * 0.3 : 1
 }
 
 export class ArenaScene {
@@ -218,6 +220,7 @@ export class ArenaScene {
       drawing.shortFused = (actor.shortFuseRemainingTicks ?? 0) > 0
       drawing.shortFlamed = (actor.shortFlameRemainingTicks ?? 0) > 0
       drawing.longFused = (actor.longFuseRemainingTicks ?? 0) > 0
+      drawing.reversed = (actor.reverseControlsRemainingTicks ?? 0) > 0
       drawing.moving = Boolean(!reset && previousMotion
         && (previousMotion.toX !== toX || previousMotion.toY !== toY))
       drawing.direction = actor.heading

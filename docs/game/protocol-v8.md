@@ -74,8 +74,9 @@ Short Fuse adds or refreshes a 600-physical-tick effect. Timed bombs capture the
 fuse or its ceiling-half when this item is enabled, even after its owner's effect expires.
 World, placement and detonation projections enforce the captured duration independently of
 current effects. Actual overdue deadlines fail capture before remaining-time conversion;
-an exact-deadline frozen bomb may expose zero remaining ticks. Paused/remote/contact triggers
-remain unavailable. No schema or archived protocol is changed.
+an exact-deadline frozen bomb may expose zero remaining ticks. Paused Timed and Contact
+triggers remain unavailable. Remote bombs have no fuse and do not use Short Fuse schedules.
+No schema or archived protocol is changed.
 
 Short Flame adds or refreshes a 600-physical-tick effect. Actor `bombRange` remains the base
 upgrade value; bombs and events publish their actual captured range one. Historical range

@@ -4,6 +4,10 @@ import { EventLoopDelayMonitor, type EventLoopDelaySummary } from './event-loop-
 import {
   installPageCollector, type CollectorEventLabel, type PageCollectorEvent,
 } from './page-stall-collector'
+import {
+  installScreenshotStageDiagnostics, resolveScreenshotServerPage,
+  type ScreenshotStageEvent,
+} from './screenshot-stage-diagnostics'
 
 const STATE_LIMIT = 128
 const ACTIVITY_LIMIT = 256
@@ -56,6 +60,7 @@ export type BrowserStallSummary = {
   pages: BrowserPageDiagnostics[]
   phases: DiagnosticPhaseEvent[]
   temporaryPages: TemporaryPageEvent[]
+  screenshotStages: ScreenshotStageEvent[]
   failures: DiagnosticFailure[]
 }
 
@@ -159,6 +164,7 @@ export class BrowserStallDiagnostics {
   private readonly pages: BrowserPageDiagnostics[] = []
   private readonly phases: DiagnosticPhaseEvent[] = []
   private readonly temporaryPages: TemporaryPageEvent[] = []
+  private readonly screenshotStages: ScreenshotStageEvent[] = []
   private readonly failures: DiagnosticFailure[] = []
   private readonly observedPages = new Set<Page>()
   private readonly closeListeners: Array<{
@@ -169,6 +175,8 @@ export class BrowserStallDiagnostics {
   }> = []
   private readonly observedContexts = new Set<BrowserContext>()
   private nextTemporaryPageOrdinal = 1
+  private nextCaptureOrdinal = 1
+  private readonly activeScreenshotCleanups = new Set<() => void>()
   private stopped = false
 
   async phase<T>(label: DiagnosticPhaseLabel, pageOrdinal: number,
@@ -181,6 +189,28 @@ export class BrowserStallDiagnostics {
         label, boundary: 'returned', pageOrdinal, nodeAt: performance.now(),
       }, PHASE_LIMIT)
     }
+  }
+
+  async screenshot<T>(page: Page, pageOrdinal: number, action: () => Promise<T>): Promise<T> {
+    return this.phase('screenshot', pageOrdinal, async () => {
+      const captureOrdinal = this.nextCaptureOrdinal
+      this.nextCaptureOrdinal += 1
+      const cleanup = installScreenshotStageDiagnostics(
+        resolveScreenshotServerPage(page), this.screenshotStages, pageOrdinal, captureOrdinal,
+      )
+      this.activeScreenshotCleanups.add(cleanup)
+      try {
+        return await action()
+      } finally {
+        cleanup()
+        this.activeScreenshotCleanups.delete(cleanup)
+      }
+    })
+  }
+
+  private cleanupScreenshotDiagnostics(): void {
+    for (const cleanup of this.activeScreenshotCleanups) cleanup()
+    this.activeScreenshotCleanups.clear()
   }
 
   private observeContext(context: BrowserContext): void {
@@ -293,11 +323,13 @@ export class BrowserStallDiagnostics {
       pages: this.pages,
       phases: this.phases,
       temporaryPages: this.temporaryPages,
+      screenshotStages: this.screenshotStages,
       failures: this.failures,
     }
   }
 
   async attach(testInfo: TestInfo, name: string): Promise<void> {
+    this.cleanupScreenshotDiagnostics()
     try {
       await testInfo.attach(name, {
         contentType: 'application/json', body: JSON.stringify(this.summary()),
@@ -314,6 +346,7 @@ export class BrowserStallDiagnostics {
   stop(): void {
     if (this.stopped) return
     this.stopped = true
+    this.cleanupScreenshotDiagnostics()
     for (const { page, listener, summary } of this.closeListeners) {
       try { page.off('close', listener) } catch {
         retain(summary.failures, { stage: 'listenerCleanup', at: performance.now() }, FAILURE_LIMIT)

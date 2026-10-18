@@ -6,7 +6,7 @@ import { pixels } from './pixel'
 export interface BombDrawing { root: Container; spark: Graphics }
 export interface FlameDrawing { root: Container; frames: readonly [Graphics, Graphics] }
 
-export function makeBomb(): BombDrawing {
+export function makeBomb(blast: 'standard' | 'piercing' | 'power' = 'standard'): BombDrawing {
   const root = new Container()
   const shadow = new Graphics()
   pixels(shadow, PALETTE.deepInk, [[-15, 12, 30, 5], [-10, 17, 20, 2]])
@@ -16,6 +16,13 @@ export function makeBomb(): BombDrawing {
   pixels(shell, PALETTE.ink, [[-9, -9, 18, 21], [-12, -3, 24, 12]])
   pixels(shell, 0x536272, [[-7, -9, 6, 9], [-10, -3, 6, 5]])
   pixels(shell, 0x8796a0, [[-6, -8, 3, 4]])
+  if (blast === 'piercing') {
+    pixels(shell, PALETTE.white, [[-4, -5, 8, 3], [-1, -8, 3, 9]])
+    pixels(shell, PALETTE.brick, [[-7, -2, 14, 3]])
+  } else if (blast === 'power') {
+    pixels(shell, PALETTE.flame, [[-7, -3, 14, 6], [-4, -7, 8, 14]])
+    pixels(shell, PALETTE.white, [[-2, -5, 4, 10]])
+  }
   pixels(shell, PALETTE.brass, [[4, -15, 7, 5], [8, -19, 4, 7], [11, -21, 7, 3]])
   const spark = new Graphics()
   pixels(spark, PALETTE.flameCore, [[16, -25, 4, 4], [21, -21, 4, 4], [12, -21, 4, 4]])
@@ -79,6 +86,17 @@ export function makePickup(kind: RenderablePickupKind): Graphics {
       [17, 19, 5, 5], [27, 19, 5, 5], [15, 23, 19, 5], [18, 28, 13, 4], [21, 32, 7, 4],
     ])
     pixels(drawing, PALETTE.brickLight, [[18, 20, 4, 3], [16, 23, 4, 3]])
+  } else if (kind === 'piercingBomb') {
+    pixels(drawing, PALETTE.deepInk, [[15, 21, 19, 14], [19, 17, 11, 21]])
+    pixels(drawing, PALETTE.ink, [[18, 22, 13, 11], [21, 19, 7, 5]])
+    pixels(drawing, PALETTE.white, [[21, 24, 7, 3], [23, 21, 3, 9]])
+    pixels(drawing, PALETTE.brick, [[17, 28, 15, 3]])
+  } else if (kind === 'powerBomb') {
+    pixels(drawing, PALETTE.deepInk, [
+      [21, 13, 7, 3], [17, 16, 15, 3], [14, 19, 21, 11], [17, 30, 15, 3], [21, 33, 7, 3],
+    ])
+    pixels(drawing, PALETTE.flame, [[21, 17, 7, 3], [18, 20, 13, 9], [21, 29, 7, 3]])
+    pixels(drawing, PALETTE.white, [[23, 21, 3, 7]])
   } else if (kind === 'shield') {
     pixels(drawing, PALETTE.deepInk, [
       [16, 15, 17, 3], [13, 18, 23, 7], [15, 25, 19, 7], [18, 32, 13, 4], [22, 36, 5, 3],

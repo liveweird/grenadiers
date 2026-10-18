@@ -34,6 +34,8 @@ function renderActor(drawing: ActorDrawing, id: number, effects: boolean, now: n
   drawing.slowFoot.children.slice(1).forEach((marker, index) => {
     marker.visible = index < drawing.slowFootStacks
   })
+  drawing.piercing.visible = drawing.piercingArmed
+  drawing.power.visible = drawing.powerArmed
 }
 
 export class ArenaScene {
@@ -152,7 +154,7 @@ export class ArenaScene {
     }
     for (const bomb of rows) {
       if (this.bombs.has(bomb.id)) continue
-      const drawing = makeBomb()
+      const drawing = makeBomb(bomb.blast)
       drawing.root.position.set((bomb.cell.column + 0.5) * TILE, (bomb.cell.row + 0.5) * TILE)
       this.bombsLayer.addChild(drawing.root)
       this.bombs.set(bomb.id, drawing)
@@ -219,6 +221,8 @@ export class ArenaScene {
       drawing.reversed = (actor.reverseControlsRemainingTicks ?? 0) > 0
       drawing.diarrheaActive = (actor.diarrheaRemainingTicks ?? 0) > 0
       drawing.slowFootStacks = actor.slowFootRemainingTicks?.length ?? 0
+      drawing.piercingArmed = Boolean(actor.piercingArmed)
+      drawing.powerArmed = Boolean(actor.powerArmed)
       drawing.moving = Boolean(!reset && previousMotion
         && (previousMotion.toX !== toX || previousMotion.toY !== toY))
       drawing.direction = actor.heading

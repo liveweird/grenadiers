@@ -108,6 +108,8 @@
     "seconds": "sekundy",
     "speedCap": "Premie prędkości dodają po jednym poziomie, maksymalnie do 5 pól/s.",
     "heartDescription": "Chroni przed jednym śmiertelnym wybuchem, a potem na krótko przed obrażeniami.",
+    "piercingBombDescription": "Przechowuje jedną specjalną bombę, której wybuch przechodzi przez zniszczalne bloki. Ładunek znika dopiero po udanym podłożeniu.",
+    "powerBombDescription": "Przechowuje jedną specjalną bombę, której wybuch wypełnia obszar w kształcie rombu, ignoruje przeszkody i nie niszczy twardych ścian. Ładunek znika dopiero po udanym podłożeniu.",
     "shieldDescription": "Zapewnia 5 sekund odporności na obrażenia. Kolejna Tarcza odnawia ten czas.",
     "goldenFlameDescription": "Maksymalizuje zasięg nowych bomb na 10 sekund. Kolejny Złoty płomień odnawia ten czas.",
     "shortFuseDescription": "Skraca o połowę lont nowych bomb przez 10 sekund. Kolejny Krótki lont odnawia ten czas.",

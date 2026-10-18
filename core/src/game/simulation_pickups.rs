@@ -87,6 +87,14 @@ impl super::Actor {
                 self.inventory
                     .replace_equipment(crate::game::Equipment::Heart);
             }
+            PickupKind::PiercingBomb => {
+                self.inventory
+                    .replace_weapon(crate::game::SpecialWeapon::Piercing);
+            }
+            PickupKind::PowerBomb => {
+                self.inventory
+                    .replace_weapon(crate::game::SpecialWeapon::Power);
+            }
             PickupKind::Shield
             | PickupKind::GoldenFlame
             | PickupKind::ShortFuse

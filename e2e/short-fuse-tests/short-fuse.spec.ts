@@ -102,7 +102,7 @@ test('two browsers collect Short Fuse and restore ordinary bomb timing after its
     await Promise.all([one, two].map((page) => page.getByRole('button', { name: 'Ready', exact: true }).click()))
     await Promise.all(games.map((game) => expect.poll(() => latestSnapshot(game)?.room.phase.type).toBe('running')))
     expect(latestSnapshot(games[0])!.room).toMatchObject({
-      rulesVersion: 5, mapId: 'generated_v2', availableItems: ['heart', 'shield', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls'],
+      rulesVersion: 5, mapId: 'generated_v2', availableItems: ['heart', 'piercingBomb', 'powerBomb', 'shield', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls'],
       settings: { enabledItems: ['shortFuse'], bombFuseTicks: 300 },
     })
     await one.getByRole('region', { name: 'Grenadiers courtyard' }).click()

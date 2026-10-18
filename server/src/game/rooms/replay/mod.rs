@@ -40,3 +40,9 @@ mod diarrhea_tests;
 
 #[cfg(test)]
 mod slow_foot_tests;
+
+#[cfg(test)]
+mod piercing_bomb_tests;
+
+#[cfg(test)]
+mod power_bomb_tests;

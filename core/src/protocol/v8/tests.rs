@@ -380,6 +380,11 @@ mod golden_flame_tests;
 
 #[path = "diarrhea_tests.rs"]
 mod diarrhea_tests;
+
+#[path = "piercing_bomb_tests.rs"]
+mod piercing_bomb_tests;
+#[path = "power_bomb_tests.rs"]
+mod power_bomb_tests;
 #[path = "reverse_controls_tests.rs"]
 mod reverse_controls_tests;
 #[path = "short_flame_tests.rs"]

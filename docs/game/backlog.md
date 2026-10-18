@@ -7,7 +7,7 @@ server, browser and pixel-art implementation with local checks and independent r
 both debug/release profiles pass and native release acceptance is pending. The v0.3.26 Shield
 candidate adds opt-in timed immunity. The v0.3.27 Golden Flame and v0.3.28 Short Fuse
 candidates also pass local checks; native acceptance and final-head CI remain pending.
-The v0.3.29 Short Flame and v0.3.30 Long Fuse candidates pass local checks and independent reviews; native acceptance remains pending. The v0.3.31 Reverse Controls candidate passes local checks and independent review. The v0.3.32 Diarrhea candidate passes local verification and independent reviews. The v0.3.33 Slow-foot candidate passes local checks and independent backend/frontend reviews; native acceptance remains pending. The other 13 requested pickups
+The v0.3.29 Short Flame and v0.3.30 Long Fuse candidates pass local checks and independent reviews; native acceptance remains pending. The v0.3.31 Reverse Controls candidate passes local checks and independent review. The v0.3.32 Diarrhea candidate passes local verification and independent reviews. The v0.3.33 Slow-foot candidate passes local checks and independent backend/frontend reviews; native acceptance remains pending. The v0.3.34 Piercing Bomb candidate is prepared locally. The v0.3.35 Power Bomb candidate passes local checks and independent backend/frontend reviews; native acceptance and final CI remain pending. The other 11 requested pickups
 remain unimplemented. Richer transitions and further item artwork remain follow-up
 work. See [pixel-art presentation](pixel-art.md) and [expanded item implementation](expanded-items.md).
 Updated 2026-10-18 after playtest feedback. Release acceptance is recorded in
@@ -161,8 +161,8 @@ instant action. Keep both in this requested pickup family without forcing them i
 | ID / weapon | Requested behavior | Decisions / acceptance focus |
 | --- | --- | --- |
 | WPN-REMOTE / remote bomb | Next bomb is planted normally; the next bomb-button press detonates it instead of using a fuse. | Armed-remote state independent of consumed inventory; button priority, owner death/disconnect, chain ignition, freezing, capacity and inability to plant; no implicit safety fuse added without a decision. |
-| WPN-PIERCE / piercing bomb | Next bomb's blast continues through destructible blocks. | Blocks consumed per range unit, interaction with other bombs, immutable same-tick chain planning and hard-wall stopping. |
-| WPN-POWER / power bomb | Next bomb damages a Manhattan-distance area of the player's blast radius, ignoring line of sight. | Exact cell mask, propagation across hard walls versus destruction of those walls, borders, block/item damage and chains; visual footprint must match affected cells. |
+| WPN-PIERCE / piercing bomb | **Prepared in v0.3.34.** The next successful manual bomb's blast continues through destructible blocks. | One-charge replacement, retained failures, ordinary automatic bombs, captured blast identity, immutable same-tick chain planning and hard-wall stopping are covered locally; independent and native review remain pending. |
+| WPN-POWER / power bomb | **Prepared in v0.3.35.** The next successful manual bomb damages every floor cell within its Manhattan blast radius, ignoring line of sight. | One-charge replacement, retained failures, hard-wall holes, complete block and bomb coverage, immutable mixed-chain planning, captured stats and distinct presentation pass local checks and independent reviews; native acceptance remains pending. |
 | WPN-MINE / landmine | Next placement explodes only when someone steps on it, never merely because time passes. | Arming/owner-exit grace, swept step detection, eligible actors, visibility, capacity and remote ownership; explicitly decide whether other blasts can trigger/destroy it without contradicting contact-only detonation. |
 
 ## Verification and incremental release requirements

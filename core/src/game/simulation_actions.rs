@@ -1,7 +1,8 @@
 use super::{InputAction, MAX_INPUTS_PER_TICK, SeatInput, State};
 use crate::game::arena::Terrain;
-use crate::game::bombs::{Bomb, BombTrigger};
+use crate::game::bombs::{BlastKind, Bomb, BombTrigger};
 use crate::game::events::{EventAudience, StepEvent, StepEventKind};
+use crate::game::inventory::SpecialWeapon;
 use crate::game::movement;
 use crate::game::types::{EntityId, SeatId, Tick};
 use crate::game::view::BombView;
@@ -9,6 +10,12 @@ use crate::game::view::BombView;
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(super) enum ManualAction {
     PlaceBomb,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum PlacementOrigin {
+    Manual,
+    Automatic,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -99,15 +106,20 @@ impl State {
         events: &mut Vec<StepEvent>,
     ) {
         let requests = SeatId::ALL.map(|seat| {
-            actions.for_seat(seat).first() == Some(ManualAction::PlaceBomb)
-                || self.actors[seat.index()].effects.forces_bomb_drops(tick)
+            if actions.for_seat(seat).first() == Some(ManualAction::PlaceBomb) {
+                Some(PlacementOrigin::Manual)
+            } else if self.actors[seat.index()].effects.forces_bomb_drops(tick) {
+                Some(PlacementOrigin::Automatic)
+            } else {
+                None
+            }
         });
         self.resolve_classic_placements(requests, tick, events);
     }
 
     fn resolve_classic_placements(
         &mut self,
-        requests: [bool; 2],
+        requests: [Option<PlacementOrigin>; 2],
         tick: Tick,
         events: &mut Vec<StepEvent>,
     ) {
@@ -121,7 +133,7 @@ impl State {
             let cell_is_free = self.world.arena.terrain(cell) == Some(Terrain::Floor)
                 && !self.world.arena.blocks().contains(&cell)
                 && !self.world.bombs.values().any(|bomb| bomb.cell() == cell);
-            if requests[seat.index()] && actor.alive && has_capacity && cell_is_free {
+            if requests[seat.index()].is_some() && actor.alive && has_capacity && cell_is_free {
                 targets[seat.index()] = Some(cell);
             }
         }
@@ -133,6 +145,20 @@ impl State {
                 continue;
             };
             let actor = &self.actors[seat.index()];
+            let weapon = if requests[seat.index()] == Some(PlacementOrigin::Manual) {
+                actor.inventory.weapon().filter(|weapon| match weapon {
+                    SpecialWeapon::Piercing => self.rules.enabled_items().contains_piercing_bomb(),
+                    SpecialWeapon::Power => self.rules.enabled_items().contains_power_bomb(),
+                    SpecialWeapon::Remote | SpecialWeapon::Landmine => false,
+                })
+            } else {
+                None
+            };
+            let blast = match weapon {
+                Some(SpecialWeapon::Piercing) => BlastKind::Piercing,
+                Some(SpecialWeapon::Power) => BlastKind::Power,
+                Some(SpecialWeapon::Remote | SpecialWeapon::Landmine) | None => BlastKind::Standard,
+            };
             let Some(fuse_ticks) = actor
                 .effects
                 .bomb_fuse_ticks(self.rules.bomb_fuse_ticks(), tick)
@@ -145,17 +171,34 @@ impl State {
             let Some(id) = self.next_bomb_id() else {
                 continue;
             };
-            let Ok(bomb) = Bomb::new(
-                id,
-                cell,
-                actor.id,
-                actor.effective_bomb_range(tick),
-                tick,
-                BombTrigger::Timed { detonates_at },
-            ) else {
+            let bomb = if blast != BlastKind::Standard {
+                Bomb::new_with_blast(
+                    id,
+                    cell,
+                    actor.id,
+                    actor.effective_bomb_range(tick),
+                    tick,
+                    BombTrigger::Timed { detonates_at },
+                    blast,
+                )
+            } else {
+                Bomb::new(
+                    id,
+                    cell,
+                    actor.id,
+                    actor.effective_bomb_range(tick),
+                    tick,
+                    BombTrigger::Timed { detonates_at },
+                )
+            };
+            let Ok(bomb) = bomb else {
                 continue;
             };
             self.insert_bomb(bomb);
+            if let Some(weapon) = weapon {
+                let consumed = self.actors[seat.index()].inventory.consume_weapon();
+                debug_assert_eq!(consumed, Some(weapon));
+            }
             events.push(StepEvent::new(
                 tick,
                 EventAudience::Both,
@@ -190,6 +233,14 @@ impl State {
         }
     }
 }
+
+#[cfg(test)]
+#[path = "piercing_bomb_tests.rs"]
+mod piercing_bomb_tests;
+
+#[cfg(test)]
+#[path = "power_bomb_tests.rs"]
+mod power_bomb_tests;
 
 #[cfg(test)]
 #[path = "simulation_actions_tests.rs"]

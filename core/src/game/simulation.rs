@@ -233,7 +233,9 @@ impl State {
             }
         }
         for bomb in world.bombs.values() {
-            if bomb.blast() != BlastKind::Standard {
+            if bomb.blast() == BlastKind::Piercing
+                && !rules.enabled_items().contains_piercing_bomb()
+            {
                 return Err(StateError::UnsupportedBombBlast(bomb.id()));
             }
         }

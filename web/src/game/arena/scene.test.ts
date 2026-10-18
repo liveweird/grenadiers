@@ -63,6 +63,8 @@ describe('retained public arena scene', () => {
   it('draws every public layer and retains unchanged objects between snapshots', () => {
     const scene = new ArenaScene()
     const snapshot = gameSnapshot()
+    snapshot.state.actors[0].piercingArmed = true
+    snapshot.state.bombs[0].blast = 'piercing'
     snapshot.state.pickups = [
       { cell: { column: 2, row: 2 }, kind: 'bombCapacity' },
       { cell: { column: 3, row: 2 }, kind: 'blastRange' },
@@ -78,6 +80,7 @@ describe('retained public arena scene', () => {
     expect(actors.children).toHaveLength(2)
     expect(actors.children.map(({ x, y }) => [x, y])).toEqual([[72, 72], [648, 552]])
     expect(bombs.children[0]).toMatchObject({ x: 72, y: 72 })
+    expect(bombs.children[0].children[1].shapes).toHaveLength(14)
     expect(pickups.children.map(({ x, y }) => [x, y])).toEqual([[96, 96], [144, 96], [192, 96]])
     expect(pickups.children.map(({ shapes }) => shapes.every((shape) => shape === 'rect')))
       .toEqual([true, true, true])
@@ -89,11 +92,11 @@ describe('retained public arena scene', () => {
     expect([
       blocks.children[0], ...pickups.children, bombs.children[0], flames.children[0], ...actors.children,
     ]).toEqual(retained)
-    expect(actors.children.map((actor) => actor.children.length)).toEqual([18, 18])
+    expect(actors.children.map((actor) => actor.children.length)).toEqual([19, 19])
     expect(actors.children[0].children.map(({ visible }) => visible))
-      .toEqual([true, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false])
+      .toEqual([true, false, false, false, false, false, false, false, false, false, true, false, false, true, false, false, false, false, false])
     expect(actors.children[1].children.map(({ visible }) => visible))
-      .toEqual([true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false])
+      .toEqual([true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false])
   })
   it('interpolates only between public positions and never extrapolates past the target', () => {
     const scene = new ArenaScene()
@@ -107,7 +110,7 @@ describe('retained public arena scene', () => {
     scene.render(125)
     expect(actor.x).toBe(96)
     expect(actor.children.map(({ visible }) => visible))
-      .toEqual([true, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false])
+      .toEqual([true, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false])
     scene.render(150)
     expect(actor.x).toBe(120)
     scene.render(100_000)
@@ -117,7 +120,7 @@ describe('retained public arena scene', () => {
     scene.update(snapshot, 200)
     scene.render(325)
     expect(actor.children.map(({ visible }) => visible))
-      .toEqual([true, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false])
+      .toEqual([true, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false])
   })
   it('keeps a selected frame stable when another moving snapshot arrives in that frame', () => {
     const scene = new ArenaScene()
@@ -216,7 +219,7 @@ describe('arena scene transitions and optional-item presentation', () => {
     expect(layers(scene)[2].children[0]).not.toBe(oldPickup)
     expect(layers(scene)[5].children[0]).toMatchObject({ x: 72, y: 120 })
     expect(layers(scene)[5].children[0].children.map(({ visible }) => visible))
-      .toEqual([true, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false])
+      .toEqual([true, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false])
   })
   it('deletes hidden actor motion and snaps a later reveal to its current position', () => {
     const scene = new ArenaScene()

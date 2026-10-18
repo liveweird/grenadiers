@@ -11,6 +11,7 @@ pub enum PickupKind {
     BlastRange,
     MovementSpeed,
     Heart,
+    PiercingBomb,
     Shield,
     GoldenFlame,
     ShortFuse,
@@ -25,6 +26,7 @@ impl PickupKind {
     pub(crate) const fn enabled_by(self, enabled: super::EnabledItems) -> bool {
         match self {
             Self::Heart => enabled.contains_heart(),
+            Self::PiercingBomb => enabled.contains_piercing_bomb(),
             Self::Shield => enabled.contains_shield(),
             Self::GoldenFlame => enabled.contains_golden_flame(),
             Self::ShortFuse => enabled.contains_short_fuse(),

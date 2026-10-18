@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.34 — 2026-10-18
+
+- Prepare opt-in Piercing Bomb as a one-charge weapon consumed only by a successful manual placement.
+- Capture an immutable Piercing blast that crosses breakable blocks while retaining ordinary bomb stops, range accounting, chaining, and transactional placement failures.
+- Add the tenth lobby switch, checked v8 state and events, replay coverage, English and Polish pixel cues, and a deterministic production-seed browser scenario. Native acceptance and final CI remain pending.
+
 ## 0.3.33 — 2026-10-18
 
 - Prepare opt-in Slow foot: each pickup adds an independent 600-tick stack and halves movement speed, up to six exact stacks.

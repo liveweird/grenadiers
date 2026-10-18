@@ -107,7 +107,9 @@ Visible actors expose ID, seat, position, heading, speed (0–4), alive status, 
 actors contain only ID, seat and alive status; owners always receive their own visible actor.
 Bombs carry ID, cell, owner, range, placement tick, blast mode and a typed trigger. Timed
 triggers report remaining ticks at `physicalTick` and pause state; no untimed deadline is invented.
-Current rooms use only Standard, unpaused Timed bombs. Flames include cell and exclusive expiry tick.
+Current rooms use unpaused Timed bombs with Standard blasts and enabled, manually placed Piercing
+blasts. Power blasts, Remote and Contact triggers, and paused Timed bombs remain unavailable.
+Flames include cell and exclusive expiry tick.
 Room metadata carries the global tick, rules/map versions, scores, actual round number,
 latest completed round, and independent match outcome; these are not duplicated in game state.
 The required `pickups` array contains closed `{cell, kind}` entries with kind `bombCapacity`,

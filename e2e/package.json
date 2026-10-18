@@ -32,7 +32,8 @@
     "test:long-fuse": "playwright test --config playwright.long-fuse.config.ts",
     "test:reverse-controls": "playwright test --config playwright.reverse-controls.config.ts",
     "test:diarrhea": "playwright test --config playwright.diarrhea.config.ts",
-    "test:slow-foot": "playwright test --config playwright.slow-foot.config.ts"
+    "test:slow-foot": "playwright test --config playwright.slow-foot.config.ts",
+    "test:piercing-bomb": "playwright test --config playwright.piercing-bomb.config.ts"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.13.0",

@@ -1,5 +1,32 @@
 # Repository verification
 
+## Piercing Bomb candidate — 2026-10-18 — local checks complete
+
+The v0.3.34 candidate activates an opt-in one-charge Piercing Bomb. Successful manual placement
+captures a blast that crosses breakable blocks; automatic placements remain ordinary, failed
+placements retain the charge, and existing bombs remain immutable. Catalog bit 6 and a final
+generator weight preserve all 512 earlier paths while supporting all 1024 subsets. The repeating
+byte-31 fixture places the pickup at (3,1) with consecutive breakable blocks at (4,1) and (5,1).
+
+Debug and release suites pass **534 core tests, 190 server tests and two doctests**; four dedicated
+performance profiles remain ignored. Rust line coverage is **91.74%** (12,432/13,551), above the
+unchanged 80% floor. All **1,399 web tests** across 47 files pass with statement/branch/function/
+line coverage of **95.44/91.36/95.59/97.78%**. Formatting, Clippy, repository limits, generated
+contract checks, lint, Knip, production builds, E2E static checks and **36-scenario parity** pass.
+Cargo-deny, both cached offline npm audits with zero vulnerabilities, and strict Kubernetes
+schemas for all three resources pass. Dependency graphs remain unchanged except for the two
+workspace package versions in `Cargo.lock`. Independent review, the native Piercing Bomb
+playthrough and screenshots, candidate-image acceptance, and final-head CI remain pending.
+
+Review regressions reject Remote, Contact and paused Timed bombs consistently in live state and
+placement/detonation events. They also cover a manual Piercing request conflicting with an
+automatic Diarrhea request, event-only Piercing detonation, and a live Piercing bomb whose dead
+owner has an empty inventory. The browser scenario verifies both target blocks before planting,
+compares both peers' captured Piercing record, and fences historical placement IDs before proving
+the later ordinary bomb. All 22 focused Piercing Rust tests, the focused web regression, the full
+web gate, and E2E static checks pass after these review fixes; the full Rust counts above are the
+unchanged production baseline from before these test-only Rust additions.
+
 ## Slow foot candidate — 2026-10-18 — local checks complete
 
 The v0.3.33 candidate activates opt-in Slow foot as up to six independent 600-tick stacks. Each

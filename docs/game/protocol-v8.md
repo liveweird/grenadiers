@@ -9,8 +9,8 @@ claim or revoke the credential needed for a version-8 connection.
 
 V8 adds rules version **5** and map ID **`generated_v2`**. Its own rules/map types leave the
 shared enums and schemas for earlier protocols unchanged. New production rooms are always
-Expanded v5/generator v2. They advertise `availableItems: ["heart", "shield", "goldenFlame", "shortFuse", "diarrhea", "slowFoot", "shortFlame", "longFuse", "reverseControls"]` and initially enable
-`settings.enabledItems: ["heart"]`. All 512 subsets of those nine available items are supported configurations.
+Expanded v5/generator v2. They advertise `availableItems: ["heart", "piercingBomb", "shield", "goldenFlame", "shortFuse", "diarrhea", "slowFoot", "shortFlame", "longFuse", "reverseControls"]` and initially enable
+`settings.enabledItems: ["heart"]`. All 1024 subsets of those ten available items are supported configurations.
 Other catalog IDs remain unavailable.
 
 The Classic settings preset disables optional items and restores the four ordinary settings.
@@ -36,8 +36,10 @@ restores current state without historical event playback.
 consuming its manual-action ID. Shield is also passive: collection adds or refreshes a 300-tick
 effect, and emits at most one `damagePrevented` with source `shield` per actor per physical tick.
 Its effect expires before damage at collection tick + 300; reconnect retains its remaining time.
-Untimed bombs, special blasts, concealment effects
-and other optional mechanics remain unavailable.
+When Piercing Bomb is enabled, a successful manual placement consumes its stored charge and
+publishes an unpaused Timed bomb with a captured Piercing blast. Automatic Diarrhea placements
+remain Standard and do not consume the charge. Remote and Contact triggers, paused Timed bombs,
+Power blasts, concealment effects, and other optional mechanics remain unavailable.
 
 ## Checked publication and replay
 
@@ -95,5 +97,5 @@ by `2^stack_count`; every supported speed is exactly divisible by 64. Collection
 tick, while each deadline expires before movement. A capped actor is excluded before collection
 distance and tie arbitration, allowing an eligible rival to collect the pickup.
 
-The nine-item availability array is exact v8 data. Deploy server and web together and reload
-older v8 clients: a client built for eight items rejects the new room even when Slow foot is disabled.
+The ten-item availability array is exact v8 data. Deploy server and web together and reload
+older v8 clients: a client built for nine items rejects the new room even when Piercing Bomb is disabled.

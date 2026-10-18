@@ -11,9 +11,12 @@ const ticks = (game: ObservedGame) => visibleActor(latestSnapshot(game), 'one')?
 const room = (game: ObservedGame) => game.frames.filter((frame) =>
   frame.type === 'admitted' || frame.type === 'roomState' || frame.type === 'snapshot').at(-1)?.room
 
-function placedBomb(game: ObservedGame, frameStart: number) {
-  return game.frames.slice(frameStart).flatMap((frame) => frame.type === 'snapshot' ? frame.events : [])
-    .find(({ kind }) => kind.type === 'bombPlaced')?.kind
+type PlacementCursor = { roundId: number; tick: number }
+
+function placedBomb(game: ObservedGame, cursor: PlacementCursor) {
+  return game.frames.flatMap((frame) => frame.type === 'snapshot'
+    && frame.room.roundId === cursor.roundId ? frame.events : [])
+    .find(({ tick, kind }) => tick > cursor.tick && kind.type === 'bombPlaced')?.kind
 }
 
 function manualBombs(game: ObservedGame) {
@@ -22,17 +25,18 @@ function manualBombs(game: ObservedGame) {
 
 async function plant(page: Page, game: ObservedGame, expectedActionId: number): Promise<number> {
   const commandStart = game.commands.length
-  const frameStart = game.frames.length
+  const before = latestSnapshot(game)!
+  const cursor = { roundId: before.room.roundId, tick: before.state.physicalTick }
   await page.keyboard.press('Space')
   await expect.poll(() => game.commands.slice(commandStart)
     .filter((command) => command.type === 'manualAction')).toEqual([{
     type: 'manualAction', action: 'bomb', actionId: expectedActionId,
   }])
   await expect.poll(() => {
-    const event = placedBomb(game, frameStart)
+    const event = placedBomb(game, cursor)
     return event?.type === 'bombPlaced' ? event.bomb.id : undefined
   }).toBeDefined()
-  const event = placedBomb(game, frameStart)
+  const event = placedBomb(game, cursor)
   if (!event || event.type !== 'bombPlaced') throw new Error('Bomb placement event expected')
   expect(manualBombs(game)).toEqual(Array.from({ length: expectedActionId }, (_, index) => ({
     type: 'manualAction', action: 'bomb', actionId: index + 1,
@@ -89,6 +93,7 @@ function expectRunningRoundSurvival(game: ObservedGame, roundId: number): void {
 function publicSummary(game: ObservedGame) {
   const snapshot = latestSnapshot(game)
   return {
+    retainedFrames: game.frames.length,
     commands: game.commands.filter((command) => command.type === 'movement'
       || command.type === 'manualAction').slice(-128),
     latest: snapshot && {

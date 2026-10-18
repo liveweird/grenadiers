@@ -1,5 +1,47 @@
 # Repository verification
 
+## Reverse Controls bounded-history integration — 2026-10-18 — native acceptance pending
+
+The reviewed Long Fuse cursor correction `e0ffd635f9aa0b25c1f2dc00a5d20d8fc00be831` is
+integrated. The inherited Long Fuse scenario matches that source except for the canonical
+seven-item catalog. Product sources, API, Cargo inputs, version and all other test inputs are
+byte-unchanged from `6ac0fc2`; the existing product checks remain applicable. E2E lint, Knip,
+type checking, 34-scenario parity, repository and diff checks pass. Independent integration
+review is clear. Long Fuse requires its corrected fresh native acceptance and final-head CI;
+Reverse Controls then requires that final parent and a new whole 33+33 run. The interrupted
+15-case record below supplies no carried acceptance.
+
+## Long Fuse bounded-history cursor correction — 2026-10-18 — fresh acceptance pending
+
+Candidate `fbc8593088de89dd60ed2457af508240994f83fa` failed both first hosted CI runs:
+PR run `39114204134` and push run `39114201841`. Each passed four non-browser jobs and
+14 browser cases, then failed Long Fuse; the later 17 classic-match/reconnect/latency/control/
+headed/audio cases and built-image scan were unattempted. Neither run was rerun.
+
+Both retained public attachments prove the third manual action placed bomb ID 4 and both peers
+observed its exact 120-tick detonation (PR ticks 2174→2294; push 1958→2078). The observer shifts
+its bounded 512-frame array, while the driver saved its length as a fixed slice index. Once full,
+`slice(512)` stays empty even when the placement event is retained. Placement now selects events
+strictly after the preceding physical tick in the same round, independently of array rotation.
+Manual IDs, valid-zero IDs, captured fuses, escapes, reconnect, expiry, timeouts, retries and
+remaining assertions are unchanged. Failure diagnostics also record the retained frame count.
+
+A focused proof executes the actual old/new helpers against a rotated 512-frame history: the
+old lookup misses a retained ID 0, the corrected lookup finds it, and prior-tick/different-round
+events remain excluded. E2E lint, Knip, type checking, repository checks and 33-scenario parity
+pass. The sealed hosted evidence at `/tmp/grenadiers-v0330-ci-failure` has 37 entries and manifest
+SHA-256 `9610fa8e390f24c1461b6ffc1e42b7b8916ed5bc8bf5d855d7c1b371087ed79c`.
+Fresh source, image, whole 32+32 native acceptance and final-head CI are required. The earlier
+64-case record below certifies only its named source, not this driver correction.
+
+The inherited Reverse Controls source `6ac0fc2` was stopped at its Compose latency gate before
+approving measurements or starting optional/Kubernetes cases. Fifteen Compose cases passed and
+none failed; the directed interruption returned 130. Its isolated evidence at
+`/tmp/grenadiers-v0331-native-acceptance` seals 1,207 entries with manifest SHA-256
+`2aeca61865b4e86fcbac13142518c7d1fdc6af4db2ace5fe035e13a7c4659156`.
+All post-run integrity and cleanup checks pass, but it has no accepted or carryable matrix.
+Reverse Controls requires the corrected final parent and a fresh whole 33+33 run.
+
 ## Reverse Controls final-parent integration — 2026-10-18 — native acceptance pending
 
 The final audited Long Fuse parent `2ffb85fcd476bce0fdf1c5fbc979fd78234afc8b` is integrated,

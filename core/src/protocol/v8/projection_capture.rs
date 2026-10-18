@@ -324,6 +324,7 @@ fn wire_pickup(value: game::PickupKind) -> PickupKind {
         game::PickupKind::GoldenFlame => PickupKind::GoldenFlame,
         game::PickupKind::ShortFuse => PickupKind::ShortFuse,
         game::PickupKind::Diarrhea => PickupKind::Diarrhea,
+        game::PickupKind::SlowFoot => PickupKind::SlowFoot,
         game::PickupKind::ShortFlame => PickupKind::ShortFlame,
         game::PickupKind::LongFuse => PickupKind::LongFuse,
         game::PickupKind::ReverseControls => PickupKind::ReverseControls,

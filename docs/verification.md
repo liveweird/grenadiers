@@ -1,5 +1,31 @@
 # Repository verification
 
+## Slow foot candidate — 2026-10-18 — local checks complete
+
+The v0.3.33 candidate activates opt-in Slow foot as up to six independent 600-tick stacks. Each
+stack halves the exact current movement rate. Collection affects the following tick, expiry
+precedes movement, and capped actors are excluded before pickup distance and tie arbitration.
+Catalog bit 15 and a final generator weight preserve all 256 earlier mask paths while supporting
+all 512 subsets. Protocol, replay, localized presentation and a deterministic browser scenario
+are included.
+
+Debug and release suites pass **511 core tests, 189 server tests and two doctests**; four dedicated
+performance profiles remain ignored. Rust line coverage is **91.60%** (12,337/13,468), above the
+unchanged 80% floor. All **880 web tests** across 45 files pass with statement/branch/function/line
+coverage of **95.40/91.26/95.57/97.76%**. Formatting, Clippy, repository limits, generated
+contract checks, lint, Knip, production builds, E2E static checks and **35-scenario parity** pass.
+Cargo-deny, both cached offline npm audits with zero vulnerabilities, and strict Kubernetes
+schemas for all three resources pass. Dependency graphs remain unchanged except for the two
+workspace package versions in `Cargo.lock`. Independent backend and frontend reviews are clear;
+native browser acceptance, candidate-image checks and final-head CI remain pending.
+
+Review fixes require both recipient streams to agree at
+identical physical-tick endpoints for slowed and restored movement, and verify all six independent
+timers in the eight-field English and Polish HUD. All 21 focused web tests and E2E static
+checks pass after those fixes. Component tests verify the six-stack presentation structure,
+but an actual six-stack 320px native playthrough is not run;
+the production-seed native scenario intentionally collects one stack and remains pending.
+
 ## Diarrhea candidate — 2026-10-18 — local checks complete
 
 The v0.3.32 candidate activates opt-in Diarrhea for exactly 600 physical ticks. Each seat selects

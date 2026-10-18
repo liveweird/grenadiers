@@ -86,9 +86,10 @@ impl State {
 
     fn move_living(&mut self, tick: Tick) -> [MovementTrace; 2] {
         let turn_assist = self.rules.turn_assist();
+        let slow_foot_enabled = self.rules.enabled_items().contains_slow_foot();
         self.actors.each_mut().map(|actor| {
             if actor.alive {
-                movement::advance_actor(&self.world, actor, turn_assist, tick)
+                movement::advance_actor(&self.world, actor, turn_assist, tick, slow_foot_enabled)
             } else {
                 MovementTrace::new(actor.position)
             }

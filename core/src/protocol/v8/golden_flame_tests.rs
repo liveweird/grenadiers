@@ -65,6 +65,7 @@ fn golden_flame_and_shield_publish_distinct_physical_timers_and_quiet_admission(
                 "goldenFlame",
                 "shortFuse",
                 "diarrhea",
+                "slowFoot",
                 "shortFlame",
                 "longFuse",
                 "reverseControls",

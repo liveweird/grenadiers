@@ -381,3 +381,5 @@ mod reverse_controls_tests;
 mod short_flame_tests;
 #[path = "short_fuse_tests.rs"]
 mod short_fuse_tests;
+#[path = "slow_foot_tests.rs"]
+mod slow_foot_tests;

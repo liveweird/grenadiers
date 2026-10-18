@@ -7,7 +7,7 @@ server, browser and pixel-art implementation with local checks and independent r
 both debug/release profiles pass and native release acceptance is pending. The v0.3.26 Shield
 candidate adds opt-in timed immunity. The v0.3.27 Golden Flame and v0.3.28 Short Fuse
 candidates also pass local checks; native acceptance and final-head CI remain pending.
-The v0.3.29 Short Flame and v0.3.30 Long Fuse candidates pass local checks and independent reviews; native acceptance remains pending. The v0.3.31 Reverse Controls candidate passes local checks and independent review. The v0.3.32 Diarrhea candidate passes local verification and independent reviews; native acceptance remains pending. The other 14 requested pickups
+The v0.3.29 Short Flame and v0.3.30 Long Fuse candidates pass local checks and independent reviews; native acceptance remains pending. The v0.3.31 Reverse Controls candidate passes local checks and independent review. The v0.3.32 Diarrhea candidate passes local verification and independent reviews. The v0.3.33 Slow-foot candidate passes local checks and independent backend/frontend reviews; native acceptance remains pending. The other 13 requested pickups
 remain unimplemented. Richer transitions and further item artwork remain follow-up
 work. See [pixel-art presentation](pixel-art.md) and [expanded item implementation](expanded-items.md).
 Updated 2026-10-18 after playtest feedback. Release acceptance is recorded in
@@ -148,7 +148,7 @@ instant action. Keep both in this requested pickup family without forcing them i
 | ID / pickup | Requested behavior | Decisions / acceptance focus |
 | --- | --- | --- |
 | CURSE-DROP / diarrhea | Automatically drop bombs whenever capacity is available, up to the player's bomb limit. | Bounded attempt cadence, legal placement, capacity release, freeze, special-weapon consumption and remote-trigger behavior; no unbounded same-tick loop. |
-| CURSE-SLOW / slow-foot | Reduce speed by 50%; each additional pickup halves the current effective speed again. | Independent versus refreshed lifetimes, exact expiry restoration, bounded stack count, fixed-point rounding and minimum nonzero movement. |
+| CURSE-SLOW / slow-foot | **Prepared in v0.3.33.** Each pickup halves current effective speed again. | Independent 600-tick lifetimes, exact expiry restoration, six-stack cap, exact fixed-point arithmetic and zero-budget ticks are defined and covered locally; native acceptance remains pending. |
 | CURSE-RANGE / short-flame | Reduce new bombs to one adjacent tile in each blast direction. | Center cell still explodes; precedence with Golden flame, upgrades and special footprints. |
 | CURSE-FUSE / long fuse | Increase new bombs' detonation delay by 100% (double it). | Rounding, stacking/re-pick policy and composition with Short fuse, remote bombs and mines. |
 | CURSE-REVERSE / reverse controls | Up moves down, left moves right, and vice versa. | Apply to logical movement after personal remapping; define held-key transition/expiry without stuck movement or stale replay. |

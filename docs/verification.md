@@ -3,6 +3,25 @@
 Records below are frozen against their named sources. Publication and later CI status are
 recorded in [release notes](https://github.com/liveweird/grenadiers/releases).
 
+## Long Fuse native scenario observation correction — 2026-10-18 — fresh acceptance pending
+
+The first whole native attempt against source `04b89a6257bd965ac93346c662f9e1c05f19af62`
+passed 31 Compose cases and then stopped at the first Long Fuse bomb placement poll; Kubernetes
+was not started. The report retained no command/frame summary, so it cannot distinguish a Space
+command that was not emitted or accepted from a 120-tick bomb that left the latest live state
+before the poll observed it. The final screenshots do not resolve that ambiguity. The failure is
+not attributed to a product focus defect, and none of its passes may be carried forward.
+
+The corrected scenario keeps the 120-tick base, captured 240-tick Long Fuse, 600-tick effect,
+timeouts, zero retries and two intended screenshots per target. Each placement now proves the
+exact next manual bomb action and obtains its bomb ID from retained `bombPlaced` history. It also
+proves that the first two escapes leave the actor alive in the same running round, while retaining
+the captured-fuse, detonation, expiry, reconnect, action-floor and final lethal-blast assertions.
+A failure-safe attachment records only whitelisted public command summaries, current public
+actors and bombs, bomb placement/detonation events, round/tick facts and focused DOM identity;
+credentials and private admission frames are excluded. Fresh full 32+32 native acceptance from a
+new source archive and image remains required.
+
 ## Long Fuse final-parent integration — 2026-10-18 — native acceptance pending
 
 The final audited Short Flame parent is integrated, including all accepted Heart, Shield,

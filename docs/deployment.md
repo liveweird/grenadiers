@@ -218,5 +218,7 @@ docker compose -f docker-compose.yaml -f docker-compose.long-fuse.yaml down
 ```
 
 The real settings panel enables only Long Fuse with a 120-tick base. The scenario follows the
-ordinary generated pickup path, observes a captured 240-tick bomb on both peers, crosses the
-exact 600-tick expiry, and verifies restored 120-tick timing. Never bake the seed into the image.
+ordinary generated pickup path, proves each emitted manual bomb action against retained placement
+history, observes a captured 240-tick bomb on both peers, crosses the exact 600-tick expiry, and
+verifies restored 120-tick timing. The first two escapes must retain the same running round and a
+living collector. Never bake the seed into the image.

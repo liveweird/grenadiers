@@ -1,5 +1,40 @@
 # Repository verification
 
+## Original capture workload — 2026-10-18 — attribution stopped
+
+Clean observer `4fcef4ba32fed92ce3324b09d2f815bf9f4aea7d`, archive SHA-256
+`0530df46dcbb8d2806161d7e608a3d12e7172ca6e3bf2dc960d842f8447beb73`, passes the original
+first reconnect case once, first attempt/retry 0, 47.529s. Pinned Linux pure fixtures pass 1/1
+and all E2E static checks/scenario parity 26 pass. The native profile deliberately reuses original
+production image `57f16c...3853`: application source/dependencies/build are unchanged, while
+development-only fixture/script additions mean the whole Docker input context differs.
+
+The first/second intended capture commands take 11,452.465/17,169.343ms. All eighteen stage
+pairs complete; no pending stage, diagnostic failure or temporary page remains. Automatic failure
+screenshots are disabled only in the opt-in profiler; explicit captures, assertions, natural
+inputs, seed, 120-second scenario budget and zero retries remain unchanged.
+
+Over the first audit/capture observation window, the primary submits no GL draws; the peer
+submits 1,426 draws/13,167,684 indices and no wrapped uploads, with untruncated counters.
+These are CPU submissions/callbacks, not completed frames. GPU-process CPU increases 24.53s
+across the wider trace-start-through-shutdown CPU bracket; this is not utilization over the
+11.873s Node window. The 195-cell/47-block public snapshot is not a per-canvas visible inventory.
+
+Trace commands, fixed clock marker, CPU snapshots and detach succeed, but Chrome reports data
+loss, bounded samples truncate and five flow IDs are unsupported. Retained PNG encoding 31.175ms
+is positive evidence only; missing trace data cannot establish exact causality or absent work.
+Attribution stops. The native capture exceeds one second, so no hosted profiling follow-up is
+authorized by this packet. Original baseline/matrix reruns and tracing expansion are excluded.
+
+Complete CPU/submission evidence separately justifies one terrain-only texture-cache package,
+with exact-pixel/lifecycle tests and one changed-image original-workload confirmation. This is
+a rendering-efficiency change, not proof of the capture cause. No block/dynamic caching, ticker
+change or gate relaxation belongs in it. Final-head CI/publication remains outstanding.
+
+Independent evidence review is clear. Strict probes, app hardening/0444 seed and cleanup pass; owned browser/app containers and
+network are absent. Frozen evidence: `/tmp/grenadiers-v0322-capture-profile-acceptance`, 595-file
+manifest SHA-256 `2863e684890909fce79e5e769f72e838c88862dfddbf4eb34e6cc60b6ec39c48`.
+
 ## Isolated renderer matrix — 2026-10-18 — non-reproduction
 
 Clean source `232eba28401af0eb9e50ce3f9649e879e4ecca72`, archive SHA-256
@@ -32,15 +67,13 @@ wording in a preserved audit addendum. Evidence: `/tmp/grenadiers-pixi-lifecycle
 original622-file manifest SHA-256 `07c6f63142938a5af0aa5a1d0d511db359d9206b358fc457f8af7411cfe0ffc7`,
 audit17-file manifest `7f044086a30e360f12e06036eeedf8e8e1b1c1567bdd97cdd4ce2e5c1a0d1dd2`.
 
-The final attribution task profiles the original natural reconnect case with explicitly
+The final attribution task subsequently profiled the original natural reconnect case with explicitly
 opt-in, bounded GL submission counters, public scene counts and canvas geometry, process CPU
 deltas and an arguments-stripped browser trace around its first audit/capture. Production
-rendering and release assertions remain unchanged. One native profile is planned; only if
-capture stays below one second may one predeclared hosted evaluation follow. Incomplete or
-unsupported profiling cannot establish absent work. This packet must select a measured code
-change or record the unresolved blocker and return to independent gameplay implementation.
+rendering and release assertions remained unchanged. Its completed result, interpretation limits and
+separate terrain-only optimization decision are recorded above. No hosted profile follows.
 
-## Hosted capture attribution — 2026-10-18 — isolated reproduction pending
+## Hosted capture attribution — 2026-10-18 — prior evaluation
 
 Exact instrumented head `482c8ba59ce4c2e0de413ecae7c020cf68ade51b` fails both browser jobs
 (`39089475906` PR, `39089473104` push); the eight other jobs pass. Both intended primary
@@ -65,17 +98,17 @@ gates/parity26 and the pure Chromium diagnostic pass1/1 in3.2 seconds. An initia
 fixture receiver error is corrected before the passing run; native timeout-path validation
 of the cutoff remains pending.
 
-The separate [renderer lifecycle experiment](game/renderer-diagnostics.md) will compare six
+The separate [renderer lifecycle experiment](game/renderer-diagnostics.md) was prepared to compare six
 predeclared pristine/active/suspended two-context cells using the actual Pixi renderer and
 synthetic public presentation data. It does not modify production rendering, game authority,
-release screenshot options, deadlines or retries. No reproduction or performance improvement
-is claimed before that experiment runs. Independent fixture review is clear after correcting
+release screenshot options, deadlines or retries. Its completed non-reproduction is recorded
+above. Independent fixture review is clear after correcting
 warm-up error propagation, shared initialization/warm-up/treatment barriers, actual history
 and reduced-motion evidence, post-capture invariants and cleanup precedence. Final E2E static,
 fixture lint/typecheck/build and ordinary-production marker isolation pass. Normal web gates
 pass259 tests with94.81/90.08/94.90/97.42% statement/branch/function/line coverage. The initial
 diagnostic build finds a nullable-host type error; a checked host accessor fixes it. No matrix
-cell has run yet. The fixture and its output remain separate from normal production assets.
+cell had run at this preparation boundary. The fixture and its output remain separate from normal production assets.
 
 ## Screenshot capture attribution — 2026-10-18 — CI blocked
 

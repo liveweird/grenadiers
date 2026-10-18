@@ -1,6 +1,6 @@
 import AxeBuilder from '@axe-core/playwright'
 import { expect, test, type Browser, type Frame, type Page, type TestInfo } from '@playwright/test'
-import { startBrowserStallDiagnostics, type BrowserStallDiagnostics } from '../tests/support/browser-stall-diagnostics'
+import { startBrowserStallDiagnostics } from '../tests/support/browser-stall-diagnostics'
 import { readViewportFits } from '../tests/support/diagnostic-phases'
 import { GameControlRecorder } from '../tests/support/duel'
 import { runGuardedLegacyAxeAudit, type LegacyAxeAudit } from '../tests/support/guarded-axe-audit'
@@ -174,27 +174,6 @@ async function publishSyntheticHeartbeats(page: Page, credential: string, socket
   }, { rawCredential: credential, rawSocketUrl: socketUrl })
 }
 
-async function exerciseForegroundWidth(page: Page, diagnostics: BrowserStallDiagnostics): Promise<void> {
-  await diagnostics.phase('foreground', 1, async () => page.bringToFront())
-  expect(diagnostics.summary().phases.slice(-2)).toMatchObject([
-    { label: 'foreground', boundary: 'sent', pageOrdinal: 1 },
-    { label: 'foreground', boundary: 'returned', pageOrdinal: 1 },
-  ])
-  expect(await diagnostics.phase('width', 1, async () => readViewportFits(page))).toBe(true)
-  await expect.poll(() => diagnostics.summary().pages[0].activityEvents
-    .filter((event) => ['page-enter', 'read-start', 'read-end'].includes(event.label))
-    .map((event) => event.label)).toEqual(['page-enter', 'read-start', 'read-end'])
-  const widthPagePhases = diagnostics.summary().pages[0].activityEvents
-    .filter((event) => ['page-enter', 'read-start', 'read-end'].includes(event.label))
-  expect(widthPagePhases.every((event) => event.pageAt >= 0
-    && event.timeOrigin > 0 && event.nodeAt >= 0)).toBe(true)
-  expect(diagnostics.summary().phases.slice(-2)).toMatchObject([
-    { label: 'width', boundary: 'sent', pageOrdinal: 1 },
-    { label: 'width', boundary: 'returned', pageOrdinal: 1 },
-  ])
-  expect(diagnostics.summary().phases.at(-2)!.nodeAt).toBeLessThanOrEqual(diagnostics.summary().phases.at(-1)!.nodeAt)
-}
-
 test('game control diagnostics stay bounded and exclude transport secrets', async ({ browser }) => {
   await exerciseGuardedLegacyAudit(browser)
   await exerciseSyntheticScreenshotStages()
@@ -263,7 +242,19 @@ test('game control diagnostics stay bounded and exclude transport secrets', asyn
     await expect.poll(() => diagnostics.summary().pages[0].activityEvents
       .some((event) => event.label === 'heartbeat')).toBe(true)
 
-    await exerciseForegroundWidth(page, diagnostics)
+    expect(await diagnostics.phase('width', 1, async () => readViewportFits(page))).toBe(true)
+    await expect.poll(() => diagnostics.summary().pages[0].activityEvents
+      .filter((event) => ['page-enter', 'read-start', 'read-end'].includes(event.label))
+      .map((event) => event.label)).toEqual(['page-enter', 'read-start', 'read-end'])
+    const widthPagePhases = diagnostics.summary().pages[0].activityEvents
+      .filter((event) => ['page-enter', 'read-start', 'read-end'].includes(event.label))
+    expect(widthPagePhases.every((event) => event.pageAt >= 0
+      && event.timeOrigin > 0 && event.nodeAt >= 0)).toBe(true)
+    expect(diagnostics.summary().phases.slice(-2)).toMatchObject([
+      { label: 'width', boundary: 'sent', pageOrdinal: 1 },
+      { label: 'width', boundary: 'returned', pageOrdinal: 1 },
+    ])
+    expect(diagnostics.summary().phases.at(-2)!.nodeAt).toBeLessThanOrEqual(diagnostics.summary().phases.at(-1)!.nodeAt)
 
     await exerciseActualScreenshotStages(page, diagnostics)
 
@@ -308,7 +299,7 @@ test('game control diagnostics stay bounded and exclude transport secrets', asyn
       await diagnostics.phase(index % 2 === 0 ? 'axe' : 'screenshot', 1, async () => undefined)
     }
     expect(diagnostics.summary().phases).toHaveLength(128)
-    expect(diagnostics.summary().phases.every((phase) => ['foreground', 'axe', 'width', 'screenshot']
+    expect(diagnostics.summary().phases.every((phase) => ['axe', 'width', 'screenshot']
       .includes(phase.label) && ['sent', 'returned'].includes(phase.boundary))).toBe(true)
     const phaseFailure = new Error('fixed-phase-failure')
     let retainedPhaseFailure: unknown

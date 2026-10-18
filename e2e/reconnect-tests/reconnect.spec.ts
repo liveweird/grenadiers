@@ -183,7 +183,6 @@ test('a browser restores its full live world and action floor before a fenced ta
     // the frame guard keeps these audits explicitly scoped to the current document.
     for (const [index, page] of pages.entries()) {
       const pageOrdinal = index + 1
-      await diagnostics.phase('foreground', pageOrdinal, async () => page.bringToFront())
       expect((await diagnostics.phase('axe', pageOrdinal,
         async () => runGuardedLegacyAxeAudit(page))).violations).toEqual([])
       expect(await diagnostics.phase('width', pageOrdinal,

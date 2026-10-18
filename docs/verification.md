@@ -1,6 +1,6 @@
 # Repository verification
 
-## Foreground capture experiment — 2026-10-18 — evaluation pending
+## Screenshot capture attribution — 2026-10-18 — CI blocked
 
 Clean diagnostic source `b2d966647310924257cb591625abe4478199d107` passes the changed
 reconnect and pure-diagnostic cases **2/2 Compose and 2/2 Kubernetes**, first attempts with
@@ -10,17 +10,24 @@ Compose12,780.635/17,782.816 ms and Kubernetes5,368.567/14,757.926 ms. Every sur
 stage finishes below9 ms. Heartbeats continue during captures, with zero temporary pages,
 diagnostic failures or pending stages. Strict probes, runtime hardening, external fixtures,
 continuous direct-pod forwarding and cleanup pass. Evidence remains in
-`/tmp/grenadiers-v0322-screenshot-stage-acceptance`; the other48 unaffected native cases
-are retained separately. This localizes a command boundary without identifying its cause.
+`/tmp/grenadiers-v0322-screenshot-stage-acceptance`. This localizes a command boundary
+without identifying its cause or resolving the CI timeout.
 
-The next bounded E2E experiment activates each page with `bringToFront` before its audit,
-width assertion and unchanged full-page screenshot. A separate fixed `foreground` phase
-measures activation. Gameplay checks finish before this loop; assertions, audit/capture
-ordering, screenshot options,120-second deadline and zero retries remain unchanged.
-Application inputs are unchanged. Independent review is clear; E2E static gates and parity26
-pass, and the pure Chromium diagnostic passes1/1 in3.1 seconds. Its initial added assertions
-exceeded the function-size limit; extracting the existing width checks fixes that gate without
-dropping coverage. Native evaluation is pending; no improvement is claimed.
+A separately reviewed foreground experiment at `f770970ee080189164750e1ede1917558c718020`
+activates each page before its audit, width assertion and unchanged full-page capture. Its
+static gates/parity26 and pure Chromium diagnostic pass; fresh native cases pass2/2 per target.
+Activation takes0.4–1.6 ms, but captures still take13.0/18.1 seconds in Compose and12.1/16.9
+seconds in Kubernetes. This does not support foregrounding as a remedy. The experiment is
+withdrawn; browser test inputs return exactly to the stage-diagnostic source above. Negative
+evidence remains in `/tmp/grenadiers-v0322-foreground-acceptance`.
+
+Evidence review corrects both native summaries: reconnect has a120-second budget, while the
+pure diagnostic has60 seconds. Two retained audio cases also execute the changed diagnostic
+helper, so they require fresh acceptance. The strict rollup is currently **50/52**, consisting
+of four fresh cases and46 unaffected retained cases; earlier52/52 generated status files are
+superseded by audit addenda. Initial HTTP000/not-ready probes establish no transport cause.
+The newer manifest covers raw reports, probes, runtime/security and cleanup evidence. Fresh
+audio acceptance remains pending. No assertion, screenshot option, deadline or retry is relaxed.
 
 ## Screenshot substage diagnostics — 2026-10-18 — native attributed
 

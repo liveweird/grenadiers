@@ -11,6 +11,17 @@ pub enum PickupKind {
     BlastRange,
     MovementSpeed,
     Heart,
+    Shield,
+}
+
+impl PickupKind {
+    pub(crate) const fn enabled_by(self, enabled: super::EnabledItems) -> bool {
+        match self {
+            Self::Heart => enabled.contains_heart(),
+            Self::Shield => enabled.contains_shield(),
+            _ => true,
+        }
+    }
 }
 
 /// A typed pickup component stored in one spatial layer.

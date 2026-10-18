@@ -186,8 +186,8 @@ fn configurable_rules_reject_the_legacy_lifecycle_profile() {
 }
 
 #[test]
-fn expanded_heart_mask_and_disabled_preset_replay_deterministically() {
-    for enabled in [EnabledItems::HEART, EnabledItems::EMPTY] {
+fn expanded_item_masks_and_disabled_preset_replay_deterministically() {
+    for enabled in [0, 16, 512, 528].map(|bits| EnabledItems::from_bits(bits).unwrap()) {
         let mut runtime = MatchRuntime::new(
             identity_for_profile(RoomProfile::ExpandedV5),
             RoundSeedSource::with_entropy(|bytes| {
@@ -198,14 +198,14 @@ fn expanded_heart_mask_and_disabled_preset_replay_deterministically() {
         runtime.initial_notice().unwrap();
         runtime.occupy(SeatId::One).unwrap();
         runtime.occupy(SeatId::Two).unwrap();
-        if enabled == EnabledItems::EMPTY {
+        if enabled != EnabledItems::HEART {
             runtime
                 .action(
                     SeatId::One,
                     1,
                     MatchAction::UpdateSettings {
                         settings_revision: 1,
-                        settings: RoomSettings::DEFAULT,
+                        settings: RoomSettings::DEFAULT.with_enabled_items(enabled),
                     },
                 )
                 .unwrap();
@@ -217,7 +217,7 @@ fn expanded_heart_mask_and_disabled_preset_replay_deterministically() {
                     1,
                     MatchAction::ReadyChecked {
                         ready: true,
-                        settings_revision: if enabled == EnabledItems::EMPTY { 2 } else { 1 },
+                        settings_revision: if enabled != EnabledItems::HEART { 2 } else { 1 },
                     },
                 )
                 .unwrap();

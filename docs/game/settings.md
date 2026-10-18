@@ -11,7 +11,8 @@ The creator can configure these rules before either starts the match:
 | Corner tolerance | 1/16–¼ tile, steps of 1/16 | Controls how far from a corridor center a perpendicular turn may align. |
 | Wins to finish | 1–9 | Sets round wins needed for match victory. Draws award no point. |
 | Bomb fuse | 1–5 seconds, steps of 0.5 | Sets the delay for successfully planted ordinary bombs. |
-| Heart | Enabled or disabled; enabled by default | Adds the one-hit protection pickup to generated soft blocks. Other optional items remain unavailable. |
+| Heart | Enabled or disabled; enabled by default | Adds the one-hit protection pickup to generated soft blocks. |
+| Shield | Enabled or disabled; disabled by default | Adds five-second immunity pickups; recollection refreshes the timer. |
 
 Both players see accepted values. Editing requires the original creator to be connected,
 unready and in the waiting lobby. Apply changes to update the shared rules; a genuine change
@@ -31,4 +32,5 @@ round/flame duration, loadouts and additional item pools remains in the [backlog
 
 Heart is introduced by the v0.3.25 implementation candidate. Expanded rooms retain immutable
 rules version 5/map `generated_v2` when Heart is disabled, including after preset changes.
-See [Heart behavior](heart.md) and [protocol compatibility](protocol-v8.md).
+Shield is available separately in the v0.3.26 candidate; switches preserve one another.
+See [Heart behavior](heart.md), [Shield behavior](shield.md) and [protocol compatibility](protocol-v8.md).

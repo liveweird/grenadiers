@@ -12,6 +12,7 @@
     "test": "playwright test",
     "test:pickups": "playwright test --config playwright.pickups.config.ts",
     "test:heart": "playwright test --config playwright.heart.config.ts",
+    "test:shield": "playwright test --config playwright.shield.config.ts",
     "test:controls": "playwright test --config playwright.controls.config.ts",
     "test:headed": "playwright test --headed",
     "test:ui": "playwright test --ui",

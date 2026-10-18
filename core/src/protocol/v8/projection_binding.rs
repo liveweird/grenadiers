@@ -165,13 +165,13 @@ pub(super) fn phase_allows_null_body(phase: &RoomPhase) -> bool {
     )
 }
 
-pub(super) fn heart_items() -> ItemSet {
-    ItemSet::new([ItemId::Heart]).expect("single Heart item is canonical")
+pub(super) fn expanded_items() -> ItemSet {
+    ItemSet::new([ItemId::Heart, ItemId::Shield]).expect("expanded items are canonical")
 }
 
 pub(super) fn available_items(version: RulesVersion) -> ItemSet {
     if version == RulesVersion::ExpandedV5 {
-        heart_items()
+        expanded_items()
     } else {
         ItemSet::empty()
     }

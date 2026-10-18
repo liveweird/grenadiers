@@ -1,5 +1,26 @@
 # Repository verification
 
+## Shield activation candidate — 2026-10-18 — native acceptance pending
+
+The v0.3.26 working candidate passes **413 core tests, 180 server tests and two doctests in each
+debug/release profile**, with four dedicated performance profiles intentionally ignored.
+Rust line coverage is **91.23%** (12,084/13,245 lines); all **291 web tests** pass with the
+unchanged coverage floors. Contracts, lint, Knip, builds, dependency audits, strict Kubernetes
+schemas (3/3), E2E static checks and **28-scenario parity** pass. Independent domain/protocol
+review is clear. Browser review identified an expiry-assertion gap; acceptance now derives the
+deadline from the real collection event and checks each retained authoritative timer against
+T+300, with observations before and after expiry. Coalesced delivery is allowed.
+
+Regression coverage includes opt-in masks, ordinary collection, refresh without stacking,
+Heart preservation, exact pre-damage expiry, both fire checks, one prevention event per player
+per tick, atomic overflow, legacy rejection and frozen prior seeded outputs. A seeded server
+scenario collects Shield, retains it through connected replacement and disconnected restore,
+survives an actual planted bomb, expires, dies to a later bomb and replays exactly. A final
+focused run verifies the strengthened bomb-placement assertion in both build profiles.
+
+No v0.3.26 native image, full browser scenario run or release is claimed. Native Compose and
+Kubernetes acceptance, visual inspection and exact final-head CI remain required.
+
 ## Heart activation candidate — 2026-10-18 — local checks only
 
 The v0.3.25 candidate passes **401 core tests, 179 server tests and two doctests** in both

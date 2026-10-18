@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.3.26 — 2026-10-18
+
+- Add opt-in Shield pickups: five seconds of refreshable immunity, independent of Heart equipment,
+  with exact expiry before damage and at most one prevention event per player per physical tick.
+- Add independent Heart/Shield lobby switches, a pixel shield glyph and current protection ring,
+  matching EN/PL guidance, deterministic generation and quiet reconnect/replay support.
+- Preserve Heart-only defaults and prior empty/Heart-only seeded arenas; add a separate ordinary-control
+  browser scenario for generated Shield collection, immunity and later unprotected elimination.
+
 ## 0.3.25 — 2026-10-18
 
 - Add the first optional pickup: Heart replaces the equipment slot and absorbs one lethal

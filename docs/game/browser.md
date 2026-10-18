@@ -79,7 +79,7 @@ voices. Returning from a hidden tab requires **Resume sound**; old events are di
 ## Exposed items and player upgrades
 
 Gameplay-v8 snapshots supply visible pickup cells and kinds under Expanded-v5 rules. Pixi draws distinct bomb,
-cross/range, speed and Heart marks above blocks and below bombs/flames/actors; it never guesses
+cross/range, speed, Heart and Shield marks above blocks and below bombs/flames/actors; it never guesses
 concealed contents. Retained drawings are reused while unchanged and destroyed when removed,
 replaced, or reset. The UI performs no collection simulation.
 
@@ -87,7 +87,7 @@ Both player rows show available bombs (capacity minus live bombs), capacity, ran
 levels 1–5 from authoritative actors. Running/nonfinal-result rows show alive or eliminated; pre-start rows show readiness. Final
 match rows show rematch consent, and authoritative vacant seats remain open despite frozen actors. Labels are localized in English and Polish. The existing single-column
 layout bounds the upgrade rows at narrow widths. Expanded-v5 rooms also show current equipment
-and physical-tick damage grace. A bounded corner aura marks Heart protection; reduced motion
+and physical-tick damage grace. A bounded corner aura marks Heart grace; a separate shield ring marks timed immunity; reduced motion
 keeps it static. Reconnecting renders current protection without replaying its consumption.
 
 ## Match facts and timers

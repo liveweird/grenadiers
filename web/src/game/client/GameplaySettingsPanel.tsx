@@ -8,6 +8,7 @@ const SPEEDS = [0, 1, 2, 3, 4] as const
 const TURN_ASSISTS = [64, 128, 192, 256] as const
 const WINS = [1, 2, 3, 4, 5, 6, 7, 8, 9] as const
 const FUSES = [60, 90, 120, 150, 180, 210, 240, 270, 300] as const
+const AVAILABLE_ITEMS = ['heart', 'shield'] as const
 const DEFAULT_SETTINGS: GameSettings = {
   startingSpeedLevel: 0, turnAssistUnits: 256, winsToFinish: 3, bombFuseTicks: 180,
   enabledItems: ['heart'],
@@ -27,7 +28,8 @@ interface Props {
   onApply(settings: GameSettings): boolean
 }
 
-function HeartSetting({ visible, checked, disabled, copy, onChange }: {
+function ItemSetting({ item, visible, checked, disabled, copy, onChange }: {
+  item: 'heart' | 'shield'
   visible: boolean
   checked: boolean
   disabled: boolean
@@ -36,9 +38,9 @@ function HeartSetting({ visible, checked, disabled, copy, onChange }: {
 }) {
   if (!visible) return null
   return <div className="item-setting">
-    <Checkbox label={copy.items.heart} checked={checked} disabled={disabled}
+    <Checkbox label={copy.items[item]} checked={checked} disabled={disabled}
       onChange={(event) => onChange(event.currentTarget.checked)} />
-    <Text size="xs">{copy.settings.heartDescription}</Text>
+    <Text size="xs">{copy.settings[`${item}Description`]}</Text>
   </div>
 }
 
@@ -58,6 +60,13 @@ export function GameplaySettingsPanel({ room, youSeat, pending, copy, onApply }:
   const dirty = useMemo(() => !sameGameSettings(draft, room.settings), [draft, room.settings])
   const update = <K extends keyof GameSettings>(field: K, value: GameSettings[K]): void => {
     setDraft((current) => ({ ...current, [field]: value }))
+  }
+  const toggleItem = (item: 'heart' | 'shield', enabled: boolean): void => {
+    setDraft((current) => ({
+      ...current,
+      enabledItems: AVAILABLE_ITEMS.filter((candidate) =>
+        candidate === item ? enabled : current.enabledItems.includes(candidate)),
+    }))
   }
   const lockText = editLockText(room, youSeat, Boolean(own?.ready), copy)
 
@@ -96,9 +105,12 @@ export function GameplaySettingsPanel({ room, youSeat, pending, copy, onApply }:
           }))} />
       </SimpleGrid>
       <Text className="settings-note" size="xs">{copy.settings.speedCap}</Text>
-      <HeartSetting visible={room.availableItems.includes('heart')}
+      <ItemSetting item="heart" visible={room.availableItems.includes('heart')}
         checked={draft.enabledItems.includes('heart')} disabled={!editable || pending} copy={copy}
-        onChange={(enabled) => update('enabledItems', enabled ? ['heart'] : [])} />
+        onChange={(enabled) => toggleItem('heart', enabled)} />
+      <ItemSetting item="shield" visible={room.availableItems.includes('shield')}
+        checked={draft.enabledItems.includes('shield')} disabled={!editable || pending} copy={copy}
+        onChange={(enabled) => toggleItem('shield', enabled)} />
       {dirty && <Text className="settings-lock" size="sm">{copy.settings.unapplied}</Text>}
       {lockText && <Text className="settings-lock" size="sm">{lockText}</Text>}
       <Group gap="sm">

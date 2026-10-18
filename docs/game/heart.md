@@ -22,8 +22,8 @@ during grace equips a future charge without extending the current grace period. 
 protection cannot undo damage that already occurred earlier in the update.
 
 The HUD shows the equipped Heart and remaining grace. Reconnecting restores this current
-state without replaying the previous absorption animation or sound. Other equipment, buffs,
-curses, special weapons and monsters remain separate implementation work.
+state without replaying the previous absorption animation or sound. Shield is a separate timed buff and leaves the Heart slot intact. Active Shield prevents damage
+before Heart is consumed. Other equipment, buffs, curses, weapons and monsters remain future work.
 
 ## Deterministic generation and compatibility
 

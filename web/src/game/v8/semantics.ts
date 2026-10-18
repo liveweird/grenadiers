@@ -26,27 +26,32 @@ export function itemSetSemanticError(
   return enabledItems.every((item) => available.has(item)) ? null : 'unavailableItem'
 }
 
-function supportedItem(kind: string, heartEnabled: boolean): boolean {
+function supportedItem(kind: string, heartEnabled: boolean, shieldEnabled: boolean): boolean {
   return ['bombCapacity', 'blastRange', 'movementSpeed'].includes(kind)
     || (kind === 'heart' && heartEnabled)
+    || (kind === 'shield' && shieldEnabled)
 }
 
-function supportedState(state: GameState | null, heartEnabled: boolean): boolean {
+function supportedState(state: GameState | null, heartEnabled: boolean, shieldEnabled: boolean): boolean {
   if (!state) return true
-  if (state.pickups.some((pickup) => !supportedItem(pickup.kind, heartEnabled))) return false
-  return state.actors.every((actor) => actor.type === 'hidden' || (
+  if (state.pickups.some((pickup) => !supportedItem(pickup.kind, heartEnabled, shieldEnabled))) return false
+  return state.actors.every((actor) => actor.type === 'visible' && (
     actor.inventory.weapon === null
     && (actor.inventory.equipment === null
       || (actor.inventory.equipment === 'heart' && heartEnabled))
-    && actor.effects.length === 0
+    && actor.effects.every((effect) => effect.kind === 'shield'
+      && shieldEnabled && effect.remainingTicks <= 300)
     && (heartEnabled || actor.damageGraceRemainingTicks === 0)
   ))
 }
 
-function supportedEvents(events: readonly WireEvent[], heartEnabled: boolean): boolean {
+function supportedEvents(
+  events: readonly WireEvent[], heartEnabled: boolean, shieldEnabled: boolean,
+): boolean {
   return events.every(({ kind }) => {
-    if (kind.type === 'pickupCollected') return supportedItem(kind.kind, heartEnabled)
-    return kind.type !== 'damagePrevented' || (kind.source === 'heart' && heartEnabled)
+    if (kind.type === 'pickupCollected') return supportedItem(kind.kind, heartEnabled, shieldEnabled)
+    return kind.type !== 'damagePrevented'
+      || (kind.source === 'heart' ? heartEnabled : shieldEnabled)
   })
 }
 
@@ -54,9 +59,14 @@ export function expandedProfileSemanticError(
   room: RoomView, state: GameState | null, events: readonly WireEvent[] = [],
 ): GameplayV8SemanticError | null {
   if (room.rulesVersion !== 5 || room.mapId !== 'generated_v2'
-    || room.availableItems.length !== 1 || room.availableItems[0] !== 'heart'
-    || room.settings.enabledItems.some((item) => item !== 'heart')) return 'unsupportedProfile'
+    || room.availableItems.length !== 2 || room.availableItems[0] !== 'heart'
+    || room.availableItems[1] !== 'shield'
+    || room.settings.enabledItems.some((item) => item !== 'heart' && item !== 'shield')) {
+    return 'unsupportedProfile'
+  }
   const heartEnabled = room.settings.enabledItems.includes('heart')
-  return supportedState(state, heartEnabled) && supportedEvents(events, heartEnabled)
+  const shieldEnabled = room.settings.enabledItems.includes('shield')
+  return supportedState(state, heartEnabled, shieldEnabled)
+    && supportedEvents(events, heartEnabled, shieldEnabled)
     ? null : 'unsupportedProfile'
 }

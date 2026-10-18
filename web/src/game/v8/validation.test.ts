@@ -25,21 +25,64 @@ describe('gameplay v8 validation and active profile', () => {
     expect(validateGameplayV8ServerMessage(message)).toEqual({ valid: true, value: message })
   })
 
+  it.each([[[]], [['heart']], [['shield']], [['heart', 'shield']]] as const)(
+    'accepts the supported enabled-item set %j', (enabledItems) => {
+      const message = snapshot(2)
+      message.room.settings.enabledItems = [...enabledItems]
+      expect(validateGameplayV8ServerMessage(message)).toEqual({ valid: true, value: message })
+    },
+  )
+
+  it.each([
+    ['shield only', ['shield'] as const],
+    ['Heart and Shield', ['heart', 'shield'] as const],
+  ])('accepts Shield state and protection events with %s enabled', (_label, enabledItems) => {
+    const message = snapshot(3)
+    message.room.settings.enabledItems = [...enabledItems]
+    const actor = message.state.actors[0]
+    if (actor.type !== 'visible') throw new Error('expected visible actor')
+    actor.effects = [{ kind: 'shield', remainingTicks: 300 }]
+    message.state.pickups = [{ cell: { column: 2, row: 2 }, kind: 'shield' }]
+    message.events = [
+      { tick: 1, index: 0, kind: { type: 'pickupCollected', id: actor.id, seat: actor.seat,
+        cell: { column: 2, row: 2 }, kind: 'shield' } },
+      { tick: 1, index: 1, kind: { type: 'damagePrevented', id: actor.id, seat: actor.seat,
+        source: 'shield' } },
+    ]
+    expect(validateGameplayV8ServerMessage(message)).toEqual({ valid: true, value: message })
+  })
+
   it.each([
     ['wrong identities', (message: ReturnType<typeof snapshot>) => { message.room.rulesVersion = 4 }],
     ['unknown availability', (message: ReturnType<typeof snapshot>) => {
-      message.room.availableItems = ['shield']
+      message.room.availableItems = ['heart', 'stopwatch']
       message.room.settings.enabledItems = []
     }],
     ['disabled Heart pickup', (message: ReturnType<typeof snapshot>) => {
       message.room.settings.enabledItems = []
       message.state.pickups = [{ cell: { column: 2, row: 2 }, kind: 'heart' }]
     }],
+    ['disabled Heart inventory', (message: ReturnType<typeof snapshot>) => {
+      message.room.settings.enabledItems = []
+      const actor = message.state.actors[0]
+      if (actor.type === 'visible') actor.inventory.equipment = 'heart'
+    }],
+    ['disabled Shield pickup', (message: ReturnType<typeof snapshot>) => {
+      message.state.pickups = [{ cell: { column: 2, row: 2 }, kind: 'shield' }]
+    }],
+    ['future equipment', (message: ReturnType<typeof snapshot>) => {
+      const actor = message.state.actors[0]
+      if (actor.type === 'visible') actor.inventory.equipment = 'kick'
+    }],
     ['unsupported inventory', (message: ReturnType<typeof snapshot>) => {
       const actor = message.state.actors[0]
       if (actor.type === 'visible') actor.inventory.weapon = 'remoteBomb'
     }],
-    ['unsupported effect', (message: ReturnType<typeof snapshot>) => {
+    ['future effect', (message: ReturnType<typeof snapshot>) => {
+      const actor = message.state.actors[0]
+      if (actor.type === 'visible') actor.effects = [{ kind: 'stopwatch', remainingTicks: 1 }]
+    }],
+    ['Shield effect while disabled', (message: ReturnType<typeof snapshot>) => {
       const actor = message.state.actors[0]
       if (actor.type === 'visible') actor.effects = [{ kind: 'shield', remainingTicks: 1 }]
     }],
@@ -48,10 +91,16 @@ describe('gameplay v8 validation and active profile', () => {
       const actor = message.state.actors[0]
       if (actor.type === 'visible') actor.damageGraceRemainingTicks = 1
     }],
-    ['unsupported protection source', (message: ReturnType<typeof snapshot>) => {
+    ['Shield protection while disabled', (message: ReturnType<typeof snapshot>) => {
       message.events = [{
         tick: 1, index: 0, kind: { type: 'damagePrevented', id: 1, seat: 'one', source: 'shield' },
       }]
+    }],
+    ['future pickup', (message: ReturnType<typeof snapshot>) => {
+      message.state.pickups = [{ cell: { column: 2, row: 2 }, kind: 'stopwatch' }]
+    }],
+    ['hidden actor', (message: ReturnType<typeof snapshot>) => {
+      message.state.actors[1] = { type: 'hidden', id: 2, seat: 'two', alive: true }
     }],
   ])('rejects %s after structural validation', (_label, mutate) => {
     const message = snapshot(3)
@@ -60,5 +109,14 @@ describe('gameplay v8 validation and active profile', () => {
     expect(validateGameplayV8ServerMessage(message)).toMatchObject({
       valid: false, source: 'semantics', error: 'unsupportedProfile',
     })
+  })
+
+  it.each([0, 301])('rejects Shield effect duration %s during structural validation', (remainingTicks) => {
+    const message = snapshot(4)
+    message.room.settings.enabledItems = ['heart', 'shield']
+    const actor = message.state.actors[0]
+    if (actor.type !== 'visible') throw new Error('expected visible actor')
+    actor.effects = [{ kind: 'shield', remainingTicks }]
+    expect(validateGameplayV8ServerMessage(message)).toMatchObject({ valid: false, source: 'schema' })
   })
 })

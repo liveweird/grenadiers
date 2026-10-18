@@ -196,16 +196,18 @@ fn generate_layers(
 }
 
 fn sample_pickup(source: &mut impl RandomWords, enabled: EnabledItems) -> Option<PickupKind> {
-    let value = if enabled.contains_heart() {
-        sample_below(source, 125)?
-    } else {
-        sample_percent(source)?
+    let value = match (enabled.contains_heart(), enabled.contains_shield()) {
+        (false, false) => sample_percent(source)?,
+        (true, false) => sample_below(source, 125)?,
+        (false, true) => sample_below(source, 115)?,
+        (true, true) => sample_below(source, 140)?,
     };
     Some(match value {
         0..40 => PickupKind::BombCapacity,
         40..80 => PickupKind::BlastRange,
         80..100 => PickupKind::MovementSpeed,
-        _ => PickupKind::Heart,
+        100..125 if enabled.contains_heart() => PickupKind::Heart,
+        _ => PickupKind::Shield,
     })
 }
 
@@ -331,6 +333,9 @@ fn index(cell: CellId) -> usize {
     usize::from(cell.row) * usize::from(ARENA_WIDTH) + usize::from(cell.column)
 }
 
+#[cfg(test)]
+#[path = "shield_tests.rs"]
+mod shield_tests;
 #[cfg(test)]
 #[path = "tests.rs"]
 mod tests;

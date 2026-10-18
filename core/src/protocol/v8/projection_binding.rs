@@ -195,6 +195,7 @@ pub(super) fn expanded_items() -> ItemSet {
         ItemId::ShortFuse,
         ItemId::ShortFlame,
         ItemId::LongFuse,
+        ItemId::ReverseControls,
     ])
     .expect("expanded items are canonical")
 }

@@ -173,3 +173,6 @@ fn repeated_long_fuse_refreshes_exactly_and_both_collection_orders_cancel() {
         }
     }
 }
+
+#[path = "reverse_controls_tests.rs"]
+mod reverse_controls_tests;

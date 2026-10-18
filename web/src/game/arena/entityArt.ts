@@ -109,12 +109,20 @@ export function makePickup(kind: RenderablePickupKind): Graphics {
     pixels(drawing, PALETTE.blue, [[19, 28, 11, 4], [21, 23, 7, 6], [23, 18, 3, 7]])
     pixels(drawing, PALETTE.blueLight, [[23, 25, 3, 4], [24, 20, 2, 4]])
     pixels(drawing, PALETTE.brick, [[14, 15, 4, 4], [31, 15, 4, 4], [13, 34, 23, 3]])
-  } else {
+  } else if (kind === 'longFuse') {
     pixels(drawing, PALETTE.deepInk, [[11, 24, 22, 12], [15, 20, 14, 18], [28, 16, 5, 10], [31, 12, 9, 5]])
     pixels(drawing, PALETTE.ink, [[14, 25, 16, 9], [18, 22, 9, 4]])
     pixels(drawing, PALETTE.blueLight, [[16, 26, 4, 5]])
     pixels(drawing, PALETTE.flame, [[39, 9, 4, 5], [42, 13, 4, 4]])
     pixels(drawing, PALETTE.flameCore, [[40, 11, 3, 3]])
+  } else {
+    pixels(drawing, PALETTE.deepInk, [
+      [12, 17, 22, 4], [12, 29, 22, 4], [9, 20, 4, 10], [33, 20, 4, 10],
+      [30, 29, 7, 4],
+    ])
+    pixels(drawing, PALETTE.blue, [[13, 21, 19, 4], [13, 25, 19, 4]])
+    pixels(drawing, PALETTE.white, [[9, 21, 7, 4], [30, 25, 7, 4]])
+    pixels(drawing, PALETTE.brick, [[9, 25, 4, 4], [33, 21, 4, 4]])
   }
   return drawing
 }

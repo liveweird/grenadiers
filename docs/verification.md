@@ -1,5 +1,78 @@
 # Repository verification
 
+## Reverse Controls fresh native acceptance — 2026-10-18 — 66/66
+
+Frozen source `ba4aa61a16488d3f39d5ee0bd69d2b3956f68f3d`, archive SHA-256
+`8a46016482bf36ff903aeaf5f76af5a720622861ac990a2d9cbf35ad2d6c08e6`, builds fresh no-cache
+image `sha256:7f44bad5be71802e4c35336f0ab53736b75099351e974b34d15b1c54f807bd2e`.
+Its saved archive hashes to
+`928044de2017ec1ce25d119dd6a2f4e5124bac0ee65127bc2a5f49f531010a9d`.
+The first and only wrapper invocation exits **0**, passing **33/33 Compose and 33/33 Kubernetes**
+cases, including all seven optional item scenarios. All 30 HTML reports and 78 configured PNGs
+verify, with no failure screenshots, retries, reruns or carried results. E2E cursor assertions run
+from separately mounted frozen source; the OCI image contains compiled product assets.
+
+The pinned browser runs Node 24.21.0, Playwright 1.63.0 and Chrome 153.0.8010.12. Twenty hardened
+runtime records verify UID/GID 65532, dropped capabilities, no privilege escalation and read-only
+roots. Nine external mode-0444 seeds drive ten fixture identities per target; Kubernetes retains
+ten unique pod UIDs and ten serial direct-pod port-forward lifecycles. Strict 200/JSON/no-store
+probes, pinned archive-only Trivy 0.74 with zero fixable HIGH/CRITICAL findings, the frozen
+Node/YAML checker with required success output, and strict Kubernetes 1.33 validation of all three
+resources pass. Final containers/network/namespace/process/port cleanup passes.
+
+All four latency profiles retain 20 samples, zero exceedances and zero throttling. Compose
+local/delay-50ms maxima are **54.896/164.940 ms**; Kubernetes maxima are **55.388/151.280 ms**.
+Root retained fresh scoped worker acknowledgments and actual current port-forward checks,
+releasing each quiet hold only after the respective eleven-case latency result passed.
+
+Actual pre/post dependency snapshots match: 8,215 files, 13 symlinks, 132 exact installed lock
+entries and 42 optional omissions. Of these inputs, **8,186 package files came from fresh Node 24
+installation and 29 jiti cache inputs were reused from the previously accepted pinned dependency
+input**. All current hashes, tar snapshots, metadata and proofs were generated afresh; no browser
+result was carried. Discarded Node 26 setup, replacement of an uncaptured build by the final
+logged build, and the corrected browser probe are retained as setup history. Frozen source,
+relative source locks, image IDs and the 1,015-entry preparation manifest match after execution.
+Its SHA-256 is `eca5a6fd567aa19fab939845f6bbf67783f0c810c8742f66382007c93fa25e57`.
+
+Sealed evidence at `/tmp/grenadiers-v0331-event-cursor-native-acceptance` includes RESULT,
+root visual review, quiet coordination and independent guard records. Its 1,799-entry final
+manifest hashes to `fcd6be180127f42976e333734354e33dc90367c40dab30624c24579b55d43e76`.
+The original RESULT overstates the still-image review by mentioning an active effect/timer.
+A separate seven-entry visual erratum at `/tmp/grenadiers-v0331-visual-record-correction`,
+manifest SHA-256 `ddb5943ae194dcfb75383b8fb5599b48a1d25c657af2684e939a364d38cd937e`,
+corrects that wording without modifying the original seal or claiming a rerun.
+
+Root actually viewed and copied the fresh [desktop uncollected pickup](screenshots/reverse-controls-desktop.png)
+and [Polish 320px after expiry/release](screenshots/reverse-controls-polish-320.png). Layout and
+localized settings were readable without observed overlap/clipping; exact inversion and expiry
+are established by browser/domain assertions. The capture SHA-256 values are
+`b933ce3d3356433954c0a5332dfe3eb501432ad75a5aebc006e2d8d52eaddffa` and
+`d1328d33e130935218e534fba78516f8f0ff734f13ddbe16e81fbfd9906db3da`.
+Product and test inputs are unchanged after the accepted source; subsequent edits are only
+this documentation and copied captures. Existing local gates remain 479 core, 186 server and
+two doctests in each Rust profile, 482 web tests, 34 static scenarios and unchanged coverage
+floors. Independent final evidence, erratum, capture and documentation review is clear;
+exact-head CI remains pending.
+
+The preceding Long Fuse release is now published as
+[v0.3.30](https://github.com/liveweird/grenadiers/releases/tag/v0.3.30), merged in
+[PR 76](https://github.com/liveweird/grenadiers/pull/76). Candidate runs `39118087194` and
+`39118084669` passed all ten jobs; post-merge run `39119339836` passed all five jobs against
+`894d6fe45a33aada83ca0862c265817220f31db1`, each browser run passing 32 cases. Older pending
+sections below are chronological records for their named source, not current release status.
+
+## Reverse Controls stable-cursor parent acceptance integration — 2026-10-18 — native pending
+
+The final accepted Long Fuse integrated parent `6cd809fea81a9eceef06b2f0a2e7ff7ebeb6b9ef`
+is integrated with its corrected-source 64/64 evidence and actual captures. This preserves
+v0.3.31, the canonical seven-item catalog and the complete stable-cursor driver. Product,
+API, Cargo, version and every test input are byte-unchanged from reviewed `1393950`; only
+documentation and copied parent captures change. Existing 482-web-test and 34-static-scenario
+gates remain applicable. Repository, diff and local document links pass; independent integration
+review is clear. Long Fuse exact-head CI/publication remains independently pending. Reverse
+Controls requires fresh whole 33+33 same-image native acceptance and exact-head CI. Its earlier
+15-case interrupted record supplies no carried results.
+
 ## Long Fuse stable-cursor native acceptance — 2026-10-18 — fresh 64/64
 
 Corrected source `e0ffd635f9aa0b25c1f2dc00a5d20d8fc00be831`, archive SHA-256
@@ -50,6 +123,17 @@ Rust profile, 409 web tests and 33 static scenarios, with unchanged coverage flo
 Independent final evidence review is clear; exact-head CI remains pending. Publication is recorded in
 [release notes](https://github.com/liveweird/grenadiers/releases).
 
+## Reverse Controls bounded-history integration — 2026-10-18 — native acceptance pending
+
+The reviewed Long Fuse cursor correction `e0ffd635f9aa0b25c1f2dc00a5d20d8fc00be831` is
+integrated. The inherited Long Fuse scenario matches that source except for the canonical
+seven-item catalog. Product sources, API, Cargo inputs, version and all other test inputs are
+byte-unchanged from `6ac0fc2`; the existing product checks remain applicable. E2E lint, Knip,
+type checking, 34-scenario parity, repository and diff checks pass. Independent integration
+review is clear. Long Fuse requires its corrected fresh native acceptance and final-head CI;
+Reverse Controls then requires that final parent and a new whole 33+33 run. The interrupted
+15-case record below supplies no carried acceptance.
+
 ## Long Fuse bounded-history cursor correction — 2026-10-18 — fresh acceptance pending
 
 Candidate `fbc8593088de89dd60ed2457af508240994f83fa` failed both first hosted CI runs:
@@ -80,6 +164,68 @@ none failed; the directed interruption returned 130. Its isolated evidence at
 `2aeca61865b4e86fcbac13142518c7d1fdc6af4db2ace5fe035e13a7c4659156`.
 All post-run integrity and cleanup checks pass, but it has no accepted or carryable matrix.
 Reverse Controls requires the corrected final parent and a fresh whole 33+33 run.
+
+## Reverse Controls final-parent integration — 2026-10-18 — native acceptance pending
+
+The final audited Long Fuse parent `2ffb85fcd476bce0fdf1c5fbc979fd78234afc8b` is integrated,
+including all twelve accepted predecessor screenshots and the complete corrected timing drivers.
+The v0.3.31 version and canonical seven-item catalog remain. Product sources, API, Cargo inputs
+and every test input are byte-unchanged from the reviewed integration `9df6c3f`; its 482-test web
+and 34-scenario static gates therefore apply without rerunning them. Repository, diff and local
+document links pass. Long Fuse PR #76 final CI/publication is pending independently. Fresh
+33+33 same-image native acceptance and final-head CI are required for Reverse Controls.
+
+## Reverse Controls predecessor-driver integration — 2026-10-18 — acceptance pending
+
+The reviewed source `6b818f1e7b3663fa05a23ad6d77950f7d677bef7` is integrated, including
+published Short Flame parent assets, corrected predecessor timing scenarios and the valid-zero
+Long Fuse placement assertion. Long Fuse native acceptance is still running against its separate
+source/image; no result from that run certifies Reverse Controls. The v0.3.31 version and exact
+seven-item catalog remain. Fresh 33+33 native acceptance and final-head CI remain required after
+integrating the final Long Fuse release parent.
+
+Integration checks pass under Node 24.21.0: all **482 web tests** across 41 files, coverage
+**95.20/90.94/95.51/97.61%** (statement/branch/function/line), contracts, lint, Knip and
+production build, plus repository checks and E2E lint, Knip, type checking and **34-scenario
+parity**. Core, server, API and Cargo inputs are byte-unchanged from the reviewed Reverse
+Controls candidate; all six predecessor item scenarios match the reviewed Long Fuse source
+apart from the exact seven-item catalog. Independent integration review is clear. These
+checks establish no native acceptance for Reverse Controls.
+
+## Reverse Controls terrain cache integration — 2026-10-18 — refreshed native acceptance pending
+Records below are frozen against their named sources. Publication and later CI status are
+recorded in [release notes](https://github.com/liveweird/grenadiers/releases).
+
+The current terrain-cache/shared-diagnostics integration passes all 482 web tests across 41 files, with coverage
+of 95.20/90.94/95.51/97.61% above the unchanged 85% floors, production and diagnostic-fixture builds, and E2E
+static checks with 34 documented scenarios. Core, server, version and API content are unchanged
+by this integration. Reverse Controls has no completed native baseline. The inherited Heart-only record
+below certifies source `00d76ac9cc08e7bb4627caf7897e02c3f15a43d2`; it includes neither
+Reverse Controls, Long Fuse, Short Flame, Short Fuse, Golden Flame, Shield nor the terrain cache. Fresh native acceptance and final-head CI remain required for this tree.
+
+## Reverse Controls candidate — 2026-10-18 — local checks complete
+
+The v0.3.31 candidate activates opt-in Reverse Controls for exactly 600 physical ticks. Raw held
+directions and recency remain authoritative while simulation movement uses their opposite. The
+collection tick moves normally, the following tick starts inversion, and the exact expiry tick
+returns to ordinary movement. Pending turn assistance clears only when inversion state changes.
+
+Catalog bit 18 and a final weight of 15 preserve the previous 64 generation paths and extend the
+supported configuration set to all 128 subsets. The deterministic seed fixture places Reverse
+Controls at cell (3,1). Protocol, replay, web and browser-scenario coverage are included.
+
+Debug and release suites pass **479 core tests, 186 server tests and two doctests**; four
+dedicated performance profiles remain ignored. Rust line coverage is **91.56%**, above the
+unchanged 80% floor. All **481 web tests** across 41 files pass with statement/branch/function/
+line coverage of **95.17/90.95/95.49/97.60%**. Formatting, Clippy, repository limits, generated
+contract checks, lint, Knip, production builds, E2E static checks and **33-scenario parity** pass.
+Cargo-deny, both cached offline npm audits with zero vulnerabilities, and strict Kubernetes
+schemas for all three resources pass. Dependency lock graphs are unchanged except for the two
+workspace package versions in Cargo.lock. Independent backend and frontend/browser-scenario
+reviews are clear. Review fixes prove every held command remains raw east and key release stops
+both peers across three later snapshots spanning six physical ticks; focused Pixi/cue tests pass.
+The native Reverse Controls playthrough and screenshots, candidate-image acceptance, and
+final-head CI remain pending.
 
 ## Long Fuse native acceptance — 2026-10-18 — fresh 64/64
 

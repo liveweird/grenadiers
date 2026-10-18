@@ -114,7 +114,8 @@ async fn two_members_receive_personalized_admission_and_live_waiting_updates() {
             "goldenFlame",
             "shortFuse",
             "shortFlame",
-            "longFuse"
+            "longFuse",
+            "reverseControls"
         ])
     );
     let code = created["room"]["roomCode"].clone();

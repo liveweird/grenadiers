@@ -3,6 +3,7 @@ import type { GameClientState } from './clientTypes'
 
 const renderedPickups = new Set([
   'bombCapacity', 'blastRange', 'movementSpeed', 'heart', 'shield', 'goldenFlame', 'shortFuse', 'shortFlame', 'longFuse',
+  'reverseControls',
 ])
 
 export function presentSnapshot(state: GameClientState): SnapshotMessage | null {
@@ -37,13 +38,15 @@ export function presentSnapshot(state: GameClientState): SnapshotMessage | null 
             effects.find((effect) => effect.kind === 'shortFlame')?.remainingTicks ?? 0,
           longFuseRemainingTicks:
             effects.find((effect) => effect.kind === 'longFuse')?.remainingTicks ?? 0,
+          reverseControlsRemainingTicks:
+            effects.find((effect) => effect.kind === 'reverseControls')?.remainingTicks ?? 0,
         })),
       bombs: bombsHidden ? [] : snapshot.state.bombs,
       flames: snapshot.state.flames,
       pickups: snapshot.state.pickups.filter(
         (pickup): pickup is typeof pickup & {
           kind: 'bombCapacity' | 'blastRange' | 'movementSpeed' | 'heart' | 'shield'
-            | 'goldenFlame' | 'shortFuse' | 'shortFlame' | 'longFuse'
+            | 'goldenFlame' | 'shortFuse' | 'shortFlame' | 'longFuse' | 'reverseControls'
         } =>
           renderedPickups.has(pickup.kind),
       ),

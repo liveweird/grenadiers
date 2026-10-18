@@ -2,10 +2,10 @@
 
 Status: [Heart](heart.md), [Shield](shield.md), [Golden Flame](golden-flame.md),
 [Short Fuse](short-fuse.md) and [Short Flame](short-flame.md) are published through v0.3.29.
-The v0.3.30 [Long Fuse](long-fuse.md) increment passes local checks. Its earlier 64/64 native
-source remains separately recorded; hosted CI exposed a bounded-history driver cursor defect,
-and the correction requires fresh native acceptance and final-head CI. Verification records
-the source-specific results and disclosed post-run bookkeeping exception.
+The v0.3.30 [Long Fuse](long-fuse.md) increment passes local checks and corrected-source native
+acceptance: 32/32 Compose and 32/32 Kubernetes cases, wrapper exit zero, no retries or carried
+results. Independent final evidence review is clear; final-head CI remains pending. Verification
+retains the earlier hosted failure and separately named source-specific attempts.
 Expanded-v5/generator-v2 rooms and gameplay-v8 are retained; see
 [verification](../verification.md) and
 [release notes](https://github.com/liveweird/grenadiers/releases).

@@ -1,5 +1,55 @@
 # Repository verification
 
+## Long Fuse stable-cursor native acceptance — 2026-10-18 — fresh 64/64
+
+Corrected source `e0ffd635f9aa0b25c1f2dc00a5d20d8fc00be831`, archive SHA-256
+`932bb85f796d87502dfa235f25b06fbd02a3735080eb0cfd915067b86a85f146`, builds fresh no-cache
+image `sha256:55aa95c71be6c3373fb119100df3e8d5cb03e9e0738e948c53e7ed2dc4d692f4`.
+Its saved archive hashes to
+`97ee74a408d244807faf7dc1c0ddae4e43d76b568e835d64b308f1f58490b026`.
+The first and only wrapper invocation exits **0**, passing **32/32 Compose and 32/32 Kubernetes**
+cases, including all six optional item scenarios. All 28 reports and 74 configured PNGs verify,
+with no failure screenshots, retries, reruns or carried results. The stable placement cursor
+and valid-zero assertion run from separately mounted frozen E2E source; the application image
+contains the compiled product assets, including the current Gear label and Long Fuse artwork.
+
+The pinned browser is Node 24.21.0, Playwright 1.63.0 and Chrome 153.0.8010.12. Eighteen runtime
+records verify UID/GID 65532, dropped capabilities, no privilege escalation and read-only roots.
+Eight external mode-0444 seeds drive nine fixture identities per target; Kubernetes retains nine
+unique pod UIDs and nine serial direct-pod port-forward lifecycles. Strict 200/JSON/no-store
+probes, archive-only pinned Trivy 0.74 with zero fixable HIGH/CRITICAL findings, the frozen
+Node/YAML checker with required success output, and strict Kubernetes 1.33 validation of all
+three resources pass. Final containers/network/namespace/process/port cleanup passes.
+
+All four latency profiles retain 20 samples, zero exceedances and zero throttling. Compose
+local/delay-50ms maxima are **60.805/159.221 ms**; Kubernetes maxima are **110.890/155.845 ms**.
+Root coordination retains separate fresh scoped worker acknowledgments and actual current
+port-forward checks. Heavy holds end only after the respective eleven-case latency result is
+zero; acknowledgments concern cooperating workers, without claiming global host idleness.
+
+Actual pre/post dependency snapshots match: 8,215 files, 13 symlinks, 132 exact installed lock
+entries and 42 optional omissions. Both dependency tar snapshots hash to
+`daccf3269e949a85682437e8ffdf9694ef4d63c8b465f12c2ce8a595c0afcf4b`.
+Frozen source, source archive, all three identically relative lock records, image IDs and the
+1,001-entry preparation manifest match after execution. This wrapper needs no lock-path repair.
+The preparation manifest SHA-256 is
+`2ba05392949480f5904b4e4a96679b19748eb8ab906f9ac9995a199a4c287516`.
+Sealed evidence at `/tmp/grenadiers-v0330-event-cursor-native-acceptance` includes RESULT,
+root visual review and quiet coordination; its 1,727-entry final manifest hashes to
+`bba883f044653dccc4bb23e2dceda52bf7c3cd9fc6403c9ea6294c740e421f40`.
+Earlier failures, interrupted runs and bookkeeping/provenance exceptions remain separately
+recorded below and supply no cases or captures to this acceptance.
+
+Root visually reviewed and copied the fresh [desktop pickup](screenshots/long-fuse-desktop.png)
+and [Polish 320px active curse](screenshots/long-fuse-polish-320.png). Their SHA-256 values are
+`8340bf832e232e427bc3aac7545ab2c042cd4f39ee9ce0d72fe7bcbd2a732640` and
+`47558bfd4482048979c48d2160088322d58b53cba0189cf53f09b57837840cbb`.
+Product/test inputs remain unchanged after this accepted source; later changes are documentation
+and copied captures. The local baseline remains 466 core, 184 server and two doctests in each
+Rust profile, 409 web tests and 33 static scenarios, with unchanged coverage floors.
+Independent final evidence review is clear; exact-head CI remains pending. Publication is recorded in
+[release notes](https://github.com/liveweird/grenadiers/releases).
+
 ## Long Fuse bounded-history cursor correction — 2026-10-18 — fresh acceptance pending
 
 Candidate `fbc8593088de89dd60ed2457af508240994f83fa` failed both first hosted CI runs:

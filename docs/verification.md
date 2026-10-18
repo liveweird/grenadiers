@@ -1,5 +1,81 @@
 # Repository verification
 
+## Canonical projections with terrain cache — 2026-10-18 — native 52/52, final CI pending
+
+Clean source `20793428554458e69fe7014232d8d08e7ea089bc`, archive SHA-256
+`4e490088c7a5f8eaadecdd6414642c4c9c453286772b2fcf00c35750a97f6303`, builds one image:
+`sha256:2b4384501ffbd7ac990c7be0f7f609ac9278da61c2afd04f8415a9833cc83258`.
+Its saved archive hashes to `39067add856a3f383e658b98d1544f413a95258ff9abd453c1c96661346cfe42`.
+Fresh acceptance passes **26/26 Compose and 26/26 Kubernetes**, first attempts, retries zero,
+one worker. All ordinary assertions and budgets remain unchanged. The optional capture profiler
+is unset; normal failure capture and all 42 configured screenshots are retained.
+
+Each runtime passes 15 functional and 11 latency cases. Four latency profiles retain 20 samples
+each, zero exceedances and zero CPU throttling. Local/shaped maxima are **43.964/163.239ms Compose**
+and **56.008/163.934ms Kubernetes**. Runtime security, strict exact-200 JSON/no-store probes,
+mode-0444 external fixtures, three fresh Kubernetes pod UIDs, direct forwarding in one long-lived
+runner and complete cleanup pass. Pinned Trivy archive-only scanning reports zero fixable
+HIGH/CRITICAL findings; strict Kubernetes 1.33 validation passes three resources. A setup-only
+schema invocation omitted Node from PATH and exited 127 before any scenario; its correction and
+initial forwarding-not-ready probes remain preserved. No substantive test was retried.
+
+All **260 web tests** pass; coverage is **94.85/90.08/94.92/97.44%**, above unchanged floors.
+Production and diagnostic-fixture builds, contract checks, lint, Knip and E2E static parity 27
+pass. This final verification update changes documentation only after the accepted source.
+Independent code/integration and complete native-evidence reviews are clear. Final-head hosted
+CI and publication remain required. Live rooms still use v6; optional pickups remain disabled.
+
+Evidence: `/tmp/grenadiers-v0323-terrain-native-acceptance`, 945-file final manifest SHA-256
+`c68bc0f99c5568e1edf90c9e3e16fe38072703d0222d61c0cdf35bb44f9b4b92`.
+
+## Earlier canonical projection verification
+
+The v0.3.23 candidate passes **373 core tests, 170 server tests and two doctests in each debug and release profile**, with four
+dedicated performance profiles intentionally ignored. Rust line coverage is **92.25%**
+(10,207/11,064 lines), above the unchanged 80% floor. All **259 web tests**, contract checks,
+ESLint, Knip, builds, E2E static checks, dependency audits and strict pinned Kubernetes schemas
+pass. The application still uses gameplay-v6; optional items remain disabled. The reviewed renderer
+lifetime correction is integrated; web statement/branch/function/line coverage is
+**94.81/90.08/94.90/97.42%**, and all 26 E2E static scenarios match.
+
+Independent review is clear. Regression tests establish complete-world validation before
+filtering, hidden record and ownership checks, exact event/world fuse consistency, paused
+Stopwatch provenance, eliminated actor cleanup, historical pickup geometry, captured audiences,
+recipient-local indexes, bounded reports and atomic two-perspective encoding. The active legacy
+projector directly rejects non-public audiences without partial encoding. Read-only observations
+preserve physical-clock expiry and frozen-result behavior. Archived contracts and replay records
+are unchanged.
+
+The pre-correction image `sha256:1b5b5e39a78178c50df3de226621c0307249d8003baffc33ab170db0826eb3e7`
+passed Compose 25/25 and Kubernetes functional 15/15 with zero retries. Kubernetes latency was
+not run: the evaluation was interrupted after confirming the release-profile takeover defect.
+Evidence remains at `/tmp/grenadiers-v0323-acceptance`; that image does not certify the fix.
+The fix and strengthened acceptance are integrated, and full debug/release gates pass.
+
+Clean source `fc37bbf996ca3fbed5ff2c085702a26ede47b8ea`, archive SHA-256
+`d42dc6a3a9edd29bd9ccf4a6ba8c6c987d79023deaed5159644f0cca6395b178`, builds fresh image
+`sha256:9e3d9611f5430b91002ec15fc2ef79941570862476a0a577510d264d40da29c9`.
+The image archive hashes to `39ac9b8792a07fb3b4123cf3449e11d5a44998012e28711a35fc5ca99d92f69c`.
+Fresh first-attempt acceptance passes **26/26 Compose and 26/26 Kubernetes**, retries zero,
+with independent evidence review clear. Local/shaped maxima are **56.641/142.426 ms** in
+Compose and **49.553/159.893 ms** in Kubernetes; each profile has 20 samples, zero exceedances
+and zero CPU throttling. Pinned archive-only Trivy finds zero fixable HIGH/CRITICAL findings;
+strict Kubernetes schemas validate 3/3. Runtime hardening, strict no-store probes, external
+mode-0444 fixtures, fresh pod/forward lifecycles and cleanup pass.
+
+Evidence is `/tmp/grenadiers-v0323-guarded-acceptance`; its summary SHA-256 is
+`810e04c5015119d58782276afc07b4ac42b1b2e00f8c9b886cbea693fe0d602a`. The selective evidence
+manifest verifies; it does not hash every raw report. The post-success shell wrapper variable
+failure, wrong preparation arity, missing generated dependency and sandbox-blocked schema fetch
+remain preserved as setup-only failures, before any browser scenario. No scenario failed or
+was retried. Saved files prove approval-gate ordering and continuous direct-pod forwarding;
+the coordinator ACK content and literal PTY attachment remain external to those logs. Runtime
+seed modes are recorded, but their hashes were not independently read inside containers.
+
+This certifies local native acceptance, without a hosted-CI or production-deployment claim.
+Publication requires exact-head hosted gates after the predecessor is merged. Later changes
+to application or browser test inputs require their corresponding evidence to be refreshed.
+
 ## Static terrain cache — 2026-10-18 — native 52/52, final CI pending
 
 Clean source `a9619e6a033e8956081bb7d4804078d61e4ae69c`, source archive SHA-256
@@ -349,8 +425,7 @@ All **259 web tests** across 37 files pass; statement/branch/function/line cover
 **94.81/90.08/94.90/97.42%**. Contract checks, lint, Knip and production build pass. This fixes
 confirmed unnecessary work; it does not attribute the separate 12,928 ms peer task below.
 Independent review is clear. A rebuilt image, fresh native acceptance and final-head CI remain required.
-
-## Arena renderer lifetime correction — 2026-10-18 — acceptance pending
+## Historical v22 arena renderer lifetime correction — 2026-10-18
 
 The single instrumented Linux run of clean harness `1bf4d74` passes its reconnect case in
 27.7 seconds, without retries, using the unchanged `efb5c7f...` image. On the primary page,
@@ -365,7 +440,7 @@ worlds, paints the latest baseline before reveal, and releases it on final compo
 Async ownership, StrictMode cancellation and later-activation initialization retries are explicit.
 Native reconnect acceptance also checks that the original canvas survives restore and remains
 connected but hidden after terminal takeover. Deadlines and retry policy remain unchanged.
-Fresh web verification passes **257 tests** across 36 files, with statement/branch/function/line
+The v0.3.22 renderer verification passes **257 tests** across 36 files, with statement/branch/function/line
 coverage of **94.81/90.05/94.90/97.42%**. Lint, TypeScript, Knip, production build and contract
 checks pass. Focused lifecycle coverage includes first-paint and suspension failures, bounded
 activation retries and recovery after an initialization completes while no world is active.

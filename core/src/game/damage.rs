@@ -10,6 +10,11 @@ pub struct DamageGrace {
 }
 
 impl DamageGrace {
+    #[must_use]
+    pub(crate) const fn received_at(self) -> Tick {
+        self.received_at
+    }
+
     const fn received(at: Tick) -> Self {
         Self { received_at: at }
     }

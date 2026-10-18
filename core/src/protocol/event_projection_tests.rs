@@ -138,6 +138,24 @@ fn chain_report_projects_every_phase_event_in_original_order() {
 }
 
 #[test]
+fn legacy_projection_rejects_non_both_audience_without_partial_encoding() {
+    let report = chain_report();
+    assert!(project_events(std::slice::from_ref(&report)).is_ok());
+
+    for audience in [
+        crate::game::EventAudience::One,
+        crate::game::EventAudience::Neither,
+    ] {
+        let mut restricted = report.clone();
+        restricted.events[0].audience = audience;
+        assert_eq!(
+            project_events(&[restricted]),
+            Err(ProjectionError::InvalidEvent)
+        );
+    }
+}
+
+#[test]
 fn three_consecutive_reports_are_accepted_and_indices_restart_per_tick() {
     let mut state = state_at(CellId::new(2, 5), CellId::new(12, 10));
     let first = state.step(&[place_one()]).unwrap();
@@ -280,6 +298,7 @@ fn mixed_valid_and_unsupported_report_window_fails_as_a_whole() {
     bomb.trigger = BombTrigger::Remote;
     unsupported.events.push(crate::game::StepEvent {
         tick: unsupported.tick,
+        audience: crate::game::EventAudience::Both,
         kind: crate::game::StepEventKind::BombDetonated(bomb),
     });
 

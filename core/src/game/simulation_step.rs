@@ -3,7 +3,7 @@ use std::collections::BTreeMap;
 use super::{RoundResult, SeatInput, State, StepError, StepReport};
 use crate::game::bombs::BombTrigger;
 use crate::game::damage::{DamageOutcome, apply_damage};
-use crate::game::events::{StepEvent, StepEventKind};
+use crate::game::events::{EventAudience, StepEvent, StepEventKind};
 use crate::game::geometry::MovementTrace;
 use crate::game::movement;
 use crate::game::simulation::DrawReason;
@@ -45,7 +45,11 @@ impl State {
         self.collect_pickups(next_tick, &mut events);
         self.running_updates += 1;
         if let Some(result) = self.decide_result() {
-            events.push(StepEvent::new(next_tick, StepEventKind::RoundEnded(result)));
+            events.push(StepEvent::new(
+                next_tick,
+                EventAudience::Both,
+                StepEventKind::RoundEnded(result),
+            ));
         }
         self.tick = next_tick;
         Ok(StepReport {
@@ -117,6 +121,7 @@ impl State {
         actor.kill();
         events.push(StepEvent::new(
             tick,
+            EventAudience::Both,
             StepEventKind::ActorEliminated {
                 id: actor.id,
                 seat: actor.seat,

@@ -1,7 +1,7 @@
 use super::{InputAction, MAX_INPUTS_PER_TICK, SeatInput, State};
 use crate::game::arena::Terrain;
 use crate::game::bombs::{Bomb, BombTrigger};
-use crate::game::events::{StepEvent, StepEventKind};
+use crate::game::events::{EventAudience, StepEvent, StepEventKind};
 use crate::game::movement;
 use crate::game::types::{EntityId, SeatId, Tick};
 use crate::game::view::BombView;
@@ -156,6 +156,7 @@ impl State {
             self.insert_bomb(bomb);
             events.push(StepEvent::new(
                 tick,
+                EventAudience::Both,
                 StepEventKind::BombPlaced(BombView::from(bomb)),
             ));
         }

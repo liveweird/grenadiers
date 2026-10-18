@@ -1,5 +1,5 @@
 use super::{Bomb, BombError, BombTrigger};
-use crate::game::events::{StepEvent, StepEventKind};
+use crate::game::events::{EventAudience, StepEvent, StepEventKind};
 use crate::game::types::{CellId, EntityId, Tick};
 use crate::game::view::BombView;
 
@@ -52,7 +52,7 @@ fn domain_views_and_events_retain_each_untimed_trigger() {
             StepEventKind::BombPlaced(view),
             StepEventKind::BombDetonated(view),
         ] {
-            let event = StepEvent::new(Tick(6), kind);
+            let event = StepEvent::new(Tick(6), EventAudience::Both, kind);
             assert!(matches!(
                 event.kind,
                 StepEventKind::BombPlaced(bomb) | StepEventKind::BombDetonated(bomb)

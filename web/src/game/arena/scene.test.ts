@@ -20,9 +20,18 @@ vi.mock('pixi.js', () => {
     rotation = 0
     destroyed = false
     releasedContext = false
+    cacheCalls: Array<false | object> = []
+    cacheUpdates = 0
+    cached = false
     scaleValue = 1
     position = { set: (x: number, y: number) => { this.x = x; this.y = y } }
     scale = { set: (value: number) => { this.scaleValue = value } }
+    get isCachedAsTexture(): boolean { return this.cached }
+    cacheAsTexture(value: false | object): void {
+      this.cacheCalls.push(value)
+      this.cached = value !== false
+    }
+    updateCacheTexture(): void { this.cacheUpdates += 1 }
     addChild(...nodes: Node[]): Node {
       for (const node of nodes) { node.parent = this; this.children.push(node) }
       return nodes[0]
@@ -57,6 +66,7 @@ type NodeView = {
   children: NodeView[]; x: number; y: number; visible: boolean; alpha: number
   visibleChanges: number; rotation: number; destroyed: boolean
   releasedContext: boolean; scaleValue: number; shapes: string[]
+  cacheCalls: Array<false | object>; cacheUpdates: number; cached: boolean
 }
 function layers(scene: ArenaScene): NodeView[] {
   return scene.root.children as unknown as NodeView[]
@@ -64,7 +74,7 @@ function layers(scene: ArenaScene): NodeView[] {
 
 describe('retained public arena scene', () => {
   it('draws every public layer and retains unchanged objects between snapshots', () => {
-    const scene = new ArenaScene()
+    const scene = new ArenaScene(2)
     const snapshot = gameSnapshot()
     snapshot.state.pickups = [
       { cell: { column: 2, row: 2 }, kind: 'bombCapacity' },
@@ -73,6 +83,8 @@ describe('retained public arena scene', () => {
     ]
     scene.update(snapshot, 0)
     const [terrain, blocks, pickups, bombs, flames, actors] = layers(scene)
+    expect(terrain.cacheCalls).toEqual([{ resolution: 2, antialias: false, scaleMode: 'nearest' }])
+    expect(terrain.cacheUpdates).toBe(1)
     expect(terrain.shapes.filter((shape) => shape === 'rect').length).toBeGreaterThan(195)
     expect(blocks.children).toHaveLength(1)
     expect(pickups.children).toHaveLength(3)
@@ -89,6 +101,7 @@ describe('retained public arena scene', () => {
       blocks.children[0], ...pickups.children, bombs.children[0], flames.children[0], ...actors.children,
     ]
     scene.update(snapshot, 50)
+    expect(terrain.cacheUpdates).toBe(1)
     expect([
       blocks.children[0], ...pickups.children, bombs.children[0], flames.children[0], ...actors.children,
     ]).toEqual(retained)
@@ -100,7 +113,7 @@ describe('retained public arena scene', () => {
   })
 
   it('interpolates only between public positions and never extrapolates past the target', () => {
-    const scene = new ArenaScene()
+    const scene = new ArenaScene(1)
     const snapshot = gameSnapshot()
     scene.update(snapshot, 0)
     snapshot.state.physicalTick = (snapshot.state.physicalTick ?? 0) + 3
@@ -125,7 +138,7 @@ describe('retained public arena scene', () => {
   })
 
   it('keeps a selected frame stable when another moving snapshot arrives in that frame', () => {
-    const scene = new ArenaScene()
+    const scene = new ArenaScene(1)
     const snapshot = gameSnapshot()
     scene.update(snapshot, 0)
     snapshot.state.physicalTick = (snapshot.state.physicalTick ?? 0) + 3
@@ -144,7 +157,7 @@ describe('retained public arena scene', () => {
   })
 
   it('removes absent public entities and replaces a changed pickup kind at the same cell', () => {
-    const scene = new ArenaScene()
+    const scene = new ArenaScene(1)
     const snapshot = gameSnapshot()
     snapshot.state.pickups = [{ cell: { column: 2, row: 2 }, kind: 'bombCapacity' }]
     scene.update(snapshot, 0)
@@ -170,7 +183,7 @@ describe('retained public arena scene', () => {
   })
 
   it('snaps terminal states, hides eliminated actors, and freezes decorative effects', () => {
-    const scene = new ArenaScene()
+    const scene = new ArenaScene(1)
     const snapshot = gameSnapshot()
     scene.update(snapshot, 0)
     scene.render(25)
@@ -192,7 +205,7 @@ describe('retained public arena scene', () => {
 
 describe('arena scene transitions and optional-item presentation', () => {
   it('respects reduced effects and resets interpolation across room/round identities', () => {
-    const scene = new ArenaScene()
+    const scene = new ArenaScene(1)
     const snapshot = gameSnapshot()
     snapshot.state.pickups = [{ cell: { column: 2, row: 2 }, kind: 'blastRange' }]
     scene.update(snapshot, 0)
@@ -208,6 +221,10 @@ describe('arena scene transitions and optional-item presentation', () => {
     snapshot.state.actors[0].position.x = 1536
     snapshot.state.actors[0].heading = 'north'
     scene.update(snapshot, 100)
+    expect(layers(scene)[0].cacheCalls.slice(-2)).toEqual([
+      false, { resolution: 1, antialias: false, scaleMode: 'nearest' },
+    ])
+    expect(layers(scene)[0].cacheUpdates).toBe(2)
     expect(oldActors.every((actor) => actor.destroyed)).toBe(true)
     expect(oldPickup.destroyed).toBe(true)
     expect(layers(scene)[2].children[0]).not.toBe(oldPickup)
@@ -217,7 +234,7 @@ describe('arena scene transitions and optional-item presentation', () => {
   })
 
   it('deletes hidden actor motion and snaps a later reveal to its current position', () => {
-    const scene = new ArenaScene()
+    const scene = new ArenaScene(1)
     const snapshot = gameSnapshot()
     scene.update(snapshot, 0)
     const actors = layers(scene)[5]
@@ -241,7 +258,7 @@ describe('arena scene transitions and optional-item presentation', () => {
   })
 
   it('draws Heart pickups and current damage grace without replaying a reconnect transition', () => {
-    const scene = new ArenaScene()
+    const scene = new ArenaScene(1)
     const snapshot = gameSnapshot()
     snapshot.state.pickups = [{ cell: { column: 2, row: 2 }, kind: 'heart' }]
     snapshot.state.actors[0].damageGraceRemainingTicks = 60
@@ -259,7 +276,7 @@ describe('arena scene transitions and optional-item presentation', () => {
   })
 
   it('draws a Shield glyph and a distinct current aura that stays static with reduced motion', () => {
-    const scene = new ArenaScene()
+    const scene = new ArenaScene(1)
     const snapshot = gameSnapshot()
     snapshot.state.pickups = [{ cell: { column: 2, row: 2 }, kind: 'shield' }]
     snapshot.state.actors[0].shieldRemainingTicks = 300
@@ -275,7 +292,7 @@ describe('arena scene transitions and optional-item presentation', () => {
   })
 
   it('draws Golden Flame as a distinct crest that coexists with Shield and Heart grace', () => {
-    const scene = new ArenaScene()
+    const scene = new ArenaScene(1)
     const snapshot = gameSnapshot()
     snapshot.state.pickups = [{ cell: { column: 2, row: 2 }, kind: 'goldenFlame' }]
     snapshot.state.actors[0].damageGraceRemainingTicks = 60
@@ -294,7 +311,7 @@ describe('arena scene transitions and optional-item presentation', () => {
   })
 
   it('draws a distinct Short Fuse spark that coexists and stays static after reconnect', () => {
-    const scene = new ArenaScene()
+    const scene = new ArenaScene(1)
     const snapshot = gameSnapshot()
     snapshot.state.pickups = [{ cell: { column: 2, row: 2 }, kind: 'shortFuse' }]
     snapshot.state.actors[0].damageGraceRemainingTicks = 60
@@ -315,7 +332,7 @@ describe('arena scene transitions and optional-item presentation', () => {
   })
 
   it('resets retained state idempotently and snaps the same identity to a fresh baseline', () => {
-    const scene = new ArenaScene()
+    const scene = new ArenaScene(1)
     const snapshot = gameSnapshot()
     scene.update(snapshot, 0)
     const originalLayers = [...layers(scene)]
@@ -326,15 +343,35 @@ describe('arena scene transitions and optional-item presentation', () => {
     scene.reset()
     expect(layers(scene)).toEqual(originalLayers)
     expect(originalLayers[0].shapes).toEqual([])
+    expect(originalLayers[0].cached).toBe(false)
     expect(originalLayers.slice(1).every((layer) => layer.children.length === 0)).toBe(true)
     expect(oldDrawings.every((drawing) => drawing.destroyed)).toBe(true)
 
     snapshot.state.actors[0].position.x += 1024
     scene.update(snapshot, 100)
+    expect(originalLayers[0].cached).toBe(true)
+    expect(originalLayers[0].cacheUpdates).toBe(2)
     const actor = layers(scene)[5].children[0]
     expect(actor.x).toBe(120)
     snapshot.state.actors[0].position.x += 1024
     scene.update(snapshot, 150)
     expect(actor.x).toBe(168)
+  })
+
+  it('refreshes changed terrain and regenerates only a populated cache after context restoration', () => {
+    const scene = new ArenaScene(2)
+    const snapshot = gameSnapshot()
+    const terrain = layers(scene)[0]
+    scene.restoreContext()
+    expect(terrain.cacheUpdates).toBe(0)
+    scene.update(snapshot, 0)
+    scene.restoreContext()
+    expect(terrain.cacheUpdates).toBe(2)
+    snapshot.state.arena.terrain[1] = snapshot.state.arena.terrain[1] === 'wall' ? 'floor' : 'wall'
+    scene.update(snapshot, 50)
+    expect(terrain.cacheUpdates).toBe(3)
+    snapshot.state.arena.width -= 1
+    scene.update(snapshot, 100)
+    expect(terrain.cacheUpdates).toBe(4)
   })
 })

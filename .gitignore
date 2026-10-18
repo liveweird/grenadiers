@@ -33,6 +33,8 @@ e2e/audio-test-results/
 
 e2e/playwright-golden-flame-report/
 e2e/golden-flame-test-results/
-
 e2e/playwright-short-fuse-report/
 e2e/short-fuse-test-results/
+web/renderer-diagnostics-dist/
+e2e/playwright-renderer-diagnostics-report/
+e2e/renderer-diagnostics-test-results/

@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="grenadiers-build-target" content="grenadiers-renderer-diagnostic">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-eval'; style-src 'self'; img-src 'self' data:; connect-src 'none'; font-src 'none'; object-src 'none'; base-uri 'none'">
+    <title>Grenadiers renderer diagnostic</title>
+    <link rel="stylesheet" href="/style.css">
+  </head>
+  <body>
+    <main class="diagnostic-shell" data-build-target="grenadiers-renderer-diagnostic">
+      <h1>Renderer lifecycle diagnostic</h1>
+      <p>Credential-free synthetic arena state.</p>
+      <div class="diagnostic-arena">
+        <div id="arena" class="game-arena" role="region" aria-label="Synthetic Grenadiers courtyard">
+          <div class="game-arena__canvas"></div>
+        </div>
+      </div>
+    </main>
+    <script type="module" src="/main.ts"></script>
+  </body>
+</html>

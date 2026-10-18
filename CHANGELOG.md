@@ -74,7 +74,11 @@
 - Fix connected takeover in production release builds by executing the binding-fence update
   outside debug assertions; verify replacement commands and stale-connection cleanup.
 - Require both debug and release workspace test suites in the server gate.
+- Guard reconnect accessibility audits to one document while preserving rule coverage,
+  screenshots, deadlines and zero retries; retain bounded browser phase diagnostics.
 - Avoid redundant actor pose visibility changes on unchanged frames and moving snapshots.
+- Cache immutable terrain at the initialized renderer's resolution with nearest sampling;
+  refresh on terrain changes, new worlds and WebGL restoration while keeping dynamic layers live.
 - Retain one arena renderer across room and reconnect transitions; suspend and clear it
   between authoritative worlds, then paint the new baseline before revealing the canvas.
 - Stage a dormant gameplay-v7 contract for inventory, timed effects, typed bombs, hidden
@@ -100,6 +104,7 @@
 - Preserve Classic simultaneous placement claims, raw-core Clear cancellation, server
   movement-before-actions ordering, reconnect action IDs and private replay completeness.
 - Keep new items disabled and preserve gameplay-v6, existing rules and journal formats.
+- Add bounded, secret-free reconnect probe diagnostics with unchanged deadlines and assertions.
 
 ## 0.3.19 — 2026-10-17
 

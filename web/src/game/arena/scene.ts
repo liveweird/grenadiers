@@ -44,7 +44,7 @@ export class ArenaScene {
     const physicalTick = snapshot.state.physicalTick ?? snapshot.state.runningUpdates ?? 0
     const tickDelta = physicalTick - this.physicalTick
     const reset = identity !== this.identity || tickDelta < 0
-    if (reset) this.clearLayers()
+    if (reset) this.reset()
     this.identity = identity
     this.receivedAt = now
     this.motionDuration = Math.max(1000 / 60, Math.min(100, tickDelta * 1000 / 60))
@@ -64,6 +64,23 @@ export class ArenaScene {
   }
 
   setReducedMotion(reduced: boolean): void { this.reducedMotion = reduced }
+
+  reset(): void {
+    for (const drawing of this.blocks.values()) drawing.destroy()
+    for (const pickup of this.pickups.values()) pickup.drawing.destroy()
+    for (const drawing of this.bombs.values()) drawing.root.destroy({ children: true, context: true })
+    for (const drawing of this.flames.values()) drawing.root.destroy({ children: true, context: true })
+    for (const drawing of this.actors.values()) drawing.root.destroy({ children: true, context: true })
+    this.blocks.clear(); this.pickups.clear(); this.bombs.clear(); this.flames.clear(); this.actors.clear()
+    this.motions.clear()
+    this.terrain.clear()
+    this.identity = ''
+    this.terrainKey = ''
+    this.receivedAt = 0
+    this.running = false
+    this.physicalTick = -1
+    this.motionDuration = 50
+  }
 
   render(now: number): void {
     const progress = this.reducedMotion || !this.running ? 1
@@ -179,17 +196,5 @@ export class ArenaScene {
         && (previousMotion.toX !== toX || previousMotion.toY !== toY))
       setActorPose(drawing, actor.heading, 0)
     }
-  }
-
-  private clearLayers(): void {
-    for (const drawing of this.blocks.values()) drawing.destroy()
-    for (const pickup of this.pickups.values()) pickup.drawing.destroy()
-    for (const drawing of this.bombs.values()) drawing.root.destroy({ children: true, context: true })
-    for (const drawing of this.flames.values()) drawing.root.destroy({ children: true, context: true })
-    for (const drawing of this.actors.values()) drawing.root.destroy({ children: true, context: true })
-    this.blocks.clear(); this.pickups.clear(); this.bombs.clear(); this.flames.clear(); this.actors.clear()
-    this.motions.clear()
-    this.terrainKey = ''
-    this.physicalTick = -1
   }
 }

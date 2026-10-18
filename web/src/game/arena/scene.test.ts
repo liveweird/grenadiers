@@ -8,7 +8,14 @@ vi.mock('pixi.js', () => {
     parent: Node | null = null
     x = 0
     y = 0
-    visible = true
+    private shown = true
+    visibleChanges = 0
+    get visible(): boolean { return this.shown }
+    set visible(value: boolean) {
+      if (value === this.shown) return
+      this.shown = value
+      this.visibleChanges += 1
+    }
     alpha = 1
     rotation = 0
     destroyed = false
@@ -48,7 +55,8 @@ vi.mock('pixi.js', () => {
 
 type NodeView = {
   children: NodeView[]; x: number; y: number; visible: boolean; alpha: number
-  rotation: number; destroyed: boolean; releasedContext: boolean; scaleValue: number; shapes: string[]
+  visibleChanges: number; rotation: number; destroyed: boolean
+  releasedContext: boolean; scaleValue: number; shapes: string[]
 }
 function layers(scene: ArenaScene): NodeView[] {
   return scene.root.children as unknown as NodeView[]
@@ -115,6 +123,27 @@ describe('retained public arena scene', () => {
     scene.render(325)
     expect(actor.children.map(({ visible }) => visible))
       .toEqual([true, false, false, true, false, false, false, false, false])
+  })
+
+  it('keeps a selected frame stable when another moving snapshot arrives in that frame', () => {
+    const scene = new ArenaScene()
+    const snapshot = gameSnapshot()
+    scene.update(snapshot, 0)
+    snapshot.room.tick += 3
+    snapshot.room.revision += 1
+    snapshot.state.actors[0].position.x += 1024
+    scene.update(snapshot, 100)
+    scene.render(120)
+    const poses = layers(scene)[5].children[0].children.slice(1)
+    for (const pose of poses) pose.visibleChanges = 0
+
+    snapshot.room.tick += 1
+    snapshot.room.revision += 1
+    snapshot.state.actors[0].position.x += 1024
+    scene.update(snapshot, 120)
+
+    expect(poses.reduce((total, pose) => total + pose.visibleChanges, 0)).toBe(0)
+    expect(poses.filter(({ visible }) => visible)).toHaveLength(1)
   })
 
   it('removes absent public entities and replaces a changed pickup kind at the same cell', () => {

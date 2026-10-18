@@ -210,4 +210,28 @@ describe('retained public arena scene', () => {
     scene.render(41)
     expect(actors.children[1]).toMatchObject({ x: 192, y: 144 })
   })
+
+  it('resets retained state idempotently and snaps the same identity to a fresh baseline', () => {
+    const scene = new ArenaScene()
+    const snapshot = gameSnapshot()
+    scene.update(snapshot, 0)
+    const originalLayers = [...layers(scene)]
+    const oldDrawings = originalLayers.slice(1).flatMap((layer) => layer.children)
+    scene.setReducedMotion(true)
+
+    scene.reset()
+    scene.reset()
+    expect(layers(scene)).toEqual(originalLayers)
+    expect(originalLayers[0].shapes).toEqual([])
+    expect(originalLayers.slice(1).every((layer) => layer.children.length === 0)).toBe(true)
+    expect(oldDrawings.every((drawing) => drawing.destroyed)).toBe(true)
+
+    snapshot.state.actors[0].position.x += 1024
+    scene.update(snapshot, 100)
+    const actor = layers(scene)[5].children[0]
+    expect(actor.x).toBe(120)
+    snapshot.state.actors[0].position.x += 1024
+    scene.update(snapshot, 150)
+    expect(actor.x).toBe(168)
+  })
 })

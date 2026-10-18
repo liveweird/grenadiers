@@ -69,6 +69,8 @@ test('a browser restores its full live world and action floor before a fenced ta
     games.push(...pages.map(observeGame))
     const [one] = pages
     await joinMatch(pages, games)
+    const canvas = await one.locator('.game-arena__canvas canvas').elementHandle()
+    if (!canvas) throw new Error('The initial arena canvas did not initialize')
     const arena = one.getByRole('region', { name: 'Grenadiers courtyard' })
     await arena.click()
     await moveTo(one, games[0], { column: 5, row: 1 })
@@ -92,6 +94,8 @@ test('a browser restores its full live world and action floor before a fenced ta
     expect(restored.positions.find((actor) => actor.seat === 'one')).toEqual({ seat: 'one', ...position })
     expect(restored.bombIds).toContain(bomb.id)
     expect(restored.stableCapability).toBe(true)
+    expect(await canvas.evaluate((element) => element.isConnected)).toBe(true)
+    await expect(one.locator('.game-arena__canvas canvas')).toHaveCount(1)
     await arena.click()
     await one.keyboard.down('ArrowLeft')
     try {
@@ -158,6 +162,8 @@ test('a browser restores its full live world and action floor before a fenced ta
     }
     await stopTakeover(one)
     await expect(one.getByText('This seat was resumed in another tab.', { exact: true })).toBeVisible()
+    expect(await canvas.evaluate((element) => element.isConnected)).toBe(true)
+    await expect(one.locator('.game-arena__canvas canvas')).toBeHidden()
     await expect(one.getByRole('button', { name: 'Create room', exact: true })).toBeEnabled()
     const socketCount = games[0].sockets
     await delay(1_000)

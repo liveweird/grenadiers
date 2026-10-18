@@ -6,9 +6,10 @@ TURN v0.3.16, CONFIG v0.3.17 and the first ART slice v0.3.18 are shipped. Heart
 [v0.3.27](https://github.com/liveweird/grenadiers/releases/tag/v0.3.27) and Short Fuse
 [v0.3.28](https://github.com/liveweird/grenadiers/releases/tag/v0.3.28), and Short Flame
 [v0.3.29](https://github.com/liveweird/grenadiers/releases/tag/v0.3.29) are published.
-The v0.3.30 Long Fuse increment passes local checks and fresh 64/64 Compose/Kubernetes browser
-cases; independent final evidence review is clear and final-head CI remains pending. The disclosed post-run
-wrapper bookkeeping exception is recorded in verification. The other 16 requested pickups remain
+The v0.3.30 Long Fuse increment passes local checks. An earlier named source passed fresh 64/64
+Compose/Kubernetes browser cases, but hosted CI exposed a bounded-history driver cursor defect.
+The corrected driver requires fresh native acceptance and final-head CI. Verification records
+the source-specific evidence and disclosed bookkeeping exception. The other 16 requested pickups remain
 outside this increment. Richer transitions
 and artwork remain follow-up work. See [pixel-art presentation](pixel-art.md),
 [expanded item implementation](expanded-items.md), and

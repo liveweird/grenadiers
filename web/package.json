@@ -21,7 +21,9 @@
     "gen:realtime": "node scripts/generate-realtime.mjs",
     "check:realtime": "node scripts/check-realtime.mjs",
     "gen:gameplay": "node scripts/generate-gameplay.mjs",
-    "check:gameplay": "node scripts/check-gameplay.mjs"
+    "check:gameplay": "node scripts/check-gameplay.mjs",
+    "build:renderer-diagnostics": "tsc --project tsconfig.renderer-diagnostics.json && vite build --config vite.renderer-diagnostics.config.ts",
+    "preview:renderer-diagnostics": "vite preview --config vite.renderer-diagnostics.config.ts --host 0.0.0.0 --port 5188 --strictPort"
   },
   "dependencies": {
     "@mantine/core": "9.6.2",

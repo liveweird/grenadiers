@@ -64,3 +64,4 @@ See the implemented expansion candidates: [Heart](heart.md) and [Shield](shield.
 - [Reverse Controls](reverse-controls.md): opt-in ten-second movement inversion with exact boundaries.
 - [Diarrhea](diarrhea.md): opt-in ten-second automatic ordinary-bomb placement curse.
 - [Slow foot](slow-foot.md): up to six independent ten-second movement-slowing stacks.
+- [Piercing Bomb](piercing-bomb.md): one stored charge for a manual bomb that crosses soft blocks.

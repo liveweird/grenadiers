@@ -34,7 +34,9 @@
     "test:diarrhea": "playwright test --config playwright.diarrhea.config.ts",
     "test:slow-foot": "playwright test --config playwright.slow-foot.config.ts",
     "test:piercing-bomb": "playwright test --config playwright.piercing-bomb.config.ts",
-    "test:power-bomb": "playwright test --config playwright.power-bomb.config.ts"
+    "test:power-bomb": "playwright test --config playwright.power-bomb.config.ts",
+    "test:renderer-diagnostics": "playwright test --config playwright.renderer-diagnostics.config.ts",
+    "test:terrain-pixels": "playwright test --config playwright.terrain-pixels.config.ts"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.13.0",

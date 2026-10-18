@@ -3,6 +3,22 @@
 Records below are frozen against their named sources. Publication and later CI status are
 recorded in [release notes](https://github.com/liveweird/grenadiers/releases).
 
+## Shield native scenario correction — 2026-10-18 — fresh acceptance pending
+
+The first responsive native attempt passed 27 Compose cases, then failed the Shield scenario;
+Kubernetes did not run. Both retained public streams establish derived collection tick 656, expiry 956,
+second-bomb placement 859 and detonation 1039. The player correctly died after Shield expired:
+language/screenshot work had consumed 203 ticks before placement. This is a scenario timing
+defect; no production simulation change is made. The corrected scenario captures exposed layouts
+before collection, plants immediately, checks detonation precedes the actual Shield deadline,
+and retains the active screenshot after both protection proofs. Existing expiry, survival,
+later death, assertions, timeouts and zero-retry policy remain intact. E2E lint, Knip, typecheck
+and 29-scenario static parity pass after the correction.
+
+Failed evidence remains sealed at `/tmp/grenadiers-v0326-responsive-native-acceptance`,
+886-entry manifest SHA-256 `51ca4c7ef6c1deb724a806335156b6c29b16aaf5832ac57bee3200177ee90d65`.
+No prior result counts toward the required complete fresh 56-case acceptance.
+
 ## Shield responsive-HUD integration — 2026-10-18 — native acceptance pending
 
 The parent two-column narrow HUD and real text-geometry regression are integrated. Core,

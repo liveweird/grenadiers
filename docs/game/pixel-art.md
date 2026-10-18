@@ -44,3 +44,7 @@ Polish mobile captures](golden-flame.md) and the source-specific verification re
 
 Actor pose visibility is assigned idempotently. Snapshot updates retain the current animation
 frame until rendering selects its final pose, avoiding intermediate visibility invalidations.
+
+Reverse Controls adds its own directional pixel pickup and localized rule/HUD presentation.
+See the [accepted desktop and Polish mobile captures](reverse-controls.md); exact inversion
+and expiry remain authoritative simulation behavior.

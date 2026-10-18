@@ -25,7 +25,7 @@ describe('gameplay v8 validation and active profile', () => {
     expect(validateGameplayV8ServerMessage(message)).toEqual({ valid: true, value: message })
   })
 
-  const supported = ['heart', 'shield', 'goldenFlame', 'shortFuse', 'shortFlame', 'longFuse'] as const
+  const supported = ['heart', 'shield', 'goldenFlame', 'shortFuse', 'shortFlame', 'longFuse', 'reverseControls'] as const
   const subsets = Array.from({ length: 2 ** supported.length }, (_, mask) => [
     supported.filter((_, index) => (mask & (1 << index)) !== 0),
   ] as const)
@@ -142,6 +142,7 @@ describe('gameplay v8 validation and active profile', () => {
       expect(validateGameplayV8ServerMessage(message)).toEqual({ valid: true, value: message })
     },
   )
+
 })
 
 describe('gameplay v8 expanded-profile rejection', () => {
@@ -357,6 +358,7 @@ describe('gameplay v8 effect rejection', () => {
       valid: false, source: 'semantics', error: 'duplicateEffect',
     })
   })
+
 })
 
 it('rejects a disabled Long Fuse pickup', () => {

@@ -87,6 +87,7 @@ fn golden_enabled_generation_is_seeded_and_places_only_enabled_special_items() {
             PickupKind::ShortFuse => enabled.contains_short_fuse(),
             PickupKind::ShortFlame => enabled.contains_short_flame(),
             PickupKind::LongFuse => enabled.contains_long_fuse(),
+            PickupKind::ReverseControls => enabled.contains_reverse_controls(),
             _ => true,
         }));
     }
@@ -139,6 +140,7 @@ fn signature(generated: &GeneratedArena) -> String {
                 Some(PickupKind::ShortFuse) => 'F',
                 Some(PickupKind::ShortFlame) => 'L',
                 Some(PickupKind::LongFuse) => 'U',
+                Some(PickupKind::ReverseControls) => 'V',
                 None if generated.arena().blocks().contains(&cell) => '#',
                 None if generated.arena().terrain(cell) == Some(Terrain::Wall) => 'X',
                 None => '.',

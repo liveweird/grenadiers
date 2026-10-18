@@ -89,14 +89,19 @@ impl super::Actor {
             | PickupKind::GoldenFlame
             | PickupKind::ShortFuse
             | PickupKind::ShortFlame
-            | PickupKind::LongFuse => {
+            | PickupKind::LongFuse
+            | PickupKind::ReverseControls => {
                 let effect = pickup
                     .kind()
                     .timed_effect()
                     .expect("timed pickups map to their effect");
+                let reversed_before = self.effects.reverses_controls(tick);
                 self.effects
                     .apply(effect, tick)
                     .map_err(|_| StepError::EffectExpiryOverflow(effect))?;
+                if self.effects.reverses_controls(tick) != reversed_before {
+                    self.pending_turn = None;
+                }
             }
         }
         Ok(())

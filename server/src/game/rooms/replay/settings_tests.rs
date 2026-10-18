@@ -187,21 +187,14 @@ fn configurable_rules_reject_the_legacy_lifecycle_profile() {
 
 #[test]
 fn expanded_item_masks_and_disabled_preset_replay_deterministically() {
-    for enabled in [
-        0, 16, 512, 528, 4096, 4112, 4608, 4624, 8192, 8208, 8704, 8720, 12288, 12304, 12800,
-        12816, 65536, 65552, 66048, 66064, 69632, 69648, 70144, 70160, 73728, 73744, 74240, 74256,
-        77824, 77840, 78336, 78352,
-    ]
-    .map(|bits| EnabledItems::from_bits(bits).unwrap())
-    .into_iter()
-    .chain(
-        [
-            131072, 131088, 131584, 131600, 135168, 135184, 135680, 135696, 139264, 139280, 139776,
-            139792, 143360, 143376, 143872, 143888, 196608, 196624, 197120, 197136, 200704, 200720,
-            201216, 201232, 204800, 204816, 205312, 205328, 208896, 208912, 209408, 209424,
-        ]
-        .map(|bits| EnabledItems::from_bits(bits).unwrap()),
-    ) {
+    let bits = [16, 512, 4096, 8192, 65536, 131072, 262144];
+    for mask in 0_u32..128 {
+        let enabled_bits = bits
+            .iter()
+            .enumerate()
+            .filter(|(index, _)| mask & (1 << index) != 0)
+            .fold(0, |enabled, (_, bit)| enabled | *bit);
+        let enabled = EnabledItems::from_bits(enabled_bits).unwrap();
         let mut runtime = MatchRuntime::new(
             identity_for_profile(RoomProfile::ExpandedV5),
             RoundSeedSource::with_entropy(|bytes| {

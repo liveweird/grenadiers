@@ -61,3 +61,4 @@ weapons, visibility and incremental activation decisions; these items are not en
 See the implemented expansion candidates: [Heart](heart.md) and [Shield](shield.md).
 
 - [Golden Flame](golden-flame.md): opt-in ten-second maximum-range pickup and captured bomb behavior.
+- [Reverse Controls](reverse-controls.md): opt-in ten-second movement inversion with exact boundaries.

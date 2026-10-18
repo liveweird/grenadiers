@@ -20,5 +20,50 @@
   "candidateRuns": [
     39120943388,
     39120940237
-  ]
+  ],
+  "native": {
+    "cases": {
+      "compose": 33,
+      "kubernetes": 33
+    },
+    "wrapperExitCode": 0,
+    "reports": 30,
+    "screenshots": 78,
+    "retries": 0,
+    "image": "sha256:7f44bad5be71802e4c35336f0ab53736b75099351e974b34d15b1c54f807bd2e",
+    "sourceArchiveSha256": "8a46016482bf36ff903aeaf5f76af5a720622861ac990a2d9cbf35ad2d6c08e6",
+    "finalManifestEntries": 1799,
+    "finalManifestSha256": "fcd6be180127f42976e333734354e33dc90367c40dab30624c24579b55d43e76",
+    "visualErratumEntries": 7,
+    "visualErratumManifestSha256": "ddb5943ae194dcfb75383b8fb5599b48a1d25c657af2684e939a364d38cd937e",
+    "dependencyInputProvenance": "8186 fresh package files plus 29 disclosed reused pinned jiti cache inputs; current proofs generated afresh; no carried browser result"
+  },
+  "candidateCiVerified": true,
+  "merged": "2b464744822dd08582e3769f5611fecef43e2c0e",
+  "mergedTreeEqualsNormalized": true,
+  "mergedAt": "2026-10-18T11:08:23Z",
+  "postMergeRun": 39122032780,
+  "postMergeCiStatus": "success",
+  "independentReleaseAudit": {
+    "result": "CLEAR",
+    "scope": "Read-only local-proof audit of raw/normalized/merge/tag/archive equality, remote recorded refs, required 10 candidate and 5 post-merge jobs, exact 33-browser sums, no bad result markers, clean source worktrees and durable copies. No rerun, no live GitHub query by reviewer; root queried and verified publication live.",
+    "supplementalTagRunNotClaimedGreen": 39123070723
+  },
+  "publishedRelease": {
+    "isPrerelease": true,
+    "publishedAt": "2026-10-18T11:23:54Z",
+    "tagName": "v0.3.31",
+    "targetCommitish": "master",
+    "url": "https://github.com/liveweird/grenadiers/releases/tag/v0.3.31"
+  },
+  "tagWorkflow": {
+    "conclusion": "",
+    "databaseId": 39123070723,
+    "event": "push",
+    "headBranch": "v0.3.31",
+    "headSha": "2b464744822dd08582e3769f5611fecef43e2c0e",
+    "status": "in_progress"
+  },
+  "tagWorkflowVerified": false,
+  "finalRecordedAt": "2026-10-18T13:37:58.481724+02:00"
 }

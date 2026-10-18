@@ -357,6 +357,8 @@ mod shield_tests;
 #[path = "golden_flame_tests.rs"]
 mod golden_flame_tests;
 
+#[path = "reverse_controls_tests.rs"]
+mod reverse_controls_tests;
 #[path = "short_flame_tests.rs"]
 mod short_flame_tests;
 #[path = "short_fuse_tests.rs"]

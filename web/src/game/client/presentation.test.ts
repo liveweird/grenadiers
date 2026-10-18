@@ -155,4 +155,18 @@ describe('v8 arena presentation', () => {
     })
     expect(presented.state.pickups).toEqual(current.snapshot!.state.pickups)
   })
+
+  it('presents Reverse Controls without changing the authoritative heading', () => {
+    const current = state()
+    const own = current.snapshot!.state.actors[0]
+    if (own.type !== 'visible') throw new Error('expected visible own actor')
+    own.heading = 'east'
+    own.effects = [{ kind: 'reverseControls', remainingTicks: 600 }]
+    current.snapshot!.state.pickups = [{ cell: { column: 2, row: 2 }, kind: 'reverseControls' }]
+    const presented = presentSnapshot(current)!
+    expect(presented.state.actors[0]).toMatchObject({
+      heading: 'east', reverseControlsRemainingTicks: 600,
+    })
+    expect(presented.state.pickups).toEqual(current.snapshot!.state.pickups)
+  })
 })

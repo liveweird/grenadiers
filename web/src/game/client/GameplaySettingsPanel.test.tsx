@@ -79,26 +79,29 @@ describe('gameplay settings panel', () => {
     expect(screen.getByRole('checkbox', { name: 'Short fuse' })).not.toBeChecked()
     expect(screen.getByRole('checkbox', { name: 'Short flame' })).not.toBeChecked()
     expect(screen.getByRole('checkbox', { name: 'Long fuse' })).not.toBeChecked()
+    expect(screen.getByRole('checkbox', { name: 'Reverse controls' })).not.toBeChecked()
     expect(screen.getByText(/Absorbs one lethal blast/)).toBeVisible()
     expect(screen.getByText(/5 seconds of damage immunity/)).toBeVisible()
     expect(screen.getByText(/Maximizes new bomb blasts for 10 seconds/)).toBeVisible()
     expect(screen.getByText(/Halves the fuse of new bombs for 10 seconds/)).toBeVisible()
     expect(screen.getByText(/Limits new bomb blasts to 1 tile for 10 seconds/)).toBeVisible()
     expect(screen.getByText(/Doubles the fuse of new bombs for 10 seconds/)).toBeVisible()
+    expect(screen.getByText(/Reverses movement controls for 10 seconds/)).toBeVisible()
     await user.click(screen.getByRole('checkbox', { name: 'Shield' }))
     await user.click(screen.getByRole('checkbox', { name: 'Golden flame' }))
     await user.click(screen.getByRole('checkbox', { name: 'Short fuse' }))
     await user.click(screen.getByRole('checkbox', { name: 'Short flame' }))
     await user.click(screen.getByRole('checkbox', { name: 'Long fuse' }))
+    await user.click(screen.getByRole('checkbox', { name: 'Reverse controls' }))
     expect(screen.getByRole('checkbox', { name: 'Heart' })).toBeChecked()
     await user.click(screen.getByRole('button', { name: 'Apply rules' }))
     expect(apply).toHaveBeenLastCalledWith(expect.objectContaining({
-      enabledItems: ['heart', 'shield', 'goldenFlame', 'shortFuse', 'shortFlame', 'longFuse'],
+      enabledItems: ['heart', 'shield', 'goldenFlame', 'shortFuse', 'shortFlame', 'longFuse', 'reverseControls'],
     }))
     await user.click(screen.getByRole('checkbox', { name: 'Golden flame' }))
     await user.click(screen.getByRole('button', { name: 'Apply rules' }))
     expect(apply).toHaveBeenLastCalledWith(expect.objectContaining({
-      enabledItems: ['heart', 'shield', 'shortFuse', 'shortFlame', 'longFuse'],
+      enabledItems: ['heart', 'shield', 'shortFuse', 'shortFlame', 'longFuse', 'reverseControls'],
     }))
     await user.click(screen.getByRole('checkbox', { name: 'Golden flame' }))
     await user.click(screen.getByRole('checkbox', { name: 'Heart' }))
@@ -107,20 +110,21 @@ describe('gameplay settings panel', () => {
     expect(screen.getByRole('checkbox', { name: 'Short fuse' })).toBeChecked()
     expect(screen.getByRole('checkbox', { name: 'Short flame' })).toBeChecked()
     expect(screen.getByRole('checkbox', { name: 'Long fuse' })).toBeChecked()
+    expect(screen.getByRole('checkbox', { name: 'Reverse controls' })).toBeChecked()
     await user.click(screen.getByRole('button', { name: 'Apply rules' }))
     expect(apply).toHaveBeenLastCalledWith(expect.objectContaining({
-      enabledItems: ['shield', 'goldenFlame', 'shortFuse', 'shortFlame', 'longFuse'],
+      enabledItems: ['shield', 'goldenFlame', 'shortFuse', 'shortFlame', 'longFuse', 'reverseControls'],
     }))
     await user.click(screen.getByRole('checkbox', { name: 'Shield' }))
     expect(screen.getByRole('checkbox', { name: 'Golden flame' })).toBeChecked()
     await user.click(screen.getByRole('button', { name: 'Apply rules' }))
     expect(apply).toHaveBeenLastCalledWith(expect.objectContaining({
-      enabledItems: ['goldenFlame', 'shortFuse', 'shortFlame', 'longFuse'],
+      enabledItems: ['goldenFlame', 'shortFuse', 'shortFlame', 'longFuse', 'reverseControls'],
     }))
     await user.click(screen.getByRole('checkbox', { name: 'Heart' }))
     await user.click(screen.getByRole('button', { name: 'Apply rules' }))
     expect(apply).toHaveBeenLastCalledWith(expect.objectContaining({
-      enabledItems: ['heart', 'goldenFlame', 'shortFuse', 'shortFlame', 'longFuse'],
+      enabledItems: ['heart', 'goldenFlame', 'shortFuse', 'shortFlame', 'longFuse', 'reverseControls'],
     }))
     await user.click(screen.getByRole('button', { name: 'Classic settings' }))
     expect(screen.getByRole('checkbox', { name: 'Heart' })).not.toBeChecked()
@@ -129,6 +133,7 @@ describe('gameplay settings panel', () => {
     expect(screen.getByRole('checkbox', { name: 'Short fuse' })).not.toBeChecked()
     expect(screen.getByRole('checkbox', { name: 'Short flame' })).not.toBeChecked()
     expect(screen.getByRole('checkbox', { name: 'Long fuse' })).not.toBeChecked()
+    expect(screen.getByRole('checkbox', { name: 'Reverse controls' })).not.toBeChecked()
     await user.click(screen.getByRole('button', { name: 'Apply rules' }))
     expect(apply).toHaveBeenLastCalledWith({
       startingSpeedLevel: 0, turnAssistUnits: 256, winsToFinish: 3,
@@ -152,6 +157,7 @@ describe('gameplay settings panel', () => {
     expect(screen.queryByRole('checkbox', { name: 'Krótki lont' })).not.toBeInTheDocument()
     expect(screen.queryByRole('checkbox', { name: 'Krótki płomień' })).not.toBeInTheDocument()
     expect(screen.queryByRole('checkbox', { name: 'Długi lont' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('checkbox', { name: 'Odwrócone sterowanie' })).not.toBeInTheDocument()
     expect(pl.settings.heartDescription).toMatch(/śmiertelnym wybuchem/)
     expect(pl.settings.shieldDescription).toMatch(/5 sekund/)
     expect(pl.settings.goldenFlameDescription).toMatch(/10 sekund/)
@@ -161,6 +167,7 @@ describe('gameplay settings panel', () => {
     expect(pl.settings.shortFlameDescription).toMatch(/Złoty płomień/)
     expect(pl.settings.longFuseDescription).toMatch(/10 sekund/)
     expect(pl.settings.longFuseDescription).toMatch(/znoszą się/)
+    expect(pl.settings.reverseControlsDescription).toMatch(/10 sekund/)
   })
 
 })
@@ -176,5 +183,6 @@ describe('gameplay settings locks', () => {
     expect(screen.getByRole('checkbox', { name: 'Golden flame' })).toBeDisabled()
     expect(screen.getByRole('checkbox', { name: 'Short fuse' })).toBeDisabled()
     expect(screen.getByRole('checkbox', { name: 'Short flame' })).toBeDisabled()
+    expect(screen.getByRole('checkbox', { name: 'Reverse controls' })).toBeDisabled()
   })
 })

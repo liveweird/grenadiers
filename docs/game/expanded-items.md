@@ -6,6 +6,9 @@ The v0.3.30 [Long Fuse](long-fuse.md) increment passes local checks and correcte
 acceptance: 32/32 Compose and 32/32 Kubernetes cases, wrapper exit zero, no retries or carried
 results. Independent final evidence review is clear; final-head CI remains pending. Verification
 retains the earlier hosted failure and separately named source-specific attempts.
+The v0.3.31 [Reverse Controls](reverse-controls.md) candidate passes local checks. Its earlier
+native run was interrupted before latency/optional/Kubernetes cases; fresh whole acceptance
+and final-head CI remain pending.
 Expanded-v5/generator-v2 rooms and gameplay-v8 are retained; see
 [verification](../verification.md) and
 [release notes](https://github.com/liveweird/grenadiers/releases).
@@ -45,7 +48,8 @@ Damage passes share one gateway. Shield prevents damage before Heart is consider
 absorbs one lethal hit, consumes its equipment slot and grants 60 ticks of immunity, including
 both damage passes and overlapping flames. Collecting protection cannot undo earlier damage.
 
-Shield uses 300 physical ticks (five seconds); Golden Flame, Short Fuse, Short Flame, and Long Fuse use 600 (ten seconds), all
+Shield uses 300 physical ticks (five seconds); Golden Flame, Short Fuse, Short Flame, Long Fuse,
+and Reverse Controls use 600 (ten seconds), all
 refreshing on recollection. Proposed remaining durations: Stopwatch 180; other timed effects and each
 Slow-foot stack 600. These become versioned constants when activated, not new settings yet.
 Golden flame gives newly placed bombs radius eight; Short-flame overrides it with radius one.

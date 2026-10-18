@@ -60,7 +60,7 @@ test('two native gameplay sockets finish one authoritative generated classic rou
     await expect.poll(async () => snapshot(await gameFrames(two))?.room.phase.type).toBe('running')
     const firstRunning = snapshot(await gameFrames(one))!
     expect(firstRunning.room).toMatchObject({ rulesVersion: 5, mapId: 'generated_v2' })
-    expect(firstRunning.room.availableItems).toEqual(['heart', 'shield'])
+    expect(firstRunning.room.availableItems).toEqual(['heart', 'piercingBomb', 'shield', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls'])
     expect(firstRunning.room.settings.enabledItems).toEqual([])
     for (const actor of firstRunning.state.actors) {
       expect(actor).toMatchObject({

@@ -1,6 +1,8 @@
 # Repository verification
 
 ## Short Fuse terrain cache integration — 2026-10-18 — refreshed native acceptance pending
+Records below are frozen against their named sources. Publication and later CI status are
+recorded in [release notes](https://github.com/liveweird/grenadiers/releases).
 
 The current terrain-cache/shared-diagnostics integration passes all 339 web tests, with coverage
 of 95.11/90.80/95.50/97.56% above the unchanged 85% floors, production and diagnostic-fixture builds, and E2E
@@ -32,6 +34,15 @@ public wire state without expanding APIs. The new browser scenario covers captur
 actual natural detonation, reconnect and exact expiry. Its native playthrough, screenshots,
 fresh same-image Compose/Kubernetes 30+30 acceptance and final-head CI remain pending.
 
+## Golden Flame terrain cache integration — 2026-10-18 — refreshed native acceptance pending
+
+The current terrain-cache/shared-diagnostics integration passes all 320 web tests, with coverage
+of 95.07/90.72/95.47/97.53% above the unchanged 85% floors, production and diagnostic-fixture builds, and E2E
+static checks with 30 documented scenarios. Core, server, version and API content are unchanged
+by this integration. Golden Flame has no completed native baseline. The inherited Heart-only record
+below certifies source `00d76ac9cc08e7bb4627caf7897e02c3f15a43d2`; it includes neither
+Golden Flame, Shield nor the terrain cache. Fresh native acceptance and final-head CI remain required for this tree.
+
 
 ## Golden Flame candidate — 2026-10-18 — native acceptance pending
 
@@ -61,6 +72,32 @@ reconnect action floor and unchanged effect deadline, exact expiry and later rad
 Its actual browser playthrough, screenshots, fresh same-image Compose/Kubernetes29+29 acceptance
 and final-head CI remain pending. Prior candidate image results do not certify this item.
 
+## Golden Flame responsive-HUD integration — 2026-10-18 — native acceptance pending
+
+The inherited two-column narrow HUD and real text-geometry regression are integrated. Core,
+server, Cargo, API, Golden Flame client/protocol/locales and dedicated item scenarios remain
+unchanged from the reviewed Golden Flame candidate. Its unit baseline remains unchanged;
+the production build and E2E static checks pass for this responsive integration.
+Fresh native Compose/Kubernetes acceptance and exact-head CI remain pending.
+
+## Shield responsive-HUD integration — 2026-10-18 — native acceptance pending
+
+The parent two-column narrow HUD and real text-geometry regression are integrated. Core,
+server, Cargo, API, Shield client/protocol/locales and dedicated item scenarios are unchanged
+from the reviewed Shield cache candidate. Its 304 web tests and coverage below remain the
+unit baseline. Production build and E2E lint, Knip, typecheck and 29-scenario static parity pass for this layout.
+No parent or historical Heart evidence certifies Shield. Fresh same-image Compose/Kubernetes
+acceptance and exact-head CI remain required.
+
+## Shield terrain cache integration — 2026-10-18 — refreshed native acceptance pending
+
+The current terrain-cache/shared-diagnostics integration passes all 304 web tests, with coverage
+of 95.03/90.68/95.43/97.51% above the unchanged 85% floors, production and diagnostic-fixture builds, and E2E
+static checks with 29 documented scenarios. Core, server, version and API content are unchanged
+by this integration. Shield has no completed native baseline. The inherited Heart-only record
+below certifies source `00d76ac9cc08e7bb4627caf7897e02c3f15a43d2`; it includes neither
+Shield nor the terrain cache. Fresh native acceptance and final-head CI remain required for this tree.
+
 ## Shield activation candidate — 2026-10-18 — native acceptance pending
 
 The v0.3.26 working candidate passes **413 core tests, 180 server tests and two doctests in each
@@ -82,6 +119,17 @@ focused run verifies the strengthened bomb-placement assertion in both build pro
 
 No v0.3.26 native image, full browser scenario run or release is claimed. Native Compose and
 Kubernetes acceptance, visual inspection and exact final-head CI remain required.
+
+## Heart responsive-HUD integration — 2026-10-18 — fresh native acceptance pending
+
+The accepted parent's two-column narrow HUD and real text-geometry regression are integrated.
+Core, server, Cargo, API, Heart client/protocol/locales and all dedicated item scenarios remain
+unchanged from the independently reviewed Heart cache candidate. Its **287 web tests** and
+coverage **94.80/90.36/94.72/97.31%** remain the local unit baseline. The new production build
+and E2E lint, Knip, typecheck and 28-scenario static parity pass. Fresh image acceptance and exact-head CI remain
+required for this tree. The inherited Heart source `00d76ac9cc08e7bb4627caf7897e02c3f15a43d2`
+certifies Heart only and excludes terrain caching and responsive layout; the parent v7 result
+below does not certify Heart.
 
 ## Heart activation candidate — 2026-10-18 — native baseline 54/54
 
@@ -127,6 +175,83 @@ contracts remain byte-unchanged; journal records retain their 64-byte and alloca
 The inherited connected-takeover release-build defect is corrected; full debug and release gates
 pass. Native acceptance requires actual movement from the replacement binding and now passes
 at the source/image recorded above. Final-head CI remains required before publication.
+
+## Parent responsive live-v7 HUD — 2026-10-18 — native 52/52, final CI pending
+
+Clean source `695157bed0852835a16b3a9e9ee5dbcc5df61ad6`, archive SHA-256
+`071a0927fa4c2087af918bbf84e2d848d38118bc02a9eaa7af1c42774cdeeef5`, builds one image:
+`sha256:d68d1becb3d8ee9e710e0bf99af6429161b39160511d251f221c6f8af5fb644f`.
+Its saved archive hashes to `4be7f6f969f98c10e53df0459d104701b1eb4e943367afdcf64906ac8dd9b8b9`.
+Complete fresh acceptance passes **26/26 Compose and 26/26 Kubernetes**, first attempts,
+one worker, retries zero, with no carried cases. All ordinary budgets and prior assertions
+remain intact. Capture profiling is unset; normal failure capture and 42 screenshots remain.
+
+Both runtimes pass the real match's text-geometry regression: both seats retain eight visible
+labels with positive text fragments, four columns on English desktop and two on Polish 320px,
+no overflow or cross-cell overlap. Root visual review confirms intact readable Polish words.
+The committed desktop/narrow screenshots are byte-identical copies from this accepted run.
+
+Four latency profiles have 20 samples each, zero exceedances and zero CPU throttling.
+Local/shaped maxima are **51.492/161.999ms Compose** and **57.489/162.215ms Kubernetes**.
+Strict exact-200 JSON/no-store probes, runtime hardening, mode-0444 external seeds, three fresh
+Kubernetes pod UIDs, serial direct-pod forwarding in one recorded harness invocation, and complete
+cleanup pass. Pinned archive-only Trivy reports zero fixable HIGH/CRITICAL findings; strict
+Kubernetes 1.33 validates three resources. Quiet acknowledgements cover named local workers,
+without a global ambient-host-idleness claim.
+
+All **275 web tests** pass with coverage **95.08/90.80/94.68/97.56%**, plus production builds,
+contracts, lint, Knip and E2E static parity 27. Backend verification remains **375 core tests,
+174 server tests and two doctests in each debug/release profile**, Rust line coverage **93.27%**.
+Independent implementation/layout and complete final native-evidence reviews are clear;
+exact-head CI and publication remain required. Live rooms use v7 with optional pickups disabled.
+The final evidence/screenshot update changes documentation only after the accepted source.
+
+Evidence: `/tmp/grenadiers-v0324-responsive-hud-native-acceptance`, 949-file manifest SHA-256
+`4b86be3b665e748fa640b715cf13932bae6b71e0b7d0c10bbd265f058ff14436`.
+
+## Earlier HUD correction records
+
+Visual review of the pre-layout baseline exposed overlapping Polish labels at 320px. The
+intermediate wrap-only source `7dd97f2` passed **15/15 Compose functional cases**, including
+text-containment assertions. Visual review still found four-to-five-line word splitting, so
+that run stopped at the Compose latency gate. No latency or Kubernetes case ran; no result
+carries to the final layout. Its interrupted cleanup initially left an owned container/network;
+explicit cleanup removed them and final residue checks are empty. Partial evidence:
+`/tmp/grenadiers-v0324-hud-wrap-native-acceptance`, 750-file manifest
+`6f3ddef9a74c770d9ccba560ef2608075aa917b6a1b1e4d5254d9d371761186d`.
+
+## Pre-layout live-v7 terrain-cache baseline — 2026-10-18 — native 52/52
+
+Clean source `b1d0340e66300057e11de1a3dbcf57950850a793`, archive SHA-256
+`1b752f0619592091bf54ed88dfa4b636625714ea028ee4355df0de0e7ee638ea`, builds one image:
+`sha256:8f420bbf1cd7a1c6a6632d6dbb79b0eae7d0b2a91c670d1ff3e08bb3e6098e23`.
+Its saved archive hashes to `e7125cea23b212ecc5a39a94645a5f72eb4f9f8aba8815482d2a4d3041e91d5d`.
+Fresh ordinary acceptance passes **26/26 Compose and 26/26 Kubernetes**, all first attempts,
+retries zero, one worker. This is a complete fresh run, with no carried cases. All eight HUD
+fields, live-v7 bindings, original browser assertions and budgets are preserved. Capture
+profiling is unset; normal failure capture and all 42 configured screenshots are retained.
+
+Each target passes 15 functional and 11 latency cases. Four profiles have 20 samples each,
+zero exceedances and zero CPU throttling. Local/shaped maxima are **47.241/161.882ms Compose**
+and **126.458/162.159ms Kubernetes**. Strict exact-200 JSON/no-store probes, runtime hardening,
+external mode-0444 seed fixtures, three fresh Kubernetes pod UIDs, serial direct-pod forwarding
+in one recorded harness invocation and complete cleanup pass. Pinned archive-only Trivy finds
+zero fixable HIGH/CRITICAL vulnerabilities; strict Kubernetes 1.33 validates all three resources.
+Initial forwarding-not-ready probes remain preserved before successful strict probes; no
+browser scenario was retried. Quiet acknowledgements cover the named local workers and do not
+claim global host idleness.
+
+All **275 web tests** pass with coverage **95.08/90.80/94.68/97.56%**; production/diagnostic
+builds, contracts, lint, Knip and E2E static parity 27 pass. Backend checks remain **375 core,
+174 server and two doctests in each debug/release profile**, with Rust line coverage **93.27%**.
+Independent implementation/integration and complete native-evidence reviews are clear.
+Final-head CI and publication remain required. Live rooms use v7; optional pickups
+remain disabled. The final evidence update changes documentation only after the accepted source.
+
+Evidence: `/tmp/grenadiers-v0324-terrain-native-acceptance`, 949-file manifest SHA-256
+`1068113a6564ebb80c2b72463c7d5ee35dab4deb8e821cd308304dfd5adc9482`.
+
+## Earlier live-v7 verification records
 
 ## Live-v7 HUD acceptance — 2026-10-18 — native verified, publication pending
 
@@ -188,6 +313,34 @@ effect presentation is infrastructure; no new pickup is playable. These results 
 initial local verification. The later image and native acceptance are recorded above; exact-head
 acceptance for the terrain-cache integration remains pending.
 
+## Parent canonical projections with terrain cache — 2026-10-18 — native 52/52, final CI pending
+
+Clean source `20793428554458e69fe7014232d8d08e7ea089bc`, archive SHA-256
+`4e490088c7a5f8eaadecdd6414642c4c9c453286772b2fcf00c35750a97f6303`, builds one image:
+`sha256:2b4384501ffbd7ac990c7be0f7f609ac9278da61c2afd04f8415a9833cc83258`.
+Its saved archive hashes to `39067add856a3f383e658b98d1544f413a95258ff9abd453c1c96661346cfe42`.
+Fresh acceptance passes **26/26 Compose and 26/26 Kubernetes**, first attempts, retries zero,
+one worker. All ordinary assertions and budgets remain unchanged. The optional capture profiler
+is unset; normal failure capture and all 42 configured screenshots are retained.
+
+Each runtime passes 15 functional and 11 latency cases. Four latency profiles retain 20 samples
+each, zero exceedances and zero CPU throttling. Local/shaped maxima are **43.964/163.239ms Compose**
+and **56.008/163.934ms Kubernetes**. Runtime security, strict exact-200 JSON/no-store probes,
+mode-0444 external fixtures, three fresh Kubernetes pod UIDs, direct forwarding in one long-lived
+runner and complete cleanup pass. Pinned Trivy archive-only scanning reports zero fixable
+HIGH/CRITICAL findings; strict Kubernetes 1.33 validation passes three resources. A setup-only
+schema invocation omitted Node from PATH and exited 127 before any scenario; its correction and
+initial forwarding-not-ready probes remain preserved. No substantive test was retried.
+
+All **260 web tests** pass; coverage is **94.85/90.08/94.92/97.44%**, above unchanged floors.
+Production and diagnostic-fixture builds, contract checks, lint, Knip and E2E static parity 27
+pass. This final verification update changes documentation only after the accepted source.
+Independent code/integration and complete native-evidence reviews are clear. Final-head hosted
+CI and publication remain required. Live rooms still use v6; optional pickups remain disabled.
+
+Evidence: `/tmp/grenadiers-v0323-terrain-native-acceptance`, 945-file final manifest SHA-256
+`c68bc0f99c5568e1edf90c9e3e16fe38072703d0222d61c0cdf35bb44f9b4b92`.
+
 ## Canonical projection history — 2026-10-18 — native verified
 
 The v0.3.23 candidate passes **373 core tests, 170 server tests and two doctests in each debug and release profile**, with four
@@ -235,6 +388,47 @@ seed modes are recorded, but their hashes were not independently read inside con
 This certifies local native acceptance, without a hosted-CI or production-deployment claim.
 Publication requires exact-head hosted gates after the predecessor is merged. Later changes
 to application or browser test inputs require their corresponding evidence to be refreshed.
+
+## Static terrain cache — 2026-10-18 — native 52/52, final CI pending
+
+Clean source `a9619e6a033e8956081bb7d4804078d61e4ae69c`, source archive SHA-256
+`6505637293a5e172f11b229ecc854a0571c4a71677d2172c924b0b4d41abfb07`, builds one image:
+`sha256:4c936d86c563c05ab3b6192a15da6975e6c6e0a9803cba0f51931dd581011f47`.
+Its saved archive hashes to `c0c4348851d208d7b07418fd0c5a79b71a4d171d322129227f60f357fd8fb47f`.
+Full fresh acceptance passes **26/26 Compose and 26/26 Kubernetes**, first attempts, retries zero.
+All ordinary assertions and budgets remain unchanged; the optional profiler is absent and normal
+failure screenshots are enabled. The 42 configured PNGs are retained.
+
+Each of four latency profiles has 20 samples and zero exceedances/throttling. Local/shaped maxima
+are **58.617/159.317ms Compose** and **63.426/159.126ms Kubernetes**. Strict health/readiness,
+UID/GID 65532, zero capabilities, no-new-privileges, read-only roots, external mode-0444 fixtures,
+RuntimeDefault/500m/256Mi, three fresh pod UIDs and direct-pod forwarding lifecycles pass.
+The isolated diagnostic-shell HTTP000 is preserved separately; the same-host gate and actual
+runner preflights return exact 200 JSON/no-store. Owned containers, network, namespace, forwards
+and listeners are gone. The frozen image scan has zero fixable HIGH/CRITICAL findings and pinned
+Kubernetes schemas validate 3/3; neither build nor scan was repeated.
+
+The separately bounded original-workload confirmation passes once in 22.031s. Captures take
+2.710/1.885s versus the frozen 11.452/17.169s baseline, as one observation. Submitted indices per
+observed animation callback fall from 9,234 to 2,718 (70.57%); draws fall from 1 to 0.5. The cache
+also introduces 0.5 wrapped buffer uploads/callback, with an 86,976-byte supplied-source upper
+bound/callback. These are CPU-side measurements; callbacks are not frames, source spans are not
+actual upload sizes, and different-duration CPU totals do not establish per-frame efficiency or
+the CI timeout's cause. Independent code, pixel and one-run evidence reviews are clear.
+
+All 260 web tests and unchanged coverage thresholds pass, alongside contracts, lint, Knip,
+production/fixture builds and E2E static parity 27. Isolated exact-pixel tests pass at DPR 1 and 2
+through paint, repaint, reset and real context restoration. The first fixture's raw restore call
+timed out; its preserved correction uses Pixi's deferred forced-loss restoration path. The passing
+list report and retained exact assertions establish zero differing bytes in each phase; attachment
+bodies were not separately persisted. The stopped six-cell matrix was not rerun.
+
+Independent full-native evidence review is clear. Evidence:
+`/tmp/grenadiers-v0322-terrain-native-acceptance`, 922-file manifest SHA-256
+`8f9818480cf59c0e3c2cc2c237ef9e418c60933d5a46555686f674938128eda9`.
+One-case evidence: `/tmp/grenadiers-v0322-terrain-capture-acceptance`, 645-file manifest
+`422bb4077a082ae21c4505e42f8e20557844174ab7ad6045abd6adde4e18937a`.
+Final-head hosted CI and publication remain separate requirements; live rooms still use gameplay-v6.
 
 ## Original capture workload — 2026-10-18 — attribution stopped
 

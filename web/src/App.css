@@ -125,6 +125,7 @@ main { min-height: 100vh; }
   font-size: .72rem;
 }
 .actor-stats div { min-width: 0; border-left: 2px solid #c7d2d7; padding-left: .3rem; }
+.actor-stats dt, .actor-stats dd { overflow-wrap: anywhere; }
 .actor-stats dt { color: #52697c; line-height: 1.1; }
 .actor-stats dd { margin: .1rem 0 0; color: var(--ink); font-size: .95rem; font-weight: 800; }
 .actor-stats .grace-active { border-left-color: #a92d43; background: #f9e6e8; }
@@ -144,6 +145,9 @@ main { min-height: 100vh; }
   .site-header > div:last-child { align-self: flex-start; }
   .game-shell { grid-template-columns: 1fr; }
   .control-column { min-height: 0; box-shadow: .3rem .3rem 0 rgb(32 53 74 / 12%); }
+}
+@media (max-width: 420px) {
+  .actor-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 390px) {
   .page-frame { padding-inline: .75rem; }

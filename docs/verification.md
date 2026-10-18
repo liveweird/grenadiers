@@ -1,6 +1,30 @@
 # Repository verification
 
-## Heart activation candidate — 2026-10-18 — local checks only
+## Heart activation candidate — 2026-10-18 — native baseline 54/54
+
+Clean source `00d76ac9cc08e7bb4627caf7897e02c3f15a43d2`, source archive SHA-256
+`cb60d03dd51e9793463191657448529ec119694656a4fca7f8ab0a943814aa61`, passes all 54 native
+cases: 27 Compose/27 Kubernetes, each first attempt with zero retries. The single built image is
+`sha256:35bf3678b5940149dd82acde55ada77f091d1bed70563db7f77b3dcbaafb0293`, saved archive
+SHA-256 `72d0303d00c25cc7dff53ab501a2f0695364c5bc2c21be2f225b7f2a830a1d52`.
+Pinned reference Chromium/Node 24.21/Playwright 1.63 runs every browser group. Heart itself passes
+in 30.2s Compose/30.6s Kubernetes with external mode-0444 `arena-v2-heart`, ordinary controls and unchanged
+assertions. All 18 reports have no failures or retries.
+
+Each of four latency profiles retains 20 samples with zero exceedances; maxima are
+51.860/172.306ms Compose local/shaped and 53.304/158.520ms Kubernetes. Throttling deltas are zero.
+Strict probes, UID/GID 65532, zero capabilities, no-new-privileges, read-only roots, RuntimeDefault,
+Kubernetes 500m/256Mi and direct fresh-pod port-forward liveness/stop/wait/cleanup pass. Four fixture
+rollouts use distinct pod UIDs. Owned Compose containers/network and Kubernetes namespace are gone.
+
+Independent evidence review confirms all 54 results and the frozen 1030-file final manifest
+`6e8587290fc441f1310711391b2147d2486f61d5dd94ba87161782d0bcaeea5b` under
+`/tmp/grenadiers-v0325-acceptance`. A preparation count-file path had become stale after its
+recorded recheck; a sealed addendum preserves historical bytes and replays the original 630
+preparation entries via the preserved count copy. Its ten-file audit manifest is
+`8fd0932bd5d8e7eab1057a41169a9ffa97cb241a5b30f989481fc380aafe75a1`; independent re-review is clear.
+This native baseline excludes the separately evaluated upstream terrain-cache candidate.
+Final-head CI, integration and publication remain outstanding.
 
 The v0.3.25 candidate passes **401 core tests, 179 server tests and two doctests** in both
 debug and release profiles; four dedicated performance profiles remain intentionally ignored. Rust line
@@ -17,10 +41,9 @@ damage before collection, replacement without stacking, overflow, disabled/Class
 real owner replacement/restore, quiet baselines and complete deterministic replay. Archived
 contracts remain byte-unchanged; journal records retain their 64-byte and allocation bounds.
 
-No v0.3.25 native image or deployment acceptance is claimed. The inherited connected-takeover
-release-build defect is corrected; full debug and release gates pass. Strengthened acceptance
-requires actual movement from the replacement binding. Fresh native acceptance and final-head
-CI remain required before publication.
+The inherited connected-takeover release-build defect is corrected; full debug and release gates
+pass. Native acceptance requires actual movement from the replacement binding and now passes
+at the source/image recorded above. Final-head CI remains required before publication.
 
 ## Live gameplay-v7 candidate — 2026-10-18 — local checks only
 

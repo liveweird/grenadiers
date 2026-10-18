@@ -1,5 +1,33 @@
 # Repository verification
 
+## Golden Flame candidate — 2026-10-18 — native acceptance pending
+
+The v0.3.27 candidate implements opt-in Golden Flame with a 600-physical-tick refreshable
+timer and captured radius eight on newly placed bombs. Defaults remain Heart-only, Classic
+clears optional items, and all eight supported pools retain canonical ordering. Existing four
+item-pool generation paths stay byte-for-byte stable; the new enabled weight is 15. Repeated
+seed byte31 gives the ordinary generated pickup at(3,1).
+
+Independent domain and frontend/protocol/server/E2E reviews are clear. Core debug/release
+passes **426 unit tests and two doctests** each; server debug/release passes **181 tests** each
+(four dedicated performance profiles ignored). Workspace clippy and formatting pass. The first
+server gate exposed a stale two-item admission expectation; the updated three-item expectation
+and both complete server suites pass. Generated collection, captured range, connected replacement,
+disconnected restore, exact expiry, base range restoration, next-round settings and journal replay
+are exercised through ordinary runtime actions.
+
+All **317 web tests** pass across 38 files, with statement/branch/function/line coverage
+**95.04/90.70/95.45/97.52%**. Contracts, lint, Knip, builds, both dependency audits and strict
+Kubernetes schemas3/3 pass. E2E static parity passes **29 scenarios**. Rust line coverage is
+**91.39% (12,142/13,286)**. Coverage tests passed initially; report output failed because an
+external target directory left the local output parent absent. Creating that parent and reporting
+the existing data succeeds without rerunning tests.
+
+A production-seed browser scenario is registered for range-eight placement, ordinary escape,
+reconnect action floor and unchanged effect deadline, exact expiry and later radius-two death.
+Its actual browser playthrough, screenshots, fresh same-image Compose/Kubernetes29+29 acceptance
+and final-head CI remain pending. Prior candidate image results do not certify this item.
+
 ## Shield activation candidate — 2026-10-18 — native acceptance pending
 
 The v0.3.26 working candidate passes **413 core tests, 180 server tests and two doctests in each

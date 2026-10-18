@@ -67,7 +67,7 @@ describe('gameplay settings panel', () => {
     })
   })
 
-  it('toggles Heart and Shield independently and keeps defaults distinct from Classic', async () => {
+  it('toggles all optional items independently and keeps defaults distinct from Classic', async () => {
     const apply = vi.fn(() => true)
     const user = userEvent.setup()
     const view = render(<MantineProvider env="test"><GameplaySettingsPanel room={room(1)} youSeat="one"
@@ -75,22 +75,39 @@ describe('gameplay settings panel', () => {
 
     expect(screen.getByRole('checkbox', { name: 'Heart' })).toBeChecked()
     expect(screen.getByRole('checkbox', { name: 'Shield' })).not.toBeChecked()
+    expect(screen.getByRole('checkbox', { name: 'Golden flame' })).not.toBeChecked()
     expect(screen.getByText(/Absorbs one lethal blast/)).toBeVisible()
     expect(screen.getByText(/5 seconds of damage immunity/)).toBeVisible()
+    expect(screen.getByText(/10 seconds/)).toBeVisible()
     await user.click(screen.getByRole('checkbox', { name: 'Shield' }))
+    await user.click(screen.getByRole('checkbox', { name: 'Golden flame' }))
     expect(screen.getByRole('checkbox', { name: 'Heart' })).toBeChecked()
     await user.click(screen.getByRole('button', { name: 'Apply rules' }))
+    expect(apply).toHaveBeenLastCalledWith(expect.objectContaining({
+      enabledItems: ['heart', 'shield', 'goldenFlame'],
+    }))
+    await user.click(screen.getByRole('checkbox', { name: 'Golden flame' }))
+    await user.click(screen.getByRole('button', { name: 'Apply rules' }))
     expect(apply).toHaveBeenLastCalledWith(expect.objectContaining({ enabledItems: ['heart', 'shield'] }))
+    await user.click(screen.getByRole('checkbox', { name: 'Golden flame' }))
     await user.click(screen.getByRole('checkbox', { name: 'Heart' }))
     expect(screen.getByRole('checkbox', { name: 'Shield' })).toBeChecked()
+    expect(screen.getByRole('checkbox', { name: 'Golden flame' })).toBeChecked()
     await user.click(screen.getByRole('button', { name: 'Apply rules' }))
-    expect(apply).toHaveBeenLastCalledWith(expect.objectContaining({ enabledItems: ['shield'] }))
+    expect(apply).toHaveBeenLastCalledWith(expect.objectContaining({
+      enabledItems: ['shield', 'goldenFlame'],
+    }))
+    await user.click(screen.getByRole('checkbox', { name: 'Shield' }))
+    expect(screen.getByRole('checkbox', { name: 'Golden flame' })).toBeChecked()
+    await user.click(screen.getByRole('button', { name: 'Apply rules' }))
+    expect(apply).toHaveBeenLastCalledWith(expect.objectContaining({ enabledItems: ['goldenFlame'] }))
     await user.click(screen.getByRole('checkbox', { name: 'Heart' }))
     await user.click(screen.getByRole('button', { name: 'Apply rules' }))
-    expect(apply).toHaveBeenLastCalledWith(expect.objectContaining({ enabledItems: ['heart', 'shield'] }))
+    expect(apply).toHaveBeenLastCalledWith(expect.objectContaining({ enabledItems: ['heart', 'goldenFlame'] }))
     await user.click(screen.getByRole('button', { name: 'Classic settings' }))
     expect(screen.getByRole('checkbox', { name: 'Heart' })).not.toBeChecked()
     expect(screen.getByRole('checkbox', { name: 'Shield' })).not.toBeChecked()
+    expect(screen.getByRole('checkbox', { name: 'Golden flame' })).not.toBeChecked()
     await user.click(screen.getByRole('button', { name: 'Apply rules' }))
     expect(apply).toHaveBeenLastCalledWith({
       startingSpeedLevel: 0, turnAssistUnits: 256, winsToFinish: 3,
@@ -104,19 +121,22 @@ describe('gameplay settings panel', () => {
       pending={false} copy={pl} onApply={apply} /></MantineProvider>)
     expect(screen.queryByRole('checkbox', { name: 'Serce' })).not.toBeInTheDocument()
     expect(screen.queryByRole('checkbox', { name: 'Tarcza' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('checkbox', { name: 'Złoty płomień' })).not.toBeInTheDocument()
     expect(pl.settings.heartDescription).toMatch(/śmiertelnym wybuchem/)
     expect(pl.settings.shieldDescription).toMatch(/5 sekund/)
+    expect(pl.settings.goldenFlameDescription).toMatch(/10 sekund/)
   })
 
 })
 
 describe('gameplay settings locks', () => {
-  it('locks both item rules with the rest of the lobby settings', () => {
+  it('locks all item rules with the rest of the lobby settings', () => {
     const locked = room(3)
     locked.seats[0].ready = true
     render(<MantineProvider env="test"><GameplaySettingsPanel room={locked} youSeat="one"
       pending={false} copy={en} onApply={() => true} /></MantineProvider>)
     expect(screen.getByRole('checkbox', { name: 'Heart' })).toBeDisabled()
     expect(screen.getByRole('checkbox', { name: 'Shield' })).toBeDisabled()
+    expect(screen.getByRole('checkbox', { name: 'Golden flame' })).toBeDisabled()
   })
 })

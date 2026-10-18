@@ -129,3 +129,9 @@ establish WAN behavior or a tail guarantee. Gameplay traces remain disabled.
 on Linux; macOS needs no Xvfb wrapper. The [sound guide](game/audio.md) records gesture, mute,
 visibility and cleanup evidence. CDP context/node observations establish browser processing,
 not hardware audibility or listening quality; final context disposal is unit-tested separately.
+
+Golden Flame has a separate production-seed scenario:
+`E2E_GOLDEN_FLAME_FIXTURE=arena-v2-golden-flame npm --prefix e2e run test:golden-flame`.
+Use `docker-compose.golden-flame.yaml` with the same image and wait for readiness after
+recreating the service. It checks generated collection, captured maximum range, exact deadline,
+reconnect and restored base range. See [deployment](deployment.md#reproduce-opt-in-golden-flame-range).

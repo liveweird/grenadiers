@@ -6,7 +6,8 @@ items are enabled in the published v0.3.21 rooms. The v0.3.25 Heart candidate no
 server, browser and pixel-art implementation with local checks and independent reviews clear;
 both debug/release profiles pass and native release acceptance is pending. The v0.3.26 Shield
 candidate adds opt-in timed immunity and independent settings with local checks underway.
-The other 20 requested pickups remain unimplemented. Richer transitions and further item artwork remain follow-up
+The v0.3.27 candidate is implementing opt-in Golden Flame. The other 19 requested pickups
+remain unimplemented. Richer transitions and further item artwork remain follow-up
 work. See [pixel-art presentation](pixel-art.md) and [expanded item implementation](expanded-items.md).
 Updated 2026-10-18 after playtest feedback. Release acceptance is recorded in
 [verification](../verification.md).

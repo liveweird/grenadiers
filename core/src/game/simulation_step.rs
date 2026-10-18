@@ -3,7 +3,6 @@ use std::collections::BTreeMap;
 use super::{RoundResult, SeatInput, State, StepError, StepReport};
 use crate::game::bombs::BombTrigger;
 use crate::game::damage::{DamageOutcome, DamagePreventionSource, apply_damage};
-use crate::game::effects::{EffectKind, SHIELD_TICKS};
 use crate::game::events::{EventAudience, StepEvent, StepEventKind};
 use crate::game::geometry::MovementTrace;
 use crate::game::movement;
@@ -33,16 +32,16 @@ impl State {
             });
         }
 
-        // A Shield collection is the only fallible mutation in a running step. Near the
+        // Timed pickup collection is the only fallible mutation in a running step. Near the
         // absolute tick horizon, retain a transaction snapshot only when that failure is
         // possible, rather than cloning every deterministic update.
-        let rollback = (next_tick.0.checked_add(SHIELD_TICKS).is_none()
-            && self
-                .world
-                .pickups
-                .iter()
-                .any(|(_, kind)| kind == crate::game::PickupKind::Shield))
-        .then(|| self.clone());
+        let rollback = self
+            .world
+            .pickups
+            .iter()
+            .filter_map(|(_, kind)| kind.timed_effect())
+            .any(|effect| next_tick.0.checked_add(effect.duration_ticks()).is_none())
+            .then(|| self.clone());
         let mut events = Vec::new();
         let mut shield_prevented = [false; 2];
         self.expire_flames(next_tick);
@@ -55,7 +54,7 @@ impl State {
         self.resolve_explosions(next_tick, &mut events)?;
         self.kill_on_final_flames(next_tick, &mut events, &mut shield_prevented);
         if let Err(error) = self.collect_pickups(next_tick, &mut events) {
-            debug_assert_eq!(error, StepError::EffectExpiryOverflow(EffectKind::Shield));
+            debug_assert!(matches!(error, StepError::EffectExpiryOverflow(_)));
             if let Some(snapshot) = rollback {
                 *self = snapshot;
             }

@@ -30,3 +30,6 @@ e2e/controls-test-results/
 
 e2e/playwright-audio-report/
 e2e/audio-test-results/
+
+e2e/playwright-golden-flame-report/
+e2e/golden-flame-test-results/

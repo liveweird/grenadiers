@@ -108,6 +108,8 @@ export class ArenaScene {
       actor.protection.alpha = effects && actor.protected ? 0.65 + (Math.floor(now / 120) % 2) * 0.35 : 1
       actor.shield.visible = actor.shielded
       actor.shield.alpha = effects && actor.shielded ? 0.75 + (Math.floor(now / 160) % 2) * 0.25 : 1
+      actor.goldenFlame.visible = actor.golden
+      actor.goldenFlame.alpha = effects && actor.golden ? 0.7 + (Math.floor(now / 100) % 2) * 0.3 : 1
     }
   }
 
@@ -192,6 +194,7 @@ export class ArenaScene {
       drawing.root.visible = actor.alive
       drawing.protected = (actor.damageGraceRemainingTicks ?? 0) > 0
       drawing.shielded = (actor.shieldRemainingTicks ?? 0) > 0
+      drawing.golden = (actor.goldenFlameRemainingTicks ?? 0) > 0
       drawing.moving = Boolean(!reset && previousMotion
         && (previousMotion.toX !== toX || previousMotion.toY !== toY))
       setActorPose(drawing, actor.heading, 0)

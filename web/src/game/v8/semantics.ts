@@ -26,47 +26,47 @@ export function itemSetSemanticError(
   return enabledItems.every((item) => available.has(item)) ? null : 'unavailableItem'
 }
 
-function supportedItem(kind: string, heartEnabled: boolean, shieldEnabled: boolean): boolean {
+const supportedItems = ['heart', 'shield', 'goldenFlame'] as const
+
+function supportedItem(kind: string, enabled: ReadonlySet<ItemId>): boolean {
   return ['bombCapacity', 'blastRange', 'movementSpeed'].includes(kind)
-    || (kind === 'heart' && heartEnabled)
-    || (kind === 'shield' && shieldEnabled)
+    || (supportedItems.includes(kind as typeof supportedItems[number]) && enabled.has(kind as ItemId))
 }
 
-function supportedState(state: GameState | null, heartEnabled: boolean, shieldEnabled: boolean): boolean {
+function supportedState(state: GameState | null, enabled: ReadonlySet<ItemId>): boolean {
   if (!state) return true
-  if (state.pickups.some((pickup) => !supportedItem(pickup.kind, heartEnabled, shieldEnabled))) return false
+  if (state.pickups.some((pickup) => !supportedItem(pickup.kind, enabled))) return false
   return state.actors.every((actor) => actor.type === 'visible' && (
     actor.inventory.weapon === null
     && (actor.inventory.equipment === null
-      || (actor.inventory.equipment === 'heart' && heartEnabled))
-    && actor.effects.every((effect) => effect.kind === 'shield'
-      && shieldEnabled && effect.remainingTicks <= 300)
-    && (heartEnabled || actor.damageGraceRemainingTicks === 0)
+      || (actor.inventory.equipment === 'heart' && enabled.has('heart')))
+    && actor.effects.every((effect) =>
+      (effect.kind === 'shield' && enabled.has('shield') && effect.remainingTicks <= 300)
+      || (effect.kind === 'goldenFlame' && enabled.has('goldenFlame') && effect.remainingTicks <= 600))
+    && (enabled.has('heart') || actor.damageGraceRemainingTicks === 0)
   ))
 }
 
-function supportedEvents(
-  events: readonly WireEvent[], heartEnabled: boolean, shieldEnabled: boolean,
-): boolean {
+function supportedEvents(events: readonly WireEvent[], enabled: ReadonlySet<ItemId>): boolean {
   return events.every(({ kind }) => {
-    if (kind.type === 'pickupCollected') return supportedItem(kind.kind, heartEnabled, shieldEnabled)
+    if (kind.type === 'pickupCollected') return supportedItem(kind.kind, enabled)
     return kind.type !== 'damagePrevented'
-      || (kind.source === 'heart' ? heartEnabled : shieldEnabled)
+      || enabled.has(kind.source)
   })
 }
 
 export function expandedProfileSemanticError(
   room: RoomView, state: GameState | null, events: readonly WireEvent[] = [],
 ): GameplayV8SemanticError | null {
+  const enabled = new Set(room.settings.enabledItems)
+  const canonicalEnabled = supportedItems.filter((item) => enabled.has(item))
   if (room.rulesVersion !== 5 || room.mapId !== 'generated_v2'
-    || room.availableItems.length !== 2 || room.availableItems[0] !== 'heart'
-    || room.availableItems[1] !== 'shield'
-    || room.settings.enabledItems.some((item) => item !== 'heart' && item !== 'shield')) {
+    || room.availableItems.length !== supportedItems.length
+    || room.availableItems.some((item, index) => item !== supportedItems[index])
+    || room.settings.enabledItems.length !== canonicalEnabled.length
+    || room.settings.enabledItems.some((item, index) => item !== canonicalEnabled[index])) {
     return 'unsupportedProfile'
   }
-  const heartEnabled = room.settings.enabledItems.includes('heart')
-  const shieldEnabled = room.settings.enabledItems.includes('shield')
-  return supportedState(state, heartEnabled, shieldEnabled)
-    && supportedEvents(events, heartEnabled, shieldEnabled)
+  return supportedState(state, enabled) && supportedEvents(events, enabled)
     ? null : 'unsupportedProfile'
 }

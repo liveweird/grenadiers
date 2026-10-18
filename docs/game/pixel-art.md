@@ -36,3 +36,7 @@ tests accompany the artwork. Independent code and visual review is clear. The sa
 passes 24 scenarios each through Compose and Kubernetes, plus a separate native capture case.
 This first visual slice covers terrain, actors, bombs, flames and the existing three pickups;
 new item icons and richer death/destruction/collection transitions remain follow-up artwork.
+
+Golden Flame adds a bright pixel flame pickup and a separate crest above the actor, coexisting
+with Shield and Heart-grace indicators. Its current timer comes from the authoritative baseline;
+reduced motion keeps the crest static. Native screenshots are pending candidate acceptance.

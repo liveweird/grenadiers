@@ -59,3 +59,5 @@ weapons, visibility and incremental activation decisions; these items are not en
 [Procedural sound](audio.md) explains gesture activation, mute, visibility recovery and event baselines.
 
 See the implemented expansion candidates: [Heart](heart.md) and [Shield](shield.md).
+
+- [Golden Flame](golden-flame.md): opt-in ten-second maximum-range pickup and captured bomb behavior.

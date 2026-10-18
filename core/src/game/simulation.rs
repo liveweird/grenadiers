@@ -193,7 +193,6 @@ impl State {
     }
 
     /// Creates a round at an existing absolute room tick.
-    ///
     /// The round-local running update count always starts at zero.
     pub fn new_at_tick(
         rules: RulesConfig,
@@ -363,6 +362,9 @@ mod explosion_step;
 #[cfg(test)]
 #[path = "flame_tests.rs"]
 mod flame_tests;
+#[cfg(test)]
+#[path = "golden_flame_tests.rs"]
+mod golden_flame_tests;
 #[cfg(test)]
 #[path = "item_foundation_tests.rs"]
 mod item_foundation_tests;

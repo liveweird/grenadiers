@@ -62,10 +62,17 @@ pub(in crate::game::rooms) fn start_expanded_heart_round(runtime: &mut MatchRunt
 }
 
 pub(in crate::game::rooms) fn start_shield_runtime() -> MatchRuntime {
+    start_optional_runtime(grenadiers_core::game::EnabledItems::SHIELD, 31)
+}
+
+pub(in crate::game::rooms) fn start_optional_runtime(
+    enabled: grenadiers_core::game::EnabledItems,
+    seed_byte: u8,
+) -> MatchRuntime {
     let mut runtime = MatchRuntime::new(
         identity(RoomProfile::ExpandedV5),
-        RoundSeedSource::with_entropy(|bytes| {
-            bytes.fill(31);
+        RoundSeedSource::with_entropy(move |bytes| {
+            bytes.fill(seed_byte);
             Ok(())
         }),
     );
@@ -76,8 +83,7 @@ pub(in crate::game::rooms) fn start_shield_runtime() -> MatchRuntime {
             1,
             MatchAction::UpdateSettings {
                 settings_revision: 1,
-                settings: grenadiers_core::room::RoomSettings::DEFAULT
-                    .with_enabled_items(grenadiers_core::game::EnabledItems::SHIELD),
+                settings: grenadiers_core::room::RoomSettings::DEFAULT.with_enabled_items(enabled),
             },
         )
         .unwrap();
@@ -244,7 +250,11 @@ pub(super) fn pickup_fixture_source() -> RoundSeedSource {
     })
 }
 
-pub(super) fn move_cells(runtime: &mut MatchRuntime, direction: Direction, cells: usize) {
+pub(in crate::game::rooms) fn move_cells(
+    runtime: &mut MatchRuntime,
+    direction: Direction,
+    cells: usize,
+) {
     let epoch = runtime.lifecycle().round_attempt();
     runtime
         .action(SeatId::One, epoch, MatchAction::Movement(Some(direction)))
@@ -263,7 +273,7 @@ pub(super) fn move_cells(runtime: &mut MatchRuntime, direction: Direction, cells
     runtime.tick().unwrap();
 }
 
-pub(super) fn plant(runtime: &mut MatchRuntime, action_id: u32) {
+pub(in crate::game::rooms) fn plant(runtime: &mut MatchRuntime, action_id: u32) {
     runtime
         .action(
             SeatId::One,

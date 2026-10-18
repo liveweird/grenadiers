@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.27 — 2026-10-18
+
+- Add opt-in Golden Flame pickups: ten seconds of refreshable maximum blast range for newly
+  planted bombs, independent of Shield and Heart; existing bombs retain their captured range.
+- Preserve Heart-only defaults and every prior seeded item-pool path; add independent settings,
+  localized guidance and distinct pixel artwork while retaining the gameplay-v8 contract.
+
 ## 0.3.26 — 2026-10-18
 
 - Add opt-in Shield pickups: five seconds of refreshable immunity, independent of Heart equipment,

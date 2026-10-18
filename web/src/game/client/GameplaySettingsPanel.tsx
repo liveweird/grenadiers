@@ -8,7 +8,7 @@ const SPEEDS = [0, 1, 2, 3, 4] as const
 const TURN_ASSISTS = [64, 128, 192, 256] as const
 const WINS = [1, 2, 3, 4, 5, 6, 7, 8, 9] as const
 const FUSES = [60, 90, 120, 150, 180, 210, 240, 270, 300] as const
-const AVAILABLE_ITEMS = ['heart', 'shield'] as const
+const AVAILABLE_ITEMS = ['heart', 'shield', 'goldenFlame'] as const
 const DEFAULT_SETTINGS: GameSettings = {
   startingSpeedLevel: 0, turnAssistUnits: 256, winsToFinish: 3, bombFuseTicks: 180,
   enabledItems: ['heart'],
@@ -29,7 +29,7 @@ interface Props {
 }
 
 function ItemSetting({ item, visible, checked, disabled, copy, onChange }: {
-  item: 'heart' | 'shield'
+  item: 'heart' | 'shield' | 'goldenFlame'
   visible: boolean
   checked: boolean
   disabled: boolean
@@ -61,7 +61,7 @@ export function GameplaySettingsPanel({ room, youSeat, pending, copy, onApply }:
   const update = <K extends keyof GameSettings>(field: K, value: GameSettings[K]): void => {
     setDraft((current) => ({ ...current, [field]: value }))
   }
-  const toggleItem = (item: 'heart' | 'shield', enabled: boolean): void => {
+  const toggleItem = (item: 'heart' | 'shield' | 'goldenFlame', enabled: boolean): void => {
     setDraft((current) => ({
       ...current,
       enabledItems: AVAILABLE_ITEMS.filter((candidate) =>
@@ -111,6 +111,9 @@ export function GameplaySettingsPanel({ room, youSeat, pending, copy, onApply }:
       <ItemSetting item="shield" visible={room.availableItems.includes('shield')}
         checked={draft.enabledItems.includes('shield')} disabled={!editable || pending} copy={copy}
         onChange={(enabled) => toggleItem('shield', enabled)} />
+      <ItemSetting item="goldenFlame" visible={room.availableItems.includes('goldenFlame')}
+        checked={draft.enabledItems.includes('goldenFlame')} disabled={!editable || pending} copy={copy}
+        onChange={(enabled) => toggleItem('goldenFlame', enabled)} />
       {dirty && <Text className="settings-lock" size="sm">{copy.settings.unapplied}</Text>}
       {lockText && <Text className="settings-lock" size="sm">{lockText}</Text>}
       <Group gap="sm">

@@ -79,7 +79,7 @@ export function makePickup(kind: RenderablePickupKind): Graphics {
       [17, 19, 5, 5], [27, 19, 5, 5], [15, 23, 19, 5], [18, 28, 13, 4], [21, 32, 7, 4],
     ])
     pixels(drawing, PALETTE.brickLight, [[18, 20, 4, 3], [16, 23, 4, 3]])
-  } else {
+  } else if (kind === 'shield') {
     pixels(drawing, PALETTE.deepInk, [
       [16, 15, 17, 3], [13, 18, 23, 7], [15, 25, 19, 7], [18, 32, 13, 4], [22, 36, 5, 3],
     ])
@@ -87,6 +87,13 @@ export function makePickup(kind: RenderablePickupKind): Graphics {
       [17, 18, 15, 4], [16, 22, 17, 6], [18, 28, 13, 4], [21, 32, 7, 3],
     ])
     pixels(drawing, PALETTE.blueLight, [[18, 19, 9, 3], [18, 22, 4, 5]])
+  } else {
+    pixels(drawing, PALETTE.deepInk, [
+      [16, 32, 17, 4], [13, 25, 23, 7], [17, 17, 15, 10], [22, 12, 7, 8],
+    ])
+    pixels(drawing, PALETTE.flame, [[16, 25, 17, 6], [19, 18, 11, 10], [23, 13, 5, 9]])
+    pixels(drawing, PALETTE.flameLight, [[20, 24, 9, 5], [22, 18, 6, 9], [24, 15, 3, 7]])
+    pixels(drawing, PALETTE.flameCore, [[23, 22, 4, 7], [24, 18, 2, 5]])
   }
   return drawing
 }

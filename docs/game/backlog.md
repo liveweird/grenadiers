@@ -4,10 +4,12 @@ TURN v0.3.16, CONFIG v0.3.17 and the first ART slice v0.3.18 are shipped. Heart
 [v0.3.25](https://github.com/liveweird/grenadiers/releases/tag/v0.3.25), Shield
 [v0.3.26](https://github.com/liveweird/grenadiers/releases/tag/v0.3.26), Golden Flame
 [v0.3.27](https://github.com/liveweird/grenadiers/releases/tag/v0.3.27) and Short Fuse
-[v0.3.28](https://github.com/liveweird/grenadiers/releases/tag/v0.3.28) are published.
-The v0.3.29 Short Flame increment has passed fresh native acceptance and awaits final CI;
-the v0.3.30 Long Fuse candidate passes local checks and awaits fresh native acceptance and
-final-head CI. The other 16 requested pickups remain outside this increment. Richer transitions
+[v0.3.28](https://github.com/liveweird/grenadiers/releases/tag/v0.3.28), and Short Flame
+[v0.3.29](https://github.com/liveweird/grenadiers/releases/tag/v0.3.29) are published.
+The v0.3.30 Long Fuse increment passes local checks and fresh 64/64 Compose/Kubernetes browser
+cases; independent final evidence review is clear and final-head CI remains pending. The disclosed post-run
+wrapper bookkeeping exception is recorded in verification. The other 16 requested pickups remain
+outside this increment. Richer transitions
 and artwork remain follow-up work. See [pixel-art presentation](pixel-art.md),
 [expanded item implementation](expanded-items.md), and
 [release notes](https://github.com/liveweird/grenadiers/releases).

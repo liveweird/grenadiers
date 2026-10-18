@@ -1,9 +1,10 @@
 # Expanded item implementation plan
 
-Status: [Heart](heart.md), [Shield](shield.md), [Golden Flame](golden-flame.md) and
-[Short Fuse](short-fuse.md) are published through v0.3.28. The v0.3.29 [Short Flame](short-flame.md)
-increment passed fresh native acceptance and awaits final CI. The v0.3.30 [Long Fuse](long-fuse.md)
-candidate passes local checks and awaits fresh native acceptance and final-head CI.
+Status: [Heart](heart.md), [Shield](shield.md), [Golden Flame](golden-flame.md),
+[Short Fuse](short-fuse.md) and [Short Flame](short-flame.md) are published through v0.3.29.
+The v0.3.30 [Long Fuse](long-fuse.md) increment passes local checks and fresh 64/64 native browser
+cases; independent final evidence review is clear and final-head CI remains pending. Verification records
+the disclosed post-run wrapper bookkeeping exception and separate successful integrity checks.
 Expanded-v5/generator-v2 rooms and gameplay-v8 are retained; see
 [verification](../verification.md) and
 [release notes](https://github.com/liveweird/grenadiers/releases).

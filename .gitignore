@@ -37,6 +37,8 @@ e2e/playwright-short-fuse-report/
 e2e/short-fuse-test-results/
 e2e/playwright-short-flame-report/
 e2e/short-flame-test-results/
+e2e/playwright-long-fuse-report/
+e2e/long-fuse-test-results/
 web/renderer-diagnostics-dist/
 e2e/playwright-renderer-diagnostics-report/
 e2e/renderer-diagnostics-test-results/

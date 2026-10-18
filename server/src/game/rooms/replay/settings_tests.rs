@@ -193,7 +193,15 @@ fn expanded_item_masks_and_disabled_preset_replay_deterministically() {
         77824, 77840, 78336, 78352,
     ]
     .map(|bits| EnabledItems::from_bits(bits).unwrap())
-    {
+    .into_iter()
+    .chain(
+        [
+            131072, 131088, 131584, 131600, 135168, 135184, 135680, 135696, 139264, 139280, 139776,
+            139792, 143360, 143376, 143872, 143888, 196608, 196624, 197120, 197136, 200704, 200720,
+            201216, 201232, 204800, 204816, 205312, 205328, 208896, 208912, 209408, 209424,
+        ]
+        .map(|bits| EnabledItems::from_bits(bits).unwrap()),
+    ) {
         let mut runtime = MatchRuntime::new(
             identity_for_profile(RoomProfile::ExpandedV5),
             RoundSeedSource::with_entropy(|bytes| {

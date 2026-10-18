@@ -9,6 +9,7 @@ impl EnabledItems {
     pub const GOLDEN_FLAME: Self = Self(1 << 12);
     pub const SHORT_FUSE: Self = Self(1 << 13);
     pub const SHORT_FLAME: Self = Self(1 << 16);
+    pub const LONG_FUSE: Self = Self(1 << 17);
     pub const HEART_AND_SHIELD: Self = Self(Self::HEART.0 | Self::SHIELD.0);
     pub const HEART_AND_GOLDEN_FLAME: Self = Self(Self::HEART.0 | Self::GOLDEN_FLAME.0);
     pub const SHIELD_AND_GOLDEN_FLAME: Self = Self(Self::SHIELD.0 | Self::GOLDEN_FLAME.0);
@@ -17,7 +18,8 @@ impl EnabledItems {
             | Self::SHIELD.0
             | Self::GOLDEN_FLAME.0
             | Self::SHORT_FUSE.0
-            | Self::SHORT_FLAME.0,
+            | Self::SHORT_FLAME.0
+            | Self::LONG_FUSE.0,
     );
 
     #[must_use]
@@ -58,6 +60,11 @@ impl EnabledItems {
     pub const fn contains_short_flame(self) -> bool {
         self.0 & Self::SHORT_FLAME.0 != 0
     }
+
+    #[must_use]
+    pub const fn contains_long_fuse(self) -> bool {
+        self.0 & Self::LONG_FUSE.0 != 0
+    }
 }
 
 #[cfg(test)]
@@ -89,7 +96,7 @@ mod tests {
         for bits in [8192, 8208, 8704, 8720, 12288, 12304, 12800, 12816] {
             assert_eq!(EnabledItems::from_bits(bits).unwrap().bits(), bits);
         }
-        assert_eq!(EnabledItems::from_bits(78_352), Some(EnabledItems::ALL));
+        assert_eq!(EnabledItems::from_bits(209_424), Some(EnabledItems::ALL));
         assert_eq!(EnabledItems::from_bits(1), None);
         assert_eq!(EnabledItems::from_bits(17), None);
         assert_eq!(EnabledItems::from_bits(1 << 10), None);
@@ -108,10 +115,10 @@ mod tests {
     }
 
     #[test]
-    fn every_subset_of_the_five_opt_in_items_is_valid() {
-        let item_bits: [u32; 5] = [16, 512, 4096, 8192, 65_536];
+    fn every_subset_of_the_six_opt_in_items_is_valid() {
+        let item_bits: [u32; 6] = [16, 512, 4096, 8192, 65_536, 131_072];
         let mut observed = 0;
-        for mask in 0_u32..32 {
+        for mask in 0_u32..64 {
             let mut bits = 0;
             for (index, bit) in item_bits.iter().enumerate() {
                 if mask & (1 << index) != 0 {
@@ -121,8 +128,8 @@ mod tests {
             assert_eq!(EnabledItems::from_bits(bits).unwrap().bits(), bits);
             observed += 1;
         }
-        assert_eq!(observed, 32);
-        assert_eq!(EnabledItems::ALL.bits(), 78_352);
+        assert_eq!(observed, 64);
+        assert_eq!(EnabledItems::ALL.bits(), 209_424);
         assert_eq!(EnabledItems::default(), EnabledItems::EMPTY);
     }
 }

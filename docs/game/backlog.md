@@ -1,15 +1,16 @@
 # Gameplay and presentation backlog
 
-Status: **TURN v0.3.16, CONFIG v0.3.17 and the first ART slice v0.3.18 are shipped**.
-The v0.3.19 equipment/effect core foundation is implemented and verified; no requested
-items are enabled in the published v0.3.21 rooms. The v0.3.25 Heart candidate now has domain,
-server, browser and pixel-art implementation with debug/release gates, independent reviews and
-native Compose/Kubernetes acceptance 54/54 clear. Final-head CI/publication remain pending;
-the v0.3.26 Shield, v0.3.27 Golden Flame, v0.3.28 Short Fuse, v0.3.29 Short Flame and
-v0.3.30 Long Fuse candidates pass local checks; native acceptance and final-head CI remain
-pending. The other 16 requested pickups remain unimplemented. Richer transitions and further
-item artwork remain follow-up
-work. See [pixel-art presentation](pixel-art.md) and [expanded item implementation](expanded-items.md).
+TURN v0.3.16, CONFIG v0.3.17 and the first ART slice v0.3.18 are shipped. Heart
+[v0.3.25](https://github.com/liveweird/grenadiers/releases/tag/v0.3.25), Shield
+[v0.3.26](https://github.com/liveweird/grenadiers/releases/tag/v0.3.26), Golden Flame
+[v0.3.27](https://github.com/liveweird/grenadiers/releases/tag/v0.3.27) and Short Fuse
+[v0.3.28](https://github.com/liveweird/grenadiers/releases/tag/v0.3.28) are published.
+The v0.3.29 Short Flame increment has passed fresh native acceptance and awaits final CI;
+the v0.3.30 Long Fuse candidate passes local checks and awaits fresh native acceptance and
+final-head CI. The other 16 requested pickups remain outside this increment. Richer transitions
+and artwork remain follow-up work. See [pixel-art presentation](pixel-art.md),
+[expanded item implementation](expanded-items.md), and
+[release notes](https://github.com/liveweird/grenadiers/releases).
 Updated 2026-10-18 after playtest feedback. Release acceptance is recorded in
 [verification](../verification.md).
 The [implementation plan](implementation-plan.md) remains the milestone/release reference;

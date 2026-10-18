@@ -13,6 +13,9 @@ disconnected restore still requires a live bomb in its full baseline. After conn
 a scoped movement from the replacement socket must change the peer's authoritative position;
 stop cleanup must preserve any original movement failure. Admission listeners detach once the
 private resume result is settled. Watchdogs and retry policy are unchanged.
+The same initialized canvas remains connected across disconnected restore and terminal
+takeover, with exactly one canvas after restore and a hidden canvas in the waiting state.
+This verifies bounded renderer reuse while the existing live-world and authority checks run.
 
 ## Scenario: two offline tabs stop recovery after a late reserved-seat rejection
 

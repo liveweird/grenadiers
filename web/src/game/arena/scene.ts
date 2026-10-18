@@ -41,7 +41,7 @@ export class ArenaScene {
   update(snapshot: SnapshotMessage, now: number): void {
     const identity = `${snapshot.room.roomId}:${snapshot.room.roundId}`
     const reset = identity !== this.identity
-    if (reset) this.clearLayers()
+    if (reset) this.reset()
     this.identity = identity
     this.receivedAt = now
     this.running = snapshot.room.phase.type === 'running'
@@ -59,6 +59,21 @@ export class ArenaScene {
   }
 
   setReducedMotion(reduced: boolean): void { this.reducedMotion = reduced }
+
+  reset(): void {
+    for (const drawing of this.blocks.values()) drawing.destroy()
+    for (const pickup of this.pickups.values()) pickup.drawing.destroy()
+    for (const drawing of this.bombs.values()) drawing.root.destroy({ children: true, context: true })
+    for (const drawing of this.flames.values()) drawing.root.destroy({ children: true, context: true })
+    for (const drawing of this.actors.values()) drawing.root.destroy({ children: true, context: true })
+    this.blocks.clear(); this.pickups.clear(); this.bombs.clear(); this.flames.clear(); this.actors.clear()
+    this.motions.clear()
+    this.terrain.clear()
+    this.identity = ''
+    this.terrainKey = ''
+    this.receivedAt = 0
+    this.running = false
+  }
 
   render(now: number): void {
     const progress = this.reducedMotion || !this.running ? 1
@@ -168,16 +183,5 @@ export class ArenaScene {
         && (previousMotion.toX !== toX || previousMotion.toY !== toY))
       setActorPose(drawing, actor.heading, 0)
     }
-  }
-
-  private clearLayers(): void {
-    for (const drawing of this.blocks.values()) drawing.destroy()
-    for (const pickup of this.pickups.values()) pickup.drawing.destroy()
-    for (const drawing of this.bombs.values()) drawing.root.destroy({ children: true, context: true })
-    for (const drawing of this.flames.values()) drawing.root.destroy({ children: true, context: true })
-    for (const drawing of this.actors.values()) drawing.root.destroy({ children: true, context: true })
-    this.blocks.clear(); this.pickups.clear(); this.bombs.clear(); this.flames.clear(); this.actors.clear()
-    this.motions.clear()
-    this.terrainKey = ''
   }
 }

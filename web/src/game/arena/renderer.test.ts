@@ -9,13 +9,19 @@ const hooks = vi.hoisted(() => ({
     canvas: HTMLCanvasElement
     init: ReturnType<typeof vi.fn>
     destroy: ReturnType<typeof vi.fn>
+    render: ReturnType<typeof vi.fn>
     renderer: { resize: ReturnType<typeof vi.fn> } | undefined
-    ticker: { add: ReturnType<typeof vi.fn> }
+    ticker: {
+      add: ReturnType<typeof vi.fn>
+      start: ReturnType<typeof vi.fn>
+      stop: ReturnType<typeof vi.fn>
+    }
   }>,
   scenes: [] as Array<{
     root: object
     update: ReturnType<typeof vi.fn>
     render: ReturnType<typeof vi.fn>
+    reset: ReturnType<typeof vi.fn>
     setReducedMotion: ReturnType<typeof vi.fn>
   }>,
 }))
@@ -25,7 +31,8 @@ vi.mock('pixi.js', () => ({
     canvas = document.createElement('canvas')
     stage = { addChild: vi.fn() }
     renderer: { resize: ReturnType<typeof vi.fn> } | undefined = { resize: vi.fn() }
-    ticker = { add: vi.fn() }
+    ticker = { add: vi.fn(), start: vi.fn(), stop: vi.fn() }
+    render = vi.fn()
     init = vi.fn(async () => {
       if (hooks.fail) {
         if (!hooks.partial) this.renderer = undefined
@@ -43,6 +50,7 @@ vi.mock('./scene', () => ({
     root = {}
     update = vi.fn()
     render = vi.fn()
+    reset = vi.fn()
     setReducedMotion = vi.fn()
     constructor() { hooks.scenes.push(this) }
   },
@@ -57,7 +65,7 @@ beforeEach(() => {
 })
 
 describe('Pixi application lifetime', () => {
-  it('keeps a fixed pixel canvas, updates the scene, and stops all work on idempotent destroy', async () => {
+  it('suspends and resumes one hidden canvas before releasing it on final destroy', async () => {
     const host = document.createElement('div')
     const renderer = await createArenaRenderer(host)
     const app = hooks.applications[0]
@@ -66,27 +74,47 @@ describe('Pixi application lifetime', () => {
     expect(app.canvas).toHaveAttribute('aria-hidden', 'true')
     expect(app.init).toHaveBeenCalledWith(expect.objectContaining({
       preference: 'webgl', resolution: 2, width: 720, height: 624, antialias: false,
+      autoStart: false,
     }))
     expect(app.canvas.style.imageRendering).toBe('pixelated')
+    expect(app.canvas.style.visibility).toBe('hidden')
     expect(app.renderer?.resize).not.toHaveBeenCalled()
     const snapshot = gameSnapshot()
     renderer.update(snapshot)
+    expect(scene.update).toHaveBeenCalledWith(snapshot, expect.any(Number))
+    expect(app.render).toHaveBeenCalledOnce()
+    expect(app.render.mock.invocationCallOrder[0]).toBeLessThan(app.ticker.start.mock.invocationCallOrder[0])
+    expect(app.canvas.style.visibility).toBe('visible')
+    expect(app.ticker.start).toHaveBeenCalledOnce()
     renderer.setReducedMotion(true)
     const tick: () => void = app.ticker.add.mock.calls[0][0]
     tick()
-    expect(scene.update).toHaveBeenCalledWith(snapshot, expect.any(Number))
     expect(scene.render).toHaveBeenCalledOnce()
     expect(scene.setReducedMotion).toHaveBeenCalledWith(true)
+    renderer.suspend()
+    renderer.suspend()
+    expect(app.canvas.style.visibility).toBe('hidden')
+    expect(app.ticker.stop).toHaveBeenCalledOnce()
+    expect(scene.reset).toHaveBeenCalledOnce()
+    expect(app.destroy).not.toHaveBeenCalled()
+    expect(host.querySelectorAll('canvas')).toHaveLength(1)
+    renderer.update(snapshot)
+    expect(scene.update).toHaveBeenCalledTimes(2)
+    expect(app.render).toHaveBeenCalledTimes(2)
+    expect(app.ticker.start).toHaveBeenCalledTimes(2)
+    expect(host.querySelectorAll('canvas')).toHaveLength(1)
     renderer.destroy()
     renderer.destroy()
     renderer.update(snapshot)
+    renderer.suspend()
     renderer.setReducedMotion(false)
     expect(host.querySelectorAll('canvas')).toHaveLength(0)
     expect(app.destroy).toHaveBeenCalledExactlyOnceWith(
       { removeView: true }, { children: true, context: true },
     )
-    expect(scene.update).toHaveBeenCalledOnce()
+    expect(scene.update).toHaveBeenCalledTimes(2)
     expect(scene.setReducedMotion).toHaveBeenCalledOnce()
+    expect(scene.reset).toHaveBeenCalledTimes(2)
   })
 
   it('uses a safe DPR fallback and releases partially initialized GPU resources on failure', async () => {

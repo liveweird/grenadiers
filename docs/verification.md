@@ -23,11 +23,24 @@ evidence remains in `/tmp/grenadiers-v0322-foreground-acceptance`.
 
 Evidence review corrects both native summaries: reconnect has a120-second budget, while the
 pure diagnostic has60 seconds. Two retained audio cases also execute the changed diagnostic
-helper, so they require fresh acceptance. The strict rollup is currently **50/52**, consisting
+helper, so they require fresh acceptance. That evaluation's strict rollup is **50/52**, consisting
 of four fresh cases and46 unaffected retained cases; earlier52/52 generated status files are
 superseded by audit addenda. Initial HTTP000/not-ready probes establish no transport cause.
-The newer manifest covers raw reports, probes, runtime/security and cleanup evidence. Fresh
-audio acceptance remains pending. No assertion, screenshot option, deadline or retry is relaxed.
+An expanded manifest now seals the source archive, runner, raw reports, probes, fixture modes,
+runtime/security and cleanup evidence while preserving earlier manifests. Fresh
+audio acceptance closes that gap below. No assertion, screenshot option, deadline or retry is relaxed.
+
+Clean documentation head `6e11870f40bdc6da222f30449c7723ebb5ff9ff2`, archive SHA-256
+`3ac713930e83ed8edd91d2e87d5cd4a469111a43026b36ccd5246fa04e88277f`, has byte-identical
+E2E inputs to `b2d9666` and identical production inputs to `954b0ad`. Fresh headed audio
+passes **1/1 Compose and 1/1 Kubernetes**, first attempts with zero retries and the original
+60-second budget. Strict probes, runtime hardening, external/projected0444 fixtures, fresh
+pod identity, continuous direct-pod forwarding and cleanup pass. This closes the composite
+at **26/26 per target,52/52 total**: four stage-diagnostic cases, two fresh audio cases and46
+unaffected retained cases. Evidence and scope addenda remain under
+`/tmp/grenadiers-v0322-audio-closure-acceptance`. The native composite does not establish that
+the hosted capture timeout is resolved; the next exact-head CI evaluation supplies new
+screenshot-substage observations. No application or E2E input changes follow this acceptance.
 
 ## Screenshot substage diagnostics — 2026-10-18 — native attributed
 

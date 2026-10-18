@@ -99,6 +99,10 @@ impl super::Actor {
                 self.inventory
                     .replace_weapon(crate::game::SpecialWeapon::Power);
             }
+            PickupKind::Landmine => {
+                self.inventory
+                    .replace_weapon(crate::game::SpecialWeapon::Landmine);
+            }
             PickupKind::Shield
             | PickupKind::GoldenFlame
             | PickupKind::ShortFuse

@@ -36,6 +36,7 @@ function renderActor(drawing: ActorDrawing, id: number, effects: boolean, now: n
   })
   drawing.piercing.visible = drawing.piercingArmed
   drawing.power.visible = drawing.powerArmed
+  drawing.landmine.visible = drawing.landmineStored
 }
 
 export class ArenaScene {
@@ -132,7 +133,8 @@ export class ArenaScene {
     }
     const effects = this.running && !this.reducedMotion
     for (const [id, bomb] of this.bombs) {
-      bomb.spark.visible = !bomb.remote && (!effects || (Math.floor(now / 90) + id) % 2 === 0)
+      bomb.spark.visible = !bomb.remote && !bomb.contact
+        && (!effects || (Math.floor(now / 90) + id) % 2 === 0)
     }
     for (const flame of this.flames.values()) {
       const frame = effects ? Math.floor(now / 80) % 2 : 0
@@ -234,6 +236,7 @@ export class ArenaScene {
       drawing.slowFootStacks = actor.slowFootRemainingTicks?.length ?? 0
       drawing.piercingArmed = Boolean(actor.piercingArmed)
       drawing.powerArmed = Boolean(actor.powerArmed)
+      drawing.landmineStored = Boolean(actor.landmineStored)
       drawing.moving = Boolean(!reset && previousMotion
         && (previousMotion.toX !== toX || previousMotion.toY !== toY))
       drawing.direction = actor.heading

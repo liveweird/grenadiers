@@ -111,6 +111,7 @@
     "remoteBombDescription": "Stores one remotely triggered bomb. Place it with the bomb key, then press the same key later to detonate it.",
     "piercingBombDescription": "Stores one special bomb whose blast passes through breakable blocks. The charge is used only when you successfully place it.",
     "powerBombDescription": "Stores one special bomb whose blast fills a diamond-shaped area, ignoring obstruction while leaving hard walls intact. The charge is used only when you successfully place it.",
+    "landmineDescription": "Stores one visible pressure mine. Everyone standing on it when placed may leave safely; entering it later detonates it. Fire and other blasts destroy it without an explosion.",
     "shieldDescription": "Grants 5 seconds of damage immunity. Picking up another Shield refreshes it.",
     "goldenFlameDescription": "Maximizes new bomb blasts for 10 seconds. Picking up another Golden flame refreshes it.",
     "shortFuseDescription": "Halves the fuse of new bombs for 10 seconds. Picking up another Short fuse refreshes it.",

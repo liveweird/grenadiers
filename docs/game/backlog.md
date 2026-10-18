@@ -1,8 +1,8 @@
 # Gameplay and presentation backlog
 
-TURN, CONFIG and the first ART slice are implemented. This v0.3.36 candidate contains twelve
+TURN, CONFIG and the first ART slice are implemented. This v0.3.37 candidate contains thirteen
 optional pickups: Heart, Shield, Golden Flame, Short Fuse, Short Flame, Long Fuse, Reverse
-Controls, Diarrhea, Slow-foot, Piercing Bomb, Power Bomb and Remote Bomb. Local checks and
+Controls, Diarrhea, Slow-foot, Piercing Bomb, Power Bomb, Remote Bomb and Landmine. Local checks and
 independent reviews are clear; this candidate still requires fresh native acceptance and final
 CI. The other ten requested pickups remain outside this increment. Current publication status
 is recorded in [release notes](https://github.com/liveweird/grenadiers/releases), with source-bound
@@ -160,6 +160,7 @@ instant action. Keep both in this requested pickup family without forcing them i
 | ID / weapon | Requested behavior | Decisions / acceptance focus |
 | --- | --- | --- |
 | WPN-REMOTE / remote bomb | **Prepared in v0.3.36.** The next successful manual placement creates an untimed bomb; the next retained bomb action detonates it. | Independent stored weapon, one live Remote per owner, capacity/allocator independence, fire and chain ignition, reconnect and replay pass local checks and independent reviews; native acceptance remains pending. |
+| WPN-LANDMINE / landmine | **Prepared in v0.3.37.** Successful manual placement creates a passable untimed Contact bomb. | Per-actor exit grace, swept entry, silent blast destruction, immutable planner priority, replay and checked v8 publication pass local checks; native acceptance remains pending. |
 | WPN-PIERCE / piercing bomb | **Prepared in v0.3.34.** The next successful manual bomb's blast continues through destructible blocks. | One-charge replacement, retained failures, ordinary automatic bombs, captured blast identity, immutable same-tick chain planning and hard-wall stopping are covered locally with independent review clear; native acceptance and final CI remain pending. |
 | WPN-POWER / power bomb | **Prepared in v0.3.35.** The next successful manual bomb damages every floor cell within its Manhattan blast radius, ignoring line of sight. | One-charge replacement, retained failures, hard-wall holes, complete block and bomb coverage, immutable mixed-chain planning, captured stats and distinct presentation pass local checks and independent reviews; native acceptance and final CI remain pending. |
 | WPN-MINE / landmine | Next placement explodes only when someone steps on it, never merely because time passes. | Arming/owner-exit grace, swept step detection, eligible actors, visibility, capacity and remote ownership; explicitly decide whether other blasts can trigger/destroy it without contradicting contact-only detonation. |

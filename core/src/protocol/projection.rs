@@ -372,6 +372,7 @@ pub(super) const fn wire_pickup_kind(kind: game::PickupKind) -> Option<PickupKin
         | game::PickupKind::RemoteBomb
         | game::PickupKind::PiercingBomb
         | game::PickupKind::PowerBomb
+        | game::PickupKind::Landmine
         | game::PickupKind::Shield
         | game::PickupKind::GoldenFlame
         | game::PickupKind::ShortFuse

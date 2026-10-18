@@ -196,19 +196,8 @@ fn generate_layers(
 }
 
 fn sample_pickup(source: &mut impl RandomWords, enabled: EnabledItems) -> Option<PickupKind> {
-    let bound = 100
-        + u32::from(enabled.contains_heart()) * 25
-        + u32::from(enabled.contains_shield()) * 15
-        + u32::from(enabled.contains_golden_flame()) * 15
-        + u32::from(enabled.contains_short_fuse()) * 15
-        + u32::from(enabled.contains_short_flame()) * 15
-        + u32::from(enabled.contains_long_fuse()) * 15
-        + u32::from(enabled.contains_reverse_controls()) * 15
-        + u32::from(enabled.contains_diarrhea()) * 15
-        + u32::from(enabled.contains_slow_foot()) * 15
-        + u32::from(enabled.contains_piercing_bomb()) * 15
-        + u32::from(enabled.contains_power_bomb()) * 15
-        + u32::from(enabled.contains_remote_bomb()) * 15;
+    let heart = u32::from(enabled.contains_heart());
+    let bound = 100 + heart * 25 + (enabled.bits().count_ones() - heart) * 15;
     let value = if bound == 100 {
         sample_percent(source)?
     } else {
@@ -225,6 +214,7 @@ fn sample_pickup(source: &mut impl RandomWords, enabled: EnabledItems) -> Option
     let slow_foot_end = diarrhea_end + u32::from(enabled.contains_slow_foot()) * 15;
     let piercing_end = slow_foot_end + u32::from(enabled.contains_piercing_bomb()) * 15;
     let power_end = piercing_end + u32::from(enabled.contains_power_bomb()) * 15;
+    let remote_end = power_end + u32::from(enabled.contains_remote_bomb()) * 15;
     Some(match value {
         0..40 => PickupKind::BombCapacity,
         40..80 => PickupKind::BlastRange,
@@ -240,7 +230,8 @@ fn sample_pickup(source: &mut impl RandomWords, enabled: EnabledItems) -> Option
         value if value < slow_foot_end => PickupKind::SlowFoot,
         value if value < piercing_end => PickupKind::PiercingBomb,
         value if value < power_end => PickupKind::PowerBomb,
-        _ => PickupKind::RemoteBomb,
+        value if value < remote_end => PickupKind::RemoteBomb,
+        _ => PickupKind::Landmine,
     })
 }
 
@@ -371,6 +362,9 @@ fn index(cell: CellId) -> usize {
 mod diarrhea_tests;
 #[cfg(test)]
 mod golden_flame_tests;
+#[cfg(test)]
+#[path = "landmine_generation_tests.rs"]
+mod landmine_tests;
 #[cfg(test)]
 mod long_fuse_tests;
 #[cfg(test)]

@@ -140,6 +140,7 @@ fn signature(generated: &GeneratedArena) -> String {
                 Some(PickupKind::PiercingBomb) => 'P',
                 Some(PickupKind::PowerBomb) => 'W',
                 Some(PickupKind::RemoteBomb) => 'M',
+                Some(PickupKind::Landmine) => 'N',
                 Some(PickupKind::Shield) => 'D',
                 Some(PickupKind::GoldenFlame) => 'G',
                 Some(PickupKind::ShortFuse) => 'F',

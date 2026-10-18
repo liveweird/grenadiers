@@ -119,7 +119,9 @@ fn canonical_bomb(
                             .checked_mul(2)
                             .is_some_and(|fuse| timed_fuse_at(at, bomb, fuse)))
             }
-            BombTriggerObservation::Contact => false,
+            BombTriggerObservation::Contact => {
+                enabled.contains(ItemId::Landmine) && bomb.blast == BlastKind::Standard
+            }
         }
 }
 
@@ -206,6 +208,7 @@ pub(super) fn expanded_items() -> ItemSet {
         ItemId::RemoteBomb,
         ItemId::PiercingBomb,
         ItemId::PowerBomb,
+        ItemId::Landmine,
         ItemId::Shield,
         ItemId::GoldenFlame,
         ItemId::ShortFuse,

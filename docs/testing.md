@@ -206,3 +206,13 @@ One fresh bomb action detonates it without placement and leaves the observed emp
 empty. Focused core regressions prove that a held Piercing or Power charge survives the same
 trigger path. A fresh-ID Timed Standard bomb then proves ordinary placement and actual escape.
 Native execution remains a candidate gate.
+
+## Landmine production-seed scenario
+
+Use `docker-compose.landmine.yaml` with the v2 seed fixture and
+`E2E_LANDMINE_FIXTURE=arena-v2-landmine npm --prefix e2e run test:landmine`.
+The two-peer scenario reveals and collects the charge at (3,1), places the Contact Standard mine
+there, and captures localized armed views before contact. It proves that the same ID survives
+beyond the ordinary fuse, that leaving the initial overlap is safe, and that ordinary keyboard
+re-entry detonates the mine without another manual action. Both streams must publish the same
+detonation and resulting flames. Native execution remains a candidate gate.

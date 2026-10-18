@@ -7,13 +7,14 @@ pub(super) fn unsupported_trigger(rules: RulesConfig, world: &World) -> Option<E
     world.bombs.values().find_map(|bomb| match bomb.trigger() {
         BombTrigger::Timed { .. } => None,
         BombTrigger::Remote if rules.enabled_items().contains_remote_bomb() => None,
+        BombTrigger::Contact if rules.enabled_items().contains_landmine() => None,
         BombTrigger::Remote | BombTrigger::Contact => Some(bomb.id()),
     })
 }
 
 pub(super) fn unsupported_blast(rules: RulesConfig, world: &World) -> Option<EntityId> {
     world.bombs.values().find_map(|bomb| {
-        let supported = (!matches!(bomb.trigger(), BombTrigger::Remote)
+        let supported = (!matches!(bomb.trigger(), BombTrigger::Remote | BombTrigger::Contact)
             || bomb.blast() == BlastKind::Standard)
             && match bomb.blast() {
                 BlastKind::Standard => true,

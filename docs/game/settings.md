@@ -20,6 +20,7 @@ The creator can configure these rules before either starts the match:
 | Piercing Bomb | Enabled or disabled; disabled by default | Stores one special manual bomb whose blast crosses breakable blocks. |
 | Power Bomb | Enabled or disabled; disabled by default | Stores one special manual bomb whose diamond-shaped blast ignores obstruction while leaving hard walls intact. |
 | Remote Bomb | Enabled or disabled; disabled by default | Stores one manual bomb with no fuse; the owner's next bomb action detonates the armed bomb. |
+| Landmine | Enabled or disabled; disabled by default | Stores one passable manual mine that detonates on swept actor contact after initial exit grace. |
 | Short Flame | Enabled or disabled; disabled by default | Adds ten-second curses that limit new bombs to range one, overriding Golden Flame. |
 | Long Fuse | Enabled or disabled; disabled by default | Adds ten-second curses that double new ordinary timed bomb fuses. Short and Long Fuse cancel while both are active. |
 | Reverse Controls | Enabled or disabled; disabled by default | Adds ten-second curses that reverse held movement directions. |
@@ -42,5 +43,5 @@ round/flame duration, loadouts and additional item pools remains in the [backlog
 
 Heart is introduced by the v0.3.25 implementation candidate. Expanded rooms retain immutable
 rules version 5/map `generated_v2` when Heart is disabled, including after preset changes.
-Shield is available separately in the v0.3.26 candidate, Golden Flame in v0.3.27, Short Fuse in v0.3.28, Short Flame in v0.3.29, Long Fuse in v0.3.30, Reverse Controls in v0.3.31, Diarrhea in v0.3.32, Slow foot in v0.3.33, Piercing Bomb in v0.3.34, Power Bomb in v0.3.35, and Remote Bomb in v0.3.36; all twelve switches preserve one another.
-See [Heart behavior](heart.md), [Remote Bomb](remote-bomb.md), [Piercing Bomb](piercing-bomb.md), [Power Bomb](power-bomb.md), [Shield behavior](shield.md), [Golden Flame](golden-flame.md), [Short Fuse](short-fuse.md), [Short Flame](short-flame.md), [Long Fuse](long-fuse.md), [Reverse Controls](reverse-controls.md), [Diarrhea](diarrhea.md), [Slow foot](slow-foot.md), and [protocol compatibility](protocol-v8.md).
+Shield is available separately in the v0.3.26 candidate, Golden Flame in v0.3.27, Short Fuse in v0.3.28, Short Flame in v0.3.29, Long Fuse in v0.3.30, Reverse Controls in v0.3.31, Diarrhea in v0.3.32, Slow foot in v0.3.33, Piercing Bomb in v0.3.34, Power Bomb in v0.3.35, Remote Bomb in v0.3.36, and Landmine in v0.3.37; all thirteen switches preserve one another.
+See [Heart behavior](heart.md), [Remote Bomb](remote-bomb.md), [Piercing Bomb](piercing-bomb.md), [Power Bomb](power-bomb.md), [Landmine](landmine.md), [Shield behavior](shield.md), [Golden Flame](golden-flame.md), [Short Fuse](short-fuse.md), [Short Flame](short-flame.md), [Long Fuse](long-fuse.md), [Reverse Controls](reverse-controls.md), [Diarrhea](diarrhea.md), [Slow foot](slow-foot.md), and [protocol compatibility](protocol-v8.md).

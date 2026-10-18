@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.37 — 2026-10-18
+
+- Add opt-in Landmine as a passable, untimed Standard bomb that detonates on swept actor contact after per-actor exit grace.
+- Preserve movement ordering and immutable explosion planning: accepted contact wins, while fire and other blasts silently destroy untriggered mines without extending rays.
+- Add the thirteenth lobby switch, checked v8 state and events, replay coverage, English and Polish pressure-plate cues, and a deterministic production-seed browser scenario. Native acceptance and final CI remain pending.
+
 ## 0.3.36 — 2026-10-18
 
 - Add opt-in Remote Bomb as a one-charge weapon whose placed bomb waits without a fuse for its owner's next manual bomb action.

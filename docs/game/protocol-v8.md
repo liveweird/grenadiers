@@ -9,8 +9,8 @@ claim or revoke the credential needed for a version-8 connection.
 
 V8 adds rules version **5** and map ID **`generated_v2`**. Its own rules/map types leave the
 shared enums and schemas for earlier protocols unchanged. New production rooms are always
-Expanded v5/generator v2. They advertise `availableItems: ["heart", "shield", "goldenFlame", "shortFuse", "diarrhea", "shortFlame", "longFuse", "reverseControls"]` and initially enable
-`settings.enabledItems: ["heart"]`. All 256 subsets of those eight available items are supported configurations.
+Expanded v5/generator v2. They advertise `availableItems: ["heart", "shield", "goldenFlame", "shortFuse", "diarrhea", "slowFoot", "shortFlame", "longFuse", "reverseControls"]` and initially enable
+`settings.enabledItems: ["heart"]`. All 512 subsets of those nine available items are supported configurations.
 Other catalog IDs remain unavailable.
 
 The Classic settings preset disables optional items and restores the four ordinary settings.
@@ -90,5 +90,10 @@ request or one automatic ordinary intent per seat, then resolves both seats toge
 intents never enter the mailbox or action-ID sequence. The first automatic placement is one tick
 after collection, and expiry suppresses placement at the exact deadline.
 
-The eight-item availability array is exact v8 data. Deploy server and web together and reload
-older v8 clients: a client built for seven items rejects the new room even when Diarrhea is disabled.
+Slow foot adds an independent 600-tick stack, up to six. Movement uses the current speed divided
+by `2^stack_count`; every supported speed is exactly divisible by 64. Collection affects the next
+tick, while each deadline expires before movement. A capped actor is excluded before collection
+distance and tie arbitration, allowing an eligible rival to collect the pickup.
+
+The nine-item availability array is exact v8 data. Deploy server and web together and reload
+older v8 clients: a client built for eight items rejects the new room even when Slow foot is disabled.

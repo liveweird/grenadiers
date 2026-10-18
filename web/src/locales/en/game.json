@@ -49,7 +49,8 @@
     "damageGrace": "Damage grace",
     "protected": "Protected from damage",
     "none": "None",
-    "effectTimer": "{{item}} ({{time}})"
+    "effectTimer": "{{item}} ({{time}})",
+    "slowFootGroup": "{{item}} ×{{count}} ({{multiplier}} speed; {{timers}})"
   },
   "items": {
     "kick": "Kick", "punch": "Punch", "bracelet": "Bracelet", "wallPass": "Wall pass",
@@ -111,6 +112,7 @@
     "goldenFlameDescription": "Maximizes new bomb blasts for 10 seconds. Picking up another Golden flame refreshes it.",
     "shortFuseDescription": "Halves the fuse of new bombs for 10 seconds. Picking up another Short fuse refreshes it.",
     "diarrheaDescription": "Automatically drops ordinary bombs for 10 seconds whenever placement is possible and you have spare capacity. Another pickup refreshes the timer.",
+    "slowFootDescription": "Halves movement speed for 10 seconds. Up to 6 pickups stack, and each has its own timer.",
     "shortFlameDescription": "Limits new bomb blasts to 1 tile for 10 seconds, overriding Golden flame. Existing bombs stay unchanged; range bonuses resume afterward. Another pickup refreshes it.",
     "longFuseDescription": "Doubles the fuse of new bombs for 10 seconds. Short and Long fuse cancel while both are active; existing bombs stay unchanged. Another pickup refreshes it.",
     "reverseControlsDescription": "Reverses movement controls for 10 seconds. Held keys stay physically held; another pickup refreshes the timer.",

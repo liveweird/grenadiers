@@ -368,6 +368,7 @@ pub(super) const fn wire_pickup_kind(kind: game::PickupKind) -> Option<PickupKin
         | game::PickupKind::GoldenFlame
         | game::PickupKind::ShortFuse
         | game::PickupKind::Diarrhea
+        | game::PickupKind::SlowFoot
         | game::PickupKind::ShortFlame
         | game::PickupKind::LongFuse
         | game::PickupKind::ReverseControls => None,

@@ -14,6 +14,7 @@ export interface ActorDrawing {
   longFuse: Graphics
   reverseControls: Graphics
   diarrhea: Graphics
+  slowFoot: Container
   poses: Record<Direction, PoseFrames>
   direction: Direction
   moving: boolean
@@ -25,6 +26,7 @@ export interface ActorDrawing {
   longFused: boolean
   reversed: boolean
   diarrheaActive: boolean
+  slowFootStacks: number
 }
 
 function legs(drawing: Graphics, frame: number, side: boolean): void {
@@ -150,6 +152,19 @@ export function makeActor(seat: Seat): ActorDrawing {
   pixels(diarrhea, PALETTE.brick, [[-10, -26, 8, 3], [4, -23, 8, 3]])
   pixels(diarrhea, PALETTE.white, [[-3, -32, 6, 9]])
   diarrhea.visible = false
+  const slowFoot = new Container()
+  const slowBoot = new Graphics()
+  pixels(slowBoot, PALETTE.deepInk, [[-13, 19, 18, 5], [-9, 14, 9, 7], [5, 21, 8, 3]])
+  pixels(slowBoot, PALETTE.brick, [[-8, 15, 7, 5], [-11, 20, 14, 3]])
+  pixels(slowBoot, PALETTE.white, [[8, 12, 3, 7], [5, 16, 9, 3]])
+  const slowMarkers = Array.from({ length: 6 }, (_, index) => {
+    const marker = new Graphics()
+    pixels(marker, PALETTE.white, [[-14 + index * 5, 27, 3, 3]])
+    marker.visible = false
+    return marker
+  })
+  slowFoot.addChild(slowBoot, ...slowMarkers)
+  slowFoot.visible = false
   const poses = {
     north: [frontOrBack(seat, 'north', 0), frontOrBack(seat, 'north', 1)],
     east: [sidePose(seat, 'east', 0), sidePose(seat, 'east', 1)],
@@ -158,15 +173,15 @@ export function makeActor(seat: Seat): ActorDrawing {
   } satisfies Record<Direction, PoseFrames>
   root.addChild(
     shadow, protection, shield, goldenFlame, shortFuse, shortFlame, longFuse, reverseControls,
-    diarrhea,
+    diarrhea, slowFoot,
     ...Object.values(poses).flat(),
   )
   const drawing = {
     root, protection, shield, goldenFlame, shortFuse, shortFlame, longFuse, reverseControls,
-    diarrhea, poses,
+    diarrhea, slowFoot, poses,
     direction: 'south' as Direction, moving: false,
     protected: false, shielded: false, golden: false, shortFused: false, shortFlamed: false,
-    longFused: false, reversed: false, diarrheaActive: false,
+    longFused: false, reversed: false, diarrheaActive: false, slowFootStacks: 0,
   }
   setActorPose(drawing, 'south', 0)
   return drawing

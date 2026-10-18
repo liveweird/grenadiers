@@ -37,3 +37,6 @@ mod reverse_controls_tests;
 
 #[cfg(test)]
 mod diarrhea_tests;
+
+#[cfg(test)]
+mod slow_foot_tests;

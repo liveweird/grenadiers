@@ -30,17 +30,18 @@ fn diarrhea_weight_is_appended_after_reverse_controls() {
         sample_pickup(&mut boundary, old_all),
         Some(PickupKind::ReverseControls)
     );
+    let diarrhea_all = EnabledItems::from_bits(487_952).unwrap();
     let mut all = Sequence([214, 215, 229].into());
     assert_eq!(
-        sample_pickup(&mut all, EnabledItems::ALL),
+        sample_pickup(&mut all, diarrhea_all),
         Some(PickupKind::ReverseControls)
     );
     assert_eq!(
-        sample_pickup(&mut all, EnabledItems::ALL),
+        sample_pickup(&mut all, diarrhea_all),
         Some(PickupKind::Diarrhea)
     );
     assert_eq!(
-        sample_pickup(&mut all, EnabledItems::ALL),
+        sample_pickup(&mut all, diarrhea_all),
         Some(PickupKind::Diarrhea)
     );
 }

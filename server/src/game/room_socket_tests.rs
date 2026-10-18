@@ -114,6 +114,7 @@ async fn two_members_receive_personalized_admission_and_live_waiting_updates() {
             "goldenFlame",
             "shortFuse",
             "diarrhea",
+            "slowFoot",
             "shortFlame",
             "longFuse",
             "reverseControls"

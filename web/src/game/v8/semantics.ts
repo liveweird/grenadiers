@@ -27,7 +27,8 @@ export function itemSetSemanticError(
 }
 
 const supportedItems = [
-  'heart', 'shield', 'goldenFlame', 'shortFuse', 'diarrhea', 'shortFlame', 'longFuse', 'reverseControls',
+  'heart', 'shield', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse',
+  'reverseControls',
 ] as const
 
 function supportedItem(kind: string, enabled: ReadonlySet<ItemId>): boolean {

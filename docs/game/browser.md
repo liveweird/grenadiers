@@ -105,3 +105,15 @@ two sockets. See [deployment](../deployment.md) for explicit read-only fixture s
 
 Historical [desktop and 320-pixel Polish captures](../screenshots/reconnect.md) record the v4
 interface; the shared gameplay settings panel is added in v6.
+
+## Arena renderer ownership
+
+One Pixi application is initialized lazily for the mounted arena. Room transitions suspend its
+ticker, hide the canvas and clear the scene; the next authoritative baseline is painted before
+the same canvas is revealed. Room changes keep one renderer rather than destroying and
+recreating its WebGL context. Final component unmount releases its resources synchronously.
+
+Initialization uses the latest snapshot. A result arriving after final unmount is destroyed;
+a result arriving while waiting stays suspended. Failed initialization disables controls and
+can retry on a later room activation, without retrying on every snapshot. Reduced-motion
+preferences and focus/input clearing retain their existing behavior.

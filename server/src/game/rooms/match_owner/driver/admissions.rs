@@ -145,7 +145,8 @@ impl Driver {
         let slot = self.seats[index].as_mut().expect("matched slot");
         let fence = if let Some(mut old) = slot.live.take() {
             let expected = old.fence.current();
-            debug_assert!(old.fence.replace_if_current(expected, binding));
+            let fence_replaced = old.fence.replace_if_current(expected, binding);
+            debug_assert!(fence_replaced);
             if let Some(replaced) = old.replaced.take() {
                 let _ = replaced.send(());
             }

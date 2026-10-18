@@ -9,6 +9,7 @@ const contracts = [
   ['../../api/gameplay-v4.schema.json', '../src/game/v4/schema.ts', 'api/gameplay-v4.schema.json'],
   ['../../api/gameplay-v5.schema.json', '../src/game/v5/schema.ts', 'api/gameplay-v5.schema.json'],
   ['../../api/gameplay-v6.schema.json', '../src/game/v6/schema.ts', 'api/gameplay-v6.schema.json'],
+  ['../../api/gameplay-v7.schema.json', '../src/game/v7/schema.ts', 'api/gameplay-v7.schema.json'],
 ]
 
 test('all gameplay contracts remain byte-for-byte reproducible', async () => {

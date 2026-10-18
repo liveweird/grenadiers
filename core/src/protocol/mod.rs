@@ -7,6 +7,7 @@ mod server;
 mod snapshot;
 pub mod v3;
 pub mod v6;
+pub mod v7;
 
 use std::fmt;
 

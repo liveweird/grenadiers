@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 import {
-  DelayedFifo, QueueOverflowError, type DelayScheduler,
+  DelayedFifo, QueueOverflowError, type DelayScheduler, type DelayTiming,
 } from '../tests/support/delayed-websocket'
 
 class FakeTime implements DelayScheduler {
@@ -28,6 +28,17 @@ class FakeTime implements DelayScheduler {
   }
 
   count(): number { return this.timers.size }
+
+  stallTo(target: number): void { this.time = target }
+
+  runDue(): void {
+    while (true) {
+      const next = [...this.timers.entries()].sort((left, right) => left[1].due - right[1].due)[0]
+      if (!next || next[1].due > this.time) return
+      this.timers.delete(next[0])
+      next[1].callback()
+    }
+  }
 }
 
 test('the delay queue preserves FIFO order under cycling jitter', () => {
@@ -86,4 +97,25 @@ test('canceling the delay queue drops pending frames and its sole timer', () => 
   expect(delivered).toEqual([])
   expect(queue.stats.canceled).toBe(2)
   expect(() => queue.push('late', 4)).toThrow('Delay queue is closed')
+})
+
+test('the delay queue reports allocated deadlines and late timer dispatch without changing order', () => {
+  const time = new FakeTime()
+  const delivered: { value: string; timing: DelayTiming }[] = []
+  const queue = new DelayedFifo<string>(50, [-10, 10, -10],
+    (value, timing) => delivered.push({ value, timing }), { scheduler: time })
+
+  expect(queue.push('one', 3)).toEqual({ enqueueAt: 0, dueAt: 40 })
+  time.stallTo(5)
+  expect(queue.push('two', 3)).toEqual({ enqueueAt: 5, dueAt: 65 })
+  time.stallTo(10)
+  expect(queue.push('three', 5)).toEqual({ enqueueAt: 10, dueAt: 65 })
+  time.stallTo(90)
+  time.runDue()
+
+  expect(delivered).toEqual([
+    { value: 'one', timing: { enqueueAt: 0, dueAt: 40, dispatchAt: 90, timerLatenessMs: 50 } },
+    { value: 'two', timing: { enqueueAt: 5, dueAt: 65, dispatchAt: 90, timerLatenessMs: 25 } },
+    { value: 'three', timing: { enqueueAt: 10, dueAt: 65, dispatchAt: 90, timerLatenessMs: 25 } },
+  ])
 })

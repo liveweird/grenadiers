@@ -20,6 +20,8 @@ server() {
   cargo fmt --all -- --check
   cargo clippy --workspace --all-targets --locked -- -D warnings
   cargo test --workspace --locked
+  # Production images disable debug assertions; verify behavior in that profile too.
+  cargo test --workspace --release --locked
   cargo build --workspace --locked
 }
 web() {

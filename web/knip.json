@@ -20,6 +20,16 @@
     "src/game/v6/schema.ts": [
       "exports",
       "types"
+    ],
+    "src/game/v7/schema.ts": [
+      "exports",
+      "types"
     ]
-  }
+  },
+  "entry": [
+    "src/main.tsx",
+    "renderer-diagnostics/main.ts",
+    "renderer-diagnostics/terrain-pixel.ts",
+    "vite.renderer-diagnostics.config.ts"
+  ]
 }

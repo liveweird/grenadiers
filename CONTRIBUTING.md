@@ -24,7 +24,8 @@ Update contracts first for transport changes. Regenerate types, add runtime conf
 behavioral tests, and update API guidance in the same change. Add a scenario document with
 verbatim test titles for every Playwright spec. Never edit generated types directly.
 
-Run the relevant `scripts/gates.sh` targets before submitting. Use ephemeral listeners and
+Run the relevant `scripts/gates.sh` targets before submitting. The server gate tests both debug
+and release profiles; required state changes must execute outside assertions. Use ephemeral listeners and
 independent test state; never rely on test order or shared developer database contents.
 Update the canonical topic document when behavior or operational requirements change.
 

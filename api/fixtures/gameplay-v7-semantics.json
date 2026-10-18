@@ -1,0 +1,97 @@
+{
+  "effects": [
+    { "name": "empty", "value": [], "expectedError": null },
+    {
+      "name": "distinct ordinary effects",
+      "value": [
+        { "kind": "shield", "remainingTicks": 300 },
+        { "kind": "stopwatch", "remainingTicks": 180 },
+        { "kind": "invisibilityCloak", "remainingTicks": 600 },
+        { "kind": "goldenFlame", "remainingTicks": 599 },
+        { "kind": "shortFuse", "remainingTicks": 598 },
+        { "kind": "diarrhea", "remainingTicks": 597 },
+        { "kind": "shortFlame", "remainingTicks": 596 },
+        { "kind": "longFuse", "remainingTicks": 595 },
+        { "kind": "reverseControls", "remainingTicks": 594 },
+        { "kind": "invisibleBombs", "remainingTicks": 593 }
+      ],
+      "expectedError": null
+    },
+    {
+      "name": "duplicate ordinary effect with different durations",
+      "value": [
+        { "kind": "shield", "remainingTicks": 300 },
+        { "kind": "shield", "remainingTicks": 1 }
+      ],
+      "expectedError": "duplicateEffect"
+    },
+    {
+      "name": "six equal slow foot effects",
+      "value": [
+        { "kind": "slowFoot", "remainingTicks": 60 },
+        { "kind": "slowFoot", "remainingTicks": 60 },
+        { "kind": "slowFoot", "remainingTicks": 60 },
+        { "kind": "slowFoot", "remainingTicks": 60 },
+        { "kind": "slowFoot", "remainingTicks": 60 },
+        { "kind": "slowFoot", "remainingTicks": 60 }
+      ],
+      "expectedError": null
+    },
+    {
+      "name": "seven slow foot effects",
+      "value": [
+        { "kind": "slowFoot", "remainingTicks": 1 },
+        { "kind": "slowFoot", "remainingTicks": 2 },
+        { "kind": "slowFoot", "remainingTicks": 3 },
+        { "kind": "slowFoot", "remainingTicks": 4 },
+        { "kind": "slowFoot", "remainingTicks": 5 },
+        { "kind": "slowFoot", "remainingTicks": 6 },
+        { "kind": "slowFoot", "remainingTicks": 7 }
+      ],
+      "expectedError": "slowFootLimit"
+    },
+    {
+      "name": "maximum sixteen effects",
+      "value": [
+        { "kind": "shield", "remainingTicks": 300 },
+        { "kind": "stopwatch", "remainingTicks": 180 },
+        { "kind": "invisibilityCloak", "remainingTicks": 600 },
+        { "kind": "goldenFlame", "remainingTicks": 600 },
+        { "kind": "shortFuse", "remainingTicks": 600 },
+        { "kind": "diarrhea", "remainingTicks": 600 },
+        { "kind": "shortFlame", "remainingTicks": 600 },
+        { "kind": "longFuse", "remainingTicks": 600 },
+        { "kind": "reverseControls", "remainingTicks": 600 },
+        { "kind": "invisibleBombs", "remainingTicks": 600 },
+        { "kind": "slowFoot", "remainingTicks": 60 },
+        { "kind": "slowFoot", "remainingTicks": 60 },
+        { "kind": "slowFoot", "remainingTicks": 60 },
+        { "kind": "slowFoot", "remainingTicks": 60 },
+        { "kind": "slowFoot", "remainingTicks": 60 },
+        { "kind": "slowFoot", "remainingTicks": 60 }
+      ],
+      "expectedError": null
+    }
+  ],
+  "itemSets": [
+    { "name": "empty", "enabledItems": [], "availableItems": [], "expectedError": null },
+    {
+      "name": "all twenty two items",
+      "enabledItems": ["kick", "punch", "bracelet", "wallPass", "heart", "remoteBomb", "piercingBomb", "powerBomb", "landmine", "shield", "stopwatch", "invisibilityCloak", "goldenFlame", "shortFuse", "diarrhea", "slowFoot", "shortFlame", "longFuse", "reverseControls", "invisibleBombs", "oilBarrel", "teleporter"],
+      "availableItems": ["kick", "punch", "bracelet", "wallPass", "heart", "remoteBomb", "piercingBomb", "powerBomb", "landmine", "shield", "stopwatch", "invisibilityCloak", "goldenFlame", "shortFuse", "diarrhea", "slowFoot", "shortFlame", "longFuse", "reverseControls", "invisibleBombs", "oilBarrel", "teleporter"],
+      "expectedError": null
+    },
+    {
+      "name": "subset in different order",
+      "enabledItems": ["teleporter", "kick", "shield"],
+      "availableItems": ["shield", "wallPass", "teleporter", "kick"],
+      "expectedError": null
+    },
+    {
+      "name": "unavailable enabled item",
+      "enabledItems": ["kick", "heart"],
+      "availableItems": ["kick", "shield"],
+      "expectedError": "unavailableItem"
+    }
+  ]
+}

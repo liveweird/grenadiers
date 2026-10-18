@@ -15,6 +15,7 @@ const unitsToPixels = (units: number): number => units * TILE / 1024
 export class ArenaScene {
   readonly root = new Container()
   private readonly terrain = new Graphics()
+  private readonly terrainCacheOptions
   private readonly blocksLayer = new Container()
   private readonly pickupsLayer = new Container()
   private readonly bombsLayer = new Container()
@@ -32,7 +33,8 @@ export class ArenaScene {
   private running = false
   private reducedMotion = false
 
-  constructor() {
+  constructor(resolution: number) {
+    this.terrainCacheOptions = { resolution, antialias: false, scaleMode: 'nearest' as const }
     this.root.addChild(
       this.terrain, this.blocksLayer, this.pickupsLayer, this.bombsLayer, this.flamesLayer, this.actorsLayer,
     )
@@ -41,13 +43,17 @@ export class ArenaScene {
   update(snapshot: SnapshotMessage, now: number): void {
     const identity = `${snapshot.room.roomId}:${snapshot.room.roundId}`
     const reset = identity !== this.identity
-    if (reset) this.clearLayers()
+    if (reset) this.reset()
     this.identity = identity
     this.receivedAt = now
     this.running = snapshot.room.phase.type === 'running'
-    const terrainKey = snapshot.state.arena.terrain.join(',')
+    const terrainKey = [
+      snapshot.state.arena.width, snapshot.state.arena.height, ...snapshot.state.arena.terrain,
+    ].join(',')
     if (terrainKey !== this.terrainKey) {
+      if (!this.terrain.isCachedAsTexture) this.terrain.cacheAsTexture(this.terrainCacheOptions)
       paintTerrain(this.terrain, snapshot.state.arena)
+      this.terrain.updateCacheTexture()
       this.terrainKey = terrainKey
     }
     this.updateBlocks(snapshot.state.arena.blocks)
@@ -59,6 +65,26 @@ export class ArenaScene {
   }
 
   setReducedMotion(reduced: boolean): void { this.reducedMotion = reduced }
+
+  reset(): void {
+    for (const drawing of this.blocks.values()) drawing.destroy()
+    for (const pickup of this.pickups.values()) pickup.drawing.destroy()
+    for (const drawing of this.bombs.values()) drawing.root.destroy({ children: true, context: true })
+    for (const drawing of this.flames.values()) drawing.root.destroy({ children: true, context: true })
+    for (const drawing of this.actors.values()) drawing.root.destroy({ children: true, context: true })
+    this.blocks.clear(); this.pickups.clear(); this.bombs.clear(); this.flames.clear(); this.actors.clear()
+    this.motions.clear()
+    if (this.terrain.isCachedAsTexture) this.terrain.cacheAsTexture(false)
+    this.terrain.clear()
+    this.identity = ''
+    this.terrainKey = ''
+    this.receivedAt = 0
+    this.running = false
+  }
+
+  restoreContext(): void {
+    if (this.terrainKey) this.terrain.updateCacheTexture()
+  }
 
   render(now: number): void {
     const progress = this.reducedMotion || !this.running ? 1
@@ -166,18 +192,7 @@ export class ArenaScene {
       drawing.root.visible = actor.alive
       drawing.moving = Boolean(!reset && previousMotion
         && (previousMotion.toX !== toX || previousMotion.toY !== toY))
-      setActorPose(drawing, actor.heading, 0)
+      drawing.direction = actor.heading
     }
-  }
-
-  private clearLayers(): void {
-    for (const drawing of this.blocks.values()) drawing.destroy()
-    for (const pickup of this.pickups.values()) pickup.drawing.destroy()
-    for (const drawing of this.bombs.values()) drawing.root.destroy({ children: true, context: true })
-    for (const drawing of this.flames.values()) drawing.root.destroy({ children: true, context: true })
-    for (const drawing of this.actors.values()) drawing.root.destroy({ children: true, context: true })
-    this.blocks.clear(); this.pickups.clear(); this.bombs.clear(); this.flames.clear(); this.actors.clear()
-    this.motions.clear()
-    this.terrainKey = ''
   }
 }

@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.3.22 — 2026-10-18
+
+- Fix connected takeover in production release builds by executing the binding-fence update
+  outside debug assertions; verify replacement commands and stale-connection cleanup.
+- Require both debug and release workspace test suites in the server gate.
+- Guard reconnect accessibility audits to one document while preserving rule coverage,
+  screenshots, deadlines and zero retries; retain bounded browser phase diagnostics.
+- Avoid redundant actor pose visibility changes on unchanged frames and moving snapshots.
+- Cache immutable terrain at the initialized renderer's resolution with nearest sampling;
+  refresh on terrain changes, new worlds and WebGL restoration while keeping dynamic layers live.
+- Retain one arena renderer across room and reconnect transitions; suspend and clear it
+  between authoritative worlds, then paint the new baseline before revealing the canvas.
+- Stage a dormant gameplay-v7 contract for inventory, timed effects, typed bombs, hidden
+  actors and shared manual-action IDs, while keeping the active v6 endpoint unchanged.
+- Add checked item masks, effect multiplicity and contextual availability validation with
+  shared Rust/browser fixtures; distinguish structural schema checks from semantic checks.
+- Bound event windows and encoded frames for the expanded contract. Canonical projections,
+  recipient filtering, runtime migration and playable item activation remain follow-up work.
+
 ## 0.3.21 — 2026-10-18
 
 - Represent domain bomb triggers explicitly as timed, remote or contact, without invented

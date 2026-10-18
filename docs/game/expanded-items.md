@@ -144,14 +144,33 @@ from final state. One unsupported record fails the whole window; no timestamp is
 no event is dropped. Failed publication preserves revision and pending reports. These changes
 do not activate remote control, mine contact/destruction, fuse pausing or bomb movement.
 
+## Dormant v7 contract
+
+The v0.3.22 candidate stages schema, generated browser types, Rust wire DTOs and checked-value
+helpers only. Active gameplay-v6 and its archived contracts remain unchanged. The contract
+includes inventory, 11 timed effect kinds (at most 16 entries), explicit bomb triggers, a
+visible/hidden actor union, available/enabled items and shared manual action IDs.
+
+JSON Schema/AJV checks server shapes, required nulls, ranges and array bounds. Rust parsing
+checks incoming client messages, settings and checked values; server DTOs are serialization-only.
+Complete server-state validation belongs to the later canonical projection increment.
+Separate matching semantic helpers check ordinary-effect uniqueness, the six-stack Slow-foot
+cap and enabled-item availability. Equal Slow-foot durations remain valid. Raw AJV validation
+alone does not establish these semantic properties. Checked item sets use 22 fixed bits and
+canonical wire order, without enlarging current live room settings or journal records.
+
+Canonical complete-world validation, event-time audience capture, recipient projections and
+live transport/browser migration are separate increments. See [v7 contract](protocol-v7.md).
+
 ## Release sequence and acceptance
 
 1. Pure core inventory/effects/damage foundation; retain classic traces and protocol behavior.
-2. Ordered manual commands with a Classic simultaneous-placement adapter (v0.3.20 foundation).
-3. Typed domain triggers and checked legacy wire projection (v0.3.21 foundation). Forced-contact
+2. Ordered manual commands with a Classic simultaneous-placement adapter (v0.3.20).
+3. Typed domain triggers and checked legacy wire projection (v0.3.21). Forced-contact
    helpers follow playable protection items rather than delaying them.
-4. Gameplay-v7 schema/projections, followed by per-seat transport and browser inventory/status UI.
-5. Expanded configuration/generation, then Heart and Shield as separate activations.
+4. Dormant gameplay-v7 schema/DTOs/checked values (v0.3.22 candidate), then canonical validation
+   and recipient projections, followed by integrated server/browser migration.
+5. Expanded configuration/generation with Heart activation, then Shield in a separate increment.
 6. Individual stat modifiers, Reverse/Diarrhea, special bombs, movement equipment, Stopwatch,
    visibility effects, Oil and Teleporter, with interaction tests at each activation.
 

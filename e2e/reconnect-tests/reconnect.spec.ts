@@ -1,11 +1,14 @@
-import AxeBuilder from '@axe-core/playwright'
 import { setTimeout as delay } from 'node:timers/promises'
 import { expect, test, type Page, type Route, type TestInfo } from '@playwright/test'
 import { latestSnapshot, observeGame, type ObservedGame } from '../tests/support/duel'
+import { readViewportFits } from '../tests/support/diagnostic-phases'
+import { runGuardedLegacyAxeAudit } from '../tests/support/guarded-axe-audit'
 import { moveTo } from '../tests/support/movement'
+import { startBrowserStallDiagnostics } from '../tests/support/browser-stall-diagnostics'
+import { startCaptureWorkloadProfile } from '../tests/support/capture-workload-profile'
 import {
   admissionBaseline, disconnectTransport, installTransportProbe, invalidResume,
-  sharedFieldsArePrivate, takeover,
+  moveTakeover, sharedFieldsArePrivate, stopTakeover, takeover,
 } from '../tests/support/reconnect'
 
 test.beforeAll(() => {
@@ -43,11 +46,35 @@ async function attachPublicSummary(testInfo: TestInfo, games: ObservedGame[]) {
     contentType: 'application/json',
     body: JSON.stringify(games.map((game) => ({
       sockets: game.sockets,
+      control: game.control,
       commands: game.commands.slice(-128),
       rooms: game.frames.filter((frame) => frame.type === 'roomState' || frame.type === 'snapshot' || frame.type === 'admitted')
         .slice(-60).map((frame) => ({ type: frame.type, room: frame.room })),
     }))),
   })
+}
+
+async function auditRecoveryPage(page: Page, index: number, game: ObservedGame,
+  instrumentation: {
+    diagnostics: ReturnType<typeof startBrowserStallDiagnostics>
+    captureProfile: ReturnType<typeof startCaptureWorkloadProfile>
+  }, testInfo: TestInfo): Promise<void> {
+  const { diagnostics, captureProfile } = instrumentation
+  const pageOrdinal = index + 1
+  if (index === 0) await captureProfile.begin(page, latestSnapshot(game)!)
+  let captureSucceeded = false
+  try {
+    expect((await diagnostics.phase('axe', pageOrdinal,
+      async () => runGuardedLegacyAxeAudit(page))).violations).toEqual([])
+    expect(await diagnostics.phase('width', pageOrdinal,
+      async () => readViewportFits(page))).toBe(true)
+    await diagnostics.screenshot(page, pageOrdinal, async () => page.screenshot({
+      path: testInfo.outputPath(`recovery-${index}.png`), fullPage: true,
+    }))
+    captureSucceeded = true
+  } finally {
+    if (index === 0) await captureProfile.end(captureSucceeded ? 'success' : 'error')
+  }
 }
 
 test('a browser restores its full live world and action floor before a fenced takeover', async ({ browser }, testInfo) => {
@@ -57,12 +84,24 @@ test('a browser restores its full live world and action floor before a fenced ta
   ])
   let release: (() => void) | undefined
   const games: ObservedGame[] = []
+  const diagnostics = startBrowserStallDiagnostics()
+  const captureProfile = startCaptureWorkloadProfile()
+  let testFailed = false
+  let testFailure: unknown
+  let cleanupFailed = false
+  let cleanupFailure: unknown
   try {
     const pages = await Promise.all(contexts.map((context) => context.newPage()))
     await Promise.all(pages.map(installTransportProbe))
+    await Promise.all(pages.map((page, index) => diagnostics.observePage(
+      page, index === 0 ? 'reconnect-primary' : 'reconnect-peer',
+    )))
+    await captureProfile.install(pages)
     games.push(...pages.map(observeGame))
     const [one] = pages
     await joinMatch(pages, games)
+    const canvas = await one.locator('.game-arena__canvas canvas').elementHandle()
+    if (!canvas) throw new Error('The initial arena canvas did not initialize')
     const arena = one.getByRole('region', { name: 'Grenadiers courtyard' })
     await arena.click()
     await moveTo(one, games[0], { column: 5, row: 1 })
@@ -86,6 +125,8 @@ test('a browser restores its full live world and action floor before a fenced ta
     expect(restored.positions.find((actor) => actor.seat === 'one')).toEqual({ seat: 'one', ...position })
     expect(restored.bombIds).toContain(bomb.id)
     expect(restored.stableCapability).toBe(true)
+    expect(await canvas.evaluate((element) => element.isConnected)).toBe(true)
+    await expect(one.locator('.game-arena__canvas canvas')).toHaveCount(1)
     await arena.click()
     await one.keyboard.down('ArrowLeft')
     try {
@@ -107,18 +148,56 @@ test('a browser restores its full live world and action floor before a fenced ta
       .some((command) => command.type === 'movement' && command.direction === null)).toBe(true)
     await one.keyboard.up('ArrowRight')
     await arena.click()
+    await moveTo(one, games[0], { column: 2, row: 1 })
     await one.keyboard.press('Space')
     await expect.poll(() => games[0].commands.filter((command) => command.type === 'placeBomb').map((command) => command.actionId))
       .toEqual([1, 2])
+    await expect.poll(() => latestSnapshot(games[0])!.state.bombs).toContainEqual(
+      expect.objectContaining({ cell: { column: 2, row: 1 }, range: 2 }),
+    )
+    // Keep the second takeover's authority check independent of the bomb's fuse.
+    await moveTo(one, games[0], { column: 5, row: 1 })
+    await expect.poll(() => {
+      const state = latestSnapshot(games[0])!.state
+      return state.bombs.length + state.flames.length
+    }).toBe(0)
+    expect(latestSnapshot(games[0])!.room.phase.type).toBe('running')
+    expect(latestSnapshot(games[0])!.state.actors[0].alive).toBe(true)
     expect(games[0].commands.filter((command) => command.type === 'resumeRoom')).toHaveLength(1)
     expect(await invalidResume(one, 'wrongCapability')).toBe('resumeRejected')
     expect(await invalidResume(one, 'wrongRoom')).toBe('resumeRejected')
+    const beforeTakeoverPosition = {
+      ...latestSnapshot(games[0])!.state.actors.find((actor) => actor.seat === 'one')!.position,
+    }
+    expect(Math.floor(beforeTakeoverPosition.x / 1_024)).toBe(5)
+    expect(Math.floor(beforeTakeoverPosition.y / 1_024)).toBe(1)
     const replacement = await takeover(one)
     expect(replacement.roomId).toBe(before.room.roomId)
     expect(replacement.seat).toBe('one')
     expect(replacement.actionFloor).toBe(2)
     expect(replacement.stableCapability).toBe(true)
+    const takeoverPosition = replacement.positions.find((actor) => actor.seat === 'one')!
+    expect(takeoverPosition).toEqual({ seat: 'one', ...beforeTakeoverPosition })
+    const takeoverDirection = takeoverPosition.x <= 1_664 ? 'east' : 'west'
+    await moveTakeover(one, takeoverDirection)
+    try {
+      await expect.poll(() => {
+        const current = latestSnapshot(games[1])!.state.actors
+          .find((actor) => actor.seat === 'one')!.position.x
+        return takeoverDirection === 'east'
+          ? current > takeoverPosition.x
+          : current < takeoverPosition.x
+      }, { intervals: [15] }).toBe(true)
+    } catch (error) {
+      try { await stopTakeover(one) } catch {
+        testInfo.annotations.push({ type: 'takeover-cleanup', description: 'stop-failed-after-movement-error' })
+      }
+      throw error
+    }
+    await stopTakeover(one)
     await expect(one.getByText('This seat was resumed in another tab.', { exact: true })).toBeVisible()
+    expect(await canvas.evaluate((element) => element.isConnected)).toBe(true)
+    await expect(one.locator('.game-arena__canvas canvas')).toBeHidden()
     await expect(one.getByRole('button', { name: 'Create room', exact: true })).toBeEnabled()
     const socketCount = games[0].sockets
     await delay(1_000)
@@ -126,19 +205,38 @@ test('a browser restores its full live world and action floor before a fenced ta
     await assertPublicOnly(pages)
     await one.getByRole('button', { name: 'Create room', exact: true }).click()
     await expect.poll(async () => (await admissionBaseline(one))?.roomId).not.toBe(before.room.roomId)
+    // Reconnect-only experiment: legacy Axe avoids partial-run temporary pages, while
+    // the frame guard keeps these audits explicitly scoped to the current document.
     for (const [index, page] of pages.entries()) {
-      expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([])
-      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
-      await page.screenshot({ path: testInfo.outputPath(`recovery-${index}.png`), fullPage: true })
+      await auditRecoveryPage(page, index, games[0], { diagnostics, captureProfile }, testInfo)
     }
     expect(games[0].commands.filter((command) => command.type === 'resumeRoom')).toHaveLength(4)
   } catch (error) {
-    await attachPublicSummary(testInfo, games)
-    throw error
+    testFailed = true
+    testFailure = error
+    try { await attachPublicSummary(testInfo, games) } catch {
+      testInfo.annotations.push({
+        type: 'reconnect-diagnostics', description: 'public-summary-attachment-failed',
+      })
+    }
   } finally {
-    if (release) await release()
-    await Promise.all(contexts.map((context) => context.close()))
+    try { if (release) await release() } catch (error) { cleanupFailed = true; cleanupFailure = error }
+    await captureProfile.cleanup()
+    await captureProfile.attach(testInfo)
+    diagnostics.stop()
+    await diagnostics.attach(testInfo, 'reconnect-browser-stall-diagnostics')
+    const closed = await Promise.allSettled(contexts.map((context) => context.close()))
+    const rejectedClose = closed.find((result) => result.status === 'rejected')
+    if (!cleanupFailed && rejectedClose?.status === 'rejected') cleanupFailure = rejectedClose.reason
+    cleanupFailed ||= rejectedClose !== undefined
   }
+  if (testFailed) {
+    if (cleanupFailed) {
+      testInfo.annotations.push({ type: 'reconnect-cleanup', description: 'failed-after-test-error' })
+    }
+    throw testFailure
+  }
+  if (cleanupFailed) throw cleanupFailure
 })
 
 test('two offline tabs stop recovery after a late reserved-seat rejection', async ({ browser }, testInfo) => {

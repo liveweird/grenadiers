@@ -20,6 +20,12 @@ The routed bridge treats overflow as a test failure and closes both endpoints.
 
 Closing a queue cancels its one timer, discards all pending values, and prevents any later delivery.
 
+## Scenario: the delay queue reports allocated deadlines and late timer dispatch without changing order
+
+Fake harness time stalls timer servicing beyond three allocated deadlines. Diagnostics retain each
+enqueue time, FIFO-clamped due time, common dispatch time, and exact nonnegative timer lateness while
+the original frame order remains unchanged.
+
 ## Scenario: page delivery evidence requires a prior delayed downlink dispatch
 
 The page-side observation cannot count until the bounded route has actually forwarded the matching
@@ -43,6 +49,16 @@ Before each native movement, the harness derives east and west clearance from th
 public position and selects the larger interval, requiring at least one full cell of runway. Variable
 publication timing can therefore change leg length without accumulating drift into a wall.
 
+## Scenario: game control diagnostics stay bounded and exclude transport secrets
+
+Synthetic credential-bearing authentication, admission, error, and snapshot frames prove that the
+Node-side recorder retains at most 256 allowlisted control events and 64 socket summaries. Six
+hundred snapshots update only the socket's latest public tick and revision, so they cannot evict
+admission, replacement, or close evidence. The report excludes tokens, capabilities, socket URLs,
+and arbitrary error messages. The same isolated test proves the page collector survives a
+`setContent` document replacement with per-document clock origins, while setup and attachment
+failures produce only bounded fixed-label metadata and cannot fail the acceptance scenario.
+
 ## Scenario: native controls publish twenty unshaped local latency observations
 
 Two real clients enter the generated open corridor. Ten native movement and release cycles produce
@@ -57,3 +73,9 @@ Every native action and release must reach the peer's authoritative public state
 250ms budget. Two fresh moving revisions precede release. Both stable revisions must enter the route
 after the delayed null command is dispatched and then reach the page; the second confirms the first
 stable timestamp and is recorded separately.
+
+Browser diagnostics also time existing allowlisted WebGL calls without invoking additional GL
+work. The focused diagnostic scenario checks native call transparency, extension identity,
+exception preservation, complete draw/delete method coverage, a 64-event slow-call ring, and
+sanitized caller frames. This instrumentation observes the reconnect/audio scenarios and does
+not change latency budgets or identify a cause until a slow call is captured.

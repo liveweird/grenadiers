@@ -9,8 +9,8 @@ claim or revoke the credential needed for a version-8 connection.
 
 V8 adds rules version **5** and map ID **`generated_v2`**. Its own rules/map types leave the
 shared enums and schemas for earlier protocols unchanged. New production rooms are always
-Expanded v5/generator v2. They advertise `availableItems: ["heart", "remoteBomb", "piercingBomb", "powerBomb", "landmine", "shield", "goldenFlame", "shortFuse", "diarrhea", "slowFoot", "shortFlame", "longFuse", "reverseControls"]` and initially enable
-`settings.enabledItems: ["heart"]`. All 8192 subsets of those thirteen available items are supported configurations.
+Expanded v5/generator v2. They advertise `availableItems: ["heart", "remoteBomb", "piercingBomb", "powerBomb", "landmine", "shield", "invisibilityCloak", "goldenFlame", "shortFuse", "diarrhea", "slowFoot", "shortFlame", "longFuse", "reverseControls"]` and initially enable
+`settings.enabledItems: ["heart"]`. All 16384 subsets of those fourteen available items are supported configurations.
 Other catalog IDs remain unavailable.
 
 The Classic settings preset disables optional items and restores the four ordinary settings.
@@ -45,8 +45,10 @@ Remote trigger. Its owner's next retained manual bomb action detonates that exac
 and chains remain valid triggers; death and disconnect add no deadline. Landmine consumes its
 charge on successful placement and publishes a passable, untimed Standard bomb with a Contact
 trigger. Swept entry after exit grace detonates it; fire and other blasts silently destroy an
-untriggered mine. Paused Timed bombs, concealment effects, and other optional mechanics remain
-unavailable.
+untriggered mine. Invisibility Cloak adds or refreshes a 600-physical-tick effect. Its owner remains
+fully visible while the other recipient receives only actor identity, seat and alive status. The
+pickup, cloaked bomb cues and cloaked damage prevention are private at event time; elimination and
+results remain public. Paused Timed bombs and other optional mechanics remain unavailable.
 
 ## Checked publication and replay
 
@@ -105,5 +107,5 @@ by `2^stack_count`; every supported speed is exactly divisible by 64. Collection
 tick, while each deadline expires before movement. A capped actor is excluded before collection
 distance and tie arbitration, allowing an eligible rival to collect the pickup.
 
-The thirteen-item availability array is exact v8 data. Deploy server and web together and reload
-older v8 clients: a client built for twelve items rejects the new room even when Landmine is disabled.
+The fourteen-item availability array is exact v8 data. Deploy server and web together and reload
+older v8 clients: a client built for thirteen items rejects the new room even when Invisibility Cloak is disabled.

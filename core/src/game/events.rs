@@ -14,6 +14,14 @@ pub enum EventAudience {
 
 impl EventAudience {
     #[must_use]
+    pub const fn only(seat: SeatId) -> Self {
+        match seat {
+            SeatId::One => Self::One,
+            SeatId::Two => Self::Two,
+        }
+    }
+
+    #[must_use]
     pub const fn includes(self, seat: SeatId) -> bool {
         matches!(
             (self, seat),

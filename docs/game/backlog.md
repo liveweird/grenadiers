@@ -1,10 +1,10 @@
 # Gameplay and presentation backlog
 
-TURN, CONFIG and the first ART slice are implemented. This v0.3.37 candidate contains thirteen
+TURN, CONFIG and the first ART slice are implemented. This v0.3.38 candidate contains fourteen
 optional pickups: Heart, Shield, Golden Flame, Short Fuse, Short Flame, Long Fuse, Reverse
-Controls, Diarrhea, Slow-foot, Piercing Bomb, Power Bomb, Remote Bomb and Landmine. Local checks and
-independent reviews are clear; this candidate still requires fresh native acceptance and final
-CI. The other ten requested pickups remain outside this increment. Current publication status
+Controls, Diarrhea, Slow-foot, Piercing Bomb, Power Bomb, Remote Bomb, Landmine and Invisibility
+Cloak. Local checks are recorded as they complete; this candidate still requires independent
+reviews, fresh native acceptance and final CI. The other nine requested pickups remain outside this increment. Current publication status
 is recorded in [release notes](https://github.com/liveweird/grenadiers/releases), with source-bound
 acceptance records in [verification](../verification.md). Richer transitions and artwork remain
 follow-up work; see [pixel-art presentation](pixel-art.md) and
@@ -135,7 +135,7 @@ needs remappable controls, input sequencing, replay and connection-generation fe
 | --- | --- | --- |
 | BUFF-SHIELD / shield | Temporary immunity to bomb blasts, monsters and other configured damage. | Damage-class coverage, duration, expiry while in danger and interaction with Heart. |
 | BUFF-CLOCK / stopwatch | Temporarily freeze bomb fuses, monsters and enemy players. | Affected owners/entities, existing versus newly spawned bombs, multiple clocks, thaw/input handling; freeze selected gameplay entities without stopping server ticks, round deadlines or reconnect grace. |
-| BUFF-CLOAK / invisibility cloak | Opponents cannot see the owner. | Owner feedback, visibility duration, shadows/events/HUD leakage and reconnect. Use recipient-specific projections rather than hiding sprites while sending secret positions. |
+| BUFF-CLOAK / invisibility cloak | **Prepared in v0.3.38.** Opponents receive only identity, seat and alive status for 600 physical ticks. | Event-time private cues, complete actor-root removal, current-position reveal, reconnect deadline preservation and paired checked publication are covered locally; native acceptance remains pending. |
 | BUFF-GOLD / golden flame | New bombs use maximum blast radius while active. | Maximum derives from the selected ruleset; define precedence with Short-flame and expiry. |
 | BUFF-FUSE / short fuse | Decrease new bombs' detonation delay by 50%. | Integer-tick rounding/minimum, repeated pickups and composition with Long fuse. |
 

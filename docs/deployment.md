@@ -335,3 +335,21 @@ The scenario enables only Landmine, reveals and collects the deterministic charg
 places the mine there, exits safely, and proves that it remains armed past the ordinary fuse.
 Normal keyboard re-entry detonates the same Contact bomb for both peers without another manual
 action. Native execution remains a candidate gate.
+
+Deploy the v0.3.38 server and web assets together and reload connected browsers. The exact v8
+`availableItems` array grows to fourteen entries, so older v8 clients reject the room even when
+Invisibility Cloak is disabled. No storage migration is required; active matches remain process-local.
+
+## Reproduce opt-in Invisibility Cloak recipient privacy
+
+```sh
+chmod 444 core/tests/fixtures/arena-v2-invisibility-cloak.seed
+docker compose -f docker-compose.yaml -f docker-compose.invisibility-cloak.yaml up -d --no-build --force-recreate app
+E2E_INVISIBILITY_CLOAK_FIXTURE=arena-v2-invisibility-cloak npm --prefix e2e run test:invisibility-cloak
+docker compose -f docker-compose.yaml -f docker-compose.invisibility-cloak.yaml down
+```
+
+The scenario enables only Invisibility Cloak, captures localized views and empty-floor compositor
+pixels before collection, then verifies owner-visible and opponent-hidden rendering. Opponent
+reconnect neither refreshes the physical deadline nor replays private collection history; exact
+expiry reveals the actor at its current position. Native execution remains a candidate gate.

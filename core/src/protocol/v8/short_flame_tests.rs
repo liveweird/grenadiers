@@ -66,6 +66,7 @@ fn short_flame_and_shield_publish_distinct_physical_timers_and_quiet_admission()
                 "powerBomb",
                 "landmine",
                 "shield",
+                "invisibilityCloak",
                 "goldenFlame",
                 "shortFuse",
                 "diarrhea",

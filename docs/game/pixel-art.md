@@ -43,3 +43,7 @@ reduced motion keeps the crest static. Native screenshots are pending candidate 
 
 Actor pose visibility is assigned idempotently. Snapshot updates retain the current animation
 frame until rendering selects its final pose, avoiding intermediate visibility invalidations.
+
+Invisibility Cloak adds a distinct hooded pickup glyph. Recipient projection removes an opponent's
+complete actor root, including shadow, motion record and attached cues, while hidden; expiry paints
+the actor at the current authoritative position without a stale interpolation trail.

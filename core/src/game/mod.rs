@@ -77,3 +77,6 @@ mod generated_upgrade_trace_tests;
 
 #[cfg(test)]
 mod generated_match_trace_tests;
+
+#[cfg(test)]
+mod invisibility_cloak_tests;

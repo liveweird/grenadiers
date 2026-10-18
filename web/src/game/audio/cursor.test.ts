@@ -80,4 +80,14 @@ describe('accepted-event audio cursor', () => {
     other.admissionBaseline = { roomId: other.room!.roomId, revision: 2, tick: 2, physicalTick: 2 }
     expect(cursor.consume(other, true)).toEqual([])
   })
+
+  it('plays only recipient-local cloak events and does not invent an omitted opponent cue', () => {
+    const owner = new AudioCursor()
+    const opponent = new AudioCursor()
+    owner.consume(state(20), true)
+    opponent.consume(state(20), true)
+    expect(owner.consume(state(21, [event(21, 0, 'pickupCollected')]), true)).toEqual(['pickup'])
+    expect(opponent.consume(state(21, []), true)).toEqual([])
+    expect(opponent.consume(state(22, []), true)).toEqual([])
+  })
 })

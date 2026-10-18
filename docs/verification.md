@@ -3,6 +3,42 @@
 Records below are frozen against their named sources. Publication and later CI status are
 recorded in [release notes](https://github.com/liveweird/grenadiers/releases).
 
+## Invisibility Cloak candidate — 2026-10-18 — local checks complete
+
+The v0.3.38 candidate activates an opt-in 600-physical-tick Invisibility Cloak. Owners receive
+their complete actor while opponents receive only identity, seat and alive status. Attributable
+pickup, bomb and prevention cues capture a private audience at emission; elimination and results
+remain public. Bombs and world state stay visible. Death clears the effect, reconnect preserves its
+physical deadline, and expiry reveals the actor at its current position. Catalog bit 11 and the final
+weight-15 generator entry preserve every earlier 8192-mask path while supporting all 16384 subsets.
+
+Debug and release suites pass **619 core tests, 195 server tests and two doctests**; four dedicated
+performance profiles remain ignored. Rust line coverage is **92.19% (12,883/13,975)**, above the
+unchanged 80% floor. All **16,789 web tests** across 56 files pass with statement/branch/function/
+line coverage of **95.57/91.66/95.68/97.87%**. Formatting, all-target Clippy with warnings denied,
+repository limits, generated contracts, lint, Knip, production and renderer-diagnostic builds,
+E2E static checks and **41-scenario parity** pass. Cargo-deny and both cached offline npm audits pass;
+strict pinned Kubernetes schemas validate all three resources.
+
+The repeating byte-31 pure-core route was proven before browser work with ordinary movement and
+bomb placement. Early focused web commands failed before discovery because the fresh worktree had
+no installed dependency tree; exact-lock dependencies were copied from the reviewed parent. The
+first full Rust run found two stale catalog assertions and then reached expected sandbox listener
+denials; corrected catalog assertions and an authorized listener run pass. The web gate separately
+caught stale UI/art expectations and complexity ceilings while adding the owner cue; the final gate
+above covers the corrected source.
+
+The native Playwright source prepares English desktop and Polish reduced-motion views before
+collection, compares compositor pixels for owner-visible and opponent-hidden rendering, reconnects
+the opponent without replaying private history, and requires current-position reveal at the exact
+deadline. No native browser run, candidate image, CI result or publication is claimed. Independent
+domain/privacy and browser/runtime reviews found no defects. A focused three-report publication
+test advances through the full 600-tick physical lifetime, then retains a private capacity pickup at
+T-1, a public placement after expiry at T and public elimination/result events at T+1. It also proves
+recipient-local contiguous event indexes and public world/bomb facts after the actor is visibly dead.
+There is no focused injected failure for only the second recipient's asymmetric serialization;
+paired preparation and the existing atomic publication failure coverage were reviewed structurally.
+
 ## Landmine candidate — 2026-10-18 — local checks complete
 
 The v0.3.37 candidate activates an opt-in one-charge Landmine. Successful manual placement

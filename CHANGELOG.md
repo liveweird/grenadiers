@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.38 — 2026-10-18
+
+- Add opt-in Invisibility Cloak with a 600-physical-tick refreshable actor-privacy effect.
+- Publish exact hidden actors and event-time private attributable cues while retaining public bombs, hazards, elimination and results.
+- Add the fourteenth lobby switch, checked asymmetric v8 publication, replay coverage, English and Polish cues, and a deterministic compositor-based browser scenario. Native acceptance and final CI remain pending.
+
 ## 0.3.37 — 2026-10-18
 
 - Add opt-in Landmine as a passable, untimed Standard bomb that detonates on swept actor contact after per-actor exit grace.

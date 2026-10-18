@@ -4,9 +4,11 @@
 
 The v0.3.23 candidate passes **373 core tests, 170 server tests and two doctests in each debug and release profile**, with four
 dedicated performance profiles intentionally ignored. Rust line coverage is **92.25%**
-(10,207/11,064 lines), above the unchanged 80% floor. All **247 web tests**, contract checks,
+(10,207/11,064 lines), above the unchanged 80% floor. All **257 web tests**, contract checks,
 ESLint, Knip, builds, E2E static checks, dependency audits and strict pinned Kubernetes schemas
-pass. The application still uses gameplay-v6; optional items remain disabled.
+pass. The application still uses gameplay-v6; optional items remain disabled. The reviewed renderer
+lifetime correction is integrated; web statement/branch/function/line coverage is
+**94.81/90.05/94.90/97.42%**, and all 26 E2E static scenarios match.
 
 Independent review is clear. Regression tests establish complete-world validation before
 filtering, hidden record and ownership checks, exact event/world fuse consistency, paused

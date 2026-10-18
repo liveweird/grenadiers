@@ -1,6 +1,6 @@
 # Repository verification
 
-## Canonical projection candidate — 2026-10-18 — local checks only
+## Canonical projection candidate — 2026-10-18 — native verified, publication pending
 
 The v0.3.23 candidate passes **373 core tests, 170 server tests and two doctests in each debug and release profile**, with four
 dedicated performance profiles intentionally ignored. Rust line coverage is **92.25%**
@@ -22,8 +22,32 @@ The pre-correction image `sha256:1b5b5e39a78178c50df3de226621c0307249d8003baffc3
 passed Compose 25/25 and Kubernetes functional 15/15 with zero retries. Kubernetes latency was
 not run: the evaluation was interrupted after confirming the release-profile takeover defect.
 Evidence remains at `/tmp/grenadiers-v0323-acceptance`; that image does not certify the fix.
-The fix and strengthened acceptance are integrated, and full debug/release gates pass. Fresh
-image acceptance and final-head CI remain required before publication.
+The fix and strengthened acceptance are integrated, and full debug/release gates pass.
+
+Clean source `fc37bbf996ca3fbed5ff2c085702a26ede47b8ea`, archive SHA-256
+`d42dc6a3a9edd29bd9ccf4a6ba8c6c987d79023deaed5159644f0cca6395b178`, builds fresh image
+`sha256:9e3d9611f5430b91002ec15fc2ef79941570862476a0a577510d264d40da29c9`.
+The image archive hashes to `39ac9b8792a07fb3b4123cf3449e11d5a44998012e28711a35fc5ca99d92f69c`.
+Fresh first-attempt acceptance passes **26/26 Compose and 26/26 Kubernetes**, retries zero,
+with independent evidence review clear. Local/shaped maxima are **56.641/142.426 ms** in
+Compose and **49.553/159.893 ms** in Kubernetes; each profile has 20 samples, zero exceedances
+and zero CPU throttling. Pinned archive-only Trivy finds zero fixable HIGH/CRITICAL findings;
+strict Kubernetes schemas validate 3/3. Runtime hardening, strict no-store probes, external
+mode-0444 fixtures, fresh pod/forward lifecycles and cleanup pass.
+
+Evidence is `/tmp/grenadiers-v0323-guarded-acceptance`; its summary SHA-256 is
+`810e04c5015119d58782276afc07b4ac42b1b2e00f8c9b886cbea693fe0d602a`. The selective evidence
+manifest verifies; it does not hash every raw report. The post-success shell wrapper variable
+failure, wrong preparation arity, missing generated dependency and sandbox-blocked schema fetch
+remain preserved as setup-only failures, before any browser scenario. No scenario failed or
+was retried. Saved files prove approval-gate ordering and continuous direct-pod forwarding;
+the coordinator ACK content and literal PTY attachment remain external to those logs. Runtime
+seed modes are recorded, but their hashes were not independently read inside containers.
+
+This certifies local native acceptance, without a hosted-CI or production-deployment claim.
+Publication requires exact-head hosted gates after the predecessor is merged. Later changes
+to application or browser test inputs require their corresponding evidence to be refreshed.
+
 ## Idempotent actor pose correction — 2026-10-18 — acceptance pending
 
 The renderer's pose setter previously hid every frame then re-showed the selected one on

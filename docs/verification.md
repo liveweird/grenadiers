@@ -1,6 +1,25 @@
 # Repository verification
 
-## Post-audit browser phase diagnostics — 2026-10-18 — acceptance pending
+## Guarded single-frame accessibility experiment — 2026-10-18 — acceptance pending
+
+Only the reconnect accessibility audits switch to Axe's legacy single-document path, avoiding
+its partial-run temporary pages. The helper subscribes before its initial frame check, requires
+one frame before and after analysis, and rejects any frame attachment during the audit. Cleanup
+removes its listener and preserves the original audit failure. The original rules, violation
+assertions, operation order, width expression, screenshots, 120-second deadline and zero retries
+remain unchanged. Application sources and the tested production image remain identical.
+
+The existing pure Chromium diagnostic now compares normalized violation-rule IDs against the
+current Axe mode on a controlled fixture and proves both report an unlabeled button. It also
+covers an existing iframe, a transient frame and cleanup/error precedence. E2E typecheck, lint,
+Knip and parity26 pass; the focused Chromium case passes1/1 in2.8 seconds. Its initial sandbox
+launch fails before test execution; a later implementation test finds an invalid Set matcher,
+which is corrected to `.size` before the passing run. Independent review is clear; one changed-mode
+native/CI evaluation remains pending. This is a test-harness hypothesis, not a proven browser
+root cause or a claim that the earlier failures are resolved.
+
+
+## Post-audit browser phase diagnostics — 2026-10-18 — native verified, CI blocked
 
 The reconnect probe now records bounded Node command boundaries around the existing Axe,
 width and screenshot operations, page-clock markers around the unchanged width expression,
@@ -12,10 +31,37 @@ the 120-second deadline, and zero retries remain unchanged.
 Independent review is clear. E2E typecheck, lint, Knip and scenario parity26 pass; the existing
 pure Chromium diagnostic passes1/1 in2.8 seconds. Its initial sandboxed launch failed before
 test execution; the permitted launch and its result are recorded separately. No production
-source changes accompany these diagnostics. Fresh instrumented native and exact-head CI
-results remain pending. Page timestamps describe event creation, while Node timestamps
+source changes accompany these diagnostics. Page timestamps describe event creation, while Node timestamps
 include asynchronous binding/IPC delivery and scheduling. Missing markers or heartbeats alone
 cannot identify a layout stall; no cause is claimed for the post-audit CI failures below.
+
+Exact source `31be38d2708d91fcc36b3d93ba5179b492d3b73a` has byte-identical production Docker
+inputs to `954b0ad`, so acceptance reuses image
+`sha256:57f16c866bff370640fe99edd367ee3378e5a7f17983a1cdcb5fd87dc6373853`.
+Changed Compose cases pass **2/2**; retained cases supply 24 distinct passes. Changed/remaining
+Kubernetes cases pass **15/15**; retained cases supply 11 distinct passes. The transparent rollup
+is **26/26 per target, 52/52 total**, retries zero, with an independent evidence audit.
+Kubernetes local/shaped maxima are **51.901/158.792 ms**, 20 samples per profile, zero
+exceedances and zero throttling. Strict probes, hardening, mode-0444 external fixtures,
+continuous direct-pod forwarding and cleanup pass. The initial evidence-runner URL-variable
+collision fails before reaching the app; its failed setup and the earlier actual position
+failure remain preserved. Evidence: `/tmp/grenadiers-v0322-phase-acceptance`.
+Literal PTY attachment and the content of the coordinator quiet acknowledgment cannot be
+independently established by saved process logs; the continuous PID lifecycle and gate order
+are recorded. This rollup combines retained and fresh cases against the same production image.
+
+Both exact-head CI runs fail the browser job (`39085949336` PR, `39085946734` push); the eight
+other checks pass. Push primary Axe passes, then width evaluation remains unresolved for
+109.347 seconds before `Test ended`. Retained heartbeats were created after command submission
+but delivered in a teardown burst 90–109 seconds later. Missing markers do not prove that page
+execution stopped, since marker delivery shares that backlog. In the PR, the peer width
+command takes 20.115 seconds while its actual read takes 0.1 ms; this observed delay precedes
+callback entry. PR activity arrays fill their 256-event bounds, so absent earlier markers may
+have been evicted. The primary width/screenshot take 49.054/25.192 seconds; the peer screenshot
+spans115.951 seconds before the test reports its 120-second timeout. Node event-loop maxima are
+136.6/165.0 ms. Artifact and decoded step prefixes are `/tmp/grenadiers-v22-phase-ci-{push,pr}-*`.
+The local successful width reads take 0–0.1 ms, with 11.4–12.8 seconds before callback entry.
+This narrows the measured delay without attributing a browser, protocol or Axe defect.
 
 ## Takeover position restoration probe correction — 2026-10-18 — acceptance pending
 

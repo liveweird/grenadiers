@@ -1,8 +1,8 @@
-import AxeBuilder from '@axe-core/playwright'
 import { setTimeout as delay } from 'node:timers/promises'
 import { expect, test, type Page, type Route, type TestInfo } from '@playwright/test'
 import { latestSnapshot, observeGame, type ObservedGame } from '../tests/support/duel'
 import { readViewportFits } from '../tests/support/diagnostic-phases'
+import { runGuardedLegacyAxeAudit } from '../tests/support/guarded-axe-audit'
 import { moveTo } from '../tests/support/movement'
 import { startBrowserStallDiagnostics } from '../tests/support/browser-stall-diagnostics'
 import {
@@ -179,10 +179,12 @@ test('a browser restores its full live world and action floor before a fenced ta
     await assertPublicOnly(pages)
     await one.getByRole('button', { name: 'Create room', exact: true }).click()
     await expect.poll(async () => (await admissionBaseline(one))?.roomId).not.toBe(before.room.roomId)
+    // Reconnect-only experiment: legacy Axe avoids partial-run temporary pages, while
+    // the frame guard keeps these audits explicitly scoped to the current document.
     for (const [index, page] of pages.entries()) {
       const pageOrdinal = index + 1
       expect((await diagnostics.phase('axe', pageOrdinal,
-        async () => new AxeBuilder({ page }).analyze())).violations).toEqual([])
+        async () => runGuardedLegacyAxeAudit(page))).violations).toEqual([])
       expect(await diagnostics.phase('width', pageOrdinal,
         async () => readViewportFits(page))).toBe(true)
       await diagnostics.phase('screenshot', pageOrdinal, async () => page.screenshot({

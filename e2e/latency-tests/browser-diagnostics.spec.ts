@@ -1,7 +1,67 @@
-import { expect, test, type Page, type TestInfo } from '@playwright/test'
+import AxeBuilder from '@axe-core/playwright'
+import { expect, test, type Browser, type Frame, type Page, type TestInfo } from '@playwright/test'
 import { startBrowserStallDiagnostics } from '../tests/support/browser-stall-diagnostics'
 import { readViewportFits } from '../tests/support/diagnostic-phases'
 import { GameControlRecorder } from '../tests/support/duel'
+import { runGuardedLegacyAxeAudit, type LegacyAxeAudit } from '../tests/support/guarded-axe-audit'
+
+function violationRuleIds(result: Awaited<ReturnType<AxeBuilder['analyze']>>): string[] {
+  return result.violations.map((violation) => violation.id).sort()
+}
+
+async function exerciseGuardedLegacyAudit(browser: Browser): Promise<void> {
+  const context = await browser.newContext()
+  try {
+    const page = await context.newPage()
+    await page.setContent('<main><button id="unnamed"></button></main>')
+    const current = await new AxeBuilder({ page }).analyze()
+    const legacy = await runGuardedLegacyAxeAudit(page)
+    expect(violationRuleIds(legacy)).toContain('button-name')
+    expect(violationRuleIds(legacy)).toEqual(violationRuleIds(current))
+
+    await page.setContent('<main><iframe title="existing"></iframe></main>')
+    await expect.poll(() => page.frames().length).toBe(2)
+    await expect(runGuardedLegacyAxeAudit(page)).rejects.toThrow(
+      'Reconnect accessibility audit requires one frame before analysis',
+    )
+
+    await page.setContent('<main></main>')
+    const duringAttachment: LegacyAxeAudit = async (auditPage) => {
+      await auditPage.evaluate(() => {
+        const frame = document.createElement('iframe')
+        frame.title = 'transient'
+        document.body.append(frame)
+        frame.remove()
+      })
+      return legacy
+    }
+    await expect(runGuardedLegacyAxeAudit(page, duringAttachment)).rejects.toThrow(
+      'Reconnect accessibility audit observed a frame attachment during analysis',
+    )
+
+    const listeners = new Set<(frame: Frame) => void>()
+    const cleanupFailure = new Error('fixed-listener-cleanup-failure')
+    const guardedPage = {
+      frames: () => [{} as Frame],
+      on: (_event: 'frameattached', listener: (frame: Frame) => void) => { listeners.add(listener) },
+      off: (_event: 'frameattached', listener: (frame: Frame) => void) => {
+        listeners.delete(listener)
+        throw cleanupFailure
+      },
+    } as unknown as Page
+    const primaryFailure = new Error('fixed-primary-audit-failure')
+    await expect(runGuardedLegacyAxeAudit(
+      guardedPage,
+      async () => { throw primaryFailure },
+    )).rejects.toBe(primaryFailure)
+    expect(listeners.size).toBe(0)
+    await expect(runGuardedLegacyAxeAudit(guardedPage, async () => legacy))
+      .rejects.toBe(cleanupFailure)
+    expect(listeners.size).toBe(0)
+  } finally {
+    await context.close()
+  }
+}
 
 async function installFakeGl(page: Page): Promise<void> {
   await page.evaluate(() => {
@@ -112,6 +172,7 @@ async function publishSyntheticHeartbeats(page: Page, credential: string, socket
 }
 
 test('game control diagnostics stay bounded and exclude transport secrets', async ({ browser }) => {
+  await exerciseGuardedLegacyAudit(browser)
   const recorder = new GameControlRecorder()
   for (let index = 0; index < 100; index += 1) recorder.addSocket()
   const socket = recorder.addSocket()
@@ -191,8 +252,7 @@ test('game control diagnostics stay bounded and exclude transport secrets', asyn
       { label: 'width', boundary: 'sent', pageOrdinal: 1 },
       { label: 'width', boundary: 'returned', pageOrdinal: 1 },
     ])
-    expect(diagnostics.summary().phases.at(-2)!.nodeAt)
-      .toBeLessThanOrEqual(diagnostics.summary().phases.at(-1)!.nodeAt)
+    expect(diagnostics.summary().phases.at(-2)!.nodeAt).toBeLessThanOrEqual(diagnostics.summary().phases.at(-1)!.nodeAt)
 
     const temporaryPage = await context.newPage()
     await temporaryPage.close()

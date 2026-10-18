@@ -17,6 +17,13 @@ The same initialized canvas remains connected across disconnected restore and te
 takeover, with exactly one canvas after restore and a hidden canvas in the waiting state.
 This verifies bounded renderer reuse while the existing live-world and authority checks run.
 
+The reconnect accessibility audits use guarded single-frame Axe legacy mode as a bounded
+experiment against post-audit browser-control stalls. The helper checks for one frame before
+and after analysis and fails on any frame attachment during analysis. It retains the same
+rules, zero-violations assertion, width check, screenshots and deadline. A separate controlled
+fixture proves legacy/current rule-result parity and detection of an unlabeled button; no
+audit fixture or game state is injected into this gameplay scenario.
+
 ## Scenario: two offline tabs stop recovery after a late reserved-seat rejection
 
 Both native transports close while fresh-session HTTP requests are held. After eleven real seconds, both resume attempts receive terminal reserved-seat rejection and return to a usable lobby without a retry loop. Exact599/600 expiry and abandonment precedence belong to deterministic core/server tests; this browser scenario verifies late network recovery behavior.

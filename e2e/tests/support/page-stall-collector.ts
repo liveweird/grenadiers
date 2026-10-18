@@ -1,5 +1,8 @@
 export type CollectorEventLabel = 'initialized' | 'visible' | 'hidden' | 'focused' | 'blurred'
-  | 'longTask' | 'schedulingGap' | 'bindingDuration' | 'glCall'
+  | 'longTask' | 'schedulingGap' | 'bindingDuration' | 'heartbeat' | 'page-enter'
+  | 'read-start' | 'read-end' | 'glCall'
+
+export type PagePhaseLabel = 'page-enter' | 'read-start' | 'read-end'
 
 export type PageCollectorEvent = {
   label: CollectorEventLabel
@@ -16,20 +19,19 @@ export type PageCollectorEvent = {
 type DiagnosticBinding = (event: PageCollectorEvent) => Promise<void>
 type DiagnosticWindow = Window & {
   grenadiersStallDiagnostic?: DiagnosticBinding
+  grenadiersStallDiagnosticPhase?: (label: PagePhaseLabel) => void
   grenadiersStallCollectorInstalled?: true
   WebGLRenderingContext?: { prototype: object }
   WebGL2RenderingContext?: { prototype: object }
 }
 
-export function installPageCollector(input: {
-  intervalMs: number; reportingGapMs: number; slowGlCallMs: number
-}): void {
+export function installPageCollector(input: { intervalMs: number; reportingGapMs: number
+  slowGlCallMs: number; heartbeatMs: number }): void {
   const observed = window as DiagnosticWindow
   const binding = observed.grenadiersStallDiagnostic
   if (!binding || observed.grenadiersStallCollectorInstalled) return
   observed.grenadiersStallCollectorInstalled = true
-  let documentOrdinal = 0
-  let observedRoot: Element | null = null
+  let documentOrdinal = 0, observedRoot: Element | null = null
   const send = (event: Omit<PageCollectorEvent, 'documentOrdinal' | 'timeOrigin'>): void => {
     const started = performance.now()
     const contextual = { ...event, documentOrdinal, timeOrigin: performance.timeOrigin }
@@ -38,10 +40,10 @@ export function installPageCollector(input: {
       timeOrigin: performance.timeOrigin, duration: performance.now() - started,
     })).catch(() => undefined)
   }
-  const state = (): void => send({
-    label: document.visibilityState === 'visible' ? 'visible' : 'hidden',
-    pageAt: performance.now(),
-  })
+  const state = (): void => send({ label: document.visibilityState === 'visible' ? 'visible' : 'hidden',
+    pageAt: performance.now() })
+  observed.grenadiersStallDiagnosticPhase = (label): void => {
+    if (['page-enter', 'read-start', 'read-end'].includes(label)) send({ label, pageAt: performance.now() }) }
   const initializeDocument = (): void => {
     documentOrdinal += 1
     observedRoot = document.documentElement
@@ -49,8 +51,7 @@ export function installPageCollector(input: {
     state()
     document.addEventListener('visibilitychange', state)
   }
-  initializeDocument()
-  send({ label: document.hasFocus() ? 'focused' : 'blurred', pageAt: performance.now() })
+  initializeDocument(); send({ label: document.hasFocus() ? 'focused' : 'blurred', pageAt: performance.now() })
   addEventListener('focus', () => send({ label: 'focused', pageAt: performance.now() }))
   addEventListener('blur', () => send({ label: 'blurred', pageAt: performance.now() }))
   if ('PerformanceObserver' in window) {
@@ -62,7 +63,6 @@ export function installPageCollector(input: {
       }).observe({ type: 'longtask', buffered: true })
     } catch { /* Long-task observation is optional in this browser. */ }
   }
-
   const methods = ['useProgram', 'deleteBuffer', 'deleteProgram', 'deleteShader', 'deleteTexture', 'deleteFramebuffer',
     'deleteRenderbuffer', 'deleteVertexArray', 'drawArrays', 'drawElements', 'drawArraysInstanced', 'drawElementsInstanced',
     'clear', 'getExtension', 'deleteQuery', 'deleteSampler', 'deleteSync', 'deleteTransformFeedback', 'drawRangeElements'] as const
@@ -171,8 +171,7 @@ export function installPageCollector(input: {
   }
   if (observed.WebGLRenderingContext) wrapPrototype(observed.WebGLRenderingContext.prototype)
   if (observed.WebGL2RenderingContext) wrapPrototype(observed.WebGL2RenderingContext.prototype)
-
-  let expected = performance.now() + input.intervalMs
+  let expected = performance.now() + input.intervalMs, nextHeartbeat = performance.now() + input.heartbeatMs
   setInterval(() => {
     const now = performance.now()
     if (observedRoot !== document.documentElement) initializeDocument()
@@ -180,6 +179,9 @@ export function installPageCollector(input: {
     if (gap >= input.reportingGapMs) {
       send({ label: 'schedulingGap', pageAt: now, duration: gap })
     }
+    if (now >= nextHeartbeat) {
+      send({ label: 'heartbeat', pageAt: now })
+      nextHeartbeat = now + input.heartbeatMs }
     expected = now + input.intervalMs
   }, input.intervalMs)
 }

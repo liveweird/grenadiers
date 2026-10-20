@@ -87,6 +87,98 @@ fn piercing_still_stops_without_fire_at_hard_walls() {
 }
 
 #[test]
+fn power_radius_one_and_two_are_exact_manhattan_masks() {
+    let center = CellId::new(7, 6);
+    for (range, expected) in [
+        (
+            1,
+            BTreeSet::from([
+                center,
+                CellId::new(7, 5),
+                CellId::new(8, 6),
+                CellId::new(7, 7),
+                CellId::new(6, 6),
+            ]),
+        ),
+        (
+            2,
+            BTreeSet::from([
+                center,
+                CellId::new(7, 4),
+                CellId::new(6, 5),
+                CellId::new(7, 5),
+                CellId::new(8, 5),
+                CellId::new(5, 6),
+                CellId::new(6, 6),
+                CellId::new(8, 6),
+                CellId::new(9, 6),
+                CellId::new(6, 7),
+                CellId::new(7, 7),
+                CellId::new(8, 7),
+                CellId::new(7, 8),
+            ]),
+        ),
+    ] {
+        let mut world = world_with(&[], &[]);
+        add_bomb_with_blast(&mut world, 1, center, range, 1, BlastKind::Power);
+        assert_eq!(plan(&world, Tick(1)).unwrap().flames, expected);
+    }
+}
+
+#[test]
+fn power_radius_eight_clips_at_the_arena_edge_and_excludes_distance_nine() {
+    let mut world = world_with(&[], &[]);
+    add_bomb_with_blast(&mut world, 1, CellId::new(1, 1), 8, 1, BlastKind::Power);
+
+    let flames = plan(&world, Tick(1)).unwrap().flames;
+    assert_eq!(flames.len(), 45);
+    assert!(flames.contains(&CellId::new(5, 5)));
+    assert!(flames.contains(&CellId::new(9, 1)));
+    assert!(!flames.contains(&CellId::new(9, 2)));
+    assert!(!flames.contains(&CellId::new(0, 1)));
+}
+
+#[test]
+fn power_treats_hard_walls_as_holes_and_burns_every_soft_block() {
+    let wall = CellId::new(4, 5);
+    let blocks = [CellId::new(5, 5), CellId::new(4, 6), CellId::new(3, 7)];
+    let mut world = world_with(&[wall], &blocks);
+    add_bomb_with_blast(&mut world, 1, CellId::new(3, 5), 3, 1, BlastKind::Power);
+
+    let result = plan(&world, Tick(1)).unwrap();
+    assert!(!result.flames.contains(&wall));
+    assert!(result.flames.contains(&CellId::new(6, 5)));
+    assert!(result.flames.contains(&CellId::new(5, 6)));
+    assert_eq!(result.destroyed_blocks, BTreeSet::from(blocks));
+}
+
+#[test]
+fn power_queues_bombs_without_shielding_and_chains_use_their_own_blasts() {
+    let wall = CellId::new(4, 5);
+    let block = CellId::new(7, 5);
+    let mut world = world_with(&[wall], &[block]);
+    add_bomb_with_blast(&mut world, 30, CellId::new(3, 5), 3, 1, BlastKind::Power);
+    add_bomb(&mut world, 20, CellId::new(5, 5), 1, 999);
+    add_bomb_with_blast(
+        &mut world,
+        10,
+        CellId::new(6, 5),
+        2,
+        999,
+        BlastKind::Piercing,
+    );
+
+    let result = plan(&world, Tick(1)).unwrap();
+    assert_eq!(
+        result.detonated,
+        BTreeSet::from([EntityId(10), EntityId(20), EntityId(30)])
+    );
+    assert!(result.flames.contains(&CellId::new(5, 5)));
+    assert!(result.flames.contains(&CellId::new(8, 5)));
+    assert_eq!(result.destroyed_blocks, BTreeSet::from([block]));
+}
+
+#[test]
 fn chained_bomb_stops_incoming_ray_and_uses_its_own_piercing_blast() {
     let blocks = [CellId::new(6, 5), CellId::new(7, 5)];
     let mut world = world_with(&[], &blocks);
@@ -207,7 +299,7 @@ fn geometry_is_unchanged_when_entity_ids_are_permuted() {
         let block = CellId::new(6, 5);
         let mut world = world_with(&[], &[block]);
         for (id, cell, deadline, blast) in [
-            (ids[0], CellId::new(3, 5), 1, BlastKind::Piercing),
+            (ids[0], CellId::new(3, 5), 1, BlastKind::Power),
             (ids[1], CellId::new(5, 5), 999, BlastKind::Standard),
             (ids[2], CellId::new(5, 7), 1, BlastKind::Standard),
         ] {

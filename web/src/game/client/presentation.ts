@@ -2,7 +2,7 @@ import type { SnapshotMessage } from '../arena/types'
 import type { GameClientState } from './clientTypes'
 
 const renderedPickups = new Set([
-  'bombCapacity', 'blastRange', 'movementSpeed', 'heart', 'piercingBomb', 'shield', 'goldenFlame', 'shortFuse',
+  'bombCapacity', 'blastRange', 'movementSpeed', 'heart', 'piercingBomb', 'powerBomb', 'shield', 'goldenFlame', 'shortFuse',
   'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls',
 ])
 
@@ -30,6 +30,7 @@ export function presentSnapshot(state: GameClientState): SnapshotMessage | null 
         .map(({ id, seat, position, heading, alive, damageGraceRemainingTicks, inventory, effects }) => ({
           id, seat, position, heading, alive, damageGraceRemainingTicks,
           piercingArmed: inventory.weapon === 'piercingBomb',
+          powerArmed: inventory.weapon === 'powerBomb',
           shieldRemainingTicks: effects.find((effect) => effect.kind === 'shield')?.remainingTicks ?? 0,
           goldenFlameRemainingTicks:
             effects.find((effect) => effect.kind === 'goldenFlame')?.remainingTicks ?? 0,
@@ -50,7 +51,7 @@ export function presentSnapshot(state: GameClientState): SnapshotMessage | null 
       flames: snapshot.state.flames,
       pickups: snapshot.state.pickups.filter(
         (pickup): pickup is typeof pickup & {
-          kind: 'bombCapacity' | 'blastRange' | 'movementSpeed' | 'heart' | 'piercingBomb' | 'shield'
+          kind: 'bombCapacity' | 'blastRange' | 'movementSpeed' | 'heart' | 'piercingBomb' | 'powerBomb' | 'shield'
             | 'goldenFlame' | 'shortFuse' | 'diarrhea' | 'slowFoot' | 'shortFlame' | 'longFuse'
             | 'reverseControls'
         } =>

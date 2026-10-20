@@ -21,30 +21,32 @@ fn default_and_explicit_constructors_capture_immutable_blast_kind() {
     };
     assert_eq!(bomb(Tick(5), trigger).unwrap().blast(), BlastKind::Standard);
 
-    let piercing = Bomb::new_with_blast(
-        EntityId(2),
-        CellId::new(3, 4),
-        EntityId(10),
-        3,
-        Tick(5),
-        trigger,
-        BlastKind::Piercing,
-    )
-    .unwrap();
-    assert_eq!(piercing.blast(), BlastKind::Piercing);
+    for (id, blast) in [(2, BlastKind::Piercing), (3, BlastKind::Power)] {
+        let special = Bomb::new_with_blast(
+            EntityId(id),
+            CellId::new(3, 4),
+            EntityId(10),
+            3,
+            Tick(5),
+            trigger,
+            blast,
+        )
+        .unwrap();
+        assert_eq!(special.blast(), blast);
 
-    let view = BombView::from(piercing);
-    assert_eq!(view.blast, BlastKind::Piercing);
-    for kind in [
-        StepEventKind::BombPlaced(view),
-        StepEventKind::BombDetonated(view),
-    ] {
-        let event = StepEvent::new(Tick(6), EventAudience::Both, kind);
-        assert!(matches!(
-            event.kind,
-            StepEventKind::BombPlaced(bomb) | StepEventKind::BombDetonated(bomb)
-                if bomb.blast == BlastKind::Piercing
-        ));
+        let view = BombView::from(special);
+        assert_eq!(view.blast, blast);
+        for kind in [
+            StepEventKind::BombPlaced(view),
+            StepEventKind::BombDetonated(view),
+        ] {
+            let event = StepEvent::new(Tick(6), EventAudience::Both, kind);
+            assert!(matches!(
+                event.kind,
+                StepEventKind::BombPlaced(bomb) | StepEventKind::BombDetonated(bomb)
+                    if bomb.blast == blast
+            ));
+        }
     }
 }
 

@@ -300,3 +300,21 @@ docker compose -f docker-compose.yaml -f docker-compose.piercing-bomb.yaml down
 The scenario enables only Piercing Bomb, reveals the deterministic charge, captures localized
 armed views, crosses two consecutive blocks with one manual bomb, and verifies the next manual
 bomb is ordinary.
+
+Deploy the v0.3.35 server and web assets together and reload connected browsers. The exact v8
+`availableItems` array grows to eleven entries, so older v8 clients reject the room even when
+Power Bomb is disabled. No storage migration is required; active matches remain process-local.
+
+## Reproduce opt-in Power Bomb hard-wall traversal
+
+```sh
+chmod 444 core/tests/fixtures/arena-v2-power-bomb.seed
+docker compose -f docker-compose.yaml -f docker-compose.power-bomb.yaml up -d --no-build --force-recreate app
+E2E_POWER_BOMB_FIXTURE=arena-v2-power-bomb npm --prefix e2e run test:power-bomb
+docker compose -f docker-compose.yaml -f docker-compose.power-bomb.yaml down
+```
+
+The scenario enables only Power Bomb and reveals the deterministic charge at (3,1). A manual
+bomb planted at (1,2) burns and destroys the block at (3,2) beyond the retained, unburned hard
+wall at (2,2), leaves the escape cell (3,1) safe, and consumes the charge. Both peers must then
+agree on a fresh ordinary manual placement. Native execution remains a candidate gate.

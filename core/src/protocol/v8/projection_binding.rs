@@ -64,6 +64,7 @@ fn canonical_gameplay(version: RulesVersion, capture: &ExpandedCapture, fuse_tic
     let short_fuse = !classic && world.enabled_items.contains(ItemId::ShortFuse);
     let long_fuse = !classic && world.enabled_items.contains(ItemId::LongFuse);
     let piercing = !classic && world.enabled_items.contains(ItemId::PiercingBomb);
+    let power = !classic && world.enabled_items.contains(ItemId::PowerBomb);
     world.bombs.iter().all(|bomb| {
         canonical_bomb(
             world.physical_tick,
@@ -72,6 +73,7 @@ fn canonical_gameplay(version: RulesVersion, capture: &ExpandedCapture, fuse_tic
             short_fuse,
             long_fuse,
             piercing,
+            power,
         )
     }) && (!classic
         || (world.actors.iter().all(|actor| {
@@ -92,10 +94,10 @@ fn canonical_gameplay(version: RulesVersion, capture: &ExpandedCapture, fuse_tic
                 (!classic || event.audience == crate::game::EventAudience::Both)
                     && match event.kind {
                         EventKind::BombPlaced { bomb } => canonical_bomb(
-                            event.tick, bomb, fuse_ticks, short_fuse, long_fuse, piercing,
+                            event.tick, bomb, fuse_ticks, short_fuse, long_fuse, piercing, power,
                         ),
                         EventKind::BombDetonated { bomb } => canonical_bomb(
-                            event.tick, bomb, fuse_ticks, short_fuse, long_fuse, piercing,
+                            event.tick, bomb, fuse_ticks, short_fuse, long_fuse, piercing, power,
                         ),
                         EventKind::PickupCollected { kind, .. } => !classic || classic_pickup(kind),
                         EventKind::DamagePrevented { .. } => !classic,
@@ -111,8 +113,11 @@ fn canonical_bomb(
     short_fuse: bool,
     long_fuse: bool,
     piercing: bool,
+    power: bool,
 ) -> bool {
-    (bomb.blast == BlastKind::Standard || (piercing && bomb.blast == BlastKind::Piercing))
+    (bomb.blast == BlastKind::Standard
+        || (piercing && bomb.blast == BlastKind::Piercing)
+        || (power && bomb.blast == BlastKind::Power))
         && (timed_fuse_at(at, bomb, base_fuse)
             || (short_fuse && timed_fuse_at(at, bomb, base_fuse.div_ceil(2).max(1)))
             || (long_fuse
@@ -194,6 +199,7 @@ pub(super) fn expanded_items() -> ItemSet {
     ItemSet::new([
         ItemId::Heart,
         ItemId::PiercingBomb,
+        ItemId::PowerBomb,
         ItemId::Shield,
         ItemId::GoldenFlame,
         ItemId::ShortFuse,
@@ -260,9 +266,17 @@ mod fuse_policy_tests {
     #[test]
     fn odd_policy_accepts_base_half_and_double_historical_captures() {
         let at = Tick::new(10).unwrap();
-        assert!(canonical_bomb(at, bomb(181), 181, true, true, false));
-        assert!(canonical_bomb(at, bomb(91), 181, true, true, false));
-        assert!(canonical_bomb(at, bomb(362), 181, true, true, false));
-        assert!(!canonical_bomb(at, bomb(180), 181, true, true, false));
+        assert!(canonical_bomb(at, bomb(181), 181, true, true, false, false));
+        assert!(canonical_bomb(at, bomb(91), 181, true, true, false, false));
+        assert!(canonical_bomb(at, bomb(362), 181, true, true, false, false));
+        assert!(!canonical_bomb(
+            at,
+            bomb(180),
+            181,
+            true,
+            true,
+            false,
+            false
+        ));
     }
 }

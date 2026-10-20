@@ -12,6 +12,7 @@ pub enum BlastKind {
     #[default]
     Standard,
     Piercing,
+    Power,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

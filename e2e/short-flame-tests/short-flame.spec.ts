@@ -69,7 +69,7 @@ test('two browsers collect Short Flame and restore base bomb range after its exa
     await Promise.all([one, two].map((page) => page.getByRole('button', { name: 'Ready', exact: true }).click()))
     await Promise.all(games.map((game) => expect.poll(() => latestSnapshot(game)?.room.phase.type).toBe('running')))
     expect(latestSnapshot(games[0])!.room).toMatchObject({
-      rulesVersion: 5, mapId: 'generated_v2', availableItems: ['heart', 'piercingBomb', 'shield', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls'],
+      rulesVersion: 5, mapId: 'generated_v2', availableItems: ['heart', 'piercingBomb', 'powerBomb', 'shield', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls'],
       settings: { enabledItems: ['shortFlame'] },
     })
     await one.getByRole('region', { name: 'Grenadiers courtyard' }).click()

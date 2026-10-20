@@ -68,3 +68,10 @@ captures have no overlap. The compact English four-column HUD wraps “Piercing 
 word, a nonblocking cosmetic preview limitation; no perfect compact-layout claim is made. Blast
 continuation, one-charge consumption and the following Standard bomb remain authoritative
 simulation and paired-browser behavior.
+
+Power Bomb adds its own armed-bomb cue and localized eleventh rule switch. Its [English desktop
+and Polish 320px captures](power-bomb.md) show the armed weapon before detonation, without active
+bombs or flames. “Power bomb” wraps normally between words in English; the Polish narrow view
+uses vertical scrolling and shows the unfocused-arena prompt. The reviewed captures have no
+unintended overlap. Manhattan blast geometry, one-charge consumption and the following Standard
+bomb remain authoritative simulation and paired-browser behavior.

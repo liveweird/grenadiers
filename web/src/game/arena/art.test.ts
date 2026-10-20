@@ -77,7 +77,7 @@ describe('original pixel-art geometry', () => {
     const gold = makeActor('one')
     const blue = makeActor('two')
     for (const actor of [gold, blue]) {
-      expect(actor.root.children).toHaveLength(19)
+      expect(actor.root.children).toHaveLength(20)
       expect(Object.values(actor.poses).flat()).toHaveLength(8)
       expect(Object.values(actor.poses).flat().filter(({ visible }) => visible)).toHaveLength(1)
       setActorPose(actor, 'north', 1)
@@ -99,12 +99,12 @@ describe('original pixel-art geometry', () => {
     expect(flame.root.children).toHaveLength(2)
     expect(flame.frames.map(({ visible }) => visible)).toEqual([true, false])
     const pickups = [
-      'bombCapacity', 'blastRange', 'movementSpeed', 'heart', 'piercingBomb', 'shield', 'goldenFlame', 'shortFuse',
+      'bombCapacity', 'blastRange', 'movementSpeed', 'heart', 'piercingBomb', 'powerBomb', 'shield', 'goldenFlame', 'shortFuse',
       'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls',
     ] as const
     const counts = pickups.map((kind) => makePickup(kind) as unknown as Drawing)
       .map(({ rectangles = [] }) => rectangles.length)
-    expect(counts).toEqual([16, 14, 18, 23, 17, 21, 22, 21, 20, 18, 22, 20, 21])
+    expect(counts).toEqual([16, 14, 18, 23, 17, 19, 21, 22, 21, 20, 18, 22, 20, 21])
     expect(Math.max(...counts)).toBeLessThanOrEqual(23)
     const heart = makePickup('heart') as unknown as Drawing
     const colors = heart.rectangles?.map(({ color }) => color)
@@ -150,6 +150,17 @@ describe('original pixel-art geometry', () => {
     const standard = makeBomb('standard').root as unknown as Drawing
     const piercing = makeBomb('piercing').root as unknown as Drawing
     expect(descendants(piercing).flatMap(({ rectangles = [] }) => rectangles))
+      .not.toEqual(descendants(standard).flatMap(({ rectangles = [] }) => rectangles))
+  })
+
+  it('gives Power pickups, held charges, and captured bombs distinct diamond cues', () => {
+    const pickup = makePickup('powerBomb') as unknown as Drawing
+    expect(pickup.rectangles?.map(({ color }) => color)).toContain(PALETTE.flame)
+    const actor = makeActor('one')
+    expect((actor.power as unknown as Drawing).rectangles?.length).toBeGreaterThan(0)
+    const standard = makeBomb('standard').root as unknown as Drawing
+    const power = makeBomb('power').root as unknown as Drawing
+    expect(descendants(power).flatMap(({ rectangles = [] }) => rectangles))
       .not.toEqual(descendants(standard).flatMap(({ rectangles = [] }) => rectangles))
   })
 })

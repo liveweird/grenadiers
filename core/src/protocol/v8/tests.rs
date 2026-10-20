@@ -303,18 +303,23 @@ fn v8_binding_checks_configured_fuse_for_world_and_event_bombs() {
 }
 
 #[test]
-fn expanded_capture_rejects_piercing_event_until_the_item_is_available() {
+fn expanded_capture_rejects_every_special_blast_until_its_item_is_available() {
     let state = classic_state_at(10);
-    let mut report = bomb_report(&state, 10, 190, true);
-    let StepEventKind::BombPlaced(ref mut bomb) = report.events[0].kind else {
-        panic!("expected placement event");
-    };
-    bomb.blast = crate::game::BlastKind::Piercing;
+    for blast in [
+        crate::game::BlastKind::Piercing,
+        crate::game::BlastKind::Power,
+    ] {
+        let mut report = bomb_report(&state, 10, 190, true);
+        let StepEventKind::BombPlaced(ref mut bomb) = report.events[0].kind else {
+            panic!("expected placement event");
+        };
+        bomb.blast = blast;
 
-    assert_eq!(
-        capture_expanded(&state, &[report]),
-        Err(ProjectionError::InvalidItems)
-    );
+        assert_eq!(
+            capture_expanded(&state, &[report]),
+            Err(ProjectionError::InvalidItems)
+        );
+    }
 }
 
 #[test]
@@ -378,6 +383,8 @@ mod diarrhea_tests;
 
 #[path = "piercing_bomb_tests.rs"]
 mod piercing_bomb_tests;
+#[path = "power_bomb_tests.rs"]
+mod power_bomb_tests;
 #[path = "reverse_controls_tests.rs"]
 mod reverse_controls_tests;
 #[path = "short_flame_tests.rs"]

@@ -16,6 +16,7 @@ export interface ActorDrawing {
   diarrhea: Graphics
   slowFoot: Container
   piercing: Graphics
+  power: Graphics
   poses: Record<Direction, PoseFrames>
   direction: Direction
   moving: boolean
@@ -29,6 +30,7 @@ export interface ActorDrawing {
   diarrheaActive: boolean
   slowFootStacks: number
   piercingArmed: boolean
+  powerArmed: boolean
 }
 
 function legs(drawing: Graphics, frame: number, side: boolean): void {
@@ -172,6 +174,13 @@ export function makeActor(seat: Seat): ActorDrawing {
   pixels(piercing, PALETTE.white, [[18, 14, 6, 3], [20, 11, 3, 9]])
   pixels(piercing, PALETTE.brick, [[16, 19, 10, 3]])
   piercing.visible = false
+  const power = new Graphics()
+  pixels(power, PALETTE.deepInk, [
+    [17, 7, 7, 3], [14, 10, 13, 3], [11, 13, 19, 7], [14, 20, 13, 3], [17, 23, 7, 3],
+  ])
+  pixels(power, PALETTE.flame, [[17, 11, 7, 3], [14, 14, 13, 5], [17, 19, 7, 3]])
+  pixels(power, PALETTE.white, [[19, 13, 3, 7]])
+  power.visible = false
   const poses = {
     north: [frontOrBack(seat, 'north', 0), frontOrBack(seat, 'north', 1)],
     east: [sidePose(seat, 'east', 0), sidePose(seat, 'east', 1)],
@@ -180,15 +189,16 @@ export function makeActor(seat: Seat): ActorDrawing {
   } satisfies Record<Direction, PoseFrames>
   root.addChild(
     shadow, protection, shield, goldenFlame, shortFuse, shortFlame, longFuse, reverseControls,
-    diarrhea, slowFoot, piercing,
+    diarrhea, slowFoot, piercing, power,
     ...Object.values(poses).flat(),
   )
   const drawing = {
     root, protection, shield, goldenFlame, shortFuse, shortFlame, longFuse, reverseControls,
-    diarrhea, slowFoot, piercing, poses,
+    diarrhea, slowFoot, piercing, power, poses,
     direction: 'south' as Direction, moving: false,
     protected: false, shielded: false, golden: false, shortFused: false, shortFlamed: false,
-    longFused: false, reversed: false, diarrheaActive: false, slowFootStacks: 0, piercingArmed: false,
+    longFused: false, reversed: false, diarrheaActive: false, slowFootStacks: 0,
+    piercingArmed: false, powerArmed: false,
   }
   setActorPose(drawing, 'south', 0)
   return drawing

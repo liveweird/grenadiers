@@ -108,12 +108,12 @@ actors contain only ID, seat and alive status; owners always receive their own v
 Bombs carry ID, cell, owner, range, placement tick, blast mode and a typed trigger. Timed
 triggers report remaining ticks at `physicalTick` and pause state; no untimed deadline is invented.
 Current rooms use unpaused Timed bombs with Standard blasts and enabled, manually placed Piercing
-blasts. Power blasts, Remote and Contact triggers, and paused Timed bombs remain unavailable.
+or Power blasts. Remote and Contact triggers and paused Timed bombs remain unavailable.
 Flames include cell and exclusive expiry tick.
 Room metadata carries the global tick, rules/map versions, scores, actual round number,
 latest completed round, and independent match outcome; these are not duplicated in game state.
-The required `pickups` array contains closed `{cell, kind}` entries with kind `bombCapacity`,
-`blastRange`, `movementSpeed`, or enabled `heart`. Empty means no exposed items. Concealed and pending items,
+The required `pickups` array contains closed `{cell, kind}` entries for ordinary upgrades or an
+enabled optional item. Empty means no exposed items. Concealed and pending items,
 round assignments, generation records, and seeds never enter these messages.
 Private held input, movement fractions, bomb-exit grace, allocator state, and hidden contents
 are excluded. The checked domain adapter enforces canonical ordering and cross-field invariants before

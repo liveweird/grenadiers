@@ -190,6 +190,16 @@ jobs:
           done
           curl --fail --silent http://127.0.0.1:8085/api/v1/ready
           E2E_PIERCING_BOMB_FIXTURE=arena-v2-piercing-bomb npm --prefix e2e run test:piercing-bomb
+      - name: Verify opt-in Power Bomb hard-wall traversal using the same built image
+        run: |
+          chmod 444 core/tests/fixtures/arena-v2-power-bomb.seed
+          docker compose -f docker-compose.yaml -f docker-compose.power-bomb.yaml up -d --no-build --force-recreate app
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent http://127.0.0.1:8085/api/v1/ready; then break; fi
+            sleep 1
+          done
+          curl --fail --silent http://127.0.0.1:8085/api/v1/ready
+          E2E_POWER_BOMB_FIXTURE=arena-v2-power-bomb npm --prefix e2e run test:power-bomb
       - name: Verify a full classic match and rematch using the same image
         run: |
           docker compose -f docker-compose.yaml -f docker-compose.matches.yaml up -d --no-build --force-recreate app

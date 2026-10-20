@@ -13,6 +13,7 @@ pub(crate) fn advance_actor(
     turn_assist: i32,
     tick: super::types::Tick,
     slow_foot_enabled: bool,
+    wall_pass_enabled: bool,
 ) -> MovementTrace {
     let mut trace = MovementTrace::new(actor.position);
     let Some(raw_direction) = actor.held.active() else {
@@ -45,12 +46,26 @@ pub(crate) fn advance_actor(
     actor.residual = numerator % TICKS_PER_SECOND;
 
     if let Some(turn) = actor.pending_turn {
-        continue_turn(world, actor, turn, &mut budget, &mut trace);
+        continue_turn(
+            world,
+            actor,
+            turn,
+            &mut budget,
+            &mut trace,
+            wall_pass_enabled,
+        );
         return trace;
     }
     if same_axis(actor.heading, direction) {
         actor.heading = direction;
-        move_actor(world, actor, direction, budget, &mut trace);
+        move_actor(
+            world,
+            actor,
+            direction,
+            budget,
+            &mut trace,
+            wall_pass_enabled,
+        );
         return trace;
     }
 
@@ -68,16 +83,32 @@ pub(crate) fn advance_actor(
             correction_direction,
             correction.abs(),
             &actor.bomb_grace,
+            wall_pass_enabled && actor.inventory().can_pass_soft_walls(),
+            &actor.soft_wall_grace,
         ) != correction.abs()
         {
             return trace;
         }
         let turn = TurnAssist { direction, target };
         actor.pending_turn = Some(turn);
-        continue_turn(world, actor, turn, &mut budget, &mut trace);
+        continue_turn(
+            world,
+            actor,
+            turn,
+            &mut budget,
+            &mut trace,
+            wall_pass_enabled,
+        );
     } else {
         actor.heading = direction;
-        move_actor(world, actor, direction, budget, &mut trace);
+        move_actor(
+            world,
+            actor,
+            direction,
+            budget,
+            &mut trace,
+            wall_pass_enabled,
+        );
     }
     trace
 }
@@ -97,13 +128,14 @@ fn continue_turn(
     turn: TurnAssist,
     budget: &mut i32,
     trace: &mut MovementTrace,
+    wall_pass_enabled: bool,
 ) {
     let coordinate = alignment_coordinate(turn.direction, actor.position);
     let correction = turn.target - coordinate;
     if correction != 0 {
         let direction = correction_direction(turn.direction, correction);
         let distance = correction.abs().min(*budget);
-        let moved = move_actor(world, actor, direction, distance, trace);
+        let moved = move_actor(world, actor, direction, distance, trace, wall_pass_enabled);
         *budget -= moved;
         if moved != distance || alignment_coordinate(turn.direction, actor.position) != turn.target
         {
@@ -112,7 +144,14 @@ fn continue_turn(
     }
     actor.pending_turn = None;
     actor.heading = turn.direction;
-    move_actor(world, actor, turn.direction, *budget, trace);
+    move_actor(
+        world,
+        actor,
+        turn.direction,
+        *budget,
+        trace,
+        wall_pass_enabled,
+    );
 }
 
 fn move_actor(
@@ -121,6 +160,7 @@ fn move_actor(
     direction: Direction,
     requested: i32,
     trace: &mut MovementTrace,
+    wall_pass_enabled: bool,
 ) -> i32 {
     let distance = allowed_distance(
         world,
@@ -128,6 +168,8 @@ fn move_actor(
         direction,
         requested,
         &actor.bomb_grace,
+        wall_pass_enabled && actor.inventory().can_pass_soft_walls(),
+        &actor.soft_wall_grace,
     );
     if distance == 0 {
         return 0;
@@ -136,6 +178,7 @@ fn move_actor(
     actor.position = translated(start, direction, distance);
     trace.push(MovementSegment::new(start, actor.position));
     prune_bomb_grace(world, actor);
+    prune_soft_wall_grace(world, actor);
     distance
 }
 
@@ -143,6 +186,8 @@ pub(crate) fn position_is_free(
     world: &World,
     position: Position,
     bomb_grace: &BTreeSet<EntityId>,
+    can_pass_soft_walls: bool,
+    soft_wall_grace: &BTreeSet<CellId>,
 ) -> bool {
     let x = i64::from(position.x);
     let y = i64::from(position.y);
@@ -154,9 +199,10 @@ pub(crate) fn position_is_free(
     {
         return false;
     }
-    blocking_cells(world).all(|(cell, bomb_id)| {
+    blocking_cells(world).all(|(cell, bomb_id, soft)| {
         !position_overlaps_cell(position, cell)
             || bomb_id.is_some_and(|id| bomb_grace.contains(&id))
+            || soft && (can_pass_soft_walls || soft_wall_grace.contains(&cell))
     })
 }
 
@@ -175,6 +221,8 @@ fn allowed_distance(
     direction: Direction,
     requested: i32,
     bomb_grace: &BTreeSet<EntityId>,
+    can_pass_soft_walls: bool,
+    soft_wall_grace: &BTreeSet<CellId>,
 ) -> i32 {
     let mut allowed = requested.max(0);
     let arena_right = i32::from(ARENA_WIDTH) * UNITS_PER_CELL;
@@ -185,8 +233,11 @@ fn allowed_distance(
         Direction::South => allowed.min(arena_bottom - HALF_FOOTPRINT - position.y),
         Direction::North => allowed.min(position.y - HALF_FOOTPRINT),
     };
-    for (cell, bomb_id) in blocking_cells(world) {
+    for (cell, bomb_id, soft) in blocking_cells(world) {
         if bomb_id.is_some_and(|id| bomb_grace.contains(&id)) {
+            continue;
+        }
+        if soft && (can_pass_soft_walls || soft_wall_grace.contains(&cell)) {
             continue;
         }
         let left = i32::from(cell.column) * UNITS_PER_CELL;
@@ -224,13 +275,17 @@ fn allowed_distance(
     allowed.max(0)
 }
 
-fn blocking_cells(world: &World) -> impl Iterator<Item = (CellId, Option<EntityId>)> + '_ {
+fn blocking_cells(world: &World) -> impl Iterator<Item = (CellId, Option<EntityId>, bool)> + '_ {
     let terrain = (0..ARENA_HEIGHT).flat_map(move |row| {
         (0..ARENA_WIDTH).filter_map(move |column| {
             let cell = CellId::new(column, row);
-            (world.arena.terrain(cell) == Some(Terrain::Wall)
-                || world.arena.blocks().contains(&cell))
-            .then_some((cell, None))
+            if world.arena.terrain(cell) == Some(Terrain::Wall) {
+                Some((cell, None, false))
+            } else if world.arena.blocks().contains(&cell) {
+                Some((cell, None, true))
+            } else {
+                None
+            }
         })
     });
     terrain.chain(
@@ -238,8 +293,24 @@ fn blocking_cells(world: &World) -> impl Iterator<Item = (CellId, Option<EntityI
             .bombs
             .values()
             .filter(|bomb| !matches!(bomb.trigger(), super::BombTrigger::Contact))
-            .map(|bomb| (bomb.cell(), Some(bomb.id()))),
+            .map(|bomb| (bomb.cell(), Some(bomb.id()), false)),
     )
+}
+
+pub(crate) fn overlapping_soft_blocks(world: &World, position: Position) -> BTreeSet<CellId> {
+    world
+        .arena
+        .blocks()
+        .iter()
+        .filter(|cell| position_overlaps_cell(position, **cell))
+        .copied()
+        .collect()
+}
+
+pub(crate) fn prune_soft_wall_grace(world: &World, actor: &mut Actor) {
+    actor.soft_wall_grace.retain(|cell| {
+        world.arena.blocks().contains(cell) && position_overlaps_cell(actor.position, *cell)
+    });
 }
 
 fn prune_bomb_grace(world: &World, actor: &mut Actor) {

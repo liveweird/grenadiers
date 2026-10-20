@@ -227,6 +227,40 @@ fn enabled_heart_has_fixed_weight_boundaries_and_symmetric_placement() {
 }
 
 #[test]
+fn sole_wall_pass_pool_is_115_with_exact_final_interval() {
+    let mut source = Sequence::new([99, 100, 114], None);
+    assert_eq!(
+        sample_pickup(&mut source, EnabledItems::WALL_PASS),
+        Some(PickupKind::MovementSpeed)
+    );
+    assert_eq!(
+        sample_pickup(&mut source, EnabledItems::WALL_PASS),
+        Some(PickupKind::WallPass)
+    );
+    assert_eq!(
+        sample_pickup(&mut source, EnabledItems::WALL_PASS),
+        Some(PickupKind::WallPass)
+    );
+}
+
+#[test]
+fn all_items_append_wall_pass_after_teleporter_without_moving_old_boundaries() {
+    let mut source = Sequence::new([364, 365, 379], None);
+    assert_eq!(
+        sample_pickup(&mut source, EnabledItems::ALL),
+        Some(PickupKind::Teleporter)
+    );
+    assert_eq!(
+        sample_pickup(&mut source, EnabledItems::ALL),
+        Some(PickupKind::WallPass)
+    );
+    assert_eq!(
+        sample_pickup(&mut source, EnabledItems::ALL),
+        Some(PickupKind::WallPass)
+    );
+}
+
+#[test]
 fn dense_generated_layout_survives_first_bomb_via_the_reserved_escape_route() {
     let mut source = Sequence::new([], Some(0));
     let generated = generate_with_source([0; 32], &mut source, classic_terrain());
@@ -314,6 +348,7 @@ fn signature(generated: &GeneratedArena) -> String {
                 Some(PickupKind::BombCapacity) => 'C',
                 Some(PickupKind::BlastRange) => 'R',
                 Some(PickupKind::MovementSpeed) => 'S',
+                Some(PickupKind::WallPass) => 'A',
                 Some(PickupKind::Heart) => 'H',
                 Some(PickupKind::PiercingBomb) => 'P',
                 Some(PickupKind::PowerBomb) => 'W',

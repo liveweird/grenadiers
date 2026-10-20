@@ -52,6 +52,7 @@ pub struct Actor {
     pub(crate) residual: u16,
     pub(crate) pending_turn: Option<TurnAssist>,
     pub(crate) bomb_grace: BTreeSet<EntityId>,
+    pub(crate) soft_wall_grace: BTreeSet<CellId>,
     capacity: u16,
     range: u16,
     alive: bool,
@@ -245,7 +246,13 @@ impl State {
             if world.bombs.contains_key(&actor.id) {
                 return Err(StateError::DuplicateEntityId(actor.id));
             }
-            if !movement::position_is_free(&world, actor.position, &BTreeSet::new()) {
+            if !movement::position_is_free(
+                &world,
+                actor.position,
+                &BTreeSet::new(),
+                false,
+                &BTreeSet::new(),
+            ) {
                 return Err(StateError::IllegalActorPosition(actor.id));
             }
         }
@@ -374,3 +381,9 @@ mod tests;
 mod upgrade_tests;
 #[path = "simulation_validation.rs"]
 mod validation;
+#[cfg(test)]
+#[path = "simulation/wall_pass_route_tests.rs"]
+mod wall_pass_route_tests;
+#[cfg(test)]
+#[path = "wall_pass_tests.rs"]
+mod wall_pass_tests;

@@ -52,6 +52,9 @@ impl State {
             .pickups
             .apply_explosion(&plan.destroyed_blocks, &plan.flames);
         self.world.arena.remove_blocks(&plan.destroyed_blocks);
+        for actor in &mut self.actors {
+            crate::game::movement::prune_soft_wall_grace(&self.world, actor);
+        }
 
         // Tick is bounded by u64. On its final representable value there can be
         // no later step, so clamping preserves deterministic terminal state.

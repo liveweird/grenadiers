@@ -37,6 +37,21 @@ All 1459 files and the source archive are byte-verified outside `/tmp` in the pr
 Nothing is reused as acceptance: a new reviewed source, archive, dependency install and image
 must pass the complete **46 Compose plus 46 Kubernetes** matrix with zero retries.
 
+## Slow Foot prepared source blocked before execution — 2026-10-20
+
+The route-corrected source `d9f213a281ea03fe07021b3c0e7b1729725385f6` completes fresh
+preparation, but independent source review blocks browser launch. Its west-wall predicate
+requires `x <= 384`, while the occupied border cell plus the actor footprint clamps the center
+at `x = 1344`. Rate windows can also include frames preceding the intended movement direction.
+The correction requires the exact reachable wall stop and direction-matched, unclamped public
+positions while preserving every 12-tick rate, peer, timer and key-release assertion.
+
+No browser acceptance or native matrix runs against this source. The 1025-entry preparation
+closure seal hashes to `e2c18f776134c3c498e5f6b4e10362b6f4be8b11e9bd150e3591cf4f885eca35`;
+all 1026 files and the source archive are copied and byte-verified outside `/tmp`. This preserves
+an unexecuted preparation, separate from the earlier failed native attempt; neither supplies
+acceptance for the corrected source.
+
 ## Diarrhea publication — 2026-10-20 — v0.3.32 published
 
 [v0.3.32](https://github.com/liveweird/grenadiers/releases/tag/v0.3.32) was published as a

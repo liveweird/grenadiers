@@ -1,5 +1,31 @@
 # Repository verification
 
+## Vite advisory follow-up — 2026-10-20 — patched; fresh native acceptance pending
+
+After v0.3.34 publication, its additional [tag workflow](https://github.com/liveweird/grenadiers/actions/runs/39502781824)
+failed the npm security check for Vite 8.3.0's bundled development editor integration:
+[Windows escaping](https://github.com/advisories/GHSA-698v-4r3x-3vcv),
+[editor arguments](https://github.com/advisories/GHSA-r825-w8mm-5pxw), and
+[Windows path check](https://github.com/advisories/GHSA-587h-7wmj-h5pm).
+The earlier candidate/post-merge successes remain historical; the tag's security job is a real
+failure and is not counted as green. The packaged runtime serves compiled assets rather than
+the Vite development server. The immutable v0.3.34 tag is retained.
+
+Power Bomb source `25951426acf1ac0331047096feb452bdd906e11d` pins Vite 8.3.4 with its
+minimal locked build graph. Independent dependency review is clear. A fresh isolated web install,
+full security gate and web/E2E audit JSON report zero vulnerabilities at every severity. The full
+web gate passes 2,429 tests across 49 files, coverage 95.49/91.39/95.61/97.81%, contracts,
+lint, Knip, type checks and the Vite 8.3.4 production build. Core/server, E2E and deployment
+inputs remain unchanged; 49-scenario E2E static parity remains applicable.
+
+The intervening Gear-corrected source `f150ad5cfe10657de42cc84826a0c21e35e35823` was prepared
+successfully but never ran a browser/native case. Its superseded preparation is preserved with
+1,057 sealed payloads, manifest SHA-256
+`3c408f1fc887f1d0f0557c2f6f60fdd164abbc44115f7ddb7e1bfe67419633cd`, plus a byte-verified
+durable copy. New source, image and whole native acceptance are required after the security
+patch. No result from either earlier Power attempt is carried; candidate CI remains pending.
+
+
 ## Power Bomb native label mismatch — 2026-10-20 — corrected acceptance pending
 
 The first fresh Power Bomb attempt at source `4a3fb776b4dd880e41aac5b5c87ea8d29b721af2`

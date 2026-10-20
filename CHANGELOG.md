@@ -2,6 +2,8 @@
 
 ## 0.3.35 — 2026-10-20
 
+- Pin Vite 8.3.4 and its locked build dependencies to fix newly reported launch-editor advisories while retaining the security audit thresholds.
+
 - Prepare opt-in Power Bomb as a one-charge weapon consumed only by a successful manual placement.
 - Capture an immutable Manhattan-area blast that ignores obstruction, preserves hard walls as holes, and chains every bomb in range from the pre-explosion world.
 - Add the eleventh lobby switch, checked v8 state and events, replay coverage, English and Polish pixel cues, and a deterministic production-seed browser scenario. Native acceptance and final CI remain pending.

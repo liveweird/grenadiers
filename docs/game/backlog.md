@@ -15,12 +15,14 @@ Diarrhea increment passes local checks and fresh corrected-readiness acceptance:
 native review, candidate CI and post-merge CI pass; [v0.3.32](https://github.com/liveweird/grenadiers/releases/tag/v0.3.32)
 is published. The original shaped-latency CI counterexample and source-specific 68/68 native
 result remain historical evidence. The
-v0.3.33 Slow-foot candidate passes local checks and independent backend/frontend reviews; its
-current scope passes 22 latency cases per target, 47 static scenarios and fresh 46 Compose plus
-46 Kubernetes cases (**92 total**) with zero retries. Independent native evidence review is clear;
-final-head CI and publication remain release gates. Its final raw source is integrated into the
-v0.3.34 Piercing Bomb candidate, which retains the feature and version but still requires its
-post-integration checks, fresh native acceptance and final-head CI. Verification retains
+v0.3.33 Slow-foot passes local checks and independent backend/frontend reviews, 22 latency cases
+per target, 47 static scenarios and fresh 46 Compose plus 46 Kubernetes cases (**92 total**) with
+zero retries. Candidate and post-merge CI pass, and
+[v0.3.33](https://github.com/liveweird/grenadiers/releases/tag/v0.3.33) is published as a source
+prerelease. Its final raw source is integrated into the v0.3.34 Piercing Bomb candidate, which
+retains the feature and version. Repository, E2E lint, Knip, type checking and 48-scenario parity
+pass at the integrated v0.3.34 source; fresh 47+47 native acceptance and final-head CI remain
+pending. Verification retains
 source-specific evidence and earlier failed or interrupted attempts. The other 12 requested
 pickups remain outside this increment. Richer transitions
 and artwork remain follow-up work. See [pixel-art presentation](pixel-art.md),
@@ -191,7 +193,7 @@ instant action. Keep both in this requested pickup family without forcing them i
 | ID / pickup | Requested behavior | Decisions / acceptance focus |
 | --- | --- | --- |
 | CURSE-DROP / diarrhea | Automatically drop bombs whenever capacity is available, up to the player's bomb limit. | Bounded attempt cadence, legal placement, capacity release, freeze, special-weapon consumption and remote-trigger behavior; no unbounded same-tick loop. |
-| CURSE-SLOW / slow-foot | **Prepared in v0.3.33.** Each pickup halves current effective speed again. | Independent 600-tick lifetimes, exact expiry restoration, six-stack cap, exact fixed-point arithmetic and zero-budget ticks have implementation coverage; v0.3.33 passes fresh 92/92 native cases, with final release gates tracked above. |
+| CURSE-SLOW / slow-foot | **Published in v0.3.33.** Each pickup halves current effective speed again. | Independent 600-tick lifetimes, exact expiry restoration, six-stack cap, exact fixed-point arithmetic and zero-budget ticks have implementation coverage; fresh 92/92 native acceptance plus candidate and post-merge CI pass. |
 | CURSE-RANGE / short-flame | Reduce new bombs to one adjacent tile in each blast direction. | Center cell still explodes; precedence with Golden flame, upgrades and special footprints. |
 | CURSE-FUSE / long fuse | Increase new bombs' detonation delay by 100% (double it). | Rounding, stacking/re-pick policy and composition with Short fuse, remote bombs and mines. |
 | CURSE-REVERSE / reverse controls | Up moves down, left moves right, and vice versa. | Apply to logical movement after personal remapping; define held-key transition/expiry without stuck movement or stale replay. |

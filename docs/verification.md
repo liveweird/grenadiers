@@ -1,6 +1,6 @@
 # Repository verification
 
-## Piercing Bomb final-parent integration — 2026-10-20 — validation pending
+## Piercing Bomb final-parent integration — 2026-10-20 — static validation complete
 
 Final raw Slow Foot source `f499f680ac68bc8eed4803e4d3c06152cb89cf64` is integrated,
 including the accepted startup-readiness baseline, stable Long Fuse cursor, corrected predecessor
@@ -9,13 +9,41 @@ behavior, weapon HUD coverage and canonical ten-item catalog remain. The Piercin
 now returns from the lower-left escape cell through the open (1,1) waypoint instead of attempting
 to cross the hard pillar at (2,2).
 
+Reviewed integrated source `1461f04d1a1b18ade191f282962e677d5ed2a43f` preserves product,
+core, server, API, web, Cargo, lock and deployment inputs byte-for-byte from reviewed Piercing
+source `d1b635fb501336495fa2819392fcc8bc246f25ea`. Using the existing exact locked developer tools,
+the repository check, E2E lint, Knip, type checking and 48-scenario parity pass with actual exit
+zero. The integrated source contains 22 latency cases; fresh whole 47+47 native acceptance,
+exact-head CI and publication remain pending. Predecessor acceptance supplies no carried Piercing
+Bomb result.
+
 The earlier Piercing source passed 1,400 web tests across 47 files with
 95.47/91.35/95.61/97.79% coverage, together with contract checks, lint, Knip and the production
 build. Its E2E lint, Knip, type checking, 37-scenario parity, repository and diff checks also
-passed under Node 24.21.0. Those results certify their named source only. The integrated source
-contains 22 latency cases and 48 static scenarios; post-integration static checks, fresh whole
-47+47 native acceptance, exact-head CI and publication remain pending. Predecessor acceptance
-supplies no carried Piercing Bomb result.
+passed under Node 24.21.0. Those full-suite and coverage results certify their named source only;
+no new local Rust, web, full-coverage or production-build run is claimed for `1461f04`.
+
+## Slow Foot source-prerelease publication — 2026-10-20
+
+[PR 79](https://github.com/liveweird/grenadiers/pull/79) normalized accepted raw source
+`f499f680ac68bc8eed4803e4d3c06152cb89cf64` to candidate head
+`f3a26f3552902219d3139960a2fe4345113243ce`. Candidate
+[PR run 39487844647](https://github.com/liveweird/grenadiers/actions/runs/39487844647) and
+[push run 39487815667](https://github.com/liveweird/grenadiers/actions/runs/39487815667) each pass
+five jobs and 46 browser cases. Merge head `27dcf225f3a1f3ef67ee3cf8c52c9d583e7318fd`
+has tree `4457ec14280d240ce54b4d4c6064fffa769e9ec6`, byte-equal to the accepted raw tree; post-merge
+[run 39490252393](https://github.com/liveweird/grenadiers/actions/runs/39490252393) also passes five
+jobs and 46 browser cases. All three retained CI records contain no failure, flaky, skipped, retry
+or timeout result markers.
+
+[v0.3.33](https://github.com/liveweird/grenadiers/releases/tag/v0.3.33) was published as a source
+prerelease at `2026-10-20T20:29:15Z` from that merged head and accepted tree. At publication, the
+additional tag-triggered CI run had not completed and supplied no publication evidence. The exact
+accepted image `sha256:6608df856d8d1b0c69b5552ae1ee7d39ff08b0a1fcc4df804fb65806007f54be`
+served `http://localhost:8085` at the local deployment checkpoint: readiness, health and
+index probes returned 200, and the served index and JavaScript bytes equalled the container files.
+The deployment reused the accepted image;
+it did not rebuild it.
 
 ## Slow Foot fresh native acceptance — 2026-10-20 — 92/92
 
@@ -63,7 +91,8 @@ Strict Node/YAML output and all three strict Kubernetes resources pass; the pinn
 reports zero fixable HIGH/CRITICAL findings. The wrapper verifies 86 runtime PNGs and 24 runtime
 image/security records, 12 distinct Kubernetes pod/forward identities and 22 seed-mode records
 across eleven mode-0444 fixtures. Independent live cleanup passes for owned resources, forwards
-and ports; default localhost:8085 remains the separately published v0.3.32 image.
+and ports. At this native-acceptance checkpoint, default localhost:8085 remained the separately
+published v0.3.32 image; the later v0.3.33 deployment is recorded above.
 
 Root actually viewed both fresh Compose captures: English desktop 1440×2295, SHA-256
 `cc7e4d803ac8078bc7dbf13e0fbe7bfad67eff5e90b4c7d59313bbd98cb315c3`, and Polish 320×3065

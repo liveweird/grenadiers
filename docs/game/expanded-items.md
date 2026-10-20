@@ -9,8 +9,9 @@ retains the earlier hosted failure and separately named source-specific attempts
 The v0.3.31 [Reverse Controls](reverse-controls.md) increment passes local checks and fresh
 33/33 Compose plus 33/33 Kubernetes acceptance. All required CI passes; v0.3.31 is published.
 The v0.3.32 [Diarrhea](diarrhea.md) candidate passes local checks and independent implementation
-reviews and its original same-image 34/34 Compose plus 34/34 Kubernetes acceptance. A shaped-latency
-CI counterexample blocks release; revised startup readiness requires fresh whole acceptance and CI.
+reviews and fresh same-image 45/45 Compose plus 45/45 Kubernetes acceptance after the reviewed
+startup-readiness correction. Independent final native review is clear; new exact-head CI remains a release gate;
+the original CI counterexample is retained separately.
 Expanded-v5/generator-v2 rooms and gameplay-v8 are retained; see
 [verification](../verification.md) and
 [release notes](https://github.com/liveweird/grenadiers/releases).

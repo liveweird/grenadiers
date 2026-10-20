@@ -10,9 +10,10 @@ The v0.3.30 Long Fuse increment passes local checks and fresh 64/64 Compose/Kube
 cases against the corrected stable-cursor source, with wrapper exit zero and no retries or
 carried results, and is published. The v0.3.31 Reverse Controls increment also passes fresh
 66/66 native acceptance and all required CI; both are published source prereleases. The v0.3.32 Diarrhea
-candidate passes local checks, independent implementation reviews and its original 68/68 native cases.
-A shaped-latency CI counterexample blocks release; a reviewed startup-readiness correction and
-fresh whole acceptance are required. Verification retains source-specific evidence and earlier failed
+candidate passes local checks and fresh corrected-readiness acceptance: 45 Compose plus 45
+Kubernetes cases, with all eight optional item scenarios and zero retries. Independent final native review is clear;
+new exact-head CI remains a release gate. The original shaped-latency CI counterexample and
+source-specific 68/68 native result remain historical evidence. Verification retains source-specific evidence and earlier failed
 or interrupted attempts. The other 14 requested pickups remain outside this increment. Richer transitions
 and artwork remain follow-up work. See [pixel-art presentation](pixel-art.md),
 [expanded item implementation](expanded-items.md), and

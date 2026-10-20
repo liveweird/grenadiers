@@ -2,16 +2,16 @@
 
 Status: [Heart](heart.md), [Shield](shield.md), [Golden Flame](golden-flame.md),
 [Short Fuse](short-fuse.md) and [Short Flame](short-flame.md) are published through v0.3.29.
-The v0.3.30 [Long Fuse](long-fuse.md) increment passes local checks. Its earlier 64/64 native
-source remains separately recorded; hosted CI exposed a bounded-history driver cursor defect,
-and the correction requires fresh native acceptance and final-head CI. Verification records
-the source-specific results and disclosed post-run bookkeeping exception.
-The v0.3.31 [Reverse Controls](reverse-controls.md) candidate passes local checks. Its earlier
-native run was interrupted before latency/optional/Kubernetes cases; fresh whole acceptance
-and final-head CI remain pending.
-The v0.3.32 [Diarrhea](diarrhea.md) and v0.3.33 [Slow foot](slow-foot.md) candidates pass local
-checks and independent implementation reviews; fresh native acceptance and final-head CI remain
-pending for both.
+The v0.3.30 [Long Fuse](long-fuse.md) increment passes local checks and corrected-source native
+acceptance: 32/32 Compose and 32/32 Kubernetes cases, wrapper exit zero, no retries or carried
+results. Independent final evidence review and all required CI pass; v0.3.30 is published. Verification
+retains the earlier hosted failure and separately named source-specific attempts.
+The v0.3.31 [Reverse Controls](reverse-controls.md) increment passes local checks and fresh
+33/33 Compose plus 33/33 Kubernetes acceptance. All required CI passes; v0.3.31 is published.
+The v0.3.32 [Diarrhea](diarrhea.md) candidate passes local checks and independent implementation
+reviews and fresh same-image 34/34 Compose plus 34/34 Kubernetes acceptance; final-head CI and
+publication remain pending. The v0.3.33 [Slow foot](slow-foot.md) candidate passes local checks
+and independent implementation reviews; fresh native acceptance and final-head CI remain pending.
 Expanded-v5/generator-v2 rooms and gameplay-v8 are retained; see
 [verification](../verification.md) and
 [release notes](https://github.com/liveweird/grenadiers/releases).

@@ -37,9 +37,18 @@ passes 24 scenarios each through Compose and Kubernetes, plus a separate native 
 This first visual slice covers terrain, actors, bombs, flames and the existing three pickups;
 new item icons and richer death/destruction/collection transitions remain follow-up artwork.
 
-Golden Flame adds a bright pixel flame pickup and a separate crest above the actor, coexisting
-with Shield and Heart-grace indicators. Its current timer comes from the authoritative baseline;
-reduced motion keeps the crest static. Native screenshots are pending candidate acceptance.
+Golden Flame, introduced in v0.3.27, adds a bright pixel flame pickup and a separate crest
+above the actor, coexisting with Shield and Heart-grace indicators. Its timer comes from the
+authoritative baseline; reduced motion keeps the crest static. See its [accepted desktop and
+Polish mobile captures](golden-flame.md) and the source-specific verification record.
 
 Actor pose visibility is assigned idempotently. Snapshot updates retain the current animation
 frame until rendering selects its final pose, avoiding intermediate visibility invalidations.
+
+Reverse Controls adds its own directional pixel pickup and localized rule/HUD presentation.
+See the [accepted desktop and Polish mobile captures](reverse-controls.md); exact inversion
+and expiry remain authoritative simulation behavior.
+
+Diarrhea adds a distinct bomb-drop pickup and actor cue; reduced motion keeps the cue static.
+Its [desktop and Polish mobile captures](diarrhea.md) show the exposed pickup and localized
+eighth rule switch before collection. Active-effect presentation also has renderer unit coverage.

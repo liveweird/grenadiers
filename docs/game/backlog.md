@@ -6,15 +6,15 @@ TURN v0.3.16, CONFIG v0.3.17 and the first ART slice v0.3.18 are shipped. Heart
 [v0.3.27](https://github.com/liveweird/grenadiers/releases/tag/v0.3.27) and Short Fuse
 [v0.3.28](https://github.com/liveweird/grenadiers/releases/tag/v0.3.28), and Short Flame
 [v0.3.29](https://github.com/liveweird/grenadiers/releases/tag/v0.3.29) are published.
-The v0.3.30 Long Fuse increment passes local checks. An earlier named source passed fresh 64/64
-Compose/Kubernetes browser cases, but hosted CI exposed a bounded-history driver cursor defect.
-The corrected driver requires fresh native acceptance and final-head CI. Verification records
-the source-specific evidence and disclosed bookkeeping exception. The v0.3.31 Reverse Controls
-candidate also passes local checks and independent implementation reviews, but its earlier native run was interrupted before latency/optional/Kubernetes cases;
-fresh whole acceptance and final-head CI remain pending. The v0.3.32 Diarrhea
-candidate passes local checks and independent implementation reviews. The v0.3.33 Slow-foot
-candidate passes local checks and independent backend/frontend reviews; both require fresh native
-acceptance and final-head CI. The other 13 requested pickups remain outside this increment. Richer transitions
+The v0.3.30 Long Fuse increment passes local checks and fresh 64/64 Compose/Kubernetes browser
+cases against the corrected stable-cursor source, with wrapper exit zero and no retries or
+carried results, and is published. The v0.3.31 Reverse Controls increment also passes fresh
+66/66 native acceptance and all required CI; both are published source prereleases. The v0.3.32 Diarrhea
+candidate passes local checks, independent implementation reviews and fresh 68/68 native cases;
+final-head CI and publication remain pending. The v0.3.33 Slow-foot candidate passes local checks
+and independent backend/frontend reviews; fresh native acceptance and final-head CI remain pending.
+Verification retains source-specific evidence and earlier failed or interrupted attempts. The
+other 13 requested pickups remain outside this increment. Richer transitions
 and artwork remain follow-up work. See [pixel-art presentation](pixel-art.md),
 [expanded item implementation](expanded-items.md), and
 [release notes](https://github.com/liveweird/grenadiers/releases).

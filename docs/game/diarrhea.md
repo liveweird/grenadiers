@@ -1,6 +1,6 @@
 # Diarrhea
 
-Diarrhea is an opt-in timed curse in the v0.3.32 candidate. Collection activates or refreshes
+Diarrhea is an opt-in timed curse in v0.3.32. Collection activates or refreshes
 it for exactly 600 physical simulation ticks. While active, each living actor contributes one
 automatic ordinary-bomb intent on a tick that has no retained manual bomb request. Automatic
 bombs capture the configured fuse, the actor's current derived range, and the actor as owner.
@@ -29,4 +29,9 @@ reconnect action floor.
 Placement follows movement and existing-fire damage, then explosions and final-fire damage.
 Capacity released by an explosion can therefore be reused on the next physical tick. The option
 is disabled by default; Heart-only defaults and Classic settings remain unchanged. Local checks
-and independent reviews pass; native browser acceptance and final CI remain pending.
+and fresh same-image browser acceptance pass: 34 Compose and 34 Kubernetes cases, without
+retries. Final exact-head CI and publication are recorded in [verification](../verification.md).
+
+Screenshots show the exposed pickup before collection: [English desktop](../screenshots/diarrhea-desktop.png)
+and [Polish 320px reduced motion](../screenshots/diarrhea-polish-320.png). The active curse,
+automatic placement and death/reset behavior are verified by domain and paired-browser assertions.

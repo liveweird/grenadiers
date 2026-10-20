@@ -1,6 +1,6 @@
 # Reverse Controls
 
-Reverse Controls is an opt-in timed curse in the v0.3.31 candidate. Collection activates or
+Reverse Controls is an opt-in timed curse in v0.3.31. Collection activates or
 refreshes it for exactly 600 physical simulation ticks. The simulation keeps the raw held keys
 and their recency unchanged, then moves in the opposite direction while the effect is active.
 
@@ -14,5 +14,9 @@ held-key state, recency and fractional movement budget. A stationary actor does 
 heading follows actual motion. Death and round reset clear the effect. Reconnect clears held input
 under the existing input policy and restores the authoritative remaining timer.
 
-The option is disabled by default. Classic and empty expanded settings remain unchanged. The
-candidate has local automated coverage; native browser acceptance and final CI remain pending.
+The option is disabled by default. Classic and empty expanded settings remain unchanged. Fresh same-image
+native acceptance passes all 33 Compose and 33 Kubernetes browser checks.
+Final exact-head CI and publication are recorded separately in [verification](../verification.md).
+
+Screenshots: [desktop pickup](../screenshots/reverse-controls-desktop.png) and
+[Polish 320px after expiry](../screenshots/reverse-controls-polish-320.png).

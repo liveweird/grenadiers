@@ -4,7 +4,7 @@
 
 - Prepare opt-in Piercing Bomb as a one-charge weapon consumed only by a successful manual placement.
 - Capture an immutable Piercing blast that crosses breakable blocks while retaining ordinary bomb stops, range accounting, chaining, and transactional placement failures.
-- Add the tenth lobby switch, checked v8 state and events, replay coverage, English and Polish pixel cues, and a deterministic production-seed browser scenario. Native acceptance and final CI remain pending.
+- Add the tenth lobby switch, checked v8 state and events, replay coverage, English and Polish pixel cues, and a deterministic production-seed browser scenario. Fresh same-image native acceptance passes all 47 Compose and 47 Kubernetes cases; independent evidence review is clear and the final evidence is sealed; exact-head CI and publication remain pending.
 
 ## 0.3.33 — 2026-10-20
 

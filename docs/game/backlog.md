@@ -21,7 +21,8 @@ zero retries. Candidate and post-merge CI pass, and
 [v0.3.33](https://github.com/liveweird/grenadiers/releases/tag/v0.3.33) is published as a source
 prerelease. Its final raw source is integrated into the v0.3.34 Piercing Bomb candidate, which
 retains the feature and version. Repository, E2E lint, Knip, type checking and 48-scenario parity
-pass at the integrated v0.3.34 source; fresh 47+47 native acceptance and final-head CI remain
+pass at the integrated v0.3.34 source. Fresh same-image acceptance now passes all 47 Compose and
+47 Kubernetes cases with zero retries; independent evidence review is clear and its final seal is verified. Exact-head CI remains
 pending. Verification retains
 source-specific evidence and earlier failed or interrupted attempts. The other 12 requested
 pickups remain outside this increment. Richer transitions
@@ -206,7 +207,7 @@ instant action. Keep both in this requested pickup family without forcing them i
 | ID / weapon | Requested behavior | Decisions / acceptance focus |
 | --- | --- | --- |
 | WPN-REMOTE / remote bomb | Next bomb is planted normally; the next bomb-button press detonates it instead of using a fuse. | Armed-remote state independent of consumed inventory; button priority, owner death/disconnect, chain ignition, freezing, capacity and inability to plant; no implicit safety fuse added without a decision. |
-| WPN-PIERCE / piercing bomb | **Prepared in v0.3.34.** The next successful manual bomb's blast continues through destructible blocks. | One-charge replacement, retained failures, ordinary automatic bombs, captured blast identity, immutable same-tick chain planning and hard-wall stopping are covered locally with independent review clear; native acceptance and final CI remain pending. |
+| WPN-PIERCE / piercing bomb | **Prepared in v0.3.34.** The next successful manual bomb's blast continues through destructible blocks. | One-charge replacement, retained failures, ordinary automatic bombs, captured blast identity, immutable same-tick chain planning and hard-wall stopping are covered locally with independent review clear; fresh 94/94 native acceptance passes while independent evidence review is clear and sealed; exact-head CI remains pending. |
 | WPN-POWER / power bomb | Next bomb damages a Manhattan-distance area of the player's blast radius, ignoring line of sight. | Exact cell mask, propagation across hard walls versus destruction of those walls, borders, block/item damage and chains; visual footprint must match affected cells. |
 | WPN-MINE / landmine | Next placement explodes only when someone steps on it, never merely because time passes. | Arming/owner-exit grace, swept step detection, eligible actors, visibility, capacity and remote ownership; explicitly decide whether other blasts can trigger/destroy it without contradicting contact-only detonation. |
 

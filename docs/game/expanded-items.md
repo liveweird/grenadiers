@@ -20,8 +20,9 @@ wrapper exits zero with no retries or carried passes. Candidate and post-merge C
 [v0.3.33](https://github.com/liveweird/grenadiers/releases/tag/v0.3.33) is published as a source
 prerelease. Its final raw source is integrated into the v0.3.34
 [Piercing Bomb](piercing-bomb.md) candidate. Piercing retains its feature and version; repository,
-E2E lint, Knip, type checking and 48-scenario parity pass. Fresh 47+47 native acceptance and
-final-head CI remain pending.
+E2E lint, Knip, type checking and 48-scenario parity pass. Fresh same-image acceptance passes all
+47 Compose and 47 Kubernetes cases with zero retries. Independent evidence review is clear and the final evidence is sealed;
+exact-head CI remains pending.
 Expanded-v5/generator-v2 rooms and gameplay-v8 are retained; see
 [verification](../verification.md) and
 [release notes](https://github.com/liveweird/grenadiers/releases).

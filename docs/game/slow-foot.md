@@ -26,3 +26,19 @@ collection on that tick; the replacement stack affects movement on the next tick
 Slow foot uses catalog bit 15 and a final generator weight of 15 after Diarrhea. The expanded
 catalog supports all 512 subsets while preserving every prior 256-mask generator path. Gameplay
 wire version 8, rules version 5, generator version 2, and journal format 2 remain unchanged.
+
+## Acceptance and presentation
+
+Fresh same-image acceptance passes 46 Compose and 46 Kubernetes cases. The ordinary-key
+Slow Foot scenario proves one stack's half-speed movement, matching peer positions, exact
+600-tick expiry, restored base speed and stopped movement after key release. Domain and server
+checks cover independently expiring stacks, the six-stack cap, death/reset and replay. Required
+candidate and post-merge CI pass, and [v0.3.33](https://github.com/liveweird/grenadiers/releases/tag/v0.3.33)
+is published as a source prerelease. At publication, the exact accepted image was deployed at
+the local default endpoint with successful readiness, health and index probes.
+
+The [English desktop capture](../screenshots/slow-foot-desktop.png) and
+[Polish 320px reduced-motion capture](../screenshots/slow-foot-polish-320.png) show the exposed
+pickup and ninth lobby switch before collection. No active Slow Foot timer is visible in these
+stills. Runtime behavior is established by assertions; see [verification](../verification.md)
+for the preserved failed route, unexecuted preparation and final accepted-source evidence.

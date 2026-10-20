@@ -6,41 +6,45 @@
 - Preserve fire and chain detonation, transactional action resolution, one armed bomb per owner, and independent replacement weapons.
 - Add the twelfth lobby switch, checked v8 state and events, replay coverage, English and Polish cues, and a deterministic production-seed browser scenario. Native acceptance and final CI remain pending.
 
-## 0.3.35 — 2026-10-18
+## 0.3.35 — 2026-10-20
+
+- Pin Vite 8.3.4 and its locked build dependencies to fix newly reported launch-editor advisories while retaining the security audit thresholds.
 
 - Prepare opt-in Power Bomb as a one-charge weapon consumed only by a successful manual placement.
 - Capture an immutable Manhattan-area blast that ignores obstruction, preserves hard walls as holes, and chains every bomb in range from the pre-explosion world.
-- Add the eleventh lobby switch, checked v8 state and events, replay coverage, English and Polish pixel cues, and a deterministic production-seed browser scenario. Native acceptance and final CI remain pending.
+- Add the eleventh lobby switch, checked v8 state and events, replay coverage, English and Polish pixel cues, and a deterministic production-seed browser scenario. Fresh same-image native acceptance passes all 48 Compose and 48 Kubernetes cases; independent evidence review and the final seal are clear; exact-head CI and publication remain subsequent gates.
 
-## 0.3.34 — 2026-10-18
+## 0.3.34 — 2026-10-20
 
 - Prepare opt-in Piercing Bomb as a one-charge weapon consumed only by a successful manual placement.
 - Capture an immutable Piercing blast that crosses breakable blocks while retaining ordinary bomb stops, range accounting, chaining, and transactional placement failures.
-- Add the tenth lobby switch, checked v8 state and events, replay coverage, English and Polish pixel cues, and a deterministic production-seed browser scenario. Native acceptance and final CI remain pending.
+- Add the tenth lobby switch, checked v8 state and events, replay coverage, English and Polish pixel cues, and a deterministic production-seed browser scenario. Fresh same-image native acceptance passes all 47 Compose and 47 Kubernetes cases; independent evidence review, candidate CI and post-merge CI pass. v0.3.34 is published as a source prerelease.
 
-## 0.3.33 — 2026-10-18
+## 0.3.33 — 2026-10-20
 
-- Prepare opt-in Slow foot: each pickup adds an independent 600-tick stack and halves movement speed, up to six exact stacks.
+- Add opt-in Slow foot: each pickup adds an independent 600-tick stack and halves movement speed, up to six exact stacks.
 - Preserve fixed-point residuals, hazards, collision rules, Reverse Controls input semantics and deterministic pickup arbitration while allowing eligible rivals to bypass capped actors.
-- Add the ninth lobby item switch, English and Polish grouped timers, pixel cues, checked v8 publication, deterministic replay and a production-seed browser scenario. Native acceptance and final CI remain pending.
+- Add the ninth lobby item switch, English and Polish grouped timers, pixel cues, checked v8 publication, deterministic replay and a production-seed browser scenario. Fresh same-image acceptance passes 46 Compose and 46 Kubernetes cases after reviewed browser-route and movement-window corrections; required candidate and post-merge CI pass, and v0.3.33 is published as a source prerelease.
 
-## 0.3.32 — 2026-10-18
+## 0.3.32 — 2026-10-20
 
-- Prepare opt-in Diarrhea: collection forces at most one ordinary bomb-placement intent per physical tick for 600 ticks, beginning after collection and ending at the exact expiry boundary.
+- Add opt-in Diarrhea: collection forces at most one ordinary bomb-placement intent per physical tick for 600 ticks, beginning after collection and ending at the exact expiry boundary.
 - Resolve manual and automatic requests together with existing capacity and same-cell conflict rules while preserving manual action IDs, stored weapons, captured stats, and transactional overflow behavior.
-- Add the eighth lobby item switch, English and Polish pixel cues, checked v8 publication, deterministic replay, and a production-seed browser scenario. Native acceptance and final CI remain pending.
+- Add the eighth lobby item switch, English and Polish pixel cues, checked v8 publication, deterministic replay, and a production-seed browser scenario. Fresh same-image acceptance passes 45 Compose and 45 Kubernetes cases; final CI and publication remain separate gates tracked in `docs/verification.md`.
+
+- Establish one rendered, running, synchronized client baseline before latency measurement, with complete startup diagnostics and eleven new regression cases; retain all twenty observations, the 250 ms shaped limit and zero retries.
 
 ## 0.3.31 — 2026-10-18
 
-- Prepare opt-in Reverse Controls: collecting the curse reverses raw held directions for exactly 600 physical ticks while preserving deterministic movement and input state.
+- Add opt-in Reverse Controls: collecting the curse reverses raw held directions for exactly 600 physical ticks while preserving deterministic movement and input state.
 - Clear pending turn assistance when inversion starts or expires, retain refresh behavior, and restore ordinary movement on the exact expiry tick.
-- Add the seventh lobby item switch, English and Polish pixel presentation, checked v8 publication, replay coverage, and a deterministic browser scenario. Native acceptance and final CI remain pending.
+- Add the seventh lobby item switch, English and Polish pixel presentation, checked v8 publication, replay coverage, and a deterministic browser scenario. Fresh same-image acceptance passes 33 Compose and 33 Kubernetes cases; final CI/publication are recorded in `docs/verification.md`.
 
 ## 0.3.30 — 2026-10-18
 
-- Prepare the opt-in Long Fuse curse: generated pickups double the fuse captured by newly placed bombs for 10 seconds.
+- Add the opt-in Long Fuse curse: generated pickups double the fuse captured by newly placed bombs for 10 seconds.
 - Keep planted bomb schedules immutable and make simultaneous Short Fuse and Long Fuse effects cancel for new placements while their timers remain independent.
-- Add Long Fuse lobby controls, English and Polish HUD presentation, protocol validation, and focused automated scenarios. Native acceptance and CI publication remain pending.
+- Add Long Fuse lobby controls, English and Polish HUD presentation, protocol validation, and focused automated scenarios. Same-image native acceptance and exact-head CI passed; v0.3.30 is published as a source prerelease.
 
 ## 0.3.29 — 2026-10-18
 

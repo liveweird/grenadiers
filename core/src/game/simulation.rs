@@ -382,6 +382,9 @@ mod upgrade_tests;
 #[path = "simulation_validation.rs"]
 mod validation;
 #[cfg(test)]
+#[path = "simulation/wall_pass_contract_tests.rs"]
+mod wall_pass_contract_tests;
+#[cfg(test)]
 #[path = "simulation/wall_pass_route_tests.rs"]
 mod wall_pass_route_tests;
 #[cfg(test)]

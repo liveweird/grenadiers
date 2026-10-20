@@ -178,3 +178,11 @@ Run `E2E_SLOW_FOOT_FIXTURE=arena-v2-slow-foot npm --prefix e2e run test:slow-foo
 views before collection. It measures one stack's half-rate movement and restored base-rate
 movement from authoritative snapshots in unclamped corridor windows, checks exact timers on both
 peers, and verifies key release across later frames. Native execution remains a candidate gate.
+
+## Piercing Bomb production-seed scenario
+
+Use `docker-compose.piercing-bomb.yaml` with the v2 seed fixture and
+`E2E_PIERCING_BOMB_FIXTURE=arena-v2-piercing-bomb npm --prefix e2e run test:piercing-bomb`.
+The two-peer scenario verifies natural collection, localized armed presentation, captured Piercing
+placement, two consecutive burned blocks, charge consumption, and the following ordinary bomb.
+It is a native browser acceptance check and remains pending for the local candidate.

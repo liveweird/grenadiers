@@ -1,7 +1,7 @@
 use std::collections::{BTreeMap, BTreeSet};
 
 use super::arena::Terrain;
-use super::bombs::BombTrigger;
+use super::bombs::{BlastKind, Bomb, BombTrigger};
 use super::input::Direction;
 use super::types::{CellId, EntityId, Tick};
 use super::world::World;
@@ -63,9 +63,8 @@ pub(crate) fn plan(world: &World, tick: Tick) -> Result<ExplosionPlan, Explosion
             trace_ray(
                 world,
                 &bombs_by_cell,
-                bomb.cell(),
+                *bomb,
                 direction,
-                bomb.range(),
                 &mut pending,
                 &mut result,
             );
@@ -77,14 +76,13 @@ pub(crate) fn plan(world: &World, tick: Tick) -> Result<ExplosionPlan, Explosion
 fn trace_ray(
     world: &World,
     bombs_by_cell: &BTreeMap<CellId, EntityId>,
-    origin: CellId,
+    bomb: Bomb,
     direction: Direction,
-    range: u16,
     pending: &mut BTreeSet<EntityId>,
     result: &mut ExplosionPlan,
 ) {
-    let mut cell = origin;
-    for _ in 0..range {
+    let mut cell = bomb.cell();
+    for _ in 0..bomb.range() {
         let Some(next) = adjacent(cell, direction) else {
             break;
         };
@@ -95,7 +93,9 @@ fn trace_ray(
         result.flames.insert(cell);
         if world.arena.blocks().contains(&cell) {
             result.destroyed_blocks.insert(cell);
-            break;
+            if bomb.blast() == BlastKind::Standard {
+                break;
+            }
         }
         if let Some(id) = bombs_by_cell.get(&cell) {
             pending.insert(*id);

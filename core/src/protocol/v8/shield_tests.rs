@@ -40,9 +40,11 @@ fn shield_room(tick: u64) -> RoomView {
 }
 
 #[test]
-fn expanded_settings_accept_all_two_hundred_fifty_six_masks_without_future_items() {
-    let bits = [16_u32, 512, 4096, 8192, 16_384, 65_536, 131_072, 262_144];
-    for mask in 0_u32..256 {
+fn expanded_settings_accept_all_one_thousand_twenty_four_masks_without_future_items() {
+    let bits = [
+        16_u32, 64, 512, 4096, 8192, 16_384, 32_768, 65_536, 131_072, 262_144,
+    ];
+    for mask in 0_u32..1024 {
         let bits = bits.iter().enumerate().fold(0, |value, (index, bit)| {
             if mask & (1 << index) == 0 {
                 value

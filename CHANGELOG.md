@@ -1,10 +1,16 @@
 # Changelog
 
+## 0.3.34 — 2026-10-20
+
+- Prepare opt-in Piercing Bomb as a one-charge weapon consumed only by a successful manual placement.
+- Capture an immutable Piercing blast that crosses breakable blocks while retaining ordinary bomb stops, range accounting, chaining, and transactional placement failures.
+- Add the tenth lobby switch, checked v8 state and events, replay coverage, English and Polish pixel cues, and a deterministic production-seed browser scenario. Fresh same-image native acceptance passes all 47 Compose and 47 Kubernetes cases; independent evidence review is clear and the final evidence is sealed; exact-head CI and publication remain pending.
+
 ## 0.3.33 — 2026-10-20
 
 - Add opt-in Slow foot: each pickup adds an independent 600-tick stack and halves movement speed, up to six exact stacks.
 - Preserve fixed-point residuals, hazards, collision rules, Reverse Controls input semantics and deterministic pickup arbitration while allowing eligible rivals to bypass capped actors.
-- Add the ninth lobby item switch, English and Polish grouped timers, pixel cues, checked v8 publication, deterministic replay and a production-seed browser scenario. Fresh same-image acceptance passes 46 Compose and 46 Kubernetes cases after reviewed browser-route and movement-window corrections; exact-head CI and publication remain release gates.
+- Add the ninth lobby item switch, English and Polish grouped timers, pixel cues, checked v8 publication, deterministic replay and a production-seed browser scenario. Fresh same-image acceptance passes 46 Compose and 46 Kubernetes cases after reviewed browser-route and movement-window corrections; required candidate and post-merge CI pass, and v0.3.33 is published as a source prerelease.
 
 ## 0.3.32 — 2026-10-20
 

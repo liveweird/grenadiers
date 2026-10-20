@@ -61,3 +61,10 @@ Slow Foot adds a distinct boot pickup and localized ninth rule switch. Its [Engl
 and Polish 320px captures](slow-foot.md) show the exposed pickup before collection, with no
 active effect timer. Grouped effect presentation has renderer coverage; speed, independent
 stack deadlines and exact restoration remain authoritative simulation behavior.
+
+Piercing Bomb adds its own armed-bomb cue and localized tenth rule switch. Its [English desktop
+and Polish 320px captures](piercing-bomb.md) show the armed weapon before detonation. The reviewed
+captures have no overlap. The compact English four-column HUD wraps “Piercing bomb” inside the
+word, a nonblocking cosmetic preview limitation; no perfect compact-layout claim is made. Blast
+continuation, one-charge consumption and the following Standard bomb remain authoritative
+simulation and paired-browser behavior.

@@ -108,6 +108,7 @@
     "seconds": "seconds",
     "speedCap": "Speed pickups add one level at a time, up to 5 cells/s.",
     "heartDescription": "Absorbs one lethal blast, then grants a brief damage grace period.",
+    "piercingBombDescription": "Stores one special bomb whose blast passes through breakable blocks. The charge is used only when you successfully place it.",
     "shieldDescription": "Grants 5 seconds of damage immunity. Picking up another Shield refreshes it.",
     "goldenFlameDescription": "Maximizes new bomb blasts for 10 seconds. Picking up another Golden flame refreshes it.",
     "shortFuseDescription": "Halves the fuse of new bombs for 10 seconds. Picking up another Short fuse refreshes it.",

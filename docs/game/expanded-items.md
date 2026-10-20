@@ -13,11 +13,16 @@ reviews and fresh same-image 45/45 Compose plus 45/45 Kubernetes acceptance afte
 startup-readiness correction. Independent final native review, candidate CI and post-merge CI
 pass; [v0.3.32](https://github.com/liveweird/grenadiers/releases/tag/v0.3.32) is published. The
 original CI counterexample is retained separately. The
-v0.3.33 [Slow foot](slow-foot.md) candidate passes local checks and independent implementation
-reviews and fresh same-image 46/46 Compose plus 46/46 Kubernetes acceptance after reviewed
-browser-driver corrections. All 22 latency cases per target pass; static parity contains 47 scenarios.
-The whole wrapper exits zero with no retries or carried passes. Independent native evidence review is clear; final-head
-CI and publication remain release gates.
+v0.3.33 [Slow foot](slow-foot.md) passes local checks and independent implementation reviews and
+fresh same-image 46/46 Compose plus 46/46 Kubernetes acceptance after reviewed browser-driver
+corrections. All 22 latency cases per target pass; static parity contains 47 scenarios. The whole
+wrapper exits zero with no retries or carried passes. Candidate and post-merge CI pass, and
+[v0.3.33](https://github.com/liveweird/grenadiers/releases/tag/v0.3.33) is published as a source
+prerelease. Its final raw source is integrated into the v0.3.34
+[Piercing Bomb](piercing-bomb.md) candidate. Piercing retains its feature and version; repository,
+E2E lint, Knip, type checking and 48-scenario parity pass. Fresh same-image acceptance passes all
+47 Compose and 47 Kubernetes cases with zero retries. Independent evidence review is clear and the final evidence is sealed;
+exact-head CI remains pending.
 Expanded-v5/generator-v2 rooms and gameplay-v8 are retained; see
 [verification](../verification.md) and
 [release notes](https://github.com/liveweird/grenadiers/releases).

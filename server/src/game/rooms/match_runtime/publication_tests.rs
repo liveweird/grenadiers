@@ -186,6 +186,7 @@ fn failed_unsupported_event_publication_keeps_revision_and_pending_reports() {
             range: 2,
             placed_at: tick,
             trigger: BombTrigger::Remote,
+            blast: grenadiers_core::game::BlastKind::Standard,
         }),
     });
     runtime.replace_reports_for_test(reports.clone());

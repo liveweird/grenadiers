@@ -1,5 +1,5 @@
 use super::{ActorInit, InputAction, MAX_INPUTS_PER_TICK, SeatInput, State, StateError, StepError};
-use crate::game::bombs::{Bomb, BombTrigger};
+use crate::game::bombs::{BlastKind, Bomb, BombTrigger};
 use crate::game::input::Direction;
 use crate::game::rules::RulesConfig;
 use crate::game::test_support::add_test_bomb_with_trigger;
@@ -47,6 +47,127 @@ fn state_construction_rejects_each_untimed_trigger() {
             Err(StateError::UnsupportedBombTrigger(EntityId(30)))
         );
     }
+}
+
+#[test]
+fn state_construction_rejects_piercing_before_activation() {
+    let mut world = World::new(fixed_arena());
+    let bomb = Bomb::new_with_blast(
+        EntityId(30),
+        CellId::new(8, 5),
+        EntityId(10),
+        2,
+        Tick(0),
+        BombTrigger::Timed {
+            detonates_at: Tick(10),
+        },
+        BlastKind::Piercing,
+    )
+    .unwrap();
+    world.bombs.insert(bomb.id(), bomb);
+
+    assert_eq!(
+        State::new(RulesConfig::classic_v1(), world, actors()),
+        Err(StateError::UnsupportedBombBlast(EntityId(30)))
+    );
+}
+
+fn mixed_unsupported_bombs(
+    piercing_id: EntityId,
+    trigger_id: EntityId,
+    trigger: BombTrigger,
+) -> [Bomb; 2] {
+    [
+        Bomb::new_with_blast(
+            piercing_id,
+            CellId::new(7, 5),
+            EntityId(10),
+            2,
+            Tick(0),
+            BombTrigger::Timed {
+                detonates_at: Tick(10),
+            },
+            BlastKind::Piercing,
+        )
+        .unwrap(),
+        Bomb::new(
+            trigger_id,
+            CellId::new(8, 5),
+            EntityId(10),
+            2,
+            Tick(0),
+            trigger,
+        )
+        .unwrap(),
+    ]
+}
+
+#[test]
+fn state_constructor_preserves_trigger_precedence_over_blast_for_every_bomb_order() {
+    for trigger in [BombTrigger::Remote, BombTrigger::Contact] {
+        for (piercing_id, trigger_id) in
+            [(EntityId(30), EntityId(31)), (EntityId(31), EntityId(30))]
+        {
+            let mut world = World::new(fixed_arena());
+            for bomb in mixed_unsupported_bombs(piercing_id, trigger_id, trigger) {
+                world.bombs.insert(bomb.id(), bomb);
+            }
+
+            assert_eq!(
+                State::new(RulesConfig::classic_v1(), world, actors()),
+                Err(StateError::UnsupportedBombTrigger(trigger_id))
+            );
+        }
+    }
+}
+
+#[test]
+fn step_preserves_trigger_precedence_over_blast_for_every_bomb_order() {
+    for trigger in [BombTrigger::Remote, BombTrigger::Contact] {
+        for (piercing_id, trigger_id) in
+            [(EntityId(30), EntityId(31)), (EntityId(31), EntityId(30))]
+        {
+            let mut state = state();
+            for bomb in mixed_unsupported_bombs(piercing_id, trigger_id, trigger) {
+                state.insert_bomb(bomb);
+            }
+            let before = state.clone();
+
+            assert_eq!(
+                state.step(&[]),
+                Err(StepError::UnsupportedBombTrigger(trigger_id))
+            );
+            assert_eq!(state, before);
+        }
+    }
+}
+
+#[test]
+fn step_rejects_piercing_before_any_mutation() {
+    let mut state = state();
+    let bomb = Bomb::new_with_blast(
+        EntityId(30),
+        CellId::new(8, 5),
+        EntityId(10),
+        2,
+        Tick(0),
+        BombTrigger::Timed {
+            detonates_at: Tick(10),
+        },
+        BlastKind::Piercing,
+    )
+    .unwrap();
+    state.insert_bomb(bomb);
+    let before = state.clone();
+
+    assert_eq!(
+        state.step(&[SeatInput {
+            seat: SeatId::One,
+            action: InputAction::Press(Direction::East),
+        }]),
+        Err(StepError::UnsupportedBombBlast(EntityId(30)))
+    );
+    assert_eq!(state, before);
 }
 
 #[test]

@@ -49,7 +49,7 @@ pub mod world;
 
 pub use arena::{Arena, ArenaError, Terrain};
 pub use assignment::RoundAssignment;
-pub use bombs::{Bomb, BombError, BombTrigger};
+pub use bombs::{BlastKind, Bomb, BombError, BombTrigger};
 pub use damage::{DamageGrace, DamageOutcome, DamagePreventionSource};
 pub use effects::{EffectApplication, EffectError, EffectKind, EffectiveSpeed, TimedEffects};
 pub use enabled_items::EnabledItems;

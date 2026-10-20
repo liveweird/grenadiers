@@ -95,6 +95,9 @@ fn enforce_server_message_size(encoded: String) -> Result<String, EncodeServerMe
 }
 
 #[cfg(test)]
+#[path = "blast_projection_tests.rs"]
+mod blast_projection_tests;
+#[cfg(test)]
 #[path = "client_tests.rs"]
 mod client_tests;
 #[cfg(test)]

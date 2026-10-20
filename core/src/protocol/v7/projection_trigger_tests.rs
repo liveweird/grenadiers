@@ -22,6 +22,7 @@ fn bomb_report(
         trigger: crate::game::BombTrigger::Timed {
             detonates_at: crate::game::Tick(detonates_at),
         },
+        blast: crate::game::BlastKind::Standard,
     };
     crate::game::StepReport {
         tick,
@@ -76,6 +77,21 @@ fn event_timer_rejects_overdue_and_preserves_equal_and_positive_chain_deadlines(
             expected_remaining
         );
     }
+}
+
+#[test]
+fn classic_capture_rejects_piercing_event_instead_of_downgrading_it() {
+    let state = classic_state_at(10);
+    let mut report = bomb_report(&state, 10, 190, true);
+    let StepEventKind::BombPlaced(ref mut bomb) = report.events[0].kind else {
+        panic!("expected placement event");
+    };
+    bomb.blast = crate::game::BlastKind::Piercing;
+
+    assert_eq!(
+        capture_classic(&state, &[report]),
+        Err(ProjectionError::InvalidItems)
+    );
 }
 
 #[test]

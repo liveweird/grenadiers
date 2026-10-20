@@ -3,7 +3,7 @@ use super::pickups::PickupKind;
 use super::simulation::RoundResult;
 use super::types::{CellId, EntityId, SeatId, Tick};
 use super::view::BombView;
-use super::{Bomb, TimedBombHistory};
+use super::{Bomb, BombMotion, TimedBombHistory};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) struct TimedBombEvent {
@@ -54,6 +54,8 @@ pub struct StepEvent {
     pub audience: EventAudience,
     pub kind: StepEventKind,
     pub(crate) timed_bomb: Option<TimedBombEvent>,
+    pub(crate) bomb_motion: Option<BombMotion>,
+    pub(crate) bomb_has_been_kicked: bool,
 }
 
 impl StepEvent {
@@ -63,6 +65,8 @@ impl StepEvent {
             audience,
             kind,
             timed_bomb: None,
+            bomb_motion: None,
+            bomb_has_been_kicked: false,
         }
     }
 
@@ -86,6 +90,8 @@ impl StepEvent {
             audience,
             kind,
             timed_bomb,
+            bomb_motion: bomb.motion(),
+            bomb_has_been_kicked: bomb.has_been_kicked(),
         }
     }
 }

@@ -1,4 +1,23 @@
+use super::input::Direction;
 use super::types::{CellId, EntityId, Tick};
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct BombMotion {
+    pub(crate) direction: Direction,
+    pub(crate) countdown: u8,
+}
+
+impl BombMotion {
+    #[must_use]
+    pub const fn direction(self) -> Direction {
+        self.direction
+    }
+
+    #[must_use]
+    pub const fn countdown(self) -> u8 {
+        self.countdown
+    }
+}
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum BombTrigger {
@@ -39,6 +58,8 @@ pub struct Bomb {
     pub(crate) trigger: BombTrigger,
     blast: BlastKind,
     timed_history: Option<TimedBombHistory>,
+    motion: Option<BombMotion>,
+    has_been_kicked: bool,
 }
 
 impl Bomb {
@@ -91,6 +112,8 @@ impl Bomb {
             trigger,
             blast,
             timed_history,
+            motion: None,
+            has_been_kicked: false,
         })
     }
 
@@ -140,6 +163,43 @@ impl Bomb {
     #[must_use]
     pub const fn timed_history(self) -> Option<TimedBombHistory> {
         self.timed_history
+    }
+
+    #[must_use]
+    pub const fn motion(self) -> Option<BombMotion> {
+        self.motion
+    }
+
+    #[must_use]
+    pub const fn has_been_kicked(self) -> bool {
+        self.has_been_kicked
+    }
+
+    pub(crate) fn arm_kick(&mut self, direction: Direction) {
+        self.motion = Some(BombMotion {
+            direction,
+            countdown: 0,
+        });
+        self.has_been_kicked = true;
+    }
+
+    pub(crate) fn set_motion(&mut self, motion: Option<BombMotion>) {
+        self.motion = motion;
+    }
+
+    // Used by the paired trusted-capture binding once the v10 protocol slice is integrated.
+    #[allow(dead_code)]
+    pub(crate) fn restore_kick_history(
+        &mut self,
+        motion: Option<BombMotion>,
+        has_been_kicked: bool,
+    ) {
+        self.motion = motion;
+        self.has_been_kicked = has_been_kicked;
+    }
+
+    pub(crate) fn set_cell(&mut self, cell: CellId) {
+        self.cell = cell;
     }
 
     pub(crate) fn pause_one_tick(&mut self) -> Result<(), BombError> {

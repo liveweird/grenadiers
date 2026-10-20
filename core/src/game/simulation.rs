@@ -144,6 +144,7 @@ pub enum StateError {
     UnsupportedBombTrigger(EntityId),
     UnsupportedBombBlast(EntityId),
     DuplicateRemoteOwner(EntityId),
+    UnsupportedBombKickHistory(EntityId),
     UnsupportedEnabledItems(crate::game::EnabledItems),
     UnsupportedPickup {
         cell: CellId,
@@ -158,6 +159,7 @@ pub enum StepError {
     UnsupportedBombTrigger(EntityId),
     UnsupportedBombBlast(EntityId),
     DuplicateRemoteOwner(EntityId),
+    UnsupportedBombKickHistory(EntityId),
     EffectExpiryOverflow(super::effects::EffectKind),
     BombPauseOverflow(EntityId),
 }
@@ -241,6 +243,9 @@ impl State {
         }
         if let Some(owner) = validation::duplicate_remote_owner(&world) {
             return Err(StateError::DuplicateRemoteOwner(owner));
+        }
+        if let Some(id) = validation::unsupported_kick_history(rules, &world) {
+            return Err(StateError::UnsupportedBombKickHistory(id));
         }
         for actor in actors {
             if world.bombs.contains_key(&actor.id) {

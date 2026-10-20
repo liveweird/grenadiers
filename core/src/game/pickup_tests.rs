@@ -303,6 +303,37 @@ fn ordinary_heart_pickup_replaces_equipment_and_is_consumed_once() {
 }
 
 #[test]
+fn ordinary_kick_pickup_uses_the_equipment_replacement_path() {
+    let cell = CellId::new(5, 5);
+    let world = World::with_pickups(
+        arena_with_blocks(BTreeSet::new()),
+        BTreeMap::new(),
+        BTreeMap::new(),
+        BTreeMap::from([(cell, PickupKind::Kick)]),
+    )
+    .unwrap();
+    let enabled =
+        EnabledItems::from_bits(EnabledItems::KICK.bits() | EnabledItems::WALL_PASS.bits())
+            .unwrap();
+    let mut state = expanded_state_with_items(world, cell, enabled);
+    state.replace_actor_equipment(SeatId::One, Equipment::WallPass);
+
+    let report = state.step(&[]).unwrap();
+
+    assert_eq!(
+        state.actors()[0].inventory().equipment(),
+        Some(Equipment::Kick)
+    );
+    assert!(report.events.iter().any(|event| matches!(
+        event.kind,
+        StepEventKind::PickupCollected {
+            kind: PickupKind::Kick,
+            ..
+        }
+    )));
+}
+
+#[test]
 fn second_heart_during_grace_does_not_extend_or_repeat_prevention() {
     let cell = CellId::new(5, 5);
     let mut state = expanded_state_in(

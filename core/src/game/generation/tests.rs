@@ -6,6 +6,9 @@ use crate::game::{
     SpeedLevel, State, World,
 };
 
+#[path = "kick_tests.rs"]
+mod kick_tests;
+
 struct Sequence {
     words: VecDeque<u32>,
     default: Option<u32>,
@@ -348,6 +351,7 @@ fn signature(generated: &GeneratedArena) -> String {
                 Some(PickupKind::BombCapacity) => 'C',
                 Some(PickupKind::BlastRange) => 'R',
                 Some(PickupKind::MovementSpeed) => 'S',
+                Some(PickupKind::Kick) => 'K',
                 Some(PickupKind::WallPass) => 'A',
                 Some(PickupKind::Heart) => 'H',
                 Some(PickupKind::PiercingBomb) => 'P',

@@ -33,3 +33,14 @@ pub(super) fn duplicate_remote_owner(world: &World) -> Option<EntityId> {
         .filter(|bomb| matches!(bomb.trigger(), BombTrigger::Remote))
         .find_map(|bomb| (!owners.insert(bomb.owner())).then_some(bomb.owner()))
 }
+
+pub(super) fn unsupported_kick_history(rules: RulesConfig, world: &World) -> Option<EntityId> {
+    world.bombs.values().find_map(|bomb| {
+        let invalid = (bomb.has_been_kicked() && !rules.enabled_items().contains_kick())
+            || (bomb.motion().is_some() && !bomb.has_been_kicked())
+            || bomb.motion().is_some_and(|motion| motion.countdown > 9)
+            || (matches!(bomb.trigger(), BombTrigger::Contact)
+                && (bomb.motion().is_some() || bomb.has_been_kicked()));
+        invalid.then_some(bomb.id())
+    })
+}

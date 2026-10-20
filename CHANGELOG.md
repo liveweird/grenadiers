@@ -8,15 +8,15 @@
 
 ## 0.3.31 — 2026-10-18
 
-- Prepare opt-in Reverse Controls: collecting the curse reverses raw held directions for exactly 600 physical ticks while preserving deterministic movement and input state.
+- Add opt-in Reverse Controls: collecting the curse reverses raw held directions for exactly 600 physical ticks while preserving deterministic movement and input state.
 - Clear pending turn assistance when inversion starts or expires, retain refresh behavior, and restore ordinary movement on the exact expiry tick.
-- Add the seventh lobby item switch, English and Polish pixel presentation, checked v8 publication, replay coverage, and a deterministic browser scenario. Native acceptance and final CI remain pending.
+- Add the seventh lobby item switch, English and Polish pixel presentation, checked v8 publication, replay coverage, and a deterministic browser scenario. Fresh same-image acceptance passes 33 Compose and 33 Kubernetes cases; final CI/publication are recorded in `docs/verification.md`.
 
 ## 0.3.30 — 2026-10-18
 
-- Prepare the opt-in Long Fuse curse: generated pickups double the fuse captured by newly placed bombs for 10 seconds.
+- Add the opt-in Long Fuse curse: generated pickups double the fuse captured by newly placed bombs for 10 seconds.
 - Keep planted bomb schedules immutable and make simultaneous Short Fuse and Long Fuse effects cancel for new placements while their timers remain independent.
-- Add Long Fuse lobby controls, English and Polish HUD presentation, protocol validation, and focused automated scenarios. Native acceptance and CI publication remain pending.
+- Add Long Fuse lobby controls, English and Polish HUD presentation, protocol validation, and focused automated scenarios. Same-image native acceptance and exact-head CI passed; v0.3.30 is published as a source prerelease.
 
 ## 0.3.29 — 2026-10-18
 

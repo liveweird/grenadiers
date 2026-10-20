@@ -1,6 +1,6 @@
 # Long Fuse
 
-Long Fuse is an opt-in timed curse in the v0.3.30 candidate. Enable it in the shared lobby settings to add ordinary Long Fuse pickups to generated arenas.
+Long Fuse is an opt-in timed curse in v0.3.30. Enable it in the shared lobby settings to add ordinary Long Fuse pickups to generated arenas.
 
 Collection activates or refreshes Long Fuse for exactly 600 physical simulation ticks. While active, a newly placed timed bomb captures twice the configured base fuse. The captured detonation deadline remains unchanged if the effect expires, the owner dies, or the round ends.
 

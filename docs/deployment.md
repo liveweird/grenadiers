@@ -207,10 +207,10 @@ into the application image. Consult [verification](verification.md) for actual c
 
 ## Reproduce opt-in Long Fuse timing
 
-Historical source `6b818f1e7b3663fa05a23ad6d77950f7d677bef7` passes 32/32 Compose and 32/32
-Kubernetes browser cases. Hosted CI subsequently exposed a bounded-history observation cursor
-defect; the corrected driver requires fresh whole acceptance before publication. See
-[verification](verification.md) for sources, images, disclosed bookkeeping exception and status.
+Corrected source `e0ffd635f9aa0b25c1f2dc00a5d20d8fc00be831` passes fresh 32/32 Compose and
+32/32 Kubernetes browser cases, with wrapper exit zero and no retries or carried results.
+See [verification](verification.md) for the exact image, sealed evidence, earlier failed
+attempts, independent review and final CI/publication status.
 
 Use the paired candidate image with its separate external production seed:
 

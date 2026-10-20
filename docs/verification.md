@@ -1,5 +1,20 @@
 # Repository verification
 
+## Power Bomb native label mismatch — 2026-10-20 — corrected acceptance pending
+
+The first fresh Power Bomb attempt at source `4a3fb776b4dd880e41aac5b5c87ea8d29b721af2`
+exited 1 in its first Compose group: seven cases passed and the rendered duel failed because
+its inherited HUD assertion expected “Gear” while the Power source rendered “Equipment”.
+No later group or Kubernetes case ran; these results supply no Power acceptance.
+Source, dependency, lock, archive and image integrity remained unchanged. The failed run is
+preserved separately; no pass or retry is carried into the replacement run.
+
+The correction restores the previously accepted English “Gear” label and its narrow-HUD
+readability fix (`d360810`), retaining the shared assertion. Power gameplay, Polish text,
+contracts and dependency locks are unchanged. Corrected-source native acceptance and
+exact-head CI remain pending.
+
+
 ## Piercing Bomb fresh native acceptance — 2026-10-20 — 94/94; independently reviewed and sealed
 
 Final raw Slow Foot source `f499f680ac68bc8eed4803e4d3c06152cb89cf64` is integrated,

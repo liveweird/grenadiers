@@ -104,8 +104,19 @@ fn dormant_equipment_transitions_share_the_bounded_seam_without_granting_new_gra
         let mut game = state(block, BTreeMap::new(), EnabledItems::WALL_PASS);
         game.actors[0].position = Position::center(block);
         game.replace_actor_equipment(SeatId::One, Equipment::WallPass);
+        game.replace_actor_equipment(SeatId::One, Equipment::Heart);
+        assert_eq!(game.actors[0].soft_wall_grace, BTreeSet::from([block]));
         game.replace_actor_equipment(SeatId::One, replacement);
         assert_eq!(game.actors[0].soft_wall_grace, BTreeSet::from([block]));
+        press(&mut game, Direction::East);
+        for _ in 0..20 {
+            game.step(&[]).unwrap();
+        }
+        assert!(game.actors[0].soft_wall_grace.is_empty());
+        assert!(!movement::position_overlaps_cell(
+            game.actors[0].position,
+            block
+        ));
     }
 
     let mut game = state(block, BTreeMap::new(), EnabledItems::WALL_PASS);
@@ -179,9 +190,16 @@ fn two_segment_turn_retains_then_later_exit_prunes_and_blocks_reentry() {
     // Exiting the rear neighbor during correction requires over 192 units: the footprint half is
     // 320 and the center is 512 from the face. Even SpeedFour moves at most 86 units per tick, so
     // same-cell exit/reentry cannot occur within one two-segment update. Test the reachable exit.
-    while !game.actors[0].soft_wall_grace.is_empty() {
+    for _ in 0..32 {
+        if game.actors[0].soft_wall_grace.is_empty() {
+            break;
+        }
         game.step(&[]).unwrap();
     }
+    assert!(
+        game.actors[0].soft_wall_grace.is_empty(),
+        "eastward movement must leave the graced block within 32 steps"
+    );
     press(&mut game, Direction::West);
     for _ in 0..30 {
         game.step(&[]).unwrap();

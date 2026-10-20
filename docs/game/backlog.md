@@ -1,15 +1,15 @@
 # Gameplay and presentation backlog
 
-TURN, CONFIG and the first ART slice are implemented. This v0.3.41 candidate contains sixteen
+TURN, CONFIG and the first ART slice are implemented. This v0.3.42 candidate contains seventeen
 optional pickups: Heart, Shield, Golden Flame, Short Fuse, Short Flame, Long Fuse, Reverse
 Controls, Diarrhea, Slow-foot, Piercing Bomb, Power Bomb, Remote Bomb, Landmine and Invisibility
-Cloak, Stopwatch and Invisible Bombs. Local checks are recorded as they complete; this candidate still requires independent
-reviews, fresh native acceptance and final CI. The other nine requested pickups remain outside this increment. Current publication status
+Cloak, Stopwatch, Invisible Bombs and Teleporter. Local checks are recorded as they complete; this candidate still requires independent
+review, predecessor integration, fresh native acceptance and final CI. The remaining requested pickups stay outside this increment. Current publication status
 is recorded in [release notes](https://github.com/liveweird/grenadiers/releases), with source-bound
 acceptance records in [verification](../verification.md). Richer transitions and artwork remain
 follow-up work; see [pixel-art presentation](pixel-art.md) and
 [expanded item implementation](expanded-items.md).
-Updated 2026-10-18 after playtest feedback. Release acceptance is recorded in
+Updated 2026-10-21 after Teleporter source activation. Release acceptance is recorded in
 [verification](../verification.md).
 The [implementation plan](implementation-plan.md) remains the milestone/release reference;
 the [rules](rules.md) describe the current baseline and historical extension catalog.
@@ -154,7 +154,7 @@ instant action. Keep both in this requested pickup family without forcing them i
 | CURSE-REVERSE / reverse controls | Up moves down, left moves right, and vice versa. | Apply to logical movement after personal remapping; define held-key transition/expiry without stuck movement or stale replay. |
 | CURSE-BLIND / invisible bombs | The afflicted player cannot see any bombs, including their own. | Recipient-specific bomb/event/effect projection and reconnect; explicitly define retained collision clues, fuse sounds and blast warnings. |
 | CURSE-OIL / oil barrel | Before detonation it blocks passage like a soft wall; after detonation it burns indefinitely. | Define how acquisition creates/places the barrel, detonation/chain triggers, blast footprint and destruction; bound creation and specify cleanup at round end without expiry during play. |
-| CURSE-SWAP / teleporter | Immediately swap with a random enemy player. | Deterministic recorded randomness; eligible living targets, safe/occupied/soft-block destinations, hazard contact, overlap grace and no-target behavior. Two-player mode has only one eligible rival. |
+| CURSE-SWAP / teleporter | **Prepared in v0.3.42.** Immediately attempt the sole two-player rival swap. | Atomic complete-footprint safety, unsafe consumption, actor-specific overlap grace, persistent position epoch, reconnect and privacy are covered locally without RNG; native acceptance remains pending. |
 
 ## Special weapons: one single-use slot
 
@@ -179,3 +179,7 @@ effects, expiry/death boundaries, moving/airborne/frozen bombs, capacity and cha
 Retain bounded scheduling, performance budgets, EN/PL documentation and full release gates,
 including same-image Compose/Kubernetes acceptance. Bots, mobs and larger matches remain
 separate tracks; their future interactions must be specified without making them prerequisites.
+
+Complete the entire expanded-item activation batch before starting ART-ATLAS. Wall Pass is the
+next bounded item increment (v0.3.43); melee equipment and Oil remain after it. ART-ATLAS begins
+only after those item increments and their release gates are complete.

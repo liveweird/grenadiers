@@ -5,9 +5,9 @@ application on port 8085. Active matches live in that process, so the initial de
 intentionally runs one replica with a `Recreate` update strategy. A restart ends active matches;
 horizontal scaling and recovery require match routing and persistence designs first.
 
-Deploy the v0.3.41 server and web assets together and reload connected browsers. Gameplay v9 has
-an exact sixteen-item catalog and publishes recipient-private live bombs and bomb events alongside
-authoritative voluntary freeze and Timed-bomb pause state. Gameplay-v8 clients fail
+Deploy the v0.3.42 server and web assets together and reload connected browsers. Gameplay v10 has
+an exact seventeen-item catalog and publishes authoritative teleport position epochs alongside
+recipient-private actors, bombs and events. Gameplay-v9 clients fail
 version negotiation before credential lookup. No storage migration is required; active matches
 remain process-local.
 
@@ -71,7 +71,7 @@ network access to the pinned schemas; successful rendering alone does not pass t
 
 The feature rollout notes below retain their original release versions and catalog counts.
 Reproduction commands use the checked-out paired image; current deployments use
-[gameplay-v9](game/protocol-v9.md) and its current catalog, even for an older optional item.
+[gameplay-v10](game/protocol-v10.md) and its current catalog, even for an older optional item.
 
 ## Reproduce a generated pickup round
 
@@ -390,3 +390,17 @@ docker compose -f docker-compose.yaml -f docker-compose.invisible-bombs.yaml dow
 The scenario enables only Invisible Bombs and proves its deterministic pickup, recipient-local
 bomb privacy, reconnect boundary, exact expiry and current-state reveal. Run it against one final
 built image together with the cumulative native matrix before release.
+
+## Reproduce opt-in Teleporter swaps
+
+```sh
+chmod 444 core/tests/fixtures/arena-v2-teleporter.seed
+docker compose -f docker-compose.yaml -f docker-compose.teleporter.yaml up -d --no-build --force-recreate app
+E2E_TELEPORTER_FIXTURE=arena-v2-teleporter npm --prefix e2e run test:teleporter
+docker compose -f docker-compose.yaml -f docker-compose.teleporter.yaml down
+```
+
+The read-only repeating-byte-31 fixture enables an ordinary keyboard route with only Teleporter.
+The two-browser scenario proves a safe atomic swap and new position marker, reconnect state taken
+directly from a fresh admission, and an unsafe consumed pickup without movement or marker change.
+Run it against the final predecessor-integrated image together with the cumulative native matrix.

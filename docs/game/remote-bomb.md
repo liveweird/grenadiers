@@ -27,5 +27,5 @@ while the owner has an armed bomb.
 Remote Bomb uses catalog bit 5 and generator weight 15 after Power Bomb. Its initial release
 supported all 4096 subsets and preserved every earlier 2048-mask generator path; those paths
 remain stable as later items join the [current catalog](settings.md). Rules version 5, generator
-version 2 and journal format 2 remain unchanged. Current deployments use [gameplay-v9](protocol-v9.md)
+version 2 and journal format 2 remain unchanged. Current deployments use [gameplay-v10](protocol-v10.md)
 and require the paired server/web assets plus a browser reload.

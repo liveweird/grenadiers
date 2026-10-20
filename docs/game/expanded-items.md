@@ -3,7 +3,7 @@
 Status: the **Heart activation candidate is implemented and locally verified**, with native
 release acceptance still pending. Published v0.3.21 has no new optional pickups. The candidate
 introduces Expanded-v5/generator-v2 rooms and gameplay-v8; see [Heart](heart.md).
-Separate candidates add opt-in [Shield](shield.md), [Golden Flame](golden-flame.md), [Short Fuse](short-fuse.md), [Short Flame](short-flame.md), [Long Fuse](long-fuse.md), [Reverse Controls](reverse-controls.md), [Diarrhea](diarrhea.md), [Slow foot](slow-foot.md), [Piercing Bomb](piercing-bomb.md), [Power Bomb](power-bomb.md), [Remote Bomb](remote-bomb.md), [Landmine](landmine.md), [Invisibility Cloak](invisibility-cloak.md), [Stopwatch](stopwatch.md), and [Invisible Bombs](invisible-bombs.md),
+Separate candidates add opt-in [Shield](shield.md), [Golden Flame](golden-flame.md), [Short Fuse](short-fuse.md), [Short Flame](short-flame.md), [Long Fuse](long-fuse.md), [Reverse Controls](reverse-controls.md), [Diarrhea](diarrhea.md), [Slow foot](slow-foot.md), [Piercing Bomb](piercing-bomb.md), [Power Bomb](power-bomb.md), [Remote Bomb](remote-bomb.md), [Landmine](landmine.md), [Invisibility Cloak](invisibility-cloak.md), [Stopwatch](stopwatch.md), [Invisible Bombs](invisible-bombs.md), and [Teleporter](teleporter.md),
 retaining the same protocol and identities.
 This optional track follows the [backlog](backlog.md), shared settings and
 pixel-art increments. The historical catalog in [rules](rules.md) is not an implementation
@@ -116,11 +116,14 @@ becomes solid, with at most eight per arena. Ignition leaves fire on that cell u
 without extra rays. Ordinary rays stop there; piercing/power retain their specified behavior.
 Document this interpretation visibly when enabling it, since the request groups it with curses.
 
-Teleporter is an immediate pickup effect. Swap with an eligible living rival only when both
-destination footprints are legal and free of active fire or triggerable mines; otherwise
-consume without swapping. Preserve heading, clear movement residual/turn intent and avoid
-another destination pickup that tick. Simultaneous pickups cause one priority-resolved swap.
-With two humans there is only one possible rival; random target selection waits for more seats.
+Teleporter is an immediate pickup effect. In the implemented two-seat rules it attempts one atomic
+swap only when both actors are living and both complete destination footprints are within bounds
+and clear of hard terrain, soft blocks, bombs and active fire. Contact overlap is safe only for the
+arriving actor's already-valid grace; Shield does not make fire safe and grace never transfers.
+Unsafe, dead or absent-target attempts consume the pickup without moving either actor. A living
+disconnected reserved-seat actor remains eligible. Success preserves headings, clears residual and
+turn intent, causes no swept contact or damage, and avoids destination pickup or extra action that
+tick. It draws no RNG, occupies no slot and starts no timer. See [Teleporter](teleporter.md).
 
 ## Ordered-action foundation
 

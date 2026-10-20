@@ -2,7 +2,7 @@
 
 `core::room::reconnect::ReconnectGrace` records two seats as Vacant, Connected,
 Disconnected with an absolute expiry tick, or Expired. This component has no sockets,
-credentials, serialization, or match-outcome policy. The active v9 owner integrates these facts
+credentials, serialization, or match-outcome policy. The active v10 owner integrates these facts
 with private capabilities, lifecycle outcomes, and settled publication.
 
 Occupy a vacant seat at the authoritative global tick. Its first `disconnect(seat, tick)`

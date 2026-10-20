@@ -1,6 +1,6 @@
 # Gameplay v8: Expanded rooms and optional pickups
 
-This is the archived v8 reference. The live contract is [gameplay v9](protocol-v9.md).
+This is the archived v8 reference. The live contract is [gameplay v10](protocol-v10.md).
 
 The archived coordinated contract is `api/gameplay-v8.schema.json`, Rust
 `core::protocol::v8`, and generated `web/src/game/v8/schema.ts`. Reload older clients after

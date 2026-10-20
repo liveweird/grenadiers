@@ -244,3 +244,13 @@ Use `docker-compose.invisible-bombs.yaml` with the v2 seed fixture and
 The two-browser route proves recipient-local live-bomb and event privacy, truthful capacity and
 public flames, reconnect without replay, exact 600-tick expiry, and current-state reveal of one
 surviving bomb. Native acceptance remains pending until this candidate is built and run.
+
+## Teleporter production-seed scenario
+
+Use `docker-compose.teleporter.yaml` with the mode-0444 v2 seed fixture and
+`E2E_TELEPORTER_FIXTURE=arena-v2-teleporter npm --prefix e2e run test:teleporter`.
+The keyboard-only two-browser route reveals both pickups with ordinary movement and bombs. It
+proves a safe atomic swap, a shared new `lastTeleportTick`, position and marker retention from a
+strictly newer reconnect admission, and unsafe consumption beside a live bomb without movement or
+marker change. The scenario has no seed search, state injection or retries. Native execution
+remains pending until the predecessor-integrated candidate image exists.

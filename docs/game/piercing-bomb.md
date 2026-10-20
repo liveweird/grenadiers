@@ -22,5 +22,5 @@ bombs are always ordinary and never inspect or consume the stored charge.
 Piercing Bomb uses catalog bit 6 and generator weight 15 after Slow foot. Its initial catalog
 supported all 1024 subsets and preserved every earlier 512-mask path; later items join the
 [current catalog](settings.md). Rules version 5, generator version 2 and journal format 2 remain
-unchanged. Current [gameplay-v9](protocol-v9.md) requires paired server/web deployment and a
+unchanged. Current [gameplay-v10](protocol-v10.md) requires paired server/web deployment and a
 browser reload.

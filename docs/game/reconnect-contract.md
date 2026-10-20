@@ -1,6 +1,6 @@
 # Archived v4 reconnect contract
 
-Historical v4 reference. Gameplay v9 now serves the endpoint; see [the migration note](protocol-v9.md).
+Historical v4 reference. Gameplay v10 now serves the endpoint; see [the migration note](protocol-v10.md).
 The v4 schema and generated types remain archived; the active Rust/browser implementation uses v9.
 
 Gameplay v4 is defined in `api/gameplay-v4.schema.json`, Rust `core::protocol::v4`, and generated

@@ -82,7 +82,7 @@ voices. Returning from a hidden tab requires **Resume sound**; old events are di
 
 ## Exposed items and player upgrades
 
-Gameplay-v9 snapshots supply visible pickup cells and kinds under Expanded-v5 rules. Pixi draws distinct bomb,
+Gameplay-v10 snapshots supply visible pickup cells and kinds under Expanded-v5 rules. Pixi draws distinct bomb,
 cross/range, speed, Heart and Shield marks above blocks and below bombs/flames/actors; it never guesses
 concealed contents. Retained drawings are reused while unchanged and destroyed when removed,
 replaced, or reset. The UI performs no collection simulation.

@@ -1,16 +1,37 @@
 # Gameplay and presentation backlog
 
-Status: **TURN v0.3.16, CONFIG v0.3.17 and the first ART slice v0.3.18 are shipped**.
-The v0.3.19 equipment/effect core foundation is implemented and verified; no requested
-items are enabled in the published v0.3.24 rooms. The v0.3.25 Heart candidate now has domain,
-server, browser and pixel-art implementation with local checks and independent reviews clear;
-both debug/release profiles and fresh native acceptance 54/54 pass; final publication remains pending. The v0.3.26 Shield
-candidate adds opt-in timed immunity. The v0.3.27 Golden Flame and v0.3.28 Short Fuse
-candidates also pass local checks; native acceptance and final-head CI remain pending.
-The v0.3.29 Short Flame and v0.3.30 Long Fuse candidates pass local checks and independent reviews; native acceptance remains pending. The v0.3.31 Reverse Controls candidate passes local checks and independent review. The v0.3.32 Diarrhea candidate passes local verification and independent reviews. The v0.3.33 Slow-foot candidate passes local checks and independent backend/frontend reviews; native acceptance remains pending. The v0.3.34 Piercing Bomb and v0.3.35 Power Bomb candidates pass local checks and independent reviews; native acceptance and final CI remain pending. The other 11 requested pickups
-remain unimplemented. Richer transitions and further item artwork remain follow-up
-work. See [pixel-art presentation](pixel-art.md) and [expanded item implementation](expanded-items.md).
-Updated 2026-10-18 after playtest feedback. Release acceptance is recorded in
+TURN v0.3.16, CONFIG v0.3.17 and the first ART slice v0.3.18 are shipped. Heart
+[v0.3.25](https://github.com/liveweird/grenadiers/releases/tag/v0.3.25), Shield
+[v0.3.26](https://github.com/liveweird/grenadiers/releases/tag/v0.3.26), Golden Flame
+[v0.3.27](https://github.com/liveweird/grenadiers/releases/tag/v0.3.27) and Short Fuse
+[v0.3.28](https://github.com/liveweird/grenadiers/releases/tag/v0.3.28), and Short Flame
+[v0.3.29](https://github.com/liveweird/grenadiers/releases/tag/v0.3.29) are published.
+The v0.3.30 Long Fuse increment passes local checks and fresh 64/64 Compose/Kubernetes browser
+cases against the corrected stable-cursor source, with wrapper exit zero and no retries or
+carried results, and is published. The v0.3.31 Reverse Controls increment also passes fresh
+66/66 native acceptance and all required CI; both are published source prereleases. The v0.3.32
+Diarrhea increment passes local checks and fresh corrected-readiness acceptance: 45 Compose plus
+45 Kubernetes cases, with all eight optional item scenarios and zero retries. Independent final
+native review, candidate CI and post-merge CI pass; [v0.3.32](https://github.com/liveweird/grenadiers/releases/tag/v0.3.32)
+is published. The original shaped-latency CI counterexample and source-specific 68/68 native
+result remain historical evidence. The
+v0.3.33 Slow-foot passes local checks and independent backend/frontend reviews, 22 latency cases
+per target, 47 static scenarios and fresh 46 Compose plus 46 Kubernetes cases (**92 total**) with
+zero retries. Candidate and post-merge CI pass, and
+[v0.3.33](https://github.com/liveweird/grenadiers/releases/tag/v0.3.33) is published as a source
+prerelease. Its final raw source is integrated into the v0.3.34 Piercing Bomb candidate, which
+retains the feature and version. Repository, E2E lint, Knip, type checking and 48-scenario parity
+pass at the integrated v0.3.34 source. Fresh same-image acceptance now passes all 47 Compose and
+47 Kubernetes cases with zero retries; independent evidence review is clear and its final seal is verified. Exact-head CI remains
+pending. Its final raw source is integrated into the v0.3.35 Power Bomb candidate, which retains
+the feature and version and passes local implementation review; fresh native acceptance and
+exact-head CI remain pending. Verification retains
+source-specific evidence and earlier failed or interrupted attempts. The other 11 requested
+pickups remain outside this increment. Richer transitions
+and artwork remain follow-up work. See [pixel-art presentation](pixel-art.md),
+[expanded item implementation](expanded-items.md), and
+[release notes](https://github.com/liveweird/grenadiers/releases).
+Updated 2026-10-20 with the artist-handoff follow-up to the playtest feedback. Release acceptance is recorded in
 [verification](../verification.md).
 The [implementation plan](implementation-plan.md) remains the milestone/release reference;
 the [rules](rules.md) describe the current baseline and historical extension catalog.
@@ -26,6 +47,7 @@ Proposed implementation policies below remain subject to design review and playt
 | 3 | ART: detailed modern retro pixel art | Complete readable arena asset set, animation, accessible presentation, measured rendering. |
 | 4 | EFFECTS: equipment and timed-effect foundations | Separate slots, bounded timers/stacks, deterministic interactions, private projections. |
 | 5 | Individual equipment, buffs, curses and weapons | One independently reviewed behavior per bounded feature increment. |
+| 6 | ART-ATLAS: artist handoff and sprite-sheet pipeline | Reviewed art sample, complete labelled asset inventory, reproducible PNG/JSON exports and validated PixiJS integration. |
 
 TURN belongs in M7 playability work. CONFIG and ART can progress separately once their
 interfaces are agreed. The expanded item system is an optional ruleset expansion, not a new
@@ -78,8 +100,9 @@ Propagate rules identity/settings through contracts, replay metadata and reconne
 
 ## ART: modern retro pixel-art presentation
 
-Replace the current procedural vector look with detailed, coherent pixel art using the existing
-PixiJS renderer. Keep server collision and simulation independent of artwork.
+The first code-generated pixel-art slice shipped in v0.3.18. Extend it with detailed, coherent
+artwork using the existing PixiJS renderer, keeping collision and simulation independent of art.
+The artist handoff and sprite-sheet pipeline are queued separately under ART-ATLAS below.
 
 - Establish a palette, pixel grid, sprite scale, lighting and silhouette guide before production.
   Use crisp nearest-neighbor sampling and deliberate scaling at desktop and narrow viewports.
@@ -91,6 +114,31 @@ PixiJS renderer. Keep server collision and simulation independent of artwork.
   clear focus/connection states. Bound particles, texture memory and animation work.
 - Deliver an art-direction preview first, then small coherent asset/animation slices with
   screenshots, provenance/licenses and measured performance. No artwork is generated by this backlog change.
+
+## ART-ATLAS: artist handoff and sprite-sheet pipeline
+
+Queued after the entire expanded-item gameplay batch. The existing code-generated PixiJS
+art remains the baseline; this follow-up does not interrupt those feature releases.
+
+- Export the current drawings into a labelled visual inventory, including terrain variants,
+  directional player frames, bombs, connected flames, pickups and status overlays. Reserve
+  named slots for planned items and animations, distinguishing placeholders from finished art.
+- Give the artist screenshots and a brief covering palette, lighting, silhouettes and the
+  existing 48×48 logical tile grid. Review a small arena mockup and representative animated
+  assets before redrawing the full catalogue.
+- Provide transparent authoring sheets with stable asset IDs and separate guide/label layers.
+  Maintain one generated overview of everything; allow separate editable terrain, character
+  and item/effect sheets as animations grow. Retain layered sources, such as Aseprite files.
+- Automate reproducible PNG-atlas and JSON-manifest exports containing named frame rectangles,
+  anchors and animation timing. PixiJS should use atlas regions directly; individual sliced
+  PNG files are optional exports. Document one command for exporting and validating assets.
+- Validate required frames, dimensions, transparency, bounds, IDs, padding and texture budgets.
+  Keep nearest-neighbor sampling, consistent character foot anchors and seamless flame pieces.
+- Integrate artwork in bounded releases with independent visual review, desktop and narrow
+  screenshots, reduced-motion checks and measured rendering performance. Preserve collision
+  geometry, authoritative visibility, hazard readability, player distinctions and EN/PL UI.
+
+This is a backlog specification; the authoring templates and export pipeline are not implemented.
 
 ## EFFECTS: inventory and status foundations
 
@@ -148,7 +196,7 @@ instant action. Keep both in this requested pickup family without forcing them i
 | ID / pickup | Requested behavior | Decisions / acceptance focus |
 | --- | --- | --- |
 | CURSE-DROP / diarrhea | Automatically drop bombs whenever capacity is available, up to the player's bomb limit. | Bounded attempt cadence, legal placement, capacity release, freeze, special-weapon consumption and remote-trigger behavior; no unbounded same-tick loop. |
-| CURSE-SLOW / slow-foot | **Prepared in v0.3.33.** Each pickup halves current effective speed again. | Independent 600-tick lifetimes, exact expiry restoration, six-stack cap, exact fixed-point arithmetic and zero-budget ticks are defined and covered locally; native acceptance remains pending. |
+| CURSE-SLOW / slow-foot | **Published in v0.3.33.** Each pickup halves current effective speed again. | Independent 600-tick lifetimes, exact expiry restoration, six-stack cap, exact fixed-point arithmetic and zero-budget ticks have implementation coverage; fresh 92/92 native acceptance plus candidate and post-merge CI pass. |
 | CURSE-RANGE / short-flame | Reduce new bombs to one adjacent tile in each blast direction. | Center cell still explodes; precedence with Golden flame, upgrades and special footprints. |
 | CURSE-FUSE / long fuse | Increase new bombs' detonation delay by 100% (double it). | Rounding, stacking/re-pick policy and composition with Short fuse, remote bombs and mines. |
 | CURSE-REVERSE / reverse controls | Up moves down, left moves right, and vice versa. | Apply to logical movement after personal remapping; define held-key transition/expiry without stuck movement or stale replay. |
@@ -161,7 +209,7 @@ instant action. Keep both in this requested pickup family without forcing them i
 | ID / weapon | Requested behavior | Decisions / acceptance focus |
 | --- | --- | --- |
 | WPN-REMOTE / remote bomb | Next bomb is planted normally; the next bomb-button press detonates it instead of using a fuse. | Armed-remote state independent of consumed inventory; button priority, owner death/disconnect, chain ignition, freezing, capacity and inability to plant; no implicit safety fuse added without a decision. |
-| WPN-PIERCE / piercing bomb | **Prepared in v0.3.34.** The next successful manual bomb's blast continues through destructible blocks. | One-charge replacement, retained failures, ordinary automatic bombs, captured blast identity, immutable same-tick chain planning and hard-wall stopping are covered locally with independent review clear; native acceptance and final CI remain pending. |
+| WPN-PIERCE / piercing bomb | **Prepared in v0.3.34.** The next successful manual bomb's blast continues through destructible blocks. | One-charge replacement, retained failures, ordinary automatic bombs, captured blast identity, immutable same-tick chain planning and hard-wall stopping are covered locally with independent review clear; fresh 94/94 native acceptance passes while independent evidence review is clear and sealed; exact-head CI remains pending. |
 | WPN-POWER / power bomb | **Prepared in v0.3.35.** The next successful manual bomb damages every floor cell within its Manhattan blast radius, ignoring line of sight. | One-charge replacement, retained failures, hard-wall holes, complete block and bomb coverage, immutable mixed-chain planning, captured stats and distinct presentation pass local checks and independent reviews; native acceptance and final CI remain pending. |
 | WPN-MINE / landmine | Next placement explodes only when someone steps on it, never merely because time passes. | Arming/owner-exit grace, swept step detection, eligible actors, visibility, capacity and remote ownership; explicitly decide whether other blasts can trigger/destroy it without contradicting contact-only detonation. |
 

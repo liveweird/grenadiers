@@ -37,9 +37,34 @@ passes 24 scenarios each through Compose and Kubernetes, plus a separate native 
 This first visual slice covers terrain, actors, bombs, flames and the existing three pickups;
 new item icons and richer death/destruction/collection transitions remain follow-up artwork.
 
-Golden Flame adds a bright pixel flame pickup and a separate crest above the actor, coexisting
-with Shield and Heart-grace indicators. Its current timer comes from the authoritative baseline;
-reduced motion keeps the crest static. Native screenshots are pending candidate acceptance.
+Golden Flame, introduced in v0.3.27, adds a bright pixel flame pickup and a separate crest
+above the actor, coexisting with Shield and Heart-grace indicators. Its timer comes from the
+authoritative baseline; reduced motion keeps the crest static. See its [accepted desktop and
+Polish mobile captures](golden-flame.md) and the source-specific verification record.
 
 Actor pose visibility is assigned idempotently. Snapshot updates retain the current animation
 frame until rendering selects its final pose, avoiding intermediate visibility invalidations.
+
+Reverse Controls adds its own directional pixel pickup and localized rule/HUD presentation.
+See the [accepted desktop and Polish mobile captures](reverse-controls.md); exact inversion
+and expiry remain authoritative simulation behavior.
+
+Diarrhea adds a distinct bomb-drop pickup and actor cue; reduced motion keeps the cue static.
+Its [desktop and Polish mobile captures](diarrhea.md) show the exposed pickup and localized
+eighth rule switch before collection. Active-effect presentation also has renderer unit coverage.
+
+The refreshed Diarrhea captures come from the corrected-readiness acceptance recorded in
+[verification](../verification.md). Both show the uncollected pickup; the active curse and
+automatic placement are established by renderer/domain and paired-browser assertions.
+
+Slow Foot adds a distinct boot pickup and localized ninth rule switch. Its [English desktop
+and Polish 320px captures](slow-foot.md) show the exposed pickup before collection, with no
+active effect timer. Grouped effect presentation has renderer coverage; speed, independent
+stack deadlines and exact restoration remain authoritative simulation behavior.
+
+Piercing Bomb adds its own armed-bomb cue and localized tenth rule switch. Its [English desktop
+and Polish 320px captures](piercing-bomb.md) show the armed weapon before detonation. The reviewed
+captures have no overlap. The compact English four-column HUD wraps “Piercing bomb” inside the
+word, a nonblocking cosmetic preview limitation; no perfect compact-layout claim is made. Blast
+continuation, one-charge consumption and the following Standard bomb remain authoritative
+simulation and paired-browser behavior.

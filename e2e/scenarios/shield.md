@@ -16,3 +16,8 @@ collector, with at most one prevention event per physical tick. Every retained e
 Require observations before and after that exact deadline; 299-tick or early-expiry effects
 fail. Delivery may coalesce publications without changing authoritative physical time. The effect expires naturally.
 A later third bomb eliminates the unprotected collector and awards Player Two the round.
+
+Capture exposed desktop and Polish narrow layouts before collecting the timed pickup. Plant
+the protected bomb immediately after collection and require its configured detonation to precede
+the event-derived Shield deadline. Capture the active Polish view after both peers have proved
+protection; retain the exact expiry and later lethal-blast assertions.

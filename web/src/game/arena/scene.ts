@@ -35,6 +35,7 @@ function renderActor(drawing: ActorDrawing, id: number, effects: boolean, now: n
     marker.visible = index < drawing.slowFootStacks
   })
   drawing.piercing.visible = drawing.piercingArmed
+  drawing.power.visible = drawing.powerArmed
 }
 
 export class ArenaScene {
@@ -232,6 +233,7 @@ export class ArenaScene {
       drawing.diarrheaActive = (actor.diarrheaRemainingTicks ?? 0) > 0
       drawing.slowFootStacks = actor.slowFootRemainingTicks?.length ?? 0
       drawing.piercingArmed = Boolean(actor.piercingArmed)
+      drawing.powerArmed = Boolean(actor.powerArmed)
       drawing.moving = Boolean(!reset && previousMotion
         && (previousMotion.toX !== toX || previousMotion.toY !== toY))
       drawing.direction = actor.heading

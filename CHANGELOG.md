@@ -1,10 +1,18 @@
 # Changelog
 
+## 0.3.35 — 2026-10-20
+
+- Pin Vite 8.3.4 and its locked build dependencies to fix newly reported launch-editor advisories while retaining the security audit thresholds.
+
+- Prepare opt-in Power Bomb as a one-charge weapon consumed only by a successful manual placement.
+- Capture an immutable Manhattan-area blast that ignores obstruction, preserves hard walls as holes, and chains every bomb in range from the pre-explosion world.
+- Add the eleventh lobby switch, checked v8 state and events, replay coverage, English and Polish pixel cues, and a deterministic production-seed browser scenario. Fresh same-image native acceptance passes all 48 Compose and 48 Kubernetes cases; independent evidence review and the final seal are clear; exact-head CI and publication remain subsequent gates.
+
 ## 0.3.34 — 2026-10-20
 
 - Prepare opt-in Piercing Bomb as a one-charge weapon consumed only by a successful manual placement.
 - Capture an immutable Piercing blast that crosses breakable blocks while retaining ordinary bomb stops, range accounting, chaining, and transactional placement failures.
-- Add the tenth lobby switch, checked v8 state and events, replay coverage, English and Polish pixel cues, and a deterministic production-seed browser scenario. Fresh same-image native acceptance passes all 47 Compose and 47 Kubernetes cases; independent evidence review is clear and the final evidence is sealed; exact-head CI and publication remain pending.
+- Add the tenth lobby switch, checked v8 state and events, replay coverage, English and Polish pixel cues, and a deterministic production-seed browser scenario. Fresh same-image native acceptance passes all 47 Compose and 47 Kubernetes cases; independent evidence review, candidate CI and post-merge CI pass. v0.3.34 is published as a source prerelease.
 
 ## 0.3.33 — 2026-10-20
 

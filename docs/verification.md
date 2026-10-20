@@ -1,5 +1,130 @@
 # Repository verification
 
+## Power Bomb fresh native acceptance — 2026-10-20 — 96/96; sealed and independently audited
+
+Frozen source `7e9cae7fb47175a9503cbe5a5dc622bedde04fa1`, tree
+`5c8b1052f88f82f98a62801add1ab95bc0d9cee2`, includes the independently reviewed Vite 8.3.4
+security patch and final Power Bomb driver. Its single fresh same-image wrapper completes at
+`2026-10-20T22:20:51.330232Z` with actual exit zero: **48/48 Compose and 48/48 Kubernetes**,
+38 groups/reports, all eleven optional-item scenarios and zero retries or carried results. Each
+target runs 37 baseline cases plus eleven feature cases. Image
+`sha256:c335e4ee9987f78dde3b758780eda61d9541b82c3701ddb84efa73b2722008d7`
+comes from source archive SHA-256
+`221dcf9d2d2de480b1221d9472c948d5ad2913c95d2f0f3b4ab8d5608352f845`;
+the image, dependency and source-tree tar SHA-256 values are respectively
+`ad0e6aa83eba4b88856f9463e2a208df59f22d661201adc16d4cc8855e0b8457`,
+`3e18974547832638362d3cc92aa7265f4081ee09e7c89cd3b3ee352505358810` and
+`0b82dc960796d0358c5763923c79477feda3c7659adfafada29af793bb8c245e`.
+
+The source inventory has 724 files, 81 directories, no symlinks and 33 tracked PNGs. Dependencies
+have 8,186 files, 1,305 directories and 13 symlinks; 132 packages are installed, all 42 omissions
+are optional, and no required package, version or metadata mismatch is reported. Runtime evidence
+contains 94 PNGs, 28 runtime image/security pairs, 14 Kubernetes identities, 13 fixtures and 26
+seed-mode records. All recorded dependency, source, lock, preparation-manifest and image-ID
+post-run comparisons match.
+
+The paired-browser Power scenario proves ordinary-key collection and placement, the complete
+Manhattan footprint through obstructing hard walls, one-charge consumption, and a following fresh
+Standard bomb on both peers. The reviewed Compose [English desktop](screenshots/power-bomb-desktop.png)
+and [Polish 320px](screenshots/power-bomb-polish-320.png) captures precede detonation and contain
+no active bombs or flames. “Power bomb” wraps normally between words in English. The Polish narrow
+view uses normal vertical scrolling and shows the unfocused-arena prompt. Neither capture has
+observed unintended overlap; native assertions establish the blast geometry.
+
+All four real latency profiles retain 20 observations, and all 22 latency cases per target pass.
+Every measured key begins after accepted readiness, all samples are retained, the fixed budget
+remains 250 ms, and each profile has zero exceedances.
+
+| Target | Profile | Samples | Maximum | Exceedances |
+| --- | --- | ---: | ---: | ---: |
+| Compose | local | 20 | 63.371394 ms | 0 |
+| Compose | delay-50ms | 20 | 140.790806 ms | 0 |
+| Kubernetes | local | 20 | 59.961206 ms | 0 |
+| Kubernetes | delay-50ms | 20 | 158.372221 ms | 0 |
+
+Compose CPU usage advances from 571068 to 826133 microseconds, a 255065-microsecond delta;
+Kubernetes advances from 478399 to 727701 microseconds, a 249302-microsecond delta. Compose uses
+the unlimited `max 100000` quota and Kubernetes uses `50000 100000`; both throttle-count and
+throttled-time deltas are zero.
+
+The security-patched source received a fresh isolated install, full security gate and web/E2E
+audits with zero vulnerabilities at every severity. Its full web gate passes 2,429 tests across
+49 files with 95.49/91.39/95.61/97.81% statement/branch/function/line coverage, contracts, lint,
+Knip, type checks and the Vite 8.3.4 production build. The earlier 558-core, 191-server and two-
+doctest results remain historical evidence for the reviewed Power source whose Rust inputs are
+unchanged; no fresh local Rust suite or Rust coverage run is claimed for `7e9cae7`.
+
+The independent raw evidence audit is CLEAR. The final manifest seals 2,065 payloads with SHA-256
+`cbd2df35818757c8f3fb9adb642260ebe6b25b7db0bf6625257ad3e5a1508c37`; all 2,066 files
+and the source archive have byte-verified durable copies under the private checkpoint. Owned
+Compose/Kubernetes resources and ports 18254/18255 are absent at the coordinator live check;
+localhost:8085 still serves the accepted v0.3.34 image, ready 200. The reviewer audited cleanup
+records without independently repeating live infrastructure queries. Final native/documentation review is clear; exact-head CI, PR, publication and image promotion
+remain subsequent release gates. The failed `4a3fb77` Gear-label attempt and
+the superseded, unexecuted `f150ad5` preparation remain preserved below and contribute no pass.
+
+## Vite advisory follow-up — 2026-10-20 — patched; fresh native acceptance complete
+
+After v0.3.34 publication, its additional [tag workflow](https://github.com/liveweird/grenadiers/actions/runs/39502781824)
+failed the npm security check for Vite 8.3.0's bundled development editor integration:
+[Windows escaping](https://github.com/advisories/GHSA-698v-4r3x-3vcv),
+[editor arguments](https://github.com/advisories/GHSA-r825-w8mm-5pxw), and
+[Windows path check](https://github.com/advisories/GHSA-587h-7wmj-h5pm).
+The earlier candidate/post-merge successes remain historical; the tag's security job is a real
+failure and is not counted as green. The packaged runtime serves compiled assets rather than
+the Vite development server. The immutable v0.3.34 tag is retained.
+
+Power Bomb source `25951426acf1ac0331047096feb452bdd906e11d` pins Vite 8.3.4 with its
+minimal locked build graph. Independent dependency review is clear. A fresh isolated web install,
+full security gate and web/E2E audit JSON report zero vulnerabilities at every severity. The full
+web gate passes 2,429 tests across 49 files, coverage 95.49/91.39/95.61/97.81%, contracts,
+lint, Knip, type checks and the Vite 8.3.4 production build. Core/server, E2E and deployment
+inputs remain unchanged; 49-scenario E2E static parity remains applicable.
+
+The intervening Gear-corrected source `f150ad5cfe10657de42cc84826a0c21e35e35823` was prepared
+successfully but never ran a browser/native case. Its superseded preparation is preserved with
+1,057 sealed payloads, manifest SHA-256
+`3c408f1fc887f1d0f0557c2f6f60fdd164abbc44115f7ddb7e1bfe67419633cd`, plus a byte-verified
+durable copy. The replacement security-patched source and image now pass the fresh 96/96 native
+acceptance recorded above. No result from either earlier Power attempt is carried; final seal is complete and candidate CI remains pending.
+
+
+## Power Bomb native label mismatch — 2026-10-20 — corrected acceptance pending
+
+The first fresh Power Bomb attempt at source `4a3fb776b4dd880e41aac5b5c87ea8d29b721af2`
+exited 1 in its first Compose group: seven cases passed and the rendered duel failed because
+its inherited HUD assertion expected “Gear” while the Power source rendered “Equipment”.
+No later group or Kubernetes case ran; these results supply no Power acceptance.
+Source, dependency, lock, archive and image integrity remained unchanged. The failed run is
+preserved separately; no pass or retry is carried into the replacement run.
+
+The correction restores the previously accepted English “Gear” label and its narrow-HUD
+readability fix (`d360810`), retaining the shared assertion. Power gameplay, Polish text,
+contracts and dependency locks are unchanged. Corrected-source native acceptance and
+exact-head CI were still pending at that checkpoint. The later security-patched source passes
+fresh sealed native acceptance as recorded above; exact-head CI remains pending.
+
+
+## Piercing Bomb publication and local deployment — 2026-10-20
+
+PR [80](https://github.com/liveweird/grenadiers/pull/80) merged at `2026-10-20T21:30:49Z` as
+`e2682187d74317a5a29c4322f802b99b1116af7a`, with sole parent
+`27dcf225f3a1f3ef67ee3cf8c52c9d583e7318fd`. Its tree
+`3068e023f1ac759c82844bb7a5f761227c6c4ad8` equals accepted raw source
+`7cba14dd2cc1cd645a5212fd22a59c2873286d74` and the normalized candidate. Candidate
+[PR CI](https://github.com/liveweird/grenadiers/actions/runs/39498552320),
+[push CI](https://github.com/liveweird/grenadiers/actions/runs/39498541031), and
+[post-merge CI](https://github.com/liveweird/grenadiers/actions/runs/39500972778) each pass five
+jobs and 47 browser cases, without failed, flaky, skipped, retry or timeout result markers.
+
+[v0.3.34](https://github.com/liveweird/grenadiers/releases/tag/v0.3.34) was published as a source
+prerelease at `2026-10-20T21:44:22Z`. Additional tag-triggered CI was not complete at that
+checkpoint and supplies no publication evidence. The exact accepted image
+`sha256:5d0bc94c7febc6764b9f875f1273f4d3814077c8d22c2b56b4a2d80fbebbe0e8`
+then served localhost:8085 without rebuilding: readiness, health and index probes returned 200;
+served index and JavaScript bytes matched the container. The v0.3.33 image is retained as a
+local rollback tag. No registry image or hosted deployment is claimed.
+
 ## Piercing Bomb fresh native acceptance — 2026-10-20 — 94/94; independently reviewed and sealed
 
 Final raw Slow Foot source `f499f680ac68bc8eed4803e4d3c06152cb89cf64` is integrated,
@@ -610,15 +735,39 @@ Diarrhea.
 Records below are frozen against their named sources. Publication and later CI status are
 recorded in [release notes](https://github.com/liveweird/grenadiers/releases).
 
-## Piercing renderer and responsive-HUD integration — 2026-10-18 — native acceptance pending
+## Power renderer and responsive-HUD integration — 2026-10-18 — native acceptance pending
 
-The reviewed terrain cache, diagnostics and responsive HUD are integrated. Core, server, Cargo,
-API, client semantics/locales and dedicated Piercing scenario are unchanged. The scene-suite Pixi
-mock moves verbatim to a test-support module to keep the scene suite below 400 lines without
-removing assertions. All 1,400 web tests across 47 files pass, with coverage
-95.47/91.35/95.61/97.79%, plus contracts, lint, Knip, production/diagnostic builds and E2E static
-parity for 37 scenarios. Independent integration review is clear; fresh native acceptance
-and exact-head CI remain required.
+The reviewed terrain cache, diagnostics and responsive HUD are integrated into the Power Bomb
+candidate. Core, server, Cargo, API, client semantics/locales and the dedicated Power scenario are
+unchanged. The scene-suite Pixi mock moves verbatim to a test-support module to keep the scene
+suite below 400 lines without removing its Power and Piercing inventory-cue assertions. Updated
+web, E2E static, diagnostic-build and production-fixture results are recorded below. Fresh native
+acceptance and exact-head CI remain required.
+
+## Power Bomb candidate — 2026-10-18 — local checks complete
+
+The v0.3.35 candidate activates an opt-in one-charge Power Bomb. Successful manual placement
+captures every floor cell in its Manhattan range, treating hard walls as intact, unburned holes
+without blocking eligible cells beyond them. Automatic placements remain ordinary, failed
+placements retain the charge, and existing bombs remain immutable. Catalog bit 7 and the final
+generator weight preserve all 1024 earlier paths while supporting all 2048 subsets. The repeating
+byte-31 fixture places the pickup at (3,1), a hard wall at (2,2), and a breakable block at (3,2).
+
+Focused core and protocol regressions cover exact footprints, immutable mixed chains, obstruction
+snapshots, ID permutations, weapon replacement and consumption, transactional failures, both
+recipient streams, event-only records, replay and the ordinary seed route. Web regressions cover
+the enabled capability guard, reserved triggers, localized settings and distinct pickup, held and
+placed-bomb cues.
+
+Debug and release suites pass **558 core tests, 191 server tests and two doctests**; four dedicated
+performance profiles remain ignored. Rust line coverage is **91.84%** (12,544/13,659), above the
+unchanged 80% floor. All **2,429 web tests** across 49 files pass with statement/branch/function/
+line coverage of **95.49/91.39/95.61/97.81%**. Formatting, all-target Clippy with warnings denied,
+repository limits, generated contract checks, lint, Knip, production and renderer-diagnostic builds,
+E2E static checks and **38-scenario parity** pass. Cargo-deny and both cached offline npm audits pass
+with zero npm vulnerabilities; strict Kubernetes schemas validate all three resources. Independent
+backend and frontend/E2E reviews are clear.
+Native browser acceptance, candidate-image checks and final-head CI remain pending.
 
 ## Piercing Bomb candidate — 2026-10-18 — local checks complete
 

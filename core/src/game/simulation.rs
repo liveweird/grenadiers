@@ -233,9 +233,12 @@ impl State {
             }
         }
         for bomb in world.bombs.values() {
-            if bomb.blast() == BlastKind::Piercing
-                && !rules.enabled_items().contains_piercing_bomb()
-            {
+            let supported = match bomb.blast() {
+                BlastKind::Standard => true,
+                BlastKind::Piercing => rules.enabled_items().contains_piercing_bomb(),
+                BlastKind::Power => rules.enabled_items().contains_power_bomb(),
+            };
+            if !supported {
                 return Err(StateError::UnsupportedBombBlast(bomb.id()));
             }
         }
@@ -279,7 +282,6 @@ impl State {
     pub const fn world(&self) -> &World {
         &self.world
     }
-
     #[must_use]
     pub const fn actors(&self) -> &[Actor; 2] {
         &self.actors

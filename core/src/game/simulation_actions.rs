@@ -145,13 +145,19 @@ impl State {
                 continue;
             };
             let actor = &self.actors[seat.index()];
-            let piercing = requests[seat.index()] == Some(PlacementOrigin::Manual)
-                && self.rules.enabled_items().contains_piercing_bomb()
-                && actor.inventory.weapon() == Some(SpecialWeapon::Piercing);
-            let blast = if piercing {
-                BlastKind::Piercing
+            let weapon = if requests[seat.index()] == Some(PlacementOrigin::Manual) {
+                actor.inventory.weapon().filter(|weapon| match weapon {
+                    SpecialWeapon::Piercing => self.rules.enabled_items().contains_piercing_bomb(),
+                    SpecialWeapon::Power => self.rules.enabled_items().contains_power_bomb(),
+                    SpecialWeapon::Remote | SpecialWeapon::Landmine => false,
+                })
             } else {
-                BlastKind::Standard
+                None
+            };
+            let blast = match weapon {
+                Some(SpecialWeapon::Piercing) => BlastKind::Piercing,
+                Some(SpecialWeapon::Power) => BlastKind::Power,
+                Some(SpecialWeapon::Remote | SpecialWeapon::Landmine) | None => BlastKind::Standard,
             };
             let Some(fuse_ticks) = actor
                 .effects
@@ -165,7 +171,7 @@ impl State {
             let Some(id) = self.next_bomb_id() else {
                 continue;
             };
-            let bomb = if blast == BlastKind::Piercing {
+            let bomb = if blast != BlastKind::Standard {
                 Bomb::new_with_blast(
                     id,
                     cell,
@@ -189,9 +195,9 @@ impl State {
                 continue;
             };
             self.insert_bomb(bomb);
-            if piercing {
+            if let Some(weapon) = weapon {
                 let consumed = self.actors[seat.index()].inventory.consume_weapon();
-                debug_assert_eq!(consumed, Some(SpecialWeapon::Piercing));
+                debug_assert_eq!(consumed, Some(weapon));
             }
             events.push(StepEvent::new(
                 tick,
@@ -231,6 +237,10 @@ impl State {
 #[cfg(test)]
 #[path = "piercing_bomb_tests.rs"]
 mod piercing_bomb_tests;
+
+#[cfg(test)]
+#[path = "power_bomb_tests.rs"]
+mod power_bomb_tests;
 
 #[cfg(test)]
 #[path = "simulation_actions_tests.rs"]

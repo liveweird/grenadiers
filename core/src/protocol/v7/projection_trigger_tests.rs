@@ -80,18 +80,24 @@ fn event_timer_rejects_overdue_and_preserves_equal_and_positive_chain_deadlines(
 }
 
 #[test]
-fn classic_capture_rejects_piercing_event_instead_of_downgrading_it() {
+fn classic_capture_rejects_every_special_blast_even_when_only_an_event_references_it() {
     let state = classic_state_at(10);
-    let mut report = bomb_report(&state, 10, 190, true);
-    let StepEventKind::BombPlaced(ref mut bomb) = report.events[0].kind else {
-        panic!("expected placement event");
-    };
-    bomb.blast = crate::game::BlastKind::Piercing;
+    for blast in [
+        crate::game::BlastKind::Piercing,
+        crate::game::BlastKind::Power,
+    ] {
+        let mut report = bomb_report(&state, 0, 180, false);
+        let StepEventKind::BombDetonated(ref mut bomb) = report.events[0].kind else {
+            panic!("expected detonation event");
+        };
+        bomb.blast = blast;
 
-    assert_eq!(
-        capture_classic(&state, &[report]),
-        Err(ProjectionError::InvalidItems)
-    );
+        assert!(state.public_view().bombs.is_empty());
+        assert_eq!(
+            capture_classic(&state, &[report]),
+            Err(ProjectionError::InvalidItems)
+        );
+    }
 }
 
 #[test]

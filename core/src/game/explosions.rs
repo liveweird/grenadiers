@@ -53,6 +53,10 @@ pub(crate) fn plan(world: &World, tick: Tick) -> Result<ExplosionPlan, Explosion
         let Some(bomb) = world.bombs.get(&id) else {
             continue;
         };
+        if bomb.blast() == BlastKind::Power {
+            plan_power_blast(world, *bomb, &mut pending, &mut result);
+            continue;
+        }
         result.flames.insert(bomb.cell());
         for direction in [
             Direction::North,
@@ -71,6 +75,43 @@ pub(crate) fn plan(world: &World, tick: Tick) -> Result<ExplosionPlan, Explosion
         }
     }
     Ok(result)
+}
+
+fn plan_power_blast(
+    world: &World,
+    bomb: Bomb,
+    pending: &mut BTreeSet<EntityId>,
+    result: &mut ExplosionPlan,
+) {
+    for row in 0..super::arena::ARENA_HEIGHT {
+        for column in 0..super::arena::ARENA_WIDTH {
+            let cell = CellId::new(column, row);
+            let distance = u32::from(column.abs_diff(bomb.cell().column))
+                + u32::from(row.abs_diff(bomb.cell().row));
+            if distance > u32::from(bomb.range())
+                || world.arena.terrain(cell) != Some(Terrain::Floor)
+            {
+                continue;
+            }
+            result.flames.insert(cell);
+            if world.arena.blocks().contains(&cell) {
+                result.destroyed_blocks.insert(cell);
+            }
+        }
+    }
+    pending.extend(
+        world
+            .bombs
+            .values()
+            .filter(|other| {
+                let cell = other.cell();
+                let distance = u32::from(cell.column.abs_diff(bomb.cell().column))
+                    + u32::from(cell.row.abs_diff(bomb.cell().row));
+                distance <= u32::from(bomb.range())
+                    && world.arena.terrain(cell) == Some(Terrain::Floor)
+            })
+            .map(|other| other.id()),
+    );
 }
 
 fn trace_ray(

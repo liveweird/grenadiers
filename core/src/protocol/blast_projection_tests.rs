@@ -43,7 +43,7 @@ fn state() -> State {
 }
 
 #[test]
-fn legacy_state_projection_rejects_piercing_without_downgrading() {
+fn legacy_state_projection_rejects_every_special_blast_without_downgrading() {
     let mut state = state();
     state
         .step(&[SeatInput {
@@ -51,42 +51,45 @@ fn legacy_state_projection_rejects_piercing_without_downgrading() {
             action: InputAction::PlaceBomb,
         }])
         .unwrap();
-    let mut view = state.public_view();
-    view.bombs[0].blast = BlastKind::Piercing;
-
-    assert_eq!(
-        project_state(&view),
-        Err(ProjectionError::UnsupportedBombBlast)
-    );
+    for blast in [BlastKind::Piercing, BlastKind::Power] {
+        let mut view = state.public_view();
+        view.bombs[0].blast = blast;
+        assert_eq!(
+            project_state(&view),
+            Err(ProjectionError::UnsupportedBombBlast)
+        );
+    }
 }
 
 #[test]
-fn legacy_event_projection_rejects_piercing_without_final_state_bombs() {
+fn legacy_event_projection_rejects_every_special_blast_without_final_state_bombs() {
     let state = state();
-    let bomb = crate::game::BombView {
-        id: EntityId(30),
-        cell: CellId::new(3, 3),
-        owner: EntityId(10),
-        range: 2,
-        placed_at: Tick(0),
-        trigger: BombTrigger::Timed {
-            detonates_at: Tick(180),
-        },
-        blast: BlastKind::Piercing,
-    };
-    for kind in [
-        StepEventKind::BombPlaced(bomb),
-        StepEventKind::BombDetonated(bomb),
-    ] {
-        let report = StepReport {
-            tick: Tick(0),
-            traces: SeatId::ALL
-                .map(|seat| MovementTrace::new(state.actors()[seat.index()].position())),
-            events: vec![StepEvent::new(Tick(0), EventAudience::Both, kind)],
+    for blast in [BlastKind::Piercing, BlastKind::Power] {
+        let bomb = crate::game::BombView {
+            id: EntityId(30),
+            cell: CellId::new(3, 3),
+            owner: EntityId(10),
+            range: 2,
+            placed_at: Tick(0),
+            trigger: BombTrigger::Timed {
+                detonates_at: Tick(180),
+            },
+            blast,
         };
-        assert_eq!(
-            project_events(&[report]),
-            Err(ProjectionError::InvalidEvent)
-        );
+        for kind in [
+            StepEventKind::BombPlaced(bomb),
+            StepEventKind::BombDetonated(bomb),
+        ] {
+            let report = StepReport {
+                tick: Tick(0),
+                traces: SeatId::ALL
+                    .map(|seat| MovementTrace::new(state.actors()[seat.index()].position())),
+                events: vec![StepEvent::new(Tick(0), EventAudience::Both, kind)],
+            };
+            assert_eq!(
+                project_events(&[report]),
+                Err(ProjectionError::InvalidEvent)
+            );
+        }
     }
 }

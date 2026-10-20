@@ -24,9 +24,12 @@ impl State {
             return Err(StepError::UnsupportedBombTrigger(id));
         }
         if let Some(id) = self.world.bombs.values().find_map(|bomb| {
-            (bomb.blast() == BlastKind::Piercing
-                && !self.rules.enabled_items().contains_piercing_bomb())
-            .then_some(bomb.id())
+            let supported = match bomb.blast() {
+                BlastKind::Standard => true,
+                BlastKind::Piercing => self.rules.enabled_items().contains_piercing_bomb(),
+                BlastKind::Power => self.rules.enabled_items().contains_power_bomb(),
+            };
+            (!supported).then_some(bomb.id())
         }) {
             return Err(StepError::UnsupportedBombBlast(id));
         }

@@ -1,7 +1,7 @@
 import type { KeyboardBindings } from './bindings'
 
 export type RenderablePickupKind =
-  | 'bombCapacity' | 'blastRange' | 'movementSpeed' | 'heart' | 'piercingBomb' | 'shield' | 'goldenFlame' | 'shortFuse'
+  | 'bombCapacity' | 'blastRange' | 'movementSpeed' | 'heart' | 'piercingBomb' | 'powerBomb' | 'shield' | 'goldenFlame' | 'shortFuse'
   | 'diarrhea' | 'slowFoot' | 'shortFlame' | 'longFuse' | 'reverseControls'
 interface PresentedActor {
   id: number
@@ -19,6 +19,7 @@ interface PresentedActor {
   longFuseRemainingTicks?: number
   reverseControlsRemainingTicks?: number
   piercingArmed?: boolean
+  powerArmed?: boolean
 }
 interface PresentedBomb {
   id: number

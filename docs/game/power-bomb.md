@@ -27,3 +27,18 @@ Power Bomb uses catalog bit 7 and generator weight 15 after Piercing Bomb. Expan
 all 2048 subsets while preserving every prior 1024-mask generator path. Gameplay wire version 8,
 rules version 5, generator version 2, and journal format 2 remain unchanged. The exact eleven-item
 v8 availability array requires a coordinated server and web deployment followed by browser reloads.
+
+## Acceptance and presentation
+
+Fresh same-image native acceptance passes all 48 Compose and 48 Kubernetes browser cases with
+zero retries. The paired-browser scenario collects the pickup with ordinary key input, places an
+armed Power bomb, verifies the Manhattan footprint through obstructing hard walls, and proves
+consumption by placing a fresh Standard bomb afterward on both peers.
+
+The accepted Compose run produced the [English desktop](../screenshots/power-bomb-desktop.png)
+and [Polish 320px](../screenshots/power-bomb-polish-320.png) captures. They precede detonation and
+show no active bombs or flames. The English HUD wraps “Power bomb” normally between words; the
+Polish narrow view uses normal vertical scrolling and shows the unfocused-arena prompt. Neither
+reviewed capture has unintended overlap. Native assertions establish blast geometry, consumption
+and the following Standard bomb. The evidence is sealed and independently audited; exact-head CI
+and publication remain subsequent gates. See [verification](../verification.md).

@@ -1,5 +1,854 @@
 # Repository verification
 
+## Landmine source integration — 2026-10-21 — native acceptance pending
+
+Corrected reviewed Landmine source `6ad59ddec460a4db331b6e6bf499def9c0b65106` integrates the
+accepted raw Remote Bomb source `d9894c9216ea6d09f1726ae7701b48fbf404cd3a` without changing
+the reviewed Landmine core or server product. The integration preserves the causal browser
+detonation snapshot, active-origin flame assertion and fresh same-state Timed Standard core
+regression, together with the inherited Remote 183-tick wait, exact-ID activation, readiness
+drivers, Gear label and Vite 8.3.4 lock.
+
+Source-only integration checks pass the repository gate; web contract checks, lint, Knip and the
+Vite 8.3.4 production build; E2E lint, Knip, type checking and 51-scenario parity; and 8,312
+focused Landmine, Remote and shared-UI web tests across eleven files. Core, server and Cargo
+inputs remain byte-identical to the corrected reviewed Landmine source. No fresh full Rust suite,
+Rust coverage or full web suite is claimed for this integration. Fresh Landmine native
+acceptance, candidate image, exact-head CI and publication remain pending; no Remote native
+result is carried forward as Landmine acceptance. The accepted Remote evidence remains 98/98,
+independently audited and sealed as recorded below, while its release gates remain pending.
+
+## Remote Bomb fresh native acceptance — 2026-10-21 — 98/98; independently audited and sealed
+
+Frozen source `a1170e37f7d92291c44b5b6812ac707567c963e8`, tree
+`b6a526b21a36d9dd0b4990dd1eddd7b5c242044a`, integrates reviewed Remote Bomb source with the
+accepted raw Power Bomb parent. Its two parents are exact Remote source
+`50018e24f3ec89df01e8793eb21f4b5226f63cb3` and accepted raw Power source
+`91c3767f56b2c61624cac01eadeef682e7dc7bb8`. The single fresh same-image wrapper completed at
+`2026-10-20T23:01:59.462005Z` with actual exit zero: **49/49 Compose and 49/49 Kubernetes**,
+40 groups/reports, all twelve optional-item scenarios and zero retries or carried results. Each
+target runs 37 baseline cases plus twelve feature cases; the combined literal matrix records
+74/74 baseline and 24/24 optional cases. Image
+`sha256:08a11bf0d6a9b8f59c139390bc56b82ca9f9bc5c9da2f9c1fb4d8f9c4ec1f7ee` is retained as
+`grenadiers-v0336-remote-bomb-native-recheck:a1170e3`. The coordinator recorded the wrapper’s actual exit after completion.
+
+The source archive SHA-256 is
+`74b0480dbd9b4181bacb15d9f08fe4fe38354e9f143d84943cae9348d88ff173`; image, dependency and
+source-tree archive SHA-256 values are respectively
+`628fb392fddab46ef8a61da1df386fe9868010cc1cf3653e1cb937e96266ec8c`,
+`4d47d877ed6aa3c96d912f6d003925958a9d58960ab1868e4cc1d79bf563924b` and
+`36259cef1b12e2c0cd9c9fa7b972020df03767b6f2d1cd219ce8a6af712ab900`.
+The source inventory has 742 files, 82 directories, no symlinks and 35 tracked PNGs. Dependencies
+contain 8,186 files, 1,305 directories and 13 symlinks; 132 of 174 frozen packages are installed, all 42
+omissions are optional, and no required package, version or metadata mismatch is reported.
+Runtime evidence contains 98 PNGs, 30 runtime image/security records, 15 Kubernetes identities,
+14 fixtures and 28 seed-mode records. All recorded dependency, source, lock,
+preparation-manifest and image-ID post-run comparisons match.
+
+The independent raw evidence audit is CLEAR. `FINAL.sha256` seals 2,140 payloads with SHA-256
+`22e3bfd8aa774acc99cbe84ea35c8c7cc164dd8a159b2be9b1a042a2da142fcf`.
+The 2,141-file durable evidence copy and source archive are byte-verified outside the native
+workspace; the source archive retains the SHA-256 recorded above.
+
+The paired-browser Remote scenario proves natural collection and placement, a live untimed Remote
+at (3,1) for 183 ticks, charge consumption and owner availability zero, activation of that exact
+bomb ID on the next retained bomb action without another placement, and a later fresh Standard
+bomb. Both actors remain alive. The reviewed Compose [English desktop](screenshots/remote-bomb-desktop.png)
+and [Polish 320px](screenshots/remote-bomb-polish-320.png) captures show the planted Remote and no
+flames. The English Gear label fits normally; the Polish narrow view uses vertical scrolling and
+shows the unfocused-arena prompt. No unintended overlap was observed. Kubernetes screenshots
+were not visually reviewed; native assertions, rather than screenshots, prove timing and action
+semantics.
+
+All four real latency profiles retain 20 observations, and all 22 latency cases per target pass.
+Every measured key begins after accepted readiness, all samples are retained, the fixed budget
+remains 250 ms, and each profile has zero exceedances.
+
+| Target | Profile | Samples | Maximum | Exceedances |
+| --- | --- | ---: | ---: | ---: |
+| Compose | local | 20 | 62.141429 ms | 0 |
+| Compose | delay-50ms | 20 | 164.831751 ms | 0 |
+| Kubernetes | local | 20 | 48.547253 ms | 0 |
+| Kubernetes | delay-50ms | 20 | 162.024912 ms | 0 |
+
+Compose CPU usage advances from 735368 to 973553 microseconds, a 238185-microsecond delta;
+Kubernetes advances from 464918 to 672361 microseconds, a 207443-microsecond delta. Compose uses
+the unlimited `max 100000` quota and Kubernetes uses `50000 100000`; both throttle-count and
+throttled-time deltas are zero.
+
+Source-only integration checks pass the repository gate; web contract drift, lint, Knip, type
+checking and the Vite 8.3.4 production build; E2E lint, Knip, type checking and 50-scenario parity;
+and 65 focused web tests across seven files. Core, server and Cargo inputs are byte-identical to
+the reviewed original Remote source. No fresh full Rust suite, Rust coverage or full web suite is
+claimed for `a1170e3`. The earlier 2,429-test web result belongs to the reviewed Power/Vite source
+and remains historical evidence only.
+
+Power Bomb's accepted tree `f69c156098598c79f656a015a4c824f21fa3ee6a` is merged by PR 81 as
+`6203328e17e5d7b456e97a037ab6836e260075a2`. Candidate runs
+[`39508652105`](https://github.com/liveweird/grenadiers/actions/runs/39508652105) and
+[`39508640318`](https://github.com/liveweird/grenadiers/actions/runs/39508640318), and post-merge
+run [`39510922355`](https://github.com/liveweird/grenadiers/actions/runs/39510922355), each pass
+all five jobs and 48 browser cases. [v0.3.35](https://github.com/liveweird/grenadiers/releases/tag/v0.3.35)
+was published as a source prerelease at `2026-10-20T23:06:48Z`. The inherited Vite 8.3.4 fix
+addresses the known v0.3.34 tag security failure without rewriting that history.
+
+Cleanup passed at `2026-10-20T23:02:22Z`: owned Compose resources, the Kubernetes namespace and
+port forwards 18264/18265 are absent. At that check, localhost:8085 still served the default v0.3.34 image
+`sha256:5d0bc94c7febc6764b9f875f1273f4d3814077c8d22c2b56b4a2d80fbebbe0e8`, ready 200.
+That observation remains the historical state at Remote cleanup. The later verified promotion
+deploys accepted v0.3.35 image
+`sha256:c335e4ee9987f78dde3b758780eda61d9541b82c3701ddb84efa73b2722008d7` to the local default,
+with release `v0.3.35`, readiness, health and index all returning 200. The served
+`index-jHLp_ZRp.js` bytes match SHA-256
+`2fcbe6f8002a985ca75e6b80e4b3461232755f7342646a005a922a125b0a37bf`; no rebuild occurred.
+Release helpers are independently clear and unexecuted: finalizer
+`704956bed774527da6843dd9378e0cd11305069adb0183dbfc4c0ee007817c78`, merge
+`06b41dbad35d935b30db11da707e7d1545117316167e6d38b37aa9a04d8aaf43`, publication
+`3ae28e97d6b0b8a85c0fa3996651c64d9fd942f05d90a913013e7fe40668cff5` and local promotion
+`43baf14eaaaa60e1aa606977d9c686c8d256cf75200517b94092bd1181bf63c3`.
+
+Finalization requires independent documentation/seal review. Exact-head candidate and post-merge
+CI, publication and image promotion are subsequent release gates.
+
+## Power Bomb fresh native acceptance — 2026-10-20 — 96/96; sealed and independently audited
+
+Frozen source `7e9cae7fb47175a9503cbe5a5dc622bedde04fa1`, tree
+`5c8b1052f88f82f98a62801add1ab95bc0d9cee2`, includes the independently reviewed Vite 8.3.4
+security patch and final Power Bomb driver. Its single fresh same-image wrapper completes at
+`2026-10-20T22:20:51.330232Z` with actual exit zero: **48/48 Compose and 48/48 Kubernetes**,
+38 groups/reports, all eleven optional-item scenarios and zero retries or carried results. Each
+target runs 37 baseline cases plus eleven feature cases. Image
+`sha256:c335e4ee9987f78dde3b758780eda61d9541b82c3701ddb84efa73b2722008d7`
+comes from source archive SHA-256
+`221dcf9d2d2de480b1221d9472c948d5ad2913c95d2f0f3b4ab8d5608352f845`;
+the image, dependency and source-tree tar SHA-256 values are respectively
+`ad0e6aa83eba4b88856f9463e2a208df59f22d661201adc16d4cc8855e0b8457`,
+`3e18974547832638362d3cc92aa7265f4081ee09e7c89cd3b3ee352505358810` and
+`0b82dc960796d0358c5763923c79477feda3c7659adfafada29af793bb8c245e`.
+
+The source inventory has 724 files, 81 directories, no symlinks and 33 tracked PNGs. Dependencies
+have 8,186 files, 1,305 directories and 13 symlinks; 132 packages are installed, all 42 omissions
+are optional, and no required package, version or metadata mismatch is reported. Runtime evidence
+contains 94 PNGs, 28 runtime image/security pairs, 14 Kubernetes identities, 13 fixtures and 26
+seed-mode records. All recorded dependency, source, lock, preparation-manifest and image-ID
+post-run comparisons match.
+
+The paired-browser Power scenario proves ordinary-key collection and placement, the complete
+Manhattan footprint through obstructing hard walls, one-charge consumption, and a following fresh
+Standard bomb on both peers. The reviewed Compose [English desktop](screenshots/power-bomb-desktop.png)
+and [Polish 320px](screenshots/power-bomb-polish-320.png) captures precede detonation and contain
+no active bombs or flames. “Power bomb” wraps normally between words in English. The Polish narrow
+view uses normal vertical scrolling and shows the unfocused-arena prompt. Neither capture has
+observed unintended overlap; native assertions establish the blast geometry.
+
+All four real latency profiles retain 20 observations, and all 22 latency cases per target pass.
+Every measured key begins after accepted readiness, all samples are retained, the fixed budget
+remains 250 ms, and each profile has zero exceedances.
+
+| Target | Profile | Samples | Maximum | Exceedances |
+| --- | --- | ---: | ---: | ---: |
+| Compose | local | 20 | 63.371394 ms | 0 |
+| Compose | delay-50ms | 20 | 140.790806 ms | 0 |
+| Kubernetes | local | 20 | 59.961206 ms | 0 |
+| Kubernetes | delay-50ms | 20 | 158.372221 ms | 0 |
+
+Compose CPU usage advances from 571068 to 826133 microseconds, a 255065-microsecond delta;
+Kubernetes advances from 478399 to 727701 microseconds, a 249302-microsecond delta. Compose uses
+the unlimited `max 100000` quota and Kubernetes uses `50000 100000`; both throttle-count and
+throttled-time deltas are zero.
+
+The security-patched source received a fresh isolated install, full security gate and web/E2E
+audits with zero vulnerabilities at every severity. Its full web gate passes 2,429 tests across
+49 files with 95.49/91.39/95.61/97.81% statement/branch/function/line coverage, contracts, lint,
+Knip, type checks and the Vite 8.3.4 production build. The earlier 558-core, 191-server and two-
+doctest results remain historical evidence for the reviewed Power source whose Rust inputs are
+unchanged; no fresh local Rust suite or Rust coverage run is claimed for `7e9cae7`.
+
+The independent raw evidence audit is CLEAR. The final manifest seals 2,065 payloads with SHA-256
+`cbd2df35818757c8f3fb9adb642260ebe6b25b7db0bf6625257ad3e5a1508c37`; all 2,066 files
+and the source archive have byte-verified durable copies under the private checkpoint. Owned
+Compose/Kubernetes resources and ports 18254/18255 are absent at the coordinator live check;
+localhost:8085 still serves the accepted v0.3.34 image, ready 200. The reviewer audited cleanup
+records without independently repeating live infrastructure queries. Final native/documentation review is clear; exact-head CI, PR, publication and image promotion
+were subsequent gates at that acceptance checkpoint. Candidate CI later passed and PR 81 merged;
+the current post-merge and publication status is recorded in the Remote section above. The failed `4a3fb77` Gear-label attempt and
+the superseded, unexecuted `f150ad5` preparation remain preserved below and contribute no pass.
+
+## Vite advisory follow-up — 2026-10-20 — patched; fresh native acceptance complete
+
+After v0.3.34 publication, its additional [tag workflow](https://github.com/liveweird/grenadiers/actions/runs/39502781824)
+failed the npm security check for Vite 8.3.0's bundled development editor integration:
+[Windows escaping](https://github.com/advisories/GHSA-698v-4r3x-3vcv),
+[editor arguments](https://github.com/advisories/GHSA-r825-w8mm-5pxw), and
+[Windows path check](https://github.com/advisories/GHSA-587h-7wmj-h5pm).
+The earlier candidate/post-merge successes remain historical; the tag's security job is a real
+failure and is not counted as green. The packaged runtime serves compiled assets rather than
+the Vite development server. The immutable v0.3.34 tag is retained.
+
+Power Bomb source `25951426acf1ac0331047096feb452bdd906e11d` pins Vite 8.3.4 with its
+minimal locked build graph. Independent dependency review is clear. A fresh isolated web install,
+full security gate and web/E2E audit JSON report zero vulnerabilities at every severity. The full
+web gate passes 2,429 tests across 49 files, coverage 95.49/91.39/95.61/97.81%, contracts,
+lint, Knip, type checks and the Vite 8.3.4 production build. Core/server, E2E and deployment
+inputs remain unchanged; 49-scenario E2E static parity remains applicable.
+
+The intervening Gear-corrected source `f150ad5cfe10657de42cc84826a0c21e35e35823` was prepared
+successfully but never ran a browser/native case. Its superseded preparation is preserved with
+1,057 sealed payloads, manifest SHA-256
+`3c408f1fc887f1d0f0557c2f6f60fdd164abbc44115f7ddb7e1bfe67419633cd`, plus a byte-verified
+durable copy. The replacement security-patched source and image now pass the fresh 96/96 native
+acceptance recorded above. No result from either earlier Power attempt is carried; final seal is
+complete. Candidate CI was pending at that checkpoint; it later passed and PR 81 merged, while
+the post-merge browser job later passed and v0.3.35 was published as recorded in the Remote
+section above.
+
+
+## Power Bomb native label mismatch — 2026-10-20 — corrected acceptance pending
+
+The first fresh Power Bomb attempt at source `4a3fb776b4dd880e41aac5b5c87ea8d29b721af2`
+exited 1 in its first Compose group: seven cases passed and the rendered duel failed because
+its inherited HUD assertion expected “Gear” while the Power source rendered “Equipment”.
+No later group or Kubernetes case ran; these results supply no Power acceptance.
+Source, dependency, lock, archive and image integrity remained unchanged. The failed run is
+preserved separately; no pass or retry is carried into the replacement run.
+
+The correction restores the previously accepted English “Gear” label and its narrow-HUD
+readability fix (`d360810`), retaining the shared assertion. Power gameplay, Polish text,
+contracts and dependency locks are unchanged. Corrected-source native acceptance and
+exact-head CI were still pending at that checkpoint. The later security-patched source passes
+fresh sealed native acceptance as recorded above; both candidate runs later passed before PR 81
+merged.
+
+
+## Piercing Bomb publication and local deployment — 2026-10-20
+
+PR [80](https://github.com/liveweird/grenadiers/pull/80) merged at `2026-10-20T21:30:49Z` as
+`e2682187d74317a5a29c4322f802b99b1116af7a`, with sole parent
+`27dcf225f3a1f3ef67ee3cf8c52c9d583e7318fd`. Its tree
+`3068e023f1ac759c82844bb7a5f761227c6c4ad8` equals accepted raw source
+`7cba14dd2cc1cd645a5212fd22a59c2873286d74` and the normalized candidate. Candidate
+[PR CI](https://github.com/liveweird/grenadiers/actions/runs/39498552320),
+[push CI](https://github.com/liveweird/grenadiers/actions/runs/39498541031), and
+[post-merge CI](https://github.com/liveweird/grenadiers/actions/runs/39500972778) each pass five
+jobs and 47 browser cases, without failed, flaky, skipped, retry or timeout result markers.
+
+[v0.3.34](https://github.com/liveweird/grenadiers/releases/tag/v0.3.34) was published as a source
+prerelease at `2026-10-20T21:44:22Z`. Additional tag-triggered CI was not complete at that
+checkpoint and supplies no publication evidence. The exact accepted image
+`sha256:5d0bc94c7febc6764b9f875f1273f4d3814077c8d22c2b56b4a2d80fbebbe0e8`
+then served localhost:8085 without rebuilding: readiness, health and index probes returned 200;
+served index and JavaScript bytes matched the container. The v0.3.33 image is retained as a
+local rollback tag. No registry image or hosted deployment is claimed.
+
+## Piercing Bomb fresh native acceptance — 2026-10-20 — 94/94; independently reviewed and sealed
+
+Final raw Slow Foot source `f499f680ac68bc8eed4803e4d3c06152cb89cf64` is integrated,
+including the accepted startup-readiness baseline, stable Long Fuse cursor, corrected predecessor
+browser drivers, final v0.3.33 native evidence and captures. The v0.3.34 version, Piercing Bomb
+behavior, weapon HUD coverage and canonical ten-item catalog remain. The Piercing browser driver
+now returns from the lower-left escape cell through the open (1,1) waypoint instead of attempting
+to cross the hard pillar at (2,2).
+
+Reviewed integrated source `1461f04d1a1b18ade191f282962e677d5ed2a43f` preserves product,
+core, server, API, web, Cargo, lock and deployment inputs byte-for-byte from reviewed Piercing
+source `d1b635fb501336495fa2819392fcc8bc246f25ea`. Using the existing exact locked developer tools,
+the repository check, E2E lint, Knip, type checking and 48-scenario parity pass with actual exit
+zero. Those checks precede frozen native source `dc6266e79ea78b3ea314aa16cd3c31a22a17d7c6`,
+tree `63ea5ed005a2302d32a63eab126ea4c5bd27fa81`.
+
+The single fresh same-image wrapper completes at `2026-10-20T21:01:06Z` with actual exit zero:
+**47/47 Compose and 47/47 Kubernetes**, 36 groups/reports, all ten optional-item scenarios and
+zero retries or carried results. Each target runs 37 baseline cases plus ten feature cases. Image
+`sha256:5d0bc94c7febc6764b9f875f1273f4d3814077c8d22c2b56b4a2d80fbebbe0e8`
+comes from source archive SHA-256
+`90d2285112c64631c5709fb32a96d2672d02df9b3db80c67e370defdc6c52ece`;
+the image, dependency and source-tree tar SHA-256 values are respectively
+`abf66f4fda7e72da4b80f27205850a7b4fc0cd80cbf83f8cc5b67b7f2e753cfc`,
+`db12f2e9df38f1af341bc3554957610970d60451cb223a6d86857c37cd830567` and
+`ca9055ada8da11cdfd1d7f007bdc4f86aed63d099066807139bfb2602326dd8b`.
+The source inventory has 710 files, 80 directories, no symlinks and 31 tracked PNGs. Dependencies
+have 8,186 files, 1,305 directories and 13 symlinks; 132 packages are installed, all 42 omissions
+are optional, and no required package, version or metadata mismatch is reported. Runtime evidence
+contains 90 PNGs, 26 runtime image/security pairs, 13 Kubernetes identities, 12 fixtures and 24
+seed-mode records. The 1,038-entry preparation manifest hashes to
+`884cf6ba4fe5f616f8c04738bebc707b40b2c5840aeccfe72444ea798782b03a`.
+
+The Piercing scenario proves ordinary-key collection and placement, an armed blast continuing
+through breakable blocks `(4,1)` and `(5,1)`, one-charge consumption, and a following fresh
+Standard bomb on both peers. The reviewed Compose [English desktop](screenshots/piercing-bomb-desktop.png)
+and [Polish 320px](screenshots/piercing-bomb-polish-320.png) captures have no observed overlap.
+The compact English four-column HUD wraps “Piercing bomb” inside the word, a nonblocking cosmetic
+preview limitation; Kubernetes captures were retained but not separately viewed.
+
+All four real latency profiles retain 20 observations, and all 22 latency cases per target pass.
+The fixed 250 ms budget, startup-readiness causality checks and zero-retry policy remain unchanged.
+
+| Target | Profile | Samples | Maximum | Exceedances |
+| --- | --- | ---: | ---: | ---: |
+| Compose | local | 20 | 56.044429 ms | 0 |
+| Compose | delay-50ms | 20 | 142.791575 ms | 0 |
+| Kubernetes | local | 20 | 51.750443 ms | 0 |
+| Kubernetes | delay-50ms | 20 | 190.529203 ms | 0 |
+
+Compose CPU usage advances from 702559 to 956078 microseconds; Kubernetes advances from 600100
+to 797327 microseconds. Both throttle-count deltas are zero. Compose retains an unlimited CPU
+quota and Kubernetes retains `50000 100000`. Coordinator-observed worker tasks remained completed
+through measurement; this is not an acknowledgement-only hold or a globally idle-host claim.
+Observed unrelated load included JVM 243.3% and OrbStack 19.7% at Compose capture, and OrbStack
+30.3% at Kubernetes capture; the earlier JVM was not among the Kubernetes top-CPU entries.
+Unrelated processes were not held, and all measurements were retained.
+
+Independent raw evidence review is clear. The final manifest covers 1,987 payloads and hashes to
+`67445cc105afe69d7894b550a70733e6634d1b05d478165c110fbc673a3d5ff7`.
+All 1,988 files including the seal, plus the immutable source archive, have byte-verified durable
+local checkpoint copies. Owned native resources were cleaned. At that native checkpoint,
+exact-head CI, PR, publication and promotion were still pending, and port 8085 served published
+v0.3.33. The later Piercing publication and local-deployment record above documents v0.3.34
+publication and promotion; this paragraph preserves the earlier acceptance state.
+
+The earlier Piercing source passed 1,400 web tests across 47 files with
+95.47/91.35/95.61/97.79% coverage, together with contract checks, lint, Knip and the production
+build. Its E2E lint, Knip, type checking, 37-scenario parity, repository and diff checks also
+passed under Node 24.21.0. Those full-suite and coverage results certify their named source only;
+no new local Rust, web, full-coverage or production-build run is claimed for `1461f04`.
+
+## Slow Foot source-prerelease publication — 2026-10-20
+
+[PR 79](https://github.com/liveweird/grenadiers/pull/79) normalized accepted raw source
+`f499f680ac68bc8eed4803e4d3c06152cb89cf64` to candidate head
+`f3a26f3552902219d3139960a2fe4345113243ce`. Candidate
+[PR run 39487844647](https://github.com/liveweird/grenadiers/actions/runs/39487844647) and
+[push run 39487815667](https://github.com/liveweird/grenadiers/actions/runs/39487815667) each pass
+five jobs and 46 browser cases. Merge head `27dcf225f3a1f3ef67ee3cf8c52c9d583e7318fd`
+has tree `4457ec14280d240ce54b4d4c6064fffa769e9ec6`, byte-equal to the accepted raw tree; post-merge
+[run 39490252393](https://github.com/liveweird/grenadiers/actions/runs/39490252393) also passes five
+jobs and 46 browser cases. All three retained CI records contain no failure, flaky, skipped, retry
+or timeout result markers.
+
+[v0.3.33](https://github.com/liveweird/grenadiers/releases/tag/v0.3.33) was published as a source
+prerelease at `2026-10-20T20:29:15Z` from that merged head and accepted tree. At publication, the
+additional tag-triggered CI run had not completed and supplied no publication evidence. It later
+completed successfully: [run 39492377407](https://github.com/liveweird/grenadiers/actions/runs/39492377407)
+passes five jobs and 46 browser cases. The exact
+accepted image `sha256:6608df856d8d1b0c69b5552ae1ee7d39ff08b0a1fcc4df804fb65806007f54be`
+served `http://localhost:8085` at the local deployment checkpoint: readiness, health and
+index probes returned 200, and the served index and JavaScript bytes equalled the container files.
+The deployment reused the accepted image;
+it did not rebuild it.
+
+## Slow Foot fresh native acceptance — 2026-10-20 — 92/92
+
+Frozen source `dbaa7f84f6013a620ec3f9bea12c02ad0e29d904`, archive SHA-256
+`34db83f3d9a2663797743fa6d905cf00e07a72cb9cc801a4808ff94909d0be07`, builds the logged
+no-cache image `sha256:6608df856d8d1b0c69b5552ae1ee7d39ff08b0a1fcc4df804fb65806007f54be`.
+Image archive SHA-256 is `ce5f2c879aa1f60ebca4246f151e089e454a9caed5bd097558490921f245ed4a`.
+The single complete wrapper invocation exits **0**: **46/46 Compose and 46/46 Kubernetes**,
+34 groups/reports, all nine optional item scenarios, one worker and zero retries or carried results.
+The Slow Foot scenario proves natural collection, one-stack half-rate movement in matching public
+frames, exact wall stop and 600-tick expiry, restored base rate, peer equality and key-release stop.
+The corrected driver uses the open top corridor and direction-matched, unclamped measurement
+windows; product/API/Cargo/web inputs remain byte-identical to the earlier reviewed Slow Foot source.
+
+All four real latency profiles retain twenty observations and complete readiness diagnostics.
+Root independently checks full ingress → dispatch → page causality and the fixed watermark,
+matching endpoint facts, accepted completion, and that every measured key starts afterward.
+All 22 latency cases per target pass; the shaped budget remains 250 ms and retries remain zero.
+
+| Target | Profile | Samples | Startup / fresh publication baseline | Maximum | Exceedances |
+| --- | --- | ---: | ---: | ---: | ---: |
+| Compose | local | 20 | 4253.027 / 108.991 ms | 49.566 ms | 0 |
+| Compose | delay-50ms | 20 | 4891.056 / 186.425 ms | 167.692 ms | 0 |
+| Kubernetes | local | 20 | 4195.146 / 128.683 ms | 49.484 ms | 0 |
+| Kubernetes | delay-50ms | 20 | 4804.694 / 186.585 ms | 178.862 ms | 0 |
+
+Startup includes context creation, joining, countdown and rendering; it has no 250 ms claim.
+These are twenty-observation reference experiments, not Internet-tail or pixel-presentation
+guarantees. Compose has unlimited CPU; Kubernetes retains `50000 100000` (half a CPU).
+Both have zero observed throttle-counter deltas. Three delegated workers hold idle through both
+latency groups. Before Compose measurement, root briefly holds the manual gate for unrelated
+Flow E2E/browser load, preserving the initial snapshot. Measurement begins with that work still
+active and lower observed load: OrbStack 15.7%, Flow E2E app 34.64%. The Kubernetes snapshot
+later has no observed Flow E2E activity and OrbStack 11.5%. Unrelated processes remain untouched;
+no globally idle host or unloaded benchmark is claimed. No measured sample is discarded.
+
+Fresh dependencies contain 8186 files, 1305 directories and 13 symlinks. The installed proof has
+132 packages, 42 optional omissions and zero required omissions or metadata/version mismatches.
+Their tar hashes to `713d056c6a7ca5c7f3064287cf054b7aca1024b8fe21e5c9e2f9f48de89ed07a`.
+The 694 source files, 79 directories, three locks, file modes, symlinks, source/dependency tar
+bytes, semantic proof, image IDs and 1021-entry preparation seal match before and after execution.
+Source-tree tar SHA-256 is `265921a4f1b12a722a2cc0c6127a31c105e8451207fd77f6569003158b33086c`;
+preparation seal SHA-256 is `e589b26a26808dd39e46d14838ed6b51326eee41fe8a2a02c550ad107845dba1`.
+Strict Node/YAML output and all three strict Kubernetes resources pass; the pinned image scan
+reports zero fixable HIGH/CRITICAL findings. The wrapper verifies 86 runtime PNGs and 24 runtime
+image/security records, 12 distinct Kubernetes pod/forward identities and 22 seed-mode records
+across eleven mode-0444 fixtures. Independent live cleanup passes for owned resources, forwards
+and ports. At this native-acceptance checkpoint, default localhost:8085 remained the separately
+published v0.3.32 image; the later v0.3.33 deployment is recorded above.
+
+Root actually viewed both fresh Compose captures: English desktop 1440×2295, SHA-256
+`cc7e4d803ac8078bc7dbf13e0fbe7bfad67eff5e90b4c7d59313bbd98cb315c3`, and Polish 320×3065
+reduced motion, `e53ca7b0979402155738f00d77c992f02a2fbda841a8a633560160514f4ddda6`.
+Both show the exposed pickup before collection, with no active curse/timer. Layouts are readable
+without observed overlap; the Polish browser scenario asserts horizontal overflow is absent.
+Kubernetes captures are not separately viewed. The frozen source's 29 tracked PNGs are distinct
+from the 86 runtime captures. Earlier failed and unexecuted preparations remain immutable history.
+Independent native and documentation reviews are clear. The 1916-entry `FINAL.sha256` seal
+hashes to `b4f287107099c3cbf17940493bb0a550c50336fffa9c751e79d9ece72b34906d`.
+All 1917 evidence files and the source archive are copied and byte-verified outside `/tmp` in the
+private checkpoint, excluded from Git and Docker. At this native checkpoint, exact-head CI,
+merge, post-merge CI and publication were subsequent release gates. The later Slow-foot
+publication record above documents their completion and the published v0.3.33 release.
+
+## Slow-foot accepted-parent integration — 2026-10-20 — before native acceptance
+
+Final raw Diarrhea source `a5787b297d611c51c31523401823a1211470dd13` is integrated,
+including the startup-readiness correction, stable Long Fuse cursor, robust predecessor drivers,
+accepted Long Fuse, Reverse Controls and Diarrhea records, final v0.3.32 evidence and captures,
+and the private checkpoint Docker exclusion. The v0.3.33 version, Slow-foot behavior and canonical
+nine-item catalog remain. Every predecessor item driver matches the reviewed parent except for
+that catalog extension. Core, server, API, Cargo and product web inputs remain byte-unchanged from
+the reviewed Slow-foot tree `c5a7bdeebe677fa9ec0979ace950623dc1a290f3`.
+All 882 web tests across 45 files pass with 95.43/91.25/95.59/97.77% coverage, together
+with contract checks, lint, Knip and the production build. E2E lint, Knip, type checking,
+47-scenario parity, 22-case latency discovery, repository and diff checks pass under Node 24.21.0.
+Independent integration review of the earlier source is clear. Fresh whole 46+46 Slow-foot native
+acceptance (**92 total**) and exact-head CI remain pending. Diarrhea's accepted matrix supplies no carried
+Slow-foot result. The accepted Diarrhea parent is published separately as v0.3.32.
+
+## Slow Foot first native attempt — 2026-10-20 — failed route
+
+Frozen source `5b6845d014fc40a781227611ef8bf257259f5a91` builds image
+`sha256:ae1e5a23bd282a202a076484137f24e21f2fb7cccfd6df1a7e0e7eb085f670fd`.
+The whole wrapper exits **1**: **45 Compose cases pass, Slow Foot fails, and all 46 Kubernetes
+cases are unattempted**. Sixteen groups pass, including all 22 latency cases. Source, dependency,
+lock, mode, tar, preparation-seal and image checks match after execution; owned cleanup passes.
+
+Independent review confirms a test-route defect: the actor escapes to `(1,2)`, then the default
+X-first movement helper tries to reach `(3,1)` by walking into permanent pillar `(2,2)`.
+The east command was observed, both failed captures show the actor at the escape tile with the
+pickup uncollected, and the position wait times out. The failure precedes collection and every
+Slow Foot speed/expiry assertion. The correction adds the ordinary-key waypoint `(1,1)` before
+moving east, preserving product code, helpers, timing, retries and all later assertions.
+
+The failed attempt is sealed with 1458 payload entries; `FINAL.sha256` hashes to
+`76581d3c4d958c06fcdd42a602b4d65806c32ff4ac8721472f3ba9455ded815f`.
+All 1459 files and the source archive are byte-verified outside `/tmp` in the private checkpoint.
+Nothing is reused as acceptance: a new reviewed source, archive, dependency install and image
+must pass the complete **46 Compose plus 46 Kubernetes** matrix with zero retries.
+
+## Slow Foot prepared source blocked before execution — 2026-10-20
+
+The route-corrected source `d9f213a281ea03fe07021b3c0e7b1729725385f6` completes fresh
+preparation, but independent source review blocks browser launch. Its west-wall predicate
+requires `x <= 384`, while the occupied border cell plus the actor footprint clamps the center
+at `x = 1344`. Rate windows can also include frames preceding the intended movement direction.
+The correction requires the exact reachable wall stop and direction-matched, unclamped public
+positions while preserving every 12-tick rate, peer, timer and key-release assertion.
+
+No browser acceptance or native matrix runs against this source. The 1025-entry preparation
+closure seal hashes to `e2c18f776134c3c498e5f6b4e10362b6f4be8b11e9bd150e3591cf4f885eca35`;
+all 1026 files and the source archive are copied and byte-verified outside `/tmp`. This preserves
+an unexecuted preparation, separate from the earlier failed native attempt; neither supplies
+acceptance for the corrected source.
+
+## Diarrhea publication — 2026-10-20 — v0.3.32 published
+
+[v0.3.32](https://github.com/liveweird/grenadiers/releases/tag/v0.3.32) was published as a
+prerelease at `2026-10-20T18:55:48Z` from merged head
+[`5b82b9e72d5aef37546d33ffc82162dbe1bc3063`](https://github.com/liveweird/grenadiers/commit/5b82b9e72d5aef37546d33ffc82162dbe1bc3063).
+Candidate runs [39474746135](https://github.com/liveweird/grenadiers/actions/runs/39474746135)
+and [39474740382](https://github.com/liveweird/grenadiers/actions/runs/39474740382) each pass
+five jobs and 45 browser cases. Post-merge run
+[39477257121](https://github.com/liveweird/grenadiers/actions/runs/39477257121) likewise passes
+five jobs and 45 browser cases; all three runs have zero retry and failure markers. The release
+tree `4e4f0b210f7965ff7040f5db21bce695580fe39e` exactly matches both the merged-head tree and the
+normalized accepted raw-source tree from `a5787b297d611c51c31523401823a1211470dd13`.
+
+## Diarrhea native acceptance after startup readiness correction — 2026-10-20 — 90/90
+
+Frozen source `96e8be6c3d9c3214ab4fe7a15a883c07cae03845`, archive SHA-256
+`1e875463977616fd6418d179f197a4baf101c26f15855d2d67331b0f8d682f54`, builds the logged
+no-cache image `sha256:e37b5708604d5554aab1615cc8c98f6fe978068ed6bbcf80bb7f45c6e168c839`.
+Its saved image archive hashes to
+`e70f64d9b2defb18adc9c7172bd0fcdcfb944576ae0909c3f8543bf9c1f93e6e`.
+The single full wrapper invocation exits **0**: **45/45 Compose and 45/45 Kubernetes** cases,
+including all eight optional item scenarios, one worker and zero retries or carried results.
+The scope adds eleven focused readiness regressions; each target retains two real latency
+profiles with all twenty movement/release observations. All 32 reports and 82 runtime PNGs verify.
+
+Startup now explicitly requires the running phase, both visible canvases and actor focus,
+followed once by two fresh, matching, stationary public revisions above a fixed ingress watermark.
+Accepted witness and head facts prove endpoint-specific ingress → dispatch → page causality;
+all measured key starts follow readiness completion. Startup stages, failures, current heads and
+accepted completion remain independently diagnosable. A later profile failure cannot overwrite
+successful readiness. The movement/release sampler, bomb checks, 250 ms shaped limit, retries and
+timeouts are unchanged. Fresh static checks pass **46 scenario titles** and **22 latency cases**.
+Product/API/Cargo inputs are byte-unchanged from the earlier locally tested Diarrhea source;
+new exact-head CI must still rerun the complete server, web, security and browser gates.
+
+| Target | Profile | Samples | Startup / fresh publication baseline | Maximum | Exceedances |
+| --- | --- | ---: | ---: | ---: | ---: |
+| Compose | local | 20 | 4189.946 / 81.428 ms | 55.767 ms | 0 |
+| Compose | delay-50ms | 20 | 4750.198 / 145.458 ms | 164.019 ms | 0 |
+| Kubernetes | local | 20 | 4148.685 / 80.641 ms | 55.409 ms | 0 |
+| Kubernetes | delay-50ms | 20 | 4776.686 / 126.462 ms | 160.842 ms | 0 |
+
+Startup includes context creation, joining, countdown and first rendering, and has no 250 ms
+performance claim. These are twenty-observation reference experiments, not Internet tail-latency
+or pixel-presentation guarantees. Compose has unlimited CPU; Kubernetes retains its half-CPU
+quota. Both have zero observed throttle-counter deltas. Root verifies current image and, for
+Kubernetes, the live pod UID and forward PID before releasing each latency gate. Three task
+workers hold idle; observed unrelated host processes remain untouched. No globally idle host
+or unloaded hardware benchmark is claimed.
+
+Fresh dependencies contain **8186 files, 1305 directories and 13 symlinks**, without reused caches.
+The exact installed proof has 132 installed packages, 42 optional omissions, zero missing required
+packages and zero metadata/version mismatches. Dependency tar SHA-256 is
+`520934df359487083f4e9d51b107a004bd362c8a465389a81161f81e4c35a3ea`.
+The 682 source files, 78 directories, three locks, files/modes/symlinks, source/dependency tar bytes,
+semantic proof, image IDs and 1008-entry preparation seal match before and after execution.
+The preparation seal hashes to `974c9c7cf0fe809e8d099aa1596b75e306eb99d9cf194dbb7db2985005b9b12a`;
+the sole runner hashes to `918359baf2302f3847b87268b631edb635c0606e7237afa767f68a1bf8006002`.
+Strict Node/YAML success output and all three strict Kubernetes resources pass; the pinned image
+scan reports zero fixable HIGH/CRITICAL findings. All 22 runtime records retain UID/GID65532,
+zero effective capabilities, no privilege escalation and read-only roots. Twenty seeded records
+use ten matching mode-0444 fixtures; eleven Kubernetes pod/forward identities are distinct.
+Owned containers, network, namespace, forwards and ports are removed; independent live cleanup passes.
+
+The first preparation of this source stopped before build or browser execution: npm11 treated
+macOS's `/tmp` alias as an extra linked package absent from its otherwise matching lockfile.
+An offline reproduction proves the false entry; using the physical path fixes it. This completed
+attempt regenerates the archive and installs/builds into entirely fresh paths with canonical
+npm prefix/cache, without changing application lockfiles. The failed setup is durably preserved
+with manifest SHA-256 `4adbd58ead0f14fa3a824dd31df8acb1a5615e96a1b512b78603536da919fb8b`.
+The original 408.754 ms CI counterexample and original 68/68 native source remain separate history.
+
+Root actually viewed and copied both fresh Compose captures: English desktop 1440×2209,
+SHA-256 `cd2609aa7b08d40eadaf90f52cf71e2205eb071849e74830fe67f6765b3eb3a4`, and Polish
+320×2980 reduced motion, `fe08792a273d8cf804d8769eb8acecaba42f10e8dd843210f9b42da6a3b6861e`.
+Both show the exposed pickup before collection, with no active curse/countdown. Layout is readable
+without observed overlap; browser assertions check horizontal overflow. Automatic placement and
+death/reset are assertion evidence, not visible in these stills. The frozen source's 29 tracked
+PNGs are separate from the 82 current runtime captures. Independent native evidence review is
+clear. The 1836-entry `FINAL.sha256` seal hashes to
+`f4c1a79ec36f7cc0e8d962d9883d57011f7f37ff40549d38687e44c38fb9b811`.
+The sealed 1837-file evidence copy and source archive are byte-verified outside `/tmp` under the
+private `.local-checkpoints/2026-10-20/` directory, excluded from Git and Docker. Candidate CI,
+merge, post-merge CI and publication remain separate gates.
+
+## Diarrhea candidate CI counterexample — 2026-10-20 — release blocked
+
+[PR 78](https://github.com/liveweird/grenadiers/pull/78) initially tests normalized head
+`23b033df6422634cecf61f0c89ca9ad46393802b`, whose tree equals raw final source
+`1bf95c6479c87607c6f81c2864a1ca4ba13186ce`. Push run
+[39462992507](https://github.com/liveweird/grenadiers/actions/runs/39462992507) passes four
+non-browser jobs but fails one of twenty shaped latency observations: **408.754 ms > 250 ms**.
+Its browser scope ends **30 passed, one failed, three unattempted**; the later image scan is
+unattempted. Separate PR run
+[39462993184](https://github.com/liveweird/grenadiers/actions/runs/39462993184) passes all five
+jobs and 34 cases. That independent pass does not supersede the failed push run.
+
+The peer publication backlog starts before the first measured key. Node event-loop delay,
+shaper timers, queue limits and clock arithmetic do not explain the excess; saved evidence
+cannot distinguish per-socket delivery from browser/runner scheduling. No underlying product
+or platform cause is proven. The 23-entry private failed-evidence manifest hashes to
+`93f1dccca18173a6044d833cf82a4c834af6f0d6c712d6874b753792a61795d1`.
+
+Independent architecture review identifies a setup gap: round text can precede asynchronous
+first arena rendering, and the round number also appears during countdown. The revised experiment
+requires the actual running phase, both painted canvases and a fresh synchronized public baseline
+once before any measured input, with separately reported startup stage/times and full sanitized
+witness facts on success and failure. Eleven focused readiness cases are added: latency discovery
+is 22 cases and static scenario parity is 46. Focused helper tests and the E2E static gate pass.
+All twenty observations, the 250 ms limit, zero retries and existing timeouts remain.
+Fresh whole native acceptance and new exact-head CI are required for the revised harness;
+the following 68/68 result remains historical evidence for its recorded source only.
+
+## Diarrhea fresh native acceptance — 2026-10-20 — 68/68
+
+Frozen source `bdf33cee9aaf4e5d43bc7fbc663970043eabd255`, source archive SHA-256
+`609b64b312a0eb9f31906e1f58851cc2504d14c38faf7b43286451d381aab346`, builds the logged
+no-cache image `sha256:df3ec56ebb73ee246df4cbe38255843efcc920e2d5df636b47e49d49748245bf`.
+Its saved image archive hashes to
+`ab3ceb25228e9deeddb2c09a2c6cd25f740444c60e6b62ed4570197df1cae9c6`.
+The first and only final wrapper invocation exits **0**, passing **34/34 Compose and 34/34
+Kubernetes** cases with all eight optional scenarios, one worker and zero retries, reruns or
+carried browser results. All 32 reports and 82 configured runtime PNGs verify. Frozen source
+also contains 27 tracked PNGs; those are not counted as current runtime captures.
+
+Fresh Node 24.21.0 installation supplies **8,186 files, 13 symlinks and 1,305 directories**,
+without copying or padding caches. The actual npm-generated hidden lock verifies 132 exact
+installed packages against the frozen lock, with 42 optional omissions and no missing required
+packages or metadata/version mismatches. Pre/post files, directory modes, symlinks, dependency
+tar, source files, all three relative lock records, image IDs and preparation seals match.
+The dependency tar SHA-256 is
+`f4aefcce0df9b15da23cf99158277ea981a64e7f6b06a8f41c196d29fb2c24a7`.
+The pinned browser retains Playwright 1.63.0 and Chrome 153.0.8010.12. Its reviewed harness
+disables jiti filesystem caching and invokes the installed Playwright CLI directly.
+
+An initial preparation attempt stopped before any browser ran: the Node/YAML CLI entry guard
+skipped validation through the `/tmp` alias, and required success output was absent. That
+attempt remains at `/tmp/grenadiers-v0332-oct20-native-setup-failure-1`. The completed source
+archive, fresh dependency installation and logged no-cache image are explicitly reused as
+pre-browser inputs; no browser result is carried. Final preparation invokes the actual checker
+through `/private/tmp`, requires its exact success output and validates all three resources
+with checksum-verified kubeconform 0.8.0, strict Kubernetes 1.33 schemas. The pinned Trivy 0.74
+archive-only scan reports zero fixable HIGH/CRITICAL findings.
+
+The immutable base, reviewed-wrapper addendum and final-wrapper seals are respectively
+`303a59a2601a3aaf561394d465f1b2abf0f6e8dab96b3adcd1fa58e3b6ff5716`,
+`9c5ae140f22dde8349a92bab110d4defd6e6446f21a7e34da9a7a2c79dc9e3a2` and
+`ccbfec6f4ff9842692313302ce5acb6aa0d7b6ca2aa5461eb480ec8bcbc93f6d`.
+Only `run-v0332-native-final.sh` executes the matrix; its SHA-256 is
+`1f9d3a387889a4ff44b973acf24867ccaa2f41666638776614b798f331e5679a`.
+Earlier sealed wrappers remain unchanged as preparation history.
+
+All 22 runtime records use the accepted image with UID/GID 65532, zero effective capabilities,
+no privilege escalation and a read-only root. Ten external mode-0444 fixtures match frozen
+source; 20 seeded runtime records retain that mode. Kubernetes records 11 unique pod UIDs
+and 11 serial port-forwards with checked liveness and complete termination. Owned containers,
+network, namespace, listeners and forwards are removed; independent live cleanup checks pass.
+
+All four latency profiles retain 20 samples and zero exceedances. Compose local/delay-50ms
+maxima are **65.882/178.928 ms**; Kubernetes maxima are **48.430/144.079 ms**. Coordinator
+approvals record fresh scoped worker holds and the current Kubernetes pod/forward identity.
+Unrelated `webbench` load was observed and left intact; these records claim task-owned quiet
+coordination, not a globally idle host or a controlled hardware benchmark.
+
+Root actually viewed and copied the fresh [English desktop](screenshots/diarrhea-desktop.png)
+and [Polish 320px reduced-motion](screenshots/diarrhea-polish-320.png) images. Both show the
+exposed pickup **before collection**, with no active curse/timer; layout was readable without
+observed overlap, and the browser asserts no horizontal overflow. Automatic placement and
+death/reset are proved by assertions rather than these stills. Their SHA-256 values are
+`1fc5dd81a5f54958422b6ea85bf92ca03dafa94e38bd4122ef806cbb0b511a68` and
+`f93728569d91879175ac7e9f36ff380b103e271318324d349a61427915c7e4af`.
+Product and test inputs remain unchanged after the accepted source; only documentation and
+these copied captures change. Independent final evidence, visual and documentation review is clear.
+The 1,848-entry `FINAL.sha256` seal at `/tmp/grenadiers-v0332-oct20-native-acceptance` hashes to
+`f5943f7e78d22b4b7f7131d16eb012262ef2b0963c4b1da9e95231422993f102`.
+Byte-verified copies of the sealed evidence, initial setup attempt and source archive are retained
+outside `/tmp` under `.local-checkpoints/2026-10-20/`, privately excluded from Git and Docker.
+Exact-head CI, merge and publication remain separate gates.
+
+## Diarrhea final-parent integration checkpoint — 2026-10-20
+
+Final raw Reverse Controls source `7cf5a5e86f190789103529e7a810bc7586d6e7d8` is integrated,
+including the stable round/tick placement cursor, final Long Fuse and Reverse Controls native
+records, guide corrections, and all four accepted captures. The v0.3.32 version and canonical
+eight-item catalog remain. Product sources, API, Cargo inputs and every other test input are
+unchanged from `d3c1774`; predecessor scenarios match the reviewed parent apart from the
+canonical catalog. At source freeze, fresh whole 34+34 Diarrhea native acceptance and exact-head
+CI remained required; predecessor acceptance supplied no carried Diarrhea result.
+
+Integrated source `bdf33cee9aaf4e5d43bc7fbc663970043eabd255` passes the current local gates:
+495 core tests, 188 server tests and two doctests in each Rust profile, Rust line coverage
+91.58%, 617 web tests with unchanged coverage floors, 35 static scenarios, both dependency
+audits with zero vulnerabilities, cargo-deny and strict validation of three Kubernetes resources.
+An initial restricted server execution could not bind local sockets; the unchanged gate passes
+with the required permissions. Initial missing-tool setup and the socket failure are retained
+separately. Independent integration review is clear. Fresh same-image native acceptance
+subsequently passes as recorded above; final exact-head CI remains pending.
+
+## Predecessor publication status — verified 2026-10-20
+
+Reverse Controls is published as [v0.3.31](https://github.com/liveweird/grenadiers/releases/tag/v0.3.31)
+from `2b464744822dd08582e3769f5611fecef43e2c0e` through [PR 77](https://github.com/liveweird/grenadiers/pull/77).
+Candidate runs `39120943388` and `39120940237` pass all ten jobs; post-merge run `39122032780`
+passes all five. The additional tag run `39123070723` also completes successfully: exact release
+head, five passing jobs, 33 browser cases, no failure, flaky, skipped, retry or timeout result
+markers. Long Fuse v0.3.30 is also published; its additional tag run `39120430011` passes.
+Pending statements in older source-specific sections describe their recorded checkpoint.
+
+## Reverse Controls fresh native acceptance — 2026-10-18 — 66/66
+
+Frozen source `ba4aa61a16488d3f39d5ee0bd69d2b3956f68f3d`, archive SHA-256
+`8a46016482bf36ff903aeaf5f76af5a720622861ac990a2d9cbf35ad2d6c08e6`, builds fresh no-cache
+image `sha256:7f44bad5be71802e4c35336f0ab53736b75099351e974b34d15b1c54f807bd2e`.
+Its saved archive hashes to
+`928044de2017ec1ce25d119dd6a2f4e5124bac0ee65127bc2a5f49f531010a9d`.
+The first and only wrapper invocation exits **0**, passing **33/33 Compose and 33/33 Kubernetes**
+cases, including all seven optional item scenarios. All 30 HTML reports and 78 configured PNGs
+verify, with no failure screenshots, retries, reruns or carried results. E2E cursor assertions run
+from separately mounted frozen source; the OCI image contains compiled product assets.
+
+The pinned browser runs Node 24.21.0, Playwright 1.63.0 and Chrome 153.0.8010.12. Twenty hardened
+runtime records verify UID/GID 65532, dropped capabilities, no privilege escalation and read-only
+roots. Nine external mode-0444 seeds drive ten fixture identities per target; Kubernetes retains
+ten unique pod UIDs and ten serial direct-pod port-forward lifecycles. Strict 200/JSON/no-store
+probes, pinned archive-only Trivy 0.74 with zero fixable HIGH/CRITICAL findings, the frozen
+Node/YAML checker with required success output, and strict Kubernetes 1.33 validation of all three
+resources pass. Final containers/network/namespace/process/port cleanup passes.
+
+All four latency profiles retain 20 samples, zero exceedances and zero throttling. Compose
+local/delay-50ms maxima are **54.896/164.940 ms**; Kubernetes maxima are **55.388/151.280 ms**.
+Root retained fresh scoped worker acknowledgments and actual current port-forward checks,
+releasing each quiet hold only after the respective eleven-case latency result passed.
+
+Actual pre/post dependency snapshots match: 8,215 files, 13 symlinks, 132 exact installed lock
+entries and 42 optional omissions. Of these inputs, **8,186 package files came from fresh Node 24
+installation and 29 jiti cache inputs were reused from the previously accepted pinned dependency
+input**. All current hashes, tar snapshots, metadata and proofs were generated afresh; no browser
+result was carried. Discarded Node 26 setup, replacement of an uncaptured build by the final
+logged build, and the corrected browser probe are retained as setup history. Frozen source,
+relative source locks, image IDs and the 1,015-entry preparation manifest match after execution.
+Its SHA-256 is `eca5a6fd567aa19fab939845f6bbf67783f0c810c8742f66382007c93fa25e57`.
+
+Sealed evidence at `/tmp/grenadiers-v0331-event-cursor-native-acceptance` includes RESULT,
+root visual review, quiet coordination and independent guard records. Its 1,799-entry final
+manifest hashes to `fcd6be180127f42976e333734354e33dc90367c40dab30624c24579b55d43e76`.
+The original RESULT overstates the still-image review by mentioning an active effect/timer.
+A separate seven-entry visual erratum at `/tmp/grenadiers-v0331-visual-record-correction`,
+manifest SHA-256 `ddb5943ae194dcfb75383b8fb5599b48a1d25c657af2684e939a364d38cd937e`,
+corrects that wording without modifying the original seal or claiming a rerun.
+
+Root actually viewed and copied the fresh [desktop uncollected pickup](screenshots/reverse-controls-desktop.png)
+and [Polish 320px after expiry/release](screenshots/reverse-controls-polish-320.png). Layout and
+localized settings were readable without observed overlap/clipping; exact inversion and expiry
+are established by browser/domain assertions. The capture SHA-256 values are
+`b933ce3d3356433954c0a5332dfe3eb501432ad75a5aebc006e2d8d52eaddffa` and
+`d1328d33e130935218e534fba78516f8f0ff734f13ddbe16e81fbfd9906db3da`.
+Product and test inputs are unchanged after the accepted source; subsequent edits are only
+this documentation and copied captures. Existing local gates remain 479 core, 186 server and
+two doctests in each Rust profile, 482 web tests, 34 static scenarios and unchanged coverage
+floors. Independent final evidence, erratum, capture and documentation review is clear;
+exact-head CI remains pending.
+
+The preceding Long Fuse release is now published as
+[v0.3.30](https://github.com/liveweird/grenadiers/releases/tag/v0.3.30), merged in
+[PR 76](https://github.com/liveweird/grenadiers/pull/76). Candidate runs `39118087194` and
+`39118084669` passed all ten jobs; post-merge run `39119339836` passed all five jobs against
+`894d6fe45a33aada83ca0862c265817220f31db1`, each browser run passing 32 cases. Older pending
+sections below are chronological records for their named source, not current release status.
+
+## Reverse Controls stable-cursor parent acceptance integration — 2026-10-18 — native pending
+
+The final accepted Long Fuse integrated parent `6cd809fea81a9eceef06b2f0a2e7ff7ebeb6b9ef`
+is integrated with its corrected-source 64/64 evidence and actual captures. This preserves
+v0.3.31, the canonical seven-item catalog and the complete stable-cursor driver. Product,
+API, Cargo, version and every test input are byte-unchanged from reviewed `1393950`; only
+documentation and copied parent captures change. Existing 482-web-test and 34-static-scenario
+gates remain applicable. Repository, diff and local document links pass; independent integration
+review is clear. Long Fuse exact-head CI/publication remains independently pending. Reverse
+Controls requires fresh whole 33+33 same-image native acceptance and exact-head CI. Its earlier
+15-case interrupted record supplies no carried results.
+
+## Long Fuse stable-cursor native acceptance — 2026-10-18 — fresh 64/64
+
+Corrected source `e0ffd635f9aa0b25c1f2dc00a5d20d8fc00be831`, archive SHA-256
+`932bb85f796d87502dfa235f25b06fbd02a3735080eb0cfd915067b86a85f146`, builds fresh no-cache
+image `sha256:55aa95c71be6c3373fb119100df3e8d5cb03e9e0738e948c53e7ed2dc4d692f4`.
+Its saved archive hashes to
+`97ee74a408d244807faf7dc1c0ddae4e43d76b568e835d64b308f1f58490b026`.
+The first and only wrapper invocation exits **0**, passing **32/32 Compose and 32/32 Kubernetes**
+cases, including all six optional item scenarios. All 28 reports and 74 configured PNGs verify,
+with no failure screenshots, retries, reruns or carried results. The stable placement cursor
+and valid-zero assertion run from separately mounted frozen E2E source; the application image
+contains the compiled product assets, including the current Gear label and Long Fuse artwork.
+
+The pinned browser is Node 24.21.0, Playwright 1.63.0 and Chrome 153.0.8010.12. Eighteen runtime
+records verify UID/GID 65532, dropped capabilities, no privilege escalation and read-only roots.
+Eight external mode-0444 seeds drive nine fixture identities per target; Kubernetes retains nine
+unique pod UIDs and nine serial direct-pod port-forward lifecycles. Strict 200/JSON/no-store
+probes, archive-only pinned Trivy 0.74 with zero fixable HIGH/CRITICAL findings, the frozen
+Node/YAML checker with required success output, and strict Kubernetes 1.33 validation of all
+three resources pass. Final containers/network/namespace/process/port cleanup passes.
+
+All four latency profiles retain 20 samples, zero exceedances and zero throttling. Compose
+local/delay-50ms maxima are **60.805/159.221 ms**; Kubernetes maxima are **110.890/155.845 ms**.
+Root coordination retains separate fresh scoped worker acknowledgments and actual current
+port-forward checks. Heavy holds end only after the respective eleven-case latency result is
+zero; acknowledgments concern cooperating workers, without claiming global host idleness.
+
+Actual pre/post dependency snapshots match: 8,215 files, 13 symlinks, 132 exact installed lock
+entries and 42 optional omissions. Both dependency tar snapshots hash to
+`daccf3269e949a85682437e8ffdf9694ef4d63c8b465f12c2ce8a595c0afcf4b`.
+Frozen source, source archive, all three identically relative lock records, image IDs and the
+1,001-entry preparation manifest match after execution. This wrapper needs no lock-path repair.
+The preparation manifest SHA-256 is
+`2ba05392949480f5904b4e4a96679b19748eb8ab906f9ac9995a199a4c287516`.
+Sealed evidence at `/tmp/grenadiers-v0330-event-cursor-native-acceptance` includes RESULT,
+root visual review and quiet coordination; its 1,727-entry final manifest hashes to
+`bba883f044653dccc4bb23e2dceda52bf7c3cd9fc6403c9ea6294c740e421f40`.
+Earlier failures, interrupted runs and bookkeeping/provenance exceptions remain separately
+recorded below and supply no cases or captures to this acceptance.
+
+Root visually reviewed and copied the fresh [desktop pickup](screenshots/long-fuse-desktop.png)
+and [Polish 320px active curse](screenshots/long-fuse-polish-320.png). Their SHA-256 values are
+`8340bf832e232e427bc3aac7545ab2c042cd4f39ee9ce0d72fe7bcbd2a732640` and
+`47558bfd4482048979c48d2160088322d58b53cba0189cf53f09b57837840cbb`.
+Product/test inputs remain unchanged after this accepted source; later changes are documentation
+and copied captures. The local baseline remains 466 core, 184 server and two doctests in each
+Rust profile, 409 web tests and 33 static scenarios, with unchanged coverage floors.
+Independent final evidence review is clear; exact-head CI remains pending. Publication is recorded in
+[release notes](https://github.com/liveweird/grenadiers/releases).
+
+## Reverse Controls bounded-history integration — 2026-10-18 — native acceptance pending
+
+The reviewed Long Fuse cursor correction `e0ffd635f9aa0b25c1f2dc00a5d20d8fc00be831` is
+integrated. The inherited Long Fuse scenario matches that source except for the canonical
+seven-item catalog. Product sources, API, Cargo inputs, version and all other test inputs are
+byte-unchanged from `6ac0fc2`; the existing product checks remain applicable. E2E lint, Knip,
+type checking, 34-scenario parity, repository and diff checks pass. Independent integration
+review is clear. Long Fuse requires its corrected fresh native acceptance and final-head CI;
+Reverse Controls then requires that final parent and a new whole 33+33 run. The interrupted
+15-case record below supplies no carried acceptance.
+
+## Long Fuse bounded-history cursor correction — 2026-10-18 — fresh acceptance pending
+
+Candidate `fbc8593088de89dd60ed2457af508240994f83fa` failed both first hosted CI runs:
+PR run `39114204134` and push run `39114201841`. Each passed four non-browser jobs and
+14 browser cases, then failed Long Fuse; the later 17 classic-match/reconnect/latency/control/
+headed/audio cases and built-image scan were unattempted. Neither run was rerun.
+
+Both retained public attachments prove the third manual action placed bomb ID 4 and both peers
+observed its exact 120-tick detonation (PR ticks 2174→2294; push 1958→2078). The observer shifts
+its bounded 512-frame array, while the driver saved its length as a fixed slice index. Once full,
+`slice(512)` stays empty even when the placement event is retained. Placement now selects events
+strictly after the preceding physical tick in the same round, independently of array rotation.
+Manual IDs, valid-zero IDs, captured fuses, escapes, reconnect, expiry, timeouts, retries and
+remaining assertions are unchanged. Failure diagnostics also record the retained frame count.
+
+A focused proof executes the actual old/new helpers against a rotated 512-frame history: the
+old lookup misses a retained ID 0, the corrected lookup finds it, and prior-tick/different-round
+events remain excluded. E2E lint, Knip, type checking, repository checks and 33-scenario parity
+pass. The sealed hosted evidence at `/tmp/grenadiers-v0330-ci-failure` has 37 entries and manifest
+SHA-256 `9610fa8e390f24c1461b6ffc1e42b7b8916ed5bc8bf5d855d7c1b371087ed79c`.
+Fresh source, image, whole 32+32 native acceptance and final-head CI are required. The earlier
+64-case record below certifies only its named source, not this driver correction.
+
+The inherited Reverse Controls source `6ac0fc2` was stopped at its Compose latency gate before
+approving measurements or starting optional/Kubernetes cases. Fifteen Compose cases passed and
+none failed; the directed interruption returned 130. Its isolated evidence at
+`/tmp/grenadiers-v0331-native-acceptance` seals 1,207 entries with manifest SHA-256
+`2aeca61865b4e86fcbac13142518c7d1fdc6af4db2ace5fe035e13a7c4659156`.
+All post-run integrity and cleanup checks pass, but it has no accepted or carryable matrix.
+Reverse Controls requires the corrected final parent and a fresh whole 33+33 run.
+
+## Reverse Controls final-parent integration — 2026-10-18 — native acceptance pending
+
+The final audited Long Fuse parent `2ffb85fcd476bce0fdf1c5fbc979fd78234afc8b` is integrated,
+including all twelve accepted predecessor screenshots and the complete corrected timing drivers.
+The v0.3.31 version and canonical seven-item catalog remain. Product sources, API, Cargo inputs
+and every test input are byte-unchanged from the reviewed integration `9df6c3f`; its 482-test web
+and 34-scenario static gates therefore apply without rerunning them. Repository, diff and local
+document links pass. Long Fuse PR #76 final CI/publication is pending independently. Fresh
+33+33 same-image native acceptance and final-head CI are required for Reverse Controls.
+
+## Diarrhea predecessor-driver integration — 2026-10-18 — acceptance pending
+
+Reviewed Reverse Controls predecessor source `9df6c3fe7026a5a03acc081e1988cde6697a7ef9`
+is integrated, including published Short Flame parent assets and corrected predecessor timing
+scenarios. The v0.3.32 version and exact eight-item catalog remain. Parent native acceptance and
+publication are still pending; their separate results cannot certify Diarrhea. Fresh 34+34 native
+acceptance and final-head CI remain required after integrating the final Reverse Controls parent.
+Integration checks pass under Node 24.21.0: all **617 web tests** across 43 files, coverage
+**95.24/91.03/95.53/97.63%** (statement/branch/function/line), contracts, lint, Knip and
+production build, plus repository checks and E2E lint, Knip, type checking and **35-scenario
+parity**. Core, server, API and Cargo inputs remain byte-unchanged from the reviewed Diarrhea
+candidate. All seven predecessor item scenarios exactly match the reviewed parent apart from
+the canonical eight-item available catalog. These checks establish no native acceptance for
+Diarrhea.
+
 Records below are frozen against their named sources. Publication and later CI status are
 recorded in [release notes](https://github.com/liveweird/grenadiers/releases).
 
@@ -90,8 +939,9 @@ The first server and coverage runs reached the listener suites inside the restri
 failed only because localhost binds returned `PermissionDenied`; their preserved logs distinguish
 that environment failure. Authorized reruns pass without product changes. The first Kubernetes
 validation likewise preserved its sandbox DNS denial before the pinned-schema rerun validated all
-three resources. Independent backend and frontend/E2E reviews are clear. Native browser
-acceptance, candidate-image checks and exact-head CI remain pending.
+three resources. Independent backend and frontend/E2E reviews are clear. At this historical
+checkpoint, native browser acceptance, candidate-image checks and exact-head CI remained pending;
+fresh native results for the integrated source are recorded above.
 
 Backend review added direct regressions for manual Remote detonation with an exhausted entity
 allocator, full bomb capacity, overflowing timed-fuse path and an unrelated held weapon. A second
@@ -232,6 +1082,34 @@ the same automatic bomb and exact natural detonation on both peers without extra
 then clear the curse on death. Focused settings and E2E static checks pass after the copy/assertion
 fixes. Native browser acceptance, candidate-image checks and final-head CI remain pending.
 
+## Reverse Controls predecessor-driver integration — 2026-10-18 — acceptance pending
+
+The reviewed source `6b818f1e7b3663fa05a23ad6d77950f7d677bef7` is integrated, including
+published Short Flame parent assets, corrected predecessor timing scenarios and the valid-zero
+Long Fuse placement assertion. Long Fuse native acceptance is still running against its separate
+source/image; no result from that run certifies Reverse Controls. The v0.3.31 version and exact
+seven-item catalog remain. Fresh 33+33 native acceptance and final-head CI remain required after
+integrating the final Long Fuse release parent.
+
+Integration checks pass under Node 24.21.0: all **482 web tests** across 41 files, coverage
+**95.20/90.94/95.51/97.61%** (statement/branch/function/line), contracts, lint, Knip and
+production build, plus repository checks and E2E lint, Knip, type checking and **34-scenario
+parity**. Core, server, API and Cargo inputs are byte-unchanged from the reviewed Reverse
+Controls candidate; all six predecessor item scenarios match the reviewed Long Fuse source
+apart from the exact seven-item catalog. Independent integration review is clear. These
+checks establish no native acceptance for Reverse Controls.
+
+## Reverse Controls terrain cache integration — 2026-10-18 — refreshed native acceptance pending
+Records below are frozen against their named sources. Publication and later CI status are
+recorded in [release notes](https://github.com/liveweird/grenadiers/releases).
+
+The current terrain-cache/shared-diagnostics integration passes all 482 web tests across 41 files, with coverage
+of 95.20/90.94/95.51/97.61% above the unchanged 85% floors, production and diagnostic-fixture builds, and E2E
+static checks with 34 documented scenarios. Core, server, version and API content are unchanged
+by this integration. Reverse Controls has no completed native baseline. The inherited Heart-only record
+below certifies source `00d76ac9cc08e7bb4627caf7897e02c3f15a43d2`; it includes neither
+Reverse Controls, Long Fuse, Short Flame, Short Fuse, Golden Flame, Shield nor the terrain cache. Fresh native acceptance and final-head CI remain required for this tree.
+
 ## Reverse Controls candidate — 2026-10-18 — local checks complete
 
 The v0.3.31 candidate activates opt-in Reverse Controls for exactly 600 physical ticks. Raw held
@@ -256,6 +1134,140 @@ both peers across three later snapshots spanning six physical ticks; focused Pix
 The native Reverse Controls playthrough and screenshots, candidate-image acceptance, and
 final-head CI remain pending.
 
+## Long Fuse native acceptance — 2026-10-18 — fresh 64/64
+
+Clean source `6b818f1e7b3663fa05a23ad6d77950f7d677bef7`, archive SHA-256
+`4de08782230881d6e9d8d6d25dfaf949bf68fc12529e8d04e0d3ec42ae0bac7e`, builds the fresh
+no-cache image `sha256:89a1158f3bbd726ecee2625353e2c1b03cd269b8e341089afc15a1ae228d16bd`.
+Its saved archive hashes to
+`1b85fdb53c229d719c82036e30289edb17e8ad2a8f713315df1e0b666c853e00`.
+That exact image passes **32/32 Compose and 32/32 Kubernetes** browser cases, first attempts
+with one worker and zero retries, reruns or carried passes. All 28 group exits are zero;
+28 reports retain exactly 74 configured PNGs and no failure captures. The six optional cases
+retain all predecessor coverage and add the ordinary generated Long Fuse pickup route.
+
+The run uses pinned Node 24.21.0, Playwright 1.63.0 and Chrome 153.0.8010.12. Eighteen runtime
+records verify UID/GID 65532, dropped capabilities, no privilege escalation and read-only roots.
+Eight external mode-0444 seeds drive nine fixture identities per target. Kubernetes has nine
+unique pod UIDs and nine direct-pod port-forward lifecycles, stopped and waited before each
+rollout. Strict probes, archive-only Trivy 0.74 scanning with zero fixable HIGH/CRITICAL findings,
+the frozen Node/YAML checker with its required success output, and strict Kubernetes 1.33
+validation for all three resources pass. The production image contains the current web assets;
+the corrected defined-ID assertion belongs to the separately mounted frozen E2E source.
+
+All four latency profiles retain 20 samples, zero exceedances and zero CPU throttling. Compose
+local/delay-50ms maxima are **55.800/145.273 ms**; Kubernetes maxima are **53.308/155.414 ms**.
+Separate root coordination records retain fresh scoped worker acknowledgments for each window.
+The initial sandboxed root process-existence probe was denied before writing any gate; the
+subsequent permitted read-only probe confirmed the current port-forward before K approval.
+
+Isolated read-only browser dependencies have pre-run file, symlink and archive snapshots:
+8,215 files, 13 symlinks, 132 exact lock entries and 42 optional entries. The pre-run tar hashes
+to `daccf3269e949a85682437e8ffdf9694ef4d63c8b465f12c2ce8a595c0afcf4b`; post-run files,
+symlinks and tar bytes match exactly. Source files, lock contents and image IDs also match.
+The original wrapper exited **1 after every case passed**, because pre/post lock records used
+relative versus absolute paths. Both raw records, original mismatch, unmodified wrapper and
+actual PTY exit remain preserved. A separate authorized comparison normalizes only the exact
+evidence prefix, verifies the three unique ordered paths and equal digests, and recomputes the
+actual lock hashes. Remaining image, preparation and cleanup checks then pass separately;
+no browser or harness case was rerun and the wrapper exit is not reported as zero.
+
+Evidence at `/tmp/grenadiers-v0330-zero-id-native-acceptance` seals 1,734 entries with final
+manifest SHA-256 `a9a3085c2371c1b75c3fa20585a46daba4a72ad711728b0f90e9a9eebabc47d6`.
+The unchanged 997-entry preparation manifest hashes to
+`b9b01d0bdace64e5d7e698f0d8f85424f2a18f6660a2c76f63097c178b93e40b`.
+A separate six-entry provenance correction at `/tmp/grenadiers-v0330-native-record-correction`
+hashes to `022b8ae3c46b730ec9ef49558004bbb669f52fb08b826935cd2125a15022e5f3` and corrects
+one original RESULT sentence that attributed the E2E assertion to the production image. The
+original sealed bundle remains unchanged. A preparation-only `google-chrome` command-name
+probe failed before any case and was corrected to the pinned browser's bundled executable;
+its raw failure remains retained. Earlier failed native attempts remain separate and uncarried.
+
+Root visually reviewed and copied the actual Compose [desktop pickup](screenshots/long-fuse-desktop.png)
+and [Polish 320px active curse](screenshots/long-fuse-polish-320.png). Their hashes are
+`1fadf789361cc3365cf745cc0a7f75f113de2bedd1d5afaec1181cbf720770a2` and
+`cdcf7266b724aa917dfc2690e044d6e887ffbd24f994eda0d1a7d9a334580f7a`.
+Independent final evidence review, including the separate provenance correction, is clear;
+final-head CI remains pending. Later changes in this
+increment are documentation and copied captures only; publication is recorded in release notes.
+
+Records below are frozen against their named sources. Publication and later CI status are
+recorded in [release notes](https://github.com/liveweird/grenadiers/releases).
+
+## Long Fuse native scenario observation correction — 2026-10-18 — fresh acceptance pending
+
+The fresh whole-matrix attempt against source `39e764a9a20fc0c25e663fd4921491c5268c8358`
+passed 31 Compose cases and stopped on the Long Fuse case; Kubernetes was not started and no
+result is carried forward. Its failure-safe public attachment conclusively records manual action
+1, bomb ID `0` placed at tick 304 in cell (2,1) with a 120-tick fuse, and exact detonation at tick
+424 on both peers. The actor page remained focused on the courtyard, both actors remained alive,
+and the same round was running. The driver had observed the valid numeric ID `0` but tested it
+with a truthiness assertion, so the poll expired after ten seconds with `Received: 0`. The
+correction accepts any defined bomb ID, including zero; timers, timeouts, retries, product code,
+and the remaining assertions are unchanged.
+
+This attempt retains 31 passed and one failed Compose case, zero Kubernetes cases, 14 HTML
+reports, and 37 PNGs including two failure captures. The sealed evidence is at
+`/tmp/grenadiers-v0330-ready-native-acceptance`: its unchanged 988-entry preparation manifest
+hashes to `9e5b2ddc43d44f8fac51d78d071093c56ba93de5388673e5626636b61243bb95`, and its
+1,380-entry final manifest hashes to
+`0c782387e843cf3c9e8e40a22e9c767e35741c91a8ee8cba5dd3dd21a4aaad86`. Source,
+locks, external dependencies and image IDs matched before and after the run; cleanup passed.
+This is a confirmed driver defect, not a product failure, and fresh full 32+32 native acceptance
+from a new source archive and image remains required.
+
+The first whole native attempt against source `04b89a6257bd965ac93346c662f9e1c05f19af62`
+passed 31 Compose cases and then stopped at the first Long Fuse bomb placement poll; Kubernetes
+was not started. The report retained no command/frame summary, so it cannot distinguish a Space
+command that was not emitted or accepted from a 120-tick bomb that left the latest live state
+before the poll observed it. The final screenshots do not resolve that ambiguity. The failure is
+not attributed to a product focus defect, and none of its passes may be carried forward. The
+later valid-zero-ID diagnosis does not retroactively prove the cause of this earlier attempt;
+its historical cause remains unproven.
+
+The corrected scenario keeps the 120-tick base, captured 240-tick Long Fuse, 600-tick effect,
+timeouts, zero retries and two intended screenshots per target. Each placement now proves the
+exact next manual bomb action and obtains its bomb ID from retained `bombPlaced` history. It also
+proves that the first two escapes leave the actor alive in the same running round, while retaining
+the captured-fuse, detonation, expiry, reconnect, action-floor and final lethal-blast assertions.
+A failure-safe attachment records only whitelisted public command summaries, current public
+actors and bombs, bomb placement/detonation events, round/tick facts and focused DOM identity;
+credentials and private admission frames are excluded. Fresh full 32+32 native acceptance from a
+new source archive and image remains required.
+
+## Long Fuse final-parent integration — 2026-10-18 — native acceptance pending
+
+The final audited Short Flame parent is integrated, including all accepted Heart, Shield,
+Golden Flame, Short Fuse and Short Flame screenshots and corrected native timing drivers.
+The English Gear label, matching web assertions and actor-stat E2E support are retained.
+Core, server, API and Cargo inputs remain unchanged from the reviewed Long Fuse candidate.
+The five predecessor item scenarios remain byte-identical to the accepted parent apart from
+the exact six-item available catalog required by Long Fuse. The Long Fuse scenario retains its
+120-to-240-tick capture proof, exact expiry, ordinary timing restoration, two screenshots per
+target, strict assertions, existing timeouts and zero retries.
+
+The merged tree retains the v0.3.30 six-item catalog. Fresh 32+32 same-image native acceptance
+and final-head CI remain required; no earlier image result certifies Long Fuse.
+
+The full web gate passes **409/409 tests** across 39 files, with statement/branch/function/line
+coverage of **95.17/90.88/95.50/97.59%**, plus contract drift checks, API and application lint,
+Knip, and the production build. Repository guards and E2E lint, Knip, type checking and static
+parity pass all **33 documented scenarios** under the required Node 24.21.0. An initial command
+selected ambient Node 26.11.1 and was rejected by the repository pin before any web task ran;
+the retained successful gate uses the required mise toolchain.
+
+## Long Fuse terrain cache integration — 2026-10-18 — refreshed native acceptance pending
+Records below are frozen against their named sources. Publication and later CI status are
+recorded in [release notes](https://github.com/liveweird/grenadiers/releases).
+
+The current terrain-cache/shared-diagnostics integration passes all 409 web tests across 39 files, with coverage
+of 95.17/90.88/95.50/97.59% above the unchanged 85% floors, production and diagnostic-fixture builds, and E2E
+static checks with 33 documented scenarios. Core, server, version and API content are unchanged
+by this integration. Long Fuse has no completed native baseline. The inherited Heart-only record
+below certifies source `00d76ac9cc08e7bb4627caf7897e02c3f15a43d2`; it includes neither
+Long Fuse, Short Flame, Short Fuse, Golden Flame, Shield nor the terrain cache. Fresh native acceptance and final-head CI remain required for this tree.
+
+
 ## Long Fuse candidate — 2026-10-18 — local checks complete
 
 The v0.3.30 candidate prepares the opt-in Long Fuse curse. Collection refreshes a 600-physical-
@@ -278,6 +1290,110 @@ both cached npm dependency audits, and strict Kubernetes schemas for all three r
 Independent backend and frontend/protocol/browser-scenario review is clear after expiry,
 resume, malformed-effect and screenshot-order regressions. The native Long Fuse playthrough
 and screenshots, final candidate-image acceptance, and final-head CI remain pending. No release or shipped status is claimed.
+
+
+## Long Fuse responsive-HUD integration — 2026-10-18 — native acceptance pending
+
+The inherited two-column narrow HUD and real text-geometry regression are integrated. Core,
+server, Cargo, API, Long Fuse client/protocol/locales and dedicated item scenarios remain
+unchanged from the reviewed Long Fuse candidate. Its unit baseline remains unchanged;
+the production build and E2E static checks pass for this responsive integration.
+Fresh native Compose/Kubernetes acceptance and exact-head CI remain pending.
+
+
+## Short Flame native acceptance — 2026-10-18 — fresh 62/62
+
+Clean source `f3e7bac200115a453cf6819c220b0c4add389583`, archive SHA-256
+`a429ed9ba5dc9a3b1dec2c87eb6a76e132191ed1c0083ffa3f52e90aa824e909`, builds image
+`sha256:85beca611ec288e00e82952d49cde91d285965e9af6cce18b155d7122db5f5d7`.
+The saved image archive hashes to
+`4c0222a4477698c418373f07f84e805d99d8943dd8a69b6770b6acd21a61c25a`.
+Fresh acceptance passes **31/31 Compose and 31/31 Kubernetes**, first test attempts, one
+worker, zero retries, reruns or carried results. Each target retains 26 baseline cases plus
+Heart, Shield, Golden Flame, Short Fuse and Short Flame. The new case proves generated
+collection, real radius-one flames with the ordinary fuse, reconnect, exact physical expiry
+and later base-range damage. Its time-sensitive bomb proof precedes active screenshots.
+
+Four latency profiles retain 20 samples each, zero exceedances and zero CPU throttling.
+Local/shaped maxima are **55.871/159.265ms Compose** and **50.420/181.861ms Kubernetes**.
+Fresh root quiet acknowledgements concern named collaborating workers, not global host
+idleness. All 26 reports and 70 configured PNGs verify, without failure screenshots.
+Sixteen hardened runtime records use the same image: UID/GID 65532, no effective capabilities,
+no-new-privileges and read-only roots. Seven external mode-0444 seeds, eight distinct Kubernetes
+fixture UIDs and eight serial direct-pod forwarding lifecycles verify. Strict exact-200 JSON/
+no-store health/readiness probes and final cleanup of project, network, namespace and ports
+18176/18177 pass. Initial transport probes may repeat; browser test cases have zero retries.
+
+The frozen Kubernetes checker actually runs with Node 24.21 and locked YAML, emitting its
+required success message. Strict Kubernetes 1.33 validates all three resources; pinned archive-only
+Trivy reports zero fixable HIGH/CRITICAL issues. An early unmounted toolchain probe selected
+Playwright 1.64 and failed Chrome lookup before any browser case; the corrected isolated mount
+proves Node 24.21/Playwright 1.63/Chrome 153. Kubeconform's initial missing PATH entry was corrected
+with its checksum-pinned 0.8 archive. The first unmounted probe is described in the sealed
+correction narrative, but its raw command/stdout was not retained; its exact failure cannot be
+independently reconstructed. The corrected mounted toolchain and pre-run dependency proof
+are independently verifiable.
+
+Browser dependencies use an isolated read-only mount outside the writable evidence bind.
+The pre-run archive hashes to
+`af88d6f20f82b7e4f4c230d0dae4a72cc95fa8b553fe4083dc05fc245f283e00`.
+All 8,215 file hashes, 13 symlink targets, source files and lockfiles match before and after
+execution. All 132 installed dependency packages match frozen lock versions/resolved locations/
+integrity; 42 omitted packages are optional. This run records pre-execution dependency bytes,
+unlike the explicitly limited earlier post-run corroboration.
+
+The runtime probe overwrote preparation kubectl version JSON with equivalent plain output.
+The exact overwritten bytes remain separately preserved; reproducing the approved JSON yielded
+its original hash, and restoration is explicitly recorded. The unchanged 984-entry preparation
+manifest verifies, SHA-256
+`8016265ee0ee767ed6c6818a196fa4c41706c4139d24b029c2a3987d11e9e955`.
+No case, source, image, dependency, assertion or timeout changed, and no test was rerun.
+Future preparation uses collision-free `prep-*` version filenames.
+
+Root visually inspected the exposed desktop pickup and active Polish 320px view: clear blue
+pickup, contained Gear label and readable Krótki płomień (0:07), without overlap. Committed
+screenshots are exact accepted copies. Independent final source/image/runtime/evidence review is clear.
+The sealed 1,636-entry final manifest includes RESULT and hashes to
+`bccadc22fba458943fd14a3964124fba287190ad62790455056658a7e9bad90e` at
+`/tmp/grenadiers-v0329-native-acceptance`. Final-head CI remains required.
+
+## Short Flame final-parent integration — 2026-10-18 — native acceptance pending
+
+The final audited Short Fuse parent is integrated, including accepted Heart, Shield, Golden
+Flame and Short Fuse screenshots, the corrected predecessor native timing proofs, and the
+English Gear label and matching tests. Core, server, API and Cargo inputs are unchanged by
+this integration. The four predecessor item scenarios remain byte-identical to the accepted
+parent apart from the exact five-item available catalog required by Short Flame.
+
+The complete web gate passes **368/368 tests** across 39 files, with statement/branch/function/
+line coverage of **95.14/90.82/95.49/97.57%** above the unchanged floors. Contract drift,
+API lint, application lint, Knip and the production build pass. Repository guards and E2E
+lint, Knip, type checking and static parity pass all **32 documented scenarios** under the
+required Node 24.21.0.
+
+The Short Flame timing hardening remains in place: its natural range-one blast is proved before
+the active screenshot, while exact expiry, reconnect and later base-range damage remain strict.
+Fresh 31+31 same-image native acceptance and final-head CI remain required. Future native
+acceptance must hash external E2E dependencies before and after execution, use pinned Node
+24.21, fail fast on static checks, and assert the repository Kubernetes checker's required
+success output. No preceding image result certifies Short Flame.
+
+## Short Flame native timing hardening — 2026-10-18 — fresh acceptance pending
+
+A confirmed native Shield failure showed that language switching and full-page screenshots can
+consume several seconds of a ten-second effect window. Short Flame now captures the narrow Polish
+pickup layout before collection, then plants, proves the captured range, escapes, and observes the
+natural one-cell blast before checking the effect is still active and taking the active screenshot.
+Exact expiry, reconnect, later base-range damage, timeouts, and zero retries remain unchanged.
+E2E lint, Knip, type checking, repository guards, and 32-scenario static parity pass; the
+hardened native scenario remains pending and no native pass is claimed.
+
+## Short Flame terrain cache integration — 2026-10-18 — refreshed native acceptance pending
+
+The terrain-cache/shared-diagnostics integration passes all 368 web tests, with coverage of
+95.14/90.82/95.49/97.57% above the unchanged 85% floors, production and diagnostic-fixture
+builds, and E2E static checks with 32 documented scenarios. Core, server, version and API
+content are unchanged by that integration. Short Flame has no completed native baseline.
 
 ## Short Flame candidate — 2026-10-18 — native acceptance pending
 
@@ -306,6 +1422,103 @@ scenario checks actual one-cell fire reach, unchanged fuse timing on both peers,
 exact expiry and later base-range damage. Its native playthrough, screenshots, same-image
 Compose/Kubernetes **31+31** acceptance and final-head CI remain pending. No release is claimed.
 
+## Short Flame responsive-HUD integration — 2026-10-18 — native acceptance pending
+
+The inherited two-column narrow HUD and real text-geometry regression are integrated. Core,
+server, Cargo, API, Short Flame client/protocol/locales and dedicated item scenarios remain
+unchanged from the reviewed Short Flame candidate. Its unit baseline remains unchanged;
+the production build and E2E static checks pass for this responsive integration.
+Fresh native Compose/Kubernetes acceptance and exact-head CI remain pending.
+
+## Short Fuse native acceptance — 2026-10-18 — fresh 60/60
+
+Clean source `05e0427f22a1337e10232485a981513f76f77ef6`, archive SHA-256
+`fa2005b453f1510a3860383c6c0a3af61cbcb4424abab40fe62f6bb60a3abc0a`, builds image
+`sha256:9ab5888eac85289562af5b9d31b8b073c2782b84fd3a6719c69f1c6c82c21db0`.
+The saved image archive hashes to
+`68f32981dfc5d34570de95540ec4dedba85f133013f892cd051a85662de5df58`.
+Fresh acceptance passes **30/30 Compose and 30/30 Kubernetes**, first test attempts, one
+worker, zero retries and no carried results. Both targets retain all 26 preceding baseline cases
+plus Heart, Shield, Golden Flame and Short Fuse. The Short Fuse case proves generated pickup,
+captured 150-tick timing, real natural detonation, reconnect, exact physical expiry and a later
+ordinary 300-tick bomb. Screenshots follow the time-sensitive bomb proof.
+
+Four latency profiles retain 20 samples each, zero exceedances and zero CPU throttling.
+Local/shaped maxima are **48.106/163.375ms Compose** and **52.593/159.301ms Kubernetes**.
+Root's separate quiet acknowledgements cover named collaborating workers, not global host
+idleness. Strict exact-200 JSON/no-store probes, hardened runtime, external mode-0444 fixtures,
+seven fresh pod UIDs, serial direct-pod forwarding and complete cleanup pass. Initial transport
+readiness probes may repeat; the no-retry claim concerns browser test cases.
+Pinned archive-only Trivy finds zero fixable HIGH/CRITICAL vulnerabilities; strict Kubernetes
+1.33 validates all three resources. All 24 reports and 64 configured PNGs verify, without failure
+captures. The accepted source includes the final audited Golden Flame parent and timing fixes.
+
+Root visually inspected the exposed desktop pickup and active Polish 320px view. The icon,
+Short Fuse timer and contained stat cells are readable; Gear now fits the desktop inventory
+label. Committed screenshots are exact accepted copies. Independent final evidence review, including the corrective bundles below, is clear. The sealed 1,271-entry final manifest hashes to
+`8509a86187966a50e9975a272235ba1ad897895b56e0a5e863f3919b39d6e8bd`. Preparation manifest retains 692 entries, SHA-256
+`ec7d66f3076c5c887f867d65ebb958f30560c8fb2414ef42c8feef57620ebdf3`.
+Evidence: `/tmp/grenadiers-v0328-native-acceptance`.
+
+The original sealed RESULT overclaimed the repository-specific Kubernetes checker: its log
+records a missing YAML dependency, while only kubeconform passed. A separate corrective
+addendum runs the exact frozen checker and original rendered input successfully with Node
+24.21 and its locked YAML dependency; a fresh frozen-source render is byte-identical. The
+checker emits the required single-owner-invariant success message. An initial `/tmp` invocation
+silently skipped its entry guard; that empty attempt is retained, followed by a successful
+canonical `/private/tmp` invocation. Original browser results and seals remain intact.
+The correction contains 251 manifest entries, SHA-256
+`ba0ee3bfa8326da7e8d6a66cc29a6bf32da1eff0f56d463bb01f8f2d2e03325b`, at
+`/tmp/grenadiers-v0328-k8s-check-correction`.
+
+The original external E2E dependency mount was read-only but lacked a pre-execution content
+hash. The addendum retains a post-run archive and 8,215 file hashes: all 132 installed packages
+match frozen lock versions, resolved locations and integrity; 42 omissions are optional. File
+mtimes predate the first case. This corroborates the dependency record without proving historical
+bytes. Future acceptance requires dependency hashes before and after execution, pinned Node,
+fail-fast static checks and an explicit checker success-output assertion.
+
+The same retrospective static-gate correction applies to accepted v0.3.25–v0.3.27 inputs:
+their complete checker, dependency lock and canonical rendered manifest are byte-identical
+to the successful correction. v0.3.26/v0.3.27 retained the same missing-dependency error;
+v0.3.25 did not retain a checker success line, so its original execution is unproven. The
+11-entry identity bundle at `/tmp/grenadiers-v0325-v0327-k8s-identity-correction` hashes to
+`cbd223f21aeecb0ee735c1b4a49ff67070213bf3d51a941d41182ff36348141a`. Earlier native
+cases, source/image seals, release tags and independent CI results remain unchanged.
+
+## Short Fuse final-parent and HUD integration — 2026-10-18 — native acceptance pending
+
+The final audited Golden Flame parent is integrated, including the corrected Shield/Golden
+native timing proofs and accepted Heart/Shield/Golden screenshots. Production/core/server/API/
+Cargo inputs are unchanged by this parent merge. Its three predecessor item scenarios are
+byte-identical to the accepted parent apart from the exact four-item available catalog.
+E2E lint, Knip, type checking, repository guards and 31-scenario static parity pass.
+
+The English HUD label now reads Gear to avoid splitting Equipment's final letter in narrow
+desktop stat cells; Polish terminology and inventory behavior are unchanged. All 339 web tests
+and the production build pass, with coverage 95.11/90.80/95.50/97.56%. The existing inventory
+and native label assertions remain intact with the updated copy. Fresh 30+30 same-image native
+acceptance and final-head CI remain required; no preceding image result certifies Short Fuse.
+
+## Short Fuse native timing hardening — 2026-10-18 — fresh acceptance pending
+
+A confirmed native Shield failure showed that language switching and full-page screenshots can
+consume several seconds of a ten-second effect window. Short Fuse now captures the narrow Polish
+pickup layout before collection, then plants and proves the captured 150-tick fuse, escapes, and
+observes natural detonation before checking the effect is still active and taking the active
+screenshot. Exact expiry, reconnect, later 300-tick bomb proof, timeouts, and zero retries remain
+unchanged. E2E lint, Knip, type checking, repository guards, and 31-scenario static parity pass;
+the hardened native scenario remains pending and no native pass is claimed.
+
+## Short Fuse terrain cache integration — 2026-10-18 — refreshed native acceptance pending
+
+The current terrain-cache/shared-diagnostics integration passes all 339 web tests, with coverage
+of 95.11/90.80/95.50/97.56% above the unchanged 85% floors, production and diagnostic-fixture builds, and E2E
+static checks with 31 documented scenarios. Core, server, version and API content are unchanged
+by this integration. Short Fuse has no completed native baseline. The inherited Heart-only record
+below certifies source `00d76ac9cc08e7bb4627caf7897e02c3f15a43d2`; it includes neither
+Short Fuse, Golden Flame, Shield nor the terrain cache. Fresh native acceptance and final-head CI remain required for this tree.
+
 ## Short Fuse candidate — 2026-10-18 — native acceptance pending
 
 The v0.3.28 candidate adds opt-in Short Fuse: a refreshable 600-physical-tick effect that
@@ -328,6 +1541,66 @@ The first server test compile attempted crate-private effect observation; the fi
 public wire state without expanding APIs. The new browser scenario covers captured deadlines,
 actual natural detonation, reconnect and exact expiry. Its native playthrough, screenshots,
 fresh same-image Compose/Kubernetes 30+30 acceptance and final-head CI remain pending.
+
+
+## Golden Flame corrected native acceptance — 2026-10-18 — fresh 58/58
+
+Clean source `b39f1b915aa4dc2b37707136af03224802d4347a`, archive SHA-256
+`86ed52ab0c4e6f5a7dc8a15ddf4eb9f1102a0b5fe14424599a5626295216fd52`, builds image
+`sha256:673f674f97f529a1dce143935c65d5aa8f7e525ff3f2ea9ae6f50e3154a124b0`.
+The saved image archive hashes to
+`806359661d891fc87a647145754b2c0b34824055234c8358e1be1ae7b7f6ad46`.
+Fresh acceptance passes **29/29 Compose and 29/29 Kubernetes**, first test attempts, one
+worker, zero retries and no carried results. Both targets retain all previous 26 cases plus
+Heart, Shield and Golden Flame. The Golden case proves ordinary generated collection,
+captured radius eight, natural detonation, reconnect, exact physical expiry and later base range.
+
+Four latency profiles retain 20 samples each, zero exceedances and zero CPU throttling.
+Local/shaped maxima are **49.836/167.982ms Compose** and **48.635/166.754ms Kubernetes**.
+Strict exact-200 JSON/no-store readiness probes, hardened runtime, external mode-0444 fixtures,
+six fresh pod UIDs, serial direct-pod forwarding and complete cleanup pass. Bounded initial
+transport-readiness probes retry until ready; the no-retry claim concerns browser test cases.
+Pinned archive-only Trivy finds zero fixable HIGH/CRITICAL vulnerabilities; strict Kubernetes
+1.33 validates all three resources. Scoped quiet acknowledgements concern named workers.
+
+All 22 reports and 58 configured PNGs verify, with no failure captures. Root visually checked
+the exposed desktop flame pickup and active Polish 320px view: clear icon and timer, contained
+stat labels and no overlap. The minor English desktop Equipment final-letter wrap remains a
+readability follow-up. Committed Golden screenshots are exact accepted copies. Independent
+final source/image/runtime/report/evidence audit is clear. The sealed 1,205-entry manifest
+hashes to `a3f3c3b31bc067e55c6863059d1d88d15d0b414cff66b14365a272071eb4dbff` under
+`/tmp/grenadiers-v0327-corrected-native-acceptance`; its 685-entry preparation manifest is intact.
+
+Local baseline remains **426 core, 181 server and two doctests** in each Rust profile, **91.39%**
+Rust line coverage; **320 web tests**, coverage **95.07/90.72/95.47/97.53%**, production/fixture
+builds and 30-scenario static parity pass. Independent implementation/integration reviews are
+clear. Exact-head CI and publication remain required. This post-acceptance update changes only
+documentation and screenshot copies. The failed catalog attempt below remains separate.
+
+## Golden Flame shared catalog correction — 2026-10-18 — fresh acceptance pending
+
+The first native attempt against source `8cec8e89702e903f15c9a2d160a9d9543743ced9`
+passed seven default Compose cases and failed the eighth: the shared round scenario still
+expected the earlier Heart/Shield catalog, while the server correctly advertised Golden Flame
+as well. The dedicated Golden Flame scenario already expected the correct three-item catalog.
+The corrected shared scenario retains an exact ordered catalog assertion and the independent
+empty enabled-item settings assertion. No production behavior, timeout or retry policy changes. E2E lint, Knip, type checking,
+repository guards and 30-scenario static parity pass.
+
+No later Compose group, Kubernetes or latency case ran. The failed first attempt remains sealed
+at `/tmp/grenadiers-v0327-native-acceptance`, 742-entry manifest SHA-256
+`fb3bfe8eed1669168f18792a470aa1b33af80fd95c48ca0caa8f055b40963714`. Its seven passes
+are not carried forward. A complete fresh 58-case native matrix is required for the correction.
+
+## Golden Flame native timing hardening — 2026-10-18 — fresh acceptance pending
+
+A confirmed native Shield failure showed that language switching and full-page screenshots can
+consume several seconds of a ten-second effect window. Golden Flame now captures the narrow
+Polish pickup layout before collection, then plants, verifies the captured range, escapes, and
+observes the natural blast before checking the effect is still active and taking the active
+screenshot. Exact expiry, reconnect, later base-range damage, timeouts, and zero retries remain
+unchanged. E2E lint, Knip, type checking, repository guards, and 30-scenario static parity pass;
+the hardened native scenario remains pending and no native pass is claimed.
 
 ## Golden Flame terrain cache integration — 2026-10-18 — refreshed native acceptance pending
 
@@ -367,46 +1640,6 @@ reconnect action floor and unchanged effect deadline, exact expiry and later rad
 Its actual browser playthrough, screenshots, fresh same-image Compose/Kubernetes29+29 acceptance
 and final-head CI remain pending. Prior candidate image results do not certify this item.
 
-## Diarrhea responsive-HUD integration — 2026-10-18 — native acceptance pending
-
-The inherited two-column narrow HUD and real text-geometry regression are integrated. Core,
-server, Cargo, API, Diarrhea client/protocol/locales and dedicated item scenarios remain
-unchanged from the reviewed Diarrhea candidate. Its unit baseline remains unchanged;
-the production build and E2E static checks pass for this responsive integration.
-Fresh native Compose/Kubernetes acceptance and exact-head CI remain pending.
-
-## Reverse Controls responsive-HUD integration — 2026-10-18 — native acceptance pending
-
-The inherited two-column narrow HUD and real text-geometry regression are integrated. Core,
-server, Cargo, API, Reverse Controls client/protocol/locales and dedicated item scenarios remain
-unchanged from the reviewed Reverse Controls candidate. Its unit baseline remains unchanged;
-the production build and E2E static checks pass for this responsive integration.
-Fresh native Compose/Kubernetes acceptance and exact-head CI remain pending.
-
-## Long Fuse responsive-HUD integration — 2026-10-18 — native acceptance pending
-
-The inherited two-column narrow HUD and real text-geometry regression are integrated. Core,
-server, Cargo, API, Long Fuse client/protocol/locales and dedicated item scenarios remain
-unchanged from the reviewed Long Fuse candidate. Its unit baseline remains unchanged;
-the production build and E2E static checks pass for this responsive integration.
-Fresh native Compose/Kubernetes acceptance and exact-head CI remain pending.
-
-## Short Flame responsive-HUD integration — 2026-10-18 — native acceptance pending
-
-The inherited two-column narrow HUD and real text-geometry regression are integrated. Core,
-server, Cargo, API, Short Flame client/protocol/locales and dedicated item scenarios remain
-unchanged from the reviewed Short Flame candidate. Its unit baseline remains unchanged;
-the production build and E2E static checks pass for this responsive integration.
-Fresh native Compose/Kubernetes acceptance and exact-head CI remain pending.
-
-## Short Fuse responsive-HUD integration — 2026-10-18 — native acceptance pending
-
-The inherited two-column narrow HUD and real text-geometry regression are integrated. Core,
-server, Cargo, API, Short Fuse client/protocol/locales and dedicated item scenarios remain
-unchanged from the reviewed Short Fuse candidate. Its unit baseline remains unchanged;
-the production build and E2E static checks pass for this responsive integration.
-Fresh native Compose/Kubernetes acceptance and exact-head CI remain pending.
-
 ## Golden Flame responsive-HUD integration — 2026-10-18 — native acceptance pending
 
 The inherited two-column narrow HUD and real text-geometry regression are integrated. Core,
@@ -414,6 +1647,54 @@ server, Cargo, API, Golden Flame client/protocol/locales and dedicated item scen
 unchanged from the reviewed Golden Flame candidate. Its unit baseline remains unchanged;
 the production build and E2E static checks pass for this responsive integration.
 Fresh native Compose/Kubernetes acceptance and exact-head CI remain pending.
+
+## Shield corrected native acceptance — 2026-10-18 — fresh 56/56
+
+Clean source `be44b8aeae88249b5635ed4424d3f04f7fa33f84`, archive SHA-256
+`62daff016257a425b67340aa0598a4818ab0960d73a4fb6a3f2501995f40d60f`, builds image
+`sha256:3751bcef474c7ca1d09ba30d46846309cfb72f783db36bce5e95be05c24391fb`.
+Its saved archive hashes to `6b3654c71aa2e1117ab5f2828645c9561615b72b031e1277b576233bb50d2890`.
+Fresh acceptance passes **28/28 Compose and 28/28 Kubernetes**, first attempts, one worker,
+zero retries and no carried results. Both targets include all previous 26 cases, Heart and Shield.
+The corrected test proves blast immunity, exact event-derived expiry and later lethal damage.
+
+All four latency profiles retain 20 samples, zero exceedances and zero CPU throttling.
+Local/shaped maxima are **54.531/141.873ms Compose** and **61.247/156.193ms Kubernetes**.
+Strict exact-200 JSON/no-store probes, hardened runtime, external mode-0444 fixtures, five
+fresh pod UIDs, serial direct-pod forwarding and complete cleanup pass. Pinned archive-only
+Trivy finds zero fixable HIGH/CRITICAL vulnerabilities; strict Kubernetes 1.33 validates 3/3
+resources. Quiet acknowledgements cover named workers, without a global host-idle claim.
+
+All 20 reports pass, with 52 fresh PNG checkpoints. Normal failure capture remains enabled;
+no failure PNGs are present. Root visually checked the exposed desktop and active Polish 320px
+Shield views: readable two-column narrow HUD, distinct glyph and timer, no overlap. The minor
+English desktop Equipment final-letter wrap remains a readability follow-up. Committed Shield
+screenshots are exact accepted copies. Independent final source/image/report/evidence audit is clear.
+The sealed 1,127-entry manifest hashes to
+`cc5b06b926398bd0b92c5a89a4c4c3b24675f51ab37d28e10aa53d6d7c3e4a50` under
+`/tmp/grenadiers-v0326-corrected-native-acceptance`; its preparation manifest remains intact.
+
+Local baseline: **413 core, 180 server and two doctests** in each Rust profile, **91.23%**
+Rust line coverage; **304 web tests**, coverage **95.03/90.68/95.43/97.51%**, production/fixture
+builds and 29-scenario static parity pass. Independent implementation and integration reviews
+are clear. Exact-head CI and publication remain required. This post-acceptance change contains
+only documentation and screenshot copies. The earlier failed attempt below remains separate.
+
+## Shield native scenario correction — 2026-10-18 — fresh acceptance pending
+
+The first responsive native attempt passed 27 Compose cases, then failed the Shield scenario;
+Kubernetes did not run. Both retained public streams establish derived collection tick 656, expiry 956,
+second-bomb placement 859 and detonation 1039. The player correctly died after Shield expired:
+language/screenshot work had consumed 203 ticks before placement. This is a scenario timing
+defect; no production simulation change is made. The corrected scenario captures exposed layouts
+before collection, plants immediately, checks detonation precedes the actual Shield deadline,
+and retains the active screenshot after both protection proofs. Existing expiry, survival,
+later death, assertions, timeouts and zero-retry policy remain intact. E2E lint, Knip, typecheck
+and 29-scenario static parity pass after the correction.
+
+Failed evidence remains sealed at `/tmp/grenadiers-v0326-responsive-native-acceptance`,
+886-entry manifest SHA-256 `51ca4c7ef6c1deb724a806335156b6c29b16aaf5832ac57bee3200177ee90d65`.
+No prior result counts toward the required complete fresh 56-case acceptance.
 
 ## Shield responsive-HUD integration — 2026-10-18 — native acceptance pending
 
@@ -455,16 +1736,44 @@ focused run verifies the strengthened bomb-placement assertion in both build pro
 No v0.3.26 native image, full browser scenario run or release is claimed. Native Compose and
 Kubernetes acceptance, visual inspection and exact final-head CI remain required.
 
-## Heart responsive-HUD integration — 2026-10-18 — fresh native acceptance pending
+## Heart responsive-HUD integration — 2026-10-18 — fresh native 54/54
 
-The accepted parent's two-column narrow HUD and real text-geometry regression are integrated.
-Core, server, Cargo, API, Heart client/protocol/locales and all dedicated item scenarios remain
-unchanged from the independently reviewed Heart cache candidate. Its **287 web tests** and
-coverage **94.80/90.36/94.72/97.31%** remain the local unit baseline. The new production build
-and E2E lint, Knip, typecheck and 28-scenario static parity pass. Fresh image acceptance and exact-head CI remain
-required for this tree. The inherited Heart source `00d76ac9cc08e7bb4627caf7897e02c3f15a43d2`
-certifies Heart only and excludes terrain caching and responsive layout; the parent v7 result
-below does not certify Heart.
+Clean source `2f86fc96f4f562871ed962052c1f0f1b74d53881`, archive SHA-256
+`7fa83c1139e1e0487b91ef2328db7d05d932146f3ff55b39d4f1a47123c95579`, builds the new image
+`sha256:e8de9c77597e5c94fe5c406994d55ab7e776c0696b5ec3333f9f46273166ea09`.
+Its saved archive hashes to `93c50da1b8f0a5d25b351778aa346b83abce89fb2235df1ee20f45f9f37e79de`.
+Fresh acceptance passes **27/27 Compose and 27/27 Kubernetes**, first attempts, one worker,
+retries zero and no carried results. Both runtimes include all previous 26 cases plus Heart.
+
+Four latency profiles retain 20 samples each, zero exceedances and zero CPU throttling.
+Local/shaped maxima are **51.386/160.103ms Compose** and **52.320/160.583ms Kubernetes**.
+Strict exact-200 JSON/no-store probes, hardened runtime, external mode-0444 fixtures, four
+fresh pod UIDs, serial direct-pod forwarding and complete cleanup pass. Pinned archive-only
+Trivy finds zero fixable HIGH/CRITICAL vulnerabilities; strict Kubernetes 1.33 validates three
+resources. Quiet acknowledgements cover named local workers, without a global host-idle claim.
+
+All 18 reports pass and 46 fresh PNGs remain. Capture profiling is unset and normal failure
+capture is preserved. Root visually checked the readable Polish 320px equipment/protection HUD
+and English desktop pickup. English desktop Equipment wraps its last letter; this minor label
+readability follow-up does not cause overlap. Committed Heart screenshots are exact accepted
+PNG copies. Independent final source/image/report/evidence audit is clear. The sealed 1,062-entry manifest hashes
+to `fd296568303671e0c44736e0ba480e9334414ed4660a892a71845c70695185d5` under
+`/tmp/grenadiers-v0325-fresh-responsive-acceptance`.
+
+Core/server/Cargo/API and dedicated item scenarios remain unchanged from the reviewed Heart
+cache candidate: **401 core, 179 server and two doctests** in each Rust profile, line coverage
+**90.94%**. Its **287 web tests**, coverage **94.80/90.36/94.72/97.31%**, production/fixture
+builds and 28-scenario static checks pass. Fresh responsive production build/static checks pass.
+Exact-head CI and publication remain required. The post-acceptance update changes documentation
+and screenshot copies only.
+
+An earlier attempt paired the new source archive with the historical `35bf3678` image by
+mistake. It is **invalid**, with no candidate passes or failures counted. Its observed match
+geometry failure and cleanup are preserved separately in
+`/tmp/grenadiers-v0325-responsive-native-acceptance`, 698-entry partial manifest
+`f6b5ec3a6cc0c2dabd62f816e19c39bd549f05fd294afbbb3085eb66b5d2f75f`.
+The complete run above builds and uses the correct new image throughout. Setup-only corrections
+before that browser launch are retained in its evidence; no valid browser case was rerun.
 
 ## Heart activation candidate — 2026-10-18 — native baseline 54/54
 

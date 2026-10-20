@@ -22,9 +22,22 @@ The HUD shows the stored weapon and armed Remote state independently. A placed R
 antenna and no burning-fuse spark; the bomb-key hint changes to the localized detonation action
 while the owner has an armed bomb.
 
+## Native acceptance
+
+Fresh same-image acceptance passes all 49 Compose and 49 Kubernetes cases with zero retries.
+The dedicated paired-browser scenario proves the planted Remote remains live for 183 ticks,
+the next bomb action activates that exact ID without placing another bomb, and the later manual
+placement is a fresh Standard bomb. The reviewed Compose [English desktop](../screenshots/remote-bomb-desktop.png)
+and [Polish 320px](../screenshots/remote-bomb-polish-320.png) captures show the planted Remote at
+(3,1), consumed charge, owner availability zero, both players alive and no flames. The English
+Gear label fits normally; the Polish view uses vertical scrolling and shows the unfocused-arena
+prompt. No unintended overlap was observed. Kubernetes screenshots were not visually reviewed.
+The raw evidence audit is clear and its final manifest is sealed. Publication requires final documentation/seal review and exact-head CI.
+
 ## Compatibility
 
-Remote Bomb uses catalog bit 5 and generator weight 15 after Power Bomb. Expanded v5 supports all
+Remote Bomb follows the shipped v0.3.35 Power Bomb parent, whose source prerelease is published
+and whose accepted image is deployed locally. Remote Bomb uses catalog bit 5 and generator weight 15 after Power Bomb. Expanded v5 supports all
 4096 subsets while preserving every prior 2048-mask generator path. Gameplay wire version 8,
 rules version 5, generator version 2, and journal format 2 remain unchanged. The exact twelve-item
 v8 availability array requires a coordinated server and web deployment followed by browser reloads.

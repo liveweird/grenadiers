@@ -27,10 +27,12 @@ is published as a source prerelease. Its final raw source is integrated into the
 [Power Bomb](power-bomb.md) candidate. Power retains its feature and version; local checks and
 independent implementation reviews are clear. Fresh same-image acceptance passes all 48 Compose
 and 48 Kubernetes cases with zero retries; independent evidence review and the final seal are
-clear; exact-head CI and publication remain subsequent gates. Its final accepted raw source is
-integrated into the v0.3.36 [Remote Bomb](remote-bomb.md) source candidate. Remote Bomb retains
-its reviewed one-charge manual-trigger behavior, but fresh native acceptance and final CI remain
-pending. Expanded-v5/generator-v2 rooms and gameplay-v8 are retained; see
+clear; both five-job candidate CI runs and the five-job post-merge run pass, PR 81 is merged, and
+[v0.3.35](https://github.com/liveweird/grenadiers/releases/tag/v0.3.35) is published as a source
+prerelease and its accepted image is deployed locally. The accepted raw source is integrated into the
+v0.3.36 [Remote Bomb](remote-bomb.md) candidate. Remote Bomb retains its reviewed one-charge
+manual-trigger behavior and passes fresh same-image 49/49 Compose plus 49/49 Kubernetes cases
+with zero retries. The raw evidence audit is clear and sealed; publication requires final documentation/seal review and exact-head CI. Expanded-v5/generator-v2 rooms and gameplay-v8 are retained; see
 [verification](../verification.md) and
 [release notes](https://github.com/liveweird/grenadiers/releases).
 This optional track follows the [backlog](backlog.md), shared settings and

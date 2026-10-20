@@ -1,10 +1,10 @@
 # Changelog
 
-## 0.3.36 — 2026-10-18
+## 0.3.36 — 2026-10-21
 
 - Add opt-in Remote Bomb as a one-charge weapon whose placed bomb waits without a fuse for its owner's next manual bomb action.
 - Preserve fire and chain detonation, transactional action resolution, one armed bomb per owner, and independent replacement weapons.
-- Add the twelfth lobby switch, checked v8 state and events, replay coverage, English and Polish cues, and a deterministic production-seed browser scenario. Native acceptance and final CI remain pending.
+- Add the twelfth lobby switch, checked v8 state and events, replay coverage, English and Polish cues, and a deterministic production-seed browser scenario. Fresh same-image native acceptance passes all 49 Compose and 49 Kubernetes cases with zero retries; the evidence audit is clear and sealed. Publication requires final documentation/seal review and exact-head CI.
 
 ## 0.3.35 — 2026-10-20
 
@@ -12,7 +12,7 @@
 
 - Prepare opt-in Power Bomb as a one-charge weapon consumed only by a successful manual placement.
 - Capture an immutable Manhattan-area blast that ignores obstruction, preserves hard walls as holes, and chains every bomb in range from the pre-explosion world.
-- Add the eleventh lobby switch, checked v8 state and events, replay coverage, English and Polish pixel cues, and a deterministic production-seed browser scenario. Fresh same-image native acceptance passes all 48 Compose and 48 Kubernetes cases; independent evidence review and the final seal are clear; exact-head CI and publication remain subsequent gates.
+- Add the eleventh lobby switch, checked v8 state and events, replay coverage, English and Polish pixel cues, and a deterministic production-seed browser scenario. Fresh same-image native acceptance passes all 48 Compose and 48 Kubernetes cases; independent evidence review, final sealing, both candidate CI runs and the five-job post-merge run pass. PR 81 is merged, [v0.3.35](https://github.com/liveweird/grenadiers/releases/tag/v0.3.35) is published as a source prerelease, and its accepted image is deployed locally.
 
 ## 0.3.34 — 2026-10-20
 

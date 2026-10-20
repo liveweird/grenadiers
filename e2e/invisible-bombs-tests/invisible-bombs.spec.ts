@@ -87,6 +87,7 @@ test('Invisible Bombs hides live bombs and cues until exact expiry', async ({ br
     expect(await two.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false)
     await two.screenshot({ path: info.outputPath('invisible-bombs-before-collection-polish-320-reduced.png'), fullPage: true })
 
+    await moveSeatTo(one, games[0], 'one', { column: 1, row: 1 })
     await moveSeatTo(one, games[0], 'one', { column: 3, row: 1 })
     await expect.poll(() => effectTicks(games[0])).toBeGreaterThan(0)
     const collection = snapshots(games[0]).flatMap(({ events }) => events).find(({ kind }) =>
@@ -116,6 +117,7 @@ test('Invisible Bombs hides live bombs and cues until exact expiry', async ({ br
     await expect.poll(() => snapshots(games[0]).some(({ state }) => state.physicalTick >= privacyStart
       && state.flames.length > 0)).toBe(true)
     await expect.poll(() => latestSnapshot(games[1])!.state.bombs.length + latestSnapshot(games[1])!.state.flames.length).toBe(0)
+    await moveSeatTo(two, games[1], 'two', { column: 13, row: 11 })
     await moveSeatTo(two, games[1], 'two', { column: 12, row: 11 })
     const survivor = await plant(two, games[1], games[1], { column: 12, row: 11 })
     expect(latestSnapshot(games[1])!.state.physicalTick).toBeGreaterThanOrEqual(deadline - 210)

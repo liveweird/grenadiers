@@ -1,14 +1,99 @@
 # Repository verification
 
-## Diarrhea bounded-history integration — 2026-10-18 — native acceptance pending
+## Diarrhea fresh native acceptance — 2026-10-20 — 68/68
+
+Frozen source `bdf33cee9aaf4e5d43bc7fbc663970043eabd255`, source archive SHA-256
+`609b64b312a0eb9f31906e1f58851cc2504d14c38faf7b43286451d381aab346`, builds the logged
+no-cache image `sha256:df3ec56ebb73ee246df4cbe38255843efcc920e2d5df636b47e49d49748245bf`.
+Its saved image archive hashes to
+`ab3ceb25228e9deeddb2c09a2c6cd25f740444c60e6b62ed4570197df1cae9c6`.
+The first and only final wrapper invocation exits **0**, passing **34/34 Compose and 34/34
+Kubernetes** cases with all eight optional scenarios, one worker and zero retries, reruns or
+carried browser results. All 32 reports and 82 configured runtime PNGs verify. Frozen source
+also contains 27 tracked PNGs; those are not counted as current runtime captures.
+
+Fresh Node 24.21.0 installation supplies **8,186 files, 13 symlinks and 1,305 directories**,
+without copying or padding caches. The actual npm-generated hidden lock verifies 132 exact
+installed packages against the frozen lock, with 42 optional omissions and no missing required
+packages or metadata/version mismatches. Pre/post files, directory modes, symlinks, dependency
+tar, source files, all three relative lock records, image IDs and preparation seals match.
+The dependency tar SHA-256 is
+`f4aefcce0df9b15da23cf99158277ea981a64e7f6b06a8f41c196d29fb2c24a7`.
+The pinned browser retains Playwright 1.63.0 and Chrome 153.0.8010.12. Its reviewed harness
+disables jiti filesystem caching and invokes the installed Playwright CLI directly.
+
+An initial preparation attempt stopped before any browser ran: the Node/YAML CLI entry guard
+skipped validation through the `/tmp` alias, and required success output was absent. That
+attempt remains at `/tmp/grenadiers-v0332-oct20-native-setup-failure-1`. The completed source
+archive, fresh dependency installation and logged no-cache image are explicitly reused as
+pre-browser inputs; no browser result is carried. Final preparation invokes the actual checker
+through `/private/tmp`, requires its exact success output and validates all three resources
+with checksum-verified kubeconform 0.8.0, strict Kubernetes 1.33 schemas. The pinned Trivy 0.74
+archive-only scan reports zero fixable HIGH/CRITICAL findings.
+
+The immutable base, reviewed-wrapper addendum and final-wrapper seals are respectively
+`303a59a2601a3aaf561394d465f1b2abf0f6e8dab96b3adcd1fa58e3b6ff5716`,
+`9c5ae140f22dde8349a92bab110d4defd6e6446f21a7e34da9a7a2c79dc9e3a2` and
+`ccbfec6f4ff9842692313302ce5acb6aa0d7b6ca2aa5461eb480ec8bcbc93f6d`.
+Only `run-v0332-native-final.sh` executes the matrix; its SHA-256 is
+`1f9d3a387889a4ff44b973acf24867ccaa2f41666638776614b798f331e5679a`.
+Earlier sealed wrappers remain unchanged as preparation history.
+
+All 22 runtime records use the accepted image with UID/GID 65532, zero effective capabilities,
+no privilege escalation and a read-only root. Ten external mode-0444 fixtures match frozen
+source; 20 seeded runtime records retain that mode. Kubernetes records 11 unique pod UIDs
+and 11 serial port-forwards with checked liveness and complete termination. Owned containers,
+network, namespace, listeners and forwards are removed; independent live cleanup checks pass.
+
+All four latency profiles retain 20 samples and zero exceedances. Compose local/delay-50ms
+maxima are **65.882/178.928 ms**; Kubernetes maxima are **48.430/144.079 ms**. Coordinator
+approvals record fresh scoped worker holds and the current Kubernetes pod/forward identity.
+Unrelated `webbench` load was observed and left intact; these records claim task-owned quiet
+coordination, not a globally idle host or a controlled hardware benchmark.
+
+Root actually viewed and copied the fresh [English desktop](screenshots/diarrhea-desktop.png)
+and [Polish 320px reduced-motion](screenshots/diarrhea-polish-320.png) images. Both show the
+exposed pickup **before collection**, with no active curse/timer; layout was readable without
+observed overlap, and the browser asserts no horizontal overflow. Automatic placement and
+death/reset are proved by assertions rather than these stills. Their SHA-256 values are
+`1fc5dd81a5f54958422b6ea85bf92ca03dafa94e38bd4122ef806cbb0b511a68` and
+`f93728569d91879175ac7e9f36ff380b103e271318324d349a61427915c7e4af`.
+Product and test inputs remain unchanged after the accepted source; only documentation and
+these copied captures change. Independent final evidence, visual and documentation review is clear.
+The 1,848-entry `FINAL.sha256` seal at `/tmp/grenadiers-v0332-oct20-native-acceptance` hashes to
+`f5943f7e78d22b4b7f7131d16eb012262ef2b0963c4b1da9e95231422993f102`.
+Byte-verified copies of the sealed evidence, initial setup attempt and source archive are retained
+outside `/tmp` under `.local-checkpoints/2026-10-20/`, privately excluded from Git and Docker.
+Exact-head CI, merge and publication remain separate gates.
+
+## Diarrhea final-parent integration checkpoint — 2026-10-20
 
 Final raw Reverse Controls source `7cf5a5e86f190789103529e7a810bc7586d6e7d8` is integrated,
 including the stable round/tick placement cursor, final Long Fuse and Reverse Controls native
 records, guide corrections, and all four accepted captures. The v0.3.32 version and canonical
 eight-item catalog remain. Product sources, API, Cargo inputs and every other test input are
 unchanged from `d3c1774`; predecessor scenarios match the reviewed parent apart from the
-canonical catalog. Fresh whole 34+34 Diarrhea native acceptance and exact-head CI remain
-required; predecessor acceptance supplies no carried Diarrhea result.
+canonical catalog. At source freeze, fresh whole 34+34 Diarrhea native acceptance and exact-head
+CI remained required; predecessor acceptance supplied no carried Diarrhea result.
+
+Integrated source `bdf33cee9aaf4e5d43bc7fbc663970043eabd255` passes the current local gates:
+495 core tests, 188 server tests and two doctests in each Rust profile, Rust line coverage
+91.58%, 617 web tests with unchanged coverage floors, 35 static scenarios, both dependency
+audits with zero vulnerabilities, cargo-deny and strict validation of three Kubernetes resources.
+An initial restricted server execution could not bind local sockets; the unchanged gate passes
+with the required permissions. Initial missing-tool setup and the socket failure are retained
+separately. Independent integration review is clear. Fresh same-image native acceptance
+subsequently passes as recorded above; final exact-head CI remains pending.
+
+## Predecessor publication status — verified 2026-10-20
+
+Reverse Controls is published as [v0.3.31](https://github.com/liveweird/grenadiers/releases/tag/v0.3.31)
+from `2b464744822dd08582e3769f5611fecef43e2c0e` through [PR 77](https://github.com/liveweird/grenadiers/pull/77).
+Candidate runs `39120943388` and `39120940237` pass all ten jobs; post-merge run `39122032780`
+passes all five. The additional tag run `39123070723` also completes successfully: exact release
+head, five passing jobs, 33 browser cases, no failure, flaky, skipped, retry or timeout result
+markers. Long Fuse v0.3.30 is also published; its additional tag run `39120430011` passes.
+Pending statements in older source-specific sections describe their recorded checkpoint.
 
 ## Reverse Controls fresh native acceptance — 2026-10-18 — 66/66
 

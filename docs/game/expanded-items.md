@@ -2,17 +2,24 @@
 
 Status: [Heart](heart.md), [Shield](shield.md), [Golden Flame](golden-flame.md),
 [Short Fuse](short-fuse.md) and [Short Flame](short-flame.md) are published through v0.3.29.
-The v0.3.30 [Long Fuse](long-fuse.md) increment passes local checks. Its earlier 64/64 native
-source remains separately recorded; hosted CI exposed a bounded-history driver cursor defect,
-and the correction requires fresh native acceptance and final-head CI. Verification records
-the source-specific results and disclosed post-run bookkeeping exception.
-The v0.3.31 [Reverse Controls](reverse-controls.md) candidate passes local checks. Its earlier
-native run was interrupted before latency/optional/Kubernetes cases; fresh whole acceptance
-and final-head CI remain pending.
-The v0.3.32 [Diarrhea](diarrhea.md) and v0.3.33 [Slow foot](slow-foot.md) candidates pass local
-checks and independent implementation reviews. The final Slow-foot parent is integrated into the
-v0.3.34 [Piercing Bomb](piercing-bomb.md) candidate, which also passes local checks and independent
-implementation reviews. Fresh native acceptance and final-head CI remain pending.
+The v0.3.30 [Long Fuse](long-fuse.md) increment passes local checks and corrected-source native
+acceptance: 32/32 Compose and 32/32 Kubernetes cases, wrapper exit zero, no retries or carried
+results. Independent final evidence review and all required CI pass; v0.3.30 is published. Verification
+retains the earlier hosted failure and separately named source-specific attempts.
+The v0.3.31 [Reverse Controls](reverse-controls.md) increment passes local checks and fresh
+33/33 Compose plus 33/33 Kubernetes acceptance. All required CI passes; v0.3.31 is published.
+The v0.3.32 [Diarrhea](diarrhea.md) increment passes local checks and independent implementation
+reviews and fresh same-image 45/45 Compose plus 45/45 Kubernetes acceptance after the reviewed
+startup-readiness correction. Independent final native review, candidate CI and post-merge CI
+pass; [v0.3.32](https://github.com/liveweird/grenadiers/releases/tag/v0.3.32) is published. The
+original CI counterexample is retained separately. The
+v0.3.33 [Slow foot](slow-foot.md) candidate passes local checks and independent implementation
+reviews and fresh same-image 46/46 Compose plus 46/46 Kubernetes acceptance after reviewed
+browser-driver corrections. All 22 latency cases per target pass; static parity contains 47 scenarios.
+The whole wrapper exits zero with no retries or carried passes. Independent native evidence review
+is clear; final-head CI and publication remain release gates. Its final raw source is integrated
+into the v0.3.34 [Piercing Bomb](piercing-bomb.md) candidate. Piercing retains its feature and
+version but requires post-integration checks, fresh native acceptance and final-head CI.
 Expanded-v5/generator-v2 rooms and gameplay-v8 are retained; see
 [verification](../verification.md) and
 [release notes](https://github.com/liveweird/grenadiers/releases).

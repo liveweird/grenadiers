@@ -2,7 +2,7 @@ import { expect, test, type Page } from '@playwright/test'
 import { expectPaintedCanvas, latestSnapshot, observeGame, visibleActor, type ObservedGame } from '../tests/support/duel'
 import { moveTo } from '../tests/support/movement'
 import { admissionBaseline, disconnectTransport, installTransportProbe } from '../tests/support/reconnect'
-import type { GameServerMessage } from '../../web/src/game/v9/schema'
+import type { GameServerMessage } from '../../web/src/game/v10/schema'
 
 test.beforeAll(() => expect(process.env.E2E_INVISIBILITY_CLOAK_FIXTURE)
   .toBe('arena-v2-invisibility-cloak'))
@@ -68,7 +68,7 @@ test('two browsers observe recipient-private Cloak through reconnect and exact e
     await Promise.all(games.map((game) => expect.poll(() => latestSnapshot(game)?.room.phase.type).toBe('running')))
     expect(latestSnapshot(games[0])!.room.availableItems).toEqual([
       'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch', 'invisibilityCloak',
-      'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls', 'invisibleBombs',
+      'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls', 'invisibleBombs', 'teleporter',
     ])
     await one.getByRole('region', { name: 'Grenadiers courtyard' }).click()
     await moveTo(one, games[0], { column: 2, row: 1 })

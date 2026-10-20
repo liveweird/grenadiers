@@ -2,7 +2,7 @@ import { expect, test, type Page } from '@playwright/test'
 import { latestSnapshot, observeGame, visibleActor, type ObservedGame } from '../tests/support/duel'
 import { moveTo } from '../tests/support/movement'
 import { admissionBaseline, disconnectTransport, installTransportProbe } from '../tests/support/reconnect'
-import type { GameServerMessage } from '../../web/src/game/v9/schema'
+import type { GameServerMessage } from '../../web/src/game/v10/schema'
 
 test.beforeAll(() => expect(process.env.E2E_LONG_FUSE_FIXTURE).toBe('arena-v2-long-fuse'))
 
@@ -80,7 +80,7 @@ test('two browsers collect Long Fuse and restore ordinary bomb timing after its 
     await Promise.all([one, two].map((page) => page.getByRole('button', { name: 'Ready', exact: true }).click()))
     await Promise.all(games.map((game) => expect.poll(() => latestSnapshot(game)?.room.phase.type).toBe('running')))
     expect(latestSnapshot(games[0])!.room.availableItems).toEqual(
-      ['heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch', 'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls', 'invisibleBombs'])
+      ['heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch', 'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls', 'invisibleBombs', 'teleporter'])
     await one.getByRole('region', { name: 'Grenadiers courtyard' }).click()
     await moveTo(one, games[0], { column: 2, row: 1 }); await plant(one, games[0])
     await moveTo(one, games[0], { column: 1, row: 1 }); await moveTo(one, games[0], { column: 1, row: 2 })

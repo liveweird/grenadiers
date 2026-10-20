@@ -2,7 +2,7 @@ import { expect, test, type Page } from '@playwright/test'
 import { expectPaintedCanvas, latestSnapshot, observeGame, visibleActor,
   type ObservedGame } from '../tests/support/duel'
 import { moveSeatTo } from '../tests/support/movement'
-import type { GameServerMessage, Seat } from '../../web/src/game/v9/schema'
+import type { GameServerMessage, Seat } from '../../web/src/game/v10/schema'
 test.beforeAll(() => expect(process.env.E2E_STOPWATCH_FIXTURE).toBe('arena-v2-stopwatch'))
 const snapshots = (game: ObservedGame) => game.frames.filter(
   (frame): frame is Extract<GameServerMessage, { type: 'snapshot' }> => frame.type === 'snapshot',
@@ -78,7 +78,7 @@ test('Stopwatch freezes voluntary actions while Timed bombs pause', async ({ bro
     expect(latestSnapshot(games[0])!.room.availableItems).toEqual([
       'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch',
       'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame',
-      'longFuse', 'reverseControls', 'invisibleBombs',
+      'longFuse', 'reverseControls', 'invisibleBombs', 'teleporter',
     ])
     await Promise.all([
       reveal(one, games[0], 'one', { column: 2, row: 1 },

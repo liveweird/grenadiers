@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test'
 import { latestSnapshot, observeGame, visibleActor, type ObservedGame } from '../tests/support/duel'
 import { moveTo } from '../tests/support/movement'
-import type { GameServerMessage } from '../../web/src/game/v9/schema'
+import type { GameServerMessage } from '../../web/src/game/v10/schema'
 
 test.beforeAll(() => expect(process.env.E2E_PIERCING_BOMB_FIXTURE).toBe('arena-v2-piercing-bomb'))
 
@@ -34,7 +34,7 @@ test('two browsers observe one Piercing Bomb cross two blocks and the next bomb 
       .toBe('running')))
     expect(latestSnapshot(games[0])!.room.availableItems).toEqual([
       'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch', 'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot',
-      'shortFlame', 'longFuse', 'reverseControls', 'invisibleBombs',
+      'shortFlame', 'longFuse', 'reverseControls', 'invisibleBombs', 'teleporter',
     ])
     await one.getByRole('region', { name: 'Grenadiers courtyard' }).click()
     await moveTo(one, games[0], { column: 2, row: 1 })

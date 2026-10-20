@@ -108,6 +108,10 @@ export function makePickup(kind: RenderablePickupKind): Graphics {
     pixels(drawing, PALETTE.blueLight, [[20, 25, 4, 5]])
     pixels(drawing, PALETTE.brick, [[12, 17, 8, 3], [20, 14, 8, 3], [28, 11, 8, 3]])
     pixels(drawing, PALETTE.white, [[14, 14, 3, 6], [30, 8, 3, 6]])
+  } else if (kind === 'slowFoot') {
+    pixels(drawing, PALETTE.deepInk, [[13, 24, 22, 9], [17, 17, 12, 10], [29, 29, 8, 4]])
+    pixels(drawing, PALETTE.brick, [[18, 19, 9, 7], [15, 26, 18, 5]])
+    pixels(drawing, PALETTE.white, [[22, 11, 4, 7], [18, 14, 12, 4], [23, 32, 3, 5]])
   } else if (kind === 'shortFlame') {
     pixels(drawing, PALETTE.deepInk, [
       [16, 31, 17, 4], [18, 24, 13, 8], [21, 18, 7, 8], [23, 14, 3, 6],

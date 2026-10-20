@@ -8,10 +8,16 @@ results. Independent final evidence review and all required CI pass; v0.3.30 is 
 retains the earlier hosted failure and separately named source-specific attempts.
 The v0.3.31 [Reverse Controls](reverse-controls.md) increment passes local checks and fresh
 33/33 Compose plus 33/33 Kubernetes acceptance. All required CI passes; v0.3.31 is published.
-The v0.3.32 [Diarrhea](diarrhea.md) candidate passes local checks and independent implementation
+The v0.3.32 [Diarrhea](diarrhea.md) increment passes local checks and independent implementation
 reviews and fresh same-image 45/45 Compose plus 45/45 Kubernetes acceptance after the reviewed
-startup-readiness correction. Independent final native review is clear; new exact-head CI remains a release gate;
-the original CI counterexample is retained separately.
+startup-readiness correction. Independent final native review, candidate CI and post-merge CI
+pass; [v0.3.32](https://github.com/liveweird/grenadiers/releases/tag/v0.3.32) is published. The
+original CI counterexample is retained separately. The
+v0.3.33 [Slow foot](slow-foot.md) candidate passes local checks and independent implementation
+reviews and fresh same-image 46/46 Compose plus 46/46 Kubernetes acceptance after reviewed
+browser-driver corrections. All 22 latency cases per target pass; static parity contains 47 scenarios.
+The whole wrapper exits zero with no retries or carried passes. Independent native evidence review is clear; final-head
+CI and publication remain release gates.
 Expanded-v5/generator-v2 rooms and gameplay-v8 are retained; see
 [verification](../verification.md) and
 [release notes](https://github.com/liveweird/grenadiers/releases).

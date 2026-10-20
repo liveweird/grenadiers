@@ -170,3 +170,11 @@ Run `E2E_DIARRHEA_FIXTURE=arena-v2-diarrhea npm --prefix e2e run test:diarrhea` 
 seeded cell (3,1) pickup, verifies the server-owned next-tick ordinary bomb without another
 browser bomb action, and observes natural death and a clean next round. Screenshots are taken
 before collection so capture time cannot change the timed behavior.
+
+## Slow-foot production-seed scenario
+
+Run `E2E_SLOW_FOOT_FIXTURE=arena-v2-slow-foot npm --prefix e2e run test:slow-foot` with
+`docker-compose.slow-foot.yaml`. The scenario enables only Slow foot and captures both localized
+views before collection. It measures one stack's half-rate movement and restored base-rate
+movement from authoritative snapshots in unclamped corridor windows, checks exact timers on both
+peers, and verifies key release across later frames. Native execution remains a candidate gate.

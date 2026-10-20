@@ -56,3 +56,8 @@ eighth rule switch before collection. Active-effect presentation also has render
 The refreshed Diarrhea captures come from the corrected-readiness acceptance recorded in
 [verification](../verification.md). Both show the uncollected pickup; the active curse and
 automatic placement are established by renderer/domain and paired-browser assertions.
+
+Slow Foot adds a distinct boot pickup and localized ninth rule switch. Its [English desktop
+and Polish 320px captures](slow-foot.md) show the exposed pickup before collection, with no
+active effect timer. Grouped effect presentation has renderer coverage; speed, independent
+stack deadlines and exact restoration remain authoritative simulation behavior.

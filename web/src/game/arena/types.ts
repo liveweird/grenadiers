@@ -2,7 +2,7 @@ import type { KeyboardBindings } from './bindings'
 
 export type RenderablePickupKind =
   | 'bombCapacity' | 'blastRange' | 'movementSpeed' | 'heart' | 'shield' | 'goldenFlame' | 'shortFuse'
-  | 'diarrhea' | 'shortFlame' | 'longFuse' | 'reverseControls'
+  | 'diarrhea' | 'slowFoot' | 'shortFlame' | 'longFuse' | 'reverseControls'
 interface PresentedActor {
   id: number
   seat: Seat
@@ -14,6 +14,7 @@ interface PresentedActor {
   goldenFlameRemainingTicks?: number
   shortFuseRemainingTicks?: number
   diarrheaRemainingTicks?: number
+  slowFootRemainingTicks?: number[]
   shortFlameRemainingTicks?: number
   longFuseRemainingTicks?: number
   reverseControlsRemainingTicks?: number

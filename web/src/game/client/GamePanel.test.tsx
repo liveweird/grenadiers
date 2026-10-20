@@ -105,6 +105,8 @@ describe('v8 private-state presentation', () => {
       { kind: 'shield', remainingTicks: 120 },
       { kind: 'goldenFlame', remainingTicks: 600 },
       { kind: 'shortFuse', remainingTicks: 599 },
+      { kind: 'slowFoot', remainingTicks: 600 },
+      { kind: 'slowFoot', remainingTicks: 120 },
       { kind: 'shortFlame', remainingTicks: 1 },
     ]
     actor.damageGraceRemainingTicks = 60
@@ -117,12 +119,35 @@ describe('v8 private-state presentation', () => {
     expect(stats).toHaveTextContent('EffectsShield (0:02)')
     expect(stats).toHaveTextContent('Golden flame (0:10)')
     expect(stats).toHaveTextContent('Short fuse (0:10)')
+    expect(stats).toHaveTextContent('Slow foot ×2 (1/4 speed; 0:10, 0:02)')
     expect(stats).toHaveTextContent('Short flame (0:01)')
     expect(stats).toHaveTextContent('Damage grace0:01')
     expect(screen.getByLabelText('Protected from damage')).toHaveTextContent('0:01')
     expect(stats).not.toHaveAttribute('role', 'status')
     expect(stats.closest('[aria-live]')).toBeNull()
     expect(screen.getByText('Round in progress')).toHaveAttribute('aria-live', 'polite')
+  })
+
+  it('groups all six Slow-foot timers in the eight-field HUD in English and Polish', async () => {
+    const current = state()
+    const actor = current.snapshot!.state.actors[0]
+    if (actor.type !== 'visible') throw new Error('expected visible own actor')
+    actor.effects = [600, 540, 420, 300, 180, 60]
+      .map((remainingTicks) => ({ kind: 'slowFoot' as const, remainingTicks }))
+    const view = render(<MantineProvider env="test">
+      <GamePanelView state={current} actions={actions()} />
+    </MantineProvider>)
+    let stats = screen.getByLabelText('Player one upgrades')
+    expect(stats.querySelectorAll('dt')).toHaveLength(8)
+    expect(stats).toHaveTextContent('Slow foot ×6 (1/64 speed; 0:10, 0:09, 0:07, 0:05, 0:03, 0:01)')
+
+    await i18n.changeLanguage('pl')
+    view.rerender(<MantineProvider env="test">
+      <GamePanelView state={{ ...current }} actions={actions()} />
+    </MantineProvider>)
+    stats = screen.getByLabelText('Ulepszenia: Gracz pierwszy')
+    expect(stats.querySelectorAll('dt')).toHaveLength(8)
+    expect(stats).toHaveTextContent('Wolna stopa ×6 (prędkość 1/64; 0:10, 0:09, 0:07, 0:05, 0:03, 0:01)')
   })
 })
 

@@ -270,3 +270,20 @@ docker compose -f docker-compose.yaml -f docker-compose.diarrhea.yaml down
 Deploy the v0.3.32 server and web assets together and reload connected browsers. The exact v8
 `availableItems` array grows to eight entries, so older v8 web clients reject the room even when
 Diarrhea is disabled. No storage migration is required; active matches remain process-local.
+
+## Reproduce opt-in Slow-foot movement
+
+Use the already built candidate image and the pinned production seed:
+
+```sh
+chmod 444 core/tests/fixtures/arena-v2-slow-foot.seed
+docker compose -f docker-compose.yaml -f docker-compose.slow-foot.yaml up -d --no-build --force-recreate app
+E2E_SLOW_FOOT_FIXTURE=arena-v2-slow-foot npm --prefix e2e run test:slow-foot
+docker compose -f docker-compose.yaml -f docker-compose.slow-foot.yaml down
+```
+
+The scenario enables only Slow foot, reveals and collects one generated stack, measures half-rate
+and restored base-rate movement in unclamped corridor windows, and checks both peers' exact timer.
+Deploy the v0.3.33 server and web assets together and reload connected browsers. The exact v8
+`availableItems` array grows to nine entries, so older v8 clients reject the room even when Slow
+foot is disabled. No storage migration is required; active matches remain process-local.

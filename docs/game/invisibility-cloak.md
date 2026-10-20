@@ -19,6 +19,6 @@ the private semantics.
 Version 0.3.38 introduced Invisibility Cloak with generator weight 15 after Landmine. Its expanded
 pool contained 320 entries and preserved every earlier 8192-mask path. That fourteen-item catalog
 supports all 16384 subsets and remains pinned by archived gameplay v8. Active
-[gameplay v9](protocol-v9.md) now has sixteen items through Invisible Bombs and supports all 65536 subsets.
+[gameplay v10](protocol-v10.md) has seventeen items through Teleporter and supports all 131072 subsets.
 Rules version 5, generator version 2 and journal format 2 remain unchanged. Reload older browsers
 when deploying the paired server/web upgrade.

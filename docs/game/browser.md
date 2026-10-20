@@ -62,7 +62,7 @@ Accepted Classic-v7 HUD examples: [English desktop](../screenshots/gameplay-v7-d
 and [Polish 320px](../screenshots/gameplay-v7-polish-320.png). Narrow screens use two stat
 columns; desktop retains four. All eight labels and values wrap within their own cells.
 
-All active-v9 Playwright configurations disable raw framework traces because personal admission
+All active-v10 Playwright configurations disable raw framework traces because personal admission
 frames contain capabilities. Failure screenshots, public reports, and redacted summaries remain.
 Run reconnect acceptance separately with
 `E2E_MATCH_FIXTURE=arena-v1-matches npm --prefix e2e run test:reconnect`.

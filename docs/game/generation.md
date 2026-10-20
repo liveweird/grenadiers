@@ -1,6 +1,7 @@
 # Generated arena API
 
-Status: generator-v1 is active in live classic-v2 rooms.
+Status: generator-v2 is active in live Expanded-v5 rooms. Generator-v1 remains the archived
+Classic profile.
 
 `core::game::generate_arena([u8; 32])` produces `GeneratedArena`. Its getters expose the
 validated arena, concealed `BTreeMap<CellId, PickupKind>`, and private `GenerationRecord`.

@@ -274,6 +274,7 @@ jobs:
             e2e/playwright-slow-foot-report/
             e2e/playwright-landmine-report/
             e2e/playwright-invisibility-cloak-report/
+            e2e/playwright-stopwatch-report/
             e2e/playwright-match-report/
             e2e/playwright-reconnect-report/
             e2e/playwright-controls-report/

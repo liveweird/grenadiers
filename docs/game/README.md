@@ -63,3 +63,4 @@ See the implemented expansion candidates: [Heart](heart.md) and [Shield](shield.
 - [Golden Flame](golden-flame.md): opt-in ten-second maximum-range pickup and captured bomb behavior.
 - [Reverse Controls](reverse-controls.md): opt-in ten-second movement inversion with exact boundaries.
 - [Diarrhea](diarrhea.md): opt-in ten-second automatic ordinary-bomb placement curse.
+- [Slow foot](slow-foot.md): up to six independent ten-second movement-slowing stacks.

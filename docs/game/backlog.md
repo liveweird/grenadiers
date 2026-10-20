@@ -9,12 +9,18 @@ TURN v0.3.16, CONFIG v0.3.17 and the first ART slice v0.3.18 are shipped. Heart
 The v0.3.30 Long Fuse increment passes local checks and fresh 64/64 Compose/Kubernetes browser
 cases against the corrected stable-cursor source, with wrapper exit zero and no retries or
 carried results, and is published. The v0.3.31 Reverse Controls increment also passes fresh
-66/66 native acceptance and all required CI; both are published source prereleases. The v0.3.32 Diarrhea
-candidate passes local checks and fresh corrected-readiness acceptance: 45 Compose plus 45
-Kubernetes cases, with all eight optional item scenarios and zero retries. Independent final native review is clear;
-new exact-head CI remains a release gate. The original shaped-latency CI counterexample and
-source-specific 68/68 native result remain historical evidence. Verification retains source-specific evidence and earlier failed
-or interrupted attempts. The other 14 requested pickups remain outside this increment. Richer transitions
+66/66 native acceptance and all required CI; both are published source prereleases. The v0.3.32
+Diarrhea increment passes local checks and fresh corrected-readiness acceptance: 45 Compose plus
+45 Kubernetes cases, with all eight optional item scenarios and zero retries. Independent final
+native review, candidate CI and post-merge CI pass; [v0.3.32](https://github.com/liveweird/grenadiers/releases/tag/v0.3.32)
+is published. The original shaped-latency CI counterexample and source-specific 68/68 native
+result remain historical evidence. The
+v0.3.33 Slow-foot candidate passes local checks and independent backend/frontend reviews; its
+current scope passes 22 latency cases per target, 47 static scenarios and fresh 46 Compose plus
+46 Kubernetes cases (**92 total**) with zero retries. Independent native evidence review is clear; final-head CI and
+publication remain release gates. Verification retains
+source-specific evidence and earlier failed or interrupted attempts. The other 13 requested
+pickups remain outside this increment. Richer transitions
 and artwork remain follow-up work. See [pixel-art presentation](pixel-art.md),
 [expanded item implementation](expanded-items.md), and
 [release notes](https://github.com/liveweird/grenadiers/releases).
@@ -156,7 +162,7 @@ instant action. Keep both in this requested pickup family without forcing them i
 | ID / pickup | Requested behavior | Decisions / acceptance focus |
 | --- | --- | --- |
 | CURSE-DROP / diarrhea | Automatically drop bombs whenever capacity is available, up to the player's bomb limit. | Bounded attempt cadence, legal placement, capacity release, freeze, special-weapon consumption and remote-trigger behavior; no unbounded same-tick loop. |
-| CURSE-SLOW / slow-foot | Reduce speed by 50%; each additional pickup halves the current effective speed again. | Independent versus refreshed lifetimes, exact expiry restoration, bounded stack count, fixed-point rounding and minimum nonzero movement. |
+| CURSE-SLOW / slow-foot | **Prepared in v0.3.33.** Each pickup halves current effective speed again. | Independent 600-tick lifetimes, exact expiry restoration, six-stack cap, exact fixed-point arithmetic and zero-budget ticks are defined and covered locally; native acceptance remains pending. |
 | CURSE-RANGE / short-flame | Reduce new bombs to one adjacent tile in each blast direction. | Center cell still explodes; precedence with Golden flame, upgrades and special footprints. |
 | CURSE-FUSE / long fuse | Increase new bombs' detonation delay by 100% (double it). | Rounding, stacking/re-pick policy and composition with Short fuse, remote bombs and mines. |
 | CURSE-REVERSE / reverse controls | Up moves down, left moves right, and vice versa. | Apply to logical movement after personal remapping; define held-key transition/expiry without stuck movement or stale replay. |

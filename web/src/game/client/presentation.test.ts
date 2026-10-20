@@ -180,4 +180,19 @@ describe('v8 arena presentation', () => {
     expect(presented.state.actors[0].diarrheaRemainingTicks).toBe(599)
     expect(presented.state.pickups).toEqual(current.snapshot!.state.pickups)
   })
+
+  it('preserves every Slow-foot stack timer for grouped presentation', () => {
+    const current = state()
+    const own = current.snapshot!.state.actors[0]
+    if (own.type !== 'visible') throw new Error('expected visible own actor')
+    own.effects = [
+      { kind: 'slowFoot', remainingTicks: 600 },
+      { kind: 'slowFoot', remainingTicks: 431 },
+      { kind: 'slowFoot', remainingTicks: 12 },
+    ]
+    current.snapshot!.state.pickups = [{ cell: { column: 2, row: 2 }, kind: 'slowFoot' }]
+    const presented = presentSnapshot(current)!
+    expect(presented.state.actors[0].slowFootRemainingTicks).toEqual([600, 431, 12])
+    expect(presented.state.pickups).toEqual(current.snapshot!.state.pickups)
+  })
 })

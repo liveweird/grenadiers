@@ -1,4 +1,5 @@
 use super::State;
+use crate::game::effects::{EffectApplication, MAX_SLOW_FOOT_STACKS};
 use crate::game::events::{EventAudience, StepEvent, StepEventKind};
 use crate::game::pickups::{Pickup, PickupKind};
 use crate::game::simulation::StepError;
@@ -15,17 +16,16 @@ impl State {
         }
         let cells: Vec<_> = self.world.pickups.exposed.keys().copied().collect();
         for cell in cells {
-            let Some(seat) = self.collector_for(cell) else {
+            let kind = self.world.pickups.exposed[&cell].kind();
+            let Some(seat) = self.collector_for(cell, kind, tick) else {
                 continue;
             };
-            let pickup = self
-                .world
-                .pickups
-                .exposed
-                .remove(&cell)
-                .expect("collection candidates came from the exposed layer");
+            let pickup = self.world.pickups.exposed[&cell];
             let actor = &mut self.actors[seat.index()];
-            actor.apply_pickup(pickup, self.rules, tick)?;
+            if !actor.apply_pickup(pickup, self.rules, tick)? {
+                continue;
+            }
+            self.world.pickups.exposed.remove(&cell);
             events.push(StepEvent::new(
                 tick,
                 EventAudience::Both,
@@ -40,11 +40,13 @@ impl State {
         Ok(())
     }
 
-    fn collector_for(&self, cell: CellId) -> Option<SeatId> {
+    fn collector_for(&self, cell: CellId, kind: PickupKind, tick: Tick) -> Option<SeatId> {
         let center = Position::center(cell);
         let distance = |seat: SeatId| {
             let actor = &self.actors[seat.index()];
-            (actor.alive && actor.position.cell() == Some(cell)).then(|| {
+            let eligible = kind != PickupKind::SlowFoot
+                || actor.effects.slow_foot_stacks(tick) < MAX_SLOW_FOOT_STACKS;
+            (actor.alive && eligible && actor.position.cell() == Some(cell)).then(|| {
                 let dx = i64::from(actor.position.x - center.x);
                 let dy = i64::from(actor.position.y - center.y);
                 dx * dx + dy * dy
@@ -69,7 +71,7 @@ impl super::Actor {
         pickup: Pickup,
         rules: crate::game::RulesConfig,
         tick: Tick,
-    ) -> Result<(), StepError> {
+    ) -> Result<bool, StepError> {
         match pickup.kind() {
             PickupKind::BombCapacity => {
                 self.capacity = self
@@ -89,6 +91,7 @@ impl super::Actor {
             | PickupKind::GoldenFlame
             | PickupKind::ShortFuse
             | PickupKind::Diarrhea
+            | PickupKind::SlowFoot
             | PickupKind::ShortFlame
             | PickupKind::LongFuse
             | PickupKind::ReverseControls => {
@@ -97,15 +100,19 @@ impl super::Actor {
                     .timed_effect()
                     .expect("timed pickups map to their effect");
                 let reversed_before = self.effects.reverses_controls(tick);
-                self.effects
+                let application = self
+                    .effects
                     .apply(effect, tick)
                     .map_err(|_| StepError::EffectExpiryOverflow(effect))?;
+                if application == EffectApplication::Ineligible {
+                    return Ok(false);
+                }
                 if self.effects.reverses_controls(tick) != reversed_before {
                     self.pending_turn = None;
                 }
             }
         }
-        Ok(())
+        Ok(true)
     }
 }
 
@@ -115,3 +122,6 @@ mod diarrhea_tests;
 #[cfg(test)]
 #[path = "short_flame_tests.rs"]
 mod short_flame_tests;
+#[cfg(test)]
+#[path = "slow_foot_tests.rs"]
+mod slow_foot_tests;

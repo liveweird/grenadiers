@@ -105,10 +105,16 @@ function visibleActor(state: GameClientState, seat: Seat): VisibleActorView | nu
 function ActorDetails({ actor, copy }: { actor: VisibleActorView; copy: GameCopy }) {
   const equipment = actor.inventory.equipment ? copy.items[actor.inventory.equipment] : copy.stats.none
   const weapon = actor.inventory.weapon ? copy.items[actor.inventory.weapon] : copy.stats.none
-  const effects = actor.effects.length === 0 ? copy.stats.none : actor.effects
+  const slowFoot = actor.effects.filter((effect) => effect.kind === 'slowFoot')
+  const effectLabels = actor.effects.filter((effect) => effect.kind !== 'slowFoot')
     .map((effect) => format(copy.stats.effectTimer, {
       item: copy.items[effect.kind], time: clock(effect.remainingTicks),
-    })).join(', ')
+    }))
+  if (slowFoot.length > 0) effectLabels.push(format(copy.stats.slowFootGroup, {
+    item: copy.items.slowFoot, count: slowFoot.length, multiplier: `1/${2 ** slowFoot.length}`,
+    timers: slowFoot.map((effect) => clock(effect.remainingTicks)).join(', '),
+  }))
+  const effects = effectLabels.length === 0 ? copy.stats.none : effectLabels.join(', ')
   return <>
     <div><dt>{copy.stats.available}</dt><dd>{actor.bombCapacity - actor.liveBombCount}</dd></div>
     <div><dt>{copy.stats.capacity}</dt><dd>{actor.bombCapacity}</dd></div>

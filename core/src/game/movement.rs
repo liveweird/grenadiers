@@ -12,6 +12,7 @@ pub(crate) fn advance_actor(
     actor: &mut Actor,
     turn_assist: i32,
     tick: super::types::Tick,
+    slow_foot_enabled: bool,
 ) -> MovementTrace {
     let mut trace = MovementTrace::new(actor.position);
     let Some(raw_direction) = actor.held.active() else {
@@ -31,7 +32,15 @@ pub(crate) fn advance_actor(
     {
         actor.pending_turn = None;
     }
-    let numerator = actor.residual + actor.speed.units_per_second();
+    // Every supported base rate is divisible by 64, so all six halvings remain exact while the
+    // existing remainder continues to represent coordinate-unit sixtieths.
+    let speed = if slow_foot_enabled {
+        let effective = actor.effects().effective_speed(actor.speed, tick);
+        effective.numerator() / effective.denominator()
+    } else {
+        actor.speed.units_per_second()
+    };
+    let numerator = actor.residual + speed;
     let mut budget = i32::from(numerator / TICKS_PER_SECOND);
     actor.residual = numerator % TICKS_PER_SECOND;
 

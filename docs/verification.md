@@ -1,5 +1,131 @@
 # Repository verification
 
+## Slow Foot fresh native acceptance — 2026-10-20 — 92/92
+
+Frozen source `dbaa7f84f6013a620ec3f9bea12c02ad0e29d904`, archive SHA-256
+`34db83f3d9a2663797743fa6d905cf00e07a72cb9cc801a4808ff94909d0be07`, builds the logged
+no-cache image `sha256:6608df856d8d1b0c69b5552ae1ee7d39ff08b0a1fcc4df804fb65806007f54be`.
+Image archive SHA-256 is `ce5f2c879aa1f60ebca4246f151e089e454a9caed5bd097558490921f245ed4a`.
+The single complete wrapper invocation exits **0**: **46/46 Compose and 46/46 Kubernetes**,
+34 groups/reports, all nine optional item scenarios, one worker and zero retries or carried results.
+The Slow Foot scenario proves natural collection, one-stack half-rate movement in matching public
+frames, exact wall stop and 600-tick expiry, restored base rate, peer equality and key-release stop.
+The corrected driver uses the open top corridor and direction-matched, unclamped measurement
+windows; product/API/Cargo/web inputs remain byte-identical to the earlier reviewed Slow Foot source.
+
+All four real latency profiles retain twenty observations and complete readiness diagnostics.
+Root independently checks full ingress → dispatch → page causality and the fixed watermark,
+matching endpoint facts, accepted completion, and that every measured key starts afterward.
+All 22 latency cases per target pass; the shaped budget remains 250 ms and retries remain zero.
+
+| Target | Profile | Samples | Startup / fresh publication baseline | Maximum | Exceedances |
+| --- | --- | ---: | ---: | ---: | ---: |
+| Compose | local | 20 | 4253.027 / 108.991 ms | 49.566 ms | 0 |
+| Compose | delay-50ms | 20 | 4891.056 / 186.425 ms | 167.692 ms | 0 |
+| Kubernetes | local | 20 | 4195.146 / 128.683 ms | 49.484 ms | 0 |
+| Kubernetes | delay-50ms | 20 | 4804.694 / 186.585 ms | 178.862 ms | 0 |
+
+Startup includes context creation, joining, countdown and rendering; it has no 250 ms claim.
+These are twenty-observation reference experiments, not Internet-tail or pixel-presentation
+guarantees. Compose has unlimited CPU; Kubernetes retains `50000 100000` (half a CPU).
+Both have zero observed throttle-counter deltas. Three delegated workers hold idle through both
+latency groups. Before Compose measurement, root briefly holds the manual gate for unrelated
+Flow E2E/browser load, preserving the initial snapshot. Measurement begins with that work still
+active and lower observed load: OrbStack 15.7%, Flow E2E app 34.64%. The Kubernetes snapshot
+later has no observed Flow E2E activity and OrbStack 11.5%. Unrelated processes remain untouched;
+no globally idle host or unloaded benchmark is claimed. No measured sample is discarded.
+
+Fresh dependencies contain 8186 files, 1305 directories and 13 symlinks. The installed proof has
+132 packages, 42 optional omissions and zero required omissions or metadata/version mismatches.
+Their tar hashes to `713d056c6a7ca5c7f3064287cf054b7aca1024b8fe21e5c9e2f9f48de89ed07a`.
+The 694 source files, 79 directories, three locks, file modes, symlinks, source/dependency tar
+bytes, semantic proof, image IDs and 1021-entry preparation seal match before and after execution.
+Source-tree tar SHA-256 is `265921a4f1b12a722a2cc0c6127a31c105e8451207fd77f6569003158b33086c`;
+preparation seal SHA-256 is `e589b26a26808dd39e46d14838ed6b51326eee41fe8a2a02c550ad107845dba1`.
+Strict Node/YAML output and all three strict Kubernetes resources pass; the pinned image scan
+reports zero fixable HIGH/CRITICAL findings. The wrapper verifies 86 runtime PNGs and 24 runtime
+image/security records, 12 distinct Kubernetes pod/forward identities and 22 seed-mode records
+across eleven mode-0444 fixtures. Independent live cleanup passes for owned resources, forwards
+and ports; default localhost:8085 remains the separately published v0.3.32 image.
+
+Root actually viewed both fresh Compose captures: English desktop 1440×2295, SHA-256
+`cc7e4d803ac8078bc7dbf13e0fbe7bfad67eff5e90b4c7d59313bbd98cb315c3`, and Polish 320×3065
+reduced motion, `e53ca7b0979402155738f00d77c992f02a2fbda841a8a633560160514f4ddda6`.
+Both show the exposed pickup before collection, with no active curse/timer. Layouts are readable
+without observed overlap; the Polish browser scenario asserts horizontal overflow is absent.
+Kubernetes captures are not separately viewed. The frozen source's 29 tracked PNGs are distinct
+from the 86 runtime captures. Earlier failed and unexecuted preparations remain immutable history.
+Independent native and documentation reviews are clear. The 1916-entry `FINAL.sha256` seal
+hashes to `b4f287107099c3cbf17940493bb0a550c50336fffa9c751e79d9ece72b34906d`.
+All 1917 evidence files and the source archive are copied and byte-verified outside `/tmp` in the
+private checkpoint, excluded from Git and Docker. Exact-head CI, merge, post-merge CI and
+publication remain separate release gates.
+
+## Slow-foot accepted-parent integration — 2026-10-20 — before native acceptance
+
+Final raw Diarrhea source `a5787b297d611c51c31523401823a1211470dd13` is integrated,
+including the startup-readiness correction, stable Long Fuse cursor, robust predecessor drivers,
+accepted Long Fuse, Reverse Controls and Diarrhea records, final v0.3.32 evidence and captures,
+and the private checkpoint Docker exclusion. The v0.3.33 version, Slow-foot behavior and canonical
+nine-item catalog remain. Every predecessor item driver matches the reviewed parent except for
+that catalog extension. Core, server, API, Cargo and product web inputs remain byte-unchanged from
+the reviewed Slow-foot tree `c5a7bdeebe677fa9ec0979ace950623dc1a290f3`.
+All 882 web tests across 45 files pass with 95.43/91.25/95.59/97.77% coverage, together
+with contract checks, lint, Knip and the production build. E2E lint, Knip, type checking,
+47-scenario parity, 22-case latency discovery, repository and diff checks pass under Node 24.21.0.
+Independent integration review of the earlier source is clear. Fresh whole 46+46 Slow-foot native
+acceptance (**92 total**) and exact-head CI remain pending. Diarrhea's accepted matrix supplies no carried
+Slow-foot result. The accepted Diarrhea parent is published separately as v0.3.32.
+
+## Slow Foot first native attempt — 2026-10-20 — failed route
+
+Frozen source `5b6845d014fc40a781227611ef8bf257259f5a91` builds image
+`sha256:ae1e5a23bd282a202a076484137f24e21f2fb7cccfd6df1a7e0e7eb085f670fd`.
+The whole wrapper exits **1**: **45 Compose cases pass, Slow Foot fails, and all 46 Kubernetes
+cases are unattempted**. Sixteen groups pass, including all 22 latency cases. Source, dependency,
+lock, mode, tar, preparation-seal and image checks match after execution; owned cleanup passes.
+
+Independent review confirms a test-route defect: the actor escapes to `(1,2)`, then the default
+X-first movement helper tries to reach `(3,1)` by walking into permanent pillar `(2,2)`.
+The east command was observed, both failed captures show the actor at the escape tile with the
+pickup uncollected, and the position wait times out. The failure precedes collection and every
+Slow Foot speed/expiry assertion. The correction adds the ordinary-key waypoint `(1,1)` before
+moving east, preserving product code, helpers, timing, retries and all later assertions.
+
+The failed attempt is sealed with 1458 payload entries; `FINAL.sha256` hashes to
+`76581d3c4d958c06fcdd42a602b4d65806c32ff4ac8721472f3ba9455ded815f`.
+All 1459 files and the source archive are byte-verified outside `/tmp` in the private checkpoint.
+Nothing is reused as acceptance: a new reviewed source, archive, dependency install and image
+must pass the complete **46 Compose plus 46 Kubernetes** matrix with zero retries.
+
+## Slow Foot prepared source blocked before execution — 2026-10-20
+
+The route-corrected source `d9f213a281ea03fe07021b3c0e7b1729725385f6` completes fresh
+preparation, but independent source review blocks browser launch. Its west-wall predicate
+requires `x <= 384`, while the occupied border cell plus the actor footprint clamps the center
+at `x = 1344`. Rate windows can also include frames preceding the intended movement direction.
+The correction requires the exact reachable wall stop and direction-matched, unclamped public
+positions while preserving every 12-tick rate, peer, timer and key-release assertion.
+
+No browser acceptance or native matrix runs against this source. The 1025-entry preparation
+closure seal hashes to `e2c18f776134c3c498e5f6b4e10362b6f4be8b11e9bd150e3591cf4f885eca35`;
+all 1026 files and the source archive are copied and byte-verified outside `/tmp`. This preserves
+an unexecuted preparation, separate from the earlier failed native attempt; neither supplies
+acceptance for the corrected source.
+
+## Diarrhea publication — 2026-10-20 — v0.3.32 published
+
+[v0.3.32](https://github.com/liveweird/grenadiers/releases/tag/v0.3.32) was published as a
+prerelease at `2026-10-20T18:55:48Z` from merged head
+[`5b82b9e72d5aef37546d33ffc82162dbe1bc3063`](https://github.com/liveweird/grenadiers/commit/5b82b9e72d5aef37546d33ffc82162dbe1bc3063).
+Candidate runs [39474746135](https://github.com/liveweird/grenadiers/actions/runs/39474746135)
+and [39474740382](https://github.com/liveweird/grenadiers/actions/runs/39474740382) each pass
+five jobs and 45 browser cases. Post-merge run
+[39477257121](https://github.com/liveweird/grenadiers/actions/runs/39477257121) likewise passes
+five jobs and 45 browser cases; all three runs have zero retry and failure markers. The release
+tree `4e4f0b210f7965ff7040f5db21bce695580fe39e` exactly matches both the merged-head tree and the
+normalized accepted raw-source tree from `a5787b297d611c51c31523401823a1211470dd13`.
+
 ## Diarrhea native acceptance after startup readiness correction — 2026-10-20 — 90/90
 
 Frozen source `96e8be6c3d9c3214ab4fe7a15a883c07cae03845`, archive SHA-256
@@ -385,10 +511,48 @@ candidate. All seven predecessor item scenarios exactly match the reviewed paren
 the canonical eight-item available catalog. These checks establish no native acceptance for
 Diarrhea.
 
-## Diarrhea terrain cache integration — 2026-10-18 — refreshed native acceptance pending
 Records below are frozen against their named sources. Publication and later CI status are
 recorded in [release notes](https://github.com/liveweird/grenadiers/releases).
 
+## Slow-foot renderer and responsive-HUD integration — 2026-10-18 — native acceptance pending
+
+The reviewed terrain cache, diagnostic fixtures and two-column narrow HUD are integrated.
+Core, server, Cargo, API, Slow-foot client/protocol/locales and dedicated item scenario are
+unchanged. Shared scene setup and the Slow-foot scene test now use the renderer resolution.
+All 882 web tests across 45 files pass, with coverage 95.43/91.25/95.59/97.77%, plus
+contracts, lint, Knip, production and diagnostic-fixture builds, and E2E static parity for
+36 scenarios. Independent cache/responsive integration review is clear. Initial integration
+checks caught the 400-line guard and the new scene test's missing cache mock; both were corrected
+without changing assertions or limits. Fresh native acceptance and exact-head CI remain
+required; inherited parent evidence does not certify Slow-foot.
+
+## Slow foot candidate — 2026-10-18 — local checks complete
+
+The v0.3.33 candidate activates opt-in Slow foot as up to six independent 600-tick stacks. Each
+stack halves the exact current movement rate. Collection affects the following tick, expiry
+precedes movement, and capped actors are excluded before pickup distance and tie arbitration.
+Catalog bit 15 and a final generator weight preserve all 256 earlier mask paths while supporting
+all 512 subsets. Protocol, replay, localized presentation and a deterministic browser scenario
+are included.
+
+Debug and release suites pass **511 core tests, 189 server tests and two doctests**; four dedicated
+performance profiles remain ignored. Rust line coverage is **91.60%** (12,337/13,468), above the
+unchanged 80% floor. All **880 web tests** across 45 files pass with statement/branch/function/line
+coverage of **95.40/91.26/95.57/97.76%**. Formatting, Clippy, repository limits, generated
+contract checks, lint, Knip, production builds, E2E static checks and **35-scenario parity** pass.
+Cargo-deny, both cached offline npm audits with zero vulnerabilities, and strict Kubernetes
+schemas for all three resources pass. Dependency graphs remain unchanged except for the two
+workspace package versions in `Cargo.lock`. Independent backend and frontend reviews are clear;
+native browser acceptance, candidate-image checks and final-head CI remain pending.
+
+Review fixes require both recipient streams to agree at
+identical physical-tick endpoints for slowed and restored movement, and verify all six independent
+timers in the eight-field English and Polish HUD. All 21 focused web tests and E2E static
+checks pass after those fixes. Component tests verify the six-stack presentation structure,
+but an actual six-stack 320px native playthrough is not run;
+the production-seed native scenario intentionally collects one stack and remains pending.
+
+## Diarrhea terrain cache integration — 2026-10-18 — refreshed native acceptance pending
 The current terrain-cache/shared-diagnostics integration passes all 617 web tests across 43 files, with coverage
 of 95.24/91.03/95.53/97.63% above the unchanged 85% floors, production and diagnostic-fixture builds, and E2E
 static checks with 35 documented scenarios. Core, server, version and API content are unchanged

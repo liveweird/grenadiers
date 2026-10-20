@@ -204,7 +204,8 @@ fn sample_pickup(source: &mut impl RandomWords, enabled: EnabledItems) -> Option
         + u32::from(enabled.contains_short_flame()) * 15
         + u32::from(enabled.contains_long_fuse()) * 15
         + u32::from(enabled.contains_reverse_controls()) * 15
-        + u32::from(enabled.contains_diarrhea()) * 15;
+        + u32::from(enabled.contains_diarrhea()) * 15
+        + u32::from(enabled.contains_slow_foot()) * 15;
     let value = if bound == 100 {
         sample_percent(source)?
     } else {
@@ -217,6 +218,7 @@ fn sample_pickup(source: &mut impl RandomWords, enabled: EnabledItems) -> Option
     let short_flame_end = short_fuse_end + u32::from(enabled.contains_short_flame()) * 15;
     let long_fuse_end = short_flame_end + u32::from(enabled.contains_long_fuse()) * 15;
     let reverse_controls_end = long_fuse_end + u32::from(enabled.contains_reverse_controls()) * 15;
+    let diarrhea_end = reverse_controls_end + u32::from(enabled.contains_diarrhea()) * 15;
     Some(match value {
         0..40 => PickupKind::BombCapacity,
         40..80 => PickupKind::BlastRange,
@@ -228,7 +230,8 @@ fn sample_pickup(source: &mut impl RandomWords, enabled: EnabledItems) -> Option
         value if value < short_flame_end => PickupKind::ShortFlame,
         value if value < long_fuse_end => PickupKind::LongFuse,
         value if value < reverse_controls_end => PickupKind::ReverseControls,
-        _ => PickupKind::Diarrhea,
+        value if value < diarrhea_end => PickupKind::Diarrhea,
+        _ => PickupKind::SlowFoot,
     })
 }
 
@@ -375,6 +378,9 @@ mod short_flame_tests;
 #[cfg(test)]
 #[path = "short_fuse_tests.rs"]
 mod short_fuse_tests;
+#[cfg(test)]
+#[path = "slow_foot_generation_tests.rs"]
+mod slow_foot_tests;
 #[cfg(test)]
 #[path = "tests.rs"]
 mod tests;

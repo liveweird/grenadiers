@@ -104,6 +104,7 @@ fn signature(generated: &GeneratedArena) -> String {
                 Some(PickupKind::LongFuse) => 'U',
                 Some(PickupKind::ReverseControls) => 'V',
                 Some(PickupKind::Diarrhea) => 'D',
+                Some(PickupKind::SlowFoot) => 'W',
                 None if generated.arena().blocks().contains(&cell) => '#',
                 None if generated.arena().terrain(cell) == Some(Terrain::Wall) => 'X',
                 None => '.',

@@ -29,8 +29,8 @@ reconnect action floor.
 Placement follows movement and existing-fire damage, then explosions and final-fire damage.
 Capacity released by an explosion can therefore be reused on the next physical tick. The option
 is disabled by default; Heart-only defaults and Classic settings remain unchanged. Local checks
-and fresh same-image browser acceptance pass: 34 Compose and 34 Kubernetes cases, without
-retries. Final exact-head CI and publication are recorded in [verification](../verification.md).
+and fresh same-image browser acceptance pass: 45 Compose and 45 Kubernetes cases, without
+retries. Final exact-head CI and publication remain separate gates tracked in [verification](../verification.md).
 
 Screenshots show the exposed pickup before collection: [English desktop](../screenshots/diarrhea-desktop.png)
 and [Polish 320px reduced motion](../screenshots/diarrhea-polish-320.png). The active curse,

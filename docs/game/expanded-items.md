@@ -9,9 +9,13 @@ retains the earlier hosted failure and separately named source-specific attempts
 The v0.3.31 [Reverse Controls](reverse-controls.md) increment passes local checks and fresh
 33/33 Compose plus 33/33 Kubernetes acceptance. All required CI passes; v0.3.31 is published.
 The v0.3.32 [Diarrhea](diarrhea.md) candidate passes local checks and independent implementation
-reviews and fresh same-image 34/34 Compose plus 34/34 Kubernetes acceptance; final-head CI and
-publication remain pending. The v0.3.33 [Slow foot](slow-foot.md) candidate passes local checks
-and independent implementation reviews; fresh native acceptance and final-head CI remain pending.
+reviews and fresh same-image 45/45 Compose plus 45/45 Kubernetes acceptance after the reviewed
+startup-readiness correction. Independent final native review is clear; new exact-head CI remains a release gate;
+the original CI counterexample is retained separately, and publication remains pending. The
+v0.3.33 [Slow foot](slow-foot.md) candidate passes local checks and independent implementation
+reviews. Its current acceptance scope contains 22 latency cases, 47 static scenarios and 46
+Compose plus 46 Kubernetes cases. The 92-case native total, final-head CI and publication remain
+pending.
 Expanded-v5/generator-v2 rooms and gameplay-v8 are retained; see
 [verification](../verification.md) and
 [release notes](https://github.com/liveweird/grenadiers/releases).

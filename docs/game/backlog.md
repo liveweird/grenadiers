@@ -10,11 +10,15 @@ The v0.3.30 Long Fuse increment passes local checks and fresh 64/64 Compose/Kube
 cases against the corrected stable-cursor source, with wrapper exit zero and no retries or
 carried results, and is published. The v0.3.31 Reverse Controls increment also passes fresh
 66/66 native acceptance and all required CI; both are published source prereleases. The v0.3.32 Diarrhea
-candidate passes local checks, independent implementation reviews and fresh 68/68 native cases;
-final-head CI and publication remain pending. The v0.3.33 Slow-foot candidate passes local checks
-and independent backend/frontend reviews; fresh native acceptance and final-head CI remain pending.
-Verification retains source-specific evidence and earlier failed or interrupted attempts. The
-other 13 requested pickups remain outside this increment. Richer transitions
+candidate passes local checks and fresh corrected-readiness acceptance: 45 Compose plus 45
+Kubernetes cases, with all eight optional item scenarios and zero retries. Independent final native review is clear;
+new exact-head CI remains a release gate. The original shaped-latency CI counterexample and
+source-specific 68/68 native result remain historical evidence. Publication remains pending. The
+v0.3.33 Slow-foot candidate passes local checks and independent backend/frontend reviews; its
+current scope has 22 latency cases, 47 static scenarios and 46 Compose plus 46 Kubernetes cases.
+The 92-case native total, final-head CI and publication remain pending. Verification retains
+source-specific evidence and earlier failed or interrupted attempts. The other 13 requested
+pickups remain outside this increment. Richer transitions
 and artwork remain follow-up work. See [pixel-art presentation](pixel-art.md),
 [expanded item implementation](expanded-items.md), and
 [release notes](https://github.com/liveweird/grenadiers/releases).

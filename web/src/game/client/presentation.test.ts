@@ -195,4 +195,5 @@ describe('v8 arena presentation', () => {
     expect(presented.state.actors[0].slowFootRemainingTicks).toEqual([600, 431, 12])
     expect(presented.state.pickups).toEqual(current.snapshot!.state.pickups)
   })
+
 })

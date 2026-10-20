@@ -1,4 +1,4 @@
-import type { EffectView, GameState, ItemId, RoomView, WireEvent } from './schema'
+import type { BombView, EffectView, GameState, ItemId, RoomView, WireEvent } from './schema'
 
 export type GameplayV8SemanticError =
   | 'duplicateEffect'
@@ -27,7 +27,7 @@ export function itemSetSemanticError(
 }
 
 const supportedItems = [
-  'heart', 'shield', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse',
+  'heart', 'piercingBomb', 'shield', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse',
   'reverseControls',
 ] as const
 
@@ -43,11 +43,20 @@ function supportedEffect(effect: EffectView, enabled: ReadonlySet<ItemId>): bool
     && effect.remainingTicks <= limit
 }
 
+function supportedBomb(bomb: BombView, enabled: ReadonlySet<ItemId>): boolean {
+  return bomb.trigger.type === 'timed' && !bomb.trigger.paused && (
+    bomb.blast === 'standard'
+    || (bomb.blast === 'piercing' && enabled.has('piercingBomb'))
+  )
+}
+
 function supportedState(state: GameState | null, enabled: ReadonlySet<ItemId>): boolean {
   if (!state) return true
   if (state.pickups.some((pickup) => !supportedItem(pickup.kind, enabled))) return false
-  return state.actors.every((actor) => actor.type === 'visible' && (
-    actor.inventory.weapon === null
+  return state.bombs.every((bomb) => supportedBomb(bomb, enabled))
+    && state.actors.every((actor) => actor.type === 'visible' && (
+    (actor.inventory.weapon === null
+      || (actor.inventory.weapon === 'piercingBomb' && enabled.has('piercingBomb')))
     && (actor.inventory.equipment === null
       || (actor.inventory.equipment === 'heart' && enabled.has('heart')))
     && actor.effects.every((effect) => supportedEffect(effect, enabled))
@@ -58,6 +67,9 @@ function supportedState(state: GameState | null, enabled: ReadonlySet<ItemId>): 
 function supportedEvents(events: readonly WireEvent[], enabled: ReadonlySet<ItemId>): boolean {
   return events.every(({ kind }) => {
     if (kind.type === 'pickupCollected') return supportedItem(kind.kind, enabled)
+    if (kind.type === 'bombPlaced' || kind.type === 'bombDetonated') {
+      return supportedBomb(kind.bomb, enabled)
+    }
     return kind.type !== 'damagePrevented'
       || enabled.has(kind.source)
   })

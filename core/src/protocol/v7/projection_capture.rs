@@ -179,7 +179,10 @@ fn capture_bomb(bomb: game::BombView, at: game::Tick) -> Result<BombView, Projec
         range: u8::try_from(bomb.range).map_err(|_| ProjectionError::InvalidBombs)?,
         placed_at: wire_tick(bomb.placed_at)?,
         trigger,
-        blast: BlastKind::Standard,
+        blast: match bomb.blast {
+            game::BlastKind::Standard => BlastKind::Standard,
+            game::BlastKind::Piercing => BlastKind::Piercing,
+        },
     })
 }
 
@@ -315,6 +318,7 @@ fn wire_pickup(value: game::PickupKind) -> PickupKind {
         game::PickupKind::BlastRange => PickupKind::BlastRange,
         game::PickupKind::MovementSpeed => PickupKind::MovementSpeed,
         game::PickupKind::Heart => PickupKind::Heart,
+        game::PickupKind::PiercingBomb => PickupKind::PiercingBomb,
         game::PickupKind::Shield => PickupKind::Shield,
         game::PickupKind::GoldenFlame => PickupKind::GoldenFlame,
         game::PickupKind::ShortFuse => PickupKind::ShortFuse,

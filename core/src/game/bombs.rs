@@ -7,6 +7,13 @@ pub enum BombTrigger {
     Contact,
 }
 
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub enum BlastKind {
+    #[default]
+    Standard,
+    Piercing,
+}
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum BombError {
     DeadlineBeforePlacement,
@@ -21,6 +28,7 @@ pub struct Bomb {
     pub(crate) range: u16,
     pub(crate) placed_at: Tick,
     pub(crate) trigger: BombTrigger,
+    blast: BlastKind,
 }
 
 impl Bomb {
@@ -31,6 +39,26 @@ impl Bomb {
         range: u16,
         placed_at: Tick,
         trigger: BombTrigger,
+    ) -> Result<Self, BombError> {
+        Self::new_with_blast(
+            id,
+            cell,
+            owner,
+            range,
+            placed_at,
+            trigger,
+            BlastKind::Standard,
+        )
+    }
+
+    pub(crate) const fn new_with_blast(
+        id: EntityId,
+        cell: CellId,
+        owner: EntityId,
+        range: u16,
+        placed_at: Tick,
+        trigger: BombTrigger,
+        blast: BlastKind,
     ) -> Result<Self, BombError> {
         if let BombTrigger::Timed { detonates_at } = trigger
             && detonates_at.0 < placed_at.0
@@ -44,6 +72,7 @@ impl Bomb {
             range,
             placed_at,
             trigger,
+            blast,
         })
     }
 
@@ -75,6 +104,11 @@ impl Bomb {
     #[must_use]
     pub const fn trigger(self) -> BombTrigger {
         self.trigger
+    }
+
+    #[must_use]
+    pub const fn blast(self) -> BlastKind {
+        self.blast
     }
 
     #[must_use]

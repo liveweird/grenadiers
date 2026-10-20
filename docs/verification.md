@@ -1,5 +1,100 @@
 # Repository verification
 
+## Piercing Bomb fresh native acceptance — 2026-10-20 — 94/94; independently reviewed and sealed
+
+Final raw Slow Foot source `f499f680ac68bc8eed4803e4d3c06152cb89cf64` is integrated,
+including the accepted startup-readiness baseline, stable Long Fuse cursor, corrected predecessor
+browser drivers, final v0.3.33 native evidence and captures. The v0.3.34 version, Piercing Bomb
+behavior, weapon HUD coverage and canonical ten-item catalog remain. The Piercing browser driver
+now returns from the lower-left escape cell through the open (1,1) waypoint instead of attempting
+to cross the hard pillar at (2,2).
+
+Reviewed integrated source `1461f04d1a1b18ade191f282962e677d5ed2a43f` preserves product,
+core, server, API, web, Cargo, lock and deployment inputs byte-for-byte from reviewed Piercing
+source `d1b635fb501336495fa2819392fcc8bc246f25ea`. Using the existing exact locked developer tools,
+the repository check, E2E lint, Knip, type checking and 48-scenario parity pass with actual exit
+zero. Those checks precede frozen native source `dc6266e79ea78b3ea314aa16cd3c31a22a17d7c6`,
+tree `63ea5ed005a2302d32a63eab126ea4c5bd27fa81`.
+
+The single fresh same-image wrapper completes at `2026-10-20T21:01:06Z` with actual exit zero:
+**47/47 Compose and 47/47 Kubernetes**, 36 groups/reports, all ten optional-item scenarios and
+zero retries or carried results. Each target runs 37 baseline cases plus ten feature cases. Image
+`sha256:5d0bc94c7febc6764b9f875f1273f4d3814077c8d22c2b56b4a2d80fbebbe0e8`
+comes from source archive SHA-256
+`90d2285112c64631c5709fb32a96d2672d02df9b3db80c67e370defdc6c52ece`;
+the image, dependency and source-tree tar SHA-256 values are respectively
+`abf66f4fda7e72da4b80f27205850a7b4fc0cd80cbf83f8cc5b67b7f2e753cfc`,
+`db12f2e9df38f1af341bc3554957610970d60451cb223a6d86857c37cd830567` and
+`ca9055ada8da11cdfd1d7f007bdc4f86aed63d099066807139bfb2602326dd8b`.
+The source inventory has 710 files, 80 directories, no symlinks and 31 tracked PNGs. Dependencies
+have 8,186 files, 1,305 directories and 13 symlinks; 132 packages are installed, all 42 omissions
+are optional, and no required package, version or metadata mismatch is reported. Runtime evidence
+contains 90 PNGs, 26 runtime image/security pairs, 13 Kubernetes identities, 12 fixtures and 24
+seed-mode records. The 1,038-entry preparation manifest hashes to
+`884cf6ba4fe5f616f8c04738bebc707b40b2c5840aeccfe72444ea798782b03a`.
+
+The Piercing scenario proves ordinary-key collection and placement, an armed blast continuing
+through breakable blocks `(4,1)` and `(5,1)`, one-charge consumption, and a following fresh
+Standard bomb on both peers. The reviewed Compose [English desktop](screenshots/piercing-bomb-desktop.png)
+and [Polish 320px](screenshots/piercing-bomb-polish-320.png) captures have no observed overlap.
+The compact English four-column HUD wraps “Piercing bomb” inside the word, a nonblocking cosmetic
+preview limitation; Kubernetes captures were retained but not separately viewed.
+
+All four real latency profiles retain 20 observations, and all 22 latency cases per target pass.
+The fixed 250 ms budget, startup-readiness causality checks and zero-retry policy remain unchanged.
+
+| Target | Profile | Samples | Maximum | Exceedances |
+| --- | --- | ---: | ---: | ---: |
+| Compose | local | 20 | 56.044429 ms | 0 |
+| Compose | delay-50ms | 20 | 142.791575 ms | 0 |
+| Kubernetes | local | 20 | 51.750443 ms | 0 |
+| Kubernetes | delay-50ms | 20 | 190.529203 ms | 0 |
+
+Compose CPU usage advances from 702559 to 956078 microseconds; Kubernetes advances from 600100
+to 797327 microseconds. Both throttle-count deltas are zero. Compose retains an unlimited CPU
+quota and Kubernetes retains `50000 100000`. Coordinator-observed worker tasks remained completed
+through measurement; this is not an acknowledgement-only hold or a globally idle-host claim.
+Observed unrelated load included JVM 243.3% and OrbStack 19.7% at Compose capture, and OrbStack
+30.3% at Kubernetes capture; the earlier JVM was not among the Kubernetes top-CPU entries.
+Unrelated processes were not held, and all measurements were retained.
+
+Independent raw evidence review is clear. The final manifest covers 1,987 payloads and hashes to
+`67445cc105afe69d7894b550a70733e6634d1b05d478165c110fbc673a3d5ff7`.
+All 1,988 files including the seal, plus the immutable source archive, have byte-verified durable
+local checkpoint copies. Owned native resources are cleaned. Exact-head CI, PR, publication and
+promotion are pending. The local default on port 8085 still serves the published v0.3.33 image;
+the v0.3.34 image has not been promoted or published.
+
+The earlier Piercing source passed 1,400 web tests across 47 files with
+95.47/91.35/95.61/97.79% coverage, together with contract checks, lint, Knip and the production
+build. Its E2E lint, Knip, type checking, 37-scenario parity, repository and diff checks also
+passed under Node 24.21.0. Those full-suite and coverage results certify their named source only;
+no new local Rust, web, full-coverage or production-build run is claimed for `1461f04`.
+
+## Slow Foot source-prerelease publication — 2026-10-20
+
+[PR 79](https://github.com/liveweird/grenadiers/pull/79) normalized accepted raw source
+`f499f680ac68bc8eed4803e4d3c06152cb89cf64` to candidate head
+`f3a26f3552902219d3139960a2fe4345113243ce`. Candidate
+[PR run 39487844647](https://github.com/liveweird/grenadiers/actions/runs/39487844647) and
+[push run 39487815667](https://github.com/liveweird/grenadiers/actions/runs/39487815667) each pass
+five jobs and 46 browser cases. Merge head `27dcf225f3a1f3ef67ee3cf8c52c9d583e7318fd`
+has tree `4457ec14280d240ce54b4d4c6064fffa769e9ec6`, byte-equal to the accepted raw tree; post-merge
+[run 39490252393](https://github.com/liveweird/grenadiers/actions/runs/39490252393) also passes five
+jobs and 46 browser cases. All three retained CI records contain no failure, flaky, skipped, retry
+or timeout result markers.
+
+[v0.3.33](https://github.com/liveweird/grenadiers/releases/tag/v0.3.33) was published as a source
+prerelease at `2026-10-20T20:29:15Z` from that merged head and accepted tree. At publication, the
+additional tag-triggered CI run had not completed and supplied no publication evidence. It later
+completed successfully: [run 39492377407](https://github.com/liveweird/grenadiers/actions/runs/39492377407)
+passes five jobs and 46 browser cases. The exact
+accepted image `sha256:6608df856d8d1b0c69b5552ae1ee7d39ff08b0a1fcc4df804fb65806007f54be`
+served `http://localhost:8085` at the local deployment checkpoint: readiness, health and
+index probes returned 200, and the served index and JavaScript bytes equalled the container files.
+The deployment reused the accepted image;
+it did not rebuild it.
+
 ## Slow Foot fresh native acceptance — 2026-10-20 — 92/92
 
 Frozen source `dbaa7f84f6013a620ec3f9bea12c02ad0e29d904`, archive SHA-256
@@ -46,7 +141,8 @@ Strict Node/YAML output and all three strict Kubernetes resources pass; the pinn
 reports zero fixable HIGH/CRITICAL findings. The wrapper verifies 86 runtime PNGs and 24 runtime
 image/security records, 12 distinct Kubernetes pod/forward identities and 22 seed-mode records
 across eleven mode-0444 fixtures. Independent live cleanup passes for owned resources, forwards
-and ports; default localhost:8085 remains the separately published v0.3.32 image.
+and ports. At this native-acceptance checkpoint, default localhost:8085 remained the separately
+published v0.3.32 image; the later v0.3.33 deployment is recorded above.
 
 Root actually viewed both fresh Compose captures: English desktop 1440×2295, SHA-256
 `cc7e4d803ac8078bc7dbf13e0fbe7bfad67eff5e90b4c7d59313bbd98cb315c3`, and Polish 320×3065
@@ -513,6 +609,43 @@ Diarrhea.
 
 Records below are frozen against their named sources. Publication and later CI status are
 recorded in [release notes](https://github.com/liveweird/grenadiers/releases).
+
+## Piercing renderer and responsive-HUD integration — 2026-10-18 — native acceptance pending
+
+The reviewed terrain cache, diagnostics and responsive HUD are integrated. Core, server, Cargo,
+API, client semantics/locales and dedicated Piercing scenario are unchanged. The scene-suite Pixi
+mock moves verbatim to a test-support module to keep the scene suite below 400 lines without
+removing assertions. All 1,400 web tests across 47 files pass, with coverage
+95.47/91.35/95.61/97.79%, plus contracts, lint, Knip, production/diagnostic builds and E2E static
+parity for 37 scenarios. Independent integration review is clear; fresh native acceptance
+and exact-head CI remain required.
+
+## Piercing Bomb candidate — 2026-10-18 — local checks complete
+
+The v0.3.34 candidate activates an opt-in one-charge Piercing Bomb. Successful manual placement
+captures a blast that crosses breakable blocks; automatic placements remain ordinary, failed
+placements retain the charge, and existing bombs remain immutable. Catalog bit 6 and a final
+generator weight preserve all 512 earlier paths while supporting all 1024 subsets. The repeating
+byte-31 fixture places the pickup at (3,1) with consecutive breakable blocks at (4,1) and (5,1).
+
+Debug and release suites pass **534 core tests, 190 server tests and two doctests**; four dedicated
+performance profiles remain ignored. Rust line coverage is **91.74%** (12,432/13,551), above the
+unchanged 80% floor. All **1,399 web tests** across 47 files pass with statement/branch/function/
+line coverage of **95.44/91.36/95.59/97.78%**. Formatting, Clippy, repository limits, generated
+contract checks, lint, Knip, production builds, E2E static checks and **36-scenario parity** pass.
+Cargo-deny, both cached offline npm audits with zero vulnerabilities, and strict Kubernetes
+schemas for all three resources pass. Dependency graphs remain unchanged except for the two
+workspace package versions in `Cargo.lock`. Independent backend/frontend review is clear; the native Piercing Bomb
+playthrough and screenshots, candidate-image acceptance, and final-head CI remain pending.
+
+Review regressions reject Remote, Contact and paused Timed bombs consistently in live state and
+placement/detonation events. They also cover a manual Piercing request conflicting with an
+automatic Diarrhea request, event-only Piercing detonation, and a live Piercing bomb whose dead
+owner has an empty inventory. The browser scenario verifies both target blocks before planting,
+compares both peers' captured Piercing record, and fences historical placement IDs before proving
+the later ordinary bomb. All 22 focused Piercing Rust tests, the focused web regression, the full
+web gate, and E2E static checks pass after these review fixes; the full Rust counts above are the
+unchanged production baseline from before these test-only Rust additions.
 
 ## Slow-foot renderer and responsive-HUD integration — 2026-10-18 — native acceptance pending
 

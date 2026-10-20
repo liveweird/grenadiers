@@ -15,6 +15,7 @@ export interface ActorDrawing {
   reverseControls: Graphics
   diarrhea: Graphics
   slowFoot: Container
+  piercing: Graphics
   poses: Record<Direction, PoseFrames>
   direction: Direction
   moving: boolean
@@ -27,6 +28,7 @@ export interface ActorDrawing {
   reversed: boolean
   diarrheaActive: boolean
   slowFootStacks: number
+  piercingArmed: boolean
 }
 
 function legs(drawing: Graphics, frame: number, side: boolean): void {
@@ -165,6 +167,11 @@ export function makeActor(seat: Seat): ActorDrawing {
   })
   slowFoot.addChild(slowBoot, ...slowMarkers)
   slowFoot.visible = false
+  const piercing = new Graphics()
+  pixels(piercing, PALETTE.deepInk, [[14, 12, 13, 12], [18, 8, 7, 18]])
+  pixels(piercing, PALETTE.white, [[18, 14, 6, 3], [20, 11, 3, 9]])
+  pixels(piercing, PALETTE.brick, [[16, 19, 10, 3]])
+  piercing.visible = false
   const poses = {
     north: [frontOrBack(seat, 'north', 0), frontOrBack(seat, 'north', 1)],
     east: [sidePose(seat, 'east', 0), sidePose(seat, 'east', 1)],
@@ -173,15 +180,15 @@ export function makeActor(seat: Seat): ActorDrawing {
   } satisfies Record<Direction, PoseFrames>
   root.addChild(
     shadow, protection, shield, goldenFlame, shortFuse, shortFlame, longFuse, reverseControls,
-    diarrhea, slowFoot,
+    diarrhea, slowFoot, piercing,
     ...Object.values(poses).flat(),
   )
   const drawing = {
     root, protection, shield, goldenFlame, shortFuse, shortFlame, longFuse, reverseControls,
-    diarrhea, slowFoot, poses,
+    diarrhea, slowFoot, piercing, poses,
     direction: 'south' as Direction, moving: false,
     protected: false, shielded: false, golden: false, shortFused: false, shortFlamed: false,
-    longFused: false, reversed: false, diarrheaActive: false, slowFootStacks: 0,
+    longFused: false, reversed: false, diarrheaActive: false, slowFootStacks: 0, piercingArmed: false,
   }
   setActorPose(drawing, 'south', 0)
   return drawing

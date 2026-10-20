@@ -1,6 +1,69 @@
 # Repository verification
 
-## Vite advisory follow-up — 2026-10-20 — patched; fresh native acceptance pending
+## Power Bomb fresh native acceptance — 2026-10-20 — 96/96; sealed and independently audited
+
+Frozen source `7e9cae7fb47175a9503cbe5a5dc622bedde04fa1`, tree
+`5c8b1052f88f82f98a62801add1ab95bc0d9cee2`, includes the independently reviewed Vite 8.3.4
+security patch and final Power Bomb driver. Its single fresh same-image wrapper completes at
+`2026-10-20T22:20:51.330232Z` with actual exit zero: **48/48 Compose and 48/48 Kubernetes**,
+38 groups/reports, all eleven optional-item scenarios and zero retries or carried results. Each
+target runs 37 baseline cases plus eleven feature cases. Image
+`sha256:c335e4ee9987f78dde3b758780eda61d9541b82c3701ddb84efa73b2722008d7`
+comes from source archive SHA-256
+`221dcf9d2d2de480b1221d9472c948d5ad2913c95d2f0f3b4ab8d5608352f845`;
+the image, dependency and source-tree tar SHA-256 values are respectively
+`ad0e6aa83eba4b88856f9463e2a208df59f22d661201adc16d4cc8855e0b8457`,
+`3e18974547832638362d3cc92aa7265f4081ee09e7c89cd3b3ee352505358810` and
+`0b82dc960796d0358c5763923c79477feda3c7659adfafada29af793bb8c245e`.
+
+The source inventory has 724 files, 81 directories, no symlinks and 33 tracked PNGs. Dependencies
+have 8,186 files, 1,305 directories and 13 symlinks; 132 packages are installed, all 42 omissions
+are optional, and no required package, version or metadata mismatch is reported. Runtime evidence
+contains 94 PNGs, 28 runtime image/security pairs, 14 Kubernetes identities, 13 fixtures and 26
+seed-mode records. All recorded dependency, source, lock, preparation-manifest and image-ID
+post-run comparisons match.
+
+The paired-browser Power scenario proves ordinary-key collection and placement, the complete
+Manhattan footprint through obstructing hard walls, one-charge consumption, and a following fresh
+Standard bomb on both peers. The reviewed Compose [English desktop](screenshots/power-bomb-desktop.png)
+and [Polish 320px](screenshots/power-bomb-polish-320.png) captures precede detonation and contain
+no active bombs or flames. “Power bomb” wraps normally between words in English. The Polish narrow
+view uses normal vertical scrolling and shows the unfocused-arena prompt. Neither capture has
+observed unintended overlap; native assertions establish the blast geometry.
+
+All four real latency profiles retain 20 observations, and all 22 latency cases per target pass.
+Every measured key begins after accepted readiness, all samples are retained, the fixed budget
+remains 250 ms, and each profile has zero exceedances.
+
+| Target | Profile | Samples | Maximum | Exceedances |
+| --- | --- | ---: | ---: | ---: |
+| Compose | local | 20 | 63.371394 ms | 0 |
+| Compose | delay-50ms | 20 | 140.790806 ms | 0 |
+| Kubernetes | local | 20 | 59.961206 ms | 0 |
+| Kubernetes | delay-50ms | 20 | 158.372221 ms | 0 |
+
+Compose CPU usage advances from 571068 to 826133 microseconds, a 255065-microsecond delta;
+Kubernetes advances from 478399 to 727701 microseconds, a 249302-microsecond delta. Compose uses
+the unlimited `max 100000` quota and Kubernetes uses `50000 100000`; both throttle-count and
+throttled-time deltas are zero.
+
+The security-patched source received a fresh isolated install, full security gate and web/E2E
+audits with zero vulnerabilities at every severity. Its full web gate passes 2,429 tests across
+49 files with 95.49/91.39/95.61/97.81% statement/branch/function/line coverage, contracts, lint,
+Knip, type checks and the Vite 8.3.4 production build. The earlier 558-core, 191-server and two-
+doctest results remain historical evidence for the reviewed Power source whose Rust inputs are
+unchanged; no fresh local Rust suite or Rust coverage run is claimed for `7e9cae7`.
+
+The independent raw evidence audit is CLEAR. The final manifest seals 2,065 payloads with SHA-256
+`cbd2df35818757c8f3fb9adb642260ebe6b25b7db0bf6625257ad3e5a1508c37`; all 2,066 files
+and the source archive have byte-verified durable copies under the private checkpoint. Owned
+Compose/Kubernetes resources and ports 18254/18255 are absent at the coordinator live check;
+localhost:8085 still serves the accepted v0.3.34 image, ready 200. The reviewer audited cleanup
+records without independently repeating live infrastructure queries. Final native/documentation review is clear; exact-head CI, PR, publication and image promotion
+remain subsequent release gates. The failed `4a3fb77` Gear-label attempt and
+the superseded, unexecuted `f150ad5` preparation remain preserved below and contribute no pass.
+
+## Vite advisory follow-up — 2026-10-20 — patched; fresh native acceptance complete
 
 After v0.3.34 publication, its additional [tag workflow](https://github.com/liveweird/grenadiers/actions/runs/39502781824)
 failed the npm security check for Vite 8.3.0's bundled development editor integration:
@@ -22,8 +85,8 @@ The intervening Gear-corrected source `f150ad5cfe10657de42cc84826a0c21e35e35823`
 successfully but never ran a browser/native case. Its superseded preparation is preserved with
 1,057 sealed payloads, manifest SHA-256
 `3c408f1fc887f1d0f0557c2f6f60fdd164abbc44115f7ddb7e1bfe67419633cd`, plus a byte-verified
-durable copy. New source, image and whole native acceptance are required after the security
-patch. No result from either earlier Power attempt is carried; candidate CI remains pending.
+durable copy. The replacement security-patched source and image now pass the fresh 96/96 native
+acceptance recorded above. No result from either earlier Power attempt is carried; final seal is complete and candidate CI remains pending.
 
 
 ## Power Bomb native label mismatch — 2026-10-20 — corrected acceptance pending
@@ -38,7 +101,8 @@ preserved separately; no pass or retry is carried into the replacement run.
 The correction restores the previously accepted English “Gear” label and its narrow-HUD
 readability fix (`d360810`), retaining the shared assertion. Power gameplay, Polish text,
 contracts and dependency locks are unchanged. Corrected-source native acceptance and
-exact-head CI remain pending.
+exact-head CI were still pending at that checkpoint. The later security-patched source passes
+fresh sealed native acceptance as recorded above; exact-head CI remains pending.
 
 
 ## Piercing Bomb publication and local deployment — 2026-10-20

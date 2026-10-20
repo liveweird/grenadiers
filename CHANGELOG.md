@@ -6,7 +6,7 @@
 
 - Prepare opt-in Power Bomb as a one-charge weapon consumed only by a successful manual placement.
 - Capture an immutable Manhattan-area blast that ignores obstruction, preserves hard walls as holes, and chains every bomb in range from the pre-explosion world.
-- Add the eleventh lobby switch, checked v8 state and events, replay coverage, English and Polish pixel cues, and a deterministic production-seed browser scenario. Native acceptance and final CI remain pending.
+- Add the eleventh lobby switch, checked v8 state and events, replay coverage, English and Polish pixel cues, and a deterministic production-seed browser scenario. Fresh same-image native acceptance passes all 48 Compose and 48 Kubernetes cases; independent evidence review and the final seal are clear; exact-head CI and publication remain subsequent gates.
 
 ## 0.3.34 — 2026-10-20
 

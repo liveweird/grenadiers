@@ -25,8 +25,8 @@ E2E lint, Knip, type checking and 48-scenario parity pass. Fresh same-image acce
 and post-merge CI pass; [v0.3.34](https://github.com/liveweird/grenadiers/releases/tag/v0.3.34)
 is published as a source prerelease. Its final raw source is integrated into the v0.3.35
 [Power Bomb](power-bomb.md) candidate. Power retains its feature and version; local checks and
-independent implementation reviews are clear, while fresh native acceptance and exact-head CI
-remain pending.
+independent implementation reviews are clear. Fresh same-image acceptance passes all 48 Compose
+and 48 Kubernetes cases with zero retries; independent evidence review and the final seal are clear; exact-head CI remains a subsequent gate.
 Expanded-v5/generator-v2 rooms and gameplay-v8 are retained; see
 [verification](../verification.md) and
 [release notes](https://github.com/liveweird/grenadiers/releases).

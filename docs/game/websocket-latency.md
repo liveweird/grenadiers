@@ -36,6 +36,26 @@ Direction is therefore driven by current public geometry rather than a fixed alt
 variable publication timing cannot accumulate several unequal legs into the spawn-side wall. The
 chosen position, direction, and both clearance values are retained in the public report.
 
+Before the first measured keydown, both clients must display the running phase, both game canvases
+must be visible, and the actor arena must hold focus. The harness then fixes one Node-clock cutoff,
+the common round, and `H`, the maximum snapshot revision that has entered either downlink. Each
+endpoint must publish the same two consecutive,
+bomb-empty snapshots `R1 < R2`, both newer than `H`, with an unchanged actor position. Every witness
+must have its own matching endpoint/round/revision chronology from post-cutoff route ingress through
+delayed dispatch to page delivery. At acceptance, each endpoint's latest delivered and dispatched
+snapshot is `R2`, and both raw ingress heads agree at or beyond `R2`. Newer raw FIFO frames are allowed
+only while their allocated deadlines remain in the future. The public report retains the cutoff,
+watermark, full selected witness facts and times, completion time, and full last ingress, dispatch,
+and page heads on success and failure. A non-null record exists before startup waits and tracks the
+current startup stage, overall reason, and independent endpoint reasons. Every measured key-call
+start is asserted to follow readiness completion, whose timestamp is the successful predicate's
+actual evaluation time.
+
+This is one pre-input readiness baseline. It sends no command, adds no warmup input or fixed sleep,
+and does not run between samples. It does not discard, substitute, or retry a slow first movement;
+all twenty profile observations and every shaped observation above 250ms retain their existing
+measurement and failure semantics.
+
 Before release, two fresh page-delivered revisions must show unobstructed movement. The harness then
 records the actual delayed null-command dispatch to the server. A stable pair counts only when both
 revisions entered the server-to-client route after that dispatch and were subsequently delivered to

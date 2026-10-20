@@ -1,5 +1,33 @@
 # Repository verification
 
+## Diarrhea candidate CI counterexample — 2026-10-20 — release blocked
+
+[PR 78](https://github.com/liveweird/grenadiers/pull/78) initially tests normalized head
+`23b033df6422634cecf61f0c89ca9ad46393802b`, whose tree equals raw final source
+`1bf95c6479c87607c6f81c2864a1ca4ba13186ce`. Push run
+[39462992507](https://github.com/liveweird/grenadiers/actions/runs/39462992507) passes four
+non-browser jobs but fails one of twenty shaped latency observations: **408.754 ms > 250 ms**.
+Its browser scope ends **30 passed, one failed, three unattempted**; the later image scan is
+unattempted. Separate PR run
+[39462993184](https://github.com/liveweird/grenadiers/actions/runs/39462993184) passes all five
+jobs and 34 cases. That independent pass does not supersede the failed push run.
+
+The peer publication backlog starts before the first measured key. Node event-loop delay,
+shaper timers, queue limits and clock arithmetic do not explain the excess; saved evidence
+cannot distinguish per-socket delivery from browser/runner scheduling. No underlying product
+or platform cause is proven. The 23-entry private failed-evidence manifest hashes to
+`93f1dccca18173a6044d833cf82a4c834af6f0d6c712d6874b753792a61795d1`.
+
+Independent architecture review identifies a setup gap: round text can precede asynchronous
+first arena rendering, and the round number also appears during countdown. The revised experiment
+requires the actual running phase, both painted canvases and a fresh synchronized public baseline
+once before any measured input, with separately reported startup stage/times and full sanitized
+witness facts on success and failure. Eleven focused readiness cases are added: latency discovery
+is 22 cases and static scenario parity is 46. Focused helper tests and the E2E static gate pass.
+All twenty observations, the 250 ms limit, zero retries and existing timeouts remain.
+Fresh whole native acceptance and new exact-head CI are required for the revised harness;
+the following 68/68 result remains historical evidence for its recorded source only.
+
 ## Diarrhea fresh native acceptance — 2026-10-20 — 68/68
 
 Frozen source `bdf33cee9aaf4e5d43bc7fbc663970043eabd255`, source archive SHA-256

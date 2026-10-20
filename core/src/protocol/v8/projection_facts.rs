@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 
 use crate::game::{EventAudience, RulesConfig};
-use crate::protocol::{EntityId, Tick, WireRoundResult};
+use crate::protocol::{Cell, EntityId, Tick, WireRoundResult};
 
 use super::{
     ArenaView, BombView, EventKind, FlameView, ItemSet, PickupView, RoomView, VisibleActorView,
@@ -17,6 +17,7 @@ pub(crate) struct WorldFacts {
     pub(crate) result: Option<WireRoundResult>,
     pub(crate) arena: ArenaView,
     pub(crate) actors: [VisibleActorView; 2],
+    pub(crate) soft_wall_grace: [Vec<Cell>; 2],
     pub(crate) bombs: Vec<BombView>,
     pub(crate) timed_bombs: BTreeMap<EntityId, TimedBombFacts>,
     pub(crate) flames: Vec<FlameView>,

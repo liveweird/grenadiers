@@ -355,6 +355,12 @@ mod stopwatch_tests;
 #[path = "simulation_teleport.rs"]
 mod teleport;
 #[cfg(test)]
+#[path = "simulation/teleporter_acceptance_tests.rs"]
+mod teleporter_acceptance_tests;
+#[cfg(test)]
+#[path = "simulation/teleporter_route_tests.rs"]
+mod teleporter_route_tests;
+#[cfg(test)]
 #[path = "teleporter_tests.rs"]
 mod teleporter_tests;
 #[cfg(test)]

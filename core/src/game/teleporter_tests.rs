@@ -4,7 +4,6 @@ use super::{ActorInit, State, TurnAssist};
 use crate::game::{
     BombTrigger, CellId, Direction, EffectKind, EnabledItems, EntityId, Pickup, PickupKind,
     Position, RulesConfig, SeatId, SpeedLevel, StepError, Tick, World, fixed_arena,
-    generate_expanded_arena,
 };
 use crate::room::RoomSettings;
 
@@ -143,7 +142,7 @@ fn unsafe_contact_solid_and_fire_destinations_consume_without_partial_swap() {
 }
 
 #[test]
-fn swap_retains_only_each_arriving_actors_preexisting_overlapping_grace() {
+fn stale_or_other_actor_grace_cannot_authorize_a_swap() {
     let one = centered(CellId::new(1, 1));
     let two = centered(CellId::new(13, 11));
     let mut game = state_at(
@@ -163,16 +162,69 @@ fn swap_retains_only_each_arriving_actors_preexisting_overlapping_grace() {
     .unwrap();
     game.actors[0].bomb_grace.insert(EntityId(30));
     game.actors[0].bomb_grace.insert(EntityId(999));
-    game.actors[1].bomb_grace.insert(EntityId(30));
+    let before = game.actors.each_ref().map(|actor| actor.position);
 
     game.step(&[]).unwrap();
 
-    assert_eq!(
-        (game.actors[0].position, game.actors[1].position),
-        (two, one)
-    );
-    assert_eq!(game.actors[0].bomb_grace, BTreeSet::from([EntityId(30)]));
-    assert!(game.actors[1].bomb_grace.is_empty());
+    assert_eq!(game.actors.each_ref().map(|actor| actor.position), before);
+    assert_eq!(game.last_teleport_tick, None);
+    assert!(game.world.pickups.exposed.is_empty());
+}
+
+#[test]
+fn valid_source_and_destination_grace_is_preserved_per_actor() {
+    let center = centered(CellId::new(5, 5));
+    let one = Position {
+        x: center.x - 80,
+        y: center.y,
+    };
+    let two = Position {
+        x: center.x + 80,
+        y: center.y,
+    };
+    for trigger in [
+        BombTrigger::Contact,
+        BombTrigger::Timed {
+            detonates_at: Tick(100),
+        },
+    ] {
+        let mut game = state_at(
+            one,
+            two,
+            BTreeMap::from([(CellId::new(5, 5), PickupKind::Teleporter)]),
+            Tick(0),
+        );
+        game.insert_test_bomb(
+            EntityId(30),
+            CellId::new(5, 5),
+            EntityId(10),
+            2,
+            Tick(0),
+            trigger,
+        )
+        .unwrap();
+        assert_eq!(
+            game.actors.each_ref().map(|actor| actor.bomb_grace.clone()),
+            [
+                BTreeSet::from([EntityId(30)]),
+                BTreeSet::from([EntityId(30)])
+            ]
+        );
+
+        game.step(&[]).unwrap();
+
+        assert_eq!(
+            game.actors.each_ref().map(|actor| actor.position),
+            [two, one]
+        );
+        assert_eq!(
+            game.actors.each_ref().map(|actor| actor.bomb_grace.clone()),
+            [
+                BTreeSet::from([EntityId(30)]),
+                BTreeSet::from([EntityId(30)])
+            ]
+        );
+    }
 }
 
 #[test]
@@ -274,65 +326,4 @@ fn arena_obstacles_reject_atomically_and_arrival_pickups_are_not_rescanned() {
             .exposed
             .contains_key(&CellId::new(13, 11))
     );
-}
-
-#[test]
-fn seed_31_runs_an_ordinary_safe_then_unsafe_teleporter_route() {
-    assert_eq!(
-        include_str!("../../tests/fixtures/arena-v2-teleporter.seed").trim(),
-        "1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f"
-    );
-    let generated = generate_expanded_arena([31; 32], EnabledItems::TELEPORTER);
-    let (arena, concealed, _) = generated.into_parts();
-    let spawns = arena.spawns();
-    let mut game = State::new(
-        RulesConfig::expanded_v5(
-            RoomSettings::DEFAULT.with_enabled_items(EnabledItems::TELEPORTER),
-        ),
-        World::with_pickups(arena, concealed, BTreeMap::new(), BTreeMap::new()).unwrap(),
-        [
-            actor(10, SeatId::One, centered(spawns[0])),
-            actor(20, SeatId::Two, centered(spawns[1])),
-        ],
-    )
-    .unwrap();
-
-    game.actors[0].position = centered(CellId::new(2, 1));
-    game.step(&[crate::game::SeatInput {
-        seat: SeatId::One,
-        action: crate::game::InputAction::PlaceBomb,
-    }])
-    .unwrap();
-    game.actors[0].position = centered(CellId::new(1, 2));
-    while !game.world.bombs.is_empty() || game.world.hazards.contains_key(&CellId::new(3, 1)) {
-        game.step(&[]).unwrap();
-    }
-    game.actors[0].position = centered(CellId::new(3, 1));
-    let other_before = game.actors[1].position;
-    game.step(&[]).unwrap();
-    assert_eq!(game.actors[0].position, other_before);
-    assert_eq!(game.last_teleport_tick, Some(game.tick()));
-
-    let source = game.actors[0].position;
-    let blocked_destination = game.actors[1].position;
-    game.insert_test_bomb(
-        EntityId(31),
-        blocked_destination.cell().unwrap(),
-        EntityId(10),
-        2,
-        game.tick(),
-        BombTrigger::Timed {
-            detonates_at: Tick(game.tick().0 + 100),
-        },
-    )
-    .unwrap();
-    game.world
-        .pickups
-        .exposed
-        .insert(source.cell().unwrap(), Pickup::new(PickupKind::Teleporter));
-    let marker = game.last_teleport_tick;
-    game.step(&[]).unwrap();
-    assert_eq!(game.actors[0].position, source);
-    assert_eq!(game.actors[1].position, blocked_destination);
-    assert_eq!(game.last_teleport_tick, marker);
 }

@@ -43,14 +43,15 @@ impl State {
     }
 
     fn retained_grace(&self, seat: SeatId, destination: Position) -> BTreeSet<EntityId> {
-        self.actors[seat.index()]
+        let actor = &self.actors[seat.index()];
+        actor
             .bomb_grace
             .iter()
             .filter(|id| {
-                self.world
-                    .bombs
-                    .get(id)
-                    .is_some_and(|bomb| movement::position_overlaps_cell(destination, bomb.cell()))
+                self.world.bombs.get(id).is_some_and(|bomb| {
+                    movement::position_overlaps_cell(actor.position, bomb.cell())
+                        && movement::position_overlaps_cell(destination, bomb.cell())
+                })
             })
             .copied()
             .collect()

@@ -9,11 +9,12 @@ TURN v0.3.16, CONFIG v0.3.17 and the first ART slice v0.3.18 are shipped. Heart
 The v0.3.30 Long Fuse increment passes local checks and fresh 64/64 Compose/Kubernetes browser
 cases against the corrected stable-cursor source, with wrapper exit zero and no retries or
 carried results, and is published. The v0.3.31 Reverse Controls increment also passes fresh
-66/66 native acceptance and all required CI; both are published source prereleases. The v0.3.32 Diarrhea
-candidate passes local checks and fresh corrected-readiness acceptance: 45 Compose plus 45
-Kubernetes cases, with all eight optional item scenarios and zero retries. Independent final native review is clear;
-new exact-head CI remains a release gate. The original shaped-latency CI counterexample and
-source-specific 68/68 native result remain historical evidence. Publication remains pending. The
+66/66 native acceptance and all required CI; both are published source prereleases. The v0.3.32
+Diarrhea increment passes local checks and fresh corrected-readiness acceptance: 45 Compose plus
+45 Kubernetes cases, with all eight optional item scenarios and zero retries. Independent final
+native review, candidate CI and post-merge CI pass; [v0.3.32](https://github.com/liveweird/grenadiers/releases/tag/v0.3.32)
+is published. The original shaped-latency CI counterexample and source-specific 68/68 native
+result remain historical evidence. The
 v0.3.33 Slow-foot candidate passes local checks and independent backend/frontend reviews; its
 current scope has 22 latency cases, 47 static scenarios and 46 Compose plus 46 Kubernetes cases.
 The 92-case native total, final-head CI and publication remain pending. Verification retains

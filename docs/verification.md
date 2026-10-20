@@ -14,7 +14,20 @@ with contract checks, lint, Knip and the production build. E2E lint, Knip, type 
 47-scenario parity, 22-case latency discovery, repository and diff checks pass under Node 24.21.0.
 Independent integration review of the earlier source is clear. Fresh whole 46+46 Slow-foot native
 acceptance (**92 total**) and exact-head CI remain pending. Diarrhea's accepted matrix supplies no carried
-Slow-foot result, and v0.3.32 publication is still pending separately.
+Slow-foot result. The accepted Diarrhea parent is published separately as v0.3.32.
+
+## Diarrhea publication — 2026-10-20 — v0.3.32 published
+
+[v0.3.32](https://github.com/liveweird/grenadiers/releases/tag/v0.3.32) was published as a
+prerelease at `2026-10-20T18:55:48Z` from merged head
+[`5b82b9e72d5aef37546d33ffc82162dbe1bc3063`](https://github.com/liveweird/grenadiers/commit/5b82b9e72d5aef37546d33ffc82162dbe1bc3063).
+Candidate runs [39474746135](https://github.com/liveweird/grenadiers/actions/runs/39474746135)
+and [39474740382](https://github.com/liveweird/grenadiers/actions/runs/39474740382) each pass
+five jobs and 45 browser cases. Post-merge run
+[39477257121](https://github.com/liveweird/grenadiers/actions/runs/39477257121) likewise passes
+five jobs and 45 browser cases; all three runs have zero retry and failure markers. The release
+tree `4e4f0b210f7965ff7040f5db21bce695580fe39e` exactly matches both the merged-head tree and the
+normalized accepted raw-source tree from `a5787b297d611c51c31523401823a1211470dd13`.
 
 ## Diarrhea native acceptance after startup readiness correction — 2026-10-20 — 90/90
 

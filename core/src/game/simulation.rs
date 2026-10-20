@@ -178,6 +178,7 @@ pub struct State {
     running_updates: u64,
     result: Option<RoundResult>,
     assignment: RoundAssignment,
+    last_teleport_tick: Option<Tick>,
 }
 
 impl State {
@@ -272,6 +273,7 @@ impl State {
             running_updates: 0,
             result: None,
             assignment,
+            last_teleport_tick: None,
         })
     }
 }
@@ -350,6 +352,11 @@ mod stopwatch_route_tests;
 #[cfg(test)]
 #[path = "stopwatch_tests.rs"]
 mod stopwatch_tests;
+#[path = "simulation_teleport.rs"]
+mod teleport;
+#[cfg(test)]
+#[path = "teleporter_tests.rs"]
+mod teleporter_tests;
 #[cfg(test)]
 #[path = "simulation_test_support.rs"]
 mod test_support;

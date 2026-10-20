@@ -10,10 +10,11 @@ impl State {
         &mut self,
         tick: Tick,
         events: &mut Vec<StepEvent>,
-    ) -> Result<(), StepError> {
+    ) -> Result<[bool; 2], StepError> {
         if !self.rules.pickup_collection() {
-            return Ok(());
+            return Ok([false; 2]);
         }
+        let mut teleport_requests = [false; 2];
         let cells: Vec<_> = self.world.pickups.exposed.keys().copied().collect();
         for cell in cells {
             let kind = self.world.pickups.exposed[&cell].kind();
@@ -21,6 +22,27 @@ impl State {
                 continue;
             };
             let pickup = self.world.pickups.exposed[&cell];
+            if kind == PickupKind::Teleporter {
+                teleport_requests[seat.index()] = true;
+                self.world.pickups.exposed.remove(&cell);
+                let actor = &self.actors[seat.index()];
+                let audience = if actor.effects.hidden_from_opponents(tick) {
+                    EventAudience::only(seat)
+                } else {
+                    EventAudience::Both
+                };
+                events.push(StepEvent::new(
+                    tick,
+                    audience,
+                    StepEventKind::PickupCollected {
+                        id: actor.id,
+                        seat,
+                        cell,
+                        kind,
+                    },
+                ));
+                continue;
+            }
             let actor = &mut self.actors[seat.index()];
             if !actor.apply_pickup(pickup, self.rules, tick)? {
                 continue;
@@ -42,7 +64,7 @@ impl State {
                 },
             ));
         }
-        Ok(())
+        Ok(teleport_requests)
     }
 
     fn collector_for(&self, cell: CellId, kind: PickupKind, tick: Tick) -> Option<SeatId> {
@@ -135,6 +157,7 @@ impl super::Actor {
                     self.pending_turn = None;
                 }
             }
+            PickupKind::Teleporter => unreachable!("teleporters are committed after collection"),
         }
         Ok(true)
     }

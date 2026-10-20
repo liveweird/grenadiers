@@ -13,6 +13,7 @@ export interface ActorDrawing {
   shortFlame: Graphics
   longFuse: Graphics
   reverseControls: Graphics
+  diarrhea: Graphics
   poses: Record<Direction, PoseFrames>
   direction: Direction
   moving: boolean
@@ -23,6 +24,7 @@ export interface ActorDrawing {
   shortFlamed: boolean
   longFused: boolean
   reversed: boolean
+  diarrheaActive: boolean
 }
 
 function legs(drawing: Graphics, frame: number, side: boolean): void {
@@ -141,6 +143,13 @@ export function makeActor(seat: Seat): ActorDrawing {
   ])
   pixels(reverseControls, PALETTE.brick, [[17, -7, 9, 3], [-26, 5, 9, 3]])
   reverseControls.visible = false
+  const diarrhea = new Graphics()
+  pixels(diarrhea, PALETTE.deepInk, [
+    [-14, -29, 28, 3], [-17, -26, 34, 3], [-20, -23, 40, 3],
+  ])
+  pixels(diarrhea, PALETTE.brick, [[-10, -26, 8, 3], [4, -23, 8, 3]])
+  pixels(diarrhea, PALETTE.white, [[-3, -32, 6, 9]])
+  diarrhea.visible = false
   const poses = {
     north: [frontOrBack(seat, 'north', 0), frontOrBack(seat, 'north', 1)],
     east: [sidePose(seat, 'east', 0), sidePose(seat, 'east', 1)],
@@ -149,13 +158,15 @@ export function makeActor(seat: Seat): ActorDrawing {
   } satisfies Record<Direction, PoseFrames>
   root.addChild(
     shadow, protection, shield, goldenFlame, shortFuse, shortFlame, longFuse, reverseControls,
+    diarrhea,
     ...Object.values(poses).flat(),
   )
   const drawing = {
-    root, protection, shield, goldenFlame, shortFuse, shortFlame, longFuse, reverseControls, poses,
+    root, protection, shield, goldenFlame, shortFuse, shortFlame, longFuse, reverseControls,
+    diarrhea, poses,
     direction: 'south' as Direction, moving: false,
     protected: false, shielded: false, golden: false, shortFused: false, shortFlamed: false,
-    longFused: false, reversed: false,
+    longFused: false, reversed: false, diarrheaActive: false,
   }
   setActorPose(drawing, 'south', 0)
   return drawing

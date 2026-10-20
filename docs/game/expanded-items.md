@@ -4,11 +4,14 @@ Status: [Heart](heart.md), [Shield](shield.md), [Golden Flame](golden-flame.md),
 [Short Fuse](short-fuse.md) and [Short Flame](short-flame.md) are published through v0.3.29.
 The v0.3.30 [Long Fuse](long-fuse.md) increment passes local checks and corrected-source native
 acceptance: 32/32 Compose and 32/32 Kubernetes cases, wrapper exit zero, no retries or carried
-results. Independent final evidence review is clear; final-head CI remains pending. Verification
+results. Independent final evidence review and all required CI pass; v0.3.30 is published. Verification
 retains the earlier hosted failure and separately named source-specific attempts.
-The v0.3.31 [Reverse Controls](reverse-controls.md) candidate passes local checks. Its earlier
-native run was interrupted before latency/optional/Kubernetes cases; fresh whole acceptance
-and final-head CI remain pending.
+The v0.3.31 [Reverse Controls](reverse-controls.md) increment passes local checks and fresh
+33/33 Compose plus 33/33 Kubernetes acceptance. All required CI passes; v0.3.31 is published.
+The v0.3.32 [Diarrhea](diarrhea.md) candidate passes local checks and independent implementation
+reviews and fresh same-image 45/45 Compose plus 45/45 Kubernetes acceptance after the reviewed
+startup-readiness correction. Independent final native review is clear; new exact-head CI remains a release gate;
+the original CI counterexample is retained separately.
 Expanded-v5/generator-v2 rooms and gameplay-v8 are retained; see
 [verification](../verification.md) and
 [release notes](https://github.com/liveweird/grenadiers/releases).
@@ -49,7 +52,7 @@ absorbs one lethal hit, consumes its equipment slot and grants 60 ticks of immun
 both damage passes and overlapping flames. Collecting protection cannot undo earlier damage.
 
 Shield uses 300 physical ticks (five seconds); Golden Flame, Short Fuse, Short Flame, Long Fuse,
-and Reverse Controls use 600 (ten seconds), all
+Reverse Controls and Diarrhea use 600 (ten seconds), all
 refreshing on recollection. Proposed remaining durations: Stopwatch 180; other timed effects and each
 Slow-foot stack 600. These become versioned constants when activated, not new settings yet.
 Golden flame gives newly placed bombs radius eight; Short-flame overrides it with radius one.

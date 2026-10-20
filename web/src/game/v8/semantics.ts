@@ -27,12 +27,19 @@ export function itemSetSemanticError(
 }
 
 const supportedItems = [
-  'heart', 'shield', 'goldenFlame', 'shortFuse', 'shortFlame', 'longFuse', 'reverseControls',
+  'heart', 'shield', 'goldenFlame', 'shortFuse', 'diarrhea', 'shortFlame', 'longFuse', 'reverseControls',
 ] as const
 
 function supportedItem(kind: string, enabled: ReadonlySet<ItemId>): boolean {
   return ['bombCapacity', 'blastRange', 'movementSpeed'].includes(kind)
     || (supportedItems.includes(kind as typeof supportedItems[number]) && enabled.has(kind as ItemId))
+}
+
+function supportedEffect(effect: EffectView, enabled: ReadonlySet<ItemId>): boolean {
+  const limit = effect.kind === 'shield' ? 300 : 600
+  return supportedItems.includes(effect.kind as typeof supportedItems[number])
+    && enabled.has(effect.kind as ItemId)
+    && effect.remainingTicks <= limit
 }
 
 function supportedState(state: GameState | null, enabled: ReadonlySet<ItemId>): boolean {
@@ -42,14 +49,7 @@ function supportedState(state: GameState | null, enabled: ReadonlySet<ItemId>): 
     actor.inventory.weapon === null
     && (actor.inventory.equipment === null
       || (actor.inventory.equipment === 'heart' && enabled.has('heart')))
-    && actor.effects.every((effect) =>
-      (effect.kind === 'shield' && enabled.has('shield') && effect.remainingTicks <= 300)
-      || (effect.kind === 'goldenFlame' && enabled.has('goldenFlame') && effect.remainingTicks <= 600)
-      || (effect.kind === 'shortFuse' && enabled.has('shortFuse') && effect.remainingTicks <= 600)
-      || (effect.kind === 'shortFlame' && enabled.has('shortFlame') && effect.remainingTicks <= 600)
-      || (effect.kind === 'longFuse' && enabled.has('longFuse') && effect.remainingTicks <= 600)
-      || (effect.kind === 'reverseControls'
-        && enabled.has('reverseControls') && effect.remainingTicks <= 600))
+    && actor.effects.every((effect) => supportedEffect(effect, enabled))
     && (enabled.has('heart') || actor.damageGraceRemainingTicks === 0)
   ))
 }

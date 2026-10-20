@@ -31,6 +31,7 @@
     "test:short-flame": "playwright test --config playwright.short-flame.config.ts",
     "test:long-fuse": "playwright test --config playwright.long-fuse.config.ts",
     "test:reverse-controls": "playwright test --config playwright.reverse-controls.config.ts",
+    "test:diarrhea": "playwright test --config playwright.diarrhea.config.ts",
     "test:renderer-diagnostics": "playwright test --config playwright.renderer-diagnostics.config.ts",
     "test:terrain-pixels": "playwright test --config playwright.terrain-pixels.config.ts"
   },

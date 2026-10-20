@@ -48,3 +48,11 @@ frame until rendering selects its final pose, avoiding intermediate visibility i
 Reverse Controls adds its own directional pixel pickup and localized rule/HUD presentation.
 See the [accepted desktop and Polish mobile captures](reverse-controls.md); exact inversion
 and expiry remain authoritative simulation behavior.
+
+Diarrhea adds a distinct bomb-drop pickup and actor cue; reduced motion keeps the cue static.
+Its [desktop and Polish mobile captures](diarrhea.md) show the exposed pickup and localized
+eighth rule switch before collection. Active-effect presentation also has renderer unit coverage.
+
+The refreshed Diarrhea captures come from the corrected-readiness acceptance recorded in
+[verification](../verification.md). Both show the uncollected pickup; the active curse and
+automatic placement are established by renderer/domain and paired-browser assertions.

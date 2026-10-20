@@ -77,7 +77,7 @@ describe('original pixel-art geometry', () => {
     const gold = makeActor('one')
     const blue = makeActor('two')
     for (const actor of [gold, blue]) {
-      expect(actor.root.children).toHaveLength(16)
+      expect(actor.root.children).toHaveLength(17)
       expect(Object.values(actor.poses).flat()).toHaveLength(8)
       expect(Object.values(actor.poses).flat().filter(({ visible }) => visible)).toHaveLength(1)
       setActorPose(actor, 'north', 1)
@@ -100,11 +100,11 @@ describe('original pixel-art geometry', () => {
     expect(flame.frames.map(({ visible }) => visible)).toEqual([true, false])
     const pickups = [
       'bombCapacity', 'blastRange', 'movementSpeed', 'heart', 'shield', 'goldenFlame', 'shortFuse',
-      'shortFlame', 'longFuse', 'reverseControls',
+      'diarrhea', 'shortFlame', 'longFuse', 'reverseControls',
     ] as const
     const counts = pickups.map((kind) => makePickup(kind) as unknown as Drawing)
       .map(({ rectangles = [] }) => rectangles.length)
-    expect(counts).toEqual([16, 14, 18, 23, 21, 22, 21, 22, 20, 21])
+    expect(counts).toEqual([16, 14, 18, 23, 21, 22, 21, 20, 22, 20, 21])
     expect(Math.max(...counts)).toBeLessThanOrEqual(23)
     const heart = makePickup('heart') as unknown as Drawing
     const colors = heart.rectangles?.map(({ color }) => color)
@@ -122,6 +122,10 @@ describe('original pixel-art geometry', () => {
     const shortFuseColors = shortFuse.rectangles?.map(({ color }) => color)
     expect(shortFuseColors).toContain(PALETTE.ink)
     expect(shortFuseColors).toContain(PALETTE.flameCore)
+    const diarrhea = makePickup('diarrhea') as unknown as Drawing
+    const diarrheaColors = diarrhea.rectangles?.map(({ color }) => color)
+    expect(diarrheaColors).toContain(PALETTE.ink)
+    expect(diarrheaColors).toContain(PALETTE.brick)
     const shortFlame = makePickup('shortFlame') as unknown as Drawing
     const shortFlameColors = shortFlame.rectangles?.map(({ color }) => color)
     expect(shortFlameColors).toContain(PALETTE.blue)

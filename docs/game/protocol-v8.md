@@ -9,8 +9,8 @@ claim or revoke the credential needed for a version-8 connection.
 
 V8 adds rules version **5** and map ID **`generated_v2`**. Its own rules/map types leave the
 shared enums and schemas for earlier protocols unchanged. New production rooms are always
-Expanded v5/generator v2. They advertise `availableItems: ["heart", "shield", "goldenFlame", "shortFuse", "shortFlame", "longFuse", "reverseControls"]` and initially enable
-`settings.enabledItems: ["heart"]`. All 128 subsets of those seven available items are supported configurations.
+Expanded v5/generator v2. They advertise `availableItems: ["heart", "shield", "goldenFlame", "shortFuse", "diarrhea", "shortFlame", "longFuse", "reverseControls"]` and initially enable
+`settings.enabledItems: ["heart"]`. All 256 subsets of those eight available items are supported configurations.
 Other catalog IDs remain unavailable.
 
 The Classic settings preset disables optional items and restores the four ordinary settings.
@@ -85,5 +85,10 @@ authoritative raw held direction beginning on the tick after collection. Expiry 
 so the raw direction applies normally at the exact deadline. Browser controls and presented
 headings remain literal; only simulation movement is inverted.
 
-The seven-item availability array is exact v8 data. Deploy server and web together and reload
-older v8 clients: a client built for six items rejects the new room even when Reverse Controls is disabled.
+Diarrhea adds or refreshes a 600-tick effect. The simulation selects one retained manual bomb
+request or one automatic ordinary intent per seat, then resolves both seats together. Automatic
+intents never enter the mailbox or action-ID sequence. The first automatic placement is one tick
+after collection, and expiry suppresses placement at the exact deadline.
+
+The eight-item availability array is exact v8 data. Deploy server and web together and reload
+older v8 clients: a client built for seven items rejects the new room even when Diarrhea is disabled.

@@ -98,8 +98,10 @@ impl State {
         tick: Tick,
         events: &mut Vec<StepEvent>,
     ) {
-        let requests =
-            SeatId::ALL.map(|seat| actions.for_seat(seat).first() == Some(ManualAction::PlaceBomb));
+        let requests = SeatId::ALL.map(|seat| {
+            actions.for_seat(seat).first() == Some(ManualAction::PlaceBomb)
+                || self.actors[seat.index()].effects.forces_bomb_drops(tick)
+        });
         self.resolve_classic_placements(requests, tick, events);
     }
 

@@ -162,3 +162,11 @@ Reverse Controls has a separate production-seed scenario:
 Use `docker-compose.reverse-controls.yaml` with the same image. It holds one raw east input across
 collection and the exact 600-tick expiry, checks both peers, and captures screenshots only outside
 the timed window. See [deployment](deployment.md#reproduce-opt-in-reverse-controls-movement).
+
+## Diarrhea production-seed scenario
+
+Run `E2E_DIARRHEA_FIXTURE=arena-v2-diarrhea npm --prefix e2e run test:diarrhea` with
+`docker-compose.diarrhea.yaml`. The scenario enables only Diarrhea, reveals and collects the
+seeded cell (3,1) pickup, verifies the server-owned next-tick ordinary bomb without another
+browser bomb action, and observes natural death and a clean next round. Screenshots are taken
+before collection so capture time cannot change the timed behavior.

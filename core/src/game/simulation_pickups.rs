@@ -88,6 +88,7 @@ impl super::Actor {
             PickupKind::Shield
             | PickupKind::GoldenFlame
             | PickupKind::ShortFuse
+            | PickupKind::Diarrhea
             | PickupKind::ShortFlame
             | PickupKind::LongFuse
             | PickupKind::ReverseControls => {
@@ -108,6 +109,9 @@ impl super::Actor {
     }
 }
 
+#[cfg(test)]
+#[path = "diarrhea_tests.rs"]
+mod diarrhea_tests;
 #[cfg(test)]
 #[path = "short_flame_tests.rs"]
 mod short_flame_tests;

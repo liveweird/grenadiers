@@ -1,10 +1,10 @@
 # Changelog
 
-## 0.3.33 — 2026-10-18
+## 0.3.33 — 2026-10-20
 
-- Prepare opt-in Slow foot: each pickup adds an independent 600-tick stack and halves movement speed, up to six exact stacks.
+- Add opt-in Slow foot: each pickup adds an independent 600-tick stack and halves movement speed, up to six exact stacks.
 - Preserve fixed-point residuals, hazards, collision rules, Reverse Controls input semantics and deterministic pickup arbitration while allowing eligible rivals to bypass capped actors.
-- Add the ninth lobby item switch, English and Polish grouped timers, pixel cues, checked v8 publication, deterministic replay and a production-seed browser scenario. Native acceptance and final CI remain pending.
+- Add the ninth lobby item switch, English and Polish grouped timers, pixel cues, checked v8 publication, deterministic replay and a production-seed browser scenario. Fresh same-image acceptance passes 46 Compose and 46 Kubernetes cases after reviewed browser-route and movement-window corrections; exact-head CI and publication remain release gates.
 
 ## 0.3.32 — 2026-10-20
 

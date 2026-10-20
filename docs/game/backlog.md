@@ -16,8 +16,9 @@ native review, candidate CI and post-merge CI pass; [v0.3.32](https://github.com
 is published. The original shaped-latency CI counterexample and source-specific 68/68 native
 result remain historical evidence. The
 v0.3.33 Slow-foot candidate passes local checks and independent backend/frontend reviews; its
-current scope has 22 latency cases, 47 static scenarios and 46 Compose plus 46 Kubernetes cases.
-The 92-case native total, final-head CI and publication remain pending. Verification retains
+current scope passes 22 latency cases per target, 47 static scenarios and fresh 46 Compose plus
+46 Kubernetes cases (**92 total**) with zero retries. Independent native evidence review is clear; final-head CI and
+publication remain release gates. Verification retains
 source-specific evidence and earlier failed or interrupted attempts. The other 13 requested
 pickups remain outside this increment. Richer transitions
 and artwork remain follow-up work. See [pixel-art presentation](pixel-art.md),

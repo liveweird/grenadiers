@@ -14,9 +14,10 @@ startup-readiness correction. Independent final native review, candidate CI and 
 pass; [v0.3.32](https://github.com/liveweird/grenadiers/releases/tag/v0.3.32) is published. The
 original CI counterexample is retained separately. The
 v0.3.33 [Slow foot](slow-foot.md) candidate passes local checks and independent implementation
-reviews. Its current acceptance scope contains 22 latency cases, 47 static scenarios and 46
-Compose plus 46 Kubernetes cases. The 92-case native total, final-head CI and publication remain
-pending.
+reviews and fresh same-image 46/46 Compose plus 46/46 Kubernetes acceptance after reviewed
+browser-driver corrections. All 22 latency cases per target pass; static parity contains 47 scenarios.
+The whole wrapper exits zero with no retries or carried passes. Independent native evidence review is clear; final-head
+CI and publication remain release gates.
 Expanded-v5/generator-v2 rooms and gameplay-v8 are retained; see
 [verification](../verification.md) and
 [release notes](https://github.com/liveweird/grenadiers/releases).

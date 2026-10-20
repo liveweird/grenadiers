@@ -1,6 +1,67 @@
 # Repository verification
 
-## Slow-foot accepted-parent integration — 2026-10-20 — native acceptance pending
+## Slow Foot fresh native acceptance — 2026-10-20 — 92/92
+
+Frozen source `dbaa7f84f6013a620ec3f9bea12c02ad0e29d904`, archive SHA-256
+`34db83f3d9a2663797743fa6d905cf00e07a72cb9cc801a4808ff94909d0be07`, builds the logged
+no-cache image `sha256:6608df856d8d1b0c69b5552ae1ee7d39ff08b0a1fcc4df804fb65806007f54be`.
+Image archive SHA-256 is `ce5f2c879aa1f60ebca4246f151e089e454a9caed5bd097558490921f245ed4a`.
+The single complete wrapper invocation exits **0**: **46/46 Compose and 46/46 Kubernetes**,
+34 groups/reports, all nine optional item scenarios, one worker and zero retries or carried results.
+The Slow Foot scenario proves natural collection, one-stack half-rate movement in matching public
+frames, exact wall stop and 600-tick expiry, restored base rate, peer equality and key-release stop.
+The corrected driver uses the open top corridor and direction-matched, unclamped measurement
+windows; product/API/Cargo/web inputs remain byte-identical to the earlier reviewed Slow Foot source.
+
+All four real latency profiles retain twenty observations and complete readiness diagnostics.
+Root independently checks full ingress → dispatch → page causality and the fixed watermark,
+matching endpoint facts, accepted completion, and that every measured key starts afterward.
+All 22 latency cases per target pass; the shaped budget remains 250 ms and retries remain zero.
+
+| Target | Profile | Samples | Startup / fresh publication baseline | Maximum | Exceedances |
+| --- | --- | ---: | ---: | ---: | ---: |
+| Compose | local | 20 | 4253.027 / 108.991 ms | 49.566 ms | 0 |
+| Compose | delay-50ms | 20 | 4891.056 / 186.425 ms | 167.692 ms | 0 |
+| Kubernetes | local | 20 | 4195.146 / 128.683 ms | 49.484 ms | 0 |
+| Kubernetes | delay-50ms | 20 | 4804.694 / 186.585 ms | 178.862 ms | 0 |
+
+Startup includes context creation, joining, countdown and rendering; it has no 250 ms claim.
+These are twenty-observation reference experiments, not Internet-tail or pixel-presentation
+guarantees. Compose has unlimited CPU; Kubernetes retains `50000 100000` (half a CPU).
+Both have zero observed throttle-counter deltas. Three delegated workers hold idle through both
+latency groups. Before Compose measurement, root briefly holds the manual gate for unrelated
+Flow E2E/browser load, preserving the initial snapshot. Measurement begins with that work still
+active and lower observed load: OrbStack 15.7%, Flow E2E app 34.64%. The Kubernetes snapshot
+later has no observed Flow E2E activity and OrbStack 11.5%. Unrelated processes remain untouched;
+no globally idle host or unloaded benchmark is claimed. No measured sample is discarded.
+
+Fresh dependencies contain 8186 files, 1305 directories and 13 symlinks. The installed proof has
+132 packages, 42 optional omissions and zero required omissions or metadata/version mismatches.
+Their tar hashes to `713d056c6a7ca5c7f3064287cf054b7aca1024b8fe21e5c9e2f9f48de89ed07a`.
+The 694 source files, 79 directories, three locks, file modes, symlinks, source/dependency tar
+bytes, semantic proof, image IDs and 1021-entry preparation seal match before and after execution.
+Source-tree tar SHA-256 is `265921a4f1b12a722a2cc0c6127a31c105e8451207fd77f6569003158b33086c`;
+preparation seal SHA-256 is `e589b26a26808dd39e46d14838ed6b51326eee41fe8a2a02c550ad107845dba1`.
+Strict Node/YAML output and all three strict Kubernetes resources pass; the pinned image scan
+reports zero fixable HIGH/CRITICAL findings. The wrapper verifies 86 runtime PNGs and 24 runtime
+image/security records, 12 distinct Kubernetes pod/forward identities and 22 seed-mode records
+across eleven mode-0444 fixtures. Independent live cleanup passes for owned resources, forwards
+and ports; default localhost:8085 remains the separately published v0.3.32 image.
+
+Root actually viewed both fresh Compose captures: English desktop 1440×2295, SHA-256
+`cc7e4d803ac8078bc7dbf13e0fbe7bfad67eff5e90b4c7d59313bbd98cb315c3`, and Polish 320×3065
+reduced motion, `e53ca7b0979402155738f00d77c992f02a2fbda841a8a633560160514f4ddda6`.
+Both show the exposed pickup before collection, with no active curse/timer. Layouts are readable
+without observed overlap; the Polish browser scenario asserts horizontal overflow is absent.
+Kubernetes captures are not separately viewed. The frozen source's 29 tracked PNGs are distinct
+from the 86 runtime captures. Earlier failed and unexecuted preparations remain immutable history.
+Independent native and documentation reviews are clear. The 1916-entry `FINAL.sha256` seal
+hashes to `b4f287107099c3cbf17940493bb0a550c50336fffa9c751e79d9ece72b34906d`.
+All 1917 evidence files and the source archive are copied and byte-verified outside `/tmp` in the
+private checkpoint, excluded from Git and Docker. Exact-head CI, merge, post-merge CI and
+publication remain separate release gates.
+
+## Slow-foot accepted-parent integration — 2026-10-20 — before native acceptance
 
 Final raw Diarrhea source `a5787b297d611c51c31523401823a1211470dd13` is integrated,
 including the startup-readiness correction, stable Long Fuse cursor, robust predecessor drivers,

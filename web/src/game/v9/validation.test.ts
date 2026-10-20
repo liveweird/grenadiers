@@ -1,44 +1,38 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it } from 'vitest'
+import { checkedCatalogMaskRanges, executeCatalogMaskRange } from '../../test/catalogMasks'
 import { validateServerMessage } from '../client/clientProtocol'
 import { snapshot } from '../client/testSupport'
 import { validateGameplayV8ServerMessage } from '../v8/validation'
 import { validateGameplayV9ServerMessage } from './validation'
-
-function checkedCatalogCases<const T extends readonly string[], R>(
-  catalog: T, enumerate: (catalog: T) => R,
-): R {
-  if (catalog.length !== 16) throw new Error(`gameplay v9 catalog must contain 16 items; got ${catalog.length}`)
-  if (new Set(catalog).size !== catalog.length) throw new Error('gameplay v9 catalog items must be unique')
-  return enumerate(catalog)
-}
 
 const supported = [
   'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch',
   'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot',
   'shortFlame', 'longFuse', 'reverseControls', 'invisibleBombs',
 ] as const
-const supportedCases = checkedCatalogCases(supported, (catalog) => Array.from(
-  { length: 2 ** catalog.length },
-  (_, mask) => [catalog.filter((_, index) => (mask & (1 << index)) !== 0)] as const,
-))
+const expectedSupported = [
+  'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch',
+  'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot',
+  'shortFlame', 'longFuse', 'reverseControls', 'invisibleBombs',
+] as const
+const supportedRanges = checkedCatalogMaskRanges({
+  protocol: 'gameplay v9', catalog: supported, expectedCount: 16,
+  expectedOrder: expectedSupported,
+})
 
 describe('gameplay v9 Stopwatch validation', () => {
-  it('pins sixteen unique catalog entries before enumerating every mask', () => {
+  it('pins sixteen unique catalog entries in canonical order before enumerating mask ranges', () => {
     expect(supported).toHaveLength(16)
     expect(new Set(supported)).toHaveLength(16)
+    expect(supported).toEqual(expectedSupported)
   })
 
-  it('rejects a duplicate catalog before calling the mask enumerator', () => {
-    const enumerate = vi.fn()
-    expect(() => checkedCatalogCases([...supported.slice(0, -1), 'reverseControls'], enumerate))
-      .toThrow('gameplay v9 catalog items must be unique')
-    expect(enumerate).not.toHaveBeenCalled()
-  })
-
-  it.each(supportedCases)('accepts the pinned supported enabled-item set %j', (enabledItems) => {
-    const message = snapshot(1)
-    message.room.settings.enabledItems = [...enabledItems]
-    expect(validateGameplayV9ServerMessage(message)).toEqual({ valid: true, value: message })
+  it.each(supportedRanges)('accepts every pinned supported enabled-item mask in [$start, $end)', (range) => {
+    executeCatalogMaskRange('gameplay v9', supported, range, (_mask, enabledItems) => {
+      const message = snapshot(1)
+      message.room.settings.enabledItems = [...enabledItems]
+      expect(validateGameplayV9ServerMessage(message)).toEqual({ valid: true, value: message })
+    })
   })
 
   it('binds visible frozen state to the living opponent Stopwatch and keeps hidden actors exact', () => {

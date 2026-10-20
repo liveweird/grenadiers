@@ -75,6 +75,10 @@ test('Stopwatch freezes voluntary actions while Timed bombs pause', async ({ bro
     ])
     await Promise.all(games.map((game) => expect.poll(() => latestSnapshot(game)?.room.phase.type)
       .toBe('running')))
+    await Promise.all([
+      one.getByRole('region', { name: 'Grenadiers courtyard', exact: true }).click(),
+      two.getByRole('region', { name: 'Dziedziniec Grenadiers', exact: true }).click(),
+    ])
     expect(latestSnapshot(games[0])!.room.availableItems).toEqual([
       'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch',
       'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame',
@@ -99,13 +103,19 @@ test('Stopwatch freezes voluntary actions while Timed bombs pause', async ({ bro
     await Promise.all(games.map((game) => expect.poll(() => stopwatchTicks(game, 'one'))
       .toBeGreaterThan(0)))
     await Promise.all(games.map((game) => expectPausedAcrossTicks(game, original)))
-    const p2Start = visibleActor(latestSnapshot(games[1]), 'two')!.position
+    const p2Starts = games.map((game) => visibleActor(latestSnapshot(game), 'two')!.position)
+    const p2Start = p2Starts[1]
     const p2BombCount = latestSnapshot(games[1])!.state.bombs.length
+    const beforeP2BombIds = games.map((game) => latestSnapshot(game)!.state.bombs.map(({ id }) => id))
+    const beforeP2ActionTicks = games.map((game) => latestSnapshot(game)!.state.physicalTick)
     await two.keyboard.down('ArrowDown')
     await two.keyboard.press('Space')
     await expect.poll(() => frozen(games[1], 'two')).toBe(true)
-    expect(visibleActor(latestSnapshot(games[1]), 'two')!.position).toEqual(p2Start)
-    expect(latestSnapshot(games[1])!.state.bombs).toHaveLength(p2BombCount)
+    await expect.poll(() => games.every((game, index) =>
+      latestSnapshot(game)!.state.physicalTick >= beforeP2ActionTicks[index] + 3)).toBe(true)
+    expect(games.map((game) => visibleActor(latestSnapshot(game), 'two')!.position)).toEqual(p2Starts)
+    expect(games.map((game) => latestSnapshot(game)!.state.bombs.map(({ id }) => id)))
+      .toEqual(beforeP2BombIds)
     await moveSeatTo(one, games[0], 'one', { column: 2, row: 1 })
     await moveSeatTo(one, games[0], 'one', { column: 3, row: 1 })
     await expect.poll(() => frozen(games[1], 'two')).toBe(false)
@@ -117,6 +127,7 @@ test('Stopwatch freezes voluntary actions while Timed bombs pause', async ({ bro
     await expect.poll(() => latestSnapshot(games[0])!.state.bombs.length
       + latestSnapshot(games[0])!.state.flames.length).toBe(0)
 
+    await moveSeatTo(two, games[1], 'two', { column: 13, row: 11 })
     await moveSeatTo(two, games[1], 'two', { column: 11, row: 11 })
     await Promise.all(games.map((game) => expect.poll(() => stopwatchTicks(game, 'two'))
       .toBeGreaterThan(0)))

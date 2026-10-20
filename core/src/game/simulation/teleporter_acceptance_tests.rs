@@ -151,6 +151,7 @@ fn tangency_is_safe_and_intermediate_mines_and_fire_are_not_swept() {
     );
     assert_eq!(game.last_teleport_tick(), Some(Tick(1)));
     assert!(game.world.bombs.contains_key(&EntityId(30)));
+    assert!(game.actors.iter().all(|actor| actor.alive));
 }
 
 fn arena_with_block(block: CellId) -> Arena {
@@ -285,12 +286,17 @@ fn completed_round_freezes_pickup_and_new_state_resets_marker() {
         BTreeMap::from([(cells[0], PickupKind::Teleporter)]),
         RoundAssignment::first(),
     );
-    assert_eq!(game.last_teleport_tick(), None);
+    game.step(&[]).unwrap();
+    assert_eq!(game.last_teleport_tick(), Some(Tick(1)));
     game.result = Some(RoundResult::Winner(SeatId::One));
     let frozen = game.clone();
     let report = game.step(&[]).unwrap();
     assert!(report.events.is_empty());
     assert_eq!(game.world, frozen.world);
     assert_eq!(game.actors, frozen.actors);
-    assert_eq!(game.last_teleport_tick(), None);
+    assert_eq!(game.result, frozen.result);
+    assert_eq!(game.last_teleport_tick(), Some(Tick(1)));
+
+    let replacement = state_with(positions, BTreeMap::new(), RoundAssignment::first());
+    assert_eq!(replacement.last_teleport_tick(), None);
 }

@@ -15,6 +15,26 @@ contracts and dependency locks are unchanged. Corrected-source native acceptance
 exact-head CI remain pending.
 
 
+## Piercing Bomb publication and local deployment — 2026-10-20
+
+PR [80](https://github.com/liveweird/grenadiers/pull/80) merged at `2026-10-20T21:30:49Z` as
+`e2682187d74317a5a29c4322f802b99b1116af7a`, with sole parent
+`27dcf225f3a1f3ef67ee3cf8c52c9d583e7318fd`. Its tree
+`3068e023f1ac759c82844bb7a5f761227c6c4ad8` equals accepted raw source
+`7cba14dd2cc1cd645a5212fd22a59c2873286d74` and the normalized candidate. Candidate
+[PR CI](https://github.com/liveweird/grenadiers/actions/runs/39498552320),
+[push CI](https://github.com/liveweird/grenadiers/actions/runs/39498541031), and
+[post-merge CI](https://github.com/liveweird/grenadiers/actions/runs/39500972778) each pass five
+jobs and 47 browser cases, without failed, flaky, skipped, retry or timeout result markers.
+
+[v0.3.34](https://github.com/liveweird/grenadiers/releases/tag/v0.3.34) was published as a source
+prerelease at `2026-10-20T21:44:22Z`. Additional tag-triggered CI was not complete at that
+checkpoint and supplies no publication evidence. The exact accepted image
+`sha256:5d0bc94c7febc6764b9f875f1273f4d3814077c8d22c2b56b4a2d80fbebbe0e8`
+then served localhost:8085 without rebuilding: readiness, health and index probes returned 200;
+served index and JavaScript bytes matched the container. The v0.3.33 image is retained as a
+local rollback tag. No registry image or hosted deployment is claimed.
+
 ## Piercing Bomb fresh native acceptance — 2026-10-20 — 94/94; independently reviewed and sealed
 
 Final raw Slow Foot source `f499f680ac68bc8eed4803e4d3c06152cb89cf64` is integrated,

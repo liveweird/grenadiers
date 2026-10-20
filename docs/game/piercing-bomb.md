@@ -36,6 +36,7 @@ and [Polish 320px](../screenshots/piercing-bomb-polish-320.png) captures. Neithe
 has overlapping controls or game content. In the compact four-column English HUD, “Piercing bomb”
 wraps inside the word; this is a nonblocking cosmetic preview limitation rather than a claim of
 perfect compact layout. Kubernetes captures were retained by the run but were not separately
-viewed. Independent evidence review is clear and the final evidence is sealed. Exact-head CI and publication
-remain pending; see
+viewed. Independent evidence review, candidate CI and post-merge CI pass.
+[v0.3.34](https://github.com/liveweird/grenadiers/releases/tag/v0.3.34) is published as a source
+prerelease, and its exact accepted image serves localhost:8085 at the deployment checkpoint; see
 [verification](../verification.md).

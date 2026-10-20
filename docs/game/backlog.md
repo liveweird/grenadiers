@@ -22,8 +22,9 @@ zero retries. Candidate and post-merge CI pass, and
 prerelease. Its final raw source is integrated into the v0.3.34 Piercing Bomb candidate, which
 retains the feature and version. Repository, E2E lint, Knip, type checking and 48-scenario parity
 pass at the integrated v0.3.34 source. Fresh same-image acceptance now passes all 47 Compose and
-47 Kubernetes cases with zero retries; independent evidence review is clear and its final seal is verified. Exact-head CI remains
-pending. Its final raw source is integrated into the v0.3.35 Power Bomb candidate, which retains
+47 Kubernetes cases with zero retries; independent evidence review and its final seal are clear.
+Candidate and post-merge CI pass, and [v0.3.34](https://github.com/liveweird/grenadiers/releases/tag/v0.3.34)
+is published as a source prerelease. Its final raw source is integrated into the v0.3.35 Power Bomb candidate, which retains
 the feature and version and passes local implementation review; fresh native acceptance and
 exact-head CI remain pending. Verification retains
 source-specific evidence and earlier failed or interrupted attempts. The other 11 requested

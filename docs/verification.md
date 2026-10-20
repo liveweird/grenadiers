@@ -16,6 +16,27 @@ Independent integration review of the earlier source is clear. Fresh whole 46+46
 acceptance (**92 total**) and exact-head CI remain pending. Diarrhea's accepted matrix supplies no carried
 Slow-foot result. The accepted Diarrhea parent is published separately as v0.3.32.
 
+## Slow Foot first native attempt — 2026-10-20 — failed route
+
+Frozen source `5b6845d014fc40a781227611ef8bf257259f5a91` builds image
+`sha256:ae1e5a23bd282a202a076484137f24e21f2fb7cccfd6df1a7e0e7eb085f670fd`.
+The whole wrapper exits **1**: **45 Compose cases pass, Slow Foot fails, and all 46 Kubernetes
+cases are unattempted**. Sixteen groups pass, including all 22 latency cases. Source, dependency,
+lock, mode, tar, preparation-seal and image checks match after execution; owned cleanup passes.
+
+Independent review confirms a test-route defect: the actor escapes to `(1,2)`, then the default
+X-first movement helper tries to reach `(3,1)` by walking into permanent pillar `(2,2)`.
+The east command was observed, both failed captures show the actor at the escape tile with the
+pickup uncollected, and the position wait times out. The failure precedes collection and every
+Slow Foot speed/expiry assertion. The correction adds the ordinary-key waypoint `(1,1)` before
+moving east, preserving product code, helpers, timing, retries and all later assertions.
+
+The failed attempt is sealed with 1458 payload entries; `FINAL.sha256` hashes to
+`76581d3c4d958c06fcdd42a602b4d65806c32ff4ac8721472f3ba9455ded815f`.
+All 1459 files and the source archive are byte-verified outside `/tmp` in the private checkpoint.
+Nothing is reused as acceptance: a new reviewed source, archive, dependency install and image
+must pass the complete **46 Compose plus 46 Kubernetes** matrix with zero retries.
+
 ## Diarrhea publication — 2026-10-20 — v0.3.32 published
 
 [v0.3.32](https://github.com/liveweird/grenadiers/releases/tag/v0.3.32) was published as a

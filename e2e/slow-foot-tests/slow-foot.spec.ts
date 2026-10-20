@@ -123,6 +123,7 @@ test('two browsers observe one Slow-foot stack and exact restored movement', asy
       path: info.outputPath('slow-foot-exposed-polish-320-reduced.png'), fullPage: true,
     })
 
+    await moveTo(one, games[0], { column: 1, row: 1 })
     await moveTo(one, games[0], { column: 3, row: 1 })
     await Promise.all(games.map((game) => expect.poll(() =>
       remaining(latestSnapshot(game)!)).toBeGreaterThan(0)))

@@ -11,6 +11,7 @@ use super::{
 pub(crate) struct WorldFacts {
     pub(crate) rules_version: super::RulesVersion,
     pub(crate) physical_tick: Tick,
+    pub(crate) last_teleport_tick: Option<Tick>,
     pub(crate) running_updates: u16,
     pub(crate) remaining_ticks: u16,
     pub(crate) result: Option<WireRoundResult>,

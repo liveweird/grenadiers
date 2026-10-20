@@ -2,8 +2,8 @@ use std::{future::pending, sync::Arc, time::Duration};
 
 use axum::extract::ws::{Message, WebSocket};
 use grenadiers_core::protocol::Counter;
-use grenadiers_core::protocol::v9::{
-    GameClientMessage, GameServerMessage, V9ErrorCode as ErrorCode, parse_client_message,
+use grenadiers_core::protocol::v10::{
+    GameClientMessage, GameServerMessage, V10ErrorCode as ErrorCode, parse_client_message,
 };
 use tokio::time::{Instant, MissedTickBehavior, interval_at, sleep_until, timeout};
 
@@ -168,7 +168,7 @@ pub(super) async fn authenticated_loop(
 
 #[derive(Debug, PartialEq, Eq)]
 struct PreparedNotice {
-    room: grenadiers_core::protocol::v9::RoomView,
+    room: grenadiers_core::protocol::v10::RoomView,
     frame: Option<Arc<str>>,
 }
 

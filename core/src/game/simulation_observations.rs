@@ -68,13 +68,6 @@ impl State {
     }
 
     #[must_use]
-    #[cfg_attr(
-        not(test),
-        expect(
-            dead_code,
-            reason = "v10 capture consumes this core-owned marker in the next integration phase"
-        )
-    )]
     pub(crate) const fn last_teleport_tick(&self) -> Option<Tick> {
         self.last_teleport_tick
     }

@@ -80,12 +80,17 @@ test('Teleporter swaps safe players, survives reconnect, and is consumed when un
     expect(position(games[0], 'one')).toEqual(rivalStart)
     expect(cell(position(games[0], 'two'))).toEqual({ column: 3, row: 1 })
 
+    const baseline = (await admissionBaseline(one))!
+    const expectedActors = (['one', 'two'] as const).map((seat) => ({
+      seat, ...position(games[0], seat), lastTeleportTick: successfulMarker,
+    }))
     const sockets = games[0].sockets
     await disconnectTransport(one)
     await expect.poll(() => games[0].sockets).toBeGreaterThan(sockets)
-    await expect.poll(async () => (await admissionBaseline(one))?.hasState).toBe(true)
-    expect(marker(games[0], 'one')).toBe(successfulMarker)
-    expect(position(games[0], 'one')).toEqual(rivalStart)
+    await expect.poll(async () => (await admissionBaseline(one))?.index).toBeGreaterThan(baseline.index)
+    const resumed = (await admissionBaseline(one))!
+    expect(resumed.hasState).toBe(true)
+    expect(resumed.visibleActors).toEqual(expectedActors)
 
     await moveSeatTo(one, games[0], 'one', { column: 12, row: 11 })
     await one.keyboard.press('Space')

@@ -193,7 +193,7 @@ export function makePickup(kind: RenderablePickupKind): Graphics {
     pixels(drawing, PALETTE.blue, [[13, 21, 19, 4], [13, 25, 19, 4]])
     pixels(drawing, PALETTE.white, [[9, 21, 7, 4], [30, 25, 7, 4]])
     pixels(drawing, PALETTE.brick, [[9, 25, 4, 4], [33, 21, 4, 4]])
-  } else {
+  } else if (kind === 'invisibleBombs') {
     pixels(drawing, PALETTE.deepInk, [
       [15, 22, 19, 13], [19, 18, 11, 20], [29, 15, 4, 8], [32, 12, 5, 5],
       [12, 16, 25, 3], [12, 34, 25, 3],
@@ -202,6 +202,16 @@ export function makePickup(kind: RenderablePickupKind): Graphics {
     pixels(drawing, PALETTE.blue, [[11, 20, 5, 11], [33, 20, 5, 11]])
     pixels(drawing, PALETTE.blueLight, [[12, 22, 3, 7], [34, 22, 3, 7]])
     pixels(drawing, PALETTE.white, [[9, 14, 4, 4], [37, 32, 4, 4]])
+  } else {
+    pixels(drawing, PALETTE.deepInk, [
+      [12, 17, 25, 4], [9, 21, 7, 10], [33, 21, 7, 10], [12, 31, 25, 4],
+    ])
+    pixels(drawing, PALETTE.blue, [
+      [15, 19, 19, 4], [12, 23, 7, 6], [30, 23, 7, 6], [15, 29, 19, 4],
+    ])
+    pixels(drawing, PALETTE.blueLight, [[18, 20, 13, 3], [14, 24, 3, 4], [32, 24, 3, 4]])
+    pixels(drawing, PALETTE.flame, [[22, 22, 5, 9], [19, 25, 11, 3]])
+    pixels(drawing, PALETTE.white, [[23, 23, 3, 7]])
   }
   return drawing
 }

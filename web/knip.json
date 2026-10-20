@@ -32,6 +32,10 @@
     "src/game/v9/schema.ts": [
       "exports",
       "types"
+    ],
+    "src/game/v10/schema.ts": [
+      "exports",
+      "types"
     ]
   },
   "entry": [

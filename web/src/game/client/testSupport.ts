@@ -1,6 +1,6 @@
 import { vi } from 'vitest'
 import { GameClient, type AdmissionIntent, type GameClientState } from './client'
-import type { Admitted, GameServerMessage, GameState, RoomPhase, RoomView, Snapshot } from '../v9/schema'
+import type { Admitted, GameServerMessage, GameState, RoomPhase, RoomView, Snapshot } from '../v10/schema'
 
 export const sessionToken = 'a'.repeat(64)
 export const resumeToken = 'c'.repeat(64)
@@ -60,7 +60,7 @@ export async function authenticate(value: Harness, intent: AdmissionIntent = { t
   await vi.waitFor(() => expect(value.sockets).toHaveLength(1))
   const socket = value.sockets.at(-1)!
   socket.emit('open')
-  socket.message({ type: 'authenticated', protocolVersion: 9 })
+  socket.message({ type: 'authenticated', protocolVersion: 10 })
   return socket
 }
 
@@ -73,7 +73,7 @@ export function room(revision: number, phase: RoomPhase = { type: 'waiting' }, r
       startingSpeedLevel: 0, turnAssistUnits: 256, winsToFinish: 3, bombFuseTicks: 180,
       enabledItems: ['heart'],
     },
-    availableItems: ['heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch', 'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls', 'invisibleBombs'],
+    availableItems: ['heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch', 'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls', 'invisibleBombs', 'teleporter'],
     settingsRevision: 1, settingsEditor: 'one',
     seats: [
       { seat: 'one', occupied: true, ready: false, rematchReady: false, connection: { type: 'connected' } },
@@ -92,13 +92,15 @@ function gameState(alive = true): GameState {
         type: 'visible',
         id: 1, seat: 'one' as const, position: { x: 512, y: 512 }, heading: 'east' as const,
         speedLevel: 0, alive, bombCapacity: 1, bombRange: 1, liveBombCount: 0,
-        inventory: { equipment: null, weapon: null }, effects: [], damageGraceRemainingTicks: 0, voluntaryActionsFrozen: false,
+        inventory: { equipment: null, weapon: null }, effects: [], damageGraceRemainingTicks: 0,
+        voluntaryActionsFrozen: false, lastTeleportTick: null,
       },
       {
         type: 'visible',
         id: 2, seat: 'two' as const, position: { x: 14_848, y: 12_800 }, heading: 'west' as const,
         speedLevel: 0, alive: true, bombCapacity: 1, bombRange: 1, liveBombCount: 0,
-        inventory: { equipment: null, weapon: null }, effects: [], damageGraceRemainingTicks: 0, voluntaryActionsFrozen: false,
+        inventory: { equipment: null, weapon: null }, effects: [], damageGraceRemainingTicks: 0,
+        voluntaryActionsFrozen: false, lastTeleportTick: null,
       },
     ],
     bombs: [], flames: [], pickups: [],

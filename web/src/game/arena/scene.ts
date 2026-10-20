@@ -6,7 +6,10 @@ import {
 import type { RenderablePickupKind, SnapshotMessage } from './types'
 
 type Cell = { column: number; row: number }
-type Motion = { fromX: number; fromY: number; toX: number; toY: number }
+type Motion = {
+  fromX: number; fromY: number; toX: number; toY: number
+  lastTeleportTick: number | null | undefined
+}
 type PickupDrawing = { kind: RenderablePickupKind; drawing: Graphics }
 type ActorRow = SnapshotMessage['state']['actors'][number]
 const key = (cell: Cell): string => `${cell.column},${cell.row}`
@@ -265,13 +268,16 @@ export class ArenaScene {
         this.actors.set(actor.id, drawing)
       }
       const enteringFreeze = actor.voluntaryActionsFrozen && !drawing.actionsFrozen
+      const teleported = previousMotion !== undefined
+        && previousMotion.lastTeleportTick !== actor.lastTeleportTick
+      if (teleported) drawing.root.position.set(toX, toY)
       this.motions.set(actor.id, {
-        fromX: reset || enteringFreeze ? toX : drawing.root.x,
-        fromY: reset || enteringFreeze ? toY : drawing.root.y,
-        toX, toY,
+        fromX: reset || enteringFreeze || teleported ? toX : drawing.root.x,
+        fromY: reset || enteringFreeze || teleported ? toY : drawing.root.y,
+        toX, toY, lastTeleportTick: actor.lastTeleportTick,
       })
       updateActorState(drawing, actor)
-      drawing.moving = Boolean(!drawing.actionsFrozen && !reset && previousMotion
+      drawing.moving = Boolean(!drawing.actionsFrozen && !reset && !teleported && previousMotion
         && (previousMotion.toX !== toX || previousMotion.toY !== toY))
       drawing.direction = actor.heading
     }

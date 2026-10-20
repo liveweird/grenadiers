@@ -17,7 +17,7 @@ function state(): GameClientState {
   }
 }
 
-describe('v9 arena presentation', () => {
+describe('v10 arena presentation', () => {
   it('removes hidden actors and reveals them only at their new public position', () => {
     const current = state()
     expect(presentSnapshot(current)?.state.actors.map((actor) => actor.seat)).toEqual(['one', 'two'])
@@ -26,7 +26,8 @@ describe('v9 arena presentation', () => {
     current.snapshot!.state.actors[1] = {
       type: 'visible', id: 2, seat: 'two', position: { x: 4096, y: 3072 }, heading: 'north',
       speedLevel: 0, alive: true, bombCapacity: 1, bombRange: 1, liveBombCount: 0,
-      inventory: { equipment: null, weapon: null }, effects: [], damageGraceRemainingTicks: 0, voluntaryActionsFrozen: false,
+      inventory: { equipment: null, weapon: null }, effects: [], damageGraceRemainingTicks: 0,
+      voluntaryActionsFrozen: false, lastTeleportTick: null,
     }
     expect(presentSnapshot(current)?.state.actors[1]).toMatchObject({
       seat: 'two', position: { x: 4096, y: 3072 }, heading: 'north',
@@ -70,6 +71,17 @@ describe('v9 arena presentation', () => {
     expect(presented.state.pickups).toEqual(current.snapshot!.state.pickups)
   })
 
+  it('carries the teleport epoch and renders the distinct pickup kind', () => {
+    const current = state()
+    for (const actor of current.snapshot!.state.actors) {
+      if (actor.type === 'visible') actor.lastTeleportTick = 2
+    }
+    current.snapshot!.state.pickups = [{ cell: { column: 11, row: 11 }, kind: 'teleporter' }]
+    const presented = presentSnapshot(current)!
+    expect(presented.state.actors.map(({ lastTeleportTick }) => lastTeleportTick)).toEqual([2, 2])
+    expect(presented.state.pickups).toEqual(current.snapshot!.state.pickups)
+  })
+
 })
 
 describe('Stopwatch presentation', () => {
@@ -92,7 +104,7 @@ describe('Stopwatch presentation', () => {
   })
 })
 
-describe('v9 timed item presentation', () => {
+describe('v10 timed item presentation', () => {
   it('presents Golden Flame pickups and its reconnect-safe authoritative clock', () => {
     const current = state()
     const own = current.snapshot!.state.actors[0]

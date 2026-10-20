@@ -118,6 +118,7 @@
     "stopwatchDescription": "Freezes the opponent's movement and manual bomb action and pauses all timed bomb fuses for 3 seconds. Another Stopwatch refreshes it.",
     "invisibilityCloakDescription": "Hides your actor and attributable cues from the opponent for 10 seconds. Public bombs and flames remain visible.",
     "invisibleBombsDescription": "Hides every bomb and its placement or detonation cue from you for 10 seconds. Bombs still block movement, consume capacity and create visible flames.",
+    "teleporterDescription": "Consumes immediately. Swaps both players only when both landing areas are safe; an unsafe pickup is still consumed without moving either player.",
     "goldenFlameDescription": "Maximizes new bomb blasts for 10 seconds. Picking up another Golden flame refreshes it.",
     "shortFuseDescription": "Halves the fuse of new bombs for 10 seconds. Picking up another Short fuse refreshes it.",
     "diarrheaDescription": "Automatically drops ordinary bombs for 10 seconds whenever placement is possible and you have spare capacity. Another pickup refreshes the timer.",

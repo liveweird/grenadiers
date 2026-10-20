@@ -118,6 +118,7 @@
     "stopwatchDescription": "Zatrzymuje ruch i ręczne podkładanie bomb przeciwnika oraz lonty wszystkich bomb czasowych na 3 sekundy. Kolejny Stoper odnawia ten czas.",
     "invisibilityCloakDescription": "Ukrywa postać i przypisane jej sygnały przed przeciwnikiem na 10 sekund. Bomby i płomienie pozostają widoczne.",
     "invisibleBombsDescription": "Ukrywa przed tobą wszystkie bomby oraz sygnały ich podłożenia i wybuchu przez 10 sekund. Bomby nadal blokują ruch, zajmują limit i tworzą widoczne płomienie.",
+    "teleporterDescription": "Zużywa się natychmiast. Zamienia graczy miejscami tylko wtedy, gdy oba miejsca lądowania są bezpieczne; niebezpieczny przedmiot także znika, ale nikogo nie przenosi.",
     "goldenFlameDescription": "Maksymalizuje zasięg nowych bomb na 10 sekund. Kolejny Złoty płomień odnawia ten czas.",
     "shortFuseDescription": "Skraca o połowę lont nowych bomb przez 10 sekund. Kolejny Krótki lont odnawia ten czas.",
     "diarrheaDescription": "Automatycznie podkłada zwykłe bomby przez 10 sekund, gdy jest wolne pole i masz miejsce na kolejną. Kolejny przedmiot odnawia czas.",

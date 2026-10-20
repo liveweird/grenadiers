@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.32 — 2026-10-20
+
+- Add opt-in Diarrhea: collection forces at most one ordinary bomb-placement intent per physical tick for 600 ticks, beginning after collection and ending at the exact expiry boundary.
+- Resolve manual and automatic requests together with existing capacity and same-cell conflict rules while preserving manual action IDs, stored weapons, captured stats, and transactional overflow behavior.
+- Add the eighth lobby item switch, English and Polish pixel cues, checked v8 publication, deterministic replay, and a production-seed browser scenario. Fresh same-image acceptance passes 34 Compose and 34 Kubernetes cases; final CI/publication are recorded in `docs/verification.md`.
+
 ## 0.3.31 — 2026-10-18
 
 - Add opt-in Reverse Controls: collecting the curse reverses raw held directions for exactly 600 physical ticks while preserving deterministic movement and input state.

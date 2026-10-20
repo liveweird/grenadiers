@@ -34,3 +34,6 @@ mod long_fuse_tests;
 
 #[cfg(test)]
 mod reverse_controls_tests;
+
+#[cfg(test)]
+mod diarrhea_tests;

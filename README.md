@@ -21,7 +21,7 @@ for five seconds of immunity; its timer refreshes on collection. The optional
 [Short Fuse](docs/game/short-fuse.md) halves newly planted bomb fuses for ten seconds. The opt-in
 [Short Flame curse](docs/game/short-flame.md) limits new bombs to one adjacent cell for ten seconds. The opt-in
 [Long Fuse curse](docs/game/long-fuse.md) doubles newly planted bomb fuses for ten seconds. Optional
-[Reverse Controls](docs/game/reverse-controls.md) reverses held movement directions for ten seconds. Gameplay v8 requires reloading older browser
+[Reverse Controls](docs/game/reverse-controls.md) reverses held movement directions for ten seconds. The opt-in [Diarrhea curse](docs/game/diarrhea.md) automatically drops ordinary bombs when placement is possible for ten seconds. Gameplay v8 requires reloading older browser
 clients after an upgrade; see the [compatibility note](docs/game/protocol-v8.md).
 
 Use **Keyboard controls** below the arena to remap movement and bombs or restore defaults. Preferences

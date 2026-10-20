@@ -15,6 +15,7 @@ The creator can configure these rules before either starts the match:
 | Shield | Enabled or disabled; disabled by default | Adds five-second immunity pickups; recollection refreshes the timer. |
 | Golden Flame | Enabled or disabled; disabled by default | Adds ten-second maximum-range pickups; recollection refreshes the timer. |
 | Short Fuse | Enabled or disabled; disabled by default | Adds ten-second pickups that halve newly planted bomb fuses; recollection refreshes the timer. |
+| Diarrhea | Enabled or disabled; disabled by default | Adds ten-second curses that automatically attempt one ordinary bomb placement per physical tick. |
 | Short Flame | Enabled or disabled; disabled by default | Adds ten-second curses that limit new bombs to range one, overriding Golden Flame. |
 | Long Fuse | Enabled or disabled; disabled by default | Adds ten-second curses that double new ordinary timed bomb fuses. Short and Long Fuse cancel while both are active. |
 | Reverse Controls | Enabled or disabled; disabled by default | Adds ten-second curses that reverse held movement directions. |
@@ -37,6 +38,6 @@ round/flame duration, loadouts and additional item pools remains in the [backlog
 
 Heart is introduced by the v0.3.25 implementation candidate. Expanded rooms retain immutable
 rules version 5/map `generated_v2` when Heart is disabled, including after preset changes.
-Shield is available separately in the v0.3.26 candidate, Golden Flame in v0.3.27, Short Fuse in v0.3.28, Short Flame in v0.3.29, Long Fuse in v0.3.30, and Reverse Controls in v0.3.31;
-all seven switches preserve one another.
-See [Heart behavior](heart.md), [Shield behavior](shield.md), [Golden Flame](golden-flame.md), [Short Fuse](short-fuse.md), [Short Flame](short-flame.md), [Long Fuse](long-fuse.md), [Reverse Controls](reverse-controls.md), and [protocol compatibility](protocol-v8.md).
+Shield is available separately in the v0.3.26 candidate, Golden Flame in v0.3.27, Short Fuse in v0.3.28, Short Flame in v0.3.29, Long Fuse in v0.3.30, Reverse Controls in v0.3.31, and Diarrhea in v0.3.32;
+all eight switches preserve one another.
+See [Heart behavior](heart.md), [Shield behavior](shield.md), [Golden Flame](golden-flame.md), [Short Fuse](short-fuse.md), [Short Flame](short-flame.md), [Long Fuse](long-fuse.md), [Reverse Controls](reverse-controls.md), [Diarrhea](diarrhea.md), and [protocol compatibility](protocol-v8.md).

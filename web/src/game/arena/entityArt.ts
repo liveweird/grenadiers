@@ -102,6 +102,12 @@ export function makePickup(kind: RenderablePickupKind): Graphics {
     pixels(drawing, PALETTE.blueLight, [[19, 23, 4, 5]])
     pixels(drawing, PALETTE.flame, [[35, 10, 4, 5], [38, 14, 4, 4], [31, 10, 3, 3]])
     pixels(drawing, PALETTE.flameCore, [[36, 12, 3, 3]])
+  } else if (kind === 'diarrhea') {
+    pixels(drawing, PALETTE.deepInk, [[16, 24, 17, 12], [19, 20, 11, 18]])
+    pixels(drawing, PALETTE.ink, [[19, 24, 11, 10], [22, 21, 6, 5]])
+    pixels(drawing, PALETTE.blueLight, [[20, 25, 4, 5]])
+    pixels(drawing, PALETTE.brick, [[12, 17, 8, 3], [20, 14, 8, 3], [28, 11, 8, 3]])
+    pixels(drawing, PALETTE.white, [[14, 14, 3, 6], [30, 8, 3, 6]])
   } else if (kind === 'shortFlame') {
     pixels(drawing, PALETTE.deepInk, [
       [16, 31, 17, 4], [18, 24, 13, 8], [21, 18, 7, 8], [23, 14, 3, 6],

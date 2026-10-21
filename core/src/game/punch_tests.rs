@@ -322,46 +322,7 @@ fn remote_reservation_follows_wave_chronology() {
 }
 
 #[test]
-fn active_source_fire_due_timing_contact_and_actor_overlap_all_reject() {
-    for trigger in [
-        BombTrigger::Timed {
-            detonates_at: Tick(1),
-        },
-        BombTrigger::Contact,
-    ] {
-        let extra = if matches!(trigger, BombTrigger::Contact) {
-            EnabledItems::LANDMINE
-        } else {
-            EnabledItems::EMPTY
-        };
-        let mut state = state_at(
-            Position::center(CellId::new(4, 5)),
-            Position::center(CellId::new(13, 11)),
-            Tick(0),
-            extra,
-        );
-        state.world.bombs.insert(
-            EntityId(9),
-            Bomb::new(
-                EntityId(9),
-                CellId::new(5, 5),
-                EntityId(2),
-                2,
-                Tick(0),
-                trigger,
-            )
-            .unwrap(),
-        );
-        equip_punch(&mut state, SeatId::One);
-        state
-            .step(&[action(SeatId::One, InputAction::UseEquipment)])
-            .unwrap();
-        assert!(
-            !state.world.bombs.contains_key(&EntityId(9))
-                || state.world.bombs[&EntityId(9)].cell() == CellId::new(5, 5)
-        );
-    }
-
+fn active_source_fire_rejects_punch_and_detonates_at_the_source() {
     let mut burning = state_at(
         Position::center(CellId::new(4, 5)),
         Position::center(CellId::new(13, 11)),
@@ -374,8 +335,14 @@ fn active_source_fire_due_timing_contact_and_actor_overlap_all_reject() {
     );
     burning.world.hazards.insert(CellId::new(5, 5), Tick(10));
     equip_punch(&mut burning, SeatId::One);
-    burning
+    let report = burning
         .step(&[action(SeatId::One, InputAction::UseEquipment)])
         .unwrap();
     assert!(!burning.world.bombs.contains_key(&EntityId(9)));
+    assert!(report.events.iter().any(|event| matches!(
+        event.kind,
+        crate::game::StepEventKind::BombDetonated(view)
+            if view.id == EntityId(9) && view.cell == CellId::new(5, 5)
+    )));
+    assert_eq!(burning.actors[0].last_successful_punch_tick(), None);
 }

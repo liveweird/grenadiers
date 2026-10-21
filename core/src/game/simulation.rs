@@ -291,6 +291,15 @@ mod projection_tests;
 #[path = "simulation_punch.rs"]
 mod punch;
 #[cfg(test)]
+#[path = "punch_claim_proof_tests.rs"]
+mod punch_claim_proof_tests;
+#[cfg(test)]
+#[path = "punch_cooldown_proof_tests.rs"]
+mod punch_cooldown_proof_tests;
+#[cfg(test)]
+#[path = "punch_interaction_proof_tests.rs"]
+mod punch_interaction_proof_tests;
+#[cfg(test)]
 #[path = "punch_rollback_tests.rs"]
 mod punch_rollback_tests;
 #[cfg(test)]
@@ -302,6 +311,9 @@ mod punch_tests;
 #[cfg(test)]
 #[path = "punch_validation_tests.rs"]
 mod punch_validation_tests;
+#[cfg(test)]
+#[path = "punch_wave_proof_tests.rs"]
+mod punch_wave_proof_tests;
 #[cfg(test)]
 #[path = "punch_wave_tests.rs"]
 mod punch_wave_tests;

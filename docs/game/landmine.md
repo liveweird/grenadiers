@@ -23,3 +23,19 @@ Version 0.3.37 appends Landmine with generator weight 15 after Remote Bomb. The 
 305 entries and preserves every prior 4096-mask generator path. The exact v8 availability catalog
 now contains thirteen items and supports all 8192 subsets. Gameplay wire version 8, rules version
 5, generator version 2, and journal format 2 remain unchanged; older v8 clients must reload.
+
+
+Fresh same-image native acceptance passes 50 Compose and 50 Kubernetes cases, with zero retries
+or carried passes. Independent raw review is clear and the final evidence manifest is sealed.
+Both clients observe the single consumed charge, Contact/Standard bomb, persistence beyond
+183 ticks, exact-ID contact detonation with a live origin flame, no extra placement, owner
+elimination and seat Two's round win. The following fresh Timed Standard bomb is covered by
+`consumed_landmine_is_followed_by_a_fresh_standard_timed_bomb_in_the_same_state` in the
+[core tests](../../core/src/game/simulation/landmine_tests.rs), rather than a separate browser
+assertion. Exact-head candidate/post-merge CI and publication remain required release gates.
+
+Reviewed Compose [English desktop](../screenshots/landmine-desktop.png) and
+[Polish 320px reduced-motion](../screenshots/landmine-polish-320.png) captures show the planted
+pressure plate before detonation and normal HUD layout. Kubernetes captures were retained but
+not visually reviewed. See [verification](../verification.md) for source/image identities,
+latency, seal, historical attempts and measurement limits.

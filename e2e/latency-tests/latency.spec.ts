@@ -10,6 +10,9 @@ import {
   distribution, LatencyObserver, sample, type LatencySample, type TrajectoryChoice,
 } from '../tests/support/latency-observer'
 import {
+  LatencyReadiness,
+} from '../tests/support/latency-readiness'
+import {
   domClockDiagnostics, installDomKeyTimings, type DomClockDiagnostics,
 } from '../tests/support/page-latency-diagnostics'
 
@@ -23,7 +26,7 @@ test.beforeAll(() => {
     .toBe('arena-v1-matches')
 })
 
-async function joinRunning(pages: Page[]): Promise<void> {
+async function joinRunning(pages: Page[], readiness: LatencyReadiness): Promise<void> {
   const [one, two] = pages
   const game = observeGame(one)
   const baseUrl = process.env.E2E_BASE_URL ?? 'http://127.0.0.1:8085'
@@ -35,7 +38,9 @@ async function joinRunning(pages: Page[]): Promise<void> {
   await two.getByRole('textbox', { name: 'Room code', exact: true }).fill(await code.innerText())
   await two.getByRole('button', { name: 'Join room', exact: true }).click()
   await Promise.all(pages.map((page) => page.getByRole('button', { name: 'Ready', exact: true }).click()))
+  readiness.setStage('running')
   await Promise.all(pages.map((page) => expect(page.getByText('Round 1', { exact: true })).toBeVisible()))
+  await Promise.all(pages.map((page) => expect(page.getByText('Round in progress', { exact: true })).toBeVisible()))
 }
 
 async function observeMovement(
@@ -91,10 +96,13 @@ type ReportInput = {
   eventLoop: EventLoopDelayMonitor
   handles: DelayBridgeHandle[]
   trajectory: TrajectoryChoice[]
+  readiness: LatencyReadiness
 }
 
 async function attachReport(input: ReportInput): Promise<void> {
-  const { testInfo, profile, observer, samples, domClock, eventLoop, handles, trajectory } = input
+  const {
+    testInfo, profile, observer, samples, domClock, eventLoop, handles, trajectory, readiness,
+  } = input
   const exceedances = samples.filter((value) => value.latencyMs > BUDGET_MS)
   const summary = {
     profile: profile.name,
@@ -127,6 +135,7 @@ async function attachReport(input: ReportInput): Promise<void> {
       forwardedFrames: publicFrames(observer.forwardedFrames),
       publicSnapshots: observer.snapshots.slice(-512),
       publicArenas: Object.fromEntries(observer.arenas),
+      readiness: readiness.diagnostics,
       queues: handles.map((handle) => handle.summary()),
       closedBridges: observer.bridges,
       failures: observer.failures,
@@ -137,12 +146,14 @@ async function attachReport(input: ReportInput): Promise<void> {
 async function runProfile(browser: Browser, testInfo: TestInfo, profile: Profile): Promise<void> {
   const contexts: BrowserContext[] = []
   const observer = new LatencyObserver()
+  const readiness = new LatencyReadiness(observer, ['actor', 'peer'])
   const samples: LatencySample[] = []
   const handles: DelayBridgeHandle[] = []
   const trajectory: TrajectoryChoice[] = []
   const eventLoop = new EventLoopDelayMonitor()
   let domClock: DomClockDiagnostics | undefined
   let reportAttached = false
+  readiness.setStage('join')
   try {
     contexts.push(await browser.newContext())
     contexts.push(await browser.newContext())
@@ -155,11 +166,17 @@ async function runProfile(browser: Browser, testInfo: TestInfo, profile: Profile
     await installDomKeyTimings(one)
     await observer.observePageSnapshots(one, 'actor')
     await observer.observePageSnapshots(two, 'peer')
-    await joinRunning(pages)
+    await joinRunning(pages, readiness)
     expect(observer.installedEndpoints).toEqual(new Set(['actor', 'peer']))
     expect(observer.pageSocketCounts).toEqual(new Map([['actor', 1], ['peer', 1]]))
     const arena = one.getByRole('region', { name: 'Grenadiers courtyard', exact: true })
+    readiness.setStage('canvas')
+    await Promise.all(pages.map((page) => expect(page.locator('.game-arena canvas')).toBeVisible()))
+    readiness.setStage('focus')
     await arena.click()
+    await expect(arena).toBeFocused()
+    readiness.captureBaseline()
+    const ready = await readiness.wait()
     for (let index = 0; index < 10; index += 1) {
       const choice = observer.safestHorizontalDirection('peer')
       trajectory.push(choice)
@@ -168,6 +185,7 @@ async function runProfile(browser: Browser, testInfo: TestInfo, profile: Profile
     domClock = await domClockDiagnostics(one)
     expect(domClock.timings.filter((timing) => timing.key === 'ArrowRight'
       || timing.key === 'ArrowLeft')).toHaveLength(20)
+    expect(samples.every((value) => value.keyStart > ready.completedAt!)).toBe(true)
 
     const bombIndex = observer.forwardedFrames.length
     await one.keyboard.press('Space')
@@ -192,12 +210,17 @@ async function runProfile(browser: Browser, testInfo: TestInfo, profile: Profile
     expect(observer.everyPageSnapshotFollowedRouteDispatch('peer')).toBe(true)
     expect(samples).toHaveLength(20)
     const exceedances = samples.filter((value) => value.latencyMs > BUDGET_MS)
-    await attachReport({ testInfo, profile, observer, samples, domClock, eventLoop, handles, trajectory })
+    await attachReport({
+      testInfo, profile, observer, samples, domClock, eventLoop, handles, trajectory, readiness,
+    })
     reportAttached = true
     if (profile.budget) expect(exceedances).toEqual([])
   } catch (error) {
+    readiness.fail()
     if (!reportAttached) {
-      await attachReport({ testInfo, profile, observer, samples, domClock, eventLoop, handles, trajectory })
+      await attachReport({
+        testInfo, profile, observer, samples, domClock, eventLoop, handles, trajectory, readiness,
+      })
     }
     throw error
   } finally {

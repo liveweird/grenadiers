@@ -51,6 +51,7 @@ test('two browsers observe one Piercing Bomb cross two blocks and the next bomb 
         { column: 4, row: 1 }, { column: 5, row: 1 },
       ]))
     }
+    await moveTo(one, games[0], { column: 1, row: 1 })
     await moveTo(one, games[0], { column: 3, row: 1 })
     await Promise.all(games.map((game) => expect.poll(() =>
       visibleActor(latestSnapshot(game), 'one')?.inventory.weapon).toBe('piercingBomb')))
@@ -99,6 +100,7 @@ test('two browsers observe one Piercing Bomb cross two blocks and the next bomb 
       expect(blocks).not.toContainEqual({ column: 5, row: 1 })
     }
 
+    await moveTo(one, games[0], { column: 1, row: 1 })
     await moveTo(one, games[0], { column: 3, row: 1 })
     const priorPlacedIds = games.map((game) => new Set(events(game).flatMap(({ kind }) =>
       kind.type === 'bombPlaced' ? [kind.bomb.id] : [])))

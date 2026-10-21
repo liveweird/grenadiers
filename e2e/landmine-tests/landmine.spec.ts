@@ -98,17 +98,27 @@ test('two browsers observe one persistent mine and its contact detonation', asyn
     await one.getByRole('region', { name: 'Grenadiers courtyard' }).click()
     await one.keyboard.down('ArrowRight')
     try {
-      await Promise.all(games.map((game) => expect.poll(() => events(game).find(({ kind }) =>
-        kind.type === 'bombDetonated' && kind.bomb.id === mine.id)).toBeDefined()))
+      await Promise.all(games.map((game) => expect.poll(() => snapshots(game).find((snapshot) =>
+        snapshot.events.some(({ kind }) => kind.type === 'bombDetonated' && kind.bomb.id === mine.id)
+        && snapshot.state.flames.some(({ cell, expiresAt }) => cell.column === mine.cell.column
+          && cell.row === mine.cell.row && expiresAt > snapshot.state.physicalTick))).toBeDefined()))
     } finally {
       await one.keyboard.up('ArrowRight')
     }
     for (const [index, game] of games.entries()) {
+      const detonation = snapshots(game).find((snapshot) =>
+        snapshot.events.some(({ kind }) => kind.type === 'bombDetonated' && kind.bomb.id === mine.id)
+        && snapshot.state.flames.some(({ cell, expiresAt }) => cell.column === mine.cell.column
+          && cell.row === mine.cell.row && expiresAt > snapshot.state.physicalTick))
+      if (!detonation) throw new Error('Active Landmine detonation snapshot expected')
+      const originFlame = detonation.state.flames.find(({ cell }) =>
+        cell.column === mine.cell.column && cell.row === mine.cell.row)
+      expect(originFlame?.expiresAt).toBeGreaterThan(detonation.state.physicalTick)
+      expect(detonation.state.bombs.some(({ id }) => id === mine.id)).toBe(false)
       expect(events(game).filter(({ kind }) => kind.type === 'bombPlaced')).toHaveLength(countsBefore[index])
       expect(events(game).filter(({ kind }) => kind.type === 'bombDetonated'
         && kind.bomb.id === mine.id && kind.bomb.trigger.type === 'contact')).toHaveLength(1)
       expect(latestSnapshot(game)!.state.bombs.some(({ id }) => id === mine.id)).toBe(false)
-      expect(latestSnapshot(game)!.state.flames.length).toBeGreaterThan(0)
       expect(visibleActor(latestSnapshot(game), 'one')?.alive).toBe(false)
       expect(visibleActor(latestSnapshot(game), 'two')?.alive).toBe(true)
       expect(events(game).filter(({ kind }) => kind.type === 'actorEliminated')).toHaveLength(1)

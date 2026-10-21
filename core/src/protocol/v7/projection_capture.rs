@@ -338,6 +338,7 @@ fn wire_pickup(value: game::PickupKind) -> PickupKind {
         game::PickupKind::LongFuse => PickupKind::LongFuse,
         game::PickupKind::ReverseControls => PickupKind::ReverseControls,
         game::PickupKind::InvisibleBombs => PickupKind::InvisibleBombs,
+        game::PickupKind::OilBarrel => PickupKind::OilBarrel,
         game::PickupKind::Teleporter => PickupKind::Teleporter,
     }
 }

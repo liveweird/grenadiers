@@ -35,6 +35,7 @@ pub struct Actor {
     pub(crate) pending_turn: Option<TurnAssist>,
     pub(crate) bomb_grace: BTreeSet<EntityId>,
     pub(crate) soft_wall_grace: BTreeSet<CellId>,
+    pub(crate) unlit_oil_grace: BTreeSet<CellId>,
     capacity: u16,
     range: u16,
     alive: bool,
@@ -152,22 +153,19 @@ impl State {
         if actors[0].id == actors[1].id {
             return Err(StateError::DuplicateActorId(actors[0].id));
         }
-        if rules.version() < 5
-            && rules.room_settings().is_some_and(|settings| {
-                settings.enabled_items() != crate::game::EnabledItems::EMPTY
-            })
-        {
-            return Err(StateError::UnsupportedEnabledItems(
-                rules
-                    .room_settings()
-                    .expect("checked above")
-                    .enabled_items(),
-            ));
+        if let Some(enabled) = validation::unsupported_enabled_items(rules) {
+            return Err(StateError::UnsupportedEnabledItems(enabled));
         }
         for (cell, pickup) in world.pickups.iter() {
             if !pickup.enabled_by(rules.enabled_items()) {
                 return Err(StateError::UnsupportedPickup { cell, kind: pickup });
             }
+        }
+        if world.oil.iter().next().is_some() && !rules.enabled_items().contains_oil_barrel() {
+            return Err(StateError::UnsupportedOilBarrels);
+        }
+        if let Some(cell) = validation::invalid_oil(&world, tick) {
+            return Err(StateError::InvalidOilBarrel(cell));
         }
         if actors[0].seat == actors[1].seat {
             return Err(StateError::DuplicateSeat(actors[0].seat));
@@ -195,6 +193,7 @@ impl State {
                 actor.position,
                 &BTreeSet::new(),
                 false,
+                &BTreeSet::new(),
                 &BTreeSet::new(),
             ) {
                 return Err(StateError::IllegalActorPosition(actor.id));
@@ -295,6 +294,11 @@ mod landmine_route_tests;
 mod landmine_tests;
 #[path = "simulation_observations.rs"]
 mod observations;
+#[path = "simulation_oil.rs"]
+mod oil_step;
+#[cfg(test)]
+#[path = "oil_tests.rs"]
+mod oil_tests;
 #[path = "simulation_pickups.rs"]
 mod pickup_step;
 #[cfg(test)]

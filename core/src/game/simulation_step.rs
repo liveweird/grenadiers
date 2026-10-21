@@ -1,5 +1,3 @@
-use std::collections::BTreeMap;
-
 use super::{RoundResult, SeatInput, State, StepError, StepReport};
 use crate::game::damage::{DamageOutcome, DamagePreventionSource, apply_damage};
 use crate::game::events::{EventAudience, StepEvent, StepEventKind};
@@ -7,7 +5,11 @@ use crate::game::geometry::MovementTrace;
 use crate::game::movement;
 use crate::game::movement::MovementOutcome;
 use crate::game::simulation::DrawReason;
-use crate::game::types::{CellId, SeatId, Tick};
+#[cfg(test)]
+use crate::game::types::CellId;
+use crate::game::types::{SeatId, Tick};
+#[cfg(test)]
+use std::collections::BTreeMap;
 use std::collections::BTreeSet;
 
 impl State {
@@ -72,7 +74,8 @@ impl State {
         self.expire_flames(next_tick);
         self.expire_actor_effects(self.tick, next_tick);
         self.apply_timed_pause(stopwatch);
-        self.world.expose_flame_free_pickups();
+        self.world.expose_flame_free_pickups(next_tick);
+        self.reveal_safe_oil(next_tick);
         let motion = crate::game::bomb_motion::advance(&mut self.world, &self.actors, next_tick);
         for actor in &mut self.actors {
             actor.bomb_grace.retain(|id| !motion.moved.contains(id));
@@ -220,12 +223,15 @@ impl State {
                 forced.seat.index() == index
                     && self
                         .world
-                        .hazards
-                        .keys()
-                        .any(|cell| forced.segment.overlaps_cell(*cell))
+                        .fire_cells(tick)
+                        .any(|cell| forced.segment.overlaps_cell(cell))
             });
             if self.actors[index].alive
-                && (trace_hits_hazards(trace, &self.world.hazards) || forced_hit)
+                && (self
+                    .world
+                    .fire_cells(tick)
+                    .any(|cell| trace.overlaps_cell(cell))
+                    || forced_hit)
             {
                 self.damage_actor(index, tick, events, shield_prevented);
             }
@@ -240,9 +246,10 @@ impl State {
     ) {
         for index in 0..self.actors.len() {
             if self.actors[index].alive
-                && self.world.hazards.keys().any(|cell| {
-                    movement::position_overlaps_cell(self.actors[index].position, *cell)
-                })
+                && self
+                    .world
+                    .committed_fire_cells()
+                    .any(|cell| movement::position_overlaps_cell(self.actors[index].position, cell))
             {
                 self.damage_actor(index, tick, events, shield_prevented);
             }
@@ -352,6 +359,7 @@ impl State {
     }
 }
 
+#[cfg(test)]
 pub(crate) fn trace_hits_hazards(trace: &MovementTrace, hazards: &BTreeMap<CellId, Tick>) -> bool {
     hazards.keys().any(|cell| trace.overlaps_cell(*cell))
 }
@@ -364,6 +372,7 @@ impl super::Actor {
         self.pending_turn = None;
         self.inventory.clear();
         self.soft_wall_grace.clear();
+        self.unlit_oil_grace.clear();
         self.effects.clear();
         self.damage_grace = None;
     }

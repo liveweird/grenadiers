@@ -259,6 +259,7 @@ fn hard_walls_and_solid_bombs_remain_blocking_for_wall_pass() {
         &BTreeSet::new(),
         true,
         &BTreeSet::new(),
+        &BTreeSet::new(),
     ));
     game.insert_test_bomb(
         EntityId(30),
@@ -276,6 +277,7 @@ fn hard_walls_and_solid_bombs_remain_blocking_for_wall_pass() {
         Position::center(CellId::new(6, 5)),
         &BTreeSet::new(),
         true,
+        &BTreeSet::new(),
         &BTreeSet::new(),
     ));
 }

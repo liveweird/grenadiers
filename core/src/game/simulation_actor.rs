@@ -15,6 +15,7 @@ impl Actor {
             pending_turn: None,
             bomb_grace: BTreeSet::new(),
             soft_wall_grace: BTreeSet::new(),
+            unlit_oil_grace: BTreeSet::new(),
             capacity: rules.bomb_capacity(),
             range: rules.bomb_range(),
             alive: true,
@@ -35,10 +36,13 @@ impl State {
             && previous == Some(Equipment::WallPass);
         if had_wall_pass && equipment != Equipment::WallPass {
             actor.soft_wall_grace = movement::overlapping_soft_blocks(&self.world, actor.position);
+            actor.unlit_oil_grace = movement::overlapping_unlit_oil(&self.world, actor.position);
         } else if equipment == Equipment::WallPass {
             actor.soft_wall_grace.clear();
+            actor.unlit_oil_grace.clear();
         } else {
             movement::prune_soft_wall_grace(&self.world, actor);
+            movement::prune_unlit_oil_grace(&self.world, actor);
         }
         actor.inventory.replace_equipment(equipment);
     }

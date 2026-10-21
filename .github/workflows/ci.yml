@@ -71,8 +71,6 @@ jobs:
       GRENADIERS_SERVER_REPLAY_ITEM_MASK_CI_SOURCE: ${{ needs.server-mask-plan.outputs.source }}
       GRENADIERS_SERVER_REPLAY_ITEM_MASK_PARTITION_INDEX: ${{ matrix.index }}
       GRENADIERS_SERVER_REPLAY_ITEM_MASK_PARTITION_COUNT: ${{ matrix.count }}
-      GRENADIERS_SERVER_REPLAY_ITEM_MASK_REPORT_DIR: ${{ runner.temp }}/server-mask-report
-      GRENADIERS_SERVER_REPLAY_ITEM_MASK_PLAN_FILE: ${{ runner.temp }}/server-mask-plan/server-mask-plan.json
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -80,6 +78,12 @@ jobs:
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version-file: .nvmrc
+      - name: Set server mask report paths
+        run: |
+          printf '%s\n' \
+            "GRENADIERS_SERVER_REPLAY_ITEM_MASK_REPORT_DIR=$RUNNER_TEMP/server-mask-report" \
+            "GRENADIERS_SERVER_REPLAY_ITEM_MASK_PLAN_FILE=$RUNNER_TEMP/server-mask-plan/server-mask-plan.json" \
+            >> "$GITHUB_ENV"
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: server-mask-plan-${{ needs.server-mask-plan.outputs.source }}

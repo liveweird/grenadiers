@@ -1,6 +1,78 @@
 # Repository verification
 
-## Cloak CI job envelope correction — 2026-10-21 — fresh acceptance pending
+## Corrected Cloak source — 2026-10-21 — fresh 102/102, audited and sealed
+
+Frozen source `4d9a751810b0620e4761dfd7bcf813596f2f82ae`, tree
+`39c77c6ca2c835240e31a0d20261175c45ba5bef`, retains all runtime behavior from the earlier Cloak
+source while splitting CI browser coverage around one sealed image and checking responsive result
+grids before accessibility scans. The corrected driver requires exactly two nonempty grids and
+retains the original bounds, accessibility checks, result timing, timeouts and retry settings.
+Current E2E lint/types/Knip, 52-scenario parity, shell syntax and repository/diff checks pass.
+
+The complete fresh wrapper exited zero at `2026-10-21T04:30:38.553911+00:00`: **51 Compose plus
+51 Kubernetes**, zero retries and zero carried results. Independent raw review decodes all44
+reports to102 expected tests, each with one passed result/retry0/errors[]. Baseline74/74 plus
+optional28/28, all106 runtime PNGs,34 runtime security/identity records,17 distinct Kubernetes
+pod/UID and port-forward lifecycles,16 external fixtures and32 mode0444 records are retained.
+Runtime UID/GID65532:65532, CapEff0, NoNewPrivs1 and read-only root pass. Strict stdin Kubernetes
+validation reports3 valid resources; the pinned image vulnerability scan passes.
+
+Accepted native image: `sha256:6e372a7c76f22a62e77c6197e5acad02cb45d82756ba00d8e653405f609bf165`;
+ref `grenadiers-v0338-cloak-native-recheck:4d9a751`.
+Archive SHA256: source `ec98c69baaec986e8ff46342126a4bdb93a24a82c92da082398b5d688066adfb`;
+image `58e4e3cfd14208ab98f35a53af43a53b49afa8d247db152d0aef1386e4f968f1`;
+dependencies `0813d09f3e63548f083e3695229f172699894ddf2ede469f523081144433df26`;
+source-tree `6126435d5ac02a9f61066ebb1c6e2c825cc603aeffecdee3910a3c7eec1496a9`.
+Source inventory780 files/85 directories/0 links includes41 source PNGs, distinct from runtime
+captures. Dependencies8186 files/1305 directories/13 links include132 installed packages,
+42 optional omissions and0 required/version/metadata mismatches. Every pre/post source,
+dependency, directory, link, lock, archive, preparation and image comparison matches.
+Preparation seals1112 entries under
+`fd4b3b60dbdc00a801da66d4844578ecec7d55515ca2f839d45e54acc86f7f69`.
+Final seal **2,296 payloads**, SHA256 `b6a1fdcda68b1a91f5e05646fd424a990deff83a27654ef09dcbda04bf92eae2`;
+2,297 durable files plus the separate source archive are byte-verified and read-only.
+
+All22 latency cases per target pass; every profile retains all20 observations with zero
+exceedances of the unchanged250ms limit. Independent raw audits verify the complete paired
+stationary bomb-empty baseline, cutoff/round/ingress/dispatch/page chronology and every key after
+readiness.
+
+| Target | Local maximum | Shaped50ms maximum | Exceedances |
+| --- | ---: | ---: | ---: |
+| Compose | 51.311013ms | 163.900773ms | 0 |
+| Kubernetes | 61.023530ms | 165.842146ms | 0 |
+
+Compose CPU usage535800→1270544us, delta734744us, cpu.max `max 100000`; Kubernetes
+445086→1062420us, delta617334us, cpu.max `50000 100000` (500m). Both throttle-count/time
+deltas are0/0. Supplemental v2 monitors retain78/63 samples and exited zero. CPU intervals
+include pre-gate waiting and sampler probes, not pure gameplay cost. Optional cpu.pressure is
+explicitly unavailable. Actual worker acknowledgements precede each window; bounded checks were
+released between windows, then fresh acknowledgements obtained for Kubernetes. A pre-approval
+Compose OrbStack90.4% observation remains preserved, caused deferral, and was followed by five
+fresh quiet samples before manual approval. There is no continuous hold or globally idle claim.
+Heavy work resumed only after both actual latency exits, raw audits and monitor completions.
+
+Root viewed only two fresh Compose pre-collection captures: [English desktop](screenshots/invisibility-cloak-desktop.png)
+and [Polish320px reduced motion](screenshots/invisibility-cloak-polish-320.png). The pickup and
+HUD are readable; Polish vertical scrolling and unfocused-arena prompt are expected. These
+stills do not prove privacy. Paired native assertions prove owner visibility, exact peer-hidden
+identity and collection cue, compositor removal, reconnect retention, and current-position reveal
+at collection+600 physical ticks. Kubernetes captures were retained but not viewed.
+
+All owned Compose resources, namespace, ports18284/18285 and port-forwards are absent. Default
+localhost8085 remains the exact published v0.3.37 image1736d193; health/ready/index200 and served
+index/bundle bytes match the container. Earlier source6e9 Cloak evidence and the failed v39 driver
+attempt remain immutable historical records with zero carry. No sample, threshold, fixture,
+product behavior, timeout, deadline or retry policy was relaxed.
+
+The next release gates are normalization of these eight final documentation/capture paths,
+PR84 exact-head candidate and post-merge CI, publication and exact accepted-image promotion.
+CI requires all seven named jobs and51 browser cases split23 item/default plus28 classic. One
+image is built/scanned/transferred and checksum/ID/source-verified by both shards inside each
+workflow. Independent GitHub x86 builds are not required to match this native ARM image ID.
+Parent v0.3.37 is fully published/tree-verified. No registry image or hosted deployment is claimed.
+
+## Historical pre-acceptance Cloak CI job envelope correction — 2026-10-21
 
 PR84 candidate `b34200306b42b4db9aa4a841534733b2f3a01287` had a successful push workflow, but PR workflow `39538079075` exceeded the browser job’s unchanged 20-minute cap. The item/default suites and classic match, reconnect, all22 latency cases, hardening and controls passed; the final audio test was cancelled after starting normally. GitHub’s annotation and complete raw logs prove aggregate job exhaustion. The cancelled run is preserved separately and does not pass the release gate.
 

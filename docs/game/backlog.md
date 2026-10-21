@@ -1,11 +1,12 @@
 # Gameplay and presentation backlog
 
-Invisibility Cloak now passes fresh same-image **51/51 Compose and 51/51 Kubernetes** cases,
-with zero retries or carried passes. Independent raw review is clear and final evidence is sealed.
-Landmine v0.3.37 is published after both candidate workflows and post-merge CI passed five jobs
-and all 50 browser cases; its accepted image is deployed locally. Cloak retains the corrected
-settled-position reveal driver and private-recipient rules. Its exact-head candidate/post-merge
-CI and publication remain gates. Earlier attempts remain source-specific historical evidence.
+Invisibility Cloak passes a fresh corrected-source **51/51 Compose and 51/51 Kubernetes** matrix
+at `4d9a751` / image `6e372a7c`, with zero retries or carried passes. Independent raw review is
+clear; all 2,296 evidence payloads are sealed and durably verified. CI now builds one image for
+two complete browser shards (23 item/default and 28 classic cases), retaining the 20-minute limits.
+Both exact-head candidate workflows and post-merge CI must pass all seven jobs before publication.
+Landmine v0.3.37 remains published and deployed locally. Earlier Cloak/driver attempts remain
+immutable historical evidence and contribute no results to this corrected-source run.
 
 TURN v0.3.16, CONFIG v0.3.17 and the first ART slice v0.3.18 are shipped. Heart
 [v0.3.25](https://github.com/liveweird/grenadiers/releases/tag/v0.3.25), Shield

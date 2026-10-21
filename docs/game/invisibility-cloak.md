@@ -22,12 +22,13 @@ contains fourteen items and supports all 16384 subsets. Gameplay wire version 8,
 generator version 2 and journal format 2 remain unchanged, so older v8 clients must reload.
 
 
-Fresh same-image acceptance passes 51 Compose and 51 Kubernetes cases with zero retries or
-carried passes. Both clients prove natural acquisition; the owner retains its actor and timed
+Fresh corrected source `4d9a751` / image `6e372a7c` passes 51 Compose and 51 Kubernetes cases
+with zero retries or carried passes. The 2,296-payload final evidence seal is
+`b6a1fdcda68b1a91f5e05646fd424a990deff83a27654ef09dcbda04bf92eae2`. Both clients prove natural acquisition; the owner retains its actor and timed
 effect while the peer receives only the hidden identity and no attributable collection cue.
 Compositor pixels prove peer removal, reconnect preserves privacy, and the actor reappears at
 its current settled position after exactly 600 physical ticks. Independent raw review is clear
-and evidence sealed. Exact-head candidate/post-merge CI and publication remain release gates.
+and evidence sealed. Exact-head candidate/post-merge CI must pass seven jobs and all 51 browser cases; publication remains a separate gate.
 
 
 Fresh reviewed Compose [English desktop](../screenshots/invisibility-cloak-desktop.png) and

@@ -11,7 +11,12 @@
   masks and existing simulation behavior. Gameplay-v8 remains archived and rejects v9 connections.
 - Integrate published v0.3.38 accepted raw parent `04c070c5` and its exact tree `d1dc83fc` while
   retaining the reviewed gameplay-v9 foundation byte-for-byte outside the eight parent
-  documentation/capture paths. v0.3.39 remains unreleased with zero native acceptance carried.
+  documentation/capture paths.
+- At the 21 October 2026 18:44:23 UTC native acceptance checkpoint, source `272b950` and image
+  `9a4dc108` passed 51 Compose plus 51 Kubernetes cases with zero retries or carried passes.
+  Independent raw audit is clear and the evidence is durably sealed. v0.3.39 had not yet been
+  normalized, pushed, merged, published or promoted; candidate, post-merge and tag CI remained
+  pending.
 
 ## 0.3.38 — 2026-10-21
 

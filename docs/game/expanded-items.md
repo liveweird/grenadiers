@@ -12,10 +12,15 @@ published and deployed locally. See [release notes](https://github.com/liveweird
 for current release status. CI retains one image, two complete
 browser shards (23 item/default plus 28 classic cases), and the existing 20-minute job limits.
 
-Published v0.3.38 merge `3c210c23` has exact accepted tree `d1dc83fc`; its raw documentation and
-capture parent `04c070c5` is integrated into the v0.3.39 gameplay-v9 foundation. Fourteen of the
-22 requested item types are published; v0.3.39 activates no additional item and has zero current
-native passes or carried acceptance. Its fresh matrix and release gates remain pending.
+At the 21 October 2026 18:44:23 UTC native acceptance checkpoint, v0.3.39 source `272b950` and
+image `9a4dc108` passed a fresh 51 Compose plus 51 Kubernetes matrix with zero retries or carried
+passes. Independent raw audit is clear; 2,320 payloads are sealed and the 2,321-file durable copy
+is byte-verified. Published v0.3.38 merge `3c210c23` has exact accepted tree `d1dc83fc`; its raw
+documentation and capture parent `04c070c5` is integrated into the gameplay-v9 foundation.
+Fourteen of the 22 requested item types are published, and v0.3.39 activates no additional item.
+At that checkpoint, normalization, candidate and post-merge CI, publication, tag CI and local
+promotion remained pending. See [release notes](https://github.com/liveweird/grenadiers/releases)
+for current release status.
 
 Status: [Heart](heart.md), [Shield](shield.md), [Golden Flame](golden-flame.md),
 [Short Fuse](short-fuse.md) and [Short Flame](short-flame.md) are published through v0.3.29.

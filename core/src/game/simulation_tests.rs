@@ -12,6 +12,8 @@ use crate::game::world::World;
 
 #[path = "simulation/kick_route_tests.rs"]
 mod kick_route_tests;
+#[path = "simulation/punch_route_tests.rs"]
+mod punch_route_tests;
 #[path = "kick_tests.rs"]
 mod kick_tests;
 

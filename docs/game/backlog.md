@@ -1,5 +1,7 @@
 # Gameplay and presentation backlog
 
+Latest Landmine acceptance uses corrected source `420d8df` and passes fresh **100/100** Compose/Kubernetes cases, independently audited and sealed. The old PR83 candidate failed a rolling-observer count assumption; new exact-head CI/post-merge CI and publication remain gates. Published/default-local version remains v0.3.36 until verified promotion.
+
 TURN v0.3.16, CONFIG v0.3.17 and the first ART slice v0.3.18 are shipped. Heart
 [v0.3.25](https://github.com/liveweird/grenadiers/releases/tag/v0.3.25), Shield
 [v0.3.26](https://github.com/liveweird/grenadiers/releases/tag/v0.3.26), Golden Flame

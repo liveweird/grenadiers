@@ -1,73 +1,106 @@
 # Repository verification
 
-## Gameplay v9 corrected-parent source integration — 2026-10-21 — checks pending
+## Gameplay v9 current-parent source integration — 2026-10-21 — native pending
 
-Reviewed foundation source `a7c0e6cb925996025c7dc077a94d32f1f72edfab` integrates
-pending Cloak source `5b6a10bff489e7d0afddf29bbfd020e537503723`, retaining the corrected
-reveal position, rolling-history placement-ID checks, inherited readiness drivers and security
-patch. Current helpers must use v9 while archived fixtures remain pinned. This source integration
-has not run checks or native acceptance. Final freezing requires the accepted raw Cloak parent;
-PR creation, publication and promotion require its complete release/tree proof. The older
-foundation suites below remain evidence for their original source only.
+The foundation now integrates reviewed Cloak source `6e9be9426d0fa7639877a506608c606794e7e2db`
+and its corrected accepted Landmine parent. Core/protocol/server/Cargo/web/E2E inputs are unchanged
+from checked v9 integration `8bd561676ea4c1eede074d6f72fc2d6f2aae05ee`; this merge carries only
+parent documentation/captures. That integration passed 33,176 shuffled web tests in57 files,
+coverage95.38/91.08/95.82/97.77, contracts/lint/Knip/types/build, E2E static52-scenario parity,
+the inherited Landmine fresh-Standard regression in both profiles, formatter, workspace/all-target
+Clippy, repository, YAML and diff checks. These are source-bound results, not newly rerun suites.
 
-## Historical gameplay v9 foundation source — 2026-10-18 — local checks complete
+Final freezing still requires the accepted raw Cloak parent and independent review. No v9
+preparation/archive/image/native/hosted CI or publication exists yet. Parent release/tree
+proof remains required before v9 release actions. Original foundation suites remain historical.
 
-The v0.3.39 candidate moves the paired server/browser endpoint to gameplay v9 without changing the
-Expanded-v5 rules identity, generated-v2 arenas, journal format 2, fourteen-item catalog, 16,384
-enabled-item masks or simulation behavior. Every visible actor now carries the required
-`voluntaryActionsFrozen` boolean; production capture emits false and foundation validation rejects
-true. Hidden actors retain their exact identity/seat/alive shape. Stopwatch and paused Timed bombs
-remain unavailable, while existing enabled Remote and Contact bombs retain their untimed behavior.
+## Cloak corrected accepted-parent integration — 2026-10-21 — native pending
 
-Focused Rust and browser checks cover version-9 authentication, archived-v8 actor shape, the new
-visible/hidden union, false-only semantics, unavailable Stopwatch, paused-bomb rejection, generated
-contract drift and unchanged frame bounds. An active-v9 contract regression validates every one of
-the 16,384 subsets of its independently pinned fourteen-item catalog. Production server, browser
-and E2E helpers now use v9; archived v8 validation fixtures remain separate. Rust policy tests
-exercise all 22 reserved item IDs against independently pinned v8 and v9 fourteen-item catalogs.
+Corrected Cloak driver `1488b110af58cc71a254518d89c37e9f343115ec` now integrates accepted
+Landmine raw source `8db1a070a0b65f8d3e679b2d12cee1783162a60a`. Its normalized candidate
+`10f60ec2c14345490d3c35228f50de9fe68377b2`, tree `2cc04356436eeae6415084bdb36eafb96566da4c`,
+is ready in PR83 with fresh native 100/100 evidence audited and sealed. New candidate/post-merge
+CI and publication remain parent release gates. Core production, server, Cargo, web, fixtures,
+readiness and all E2E inputs are byte-identical to the previous reviewed Cloak integration;
+this merge carries only final parent documentation and captures. Previous integration suites
+remain source-bound historical evidence below; current repository/diff checks pass.
 
-Debug and release suites pass **627 core tests, 195 server tests and two doctests**; four dedicated
-performance profiles remain ignored. Rust line coverage is **92.27% (13,162/14,265)**, above the
-unchanged 80% floor. All **33,176 web tests** across 57 files pass with statement/branch/function/
-line coverage of **95.38/91.08/95.82/97.77%**. Formatting, all-target Clippy with warnings denied,
-repository limits, generated contracts, lint, Knip, production and renderer-diagnostic builds,
-E2E static checks and **41-scenario parity** pass. Cargo-deny and both cached offline npm audits pass;
-strict pinned Kubernetes schemas validate all three resources.
+No Cloak preparation or native result exists yet. Isolated preparation/native may overlap parent
+external CI only after independent review and an explicit source-bound conditional record.
+Cloak normalization, PR, publication and promotion require complete corrected Landmine CI,
+publication and exact accepted-tree proof. Any required parent source/tree correction invalidates
+dependent preparation/results with zero carry. The corrected settled-position reveal driver,
+full fourteen-item catalog, rolling-history causal-ID assertions and CI reports are retained.
 
-Independent core/server and browser/schema reviews are clear after correcting explicit archived-v8
-catalog pinning, v9 policy propagation through binding, production-sized false boolean bounds and
-active documentation references. A differing thirteen-item internal policy regression proves that
-binding uses the selected catalog rather than the archived one. Archived v8 recipient test helpers
-are independent fixtures rather than a shipping old client; active v9 production guards retain
-separate duplicate-entity and privacy tests. No focused asymmetric second-recipient serialization
-failure injection was added; paired preparation still structurally precedes transaction commit.
+## Landmine rolling-history acceptance — 2026-10-21 — 100/100, audited and sealed
 
-The final instrumented tests pass. Their first report write failed because the external Cargo target
-left the ignored local `target/` output directory absent. Creating that directory and completing the
-report-only stage produced the coverage result above without rerunning tests or changing source.
+Frozen source `420d8df074e85def8a34bd057c13d88a39ad8e53`, tree
+`8db4f3a94e63d528da913604e335c9e9dc97c311`, corrects the inherited Remote and Landmine
+rolling-history assertions. Product, wire, fixtures and other E2E inputs remain byte-identical
+to raw Landmine `80f0450e3ae7aed132b8cd0c41eab4d9d58454ef`. Both corrected cases reject
+fresh placement IDs, preserving exact activation/contact and charge semantics. CI also retains
+the previously omitted Piercing and Power failure reports. No timeout, retry or budget changes.
 
-The first full web gate exposed missing generated-file lint and Knip entries for the new v9 output;
-the corrected complete gate passes. The first Rust coverage and Kubernetes schema attempts reached
-expected sandbox listener and DNS restrictions; their preserved logs precede authorized reruns of
-the identical gates, which pass. No native browser run, candidate image, hosted CI result,
-Stopwatch activation or publication is claimed.
+The wrapper completed at `2026-10-21T02:11:28.459362Z`, actual exit zero: **50 Compose plus
+50 Kubernetes**. Independent raw review decodes all 42 embedded reports: one expected result per
+test, retry zero, no failure, flaky, skipped or unexpected result. The matrix records 74/74 baseline plus
+26/26 optional cases; 102 runtime PNGs, 32 runtime security/image records, 16 Kubernetes
+identities/port-forward lifecycles, 15 fixtures and 30 mode-0444 records. Runtime UID/GID 65532:65532,
+CapEff 0, NoNewPrivs 1 and read-only root pass. Strict Kubernetes validation 3/3 and image scan pass.
 
-## Cloak rolling-history parent source integration — 2026-10-21 — accepted parent pending
+Accepted image: `sha256:1736d19303b9859ef66cd224ae316e0de1e5e14db2227fdaa86f7bba4f2443a7`,
+ref `grenadiers-v0337-landmine-rolling-native-recheck:420d8df`.
+Source archive SHA256 `25f334b23861706c7e258117e926625dbb9cc49323101b52afe1bb2b9a73e734`;
+image archive `eb8d61f6a7182651e19e4996dad89c8168542841c08d72f8b9f1518666c515d3`;
+dependencies `a0631c9100478e4d3f05fdc658389e3d007d9e4391ef233324893116648f04b3`;
+source-tree archive `3c4e8ef881ff2ee6c0196fe277027c876555c2f178112c8bc4d24bb2cd8ead4d`.
+Source: 762 files/84 directories/0 links with 39 source PNGs, separate from runtime captures.
+Dependencies: 8186 files/1305 directories/13 links, 132 installed, 42 optional omissions, zero required omissions,
+version or metadata mismatches. All source/dependency/lock/tar/preparation/image comparisons match.
+Preparation: 1093 entries, SHA256 `d1310d307ff91f013fbf95bc307dd1decbf07686b7fecadc030021e493e976ca`.
+Final manifest seals **2224 payloads**, SHA256 `e85791d8ee76a011cf0c6a23b84f6cd9245167c2c11f390126af466f7dccd560`;
+2225 durable files plus the separate source archive are byte-verified and read-only.
 
-The pending Cloak source now incorporates reviewed Landmine correction
-`420d8df074e85def8a34bd057c13d88a39ad8e53`. Remote and Landmine reject fresh placement
-IDs rather than comparing totals from rolling observation history. Cloak's own corrected
-reveal driver, fourteen-item catalog, core production, server, Cargo, web, fixtures and
-readiness checks are retained. CI includes the Piercing and Power failure reports.
+Both clients prove one consumed Contact/Standard range-two mine at (3,1), persistence beyond
+placedAt+183, exact-ID contact detonation/live origin flame, no fresh placement, owner elimination,
+peer survival and seat Two's win. Following fresh Timed Standard placement remains an immutable-source
+core regression, not an extra browser assertion. Remote separately proves manual exact-ID activation
+and its following fresh Timed Standard bomb on both targets. Root viewed the fresh Compose
+[English desktop](screenshots/landmine-desktop.png) and
+[Polish 320px reduced-motion](screenshots/landmine-polish-320.png): pressure plate at (3,1)/owner at (2,1),
+consumed charge/availability 0, both alive/no flames, readable labels, normal Polish vertical scroll
+and intentional unfocused prompt. No unintended overlap observed. Kubernetes images were not viewed.
 
-The old parent candidate is draft after its diagnosed inherited Remote assertion failure.
-No Cloak preparation, archive, image or native result exists. Final Cloak freezing requires
-integration of the corrected parent's accepted raw documentation/captures and independent
-review. Any conditional execution must be recorded separately; normalization, PR creation,
-publication and promotion require complete corrected parent release/tree proof. Previous
-integration checks below describe their original source and have not been rerun here.
+All 22 latency tests per target pass; every profile retains 20 samples with zero exceedances of 250 ms.
+Raw cutoff/round/paired stationary bomb-empty readiness/ingress/dispatch/page/key chronology passes.
 
-## Landmine candidate CI correction — 2026-10-21 — fresh acceptance pending
+| Target | Local maximum | Shaped50ms maximum | Exceedances |
+| --- | ---: | ---: | ---: |
+| Compose | 56.077335 ms | 162.266528 ms | 0 |
+| Kubernetes | 49.979140 ms | 162.076035 ms | 0 |
+
+CPU usage: Compose 551465 → 1093787 us (delta 542322), Kubernetes 453750 → 1238143 us (delta 784393);
+quotas `max 100000` / `50000 100000`, throttle count/time deltas zero. These intervals include pre-gate
+waiting and sampler probes, not pure gameplay CPU cost. Supplemental monitors retain 48/86 samples exit zero,
+group completion zero; optional cpu.pressure unavailable, mandatory cpu.max/stat checked. Actual worker
+ACKs precede each gate; bounded checks were explicitly released between windows, then fresh K ACKs
+recorded. Earlier busy observations remain. No hold breach/global-idle/causal host-load claim.
+
+Cleanup at `2026-10-21T02:11:49.615187Z` confirms owned resources/PFs/ports 18274/18275 absent;
+default localhost:8085 still runs published v0.3.36 image7b13, readiness200. Reviewers inspect root records without new
+live queries. First facts summary refused a missing coordinator exit marker; persisting the consumed
+actual root exit zero then recomputing facts succeeded, with no browser rerun. Earlier B92 native100/100,
+seal eaa59, remains immutable original-source evidence only; the earlier interrupted143/seal76fec
+attempt remains invalidated. No prior pass is carried. Parent v0.3.36 was already fully published before
+this preparation, with candidate/post-merge CI and accepted-tree proof clear; no conditional amendment.
+
+PR83's old3826 candidate remains draft after its diagnosed rolling-history CI failure. All five new
+rolling release helpers have independent static review clear and remain unexecuted at this checkpoint.
+Finalizer `ef9adda4de5d0c52e6de3447cdaad2bb47268861c28cf88bb18e6e1a20710d15` binds this seal,
+the eight documentation/capture paths, and exact old-head branch/PR lease. Final documentation and seal review is clear; new exact-head candidate and post-merge CI with
+50 browser passes, publication and image promotion remain gates. Dependent Cloak preparation has not started and must inherit this accepted raw parent.
+
+## Historical Landmine candidate CI correction — fresh acceptance was pending
 
 Candidate PR 83 at `3826be4b95d07b88037a09e5866cdd6e37dd66cb` failed its inherited
 Remote browser case in [PR CI](https://github.com/liveweird/grenadiers/actions/runs/39526781408).
@@ -84,28 +117,7 @@ its original frozen source. This corrected source requires fresh immutable prepa
 Compose/Kubernetes acceptance; no prior pass is carried. Dependent Cloak preparation has not
 started and must use the corrected accepted parent. The failed candidate remains draft.
 
-## Earlier Cloak parent integration — historical checkpoint before parent CI correction
-
-Reviewed Cloak driver source `1488b110af58cc71a254518d89c37e9f343115ec` integrates accepted raw
-Landmine source `80f0450e3ae7aed132b8cd0c41eab4d9d58454ef`. Landmine candidate `3826be4b95d07b88037a09e5866cdd6e37dd66cb`,
-tree `a718c03d2896bcdb323d1a6d61b631bae0829ca9`, is PR 83. Its native 100/100 acceptance is audited
-and sealed; candidate/post-merge CI and publication remain gates. Isolated Cloak preparation/native
-may overlap parent CI only under a separately recorded reviewed conditional amendment. No Cloak
-normalization/PR/publication may precede full Landmine release/tree proof, and any required parent
-source/tree correction invalidates dependent evidence with zero carry.
-
-The integration retains the corrected Cloak settled reveal position, complete actor-root privacy,
-public event audience capture, existing readiness drivers and the Vite 8.3.4 security fix. The one
-long-fuse conflict retains both the fourteen-item catalog and accepted-round capture/survival checks.
-The corrected Landmine fresh-Standard core regression is inherited. Fresh integration checks pass: full web coverage has 16,789 shuffled tests in 56 files with
-95.57/91.66/95.68/97.87 coverage, contract/lint/Knip/types/build gates pass, and E2E static checks
-report 52 matched scenarios. The inherited fresh-Standard core regression passes in debug and
-release; formatting, workspace/all-target Clippy and repository checks pass. Core production,
-server and Cargo inputs are unchanged from reviewed Cloak source; only that inherited core test
-is added. No fresh full Rust suite or coverage is claimed. Fresh native acceptance remains pending;
-earlier source-specific full Rust suites remain historical below.
-
-## Landmine fresh native acceptance — 2026-10-21 — 100/100; audited and sealed
+## Earlier Landmine native acceptance — original B92 source only — 100/100
 
 Frozen source `ba92fbc5a6dab0b756192ffbe5cc05bd780bc8fd`, tree
 `defacd308d5cd747085653a2d5c30d2529807473`, retains corrected Landmine source `6ad59ddec460a4db331b6e6bf499def9c0b65106`
@@ -4611,6 +4623,41 @@ these scaffold checks. These are local results; hosted CI status is separate evi
 The original `AGENTS.md` remains unchanged under the explicit preservation instruction;
 current engineering conventions live in `CONTRIBUTING.md`.
 
+## Historical Cloak rolling-history source integration — parent acceptance was pending
+
+The pending Cloak source now incorporates reviewed Landmine correction
+`420d8df074e85def8a34bd057c13d88a39ad8e53`. Remote and Landmine reject fresh placement
+IDs rather than comparing totals from rolling observation history. Cloak's own corrected
+reveal driver, fourteen-item catalog, core production, server, Cargo, web, fixtures and
+readiness checks are retained. CI includes the Piercing and Power failure reports.
+
+The old parent candidate is draft after its diagnosed inherited Remote assertion failure.
+No Cloak preparation, archive, image or native result exists. Final Cloak freezing requires
+integration of the corrected parent's accepted raw documentation/captures and independent
+review. Any conditional execution must be recorded separately; normalization, PR creation,
+publication and promotion require complete corrected parent release/tree proof. Previous
+integration checks below describe their original source and have not been rerun here.
+
+## Earlier Cloak parent integration — historical checkpoint before parent CI correction
+
+Reviewed Cloak driver source `1488b110af58cc71a254518d89c37e9f343115ec` integrates accepted raw
+Landmine source `80f0450e3ae7aed132b8cd0c41eab4d9d58454ef`. Landmine candidate `3826be4b95d07b88037a09e5866cdd6e37dd66cb`,
+tree `a718c03d2896bcdb323d1a6d61b631bae0829ca9`, is PR 83. Its native 100/100 acceptance is audited
+and sealed; candidate/post-merge CI and publication remain gates. Isolated Cloak preparation/native
+may overlap parent CI only under a separately recorded reviewed conditional amendment. No Cloak
+normalization/PR/publication may precede full Landmine release/tree proof, and any required parent
+source/tree correction invalidates dependent evidence with zero carry.
+
+The integration retains the corrected Cloak settled reveal position, complete actor-root privacy,
+public event audience capture, existing readiness drivers and the Vite 8.3.4 security fix. The one
+long-fuse conflict retains both the fourteen-item catalog and accepted-round capture/survival checks.
+The corrected Landmine fresh-Standard core regression is inherited. Fresh integration checks pass: full web coverage has 16,789 shuffled tests in 56 files with
+95.57/91.66/95.68/97.87 coverage, contract/lint/Knip/types/build gates pass, and E2E static checks
+report 52 matched scenarios. The inherited fresh-Standard core regression passes in debug and
+release; formatting, workspace/all-target Clippy and repository checks pass. Core production,
+server and Cargo inputs are unchanged from reviewed Cloak source; only that inherited core test
+is added. No fresh full Rust suite or coverage is claimed. Fresh native acceptance remains pending;
+earlier source-specific full Rust suites remain historical below.
 
 ## Historical Invisibility Cloak candidate — 2026-10-18 — local checks complete
 
@@ -4671,3 +4718,55 @@ server, Cargo, API, Short Fuse client/protocol/locales and dedicated item scenar
 unchanged from the reviewed Short Fuse candidate. Its unit baseline remains unchanged;
 the production build and E2E static checks pass for this responsive integration.
 Fresh native Compose/Kubernetes acceptance and exact-head CI remain pending.
+
+## Historical gameplay v9 integration — checkpoint before source checks
+
+Reviewed foundation source `a7c0e6cb925996025c7dc077a94d32f1f72edfab` integrates
+pending Cloak source `5b6a10bff489e7d0afddf29bbfd020e537503723`, retaining the corrected
+reveal position, rolling-history placement-ID checks, inherited readiness drivers and security
+patch. Current helpers must use v9 while archived fixtures remain pinned. This source integration
+has not run checks or native acceptance. Final freezing requires the accepted raw Cloak parent;
+PR creation, publication and promotion require its complete release/tree proof. The older
+foundation suites below remain evidence for their original source only.
+
+## Historical gameplay v9 foundation source — 2026-10-18 — local checks complete
+
+The v0.3.39 candidate moves the paired server/browser endpoint to gameplay v9 without changing the
+Expanded-v5 rules identity, generated-v2 arenas, journal format 2, fourteen-item catalog, 16,384
+enabled-item masks or simulation behavior. Every visible actor now carries the required
+`voluntaryActionsFrozen` boolean; production capture emits false and foundation validation rejects
+true. Hidden actors retain their exact identity/seat/alive shape. Stopwatch and paused Timed bombs
+remain unavailable, while existing enabled Remote and Contact bombs retain their untimed behavior.
+
+Focused Rust and browser checks cover version-9 authentication, archived-v8 actor shape, the new
+visible/hidden union, false-only semantics, unavailable Stopwatch, paused-bomb rejection, generated
+contract drift and unchanged frame bounds. An active-v9 contract regression validates every one of
+the 16,384 subsets of its independently pinned fourteen-item catalog. Production server, browser
+and E2E helpers now use v9; archived v8 validation fixtures remain separate. Rust policy tests
+exercise all 22 reserved item IDs against independently pinned v8 and v9 fourteen-item catalogs.
+
+Debug and release suites pass **627 core tests, 195 server tests and two doctests**; four dedicated
+performance profiles remain ignored. Rust line coverage is **92.27% (13,162/14,265)**, above the
+unchanged 80% floor. All **33,176 web tests** across 57 files pass with statement/branch/function/
+line coverage of **95.38/91.08/95.82/97.77%**. Formatting, all-target Clippy with warnings denied,
+repository limits, generated contracts, lint, Knip, production and renderer-diagnostic builds,
+E2E static checks and **41-scenario parity** pass. Cargo-deny and both cached offline npm audits pass;
+strict pinned Kubernetes schemas validate all three resources.
+
+Independent core/server and browser/schema reviews are clear after correcting explicit archived-v8
+catalog pinning, v9 policy propagation through binding, production-sized false boolean bounds and
+active documentation references. A differing thirteen-item internal policy regression proves that
+binding uses the selected catalog rather than the archived one. Archived v8 recipient test helpers
+are independent fixtures rather than a shipping old client; active v9 production guards retain
+separate duplicate-entity and privacy tests. No focused asymmetric second-recipient serialization
+failure injection was added; paired preparation still structurally precedes transaction commit.
+
+The final instrumented tests pass. Their first report write failed because the external Cargo target
+left the ignored local `target/` output directory absent. Creating that directory and completing the
+report-only stage produced the coverage result above without rerunning tests or changing source.
+
+The first full web gate exposed missing generated-file lint and Knip entries for the new v9 output;
+the corrected complete gate passes. The first Rust coverage and Kubernetes schema attempts reached
+expected sandbox listener and DNS restrictions; their preserved logs precede authorized reruns of
+the identical gates, which pass. No native browser run, candidate image, hosted CI result,
+Stopwatch activation or publication is claimed.

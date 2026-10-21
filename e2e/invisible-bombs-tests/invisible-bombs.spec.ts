@@ -2,6 +2,7 @@ import { expect, test, type Page } from '@playwright/test'
 import { expectPaintedCanvas, latestSnapshot, observeGame, visibleActor, type ObservedGame } from '../tests/support/duel'
 import { moveSeatTo } from '../tests/support/movement'
 import { admissionBaseline, disconnectTransport, installTransportProbe } from '../tests/support/reconnect'
+import { arenaTilePixels } from '../tests/support/compositor'
 import type { GameServerMessage } from '../../web/src/game/v10/schema'
 
 test.beforeAll(() => expect(process.env.E2E_INVISIBLE_BOMBS_FIXTURE).toBe('arena-v2-invisible-bombs'))
@@ -14,24 +15,6 @@ const effectTicks = (game: ObservedGame) => visibleActor(latestSnapshot(game), '
 const bombEvents = (game: ObservedGame, since: number) => snapshots(game)
   .filter(({ state }) => state.physicalTick >= since).flatMap(({ events }) => events)
   .filter(({ kind }) => kind.type === 'bombPlaced' || kind.type === 'bombDetonated')
-
-async function tilePixels(page: Page, column: number, row: number): Promise<string[]> {
-  const encoded = (await page.locator('.game-arena canvas').screenshot()).toString('base64')
-  return page.evaluate(async ({ encoded: png, column: x, row: y }) => {
-    const image = new Image(); image.src = `data:image/png;base64,${png}`; await image.decode()
-    const canvas = document.createElement('canvas'); canvas.width = image.width; canvas.height = image.height
-    const context = canvas.getContext('2d'); if (!context) throw new Error('decoder unavailable')
-    context.drawImage(image, 0, 0)
-    const width = image.width / 15; const height = image.height / 13
-    const pixels = context.getImageData(Math.floor(x * width), Math.floor(y * height),
-      Math.ceil(width), Math.ceil(height)).data
-    const result: string[] = []
-    for (let index = 0; index < pixels.length; index += 16) {
-      result.push(`${pixels[index]},${pixels[index + 1]},${pixels[index + 2]},${pixels[index + 3]}`)
-    }
-    return result
-  }, { encoded, column, row })
-}
 
 async function plant(page: Page, actorGame: ObservedGame, sightedGame: ObservedGame,
   cell: { column: number; row: number }) {
@@ -95,7 +78,7 @@ test('Invisible Bombs hides live bombs and cues until exact expiry', async ({ br
     const deadline = collection.tick + 600
     const privacyStart = latestSnapshot(games[0])!.state.physicalTick
     await moveSeatTo(one, games[0], 'one', { column: 2, row: 1 })
-    const floor = await tilePixels(one, 3, 1)
+    const floor = await arenaTilePixels(one, 3, 1)
     await moveSeatTo(one, games[0], 'one', { column: 3, row: 1 })
     const ownBomb = await plant(one, games[0], games[1], { column: 3, row: 1 })
     await moveSeatTo(one, games[0], 'one', { column: 2, row: 1 }); await moveSeatTo(one, games[0], 'one', { column: 1, row: 2 })
@@ -107,8 +90,8 @@ test('Invisible Bombs hides live bombs and cues until exact expiry', async ({ br
     await expect.poll(() => latestSnapshot(games[1])!.state.bombs.map(({ id }) => id))
       .toEqual(expect.arrayContaining([ownBomb.id, rivalBomb.id]))
     expect(bombEvents(games[0], privacyStart)).toHaveLength(0)
-    expect(await tilePixels(one, 3, 1)).toEqual(floor)
-    expect(await tilePixels(two, 3, 1)).not.toEqual(floor)
+    expect(await arenaTilePixels(one, 3, 1)).toEqual(floor)
+    expect(await arenaTilePixels(two, 3, 1)).not.toEqual(floor)
 
     await disconnectTransport(one)
     await expect.poll(async () => (await admissionBaseline(one))?.tick).toBeGreaterThan(privacyStart)
@@ -150,6 +133,6 @@ test('Invisible Bombs hides live bombs and cues until exact expiry', async ({ br
     }
     expect(revealed.trigger.remainingTicks).toBe(sighted.trigger.remainingTicks)
     expect(bombEvents(games[0], privacyStart)).toHaveLength(0)
-    expect(await tilePixels(one, 12, 11)).not.toEqual(await tilePixels(one, 3, 1))
+    expect(await arenaTilePixels(one, 12, 11)).not.toEqual(await arenaTilePixels(one, 3, 1))
   } finally { await Promise.all(contexts.map((context) => context.close())) }
 })

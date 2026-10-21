@@ -3,6 +3,32 @@
 Records below are frozen against their named sources. Publication and later CI status are
 recorded in [release notes](https://github.com/liveweird/grenadiers/releases).
 
+## Wall Pass candidate — 2026-10-21 — source checks complete
+
+The v0.3.43 source candidate activates permanent Wall Pass equipment in the current gameplay-v10
+catalog. Core coverage exercises ordinary collection, equipment replacement and private per-cell
+exit grace, destruction, two-segment movement, hard terrain, bombs, Contact, fire, planting,
+Teleporter interactions and rollback. It recorded **710 core tests plus two doctests**. Focused
+protocol coverage recorded **four tests** and runtime resume coverage recorded **one test**; actual
+admission validation of private facts is covered in core protocol tests. The runtime resume test
+inspects the prepared notice snapshot frame and commit, not an encoded `Admitted` message.
+
+The server's complete current-catalog enumeration accepted all **262,144 masks**. Archived v9 and
+earlier contracts remain pinned and reject Wall Pass. Web activation recorded **797 tests across 64
+files** with statement/branch/function/line coverage of **95.24/90.88/96/97.66%**, and independent
+source review found no production defect. The E2E source adds one mode-0444 fixture, read-only
+Compose override and keyboard-only scenario. Static type, lint, Knip, scenario-parity and repository
+checks pass. Its planned captures are `wall-pass-inside-desktop-en.png` and
+`wall-pass-inside-polish-320-reduced.png`.
+
+The repeating-byte-31 route reveals Wall Pass at `(3,1)`, enters intact block `(3,2)`, rejects
+planting, clamps against hard wall `(2,2)`, resumes from a newer admission and exits north. A legal
+post-exit bomb takes the reveal bomb's immediate successor ID, proving the failed placement consumed
+no entity allocation. The route uses
+no state injection, direct WebSocket commands, seed search or retry. The sole-item fixture cannot
+prove replacement grace; the core/protocol layers do. This record does not claim predecessor
+integration, a candidate image, native Compose/Kubernetes execution, hosted CI or publication.
+
 ## Teleporter candidate — 2026-10-21 — source checks complete
 
 The v0.3.42 source candidate activates Teleporter and the paired gameplay v10 contract. Domain
@@ -3182,3 +3208,17 @@ these scaffold checks. These are local results; hosted CI status is separate evi
 
 The original `AGENTS.md` remains unchanged under the explicit preservation instruction;
 current engineering conventions live in `CONTRIBUTING.md`.
+
+## v0.3.44 Kick source candidate
+
+The deterministic browser source is configured for the reviewed repeating-byte-31 fixture. Planned
+captures are `kick-stopped-desktop-en.png` and `kick-stopped-polish-320-reduced.png`. Native
+same-image execution and release acceptance remain pending.
+
+## v0.3.45 Punch source candidate
+
+The deterministic two-browser source is configured for the reviewed repeating-byte-31 fixture.
+Planned captures are `punch-wrapped-desktop-en.png` and
+`punch-wrapped-polish-320-reduced.png`. The source route uses ordinary inputs, a remapped actual
+Equipment key and both recipient streams; it adds no private cooldown/history fields or test hooks.
+Accepted v0.3.44 parent integration, native same-image execution and release acceptance remain pending.

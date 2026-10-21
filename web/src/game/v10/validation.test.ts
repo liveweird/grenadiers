@@ -4,12 +4,12 @@ import { admitted, snapshot } from '../client/testSupport'
 import { validateGameplayV10ServerMessage } from './validation'
 
 const supported = [
-  'wallPass', 'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch',
+  'kick', 'punch', 'wallPass', 'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch',
   'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame',
   'longFuse', 'reverseControls', 'invisibleBombs', 'teleporter',
 ] as const
 const supportedRanges = checkedCatalogMaskRanges({
-  protocol: 'gameplay v10', catalog: supported, expectedCount: 18, expectedOrder: supported,
+  protocol: 'gameplay v10', catalog: supported, expectedCount: 20, expectedOrder: supported,
 })
 
 function withMarker(marker: number | null) {
@@ -23,11 +23,11 @@ function withMarker(marker: number | null) {
 }
 
 describe('gameplay v10 item validation', () => {
-  it('pins eighteen unique settings entries before exhaustively enumerating all masks', () => {
-    expect(supported).toHaveLength(18)
-    expect(new Set(supported)).toHaveLength(18)
-    expect(2 ** supported.length).toBe(262_144)
-    expect(supportedRanges).toHaveLength(256)
+  it('pins twenty unique settings entries before exhaustively enumerating all masks', () => {
+    expect(supported).toHaveLength(20)
+    expect(new Set(supported)).toHaveLength(20)
+    expect(2 ** supported.length).toBe(1_048_576)
+    expect(supportedRanges).toHaveLength(1_024)
   })
 
   it('accepts enabled Wall Pass equipment, pickups, and collection history', () => {
@@ -47,6 +47,56 @@ describe('gameplay v10 item validation', () => {
     expect(validateGameplayV10ServerMessage(message)).toEqual({
       valid: false, source: 'semantics', error: 'unsupportedProfile',
     })
+  })
+
+  it('accepts public Kick facts only when enabled and rejects private motion history', () => {
+    const message = withMarker(null)
+    message.room.settings.enabledItems = ['kick']
+    const actor = message.state.actors[0]
+    if (actor.type !== 'visible') throw new Error('expected visible actor')
+    actor.inventory.equipment = 'kick'
+    message.state.pickups = [{ cell: { column: 3, row: 2 }, kind: 'kick' }]
+    expect(validateGameplayV10ServerMessage(message)).toEqual({ valid: true, value: message })
+
+    message.room.settings.enabledItems = []
+    expect(validateGameplayV10ServerMessage(message)).toMatchObject({
+      valid: false, source: 'semantics', error: 'unsupportedProfile',
+    })
+    const leaked = structuredClone(message) as unknown as Record<string, unknown>
+    const bombs = (leaked.state as { bombs: Array<Record<string, unknown>> }).bombs
+    bombs.push({ id: 3, cell: { column: 2, row: 2 }, owner: 1, range: 2, placedAt: 1,
+      trigger: { type: 'timed', remainingTicks: 10, paused: false }, blast: 'standard',
+      motion: { direction: 'east', countdown: 9 }, hasBeenKicked: true })
+    expect(validateGameplayV10ServerMessage(leaked)).toMatchObject({ valid: false, source: 'schema' })
+  })
+
+  it('accepts public Punch equipment and pickup only when Punch is enabled', () => {
+    const message = withMarker(null)
+    message.room.settings.enabledItems = ['punch']
+    const actor = message.state.actors[0]
+    if (actor.type !== 'visible') throw new Error('expected visible actor')
+    actor.inventory.equipment = 'punch'
+    message.state.pickups = [{ cell: { column: 3, row: 2 }, kind: 'punch' }]
+    message.events = [{ tick: 2, index: 0, kind: {
+      type: 'pickupCollected', id: actor.id, seat: actor.seat,
+      cell: { column: 2, row: 2 }, kind: 'punch',
+    } }]
+    expect(validateGameplayV10ServerMessage(message)).toEqual({ valid: true, value: message })
+
+    message.room.settings.enabledItems = []
+    expect(validateGameplayV10ServerMessage(message)).toMatchObject({
+      valid: false, source: 'semantics', error: 'unsupportedProfile',
+    })
+    const leaked = structuredClone(message) as unknown as Record<string, unknown>
+    const bombs = (leaked.state as { bombs: Array<Record<string, unknown>> }).bombs
+    bombs.push({ id: 3, cell: { column: 2, row: 2 }, owner: 1, range: 2, placedAt: 1,
+      trigger: { type: 'timed', remainingTicks: 10, paused: false }, blast: 'standard',
+      hasBeenPunched: true })
+    expect(validateGameplayV10ServerMessage(leaked)).toMatchObject({ valid: false, source: 'schema' })
+    const cooldownLeak = structuredClone(message) as unknown as Record<string, unknown>
+    const actors = (cooldownLeak.state as { actors: Array<Record<string, unknown>> }).actors
+    actors[0].lastSuccessfulPunchTick = 2
+    expect(validateGameplayV10ServerMessage(cooldownLeak)).toMatchObject({ valid: false, source: 'schema' })
   })
 
   it('accepts the current Wall Pass catalog in fresh admission and lobby messages', () => {

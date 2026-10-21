@@ -2,15 +2,13 @@ use crate::game;
 use crate::protocol::{EntityId, Tick};
 use std::collections::BTreeMap;
 
+use super::projection_capture_events::capture_report;
 use super::projection_capture_wire::*;
-use super::projection_facts::{
-    EventFacts, ExpandedCapture, ProjectionError, ReportFacts, TimedBombFacts, WorldFacts,
-};
+use super::projection_facts::{ExpandedCapture, ProjectionError, TimedBombFacts, WorldFacts};
 use super::projection_validation::{validate_reports, validate_world_for_items};
 use super::{
     ArenaView, BlastKind, BombTrigger, BombView, DamageGraceTicks, EffectView, EffectViews,
-    EventKind, FlameView, InventoryView, ItemSet, PickupView, RulesVersion, Terrain,
-    VisibleActorView,
+    FlameView, InventoryView, ItemSet, PickupView, RulesVersion, Terrain, VisibleActorView,
 };
 
 pub fn capture_expanded(
@@ -59,6 +57,19 @@ pub(crate) fn capture_expanded_for_items(
             result: wire_result(public.result),
             arena: capture_arena(&public.arena)?,
             actors,
+            last_successful_punch_ticks: state
+                .actors()
+                .each_ref()
+                .map(|actor| {
+                    actor
+                        .last_successful_punch_tick()
+                        .map(wire_tick)
+                        .transpose()
+                })
+                .into_iter()
+                .collect::<Result<Vec<_>, _>>()?
+                .try_into()
+                .map_err(|_| ProjectionError::InvalidActors)?,
             soft_wall_grace: state
                 .actors()
                 .each_ref()
@@ -72,11 +83,19 @@ pub(crate) fn capture_expanded_for_items(
                 .collect::<Result<Vec<_>, _>>()?
                 .try_into()
                 .map_err(|_| ProjectionError::InvalidActors)?,
-            bombs: captured_bombs.iter().map(|(bomb, _)| *bomb).collect(),
+            bombs: captured_bombs.iter().map(|(bomb, _, _, _)| *bomb).collect(),
             timed_bombs: captured_bombs
                 .iter()
-                .filter_map(|(bomb, timing)| timing.map(|facts| (bomb.id, facts)))
+                .filter_map(|(bomb, timing, _, _)| timing.map(|facts| (bomb.id, facts)))
                 .collect::<BTreeMap<_, _>>(),
+            kick_bombs: captured_bombs
+                .iter()
+                .map(|(bomb, _, kick, _)| (bomb.id, *kick))
+                .collect(),
+            punch_bombs: captured_bombs
+                .iter()
+                .map(|(bomb, _, _, punch)| (bomb.id, *punch))
+                .collect(),
             flames: public
                 .flames
                 .iter()
@@ -201,7 +220,15 @@ fn capture_bomb(
     bomb: game::Bomb,
     at: game::Tick,
     paused: bool,
-) -> Result<(BombView, Option<TimedBombFacts>), ProjectionError> {
+) -> Result<
+    (
+        BombView,
+        Option<TimedBombFacts>,
+        super::projection_facts::KickBombFacts,
+        super::projection_facts::PunchBombFacts,
+    ),
+    ProjectionError,
+> {
     let view = game::BombView::from(bomb);
     let (trigger, timed_bomb) = match view.trigger {
         game::BombTrigger::Timed { detonates_at } => {
@@ -230,151 +257,27 @@ fn capture_bomb(
         game::BombTrigger::Remote => (BombTrigger::remote(), None),
         game::BombTrigger::Contact => (BombTrigger::contact(), None),
     };
-    Ok((
-        BombView {
-            id: EntityId::new(view.id.0),
-            cell: wire_cell(view.cell)?,
-            owner: EntityId::new(view.owner.0),
-            range: u8::try_from(view.range).map_err(|_| ProjectionError::InvalidBombs)?,
-            placed_at: wire_tick(view.placed_at)?,
-            trigger,
-            blast: match view.blast {
-                game::BlastKind::Standard => BlastKind::Standard,
-                game::BlastKind::Piercing => BlastKind::Piercing,
-                game::BlastKind::Power => BlastKind::Power,
-            },
+    let bomb_view = BombView {
+        id: EntityId::new(view.id.0),
+        cell: wire_cell(view.cell)?,
+        owner: EntityId::new(view.owner.0),
+        range: u8::try_from(view.range).map_err(|_| ProjectionError::InvalidBombs)?,
+        placed_at: wire_tick(view.placed_at)?,
+        trigger,
+        blast: match view.blast {
+            game::BlastKind::Standard => BlastKind::Standard,
+            game::BlastKind::Piercing => BlastKind::Piercing,
+            game::BlastKind::Power => BlastKind::Power,
         },
-        timed_bomb,
-    ))
-}
-
-fn capture_event_bomb(
-    bomb: game::BombView,
-    event_tick: game::Tick,
-    timing: Option<game::events::TimedBombEvent>,
-) -> Result<(BombView, Option<TimedBombFacts>), ProjectionError> {
-    if matches!(
-        bomb.trigger,
-        game::BombTrigger::Timed { detonates_at } if detonates_at.0 < event_tick.0
-    ) {
-        return Err(ProjectionError::InvalidEvent);
-    }
-    let (trigger, timed_bomb) = match bomb.trigger {
-        game::BombTrigger::Timed { detonates_at } => {
-            let remaining = detonates_at
-                .0
-                .checked_sub(event_tick.0)
-                .ok_or(ProjectionError::InvalidEvent)?;
-            let facts = timing.ok_or(ProjectionError::InvalidEvent)?;
-            (
-                BombTrigger::timed(
-                    u16::try_from(remaining).map_err(|_| ProjectionError::InvalidEvent)?,
-                    facts.paused,
-                )
-                .map_err(|_| ProjectionError::InvalidEvent)?,
-                Some(TimedBombFacts {
-                    captured_fuse_ticks: facts.history.captured_fuse_ticks,
-                    paused_ticks: facts.history.paused_ticks,
-                    detonates_at: wire_tick(facts.detonates_at)
-                        .map_err(|_| ProjectionError::InvalidEvent)?,
-                    paused: facts.paused,
-                }),
-            )
-        }
-        game::BombTrigger::Remote => (BombTrigger::remote(), None),
-        game::BombTrigger::Contact => (BombTrigger::contact(), None),
     };
     Ok((
-        BombView {
-            id: EntityId::new(bomb.id.0),
-            cell: wire_cell(bomb.cell)?,
-            owner: EntityId::new(bomb.owner.0),
-            range: u8::try_from(bomb.range).map_err(|_| ProjectionError::InvalidEvent)?,
-            placed_at: wire_tick(bomb.placed_at)?,
-            trigger,
-            blast: match bomb.blast {
-                game::BlastKind::Standard => BlastKind::Standard,
-                game::BlastKind::Piercing => BlastKind::Piercing,
-                game::BlastKind::Power => BlastKind::Power,
-            },
-        },
+        bomb_view,
         timed_bomb,
+        super::projection_kick::capture_bomb(bomb, bomb_view),
+        super::projection_punch::capture_bomb(bomb, bomb_view),
     ))
 }
 
-fn capture_report(report: &game::StepReport) -> Result<ReportFacts, ProjectionError> {
-    let tick = wire_tick(report.tick)?;
-    Ok(ReportFacts {
-        tick,
-        events: report
-            .events
-            .iter()
-            .map(|event| {
-                let (kind, timed_bomb) = match event.kind {
-                    game::StepEventKind::BombPlaced(bomb) => {
-                        let (bomb, timing) =
-                            capture_event_bomb(bomb, event.tick, event.timed_bomb)?;
-                        (EventKind::BombPlaced { bomb }, timing)
-                    }
-                    game::StepEventKind::BombDetonated(bomb) => {
-                        let (bomb, timing) =
-                            capture_event_bomb(bomb, event.tick, event.timed_bomb)?;
-                        (EventKind::BombDetonated { bomb }, timing)
-                    }
-                    game::StepEventKind::ActorEliminated { id, seat } => (
-                        EventKind::ActorEliminated {
-                            id: EntityId::new(id.0),
-                            seat: wire_seat(seat),
-                        },
-                        None,
-                    ),
-                    game::StepEventKind::PickupCollected {
-                        id,
-                        seat,
-                        cell,
-                        kind,
-                    } => (
-                        EventKind::PickupCollected {
-                            id: EntityId::new(id.0),
-                            seat: wire_seat(seat),
-                            cell: wire_cell(cell)?,
-                            kind: wire_pickup(kind),
-                        },
-                        None,
-                    ),
-                    game::StepEventKind::RoundEnded(result) => (
-                        EventKind::RoundEnded {
-                            result: wire_result(Some(result))
-                                .ok_or(ProjectionError::InvalidEvent)?,
-                        },
-                        None,
-                    ),
-                    game::StepEventKind::DamagePrevented { id, seat, source } => (
-                        EventKind::DamagePrevented {
-                            id: EntityId::new(id.0),
-                            seat: wire_seat(seat),
-                            source: match source {
-                                game::DamagePreventionSource::Heart => {
-                                    super::DamagePreventionSource::Heart
-                                }
-                                game::DamagePreventionSource::Shield => {
-                                    super::DamagePreventionSource::Shield
-                                }
-                            },
-                        },
-                        None,
-                    ),
-                };
-                Ok(EventFacts {
-                    tick: wire_tick(event.tick)?,
-                    audience: event.audience,
-                    kind,
-                    timed_bomb,
-                })
-            })
-            .collect::<Result<_, ProjectionError>>()?,
-    })
-}
 #[cfg(test)]
 #[path = "projection_capture_tests.rs"]
 mod tests;

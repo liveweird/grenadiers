@@ -73,6 +73,7 @@ describe('gameplay settings items', () => {
     const view = render(<MantineProvider env="test"><GameplaySettingsPanel room={room(1)} youSeat="one"
       pending={false} copy={en} onApply={apply} /></MantineProvider>)
 
+    expect(screen.getByRole('checkbox', { name: 'Kick' })).not.toBeChecked()
     expect(screen.getByRole('checkbox', { name: 'Wall pass' })).not.toBeChecked()
     expect(screen.getByRole('checkbox', { name: 'Heart' })).toBeChecked()
     expect(screen.getByRole('checkbox', { name: 'Remote bomb' })).not.toBeChecked()
@@ -92,6 +93,7 @@ describe('gameplay settings items', () => {
     expect(screen.getByText(/leave a block you already overlap but cannot re-enter/)).toBeVisible()
     expect(screen.getByText(/Absorbs one lethal blast/)).toBeVisible()
     expect(screen.getByText(/remotely triggered bomb/)).toBeVisible()
+    expect(screen.getByText(/kicks a stationary timed or remote bomb/)).toBeVisible()
     expect(screen.getByText(/blast passes through breakable blocks/)).toBeVisible()
     expect(screen.getByText(/diamond-shaped area/)).toBeVisible()
     expect(screen.getByText(/entering it later detonates it/)).toBeVisible()
@@ -106,6 +108,9 @@ describe('gameplay settings items', () => {
     expect(screen.getByText(/Reverses movement controls for 10 seconds/)).toBeVisible()
     expect(screen.getByText(/Hides every bomb and its placement or detonation cue/)).toBeVisible()
     expect(screen.getByText(/unsafe pickup is still consumed/)).toBeVisible()
+    await user.click(screen.getByRole('checkbox', { name: 'Kick' }))
+    expect(screen.getByText(/Press your Equipment key to punch/)).toBeVisible()
+    await user.click(screen.getByRole('checkbox', { name: 'Punch' }))
     await user.click(screen.getByRole('checkbox', { name: 'Wall pass' }))
     await user.click(screen.getByRole('checkbox', { name: 'Remote bomb' }))
     await user.click(screen.getByRole('checkbox', { name: 'Piercing bomb' }))
@@ -126,12 +131,12 @@ describe('gameplay settings items', () => {
     expect(screen.getByRole('checkbox', { name: 'Heart' })).toBeChecked()
     await user.click(screen.getByRole('button', { name: 'Apply rules' }))
     expect(apply).toHaveBeenLastCalledWith(expect.objectContaining({
-      enabledItems: ['wallPass', 'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch', 'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls', 'invisibleBombs', 'teleporter'],
+      enabledItems: ['kick', 'punch', 'wallPass', 'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch', 'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls', 'invisibleBombs', 'teleporter'],
     }))
     await user.click(screen.getByRole('checkbox', { name: 'Golden flame' }))
     await user.click(screen.getByRole('button', { name: 'Apply rules' }))
     expect(apply).toHaveBeenLastCalledWith(expect.objectContaining({
-      enabledItems: ['wallPass', 'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch', 'invisibilityCloak', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls', 'invisibleBombs', 'teleporter'],
+      enabledItems: ['kick', 'punch', 'wallPass', 'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch', 'invisibilityCloak', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls', 'invisibleBombs', 'teleporter'],
     }))
     await user.click(screen.getByRole('checkbox', { name: 'Golden flame' }))
     await user.click(screen.getByRole('checkbox', { name: 'Heart' }))
@@ -151,20 +156,22 @@ describe('gameplay settings items', () => {
     expect(screen.getByRole('checkbox', { name: 'Teleporter' })).toBeChecked()
     await user.click(screen.getByRole('button', { name: 'Apply rules' }))
     expect(apply).toHaveBeenLastCalledWith(expect.objectContaining({
-      enabledItems: ['wallPass', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch', 'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls', 'invisibleBombs', 'teleporter'],
+      enabledItems: ['kick', 'punch', 'wallPass', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch', 'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls', 'invisibleBombs', 'teleporter'],
     }))
     await user.click(screen.getByRole('checkbox', { name: 'Shield' }))
     expect(screen.getByRole('checkbox', { name: 'Golden flame' })).toBeChecked()
     await user.click(screen.getByRole('button', { name: 'Apply rules' }))
     expect(apply).toHaveBeenLastCalledWith(expect.objectContaining({
-      enabledItems: ['wallPass', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'stopwatch', 'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls', 'invisibleBombs', 'teleporter'],
+      enabledItems: ['kick', 'punch', 'wallPass', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'stopwatch', 'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls', 'invisibleBombs', 'teleporter'],
     }))
     await user.click(screen.getByRole('checkbox', { name: 'Heart' }))
     await user.click(screen.getByRole('button', { name: 'Apply rules' }))
     expect(apply).toHaveBeenLastCalledWith(expect.objectContaining({
-      enabledItems: ['wallPass', 'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'stopwatch', 'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls', 'invisibleBombs', 'teleporter'],
+      enabledItems: ['kick', 'punch', 'wallPass', 'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'stopwatch', 'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls', 'invisibleBombs', 'teleporter'],
     }))
     await user.click(screen.getByRole('button', { name: 'Classic settings' }))
+    expect(screen.getByRole('checkbox', { name: 'Kick' })).not.toBeChecked()
+    expect(screen.getByRole('checkbox', { name: 'Punch' })).not.toBeChecked()
     expect(screen.getByRole('checkbox', { name: 'Wall pass' })).not.toBeChecked()
     expect(screen.getByRole('checkbox', { name: 'Heart' })).not.toBeChecked()
     expect(screen.getByRole('checkbox', { name: 'Remote bomb' })).not.toBeChecked()
@@ -212,6 +219,8 @@ describe('gameplay settings items', () => {
     expect(pl.settings.wallPassDescription).toMatch(/zniszczalne bloki/)
     expect(pl.settings.wallPassDescription).toMatch(/Twarde ściany i bomby nadal blokują/)
     expect(pl.settings.wallPassDescription).toMatch(/nie możesz wejść do niego ponownie/)
+    expect(pl.settings.kickDescription).toMatch(/co 10 aktualizacji/)
+    expect(pl.settings.kickDescription).toMatch(/Min nie można kopać/)
     expect(pl.settings.shieldDescription).toMatch(/5 sekund/)
     expect(pl.settings.goldenFlameDescription).toMatch(/10 sekund/)
     expect(pl.settings.shortFuseDescription).toMatch(/10 sekund/)

@@ -112,7 +112,11 @@ pub(super) fn replay(journal: &Journal) -> Result<RuntimeInspection, ReplayError
                 if awaiting_start.is_some() {
                     return Err(ReplayError::MissingRoundStart);
                 }
-                validate_operation(operation, journal.header.rules_version)?;
+                validate_operation(
+                    operation,
+                    journal.header.rules_version,
+                    runtime.lifecycle().settings().enabled_items(),
+                )?;
                 let before = runtime.lifecycle().phase();
                 apply_profile(&mut runtime, operation, journal.header.lifecycle_profile)?;
                 if matches!(operation, Operation::Tick) {
@@ -226,8 +230,15 @@ fn validate_order(records: &[super::record::Record]) -> Result<(), ReplayError> 
     Ok(())
 }
 
-fn validate_operation(operation: Operation, rules_version: u16) -> Result<(), ReplayError> {
+fn validate_operation(
+    operation: Operation,
+    rules_version: u16,
+    effective_items: EnabledItems,
+) -> Result<(), ReplayError> {
     if let Operation::Action { action, .. } = operation {
+        if matches!(action, ReplayAction::Equipment(_)) && rules_version != EXPANDED_V5_RULES {
+            return Err(ReplayError::InvalidActionProfile);
+        }
         let valid_for_profile = match rules_version {
             CLASSIC_V2_RULES | CLASSIC_V3_RULES => !matches!(
                 action,
@@ -240,7 +251,11 @@ fn validate_operation(operation: Operation, rules_version: u16) -> Result<(), Re
                 }
                 _ => true,
             },
-            EXPANDED_V5_RULES => !matches!(action, ReplayAction::Ready(_)),
+            EXPANDED_V5_RULES => {
+                !matches!(action, ReplayAction::Ready(_))
+                    && (!matches!(action, ReplayAction::Equipment(_))
+                        || effective_items.contains_punch())
+            }
             _ => false,
         };
         if !valid_for_profile {
@@ -250,7 +265,7 @@ fn validate_operation(operation: Operation, rules_version: u16) -> Result<(), Re
     match operation {
         Operation::Action { epoch: 0, .. } => Err(ReplayError::InvalidBounds),
         Operation::Action {
-            action: ReplayAction::Bomb(action_id),
+            action: ReplayAction::Bomb(action_id) | ReplayAction::Equipment(action_id),
             ..
         } if action_id == 0 || action_id > MAX_COUNTER => Err(ReplayError::InvalidBounds),
         Operation::Action {
@@ -309,6 +324,7 @@ fn apply_profile(
                     },
                     ReplayAction::Movement(value) => MatchAction::Movement(value),
                     ReplayAction::Bomb(value) => MatchAction::Bomb(value),
+                    ReplayAction::Equipment(value) => MatchAction::Equipment(value),
                     ReplayAction::Rematch(value) => MatchAction::Rematch(value),
                 },
             )

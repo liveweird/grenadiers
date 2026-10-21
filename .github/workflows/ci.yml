@@ -250,6 +250,36 @@ jobs:
           done
           curl --fail --silent http://127.0.0.1:8085/api/v1/ready
           E2E_TELEPORTER_FIXTURE=arena-v2-teleporter npm --prefix e2e run test:teleporter
+      - name: Verify opt-in Wall Pass collision and reconnect behavior using the same built image
+        run: |
+          chmod 444 core/tests/fixtures/arena-v2-wall-pass.seed
+          docker compose -f docker-compose.yaml -f docker-compose.wall-pass.yaml up -d --no-build --force-recreate app
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent http://127.0.0.1:8085/api/v1/ready; then break; fi
+            sleep 1
+          done
+          curl --fail --silent http://127.0.0.1:8085/api/v1/ready
+          E2E_WALL_PASS_FIXTURE=arena-v2-wall-pass npm --prefix e2e run test:wall-pass
+      - name: Verify opt-in Kick motion and fuse preservation using the same built image
+        run: |
+          chmod 444 core/tests/fixtures/arena-v2-kick.seed
+          docker compose -f docker-compose.yaml -f docker-compose.kick.yaml up -d --no-build --force-recreate app
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent http://127.0.0.1:8085/api/v1/ready; then break; fi
+            sleep 1
+          done
+          curl --fail --silent http://127.0.0.1:8085/api/v1/ready
+          E2E_KICK_FIXTURE=arena-v2-kick npm --prefix e2e run test:kick
+      - name: Verify opt-in Punch wrapping and fuse preservation using the same built image
+        run: |
+          chmod 444 core/tests/fixtures/arena-v2-punch.seed
+          docker compose -f docker-compose.yaml -f docker-compose.punch.yaml up -d --no-build --force-recreate app
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent http://127.0.0.1:8085/api/v1/ready; then break; fi
+            sleep 1
+          done
+          curl --fail --silent http://127.0.0.1:8085/api/v1/ready
+          E2E_PUNCH_FIXTURE=arena-v2-punch npm --prefix e2e run test:punch
       - name: Verify a full classic match and rematch using the same image
         run: |
           docker compose -f docker-compose.yaml -f docker-compose.matches.yaml up -d --no-build --force-recreate app
@@ -296,6 +326,10 @@ jobs:
             e2e/playwright-invisibility-cloak-report/
             e2e/playwright-invisible-bombs-report/
             e2e/playwright-teleporter-report/
+            e2e/playwright-wall-pass-report/
+            e2e/playwright-kick-report/
+            e2e/playwright-punch-report/
+            e2e/punch-test-results/
             e2e/playwright-match-report/
             e2e/playwright-reconnect-report/
             e2e/playwright-controls-report/

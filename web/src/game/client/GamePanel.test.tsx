@@ -6,26 +6,26 @@ import i18n from '../../i18n'
 import type { GameClientState } from './client'
 import { GamePanel, GamePanelView, type GameActions } from './GamePanel'
 import { room, snapshot } from './testSupport'
-
 vi.mock('../arena/GameArena', () => ({
-  GameArena: ({ label, enabled, bindings, focusHint, snapshot: current, onDirection, onBomb }: GameArenaProps) => (
+  GameArena: ({ label, enabled, bindings, focusHint, snapshot: current,
+    onDirection, onBomb, onEquipment }: GameArenaProps) => (
     <div role="region" aria-label={label} data-enabled={String(enabled)} data-world={String(Boolean(current))}
       data-north={bindings?.north.join(',')} data-bomb={bindings?.bomb.join(',')} data-focus-hint={focusHint}>
       <button onClick={() => onDirection('east')}>Move in test arena</button>
       <button onClick={() => onDirection(null)}>Release in test arena</button>
       <button onClick={() => onBomb()}>Bomb in test arena</button>
+      <button onClick={() => onEquipment()}>Equipment in test arena</button>
     </div>
   ),
 }))
-
 function actions(): GameActions {
   return {
     admit: vi.fn(() => true), ready: vi.fn(() => true), updateSettings: vi.fn(() => true),
     rematch: vi.fn(() => true),
-    movement: vi.fn(() => true), placeBomb: vi.fn(() => true), leave: vi.fn(() => true),
+    movement: vi.fn(() => true), placeBomb: vi.fn(() => true), useEquipment: vi.fn(() => true),
+    leave: vi.fn(() => true),
   }
 }
-
 function state(connection: GameClientState['connection'] = 'authenticated'): GameClientState {
   const current = snapshot(20)
   return {
@@ -38,7 +38,6 @@ function state(connection: GameClientState['connection'] = 'authenticated'): Gam
     reconnectAttempt: connection === 'reconnecting' ? 1 : 0,
   }
 }
-
 function renderPanel(current: GameClientState) {
   render(<MantineProvider env="test"><GamePanelView state={current} actions={actions()} /></MantineProvider>)
 }
@@ -141,6 +140,36 @@ describe('v10 private-state presentation', () => {
     expect(stats).not.toHaveTextContent('Wall pass (')
   })
 
+  it('labels Kick as permanent equipment without adding an action or timer', () => {
+    const current = state()
+    const actor = current.snapshot!.state.actors[0]
+    if (actor.type !== 'visible') throw new Error('expected visible own actor')
+    actor.inventory = { equipment: 'kick', weapon: null }
+    renderPanel(current)
+    const stats = screen.getByLabelText('Player one upgrades')
+    expect(stats).toHaveTextContent('EquipmentKick')
+    expect(stats).toHaveTextContent('Bomb typeNone')
+    expect(stats).not.toHaveTextContent('Kick (')
+  })
+
+  it('shows Punch with the actual migrated equipment key and no private cooldown', () => {
+    localStorage.setItem('grenadiers.controls.v2', JSON.stringify({ version: 2, bindings: {
+      north: ['ArrowUp'], east: ['ArrowRight'], south: ['ArrowDown'], west: ['ArrowLeft'],
+      bomb: ['Space'], equipment: ['KeyF'],
+    } }))
+    const current = state()
+    const actor = current.snapshot!.state.actors[0]
+    if (actor.type !== 'visible') throw new Error('expected visible own actor')
+    actor.inventory = { equipment: 'punch', weapon: null }
+    renderPanel(current)
+    const stats = screen.getByLabelText('Player one upgrades')
+    expect(stats).toHaveTextContent('EquipmentPunch')
+    expect(stats).not.toHaveTextContent('cooldown')
+    expect(screen.getByRole('region', { name: 'Grenadiers courtyard' })).toHaveAttribute('data-focus-hint',
+      'Punch equipped. Select the courtyard and press F to punch the bomb ahead.')
+    expect(screen.getByText(/Use Punch equipment with F/)).toBeVisible()
+  })
+
   it('uses the existing bomb binding in the armed Remote detonation hint', () => {
     const current = state()
     const actor = current.snapshot!.state.actors[0]
@@ -233,18 +262,21 @@ describe('v10 room controls', () => {
     }]])
   })
 
-  it('preserves the action receiver for arena movement, release and bombs', () => {
+  it('preserves the action receiver for arena movement, Bomb and Equipment', () => {
     const received: unknown[] = []
     const currentActions = {
       ...actions(),
       movement(direction: 'east' | null) { received.push([this, direction]); return true },
       placeBomb() { received.push([this, 'bomb']); return true },
+      useEquipment() { received.push([this, 'equipment']); return true },
     }
     render(<MantineProvider env="test"><GamePanelView state={state()} actions={currentActions} /></MantineProvider>)
     fireEvent.click(screen.getByRole('button', { name: 'Move in test arena' }))
     fireEvent.click(screen.getByRole('button', { name: 'Release in test arena' }))
     fireEvent.click(screen.getByRole('button', { name: 'Bomb in test arena' }))
-    expect(received).toEqual([[currentActions, 'east'], [currentActions, null], [currentActions, 'bomb']])
+    fireEvent.click(screen.getByRole('button', { name: 'Equipment in test arena' }))
+    expect(received).toEqual([[currentActions, 'east'], [currentActions, null],
+      [currentActions, 'bomb'], [currentActions, 'equipment']])
   })
 
   it('explains a completed-round hold that waits beyond its deadline for connection', () => {
@@ -317,7 +349,7 @@ describe('v10 room controls', () => {
     const arena = screen.getByRole('region', { name: 'Grenadiers courtyard' })
     fireEvent.click(screen.getByRole('button', { name: 'Keyboard controls' }))
     expect(arena).toHaveAttribute('data-enabled', 'false')
-    for (const action of ['North', 'East', 'South', 'West', 'Bomb']) {
+    for (const action of ['North', 'East', 'South', 'West', 'Bomb', 'Equipment']) {
       expect(screen.getByRole('button', { name: `Change ${action}` })).toBeVisible()
     }
     fireEvent.click(screen.getByRole('button', { name: 'Change North' }))
@@ -357,7 +389,7 @@ describe('v10 room controls', () => {
     expect(screen.getByRole('region', { name: 'Dziedziniec Grenadiers' })).toHaveAttribute('data-bomb', 'Enter')
     fireEvent.click(screen.getByRole('button', { name: 'Sterowanie klawiaturą' }))
     expect(screen.getByRole('dialog', { name: 'Sterowanie klawiaturą' })).toHaveTextContent('Północ')
-    for (const action of ['Północ', 'Wschód', 'Południe', 'Zachód', 'Bomba']) {
+    for (const action of ['Północ', 'Wschód', 'Południe', 'Zachód', 'Bomba', 'Wyposażenie']) {
       expect(screen.getByRole('button', { name: `Zmień: ${action}` })).toBeVisible()
     }
     fireEvent.click(screen.getByRole('button', { name: 'Zmień: Północ' }))

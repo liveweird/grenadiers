@@ -25,7 +25,7 @@ pub(crate) fn validate_world_for_items(
     validate_clock(&facts)?;
     validate_arena(&facts)?;
     validate_actors(&facts, supported_items)?;
-    validate_bombs(&facts)?;
+    validate_bombs(&facts, supported_items)?;
     validate_flames(&facts)?;
     validate_pickups(&facts)?;
     validate_result(&facts)?;
@@ -181,7 +181,10 @@ fn position_overlaps(position: crate::protocol::Position, cell: crate::protocol:
         && i32::from(position.y()) + HALF_FOOTPRINT > top
 }
 
-fn validate_bombs(world: &WorldFacts) -> Result<(), ProjectionError> {
+fn validate_bombs(
+    world: &WorldFacts,
+    supported_items: super::ItemSet,
+) -> Result<(), ProjectionError> {
     if world.bombs.len() > MAX_BOMBS
         || !world
             .bombs
@@ -259,7 +262,8 @@ fn validate_bombs(world: &WorldFacts) -> Result<(), ProjectionError> {
             return Err(ProjectionError::InvalidBombs);
         }
     }
-    Ok(())
+    super::projection_kick::validate_world(world, supported_items)?;
+    super::projection_punch::validate_world(world, supported_items)
 }
 
 fn validate_flames(world: &WorldFacts) -> Result<(), ProjectionError> {

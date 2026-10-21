@@ -14,5 +14,6 @@ export function bindingsSummary(bindings: KeyboardBindings, copy: GameCopy): str
   return format(copy.controls.instructions, {
     movement: movements,
     bomb: bindings.bomb.map((code) => keyLabel(code, copy)).join(' / '),
+    equipment: bindings.equipment.map((code) => keyLabel(code, copy)).join(' / '),
   })
 }

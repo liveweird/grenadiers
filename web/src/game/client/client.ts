@@ -24,8 +24,7 @@ export class GameClient {
   private readonly onChange: (state: GameClientState) => void
   private readonly dependencies: Dependencies
   constructor(onChange: (state: GameClientState) => void, dependencies?: Partial<Dependencies>) {
-    this.onChange = onChange
-    this.dependencies = dependenciesWithDefaults(dependencies)
+    this.onChange = onChange; this.dependencies = dependenciesWithDefaults(dependencies)
   }
   getState(): GameClientState { return this.state }
   admit(intent: AdmissionIntent): boolean {
@@ -50,7 +49,7 @@ export class GameClient {
     const room = this.state.room
     const own = room?.seats.find((seat) => seat.seat === this.state.youSeat)
     const canonicalItems = room?.availableItems.filter((item) => settings.enabledItems.includes(item))
-    if (!room || settings.enabledItems.length > 18
+    if (!room || settings.enabledItems.length > 20
       || new Set(settings.enabledItems).size !== settings.enabledItems.length
       || settings.enabledItems.some((item, index) => item !== canonicalItems?.[index])
       || settings.enabledItems.some((item) => !room.availableItems.includes(item))
@@ -77,15 +76,17 @@ export class GameClient {
       && this.sendRoomCommand({ type: 'rematch', ready })
   }
   movement(direction: Direction | null): boolean {
-    return this.canControl() && this.sendRoomCommand({ type: 'movement', direction })
+    return this.canControl() && this.sendRoomCommand({ type: 'movement', direction }) }
+  placeBomb(): boolean { return this.manualAction('bomb') }
+  useEquipment(): boolean {
+    return Boolean(this.state.room?.settings.enabledItems.includes('punch') && this.manualAction('equipment'))
   }
-  placeBomb(): boolean {
+  private manualAction(action: 'bomb' | 'equipment'): boolean {
     if (!this.canControl() || this.nextAction > MAX_COUNTER) {
       if (this.nextAction > MAX_COUNTER) this.update({ failure: 'sequenceExhausted' })
       return false
     }
-    const actionId = this.nextAction
-    if (!this.sendRoomCommand({ type: 'manualAction', actionId, action: 'bomb' })) return false
+    if (!this.sendRoomCommand({ type: 'manualAction', actionId: this.nextAction, action })) return false
     this.nextAction += 1
     return true
   }

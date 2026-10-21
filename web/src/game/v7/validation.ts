@@ -22,10 +22,11 @@ function semanticErrorForState(
   state: GameState | null, events: readonly WireEvent[] = [],
 ): GameplayV7SemanticError | null {
   if (!state) return null
-  if (state.pickups.some(({ kind }) => kind === 'wallPass')
+  if (state.pickups.some(({ kind }) => kind === 'wallPass' || kind === 'punch')
     || state.actors.some((actor) => actor.type === 'visible'
-      && actor.inventory.equipment === 'wallPass')
-    || events.some(({ kind }) => kind.type === 'pickupCollected' && kind.kind === 'wallPass')) {
+      && (actor.inventory.equipment === 'wallPass' || actor.inventory.equipment === 'punch'))
+    || events.some(({ kind }) => kind.type === 'pickupCollected'
+      && (kind.kind === 'wallPass' || kind.kind === 'punch'))) {
     return 'unsupportedProfile'
   }
   for (const actor of state.actors) {
@@ -38,7 +39,8 @@ function semanticErrorForState(
 }
 
 function semanticErrorForRoom(room: RoomView): GameplayV7SemanticError | null {
-  if (room.availableItems.includes('wallPass') || room.settings.enabledItems.includes('wallPass')) {
+  if (room.availableItems.some((item) => item === 'wallPass' || item === 'punch')
+    || room.settings.enabledItems.some((item) => item === 'wallPass' || item === 'punch')) {
     return 'unsupportedProfile'
   }
   return itemSetSemanticError(room.settings.enabledItems, room.availableItems)

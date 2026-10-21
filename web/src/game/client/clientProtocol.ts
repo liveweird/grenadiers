@@ -16,7 +16,7 @@ export type Capability = { roomId: string; seat: Seat; token: string }
 export type RoomCommand =
   | { type: 'ready'; ready: boolean; settingsRevision: number }
   | { type: 'movement'; direction: Direction | null }
-  | { type: 'manualAction'; actionId: number; action: 'bomb' }
+  | { type: 'manualAction'; actionId: number; action: 'bomb' | 'equipment' }
   | { type: 'rematch'; ready: boolean }
 export type ControlCommand = { sequence: number; roomId: string; roundId: number; revision: number }
 export type PendingSettings = {

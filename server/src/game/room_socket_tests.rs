@@ -110,6 +110,7 @@ async fn two_members_receive_personalized_admission_and_live_waiting_updates() {
         created["room"]["availableItems"],
         json!([
             "kick",
+            "punch",
             "wallPass",
             "heart",
             "remoteBomb",

@@ -9,7 +9,7 @@ mod projection_event_validation;
 mod projection_facts;
 mod projection_items;
 mod projection_kick;
-mod projection_punch;
+pub(crate) mod projection_punch;
 mod projection_recipient;
 pub(crate) mod projection_room;
 mod projection_room_settings;

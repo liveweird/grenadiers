@@ -77,15 +77,32 @@ fn validate_bomb(
     facts: PunchBombFacts,
     placement: bool,
 ) -> Result<(), ()> {
+    let has_retained_marker = world
+        .last_successful_punch_ticks
+        .iter()
+        .flatten()
+        .any(|tick| *tick >= bomb.placed_at);
     if facts.bomb != bomb
         || (facts.has_been_punched
             && (placement
                 || matches!(bomb.trigger.observation(), BombTriggerObservation::Contact)
-                || !punch_allowed(world, supported_items)))
+                || !punch_allowed(world, supported_items)
+                || !has_retained_marker))
     {
         return Err(());
     }
     Ok(())
+}
+
+#[cfg(test)]
+pub(crate) fn validate_bomb_history_for_test(
+    world: &WorldFacts,
+    supported_items: ItemSet,
+    bomb: BombView,
+    facts: PunchBombFacts,
+    placement: bool,
+) -> Result<(), ()> {
+    validate_bomb(world, supported_items, bomb, facts, placement)
 }
 
 fn punch_allowed(world: &WorldFacts, supported_items: ItemSet) -> bool {

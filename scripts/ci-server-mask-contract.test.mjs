@@ -184,4 +184,115 @@ test("workflow aggregate fails closed before pinned runtime and artifact validat
   assert.equal((partition.match(pinnedDownload) ?? []).length, 1);
   assert.equal((aggregate.match(pinnedDownload) ?? []).length, 2);
   assert.doesNotMatch(aggregate, /continue-on-error/);
+  const expectedArtifactPath = "path: ${{ runner.temp }}/server-mask-artifacts${{ fromJSON(needs.server-mask-plan.outputs.matrix).include[0].count == 1 && format('/server-mask-partition-{0}-0', needs.server-mask-plan.outputs.source) || '' }}";
+  const artifactPaths = aggregate.split("\n").map((line) => line.trim())
+    .filter((line) => line.startsWith("path:") && line.includes("server-mask-artifacts"));
+  assert.deepEqual(artifactPaths, [expectedArtifactPath]);
+  const artifactDownload = aggregate.slice(aggregate.indexOf("pattern: server-mask-partition-*"),
+    aggregate.indexOf("- name: Validate complete server mask evidence"));
+  assert.match(artifactDownload, /merge-multiple: false/);
+});
+
+function planForPartitions(partitionCount) {
+  const capacity = { 1: 8, 2: 4, 3: 3 }[partitionCount];
+  const ranges = Array.from({ length: partitionCount }, (_, index) => ({
+    index,
+    startOrdinal: index * capacity,
+    endOrdinalExclusive: Math.min((index + 1) * capacity, plan.totalCardinality),
+  }));
+  return { ...structuredClone(plan), capacity, partitionCount, ranges };
+}
+
+function summaryFor(fixturePlan, index, profile, overrides = {}) {
+  const range = fixturePlan.ranges[index];
+  return { schemaVersion: 1, source, profile, selection: "partition", partitionIndex: index,
+    partitionCount: fixturePlan.partitionCount, startOrdinal: range.startOrdinal,
+    endOrdinalExclusive: range.endOrdinalExclusive,
+    observedCount: range.endOrdinalExclusive - range.startOrdinal,
+    totalCardinality: fixturePlan.totalCardinality, ...overrides };
+}
+
+function writeOfficialActionLayout(root, partitionCount, { oldSingleRoot = false,
+  matchedIndexes = Array.from({ length: partitionCount }, (_, index) => index) } = {}) {
+  const fixturePlan = planForPartitions(partitionCount);
+  const planPath = path.join(root, "plan.json");
+  const artifactRoot = path.join(root, "artifacts");
+  fs.writeFileSync(planPath, `${JSON.stringify(fixturePlan)}\n`);
+  fs.mkdirSync(artifactRoot);
+  const resolvedPath = partitionCount === 1 && !oldSingleRoot
+    ? partitionDirectory(artifactRoot, 0) : artifactRoot;
+  for (const index of matchedIndexes) {
+    const range = fixturePlan.ranges[index];
+    const artifactName = `server-mask-partition-${source}-${range.index}`;
+    const directory = matchedIndexes.length === 1 ? resolvedPath : path.join(resolvedPath, artifactName);
+    fs.mkdirSync(directory, { recursive: true });
+    for (const profile of ["debug", "release", "coverage"]) {
+      fs.writeFileSync(path.join(directory, `${profile}.json`),
+        `${JSON.stringify(summaryFor(fixturePlan, range.index, profile))}\n`);
+    }
+  }
+  return { fixturePlan, planPath, artifactRoot };
+}
+
+function withOfficialActionLayout(partitionCount, mutate, options = {}) {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "grenadiers-action-layout-"));
+  try {
+    const fixture = writeOfficialActionLayout(root, partitionCount, options);
+    mutate?.(fixture);
+    return runAggregate(fixture.planPath, fixture.artifactRoot);
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+}
+
+function partitionDirectory(artifactRoot, index) {
+  return path.join(artifactRoot, `server-mask-partition-${source}-${index}`);
+}
+
+function mutateSummary(file, mutation) {
+  const value = JSON.parse(fs.readFileSync(file, "utf8"));
+  fs.writeFileSync(file, `${JSON.stringify({ ...value, ...mutation })}\n`);
+}
+
+test("aggregate workflow path exactly preserves the official single-artifact directory", () => {
+  assert.notEqual(withOfficialActionLayout(1, undefined, { oldSingleRoot: true }).status, 0);
+  assert.equal(withOfficialActionLayout(1).status, 0);
+});
+
+test("aggregate CLI accepts official multi-artifact layouts for two and three partitions", () => {
+  for (const count of [2, 3]) assert.equal(withOfficialActionLayout(count).status, 0);
+});
+
+test("aggregate CLI rejects malformed official-action artifact layouts", () => {
+  assert.notEqual(withOfficialActionLayout(2, undefined, { matchedIndexes: [0] }).status, 0);
+  assert.notEqual(withOfficialActionLayout(3, undefined, { matchedIndexes: [0] }).status, 0);
+  assert.notEqual(withOfficialActionLayout(3, undefined, { matchedIndexes: [0, 1] }).status, 0);
+  const failures = [
+    ({ artifactRoot }) => fs.rmSync(partitionDirectory(artifactRoot, 1), { recursive: true }),
+    ({ artifactRoot }) => fs.mkdirSync(partitionDirectory(artifactRoot, 3)),
+    ({ artifactRoot }) => mutateSummary(path.join(partitionDirectory(artifactRoot, 0), "debug.json"),
+      { source: "b".repeat(40) }),
+    ({ artifactRoot }) => mutateSummary(path.join(partitionDirectory(artifactRoot, 0), "release.json"),
+      { partitionIndex: 1 }),
+    ({ artifactRoot }) => mutateSummary(path.join(partitionDirectory(artifactRoot, 0), "coverage.json"),
+      { partitionCount: 2 }),
+    ({ artifactRoot }) => mutateSummary(path.join(partitionDirectory(artifactRoot, 1), "debug.json"),
+      { partitionIndex: 0 }),
+    ({ artifactRoot }) => mutateSummary(path.join(partitionDirectory(artifactRoot, 1), "release.json"),
+      { observedCount: 2 }),
+    ({ artifactRoot }) => fs.rmSync(path.join(partitionDirectory(artifactRoot, 1), "coverage.json")),
+    ({ artifactRoot, fixturePlan }) => fs.writeFileSync(
+      path.join(partitionDirectory(artifactRoot, 1), "extra.json"),
+      `${JSON.stringify(summaryFor(fixturePlan, 1, "coverage"))}\n`),
+    ({ artifactRoot }) => fs.writeFileSync(path.join(artifactRoot, "unexpected.json"), "{}\n"),
+    ({ artifactRoot }) => fs.symlinkSync(partitionDirectory(artifactRoot, 0), path.join(artifactRoot, "linked")),
+    ({ artifactRoot }) => {
+      const directory = partitionDirectory(artifactRoot, 0);
+      for (const profile of ["debug", "release", "coverage"]) {
+        fs.renameSync(path.join(directory, `${profile}.json`), path.join(artifactRoot, `${profile}.json`));
+      }
+      fs.rmdirSync(directory);
+    },
+  ];
+  for (const mutate of failures) assert.notEqual(withOfficialActionLayout(3, mutate).status, 0);
 });

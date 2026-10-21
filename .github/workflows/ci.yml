@@ -134,7 +134,8 @@ jobs:
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           pattern: server-mask-partition-*
-          path: ${{ runner.temp }}/server-mask-artifacts
+          path: ${{ runner.temp }}/server-mask-artifacts${{ fromJSON(needs.server-mask-plan.outputs.matrix).include[0].count == 1 && format('/server-mask-partition-{0}-0', needs.server-mask-plan.outputs.source) || '' }}
+          merge-multiple: false
       - name: Validate complete server mask evidence
         run: node scripts/ci-server-mask-aggregate.mjs "$RUNNER_TEMP/server-mask-plan/server-mask-plan.json" "$RUNNER_TEMP/server-mask-artifacts" '${{ needs.server-mask-plan.outputs.source }}'
 

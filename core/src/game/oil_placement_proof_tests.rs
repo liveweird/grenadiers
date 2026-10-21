@@ -80,7 +80,11 @@ fn unlit_veto_preserves_allocator_weapon_and_capacity_with_a_free_center_control
     assert!(blocked.world.bombs.is_empty());
 
     let mut allowed = state();
-    allowed.actors[0].position = Position::center(CellId::new(2, 1));
+    allowed.actors[0].position = Position { x: 2_753, y: 1_536 };
+    assert!(crate::game::movement::position_overlaps_cell(
+        allowed.actors[0].position,
+        CellId::new(3, 1)
+    ));
     allowed.step(&[place(SeatId::One)]).unwrap();
     let bomb = allowed.world.bombs.get(&EntityId(next as u32)).unwrap();
     assert_eq!(bomb.cell(), CellId::new(2, 1));
@@ -93,7 +97,11 @@ fn unlit_veto_preserves_allocator_weapon_and_capacity_with_a_free_center_control
 fn one_unlit_veto_does_not_suppress_the_other_actors_valid_neighbor_placement() {
     let mut state = state();
     let next = state.next_entity_id;
-    state.actors[1].position = Position::center(CellId::new(2, 1));
+    state.actors[1].position = Position { x: 2_753, y: 1_536 };
+    assert!(crate::game::movement::position_overlaps_cell(
+        state.actors[1].position,
+        CellId::new(3, 1)
+    ));
 
     state
         .step(&[place(SeatId::One), place(SeatId::Two)])

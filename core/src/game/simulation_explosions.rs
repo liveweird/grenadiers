@@ -71,7 +71,6 @@ impl State {
         self.world.arena.remove_blocks(&plan.destroyed_blocks);
         for actor in &mut self.actors {
             crate::game::movement::prune_soft_wall_grace(&self.world, actor);
-            crate::game::movement::prune_unlit_oil_grace(&self.world, actor);
         }
 
         // Tick is bounded by u64. On its final representable value there can be
@@ -82,6 +81,9 @@ impl State {
                 .oil
                 .set_state(*cell, crate::game::OilState::Burning);
             self.world.hazards.remove(cell);
+        }
+        for actor in &mut self.actors {
+            crate::game::movement::prune_unlit_oil_grace(&self.world, actor);
         }
         for cell in plan.flames {
             if self.world.oil.burning(cell) {

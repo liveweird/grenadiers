@@ -113,3 +113,46 @@ fn seed_31_places_the_sole_oil_pool_on_both_sides() {
             <= crate::game::MAX_OIL_BARRELS
     );
 }
+
+#[test]
+fn oil_cap_accepts_one_self_mirror_site_but_never_half_of_a_pair() {
+    let occupied = (0..7)
+        .map(|column| (CellId::new(column, 1), PickupKind::OilBarrel))
+        .collect();
+    let center = CellId::new(7, 6);
+    assert!(generated_pair_fits(&occupied, center, center));
+    assert!(!generated_pair_fits(
+        &occupied,
+        CellId::new(3, 3),
+        CellId::new(11, 9)
+    ));
+}
+
+#[test]
+fn rejected_over_cap_pair_consumes_no_extra_draw_and_later_pickup_is_ordinary() {
+    let pairs = eligible_pairs();
+    assert!(pairs.len() > 6);
+    let mut words = VecDeque::new();
+    for index in 0..pairs.len() {
+        match index {
+            0..4 => words.extend([0, 0, 100]),
+            4 => words.extend([0, 0, 100]),
+            5 => words.extend([0, 0, 0]),
+            _ => words.push_back(99),
+        }
+    }
+    let later = pairs[5];
+    let mut source = Sequence(words);
+    let (_, concealed) = generate_layers(&mut source, EnabledItems::OIL_BARREL).unwrap();
+
+    assert_eq!(
+        concealed
+            .values()
+            .filter(|kind| **kind == PickupKind::OilBarrel)
+            .count(),
+        8
+    );
+    assert_eq!(concealed.get(&later.0), Some(&PickupKind::BombCapacity));
+    assert_eq!(concealed.get(&later.1), Some(&PickupKind::BombCapacity));
+    assert!(source.0.is_empty());
+}

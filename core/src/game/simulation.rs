@@ -294,11 +294,11 @@ mod landmine_route_tests;
 mod landmine_tests;
 #[path = "simulation_observations.rs"]
 mod observations;
+#[cfg(test)]
+#[path = "oil_proof_tests.rs"]
+mod oil_proof_tests;
 #[path = "simulation_oil.rs"]
 mod oil_step;
-#[cfg(test)]
-#[path = "oil_tests.rs"]
-mod oil_tests;
 #[path = "simulation_pickups.rs"]
 mod pickup_step;
 #[cfg(test)]

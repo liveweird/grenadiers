@@ -211,7 +211,9 @@ fn late_effect_overflow_rolls_back_oil_reveal_with_a_positive_control() {
     let before = state.clone();
     assert_eq!(
         state.step(&[]),
-        Err(super::StepError::EffectExpiryOverflow(EffectKind::Shield))
+        Err(crate::game::StepError::EffectExpiryOverflow(
+            EffectKind::Shield
+        ))
     );
     assert_eq!(state, before);
 

@@ -3,6 +3,24 @@
 Records below are frozen against their named sources. Publication and later CI status are
 recorded in [release notes](https://github.com/liveweird/grenadiers/releases).
 
+## Bracelet candidate — 2026-10-21 — source static checks complete
+
+The v0.3.46 source candidate adds passive Bracelet contact shoves to gameplay v10 without a new
+command, event or wire field. Domain, protocol and replay coverage exercises the one-tile clamp,
+separation rearm, 30-tick cooldown, alternating simultaneous priority, swept hazards and private
+forced-movement history. The current catalog contains 21 items and all **2,097,152 masks**; archived
+v9 and earlier reject Bracelet settings, gear, pickups and history.
+
+The E2E source adds a mode-0444 repeating-byte-31 fixture and two-browser ordinary-input route. It
+clears opposite arena perimeters, stages the players at `(10,1)` and `(11,1)`, and checks the same
+one-tile victim displacement in both recipient streams without a victim command, Equipment action,
+public event or private marker. Planned captures are `bracelet-shoved-desktop-en.png` and
+`bracelet-shoved-polish-320-reduced.png`. E2E lint, type checking, Knip, one-test Playwright
+discovery and **48-scenario parity** pass, as do Cargo metadata/version consistency, formatting,
+repository, YAML syntax and diff checks. This record does not claim the pending full debug mask
+gate, accepted v0.3.45 parent integration, native same-image Compose/Kubernetes execution, final CI
+or publication.
+
 ## Wall Pass candidate — 2026-10-21 — source checks complete
 
 The v0.3.43 source candidate activates permanent Wall Pass equipment in the current gameplay-v10

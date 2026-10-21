@@ -1,7 +1,8 @@
 # Configurable keyboard controls
 
 The active browser keeps keyboard preferences locally. Defaults remain the arrow keys and
-W A S D for movement, with Space for bombs and E for Punch equipment. **Keyboard controls** opens a
+W A S D for movement, with Space for bombs and E for active Punch equipment. Bracelet activates
+passively on forward contact and has no separate command. **Keyboard controls** opens a
 localized dialog outside the arena. Choosing **Change** for North, East, South, West, Bomb, or Equipment replaces that
 action's aliases with one physical key. **Restore defaults** restores every original alias.
 

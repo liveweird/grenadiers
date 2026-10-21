@@ -286,3 +286,14 @@ moves one ordinary bomb from `(4,1)` to wrapped `(1,1)`. It proves the shared ac
 same public bomb identity and fuse, no placement/detonation event, recipient parity, safe escape,
 and natural detonation using ordinary UI and native keys. It does not inject state, search seeds,
 retry, send direct gameplay commands or extend budgets. Native same-image execution remains pending.
+
+### Bracelet source scenario
+
+Use `docker-compose.bracelet.yaml` with the mode-0444 repeating-byte-31 v2 seed fixture and
+`E2E_BRACELET_FIXTURE=arena-v2-bracelet npm --prefix e2e run test:bracelet`. Two browser peers use
+ordinary movement and Bomb input to clear opposite perimeter routes, collect Bracelet naturally,
+and stage the players at `(10,1)` and `(11,1)`. Forward movement shoves the stationary second player
+exactly one tile to `(12,1)` in both public streams. The scenario asserts no victim command,
+Equipment action, public event or private cooldown/report field, then captures English desktop and
+Polish 320-pixel reduced-motion views. It does not inject state, search seeds, retry, send direct
+gameplay commands or extend budgets. Native same-image execution remains pending.

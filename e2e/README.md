@@ -41,3 +41,9 @@ The Punch source route uses `docker-compose.punch.yaml` with the mode-0444 repea
 `E2E_PUNCH_FIXTURE=arena-v2-punch npm run test:punch`. It remaps and uses the actual Equipment key,
 uses native movement/Bomb input and observes both public recipient streams without injection or
 direct gameplay messages. Source checks do not claim native acceptance.
+
+The Bracelet source route uses `docker-compose.bracelet.yaml` with that same production seed:
+`E2E_BRACELET_FIXTURE=arena-v2-bracelet npm run test:bracelet`. Two browsers clear opposite
+perimeters with ordinary Bomb and movement input, then prove the stationary rival moves exactly
+one tile in both recipient streams without an Equipment action, public event or private marker.
+Source checks do not claim native acceptance.

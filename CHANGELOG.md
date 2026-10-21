@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.3.46 — 2026-10-21 (source candidate)
+
+- Add opt-in Bracelet equipment: moving into the other player shoves them at most one tile along
+  the attempted direction, clamped by authoritative collision and hazard checks.
+- Require separation and a fixed 30-tick cooldown after a successful shove while keeping the
+  cooldown marker and forced-movement report private across admission, resume and replay.
+- Extend gameplay v10 to 21 lobby switches and all 2,097,152 settings masks, with English/Polish
+  presentation and a deterministic production-seed browser scenario. Accepted v0.3.45 parent
+  integration, the full debug mask gate, native same-image acceptance, final CI and publication
+  remain pending.
+
 ## 0.3.45 — 2026-10-21 (source candidate)
 
 - Add opt-in Punch equipment: the remappable Equipment action moves the adjacent facing bomb to the

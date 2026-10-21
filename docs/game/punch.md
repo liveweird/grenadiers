@@ -22,7 +22,7 @@ success through T+11 and permits one at T+12. The cooldown and persistent `hasBe
 private trusted state retained through replacement, reconnect, death and results, then cleared by a
 new round. No countdown, target highlight, blocked reason or success cue is published.
 
-Version 0.3.45 adds Punch as the first item in the twenty-item current catalog. Its capability bit
+Version 0.3.45 added Punch as the first item in its twenty-item catalog. Its capability bit
 is `2`; `ALL` is `3,145,723`. Generator v2 appends weight 15 after Kick, making the complete pool
 410 and the Punch interval `[395,410)`. A Punch-only pool is 115. All 1,048,576 catalog subsets are
 validated. Archived gameplay v9 and earlier reject Punch catalog entries, equipment, pickups,

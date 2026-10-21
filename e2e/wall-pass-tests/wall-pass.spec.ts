@@ -161,11 +161,16 @@ test('Wall Pass crosses one intact block, rejects planting and hard walls, and r
       const afterExit = latestSnapshot(games[0])!
       await one.keyboard.press('Space')
       await Promise.all(games.map((game) => expect.poll(() =>
-        bombPlacementsAfter(game, afterExit.room.revision).map(({ id }) => id))
-      .toEqual([revealBombId + 1])))
+        bombPlacementsAfter(game, afterExit.room.revision).map(({ id, blast, trigger }) => ({
+          id, blast, trigger,
+        }))).toEqual([{
+        id: revealBombId + 1, blast: 'standard',
+        trigger: { type: 'timed', remainingTicks: 180, paused: false },
+      }])))
       for (const game of games) {
         expect(latestSnapshot(game)!.state.bombs).toContainEqual(expect.objectContaining({
           id: revealBombId + 1, owner: exited.id, cell: { column: 3, row: 1 },
+          blast: 'standard', trigger: expect.objectContaining({ type: 'timed', paused: false }),
         }))
       }
     } finally {

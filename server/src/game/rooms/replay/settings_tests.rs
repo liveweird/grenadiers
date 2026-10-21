@@ -4,7 +4,7 @@ use grenadiers_core::{
 };
 
 use super::{
-    item_mask_plan::{ItemMaskPlan, PARTITION_CAPACITY},
+    item_mask_plan::{ItemMaskPlan, enabled_item_plan},
     record::{Header, Journal, M5_LIFECYCLE_PROFILE, Operation, ReplayAction},
     replay,
     runner::{ReplayError, identity_for_profile},
@@ -188,12 +188,7 @@ fn configurable_rules_reject_the_legacy_lifecycle_profile() {
 
 #[test]
 fn expanded_item_masks_and_disabled_preset_replay_deterministically() {
-    let catalog = [
-        16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144,
-    ];
-    assert_eq!(catalog.len(), 15);
-    let plan = ItemMaskPlan::checked(&catalog, EnabledItems::ALL.bits(), PARTITION_CAPACITY)
-        .unwrap_or_else(|error| panic!("invalid exhaustive item-mask plan: {error}"));
+    let plan = enabled_item_plan();
     let selection = plan
         .selection_from_environment()
         .unwrap_or_else(|error| panic!("invalid item-mask partition selection: {error}"));

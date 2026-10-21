@@ -26,16 +26,68 @@ jobs:
       - run: scripts/gates.sh web
       - run: scripts/gates.sh e2e
 
-  server:
+  server-mask-plan:
+    name: server-mask-plan
     runs-on: ubuntu-24.04
     timeout-minutes: 20
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+      source: ${{ steps.source.outputs.source }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version-file: .nvmrc
       - name: Require reviewed lockfile
         run: test -s Cargo.lock
+      - name: Install declared Rust toolchain
+        run: rustup show
+      - id: source
+        name: Bind exact source
+        run: |
+          source='${{ github.event.pull_request.head.sha || github.sha }}'
+          test "$(git rev-parse HEAD)" = "$source"
+          echo "source=$source" >> "$GITHUB_OUTPUT"
+      - id: plan
+        run: node scripts/ci-server-mask-plan.mjs '${{ github.event.pull_request.head.sha || github.sha }}'
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: server-mask-plan-${{ steps.source.outputs.source }}
+          path: server-mask-plan.json
+          if-no-files-found: error
+          retention-days: 7
+
+  server-mask-partition:
+    name: server-mask-partition (${{ matrix.index }}/${{ matrix.count }})
+    needs: server-mask-plan
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.server-mask-plan.outputs.matrix) }}
+    env:
+      GRENADIERS_SERVER_REPLAY_ITEM_MASK_CI_SOURCE: ${{ needs.server-mask-plan.outputs.source }}
+      GRENADIERS_SERVER_REPLAY_ITEM_MASK_PARTITION_INDEX: ${{ matrix.index }}
+      GRENADIERS_SERVER_REPLAY_ITEM_MASK_PARTITION_COUNT: ${{ matrix.count }}
+      GRENADIERS_SERVER_REPLAY_ITEM_MASK_REPORT_DIR: ${{ runner.temp }}/server-mask-report
+      GRENADIERS_SERVER_REPLAY_ITEM_MASK_PLAN_FILE: ${{ runner.temp }}/server-mask-plan/server-mask-plan.json
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.server-mask-plan.outputs.source }}
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: server-mask-plan-${{ needs.server-mask-plan.outputs.source }}
+          path: ${{ runner.temp }}/server-mask-plan
+      - name: Require exact source and reviewed lockfile
+        run: |
+          test "$(git rev-parse HEAD)" = "$GRENADIERS_SERVER_REPLAY_ITEM_MASK_CI_SOURCE"
+          test -s Cargo.lock
       - name: Install declared Rust toolchain
         run: |
           rustup show
@@ -44,6 +96,43 @@ jobs:
       # Repository checks only read npm manifests/locks; no npm installation is needed.
       - run: scripts/gates.sh server
       - run: scripts/gates.sh coverage
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always()
+        with:
+          name: server-mask-partition-${{ needs.server-mask-plan.outputs.source }}-${{ matrix.index }}
+          path: ${{ runner.temp }}/server-mask-report/*.json
+          if-no-files-found: error
+          retention-days: 7
+
+  server:
+    name: server
+    if: always()
+    needs: [server-mask-plan, server-mask-partition]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Require successful server mask jobs
+        run: |
+          test '${{ needs.server-mask-plan.result }}' = 'success'
+          test '${{ needs.server-mask-partition.result }}' = 'success'
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.server-mask-plan.outputs.source }}
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+      - name: Verify aggregate source
+        run: test "$(git rev-parse HEAD)" = '${{ needs.server-mask-plan.outputs.source }}'
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: server-mask-plan-${{ needs.server-mask-plan.outputs.source }}
+          path: ${{ runner.temp }}/server-mask-plan
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          pattern: server-mask-partition-*
+          path: ${{ runner.temp }}/server-mask-artifacts
+      - name: Validate complete server mask evidence
+        run: node scripts/ci-server-mask-aggregate.mjs "$RUNNER_TEMP/server-mask-plan/server-mask-plan.json" "$RUNNER_TEMP/server-mask-artifacts" '${{ needs.server-mask-plan.outputs.source }}'
 
   security:
     runs-on: ubuntu-24.04

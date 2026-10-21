@@ -20,6 +20,21 @@ Install with `cargo install cargo-llvm-cov --version 0.9.1 --locked`, then
 `rustup component add llvm-tools-preview` and `scripts/gates.sh coverage`.
 Stable branch coverage equivalent to Flow's Kover gate is not configured.
 
+CI derives the exhaustive server item-mask partition matrix from the checked Rust catalog; the
+workflow and JavaScript helpers do not duplicate item bits, cardinality, or ranges. Each partition
+runs the complete debug, release, build, and 80%-floor coverage gates with a 20-minute limit and
+emits source-bound debug, release, and coverage summaries. The stable `server` job accepts only the
+complete, disjoint set of successful partition artifacts. With both partition variables absent,
+local debug, release, and coverage commands still execute every mask. Clean Git worktrees report
+their HEAD; dirty worktrees and archives without `.git` honestly report a null source. CI requires
+and verifies an exact clean checked-out 40-hex source.
+
+The CI-only selector pair is
+`GRENADIERS_SERVER_REPLAY_ITEM_MASK_PARTITION_INDEX` and
+`GRENADIERS_SERVER_REPLAY_ITEM_MASK_PARTITION_COUNT`. Supplying only one, a malformed value, or a
+count that differs from the checked plan fails before mask execution. Profile and source context
+are assigned by `scripts/gates.sh`; callers must not infer or relabel coverage output.
+
 There is no durable schema yet, so no Testcontainers suite is needed. When persistence is
 added, run migrations against an isolated real PostgreSQL instance and test query behavior,
 constraints, and rollback; never use the developer's database as a test fixture.

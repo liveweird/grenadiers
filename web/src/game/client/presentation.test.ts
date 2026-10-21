@@ -32,7 +32,6 @@ describe('v8 arena presentation', () => {
       seat: 'two', position: { x: 4096, y: 3072 }, heading: 'north',
     })
   })
-
   it('removes all bomb drawings during blindness while keeping fire and authoritative counts', () => {
     const current = state()
     const own = current.snapshot!.state.actors[0]
@@ -195,5 +194,4 @@ describe('v8 arena presentation', () => {
     expect(presented.state.actors[0].slowFootRemainingTicks).toEqual([600, 431, 12])
     expect(presented.state.pickups).toEqual(current.snapshot!.state.pickups)
   })
-
 })

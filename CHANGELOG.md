@@ -1,11 +1,18 @@
 # Changelog
 
+## 0.3.38 — 2026-10-21
+
+- Add opt-in Invisibility Cloak with a 600-physical-tick refreshable actor-privacy effect.
+- Publish exact hidden actors and event-time private attributable cues while retaining public bombs, hazards, elimination and results.
+- Add the fourteenth lobby switch, checked asymmetric v8 publication, replay coverage, English and Polish cues, and a deterministic compositor-based browser scenario. Corrected source `1c6724f` passes a fresh 51 Compose plus 51 Kubernetes matrix with zero retries or carried passes; the independent raw audit is clear and 2,298 evidence payloads are sealed and durably byte-verified.
+- Preserve the 20-minute browser-job limit by dividing complete coverage between item and classic jobs using one verified image. The complete 320px HUD layout proof now runs in stable Running before gameplay and restores 390px afterward. No timeout, threshold, sample count, retry policy or product behavior was relaxed. At the 21 October 2026 16:47 UTC native acceptance checkpoint, both seven-job candidate workflows, merge/post-merge CI, publication, exact-image promotion and tag CI remained pending; v0.3.38 was not published.
+
 ## 0.3.37 — 2026-10-21
 
-- Correct Remote/Landmine rolling-history assertions using causal placement IDs; preserve Piercing/Power CI diagnostics. Fresh corrected-source acceptance passes 100/100 Compose/Kubernetes cases, independently audited and sealed; new exact-head CI and publication remain gates.
+- Correct Remote/Landmine rolling-history assertions using causal placement IDs; preserve Piercing/Power CI diagnostics. Fresh corrected-source acceptance passes 100/100 Compose/Kubernetes cases, independently audited and sealed; both new five-job candidate workflows and the five-job post-merge workflow pass all 50 browser cases; PR 83 is merged, v0.3.37 is published, and its accepted image is deployed locally.
 - Add opt-in Landmine as a passable, untimed Standard bomb that detonates on swept actor contact after per-actor exit grace.
 - Preserve movement ordering and immutable explosion planning: accepted contact wins, while fire and other blasts silently destroy untriggered mines without extending rays.
-- Add the thirteenth lobby switch, checked v8 state and events, replay coverage, English and Polish pressure-plate cues, and a deterministic production-seed browser scenario. Fresh same-image acceptance passes 50 Compose and 50 Kubernetes cases with zero retries; the raw audit is clear and evidence sealed. Publication requires exact-head candidate and post-merge CI.
+- Add the thirteenth lobby switch, checked v8 state and events, replay coverage, English and Polish pressure-plate cues, and a deterministic production-seed browser scenario. Fresh same-image acceptance passes 50 Compose and 50 Kubernetes cases with zero retries; the raw audit is clear and evidence sealed. Both candidate workflows and post-merge CI pass five jobs and all 50 browser cases; v0.3.37 is published and its accepted image deployed locally.
 
 ## 0.3.36 — 2026-10-21
 

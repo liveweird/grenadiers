@@ -166,9 +166,14 @@ impl State {
             DamageOutcome::IgnoredGrace => return,
             DamageOutcome::AbsorbedShield => {
                 if !shield_prevented[index] {
+                    let audience = if actor.effects.hidden_from_opponents(tick) {
+                        EventAudience::only(actor.seat)
+                    } else {
+                        EventAudience::Both
+                    };
                     events.push(StepEvent::new(
                         tick,
-                        EventAudience::Both,
+                        audience,
                         StepEventKind::DamagePrevented {
                             id: actor.id,
                             seat: actor.seat,
@@ -180,9 +185,14 @@ impl State {
                 return;
             }
             DamageOutcome::AbsorbedHeart { .. } => {
+                let audience = if actor.effects.hidden_from_opponents(tick) {
+                    EventAudience::only(actor.seat)
+                } else {
+                    EventAudience::Both
+                };
                 events.push(StepEvent::new(
                     tick,
-                    EventAudience::Both,
+                    audience,
                     StepEventKind::DamagePrevented {
                         id: actor.id,
                         seat: actor.seat,

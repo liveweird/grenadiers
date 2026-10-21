@@ -27,7 +27,7 @@ export function itemSetSemanticError(
 }
 
 const supportedItems = [
-  'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse',
+  'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse',
   'reverseControls',
 ] as const
 
@@ -63,8 +63,9 @@ function supportedState(state: GameState | null, enabled: ReadonlySet<ItemId>): 
   return state.bombs.every((bomb) => actorIds.has(bomb.owner) && supportedBomb(bomb, enabled))
     && state.bombs.filter((bomb) => bomb.trigger.type === 'remote')
       .every((bomb, index, remotes) => remotes.findIndex((other) => other.owner === bomb.owner) === index)
-    && state.actors.every((actor) => actor.type === 'visible' && (
-    (actor.inventory.weapon === null
+    && state.actors.every((actor) => actor.type === 'hidden'
+      ? enabled.has('invisibilityCloak') && actor.alive
+      : (actor.inventory.weapon === null
       || (actor.inventory.weapon === 'piercingBomb' && enabled.has('piercingBomb'))
       || (actor.inventory.weapon === 'remoteBomb' && enabled.has('remoteBomb'))
       || (actor.inventory.weapon === 'powerBomb' && enabled.has('powerBomb'))
@@ -72,8 +73,7 @@ function supportedState(state: GameState | null, enabled: ReadonlySet<ItemId>): 
     && (actor.inventory.equipment === null
       || (actor.inventory.equipment === 'heart' && enabled.has('heart')))
     && actor.effects.every((effect) => supportedEffect(effect, enabled))
-    && (enabled.has('heart') || actor.damageGraceRemainingTicks === 0)
-  ))
+    && (enabled.has('heart') || actor.damageGraceRemainingTicks === 0))
 }
 
 function supportedEvents(events: readonly WireEvent[], enabled: ReadonlySet<ItemId>): boolean {

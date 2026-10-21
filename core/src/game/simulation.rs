@@ -3,7 +3,7 @@ use std::collections::BTreeSet;
 use super::assignment::RoundAssignment;
 use super::damage::DamageGrace;
 use super::effects::{EffectiveSpeed, TimedEffects};
-use super::events::StepEvent;
+use super::events::{EventAudience, StepEvent};
 use super::geometry::MovementTrace;
 use super::input::{Direction, HeldDirections};
 use super::inventory::Inventory;
@@ -180,6 +180,13 @@ pub struct State {
 }
 
 impl State {
+    pub(super) fn event_audience_for(&self, id: EntityId, at: Tick) -> EventAudience {
+        self.actors
+            .iter()
+            .find(|actor| actor.id == id && actor.effects.hidden_from_opponents(at))
+            .map_or(EventAudience::Both, |actor| EventAudience::only(actor.seat))
+    }
+
     pub fn new(
         rules: RulesConfig,
         world: World,
@@ -342,6 +349,9 @@ mod flame_tests;
 #[cfg(test)]
 #[path = "golden_flame_tests.rs"]
 mod golden_flame_tests;
+#[cfg(test)]
+#[path = "simulation/invisibility_cloak_acceptance_tests.rs"]
+mod invisibility_cloak_acceptance_tests;
 #[cfg(test)]
 #[path = "item_foundation_tests.rs"]
 mod item_foundation_tests;

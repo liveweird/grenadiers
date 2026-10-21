@@ -68,3 +68,4 @@ See the implemented expansion candidates: [Heart](heart.md) and [Shield](shield.
 - [Power Bomb](power-bomb.md): one stored charge for a Manhattan blast that ignores obstruction.
 - [Remote Bomb](remote-bomb.md): one untimed bomb triggered by the owner's next bomb action.
 - [Landmine](landmine.md): one passable contact mine with per-actor exit grace.
+- [Invisibility Cloak](invisibility-cloak.md): ten seconds of recipient-private actor details.

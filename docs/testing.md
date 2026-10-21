@@ -216,3 +216,13 @@ there, and captures localized armed views before contact. It proves that the sam
 beyond the ordinary fuse, that leaving the initial overlap is safe, and that ordinary keyboard
 re-entry detonates the mine without another manual action. Both streams must publish the same
 detonation and resulting flames. Native execution remains a candidate gate.
+
+## Invisibility Cloak production-seed scenario
+
+Use `docker-compose.invisibility-cloak.yaml` with the v2 seed fixture and
+`E2E_INVISIBILITY_CLOAK_FIXTURE=arena-v2-invisibility-cloak npm --prefix e2e run test:invisibility-cloak`.
+The two-peer scenario reveals and collects the cloak at (3,1), proves the owner keeps a complete
+actor while the opponent receives an exact hidden actor and no collection cue, and compares actual
+compositor pixels at (2,1). Opponent reconnect preserves privacy without replay or deadline refresh;
+the actor appears at the current cell at collection tick plus 600. Native execution remains a
+candidate gate.

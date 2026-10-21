@@ -36,6 +36,9 @@ mod long_fuse_tests;
 mod landmine_tests;
 
 #[cfg(test)]
+mod invisibility_cloak_tests;
+
+#[cfg(test)]
 mod reverse_controls_tests;
 
 #[cfg(test)]

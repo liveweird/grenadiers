@@ -26,9 +26,14 @@ impl State {
                 continue;
             }
             self.world.pickups.exposed.remove(&cell);
+            let audience = if actor.effects.hidden_from_opponents(tick) {
+                EventAudience::only(seat)
+            } else {
+                EventAudience::Both
+            };
             events.push(StepEvent::new(
                 tick,
-                EventAudience::Both,
+                audience,
                 StepEventKind::PickupCollected {
                     id: actor.id,
                     seat,
@@ -104,6 +109,7 @@ impl super::Actor {
                     .replace_weapon(crate::game::SpecialWeapon::Landmine);
             }
             PickupKind::Shield
+            | PickupKind::InvisibilityCloak
             | PickupKind::GoldenFlame
             | PickupKind::ShortFuse
             | PickupKind::Diarrhea

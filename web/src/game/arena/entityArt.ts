@@ -130,6 +130,14 @@ export function makePickup(kind: RenderablePickupKind): Graphics {
       [17, 18, 15, 4], [16, 22, 17, 6], [18, 28, 13, 4], [21, 32, 7, 3],
     ])
     pixels(drawing, PALETTE.blueLight, [[18, 19, 9, 3], [18, 22, 4, 5]])
+  } else if (kind === 'invisibilityCloak') {
+    pixels(drawing, PALETTE.deepInk, [
+      [16, 14, 17, 4], [13, 18, 23, 5], [16, 23, 17, 13], [12, 34, 9, 4], [28, 34, 9, 4],
+    ])
+    pixels(drawing, PALETTE.blue, [
+      [17, 18, 15, 5], [19, 23, 11, 11], [15, 31, 7, 4], [27, 31, 7, 4],
+    ])
+    pixels(drawing, PALETTE.white, [[20, 19, 9, 3], [22, 24, 5, 7]])
   } else if (kind === 'goldenFlame') {
     pixels(drawing, PALETTE.deepInk, [
       [16, 32, 17, 4], [13, 25, 23, 7], [17, 17, 15, 10], [22, 12, 7, 8],

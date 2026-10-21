@@ -16,6 +16,7 @@ pub enum PickupKind {
     PowerBomb,
     Landmine,
     Shield,
+    InvisibilityCloak,
     GoldenFlame,
     ShortFuse,
     Diarrhea,
@@ -34,6 +35,7 @@ impl PickupKind {
             Self::PowerBomb => enabled.contains_power_bomb(),
             Self::Landmine => enabled.contains_landmine(),
             Self::Shield => enabled.contains_shield(),
+            Self::InvisibilityCloak => enabled.contains_invisibility_cloak(),
             Self::GoldenFlame => enabled.contains_golden_flame(),
             Self::ShortFuse => enabled.contains_short_fuse(),
             Self::Diarrhea => enabled.contains_diarrhea(),
@@ -48,6 +50,7 @@ impl PickupKind {
     pub(crate) const fn timed_effect(self) -> Option<super::EffectKind> {
         match self {
             Self::Shield => Some(super::EffectKind::Shield),
+            Self::InvisibilityCloak => Some(super::EffectKind::InvisibilityCloak),
             Self::GoldenFlame => Some(super::EffectKind::GoldenFlame),
             Self::ShortFuse => Some(super::EffectKind::ShortFuse),
             Self::Diarrhea => Some(super::EffectKind::Diarrhea),

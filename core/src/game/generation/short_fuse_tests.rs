@@ -98,6 +98,7 @@ fn signature(generated: &GeneratedArena) -> String {
                 Some(PickupKind::SlowFoot) => 'W',
                 None if generated.arena().blocks().contains(&cell) => '#',
                 None if generated.arena().terrain(cell) == Some(Terrain::Wall) => 'X',
+                Some(PickupKind::InvisibilityCloak) => 'C',
                 None => '.',
             });
         }

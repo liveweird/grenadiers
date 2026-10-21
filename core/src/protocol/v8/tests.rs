@@ -372,13 +372,14 @@ fn v8_capture_and_binding_reject_overdue_frozen_bombs_and_accept_the_deadline() 
     }
 }
 
-#[path = "shield_tests.rs"]
-mod shield_tests;
-
 #[path = "golden_flame_tests.rs"]
 mod golden_flame_tests;
+#[path = "invisibility_cloak_tests.rs"]
+mod invisibility_cloak_tests;
 #[path = "landmine_tests.rs"]
 mod landmine_tests;
+#[path = "shield_tests.rs"]
+mod shield_tests;
 
 #[path = "diarrhea_tests.rs"]
 mod diarrhea_tests;

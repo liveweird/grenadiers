@@ -192,6 +192,7 @@ fn expanded_item_masks_and_disabled_preset_replay_deterministically() {
         262144, 524288, 1048576, 2097152,
     ];
     assert_eq!(bits.len(), 22);
+    let mut observed = 0_u32;
     for mask in 0_u32..4194304 {
         let enabled_bits = bits
             .iter()
@@ -242,7 +243,9 @@ fn expanded_item_masks_and_disabled_preset_replay_deterministically() {
         assert_eq!(journal.header.generator_version, 2);
         assert_eq!(runtime.lifecycle().settings().enabled_items(), enabled);
         assert_eq!(replay(journal).unwrap(), runtime.replay_inspection());
+        observed += 1;
     }
+    assert_eq!(observed, 4194304);
 }
 
 #[test]

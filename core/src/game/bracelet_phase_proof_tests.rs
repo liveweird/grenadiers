@@ -52,6 +52,27 @@ fn voluntary_grace_exit_then_forced_reentry_accepts_contact_before_old_fire_deat
     assert_eq!(report.forced_movement.unwrap().segment.start().x, 4_800);
     assert!(!game.actors[1].alive);
     assert!(!game.world.bombs.contains_key(&EntityId(30)));
+    let eliminated = report
+        .events
+        .iter()
+        .position(|event| {
+            matches!(
+                event.kind,
+                StepEventKind::ActorEliminated {
+                    id: EntityId(2),
+                    seat: SeatId::Two,
+                }
+            )
+        })
+        .expect("the forced path through old fire eliminates the victim");
+    let detonated = report
+        .events
+        .iter()
+        .position(|event| {
+            matches!(event.kind, StepEventKind::BombDetonated(view) if view.id == EntityId(30))
+        })
+        .expect("contact accepted before death remains in the later explosion plan");
+    assert!(eliminated < detonated);
     assert_eq!(
         report
             .events
@@ -78,12 +99,43 @@ fn old_fire_reached_only_by_forced_segment_uses_shield_once_before_heart() {
     game.replace_actor_equipment(SeatId::Two, Equipment::Heart);
     game.apply_test_effect(SeatId::Two, EffectKind::Shield, Tick(0));
 
-    let report = game.step(&[press(SeatId::One, Direction::East)]).unwrap();
+    let report = game
+        .step(&[
+            press(SeatId::One, Direction::East),
+            input(SeatId::Two, InputAction::PlaceBomb),
+        ])
+        .unwrap();
 
     assert!(report.traces[1].is_empty());
     assert!(report.forced_movement.unwrap().segment.overlaps_cell(fire));
     assert!(game.actors[1].alive);
     assert_eq!(game.actors[1].inventory.equipment(), Some(Equipment::Heart));
+    let shield_prevention = report
+        .events
+        .iter()
+        .position(|event| {
+            matches!(
+                event.kind,
+                StepEventKind::DamagePrevented {
+                    seat: SeatId::Two,
+                    source: DamagePreventionSource::Shield,
+                    ..
+                }
+            )
+        })
+        .expect("the forced path reaches old fire before manual actions");
+    let victim_placement = report
+        .events
+        .iter()
+        .position(|event| {
+            matches!(
+                event.kind,
+                StepEventKind::BombPlaced(view)
+                    if view.owner == EntityId(2) && view.cell == CellId::new(5, 4)
+            )
+        })
+        .expect("shield survival preserves the queued post-shove placement");
+    assert!(shield_prevention < victim_placement);
     assert_eq!(
         report
             .events

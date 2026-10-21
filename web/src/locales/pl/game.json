@@ -109,6 +109,7 @@
     "tile": "pola",
     "seconds": "sekundy",
     "speedCap": "Premie prędkości dodają po jednym poziomie, maksymalnie do 5 pól/s.",
+    "wallPassDescription": "Stałe wyposażenie pozwalające przechodzić przez zniszczalne bloki. Twarde ściany i bomby nadal blokują ruch, wybuchy nadal ranią, a inny przedmiot wyposażenia je zastępuje. Po zastąpieniu możesz opuścić blok, który już przecinasz, ale nie możesz wejść do niego ponownie.",
     "heartDescription": "Chroni przed jednym śmiertelnym wybuchem, a potem na krótko przed obrażeniami.",
     "remoteBombDescription": "Przechowuje jedną zdalnie odpaloną bombę. Podłóż ją klawiszem bomby, a później naciśnij ten sam klawisz, aby ją zdetonować.",
     "piercingBombDescription": "Przechowuje jedną specjalną bombę, której wybuch przechodzi przez zniszczalne bloki. Ładunek znika dopiero po udanym podłożeniu.",

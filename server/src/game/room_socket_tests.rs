@@ -109,6 +109,7 @@ async fn two_members_receive_personalized_admission_and_live_waiting_updates() {
     assert_eq!(
         created["room"]["availableItems"],
         json!([
+            "wallPass",
             "heart",
             "remoteBomb",
             "piercingBomb",

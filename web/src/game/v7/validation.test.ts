@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { snapshot, state } from './testSupport'
 import { gameplayV7ServerSchemaValidator, validateGameplayV7ServerMessage } from './validation'
+import type { Snapshot } from './schema'
 
 describe('gameplay v7 composed validation', () => {
   it('runs structural validation before semantic validation', () => {
@@ -47,6 +48,33 @@ describe('gameplay v7 composed validation', () => {
       room: { ...snapshot.room, settings: { ...snapshot.room.settings, enabledItems: ['teleporter'] } },
     })
     expect(result).toEqual({ valid: false, source: 'semantics', error: 'unavailableItem' })
+  })
+
+  it('rejects Wall Pass throughout the archived room, state, and event profile', () => {
+    const mutations = [
+      (message: Snapshot) => { message.room.availableItems.push('wallPass') },
+      (message: Snapshot) => { message.room.settings.enabledItems.push('wallPass') },
+      (message: Snapshot) => {
+        const actor = message.state.actors[0]
+        if (actor.type === 'visible') actor.inventory.equipment = 'wallPass'
+      },
+      (message: Snapshot) => {
+        message.state.pickups = [{ cell: { column: 2, row: 2 }, kind: 'wallPass' }]
+      },
+      (message: Snapshot) => {
+        message.events = [{ tick: 42, index: 0, kind: {
+          type: 'pickupCollected', id: 1, seat: 'one',
+          cell: { column: 2, row: 2 }, kind: 'wallPass',
+        } }]
+      },
+    ]
+    for (const mutate of mutations) {
+      const message = structuredClone(snapshot) as unknown as Snapshot
+      mutate(message)
+      expect(validateGameplayV7ServerMessage(message)).toEqual({
+        valid: false, source: 'semantics', error: 'unsupportedProfile',
+      })
+    }
   })
 
   it('accepts a structurally and semantically valid dormant snapshot', () => {

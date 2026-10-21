@@ -174,6 +174,19 @@ describe('gameplay v8 expanded-profile rejection', () => {
       const actor = message.state.actors[0]
       if (actor.type === 'visible') actor.inventory.equipment = 'heart'
     }],
+    ['archived Wall Pass inventory', (message: ReturnType<typeof snapshot>) => {
+      const actor = message.state.actors[0]
+      if (actor.type === 'visible') actor.inventory.equipment = 'wallPass'
+    }],
+    ['archived Wall Pass pickup', (message: ReturnType<typeof snapshot>) => {
+      message.state.pickups = [{ cell: { column: 2, row: 2 }, kind: 'wallPass' }]
+    }],
+    ['archived Wall Pass collection', (message: ReturnType<typeof snapshot>) => {
+      message.events = [{ tick: 1, index: 0, kind: {
+        type: 'pickupCollected', id: 1, seat: 'one',
+        cell: { column: 2, row: 2 }, kind: 'wallPass',
+      } }]
+    }],
     ['disabled Shield pickup', (message: ReturnType<typeof snapshot>) => {
       message.state.pickups = [{ cell: { column: 2, row: 2 }, kind: 'shield' }]
     }],

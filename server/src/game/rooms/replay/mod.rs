@@ -63,3 +63,6 @@ mod remote_bomb_tests;
 
 #[cfg(test)]
 mod teleporter_tests;
+
+#[cfg(test)]
+mod wall_pass_tests;

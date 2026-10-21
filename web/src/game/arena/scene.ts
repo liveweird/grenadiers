@@ -60,6 +60,7 @@ function renderActorEquipment(drawing: ActorDrawing): void {
   drawing.piercing.visible = drawing.piercingArmed
   drawing.power.visible = drawing.powerArmed
   drawing.landmine.visible = drawing.landmineStored
+  drawing.wallPass.visible = drawing.wallPassEquipped
 }
 
 function updateActorState(drawing: ActorDrawing, actor: ActorRow): void {
@@ -79,6 +80,7 @@ function updateActorState(drawing: ActorDrawing, actor: ActorRow): void {
   drawing.piercingArmed = Boolean(actor.piercingArmed)
   drawing.powerArmed = Boolean(actor.powerArmed)
   drawing.landmineStored = Boolean(actor.landmineStored)
+  drawing.wallPassEquipped = Boolean(actor.wallPassEquipped)
 }
 
 export class ArenaScene {

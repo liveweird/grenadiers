@@ -129,6 +129,18 @@ describe('v10 private-state presentation', () => {
     expect(screen.getByText('Round in progress')).toHaveAttribute('aria-live', 'polite')
   })
 
+  it('labels Wall Pass as permanent equipment without adding a timer or weapon cue', () => {
+    const current = state()
+    const actor = current.snapshot!.state.actors[0]
+    if (actor.type !== 'visible') throw new Error('expected visible own actor')
+    actor.inventory = { equipment: 'wallPass', weapon: null }
+    renderPanel(current)
+    const stats = screen.getByLabelText('Player one upgrades')
+    expect(stats).toHaveTextContent('EquipmentWall pass')
+    expect(stats).toHaveTextContent('Bomb typeNone')
+    expect(stats).not.toHaveTextContent('Wall pass (')
+  })
+
   it('uses the existing bomb binding in the armed Remote detonation hint', () => {
     const current = state()
     const actor = current.snapshot!.state.actors[0]

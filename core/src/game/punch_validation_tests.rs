@@ -62,6 +62,27 @@ fn punched_bomb() -> Bomb {
     bomb
 }
 
+fn punched_contact_bomb() -> Bomb {
+    let mut bomb = Bomb::new(
+        EntityId(9),
+        CellId::new(5, 5),
+        EntityId(1),
+        2,
+        Tick(0),
+        BombTrigger::Contact,
+    )
+    .unwrap();
+    bomb.restore_punch_history(true);
+    bomb
+}
+
+fn punch_and_landmine_rules() -> RulesConfig {
+    let enabled =
+        EnabledItems::from_bits(EnabledItems::PUNCH.bits() | EnabledItems::LANDMINE.bits())
+            .unwrap();
+    RulesConfig::expanded_v5(RoomSettings::DEFAULT.with_enabled_items(enabled))
+}
+
 #[test]
 fn unsupported_punch_history_is_validated_before_terminal_short_circuit() {
     let mut world = World::new(arena());
@@ -83,6 +104,89 @@ fn unsupported_punch_history_is_validated_before_terminal_short_circuit() {
     assert_eq!(
         state.step(&[]),
         Err(StepError::UnsupportedBombPunchHistory(EntityId(9)))
+    );
+}
+
+#[test]
+fn constructor_rejects_punched_contact_history_when_both_items_are_enabled() {
+    let mut world = World::new(arena());
+    let bomb = punched_contact_bomb();
+    world.bombs.insert(bomb.id(), bomb);
+
+    assert_eq!(
+        State::new(punch_and_landmine_rules(), world, actors()),
+        Err(StateError::UnsupportedBombPunchHistory(EntityId(9)))
+    );
+}
+
+#[test]
+fn step_preflights_punched_contact_history_atomically_with_existing_precedence() {
+    let mut world = World::new(arena());
+    let bomb = Bomb::new(
+        EntityId(9),
+        CellId::new(5, 5),
+        EntityId(1),
+        2,
+        Tick(0),
+        BombTrigger::Contact,
+    )
+    .unwrap();
+    world.bombs.insert(bomb.id(), bomb);
+    let mut state = State::new(punch_and_landmine_rules(), world, actors()).unwrap();
+    state.result = Some(RoundResult::Winner(SeatId::One));
+    state
+        .world
+        .bombs
+        .get_mut(&EntityId(9))
+        .unwrap()
+        .restore_punch_history(true);
+    let before = state.clone();
+    let clear = SeatInput {
+        seat: SeatId::One,
+        action: InputAction::Clear,
+    };
+
+    assert_eq!(
+        state.step(&[clear; MAX_INPUTS_PER_TICK + 1]),
+        Err(StepError::TooManyInputs {
+            count: MAX_INPUTS_PER_TICK + 1,
+            maximum: MAX_INPUTS_PER_TICK,
+        })
+    );
+    assert_eq!(state, before);
+
+    state.tick = Tick(u64::MAX);
+    let before_overflow = state.clone();
+    assert_eq!(state.step(&[]), Err(StepError::TickOverflow));
+    assert_eq!(state, before_overflow);
+
+    state.tick = Tick(0);
+    let before_history = state.clone();
+    assert_eq!(
+        state.step(&[]),
+        Err(StepError::UnsupportedBombPunchHistory(EntityId(9)))
+    );
+    assert_eq!(state, before_history);
+}
+
+#[test]
+fn malformed_kick_history_keeps_priority_over_malformed_punch_history() {
+    let mut world = World::new(arena());
+    let mut bomb = punched_contact_bomb();
+    bomb.restore_kick_history(None, true);
+    world.bombs.insert(bomb.id(), bomb);
+    let enabled = EnabledItems::from_bits(
+        EnabledItems::PUNCH.bits() | EnabledItems::LANDMINE.bits() | EnabledItems::KICK.bits(),
+    )
+    .unwrap();
+
+    assert_eq!(
+        State::new(
+            RulesConfig::expanded_v5(RoomSettings::DEFAULT.with_enabled_items(enabled)),
+            world,
+            actors(),
+        ),
+        Err(StateError::UnsupportedBombKickHistory(EntityId(9)))
     );
 }
 

@@ -1,5 +1,24 @@
 # Repository verification
 
+## v0.3.40 hosted CI aggregate recovery — 2026-10-21 — C1 artifact layout
+
+Hosted push run 39680221078 completed the Rust server-mask partition but failed the aggregate job.
+With one matching partition artifact, the pinned download action extracted its three profile files
+directly into the requested path; the strict aggregate validator correctly rejected that flat root.
+The correction conditionally appends the expected artifact-name directory only for a one-partition
+plan. Plans with multiple artifacts retain the action's artifact-name subdirectories, and
+`merge-multiple: false` remains explicit.
+
+This workflow, contract-test and documentation correction changes no application, build input,
+runtime behavior, native harness, Stopwatch oracle, fixture, dependency lock or product
+configuration. Native acceptance remains bound to source
+`fa25467b11038a9073d52f35e44ac6cee5380bcc`, image
+`sha256:ec8604af4317d188d7b00ab7cfa27115114430e0a11fb9821856617ad9409906`, source archive
+`ee5fe698b98efcf72ff8346770242c4321d36e90c877514c30d7d028b0d660f8`, and final seal
+`36076deaad3b83fa6585459c03ccec5249bdff1f3744ee7c7cd087503d7d7def`. No native or hosted-CI
+acceptance is claimed for the corrected C2 tree; fresh candidate, post-merge and tag CI remain
+required for that exact tree.
+
 ## v0.3.40 hosted CI recovery — 2026-10-21 — N0 jobless failure
 
 Hosted push run 39676052178 for source prefix `a5ddcee` failed before creating any jobs or

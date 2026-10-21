@@ -244,9 +244,6 @@ impl State {
         if let Some(owner) = validation::duplicate_remote_owner(&world) {
             return Err(StateError::DuplicateRemoteOwner(owner));
         }
-        if let Some(id) = validation::unsupported_kick_history(rules, &world) {
-            return Err(StateError::UnsupportedBombKickHistory(id));
-        }
         for actor in actors {
             if world.bombs.contains_key(&actor.id) {
                 return Err(StateError::DuplicateEntityId(actor.id));
@@ -265,6 +262,9 @@ impl State {
             if !actors.iter().any(|actor| actor.id == bomb.owner()) {
                 return Err(StateError::UnknownBombOwner(bomb.owner()));
             }
+        }
+        if let Some(id) = validation::unsupported_kick_history(rules, &world) {
+            return Err(StateError::UnsupportedBombKickHistory(id));
         }
 
         let mut canonical = actors;
@@ -321,6 +321,9 @@ mod invisibility_cloak_acceptance_tests;
 #[cfg(test)]
 #[path = "item_foundation_tests.rs"]
 mod item_foundation_tests;
+#[cfg(test)]
+#[path = "kick_validation_tests.rs"]
+mod kick_validation_tests;
 #[cfg(test)]
 #[path = "simulation/landmine_acceptance_tests.rs"]
 mod landmine_acceptance_tests;

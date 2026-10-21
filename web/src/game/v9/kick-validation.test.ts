@@ -40,13 +40,18 @@ describe('gameplay v9 Kick rejection', () => {
 
 describe('gameplay v9 Punch rejection', () => {
   it('rejects Punch in every archived public capability-bearing position', () => {
+    expect(validateGameplayV9ServerMessage(archivedSnapshot())).toMatchObject({ valid: true })
+
     const roomCatalog = archivedSnapshot()
     roomCatalog.room.availableItems = ['punch', ...roomCatalog.room.availableItems]
     expect(validateGameplayV9ServerMessage(roomCatalog)).toMatchObject({ valid: false })
 
+    const settings = archivedSnapshot()
+    settings.room.settings.enabledItems = ['punch']
+    expect(validateGameplayV9ServerMessage(settings)).toMatchObject({ valid: false })
+
     for (const field of ['equipment', 'pickup', 'event'] as const) {
       const message = archivedSnapshot()
-      message.room.settings.enabledItems = ['punch']
       if (field === 'equipment') {
         const actor = message.state.actors[0]
         if (actor.type !== 'visible') throw new Error('expected visible actor')
@@ -59,7 +64,9 @@ describe('gameplay v9 Punch rejection', () => {
           cell: { column: 2, row: 2 }, kind: 'punch',
         } }]
       }
-      expect(validateGameplayV9ServerMessage(message)).toMatchObject({ valid: false })
+      expect(validateGameplayV9ServerMessage(message)).toEqual({
+        valid: false, source: 'semantics', error: 'unsupportedProfile',
+      })
     }
   })
 })

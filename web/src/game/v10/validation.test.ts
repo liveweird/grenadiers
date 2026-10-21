@@ -77,6 +77,10 @@ describe('gameplay v10 item validation', () => {
     if (actor.type !== 'visible') throw new Error('expected visible actor')
     actor.inventory.equipment = 'punch'
     message.state.pickups = [{ cell: { column: 3, row: 2 }, kind: 'punch' }]
+    message.events = [{ tick: 2, index: 0, kind: {
+      type: 'pickupCollected', id: actor.id, seat: actor.seat,
+      cell: { column: 2, row: 2 }, kind: 'punch',
+    } }]
     expect(validateGameplayV10ServerMessage(message)).toEqual({ valid: true, value: message })
 
     message.room.settings.enabledItems = []

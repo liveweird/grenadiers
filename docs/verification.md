@@ -1,6 +1,100 @@
 # Repository verification
 
-## Landmine source integration — 2026-10-21 — native acceptance pending
+## Landmine fresh native acceptance — 2026-10-21 — 100/100; audited and sealed
+
+Frozen source `ba92fbc5a6dab0b756192ffbe5cc05bd780bc8fd`, tree
+`defacd308d5cd747085653a2d5c30d2529807473`, retains corrected Landmine source `6ad59ddec460a4db331b6e6bf499def9c0b65106`
+and integrates the CI-corrected accepted raw Remote source `13772d6ea1d522958d9548180a7ef937c76667cd`.
+Core/server/Cargo inputs remain byte-exact to corrected Landmine; all core/server/Cargo/web/E2E
+inputs match prior reviewed integration `0a65542f758131d30cdf5539868a28a87ca19c8d`.
+The integration adds the missing dedicated Remote CI step and artifact before Landmine and
+retains both scenarios. Source-only repository, YAML, exact-input and diff checks pass; prior
+source-specific suites below remain historical rather than fresh full Rust/web claims.
+
+The whole wrapper completed at `2026-10-21T01:03:36.698294Z`, actual exit zero: **50/50 Compose
+and 50/50 Kubernetes**, zero retries and zero carried passes. Each target has 37 baseline and
+thirteen feature cases; the literal matrix records 74/74 baseline plus 26/26 optional cases.
+Independent raw review decodes all 42 reports, every test's single expected result, and their
+exit/last-run records: CLEAR. There are 102 runtime PNGs, 32 runtime identity/security records,
+16 distinct Kubernetes pod/UID identities and port-forward lifecycles, 15 external fixtures and
+30 mode-0444 records. Runtime UID/GID is 65532, effective capabilities zero, `NoNewPrivs=1`,
+with read-only-root enforcement. Strict Node/Kubernetes stdin validation is 3/3; image scan passes.
+
+Accepted image: `sha256:f2ea362c8f52972ef102278794ce03ad9b665aa45d79f98a4d7813f0bcf46d00`,
+ref `grenadiers-v0337-landmine-native-recheck:ba92fbc`.
+Archive SHA-256 values are source `410a95cc8ec2ed4ef8d82a8921b8778add617ad44130146f0b4eeea2b6ff195e`,
+image `3702cf42b595d4089a31def911b1f8ea253cb704aa773da408bb9563efddea8d`,
+dependencies `f196c9d0cfa0a7d0ae89bfb8ddf555f60e955bd45a72023fd7adc93102254b05`, and source-tree
+`f4ee35bd03dde72f9f1e6e23f4a1944a97cc81cdfbf1b7b63c385b2c5562c5fa`.
+Source has 760 files/84 directories/no links and 37 tracked PNGs, distinct from runtime captures.
+Dependencies have 8186 files/1305 directories/13 links, 132 installed packages, 42 optional omissions,
+zero required omissions or version/metadata mismatches. All source/dependency/lock/archive/
+preparation/image comparisons match. Preparation seals 1091 entries under
+`001f9e123973299bbff11aba925ff4284b0ce91d5805acd8673b967e5f6c358e`.
+
+`FINAL.sha256` seals **2219 payloads**, SHA-256
+`eaa59f16e20005b120fbfc80d9a7067a738562c22c8a73e81c5ace26c21016aa`.
+All 2220 durable files plus the separately preserved source archive are byte-verified.
+
+Both clients prove natural collection and consumed charge, a Contact/Standard range-two mine
+at (3,1), persistence beyond `placedAt + 183`, exact-ID contact detonation with an active origin
+flame, no extra placement, owner elimination and seat Two's round win. The following fresh Timed
+Standard bomb is proven by the immutable-source core regression
+`consumed_landmine_is_followed_by_a_fresh_standard_timed_bomb_in_the_same_state`, not an additional
+native/browser assertion. Root reviewed fresh Compose [English desktop](screenshots/landmine-desktop.png)
+and [Polish 320px reduced-motion](screenshots/landmine-polish-320.png) captures before detonation:
+visible pressure plate, consumed charge/zero owner availability, both actors alive/no flames,
+readable HUD labels, normal Polish vertical scrolling and intentional unfocused-arena prompt.
+No unintended overlap was observed. Kubernetes captures were retained but not visually reviewed.
+
+All 22 latency tests per target pass. Each public profile retains all 20 samples with zero
+exceedances of the unchanged 250 ms budget. The raw audit verifies cutoff/round/ingress/dispatch/
+delivery chronology, paired stationary bomb-empty readiness and every key starting after readiness.
+
+| Target | Profile | Samples | Maximum | Exceedances |
+| --- | --- | ---: | ---: | ---: |
+| Compose | local | 20 | 46.834749 ms | 0 |
+| Compose | delay-50ms | 20 | 164.040681 ms | 0 |
+| Kubernetes | local | 20 | 46.024011 ms | 0 |
+| Kubernetes | delay-50ms | 20 | 171.173351 ms | 0 |
+
+Compose CPU usage is 548816 → 1098220 microseconds (delta549404); Kubernetes 436187 → 1120722
+(delta684535). Quotas remain `max 100000` and `50000 100000`; throttle-count/time deltas are zero.
+These intervals include pre-gate waiting and sampler probes, not isolated gameplay CPU cost.
+Supplemental monitors retain 50 Compose and 71 Kubernetes observations, actual exits zero and
+native-group completion zero. Optional `cpu.pressure` is explicitly unavailable; mandatory
+`cpu.max/stat` remain checked. Gates follow actual managed-worker holds, exact-image readiness and
+five recent low-load observations. Limited Kick focused checks were explicitly released between
+windows, followed by a fresh Kubernetes hold; earlier busy observations remain retained. No
+managed hold breach is recorded here. Ordinary source checks resumed only after both measured
+groups and raw audits. Unrelated applications were untouched; no global-idle or causal attribution
+is claimed.
+
+The prior Landmine attempt is invalidated, actual143, with 1189 payloads sealed separately under
+`76fec1a922447c0385d9ce534d7918d58092ed3bfaafab6749baefc98c8926bc`; it contributes no pass.
+This fresh preparation used independently reviewed conditional sequencing while Remote candidate CI
+ran. Before Landmine candidate creation, Remote [PR](https://github.com/liveweird/grenadiers/actions/runs/39522011567),
+[push](https://github.com/liveweird/grenadiers/actions/runs/39522007069), and
+[post-merge](https://github.com/liveweird/grenadiers/actions/runs/39523982351) each pass five jobs and
+49 browser cases. PR 82 merged as `fdf92dc82b717c2c6ba795cd7ed3c48459d55516`, sole parent v0.3.35;
+[v0.3.36](https://github.com/liveweird/grenadiers/releases/tag/v0.3.36) published at `2026-10-21T01:13:10Z`
+with accepted tree `89cae8f4f247ac191da51735aebc89a3b0e8b14e` equal to raw Remote.
+Any required parent source/tree correction would invalidate dependent preparation/native evidence.
+
+Cleanup at `2026-10-21T01:04:24.658318Z` verifies owned Compose/network/namespace/port-forwards and
+ports18274/18275 absent; default8085 still served accepted v0.3.35 imagec335e4e, ready200.
+That is a historical cleanup observation. Subsequent verified promotion serves accepted v0.3.36
+image `sha256:7b13e75697dfbe2d690c47ff1a119db95d32abe92fc80086b3f20a2c90be0f40` with health/readiness/index200.
+Served `index-AFx_p0Dq.js` matches SHA-256 `8c9ed66442e49da421c954f0a48e848e0ce8e92e2ba8c64aaf1d0e3c2e912f24`;
+no rebuild occurred. The independent reviewer audits coordinator cleanup records without new live queries.
+
+Landmine's five release controls have independent static review clear and remain unexecuted at
+this checkpoint. Finalizer `6824a9a83bdfa7e53e245fc50533a9706d89f19aa2c26d9d93ff8e07165e840e`
+binds the final native manifest, eight documentation/capture paths and parent publication proof.
+Exact-head candidate and post-merge CI with **50 browser passes**, publication and image promotion
+remain release gates.
+
+## Earlier Landmine source integration — historical checkpoint before native acceptance
 
 Corrected reviewed Landmine source `6ad59ddec460a4db331b6e6bf499def9c0b65106` integrates the
 CI-corrected accepted raw Remote Bomb source `13772d6ea1d522958d9548180a7ef937c76667cd` without changing

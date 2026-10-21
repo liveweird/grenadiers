@@ -31,18 +31,21 @@ independent evidence review, final sealing, both five-job candidate CI runs and 
 post-merge run are clear. PR 81 is merged and
 [v0.3.35](https://github.com/liveweird/grenadiers/releases/tag/v0.3.35) is published as a source
 prerelease and its accepted image is deployed locally. Its CI-corrected accepted raw source is
-integrated into the v0.3.36 Remote Bomb candidate. Remote Bomb
-retains its reviewed one-charge manual-trigger behavior and passes fresh same-image 49/49 Compose
-plus 49/49 Kubernetes acceptance with zero retries. The raw evidence audit is clear and sealed;
-native evidence and documentation review are clear; publication requires exact-head candidate and post-merge CI. Its CI-corrected accepted raw
-source is integrated into this v0.3.37 Landmine source candidate. Landmine retains its reviewed
-contact, grace and immutable-planning behavior; fresh native acceptance and final CI remain
-pending. Verification retains source-specific evidence and earlier failed or interrupted attempts. The other ten requested
-pickups remain outside this increment. Richer
+integrated into the v0.3.36 Remote Bomb candidate. Remote Bomb retains its reviewed one-charge
+manual-trigger behavior and passes fresh 49/49 Compose plus 49/49 Kubernetes acceptance, zero
+retries, independently audited and sealed. Both candidate CI runs and post-merge CI pass all
+five jobs and all 49 browser cases; PR 82 is merged and [v0.3.36](https://github.com/liveweird/grenadiers/releases/tag/v0.3.36)
+is published. Its accepted image is deployed locally. Its CI-corrected accepted raw source is
+integrated into this v0.3.37 Landmine candidate. Landmine retains reviewed contact, grace and
+immutable-planning behavior; fresh same-image 50/50 Compose plus 50/50 Kubernetes acceptance
+passes, with zero retries, independent raw review clear and evidence sealed. Exact-head candidate
+and post-merge CI and publication remain gates. Verification preserves source-specific evidence
+and earlier failed or interrupted attempts. The other nine requested pickups remain outside this
+increment. Richer
 transitions and artwork remain follow-up work. See [pixel-art presentation](pixel-art.md),
 [expanded item implementation](expanded-items.md), and
 [release notes](https://github.com/liveweird/grenadiers/releases).
-Updated 2026-10-21 with v0.3.37 source integration. Release acceptance is recorded in
+Updated 2026-10-21 with fresh v0.3.37 native acceptance. Release acceptance is recorded in
 [verification](../verification.md).
 The [implementation plan](implementation-plan.md) remains the milestone/release reference;
 the [rules](rules.md) describe the current baseline and historical extension catalog.
@@ -221,8 +224,8 @@ instant action. Keep both in this requested pickup family without forcing them i
 
 | ID / weapon | Requested behavior | Decisions / acceptance focus |
 | --- | --- | --- |
-| WPN-REMOTE / remote bomb | **Prepared in v0.3.36.** The next successful manual placement creates an untimed bomb; the next retained bomb action detonates it. | Independent stored weapon, one live Remote per owner, capacity/allocator independence, fire and chain ignition, reconnect and replay pass local checks and independent reviews; fresh 98/98 native cases pass and the evidence is independently audited and sealed. Native evidence and documentation review are clear; publication requires exact-head candidate and post-merge CI. |
-| WPN-LANDMINE / landmine | **Prepared in v0.3.37.** Successful manual placement creates a passable untimed Contact bomb. | Per-actor exit grace, swept entry, silent blast destruction, immutable planner priority, replay and checked v8 publication pass local checks; fresh native acceptance and final CI remain pending. |
+| WPN-REMOTE / remote bomb | **Shipped in v0.3.36.** The next successful manual placement creates an untimed bomb; the next retained bomb action detonates it. | Independent stored weapon, one live Remote per owner, capacity/allocator independence, fire and chain ignition, reconnect and replay pass local checks and independent reviews; fresh 98/98 native cases pass and the evidence is independently audited and sealed. Both five-job candidate CI runs and post-merge CI pass 49 browser cases; PR 82 is merged, the source release is published and its accepted image is deployed locally. |
+| WPN-LANDMINE / landmine | **Prepared in v0.3.37.** Successful manual placement creates a passable untimed Contact bomb. | Per-actor exit grace, swept entry, silent blast destruction, immutable planner priority, replay and checked v8 publication pass local checks; fresh 100/100 native acceptance is independently audited and sealed; exact-head candidate/post-merge CI and publication remain gates. |
 | WPN-PIERCE / piercing bomb | **Shipped in v0.3.34.** The next successful manual bomb's blast continues through destructible blocks. | One-charge replacement, retained failures, ordinary automatic bombs, captured blast identity, immutable same-tick chain planning and hard-wall stopping are covered locally with independent review clear; fresh 94/94 native acceptance is independently audited and sealed; primary candidate/post-merge CI passed and the source release is published. Its additional tag security failure is documented and the Vite fix is included in the published v0.3.35 release. |
 | WPN-POWER / power bomb | **Shipped in v0.3.35.** The next successful manual bomb damages every floor cell within its Manhattan blast radius, ignoring line of sight. | One-charge replacement, retained failures, hard-wall holes, complete block and bomb coverage, immutable mixed-chain planning, captured stats and distinct presentation pass local checks and independent reviews; fresh 96/96 native acceptance, final seal, both candidate CI runs and the five-job post-merge run pass. PR 81 is merged, the source release is published and the accepted image is deployed locally. |
 

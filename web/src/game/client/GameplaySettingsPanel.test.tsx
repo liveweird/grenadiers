@@ -103,6 +103,7 @@ describe('gameplay settings items', () => {
     await user.click(screen.getByRole('checkbox', { name: 'Power bomb' }))
     await user.click(screen.getByRole('checkbox', { name: 'Landmine' }))
     await user.click(screen.getByRole('checkbox', { name: 'Shield' }))
+    await user.click(screen.getByRole('checkbox', { name: 'Stopwatch' }))
     await user.click(screen.getByRole('checkbox', { name: 'Invisibility cloak' }))
     await user.click(screen.getByRole('checkbox', { name: 'Golden flame' }))
     await user.click(screen.getByRole('checkbox', { name: 'Short fuse' }))
@@ -114,16 +115,17 @@ describe('gameplay settings items', () => {
     expect(screen.getByRole('checkbox', { name: 'Heart' })).toBeChecked()
     await user.click(screen.getByRole('button', { name: 'Apply rules' }))
     expect(apply).toHaveBeenLastCalledWith(expect.objectContaining({
-      enabledItems: ['heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls'],
+      enabledItems: ['heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch', 'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls'],
     }))
     await user.click(screen.getByRole('checkbox', { name: 'Golden flame' }))
     await user.click(screen.getByRole('button', { name: 'Apply rules' }))
     expect(apply).toHaveBeenLastCalledWith(expect.objectContaining({
-      enabledItems: ['heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'invisibilityCloak', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls'],
+      enabledItems: ['heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch', 'invisibilityCloak', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls'],
     }))
     await user.click(screen.getByRole('checkbox', { name: 'Golden flame' }))
     await user.click(screen.getByRole('checkbox', { name: 'Heart' }))
     expect(screen.getByRole('checkbox', { name: 'Shield' })).toBeChecked()
+    expect(screen.getByRole('checkbox', { name: 'Stopwatch' })).toBeChecked()
     expect(screen.getByRole('checkbox', { name: 'Piercing bomb' })).toBeChecked()
     expect(screen.getByRole('checkbox', { name: 'Power bomb' })).toBeChecked()
     expect(screen.getByRole('checkbox', { name: 'Landmine' })).toBeChecked()
@@ -137,18 +139,18 @@ describe('gameplay settings items', () => {
     expect(screen.getByRole('checkbox', { name: 'Reverse controls' })).toBeChecked()
     await user.click(screen.getByRole('button', { name: 'Apply rules' }))
     expect(apply).toHaveBeenLastCalledWith(expect.objectContaining({
-      enabledItems: ['remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls'],
+      enabledItems: ['remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch', 'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls'],
     }))
     await user.click(screen.getByRole('checkbox', { name: 'Shield' }))
     expect(screen.getByRole('checkbox', { name: 'Golden flame' })).toBeChecked()
     await user.click(screen.getByRole('button', { name: 'Apply rules' }))
     expect(apply).toHaveBeenLastCalledWith(expect.objectContaining({
-      enabledItems: ['remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls'],
+      enabledItems: ['remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'stopwatch', 'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls'],
     }))
     await user.click(screen.getByRole('checkbox', { name: 'Heart' }))
     await user.click(screen.getByRole('button', { name: 'Apply rules' }))
     expect(apply).toHaveBeenLastCalledWith(expect.objectContaining({
-      enabledItems: ['heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls'],
+      enabledItems: ['heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'stopwatch', 'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls'],
     }))
     await user.click(screen.getByRole('button', { name: 'Classic settings' }))
     expect(screen.getByRole('checkbox', { name: 'Heart' })).not.toBeChecked()
@@ -156,6 +158,7 @@ describe('gameplay settings items', () => {
     expect(screen.getByRole('checkbox', { name: 'Piercing bomb' })).not.toBeChecked()
     expect(screen.getByRole('checkbox', { name: 'Power bomb' })).not.toBeChecked()
     expect(screen.getByRole('checkbox', { name: 'Shield' })).not.toBeChecked()
+    expect(screen.getByRole('checkbox', { name: 'Stopwatch' })).not.toBeChecked()
     expect(screen.getByRole('checkbox', { name: 'Invisibility cloak' })).not.toBeChecked()
     expect(screen.getByRole('checkbox', { name: 'Golden flame' })).not.toBeChecked()
     expect(screen.getByRole('checkbox', { name: 'Short fuse' })).not.toBeChecked()

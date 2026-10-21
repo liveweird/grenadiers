@@ -1,6 +1,113 @@
 # Repository verification
 
-## Latest native acceptance checkpoint — 2026-10-21 18:44:23 UTC — 102/102
+## v0.3.40 hosted CI aggregate recovery — 2026-10-21 — C1 artifact layout
+
+Hosted push run 39680221078 completed the Rust server-mask partition but failed the aggregate job.
+With one matching partition artifact, the pinned download action extracted its three profile files
+directly into the requested path; the strict aggregate validator correctly rejected that flat root.
+The correction conditionally appends the expected artifact-name directory only for a one-partition
+plan. Plans with multiple artifacts retain the action's artifact-name subdirectories, and
+`merge-multiple: false` remains explicit.
+
+This workflow, contract-test and documentation correction changes no application, build input,
+runtime behavior, native harness, Stopwatch oracle, fixture, dependency lock or product
+configuration. Native acceptance remains bound to source
+`fa25467b11038a9073d52f35e44ac6cee5380bcc`, image
+`sha256:ec8604af4317d188d7b00ab7cfa27115114430e0a11fb9821856617ad9409906`, source archive
+`ee5fe698b98efcf72ff8346770242c4321d36e90c877514c30d7d028b0d660f8`, and final seal
+`36076deaad3b83fa6585459c03ccec5249bdff1f3744ee7c7cd087503d7d7def`. No native or hosted-CI
+acceptance is claimed for the corrected C2 tree; fresh candidate, post-merge and tag CI remain
+required for that exact tree.
+
+## v0.3.40 hosted CI recovery — 2026-10-21 — N0 jobless failure
+
+Hosted push run 39676052178 for source prefix `a5ddcee` failed before creating any jobs or
+executing any tests. The workflow used `runner.temp` in two job-level `env` expressions for the
+server-mask partition, where that context is unavailable. The correction initializes those two
+paths through `GITHUB_ENV` after job startup and before their first consumer.
+
+This CI-context correction changes no application, build input, runtime behavior, native harness,
+Stopwatch oracle, fixture, dependency lock or product configuration. The native acceptance remains
+bound exactly to source `fa25467b11038a9073d52f35e44ac6cee5380bcc`, image
+`sha256:ec8604af4317d188d7b00ab7cfa27115114430e0a11fb9821856617ad9409906`, source archive
+`ee5fe698b98efcf72ff8346770242c4321d36e90c877514c30d7d028b0d660f8`, and final seal
+`36076deaad3b83fa6585459c03ccec5249bdff1f3744ee7c7cd087503d7d7def`. No native execution is
+claimed for the corrected CI tree. Fresh candidate, post-merge and tag CI remain required against
+that exact corrected tree.
+
+## Latest v0.3.40 native acceptance checkpoint — 2026-10-21 20:56:41 UTC — 104/104
+
+At this checkpoint, corrected source `fa25467b11038a9073d52f35e44ac6cee5380bcc`, tree
+`07ac34a87a368d2c9425fcbc04020295ef9fe4e3`, passed the complete native matrix on image
+`sha256:ec8604af4317d188d7b00ab7cfa27115114430e0a11fb9821856617ad9409906`, ref
+`grenadiers-v0340-stopwatch-native-recheck:fa25467`. Source archive SHA256 is
+`ee5fe698b98efcf72ff8346770242c4321d36e90c877514c30d7d028b0d660f8`. Root PTY 13621
+completed with actual exit zero at `2026-10-21T20:50:28.671845Z`; root consumed that exit at
+`2026-10-21T20:50:54.913938Z`.
+Independent review decoded all 46 reports, verified all 110 PNG hashes and 275 provenance hashes,
+and returned CLEAR under audit-receipt SHA256
+`9ad5342f8c2a3607198fcbefabe7266f8c0804f18a1c39f988ec4d7d833cfaca`.
+The RESULT review is also CLEAR. The final manifest seals 2,434 payloads under SHA256
+`36076deaad3b83fa6585459c03ccec5249bdff1f3744ee7c7cd087503d7d7def`;
+2,435 durable files and the separate source archive are byte-verified and read-only.
+
+Fresh source-bound gates passed before native execution. Debug and release each pass 647 core tests,
+205 server tests, two doctests and retain four historical ignores. Coverage passes the same 647 core
+and 205 server tests without doctests and reports 92.34% Rust line coverage. All 32,768 item masks
+complete in debug, release and coverage with exact observed counts. The web gate passes 49,569 tests
+across 58 files with 95.41% statement, 91.21% branch, 95.88% function and 97.81% line coverage;
+53 E2E scenario contracts, renderer diagnostics, cargo-deny and both npm audits pass.
+
+The native matrix passes **52 Compose plus 52 Kubernetes** cases, all 46 groups and reports,
+74/74 baseline plus 30/30 optional cases, with zero retries and zero carried passes. It retains
+110 runtime PNGs, 36 runtime image/security records, 18 distinct Kubernetes pod UID and
+port-forward lifecycles, 17 external fixtures and 34 mode-0444 records. Frozen source,
+dependencies, locks, archive, preparation and image comparisons match.
+
+All 22 latency cases per target pass. Each local and shaped profile retains all 20 observations,
+and no observation exceeds the unchanged 250 ms limit.
+
+| Target | Local maximum | Shaped 50 ms maximum | Exceedances |
+| --- | ---: | ---: | ---: |
+| Compose | 50.930298 ms | 179.973828 ms | 0 |
+| Kubernetes | 54.647992 ms | 150.606331 ms | 0 |
+
+Compose CPU usage changed from 602182 to 2458157 us, delta 1855975 us, under cpu.max
+`max 100000`; Kubernetes changed from 493583 to 1069938 us, delta 576355 us, under cpu.max
+`50000 100000`. Throttle-count/time deltas are zero for both. Supplemental monitors 64536 and
+91793 completed with actual exit zero and retained 65 Compose and 50 Kubernetes samples. The
+initial Compose observer 98805 expired before any latency test while macOS was busy; all 179 of
+its samples and its consumed exit remain preserved. The fresh monitor then passed. No test retry,
+latency budget, sample count, timeout or product behavior changed.
+
+Root reviewed only two fresh Compose pre-collection captures: [English desktop](screenshots/stopwatch-desktop.png)
+and [Polish 320px reduced motion](screenshots/stopwatch-mobile-pl.png). Both show exposed clock
+pickups and readable localized HUD/settings. These stills do not prove action freeze or bomb-pause
+behavior; the paired native assertions do. Kubernetes captures were retained without visual review.
+
+Cleanup passed at `2026-10-21T20:51:20.993689Z`: all owned containers, network, namespace,
+port-forwards and ports 18284/18285 were absent. Localhost:8085 still served published v0.3.39
+image `sha256:9a4dc108c4f4ba14a091ed9f55887e41d9e8a8bf49c5c2a4f9369078469e2d10`;
+health, readiness and index returned 200, and served index/JavaScript bytes matched the container.
+
+As of this dated sealed checkpoint, hosted v0.3.40 CI, PR/merge, publication, tag verification and
+local promotion remained pending. Fourteen of 22 item types were published through v0.3.39.
+Stopwatch is the fifteenth source/native-verified type; seven requested types remain after it. See
+the [release notes](https://github.com/liveweird/grenadiers/releases) for current release status.
+
+## Historical failed v0.3.40 attempt — 2026-10-21 20:02:21 UTC — zero carry
+
+Native root 8289 completed with actual exit 1 for source
+`bd9d064fcd1774085c3b5bc6cac45c2f0b55cfb0` and image
+`sha256:5fbe61fbbcc1177fb257a9b4241330aeaa9fb87914a2b1abba137967a6eec297`;
+its exit was consumed. The Compose Stopwatch scenario expected a 359-tick fresh-bomb lifetime but
+observed the correct 325 ticks because the bomb was placed after 34 ticks of the second Stopwatch
+window had elapsed. The corrected test derives remaining pause independently as
+`deadline - placedAt - 1`. Product behavior was unchanged. The failed attempt passed 51 Compose
+cases before that single oracle failure; Kubernetes never started. Its integrity checks matched,
+but it contributes no accepted or carried pass to the fresh checkpoint above.
+
+## Historical v0.3.39 native acceptance checkpoint — 2026-10-21 18:44:23 UTC — 102/102
 
 At this checkpoint, frozen source `272b950df876596d5912fac3a56377e524899a2a`, tree
 `a6104621669608ad3f54cc19873d0e516d3a7d4b`, passed the complete native matrix on image
@@ -1474,6 +1581,94 @@ Diarrhea.
 Records below are frozen against their named sources. Publication and later CI status are
 recorded in [release notes](https://github.com/liveweird/grenadiers/releases).
 
+## Historical prepared v0.3.40 Stopwatch source — source-specific local checks
+
+At this historical preparation checkpoint, v0.3.39 publication and exact tree verification still
+had to precede integration. v0.3.40 had no accepted native cases and carried no v0.3.39 pass.
+Fourteen of 22 item types were published through v0.3.38; v0.3.39 added no item. Stopwatch could
+become the fifteenth published type only after integrated full-mask execution, fresh native
+acceptance and hosted release gates passed.
+
+This record is bound to prepared source `7998d6809d3d147f9c88ec8ba0b53bbfefedeb1e`; its recorded
+commands and results do not clear checks for a future integrated source. That prepared source
+activates an opt-in 180-physical-tick Stopwatch. A living holder freezes the
+opponent's voluntary movement and bomb actions while preserving admitted sequence high-water marks;
+held directions resume after thaw, while frozen bomb actions are discarded. Any living holder also
+pauses every Timed bomb exactly once per update. Fuse history is captured privately on live and
+historical bombs, remains immutable at event emission, and is validated before recipient filtering.
+Fire, effects, input expiry, Diarrhea, Remote chains, Landmine contact and round clocks continue.
+The candidate v9 catalog has fifteen items and all 32,768 subsets; archived v8 remains pinned to its
+fourteen-item Cloak-era catalog and rejects Stopwatch or paused/history-bearing Timed bombs.
+
+At source `7998d6809d3d147f9c88ec8ba0b53bbfefedeb1e`, debug and release suites passed **646 core
+tests, 196 server tests and two doctests**; four dedicated
+performance profiles remain ignored. Rust line coverage is **92.43% (13,485/14,590)**, above the
+unchanged 80% floor. All **49,569 web tests** across 58 files pass with statement/branch/function/
+line coverage of **95.41/91.21/95.88/97.81%**. Formatting, all-target Clippy with warnings denied,
+repository limits, generated contracts, lint, Knip, production and renderer-diagnostic builds,
+E2E static checks and **42-scenario parity** pass. Cargo-deny and both cached offline npm audits pass;
+strict pinned Kubernetes schemas validate all three resources.
+
+The repeating byte-31 pure-core route uses ordinary movement and bomb actions through two
+sequential holders. It proves both freeze windows, admitted-but-dropped actions, held-input thaw,
+exact pause accounting and resumed natural detonation. Generation regressions exhaust all 16,384
+pre-Stopwatch masks and assert fourteen unique prior mappings; active protocol and browser guards
+exhaust all 32,768 v9 masks while archived v8 retains all 16,384 prior masks. The isolated browser
+mask run completed in 1.59 seconds; peak RSS was unavailable because macOS denied the timing tool's
+`kern.clockrate` query, so no memory figure is claimed.
+
+The first repository gate exposed three files above existing source or complexity limits; narrow
+observation, projection-wire and event-validation helpers now keep those limits without changing
+contracts. The first full web run then exposed a stale Cloak overlay child-position assertion; the
+corrected test follows the active drawing across reduced-motion rendering. The first E2E static
+gate found the new Stopwatch scenario directory absent from parity discovery; the corrected gate
+finds all 42 scenarios. The restricted Rust rerun preserved 17 expected loopback
+`PermissionDenied` failures before the authorized identical run passed. Cargo-deny first reached a
+read-only advisory lock and Kubernetes validation first reached sandbox DNS denial; authorized
+reruns passed. No native browser run, candidate image, hosted CI result or publication is
+claimed. Independent browser review found and closed three bounded gaps: live Timed bombs now require
+positive remaining time without rejecting valid detonation history, the native source proves that
+the second frozen player's bomb action creates no placement during freeze or queued placement after
+thaw in either peer stream, and current v9/Stopwatch documentation no longer describes the v0.3.39
+false-only foundation or fourteen-item catalog as active. Independent core/server review and final
+browser re-review are clear. Native acceptance requires integration of the final preceding release
+and its reviewed predecessor drivers before freezing the image.
+
+## Historical gameplay-v9 foundation source review — 2026-10-18
+
+The v0.3.39 candidate moves the paired server/browser endpoint to gameplay v9 without changing the
+Expanded-v5 rules identity, generated-v2 arenas, journal format 2, fourteen-item catalog, 16,384
+enabled-item masks or simulation behavior. Every visible actor now carries the required
+`voluntaryActionsFrozen` boolean; production capture emits false and foundation validation rejects
+true. Hidden actors retain their exact identity/seat/alive shape. Stopwatch and paused Timed bombs
+remain unavailable, while existing enabled Remote and Contact bombs retain their untimed behavior.
+
+Focused Rust and browser checks cover version-9 authentication, archived-v8 actor shape, the new
+visible/hidden union, false-only semantics, unavailable Stopwatch, paused-bomb rejection, generated
+contract drift and unchanged frame bounds. An active-v9 contract regression validates every one of
+the 16,384 subsets of its independently pinned fourteen-item catalog. Production server, browser
+and E2E helpers now use v9; archived v8 validation fixtures remain separate. Rust policy tests
+exercise all 22 reserved item IDs against independently pinned v8 and v9 fourteen-item catalogs.
+
+Debug and release suites pass **627 core tests, 195 server tests and two doctests**; four dedicated
+performance profiles remain ignored. Rust line coverage is **92.27% (13,162/14,265)**, above the
+unchanged 80% floor. All **33,176 web tests** across 57 files pass with statement/branch/function/
+line coverage of **95.38/91.08/95.82/97.77%**. Formatting, all-target Clippy with warnings denied,
+repository limits, generated contracts, lint, Knip, production and renderer-diagnostic builds,
+E2E static checks and **41-scenario parity** pass. Cargo-deny and both cached offline npm audits pass;
+strict pinned Kubernetes schemas validate all three resources.
+
+Independent core/server and browser/schema reviews are clear after correcting explicit archived-v8
+catalog pinning, v9 policy propagation through binding, production-sized false boolean bounds and
+active documentation references. A differing thirteen-item internal policy regression proves that
+binding uses the selected catalog rather than the archived one. Archived v8 recipient test helpers
+are independent fixtures rather than a shipping old client; active v9 production guards retain
+separate duplicate-entity and privacy tests. No focused asymmetric second-recipient serialization
+failure injection was added; paired preparation still structurally precedes transaction commit.
+
+The final instrumented tests pass. Their first report write failed because the external Cargo target
+left the ignored local `target/` output directory absent. Creating that directory and completing the
+report-only stage produced the coverage result above without rerunning tests or changing source.
 ## Landmine candidate — 2026-10-18 — historical local source evidence
 
 This retained record documents the earlier Landmine implementation lineage, subsequently corrected

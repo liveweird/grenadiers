@@ -3,7 +3,7 @@ use std::collections::BTreeSet;
 use super::assignment::RoundAssignment;
 use super::damage::DamageGrace;
 use super::effects::{EffectiveSpeed, TimedEffects};
-use super::events::{EventAudience, StepEvent};
+use super::events::StepEvent;
 use super::geometry::MovementTrace;
 use super::input::{Direction, HeldDirections};
 use super::inventory::Inventory;
@@ -158,6 +158,7 @@ pub enum StepError {
     UnsupportedBombBlast(EntityId),
     DuplicateRemoteOwner(EntityId),
     EffectExpiryOverflow(super::effects::EffectKind),
+    BombPauseOverflow(EntityId),
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -180,13 +181,6 @@ pub struct State {
 }
 
 impl State {
-    pub(super) fn event_audience_for(&self, id: EntityId, at: Tick) -> EventAudience {
-        self.actors
-            .iter()
-            .find(|actor| actor.id == id && actor.effects.hidden_from_opponents(at))
-            .map_or(EventAudience::Both, |actor| EventAudience::only(actor.seat))
-    }
-
     pub fn new(
         rules: RulesConfig,
         world: World,
@@ -280,48 +274,6 @@ impl State {
             assignment,
         })
     }
-    #[must_use]
-    pub const fn rules(&self) -> &RulesConfig {
-        &self.rules
-    }
-    #[must_use]
-    pub const fn world(&self) -> &World {
-        &self.world
-    }
-    #[must_use]
-    pub const fn actors(&self) -> &[Actor; 2] {
-        &self.actors
-    }
-
-    #[must_use]
-    pub const fn tick(&self) -> Tick {
-        self.tick
-    }
-
-    #[must_use]
-    pub const fn running_updates(&self) -> u64 {
-        self.running_updates
-    }
-
-    #[must_use]
-    pub const fn result(&self) -> Option<RoundResult> {
-        self.result
-    }
-
-    #[must_use]
-    pub const fn round_assignment(&self) -> RoundAssignment {
-        self.assignment
-    }
-
-    #[must_use]
-    pub fn live_bomb_count(&self, seat: SeatId) -> usize {
-        let owner = self.actors[seat.index()].id;
-        self.world
-            .bombs
-            .values()
-            .filter(|bomb| bomb.owner() == owner)
-            .count()
-    }
 }
 
 #[path = "simulation_actions.rs"]
@@ -387,6 +339,17 @@ mod step;
 #[cfg(test)]
 #[path = "step_event_tests.rs"]
 mod step_event_tests;
+#[path = "simulation_stopwatch.rs"]
+mod stopwatch;
+#[cfg(test)]
+#[path = "stopwatch_interaction_tests.rs"]
+mod stopwatch_interaction_tests;
+#[cfg(test)]
+#[path = "simulation/stopwatch_route_tests.rs"]
+mod stopwatch_route_tests;
+#[cfg(test)]
+#[path = "stopwatch_tests.rs"]
+mod stopwatch_tests;
 #[cfg(test)]
 #[path = "simulation_test_support.rs"]
 mod test_support;

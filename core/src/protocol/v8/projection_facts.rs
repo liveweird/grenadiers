@@ -1,5 +1,7 @@
+use std::collections::BTreeMap;
+
 use crate::game::{EventAudience, RulesConfig};
-use crate::protocol::{Tick, WireRoundResult};
+use crate::protocol::{EntityId, Tick, WireRoundResult};
 
 use super::{
     ArenaView, BombView, EventKind, FlameView, ItemSet, PickupView, RoomView, VisibleActorView,
@@ -15,6 +17,7 @@ pub(crate) struct WorldFacts {
     pub(crate) arena: ArenaView,
     pub(crate) actors: [VisibleActorView; 2],
     pub(crate) bombs: Vec<BombView>,
+    pub(crate) timed_bombs: BTreeMap<EntityId, TimedBombFacts>,
     pub(crate) flames: Vec<FlameView>,
     pub(crate) pickups: Vec<PickupView>,
     pub(crate) available_items: ItemSet,
@@ -26,6 +29,15 @@ pub(crate) struct EventFacts {
     pub(crate) tick: Tick,
     pub(crate) audience: EventAudience,
     pub(crate) kind: EventKind,
+    pub(crate) timed_bomb: Option<TimedBombFacts>,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) struct TimedBombFacts {
+    pub(crate) captured_fuse_ticks: u64,
+    pub(crate) paused_ticks: u64,
+    pub(crate) detonates_at: Tick,
+    pub(crate) paused: bool,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]

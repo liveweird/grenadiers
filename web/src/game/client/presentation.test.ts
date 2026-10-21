@@ -67,6 +67,29 @@ describe('v9 arena presentation', () => {
     expect(presented.state.pickups).toEqual(current.snapshot!.state.pickups)
   })
 
+})
+
+describe('Stopwatch presentation', () => {
+  it('presents its holder, frozen status, and an authoritative paused Timed bomb', () => {
+    const current = state()
+    const [holder, victim] = current.snapshot!.state.actors
+    if (holder.type !== 'visible' || victim.type !== 'visible') throw new Error('visible actors expected')
+    holder.effects = [{ kind: 'stopwatch', remainingTicks: 179 }]
+    victim.voluntaryActionsFrozen = true
+    current.snapshot!.state.pickups = [{ cell: { column: 2, row: 2 }, kind: 'stopwatch' }]
+    current.snapshot!.state.bombs = [{
+      id: 9, cell: { column: 4, row: 4 }, owner: holder.id, range: 2, placedAt: 1,
+      trigger: { type: 'timed', remainingTicks: 120, paused: true }, blast: 'standard',
+    }]
+    const presented = presentSnapshot(current)!
+    expect(presented.state.actors[0]).toMatchObject({ stopwatchRemainingTicks: 179 })
+    expect(presented.state.actors[1]).toMatchObject({ voluntaryActionsFrozen: true })
+    expect(presented.state.bombs[0].trigger).toEqual({ type: 'timed', remainingTicks: 120, paused: true })
+    expect(presented.state.pickups).toEqual(current.snapshot!.state.pickups)
+  })
+})
+
+describe('v9 timed item presentation', () => {
   it('presents Golden Flame pickups and its reconnect-safe authoritative clock', () => {
     const current = state()
     const own = current.snapshot!.state.actors[0]

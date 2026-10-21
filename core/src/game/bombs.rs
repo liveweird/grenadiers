@@ -18,6 +18,14 @@ pub enum BlastKind {
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum BombError {
     DeadlineBeforePlacement,
+    DeadlineOverflow,
+    PauseOverflow,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct TimedBombHistory {
+    pub(crate) captured_fuse_ticks: u64,
+    pub(crate) paused_ticks: u64,
 }
 
 /// An owned bomb with placement-time properties captured for later detonation.
@@ -30,6 +38,7 @@ pub struct Bomb {
     pub(crate) placed_at: Tick,
     pub(crate) trigger: BombTrigger,
     blast: BlastKind,
+    timed_history: Option<TimedBombHistory>,
 }
 
 impl Bomb {
@@ -61,11 +70,18 @@ impl Bomb {
         trigger: BombTrigger,
         blast: BlastKind,
     ) -> Result<Self, BombError> {
-        if let BombTrigger::Timed { detonates_at } = trigger
-            && detonates_at.0 < placed_at.0
-        {
-            return Err(BombError::DeadlineBeforePlacement);
-        }
+        let timed_history = match trigger {
+            BombTrigger::Timed { detonates_at } => {
+                let Some(captured_fuse_ticks) = detonates_at.0.checked_sub(placed_at.0) else {
+                    return Err(BombError::DeadlineBeforePlacement);
+                };
+                Some(TimedBombHistory {
+                    captured_fuse_ticks,
+                    paused_ticks: 0,
+                })
+            }
+            BombTrigger::Remote | BombTrigger::Contact => None,
+        };
         Ok(Self {
             id,
             cell,
@@ -74,6 +90,7 @@ impl Bomb {
             placed_at,
             trigger,
             blast,
+            timed_history,
         })
     }
 
@@ -118,6 +135,33 @@ impl Bomb {
             BombTrigger::Timed { detonates_at } => Some(detonates_at),
             BombTrigger::Remote | BombTrigger::Contact => None,
         }
+    }
+
+    #[must_use]
+    pub const fn timed_history(self) -> Option<TimedBombHistory> {
+        self.timed_history
+    }
+
+    pub(crate) fn pause_one_tick(&mut self) -> Result<(), BombError> {
+        let BombTrigger::Timed { detonates_at } = self.trigger else {
+            return Ok(());
+        };
+        let Some(history) = self.timed_history.as_mut() else {
+            return Err(BombError::PauseOverflow);
+        };
+        let paused_ticks = history
+            .paused_ticks
+            .checked_add(1)
+            .ok_or(BombError::PauseOverflow)?;
+        let deadline = detonates_at
+            .0
+            .checked_add(1)
+            .ok_or(BombError::DeadlineOverflow)?;
+        history.paused_ticks = paused_ticks;
+        self.trigger = BombTrigger::Timed {
+            detonates_at: Tick(deadline),
+        };
+        Ok(())
     }
 }
 

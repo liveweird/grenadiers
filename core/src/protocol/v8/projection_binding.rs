@@ -1,7 +1,7 @@
 use crate::game::{EXPANDED_GENERATOR_VERSION, GenerationRecord, RulesConfig};
 use crate::protocol::Counter;
 
-use super::projection_facts::{BoundPublication, ExpandedCapture, ProjectionError};
+use super::projection_facts::{BoundPublication, ExpandedCapture, ProjectionError, TimedBombFacts};
 use super::{
     BlastKind, BombTriggerObservation, EventKind, ItemId, ItemSet, MapId, MatchInterruptReason,
     MatchResult, PickupKind, RoomPhase, RoomView, RulesVersion,
@@ -81,11 +81,14 @@ pub(crate) fn validate_expanded_room_for_items(
 fn canonical_gameplay(version: RulesVersion, capture: &ExpandedCapture, fuse_ticks: u64) -> bool {
     let world = &capture.world.0;
     let classic = version != RulesVersion::ExpandedV5;
-    world
-        .bombs
-        .iter()
-        .all(|bomb| canonical_bomb(world.physical_tick, *bomb, fuse_ticks, world.enabled_items))
-        && unique_remote_owners(&world.bombs)
+    world.bombs.iter().all(|bomb| {
+        canonical_bomb(
+            *bomb,
+            world.timed_bombs.get(&bomb.id).copied(),
+            fuse_ticks,
+            world.enabled_items,
+        )
+    }) && unique_remote_owners(&world.bombs)
         && (!classic
             || (world.actors.iter().all(|actor| {
                 actor.inventory.equipment.is_none()
@@ -105,10 +108,10 @@ fn canonical_gameplay(version: RulesVersion, capture: &ExpandedCapture, fuse_tic
                 canonical_audience(classic, world, event)
                     && match event.kind {
                         EventKind::BombPlaced { bomb } => {
-                            canonical_bomb(event.tick, bomb, fuse_ticks, world.enabled_items)
+                            canonical_bomb(bomb, event.timed_bomb, fuse_ticks, world.enabled_items)
                         }
                         EventKind::BombDetonated { bomb } => {
-                            canonical_bomb(event.tick, bomb, fuse_ticks, world.enabled_items)
+                            canonical_bomb(bomb, event.timed_bomb, fuse_ticks, world.enabled_items)
                         }
                         EventKind::PickupCollected { kind, .. } => !classic || classic_pickup(kind),
                         EventKind::DamagePrevented { .. } => !classic,
@@ -150,8 +153,8 @@ fn canonical_audience(
 }
 
 fn canonical_bomb(
-    at: crate::protocol::Tick,
     bomb: super::BombView,
+    timing: Option<TimedBombFacts>,
     base_fuse: u64,
     enabled: ItemSet,
 ) -> bool {
@@ -160,19 +163,30 @@ fn canonical_bomb(
         || (enabled.contains(ItemId::PowerBomb) && bomb.blast == BlastKind::Power))
         && match bomb.trigger.observation() {
             BombTriggerObservation::Remote => {
-                enabled.contains(ItemId::RemoteBomb) && bomb.blast == BlastKind::Standard
+                timing.is_none()
+                    && enabled.contains(ItemId::RemoteBomb)
+                    && bomb.blast == BlastKind::Standard
             }
-            BombTriggerObservation::Timed { .. } => {
-                timed_fuse_at(at, bomb, base_fuse)
-                    || (enabled.contains(ItemId::ShortFuse)
-                        && timed_fuse_at(at, bomb, base_fuse.div_ceil(2).max(1)))
-                    || (enabled.contains(ItemId::LongFuse)
-                        && base_fuse
-                            .checked_mul(2)
-                            .is_some_and(|fuse| timed_fuse_at(at, bomb, fuse)))
-            }
+            BombTriggerObservation::Timed { .. } => timing.is_some_and(|timing| {
+                let observed_paused = matches!(
+                    bomb.trigger.observation(),
+                    BombTriggerObservation::Timed { paused: true, .. }
+                );
+                timing.paused == observed_paused
+                    && (timing.paused_ticks == 0 && !timing.paused
+                        || enabled.contains(ItemId::Stopwatch))
+                    && (timing.captured_fuse_ticks == base_fuse
+                        || (enabled.contains(ItemId::ShortFuse)
+                            && timing.captured_fuse_ticks == base_fuse.div_ceil(2).max(1))
+                        || (enabled.contains(ItemId::LongFuse)
+                            && base_fuse
+                                .checked_mul(2)
+                                .is_some_and(|fuse| timing.captured_fuse_ticks == fuse)))
+            }),
             BombTriggerObservation::Contact => {
-                enabled.contains(ItemId::Landmine) && bomb.blast == BlastKind::Standard
+                timing.is_none()
+                    && enabled.contains(ItemId::Landmine)
+                    && bomb.blast == BlastKind::Standard
             }
         }
 }
@@ -183,22 +197,6 @@ fn unique_remote_owners(bombs: &[super::BombView]) -> bool {
         !matches!(bomb.trigger.observation(), BombTriggerObservation::Remote)
             || owners.insert(bomb.owner)
     })
-}
-
-fn timed_fuse_at(at: crate::protocol::Tick, bomb: super::BombView, fuse_ticks: u64) -> bool {
-    let Some(expected) = bomb
-        .placed_at
-        .get()
-        .checked_add(fuse_ticks)
-        .and_then(|deadline| deadline.checked_sub(at.get()))
-    else {
-        return false;
-    };
-    matches!(
-        bomb.trigger.observation(),
-        BombTriggerObservation::Timed { remaining_ticks, paused: false }
-            if u64::from(remaining_ticks) == expected
-    )
 }
 
 fn classic_pickup(kind: PickupKind) -> bool {
@@ -310,6 +308,7 @@ pub(super) fn generation_matches(
 #[cfg(test)]
 mod fuse_policy_tests {
     use super::canonical_bomb;
+    use crate::protocol::v8::projection_facts::TimedBombFacts;
     use crate::protocol::v8::{BlastKind, BombTrigger, BombView, ItemId, ItemSet};
     use crate::protocol::{Cell, EntityId, Tick};
 
@@ -327,11 +326,16 @@ mod fuse_policy_tests {
 
     #[test]
     fn odd_policy_accepts_base_half_and_double_historical_captures() {
-        let at = Tick::new(10).unwrap();
         let enabled = ItemSet::new([ItemId::ShortFuse, ItemId::LongFuse]).unwrap();
-        assert!(canonical_bomb(at, bomb(181), 181, enabled));
-        assert!(canonical_bomb(at, bomb(91), 181, enabled));
-        assert!(canonical_bomb(at, bomb(362), 181, enabled));
-        assert!(!canonical_bomb(at, bomb(180), 181, enabled));
+        let facts = |duration| TimedBombFacts {
+            captured_fuse_ticks: duration,
+            paused_ticks: 0,
+            detonates_at: Tick::new(10 + duration).unwrap(),
+            paused: false,
+        };
+        assert!(canonical_bomb(bomb(181), Some(facts(181)), 181, enabled));
+        assert!(canonical_bomb(bomb(91), Some(facts(91)), 181, enabled));
+        assert!(canonical_bomb(bomb(362), Some(facts(362)), 181, enabled));
+        assert!(!canonical_bomb(bomb(180), Some(facts(180)), 181, enabled));
     }
 }

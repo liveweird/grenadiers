@@ -1,6 +1,6 @@
 import Ajv, { type ErrorObject, type ValidateFunction } from 'ajv'
 import gameplayV9Schema from '../../../../api/gameplay-v9.schema.json'
-import { effectSemanticError, expandedProfileSemanticError, itemSetSemanticError,
+import { effectSemanticError, expandedProfileSemanticErrorFor, itemSetSemanticError,
   type GameplayV8SemanticError } from '../v8/semantics'
 import type { GameServerMessage, GameState, RoomView } from './schema'
 
@@ -19,13 +19,29 @@ function resolveServerValidator(): ValidateFunction<GameServerMessage> {
 }
 const validateServer = resolveServerValidator()
 
-function stateSemanticError(state: GameState | null): GameplayV9SemanticError | null {
+const supportedItems = [
+  'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch',
+  'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame',
+  'longFuse', 'reverseControls',
+] as const
+
+function stateSemanticError(
+  state: GameState | null, stopwatchEnabled: boolean,
+): GameplayV9SemanticError | null {
   if (!state) return null
-  for (const actor of state.actors) {
+  for (const [index, actor] of state.actors.entries()) {
     if (actor.type === 'visible') {
       const error = effectSemanticError(actor.effects)
       if (error) return error
-      if (actor.voluntaryActionsFrozen) return 'invalidFrozenState'
+      if ((!actor.alive || !stopwatchEnabled) && actor.voluntaryActionsFrozen) {
+        return 'invalidFrozenState'
+      }
+      const opponent = state.actors[1 - index]
+      if (opponent.type === 'visible') {
+        const expected = actor.alive && opponent.alive
+          && opponent.effects.some((effect) => effect.kind === 'stopwatch')
+        if (actor.voluntaryActionsFrozen !== expected) return 'invalidFrozenState'
+      }
     }
   }
   return null
@@ -37,14 +53,21 @@ function roomSemanticError(room: RoomView): GameplayV9SemanticError | null {
 
 function messageSemanticError(message: GameServerMessage): GameplayV9SemanticError | null {
   switch (message.type) {
-    case 'admitted':
-      return roomSemanticError(message.room) ?? stateSemanticError(message.state)
-        ?? expandedProfileSemanticError(message.room, message.state)
+    case 'admitted': {
+      const enabled = message.room.settings.enabledItems.includes('stopwatch')
+      return roomSemanticError(message.room) ?? stateSemanticError(message.state, enabled)
+        ?? expandedProfileSemanticErrorFor(message.room, message.state, [], supportedItems, true)
+    }
     case 'roomState':
-      return roomSemanticError(message.room) ?? expandedProfileSemanticError(message.room, null)
-    case 'snapshot':
-      return roomSemanticError(message.room) ?? stateSemanticError(message.state)
-        ?? expandedProfileSemanticError(message.room, message.state, message.events)
+      return roomSemanticError(message.room)
+        ?? expandedProfileSemanticErrorFor(message.room, null, [], supportedItems, true)
+    case 'snapshot': {
+      const enabled = message.room.settings.enabledItems.includes('stopwatch')
+      return roomSemanticError(message.room) ?? stateSemanticError(message.state, enabled)
+        ?? expandedProfileSemanticErrorFor(
+          message.room, message.state, message.events, supportedItems, true,
+        )
+    }
     default:
       return null
   }

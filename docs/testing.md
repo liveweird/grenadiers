@@ -20,6 +20,21 @@ Install with `cargo install cargo-llvm-cov --version 0.9.1 --locked`, then
 `rustup component add llvm-tools-preview` and `scripts/gates.sh coverage`.
 Stable branch coverage equivalent to Flow's Kover gate is not configured.
 
+CI derives the exhaustive server item-mask partition matrix from the checked Rust catalog; the
+workflow and JavaScript helpers do not duplicate item bits, cardinality, or ranges. Each partition
+runs the complete debug, release, build, and 80%-floor coverage gates with a 20-minute limit and
+emits source-bound debug, release, and coverage summaries. The stable `server` job accepts only the
+complete, disjoint set of successful partition artifacts. With both partition variables absent,
+local debug, release, and coverage commands still execute every mask. Clean Git worktrees report
+their HEAD; dirty worktrees and archives without `.git` honestly report a null source. CI requires
+and verifies an exact clean checked-out 40-hex source.
+
+The CI-only selector pair is
+`GRENADIERS_SERVER_REPLAY_ITEM_MASK_PARTITION_INDEX` and
+`GRENADIERS_SERVER_REPLAY_ITEM_MASK_PARTITION_COUNT`. Supplying only one, a malformed value, or a
+count that differs from the checked plan fails before mask execution. Profile and source context
+are assigned by `scripts/gates.sh`; callers must not infer or relabel coverage output.
+
 There is no durable schema yet, so no Testcontainers suite is needed. When persistence is
 added, run migrations against an isolated real PostgreSQL instance and test query behavior,
 constraints, and rollback; never use the developer's database as a test fixture.
@@ -226,3 +241,13 @@ actor while the opponent receives an exact hidden actor and no collection cue, a
 compositor pixels at (2,1). Opponent reconnect preserves privacy without replay or deadline refresh;
 the actor appears at the current cell at collection tick plus 600. Native execution remains a
 candidate gate.
+
+## Stopwatch production-seed scenario
+
+Use `docker-compose.stopwatch.yaml` with the v2 seed fixture and
+`E2E_STOPWATCH_FIXTURE=arena-v2-stopwatch npm --prefix e2e run test:stopwatch`.
+The two-peer scenario reveals both mirrored pickups with ordinary bombs and exercises two
+sequential 180-tick holder windows. It proves blocked movement and consumed manual actions,
+held-input thaw, one pause per physical update, full-fuse placement during a pause, and natural
+detonation after the exact accumulated pause. Both recipient streams must retain the same bomb IDs,
+pause facts and deadlines. Native execution remains a candidate gate.

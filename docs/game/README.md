@@ -49,8 +49,9 @@ and remaining presentation work are planned extensions to the implemented Classi
 
 [Room settings](settings.md) covers shared starting speed, turn tolerance, match target and fuse.
 
-[Gameplay v9 compatibility](protocol-v9.md) defines the paired live wire foundation and its
-required, currently false visible-actor freeze field. [Gameplay v8](protocol-v8.md) is archived.
+[Gameplay v9 compatibility](protocol-v9.md) defines the paired live wire contract, including the
+authoritative visible-actor freeze field used by [Stopwatch](stopwatch.md). [Gameplay v8](protocol-v8.md)
+is the archived fourteen-item contract; the v0.3.39 false-only foundation is recorded in history.
 
 [Pixel-art presentation](pixel-art.md) describes original artwork, animation and resource bounds.
 
@@ -72,3 +73,4 @@ See the implemented expansion candidates: [Heart](heart.md) and [Shield](shield.
 - [Remote Bomb](remote-bomb.md): one untimed bomb triggered by the owner's next bomb action.
 - [Landmine](landmine.md): one passable contact mine with per-actor exit grace.
 - [Invisibility Cloak](invisibility-cloak.md): ten seconds of recipient-private actor details.
+- [Stopwatch](stopwatch.md): three seconds of opponent action freezing and Timed-bomb pausing.

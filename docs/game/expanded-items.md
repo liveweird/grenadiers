@@ -66,6 +66,16 @@ PR 83 is merged, v0.3.37 is published and its accepted image deployed locally. E
 The accepted raw Landmine source is integrated into the v0.3.38 [Invisibility Cloak](invisibility-cloak.md)
 source candidate. Its corrected reveal-position driver and private actor/event semantics are
 retained. Corrected source `1c6724f` passed fresh 51 Compose plus 51 Kubernetes acceptance with an independent raw audit and durable seal. Those exact-head candidate/post-merge CI, publication and promotion gates subsequently passed for v0.3.38; the accepted parent is integrated above.
+
+At the 21 October 2026 20:56:41 UTC v0.3.40 native checkpoint, corrected [Stopwatch](stopwatch.md)
+source `fa25467`, tree `07ac34a8`, and image `ec8604af` passed complete 32,768-mask debug,
+release and coverage execution plus fresh 52 Compose and 52 Kubernetes cases, with zero retries
+or carried passes. The earlier `bd9d064` attempt is historical and contributes no pass. Independent raw audit is clear and 2,434 payloads are durably sealed; hosted CI, PR/merge, publication, tag verification and promotion remained
+pending at this checkpoint. Published v0.3.39 remains the parent and local deployment. Fourteen of
+22 item types were published; Stopwatch is the fifteenth source/native-verified type, and seven
+requested types remain after it. See [release notes](https://github.com/liveweird/grenadiers/releases)
+for current release status.
+
 This optional track follows the [backlog](backlog.md), shared settings and
 pixel-art increments. The historical catalog in [rules](rules.md) is not an implementation
 claim. Each activation requires its own reviewed behavior, UI, documentation and acceptance.
@@ -102,9 +112,8 @@ Damage passes share one gateway. Shield prevents damage before Heart is consider
 absorbs one lethal hit, consumes its equipment slot and grants 60 ticks of immunity, including
 both damage passes and overlapping flames. Collecting protection cannot undo earlier damage.
 
-Shield uses 300 physical ticks (five seconds); Golden Flame, Short Fuse, Short Flame, Long Fuse,
-Reverse Controls and Diarrhea use 600 (ten seconds), all
-refreshing on recollection. Proposed remaining durations: Stopwatch 180; other timed effects and each
+Shield uses 300 physical ticks (five seconds); Stopwatch uses 180 (three seconds); Golden Flame, Short Fuse, Short Flame, Long Fuse, Reverse Controls, and Diarrhea use 600 (ten seconds), all
+refreshing on recollection. Proposed remaining durations: other timed effects and each
 Slow-foot stack 600. These become versioned constants when activated, not new settings yet.
 Golden flame gives newly placed bombs radius eight; Short-flame overrides it with radius one.
 Short fuse halves and Long fuse doubles the configured fuse; together they cancel. Derive

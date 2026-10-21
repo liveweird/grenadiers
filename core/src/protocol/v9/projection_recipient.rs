@@ -28,7 +28,11 @@ pub(super) fn recipient_state(publication: &BoundPublication, recipient: Seat) -
     let facts = &publication.world.0;
     let recipient_actor = &facts.actors[seat_index(recipient)];
     let hides_bombs = has_effect(recipient_actor, EffectKind::InvisibleBombs);
+    let frozen = voluntary_actions_frozen(&facts.actors);
+    let mut actor_index = 0;
     let actors = facts.actors.clone().map(|actor| {
+        let current = actor_index;
+        actor_index += 1;
         if actor.seat != recipient && has_effect(&actor, EffectKind::InvisibilityCloak) {
             HiddenActorView {
                 id: actor.id,
@@ -37,7 +41,7 @@ pub(super) fn recipient_state(publication: &BoundPublication, recipient: Seat) -
             }
             .into()
         } else {
-            visible_actor(actor).into()
+            visible_actor(actor, frozen[current]).into()
         }
     });
     GameState {
@@ -56,7 +60,10 @@ pub(super) fn recipient_state(publication: &BoundPublication, recipient: Seat) -
     }
 }
 
-pub(super) fn visible_actor(actor: crate::protocol::v8::VisibleActorView) -> VisibleActorView {
+pub(super) fn visible_actor(
+    actor: crate::protocol::v8::VisibleActorView,
+    voluntary_actions_frozen: bool,
+) -> VisibleActorView {
     VisibleActorView {
         id: actor.id,
         seat: actor.seat,
@@ -70,8 +77,15 @@ pub(super) fn visible_actor(actor: crate::protocol::v8::VisibleActorView) -> Vis
         inventory: actor.inventory,
         effects: actor.effects,
         damage_grace_remaining_ticks: actor.damage_grace_remaining_ticks,
-        voluntary_actions_frozen: false,
+        voluntary_actions_frozen,
     }
+}
+
+fn voluntary_actions_frozen(actors: &[crate::protocol::v8::VisibleActorView; 2]) -> [bool; 2] {
+    [
+        actors[0].alive && actors[1].alive && has_effect(&actors[1], EffectKind::Stopwatch),
+        actors[1].alive && actors[0].alive && has_effect(&actors[0], EffectKind::Stopwatch),
+    ]
 }
 
 fn recipient_events(

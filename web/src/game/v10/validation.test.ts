@@ -1,7 +1,26 @@
 import { describe, expect, it } from 'vitest'
 import { checkedCatalogMaskRanges, executeCatalogMaskRange } from '../../test/catalogMasks'
-import { admitted, snapshot } from '../client/testSupport'
+import { admitted as currentAdmitted, snapshot as currentSnapshot } from '../client/testSupport'
 import { validateGameplayV10ServerMessage } from './validation'
+import type { Admitted, Snapshot } from './schema'
+
+function stripOil(message: Record<string, unknown>): void {
+  delete (message.state as Record<string, unknown>).oilBarrels
+  const room = message.room as { availableItems: string[] }
+  room.availableItems = room.availableItems.filter((item) => item !== 'oilBarrel')
+}
+
+function snapshot(revision: number): Snapshot {
+  const message = structuredClone(currentSnapshot(revision)) as unknown as Record<string, unknown>
+  stripOil(message)
+  return message as unknown as Snapshot
+}
+
+function admitted(): Admitted {
+  const message = structuredClone(currentAdmitted()) as unknown as Record<string, unknown>
+  stripOil(message)
+  return message as unknown as Admitted
+}
 
 const supported = [
   'kick', 'punch', 'bracelet', 'wallPass', 'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch',

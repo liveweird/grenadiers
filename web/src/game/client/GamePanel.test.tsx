@@ -44,7 +44,7 @@ function renderPanel(current: GameClientState) {
 
 beforeEach(async () => { localStorage.clear(); await i18n.changeLanguage('en') })
 
-describe('v10 reconnect presentation', () => {
+describe('v11 reconnect presentation', () => {
   it('exposes the dormant hook-backed panel without activating it in App', () => {
     render(<MantineProvider env="test"><GamePanel /></MantineProvider>)
     expect(screen.getByRole('button', { name: 'Create room' })).toBeVisible()
@@ -68,7 +68,7 @@ describe('v10 reconnect presentation', () => {
   })
 })
 
-describe('v10 private-state presentation', () => {
+describe('v11 private-state presentation', () => {
   it('removes hidden rival stats and accessibility details until a fresh reveal', () => {
     const current = state()
     const view = render(<MantineProvider env="test">
@@ -233,7 +233,7 @@ describe('v10 private-state presentation', () => {
   })
 })
 
-describe('v10 room controls', () => {
+describe('v11 room controls', () => {
   it('blocks readiness and rule edits while an update awaits authority', () => {
     const current = state()
     current.room = room(20, { type: 'waiting' }, 1)

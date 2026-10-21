@@ -5,7 +5,7 @@ import {
 } from './testSupport'
 import { gameplayUrl } from './client'
 
-describe('v10 admission and authoritative baselines', () => {
+describe('v11 admission and authoritative baselines', () => {
   beforeEach(() => {
     vi.stubGlobal('WebSocket', { OPEN: SocketStub.OPEN })
     localStorage.clear()
@@ -19,11 +19,11 @@ describe('v10 admission and authoritative baselines', () => {
       .toBe('ws://localhost:5177/api/v1/game/ws')
   })
 
-  it('authenticates with v10 and keeps the seat capability out of public state and storage', async () => {
+  it('authenticates with v11 and keeps the seat capability out of public state and storage', async () => {
     const value = harness()
     const socket = await authenticate(value, { type: 'join', roomCode: 'ABCDEFGH' })
     expect(messages(socket)).toEqual([
-      { type: 'authenticate', protocolVersion: 10, token: sessionToken },
+      { type: 'authenticate', protocolVersion: 11, token: sessionToken },
       { type: 'joinRoom', sequence: 1, roomCode: 'ABCDEFGH' },
     ])
     socket.message(admitted())
@@ -92,9 +92,9 @@ describe('v10 admission and authoritative baselines', () => {
     await vi.waitFor(() => expect(value.sockets).toHaveLength(2))
     const resumed = value.sockets[1]
     resumed.emit('open')
-    resumed.message({ type: 'authenticated', protocolVersion: 10 })
+    resumed.message({ type: 'authenticated', protocolVersion: 11 })
     expect(messages(resumed)).toEqual([
-      { type: 'authenticate', protocolVersion: 10, token: sessionToken },
+      { type: 'authenticate', protocolVersion: 11, token: sessionToken },
       { type: 'resumeRoom', sequence: 1, roomId, resumeToken },
     ])
     expect(messages(resumed).some((message) => message.type === 'manualAction')).toBe(false)
@@ -111,7 +111,7 @@ describe('v10 admission and authoritative baselines', () => {
     await vi.waitFor(() => expect(value.sockets).toHaveLength(2))
     const resumed = value.sockets[1]
     resumed.emit('open')
-    resumed.message({ type: 'authenticated', protocolVersion: 10 })
+    resumed.message({ type: 'authenticated', protocolVersion: 11 })
     resumed.message({ type: 'roomState', room: room(6, { type: 'running' }) })
     resumed.message(snapshot(7))
     expect(value.client.getState().snapshot).toBe(retained)
@@ -136,7 +136,7 @@ describe('v10 admission and authoritative baselines', () => {
   })
 })
 
-describe('v10 recovery lifecycle', () => {
+describe('v11 recovery lifecycle', () => {
   beforeEach(() => vi.stubGlobal('WebSocket', { OPEN: SocketStub.OPEN }))
 
   it('uses a fresh single-use HTTP session on every bounded reconnect attempt', async () => {
@@ -197,7 +197,7 @@ describe('v10 recovery lifecycle', () => {
     await vi.waitFor(() => expect(value.sockets).toHaveLength(2))
     const resumed = value.sockets[1]
     resumed.emit('open')
-    resumed.message({ type: 'authenticated', protocolVersion: 10 })
+    resumed.message({ type: 'authenticated', protocolVersion: 11 })
     stop(resumed)
     expect(value.client.getState()).toMatchObject({
       connection: 'disconnected', room: null, snapshot: null, youSeat: null,

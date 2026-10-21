@@ -1,6 +1,6 @@
 import { vi } from 'vitest'
 import { GameClient, type AdmissionIntent, type GameClientState } from './client'
-import type { Admitted, GameServerMessage, GameState, RoomPhase, RoomView, Snapshot } from '../v10/schema'
+import type { Admitted, GameServerMessage, GameState, RoomPhase, RoomView, Snapshot } from '../v11/schema'
 
 export const sessionToken = 'a'.repeat(64)
 export const resumeToken = 'c'.repeat(64)
@@ -60,7 +60,7 @@ export async function authenticate(value: Harness, intent: AdmissionIntent = { t
   await vi.waitFor(() => expect(value.sockets).toHaveLength(1))
   const socket = value.sockets.at(-1)!
   socket.emit('open')
-  socket.message({ type: 'authenticated', protocolVersion: 10 })
+  socket.message({ type: 'authenticated', protocolVersion: 11 })
   return socket
 }
 
@@ -73,7 +73,7 @@ export function room(revision: number, phase: RoomPhase = { type: 'waiting' }, r
       startingSpeedLevel: 0, turnAssistUnits: 256, winsToFinish: 3, bombFuseTicks: 180,
       enabledItems: ['heart'],
     },
-    availableItems: ['kick', 'punch', 'bracelet', 'wallPass', 'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch', 'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls', 'invisibleBombs', 'teleporter'],
+    availableItems: ['kick', 'punch', 'bracelet', 'wallPass', 'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch', 'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls', 'invisibleBombs', 'oilBarrel', 'teleporter'],
     settingsRevision: 1, settingsEditor: 'one',
     seats: [
       { seat: 'one', occupied: true, ready: false, rematchReady: false, connection: { type: 'connected' } },
@@ -103,7 +103,7 @@ function gameState(alive = true): GameState {
         voluntaryActionsFrozen: false, lastTeleportTick: null,
       },
     ],
-    bombs: [], flames: [], pickups: [],
+    bombs: [], flames: [], pickups: [], oilBarrels: [],
   }
 }
 

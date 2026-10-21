@@ -3,7 +3,7 @@ import { act, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { GameArenaProps } from './game/arena/types'
-import type { GameState, RoomPhase, RoomView, Snapshot } from './game/v10/schema'
+import type { GameState, RoomPhase, RoomView, Snapshot } from './game/v11/schema'
 import i18n from './i18n'
 import { App } from './App'
 
@@ -62,7 +62,7 @@ function room(revision: number, phase: RoomPhase = { type: 'waiting' }): RoomVie
       startingSpeedLevel: 0, turnAssistUnits: 256, winsToFinish: 3, bombFuseTicks: 180,
       enabledItems: ['heart'],
     },
-    availableItems: ['kick', 'punch', 'bracelet', 'wallPass', 'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch', 'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls', 'invisibleBombs', 'teleporter'],
+    availableItems: ['kick', 'punch', 'bracelet', 'wallPass', 'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch', 'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls', 'invisibleBombs', 'oilBarrel', 'teleporter'],
     settingsRevision: 1,
     settingsEditor: 'one',
     seats: [
@@ -101,6 +101,7 @@ function snapshot(revision: number, phase: RoomPhase = { type: 'running' }): Sna
       bombs: [],
       flames: [],
       pickups: [],
+      oilBarrels: [],
     },
     events: [],
   }
@@ -126,8 +127,8 @@ async function beginRoom(user: ReturnType<typeof userEvent.setup>, action: 'crea
   await waitFor(() => expect(appSockets.filter((socket) => socket.url.endsWith('/api/v1/game/ws'))).toHaveLength(1))
   const socket = appSockets.find((candidate) => candidate.url.endsWith('/api/v1/game/ws'))!
   act(() => socket.emit('open'))
-  expect(JSON.parse(socket.sent[0])).toEqual({ type: 'authenticate', protocolVersion: 10, token })
-  act(() => socket.message({ type: 'authenticated', protocolVersion: 10 }))
+  expect(JSON.parse(socket.sent[0])).toEqual({ type: 'authenticate', protocolVersion: 11, token })
+  act(() => socket.message({ type: 'authenticated', protocolVersion: 11 }))
   return socket
 }
 

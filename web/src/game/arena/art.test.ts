@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import { makeActor, setActorPose } from './actorArt'
-import { makeBomb, makeFlame, makePickup } from './entityArt'
+import { makeBomb, makeFlame, makeOilBarrel, makePickup } from './entityArt'
 import { PALETTE } from './palette'
 import { deterministicVariant } from './pixel'
 import { makeBlock, paintTerrain, TILE } from './terrainArt'
@@ -150,6 +150,21 @@ describe('original pixel-art geometry', () => {
     const reverseColors = reverse.rectangles?.map(({ color }) => color)
     expect(reverseColors).toContain(PALETTE.white)
     expect(reverseColors).toContain(PALETTE.brick)
+  })
+
+  it('draws distinct solid and charred Oil states with one retained flame root', () => {
+    const oil = makeOilBarrel() as unknown as {
+      root: Drawing
+      unlit: Drawing
+      charred: Drawing
+      flame: { root: Drawing; frames: Drawing[] }
+    }
+    expect(oil.root.children).toEqual([oil.unlit, oil.charred, oil.flame.root])
+    expect(oil.unlit.rectangles?.length).toBeGreaterThan(6)
+    expect(oil.charred.rectangles?.length).toBeGreaterThan(5)
+    expect(oil.flame.frames).toHaveLength(2)
+    expect([oil.unlit.visible, oil.charred.visible, oil.flame.root.visible])
+      .toEqual([true, false, false])
   })
 
   it('gives Piercing pickups, held charges, and captured bombs distinct pixel cues', () => {

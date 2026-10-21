@@ -9,7 +9,7 @@ const changed = {
   enabledItems: [],
 }
 
-describe('v10 authoritative gameplay settings', () => {
+describe('v11 authoritative gameplay settings', () => {
   beforeEach(() => vi.stubGlobal('WebSocket', { OPEN: SocketStub.OPEN }))
 
   it('sends an atomic revision-fenced update and fences readiness until acceptance', async () => {
@@ -110,15 +110,20 @@ describe('v10 authoritative gameplay settings', () => {
     socket.message(baseline)
     const sent = socket.sent.length
 
-    expect(value.client.updateSettings({
-      ...baseline.room.settings,
-      enabledItems: [
-        'kick', 'wallPass', 'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch', 'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame',
-        'longFuse', 'reverseControls', 'invisibleBombs', 'teleporter',
-      ],
-    })).toBe(true)
+    const allItems = [...baseline.room.availableItems]
+    expect(allItems).toHaveLength(22)
+    expect(value.client.updateSettings({ ...baseline.room.settings, enabledItems: allItems })).toBe(true)
     expect(socket.sent).toHaveLength(sent + 1)
+    expect(messages(socket).at(-1)).toMatchObject({
+      type: 'updateSettings', settings: { enabledItems: allItems },
+    })
     socket.message({ type: 'error', code: 'staleSettings', sequence: 2 })
+    const tooMany: typeof allItems = [...allItems, 'kick']
+    expect(value.client.updateSettings({ ...baseline.room.settings, enabledItems: tooMany })).toBe(false)
+    expect(value.client.updateSettings({
+      ...baseline.room.settings, enabledItems: ['kick', 'kick'],
+    })).toBe(false)
+    expect(socket.sent).toHaveLength(sent + 1)
     expect(value.client.updateSettings({
       ...baseline.room.settings, enabledItems: ['goldenFlame', 'shortFuse', 'shortFlame'],
     })).toBe(true)

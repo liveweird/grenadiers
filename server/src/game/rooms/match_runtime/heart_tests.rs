@@ -1,6 +1,6 @@
 use grenadiers_core::{
     game::SeatId,
-    protocol::{Counter, Seat, v10::ResumeToken},
+    protocol::{Counter, Seat, v11::ResumeToken},
     room::DepartureReason,
 };
 
@@ -11,7 +11,7 @@ use super::test_support::{
 };
 
 fn personal_state(prepared: &super::PreparedRuntimeAdmission) -> serde_json::Value {
-    let encoded = grenadiers_core::protocol::v10::prepare_expanded_admission(
+    let encoded = grenadiers_core::protocol::v11::prepare_expanded_admission(
         &prepared.room,
         prepared.state_epoch,
         prepared.capture.as_ref(),

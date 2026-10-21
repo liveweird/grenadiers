@@ -1,6 +1,6 @@
 use grenadiers_core::{
     game::StepReport,
-    protocol::v10::{
+    protocol::v11::{
         RoomMetadata, RoomView, capture_expanded, prepare_snapshot_pair, project_expanded_room,
     },
     room::MatchLifecycle,
@@ -12,7 +12,7 @@ use super::{
     SeatFrames,
     runtime::{MatchNotice, SimRound},
 };
-use grenadiers_core::protocol::v10::RoomPhase;
+use grenadiers_core::protocol::v11::RoomPhase;
 
 pub(super) fn room_view(
     identity: &RoomIdentity,
@@ -92,7 +92,7 @@ pub(super) fn snapshot(
         u32::try_from(sim.epoch).map_err(|_| MatchRuntimeError::CapacityReached)?,
     )
     .map_err(|_| MatchRuntimeError::CapacityReached)?;
-    let bound = grenadiers_core::protocol::v10::bind_expanded(
+    let bound = grenadiers_core::protocol::v11::bind_expanded(
         &room,
         epoch,
         &capture,
@@ -108,14 +108,14 @@ pub(super) fn snapshot(
 
 fn wire_settings(
     settings: grenadiers_core::room::RoomSettings,
-) -> Result<grenadiers_core::protocol::v10::GameSettings, MatchRuntimeError> {
-    grenadiers_core::protocol::v10::GameSettings::new(
+) -> Result<grenadiers_core::protocol::v11::GameSettings, MatchRuntimeError> {
+    grenadiers_core::protocol::v11::GameSettings::new(
         speed_level(settings.starting_speed()),
         settings.turn_assist_units(),
         settings.wins_to_finish(),
         u16::try_from(settings.bomb_fuse_ticks()).map_err(|_| MatchRuntimeError::Publication)?,
-        grenadiers_core::protocol::v10::ItemSet::from_mask(
-            grenadiers_core::protocol::v10::ItemMask::new(settings.enabled_items().bits())
+        grenadiers_core::protocol::v11::ItemSet::from_mask(
+            grenadiers_core::protocol::v11::ItemMask::new(settings.enabled_items().bits())
                 .map_err(|_| MatchRuntimeError::Publication)?,
         ),
     )

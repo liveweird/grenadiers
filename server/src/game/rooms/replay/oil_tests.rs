@@ -1,0 +1,69 @@
+use grenadiers_core::game::{CellId, Direction, EnabledItems, OilBarrelState, SeatId};
+
+use super::replay;
+use crate::game::rooms::match_runtime::{move_cells, plant, start_optional_runtime, wait_clear};
+
+#[test]
+fn concealed_reveal_resume_and_materialized_oil_replay_deterministically() {
+    let mut runtime = start_optional_runtime(EnabledItems::OIL_BARREL, 31);
+    assert!(
+        runtime
+            .sim()
+            .unwrap()
+            .state
+            .public_view()
+            .oil_barrels
+            .is_empty()
+    );
+    assert_eq!(
+        replay(runtime.replay_journal()).unwrap(),
+        runtime.replay_inspection()
+    );
+
+    move_cells(&mut runtime, Direction::East, 1);
+    plant(&mut runtime, 1);
+    move_cells(&mut runtime, Direction::West, 1);
+    move_cells(&mut runtime, Direction::South, 1);
+    wait_clear(&mut runtime);
+    assert!(
+        runtime
+            .sim()
+            .unwrap()
+            .state
+            .public_view()
+            .oil_barrels
+            .iter()
+            .any(|oil| { oil.cell == CellId::new(3, 1) && oil.state == OilBarrelState::Unlit })
+    );
+
+    for seat in SeatId::ALL {
+        let admission = runtime.prepare_resume(seat).unwrap();
+        let frame = admission.notice.frame(seat).expect("running Oil snapshot");
+        let value: serde_json::Value = serde_json::from_str(&frame).unwrap();
+        assert!(
+            value["state"]["oilBarrels"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .any(|oil| oil
+                    == &serde_json::json!({
+                        "cell":{"column":3,"row":1},
+                        "state":"unlit"
+                    }))
+        );
+        for private in [
+            "concealed",
+            "pending",
+            "oilGrace",
+            "generationRecord",
+            "seed",
+        ] {
+            assert!(!frame.contains(private));
+        }
+        runtime.commit_admission(admission);
+    }
+    assert_eq!(
+        replay(runtime.replay_journal()).unwrap(),
+        runtime.replay_inspection()
+    );
+}

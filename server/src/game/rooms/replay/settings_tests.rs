@@ -189,10 +189,10 @@ fn configurable_rules_reject_the_legacy_lifecycle_profile() {
 fn expanded_item_masks_and_disabled_preset_replay_deterministically() {
     let bits = [
         1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072,
-        262144, 524288, 2097152,
+        262144, 524288, 1048576, 2097152,
     ];
-    assert_eq!(bits.len(), 21);
-    for mask in 0_u32..2097152 {
+    assert_eq!(bits.len(), 22);
+    for mask in 0_u32..4194304 {
         let enabled_bits = bits
             .iter()
             .enumerate()

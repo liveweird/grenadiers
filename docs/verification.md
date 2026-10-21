@@ -1,5 +1,21 @@
 # Repository verification
 
+## v0.3.40 hosted CI recovery — 2026-10-21 — N0 jobless failure
+
+Hosted push run 39676052178 for source prefix `a5ddcee` failed before creating any jobs or
+executing any tests. The workflow used `runner.temp` in two job-level `env` expressions for the
+server-mask partition, where that context is unavailable. The correction initializes those two
+paths through `GITHUB_ENV` after job startup and before their first consumer.
+
+This CI-context correction changes no application, build input, runtime behavior, native harness,
+Stopwatch oracle, fixture, dependency lock or product configuration. The native acceptance remains
+bound exactly to source `fa25467b11038a9073d52f35e44ac6cee5380bcc`, image
+`sha256:ec8604af4317d188d7b00ab7cfa27115114430e0a11fb9821856617ad9409906`, source archive
+`ee5fe698b98efcf72ff8346770242c4321d36e90c877514c30d7d028b0d660f8`, and final seal
+`36076deaad3b83fa6585459c03ccec5249bdff1f3744ee7c7cd087503d7d7def`. No native execution is
+claimed for the corrected CI tree. Fresh candidate, post-merge and tag CI remain required against
+that exact corrected tree.
+
 ## Latest v0.3.40 native acceptance checkpoint — 2026-10-21 20:56:41 UTC — 104/104
 
 At this checkpoint, corrected source `fa25467b11038a9073d52f35e44ac6cee5380bcc`, tree

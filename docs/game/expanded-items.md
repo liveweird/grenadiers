@@ -3,7 +3,7 @@
 Status: the **Heart activation candidate is implemented and locally verified**, with native
 release acceptance still pending. Published v0.3.21 has no new optional pickups. The candidate
 introduces Expanded-v5/generator-v2 rooms and gameplay-v8; see [Heart](heart.md).
-Separate candidates add opt-in [Shield](shield.md), [Golden Flame](golden-flame.md), [Short Fuse](short-fuse.md), [Short Flame](short-flame.md), [Long Fuse](long-fuse.md), [Reverse Controls](reverse-controls.md), [Diarrhea](diarrhea.md), [Slow foot](slow-foot.md), [Piercing Bomb](piercing-bomb.md), [Power Bomb](power-bomb.md), [Remote Bomb](remote-bomb.md), [Landmine](landmine.md), [Invisibility Cloak](invisibility-cloak.md), [Stopwatch](stopwatch.md), [Invisible Bombs](invisible-bombs.md), and [Teleporter](teleporter.md),
+Separate candidates add opt-in [Shield](shield.md), [Golden Flame](golden-flame.md), [Short Fuse](short-fuse.md), [Short Flame](short-flame.md), [Long Fuse](long-fuse.md), [Reverse Controls](reverse-controls.md), [Diarrhea](diarrhea.md), [Slow foot](slow-foot.md), [Piercing Bomb](piercing-bomb.md), [Power Bomb](power-bomb.md), [Remote Bomb](remote-bomb.md), [Landmine](landmine.md), [Invisibility Cloak](invisibility-cloak.md), [Stopwatch](stopwatch.md), [Invisible Bombs](invisible-bombs.md), [Teleporter](teleporter.md), and [Wall Pass](wall-pass.md),
 retaining the same protocol and identities.
 This optional track follows the [backlog](backlog.md), shared settings and
 pixel-art increments. The historical catalog in [rules](rules.md) is not an implementation
@@ -65,7 +65,7 @@ per seat/tick. Add a remappable equipment action, proposed default **E**, for Pu
 | Kick | Walking into a solid bomb starts sliding next tick, one cell per ten ticks. Swept collisions stop at the last legal cell before walls, blocks, barrels, bombs or living players. |
 | Punch | Move the adjacent facing bomb three interior cells, wrapping playable coordinates. Landing requires floor, no soft block/barrel/other bomb, and no overlap with a living player's footprint. If blocked, try further three-cell landings for at most one axis cycle. Returning to the original cell fails unchanged, with no cooldown; successful punches have a 12-tick cooldown and stop sliding. |
 | Bracelet | New moving contact shoves up to one tile, clamped by obstacles. Require separation to rearm and a 30-tick cooldown. Resolve simultaneous claims using alternating round priority; check swept fire/mines without recursive shoves. |
-| Wall pass | Ignore soft blocks and unlit barrels, but not hard walls or solid bombs. Placement inside obstacles is illegal. Replacement grants exit-only grace for obstacles currently overlapped; grace ends individually on exit. |
+| Wall Pass (**prepared in v0.3.43**) | Ignore soft blocks, but not hard walls or solid bombs. Placement inside obstacles is illegal. Replacement grants private exit-only grace for positively overlapped soft cells; grace ends individually when the full footprint exits or reaches tangency. |
 | Remote bomb | The next manual bomb action detonates the armed bomb instead of planting. Chains/fire still trigger it; death/disconnect adds no invented fuse. Another unused weapon may occupy the slot while it is armed. |
 | Piercing bomb | Rays spend range through soft blocks/barrels; hard walls stop them. Solid bombs chain and stop the ray. |
 | Power bomb | Affect eligible cells within Manhattan radius, ignoring line of sight. Hard walls remain intact without fire; blocks, barrels and bombs use the same immutable explosion plan. |
@@ -184,7 +184,7 @@ live transport/browser migration are separate increments. See [v7 contract](prot
    admission and routing; Classic still has empty item availability.
 7. Expanded configuration/generation with Heart activation, then Shield in a separate increment.
 8. Individual stat modifiers, Reverse/Diarrhea, special bombs, movement equipment, Stopwatch,
-   visibility effects, Oil and Teleporter, with interaction tests at each activation.
+   visibility effects, Oil, Teleporter and Wall Pass, with interaction tests at each activation.
 
 Each release needs a version bump, focused PR, independent review and existing gates. Test
 exact expiry, protection priority, modifiers together, independently expiring stacks, action

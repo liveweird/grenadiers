@@ -1,15 +1,16 @@
 # Gameplay and presentation backlog
 
-TURN, CONFIG and the first ART slice are implemented. This v0.3.42 candidate contains seventeen
+TURN, CONFIG and the first ART slice are implemented. This v0.3.43 source candidate contains eighteen
 optional pickups: Heart, Shield, Golden Flame, Short Fuse, Short Flame, Long Fuse, Reverse
 Controls, Diarrhea, Slow-foot, Piercing Bomb, Power Bomb, Remote Bomb, Landmine and Invisibility
-Cloak, Stopwatch, Invisible Bombs and Teleporter. Local checks are recorded as they complete; this candidate still requires independent
-review, predecessor integration, fresh native acceptance and final CI. The remaining requested pickups stay outside this increment. Current publication status
+Cloak, Stopwatch, Invisible Bombs, Teleporter and Wall Pass. Source review and static checks are
+complete; this candidate still requires predecessor integration, fresh native acceptance and final
+CI. The remaining requested pickups stay outside this increment. Current publication status
 is recorded in [release notes](https://github.com/liveweird/grenadiers/releases), with source-bound
 acceptance records in [verification](../verification.md). Richer transitions and artwork remain
 follow-up work; see [pixel-art presentation](pixel-art.md) and
 [expanded item implementation](expanded-items.md).
-Updated 2026-10-21 after Teleporter source activation. Release acceptance is recorded in
+Updated 2026-10-21 after Wall Pass source activation. Release acceptance is recorded in
 [verification](../verification.md).
 The [implementation plan](implementation-plan.md) remains the milestone/release reference;
 the [rules](rules.md) describe the current baseline and historical extension catalog.
@@ -126,7 +127,7 @@ needs remappable controls, input sequencing, replay and connection-generation fe
 | EQ-KICK / boot | Walking into a planted bomb slides it across the floor until a wall, another bomb or a player stops it. | Sliding speed, soft-block collision, contact priorities, fuse/chain behavior and bomb ownership; no tunneling. |
 | EQ-PUNCH / boxing glove | Punch an adjacent bomb three tiles forward over obstacles, wrapping at arena edges. | Action/direction, airborne collision and fuse behavior, landing on blocked cells, repeated punches; wrap logical arena cells rather than screen pixels, defining treatment of border walls. |
 | EQ-SHOVE / bracelet | Shove rival players when touching them. | Contact detection despite normally non-blocking players, displacement, cooldown, simultaneous shoves and collision/fire along the pushed path. |
-| EQ-WALL / wall pass | Phase through destructible soft blocks. | Hard walls/borders stay solid; interaction with bombs and hazards; safe resolution if replaced/removed while inside a block. |
+| EQ-WALL / wall pass | **Prepared in v0.3.43.** Phase through destructible soft blocks. | Hard walls, bombs and hazards stay effective. Replacement captures only positively overlapped soft cells as private exit grace; each cell is lost at full-footprint exit or tangency and cannot be re-entered. Source review is clear; native acceptance remains pending. |
 | EQ-HEART / heart | Absorb one lethal explosion or enemy collision, then vanish. | Simultaneous/overlapping hits, remaining in flame, protection precedence with Shield and post-hit grace. Enemy collision applies when an enemy damage system exists. |
 
 ## Timed buffs: multiple active effects allowed
@@ -181,5 +182,5 @@ including same-image Compose/Kubernetes acceptance. Bots, mobs and larger matche
 separate tracks; their future interactions must be specified without making them prerequisites.
 
 Complete the entire expanded-item activation batch before starting ART-ATLAS. Wall Pass is the
-next bounded item increment (v0.3.43); melee equipment and Oil remain after it. ART-ATLAS begins
+current bounded source increment (v0.3.43); melee equipment and Oil remain after it. ART-ATLAS begins
 only after those item increments and their release gates are complete.

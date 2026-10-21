@@ -20,6 +20,7 @@
     "scripts/*.mjs",
     "renderer-diagnostic-tests/**/*.spec.ts",
     "terrain-pixel-tests/**/*.spec.ts",
-    "remote-bomb-tests/**/*.spec.ts"
+    "remote-bomb-tests/**/*.spec.ts",
+    "wall-pass-tests/**/*.spec.ts"
   ]
 }

@@ -4,6 +4,7 @@ use grenadiers_core::{
 };
 
 use super::{
+    item_mask_plan::{ItemMaskPlan, PARTITION_CAPACITY},
     record::{Header, Journal, M5_LIFECYCLE_PROFILE, Operation, ReplayAction},
     replay,
     runner::{ReplayError, identity_for_profile},
@@ -187,16 +188,20 @@ fn configurable_rules_reject_the_legacy_lifecycle_profile() {
 
 #[test]
 fn expanded_item_masks_and_disabled_preset_replay_deterministically() {
-    let bits = [
+    let catalog = [
         16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144,
     ];
-    assert_eq!(bits.len(), 15);
-    for mask in 0_u32..32768 {
-        let enabled_bits = bits
-            .iter()
-            .enumerate()
-            .filter(|(index, _)| mask & (1 << index) != 0)
-            .fold(0, |enabled, (_, bit)| enabled | *bit);
+    assert_eq!(catalog.len(), 15);
+    let plan = ItemMaskPlan::checked(&catalog, EnabledItems::ALL.bits(), PARTITION_CAPACITY)
+        .unwrap_or_else(|error| panic!("invalid exhaustive item-mask plan: {error}"));
+    let selection = plan
+        .selection_from_environment()
+        .unwrap_or_else(|error| panic!("invalid item-mask partition selection: {error}"));
+    let context = ItemMaskPlan::context_from_environment()
+        .unwrap_or_else(|error| panic!("invalid item-mask gate context: {error}"));
+    let mut observed = 0;
+    for ordinal in selection.range.clone() {
+        let enabled_bits = plan.enabled_bits(ordinal);
         let enabled = EnabledItems::from_bits(enabled_bits).unwrap();
         let mut runtime = MatchRuntime::new(
             identity_for_profile(RoomProfile::ExpandedV5),
@@ -241,7 +246,9 @@ fn expanded_item_masks_and_disabled_preset_replay_deterministically() {
         assert_eq!(journal.header.generator_version, 2);
         assert_eq!(runtime.lifecycle().settings().enabled_items(), enabled);
         assert_eq!(replay(journal).unwrap(), runtime.replay_inspection());
+        observed += 1;
     }
+    plan.emit_completion(&selection, &context, observed);
 }
 
 #[test]

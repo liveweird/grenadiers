@@ -42,17 +42,18 @@ fn every_living_source_overlap_blocks_including_owner_frozen_and_hidden() {
         let source = CellId::new(4, 5);
         let mut state = game(Position::center(CellId::new(1, 1)), BTreeSet::new());
         moving_bomb(&mut state, 9, source, Direction::East, 0);
-        state.actors[0].position = Position::center(source);
+        let blocker = if condition == "owner" { 0 } else { 1 };
+        state.actors[blocker].position = Position::center(source);
         match condition {
             "owner" => {}
             "frozen" => {
-                state.actors[1]
+                state.actors[0]
                     .effects
                     .apply(EffectKind::Stopwatch, Tick(0))
                     .unwrap();
             }
             "hidden" => {
-                state.actors[0]
+                state.actors[1]
                     .effects
                     .apply(EffectKind::InvisibilityCloak, Tick(0))
                     .unwrap();

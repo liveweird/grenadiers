@@ -105,6 +105,42 @@ fn lane_correction_does_not_kick_sideways_then_forward_remainder_can_kick() {
 }
 
 #[test]
+fn an_actual_internal_correction_collision_never_surfaces_a_kick_request() {
+    // A naturally created turn correction is at most 256 units from its lane center. With a
+    // 320-unit half-footprint, that leaves 448 units to the next lane's blocking cell, so no
+    // legal correction can reach a newly encountered blocker. Exercise the collision branch
+    // directly with a physically legal actor/world and an intentionally longer pending turn.
+    let blocker = CellId::new(4, 4);
+    let mut state = game(Position::center(CellId::new(4, 5)), BTreeSet::new());
+    add_stationary(&mut state, 9, blocker);
+    state.replace_actor_equipment(SeatId::One, Equipment::Kick);
+    state.actors[0].held.press(Direction::East);
+    state.actors[0].pending_turn = Some(crate::game::simulation::TurnAssist {
+        direction: Direction::East,
+        target: Position::center(blocker).y,
+    });
+    let moving_at_start = BTreeSet::new();
+    let config = crate::game::movement::AdvanceConfig {
+        turn_assist: 256,
+        tick: Tick(1),
+        slow_foot_enabled: true,
+        wall_pass_enabled: true,
+        kick_enabled: true,
+        moving_at_start: &moving_at_start,
+    };
+
+    for _ in 0..4 {
+        let outcome =
+            crate::game::movement::advance_actor(&state.world, &mut state.actors[0], &config);
+        assert_eq!(outcome.kick, None);
+    }
+
+    assert_eq!(state.actors[0].position, tangent(blocker, Direction::North));
+    assert_eq!(state.world.bombs[&EntityId(9)].motion(), None);
+    assert!(state.actors[0].pending_turn.is_some());
+}
+
+#[test]
 fn zero_budget_from_slow_foot_and_stopwatch_freeze_cannot_request_kicks() {
     let cell = CellId::new(5, 5);
     let mut slow = game(tangent(cell, Direction::East), BTreeSet::new());

@@ -68,7 +68,7 @@ fn moving_at_start_cannot_redirect_after_stopping_or_becoming_due() {
     assert_eq!(stopped.world.bombs[&EntityId(9)].motion(), None);
 
     let mut due = game(west_tangent(source), BTreeSet::new());
-    add_motion(&mut due, 9, source, Direction::East, 0, Tick(1));
+    add_motion(&mut due, 9, source, Direction::North, 0, Tick(1));
     due.replace_actor_equipment(SeatId::One, Equipment::Kick);
     let report = due.step(&[press(Direction::East)]).unwrap();
     let event = report
@@ -76,7 +76,8 @@ fn moving_at_start_cannot_redirect_after_stopping_or_becoming_due() {
         .iter()
         .find(|event| matches!(event.kind, StepEventKind::BombDetonated(_)))
         .unwrap();
-    assert_eq!(event.bomb_motion.unwrap().direction(), Direction::East);
+    assert_eq!(event.bomb_motion.unwrap().direction(), Direction::North);
+    assert_eq!(event.bomb_motion.unwrap().countdown(), 0);
     assert!(event.bomb_has_been_kicked);
 }
 

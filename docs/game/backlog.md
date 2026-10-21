@@ -84,6 +84,12 @@ release baseline. Fourteen of 22 types were published; Stopwatch is the fifteent
 verified type and seven requested types remain after it. See
 [release notes](https://github.com/liveweird/grenadiers/releases) for current release status.
 
+The v0.3.41 source candidate adds opt-in [Invisible Bombs](invisible-bombs.md) as the sixteenth
+item while retaining the accepted v0.3.40 Stopwatch source and its corrected deadline-derived
+browser oracle. Its source checks are recorded in [verification](../verification.md), but fresh
+native acceptance and hosted release CI for the integrated v0.3.41 source remain pending. Six of
+the 22 requested item types remain outside this increment.
+
 The [implementation plan](implementation-plan.md) remains the milestone/release reference;
 the [rules](rules.md) describe the current baseline and historical extension catalog.
 This document records the requested Grenadiers behavior and decisions required before coding.

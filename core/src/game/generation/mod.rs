@@ -15,7 +15,6 @@ pub const EXPANDED_GENERATOR_VERSION: u16 = 2;
 const SAMPLE_LIMIT: u32 = 4_294_967_200;
 const MAX_DRAWS_PER_SAMPLE: usize = 16;
 
-/// Replay metadata retained by trusted domain code.
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub struct GenerationRecord {
     version: u16,
@@ -51,7 +50,6 @@ impl fmt::Debug for GenerationRecord {
     }
 }
 
-/// A generated arena and its server-private concealed pickup layer.
 #[derive(Clone, PartialEq, Eq)]
 pub struct GeneratedArena {
     arena: Arena,
@@ -92,7 +90,6 @@ impl fmt::Debug for GeneratedArena {
     }
 }
 
-/// Generates the version-one arena for an exact 32-byte seed.
 #[must_use]
 pub fn generate_arena(seed: [u8; 32]) -> GeneratedArena {
     let mut rng = ChaCha20Rng::from_seed(seed);
@@ -101,7 +98,6 @@ pub fn generate_arena(seed: [u8; 32]) -> GeneratedArena {
     generate_with_source(seed, &mut ChaChaWords(rng), classic_terrain())
 }
 
-/// Generates the version-two arena with the selected expanded item weights.
 #[must_use]
 pub fn generate_expanded_arena(seed: [u8; 32], enabled: EnabledItems) -> GeneratedArena {
     let mut rng = ChaCha20Rng::from_seed(seed);
@@ -216,6 +212,7 @@ fn sample_pickup(source: &mut impl RandomWords, enabled: EnabledItems) -> Option
     let landmine_end = remote_end + u32::from(enabled.contains_landmine()) * 15;
     let cloak_end = landmine_end + u32::from(enabled.contains_invisibility_cloak()) * 15;
     let stopwatch_end = cloak_end + u32::from(enabled.contains_stopwatch()) * 15;
+    let invisible_bombs_end = stopwatch_end + u32::from(enabled.contains_invisible_bombs()) * 15;
     Some(match value {
         0..40 => PickupKind::BombCapacity,
         40..80 => PickupKind::BlastRange,
@@ -235,6 +232,7 @@ fn sample_pickup(source: &mut impl RandomWords, enabled: EnabledItems) -> Option
         value if value < landmine_end => PickupKind::Landmine,
         value if value < cloak_end => PickupKind::InvisibilityCloak,
         value if value < stopwatch_end => PickupKind::Stopwatch,
+        value if value < invisible_bombs_end => PickupKind::InvisibleBombs,
         _ => unreachable!("sample value is bounded by the enabled item pool"),
     })
 }
@@ -368,6 +366,8 @@ mod diarrhea_tests;
 mod golden_flame_tests;
 #[cfg(test)]
 mod invisibility_cloak_tests;
+#[cfg(test)]
+mod invisible_bombs_tests;
 #[cfg(test)]
 #[path = "landmine_generation_tests.rs"]
 mod landmine_tests;

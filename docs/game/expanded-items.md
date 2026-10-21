@@ -76,6 +76,11 @@ pending at this checkpoint. Published v0.3.39 remains the parent and local deplo
 requested types remain after it. See [release notes](https://github.com/liveweird/grenadiers/releases)
 for current release status.
 
+The v0.3.41 source candidate adds [Invisible Bombs](invisible-bombs.md) as gameplay v9's sixteenth
+independent item. The integrated catalog has 65,536 subsets; all earlier mappings and the archived
+v8 catalog remain pinned. Prepared-source checks do not establish native acceptance or hosted
+release CI for this integrated candidate, and no v0.3.40 acceptance result is carried forward.
+
 This optional track follows the [backlog](backlog.md), shared settings and
 pixel-art increments. The historical catalog in [rules](rules.md) is not an implementation
 claim. Each activation requires its own reviewed behavior, UI, documentation and acceptance.

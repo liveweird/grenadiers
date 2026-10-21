@@ -18,11 +18,18 @@ impl Actor {
 }
 
 impl State {
-    pub(super) fn event_audience_for(&self, id: EntityId, at: Tick) -> EventAudience {
-        self.actors
+    pub(super) fn bomb_event_audience_for(&self, id: EntityId, at: Tick) -> EventAudience {
+        let mut audience = self
+            .actors
             .iter()
             .find(|actor| actor.id == id && actor.effects.hidden_from_opponents(at))
-            .map_or(EventAudience::Both, |actor| EventAudience::only(actor.seat))
+            .map_or(EventAudience::Both, |actor| EventAudience::only(actor.seat));
+        for actor in &self.actors {
+            if actor.effects.hides_bombs(at) {
+                audience = audience.without(actor.seat);
+            }
+        }
+        audience
     }
 
     #[must_use]

@@ -1546,6 +1546,42 @@ Diarrhea.
 Records below are frozen against their named sources. Publication and later CI status are
 recorded in [release notes](https://github.com/liveweird/grenadiers/releases).
 
+## Prepared v0.3.41 Invisible Bombs source — source-specific local checks
+
+This record is bound to prepared source `429460fb1ddb12f1612fc53cdd8096afdc3d1e70` and does not
+clear checks for the integrated source. It activates the 600-physical-tick Invisible Bombs curse.
+Domain tests cover ordinary seed-31 collection, own and rival bombs, event-time Cloak/blindness
+audience intersections, exact expiry, current-state reveal, death ordering and overflow rollback.
+Gameplay v9 publishes an empty bomb list only to afflicted recipients while keeping live counts,
+flames, collision and full pre-filter validation authoritative; gameplay v8 remains pinned to its
+fourteen-item catalog.
+
+At the prepared source, the required debug and release Rust suites passed 657 core tests and 198
+server tests, with four explicit server performance tests ignored. The first sandboxed debug
+attempt had 17 listener failures because local binds returned `PermissionDenied`; an authorized
+listener run then found one stale 15-item socket catalog assertion. After updating that assertion,
+debug and release passed.
+
+The prepared-source shuffled web gate passed 59 files and 82,344 tests with 95.43% statements,
+91.25% branches, 95.90% functions and 97.82% lines, plus production build, lint, Knip and generated
+contract checks. A test-only uniqueness guard initially raised the focused v9 contract count to
+65,545: all 65,536 masks plus nine focused guards passed. A prior duplicate-catalog fixture caused
+a failed 131,090-case reporter and is retained as failed evidence. Module initialization now checks
+the catalog's 16-entry length and uniqueness before constructing the parameter table; a negative
+fixture proves its enumerator is never called. The final focused run passed 65,546 tests, including
+that negative preflight proof.
+
+Prepared-source Rust coverage passed the unchanged 80% floor at 92.47% lines
+(13,527/14,629). E2E static checks passed 43 scenario/spec pairs with typecheck and lint. Renderer
+diagnostics, repository size/pin checks, offline dependency audits and strict validation of all
+three Kubernetes resources also passed. Independent browser review corrected the source-only proof
+without changing production code: blind P1 placement derives its ID from P2's sighted stream, the
+compositor baseline uses the same cell after collection and before planting, and paired adjacent
+publication windows prove hidden-before/revealed-after state with the same current fuse.
+
+No native Compose/Kubernetes acceptance or hosted CI is claimed for v0.3.41. Before native
+acceptance, the integrated source still requires its source-bound full gates and independent review.
+
 ## Historical prepared v0.3.40 Stopwatch source — source-specific local checks
 
 At this historical preparation checkpoint, v0.3.39 publication and exact tree verification still

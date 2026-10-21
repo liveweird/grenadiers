@@ -114,7 +114,7 @@ describe('v9 authoritative gameplay settings', () => {
       ...baseline.room.settings,
       enabledItems: [
         'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch', 'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame',
-        'longFuse', 'reverseControls',
+        'longFuse', 'reverseControls', 'invisibleBombs',
       ],
     })).toBe(true)
     expect(socket.sent).toHaveLength(sent + 1)

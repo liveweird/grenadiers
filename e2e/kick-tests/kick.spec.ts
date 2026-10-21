@@ -91,11 +91,11 @@ test('Kick moves one retained bomb through authoritative cells without extra cue
       })
       await moveSeatTo(one, games[0], 'one', { column: 4, row: 1 })
       const kickFloor = latestSnapshot(games[0])!.room.revision
-      const beforePixels = await Promise.all([one, two].map((page) => arenaTilePixels(page, 3, 1)))
       await one.keyboard.down('ArrowLeft')
       try {
-        await expect.poll(() => latestSnapshot(games[0])!.state.bombs.find(({ id }) => id === demo.id)?.cell)
-          .toEqual({ column: 1, row: 1 })
+        await Promise.all(games.map((game) => expect.poll(() =>
+          latestSnapshot(game)!.state.bombs.find(({ id }) => id === demo.id)?.cell)
+          .toEqual({ column: 1, row: 1 })))
       } finally { await one.keyboard.up('ArrowLeft') }
       for (const game of games) {
         const stream = snapshots(game).filter(({ room }) => room.revision > kickFloor)
@@ -112,17 +112,21 @@ test('Kick moves one retained bomb through authoritative cells without extra cue
           blast: demo.blast, trigger: expect.objectContaining({ type: 'timed', paused: false }),
         })
       }
-      const afterPixels = await Promise.all([one, two].map((page) => arenaTilePixels(page, 3, 1)))
-      expect(afterPixels[0]).not.toEqual(beforePixels[0])
-      expect(afterPixels[1]).not.toEqual(beforePixels[1])
+
+      await moveSeatTo(one, games[0], 'one', { column: 3, row: 1 })
+      await moveSeatTo(one, games[0], 'one', { column: 3, row: 2 })
+      await Promise.all(games.map((game) => expect.poll(() =>
+        visibleActor(latestSnapshot(game), 'one')?.position).toEqual(actor(games[0]).position)))
+      const stoppedPixels = await Promise.all([one, two].map((page) => arenaTilePixels(page, 1, 1)))
+      const vacatedPixels = await Promise.all([one, two].map((page) => arenaTilePixels(page, 3, 1)))
+      expect(stoppedPixels[0]).not.toEqual(vacatedPixels[0])
+      expect(stoppedPixels[1]).not.toEqual(vacatedPixels[1])
       await one.screenshot({ path: info.outputPath('kick-stopped-desktop-en.png'), fullPage: true })
       expect(await two.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false)
       await two.screenshot({ path: info.outputPath('kick-stopped-polish-320-reduced.png'), fullPage: true })
 
-      await moveSeatTo(one, games[0], 'one', { column: 3, row: 1 })
-      await moveSeatTo(one, games[0], 'one', { column: 3, row: 2 })
-      await expect.poll(() => detonatedAfter(games[0], beforePlant)
-        .find(({ bomb }) => bomb.id === demo.id)).toBeTruthy()
+      await Promise.all(games.map((game) => expect.poll(() => detonatedAfter(game, beforePlant)
+        .find(({ bomb }) => bomb.id === demo.id)).toBeTruthy()))
       for (const game of games) {
         const detonation = detonatedAfter(game, beforePlant).find(({ bomb }) => bomb.id === demo.id)!
         expect(detonation.tick).toBe(demo.placedAt + 300)
@@ -130,7 +134,9 @@ test('Kick moves one retained bomb through authoritative cells without extra cue
           id: demo.id, cell: { column: 1, row: 1 }, owner: demo.owner,
           range: demo.range, placedAt: demo.placedAt, blast: demo.blast,
         })
-        expect(actor(game).alive).toBe(true)
+        for (const seat of ['one', 'two'] as const) {
+          expect(visibleActor(latestSnapshot(game), seat)?.alive).toBe(true)
+        }
       }
     } finally {
       await Promise.all(contexts.map(async (context) => {

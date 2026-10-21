@@ -8,7 +8,9 @@ reveal and collect Kick with an ordinary bomb, then use a second ordinary bomb t
 corridor. A demo bomb is planted at `(3,1)` and the holder walks west into it using real keyboard
 input. Both public streams retain the same entity ID and observe ordered cells `(3,1)`, `(2,1)`,
 `(1,1)` with unchanged owner, range, placement tick, Timed trigger and Standard blast. The movement
-creates no extra placement event. Both clients capture the stopped bomb and vacated source cell.
-The holder escapes through `(3,2)` and both clients observe natural detonation at `placedAt + 300`
-from `(1,1)` while both actors survive. The scenario uses ordinary UI actions, native keys and
-read-only socket observation without injection, seed search, retries or extended budgets.
+creates no extra placement event. Both public streams first reach the stopped state. The holder then
+escapes through `(3,1)` into safe cell `(3,2)` before either screenshot or compositor crop is taken.
+Both clients capture the stopped bomb at `(1,1)` and the unobscured vacated source cell `(3,1)`, then
+observe the same-ID natural detonation at `placedAt + 300`. Both public views show both actors alive.
+The scenario uses ordinary UI actions, native keys and read-only socket observation without
+injection, seed search, retries or extended budgets.

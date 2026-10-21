@@ -1,9 +1,10 @@
 use super::State;
 use crate::game::events::{EventAudience, StepEvent, StepEventKind};
-use crate::game::explosions::{self, ExplosionError};
+use crate::game::explosions;
 use crate::game::simulation::StepError;
 use crate::game::types::{EntityId, Tick};
 use crate::game::view::BombView;
+use std::collections::BTreeSet;
 
 impl State {
     pub(super) fn expire_flames(&mut self, tick: Tick) {
@@ -14,13 +15,12 @@ impl State {
         &mut self,
         tick: Tick,
         remote_targets: [Option<EntityId>; 2],
+        contact_targets: BTreeSet<EntityId>,
         events: &mut Vec<StepEvent>,
     ) -> Result<(), StepError> {
         let plan =
-            explosions::plan(&self.world, tick, remote_targets).map_err(|error| match error {
-                ExplosionError::UnsupportedBombTrigger(id) => StepError::UnsupportedBombTrigger(id),
-            })?;
-        if plan.detonated.is_empty() {
+            explosions::plan_with_contacts(&self.world, tick, remote_targets, &contact_targets);
+        if plan.detonated.is_empty() && plan.destroyed_mines.is_empty() {
             return Ok(());
         }
 
@@ -38,7 +38,12 @@ impl State {
             self.world.bombs.remove(id);
         }
         for actor in &mut self.actors {
-            actor.bomb_grace.retain(|id| !plan.detonated.contains(id));
+            actor
+                .bomb_grace
+                .retain(|id| !plan.detonated.contains(id) && !plan.destroyed_mines.contains(id));
+        }
+        for id in &plan.destroyed_mines {
+            self.world.bombs.remove(id);
         }
         self.world
             .pickups

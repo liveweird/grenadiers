@@ -322,6 +322,7 @@ fn wire_pickup(value: game::PickupKind) -> PickupKind {
         game::PickupKind::RemoteBomb => PickupKind::RemoteBomb,
         game::PickupKind::PiercingBomb => PickupKind::PiercingBomb,
         game::PickupKind::PowerBomb => PickupKind::PowerBomb,
+        game::PickupKind::Landmine => PickupKind::Landmine,
         game::PickupKind::Shield => PickupKind::Shield,
         game::PickupKind::GoldenFlame => PickupKind::GoldenFlame,
         game::PickupKind::ShortFuse => PickupKind::ShortFuse,

@@ -260,10 +260,12 @@ impl State {
             .keys()
             .next_back()
             .map_or(0, |id| u64::from(id.0) + 1);
+        let mut initialized = canonical.map(|actor| Actor::new(actor, rules));
+        contacts::initialize_grace(&world, &mut initialized);
         Ok(Self {
             rules,
             world,
-            actors: canonical.map(|actor| Actor::new(actor, rules)),
+            actors: initialized,
             tick,
             next_entity_id,
             running_updates: 0,
@@ -315,30 +317,10 @@ impl State {
     }
 }
 
-impl Actor {
-    fn new(init: ActorInit, rules: RulesConfig) -> Self {
-        Self {
-            id: init.id,
-            seat: init.seat,
-            position: init.position,
-            heading: init.heading,
-            speed: init.speed,
-            held: HeldDirections::default(),
-            residual: 0,
-            pending_turn: None,
-            bomb_grace: BTreeSet::new(),
-            capacity: rules.bomb_capacity(),
-            range: rules.bomb_range(),
-            alive: true,
-            inventory: Inventory::default(),
-            effects: TimedEffects::default(),
-            damage_grace: None,
-        }
-    }
-}
-
 #[path = "simulation_actions.rs"]
 mod actions;
+#[path = "simulation_actor.rs"]
+mod actor_state;
 #[cfg(test)]
 #[path = "bomb_order_acceptance_tests.rs"]
 mod bomb_order_acceptance_tests;
@@ -348,6 +330,7 @@ mod bomb_trigger_tests;
 #[cfg(test)]
 #[path = "simulation_constructor_tests.rs"]
 mod constructor_tests;
+mod contacts;
 #[cfg(test)]
 #[path = "damage_tests.rs"]
 mod damage_tests;
@@ -362,6 +345,14 @@ mod golden_flame_tests;
 #[cfg(test)]
 #[path = "item_foundation_tests.rs"]
 mod item_foundation_tests;
+#[cfg(test)]
+#[path = "simulation/landmine_acceptance_tests.rs"]
+mod landmine_acceptance_tests;
+#[cfg(test)]
+#[path = "simulation/landmine_route_tests.rs"]
+mod landmine_route_tests;
+#[cfg(test)]
+mod landmine_tests;
 #[path = "simulation_observations.rs"]
 mod observations;
 #[path = "simulation_pickups.rs"]

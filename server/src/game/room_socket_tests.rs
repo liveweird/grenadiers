@@ -113,6 +113,7 @@ async fn two_members_receive_personalized_admission_and_live_waiting_updates() {
             "remoteBomb",
             "piercingBomb",
             "powerBomb",
+            "landmine",
             "shield",
             "goldenFlame",
             "shortFuse",

@@ -2,7 +2,7 @@ import type { SnapshotMessage } from '../arena/types'
 import type { GameClientState } from './clientTypes'
 
 const renderedPickups = new Set([
-  'bombCapacity', 'blastRange', 'movementSpeed', 'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'shield', 'goldenFlame', 'shortFuse',
+  'bombCapacity', 'blastRange', 'movementSpeed', 'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'goldenFlame', 'shortFuse',
   'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls',
 ])
 
@@ -33,6 +33,7 @@ export function presentSnapshot(state: GameClientState): SnapshotMessage | null 
             bomb.owner === id && bomb.trigger.type === 'remote'),
           piercingArmed: inventory.weapon === 'piercingBomb',
           powerArmed: inventory.weapon === 'powerBomb',
+          landmineStored: inventory.weapon === 'landmine',
           shieldRemainingTicks: effects.find((effect) => effect.kind === 'shield')?.remainingTicks ?? 0,
           goldenFlameRemainingTicks:
             effects.find((effect) => effect.kind === 'goldenFlame')?.remainingTicks ?? 0,
@@ -53,7 +54,7 @@ export function presentSnapshot(state: GameClientState): SnapshotMessage | null 
       flames: snapshot.state.flames,
       pickups: snapshot.state.pickups.filter(
         (pickup): pickup is typeof pickup & {
-          kind: 'bombCapacity' | 'blastRange' | 'movementSpeed' | 'heart' | 'remoteBomb' | 'piercingBomb' | 'powerBomb' | 'shield'
+          kind: 'bombCapacity' | 'blastRange' | 'movementSpeed' | 'heart' | 'remoteBomb' | 'piercingBomb' | 'powerBomb' | 'landmine' | 'shield'
             | 'goldenFlame' | 'shortFuse' | 'diarrhea' | 'slowFoot' | 'shortFlame' | 'longFuse'
             | 'reverseControls'
         } =>

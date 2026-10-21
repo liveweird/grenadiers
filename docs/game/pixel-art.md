@@ -1,5 +1,7 @@
 # Retro pixel-art courtyard
 
+The latest Landmine desktop and Polish 320px captures were refreshed from corrected source `420d8df` and tested image1736. The pressure plate/consumed charge/no-flame state and normal HUD layout were visually reviewed; these stills precede contact and do not replace behavioral assertions. Kubernetes captures were retained without visual review.
+
 Implemented in v0.3.18. [Actual application captures](../screenshots/pixel-art.md) and the
 [verification record](../verification.md) cover both deployment paths.
 
@@ -84,3 +86,13 @@ the unfocused-arena prompt. The reviewed Compose captures have no observed unint
 Kubernetes captures were not visually reviewed. Native assertions establish the 183-tick wait,
 exact-ID activation without another placement and the following fresh Standard bomb. The native
 evidence audit is clear and its final manifest is sealed.
+
+
+Landmine adds a visible pressure plate and localized thirteenth rule switch. Fresh reviewed
+Compose [English desktop](../screenshots/landmine-desktop.png) and
+[Polish 320px](../screenshots/landmine-polish-320.png) captures show the mine at (3,1), its owner
+at (2,1), charge consumed and no flames. HUD labels fit; Polish uses normal vertical scrolling
+and the intentional unfocused-arena prompt. No unintended overlap was observed. Kubernetes
+captures were retained but not visually reviewed. Paired native assertions establish exit grace,
+persistence past 183 ticks and exact contact detonation; the following fresh Timed Standard bomb
+is a separate core regression, not an additional native assertion.

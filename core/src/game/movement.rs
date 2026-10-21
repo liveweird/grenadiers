@@ -237,6 +237,7 @@ fn blocking_cells(world: &World) -> impl Iterator<Item = (CellId, Option<EntityI
         world
             .bombs
             .values()
+            .filter(|bomb| !matches!(bomb.trigger(), super::BombTrigger::Contact))
             .map(|bomb| (bomb.cell(), Some(bomb.id()))),
     )
 }

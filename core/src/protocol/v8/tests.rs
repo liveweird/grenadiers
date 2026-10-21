@@ -377,6 +377,8 @@ mod shield_tests;
 
 #[path = "golden_flame_tests.rs"]
 mod golden_flame_tests;
+#[path = "landmine_tests.rs"]
+mod landmine_tests;
 
 #[path = "diarrhea_tests.rs"]
 mod diarrhea_tests;

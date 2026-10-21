@@ -1,10 +1,17 @@
 # Changelog
 
+## 0.3.37 — 2026-10-21
+
+- Correct Remote/Landmine rolling-history assertions using causal placement IDs; preserve Piercing/Power CI diagnostics. Fresh corrected-source acceptance passes 100/100 Compose/Kubernetes cases, independently audited and sealed; new exact-head CI and publication remain gates.
+- Add opt-in Landmine as a passable, untimed Standard bomb that detonates on swept actor contact after per-actor exit grace.
+- Preserve movement ordering and immutable explosion planning: accepted contact wins, while fire and other blasts silently destroy untriggered mines without extending rays.
+- Add the thirteenth lobby switch, checked v8 state and events, replay coverage, English and Polish pressure-plate cues, and a deterministic production-seed browser scenario. Fresh same-image acceptance passes 50 Compose and 50 Kubernetes cases with zero retries; the raw audit is clear and evidence sealed. Publication requires exact-head candidate and post-merge CI.
+
 ## 0.3.36 — 2026-10-21
 
 - Add opt-in Remote Bomb as a one-charge weapon whose placed bomb waits without a fuse for its owner's next manual bomb action.
 - Preserve fire and chain detonation, transactional action resolution, one armed bomb per owner, and independent replacement weapons.
-- Add the twelfth lobby switch, checked v8 state and events, replay coverage, English and Polish cues, and a deterministic production-seed browser scenario. Fresh same-image native acceptance passes all 49 Compose and 49 Kubernetes cases with zero retries; the evidence audit is clear and sealed. Native evidence and documentation review are clear; publication requires exact-head candidate and post-merge CI.
+- Add the twelfth lobby switch, checked v8 state and events, replay coverage, English and Polish cues, and a deterministic production-seed browser scenario. Fresh same-image native acceptance passes all 49 Compose and 49 Kubernetes cases with zero retries; the evidence audit is clear and sealed. Both five-job candidate workflows and the five-job post-merge workflow pass all 49 browser cases; PR 82 is merged, the source release is published, and the accepted image is deployed locally.
 
 ## 0.3.35 — 2026-10-20
 

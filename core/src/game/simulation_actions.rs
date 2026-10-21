@@ -160,7 +160,7 @@ impl State {
                     SpecialWeapon::Piercing => self.rules.enabled_items().contains_piercing_bomb(),
                     SpecialWeapon::Power => self.rules.enabled_items().contains_power_bomb(),
                     SpecialWeapon::Remote => self.rules.enabled_items().contains_remote_bomb(),
-                    SpecialWeapon::Landmine => false,
+                    SpecialWeapon::Landmine => self.rules.enabled_items().contains_landmine(),
                 })
             } else {
                 None
@@ -181,6 +181,15 @@ impl State {
                     actor.effective_bomb_range(tick),
                     tick,
                     BombTrigger::Remote,
+                )
+            } else if weapon == Some(SpecialWeapon::Landmine) {
+                Bomb::new(
+                    id,
+                    cell,
+                    actor.id,
+                    actor.effective_bomb_range(tick),
+                    tick,
+                    BombTrigger::Contact,
                 )
             } else {
                 let Some(fuse_ticks) = actor

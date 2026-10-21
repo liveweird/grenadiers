@@ -27,7 +27,7 @@ export function itemSetSemanticError(
 }
 
 const supportedItems = [
-  'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'shield', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse',
+  'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse',
   'reverseControls',
 ] as const
 
@@ -47,6 +47,9 @@ function supportedBomb(bomb: BombView, enabled: ReadonlySet<ItemId>): boolean {
   if (bomb.trigger.type === 'remote') {
     return enabled.has('remoteBomb') && bomb.blast === 'standard'
   }
+  if (bomb.trigger.type === 'contact') {
+    return enabled.has('landmine') && bomb.blast === 'standard'
+  }
   return bomb.trigger.type === 'timed' && !bomb.trigger.paused
     && (bomb.blast === 'standard'
       || (bomb.blast === 'piercing' && enabled.has('piercingBomb'))
@@ -64,7 +67,8 @@ function supportedState(state: GameState | null, enabled: ReadonlySet<ItemId>): 
     (actor.inventory.weapon === null
       || (actor.inventory.weapon === 'piercingBomb' && enabled.has('piercingBomb'))
       || (actor.inventory.weapon === 'remoteBomb' && enabled.has('remoteBomb'))
-      || (actor.inventory.weapon === 'powerBomb' && enabled.has('powerBomb')))
+      || (actor.inventory.weapon === 'powerBomb' && enabled.has('powerBomb'))
+      || (actor.inventory.weapon === 'landmine' && enabled.has('landmine')))
     && (actor.inventory.equipment === null
       || (actor.inventory.equipment === 'heart' && enabled.has('heart')))
     && actor.effects.every((effect) => supportedEffect(effect, enabled))

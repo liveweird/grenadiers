@@ -51,11 +51,19 @@ impl State {
         self.expire_actor_effects(self.tick, next_tick);
         self.world.expose_flame_free_pickups();
         let manual_actions = self.apply_inputs(inputs);
+        let alive_at_movement_start = self.actors.each_ref().map(|actor| actor.alive);
+        let grace_at_movement_start = self.actors.each_ref().map(|actor| actor.bomb_grace.clone());
         let traces = self.move_living(next_tick);
+        let contact_targets = super::contacts::accepted_contact_ids(
+            &self.world,
+            &traces,
+            alive_at_movement_start,
+            &grace_at_movement_start,
+        );
         self.kill_on_existing_flames(&traces, next_tick, &mut events, &mut shield_prevented);
         let remote_targets =
             self.resolve_classic_manual_actions(&manual_actions, next_tick, &mut events);
-        self.resolve_explosions(next_tick, remote_targets, &mut events)?;
+        self.resolve_explosions(next_tick, remote_targets, contact_targets, &mut events)?;
         self.kill_on_final_flames(next_tick, &mut events, &mut shield_prevented);
         if let Err(error) = self.collect_pickups(next_tick, &mut events) {
             debug_assert!(matches!(error, StepError::EffectExpiryOverflow(_)));

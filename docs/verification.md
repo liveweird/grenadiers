@@ -1,6 +1,73 @@
 # Repository verification
 
-## Current candidate — source correction, fresh acceptance pending
+## Latest native acceptance checkpoint — 2026-10-21 16:47 UTC — 102/102
+
+At this checkpoint, frozen source `1c6724fb5599b9f7f9625af05db295aa7c4ab3b2`, tree
+`403bb73fe619840adeb086e537535b892cd9bec8`, passed the complete corrected-source matrix on image
+`sha256:960976c9cda7a04871429ca99f7b0c5fdc94f970a685a10183b63ffe17e77b93`, ref
+`grenadiers-v0338-cloak-native-recheck:1c6724f`. Source archive SHA256 is
+`98a246db2eda7e6915cc5a5dfd2e7114005e983bbc1b28971b5bb0c453cf74ec`. Root PTY 23208
+completed with actual exit zero at `2026-10-21T16:47:07.611922+00:00`; its exit was consumed.
+The independent raw audit is clear. The final manifest seals 2,298 payloads under SHA256
+`7b2f24235019d70b3207a6ed99adf6264c45347083bce397eaa873107a0ec14e`; 2,299 durable files
+and the separate source archive are byte-verified and read-only.
+
+The fresh matrix passes **51 Compose plus 51 Kubernetes** cases, all 44 groups and reports,
+74/74 baseline plus 28/28 optional cases, with zero retries and zero carried passes. It retains
+106 runtime PNGs, 34 runtime image/security records, 17 distinct Kubernetes pod UIDs and
+port-forward lifecycles, 16 external fixtures and 32 mode-0444 records. Runtime
+UID/GID 65532:65532, CapEff 0, NoNewPrivs 1 and read-only root pass. Strict stdin Kubernetes
+validation reports three valid resources, and the pinned vulnerability scan reports zero
+HIGH/CRITICAL findings under the configured policy. All frozen source, dependency, lock,
+archive, preparation and image integrity comparisons match.
+
+All 22 latency cases per target pass. Every local and shaped profile retains all 20 observations;
+no observation exceeds the unchanged 250 ms limit.
+
+| Target | Local maximum | Shaped 50 ms maximum | Exceedances |
+| --- | ---: | ---: | ---: |
+| Compose | 56.449953 ms | 148.933439 ms | 0 |
+| Kubernetes | 55.565752 ms | 166.100548 ms | 0 |
+
+Compose CPU usage changed from 596028 to 1156447 us, delta 560419 us, under cpu.max
+`max 100000`; Kubernetes changed from 471529 to 1044257 us, delta 572728 us, under cpu.max
+`50000 100000`. Throttle-count/time deltas are zero for both. Supplemental v2 monitors retained
+48 Compose and 52 Kubernetes samples and completed with actual exit zero. CPU intervals include
+pre-gate waiting and sampler probes, so they are not pure gameplay cost; optional cpu.pressure is
+unavailable. Managed-worker acknowledgements and five fresh quiet host samples preceded each
+approved window. Bounded helper checks ran between windows, followed by a fresh Kubernetes
+acknowledgement. There is no globally idle host or continuous worker-hold claim. Auxiliary debug
+work began after both windows. No threshold, sample count, timeout, fixture, retry policy or
+product behavior was relaxed.
+
+Root actually viewed only two fresh Compose pre-collection captures: [English desktop](screenshots/invisibility-cloak-desktop.png)
+and [Polish 320px reduced motion](screenshots/invisibility-cloak-polish-320.png). The hooded pickup,
+arena and localized HUD/settings are readable; Polish vertical scrolling and the unfocused-arena
+prompt are expected. These stills do not prove privacy. Paired browser assertions establish
+natural acquisition, owner visibility, exact peer-hidden identity/private cue, compositor
+removal, reconnect retention and current-position reveal at collection plus 600 physical ticks.
+Kubernetes captures are retained but were not visually reviewed.
+
+Every one of the 17 Kubernetes port-forward lifecycles had a first startup probe return 000 while
+the forward started; each second health and readiness probe returned 200 with `no-store`, and all
+browser cases passed. These startup probes are distinct from browser-test retries, which remain
+zero. A retained POSIX-global label variable produces nested names for successful second-probe
+and seeded-runtime records. Their ordered lifecycle, pod UID and seed associations were
+independently verified; flat filename pairing is not claimed.
+
+Cleanup confirmed all owned Compose containers/network, Kubernetes namespace, ports 18284/18285
+and port-forwards were absent. At this checkpoint, localhost:8085 served accepted published v0.3.37 image
+`sha256:1736d19303b9859ef66cd224ae316e0de1e5e14db2227fdaa86f7bba4f2443a7`; health, readiness
+and index return 200 and served index/bundle bytes equal the container.
+
+Correction `92fe626` now passes both targets. Earlier source `4d9a751`, its image `6e372a7c`, and
+PR #84's failed old head `97a85d4` remain immutable source-specific history with zero carry.
+At this checkpoint, PR #84 was still draft. Both new seven-job/51-case candidate workflows,
+merge and post-merge CI, publication, exact-image local promotion and tag CI remained pending;
+v0.3.38 was not published, and no registry push or hosted deployment was claimed. See the
+[release notes](https://github.com/liveweird/grenadiers/releases) for current release status.
+
+## Historical correction checkpoint — before fresh corrected-source acceptance
 
 PR #84 at `97a85d4` failed its item shard in the default duel: all three configured
 attempts measured zero HUD grids after two full-page result screenshots outlasted the
@@ -15,7 +82,7 @@ threshold or product behavior changed. Fresh full native and release CI gates re
 The sealed evidence below applies only to its named earlier source; it does not accept this
 changed candidate. Localhost:8085 remains the published v0.3.37 image.
 
-## Earlier Cloak source — 2026-10-21 — source-specific 102/102, audited and sealed
+## Historical earlier Cloak source — 2026-10-21 — source-specific 102/102, audited and sealed
 
 Frozen source `4d9a751810b0620e4761dfd7bcf813596f2f82ae`, tree
 `39c77c6ca2c835240e31a0d20261175c45ba5bef`, retains all runtime behavior from the earlier Cloak

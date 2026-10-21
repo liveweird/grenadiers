@@ -22,25 +22,26 @@ contains fourteen items and supports all 16384 subsets. Gameplay wire version 8,
 generator version 2 and journal format 2 remain unchanged, so older v8 clients must reload.
 
 
-Current driver correction `92fe626` is source-reviewed and passes bounded static checks,
-but remains unreleased and requires fresh complete native and release CI acceptance. PR #84
-exposed a result-screen HUD timing race; the complete narrow HUD proof now runs before
-movement in stable running state. Published/local deployment remains v0.3.37. The following
-evidence is historical and specific to the earlier source, with no carried acceptance.
-
-Earlier corrected source `4d9a751` / image `6e372a7c` passes 51 Compose and 51 Kubernetes cases
-with zero retries or carried passes. The 2,296-payload final evidence seal is
-`b6a1fdcda68b1a91f5e05646fd424a990deff83a27654ef09dcbda04bf92eae2`. Both clients prove natural acquisition; the owner retains its actor and timed
+At the 21 October 2026 16:47 UTC native acceptance checkpoint, corrected source `1c6724f`, tree
+`403bb73f`, and image `960976c9` passed fresh 51 Compose plus
+51 Kubernetes acceptance with zero retries or carried passes. The independent raw audit is clear;
+the 2,298-payload final evidence seal is
+`7b2f24235019d70b3207a6ed99adf6264c45347083bce397eaa873107a0ec14e`, and all 2,299 durable
+files are byte-verified. Both clients prove natural acquisition; the owner retains its actor and timed
 effect while the peer receives only the hidden identity and no attributable collection cue.
 Compositor pixels prove peer removal, reconnect preserves privacy, and the actor reappears at
-its current settled position after exactly 600 physical ticks. Independent raw review is clear
-and evidence sealed. Exact-head candidate/post-merge CI must pass seven jobs and all 51 browser cases; publication remains a separate gate.
+its current settled position after exactly 600 physical ticks. The earlier `4d9a751` pass and
+failed PR #84 head `97a85d4` remain historical with zero carry. At that checkpoint, exact-head
+candidate/post-merge CI still had to pass seven jobs and all 51 browser cases; publication and
+promotion were separate gates, and published/local deployment was v0.3.37. See the
+[release notes](https://github.com/liveweird/grenadiers/releases) for current release status.
 
 
 Fresh reviewed Compose [English desktop](../screenshots/invisibility-cloak-desktop.png) and
 [Polish 320px reduced-motion](../screenshots/invisibility-cloak-polish-320.png) captures show the
-Cloak pickup before collection and readable localized HUD/settings. Polish uses normal vertical
-scrolling. These stills do not prove actor privacy: the paired native assertions establish owner
+Cloak pickup before collection and readable localized HUD/settings. Root actually viewed only
+these two Compose captures. Polish uses normal vertical scrolling and the unfocused-arena prompt
+is expected. These stills do not prove actor privacy: the paired native assertions establish owner
 visibility, exact peer-hidden actor shape, compositor removal, reconnect and current-position
 reveal at the physical deadline. Kubernetes captures are retained but were not visually reviewed.
 

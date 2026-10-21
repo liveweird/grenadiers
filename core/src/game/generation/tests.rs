@@ -6,6 +6,8 @@ use crate::game::{
     SpeedLevel, State, World,
 };
 
+#[path = "kick_preservation_tests.rs"]
+mod kick_preservation_tests;
 #[path = "kick_tests.rs"]
 mod kick_tests;
 

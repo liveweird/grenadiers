@@ -5,9 +5,10 @@ application on port 8085. Active matches live in that process, so the initial de
 intentionally runs one replica with a `Recreate` update strategy. A restart ends active matches;
 horizontal scaling and recovery require match routing and persistence designs first.
 
-Deploy the v0.3.42 server and web assets together and reload connected browsers. Gameplay v10 has
-an exact seventeen-item catalog and publishes authoritative teleport position epochs alongside
-recipient-private actors, bombs and events. Gameplay-v9 clients fail
+Deploy the v0.3.43 server and web assets together and reload connected browsers. Gameplay v10 has
+an exact eighteen-item catalog, publishes authoritative teleport position epochs and retains Wall
+Pass exit grace as private server state alongside recipient-private actors, bombs and events.
+Gameplay-v9 clients fail
 version negotiation before credential lookup. No storage migration is required; active matches
 remain process-local.
 
@@ -403,4 +404,20 @@ docker compose -f docker-compose.yaml -f docker-compose.teleporter.yaml down
 The read-only repeating-byte-31 fixture enables an ordinary keyboard route with only Teleporter.
 The two-browser scenario proves a safe atomic swap and new position marker, reconnect state taken
 directly from a fresh admission, and an unsafe consumed pickup without movement or marker change.
+Run it against the final predecessor-integrated image together with the cumulative native matrix.
+
+## Reproduce opt-in Wall Pass movement
+
+```sh
+chmod 444 core/tests/fixtures/arena-v2-wall-pass.seed
+docker compose -f docker-compose.yaml -f docker-compose.wall-pass.yaml up -d --no-build --force-recreate app
+E2E_WALL_PASS_FIXTURE=arena-v2-wall-pass npm --prefix e2e run test:wall-pass
+docker compose -f docker-compose.yaml -f docker-compose.wall-pass.yaml down
+```
+
+The read-only repeating-byte-31 fixture enables an ordinary keyboard route with only Wall Pass.
+The two-browser scenario proves intact-block passage and presentation, rejected placement, hard-wall
+clamping, and state from a strictly newer reconnect admission before exiting the block. It writes
+the English desktop and Polish 320-pixel reduced-motion full-page captures named in the scenario.
+This sole-item route does not cover equipment-replacement grace; focused core and protocol tests do.
 Run it against the final predecessor-integrated image together with the cumulative native matrix.

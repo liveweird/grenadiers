@@ -1,6 +1,6 @@
 {
   "name": "grenadiers-e2e",
-  "version": "0.0.0",
+  "version": "0.3.43",
   "private": true,
   "license": "UNLICENSED",
   "description": "Browser black-box tests against the complete Grenadiers stack",

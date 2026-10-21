@@ -272,6 +272,8 @@ jobs:
             e2e/playwright-reverse-controls-report/
             e2e/playwright-diarrhea-report/
             e2e/playwright-slow-foot-report/
+            e2e/playwright-piercing-bomb-report/
+            e2e/playwright-power-bomb-report/
             e2e/playwright-remote-bomb-report/
             e2e/playwright-landmine-report/
             e2e/playwright-invisibility-cloak-report/

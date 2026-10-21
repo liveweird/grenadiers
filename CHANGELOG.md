@@ -4,8 +4,8 @@
 
 - Add opt-in Invisibility Cloak with a 600-physical-tick refreshable actor-privacy effect.
 - Publish exact hidden actors and event-time private attributable cues while retaining public bombs, hazards, elimination and results.
-- Add the fourteenth lobby switch, checked asymmetric v8 publication, replay coverage, English and Polish cues, and a deterministic compositor-based browser scenario. Fresh corrected-source acceptance passes 51 Compose and 51 Kubernetes cases with zero retries; independent review is clear and 2,296 evidence payloads are sealed. Seven-job candidate/post-merge CI and publication remain gates.
-- Preserve the 20-minute browser-job limit by dividing complete coverage between item and classic jobs using one verified image. Check responsive result grids before accessibility scans to avoid reading grids after the result screen closes.
+- Add the fourteenth lobby switch, checked asymmetric v8 publication, replay coverage, English and Polish cues, and a deterministic compositor-based browser scenario. Earlier source `4d9a751` passes 51 Compose and 51 Kubernetes cases with zero retries; its 2,296 sealed evidence payloads do not accept the subsequent driver correction. Fresh native, seven-job candidate/post-merge CI and publication remain gates.
+- Preserve the 20-minute browser-job limit by dividing complete coverage between item and classic jobs using one verified image. CI then exposed a result-screen HUD race; move the complete 320px HUD layout proof into stable running state before gameplay. This source correction passes static checks and independent review; fresh native and release CI acceptance remain pending, and v0.3.38 is not published.
 
 ## 0.3.37 — 2026-10-21
 

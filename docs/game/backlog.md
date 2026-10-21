@@ -1,12 +1,14 @@
 # Gameplay and presentation backlog
 
-Invisibility Cloak passes a fresh corrected-source **51/51 Compose and 51/51 Kubernetes** matrix
-at `4d9a751` / image `6e372a7c`, with zero retries or carried passes. Independent raw review is
-clear; all 2,296 evidence payloads are sealed and durably verified. CI now builds one image for
-two complete browser shards (23 item/default and 28 classic cases), retaining the 20-minute limits.
-Both exact-head candidate workflows and post-merge CI must pass all seven jobs before publication.
-Landmine v0.3.37 remains published and deployed locally. Earlier Cloak/driver attempts remain
-immutable historical evidence and contribute no results to this corrected-source run.
+Invisibility Cloak remains an **unreleased source candidate**. Source `4d9a751` passed
+51 Compose and 51 Kubernetes cases, but PR #84 CI exposed a duel-driver timing race:
+after result screenshots, the three-second result hold had ended and the HUD grids were gone.
+Correction `92fe626` moves the complete 320px HUD layout proof into the stable running phase,
+restoring the viewport before gameplay; bounded checks and independent source review pass.
+Fresh complete acceptance and both seven-job candidate workflows are required for this changed
+source. Earlier native evidence stays sealed and source-specific, with zero carried results.
+Landmine v0.3.37 remains published and deployed locally. CI retains one image, two complete
+browser shards (23 item/default plus 28 classic cases), and the existing 20-minute job limits.
 
 TURN v0.3.16, CONFIG v0.3.17 and the first ART slice v0.3.18 are shipped. Heart
 [v0.3.25](https://github.com/liveweird/grenadiers/releases/tag/v0.3.25), Shield

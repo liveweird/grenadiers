@@ -22,7 +22,13 @@ contains fourteen items and supports all 16384 subsets. Gameplay wire version 8,
 generator version 2 and journal format 2 remain unchanged, so older v8 clients must reload.
 
 
-Fresh corrected source `4d9a751` / image `6e372a7c` passes 51 Compose and 51 Kubernetes cases
+Current driver correction `92fe626` is source-reviewed and passes bounded static checks,
+but remains unreleased and requires fresh complete native and release CI acceptance. PR #84
+exposed a result-screen HUD timing race; the complete narrow HUD proof now runs before
+movement in stable running state. Published/local deployment remains v0.3.37. The following
+evidence is historical and specific to the earlier source, with no carried acceptance.
+
+Earlier corrected source `4d9a751` / image `6e372a7c` passes 51 Compose and 51 Kubernetes cases
 with zero retries or carried passes. The 2,296-payload final evidence seal is
 `b6a1fdcda68b1a91f5e05646fd424a990deff83a27654ef09dcbda04bf92eae2`. Both clients prove natural acquisition; the owner retains its actor and timed
 effect while the peer receives only the hidden identity and no attributable collection cue.

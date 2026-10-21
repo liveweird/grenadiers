@@ -1,6 +1,21 @@
 # Repository verification
 
-## Corrected Cloak source — 2026-10-21 — fresh 102/102, audited and sealed
+## Current candidate — source correction, fresh acceptance pending
+
+PR #84 at `97a85d4` failed its item shard in the default duel: all three configured
+attempts measured zero HUD grids after two full-page result screenshots outlasted the
+180-tick result hold. The classic shard and image producer passed; optional item steps
+were not attempted in that failed workflow. No release, merge or local promotion followed.
+
+Correction `92fe626` moves the entire 320px overflow/exact-two/nonempty/in-bounds HUD
+proof into stable running state before movement or planting, restores 390px before gameplay,
+and preserves result, accessibility and synchronization assertions. E2E typecheck, lint,
+repository and diff checks pass; independent source review is clear. No timeout, retry,
+threshold or product behavior changed. Fresh full native and release CI gates remain pending.
+The sealed evidence below applies only to its named earlier source; it does not accept this
+changed candidate. Localhost:8085 remains the published v0.3.37 image.
+
+## Earlier Cloak source — 2026-10-21 — source-specific 102/102, audited and sealed
 
 Frozen source `4d9a751810b0620e4761dfd7bcf813596f2f82ae`, tree
 `39c77c6ca2c835240e31a0d20261175c45ba5bef`, retains all runtime behavior from the earlier Cloak

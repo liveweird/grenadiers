@@ -59,6 +59,21 @@ test('two players complete a rendered keyboard duel with shared authoritative re
         })
       }
     }
+    await two.setViewportSize({ width: 320, height: 844 })
+    expect(await two.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false)
+    const statBounds = await two.locator('.actor-stats').evaluateAll((elements) => elements.map((element) => {
+      const { x, width, height } = element.getBoundingClientRect()
+      return { x, width, height }
+    }))
+    expect(statBounds).toHaveLength(2)
+    for (const bounds of statBounds) {
+      expect(bounds.width).toBeGreaterThan(0)
+      expect(bounds.height).toBeGreaterThan(0)
+      expect(bounds.x).toBeGreaterThanOrEqual(0)
+      expect(bounds.x + bounds.width).toBeLessThanOrEqual(320)
+    }
+    await two.screenshot({ path: testInfo.outputPath('running-320.png'), fullPage: true })
+    await two.setViewportSize({ width: 390, height: 844 })
     for (const page of [one, two]) {
       expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([])
     }
@@ -116,21 +131,6 @@ test('two players complete a rendered keyboard duel with shared authoritative re
     await Promise.all([one, two].map((page, index) =>
       page.screenshot({ path: testInfo.outputPath(`result-${index}.png`), fullPage: true }),
     ))
-    await two.setViewportSize({ width: 320, height: 844 })
-    expect(await two.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false)
-    const statBounds = await two.locator('.actor-stats').evaluateAll((elements) => elements.map((element) => {
-      const { x, width, height } = element.getBoundingClientRect()
-      return { x, width, height }
-    }))
-    expect(statBounds).toHaveLength(2)
-    for (const bounds of statBounds) {
-      expect(bounds.width).toBeGreaterThan(0)
-      expect(bounds.height).toBeGreaterThan(0)
-      expect(bounds.x).toBeGreaterThanOrEqual(0)
-      expect(bounds.x + bounds.width).toBeLessThanOrEqual(320)
-    }
-    await two.screenshot({ path: testInfo.outputPath('result-320.png'), fullPage: true })
-    await two.setViewportSize({ width: 390, height: 844 })
     for (const page of [one, two]) {
       expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([])
     }

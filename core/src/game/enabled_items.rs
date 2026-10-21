@@ -198,6 +198,7 @@ mod tests {
         assert_eq!(EnabledItems::from_bits(3_145_723), Some(EnabledItems::ALL));
         assert_eq!(EnabledItems::from_bits(8), Some(EnabledItems::WALL_PASS));
         assert_eq!(EnabledItems::from_bits(1), Some(EnabledItems::KICK));
+        assert_eq!(EnabledItems::from_bits(2), Some(EnabledItems::PUNCH));
         assert_eq!(EnabledItems::from_bits(17).unwrap().bits(), 17);
         assert_eq!(EnabledItems::from_bits(1 << 20), None);
         assert!(!EnabledItems::EMPTY.contains_heart());
@@ -212,6 +213,8 @@ mod tests {
         assert!(EnabledItems::SHORT_FUSE.contains_short_fuse());
         assert!(!EnabledItems::SHORT_FUSE.contains_short_flame());
         assert!(EnabledItems::SHORT_FLAME.contains_short_flame());
+        assert!(!EnabledItems::KICK.contains_punch());
+        assert!(EnabledItems::PUNCH.contains_punch());
     }
 
     #[test]

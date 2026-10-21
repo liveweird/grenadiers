@@ -296,6 +296,9 @@ mod punch_tests;
 #[path = "punch_rollback_tests.rs"]
 mod punch_rollback_tests;
 #[cfg(test)]
+#[path = "punch_target_tests.rs"]
+mod punch_target_tests;
+#[cfg(test)]
 #[path = "punch_validation_tests.rs"]
 mod punch_validation_tests;
 #[cfg(test)]

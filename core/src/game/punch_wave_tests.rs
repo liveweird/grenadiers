@@ -102,6 +102,7 @@ fn later_wave_cannot_rescue_a_bomb_punched_onto_existing_fire() {
     );
     state.replace_actor_equipment(SeatId::One, Equipment::Punch);
     state.replace_actor_equipment(SeatId::Two, Equipment::Punch);
+    state.actors[1].heading = Direction::East;
     state.world.bombs.insert(
         EntityId(9),
         Bomb::new(

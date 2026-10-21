@@ -33,6 +33,13 @@ impl State {
         if let Some(id) = super::validation::unsupported_punch_history(self.rules, &self.world) {
             return Err(StepError::UnsupportedBombPunchHistory(id));
         }
+        if !self.rules.enabled_items().contains_punch()
+            && inputs
+                .iter()
+                .any(|input| input.action == super::InputAction::UseEquipment)
+        {
+            return Err(StepError::UnsupportedEquipmentAction);
+        }
         if self.result.is_some() {
             self.tick = next_tick;
             return Ok(StepReport {

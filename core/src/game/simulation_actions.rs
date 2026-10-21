@@ -148,9 +148,11 @@ impl State {
         let mut remote_reservations = BTreeSet::new();
         for ordinal in 0..wave_count {
             let wave = SeatId::ALL.map(|seat| {
-                (!stopwatch.frozen[seat.index()])
-                    .then(|| actions.for_seat(seat).as_slice().get(ordinal).copied())
-                    .flatten()
+                if stopwatch.frozen[seat.index()] {
+                    None
+                } else {
+                    actions.for_seat(seat).as_slice().get(ordinal).copied()
+                }
             });
             for seat in SeatId::ALL {
                 if wave[seat.index()] != Some(ManualAction::PlaceBomb)

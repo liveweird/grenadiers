@@ -280,7 +280,7 @@ fn remote_reservation_follows_wave_chronology() {
         ])
         .unwrap();
     assert!(!reserved.world.bombs.contains_key(&EntityId(9)));
-    assert!(report.events.iter().any(|event| event.bomb_has_been_punched == false));
+    assert!(report.events.iter().any(|event| !event.bomb_has_been_punched));
 
     let mut moved = state_at(
         Position::center(CellId::new(4, 5)),
@@ -343,7 +343,10 @@ fn active_source_fire_due_timing_contact_and_actor_overlap_all_reject() {
         state
             .step(&[action(SeatId::One, InputAction::UseEquipment)])
             .unwrap();
-        assert!(!state.world.bombs.contains_key(&EntityId(9)) || state.world.bombs[&EntityId(9)].cell() == CellId::new(5, 5));
+        assert!(
+            !state.world.bombs.contains_key(&EntityId(9))
+                || state.world.bombs[&EntityId(9)].cell() == CellId::new(5, 5)
+        );
     }
 
     let mut burning = state_at(

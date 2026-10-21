@@ -60,6 +60,7 @@ pub enum StepError {
     DuplicateRemoteOwner(EntityId),
     UnsupportedBombKickHistory(EntityId),
     UnsupportedBombPunchHistory(EntityId),
+    UnsupportedEquipmentAction,
     EffectExpiryOverflow(EffectKind),
     BombPauseOverflow(EntityId),
 }

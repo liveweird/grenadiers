@@ -52,15 +52,15 @@ passes, with zero retries, independent raw review clear and evidence sealed. Bot
 workflows and post-merge CI pass five jobs and all 50 browser cases; PR 83 is merged, v0.3.37
 is published and its accepted image is deployed locally. Verification preserves source-specific evidence
 and earlier failed or interrupted attempts. The accepted Landmine raw source is integrated into the v0.3.38 Invisibility Cloak source
-candidate, retaining its corrected reveal-position driver and private-recipient behavior. Source integration gates and fresh 102/102 same-image native acceptance pass; independent raw review and sealing are clear. Exact-head candidate/post-merge CI and publication remain gates. The other eight
+candidate, retaining its corrected reveal-position driver and private-recipient behavior. Earlier source `4d9a751` passed its source-specific 102/102 native matrix and independent audit/seal. The subsequent running-HUD driver correction remains a reviewed candidate requiring fresh native, candidate/post-merge CI and publication gates. The other eight
 requested pickups remain outside these increments. Richer
 transitions and artwork remain follow-up work. See [pixel-art presentation](pixel-art.md),
 [expanded item implementation](expanded-items.md), and
 [release notes](https://github.com/liveweird/grenadiers/releases).
 The v0.3.39 source stages the paired gameplay-v9 false-only freeze-status foundation without
-activating another pickup. Accepted Cloak raw source is integrated; independent source review, fresh native
+activating another pickup. The reviewed corrected Cloak candidate is integrated; fresh native
 acceptance and release gates remain pending.
-Updated 2026-10-21 with fresh v0.3.38 native acceptance. Release acceptance is recorded in
+Updated 2026-10-21 with the pending corrected candidate and historical source-specific evidence. Release acceptance is recorded in
 [verification](../verification.md).
 The [implementation plan](implementation-plan.md) remains the milestone/release reference;
 the [rules](rules.md) describe the current baseline and historical extension catalog.
@@ -215,7 +215,7 @@ needs remappable controls, input sequencing, replay and connection-generation fe
 | --- | --- | --- |
 | BUFF-SHIELD / shield | Temporary immunity to bomb blasts, monsters and other configured damage. | Damage-class coverage, duration, expiry while in danger and interaction with Heart. |
 | BUFF-CLOCK / stopwatch | Temporarily freeze bomb fuses, monsters and enemy players. | Affected owners/entities, existing versus newly spawned bombs, multiple clocks, thaw/input handling; freeze selected gameplay entities without stopping server ticks, round deadlines or reconnect grace. |
-| BUFF-CLOAK / invisibility cloak | **Prepared in v0.3.38.** Opponents receive only identity, seat and alive status for 600 physical ticks. | Event-time private cues, complete actor-root removal, current-position reveal, reconnect deadline preservation and paired checked publication are covered locally; fresh 102/102 native cases pass, independently audited and sealed. Candidate/post-merge CI and publication remain gates. |
+| BUFF-CLOAK / invisibility cloak | **Prepared in v0.3.38.** Opponents receive only identity, seat and alive status for 600 physical ticks. | Event-time private cues, complete actor-root removal, current-position reveal, reconnect deadline preservation and paired checked publication are covered locally; source `4d9a751` passed 102/102 native cases with an independent audit/seal. The corrected running-HUD source requires fresh native, candidate/post-merge CI and publication gates. |
 | BUFF-GOLD / golden flame | New bombs use maximum blast radius while active. | Maximum derives from the selected ruleset; define precedence with Short-flame and expiry. |
 | BUFF-FUSE / short fuse | Decrease new bombs' detonation delay by 50%. | Integer-tick rounding/minimum, repeated pickups and composition with Long fuse. |
 

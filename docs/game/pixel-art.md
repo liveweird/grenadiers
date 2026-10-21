@@ -1,11 +1,12 @@
 # Retro pixel-art courtyard
 
-Fresh Cloak captures now come from corrected source `4d9a751` and image `6e372a7c`:
+Historical Cloak captures come from source `4d9a751` and image `6e372a7c`:
 [English desktop](../screenshots/invisibility-cloak-desktop.png) and
 [Polish 320px reduced-motion](../screenshots/invisibility-cloak-polish-320.png). Root reviewed the
 pre-collection pickup and readable HUD/settings; normal Polish vertical scrolling and the expected
-unfocused-arena prompt remain. Privacy/expiry are proved by native assertions, not these stills.
-Kubernetes captures are retained without visual review.
+unfocused-arena prompt remain. Native assertions prove privacy/expiry only for that named source;
+these stills do not establish behavior. Kubernetes captures are retained without visual review.
+The subsequent running-HUD driver correction remains unaccepted pending fresh native and release CI.
 
 The latest Landmine desktop and Polish 320px captures were refreshed from corrected source `420d8df` and tested image1736. The pressure plate/consumed charge/no-flame state and normal HUD layout were visually reviewed; these stills precede contact and do not replace behavioral assertions. Kubernetes captures were retained without visual review.
 

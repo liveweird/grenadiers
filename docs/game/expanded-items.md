@@ -53,7 +53,7 @@ PR 83 is merged, v0.3.37 is published and its accepted image deployed locally. E
 [release notes](https://github.com/liveweird/grenadiers/releases).
 The accepted raw Landmine source is integrated into the v0.3.38 [Invisibility Cloak](invisibility-cloak.md)
 source candidate. Its corrected reveal-position driver and private actor/event semantics are
-retained; fresh 51/51 Compose plus 51/51 Kubernetes acceptance passes. Independent raw audit and sealing are clear; exact-head candidate/post-merge CI and publication remain gates.
+retained. Earlier source `4d9a751` passed 51 Compose plus 51 Kubernetes cases and an independent raw audit/seal. The subsequent running-HUD driver correction is reviewed but requires fresh native, exact-head candidate/post-merge CI and publication gates.
 This optional track follows the [backlog](backlog.md), shared settings and
 pixel-art increments. The historical catalog in [rules](rules.md) is not an implementation
 claim. Each activation requires its own reviewed behavior, UI, documentation and acceptance.

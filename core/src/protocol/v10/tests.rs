@@ -54,14 +54,15 @@ fn authentication_is_version_ten_and_version_nine_stays_archived() {
 }
 
 #[test]
-fn expanded_catalog_activates_wall_pass_without_changing_reserved_ids() {
+fn expanded_catalog_activates_kick_without_changing_reserved_ids() {
     let catalog = super::expanded_items();
-    assert_eq!(catalog.iter().count(), 18);
-    assert_eq!(1_usize << catalog.iter().count(), 262_144);
+    assert_eq!(catalog.iter().count(), 19);
+    assert_eq!(1_usize << catalog.iter().count(), 524_288);
     assert!(catalog.contains(ItemId::Stopwatch));
     assert!(catalog.contains(ItemId::InvisibleBombs));
     assert!(catalog.contains(ItemId::Teleporter));
     assert!(catalog.contains(ItemId::WallPass));
+    assert!(catalog.contains(ItemId::Kick));
     for item in RESERVED_ITEMS {
         let settings = GameSettings::new(0, 256, 3, 180, ItemSet::new([item]).unwrap()).unwrap();
         assert_eq!(
@@ -73,18 +74,18 @@ fn expanded_catalog_activates_wall_pass_without_changing_reserved_ids() {
     let settings = GameSettings::new(0, 256, 3, 180, catalog).unwrap();
     assert_eq!(
         expanded_settings(settings).unwrap().enabled_items().bits(),
-        3_145_720
+        3_145_721
     );
 }
 
 #[test]
-fn expanded_settings_accept_every_subset_of_the_pinned_eighteen_item_catalog() {
+fn expanded_settings_accept_every_subset_of_the_pinned_nineteen_item_catalog() {
     let bits = [
-        8_u32, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16_384, 32_768, 65_536, 131_072,
-        262_144, 524_288, 2_097_152,
+        1_u32, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16_384, 32_768, 65_536,
+        131_072, 262_144, 524_288, 2_097_152,
     ];
-    assert_eq!(bits.len(), 18);
-    for mask in 0_u32..262_144 {
+    assert_eq!(bits.len(), 19);
+    for mask in 0_u32..524_288 {
         let enabled = bits.iter().enumerate().fold(0, |value, (index, bit)| {
             if mask & (1 << index) == 0 {
                 value

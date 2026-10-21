@@ -60,6 +60,7 @@ pub fn expanded_settings(
 
 fn expanded_items() -> ItemSet {
     ItemSet::new([
+        ItemId::Kick,
         ItemId::WallPass,
         ItemId::Heart,
         ItemId::RemoteBomb,
@@ -124,6 +125,8 @@ pub fn encode_server_message(
 #[cfg(test)]
 #[path = "frame_bound_tests.rs"]
 mod frame_bound_tests;
+#[cfg(test)]
+mod kick_tests;
 #[cfg(test)]
 #[path = "max_frame_tests.rs"]
 mod max_frame_tests;

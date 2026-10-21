@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.3.45 — 2026-10-21 (source candidate)
+
+- Add opt-in Punch equipment: the remappable Equipment action moves the adjacent facing bomb to the
+  next open three-cell wrapped landing while preserving its identity, ownership, blast and fuse.
+- Keep the fixed 12-tick success cooldown and Punch history private across capture, admission,
+  resume and replay; archived protocols reject those facts and no new wire field or event is added.
+- Extend gameplay v10 to the twentieth lobby switch and all 1,048,576 settings masks, with
+  English/Polish presentation and deterministic production-seed browser source. Accepted v0.3.44
+  parent integration, native same-image acceptance, final CI and publication remain pending.
+
 ## 0.3.44 — 2026-10-21 (source candidate)
 
 - Add opt-in Kick equipment: walking into a stationary Timed or Remote bomb starts authoritative

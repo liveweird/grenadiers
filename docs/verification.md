@@ -3214,3 +3214,11 @@ current engineering conventions live in `CONTRIBUTING.md`.
 The deterministic browser source is configured for the reviewed repeating-byte-31 fixture. Planned
 captures are `kick-stopped-desktop-en.png` and `kick-stopped-polish-320-reduced.png`. Native
 same-image execution and release acceptance remain pending.
+
+## v0.3.45 Punch source candidate
+
+The deterministic two-browser source is configured for the reviewed repeating-byte-31 fixture.
+Planned captures are `punch-wrapped-desktop-en.png` and
+`punch-wrapped-polish-320-reduced.png`. The source route uses ordinary inputs, a remapped actual
+Equipment key and both recipient streams; it adds no private cooldown/history fields or test hooks.
+Accepted v0.3.44 parent integration, native same-image execution and release acceptance remain pending.

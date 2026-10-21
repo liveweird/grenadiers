@@ -15,7 +15,7 @@ capture, resume, replay and archive rejection. They never appear in gameplay-v10
 events. Public clients render the latest authoritative cell on the retained bomb drawing. Invisible
 Bombs filtering and Invisibility Cloak attribution rules remain unchanged.
 
-Version 0.3.44 adds Kick as the first item in the nineteen-item current catalog. Its capability bit
+Version 0.3.44 added Kick as the first item in its nineteen-item catalog. Its capability bit
 is `1`; `ALL` is `3,145,721`. Generator v2 appends weight 15 after Wall Pass, making the complete
 pool 395 and Kick interval `[380,395)`. All 524,288 catalog subsets are validated. Archived gameplay
 v9 and earlier reject Kick catalog entries, equipment, pickups, collection history, and trusted bomb

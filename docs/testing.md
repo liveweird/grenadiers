@@ -276,3 +276,13 @@ execution remains pending until the predecessor-integrated candidate image exist
 Use `docker-compose.kick.yaml` with the mode-0444 v2 seed fixture and
 `E2E_KICK_FIXTURE=arena-v2-kick npm --prefix e2e run test:kick`. The scenario uses ordinary UI and
 keys, observes public streams, and does not inject state, search seeds, retry, or extend budgets.
+
+### Punch source scenario
+
+Use `docker-compose.punch.yaml` with the mode-0444 repeating-byte-31 v2 seed fixture and
+`E2E_PUNCH_FIXTURE=arena-v2-punch npm --prefix e2e run test:punch`. The two-browser route remaps
+Equipment to F, enables only Punch, reveals the natural pickup, clears the approved corridor and
+moves one ordinary bomb from `(4,1)` to wrapped `(1,1)`. It proves the shared action-ID successor,
+same public bomb identity and fuse, no placement/detonation event, recipient parity, safe escape,
+and natural detonation using ordinary UI and native keys. It does not inject state, search seeds,
+retry, send direct gameplay commands or extend budgets. Native same-image execution remains pending.

@@ -36,3 +36,8 @@ Owned processes/profiles have bounded cleanup; private CDP endpoints and capabil
 The Kick source route uses `docker-compose.kick.yaml` with the mode-0444 repeating-byte-31 seed:
 `E2E_KICK_FIXTURE=arena-v2-kick npm run test:kick`. It uses native controls and read-only public
 observations; source checks do not claim native acceptance.
+
+The Punch source route uses `docker-compose.punch.yaml` with the mode-0444 repeating-byte-31 seed:
+`E2E_PUNCH_FIXTURE=arena-v2-punch npm run test:punch`. It remaps and uses the actual Equipment key,
+uses native movement/Bomb input and observes both public recipient streams without injection or
+direct gameplay messages. Source checks do not claim native acceptance.

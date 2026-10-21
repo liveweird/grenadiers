@@ -1,0 +1,182 @@
+import { expect, test, type Page } from '@playwright/test'
+import { arenaTilePixels } from '../tests/support/compositor'
+import { latestSnapshot, observeGame, visibleActor, type ObservedGame } from '../tests/support/duel'
+import { moveSeatTo } from '../tests/support/movement'
+import type { GameServerMessage } from '../../web/src/game/v10/schema'
+
+test.beforeAll(() => expect(process.env.E2E_PUNCH_FIXTURE).toBe('arena-v2-punch'))
+type Snapshot = Extract<GameServerMessage, { type: 'snapshot' }>
+const snapshots = (game: ObservedGame): Snapshot[] => game.frames.filter(
+  (frame): frame is Snapshot => frame.type === 'snapshot')
+const actor = (game: ObservedGame) => visibleActor(latestSnapshot(game), 'one')!
+const eventsAfter = (game: ObservedGame, revision: number) => snapshots(game)
+  .filter(({ room }) => room.revision > revision).flatMap(({ events }) => events)
+const placedAfter = (game: ObservedGame, revision: number) => eventsAfter(game, revision)
+  .flatMap(({ kind }) => kind.type === 'bombPlaced' ? [kind.bomb] : [])
+const detonatedAfter = (game: ObservedGame, revision: number) => eventsAfter(game, revision)
+  .flatMap(({ tick, kind }) => kind.type === 'bombDetonated' ? [{ tick, bomb: kind.bomb }] : [])
+
+async function waitClear(game: ObservedGame): Promise<void> {
+  await expect.poll(() => {
+    const state = latestSnapshot(game)!.state
+    return state.bombs.length + state.flames.length
+  }).toBe(0)
+}
+
+async function revealAndCollect(page: Page, game: ObservedGame): Promise<void> {
+  await moveSeatTo(page, game, 'one', { column: 2, row: 1 })
+  await page.keyboard.press('Space')
+  await moveSeatTo(page, game, 'one', { column: 1, row: 1 })
+  await moveSeatTo(page, game, 'one', { column: 1, row: 2 })
+  await waitClear(game)
+  await moveSeatTo(page, game, 'one', { column: 1, row: 1 })
+  await moveSeatTo(page, game, 'one', { column: 3, row: 1 })
+  await expect.poll(() => actor(game).inventory.equipment).toBe('punch')
+}
+
+async function clearPunchRoute(page: Page, game: ObservedGame): Promise<void> {
+  await page.keyboard.press('Space')
+  await moveSeatTo(page, game, 'one', { column: 1, row: 1 })
+  await moveSeatTo(page, game, 'one', { column: 1, row: 2 })
+  await waitClear(game)
+  for (const cell of [{ column: 3, row: 2 }, { column: 4, row: 1 }]) {
+    expect(latestSnapshot(game)!.state.arena.blocks).not.toContainEqual(cell)
+  }
+  await moveSeatTo(page, game, 'one', { column: 1, row: 1 })
+  await moveSeatTo(page, game, 'one', { column: 4, row: 1 })
+  await page.keyboard.press('Space')
+  await moveSeatTo(page, game, 'one', { column: 3, row: 1 })
+  await moveSeatTo(page, game, 'one', { column: 3, row: 2 })
+  await waitClear(game)
+  expect(latestSnapshot(game)!.state.arena.blocks).not.toContainEqual({ column: 5, row: 1 })
+  await moveSeatTo(page, game, 'one', { column: 3, row: 1 })
+  await moveSeatTo(page, game, 'one', { column: 4, row: 1 })
+}
+
+test('Punch wraps one retained bomb three cells without extra cues and preserves its fuse',
+  async ({ browser }, info) => {
+    const contexts = await Promise.all([
+      browser.newContext({ viewport: { width: 1440, height: 1050 } }),
+      browser.newContext({ viewport: { width: 320, height: 844 }, reducedMotion: 'reduce' }),
+    ])
+    try {
+      const [one, two] = await Promise.all(contexts.map((context) => context.newPage()))
+      const games = [observeGame(one), observeGame(two)]
+      await Promise.all([one.goto('/'), two.goto('/')])
+      await one.getByRole('button', { name: 'Keyboard controls', exact: true }).click()
+      await one.getByRole('button', { name: 'Change Equipment', exact: true }).click()
+      await one.keyboard.press('KeyF')
+      await expect(one.getByRole('dialog', { name: 'Keyboard controls' })).toContainText('EquipmentF')
+      await one.getByRole('button', { name: 'Done', exact: true }).click()
+      await expect(one.getByText(/Equipment: F/)).toBeVisible()
+
+      await one.getByRole('button', { name: 'Create room', exact: true }).click()
+      const code = one.getByLabel('Room invitation code', { exact: true })
+      await expect(code).toHaveText(/^[A-HJ-NP-Z2-9]{8}$/)
+      await one.getByRole('checkbox', { name: 'Heart', exact: true }).uncheck()
+      await one.getByRole('checkbox', { name: 'Punch', exact: true }).check()
+      await one.getByLabel('Bomb fuse').selectOption('300')
+      await one.getByRole('button', { name: 'Apply rules', exact: true }).click()
+      await two.getByText('Polski', { exact: true }).click()
+      await two.getByRole('textbox', { name: 'Kod pokoju', exact: true }).fill(await code.innerText())
+      await two.getByRole('button', { name: 'Dołącz do pokoju', exact: true }).click()
+      await Promise.all([
+        one.getByRole('button', { name: 'Ready', exact: true }).click(),
+        two.getByRole('button', { name: 'Gotowy', exact: true }).click(),
+      ])
+      await Promise.all(games.map((game) => expect.poll(() => latestSnapshot(game)?.room.phase.type)
+        .toBe('running')))
+      await one.getByRole('region', { name: 'Grenadiers courtyard' }).click()
+      await two.getByRole('region', { name: 'Dziedziniec Grenadierów' }).click()
+      await revealAndCollect(one, games[0])
+      await clearPunchRoute(one, games[0])
+      await Promise.all(games.map((game) => expect.poll(() => actor(game).inventory.equipment)
+        .toBe('punch')))
+      await expect(one.getByLabel('Player one upgrades')).toContainText('EquipmentPunch')
+      await expect(two.getByLabel('Ulepszenia: Gracz pierwszy')).toContainText('WyposażenieUderzenie')
+      await expect(one.getByText(/press F to punch/)).toBeVisible()
+      await expect(one.getByText(/fixed 0.2 second cooldown/)).toBeVisible()
+      await expect(two.getByText(/stałe 0,2 sekundy odnowienia/)).toBeVisible()
+
+      const beforePlant = latestSnapshot(games[0])!.room.revision
+      const plantCommands = games[0].commands.length
+      await one.keyboard.press('Space')
+      await expect.poll(() => placedAfter(games[0], beforePlant)).toHaveLength(1)
+      const demo = placedAfter(games[0], beforePlant)[0]!
+      const plant = games[0].commands.slice(plantCommands)
+        .find((command) => command.type === 'manualAction' && command.action === 'bomb')!
+      expect(demo).toMatchObject({
+        cell: { column: 4, row: 1 }, owner: actor(games[0]).id,
+        blast: 'standard', trigger: { type: 'timed', remainingTicks: 300, paused: false },
+      })
+      await moveSeatTo(one, games[0], 'one', { column: 5, row: 1 })
+      const faceFloors = games.map((game) => latestSnapshot(game)!.room.revision)
+      await one.keyboard.press('ArrowLeft', { delay: 40 })
+      await Promise.all(games.map((game, index) => expect.poll(() => {
+        const snapshot = latestSnapshot(game)!
+        if (snapshot.room.revision <= faceFloors[index]!) return undefined
+        const bomb = snapshot.state.bombs.find(({ id }) => id === demo.id)
+        return { heading: visibleActor(snapshot, 'one')?.heading, cell: bomb?.cell }
+      }).toEqual({ heading: 'west', cell: { column: 4, row: 1 } })))
+      const actorFacts = games.map((game) => {
+        const value = visibleActor(latestSnapshot(game), 'one')!
+        return { position: value.position, heading: value.heading, lastTeleportTick: value.lastTeleportTick }
+      })
+      const punchFloors = games.map((game) => latestSnapshot(game)!.room.revision)
+      const punchCommands = games[0].commands.length
+      await one.keyboard.press('KeyF')
+      await expect.poll(() => games[0].commands.slice(punchCommands)
+        .find((command) => command.type === 'manualAction' && command.action === 'equipment'))
+        .toMatchObject({ actionId: plant.actionId! + 1 })
+      await Promise.all(games.map((game, index) => expect.poll(() => {
+        const snapshot = latestSnapshot(game)!
+        if (snapshot.room.revision <= punchFloors[index]!) return undefined
+        return snapshot.state.bombs.find(({ id }) => id === demo.id)?.cell
+      }).toEqual({ column: 1, row: 1 })))
+
+      for (const [index, game] of games.entries()) {
+        const moved = snapshots(game).find(({ room, state }) => room.revision > punchFloors[index]!
+          && state.bombs.some(({ id, cell }) => id === demo.id && cell.column === 1 && cell.row === 1))!
+        const bomb = moved.state.bombs.find(({ id }) => id === demo.id)!
+        expect(bomb).toMatchObject({
+          id: demo.id, cell: { column: 1, row: 1 }, owner: demo.owner,
+          range: demo.range, placedAt: demo.placedAt, blast: demo.blast,
+          trigger: expect.objectContaining({ type: 'timed', paused: false }),
+        })
+        expect(moved.events.filter(({ kind }) => ['bombPlaced', 'bombDetonated'].includes(kind.type)))
+          .toEqual([])
+        expect(visibleActor(moved, 'one')).toMatchObject(actorFacts[index]!)
+        expect(moved.state.bombs.some(({ cell }) => cell.column === 4 && cell.row === 1)).toBe(false)
+        expect(JSON.stringify(moved)).not.toMatch(/lastSuccessfulPunchTick|hasBeenPunched/i)
+      }
+
+      await moveSeatTo(one, games[0], 'one', { column: 4, row: 1 })
+      await moveSeatTo(one, games[0], 'one', { column: 3, row: 1 })
+      await moveSeatTo(one, games[0], 'one', { column: 3, row: 2 })
+      await Promise.all(games.map((game) => expect.poll(() =>
+        visibleActor(latestSnapshot(game), 'one')?.position).toEqual(actor(games[0]).position)))
+      const punchedPixels = await Promise.all([one, two].map((page) => arenaTilePixels(page, 1, 1)))
+      const sourcePixels = await Promise.all([one, two].map((page) => arenaTilePixels(page, 4, 1)))
+      expect(punchedPixels[0]).not.toEqual(sourcePixels[0])
+      expect(punchedPixels[1]).not.toEqual(sourcePixels[1])
+      await one.screenshot({ path: info.outputPath('punch-wrapped-desktop-en.png'), fullPage: true })
+      expect(await two.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false)
+      await two.screenshot({ path: info.outputPath('punch-wrapped-polish-320-reduced.png'), fullPage: true })
+
+      await Promise.all(games.map((game) => expect.poll(() => detonatedAfter(game, beforePlant)
+        .find(({ bomb }) => bomb.id === demo.id)).toBeTruthy()))
+      for (const game of games) {
+        const detonation = detonatedAfter(game, beforePlant).find(({ bomb }) => bomb.id === demo.id)!
+        expect(detonation.tick).toBe(demo.placedAt + 300)
+        expect(detonation.bomb).toMatchObject({
+          id: demo.id, cell: { column: 1, row: 1 }, owner: demo.owner,
+          range: demo.range, placedAt: demo.placedAt, blast: demo.blast,
+        })
+        for (const seat of ['one', 'two'] as const) {
+          expect(visibleActor(latestSnapshot(game), seat)?.alive).toBe(true)
+        }
+      }
+    } finally {
+      await Promise.all(contexts.map((context) => context.close()))
+    }
+  })

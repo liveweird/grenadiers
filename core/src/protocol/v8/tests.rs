@@ -1,5 +1,4 @@
-use crate::game::{EnabledItems, SpeedLevel};
-use crate::game::{EventAudience, StepEvent, StepEventKind};
+use crate::game::{EnabledItems, EventAudience, SpeedLevel, StepEvent, StepEventKind};
 use crate::protocol::{Counter, RoomCode, RoomId, Seat, Tick};
 use crate::room::{MatchLifecycle, RoomSettings};
 
@@ -243,29 +242,33 @@ fn bomb_report(
     placed: bool,
 ) -> crate::game::StepReport {
     let tick = state.tick();
-    let bomb = crate::game::BombView {
-        id: crate::game::EntityId(3),
-        cell: crate::game::CellId::new(1, 1),
-        owner: crate::game::EntityId(1),
-        range: 2,
-        placed_at: crate::game::Tick(placed_at),
-        trigger: crate::game::BombTrigger::Timed {
+    let bomb = crate::game::Bomb::new_with_blast(
+        crate::game::EntityId(3),
+        crate::game::CellId::new(1, 1),
+        crate::game::EntityId(1),
+        2,
+        crate::game::Tick(placed_at),
+        crate::game::BombTrigger::Timed {
             detonates_at: crate::game::Tick(detonates_at),
         },
-        blast: crate::game::BlastKind::Standard,
-    };
+        crate::game::BlastKind::Standard,
+    )
+    .unwrap();
+    let view = bomb.into();
     crate::game::StepReport {
         tick,
         traces: crate::game::SeatId::ALL
             .map(|seat| crate::game::MovementTrace::new(state.actors()[seat.index()].position())),
-        events: vec![StepEvent::new(
+        events: vec![StepEvent::bomb(
             tick,
             EventAudience::Both,
             if placed {
-                StepEventKind::BombPlaced(bomb)
+                StepEventKind::BombPlaced(view)
             } else {
-                StepEventKind::BombDetonated(bomb)
+                StepEventKind::BombDetonated(view)
             },
+            bomb,
+            false,
         )],
     }
 }
@@ -371,19 +374,14 @@ fn v8_capture_and_binding_reject_overdue_frozen_bombs_and_accept_the_deadline() 
         assert_eq!(publication.is_ok(), expected);
     }
 }
-
+#[path = "diarrhea_tests.rs"]
+mod diarrhea_tests;
 #[path = "golden_flame_tests.rs"]
 mod golden_flame_tests;
 #[path = "invisibility_cloak_tests.rs"]
 mod invisibility_cloak_tests;
 #[path = "landmine_tests.rs"]
 mod landmine_tests;
-#[path = "shield_tests.rs"]
-mod shield_tests;
-
-#[path = "diarrhea_tests.rs"]
-mod diarrhea_tests;
-
 #[path = "piercing_bomb_tests.rs"]
 mod piercing_bomb_tests;
 #[path = "power_bomb_tests.rs"]
@@ -392,6 +390,8 @@ mod power_bomb_tests;
 mod remote_bomb_tests;
 #[path = "reverse_controls_tests.rs"]
 mod reverse_controls_tests;
+#[path = "shield_tests.rs"]
+mod shield_tests;
 #[path = "short_flame_tests.rs"]
 mod short_flame_tests;
 #[path = "short_fuse_tests.rs"]

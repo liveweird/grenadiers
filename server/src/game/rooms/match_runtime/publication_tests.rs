@@ -176,10 +176,10 @@ fn failed_unsupported_event_publication_keeps_revision_and_pending_reports() {
     let mut reports = runtime.replay_inspection().reports;
     assert_eq!(reports.len(), 1);
     let tick = reports[0].tick;
-    reports[0].events.push(StepEvent {
+    reports[0].events.push(StepEvent::new(
         tick,
-        audience: grenadiers_core::game::EventAudience::Both,
-        kind: StepEventKind::BombPlaced(BombView {
+        grenadiers_core::game::EventAudience::Both,
+        StepEventKind::BombPlaced(BombView {
             id: EntityId(999),
             cell: CellId::new(2, 2),
             owner: EntityId(10),
@@ -188,7 +188,7 @@ fn failed_unsupported_event_publication_keeps_revision_and_pending_reports() {
             trigger: BombTrigger::Remote,
             blast: grenadiers_core::game::BlastKind::Standard,
         }),
-    });
+    ));
     runtime.replace_reports_for_test(reports.clone());
     let revision = runtime.publication_revision_for_test();
 

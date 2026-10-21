@@ -51,11 +51,11 @@ fn authentication_is_version_nine_and_version_eight_stays_archived() {
 }
 
 #[test]
-fn foundation_catalog_matches_archived_v8_and_rejects_stopwatch() {
-    let catalog = super::foundation_items();
-    assert_eq!(catalog.iter().count(), 14);
-    assert_eq!(1_usize << catalog.iter().count(), 16_384);
-    assert!(!catalog.contains(ItemId::Stopwatch));
+fn expanded_catalog_activates_stopwatch_without_changing_reserved_ids() {
+    let catalog = super::expanded_items();
+    assert_eq!(catalog.iter().count(), 15);
+    assert_eq!(1_usize << catalog.iter().count(), 32_768);
+    assert!(catalog.contains(ItemId::Stopwatch));
     for item in RESERVED_ITEMS {
         let settings = GameSettings::new(0, 256, 3, 180, ItemSet::new([item]).unwrap()).unwrap();
         assert_eq!(
@@ -67,12 +67,38 @@ fn foundation_catalog_matches_archived_v8_and_rejects_stopwatch() {
     let settings = GameSettings::new(0, 256, 3, 180, catalog).unwrap();
     assert_eq!(
         expanded_settings(settings).unwrap().enabled_items().bits(),
-        523_248
+        524_272
     );
 }
 
 #[test]
-fn foundation_visible_actors_are_explicitly_unfrozen() {
+fn expanded_settings_accept_every_subset_of_the_pinned_fifteen_item_catalog() {
+    let bits = [
+        16_u32, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16_384, 32_768, 65_536, 131_072,
+        262_144,
+    ];
+    assert_eq!(bits.len(), 15);
+    for mask in 0_u32..32_768 {
+        let enabled = bits.iter().enumerate().fold(0, |value, (index, bit)| {
+            if mask & (1 << index) == 0 {
+                value
+            } else {
+                value | bit
+            }
+        });
+        let items = ItemSet::from_mask(ItemMask::new(enabled).unwrap());
+        assert_eq!(
+            expanded_settings(GameSettings::new(0, 256, 3, 180, items).unwrap())
+                .unwrap()
+                .enabled_items()
+                .bits(),
+            enabled
+        );
+    }
+}
+
+#[test]
+fn visible_actor_serializes_the_authoritative_frozen_status() {
     let actor = crate::protocol::v8::VisibleActorView {
         id: EntityId::new(1),
         seat: Seat::One,
@@ -92,7 +118,7 @@ fn foundation_visible_actors_are_explicitly_unfrozen() {
     };
     let archived =
         serde_json::to_value(crate::protocol::v8::ActorView::from(actor.clone())).unwrap();
-    let visible = ActorView::from(super::projection_recipient::visible_actor(actor));
+    let visible = ActorView::from(super::projection_recipient::visible_actor(actor, true));
     let hidden = ActorView::from(HiddenActorView {
         id: EntityId::new(2),
         seat: Seat::Two,
@@ -100,7 +126,7 @@ fn foundation_visible_actors_are_explicitly_unfrozen() {
     });
     let visible = serde_json::to_value(visible).unwrap();
     let hidden = serde_json::to_value(hidden).unwrap();
-    assert_eq!(visible["voluntaryActionsFrozen"], false);
+    assert_eq!(visible["voluntaryActionsFrozen"], true);
     assert!(archived.get("voluntaryActionsFrozen").is_none());
     assert_eq!(
         hidden,

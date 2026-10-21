@@ -35,9 +35,12 @@ impl State {
             });
         }
 
-        // Timed pickup collection is the only fallible mutation in a running step. Near the
-        // absolute tick horizon, retain a transaction snapshot only when that failure is
-        // possible, rather than cloning every deterministic update.
+        let stopwatch = self.stopwatch_context(next_tick);
+        self.preflight_timed_pause(stopwatch)?;
+
+        // Timed-pause overflow is preflight before mutation. Timed pickup collection remains
+        // the only later fallible mutation, so retain a transaction snapshot only when that
+        // failure is possible rather than cloning every deterministic update.
         let rollback = self
             .world
             .pickups
@@ -49,11 +52,13 @@ impl State {
         let mut shield_prevented = [false; 2];
         self.expire_flames(next_tick);
         self.expire_actor_effects(self.tick, next_tick);
+        self.apply_timed_pause(stopwatch);
         self.world.expose_flame_free_pickups();
         let manual_actions = self.apply_inputs(inputs);
+        self.clear_frozen_movement(stopwatch.frozen);
         let alive_at_movement_start = self.actors.each_ref().map(|actor| actor.alive);
         let grace_at_movement_start = self.actors.each_ref().map(|actor| actor.bomb_grace.clone());
-        let traces = self.move_living(next_tick);
+        let traces = self.move_living(next_tick, stopwatch.frozen);
         let contact_targets = super::contacts::accepted_contact_ids(
             &self.world,
             &traces,
@@ -62,8 +67,14 @@ impl State {
         );
         self.kill_on_existing_flames(&traces, next_tick, &mut events, &mut shield_prevented);
         let remote_targets =
-            self.resolve_classic_manual_actions(&manual_actions, next_tick, &mut events);
-        self.resolve_explosions(next_tick, remote_targets, contact_targets, &mut events)?;
+            self.resolve_classic_manual_actions(&manual_actions, next_tick, stopwatch, &mut events);
+        self.resolve_explosions(
+            next_tick,
+            remote_targets,
+            contact_targets,
+            stopwatch.pause_timed,
+            &mut events,
+        )?;
         self.kill_on_final_flames(next_tick, &mut events, &mut shield_prevented);
         if let Err(error) = self.collect_pickups(next_tick, &mut events) {
             debug_assert!(matches!(error, StepError::EffectExpiryOverflow(_)));
@@ -88,11 +99,14 @@ impl State {
         })
     }
 
-    fn move_living(&mut self, tick: Tick) -> [MovementTrace; 2] {
+    fn move_living(&mut self, tick: Tick, frozen: [bool; 2]) -> [MovementTrace; 2] {
         let turn_assist = self.rules.turn_assist();
         let slow_foot_enabled = self.rules.enabled_items().contains_slow_foot();
+        let mut index = 0;
         self.actors.each_mut().map(|actor| {
-            if actor.alive {
+            let current = index;
+            index += 1;
+            if actor.alive && !frozen[current] {
                 movement::advance_actor(&self.world, actor, turn_assist, tick, slow_foot_enabled)
             } else {
                 MovementTrace::new(actor.position)

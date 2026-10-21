@@ -20,7 +20,7 @@ pub fn prepare_expanded_admission(
 ) -> Result<String, ProjectionError> {
     crate::protocol::v8::projection_binding::validate_expanded_room_for_items(
         room,
-        super::foundation_items(),
+        super::expanded_items(),
     )?;
     let seat = &room.seats[seat_index(recipient)];
     if seat.seat != recipient || seat.connection != ConnectionStatus::Connected {

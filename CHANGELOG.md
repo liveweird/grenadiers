@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.40 — 2026-10-21
+
+- Add opt-in Stopwatch with a 180-physical-tick refreshable effect that freezes the living opponent's voluntary actions while ordinary simulation and network clocks continue.
+- Pause every Timed bomb once per affected update using checked captured-fuse provenance; preserve untimed Remote and Contact bombs, fire chains, Diarrhea and transactional rollback.
+- Add the fifteenth lobby switch, all 32,768 v9 settings masks, replay and archived-v8 guards, English/Polish cues, and a deterministic two-window production-seed browser scenario source. Integrate the exact published v0.3.39 tree with the reviewed Stopwatch and mask-CI source; full current mask runs, native acceptance and final CI remain pending, and v0.3.40 has zero accepted native cases.
+
 ## 0.3.39 — 2026-10-21
 
 - Check responsive result geometry atomically in stable running state before movement or bomb placement; preserve both grids, bounds, viewports and all accessibility assertions.

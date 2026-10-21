@@ -8,6 +8,7 @@ import type { RenderablePickupKind, SnapshotMessage } from './types'
 type Cell = { column: number; row: number }
 type Motion = { fromX: number; fromY: number; toX: number; toY: number }
 type PickupDrawing = { kind: RenderablePickupKind; drawing: Graphics }
+type ActorRow = SnapshotMessage['state']['actors'][number]
 const key = (cell: Cell): string => `${cell.column},${cell.row}`
 const unitsToPixels = (units: number): number => units * TILE / 1024
 const cloakActive = (remaining: number | undefined): boolean => (remaining ?? 0) > 0
@@ -18,13 +19,24 @@ function renderCloak(drawing: ActorDrawing, effects: boolean, now: number): void
 function renderActor(drawing: ActorDrawing, id: number, effects: boolean, now: number): void {
   const frame = effects && drawing.moving && (Math.floor(now / 110) + id) % 2 === 1 ? 1 : 0
   setActorPose(drawing, drawing.direction, frame)
+  renderActorProtection(drawing, effects, now)
+  renderActorModifiers(drawing, effects, now)
+  renderActorEquipment(drawing)
+}
+function renderActorProtection(drawing: ActorDrawing, effects: boolean, now: number): void {
   drawing.protection.visible = drawing.protected
   drawing.protection.alpha = effects && drawing.protected ? 0.65 + (Math.floor(now / 120) % 2) * 0.35 : 1
   drawing.shield.visible = drawing.shielded
   drawing.shield.alpha = effects && drawing.shielded ? 0.75 + (Math.floor(now / 160) % 2) * 0.25 : 1
+  drawing.stopwatch.visible = drawing.stopwatchActive
+  drawing.stopwatch.alpha = effects && drawing.stopwatchActive
+    ? 0.7 + (Math.floor(now / 120) % 2) * 0.3 : 1
+  drawing.frozen.visible = drawing.actionsFrozen
   drawing.goldenFlame.visible = drawing.golden
   drawing.goldenFlame.alpha = effects && drawing.golden ? 0.7 + (Math.floor(now / 100) % 2) * 0.3 : 1
   renderCloak(drawing, effects, now)
+}
+function renderActorModifiers(drawing: ActorDrawing, effects: boolean, now: number): void {
   drawing.shortFuse.visible = drawing.shortFused
   drawing.shortFuse.alpha = effects && drawing.shortFused ? 0.65 + (Math.floor(now / 75) % 2) * 0.35 : 1
   drawing.shortFlame.visible = drawing.shortFlamed
@@ -36,6 +48,8 @@ function renderActor(drawing: ActorDrawing, id: number, effects: boolean, now: n
   drawing.diarrhea.visible = drawing.diarrheaActive
   drawing.diarrhea.alpha = effects && drawing.diarrheaActive
     ? 0.65 + (Math.floor(now / 105) % 2) * 0.35 : 1
+}
+function renderActorEquipment(drawing: ActorDrawing): void {
   drawing.slowFoot.visible = drawing.slowFootStacks > 0
   drawing.slowFoot.children.slice(1).forEach((marker, index) => {
     marker.visible = index < drawing.slowFootStacks
@@ -43,6 +57,25 @@ function renderActor(drawing: ActorDrawing, id: number, effects: boolean, now: n
   drawing.piercing.visible = drawing.piercingArmed
   drawing.power.visible = drawing.powerArmed
   drawing.landmine.visible = drawing.landmineStored
+}
+
+function updateActorState(drawing: ActorDrawing, actor: ActorRow): void {
+  drawing.root.visible = actor.alive
+  drawing.protected = (actor.damageGraceRemainingTicks ?? 0) > 0
+  drawing.shielded = (actor.shieldRemainingTicks ?? 0) > 0
+  drawing.stopwatchActive = (actor.stopwatchRemainingTicks ?? 0) > 0
+  drawing.actionsFrozen = Boolean(actor.voluntaryActionsFrozen)
+  drawing.cloaked = cloakActive(actor.invisibilityCloakRemainingTicks)
+  drawing.golden = (actor.goldenFlameRemainingTicks ?? 0) > 0
+  drawing.shortFused = (actor.shortFuseRemainingTicks ?? 0) > 0
+  drawing.shortFlamed = (actor.shortFlameRemainingTicks ?? 0) > 0
+  drawing.longFused = (actor.longFuseRemainingTicks ?? 0) > 0
+  drawing.reversed = (actor.reverseControlsRemainingTicks ?? 0) > 0
+  drawing.diarrheaActive = (actor.diarrheaRemainingTicks ?? 0) > 0
+  drawing.slowFootStacks = actor.slowFootRemainingTicks?.length ?? 0
+  drawing.piercingArmed = Boolean(actor.piercingArmed)
+  drawing.powerArmed = Boolean(actor.powerArmed)
+  drawing.landmineStored = Boolean(actor.landmineStored)
 }
 
 export class ArenaScene {
@@ -139,8 +172,9 @@ export class ArenaScene {
     }
     const effects = this.running && !this.reducedMotion
     for (const [id, bomb] of this.bombs) {
-      bomb.spark.visible = !bomb.remote && !bomb.contact
+      bomb.spark.visible = !bomb.remote && !bomb.contact && !bomb.paused
         && (!effects || (Math.floor(now / 90) + id) % 2 === 0)
+      bomb.pause.visible = bomb.paused
     }
     for (const flame of this.flames.values()) {
       const frame = effects ? Math.floor(now / 80) % 2 : 0
@@ -172,11 +206,14 @@ export class ArenaScene {
       if (!present.has(id)) { drawing.root.destroy({ children: true, context: true }); this.bombs.delete(id) }
     }
     for (const bomb of rows) {
-      if (this.bombs.has(bomb.id)) continue
-      const drawing = makeBomb(bomb.blast, bomb.trigger?.type)
-      drawing.root.position.set((bomb.cell.column + 0.5) * TILE, (bomb.cell.row + 0.5) * TILE)
-      this.bombsLayer.addChild(drawing.root)
-      this.bombs.set(bomb.id, drawing)
+      let drawing = this.bombs.get(bomb.id)
+      if (!drawing) {
+        drawing = makeBomb(bomb.blast, bomb.trigger?.type)
+        drawing.root.position.set((bomb.cell.column + 0.5) * TILE, (bomb.cell.row + 0.5) * TILE)
+        this.bombsLayer.addChild(drawing.root)
+        this.bombs.set(bomb.id, drawing)
+      }
+      drawing.paused = bomb.trigger?.type === 'timed' && bomb.trigger.paused
     }
   }
 
@@ -227,24 +264,14 @@ export class ArenaScene {
         this.actorsLayer.addChild(drawing.root)
         this.actors.set(actor.id, drawing)
       }
+      const enteringFreeze = actor.voluntaryActionsFrozen && !drawing.actionsFrozen
       this.motions.set(actor.id, {
-        fromX: reset ? toX : drawing.root.x, fromY: reset ? toY : drawing.root.y, toX, toY,
+        fromX: reset || enteringFreeze ? toX : drawing.root.x,
+        fromY: reset || enteringFreeze ? toY : drawing.root.y,
+        toX, toY,
       })
-      drawing.root.visible = actor.alive
-      drawing.protected = (actor.damageGraceRemainingTicks ?? 0) > 0
-      drawing.shielded = (actor.shieldRemainingTicks ?? 0) > 0
-      drawing.cloaked = cloakActive(actor.invisibilityCloakRemainingTicks)
-      drawing.golden = (actor.goldenFlameRemainingTicks ?? 0) > 0
-      drawing.shortFused = (actor.shortFuseRemainingTicks ?? 0) > 0
-      drawing.shortFlamed = (actor.shortFlameRemainingTicks ?? 0) > 0
-      drawing.longFused = (actor.longFuseRemainingTicks ?? 0) > 0
-      drawing.reversed = (actor.reverseControlsRemainingTicks ?? 0) > 0
-      drawing.diarrheaActive = (actor.diarrheaRemainingTicks ?? 0) > 0
-      drawing.slowFootStacks = actor.slowFootRemainingTicks?.length ?? 0
-      drawing.piercingArmed = Boolean(actor.piercingArmed)
-      drawing.powerArmed = Boolean(actor.powerArmed)
-      drawing.landmineStored = Boolean(actor.landmineStored)
-      drawing.moving = Boolean(!reset && previousMotion
+      updateActorState(drawing, actor)
+      drawing.moving = Boolean(!drawing.actionsFrozen && !reset && previousMotion
         && (previousMotion.toX !== toX || previousMotion.toY !== toY))
       drawing.direction = actor.heading
     }

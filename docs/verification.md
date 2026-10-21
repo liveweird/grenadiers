@@ -1,5 +1,20 @@
 # Repository verification
 
+## Current v0.3.40 integrated source — acceptance zero
+
+Published v0.3.39 merge `40cb17e7d2131f7c4d30c95a26531b49ab9450e6` has exact tree
+`82f206f922c9f2d7b79af9a58dbfb977f51ef56e`, byte-identical to this integration's raw v0.3.39
+first parent `383d3da55960b2b5428d040d4e07939cfc93e239`. PR #85 and post-merge run 39658973239 passed
+seven jobs and all 51 cases; tag verification was still running when this source was integrated.
+The reviewed Stopwatch/report-retention head `7998d6809d3d147f9c88ec8ba0b53bbfefedeb1e`, mask-plan
+WP1 `7d3bdea1b67e174709e0fc6eafe8b9f43339a64f`, and mask-CI WP2
+`ae295c473eab2d7935b9575384f5935eb89c2ef4` are now combined with that exact parent tree.
+Their earlier results remain source-specific light/pre-integration records: no complete current
+32,768-mask debug/release/coverage run, native case, hosted v0.3.40 CI result or publication exists,
+and no v0.3.39 pass carries forward. Fourteen of 22 item types are published through v0.3.39,
+which adds no item. Stopwatch becomes the fifteenth published type only after every v0.3.40 gate
+passes.
+
 ## Latest native acceptance checkpoint — 2026-10-21 18:44:23 UTC — 102/102
 
 At this checkpoint, frozen source `272b950df876596d5912fac3a56377e524899a2a`, tree
@@ -1474,6 +1489,94 @@ Diarrhea.
 Records below are frozen against their named sources. Publication and later CI status are
 recorded in [release notes](https://github.com/liveweird/grenadiers/releases).
 
+## Historical prepared v0.3.40 Stopwatch source — source-specific local checks
+
+At this historical preparation checkpoint, v0.3.39 publication and exact tree verification still
+had to precede integration. v0.3.40 had no accepted native cases and carried no v0.3.39 pass.
+Fourteen of 22 item types were published through v0.3.38; v0.3.39 added no item. Stopwatch could
+become the fifteenth published type only after integrated full-mask execution, fresh native
+acceptance and hosted release gates passed.
+
+This record is bound to prepared source `7998d6809d3d147f9c88ec8ba0b53bbfefedeb1e`; its recorded
+commands and results do not clear checks for a future integrated source. That prepared source
+activates an opt-in 180-physical-tick Stopwatch. A living holder freezes the
+opponent's voluntary movement and bomb actions while preserving admitted sequence high-water marks;
+held directions resume after thaw, while frozen bomb actions are discarded. Any living holder also
+pauses every Timed bomb exactly once per update. Fuse history is captured privately on live and
+historical bombs, remains immutable at event emission, and is validated before recipient filtering.
+Fire, effects, input expiry, Diarrhea, Remote chains, Landmine contact and round clocks continue.
+The candidate v9 catalog has fifteen items and all 32,768 subsets; archived v8 remains pinned to its
+fourteen-item Cloak-era catalog and rejects Stopwatch or paused/history-bearing Timed bombs.
+
+At source `7998d6809d3d147f9c88ec8ba0b53bbfefedeb1e`, debug and release suites passed **646 core
+tests, 196 server tests and two doctests**; four dedicated
+performance profiles remain ignored. Rust line coverage is **92.43% (13,485/14,590)**, above the
+unchanged 80% floor. All **49,569 web tests** across 58 files pass with statement/branch/function/
+line coverage of **95.41/91.21/95.88/97.81%**. Formatting, all-target Clippy with warnings denied,
+repository limits, generated contracts, lint, Knip, production and renderer-diagnostic builds,
+E2E static checks and **42-scenario parity** pass. Cargo-deny and both cached offline npm audits pass;
+strict pinned Kubernetes schemas validate all three resources.
+
+The repeating byte-31 pure-core route uses ordinary movement and bomb actions through two
+sequential holders. It proves both freeze windows, admitted-but-dropped actions, held-input thaw,
+exact pause accounting and resumed natural detonation. Generation regressions exhaust all 16,384
+pre-Stopwatch masks and assert fourteen unique prior mappings; active protocol and browser guards
+exhaust all 32,768 v9 masks while archived v8 retains all 16,384 prior masks. The isolated browser
+mask run completed in 1.59 seconds; peak RSS was unavailable because macOS denied the timing tool's
+`kern.clockrate` query, so no memory figure is claimed.
+
+The first repository gate exposed three files above existing source or complexity limits; narrow
+observation, projection-wire and event-validation helpers now keep those limits without changing
+contracts. The first full web run then exposed a stale Cloak overlay child-position assertion; the
+corrected test follows the active drawing across reduced-motion rendering. The first E2E static
+gate found the new Stopwatch scenario directory absent from parity discovery; the corrected gate
+finds all 42 scenarios. The restricted Rust rerun preserved 17 expected loopback
+`PermissionDenied` failures before the authorized identical run passed. Cargo-deny first reached a
+read-only advisory lock and Kubernetes validation first reached sandbox DNS denial; authorized
+reruns passed. No native browser run, candidate image, hosted CI result or publication is
+claimed. Independent browser review found and closed three bounded gaps: live Timed bombs now require
+positive remaining time without rejecting valid detonation history, the native source proves that
+the second frozen player's bomb action creates no placement during freeze or queued placement after
+thaw in either peer stream, and current v9/Stopwatch documentation no longer describes the v0.3.39
+false-only foundation or fourteen-item catalog as active. Independent core/server review and final
+browser re-review are clear. Native acceptance requires integration of the final preceding release
+and its reviewed predecessor drivers before freezing the image.
+
+## Historical gameplay-v9 foundation source review — 2026-10-18
+
+The v0.3.39 candidate moves the paired server/browser endpoint to gameplay v9 without changing the
+Expanded-v5 rules identity, generated-v2 arenas, journal format 2, fourteen-item catalog, 16,384
+enabled-item masks or simulation behavior. Every visible actor now carries the required
+`voluntaryActionsFrozen` boolean; production capture emits false and foundation validation rejects
+true. Hidden actors retain their exact identity/seat/alive shape. Stopwatch and paused Timed bombs
+remain unavailable, while existing enabled Remote and Contact bombs retain their untimed behavior.
+
+Focused Rust and browser checks cover version-9 authentication, archived-v8 actor shape, the new
+visible/hidden union, false-only semantics, unavailable Stopwatch, paused-bomb rejection, generated
+contract drift and unchanged frame bounds. An active-v9 contract regression validates every one of
+the 16,384 subsets of its independently pinned fourteen-item catalog. Production server, browser
+and E2E helpers now use v9; archived v8 validation fixtures remain separate. Rust policy tests
+exercise all 22 reserved item IDs against independently pinned v8 and v9 fourteen-item catalogs.
+
+Debug and release suites pass **627 core tests, 195 server tests and two doctests**; four dedicated
+performance profiles remain ignored. Rust line coverage is **92.27% (13,162/14,265)**, above the
+unchanged 80% floor. All **33,176 web tests** across 57 files pass with statement/branch/function/
+line coverage of **95.38/91.08/95.82/97.77%**. Formatting, all-target Clippy with warnings denied,
+repository limits, generated contracts, lint, Knip, production and renderer-diagnostic builds,
+E2E static checks and **41-scenario parity** pass. Cargo-deny and both cached offline npm audits pass;
+strict pinned Kubernetes schemas validate all three resources.
+
+Independent core/server and browser/schema reviews are clear after correcting explicit archived-v8
+catalog pinning, v9 policy propagation through binding, production-sized false boolean bounds and
+active documentation references. A differing thirteen-item internal policy regression proves that
+binding uses the selected catalog rather than the archived one. Archived v8 recipient test helpers
+are independent fixtures rather than a shipping old client; active v9 production guards retain
+separate duplicate-entity and privacy tests. No focused asymmetric second-recipient serialization
+failure injection was added; paired preparation still structurally precedes transaction commit.
+
+The final instrumented tests pass. Their first report write failed because the external Cargo target
+left the ignored local `target/` output directory absent. Creating that directory and completing the
+report-only stage produced the coverage result above without rerunning tests or changing source.
 ## Landmine candidate — 2026-10-18 — historical local source evidence
 
 This retained record documents the earlier Landmine implementation lineage, subsequently corrected

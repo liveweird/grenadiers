@@ -12,7 +12,9 @@ pending at that checkpoint. See [release notes](https://github.com/liveweird/gre
 for current release status.
 
 These accepted v0.3.38 captures are integrated into the v0.3.39 gameplay-v9 foundation without
-changing artwork or runtime code. They provide no v0.3.39 native acceptance or carried pass.
+changing artwork or runtime code. The later v0.3.39 native checkpoint passed 102/102 with zero
+carried passes; it added no visual feature or fresh visually reviewed screenshot. Those results
+do not accept the integrated v0.3.40 Stopwatch presentation.
 
 The latest Landmine desktop and Polish 320px captures were refreshed from corrected source `420d8df` and tested image1736. The pressure plate/consumed charge/no-flame state and normal HUD layout were visually reviewed; these stills precede contact and do not replace behavioral assertions. Kubernetes captures were retained without visual review.
 
@@ -124,3 +126,7 @@ these two Compose stills; Polish uses normal vertical scrolling and the unfocuse
 expected. These stills do not prove actor privacy: the paired native assertions establish owner
 visibility, exact peer-hidden actor shape, compositor removal, reconnect and current-position
 reveal at the physical deadline. Kubernetes captures are retained but were not visually reviewed.
+
+Stopwatch adds a clock-face pickup and holder marker. A frozen visible actor receives static corner
+brackets, while a paused Timed bomb replaces its burning spark with a pause mark. Reduced motion
+keeps those cues visible without pulsing; Remote and Contact bombs retain their untimed art.

@@ -123,6 +123,9 @@ function ActorDetails({ actor, copy }: { actor: VisibleActorView; copy: GameCopy
     <div><dt>{copy.stats.equipment}</dt><dd>{equipment}</dd></div>
     <div><dt>{copy.stats.weapon}</dt><dd>{weapon}</dd></div>
     <div><dt>{copy.stats.effects}</dt><dd>{effects}</dd></div>
+    {actor.voluntaryActionsFrozen && <div className="actions-frozen">
+      <dt>{copy.stats.actions}</dt><dd role="status">{copy.stats.frozen}</dd>
+    </div>}
     <div className={actor.damageGraceRemainingTicks > 0 ? 'grace-active' : undefined}>
       <dt>{copy.stats.damageGrace}</dt>
       <dd aria-label={actor.damageGraceRemainingTicks > 0 ? copy.stats.protected : undefined}>

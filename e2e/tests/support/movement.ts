@@ -1,5 +1,6 @@
 import { expect, type Page } from '@playwright/test'
 import { visibleActor, latestSnapshot, type ObservedGame } from './duel'
+import type { Seat } from '../../../web/src/game/v9/schema'
 
 type Cell = { column: number; row: number }
 const CENTER = 512
@@ -7,21 +8,22 @@ const CELL = 1024
 const RELEASE_LEAD = 640
 const BASE_SPEED = 3_072
 
-function actor(game: ObservedGame) {
-  const value = visibleActor(latestSnapshot(game), 'one')
-  if (!value?.alive) throw new Error('Fixture route requires a living first player')
+function actor(game: ObservedGame, seat: Seat) {
+  const value = visibleActor(latestSnapshot(game), seat)
+  if (!value?.alive) throw new Error(`Fixture route requires a living ${seat} player`)
   return value
 }
 
-export async function moveTo(
+export async function moveSeatTo(
   page: Page,
   game: ObservedGame,
+  seat: Seat,
   cell: Cell,
   axisOrder: readonly ('x' | 'y')[] = ['x', 'y'],
 ) {
   const target = { x: cell.column * CELL + CENTER, y: cell.row * CELL + CENTER }
   for (let attempt = 0; attempt < 20; attempt += 1) {
-    const position = actor(game).position
+    const position = actor(game, seat).position
     const differences = { x: target.x - position.x, y: target.y - position.y }
     if (Math.abs(differences.x) <= 128 && Math.abs(differences.y) <= 128) break
     const axis = axisOrder.find((candidate) => Math.abs(differences[candidate]) > 128)!
@@ -47,7 +49,7 @@ export async function moveTo(
           .toBe(true)
         const sign = Math.sign(delta)
         await expect.poll(() => {
-          const remaining = target[axis] - actor(game).position[axis]
+          const remaining = target[axis] - actor(game, seat).position[axis]
           return Math.abs(remaining) <= RELEASE_LEAD || Math.sign(remaining) !== sign
         }, { intervals: [15] }).toBe(true)
       } finally {
@@ -65,17 +67,24 @@ export async function moveTo(
     // Do not mistake snapshots queued before the input for proof of key-up. The
     // accepted direction must move the actor before stationary frames can settle
     // the pulse; this also prevents an opposite correction from being queued.
-    await expect.poll(() => actor(game).position[axis], { intervals: [15], timeout: 1_000 })
+    await expect.poll(() => actor(game, seat).position[axis], { intervals: [15], timeout: 1_000 })
       .not.toBe(startPosition)
     const movedRevision = latestSnapshot(game)!.room.revision
     await expect.poll(() => {
       const frames = game.frames.filter((frame) => frame.type === 'snapshot').slice(-2)
       if (frames.length !== 2 || frames[0].room.revision <= Math.max(startRevision, movedRevision)) return false
-      const positions = frames.map((frame) => visibleActor(frame, 'one')!.position)
+      const positions = frames.map((frame) => visibleActor(frame, seat)!.position)
       return positions.every((value) => value.x === positions[0].x && value.y === positions[0].y)
     }, { intervals: [15] }).toBe(true)
   }
-  expect(Math.abs(target.x - actor(game).position.x)).toBeLessThanOrEqual(128)
-  expect(Math.abs(target.y - actor(game).position.y)).toBeLessThanOrEqual(128)
+  expect(Math.abs(target.x - actor(game, seat).position.x)).toBeLessThanOrEqual(128)
+  expect(Math.abs(target.y - actor(game, seat).position.y)).toBeLessThanOrEqual(128)
 }
+
+export async function moveTo(
+  page: Page,
+  game: ObservedGame,
+  cell: Cell,
+  axisOrder: readonly ('x' | 'y')[] = ['x', 'y'],
+) { return moveSeatTo(page, game, 'one', cell, axisOrder) }
 

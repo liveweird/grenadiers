@@ -22,10 +22,10 @@ invalid-map fallback, privacy checks, and simulation-level first-bomb escape sur
 Changing the algorithm or draw semantics requires a new generator version and reviewed
 replay/compatibility expectations. Do not replace the golden outputs merely to hide drift.
 
-Expanded generator v2 appends each enabled optional item to a stable weighted pool. Invisibility
-Cloak adds weight 15 after Landmine, growing the all-items pool from 305 to 320 entries. Every mask
-that does not enable Invisibility Cloak retains its previous pool and exact seeded output; all 16384
-item masks are covered by the current generator tests.
+Expanded generator v2 appends each enabled optional item to a stable weighted pool. Stopwatch adds
+weight 15 after Invisibility Cloak, growing the all-items pool from 320 to 335 entries. Every mask
+that does not enable Stopwatch retains its previous pool and exact seeded output; all 32768 item
+masks are covered by the current generator tests.
 
 The server constructs typed worlds at each actual round start and keeps the generation record
 private. Layer transitions, collection, gameplay-v2 projection, and item graphics are integrated.

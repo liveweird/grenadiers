@@ -13,12 +13,16 @@ use runner::{ReplayError, replay};
 #[cfg(test)]
 mod capture_tests;
 #[cfg(test)]
+mod item_mask_plan;
+#[cfg(test)]
 mod settings_tests;
 #[cfg(test)]
 mod tests;
 
 #[cfg(test)]
 mod shield_tests;
+#[cfg(test)]
+mod stopwatch_tests;
 
 #[cfg(test)]
 mod golden_flame_tests;

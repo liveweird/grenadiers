@@ -31,36 +31,48 @@ const supportedItems = [
   'reverseControls',
 ] as const
 
-function supportedItem(kind: string, enabled: ReadonlySet<ItemId>): boolean {
+function supportedItem(
+  kind: string, enabled: ReadonlySet<ItemId>, catalog: readonly ItemId[],
+): boolean {
   return ['bombCapacity', 'blastRange', 'movementSpeed'].includes(kind)
-    || (supportedItems.includes(kind as typeof supportedItems[number]) && enabled.has(kind as ItemId))
+    || (catalog.includes(kind as ItemId) && enabled.has(kind as ItemId))
 }
 
-function supportedEffect(effect: EffectView, enabled: ReadonlySet<ItemId>): boolean {
-  const limit = effect.kind === 'shield' ? 300 : 600
-  return supportedItems.includes(effect.kind as typeof supportedItems[number])
+function supportedEffect(
+  effect: EffectView, enabled: ReadonlySet<ItemId>, catalog: readonly ItemId[],
+): boolean {
+  const limit = effect.kind === 'shield' ? 300 : effect.kind === 'stopwatch' ? 180 : 600
+  return catalog.includes(effect.kind as ItemId)
     && enabled.has(effect.kind as ItemId)
     && effect.remainingTicks <= limit
 }
 
-function supportedBomb(bomb: BombView, enabled: ReadonlySet<ItemId>): boolean {
+function supportedBomb(
+  bomb: BombView, enabled: ReadonlySet<ItemId>, allowPausedTimed: boolean,
+): boolean {
   if (bomb.trigger.type === 'remote') {
     return enabled.has('remoteBomb') && bomb.blast === 'standard'
   }
   if (bomb.trigger.type === 'contact') {
     return enabled.has('landmine') && bomb.blast === 'standard'
   }
-  return bomb.trigger.type === 'timed' && !bomb.trigger.paused
+  return bomb.trigger.type === 'timed'
+    && (!bomb.trigger.paused || (allowPausedTimed && enabled.has('stopwatch')))
     && (bomb.blast === 'standard'
       || (bomb.blast === 'piercing' && enabled.has('piercingBomb'))
       || (bomb.blast === 'power' && enabled.has('powerBomb')))
 }
 
-function supportedState(state: GameState | null, enabled: ReadonlySet<ItemId>): boolean {
+function supportedState(
+  state: GameState | null, enabled: ReadonlySet<ItemId>, catalog: readonly ItemId[],
+  allowPausedTimed: boolean,
+): boolean {
   if (!state) return true
-  if (state.pickups.some((pickup) => !supportedItem(pickup.kind, enabled))) return false
+  if (state.pickups.some((pickup) => !supportedItem(pickup.kind, enabled, catalog))) return false
   const actorIds = new Set(state.actors.map((actor) => actor.id))
-  return state.bombs.every((bomb) => actorIds.has(bomb.owner) && supportedBomb(bomb, enabled))
+  return state.bombs.every((bomb) => actorIds.has(bomb.owner)
+      && (bomb.trigger.type !== 'timed' || bomb.trigger.remainingTicks > 0)
+      && supportedBomb(bomb, enabled, allowPausedTimed))
     && state.bombs.filter((bomb) => bomb.trigger.type === 'remote')
       .every((bomb, index, remotes) => remotes.findIndex((other) => other.owner === bomb.owner) === index)
     && state.actors.every((actor) => actor.type === 'hidden'
@@ -72,15 +84,18 @@ function supportedState(state: GameState | null, enabled: ReadonlySet<ItemId>): 
       || (actor.inventory.weapon === 'landmine' && enabled.has('landmine')))
     && (actor.inventory.equipment === null
       || (actor.inventory.equipment === 'heart' && enabled.has('heart')))
-    && actor.effects.every((effect) => supportedEffect(effect, enabled))
+    && actor.effects.every((effect) => supportedEffect(effect, enabled, catalog))
     && (enabled.has('heart') || actor.damageGraceRemainingTicks === 0))
 }
 
-function supportedEvents(events: readonly WireEvent[], enabled: ReadonlySet<ItemId>): boolean {
+function supportedEvents(
+  events: readonly WireEvent[], enabled: ReadonlySet<ItemId>, catalog: readonly ItemId[],
+  allowPausedTimed: boolean,
+): boolean {
   return events.every(({ kind }) => {
-    if (kind.type === 'pickupCollected') return supportedItem(kind.kind, enabled)
+    if (kind.type === 'pickupCollected') return supportedItem(kind.kind, enabled, catalog)
     if (kind.type === 'bombPlaced' || kind.type === 'bombDetonated') {
-      return supportedBomb(kind.bomb, enabled)
+      return supportedBomb(kind.bomb, enabled, allowPausedTimed)
     }
     return kind.type !== 'damagePrevented'
       || enabled.has(kind.source)
@@ -90,15 +105,23 @@ function supportedEvents(events: readonly WireEvent[], enabled: ReadonlySet<Item
 export function expandedProfileSemanticError(
   room: RoomView, state: GameState | null, events: readonly WireEvent[] = [],
 ): GameplayV8SemanticError | null {
+  return expandedProfileSemanticErrorFor(room, state, events, supportedItems, false)
+}
+
+export function expandedProfileSemanticErrorFor(
+  room: RoomView, state: GameState | null, events: readonly WireEvent[],
+  catalog: readonly ItemId[], allowPausedTimed: boolean,
+): GameplayV8SemanticError | null {
   const enabled = new Set(room.settings.enabledItems)
-  const canonicalEnabled = supportedItems.filter((item) => enabled.has(item))
+  const canonicalEnabled = catalog.filter((item) => enabled.has(item))
   if (room.rulesVersion !== 5 || room.mapId !== 'generated_v2'
-    || room.availableItems.length !== supportedItems.length
-    || room.availableItems.some((item, index) => item !== supportedItems[index])
+    || room.availableItems.length !== catalog.length
+    || room.availableItems.some((item, index) => item !== catalog[index])
     || room.settings.enabledItems.length !== canonicalEnabled.length
     || room.settings.enabledItems.some((item, index) => item !== canonicalEnabled[index])) {
     return 'unsupportedProfile'
   }
-  return supportedState(state, enabled) && supportedEvents(events, enabled)
+  return supportedState(state, enabled, catalog, allowPausedTimed)
+    && supportedEvents(events, enabled, catalog, allowPausedTimed)
     ? null : 'unsupportedProfile'
 }

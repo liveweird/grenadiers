@@ -111,3 +111,7 @@ distance and tie arbitration, allowing an eligible rival to collect the pickup.
 
 The fourteen-item availability array is exact v8 data. Deploy server and web together and reload
 older v8 clients: a client built for thirteen items rejects the new room even when Invisibility Cloak is disabled.
+
+Gameplay v8 remains archived at that Cloak-era catalog. It rejects Stopwatch in settings, pickups,
+effects and events, and rejects private pause history in live or event-only Timed bombs even when a
+resumed bomb's public `paused` flag is false. Active Stopwatch rooms require gameplay v9.

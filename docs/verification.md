@@ -1,32 +1,78 @@
 # Repository verification
 
-## Current v0.3.40 native attempt — failed, acceptance zero
+## Latest v0.3.40 native acceptance checkpoint — 2026-10-21 20:56:41 UTC — 104/104
 
-Native root 8289 completed with actual exit 1 at `2026-10-21T20:02:21Z` for source
+At this checkpoint, corrected source `fa25467b11038a9073d52f35e44ac6cee5380bcc`, tree
+`07ac34a87a368d2c9425fcbc04020295ef9fe4e3`, passed the complete native matrix on image
+`sha256:ec8604af4317d188d7b00ab7cfa27115114430e0a11fb9821856617ad9409906`, ref
+`grenadiers-v0340-stopwatch-native-recheck:fa25467`. Source archive SHA256 is
+`ee5fe698b98efcf72ff8346770242c4321d36e90c877514c30d7d028b0d660f8`. Root PTY 13621
+completed with actual exit zero at `2026-10-21T20:50:28.671845Z`; root consumed that exit at
+`2026-10-21T20:50:54.913938Z`.
+Independent review decoded all 46 reports, verified all 110 PNG hashes and 275 provenance hashes,
+and returned CLEAR under audit-receipt SHA256
+`9ad5342f8c2a3607198fcbefabe7266f8c0804f18a1c39f988ec4d7d833cfaca`.
+The RESULT review is also CLEAR. The final manifest seals 2,434 payloads under SHA256
+`36076deaad3b83fa6585459c03ccec5249bdff1f3744ee7c7cd087503d7d7def`;
+2,435 durable files and the separate source archive are byte-verified and read-only.
+
+Fresh source-bound gates passed before native execution. Debug and release each pass 647 core tests,
+205 server tests, two doctests and retain four historical ignores. Coverage passes the same 647 core
+and 205 server tests without doctests and reports 92.34% Rust line coverage. All 32,768 item masks
+complete in debug, release and coverage with exact observed counts. The web gate passes 49,569 tests
+across 58 files with 95.41% statement, 91.21% branch, 95.88% function and 97.81% line coverage;
+53 E2E scenario contracts, renderer diagnostics, cargo-deny and both npm audits pass.
+
+The native matrix passes **52 Compose plus 52 Kubernetes** cases, all 46 groups and reports,
+74/74 baseline plus 30/30 optional cases, with zero retries and zero carried passes. It retains
+110 runtime PNGs, 36 runtime image/security records, 18 distinct Kubernetes pod UID and
+port-forward lifecycles, 17 external fixtures and 34 mode-0444 records. Frozen source,
+dependencies, locks, archive, preparation and image comparisons match.
+
+All 22 latency cases per target pass. Each local and shaped profile retains all 20 observations,
+and no observation exceeds the unchanged 250 ms limit.
+
+| Target | Local maximum | Shaped 50 ms maximum | Exceedances |
+| --- | ---: | ---: | ---: |
+| Compose | 50.930298 ms | 179.973828 ms | 0 |
+| Kubernetes | 54.647992 ms | 150.606331 ms | 0 |
+
+Compose CPU usage changed from 602182 to 2458157 us, delta 1855975 us, under cpu.max
+`max 100000`; Kubernetes changed from 493583 to 1069938 us, delta 576355 us, under cpu.max
+`50000 100000`. Throttle-count/time deltas are zero for both. Supplemental monitors 64536 and
+91793 completed with actual exit zero and retained 65 Compose and 50 Kubernetes samples. The
+initial Compose observer 98805 expired before any latency test while macOS was busy; all 179 of
+its samples and its consumed exit remain preserved. The fresh monitor then passed. No test retry,
+latency budget, sample count, timeout or product behavior changed.
+
+Root reviewed only two fresh Compose pre-collection captures: [English desktop](screenshots/stopwatch-desktop.png)
+and [Polish 320px reduced motion](screenshots/stopwatch-mobile-pl.png). Both show exposed clock
+pickups and readable localized HUD/settings. These stills do not prove action freeze or bomb-pause
+behavior; the paired native assertions do. Kubernetes captures were retained without visual review.
+
+Cleanup passed at `2026-10-21T20:51:20.993689Z`: all owned containers, network, namespace,
+port-forwards and ports 18284/18285 were absent. Localhost:8085 still served published v0.3.39
+image `sha256:9a4dc108c4f4ba14a091ed9f55887e41d9e8a8bf49c5c2a4f9369078469e2d10`;
+health, readiness and index returned 200, and served index/JavaScript bytes matched the container.
+
+As of this dated sealed checkpoint, hosted v0.3.40 CI, PR/merge, publication, tag verification and
+local promotion remained pending. Fourteen of 22 item types were published through v0.3.39.
+Stopwatch is the fifteenth source/native-verified type; seven requested types remain after it. See
+the [release notes](https://github.com/liveweird/grenadiers/releases) for current release status.
+
+## Historical failed v0.3.40 attempt — 2026-10-21 20:02:21 UTC — zero carry
+
+Native root 8289 completed with actual exit 1 for source
 `bd9d064fcd1774085c3b5bc6cac45c2f0b55cfb0` and image
-`sha256:5fbe61fbbcc1177fb257a9b4241330aeaa9fb87914a2b1abba137967a6eec297`; its exit was consumed.
-The Compose Stopwatch scenario expected a 359-tick fresh-bomb lifetime but observed the correct
-325 ticks because the bomb was placed after 34 ticks of the second Stopwatch window had elapsed.
-All preceding 22 Compose groups exited zero, but Kubernetes never started. Input-integrity checks
-matched; this failed matrix provides no accepted or carried native pass. The corrected oracle derives
-the remaining pause from the independently visible effect deadline and the placement event tick.
+`sha256:5fbe61fbbcc1177fb257a9b4241330aeaa9fb87914a2b1abba137967a6eec297`;
+its exit was consumed. The Compose Stopwatch scenario expected a 359-tick fresh-bomb lifetime but
+observed the correct 325 ticks because the bomb was placed after 34 ticks of the second Stopwatch
+window had elapsed. The corrected test derives remaining pause independently as
+`deadline - placedAt - 1`. Product behavior was unchanged. The failed attempt passed 51 Compose
+cases before that single oracle failure; Kubernetes never started. Its integrity checks matched,
+but it contributes no accepted or carried pass to the fresh checkpoint above.
 
-## Current v0.3.40 integrated source — acceptance zero
-
-Published v0.3.39 merge `40cb17e7d2131f7c4d30c95a26531b49ab9450e6` has exact tree
-`82f206f922c9f2d7b79af9a58dbfb977f51ef56e`, byte-identical to this integration's raw v0.3.39
-first parent `383d3da55960b2b5428d040d4e07939cfc93e239`. PR #85 and post-merge run 39658973239 passed
-seven jobs and all 51 cases; tag verification was still running when this source was integrated.
-The reviewed Stopwatch/report-retention head `7998d6809d3d147f9c88ec8ba0b53bbfefedeb1e`, mask-plan
-WP1 `7d3bdea1b67e174709e0fc6eafe8b9f43339a64f`, and mask-CI WP2
-`ae295c473eab2d7935b9575384f5935eb89c2ef4` are now combined with that exact parent tree.
-Their earlier results remain source-specific light/pre-integration records: no complete current
-32,768-mask debug/release/coverage run, native case, hosted v0.3.40 CI result or publication exists,
-and no v0.3.39 pass carries forward. Fourteen of 22 item types are published through v0.3.39,
-which adds no item. Stopwatch becomes the fifteenth published type only after every v0.3.40 gate
-passes.
-
-## Latest native acceptance checkpoint — 2026-10-21 18:44:23 UTC — 102/102
+## Historical v0.3.39 native acceptance checkpoint — 2026-10-21 18:44:23 UTC — 102/102
 
 At this checkpoint, frozen source `272b950df876596d5912fac3a56377e524899a2a`, tree
 `a6104621669608ad3f54cc19873d0e516d3a7d4b`, passed the complete native matrix on image

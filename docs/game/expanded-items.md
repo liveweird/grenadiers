@@ -67,12 +67,14 @@ The accepted raw Landmine source is integrated into the v0.3.38 [Invisibility Cl
 source candidate. Its corrected reveal-position driver and private actor/event semantics are
 retained. Corrected source `1c6724f` passed fresh 51 Compose plus 51 Kubernetes acceptance with an independent raw audit and durable seal. Those exact-head candidate/post-merge CI, publication and promotion gates subsequently passed for v0.3.38; the accepted parent is integrated above.
 
-The v0.3.40 integration contains the reviewed opt-in [Stopwatch](stopwatch.md) source. Its raw
-v0.3.39 parent tree exactly equals published merge `40cb17e7`; PR #85 and post-merge run
-39658973239 passed seven jobs and all 51 cases. v0.3.40 has zero native acceptance and no carried
-passes. Integrated full-mask execution, fresh native acceptance and hosted release gates are still
-required. Fourteen of 22 item types are published through v0.3.39, which adds no item; the
-published count becomes fifteen only after every v0.3.40 gate passes.
+At the 21 October 2026 20:56:41 UTC v0.3.40 native checkpoint, corrected [Stopwatch](stopwatch.md)
+source `fa25467`, tree `07ac34a8`, and image `ec8604af` passed complete 32,768-mask debug,
+release and coverage execution plus fresh 52 Compose and 52 Kubernetes cases, with zero retries
+or carried passes. The earlier `bd9d064` attempt is historical and contributes no pass. Independent raw audit is clear and 2,434 payloads are durably sealed; hosted CI, PR/merge, publication, tag verification and promotion remained
+pending at this checkpoint. Published v0.3.39 remains the parent and local deployment. Fourteen of
+22 item types were published; Stopwatch is the fifteenth source/native-verified type, and seven
+requested types remain after it. See [release notes](https://github.com/liveweird/grenadiers/releases)
+for current release status.
 
 This optional track follows the [backlog](backlog.md), shared settings and
 pixel-art increments. The historical catalog in [rules](rules.md) is not an implementation

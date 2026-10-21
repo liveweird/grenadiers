@@ -30,9 +30,12 @@ Event-side timing and audience facts are captured when an event occurs rather th
 the final state. Archived v8 rejects both live and event-only Stopwatch or pause history, including
 a resumed Timed bomb whose public paused flag is currently false.
 
-The v0.3.40 integration activates Stopwatch in the source contract, but has zero native acceptance
-and no carried passes. Its raw v0.3.39 parent tree equals published merge `40cb17e7`; complete
-32,768-mask execution, fresh native acceptance and hosted release gates remain pending.
+At the 21 October 2026 20:56:41 UTC v0.3.40 native checkpoint, corrected source `fa25467`
+activated Stopwatch and passed all 32,768 settings subsets in debug, release and coverage plus
+fresh 52 Compose and 52 Kubernetes cases, with zero retries or carried passes. The paired
+server/browser deployment and reload used current gameplay v9 assets; archived v8 rejection and
+the exact hidden-actor shape remained covered. Independent raw audit is clear and 2,434 payloads are durably sealed; hosted release gates
+remained pending at that checkpoint. Published/local v0.3.39 remained the release baseline.
 
 At the historical 21 October 2026 18:44:23 UTC native acceptance checkpoint, frozen source `272b950` and
 image `9a4dc108` passed all 51 Compose and 51 Kubernetes cases with zero retries or carried

@@ -11,10 +11,14 @@ Fresh native acceptance was independently audited and sealed; release CI and pub
 pending at that checkpoint. See [release notes](https://github.com/liveweird/grenadiers/releases)
 for current release status.
 
-These accepted v0.3.38 captures are integrated into the v0.3.39 gameplay-v9 foundation without
-changing artwork or runtime code. The later v0.3.39 native checkpoint passed 102/102 with zero
-carried passes; it added no visual feature or fresh visually reviewed screenshot. Those results
-do not accept the integrated v0.3.40 Stopwatch presentation.
+These accepted v0.3.38 captures are integrated into the published v0.3.39 gameplay-v9
+foundation without changing artwork or runtime code. At the 21 October 2026 20:56:41 UTC v0.3.40
+native checkpoint, corrected source `fa25467` passed fresh 52 Compose plus 52 Kubernetes cases.
+Root reviewed the Compose [Stopwatch English desktop](../screenshots/stopwatch-desktop.png) and
+[Polish 320px reduced-motion](../screenshots/stopwatch-mobile-pl.png) captures: both show the
+pre-collection clock pickups and readable localized HUD/settings. They do not prove freeze or
+fuse behavior; native assertions do. Independent raw audit is clear and 2,434 payloads are durably sealed; release gates remained pending
+at that checkpoint, and published/local v0.3.39 remained the release baseline.
 
 The latest Landmine desktop and Polish 320px captures were refreshed from corrected source `420d8df` and tested image1736. The pressure plate/consumed charge/no-flame state and normal HUD layout were visually reviewed; these stills precede contact and do not replace behavioral assertions. Kubernetes captures were retained without visual review.
 

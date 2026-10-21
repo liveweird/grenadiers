@@ -45,10 +45,11 @@ The accepted raw documentation/capture commit `04c070c5` has sole parent `1c6724
 clear and 2,320 payloads are durably sealed. At that checkpoint, v0.3.39 release CI, publication
 and promotion remained pending.
 
-The v0.3.40 integration preserves those Cloak semantics while adding Stopwatch as the
-fifteenth candidate item and expanding active gameplay-v9 to 32,768 subsets. v0.3.40 has zero
-native acceptance; the raw v0.3.39 parent tree equals published merge `40cb17e7`, while full mask
-runs, native acceptance and hosted release gates remain pending.
+At the 21 October 2026 20:56:41 UTC v0.3.40 native checkpoint, source `fa25467` preserves
+those Cloak semantics while adding Stopwatch as the fifteenth source/native-verified item. All
+32,768 gameplay-v9 subsets passed in debug, release and coverage, followed by fresh 52 Compose
+plus 52 Kubernetes cases with zero retries or carried passes. Independent raw audit is clear and 2,434 payloads are durably sealed; hosted CI and publication remained pending at this checkpoint; published/local v0.3.39 remained
+the release baseline.
 
 
 Fresh reviewed Compose [English desktop](../screenshots/invisibility-cloak-desktop.png) and

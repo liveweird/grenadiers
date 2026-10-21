@@ -3,7 +3,7 @@ use crate::protocol::EntityId;
 
 use super::projection_capture_wire::*;
 use super::projection_facts::{
-    EventFacts, KickBombFacts, ProjectionError, ReportFacts, TimedBombFacts,
+    EventFacts, KickBombFacts, ProjectionError, PunchBombFacts, ReportFacts, TimedBombFacts,
 };
 use super::{BlastKind, BombTrigger, BombView, EventKind};
 
@@ -13,7 +13,16 @@ fn capture_event_bomb(
     timing: Option<game::events::TimedBombEvent>,
     motion: Option<game::BombMotion>,
     has_been_kicked: bool,
-) -> Result<(BombView, Option<TimedBombFacts>, KickBombFacts), ProjectionError> {
+    has_been_punched: bool,
+) -> Result<
+    (
+        BombView,
+        Option<TimedBombFacts>,
+        KickBombFacts,
+        PunchBombFacts,
+    ),
+    ProjectionError,
+> {
     if matches!(
         bomb.trigger,
         game::BombTrigger::Timed { detonates_at } if detonates_at.0 < event_tick.0
@@ -62,6 +71,7 @@ fn capture_event_bomb(
         bomb_view,
         timed_bomb,
         super::projection_kick::capture_event_bomb(bomb_view, motion, has_been_kicked),
+        super::projection_punch::capture_event_bomb(bomb_view, has_been_punched),
     ))
 }
 
@@ -73,32 +83,45 @@ pub(super) fn capture_report(report: &game::StepReport) -> Result<ReportFacts, P
             .events
             .iter()
             .map(|event| {
-                let (kind, timed_bomb, kick_bomb) = match event.kind {
+                let (kind, timed_bomb, kick_bomb, punch_bomb) = match event.kind {
                     game::StepEventKind::BombPlaced(bomb) => {
-                        let (bomb, timing, kick) = capture_event_bomb(
+                        let (bomb, timing, kick, punch) = capture_event_bomb(
                             bomb,
                             event.tick,
                             event.timed_bomb,
                             event.bomb_motion,
                             event.bomb_has_been_kicked,
+                            event.bomb_has_been_punched,
                         )?;
-                        (EventKind::BombPlaced { bomb }, timing, Some(kick))
+                        (
+                            EventKind::BombPlaced { bomb },
+                            timing,
+                            Some(kick),
+                            Some(punch),
+                        )
                     }
                     game::StepEventKind::BombDetonated(bomb) => {
-                        let (bomb, timing, kick) = capture_event_bomb(
+                        let (bomb, timing, kick, punch) = capture_event_bomb(
                             bomb,
                             event.tick,
                             event.timed_bomb,
                             event.bomb_motion,
                             event.bomb_has_been_kicked,
+                            event.bomb_has_been_punched,
                         )?;
-                        (EventKind::BombDetonated { bomb }, timing, Some(kick))
+                        (
+                            EventKind::BombDetonated { bomb },
+                            timing,
+                            Some(kick),
+                            Some(punch),
+                        )
                     }
                     game::StepEventKind::ActorEliminated { id, seat } => (
                         EventKind::ActorEliminated {
                             id: EntityId::new(id.0),
                             seat: wire_seat(seat),
                         },
+                        None,
                         None,
                         None,
                     ),
@@ -116,12 +139,14 @@ pub(super) fn capture_report(report: &game::StepReport) -> Result<ReportFacts, P
                         },
                         None,
                         None,
+                        None,
                     ),
                     game::StepEventKind::RoundEnded(result) => (
                         EventKind::RoundEnded {
                             result: wire_result(Some(result))
                                 .ok_or(ProjectionError::InvalidEvent)?,
                         },
+                        None,
                         None,
                         None,
                     ),
@@ -140,6 +165,7 @@ pub(super) fn capture_report(report: &game::StepReport) -> Result<ReportFacts, P
                         },
                         None,
                         None,
+                        None,
                     ),
                 };
                 Ok(EventFacts {
@@ -148,6 +174,7 @@ pub(super) fn capture_report(report: &game::StepReport) -> Result<ReportFacts, P
                     kind,
                     timed_bomb,
                     kick_bomb,
+                    punch_bomb,
                 })
             })
             .collect::<Result<_, ProjectionError>>()?,

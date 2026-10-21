@@ -201,7 +201,7 @@ pub(super) async fn dispatch(
 const fn manual_room_action(kind: ManualActionKind, id: Counter) -> Option<RoomAction> {
     match kind {
         ManualActionKind::Bomb => Some(RoomAction::Bomb(id.get())),
-        ManualActionKind::Equipment => None,
+        ManualActionKind::Equipment => Some(RoomAction::Equipment(id.get())),
     }
 }
 
@@ -330,9 +330,12 @@ mod tests {
     use super::*;
 
     #[test]
-    fn equipment_never_reaches_room_budget_journal_or_action_high_water() {
+    fn equipment_reaches_the_shared_room_action_path() {
         let id = Counter::new(7).unwrap();
-        assert_eq!(manual_room_action(ManualActionKind::Equipment, id), None);
+        assert_eq!(
+            manual_room_action(ManualActionKind::Equipment, id),
+            Some(RoomAction::Equipment(7))
+        );
         assert_eq!(
             manual_room_action(ManualActionKind::Bomb, id),
             Some(RoomAction::Bomb(7))

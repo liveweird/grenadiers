@@ -25,6 +25,7 @@ pub(super) fn validate_event(
                 bomb,
                 event.timed_bomb,
                 event.kick_bomb,
+                event.punch_bomb,
                 true,
             )
         }
@@ -34,6 +35,7 @@ pub(super) fn validate_event(
             bomb,
             event.timed_bomb,
             event.kick_bomb,
+            event.punch_bomb,
             false,
         ),
         EventKind::ActorEliminated { id, seat } => {
@@ -94,6 +96,7 @@ fn validate_event_bomb(
     bomb: BombView,
     timing: Option<TimedBombFacts>,
     kick: Option<super::projection_facts::KickBombFacts>,
+    punch: Option<super::projection_facts::PunchBombFacts>,
     placement: bool,
 ) -> Result<(), ProjectionError> {
     if !(1..=8).contains(&bomb.range)
@@ -131,6 +134,7 @@ fn validate_event_bomb(
         return Err(ProjectionError::InvalidEvent);
     }
     super::projection_kick::validate_event(world, bomb, kick, placement)?;
+    super::projection_punch::validate_event(world, bomb, punch, placement)?;
     let blast_item = match bomb.blast {
         BlastKind::Standard => None,
         BlastKind::Piercing => Some(ItemId::PiercingBomb),
@@ -147,7 +151,7 @@ fn validate_event_bomb(
 }
 
 fn reject_non_bomb_timing(event: &EventFacts) -> Result<(), ProjectionError> {
-    (event.timed_bomb.is_none() && event.kick_bomb.is_none())
+    (event.timed_bomb.is_none() && event.kick_bomb.is_none() && event.punch_bomb.is_none())
         .then_some(())
         .ok_or(ProjectionError::InvalidEvent)
 }

@@ -99,6 +99,7 @@ pub(in crate::game::rooms) enum ReplayAction {
     },
     Movement(Option<Direction>),
     Bomb(u32),
+    Equipment(u32),
     Rematch(bool),
 }
 

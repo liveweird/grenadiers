@@ -57,6 +57,19 @@ pub(crate) fn capture_expanded_for_items(
             result: wire_result(public.result),
             arena: capture_arena(&public.arena)?,
             actors,
+            last_successful_punch_ticks: state
+                .actors()
+                .each_ref()
+                .map(|actor| {
+                    actor
+                        .last_successful_punch_tick()
+                        .map(wire_tick)
+                        .transpose()
+                })
+                .into_iter()
+                .collect::<Result<Vec<_>, _>>()?
+                .try_into()
+                .map_err(|_| ProjectionError::InvalidActors)?,
             soft_wall_grace: state
                 .actors()
                 .each_ref()
@@ -70,14 +83,18 @@ pub(crate) fn capture_expanded_for_items(
                 .collect::<Result<Vec<_>, _>>()?
                 .try_into()
                 .map_err(|_| ProjectionError::InvalidActors)?,
-            bombs: captured_bombs.iter().map(|(bomb, _, _)| *bomb).collect(),
+            bombs: captured_bombs.iter().map(|(bomb, _, _, _)| *bomb).collect(),
             timed_bombs: captured_bombs
                 .iter()
-                .filter_map(|(bomb, timing, _)| timing.map(|facts| (bomb.id, facts)))
+                .filter_map(|(bomb, timing, _, _)| timing.map(|facts| (bomb.id, facts)))
                 .collect::<BTreeMap<_, _>>(),
             kick_bombs: captured_bombs
                 .iter()
-                .map(|(bomb, _, kick)| (bomb.id, *kick))
+                .map(|(bomb, _, kick, _)| (bomb.id, *kick))
+                .collect(),
+            punch_bombs: captured_bombs
+                .iter()
+                .map(|(bomb, _, _, punch)| (bomb.id, *punch))
                 .collect(),
             flames: public
                 .flames
@@ -208,6 +225,7 @@ fn capture_bomb(
         BombView,
         Option<TimedBombFacts>,
         super::projection_facts::KickBombFacts,
+        super::projection_facts::PunchBombFacts,
     ),
     ProjectionError,
 > {
@@ -256,6 +274,7 @@ fn capture_bomb(
         bomb_view,
         timed_bomb,
         super::projection_kick::capture_bomb(bomb, bomb_view),
+        super::projection_punch::capture_bomb(bomb, bomb_view),
     ))
 }
 

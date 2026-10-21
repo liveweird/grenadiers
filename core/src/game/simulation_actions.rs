@@ -7,10 +7,12 @@ use crate::game::inventory::SpecialWeapon;
 use crate::game::movement;
 use crate::game::types::{EntityId, SeatId, Tick};
 use crate::game::view::BombView;
+use std::collections::BTreeSet;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(super) enum ManualAction {
     PlaceBomb,
+    UseEquipment,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -89,6 +91,9 @@ impl State {
                 InputAction::PlaceBomb => {
                     manual_actions.seats[input.seat.index()].push(ManualAction::PlaceBomb);
                 }
+                InputAction::UseEquipment => {
+                    manual_actions.seats[input.seat.index()].push(ManualAction::UseEquipment);
+                }
             }
             if actor.held.active() != previous {
                 actor.pending_turn = None;
@@ -100,7 +105,7 @@ impl State {
         manual_actions
     }
 
-    pub(super) fn resolve_classic_manual_actions(
+    pub(super) fn resolve_manual_actions(
         &mut self,
         actions: &ManualActionQueues,
         tick: Tick,
@@ -108,17 +113,22 @@ impl State {
         events: &mut Vec<StepEvent>,
     ) -> [Option<EntityId>; 2] {
         let mut remote_targets = [None; 2];
-        let requests = SeatId::ALL.map(|seat| {
+        let first_bombs = SeatId::ALL.map(|seat| {
+            if stopwatch.frozen[seat.index()] {
+                return None;
+            }
+            actions
+                .for_seat(seat)
+                .as_slice()
+                .iter()
+                .position(|action| *action == ManualAction::PlaceBomb)
+        });
+        let eventual_requests = SeatId::ALL.map(|seat| {
             let actor = &self.actors[seat.index()];
-            if actions.for_seat(seat).first() == Some(ManualAction::PlaceBomb)
-                && actor.alive
-                && !stopwatch.frozen[seat.index()]
-            {
-                if let Some(id) = self.world.bombs.values().find_map(|bomb| {
+            if actor.alive && first_bombs[seat.index()].is_some() {
+                if self.world.bombs.values().any(|bomb| {
                     (bomb.owner() == actor.id && matches!(bomb.trigger(), BombTrigger::Remote))
-                        .then_some(bomb.id())
                 }) {
-                    remote_targets[seat.index()] = Some(id);
                     return None;
                 }
                 Some(PlacementOrigin::Manual)
@@ -128,13 +138,88 @@ impl State {
                 None
             }
         });
-        self.resolve_classic_placements(requests, tick, stopwatch.pause_timed, events);
+        let placement_veto = self.shared_placement_veto(eventual_requests);
+        let wave_count = actions
+            .seats
+            .iter()
+            .map(|queue| queue.as_slice().len())
+            .max()
+            .unwrap_or(0);
+        let mut remote_reservations = BTreeSet::new();
+        for ordinal in 0..wave_count {
+            let wave = SeatId::ALL.map(|seat| {
+                (!stopwatch.frozen[seat.index()])
+                    .then(|| actions.for_seat(seat).as_slice().get(ordinal).copied())
+                    .flatten()
+            });
+            for seat in SeatId::ALL {
+                if wave[seat.index()] != Some(ManualAction::PlaceBomb)
+                    || first_bombs[seat.index()] != Some(ordinal)
+                {
+                    continue;
+                }
+                let owner = self.actors[seat.index()].id;
+                if let Some(id) = self.world.bombs.values().find_map(|bomb| {
+                    (bomb.owner() == owner && matches!(bomb.trigger(), BombTrigger::Remote))
+                        .then_some(bomb.id())
+                }) {
+                    remote_targets[seat.index()] = Some(id);
+                    remote_reservations.insert(id);
+                }
+            }
+            let punches = SeatId::ALL.map(|seat| {
+                (wave[seat.index()] == Some(ManualAction::UseEquipment)).then_some(seat)
+            });
+            self.resolve_punch_requests(punches, tick, &remote_reservations);
+            let placements = SeatId::ALL.map(|seat| {
+                (wave[seat.index()] == Some(ManualAction::PlaceBomb)
+                    && first_bombs[seat.index()] == Some(ordinal)
+                    && remote_targets[seat.index()].is_none())
+                .then_some(PlacementOrigin::Manual)
+            });
+            self.resolve_placements(
+                placements,
+                placement_veto,
+                tick,
+                stopwatch.pause_timed,
+                events,
+            );
+        }
+        let automatic = SeatId::ALL.map(|seat| {
+            (first_bombs[seat.index()].is_none()
+                && self.actors[seat.index()].alive
+                && self.actors[seat.index()].effects.forces_bomb_drops(tick))
+            .then_some(PlacementOrigin::Automatic)
+        });
+        self.resolve_placements(
+            automatic,
+            placement_veto,
+            tick,
+            stopwatch.pause_timed,
+            events,
+        );
         remote_targets
     }
 
-    fn resolve_classic_placements(
+    fn shared_placement_veto(&self, requests: [Option<PlacementOrigin>; 2]) -> [bool; 2] {
+        let targets = SeatId::ALL.map(|seat| {
+            let actor = &self.actors[seat.index()];
+            let cell = actor.position.cell()?;
+            let eligible = requests[seat.index()].is_some()
+                && actor.alive
+                && self.live_bomb_count(seat) < usize::from(actor.capacity)
+                && self.world.arena.terrain(cell) == Some(Terrain::Floor)
+                && !self.world.arena.blocks().contains(&cell);
+            eligible.then_some(cell)
+        });
+        let contested = targets[0].is_some() && targets[0] == targets[1];
+        [contested, contested]
+    }
+
+    fn resolve_placements(
         &mut self,
         requests: [Option<PlacementOrigin>; 2],
+        placement_veto: [bool; 2],
         tick: Tick,
         timed_paused: bool,
         events: &mut Vec<StepEvent>,
@@ -149,7 +234,12 @@ impl State {
             let cell_is_free = self.world.arena.terrain(cell) == Some(Terrain::Floor)
                 && !self.world.arena.blocks().contains(&cell)
                 && !self.world.bombs.values().any(|bomb| bomb.cell() == cell);
-            if requests[seat.index()].is_some() && actor.alive && has_capacity && cell_is_free {
+            if requests[seat.index()].is_some()
+                && !placement_veto[seat.index()]
+                && actor.alive
+                && has_capacity
+                && cell_is_free
+            {
                 targets[seat.index()] = Some(cell);
             }
         }

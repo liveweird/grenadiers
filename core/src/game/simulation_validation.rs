@@ -44,3 +44,9 @@ pub(super) fn unsupported_kick_history(rules: RulesConfig, world: &World) -> Opt
         invalid.then_some(bomb.id())
     })
 }
+
+pub(super) fn unsupported_punch_history(rules: RulesConfig, world: &World) -> Option<EntityId> {
+    world.bombs.values().find_map(|bomb| {
+        (bomb.has_been_punched() && !rules.enabled_items().contains_punch()).then_some(bomb.id())
+    })
+}

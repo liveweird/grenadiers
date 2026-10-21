@@ -27,6 +27,7 @@ pub enum InputAction {
     Release(Direction),
     Clear,
     PlaceBomb,
+    UseEquipment,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -59,6 +60,7 @@ pub struct Actor {
     inventory: Inventory,
     effects: TimedEffects,
     damage_grace: Option<DamageGrace>,
+    last_successful_punch_tick: Option<Tick>,
 }
 
 impl Actor {
@@ -145,6 +147,7 @@ pub enum StateError {
     UnsupportedBombBlast(EntityId),
     DuplicateRemoteOwner(EntityId),
     UnsupportedBombKickHistory(EntityId),
+    UnsupportedBombPunchHistory(EntityId),
     UnsupportedEnabledItems(crate::game::EnabledItems),
     UnsupportedPickup {
         cell: CellId,
@@ -160,6 +163,7 @@ pub enum StepError {
     UnsupportedBombBlast(EntityId),
     DuplicateRemoteOwner(EntityId),
     UnsupportedBombKickHistory(EntityId),
+    UnsupportedBombPunchHistory(EntityId),
     EffectExpiryOverflow(super::effects::EffectKind),
     BombPauseOverflow(EntityId),
 }
@@ -266,6 +270,9 @@ impl State {
         if let Some(id) = validation::unsupported_kick_history(rules, &world) {
             return Err(StateError::UnsupportedBombKickHistory(id));
         }
+        if let Some(id) = validation::unsupported_punch_history(rules, &world) {
+            return Err(StateError::UnsupportedBombPunchHistory(id));
+        }
 
         let mut canonical = actors;
         canonical.sort_by_key(|actor| actor.seat.index());
@@ -336,6 +343,8 @@ mod landmine_tests;
 mod observations;
 #[path = "simulation_pickups.rs"]
 mod pickup_step;
+#[path = "simulation_punch.rs"]
+mod punch;
 #[cfg(test)]
 #[path = "pickup_tests.rs"]
 mod pickup_tests;

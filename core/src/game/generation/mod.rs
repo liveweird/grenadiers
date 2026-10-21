@@ -216,6 +216,7 @@ fn sample_pickup(source: &mut impl RandomWords, enabled: EnabledItems) -> Option
     let teleporter_end = invisible_bombs_end + u32::from(enabled.contains_teleporter()) * 15;
     let wall_pass_end = teleporter_end + u32::from(enabled.contains_wall_pass()) * 15;
     let kick_end = wall_pass_end + u32::from(enabled.contains_kick()) * 15;
+    let punch_end = kick_end + u32::from(enabled.contains_punch()) * 15;
     Some(match value {
         0..40 => PickupKind::BombCapacity,
         40..80 => PickupKind::BlastRange,
@@ -239,6 +240,7 @@ fn sample_pickup(source: &mut impl RandomWords, enabled: EnabledItems) -> Option
         value if value < teleporter_end => PickupKind::Teleporter,
         value if value < wall_pass_end => PickupKind::WallPass,
         value if value < kick_end => PickupKind::Kick,
+        value if value < punch_end => PickupKind::Punch,
         _ => unreachable!("sample value is bounded by the enabled item pool"),
     })
 }
@@ -377,6 +379,8 @@ mod piercing_bomb_tests;
 #[cfg(test)]
 #[path = "power_bomb_generation_tests.rs"]
 mod power_bomb_tests;
+#[cfg(test)]
+mod punch_tests;
 #[cfg(test)]
 #[path = "remote_bomb_generation_tests.rs"]
 mod remote_bomb_tests;

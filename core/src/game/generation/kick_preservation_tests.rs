@@ -136,8 +136,8 @@ fn complete_catalog_pool_is_395_with_kick_at_380_through_394() {
         .iter()
         .fold(0, |bits, (historical_bit, _)| bits | *historical_bit);
     assert_eq!(historical_all, 3_145_720);
-    assert_eq!(EnabledItems::ALL.bits(), 3_145_721);
-    assert_eq!(EnabledItems::ALL.bits().count_ones(), 19);
+    let kick_all = EnabledItems::from_bits(3_145_721).unwrap();
+    assert_eq!(kick_all.bits().count_ones(), 19);
 
     for (value, expected) in [
         (379, PickupKind::WallPass),
@@ -146,7 +146,7 @@ fn complete_catalog_pool_is_395_with_kick_at_380_through_394() {
     ] {
         let mut source = CountingSequence::one(value);
         assert_eq!(
-            sample_pickup(&mut source, EnabledItems::ALL),
+            sample_pickup(&mut source, kick_all),
             Some(expected)
         );
         assert_eq!(source.draws, 1);

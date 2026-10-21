@@ -56,6 +56,7 @@ pub struct StepEvent {
     pub(crate) timed_bomb: Option<TimedBombEvent>,
     pub(crate) bomb_motion: Option<BombMotion>,
     pub(crate) bomb_has_been_kicked: bool,
+    pub(crate) bomb_has_been_punched: bool,
 }
 
 impl StepEvent {
@@ -67,6 +68,7 @@ impl StepEvent {
             timed_bomb: None,
             bomb_motion: None,
             bomb_has_been_kicked: false,
+            bomb_has_been_punched: false,
         }
     }
 
@@ -92,6 +94,7 @@ impl StepEvent {
             timed_bomb,
             bomb_motion: bomb.motion(),
             bomb_has_been_kicked: bomb.has_been_kicked(),
+            bomb_has_been_punched: bomb.has_been_punched(),
         }
     }
 }

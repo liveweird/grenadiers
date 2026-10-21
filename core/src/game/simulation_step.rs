@@ -30,6 +30,9 @@ impl State {
         if let Some(id) = super::validation::unsupported_kick_history(self.rules, &self.world) {
             return Err(StepError::UnsupportedBombKickHistory(id));
         }
+        if let Some(id) = super::validation::unsupported_punch_history(self.rules, &self.world) {
+            return Err(StepError::UnsupportedBombPunchHistory(id));
+        }
         if self.result.is_some() {
             self.tick = next_tick;
             return Ok(StepReport {
@@ -77,7 +80,7 @@ impl State {
         self.resolve_kick_requests(kick_requests);
         self.kill_on_existing_flames(&traces, next_tick, &mut events, &mut shield_prevented);
         let remote_targets =
-            self.resolve_classic_manual_actions(&manual_actions, next_tick, stopwatch, &mut events);
+            self.resolve_manual_actions(&manual_actions, next_tick, stopwatch, &mut events);
         self.resolve_explosions(
             next_tick,
             remote_targets,

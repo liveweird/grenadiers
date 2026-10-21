@@ -96,8 +96,7 @@ test('two browsers observe one Remote Bomb wait past its fuse and detonate on co
     }
 
     await one.getByRole('region', { name: 'Grenadiers courtyard' }).click()
-    const placementCountsBefore = games.map((game) => events(game).filter(({ kind }) =>
-      kind.type === 'bombPlaced').length)
+    // The observer retains a rolling frame window: compare causal IDs, not shrinking totals.
     const priorBombIds = games.map((game) => new Set(events(game).flatMap(({ kind }) =>
       kind.type === 'bombPlaced' ? [kind.bomb.id] : [])))
     await one.keyboard.press('Space')
@@ -105,8 +104,6 @@ test('two browsers observe one Remote Bomb wait past its fuse and detonate on co
       kind.type === 'bombDetonated' && kind.bomb.id === remote.id)).toBeDefined()))
     expect(manualActions(games[0])).toHaveLength(quietActionFloor + 1)
     for (const [index, game] of games.entries()) {
-      expect(events(game).filter(({ kind }) => kind.type === 'bombPlaced'))
-        .toHaveLength(placementCountsBefore[index])
       expect(events(game).filter(({ kind }) => kind.type === 'bombPlaced'
         && !priorBombIds[index].has(kind.bomb.id))).toEqual([])
       expect(latestSnapshot(game)!.state.bombs.some(({ id }) => id === remote.id)).toBe(false)

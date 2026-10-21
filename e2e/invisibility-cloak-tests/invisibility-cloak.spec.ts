@@ -99,6 +99,9 @@ test('two browsers observe recipient-private Cloak through reconnect and exact e
     expect(hidden).toEqual({ type: 'hidden', id: visibleActor(latestSnapshot(games[0]), 'one')!.id,
       seat: 'one', alive: true })
     await moveTo(one, games[0], { column: 2, row: 1 })
+    const settledOwner = visibleActor(latestSnapshot(games[0]), 'one')
+    if (!settledOwner) throw new Error('Cloak owner must remain visible to its own client')
+    const settledOwnerPosition = { ...settledOwner.position }
     expect(await tilePixels(one, 2, 1)).not.toEqual(ownerFloor)
     expect(await tilePixels(two, 2, 1)).toEqual(emptyFloor)
 
@@ -118,8 +121,9 @@ test('two browsers observe recipient-private Cloak through reconnect and exact e
       const effect = visibleActor(frame, 'one')?.effects.find(({ kind }) => kind === 'invisibilityCloak')
       expect(effect?.remainingTicks ?? 0).toBe(Math.max(deadline - frame.state.physicalTick, 0))
     }
+    expect(visibleActor(latestSnapshot(games[0]), 'one')?.position).toEqual(settledOwnerPosition)
     await expect.poll(() => visibleActor(latestSnapshot(games[1]), 'one')?.position)
-      .toEqual({ x: 2560, y: 1536 })
+      .toEqual(settledOwnerPosition)
     expect(await tilePixels(two, 2, 1)).not.toEqual(emptyFloor)
   } finally {
     await Promise.all(contexts.map((context) => context.close()))

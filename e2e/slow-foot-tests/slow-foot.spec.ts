@@ -5,6 +5,8 @@ import type { GameServerMessage } from '../../web/src/game/v9/schema'
 
 test.beforeAll(() => expect(process.env.E2E_SLOW_FOOT_FIXTURE).toBe('arena-v2-slow-foot'))
 
+const LEFT_WALL_STOP = 1_344
+
 const room = (game: ObservedGame) => game.frames.filter((frame) =>
   frame.type === 'admitted' || frame.type === 'roomState' || frame.type === 'snapshot').at(-1)?.room
 const snapshots = (game: ObservedGame) => game.frames.filter(
@@ -26,14 +28,16 @@ function exactTimer(game: ObservedGame, collectedAt: number): void {
   }
 }
 
-function sharedDisplacementWindow(games: ObservedGame[], after: number, active: boolean) {
+function sharedDisplacementWindow(games: ObservedGame[], after: number, active: boolean,
+  direction: 'east' | 'west') {
   const peerFrames = new Map(snapshots(games[1]).map((frame) => [frame.state.physicalTick, frame]))
   const eligible = snapshots(games[0]).flatMap((first) => {
     const second = peerFrames.get(first.state.physicalTick)
     if (!second) return []
     const actors = [visibleActor(first, 'one'), visibleActor(second, 'one')]
     return first.state.physicalTick > after && actors.every((actor) => actor !== undefined
-      && actor.position.x > 448 && actor.position.x < 3_392)
+      && actor.position.x > LEFT_WALL_STOP && actor.position.x < 3_392
+      && actor.heading === direction)
       && [first, second].every((frame) => Boolean(remaining(frame)) === active)
       ? [[first, second] as const] : []
   })
@@ -123,6 +127,7 @@ test('two browsers observe one Slow-foot stack and exact restored movement', asy
       path: info.outputPath('slow-foot-exposed-polish-320-reduced.png'), fullPage: true,
     })
 
+    await moveTo(one, games[0], { column: 1, row: 1 })
     await moveTo(one, games[0], { column: 3, row: 1 })
     await Promise.all(games.map((game) => expect.poll(() =>
       remaining(latestSnapshot(game)!)).toBeGreaterThan(0)))
@@ -132,10 +137,11 @@ test('two browsers observe one Slow-foot stack and exact restored movement', asy
     await one.keyboard.down('ArrowLeft')
     await expect.poll(() => games[0].commands.slice(westCommandStart).some((command) =>
       command.type === 'movement' && command.direction === 'west')).toBe(true)
-    await expect.poll(() => sharedDisplacementWindow(games, collected[0], true)).toBeDefined()
-    expectRate(sharedDisplacementWindow(games, collected[0], true)!, 'west', 1_536)
+    await expect.poll(() => sharedDisplacementWindow(games, collected[0], true, 'west'))
+      .toBeDefined()
+    expectRate(sharedDisplacementWindow(games, collected[0], true, 'west')!, 'west', 1_536)
     await expect.poll(() => visibleActor(latestSnapshot(games[0]), 'one')!.position.x)
-      .toBeLessThanOrEqual(384)
+      .toBe(LEFT_WALL_STOP)
     await Promise.all(games.map((game) => expect.poll(() =>
       remaining(latestSnapshot(game)!)).toBe(0)))
     await one.keyboard.up('ArrowLeft')
@@ -144,8 +150,9 @@ test('two browsers observe one Slow-foot stack and exact restored movement', asy
     await one.keyboard.down('ArrowRight')
     await expect.poll(() => games[0].commands.slice(eastCommandStart).some((command) =>
       command.type === 'movement' && command.direction === 'east')).toBe(true)
-    await expect.poll(() => sharedDisplacementWindow(games, restoredAt, false)).toBeDefined()
-    expectRate(sharedDisplacementWindow(games, restoredAt, false)!, 'east', 3_072)
+    await expect.poll(() => sharedDisplacementWindow(games, restoredAt, false, 'east'))
+      .toBeDefined()
+    expectRate(sharedDisplacementWindow(games, restoredAt, false, 'east')!, 'east', 3_072)
     const releaseCommandStart = games[0].commands.length
     await one.keyboard.up('ArrowRight')
     await expect.poll(() => games[0].commands.slice(releaseCommandStart).some((command) =>

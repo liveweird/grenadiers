@@ -3,9 +3,10 @@ use std::collections::BTreeMap;
 use crate::room::RoomSettings;
 
 use crate::game::{
-    ActorInit, Bomb, BombTrigger, CellId, Direction, EffectKind, EnabledItems, EntityId, Equipment,
-    InputAction, OilState, PickupKind, Position, RulesConfig, SeatId, SeatInput, SpecialWeapon,
-    SpeedLevel, State, StepError, StepEventKind, Tick, World, fixed_arena,
+    ActorInit, Bomb, BombTrigger, CellId, DamagePreventionSource, Direction, EffectKind,
+    EnabledItems, EntityId, Equipment, InputAction, OilState, PickupKind, Position, RulesConfig,
+    SeatId, SeatInput, SpecialWeapon, SpeedLevel, State, StepError, StepEventKind, Tick, World,
+    fixed_arena,
 };
 
 fn actors() -> [ActorInit; 2] {
@@ -67,11 +68,26 @@ fn ignition_removes_unlit_exit_grace_from_a_shielded_survivor() {
         .unwrap();
     assert_eq!(state.actors[0].unlit_oil_grace, [oil].into());
 
-    state.step(&[]).unwrap();
+    let report = state.step(&[]).unwrap();
 
     assert!(state.actors[0].alive);
     assert_eq!(state.world.oil.state(oil), Some(OilState::Burning));
     assert!(state.actors[0].unlit_oil_grace.is_empty());
+    assert_eq!(
+        report
+            .events
+            .iter()
+            .filter(|event| matches!(
+                event.kind,
+                StepEventKind::DamagePrevented {
+                    seat: SeatId::One,
+                    source: DamagePreventionSource::Shield,
+                    ..
+                }
+            ))
+            .count(),
+        1
+    );
 }
 
 #[test]

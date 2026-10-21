@@ -43,6 +43,7 @@ fn eight_lifetime_sites_can_mix_all_phases_and_public_view_sorts_materialized_on
         (CellId::new(3, 3), OilState::Burning),
         (CellId::new(5, 3), OilState::Burning),
     ]);
+    let expected = sites.clone();
     let world = World::with_pickups_and_oil(
         fixed_arena(),
         BTreeMap::new(),
@@ -51,7 +52,7 @@ fn eight_lifetime_sites_can_mix_all_phases_and_public_view_sorts_materialized_on
         sites,
     )
     .unwrap();
-    assert_eq!(world.oil.iter().count(), 8);
+    assert_eq!(world.oil.iter().collect::<BTreeMap<_, _>>(), expected);
     let state = State::new(rules(EnabledItems::OIL_BARREL), world, actors()).unwrap();
     let visible = state.public_view().oil_barrels;
     assert_eq!(
@@ -65,6 +66,7 @@ fn eight_lifetime_sites_can_mix_all_phases_and_public_view_sorts_materialized_on
     );
     assert_eq!(visible[0].state, OilBarrelState::Unlit);
     assert_eq!(visible[2].state, OilBarrelState::Burning);
+    assert!(state.public_view().flames.is_empty());
 
     let debug = format!("{state:?}");
     assert!(debug.contains("OilBarrels { sites: \"<redacted>\" }"));

@@ -68,26 +68,63 @@ fn stopwatch_does_not_pause_burning_oil_damage() {
 fn terminal_round_freezes_every_oil_phase_while_ticks_continue() {
     let burning = CellId::new(3, 1);
     let pending = CellId::new(4, 1);
+    let expiry = Tick(5);
     let mut init = actors();
     init[1].position = Position::center(burning);
-    let mut state = State::new(
-        rules(EnabledItems::EMPTY),
-        world([(burning, OilState::Burning), (pending, OilState::Pending)]),
-        init,
-    )
-    .unwrap();
+    let mut oil_world = world([(burning, OilState::Burning), (pending, OilState::Pending)]);
+    oil_world.hazards.insert(pending, expiry);
+    let mut state = State::new(rules(EnabledItems::EMPTY), oil_world, init).unwrap();
     state.step(&[]).unwrap();
     assert!(state.result().is_some());
+    assert_eq!(state.world.oil.state(pending), Some(OilState::Pending));
+    assert_eq!(state.world.hazards.get(&pending), Some(&expiry));
     let frozen = state.world.oil.clone();
     let updates = state.running_updates();
 
-    state.step(&[]).unwrap();
-    state.step(&[]).unwrap();
+    for expected in 2..=6 {
+        state.step(&[]).unwrap();
+        assert_eq!(state.tick(), Tick(expected));
+    }
 
-    assert_eq!(state.tick(), Tick(3));
     assert_eq!(state.running_updates(), updates);
     assert_eq!(state.world.oil, frozen);
-    assert_eq!(state.world.oil.state(pending), Some(OilState::Unlit));
+    assert_eq!(state.world.oil.state(pending), Some(OilState::Pending));
+    assert_eq!(state.world.hazards.get(&pending), Some(&expiry));
+
+    let fresh = State::new(
+        rules(EnabledItems::EMPTY),
+        World::new(fixed_arena()),
+        actors(),
+    )
+    .unwrap();
+    assert_eq!(fresh.tick(), Tick(0));
+    assert_eq!(fresh.running_updates(), 0);
+    assert_eq!(fresh.result(), None);
+    assert!(fresh.world.oil.iter().next().is_none());
+}
+
+#[test]
+fn oil_blocked_by_a_living_actor_remains_private_through_exact_timeout() {
+    let pending = CellId::new(1, 1);
+    let config = rules(EnabledItems::EMPTY);
+    let mut state = State::new(config, world([(pending, OilState::Pending)]), actors()).unwrap();
+
+    for _ in 0..config.round_ticks() - 1 {
+        state.step(&[]).unwrap();
+    }
+    assert_eq!(state.running_updates(), config.round_ticks() - 1);
+    assert_eq!(state.world.oil.state(pending), Some(OilState::Pending));
+    assert!(state.public_view().oil_barrels.is_empty());
+    assert_eq!(state.result(), None);
+    state.step(&[]).unwrap();
+
+    assert_eq!(state.running_updates(), config.round_ticks());
+    assert_eq!(
+        state.result(),
+        Some(RoundResult::Draw(super::super::DrawReason::Timeout))
+    );
+    assert_eq!(state.world.oil.state(pending), Some(OilState::Pending));
+    assert!(state.public_view().oil_barrels.is_empty());
 }
 
 #[test]

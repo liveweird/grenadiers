@@ -957,6 +957,72 @@ Diarrhea.
 Records below are frozen against their named sources. Publication and later CI status are
 recorded in [release notes](https://github.com/liveweird/grenadiers/releases).
 
+## Landmine candidate — 2026-10-18 — historical local source evidence
+
+This retained record documents the earlier Landmine implementation lineage, subsequently corrected
+in source `6ad59ddec460a4db331b6e6bf499def9c0b65106` and integrated as
+`0a65542f758131d30cdf5539868a28a87ca19c8d`. It is historical source-specific evidence, not a new
+full suite or native result for the current CI-corrected parent integration.
+
+The v0.3.37 candidate activates an opt-in one-charge Landmine. Successful manual placement
+publishes a visible, passable, capacity-counted Contact Standard bomb without fuse arithmetic.
+Per-actor overlap grace permits a full exit, while later positive-area swept entry detonates the
+mine. Contact accepted during movement remains authoritative after old-fire damage. Other fire and
+blasts silently destroy an unaccepted mine without a detonation event or flame extension; accepted
+contact wins within the immutable planner. Automatic Diarrhea placements remain ordinary Timed
+bombs. Catalog bit 8 and the final weight-15 generator entry preserve every earlier 4096-mask path
+while supporting all 8192 subsets. The repeating byte-31 fixture places Landmine at (3,1) with the
+documented reveal, collection, exit and re-entry route.
+
+Debug and release suites pass **606 core tests, 193 server tests and two doctests**; four dedicated
+performance profiles remain ignored. Rust line coverage is **92.09% (12,814/13,915)**, above the
+unchanged 80% floor. All **8,589 web tests** across 53 files pass with statement/branch/function/
+line coverage of **95.57/91.62/95.64/97.85%**. Formatting, all-target Clippy with warnings denied,
+repository limits, generated contracts, lint, Knip, production and renderer-diagnostic builds,
+E2E static checks and **40-scenario parity** pass. Cargo-deny and both cached offline npm audits
+pass with zero npm vulnerabilities. Strict pinned Kubernetes schemas validate all three resources.
+
+The first focused seed-proof command accidentally used an exact filter that selected zero tests;
+the corrected filter ran the intended route proof 1/1 before browser work, and the same proof is
+included in every later full-core run. Focused browser runs exposed only stale child-
+visibility counts after adding the stored Landmine cue, and the first full web run caught a test
+that expected Landmine without toggling its checkbox. The corrected candidate passes the complete
+web gate. The first repository gate also exposed source files over the 400-line ceiling; actor and
+contact helpers were extracted without weakening the limit.
+
+The first preserved server gate caught a test-only planner wrapper compiled into production. After
+scoping it to tests, the restricted run reached loopback listener tests and exposed sandbox denials
+alongside a replay helper that kept issuing movement after lethal contact. That combined log was
+overwritten during correction; a focused sandbox reproduction preserves the same listener denial.
+The replay now stops at the actual detonation boundary; an authorized full rerun passes. A later full run caught and corrected the
+server's stale twelve-item availability assertion. The initial Kubernetes run preserves its DNS
+denial separately; the authorized pinned-schema rerun passes. The first coverage report completed
+all tests but lacked its output directory; the corrected run produced the recorded LCOV result.
+
+The native Playwright Landmine scenario source uses ordinary keyboard input for lethal re-entry,
+captures both localized views before the contact window, and requires both streams to publish the
+same Contact bomb ID, detonation and flames without a new placement action. No native browser run,
+candidate image, CI result or publication is claimed yet. Independent domain and
+protocol/server/browser reviews are clear.
+
+Domain review found no product defect and identified explicit acceptance gaps. The follow-up suite
+now drives the complete seed-31 reveal, escape, collection, placement, exit and re-entry route with
+ordinary Press/Release/PlaceBomb inputs. Direct regressions cover actual two-segment turn contact,
+the diagonal bounding-box false-positive, both initially graced actors, a nongraced rival, multiple
+contacts, Shield and Heart prevention, same-tick placement exclusion, capacity ordering, Remote
+priority with a held Landmine, and one mixed Timed/Remote/accepted-Contact plan with silent mine
+destruction and grace cleanup. Replay continues through result and a clean next round. The native
+source now waits for a publication at least six physical ticks after placement and verifies the
+same live owner remains at the placement cell before exit. Independent domain re-review and
+protocol/server/browser review are clear. The final same-tick-placement regression now moves
+through the actual placement cell and rejects an incorrectly reordered contact scan. Its focused
+debug/release runs pass, with formatting, test Clippy and repository checks. Coverage above was
+measured before this final test-only strengthening; production code is unchanged. Root additionally
+requires Player Two alive, one elimination event and Winner Two in both native streams; E2E lint,
+Knip, type checks and all 40 scenario records pass after those assertions. The protocol guide now
+correctly distinguishes untimed Remote/Contact triggers from Short Fuse schedules.
+
+
 ## Remote Bomb candidate — 2026-10-18 — local checks complete
 
 The v0.3.36 candidate activates an opt-in one-charge Remote Bomb. Successful manual placement

@@ -1,5 +1,16 @@
 # Repository verification
 
+## Current v0.3.40 native attempt — failed, acceptance zero
+
+Native root 8289 completed with actual exit 1 at `2026-10-21T20:02:21Z` for source
+`bd9d064fcd1774085c3b5bc6cac45c2f0b55cfb0` and image
+`sha256:5fbe61fbbcc1177fb257a9b4241330aeaa9fb87914a2b1abba137967a6eec297`; its exit was consumed.
+The Compose Stopwatch scenario expected a 359-tick fresh-bomb lifetime but observed the correct
+325 ticks because the bomb was placed after 34 ticks of the second Stopwatch window had elapsed.
+All preceding 22 Compose groups exited zero, but Kubernetes never started. Input-integrity checks
+matched; this failed matrix provides no accepted or carried native pass. The corrected oracle derives
+the remaining pause from the independently visible effect deadline and the placement event tick.
+
 ## Current v0.3.40 integrated source — acceptance zero
 
 Published v0.3.39 merge `40cb17e7d2131f7c4d30c95a26531b49ab9450e6` has exact tree

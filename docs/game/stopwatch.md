@@ -11,7 +11,9 @@ placed during a pause keeps its complete captured fuse on the placement update. 
 bombs remain untimed, and fire, chains, damage, effect timers, round deadlines, automatic Diarrhea
 placement, publication and reconnect clocks continue. Each Timed bomb privately retains its
 original captured fuse and accumulated paused ticks so live and historical wire facts cannot alias
-an ordinary schedule. All pause arithmetic is checked before the update mutates state.
+an ordinary schedule. A newly placed bomb accumulates only the remaining active Stopwatch window,
+from its placement through the holder's fixed deadline. All pause arithmetic is checked before the
+update mutates state.
 
 Gameplay v9 publishes `voluntaryActionsFrozen` on visible actors and a pause flag on Timed bombs.
 The flag is derived from both complete actors before Cloak recipient filtering; hidden actors stay

@@ -32,8 +32,8 @@ clear; both five-job candidate CI runs and the five-job post-merge run pass, PR 
 prerelease and its accepted image is deployed locally. The accepted raw source is integrated into the
 v0.3.36 [Remote Bomb](remote-bomb.md) candidate. Remote Bomb retains its reviewed one-charge
 manual-trigger behavior and passes fresh same-image 49/49 Compose plus 49/49 Kubernetes cases
-with zero retries. The raw evidence audit is clear and sealed; publication requires final
-documentation/seal review and exact-head CI. Its final accepted raw source is integrated into the
+with zero retries. The raw evidence audit is clear and sealed; native evidence and documentation review are clear; publication requires exact-head candidate
+and post-merge CI. Its CI-corrected accepted raw source is integrated into the
 v0.3.37 [Landmine](landmine.md) source candidate. Landmine retains reviewed contact, per-actor
 exit grace, silent destruction and immutable-planning behavior; fresh native acceptance and final
 CI remain pending. Expanded-v5/generator-v2 rooms and gameplay-v8 are retained; see

@@ -10,7 +10,7 @@
 
 - Add opt-in Remote Bomb as a one-charge weapon whose placed bomb waits without a fuse for its owner's next manual bomb action.
 - Preserve fire and chain detonation, transactional action resolution, one armed bomb per owner, and independent replacement weapons.
-- Add the twelfth lobby switch, checked v8 state and events, replay coverage, English and Polish cues, and a deterministic production-seed browser scenario. Fresh same-image native acceptance passes all 49 Compose and 49 Kubernetes cases with zero retries; the evidence audit is clear and sealed. Publication requires final documentation/seal review and exact-head CI.
+- Add the twelfth lobby switch, checked v8 state and events, replay coverage, English and Polish cues, and a deterministic production-seed browser scenario. Fresh same-image native acceptance passes all 49 Compose and 49 Kubernetes cases with zero retries; the evidence audit is clear and sealed. Native evidence and documentation review are clear; publication requires exact-head candidate and post-merge CI.
 
 ## 0.3.35 — 2026-10-20
 

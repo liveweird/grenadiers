@@ -3,22 +3,126 @@
 ## Landmine source integration — 2026-10-21 — native acceptance pending
 
 Corrected reviewed Landmine source `6ad59ddec460a4db331b6e6bf499def9c0b65106` integrates the
-accepted raw Remote Bomb source `d9894c9216ea6d09f1726ae7701b48fbf404cd3a` without changing
+CI-corrected accepted raw Remote Bomb source `13772d6ea1d522958d9548180a7ef937c76667cd` without changing
 the reviewed Landmine core or server product. The integration preserves the causal browser
 detonation snapshot, active-origin flame assertion and fresh same-state Timed Standard core
 regression, together with the inherited Remote 183-tick wait, exact-ID activation, readiness
 drivers, Gear label and Vite 8.3.4 lock.
 
-Source-only integration checks pass the repository gate; web contract checks, lint, Knip and the
+Earlier source-only integration checks pass the repository gate; web contract checks, lint, Knip and the
 Vite 8.3.4 production build; E2E lint, Knip, type checking and 51-scenario parity; and 8,312
 focused Landmine, Remote and shared-UI web tests across eleven files. Core, server and Cargo
 inputs remain byte-identical to the corrected reviewed Landmine source. No fresh full Rust suite,
-Rust coverage or full web suite is claimed for this integration. Fresh Landmine native
-acceptance, candidate image, exact-head CI and publication remain pending; no Remote native
+Rust coverage or full web suite is claimed for this integration. Fresh integration checks, Landmine native acceptance, candidate image, exact-head CI and
+publication remain pending; no Remote native
 result is carried forward as Landmine acceptance. The accepted Remote evidence remains 98/98,
 independently audited and sealed as recorded below, while its release gates remain pending.
 
-## Remote Bomb fresh native acceptance — 2026-10-21 — 98/98; independently audited and sealed
+Conditional isolated preparation/native acceptance may proceed while Remote candidate CI runs,
+with zero carried passes. Landmine normalization, PR and publication remain blocked until Remote
+candidate/post-merge CI, publication and accepted-tree proof complete. Any Remote source correction
+invalidates the dependent Landmine source and evidence. The earlier Landmine attempt is invalidated
+and sealed separately; its interrupted results provide no acceptance here.
+
+## Remote Bomb CI-corrected fresh acceptance — 2026-10-21 — 98/98; audited and sealed
+
+Frozen source `b14a28f2e7d3ba86592207167151ad7a68ec58e5`, tree
+`2368d01945c9004bfb5f46137e643665ebab9311`, adds the dedicated Remote Bomb CI step and failure
+artifact to parent `a1170e37f7d92291c44b5b6812ac707567c963e8`. That parent retains the exact
+original Remote source and accepted raw Power Bomb merge documented below. The workflow is the
+only runtime-source correction; core, server, web, Cargo and E2E inputs are unchanged.
+
+The fresh whole wrapper completed at `2026-10-21T00:19:09.024178+00:00` with actual exit zero:
+**49/49 Compose and 49/49 Kubernetes**, 40 reports, 37 baseline plus twelve feature cases per
+target, zero retries and zero carried passes. The literal matrix records 74/74 baseline and
+24/24 optional cases. The accepted image is `sha256:7b13e75697dfbe2d690c47ff1a119db95d32abe92fc80086b3f20a2c90be0f40`,
+retained as `grenadiers-v0336-remote-bomb-quiet-native-recheck:b14a28f`.
+Source archive SHA-256 is `3d0912cfc3cd1cb468b6a7c2d0e0e946cb23c1bfa514a1f114c9ac337db58787`; image,
+dependency and source-tree archive SHA-256 values are respectively
+`8648df440b69d167a87354eae2ca76c6e4542a2ed7bafcccf7d88313960e941b`,
+`ef9b3b9f43b5e806d44da0016e676d45bc463ce53a8ce6d361d49124eb1a4bcd` and
+`6e16843021360b6aea53c9a2ca57c835e3181126086e59ff6666732ba5e35265`.
+
+The immutable source has 742 files, 82 directories, no symlinks and 35 tracked PNGs. Dependencies
+have 8,186 files, 1,305 directories and 13 symlinks: 132 packages installed, 42 optional omissions,
+zero required omissions and zero version/metadata mismatches. Runtime evidence contains 98 PNGs,
+30 image/security records, 15 Kubernetes identities, 14 fixtures and 28 seed-mode records. All
+source/dependency/lock/archive/preparation/image post-run comparisons match. Pinned Node/npm,
+Playwright/Chrome, strict Node Kubernetes checks, kubeconform stdin validation (3/3) and the
+HIGH/CRITICAL image scan pass. Independent raw audit: CLEAR.
+
+`FINAL.sha256` seals 2,147 payloads with SHA-256
+`0a792fe297e051c2230e00012810ddb7e95c3c9317711fad5f7287e4ab8767dd`. All 2,148 durable files and the source archive
+are byte-verified outside the native workspace.
+
+Paired browser assertions prove natural collection, consumption, a live untimed Remote at (3,1)
+past its normal fuse, exact-ID activation without a second placement, then a fresh timed Standard
+bomb. Both actors survive. Root reviewed fresh Compose [English desktop](screenshots/remote-bomb-desktop.png)
+and [Polish 320px](screenshots/remote-bomb-polish-320.png) captures: planted bomb, owner availability
+zero, stored charge consumed, no flames, readable Gear label and normal Polish vertical scrolling.
+No unintended overlap was observed. Kubernetes captures were retained but not visually reviewed;
+assertions establish timing and action semantics.
+
+All 22 latency tests per target pass. Each profile retains all 20 samples; every key starts after
+accepted stationary, bomb-empty readiness on both endpoints. Cutoff, ingress/dispatch chronology,
+public facts and release evidence pass the independent raw extractor. The fixed budget is 250 ms.
+
+| Target | Profile | Samples | Maximum | Exceedances |
+| --- | --- | ---: | ---: | ---: |
+| Compose | local | 20 | 50.256023 ms | 0 |
+| Compose | delay-50ms | 20 | 162.529937 ms | 0 |
+| Kubernetes | local | 20 | 83.085886 ms | 0 |
+| Kubernetes | delay-50ms | 20 | 164.421098 ms | 0 |
+
+Compose container CPU usage advances 595191 → 1557914 microseconds
+(delta 962723); Kubernetes advances 472241 → 1006247
+(delta 534006). Quotas remain `max 100000` and `50000 100000`; both throttle-count and
+throttled-time deltas are zero. These are whole-container intervals including pre-gate waiting
+and supplemental probe work, not isolated gameplay CPU cost.
+
+The preceding CI-corrected attempt retained one valid shaped sample of 350.226735 ms and failed.
+Its 1,274-payload evidence is preserved under seal
+`14536d861a48a737e1f13118d49990920551ab2cf2c5138ff7dce173bf85c6f1`.
+Trace review found prompt input and a transient delay across relay, publication, browser delivery
+and observation; the responsible resource/process remains unproven. That attempt ran no Kubernetes
+cases and contributes no pass here. This separately prepared whole attempt changed no test,
+budget, sample filter or retry setting.
+
+Supplemental monitoring retained 111 Compose and 52 Kubernetes 1 Hz host/cgroup records, with
+actual monitor exits zero and observed latency-group completion. An initial pre-gate monitor
+setup emitted zero samples because this kernel omits optional `cpu.pressure`; that failure is
+preserved. The reviewed v2 records its unavailability while keeping `cpu.max`/`cpu.stat` mandatory.
+Only the coordinator opened gates after fresh holds, readiness and recent low-load observations.
+One managed worker breached the hold between windows; artifact timestamps bound its heavy work
+after 00:02:33 UTC, after Compose measurement ended at 00:01:44. The breach and audit are retained.
+Other bounded checks were explicitly released between windows; a new acknowledged hold preceded
+Kubernetes measurement. No continuous global-idle claim or causal resource attribution is made.
+
+The old candidate's two workflows had five green jobs but only 48 browser passes; the missing
+Remote CI case was caught before merge/publication. Those runs are historical:
+[PR](https://github.com/liveweird/grenadiers/actions/runs/39513806041),
+[push](https://github.com/liveweird/grenadiers/actions/runs/39513795115).
+The dedicated same-image case and its failure artifact are now present. Full exact-head candidate
+and post-merge CI with **49 browser passes** remain mandatory release gates.
+
+Prior source integration repository/contracts/lint/Knip/types/build, 50-scenario discovery and
+65 focused web checks apply to unchanged inputs. B14's YAML, exact CI wiring, repository and diff
+checks pass. No additional full local Rust suite, Rust coverage or full web suite is claimed for
+B14; the unchanged historical source evidence below remains explicitly historical.
+
+The published v0.3.35 parent and its full candidate/post-merge CI/tree proof preceded preparation.
+At cleanup `2026-10-21T00:20:59.982190Z`, owned Compose/Kubernetes resources, namespace, port
+forwards and ports 18264/18265 were absent; localhost:8085 still served accepted v0.3.35 image
+`sha256:c335e4ee9987f78dde3b758780eda61d9541b82c3701ddb84efa73b2722008d7`, ready 200.
+The independent reviewer audits those records without repeating live infrastructure queries.
+Release helpers are independently clear and unexecuted at this checkpoint: finalizer
+`dbbc88d893be22dd446546d1514b6abc5cdf1451bd69ff68d9e5b2be38b1a5c5`, push
+`e313a5cdf70678eec8508368c4801acff7df0399472147e835dec3a82389251c`, merge
+`4190c7aba478de09a635eccc4c580bb984d6d2aa01c7151aec05e6c6f70d7399`, publication
+`f4e460afeb04a6ff5854a1f9d0692dbd938150ccf5119cad81091de741c05a14`, promotion
+`953a56a49eb28330eedb2289a82528560bcb1ba8e3c3a29a52e397c85f5bb02d`.
+
+## Earlier Remote Bomb native evidence — historical; superseded by CI-corrected acceptance
 
 Frozen source `a1170e37f7d92291c44b5b6812ac707567c963e8`, tree
 `b6a526b21a36d9dd0b4990dd1eddd7b5c242044a`, integrates reviewed Remote Bomb source with the
@@ -107,8 +211,9 @@ Release helpers are independently clear and unexecuted: finalizer
 `3ae28e97d6b0b8a85c0fa3996651c64d9fd942f05d90a913013e7fe40668cff5` and local promotion
 `43baf14eaaaa60e1aa606977d9c686c8d256cf75200517b94092bd1181bf63c3`.
 
-Finalization requires independent documentation/seal review. Exact-head candidate and post-merge
-CI, publication and image promotion are subsequent release gates.
+The independent native evidence and documentation review is clear. The corrected candidate
+above supersedes this historical run; exact-head candidate and post-merge CI, publication
+and image promotion remain subsequent release gates.
 
 ## Power Bomb fresh native acceptance — 2026-10-20 — 96/96; sealed and independently audited
 
@@ -851,66 +956,6 @@ Diarrhea.
 
 Records below are frozen against their named sources. Publication and later CI status are
 recorded in [release notes](https://github.com/liveweird/grenadiers/releases).
-
-## Landmine candidate — 2026-10-18 — local checks complete
-
-The v0.3.37 candidate activates an opt-in one-charge Landmine. Successful manual placement
-publishes a visible, passable, capacity-counted Contact Standard bomb without fuse arithmetic.
-Per-actor overlap grace permits a full exit, while later positive-area swept entry detonates the
-mine. Contact accepted during movement remains authoritative after old-fire damage. Other fire and
-blasts silently destroy an unaccepted mine without a detonation event or flame extension; accepted
-contact wins within the immutable planner. Automatic Diarrhea placements remain ordinary Timed
-bombs. Catalog bit 8 and the final weight-15 generator entry preserve every earlier 4096-mask path
-while supporting all 8192 subsets. The repeating byte-31 fixture places Landmine at (3,1) with the
-documented reveal, collection, exit and re-entry route.
-
-Debug and release suites pass **606 core tests, 193 server tests and two doctests**; four dedicated
-performance profiles remain ignored. Rust line coverage is **92.09% (12,814/13,915)**, above the
-unchanged 80% floor. All **8,589 web tests** across 53 files pass with statement/branch/function/
-line coverage of **95.57/91.62/95.64/97.85%**. Formatting, all-target Clippy with warnings denied,
-repository limits, generated contracts, lint, Knip, production and renderer-diagnostic builds,
-E2E static checks and **40-scenario parity** pass. Cargo-deny and both cached offline npm audits
-pass with zero npm vulnerabilities. Strict pinned Kubernetes schemas validate all three resources.
-
-The first focused seed-proof command accidentally used an exact filter that selected zero tests;
-the corrected filter ran the intended route proof 1/1 before browser work, and the same proof is
-included in every later full-core run. Focused browser runs exposed only stale child-
-visibility counts after adding the stored Landmine cue, and the first full web run caught a test
-that expected Landmine without toggling its checkbox. The corrected candidate passes the complete
-web gate. The first repository gate also exposed source files over the 400-line ceiling; actor and
-contact helpers were extracted without weakening the limit.
-
-The first preserved server gate caught a test-only planner wrapper compiled into production. After
-scoping it to tests, the restricted run reached loopback listener tests and exposed sandbox denials
-alongside a replay helper that kept issuing movement after lethal contact. That combined log was
-overwritten during correction; a focused sandbox reproduction preserves the same listener denial.
-The replay now stops at the actual detonation boundary; an authorized full rerun passes. A later full run caught and corrected the
-server's stale twelve-item availability assertion. The initial Kubernetes run preserves its DNS
-denial separately; the authorized pinned-schema rerun passes. The first coverage report completed
-all tests but lacked its output directory; the corrected run produced the recorded LCOV result.
-
-The native Playwright Landmine scenario source uses ordinary keyboard input for lethal re-entry,
-captures both localized views before the contact window, and requires both streams to publish the
-same Contact bomb ID, detonation and flames without a new placement action. No native browser run,
-candidate image, CI result or publication is claimed yet. Independent domain and
-protocol/server/browser reviews are clear.
-
-Domain review found no product defect and identified explicit acceptance gaps. The follow-up suite
-now drives the complete seed-31 reveal, escape, collection, placement, exit and re-entry route with
-ordinary Press/Release/PlaceBomb inputs. Direct regressions cover actual two-segment turn contact,
-the diagonal bounding-box false-positive, both initially graced actors, a nongraced rival, multiple
-contacts, Shield and Heart prevention, same-tick placement exclusion, capacity ordering, Remote
-priority with a held Landmine, and one mixed Timed/Remote/accepted-Contact plan with silent mine
-destruction and grace cleanup. Replay continues through result and a clean next round. The native
-source now waits for a publication at least six physical ticks after placement and verifies the
-same live owner remains at the placement cell before exit. Independent domain re-review and
-protocol/server/browser review are clear. The final same-tick-placement regression now moves
-through the actual placement cell and rejects an incorrectly reordered contact scan. Its focused
-debug/release runs pass, with formatting, test Clippy and repository checks. Coverage above was
-measured before this final test-only strengthening; production code is unchanged. Root additionally
-requires Player Two alive, one elimination event and Winner Two in both native streams; E2E lint,
-Knip, type checks and all 40 scenario records pass after those assertions. The protocol guide now
-correctly distinguishes untimed Remote/Contact triggers from Short Fuse schedules.
 
 ## Remote Bomb candidate — 2026-10-18 — local checks complete
 

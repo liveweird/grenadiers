@@ -32,7 +32,7 @@ and [Polish 320px](../screenshots/remote-bomb-polish-320.png) captures show the 
 (3,1), consumed charge, owner availability zero, both players alive and no flames. The English
 Gear label fits normally; the Polish view uses vertical scrolling and shows the unfocused-arena
 prompt. No unintended overlap was observed. Kubernetes screenshots were not visually reviewed.
-The raw evidence audit is clear and its final manifest is sealed. Publication requires final documentation/seal review and exact-head CI.
+The raw evidence audit is clear and its final manifest is sealed. Native evidence and documentation review are clear; publication requires exact-head candidate and post-merge CI.
 
 ## Compatibility
 

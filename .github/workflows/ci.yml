@@ -280,6 +280,16 @@ jobs:
           done
           curl --fail --silent http://127.0.0.1:8085/api/v1/ready
           E2E_PUNCH_FIXTURE=arena-v2-punch npm --prefix e2e run test:punch
+      - name: Verify opt-in Bracelet shove behavior using the same built image
+        run: |
+          chmod 444 core/tests/fixtures/arena-v2-bracelet.seed
+          docker compose -f docker-compose.yaml -f docker-compose.bracelet.yaml up -d --no-build --force-recreate app
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent http://127.0.0.1:8085/api/v1/ready; then break; fi
+            sleep 1
+          done
+          curl --fail --silent http://127.0.0.1:8085/api/v1/ready
+          E2E_BRACELET_FIXTURE=arena-v2-bracelet npm --prefix e2e run test:bracelet
       - name: Verify a full classic match and rematch using the same image
         run: |
           docker compose -f docker-compose.yaml -f docker-compose.matches.yaml up -d --no-build --force-recreate app
@@ -330,6 +340,8 @@ jobs:
             e2e/playwright-kick-report/
             e2e/playwright-punch-report/
             e2e/punch-test-results/
+            e2e/playwright-bracelet-report/
+            e2e/bracelet-test-results/
             e2e/playwright-match-report/
             e2e/playwright-reconnect-report/
             e2e/playwright-controls-report/

@@ -155,6 +155,8 @@ test('Bracelet shoves a stationary rival one tile without an action or private c
         one: actor(game, 'one').position,
         two: actor(game, 'two').position,
       }))
+      const targetBaselines = await Promise.all([one, two]
+        .map((page) => arenaTilePixels(page, 12, 1)))
       await one.keyboard.down('ArrowRight')
       try {
         await expect.poll(() => actor(games[0], 'two').position.x).toBe(starts[0]!.two.x + 1_024)
@@ -163,6 +165,11 @@ test('Bracelet shoves a stationary rival one tile without an action or private c
       }
       await expect.poll(() => games[0].commands.slice(commandFloors[0])
         .some((command) => command.type === 'movement' && command.direction === null)).toBe(true)
+      await Promise.all(games.map((game, index) => expect.poll(() => {
+        const snapshot = latestSnapshot(game)!
+        if (snapshot.room.revision <= floors[index]!) return undefined
+        return visibleActor(snapshot, 'two')?.position
+      }).toEqual({ x: starts[index]!.two.x + 1_024, y: starts[index]!.two.y })))
 
       const movedRevisions: number[] = []
       for (const [index, game] of games.entries()) {
@@ -193,9 +200,8 @@ test('Bracelet shoves a stationary rival one tile without an action or private c
       ]))
 
       const shovePixels = await Promise.all([one, two].map((page) => arenaTilePixels(page, 12, 1)))
-      const vacatedPixels = await Promise.all([one, two].map((page) => arenaTilePixels(page, 11, 1)))
-      expect(shovePixels[0]).not.toEqual(vacatedPixels[0])
-      expect(shovePixels[1]).not.toEqual(vacatedPixels[1])
+      expect(shovePixels[0]).not.toEqual(targetBaselines[0])
+      expect(shovePixels[1]).not.toEqual(targetBaselines[1])
       expect(await two.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false)
       await Promise.all([
         one.screenshot({ path: info.outputPath('bracelet-shoved-desktop-en.png'), fullPage: true }),

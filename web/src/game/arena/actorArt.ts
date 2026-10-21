@@ -20,7 +20,10 @@ export interface ActorDrawing {
   piercing: Graphics
   power: Graphics
   landmine: Graphics
+  equipment: Container
   kick: Graphics
+  punch: Graphics
+  punchPulse: Graphics
   wallPass: Graphics
   cloak: Graphics
   poses: Record<Direction, PoseFrames>
@@ -41,6 +44,8 @@ export interface ActorDrawing {
   powerArmed: boolean
   landmineStored: boolean
   kickEquipped: boolean
+  punchEquipped: boolean
+  punchUntil: number
   wallPassEquipped: boolean
   cloaked: boolean
 }
@@ -213,6 +218,16 @@ export function makeActor(seat: Seat): ActorDrawing {
   pixels(kick, PALETTE.deepInk, [[-18, 13, 14, 9], [-14, 9, 8, 13]])
   pixels(kick, PALETTE.brassLight, [[-15, 12, 7, 7], [-17, 17, 11, 3]])
   kick.visible = false
+  const punch = new Graphics()
+  pixels(punch, PALETTE.deepInk, [[11, 10, 15, 12], [14, 6, 4, 8], [19, 5, 4, 9], [24, 8, 4, 9]])
+  pixels(punch, PALETTE.brassLight, [[14, 11, 10, 8], [16, 8, 3, 6], [20, 7, 3, 7]])
+  punch.visible = false
+  const punchPulse = new Graphics()
+  pixels(punchPulse, PALETTE.white, [[29, 8, 5, 3], [32, 3, 3, 5], [29, 18, 5, 3]])
+  punchPulse.visible = false
+  const equipment = new Container()
+  equipment.addChild(kick, punch, punchPulse)
+  equipment.visible = false
   const wallPass = new Graphics()
   pixels(wallPass, PALETTE.deepInk, [[-16, -23, 5, 43], [11, -23, 5, 43], [-16, -23, 32, 5]])
   pixels(wallPass, PALETTE.brick, [[-13, -20, 4, 37], [9, -20, 4, 37], [-9, -20, 18, 4]])
@@ -234,17 +249,18 @@ export function makeActor(seat: Seat): ActorDrawing {
   } satisfies Record<Direction, PoseFrames>
   root.addChild(
     shadow, protection, shield, goldenFlame, shortFuse, shortFlame, longFuse, reverseControls,
-    diarrhea, slowFoot, piercing, power, landmine, kick,
+    diarrhea, slowFoot, piercing, power, landmine, equipment,
     ...Object.values(poses).flat(), cloak, stopwatch, frozen, wallPass,
   )
   const drawing = {
     root, protection, shield, stopwatch, frozen, goldenFlame, shortFuse, shortFlame, longFuse, reverseControls,
-    diarrhea, slowFoot, piercing, power, landmine, kick, wallPass, cloak, poses,
+    diarrhea, slowFoot, piercing, power, landmine, equipment, kick, punch, punchPulse, wallPass, cloak, poses,
     direction: 'south' as Direction, moving: false,
     protected: false, shielded: false, stopwatchActive: false, actionsFrozen: false,
     golden: false, shortFused: false, shortFlamed: false,
     longFused: false, reversed: false, diarrheaActive: false, slowFootStacks: 0,
-    piercingArmed: false, powerArmed: false, landmineStored: false, kickEquipped: false, wallPassEquipped: false, cloaked: false,
+    piercingArmed: false, powerArmed: false, landmineStored: false, kickEquipped: false,
+    punchEquipped: false, punchUntil: 0, wallPassEquipped: false, cloaked: false,
   }
   setActorPose(drawing, 'south', 0)
   return drawing

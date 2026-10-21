@@ -77,6 +77,33 @@ describe('gameplay v7 composed validation', () => {
     }
   })
 
+  it('rejects Punch throughout the archived room, state, and event profile', () => {
+    const mutations = [
+      (message: Snapshot) => { message.room.availableItems.push('punch') },
+      (message: Snapshot) => { message.room.settings.enabledItems.push('punch') },
+      (message: Snapshot) => {
+        const actor = message.state.actors[0]
+        if (actor.type === 'visible') actor.inventory.equipment = 'punch'
+      },
+      (message: Snapshot) => {
+        message.state.pickups = [{ cell: { column: 2, row: 2 }, kind: 'punch' }]
+      },
+      (message: Snapshot) => {
+        message.events = [{ tick: 42, index: 0, kind: {
+          type: 'pickupCollected', id: 1, seat: 'one',
+          cell: { column: 2, row: 2 }, kind: 'punch',
+        } }]
+      },
+    ]
+    for (const mutate of mutations) {
+      const message = structuredClone(snapshot) as unknown as Snapshot
+      mutate(message)
+      expect(validateGameplayV7ServerMessage(message)).toEqual({
+        valid: false, source: 'semantics', error: 'unsupportedProfile',
+      })
+    }
+  })
+
   it('accepts a structurally and semantically valid dormant snapshot', () => {
     expect(validateGameplayV7ServerMessage(snapshot)).toEqual({ valid: true, value: snapshot })
   })

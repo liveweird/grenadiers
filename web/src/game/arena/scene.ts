@@ -24,7 +24,7 @@ function renderActor(drawing: ActorDrawing, id: number, effects: boolean, now: n
   setActorPose(drawing, drawing.direction, frame)
   renderActorProtection(drawing, effects, now)
   renderActorModifiers(drawing, effects, now)
-  renderActorEquipment(drawing)
+  renderActorEquipment(drawing, now)
 }
 function renderActorProtection(drawing: ActorDrawing, effects: boolean, now: number): void {
   drawing.protection.visible = drawing.protected
@@ -52,7 +52,7 @@ function renderActorModifiers(drawing: ActorDrawing, effects: boolean, now: numb
   drawing.diarrhea.alpha = effects && drawing.diarrheaActive
     ? 0.65 + (Math.floor(now / 105) % 2) * 0.35 : 1
 }
-function renderActorEquipment(drawing: ActorDrawing): void {
+function renderActorEquipment(drawing: ActorDrawing, now: number): void {
   drawing.slowFoot.visible = drawing.slowFootStacks > 0
   drawing.slowFoot.children.slice(1).forEach((marker, index) => {
     marker.visible = index < drawing.slowFootStacks
@@ -61,6 +61,9 @@ function renderActorEquipment(drawing: ActorDrawing): void {
   drawing.power.visible = drawing.powerArmed
   drawing.landmine.visible = drawing.landmineStored
   drawing.kick.visible = drawing.kickEquipped
+  drawing.punch.visible = drawing.punchEquipped
+  drawing.punchPulse.visible = drawing.punchEquipped && now < drawing.punchUntil
+  drawing.equipment.visible = drawing.kick.visible || drawing.punch.visible || drawing.punchPulse.visible
   drawing.wallPass.visible = drawing.wallPassEquipped
 }
 
@@ -82,6 +85,8 @@ function updateActorState(drawing: ActorDrawing, actor: ActorRow): void {
   drawing.powerArmed = Boolean(actor.powerArmed)
   drawing.landmineStored = Boolean(actor.landmineStored)
   drawing.kickEquipped = Boolean(actor.kickEquipped)
+  drawing.punchEquipped = Boolean(actor.punchEquipped)
+  if (!drawing.punchEquipped) drawing.punchUntil = 0
   drawing.wallPassEquipped = Boolean(actor.wallPassEquipped)
 }
 
@@ -137,9 +142,11 @@ export class ArenaScene {
     }
     this.updateBlocks(snapshot.state.arena.blocks)
     this.updatePickups(snapshot.state.pickups)
+    const movedBombSources = this.movedBombSources(snapshot.state.bombs)
     this.updateBombs(snapshot.state.bombs)
     this.updateFlames(snapshot.state.flames)
     this.updateActors(snapshot.state.actors, reset)
+    if (!reset) this.markPunches(snapshot.state.actors, movedBombSources, now)
     this.render(now)
   }
 
@@ -222,6 +229,35 @@ export class ArenaScene {
       }
       drawing.root.position.set((bomb.cell.column + 0.5) * TILE, (bomb.cell.row + 0.5) * TILE)
       drawing.paused = bomb.trigger?.type === 'timed' && bomb.trigger.paused
+    }
+  }
+
+  private movedBombSources(rows: SnapshotMessage['state']['bombs']): Set<string> {
+    const sources = new Set<string>()
+    for (const bomb of rows) {
+      const drawing = this.bombs.get(bomb.id)
+      if (!drawing) continue
+      const source = {
+        column: Math.round(drawing.root.x / TILE - 0.5),
+        row: Math.round(drawing.root.y / TILE - 0.5),
+      }
+      if (source.column !== bomb.cell.column || source.row !== bomb.cell.row) sources.add(key(source))
+    }
+    return sources
+  }
+
+  private markPunches(rows: SnapshotMessage['state']['actors'], sources: Set<string>, now: number): void {
+    for (const actor of rows) {
+      if (!actor.punchEquipped || !actor.alive) continue
+      const column = Math.floor(actor.position.x / 1024)
+      const row = Math.floor(actor.position.y / 1024)
+      const target = actor.heading === 'north' ? { column, row: row - 1 }
+        : actor.heading === 'east' ? { column: column + 1, row }
+          : actor.heading === 'south' ? { column, row: row + 1 } : { column: column - 1, row }
+      if (sources.has(key(target))) {
+        const drawing = this.actors.get(actor.id)
+        if (drawing) drawing.punchUntil = now + 200
+      }
     }
   }
 

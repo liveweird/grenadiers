@@ -1,16 +1,16 @@
 # Gameplay and presentation backlog
 
-TURN, CONFIG and the first ART slice are implemented. This v0.3.43 source candidate contains eighteen
+TURN, CONFIG and the first ART slice are implemented. This v0.3.44 source candidate contains nineteen
 optional pickups: Heart, Shield, Golden Flame, Short Fuse, Short Flame, Long Fuse, Reverse
 Controls, Diarrhea, Slow-foot, Piercing Bomb, Power Bomb, Remote Bomb, Landmine and Invisibility
-Cloak, Stopwatch, Invisible Bombs, Teleporter and Wall Pass. Source review and static checks are
+Cloak, Stopwatch, Invisible Bombs, Teleporter, Wall Pass and Kick. Source review and static checks are
 complete; this candidate still requires predecessor integration, fresh native acceptance and final
 CI. The remaining requested pickups stay outside this increment. Current publication status
 is recorded in [release notes](https://github.com/liveweird/grenadiers/releases), with source-bound
 acceptance records in [verification](../verification.md). Richer transitions and artwork remain
 follow-up work; see [pixel-art presentation](pixel-art.md) and
 [expanded item implementation](expanded-items.md).
-Updated 2026-10-21 after Wall Pass source activation. Release acceptance is recorded in
+Updated 2026-10-21 after Kick source activation. Release acceptance is recorded in
 [verification](../verification.md).
 The [implementation plan](implementation-plan.md) remains the milestone/release reference;
 the [rules](rules.md) describe the current baseline and historical extension catalog.
@@ -181,6 +181,6 @@ Retain bounded scheduling, performance budgets, EN/PL documentation and full rel
 including same-image Compose/Kubernetes acceptance. Bots, mobs and larger matches remain
 separate tracks; their future interactions must be specified without making them prerequisites.
 
-Complete the entire expanded-item activation batch before starting ART-ATLAS. Wall Pass is the
-current bounded source increment (v0.3.43); melee equipment and Oil remain after it. ART-ATLAS begins
+Complete the entire expanded-item activation batch before starting ART-ATLAS. Kick is the
+current bounded source increment (v0.3.44); melee equipment and Oil remain after it. ART-ATLAS begins
 only after those item increments and their release gates are complete.

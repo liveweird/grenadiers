@@ -270,3 +270,9 @@ reduced-motion views produce the two named full-page captures. The scenario uses
 injection, direct WebSocket commands, seed search or retry. The sole-item fixture cannot prove
 Wall-Pass-to-Heart replacement grace; core and protocol tests provide that coverage. Native
 execution remains pending until the predecessor-integrated candidate image exists.
+
+### Kick source scenario
+
+Use `docker-compose.kick.yaml` with the mode-0444 v2 seed fixture and
+`E2E_KICK_FIXTURE=arena-v2-kick npm --prefix e2e run test:kick`. The scenario uses ordinary UI and
+keys, observes public streams, and does not inject state, search seeds, retry, or extend budgets.

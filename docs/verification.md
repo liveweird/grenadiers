@@ -3208,3 +3208,9 @@ these scaffold checks. These are local results; hosted CI status is separate evi
 
 The original `AGENTS.md` remains unchanged under the explicit preservation instruction;
 current engineering conventions live in `CONTRIBUTING.md`.
+
+## v0.3.44 Kick source candidate
+
+The deterministic browser source is configured for the reviewed repeating-byte-31 fixture. Planned
+captures are `kick-stopped-desktop-en.png` and `kick-stopped-polish-320-reduced.png`. Native
+same-image execution and release acceptance remain pending.

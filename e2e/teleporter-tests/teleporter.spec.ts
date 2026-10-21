@@ -64,7 +64,7 @@ test('Teleporter swaps safe players, survives reconnect, and is consumed when un
     await Promise.all(games.map((game) => expect.poll(() => latestSnapshot(game)?.room.phase.type)
       .toBe('running')))
     await one.getByRole('region', { name: 'Grenadiers courtyard' }).click()
-    await two.getByRole('region', { name: 'Dziedziniec Grenadierów' }).click()
+    await two.getByRole('region', { name: 'Dziedziniec Grenadiers', exact: true }).click()
 
     await reveal(one, games[0], 'one', { column: 2, row: 1 },
       [{ column: 1, row: 1 }, { column: 1, row: 2 }])

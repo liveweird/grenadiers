@@ -75,7 +75,7 @@ test('Invisible Bombs hides live bombs and cues until exact expiry', async ({ br
       two.getByRole('button', { name: 'Gotowy', exact: true }).click()])
     await Promise.all(games.map((game) => expect.poll(() => latestSnapshot(game)?.room.phase.type).toBe('running')))
     await one.getByRole('region', { name: 'Grenadiers courtyard' }).click()
-    await two.getByRole('region', { name: 'Dziedziniec Grenadierów' }).click()
+    await two.getByRole('region', { name: 'Dziedziniec Grenadiers', exact: true }).click()
     await moveSeatTo(one, games[0], 'one', { column: 2, row: 1 })
     await plant(one, games[0], games[0], { column: 2, row: 1 })
     await moveSeatTo(one, games[0], 'one', { column: 1, row: 1 }); await moveSeatTo(one, games[0], 'one', { column: 1, row: 2 })

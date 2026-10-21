@@ -4704,4 +4704,3 @@ server, Cargo, API, Short Fuse client/protocol/locales and dedicated item scenar
 unchanged from the reviewed Short Fuse candidate. Its unit baseline remains unchanged;
 the production build and E2E static checks pass for this responsive integration.
 Fresh native Compose/Kubernetes acceptance and exact-head CI remain pending.
-

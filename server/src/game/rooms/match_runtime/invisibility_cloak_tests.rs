@@ -1,12 +1,12 @@
 use grenadiers_core::{
     game::{EnabledItems, SeatId},
-    protocol::{Counter, Seat, v8::ResumeToken},
+    protocol::{Counter, Seat, v9::ResumeToken},
 };
 
 use super::test_support::{collect_generated_pickup, start_optional_runtime};
 
 fn admission(prepared: &super::PreparedRuntimeAdmission, recipient: Seat) -> serde_json::Value {
-    let encoded = grenadiers_core::protocol::v8::prepare_expanded_admission(
+    let encoded = grenadiers_core::protocol::v9::prepare_expanded_admission(
         &prepared.room,
         prepared.state_epoch,
         prepared.capture.as_ref(),
@@ -31,6 +31,7 @@ fn asymmetric_live_publication_and_quiet_replacements_keep_the_physical_deadline
     let two: serde_json::Value =
         serde_json::from_str(notice.frame(SeatId::Two).unwrap().as_ref()).unwrap();
     assert_eq!(one["state"]["actors"][0]["type"], "visible");
+    assert_eq!(one["state"]["actors"][0]["voluntaryActionsFrozen"], false);
     let remaining = one["state"]["actors"][0]["effects"][0]["remainingTicks"]
         .as_u64()
         .unwrap();
@@ -41,6 +42,10 @@ fn asymmetric_live_publication_and_quiet_replacements_keep_the_physical_deadline
     let owner_frame = admission(&owner, Seat::One);
     assert!(owner_frame.get("events").is_none());
     assert_eq!(owner_frame["state"]["actors"][0]["type"], "visible");
+    assert_eq!(
+        owner_frame["state"]["actors"][0]["voluntaryActionsFrozen"],
+        false
+    );
     runtime.commit_admission(owner);
 
     let opponent = runtime.prepare_resume(SeatId::Two).unwrap();

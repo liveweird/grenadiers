@@ -49,7 +49,7 @@ async fn connect(url: &str, token: &str) -> ClientSocket {
     send(
         &mut socket,
         json!({
-            "type":"authenticate", "protocolVersion":8, "token":token
+            "type":"authenticate", "protocolVersion":9, "token":token
         }),
     )
     .await;

@@ -11,6 +11,9 @@ Fresh native acceptance was independently audited and sealed; release CI and pub
 pending at that checkpoint. See [release notes](https://github.com/liveweird/grenadiers/releases)
 for current release status.
 
+These accepted v0.3.38 captures are integrated into the v0.3.39 gameplay-v9 foundation without
+changing artwork or runtime code. They provide no v0.3.39 native acceptance or carried pass.
+
 The latest Landmine desktop and Polish 320px captures were refreshed from corrected source `420d8df` and tested image1736. The pressure plate/consumed charge/no-flame state and normal HUD layout were visually reviewed; these stills precede contact and do not replace behavioral assertions. Kubernetes captures were retained without visual review.
 
 Implemented in v0.3.18. [Actual application captures](../screenshots/pixel-art.md) and the

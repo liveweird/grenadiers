@@ -9,11 +9,10 @@ use crate::room::{
     MatchPhase as DomainMatchPhase, RoomSettings,
 };
 
-use super::projection_binding::{available_items, validate_expanded_room};
 use super::{
-    CompletedRound, ConnectionStatus, CountdownKind, GameSettings, MapId, MatchInterruptReason,
-    MatchResult, MatchWinnerReason, ProjectionError, RoomPhase, RoomView, RoundCount, RulesVersion,
-    Scores, SeatStatus, Wins,
+    CompletedRound, ConnectionStatus, CountdownKind, GameSettings, ItemSet, MapId,
+    MatchInterruptReason, MatchResult, MatchWinnerReason, ProjectionError, RoomPhase, RoomView,
+    RoundCount, RulesVersion, Scores, SeatStatus, Wins,
 };
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -29,6 +28,16 @@ pub struct RoomMetadata {
 }
 
 pub fn expanded_settings(settings: GameSettings) -> Result<RoomSettings, ProjectionError> {
+    expanded_settings_for_items(settings, super::projection_binding::expanded_items())
+}
+
+pub(crate) fn expanded_settings_for_items(
+    settings: GameSettings,
+    supported_items: ItemSet,
+) -> Result<RoomSettings, ProjectionError> {
+    if !settings.enabled_items().is_subset_of(supported_items) {
+        return Err(ProjectionError::InvalidItems);
+    }
     let speed = match settings.starting_speed_level() {
         0 => SpeedLevel::Base,
         1 => SpeedLevel::One,
@@ -53,7 +62,19 @@ pub fn project_expanded_room(
     metadata: RoomMetadata,
     lifecycle: &MatchLifecycle,
 ) -> Result<RoomView, ProjectionError> {
-    if expanded_settings(metadata.settings)? != lifecycle.settings() {
+    project_expanded_room_for_items(
+        metadata,
+        lifecycle,
+        super::projection_binding::expanded_items(),
+    )
+}
+
+pub(crate) fn project_expanded_room_for_items(
+    metadata: RoomMetadata,
+    lifecycle: &MatchLifecycle,
+    supported_items: ItemSet,
+) -> Result<RoomView, ProjectionError> {
+    if expanded_settings_for_items(metadata.settings, supported_items)? != lifecycle.settings() {
         return Err(ProjectionError::InvalidExpandedBinding);
     }
     let series = lifecycle.series();
@@ -63,7 +84,10 @@ pub fn project_expanded_room(
         settings: metadata.settings,
         settings_revision: metadata.settings_revision,
         settings_editor: metadata.settings_editor,
-        available_items: available_items(metadata.rules_version),
+        available_items: super::projection_binding::available_items_for(
+            metadata.rules_version,
+            supported_items,
+        ),
         room_id: metadata.room_id,
         room_code: metadata.room_code,
         round_id: counter(lifecycle.round_attempt())?,
@@ -87,7 +111,7 @@ pub fn project_expanded_room(
         ],
         phase: phase(lifecycle.phase())?,
     };
-    validate_expanded_room(&room)?;
+    super::projection_binding::validate_expanded_room_for_items(&room, supported_items)?;
     Ok(room)
 }
 

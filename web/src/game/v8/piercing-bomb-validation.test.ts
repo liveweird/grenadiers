@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { snapshot } from '../client/testSupport'
+import { snapshot } from './testSupport'
 import type { BombTrigger, BombView } from './schema'
 import { validateGameplayV8ServerMessage } from './validation'
 

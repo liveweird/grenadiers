@@ -32,7 +32,9 @@ collection effects. Result screens freeze the physical clock.
 ## Generation and compatibility
 
 The enabled weight is 15, appended after Short Fuse. All sixteen previous pool masks retain
-their exact generation paths. All thirty-two subsets of the five available items are supported.
-Rules version 5, generator version 2, gameplay-v8 and journal format 2 remain unchanged.
-Deploy the paired server/browser build together: older v8 clients reject the extended
-availability list and need a reload. Retain a compatible server to replay newly enabled masks.
+their exact generation paths. All thirty-two subsets of the five items available at
+introduction remain valid; see the [current catalog](settings.md) for later items.
+Rules version 5, generator version 2 and journal format 2 remain unchanged. The active
+wire contract is [gameplay-v9](protocol-v9.md).
+Deploy the paired server/browser build together: older clients require a reload for the current
+wire contract and availability list. Retain a compatible server to replay newly enabled masks.

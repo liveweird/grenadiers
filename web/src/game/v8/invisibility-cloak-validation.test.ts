@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { validateServerMessage } from '../client/clientProtocol'
-import { snapshot } from '../client/testSupport'
+import { snapshot, validateRecipient } from './testSupport'
 import { validateGameplayV8ServerMessage } from './validation'
 
 function cloakedSnapshot() {
@@ -19,7 +18,7 @@ describe('Invisibility Cloak recipient validation', () => {
   it('accepts an exact living hidden opponent while preserving the visible recipient', () => {
     const message = cloakedSnapshot()
     expect(validateGameplayV8ServerMessage(message)).toEqual({ valid: true, value: message })
-    expect(validateServerMessage(message, 'one')).toBe(true)
+    expect(validateRecipient(message, 'one')).toBe(true)
   })
 
   it('rejects hidden self, both hidden, dead hidden, disabled hidden, and leaked fields', () => {
@@ -60,7 +59,7 @@ describe('Invisibility Cloak recipient validation', () => {
         return message
       },
     ]
-    for (const make of cases) expect(validateServerMessage(make(), 'one')).toBe(false)
+    for (const make of cases) expect(validateRecipient(make(), 'one')).toBe(false)
   })
 
   it('requires a cloaked opponent to use the hidden variant but keeps a known dead actor visible', () => {
@@ -70,11 +69,11 @@ describe('Invisibility Cloak recipient validation', () => {
     if (opponent.type !== 'visible') throw new Error('expected visible actor')
     opponent.effects = [{ kind: 'invisibilityCloak', remainingTicks: 1 }]
     expect(validateGameplayV8ServerMessage(leaked).valid).toBe(true)
-    expect(validateServerMessage(leaked, 'one')).toBe(false)
+    expect(validateRecipient(leaked, 'one')).toBe(false)
 
     opponent.effects = []
     opponent.alive = false
-    expect(validateServerMessage(leaked, 'one')).toBe(true)
+    expect(validateRecipient(leaked, 'one')).toBe(true)
   })
 
   it('accepts event-only cloak history after the current actor is visible', () => {
@@ -86,6 +85,6 @@ describe('Invisibility Cloak recipient validation', () => {
         kind: 'invisibilityCloak',
       },
     }]
-    expect(validateServerMessage(message, 'one')).toBe(true)
+    expect(validateRecipient(message, 'one')).toBe(true)
   })
 })

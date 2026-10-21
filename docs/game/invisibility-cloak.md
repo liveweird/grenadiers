@@ -16,10 +16,11 @@ Audience is captured at emission and is not recomputed from the final world in a
 Both complete recipient encodings are validated before either is published; legacy protocols reject
 the private semantics.
 
-Version 0.3.38 appends Invisibility Cloak with generator weight 15 after Landmine. The expanded pool
-contains 320 entries and preserves every earlier 8192-mask path. The exact v8 availability catalog
-contains fourteen items and supports all 16384 subsets. Gameplay wire version 8, rules version 5,
-generator version 2 and journal format 2 remain unchanged, so older v8 clients must reload.
+Published version 0.3.38 introduces Invisibility Cloak with generator weight 15 after Landmine.
+The expanded pool contains 320 entries and preserves every earlier 8192-mask path. Its fourteen-item
+catalog supports all 16384 subsets and is retained by [gameplay-v9](protocol-v9.md). Rules version 5,
+generator version 2 and journal format 2 remain unchanged. Reload older browsers when deploying the
+paired server/web upgrade.
 
 
 At the 21 October 2026 16:47 UTC native acceptance checkpoint, corrected source `1c6724f`, tree
@@ -35,6 +36,12 @@ failed PR #84 head `97a85d4` remain historical with zero carry. At that checkpoi
 candidate/post-merge CI still had to pass seven jobs and all 51 browser cases; publication and
 promotion were separate gates, and published/local deployment was v0.3.37. See the
 [release notes](https://github.com/liveweird/grenadiers/releases) for current release status.
+
+The accepted raw documentation/capture commit `04c070c5` has sole parent `1c6724f`. Its tree
+`d1dc83fc` equals published v0.3.38 merge `3c210c23`; all candidate and post-merge seven-job,
+51-case workflows passed, and accepted image `960976c9` is promoted locally. The v0.3.39
+gameplay-v9 foundation retains these Cloak semantics but has zero native acceptance or carried
+passes. Its fresh matrix and release gates remain pending.
 
 
 Fresh reviewed Compose [English desktop](../screenshots/invisibility-cloak-desktop.png) and

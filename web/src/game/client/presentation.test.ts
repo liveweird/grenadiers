@@ -17,7 +17,7 @@ function state(): GameClientState {
   }
 }
 
-describe('v8 arena presentation', () => {
+describe('v9 arena presentation', () => {
   it('removes hidden actors and reveals them only at their new public position', () => {
     const current = state()
     expect(presentSnapshot(current)?.state.actors.map((actor) => actor.seat)).toEqual(['one', 'two'])
@@ -26,7 +26,7 @@ describe('v8 arena presentation', () => {
     current.snapshot!.state.actors[1] = {
       type: 'visible', id: 2, seat: 'two', position: { x: 4096, y: 3072 }, heading: 'north',
       speedLevel: 0, alive: true, bombCapacity: 1, bombRange: 1, liveBombCount: 0,
-      inventory: { equipment: null, weapon: null }, effects: [], damageGraceRemainingTicks: 0,
+      inventory: { equipment: null, weapon: null }, effects: [], damageGraceRemainingTicks: 0, voluntaryActionsFrozen: false,
     }
     expect(presentSnapshot(current)?.state.actors[1]).toMatchObject({
       seat: 'two', position: { x: 4096, y: 3072 }, heading: 'north',

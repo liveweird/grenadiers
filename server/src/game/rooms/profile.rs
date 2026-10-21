@@ -3,7 +3,7 @@ use grenadiers_core::{
         ActorInit, Direction, EntityId, GenerationRecord, Position, RoundAssignment, RulesConfig,
         SeatId, SpeedLevel, State, Tick, World, generate_arena,
     },
-    protocol::v8::{MapId, RulesVersion},
+    protocol::v9::{MapId, RulesVersion},
     room::RoomSettings,
 };
 
@@ -52,8 +52,8 @@ impl RoomProfile {
     }
 
     pub(super) fn initial_settings(self) -> RoomSettings {
-        let settings = grenadiers_core::protocol::v8::GameSettings::for_rules(self.rules_version());
-        grenadiers_core::protocol::v8::expanded_settings(settings)
+        let settings = grenadiers_core::protocol::v9::GameSettings::for_rules(self.rules_version());
+        grenadiers_core::protocol::v9::expanded_settings(settings)
             .expect("profile defaults contain supported items")
     }
 

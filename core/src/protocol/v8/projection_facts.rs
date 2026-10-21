@@ -35,23 +35,23 @@ pub(crate) struct ReportFacts {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub struct ValidatedWorld(pub(super) WorldFacts);
+pub struct ValidatedWorld(pub(crate) WorldFacts);
 
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub struct ValidatedReports(pub(super) Vec<ReportFacts>);
+pub struct ValidatedReports(pub(crate) Vec<ReportFacts>);
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct ExpandedCapture {
-    pub(super) rules: RulesConfig,
-    pub(super) world: ValidatedWorld,
-    pub(super) reports: ValidatedReports,
+    pub(crate) rules: RulesConfig,
+    pub(crate) world: ValidatedWorld,
+    pub(crate) reports: ValidatedReports,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct BoundPublication {
-    pub(super) room: RoomView,
-    pub(super) world: ValidatedWorld,
-    pub(super) reports: ValidatedReports,
+    pub(crate) room: RoomView,
+    pub(crate) world: ValidatedWorld,
+    pub(crate) reports: ValidatedReports,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

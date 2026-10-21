@@ -1,6 +1,93 @@
 # Repository verification
 
-## Latest native acceptance checkpoint — 2026-10-21 16:47 UTC — 102/102
+## Latest native acceptance checkpoint — 2026-10-21 18:44:23 UTC — 102/102
+
+At this checkpoint, frozen source `272b950df876596d5912fac3a56377e524899a2a`, tree
+`a6104621669608ad3f54cc19873d0e516d3a7d4b`, passed the complete native matrix on image
+`sha256:9a4dc108c4f4ba14a091ed9f55887e41d9e8a8bf49c5c2a4f9369078469e2d10`, ref
+`grenadiers-v0339-freeze-protocol-native-recheck:272b950`. Source archive SHA256 is
+`20088205e0e0a96bfab4a9042f7e6545545b1d08898174fe036aa1f79ca3fd56`. Root PTY 63336
+completed with actual exit zero at `2026-10-21T18:36:57.205841Z`; its exit was consumed.
+The extracted-facts receipt has SHA256
+`5906383686352c787b40f68c7e2b3284652eaf7a8438c428094ef21e183796c1`. Independent review of
+all 44 reports and 267 provenance records is CLEAR under audit-receipt SHA256
+`e4a4ec8497747859fdd1917fff181ff90e739231ab8a3293e3808dbf86895f30`. The final manifest seals
+2,320 payloads under SHA256 `51415e849f6267981a988586d1a2db54ec29bd52a9b35435ae2aaac0384f0877`;
+2,321 durable files and the separate source archive are byte-verified and read-only.
+
+The fresh matrix passes **51 Compose plus 51 Kubernetes** cases, all 44 groups and reports,
+74/74 baseline plus 28/28 optional cases, with zero retries and zero carried passes. It retains
+106 runtime PNGs, 34 runtime image/security records, 17 distinct Kubernetes pod UID and
+port-forward lifecycles, 16 external fixtures and 32 mode-0444 records. Runtime UID/GID
+65532:65532, CapEff 0, NoNewPrivs 1 and read-only root pass. Strict stdin Kubernetes validation
+reports three valid resources, and the pinned vulnerability scan reports zero fixable
+HIGH/CRITICAL findings under the configured policy. All frozen source, dependency, lock,
+archive, preparation and image integrity comparisons match.
+
+All 22 latency cases per target pass. Every local and shaped profile retains all 20 observations;
+no observation exceeds the unchanged 250 ms limit.
+
+| Target | Local maximum | Shaped 50 ms maximum | Exceedances |
+| --- | ---: | ---: | ---: |
+| Compose | 42.805909 ms | 159.804948 ms | 0 |
+| Kubernetes | 46.270219 ms | 161.961998 ms | 0 |
+
+Compose CPU usage changed from 498955 to 1083731 us, delta 584776 us, under cpu.max
+`max 100000`; Kubernetes changed from 437298 to 1486788 us, delta 1049490 us, under cpu.max
+`50000 100000`. Throttle-count/time deltas are zero for both. Supplemental read-only monitors
+8205 and 98157 completed with actual exit zero and retained 69 Compose and 126 Kubernetes
+samples. CPU intervals include waiting and sampler probes; Compose includes an extended gate
+wait, so these are not pure gameplay measurements. All VM spikes were retained. Coordinator
+holds and five fresh quiet samples preceded each gate; only light inert v0.3.40 template preparation/review
+ran between windows, followed by a fresh mechanic acknowledgement. Oil47 completed naturally
+before both windows. There is no globally idle-host claim. No threshold, sample count, timeout,
+fixture, retry policy or product behavior was relaxed.
+
+Every one of the 17 Kubernetes port-forward lifecycles had a first startup probe return 000;
+each nested second health and readiness probe returned 200 with `no-store` from the same PID and
+pod UID. The retained POSIX-global naming quirk was independently correlated by lifecycle, UID
+and seed. Startup probes are distinct from browser-test retries, which remain zero.
+
+Gameplay v9 preserves all fourteen published item types and all 16,384 masks. Visible actors
+require `voluntaryActionsFrozen: false`; hidden actors retain exactly
+`{type,id,seat,alive}`. Stopwatch remains unavailable. No fresh v0.3.39 screenshot was visually
+reviewed, and this transport foundation adds no visual feature; the accepted v0.3.38 public
+captures remain unchanged.
+
+Cleanup passed at `2026-10-21T18:37:45Z`: all owned resources, port-forwards and ports were gone.
+Localhost:8085 still served published v0.3.38 image `960976c9`; health, readiness and index
+returned 200, and served index/JavaScript bytes matched its container (bundle SHA256 prefix `3cf978`).
+
+At this checkpoint, v0.3.39 had not been normalized, pushed, merged, published or promoted;
+candidate, post-merge and tag CI remained pending. Earlier failed v0.3.39 source `30c051c`, failed
+v0.3.38 PR head `97a85d4`, and source `4d9a751` remain source-specific history with zero carry.
+See the [release notes](https://github.com/liveweird/grenadiers/releases) for current release
+status.
+
+## Historical initial v0.3.39 integration checkpoint — acceptance zero
+
+The initial v0.3.39 integration combined its reviewed gameplay-v9 foundation with accepted raw v0.3.38
+commit `04c070c522a318e6946e33e388938bbeb7b40d2d`, whose sole parent is corrected native source
+`1c6724fb5599b9f7f9625af05db295aa7c4ab3b2`. Raw tree
+`d1dc83fc961d5c996eadf2a6b4c107598d2741aa` equals published v0.3.38 merge
+`3c210c232daf7a2f401868abecf3db3ccbde38bc`; publication completed at
+`2026-10-21T17:32:03Z`. Both candidate workflows and post-merge CI passed seven jobs and all
+51 browser cases, accepted image `960976c9` was promoted locally, and tag verification later
+passed seven jobs and all 51 cases.
+
+Fourteen of the 22 requested item types are published through v0.3.38. The v0.3.39 protocol
+foundation activates no additional item.
+
+Runtime, core, server, web, API, Cargo and version inputs remain byte-identical to v0.3.39 source
+`ded881e65d46874c12a4599156d9b676fd165f61`; this merge changes only the eight accepted parent
+documentation/capture paths. The seven-job shared-image CI layout and all 51 browser cases are
+retained. Static checks are not native acceptance.
+
+At that initial checkpoint, no v0.3.39 Compose or Kubernetes case had been accepted or carried.
+The later checkpoint above records the fresh source-specific matrix; it does not carry acceptance
+from an earlier source.
+
+## Published v0.3.38 native checkpoint — 2026-10-21 16:47 UTC — 102/102
 
 At this checkpoint, frozen source `1c6724fb5599b9f7f9625af05db295aa7c4ab3b2`, tree
 `403bb73fe619840adeb086e537535b892cd9bec8`, passed the complete corrected-source matrix on image
@@ -78,7 +165,7 @@ Correction `92fe626` moves the entire 320px overflow/exact-two/nonempty/in-bound
 proof into stable running state before movement or planting, restores 390px before gameplay,
 and preserves result, accessibility and synchronization assertions. E2E typecheck, lint,
 repository and diff checks pass; independent source review is clear. No timeout, retry,
-threshold or product behavior changed. Fresh full native and release CI gates remain pending.
+threshold or product behavior changed. Fresh full native and seven-job release CI gates remain pending.
 The sealed evidence below applies only to its named earlier source; it does not accept this
 changed candidate. Localhost:8085 remains the published v0.3.37 image.
 

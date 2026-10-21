@@ -3,7 +3,7 @@ import { act, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { GameArenaProps } from './game/arena/types'
-import type { GameState, RoomPhase, RoomView, Snapshot } from './game/v8/schema'
+import type { GameState, RoomPhase, RoomView, Snapshot } from './game/v9/schema'
 import i18n from './i18n'
 import { App } from './App'
 
@@ -87,13 +87,13 @@ function snapshot(revision: number, phase: RoomPhase = { type: 'running' }): Sna
           type: 'visible',
           id: 1, seat: 'one', position: { x: 512, y: 512 }, heading: 'east', speedLevel: 0,
           alive: true, bombCapacity: 1, bombRange: 1, liveBombCount: 0,
-          inventory: { equipment: null, weapon: null }, effects: [], damageGraceRemainingTicks: 0,
+          inventory: { equipment: null, weapon: null }, effects: [], damageGraceRemainingTicks: 0, voluntaryActionsFrozen: false,
         },
         {
           type: 'visible',
           id: 2, seat: 'two', position: { x: 14_848, y: 12_800 }, heading: 'west', speedLevel: 0,
           alive: true, bombCapacity: 1, bombRange: 1, liveBombCount: 0,
-          inventory: { equipment: null, weapon: null }, effects: [], damageGraceRemainingTicks: 0,
+          inventory: { equipment: null, weapon: null }, effects: [], damageGraceRemainingTicks: 0, voluntaryActionsFrozen: false,
         },
       ],
       bombs: [],
@@ -124,8 +124,8 @@ async function beginRoom(user: ReturnType<typeof userEvent.setup>, action: 'crea
   await waitFor(() => expect(appSockets.filter((socket) => socket.url.endsWith('/api/v1/game/ws'))).toHaveLength(1))
   const socket = appSockets.find((candidate) => candidate.url.endsWith('/api/v1/game/ws'))!
   act(() => socket.emit('open'))
-  expect(JSON.parse(socket.sent[0])).toEqual({ type: 'authenticate', protocolVersion: 8, token })
-  act(() => socket.message({ type: 'authenticated', protocolVersion: 8 }))
+  expect(JSON.parse(socket.sent[0])).toEqual({ type: 'authenticate', protocolVersion: 9, token })
+  act(() => socket.message({ type: 'authenticated', protocolVersion: 9 }))
   return socket
 }
 

@@ -2,7 +2,7 @@ use grenadiers_core::{
     game::{
         BombTrigger, BombView, CellId, EntityId, RoundAssignment, SeatId, StepEvent, StepEventKind,
     },
-    protocol::v8::RoomPhase,
+    protocol::v9::RoomPhase,
     room::{InterruptReason, MatchLifecycle, MatchPhase},
 };
 
@@ -107,8 +107,8 @@ fn entropy_failure_interrupts_with_view_only_and_no_simulation_record() {
     assert!(matches!(
         terminal.room.phase,
         RoomPhase::MatchResult {
-            result: grenadiers_core::protocol::v8::MatchResult::Interrupted {
-                reason: grenadiers_core::protocol::v8::MatchInterruptReason::InternalError
+            result: grenadiers_core::protocol::v9::MatchResult::Interrupted {
+                reason: grenadiers_core::protocol::v9::MatchInterruptReason::InternalError
             },
             ..
         }

@@ -4,7 +4,8 @@
 
 - Add opt-in Invisibility Cloak with a 600-physical-tick refreshable actor-privacy effect.
 - Publish exact hidden actors and event-time private attributable cues while retaining public bombs, hazards, elimination and results.
-- Add the fourteenth lobby switch, checked asymmetric v8 publication, replay coverage, English and Polish cues, and a deterministic compositor-based browser scenario. Fresh same-image acceptance passes 51 Compose and 51 Kubernetes cases with zero retries; independent raw review is clear and evidence sealed. Exact-head candidate/post-merge CI and publication remain gates.
+- Add the fourteenth lobby switch, checked asymmetric v8 publication, replay coverage, English and Polish cues, and a deterministic compositor-based browser scenario. Earlier same-image acceptance passed 102/102; CI job sharding and a result-grid driver correction require fresh exact-source acceptance before release.
+- Preserve the 20-minute browser-job limit by dividing complete coverage between item and classic jobs using one verified image. Check responsive result grids before accessibility scans to avoid reading grids after the result screen closes.
 
 ## 0.3.37 — 2026-10-21
 

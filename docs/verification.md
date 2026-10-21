@@ -1,6 +1,16 @@
 # Repository verification
 
-## Invisibility Cloak fresh native acceptance — 2026-10-21 — 102/102, audited and sealed
+## Cloak CI job envelope correction — 2026-10-21 — fresh acceptance pending
+
+PR84 candidate `b34200306b42b4db9aa4a841534733b2f3a01287` had a successful push workflow, but PR workflow `39538079075` exceeded the browser job’s unchanged 20-minute cap. The item/default suites and classic match, reconnect, all22 latency cases, hardening and controls passed; the final audio test was cancelled after starting normally. GitHub’s annotation and complete raw logs prove aggregate job exhaustion. The cancelled run is preserved separately and does not pass the release gate.
+
+Browser coverage is being divided between item and classic jobs, with one built and scanned OCI image transferred by a verified archive. Every existing suite, readiness check, sample, budget, timeout and zero-retry setting remains required. Updated release verification must require all image-build/browser-shard jobs and the complete51 browser cases.
+
+The responsive rendered-duel check also moves before both result accessibility scans. The previous v39 attempt at source `30c051c1a11d4dc0fd5f67cfe3075bea09c658a3` demonstrated that two scans could outlast the three-second results screen before DOM geometry was read. The corrected check captures both grids atomically, requires exactly two nonempty rectangles, retains the320px bounds, and restores390px before unchanged accessibility scans. Product result timing is unchanged. The failed attempt’s1211 payloads remain sealed by `0a059f89ec762e2796c62e707cc95f0f94d34fa7724a5d50526f13e4defc8b73`; its7 passes and1 failure contribute no carried results.
+
+The previous102/102 Cloak evidence below is immutable historical evidence for its exact source. These CI/driver corrections change the source tree, requiring a fresh source archive, dependencies, built image, entire51 Compose plus51 Kubernetes matrix, independent audit/seal and exact-head candidate/post-merge CI before publication or local promotion. Dependent v39 evidence must be re-integrated from the final corrected parent and redone with zero carry. Published/local v0.3.37 remains unchanged.
+
+## Historical Invisibility Cloak native acceptance — 2026-10-21 — 102/102 at source 6e9be94
 
 Frozen source `6e9be9426d0fa7639877a506608c606794e7e2db`, tree `419d904e011b525d0b3fcbfdb65f304e1f77fbbf`, retains the corrected Cloak reveal-position driver and
 integrates accepted Landmine raw `8db1a070a0b65f8d3e679b2d12cee1783162a60a`. Prior suites remain

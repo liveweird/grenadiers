@@ -20,6 +20,11 @@ and bounded redacted summaries; never print or attach authentication/resume payl
 reconnect probe closes real native transports and authenticates normally without changing
 the authoritative simulation clock, state, or outcomes.
 
+The Wall Pass production route runs separately with the mode-0444 seed fixture:
+`E2E_WALL_PASS_FIXTURE=arena-v2-wall-pass npm run test:wall-pass`. Start the same application image
+with `docker-compose.wall-pass.yaml` first. The route uses only browser controls and read-only socket
+observations; it does not inject state or send gameplay commands over the probe.
+
 ## Natural headed visibility
 
 With the matches fixture ready, run `E2E_MATCH_FIXTURE=arena-v1-matches xvfb-run -a npm --prefix e2e run test:hardening`
@@ -27,3 +32,7 @@ on Linux. The dedicated harness launches fresh Chromium and uses the existing de
 with `connectOverCDP({ noDefaults: true })`; default Playwright focus emulation forces all targets
 visible and cannot establish a genuine hidden tab. The scenario observes actual visibility events.
 Owned processes/profiles have bounded cleanup; private CDP endpoints and capabilities are not attached.
+
+The Kick source route uses `docker-compose.kick.yaml` with the mode-0444 repeating-byte-31 seed:
+`E2E_KICK_FIXTURE=arena-v2-kick npm run test:kick`. It uses native controls and read-only public
+observations; source checks do not claim native acceptance.

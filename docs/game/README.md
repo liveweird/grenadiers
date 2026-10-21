@@ -76,3 +76,5 @@ See the implemented expansion candidates: [Heart](heart.md) and [Shield](shield.
 - [Stopwatch](stopwatch.md): three seconds of opponent action freezing and Timed-bomb pausing.
 - [Invisible Bombs](invisible-bombs.md): ten seconds without live bomb records or bomb cues.
 - [Teleporter](teleporter.md): an immediate, atomic safe-position swap or consumed unsafe attempt.
+- [Kick](kick.md): permanent bomb-kicking equipment with private motion history.
+- [Wall Pass](wall-pass.md): permanent soft-block passage with private replacement exit grace.

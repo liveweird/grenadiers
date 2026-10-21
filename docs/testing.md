@@ -254,3 +254,25 @@ proves a safe atomic swap, a shared new `lastTeleportTick`, position and marker 
 strictly newer reconnect admission, and unsafe consumption beside a live bomb without movement or
 marker change. The scenario has no seed search, state injection or retries. Native execution
 remains pending until the predecessor-integrated candidate image exists.
+
+## Wall Pass production-seed scenario
+
+Use `docker-compose.wall-pass.yaml` with the mode-0444 v2 seed fixture and
+`E2E_WALL_PASS_FIXTURE=arena-v2-wall-pass npm --prefix e2e run test:wall-pass`.
+The keyboard-only two-browser route enables only Wall Pass, reveals and collects the pickup at
+`(3,1)`, enters the intact soft block at `(3,2)`, and proves the authoritative block remains opaque
+while the actor and equipment cue remain legible. It rejects planting without consuming a bomb ID,
+capacity or weapon, clamps west against hard wall `(2,2)`, resumes from a strictly newer admission
+inside the block, then exits north without re-entry. A legal post-exit bomb has the immediate
+successor of the reveal bomb's entity ID, so the rejected inside action consumed no allocation.
+English desktop and Polish 320-pixel
+reduced-motion views produce the two named full-page captures. The scenario uses no state
+injection, direct WebSocket commands, seed search or retry. The sole-item fixture cannot prove
+Wall-Pass-to-Heart replacement grace; core and protocol tests provide that coverage. Native
+execution remains pending until the predecessor-integrated candidate image exists.
+
+### Kick source scenario
+
+Use `docker-compose.kick.yaml` with the mode-0444 v2 seed fixture and
+`E2E_KICK_FIXTURE=arena-v2-kick npm --prefix e2e run test:kick`. The scenario uses ordinary UI and
+keys, observes public streams, and does not inject state, search seeds, retry, or extend budgets.

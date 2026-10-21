@@ -83,7 +83,9 @@ function supportedState(
       || (actor.inventory.weapon === 'powerBomb' && enabled.has('powerBomb'))
       || (actor.inventory.weapon === 'landmine' && enabled.has('landmine')))
     && (actor.inventory.equipment === null
-      || (actor.inventory.equipment === 'wallPass' || actor.inventory.equipment === 'heart')
+      || (actor.inventory.equipment === 'kick'
+        || actor.inventory.equipment === 'wallPass'
+        || actor.inventory.equipment === 'heart')
         && catalog.includes(actor.inventory.equipment)
         && enabled.has(actor.inventory.equipment))
     && actor.effects.every((effect) => supportedEffect(effect, enabled, catalog))

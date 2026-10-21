@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.3.44 — 2026-10-21 (source candidate)
+
+- Add opt-in Kick equipment: walking into a stationary Timed or Remote bomb starts authoritative
+  one-cell motion on the next update and every ten updates until blocked; Contact mines never move.
+- Preserve bomb identity, owner, blast and fuse while keeping motion and stopped Kick history private
+  across capture, admission, resume and replay; archived protocols reject that provenance.
+- Extend gameplay v10 to the nineteenth lobby switch and all 524,288 settings masks, with
+  English/Polish presentation and deterministic production-seed browser source. Native same-image
+  acceptance, final CI and publication remain pending.
+
+## 0.3.43 — 2026-10-21 (source candidate)
+
+- Add opt-in Wall Pass equipment for movement through breakable blocks while hard walls, bombs,
+  contact, fire and placement rules remain authoritative.
+- Preserve private per-block exit grace across equipment replacement and reconnect without adding
+  a wire marker, timer or public concealed-content cue.
+- Extend gameplay v10 to the eighteenth lobby switch and all 262,144 settings masks, with pinned
+  archive rejection, English/Polish presentation and deterministic production-seed browser source.
+- Source checks are complete. Predecessor integration, native same-image acceptance, final CI and
+  publication remain pending; this entry does not claim a released artifact.
+
 ## 0.3.42 — 2026-10-21
 
 - Add opt-in Teleporter pickups that atomically swap both living players only when both complete destination footprints are safe; unsafe pickups are consumed without moving either player.

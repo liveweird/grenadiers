@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test'
-import type { Direction, GameServerMessage, Seat } from '../../../web/src/game/v10/schema'
+import type { Direction, EquipmentId, GameServerMessage, Seat } from '../../../web/src/game/v10/schema'
 
 type Admission = Extract<GameServerMessage, { type: 'admitted' }>
 export type PublicAdmission = {
@@ -11,6 +11,7 @@ export type PublicAdmission = {
   hasState: boolean
   positions: { seat: Seat; x: number; y: number }[]
   visibleActors: { seat: Seat; x: number; y: number; lastTeleportTick: number | null }[]
+  equipment: { seat: Seat; equipment: EquipmentId | null }[]
   bombIds: number[]
   stableCapability: boolean
 }
@@ -44,11 +45,11 @@ export async function installTransportProbe(page: Page): Promise<void> {
         roomId: message.room.roomId, seat: message.youSeat,
         actionFloor: message.lastActionId, tick: message.room.tick,
         hasState: message.state !== null,
-        positions: message.state?.actors.flatMap((actor) => actor.type === 'visible'
-          ? [{ seat: actor.seat, ...actor.position }] : []) ?? [],
+        positions: message.state?.actors.flatMap((actor) => actor.type === 'visible' ? [{ seat: actor.seat, ...actor.position }] : []) ?? [],
         visibleActors: message.state?.actors.flatMap((actor) => actor.type === 'visible'
           ? [{ seat: actor.seat, ...actor.position, lastTeleportTick: actor.lastTeleportTick }]
           : []) ?? [],
+        equipment: message.state?.actors.flatMap((actor) => actor.type === 'visible' ? [{ seat: actor.seat, equipment: actor.inventory.equipment }] : []) ?? [],
         bombIds: message.state?.bombs.map((bomb) => bomb.id) ?? [], stableCapability,
       }
     }

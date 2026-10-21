@@ -25,16 +25,16 @@ describe('Wall Pass arena presentation', () => {
     const [, blocks, pickups, , , actors] = layers(scene)
     expect(blocks.children[0]).toMatchObject({ visible: true, alpha: 1 })
     expect(pickups.children[0].shapes).toHaveLength(19)
-    expect(actors.children[0].children[24]).toMatchObject({ visible: true, alpha: 1 })
+    expect(actors.children[0].children[25]).toMatchObject({ visible: true, alpha: 1 })
     expect(layers(scene).indexOf(blocks)).toBeLessThan(layers(scene).indexOf(actors))
     scene.setReducedMotion(true)
     scene.render(500)
-    expect(actors.children[0].children[24]).toMatchObject({ visible: true, alpha: 1 })
+    expect(actors.children[0].children[25]).toMatchObject({ visible: true, alpha: 1 })
 
     snapshot.state.actors[0].wallPassEquipped = false
     snapshot.room.presentationBaseline = 'heart-replaced-wall-pass'
     scene.update(snapshot, 100)
     expect(blocks.children[0]).toMatchObject({ visible: true, alpha: 1 })
-    expect(actors.children[0].children[24]).toMatchObject({ visible: false })
+    expect(actors.children[0].children[25]).toMatchObject({ visible: false })
   })
 })

@@ -25,6 +25,7 @@ pub(crate) fn validate_world_for_items(
     validate_clock(&facts)?;
     validate_arena(&facts)?;
     validate_actors(&facts, supported_items)?;
+    super::projection_bracelet::validate_world(&facts, supported_items)?;
     validate_bombs(&facts, supported_items)?;
     validate_flames(&facts)?;
     validate_pickups(&facts)?;
@@ -76,6 +77,7 @@ pub(crate) fn validate_reports(
         return Err(ProjectionError::InvalidReports);
     }
     for report in &reports {
+        super::projection_bracelet::validate_report(&world.0, report)?;
         for event in &report.events {
             validate_event(&world.0, report.tick, event)?;
         }

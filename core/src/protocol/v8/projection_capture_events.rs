@@ -3,7 +3,8 @@ use crate::protocol::EntityId;
 
 use super::projection_capture_wire::*;
 use super::projection_facts::{
-    EventFacts, KickBombFacts, ProjectionError, PunchBombFacts, ReportFacts, TimedBombFacts,
+    EventFacts, ForcedMovementFacts, KickBombFacts, ProjectionError, PunchBombFacts, ReportFacts,
+    TimedBombFacts,
 };
 use super::{BlastKind, BombTrigger, BombView, EventKind};
 
@@ -79,6 +80,16 @@ pub(super) fn capture_report(report: &game::StepReport) -> Result<ReportFacts, P
     let tick = wire_tick(report.tick)?;
     Ok(ReportFacts {
         tick,
+        forced_movement: report
+            .forced_movement
+            .map(|forced| {
+                Ok(ForcedMovementFacts {
+                    victim: wire_seat(forced.seat),
+                    start: wire_position(forced.segment.start())?,
+                    end: wire_position(forced.segment.end())?,
+                })
+            })
+            .transpose()?,
         events: report
             .events
             .iter()

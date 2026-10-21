@@ -2,6 +2,7 @@ mod client;
 mod identity;
 mod projection_admission;
 pub(crate) mod projection_binding;
+pub(crate) mod projection_bracelet;
 pub(crate) mod projection_capture;
 mod projection_capture_events;
 mod projection_capture_wire;

@@ -18,6 +18,7 @@ pub(crate) struct WorldFacts {
     pub(crate) arena: ArenaView,
     pub(crate) actors: [VisibleActorView; 2],
     pub(crate) last_successful_punch_ticks: [Option<Tick>; 2],
+    pub(crate) last_successful_shove_ticks: [Option<Tick>; 2],
     pub(crate) soft_wall_grace: [Vec<Cell>; 2],
     pub(crate) bombs: Vec<BombView>,
     pub(crate) timed_bombs: BTreeMap<EntityId, TimedBombFacts>,
@@ -70,6 +71,14 @@ pub(crate) struct PunchBombFacts {
 pub(crate) struct ReportFacts {
     pub(crate) tick: Tick,
     pub(crate) events: Vec<EventFacts>,
+    pub(crate) forced_movement: Option<ForcedMovementFacts>,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) struct ForcedMovementFacts {
+    pub(crate) victim: crate::protocol::Seat,
+    pub(crate) start: crate::protocol::Position,
+    pub(crate) end: crate::protocol::Position,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]

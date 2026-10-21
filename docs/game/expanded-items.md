@@ -1,5 +1,7 @@
 # Expanded item implementation plan
 
+The corrected Landmine candidate retains all gameplay behavior and now passes fresh 50 Compose plus 50 Kubernetes cases with causal placement-ID assertions. Evidence is independently audited/sealed; new candidate/post-merge CI and publication remain pending. Earlier source-native records remain historical; see [verification](../verification.md).
+
 Status: [Heart](heart.md), [Shield](shield.md), [Golden Flame](golden-flame.md),
 [Short Fuse](short-fuse.md) and [Short Flame](short-flame.md) are published through v0.3.29.
 The v0.3.30 [Long Fuse](long-fuse.md) increment passes local checks and corrected-source native

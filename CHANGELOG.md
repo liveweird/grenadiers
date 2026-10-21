@@ -8,6 +8,7 @@
 
 ## 0.3.37 — 2026-10-21
 
+- Correct Remote/Landmine rolling-history assertions using causal placement IDs; preserve Piercing/Power CI diagnostics. Fresh corrected-source acceptance passes 100/100 Compose/Kubernetes cases, independently audited and sealed; new exact-head CI and publication remain gates.
 - Add opt-in Landmine as a passable, untimed Standard bomb that detonates on swept actor contact after per-actor exit grace.
 - Preserve movement ordering and immutable explosion planning: accepted contact wins, while fire and other blasts silently destroy untriggered mines without extending rays.
 - Add the thirteenth lobby switch, checked v8 state and events, replay coverage, English and Polish pressure-plate cues, and a deterministic production-seed browser scenario. Fresh same-image acceptance passes 50 Compose and 50 Kubernetes cases with zero retries; the raw audit is clear and evidence sealed. Publication requires exact-head candidate and post-merge CI.

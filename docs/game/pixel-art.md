@@ -1,5 +1,7 @@
 # Retro pixel-art courtyard
 
+The latest Landmine desktop and Polish 320px captures were refreshed from corrected source `420d8df` and tested image1736. The pressure plate/consumed charge/no-flame state and normal HUD layout were visually reviewed; these stills precede contact and do not replace behavioral assertions. Kubernetes captures were retained without visual review.
+
 Implemented in v0.3.18. [Actual application captures](../screenshots/pixel-art.md) and the
 [verification record](../verification.md) cover both deployment paths.
 

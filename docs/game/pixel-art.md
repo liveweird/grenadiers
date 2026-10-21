@@ -1,12 +1,18 @@
 # Retro pixel-art courtyard
 
-Historical Cloak captures come from source `4d9a751` and image `6e372a7c`:
+The 21 October 2026 16:47 UTC native acceptance checkpoint's Cloak captures come from corrected
+source `1c6724f` and image `960976c9`:
 [English desktop](../screenshots/invisibility-cloak-desktop.png) and
 [Polish 320px reduced-motion](../screenshots/invisibility-cloak-polish-320.png). Root reviewed the
 pre-collection pickup and readable HUD/settings; normal Polish vertical scrolling and the expected
-unfocused-arena prompt remain. Native assertions prove privacy/expiry only for that named source;
+unfocused-arena prompt remain. Native assertions prove privacy/expiry for that named source;
 these stills do not establish behavior. Kubernetes captures are retained without visual review.
-The subsequent running-HUD driver correction remains unaccepted pending fresh native and release CI.
+Fresh native acceptance was independently audited and sealed; release CI and publication remained
+pending at that checkpoint. See [release notes](https://github.com/liveweird/grenadiers/releases)
+for current release status.
+
+These accepted v0.3.38 captures are integrated into the v0.3.39 gameplay-v9 foundation without
+changing artwork or runtime code. They provide no v0.3.39 native acceptance or carried pass.
 
 The latest Landmine desktop and Polish 320px captures were refreshed from corrected source `420d8df` and tested image1736. The pressure plate/consumed charge/no-flame state and normal HUD layout were visually reviewed; these stills precede contact and do not replace behavioral assertions. Kubernetes captures were retained without visual review.
 
@@ -113,7 +119,8 @@ the actor at the current authoritative position without a stale interpolation tr
 
 Fresh reviewed Compose [English desktop](../screenshots/invisibility-cloak-desktop.png) and
 [Polish 320px reduced-motion](../screenshots/invisibility-cloak-polish-320.png) captures show the
-Cloak pickup before collection and readable localized HUD/settings. Polish uses normal vertical
-scrolling. These stills do not prove actor privacy: the paired native assertions establish owner
+Cloak pickup before collection and readable localized HUD/settings. Root actually viewed only
+these two Compose stills; Polish uses normal vertical scrolling and the unfocused-arena prompt is
+expected. These stills do not prove actor privacy: the paired native assertions establish owner
 visibility, exact peer-hidden actor shape, compositor removal, reconnect and current-position
 reveal at the physical deadline. Kubernetes captures are retained but were not visually reviewed.

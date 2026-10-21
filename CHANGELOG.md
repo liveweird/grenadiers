@@ -9,13 +9,16 @@
   their exact privacy-preserving shape.
 - Preserve Expanded-v5/generated-v2/journal-v2 identity, all fourteen available items, all 16,384
   masks and existing simulation behavior. Gameplay-v8 remains archived and rejects v9 connections.
+- Integrate published v0.3.38 accepted raw parent `04c070c5` and its exact tree `d1dc83fc` while
+  retaining the reviewed gameplay-v9 foundation byte-for-byte outside the eight parent
+  documentation/capture paths. v0.3.39 remains unreleased with zero native acceptance carried.
 
 ## 0.3.38 — 2026-10-21
 
 - Add opt-in Invisibility Cloak with a 600-physical-tick refreshable actor-privacy effect.
 - Publish exact hidden actors and event-time private attributable cues while retaining public bombs, hazards, elimination and results.
-- Add the fourteenth lobby switch, checked asymmetric v8 publication, replay coverage, English and Polish cues, and a deterministic compositor-based browser scenario. Earlier source `4d9a751` passes 51 Compose and 51 Kubernetes cases with zero retries; its 2,296 sealed evidence payloads do not accept the subsequent driver correction. Fresh native, seven-job candidate/post-merge CI and publication remain gates.
-- Preserve the 20-minute browser-job limit by dividing complete coverage between item and classic jobs using one verified image. CI then exposed a result-screen HUD race; move the complete 320px HUD layout proof into stable running state before gameplay. This source correction passes static checks and independent review; fresh native and release CI acceptance remain pending, and v0.3.38 is not published.
+- Add the fourteenth lobby switch, checked asymmetric v8 publication, replay coverage, English and Polish cues, and a deterministic compositor-based browser scenario. Corrected source `1c6724f` passes a fresh 51 Compose plus 51 Kubernetes matrix with zero retries or carried passes; the independent raw audit is clear and 2,298 evidence payloads are sealed and durably byte-verified.
+- Preserve the 20-minute browser-job limit by dividing complete coverage between item and classic jobs using one verified image. The complete 320px HUD layout proof now runs in stable Running before gameplay and restores 390px afterward. No timeout, threshold, sample count, retry policy or product behavior was relaxed. At the 21 October 2026 16:47 UTC native acceptance checkpoint, both seven-job candidate workflows, merge/post-merge CI, publication, exact-image promotion and tag CI remained pending; v0.3.38 was not published.
 
 ## 0.3.37 — 2026-10-21
 

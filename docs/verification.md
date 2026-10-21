@@ -1,6 +1,97 @@
 # Repository verification
 
-## Unreleased v0.3.38 candidate — source correction, fresh acceptance pending
+## Gameplay v9 integration — published v0.3.38 parent, acceptance zero
+
+The v0.3.39 integration combines its reviewed gameplay-v9 foundation with accepted raw v0.3.38
+commit `04c070c522a318e6946e33e388938bbeb7b40d2d`, whose sole parent is corrected native source
+`1c6724fb5599b9f7f9625af05db295aa7c4ab3b2`. Raw tree
+`d1dc83fc961d5c996eadf2a6b4c107598d2741aa` equals published v0.3.38 merge
+`3c210c232daf7a2f401868abecf3db3ccbde38bc`; publication completed at
+`2026-10-21T17:32:03Z`. Both candidate workflows and post-merge CI passed seven jobs and all
+51 browser cases, and accepted image `960976c9` is promoted locally. Tag verification was still
+pending when this parent integration began.
+
+Fourteen of the 22 requested item types are published through v0.3.38. The v0.3.39 protocol
+foundation activates no additional item.
+
+Runtime, core, server, web, API, Cargo and version inputs remain byte-identical to v0.3.39 source
+`ded881e65d46874c12a4599156d9b676fd165f61`; this merge changes only the eight accepted parent
+documentation/capture paths. The seven-job shared-image CI layout and all 51 browser cases are
+retained. Static checks are not native acceptance.
+
+No v0.3.39 Compose or Kubernetes case has been accepted or carried. Its fresh 51+51 matrix must
+use this published exact parent proof. Subsequent v0.3.39 normalization, CI, publication and
+promotion remain pending. Earlier v0.3.39 failed source `30c051c`, failed v0.3.38 PR head
+`97a85d4`, and source `4d9a751` remain source-specific historical records with zero carry.
+
+## Published v0.3.38 native checkpoint — 2026-10-21 16:47 UTC — 102/102
+
+At this checkpoint, frozen source `1c6724fb5599b9f7f9625af05db295aa7c4ab3b2`, tree
+`403bb73fe619840adeb086e537535b892cd9bec8`, passed the complete corrected-source matrix on image
+`sha256:960976c9cda7a04871429ca99f7b0c5fdc94f970a685a10183b63ffe17e77b93`, ref
+`grenadiers-v0338-cloak-native-recheck:1c6724f`. Source archive SHA256 is
+`98a246db2eda7e6915cc5a5dfd2e7114005e983bbc1b28971b5bb0c453cf74ec`. Root PTY 23208
+completed with actual exit zero at `2026-10-21T16:47:07.611922+00:00`; its exit was consumed.
+The independent raw audit is clear. The final manifest seals 2,298 payloads under SHA256
+`7b2f24235019d70b3207a6ed99adf6264c45347083bce397eaa873107a0ec14e`; 2,299 durable files
+and the separate source archive are byte-verified and read-only.
+
+The fresh matrix passes **51 Compose plus 51 Kubernetes** cases, all 44 groups and reports,
+74/74 baseline plus 28/28 optional cases, with zero retries and zero carried passes. It retains
+106 runtime PNGs, 34 runtime image/security records, 17 distinct Kubernetes pod UIDs and
+port-forward lifecycles, 16 external fixtures and 32 mode-0444 records. Runtime
+UID/GID 65532:65532, CapEff 0, NoNewPrivs 1 and read-only root pass. Strict stdin Kubernetes
+validation reports three valid resources, and the pinned vulnerability scan reports zero
+HIGH/CRITICAL findings under the configured policy. All frozen source, dependency, lock,
+archive, preparation and image integrity comparisons match.
+
+All 22 latency cases per target pass. Every local and shaped profile retains all 20 observations;
+no observation exceeds the unchanged 250 ms limit.
+
+| Target | Local maximum | Shaped 50 ms maximum | Exceedances |
+| --- | ---: | ---: | ---: |
+| Compose | 56.449953 ms | 148.933439 ms | 0 |
+| Kubernetes | 55.565752 ms | 166.100548 ms | 0 |
+
+Compose CPU usage changed from 596028 to 1156447 us, delta 560419 us, under cpu.max
+`max 100000`; Kubernetes changed from 471529 to 1044257 us, delta 572728 us, under cpu.max
+`50000 100000`. Throttle-count/time deltas are zero for both. Supplemental v2 monitors retained
+48 Compose and 52 Kubernetes samples and completed with actual exit zero. CPU intervals include
+pre-gate waiting and sampler probes, so they are not pure gameplay cost; optional cpu.pressure is
+unavailable. Managed-worker acknowledgements and five fresh quiet host samples preceded each
+approved window. Bounded helper checks ran between windows, followed by a fresh Kubernetes
+acknowledgement. There is no globally idle host or continuous worker-hold claim. Auxiliary debug
+work began after both windows. No threshold, sample count, timeout, fixture, retry policy or
+product behavior was relaxed.
+
+Root actually viewed only two fresh Compose pre-collection captures: [English desktop](screenshots/invisibility-cloak-desktop.png)
+and [Polish 320px reduced motion](screenshots/invisibility-cloak-polish-320.png). The hooded pickup,
+arena and localized HUD/settings are readable; Polish vertical scrolling and the unfocused-arena
+prompt are expected. These stills do not prove privacy. Paired browser assertions establish
+natural acquisition, owner visibility, exact peer-hidden identity/private cue, compositor
+removal, reconnect retention and current-position reveal at collection plus 600 physical ticks.
+Kubernetes captures are retained but were not visually reviewed.
+
+Every one of the 17 Kubernetes port-forward lifecycles had a first startup probe return 000 while
+the forward started; each second health and readiness probe returned 200 with `no-store`, and all
+browser cases passed. These startup probes are distinct from browser-test retries, which remain
+zero. A retained POSIX-global label variable produces nested names for successful second-probe
+and seeded-runtime records. Their ordered lifecycle, pod UID and seed associations were
+independently verified; flat filename pairing is not claimed.
+
+Cleanup confirmed all owned Compose containers/network, Kubernetes namespace, ports 18284/18285
+and port-forwards were absent. At this checkpoint, localhost:8085 served accepted published v0.3.37 image
+`sha256:1736d19303b9859ef66cd224ae316e0de1e5e14db2227fdaa86f7bba4f2443a7`; health, readiness
+and index return 200 and served index/bundle bytes equal the container.
+
+Correction `92fe626` now passes both targets. Earlier source `4d9a751`, its image `6e372a7c`, and
+PR #84's failed old head `97a85d4` remain immutable source-specific history with zero carry.
+At this checkpoint, PR #84 was still draft. Both new seven-job/51-case candidate workflows,
+merge and post-merge CI, publication, exact-image local promotion and tag CI remained pending;
+v0.3.38 was not published, and no registry push or hosted deployment was claimed. See the
+[release notes](https://github.com/liveweird/grenadiers/releases) for current release status.
+
+## Historical correction checkpoint — before fresh corrected-source acceptance
 
 PR #84 at `97a85d4` failed its item shard in the default duel: all three configured
 attempts measured zero HUD grids after two full-page result screenshots outlasted the
@@ -15,20 +106,7 @@ threshold or product behavior changed. Fresh full native and seven-job release C
 The sealed evidence below applies only to its named earlier source; it does not accept this
 changed candidate. Localhost:8085 remains the published v0.3.37 image.
 
-## Gameplay v9 integration — source checks only, acceptance zero
-
-The v0.3.39 integration combines foundation `7fbd910` with reviewed v0.3.38 source child
-`29bba9d` and exact corrected duel driver `92fe626`. Runtime, core, server, web, API and Cargo
-version inputs remain byte-identical to the v0.3.39 foundation. The seven-job shared-image CI
-layout and all 51 browser cases are retained. Current E2E type/lint/Knip checks, scenario parity,
-shell syntax and repository/diff checks pass; these static checks are not native acceptance.
-
-No v0.3.39 Compose or Kubernetes case has been accepted or carried. Its fresh 51+51 matrix must
-start only after v0.3.38 is published and its exact accepted tree is proved. Subsequent v0.3.39
-normalization, CI, publication and promotion remain pending. The earlier v0.3.39 failed attempt
-and the v0.3.38 evidence below remain source-specific historical records with zero carry.
-
-## Earlier Cloak source — 2026-10-21 — source-specific 102/102, audited and sealed
+## Historical earlier Cloak source — 2026-10-21 — source-specific 102/102, audited and sealed
 
 Frozen source `4d9a751810b0620e4761dfd7bcf813596f2f82ae`, tree
 `39c77c6ca2c835240e31a0d20261175c45ba5bef`, retains all runtime behavior from the earlier Cloak

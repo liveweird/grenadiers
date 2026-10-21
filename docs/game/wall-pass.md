@@ -30,5 +30,6 @@ earlier generated mapping and RNG draw count.
 
 The deterministic browser source route uses the read-only repeating-byte-31 fixture. It reveals the
 pickup at `(3,1)`, enters the intact block `(3,2)`, rejects placement there, clamps against hard wall
-`(2,2)`, resumes inside through a newer admission and exits north. That sole-item fixture cannot
+`(2,2)`, resumes inside through a newer admission, exits north and assigns the next legal bomb the
+immediate successor of the reveal bomb's entity ID. That sole-item fixture cannot
 exercise equipment replacement; focused core and protocol tests cover replacement exit grace.

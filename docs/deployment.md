@@ -417,7 +417,8 @@ docker compose -f docker-compose.yaml -f docker-compose.wall-pass.yaml down
 
 The read-only repeating-byte-31 fixture enables an ordinary keyboard route with only Wall Pass.
 The two-browser scenario proves intact-block passage and presentation, rejected placement, hard-wall
-clamping, and state from a strictly newer reconnect admission before exiting the block. It writes
+clamping, and state from a strictly newer reconnect admission before exiting the block. A legal
+post-exit bomb must receive the immediate successor of the reveal bomb's entity ID. The route writes
 the English desktop and Polish 320-pixel reduced-motion full-page captures named in the scenario.
 This sole-item route does not cover equipment-replacement grace; focused core and protocol tests do.
 Run it against the final predecessor-integrated image together with the cumulative native matrix.

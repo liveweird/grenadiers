@@ -22,7 +22,9 @@ checks pass. Its planned captures are `wall-pass-inside-desktop-en.png` and
 `wall-pass-inside-polish-320-reduced.png`.
 
 The repeating-byte-31 route reveals Wall Pass at `(3,1)`, enters intact block `(3,2)`, rejects
-planting, clamps against hard wall `(2,2)`, resumes from a newer admission and exits north. It uses
+planting, clamps against hard wall `(2,2)`, resumes from a newer admission and exits north. A legal
+post-exit bomb takes the reveal bomb's immediate successor ID, proving the failed placement consumed
+no entity allocation. The route uses
 no state injection, direct WebSocket commands, seed search or retry. The sole-item fixture cannot
 prove replacement grace; the core/protocol layers do. This record does not claim predecessor
 integration, a candidate image, native Compose/Kubernetes execution, hosted CI or publication.

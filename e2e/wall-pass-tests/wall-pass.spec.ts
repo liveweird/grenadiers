@@ -13,11 +13,13 @@ const snapshots = (game: ObservedGame): Snapshot[] => game.frames.filter(
 const actor = (game: ObservedGame, seat: Seat) => visibleActor(latestSnapshot(game), seat)!
 const collections = (game: ObservedGame) => snapshots(game).flatMap(({ events }) => events)
   .filter(({ kind }) => kind.type === 'pickupCollected' && kind.kind === 'wallPass')
+const bombPlacements = (game: ObservedGame) => snapshots(game).flatMap(({ events }) => events)
+  .flatMap(({ kind }) => kind.type === 'bombPlaced' ? [kind.bomb] : [])
 const bombPlacementsAfter = (game: ObservedGame, revision: number) => snapshots(game)
   .filter(({ room }) => room.revision > revision).flatMap(({ events }) => events)
-  .filter(({ kind }) => kind.type === 'bombPlaced')
+  .flatMap(({ kind }) => kind.type === 'bombPlaced' ? [kind.bomb] : [])
 
-async function revealWallPass(page: Page, game: ObservedGame): Promise<void> {
+async function revealWallPass(page: Page, game: ObservedGame): Promise<number> {
   await moveSeatTo(page, game, 'one', { column: 2, row: 1 })
   await page.keyboard.press('Space')
   await moveSeatTo(page, game, 'one', { column: 1, row: 1 })
@@ -27,6 +29,8 @@ async function revealWallPass(page: Page, game: ObservedGame): Promise<void> {
   await expect.poll(() => latestSnapshot(game)!.state.pickups).toContainEqual({
     cell: { column: 3, row: 1 }, kind: 'wallPass',
   })
+  expect(bombPlacements(game)).toHaveLength(1)
+  return bombPlacements(game)[0]!.id
 }
 
 async function expectStationary(game: ObservedGame, seat: Seat): Promise<void> {
@@ -66,7 +70,7 @@ test('Wall Pass crosses one intact block, rejects planting and hard walls, and r
       await one.getByRole('region', { name: 'Grenadiers courtyard' }).click()
       await two.getByRole('region', { name: 'Dziedziniec Grenadierów' }).click()
 
-      await revealWallPass(one, games[0])
+      const revealBombId = await revealWallPass(one, games[0])
       await moveSeatTo(one, games[0], 'one', { column: 1, row: 1 })
       await moveSeatTo(one, games[0], 'one', { column: 3, row: 1 })
       await Promise.all(games.map((game) => expect.poll(() =>
@@ -153,6 +157,17 @@ test('Wall Pass crosses one intact block, rejects planting and hard walls, and r
       expect(exited.inventory.equipment).toBe('wallPass')
       expect(latestSnapshot(games[0])!.state.arena.blocks)
         .toContainEqual({ column: 3, row: 2 })
+
+      const afterExit = latestSnapshot(games[0])!
+      await one.keyboard.press('Space')
+      await Promise.all(games.map((game) => expect.poll(() =>
+        bombPlacementsAfter(game, afterExit.room.revision).map(({ id }) => id))
+      .toEqual([revealBombId + 1])))
+      for (const game of games) {
+        expect(latestSnapshot(game)!.state.bombs).toContainEqual(expect.objectContaining({
+          id: revealBombId + 1, owner: exited.id, cell: { column: 3, row: 1 },
+        }))
+      }
     } finally {
       await Promise.all(contexts.map(async (context) => {
         for (const page of context.pages()) {

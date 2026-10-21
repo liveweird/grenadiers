@@ -5,6 +5,12 @@ application on port 8085. Active matches live in that process, so the initial de
 intentionally runs one replica with a `Recreate` update strategy. A restart ends active matches;
 horizontal scaling and recovery require match routing and persistence designs first.
 
+Deploy the v0.3.39 server and web assets together and reload connected browsers. Gameplay v9 adds
+the required `voluntaryActionsFrozen: false` field to every visible actor while retaining the exact
+fourteen-item catalog and Expanded-v5/generated-v2 identity. Gameplay-v8 clients fail version
+negotiation before credential lookup. No storage migration is required; active matches remain
+process-local. Stopwatch gameplay remains unavailable in this foundation release.
+
 ## Docker Compose
 
 The image build uses the repository's reviewed `Cargo.lock` and pinned base-image digests:
@@ -62,6 +68,10 @@ The gate checks the same rendered YAML for one replica, the Recreate strategy, a
 of an autoscaler targeting the game Deployment, and consistent Service routing. It rejects
 duplicate YAML keys. Local installations require the appropriate platform binary. Schema validation may require
 network access to the pinned schemas; successful rendering alone does not pass this gate.
+
+The feature rollout notes below retain their original release versions and catalog counts.
+Reproduction commands use the checked-out paired image; current deployments use
+[gameplay-v9](game/protocol-v9.md) and its current catalog, even for an older optional item.
 
 ## Reproduce a generated pickup round
 

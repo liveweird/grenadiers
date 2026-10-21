@@ -111,8 +111,8 @@ async fn authenticates_and_consumes_fresh_sequences_before_semantics() {
     let (url, server) = start_server(state).await;
     let mut socket = connect(&url).await;
     assert_eq!(
-        authenticate(&mut socket, &token, 8).await,
-        json!({"type":"authenticated", "protocolVersion":8})
+        authenticate(&mut socket, &token, 9).await,
+        json!({"type":"authenticated", "protocolVersion":9})
     );
 
     send_json(&mut socket, json!({"type":"createRoom", "sequence":1})).await;
@@ -124,7 +124,7 @@ async fn authenticates_and_consumes_fresh_sequences_before_semantics() {
     );
     send_json(
         &mut socket,
-        json!({"type":"authenticate", "protocolVersion":8, "token":token}),
+        json!({"type":"authenticate", "protocolVersion":9, "token":token}),
     )
     .await;
     assert_eq!(next_json(&mut socket).await["code"], "alreadyAuthenticated");
@@ -137,17 +137,17 @@ async fn version_precedes_claim_and_duplicate_cannot_revoke_owner() {
     let token = issue_token(&state);
     let (url, server) = start_server(state).await;
 
-    for version in [1, 2, 3, 4, 5, 6, 7] {
+    for version in [1, 2, 3, 4, 5, 6, 7, 8] {
         let mut wrong = connect(&url).await;
         assert_eq!(
             authenticate(&mut wrong, &token, version).await,
-            json!({"type":"incompatibleProtocol", "supportedVersion":8})
+            json!({"type":"incompatibleProtocol", "supportedVersion":9})
         );
     }
 
     let mut owner = connect(&url).await;
     assert_eq!(
-        authenticate(&mut owner, &token, 8).await["type"],
+        authenticate(&mut owner, &token, 9).await["type"],
         "authenticated"
     );
     let mut claimed_wrong_version = connect(&url).await;
@@ -157,7 +157,7 @@ async fn version_precedes_claim_and_duplicate_cannot_revoke_owner() {
     );
     let mut duplicate = connect(&url).await;
     assert_eq!(
-        authenticate(&mut duplicate, &token, 8).await["code"],
+        authenticate(&mut duplicate, &token, 9).await["code"],
         "connectionInUse"
     );
     send_json(&mut owner, json!({"type":"createRoom", "sequence":1})).await;
@@ -167,7 +167,7 @@ async fn version_precedes_claim_and_duplicate_cannot_revoke_owner() {
     tokio::task::yield_now().await;
     let mut consumed = connect(&url).await;
     assert_eq!(
-        authenticate(&mut consumed, &token, 8).await["code"],
+        authenticate(&mut consumed, &token, 9).await["code"],
         "authenticationFailed"
     );
     server.abort();
@@ -227,7 +227,7 @@ async fn control_frames_do_not_extend_authentication_deadline() {
 
     let mut fresh = connect(&url).await;
     assert_eq!(
-        authenticate(&mut fresh, &token, 8).await["type"],
+        authenticate(&mut fresh, &token, 9).await["type"],
         "authenticated"
     );
     server.abort();
@@ -287,7 +287,7 @@ async fn diagnostic_and_authenticated_game_sockets_share_capacity_both_direction
     wait_for_available_connection(&app_state).await;
     let mut game = connect(&game_url).await;
     assert_eq!(
-        authenticate(&mut game, &token, 8).await["type"],
+        authenticate(&mut game, &token, 9).await["type"],
         "authenticated"
     );
     assert_eq!(
@@ -312,7 +312,7 @@ async fn abrupt_authenticated_disconnect_releases_lease_and_connection_permit() 
     let (url, server) = start_server(app_state.clone()).await;
     let mut socket = connect(&url).await;
     assert_eq!(
-        authenticate(&mut socket, &token, 8).await["type"],
+        authenticate(&mut socket, &token, 9).await["type"],
         "authenticated"
     );
     assert_eq!(
@@ -329,7 +329,7 @@ async fn abrupt_authenticated_disconnect_releases_lease_and_connection_permit() 
     .await;
     let mut retry = connect(&url).await;
     assert_eq!(
-        authenticate(&mut retry, &token, 8).await["code"],
+        authenticate(&mut retry, &token, 9).await["code"],
         "authenticationFailed"
     );
     server.abort();

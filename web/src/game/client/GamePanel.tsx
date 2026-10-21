@@ -7,7 +7,7 @@ import type { AdmissionIntent, GameClientState } from './client'
 import { format, useGameCopy, type GameCopy } from './locale'
 import type {
   GameSettings, MatchInterruptReason, MatchResult, RoomPhase, RoundResult, Seat, VisibleActorView,
-} from '../v8/schema'
+} from '../v9/schema'
 import { useGameClient } from './useGameClient'
 import { ControlsDialog } from './ControlsDialog'
 import { bindingsSummary, keyLabel } from './controlLabels'

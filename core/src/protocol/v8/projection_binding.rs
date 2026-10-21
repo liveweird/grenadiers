@@ -13,8 +13,19 @@ pub fn bind_expanded(
     capture: &ExpandedCapture,
     generation: Option<GenerationRecord>,
 ) -> Result<BoundPublication, ProjectionError> {
-    validate_expanded_room(room)?;
-    let settings = super::expanded_settings(room.settings)?;
+    bind_expanded_for_items(room, state_epoch, capture, generation, expanded_items())
+}
+
+pub(crate) fn bind_expanded_for_items(
+    room: &RoomView,
+    state_epoch: Counter,
+    capture: &ExpandedCapture,
+    generation: Option<GenerationRecord>,
+    supported_items: ItemSet,
+) -> Result<BoundPublication, ProjectionError> {
+    validate_expanded_room_for_items(room, supported_items)?;
+    let settings =
+        super::projection_room::expanded_settings_for_items(room.settings, supported_items)?;
     let expected_rules = match room.rules_version {
         RulesVersion::ClassicV1 => RulesConfig::classic_v1(),
         RulesVersion::ClassicV2 => RulesConfig::classic_v2(),
@@ -24,7 +35,8 @@ pub fn bind_expanded(
     };
     if capture.rules != expected_rules
         || capture.world.0.rules_version != room.rules_version
-        || capture.world.0.available_items != available_items(room.rules_version)
+        || capture.world.0.available_items
+            != available_items_for(room.rules_version, supported_items)
         || capture.world.0.enabled_items != room.settings.enabled_items()
         || !generation_matches(room.rules_version, generation)
         || !canonical_gameplay(
@@ -43,18 +55,26 @@ pub fn bind_expanded(
     })
 }
 
-pub(super) fn validate_expanded_room(room: &RoomView) -> Result<(), ProjectionError> {
+pub(crate) fn validate_expanded_room(room: &RoomView) -> Result<(), ProjectionError> {
+    validate_expanded_room_for_items(room, expanded_items())
+}
+
+pub(crate) fn validate_expanded_room_for_items(
+    room: &RoomView,
+    supported_items: ItemSet,
+) -> Result<(), ProjectionError> {
     if room.map_id != expected_map(room.rules_version)
-        || room.available_items != available_items(room.rules_version)
+        || room.available_items != available_items_for(room.rules_version, supported_items)
         || !room
             .settings
             .enabled_items()
             .is_subset_of(room.available_items)
-        || super::expanded_settings(room.settings).is_err()
+        || super::projection_room::expanded_settings_for_items(room.settings, supported_items)
+            .is_err()
     {
         return Err(ProjectionError::InvalidExpandedBinding);
     }
-    super::projection_room_validation::validate_room_view(room)?;
+    super::projection_room_validation::validate_room_view(room, supported_items)?;
     Ok(())
 }
 
@@ -219,7 +239,7 @@ fn completed_binding(
     })
 }
 
-pub(super) fn phase_allows_null_body(phase: &RoomPhase) -> bool {
+pub(crate) fn phase_allows_null_body(phase: &RoomPhase) -> bool {
     matches!(
         phase,
         RoomPhase::Waiting | RoomPhase::Countdown { .. } | RoomPhase::Interrupted { .. }
@@ -234,7 +254,7 @@ pub(super) fn phase_allows_null_body(phase: &RoomPhase) -> bool {
     )
 }
 
-pub(super) fn expanded_items() -> ItemSet {
+pub(crate) fn expanded_items() -> ItemSet {
     ItemSet::new([
         ItemId::Heart,
         ItemId::RemoteBomb,
@@ -254,9 +274,9 @@ pub(super) fn expanded_items() -> ItemSet {
     .expect("expanded items are canonical")
 }
 
-pub(super) fn available_items(version: RulesVersion) -> ItemSet {
+pub(crate) fn available_items_for(version: RulesVersion, supported_items: ItemSet) -> ItemSet {
     if version == RulesVersion::ExpandedV5 {
-        expanded_items()
+        supported_items
     } else {
         ItemSet::empty()
     }

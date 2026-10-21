@@ -1,12 +1,12 @@
 mod client;
 mod identity;
 mod projection_admission;
-mod projection_binding;
+pub(crate) mod projection_binding;
 mod projection_capture;
 mod projection_facts;
 mod projection_items;
 mod projection_recipient;
-mod projection_room;
+pub(crate) mod projection_room;
 mod projection_room_settings;
 mod projection_room_validation;
 mod projection_validation;
@@ -78,5 +78,7 @@ mod frame_bound_tests;
 #[cfg(test)]
 #[path = "max_frame_tests.rs"]
 mod max_frame_tests;
+#[cfg(test)]
+mod settings_policy_tests;
 #[cfg(test)]
 mod tests;

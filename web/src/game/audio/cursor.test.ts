@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { GameClientState } from '../client/client'
-import type { EventKind, WireEvent } from '../v8/schema'
+import type { EventKind, WireEvent } from '../v9/schema'
 import { snapshot } from '../client/testSupport'
 import { AudioCursor } from './cursor'
 

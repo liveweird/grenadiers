@@ -1,11 +1,14 @@
 use super::{
-    ConnectionStatus, CountdownKind, MatchResult, MatchWinnerReason, ProjectionError, RoomPhase,
-    RoomView, SeatStatus,
+    ConnectionStatus, CountdownKind, ItemSet, MatchResult, MatchWinnerReason, ProjectionError,
+    RoomPhase, RoomView, SeatStatus,
 };
 use crate::protocol::{Seat, Tick, WireRoundResult};
 
-pub fn validate_room_view(room: &RoomView) -> Result<(), ProjectionError> {
-    super::projection_room_settings::validate_settings(room)?;
+pub(crate) fn validate_room_view(
+    room: &RoomView,
+    supported_items: ItemSet,
+) -> Result<(), ProjectionError> {
+    super::projection_room_settings::validate_settings(room, supported_items)?;
     if room.round_id.get() < room.round_number.get() {
         return Err(ProjectionError::InvalidExpandedBinding);
     }

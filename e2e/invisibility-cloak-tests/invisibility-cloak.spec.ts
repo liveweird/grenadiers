@@ -2,7 +2,7 @@ import { expect, test, type Page } from '@playwright/test'
 import { expectPaintedCanvas, latestSnapshot, observeGame, visibleActor, type ObservedGame } from '../tests/support/duel'
 import { moveTo } from '../tests/support/movement'
 import { admissionBaseline, disconnectTransport, installTransportProbe } from '../tests/support/reconnect'
-import type { GameServerMessage } from '../../web/src/game/v8/schema'
+import type { GameServerMessage } from '../../web/src/game/v9/schema'
 
 test.beforeAll(() => expect(process.env.E2E_INVISIBILITY_CLOAK_FIXTURE)
   .toBe('arena-v2-invisibility-cloak'))

@@ -9,6 +9,7 @@ const contracts = [
   ['../../api/gameplay-v6.schema.json', '../src/game/v6/schema.ts', 'api/gameplay-v6.schema.json'],
   ['../../api/gameplay-v7.schema.json', '../src/game/v7/schema.ts', 'api/gameplay-v7.schema.json'],
   ['../../api/gameplay-v8.schema.json', '../src/game/v8/schema.ts', 'api/gameplay-v8.schema.json'],
+  ['../../api/gameplay-v9.schema.json', '../src/game/v9/schema.ts', 'api/gameplay-v9.schema.json'],
 ]
 
 for (const [specPath, targetPath, sourceLabel] of contracts) {

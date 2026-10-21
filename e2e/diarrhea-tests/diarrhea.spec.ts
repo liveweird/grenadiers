@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test'
 import { latestSnapshot, observeGame, visibleActor, type ObservedGame } from '../tests/support/duel'
 import { moveTo } from '../tests/support/movement'
-import type { GameServerMessage } from '../../web/src/game/v8/schema'
+import type { GameServerMessage } from '../../web/src/game/v9/schema'
 
 test.beforeAll(() => expect(process.env.E2E_DIARRHEA_FIXTURE).toBe('arena-v2-diarrhea'))
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { snapshot } from '../client/testSupport'
+import { snapshot } from './testSupport'
 import { gameplayV8ServerSchemaValidator, validateGameplayV8ServerMessage } from './validation'
 
 describe('gameplay v8 validation and active profile', () => {

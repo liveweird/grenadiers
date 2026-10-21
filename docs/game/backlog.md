@@ -60,8 +60,18 @@ requested pickups remain outside these increments. Richer
 transitions and artwork remain follow-up work. See [pixel-art presentation](pixel-art.md),
 [expanded item implementation](expanded-items.md), and
 [release notes](https://github.com/liveweird/grenadiers/releases).
-Updated for the 2026-10-21 native acceptance checkpoint and its then-pending release gates. Release acceptance is recorded in
-[verification](../verification.md).
+At the 21 October 2026 18:44:23 UTC native acceptance checkpoint, v0.3.39 source `272b950` and
+image `9a4dc108` passed a fresh 51 Compose plus 51 Kubernetes matrix with zero retries or carried
+passes. Independent raw audit is clear; 2,320 payloads are sealed and the 2,321-file durable copy
+is byte-verified. The source stages the paired gameplay-v9 false-only freeze-status foundation
+without activating another pickup. It integrates accepted raw v0.3.38 source `04c070c5`, whose
+exact tree `d1dc83fc` is published as v0.3.38 from merge `3c210c23`; the accepted image `960976c9`
+is promoted locally. Fourteen of the 22 requested item types are published. At that checkpoint,
+v0.3.39 had not been normalized, pushed, merged, published or promoted; candidate, post-merge and
+tag CI remained pending. Earlier v0.3.39 source `30c051c`, failed v0.3.38 PR head `97a85d4`, and
+source `4d9a751` remain historical with zero carry. Full acceptance evidence is recorded in
+[verification](../verification.md); see the
+[release notes](https://github.com/liveweird/grenadiers/releases) for current release status.
 The [implementation plan](implementation-plan.md) remains the milestone/release reference;
 the [rules](rules.md) describe the current baseline and historical extension catalog.
 This document records the requested Grenadiers behavior and decisions required before coding.

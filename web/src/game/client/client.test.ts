@@ -5,7 +5,7 @@ import {
 } from './testSupport'
 import { gameplayUrl } from './client'
 
-describe('v8 admission and authoritative baselines', () => {
+describe('v9 admission and authoritative baselines', () => {
   beforeEach(() => {
     vi.stubGlobal('WebSocket', { OPEN: SocketStub.OPEN })
     localStorage.clear()
@@ -19,11 +19,11 @@ describe('v8 admission and authoritative baselines', () => {
       .toBe('ws://localhost:5177/api/v1/game/ws')
   })
 
-  it('authenticates with v8 and keeps the seat capability out of public state and storage', async () => {
+  it('authenticates with v9 and keeps the seat capability out of public state and storage', async () => {
     const value = harness()
     const socket = await authenticate(value, { type: 'join', roomCode: 'ABCDEFGH' })
     expect(messages(socket)).toEqual([
-      { type: 'authenticate', protocolVersion: 8, token: sessionToken },
+      { type: 'authenticate', protocolVersion: 9, token: sessionToken },
       { type: 'joinRoom', sequence: 1, roomCode: 'ABCDEFGH' },
     ])
     socket.message(admitted())
@@ -62,9 +62,9 @@ describe('v8 admission and authoritative baselines', () => {
     await vi.waitFor(() => expect(value.sockets).toHaveLength(2))
     const resumed = value.sockets[1]
     resumed.emit('open')
-    resumed.message({ type: 'authenticated', protocolVersion: 8 })
+    resumed.message({ type: 'authenticated', protocolVersion: 9 })
     expect(messages(resumed)).toEqual([
-      { type: 'authenticate', protocolVersion: 8, token: sessionToken },
+      { type: 'authenticate', protocolVersion: 9, token: sessionToken },
       { type: 'resumeRoom', sequence: 1, roomId, resumeToken },
     ])
     expect(messages(resumed).some((message) => message.type === 'manualAction')).toBe(false)
@@ -81,7 +81,7 @@ describe('v8 admission and authoritative baselines', () => {
     await vi.waitFor(() => expect(value.sockets).toHaveLength(2))
     const resumed = value.sockets[1]
     resumed.emit('open')
-    resumed.message({ type: 'authenticated', protocolVersion: 8 })
+    resumed.message({ type: 'authenticated', protocolVersion: 9 })
     resumed.message({ type: 'roomState', room: room(6, { type: 'running' }) })
     resumed.message(snapshot(7))
     expect(value.client.getState().snapshot).toBe(retained)
@@ -106,7 +106,7 @@ describe('v8 admission and authoritative baselines', () => {
   })
 })
 
-describe('v8 recovery lifecycle', () => {
+describe('v9 recovery lifecycle', () => {
   beforeEach(() => vi.stubGlobal('WebSocket', { OPEN: SocketStub.OPEN }))
 
   it('uses a fresh single-use HTTP session on every bounded reconnect attempt', async () => {
@@ -167,7 +167,7 @@ describe('v8 recovery lifecycle', () => {
     await vi.waitFor(() => expect(value.sockets).toHaveLength(2))
     const resumed = value.sockets[1]
     resumed.emit('open')
-    resumed.message({ type: 'authenticated', protocolVersion: 8 })
+    resumed.message({ type: 'authenticated', protocolVersion: 9 })
     stop(resumed)
     expect(value.client.getState()).toMatchObject({
       connection: 'disconnected', room: null, snapshot: null, youSeat: null,

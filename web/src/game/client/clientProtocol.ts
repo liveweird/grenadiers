@@ -1,5 +1,5 @@
-import type { Direction, GameServerMessage, GameSettings, RoomView, Seat, V8ErrorCode } from '../v8/schema'
-import { validateGameplayV8ServerMessage } from '../v8/validation'
+import type { Direction, GameServerMessage, GameSettings, RoomView, Seat, V9ErrorCode } from '../v9/schema'
+import { validateGameplayV9ServerMessage } from '../v9/validation'
 
 export const MAX_COUNTER = 2_147_483_647
 export const MAX_RECONNECT_ATTEMPTS = 3
@@ -25,7 +25,7 @@ export type PendingSettings = {
   settingsRevision: number
   settings: GameSettings
 }
-export type ControlFailure = ControlCommand & { code: V8ErrorCode }
+export type ControlFailure = ControlCommand & { code: V9ErrorCode }
 
 const TOKEN_PATTERN = /^[0-9a-f]{64}$/
 function unique<T>(values: readonly T[]): boolean {
@@ -57,7 +57,7 @@ function roomRecipientValid(message: GameServerMessage): boolean {
 }
 
 export function validateServerMessage(value: unknown, expectedSeat: Seat | null): value is GameServerMessage {
-  const result = validateGameplayV8ServerMessage(value)
+  const result = validateGameplayV9ServerMessage(value)
   return result.valid && roomRecipientValid(result.value) && stateRecipientValid(result.value, expectedSeat)
 }
 

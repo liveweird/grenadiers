@@ -1,6 +1,6 @@
 import { vi } from 'vitest'
 import { GameClient, type AdmissionIntent, type GameClientState } from './client'
-import type { Admitted, GameServerMessage, GameState, RoomPhase, RoomView, Snapshot } from '../v8/schema'
+import type { Admitted, GameServerMessage, GameState, RoomPhase, RoomView, Snapshot } from '../v9/schema'
 
 export const sessionToken = 'a'.repeat(64)
 export const resumeToken = 'c'.repeat(64)
@@ -60,7 +60,7 @@ export async function authenticate(value: Harness, intent: AdmissionIntent = { t
   await vi.waitFor(() => expect(value.sockets).toHaveLength(1))
   const socket = value.sockets.at(-1)!
   socket.emit('open')
-  socket.message({ type: 'authenticated', protocolVersion: 8 })
+  socket.message({ type: 'authenticated', protocolVersion: 9 })
   return socket
 }
 
@@ -92,13 +92,13 @@ function gameState(alive = true): GameState {
         type: 'visible',
         id: 1, seat: 'one' as const, position: { x: 512, y: 512 }, heading: 'east' as const,
         speedLevel: 0, alive, bombCapacity: 1, bombRange: 1, liveBombCount: 0,
-        inventory: { equipment: null, weapon: null }, effects: [], damageGraceRemainingTicks: 0,
+        inventory: { equipment: null, weapon: null }, effects: [], damageGraceRemainingTicks: 0, voluntaryActionsFrozen: false,
       },
       {
         type: 'visible',
         id: 2, seat: 'two' as const, position: { x: 14_848, y: 12_800 }, heading: 'west' as const,
         speedLevel: 0, alive: true, bombCapacity: 1, bombRange: 1, liveBombCount: 0,
-        inventory: { equipment: null, weapon: null }, effects: [], damageGraceRemainingTicks: 0,
+        inventory: { equipment: null, weapon: null }, effects: [], damageGraceRemainingTicks: 0, voluntaryActionsFrozen: false,
       },
     ],
     bombs: [], flames: [], pickups: [],

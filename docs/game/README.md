@@ -49,6 +49,9 @@ and remaining presentation work are planned extensions to the implemented Classi
 
 [Room settings](settings.md) covers shared starting speed, turn tolerance, match target and fuse.
 
+[Gameplay v9 compatibility](protocol-v9.md) defines the paired live wire foundation and its
+required, currently false visible-actor freeze field. [Gameplay v8](protocol-v8.md) is archived.
+
 [Pixel-art presentation](pixel-art.md) describes original artwork, animation and resource bounds.
 
 [Expanded item implementation](expanded-items.md) records the optional inventory, effects,

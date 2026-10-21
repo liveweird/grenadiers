@@ -128,6 +128,23 @@ describe('v10 arena presentation', () => {
     expect(Object.keys(presented.state.actors[0])).not.toContain('lastSuccessfulPunchTick')
   })
 
+  it('presents Bracelet statically while shove movement and hidden actors stay authoritative', () => {
+    const current = state()
+    const [holder, victim] = current.snapshot!.state.actors
+    if (holder.type !== 'visible' || victim.type !== 'visible') throw new Error('visible actors expected')
+    holder.inventory.equipment = 'bracelet'
+    victim.position = { x: 12_800, y: 12_800 }
+    current.snapshot!.state.pickups = [{ cell: { column: 3, row: 2 }, kind: 'bracelet' }]
+    const presented = presentSnapshot(current)!
+    expect(presented.state.actors[0]).toMatchObject({ braceletEquipped: true })
+    expect(presented.state.actors[1]).toMatchObject({ position: { x: 12_800, y: 12_800 } })
+    expect(presented.state.pickups).toEqual(current.snapshot!.state.pickups)
+    expect(Object.keys(presented.state.actors[0])).not.toContain('lastSuccessfulShoveTick')
+
+    current.snapshot!.state.actors[1] = { type: 'hidden', id: victim.id, seat: victim.seat, alive: true }
+    expect(presentSnapshot(current)!.state.actors.map(({ id }) => id)).toEqual([holder.id])
+  })
+
 })
 
 describe('Stopwatch presentation', () => {

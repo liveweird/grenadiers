@@ -50,6 +50,9 @@ mod kick_tests;
 mod punch_tests;
 
 #[cfg(test)]
+mod bracelet_tests;
+
+#[cfg(test)]
 mod reverse_controls_tests;
 
 #[cfg(test)]

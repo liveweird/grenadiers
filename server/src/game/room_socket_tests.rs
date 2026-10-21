@@ -218,7 +218,7 @@ async fn two_members_receive_personalized_admission_and_live_waiting_updates() {
         }),
     )
     .await;
-    assert_eq!(next(&mut one).await["code"], "invalidMessage");
+    assert_eq!(next(&mut one).await["code"], "invalidPhase");
     send(
         &mut one,
         json!({

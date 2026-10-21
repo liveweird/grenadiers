@@ -75,10 +75,7 @@ fn seed_31_ordinary_input_route_reveals_collects_and_punches_with_captured_fuse(
     move_cells(&mut game, Direction::North, 1);
     move_cells(&mut game, Direction::East, 2);
     assert_eq!(game.actors[0].position, Position::center(pickup));
-    assert_eq!(
-        game.actors[0].inventory.equipment(),
-        Some(Equipment::Punch)
-    );
+    assert_eq!(game.actors[0].inventory.equipment(), Some(Equipment::Punch));
 
     game.step(&input(InputAction::PlaceBomb)).unwrap();
     move_cells(&mut game, Direction::West, 2);

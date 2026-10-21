@@ -1,10 +1,10 @@
-use std::collections::BTreeSet;
+use std::collections::{BTreeMap, BTreeSet};
 
 use super::super::{ActorInit, InputAction, SeatInput, State, StepError};
 use crate::game::arena::{ARENA_CELL_COUNT, ARENA_HEIGHT, ARENA_WIDTH, Arena, Terrain};
 use crate::game::{
-    Bomb, BombTrigger, CellId, Direction, EffectKind, EnabledItems, EntityId, Equipment, Position,
-    RulesConfig, SeatId, SpeedLevel, Tick, World,
+    Bomb, BombTrigger, CellId, Direction, EffectKind, EnabledItems, EntityId, Equipment,
+    PickupKind, Position, RulesConfig, SeatId, SpeedLevel, Tick, World,
 };
 use crate::room::RoomSettings;
 
@@ -22,12 +22,7 @@ fn arena_with_blocks(blocks: BTreeSet<CellId>) -> Arena {
             }
         }
     }
-    Arena::new(
-        terrain,
-        blocks,
-        [CellId::new(1, 1), CellId::new(13, 11)],
-    )
-    .unwrap()
+    Arena::new(terrain, blocks, [CellId::new(1, 1), CellId::new(13, 11)]).unwrap()
 }
 
 fn state(position: Position, heading: Direction, enabled: EnabledItems) -> State {
@@ -83,26 +78,10 @@ fn every_direction_uses_the_fractional_actor_center_cell_and_signed_wrapped_stri
         y: Position::center(center).y - 97,
     };
     for (heading, source, landing) in [
-        (
-            Direction::North,
-            CellId::new(6, 5),
-            CellId::new(6, 2),
-        ),
-        (
-            Direction::East,
-            CellId::new(7, 6),
-            CellId::new(10, 6),
-        ),
-        (
-            Direction::South,
-            CellId::new(6, 7),
-            CellId::new(6, 10),
-        ),
-        (
-            Direction::West,
-            CellId::new(5, 6),
-            CellId::new(2, 6),
-        ),
+        (Direction::North, CellId::new(6, 5), CellId::new(6, 2)),
+        (Direction::East, CellId::new(7, 6), CellId::new(10, 6)),
+        (Direction::South, CellId::new(6, 7), CellId::new(6, 10)),
+        (Direction::West, CellId::new(5, 6), CellId::new(2, 6)),
     ] {
         let mut state = state(fractional, heading, EnabledItems::PUNCH);
         state.replace_actor_equipment(SeatId::One, Equipment::Punch);
@@ -144,10 +123,9 @@ fn movement_updates_authoritative_heading_before_equipment_resolution() {
 
 #[test]
 fn reverse_controls_changes_movement_heading_once_and_equipment_does_not_invert_again() {
-    let enabled = EnabledItems::from_bits(
-        EnabledItems::PUNCH.bits() | EnabledItems::REVERSE_CONTROLS.bits(),
-    )
-    .unwrap();
+    let enabled =
+        EnabledItems::from_bits(EnabledItems::PUNCH.bits() | EnabledItems::REVERSE_CONTROLS.bits())
+            .unwrap();
     let mut state = state(
         Position::center(CellId::new(5, 5)),
         Direction::East,
@@ -179,10 +157,8 @@ fn wrong_gear_and_stopwatch_freeze_are_gameplay_no_ops() {
     let cases = [
         (EnabledItems::PUNCH, Some(Equipment::Kick), false),
         (
-            EnabledItems::from_bits(
-                EnabledItems::PUNCH.bits() | EnabledItems::STOPWATCH.bits(),
-            )
-            .unwrap(),
+            EnabledItems::from_bits(EnabledItems::PUNCH.bits() | EnabledItems::STOPWATCH.bits())
+                .unwrap(),
             Some(Equipment::Punch),
             true,
         ),
@@ -257,8 +233,7 @@ fn exhausting_the_stride_cycle_and_returning_to_source_fails_unchanged() {
         Direction::East,
         EnabledItems::PUNCH,
     );
-    let blocked = [1, 2, 3, 6, 7, 8, 9, 10, 11, 12, 13]
-        .map(|column| CellId::new(column, 5));
+    let blocked = [1, 2, 3, 6, 7, 8, 9, 10, 11, 12, 13].map(|column| CellId::new(column, 5));
     state.world.arena = arena_with_blocks(BTreeSet::from(blocked));
     state.replace_actor_equipment(SeatId::One, Equipment::Punch);
     state
@@ -296,7 +271,8 @@ fn positive_living_footprint_overlap_skips_a_landing_candidate() {
     );
     let candidate = Position::center(CellId::new(8, 5));
     state.actors[1].position = Position {
-        x: candidate.x + crate::game::types::UNITS_PER_CELL / 2
+        x: candidate.x
+            + crate::game::types::UNITS_PER_CELL / 2
             + crate::game::types::HALF_FOOTPRINT
             - 1,
         y: candidate.y,
@@ -310,4 +286,27 @@ fn positive_living_footprint_overlap_skips_a_landing_candidate() {
     state.step(&[equipment()]).unwrap();
 
     assert_eq!(state.world.bombs[&EntityId(9)].cell(), CellId::new(1, 5));
+}
+
+#[test]
+fn punch_pickup_replaces_equipment_after_actions() {
+    let cell = CellId::new(4, 5);
+    let enabled =
+        EnabledItems::from_bits(EnabledItems::PUNCH.bits() | EnabledItems::KICK.bits()).unwrap();
+    let mut state = state(Position::center(cell), Direction::East, enabled);
+    state.world.pickups.exposed =
+        BTreeMap::from([(cell, crate::game::Pickup::new(PickupKind::Punch))]);
+    state.replace_actor_equipment(SeatId::One, Equipment::Kick);
+    state
+        .world
+        .bombs
+        .insert(EntityId(9), bomb(CellId::new(5, 5)));
+
+    state.step(&[equipment()]).unwrap();
+
+    assert_eq!(state.world.bombs[&EntityId(9)].cell(), CellId::new(5, 5));
+    assert_eq!(
+        state.actors[0].inventory().equipment(),
+        Some(Equipment::Punch)
+    );
 }

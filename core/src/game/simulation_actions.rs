@@ -53,10 +53,6 @@ impl ManualActionQueue {
     pub(super) fn as_slice(&self) -> &[ManualAction] {
         &self.actions[..self.len]
     }
-
-    fn first(&self) -> Option<ManualAction> {
-        self.as_slice().first().copied()
-    }
 }
 
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
@@ -127,7 +123,7 @@ impl State {
             let actor = &self.actors[seat.index()];
             if actor.alive && first_bombs[seat.index()].is_some() {
                 if self.world.bombs.values().any(|bomb| {
-                    (bomb.owner() == actor.id && matches!(bomb.trigger(), BombTrigger::Remote))
+                    bomb.owner() == actor.id && matches!(bomb.trigger(), BombTrigger::Remote)
                 }) {
                     return None;
                 }
@@ -157,6 +153,7 @@ impl State {
             for seat in SeatId::ALL {
                 if wave[seat.index()] != Some(ManualAction::PlaceBomb)
                     || first_bombs[seat.index()] != Some(ordinal)
+                    || !self.actors[seat.index()].alive
                 {
                     continue;
                 }

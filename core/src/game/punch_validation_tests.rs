@@ -1,9 +1,7 @@
 use std::collections::BTreeSet;
 
-use super::super::{
-    ActorInit, InputAction, RoundResult, SeatInput, State, StateError, StepError,
-    MAX_INPUTS_PER_TICK,
-};
+use super::super::{ActorInit, InputAction, RoundResult, SeatInput, State, StateError, StepError};
+use super::MAX_INPUTS_PER_TICK;
 use crate::game::arena::{ARENA_CELL_COUNT, ARENA_HEIGHT, ARENA_WIDTH, Arena, Terrain};
 use crate::game::{
     Bomb, BombTrigger, CellId, Direction, EnabledItems, EntityId, Position, RulesConfig, SeatId,
@@ -74,9 +72,8 @@ fn unsupported_punch_history_is_validated_before_terminal_short_circuit() {
         Err(StateError::UnsupportedBombPunchHistory(EntityId(9)))
     );
 
-    let rules = RulesConfig::expanded_v5(
-        RoomSettings::DEFAULT.with_enabled_items(EnabledItems::PUNCH),
-    );
+    let rules =
+        RulesConfig::expanded_v5(RoomSettings::DEFAULT.with_enabled_items(EnabledItems::PUNCH));
     let mut world = World::new(arena());
     let bomb = punched_bomb();
     world.bombs.insert(bomb.id(), bomb);

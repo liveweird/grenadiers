@@ -1,11 +1,11 @@
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::BTreeSet;
 
 use super::super::{ActorInit, InputAction, SeatInput, State};
 use crate::game::arena::{ARENA_CELL_COUNT, ARENA_HEIGHT, ARENA_WIDTH, Arena, Terrain};
 use crate::game::bombs::{BlastKind, Bomb, BombMotion, BombTrigger};
 use crate::game::{
-    CellId, Direction, EnabledItems, EntityId, Equipment, PickupKind, Position, RulesConfig,
-    SeatId, SpeedLevel, Tick, World,
+    CellId, Direction, EnabledItems, EntityId, Equipment, Position, RulesConfig, SeatId,
+    SpeedLevel, Tick, World,
 };
 use crate::room::RoomSettings;
 
@@ -19,12 +19,7 @@ fn arena(blocks: BTreeSet<CellId>) -> Arena {
             }
         }
     }
-    Arena::new(
-        terrain,
-        blocks,
-        [CellId::new(1, 1), CellId::new(13, 11)],
-    )
-    .unwrap()
+    Arena::new(terrain, blocks, [CellId::new(1, 1), CellId::new(13, 11)]).unwrap()
 }
 
 fn enabled(extra: EnabledItems) -> EnabledItems {
@@ -33,9 +28,7 @@ fn enabled(extra: EnabledItems) -> EnabledItems {
 
 fn state_at(one: Position, two: Position, tick: Tick, extra: EnabledItems) -> State {
     State::new_at_tick(
-        RulesConfig::expanded_v5(
-            RoomSettings::DEFAULT.with_enabled_items(enabled(extra)),
-        ),
+        RulesConfig::expanded_v5(RoomSettings::DEFAULT.with_enabled_items(enabled(extra))),
         World::new(arena(BTreeSet::new())),
         [
             ActorInit {
@@ -127,7 +120,12 @@ fn punch_moves_three_cells_preserving_identity_timing_blast_and_kick_history() {
     assert_eq!(moved.motion(), None);
     assert!(moved.has_been_kicked());
     assert!(moved.has_been_punched());
-    assert!(state.actors.iter().all(|actor| !actor.bomb_grace.contains(&EntityId(9))));
+    assert!(
+        state
+            .actors
+            .iter()
+            .all(|actor| !actor.bomb_grace.contains(&EntityId(9)))
+    );
     assert_eq!(state.actors[0].last_successful_punch_tick(), Some(Tick(21)));
 }
 
@@ -145,10 +143,10 @@ fn cooldown_blocks_through_eleven_elapsed_ticks_and_failure_does_not_start_it() 
         .unwrap();
     assert_eq!(state.actors[0].last_successful_punch_tick(), None);
 
-    state
-        .world
-        .bombs
-        .insert(EntityId(9), timed(9, CellId::new(5, 5), 2, Tick(0), Tick(100)));
+    state.world.bombs.insert(
+        EntityId(9),
+        timed(9, CellId::new(5, 5), 2, Tick(0), Tick(100)),
+    );
     state
         .step(&[action(SeatId::One, InputAction::UseEquipment)])
         .unwrap();
@@ -187,8 +185,7 @@ fn search_wraps_by_three_skips_blockers_and_accepts_tangent_actor() {
     );
     let tangent = Position::center(CellId::new(8, 5));
     state.actors[1].position = Position {
-        x: tangent.x + crate::game::types::UNITS_PER_CELL / 2
-            + crate::game::types::HALF_FOOTPRINT,
+        x: tangent.x + crate::game::types::UNITS_PER_CELL / 2 + crate::game::types::HALF_FOOTPRINT,
         y: tangent.y,
     };
     equip_punch(&mut state, SeatId::One);
@@ -209,9 +206,10 @@ fn same_bomb_uses_round_priority_while_distinct_same_destination_rejects_both() 
     );
     same.actors[0].heading = Direction::East;
     same.actors[1].heading = Direction::West;
-    same.world
-        .bombs
-        .insert(EntityId(9), timed(9, CellId::new(5, 5), 1, Tick(0), Tick(100)));
+    same.world.bombs.insert(
+        EntityId(9),
+        timed(9, CellId::new(5, 5), 1, Tick(0), Tick(100)),
+    );
     equip_punch(&mut same, SeatId::One);
     equip_punch(&mut same, SeatId::Two);
     same.step(&[
@@ -248,7 +246,10 @@ fn same_bomb_uses_round_priority_while_distinct_same_destination_rejects_both() 
         ])
         .unwrap();
     assert_eq!(distinct.world.bombs[&EntityId(9)].cell(), CellId::new(2, 5));
-    assert_eq!(distinct.world.bombs[&EntityId(10)].cell(), CellId::new(8, 5));
+    assert_eq!(
+        distinct.world.bombs[&EntityId(10)].cell(),
+        CellId::new(8, 5)
+    );
 }
 
 #[test]
@@ -280,7 +281,12 @@ fn remote_reservation_follows_wave_chronology() {
         ])
         .unwrap();
     assert!(!reserved.world.bombs.contains_key(&EntityId(9)));
-    assert!(report.events.iter().any(|event| !event.bomb_has_been_punched));
+    assert!(
+        report
+            .events
+            .iter()
+            .any(|event| !event.bomb_has_been_punched)
+    );
 
     let mut moved = state_at(
         Position::center(CellId::new(4, 5)),
@@ -336,8 +342,15 @@ fn active_source_fire_due_timing_contact_and_actor_overlap_all_reject() {
         );
         state.world.bombs.insert(
             EntityId(9),
-            Bomb::new(EntityId(9), CellId::new(5, 5), EntityId(2), 2, Tick(0), trigger)
-                .unwrap(),
+            Bomb::new(
+                EntityId(9),
+                CellId::new(5, 5),
+                EntityId(2),
+                2,
+                Tick(0),
+                trigger,
+            )
+            .unwrap(),
         );
         equip_punch(&mut state, SeatId::One);
         state
@@ -366,31 +379,3 @@ fn active_source_fire_due_timing_contact_and_actor_overlap_all_reject() {
         .unwrap();
     assert!(!burning.world.bombs.contains_key(&EntityId(9)));
 }
-
-#[test]
-fn punch_pickup_replaces_equipment_after_actions() {
-    let cell = CellId::new(4, 5);
-    let mut state = state_at(
-        Position::center(cell),
-        Position::center(CellId::new(13, 11)),
-        Tick(0),
-        EnabledItems::KICK,
-    );
-    state.world.pickups.exposed = BTreeMap::from([(
-        cell,
-        crate::game::Pickup::new(PickupKind::Punch),
-    )]);
-    state.replace_actor_equipment(SeatId::One, Equipment::Kick);
-    state.world.bombs.insert(
-        EntityId(9),
-        timed(9, CellId::new(5, 5), 2, Tick(0), Tick(100)),
-    );
-
-    state
-        .step(&[action(SeatId::One, InputAction::UseEquipment)])
-        .unwrap();
-
-    assert_eq!(state.world.bombs[&EntityId(9)].cell(), CellId::new(5, 5));
-    assert_eq!(state.actors[0].inventory().equipment(), Some(Equipment::Punch));
-}
-

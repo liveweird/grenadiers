@@ -3,8 +3,8 @@ use std::collections::{BTreeMap, BTreeSet};
 use super::super::{ActorInit, InputAction, SeatInput, State, StepError};
 use crate::game::arena::{ARENA_CELL_COUNT, ARENA_HEIGHT, ARENA_WIDTH, Arena, Terrain};
 use crate::game::{
-    Bomb, BombTrigger, CellId, Direction, EffectKind, EnabledItems, EntityId, Equipment, PickupKind,
-    Position, RulesConfig, SeatId, SpeedLevel, Tick, World,
+    Bomb, BombTrigger, CellId, Direction, EffectKind, EnabledItems, EntityId, Equipment,
+    PickupKind, Position, RulesConfig, SeatId, SpeedLevel, Tick, World,
 };
 use crate::room::RoomSettings;
 

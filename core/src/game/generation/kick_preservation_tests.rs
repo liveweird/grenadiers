@@ -145,10 +145,7 @@ fn complete_catalog_pool_is_395_with_kick_at_380_through_394() {
         (394, PickupKind::Kick),
     ] {
         let mut source = CountingSequence::one(value);
-        assert_eq!(
-            sample_pickup(&mut source, kick_all),
-            Some(expected)
-        );
+        assert_eq!(sample_pickup(&mut source, kick_all), Some(expected));
         assert_eq!(source.draws, 1);
     }
 }

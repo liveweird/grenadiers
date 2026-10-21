@@ -1,7 +1,7 @@
-use super::geometry::MovementTrace;
-use super::input::Direction;
-use super::types::{EntityId, Position, SeatId, SpeedLevel, Tick};
-use super::{EffectKind, StepEvent};
+use crate::game::geometry::MovementTrace;
+use crate::game::input::Direction;
+use crate::game::types::{CellId, EntityId, Position, SeatId, SpeedLevel, Tick};
+use crate::game::{EffectKind, EnabledItems, PickupKind, StepEvent};
 
 pub const MAX_INPUTS_PER_TICK: usize = 64;
 
@@ -35,8 +35,8 @@ pub enum StateError {
     DuplicateSeat(SeatId),
     IllegalActorPosition(EntityId),
     DuplicateEntityId(EntityId),
-    IllegalBombCell(super::CellId),
-    OccupiedBombCell(super::CellId),
+    IllegalBombCell(CellId),
+    OccupiedBombCell(CellId),
     UnknownBombOwner(EntityId),
     BombIdMismatch { key: EntityId, id: EntityId },
     UnsupportedBombTrigger(EntityId),
@@ -44,11 +44,8 @@ pub enum StateError {
     DuplicateRemoteOwner(EntityId),
     UnsupportedBombKickHistory(EntityId),
     UnsupportedBombPunchHistory(EntityId),
-    UnsupportedEnabledItems(super::EnabledItems),
-    UnsupportedPickup {
-        cell: super::CellId,
-        kind: super::PickupKind,
-    },
+    UnsupportedEnabledItems(EnabledItems),
+    UnsupportedPickup { cell: CellId, kind: PickupKind },
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

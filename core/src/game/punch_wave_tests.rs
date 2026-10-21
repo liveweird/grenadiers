@@ -73,11 +73,7 @@ fn equipment_padding_cannot_defeat_whole_update_shared_cell_placement_fairness()
 
 #[test]
 fn an_earlier_wave_placement_can_be_punched_by_a_later_wave() {
-    let mut state = state(
-        CellId::new(1, 1),
-        CellId::new(2, 1),
-        EnabledItems::PUNCH,
-    );
+    let mut state = state(CellId::new(1, 1), CellId::new(2, 1), EnabledItems::PUNCH);
     state.replace_actor_equipment(SeatId::Two, Equipment::Punch);
 
     state
@@ -95,11 +91,7 @@ fn an_earlier_wave_placement_can_be_punched_by_a_later_wave() {
 
 #[test]
 fn later_wave_cannot_rescue_a_bomb_punched_onto_existing_fire() {
-    let mut state = state(
-        CellId::new(1, 5),
-        CellId::new(4, 5),
-        EnabledItems::PUNCH,
-    );
+    let mut state = state(CellId::new(1, 5), CellId::new(4, 5), EnabledItems::PUNCH);
     state.replace_actor_equipment(SeatId::One, Equipment::Punch);
     state.replace_actor_equipment(SeatId::Two, Equipment::Punch);
     state.actors[1].heading = Direction::East;
@@ -141,11 +133,7 @@ fn later_wave_cannot_rescue_a_bomb_punched_onto_existing_fire() {
 
 #[test]
 fn only_first_bomb_command_has_gameplay_effect_but_failed_equipment_can_retry() {
-    let mut state = state(
-        CellId::new(1, 1),
-        CellId::new(13, 11),
-        EnabledItems::PUNCH,
-    );
+    let mut state = state(CellId::new(1, 1), CellId::new(13, 11), EnabledItems::PUNCH);
     state.replace_actor_equipment(SeatId::One, Equipment::Punch);
     state.world.bombs.insert(
         EntityId(9),

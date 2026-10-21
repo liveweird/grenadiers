@@ -1,14 +1,14 @@
 use std::collections::{BTreeMap, BTreeSet};
 use std::fmt;
 
-use rand_chacha::ChaCha20Rng;
-use rand_chacha::rand_core::{RngCore, SeedableRng};
-
 use super::arena::{ARENA_HEIGHT, ARENA_WIDTH, Arena, Terrain};
 use super::enabled_items::EnabledItems;
 use super::fixtures::{classic_spawns, classic_terrain};
 use super::pickups::PickupKind;
 use super::types::CellId;
+use random_words::{ChaChaWords, RandomWords};
+
+mod random_words;
 
 pub const GENERATOR_VERSION: u16 = 1;
 pub const EXPANDED_GENERATOR_VERSION: u16 = 2;
@@ -92,30 +92,17 @@ impl fmt::Debug for GeneratedArena {
 
 #[must_use]
 pub fn generate_arena(seed: [u8; 32]) -> GeneratedArena {
-    let mut rng = ChaCha20Rng::from_seed(seed);
-    rng.set_stream(0);
-    rng.set_word_pos(0);
-    generate_with_source(seed, &mut ChaChaWords(rng), classic_terrain())
+    generate_with_source(seed, &mut ChaChaWords::seeded(seed), classic_terrain())
 }
 
 #[must_use]
 pub fn generate_expanded_arena(seed: [u8; 32], enabled: EnabledItems) -> GeneratedArena {
-    let mut rng = ChaCha20Rng::from_seed(seed);
-    rng.set_stream(0);
-    rng.set_word_pos(0);
-    generate_expanded_with_source(seed, &mut ChaChaWords(rng), classic_terrain(), enabled)
-}
-
-trait RandomWords {
-    fn next_u32(&mut self) -> Option<u32>;
-}
-
-struct ChaChaWords(ChaCha20Rng);
-
-impl RandomWords for ChaChaWords {
-    fn next_u32(&mut self) -> Option<u32> {
-        Some(self.0.next_u32())
-    }
+    generate_expanded_with_source(
+        seed,
+        &mut ChaChaWords::seeded(seed),
+        classic_terrain(),
+        enabled,
+    )
 }
 
 fn generate_with_source(
@@ -379,8 +366,6 @@ mod piercing_bomb_tests;
 #[cfg(test)]
 #[path = "power_bomb_generation_tests.rs"]
 mod power_bomb_tests;
-#[cfg(test)]
-mod punch_tests;
 #[cfg(test)]
 #[path = "remote_bomb_generation_tests.rs"]
 mod remote_bomb_tests;

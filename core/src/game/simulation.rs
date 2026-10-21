@@ -3,6 +3,7 @@ use std::collections::BTreeSet;
 use super::assignment::RoundAssignment;
 use super::damage::DamageGrace;
 use super::effects::{EffectiveSpeed, TimedEffects};
+use super::geometry::MovementTrace;
 use super::input::{Direction, HeldDirections};
 use super::inventory::Inventory;
 use super::movement;
@@ -278,8 +279,6 @@ mod landmine_tests;
 mod observations;
 #[path = "simulation_pickups.rs"]
 mod pickup_step;
-#[path = "simulation_punch.rs"]
-mod punch;
 #[cfg(test)]
 #[path = "pickup_tests.rs"]
 mod pickup_tests;
@@ -289,15 +288,17 @@ mod placement_tests;
 #[cfg(test)]
 #[path = "projection_tests.rs"]
 mod projection_tests;
-#[cfg(test)]
-#[path = "punch_tests.rs"]
-mod punch_tests;
+#[path = "simulation_punch.rs"]
+mod punch;
 #[cfg(test)]
 #[path = "punch_rollback_tests.rs"]
 mod punch_rollback_tests;
 #[cfg(test)]
 #[path = "punch_target_tests.rs"]
 mod punch_target_tests;
+#[cfg(test)]
+#[path = "punch_tests.rs"]
+mod punch_tests;
 #[cfg(test)]
 #[path = "punch_validation_tests.rs"]
 mod punch_validation_tests;

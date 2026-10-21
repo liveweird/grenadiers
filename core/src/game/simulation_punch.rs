@@ -56,9 +56,11 @@ impl State {
         remote_reservations: &BTreeSet<EntityId>,
     ) -> Option<PunchClaim> {
         let actor = &self.actors[seat.index()];
-        let ready = actor
-            .last_successful_punch_tick
-            .is_none_or(|last| tick.0.checked_sub(last.0).is_some_and(|elapsed| elapsed >= PUNCH_COOLDOWN_TICKS));
+        let ready = actor.last_successful_punch_tick.is_none_or(|last| {
+            tick.0
+                .checked_sub(last.0)
+                .is_some_and(|elapsed| elapsed >= PUNCH_COOLDOWN_TICKS)
+        });
         if !actor.alive
             || !self.rules.enabled_items().contains_punch()
             || !actor.inventory.can_punch()
@@ -79,7 +81,8 @@ impl State {
             .hazards
             .get(&source)
             .is_some_and(|expiry| *expiry > tick);
-        let due = matches!(bomb.trigger(), BombTrigger::Timed { detonates_at } if detonates_at <= tick);
+        let due =
+            matches!(bomb.trigger(), BombTrigger::Timed { detonates_at } if detonates_at <= tick);
         if matches!(bomb.trigger(), BombTrigger::Contact)
             || source_burning
             || due
@@ -95,12 +98,7 @@ impl State {
         })
     }
 
-    fn punch_landing(
-        &self,
-        id: EntityId,
-        source: CellId,
-        direction: Direction,
-    ) -> Option<CellId> {
+    fn punch_landing(&self, id: EntityId, source: CellId, direction: Direction) -> Option<CellId> {
         let (coordinate, length, delta) = match direction {
             Direction::East => (source.column, ARENA_WIDTH - 2, 3_i32),
             Direction::West => (source.column, ARENA_WIDTH - 2, -3_i32),

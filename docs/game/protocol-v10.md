@@ -1,4 +1,4 @@
-# Gameplay v10: authoritative teleport position epochs
+# Gameplay v10: Teleporter epochs, Wall Pass, Kick and Punch
 
 The coordinated live contract is `api/gameplay-v10.schema.json`, Rust `core::protocol::v10`, and
 generated `web/src/game/v10/schema.ts`. Deploy the paired server and browser assets together.
@@ -7,9 +7,9 @@ revoke a credential for a v10 connection.
 
 V10 retains Expanded-v5 rules, generated-v2 arenas, journal format 2, all v9 commands, room fields,
 bombs, events, inventory, privacy and voluntary-action freeze semantics. Its independent catalog
-adds Teleporter as the seventeenth item and accepts all 131,072 masks. Archived v9 remains pinned
-to its sixteen-item catalog and rejects Teleporter in settings, pickups and event-only history even
-when the live enabled mask omits it.
+adds Teleporter, Wall Pass, Kick and Punch through the twentieth item and accepts all 1,048,576
+masks. Archived v9 remains pinned to its sixteen-item catalog and rejects every newer item in
+settings, equipment, pickups and event-only history even when the live enabled mask omits it.
 
 Every visible actor adds required nullable `lastTeleportTick`. A successful atomic Teleporter swap
 sets the same marker on both actors. The marker must be after the physical round start and no later
@@ -18,7 +18,11 @@ death and results until a new round state is constructed. A hidden actor remains
 `{type,id,seat,alive}`; its position, loadout, effects and marker remain private.
 
 The server validates the complete canonical world, bounds, enabled catalog and history before
-recipient filtering, including an audience of neither seat. It prepares both bounded recipient
+recipient filtering, including an audience of neither seat. Kick bomb motion, Punch cooldown and
+both retained bomb histories are canonical private trusted state. Wall Pass exit grace allows each live or dead actor to retain
+at most four in-bounds soft-block cells that its footprint still positively overlaps. No grace
+count, Kick direction, countdown, Punch cooldown, history flag, timer or marker appears on the wire. It
+prepares both bounded recipient
 frames before publication state or revision commits, and admissions remain event-free. Replay
 checks both perspectives, state, reports and markers. A client accepts a newer marker only after
 the ordinary round/revision/tick freshness checks, then snaps both authoritative positions without

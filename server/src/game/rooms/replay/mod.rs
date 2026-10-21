@@ -44,6 +44,12 @@ mod invisibility_cloak_tests;
 mod invisible_bombs_tests;
 
 #[cfg(test)]
+mod kick_tests;
+
+#[cfg(test)]
+mod punch_tests;
+
+#[cfg(test)]
 mod reverse_controls_tests;
 
 #[cfg(test)]

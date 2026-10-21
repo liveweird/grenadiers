@@ -92,6 +92,7 @@ impl MatchRuntime {
             },
             MatchAction::Movement(value) => ReplayAction::Movement(value),
             MatchAction::Bomb(value) => ReplayAction::Bomb(value),
+            MatchAction::Equipment(value) => ReplayAction::Equipment(value),
             MatchAction::Rematch(value) => ReplayAction::Rematch(value),
         };
         self.capture(

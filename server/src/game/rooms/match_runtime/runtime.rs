@@ -8,12 +8,13 @@ use grenadiers_core::{
 
 use super::super::{input::InputMailbox, types::RoomIdentity};
 use super::SeatFrames;
-use super::error::{MatchRuntimeError, map_input_error, map_lifecycle_error};
+use super::error::{MatchRuntimeError, map_lifecycle_error};
 use super::publication;
 use crate::round_seed::RoundSeedSource;
 
 pub(super) mod admission;
 mod capture;
+mod input_action;
 mod maintenance;
 mod owner_helpers;
 #[cfg(test)]
@@ -36,6 +37,7 @@ pub(crate) enum MatchAction {
     },
     Movement(Option<Direction>),
     Bomb(u32),
+    Equipment(u32),
     Rematch(bool),
 }
 
@@ -95,48 +97,6 @@ impl MatchRuntime {
         let notice = self.publish_view()?;
         self.capture(tick, super::super::replay::Operation::Occupy(seat));
         Ok(notice)
-    }
-
-    pub(in crate::game::rooms) fn action(
-        &mut self,
-        seat: SeatId,
-        expected_epoch: u64,
-        action: MatchAction,
-    ) -> Result<Option<MatchNotice>, MatchRuntimeError> {
-        self.validate_actor(seat, expected_epoch)?;
-        if matches!(action, MatchAction::Bomb(id) if grenadiers_core::protocol::Counter::new(id).is_err())
-        {
-            return Err(MatchRuntimeError::DuplicateAction);
-        }
-        let tick = self.lifecycle.tick();
-        let result = match action {
-            MatchAction::Ready(ready) => self.ready(seat, ready),
-            MatchAction::ReadyChecked {
-                ready,
-                settings_revision,
-            } => self.ready_checked(seat, ready, settings_revision),
-            MatchAction::UpdateSettings {
-                settings_revision,
-                settings,
-            } => self.update_settings(seat, settings_revision, settings),
-            MatchAction::Movement(direction) => {
-                self.require_running()?;
-                self.inputs
-                    .movement(seat, direction, self.lifecycle.tick())
-                    .map_err(map_input_error)?;
-                Ok(None)
-            }
-            MatchAction::Bomb(action_id) => {
-                self.require_running()?;
-                self.inputs.bomb(seat, action_id).map_err(map_input_error)?;
-                Ok(None)
-            }
-            MatchAction::Rematch(ready) => self.rematch(seat, ready),
-        };
-        if result.is_ok() {
-            self.capture_action(tick, seat, expected_epoch, action);
-        }
-        result
     }
 
     #[cfg(test)]

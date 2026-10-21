@@ -1,12 +1,13 @@
-export const controlActions = ['north', 'east', 'south', 'west', 'bomb'] as const
+export const controlActions = ['north', 'east', 'south', 'west', 'bomb', 'equipment'] as const
 export type ControlAction = typeof controlActions[number]
 export type KeyboardBindings = Readonly<Record<ControlAction, readonly string[]>>
 
-const allowedCodes = new Set([
+export const supportedControlCodes = [
   'ArrowUp', 'ArrowRight', 'ArrowDown', 'ArrowLeft', 'Space', 'Enter',
   ...Array.from({ length: 26 }, (_, index) => `Key${String.fromCharCode(65 + index)}`),
   ...Array.from({ length: 10 }, (_, index) => `Digit${index}`),
-])
+] as const
+const allowedCodes = new Set<string>(supportedControlCodes)
 
 export const defaultKeyboardBindings: KeyboardBindings = Object.freeze({
   north: Object.freeze(['ArrowUp', 'KeyW']),
@@ -14,6 +15,7 @@ export const defaultKeyboardBindings: KeyboardBindings = Object.freeze({
   south: Object.freeze(['ArrowDown', 'KeyS']),
   west: Object.freeze(['ArrowLeft', 'KeyA']),
   bomb: Object.freeze(['Space']),
+  equipment: Object.freeze(['KeyE']),
 })
 
 export function isAllowedControlCode(code: string): boolean {

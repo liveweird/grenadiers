@@ -97,6 +97,37 @@ describe('v10 arena presentation', () => {
     expect(presentSnapshot(current)!.state.actors[0]).toMatchObject({ wallPassEquipped: false })
   })
 
+  it('presents Kick equipment and pickup without inventing private bomb motion', () => {
+    const current = state()
+    const own = current.snapshot!.state.actors[0]
+    if (own.type !== 'visible') throw new Error('expected visible own actor')
+    own.inventory.equipment = 'kick'
+    current.snapshot!.state.pickups = [{ cell: { column: 3, row: 2 }, kind: 'kick' }]
+    current.snapshot!.state.bombs = [{
+      id: 9, cell: { column: 4, row: 2 }, owner: own.id, range: 2, placedAt: 1,
+      trigger: { type: 'timed', remainingTicks: 100, paused: false }, blast: 'standard',
+    }]
+    const presented = presentSnapshot(current)!
+    expect(presented.state.actors[0]).toMatchObject({ kickEquipped: true })
+    expect(presented.state.pickups).toEqual(current.snapshot!.state.pickups)
+    expect(presented.state.bombs[0]).toEqual(current.snapshot!.state.bombs[0])
+    expect(Object.keys(presented.state.bombs[0])).toEqual([
+      'id', 'cell', 'owner', 'range', 'placedAt', 'trigger', 'blast',
+    ])
+  })
+
+  it('presents Punch equipment and its distinct pickup without private cooldown or bomb history', () => {
+    const current = state()
+    const own = current.snapshot!.state.actors[0]
+    if (own.type !== 'visible') throw new Error('expected visible own actor')
+    own.inventory.equipment = 'punch'
+    current.snapshot!.state.pickups = [{ cell: { column: 3, row: 2 }, kind: 'punch' }]
+    const presented = presentSnapshot(current)!
+    expect(presented.state.actors[0]).toMatchObject({ punchEquipped: true })
+    expect(presented.state.pickups).toEqual(current.snapshot!.state.pickups)
+    expect(Object.keys(presented.state.actors[0])).not.toContain('lastSuccessfulPunchTick')
+  })
+
 })
 
 describe('Stopwatch presentation', () => {

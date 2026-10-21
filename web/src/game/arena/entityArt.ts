@@ -84,6 +84,22 @@ function pickupFrame(): Graphics {
   return drawing
 }
 
+function makeKickPickup(): Graphics {
+  const drawing = pickupFrame()
+  pixels(drawing, PALETTE.deepInk, [[13, 15, 14, 20], [24, 25, 12, 10]])
+  pixels(drawing, PALETTE.brassLight, [[16, 17, 8, 15], [23, 28, 10, 4]])
+  pixels(drawing, PALETTE.white, [[17, 18, 4, 8]])
+  return drawing
+}
+
+function makePunchPickup(): Graphics {
+  const drawing = pickupFrame()
+  pixels(drawing, PALETTE.deepInk, [[14, 17, 21, 15], [18, 13, 5, 9], [24, 12, 5, 10], [30, 15, 5, 10]])
+  pixels(drawing, PALETTE.brassLight, [[17, 19, 15, 10], [20, 15, 3, 7], [25, 14, 3, 8]])
+  pixels(drawing, PALETTE.white, [[18, 20, 5, 4]])
+  return drawing
+}
+
 function makeWallPassPickup(): Graphics {
   const drawing = pickupFrame()
   pixels(drawing, PALETTE.deepInk, [[13, 14, 23, 23], [17, 18, 15, 19]])
@@ -93,7 +109,7 @@ function makeWallPassPickup(): Graphics {
   return drawing
 }
 
-function makeLegacyPickup(kind: Exclude<RenderablePickupKind, 'wallPass'>): Graphics {
+function makeLegacyPickup(kind: Exclude<RenderablePickupKind, 'kick' | 'wallPass'>): Graphics {
   const drawing = pickupFrame()
   if (kind === 'bombCapacity') {
     pixels(drawing, PALETTE.deepInk, [[17, 18, 15, 13], [20, 15, 9, 19], [14, 21, 21, 7]])
@@ -226,5 +242,7 @@ function makeLegacyPickup(kind: Exclude<RenderablePickupKind, 'wallPass'>): Grap
 }
 
 export function makePickup(kind: RenderablePickupKind): Graphics {
-  return kind === 'wallPass' ? makeWallPassPickup() : makeLegacyPickup(kind)
+  return kind === 'kick' ? makeKickPickup()
+    : kind === 'punch' ? makePunchPickup()
+    : kind === 'wallPass' ? makeWallPassPickup() : makeLegacyPickup(kind)
 }

@@ -12,11 +12,15 @@ all three maps. `World::new` still creates an item-free world.
 `GenerationRecord` separately to the trusted caller. `exposed_pickups()` is the read-only
 visible layer. Public domain `PickupView { cell, kind }` entries are row-major and contain no
 concealed or pending information; Debug redacts those private layers. Gameplay-v9 transmits only
-exposed items and collection events. Gameplay v10 adds the visible actor Teleporter position epoch.
+exposed items and collection events. Gameplay v10 adds the visible actor Teleporter position epoch,
+Wall Pass, Kick and Punch equipment kinds. Wall Pass exit-grace cells remain private authoritative
+state; Kick motion, Punch cooldown and both retained bomb histories are private too.
 The browser renders the three base upgrades and enabled optional items, with authoritative
 upgrade, inventory and effect state; see the [current catalog](settings.md). Live generated rounds
 keep private layers and seed records inside the server owner. Teleporter collection follows the
-separate atomic swap rules in [its feature reference](teleporter.md).
+separate atomic swap rules in [its feature reference](teleporter.md). Kick and Punch collection each
+replace the equipment slot without exposing bomb-motion, cooldown or history fields. Wall Pass
+collection and replacement rules are described in [its feature reference](wall-pass.md).
 
 A destroyed block moves its concealed item to Pending. The revealing explosion cannot burn
 that item. It becomes Exposed only after all flames on its cell expire; overlap or renewal

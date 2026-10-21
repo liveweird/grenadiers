@@ -55,14 +55,28 @@
     "slowFootGroup": "{{item}} ×{{count}} (prędkość {{multiplier}}; {{timers}})"
   },
   "items": {
-    "kick": "Kopnięcie", "punch": "Uderzenie", "bracelet": "Bransoleta", "wallPass": "Przejście przez ściany",
-    "heart": "Serce", "remoteBomb": "Bomba zdalna", "piercingBomb": "Bomba przebijająca",
-    "powerBomb": "Bomba mocy", "landmine": "Mina", "shield": "Tarcza",
-    "stopwatch": "Stoper", "invisibilityCloak": "Peleryna niewidzialności",
-    "goldenFlame": "Złoty płomień", "shortFuse": "Krótki lont", "diarrhea": "Biegunka",
-    "slowFoot": "Wolna stopa", "shortFlame": "Krótki płomień", "longFuse": "Długi lont",
-    "reverseControls": "Odwrócone sterowanie", "invisibleBombs": "Niewidzialne bomby",
-    "oilBarrel": "Beczka oleju", "teleporter": "Teleporter"
+    "kick": "Kopnięcie",
+    "punch": "Uderzenie",
+    "bracelet": "Bransoleta",
+    "wallPass": "Przejście przez ściany",
+    "heart": "Serce",
+    "remoteBomb": "Bomba zdalna",
+    "piercingBomb": "Bomba przebijająca",
+    "powerBomb": "Bomba mocy",
+    "landmine": "Mina",
+    "shield": "Tarcza",
+    "stopwatch": "Stoper",
+    "invisibilityCloak": "Peleryna niewidzialności",
+    "goldenFlame": "Złoty płomień",
+    "shortFuse": "Krótki lont",
+    "diarrhea": "Biegunka",
+    "slowFoot": "Wolna stopa",
+    "shortFlame": "Krótki płomień",
+    "longFuse": "Długi lont",
+    "reverseControls": "Odwrócone sterowanie",
+    "invisibleBombs": "Niewidzialne bomby",
+    "oilBarrel": "Beczka oleju",
+    "teleporter": "Teleporter"
   },
   "phase": {
     "waiting": "Oczekiwanie na obu graczy",
@@ -109,6 +123,8 @@
     "tile": "pola",
     "seconds": "sekundy",
     "speedCap": "Premie prędkości dodają po jednym poziomie, maksymalnie do 5 pól/s.",
+    "kickDescription": "Stałe wyposażenie, które kopie nieruchomą bombę czasową lub zdalną, gdy na nią wejdziesz. Bomba przesuwa się o jedno pole w następnej aktualizacji, a potem co 10 aktualizacji aż do zablokowania; właściciel i lont się nie zmieniają. Min nie można kopać, a inny przedmiot wyposażenia zastępuje Kopnięcie.",
+    "punchDescription": "Stałe wyposażenie. Naciśnij klawisz Wyposażenia, aby uderzyć bombę bezpośrednio przed sobą do następnego wolnego pola na trasie co trzy pola. Po udanym uderzeniu Uderzenie ma stałe 0,2 sekundy odnowienia; inny przedmiot wyposażenia zastępuje Uderzenie.",
     "wallPassDescription": "Stałe wyposażenie pozwalające przechodzić przez zniszczalne bloki. Twarde ściany i bomby nadal blokują ruch, wybuchy nadal ranią, a inny przedmiot wyposażenia je zastępuje. Po zastąpieniu możesz opuścić blok, który już przecinasz, ale nie możesz wejść do niego ponownie.",
     "heartDescription": "Chroni przed jednym śmiertelnym wybuchem, a potem na krótko przed obrażeniami.",
     "remoteBombDescription": "Przechowuje jedną zdalnie odpaloną bombę. Podłóż ją klawiszem bomby, a później naciśnij ten sam klawisz, aby ją zdetonować.",
@@ -154,6 +170,7 @@
     "failure": "Nie udało się wyświetlić dziedzińca.",
     "focusHint": "Wybierz dziedziniec, aby sterować graczem.",
     "remoteHint": "Bomba zdalna jest uzbrojona. Wybierz dziedziniec i naciśnij {{bomb}}, aby ją zdetonować.",
+    "punchHint": "Masz Uderzenie. Wybierz dziedziniec i naciśnij {{equipment}}, aby uderzyć bombę przed sobą.",
     "blindBombHint": "Bomby są ukryte. Wybierz dziedziniec i naciśnij {{bomb}}, aby podłożyć bombę albo odpalić swoją bombę zdalną.",
     "instructions": "Poruszaj się strzałkami lub klawiszami W A S D. Podłóż bombę spacją. Sterowanie działa tylko podczas rundy."
   },
@@ -176,7 +193,8 @@
       "east": "Wschód",
       "south": "Południe",
       "west": "Zachód",
-      "bomb": "Bomba"
+      "bomb": "Bomba",
+      "equipment": "Wyposażenie"
     },
     "keys": {
       "ArrowUp": "Strzałka w górę",
@@ -186,7 +204,7 @@
       "Space": "Spacja",
       "Enter": "Enter"
     },
-    "instructions": "Ruch: {{movement}}. Bomba: {{bomb}}. Sterowanie działa tylko podczas rundy."
+    "instructions": "Ruch: {{movement}}. Bomba: {{bomb}}. Użyj Uderzenia: {{equipment}}. Sterowanie działa tylko podczas rundy."
   },
   "audio": {
     "enable": "Włącz dźwięk",

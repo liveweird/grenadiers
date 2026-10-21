@@ -16,7 +16,7 @@ describe('Stopwatch arena presentation', () => {
     scene.update(snapshot, 0)
     const [, , pickups, , , actors] = layers(scene)
     expect(pickups.children[0].shapes.length).toBeGreaterThan(12)
-    expect(actors.children[0].children[22]).toMatchObject({ visible: true, alpha: 0.7 })
+    expect(actors.children[0].children[23]).toMatchObject({ visible: true, alpha: 0.7 })
 
     snapshot.state.physicalTick = (snapshot.state.physicalTick ?? 0) + 1
     snapshot.state.actors[1].position.x -= 1024
@@ -24,7 +24,7 @@ describe('Stopwatch arena presentation', () => {
     scene.update(snapshot, 20)
     const victim = actors.children[1]
     expect(victim.x).toBe(600)
-    expect(victim.children[23]).toMatchObject({ visible: true })
+    expect(victim.children[24]).toMatchObject({ visible: true })
     scene.render(21)
     expect(victim.x).toBe(600)
   })

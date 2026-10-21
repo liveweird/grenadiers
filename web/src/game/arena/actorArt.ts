@@ -23,6 +23,7 @@ export interface ActorDrawing {
   equipment: Container
   kick: Graphics
   punch: Graphics
+  bracelet: Graphics
   wallPass: Graphics
   cloak: Graphics
   poses: Record<Direction, PoseFrames>
@@ -44,6 +45,7 @@ export interface ActorDrawing {
   landmineStored: boolean
   kickEquipped: boolean
   punchEquipped: boolean
+  braceletEquipped: boolean
   wallPassEquipped: boolean
   cloaked: boolean
 }
@@ -220,8 +222,12 @@ export function makeActor(seat: Seat): ActorDrawing {
   pixels(punch, PALETTE.deepInk, [[11, 10, 15, 12], [14, 6, 4, 8], [19, 5, 4, 9], [24, 8, 4, 9]])
   pixels(punch, PALETTE.brassLight, [[14, 11, 10, 8], [16, 8, 3, 6], [20, 7, 3, 7]])
   punch.visible = false
+  const bracelet = new Graphics()
+  pixels(bracelet, PALETTE.deepInk, [[-15, -2, 6, 12], [9, -2, 6, 12]])
+  pixels(bracelet, PALETTE.blueLight, [[-13, 0, 3, 8], [10, 0, 3, 8]])
+  bracelet.visible = false
   const equipment = new Container()
-  equipment.addChild(kick, punch)
+  equipment.addChild(kick, punch, bracelet)
   equipment.visible = false
   const wallPass = new Graphics()
   pixels(wallPass, PALETTE.deepInk, [[-16, -23, 5, 43], [11, -23, 5, 43], [-16, -23, 32, 5]])
@@ -249,13 +255,13 @@ export function makeActor(seat: Seat): ActorDrawing {
   )
   const drawing = {
     root, protection, shield, stopwatch, frozen, goldenFlame, shortFuse, shortFlame, longFuse, reverseControls,
-    diarrhea, slowFoot, piercing, power, landmine, equipment, kick, punch, wallPass, cloak, poses,
+    diarrhea, slowFoot, piercing, power, landmine, equipment, kick, punch, bracelet, wallPass, cloak, poses,
     direction: 'south' as Direction, moving: false,
     protected: false, shielded: false, stopwatchActive: false, actionsFrozen: false,
     golden: false, shortFused: false, shortFlamed: false,
     longFused: false, reversed: false, diarrheaActive: false, slowFootStacks: 0,
     piercingArmed: false, powerArmed: false, landmineStored: false, kickEquipped: false,
-    punchEquipped: false, wallPassEquipped: false, cloaked: false,
+    punchEquipped: false, braceletEquipped: false, wallPassEquipped: false, cloaked: false,
   }
   setActorPose(drawing, 'south', 0)
   return drawing

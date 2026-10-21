@@ -65,7 +65,13 @@ describe('v10 admission and authoritative baselines', () => {
     expect(value.client.useEquipment()).toBe(false)
     expect(messages(socket).some((message) => message.action === 'equipment')).toBe(false)
 
-    const enabled = snapshot(2)
+    const passive = snapshot(2)
+    passive.room.settings.enabledItems = ['bracelet']
+    socket.message(passive)
+    expect(value.client.useEquipment()).toBe(false)
+    expect(messages(socket).some((message) => message.action === 'equipment')).toBe(false)
+
+    const enabled = snapshot(3)
     enabled.room.settings.enabledItems = ['punch']
     socket.message(enabled)
     expect(value.client.useEquipment()).toBe(true)

@@ -17,15 +17,15 @@ describe('Punch arena presentation', () => {
     scene.update(snapshot, 0)
     const equipment = actors(scene)[0].children[13]
     expect(equipment).toMatchObject({ visible: true })
-    expect(equipment.children).toHaveLength(2)
-    expect(equipment.children.map(({ visible }) => visible)).toEqual([false, true])
+    expect(equipment.children).toHaveLength(3)
+    expect(equipment.children.map(({ visible }) => visible)).toEqual([false, true, false])
 
     snapshot.state.physicalTick = 101
     snapshot.state.bombs[0].cell = { column: 5, row: 1 }
     scene.update(snapshot, 16)
     scene.render(500)
     expect(actors(scene)[0].children[13]).toBe(equipment)
-    expect(equipment.children.map(({ visible }) => visible)).toEqual([false, true])
+    expect(equipment.children.map(({ visible }) => visible)).toEqual([false, true, false])
   })
 
   it('clears the static glove on replacement and removes a cloaked holder', () => {

@@ -1,5 +1,196 @@
 # Repository verification
 
+## Remote Bomb CI-corrected fresh acceptance — 2026-10-21 — 98/98; audited and sealed
+
+Frozen source `b14a28f2e7d3ba86592207167151ad7a68ec58e5`, tree
+`2368d01945c9004bfb5f46137e643665ebab9311`, adds the dedicated Remote Bomb CI step and failure
+artifact to parent `a1170e37f7d92291c44b5b6812ac707567c963e8`. That parent retains the exact
+original Remote source and accepted raw Power Bomb merge documented below. The workflow is the
+only runtime-source correction; core, server, web, Cargo and E2E inputs are unchanged.
+
+The fresh whole wrapper completed at `2026-10-21T00:19:09.024178+00:00` with actual exit zero:
+**49/49 Compose and 49/49 Kubernetes**, 40 reports, 37 baseline plus twelve feature cases per
+target, zero retries and zero carried passes. The literal matrix records 74/74 baseline and
+24/24 optional cases. The accepted image is `sha256:7b13e75697dfbe2d690c47ff1a119db95d32abe92fc80086b3f20a2c90be0f40`,
+retained as `grenadiers-v0336-remote-bomb-quiet-native-recheck:b14a28f`.
+Source archive SHA-256 is `3d0912cfc3cd1cb468b6a7c2d0e0e946cb23c1bfa514a1f114c9ac337db58787`; image,
+dependency and source-tree archive SHA-256 values are respectively
+`8648df440b69d167a87354eae2ca76c6e4542a2ed7bafcccf7d88313960e941b`,
+`ef9b3b9f43b5e806d44da0016e676d45bc463ce53a8ce6d361d49124eb1a4bcd` and
+`6e16843021360b6aea53c9a2ca57c835e3181126086e59ff6666732ba5e35265`.
+
+The immutable source has 742 files, 82 directories, no symlinks and 35 tracked PNGs. Dependencies
+have 8,186 files, 1,305 directories and 13 symlinks: 132 packages installed, 42 optional omissions,
+zero required omissions and zero version/metadata mismatches. Runtime evidence contains 98 PNGs,
+30 image/security records, 15 Kubernetes identities, 14 fixtures and 28 seed-mode records. All
+source/dependency/lock/archive/preparation/image post-run comparisons match. Pinned Node/npm,
+Playwright/Chrome, strict Node Kubernetes checks, kubeconform stdin validation (3/3) and the
+HIGH/CRITICAL image scan pass. Independent raw audit: CLEAR.
+
+`FINAL.sha256` seals 2,147 payloads with SHA-256
+`0a792fe297e051c2230e00012810ddb7e95c3c9317711fad5f7287e4ab8767dd`. All 2,148 durable files and the source archive
+are byte-verified outside the native workspace.
+
+Paired browser assertions prove natural collection, consumption, a live untimed Remote at (3,1)
+past its normal fuse, exact-ID activation without a second placement, then a fresh timed Standard
+bomb. Both actors survive. Root reviewed fresh Compose [English desktop](screenshots/remote-bomb-desktop.png)
+and [Polish 320px](screenshots/remote-bomb-polish-320.png) captures: planted bomb, owner availability
+zero, stored charge consumed, no flames, readable Gear label and normal Polish vertical scrolling.
+No unintended overlap was observed. Kubernetes captures were retained but not visually reviewed;
+assertions establish timing and action semantics.
+
+All 22 latency tests per target pass. Each profile retains all 20 samples; every key starts after
+accepted stationary, bomb-empty readiness on both endpoints. Cutoff, ingress/dispatch chronology,
+public facts and release evidence pass the independent raw extractor. The fixed budget is 250 ms.
+
+| Target | Profile | Samples | Maximum | Exceedances |
+| --- | --- | ---: | ---: | ---: |
+| Compose | local | 20 | 50.256023 ms | 0 |
+| Compose | delay-50ms | 20 | 162.529937 ms | 0 |
+| Kubernetes | local | 20 | 83.085886 ms | 0 |
+| Kubernetes | delay-50ms | 20 | 164.421098 ms | 0 |
+
+Compose container CPU usage advances 595191 → 1557914 microseconds
+(delta 962723); Kubernetes advances 472241 → 1006247
+(delta 534006). Quotas remain `max 100000` and `50000 100000`; both throttle-count and
+throttled-time deltas are zero. These are whole-container intervals including pre-gate waiting
+and supplemental probe work, not isolated gameplay CPU cost.
+
+The preceding CI-corrected attempt retained one valid shaped sample of 350.226735 ms and failed.
+Its 1,274-payload evidence is preserved under seal
+`14536d861a48a737e1f13118d49990920551ab2cf2c5138ff7dce173bf85c6f1`.
+Trace review found prompt input and a transient delay across relay, publication, browser delivery
+and observation; the responsible resource/process remains unproven. That attempt ran no Kubernetes
+cases and contributes no pass here. This separately prepared whole attempt changed no test,
+budget, sample filter or retry setting.
+
+Supplemental monitoring retained 111 Compose and 52 Kubernetes 1 Hz host/cgroup records, with
+actual monitor exits zero and observed latency-group completion. An initial pre-gate monitor
+setup emitted zero samples because this kernel omits optional `cpu.pressure`; that failure is
+preserved. The reviewed v2 records its unavailability while keeping `cpu.max`/`cpu.stat` mandatory.
+Only the coordinator opened gates after fresh holds, readiness and recent low-load observations.
+One managed worker breached the hold between windows; artifact timestamps bound its heavy work
+after 00:02:33 UTC, after Compose measurement ended at 00:01:44. The breach and audit are retained.
+Other bounded checks were explicitly released between windows; a new acknowledged hold preceded
+Kubernetes measurement. No continuous global-idle claim or causal resource attribution is made.
+
+The old candidate's two workflows had five green jobs but only 48 browser passes; the missing
+Remote CI case was caught before merge/publication. Those runs are historical:
+[PR](https://github.com/liveweird/grenadiers/actions/runs/39513806041),
+[push](https://github.com/liveweird/grenadiers/actions/runs/39513795115).
+The dedicated same-image case and its failure artifact are now present. Full exact-head candidate
+and post-merge CI with **49 browser passes** remain mandatory release gates.
+
+Prior source integration repository/contracts/lint/Knip/types/build, 50-scenario discovery and
+65 focused web checks apply to unchanged inputs. B14's YAML, exact CI wiring, repository and diff
+checks pass. No additional full local Rust suite, Rust coverage or full web suite is claimed for
+B14; the unchanged historical source evidence below remains explicitly historical.
+
+The published v0.3.35 parent and its full candidate/post-merge CI/tree proof preceded preparation.
+At cleanup `2026-10-21T00:20:59.982190Z`, owned Compose/Kubernetes resources, namespace, port
+forwards and ports 18264/18265 were absent; localhost:8085 still served accepted v0.3.35 image
+`sha256:c335e4ee9987f78dde3b758780eda61d9541b82c3701ddb84efa73b2722008d7`, ready 200.
+The independent reviewer audits those records without repeating live infrastructure queries.
+Release helpers are independently clear and unexecuted at this checkpoint: finalizer
+`dbbc88d893be22dd446546d1514b6abc5cdf1451bd69ff68d9e5b2be38b1a5c5`, push
+`e313a5cdf70678eec8508368c4801acff7df0399472147e835dec3a82389251c`, merge
+`4190c7aba478de09a635eccc4c580bb984d6d2aa01c7151aec05e6c6f70d7399`, publication
+`f4e460afeb04a6ff5854a1f9d0692dbd938150ccf5119cad81091de741c05a14`, promotion
+`953a56a49eb28330eedb2289a82528560bcb1ba8e3c3a29a52e397c85f5bb02d`.
+
+## Earlier Remote Bomb native evidence — historical; superseded by CI-corrected acceptance
+
+Frozen source `a1170e37f7d92291c44b5b6812ac707567c963e8`, tree
+`b6a526b21a36d9dd0b4990dd1eddd7b5c242044a`, integrates reviewed Remote Bomb source with the
+accepted raw Power Bomb parent. Its two parents are exact Remote source
+`50018e24f3ec89df01e8793eb21f4b5226f63cb3` and accepted raw Power source
+`91c3767f56b2c61624cac01eadeef682e7dc7bb8`. The single fresh same-image wrapper completed at
+`2026-10-20T23:01:59.462005Z` with actual exit zero: **49/49 Compose and 49/49 Kubernetes**,
+40 groups/reports, all twelve optional-item scenarios and zero retries or carried results. Each
+target runs 37 baseline cases plus twelve feature cases; the combined literal matrix records
+74/74 baseline and 24/24 optional cases. Image
+`sha256:08a11bf0d6a9b8f59c139390bc56b82ca9f9bc5c9da2f9c1fb4d8f9c4ec1f7ee` is retained as
+`grenadiers-v0336-remote-bomb-native-recheck:a1170e3`. The coordinator recorded the wrapper’s actual exit after completion.
+
+The source archive SHA-256 is
+`74b0480dbd9b4181bacb15d9f08fe4fe38354e9f143d84943cae9348d88ff173`; image, dependency and
+source-tree archive SHA-256 values are respectively
+`628fb392fddab46ef8a61da1df386fe9868010cc1cf3653e1cb937e96266ec8c`,
+`4d47d877ed6aa3c96d912f6d003925958a9d58960ab1868e4cc1d79bf563924b` and
+`36259cef1b12e2c0cd9c9fa7b972020df03767b6f2d1cd219ce8a6af712ab900`.
+The source inventory has 742 files, 82 directories, no symlinks and 35 tracked PNGs. Dependencies
+contain 8,186 files, 1,305 directories and 13 symlinks; 132 of 174 frozen packages are installed, all 42
+omissions are optional, and no required package, version or metadata mismatch is reported.
+Runtime evidence contains 98 PNGs, 30 runtime image/security records, 15 Kubernetes identities,
+14 fixtures and 28 seed-mode records. All recorded dependency, source, lock,
+preparation-manifest and image-ID post-run comparisons match.
+
+The independent raw evidence audit is CLEAR. `FINAL.sha256` seals 2,140 payloads with SHA-256
+`22e3bfd8aa774acc99cbe84ea35c8c7cc164dd8a159b2be9b1a042a2da142fcf`.
+The 2,141-file durable evidence copy and source archive are byte-verified outside the native
+workspace; the source archive retains the SHA-256 recorded above.
+
+The paired-browser Remote scenario proves natural collection and placement, a live untimed Remote
+at (3,1) for 183 ticks, charge consumption and owner availability zero, activation of that exact
+bomb ID on the next retained bomb action without another placement, and a later fresh Standard
+bomb. Both actors remain alive. The reviewed Compose [English desktop](screenshots/remote-bomb-desktop.png)
+and [Polish 320px](screenshots/remote-bomb-polish-320.png) captures show the planted Remote and no
+flames. The English Gear label fits normally; the Polish narrow view uses vertical scrolling and
+shows the unfocused-arena prompt. No unintended overlap was observed. Kubernetes screenshots
+were not visually reviewed; native assertions, rather than screenshots, prove timing and action
+semantics.
+
+All four real latency profiles retain 20 observations, and all 22 latency cases per target pass.
+Every measured key begins after accepted readiness, all samples are retained, the fixed budget
+remains 250 ms, and each profile has zero exceedances.
+
+| Target | Profile | Samples | Maximum | Exceedances |
+| --- | --- | ---: | ---: | ---: |
+| Compose | local | 20 | 62.141429 ms | 0 |
+| Compose | delay-50ms | 20 | 164.831751 ms | 0 |
+| Kubernetes | local | 20 | 48.547253 ms | 0 |
+| Kubernetes | delay-50ms | 20 | 162.024912 ms | 0 |
+
+Compose CPU usage advances from 735368 to 973553 microseconds, a 238185-microsecond delta;
+Kubernetes advances from 464918 to 672361 microseconds, a 207443-microsecond delta. Compose uses
+the unlimited `max 100000` quota and Kubernetes uses `50000 100000`; both throttle-count and
+throttled-time deltas are zero.
+
+Source-only integration checks pass the repository gate; web contract drift, lint, Knip, type
+checking and the Vite 8.3.4 production build; E2E lint, Knip, type checking and 50-scenario parity;
+and 65 focused web tests across seven files. Core, server and Cargo inputs are byte-identical to
+the reviewed original Remote source. No fresh full Rust suite, Rust coverage or full web suite is
+claimed for `a1170e3`. The earlier 2,429-test web result belongs to the reviewed Power/Vite source
+and remains historical evidence only.
+
+Power Bomb's accepted tree `f69c156098598c79f656a015a4c824f21fa3ee6a` is merged by PR 81 as
+`6203328e17e5d7b456e97a037ab6836e260075a2`. Candidate runs
+[`39508652105`](https://github.com/liveweird/grenadiers/actions/runs/39508652105) and
+[`39508640318`](https://github.com/liveweird/grenadiers/actions/runs/39508640318), and post-merge
+run [`39510922355`](https://github.com/liveweird/grenadiers/actions/runs/39510922355), each pass
+all five jobs and 48 browser cases. [v0.3.35](https://github.com/liveweird/grenadiers/releases/tag/v0.3.35)
+was published as a source prerelease at `2026-10-20T23:06:48Z`. The inherited Vite 8.3.4 fix
+addresses the known v0.3.34 tag security failure without rewriting that history.
+
+Cleanup passed at `2026-10-20T23:02:22Z`: owned Compose resources, the Kubernetes namespace and
+port forwards 18264/18265 are absent. At that check, localhost:8085 still served the default v0.3.34 image
+`sha256:5d0bc94c7febc6764b9f875f1273f4d3814077c8d22c2b56b4a2d80fbebbe0e8`, ready 200.
+That observation remains the historical state at Remote cleanup. The later verified promotion
+deploys accepted v0.3.35 image
+`sha256:c335e4ee9987f78dde3b758780eda61d9541b82c3701ddb84efa73b2722008d7` to the local default,
+with release `v0.3.35`, readiness, health and index all returning 200. The served
+`index-jHLp_ZRp.js` bytes match SHA-256
+`2fcbe6f8002a985ca75e6b80e4b3461232755f7342646a005a922a125b0a37bf`; no rebuild occurred.
+Release helpers are independently clear and unexecuted: finalizer
+`704956bed774527da6843dd9378e0cd11305069adb0183dbfc4c0ee007817c78`, merge
+`06b41dbad35d935b30db11da707e7d1545117316167e6d38b37aa9a04d8aaf43`, publication
+`3ae28e97d6b0b8a85c0fa3996651c64d9fd942f05d90a913013e7fe40668cff5` and local promotion
+`43baf14eaaaa60e1aa606977d9c686c8d256cf75200517b94092bd1181bf63c3`.
+
+The independent native evidence and documentation review is clear. The corrected candidate
+above supersedes this historical run; exact-head candidate and post-merge CI, publication
+and image promotion remain subsequent release gates.
+
 ## Power Bomb fresh native acceptance — 2026-10-20 — 96/96; sealed and independently audited
 
 Frozen source `7e9cae7fb47175a9503cbe5a5dc622bedde04fa1`, tree
@@ -60,7 +251,8 @@ and the source archive have byte-verified durable copies under the private check
 Compose/Kubernetes resources and ports 18254/18255 are absent at the coordinator live check;
 localhost:8085 still serves the accepted v0.3.34 image, ready 200. The reviewer audited cleanup
 records without independently repeating live infrastructure queries. Final native/documentation review is clear; exact-head CI, PR, publication and image promotion
-remain subsequent release gates. The failed `4a3fb77` Gear-label attempt and
+were subsequent gates at that acceptance checkpoint. Candidate CI later passed and PR 81 merged;
+the current post-merge and publication status is recorded in the Remote section above. The failed `4a3fb77` Gear-label attempt and
 the superseded, unexecuted `f150ad5` preparation remain preserved below and contribute no pass.
 
 ## Vite advisory follow-up — 2026-10-20 — patched; fresh native acceptance complete
@@ -86,7 +278,10 @@ successfully but never ran a browser/native case. Its superseded preparation is 
 1,057 sealed payloads, manifest SHA-256
 `3c408f1fc887f1d0f0557c2f6f60fdd164abbc44115f7ddb7e1bfe67419633cd`, plus a byte-verified
 durable copy. The replacement security-patched source and image now pass the fresh 96/96 native
-acceptance recorded above. No result from either earlier Power attempt is carried; final seal is complete and candidate CI remains pending.
+acceptance recorded above. No result from either earlier Power attempt is carried; final seal is
+complete. Candidate CI was pending at that checkpoint; it later passed and PR 81 merged, while
+the post-merge browser job later passed and v0.3.35 was published as recorded in the Remote
+section above.
 
 
 ## Power Bomb native label mismatch — 2026-10-20 — corrected acceptance pending
@@ -102,7 +297,8 @@ The correction restores the previously accepted English “Gear” label and its
 readability fix (`d360810`), retaining the shared assertion. Power gameplay, Polish text,
 contracts and dependency locks are unchanged. Corrected-source native acceptance and
 exact-head CI were still pending at that checkpoint. The later security-patched source passes
-fresh sealed native acceptance as recorded above; exact-head CI remains pending.
+fresh sealed native acceptance as recorded above; both candidate runs later passed before PR 81
+merged.
 
 
 ## Piercing Bomb publication and local deployment — 2026-10-20
@@ -186,9 +382,10 @@ Unrelated processes were not held, and all measurements were retained.
 Independent raw evidence review is clear. The final manifest covers 1,987 payloads and hashes to
 `67445cc105afe69d7894b550a70733e6634d1b05d478165c110fbc673a3d5ff7`.
 All 1,988 files including the seal, plus the immutable source archive, have byte-verified durable
-local checkpoint copies. Owned native resources are cleaned. Exact-head CI, PR, publication and
-promotion are pending. The local default on port 8085 still serves the published v0.3.33 image;
-the v0.3.34 image has not been promoted or published.
+local checkpoint copies. Owned native resources were cleaned. At that native checkpoint,
+exact-head CI, PR, publication and promotion were still pending, and port 8085 served published
+v0.3.33. The later Piercing publication and local-deployment record above documents v0.3.34
+publication and promotion; this paragraph preserves the earlier acceptance state.
 
 The earlier Piercing source passed 1,400 web tests across 47 files with
 95.47/91.35/95.61/97.79% coverage, together with contract checks, lint, Knip and the production
@@ -279,8 +476,9 @@ from the 86 runtime captures. Earlier failed and unexecuted preparations remain 
 Independent native and documentation reviews are clear. The 1916-entry `FINAL.sha256` seal
 hashes to `b4f287107099c3cbf17940493bb0a550c50336fffa9c751e79d9ece72b34906d`.
 All 1917 evidence files and the source archive are copied and byte-verified outside `/tmp` in the
-private checkpoint, excluded from Git and Docker. Exact-head CI, merge, post-merge CI and
-publication remain separate release gates.
+private checkpoint, excluded from Git and Docker. At this native checkpoint, exact-head CI,
+merge, post-merge CI and publication were subsequent release gates. The later Slow-foot
+publication record above documents their completion and the published v0.3.33 release.
 
 ## Slow-foot accepted-parent integration — 2026-10-20 — before native acceptance
 
@@ -762,8 +960,9 @@ The first server and coverage runs reached the listener suites inside the restri
 failed only because localhost binds returned `PermissionDenied`; their preserved logs distinguish
 that environment failure. Authorized reruns pass without product changes. The first Kubernetes
 validation likewise preserved its sandbox DNS denial before the pinned-schema rerun validated all
-three resources. Independent backend and frontend/E2E reviews are clear. Native browser
-acceptance, candidate-image checks and exact-head CI remain pending.
+three resources. Independent backend and frontend/E2E reviews are clear. At this historical
+checkpoint, native browser acceptance, candidate-image checks and exact-head CI remained pending;
+fresh native results for the integrated source are recorded above.
 
 Backend review added direct regressions for manual Remote detonation with an exhausted entity
 allocator, full bomb capacity, overflowing timed-fuse path and an unrelated held weapon. A second

@@ -4,8 +4,10 @@ Status: gameplay contracts, checked domain conversion, HTTP session issuance, an
 gameplay WebSockets with authoritative configurable two-seat matches are implemented.
 `api/gameplay-v9.schema.json`, Rust `core::protocol::v9`, and generated
 `web/src/game/v9/schema.ts` define active socket messages. V2 through v8 remain historical.
-V9 keeps Expanded v5/generator v2 identity while adding the required, currently false
-`voluntaryActionsFrozen` visible-actor field; see [compatibility](protocol-v9.md).
+V9 keeps Expanded v5/generator v2 identity and carries the authoritative
+`voluntaryActionsFrozen` visible-actor field used by Stopwatch. Version 0.3.39 introduced that
+field with false-only foundation semantics; version 0.3.40 activates it. See
+[compatibility](protocol-v9.md).
 The browser validates these messages and drives the playable generated-map match. Diagnostic `/api/v1/ws` and
 `api/realtime.schema.json` remain unchanged.
 
@@ -105,13 +107,13 @@ row-major floor/wall terrain entries, and up to 195 unique soft-block cells.
 
 Visible actors expose ID, seat, position, heading, speed (0–4), alive status, capacity/range
 (1–8), authoritative owned-bomb count, inventory, effects, remaining damage grace and the required
-`voluntaryActionsFrozen` boolean, which is always false in the v0.3.39 foundation. Hidden
+`voluntaryActionsFrozen` boolean, derived from the living opponent's active Stopwatch. Hidden
 actors contain only ID, seat and alive status; owners always receive their own visible actor.
 Bombs carry ID, cell, owner, range, placement tick, blast mode and a typed trigger. Timed
 triggers report remaining ticks at `physicalTick` and pause state; no untimed deadline is invented.
-Current rooms use unpaused Timed bombs with Standard blasts and enabled, manually placed Piercing
-or Power blasts. Enabled Remote Bombs use Standard blasts with no invented fuse; Contact triggers
-and paused Timed bombs remain unavailable.
+Timed bombs may pause only with enabled Stopwatch and validated private captured-fuse history.
+Enabled Piercing and Power bombs retain their special blasts. Enabled Remote and Contact bombs use
+untimed Standard triggers with no invented fuse.
 Flames include cell and exclusive expiry tick.
 Room metadata carries the global tick, rules/map versions, scores, actual round number,
 latest completed round, and independent match outcome; these are not duplicated in game state.
@@ -179,8 +181,8 @@ spawn/tie assignment uses actual round count rather than command epoch.
 
 Shared room views and snapshot metadata also carry the complete checked `settings`,
 `settingsRevision`, nullable original `settingsEditor`, and `availableItems`. Settings also
-carry `enabledItems`; availability is the exact fourteen-item v8/v9 foundation catalog, with Heart
-enabled by default and every supported subset allowed.
+carry `enabledItems`; v8 remains pinned to its fourteen-item Cloak catalog while active v9 has the
+fifteen-item Stopwatch catalog. Heart is enabled by default and every supported subset is allowed.
 Only actual changes increment
 the settings revision and clear readiness; Ready commands acknowledge that exact revision.
 See [v6 settings and authority](protocol-v6.md) for bounds, no-op acknowledgements and edit locks.

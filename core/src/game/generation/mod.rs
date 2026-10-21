@@ -10,9 +10,7 @@ use super::fixtures::{classic_spawns, classic_terrain};
 use super::pickups::PickupKind;
 use super::types::CellId;
 
-/// The algorithm version recorded with arenas produced by this module.
 pub const GENERATOR_VERSION: u16 = 1;
-/// Generator identity for expanded item-aware arenas.
 pub const EXPANDED_GENERATOR_VERSION: u16 = 2;
 const SAMPLE_LIMIT: u32 = 4_294_967_200;
 const MAX_DRAWS_PER_SAMPLE: usize = 16;
@@ -217,6 +215,7 @@ fn sample_pickup(source: &mut impl RandomWords, enabled: EnabledItems) -> Option
     let remote_end = power_end + u32::from(enabled.contains_remote_bomb()) * 15;
     let landmine_end = remote_end + u32::from(enabled.contains_landmine()) * 15;
     let cloak_end = landmine_end + u32::from(enabled.contains_invisibility_cloak()) * 15;
+    let stopwatch_end = cloak_end + u32::from(enabled.contains_stopwatch()) * 15;
     Some(match value {
         0..40 => PickupKind::BombCapacity,
         40..80 => PickupKind::BlastRange,
@@ -235,6 +234,7 @@ fn sample_pickup(source: &mut impl RandomWords, enabled: EnabledItems) -> Option
         value if value < remote_end => PickupKind::RemoteBomb,
         value if value < landmine_end => PickupKind::Landmine,
         value if value < cloak_end => PickupKind::InvisibilityCloak,
+        value if value < stopwatch_end => PickupKind::Stopwatch,
         _ => unreachable!("sample value is bounded by the enabled item pool"),
     })
 }
@@ -394,5 +394,7 @@ mod short_fuse_tests;
 #[cfg(test)]
 #[path = "slow_foot_generation_tests.rs"]
 mod slow_foot_tests;
+#[cfg(test)]
+mod stopwatch_tests;
 #[cfg(test)]
 mod tests;

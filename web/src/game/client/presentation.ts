@@ -2,7 +2,7 @@ import type { SnapshotMessage } from '../arena/types'
 import type { GameClientState } from './clientTypes'
 
 const renderedPickups = new Set([
-  'bombCapacity', 'blastRange', 'movementSpeed', 'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'invisibilityCloak', 'goldenFlame', 'shortFuse',
+  'bombCapacity', 'blastRange', 'movementSpeed', 'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch', 'invisibilityCloak', 'goldenFlame', 'shortFuse',
   'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls',
 ])
 
@@ -27,14 +27,17 @@ export function presentSnapshot(state: GameClientState): SnapshotMessage | null 
       arena: snapshot.state.arena,
       actors: snapshot.state.actors
         .filter((actor) => actor.type === 'visible')
-        .map(({ id, seat, position, heading, alive, damageGraceRemainingTicks, inventory, effects }) => ({
-          id, seat, position, heading, alive, damageGraceRemainingTicks,
+        .map(({ id, seat, position, heading, alive, damageGraceRemainingTicks, inventory, effects,
+          voluntaryActionsFrozen }) => ({
+          id, seat, position, heading, alive, damageGraceRemainingTicks, voluntaryActionsFrozen,
           remoteArmed: snapshot.state.bombs.some((bomb) =>
             bomb.owner === id && bomb.trigger.type === 'remote'),
           piercingArmed: inventory.weapon === 'piercingBomb',
           powerArmed: inventory.weapon === 'powerBomb',
           landmineStored: inventory.weapon === 'landmine',
           shieldRemainingTicks: effects.find((effect) => effect.kind === 'shield')?.remainingTicks ?? 0,
+          stopwatchRemainingTicks:
+            effects.find((effect) => effect.kind === 'stopwatch')?.remainingTicks ?? 0,
           invisibilityCloakRemainingTicks:
             effects.find((effect) => effect.kind === 'invisibilityCloak')?.remainingTicks ?? 0,
           goldenFlameRemainingTicks:
@@ -56,7 +59,7 @@ export function presentSnapshot(state: GameClientState): SnapshotMessage | null 
       flames: snapshot.state.flames,
       pickups: snapshot.state.pickups.filter(
         (pickup): pickup is typeof pickup & {
-          kind: 'bombCapacity' | 'blastRange' | 'movementSpeed' | 'heart' | 'remoteBomb' | 'piercingBomb' | 'powerBomb' | 'landmine' | 'shield' | 'invisibilityCloak'
+          kind: 'bombCapacity' | 'blastRange' | 'movementSpeed' | 'heart' | 'remoteBomb' | 'piercingBomb' | 'powerBomb' | 'landmine' | 'shield' | 'stopwatch' | 'invisibilityCloak'
             | 'goldenFlame' | 'shortFuse' | 'diarrhea' | 'slowFoot' | 'shortFlame' | 'longFuse'
             | 'reverseControls'
         } =>

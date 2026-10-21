@@ -113,7 +113,7 @@ describe('v9 authoritative gameplay settings', () => {
     expect(value.client.updateSettings({
       ...baseline.room.settings,
       enabledItems: [
-        'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame',
+        'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch', 'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame',
         'longFuse', 'reverseControls',
       ],
     })).toBe(true)

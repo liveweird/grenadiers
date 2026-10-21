@@ -1,9 +1,18 @@
 use super::{State, StateError};
 use crate::game::arena::Terrain;
 use crate::game::bombs::{Bomb, BombTrigger};
-use crate::game::types::{CellId, EntityId, Tick};
+use crate::game::effects::EffectKind;
+use crate::game::types::{CellId, EntityId, SeatId, Tick};
 
 impl State {
+    pub(crate) fn apply_test_effect(&mut self, seat: SeatId, kind: EffectKind, at: Tick) {
+        self.actors[seat.index()].effects.apply(kind, at).unwrap();
+    }
+
+    pub(crate) fn clear_test_effects(&mut self, seat: SeatId) {
+        self.actors[seat.index()].effects.clear();
+    }
+
     pub(crate) fn insert_test_flame(&mut self, cell: CellId, expires_at: Tick) {
         self.world.hazards.insert(cell, expires_at);
     }

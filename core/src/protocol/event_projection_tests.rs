@@ -296,11 +296,11 @@ fn mixed_valid_and_unsupported_report_window_fails_as_a_whole() {
         _ => panic!("expected placement"),
     };
     bomb.trigger = BombTrigger::Remote;
-    unsupported.events.push(crate::game::StepEvent {
-        tick: unsupported.tick,
-        audience: crate::game::EventAudience::Both,
-        kind: crate::game::StepEventKind::BombDetonated(bomb),
-    });
+    unsupported.events.push(crate::game::StepEvent::new(
+        unsupported.tick,
+        crate::game::EventAudience::Both,
+        crate::game::StepEventKind::BombDetonated(bomb),
+    ));
 
     assert_eq!(
         project_events(&[valid, unsupported]),
@@ -336,11 +336,11 @@ fn legacy_event_projection_rejects_expanded_items_even_when_absent_from_final_st
         },
     ] {
         let mut report = state.step(&[]).unwrap();
-        report.events.push(crate::game::StepEvent {
-            tick: report.tick,
-            audience: crate::game::EventAudience::Both,
+        report.events.push(crate::game::StepEvent::new(
+            report.tick,
+            crate::game::EventAudience::Both,
             kind,
-        });
+        ));
         assert_eq!(
             project_events(&[report]),
             Err(ProjectionError::InvalidEvent)

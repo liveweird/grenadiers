@@ -38,10 +38,18 @@ promotion were separate gates, and published/local deployment was v0.3.37. See t
 [release notes](https://github.com/liveweird/grenadiers/releases) for current release status.
 
 The accepted raw documentation/capture commit `04c070c5` has sole parent `1c6724f`. Its tree
-`d1dc83fc` equals published v0.3.38 merge `3c210c23`; all candidate and post-merge seven-job,
-51-case workflows passed, and accepted image `960976c9` is promoted locally. The v0.3.39
-gameplay-v9 foundation retains these Cloak semantics but has zero native acceptance or carried
-passes. Its fresh matrix and release gates remain pending.
+`d1dc83fc` equals published v0.3.38 merge `3c210c23`; all candidate, post-merge and tag seven-job,
+51-case workflows passed, and accepted image `960976c9` is promoted locally. At the 21 October
+2026 18:44:23 UTC v0.3.39 native checkpoint, source `272b950` and image `9a4dc108` passed fresh
+51 Compose plus 51 Kubernetes cases with zero retries or carried passes; independent raw audit is
+clear and 2,320 payloads are durably sealed. At that checkpoint, v0.3.39 release CI, publication
+and promotion remained pending.
+
+At the 21 October 2026 20:56:41 UTC v0.3.40 native checkpoint, source `fa25467` preserves
+those Cloak semantics while adding Stopwatch as the fifteenth source/native-verified item. All
+32,768 gameplay-v9 subsets passed in debug, release and coverage, followed by fresh 52 Compose
+plus 52 Kubernetes cases with zero retries or carried passes. Independent raw audit is clear and 2,434 payloads are durably sealed; hosted CI and publication remained pending at this checkpoint; published/local v0.3.39 remained
+the release baseline.
 
 
 Fresh reviewed Compose [English desktop](../screenshots/invisibility-cloak-desktop.png) and

@@ -8,6 +8,8 @@ export interface ActorDrawing {
   root: Container
   protection: Graphics
   shield: Graphics
+  stopwatch: Graphics
+  frozen: Graphics
   goldenFlame: Graphics
   shortFuse: Graphics
   shortFlame: Graphics
@@ -24,6 +26,8 @@ export interface ActorDrawing {
   moving: boolean
   protected: boolean
   shielded: boolean
+  stopwatchActive: boolean
+  actionsFrozen: boolean
   golden: boolean
   shortFused: boolean
   shortFlamed: boolean
@@ -120,6 +124,17 @@ export function makeActor(seat: Seat): ActorDrawing {
     [-12, -24, 12, 3], [-24, -9, 3, 12], [21, -9, 3, 12], [0, 24, 12, 3],
   ])
   shield.visible = false
+  const stopwatch = new Graphics()
+  pixels(stopwatch, PALETTE.deepInk, [[-8, -34, 16, 16], [-4, -38, 8, 5]])
+  pixels(stopwatch, PALETTE.white, [[-5, -31, 10, 10]])
+  pixels(stopwatch, PALETTE.blue, [[-1, -30, 3, 7], [-1, -24, 6, 3]])
+  stopwatch.visible = false
+  const frozen = new Graphics()
+  pixels(frozen, PALETTE.blueLight, [
+    [-24, -25, 9, 3], [-24, -25, 3, 9], [15, -25, 9, 3], [21, -25, 3, 9],
+    [-24, 20, 9, 3], [-24, 14, 3, 9], [15, 20, 9, 3], [21, 14, 3, 9],
+  ])
+  frozen.visible = false
   const goldenFlame = new Graphics()
   pixels(goldenFlame, PALETTE.deepInk, [
     [-8, -30, 16, 3], [-11, -27, 22, 4], [-8, -23, 16, 3],
@@ -207,13 +222,14 @@ export function makeActor(seat: Seat): ActorDrawing {
   root.addChild(
     shadow, protection, shield, goldenFlame, shortFuse, shortFlame, longFuse, reverseControls,
     diarrhea, slowFoot, piercing, power, landmine,
-    ...Object.values(poses).flat(), cloak,
+    ...Object.values(poses).flat(), cloak, stopwatch, frozen,
   )
   const drawing = {
-    root, protection, shield, goldenFlame, shortFuse, shortFlame, longFuse, reverseControls,
+    root, protection, shield, stopwatch, frozen, goldenFlame, shortFuse, shortFlame, longFuse, reverseControls,
     diarrhea, slowFoot, piercing, power, landmine, cloak, poses,
     direction: 'south' as Direction, moving: false,
-    protected: false, shielded: false, golden: false, shortFused: false, shortFlamed: false,
+    protected: false, shielded: false, stopwatchActive: false, actionsFrozen: false,
+    golden: false, shortFused: false, shortFlamed: false,
     longFused: false, reversed: false, diarrheaActive: false, slowFootStacks: 0,
     piercingArmed: false, powerArmed: false, landmineStored: false, cloaked: false,
   }

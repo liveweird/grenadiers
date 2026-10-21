@@ -109,6 +109,7 @@ impl super::Actor {
                     .replace_weapon(crate::game::SpecialWeapon::Landmine);
             }
             PickupKind::Shield
+            | PickupKind::Stopwatch
             | PickupKind::InvisibilityCloak
             | PickupKind::GoldenFlame
             | PickupKind::ShortFuse

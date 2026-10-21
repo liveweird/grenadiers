@@ -99,6 +99,7 @@ fn signature(generated: &GeneratedArena) -> String {
                 None if generated.arena().blocks().contains(&cell) => '#',
                 None if generated.arena().terrain(cell) == Some(Terrain::Wall) => 'X',
                 Some(PickupKind::InvisibilityCloak) => 'C',
+                Some(PickupKind::Stopwatch) => 'T',
                 None => '.',
             });
         }

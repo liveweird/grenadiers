@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.40 — 2026-10-21
+
+- Add opt-in Stopwatch with a 180-physical-tick refreshable effect that freezes the living opponent's voluntary actions while ordinary simulation and network clocks continue.
+- Pause every Timed bomb once per affected update using checked captured-fuse provenance; preserve untimed Remote and Contact bombs, fire chains, Diarrhea and transactional rollback.
+- Add the fifteenth lobby switch, all 32,768 v9 settings masks, replay and archived-v8 guards, English/Polish cues, and a deterministic two-window production-seed browser scenario. At the 21 October 2026 20:56:41 UTC native checkpoint, corrected source `fa25467` passed full debug/release/coverage gates and fresh 52 Compose plus 52 Kubernetes cases with zero retries or carried passes. Independent raw audit is clear and 2,434 payloads are durably sealed; hosted CI, PR/merge, publication, tag verification and promotion remained pending at that checkpoint.
+
 ## 0.3.39 — 2026-10-21
 
 - Check responsive result geometry atomically in stable running state before movement or bomb placement; preserve both grids, bounds, viewports and all accessibility assertions.

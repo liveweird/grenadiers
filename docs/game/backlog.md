@@ -72,6 +72,18 @@ tag CI remained pending. Earlier v0.3.39 source `30c051c`, failed v0.3.38 PR hea
 source `4d9a751` remain historical with zero carry. Full acceptance evidence is recorded in
 [verification](../verification.md); see the
 [release notes](https://github.com/liveweird/grenadiers/releases) for current release status.
+
+At the 21 October 2026 20:56:41 UTC v0.3.40 native checkpoint, corrected source `fa25467`,
+tree `07ac34a8`, and image `ec8604af` passed all 32,768 masks in debug, release and coverage plus
+fresh 52 Compose and 52 Kubernetes cases, all 46 groups, with zero retries or carried passes. The
+failed `bd9d064` attempt remains historical: 51 Compose cases passed, the Stopwatch oracle failed
+once, and Kubernetes did not start. The corrected oracle uses the independently visible deadline,
+`deadline - placedAt - 1`; product behavior did not change. Independent raw audit is clear and 2,434 payloads are durably sealed; hosted CI, PR/merge, publication, tag verification and promotion remained pending at this dated
+checkpoint. Published v0.3.39/PR #85, tag run 39661497383 and local image `9a4dc108` remain the
+release baseline. Fourteen of 22 types were published; Stopwatch is the fifteenth source/native-
+verified type and seven requested types remain after it. See
+[release notes](https://github.com/liveweird/grenadiers/releases) for current release status.
+
 The [implementation plan](implementation-plan.md) remains the milestone/release reference;
 the [rules](rules.md) describe the current baseline and historical extension catalog.
 This document records the requested Grenadiers behavior and decisions required before coding.
@@ -224,7 +236,7 @@ needs remappable controls, input sequencing, replay and connection-generation fe
 | ID / pickup | Requested behavior | Decisions / acceptance focus |
 | --- | --- | --- |
 | BUFF-SHIELD / shield | Temporary immunity to bomb blasts, monsters and other configured damage. | Damage-class coverage, duration, expiry while in danger and interaction with Heart. |
-| BUFF-CLOCK / stopwatch | Temporarily freeze bomb fuses, monsters and enemy players. | Affected owners/entities, existing versus newly spawned bombs, multiple clocks, thaw/input handling; freeze selected gameplay entities without stopping server ticks, round deadlines or reconnect grace. |
+| BUFF-CLOCK / stopwatch | **Source/native verified at the v0.3.40 checkpoint.** V9 publishes authoritative voluntary freeze and Timed-bomb pause state. | Exact 180-tick collection, checked fuse-history provenance, two-holder deduplication, thaw/input handling and rollback pass fresh 52+52 native acceptance at source `fa25467`; independent audit and durable sealing are clear, while release gates remained pending at that checkpoint. |
 | BUFF-CLOAK / invisibility cloak | **Prepared at the v0.3.38 native acceptance checkpoint.** Opponents receive only identity, seat and alive status for 600 physical ticks. | Event-time private cues, complete actor-root removal, current-position reveal, reconnect deadline preservation and paired checked publication are covered locally; corrected source `1c6724f` passed fresh 102/102 native cases with an independent audit and durable seal. Candidate/post-merge CI, publication and promotion remained pending at that checkpoint. |
 | BUFF-GOLD / golden flame | New bombs use maximum blast radius while active. | Maximum derives from the selected ruleset; define precedence with Short-flame and expiry. |
 | BUFF-FUSE / short fuse | Decrease new bombs' detonation delay by 50%. | Integer-tick rounding/minimum, repeated pickups and composition with Long fuse. |

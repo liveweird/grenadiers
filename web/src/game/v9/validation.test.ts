@@ -4,9 +4,9 @@ import { snapshot } from '../client/testSupport'
 import { validateGameplayV8ServerMessage } from '../v8/validation'
 import { validateGameplayV9ServerMessage } from './validation'
 
-describe('gameplay v9 foundation validation', () => {
+describe('gameplay v9 Stopwatch validation', () => {
   const supported = [
-    'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield',
+    'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch',
     'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot',
     'shortFlame', 'longFuse', 'reverseControls',
   ] as const
@@ -19,7 +19,7 @@ describe('gameplay v9 foundation validation', () => {
     expect(validateGameplayV9ServerMessage(message)).toEqual({ valid: true, value: message })
   })
 
-  it('requires false frozen state on visible actors and keeps hidden actors exact', () => {
+  it('binds visible frozen state to the living opponent Stopwatch and keeps hidden actors exact', () => {
     const message = snapshot(1)
     expect(validateGameplayV9ServerMessage(message)).toEqual({ valid: true, value: message })
     expect(validateGameplayV8ServerMessage(message)).toMatchObject({ valid: false, source: 'schema' })
@@ -36,6 +36,11 @@ describe('gameplay v9 foundation validation', () => {
     expect(validateGameplayV9ServerMessage(frozen)).toEqual({
       valid: false, source: 'semantics', error: 'invalidFrozenState',
     })
+    frozen.room.settings.enabledItems = ['stopwatch']
+    const opponent = frozen.state.actors[1]
+    if (opponent.type !== 'visible') throw new Error('expected visible opponent')
+    opponent.effects = [{ kind: 'stopwatch', remainingTicks: 180 }]
+    expect(validateGameplayV9ServerMessage(frozen)).toEqual({ valid: true, value: frozen })
     actor.alive = false
     expect(validateGameplayV9ServerMessage(frozen)).toEqual({
       valid: false, source: 'semantics', error: 'invalidFrozenState',
@@ -48,12 +53,10 @@ describe('gameplay v9 foundation validation', () => {
     expect(validateGameplayV9ServerMessage(hidden)).toMatchObject({ valid: false, source: 'schema' })
   })
 
-  it('keeps Stopwatch and paused timed bombs unavailable in the foundation', () => {
+  it('accepts Stopwatch and paused timed bombs only with the enabled capability', () => {
     const stopwatch = snapshot(2)
     stopwatch.room.settings.enabledItems = ['stopwatch']
-    expect(validateGameplayV9ServerMessage(stopwatch)).toMatchObject({
-      valid: false, source: 'semantics', error: 'unavailableItem',
-    })
+    expect(validateGameplayV9ServerMessage(stopwatch)).toEqual({ valid: true, value: stopwatch })
 
     const paused = snapshot(2)
     paused.state.bombs = [{
@@ -66,6 +69,37 @@ describe('gameplay v9 foundation validation', () => {
     expect(validateGameplayV9ServerMessage(paused)).toMatchObject({
       valid: false, source: 'semantics', error: 'unsupportedProfile',
     })
+    paused.room.settings.enabledItems = ['stopwatch']
+    expect(validateGameplayV9ServerMessage(paused)).toEqual({ valid: true, value: paused })
+  })
+
+  it.each([false, true])('rejects a live Timed bomb at zero with paused=%s', (paused) => {
+    const message = snapshot(2)
+    message.room.settings.enabledItems = ['stopwatch']
+    message.state.bombs = [{
+      id: 3, cell: { column: 1, row: 1 }, owner: 1, range: 2, placedAt: 1,
+      trigger: { type: 'timed', remainingTicks: 0, paused }, blast: 'standard',
+    }]
+    const owner = message.state.actors[0]
+    if (owner.type !== 'visible') throw new Error('expected visible actor')
+    owner.liveBombCount = 1
+    expect(validateGameplayV9ServerMessage(message)).toMatchObject({
+      valid: false, source: 'semantics', error: 'unsupportedProfile',
+    })
+  })
+
+  it('keeps zero natural and positive paused chain detonation history valid', () => {
+    const message = snapshot(2)
+    message.room.settings.enabledItems = ['stopwatch']
+    const eventBomb = (id: number, remainingTicks: number, paused: boolean) => ({
+      id, cell: { column: id, row: 1 }, owner: 1, range: 2, placedAt: 1,
+      trigger: { type: 'timed' as const, remainingTicks, paused }, blast: 'standard' as const,
+    })
+    message.events = [
+      { tick: 2, index: 0, kind: { type: 'bombDetonated', bomb: eventBomb(3, 0, false) } },
+      { tick: 2, index: 1, kind: { type: 'bombDetonated', bomb: eventBomb(4, 179, true) } },
+    ]
+    expect(validateGameplayV9ServerMessage(message)).toEqual({ valid: true, value: message })
   })
 
   it('retains recipient-private Cloak validation with the new visible shape', () => {

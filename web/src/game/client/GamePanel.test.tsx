@@ -143,6 +143,17 @@ describe('v9 private-state presentation', () => {
     expect(screen.getByLabelText('Player one upgrades')).toHaveTextContent('Bomb typeNone')
   })
 
+  it('announces authoritative Stopwatch freeze without inventing an effect timer', () => {
+    const current = state()
+    const actor = current.snapshot!.state.actors[0]
+    if (actor.type !== 'visible') throw new Error('expected visible own actor')
+    actor.voluntaryActionsFrozen = true
+    renderPanel(current)
+    const stats = screen.getByLabelText('Player one upgrades')
+    expect(stats).toHaveTextContent('ActionsFrozen by Stopwatch')
+    expect(stats).not.toHaveTextContent('Stopwatch (')
+  })
+
   it('groups all six Slow-foot timers in the eight-field HUD in English and Polish', async () => {
     const current = state()
     const actor = current.snapshot!.state.actors[0]

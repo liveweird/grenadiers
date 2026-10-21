@@ -34,6 +34,7 @@ const testDirectories = [
   new URL('../stopwatch-tests/', import.meta.url),
   new URL('../invisible-bombs-tests/', import.meta.url),
   new URL('../teleporter-tests/', import.meta.url),
+  new URL('../wall-pass-tests/', import.meta.url),
   new URL('../terrain-pixel-tests/', import.meta.url),
 ]
 const testText = (await Promise.all(testDirectories.map(async (directory) =>

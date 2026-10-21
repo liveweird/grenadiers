@@ -110,15 +110,21 @@ describe('v10 authoritative gameplay settings', () => {
     socket.message(baseline)
     const sent = socket.sent.length
 
+    const allItems = [...baseline.room.availableItems]
+    expect(allItems).toHaveLength(21)
+    expect(allItems.slice(0, 3)).toEqual(['kick', 'punch', 'bracelet'])
     expect(value.client.updateSettings({
-      ...baseline.room.settings,
-      enabledItems: [
-        'kick', 'wallPass', 'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch', 'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame',
-        'longFuse', 'reverseControls', 'invisibleBombs', 'teleporter',
-      ],
+      ...baseline.room.settings, enabledItems: allItems,
     })).toBe(true)
     expect(socket.sent).toHaveLength(sent + 1)
+    expect(messages(socket).at(-1)).toMatchObject({
+      type: 'updateSettings', settings: { enabledItems: allItems },
+    })
     socket.message({ type: 'error', code: 'staleSettings', sequence: 2 })
+    expect(value.client.updateSettings({
+      ...baseline.room.settings, enabledItems: [...allItems, allItems[0]!],
+    })).toBe(false)
+    expect(socket.sent).toHaveLength(sent + 1)
     expect(value.client.updateSettings({
       ...baseline.room.settings, enabledItems: ['goldenFlame', 'shortFuse', 'shortFlame'],
     })).toBe(true)

@@ -2,6 +2,8 @@
 
 ## 0.3.46 — 2026-10-21 (source candidate)
 
+- Allow applying the entire advertised item catalog by deriving the client limit from the authoritative room catalog.
+
 - Add opt-in Bracelet equipment: moving into the other player shoves them at most one tile along
   the attempted direction, clamped by authoritative collision and hazard checks.
 - Require separation and a fixed 30-tick cooldown after a successful shove while keeping the

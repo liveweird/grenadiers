@@ -2,7 +2,7 @@ use super::State;
 use crate::game::events::{EventAudience, StepEvent, StepEventKind};
 use crate::game::explosions::{self, ExplosionError};
 use crate::game::simulation::StepError;
-use crate::game::types::Tick;
+use crate::game::types::{EntityId, Tick};
 use crate::game::view::BombView;
 
 impl State {
@@ -13,11 +13,13 @@ impl State {
     pub(super) fn resolve_explosions(
         &mut self,
         tick: Tick,
+        remote_targets: [Option<EntityId>; 2],
         events: &mut Vec<StepEvent>,
     ) -> Result<(), StepError> {
-        let plan = explosions::plan(&self.world, tick).map_err(|error| match error {
-            ExplosionError::UnsupportedBombTrigger(id) => StepError::UnsupportedBombTrigger(id),
-        })?;
+        let plan =
+            explosions::plan(&self.world, tick, remote_targets).map_err(|error| match error {
+                ExplosionError::UnsupportedBombTrigger(id) => StepError::UnsupportedBombTrigger(id),
+            })?;
         if plan.detonated.is_empty() {
             return Ok(());
         }

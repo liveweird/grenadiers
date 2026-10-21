@@ -3,10 +3,13 @@ import type { RenderablePickupKind } from './types'
 import { PALETTE } from './palette'
 import { pixels } from './pixel'
 
-export interface BombDrawing { root: Container; spark: Graphics }
+export interface BombDrawing { root: Container; spark: Graphics; remote: boolean }
 export interface FlameDrawing { root: Container; frames: readonly [Graphics, Graphics] }
 
-export function makeBomb(blast: 'standard' | 'piercing' | 'power' = 'standard'): BombDrawing {
+export function makeBomb(
+  blast: 'standard' | 'piercing' | 'power' = 'standard',
+  trigger: 'timed' | 'remote' | 'contact' = 'timed',
+): BombDrawing {
   const root = new Container()
   const shadow = new Graphics()
   pixels(shadow, PALETTE.deepInk, [[-15, 12, 30, 5], [-10, 17, 20, 2]])
@@ -23,12 +26,18 @@ export function makeBomb(blast: 'standard' | 'piercing' | 'power' = 'standard'):
     pixels(shell, PALETTE.flame, [[-7, -3, 14, 6], [-4, -7, 8, 14]])
     pixels(shell, PALETTE.white, [[-2, -5, 4, 10]])
   }
-  pixels(shell, PALETTE.brass, [[4, -15, 7, 5], [8, -19, 4, 7], [11, -21, 7, 3]])
+  if (trigger === 'remote') {
+    pixels(shell, PALETTE.brass, [[4, -15, 7, 5], [8, -21, 4, 9], [6, -24, 3, 5], [11, -27, 3, 8]])
+    pixels(shell, PALETTE.brick, [[9, -29, 7, 4]])
+  } else {
+    pixels(shell, PALETTE.brass, [[4, -15, 7, 5], [8, -19, 4, 7], [11, -21, 7, 3]])
+  }
   const spark = new Graphics()
   pixels(spark, PALETTE.flameCore, [[16, -25, 4, 4], [21, -21, 4, 4], [12, -21, 4, 4]])
   pixels(spark, PALETTE.flame, [[18, -29, 3, 4], [24, -24, 3, 3]])
+  spark.visible = trigger !== 'remote'
   root.addChild(shadow, shell, spark)
-  return { root, spark }
+  return { root, spark, remote: trigger === 'remote' }
 }
 
 function flameFrame(alternate: boolean): Graphics {
@@ -86,6 +95,11 @@ export function makePickup(kind: RenderablePickupKind): Graphics {
       [17, 19, 5, 5], [27, 19, 5, 5], [15, 23, 19, 5], [18, 28, 13, 4], [21, 32, 7, 4],
     ])
     pixels(drawing, PALETTE.brickLight, [[18, 20, 4, 3], [16, 23, 4, 3]])
+  } else if (kind === 'remoteBomb') {
+    pixels(drawing, PALETTE.deepInk, [[16, 22, 17, 13], [20, 18, 9, 20], [28, 14, 4, 8]])
+    pixels(drawing, PALETTE.ink, [[19, 23, 11, 10], [22, 20, 6, 5]])
+    pixels(drawing, PALETTE.brass, [[29, 12, 3, 7], [26, 9, 3, 6], [31, 7, 3, 7]])
+    pixels(drawing, PALETTE.brick, [[29, 5, 7, 4]])
   } else if (kind === 'piercingBomb') {
     pixels(drawing, PALETTE.deepInk, [[15, 21, 19, 14], [19, 17, 11, 21]])
     pixels(drawing, PALETTE.ink, [[18, 22, 13, 11], [21, 19, 7, 5]])

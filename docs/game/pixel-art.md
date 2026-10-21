@@ -75,3 +75,12 @@ bombs or flames. “Power bomb” wraps normally between words in English; the P
 uses vertical scrolling and shows the unfocused-arena prompt. The reviewed captures have no
 unintended overlap. Manhattan blast geometry, one-charge consumption and the following Standard
 bomb remain authoritative simulation and paired-browser behavior.
+
+Remote Bomb adds an antenna-topped planted-bomb cue, localized armed state and twelfth rule
+switch. Its [English desktop and Polish 320px captures](remote-bomb.md) show the live Remote at
+(3,1), its stored charge consumed, owner availability at zero, both actors alive and no flames.
+The English Gear label fits normally; the Polish narrow view uses vertical scrolling and shows
+the unfocused-arena prompt. The reviewed Compose captures have no observed unintended overlap;
+Kubernetes captures were not visually reviewed. Native assertions establish the 183-tick wait,
+exact-ID activation without another placement and the following fresh Standard bomb. The native
+evidence audit is clear and its final manifest is sealed.

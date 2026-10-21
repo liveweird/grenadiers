@@ -87,6 +87,10 @@ impl super::Actor {
                 self.inventory
                     .replace_equipment(crate::game::Equipment::Heart);
             }
+            PickupKind::RemoteBomb => {
+                self.inventory
+                    .replace_weapon(crate::game::SpecialWeapon::Remote);
+            }
             PickupKind::PiercingBomb => {
                 self.inventory
                     .replace_weapon(crate::game::SpecialWeapon::Piercing);

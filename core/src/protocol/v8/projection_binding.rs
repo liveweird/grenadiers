@@ -61,30 +61,21 @@ pub(super) fn validate_expanded_room(room: &RoomView) -> Result<(), ProjectionEr
 fn canonical_gameplay(version: RulesVersion, capture: &ExpandedCapture, fuse_ticks: u64) -> bool {
     let world = &capture.world.0;
     let classic = version != RulesVersion::ExpandedV5;
-    let short_fuse = !classic && world.enabled_items.contains(ItemId::ShortFuse);
-    let long_fuse = !classic && world.enabled_items.contains(ItemId::LongFuse);
-    let piercing = !classic && world.enabled_items.contains(ItemId::PiercingBomb);
-    let power = !classic && world.enabled_items.contains(ItemId::PowerBomb);
-    world.bombs.iter().all(|bomb| {
-        canonical_bomb(
-            world.physical_tick,
-            *bomb,
-            fuse_ticks,
-            short_fuse,
-            long_fuse,
-            piercing,
-            power,
-        )
-    }) && (!classic
-        || (world.actors.iter().all(|actor| {
-            actor.inventory.equipment.is_none()
-                && actor.inventory.weapon.is_none()
-                && actor.effects.as_slice().is_empty()
-                && actor.damage_grace_remaining_ticks.get() == 0
-        }) && world
-            .pickups
-            .iter()
-            .all(|pickup| classic_pickup(pickup.kind))))
+    world
+        .bombs
+        .iter()
+        .all(|bomb| canonical_bomb(world.physical_tick, *bomb, fuse_ticks, world.enabled_items))
+        && unique_remote_owners(&world.bombs)
+        && (!classic
+            || (world.actors.iter().all(|actor| {
+                actor.inventory.equipment.is_none()
+                    && actor.inventory.weapon.is_none()
+                    && actor.effects.as_slice().is_empty()
+                    && actor.damage_grace_remaining_ticks.get() == 0
+            }) && world
+                .pickups
+                .iter()
+                .all(|pickup| classic_pickup(pickup.kind))))
         && capture
             .reports
             .0
@@ -93,12 +84,12 @@ fn canonical_gameplay(version: RulesVersion, capture: &ExpandedCapture, fuse_tic
             .all(|event| {
                 (!classic || event.audience == crate::game::EventAudience::Both)
                     && match event.kind {
-                        EventKind::BombPlaced { bomb } => canonical_bomb(
-                            event.tick, bomb, fuse_ticks, short_fuse, long_fuse, piercing, power,
-                        ),
-                        EventKind::BombDetonated { bomb } => canonical_bomb(
-                            event.tick, bomb, fuse_ticks, short_fuse, long_fuse, piercing, power,
-                        ),
+                        EventKind::BombPlaced { bomb } => {
+                            canonical_bomb(event.tick, bomb, fuse_ticks, world.enabled_items)
+                        }
+                        EventKind::BombDetonated { bomb } => {
+                            canonical_bomb(event.tick, bomb, fuse_ticks, world.enabled_items)
+                        }
                         EventKind::PickupCollected { kind, .. } => !classic || classic_pickup(kind),
                         EventKind::DamagePrevented { .. } => !classic,
                         EventKind::ActorEliminated { .. } | EventKind::RoundEnded { .. } => true,
@@ -110,20 +101,34 @@ fn canonical_bomb(
     at: crate::protocol::Tick,
     bomb: super::BombView,
     base_fuse: u64,
-    short_fuse: bool,
-    long_fuse: bool,
-    piercing: bool,
-    power: bool,
+    enabled: ItemSet,
 ) -> bool {
     (bomb.blast == BlastKind::Standard
-        || (piercing && bomb.blast == BlastKind::Piercing)
-        || (power && bomb.blast == BlastKind::Power))
-        && (timed_fuse_at(at, bomb, base_fuse)
-            || (short_fuse && timed_fuse_at(at, bomb, base_fuse.div_ceil(2).max(1)))
-            || (long_fuse
-                && base_fuse
-                    .checked_mul(2)
-                    .is_some_and(|fuse| timed_fuse_at(at, bomb, fuse))))
+        || (enabled.contains(ItemId::PiercingBomb) && bomb.blast == BlastKind::Piercing)
+        || (enabled.contains(ItemId::PowerBomb) && bomb.blast == BlastKind::Power))
+        && match bomb.trigger.observation() {
+            BombTriggerObservation::Remote => {
+                enabled.contains(ItemId::RemoteBomb) && bomb.blast == BlastKind::Standard
+            }
+            BombTriggerObservation::Timed { .. } => {
+                timed_fuse_at(at, bomb, base_fuse)
+                    || (enabled.contains(ItemId::ShortFuse)
+                        && timed_fuse_at(at, bomb, base_fuse.div_ceil(2).max(1)))
+                    || (enabled.contains(ItemId::LongFuse)
+                        && base_fuse
+                            .checked_mul(2)
+                            .is_some_and(|fuse| timed_fuse_at(at, bomb, fuse)))
+            }
+            BombTriggerObservation::Contact => false,
+        }
+}
+
+fn unique_remote_owners(bombs: &[super::BombView]) -> bool {
+    let mut owners = std::collections::BTreeSet::new();
+    bombs.iter().all(|bomb| {
+        !matches!(bomb.trigger.observation(), BombTriggerObservation::Remote)
+            || owners.insert(bomb.owner)
+    })
 }
 
 fn timed_fuse_at(at: crate::protocol::Tick, bomb: super::BombView, fuse_ticks: u64) -> bool {
@@ -198,6 +203,7 @@ pub(super) fn phase_allows_null_body(phase: &RoomPhase) -> bool {
 pub(super) fn expanded_items() -> ItemSet {
     ItemSet::new([
         ItemId::Heart,
+        ItemId::RemoteBomb,
         ItemId::PiercingBomb,
         ItemId::PowerBomb,
         ItemId::Shield,
@@ -248,7 +254,7 @@ pub(super) fn generation_matches(
 #[cfg(test)]
 mod fuse_policy_tests {
     use super::canonical_bomb;
-    use crate::protocol::v8::{BlastKind, BombTrigger, BombView};
+    use crate::protocol::v8::{BlastKind, BombTrigger, BombView, ItemId, ItemSet};
     use crate::protocol::{Cell, EntityId, Tick};
 
     fn bomb(duration: u16) -> BombView {
@@ -266,17 +272,10 @@ mod fuse_policy_tests {
     #[test]
     fn odd_policy_accepts_base_half_and_double_historical_captures() {
         let at = Tick::new(10).unwrap();
-        assert!(canonical_bomb(at, bomb(181), 181, true, true, false, false));
-        assert!(canonical_bomb(at, bomb(91), 181, true, true, false, false));
-        assert!(canonical_bomb(at, bomb(362), 181, true, true, false, false));
-        assert!(!canonical_bomb(
-            at,
-            bomb(180),
-            181,
-            true,
-            true,
-            false,
-            false
-        ));
+        let enabled = ItemSet::new([ItemId::ShortFuse, ItemId::LongFuse]).unwrap();
+        assert!(canonical_bomb(at, bomb(181), 181, enabled));
+        assert!(canonical_bomb(at, bomb(91), 181, enabled));
+        assert!(canonical_bomb(at, bomb(362), 181, enabled));
+        assert!(!canonical_bomb(at, bomb(180), 181, enabled));
     }
 }

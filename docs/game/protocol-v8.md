@@ -9,8 +9,8 @@ claim or revoke the credential needed for a version-8 connection.
 
 V8 adds rules version **5** and map ID **`generated_v2`**. Its own rules/map types leave the
 shared enums and schemas for earlier protocols unchanged. New production rooms are always
-Expanded v5/generator v2. They advertise `availableItems: ["heart", "piercingBomb", "powerBomb", "shield", "goldenFlame", "shortFuse", "diarrhea", "slowFoot", "shortFlame", "longFuse", "reverseControls"]` and initially enable
-`settings.enabledItems: ["heart"]`. All 2048 subsets of those eleven available items are supported configurations.
+Expanded v5/generator v2. They advertise `availableItems: ["heart", "remoteBomb", "piercingBomb", "powerBomb", "shield", "goldenFlame", "shortFuse", "diarrhea", "slowFoot", "shortFlame", "longFuse", "reverseControls"]` and initially enable
+`settings.enabledItems: ["heart"]`. All 4096 subsets of those twelve available items are supported configurations.
 Other catalog IDs remain unavailable.
 
 The Classic settings preset disables optional items and restores the four ordinary settings.
@@ -40,8 +40,10 @@ When Piercing Bomb or Power Bomb is enabled, a successful manual placement consu
 charge and publishes an unpaused Timed bomb with the corresponding captured blast. Power burns
 every floor cell in its Manhattan range, treating hard walls as unburned holes instead of line-of-
 sight barriers. Automatic Diarrhea placements remain Standard and do not consume either charge.
-Remote and Contact triggers, paused Timed bombs, concealment effects, and other optional mechanics
-remain unavailable.
+Remote Bomb consumes its charge only on successful placement and publishes a Standard bomb with a
+Remote trigger. Its owner's next retained manual bomb action detonates that exact live bomb. Fire
+and chains remain valid triggers; death and disconnect add no deadline. Contact triggers, paused
+Timed bombs, concealment effects, and other optional mechanics remain unavailable.
 
 ## Checked publication and replay
 
@@ -72,8 +74,9 @@ Short Fuse adds or refreshes a 600-physical-tick effect. Timed bombs capture the
 fuse or its ceiling-half when this item is enabled, even after its owner's effect expires.
 World, placement and detonation projections enforce the captured duration independently of
 current effects. Actual overdue deadlines fail capture before remaining-time conversion;
-an exact-deadline frozen bomb may expose zero remaining ticks. Paused/remote/contact triggers
-remain unavailable. No schema or archived protocol is changed.
+an exact-deadline frozen bomb may expose zero remaining ticks. Paused Timed and Contact
+triggers remain unavailable. Remote bombs have no fuse and do not use Short Fuse schedules.
+No schema or archived protocol is changed.
 
 Short Flame adds or refreshes a 600-physical-tick effect. Actor `bombRange` remains the base
 upgrade value; bombs and events publish their actual captured range one. Historical range
@@ -99,5 +102,5 @@ by `2^stack_count`; every supported speed is exactly divisible by 64. Collection
 tick, while each deadline expires before movement. A capped actor is excluded before collection
 distance and tie arbitration, allowing an eligible rival to collect the pickup.
 
-The eleven-item availability array is exact v8 data. Deploy server and web together and reload
-older v8 clients: a client built for ten items rejects the new room even when Power Bomb is disabled.
+The twelve-item availability array is exact v8 data. Deploy server and web together and reload
+older v8 clients: a client built for eleven items rejects the new room even when Remote Bomb is disabled.

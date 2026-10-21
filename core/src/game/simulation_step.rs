@@ -1,7 +1,6 @@
 use std::collections::BTreeMap;
 
 use super::{RoundResult, SeatInput, State, StepError, StepReport};
-use crate::game::bombs::{BlastKind, BombTrigger};
 use crate::game::damage::{DamageOutcome, DamagePreventionSource, apply_damage};
 use crate::game::events::{EventAudience, StepEvent, StepEventKind};
 use crate::game::geometry::MovementTrace;
@@ -18,20 +17,14 @@ impl State {
             });
         }
         let next_tick = Tick(self.tick.0.checked_add(1).ok_or(StepError::TickOverflow)?);
-        if let Some(id) = self.world.bombs.values().find_map(|bomb| {
-            (!matches!(bomb.trigger(), BombTrigger::Timed { .. })).then_some(bomb.id())
-        }) {
+        if let Some(id) = super::validation::unsupported_trigger(self.rules, &self.world) {
             return Err(StepError::UnsupportedBombTrigger(id));
         }
-        if let Some(id) = self.world.bombs.values().find_map(|bomb| {
-            let supported = match bomb.blast() {
-                BlastKind::Standard => true,
-                BlastKind::Piercing => self.rules.enabled_items().contains_piercing_bomb(),
-                BlastKind::Power => self.rules.enabled_items().contains_power_bomb(),
-            };
-            (!supported).then_some(bomb.id())
-        }) {
+        if let Some(id) = super::validation::unsupported_blast(self.rules, &self.world) {
             return Err(StepError::UnsupportedBombBlast(id));
+        }
+        if let Some(owner) = super::validation::duplicate_remote_owner(&self.world) {
+            return Err(StepError::DuplicateRemoteOwner(owner));
         }
         if self.result.is_some() {
             self.tick = next_tick;
@@ -60,8 +53,9 @@ impl State {
         let manual_actions = self.apply_inputs(inputs);
         let traces = self.move_living(next_tick);
         self.kill_on_existing_flames(&traces, next_tick, &mut events, &mut shield_prevented);
-        self.resolve_classic_manual_actions(&manual_actions, next_tick, &mut events);
-        self.resolve_explosions(next_tick, &mut events)?;
+        let remote_targets =
+            self.resolve_classic_manual_actions(&manual_actions, next_tick, &mut events);
+        self.resolve_explosions(next_tick, remote_targets, &mut events)?;
         self.kill_on_final_flames(next_tick, &mut events, &mut shield_prevented);
         if let Err(error) = self.collect_pickups(next_tick, &mut events) {
             debug_assert!(matches!(error, StepError::EffectExpiryOverflow(_)));

@@ -10,7 +10,7 @@ import type {
 } from '../v8/schema'
 import { useGameClient } from './useGameClient'
 import { ControlsDialog } from './ControlsDialog'
-import { bindingsSummary } from './controlLabels'
+import { bindingsSummary, keyLabel } from './controlLabels'
 import { loadControlBindings, saveControlBindings } from './controlPreferences'
 import { SoundControl } from '../audio/SoundControl'
 import { GameplaySettingsPanel } from './GameplaySettingsPanel'
@@ -246,6 +246,13 @@ export function GamePanelView({ state, actions }: { state: GameClientState; acti
   const round = state.room?.roundNumber
   const reconnecting = state.room && ['reconnecting', 'connecting', 'authenticating'].includes(state.connection)
   const arenaSnapshot = useMemo(() => presentSnapshot(state), [state])
+  const remoteArmed = Boolean(state.youSeat && arenaSnapshot?.state.actors
+    .find((actor) => actor.seat === state.youSeat)?.remoteArmed)
+  const focusHint = remoteArmed
+    ? format(copy.arena.remoteHint, {
+      bomb: bindings.bomb.map((code) => keyLabel(code, copy)).join(' / '),
+    })
+    : copy.arena.focusHint
   const updateBindings = (next: KeyboardBindings): void => {
     setBindings(next)
     saveControlBindings(next)
@@ -262,7 +269,7 @@ export function GamePanelView({ state, actions }: { state: GameClientState; acti
             <span>{copy.player.two}</span><strong>{state.room?.scores.two ?? 0}</strong></span>
         </div>
         <GameArena label={copy.arena.label} waitingText={waitingText} failureText={copy.arena.failure}
-          focusHint={copy.arena.focusHint} instructionsId="game-instructions" snapshot={arenaSnapshot}
+          focusHint={focusHint} instructionsId="game-instructions" snapshot={arenaSnapshot}
           youSeat={state.youSeat} enabled={Boolean(enabled)}
           bindings={bindings}
           onDirection={(direction) => actions.movement(direction)} onBomb={() => actions.placeBomb()} />

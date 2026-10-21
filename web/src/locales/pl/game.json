@@ -108,6 +108,7 @@
     "seconds": "sekundy",
     "speedCap": "Premie prędkości dodają po jednym poziomie, maksymalnie do 5 pól/s.",
     "heartDescription": "Chroni przed jednym śmiertelnym wybuchem, a potem na krótko przed obrażeniami.",
+    "remoteBombDescription": "Przechowuje jedną zdalnie odpaloną bombę. Podłóż ją klawiszem bomby, a później naciśnij ten sam klawisz, aby ją zdetonować.",
     "piercingBombDescription": "Przechowuje jedną specjalną bombę, której wybuch przechodzi przez zniszczalne bloki. Ładunek znika dopiero po udanym podłożeniu.",
     "powerBombDescription": "Przechowuje jedną specjalną bombę, której wybuch wypełnia obszar w kształcie rombu, ignoruje przeszkody i nie niszczy twardych ścian. Ładunek znika dopiero po udanym podłożeniu.",
     "shieldDescription": "Zapewnia 5 sekund odporności na obrażenia. Kolejna Tarcza odnawia ten czas.",
@@ -144,6 +145,7 @@
     "label": "Dziedziniec Grenadiers",
     "failure": "Nie udało się wyświetlić dziedzińca.",
     "focusHint": "Wybierz dziedziniec, aby sterować graczem.",
+    "remoteHint": "Bomba zdalna jest uzbrojona. Wybierz dziedziniec i naciśnij {{bomb}}, aby ją zdetonować.",
     "instructions": "Poruszaj się strzałkami lub klawiszami W A S D. Podłóż bombę spacją. Sterowanie działa tylko podczas rundy."
   },
   "controls": {

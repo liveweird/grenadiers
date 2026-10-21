@@ -149,6 +149,22 @@ describe('retained public arena scene', () => {
     expect(spark.visible).toBe(true)
     expect(flames.children[0].children.map(({ visible }) => visible)).toEqual([true, false])
   })
+  it('never re-enables the burning spark on an armed Remote bomb', () => {
+    const scene = new ArenaScene(1)
+    const snapshot = gameSnapshot()
+    snapshot.state.bombs[0].trigger = { type: 'remote' }
+    scene.update(snapshot, 0)
+    const spark = layers(scene)[3].children[0].children[2]
+    expect(spark.visible).toBe(false)
+    scene.render(90)
+    expect(spark.visible).toBe(false)
+    scene.setReducedMotion(true)
+    scene.render(180)
+    expect(spark.visible).toBe(false)
+    snapshot.room.phase = { type: 'result' }
+    scene.update(snapshot, 270)
+    expect(spark.visible).toBe(false)
+  })
 })
 describe('arena scene transitions and optional-item presentation', () => {
   it('respects reduced effects and resets interpolation across room/round identities', () => {

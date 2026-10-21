@@ -318,3 +318,21 @@ The scenario enables only Power Bomb and reveals the deterministic charge at (3,
 bomb planted at (1,2) burns and destroys the block at (3,2) beyond the retained, unburned hard
 wall at (2,2), leaves the escape cell (3,1) safe, and consumes the charge. Both peers must then
 agree on a fresh ordinary manual placement. Native execution remains a candidate gate.
+
+Deploy the v0.3.36 server and web assets together and reload connected browsers. The exact v8
+`availableItems` array grows to twelve entries, so older v8 clients reject the room even when
+Remote Bomb is disabled. No storage migration is required; active matches remain process-local.
+
+## Reproduce opt-in Remote Bomb manual detonation
+
+```sh
+chmod 444 core/tests/fixtures/arena-v2-remote-bomb.seed
+docker compose -f docker-compose.yaml -f docker-compose.remote-bomb.yaml up -d --no-build --force-recreate app
+E2E_REMOTE_BOMB_FIXTURE=arena-v2-remote-bomb npm --prefix e2e run test:remote-bomb
+docker compose -f docker-compose.yaml -f docker-compose.remote-bomb.yaml down
+```
+
+The scenario enables only Remote Bomb, reveals the deterministic charge at (3,1), and plants it
+there before escaping to (1,2). Both peers prove that the same bomb remains armed beyond the
+ordinary fuse duration. One fresh bomb action detonates that ID without another placement, after
+which a fresh Timed Standard bomb proves the normal path. Native execution remains a candidate gate.

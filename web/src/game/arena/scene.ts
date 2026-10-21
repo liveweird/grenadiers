@@ -132,7 +132,7 @@ export class ArenaScene {
     }
     const effects = this.running && !this.reducedMotion
     for (const [id, bomb] of this.bombs) {
-      bomb.spark.visible = !effects || (Math.floor(now / 90) + id) % 2 === 0
+      bomb.spark.visible = !bomb.remote && (!effects || (Math.floor(now / 90) + id) % 2 === 0)
     }
     for (const flame of this.flames.values()) {
       const frame = effects ? Math.floor(now / 80) % 2 : 0
@@ -165,7 +165,7 @@ export class ArenaScene {
     }
     for (const bomb of rows) {
       if (this.bombs.has(bomb.id)) continue
-      const drawing = makeBomb(bomb.blast)
+      const drawing = makeBomb(bomb.blast, bomb.trigger?.type)
       drawing.root.position.set((bomb.cell.column + 0.5) * TILE, (bomb.cell.row + 0.5) * TILE)
       this.bombsLayer.addChild(drawing.root)
       this.bombs.set(bomb.id, drawing)

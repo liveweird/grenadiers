@@ -2,7 +2,7 @@ import { expect, test, type Page } from '@playwright/test'
 import { latestSnapshot, observeGame, visibleActor, type ObservedGame } from '../tests/support/duel'
 import { moveSeatTo } from '../tests/support/movement'
 import { admissionBaseline, disconnectTransport, installTransportProbe } from '../tests/support/reconnect'
-import type { GameServerMessage, Seat } from '../../web/src/game/v10/schema'
+import type { GameServerMessage, Seat } from '../../web/src/game/v11/schema'
 
 test.beforeAll(() => expect(process.env.E2E_TELEPORTER_FIXTURE).toBe('arena-v2-teleporter'))
 type Snapshot = Extract<GameServerMessage, { type: 'snapshot' }>

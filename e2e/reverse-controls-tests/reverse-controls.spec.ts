@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test'
 import { latestSnapshot, observeGame, visibleActor, type ObservedGame } from '../tests/support/duel'
 import { moveTo } from '../tests/support/movement'
-import type { GameServerMessage } from '../../web/src/game/v10/schema'
+import type { GameServerMessage } from '../../web/src/game/v11/schema'
 
 test.beforeAll(() => expect(process.env.E2E_REVERSE_CONTROLS_FIXTURE)
   .toBe('arena-v2-reverse-controls'))

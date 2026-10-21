@@ -3,7 +3,7 @@ import { expectPaintedCanvas, latestSnapshot, observeGame, visibleActor, type Ob
 import { moveSeatTo } from '../tests/support/movement'
 import { admissionBaseline, disconnectTransport, installTransportProbe } from '../tests/support/reconnect'
 import { arenaTilePixels } from '../tests/support/compositor'
-import type { GameServerMessage } from '../../web/src/game/v10/schema'
+import type { GameServerMessage } from '../../web/src/game/v11/schema'
 
 test.beforeAll(() => expect(process.env.E2E_INVISIBLE_BOMBS_FIXTURE).toBe('arena-v2-invisible-bombs'))
 

@@ -1,0 +1,7 @@
+# Explicit operator reproduction mode for isolated production Oil Barrel acceptance.
+services:
+  app:
+    environment:
+      GAME_ROUND_SEED_FILE: /run/grenadiers/round.seed
+    volumes:
+      - ./core/tests/fixtures/arena-v2-oil-barrel.seed:/run/grenadiers/round.seed:ro

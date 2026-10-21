@@ -72,7 +72,7 @@ network access to the pinned schemas; successful rendering alone does not pass t
 
 The feature rollout notes below retain their original release versions and catalog counts.
 Reproduction commands use the checked-out paired image; current deployments use
-[gameplay-v10](game/protocol-v10.md) and its current catalog, even for an older optional item.
+[gameplay-v11](game/protocol-v11.md) and its current catalog, even for an older optional item.
 
 ## Reproduce a generated pickup round
 
@@ -422,3 +422,18 @@ post-exit bomb must receive the immediate successor of the reveal bomb's entity 
 the English desktop and Polish 320-pixel reduced-motion full-page captures named in the scenario.
 This sole-item route does not cover equipment-replacement grace; focused core and protocol tests do.
 Run it against the final predecessor-integrated image together with the cumulative native matrix.
+
+## Reproduce opt-in Oil Barrel reveal and persistent fire
+
+```sh
+chmod 444 core/tests/fixtures/arena-v2-oil-barrel.seed
+docker compose -f docker-compose.yaml -f docker-compose.oil-barrel.yaml up -d --no-build --force-recreate app
+E2E_OIL_BARREL_FIXTURE=arena-v2-oil-barrel npm --prefix e2e run test:oil-barrel
+docker compose -f docker-compose.yaml -f docker-compose.oil-barrel.yaml down
+```
+
+The read-only repeating-byte-31 fixture enables only Oil Barrel. Ordinary movement and Bomb input
+reveal the `(3,1)` site, prove its exact collision edge, ignite it, escape safely, and retain its
+burning state after finite flames expire and through a normal reconnect. Both recipient streams,
+English desktop and Polish 320-pixel reduced-motion rendering are checked. Run this source route
+against the final predecessor-integrated image together with the cumulative native matrix.

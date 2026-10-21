@@ -297,3 +297,15 @@ exactly one tile to `(12,1)` in both public streams. The scenario asserts no vic
 Equipment action, public event or private cooldown/report field, then captures English desktop and
 Polish 320-pixel reduced-motion views. It does not inject state, search seeds, retry, send direct
 gameplay commands or extend budgets. Native same-image execution remains pending.
+
+### Oil Barrel production-seed scenario
+
+Use `docker-compose.oil-barrel.yaml` with the mode-0444 repeating-byte-31 v2 seed fixture and
+`E2E_OIL_BARREL_FIXTURE=arena-v2-oil-barrel npm --prefix e2e run test:oil-barrel`. The 90-second,
+retry-free two-browser route enables only Oil Barrel and uses ordinary movement and Bomb input. It
+proves pending privacy while finite fire remains, safe revelation at `(3,1)`, the exact unlit east
+clamp at `x=2752`, legal adjacent ignition and escape, unchanged `(4,1)` and `(3,2)` soft blocks,
+finite-flame expiry after at least 60 ticks, persistent burning, survival, localized rendering and
+reconnect retention without a pickup event or synthesized audio cue. It does not inject state,
+search seeds, send direct gameplay commands or extend the timeout. Native same-image execution
+remains pending.

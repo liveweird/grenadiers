@@ -1,6 +1,6 @@
 # Gameplay v9: archived recipient-private actors, bombs and voluntary-action freeze
 
-This is the archived sixteen-item contract. The live paired contract is [gameplay v10](protocol-v10.md).
+This is the archived sixteen-item contract. The live paired contract is [gameplay v11](protocol-v11.md).
 
 The coordinated server/browser contract is `api/gameplay-v9.schema.json`, Rust
 `core::protocol::v9`, and generated `web/src/game/v9/schema.ts`. Version 8 is archived and rejected

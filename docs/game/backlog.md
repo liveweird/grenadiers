@@ -1,16 +1,16 @@
 # Gameplay and presentation backlog
 
-TURN, CONFIG and the first ART slice are implemented. This v0.3.46 source candidate contains 21
+TURN, CONFIG and the first ART slice are implemented. This v0.3.47 source candidate contains 22
 optional pickups: Heart, Shield, Golden Flame, Short Fuse, Short Flame, Long Fuse, Reverse
 Controls, Diarrhea, Slow-foot, Piercing Bomb, Power Bomb, Remote Bomb, Landmine and Invisibility
-Cloak, Stopwatch, Invisible Bombs, Teleporter, Wall Pass, Kick, Punch and Bracelet. Reviewed implementation
-source is complete; this candidate still requires accepted v0.3.45 parent integration, fresh native acceptance and final
+Cloak, Stopwatch, Invisible Bombs, Teleporter, Wall Pass, Kick, Punch, Bracelet and Oil Barrel. Reviewed implementation
+source is complete; this candidate still requires accepted v0.3.46 parent integration, fresh native acceptance and final
 CI. The remaining requested pickups stay outside this increment. Current publication status
 is recorded in [release notes](https://github.com/liveweird/grenadiers/releases), with source-bound
 acceptance records in [verification](../verification.md). Richer transitions and artwork remain
 follow-up work; see [pixel-art presentation](pixel-art.md) and
 [expanded item implementation](expanded-items.md).
-Updated 2026-10-21 after Bracelet source activation. Release acceptance is recorded in
+Updated 2026-10-21 after Oil Barrel source activation. Release acceptance is recorded in
 [verification](../verification.md).
 The [implementation plan](implementation-plan.md) remains the milestone/release reference;
 the [rules](rules.md) describe the current baseline and historical extension catalog.
@@ -154,7 +154,7 @@ instant action. Keep both in this requested pickup family without forcing them i
 | CURSE-FUSE / long fuse | Increase new bombs' detonation delay by 100% (double it). | Rounding, stacking/re-pick policy and composition with Short fuse, remote bombs and mines. |
 | CURSE-REVERSE / reverse controls | Up moves down, left moves right, and vice versa. | Apply to logical movement after personal remapping; define held-key transition/expiry without stuck movement or stale replay. |
 | CURSE-BLIND / invisible bombs | The afflicted player cannot see any bombs, including their own. | Recipient-specific bomb/event/effect projection and reconnect; explicitly define retained collision clues, fuse sounds and blast warnings. |
-| CURSE-OIL / oil barrel | Before detonation it blocks passage like a soft wall; after detonation it burns indefinitely. | Define how acquisition creates/places the barrel, detonation/chain triggers, blast footprint and destruction; bound creation and specify cleanup at round end without expiry during play. |
+| CURSE-OIL / oil barrel | **Prepared in v0.3.47.** Generated sites reveal as solid arena objects and burn until round end after ignition. | Eight-site lifetime cap, safe private revelation, immutable blast blocking, typed Wall Pass grace, shared fire hazards, replay and v11 publication are covered locally; native acceptance remains pending. |
 | CURSE-SWAP / teleporter | **Prepared in v0.3.42.** Immediately attempt the sole two-player rival swap. | Atomic complete-footprint safety, unsafe consumption, actor-specific overlap grace, persistent position epoch, reconnect and privacy are covered locally without RNG; native acceptance remains pending. |
 
 ## Special weapons: one single-use slot
@@ -181,6 +181,6 @@ Retain bounded scheduling, performance budgets, EN/PL documentation and full rel
 including same-image Compose/Kubernetes acceptance. Bots, mobs and larger matches remain
 separate tracks; their future interactions must be specified without making them prerequisites.
 
-Complete the entire expanded-item activation batch before starting ART-ATLAS. Bracelet is the
-current bounded source increment (v0.3.46); Oil remains after it. ART-ATLAS begins
+Complete the entire expanded-item activation batch before starting ART-ATLAS. Oil Barrel is the
+current bounded source increment (v0.3.47) and completes the planned item sequence. ART-ATLAS begins
 only after those item increments and their release gates are complete.

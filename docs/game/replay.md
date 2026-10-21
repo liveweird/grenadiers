@@ -61,6 +61,12 @@ revision-fenced readiness/settings actions and permanent authority release repla
 Legacy journals reject v6-only actions; configurable journals reject legacy unfenced readiness.
 Snapshot publication and personal admission bind the complete immutable settings identity.
 
+Oil Barrel keeps journal format 2 unchanged. Effective settings and the private generation record
+reconstruct every concealed, pending, unlit and burning site; complete state equality also includes
+typed Oil exit grace and persistent fire. Replay neither adds an Oil operation nor serializes a
+public pickup/event surrogate. Reconnect, pause, terminal freeze and new-round reset therefore
+follow the same accepted inputs, ticks and generation record as live execution.
+
 Expanded journals retain the enabled-item mask inside complete settings. They do not add a
 duplicate mask to round-start generation records. Format 2 accepts only the supported rules-5,
 generator-2 and M6 lifecycle tuple; older profiles require format 1 and empty item masks.

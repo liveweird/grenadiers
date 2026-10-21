@@ -3,6 +3,26 @@
 Records below are frozen against their named sources. Publication and later CI status are
 recorded in [release notes](https://github.com/liveweird/grenadiers/releases).
 
+## Oil Barrel candidate — 2026-10-21 — source static checks complete
+
+The v0.3.47 source candidate adds bounded Oil Barrel arena objects and activates gameplay v11.
+Domain coverage exercises the eight-site lifetime cap, delayed private revelation, immutable blast
+planning, persistent shared fire, typed Wall Pass grace, movement/bomb/Teleport/forced hazards,
+rollback, terminal freeze, reset and replay. Protocol coverage captures every private phase before
+filtering, publishes only sorted unlit/burning sites, rejects Oil pickup events and pins archived
+contracts. The catalog contains 22 items and all **4,194,304 masks**.
+
+The source-only activation adds a mode-0444 repeating-byte-31 fixture and a retry-free 90-second
+two-browser ordinary-input route. It checks pending privacy, exact unlit collision at `x=2752`,
+legal adjacent ignition with safe escape, unchanged adjacent blocks, finite-flame expiry after 60
+ticks, persistent painting in English desktop and Polish 320-pixel reduced-motion views, survival,
+quiet reconnect and both recipient streams. Planned captures are `oil-burning-desktop-en.png` and
+`oil-burning-polish-320-reduced.png`. This record does not claim the pending full server mask gates,
+accepted final v0.3.46 parent, native Compose/Kubernetes matrix, final CI or publication.
+Source parity is 49 documented scenarios. After the accepted v0.3.46 native parent is integrated,
+the cumulative same-image native matrix is expected to contain 59 scenarios; it is not executed or
+claimed by this source-only record.
+
 ## Bracelet candidate — 2026-10-21 — source static checks complete
 
 The v0.3.46 source candidate adds passive Bracelet contact shoves to gameplay v10 without a new

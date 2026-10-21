@@ -26,4 +26,4 @@ collection on that tick; the replacement stack affects movement on the next tick
 Slow foot uses catalog bit 15 and generator weight 15 after Diarrhea. Its initial catalog
 supported all 512 subsets and preserved every earlier 256-mask path; later items join the
 [current catalog](settings.md). Rules version 5, generator version 2 and journal format 2 remain
-unchanged. Current paired server/browser deployments use [gameplay-v10](protocol-v10.md).
+unchanged. Current paired server/browser deployments use [gameplay-v11](protocol-v11.md).

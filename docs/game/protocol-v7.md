@@ -1,6 +1,6 @@
 # Gameplay v7: recipient state and manual actions
 
-This is the archived v7 reference. The live contract is [gameplay v10](protocol-v10.md).
+This is the archived v7 reference. The live contract is [gameplay v11](protocol-v11.md).
 The closed v7 schema is `api/gameplay-v7.schema.json`;
 generated browser types are `web/src/game/v7/schema.ts`, with the active client in
 `web/src/game/client`. Server and browser migrate together; there is no live v6 fallback.

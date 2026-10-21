@@ -24,10 +24,11 @@ replay/compatibility expectations. Do not replace the golden outputs merely to h
 
 Expanded generator v2 appends each enabled optional item to a stable weighted pool. Wall Pass adds
 the weight-15 interval `[365,380)` after Teleporter, Kick adds `[380,395)`, Punch adds
-`[395,410)`, and Bracelet adds `[410,425)`. The all-items pool is 425; each equipment-only pool is
-115. Any mask without Bracelet preserves its v0.3.45 pool, draw count and exact seeded output; all
-2,097,152 item subsets are accepted. All 1,048,576 earlier twenty-item masks retain their exact
-outputs.
+`[395,410)`, Bracelet adds `[410,425)`, and Oil Barrel adds `[425,440)`. The all-items pool is 440;
+each sole-item pool is 115. Oil accepts whole mirrored placements only while its lifetime eight-site
+cap permits them; an over-cap draw keeps the soft blocks and makes no replacement draw. Any mask
+without Oil Barrel preserves its v0.3.46 pool, draw count and exact seeded output. All 4,194,304
+item subsets are accepted, and all 2,097,152 earlier masks retain their exact outputs.
 
 The server constructs typed worlds at each actual round start and keeps the generation record
 private. Layer transitions, collection, gameplay-v2 projection, and item graphics are integrated.

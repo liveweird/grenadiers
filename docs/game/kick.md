@@ -11,7 +11,7 @@ hops. Movement creates no placement, detonation or audio event. Timed bombs stil
 captured deadline; Remote bombs retain their owner action trigger.
 
 Direction, countdown and persistent `hasBeenKicked` provenance are private trusted state used for
-capture, resume, replay and archive rejection. They never appear in gameplay-v10 wire state or
+capture, resume, replay and archive rejection. They never appear in gameplay-v11 wire state or
 events. Public clients render the latest authoritative cell on the retained bomb drawing. Invisible
 Bombs filtering and Invisibility Cloak attribution rules remain unchanged.
 

@@ -1,49 +1,116 @@
 # Repository verification
 
-## Gameplay v9 rendered-duel driver correction — 2026-10-21 — fresh acceptance pending
+## Unreleased v0.3.38 candidate — source correction, fresh acceptance pending
 
-The first v39 native attempt at source `30c051c1a11d4dc0fd5f67cfe3075bea09c658a3`, image
-`sha256:52ae3c23ba15bc2a612014fbf112d6242ab039a54f6a53982918fba6211cf1a7`, exited one
-in its first Compose group: **7/8 default cases passed, one failed**. All later Compose groups,
-latency and Kubernetes were unattempted. Two valid result screenshots preceded two Axe scans;
-the three-second result hold expired during those scans. The subsequent dynamic `.actor-stats`
-locators detached for the expected next countdown; `boundingBox()` returned null. Independent
-review identifies a driver-ordering race, rather than a product layout defect.
+PR #84 at `97a85d4` failed its item shard in the default duel: all three configured
+attempts measured zero HUD grids after two full-page result screenshots outlasted the
+180-tick result hold. The classic shard and image producer passed; optional item steps
+were not attempted in that failed workflow. No release, merge or local promotion followed.
 
-The correction moves 320px geometry before Axe, reads both grids in one atomic DOM evaluation,
-requires exactly two nonempty grids, retains both horizontal bounds, and restores the original
-390px viewport before both unchanged Axe assertions. Product behavior, the three-second hold,
-timeouts, retries and acceptance limits are unchanged. Backend, web implementation and Cargo
-inputs remain byte-identical; this source adds only the driver correction and documentation.
-Static checks are recorded with the reviewed corrected source before fresh preparation.
+Correction `92fe626` moves the entire 320px overflow/exact-two/nonempty/in-bounds HUD
+proof into stable running state before movement or planting, restores 390px before gameplay,
+and preserves result, accessibility and synchronization assertions. E2E typecheck, lint,
+repository and diff checks pass; independent source review is clear. No timeout, retry,
+threshold or product behavior changed. Fresh full native and seven-job release CI gates remain pending.
+The sealed evidence below applies only to its named earlier source; it does not accept this
+changed candidate. Localhost:8085 remains the published v0.3.37 image.
 
-The failed source/preparation/report/images/input-integrity and cleanup records are preserved
-read-only: `FAILED.sha256` seals **1211 payloads**, SHA256
-`0a059f89ec762e2796c62e707cc95f0f94d34fa7724a5d50526f13e4defc8b73`;
-1212 durable files plus source archive SHA256
-`c49ddfe0cc35f12ed14665813fb46f19b6b2a37e700976192170cccd2398d77e` are byte-verified.
-Cleanup confirms owned resources/ports absent and published v37 image1736 ready. No pass carries
-forward. A completely fresh source archive, dependencies, image and 51+51 native matrix remain
-required, followed by exact-head CI and publication. Parent Cloak's records below remain v38
-source-specific evidence. Any parent source/tree correction still invalidates dependent results.
+## Gameplay v9 integration — source checks only, acceptance zero
 
-## Gameplay v9 accepted-Cloak source integration — 2026-10-21 — native pending
+The v0.3.39 integration combines foundation `7fbd910` with reviewed v0.3.38 source child
+`29bba9d` and exact corrected duel driver `92fe626`. Runtime, core, server, web, API and Cargo
+version inputs remain byte-identical to the v0.3.39 foundation. The seven-job shared-image CI
+layout and all 51 browser cases are retained. Current E2E type/lint/Knip checks, scenario parity,
+shell syntax and repository/diff checks pass; these static checks are not native acceptance.
 
-The v0.3.39 false-only freeze-status foundation integrates final Cloak raw source
-`bbc218b8784c4cf7fa51cc70d056deacf22303fd`, tree `1c01f2fcd6de9fed0aff997d633b78730d5992cd`.
-Cloak's fresh 102/102 acceptance, seal and reviewed captures remain source-specific v0.3.38
-records below; they are not fresh v9 evidence. Runtime, build, E2E and CI inputs are unchanged
-from checked v39 source `8bd561676ea4c1eede074d6f72fc2d6f2aae05ee`: its full web gate passes
-33,176 tests in 57 files, with inherited Mine core regression in debug/release, workspace
-format/lint, static scenario parity52, repository/YAML/diff checks. This merge carries only
-parent documentation/captures, retains v9 compatibility text and all earlier source evidence.
+No v0.3.39 Compose or Kubernetes case has been accepted or carried. Its fresh 51+51 matrix must
+start only after v0.3.38 is published and its exact accepted tree is proved. Subsequent v0.3.39
+normalization, CI, publication and promotion remain pending. The earlier v0.3.39 failed attempt
+and the v0.3.38 evidence below remain source-specific historical records with zero carry.
 
-Fresh v39 preparation/native acceptance require independent source and conditional-sequencing
-review. Normalization, PR, publication and promotion require full Cloak candidate/post-merge CI,
-publication and exact accepted-tree proof. Any required parent source/tree correction invalidates
-dependent preparation/results with zero carry. No v39 native result or publication is claimed.
+## Earlier Cloak source — 2026-10-21 — source-specific 102/102, audited and sealed
 
-## Invisibility Cloak fresh native acceptance — 2026-10-21 — 102/102, audited and sealed
+Frozen source `4d9a751810b0620e4761dfd7bcf813596f2f82ae`, tree
+`39c77c6ca2c835240e31a0d20261175c45ba5bef`, retains all runtime behavior from the earlier Cloak
+source while splitting CI browser coverage around one sealed image and checking responsive result
+grids before accessibility scans. The corrected driver requires exactly two nonempty grids and
+retains the original bounds, accessibility checks, result timing, timeouts and retry settings.
+Current E2E lint/types/Knip, 52-scenario parity, shell syntax and repository/diff checks pass.
+
+The complete fresh wrapper exited zero at `2026-10-21T04:30:38.553911+00:00`: **51 Compose plus
+51 Kubernetes**, zero retries and zero carried results. Independent raw review decodes all44
+reports to102 expected tests, each with one passed result/retry0/errors[]. Baseline74/74 plus
+optional28/28, all106 runtime PNGs,34 runtime security/identity records,17 distinct Kubernetes
+pod/UID and port-forward lifecycles,16 external fixtures and32 mode0444 records are retained.
+Runtime UID/GID65532:65532, CapEff0, NoNewPrivs1 and read-only root pass. Strict stdin Kubernetes
+validation reports3 valid resources; the pinned image vulnerability scan passes.
+
+Accepted native image: `sha256:6e372a7c76f22a62e77c6197e5acad02cb45d82756ba00d8e653405f609bf165`;
+ref `grenadiers-v0338-cloak-native-recheck:4d9a751`.
+Archive SHA256: source `ec98c69baaec986e8ff46342126a4bdb93a24a82c92da082398b5d688066adfb`;
+image `58e4e3cfd14208ab98f35a53af43a53b49afa8d247db152d0aef1386e4f968f1`;
+dependencies `0813d09f3e63548f083e3695229f172699894ddf2ede469f523081144433df26`;
+source-tree `6126435d5ac02a9f61066ebb1c6e2c825cc603aeffecdee3910a3c7eec1496a9`.
+Source inventory780 files/85 directories/0 links includes41 source PNGs, distinct from runtime
+captures. Dependencies8186 files/1305 directories/13 links include132 installed packages,
+42 optional omissions and0 required/version/metadata mismatches. Every pre/post source,
+dependency, directory, link, lock, archive, preparation and image comparison matches.
+Preparation seals1112 entries under
+`fd4b3b60dbdc00a801da66d4844578ecec7d55515ca2f839d45e54acc86f7f69`.
+Final seal **2,296 payloads**, SHA256 `b6a1fdcda68b1a91f5e05646fd424a990deff83a27654ef09dcbda04bf92eae2`;
+2,297 durable files plus the separate source archive are byte-verified and read-only.
+
+All22 latency cases per target pass; every profile retains all20 observations with zero
+exceedances of the unchanged250ms limit. Independent raw audits verify the complete paired
+stationary bomb-empty baseline, cutoff/round/ingress/dispatch/page chronology and every key after
+readiness.
+
+| Target | Local maximum | Shaped50ms maximum | Exceedances |
+| --- | ---: | ---: | ---: |
+| Compose | 51.311013ms | 163.900773ms | 0 |
+| Kubernetes | 61.023530ms | 165.842146ms | 0 |
+
+Compose CPU usage535800→1270544us, delta734744us, cpu.max `max 100000`; Kubernetes
+445086→1062420us, delta617334us, cpu.max `50000 100000` (500m). Both throttle-count/time
+deltas are0/0. Supplemental v2 monitors retain78/63 samples and exited zero. CPU intervals
+include pre-gate waiting and sampler probes, not pure gameplay cost. Optional cpu.pressure is
+explicitly unavailable. Actual worker acknowledgements precede each window; bounded checks were
+released between windows, then fresh acknowledgements obtained for Kubernetes. A pre-approval
+Compose OrbStack90.4% observation remains preserved, caused deferral, and was followed by five
+fresh quiet samples before manual approval. There is no continuous hold or globally idle claim.
+Heavy work resumed only after both actual latency exits, raw audits and monitor completions.
+
+Root viewed only two fresh Compose pre-collection captures: [English desktop](screenshots/invisibility-cloak-desktop.png)
+and [Polish320px reduced motion](screenshots/invisibility-cloak-polish-320.png). The pickup and
+HUD are readable; Polish vertical scrolling and unfocused-arena prompt are expected. These
+stills do not prove privacy. Paired native assertions prove owner visibility, exact peer-hidden
+identity and collection cue, compositor removal, reconnect retention, and current-position reveal
+at collection+600 physical ticks. Kubernetes captures were retained but not viewed.
+
+All owned Compose resources, namespace, ports18284/18285 and port-forwards are absent. Default
+localhost8085 remains the exact published v0.3.37 image1736d193; health/ready/index200 and served
+index/bundle bytes match the container. Earlier source6e9 Cloak evidence and the failed v39 driver
+attempt remain immutable historical records with zero carry. No sample, threshold, fixture,
+product behavior, timeout, deadline or retry policy was relaxed.
+
+The next release gates are normalization of these eight final documentation/capture paths,
+PR84 exact-head candidate and post-merge CI, publication and exact accepted-image promotion.
+CI requires all seven named jobs and51 browser cases split23 item/default plus28 classic. One
+image is built/scanned/transferred and checksum/ID/source-verified by both shards inside each
+workflow. Independent GitHub x86 builds are not required to match this native ARM image ID.
+Parent v0.3.37 is fully published/tree-verified. No registry image or hosted deployment is claimed.
+
+## Historical pre-acceptance Cloak CI job envelope correction — 2026-10-21
+
+PR84 candidate `b34200306b42b4db9aa4a841534733b2f3a01287` had a successful push workflow, but PR workflow `39538079075` exceeded the browser job’s unchanged 20-minute cap. The item/default suites and classic match, reconnect, all22 latency cases, hardening and controls passed; the final audio test was cancelled after starting normally. GitHub’s annotation and complete raw logs prove aggregate job exhaustion. The cancelled run is preserved separately and does not pass the release gate.
+
+Browser coverage is being divided between item and classic jobs, with one built and scanned OCI image transferred by a verified archive. Every existing suite, readiness check, sample, budget, timeout and zero-retry setting remains required. Updated release verification must require all image-build/browser-shard jobs and the complete51 browser cases.
+
+The responsive rendered-duel check also moves before both result accessibility scans. The previous v39 attempt at source `30c051c1a11d4dc0fd5f67cfe3075bea09c658a3` demonstrated that two scans could outlast the three-second results screen before DOM geometry was read. The corrected check captures both grids atomically, requires exactly two nonempty rectangles, retains the320px bounds, and restores390px before unchanged accessibility scans. Product result timing is unchanged. The failed attempt’s1211 payloads remain sealed by `0a059f89ec762e2796c62e707cc95f0f94d34fa7724a5d50526f13e4defc8b73`; its7 passes and1 failure contribute no carried results.
+
+The previous102/102 Cloak evidence below is immutable historical evidence for its exact source. These CI/driver corrections change the source tree, requiring a fresh source archive, dependencies, built image, entire51 Compose plus51 Kubernetes matrix, independent audit/seal and exact-head candidate/post-merge CI before publication or local promotion. Dependent v39 evidence must be re-integrated from the final corrected parent and redone with zero carry. Published/local v0.3.37 remains unchanged.
+
+## Historical Invisibility Cloak native acceptance — 2026-10-21 — 102/102 at source 6e9be94
 
 Frozen source `6e9be9426d0fa7639877a506608c606794e7e2db`, tree `419d904e011b525d0b3fcbfdb65f304e1f77fbbf`, retains the corrected Cloak reveal-position driver and
 integrates accepted Landmine raw `8db1a070a0b65f8d3e679b2d12cee1783162a60a`. Prior suites remain
@@ -4816,69 +4883,3 @@ server, Cargo, API, Short Fuse client/protocol/locales and dedicated item scenar
 unchanged from the reviewed Short Fuse candidate. Its unit baseline remains unchanged;
 the production build and E2E static checks pass for this responsive integration.
 Fresh native Compose/Kubernetes acceptance and exact-head CI remain pending.
-
-## Historical gameplay v9 source integration before final Cloak acceptance — 2026-10-21 — native pending
-
-The foundation now integrates reviewed Cloak source `6e9be9426d0fa7639877a506608c606794e7e2db`
-and its corrected accepted Landmine parent. Core/protocol/server/Cargo/web/E2E inputs are unchanged
-from checked v9 integration `8bd561676ea4c1eede074d6f72fc2d6f2aae05ee`; this merge carries only
-parent documentation/captures. That integration passed 33,176 shuffled web tests in57 files,
-coverage95.38/91.08/95.82/97.77, contracts/lint/Knip/types/build, E2E static52-scenario parity,
-the inherited Landmine fresh-Standard regression in both profiles, formatter, workspace/all-target
-Clippy, repository, YAML and diff checks. These are source-bound results, not newly rerun suites.
-
-Final freezing still requires the accepted raw Cloak parent and independent review. No v9
-preparation/archive/image/native/hosted CI or publication exists yet. Parent release/tree
-proof remains required before v9 release actions. Original foundation suites remain historical.
-
-## Historical gameplay v9 integration — checkpoint before source checks
-
-Reviewed foundation source `a7c0e6cb925996025c7dc077a94d32f1f72edfab` integrates
-pending Cloak source `5b6a10bff489e7d0afddf29bbfd020e537503723`, retaining the corrected
-reveal position, rolling-history placement-ID checks, inherited readiness drivers and security
-patch. Current helpers must use v9 while archived fixtures remain pinned. This source integration
-has not run checks or native acceptance. Final freezing requires the accepted raw Cloak parent;
-PR creation, publication and promotion require its complete release/tree proof. The older
-foundation suites below remain evidence for their original source only.
-
-## Historical gameplay v9 foundation source — 2026-10-18 — local checks complete
-
-The v0.3.39 candidate moves the paired server/browser endpoint to gameplay v9 without changing the
-Expanded-v5 rules identity, generated-v2 arenas, journal format 2, fourteen-item catalog, 16,384
-enabled-item masks or simulation behavior. Every visible actor now carries the required
-`voluntaryActionsFrozen` boolean; production capture emits false and foundation validation rejects
-true. Hidden actors retain their exact identity/seat/alive shape. Stopwatch and paused Timed bombs
-remain unavailable, while existing enabled Remote and Contact bombs retain their untimed behavior.
-
-Focused Rust and browser checks cover version-9 authentication, archived-v8 actor shape, the new
-visible/hidden union, false-only semantics, unavailable Stopwatch, paused-bomb rejection, generated
-contract drift and unchanged frame bounds. An active-v9 contract regression validates every one of
-the 16,384 subsets of its independently pinned fourteen-item catalog. Production server, browser
-and E2E helpers now use v9; archived v8 validation fixtures remain separate. Rust policy tests
-exercise all 22 reserved item IDs against independently pinned v8 and v9 fourteen-item catalogs.
-
-Debug and release suites pass **627 core tests, 195 server tests and two doctests**; four dedicated
-performance profiles remain ignored. Rust line coverage is **92.27% (13,162/14,265)**, above the
-unchanged 80% floor. All **33,176 web tests** across 57 files pass with statement/branch/function/
-line coverage of **95.38/91.08/95.82/97.77%**. Formatting, all-target Clippy with warnings denied,
-repository limits, generated contracts, lint, Knip, production and renderer-diagnostic builds,
-E2E static checks and **41-scenario parity** pass. Cargo-deny and both cached offline npm audits pass;
-strict pinned Kubernetes schemas validate all three resources.
-
-Independent core/server and browser/schema reviews are clear after correcting explicit archived-v8
-catalog pinning, v9 policy propagation through binding, production-sized false boolean bounds and
-active documentation references. A differing thirteen-item internal policy regression proves that
-binding uses the selected catalog rather than the archived one. Archived v8 recipient test helpers
-are independent fixtures rather than a shipping old client; active v9 production guards retain
-separate duplicate-entity and privacy tests. No focused asymmetric second-recipient serialization
-failure injection was added; paired preparation still structurally precedes transaction commit.
-
-The final instrumented tests pass. Their first report write failed because the external Cargo target
-left the ignored local `target/` output directory absent. Creating that directory and completing the
-report-only stage produced the coverage result above without rerunning tests or changing source.
-
-The first full web gate exposed missing generated-file lint and Knip entries for the new v9 output;
-the corrected complete gate passes. The first Rust coverage and Kubernetes schema attempts reached
-expected sandbox listener and DNS restrictions; their preserved logs precede authorized reruns of
-the identical gates, which pass. No native browser run, candidate image, hosted CI result,
-Stopwatch activation or publication is claimed.

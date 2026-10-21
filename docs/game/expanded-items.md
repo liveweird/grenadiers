@@ -1,11 +1,14 @@
 # Expanded item implementation plan
 
-Invisibility Cloak now passes fresh same-image **51/51 Compose and 51/51 Kubernetes** cases,
-with zero retries or carried passes. Independent raw review is clear and final evidence is sealed.
-Landmine v0.3.37 is published after both candidate workflows and post-merge CI passed five jobs
-and all 50 browser cases; its accepted image is deployed locally. Cloak retains the corrected
-settled-position reveal driver and private-recipient rules. Its exact-head candidate/post-merge
-CI and publication remain gates. Earlier attempts remain source-specific historical evidence.
+Invisibility Cloak remains an **unreleased source candidate**. Source `4d9a751` passed
+51 Compose and 51 Kubernetes cases, but PR #84 CI exposed a duel-driver timing race:
+after result screenshots, the three-second result hold had ended and the HUD grids were gone.
+Correction `92fe626` moves the complete 320px HUD layout proof into the stable running phase,
+restoring the viewport before gameplay; bounded checks and independent source review pass.
+Fresh complete acceptance and both seven-job candidate workflows are required for this changed
+source. Earlier native evidence stays sealed and source-specific, with zero carried results.
+Landmine v0.3.37 remains published and deployed locally. CI retains one image, two complete
+browser shards (23 item/default plus 28 classic cases), and the existing 20-minute job limits.
 
 Status: [Heart](heart.md), [Shield](shield.md), [Golden Flame](golden-flame.md),
 [Short Fuse](short-fuse.md) and [Short Flame](short-flame.md) are published through v0.3.29.

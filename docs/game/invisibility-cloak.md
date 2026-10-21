@@ -16,19 +16,27 @@ Audience is captured at emission and is not recomputed from the final world in a
 Both complete recipient encodings are validated before either is published; legacy protocols reject
 the private semantics.
 
-Version 0.3.38 introduced Invisibility Cloak with generator weight 15 after Landmine. The expanded
-pool contains 320 entries and preserves every earlier 8192-mask path. Its fourteen-item catalog
-supports all 16384 subsets and is retained by [gameplay-v9](protocol-v9.md). Rules version 5,
-generator version 2 and journal format 2 remain unchanged. Reload older browsers when deploying
-the paired server/web upgrade.
+Unreleased version 0.3.38 introduces Invisibility Cloak with generator weight 15 after Landmine.
+The expanded pool contains 320 entries and preserves every earlier 8192-mask path. Its fourteen-item
+catalog supports all 16384 subsets and is retained by [gameplay-v9](protocol-v9.md). Rules version 5,
+generator version 2 and journal format 2 remain unchanged. Reload older browsers when deploying the
+paired server/web upgrade.
 
 
-Version 0.3.38 acceptance passes 51 Compose and 51 Kubernetes cases against its frozen v8
-source, with zero retries or carried passes. Fresh v0.3.39/v9 acceptance remains pending. Both clients prove natural acquisition; the owner retains its actor and timed
+Current driver correction `92fe626` is source-reviewed and passes bounded static checks, but v0.3.38
+remains unreleased and requires fresh complete native and seven-job release CI acceptance. PR #84
+exposed a result-screen HUD timing race; the complete narrow HUD proof now runs before movement in
+stable running state. Published/local deployment remains v0.3.37. The following evidence is
+historical and specific to earlier source `4d9a751`, with no carried acceptance. The v0.3.39
+integration has zero acceptance; its fresh matrix must follow published v0.3.38 exact-tree proof.
+
+Earlier corrected source `4d9a751` / image `6e372a7c` passes 51 Compose and 51 Kubernetes cases
+with zero retries or carried passes. The 2,296-payload final evidence seal is
+`b6a1fdcda68b1a91f5e05646fd424a990deff83a27654ef09dcbda04bf92eae2`. Both clients prove natural acquisition; the owner retains its actor and timed
 effect while the peer receives only the hidden identity and no attributable collection cue.
 Compositor pixels prove peer removal, reconnect preserves privacy, and the actor reappears at
 its current settled position after exactly 600 physical ticks. Independent raw review is clear
-and evidence sealed. Exact-head candidate/post-merge CI and publication remain release gates.
+and evidence sealed. Exact-head candidate/post-merge CI must pass seven jobs and all 51 browser cases; publication remains a separate gate.
 
 
 Fresh reviewed Compose [English desktop](../screenshots/invisibility-cloak-desktop.png) and

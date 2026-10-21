@@ -1,6 +1,6 @@
 use std::collections::BTreeSet;
 
-use super::{RulesConfig, World};
+use super::{RulesConfig, State, World};
 use crate::game::{BlastKind, BombTrigger, EntityId};
 
 pub(super) fn unsupported_trigger(rules: RulesConfig, world: &World) -> Option<EntityId> {
@@ -51,5 +51,21 @@ pub(super) fn unsupported_punch_history(rules: RulesConfig, world: &World) -> Op
             && (!rules.enabled_items().contains_punch()
                 || matches!(bomb.trigger(), BombTrigger::Contact));
         invalid.then_some(bomb.id())
+    })
+}
+
+pub(super) fn unsupported_shove_history(state: &State) -> Option<EntityId> {
+    let latest_running_tick = state
+        .construction_tick
+        .0
+        .checked_add(state.running_updates)
+        .map(crate::game::Tick);
+    state.actors.iter().find_map(|actor| {
+        actor.last_successful_shove_tick.and_then(|tick| {
+            let invalid = !state.rules.enabled_items().contains_bracelet()
+                || tick <= state.construction_tick
+                || latest_running_tick.is_none_or(|latest| tick > latest);
+            invalid.then_some(actor.id)
+        })
     })
 }

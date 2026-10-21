@@ -179,7 +179,6 @@ fn null_admission(room: &RoomView) -> Result<String, ProjectionError> {
 fn null_admission_validates_the_complete_raw_room_dto() {
     let room = forged_waiting_room();
     assert!(null_admission(&room).is_ok());
-
     let mut duplicate_seats = room.clone();
     duplicate_seats.seats[1].seat = Seat::One;
     assert_eq!(
@@ -259,6 +258,7 @@ fn bomb_report(
         tick,
         traces: crate::game::SeatId::ALL
             .map(|seat| crate::game::MovementTrace::new(state.actors()[seat.index()].position())),
+        forced_movement: None,
         events: vec![StepEvent::bomb(
             tick,
             EventAudience::Both,

@@ -59,6 +59,10 @@ impl MovementTrace {
         }
     }
 
+    pub(crate) const fn start(&self) -> Position {
+        self.start
+    }
+
     pub(crate) fn push(&mut self, segment: MovementSegment) {
         assert!(self.len < 2, "movement traces contain at most two segments");
         self.segments[usize::from(self.len)] = Some(segment);

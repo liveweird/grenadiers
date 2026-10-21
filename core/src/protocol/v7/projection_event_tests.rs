@@ -11,6 +11,7 @@ fn pickup_report(state: &crate::game::State, cell: crate::game::CellId) -> crate
         tick,
         traces: crate::game::SeatId::ALL
             .map(|seat| crate::game::MovementTrace::new(state.actors()[seat.index()].position())),
+        forced_movement: None,
         events: vec![StepEvent::new(
             tick,
             EventAudience::Both,
@@ -70,6 +71,7 @@ fn classic_capture_rejects_expanded_item_only_event_records() {
             traces: crate::game::SeatId::ALL.map(|seat| {
                 crate::game::MovementTrace::new(state.actors()[seat.index()].position())
             }),
+            forced_movement: None,
             events: vec![StepEvent::new(
                 tick,
                 EventAudience::Both,

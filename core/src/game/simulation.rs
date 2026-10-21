@@ -42,6 +42,7 @@ pub struct Actor {
     effects: TimedEffects,
     damage_grace: Option<DamageGrace>,
     last_successful_punch_tick: Option<Tick>,
+    last_successful_shove_tick: Option<Tick>,
 }
 
 impl Actor {
@@ -122,6 +123,7 @@ pub struct State {
     result: Option<RoundResult>,
     assignment: RoundAssignment,
     last_teleport_tick: Option<Tick>,
+    construction_tick: Tick,
 }
 
 impl State {
@@ -229,6 +231,7 @@ impl State {
             result: None,
             assignment,
             last_teleport_tick: None,
+            construction_tick: tick,
         })
     }
 }
@@ -243,6 +246,9 @@ mod bomb_order_acceptance_tests;
 #[cfg(test)]
 #[path = "bomb_trigger_tests.rs"]
 mod bomb_trigger_tests;
+#[cfg(test)]
+#[path = "bracelet_tests.rs"]
+mod bracelet_tests;
 #[cfg(test)]
 #[path = "simulation_constructor_tests.rs"]
 mod constructor_tests;
@@ -323,6 +329,10 @@ mod round_result_tests;
 #[cfg(test)]
 #[path = "short_fuse_tests.rs"]
 mod short_fuse_tests;
+#[path = "simulation_shove.rs"]
+mod shove;
+#[path = "shove_geometry.rs"]
+mod shove_geometry;
 #[path = "simulation_step.rs"]
 mod step;
 #[cfg(test)]

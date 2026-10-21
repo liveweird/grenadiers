@@ -12,6 +12,21 @@ use super::world::World;
 pub(crate) struct MovementOutcome {
     pub(crate) trace: MovementTrace,
     pub(crate) kick: Option<(EntityId, Direction)>,
+    pub(crate) original_budget: i32,
+    pub(crate) forward_segment: Option<MovementSegment>,
+}
+
+#[derive(Default)]
+struct MovementCapture {
+    kick: Option<(EntityId, Direction)>,
+    forward_segment: Option<MovementSegment>,
+}
+
+#[derive(Clone, Copy)]
+struct MoveRequest {
+    direction: Direction,
+    distance: i32,
+    forward: bool,
 }
 
 pub(crate) struct AdvanceConfig<'a> {
@@ -29,11 +44,16 @@ pub(crate) fn advance_actor(
     config: &AdvanceConfig<'_>,
 ) -> MovementOutcome {
     let mut trace = MovementTrace::new(actor.position);
-    let mut kick = None;
+    let mut capture = MovementCapture::default();
     let Some(raw_direction) = actor.held.active() else {
         actor.residual = 0;
         actor.pending_turn = None;
-        return MovementOutcome { trace, kick };
+        return MovementOutcome {
+            trace,
+            kick: capture.kick,
+            original_budget: 0,
+            forward_segment: capture.forward_segment,
+        };
     };
     let direction = if actor.effects().reverses_controls(config.tick) {
         opposite(raw_direction)
@@ -57,6 +77,7 @@ pub(crate) fn advance_actor(
     };
     let numerator = actor.residual + speed;
     let mut budget = i32::from(numerator / TICKS_PER_SECOND);
+    let original_budget = budget;
     actor.residual = numerator % TICKS_PER_SECOND;
 
     if let Some(turn) = actor.pending_turn {
@@ -67,20 +88,46 @@ pub(crate) fn advance_actor(
             &mut budget,
             &mut trace,
             config,
-            &mut kick,
+            &mut capture,
         );
-        return MovementOutcome { trace, kick };
+        return MovementOutcome {
+            trace,
+            kick: capture.kick,
+            original_budget,
+            forward_segment: capture.forward_segment,
+        };
     }
     if same_axis(actor.heading, direction) {
         actor.heading = direction;
-        kick = move_actor(world, actor, direction, budget, &mut trace, config, true);
-        return MovementOutcome { trace, kick };
+        move_actor(
+            world,
+            actor,
+            MoveRequest {
+                direction,
+                distance: budget,
+                forward: true,
+            },
+            &mut trace,
+            config,
+            &mut capture,
+        );
+        return MovementOutcome {
+            trace,
+            kick: capture.kick,
+            original_budget,
+            forward_segment: capture.forward_segment,
+        };
     }
 
     let coordinate = alignment_coordinate(direction, actor.position);
     let target = nearest_center(coordinate);
     if (coordinate - target).abs() > config.turn_assist {
-        return MovementOutcome { trace, kick };
+        return MovementOutcome {
+            trace,
+            kick: capture.kick,
+            original_budget,
+            forward_segment: capture.forward_segment,
+        };
     }
     let correction = target - coordinate;
     if correction != 0 {
@@ -95,7 +142,12 @@ pub(crate) fn advance_actor(
             &actor.soft_wall_grace,
         ) != correction.abs()
         {
-            return MovementOutcome { trace, kick };
+            return MovementOutcome {
+                trace,
+                kick: capture.kick,
+                original_budget,
+                forward_segment: capture.forward_segment,
+            };
         }
         let turn = TurnAssist { direction, target };
         actor.pending_turn = Some(turn);
@@ -106,13 +158,29 @@ pub(crate) fn advance_actor(
             &mut budget,
             &mut trace,
             config,
-            &mut kick,
+            &mut capture,
         );
     } else {
         actor.heading = direction;
-        kick = move_actor(world, actor, direction, budget, &mut trace, config, true);
+        move_actor(
+            world,
+            actor,
+            MoveRequest {
+                direction,
+                distance: budget,
+                forward: true,
+            },
+            &mut trace,
+            config,
+            &mut capture,
+        );
     }
-    MovementOutcome { trace, kick }
+    MovementOutcome {
+        trace,
+        kick: capture.kick,
+        original_budget,
+        forward_segment: capture.forward_segment,
+    }
 }
 
 const fn opposite(direction: Direction) -> Direction {
@@ -131,7 +199,7 @@ fn continue_turn(
     budget: &mut i32,
     trace: &mut MovementTrace,
     config: &AdvanceConfig<'_>,
-    kick: &mut Option<(EntityId, Direction)>,
+    capture: &mut MovementCapture,
 ) {
     let coordinate = alignment_coordinate(turn.direction, actor.position);
     let correction = turn.target - coordinate;
@@ -139,7 +207,18 @@ fn continue_turn(
         let direction = correction_direction(turn.direction, correction);
         let distance = correction.abs().min(*budget);
         let before = actor.position;
-        let _ = move_actor(world, actor, direction, distance, trace, config, false);
+        move_actor(
+            world,
+            actor,
+            MoveRequest {
+                direction,
+                distance,
+                forward: false,
+            },
+            trace,
+            config,
+            capture,
+        );
         let moved = match direction {
             Direction::East | Direction::West => (actor.position.x - before.x).abs(),
             Direction::North | Direction::South => (actor.position.y - before.y).abs(),
@@ -152,45 +231,62 @@ fn continue_turn(
     }
     actor.pending_turn = None;
     actor.heading = turn.direction;
-    *kick = move_actor(world, actor, turn.direction, *budget, trace, config, true);
+    move_actor(
+        world,
+        actor,
+        MoveRequest {
+            direction: turn.direction,
+            distance: *budget,
+            forward: true,
+        },
+        trace,
+        config,
+        capture,
+    );
 }
 
 fn move_actor(
     world: &World,
     actor: &mut Actor,
-    direction: Direction,
-    requested: i32,
+    request: MoveRequest,
     trace: &mut MovementTrace,
     config: &AdvanceConfig<'_>,
-    forward: bool,
-) -> Option<(EntityId, Direction)> {
+    capture: &mut MovementCapture,
+) {
     let collision = allowed_distance_with_blocker(
         world,
         actor.position,
-        direction,
-        requested,
+        request.direction,
+        request.distance,
         &actor.bomb_grace,
         config.wall_pass_enabled && actor.inventory().can_pass_soft_walls(),
         &actor.soft_wall_grace,
     );
     let distance = collision.distance;
-    let kick = if forward && config.kick_enabled && requested > 0 && !collision.ambiguous {
-        collision
-            .bomb
-            .filter(|id| !config.moving_at_start.contains(id))
-            .map(|id| (id, direction))
-    } else {
-        None
-    };
+    let kick =
+        if request.forward && config.kick_enabled && request.distance > 0 && !collision.ambiguous {
+            collision
+                .bomb
+                .filter(|id| !config.moving_at_start.contains(id))
+                .map(|id| (id, request.direction))
+        } else {
+            None
+        };
+    if request.forward {
+        capture.kick = kick;
+    }
     if distance == 0 {
-        return kick;
+        return;
     }
     let start = actor.position;
-    actor.position = translated(start, direction, distance);
-    trace.push(MovementSegment::new(start, actor.position));
+    actor.position = translated(start, request.direction, distance);
+    let segment = MovementSegment::new(start, actor.position);
+    trace.push(segment);
+    if request.forward {
+        capture.forward_segment = Some(segment);
+    }
     prune_bomb_grace(world, actor);
     prune_soft_wall_grace(world, actor);
-    kick
 }
 
 pub(crate) fn overlapping_soft_blocks(world: &World, position: Position) -> BTreeSet<CellId> {
@@ -209,7 +305,7 @@ pub(crate) fn prune_soft_wall_grace(world: &World, actor: &mut Actor) {
     });
 }
 
-fn prune_bomb_grace(world: &World, actor: &mut Actor) {
+pub(crate) fn prune_bomb_grace(world: &World, actor: &mut Actor) {
     actor.bomb_grace.retain(|id| {
         world
             .bombs
@@ -218,7 +314,7 @@ fn prune_bomb_grace(world: &World, actor: &mut Actor) {
     });
 }
 
-fn translated(position: Position, direction: Direction, distance: i32) -> Position {
+pub(crate) fn translated(position: Position, direction: Direction, distance: i32) -> Position {
     match direction {
         Direction::North => Position {
             y: position.y - distance,

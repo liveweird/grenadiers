@@ -22,6 +22,7 @@ impl Actor {
             effects: TimedEffects::default(),
             damage_grace: None,
             last_successful_punch_tick: None,
+            last_successful_shove_tick: None,
         }
     }
 }

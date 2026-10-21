@@ -63,6 +63,7 @@ pub(super) fn wire_pickup(value: game::PickupKind) -> PickupKind {
         game::PickupKind::MovementSpeed => PickupKind::MovementSpeed,
         game::PickupKind::Kick => PickupKind::Kick,
         game::PickupKind::Punch => PickupKind::Punch,
+        game::PickupKind::Bracelet => PickupKind::Bracelet,
         game::PickupKind::WallPass => PickupKind::WallPass,
         game::PickupKind::Heart => PickupKind::Heart,
         game::PickupKind::RemoteBomb => PickupKind::RemoteBomb,

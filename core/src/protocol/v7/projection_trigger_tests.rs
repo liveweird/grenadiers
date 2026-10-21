@@ -28,6 +28,7 @@ fn bomb_report(
         tick,
         traces: crate::game::SeatId::ALL
             .map(|seat| crate::game::MovementTrace::new(state.actors()[seat.index()].position())),
+        forced_movement: None,
         events: vec![StepEvent::new(
             tick,
             EventAudience::Both,

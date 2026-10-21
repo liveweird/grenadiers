@@ -31,6 +31,16 @@ impl Actor {
     pub(crate) fn restore_punch_cooldown(&mut self, tick: Option<Tick>) {
         self.last_successful_punch_tick = tick;
     }
+
+    #[allow(dead_code)]
+    pub(crate) const fn last_successful_shove_tick(&self) -> Option<Tick> {
+        self.last_successful_shove_tick
+    }
+
+    #[allow(dead_code)]
+    pub(crate) fn restore_shove_cooldown(&mut self, tick: Option<Tick>) {
+        self.last_successful_shove_tick = tick;
+    }
 }
 
 impl State {

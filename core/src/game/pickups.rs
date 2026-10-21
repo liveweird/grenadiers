@@ -12,6 +12,7 @@ pub enum PickupKind {
     MovementSpeed,
     Kick,
     Punch,
+    Bracelet,
     WallPass,
     Heart,
     RemoteBomb,
@@ -37,6 +38,7 @@ impl PickupKind {
         match self {
             Self::Kick => enabled.contains_kick(),
             Self::Punch => enabled.contains_punch(),
+            Self::Bracelet => enabled.contains_bracelet(),
             Self::WallPass => enabled.contains_wall_pass(),
             Self::Heart => enabled.contains_heart(),
             Self::RemoteBomb => enabled.contains_remote_bomb(),

@@ -94,7 +94,9 @@ test('two browsers observe one persistent mine and its contact detonation', asyn
       expect(events(game).some(({ kind }) => kind.type === 'bombDetonated' && kind.bomb.id === mine.id)).toBe(false)
     }
 
-    const countsBefore = games.map((game) => events(game).filter(({ kind }) => kind.type === 'bombPlaced').length)
+    // Retained history may shrink while contact is awaited; fresh IDs prove new placements.
+    const priorBombIds = games.map((game) => new Set(events(game).flatMap(({ kind }) =>
+      kind.type === 'bombPlaced' ? [kind.bomb.id] : [])))
     await one.getByRole('region', { name: 'Grenadiers courtyard' }).click()
     await one.keyboard.down('ArrowRight')
     try {
@@ -115,7 +117,8 @@ test('two browsers observe one persistent mine and its contact detonation', asyn
         cell.column === mine.cell.column && cell.row === mine.cell.row)
       expect(originFlame?.expiresAt).toBeGreaterThan(detonation.state.physicalTick)
       expect(detonation.state.bombs.some(({ id }) => id === mine.id)).toBe(false)
-      expect(events(game).filter(({ kind }) => kind.type === 'bombPlaced')).toHaveLength(countsBefore[index])
+      expect(events(game).filter(({ kind }) => kind.type === 'bombPlaced'
+        && !priorBombIds[index].has(kind.bomb.id))).toEqual([])
       expect(events(game).filter(({ kind }) => kind.type === 'bombDetonated'
         && kind.bomb.id === mine.id && kind.bomb.trigger.type === 'contact')).toHaveLength(1)
       expect(latestSnapshot(game)!.state.bombs.some(({ id }) => id === mine.id)).toBe(false)

@@ -1,6 +1,38 @@
 # Repository verification
 
-## Invisibility Cloak parent integration — 2026-10-21 — source checks complete; native pending
+## Cloak rolling-history parent source integration — 2026-10-21 — accepted parent pending
+
+The pending Cloak source now incorporates reviewed Landmine correction
+`420d8df074e85def8a34bd057c13d88a39ad8e53`. Remote and Landmine reject fresh placement
+IDs rather than comparing totals from rolling observation history. Cloak's own corrected
+reveal driver, fourteen-item catalog, core production, server, Cargo, web, fixtures and
+readiness checks are retained. CI includes the Piercing and Power failure reports.
+
+The old parent candidate is draft after its diagnosed inherited Remote assertion failure.
+No Cloak preparation, archive, image or native result exists. Final Cloak freezing requires
+integration of the corrected parent's accepted raw documentation/captures and independent
+review. Any conditional execution must be recorded separately; normalization, PR creation,
+publication and promotion require complete corrected parent release/tree proof. Previous
+integration checks below describe their original source and have not been rerun here.
+
+## Landmine candidate CI correction — 2026-10-21 — fresh acceptance pending
+
+Candidate PR 83 at `3826be4b95d07b88037a09e5866cdd6e37dd66cb` failed its inherited
+Remote browser case in [PR CI](https://github.com/liveweird/grenadiers/actions/runs/39526781408).
+The observer retains a rolling 512-frame window. An older placement expired during asynchronous
+waits, shrinking the retained placement count from two to one. This is a test-history assumption;
+the failed comparison does not show an extra placement or a product regression.
+
+The correction replaces rolling total-count comparisons in Remote and Landmine with causal
+placement-ID checks and retains exact Remote-ID detonation,
+exactly one new manual action, rejection of every fresh placement ID, consumed charge, bomb
+absence, and the following fresh Timed Standard proof. No retry, timeout, budget, fixture,
+protocol, or product input changes. The prior native record below remains evidence only for
+its original frozen source. This corrected source requires fresh immutable preparation and
+Compose/Kubernetes acceptance; no prior pass is carried. Dependent Cloak preparation has not
+started and must use the corrected accepted parent. The failed candidate remains draft.
+
+## Earlier Cloak parent integration — historical checkpoint before parent CI correction
 
 Reviewed Cloak driver source `1488b110af58cc71a254518d89c37e9f343115ec` integrates accepted raw
 Landmine source `80f0450e3ae7aed132b8cd0c41eab4d9d58454ef`. Landmine candidate `3826be4b95d07b88037a09e5866cdd6e37dd66cb`,

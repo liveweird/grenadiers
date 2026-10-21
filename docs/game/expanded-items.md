@@ -1,6 +1,11 @@
 # Expanded item implementation plan
 
-The corrected Landmine candidate retains all gameplay behavior and now passes fresh 50 Compose plus 50 Kubernetes cases with causal placement-ID assertions. Evidence is independently audited/sealed; new candidate/post-merge CI and publication remain pending. Earlier source-native records remain historical; see [verification](../verification.md).
+Invisibility Cloak now passes fresh same-image **51/51 Compose and 51/51 Kubernetes** cases,
+with zero retries or carried passes. Independent raw review is clear and final evidence is sealed.
+Landmine v0.3.37 is published after both candidate workflows and post-merge CI passed five jobs
+and all 50 browser cases; its accepted image is deployed locally. Cloak retains the corrected
+settled-position reveal driver and private-recipient rules. Its exact-head candidate/post-merge
+CI and publication remain gates. Earlier attempts remain source-specific historical evidence.
 
 Status: [Heart](heart.md), [Shield](shield.md), [Golden Flame](golden-flame.md),
 [Short Fuse](short-fuse.md) and [Short Flame](short-flame.md) are published through v0.3.29.
@@ -39,12 +44,13 @@ and the post-merge workflow pass all 49 browser cases. PR 82 is merged, [v0.3.36
 is published and its accepted image is deployed locally. Its CI-corrected raw source is integrated
 into the v0.3.37 [Landmine](landmine.md) candidate. Fresh same-image acceptance passes all
 50 Compose and 50 Kubernetes cases with zero retries; independent raw audit is clear and evidence
-sealed. Exact-head candidate/post-merge CI and publication remain required. Expanded-v5/generator-v2 rooms and gameplay-v8 are retained; see
+sealed. Both candidate workflows and post-merge CI pass five jobs and all 50 browser cases;
+PR 83 is merged, v0.3.37 is published and its accepted image deployed locally. Expanded-v5/generator-v2 rooms and gameplay-v8 are retained; see
 [verification](../verification.md) and
 [release notes](https://github.com/liveweird/grenadiers/releases).
 The accepted raw Landmine source is integrated into the v0.3.38 [Invisibility Cloak](invisibility-cloak.md)
 source candidate. Its corrected reveal-position driver and private actor/event semantics are
-retained; source integration gates pass, while fresh native acceptance and final CI remain pending.
+retained; fresh 51/51 Compose plus 51/51 Kubernetes acceptance passes. Independent raw audit and sealing are clear; exact-head candidate/post-merge CI and publication remain gates.
 This optional track follows the [backlog](backlog.md), shared settings and
 pixel-art increments. The historical catalog in [rules](rules.md) is not an implementation
 claim. Each activation requires its own reviewed behavior, UI, documentation and acceptance.

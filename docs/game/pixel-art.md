@@ -101,3 +101,11 @@ is a separate core regression, not an additional native assertion.
 Invisibility Cloak adds a distinct hooded pickup glyph. Recipient projection removes an opponent's
 complete actor root, including shadow, motion record and attached cues, while hidden; expiry paints
 the actor at the current authoritative position without a stale interpolation trail.
+
+
+Fresh reviewed Compose [English desktop](../screenshots/invisibility-cloak-desktop.png) and
+[Polish 320px reduced-motion](../screenshots/invisibility-cloak-polish-320.png) captures show the
+Cloak pickup before collection and readable localized HUD/settings. Polish uses normal vertical
+scrolling. These stills do not prove actor privacy: the paired native assertions establish owner
+visibility, exact peer-hidden actor shape, compositor removal, reconnect and current-position
+reveal at the physical deadline. Kubernetes captures are retained but were not visually reviewed.

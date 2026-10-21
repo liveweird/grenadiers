@@ -1,5 +1,32 @@
 # Repository verification
 
+## Gameplay v9 rendered-duel driver correction — 2026-10-21 — fresh acceptance pending
+
+The first v39 native attempt at source `30c051c1a11d4dc0fd5f67cfe3075bea09c658a3`, image
+`sha256:52ae3c23ba15bc2a612014fbf112d6242ab039a54f6a53982918fba6211cf1a7`, exited one
+in its first Compose group: **7/8 default cases passed, one failed**. All later Compose groups,
+latency and Kubernetes were unattempted. Two valid result screenshots preceded two Axe scans;
+the three-second result hold expired during those scans. The subsequent dynamic `.actor-stats`
+locators detached for the expected next countdown; `boundingBox()` returned null. Independent
+review identifies a driver-ordering race, rather than a product layout defect.
+
+The correction moves 320px geometry before Axe, reads both grids in one atomic DOM evaluation,
+requires exactly two nonempty grids, retains both horizontal bounds, and restores the original
+390px viewport before both unchanged Axe assertions. Product behavior, the three-second hold,
+timeouts, retries and acceptance limits are unchanged. Backend, web implementation and Cargo
+inputs remain byte-identical; this source adds only the driver correction and documentation.
+Static checks are recorded with the reviewed corrected source before fresh preparation.
+
+The failed source/preparation/report/images/input-integrity and cleanup records are preserved
+read-only: `FAILED.sha256` seals **1211 payloads**, SHA256
+`0a059f89ec762e2796c62e707cc95f0f94d34fa7724a5d50526f13e4defc8b73`;
+1212 durable files plus source archive SHA256
+`c49ddfe0cc35f12ed14665813fb46f19b6b2a37e700976192170cccd2398d77e` are byte-verified.
+Cleanup confirms owned resources/ports absent and published v37 image1736 ready. No pass carries
+forward. A completely fresh source archive, dependencies, image and 51+51 native matrix remain
+required, followed by exact-head CI and publication. Parent Cloak's records below remain v38
+source-specific evidence. Any parent source/tree correction still invalidates dependent results.
+
 ## Gameplay v9 accepted-Cloak source integration — 2026-10-21 — native pending
 
 The v0.3.39 false-only freeze-status foundation integrates final Cloak raw source

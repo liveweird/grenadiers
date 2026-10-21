@@ -2,6 +2,8 @@
 
 ## 0.3.39 — 2026-10-21
 
+- Check responsive result geometry atomically before accessibility scans consume the fixed result phase; preserve both grids, bounds, viewports and all accessibility assertions.
+
 - Add the paired gameplay-v9 server/browser contract. Visible actors now require
   `voluntaryActionsFrozen`, published as `false` until Stopwatch activation; hidden actors retain
   their exact privacy-preserving shape.

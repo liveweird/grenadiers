@@ -99,17 +99,21 @@ describe('original pixel-art geometry', () => {
     expect(flame.root.children).toHaveLength(2)
     expect(flame.frames.map(({ visible }) => visible)).toEqual([true, false])
     const pickups = [
-      'bombCapacity', 'blastRange', 'movementSpeed', 'kick', 'punch', 'wallPass', 'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch', 'invisibilityCloak', 'goldenFlame', 'shortFuse',
+      'bombCapacity', 'blastRange', 'movementSpeed', 'kick', 'punch', 'bracelet', 'wallPass', 'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch', 'invisibilityCloak', 'goldenFlame', 'shortFuse',
       'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls', 'invisibleBombs', 'teleporter',
     ] as const
     const counts = pickups.map((kind) => makePickup(kind) as unknown as Drawing)
       .map(({ rectangles = [] }) => rectangles.length)
-    expect(counts).toEqual([16, 14, 18, 15, 18, 19, 23, 19, 17, 19, 16, 21, 15, 21, 22, 21, 20, 18, 22, 20, 21, 24, 24])
+    expect(counts).toEqual([16, 14, 18, 15, 18, 20, 19, 23, 19, 17, 19, 16, 21, 15, 21, 22, 21, 20, 18, 22, 20, 21, 24, 24])
     expect(Math.max(...counts)).toBeLessThanOrEqual(24)
     const wallPass = makePickup('wallPass') as unknown as Drawing
     const wallPassColors = wallPass.rectangles?.map(({ color }) => color)
     expect(wallPassColors).toContain(PALETTE.brick)
     expect(wallPassColors).toContain(PALETTE.blueLight)
+    const bracelet = makePickup('bracelet') as unknown as Drawing
+    const braceletColors = bracelet.rectangles?.map(({ color }) => color)
+    expect(braceletColors).toContain(PALETTE.blueLight)
+    expect(braceletColors).toContain(PALETTE.white)
     const heart = makePickup('heart') as unknown as Drawing
     const colors = heart.rectangles?.map(({ color }) => color)
     expect(colors).toContain(PALETTE.brick)

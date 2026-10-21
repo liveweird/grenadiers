@@ -4,12 +4,12 @@ import { admitted, snapshot } from '../client/testSupport'
 import { validateGameplayV10ServerMessage } from './validation'
 
 const supported = [
-  'kick', 'punch', 'wallPass', 'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch',
+  'kick', 'punch', 'bracelet', 'wallPass', 'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch',
   'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame',
   'longFuse', 'reverseControls', 'invisibleBombs', 'teleporter',
 ] as const
 const supportedRanges = checkedCatalogMaskRanges({
-  protocol: 'gameplay v10', catalog: supported, expectedCount: 20, expectedOrder: supported,
+  protocol: 'gameplay v10', catalog: supported, expectedCount: 21, expectedOrder: supported,
 })
 
 function withMarker(marker: number | null) {
@@ -23,11 +23,11 @@ function withMarker(marker: number | null) {
 }
 
 describe('gameplay v10 item validation', () => {
-  it('pins twenty unique settings entries before exhaustively enumerating all masks', () => {
-    expect(supported).toHaveLength(20)
-    expect(new Set(supported)).toHaveLength(20)
-    expect(2 ** supported.length).toBe(1_048_576)
-    expect(supportedRanges).toHaveLength(1_024)
+  it('pins twenty-one unique settings entries before exhaustively enumerating all masks', () => {
+    expect(supported).toHaveLength(21)
+    expect(new Set(supported)).toHaveLength(21)
+    expect(2 ** supported.length).toBe(2_097_152)
+    expect(supportedRanges).toHaveLength(2_048)
   })
 
   it('accepts enabled Wall Pass equipment, pickups, and collection history', () => {
@@ -97,6 +97,44 @@ describe('gameplay v10 item validation', () => {
     const actors = (cooldownLeak.state as { actors: Array<Record<string, unknown>> }).actors
     actors[0].lastSuccessfulPunchTick = 2
     expect(validateGameplayV10ServerMessage(cooldownLeak)).toMatchObject({ valid: false, source: 'schema' })
+  })
+
+  it('accepts public Bracelet facts only when enabled and rejects private shove history', () => {
+    const message = withMarker(null)
+    message.room.settings.enabledItems = ['bracelet']
+    const actor = message.state.actors[0]
+    if (actor.type !== 'visible') throw new Error('expected visible actor')
+    actor.inventory.equipment = 'bracelet'
+    message.state.pickups = [{ cell: { column: 3, row: 2 }, kind: 'bracelet' }]
+    message.events = [{ tick: 2, index: 0, kind: {
+      type: 'pickupCollected', id: actor.id, seat: actor.seat,
+      cell: { column: 2, row: 2 }, kind: 'bracelet',
+    } }]
+    expect(validateGameplayV10ServerMessage(message)).toEqual({ valid: true, value: message })
+
+    message.room.settings.enabledItems = []
+    expect(validateGameplayV10ServerMessage(message)).toMatchObject({
+      valid: false, source: 'semantics', error: 'unsupportedProfile',
+    })
+    const leaked = structuredClone(message) as unknown as Record<string, unknown>
+    const actors = (leaked.state as { actors: Array<Record<string, unknown>> }).actors
+    actors[0].lastSuccessfulShoveTick = 2
+    expect(validateGameplayV10ServerMessage(leaked)).toMatchObject({ valid: false, source: 'schema' })
+    const traceLeak = structuredClone(message) as unknown as Record<string, unknown>
+    const leakedState = traceLeak.state as Record<string, unknown>
+    leakedState.forcedMovement = {
+      seat: 'two', direction: 'east', distance: 1024,
+    }
+    expect(validateGameplayV10ServerMessage(traceLeak)).toMatchObject({ valid: false, source: 'schema' })
+
+    const cloaked = withMarker(null)
+    cloaked.room.settings.enabledItems = ['bracelet', 'invisibilityCloak']
+    cloaked.state.actors[1] = { type: 'hidden', id: 2, seat: 'two', alive: true }
+    expect(validateGameplayV10ServerMessage(cloaked)).toEqual({ valid: true, value: cloaked })
+    const hiddenLeak = structuredClone(cloaked) as unknown as Record<string, unknown>
+    const hiddenActors = (hiddenLeak.state as { actors: Array<Record<string, unknown>> }).actors
+    hiddenActors[1].position = { x: 1024, y: 1024 }
+    expect(validateGameplayV10ServerMessage(hiddenLeak)).toMatchObject({ valid: false, source: 'schema' })
   })
 
   it('accepts the current Wall Pass catalog in fresh admission and lobby messages', () => {

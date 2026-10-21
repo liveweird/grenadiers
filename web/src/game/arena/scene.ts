@@ -62,7 +62,8 @@ function renderActorEquipment(drawing: ActorDrawing): void {
   drawing.landmine.visible = drawing.landmineStored
   drawing.kick.visible = drawing.kickEquipped
   drawing.punch.visible = drawing.punchEquipped
-  drawing.equipment.visible = drawing.kick.visible || drawing.punch.visible
+  drawing.bracelet.visible = drawing.braceletEquipped
+  drawing.equipment.visible = drawing.kick.visible || drawing.punch.visible || drawing.bracelet.visible
   drawing.wallPass.visible = drawing.wallPassEquipped
 }
 
@@ -85,6 +86,7 @@ function updateActorState(drawing: ActorDrawing, actor: ActorRow): void {
   drawing.landmineStored = Boolean(actor.landmineStored)
   drawing.kickEquipped = Boolean(actor.kickEquipped)
   drawing.punchEquipped = Boolean(actor.punchEquipped)
+  drawing.braceletEquipped = Boolean(actor.braceletEquipped)
   drawing.wallPassEquipped = Boolean(actor.wallPassEquipped)
 }
 

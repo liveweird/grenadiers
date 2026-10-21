@@ -2,7 +2,7 @@ import type { SnapshotMessage } from '../arena/types'
 import type { GameClientState } from './clientTypes'
 
 const renderedPickups = new Set([
-  'bombCapacity', 'blastRange', 'movementSpeed', 'kick', 'punch', 'wallPass', 'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch', 'invisibilityCloak', 'goldenFlame', 'shortFuse',
+  'bombCapacity', 'blastRange', 'movementSpeed', 'kick', 'punch', 'bracelet', 'wallPass', 'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch', 'invisibilityCloak', 'goldenFlame', 'shortFuse',
   'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls', 'invisibleBombs', 'teleporter',
 ])
 const effectTicks = (effects: { kind: string; remainingTicks: number }[], kind: string): number =>
@@ -40,6 +40,7 @@ export function presentSnapshot(state: GameClientState): SnapshotMessage | null 
           landmineStored: inventory.weapon === 'landmine',
           kickEquipped: inventory.equipment === 'kick',
           punchEquipped: inventory.equipment === 'punch',
+          braceletEquipped: inventory.equipment === 'bracelet',
           wallPassEquipped: inventory.equipment === 'wallPass',
           shieldRemainingTicks: effects.find((effect) => effect.kind === 'shield')?.remainingTicks ?? 0,
           stopwatchRemainingTicks:
@@ -66,7 +67,7 @@ export function presentSnapshot(state: GameClientState): SnapshotMessage | null 
       flames: snapshot.state.flames,
       pickups: snapshot.state.pickups.filter(
         (pickup): pickup is typeof pickup & {
-          kind: 'bombCapacity' | 'blastRange' | 'movementSpeed' | 'kick' | 'punch' | 'wallPass' | 'heart' | 'remoteBomb' | 'piercingBomb' | 'powerBomb' | 'landmine' | 'shield' | 'stopwatch' | 'invisibilityCloak'
+          kind: 'bombCapacity' | 'blastRange' | 'movementSpeed' | 'kick' | 'punch' | 'bracelet' | 'wallPass' | 'heart' | 'remoteBomb' | 'piercingBomb' | 'powerBomb' | 'landmine' | 'shield' | 'stopwatch' | 'invisibilityCloak'
             | 'goldenFlame' | 'shortFuse' | 'diarrhea' | 'slowFoot' | 'shortFlame' | 'longFuse'
             | 'reverseControls' | 'invisibleBombs' | 'teleporter'
         } =>

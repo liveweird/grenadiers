@@ -100,6 +100,14 @@ function makePunchPickup(): Graphics {
   return drawing
 }
 
+function makeBraceletPickup(): Graphics {
+  const drawing = pickupFrame()
+  pixels(drawing, PALETTE.deepInk, [[13, 15, 23, 5], [10, 19, 6, 15], [33, 19, 6, 15], [14, 32, 21, 5]])
+  pixels(drawing, PALETTE.blueLight, [[16, 17, 17, 3], [13, 21, 3, 10], [35, 21, 3, 10], [17, 33, 15, 3]])
+  pixels(drawing, PALETTE.white, [[17, 18, 7, 2], [14, 22, 2, 6]])
+  return drawing
+}
+
 function makeWallPassPickup(): Graphics {
   const drawing = pickupFrame()
   pixels(drawing, PALETTE.deepInk, [[13, 14, 23, 23], [17, 18, 15, 19]])
@@ -244,5 +252,6 @@ function makeLegacyPickup(kind: Exclude<RenderablePickupKind, 'kick' | 'wallPass
 export function makePickup(kind: RenderablePickupKind): Graphics {
   return kind === 'kick' ? makeKickPickup()
     : kind === 'punch' ? makePunchPickup()
+    : kind === 'bracelet' ? makeBraceletPickup()
     : kind === 'wallPass' ? makeWallPassPickup() : makeLegacyPickup(kind)
 }

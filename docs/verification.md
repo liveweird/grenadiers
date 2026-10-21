@@ -1,5 +1,21 @@
 # Repository verification
 
+## Landmine candidate CI correction — 2026-10-21 — fresh acceptance pending
+
+Candidate PR 83 at `3826be4b95d07b88037a09e5866cdd6e37dd66cb` failed its inherited
+Remote browser case in [PR CI](https://github.com/liveweird/grenadiers/actions/runs/39526781408).
+The observer retains a rolling 512-frame window. An older placement expired during asynchronous
+waits, shrinking the retained placement count from two to one. This is a test-history assumption;
+the failed comparison does not show an extra placement or a product regression.
+
+The correction removes the total-count comparison and retains exact Remote-ID detonation,
+exactly one new manual action, rejection of every fresh placement ID, consumed charge, bomb
+absence, and the following fresh Timed Standard proof. No retry, timeout, budget, fixture,
+protocol, or product input changes. The prior native record below remains evidence only for
+its original frozen source. This corrected source requires fresh immutable preparation and
+Compose/Kubernetes acceptance; no prior pass is carried. Dependent Cloak preparation has not
+started and must use the corrected accepted parent. The failed candidate remains draft.
+
 ## Landmine fresh native acceptance — 2026-10-21 — 100/100; audited and sealed
 
 Frozen source `ba92fbc5a6dab0b756192ffbe5cc05bd780bc8fd`, tree

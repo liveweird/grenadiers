@@ -14,6 +14,13 @@ fn input(action: InputAction) -> [SeatInput; 1] {
     }]
 }
 
+fn assert_no_bomb_lifecycle_event(report: &crate::game::StepReport) {
+    assert!(report.events.iter().all(|event| !matches!(
+        event.kind,
+        crate::game::StepEventKind::BombPlaced(_) | crate::game::StepEventKind::BombDetonated(_)
+    )));
+}
+
 fn move_cells(game: &mut State, direction: Direction, cells: usize) {
     game.step(&input(InputAction::Press(direction))).unwrap();
     for _ in 1..cells * 20 {
@@ -106,15 +113,19 @@ fn seed_31_ordinary_input_route_proves_pickup_corridor_kick_cadence_escape_and_f
     }
     assert!(game.world.bombs[&demo.id()].has_been_kicked());
     assert_eq!(game.world.bombs[&demo.id()].cell(), CellId::new(3, 1));
-    game.step(&input(InputAction::Release(Direction::West)))
+    let first_hop = game
+        .step(&input(InputAction::Release(Direction::West)))
         .unwrap();
+    assert_no_bomb_lifecycle_event(&first_hop);
     assert_eq!(game.world.bombs[&demo.id()].cell(), CellId::new(2, 1));
     for _ in 0..10 {
-        game.step(&[]).unwrap();
+        let report = game.step(&[]).unwrap();
+        assert_no_bomb_lifecycle_event(&report);
     }
     assert_eq!(game.world.bombs[&demo.id()].cell(), CellId::new(1, 1));
     for _ in 0..10 {
-        game.step(&[]).unwrap();
+        let report = game.step(&[]).unwrap();
+        assert_no_bomb_lifecycle_event(&report);
     }
     assert_eq!(game.world.bombs[&demo.id()].motion(), None);
 

@@ -10,6 +10,13 @@ use crate::game::{
 };
 use crate::room::RoomSettings;
 
+#[path = "kick_tests/motion_contracts.rs"]
+mod motion_contracts;
+#[path = "kick_tests/movement_contracts.rs"]
+mod movement_contracts;
+#[path = "kick_tests/phase_contracts.rs"]
+mod phase_contracts;
+
 fn open_world(blocks: BTreeSet<CellId>) -> World {
     let mut terrain = [Terrain::Floor; ARENA_CELL_COUNT];
     for row in 0..ARENA_HEIGHT {

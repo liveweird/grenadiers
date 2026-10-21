@@ -8,7 +8,8 @@ The observer retains a rolling 512-frame window. An older placement expired duri
 waits, shrinking the retained placement count from two to one. This is a test-history assumption;
 the failed comparison does not show an extra placement or a product regression.
 
-The correction removes the total-count comparison and retains exact Remote-ID detonation,
+The correction replaces rolling total-count comparisons in Remote and Landmine with causal
+placement-ID checks and retains exact Remote-ID detonation,
 exactly one new manual action, rejection of every fresh placement ID, consumed charge, bomb
 absence, and the following fresh Timed Standard proof. No retry, timeout, budget, fixture,
 protocol, or product input changes. The prior native record below remains evidence only for

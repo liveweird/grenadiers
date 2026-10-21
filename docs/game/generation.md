@@ -22,6 +22,11 @@ invalid-map fallback, privacy checks, and simulation-level first-bomb escape sur
 Changing the algorithm or draw semantics requires a new generator version and reviewed
 replay/compatibility expectations. Do not replace the golden outputs merely to hide drift.
 
+Expanded generator v2 appends each enabled optional item to a stable weighted pool. Landmine adds
+weight 15 after Remote Bomb, growing the all-items pool from 290 to 305 entries. Every mask that
+does not enable Landmine retains its previous pool and exact seeded output; all 8192 item masks are
+covered by the current generator tests.
+
 The server constructs typed worlds at each actual round start and keeps the generation record
 private. Layer transitions, collection, gameplay-v2 projection, and item graphics are integrated.
 Default seeds use fresh OS entropy; [ADR 0014](../decisions/0014-private-round-seeds-and-live-generation.md)

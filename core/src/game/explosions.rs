@@ -9,25 +9,26 @@ use super::world::World;
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub(crate) struct ExplosionPlan {
     pub(crate) detonated: BTreeSet<EntityId>,
+    pub(crate) destroyed_mines: BTreeSet<EntityId>,
     pub(crate) flames: BTreeSet<CellId>,
     pub(crate) destroyed_blocks: BTreeSet<CellId>,
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub(crate) enum ExplosionError {
-    UnsupportedBombTrigger(EntityId),
-}
-
+#[cfg(test)]
 pub(crate) fn plan(
     world: &World,
     tick: Tick,
     remote_targets: [Option<EntityId>; 2],
-) -> Result<ExplosionPlan, ExplosionError> {
-    for bomb in world.bombs.values() {
-        if matches!(bomb.trigger(), BombTrigger::Contact) {
-            return Err(ExplosionError::UnsupportedBombTrigger(bomb.id()));
-        }
-    }
+) -> ExplosionPlan {
+    plan_with_contacts(world, tick, remote_targets, &BTreeSet::new())
+}
+
+pub(crate) fn plan_with_contacts(
+    world: &World,
+    tick: Tick,
+    remote_targets: [Option<EntityId>; 2],
+    contact_targets: &BTreeSet<EntityId>,
+) -> ExplosionPlan {
     let bombs_by_cell: BTreeMap<_, _> = world
         .bombs
         .values()
@@ -41,16 +42,26 @@ pub(crate) fn plan(
                 .hazards
                 .get(&bomb.cell())
                 .is_some_and(|expiry| *expiry > tick);
-            burning
-                || match bomb.trigger() {
-                    BombTrigger::Timed { detonates_at } => detonates_at <= tick,
-                    BombTrigger::Remote => remote_targets.contains(&Some(bomb.id())),
-                    BombTrigger::Contact => false,
-                }
+            (match bomb.trigger() {
+                BombTrigger::Contact => contact_targets.contains(&bomb.id()),
+                BombTrigger::Timed { detonates_at } => detonates_at <= tick,
+                BombTrigger::Remote => remote_targets.contains(&Some(bomb.id())) || burning,
+            }) || burning && !matches!(bomb.trigger(), BombTrigger::Contact)
         })
         .map(|bomb| bomb.id())
         .collect();
     let mut result = ExplosionPlan::default();
+    result
+        .destroyed_mines
+        .extend(world.bombs.values().filter_map(|bomb| {
+            (matches!(bomb.trigger(), BombTrigger::Contact)
+                && !contact_targets.contains(&bomb.id())
+                && world
+                    .hazards
+                    .get(&bomb.cell())
+                    .is_some_and(|expiry| *expiry > tick))
+            .then_some(bomb.id())
+        }));
 
     while let Some(id) = pending.pop_first() {
         if !result.detonated.insert(id) {
@@ -60,7 +71,7 @@ pub(crate) fn plan(
             continue;
         };
         if bomb.blast() == BlastKind::Power {
-            plan_power_blast(world, *bomb, &mut pending, &mut result);
+            plan_power_blast(world, *bomb, contact_targets, &mut pending, &mut result);
             continue;
         }
         result.flames.insert(bomb.cell());
@@ -75,17 +86,19 @@ pub(crate) fn plan(
                 &bombs_by_cell,
                 *bomb,
                 direction,
+                contact_targets,
                 &mut pending,
                 &mut result,
             );
         }
     }
-    Ok(result)
+    result
 }
 
 fn plan_power_blast(
     world: &World,
     bomb: Bomb,
+    contact_targets: &BTreeSet<EntityId>,
     pending: &mut BTreeSet<EntityId>,
     result: &mut ExplosionPlan,
 ) {
@@ -105,19 +118,22 @@ fn plan_power_blast(
             }
         }
     }
-    pending.extend(
-        world
-            .bombs
-            .values()
-            .filter(|other| {
-                let cell = other.cell();
-                let distance = u32::from(cell.column.abs_diff(bomb.cell().column))
-                    + u32::from(cell.row.abs_diff(bomb.cell().row));
-                distance <= u32::from(bomb.range())
-                    && world.arena.terrain(cell) == Some(Terrain::Floor)
-            })
-            .map(|other| other.id()),
-    );
+    for other in world.bombs.values().filter(|other| {
+        let cell = other.cell();
+        let distance = u32::from(cell.column.abs_diff(bomb.cell().column))
+            + u32::from(cell.row.abs_diff(bomb.cell().row));
+        distance <= u32::from(bomb.range()) && world.arena.terrain(cell) == Some(Terrain::Floor)
+    }) {
+        if matches!(other.trigger(), BombTrigger::Contact) {
+            if contact_targets.contains(&other.id()) {
+                pending.insert(other.id());
+            } else {
+                result.destroyed_mines.insert(other.id());
+            }
+        } else {
+            pending.insert(other.id());
+        }
+    }
 }
 
 fn trace_ray(
@@ -125,6 +141,7 @@ fn trace_ray(
     bombs_by_cell: &BTreeMap<CellId, EntityId>,
     bomb: Bomb,
     direction: Direction,
+    contact_targets: &BTreeSet<EntityId>,
     pending: &mut BTreeSet<EntityId>,
     result: &mut ExplosionPlan,
 ) {
@@ -145,8 +162,20 @@ fn trace_ray(
             }
         }
         if let Some(id) = bombs_by_cell.get(&cell) {
-            pending.insert(*id);
-            break;
+            let other = world
+                .bombs
+                .get(id)
+                .expect("bomb-cell index references existing bombs");
+            if matches!(other.trigger(), BombTrigger::Contact) {
+                if contact_targets.contains(id) {
+                    pending.insert(*id);
+                } else {
+                    result.destroyed_mines.insert(*id);
+                }
+            } else {
+                pending.insert(*id);
+                break;
+            }
         }
     }
 }

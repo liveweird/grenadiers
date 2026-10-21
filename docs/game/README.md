@@ -52,7 +52,7 @@ and remaining presentation work are planned extensions to the implemented Classi
 [Pixel-art presentation](pixel-art.md) describes original artwork, animation and resource bounds.
 
 [Expanded item implementation](expanded-items.md) records the optional inventory, effects,
-weapons, visibility and incremental activation decisions; these items are not enabled yet.
+weapons, visibility and incremental activation decisions; each item remains opt-in except Heart.
 
 [Ordered WebSocket delay](websocket-latency.md) defines the measured profile, causal observations and limits.
 
@@ -65,3 +65,6 @@ See the implemented expansion candidates: [Heart](heart.md) and [Shield](shield.
 - [Diarrhea](diarrhea.md): opt-in ten-second automatic ordinary-bomb placement curse.
 - [Slow foot](slow-foot.md): up to six independent ten-second movement-slowing stacks.
 - [Piercing Bomb](piercing-bomb.md): one stored charge for a manual bomb that crosses soft blocks.
+- [Power Bomb](power-bomb.md): one stored charge for a Manhattan blast that ignores obstruction.
+- [Remote Bomb](remote-bomb.md): one untimed bomb triggered by the owner's next bomb action.
+- [Landmine](landmine.md): one passable contact mine with per-actor exit grace.

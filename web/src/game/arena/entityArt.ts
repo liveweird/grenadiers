@@ -3,7 +3,7 @@ import type { RenderablePickupKind } from './types'
 import { PALETTE } from './palette'
 import { pixels } from './pixel'
 
-export interface BombDrawing { root: Container; spark: Graphics; remote: boolean }
+export interface BombDrawing { root: Container; spark: Graphics; remote: boolean; contact: boolean }
 export interface FlameDrawing { root: Container; frames: readonly [Graphics, Graphics] }
 
 export function makeBomb(
@@ -26,7 +26,13 @@ export function makeBomb(
     pixels(shell, PALETTE.flame, [[-7, -3, 14, 6], [-4, -7, 8, 14]])
     pixels(shell, PALETTE.white, [[-2, -5, 4, 10]])
   }
-  if (trigger === 'remote') {
+  if (trigger === 'contact') {
+    shell.clear()
+    pixels(shell, PALETTE.deepInk, [[-18, 2, 36, 10], [-14, -3, 28, 16]])
+    pixels(shell, PALETTE.brass, [[-12, 0, 24, 8], [-8, -5, 16, 7]])
+    pixels(shell, PALETTE.brassLight, [[-7, -3, 14, 3]])
+    pixels(shell, PALETTE.brick, [[-3, 1, 6, 5]])
+  } else if (trigger === 'remote') {
     pixels(shell, PALETTE.brass, [[4, -15, 7, 5], [8, -21, 4, 9], [6, -24, 3, 5], [11, -27, 3, 8]])
     pixels(shell, PALETTE.brick, [[9, -29, 7, 4]])
   } else {
@@ -35,9 +41,9 @@ export function makeBomb(
   const spark = new Graphics()
   pixels(spark, PALETTE.flameCore, [[16, -25, 4, 4], [21, -21, 4, 4], [12, -21, 4, 4]])
   pixels(spark, PALETTE.flame, [[18, -29, 3, 4], [24, -24, 3, 3]])
-  spark.visible = trigger !== 'remote'
+  spark.visible = trigger === 'timed'
   root.addChild(shadow, shell, spark)
-  return { root, spark, remote: trigger === 'remote' }
+  return { root, spark, remote: trigger === 'remote', contact: trigger === 'contact' }
 }
 
 function flameFrame(alternate: boolean): Graphics {
@@ -111,6 +117,11 @@ export function makePickup(kind: RenderablePickupKind): Graphics {
     ])
     pixels(drawing, PALETTE.flame, [[21, 17, 7, 3], [18, 20, 13, 9], [21, 29, 7, 3]])
     pixels(drawing, PALETTE.white, [[23, 21, 3, 7]])
+  } else if (kind === 'landmine') {
+    pixels(drawing, PALETTE.deepInk, [[12, 25, 25, 9], [16, 20, 17, 15]])
+    pixels(drawing, PALETTE.brass, [[15, 24, 19, 7], [19, 20, 11, 8]])
+    pixels(drawing, PALETTE.brassLight, [[20, 21, 9, 3]])
+    pixels(drawing, PALETTE.brick, [[22, 26, 5, 4]])
   } else if (kind === 'shield') {
     pixels(drawing, PALETTE.deepInk, [
       [16, 15, 17, 3], [13, 18, 23, 7], [15, 25, 19, 7], [18, 32, 13, 4], [22, 36, 5, 3],

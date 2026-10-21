@@ -1,5 +1,7 @@
 # Expanded item implementation plan
 
+The corrected Landmine candidate retains all gameplay behavior and now passes fresh 50 Compose plus 50 Kubernetes cases with causal placement-ID assertions. Evidence is independently audited/sealed; new candidate/post-merge CI and publication remain pending. Earlier source-native records remain historical; see [verification](../verification.md).
+
 Status: [Heart](heart.md), [Shield](shield.md), [Golden Flame](golden-flame.md),
 [Short Fuse](short-fuse.md) and [Short Flame](short-flame.md) are published through v0.3.29.
 The v0.3.30 [Long Fuse](long-fuse.md) increment passes local checks and corrected-source native
@@ -32,7 +34,12 @@ clear; both five-job candidate CI runs and the five-job post-merge run pass, PR 
 prerelease and its accepted image is deployed locally. The accepted raw source is integrated into the
 v0.3.36 [Remote Bomb](remote-bomb.md) candidate. Remote Bomb retains its reviewed one-charge
 manual-trigger behavior and passes fresh same-image 49/49 Compose plus 49/49 Kubernetes cases
-with zero retries. The raw evidence audit is clear and sealed; native evidence and documentation review are clear; publication requires exact-head candidate and post-merge CI. Expanded-v5/generator-v2 rooms and gameplay-v8 are retained; see
+with zero retries. The raw evidence audit and seal are clear; both five-job candidate workflows
+and the post-merge workflow pass all 49 browser cases. PR 82 is merged, [v0.3.36](https://github.com/liveweird/grenadiers/releases/tag/v0.3.36)
+is published and its accepted image is deployed locally. Its CI-corrected raw source is integrated
+into the v0.3.37 [Landmine](landmine.md) candidate. Fresh same-image acceptance passes all
+50 Compose and 50 Kubernetes cases with zero retries; independent raw audit is clear and evidence
+sealed. Exact-head candidate/post-merge CI and publication remain required. Expanded-v5/generator-v2 rooms and gameplay-v8 are retained; see
 [verification](../verification.md) and
 [release notes](https://github.com/liveweird/grenadiers/releases).
 This optional track follows the [backlog](backlog.md), shared settings and

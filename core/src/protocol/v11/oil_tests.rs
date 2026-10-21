@@ -45,7 +45,7 @@ pub(super) fn oil_state() -> State {
     .unwrap()
 }
 
-fn room(enabled: ItemSet, tick: crate::protocol::Tick) -> RoomView {
+pub(super) fn room(enabled: ItemSet, tick: crate::protocol::Tick) -> RoomView {
     RoomView {
         settings: GameSettings::new(0, 256, 3, 180, enabled).unwrap(),
         settings_revision: Counter::new(1).unwrap(),

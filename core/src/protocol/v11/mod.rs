@@ -126,6 +126,8 @@ pub fn encode_server_message(
 }
 
 #[cfg(test)]
+mod archive_oil_tests;
+#[cfg(test)]
 #[path = "frame_bound_tests.rs"]
 mod frame_bound_tests;
 #[cfg(test)]

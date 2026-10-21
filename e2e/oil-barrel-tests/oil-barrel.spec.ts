@@ -17,6 +17,13 @@ const oilAt = (game: ObservedGame, column: number, row: number) =>
 const hasBlock = (game: ObservedGame, column: number, row: number) =>
   latestSnapshot(game)!.state.arena.blocks.some((cell) => cell.column === column && cell.row === row)
 
+function expectUnlitOilArt(pixels: string[]): void {
+  const colors = new Set(pixels)
+  expect([...colors]).toEqual(expect.arrayContaining([
+    '23,35,49,255', '38,52,69,255', '100,115,132,255', '239,189,86,255',
+  ]))
+}
+
 async function plantAndObserve(page: Page, game: ObservedGame): Promise<number> {
   const known = new Set(latestSnapshot(game)!.state.bombs.map(({ id }) => id))
   await page.keyboard.press('Space')
@@ -67,7 +74,9 @@ test('Oil Barrel reveals, blocks, burns persistently, and resumes without synthe
         .toBe('running')))
       await one.getByRole('region', { name: 'Grenadiers courtyard' }).click()
       await two.getByRole('region', { name: 'Dziedziniec Grenadierów' }).click()
-      expect(latestSnapshot(games[0])!.state.oilBarrels).toEqual([])
+      for (const game of games) expect(latestSnapshot(game)!.state.oilBarrels).toEqual([])
+      const privacyFloors = games.map((game) => latestSnapshot(game)!.room.revision)
+      const concealedPixels = await Promise.all([one, two].map((page) => arenaTilePixels(page, 3, 1)))
       const originalInventory = structuredClone(actor(games[0], 'one').inventory)
 
       await moveSeatTo(one, games[0], 'one', { column: 2, row: 1 })
@@ -75,18 +84,30 @@ test('Oil Barrel reveals, blocks, burns persistently, and resumes without synthe
       expect(revealBomb).toBeGreaterThan(0)
       await moveSeatTo(one, games[0], 'one', { column: 1, row: 1 })
       await moveSeatTo(one, games[0], 'one', { column: 1, row: 2 })
-      await expect.poll(() => {
-        const state = latestSnapshot(games[0])!.state
-        return state.bombs.length === 0 && state.flames.length > 0
-          ? state.oilBarrels.length : -1
-      }).toBe(0)
-      await expect.poll(() => latestSnapshot(games[0])!.state.flames.length).toBe(0)
       await Promise.all(games.map((game) => expect.poll(() => oilAt(game, 3, 1)?.state)
         .toBe('unlit')))
+      games.forEach((game, index) => {
+        const retained = snapshots(game).filter(({ room }) => room.revision >= privacyFloors[index]!)
+        expect(retained[0]!.room.revision).toBe(privacyFloors[index])
+        const firstOil = retained.findIndex(({ state }) => state.oilBarrels.length > 0)
+        expect(firstOil).toBeGreaterThan(0)
+        const privateFrames = retained.slice(0, firstOil)
+        expect(privateFrames.every(({ state }) => state.oilBarrels.length === 0)).toBe(true)
+        expect(privateFrames.some(({ state }) => state.flames.length > 0)).toBe(true)
+        expect(retained[firstOil]!.state.flames).toEqual([])
+        expect(retained[firstOil]!.state.oilBarrels).toEqual([
+          { cell: { column: 3, row: 1 }, state: 'unlit' },
+        ])
+      })
       expect(actor(games[0], 'one').inventory).toEqual(originalInventory)
       expect(hasBlock(games[0], 4, 1)).toBe(true)
       expect(hasBlock(games[0], 3, 2)).toBe(true)
-      const unlitPixels = await arenaTilePixels(one, 3, 1)
+      const unlitPixels = await Promise.all([one, two].map((page) => arenaTilePixels(page, 3, 1)))
+      unlitPixels.forEach((pixels, index) => {
+        expect(pixels).not.toEqual(concealedPixels[index])
+        expect(new Set(pixels).size).toBeGreaterThan(10)
+      })
+      expectUnlitOilArt(unlitPixels[0]!)
 
       await moveSeatTo(one, games[0], 'one', { column: 1, row: 1 })
       await moveSeatTo(one, games[0], 'one', { column: 2, row: 1 })
@@ -115,7 +136,7 @@ test('Oil Barrel reveals, blocks, burns persistently, and resumes without synthe
           && snapshot.state.oilBarrels.some(({ cell, state }) =>
             cell.column === 3 && cell.row === 1 && state === 'burning'))!.state.physicalTick)
       const burningPixels = await arenaTilePixels(one, 3, 1)
-      expect(burningPixels).not.toEqual(unlitPixels)
+      expect(burningPixels).not.toEqual(unlitPixels[0])
       expect(hasBlock(games[0], 4, 1)).toBe(true)
       expect(hasBlock(games[0], 3, 2)).toBe(true)
       expect(latestSnapshot(games[0])!.state.oilBarrels).toHaveLength(1)
@@ -126,7 +147,7 @@ test('Oil Barrel reveals, blocks, burns persistently, and resumes without synthe
           ? oilAt(game, 3, 1)?.state : undefined
       }).toBe('burning')))
       const persistentPixels = await arenaTilePixels(one, 3, 1)
-      expect(persistentPixels).not.toEqual(unlitPixels)
+      expect(persistentPixels).not.toEqual(unlitPixels[0])
       expect(new Set(persistentPixels).size).toBeGreaterThan(10)
       await moveSeatTo(one, games[0], 'one', { column: 1, row: 1 })
       await moveSeatTo(one, games[0], 'one', { column: 2, row: 1 })
@@ -151,6 +172,11 @@ test('Oil Barrel reveals, blocks, burns persistently, and resumes without synthe
       await expect.poll(async () => (await admissionBaseline(one))?.index).toBeGreaterThan(admission.index)
       const resumed = (await admissionBaseline(one))!
       expect(resumed.oilBarrels).toContainEqual({ column: 3, row: 1, state: 'burning' })
+      const resumedArena = one.getByRole('region', { name: 'Grenadiers courtyard' })
+      await expect(resumedArena).toHaveAttribute('tabindex', '0')
+      const resumedPixels = await arenaTilePixels(one, 3, 1)
+      expect(resumedPixels).not.toEqual(unlitPixels[0])
+      expect(new Set(resumedPixels).size).toBeGreaterThan(10)
       await delay(250)
       expect(audioNodes).toHaveLength(quietBaseline)
       await Promise.all([

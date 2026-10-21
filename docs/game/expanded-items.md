@@ -4,7 +4,8 @@ Status: the **Heart activation candidate is implemented and locally verified**, 
 release acceptance still pending. Published v0.3.21 has no new optional pickups. The candidate
 introduces Expanded-v5/generator-v2 rooms and gameplay-v8; see [Heart](heart.md).
 Separate candidates add opt-in [Shield](shield.md), [Golden Flame](golden-flame.md), [Short Fuse](short-fuse.md), [Short Flame](short-flame.md), [Long Fuse](long-fuse.md), [Reverse Controls](reverse-controls.md), [Diarrhea](diarrhea.md), [Slow foot](slow-foot.md), [Piercing Bomb](piercing-bomb.md), [Power Bomb](power-bomb.md), [Remote Bomb](remote-bomb.md), [Landmine](landmine.md), [Invisibility Cloak](invisibility-cloak.md), [Stopwatch](stopwatch.md), [Invisible Bombs](invisible-bombs.md), [Teleporter](teleporter.md), [Wall Pass](wall-pass.md), [Kick](kick.md), [Punch](punch.md), [Bracelet](bracelet.md), and [Oil Barrel](oil-barrel.md),
-retaining the same protocol and identities.
+retaining Expanded-v5 rules, generator-v2, and journal-v2 identities. Oil Barrel migrates the
+active gameplay transport to v11 while the earlier wire contracts remain archived.
 This optional track follows the [backlog](backlog.md), shared settings and
 pixel-art increments. The historical catalog in [rules](rules.md) is not an implementation
 claim. Each activation requires its own reviewed behavior, UI, documentation and acceptance.

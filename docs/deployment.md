@@ -5,12 +5,13 @@ application on port 8085. Active matches live in that process, so the initial de
 intentionally runs one replica with a `Recreate` update strategy. A restart ends active matches;
 horizontal scaling and recovery require match routing and persistence designs first.
 
-Deploy the v0.3.43 server and web assets together and reload connected browsers. Gameplay v10 has
-an exact eighteen-item catalog, publishes authoritative teleport position epochs and retains Wall
-Pass exit grace as private server state alongside recipient-private actors, bombs and events.
-Gameplay-v9 clients fail
-version negotiation before credential lookup. No storage migration is required; active matches
-remain process-local.
+Deploy the v0.3.47 server and matching web assets together, then reload connected browsers.
+Gameplay v11 has an exact catalog of 22 item types: 21 collectible pickup types plus the Oil Barrel
+arena object. It publishes materialized Oil state while concealed and pending locations, generation
+data, and typed exit grace remain private. Gameplay-v10 clients fail version negotiation before
+credential lookup. Roll back the server and web assets as one paired image and reload browsers;
+mixing either side across gameplay versions is unsupported. No storage migration is required;
+active matches remain process-local and end on rollout or rollback.
 
 ## Docker Compose
 

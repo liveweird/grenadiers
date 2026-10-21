@@ -1,6 +1,7 @@
 # Generated arena API
 
-Status: generator-v1 is active in live classic-v2 rooms.
+Status: this source candidate uses generator-v2 with Expanded-v5 rules, gameplay-v11, and
+multi-round matches. Generator-v1 and classic-v2 are retained historical identities.
 
 `core::game::generate_arena([u8; 32])` produces `GeneratedArena`. Its getters expose the
 validated arena, concealed `BTreeMap<CellId, PickupKind>`, and private `GenerationRecord`.
@@ -31,7 +32,7 @@ without Oil Barrel preserves its v0.3.46 pool, draw count and exact seeded outpu
 item subsets are accepted, and all 2,097,152 earlier masks retain their exact outputs.
 
 The server constructs typed worlds at each actual round start and keeps the generation record
-private. Layer transitions, collection, gameplay-v2 projection, and item graphics are integrated.
+private. Layer transitions, collection, gameplay-v11 projection, and item graphics are integrated.
 Default seeds use fresh OS entropy; [ADR 0014](../decisions/0014-private-round-seeds-and-live-generation.md)
 defines the optional read-once operator reproduction setting and real-browser acceptance.
-The preview has one round; alternating successive match rounds are integrated in M5.
+Alternating successive match rounds use fresh generated arenas within the multi-round match.

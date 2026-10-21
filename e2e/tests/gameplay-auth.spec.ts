@@ -57,9 +57,9 @@ test('gameplay authentication preserves credentials and connection ownership', a
     }
 
     try {
-      const incompatible = await connect(9)
-      const owner = await connect(10)
-      const duplicate = await connect(10)
+      const incompatible = await connect(10)
+      const owner = await connect(11)
+      const duplicate = await connect(11)
       const command = {
         type: 'movement', sequence: 1, roomId: 'a'.repeat(32), roundId: 1, direction: null,
       }

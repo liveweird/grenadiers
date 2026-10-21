@@ -1,11 +1,12 @@
 # Gameplay and presentation backlog
 
-TURN, CONFIG and the first ART slice are implemented. This v0.3.47 source candidate contains 22
+TURN, CONFIG and the first ART slice are implemented. This v0.3.47 source candidate contains 21
 optional pickups: Heart, Shield, Golden Flame, Short Fuse, Short Flame, Long Fuse, Reverse
 Controls, Diarrhea, Slow-foot, Piercing Bomb, Power Bomb, Remote Bomb, Landmine and Invisibility
-Cloak, Stopwatch, Invisible Bombs, Teleporter, Wall Pass, Kick, Punch, Bracelet and Oil Barrel. Reviewed implementation
-source is complete; this candidate still requires accepted v0.3.46 parent integration, fresh native acceptance and final
-CI. The remaining requested pickups stay outside this increment. Current publication status
+Cloak, Stopwatch, Invisible Bombs, Teleporter, Wall Pass, Kick, Punch and Bracelet, plus the Oil
+Barrel arena object. Reviewed implementation source is complete; this candidate still requires
+accepted v0.3.46 parent integration, fresh native acceptance and final CI. The remaining requested
+pickups stay outside this increment. Current publication status
 is recorded in [release notes](https://github.com/liveweird/grenadiers/releases), with source-bound
 acceptance records in [verification](../verification.md). Richer transitions and artwork remain
 follow-up work; see [pixel-art presentation](pixel-art.md) and

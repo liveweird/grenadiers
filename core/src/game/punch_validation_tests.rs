@@ -1,6 +1,9 @@
 use std::collections::BTreeSet;
 
-use super::super::{ActorInit, RoundResult, State, StateError, StepError};
+use super::super::{
+    ActorInit, InputAction, RoundResult, SeatInput, State, StateError, StepError,
+    MAX_INPUTS_PER_TICK,
+};
 use crate::game::arena::{ARENA_CELL_COUNT, ARENA_HEIGHT, ARENA_WIDTH, Arena, Terrain};
 use crate::game::{
     Bomb, BombTrigger, CellId, Direction, EnabledItems, EntityId, Position, RulesConfig, SeatId,
@@ -83,5 +86,44 @@ fn unsupported_punch_history_is_validated_before_terminal_short_circuit() {
     assert_eq!(
         state.step(&[]),
         Err(StepError::UnsupportedBombPunchHistory(EntityId(9)))
+    );
+}
+
+#[test]
+fn raw_equipment_rejection_preserves_existing_step_validation_precedence() {
+    let equipment = SeatInput {
+        seat: SeatId::One,
+        action: InputAction::UseEquipment,
+    };
+    let mut state = State::new(RulesConfig::classic_v1(), World::new(arena()), actors()).unwrap();
+    assert_eq!(
+        state.step(&[equipment; MAX_INPUTS_PER_TICK + 1]),
+        Err(StepError::TooManyInputs {
+            count: MAX_INPUTS_PER_TICK + 1,
+            maximum: MAX_INPUTS_PER_TICK,
+        })
+    );
+    state.tick = Tick(u64::MAX);
+    assert_eq!(state.step(&[equipment]), Err(StepError::TickOverflow));
+
+    let rules = RulesConfig::expanded_v5(
+        RoomSettings::DEFAULT.with_enabled_items(EnabledItems::REMOTE_BOMB),
+    );
+    let mut world = World::new(arena());
+    let remote = Bomb::new(
+        EntityId(9),
+        CellId::new(5, 5),
+        EntityId(1),
+        2,
+        Tick(0),
+        BombTrigger::Remote,
+    )
+    .unwrap();
+    world.bombs.insert(remote.id(), remote);
+    let mut state = State::new(rules, world, actors()).unwrap();
+    state.rules = RulesConfig::classic_v1();
+    assert_eq!(
+        state.step(&[equipment]),
+        Err(StepError::UnsupportedBombTrigger(EntityId(9)))
     );
 }

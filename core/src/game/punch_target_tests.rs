@@ -9,6 +9,10 @@ use crate::game::{
 use crate::room::RoomSettings;
 
 fn arena() -> Arena {
+    arena_with_blocks(BTreeSet::new())
+}
+
+fn arena_with_blocks(blocks: BTreeSet<CellId>) -> Arena {
     let mut terrain = [Terrain::Floor; ARENA_CELL_COUNT];
     for row in 0..ARENA_HEIGHT {
         for column in 0..ARENA_WIDTH {
@@ -20,7 +24,7 @@ fn arena() -> Arena {
     }
     Arena::new(
         terrain,
-        BTreeSet::new(),
+        blocks,
         [CellId::new(1, 1), CellId::new(13, 11)],
     )
     .unwrap()
@@ -255,27 +259,7 @@ fn exhausting_the_stride_cycle_and_returning_to_source_fails_unchanged() {
     );
     let blocked = [1, 2, 3, 6, 7, 8, 9, 10, 11, 12, 13]
         .map(|column| CellId::new(column, 5));
-    state.world.arena = {
-        let mut terrain = [Terrain::Floor; ARENA_CELL_COUNT];
-        for row in 0..ARENA_HEIGHT {
-            for column in 0..ARENA_WIDTH {
-                if column == 0
-                    || row == 0
-                    || column == ARENA_WIDTH - 1
-                    || row == ARENA_HEIGHT - 1
-                {
-                    terrain[usize::from(row) * usize::from(ARENA_WIDTH) + usize::from(column)] =
-                        Terrain::Wall;
-                }
-            }
-        }
-        Arena::new(
-            terrain,
-            BTreeSet::from(blocked),
-            [CellId::new(1, 1), CellId::new(13, 11)],
-        )
-        .unwrap()
-    };
+    state.world.arena = arena_with_blocks(BTreeSet::from(blocked));
     state.replace_actor_equipment(SeatId::One, Equipment::Punch);
     state
         .world
@@ -295,11 +279,7 @@ fn positive_living_footprint_overlap_skips_a_landing_candidate() {
         Direction::East,
         EnabledItems::PUNCH,
     );
-    state.world.arena = {
-        let mut open = arena();
-        open.blocks.insert(CellId::new(2, 5));
-        open
-    };
+    state.world.arena = arena_with_blocks(BTreeSet::from([CellId::new(2, 5)]));
     state.world.bombs.insert(
         EntityId(10),
         Bomb::new(

@@ -113,6 +113,7 @@
     "powerBombDescription": "Przechowuje jedną specjalną bombę, której wybuch wypełnia obszar w kształcie rombu, ignoruje przeszkody i nie niszczy twardych ścian. Ładunek znika dopiero po udanym podłożeniu.",
     "landmineDescription": "Przechowuje jedną widoczną minę naciskową. Każdy, kto stoi na niej podczas podłożenia, może bezpiecznie zejść; późniejsze wejście ją odpala. Ogień i inne wybuchy niszczą ją bez eksplozji.",
     "shieldDescription": "Zapewnia 5 sekund odporności na obrażenia. Kolejna Tarcza odnawia ten czas.",
+    "invisibilityCloakDescription": "Ukrywa postać i przypisane jej sygnały przed przeciwnikiem na 10 sekund. Bomby i płomienie pozostają widoczne.",
     "goldenFlameDescription": "Maksymalizuje zasięg nowych bomb na 10 sekund. Kolejny Złoty płomień odnawia ten czas.",
     "shortFuseDescription": "Skraca o połowę lont nowych bomb przez 10 sekund. Kolejny Krótki lont odnawia ten czas.",
     "diarrheaDescription": "Automatycznie podkłada zwykłe bomby przez 10 sekund, gdy jest wolne pole i masz miejsce na kolejną. Kolejny przedmiot odnawia czas.",

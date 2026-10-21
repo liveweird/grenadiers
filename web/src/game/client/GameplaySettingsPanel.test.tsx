@@ -90,6 +90,7 @@ describe('gameplay settings items', () => {
     expect(screen.getByText(/diamond-shaped area/)).toBeVisible()
     expect(screen.getByText(/entering it later detonates it/)).toBeVisible()
     expect(screen.getByText(/5 seconds of damage immunity/)).toBeVisible()
+    expect(screen.getByText(/Hides your actor and attributable cues/)).toBeVisible()
     expect(screen.getByText(/Maximizes new bomb blasts for 10 seconds/)).toBeVisible()
     expect(screen.getByText(/Halves the fuse of new bombs for 10 seconds/)).toBeVisible()
     expect(screen.getByText(/Automatically drops ordinary bombs for 10 seconds/)).toBeVisible()
@@ -102,6 +103,7 @@ describe('gameplay settings items', () => {
     await user.click(screen.getByRole('checkbox', { name: 'Power bomb' }))
     await user.click(screen.getByRole('checkbox', { name: 'Landmine' }))
     await user.click(screen.getByRole('checkbox', { name: 'Shield' }))
+    await user.click(screen.getByRole('checkbox', { name: 'Invisibility cloak' }))
     await user.click(screen.getByRole('checkbox', { name: 'Golden flame' }))
     await user.click(screen.getByRole('checkbox', { name: 'Short fuse' }))
     await user.click(screen.getByRole('checkbox', { name: 'Diarrhea' }))
@@ -112,12 +114,12 @@ describe('gameplay settings items', () => {
     expect(screen.getByRole('checkbox', { name: 'Heart' })).toBeChecked()
     await user.click(screen.getByRole('button', { name: 'Apply rules' }))
     expect(apply).toHaveBeenLastCalledWith(expect.objectContaining({
-      enabledItems: ['heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls'],
+      enabledItems: ['heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls'],
     }))
     await user.click(screen.getByRole('checkbox', { name: 'Golden flame' }))
     await user.click(screen.getByRole('button', { name: 'Apply rules' }))
     expect(apply).toHaveBeenLastCalledWith(expect.objectContaining({
-      enabledItems: ['heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls'],
+      enabledItems: ['heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'invisibilityCloak', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls'],
     }))
     await user.click(screen.getByRole('checkbox', { name: 'Golden flame' }))
     await user.click(screen.getByRole('checkbox', { name: 'Heart' }))
@@ -125,6 +127,7 @@ describe('gameplay settings items', () => {
     expect(screen.getByRole('checkbox', { name: 'Piercing bomb' })).toBeChecked()
     expect(screen.getByRole('checkbox', { name: 'Power bomb' })).toBeChecked()
     expect(screen.getByRole('checkbox', { name: 'Landmine' })).toBeChecked()
+    expect(screen.getByRole('checkbox', { name: 'Invisibility cloak' })).toBeChecked()
     expect(screen.getByRole('checkbox', { name: 'Golden flame' })).toBeChecked()
     expect(screen.getByRole('checkbox', { name: 'Short fuse' })).toBeChecked()
     expect(screen.getByRole('checkbox', { name: 'Diarrhea' })).toBeChecked()
@@ -134,18 +137,18 @@ describe('gameplay settings items', () => {
     expect(screen.getByRole('checkbox', { name: 'Reverse controls' })).toBeChecked()
     await user.click(screen.getByRole('button', { name: 'Apply rules' }))
     expect(apply).toHaveBeenLastCalledWith(expect.objectContaining({
-      enabledItems: ['remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls'],
+      enabledItems: ['remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls'],
     }))
     await user.click(screen.getByRole('checkbox', { name: 'Shield' }))
     expect(screen.getByRole('checkbox', { name: 'Golden flame' })).toBeChecked()
     await user.click(screen.getByRole('button', { name: 'Apply rules' }))
     expect(apply).toHaveBeenLastCalledWith(expect.objectContaining({
-      enabledItems: ['remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls'],
+      enabledItems: ['remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls'],
     }))
     await user.click(screen.getByRole('checkbox', { name: 'Heart' }))
     await user.click(screen.getByRole('button', { name: 'Apply rules' }))
     expect(apply).toHaveBeenLastCalledWith(expect.objectContaining({
-      enabledItems: ['heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls'],
+      enabledItems: ['heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls'],
     }))
     await user.click(screen.getByRole('button', { name: 'Classic settings' }))
     expect(screen.getByRole('checkbox', { name: 'Heart' })).not.toBeChecked()
@@ -153,6 +156,7 @@ describe('gameplay settings items', () => {
     expect(screen.getByRole('checkbox', { name: 'Piercing bomb' })).not.toBeChecked()
     expect(screen.getByRole('checkbox', { name: 'Power bomb' })).not.toBeChecked()
     expect(screen.getByRole('checkbox', { name: 'Shield' })).not.toBeChecked()
+    expect(screen.getByRole('checkbox', { name: 'Invisibility cloak' })).not.toBeChecked()
     expect(screen.getByRole('checkbox', { name: 'Golden flame' })).not.toBeChecked()
     expect(screen.getByRole('checkbox', { name: 'Short fuse' })).not.toBeChecked()
     expect(screen.getByRole('checkbox', { name: 'Diarrhea' })).not.toBeChecked()

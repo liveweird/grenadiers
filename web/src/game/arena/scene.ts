@@ -10,6 +10,11 @@ type Motion = { fromX: number; fromY: number; toX: number; toY: number }
 type PickupDrawing = { kind: RenderablePickupKind; drawing: Graphics }
 const key = (cell: Cell): string => `${cell.column},${cell.row}`
 const unitsToPixels = (units: number): number => units * TILE / 1024
+const cloakActive = (remaining: number | undefined): boolean => (remaining ?? 0) > 0
+function renderCloak(drawing: ActorDrawing, effects: boolean, now: number): void {
+  drawing.cloak.visible = drawing.cloaked
+  drawing.cloak.alpha = effects && drawing.cloaked ? 0.7 + (Math.floor(now / 140) % 2) * 0.3 : 1
+}
 function renderActor(drawing: ActorDrawing, id: number, effects: boolean, now: number): void {
   const frame = effects && drawing.moving && (Math.floor(now / 110) + id) % 2 === 1 ? 1 : 0
   setActorPose(drawing, drawing.direction, frame)
@@ -19,6 +24,7 @@ function renderActor(drawing: ActorDrawing, id: number, effects: boolean, now: n
   drawing.shield.alpha = effects && drawing.shielded ? 0.75 + (Math.floor(now / 160) % 2) * 0.25 : 1
   drawing.goldenFlame.visible = drawing.golden
   drawing.goldenFlame.alpha = effects && drawing.golden ? 0.7 + (Math.floor(now / 100) % 2) * 0.3 : 1
+  renderCloak(drawing, effects, now)
   drawing.shortFuse.visible = drawing.shortFused
   drawing.shortFuse.alpha = effects && drawing.shortFused ? 0.65 + (Math.floor(now / 75) % 2) * 0.35 : 1
   drawing.shortFlame.visible = drawing.shortFlamed
@@ -227,6 +233,7 @@ export class ArenaScene {
       drawing.root.visible = actor.alive
       drawing.protected = (actor.damageGraceRemainingTicks ?? 0) > 0
       drawing.shielded = (actor.shieldRemainingTicks ?? 0) > 0
+      drawing.cloaked = cloakActive(actor.invisibilityCloakRemainingTicks)
       drawing.golden = (actor.goldenFlameRemainingTicks ?? 0) > 0
       drawing.shortFused = (actor.shortFuseRemainingTicks ?? 0) > 0
       drawing.shortFlamed = (actor.shortFlameRemainingTicks ?? 0) > 0

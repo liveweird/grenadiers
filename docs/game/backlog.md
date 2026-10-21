@@ -1,6 +1,17 @@
 # Gameplay and presentation backlog
 
-Latest Landmine acceptance uses corrected source `420d8df` and passes fresh **100/100** Compose/Kubernetes cases, independently audited and sealed. The old PR83 candidate failed a rolling-observer count assumption; new exact-head CI/post-merge CI and publication remain gates. Published/default-local version remains v0.3.36 until verified promotion.
+At the 21 October 2026 16:47 UTC native acceptance checkpoint, Invisibility Cloak was an
+**unreleased source candidate**. Corrected source `1c6724f` and
+image `960976c9` pass a fresh 51 Compose plus 51 Kubernetes matrix: all 44 groups/reports,
+106 runtime PNGs, 34 runtime records and 17 Kubernetes lifecycles pass with zero retries or
+carried results. Independent raw review is clear; 2,298 payloads are sealed and the 2,299-file
+durable copy is byte-verified. At that checkpoint, PR #84 was draft at the earlier `97a85d4`; both exact-head
+seven-job candidate workflows, merge/post-merge CI, publication, exact-image promotion and tag
+CI remained required. Earlier Cloak attempts remain source-specific history with zero carry.
+Thirteen of the 22 requested item types were published, and Landmine v0.3.37 was published and
+deployed locally. See [release notes](https://github.com/liveweird/grenadiers/releases) for current
+release status. CI retains one image, two complete
+browser shards (23 item/default plus 28 classic cases), and the existing 20-minute job limits.
 
 TURN v0.3.16, CONFIG v0.3.17 and the first ART slice v0.3.18 are shipped. Heart
 [v0.3.25](https://github.com/liveweird/grenadiers/releases/tag/v0.3.25), Shield
@@ -40,14 +51,16 @@ five jobs and all 49 browser cases; PR 82 is merged and [v0.3.36](https://github
 is published. Its accepted image is deployed locally. Its CI-corrected accepted raw source is
 integrated into this v0.3.37 Landmine candidate. Landmine retains reviewed contact, grace and
 immutable-planning behavior; fresh same-image 50/50 Compose plus 50/50 Kubernetes acceptance
-passes, with zero retries, independent raw review clear and evidence sealed. Exact-head candidate
-and post-merge CI and publication remain gates. Verification preserves source-specific evidence
-and earlier failed or interrupted attempts. The other nine requested pickups remain outside this
-increment. Richer
+passes, with zero retries, independent raw review clear and evidence sealed. Both candidate
+workflows and post-merge CI pass five jobs and all 50 browser cases; PR 83 is merged, v0.3.37
+is published and its accepted image is deployed locally. Verification preserves source-specific evidence
+and earlier failed or interrupted attempts. The accepted Landmine raw source is integrated into the v0.3.38 Invisibility Cloak source
+candidate, retaining its corrected reveal-position driver and private-recipient behavior. Corrected source `1c6724f` passed fresh 102/102 native acceptance with independent audit and durable seal. At the native acceptance checkpoint, candidate/post-merge CI, publication and promotion remained pending. The other eight
+requested pickups remain outside these increments. Richer
 transitions and artwork remain follow-up work. See [pixel-art presentation](pixel-art.md),
 [expanded item implementation](expanded-items.md), and
 [release notes](https://github.com/liveweird/grenadiers/releases).
-Updated 2026-10-21 with fresh v0.3.37 native acceptance. Release acceptance is recorded in
+Updated for the 2026-10-21 native acceptance checkpoint and its then-pending release gates. Release acceptance is recorded in
 [verification](../verification.md).
 The [implementation plan](implementation-plan.md) remains the milestone/release reference;
 the [rules](rules.md) describe the current baseline and historical extension catalog.
@@ -202,7 +215,7 @@ needs remappable controls, input sequencing, replay and connection-generation fe
 | --- | --- | --- |
 | BUFF-SHIELD / shield | Temporary immunity to bomb blasts, monsters and other configured damage. | Damage-class coverage, duration, expiry while in danger and interaction with Heart. |
 | BUFF-CLOCK / stopwatch | Temporarily freeze bomb fuses, monsters and enemy players. | Affected owners/entities, existing versus newly spawned bombs, multiple clocks, thaw/input handling; freeze selected gameplay entities without stopping server ticks, round deadlines or reconnect grace. |
-| BUFF-CLOAK / invisibility cloak | Opponents cannot see the owner. | Owner feedback, visibility duration, shadows/events/HUD leakage and reconnect. Use recipient-specific projections rather than hiding sprites while sending secret positions. |
+| BUFF-CLOAK / invisibility cloak | **Prepared at the v0.3.38 native acceptance checkpoint.** Opponents receive only identity, seat and alive status for 600 physical ticks. | Event-time private cues, complete actor-root removal, current-position reveal, reconnect deadline preservation and paired checked publication are covered locally; corrected source `1c6724f` passed fresh 102/102 native cases with an independent audit and durable seal. Candidate/post-merge CI, publication and promotion remained pending at that checkpoint. |
 | BUFF-GOLD / golden flame | New bombs use maximum blast radius while active. | Maximum derives from the selected ruleset; define precedence with Short-flame and expiry. |
 | BUFF-FUSE / short fuse | Decrease new bombs' detonation delay by 50%. | Integer-tick rounding/minimum, repeated pickups and composition with Long fuse. |
 
@@ -227,7 +240,7 @@ instant action. Keep both in this requested pickup family without forcing them i
 | ID / weapon | Requested behavior | Decisions / acceptance focus |
 | --- | --- | --- |
 | WPN-REMOTE / remote bomb | **Shipped in v0.3.36.** The next successful manual placement creates an untimed bomb; the next retained bomb action detonates it. | Independent stored weapon, one live Remote per owner, capacity/allocator independence, fire and chain ignition, reconnect and replay pass local checks and independent reviews; fresh 98/98 native cases pass and the evidence is independently audited and sealed. Both five-job candidate CI runs and post-merge CI pass 49 browser cases; PR 82 is merged, the source release is published and its accepted image is deployed locally. |
-| WPN-LANDMINE / landmine | **Prepared in v0.3.37.** Successful manual placement creates a passable untimed Contact bomb. | Per-actor exit grace, swept entry, silent blast destruction, immutable planner priority, replay and checked v8 publication pass local checks; fresh 100/100 native acceptance is independently audited and sealed; exact-head candidate/post-merge CI and publication remain gates. |
+| WPN-LANDMINE / landmine | **Shipped in v0.3.37.** Successful manual placement creates a passable untimed Contact bomb. | Per-actor exit grace, swept entry, silent blast destruction, immutable planner priority, replay and checked v8 publication pass local checks; fresh 100/100 native acceptance is independently audited and sealed. Both candidate workflows and post-merge CI pass five jobs and 50 browser cases; PR 83 is merged, the release published and accepted image deployed locally. |
 | WPN-PIERCE / piercing bomb | **Shipped in v0.3.34.** The next successful manual bomb's blast continues through destructible blocks. | One-charge replacement, retained failures, ordinary automatic bombs, captured blast identity, immutable same-tick chain planning and hard-wall stopping are covered locally with independent review clear; fresh 94/94 native acceptance is independently audited and sealed; primary candidate/post-merge CI passed and the source release is published. Its additional tag security failure is documented and the Vite fix is included in the published v0.3.35 release. |
 | WPN-POWER / power bomb | **Shipped in v0.3.35.** The next successful manual bomb damages every floor cell within its Manhattan blast radius, ignoring line of sight. | One-charge replacement, retained failures, hard-wall holes, complete block and bomb coverage, immutable mixed-chain planning, captured stats and distinct presentation pass local checks and independent reviews; fresh 96/96 native acceptance, final seal, both candidate CI runs and the five-job post-merge run pass. PR 81 is merged, the source release is published and the accepted image is deployed locally. |
 

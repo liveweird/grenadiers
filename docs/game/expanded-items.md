@@ -1,6 +1,16 @@
 # Expanded item implementation plan
 
-The corrected Landmine candidate retains all gameplay behavior and now passes fresh 50 Compose plus 50 Kubernetes cases with causal placement-ID assertions. Evidence is independently audited/sealed; new candidate/post-merge CI and publication remain pending. Earlier source-native records remain historical; see [verification](../verification.md).
+At the 21 October 2026 16:47 UTC native acceptance checkpoint, Invisibility Cloak was an
+**unreleased source candidate**. Corrected source `1c6724f` and
+image `960976c9` pass a fresh 51 Compose plus 51 Kubernetes matrix with zero retries or carried
+passes. Independent raw review is clear; all 2,298 payloads are sealed and the 2,299-file durable
+copy is byte-verified. The complete 320px HUD proof runs in stable Running and restores 390px
+before gameplay. At that checkpoint, PR #84 was draft at earlier head `97a85d4`; both seven-job
+candidate workflows, merge/post-merge CI, publication, exact-image promotion and tag CI remained
+pending. Thirteen of the 22 requested item types were published, and Landmine v0.3.37 was
+published and deployed locally. See [release notes](https://github.com/liveweird/grenadiers/releases)
+for current release status. CI retains one image, two complete
+browser shards (23 item/default plus 28 classic cases), and the existing 20-minute job limits.
 
 Status: [Heart](heart.md), [Shield](shield.md), [Golden Flame](golden-flame.md),
 [Short Fuse](short-fuse.md) and [Short Flame](short-flame.md) are published through v0.3.29.
@@ -39,9 +49,13 @@ and the post-merge workflow pass all 49 browser cases. PR 82 is merged, [v0.3.36
 is published and its accepted image is deployed locally. Its CI-corrected raw source is integrated
 into the v0.3.37 [Landmine](landmine.md) candidate. Fresh same-image acceptance passes all
 50 Compose and 50 Kubernetes cases with zero retries; independent raw audit is clear and evidence
-sealed. Exact-head candidate/post-merge CI and publication remain required. Expanded-v5/generator-v2 rooms and gameplay-v8 are retained; see
+sealed. Both candidate workflows and post-merge CI pass five jobs and all 50 browser cases;
+PR 83 is merged, v0.3.37 is published and its accepted image deployed locally. Expanded-v5/generator-v2 rooms and gameplay-v8 are retained; see
 [verification](../verification.md) and
 [release notes](https://github.com/liveweird/grenadiers/releases).
+The accepted raw Landmine source is integrated into the v0.3.38 [Invisibility Cloak](invisibility-cloak.md)
+source candidate. Its corrected reveal-position driver and private actor/event semantics are
+retained. Corrected source `1c6724f` passed fresh 51 Compose plus 51 Kubernetes acceptance with an independent raw audit and durable seal. At the native acceptance checkpoint, exact-head candidate/post-merge CI, publication and promotion remained pending.
 This optional track follows the [backlog](backlog.md), shared settings and
 pixel-art increments. The historical catalog in [rules](rules.md) is not an implementation
 claim. Each activation requires its own reviewed behavior, UI, documentation and acceptance.

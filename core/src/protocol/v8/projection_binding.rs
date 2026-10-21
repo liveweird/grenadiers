@@ -82,7 +82,7 @@ fn canonical_gameplay(version: RulesVersion, capture: &ExpandedCapture, fuse_tic
             .iter()
             .flat_map(|report| &report.events)
             .all(|event| {
-                (!classic || event.audience == crate::game::EventAudience::Both)
+                canonical_audience(classic, world, event)
                     && match event.kind {
                         EventKind::BombPlaced { bomb } => {
                             canonical_bomb(event.tick, bomb, fuse_ticks, world.enabled_items)
@@ -95,6 +95,38 @@ fn canonical_gameplay(version: RulesVersion, capture: &ExpandedCapture, fuse_tic
                         EventKind::ActorEliminated { .. } | EventKind::RoundEnded { .. } => true,
                     }
             })
+}
+
+fn canonical_audience(
+    classic: bool,
+    world: &super::projection_facts::WorldFacts,
+    event: &super::projection_facts::EventFacts,
+) -> bool {
+    use crate::game::EventAudience;
+    if classic || !world.enabled_items.contains(ItemId::InvisibilityCloak) {
+        return event.audience == EventAudience::Both;
+    }
+    let seat = match event.kind {
+        EventKind::BombPlaced { bomb } | EventKind::BombDetonated { bomb } => world
+            .actors
+            .iter()
+            .find(|actor| actor.id == bomb.owner)
+            .map(|actor| actor.seat),
+        EventKind::PickupCollected { seat, .. } | EventKind::DamagePrevented { seat, .. } => {
+            Some(seat)
+        }
+        EventKind::ActorEliminated { .. } | EventKind::RoundEnded { .. } => {
+            return event.audience == EventAudience::Both;
+        }
+    };
+    seat.is_some_and(|seat| {
+        event.audience == EventAudience::Both
+            || event.audience
+                == match seat {
+                    crate::protocol::Seat::One => EventAudience::One,
+                    crate::protocol::Seat::Two => EventAudience::Two,
+                }
+    })
 }
 
 fn canonical_bomb(
@@ -210,6 +242,7 @@ pub(super) fn expanded_items() -> ItemSet {
         ItemId::PowerBomb,
         ItemId::Landmine,
         ItemId::Shield,
+        ItemId::InvisibilityCloak,
         ItemId::GoldenFlame,
         ItemId::ShortFuse,
         ItemId::Diarrhea,

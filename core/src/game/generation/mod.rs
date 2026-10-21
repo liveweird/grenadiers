@@ -215,6 +215,8 @@ fn sample_pickup(source: &mut impl RandomWords, enabled: EnabledItems) -> Option
     let piercing_end = slow_foot_end + u32::from(enabled.contains_piercing_bomb()) * 15;
     let power_end = piercing_end + u32::from(enabled.contains_power_bomb()) * 15;
     let remote_end = power_end + u32::from(enabled.contains_remote_bomb()) * 15;
+    let landmine_end = remote_end + u32::from(enabled.contains_landmine()) * 15;
+    let cloak_end = landmine_end + u32::from(enabled.contains_invisibility_cloak()) * 15;
     Some(match value {
         0..40 => PickupKind::BombCapacity,
         40..80 => PickupKind::BlastRange,
@@ -231,7 +233,9 @@ fn sample_pickup(source: &mut impl RandomWords, enabled: EnabledItems) -> Option
         value if value < piercing_end => PickupKind::PiercingBomb,
         value if value < power_end => PickupKind::PowerBomb,
         value if value < remote_end => PickupKind::RemoteBomb,
-        _ => PickupKind::Landmine,
+        value if value < landmine_end => PickupKind::Landmine,
+        value if value < cloak_end => PickupKind::InvisibilityCloak,
+        _ => unreachable!("sample value is bounded by the enabled item pool"),
     })
 }
 
@@ -362,6 +366,8 @@ fn index(cell: CellId) -> usize {
 mod diarrhea_tests;
 #[cfg(test)]
 mod golden_flame_tests;
+#[cfg(test)]
+mod invisibility_cloak_tests;
 #[cfg(test)]
 #[path = "landmine_generation_tests.rs"]
 mod landmine_tests;

@@ -19,6 +19,9 @@ mod heart_tests;
 #[path = "input_tests.rs"]
 mod input_tests;
 #[cfg(test)]
+#[path = "invisibility_cloak_tests.rs"]
+mod invisibility_cloak_tests;
+#[cfg(test)]
 #[path = "lifecycle_tests.rs"]
 mod lifecycle_tests;
 #[cfg(test)]

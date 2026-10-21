@@ -33,7 +33,7 @@ test('two browsers observe one Piercing Bomb cross two blocks and the next bomb 
     await Promise.all(games.map((game) => expect.poll(() => latestSnapshot(game)?.room.phase.type)
       .toBe('running')))
     expect(latestSnapshot(games[0])!.room.availableItems).toEqual([
-      'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot',
+      'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot',
       'shortFlame', 'longFuse', 'reverseControls',
     ])
     await one.getByRole('region', { name: 'Grenadiers courtyard' }).click()

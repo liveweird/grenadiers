@@ -115,6 +115,7 @@ async fn two_members_receive_personalized_admission_and_live_waiting_updates() {
             "powerBomb",
             "landmine",
             "shield",
+            "invisibilityCloak",
             "goldenFlame",
             "shortFuse",
             "diarrhea",

@@ -1,5 +1,5 @@
 use super::State;
-use crate::game::events::{EventAudience, StepEvent, StepEventKind};
+use crate::game::events::{StepEvent, StepEventKind};
 use crate::game::explosions;
 use crate::game::simulation::StepError;
 use crate::game::types::{EntityId, Tick};
@@ -32,7 +32,7 @@ impl State {
                 .expect("planned detonations reference existing bombs");
             events.push(StepEvent::new(
                 tick,
-                EventAudience::Both,
+                self.event_audience_for(bomb.owner(), tick),
                 StepEventKind::BombDetonated(BombView::from(bomb)),
             ));
             self.world.bombs.remove(id);

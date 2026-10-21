@@ -214,6 +214,7 @@ export function GamePanelView({ state, actions }: { state: GameClientState; acti
           focusHint={copy.arena.focusHint} instructionsId="v3-game-instructions"
           snapshot={state.snapshot} youSeat={state.youSeat} enabled={enabled}
           onDirection={(direction) => actions.movement(direction)} onBomb={() => actions.placeBomb()}
+          onEquipment={() => undefined}
         />
         <p id="v3-game-instructions" className="game-instructions">{copy.arena.instructions}</p>
       </div>

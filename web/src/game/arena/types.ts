@@ -1,7 +1,7 @@
 import type { KeyboardBindings } from './bindings'
 
 export type RenderablePickupKind =
-  | 'bombCapacity' | 'blastRange' | 'movementSpeed' | 'kick' | 'wallPass' | 'heart' | 'remoteBomb' | 'piercingBomb' | 'powerBomb' | 'landmine' | 'shield' | 'stopwatch' | 'invisibilityCloak' | 'goldenFlame' | 'shortFuse'
+  | 'bombCapacity' | 'blastRange' | 'movementSpeed' | 'kick' | 'punch' | 'wallPass' | 'heart' | 'remoteBomb' | 'piercingBomb' | 'powerBomb' | 'landmine' | 'shield' | 'stopwatch' | 'invisibilityCloak' | 'goldenFlame' | 'shortFuse'
   | 'diarrhea' | 'slowFoot' | 'shortFlame' | 'longFuse' | 'reverseControls' | 'invisibleBombs' | 'teleporter'
 interface PresentedActor {
   id: number
@@ -28,6 +28,7 @@ interface PresentedActor {
   landmineStored?: boolean
   remoteArmed?: boolean
   kickEquipped?: boolean
+  punchEquipped?: boolean
   wallPassEquipped?: boolean
 }
 interface PresentedBomb {
@@ -80,4 +81,5 @@ export interface GameArenaProps {
   bindings?: KeyboardBindings
   onDirection: (direction: Direction | null) => void
   onBomb: () => void
+  onEquipment: () => void
 }

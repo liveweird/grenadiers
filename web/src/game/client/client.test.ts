@@ -48,6 +48,30 @@ describe('v10 admission and authoritative baselines', () => {
     })
     expect(value.client.placeBomb()).toBe(true)
     expect(messages(socket).at(-1)).toMatchObject({ type: 'manualAction', action: 'bomb', actionId: 42 })
+    const punchEnabled = snapshot(5)
+    punchEnabled.room.settings.enabledItems = ['punch']
+    socket.message(punchEnabled)
+    expect(value.client.useEquipment()).toBe(true)
+    expect(messages(socket).at(-1)).toMatchObject({
+      type: 'manualAction', action: 'equipment', actionId: 43,
+    })
+  })
+
+  it('guards Equipment by Punch settings without consuming the shared manual-action ID', async () => {
+    const value = harness()
+    const socket = await authenticate(value)
+    const baseline = admitted(1, 8)
+    socket.message(baseline)
+    expect(value.client.useEquipment()).toBe(false)
+    expect(messages(socket).some((message) => message.action === 'equipment')).toBe(false)
+
+    const enabled = snapshot(2)
+    enabled.room.settings.enabledItems = ['punch']
+    socket.message(enabled)
+    expect(value.client.useEquipment()).toBe(true)
+    expect(messages(socket).at(-1)).toMatchObject({ action: 'equipment', actionId: 9 })
+    expect(value.client.placeBomb()).toBe(true)
+    expect(messages(socket).at(-1)).toMatchObject({ action: 'bomb', actionId: 10 })
   })
 
   it('keeps MAX manual action exhaustion and never resends an action after reconnect', async () => {

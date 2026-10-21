@@ -120,6 +120,33 @@ fn tangent_stationary_and_correction_only_motion_do_not_shove() {
 }
 
 #[test]
+fn transverse_side_entry_does_not_arm_but_longitudinal_leading_face_entry_does() {
+    let holder = Position { x: 3_988, y: 4_096 };
+    let mut side_entry = state(holder, Position { x: 4_608, y: 4_746 }, BTreeSet::new());
+    let side_report = side_entry
+        .step(&[
+            press(SeatId::One, Direction::East),
+            press(SeatId::Two, Direction::North),
+        ])
+        .unwrap();
+    assert!(side_report.forced_movement.is_none());
+    assert_eq!(side_entry.actors[0].last_successful_shove_tick(), None);
+
+    let mut leading_entry = state(holder, Position { x: 4_638, y: 4_716 }, BTreeSet::new());
+    let leading_report = leading_entry
+        .step(&[
+            press(SeatId::One, Direction::East),
+            press(SeatId::Two, Direction::North),
+        ])
+        .unwrap();
+    assert_eq!(leading_report.forced_movement.unwrap().seat, SeatId::Two);
+    assert_eq!(
+        leading_entry.actors[0].last_successful_shove_tick(),
+        Some(Tick(1))
+    );
+}
+
+#[test]
 fn victim_collision_capability_controls_partial_clamp() {
     let one = Position { x: 4_220, y: 4_608 };
     let two = Position {

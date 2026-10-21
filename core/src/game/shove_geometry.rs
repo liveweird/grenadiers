@@ -95,7 +95,7 @@ pub(super) fn contact_entry_direction(
         };
         if !initially_overlapped
             && holder_velocity.forward == Some(forward)
-            && leading_face_entry(direction, relative, relative_velocity, entry)
+            && leading_face_entry(direction, relative, relative_velocity, entry, denominator)
         {
             return Some(direction);
         }
@@ -161,16 +161,27 @@ fn leading_face_entry(
     relative: (i64, i64),
     velocity: (i64, i64),
     entry: Fraction,
+    scale: i64,
 ) -> bool {
     let value_at_entry = |position: i64, speed: i64| {
         i128::from(position) * i128::from(entry.denominator)
             + i128::from(speed) * i128::from(entry.numerator)
     };
+    let leading_boundary =
+        i128::from(2 * HALF_FOOTPRINT) * i128::from(scale) * i128::from(entry.denominator);
     match direction {
-        Direction::East => velocity.0 < 0 && value_at_entry(relative.0, velocity.0) > 0,
-        Direction::West => velocity.0 > 0 && value_at_entry(relative.0, velocity.0) < 0,
-        Direction::South => velocity.1 < 0 && value_at_entry(relative.1, velocity.1) > 0,
-        Direction::North => velocity.1 > 0 && value_at_entry(relative.1, velocity.1) < 0,
+        Direction::East => {
+            velocity.0 < 0 && value_at_entry(relative.0, velocity.0) == leading_boundary
+        }
+        Direction::West => {
+            velocity.0 > 0 && value_at_entry(relative.0, velocity.0) == -leading_boundary
+        }
+        Direction::South => {
+            velocity.1 < 0 && value_at_entry(relative.1, velocity.1) == leading_boundary
+        }
+        Direction::North => {
+            velocity.1 > 0 && value_at_entry(relative.1, velocity.1) == -leading_boundary
+        }
     }
 }
 

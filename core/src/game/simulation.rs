@@ -247,6 +247,18 @@ mod bomb_order_acceptance_tests;
 #[path = "bomb_trigger_tests.rs"]
 mod bomb_trigger_tests;
 #[cfg(test)]
+#[path = "bracelet_geometry_proof_tests.rs"]
+mod bracelet_geometry_proof_tests;
+#[cfg(test)]
+#[path = "bracelet_history_proof_tests.rs"]
+mod bracelet_history_proof_tests;
+#[cfg(test)]
+#[path = "bracelet_phase_proof_tests.rs"]
+mod bracelet_phase_proof_tests;
+#[cfg(test)]
+#[path = "bracelet_test_support.rs"]
+mod bracelet_test_support;
+#[cfg(test)]
 #[path = "bracelet_tests.rs"]
 mod bracelet_tests;
 #[cfg(test)]

@@ -18,9 +18,13 @@ pub(crate) enum ExplosionError {
     UnsupportedBombTrigger(EntityId),
 }
 
-pub(crate) fn plan(world: &World, tick: Tick) -> Result<ExplosionPlan, ExplosionError> {
+pub(crate) fn plan(
+    world: &World,
+    tick: Tick,
+    remote_targets: [Option<EntityId>; 2],
+) -> Result<ExplosionPlan, ExplosionError> {
     for bomb in world.bombs.values() {
-        if !matches!(bomb.trigger(), BombTrigger::Timed { .. }) {
+        if matches!(bomb.trigger(), BombTrigger::Contact) {
             return Err(ExplosionError::UnsupportedBombTrigger(bomb.id()));
         }
     }
@@ -32,15 +36,17 @@ pub(crate) fn plan(world: &World, tick: Tick) -> Result<ExplosionPlan, Explosion
     let mut pending: BTreeSet<_> = world
         .bombs
         .values()
-        .filter(|bomb| match bomb.trigger() {
-            BombTrigger::Timed { detonates_at } => {
-                detonates_at <= tick
-                    || world
-                        .hazards
-                        .get(&bomb.cell())
-                        .is_some_and(|expiry| *expiry > tick)
-            }
-            BombTrigger::Remote | BombTrigger::Contact => false,
+        .filter(|bomb| {
+            let burning = world
+                .hazards
+                .get(&bomb.cell())
+                .is_some_and(|expiry| *expiry > tick);
+            burning
+                || match bomb.trigger() {
+                    BombTrigger::Timed { detonates_at } => detonates_at <= tick,
+                    BombTrigger::Remote => remote_targets.contains(&Some(bomb.id())),
+                    BombTrigger::Contact => false,
+                }
         })
         .map(|bomb| bomb.id())
         .collect();
@@ -169,3 +175,7 @@ fn adjacent(cell: CellId, direction: Direction) -> Option<CellId> {
 #[cfg(test)]
 #[path = "explosions_tests.rs"]
 mod tests;
+
+#[cfg(test)]
+#[path = "remote_explosion_tests.rs"]
+mod remote_tests;

@@ -61,6 +61,7 @@ fn short_flame_and_shield_publish_distinct_physical_timers_and_quiet_admission()
             frame["room"]["availableItems"],
             serde_json::json!([
                 "heart",
+                "remoteBomb",
                 "piercingBomb",
                 "powerBomb",
                 "shield",

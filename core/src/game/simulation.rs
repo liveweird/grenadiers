@@ -1,7 +1,6 @@
 use std::collections::BTreeSet;
 
 use super::assignment::RoundAssignment;
-use super::bombs::{BlastKind, BombTrigger};
 use super::damage::DamageGrace;
 use super::effects::{EffectiveSpeed, TimedEffects};
 use super::events::StepEvent;
@@ -143,6 +142,7 @@ pub enum StateError {
     },
     UnsupportedBombTrigger(EntityId),
     UnsupportedBombBlast(EntityId),
+    DuplicateRemoteOwner(EntityId),
     UnsupportedEnabledItems(crate::game::EnabledItems),
     UnsupportedPickup {
         cell: CellId,
@@ -156,6 +156,7 @@ pub enum StepError {
     TickOverflow,
     UnsupportedBombTrigger(EntityId),
     UnsupportedBombBlast(EntityId),
+    DuplicateRemoteOwner(EntityId),
     EffectExpiryOverflow(super::effects::EffectKind),
 }
 
@@ -228,19 +229,15 @@ impl State {
             if key != bomb.id() {
                 return Err(StateError::BombIdMismatch { key, id: bomb.id() });
             }
-            if !matches!(bomb.trigger(), BombTrigger::Timed { .. }) {
-                return Err(StateError::UnsupportedBombTrigger(bomb.id()));
-            }
         }
-        for bomb in world.bombs.values() {
-            let supported = match bomb.blast() {
-                BlastKind::Standard => true,
-                BlastKind::Piercing => rules.enabled_items().contains_piercing_bomb(),
-                BlastKind::Power => rules.enabled_items().contains_power_bomb(),
-            };
-            if !supported {
-                return Err(StateError::UnsupportedBombBlast(bomb.id()));
-            }
+        if let Some(id) = validation::unsupported_trigger(rules, &world) {
+            return Err(StateError::UnsupportedBombTrigger(id));
+        }
+        if let Some(id) = validation::unsupported_blast(rules, &world) {
+            return Err(StateError::UnsupportedBombBlast(id));
+        }
+        if let Some(owner) = validation::duplicate_remote_owner(&world) {
+            return Err(StateError::DuplicateRemoteOwner(owner));
         }
         for actor in actors {
             if world.bombs.contains_key(&actor.id) {
@@ -398,3 +395,5 @@ mod tests;
 #[cfg(test)]
 #[path = "upgrade_tests.rs"]
 mod upgrade_tests;
+#[path = "simulation_validation.rs"]
+mod validation;

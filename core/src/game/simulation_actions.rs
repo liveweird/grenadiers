@@ -104,17 +104,27 @@ impl State {
         actions: &ManualActionQueues,
         tick: Tick,
         events: &mut Vec<StepEvent>,
-    ) {
+    ) -> [Option<EntityId>; 2] {
+        let mut remote_targets = [None; 2];
         let requests = SeatId::ALL.map(|seat| {
-            if actions.for_seat(seat).first() == Some(ManualAction::PlaceBomb) {
+            let actor = &self.actors[seat.index()];
+            if actions.for_seat(seat).first() == Some(ManualAction::PlaceBomb) && actor.alive {
+                if let Some(id) = self.world.bombs.values().find_map(|bomb| {
+                    (bomb.owner() == actor.id && matches!(bomb.trigger(), BombTrigger::Remote))
+                        .then_some(bomb.id())
+                }) {
+                    remote_targets[seat.index()] = Some(id);
+                    return None;
+                }
                 Some(PlacementOrigin::Manual)
-            } else if self.actors[seat.index()].effects.forces_bomb_drops(tick) {
+            } else if actor.effects.forces_bomb_drops(tick) {
                 Some(PlacementOrigin::Automatic)
             } else {
                 None
             }
         });
         self.resolve_classic_placements(requests, tick, events);
+        remote_targets
     }
 
     fn resolve_classic_placements(
@@ -149,7 +159,8 @@ impl State {
                 actor.inventory.weapon().filter(|weapon| match weapon {
                     SpecialWeapon::Piercing => self.rules.enabled_items().contains_piercing_bomb(),
                     SpecialWeapon::Power => self.rules.enabled_items().contains_power_bomb(),
-                    SpecialWeapon::Remote | SpecialWeapon::Landmine => false,
+                    SpecialWeapon::Remote => self.rules.enabled_items().contains_remote_bomb(),
+                    SpecialWeapon::Landmine => false,
                 })
             } else {
                 None
@@ -159,37 +170,48 @@ impl State {
                 Some(SpecialWeapon::Power) => BlastKind::Power,
                 Some(SpecialWeapon::Remote | SpecialWeapon::Landmine) | None => BlastKind::Standard,
             };
-            let Some(fuse_ticks) = actor
-                .effects
-                .bomb_fuse_ticks(self.rules.bomb_fuse_ticks(), tick)
-            else {
-                continue;
-            };
-            let Some(detonates_at) = tick.0.checked_add(fuse_ticks).map(Tick) else {
-                continue;
-            };
             let Some(id) = self.next_bomb_id() else {
                 continue;
             };
-            let bomb = if blast != BlastKind::Standard {
-                Bomb::new_with_blast(
-                    id,
-                    cell,
-                    actor.id,
-                    actor.effective_bomb_range(tick),
-                    tick,
-                    BombTrigger::Timed { detonates_at },
-                    blast,
-                )
-            } else {
+            let bomb = if weapon == Some(SpecialWeapon::Remote) {
                 Bomb::new(
                     id,
                     cell,
                     actor.id,
                     actor.effective_bomb_range(tick),
                     tick,
-                    BombTrigger::Timed { detonates_at },
+                    BombTrigger::Remote,
                 )
+            } else {
+                let Some(fuse_ticks) = actor
+                    .effects
+                    .bomb_fuse_ticks(self.rules.bomb_fuse_ticks(), tick)
+                else {
+                    continue;
+                };
+                let Some(detonates_at) = tick.0.checked_add(fuse_ticks).map(Tick) else {
+                    continue;
+                };
+                if blast != BlastKind::Standard {
+                    Bomb::new_with_blast(
+                        id,
+                        cell,
+                        actor.id,
+                        actor.effective_bomb_range(tick),
+                        tick,
+                        BombTrigger::Timed { detonates_at },
+                        blast,
+                    )
+                } else {
+                    Bomb::new(
+                        id,
+                        cell,
+                        actor.id,
+                        actor.effective_bomb_range(tick),
+                        tick,
+                        BombTrigger::Timed { detonates_at },
+                    )
+                }
             };
             let Ok(bomb) = bomb else {
                 continue;
@@ -241,6 +263,10 @@ mod piercing_bomb_tests;
 #[cfg(test)]
 #[path = "power_bomb_tests.rs"]
 mod power_bomb_tests;
+
+#[cfg(test)]
+#[path = "remote_bomb_tests.rs"]
+mod remote_bomb_tests;
 
 #[cfg(test)]
 #[path = "simulation_actions_tests.rs"]

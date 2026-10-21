@@ -27,7 +27,7 @@ export function itemSetSemanticError(
 }
 
 const supportedItems = [
-  'heart', 'piercingBomb', 'powerBomb', 'shield', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse',
+  'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'shield', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse',
   'reverseControls',
 ] as const
 
@@ -44,20 +44,26 @@ function supportedEffect(effect: EffectView, enabled: ReadonlySet<ItemId>): bool
 }
 
 function supportedBomb(bomb: BombView, enabled: ReadonlySet<ItemId>): boolean {
-  return bomb.trigger.type === 'timed' && !bomb.trigger.paused && (
-    bomb.blast === 'standard'
-    || (bomb.blast === 'piercing' && enabled.has('piercingBomb'))
-    || (bomb.blast === 'power' && enabled.has('powerBomb'))
-  )
+  if (bomb.trigger.type === 'remote') {
+    return enabled.has('remoteBomb') && bomb.blast === 'standard'
+  }
+  return bomb.trigger.type === 'timed' && !bomb.trigger.paused
+    && (bomb.blast === 'standard'
+      || (bomb.blast === 'piercing' && enabled.has('piercingBomb'))
+      || (bomb.blast === 'power' && enabled.has('powerBomb')))
 }
 
 function supportedState(state: GameState | null, enabled: ReadonlySet<ItemId>): boolean {
   if (!state) return true
   if (state.pickups.some((pickup) => !supportedItem(pickup.kind, enabled))) return false
-  return state.bombs.every((bomb) => supportedBomb(bomb, enabled))
+  const actorIds = new Set(state.actors.map((actor) => actor.id))
+  return state.bombs.every((bomb) => actorIds.has(bomb.owner) && supportedBomb(bomb, enabled))
+    && state.bombs.filter((bomb) => bomb.trigger.type === 'remote')
+      .every((bomb, index, remotes) => remotes.findIndex((other) => other.owner === bomb.owner) === index)
     && state.actors.every((actor) => actor.type === 'visible' && (
     (actor.inventory.weapon === null
       || (actor.inventory.weapon === 'piercingBomb' && enabled.has('piercingBomb'))
+      || (actor.inventory.weapon === 'remoteBomb' && enabled.has('remoteBomb'))
       || (actor.inventory.weapon === 'powerBomb' && enabled.has('powerBomb')))
     && (actor.inventory.equipment === null
       || (actor.inventory.equipment === 'heart' && enabled.has('heart')))

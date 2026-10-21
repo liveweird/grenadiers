@@ -207,7 +207,8 @@ fn sample_pickup(source: &mut impl RandomWords, enabled: EnabledItems) -> Option
         + u32::from(enabled.contains_diarrhea()) * 15
         + u32::from(enabled.contains_slow_foot()) * 15
         + u32::from(enabled.contains_piercing_bomb()) * 15
-        + u32::from(enabled.contains_power_bomb()) * 15;
+        + u32::from(enabled.contains_power_bomb()) * 15
+        + u32::from(enabled.contains_remote_bomb()) * 15;
     let value = if bound == 100 {
         sample_percent(source)?
     } else {
@@ -223,6 +224,7 @@ fn sample_pickup(source: &mut impl RandomWords, enabled: EnabledItems) -> Option
     let diarrhea_end = reverse_controls_end + u32::from(enabled.contains_diarrhea()) * 15;
     let slow_foot_end = diarrhea_end + u32::from(enabled.contains_slow_foot()) * 15;
     let piercing_end = slow_foot_end + u32::from(enabled.contains_piercing_bomb()) * 15;
+    let power_end = piercing_end + u32::from(enabled.contains_power_bomb()) * 15;
     Some(match value {
         0..40 => PickupKind::BombCapacity,
         40..80 => PickupKind::BlastRange,
@@ -237,7 +239,8 @@ fn sample_pickup(source: &mut impl RandomWords, enabled: EnabledItems) -> Option
         value if value < diarrhea_end => PickupKind::Diarrhea,
         value if value < slow_foot_end => PickupKind::SlowFoot,
         value if value < piercing_end => PickupKind::PiercingBomb,
-        _ => PickupKind::PowerBomb,
+        value if value < power_end => PickupKind::PowerBomb,
+        _ => PickupKind::RemoteBomb,
     })
 }
 
@@ -367,10 +370,8 @@ fn index(cell: CellId) -> usize {
 #[path = "diarrhea_generation_tests.rs"]
 mod diarrhea_tests;
 #[cfg(test)]
-#[path = "golden_flame_tests.rs"]
 mod golden_flame_tests;
 #[cfg(test)]
-#[path = "long_fuse_tests.rs"]
 mod long_fuse_tests;
 #[cfg(test)]
 #[path = "piercing_bomb_generation_tests.rs"]
@@ -379,20 +380,19 @@ mod piercing_bomb_tests;
 #[path = "power_bomb_generation_tests.rs"]
 mod power_bomb_tests;
 #[cfg(test)]
+#[path = "remote_bomb_generation_tests.rs"]
+mod remote_bomb_tests;
+#[cfg(test)]
 #[path = "reverse_controls_generation_tests.rs"]
 mod reverse_controls_tests;
 #[cfg(test)]
-#[path = "shield_tests.rs"]
 mod shield_tests;
 #[cfg(test)]
-#[path = "short_flame_tests.rs"]
 mod short_flame_tests;
 #[cfg(test)]
-#[path = "short_fuse_tests.rs"]
 mod short_fuse_tests;
 #[cfg(test)]
 #[path = "slow_foot_generation_tests.rs"]
 mod slow_foot_tests;
 #[cfg(test)]
-#[path = "tests.rs"]
 mod tests;

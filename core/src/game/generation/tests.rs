@@ -133,7 +133,7 @@ fn rejection_exhaustion_uses_the_empty_symmetric_fallback() {
 #[test]
 fn invalid_generated_terrain_uses_the_canonical_empty_fallback() {
     let mut invalid = classic_terrain();
-    invalid[index(CellId::new(7, 0))] = Terrain::Floor;
+    invalid[7] = Terrain::Floor;
     let mut source = Sequence::new([], Some(99));
     let generated = generate_with_source([3; 32], &mut source, invalid);
 
@@ -165,7 +165,7 @@ fn generated_layers_are_symmetric_reserved_and_concealed_only_under_blocks() {
             );
         }
     }
-    for cell in reserved_cells() {
+    for cell in RESERVED_CELLS {
         assert_eq!(arena.terrain(cell), Some(Terrain::Floor));
         assert!(!arena.blocks().contains(&cell));
         assert!(!generated.concealed_pickups().contains_key(&cell));
@@ -332,6 +332,7 @@ fn signature(generated: &GeneratedArena) -> String {
                 Some(PickupKind::InvisibilityCloak) => 'C',
                 Some(PickupKind::Stopwatch) => 'T',
                 Some(PickupKind::InvisibleBombs) => 'I',
+                Some(PickupKind::Teleporter) => 'E',
                 None => '.',
             });
         }

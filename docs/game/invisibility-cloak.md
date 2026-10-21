@@ -16,13 +16,12 @@ Audience is captured at emission and is not recomputed from the final world in a
 Both complete recipient encodings are validated before either is published; legacy protocols reject
 the private semantics.
 
-Published version 0.3.38 introduces Invisibility Cloak with generator weight 15 after Landmine.
-The expanded pool contains 320 entries and preserves every earlier 8192-mask path. Its fourteen-item
-catalog supports all 16384 subsets and remains pinned by archived gameplay v8. Active
-[gameplay v9](protocol-v9.md) now has sixteen items through Invisible Bombs and supports all 65,536
-subsets. Rules version 5, generator version 2 and journal format 2 remain unchanged. Reload older
-browsers when deploying the paired server/web upgrade.
-
+Version 0.3.38 introduced Invisibility Cloak with generator weight 15 after Landmine. Its expanded
+pool contained 320 entries and preserved every earlier 8192-mask path. That fourteen-item catalog
+supports all 16384 subsets and remains pinned by archived gameplay v8. Active
+[gameplay v10](protocol-v10.md) has seventeen items through Teleporter and supports all 131072 subsets.
+Rules version 5, generator version 2 and journal format 2 remain unchanged. Reload older browsers
+when deploying the paired server/web upgrade.
 
 At the 21 October 2026 16:47 UTC native acceptance checkpoint, corrected source `1c6724f`, tree
 `403bb73f`, and image `960976c9` passed fresh 51 Compose plus

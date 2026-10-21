@@ -4,6 +4,18 @@ import { validateServerMessage } from '../client/clientProtocol'
 import { snapshot } from '../client/testSupport'
 import { validateGameplayV8ServerMessage } from '../v8/validation'
 import { validateGameplayV9ServerMessage } from './validation'
+import type { Snapshot as V9Snapshot } from './schema'
+
+function archivedValue(value: unknown): V9Snapshot {
+  const archived = structuredClone(value) as {
+    room: { availableItems: string[] }
+    state: { actors: Array<Record<string, unknown>> }
+  }
+  archived.room.availableItems = archived.room.availableItems.filter((item) => item !== 'teleporter')
+  for (const actor of archived.state.actors) delete actor.lastTeleportTick
+  return archived as unknown as V9Snapshot
+}
+const archivedSnapshot = (revision: number): V9Snapshot => archivedValue(snapshot(revision))
 
 const supported = [
   'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch',
@@ -29,14 +41,14 @@ describe('gameplay v9 Stopwatch validation', () => {
 
   it.each(supportedRanges)('accepts every pinned supported enabled-item mask in [$start, $end)', (range) => {
     executeCatalogMaskRange('gameplay v9', supported, range, (_mask, enabledItems) => {
-      const message = snapshot(1)
+      const message = archivedSnapshot(1)
       message.room.settings.enabledItems = [...enabledItems]
       expect(validateGameplayV9ServerMessage(message)).toEqual({ valid: true, value: message })
     })
   })
 
   it('binds visible frozen state to the living opponent Stopwatch and keeps hidden actors exact', () => {
-    const message = snapshot(1)
+    const message = archivedSnapshot(1)
     expect(validateGameplayV9ServerMessage(message)).toEqual({ valid: true, value: message })
     expect(validateGameplayV8ServerMessage(message)).toMatchObject({ valid: false, source: 'schema' })
 
@@ -70,11 +82,11 @@ describe('gameplay v9 Stopwatch validation', () => {
   })
 
   it('accepts Stopwatch and paused timed bombs only with the enabled capability', () => {
-    const stopwatch = snapshot(2)
+    const stopwatch = archivedSnapshot(2)
     stopwatch.room.settings.enabledItems = ['stopwatch']
     expect(validateGameplayV9ServerMessage(stopwatch)).toEqual({ valid: true, value: stopwatch })
 
-    const paused = snapshot(2)
+    const paused = archivedSnapshot(2)
     paused.state.bombs = [{
       id: 3, cell: { column: 1, row: 1 }, owner: 1, range: 2, placedAt: 1,
       trigger: { type: 'timed', remainingTicks: 179, paused: true }, blast: 'standard',
@@ -90,7 +102,7 @@ describe('gameplay v9 Stopwatch validation', () => {
   })
 
   it.each([false, true])('rejects a live Timed bomb at zero with paused=%s', (paused) => {
-    const message = snapshot(2)
+    const message = archivedSnapshot(2)
     message.room.settings.enabledItems = ['stopwatch']
     message.state.bombs = [{
       id: 3, cell: { column: 1, row: 1 }, owner: 1, range: 2, placedAt: 1,
@@ -105,7 +117,7 @@ describe('gameplay v9 Stopwatch validation', () => {
   })
 
   it('keeps zero natural and positive paused chain detonation history valid', () => {
-    const message = snapshot(2)
+    const message = archivedSnapshot(2)
     message.room.settings.enabledItems = ['stopwatch']
     const eventBomb = (id: number, remainingTicks: number, paused: boolean) => ({
       id, cell: { column: id, row: 1 }, owner: 1, range: 2, placedAt: 1,
@@ -152,7 +164,8 @@ describe('gameplay v9 Stopwatch validation', () => {
       trigger: { type: 'remote' }, blast: 'standard',
     }]
     message.room.settings.enabledItems = ['remoteBomb', 'invisibleBombs']
-    expect(validateGameplayV9ServerMessage(message)).toEqual({ valid: true, value: message })
+    const archived = archivedValue(message)
+    expect(validateGameplayV9ServerMessage(archived)).toEqual({ valid: true, value: archived })
     expect(validateServerMessage(message, 'one')).toBe(false)
 
     own.effects = []

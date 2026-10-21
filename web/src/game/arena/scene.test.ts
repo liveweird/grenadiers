@@ -222,12 +222,31 @@ describe('arena scene transitions and optional-item presentation', () => {
     snapshot.state.physicalTick = 3
     snapshot.state.actors.push({
       id: 20, seat: 'two', position: { x: 4096, y: 3072 }, heading: 'north', alive: true,
+      lastTeleportTick: 3,
     })
     scene.update(snapshot, 40)
     expect(actors.children).toHaveLength(2)
     expect(actors.children[1]).toMatchObject({ x: 192, y: 144 })
     scene.render(41)
     expect(actors.children[1]).toMatchObject({ x: 192, y: 144 })
+  })
+  it('snaps both actors on a new teleport marker without a walking frame', () => {
+    const scene = new ArenaScene(1)
+    const snapshot = gameSnapshot()
+    scene.update(snapshot, 0)
+    const actors = layers(scene)[5]
+    const poses = actors.children.map((actor) => actor.children.slice(6).map(({ visible }) => visible))
+    snapshot.state.physicalTick = 103
+    snapshot.state.actors[0].position = { x: 13_824, y: 11_776 }
+    snapshot.state.actors[1].position = { x: 1536, y: 1536 }
+    snapshot.state.actors[0].lastTeleportTick = 103
+    snapshot.state.actors[1].lastTeleportTick = 103
+    scene.update(snapshot, 100)
+    expect(actors.children.map(({ x, y }) => [x, y])).toEqual([[648, 552], [72, 72]])
+    scene.render(125)
+    expect(actors.children.map(({ x, y }) => [x, y])).toEqual([[648, 552], [72, 72]])
+    expect(actors.children.map((actor) => actor.children.slice(6).map(({ visible }) => visible)))
+      .toEqual(poses)
   })
 })
 describe('optional-item presentation', () => {

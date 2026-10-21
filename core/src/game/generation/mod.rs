@@ -213,6 +213,7 @@ fn sample_pickup(source: &mut impl RandomWords, enabled: EnabledItems) -> Option
     let cloak_end = landmine_end + u32::from(enabled.contains_invisibility_cloak()) * 15;
     let stopwatch_end = cloak_end + u32::from(enabled.contains_stopwatch()) * 15;
     let invisible_bombs_end = stopwatch_end + u32::from(enabled.contains_invisible_bombs()) * 15;
+    let teleporter_end = invisible_bombs_end + u32::from(enabled.contains_teleporter()) * 15;
     Some(match value {
         0..40 => PickupKind::BombCapacity,
         40..80 => PickupKind::BlastRange,
@@ -233,6 +234,7 @@ fn sample_pickup(source: &mut impl RandomWords, enabled: EnabledItems) -> Option
         value if value < cloak_end => PickupKind::InvisibilityCloak,
         value if value < stopwatch_end => PickupKind::Stopwatch,
         value if value < invisible_bombs_end => PickupKind::InvisibleBombs,
+        value if value < teleporter_end => PickupKind::Teleporter,
         _ => unreachable!("sample value is bounded by the enabled item pool"),
     })
 }
@@ -260,13 +262,13 @@ fn sample_percent(source: &mut impl RandomWords) -> Option<u32> {
 
 fn eligible_pairs() -> Vec<(CellId, CellId)> {
     let terrain = classic_terrain();
-    let reserved = reserved_cells();
     let mut pairs = Vec::new();
     for row in 1..ARENA_HEIGHT - 1 {
         for column in 1..ARENA_WIDTH - 1 {
             let cell = CellId::new(column, row);
             let mirror = rotate(cell);
-            if cell <= mirror && terrain[index(cell)] == Terrain::Floor && !reserved.contains(&cell)
+            let index = usize::from(row * ARENA_WIDTH + column);
+            if cell <= mirror && terrain[index] == Terrain::Floor && !RESERVED_CELLS.contains(&cell)
             {
                 pairs.push((cell, mirror));
             }
@@ -292,7 +294,7 @@ fn validate_generated(arena: &Arena, concealed: &BTreeMap<CellId, PickupKind>) -
 }
 
 fn has_escape_witness(arena: &Arena) -> bool {
-    escape_routes().into_iter().all(|(spawn, bomb, safe)| {
+    ESCAPE_ROUTES.into_iter().all(|(spawn, bomb, safe)| {
         [spawn, bomb, safe].into_iter().all(|cell| {
             arena.terrain(cell) == Some(Terrain::Floor) && !arena.blocks().contains(&cell)
         }) && !blast_reaches(arena, bomb, safe, 2)
@@ -333,31 +335,23 @@ const fn rotate(cell: CellId) -> CellId {
     CellId::new(ARENA_WIDTH - 1 - cell.column, ARENA_HEIGHT - 1 - cell.row)
 }
 
-const fn reserved_cells() -> [CellId; 6] {
-    [
-        CellId::new(1, 1),
-        CellId::new(2, 1),
-        CellId::new(1, 2),
+const RESERVED_CELLS: [CellId; 6] = [
+    CellId::new(1, 1),
+    CellId::new(2, 1),
+    CellId::new(1, 2),
+    CellId::new(13, 11),
+    CellId::new(12, 11),
+    CellId::new(13, 10),
+];
+
+const ESCAPE_ROUTES: [(CellId, CellId, CellId); 2] = [
+    (CellId::new(1, 1), CellId::new(2, 1), CellId::new(1, 2)),
+    (
         CellId::new(13, 11),
         CellId::new(12, 11),
         CellId::new(13, 10),
-    ]
-}
-
-const fn escape_routes() -> [(CellId, CellId, CellId); 2] {
-    [
-        (CellId::new(1, 1), CellId::new(2, 1), CellId::new(1, 2)),
-        (
-            CellId::new(13, 11),
-            CellId::new(12, 11),
-            CellId::new(13, 10),
-        ),
-    ]
-}
-
-fn index(cell: CellId) -> usize {
-    usize::from(cell.row) * usize::from(ARENA_WIDTH) + usize::from(cell.column)
-}
+    ),
+];
 
 #[cfg(test)]
 #[path = "diarrhea_generation_tests.rs"]
@@ -396,5 +390,7 @@ mod short_fuse_tests;
 mod slow_foot_tests;
 #[cfg(test)]
 mod stopwatch_tests;
+#[cfg(test)]
+mod teleporter_tests;
 #[cfg(test)]
 mod tests;

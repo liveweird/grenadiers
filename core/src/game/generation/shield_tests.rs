@@ -114,6 +114,7 @@ fn signature(generated: &GeneratedArena) -> String {
                 Some(PickupKind::InvisibilityCloak) => 'C',
                 Some(PickupKind::Stopwatch) => 'T',
                 Some(PickupKind::InvisibleBombs) => 'I',
+                Some(PickupKind::Teleporter) => 'E',
                 None => '.',
             });
         }

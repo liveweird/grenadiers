@@ -40,6 +40,7 @@
     "test:invisibility-cloak": "playwright test --config playwright.invisibility-cloak.config.ts",
     "test:stopwatch": "playwright test --config playwright.stopwatch.config.ts",
     "test:invisible-bombs": "playwright test --config playwright.invisible-bombs.config.ts",
+    "test:teleporter": "playwright test --config playwright.teleporter.config.ts",
     "test:renderer-diagnostics": "playwright test --config playwright.renderer-diagnostics.config.ts",
     "test:terrain-pixels": "playwright test --config playwright.terrain-pixels.config.ts"
   },

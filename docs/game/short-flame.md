@@ -35,6 +35,6 @@ The enabled weight is 15, appended after Short Fuse. All sixteen previous pool m
 their exact generation paths. All thirty-two subsets of the five items available at
 introduction remain valid; see the [current catalog](settings.md) for later items.
 Rules version 5, generator version 2 and journal format 2 remain unchanged. The active
-wire contract is [gameplay-v9](protocol-v9.md).
+wire contract is [gameplay-v10](protocol-v10.md).
 Deploy the paired server/browser build together: older clients require a reload for the current
 wire contract and availability list. Retain a compatible server to replay newly enabled masks.

@@ -49,9 +49,9 @@ and remaining presentation work are planned extensions to the implemented Classi
 
 [Room settings](settings.md) covers shared starting speed, turn tolerance, match target and fuse.
 
-[Gameplay v9 compatibility](protocol-v9.md) defines the paired live wire contract, including the
-authoritative visible-actor freeze field used by [Stopwatch](stopwatch.md). [Gameplay v8](protocol-v8.md)
-is the archived fourteen-item contract; the v0.3.39 false-only foundation is recorded in history.
+[Gameplay v10 compatibility](protocol-v10.md) defines the paired live wire contract, including the
+authoritative teleport position epoch. [Gameplay v9](protocol-v9.md) is the archived sixteen-item
+contract; earlier contracts remain historical references.
 
 [Pixel-art presentation](pixel-art.md) describes original artwork, animation and resource bounds.
 
@@ -75,3 +75,4 @@ See the implemented expansion candidates: [Heart](heart.md) and [Shield](shield.
 - [Invisibility Cloak](invisibility-cloak.md): ten seconds of recipient-private actor details.
 - [Stopwatch](stopwatch.md): three seconds of opponent action freezing and Timed-bomb pausing.
 - [Invisible Bombs](invisible-bombs.md): ten seconds without live bomb records or bomb cues.
+- [Teleporter](teleporter.md): an immediate, atomic safe-position swap or consumed unsafe attempt.

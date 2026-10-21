@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { GameClientState } from '../client/client'
-import type { EventKind, WireEvent } from '../v9/schema'
+import type { EventKind, WireEvent } from '../v10/schema'
 import { snapshot } from '../client/testSupport'
 import { AudioCursor } from './cursor'
 
@@ -89,6 +89,15 @@ describe('accepted-event audio cursor', () => {
     expect(owner.consume(state(21, [event(21, 0, 'pickupCollected')]), true)).toEqual(['pickup'])
     expect(opponent.consume(state(21, []), true)).toEqual([])
     expect(opponent.consume(state(22, []), true)).toEqual([])
+  })
+
+  it('uses only the existing pickup cue for Teleporter collection', () => {
+    const cursor = new AudioCursor()
+    cursor.consume(state(20), true)
+    const collected = event(21, 0, 'pickupCollected')
+    if (collected.kind.type !== 'pickupCollected') throw new Error('pickup event expected')
+    collected.kind.kind = 'teleporter'
+    expect(cursor.consume(state(21, [collected]), true)).toEqual(['pickup'])
   })
 
   it('keeps public sounds while blind bomb cues, admission, and reveal stay quiet', () => {

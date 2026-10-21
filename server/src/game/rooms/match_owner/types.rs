@@ -1,6 +1,6 @@
 use grenadiers_core::{
     game::SeatId,
-    protocol::{Counter, RoomId, Seat, v9::ResumeToken},
+    protocol::{Counter, RoomId, Seat, v10::ResumeToken},
     room::DepartureReason,
 };
 use tokio::{
@@ -42,7 +42,7 @@ pub(crate) struct MatchAdmission {
     pub(crate) room_id: RoomId,
     pub(crate) round_id: u64,
     pub(crate) seat: Seat,
-    pub(crate) room: grenadiers_core::protocol::v9::RoomView,
+    pub(crate) room: grenadiers_core::protocol::v10::RoomView,
     #[cfg_attr(not(test), allow(dead_code))]
     pub(crate) resume_token: ResumeToken,
     #[cfg_attr(not(test), allow(dead_code))]

@@ -95,6 +95,14 @@ fn canonical_gameplay(
             world.enabled_items,
         )
     }) && unique_remote_owners(&world.bombs)
+        && world.last_teleport_tick.is_none_or(|_| {
+            supported_items.contains(ItemId::Teleporter)
+                && world.enabled_items.contains(ItemId::Teleporter)
+        })
+        && world
+            .pickups
+            .iter()
+            .all(|pickup| canonical_pickup(pickup.kind, supported_items, world.enabled_items))
         && (!classic
             || (world.actors.iter().all(|actor| {
                 actor.inventory.equipment.is_none()
@@ -119,7 +127,10 @@ fn canonical_gameplay(
                         EventKind::BombDetonated { bomb } => {
                             canonical_bomb(bomb, event.timed_bomb, fuse_ticks, world.enabled_items)
                         }
-                        EventKind::PickupCollected { kind, .. } => !classic || classic_pickup(kind),
+                        EventKind::PickupCollected { kind, .. } => {
+                            (!classic || classic_pickup(kind))
+                                && canonical_pickup(kind, supported_items, world.enabled_items)
+                        }
                         EventKind::DamagePrevented { .. } => !classic,
                         EventKind::ActorEliminated { .. } | EventKind::RoundEnded { .. } => true,
                     }
@@ -222,6 +233,11 @@ fn classic_pickup(kind: PickupKind) -> bool {
         kind,
         PickupKind::BombCapacity | PickupKind::BlastRange | PickupKind::MovementSpeed
     )
+}
+
+fn canonical_pickup(kind: PickupKind, supported: ItemSet, enabled: ItemSet) -> bool {
+    super::projection_items::pickup_item(kind)
+        .is_none_or(|item| supported.contains(item) && enabled.contains(item))
 }
 
 fn state_binding(room: &RoomView, epoch: Counter, capture: &ExpandedCapture) -> bool {

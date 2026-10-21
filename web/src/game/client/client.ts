@@ -1,23 +1,17 @@
-import type { Direction, GameClientMessage, GameServerMessage, GameSettings, RoomView, Snapshot, V9ErrorCode } from '../v9/schema'
+import type { Direction, GameClientMessage, GameServerMessage, GameSettings, RoomView, Snapshot, V10ErrorCode } from '../v10/schema'
 import { initialGameClientState, type AdmissionIntent, type GameClientState, type GameFailure } from './clientTypes'
+import { preservesTeleportHistory } from './teleportHistory'
 export { initialGameClientState, type AdmissionIntent, type GameClientState, type GameFailure } from './clientTypes'
-import {
-  acceptableBaseline, controlIsObsolete, dependenciesWithDefaults, gameplayUrl,
+import { acceptableBaseline, controlIsObsolete, dependenciesWithDefaults, gameplayUrl,
   isCurrentConnection, MAX_COUNTER, MAX_RECONNECT_ATTEMPTS, newerRoom, sessionToken,
-  settlesPendingSettings, validateServerMessage,
-  type Capability, type ControlCommand, type ControlFailure, type Dependencies,
-  type PendingSettings, type RoomCommand,
-} from './clientProtocol'
+  settlesPendingSettings, validateServerMessage, type Capability, type ControlCommand,
+  type ControlFailure, type Dependencies, type PendingSettings, type RoomCommand } from './clientProtocol'
 export { gameplayUrl } from './clientProtocol'
-
 export class GameClient {
   private state = initialGameClientState()
-  private generation = 0
-  private controller: AbortController | null = null
-  private socket: WebSocket | null = null
-  private retryTimer: ReturnType<typeof setTimeout> | null = null
-  private nextSequence = 1
-  private nextAction = 1
+  private generation = 0; private controller: AbortController | null = null
+  private socket: WebSocket | null = null; private retryTimer: ReturnType<typeof setTimeout> | null = null
+  private nextSequence = 1; private nextAction = 1
   private admission: AdmissionIntent | null = null
   private capability: Capability | null = null
   private admissionSequence: number | null = null
@@ -56,7 +50,7 @@ export class GameClient {
     const room = this.state.room
     const own = room?.seats.find((seat) => seat.seat === this.state.youSeat)
     const canonicalItems = room?.availableItems.filter((item) => settings.enabledItems.includes(item))
-    if (!room || settings.enabledItems.length > 16
+    if (!room || settings.enabledItems.length > 17
       || new Set(settings.enabledItems).size !== settings.enabledItems.length
       || settings.enabledItems.some((item, index) => item !== canonicalItems?.[index])
       || settings.enabledItems.some((item) => !room.availableItems.includes(item))
@@ -156,7 +150,7 @@ export class GameClient {
     socket.addEventListener('open', () => {
       if (!isCurrentConnection(generation, socket, this.generation, this.socket)) return
       this.update({ connection: 'authenticating' })
-      socket.send(JSON.stringify({ type: 'authenticate', protocolVersion: 9, token: credential }))
+      socket.send(JSON.stringify({ type: 'authenticate', protocolVersion: 10, token: credential }))
       credential = ''
     })
     socket.addEventListener('message', (event) => this.receive(generation, socket, event.data))
@@ -196,6 +190,9 @@ export class GameClient {
     const existing = this.capability
     if (existing && (message.room.roomId !== existing.roomId || message.youSeat !== existing.seat
       || message.resumeToken !== existing.token || !acceptableBaseline(message.room, this.state.room))) return
+    if (!preservesTeleportHistory(this.state.snapshot, message.room, message.state)) {
+      this.terminal('invalidServerMessage', true); return
+    }
     this.capability = { roomId: message.room.roomId, seat: message.youSeat, token: message.resumeToken }
     this.admission = null
     this.admissionSequence = null
@@ -234,6 +231,10 @@ export class GameClient {
     const settlesSettings = current ? settlesPendingSettings(this.pendingSettings, message.room, current) : false
     if (!current || !this.capability || this.state.admissionPending
       || (!newerRoom(message.room, current) && !settlesSettings)) return
+    if (!settlesSettings
+      && !preservesTeleportHistory(this.state.snapshot, message.room, message.state)) {
+      this.terminal('invalidServerMessage', true); return
+    }
     if (message.room.roundId > current.roundId) this.nextAction = 1
     const settingsAccepted = message.room.settingsRevision > current.settingsRevision || settlesSettings
     if (settingsAccepted) {
@@ -255,7 +256,7 @@ export class GameClient {
     this.update({ room: null, snapshot: null, youSeat: null, admissionBaseline: null,
       leavePending: false, settingsPending: false, failure: null })
   }
-  private acceptError(code: V9ErrorCode, sequence: number | null): void {
+  private acceptError(code: V10ErrorCode, sequence: number | null): void {
     if (code === 'resumeRejected' && sequence === this.admissionSequence && this.capability) {
       this.terminal('resumeRejected', true)
       return

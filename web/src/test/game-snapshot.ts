@@ -17,8 +17,10 @@ export function gameSnapshot(): SnapshotMessage {
         blocks: [{ column: 4, row: 1 }],
       },
       actors: [
-        { id: 10, seat: 'one', position: { x: 1536, y: 1536 }, heading: 'east', alive: true },
-        { id: 20, seat: 'two', position: { x: 13_824, y: 11_776 }, heading: 'west', alive: true },
+        { id: 10, seat: 'one', position: { x: 1536, y: 1536 }, heading: 'east', alive: true,
+          lastTeleportTick: null },
+        { id: 20, seat: 'two', position: { x: 13_824, y: 11_776 }, heading: 'west', alive: true,
+          lastTeleportTick: null },
       ],
       bombs: [{
         id: 30, cell: { column: 1, row: 1 }, owner: 10, range: 2, placedAt: 1,

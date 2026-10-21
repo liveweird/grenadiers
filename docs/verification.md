@@ -1581,6 +1581,27 @@ Diarrhea.
 Records below are frozen against their named sources. Publication and later CI status are
 recorded in [release notes](https://github.com/liveweird/grenadiers/releases).
 
+## Teleporter candidate — 2026-10-21 — source checks complete
+
+The v0.3.42 source candidate activates Teleporter and the paired gameplay v10 contract. Domain
+coverage exercises atomic safe swaps, both unsafe destinations, bounds/tangency, solid and Contact
+overlap grace, fire even with Shield, frozen/reversed/slow input, privacy, disconnect, results,
+new-round marker clearing, no swept damage, no arrival collection and full rollback. The ordinary
+repeating-byte-31 route uses real movement, placement and timing for safe and unsafe pickups.
+
+Phase 2 recorded **688 core tests** and **199 release protocol/server tests**. Phase 3 recorded
+**657 web tests across 63 files** with statement/branch/function/line coverage of
+**95.21/90.8/95.97/97.64%**. Focused current-v10 and archived-v9 checks covered **205 tests**,
+including batched exhaustive mask validation. The full server runtime/start/replay enumeration
+accepted all **131,072 masks** in **197.52 seconds**. Formatting, Clippy, repository policy,
+generated contracts and **44-scenario** E2E static parity passed at the reviewed feature tip.
+
+This source activation adds the mode-0444 seed fixture, read-only Compose override and one CI
+keyboard scenario for safe swap, marker, fresh reconnect admission and unsafe consumption. It does
+not claim predecessor raw-v0.3.41 integration, a fresh candidate image, native Compose/Kubernetes
+acceptance, hosted CI, publication or a current v0.3.42 localhost deployment. Those gates remain
+before release.
+
 ## Prepared v0.3.41 Invisible Bombs source — source-specific local checks
 
 This record is bound to prepared source `429460fb1ddb12f1612fc53cdd8096afdc3d1e70` and does not

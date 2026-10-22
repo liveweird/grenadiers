@@ -1,5 +1,68 @@
 # Repository verification
 
+## v0.3.41 capture-r4 native acceptance checkpoint — 2026-10-22 17:00:43 UTC
+
+Source `97a3990764592a867574b87843401d146d307f80`, tree
+`8c0897440f40b8617bfdb9fd96e0be2cb3e4f9da`, image
+`sha256:11003ee18addba9badf2e2be7d8cf0c20cf743a7ccd6d65f056724083014abb2`, and ref
+`grenadiers-v0341-invisible-bombs-native-recheck:97a3990` passed 53 Compose plus 53 Kubernetes
+cases, 48 groups/reports and post-run integrity checks with zero retries or carried passes. Source
+and Docker archive SHA-256 values are
+`bbb0417ea75275f9ff2ee8b54adb33137921cb2306e4cf79cf894e62184a5a68` and
+`833aa558579aed34f124d728ebd72b37c3c3880c073bd0b841d489e6f4c0ac57`. Native root session
+60005 was consumed with exit zero.
+
+Fresh source-bound gates passed under consumed server/web root sessions 24633 and 23267; the rollup
+hash is `1b44044c676c28583913a472c22ecee18ed2125221134c2a15d02d039b6e7ed3`. Debug, release and
+coverage each covered all 65,536 masks without partitioning. Each profile passed 658 core and 207
+server tests; debug and release also passed two doctests. Rust line coverage was 92.38%. The web
+gate passed 516 tests with statement/branch/function/line coverage of 95.43/91.25/95.90/97.82%.
+Renderer diagnostics and 54 static scenario contracts passed. The separate native matrix covered
+53 browser cases per target. The configured
+HIGH audit policy passed with no high or critical finding; Vitest and `@vitest/mocker` remain pinned
+at 5.0.1 with the two recorded moderate advisories GHSA-qxg6-89mg-rqv8 and
+GHSA-xp26-3454-mjgp. The e2e audit reported zero vulnerabilities.
+
+The complete native matrix produced 74 baseline plus 32 optional passes, 114 PNGs, 38 runtime
+records, 19 distinct Kubernetes identities, 18 fixtures and 36 seed-mode records. All 80 latency
+measurements were at or below 164.893972 ms, within the 250 ms budget. The accepted Compose
+observer ran under root 86500 for 120 samples and its capture under root 64782; the Kubernetes
+observer ran under root 38492 for 50 samples and its capture under root 56420. No interrupted
+observer result was accepted. The native facts, audit and result-review hashes are
+`f54054d258a88047e153f558938f0fd36961744a803ffa277a66e0863427e978`,
+`2f20cad22b6b69192efa2821cff23c39b15ca9142597093c44811e193f524866`, and
+`5c5e97841160c3c8ed221b5ba8702bdd7351d7951139dbae0ec874387e012c1a`; both independent reviews
+are clear.
+
+Sealer root session 2450 was consumed with exit zero. The final manifest
+`ec7763fca51926fbe178e3733866f60ce664ad1ec9797c5979a57e9d02829ade` covers 2,483 payloads;
+2,484 files and 272 directories were copied to immutable durable evidence and byte-verified under
+seal `f476ec148b235a72ccb3405889b622b32f7be9cb21c0a50908ec52a90bb4cd84`. Independent seal review
+is clear under hash `6aa0a2a0af2454d663852b582b606e50ce1018bbd039196cbdcb7c9dc724de90`.
+
+Draft PR #87's earlier hosted timing failure and source `239181c`'s CPU-one diagnostic failure are
+zero-carry history. Capture-r1 server root 24633 completed successfully at the exact source/tree.
+Its web gate passed the first five stages, then the E2E npm audit timed out after 300 seconds
+contacting the registry after the web audit had completed; the consumed failure carries no web or
+native acceptance. Capture-r2 and capture-r3 each passed their first five stages, then timed out in
+the web npm audit before the E2E audit ran. None of those partial web results was reused. Capture-r4
+retained only the exact capture-r1 server result, then passed one fresh six-stage web run and the
+fresh rollup. The exact source `97a3990` diagnostic passed its one focused case under consumed
+root session 2294; independent evidence review returned `CLEAR_DIAGNOSTIC_ONLY_NO_ACCEPTANCE`.
+It remained diagnostic-only, accepted no native case, carried no pass, left prepared inputs and the
+published v0.3.40 deployment unchanged, and was followed by the complete fresh 106-case matrix.
+
+Independent visual review binds two fresh Compose pre-collection captures under
+`64400c142a54e92a6675dd66a60e498070b5089d90eb140a9c938bdd69a848c8` and
+`475626b5267fb37fe23e4f4609dffe0df65894982407da3f42f46940b163e8fd`. The stills establish
+presentation; paired browser assertions establish privacy, reconnect and exact expiry. Cleanup
+passed at 2026-10-22 16:52:21 UTC with owned resources absent and the served v0.3.40 bytes matching
+container `95804c1d803d3c5c033bda230914a6ead2eb369245e933ded8f504d26f25f2d1` and image
+`sha256:ec8604af4317d188d7b00ab7cfa27115114430e0a11fb9821856617ad9409906`. That same container
+identity was restarted after laptop shutdown without rebuilding or recreating it; continuous
+uptime is not claimed. Hosted candidate, merge, post-merge, publication, tag and promotion had not
+started at this native checkpoint.
+
 ## v0.3.40 hosted CI aggregate recovery — 2026-10-21 — C1 artifact layout
 
 Hosted push run 39680221078 completed the Rust server-mask partition but failed the aggregate job.
@@ -1580,6 +1643,42 @@ Diarrhea.
 
 Records below are frozen against their named sources. Publication and later CI status are
 recorded in [release notes](https://github.com/liveweird/grenadiers/releases).
+
+## Prepared v0.3.41 Invisible Bombs source — source-specific local checks
+
+This record is bound to prepared source `429460fb1ddb12f1612fc53cdd8096afdc3d1e70` and does not
+clear checks for the integrated source. It activates the 600-physical-tick Invisible Bombs curse.
+Domain tests cover ordinary seed-31 collection, own and rival bombs, event-time Cloak/blindness
+audience intersections, exact expiry, current-state reveal, death ordering and overflow rollback.
+Gameplay v9 publishes an empty bomb list only to afflicted recipients while keeping live counts,
+flames, collision and full pre-filter validation authoritative; gameplay v8 remains pinned to its
+fourteen-item catalog.
+
+At the prepared source, the required debug and release Rust suites passed 657 core tests and 198
+server tests, with four explicit server performance tests ignored. The first sandboxed debug
+attempt had 17 listener failures because local binds returned `PermissionDenied`; an authorized
+listener run then found one stale 15-item socket catalog assertion. After updating that assertion,
+debug and release passed.
+
+The prepared-source shuffled web gate passed 59 files and 82,344 tests with 95.43% statements,
+91.25% branches, 95.90% functions and 97.82% lines, plus production build, lint, Knip and generated
+contract checks. A test-only uniqueness guard initially raised the focused v9 contract count to
+65,545: all 65,536 masks plus nine focused guards passed. A prior duplicate-catalog fixture caused
+a failed 131,090-case reporter and is retained as failed evidence. Module initialization now checks
+the catalog's 16-entry length and uniqueness before constructing the parameter table; a negative
+fixture proves its enumerator is never called. The final focused run passed 65,546 tests, including
+that negative preflight proof.
+
+Prepared-source Rust coverage passed the unchanged 80% floor at 92.47% lines
+(13,527/14,629). E2E static checks passed 43 scenario/spec pairs with typecheck and lint. Renderer
+diagnostics, repository size/pin checks, offline dependency audits and strict validation of all
+three Kubernetes resources also passed. Independent browser review corrected the source-only proof
+without changing production code: blind P1 placement derives its ID from P2's sighted stream, the
+compositor baseline uses the same cell after collection and before planting, and paired adjacent
+publication windows prove hidden-before/revealed-after state with the same current fuse.
+
+No native Compose/Kubernetes acceptance or hosted CI is claimed for v0.3.41. Before native
+acceptance, the integrated source still requires its source-bound full gates and independent review.
 
 ## Historical prepared v0.3.40 Stopwatch source — source-specific local checks
 

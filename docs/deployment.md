@@ -5,9 +5,9 @@ application on port 8085. Active matches live in that process, so the initial de
 intentionally runs one replica with a `Recreate` update strategy. A restart ends active matches;
 horizontal scaling and recovery require match routing and persistence designs first.
 
-Deploy the v0.3.40 server and web assets together and reload connected browsers. Gameplay v9 adds
-Stopwatch to its exact fifteen-item catalog and publishes authoritative voluntary freeze and Timed
-bomb pause state while retaining Expanded-v5/generated-v2 identity. Gameplay-v8 clients fail
+Deploy the v0.3.41 server and web assets together and reload connected browsers. Gameplay v9 has
+an exact sixteen-item catalog and publishes recipient-private live bombs and bomb events alongside
+authoritative voluntary freeze and Timed-bomb pause state. Gameplay-v8 clients fail
 version negotiation before credential lookup. No storage migration is required; active matches
 remain process-local.
 
@@ -396,3 +396,16 @@ The scenario enables only Stopwatch and follows the deterministic mirrored picku
 movement and bombs. Two sequential holder windows prove blocked voluntary actions, held-input thaw,
 constant paused fuses, full-fuse placement during a pause and exact natural detonation. Native
 execution remains a candidate gate.
+
+## Reproduce opt-in Invisible Bombs privacy
+
+```sh
+chmod 444 core/tests/fixtures/arena-v2-invisible-bombs.seed
+docker compose -f docker-compose.yaml -f docker-compose.invisible-bombs.yaml up -d --no-build --force-recreate app
+E2E_INVISIBLE_BOMBS_FIXTURE=arena-v2-invisible-bombs npm --prefix e2e run test:invisible-bombs
+docker compose -f docker-compose.yaml -f docker-compose.invisible-bombs.yaml down
+```
+
+The scenario enables only Invisible Bombs and proves its deterministic pickup, recipient-local
+bomb privacy, reconnect boundary, exact expiry and current-state reveal. Run it against one final
+built image together with the cumulative native matrix before release.

@@ -117,6 +117,7 @@
     "shieldDescription": "Grants 5 seconds of damage immunity. Picking up another Shield refreshes it.",
     "stopwatchDescription": "Freezes the opponent's movement and manual bomb action and pauses all timed bomb fuses for 3 seconds. Another Stopwatch refreshes it.",
     "invisibilityCloakDescription": "Hides your actor and attributable cues from the opponent for 10 seconds. Public bombs and flames remain visible.",
+    "invisibleBombsDescription": "Hides every bomb and its placement or detonation cue from you for 10 seconds. Bombs still block movement, consume capacity and create visible flames.",
     "goldenFlameDescription": "Maximizes new bomb blasts for 10 seconds. Picking up another Golden flame refreshes it.",
     "shortFuseDescription": "Halves the fuse of new bombs for 10 seconds. Picking up another Short fuse refreshes it.",
     "diarrheaDescription": "Automatically drops ordinary bombs for 10 seconds whenever placement is possible and you have spare capacity. Another pickup refreshes the timer.",
@@ -151,6 +152,7 @@
     "failure": "The courtyard could not be drawn. Leave the room and try again.",
     "focusHint": "Select the courtyard to control your player.",
     "remoteHint": "Remote bomb armed. Select the courtyard and press {{bomb}} to detonate it.",
+    "blindBombHint": "Bombs are hidden. Select the courtyard and press {{bomb}} to place a bomb or trigger your remote bomb.",
     "instructions": "Move with the arrow keys or W A S D. Place a bomb with Space. Controls work only during a live round."
   },
   "controls": {

@@ -33,7 +33,7 @@ impl State {
                 .expect("planned detonations reference existing bombs");
             events.push(StepEvent::bomb(
                 tick,
-                self.event_audience_for(bomb.owner(), tick),
+                self.bomb_event_audience_for(bomb.owner(), tick),
                 StepEventKind::BombDetonated(BombView::from(bomb)),
                 bomb,
                 timed_paused,

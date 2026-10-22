@@ -117,7 +117,8 @@ impl super::Actor {
             | PickupKind::SlowFoot
             | PickupKind::ShortFlame
             | PickupKind::LongFuse
-            | PickupKind::ReverseControls => {
+            | PickupKind::ReverseControls
+            | PickupKind::InvisibleBombs => {
                 let effect = pickup
                     .kind()
                     .timed_effect()

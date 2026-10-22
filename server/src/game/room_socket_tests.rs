@@ -123,7 +123,8 @@ async fn two_members_receive_personalized_admission_and_live_waiting_updates() {
             "slowFoot",
             "shortFlame",
             "longFuse",
-            "reverseControls"
+            "reverseControls",
+            "invisibleBombs"
         ])
     );
     let code = created["room"]["roomCode"].clone();

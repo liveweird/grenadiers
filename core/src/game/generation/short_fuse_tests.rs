@@ -100,6 +100,7 @@ fn signature(generated: &GeneratedArena) -> String {
                 None if generated.arena().terrain(cell) == Some(Terrain::Wall) => 'X',
                 Some(PickupKind::InvisibilityCloak) => 'C',
                 Some(PickupKind::Stopwatch) => 'T',
+                Some(PickupKind::InvisibleBombs) => 'I',
                 None => '.',
             });
         }

@@ -245,6 +245,10 @@ describe('v9 authoritative updates and controls', () => {
       const actor = next.state.actors[0]
       if (actor.type === 'visible') actor.effects = [{ kind: 'shortFlame', remainingTicks: 600 }]
     }],
+    ['Invisible Bombs effect while disabled', (next: ReturnType<typeof snapshot>) => {
+      const actor = next.state.actors[0]
+      if (actor.type === 'visible') actor.effects = [{ kind: 'invisibleBombs', remainingTicks: 600 }]
+    }],
   ])('rejects %s before installing recipient state', async (_label, mutate) => {
     const value = harness()
     const socket = await authenticate(value)

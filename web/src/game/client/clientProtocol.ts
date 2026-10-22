@@ -43,7 +43,9 @@ function stateRecipientValid(message: GameServerMessage, expectedSeat: Seat | nu
   const ownSeat = message.type === 'admitted' ? message.youSeat : expectedSeat
   if (ownSeat === null) return true
   const cloakEnabled = message.room.settings.enabledItems.includes('invisibilityCloak')
-  return state.actors.some((actor) => actor.seat === ownSeat && actor.type === 'visible')
+  const own = state.actors.find((actor) => actor.seat === ownSeat)
+  return own?.type === 'visible'
+    && (!own.effects.some((effect) => effect.kind === 'invisibleBombs') || state.bombs.length === 0)
     && state.actors.every((actor) => {
     if (actor.seat === ownSeat) return actor.type === 'visible'
     if (actor.type === 'hidden') return cloakEnabled && actor.alive

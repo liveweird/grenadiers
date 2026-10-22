@@ -39,7 +39,7 @@ verification record identify locally tested artifacts; no production registry or
 has been configured. A source prerelease does not claim a production deployment.
 
 Evidence may name a clean candidate commit from before rebase or squash. Before merging,
-compare its Docker build inputs with the final PR head, require all ten push/PR checks to pass,
+compare its Docker build inputs with the final PR head, require every configured push/PR check to pass,
 and verify that the merged tree equals that head. Use the corresponding release tag for the
 published source. Retain the accepted image when exact artifact reuse is required; a later
 rebuild can receive different operating-system security updates and needs its own acceptance.

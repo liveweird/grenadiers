@@ -1,5 +1,90 @@
 # Repository verification
 
+## v0.3.41 live-window checkpoint - native acceptance audited and sealed
+
+Source 035c6a1263674601874e82c31b5c731c794cb38a, tree
+d447fa8099ded815a37060d79117021ea89a61b7, is the sole child of corrected source 97a3990.
+The change is confined to the Invisible Bombs browser proof, its public diagnostic helpers, scenario
+documentation and explicit isolated check registration. Application runtime, fixture, fuse 300,
+curse 600, workflow timeouts, retries and product configuration are unchanged.
+
+Fresh source-bound gates completed with consumed exit zero under server root 26801 and web root
+32048. Debug, release and coverage each enumerate all 65,536 masks. Debug and release each pass 658
+core tests, 207 server tests and two doctests; coverage passes 658 core and 207 server tests. Rust
+line coverage is 92.38127315594477% (13,714/14,845). All 516 web tests pass with
+95.43/91.25/95.9/97.82 statement/branch/function/line coverage. Renderer diagnostics and 54 static
+scenario contracts pass. Cargo deny and both configured high-threshold npm audits pass; the web
+audit records two moderate Vitest/mocker 5.0.1 advisories and no high or critical findings, while
+the e2e audit reports zero vulnerabilities. Independent actual-gate review is clear.
+
+Preparation root 89381 completed with consumed exit zero. Prebrowser review is clear and binds image
+sha256:30d288179bf76bb87f6c9d28362041ac18451b77d3fa8f0ec6a481e2c348d416, source archive SHA-256
+5ffdb3bf96c65a7d0280a5593709b7185c16904f7221c0eafb685e3387721caa, preparation seal
+54450af66fae78ad7b3bd83e62099b22217af9e5beb9d78979e959a6597a6b23, and zero retries or carried
+passes.
+
+A single CPU-1 diagnostic passed in 45.8 seconds. The selected bomb was placed at physical tick
+1150 and naturally detonated at 1450; both screenshot boundaries, 1231 and 1330, precede that exact
+deadline. Reconnect admission at tick 1220 retained 506 effect ticks, preserving the original curse
+deadline 1726. All three pixel comparisons passed and six comparison-buffer hashes were recorded.
+This is diagnostic-only evidence and contributes zero accepted native cases.
+
+The earlier PR 88 candidate is rejected with zero hosted carry. Run 39820850960 contained eight
+jobs: seven non-server jobs were cancelled with no steps, while the aggregate server job failed its
+upstream success guard and skipped only its later steps. Push run 39820856196 passed all nine jobs.
+Pull-request run 39820865780 failed a real browser assertion after about 32.5 seconds because the
+original five-second bomb naturally expired across two roughly 2.22-second sequential screenshots.
+The corrected proof captures both pages concurrently while the remaining normal retreat runs,
+revalidates prepared geometry without scrolling, and always emits bounded sanitized JSON; every
+returned comparison PNG is retained and attached on failure.
+
+Native root 30427 completed with actual exit zero at `2026-10-22T18:47:13.058221Z`, and that exit
+was consumed. The source-bound matrix passes **53 Compose plus 53 Kubernetes** cases, all 48 groups
+and reports, 74/74 baseline plus 32/32 optional cases, with zero retries and zero carried passes.
+It retains 114 runtime PNGs, 38 runtime image/security records, 19 Kubernetes identities, 18
+external fixtures and 36 seed-mode records. Post-run source, dependencies, locks, archives,
+preparation manifest and image identities match.
+
+All 22 latency cases per target pass. Each local and shaped profile retains all 20 observations;
+all 80 observations remain below the unchanged 250 ms limit.
+
+| Target | Local maximum | Shaped 50 ms maximum | Exceedances |
+| --- | ---: | ---: | ---: |
+| Compose | 53.420852 ms | 173.166454 ms | 0 |
+| Kubernetes | 59.075919 ms | 175.887630 ms | 0 |
+
+Compose used cpu.max `max 100000`; Kubernetes used `50000 100000`. Both throttle-count and
+throttled-time deltas are zero. The Compose observer/capture roots 66009/65956 pass and retain 79
+observer samples; Kubernetes roots 5960/33109 pass and retain 70. No latency budget, sample count,
+timeout, retry policy or product behavior changed.
+
+Root reviewed only two fresh Compose pre-collection captures: [English desktop](screenshots/invisible-bombs-desktop.png)
+and [Polish 320px reduced motion](screenshots/invisible-bombs-mobile-pl.png). Both present the arena,
+players and enabled locked rules without apparent clipping or horizontal overflow. These stills do
+not prove recipient privacy, detonation timing or exact expiry; the Compose and Kubernetes native
+assertions and sanitized JSON do. Kubernetes captures were retained without visual review.
+
+Cleanup passed at `2026-10-22T18:48:16.891157Z`: all owned containers, network, namespace,
+port-forwards and ports 18284/18285 were absent. The default v0.3.40 container remained healthy and
+ready, and its image identity and served index/JavaScript bytes matched the accepted deployment.
+
+Independent native audit and RESULT review are clear under receipt SHA-256 values
+`467b1054f7e83c1b38c259cc96b5088aabb948b440cc53aac0a320bc20324962` and
+`e07a7de78197f30c979a5faa471d7aef20218ab4fcb6185d3fdc4bf5b4cc0eac`.
+The final manifest seals 2,486 payloads under SHA-256
+`046744753f961c7875808c7ac28967f46069286342308312fdf364648b221487`;
+2,487 files and the separate source archive are byte-verified and read-only. The native seal has
+SHA-256 `4a1a1ec14fd0798888d78f3e0df362a0ba82ea4686190134c4ec3306c8da099e`,
+and independent seal review is clear under SHA-256
+`5296247097ec158a1d4a0f9ae3849de6e6c72fd07be5e64042798af41862787f`.
+No old R4 native, audit, result, seal, image or archive value is accepted for this changed source.
+No v0.3.41 candidate, merge, post-merge CI, publication, tag verification or promotion has started.
+
+The original v0.3.40 default deployment was historically restarted after laptop shutdown without
+rebuild or recreation; its container/image identities and served bytes matched that accepted
+deployment. Continuous uptime is not claimed. This historical restoration is not v0.3.41
+acceptance or deployment.
+
 ## v0.3.40 hosted CI aggregate recovery — 2026-10-21 — C1 artifact layout
 
 Hosted push run 39680221078 completed the Rust server-mask partition but failed the aggregate job.

@@ -23,36 +23,30 @@ Version 0.3.41 adds Invisible Bombs as gameplay v9's sixteenth item and generato
 350)` and the sole-item pool is 115. Every earlier catalog mask and generator path is unchanged.
 Archived gameplay v8 remains pinned to its fourteen-item Cloak-era catalog.
 
-## Verification checkpoint - fresh native execution complete
+## Verification checkpoint — visibility-startup candidate
 
-Source 035c6a1263674601874e82c31b5c731c794cb38a, tree
-d447fa8099ded815a37060d79117021ea89a61b7, preserves the Invisible Bombs runtime contract and
-changes the browser proof schedule and diagnostics. Both page captures now run concurrently while
-Player One completes the remaining normal retreat. Capture geometry is prepared before collection
-and revalidated without scrolling; sanitized receipts retain selected bomb events, exact physical
-deadlines, capture boundaries, comparison hashes and every returned comparison PNG on failure.
+Source `eb0b756df43fdd896cf87573a5224e4eb5f659a3`, tree
+`098f2a3beb766b4fefd2316b7c7ceaf37275a826`, preserves the Invisible Bombs game contract and
+changes only six E2E startup/proof files. The Chromium launcher now parses complete endpoint lines
+from a bounded stream, retains redacted diagnostics for timeout and exit failures, and preserves
+the original launch error when cleanup also fails. The actual cause of the earlier PR 90 startup
+failure remains unknown; the parser and reporting defects are independently confirmed and tested.
 
-Fresh full gates pass for this source: debug, release and coverage each cover all 65,536 masks;
-debug and release pass 658 core plus 207 server tests and two doctests; coverage passes the same
-core/server counts; Rust line coverage is 92.38127315594477%. All 516 web tests pass with
-95.43/91.25/95.9/97.82 statement/branch/function/line coverage. Renderer diagnostics, 54 static
-scenario contracts, Cargo deny and both configured high-threshold npm audits pass. The web audit
-still records two moderate Vitest/mocker 5.0.1 advisories; no high or critical advisory is accepted.
+Typed gate assembly `813e7c58…` retains the authenticated original-035 Rust/web computations under
+input-equivalence review `1ea0a03b…`: all 65,536 masks per profile, 658 core plus 207 server tests,
+516 web tests and renderer diagnostics. Fresh H repository/E2E lint, Knip, type and scenario checks,
+startup and retained live-pixel units, server-mask contract 10/10, mirror unit 5/5 and current
+security checks pass. A single headed diagnostic passes with zero accepted or carried cases.
 
-The earlier PR 88 delivery is disqualified with zero hosted carry. Run 39820850960 was cancelled
-with seven non-server jobs cancelled without steps; only the aggregate server job's upstream guard
-failed and its later steps were skipped. Push run 39820856196 passed all nine jobs. Pull-request run
-39820865780 failed a real browser assertion after the original five-second bomb naturally expired
-across sequential captures. The correction's single CPU-1 diagnostic passed in 45.8 seconds:
-placement 1150, natural detonation 1450, captures 1231..1330, and reconnect 1220 + 506 preserving
-the original curse deadline 1726. That run is diagnostic only and contributes zero accepted cases.
-
-Preparation and prebrowser review are clear for the new source, image and archive. Native root
-30427 completed with consumed exit zero: 53 Compose plus 53 Kubernetes cases, all 48 groups and
-reports, 114 runtime PNGs, 38 runtime records, 19 Kubernetes identities, 18 fixtures and 36
-seed-mode records pass with zero retries or carried results. All 80 latency observations remain
-below 250 ms. Root reviewed two fresh Compose pre-collection captures for presentation; those
-stills do not prove privacy or timing, which the native assertions and sanitized JSON cover.
-Independent native audit and result review are clear. The final manifest seals 2,486 payloads;
-2,487 files and the separate source archive are byte-verified and read-only, and independent seal
-review is clear. No v0.3.41 candidate, merge, publication, tag or deployment is claimed.
+Native root 40405 completed with consumed exit zero. Its source-bound matrix passes 53 Compose plus
+53 Kubernetes cases, 48 reports, 114 runtime PNGs, 38 runtime records, 19 Kubernetes identities,
+18 fixtures and 36 seed-mode records with zero retries and zero carry. All 80 retained latency
+samples remain below 250 ms. Independent audit is clear under SHA-256
+`b0c72b1ff651257930f0db8df9db3cfc1274bd6882f142336e508e699c41097e`; result review is clear under
+`0cff7c9dd3bd4895cfcb426f340eca146b8c9627a55bac04c01111819b9008be`. The evidence is durably
+sealed and byte-verified, with independent seal review clear under SHA-256
+`87666f73ca51ac78e2d726de48f74444059e1aca636864839ab437249f353ec8`.
+The two tracked screenshots are independently reviewed Compose
+pre-collection presentation captures; they do not prove privacy or timing, and no Kubernetes
+screenshot received visual review. PRs 89 and 90 contribute zero hosted cases. This source-bound
+checkpoint makes no v0.3.41 candidate delivery, merge, publication, tag or deployment claim.

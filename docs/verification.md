@@ -1,6 +1,84 @@
 # Repository verification
 
-## v0.3.41 hosted CI recovery — 2026-10-22 — browser APT mirror priority
+## v0.3.41 visibility-startup native checkpoint — 2026-10-22 — 106/106 passed
+
+Source `eb0b756df43fdd896cf87573a5224e4eb5f659a3`, tree
+`098f2a3beb766b4fefd2316b7c7ceaf37275a826`, is archived by reviewed checkpoint
+`4e0e41b9a1c86a27872b81bde664058af43fae6b`. Its source archive SHA-256 is
+`3aad22915a12a14477bd1ed898b8946eb39950f9b7b97b76b78f0db378a3bb57`; the independently
+reviewed preparation binds image
+`sha256:d063462c3130e3c8653734da72e8dfd6785b0c036e9579d9046cee884ccd9f82`.
+Preparation identity alone is not native acceptance.
+
+The six-path E2E change replaces partial/chunk-truncated Chromium endpoint parsing with bounded
+complete-line parsing, retains sanitized startup history, reports timeout and exit diagnostics,
+and preserves an original launch failure alongside cleanup failures. Direct parser and serializer
+reproductions pass. Startup remains 10 seconds, visibility remains 60 seconds, shutdown grace
+remains 2 seconds, retries remain zero, and Chromium flags, revision, headed configuration and
+gameplay assertions are unchanged. These fixes address confirmed parser and reporting bugs; the
+actual cause of the earlier PR 90 Chromium startup failure remains unknown.
+
+Gate assembly SHA-256 `813e7c58da0c8a9114e9b39f5dd0c3ed44d9d4badd88309621b69edd16c1076f`
+retains original-source-035 Rust, web and renderer computations only. Independent input-equivalence
+review `1ea0a03b9753ff5b1df3902ce724acd9026e636234eb1499782cb123e66d179d` authenticates all
+65,536 masks in each debug/release/coverage profile, 658 core plus 207 server tests, 516 web tests,
+Rust line coverage 13,714/14,845, and the original logs/results without representing them as H
+executions. Repository, E2E lint/Knip/type checks, all 54 scenario contracts, the registered
+startup and retained live-pixel units, server-mask contract 10/10, mirror unit 5/5 and current
+security checks ran fresh on H and passed. One single-worker headed diagnostic also passed, but is
+diagnostic only with zero accepted and zero carried cases.
+
+Native root session 40405 completed with actual exit zero, consumed at
+`2026-10-22T22:05:04.788548+00:00`. Facts SHA-256
+`f173ff4a97c2449178f50e8cbb20a098e93529b44382a5d6227dbe25c94d22f5` records one fresh
+matrix of **53 Compose plus 53 Kubernetes cases**: all 48 groups and reports pass, retaining
+114 runtime PNGs, 38 runtime image/security records, 19 Kubernetes identities, 18 fixtures and
+36 seed-mode records with zero retries and zero carried passes. Post-run source, dependency,
+lock, archive, preparation-manifest and image checks match. The accepted facts bind image
+`sha256:d063462c3130e3c8653734da72e8dfd6785b0c036e9579d9046cee884ccd9f82`
+and image archive SHA-256
+`e4e75ea5c424dd165b1de6da8fd8a842d11551adc4c435764d4d367dd0284dd8`.
+
+All 22 latency cases per target pass. Each local and shaped profile retains all 20 observations;
+all 80 observations remain below the unchanged 250 ms limit.
+
+| Target | Local maximum | Shaped 50 ms maximum | Exceedances |
+| --- | ---: | ---: | ---: |
+| Compose | 50.43858 ms | 161.747643 ms | 0 |
+| Kubernetes | 42.937263 ms | 160.237894 ms | 0 |
+
+Compose used `cpu.max` `max 100000`; Kubernetes used `50000 100000`. Both throttle-count and
+throttled-time deltas are zero. Root cleanup completed with actual exit zero: all run-owned
+resources were absent, while the pre-existing v0.3.40 container remained unchanged and healthy
+with the same `ec8604af…` image, container identity and served JavaScript bytes at HTTP 200.
+
+Presentation review SHA-256
+`6b041bf32f02d9a76f48f1a8d048ef7116e974eebba2df2a108fff5f56bfbc96` covers only the fresh
+Compose pre-collection [English desktop](screenshots/invisible-bombs-desktop.png) at 1440×2961
+and [Polish 320px reduced-motion](screenshots/invisible-bombs-mobile-pl.png) at 320×3832. Both show
+the arena, actors, bomb pickup, HUD and locked rules without apparent clipping. Still images do
+not prove recipient privacy, physical timing or compositor comparisons; runtime assertions and
+sanitized diagnostics provide those proofs. No Kubernetes capture received visual review.
+
+Independent raw audit is clear under receipt SHA-256
+`b0c72b1ff651257930f0db8df9db3cfc1274bd6882f142336e508e699c41097e`: all 48 reports,
+106 tests, 844 source files, 8,186 dependency files, 18 fixtures, 114 PNGs and CRCs, all 80
+latency observations, Invisible Bombs JSON, observers and cleanup were checked with no findings.
+Independent result review is clear under SHA-256
+`0cff7c9dd3bd4895cfcb426f340eca146b8c9627a55bac04c01111819b9008be`. Seal receipt SHA-256
+`10db792e74f84a7f540e463f04fee5ebaae6a94f984bbb6d2a15317956cf99f1` records 2,503 payloads,
+2,504 files and 272 directories as read-only and durably byte-verified under final manifest
+SHA-256 `25e8d3753b24a5dca94028880922b220afd26a6a8035ac5f14c4db619269d813`.
+Independent seal review is clear under SHA-256
+`87666f73ca51ac78e2d726de48f74444059e1aca636864839ab437249f353ec8`.
+PRs 89 and 90 are disqualified and contribute zero hosted cases.
+At this native verification checkpoint, no fresh candidate CI, PR, merge, publication, tag
+verification or promotion had run, and localhost:8085 served the unchanged published v0.3.40
+deployment. Subsequent delivery and deployment state is recorded by the release history. The final
+documentation is staged for a sole-child commit of H; independent final-document review and release
+delivery follow that commit without claiming its head or tree here.
+
+## Historical v0.3.41 PR 89 CI recovery — zero hosted carry
 
 PR 89 push run 39840668328 completed eight jobs, but its browser-items job spent 13 minutes
 43 seconds in `playwright install --with-deps chromium` and exceeded the unchanged 20-minute job
@@ -25,7 +103,7 @@ acceptance, merge, publication, tag verification or promotion is claimed for the
 exact-source hosted runs remain required. The CI recovery and release records identify the
 corrected commit independently.
 
-## v0.3.41 live-window checkpoint - native acceptance audited and sealed
+## Historical original-035 v0.3.41 native checkpoint — retained computations only
 
 Source 035c6a1263674601874e82c31b5c731c794cb38a, tree
 d447fa8099ded815a37060d79117021ea89a61b7, is the sole child of corrected source 97a3990.

@@ -3,6 +3,25 @@
 A browser-based multiplayer game inspired by classic Bomberman/Dynablaster.
 The initial playable profile supports two human players. Bots and larger matches follow later.
 
+The next v0.3.41 candidate adds optional [Invisible Bombs](docs/game/invisible-bombs.md) to
+Expanded-v5 rooms. For ten seconds, the affected player cannot see either player's live bombs or
+their placement and detonation cues. Hidden bombs still block movement, advance their fuses, use
+capacity, trigger chains and produce public flames. Recollection refreshes the effect, reconnect
+preserves its deadline, and surviving bombs reappear at their current state after exact expiry.
+
+Candidate source `eb0b756df43fdd896cf87573a5224e4eb5f659a3` also hardens Chromium startup
+parsing and redacted diagnostics for the browser visibility proof. That six-file H delta preserves
+browser flags, deadlines, retry policy and gameplay assertions. Fresh source checks and one headed
+diagnostic pass. Source-bound native root 40405 completed with consumed exit zero: all 53 Compose
+plus 53 Kubernetes cases pass with zero retries or carried passes. Independent audit is clear under SHA-256
+`b0c72b1ff651257930f0db8df9db3cfc1274bd6882f142336e508e699c41097e`, and result review is clear
+under `0cff7c9dd3bd4895cfcb426f340eca146b8c9627a55bac04c01111819b9008be`. The evidence is durably
+sealed and byte-verified; independent seal review is clear under SHA-256
+`87666f73ca51ac78e2d726de48f74444059e1aca636864839ab437249f353ec8`.
+At this native verification checkpoint, localhost:8085 served the
+unchanged published v0.3.40 deployment; subsequent publication and deployment are recorded in
+the release history.
+
 The **two-player arena match is playable**. Create a room, share its invitation,
 join from another browser, and both choose Ready. Select the courtyard to move with arrows
 or W/A/S/D and plant bombs with Space. Rust owns the 60 Hz simulation; PixiJS draws public
@@ -23,7 +42,11 @@ for five seconds of immunity; its timer refreshes on collection. The optional
 [Long Fuse curse](docs/game/long-fuse.md) doubles newly planted bomb fuses for ten seconds. Optional
 [Reverse Controls](docs/game/reverse-controls.md) reverses held movement directions for ten seconds. The opt-in [Diarrhea curse](docs/game/diarrhea.md) automatically drops ordinary bombs when placement is possible for ten seconds. [Slow foot](docs/game/slow-foot.md) halves movement speed for ten seconds per independently timed stack. [Remote Bomb](docs/game/remote-bomb.md) stores one manual bomb that waits for its owner's next bomb action. [Piercing Bomb](docs/game/piercing-bomb.md) stores one manual bomb whose blast crosses breakable blocks. [Power Bomb](docs/game/power-bomb.md) stores one manual bomb whose diamond-shaped blast ignores obstruction while preserving hard walls. [Landmine](docs/game/landmine.md) stores one passable contact mine with initial exit grace. [Invisibility Cloak](docs/game/invisibility-cloak.md) hides an active actor's spatial and loadout details from the opponent for ten seconds. [Stopwatch](docs/game/stopwatch.md) freezes the opponent's voluntary actions and pauses Timed bombs for three seconds. [Invisible Bombs](docs/game/invisible-bombs.md) hides every live bomb and its cues from the afflicted player for ten seconds. Gameplay v9 requires reloading older browser
 clients after an upgrade; see the [compatibility note](docs/game/protocol-v9.md).
-The final documentation links the independently reviewed [English desktop](docs/screenshots/invisible-bombs-desktop.png) and [Polish 320px reduced-motion](docs/screenshots/invisible-bombs-mobile-pl.png) pre-collection captures. Runtime assertions separately establish bomb privacy, reconnect and exact-expiry behavior.
+The [English desktop](docs/screenshots/invisible-bombs-desktop.png) and
+[Polish 320px reduced-motion](docs/screenshots/invisible-bombs-mobile-pl.png) captures are fresh
+Compose pre-collection views independently reviewed for presentation. Still images do not prove
+bomb privacy, timing or reconnect behavior; the Compose and Kubernetes runtime assertions and
+sanitized diagnostics establish those properties. No Kubernetes screenshot received visual review.
 
 Use **Keyboard controls** below the arena to remap movement and bombs or restore defaults. Preferences
 stay in this browser. Opening settings, losing focus, or hiding the tab releases held movement;

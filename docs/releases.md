@@ -4,6 +4,23 @@ Release labels and scope live in the [implementation plan](game/implementation-p
 A completed milestone is verification evidence; a release exists only after its tested commit
 is tagged and its artifacts are published intentionally.
 
+## v0.3.41 source-bound acceptance checkpoint
+
+The current candidate is source `eb0b756df43fdd896cf87573a5224e4eb5f659a3`, tree
+`098f2a3beb766b4fefd2316b7c7ceaf37275a826`. Fresh source checks, a diagnostic-only headed
+Chromium run and the full source-bound native matrix pass. Native root 40405 completed with
+consumed exit zero across 53 Compose plus 53 Kubernetes cases, with zero retries or carry.
+Independent audit is clear under SHA-256
+`b0c72b1ff651257930f0db8df9db3cfc1274bd6882f142336e508e699c41097e`; result review is clear under
+`0cff7c9dd3bd4895cfcb426f340eca146b8c9627a55bac04c01111819b9008be`. The evidence is durably
+sealed under receipt SHA-256 `10db792e74f84a7f540e463f04fee5ebaae6a94f984bbb6d2a15317956cf99f1`,
+and independent seal review is clear under SHA-256
+`87666f73ca51ac78e2d726de48f74444059e1aca636864839ab437249f353ec8`.
+With those source-bound records complete, the documentation commit and independent review come
+next, followed by release-contract review. At this native verification checkpoint, no PR, merge, v0.3.41 tag,
+publication or promotion was claimed, and localhost:8085 served the unchanged published v0.3.40
+deployment. Subsequent delivery and deployment state is recorded by the release history.
+
 ## Version ownership
 
 Use Git tags `vMAJOR.MINOR.PATCH` for the combined server/web product. Cargo workspace package

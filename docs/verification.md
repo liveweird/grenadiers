@@ -1,5 +1,48 @@
 # Repository verification
 
+## v0.3.41 post-merge startup investigation — 2026-10-23
+
+PR 91 merged Invisible Bombs at `2fbc782fcea536331544ad7b34202d0780e9b465`.
+Its candidate push and pull-request workflows, `39868101870` and `39868112868`,
+each passed all nine jobs, 53 browser cases and 65,536 settings masks per Rust profile.
+Post-merge workflow `39870771097`, attempt one, passed eight jobs but failed the
+classic browser job before Chromium exposed its CDP endpoint. The retained startup
+attachment reports 10,016.954276 ms, zero stderr bytes and no observed endpoint.
+The cause remains unknown; missing exit data does not establish that Chrome stayed alive.
+Failed post-merge results contribute zero accepted hosted cases.
+
+Artifact `12465927804` is preserved under SHA-256
+`e4f8061a52c685ba21765532891bf595d98ba911045f54023d5e63d658b94d09`.
+The terminal metadata, complete raw logs, extracted startup attachment and original
+failed fetches are retained together; their inventory SHA-256 is
+`aefd9f790dcac27558d3caa41c72baf06b5b7ec31ecdbe238f7e1dcb830a5bed`.
+
+The CI observer launches the existing hardening command once inside Xvfb and samples
+only its owned process tree. It records bounded process state and the existence,
+type and size of an owned profile's DevTools file, without retaining its contents,
+command lines, environment values or debugging endpoints. These are sampled observations,
+not an atomic timeout witness. Missing observations remain inconclusive. The command's
+exit or signal remains authoritative; observations do not retry or replace browser checks.
+On an instrumented failure, the workflow retains the process records and Xvfb
+error output in the failure artifact. The preserved failure above predates this observer.
+
+Observer source `064df2000f86ca91b04eba8282df7797295c7f7c` passes all nine
+observer tests on both macOS and the cached repository-pinned Linux Node image,
+all ten server-mask contract tests, five mirror tests, repository policy, syntax
+and whitespace checks. Independent source review is clear under SHA-256
+`858b86cefddfdd4fc2b8f78b0ed6a2ba5fc516b31dfd098848cbfcb41e27ca2c`;
+the consumed check receipt is
+`3b56341d3e356f1a2a0a25fa3758dafc5afecb586b838caa916552a7d78eaf4f`.
+Regression tests cover owned child/grandchild signal forwarding and PID reuse
+without leaking unrelated process metadata. The wrapper forwards signals to its
+command group and waits for its direct child; it does not claim direct control
+of Chromium's separately detached group, which remains owned by the E2E launcher.
+The accepted 53 Compose plus 53 Kubernetes cases below remain executions on source
+`eb0b756df43fdd896cf87573a5224e4eb5f659a3`; they are not executions on the observer
+revision. Application, E2E, dependency, lock and native harness inputs must remain identical.
+Fresh candidate, post-merge and tag checks remain required. v0.3.41 is unpublished,
+and localhost:8085 remains on the accepted v0.3.40 image at this checkpoint.
+
 ## v0.3.41 visibility-startup native checkpoint — 2026-10-22 — 106/106 passed
 
 Source `eb0b756df43fdd896cf87573a5224e4eb5f659a3`, tree

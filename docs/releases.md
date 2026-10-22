@@ -4,9 +4,24 @@ Release labels and scope live in the [implementation plan](game/implementation-p
 A completed milestone is verification evidence; a release exists only after its tested commit
 is tagged and its artifacts are published intentionally.
 
+## v0.3.41 delivery recovery
+
+Invisible Bombs was merged in PR 91, but post-merge workflow `39870771097` failed
+while starting the headed visibility browser. v0.3.41 remains unpublished, and the
+local deployment remains v0.3.40. The CI-only observer revision gathers bounded
+process and Xvfb diagnostics without changing gameplay or test budgets; a passing
+instrumented run does not establish the cause of the intermittent failure.
+
+Roll forward from the unpublished merged commit `2fbc782`, keeping version 0.3.41.
+Require fresh push and PR checks on the reviewed observer revision, exact-tree squash
+merge, post-merge checks and tag checks before promoting the accepted native image.
+Retain native proofs under their original source identity and require independently
+reviewed input equality. Failed hosted runs contribute zero accepted cases. See the
+[current investigation](verification.md#v0341-post-merge-startup-investigation--2026-10-23).
+
 ## v0.3.41 source-bound acceptance checkpoint
 
-The current candidate is source `eb0b756df43fdd896cf87573a5224e4eb5f659a3`, tree
+The native acceptance source is `eb0b756df43fdd896cf87573a5224e4eb5f659a3`, tree
 `098f2a3beb766b4fefd2316b7c7ceaf37275a826`. Fresh source checks, a diagnostic-only headed
 Chromium run and the full source-bound native matrix pass. Native root 40405 completed with
 consumed exit zero across 53 Compose plus 53 Kubernetes cases, with zero retries or carry.

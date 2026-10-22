@@ -1,10 +1,10 @@
 # Changelog
 
-## 0.3.41 — 2026-10-21
+## 0.3.41 — 2026-10-22
 
 - Add opt-in Invisible Bombs with a 600-physical-tick refreshable curse that hides every live bomb from the affected recipient while preserving collision, capacity, chains and public flames.
 - Capture placement and detonation audiences at emission, intersecting Cloak ownership privacy with blinded seats, including events visible to neither recipient.
-- Add the sixteenth lobby switch, all 65,536 v9 settings masks, replay and archived-v8 guards, English/Polish cues, and a deterministic production-seed browser scenario source. Native acceptance and hosted release CI remain pending.
+- Add the sixteenth lobby switch, all 65,536 v9 settings masks, replay and archived-v8 guards, English/Polish cues, and a deterministic production-seed browser scenario. At the 22 October 2026 17:00:43 UTC seal checkpoint, source `97a3990` passed 53 Compose plus 53 Kubernetes cases with zero retries or carried passes; independent audit, result review and durable-seal review are clear, and 2,483 payloads are durably sealed. Hosted delivery had not started at this native checkpoint.
 
 ## 0.3.40 — 2026-10-21
 

@@ -1,8 +1,7 @@
 import { MantineProvider } from '@mantine/core'
 import { render, screen } from '@testing-library/react'
-import { beforeEach, expect, it, vi } from 'vitest'
+import { expect, it, vi } from 'vitest'
 import type { GameArenaProps } from '../arena/types'
-import i18n from '../../i18n'
 import { GamePanelView, type GameActions } from './GamePanel'
 import { initialGameClientState } from './clientTypes'
 import { snapshot } from './testSupport'
@@ -11,8 +10,6 @@ vi.mock('../arena/GameArena', () => ({
   GameArena: ({ label, focusHint }: GameArenaProps) =>
     <div role="region" aria-label={label} data-focus-hint={focusHint} />,
 }))
-
-beforeEach(async () => { await i18n.changeLanguage('en') })
 
 it('labels Bracelet as passive equipment without an action hint or cooldown timer', () => {
   const current = snapshot(20)

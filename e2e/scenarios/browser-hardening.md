@@ -5,6 +5,10 @@ fixture. Chromium must be headed; Linux runs require Xvfb. The dedicated project
 ordinary background throttling and renderer behavior, disables retries and traces, and retains only
 public command, room, and actor summaries on failure. Its default-context CDP connection disables
 Playwright's focus-emulation defaults so cover-tab activation exposes native visibility state.
+The headed Chromium startup monitor waits at most 10 seconds for one complete DevTools announcement
+line. Its bounded failure receipt records only sanitized stderr and process state; endpoint capabilities
+and the temporary profile path are redacted. Cleanup terminates only the owned process before removing
+its profile, and preserves both the original scenario failure and any cleanup failure.
 
 ## Scenario: a hidden gameplay tab clears held input and recovers on a fresh native action
 

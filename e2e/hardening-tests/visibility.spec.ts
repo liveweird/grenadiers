@@ -6,6 +6,7 @@ import {
   expectStableFreshPosition, expectVisibility, launchNaturalVisibilityBrowser,
   observeVisibilityChanges, position, visibilityChanges,
 } from '../tests/support/visibility'
+import { publicErrorSummary, startupDiagnosticsFrom } from '../tests/support/visibility-startup'
 
 test.beforeAll(() => {
   expect(process.env.E2E_MATCH_FIXTURE, 'Configure the documented match fixture for hardening acceptance')
@@ -38,12 +39,23 @@ async function attachPublicSummary(testInfo: TestInfo, games: ObservedGame[]): P
   })
 }
 
+async function attachStartupSummary(testInfo: TestInfo, error: unknown,
+  launched?: Awaited<ReturnType<typeof launchNaturalVisibilityBrowser>>): Promise<void> {
+  const diagnostics = startupDiagnosticsFrom(error) ?? launched?.startupDiagnostics()
+  if (!diagnostics) return
+  await testInfo.attach('visibility-chromium-startup', {
+    contentType: 'application/json', body: JSON.stringify(diagnostics),
+  })
+}
+
 test('a hidden gameplay tab clears held input and recovers on a fresh native action', async ({ browserName }, testInfo) => {
   expect(browserName).toBe('chromium')
-  const launched = await launchNaturalVisibilityBrowser()
+  let launched: Awaited<ReturnType<typeof launchNaturalVisibilityBrowser>> | undefined
   let peerContext: BrowserContext | undefined
   const games: ObservedGame[] = []
+  let failure: unknown
   try {
+    launched = await launchNaturalVisibilityBrowser()
     peerContext = await launched.browser.newContext()
     const one = launched.context.pages()[0]
     const two = await peerContext.newPage()
@@ -109,9 +121,32 @@ test('a hidden gameplay tab clears held input and recovers on a fresh native act
     await expect(two.getByText('Alive', { exact: true })).toHaveCount(2)
     expect(games[0].sockets).toBe(socketCount)
   } catch (error) {
-    await attachPublicSummary(testInfo, games)
-    throw error
-  } finally {
-    await launched.close()
+    failure = error
+    try {
+      await attachPublicSummary(testInfo, games)
+    } catch (attachmentError) {
+      failure = new AggregateError([error, attachmentError],
+        'Visibility scenario and public-summary attachment both failed', { cause: error })
+    }
+  }
+  if (launched) {
+    try {
+      await launched.close()
+    } catch (cleanupError) {
+      failure = failure === undefined ? cleanupError : new AggregateError(
+        [failure, cleanupError],
+        `Visibility scenario failed (${publicErrorSummary(failure)}); browser cleanup failed `
+        + `(${publicErrorSummary(cleanupError)})`,
+        { cause: failure instanceof Error ? failure : undefined })
+    }
+  }
+  if (failure !== undefined) {
+    try {
+      await attachStartupSummary(testInfo, failure, launched)
+    } catch (attachmentError) {
+      failure = new AggregateError([failure, attachmentError],
+        'Visibility failure and startup-summary attachment both failed', { cause: failure })
+    }
+    throw failure
   }
 })

@@ -31,7 +31,7 @@ const bombEvents = (game: ObservedGame, since: number) => snapshots(game)
   .filter(({ state }) => state.physicalTick >= since).flatMap(({ events }) => events)
   .filter(({ kind }) => kind.type === 'bombPlaced' || kind.type === 'bombDetonated')
 
-async function tilePixels(page: Page, column: number, row: number): Promise<string[]> {
+async function captureTilePng(page: Page, column: number, row: number): Promise<Buffer> {
   const canvas = page.locator('.game-arena canvas')
   await canvas.scrollIntoViewIfNeeded()
   const [box, viewport] = await Promise.all([canvas.boundingBox(), Promise.resolve(page.viewportSize())])
@@ -42,11 +42,14 @@ async function tilePixels(page: Page, column: number, row: number): Promise<stri
   const bottom = Math.floor(box.y + (row + 1) * box.height / 13)
   if (left < 0 || top < 0 || right > viewport.width || bottom > viewport.height
     || right <= left || bottom <= top) throw new Error('arena tile clip is outside the viewport')
-  const encoded = (await page.screenshot({
+  return page.screenshot({
     clip: { x: left, y: top, width: right - left, height: bottom - top }, scale: 'css',
-  })).toString('base64')
-  return page.evaluate(async (png) => {
-    const image = new Image(); image.src = `data:image/png;base64,${png}`; await image.decode()
+  })
+}
+
+async function decodeTilePng(page: Page, png: Buffer): Promise<string[]> {
+  return page.evaluate(async (encoded) => {
+    const image = new Image(); image.src = `data:image/png;base64,${encoded}`; await image.decode()
     const canvas = document.createElement('canvas'); canvas.width = image.width; canvas.height = image.height
     const context = canvas.getContext('2d'); if (!context) throw new Error('decoder unavailable')
     context.drawImage(image, 0, 0)
@@ -56,7 +59,7 @@ async function tilePixels(page: Page, column: number, row: number): Promise<stri
       result.push(`${pixels[index]},${pixels[index + 1]},${pixels[index + 2]},${pixels[index + 3]}`)
     }
     return result
-  }, encoded)
+  }, png.toString('base64'))
 }
 
 function expectLivePixelWindow(blinded: ObservedGame, sighted: ObservedGame,
@@ -75,6 +78,24 @@ function expectLivePixelWindow(blinded: ObservedGame, sighted: ObservedGame,
   expect(visible.state.actors.some((actor) => actor.type === 'visible'
     && Math.floor(actor.position.x / 1024) === 3 && Math.floor(actor.position.y / 1024) === 1)).toBe(false)
   return visible.state.physicalTick
+}
+
+function expectRevealedPixelWindow(game: ObservedGame, bombId: number,
+  deadline: number, roundId: number): number {
+  const frame = latestSnapshot(game)!
+  expect(frame.room.roundId).toBe(roundId)
+  expect(frame.state.physicalTick).toBeGreaterThanOrEqual(deadline)
+  expect(stateEffectTicks(frame.state, 'two')).toBe(0)
+  expect(frame.state.arena.terrain[11 * 15 + 12]).toBe('floor')
+  const bomb = frame.state.bombs.find(({ id }) => id === bombId)
+  expect(bomb?.cell).toEqual({ column: 12, row: 11 })
+  expect(bomb?.trigger.type).toBe('timed')
+  if (bomb?.trigger.type !== 'timed') throw new Error('revealed compositor bomb must be Timed')
+  expect(bomb.trigger.remainingTicks).toBeGreaterThan(0)
+  expect(frame.state.flames).not.toContainEqual(expect.objectContaining({ cell: { column: 12, row: 11 } }))
+  expect(frame.state.actors.some((actor) => actor.type === 'visible'
+    && Math.floor(actor.position.x / 1024) === 12 && Math.floor(actor.position.y / 1024) === 11)).toBe(false)
+  return frame.state.physicalTick
 }
 
 async function plant(page: Page, actorGame: ObservedGame, sightedGame: ObservedGame,
@@ -138,17 +159,17 @@ async function reconnectAndCaptureLiveBombs({ deadline, games, one, ownBomb, pri
   if (connectedBomb?.trigger.type !== 'timed') throw new Error('live reconnect bomb must be Timed')
   expect(connectedBomb.trigger.remainingTicks).toBeGreaterThan(0)
   expect(bombEvents(games[0], privacyStart)).toHaveLength(0)
-  const pixelReadStart = expectLivePixelWindow(games[0], games[1], ownBomb.id, deadline)
-  const [hiddenPixels, sightedPixels] = await Promise.all([
-    tilePixels(one, 3, 1), tilePixels(two, 3, 1),
+  const captureStart = expectLivePixelWindow(games[0], games[1], ownBomb.id, deadline)
+  const [hiddenPng, sightedPng] = await Promise.all([
+    captureTilePng(one, 3, 1), captureTilePng(two, 3, 1),
   ])
-  const pixelReadEnd = expectLivePixelWindow(games[0], games[1], ownBomb.id, deadline)
+  const captureEnd = expectLivePixelWindow(games[0], games[1], ownBomb.id, deadline)
   return {
     admissionTick: resumed.state.physicalTick,
+    captureTicks: [captureStart, captureEnd],
     disconnectTick: beforeReconnect.state.physicalTick,
-    hiddenPixels,
-    pixelReadTicks: [pixelReadStart, pixelReadEnd],
-    sightedPixels,
+    hiddenPng,
+    sightedPng,
   }
 }
 
@@ -220,16 +241,28 @@ test('Invisible Bombs hides live bombs and cues until exact expiry', async ({ br
     info.annotations.push({ type: 'phase-physical-ticks', description: JSON.stringify({
       collection: collection.tick, ownPlacement: ownBomb.placedAt, rivalPlacement: rivalBomb.placedAt,
       disconnect: reconnect.disconnectTick, admission: reconnect.admissionTick,
-      pixelReads: reconnect.pixelReadTicks, detonation: witnessedDetonation.tick,
+      captures: reconnect.captureTicks, detonation: witnessedDetonation.tick,
     }) })
     await expect.poll(() => snapshots(games[0]).some(({ state }) => state.physicalTick >= privacyStart
       && state.flames.length > 0)).toBe(true)
     await Promise.all(games.map((game) => expect.poll(() => latestSnapshot(game)!.state.bombs.length + latestSnapshot(game)!.state.flames.length).toBe(0)))
-    const [hiddenClean, sightedClean] = await Promise.all([
-      tilePixels(one, 3, 1), tilePixels(two, 3, 1),
+    const [hiddenCleanPng, sightedCleanPng] = await Promise.all([
+      captureTilePng(one, 3, 1), captureTilePng(two, 3, 1),
     ])
-    expect(reconnect.hiddenPixels).toEqual(hiddenClean)
-    expect(reconnect.sightedPixels).not.toEqual(sightedClean)
+    const secondEmptyFrame = latestSnapshot(games[1])!
+    expect(secondEmptyFrame.state.arena.terrain[11 * 15 + 12]).toBe('floor')
+    expect(secondEmptyFrame.state.bombs).toEqual([])
+    expect(secondEmptyFrame.state.flames).toEqual([])
+    const secondEmptyActor = visibleActor(secondEmptyFrame, 'two')!
+    expect(Math.floor(secondEmptyActor.position.x / 1024)).toBe(13)
+    expect(Math.floor(secondEmptyActor.position.y / 1024)).toBe(10)
+    const emptySecondPng = await captureTilePng(two, 12, 11)
+    const [hiddenPixels, sightedPixels, hiddenClean, sightedClean] = await Promise.all([
+      decodeTilePng(one, reconnect.hiddenPng), decodeTilePng(two, reconnect.sightedPng),
+      decodeTilePng(one, hiddenCleanPng), decodeTilePng(two, sightedCleanPng),
+    ])
+    expect(hiddenPixels).toEqual(hiddenClean)
+    expect(sightedPixels).not.toEqual(sightedClean)
     expect(bombEvents(games[0], privacyStart).filter(({ tick }) => tick < deadline)).toHaveLength(0)
     expect(bombEvents(games[1], privacyStart).some(({ tick, kind }) => tick < deadline
       && kind.type === 'bombDetonated' && (kind.bomb.id === ownBomb.id
@@ -249,10 +282,12 @@ test('Invisible Bombs hides live bombs and cues until exact expiry', async ({ br
     expect(observedDeadlines).toEqual([secondDeadline, secondDeadline])
     const secondPrivacyStart = latestSnapshot(games[1])!.state.physicalTick
     await moveSeatTo(two, games[1], 'two', { column: 12, row: 11 })
-    await expect.poll(() => latestSnapshot(games[0])!.state.physicalTick)
-      .toBeGreaterThanOrEqual(secondDeadline - 210)
+    await expect.poll(() => latestSnapshot(games[0])!.state.physicalTick, { intervals: [15] })
+      .toBeGreaterThanOrEqual(secondDeadline - 120)
     const survivor = await plant(two, games[1], games[0], { column: 12, row: 11 })
-    expect(latestSnapshot(games[0])!.state.physicalTick).toBeLessThanOrEqual(secondDeadline - 130)
+    expect(survivor.placedAt).toBeGreaterThanOrEqual(secondDeadline - 120)
+    expect(survivor.placedAt).toBeLessThanOrEqual(secondDeadline - 60)
+    expect(latestSnapshot(games[0])!.state.physicalTick).toBeLessThanOrEqual(secondDeadline - 60)
     await moveSeatTo(two, games[1], 'two', { column: 13, row: 11 })
     await moveSeatTo(two, games[1], 'two', { column: 13, row: 10 })
     await expect.poll(() => latestSnapshot(games[1])!.state.physicalTick).toBeGreaterThanOrEqual(secondDeadline)
@@ -284,6 +319,18 @@ test('Invisible Bombs hides live bombs and cues until exact expiry', async ({ br
     expect(bombEvents(games[0], secondPrivacyStart).filter(({ kind }) =>
       kind.type === 'bombPlaced' && kind.bomb.id === survivor.id)).toHaveLength(1)
     expect(bombEvents(games[1], secondPrivacyStart)).toHaveLength(0)
-    expect(await tilePixels(two, 12, 11)).not.toEqual(await tilePixels(two, 3, 1))
+    const revealCaptureStart = expectRevealedPixelWindow(
+      games[1], survivor.id, secondDeadline, after.room.roundId)
+    const revealSecondPng = await captureTilePng(two, 12, 11)
+    const revealCaptureEnd = expectRevealedPixelWindow(
+      games[1], survivor.id, secondDeadline, after.room.roundId)
+    const [emptySecondPixels, revealSecondPixels] = await Promise.all([
+      decodeTilePng(two, emptySecondPng), decodeTilePng(two, revealSecondPng),
+    ])
+    expect(revealSecondPixels).not.toEqual(emptySecondPixels)
+    info.annotations.push({ type: 'second-window-capture-ticks', description: JSON.stringify({
+      collection: secondCollection.tick, placement: survivor.placedAt,
+      captures: [revealCaptureStart, revealCaptureEnd],
+    }) })
   } finally { await Promise.all(contexts.map((context) => context.close())) }
 })

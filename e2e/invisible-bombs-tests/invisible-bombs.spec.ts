@@ -1,8 +1,13 @@
 import { expect, test, type Page } from '@playwright/test'
-import { expectPaintedCanvas, latestSnapshot, observeGame, visibleActor, type ObservedGame } from '../tests/support/duel'
+import { latestSnapshot, visibleActor, type ObservedGame } from '../tests/support/duel'
 import { moveSeatTo } from '../tests/support/movement'
-import { admissionBaseline, disconnectTransport, installTransportProbe } from '../tests/support/reconnect'
+import { admissionBaseline, disconnectTransport } from '../tests/support/reconnect'
 import type { GameServerMessage, Seat } from '../../web/src/game/v9/schema'
+import { attachLiveWindowEvidence, capturePreparedTilePng, markStage, prepareInvisibleBombsMatch,
+  prepareTileCapture, requireSuccessfulTasks, trackTask, validateLiveGuard,
+  recordDetonatedBomb, recordPixelComparison, recordPlacedBomb, retainPng, settleAll,
+  type LivePng, type LiveWindowDiagnostics, type PixelComparison,
+  type PreparedTileCapture, type TaskOutcome } from './live-pixel-window'
 
 test.beforeAll(() => expect(process.env.E2E_INVISIBLE_BOMBS_FIXTURE).toBe('arena-v2-invisible-bombs'))
 
@@ -13,9 +18,13 @@ type VisibleActor = Extract<Snapshot['state']['actors'][number], { type: 'visibl
 type Bomb = Snapshot['state']['bombs'][number]
 type ReconnectProofInput = {
   deadline: number
+  diagnostics: LiveWindowDiagnostics
   games: ObservedGame[]
+  livePngs: LivePng[]
   one: Page
   ownBomb: Bomb
+  peerRetreat: Promise<TaskOutcome<void>>
+  prepared: [PreparedTileCapture, PreparedTileCapture]
   privacyStart: number
   rivalBomb: Bomb
   two: Page
@@ -27,25 +36,14 @@ const stateEffectTicks = (state: Snapshot['state'], seat: Seat) => state.actors
   .find(({ kind }) => kind === 'invisibleBombs')?.remainingTicks ?? 0
 const effectTicks = (game: ObservedGame, seat: Seat) =>
   stateEffectTicks(latestSnapshot(game)!.state, seat)
+function expectEffectDeadline(frame: Snapshot, seat: Seat, deadline: number): void {
+  const remaining = stateEffectTicks(frame.state, seat)
+  expect(remaining).toBeGreaterThan(0)
+  expect(frame.state.physicalTick + remaining).toBe(deadline)
+}
 const bombEvents = (game: ObservedGame, since: number) => snapshots(game)
   .filter(({ state }) => state.physicalTick >= since).flatMap(({ events }) => events)
   .filter(({ kind }) => kind.type === 'bombPlaced' || kind.type === 'bombDetonated')
-
-async function captureTilePng(page: Page, column: number, row: number): Promise<Buffer> {
-  const canvas = page.locator('.game-arena canvas')
-  await canvas.scrollIntoViewIfNeeded()
-  const [box, viewport] = await Promise.all([canvas.boundingBox(), Promise.resolve(page.viewportSize())])
-  if (!box || !viewport) throw new Error('arena canvas bounds are unavailable')
-  const left = Math.ceil(box.x + column * box.width / 15)
-  const top = Math.ceil(box.y + row * box.height / 13)
-  const right = Math.floor(box.x + (column + 1) * box.width / 15)
-  const bottom = Math.floor(box.y + (row + 1) * box.height / 13)
-  if (left < 0 || top < 0 || right > viewport.width || bottom > viewport.height
-    || right <= left || bottom <= top) throw new Error('arena tile clip is outside the viewport')
-  return page.screenshot({
-    clip: { x: left, y: top, width: right - left, height: bottom - top }, scale: 'css',
-  })
-}
 
 async function decodeTilePng(page: Page, png: Buffer): Promise<string[]> {
   return page.evaluate(async (encoded) => {
@@ -63,8 +61,11 @@ async function decodeTilePng(page: Page, png: Buffer): Promise<string[]> {
 }
 
 function expectLivePixelWindow(blinded: ObservedGame, sighted: ObservedGame,
-  bombId: number, deadline: number): number {
+  bombId: number, rivalBombId: number, deadline: number): number {
   const hidden = latestSnapshot(blinded)!; const visible = latestSnapshot(sighted)!
+  validateLiveGuard({ currentRoundId: visible.room.roundId, expectedRoundId: hidden.room.roundId,
+    physicalTick: hidden.state.physicalTick, effectTicks: stateEffectTicks(hidden.state, 'one'),
+    effectDeadline: deadline, bombId, bomb: visible.state.bombs.find(({ id }) => id === bombId) })
   expect([hidden.room.roomId, hidden.room.roundId]).toEqual([visible.room.roomId, visible.room.roundId])
   expect(hidden.state.arena.terrain[1 * 15 + 3]).toBe('floor')
   expect(visible.state.arena.terrain[1 * 15 + 3]).toBe('floor')
@@ -74,6 +75,11 @@ function expectLivePixelWindow(blinded: ObservedGame, sighted: ObservedGame,
   expect(bomb?.trigger.type).toBe('timed')
   if (bomb?.trigger.type !== 'timed') throw new Error('own compositor bomb must be Timed')
   expect(bomb.trigger.remainingTicks).toBeGreaterThan(0)
+  expect(visible.state.bombs.some(({ id }) => id === rivalBombId)).toBe(true)
+  for (const game of [blinded, sighted]) {
+    expect(visibleActor(latestSnapshot(game), 'one')?.liveBombCount).toBe(1)
+    expect(visibleActor(latestSnapshot(game), 'two')?.liveBombCount).toBe(1)
+  }
   expect(visible.state.flames).not.toContainEqual(expect.objectContaining({ cell: { column: 3, row: 1 } }))
   expect(visible.state.actors.some((actor) => actor.type === 'visible'
     && Math.floor(actor.position.x / 1024) === 3 && Math.floor(actor.position.y / 1024) === 1)).toBe(false)
@@ -98,6 +104,15 @@ function expectRevealedPixelWindow(game: ObservedGame, bombId: number,
   return frame.state.physicalTick
 }
 
+function recordSecondCaptureBoundary(diagnostics: LiveWindowDiagnostics, boundary: 'pre' | 'post',
+  frame: Snapshot, bombId: number, deadline: number): void {
+  const bomb = frame.state.bombs.find(({ id }) => id === bombId)
+  markStage(diagnostics, `second-capture-${boundary}-guard`, 'passed', {
+    physicalTick: frame.state.physicalTick, deadline, roundId: frame.room.roundId, bombId,
+    remainingTicks: bomb?.trigger.type === 'timed' ? bomb.trigger.remainingTicks : undefined,
+  })
+}
+
 async function plant(page: Page, actorGame: ObservedGame, sightedGame: ObservedGame,
   cell: { column: number; row: number }) {
   const beforeFrame = latestSnapshot(sightedGame)!
@@ -116,8 +131,8 @@ async function plant(page: Page, actorGame: ObservedGame, sightedGame: ObservedG
   return frame.state.bombs.find((bomb) => !before.has(bomb.id))!
 }
 
-async function reconnectAndCaptureLiveBombs({ deadline, games, one, ownBomb, privacyStart,
-  rivalBomb, two }: ReconnectProofInput) {
+async function reconnectAndCaptureLiveBombs({ deadline, diagnostics, games, livePngs, one, ownBomb,
+  peerRetreat, prepared, privacyStart, rivalBomb, two }: ReconnectProofInput) {
   const admissionFrameFloor = games[0].frames.length
   const beforeReconnect = latestSnapshot(games[0])!
   await disconnectTransport(one)
@@ -136,6 +151,8 @@ async function reconnectAndCaptureLiveBombs({ deadline, games, one, ownBomb, pri
   expect(resumed.state.physicalTick + resumedEffectTicks).toBe(deadline)
   expect(resumed.state.bombs).toEqual([])
   expect('events' in resumed).toBe(false)
+  markStage(diagnostics, 'reconnect-admission', 'passed', { physicalTick: resumed.state.physicalTick,
+    effectTicks: resumedEffectTicks, deadline, roundId: resumed.room.roundId })
   const sightedFrameFloor = games[1].frames.length
   const admissionIndex = games[0].frames.findLastIndex((frame) => frame === resumed)
   await expect.poll(() => games[0].frames.slice(admissionIndex + 1).some((frame) =>
@@ -152,77 +169,77 @@ async function reconnectAndCaptureLiveBombs({ deadline, games, one, ownBomb, pri
   expect(latestSnapshot(games[0])!.state.physicalTick).toBeLessThan(deadline)
   expect(effectTicks(games[0], 'one')).toBeGreaterThan(0)
   expect(latestSnapshot(games[0])!.state.bombs).toEqual([])
-  const connectedBomb = latestSnapshot(games[1])!.state.bombs.find(({ id }) =>
-    id === ownBomb.id || id === rivalBomb.id)
-  expect(connectedBomb).toBeDefined()
-  expect(connectedBomb?.trigger.type).toBe('timed')
-  if (connectedBomb?.trigger.type !== 'timed') throw new Error('live reconnect bomb must be Timed')
-  expect(connectedBomb.trigger.remainingTicks).toBeGreaterThan(0)
+  const connectedBombs = latestSnapshot(games[1])!.state.bombs
+    .filter(({ id }) => id === ownBomb.id || id === rivalBomb.id)
+  expect(connectedBombs.map(({ id }) => id)).toEqual(expect.arrayContaining([ownBomb.id, rivalBomb.id]))
+  for (const bomb of connectedBombs) {
+    expect(bomb.trigger.type).toBe('timed')
+    if (bomb.trigger.type !== 'timed') throw new Error('live reconnect bomb must be Timed')
+    expect(bomb.trigger.remainingTicks).toBeGreaterThan(0)
+  }
   expect(bombEvents(games[0], privacyStart)).toHaveLength(0)
-  const captureStart = expectLivePixelWindow(games[0], games[1], ownBomb.id, deadline)
-  const [hiddenPng, sightedPng] = await Promise.all([
-    captureTilePng(one, 3, 1), captureTilePng(two, 3, 1),
-  ])
-  const captureEnd = expectLivePixelWindow(games[0], games[1], ownBomb.id, deadline)
+  const capture = trackTask('dual-page-live-capture', diagnostics, async () => {
+    const captureStart = expectLivePixelWindow(games[0], games[1], ownBomb.id, rivalBomb.id, deadline)
+    const beforeBomb = latestSnapshot(games[1])!.state.bombs.find(({ id }) => id === ownBomb.id)!
+    markStage(diagnostics, 'capture-pre-guard', 'passed', { physicalTick: captureStart,
+      deadline, bombId: ownBomb.id, remainingTicks: beforeBomb.trigger.type === 'timed'
+        ? beforeBomb.trigger.remainingTicks : undefined })
+    const captureOne = retainPng(livePngs, 'invisible-bombs-hidden-live-3-1.png',
+      capturePreparedTilePng(one, prepared[0]))
+    const captureTwo = retainPng(livePngs, 'invisible-bombs-sighted-live-3-1.png',
+      capturePreparedTilePng(two, prepared[1]))
+    const [hiddenPng, sightedPng] = await settleAll([captureOne, captureTwo])
+    const captureEnd = expectLivePixelWindow(games[0], games[1], ownBomb.id, rivalBomb.id, deadline)
+    const afterBomb = latestSnapshot(games[1])!.state.bombs.find(({ id }) => id === ownBomb.id)!
+    markStage(diagnostics, 'capture-post-guard', 'passed', { physicalTick: captureEnd,
+      deadline, bombId: ownBomb.id, remainingTicks: afterBomb.trigger.type === 'timed'
+        ? afterBomb.trigger.remainingTicks : undefined })
+    return { captureStart, captureEnd, hiddenPng, sightedPng }
+  })
+  const oneRetreat = trackTask('one-normal-retreat', diagnostics, async () => {
+    await moveSeatTo(one, games[0], 'one', { column: 1, row: 2 })
+  })
+  const outcomes = await Promise.all([capture, oneRetreat, peerRetreat])
+  requireSuccessfulTasks(diagnostics, outcomes)
+  if (!outcomes[0].ok) throw outcomes[0].error
+  const captured = outcomes[0].value
+  markStage(diagnostics, 'live-window-phase', 'passed')
   return {
     admissionTick: resumed.state.physicalTick,
-    captureTicks: [captureStart, captureEnd],
+    captureTicks: [captured.captureStart, captured.captureEnd],
     disconnectTick: beforeReconnect.state.physicalTick,
-    hiddenPng,
-    sightedPng,
+    hiddenPng: captured.hiddenPng,
+    sightedPng: captured.sightedPng,
   }
 }
 
 test('Invisible Bombs hides live bombs and cues until exact expiry', async ({ browser }, info) => {
-  const contexts = await Promise.all([
-    browser.newContext({ viewport: { width: 1440, height: 1050 } }),
-    browser.newContext({ viewport: { width: 320, height: 844 }, reducedMotion: 'reduce' }),
-  ])
+  const contexts = await Promise.all([browser.newContext({ viewport: { width: 1440, height: 1050 } }),
+    browser.newContext({ viewport: { width: 320, height: 844 }, reducedMotion: 'reduce' })])
+  const diagnostics: LiveWindowDiagnostics = { stages: [], selectedBombs: [], events: [] }
+  const livePngs: LivePng[] = []; const pixelComparisons: PixelComparison[] = []
+  let games: ObservedGame[] = []; let receiptStart = 0
+  let failed = false
   try {
-    const [one, two] = await Promise.all(contexts.map((context) => context.newPage()))
-    await Promise.all([one, two].map(installTransportProbe))
-    const games = [observeGame(one), observeGame(two)]
-    await Promise.all([one.goto('/'), two.goto('/')])
-    await one.getByRole('button', { name: 'Create room', exact: true }).click()
-    const code = one.getByLabel('Room invitation code', { exact: true })
-    await expect(code).toHaveText(/^[A-HJ-NP-Z2-9]{8}$/)
-    await one.getByRole('checkbox', { name: 'Heart', exact: true }).uncheck()
-    await one.getByRole('checkbox', { name: 'Invisible bombs', exact: true }).check()
-    await one.getByLabel('Bomb fuse').selectOption('300')
-    await one.getByRole('button', { name: 'Apply rules', exact: true }).click()
-    await two.getByText('Polski', { exact: true }).click()
-    await two.getByRole('textbox', { name: 'Kod pokoju', exact: true }).fill(await code.innerText())
-    await two.getByRole('button', { name: 'Dołącz do pokoju', exact: true }).click()
-    await Promise.all([one.getByRole('button', { name: 'Ready', exact: true }).click(),
-      two.getByRole('button', { name: 'Gotowy', exact: true }).click()])
-    await Promise.all(games.map((game) => expect.poll(() => latestSnapshot(game)?.room.phase.type).toBe('running')))
-    await one.getByRole('region', { name: 'Grenadiers courtyard' }).click()
-    await two.getByRole('region', { name: 'Dziedziniec Grenadiers', exact: true }).click()
-    await moveSeatTo(one, games[0], 'one', { column: 2, row: 1 })
-    await plant(one, games[0], games[0], { column: 2, row: 1 })
-    await moveSeatTo(one, games[0], 'one', { column: 1, row: 1 }); await moveSeatTo(one, games[0], 'one', { column: 1, row: 2 })
-    await expect.poll(() => latestSnapshot(games[0])!.state.bombs.length + latestSnapshot(games[0])!.state.flames.length).toBe(0)
-    await expect.poll(() => latestSnapshot(games[0])!.state.pickups).toContainEqual({
-      cell: { column: 3, row: 1 }, kind: 'invisibleBombs' })
-    await Promise.all([one, two].map(expectPaintedCanvas))
-    await one.screenshot({ path: info.outputPath('invisible-bombs-before-collection-desktop-en.png'), fullPage: true })
-    expect(await two.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false)
-    await two.screenshot({ path: info.outputPath('invisible-bombs-before-collection-polish-320-reduced.png'), fullPage: true })
-
-    await moveSeatTo(two, games[1], 'two', { column: 12, row: 11 })
-    await moveSeatTo(one, games[0], 'one', { column: 1, row: 1 })
-    await moveSeatTo(one, games[0], 'one', { column: 3, row: 1 })
+    const preparedMatch = await prepareInvisibleBombsMatch(contexts, info, plant)
+    const { one, two, prepared } = preparedMatch
+    games = preparedMatch.games
     await expect.poll(() => effectTicks(games[0], 'one')).toBeGreaterThan(0)
     const collection = snapshots(games[0]).flatMap(({ events }) => events).find(({ kind }) =>
       kind.type === 'pickupCollected' && kind.seat === 'one' && kind.kind === 'invisibleBombs')!
     const deadline = collection.tick + 600
     const privacyStart = latestSnapshot(games[0])!.state.physicalTick
+    receiptStart = privacyStart
+    diagnostics.originalEffectDeadline = deadline
     const ownBomb = await plant(one, games[0], games[1], { column: 3, row: 1 })
     const rivalBomb = await plant(two, games[1], games[1], { column: 12, row: 11 })
-    await Promise.all([
-      (async () => { await moveSeatTo(one, games[0], 'one', { column: 2, row: 1 }); await moveSeatTo(one, games[0], 'one', { column: 1, row: 2 }) })(),
-      (async () => { await moveSeatTo(two, games[1], 'two', { column: 13, row: 11 }); await moveSeatTo(two, games[1], 'two', { column: 13, row: 10 }) })(),
-    ])
+    recordPlacedBomb(diagnostics, ownBomb, 300)
+    recordPlacedBomb(diagnostics, rivalBomb, 300)
+    const peerRetreat = trackTask('two-normal-retreat', diagnostics, async () => {
+      await moveSeatTo(two, games[1], 'two', { column: 13, row: 11 })
+      await moveSeatTo(two, games[1], 'two', { column: 13, row: 10 })
+    })
+    await moveSeatTo(one, games[0], 'one', { column: 2, row: 1 })
     expect(ownBomb.placedAt + 300).toBeLessThan(deadline)
     await expect.poll(() => latestSnapshot(games[0])!.state.bombs).toEqual([])
     expect(visibleActor(latestSnapshot(games[0]), 'one')?.liveBombCount).toBe(1)
@@ -230,14 +247,18 @@ test('Invisible Bombs hides live bombs and cues until exact expiry', async ({ br
       .toEqual(expect.arrayContaining([ownBomb.id, rivalBomb.id]))
     expect(bombEvents(games[0], privacyStart)).toHaveLength(0)
     const reconnect = await reconnectAndCaptureLiveBombs({
-      deadline, games, one, ownBomb, privacyStart, rivalBomb, two,
+      deadline, diagnostics, games, livePngs, one, ownBomb, peerRetreat, prepared,
+      privacyStart, rivalBomb, two,
     })
+    expect(reconnect.captureTicks[1]).toBeLessThan(ownBomb.placedAt + 300)
     await expect.poll(() => bombEvents(games[1], privacyStart).some(({ tick, kind }) =>
-      tick < deadline && kind.type === 'bombDetonated' && (kind.bomb.id === ownBomb.id
-        || kind.bomb.id === rivalBomb.id))).toBe(true)
+      tick < deadline && kind.type === 'bombDetonated' && kind.bomb.id === ownBomb.id)).toBe(true)
     const witnessedDetonation = bombEvents(games[1], privacyStart).find(({ tick, kind }) =>
-      tick < deadline && kind.type === 'bombDetonated' && (kind.bomb.id === ownBomb.id
-        || kind.bomb.id === rivalBomb.id))!
+      tick < deadline && kind.type === 'bombDetonated' && kind.bomb.id === ownBomb.id)!
+    expect(witnessedDetonation.tick).toBe(ownBomb.placedAt + 300)
+    if (witnessedDetonation.kind.type !== 'bombDetonated') throw new Error('own bomb did not detonate')
+    recordDetonatedBomb(diagnostics, { id: ownBomb.id,
+      cell: witnessedDetonation.kind.bomb.cell, tick: witnessedDetonation.tick }, ownBomb.placedAt + 300)
     info.annotations.push({ type: 'phase-physical-ticks', description: JSON.stringify({
       collection: collection.tick, ownPlacement: ownBomb.placedAt, rivalPlacement: rivalBomb.placedAt,
       disconnect: reconnect.disconnectTick, admission: reconnect.admissionTick,
@@ -246,8 +267,11 @@ test('Invisible Bombs hides live bombs and cues until exact expiry', async ({ br
     await expect.poll(() => snapshots(games[0]).some(({ state }) => state.physicalTick >= privacyStart
       && state.flames.length > 0)).toBe(true)
     await Promise.all(games.map((game) => expect.poll(() => latestSnapshot(game)!.state.bombs.length + latestSnapshot(game)!.state.flames.length).toBe(0)))
-    const [hiddenCleanPng, sightedCleanPng] = await Promise.all([
-      captureTilePng(one, 3, 1), captureTilePng(two, 3, 1),
+    const [hiddenCleanPng, sightedCleanPng] = await settleAll([
+      retainPng(livePngs, 'invisible-bombs-hidden-clean-3-1.png',
+        capturePreparedTilePng(one, prepared[0])),
+      retainPng(livePngs, 'invisible-bombs-sighted-clean-3-1.png',
+        capturePreparedTilePng(two, prepared[1])),
     ])
     const secondEmptyFrame = latestSnapshot(games[1])!
     expect(secondEmptyFrame.state.arena.terrain[11 * 15 + 12]).toBe('floor')
@@ -256,13 +280,17 @@ test('Invisible Bombs hides live bombs and cues until exact expiry', async ({ br
     const secondEmptyActor = visibleActor(secondEmptyFrame, 'two')!
     expect(Math.floor(secondEmptyActor.position.x / 1024)).toBe(13)
     expect(Math.floor(secondEmptyActor.position.y / 1024)).toBe(10)
-    const emptySecondPng = await captureTilePng(two, 12, 11)
+    const secondPrepared = await prepareTileCapture(two, 12, 11)
+    const emptySecondPng = await retainPng(livePngs, 'invisible-bombs-empty-12-11.png',
+      capturePreparedTilePng(two, secondPrepared))
     const [hiddenPixels, sightedPixels, hiddenClean, sightedClean] = await Promise.all([
       decodeTilePng(one, reconnect.hiddenPng), decodeTilePng(two, reconnect.sightedPng),
       decodeTilePng(one, hiddenCleanPng), decodeTilePng(two, sightedCleanPng),
     ])
-    expect(hiddenPixels).toEqual(hiddenClean)
-    expect(sightedPixels).not.toEqual(sightedClean)
+    expect(recordPixelComparison(pixelComparisons, 'hidden-live-equals-clean',
+      hiddenPixels, hiddenClean, true)).toBe(true)
+    expect(recordPixelComparison(pixelComparisons, 'sighted-live-differs-clean',
+      sightedPixels, sightedClean, false)).toBe(true)
     expect(bombEvents(games[0], privacyStart).filter(({ tick }) => tick < deadline)).toHaveLength(0)
     expect(bombEvents(games[1], privacyStart).some(({ tick, kind }) => tick < deadline
       && kind.type === 'bombDetonated' && (kind.bomb.id === ownBomb.id
@@ -275,16 +303,14 @@ test('Invisible Bombs hides live bombs and cues until exact expiry', async ({ br
     const secondCollection = snapshots(games[1]).flatMap(({ events }) => events).find(({ kind }) =>
       kind.type === 'pickupCollected' && kind.seat === 'two' && kind.kind === 'invisibleBombs')!
     const secondDeadline = secondCollection.tick + 600
-    const observedDeadlines = games.map((game) => {
-      const snapshot = latestSnapshot(game)!
-      return snapshot.state.physicalTick + effectTicks(game, 'two')
-    })
-    expect(observedDeadlines).toEqual([secondDeadline, secondDeadline])
+    diagnostics.secondEffectDeadline = secondDeadline
+    games.forEach((game) => expectEffectDeadline(latestSnapshot(game)!, 'two', secondDeadline))
     const secondPrivacyStart = latestSnapshot(games[1])!.state.physicalTick
     await moveSeatTo(two, games[1], 'two', { column: 12, row: 11 })
     await expect.poll(() => latestSnapshot(games[0])!.state.physicalTick, { intervals: [15] })
       .toBeGreaterThanOrEqual(secondDeadline - 120)
     const survivor = await plant(two, games[1], games[0], { column: 12, row: 11 })
+    recordPlacedBomb(diagnostics, survivor, 300)
     expect(survivor.placedAt).toBeGreaterThanOrEqual(secondDeadline - 120)
     expect(survivor.placedAt).toBeLessThanOrEqual(secondDeadline - 60)
     expect(latestSnapshot(games[0])!.state.physicalTick).toBeLessThanOrEqual(secondDeadline - 60)
@@ -297,6 +323,8 @@ test('Invisible Bombs hides live bombs and cues until exact expiry', async ({ br
     const beforeSighted = snapshots(games[0]).find(({ state }) =>
       state.physicalTick === before.state.physicalTick)!
     expect(before.state.physicalTick).toBeGreaterThanOrEqual(secondDeadline - 3)
+    expectEffectDeadline(before, 'two', secondDeadline)
+    expectEffectDeadline(beforeSighted, 'two', secondDeadline)
     expect(before.state.bombs.some(({ id }) => id === survivor.id)).toBe(false)
     expect(beforeSighted.state.bombs.some(({ id }) => id === survivor.id)).toBe(true)
     await expect.poll(() => snapshots(games[1]).find(({ state }) => state.physicalTick >= secondDeadline
@@ -316,21 +344,28 @@ test('Invisible Bombs hides live bombs and cues until exact expiry', async ({ br
       throw new Error('surviving fixture bomb must remain Timed')
     }
     expect(revealed.trigger.remainingTicks).toBe(sighted.trigger.remainingTicks)
+    expect(revealed.trigger.remainingTicks).toBe(survivor.placedAt + 300 - after.state.physicalTick)
+    expect(sighted.trigger.remainingTicks).toBe(survivor.placedAt + 300 - afterSighted.state.physicalTick)
     expect(bombEvents(games[0], secondPrivacyStart).filter(({ kind }) =>
       kind.type === 'bombPlaced' && kind.bomb.id === survivor.id)).toHaveLength(1)
     expect(bombEvents(games[1], secondPrivacyStart)).toHaveLength(0)
-    const revealCaptureStart = expectRevealedPixelWindow(
-      games[1], survivor.id, secondDeadline, after.room.roundId)
-    const revealSecondPng = await captureTilePng(two, 12, 11)
-    const revealCaptureEnd = expectRevealedPixelWindow(
-      games[1], survivor.id, secondDeadline, after.room.roundId)
+    expectRevealedPixelWindow(games[1], survivor.id, secondDeadline, after.room.roundId)
+    recordSecondCaptureBoundary(diagnostics, 'pre', latestSnapshot(games[1])!,
+      survivor.id, secondDeadline)
+    const revealSecondPng = await retainPng(livePngs, 'invisible-bombs-revealed-12-11.png',
+      capturePreparedTilePng(two, secondPrepared))
+    expectRevealedPixelWindow(games[1], survivor.id, secondDeadline, after.room.roundId)
+    recordSecondCaptureBoundary(diagnostics, 'post', latestSnapshot(games[1])!,
+      survivor.id, secondDeadline)
     const [emptySecondPixels, revealSecondPixels] = await Promise.all([
       decodeTilePng(two, emptySecondPng), decodeTilePng(two, revealSecondPng),
     ])
-    expect(revealSecondPixels).not.toEqual(emptySecondPixels)
-    info.annotations.push({ type: 'second-window-capture-ticks', description: JSON.stringify({
-      collection: secondCollection.tick, placement: survivor.placedAt,
-      captures: [revealCaptureStart, revealCaptureEnd],
-    }) })
-  } finally { await Promise.all(contexts.map((context) => context.close())) }
+    expect(recordPixelComparison(pixelComparisons, 'revealed-differs-empty',
+      revealSecondPixels, emptySecondPixels, false)).toBe(true)
+  } catch (error) { failed = true; throw error } finally {
+    try {
+      await attachLiveWindowEvidence({ info, failed, diagnostics, livePngs,
+        pixelComparisons, games, receiptStart })
+    } finally { await Promise.all(contexts.map((context) => context.close())) }
+  }
 })

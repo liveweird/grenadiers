@@ -9,10 +9,11 @@ test.beforeAll(() => expect(process.env.E2E_INVISIBLE_BOMBS_FIXTURE).toBe('arena
 type Snapshot = Extract<GameServerMessage, { type: 'snapshot' }>
 type Admission = Extract<GameServerMessage, { type: 'admitted' }>
 type StatefulAdmission = Admission & { state: NonNullable<Admission['state']> }
+type VisibleActor = Extract<Snapshot['state']['actors'][number], { type: 'visible' }>
 const snapshots = (game: ObservedGame): Snapshot[] => game.frames.filter(
   (frame): frame is Snapshot => frame.type === 'snapshot')
 const stateEffectTicks = (state: Snapshot['state'], seat: Seat) => state.actors
-  .find((actor) => actor.type === 'visible' && actor.seat === seat)?.effects
+  .find((actor): actor is VisibleActor => actor.type === 'visible' && actor.seat === seat)?.effects
   .find(({ kind }) => kind === 'invisibleBombs')?.remainingTicks ?? 0
 const effectTicks = (game: ObservedGame, seat: Seat) =>
   stateEffectTicks(latestSnapshot(game)!.state, seat)
@@ -152,12 +153,10 @@ test('Invisible Bombs hides live bombs and cues until exact expiry', async ({ br
       frame.type === 'admitted' && frame.room.roomId === beforeReconnect.room.roomId
       && frame.room.roundId === beforeReconnect.room.roundId && frame.youSeat === 'one'
       && frame.room.revision > beforeReconnect.room.revision && frame.state !== null)!
-    const resumedActor = resumed.state.actors.find((actor) => actor.type === 'visible'
-      && actor.seat === 'one')
-    const resumedEffect = resumedActor?.effects.find(({ kind }) => kind === 'invisibleBombs')
+    const resumedEffectTicks = stateEffectTicks(resumed.state, 'one')
     expect(resumed.state.physicalTick).toBeLessThan(deadline)
-    expect(resumedEffect?.remainingTicks).toBeGreaterThan(0)
-    expect(resumed.state.physicalTick + resumedEffect!.remainingTicks).toBe(deadline)
+    expect(resumedEffectTicks).toBeGreaterThan(0)
+    expect(resumed.state.physicalTick + resumedEffectTicks).toBe(deadline)
     expect(resumed.state.bombs).toEqual([])
     expect('events' in resumed).toBe(false)
     const sightedFrameFloor = games[1].frames.length

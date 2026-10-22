@@ -34,7 +34,7 @@ test('two browsers observe one Power Bomb cross a hard wall and the next bomb st
       .toBe('running')))
     expect(latestSnapshot(games[0])!.room.availableItems).toEqual([
       'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch', 'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot',
-      'shortFlame', 'longFuse', 'reverseControls',
+      'shortFlame', 'longFuse', 'reverseControls', 'invisibleBombs',
     ])
     await one.getByRole('region', { name: 'Grenadiers courtyard' }).click()
     await moveTo(one, games[0], { column: 2, row: 1 })

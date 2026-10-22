@@ -78,11 +78,19 @@ tree `07ac34a8`, and image `ec8604af` passed all 32,768 masks in debug, release 
 fresh 52 Compose and 52 Kubernetes cases, all 46 groups, with zero retries or carried passes. The
 failed `bd9d064` attempt remains historical: 51 Compose cases passed, the Stopwatch oracle failed
 once, and Kubernetes did not start. The corrected oracle uses the independently visible deadline,
-`deadline - placedAt - 1`; product behavior did not change. Independent raw audit is clear and 2,434 payloads are durably sealed; hosted CI, PR/merge, publication, tag verification and promotion remained pending at this dated
-checkpoint. Published v0.3.39/PR #85, tag run 39661497383 and local image `9a4dc108` remain the
-release baseline. Fourteen of 22 types were published; Stopwatch is the fifteenth source/native-
-verified type and seven requested types remain after it. See
+`deadline - placedAt - 1`; product behavior did not change. Independent raw audit and durable seal
+are clear. v0.3.40 is now published and its accepted image is the local release baseline. Fifteen of
+22 requested item types are published through v0.3.40. See
 [release notes](https://github.com/liveweird/grenadiers/releases) for current release status.
+
+At the 22 October 2026 00:55:23 UTC sealed checkpoint, v0.3.41 corrected source `cb10ec7`, tree
+`9d38e0cb`, and image `d08b93af` add opt-in [Invisible Bombs](invisible-bombs.md) as the sixteenth
+item and pass all 65,536 masks plus fresh 53 Compose and 53 Kubernetes cases, all 48 groups, with
+zero retries or carried passes. The final browser scenario uses two independently collected
+600-tick privacy windows and a polled sighted detonation witness; these oracle corrections changed
+no game behavior. Independent audit is clear and 2,492 payloads are durably sealed. Hosted candidate, merge, tag
+and promotion checks have not run. Six requested types remain: Teleporter,
+Wall Pass, Kick, Punch, Bracelet and Oil Barrel. ART-ATLAS follows the completed feature batch.
 
 The [implementation plan](implementation-plan.md) remains the milestone/release reference;
 the [rules](rules.md) describe the current baseline and historical extension catalog.

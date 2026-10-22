@@ -74,3 +74,4 @@ See the implemented expansion candidates: [Heart](heart.md) and [Shield](shield.
 - [Landmine](landmine.md): one passable contact mine with per-actor exit grace.
 - [Invisibility Cloak](invisibility-cloak.md): ten seconds of recipient-private actor details.
 - [Stopwatch](stopwatch.md): three seconds of opponent action freezing and Timed-bomb pausing.
+- [Invisible Bombs](invisible-bombs.md): ten seconds without live bomb records or bomb cues.

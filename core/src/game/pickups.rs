@@ -25,6 +25,7 @@ pub enum PickupKind {
     ShortFlame,
     LongFuse,
     ReverseControls,
+    InvisibleBombs,
 }
 
 impl PickupKind {
@@ -45,6 +46,7 @@ impl PickupKind {
             Self::ShortFlame => enabled.contains_short_flame(),
             Self::LongFuse => enabled.contains_long_fuse(),
             Self::ReverseControls => enabled.contains_reverse_controls(),
+            Self::InvisibleBombs => enabled.contains_invisible_bombs(),
             _ => true,
         }
     }
@@ -61,6 +63,7 @@ impl PickupKind {
             Self::ShortFlame => Some(super::EffectKind::ShortFlame),
             Self::LongFuse => Some(super::EffectKind::LongFuse),
             Self::ReverseControls => Some(super::EffectKind::ReverseControls),
+            Self::InvisibleBombs => Some(super::EffectKind::InvisibleBombs),
             _ => None,
         }
     }

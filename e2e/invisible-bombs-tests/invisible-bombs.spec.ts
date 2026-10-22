@@ -109,8 +109,8 @@ test('Invisible Bombs hides live bombs and cues until exact expiry', async ({ br
     expect(bombEvents(games[0], privacyStart)).toHaveLength(0)
     expect(await tilePixels(one, 3, 1)).toEqual(floor)
     expect(await tilePixels(two, 3, 1)).not.toEqual(floor)
-    expect(bombEvents(games[1], privacyStart).some(({ tick, kind }) => tick < deadline
-      && kind.type === 'bombDetonated' && (kind.bomb.id === ownBomb.id
+    await expect.poll(() => bombEvents(games[1], privacyStart).some(({ tick, kind }) =>
+      tick < deadline && kind.type === 'bombDetonated' && (kind.bomb.id === ownBomb.id
         || kind.bomb.id === rivalBomb.id))).toBe(true)
 
     await disconnectTransport(one)

@@ -3,6 +3,7 @@
 set -euo pipefail
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$root"
+source scripts/ci-server-mask-gate-context.sh
 
 require_lock() {
   if [ ! -s Cargo.lock ]; then
@@ -13,15 +14,39 @@ require_lock() {
 repository() {
   node scripts/check-repository.mjs
 }
+mask_profile() (
+  profile="$1"
+  shift
+  server_mask_resolve_context "$root"
+  source="$server_mask_source"
+  unset GRENADIERS_SERVER_REPLAY_ITEM_MASK_SOURCE GRENADIERS_SERVER_REPLAY_ITEM_MASK_PROFILE
+  if [ -n "$source" ]; then
+    export GRENADIERS_SERVER_REPLAY_ITEM_MASK_SOURCE="$source"
+  fi
+  export GRENADIERS_SERVER_REPLAY_ITEM_MASK_PROFILE="$profile"
+  if [ -z "${GRENADIERS_SERVER_REPLAY_ITEM_MASK_REPORT_DIR:-}" ]; then
+    "$@"
+    exit
+  fi
+  mkdir -p "$GRENADIERS_SERVER_REPLAY_ITEM_MASK_REPORT_DIR"
+  log="$GRENADIERS_SERVER_REPLAY_ITEM_MASK_REPORT_DIR/$profile.log"
+  "$@" 2>&1 | tee "$log"
+  node scripts/ci-server-mask-summary.mjs \
+    "$log" "$GRENADIERS_SERVER_REPLAY_ITEM_MASK_PLAN_FILE" "$source" "$profile" \
+    "$GRENADIERS_SERVER_REPLAY_ITEM_MASK_PARTITION_INDEX" \
+    "$GRENADIERS_SERVER_REPLAY_ITEM_MASK_REPORT_DIR/$profile.json"
+  rm "$log"
+)
 server() {
   require_lock
   bash -n scripts/measure-game.sh
   node --test scripts/measure-game-artifact.test.mjs
+  node --test scripts/ci-server-mask-contract.test.mjs
   cargo fmt --all -- --check
   cargo clippy --workspace --all-targets --locked -- -D warnings
-  cargo test --workspace --locked
+  mask_profile debug cargo test --workspace --locked -- --show-output
   # Production images disable debug assertions; verify behavior in that profile too.
-  cargo test --workspace --release --locked
+  mask_profile release cargo test --workspace --release --locked -- --show-output
   cargo build --workspace --locked
 }
 web() {
@@ -63,7 +88,8 @@ security() {
 }
 coverage() {
   require_lock
-  cargo llvm-cov --workspace --locked --fail-under-lines 80 --lcov --output-path target/coverage.lcov
+  mask_profile coverage cargo llvm-cov --workspace --locked --fail-under-lines 80 \
+    --lcov --output-path target/coverage.lcov -- --show-output
 }
 
 case "${1:-all}" in

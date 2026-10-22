@@ -49,6 +49,61 @@ Before each native movement, the harness derives east and west clearance from th
 public position and selects the larger interval, requiring at least one full cell of runway. Variable
 publication timing can therefore change leg length without accumulating drift into a wall.
 
+## Scenario: readiness rejects publications ingressed before its cutoff
+
+The pre-input gate fixes one Node-clock cutoff and cannot reuse page publications whose matching
+route ingress predates that cutoff.
+
+## Scenario: readiness rejects only one fresh revision
+
+One post-cutoff publication cannot establish a stationary renderer baseline. Each endpoint needs two
+consecutive fresh revisions.
+
+## Scenario: readiness rejects missing ingress, dispatch, wrong endpoint, and wrong round evidence
+
+Each page witness must have its own matching endpoint, round, and revision chronology from route
+ingress through delayed dispatch to page delivery.
+
+## Scenario: readiness rejects an old matching pair when raw ingress or dispatch is ahead
+
+A matching page pair cannot pass after a newer snapshot is due or has already been dispatched but
+has not reached the page.
+
+## Scenario: readiness accepts a caught-up pair with ordinary scheduled future frames
+
+The latest delivered and dispatched revisions agree on the second stationary witness. Matching raw
+ingress heads may be newer only while those FIFO frames retain scheduled future deadlines.
+
+## Scenario: startup readiness diagnostics survive a cutoff capture failure
+
+Diagnostics exist before startup waits begin and retain the current stage, reason, Node start time,
+and available full-fact heads when the fixed cutoff cannot be captured.
+
+## Scenario: readiness rejects moving or bomb-filled publication pairs
+
+Both selected publications must retain the same actor position and an empty public bomb list; full
+matching route chronology cannot make a moving or bomb-filled pair ready.
+
+## Scenario: readiness rejects cross-endpoint publication fact mismatches
+
+The two endpoints must select identical round, revision, tick, position, and bomb facts for each
+witness, even when each endpoint independently has complete route and page chronology.
+
+## Scenario: readiness never passes a stalled endpoint as time advances
+
+Both endpoints independently need the complete two-publication chronology; advancing the evaluator
+clock cannot make missing page evidence ready.
+
+## Scenario: a synthetic 300ms first movement after readiness remains the first witness and an exceedance
+
+Readiness completes before input and does not replace, filter, or retry movement evidence. A synthetic
+first matching movement at 300ms remains the measured witness and exceeds the unchanged 250ms budget.
+
+## Scenario: readiness baseline fixes cutoff, round, and maximum ingress revision
+
+The gate records one cutoff, the common active round, and the maximum snapshot ingress revision
+visible across both endpoints before it starts waiting.
+
 ## Scenario: game control diagnostics stay bounded and exclude transport secrets
 
 Synthetic credential-bearing authentication, admission, error, and snapshot frames prove that the

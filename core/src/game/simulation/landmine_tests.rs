@@ -141,6 +141,72 @@ fn successful_manual_placement_consumes_charge_and_bypasses_fuse_overflow() {
 }
 
 #[test]
+fn consumed_landmine_is_followed_by_a_fresh_standard_timed_bomb_in_the_same_state() {
+    let enabled =
+        EnabledItems::from_bits(EnabledItems::LANDMINE.bits() | EnabledItems::SHIELD.bits())
+            .unwrap();
+    let mine_cell = CellId::new(3, 1);
+    let safe_cell = CellId::new(1, 2);
+    let mut game = state(enabled, mine_cell, Some(PickupKind::Landmine), Tick(0));
+
+    game.step(&[]).unwrap();
+    assert_eq!(
+        game.actors[0].inventory.weapon(),
+        Some(SpecialWeapon::Landmine)
+    );
+    game.step(&input(InputAction::PlaceBomb)).unwrap();
+    let placed_mine = *game.world.bombs.values().next().unwrap();
+    assert_eq!(placed_mine.cell(), mine_cell);
+    assert_eq!(placed_mine.trigger(), BombTrigger::Contact);
+    assert_eq!(placed_mine.blast(), BlastKind::Standard);
+    assert_eq!(game.actors[0].inventory.weapon(), None);
+
+    game.actors[0].position = Position::center(safe_cell);
+    game.actors[1].position = Position {
+        x: 2_750,
+        y: Position::center(mine_cell).y,
+    };
+    game.actors[1].heading = Direction::East;
+    game.actors[1]
+        .effects
+        .apply(EffectKind::Shield, game.tick())
+        .unwrap();
+    assert!(!game.actors[1].bomb_grace.contains(&placed_mine.id()));
+
+    let detonation = game
+        .step(&[SeatInput {
+            seat: SeatId::Two,
+            action: InputAction::Press(Direction::East),
+        }])
+        .unwrap();
+    assert!(!game.world.bombs.contains_key(&placed_mine.id()));
+    assert!(game.actors.iter().all(|actor| actor.alive()));
+    assert!(detonation.events.iter().any(|event| matches!(
+        event.kind,
+        StepEventKind::BombDetonated(view) if view.id == placed_mine.id()
+    )));
+
+    let expected_id = EntityId(placed_mine.id().0 + 1);
+    let placement = game.step(&input(InputAction::PlaceBomb)).unwrap();
+    let fresh = *game.world.bombs.get(&expected_id).unwrap();
+    assert_eq!(fresh.cell(), safe_cell);
+    assert_eq!(fresh.owner(), game.actors[0].id);
+    assert_eq!(fresh.placed_at(), game.tick());
+    assert_eq!(
+        fresh.trigger(),
+        BombTrigger::Timed {
+            detonates_at: Tick(game.tick().0 + 180)
+        }
+    );
+    assert_eq!(fresh.blast(), BlastKind::Standard);
+    assert_eq!(game.actors[0].inventory.weapon(), None);
+    assert!(placement.events.iter().any(|event| matches!(
+        event.kind,
+        StepEventKind::BombPlaced(view) if view.id == expected_id
+    )));
+}
+
+#[test]
 fn initial_overlap_is_safe_until_full_exit_then_owner_reentry_detonates() {
     let cell = CellId::new(3, 1);
     let mut world = World::new(fixed_arena());

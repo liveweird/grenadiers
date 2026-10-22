@@ -136,7 +136,7 @@ completed 60 Hz updates per normal snapshot.
 
 ## Checked domain conversion
 
-Use `core::protocol::v9::capture_expanded` to observe the complete State and reports, then
+Use `core::protocol::v10::capture_expanded` to observe the complete State and reports, then
 `bind_expanded` to certify the room profile, settings, lifecycle epoch, physical tick and
 trusted round generation record.
 Opaque captures cannot be serialized directly. Raw server DTO fields alone do not establish

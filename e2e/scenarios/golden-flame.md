@@ -8,4 +8,6 @@ collect it. Both players observe the same collection tick and physical-clock dea
 radius-eight bomb placement, escape its real blast, reconnect with the original action floor
 and retained timer, then verify every recorded snapshot against collection tick + 600. After
 expiry, plant a radius-two bomb and observe ordinary elimination. Capture desktop pickup and
-Polish 320-pixel reduced-motion active-effect screenshots. No debug insertion or test retries.
+Polish 320-pixel reduced-motion pickup layouts before collection. Plant and escape before any
+active screenshot work; after the natural range-eight blast proof, confirm the effect remains
+active and capture the Polish active-effect view. No debug insertion or test retries.

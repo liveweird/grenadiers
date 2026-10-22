@@ -31,7 +31,7 @@ test('two browsers observe one persistent mine and its contact detonation', asyn
     await Promise.all([one, two].map((page) => page.getByRole('button', { name: 'Ready', exact: true }).click()))
     await Promise.all(games.map((game) => expect.poll(() => latestSnapshot(game)?.room.phase.type).toBe('running')))
     expect(latestSnapshot(games[0])!.room.availableItems).toEqual([
-      'wallPass', 'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch', 'invisibilityCloak', 'goldenFlame', 'shortFuse',
+      'kick', 'punch', 'wallPass', 'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch', 'invisibilityCloak', 'goldenFlame', 'shortFuse',
       'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls', 'invisibleBombs', 'teleporter',
     ])
     await one.getByRole('region', { name: 'Grenadiers courtyard' }).click()
@@ -94,21 +94,34 @@ test('two browsers observe one persistent mine and its contact detonation', asyn
       expect(events(game).some(({ kind }) => kind.type === 'bombDetonated' && kind.bomb.id === mine.id)).toBe(false)
     }
 
-    const countsBefore = games.map((game) => events(game).filter(({ kind }) => kind.type === 'bombPlaced').length)
+    // Retained history may shrink while contact is awaited; fresh IDs prove new placements.
+    const priorBombIds = games.map((game) => new Set(events(game).flatMap(({ kind }) =>
+      kind.type === 'bombPlaced' ? [kind.bomb.id] : [])))
     await one.getByRole('region', { name: 'Grenadiers courtyard' }).click()
     await one.keyboard.down('ArrowRight')
     try {
-      await Promise.all(games.map((game) => expect.poll(() => events(game).find(({ kind }) =>
-        kind.type === 'bombDetonated' && kind.bomb.id === mine.id)).toBeDefined()))
+      await Promise.all(games.map((game) => expect.poll(() => snapshots(game).find((snapshot) =>
+        snapshot.events.some(({ kind }) => kind.type === 'bombDetonated' && kind.bomb.id === mine.id)
+        && snapshot.state.flames.some(({ cell, expiresAt }) => cell.column === mine.cell.column
+          && cell.row === mine.cell.row && expiresAt > snapshot.state.physicalTick))).toBeDefined()))
     } finally {
       await one.keyboard.up('ArrowRight')
     }
     for (const [index, game] of games.entries()) {
-      expect(events(game).filter(({ kind }) => kind.type === 'bombPlaced')).toHaveLength(countsBefore[index])
+      const detonation = snapshots(game).find((snapshot) =>
+        snapshot.events.some(({ kind }) => kind.type === 'bombDetonated' && kind.bomb.id === mine.id)
+        && snapshot.state.flames.some(({ cell, expiresAt }) => cell.column === mine.cell.column
+          && cell.row === mine.cell.row && expiresAt > snapshot.state.physicalTick))
+      if (!detonation) throw new Error('Active Landmine detonation snapshot expected')
+      const originFlame = detonation.state.flames.find(({ cell }) =>
+        cell.column === mine.cell.column && cell.row === mine.cell.row)
+      expect(originFlame?.expiresAt).toBeGreaterThan(detonation.state.physicalTick)
+      expect(detonation.state.bombs.some(({ id }) => id === mine.id)).toBe(false)
+      expect(events(game).filter(({ kind }) => kind.type === 'bombPlaced'
+        && !priorBombIds[index].has(kind.bomb.id))).toEqual([])
       expect(events(game).filter(({ kind }) => kind.type === 'bombDetonated'
         && kind.bomb.id === mine.id && kind.bomb.trigger.type === 'contact')).toHaveLength(1)
       expect(latestSnapshot(game)!.state.bombs.some(({ id }) => id === mine.id)).toBe(false)
-      expect(latestSnapshot(game)!.state.flames.length).toBeGreaterThan(0)
       expect(visibleActor(latestSnapshot(game), 'one')?.alive).toBe(false)
       expect(visibleActor(latestSnapshot(game), 'two')?.alive).toBe(true)
       expect(events(game).filter(({ kind }) => kind.type === 'actorEliminated')).toHaveLength(1)

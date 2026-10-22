@@ -1,18 +1,19 @@
 import { expect, test, type Page } from '@playwright/test'
 import { latestSnapshot, observeGame, visibleActor, type ObservedGame } from '../tests/support/duel'
 import { moveTo } from '../tests/support/movement'
-import type { GameServerMessage } from '../../web/src/game/v10/schema'
+import type { BombView, GameServerMessage } from '../../web/src/game/v10/schema'
 
 test.beforeAll(() => {
   expect(process.env.E2E_SHIELD_FIXTURE, 'Configure the documented production Shield seed')
     .toBe('arena-v2-shield')
 })
 
-async function plant(page: Page, game: ObservedGame): Promise<void> {
+async function plant(page: Page, game: ObservedGame): Promise<BombView> {
   const previous = latestSnapshot(game)!.state.bombs.map((bomb) => bomb.id)
   await page.keyboard.press('Space')
   await expect.poll(() => latestSnapshot(game)?.state.bombs
     .some((bomb) => !previous.includes(bomb.id)), { intervals: [15] }).toBe(true)
+  return latestSnapshot(game)!.state.bombs.find((bomb) => !previous.includes(bomb.id))!
 }
 
 const shieldTicks = (game: ObservedGame) => visibleActor(latestSnapshot(game), 'one')?.effects
@@ -71,7 +72,7 @@ test('two browsers enable a generated Shield and observe immunity end before a l
     await Promise.all([one, two].map((page) => page.getByRole('button', { name: 'Ready', exact: true }).click()))
     await Promise.all(games.map((game) => expect.poll(() => latestSnapshot(game)?.room.phase.type).toBe('running')))
     expect(latestSnapshot(games[0])!.room).toMatchObject({
-      rulesVersion: 5, mapId: 'generated_v2', availableItems: ['wallPass', 'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch', 'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls', 'invisibleBombs', 'teleporter'],
+      rulesVersion: 5, mapId: 'generated_v2', availableItems: ['kick', 'punch', 'wallPass', 'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch', 'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls', 'invisibleBombs', 'teleporter'],
       settings: { enabledItems: ['shield'] },
     })
     await one.getByRole('region', { name: 'Grenadiers courtyard' }).click()
@@ -85,16 +86,19 @@ test('two browsers enable a generated Shield and observe immunity end before a l
       cell: { column: 3, row: 1 }, kind: 'shield',
     })
     await one.screenshot({ path: testInfo.outputPath('shield-exposed-desktop.png'), fullPage: true })
+    await two.getByText('Polski', { exact: true }).click()
+    expect(await two.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false)
+    await two.screenshot({ path: testInfo.outputPath('shield-exposed-polish-320.png'), fullPage: true })
+    await one.getByRole('region', { name: 'Grenadiers courtyard' }).click()
     await moveTo(one, games[0], { column: 1, row: 1 })
     await moveTo(one, games[0], { column: 3, row: 1 })
     await Promise.all(games.map((game) => expect.poll(() => shieldTicks(game)).toBeGreaterThan(0)))
     const collectedAt = games.map(collectionTick)
     expect(collectedAt[0]).toBe(collectedAt[1])
-    await two.getByText('Polski', { exact: true }).click()
-    expect(await two.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false)
-    await two.screenshot({ path: testInfo.outputPath('shield-active-polish-320.png'), fullPage: true })
-
-    await plant(one, games[0])
+    const protectedBomb = await plant(one, games[0])
+    expect(protectedBomb.placedAt + publicRoom(games[0])!.settings.bombFuseTicks,
+      'The actual bomb must detonate before the collection-derived Shield deadline')
+      .toBeLessThan(collectedAt[0] + 300)
     await Promise.all(games.map((game) => expect.poll(() => protectionEvents(game).length).toBeGreaterThan(0)))
     for (const game of games) {
       expect(visibleActor(latestSnapshot(game), 'one')?.alive).toBe(true)
@@ -102,6 +106,8 @@ test('two browsers enable a generated Shield and observe immunity end before a l
       const ticks = protectionEvents(game).map((event) => event.tick)
       expect(new Set(ticks).size).toBe(ticks.length)
     }
+    expect(await two.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false)
+    await two.screenshot({ path: testInfo.outputPath('shield-active-polish-320.png'), fullPage: true })
     await Promise.all(games.map((game) => expect.poll(() => shieldTicks(game), { intervals: [15] }).toBe(0)))
     games.forEach((game, index) => expectExactShieldDeadline(game, collectedAt[index]))
     expect(visibleActor(latestSnapshot(games[0]), 'one')?.alive).toBe(true)

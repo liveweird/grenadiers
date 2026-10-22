@@ -20,6 +20,10 @@ v0.3.21 adds typed bomb triggers and checked legacy projection without activatin
 v0.3.20 retains ordered manual actions while preserving Classic placement and private replay,
 verified through both deployment paths.
 Published engineering prereleases are listed in `CHANGELOG.md` and GitHub Releases.
+As of the 22 October 2026 v0.3.41 native checkpoint, fifteen requested item types are published
+through v0.3.40. Invisible Bombs is the sixteenth native-verified candidate; its independent audit
+and durable seal are clear, while hosted release stages remain pending. Teleporter, Wall Pass, Kick, Punch, Bracelet
+and Oil Barrel remain, followed by ART-ATLAS after the feature batch.
 
 New playtest requests and expansion work are tracked in the [gameplay and presentation
 backlog](backlog.md): forgiving turns first, shared gameplay settings, detailed retro pixel art,

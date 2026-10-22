@@ -6,6 +6,11 @@ import { setTimeout as delay } from 'node:timers/promises'
 import { chromium, expect, type Browser, type BrowserContext, type Page } from '@playwright/test'
 import type { GameServerMessage, Position, Seat } from '../../../web/src/game/v10/schema'
 import { visibleActor, latestSnapshot, type ObservedGame } from './duel'
+import {
+  publicErrorSummary, runSanitizedCleanup, sanitizePublicError, sanitizeStartupText,
+  VisibilityStartupError, waitForChromiumEndpoint,
+  type VisibilityStartupDiagnostics,
+} from './visibility-startup'
 
 type Snapshot = Extract<GameServerMessage, { type: 'snapshot' }>
 type VisibilityWindow = Window & { grenadiersVisibilityChanges?: DocumentVisibilityState[] }
@@ -58,26 +63,10 @@ async function cleanupOwnedBrowser(owned: OwnedProcess, profile: string, browser
   await rm(profile, { recursive: true, force: true })
 }
 
-async function debuggingEndpoint(child: ChildProcess): Promise<string> {
-  return new Promise((resolve, reject) => {
-    let stderr = ''
-    const fail = (error: Error): void => { clearTimeout(timer); reject(error) }
-    const timer = setTimeout(() => fail(new Error('Chromium debugging endpoint timed out')), 10_000)
-    child.once('error', fail)
-    child.once('exit', (code) => fail(new Error(`Chromium exited before connection (${code})`)))
-    child.stderr?.on('data', (chunk: Buffer) => {
-      stderr = `${stderr}${chunk.toString()}`.slice(-16_384)
-      const match = stderr.match(/DevTools listening on (ws:\/\/[^\s]+)/)
-      if (!match) return
-      clearTimeout(timer)
-      resolve(match[1])
-    })
-  })
-}
-
 export async function launchNaturalVisibilityBrowser(): Promise<{
   browser: Browser
   context: BrowserContext
+  startupDiagnostics: () => VisibilityStartupDiagnostics
   close: () => Promise<void>
 }> {
   const profile = await mkdtemp(join(tmpdir(), 'grenadiers-visibility-'))
@@ -87,24 +76,65 @@ export async function launchNaturalVisibilityBrowser(): Promise<{
     '--remote-debugging-port=0', `--user-data-dir=${profile}`, 'about:blank',
   ], { detached: process.platform !== 'win32', stdio: ['ignore', 'ignore', 'pipe'] })
   const owned = ownProcess(child)
-  let browser: Browser
+  const startup = waitForChromiumEndpoint(child, profile, 10_000)
+  let browser!: Browser
+  let connectionError: unknown
   try {
-    browser = await chromium.connectOverCDP(await debuggingEndpoint(child), { noDefaults: true })
+    browser = await chromium.connectOverCDP(await startup.endpoint, { noDefaults: true })
   } catch (error) {
-    await cleanupOwnedBrowser(owned, profile)
-    throw error
+    connectionError = error
+  }
+  if (connectionError !== undefined) {
+    const error = sanitizePublicError(connectionError, profile)
+    let cleanupError: unknown
+    try {
+      await cleanupOwnedBrowser(owned, profile)
+    } catch (caught) {
+      cleanupError = caught
+    } finally {
+      startup.dispose()
+    }
+    const startupError = new VisibilityStartupError(
+      error instanceof Error ? sanitizeStartupText(error.message, profile) : 'Chromium startup failed',
+      startup.diagnostics(), { cause: error },
+    )
+    if (cleanupError !== undefined) {
+      const safeCleanup = sanitizePublicError(cleanupError, profile)
+      throw new AggregateError([startupError, safeCleanup],
+        `Chromium startup failed (${publicErrorSummary(error)}); owned-process cleanup failed `
+        + `(${publicErrorSummary(safeCleanup)})`, { cause: error })
+    }
+    throw startupError
   }
   const context = browser.contexts()[0]
   if (!context) {
-    await cleanupOwnedBrowser(owned, profile, browser)
-    throw new Error('Chromium default context is unavailable')
+    let cleanupError: unknown
+    try {
+      await cleanupOwnedBrowser(owned, profile, browser)
+    } catch (caught) {
+      cleanupError = caught
+    } finally {
+      startup.dispose()
+    }
+    const unavailable = new VisibilityStartupError('Chromium default context is unavailable',
+      startup.diagnostics())
+    if (cleanupError !== undefined) {
+      const safeCleanup = sanitizePublicError(cleanupError, profile)
+      throw new AggregateError([unavailable, safeCleanup],
+        `Chromium context lookup failed (${publicErrorSummary(unavailable)}); `
+        + `owned-process cleanup failed (${publicErrorSummary(safeCleanup)})`,
+        { cause: unavailable })
+    }
+    throw unavailable
   }
   let closing: Promise<void> | undefined
   return {
     browser,
     context,
+    startupDiagnostics: startup.diagnostics,
     async close() {
-      closing ??= cleanupOwnedBrowser(owned, profile, browser)
+      closing ??= runSanitizedCleanup(
+        () => cleanupOwnedBrowser(owned, profile, browser), profile).finally(startup.dispose)
       await closing
     },
   }

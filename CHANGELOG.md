@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.41 - 2026-10-22
+
+- Add opt-in Invisible Bombs with a 600-physical-tick refreshable curse that hides every live bomb from the affected recipient while preserving collision, capacity, chains and public flames.
+- Capture placement and detonation audiences at emission, intersecting Cloak ownership privacy with blinded seats, including events visible to neither recipient.
+- Add the sixteenth lobby switch, all 65,536 v9 settings masks, replay and archived-v8 guards, English/Polish cues, and a deterministic production-seed browser scenario.
+- Correct the hosted live-pixel proof by capturing both pages concurrently with the remaining normal retreat, reusing invariant prepared geometry, and retaining sanitized JSON plus every returned comparison PNG on failure. The earlier PR 88 candidate is rejected with zero accepted hosted cases.
+- Source 035c6a1263674601874e82c31b5c731c794cb38a passes fresh debug, release, coverage, web, renderer, scenario and security gates plus 53 Compose and 53 Kubernetes native cases with zero retries. Independent native audit, result review and durable seal review are clear; hosted delivery remains pending.
+
 ## 0.3.40 — 2026-10-21
 
 - Add opt-in Stopwatch with a 180-physical-tick refreshable effect that freezes the living opponent's voluntary actions while ordinary simulation and network clocks continue.

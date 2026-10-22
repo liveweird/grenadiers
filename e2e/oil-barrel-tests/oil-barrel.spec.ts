@@ -73,7 +73,7 @@ test('Oil Barrel reveals, blocks, burns persistently, and resumes without synthe
       await Promise.all(games.map((game) => expect.poll(() => latestSnapshot(game)?.room.phase.type)
         .toBe('running')))
       await one.getByRole('region', { name: 'Grenadiers courtyard' }).click()
-      await two.getByRole('region', { name: 'Dziedziniec Grenadierów' }).click()
+      await two.getByRole('region', { name: 'Dziedziniec Grenadiers', exact: true }).click()
       for (const game of games) expect(latestSnapshot(game)!.state.oilBarrels).toEqual([])
       const privacyFloors = games.map((game) => latestSnapshot(game)!.room.revision)
       const concealedPixels = await Promise.all([one, two].map((page) => arenaTilePixels(page, 3, 1)))

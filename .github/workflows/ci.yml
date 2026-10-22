@@ -473,6 +473,7 @@ jobs:
           curl --fail --silent http://127.0.0.1:8085/api/v1/ready
           E2E_BRACELET_FIXTURE=arena-v2-bracelet npm --prefix e2e run test:bracelet
       - name: Verify opt-in Oil Barrel reveal, ignition, and persistent fire using the same built image
+        if: matrix.shard == 'items'
         run: |
           chmod 444 core/tests/fixtures/arena-v2-oil-barrel.seed
           docker compose -f docker-compose.yaml -f docker-compose.oil-barrel.yaml up -d --no-build --force-recreate app

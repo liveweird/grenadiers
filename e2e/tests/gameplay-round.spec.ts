@@ -62,7 +62,7 @@ test('two native gameplay sockets finish one authoritative generated classic rou
     expect(firstRunning.room).toMatchObject({ rulesVersion: 5, mapId: 'generated_v2' })
     expect(firstRunning.room.availableItems).toEqual([
       'kick', 'punch', 'bracelet', 'wallPass', 'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch', 'invisibilityCloak', 'goldenFlame', 'shortFuse',
-      'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls', 'invisibleBombs', 'teleporter',
+      'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls', 'invisibleBombs', 'oilBarrel', 'teleporter',
     ])
     expect(firstRunning.room.settings.enabledItems).toEqual([])
     for (const actor of firstRunning.state.actors) {

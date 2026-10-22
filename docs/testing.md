@@ -251,3 +251,11 @@ sequential 180-tick holder windows. It proves blocked movement and consumed manu
 held-input thaw, one pause per physical update, full-fuse placement during a pause, and natural
 detonation after the exact accumulated pause. Both recipient streams must retain the same bomb IDs,
 pause facts and deadlines. Native execution remains a candidate gate.
+
+## Invisible Bombs production-seed scenario
+
+Use `docker-compose.invisible-bombs.yaml` with the v2 seed fixture and
+`E2E_INVISIBLE_BOMBS_FIXTURE=arena-v2-invisible-bombs npm --prefix e2e run test:invisible-bombs`.
+The two-browser route proves recipient-local live-bomb and event privacy, truthful capacity and
+public flames, reconnect without replay, exact 600-tick expiry, and current-state reveal of one
+surviving bomb. Native acceptance remains pending until this candidate is built and run.

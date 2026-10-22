@@ -84,6 +84,25 @@ release baseline. Fourteen of 22 types were published; Stopwatch is the fifteent
 verified type and seven requested types remain after it. See
 [release notes](https://github.com/liveweird/grenadiers/releases) for current release status.
 
+For v0.3.41, source `eb0b756df43fdd896cf87573a5224e4eb5f659a3`, tree
+`098f2a3beb766b4fefd2316b7c7ceaf37275a826`, retains opt-in
+[Invisible Bombs](invisible-bombs.md) as the sixteenth item and hardens the Chromium launcher used
+by its visibility proof. The confirmed parser and failure-reporting defects are fixed and tested;
+the actual cause of the earlier Chromium startup failure remains unknown. Authenticated original-
+035 Rust/web computations cover all 65,536 masks per profile, 658 core plus 207 server tests and
+516 web tests under input-equivalence review `1ea0a03b…`. Fresh H repository/E2E checks, 54 scenario
+contracts, startup and live-pixel units, server-mask contract 10/10, mirror unit 5/5, current
+security checks and one headed diagnostic pass; the diagnostic accepts and carries zero cases.
+Fresh source-bound acceptance passes 53 Compose plus 53 Kubernetes cases, 48 reports, 114 PNGs,
+38 runtime records, 19 Kubernetes identities, 18 fixtures and 36 seed-mode records with zero
+retries or carried passes. Independent audit is clear under SHA-256
+`b0c72b1ff651257930f0db8df9db3cfc1274bd6882f142336e508e699c41097e`; result review is clear under
+`0cff7c9dd3bd4895cfcb426f340eca146b8c9627a55bac04c01111819b9008be`, and evidence is durably
+sealed and independently reviewed under seal-review SHA-256
+`87666f73ca51ac78e2d726de48f74444059e1aca636864839ab437249f353ec8`.
+PRs 89 and 90 are disqualified with zero hosted carry. Six requested types remain: Teleporter, Wall Pass, Kick,
+Punch, Bracelet and Oil Barrel. ART-ATLAS follows the completed feature batch.
+
 The [implementation plan](implementation-plan.md) remains the milestone/release reference;
 the [rules](rules.md) describe the current baseline and historical extension catalog.
 This document records the requested Grenadiers behavior and decisions required before coding.

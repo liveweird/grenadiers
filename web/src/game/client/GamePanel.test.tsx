@@ -143,6 +143,20 @@ describe('v9 private-state presentation', () => {
     expect(screen.getByLabelText('Player one upgrades')).toHaveTextContent('Bomb typeNone')
   })
 
+  it('uses a generic bomb hint while the recipient cannot observe Remote state', () => {
+    const current = state()
+    const actor = current.snapshot!.state.actors[0]
+    if (actor.type !== 'visible') throw new Error('expected visible own actor')
+    actor.effects.push({ kind: 'invisibleBombs', remainingTicks: 600 })
+    current.snapshot!.room.settings.enabledItems.push('remoteBomb', 'invisibleBombs')
+    current.snapshot!.state.bombs = []
+    renderPanel(current)
+    expect(screen.getByRole('region', { name: 'Grenadiers courtyard' })).toHaveAttribute(
+      'data-focus-hint',
+      'Bombs are hidden. Select the courtyard and press Space to place a bomb or trigger your remote bomb.',
+    )
+  })
+
   it('announces authoritative Stopwatch freeze without inventing an effect timer', () => {
     const current = state()
     const actor = current.snapshot!.state.actors[0]

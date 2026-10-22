@@ -20,6 +20,24 @@ v0.3.21 adds typed bomb triggers and checked legacy projection without activatin
 v0.3.20 retains ordered manual actions while preserving Classic placement and private replay,
 verified through both deployment paths.
 Published engineering prereleases are listed in `CHANGELOG.md` and GitHub Releases.
+At this v0.3.41 visibility-startup checkpoint, fifteen requested item types are published through
+v0.3.40. Invisible Bombs source `eb0b756` is the sixteenth candidate. Its six-path E2E change uses
+a bounded complete-line Chromium endpoint parser, preserves sanitized launch and cleanup failures,
+and leaves application runtime and gameplay assertions unchanged. The typed gate assembly retains
+the authenticated original-035 Rust/web computations under exact input equivalence. Fresh H
+repository/E2E/scenario/startup units, server-mask contract, mirror unit, current security checks
+and a single headed diagnostic pass; the diagnostic grants zero acceptance. Source-bound native
+root 40405 completed with consumed exit zero: the full 53 Compose plus 53 Kubernetes matrix,
+48 reports, 114 runtime PNGs, 38 runtime records, 19 Kubernetes identities, 18 fixtures and
+36 seed-mode records pass with zero retries or carry. Independent audit is clear under SHA-256
+`b0c72b1ff651257930f0db8df9db3cfc1274bd6882f142336e508e699c41097e`; result review is clear under
+`0cff7c9dd3bd4895cfcb426f340eca146b8c9627a55bac04c01111819b9008be`, and evidence is durably
+sealed and independently reviewed under seal-review SHA-256
+`87666f73ca51ac78e2d726de48f74444059e1aca636864839ab437249f353ec8`.
+At this source-bound documentation checkpoint, hosted delivery had
+not started; later delivery state belongs in the release record. PRs 89 and 90 provide zero
+accepted hosted cases.
+Teleporter, Wall Pass, Kick, Punch, Bracelet and Oil Barrel remain, followed by ART-ATLAS.
 
 New playtest requests and expansion work are tracked in the [gameplay and presentation
 backlog](backlog.md): forgiving turns first, shared gameplay settings, detailed retro pixel art,

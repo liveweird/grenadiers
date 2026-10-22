@@ -27,7 +27,7 @@ it('labels Bracelet as passive equipment without an action hint or cooldown time
   }
   render(<MantineProvider env="test"><GamePanelView state={state} actions={actions} /></MantineProvider>)
   const stats = screen.getByLabelText('Player one upgrades')
-  expect(stats).toHaveTextContent('EquipmentBracelet')
+  expect(stats).toHaveTextContent('GearBracelet')
   expect(stats).not.toHaveTextContent('Bracelet (')
   expect(screen.getByRole('region', { name: 'Grenadiers courtyard' })).toHaveAttribute(
     'data-focus-hint', 'Select the courtyard to control your player.',

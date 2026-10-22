@@ -90,4 +90,17 @@ describe('accepted-event audio cursor', () => {
     expect(opponent.consume(state(21, []), true)).toEqual([])
     expect(opponent.consume(state(22, []), true)).toEqual([])
   })
+
+  it('keeps public sounds while blind bomb cues, admission, and reveal stay quiet', () => {
+    const cursor = new AudioCursor()
+    cursor.consume(state(20), true)
+    expect(cursor.consume(state(21, [
+      event(21, 0, 'pickupCollected'), event(21, 1, 'actorEliminated'),
+    ]), true)).toEqual(['elimination', 'pickup'])
+    expect(cursor.consume(state(22, []), true)).toEqual([])
+    const resumed = state(30, [], 2)
+    resumed.admissionBaseline = { roomId: resumed.room!.roomId, revision: 29, tick: 29, physicalTick: 29 }
+    expect(cursor.consume(resumed, true)).toEqual([])
+    expect(cursor.consume(state(31, [], 2), true)).toEqual([])
+  })
 })

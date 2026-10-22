@@ -20,6 +20,16 @@ v0.3.21 adds typed bomb triggers and checked legacy projection without activatin
 v0.3.20 retains ordered manual actions while preserving Classic placement and private replay,
 verified through both deployment paths.
 Published engineering prereleases are listed in `CHANGELOG.md` and GitHub Releases.
+At this v0.3.41 live-window checkpoint, fifteen requested item types are published through v0.3.40.
+Invisible Bombs source 035c6a1 is the sixteenth candidate. Fresh
+source-bound debug, release and coverage gates cover all 65,536 masks; 516 web tests, renderer
+diagnostics, 54 static scenario contracts and security gates pass. The corrected live-pixel proof
+captures both pages concurrently with the remaining retreat and retains bounded sanitized failure
+evidence. Its one-case CPU-1 diagnostic is not release acceptance. The fresh matrix completed 53
+Compose plus 53 Kubernetes cases, 48 groups/reports and all 80 latency observations under 250 ms,
+with zero retries or carried passes. Independent audit and result review are clear, and 2,486
+payloads are durably sealed and byte-verified. Hosted delivery remains pending at this checkpoint.
+Teleporter, Wall Pass, Kick, Punch, Bracelet and Oil Barrel remain, followed by ART-ATLAS.
 
 New playtest requests and expansion work are tracked in the [gameplay and presentation
 backlog](backlog.md): forgiving turns first, shared gameplay settings, detailed retro pixel art,

@@ -84,6 +84,23 @@ release baseline. Fourteen of 22 types were published; Stopwatch is the fifteent
 verified type and seven requested types remain after it. See
 [release notes](https://github.com/liveweird/grenadiers/releases) for current release status.
 
+For v0.3.41, source 035c6a1263674601874e82c31b5c731c794cb38a, tree
+d447fa8099ded815a37060d79117021ea89a61b7, adds opt-in
+[Invisible Bombs](invisible-bombs.md) as the sixteenth item. Fresh source-bound debug, release and
+coverage gates each cover all 65,536 masks; 516 web tests, renderer diagnostics, 54 static scenario
+contracts and the configured security gates pass. The earlier PR 88 candidate contributes zero
+accepted hosted cases: its cancelled run had seven non-server jobs cancelled without steps and only
+the aggregate server guard failed; its push run passed; its PR run exposed a real screenshot-window
+failure after the original five-second bomb naturally expired. The corrected scenario overlaps
+dual-page capture with the remaining retreat, revalidates prepared geometry without scrolling, and
+preserves sanitized failure evidence. Its one-case CPU-1 diagnostic passed but remains diagnostic
+only with zero acceptance carry. The fresh matrix completed 53 Compose plus 53 Kubernetes cases,
+all 48 groups/reports and all 80 latency observations under 250 ms, with zero retries or carried
+passes. Independent native audit and result review are clear, and 2,486 payloads are durably
+sealed and byte-verified. Hosted delivery remains pending. Six requested
+types remain: Teleporter, Wall Pass, Kick, Punch, Bracelet and Oil Barrel. ART-ATLAS follows the
+completed feature batch.
+
 The [implementation plan](implementation-plan.md) remains the milestone/release reference;
 the [rules](rules.md) describe the current baseline and historical extension catalog.
 This document records the requested Grenadiers behavior and decisions required before coding.

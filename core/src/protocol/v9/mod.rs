@@ -68,6 +68,7 @@ fn expanded_items() -> ItemSet {
         ItemId::Shield,
         ItemId::Stopwatch,
         ItemId::InvisibilityCloak,
+        ItemId::InvisibleBombs,
         ItemId::GoldenFlame,
         ItemId::ShortFuse,
         ItemId::Diarrhea,
@@ -121,6 +122,8 @@ pub fn encode_server_message(
 #[cfg(test)]
 #[path = "frame_bound_tests.rs"]
 mod frame_bound_tests;
+#[cfg(test)]
+mod invisible_bombs_tests;
 #[cfg(test)]
 #[path = "max_frame_tests.rs"]
 mod max_frame_tests;

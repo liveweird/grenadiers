@@ -53,7 +53,10 @@ describe('v9 arena presentation', () => {
     const presented = presentSnapshot(current)!
     expect(presented.state.bombs).toEqual([])
     expect(presented.state.flames).toHaveLength(1)
+    expect(presented.state.actors[0].invisibleBombsRemainingTicks).toBe(120)
     expect(own.liveBombCount).toBe(2)
+    current.snapshot!.state.pickups = [{ cell: { column: 4, row: 1 }, kind: 'invisibleBombs' }]
+    expect(presentSnapshot(current)?.state.pickups).toEqual(current.snapshot!.state.pickups)
   })
 
   it('presents Shield pickups and current protection from the authoritative effect clock', () => {

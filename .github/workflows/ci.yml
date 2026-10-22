@@ -429,6 +429,7 @@ jobs:
           curl --fail --silent http://127.0.0.1:8085/api/v1/ready
           E2E_TELEPORTER_FIXTURE=arena-v2-teleporter npm --prefix e2e run test:teleporter
       - name: Verify opt-in Wall Pass collision and reconnect behavior using the same built image
+        if: matrix.shard == 'items'
         run: |
           chmod 444 core/tests/fixtures/arena-v2-wall-pass.seed
           docker compose -f docker-compose.yaml -f docker-compose.wall-pass.yaml up -d --no-build --force-recreate app

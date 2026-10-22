@@ -193,6 +193,17 @@ test("workflow aggregate fails closed before pinned runtime and artifact validat
   assert.match(artifactDownload, /merge-multiple: false/);
 });
 
+test("every opt-in browser scenario runs only in the item shard", () => {
+  const workflow = fs.readFileSync(new URL("../.github/workflows/ci.yml", import.meta.url), "utf8");
+  const steps = workflow.split(/(?=^      - name: )/m)
+    .filter((step) => step.startsWith("      - name: Verify opt-in "));
+  assert.ok(steps.length > 0, "expected opt-in browser scenarios");
+  for (const step of steps) {
+    const header = step.slice(0, step.indexOf("        run:"));
+    assert.match(header, /^        if: matrix\.shard == 'items'$/m, step.split("\n")[0]);
+  }
+});
+
 function planForPartitions(partitionCount) {
   const capacity = { 1: 8, 2: 4, 3: 3 }[partitionCount];
   const ranges = Array.from({ length: partitionCount }, (_, index) => ({

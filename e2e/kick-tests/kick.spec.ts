@@ -73,7 +73,7 @@ test('Kick moves one retained bomb through authoritative cells without extra cue
       await Promise.all(games.map((game) => expect.poll(() => latestSnapshot(game)?.room.phase.type)
         .toBe('running')))
       await one.getByRole('region', { name: 'Grenadiers courtyard' }).click()
-      await two.getByRole('region', { name: 'Dziedziniec Grenadierów' }).click()
+      await two.getByRole('region', { name: 'Dziedziniec Grenadiers', exact: true }).click()
       await revealAndCollect(one, games[0])
       await prepareEscape(one, games[0])
       await Promise.all(games.map((game) => expect.poll(() => actor(game).inventory.equipment)

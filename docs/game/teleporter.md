@@ -5,9 +5,10 @@ Heart-only, so operators must enable Teleporter explicitly.
 
 When a living player collects one and the other seat has a living actor, the game considers one
 atomic exchange of their current positions. Both complete actor footprints must be within bounds
-and clear of hard terrain, soft blocks, active fire and bombs. Contact mines are unsafe unless the
-arriving actor already owns valid overlap grace for that exact mine at both its current position
-and destination; grace never transfers between actors. Shield does not make fire safe.
+and clear of hard terrain, soft blocks, active fire and bombs. An actor may retain only its own
+already-valid overlap grace for the same bomb when that grace covers both its current footprint and
+destination; this applies to solid Timed or Remote bombs as well as Contact mines. A swap creates
+no new grace and never transfers grace between actors. Shield does not make fire safe.
 
 If either destination is unsafe, or the rival is dead or absent, the pickup is consumed and neither
 actor moves. A disconnected but still living reserved-seat actor remains the other participant.

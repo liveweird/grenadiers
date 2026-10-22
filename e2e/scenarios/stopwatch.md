@@ -15,6 +15,9 @@ bomb resumes and detonates at its captured fuse plus the exact paused duration.
 Player Two then collects the mirrored Stopwatch. Player One's held movement and one bomb action are
 blocked. Player Two places a fresh Timed bomb while holding the effect; its placement event starts
 at the full configured fuse with `paused: true`. Player Two escapes normally, Player One thaws from
-held input, and the fresh bomb resumes and detonates naturally. Both streams must agree on bomb IDs,
-owners, pause state, placement/detonation facts, actor status, and physical deadlines. The scenario
-uses no state injection, duration override, seed search, retry, or extended timeout.
+held input, and the fresh bomb resumes and detonates naturally after exactly the part of the active
+Stopwatch window following its placement. The expected pause is derived independently as the shared
+visible Stopwatch deadline minus the placement event's `placedAt` tick minus one. Both streams must
+agree on bomb IDs, owners, pause state, placement/detonation facts, actor status, and physical
+deadlines. The scenario uses no state injection, duration override, seed search, retry, or extended
+timeout.

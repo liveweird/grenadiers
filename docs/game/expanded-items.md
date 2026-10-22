@@ -6,22 +6,113 @@ introduces Expanded-v5/generator-v2 rooms and gameplay-v8; see [Heart](heart.md)
 Separate candidates add opt-in [Shield](shield.md), [Golden Flame](golden-flame.md), [Short Fuse](short-fuse.md), [Short Flame](short-flame.md), [Long Fuse](long-fuse.md), [Reverse Controls](reverse-controls.md), [Diarrhea](diarrhea.md), [Slow foot](slow-foot.md), [Piercing Bomb](piercing-bomb.md), [Power Bomb](power-bomb.md), [Remote Bomb](remote-bomb.md), [Landmine](landmine.md), [Invisibility Cloak](invisibility-cloak.md), [Stopwatch](stopwatch.md), [Invisible Bombs](invisible-bombs.md), [Teleporter](teleporter.md), [Wall Pass](wall-pass.md), [Kick](kick.md), [Punch](punch.md), [Bracelet](bracelet.md), and [Oil Barrel](oil-barrel.md),
 retaining Expanded-v5 rules, generator-v2, and journal-v2 identities. Oil Barrel migrates the
 active gameplay transport to v11 while the earlier wire contracts remain archived.
+
+At the 21 October 2026 16:47 UTC native acceptance checkpoint, Invisibility Cloak was an
+**unreleased source candidate**. Corrected source `1c6724f` and
+image `960976c9` pass a fresh 51 Compose plus 51 Kubernetes matrix with zero retries or carried
+passes. Independent raw review is clear; all 2,298 payloads are sealed and the 2,299-file durable
+copy is byte-verified. The complete 320px HUD proof runs in stable Running and restores 390px
+before gameplay. At that checkpoint, PR #84 was draft at earlier head `97a85d4`; both seven-job
+candidate workflows, merge/post-merge CI, publication, exact-image promotion and tag CI remained
+pending. Thirteen of the 22 requested item types were published, and Landmine v0.3.37 was
+published and deployed locally. See [release notes](https://github.com/liveweird/grenadiers/releases)
+for current release status. CI retains one image, two complete
+browser shards (23 item/default plus 28 classic cases), and the existing 20-minute job limits.
+
+At the 21 October 2026 18:44:23 UTC native acceptance checkpoint, v0.3.39 source `272b950` and
+image `9a4dc108` passed a fresh 51 Compose plus 51 Kubernetes matrix with zero retries or carried
+passes. Independent raw audit is clear; 2,320 payloads are sealed and the 2,321-file durable copy
+is byte-verified. Published v0.3.38 merge `3c210c23` has exact accepted tree `d1dc83fc`; its raw
+documentation and capture parent `04c070c5` is integrated into the gameplay-v9 foundation.
+Fourteen of the 22 requested item types are published, and v0.3.39 activates no additional item.
+At that checkpoint, normalization, candidate and post-merge CI, publication, tag CI and local
+promotion remained pending. See [release notes](https://github.com/liveweird/grenadiers/releases)
+for current release status.
+
+Status: [Heart](heart.md), [Shield](shield.md), [Golden Flame](golden-flame.md),
+[Short Fuse](short-fuse.md) and [Short Flame](short-flame.md) are published through v0.3.29.
+The v0.3.30 [Long Fuse](long-fuse.md) increment passes local checks and corrected-source native
+acceptance: 32/32 Compose and 32/32 Kubernetes cases, wrapper exit zero, no retries or carried
+results. Independent final evidence review and all required CI pass; v0.3.30 is published. Verification
+retains the earlier hosted failure and separately named source-specific attempts.
+The v0.3.31 [Reverse Controls](reverse-controls.md) increment passes local checks and fresh
+33/33 Compose plus 33/33 Kubernetes acceptance. All required CI passes; v0.3.31 is published.
+The v0.3.32 [Diarrhea](diarrhea.md) increment passes local checks and independent implementation
+reviews and fresh same-image 45/45 Compose plus 45/45 Kubernetes acceptance after the reviewed
+startup-readiness correction. Independent final native review, candidate CI and post-merge CI
+pass; [v0.3.32](https://github.com/liveweird/grenadiers/releases/tag/v0.3.32) is published. The
+original CI counterexample is retained separately. The
+v0.3.33 [Slow foot](slow-foot.md) passes local checks and independent implementation reviews and
+fresh same-image 46/46 Compose plus 46/46 Kubernetes acceptance after reviewed browser-driver
+corrections. All 22 latency cases per target pass; static parity contains 47 scenarios. The whole
+wrapper exits zero with no retries or carried passes. Candidate and post-merge CI pass, and
+[v0.3.33](https://github.com/liveweird/grenadiers/releases/tag/v0.3.33) is published as a source
+prerelease. Its final raw source is integrated into the v0.3.34
+[Piercing Bomb](piercing-bomb.md) candidate. Piercing retains its feature and version; repository,
+E2E lint, Knip, type checking and 48-scenario parity pass. Fresh same-image acceptance passes all
+47 Compose and 47 Kubernetes cases with zero retries. Independent evidence review, candidate CI
+and post-merge CI pass; [v0.3.34](https://github.com/liveweird/grenadiers/releases/tag/v0.3.34)
+is published as a source prerelease. Its final raw source is integrated into the v0.3.35
+[Power Bomb](power-bomb.md) candidate. Power retains its feature and version; local checks and
+independent implementation reviews are clear. Fresh same-image acceptance passes all 48 Compose
+and 48 Kubernetes cases with zero retries; independent evidence review and the final seal are
+clear; both five-job candidate CI runs and the five-job post-merge run pass, PR 81 is merged, and
+[v0.3.35](https://github.com/liveweird/grenadiers/releases/tag/v0.3.35) is published as a source
+prerelease and its accepted image is deployed locally. The accepted raw source is integrated into the
+v0.3.36 [Remote Bomb](remote-bomb.md) candidate. Remote Bomb retains its reviewed one-charge
+manual-trigger behavior and passes fresh same-image 49/49 Compose plus 49/49 Kubernetes cases
+with zero retries. The raw evidence audit and seal are clear; both five-job candidate workflows
+and the post-merge workflow pass all 49 browser cases. PR 82 is merged, [v0.3.36](https://github.com/liveweird/grenadiers/releases/tag/v0.3.36)
+is published and its accepted image is deployed locally. Its CI-corrected raw source is integrated
+into the v0.3.37 [Landmine](landmine.md) candidate. Fresh same-image acceptance passes all
+50 Compose and 50 Kubernetes cases with zero retries; independent raw audit is clear and evidence
+sealed. Both candidate workflows and post-merge CI pass five jobs and all 50 browser cases;
+PR 83 is merged, v0.3.37 is published and its accepted image deployed locally. Expanded-v5/generator-v2 rooms and gameplay-v8 are retained; see
+[verification](../verification.md) and
+[release notes](https://github.com/liveweird/grenadiers/releases).
+The accepted raw Landmine source is integrated into the v0.3.38 [Invisibility Cloak](invisibility-cloak.md)
+source candidate. Its corrected reveal-position driver and private actor/event semantics are
+retained. Corrected source `1c6724f` passed fresh 51 Compose plus 51 Kubernetes acceptance with an independent raw audit and durable seal. Those exact-head candidate/post-merge CI, publication and promotion gates subsequently passed for v0.3.38; the accepted parent is integrated above.
+
+At the 21 October 2026 20:56:41 UTC v0.3.40 native checkpoint, corrected [Stopwatch](stopwatch.md)
+source `fa25467`, tree `07ac34a8`, and image `ec8604af` passed complete 32,768-mask debug,
+release and coverage execution plus fresh 52 Compose and 52 Kubernetes cases, with zero retries
+or carried passes. The earlier `bd9d064` attempt is historical and contributes no pass. Independent raw audit is clear and 2,434 payloads are durably sealed; hosted CI, PR/merge, publication, tag verification and promotion remained
+pending at this checkpoint. Published v0.3.39 remains the parent and local deployment. Fourteen of
+22 item types were published; Stopwatch is the fifteenth source/native-verified type, and seven
+requested types remain after it. See [release notes](https://github.com/liveweird/grenadiers/releases)
+for current release status.
+
+The v0.3.41 source candidate adds [Invisible Bombs](invisible-bombs.md) as gameplay v9's sixteenth
+independent item. The integrated catalog has 65,536 subsets; all earlier mappings and the archived
+v8 catalog remain pinned. Prepared-source checks do not establish native acceptance or hosted
+release CI for this integrated candidate, and no v0.3.40 acceptance result is carried forward.
+
+The final v0.3.42 source adds [Teleporter](teleporter.md) as the seventeenth optional pickup while
+preserving every v0.3.41 item. Rules version 5, generator version 2 and journal format 2 remain
+stable; Teleporter introduces the paired gameplay-v10 contract for its authoritative position
+epoch. Its release acceptance remains separately pending.
+
+The provisional v0.3.43 source adds [Wall Pass](wall-pass.md) as the eighteenth optional pickup
+while preserving the reviewed final v0.3.42 source parent and gameplay v10. Its 262,144 settings
+masks require two server-mask partitions. Fresh v0.3.43 gates, independent review, native
+acceptance and hosted CI remain pending.
 This optional track follows the [backlog](backlog.md), shared settings and
 pixel-art increments. The historical catalog in [rules](rules.md) is not an implementation
 claim. Each activation requires its own reviewed behavior, UI, documentation and acceptance.
 
-The original foundation implements `core::game::{inventory,effects,damage}` and immutable Actor inventory,
-effect and derived-stat access. Production cannot inject items into State yet. Both fire checks
-share the damage gateway; effects/grace expire before movement and new bombs capture derived
+The v0.3.19 foundation introduced `core::game::{inventory,effects,damage}` and immutable Actor
+inventory, effect and derived-stat access. At that stage, production could not inject items into
+State. Both fire checks share the damage gateway; effects/grace expire before movement and new bombs capture derived
 range/fuse. Slow-foot exposes an exact speed ratio but does not change movement before activation.
 That foundational release enabled no item pickup, equipment action, visible effect, new rules
-profile or wire field. Heart activation is the later candidate described above.
+profile or wire field. Heart activation followed in v0.3.25.
 
-Independent review is clear after replacing overflow-prone Heart expiry with checked elapsed
-grace. The integrated gates pass 334 core tests, 163 server tests, two doctests and 230 web tests;
-four dedicated performance profiles remain intentionally ignored. Rust line coverage is 94.21%
-above the unchanged 80% floor. Dependency audits and strict Kubernetes schemas pass. The same
-image passes 24/24 scenarios through Compose and 24/24 through Kubernetes, retries zero,
+The historical foundation review cleared checked elapsed grace in place of overflow-prone Heart
+expiry. Its integrated gates passed 334 core tests, 163 server tests, two doctests and 230 web tests;
+four dedicated performance profiles were intentionally ignored. Rust line coverage was 94.21%
+above the unchanged 80% floor. Dependency audits and strict Kubernetes schemas passed. The same
+image passed 24/24 scenarios through Compose and 24/24 through Kubernetes, retries zero,
 including a recheck of the corrected default browser harness. See [verification](../verification.md)
 for image identity, the final evidence rollup and its limits.
 
@@ -186,7 +277,7 @@ live transport/browser migration are separate increments. See [v7 contract](prot
    admission and routing; Classic still has empty item availability.
 7. Expanded configuration/generation with Heart activation, then Shield in a separate increment.
 8. Individual stat modifiers, Reverse/Diarrhea, special bombs, movement equipment, Stopwatch,
-   visibility effects, Oil, Teleporter and Wall Pass, with interaction tests at each activation.
+   visibility effects, Oil and Teleporter, with interaction tests at each activation.
 
 Each release needs a version bump, focused PR, independent review and existing gates. Test
 exact expiry, protection priority, modifiers together, independently expiring stacks, action

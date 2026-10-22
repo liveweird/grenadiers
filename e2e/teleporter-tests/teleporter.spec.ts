@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
-import { latestSnapshot, observeGame, visibleActor, type ObservedGame } from '../tests/support/duel'
+import { expectPaintedCanvas, latestSnapshot, observeGame, visibleActor, type ObservedGame } from '../tests/support/duel'
 import { moveSeatTo } from '../tests/support/movement'
 import { admissionBaseline, disconnectTransport, installTransportProbe } from '../tests/support/reconnect'
 import type { GameServerMessage, Seat } from '../../web/src/game/v11/schema'
@@ -38,7 +38,7 @@ async function collectUntil(
   }
 }
 
-test('Teleporter swaps safe players, survives reconnect, and is consumed when unsafe', async ({ browser }) => {
+test('Teleporter swaps safe players, survives reconnect, and is consumed when unsafe', async ({ browser }, info) => {
   const contexts = await Promise.all([
     browser.newContext({ viewport: { width: 1440, height: 1050 } }),
     browser.newContext({ viewport: { width: 320, height: 844 }, reducedMotion: 'reduce' }),
@@ -64,13 +64,19 @@ test('Teleporter swaps safe players, survives reconnect, and is consumed when un
     await Promise.all(games.map((game) => expect.poll(() => latestSnapshot(game)?.room.phase.type)
       .toBe('running')))
     await one.getByRole('region', { name: 'Grenadiers courtyard' }).click()
-    await two.getByRole('region', { name: 'Dziedziniec Grenadierów' }).click()
+    await two.getByRole('region', { name: 'Dziedziniec Grenadiers', exact: true }).click()
 
     await reveal(one, games[0], 'one', { column: 2, row: 1 },
       [{ column: 1, row: 1 }, { column: 1, row: 2 }])
     await expect.poll(() => latestSnapshot(games[0])!.state.pickups).toContainEqual({
       cell: { column: 3, row: 1 }, kind: 'teleporter',
     })
+    await Promise.all(games.map((game) => expect.poll(() => latestSnapshot(game)!.state.bombs.length
+      + latestSnapshot(game)!.state.flames.length).toBe(0)))
+    await Promise.all([one, two].map(expectPaintedCanvas))
+    await one.screenshot({ path: info.outputPath('teleporter-before-collection-desktop-en.png'), fullPage: true })
+    expect(await two.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false)
+    await two.screenshot({ path: info.outputPath('teleporter-before-collection-polish-320-reduced.png'), fullPage: true })
     await moveSeatTo(one, games[0], 'one', { column: 1, row: 1 })
     const rivalStart = position(games[0], 'two')
     await collectUntil(one, games[0], 'ArrowRight', 1)

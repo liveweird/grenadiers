@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test'
 import { arenaTilePixels } from '../tests/support/compositor'
-import { latestSnapshot, observeGame, visibleActor, type ObservedGame } from '../tests/support/duel'
+import { expectPaintedCanvas, latestSnapshot, observeGame, visibleActor, type ObservedGame } from '../tests/support/duel'
 import { moveSeatTo } from '../tests/support/movement'
 import { admissionBaseline, disconnectTransport, installTransportProbe } from '../tests/support/reconnect'
 import type { GameServerMessage, Seat } from '../../web/src/game/v11/schema'
@@ -67,10 +67,20 @@ test('Wall Pass crosses one intact block, rejects planting and hard walls, and r
       ])
       await Promise.all(games.map((game) => expect.poll(() => latestSnapshot(game)?.room.phase.type)
         .toBe('running')))
-      await one.getByRole('region', { name: 'Grenadiers courtyard' }).click()
-      await two.getByRole('region', { name: 'Dziedziniec Grenadierów' }).click()
+      await one.getByRole('region', { name: 'Grenadiers courtyard', exact: true }).click()
+      await two.getByRole('region', { name: 'Dziedziniec Grenadiers', exact: true }).click()
 
       const revealBombId = await revealWallPass(one, games[0])
+      await Promise.all(games.map((game) => expect.poll(() => latestSnapshot(game)!.state.bombs.length
+        + latestSnapshot(game)!.state.flames.length).toBe(0)))
+      await Promise.all([one, two].map(expectPaintedCanvas))
+      await one.screenshot({
+        path: info.outputPath('wall-pass-before-collection-desktop-en.png'), fullPage: true,
+      })
+      expect(await two.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false)
+      await two.screenshot({
+        path: info.outputPath('wall-pass-before-collection-polish-320-reduced.png'), fullPage: true,
+      })
       await moveSeatTo(one, games[0], 'one', { column: 1, row: 1 })
       await moveSeatTo(one, games[0], 'one', { column: 3, row: 1 })
       await Promise.all(games.map((game) => expect.poll(() =>
@@ -101,12 +111,6 @@ test('Wall Pass crosses one intact block, rejects planting and hard walls, and r
         const oldColors = new Set(blockOnly[index])
         expect(new Set(pixels.filter((pixel) => oldColors.has(pixel))).size).toBeGreaterThan(3)
       }
-      await one.screenshot({ path: info.outputPath('wall-pass-inside-desktop-en.png'), fullPage: true })
-      expect(await two.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false)
-      await two.screenshot({
-        path: info.outputPath('wall-pass-inside-polish-320-reduced.png'), fullPage: true,
-      })
-
       const beforeBomb = latestSnapshot(games[0])!
       const beforeActor = actor(games[0], 'one')
       const commandFloor = games[0].commands.length

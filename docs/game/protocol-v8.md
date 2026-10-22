@@ -114,4 +114,4 @@ older v8 clients: a client built for thirteen items rejects the new room even wh
 
 Gameplay v8 remains archived at that Cloak-era catalog. It rejects Stopwatch in settings, pickups,
 effects and events, and rejects private pause history in live or event-only Timed bombs even when a
-resumed bomb's public `paused` flag is false. Active Stopwatch rooms require gameplay v9.
+resumed bomb's public `paused` flag is false. Active Stopwatch rooms require gameplay v10.

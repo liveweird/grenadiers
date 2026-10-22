@@ -239,6 +239,16 @@ function gameInputEnabled(state: GameClientState): boolean {
     && state.room?.phase.type === 'running' && ownActorAlive(state)
 }
 
+function arenaFocusHint(state: GameClientState, snapshot: ReturnType<typeof presentSnapshot>,
+  bindings: KeyboardBindings, copy: ReturnType<typeof useGameCopy>): string {
+  const actor = state.youSeat && snapshot?.state.actors.find(({ seat }) => seat === state.youSeat)
+  const bomb = bindings.bomb.map((code) => keyLabel(code, copy)).join(' / ')
+  if (actor?.invisibleBombsRemainingTicks && state.room?.settings.enabledItems.includes('remoteBomb')) {
+    return format(copy.arena.blindBombHint, { bomb })
+  }
+  return actor?.remoteArmed ? format(copy.arena.remoteHint, { bomb }) : copy.arena.focusHint
+}
+
 export function GamePanelView({ state, actions }: { state: GameClientState; actions: GameActions }) {
   const copy = useGameCopy()
   const [bindings, setBindings] = useState(loadControlBindings)
@@ -249,13 +259,7 @@ export function GamePanelView({ state, actions }: { state: GameClientState; acti
   const round = state.room?.roundNumber
   const reconnecting = state.room && ['reconnecting', 'connecting', 'authenticating'].includes(state.connection)
   const arenaSnapshot = useMemo(() => presentSnapshot(state), [state])
-  const remoteArmed = Boolean(state.youSeat && arenaSnapshot?.state.actors
-    .find((actor) => actor.seat === state.youSeat)?.remoteArmed)
-  const focusHint = remoteArmed
-    ? format(copy.arena.remoteHint, {
-      bomb: bindings.bomb.map((code) => keyLabel(code, copy)).join(' / '),
-    })
-    : copy.arena.focusHint
+  const focusHint = arenaFocusHint(state, arenaSnapshot, bindings, copy)
   const updateBindings = (next: KeyboardBindings): void => {
     setBindings(next)
     saveControlBindings(next)

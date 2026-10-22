@@ -80,3 +80,6 @@ mod generated_match_trace_tests;
 
 #[cfg(test)]
 mod invisibility_cloak_tests;
+
+#[cfg(test)]
+mod invisible_bombs_tests;

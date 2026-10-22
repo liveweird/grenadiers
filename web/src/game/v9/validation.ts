@@ -22,7 +22,7 @@ const validateServer = resolveServerValidator()
 const supportedItems = [
   'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch',
   'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame',
-  'longFuse', 'reverseControls',
+  'longFuse', 'reverseControls', 'invisibleBombs',
 ] as const
 
 function stateSemanticError(

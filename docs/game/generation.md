@@ -22,9 +22,9 @@ invalid-map fallback, privacy checks, and simulation-level first-bomb escape sur
 Changing the algorithm or draw semantics requires a new generator version and reviewed
 replay/compatibility expectations. Do not replace the golden outputs merely to hide drift.
 
-Expanded generator v2 appends each enabled optional item to a stable weighted pool. Stopwatch adds
-weight 15 after Invisibility Cloak, growing the all-items pool from 320 to 335 entries. Every mask
-that does not enable Stopwatch retains its previous pool and exact seeded output; all 32768 item
+Expanded generator v2 appends each enabled optional item to a stable weighted pool. Invisible Bombs
+adds weight 15 after Stopwatch, growing the all-items pool from 335 to 350 entries. Every mask that
+does not enable Invisible Bombs retains its previous pool and exact seeded output; all 65536 item
 masks are covered by the current generator tests.
 
 The server constructs typed worlds at each actual round start and keeps the generation record

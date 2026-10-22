@@ -185,7 +185,7 @@ export function makePickup(kind: RenderablePickupKind): Graphics {
     pixels(drawing, PALETTE.blueLight, [[16, 26, 4, 5]])
     pixels(drawing, PALETTE.flame, [[39, 9, 4, 5], [42, 13, 4, 4]])
     pixels(drawing, PALETTE.flameCore, [[40, 11, 3, 3]])
-  } else {
+  } else if (kind === 'reverseControls') {
     pixels(drawing, PALETTE.deepInk, [
       [12, 17, 22, 4], [12, 29, 22, 4], [9, 20, 4, 10], [33, 20, 4, 10],
       [30, 29, 7, 4],
@@ -193,6 +193,15 @@ export function makePickup(kind: RenderablePickupKind): Graphics {
     pixels(drawing, PALETTE.blue, [[13, 21, 19, 4], [13, 25, 19, 4]])
     pixels(drawing, PALETTE.white, [[9, 21, 7, 4], [30, 25, 7, 4]])
     pixels(drawing, PALETTE.brick, [[9, 25, 4, 4], [33, 21, 4, 4]])
+  } else {
+    pixels(drawing, PALETTE.deepInk, [
+      [15, 22, 19, 13], [19, 18, 11, 20], [29, 15, 4, 8], [32, 12, 5, 5],
+      [12, 16, 25, 3], [12, 34, 25, 3],
+    ])
+    pixels(drawing, PALETTE.ink, [[18, 23, 13, 10], [22, 20, 6, 5]])
+    pixels(drawing, PALETTE.blue, [[11, 20, 5, 11], [33, 20, 5, 11]])
+    pixels(drawing, PALETTE.blueLight, [[12, 22, 3, 7], [34, 22, 3, 7]])
+    pixels(drawing, PALETTE.white, [[9, 14, 4, 4], [37, 32, 4, 4]])
   }
   return drawing
 }

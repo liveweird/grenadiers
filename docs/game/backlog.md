@@ -84,6 +84,28 @@ release baseline. Fourteen of 22 types were published; Stopwatch is the fifteent
 verified type and seven requested types remain after it. See
 [release notes](https://github.com/liveweird/grenadiers/releases) for current release status.
 
+At the 22 October 2026 17:00:43 UTC seal checkpoint, v0.3.41 source
+`97a3990764592a867574b87843401d146d307f80`, tree
+`8c0897440f40b8617bfdb9fd96e0be2cb3e4f9da`, and image
+`sha256:11003ee18addba9badf2e2be7d8cf0c20cf743a7ccd6d65f056724083014abb2` add opt-in [Invisible Bombs](invisible-bombs.md) as the sixteenth item.
+The fresh matrix passed all 53 Compose plus 53 Kubernetes cases, 48 groups/reports and post-run
+integrity checks with zero retries or carried passes; independent audit and result review are clear.
+Final manifest `ec7763fca51926fbe178e3733866f60ce664ad1ec9797c5979a57e9d02829ade`
+binds 2,483 durably sealed payloads. Independent seal review is clear. The capture-r1 server gate passed
+at this exact source/tree, while its web gate passed the first five stages and then timed out after
+300 seconds in the E2E npm audit after the web audit completed; that infrastructure-only failure
+contributes no web or native acceptance. Capture-r2 and capture-r3 each passed their first five
+stages, then timed out in the web npm audit before the E2E audit ran. None of those partial web
+results was reused: capture-r4 retained only the exact capture-r1 server proof, then a fresh
+six-stage web root 23267 and full-gate rollup passed. Draft PR #87's earlier hosted timing failure and the source
+`239181c` CPU-one diagnostic failure carry no acceptance. The exact source `97a3990` diagnostic
+passed one focused case under root session 2294 and independent diagnostic review, but remained
+`diagnosticOnly: true`, `nativeAccepted: false`, and `acceptanceCarry: 0`; the later fresh 106-case
+matrix supplied acceptance evidence without carrying that result. Hosted delivery had not started
+at this native checkpoint. Six requested
+types remain: Teleporter, Wall Pass, Kick, Punch, Bracelet and Oil Barrel. ART-ATLAS follows the
+completed feature batch.
+
 The [implementation plan](implementation-plan.md) remains the milestone/release reference;
 the [rules](rules.md) describe the current baseline and historical extension catalog.
 This document records the requested Grenadiers behavior and decisions required before coding.

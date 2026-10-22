@@ -10,6 +10,16 @@ type Snapshot = Extract<GameServerMessage, { type: 'snapshot' }>
 type Admission = Extract<GameServerMessage, { type: 'admitted' }>
 type StatefulAdmission = Admission & { state: NonNullable<Admission['state']> }
 type VisibleActor = Extract<Snapshot['state']['actors'][number], { type: 'visible' }>
+type Bomb = Snapshot['state']['bombs'][number]
+type ReconnectProofInput = {
+  deadline: number
+  games: ObservedGame[]
+  one: Page
+  ownBomb: Bomb
+  privacyStart: number
+  rivalBomb: Bomb
+  two: Page
+}
 const snapshots = (game: ObservedGame): Snapshot[] => game.frames.filter(
   (frame): frame is Snapshot => frame.type === 'snapshot')
 const stateEffectTicks = (state: Snapshot['state'], seat: Seat) => state.actors
@@ -85,6 +95,63 @@ async function plant(page: Page, actorGame: ObservedGame, sightedGame: ObservedG
   return frame.state.bombs.find((bomb) => !before.has(bomb.id))!
 }
 
+async function reconnectAndCaptureLiveBombs({ deadline, games, one, ownBomb, privacyStart,
+  rivalBomb, two }: ReconnectProofInput) {
+  const admissionFrameFloor = games[0].frames.length
+  const beforeReconnect = latestSnapshot(games[0])!
+  await disconnectTransport(one)
+  await expect.poll(async () => (await admissionBaseline(one))?.tick).toBeGreaterThan(privacyStart)
+  await expect.poll(() => games[0].frames.slice(admissionFrameFloor).some((frame) =>
+    frame.type === 'admitted' && frame.room.roomId === beforeReconnect.room.roomId
+    && frame.room.roundId === beforeReconnect.room.roundId && frame.youSeat === 'one'
+    && frame.room.revision > beforeReconnect.room.revision && frame.state !== null)).toBe(true)
+  const resumed = games[0].frames.slice(admissionFrameFloor).findLast((frame): frame is StatefulAdmission =>
+    frame.type === 'admitted' && frame.room.roomId === beforeReconnect.room.roomId
+    && frame.room.roundId === beforeReconnect.room.roundId && frame.youSeat === 'one'
+    && frame.room.revision > beforeReconnect.room.revision && frame.state !== null)!
+  const resumedEffectTicks = stateEffectTicks(resumed.state, 'one')
+  expect(resumed.state.physicalTick).toBeLessThan(deadline)
+  expect(resumedEffectTicks).toBeGreaterThan(0)
+  expect(resumed.state.physicalTick + resumedEffectTicks).toBe(deadline)
+  expect(resumed.state.bombs).toEqual([])
+  expect('events' in resumed).toBe(false)
+  const sightedFrameFloor = games[1].frames.length
+  const admissionIndex = games[0].frames.findLastIndex((frame) => frame === resumed)
+  await expect.poll(() => games[0].frames.slice(admissionIndex + 1).some((frame) =>
+    frame.type === 'snapshot' && frame.room.roomId === resumed.room.roomId
+    && frame.room.roundId === resumed.room.roundId && frame.state.physicalTick >= resumed.state.physicalTick
+    && stateEffectTicks(frame.state, 'one') > 0
+    && frame.state.physicalTick + stateEffectTicks(frame.state, 'one') === deadline
+    && frame.state.bombs.length === 0)).toBe(true)
+  await expect.poll(() => games[1].frames.slice(sightedFrameFloor).some((frame) =>
+    frame.type === 'snapshot' && frame.room.roomId === resumed.room.roomId
+    && frame.room.roundId === resumed.room.roundId && frame.state.physicalTick >= resumed.state.physicalTick
+    && frame.state.bombs.some((bomb) => bomb.id === ownBomb.id && bomb.trigger.type === 'timed'
+      && bomb.trigger.remainingTicks > 0))).toBe(true)
+  expect(latestSnapshot(games[0])!.state.physicalTick).toBeLessThan(deadline)
+  expect(effectTicks(games[0], 'one')).toBeGreaterThan(0)
+  expect(latestSnapshot(games[0])!.state.bombs).toEqual([])
+  const connectedBomb = latestSnapshot(games[1])!.state.bombs.find(({ id }) =>
+    id === ownBomb.id || id === rivalBomb.id)
+  expect(connectedBomb).toBeDefined()
+  expect(connectedBomb?.trigger.type).toBe('timed')
+  if (connectedBomb?.trigger.type !== 'timed') throw new Error('live reconnect bomb must be Timed')
+  expect(connectedBomb.trigger.remainingTicks).toBeGreaterThan(0)
+  expect(bombEvents(games[0], privacyStart)).toHaveLength(0)
+  const pixelReadStart = expectLivePixelWindow(games[0], games[1], ownBomb.id, deadline)
+  const [hiddenPixels, sightedPixels] = await Promise.all([
+    tilePixels(one, 3, 1), tilePixels(two, 3, 1),
+  ])
+  const pixelReadEnd = expectLivePixelWindow(games[0], games[1], ownBomb.id, deadline)
+  return {
+    admissionTick: resumed.state.physicalTick,
+    disconnectTick: beforeReconnect.state.physicalTick,
+    hiddenPixels,
+    pixelReadTicks: [pixelReadStart, pixelReadEnd],
+    sightedPixels,
+  }
+}
+
 test('Invisible Bombs hides live bombs and cues until exact expiry', async ({ browser }, info) => {
   const contexts = await Promise.all([
     browser.newContext({ viewport: { width: 1440, height: 1050 } }),
@@ -141,52 +208,9 @@ test('Invisible Bombs hides live bombs and cues until exact expiry', async ({ br
     await expect.poll(() => latestSnapshot(games[1])!.state.bombs.map(({ id }) => id))
       .toEqual(expect.arrayContaining([ownBomb.id, rivalBomb.id]))
     expect(bombEvents(games[0], privacyStart)).toHaveLength(0)
-    const admissionFrameFloor = games[0].frames.length
-    const beforeReconnect = latestSnapshot(games[0])!
-    await disconnectTransport(one)
-    await expect.poll(async () => (await admissionBaseline(one))?.tick).toBeGreaterThan(privacyStart)
-    await expect.poll(() => games[0].frames.slice(admissionFrameFloor).some((frame) =>
-      frame.type === 'admitted' && frame.room.roomId === beforeReconnect.room.roomId
-      && frame.room.roundId === beforeReconnect.room.roundId && frame.youSeat === 'one'
-      && frame.room.revision > beforeReconnect.room.revision && frame.state !== null)).toBe(true)
-    const resumed = games[0].frames.slice(admissionFrameFloor).findLast((frame): frame is StatefulAdmission =>
-      frame.type === 'admitted' && frame.room.roomId === beforeReconnect.room.roomId
-      && frame.room.roundId === beforeReconnect.room.roundId && frame.youSeat === 'one'
-      && frame.room.revision > beforeReconnect.room.revision && frame.state !== null)!
-    const resumedEffectTicks = stateEffectTicks(resumed.state, 'one')
-    expect(resumed.state.physicalTick).toBeLessThan(deadline)
-    expect(resumedEffectTicks).toBeGreaterThan(0)
-    expect(resumed.state.physicalTick + resumedEffectTicks).toBe(deadline)
-    expect(resumed.state.bombs).toEqual([])
-    expect('events' in resumed).toBe(false)
-    const sightedFrameFloor = games[1].frames.length
-    const admissionIndex = games[0].frames.findLastIndex((frame) => frame === resumed)
-    await expect.poll(() => games[0].frames.slice(admissionIndex + 1).some((frame) =>
-      frame.type === 'snapshot' && frame.room.roomId === resumed.room.roomId
-      && frame.room.roundId === resumed.room.roundId && frame.state.physicalTick >= resumed.state.physicalTick
-      && stateEffectTicks(frame.state, 'one') > 0
-      && frame.state.physicalTick + stateEffectTicks(frame.state, 'one') === deadline
-      && frame.state.bombs.length === 0)).toBe(true)
-    await expect.poll(() => games[1].frames.slice(sightedFrameFloor).some((frame) =>
-      frame.type === 'snapshot' && frame.room.roomId === resumed.room.roomId
-      && frame.room.roundId === resumed.room.roundId && frame.state.physicalTick >= resumed.state.physicalTick
-      && frame.state.bombs.some((bomb) => bomb.id === ownBomb.id && bomb.trigger.type === 'timed'
-        && bomb.trigger.remainingTicks > 0))).toBe(true)
-    expect(latestSnapshot(games[0])!.state.physicalTick).toBeLessThan(deadline)
-    expect(effectTicks(games[0], 'one')).toBeGreaterThan(0)
-    expect(latestSnapshot(games[0])!.state.bombs).toEqual([])
-    const connectedBomb = latestSnapshot(games[1])!.state.bombs.find(({ id }) =>
-      id === ownBomb.id || id === rivalBomb.id)
-    expect(connectedBomb).toBeDefined()
-    expect(connectedBomb?.trigger.type).toBe('timed')
-    if (connectedBomb?.trigger.type !== 'timed') throw new Error('live reconnect bomb must be Timed')
-    expect(connectedBomb.trigger.remainingTicks).toBeGreaterThan(0)
-    expect(bombEvents(games[0], privacyStart)).toHaveLength(0)
-    const pixelReadStart = expectLivePixelWindow(games[0], games[1], ownBomb.id, deadline)
-    const [hiddenPixels, sightedPixels] = await Promise.all([
-      tilePixels(one, 3, 1), tilePixels(two, 3, 1),
-    ])
-    const pixelReadEnd = expectLivePixelWindow(games[0], games[1], ownBomb.id, deadline)
+    const reconnect = await reconnectAndCaptureLiveBombs({
+      deadline, games, one, ownBomb, privacyStart, rivalBomb, two,
+    })
     await expect.poll(() => bombEvents(games[1], privacyStart).some(({ tick, kind }) =>
       tick < deadline && kind.type === 'bombDetonated' && (kind.bomb.id === ownBomb.id
         || kind.bomb.id === rivalBomb.id))).toBe(true)
@@ -195,8 +219,8 @@ test('Invisible Bombs hides live bombs and cues until exact expiry', async ({ br
         || kind.bomb.id === rivalBomb.id))!
     info.annotations.push({ type: 'phase-physical-ticks', description: JSON.stringify({
       collection: collection.tick, ownPlacement: ownBomb.placedAt, rivalPlacement: rivalBomb.placedAt,
-      disconnect: beforeReconnect.state.physicalTick, admission: resumed.state.physicalTick,
-      pixelReads: [pixelReadStart, pixelReadEnd], detonation: witnessedDetonation.tick,
+      disconnect: reconnect.disconnectTick, admission: reconnect.admissionTick,
+      pixelReads: reconnect.pixelReadTicks, detonation: witnessedDetonation.tick,
     }) })
     await expect.poll(() => snapshots(games[0]).some(({ state }) => state.physicalTick >= privacyStart
       && state.flames.length > 0)).toBe(true)
@@ -204,8 +228,8 @@ test('Invisible Bombs hides live bombs and cues until exact expiry', async ({ br
     const [hiddenClean, sightedClean] = await Promise.all([
       tilePixels(one, 3, 1), tilePixels(two, 3, 1),
     ])
-    expect(hiddenPixels).toEqual(hiddenClean)
-    expect(sightedPixels).not.toEqual(sightedClean)
+    expect(reconnect.hiddenPixels).toEqual(hiddenClean)
+    expect(reconnect.sightedPixels).not.toEqual(sightedClean)
     expect(bombEvents(games[0], privacyStart).filter(({ tick }) => tick < deadline)).toHaveLength(0)
     expect(bombEvents(games[1], privacyStart).some(({ tick, kind }) => tick < deadline
       && kind.type === 'bombDetonated' && (kind.bomb.id === ownBomb.id

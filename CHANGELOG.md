@@ -1,16 +1,16 @@
 # Changelog
 
-## 0.3.42 — 2026-10-21
+## 0.3.42 — 2026-10-22
 
 - Add opt-in Teleporter pickups that atomically swap both living players only when both complete destination footprints are safe; unsafe pickups are consumed without moving either player.
 - Publish a persistent nullable `lastTeleportTick` position epoch in gameplay v10 so clients snap an authoritative swap without fabricating walking or audio.
-- Add the seventeenth lobby switch, all 131,072 settings masks, replay and archived-v9 guards, English/Polish cues, and a deterministic production-seed browser scenario source. Native acceptance, final predecessor integration and hosted CI remain pending.
+- Add the seventeenth lobby switch, all 131,072 settings masks, replay and archived-v9 guards, English/Polish cues, and a deterministic production-seed browser scenario source. The sealed v0.3.41 parent is integrated; v0.3.42 native acceptance and hosted CI remain pending.
 
-## 0.3.41 — 2026-10-21
+## 0.3.41 — 2026-10-22
 
 - Add opt-in Invisible Bombs with a 600-physical-tick refreshable curse that hides every live bomb from the affected recipient while preserving collision, capacity, chains and public flames.
 - Capture placement and detonation audiences at emission, intersecting Cloak ownership privacy with blinded seats, including events visible to neither recipient.
-- Add the sixteenth lobby switch, all 65,536 v9 settings masks, replay and archived-v8 guards, English/Polish cues, and a deterministic production-seed browser scenario source. Native acceptance and hosted release CI remain pending.
+- Add the sixteenth lobby switch, all 65,536 v9 settings masks, replay and archived-v8 guards, English/Polish cues, and a deterministic production-seed browser scenario. At the 22 October 2026 00:55:23 UTC sealed native checkpoint, corrected source `cb10ec7` passed fresh 53 Compose plus 53 Kubernetes cases and complete debug, release and coverage gates with zero retries or carried passes. Independent audit was clear and 2,492 payloads were durably sealed; hosted CI, PR/merge, publication, tag verification and promotion remained pending then.
 
 ## 0.3.40 — 2026-10-21
 

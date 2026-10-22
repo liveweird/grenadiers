@@ -78,28 +78,31 @@ tree `07ac34a8`, and image `ec8604af` passed all 32,768 masks in debug, release 
 fresh 52 Compose and 52 Kubernetes cases, all 46 groups, with zero retries or carried passes. The
 failed `bd9d064` attempt remains historical: 51 Compose cases passed, the Stopwatch oracle failed
 once, and Kubernetes did not start. The corrected oracle uses the independently visible deadline,
-`deadline - placedAt - 1`; product behavior did not change. Independent raw audit is clear and 2,434 payloads are durably sealed; hosted CI, PR/merge, publication, tag verification and promotion remained pending at this dated
-checkpoint. Published v0.3.39/PR #85, tag run 39661497383 and local image `9a4dc108` remain the
-release baseline. Fourteen of 22 types were published; Stopwatch is the fifteenth source/native-
-verified type and seven requested types remain after it. See
+`deadline - placedAt - 1`; product behavior did not change. Independent raw audit and durable seal
+are clear. v0.3.40 is now published and its accepted image is the local release baseline. Fifteen of
+22 requested item types are published through v0.3.40. See
 [release notes](https://github.com/liveweird/grenadiers/releases) for current release status.
 
-The v0.3.41 source candidate adds opt-in [Invisible Bombs](invisible-bombs.md) as the sixteenth
-item while retaining the accepted v0.3.40 Stopwatch source and its corrected deadline-derived
-browser oracle. Its source checks are recorded in [verification](../verification.md), but fresh
-native acceptance and hosted release CI for the integrated v0.3.41 source remain pending. Six of
-the 22 requested item types remain outside this increment.
+At the 22 October 2026 00:55:23 UTC sealed checkpoint, v0.3.41 corrected source `cb10ec7`, tree
+`9d38e0cb`, and image `d08b93af` add opt-in [Invisible Bombs](invisible-bombs.md) as the sixteenth
+item and pass all 65,536 masks plus fresh 53 Compose and 53 Kubernetes cases, all 48 groups, with
+zero retries or carried passes. The final browser scenario uses two independently collected
+600-tick privacy windows and a polled sighted detonation witness; these oracle corrections changed
+no game behavior. Independent audit is clear and 2,492 payloads are durably sealed. Hosted candidate, merge, tag
+and promotion checks have not run. Six requested types remain: Teleporter,
+Wall Pass, Kick, Punch, Bracelet and Oil Barrel. ART-ATLAS follows the completed feature batch.
 
 TURN, CONFIG and the first ART slice are implemented. This v0.3.42 candidate contains seventeen
 optional pickups: Heart, Shield, Golden Flame, Short Fuse, Short Flame, Long Fuse, Reverse
 Controls, Diarrhea, Slow-foot, Piercing Bomb, Power Bomb, Remote Bomb, Landmine and Invisibility
-Cloak, Stopwatch, Invisible Bombs and Teleporter. Local checks are recorded as they complete; this candidate still requires independent
-review, predecessor integration, fresh native acceptance and final CI. The remaining requested pickups stay outside this increment. Current publication status
+Cloak, Stopwatch, Invisible Bombs and Teleporter. The sealed v0.3.41 parent is integrated. This
+candidate still requires independent review of that integration, fresh v0.3.42 native acceptance
+and final CI. The remaining requested pickups stay outside this increment. Current publication status
 is recorded in [release notes](https://github.com/liveweird/grenadiers/releases), with source-bound
 acceptance records in [verification](../verification.md). Richer transitions and artwork remain
 follow-up work; see [pixel-art presentation](pixel-art.md) and
 [expanded item implementation](expanded-items.md).
-Updated 2026-10-21 after Teleporter source activation. Release acceptance is recorded in
+Updated 2026-10-22 after final v0.3.41 parent integration. Release acceptance is recorded in
 [verification](../verification.md).
 The [implementation plan](implementation-plan.md) remains the milestone/release reference;
 the [rules](rules.md) describe the current baseline and historical extension catalog.

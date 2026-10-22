@@ -1,5 +1,74 @@
 # Repository verification
 
+## v0.3.41 sealed native acceptance checkpoint — 2026-10-22 00:55:23 UTC — 106/106
+
+Corrected source `cb10ec7a143ed62128de3b96765b715cab346acf`, tree
+`9d38e0cbe6abf6e7601a44dea1162acdde386e28`, passed the fresh native matrix on image
+`sha256:d08b93af6eec7791e63ac423f12b33a43ee8c21e931423750f9a1a37ab63a3bf`, ref
+`grenadiers-v0341-invisible-bombs-native-recheck:cb10ec7`. The source archive SHA256 is
+`02436699dbb1bbca78b155246f7f23d886fe66a0231c041f478406615f1fdbf6`; the Docker archive
+SHA256 is `2c5143a306336ba846291f7c44bc94f66e5167943dea43c55400993e9cee4fc5`.
+Root session 28502 completed with consumed exit zero. The extracted native facts receipt SHA256 is
+`4a5962c28deb115b1cac493fde6e92862f696d41377a5aeb8eb9939b9d2f234e`; the consumed full-gate
+rollup SHA256 is `53ea3ed5daf3a483afe1319e3bef0603b62dfd8fc3f3fab55ae8263b0a797100`.
+Independent audit decoded all 48 raw reports, checked 114 PNG hashes and structures, rehashed 285
+provenance records (282 unique), and checked 80 raw latency samples. It returned CLEAR under receipt SHA256
+`7f483294b9a3a7d1b11ef3b006c8f7efe09cdf95c7492ef6947e7442d9fa899d`. The result review is
+also CLEAR under SHA256 `6ab0d0b36337c7ab104a47a17e469558d6fe569fbf2489b93a06d4f1cdf8f27a`.
+Root sealer session 69534 completed with consumed exit zero. The final manifest seals 2,492
+payloads under SHA256 `819545a47add9a28bb4394fe8b4baa5b66f503090b1a575c4dbf39d2beb5ce15`;
+2,493 durable files, 274 directories and the separate source-archive copy are byte-verified and
+read-only. The seal receipt SHA256 is
+`455c94650f76207be4eb9151f393f1b67e3f5a3937e1e95ec7a59f89005eb55b`. Independent seal
+review verified every payload hash in both copies, exact path and directory sets, read-only modes,
+zero symlinks and byte-identical source archives, and returned CLEAR under SHA256
+`a66e9618d96b5d1b45db28b5f2eb10ac75ead9c315d331756f3dca43909250f0`.
+
+Fresh source-bound gates pass. Debug and release each pass 658 core tests, 207 server tests and two
+doctests with four historical ignores. Coverage passes the same core/server counts without
+doctests and reports 13,714/14,845 lines, **92.381%**. Debug, release and coverage each complete
+all 65,536 item masks. The web gate passes 516 tests across 60 files with 95.43% statement, 91.25%
+branch, 95.9% function and 97.82% line coverage. All 54 static scenarios, renderer diagnostics,
+cargo-deny and both npm audits pass. The HIGH audit policy reports no high or critical finding;
+Vitest and `@vitest/mocker` remain pinned at 5.0.1 with two accepted moderate advisories,
+GHSA-qxg6-89mg-rqv8 and GHSA-xp26-3454-mjgp, for separate maintenance follow-up.
+
+The native matrix passes **53 Compose plus 53 Kubernetes** cases: 48 groups/reports, 74 baseline
+plus 32 optional cases, 114 PNGs, 38 runtime records, 19 Kubernetes UID/port-forward identities,
+18 fixtures and 36 seed-mode records. Source, locks, dependencies, archive and image identities
+match. Retries and carried passes are zero.
+
+All latency profiles retain 20 observations with no exceedance of the unchanged 250 ms limit.
+
+| Target | Local maximum | Shaped 50 ms maximum | Exceedances |
+| --- | ---: | ---: | ---: |
+| Compose | 48.452349 ms | 159.100015 ms | 0 |
+| Kubernetes | 155.614563 ms | 187.462147 ms | 0 |
+
+Root reviewed only the two fresh Compose pre-collection captures: [English desktop](screenshots/invisible-bombs-desktop.png)
+and [Polish 320px reduced motion](screenshots/invisible-bombs-mobile-pl.png). They show the exposed
+pickup and readable localized presentation. The paired native assertions prove privacy, reconnect
+and exact expiry; Kubernetes stills were retained without visual review.
+
+Earlier v0.3.41 attempts remain zero-carry history. The stale Diarrhea catalog oracle, exact Polish
+arena locator and initial one-window Invisible Bombs route were corrected in tests. The final route
+uses separate 600-tick collection windows, swapped viewers, event-tick privacy filtering and a
+polled sighted pre-deadline detonation; no game behavior, timeout, fuse, retry policy or timing
+bound changed. The initial Kubernetes premeasurement capture 54425 rejected a filename assumption;
+observer 14269 was deliberately stopped with consumed exit 143 before any latency test. Fresh
+observer 43361 and the full matrix passed without retrying a test.
+
+Cleanup passed at `2026-10-22T00:48:26.712841Z`: owned containers, network, namespace,
+port-forwards and ports 18284/18285 were absent. Localhost:8085 still served published v0.3.40
+image `sha256:ec8604af4317d188d7b00ab7cfa27115114430e0a11fb9821856617ad9409906`; health, readiness
+and index returned 200 and served bytes matched the container.
+
+At this dated checkpoint, hosted candidate, merge, tag and promotion checks for v0.3.41 have not
+run. Fifteen of 22 requested item types are published through v0.3.40. Invisible Bombs is the
+sixteenth native-verified type; Teleporter, Wall Pass, Kick, Punch, Bracelet and Oil Barrel
+remain, with ART-ATLAS following the feature batch. See the
+[release notes](https://github.com/liveweird/grenadiers/releases) for current release status.
+
 ## v0.3.40 hosted CI aggregate recovery — 2026-10-21 — C1 artifact layout
 
 Hosted push run 39680221078 completed the Rust server-mask partition but failed the aggregate job.
@@ -1597,10 +1666,11 @@ accepted all **131,072 masks** in **197.52 seconds**. Formatting, Clippy, reposi
 generated contracts and **44-scenario** E2E static parity passed at the reviewed feature tip.
 
 This source activation adds the mode-0444 seed fixture, read-only Compose override and one CI
-keyboard scenario for safe swap, marker, fresh reconnect admission and unsafe consumption. It does
-not claim predecessor raw-v0.3.41 integration, a fresh candidate image, native Compose/Kubernetes
-acceptance, hosted CI, publication or a current v0.3.42 localhost deployment. Those gates remain
-before release.
+keyboard scenario for safe swap, marker, fresh reconnect admission and unsafe consumption. That
+source-activation checkpoint did not claim predecessor raw-v0.3.41 integration. The current
+candidate incorporates the sealed v0.3.41 parent and still does not claim a fresh v0.3.42 image,
+native Compose/Kubernetes acceptance, hosted CI, publication or a current v0.3.42 localhost
+deployment. Those gates remain before release.
 
 ## Prepared v0.3.41 Invisible Bombs source — source-specific local checks
 
@@ -1635,8 +1705,8 @@ without changing production code: blind P1 placement derives its ID from P2's si
 compositor baseline uses the same cell after collection and before planting, and paired adjacent
 publication windows prove hidden-before/revealed-after state with the same current fuse.
 
-No native Compose/Kubernetes acceptance or hosted CI is claimed for v0.3.41. Before native
-acceptance, the integrated source still requires its source-bound full gates and independent review.
+At that prepared-source checkpoint, no native Compose/Kubernetes acceptance or hosted CI was
+claimed for v0.3.41; the later integrated-source checkpoint is recorded at the top of this file.
 
 ## Historical prepared v0.3.40 Stopwatch source — source-specific local checks
 

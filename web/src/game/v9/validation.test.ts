@@ -1,22 +1,38 @@
 import { describe, expect, it } from 'vitest'
+import { checkedCatalogMaskRanges, executeCatalogMaskRange } from '../../test/catalogMasks'
 import { validateServerMessage } from '../client/clientProtocol'
 import { snapshot } from '../client/testSupport'
 import { validateGameplayV8ServerMessage } from '../v8/validation'
 import { validateGameplayV9ServerMessage } from './validation'
 
-describe('gameplay v9 Stopwatch validation', () => {
-  const supported = [
-    'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch',
-    'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot',
-    'shortFlame', 'longFuse', 'reverseControls',
-  ] as const
+const supported = [
+  'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch',
+  'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot',
+  'shortFlame', 'longFuse', 'reverseControls', 'invisibleBombs',
+] as const
+const expectedSupported = [
+  'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch',
+  'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot',
+  'shortFlame', 'longFuse', 'reverseControls', 'invisibleBombs',
+] as const
+const supportedRanges = checkedCatalogMaskRanges({
+  protocol: 'gameplay v9', catalog: supported, expectedCount: 16,
+  expectedOrder: expectedSupported,
+})
 
-  it.each(Array.from({ length: 2 ** supported.length }, (_, mask) => [
-    supported.filter((_, index) => (mask & (1 << index)) !== 0),
-  ] as const))('accepts the pinned supported enabled-item set %j', (enabledItems) => {
-    const message = snapshot(1)
-    message.room.settings.enabledItems = [...enabledItems]
-    expect(validateGameplayV9ServerMessage(message)).toEqual({ valid: true, value: message })
+describe('gameplay v9 Stopwatch validation', () => {
+  it('pins sixteen unique catalog entries in canonical order before enumerating mask ranges', () => {
+    expect(supported).toHaveLength(16)
+    expect(new Set(supported)).toHaveLength(16)
+    expect(supported).toEqual(expectedSupported)
+  })
+
+  it.each(supportedRanges)('accepts every pinned supported enabled-item mask in [$start, $end)', (range) => {
+    executeCatalogMaskRange('gameplay v9', supported, range, (_mask, enabledItems) => {
+      const message = snapshot(1)
+      message.room.settings.enabledItems = [...enabledItems]
+      expect(validateGameplayV9ServerMessage(message)).toEqual({ valid: true, value: message })
+    })
   })
 
   it('binds visible frozen state to the living opponent Stopwatch and keeps hidden actors exact', () => {
@@ -120,5 +136,45 @@ describe('gameplay v9 Stopwatch validation', () => {
     if (leakedOpponent.type !== 'visible') throw new Error('expected visible actor')
     leakedOpponent.effects = [{ kind: 'invisibilityCloak', remainingTicks: 600 }]
     expect(validateServerMessage(leaked, 'one')).toBe(false)
+  })
+
+  it('requires an afflicted recipient to receive an empty live-bomb list', () => {
+    const message = snapshot(3)
+    message.room.settings.enabledItems = ['invisibleBombs']
+    const own = message.state.actors[0]
+    if (own.type !== 'visible') throw new Error('expected visible own actor')
+    own.effects = [{ kind: 'invisibleBombs', remainingTicks: 600 }]
+    expect(validateServerMessage(message, 'one')).toBe(true)
+
+    own.liveBombCount = 1
+    message.state.bombs = [{
+      id: 3, cell: { column: 1, row: 1 }, owner: own.id, range: 2, placedAt: 1,
+      trigger: { type: 'remote' }, blast: 'standard',
+    }]
+    message.room.settings.enabledItems = ['remoteBomb', 'invisibleBombs']
+    expect(validateGameplayV9ServerMessage(message)).toEqual({ valid: true, value: message })
+    expect(validateServerMessage(message, 'one')).toBe(false)
+
+    own.effects = []
+    const opponent = message.state.actors[1]
+    if (opponent.type !== 'visible') throw new Error('expected visible opponent')
+    opponent.effects = [{ kind: 'invisibleBombs', remainingTicks: 600 }]
+    expect(validateServerMessage(message, 'one')).toBe(true)
+    expect(validateServerMessage(message, 'two')).toBe(false)
+  })
+
+  it('accepts visible pre-collection history without requiring a live bomb', () => {
+    const message = snapshot(4)
+    message.room.settings.enabledItems = ['invisibleBombs']
+    const own = message.state.actors[0]
+    if (own.type !== 'visible') throw new Error('expected visible own actor')
+    own.effects = [{ kind: 'invisibleBombs', remainingTicks: 599 }]
+    message.events = [{
+      tick: 3, index: 0, kind: { type: 'bombPlaced', bomb: {
+        id: 3, cell: { column: 1, row: 1 }, owner: 1, range: 2, placedAt: 3,
+        trigger: { type: 'timed', remainingTicks: 180, paused: false }, blast: 'standard',
+      } },
+    }]
+    expect(validateServerMessage(message, 'one')).toBe(true)
   })
 })

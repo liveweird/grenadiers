@@ -238,7 +238,7 @@ impl State {
             }
             events.push(StepEvent::bomb(
                 tick,
-                self.event_audience_for(bomb.owner(), tick),
+                self.bomb_event_audience_for(bomb.owner(), tick),
                 StepEventKind::BombPlaced(BombView::from(bomb)),
                 bomb,
                 timed_paused,

@@ -51,11 +51,12 @@ fn authentication_is_version_nine_and_version_eight_stays_archived() {
 }
 
 #[test]
-fn expanded_catalog_activates_stopwatch_without_changing_reserved_ids() {
+fn expanded_catalog_activates_stopwatch_and_invisible_bombs_without_changing_reserved_ids() {
     let catalog = super::expanded_items();
-    assert_eq!(catalog.iter().count(), 15);
-    assert_eq!(1_usize << catalog.iter().count(), 32_768);
+    assert_eq!(catalog.iter().count(), 16);
+    assert_eq!(1_usize << catalog.iter().count(), 65_536);
     assert!(catalog.contains(ItemId::Stopwatch));
+    assert!(catalog.contains(ItemId::InvisibleBombs));
     for item in RESERVED_ITEMS {
         let settings = GameSettings::new(0, 256, 3, 180, ItemSet::new([item]).unwrap()).unwrap();
         assert_eq!(
@@ -67,18 +68,18 @@ fn expanded_catalog_activates_stopwatch_without_changing_reserved_ids() {
     let settings = GameSettings::new(0, 256, 3, 180, catalog).unwrap();
     assert_eq!(
         expanded_settings(settings).unwrap().enabled_items().bits(),
-        524_272
+        1_048_560
     );
 }
 
 #[test]
-fn expanded_settings_accept_every_subset_of_the_pinned_fifteen_item_catalog() {
+fn expanded_settings_accept_every_subset_of_the_pinned_sixteen_item_catalog() {
     let bits = [
         16_u32, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16_384, 32_768, 65_536, 131_072,
-        262_144,
+        262_144, 524_288,
     ];
-    assert_eq!(bits.len(), 15);
-    for mask in 0_u32..32_768 {
+    assert_eq!(bits.len(), 16);
+    for mask in 0_u32..65_536 {
         let enabled = bits.iter().enumerate().fold(0, |value, (index, bit)| {
             if mask & (1 << index) == 0 {
                 value

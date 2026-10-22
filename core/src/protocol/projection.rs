@@ -382,6 +382,7 @@ pub(super) const fn wire_pickup_kind(kind: game::PickupKind) -> Option<PickupKin
         | game::PickupKind::SlowFoot
         | game::PickupKind::ShortFlame
         | game::PickupKind::LongFuse
-        | game::PickupKind::ReverseControls => None,
+        | game::PickupKind::ReverseControls
+        | game::PickupKind::InvisibleBombs => None,
     }
 }

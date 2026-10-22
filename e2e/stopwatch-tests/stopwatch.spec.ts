@@ -82,7 +82,7 @@ test('Stopwatch freezes voluntary actions while Timed bombs pause', async ({ bro
     expect(latestSnapshot(games[0])!.room.availableItems).toEqual([
       'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch',
       'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame',
-      'longFuse', 'reverseControls',
+      'longFuse', 'reverseControls', 'invisibleBombs',
     ])
     await Promise.all([
       reveal(one, games[0], 'one', { column: 2, row: 1 },

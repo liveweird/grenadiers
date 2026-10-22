@@ -13,9 +13,14 @@ receives an empty bomb list and no post-collection placement or detonation event
 crops distinguish the sighted bomb from the blinded floor while public flames remain visible.
 
 Player One reconnects while blinded and a bomb is live. The event-free admission preserves the
-original physical expiry deadline. After the initial fire clears, Player Two places a late bomb in
-the `T+390..T+470` window. The last paired publication at `T+597..T+599` keeps it hidden from
-Player One and visible to Player Two. The first paired publication at `T+600..T+602` reveals
-the same ID and cell with equal current remaining fuse on both views, without a replayed
-placement cue. Pure-core tests establish the exact domain expiry at `T+600`. The route uses normal controls, no
-state injection, seed search, retries, duration override or extended timeout.
+original physical expiry deadline. After the initial fire clears, the mirrored block exposes the
+same pickup at 11,11. Player Two collects it, and both streams derive the same new `T2+600`
+deadline from the collection event and remaining effect ticks.
+
+Player Two then places a late bomb in the unchanged `T2+390..T2+470` window. Player One is the
+sighted recipient and receives that bomb's placement cue; newly blinded Player Two receives no
+placement or detonation cue. The last paired publication at `T2+597..T2+599` keeps the bomb hidden
+from Player Two and visible to Player One. The first paired publication at `T2+600..T2+602`
+reveals the same ID and cell with equal current remaining fuse on both views, without replaying the
+placement cue to Player Two. Pure-core tests establish exact domain expiry at 600 ticks. The route
+uses normal controls, no state injection, seed search, retries, duration override or extended timeout.

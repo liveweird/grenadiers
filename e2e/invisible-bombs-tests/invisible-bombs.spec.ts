@@ -166,7 +166,8 @@ test('Invisible Bombs hides live bombs and cues until exact expiry', async ({ br
       throw new Error('surviving fixture bomb must remain Timed')
     }
     expect(revealed.trigger.remainingTicks).toBe(sighted.trigger.remainingTicks)
-    expect(bombEvents(games[0], privacyStart)).toHaveLength(0)
+    expect(bombEvents(games[0], secondPrivacyStart).filter(({ kind }) =>
+      kind.type === 'bombPlaced' && kind.bomb.id === survivor.id)).toHaveLength(1)
     expect(bombEvents(games[1], secondPrivacyStart)).toHaveLength(0)
     expect(await tilePixels(two, 12, 11)).not.toEqual(await tilePixels(two, 3, 1))
   } finally { await Promise.all(contexts.map((context) => context.close())) }

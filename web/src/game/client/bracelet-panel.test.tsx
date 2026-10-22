@@ -1,7 +1,8 @@
 import { MantineProvider } from '@mantine/core'
 import { render, screen } from '@testing-library/react'
-import { expect, it, vi } from 'vitest'
+import { beforeEach, expect, it, vi } from 'vitest'
 import type { GameArenaProps } from '../arena/types'
+import i18n from '../../i18n'
 import { GamePanelView, type GameActions } from './GamePanel'
 import { initialGameClientState } from './clientTypes'
 import { snapshot } from './testSupport'
@@ -10,6 +11,8 @@ vi.mock('../arena/GameArena', () => ({
   GameArena: ({ label, focusHint }: GameArenaProps) =>
     <div role="region" aria-label={label} data-focus-hint={focusHint} />,
 }))
+
+beforeEach(async () => { await i18n.changeLanguage('en') })
 
 it('labels Bracelet as passive equipment without an action hint or cooldown timer', () => {
   const current = snapshot(20)
@@ -27,7 +30,7 @@ it('labels Bracelet as passive equipment without an action hint or cooldown time
   }
   render(<MantineProvider env="test"><GamePanelView state={state} actions={actions} /></MantineProvider>)
   const stats = screen.getByLabelText('Player one upgrades')
-  expect(stats).toHaveTextContent('EquipmentBracelet')
+  expect(stats).toHaveTextContent('GearBracelet')
   expect(stats).not.toHaveTextContent('Bracelet (')
   expect(screen.getByRole('region', { name: 'Grenadiers courtyard' })).toHaveAttribute(
     'data-focus-hint', 'Select the courtyard to control your player.',

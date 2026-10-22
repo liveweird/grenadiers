@@ -2,7 +2,6 @@ import { expect, test, type Page } from '@playwright/test'
 import { expectPaintedCanvas, latestSnapshot, observeGame, visibleActor, type ObservedGame } from '../tests/support/duel'
 import { moveTo } from '../tests/support/movement'
 import { admissionBaseline, disconnectTransport, installTransportProbe } from '../tests/support/reconnect'
-import { arenaTilePixels } from '../tests/support/compositor'
 import type { GameServerMessage } from '../../web/src/game/v11/schema'
 
 test.beforeAll(() => expect(process.env.E2E_INVISIBILITY_CLOAK_FIXTURE)

@@ -9,8 +9,10 @@ collection.
 
 After collection, both players place and escape from real bombs. Player Two's stream sees both
 current bomb records and captured cues. Player One's stream keeps truthful live-bomb counts but
-receives an empty bomb list and no post-collection placement or detonation events. Compositor tile
-crops distinguish the sighted bomb from the blinded floor while public flames remain visible.
+receives an empty bomb list and no placement or detonation events whose event ticks precede the
+exact `T+600` expiry. Player Two's sighted stream witnesses a pre-expiry detonation, so the cue
+filtering proof is non-vacuous. Compositor tile crops distinguish the sighted bomb from the blinded
+floor while public flames remain visible.
 
 Player One reconnects while blinded and a bomb is live. The event-free admission preserves the
 original physical expiry deadline. After the initial fire clears, the mirrored block exposes the
@@ -19,7 +21,7 @@ deadline from the collection event and remaining effect ticks.
 
 Player Two then places a late bomb in the unchanged `T2+390..T2+470` window. Player One is the
 sighted recipient and receives that bomb's placement cue; newly blinded Player Two receives no
-placement or detonation cue. The last paired publication at `T2+597..T2+599` keeps the bomb hidden
+placement cue while blinded. The last paired publication at `T2+597..T2+599` keeps the bomb hidden
 from Player Two and visible to Player One. The first paired publication at `T2+600..T2+602`
 reveals the same ID and cell with equal current remaining fuse on both views, without replaying the
 placement cue to Player Two. Pure-core tests establish exact domain expiry at 600 ticks. The route

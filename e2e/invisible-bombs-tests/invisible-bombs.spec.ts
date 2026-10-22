@@ -109,16 +109,29 @@ test('Invisible Bombs hides live bombs and cues until exact expiry', async ({ br
     expect(bombEvents(games[0], privacyStart)).toHaveLength(0)
     expect(await tilePixels(one, 3, 1)).toEqual(floor)
     expect(await tilePixels(two, 3, 1)).not.toEqual(floor)
+    expect(bombEvents(games[1], privacyStart).some(({ tick, kind }) => tick < deadline
+      && kind.type === 'bombDetonated' && (kind.bomb.id === ownBomb.id
+        || kind.bomb.id === rivalBomb.id))).toBe(true)
 
     await disconnectTransport(one)
     await expect.poll(async () => (await admissionBaseline(one))?.tick).toBeGreaterThan(privacyStart)
     expect(latestSnapshot(games[0])!.state.physicalTick).toBeLessThan(deadline)
     expect(effectTicks(games[0], 'one')).toBeGreaterThan(0)
     expect(latestSnapshot(games[0])!.state.bombs).toEqual([])
+    const connectedBomb = latestSnapshot(games[1])!.state.bombs.find(({ id }) =>
+      id === ownBomb.id || id === rivalBomb.id)
+    expect(connectedBomb).toBeDefined()
+    expect(connectedBomb?.trigger.type).toBe('timed')
+    if (connectedBomb?.trigger.type !== 'timed') throw new Error('live reconnect bomb must be Timed')
+    expect(connectedBomb.trigger.remainingTicks).toBeGreaterThan(0)
     expect(bombEvents(games[0], privacyStart)).toHaveLength(0)
     await expect.poll(() => snapshots(games[0]).some(({ state }) => state.physicalTick >= privacyStart
       && state.flames.length > 0)).toBe(true)
     await expect.poll(() => latestSnapshot(games[1])!.state.bombs.length + latestSnapshot(games[1])!.state.flames.length).toBe(0)
+    expect(bombEvents(games[0], privacyStart).filter(({ tick }) => tick < deadline)).toHaveLength(0)
+    expect(bombEvents(games[1], privacyStart).some(({ tick, kind }) => tick < deadline
+      && kind.type === 'bombDetonated' && (kind.bomb.id === ownBomb.id
+        || kind.bomb.id === rivalBomb.id))).toBe(true)
     await expect.poll(() => latestSnapshot(games[1])!.state.pickups).toContainEqual({
       cell: { column: 11, row: 11 }, kind: 'invisibleBombs' })
     await moveSeatTo(two, games[1], 'two', { column: 13, row: 11 })

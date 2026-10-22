@@ -1,5 +1,30 @@
 # Repository verification
 
+## v0.3.41 hosted CI recovery — 2026-10-22 — browser APT mirror priority
+
+PR 89 push run 39840668328 completed eight jobs, but its browser-items job spent 13 minutes
+43 seconds in `playwright install --with-deps chromium` and exceeded the unchanged 20-minute job
+budget. The package phase alone reported 13 minutes 15 seconds fetching Ubuntu archives through
+the Azure mirror before falling back to the Ubuntu archive. No browser assertion failed: Short
+Fuse passed, Short Flame was interrupted by the job timeout, and the remaining item cases did not
+run. Pull-request run 39840683278 passed all nine jobs and the exact 53-case/65,536-mask verifier,
+but it cannot replace the required successful push lineage.
+
+The runner image [`ubuntu24/20261012.334` setup source](https://github.com/actions/runner-images/blob/ubuntu24/20261012.334/images/ubuntu/scripts/build/configure-apt-sources.sh#L8-L11)
+assigns explicit priorities in `/etc/apt/apt-mirrors.txt`: Azure archive 1, Ubuntu archive 2 and
+Ubuntu security 3. This four-path CI-only repair validates that exact three-line configuration,
+atomically swaps the archive priorities to Ubuntu 1 and Azure 2, and preserves the security mirror,
+file mode, APT signature checks and the existing Playwright command. The already-correct state is
+accepted idempotently; missing, duplicate, reordered, unknown or differently prioritized entries
+fail before the file is changed. Job/test timeouts, retries, the browser matrix, dependency and
+browser revisions, application runtime inputs and all product behavior remain unchanged.
+
+The 106-case native result and source-bound gates remain evidence for source
+`035c6a1263674601874e82c31b5c731c794cb38a`. They were not rerun for this CI-only tree. No hosted
+acceptance, merge, publication, tag verification or promotion is claimed for the repair; fresh
+exact-source hosted runs remain required. The CI recovery and release records identify the
+corrected commit independently.
+
 ## v0.3.41 live-window checkpoint - native acceptance audited and sealed
 
 Source 035c6a1263674601874e82c31b5c731c794cb38a, tree

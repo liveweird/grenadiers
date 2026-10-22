@@ -208,6 +208,10 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
           cache-dependency-path: e2e/package-lock.json
+      - name: Check browser APT mirror contract
+        run: node --test scripts/ci-browser-apt-mirror.test.mjs
+      - name: Prioritize the Ubuntu archive mirror
+        run: sudo "$(command -v node)" scripts/ci-browser-apt-mirror.mjs /etc/apt/apt-mirrors.txt
       - run: test -s Cargo.lock
       - run: npm --prefix e2e ci
       - run: npm --prefix e2e exec -- playwright install --with-deps chromium

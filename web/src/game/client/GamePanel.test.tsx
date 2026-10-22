@@ -115,7 +115,7 @@ describe('v10 private-state presentation', () => {
 
     const stats = screen.getByLabelText('Player one upgrades')
     expect(stats).toHaveTextContent('Bombs available1')
-    expect(stats).toHaveTextContent('EquipmentHeart')
+    expect(stats).toHaveTextContent('GearHeart')
     expect(stats).toHaveTextContent('Bomb typeRemote bomb')
     expect(stats).toHaveTextContent('EffectsShield (0:02)')
     expect(stats).toHaveTextContent('Golden flame (0:10)')

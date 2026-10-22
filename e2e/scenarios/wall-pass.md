@@ -3,10 +3,13 @@
 ## Scenario: Wall Pass crosses one intact block, rejects planting and hard walls, and resumes inside
 
 Two Chromium contexts use the repeating-byte-31 generated-v2 fixture with only Wall Pass enabled.
-The English desktop and Polish 320-pixel reduced-motion clients ready before play, reveal the
-pickup with an ordinary bomb, and move the holder into the intact block at `(3,2)`. Both public
-views retain the opaque block and show the current equipment cue without exposing concealed
-contents. A bomb action inside creates no bomb or event and consumes no inventory. Movement west
+The English desktop and Polish 320-pixel reduced-motion clients ready before play and reveal the
+pickup with an ordinary bomb. After the bomb and flames clear, both painted canvases provide
+localized pre-collection captures while both actors are idle; the mobile view has no horizontal
+overflow. The holder then collects Wall Pass and moves into the intact block at `(3,2)`. Both
+public views retain the opaque block and show the current equipment cue without exposing concealed
+contents, while paired pixel and position assertions prove the crossing. A bomb action inside
+creates no bomb or event and consumes no inventory. Movement west
 clamps at the hard wall `(2,2)`. A strictly newer ordinary reconnect admission retains the
 equipment and position, after which normal movement exits north. The scenario uses native keys,
 ordinary UI actions, and read-only socket observation. A legal bomb placed after exit has the

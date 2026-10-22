@@ -26,16 +26,72 @@ jobs:
       - run: scripts/gates.sh web
       - run: scripts/gates.sh e2e
 
-  server:
+  server-mask-plan:
+    name: server-mask-plan
     runs-on: ubuntu-24.04
     timeout-minutes: 20
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+      source: ${{ steps.source.outputs.source }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version-file: .nvmrc
       - name: Require reviewed lockfile
         run: test -s Cargo.lock
+      - name: Install declared Rust toolchain
+        run: rustup show
+      - id: source
+        name: Bind exact source
+        run: |
+          source='${{ github.event.pull_request.head.sha || github.sha }}'
+          test "$(git rev-parse HEAD)" = "$source"
+          echo "source=$source" >> "$GITHUB_OUTPUT"
+      - id: plan
+        run: node scripts/ci-server-mask-plan.mjs '${{ github.event.pull_request.head.sha || github.sha }}'
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: server-mask-plan-${{ steps.source.outputs.source }}
+          path: server-mask-plan.json
+          if-no-files-found: error
+          retention-days: 7
+
+  server-mask-partition:
+    name: server-mask-partition (${{ matrix.index }}/${{ matrix.count }})
+    needs: server-mask-plan
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.server-mask-plan.outputs.matrix) }}
+    env:
+      GRENADIERS_SERVER_REPLAY_ITEM_MASK_CI_SOURCE: ${{ needs.server-mask-plan.outputs.source }}
+      GRENADIERS_SERVER_REPLAY_ITEM_MASK_PARTITION_INDEX: ${{ matrix.index }}
+      GRENADIERS_SERVER_REPLAY_ITEM_MASK_PARTITION_COUNT: ${{ matrix.count }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.server-mask-plan.outputs.source }}
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+      - name: Set server mask report paths
+        run: |
+          printf '%s\n' \
+            "GRENADIERS_SERVER_REPLAY_ITEM_MASK_REPORT_DIR=$RUNNER_TEMP/server-mask-report" \
+            "GRENADIERS_SERVER_REPLAY_ITEM_MASK_PLAN_FILE=$RUNNER_TEMP/server-mask-plan/server-mask-plan.json" \
+            >> "$GITHUB_ENV"
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: server-mask-plan-${{ needs.server-mask-plan.outputs.source }}
+          path: ${{ runner.temp }}/server-mask-plan
+      - name: Require exact source and reviewed lockfile
+        run: |
+          test "$(git rev-parse HEAD)" = "$GRENADIERS_SERVER_REPLAY_ITEM_MASK_CI_SOURCE"
+          test -s Cargo.lock
       - name: Install declared Rust toolchain
         run: |
           rustup show
@@ -44,6 +100,44 @@ jobs:
       # Repository checks only read npm manifests/locks; no npm installation is needed.
       - run: scripts/gates.sh server
       - run: scripts/gates.sh coverage
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always()
+        with:
+          name: server-mask-partition-${{ needs.server-mask-plan.outputs.source }}-${{ matrix.index }}
+          path: ${{ runner.temp }}/server-mask-report/*.json
+          if-no-files-found: error
+          retention-days: 7
+
+  server:
+    name: server
+    if: always()
+    needs: [server-mask-plan, server-mask-partition]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Require successful server mask jobs
+        run: |
+          test '${{ needs.server-mask-plan.result }}' = 'success'
+          test '${{ needs.server-mask-partition.result }}' = 'success'
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.server-mask-plan.outputs.source }}
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+      - name: Verify aggregate source
+        run: test "$(git rev-parse HEAD)" = '${{ needs.server-mask-plan.outputs.source }}'
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: server-mask-plan-${{ needs.server-mask-plan.outputs.source }}
+          path: ${{ runner.temp }}/server-mask-plan
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          pattern: server-mask-partition-*
+          path: ${{ runner.temp }}/server-mask-artifacts${{ fromJSON(needs.server-mask-plan.outputs.matrix).include[0].count == 1 && format('/server-mask-partition-{0}-0', needs.server-mask-plan.outputs.source) || '' }}
+          merge-multiple: false
+      - name: Validate complete server mask evidence
+        run: node scripts/ci-server-mask-aggregate.mjs "$RUNNER_TEMP/server-mask-plan/server-mask-plan.json" "$RUNNER_TEMP/server-mask-artifacts" '${{ needs.server-mask-plan.outputs.source }}'
 
   security:
     runs-on: ubuntu-24.04
@@ -58,11 +152,57 @@ jobs:
       - run: cargo install cargo-deny --version 0.20.2 --locked
       - run: scripts/gates.sh security
 
+  browser-image:
+    name: browser-image
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    outputs:
+      image-id: ${{ steps.transfer.outputs.image-id }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - run: test -s Cargo.lock
+      - name: Build the shared browser image
+        run: docker compose build app
+      - name: Scan built image for fixable high or critical vulnerabilities
+        run: |
+          image_id="$(docker image inspect --format '{{.Id}}' grenadiers-app)"
+          docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+            ghcr.io/aquasecurity/trivy:0.74.0@sha256:62b1e65e8869bc4b4c6aa4fa2b21595256c7c2f6018a9d9ad61caf87187c1969 \
+            image --scanners vuln --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 \
+            --no-progress "$image_id"
+      - name: Seal the image transfer artifact
+        id: transfer
+        env:
+          SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          scripts/ci-image-transfer.sh prepare "$RUNNER_TEMP/browser-image" "$SOURCE_SHA" grenadiers-app
+          image_id="$(docker image inspect --format '{{.Id}}' grenadiers-app)"
+          echo "image-id=$image_id" >> "$GITHUB_OUTPUT"
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: browser-image-${{ github.run_id }}-${{ github.run_attempt }}-${{ github.event.pull_request.head.sha || github.sha }}
+          path: ${{ runner.temp }}/browser-image/
+          compression-level: 0
+          retention-days: 1
+      - name: Clean up image builder
+        if: always()
+        run: docker compose down --volumes --remove-orphans
+
   browser:
+    name: browser (${{ matrix.shard }})
+    needs: browser-image
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [items, classic]
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version-file: .nvmrc
@@ -71,7 +211,16 @@ jobs:
       - run: test -s Cargo.lock
       - run: npm --prefix e2e ci
       - run: npm --prefix e2e exec -- playwright install --with-deps chromium
-      - run: docker compose up --build -d
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: browser-image-${{ github.run_id }}-${{ github.run_attempt }}-${{ github.event.pull_request.head.sha || github.sha }}
+          path: ${{ runner.temp }}/browser-image
+      - name: Verify and load the sealed browser image
+        env:
+          EXPECTED_IMAGE_ID: ${{ needs['browser-image'].outputs['image-id'] }}
+          SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: scripts/ci-image-transfer.sh load "$RUNNER_TEMP/browser-image" "$SOURCE_SHA" grenadiers-app "$EXPECTED_IMAGE_ID"
+      - run: docker compose up -d --no-build
       - name: Wait for actual service readiness
         run: |
           for attempt in $(seq 1 60); do
@@ -81,7 +230,9 @@ jobs:
           docker compose logs app
           exit 1
       - run: scripts/gates.sh browser
+        if: matrix.shard == 'items'
       - name: Verify deterministic pickups using the same built image
+        if: matrix.shard == 'items'
         run: |
           docker compose -f docker-compose.yaml -f docker-compose.pickups.yaml up -d --no-build --force-recreate app
           for attempt in $(seq 1 60); do
@@ -91,6 +242,7 @@ jobs:
           curl --fail --silent http://127.0.0.1:8085/api/v1/ready
           E2E_PICKUP_FIXTURE=arena-v1-pickups npm --prefix e2e run test:pickups
       - name: Verify Heart pickup and protection using the same built image
+        if: matrix.shard == 'items'
         run: |
           chmod 444 core/tests/fixtures/arena-v2-heart.seed
           docker compose -f docker-compose.yaml -f docker-compose.heart.yaml up -d --no-build --force-recreate app
@@ -101,6 +253,7 @@ jobs:
           curl --fail --silent http://127.0.0.1:8085/api/v1/ready
           E2E_HEART_FIXTURE=arena-v2-heart npm --prefix e2e run test:heart
       - name: Verify opt-in Shield pickup and exact expiry using the same built image
+        if: matrix.shard == 'items'
         run: |
           chmod 444 core/tests/fixtures/arena-v2-shield.seed
           docker compose -f docker-compose.yaml -f docker-compose.shield.yaml up -d --no-build --force-recreate app
@@ -111,6 +264,7 @@ jobs:
           curl --fail --silent http://127.0.0.1:8085/api/v1/ready
           E2E_SHIELD_FIXTURE=arena-v2-shield npm --prefix e2e run test:shield
       - name: Verify opt-in Golden Flame range and exact expiry using the same built image
+        if: matrix.shard == 'items'
         run: |
           chmod 444 core/tests/fixtures/arena-v2-golden-flame.seed
           docker compose -f docker-compose.yaml -f docker-compose.golden-flame.yaml up -d --no-build --force-recreate app
@@ -121,6 +275,7 @@ jobs:
           curl --fail --silent http://127.0.0.1:8085/api/v1/ready
           E2E_GOLDEN_FLAME_FIXTURE=arena-v2-golden-flame npm --prefix e2e run test:golden-flame
       - name: Verify opt-in Short Fuse timing and exact expiry using the same built image
+        if: matrix.shard == 'items'
         run: |
           chmod 444 core/tests/fixtures/arena-v2-short-fuse.seed
           docker compose -f docker-compose.yaml -f docker-compose.short-fuse.yaml up -d --no-build --force-recreate app
@@ -131,6 +286,7 @@ jobs:
           curl --fail --silent http://127.0.0.1:8085/api/v1/ready
           E2E_SHORT_FUSE_FIXTURE=arena-v2-short-fuse npm --prefix e2e run test:short-fuse
       - name: Verify opt-in Short Flame range and exact expiry using the same built image
+        if: matrix.shard == 'items'
         run: |
           chmod 444 core/tests/fixtures/arena-v2-short-flame.seed
           docker compose -f docker-compose.yaml -f docker-compose.short-flame.yaml up -d --no-build --force-recreate app
@@ -141,6 +297,7 @@ jobs:
           curl --fail --silent http://127.0.0.1:8085/api/v1/ready
           E2E_SHORT_FLAME_FIXTURE=arena-v2-short-flame npm --prefix e2e run test:short-flame
       - name: Verify opt-in Long Fuse timing and exact expiry using the same built image
+        if: matrix.shard == 'items'
         run: |
           chmod 444 core/tests/fixtures/arena-v2-long-fuse.seed
           docker compose -f docker-compose.yaml -f docker-compose.long-fuse.yaml up -d --no-build --force-recreate app
@@ -151,6 +308,7 @@ jobs:
           curl --fail --silent http://127.0.0.1:8085/api/v1/ready
           E2E_LONG_FUSE_FIXTURE=arena-v2-long-fuse npm --prefix e2e run test:long-fuse
       - name: Verify opt-in Reverse Controls inversion and exact expiry using the same built image
+        if: matrix.shard == 'items'
         run: |
           chmod 444 core/tests/fixtures/arena-v2-reverse-controls.seed
           docker compose -f docker-compose.yaml -f docker-compose.reverse-controls.yaml up -d --no-build --force-recreate app
@@ -161,6 +319,7 @@ jobs:
           curl --fail --silent http://127.0.0.1:8085/api/v1/ready
           E2E_REVERSE_CONTROLS_FIXTURE=arena-v2-reverse-controls npm --prefix e2e run test:reverse-controls
       - name: Verify opt-in Diarrhea automatic bomb placement using the same built image
+        if: matrix.shard == 'items'
         run: |
           chmod 444 core/tests/fixtures/arena-v2-diarrhea.seed
           docker compose -f docker-compose.yaml -f docker-compose.diarrhea.yaml up -d --no-build --force-recreate app
@@ -171,6 +330,7 @@ jobs:
           curl --fail --silent http://127.0.0.1:8085/api/v1/ready
           E2E_DIARRHEA_FIXTURE=arena-v2-diarrhea npm --prefix e2e run test:diarrhea
       - name: Verify opt-in Slow foot movement and exact expiry using the same built image
+        if: matrix.shard == 'items'
         run: |
           chmod 444 core/tests/fixtures/arena-v2-slow-foot.seed
           docker compose -f docker-compose.yaml -f docker-compose.slow-foot.yaml up -d --no-build --force-recreate app
@@ -181,6 +341,7 @@ jobs:
           curl --fail --silent http://127.0.0.1:8085/api/v1/ready
           E2E_SLOW_FOOT_FIXTURE=arena-v2-slow-foot npm --prefix e2e run test:slow-foot
       - name: Verify opt-in Piercing Bomb penetration using the same built image
+        if: matrix.shard == 'items'
         run: |
           chmod 444 core/tests/fixtures/arena-v2-piercing-bomb.seed
           docker compose -f docker-compose.yaml -f docker-compose.piercing-bomb.yaml up -d --no-build --force-recreate app
@@ -191,6 +352,7 @@ jobs:
           curl --fail --silent http://127.0.0.1:8085/api/v1/ready
           E2E_PIERCING_BOMB_FIXTURE=arena-v2-piercing-bomb npm --prefix e2e run test:piercing-bomb
       - name: Verify opt-in Power Bomb hard-wall traversal using the same built image
+        if: matrix.shard == 'items'
         run: |
           chmod 444 core/tests/fixtures/arena-v2-power-bomb.seed
           docker compose -f docker-compose.yaml -f docker-compose.power-bomb.yaml up -d --no-build --force-recreate app
@@ -200,7 +362,19 @@ jobs:
           done
           curl --fail --silent http://127.0.0.1:8085/api/v1/ready
           E2E_POWER_BOMB_FIXTURE=arena-v2-power-bomb npm --prefix e2e run test:power-bomb
+      - name: Verify opt-in Remote Bomb command detonation using the same built image
+        if: matrix.shard == 'items'
+        run: |
+          chmod 444 core/tests/fixtures/arena-v2-remote-bomb.seed
+          docker compose -f docker-compose.yaml -f docker-compose.remote-bomb.yaml up -d --no-build --force-recreate app
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent http://127.0.0.1:8085/api/v1/ready; then break; fi
+            sleep 1
+          done
+          curl --fail --silent http://127.0.0.1:8085/api/v1/ready
+          E2E_REMOTE_BOMB_FIXTURE=arena-v2-remote-bomb npm --prefix e2e run test:remote-bomb
       - name: Verify opt-in Landmine contact detonation using the same built image
+        if: matrix.shard == 'items'
         run: |
           chmod 444 core/tests/fixtures/arena-v2-landmine.seed
           docker compose -f docker-compose.yaml -f docker-compose.landmine.yaml up -d --no-build --force-recreate app
@@ -211,6 +385,7 @@ jobs:
           curl --fail --silent http://127.0.0.1:8085/api/v1/ready
           E2E_LANDMINE_FIXTURE=arena-v2-landmine npm --prefix e2e run test:landmine
       - name: Verify opt-in Invisibility Cloak recipient privacy using the same built image
+        if: matrix.shard == 'items'
         run: |
           chmod 444 core/tests/fixtures/arena-v2-invisibility-cloak.seed
           docker compose -f docker-compose.yaml -f docker-compose.invisibility-cloak.yaml up -d --no-build --force-recreate app
@@ -221,6 +396,7 @@ jobs:
           curl --fail --silent http://127.0.0.1:8085/api/v1/ready
           E2E_INVISIBILITY_CLOAK_FIXTURE=arena-v2-invisibility-cloak npm --prefix e2e run test:invisibility-cloak
       - name: Verify opt-in Stopwatch action and fuse pausing using the same built image
+        if: matrix.shard == 'items'
         run: |
           chmod 444 core/tests/fixtures/arena-v2-stopwatch.seed
           docker compose -f docker-compose.yaml -f docker-compose.stopwatch.yaml up -d --no-build --force-recreate app
@@ -231,6 +407,7 @@ jobs:
           curl --fail --silent http://127.0.0.1:8085/api/v1/ready
           E2E_STOPWATCH_FIXTURE=arena-v2-stopwatch npm --prefix e2e run test:stopwatch
       - name: Verify opt-in Invisible Bombs recipient privacy using the same built image
+        if: matrix.shard == 'items'
         run: |
           chmod 444 core/tests/fixtures/arena-v2-invisible-bombs.seed
           docker compose -f docker-compose.yaml -f docker-compose.invisible-bombs.yaml up -d --no-build --force-recreate app
@@ -241,6 +418,7 @@ jobs:
           curl --fail --silent http://127.0.0.1:8085/api/v1/ready
           E2E_INVISIBLE_BOMBS_FIXTURE=arena-v2-invisible-bombs npm --prefix e2e run test:invisible-bombs
       - name: Verify opt-in Teleporter swaps and unsafe consumption using the same built image
+        if: matrix.shard == 'items'
         run: |
           chmod 444 core/tests/fixtures/arena-v2-teleporter.seed
           docker compose -f docker-compose.yaml -f docker-compose.teleporter.yaml up -d --no-build --force-recreate app
@@ -261,6 +439,7 @@ jobs:
           curl --fail --silent http://127.0.0.1:8085/api/v1/ready
           E2E_WALL_PASS_FIXTURE=arena-v2-wall-pass npm --prefix e2e run test:wall-pass
       - name: Verify a full classic match and rematch using the same image
+        if: matrix.shard == 'classic'
         run: |
           docker compose -f docker-compose.yaml -f docker-compose.matches.yaml up -d --no-build --force-recreate app
           for attempt in $(seq 1 60); do
@@ -274,24 +453,19 @@ jobs:
           E2E_MATCH_FIXTURE=arena-v1-matches xvfb-run -a npm --prefix e2e run test:hardening
           npm --prefix e2e run test:controls
           xvfb-run -a npm --prefix e2e run test:audio
-      - name: Scan built image for fixable high or critical vulnerabilities
-        run: |
-          docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
-            ghcr.io/aquasecurity/trivy:0.74.0@sha256:62b1e65e8869bc4b4c6aa4fa2b21595256c7c2f6018a9d9ad61caf87187c1969 \
-            image --scanners vuln --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 \
-            --no-progress grenadiers-app
       - name: Stack logs
         if: failure()
         run: docker compose logs
       - name: Tear down isolated stack
         if: always()
-        run: docker compose down --volumes
+        run: docker compose down --volumes --remove-orphans
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: failure()
         with:
-          name: playwright-report
+          name: playwright-report-${{ matrix.shard }}
           path: |
             e2e/playwright-report/
+            e2e/test-results/
             e2e/playwright-pickup-report/
             e2e/playwright-heart-report/
             e2e/playwright-shield-report/
@@ -302,8 +476,12 @@ jobs:
             e2e/playwright-reverse-controls-report/
             e2e/playwright-diarrhea-report/
             e2e/playwright-slow-foot-report/
+            e2e/playwright-piercing-bomb-report/
+            e2e/playwright-power-bomb-report/
+            e2e/playwright-remote-bomb-report/
             e2e/playwright-landmine-report/
             e2e/playwright-invisibility-cloak-report/
+            e2e/playwright-stopwatch-report/
             e2e/playwright-invisible-bombs-report/
             e2e/playwright-teleporter-report/
             e2e/playwright-wall-pass-report/

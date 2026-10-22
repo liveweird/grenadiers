@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.3.43 — 2026-10-21 (source candidate)
+## 0.3.43 — 2026-10-22 (source candidate)
 
 - Add opt-in Wall Pass equipment for movement through breakable blocks while hard walls, bombs,
   contact, fire and placement rules remain authoritative.
@@ -8,88 +8,104 @@
   a wire marker, timer or public concealed-content cue.
 - Extend gameplay v10 to the eighteenth lobby switch and all 262,144 settings masks, with pinned
   archive rejection, English/Polish presentation and deterministic production-seed browser source.
-- Source checks are complete. Predecessor integration, native same-image acceptance, final CI and
-  publication remain pending; this entry does not claim a released artifact.
+- The final v0.3.42 source parent is integrated. Fresh v0.3.43 gates, native same-image acceptance,
+  hosted CI and publication remain pending; this entry does not claim a released artifact.
 
-## 0.3.42 — 2026-10-21
+## 0.3.42 — 2026-10-22
 
 - Add opt-in Teleporter pickups that atomically swap both living players only when both complete destination footprints are safe; unsafe pickups are consumed without moving either player.
 - Publish a persistent nullable `lastTeleportTick` position epoch in gameplay v10 so clients snap an authoritative swap without fabricating walking or audio.
-- Add the seventeenth lobby switch, all 131,072 settings masks, replay and archived-v9 guards, English/Polish cues, and a deterministic production-seed browser scenario source. Native acceptance, predecessor integration and final CI remain pending.
+- Add the seventeenth lobby switch, all 131,072 settings masks, replay and archived-v9 guards, English/Polish cues, and a deterministic production-seed browser scenario source. The sealed v0.3.41 parent is integrated; v0.3.42 native acceptance and hosted CI remain pending.
 
-## 0.3.41 — 2026-10-18
+## 0.3.41 — 2026-10-22
 
 - Add opt-in Invisible Bombs with a 600-physical-tick refreshable curse that hides every live bomb from the affected recipient while preserving collision, capacity, chains and public flames.
 - Capture placement and detonation audiences at emission, intersecting Cloak ownership privacy with blinded seats, including events visible to neither recipient.
-- Add the sixteenth lobby switch, all 65,536 v9 settings masks, replay and archived-v8 guards, English/Polish cues, and a deterministic production-seed browser scenario source. Native acceptance and final CI remain pending.
+- Add the sixteenth lobby switch, all 65,536 v9 settings masks, replay and archived-v8 guards, English/Polish cues, and a deterministic production-seed browser scenario. At the 22 October 2026 00:55:23 UTC sealed native checkpoint, corrected source `cb10ec7` passed fresh 53 Compose plus 53 Kubernetes cases and complete debug, release and coverage gates with zero retries or carried passes. Independent audit was clear and 2,492 payloads were durably sealed; hosted CI, PR/merge, publication, tag verification and promotion remained pending then.
 
-## 0.3.40 — 2026-10-18
+## 0.3.40 — 2026-10-21
 
 - Add opt-in Stopwatch with a 180-physical-tick refreshable effect that freezes the living opponent's voluntary actions while ordinary simulation and network clocks continue.
 - Pause every Timed bomb once per affected update using checked captured-fuse provenance; preserve untimed Remote and Contact bombs, fire chains, Diarrhea and transactional rollback.
-- Add the fifteenth lobby switch, all 32,768 v9 settings masks, replay and archived-v8 guards, English/Polish cues, and a deterministic two-window production-seed browser scenario source. Native acceptance and final CI remain pending.
+- Add the fifteenth lobby switch, all 32,768 v9 settings masks, replay and archived-v8 guards, English/Polish cues, and a deterministic two-window production-seed browser scenario. At the 21 October 2026 20:56:41 UTC native checkpoint, corrected source `fa25467` passed full debug/release/coverage gates and fresh 52 Compose plus 52 Kubernetes cases with zero retries or carried passes. Independent raw audit is clear and 2,434 payloads are durably sealed; hosted CI, PR/merge, publication, tag verification and promotion remained pending at that checkpoint.
 
-## 0.3.39 — 2026-10-18
+## 0.3.39 — 2026-10-21
+
+- Check responsive result geometry atomically in stable running state before movement or bomb placement; preserve both grids, bounds, viewports and all accessibility assertions.
 
 - Add the paired gameplay-v9 server/browser contract. Visible actors now require
   `voluntaryActionsFrozen`, published as `false` until Stopwatch activation; hidden actors retain
   their exact privacy-preserving shape.
 - Preserve Expanded-v5/generated-v2/journal-v2 identity, all fourteen available items, all 16,384
   masks and existing simulation behavior. Gameplay-v8 remains archived and rejects v9 connections.
+- Integrate published v0.3.38 accepted raw parent `04c070c5` and its exact tree `d1dc83fc` while
+  retaining the reviewed gameplay-v9 foundation byte-for-byte outside the eight parent
+  documentation/capture paths.
+- At the 21 October 2026 18:44:23 UTC native acceptance checkpoint, source `272b950` and image
+  `9a4dc108` passed 51 Compose plus 51 Kubernetes cases with zero retries or carried passes.
+  Independent raw audit is clear and the evidence is durably sealed. v0.3.39 had not yet been
+  normalized, pushed, merged, published or promoted; candidate, post-merge and tag CI remained
+  pending.
 
-## 0.3.38 — 2026-10-18
+## 0.3.38 — 2026-10-21
 
 - Add opt-in Invisibility Cloak with a 600-physical-tick refreshable actor-privacy effect.
 - Publish exact hidden actors and event-time private attributable cues while retaining public bombs, hazards, elimination and results.
-- Add the fourteenth lobby switch, checked asymmetric v8 publication, replay coverage, English and Polish cues, and a deterministic compositor-based browser scenario. Native acceptance and final CI remain pending.
+- Add the fourteenth lobby switch, checked asymmetric v8 publication, replay coverage, English and Polish cues, and a deterministic compositor-based browser scenario. Corrected source `1c6724f` passes a fresh 51 Compose plus 51 Kubernetes matrix with zero retries or carried passes; the independent raw audit is clear and 2,298 evidence payloads are sealed and durably byte-verified.
+- Preserve the 20-minute browser-job limit by dividing complete coverage between item and classic jobs using one verified image. The complete 320px HUD layout proof now runs in stable Running before gameplay and restores 390px afterward. No timeout, threshold, sample count, retry policy or product behavior was relaxed. At the 21 October 2026 16:47 UTC native acceptance checkpoint, both seven-job candidate workflows, merge/post-merge CI, publication, exact-image promotion and tag CI remained pending; v0.3.38 was not published.
 
-## 0.3.37 — 2026-10-18
+## 0.3.37 — 2026-10-21
 
+- Correct Remote/Landmine rolling-history assertions using causal placement IDs; preserve Piercing/Power CI diagnostics. Fresh corrected-source acceptance passes 100/100 Compose/Kubernetes cases, independently audited and sealed; both new five-job candidate workflows and the five-job post-merge workflow pass all 50 browser cases; PR 83 is merged, v0.3.37 is published, and its accepted image is deployed locally.
 - Add opt-in Landmine as a passable, untimed Standard bomb that detonates on swept actor contact after per-actor exit grace.
 - Preserve movement ordering and immutable explosion planning: accepted contact wins, while fire and other blasts silently destroy untriggered mines without extending rays.
-- Add the thirteenth lobby switch, checked v8 state and events, replay coverage, English and Polish pressure-plate cues, and a deterministic production-seed browser scenario. Native acceptance and final CI remain pending.
+- Add the thirteenth lobby switch, checked v8 state and events, replay coverage, English and Polish pressure-plate cues, and a deterministic production-seed browser scenario. Fresh same-image acceptance passes 50 Compose and 50 Kubernetes cases with zero retries; the raw audit is clear and evidence sealed. Both candidate workflows and post-merge CI pass five jobs and all 50 browser cases; v0.3.37 is published and its accepted image deployed locally.
 
-## 0.3.36 — 2026-10-18
+## 0.3.36 — 2026-10-21
 
 - Add opt-in Remote Bomb as a one-charge weapon whose placed bomb waits without a fuse for its owner's next manual bomb action.
 - Preserve fire and chain detonation, transactional action resolution, one armed bomb per owner, and independent replacement weapons.
-- Add the twelfth lobby switch, checked v8 state and events, replay coverage, English and Polish cues, and a deterministic production-seed browser scenario. Native acceptance and final CI remain pending.
+- Add the twelfth lobby switch, checked v8 state and events, replay coverage, English and Polish cues, and a deterministic production-seed browser scenario. Fresh same-image native acceptance passes all 49 Compose and 49 Kubernetes cases with zero retries; the evidence audit is clear and sealed. Both five-job candidate workflows and the five-job post-merge workflow pass all 49 browser cases; PR 82 is merged, the source release is published, and the accepted image is deployed locally.
 
-## 0.3.35 — 2026-10-18
+## 0.3.35 — 2026-10-20
+
+- Pin Vite 8.3.4 and its locked build dependencies to fix newly reported launch-editor advisories while retaining the security audit thresholds.
 
 - Prepare opt-in Power Bomb as a one-charge weapon consumed only by a successful manual placement.
 - Capture an immutable Manhattan-area blast that ignores obstruction, preserves hard walls as holes, and chains every bomb in range from the pre-explosion world.
-- Add the eleventh lobby switch, checked v8 state and events, replay coverage, English and Polish pixel cues, and a deterministic production-seed browser scenario. Native acceptance and final CI remain pending.
+- Add the eleventh lobby switch, checked v8 state and events, replay coverage, English and Polish pixel cues, and a deterministic production-seed browser scenario. Fresh same-image native acceptance passes all 48 Compose and 48 Kubernetes cases; independent evidence review, final sealing, both candidate CI runs and the five-job post-merge run pass. PR 81 is merged, [v0.3.35](https://github.com/liveweird/grenadiers/releases/tag/v0.3.35) is published as a source prerelease, and its accepted image is deployed locally.
 
-## 0.3.34 — 2026-10-18
+## 0.3.34 — 2026-10-20
 
 - Prepare opt-in Piercing Bomb as a one-charge weapon consumed only by a successful manual placement.
 - Capture an immutable Piercing blast that crosses breakable blocks while retaining ordinary bomb stops, range accounting, chaining, and transactional placement failures.
-- Add the tenth lobby switch, checked v8 state and events, replay coverage, English and Polish pixel cues, and a deterministic production-seed browser scenario. Native acceptance and final CI remain pending.
+- Add the tenth lobby switch, checked v8 state and events, replay coverage, English and Polish pixel cues, and a deterministic production-seed browser scenario. Fresh same-image native acceptance passes all 47 Compose and 47 Kubernetes cases; independent evidence review, candidate CI and post-merge CI pass. v0.3.34 is published as a source prerelease.
 
-## 0.3.33 — 2026-10-18
+## 0.3.33 — 2026-10-20
 
-- Prepare opt-in Slow foot: each pickup adds an independent 600-tick stack and halves movement speed, up to six exact stacks.
+- Add opt-in Slow foot: each pickup adds an independent 600-tick stack and halves movement speed, up to six exact stacks.
 - Preserve fixed-point residuals, hazards, collision rules, Reverse Controls input semantics and deterministic pickup arbitration while allowing eligible rivals to bypass capped actors.
-- Add the ninth lobby item switch, English and Polish grouped timers, pixel cues, checked v8 publication, deterministic replay and a production-seed browser scenario. Native acceptance and final CI remain pending.
+- Add the ninth lobby item switch, English and Polish grouped timers, pixel cues, checked v8 publication, deterministic replay and a production-seed browser scenario. Fresh same-image acceptance passes 46 Compose and 46 Kubernetes cases after reviewed browser-route and movement-window corrections; required candidate and post-merge CI pass, and v0.3.33 is published as a source prerelease.
 
-## 0.3.32 — 2026-10-18
+## 0.3.32 — 2026-10-20
 
-- Prepare opt-in Diarrhea: collection forces at most one ordinary bomb-placement intent per physical tick for 600 ticks, beginning after collection and ending at the exact expiry boundary.
+- Add opt-in Diarrhea: collection forces at most one ordinary bomb-placement intent per physical tick for 600 ticks, beginning after collection and ending at the exact expiry boundary.
 - Resolve manual and automatic requests together with existing capacity and same-cell conflict rules while preserving manual action IDs, stored weapons, captured stats, and transactional overflow behavior.
-- Add the eighth lobby item switch, English and Polish pixel cues, checked v8 publication, deterministic replay, and a production-seed browser scenario. Native acceptance and final CI remain pending.
+- Add the eighth lobby item switch, English and Polish pixel cues, checked v8 publication, deterministic replay, and a production-seed browser scenario. Fresh same-image acceptance passes 45 Compose and 45 Kubernetes cases; final CI and publication remain separate gates tracked in `docs/verification.md`.
+
+- Establish one rendered, running, synchronized client baseline before latency measurement, with complete startup diagnostics and eleven new regression cases; retain all twenty observations, the 250 ms shaped limit and zero retries.
 
 ## 0.3.31 — 2026-10-18
 
-- Prepare opt-in Reverse Controls: collecting the curse reverses raw held directions for exactly 600 physical ticks while preserving deterministic movement and input state.
+- Add opt-in Reverse Controls: collecting the curse reverses raw held directions for exactly 600 physical ticks while preserving deterministic movement and input state.
 - Clear pending turn assistance when inversion starts or expires, retain refresh behavior, and restore ordinary movement on the exact expiry tick.
-- Add the seventh lobby item switch, English and Polish pixel presentation, checked v8 publication, replay coverage, and a deterministic browser scenario. Native acceptance and final CI remain pending.
+- Add the seventh lobby item switch, English and Polish pixel presentation, checked v8 publication, replay coverage, and a deterministic browser scenario. Fresh same-image acceptance passes 33 Compose and 33 Kubernetes cases; final CI/publication are recorded in `docs/verification.md`.
 
 ## 0.3.30 — 2026-10-18
 
-- Prepare the opt-in Long Fuse curse: generated pickups double the fuse captured by newly placed bombs for 10 seconds.
+- Add the opt-in Long Fuse curse: generated pickups double the fuse captured by newly placed bombs for 10 seconds.
 - Keep planted bomb schedules immutable and make simultaneous Short Fuse and Long Fuse effects cancel for new placements while their timers remain independent.
-- Add Long Fuse lobby controls, English and Polish HUD presentation, protocol validation, and focused automated scenarios. Native acceptance and CI publication remain pending.
+- Add Long Fuse lobby controls, English and Polish HUD presentation, protocol validation, and focused automated scenarios. Same-image native acceptance and exact-head CI passed; v0.3.30 is published as a source prerelease.
 
 ## 0.3.29 — 2026-10-18
 

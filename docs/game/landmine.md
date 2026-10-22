@@ -1,5 +1,7 @@
 # Landmine
 
+Corrected-source acceptance at `420d8df` passes fresh **50 Compose plus 50 Kubernetes** cases with zero retries or carried results. Remote and Landmine use fresh placement-ID checks across rolling observer history. Product behavior is unchanged; the new evidence is audited/sealed, while exact-head CI/post-merge CI and publication remain pending. See [verification](../verification.md).
+
 Landmine is an opt-in Expanded-v5 one-charge weapon. A successful manual bomb action consumes
 the stored charge and places a visible, passable, capacity-counted Standard bomb with a Contact
 trigger. It has no fuse. Automatic Diarrhea placements remain ordinary Timed bombs and do not
@@ -24,3 +26,22 @@ to 305 entries while preserving every earlier 4096-mask path. Its original thirt
 supported all 8192 subsets; those paths remain stable in the [current catalog](settings.md).
 Rules version 5, generator version 2 and journal format 2 remain unchanged. Current deployments
 use [gameplay-v10](protocol-v10.md); reload older browsers with the paired server/web upgrade.
+
+## Historical v0.3.37 native acceptance
+
+
+
+Fresh same-image native acceptance passes 50 Compose and 50 Kubernetes cases, with zero retries
+or carried passes. Independent raw review is clear and the final evidence manifest is sealed.
+Both clients observe the single consumed charge, Contact/Standard bomb, persistence beyond
+183 ticks, exact-ID contact detonation with a live origin flame, no extra placement, owner
+elimination and seat Two's round win. The following fresh Timed Standard bomb is covered by
+`consumed_landmine_is_followed_by_a_fresh_standard_timed_bomb_in_the_same_state` in the
+[core tests](../../core/src/game/simulation/landmine_tests.rs), rather than a separate browser
+assertion. Exact-head candidate/post-merge CI and publication remain required release gates.
+
+Reviewed Compose [English desktop](../screenshots/landmine-desktop.png) and
+[Polish 320px reduced-motion](../screenshots/landmine-polish-320.png) captures show the planted
+pressure plate before detonation and normal HUD layout. Kubernetes captures were retained but
+not visually reviewed. See [verification](../verification.md) for source/image identities,
+latency, seal, historical attempts and measurement limits.

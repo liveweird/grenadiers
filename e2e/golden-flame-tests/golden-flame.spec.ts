@@ -69,7 +69,7 @@ test('two browsers collect Golden Flame and restore base bomb range after its ex
     await Promise.all([one, two].map((page) => page.getByRole('button', { name: 'Ready', exact: true }).click()))
     await Promise.all(games.map((game) => expect.poll(() => latestSnapshot(game)?.room.phase.type).toBe('running')))
     expect(latestSnapshot(games[0])!.room).toMatchObject({
-      rulesVersion: 5, mapId: 'generated_v2', availableItems: ['wallPass', 'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch', 'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls', 'invisibleBombs', 'teleporter'],
+      rulesVersion: 5, mapId: 'generated_v2', availableItems: ['kick', 'wallPass', 'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch', 'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls', 'invisibleBombs', 'teleporter'],
       settings: { enabledItems: ['goldenFlame'] },
     })
     await one.getByRole('region', { name: 'Grenadiers courtyard' }).click()
@@ -83,23 +83,39 @@ test('two browsers collect Golden Flame and restore base bomb range after its ex
       cell: { column: 3, row: 1 }, kind: 'goldenFlame',
     })
     await one.screenshot({ path: testInfo.outputPath('golden-flame-exposed-desktop.png'), fullPage: true })
+    await two.getByText('Polski', { exact: true }).click()
+    expect(await two.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false)
+    await two.screenshot({
+      path: testInfo.outputPath('golden-flame-exposed-polish-320.png'), fullPage: true,
+    })
     await moveTo(one, games[0], { column: 1, row: 1 })
     await moveTo(one, games[0], { column: 3, row: 1 })
     await Promise.all(games.map((game) => expect.poll(() => goldenTicks(game)).toBeGreaterThan(0)))
     const collectedAt = games.map(collectionTick)
     expect(collectedAt[0]).toBe(collectedAt[1])
-    await two.getByText('Polski', { exact: true }).click()
-    expect(await two.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false)
-    await two.screenshot({ path: testInfo.outputPath('golden-flame-active-polish-320.png'), fullPage: true })
 
     await plant(one, games[0])
+    const goldenBomb = latestSnapshot(games[0])!.state.bombs.find((bomb) => bomb.range === 8)
+    if (!goldenBomb) throw new Error('Captured range-eight bomb expected')
     await Promise.all(games.map((game) => expect.poll(() => latestSnapshot(game)?.state.bombs)
-      .toContainEqual(expect.objectContaining({ range: 8 }))))
+      .toContainEqual(expect.objectContaining({ id: goldenBomb.id, range: 8 }))))
     await moveTo(one, games[0], { column: 1, row: 1 })
     await moveTo(one, games[0], { column: 1, row: 2 })
     await expect.poll(() => latestSnapshot(games[0])!.state.bombs.length
       + latestSnapshot(games[0])!.state.flames.length, { intervals: [30] }).toBe(0)
+    for (const game of games) {
+      const detonation = game.frames.flatMap((frame) => frame.type === 'snapshot' ? frame.events : [])
+        .find(({ kind }) => kind.type === 'bombDetonated' && kind.bomb.id === goldenBomb.id)
+      if (!detonation || detonation.kind.type !== 'bombDetonated') {
+        throw new Error('The range-eight bomb must actually detonate')
+      }
+      expect(detonation.tick - detonation.kind.bomb.placedAt).toBe(180)
+      expect(detonation.kind.bomb.trigger).toEqual({ type: 'timed', remainingTicks: 0, paused: false })
+    }
     expect(visibleActor(latestSnapshot(games[0]), 'one')?.alive).toBe(true)
+    await Promise.all(games.map((game) => expect.poll(() => goldenTicks(game)).toBeGreaterThan(0)))
+    expect(await two.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false)
+    await two.screenshot({ path: testInfo.outputPath('golden-flame-active-polish-320.png'), fullPage: true })
     await disconnectTransport(one)
     await expect.poll(async () => (await admissionBaseline(one))?.actionFloor).toBe(2)
     expect((await admissionBaseline(one))?.stableCapability).toBe(true)

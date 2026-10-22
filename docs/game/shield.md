@@ -34,7 +34,7 @@ seeded generation remain unchanged.
 
 With only Heart and Shield enabled, rules 5 / generator 2 sample weights 40 capacity,
 40 range, 20 speed, 25 Heart and 15 Shield. Disabled items contribute no weight or additional random draw.
-Gameplay v9 and private journal format 2 are current; older contracts and journal format-1
+Gameplay v10 and private journal format 2 are current; older contracts and journal format-1
 rules retain their original behavior. Checked timer overflow fails the step atomically.
 
 See [the seeded browser scenario](../../e2e/scenarios/shield.md), [deployment reproduction](../deployment.md),

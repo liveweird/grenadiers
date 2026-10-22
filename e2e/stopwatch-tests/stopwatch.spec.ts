@@ -75,8 +75,12 @@ test('Stopwatch freezes voluntary actions while Timed bombs pause', async ({ bro
     ])
     await Promise.all(games.map((game) => expect.poll(() => latestSnapshot(game)?.room.phase.type)
       .toBe('running')))
+    await Promise.all([
+      one.getByRole('region', { name: 'Grenadiers courtyard', exact: true }).click(),
+      two.getByRole('region', { name: 'Dziedziniec Grenadiers', exact: true }).click(),
+    ])
     expect(latestSnapshot(games[0])!.room.availableItems).toEqual([
-      'wallPass', 'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch',
+      'kick', 'wallPass', 'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch',
       'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame',
       'longFuse', 'reverseControls', 'invisibleBombs', 'teleporter',
     ])
@@ -99,13 +103,19 @@ test('Stopwatch freezes voluntary actions while Timed bombs pause', async ({ bro
     await Promise.all(games.map((game) => expect.poll(() => stopwatchTicks(game, 'one'))
       .toBeGreaterThan(0)))
     await Promise.all(games.map((game) => expectPausedAcrossTicks(game, original)))
-    const p2Start = visibleActor(latestSnapshot(games[1]), 'two')!.position
+    const p2Starts = games.map((game) => visibleActor(latestSnapshot(game), 'two')!.position)
+    const p2Start = p2Starts[1]
     const p2BombCount = latestSnapshot(games[1])!.state.bombs.length
+    const beforeP2BombIds = games.map((game) => latestSnapshot(game)!.state.bombs.map(({ id }) => id))
+    const beforeP2ActionTicks = games.map((game) => latestSnapshot(game)!.state.physicalTick)
     await two.keyboard.down('ArrowDown')
     await two.keyboard.press('Space')
     await expect.poll(() => frozen(games[1], 'two')).toBe(true)
-    expect(visibleActor(latestSnapshot(games[1]), 'two')!.position).toEqual(p2Start)
-    expect(latestSnapshot(games[1])!.state.bombs).toHaveLength(p2BombCount)
+    await expect.poll(() => games.every((game, index) =>
+      latestSnapshot(game)!.state.physicalTick >= beforeP2ActionTicks[index] + 3)).toBe(true)
+    expect(games.map((game) => visibleActor(latestSnapshot(game), 'two')!.position)).toEqual(p2Starts)
+    expect(games.map((game) => latestSnapshot(game)!.state.bombs.map(({ id }) => id)))
+      .toEqual(beforeP2BombIds)
     await moveSeatTo(one, games[0], 'one', { column: 2, row: 1 })
     await moveSeatTo(one, games[0], 'one', { column: 3, row: 1 })
     await expect.poll(() => frozen(games[1], 'two')).toBe(false)
@@ -117,9 +127,19 @@ test('Stopwatch freezes voluntary actions while Timed bombs pause', async ({ bro
     await expect.poll(() => latestSnapshot(games[0])!.state.bombs.length
       + latestSnapshot(games[0])!.state.flames.length).toBe(0)
 
+    await moveSeatTo(two, games[1], 'two', { column: 13, row: 11 })
     await moveSeatTo(two, games[1], 'two', { column: 11, row: 11 })
     await Promise.all(games.map((game) => expect.poll(() => stopwatchTicks(game, 'two'))
       .toBeGreaterThan(0)))
+    const secondDeadlines = games.map((game) => {
+      const snapshot = latestSnapshot(game)!
+      const remainingTicks = visibleActor(snapshot, 'two')!.effects
+        .find(({ kind }) => kind === 'stopwatch')!.remainingTicks
+      expect(remainingTicks).toBeGreaterThan(0)
+      return snapshot.state.physicalTick + remainingTicks
+    })
+    expect(secondDeadlines[1]).toBe(secondDeadlines[0])
+    const secondDeadline = secondDeadlines[0]
     const p1Start = visibleActor(latestSnapshot(games[0]), 'one')!.position
     const p1Id = visibleActor(latestSnapshot(games[0]), 'one')!.id
     const beforeBombIds = games.map((game) => latestSnapshot(game)!.state.bombs.map(({ id }) => id))
@@ -135,12 +155,23 @@ test('Stopwatch freezes voluntary actions while Timed bombs pause', async ({ bro
     expect(games.map((game) => latestSnapshot(game)!.state.bombs.map(({ id }) => id)))
       .toEqual(beforeBombIds)
     const fresh = await plant(two, games[1])
-    const placed = snapshots(games[1]).flatMap(({ events }) => events).find(({ kind }) =>
-      kind.type === 'bombPlaced' && kind.bomb.id === fresh)
-    expect(placed?.kind.type === 'bombPlaced' ? placed.kind.bomb.trigger : null)
-      .toEqual({ type: 'timed', remainingTicks: 180, paused: true })
     await expect.poll(() => games.map((game) => latestSnapshot(game)!.state.bombs
       .filter(({ id }) => !beforeBombIds[0].includes(id)).map(({ id }) => id))).toEqual([[fresh], [fresh]])
+    const placements = games.map((game) => snapshots(game).flatMap(({ events }) => events)
+      .find(({ kind }) => kind.type === 'bombPlaced' && kind.bomb.id === fresh))
+    expect(placements.every((event) => event?.kind.type === 'bombPlaced')).toBe(true)
+    const placedAts = placements.map((event) => event?.kind.type === 'bombPlaced'
+      ? event.kind.bomb.placedAt : -1)
+    expect(placedAts[1]).toBe(placedAts[0])
+    expect(placements.map((event) => event?.kind.type === 'bombPlaced'
+      ? event.kind.bomb.trigger : null)).toEqual([
+      { type: 'timed', remainingTicks: 180, paused: true },
+      { type: 'timed', remainingTicks: 180, paused: true },
+    ])
+    const expectedPausedTicks = secondDeadline - placedAts[0] - 1
+    expect(placedAts[0]).toBeLessThan(secondDeadline)
+    expect(expectedPausedTicks).toBeGreaterThanOrEqual(0)
+    expect(expectedPausedTicks).toBeLessThan(180)
     await moveSeatTo(two, games[1], 'two', { column: 12, row: 11 })
     await moveSeatTo(two, games[1], 'two', { column: 13, row: 11 })
     await moveSeatTo(two, games[1], 'two', { column: 13, row: 10 })
@@ -150,7 +181,8 @@ test('Stopwatch freezes voluntary actions while Timed bombs pause', async ({ bro
     await one.keyboard.up('ArrowLeft')
     await expect.poll(() => games.map((game) => placementIds(game, p1Id)))
       .toEqual(beforeP1Placements)
-    await Promise.all(games.map((game) => expectNaturalDetonation(game, fresh, 179)))
+    await Promise.all(games.map((game) =>
+      expectNaturalDetonation(game, fresh, expectedPausedTicks)))
   } finally {
     await Promise.all(contexts.map(async (context) => { try {
       for (const page of context.pages()) await page.keyboard.up('ArrowDown').catch(() => undefined)

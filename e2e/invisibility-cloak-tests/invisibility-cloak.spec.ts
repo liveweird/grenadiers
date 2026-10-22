@@ -1,8 +1,7 @@
-import { expect, test } from '@playwright/test'
+import { expect, test, type Page } from '@playwright/test'
 import { expectPaintedCanvas, latestSnapshot, observeGame, visibleActor, type ObservedGame } from '../tests/support/duel'
 import { moveTo } from '../tests/support/movement'
 import { admissionBaseline, disconnectTransport, installTransportProbe } from '../tests/support/reconnect'
-import { arenaTilePixels } from '../tests/support/compositor'
 import type { GameServerMessage } from '../../web/src/game/v10/schema'
 
 test.beforeAll(() => expect(process.env.E2E_INVISIBILITY_CLOAK_FIXTURE)
@@ -18,6 +17,30 @@ const collections = (game: ObservedGame) => snapshots(game).flatMap(({ events })
 
 const cloakTicks = (game: ObservedGame) => visibleActor(latestSnapshot(game), 'one')?.effects
   .find(({ kind }) => kind === 'invisibilityCloak')?.remainingTicks ?? 0
+
+async function tilePixels(page: Page, column: number, row: number): Promise<string[]> {
+  const png = (await page.locator('.game-arena canvas').screenshot()).toString('base64')
+  return page.evaluate(async ({ encoded, column: x, row: y }) => {
+    const image = new Image()
+    image.src = `data:image/png;base64,${encoded}`
+    await image.decode()
+    const canvas = document.createElement('canvas')
+    canvas.width = image.width
+    canvas.height = image.height
+    const context = canvas.getContext('2d')
+    if (!context) throw new Error('Screenshot decoder unavailable')
+    context.drawImage(image, 0, 0)
+    const width = image.width / 15
+    const height = image.height / 13
+    const pixels = context.getImageData(Math.floor(x * width), Math.floor(y * height),
+      Math.ceil(width), Math.ceil(height)).data
+    const result: string[] = []
+    for (let index = 0; index < pixels.length; index += 16) {
+      result.push(`${pixels[index]},${pixels[index + 1]},${pixels[index + 2]},${pixels[index + 3]}`)
+    }
+    return result
+  }, { encoded: png, column, row })
+}
 
 test('two browsers observe recipient-private Cloak through reconnect and exact expiry', async ({ browser }, info) => {
   const contexts = await Promise.all([
@@ -44,7 +67,7 @@ test('two browsers observe recipient-private Cloak through reconnect and exact e
     ])
     await Promise.all(games.map((game) => expect.poll(() => latestSnapshot(game)?.room.phase.type).toBe('running')))
     expect(latestSnapshot(games[0])!.room.availableItems).toEqual([
-      'wallPass', 'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch', 'invisibilityCloak',
+      'kick', 'wallPass', 'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch', 'invisibilityCloak',
       'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls', 'invisibleBombs', 'teleporter',
     ])
     await one.getByRole('region', { name: 'Grenadiers courtyard' }).click()
@@ -59,8 +82,8 @@ test('two browsers observe recipient-private Cloak through reconnect and exact e
     })
     await moveTo(one, games[0], { column: 1, row: 1 })
     await Promise.all([one, two].map(expectPaintedCanvas))
-    const ownerFloor = await arenaTilePixels(one, 2, 1)
-    const emptyFloor = await arenaTilePixels(two, 2, 1)
+    const ownerFloor = await tilePixels(one, 2, 1)
+    const emptyFloor = await tilePixels(two, 2, 1)
     await one.screenshot({ path: info.outputPath('cloak-before-collection-desktop-en.png'), fullPage: true })
     expect(await two.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false)
     await two.screenshot({ path: info.outputPath('cloak-before-collection-polish-320-reduced.png'), fullPage: true })
@@ -76,8 +99,11 @@ test('two browsers observe recipient-private Cloak through reconnect and exact e
     expect(hidden).toEqual({ type: 'hidden', id: visibleActor(latestSnapshot(games[0]), 'one')!.id,
       seat: 'one', alive: true })
     await moveTo(one, games[0], { column: 2, row: 1 })
-    expect(await arenaTilePixels(one, 2, 1)).not.toEqual(ownerFloor)
-    expect(await arenaTilePixels(two, 2, 1)).toEqual(emptyFloor)
+    const settledOwner = visibleActor(latestSnapshot(games[0]), 'one')
+    if (!settledOwner) throw new Error('Cloak owner must remain visible to its own client')
+    const settledOwnerPosition = { ...settledOwner.position }
+    expect(await tilePixels(one, 2, 1)).not.toEqual(ownerFloor)
+    expect(await tilePixels(two, 2, 1)).toEqual(emptyFloor)
 
     const collectedAt = collections(games[0])[0].tick
     const deadline = collectedAt + 600
@@ -95,9 +121,10 @@ test('two browsers observe recipient-private Cloak through reconnect and exact e
       const effect = visibleActor(frame, 'one')?.effects.find(({ kind }) => kind === 'invisibilityCloak')
       expect(effect?.remainingTicks ?? 0).toBe(Math.max(deadline - frame.state.physicalTick, 0))
     }
+    expect(visibleActor(latestSnapshot(games[0]), 'one')?.position).toEqual(settledOwnerPosition)
     await expect.poll(() => visibleActor(latestSnapshot(games[1]), 'one')?.position)
-      .toEqual({ x: 2560, y: 1536 })
-    expect(await arenaTilePixels(two, 2, 1)).not.toEqual(emptyFloor)
+      .toEqual(settledOwnerPosition)
+    expect(await tilePixels(two, 2, 1)).not.toEqual(emptyFloor)
   } finally {
     await Promise.all(contexts.map((context) => context.close()))
   }

@@ -43,6 +43,7 @@ pub(crate) fn bind_expanded_for_items(
             room.rules_version,
             capture,
             u64::from(room.settings.bomb_fuse_ticks()),
+            supported_items,
         )
         || !state_binding(room, state_epoch, capture)
     {
@@ -78,7 +79,12 @@ pub(crate) fn validate_expanded_room_for_items(
     Ok(())
 }
 
-fn canonical_gameplay(version: RulesVersion, capture: &ExpandedCapture, fuse_ticks: u64) -> bool {
+fn canonical_gameplay(
+    version: RulesVersion,
+    capture: &ExpandedCapture,
+    fuse_ticks: u64,
+    supported_items: ItemSet,
+) -> bool {
     let world = &capture.world.0;
     let classic = version != RulesVersion::ExpandedV5;
     world.bombs.iter().all(|bomb| {
@@ -105,7 +111,7 @@ fn canonical_gameplay(version: RulesVersion, capture: &ExpandedCapture, fuse_tic
             .iter()
             .flat_map(|report| &report.events)
             .all(|event| {
-                canonical_audience(classic, world, event)
+                canonical_audience(classic, world, event, supported_items)
                     && match event.kind {
                         EventKind::BombPlaced { bomb } => {
                             canonical_bomb(bomb, event.timed_bomb, fuse_ticks, world.enabled_items)
@@ -124,9 +130,21 @@ fn canonical_audience(
     classic: bool,
     world: &super::projection_facts::WorldFacts,
     event: &super::projection_facts::EventFacts,
+    supported_items: ItemSet,
 ) -> bool {
     use crate::game::EventAudience;
-    if classic || !world.enabled_items.contains(ItemId::InvisibilityCloak) {
+    if classic {
+        return event.audience == EventAudience::Both;
+    }
+    if matches!(
+        event.kind,
+        EventKind::BombPlaced { .. } | EventKind::BombDetonated { .. }
+    ) && supported_items.contains(ItemId::InvisibleBombs)
+        && world.enabled_items.contains(ItemId::InvisibleBombs)
+    {
+        return true;
+    }
+    if !world.enabled_items.contains(ItemId::InvisibilityCloak) {
         return event.audience == EventAudience::Both;
     }
     let seat = match event.kind {

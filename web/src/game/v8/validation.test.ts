@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { checkedCatalogMaskRanges, executeCatalogMaskRange } from '../../test/catalogMasks'
 import { snapshot } from './testSupport'
 import { gameplayV8ServerSchemaValidator, validateGameplayV8ServerMessage } from './validation'
 
@@ -26,14 +27,23 @@ describe('gameplay v8 validation and active profile', () => {
   })
 
   const supported = ['heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls'] as const
-  const subsets = Array.from({ length: 2 ** supported.length }, (_, mask) => [
-    supported.filter((_, index) => (mask & (1 << index)) !== 0),
-  ] as const)
-  it.each(subsets)(
-    'accepts the supported enabled-item set %j', (enabledItems) => {
-      const message = snapshot(2)
-      message.room.settings.enabledItems = [...enabledItems]
-      expect(validateGameplayV8ServerMessage(message)).toEqual({ valid: true, value: message })
+  const expectedSupported = ['heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls'] as const
+  const ranges = checkedCatalogMaskRanges({
+    protocol: 'gameplay v8', catalog: supported, expectedCount: 14,
+    expectedOrder: expectedSupported,
+  })
+  it('pins fourteen unique catalog entries in canonical order before enumerating mask ranges', () => {
+    expect(supported).toHaveLength(14)
+    expect(new Set(supported)).toHaveLength(14)
+    expect(supported).toEqual(expectedSupported)
+  })
+  it.each(ranges)(
+    'accepts every supported enabled-item mask in [$start, $end)', (range) => {
+      executeCatalogMaskRange('gameplay v8', supported, range, (_mask, enabledItems) => {
+        const message = snapshot(2)
+        message.room.settings.enabledItems = [...enabledItems]
+        expect(validateGameplayV8ServerMessage(message)).toEqual({ valid: true, value: message })
+      })
     },
   )
 

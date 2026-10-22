@@ -1,5 +1,115 @@
 # Repository verification
 
+## v0.3.41 hosted CI recovery — 2026-10-22 — browser APT mirror priority
+
+PR 89 push run 39840668328 completed eight jobs, but its browser-items job spent 13 minutes
+43 seconds in `playwright install --with-deps chromium` and exceeded the unchanged 20-minute job
+budget. The package phase alone reported 13 minutes 15 seconds fetching Ubuntu archives through
+the Azure mirror before falling back to the Ubuntu archive. No browser assertion failed: Short
+Fuse passed, Short Flame was interrupted by the job timeout, and the remaining item cases did not
+run. Pull-request run 39840683278 passed all nine jobs and the exact 53-case/65,536-mask verifier,
+but it cannot replace the required successful push lineage.
+
+The runner image [`ubuntu24/20261012.334` setup source](https://github.com/actions/runner-images/blob/ubuntu24/20261012.334/images/ubuntu/scripts/build/configure-apt-sources.sh#L8-L11)
+assigns explicit priorities in `/etc/apt/apt-mirrors.txt`: Azure archive 1, Ubuntu archive 2 and
+Ubuntu security 3. This four-path CI-only repair validates that exact three-line configuration,
+atomically swaps the archive priorities to Ubuntu 1 and Azure 2, and preserves the security mirror,
+file mode, APT signature checks and the existing Playwright command. The already-correct state is
+accepted idempotently; missing, duplicate, reordered, unknown or differently prioritized entries
+fail before the file is changed. Job/test timeouts, retries, the browser matrix, dependency and
+browser revisions, application runtime inputs and all product behavior remain unchanged.
+
+The 106-case native result and source-bound gates remain evidence for source
+`035c6a1263674601874e82c31b5c731c794cb38a`. They were not rerun for this CI-only tree. No hosted
+acceptance, merge, publication, tag verification or promotion is claimed for the repair; fresh
+exact-source hosted runs remain required. The CI recovery and release records identify the
+corrected commit independently.
+
+## v0.3.41 live-window checkpoint - native acceptance audited and sealed
+
+Source 035c6a1263674601874e82c31b5c731c794cb38a, tree
+d447fa8099ded815a37060d79117021ea89a61b7, is the sole child of corrected source 97a3990.
+The change is confined to the Invisible Bombs browser proof, its public diagnostic helpers, scenario
+documentation and explicit isolated check registration. Application runtime, fixture, fuse 300,
+curse 600, workflow timeouts, retries and product configuration are unchanged.
+
+Fresh source-bound gates completed with consumed exit zero under server root 26801 and web root
+32048. Debug, release and coverage each enumerate all 65,536 masks. Debug and release each pass 658
+core tests, 207 server tests and two doctests; coverage passes 658 core and 207 server tests. Rust
+line coverage is 92.38127315594477% (13,714/14,845). All 516 web tests pass with
+95.43/91.25/95.9/97.82 statement/branch/function/line coverage. Renderer diagnostics and 54 static
+scenario contracts pass. Cargo deny and both configured high-threshold npm audits pass; the web
+audit records two moderate Vitest/mocker 5.0.1 advisories and no high or critical findings, while
+the e2e audit reports zero vulnerabilities. Independent actual-gate review is clear.
+
+Preparation root 89381 completed with consumed exit zero. Prebrowser review is clear and binds image
+sha256:30d288179bf76bb87f6c9d28362041ac18451b77d3fa8f0ec6a481e2c348d416, source archive SHA-256
+5ffdb3bf96c65a7d0280a5593709b7185c16904f7221c0eafb685e3387721caa, preparation seal
+54450af66fae78ad7b3bd83e62099b22217af9e5beb9d78979e959a6597a6b23, and zero retries or carried
+passes.
+
+A single CPU-1 diagnostic passed in 45.8 seconds. The selected bomb was placed at physical tick
+1150 and naturally detonated at 1450; both screenshot boundaries, 1231 and 1330, precede that exact
+deadline. Reconnect admission at tick 1220 retained 506 effect ticks, preserving the original curse
+deadline 1726. All three pixel comparisons passed and six comparison-buffer hashes were recorded.
+This is diagnostic-only evidence and contributes zero accepted native cases.
+
+The earlier PR 88 candidate is rejected with zero hosted carry. Run 39820850960 contained eight
+jobs: seven non-server jobs were cancelled with no steps, while the aggregate server job failed its
+upstream success guard and skipped only its later steps. Push run 39820856196 passed all nine jobs.
+Pull-request run 39820865780 failed a real browser assertion after about 32.5 seconds because the
+original five-second bomb naturally expired across two roughly 2.22-second sequential screenshots.
+The corrected proof captures both pages concurrently while the remaining normal retreat runs,
+revalidates prepared geometry without scrolling, and always emits bounded sanitized JSON; every
+returned comparison PNG is retained and attached on failure.
+
+Native root 30427 completed with actual exit zero at `2026-10-22T18:47:13.058221Z`, and that exit
+was consumed. The source-bound matrix passes **53 Compose plus 53 Kubernetes** cases, all 48 groups
+and reports, 74/74 baseline plus 32/32 optional cases, with zero retries and zero carried passes.
+It retains 114 runtime PNGs, 38 runtime image/security records, 19 Kubernetes identities, 18
+external fixtures and 36 seed-mode records. Post-run source, dependencies, locks, archives,
+preparation manifest and image identities match.
+
+All 22 latency cases per target pass. Each local and shaped profile retains all 20 observations;
+all 80 observations remain below the unchanged 250 ms limit.
+
+| Target | Local maximum | Shaped 50 ms maximum | Exceedances |
+| --- | ---: | ---: | ---: |
+| Compose | 53.420852 ms | 173.166454 ms | 0 |
+| Kubernetes | 59.075919 ms | 175.887630 ms | 0 |
+
+Compose used cpu.max `max 100000`; Kubernetes used `50000 100000`. Both throttle-count and
+throttled-time deltas are zero. The Compose observer/capture roots 66009/65956 pass and retain 79
+observer samples; Kubernetes roots 5960/33109 pass and retain 70. No latency budget, sample count,
+timeout, retry policy or product behavior changed.
+
+Root reviewed only two fresh Compose pre-collection captures: [English desktop](screenshots/invisible-bombs-desktop.png)
+and [Polish 320px reduced motion](screenshots/invisible-bombs-mobile-pl.png). Both present the arena,
+players and enabled locked rules without apparent clipping or horizontal overflow. These stills do
+not prove recipient privacy, detonation timing or exact expiry; the Compose and Kubernetes native
+assertions and sanitized JSON do. Kubernetes captures were retained without visual review.
+
+Cleanup passed at `2026-10-22T18:48:16.891157Z`: all owned containers, network, namespace,
+port-forwards and ports 18284/18285 were absent. The default v0.3.40 container remained healthy and
+ready, and its image identity and served index/JavaScript bytes matched the accepted deployment.
+
+Independent native audit and RESULT review are clear under receipt SHA-256 values
+`467b1054f7e83c1b38c259cc96b5088aabb948b440cc53aac0a320bc20324962` and
+`e07a7de78197f30c979a5faa471d7aef20218ab4fcb6185d3fdc4bf5b4cc0eac`.
+The final manifest seals 2,486 payloads under SHA-256
+`046744753f961c7875808c7ac28967f46069286342308312fdf364648b221487`;
+2,487 files and the separate source archive are byte-verified and read-only. The native seal has
+SHA-256 `4a1a1ec14fd0798888d78f3e0df362a0ba82ea4686190134c4ec3306c8da099e`,
+and independent seal review is clear under SHA-256
+`5296247097ec158a1d4a0f9ae3849de6e6c72fd07be5e64042798af41862787f`.
+No old R4 native, audit, result, seal, image or archive value is accepted for this changed source.
+No v0.3.41 candidate, merge, post-merge CI, publication, tag verification or promotion has started.
+
+The original v0.3.40 default deployment was historically restarted after laptop shutdown without
+rebuild or recreation; its container/image identities and served bytes matched that accepted
+deployment. Continuous uptime is not claimed. This historical restoration is not v0.3.41
+acceptance or deployment.
+
 ## v0.3.40 hosted CI aggregate recovery — 2026-10-21 — C1 artifact layout
 
 Hosted push run 39680221078 completed the Rust server-mask partition but failed the aggregate job.
@@ -1580,6 +1690,42 @@ Diarrhea.
 
 Records below are frozen against their named sources. Publication and later CI status are
 recorded in [release notes](https://github.com/liveweird/grenadiers/releases).
+
+## Prepared v0.3.41 Invisible Bombs source — source-specific local checks
+
+This record is bound to prepared source `429460fb1ddb12f1612fc53cdd8096afdc3d1e70` and does not
+clear checks for the integrated source. It activates the 600-physical-tick Invisible Bombs curse.
+Domain tests cover ordinary seed-31 collection, own and rival bombs, event-time Cloak/blindness
+audience intersections, exact expiry, current-state reveal, death ordering and overflow rollback.
+Gameplay v9 publishes an empty bomb list only to afflicted recipients while keeping live counts,
+flames, collision and full pre-filter validation authoritative; gameplay v8 remains pinned to its
+fourteen-item catalog.
+
+At the prepared source, the required debug and release Rust suites passed 657 core tests and 198
+server tests, with four explicit server performance tests ignored. The first sandboxed debug
+attempt had 17 listener failures because local binds returned `PermissionDenied`; an authorized
+listener run then found one stale 15-item socket catalog assertion. After updating that assertion,
+debug and release passed.
+
+The prepared-source shuffled web gate passed 59 files and 82,344 tests with 95.43% statements,
+91.25% branches, 95.90% functions and 97.82% lines, plus production build, lint, Knip and generated
+contract checks. A test-only uniqueness guard initially raised the focused v9 contract count to
+65,545: all 65,536 masks plus nine focused guards passed. A prior duplicate-catalog fixture caused
+a failed 131,090-case reporter and is retained as failed evidence. Module initialization now checks
+the catalog's 16-entry length and uniqueness before constructing the parameter table; a negative
+fixture proves its enumerator is never called. The final focused run passed 65,546 tests, including
+that negative preflight proof.
+
+Prepared-source Rust coverage passed the unchanged 80% floor at 92.47% lines
+(13,527/14,629). E2E static checks passed 43 scenario/spec pairs with typecheck and lint. Renderer
+diagnostics, repository size/pin checks, offline dependency audits and strict validation of all
+three Kubernetes resources also passed. Independent browser review corrected the source-only proof
+without changing production code: blind P1 placement derives its ID from P2's sighted stream, the
+compositor baseline uses the same cell after collection and before planting, and paired adjacent
+publication windows prove hidden-before/revealed-after state with the same current fuse.
+
+No native Compose/Kubernetes acceptance or hosted CI is claimed for v0.3.41. Before native
+acceptance, the integrated source still requires its source-bound full gates and independent review.
 
 ## Historical prepared v0.3.40 Stopwatch source — source-specific local checks
 

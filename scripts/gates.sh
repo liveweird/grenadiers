@@ -88,6 +88,7 @@ security() {
 }
 coverage() {
   require_lock
+  mkdir -p target
   mask_profile coverage cargo llvm-cov --workspace --locked --fail-under-lines 80 \
     --lcov --output-path target/coverage.lcov -- --show-output
 }

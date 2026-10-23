@@ -1,5 +1,57 @@
 # Repository verification
 
+## v0.3.43 Wall Pass sealed native checkpoint — 2026-10-23 19:48 UTC — 110/110
+
+Final source `bd34192d8915a8aac4288e3f69bd5898ad01d952`, tree
+`daa2306e77de0e279a6752aa69e687e0a6c51ba0`, passes fresh source-bound gates and the complete
+same-image native matrix on
+`sha256:e2f02586988e2359404189afbe465ad47a4dd12e8227de8b6d3c627401ad7cfc`.
+Native root `98418`, tool chunk `465b91`, completed at `2026-10-23T19:48:00.902929Z`; its actual
+exit zero is consumed.
+All **55 Compose plus 55 Kubernetes** cases pass with zero retries and zero carried passes. The
+reviewed evidence contains 52 decoded reports, 122 verified PNGs, 42 runtime/security records,
+21 distinct Kubernetes UIDs, 20 fixtures and 40 seed-mode records. All 80 latency observations
+are retained below the unchanged 250 ms budget; maxima are 55.210/158.614 ms for local/shaped
+Compose and 56.475/166.412 ms for local/shaped Kubernetes.
+
+Fresh debug, release and coverage profiles each pass 711 core and 209 server tests with four
+historical ignores. Debug and release each add two passing doctests. Every profile enumerates all
+262,144 current masks. Rust coverage is 14,275/15,456 lines, **92.358954%**. The web gate passes
+797 tests across 64 files with **95.24/90.88/96/97.66%** statement/branch/function/line coverage;
+all 56 documented scenarios and renderer diagnostics pass. Cargo deny and both configured npm
+audits exit zero. The web audit retains two moderate development advisories for Vitest 5.0.1 and
+`@vitest/mocker` 5.0.1; there are no high or critical advisories, and the E2E audit reports none.
+
+The authoritative checkpoint inputs are
+`.local-checkpoints/2026-10-21/v0343-wall-pass-native-attempt4-facts.json` and
+`v0343-wall-pass-native-attempt4-actual-exit-consumed.json`. Independent audit
+`v0343-wall-pass-native-attempt4-audit.json` is CLEAR under SHA-256
+`1c53debae48997b48dbb37c1e9710f21d8dc5b45858707a1cd1368e8dca033a2`; result review
+`v0343-wall-pass-native-attempt4-result-review.json` is CLEAR under
+`41d6409d3a6f15fadbc07f8e75ef5cacf5406ab4aa2b541a5e221b53c0cd76f1`; proof binding review
+`v0343-wall-pass-native-attempt4-proof-binding-review.json` is CLEAR under
+`19ca908c65eb5bc430c1b2e2651d1abeed24e7c70d84b016b663b6bffdfa204c`.
+
+Sealer root `68301`, tool chunk `0c4202`, completes with consumed exit zero. Final manifest
+`e2f58e9a171b62eb2607d46a59236f19e2ca99fac0a7cd1148d3a34d5fae1a0e` byte-verifies 2,661
+payloads, 2,662 files and 284 directories in the immutable durable copy. Seal receipt
+`v0343-wall-pass-native-attempt4-seal.json` hashes to
+`da27773490c16bb4f32edc5e153544e2f659f2158df29dcd94e2560d036241b3`; independent
+`v0343-wall-pass-native-attempt4-seal-review.json` is CLEAR under
+`57dd9fc256ab34bbe6c5e51e070fe0502a69ccf3fd94507e27a26972bf844aff`.
+
+The reviewed Compose pre-collection captures are [English desktop](screenshots/wall-pass-desktop.png)
+and [Polish 320px reduced motion](screenshots/wall-pass-mobile-pl.png), with SHA-256 values
+`9200da355aa5fe9273a9a130186c7d8f27d28255f705abd6ded068671e71f9f8` and
+`07a276234fdf8023be1603fd04c27965ef4fa8698afbef63623c84205a0bf4ec`.
+
+This dated record certifies the eighteenth native-verified requested item; Kick, Punch, Bracelet
+and Oil Barrel remain before ART-ATLAS. It does **not** claim candidate, master or tag CI,
+publication, or promotion for v0.3.43. Those steps remain pending; consult current
+[checks](https://github.com/liveweird/grenadiers/actions) and
+[releases](https://github.com/liveweird/grenadiers/releases). The v0.3.42 delivery below remains
+the published baseline.
+
 ## v0.3.42 published delivery — 2026-10-23
 
 Published merge `0ff1512c5a8fdbd1e1b16583ae7791e668bf070b`, tree
@@ -11,8 +63,8 @@ settings masks on their first attempt. Publication completed with actual exit ze
 chunk `959d39`. Promotion root `84311`, chunk `3aee8a`, completed with consumed exit zero and serves
 the exact accepted image `sha256:8ae9818d27c4345bceec6dad77f02e21ee7148626efded48c421d86421285477`
 from container `0a3bcbac08bc2c2cf46365917a3719d3c5e522c4555234da8e1f661f6edcf214`.
-Seventeen of 22 requested item types are published. Wall Pass remains the eighteenth-item v0.3.43
-source candidate, pending fresh gates, native acceptance and final CI.
+Seventeen of 22 requested item types are published. At this delivery checkpoint Wall Pass was the
+next v0.3.43 source candidate; its later sealed native acceptance is recorded above.
 
 ## Historical Teleporter native acceptance — `2026-10-23 04:37 UTC`
 
@@ -1793,7 +1845,11 @@ Diarrhea.
 Records below are frozen against their named sources. Publication and later CI status are
 recorded in [release notes](https://github.com/liveweird/grenadiers/releases).
 
-## Wall Pass candidate — 2026-10-21 — source checks complete
+## Historical Wall Pass source-only candidate — 2026-10-21 — superseded
+
+This source-only chapter is preserved as dated history. Its pending native statement was
+superseded by the final-source sealed checkpoint recorded at the top of this document; it must not
+be read as the current v0.3.43 status.
 
 The v0.3.43 source candidate activates permanent Wall Pass equipment in the current gameplay-v10
 catalog. Core coverage exercises ordinary collection, equipment replacement and private per-cell
@@ -1818,9 +1874,10 @@ post-exit bomb has a later entity ID, identical on both clients. E2E verifies th
 creates no bomb or event and leaves resources unchanged; focused core tests verify no entity allocation. The route uses
 no state injection, direct WebSocket commands, seed search or retry. The sole-item fixture cannot
 prove replacement grace; the core/protocol layers do. That source-activation record did not claim
-predecessor integration. The current provisional source integrates the reviewed final v0.3.42
-source parent but does not claim a v0.3.43 candidate image, native Compose/Kubernetes execution,
-hosted CI or publication.
+predecessor integration. The then-provisional source integrated the reviewed final v0.3.42 source
+parent but did not claim a v0.3.43 candidate image, native Compose/Kubernetes execution, hosted CI
+or publication. The final source and native acceptance now exist above; hosted CI and publication
+remain pending.
 
 ## Teleporter candidate — 2026-10-21 — source checks complete
 

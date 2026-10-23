@@ -9,6 +9,11 @@ first-to-three progression, and rematches pass exact-image Compose/Kubernetes ac
 M6 reconnect/replay is implemented with all 42 baseline rules mapped to automated assertions.
 M6 is complete and locally verified on 2026-10-17, including exact-image deployment acceptance.
 M7 hardening has started; M8 remains planned.
+Invisible Bombs is published as prerelease v0.3.41 after distinct passing post-merge and tag
+workflows, and its sealed accepted image is promoted locally. Sixteen requested item types are
+published. The v0.3.42 Teleporter source is the seventeenth native-accepted candidate. Source
+`880fff7c67269f2886746b45239cd888576832f4` and image `sha256:8ae9818d27c4345bceec6dad77f02e21ee7148626efded48c421d86421285477` pass 54
+Compose plus 54 Kubernetes cases at `2026-10-23 04:37 UTC`; hosted delivery remains pending.
 The v0.3.16 increment adds classic-v3 forgiving turns and explicit gameplay-v5 compatibility,
 locally verified through both deployment paths on 2026-10-17.
 The v0.3.17 increment adds four shared gameplay settings with configurable-v4 rules and
@@ -20,24 +25,11 @@ v0.3.21 adds typed bomb triggers and checked legacy projection without activatin
 v0.3.20 retains ordered manual actions while preserving Classic placement and private replay,
 verified through both deployment paths.
 Published engineering prereleases are listed in `CHANGELOG.md` and GitHub Releases.
-At this v0.3.41 visibility-startup checkpoint, fifteen requested item types are published through
-v0.3.40. Invisible Bombs source `eb0b756` is the sixteenth candidate. Its six-path E2E change uses
-a bounded complete-line Chromium endpoint parser, preserves sanitized launch and cleanup failures,
-and leaves application runtime and gameplay assertions unchanged. The typed gate assembly retains
-the authenticated original-035 Rust/web computations under exact input equivalence. Fresh H
-repository/E2E/scenario/startup units, server-mask contract, mirror unit, current security checks
-and a single headed diagnostic pass; the diagnostic grants zero acceptance. Source-bound native
-root 40405 completed with consumed exit zero: the full 53 Compose plus 53 Kubernetes matrix,
-48 reports, 114 runtime PNGs, 38 runtime records, 19 Kubernetes identities, 18 fixtures and
-36 seed-mode records pass with zero retries or carry. Independent audit is clear under SHA-256
-`b0c72b1ff651257930f0db8df9db3cfc1274bd6882f142336e508e699c41097e`; result review is clear under
-`0cff7c9dd3bd4895cfcb426f340eca146b8c9627a55bac04c01111819b9008be`, and evidence is durably
-sealed and independently reviewed under seal-review SHA-256
-`87666f73ca51ac78e2d726de48f74444059e1aca636864839ab437249f353ec8`.
-At this source-bound documentation checkpoint, hosted delivery had
-not started; later delivery state belongs in the release record. PRs 89 and 90 provide zero
-accepted hosted cases.
-Teleporter, Wall Pass, Kick, Punch, Bracelet and Oil Barrel remain, followed by ART-ATLAS.
+Sixteen requested item types are published through v0.3.41. Teleporter is the seventeenth v0.3.42
+native-accepted candidate; its source gates cover 689 core, 208 release server and 657 web tests,
+55 static scenarios and all 131,072 settings masks in debug, release and coverage profiles. Wall
+Pass, Kick, Punch, Bracelet and Oil Barrel remain, followed by ART-ATLAS after the
+feature batch.
 
 New playtest requests and expansion work are tracked in the [gameplay and presentation
 backlog](backlog.md): forgiving turns first, shared gameplay settings, detailed retro pixel art,

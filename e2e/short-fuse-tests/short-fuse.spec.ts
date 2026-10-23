@@ -2,7 +2,7 @@ import { expect, test, type Page } from '@playwright/test'
 import { latestSnapshot, observeGame, visibleActor, type ObservedGame } from '../tests/support/duel'
 import { moveTo } from '../tests/support/movement'
 import { admissionBaseline, disconnectTransport, installTransportProbe } from '../tests/support/reconnect'
-import type { GameServerMessage } from '../../web/src/game/v9/schema'
+import type { GameServerMessage } from '../../web/src/game/v10/schema'
 
 test.beforeAll(() => {
   expect(process.env.E2E_SHORT_FUSE_FIXTURE, 'Configure the documented production Short Fuse seed')
@@ -102,7 +102,7 @@ test('two browsers collect Short Fuse and restore ordinary bomb timing after its
     await Promise.all([one, two].map((page) => page.getByRole('button', { name: 'Ready', exact: true }).click()))
     await Promise.all(games.map((game) => expect.poll(() => latestSnapshot(game)?.room.phase.type).toBe('running')))
     expect(latestSnapshot(games[0])!.room).toMatchObject({
-      rulesVersion: 5, mapId: 'generated_v2', availableItems: ['heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch', 'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls', 'invisibleBombs'],
+      rulesVersion: 5, mapId: 'generated_v2', availableItems: ['heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch', 'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls', 'invisibleBombs', 'teleporter'],
       settings: { enabledItems: ['shortFuse'], bombFuseTicks: 300 },
     })
     await one.getByRole('region', { name: 'Grenadiers courtyard' }).click()

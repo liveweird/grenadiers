@@ -81,6 +81,7 @@ independent item. The integrated catalog has 65,536 subsets; all earlier mapping
 v8 catalog remain pinned. Prepared-source checks do not establish native acceptance or hosted
 release CI for this integrated candidate, and no v0.3.40 acceptance result is carried forward.
 
+The provisional v0.3.42 source adds [Teleporter](teleporter.md) as the seventeenth optional pickup while preserving every v0.3.41 item. Rules version 5, generator version 2 and journal format 2 remain stable; Teleporter introduces the paired gameplay-v10 contract for its authoritative position epoch. This provisional integration still requires the final accepted v0.3.41 parent, fresh gates, independent review and native acceptance.
 This optional track follows the [backlog](backlog.md), shared settings and
 pixel-art increments. The historical catalog in [rules](rules.md) is not an implementation
 claim. Each activation requires its own reviewed behavior, UI, documentation and acceptance.
@@ -192,11 +193,14 @@ becomes solid, with at most eight per arena. Ignition leaves fire on that cell u
 without extra rays. Ordinary rays stop there; piercing/power retain their specified behavior.
 Document this interpretation visibly when enabling it, since the request groups it with curses.
 
-Teleporter is an immediate pickup effect. Swap with an eligible living rival only when both
-destination footprints are legal and free of active fire or triggerable mines; otherwise
-consume without swapping. Preserve heading, clear movement residual/turn intent and avoid
-another destination pickup that tick. Simultaneous pickups cause one priority-resolved swap.
-With two humans there is only one possible rival; random target selection waits for more seats.
+Teleporter is an immediate pickup effect. In the implemented two-seat rules it attempts one atomic
+swap only when both actors are living and both complete destination footprints are within bounds
+and clear of hard terrain, soft blocks, bombs and active fire. Contact overlap is safe only for the
+arriving actor's already-valid grace; Shield does not make fire safe and grace never transfers.
+Unsafe, dead or absent-target attempts consume the pickup without moving either actor. A living
+disconnected reserved-seat actor remains eligible. Success preserves headings, clears residual and
+turn intent, causes no swept contact or damage, and avoids destination pickup or extra action that
+tick. It draws no RNG, occupies no slot and starts no timer. See [Teleporter](teleporter.md).
 
 ## Ordered-action foundation
 

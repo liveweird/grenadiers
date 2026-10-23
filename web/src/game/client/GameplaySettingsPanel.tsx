@@ -2,7 +2,7 @@ import { Button, Checkbox, Group, NativeSelect, SimpleGrid, Text, Title } from '
 import { useMemo, useState } from 'react'
 import { sameGameSettings } from './clientProtocol'
 import type { GameCopy } from './locale'
-import type { GameSettings, RoomView, Seat } from '../v9/schema'
+import type { GameSettings, RoomView, Seat } from '../v10/schema'
 
 const SPEEDS = [0, 1, 2, 3, 4] as const
 const TURN_ASSISTS = [64, 128, 192, 256] as const
@@ -10,7 +10,7 @@ const WINS = [1, 2, 3, 4, 5, 6, 7, 8, 9] as const
 const FUSES = [60, 90, 120, 150, 180, 210, 240, 270, 300] as const
 const AVAILABLE_ITEMS = [
   'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch', 'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse',
-  'reverseControls', 'invisibleBombs',
+  'reverseControls', 'invisibleBombs', 'teleporter',
 ] as const
 type AvailableItem = typeof AVAILABLE_ITEMS[number]
 const DEFAULT_SETTINGS: GameSettings = {

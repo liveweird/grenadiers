@@ -26,6 +26,7 @@ pub enum PickupKind {
     LongFuse,
     ReverseControls,
     InvisibleBombs,
+    Teleporter,
 }
 
 impl PickupKind {
@@ -47,6 +48,7 @@ impl PickupKind {
             Self::LongFuse => enabled.contains_long_fuse(),
             Self::ReverseControls => enabled.contains_reverse_controls(),
             Self::InvisibleBombs => enabled.contains_invisible_bombs(),
+            Self::Teleporter => enabled.contains_teleporter(),
             _ => true,
         }
     }

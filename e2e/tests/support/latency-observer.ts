@@ -2,7 +2,7 @@ import { performance } from 'node:perf_hooks'
 import { expect, type Page } from '@playwright/test'
 import type {
   ArenaView, Cell, Direction, GameServerMessage, Position, Terrain,
-} from '../../../web/src/game/v9/schema'
+} from '../../../web/src/game/v10/schema'
 import type {
   DelayBridgeObserver, DelayBridgeSummary, RoutedFrameSummary, SanitizedSnapshot,
 } from './delayed-websocket'

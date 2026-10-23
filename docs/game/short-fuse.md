@@ -34,7 +34,7 @@ Short Fuse were supported at introduction and remain valid; later items join the
 [current catalog](settings.md). The default remains Heart-only.
 
 Rules version 5, generator version 2 and journal format 2 remain unchanged. The active
-wire contract is [gameplay-v9](protocol-v9.md).
+wire contract is [gameplay-v10](protocol-v10.md).
 Deploy the paired server/browser build together: older clients require a reload for the current
 wire contract and availability list. Bomb projections accept either the ordinary configured
 fuse or its captured halved value when Short Fuse is enabled, independently of the owner's

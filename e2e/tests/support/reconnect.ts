@@ -1,14 +1,16 @@
 import type { Page } from '@playwright/test'
-import type { Direction, GameServerMessage, Seat } from '../../../web/src/game/v9/schema'
+import type { Direction, GameServerMessage, Seat } from '../../../web/src/game/v10/schema'
 
 type Admission = Extract<GameServerMessage, { type: 'admitted' }>
 export type PublicAdmission = {
+  index: number
   roomId: string
   seat: Seat
   actionFloor: number | null
   tick: number
   hasState: boolean
   positions: { seat: Seat; x: number; y: number }[]
+  visibleActors: { seat: Seat; x: number; y: number; lastTeleportTick: number | null }[]
   bombIds: number[]
   stableCapability: boolean
 }
@@ -30,16 +32,23 @@ export async function installTransportProbe(page: Page): Promise<void> {
     let appSocket: WebSocket | null = null
     let credential: { roomId: string; seat: Seat; token: string } | null = null
     let admitted: PublicAdmission | null = null
+    let admissionIndex = 0
     let takeoverBinding: { socket: WebSocket; roomId: string; roundId: number; sequence: number } | null = null
     let sharedLeak = false
 
-    function publicAdmission(message: Admission, stableCapability: boolean): PublicAdmission {
+    function publicAdmission(
+      message: Admission, stableCapability: boolean, index: number,
+    ): PublicAdmission {
       return {
+        index,
         roomId: message.room.roomId, seat: message.youSeat,
         actionFloor: message.lastActionId, tick: message.room.tick,
         hasState: message.state !== null,
         positions: message.state?.actors.flatMap((actor) => actor.type === 'visible'
           ? [{ seat: actor.seat, ...actor.position }] : []) ?? [],
+        visibleActors: message.state?.actors.flatMap((actor) => actor.type === 'visible'
+          ? [{ seat: actor.seat, ...actor.position, lastTeleportTick: actor.lastTeleportTick }]
+          : []) ?? [],
         bombIds: message.state?.bombs.map((bomb) => bomb.id) ?? [], stableCapability,
       }
     }
@@ -56,7 +65,8 @@ export async function installTransportProbe(page: Page): Promise<void> {
             const stable = credential === null || credential.roomId !== message.room.roomId
               || credential.token === message.resumeToken
             credential = { roomId: message.room.roomId, seat: message.youSeat, token: message.resumeToken }
-            admitted = publicAdmission(message, stable)
+            admissionIndex += 1
+            admitted = publicAdmission(message, stable, admissionIndex)
           }
           if (message.type === 'roomState' || message.type === 'snapshot') {
             const encoded = JSON.stringify(message)
@@ -107,7 +117,7 @@ export async function installTransportProbe(page: Page): Promise<void> {
         socket.addEventListener('close', fail, { once: true })
         socket.addEventListener('open', () => {
           stage = 'open'
-          socket.send(JSON.stringify({ type: 'authenticate', protocolVersion: 9, token: session.token }))
+          socket.send(JSON.stringify({ type: 'authenticate', protocolVersion: 10, token: session.token }))
         }, { once: true })
         const onMessage = (event: MessageEvent): void => {
           const message = JSON.parse(String(event.data)) as GameServerMessage
@@ -134,7 +144,8 @@ export async function installTransportProbe(page: Page): Promise<void> {
                   socket, roomId: message.room.roomId, roundId: message.room.roundId, sequence: 2,
                 }
               }
-              resolve(publicAdmission(message, message.resumeToken === capability.token))
+              admissionIndex += 1
+              resolve(publicAdmission(message, message.resumeToken === capability.token, admissionIndex))
             }
           }
         }

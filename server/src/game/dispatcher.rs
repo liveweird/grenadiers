@@ -1,8 +1,8 @@
 use std::sync::Arc;
 
 use axum::extract::ws::{Message, WebSocket};
-use grenadiers_core::protocol::v9::{
-    GameClientMessage, GameServerMessage, ManualActionKind, V9ErrorCode as ErrorCode,
+use grenadiers_core::protocol::v10::{
+    GameClientMessage, GameServerMessage, ManualActionKind, V10ErrorCode as ErrorCode,
 };
 use grenadiers_core::protocol::{Counter, Direction as WireDirection, RoomId};
 use tokio::time::Instant;
@@ -127,7 +127,7 @@ pub(super) async fn dispatch(
                 u64::from(round_id.get()),
                 RoomAction::UpdateSettings {
                     settings_revision: settings_revision.get(),
-                    settings: match grenadiers_core::protocol::v9::expanded_settings(settings) {
+                    settings: match grenadiers_core::protocol::v10::expanded_settings(settings) {
                         Ok(settings) => settings,
                         Err(_) => {
                             return reply_error(socket, ErrorCode::InvalidMessage, sequence).await;

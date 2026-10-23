@@ -6,7 +6,7 @@ use super::projection_capture_wire::*;
 use super::projection_facts::{
     EventFacts, ExpandedCapture, ProjectionError, ReportFacts, TimedBombFacts, WorldFacts,
 };
-use super::projection_validation::{validate_reports, validate_world};
+use super::projection_validation::{validate_reports, validate_world_for_items};
 use super::{
     ArenaView, BlastKind, BombTrigger, BombView, DamageGraceTicks, EffectView, EffectViews,
     EventKind, FlameView, InventoryView, ItemSet, PickupView, RulesVersion, Terrain,
@@ -47,52 +47,56 @@ pub(crate) fn capture_expanded_for_items(
         .values()
         .map(|bomb| capture_bomb(*bomb, public.tick, state.timed_bombs_paused()))
         .collect::<Result<Vec<_>, _>>()?;
-    let world = validate_world(WorldFacts {
-        rules_version,
-        physical_tick,
-        running_updates: u16::try_from(public.running_updates)
-            .map_err(|_| ProjectionError::InvalidClock)?,
-        remaining_ticks: u16::try_from(public.remaining_ticks)
-            .map_err(|_| ProjectionError::InvalidClock)?,
-        result: wire_result(public.result),
-        arena: capture_arena(&public.arena)?,
-        actors,
-        bombs: captured_bombs.iter().map(|(bomb, _)| *bomb).collect(),
-        timed_bombs: captured_bombs
-            .iter()
-            .filter_map(|(bomb, timing)| timing.map(|facts| (bomb.id, facts)))
-            .collect::<BTreeMap<_, _>>(),
-        flames: public
-            .flames
-            .iter()
-            .map(|flame| {
-                Ok(FlameView {
-                    cell: wire_cell(flame.cell)?,
-                    expires_at: wire_tick(flame.expires_at)?,
+    let world = validate_world_for_items(
+        WorldFacts {
+            rules_version,
+            physical_tick,
+            last_teleport_tick: state.last_teleport_tick().map(wire_tick).transpose()?,
+            running_updates: u16::try_from(public.running_updates)
+                .map_err(|_| ProjectionError::InvalidClock)?,
+            remaining_ticks: u16::try_from(public.remaining_ticks)
+                .map_err(|_| ProjectionError::InvalidClock)?,
+            result: wire_result(public.result),
+            arena: capture_arena(&public.arena)?,
+            actors,
+            bombs: captured_bombs.iter().map(|(bomb, _)| *bomb).collect(),
+            timed_bombs: captured_bombs
+                .iter()
+                .filter_map(|(bomb, timing)| timing.map(|facts| (bomb.id, facts)))
+                .collect::<BTreeMap<_, _>>(),
+            flames: public
+                .flames
+                .iter()
+                .map(|flame| {
+                    Ok(FlameView {
+                        cell: wire_cell(flame.cell)?,
+                        expires_at: wire_tick(flame.expires_at)?,
+                    })
                 })
-            })
-            .collect::<Result<_, ProjectionError>>()?,
-        pickups: public
-            .pickups
-            .iter()
-            .map(|pickup| {
-                Ok(PickupView {
-                    cell: wire_cell(pickup.cell)?,
-                    kind: wire_pickup(pickup.kind),
+                .collect::<Result<_, ProjectionError>>()?,
+            pickups: public
+                .pickups
+                .iter()
+                .map(|pickup| {
+                    Ok(PickupView {
+                        cell: wire_cell(pickup.cell)?,
+                        kind: wire_pickup(pickup.kind),
+                    })
                 })
-            })
-            .collect::<Result<_, ProjectionError>>()?,
-        available_items: if rules_version == RulesVersion::ExpandedV5 {
-            supported_items
-        } else {
-            ItemSet::empty()
+                .collect::<Result<_, ProjectionError>>()?,
+            available_items: if rules_version == RulesVersion::ExpandedV5 {
+                supported_items
+            } else {
+                ItemSet::empty()
+            },
+            enabled_items: if rules_version == RulesVersion::ExpandedV5 {
+                enabled_items
+            } else {
+                ItemSet::empty()
+            },
         },
-        enabled_items: if rules_version == RulesVersion::ExpandedV5 {
-            enabled_items
-        } else {
-            ItemSet::empty()
-        },
-    })?;
+        supported_items,
+    )?;
     let facts = reports
         .iter()
         .map(capture_report)

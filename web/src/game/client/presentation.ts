@@ -3,7 +3,7 @@ import type { GameClientState } from './clientTypes'
 
 const renderedPickups = new Set([
   'bombCapacity', 'blastRange', 'movementSpeed', 'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch', 'invisibilityCloak', 'goldenFlame', 'shortFuse',
-  'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls', 'invisibleBombs',
+  'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls', 'invisibleBombs', 'teleporter',
 ])
 const effectTicks = (effects: { kind: string; remainingTicks: number }[], kind: string): number =>
   effects.find((effect) => effect.kind === kind)?.remainingTicks ?? 0
@@ -30,8 +30,9 @@ export function presentSnapshot(state: GameClientState): SnapshotMessage | null 
       actors: snapshot.state.actors
         .filter((actor) => actor.type === 'visible')
         .map(({ id, seat, position, heading, alive, damageGraceRemainingTicks, inventory, effects,
-          voluntaryActionsFrozen }) => ({
+          voluntaryActionsFrozen, lastTeleportTick }) => ({
           id, seat, position, heading, alive, damageGraceRemainingTicks, voluntaryActionsFrozen,
+          lastTeleportTick,
           remoteArmed: snapshot.state.bombs.some((bomb) =>
             bomb.owner === id && bomb.trigger.type === 'remote'),
           piercingArmed: inventory.weapon === 'piercingBomb',
@@ -64,7 +65,7 @@ export function presentSnapshot(state: GameClientState): SnapshotMessage | null 
         (pickup): pickup is typeof pickup & {
           kind: 'bombCapacity' | 'blastRange' | 'movementSpeed' | 'heart' | 'remoteBomb' | 'piercingBomb' | 'powerBomb' | 'landmine' | 'shield' | 'stopwatch' | 'invisibilityCloak'
             | 'goldenFlame' | 'shortFuse' | 'diarrhea' | 'slowFoot' | 'shortFlame' | 'longFuse'
-            | 'reverseControls' | 'invisibleBombs'
+            | 'reverseControls' | 'invisibleBombs' | 'teleporter'
         } =>
           renderedPickups.has(pickup.kind),
       ),

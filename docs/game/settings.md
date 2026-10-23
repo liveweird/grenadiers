@@ -24,6 +24,7 @@ The creator can configure these rules before either starts the match:
 | Landmine | Enabled or disabled; disabled by default | Stores one passable manual mine that detonates on swept actor contact after initial exit grace. |
 | Invisibility Cloak | Enabled or disabled; disabled by default | Hides the actor's position and gameplay details from the opponent for ten seconds. |
 | Invisible Bombs | Enabled or disabled; disabled by default | Hides every bomb and its placement or detonation cue from the affected player for ten seconds. |
+| Teleporter | Enabled or disabled; disabled by default | Atomically swaps both living players when both destination footprints are safe; an unsafe pickup is consumed without movement. |
 | Short Flame | Enabled or disabled; disabled by default | Adds ten-second curses that limit new bombs to range one, overriding Golden Flame. |
 | Long Fuse | Enabled or disabled; disabled by default | Adds ten-second curses that double new ordinary timed bomb fuses. Short and Long Fuse cancel while both are active. |
 | Reverse Controls | Enabled or disabled; disabled by default | Adds ten-second curses that reverse held movement directions. |
@@ -33,6 +34,7 @@ unready and in the waiting lobby. Apply changes to update the shared rules; a ge
 clears both players' readiness. Restore defaults prepares Expanded defaults, including Heart.
 Classic settings prepares the original four values with optional items disabled. Both presets
 require Apply rules before changing the shared configuration.
+Oil remains unavailable and disabled; this activation does not add an Oil switch or arena object.
 Once a match starts, settings stay locked through all automatic rounds. Both players can
 consent to a rematch and then edit in the unready lobby again.
 
@@ -46,5 +48,5 @@ round/flame duration, loadouts and additional item pools remains in the [backlog
 
 Heart is introduced by the v0.3.25 implementation candidate. Expanded rooms retain immutable
 rules version 5/map `generated_v2` when Heart is disabled, including after preset changes.
-Shield is available separately in the v0.3.26 candidate, Golden Flame in v0.3.27, Short Fuse in v0.3.28, Short Flame in v0.3.29, Long Fuse in v0.3.30, Reverse Controls in v0.3.31, Diarrhea in v0.3.32, Slow foot in v0.3.33, Piercing Bomb in v0.3.34, Power Bomb in v0.3.35, Remote Bomb in v0.3.36, Landmine in v0.3.37, Invisibility Cloak in v0.3.38, Stopwatch in v0.3.40, and Invisible Bombs in v0.3.41; all sixteen switches preserve one another.
-See [Heart behavior](heart.md), [Remote Bomb](remote-bomb.md), [Piercing Bomb](piercing-bomb.md), [Power Bomb](power-bomb.md), [Landmine](landmine.md), [Stopwatch](stopwatch.md), [Invisibility Cloak](invisibility-cloak.md), [Invisible Bombs](invisible-bombs.md), [Shield behavior](shield.md), [Golden Flame](golden-flame.md), [Short Fuse](short-fuse.md), [Short Flame](short-flame.md), [Long Fuse](long-fuse.md), [Reverse Controls](reverse-controls.md), [Diarrhea](diarrhea.md), [Slow foot](slow-foot.md), and [protocol compatibility](protocol-v9.md).
+Shield is available separately in the v0.3.26 candidate, Golden Flame in v0.3.27, Short Fuse in v0.3.28, Short Flame in v0.3.29, Long Fuse in v0.3.30, Reverse Controls in v0.3.31, Diarrhea in v0.3.32, Slow foot in v0.3.33, Piercing Bomb in v0.3.34, Power Bomb in v0.3.35, Remote Bomb in v0.3.36, Landmine in v0.3.37, Invisibility Cloak in v0.3.38, Stopwatch in v0.3.40, Invisible Bombs in v0.3.41, and Teleporter in v0.3.42; all seventeen switches preserve one another.
+See [Heart behavior](heart.md), [Remote Bomb](remote-bomb.md), [Piercing Bomb](piercing-bomb.md), [Power Bomb](power-bomb.md), [Landmine](landmine.md), [Stopwatch](stopwatch.md), [Invisibility Cloak](invisibility-cloak.md), [Invisible Bombs](invisible-bombs.md), [Teleporter](teleporter.md), [Shield behavior](shield.md), [Golden Flame](golden-flame.md), [Short Fuse](short-fuse.md), [Short Flame](short-flame.md), [Long Fuse](long-fuse.md), [Reverse Controls](reverse-controls.md), [Diarrhea](diarrhea.md), [Slow foot](slow-foot.md), and [protocol compatibility](protocol-v10.md).

@@ -5,6 +5,7 @@ mod projection;
 mod scalars;
 mod server;
 mod snapshot;
+pub mod v10;
 pub mod v3;
 pub mod v6;
 pub mod v7;

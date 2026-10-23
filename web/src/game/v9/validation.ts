@@ -3,6 +3,7 @@ import gameplayV9Schema from '../../../../api/gameplay-v9.schema.json'
 import { effectSemanticError, expandedProfileSemanticErrorFor, itemSetSemanticError,
   type GameplayV8SemanticError } from '../v8/semantics'
 import type { GameServerMessage, GameState, RoomView } from './schema'
+import { freezeSemanticError } from './freezeValidation'
 
 type GameplayV9SemanticError = GameplayV8SemanticError | 'invalidFrozenState'
 export type GameplayV9ValidationResult =
@@ -29,22 +30,13 @@ function stateSemanticError(
   state: GameState | null, stopwatchEnabled: boolean,
 ): GameplayV9SemanticError | null {
   if (!state) return null
-  for (const [index, actor] of state.actors.entries()) {
+  for (const actor of state.actors) {
     if (actor.type === 'visible') {
       const error = effectSemanticError(actor.effects)
       if (error) return error
-      if ((!actor.alive || !stopwatchEnabled) && actor.voluntaryActionsFrozen) {
-        return 'invalidFrozenState'
-      }
-      const opponent = state.actors[1 - index]
-      if (opponent.type === 'visible') {
-        const expected = actor.alive && opponent.alive
-          && opponent.effects.some((effect) => effect.kind === 'stopwatch')
-        if (actor.voluntaryActionsFrozen !== expected) return 'invalidFrozenState'
-      }
     }
   }
-  return null
+  return freezeSemanticError(state.actors, stopwatchEnabled) ? 'invalidFrozenState' : null
 }
 
 function roomSemanticError(room: RoomView): GameplayV9SemanticError | null {

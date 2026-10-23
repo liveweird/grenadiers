@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { admitted, authenticate, harness, messages, room, roomId, snapshot, SocketStub } from './testSupport'
 
-describe('v9 session and admission failures', () => {
+describe('v10 session and admission failures', () => {
   beforeEach(() => vi.stubGlobal('WebSocket', { OPEN: SocketStub.OPEN }))
 
   it.each([
@@ -39,8 +39,8 @@ describe('v9 session and admission failures', () => {
     await vi.waitFor(() => expect(value.sockets).toHaveLength(1))
     const socket = value.sockets[0]
     socket.emit('open')
-    socket.message({ type: 'authenticated', protocolVersion: 9 })
-    socket.message({ type: 'authenticated', protocolVersion: 9 })
+    socket.message({ type: 'authenticated', protocolVersion: 10 })
+    socket.message({ type: 'authenticated', protocolVersion: 10 })
     expect(messages(socket).filter((message) => message.type === 'createRoom')).toHaveLength(1)
     socket.message({ ...admitted(), sequence: 2 })
     expect(value.client.getState().room).toBeNull()
@@ -75,7 +75,7 @@ describe('v9 session and admission failures', () => {
   })
 })
 
-describe('v9 authoritative updates and controls', () => {
+describe('v10 authoritative updates and controls', () => {
   beforeEach(() => vi.stubGlobal('WebSocket', { OPEN: SocketStub.OPEN }))
 
   it('accepts only newer same-room nonregressing shared facts', async () => {
@@ -263,7 +263,7 @@ describe('v9 authoritative updates and controls', () => {
   })
 })
 
-describe('v9 live Timed bomb validation', () => {
+describe('v10 live Timed bomb validation', () => {
   beforeEach(() => vi.stubGlobal('WebSocket', { OPEN: SocketStub.OPEN }))
   it.each([false, true])('closes on a zero-tick live Timed bomb with paused=%s', async (paused) => {
     const value = harness()
@@ -284,7 +284,7 @@ describe('v9 live Timed bomb validation', () => {
   })
 })
 
-describe('v9 retry callback fences', () => {
+describe('v10 retry callback fences', () => {
   beforeEach(() => vi.stubGlobal('WebSocket', { OPEN: SocketStub.OPEN }))
 
   it('does not run a canceled reconnect timer after explicit disconnect', async () => {

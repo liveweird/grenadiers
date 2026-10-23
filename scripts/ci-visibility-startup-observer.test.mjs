@@ -1,12 +1,15 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { spawn, spawnSync } from "node:child_process";
 import test from "node:test";
 
-import { collectSample, MAX_PROCESSES, parseMemAvailable, parsePressure, parseProcIo,
-  parseProcStat, parseProcStatusMemory } from "./ci-visibility-startup-observer.mjs";
+import { captureStartupFileSnapshot, collectSample, FILE_SNAPSHOT_ELAPSED_MS,
+  MAX_MAPPING_BYTES, MAX_MAPPING_ENTRIES, MAX_MAPPING_GROUPS, MAX_PROCESSES,
+  parseMemAvailable, parsePressure, parseProcIo, parseProcStat, parseProcStatusMemory }
+  from "./ci-visibility-startup-observer.mjs";
 
 const observer = new URL("./ci-visibility-startup-observer.mjs", import.meta.url);
 
@@ -32,6 +35,25 @@ function writeProcess(root, process, argv = ["node"], stderrTarget = null) {
     "VmRSS:\t11 kB\nRssAnon:\t12 kB\nRssFile:\t13 kB\nRssShmem:\t14 kB\nVmSwap:\t15 kB\n");
   fs.symlinkSync(stderrTarget ?? path.join(directory, "stderr.log"), path.join(directory, "fd", "2"));
   if (!stderrTarget) fs.writeFileSync(path.join(directory, "stderr.log"), "");
+}
+
+function writeFileMappings(root, pid, executable, extraPath = null) {
+  const directory = path.join(root, String(pid));
+  fs.symlinkSync(executable, path.join(directory, "exe"));
+  const lines = [
+    `1000-2000 r-xp 00000000 08:01 41 ${executable}`,
+    `2000-3000 r--p 00001000 08:01 41 ${executable}`,
+  ];
+  if (extraPath) lines.push(`3000-4000 r--p 00000000 08:02 42 ${extraPath}`);
+  fs.writeFileSync(path.join(directory, "maps"), `${lines.join("\n")}\n`);
+  fs.writeFileSync(path.join(directory, "smaps"), `${lines.map((line, index) =>
+    `${line}\nRss: ${index + 2} kB\nReferenced: ${index + 1} kB`).join("\n")}\n`);
+}
+
+function executableExpectation(executable) {
+  const stat = fs.statSync(executable, { bigint: true });
+  return { canonicalPathSHA256: createHash("sha256").update(executable).digest("hex"),
+    device: String(stat.dev), inode: String(stat.ino), size: Number(stat.size) };
 }
 
 function withProc(assertion) {
@@ -78,6 +100,133 @@ test("parses selected process and bounded host counters at their documented posi
   assert.equal(parseMemAvailable("MemTotal: 99 kB\nMemAvailable: 14 kB\n"), 14);
 });
 
+test("attributes matching executable mappings, aggregates residency, and reports later deltas", () => {
+  withProc((root) => {
+    const browserRoot = path.join(root, "browser");
+    fs.mkdirSync(browserRoot);
+    const executable = path.join(browserRoot, "chrome");
+    fs.writeFileSync(executable, "browser-binary");
+    const privatePath = path.join(root, "grenadiers-visibility-secret", "cache.bin");
+    writeProcess(root, { pid: 101, ppid: 1, starttime: 11 });
+    writeFileMappings(root, 101, executable, privatePath);
+    const opened = [];
+    const fsApi = Object.create(fs);
+    fsApi.openSync = (file, ...args) => { opened.push(file); return fs.openSync(file, ...args); };
+    const first = captureStartupFileSnapshot({ procRoot: root, pid: 101, starttime: 11,
+      elapsedMs: 10, expectedExecutable: executableExpectation(executable), fsApi });
+    assert.equal(first.executable.readinessMatch, true);
+    assert.deepEqual(first.mappings[0], {
+      device: "08:01", inode: "41", mappedBytes: 8192,
+      rssBytes: 5 * 1024, referencedBytes: 3 * 1024,
+      permissions: ["r--p", "r-xp"],
+      path: { pathSHA256: createHash("sha256").update(executable).digest("hex"),
+        kind: "browser", browserRelativePath: "chrome" },
+    });
+    assert.equal(JSON.stringify(first).includes("grenadiers-visibility-secret"), false);
+    assert(opened.every((file) => file.startsWith(path.join(root, "101"))));
+    assert.equal(opened.includes(executable), false);
+
+    const smaps = fs.readFileSync(path.join(root, "101", "smaps"), "utf8")
+      .replace("Rss: 2 kB", "Rss: 7 kB").replace("Referenced: 1 kB", "Referenced: 4 kB");
+    fs.writeFileSync(path.join(root, "101", "smaps"), smaps);
+    const second = captureStartupFileSnapshot({ procRoot: root, pid: 101, starttime: 11,
+      elapsedMs: FILE_SNAPSHOT_ELAPSED_MS, expectedExecutable: executableExpectation(executable),
+      baseline: first });
+    assert.deepEqual(second.mappings[0].deltaFromFirst,
+      { mappedBytes: 0, rssBytes: 5 * 1024, referencedBytes: 3 * 1024 });
+    const mismatch = captureStartupFileSnapshot({ procRoot: root, pid: 101, starttime: 11,
+      expectedExecutable: { ...executableExpectation(executable), inode: "999" } });
+    assert.equal(mismatch.executable.readinessMatch, false);
+    assert.equal(mismatch.executable.identityMatchesReadiness, false);
+    assert.equal(mismatch.executable.pathMatchesReadiness, true);
+    assert.equal(mismatch.mappings[0].path.kind, "private-or-unknown");
+    assert.equal("browserRelativePath" in mismatch.mappings[0].path, false);
+  });
+});
+
+test("makes missing, malformed, truncated, and PID-reused snapshot metadata explicit", () => {
+  withProc((root) => {
+    const executable = path.join(root, "chrome");
+    fs.writeFileSync(executable, "browser-binary");
+    writeProcess(root, { pid: 101, ppid: 1, starttime: 11 });
+    fs.symlinkSync(executable, path.join(root, "101", "exe"));
+    fs.writeFileSync(path.join(root, "101", "maps"),
+      `malformed\n${"x".repeat(MAX_MAPPING_BYTES + 1)}`);
+    const incomplete = captureStartupFileSnapshot({ procRoot: root, pid: 101, starttime: 11,
+      expectedExecutable: executableExpectation(executable) });
+    assert.equal(incomplete.maps.status, "truncated");
+    assert.equal(incomplete.maps.truncated, true);
+    assert.equal(incomplete.maps.malformedLines > 0, true);
+    assert.equal(incomplete.smaps.status, "missing");
+
+    fs.writeFileSync(path.join(root, "101", "maps"),
+      `1000-2000 r--p 00000000 08:03 77 /private/cache.bin\n`);
+    const mapsFallback = captureStartupFileSnapshot({ procRoot: root, pid: 101, starttime: 11,
+      expectedExecutable: executableExpectation(executable) });
+    assert.equal(mapsFallback.mappingSource, "maps");
+    assert.equal(mapsFallback.aggregation.source, "maps");
+    assert.equal(mapsFallback.aggregation.groupLimitReached, false);
+    assert.equal(mapsFallback.mappings[0].rssBytes, null);
+    assert.equal(mapsFallback.mappings[0].referencedBytes, null);
+
+    const manyMapGroups = Array.from({ length: MAX_MAPPING_GROUPS + 2 }, (_, index) =>
+      `${(0x1000 + index * 0x1000).toString(16)}-${(0x2000 + index * 0x1000).toString(16)} r--p 00000000 08:04 ${2000 + index} /private/maps-only/${index}`);
+    fs.writeFileSync(path.join(root, "101", "maps"), `${manyMapGroups.join("\n")}\n`);
+    const mapsOnlyCapped = captureStartupFileSnapshot({ procRoot: root, pid: 101,
+      starttime: 11, expectedExecutable: executableExpectation(executable) });
+    assert.equal(mapsOnlyCapped.smaps.status, "missing");
+    assert.equal(mapsOnlyCapped.aggregation.source, "maps");
+    assert.equal(mapsOnlyCapped.aggregation.groupLimitReached, true);
+    assert.equal(mapsOnlyCapped.mappings.length, MAX_MAPPING_GROUPS);
+
+    const manyMappings = Array.from({ length: MAX_MAPPING_ENTRIES + 2 }, (_, index) =>
+      `${(0x1000 + index * 0x1000).toString(16)}-${(0x2000 + index * 0x1000).toString(16)} r--p 00000000 08:03 ${1000 + index} /private/${index}`);
+    fs.writeFileSync(path.join(root, "101", "maps"), `${manyMappings.join("\n")}\n`);
+    fs.writeFileSync(path.join(root, "101", "smaps"),
+      `${manyMappings.map((line) => `${line}\nRss: 1 kB\nReferenced: 1 kB`).join("\n")}\n`);
+    const capped = captureStartupFileSnapshot({ procRoot: root, pid: 101, starttime: 11,
+      expectedExecutable: executableExpectation(executable) });
+    assert.equal(capped.maps.entryLimitReached, true);
+    assert.equal(capped.aggregation.source, "smaps");
+    assert.equal(capped.aggregation.entryLimitReached, true);
+    assert.equal(capped.aggregation.groupLimitReached, true);
+    assert.equal(capped.mappings.length, MAX_MAPPING_GROUPS);
+
+    const replacement = path.join(root, "replacement-chrome");
+    fs.writeFileSync(replacement, "replacement-browser-binary");
+    let executableReads = 0;
+    const execRaceFsApi = Object.create(fs);
+    execRaceFsApi.readlinkSync = (...args) => {
+      executableReads += 1;
+      if (executableReads === 2) {
+        fs.unlinkSync(path.join(root, "101", "exe"));
+        fs.symlinkSync(replacement, path.join(root, "101", "exe"));
+      }
+      return fs.readlinkSync(...args);
+    };
+    const execRace = captureStartupFileSnapshot({ procRoot: root, pid: 101, starttime: 11,
+      expectedExecutable: executableExpectation(executable), fsApi: execRaceFsApi });
+    assert.equal(execRace.gap, "executable-changed-during-snapshot");
+    assert.equal(execRace.executableBefore.canonicalPathSHA256,
+      createHash("sha256").update(executable).digest("hex"));
+    assert.equal(execRace.executableAfter.canonicalPathSHA256,
+      createHash("sha256").update(replacement).digest("hex"));
+    assert.equal("mappings" in execRace, false);
+
+    const fsApi = Object.create(fs);
+    fsApi.readlinkSync = (...args) => {
+      const result = fs.readlinkSync(...args);
+      fs.writeFileSync(path.join(root, "101", "stat"),
+        statLine({ pid: 101, ppid: 1, starttime: 999 }));
+      return result;
+    };
+    const reused = captureStartupFileSnapshot({ procRoot: root, pid: 101, starttime: 11,
+      expectedExecutable: executableExpectation(executable), fsApi });
+    assert.equal(reused.gap, "process-identity-changed-after-snapshot");
+    assert.equal("mappings" in reused, false);
+  });
+});
+
 test("keeps only the owned ancestry and exposes no argv, profile path, endpoint, or environment", () => {
   withProc((root) => {
     writeProcess(root, { pid: 100, ppid: 1, starttime: 10 });
@@ -110,6 +259,34 @@ test("keeps only the owned ancestry and exposes no argv, profile path, endpoint,
     for (const forbidden of [secret, secondProfile, "secret-endpoint", "cmdline", "environment",
       "about:blank"])
       assert.equal(serialized.includes(forbidden), false);
+  });
+});
+
+test("takes at most two file snapshots on existing sample ticks for the same unique browser", () => {
+  withProc((root) => {
+    const executable = path.join(root, "chrome");
+    fs.writeFileSync(executable, "browser-binary");
+    writeProcess(root, { pid: 100, ppid: 1, starttime: 10 });
+    const profile = path.join(root, "grenadiers-visibility-snapshot-profile");
+    fs.mkdirSync(profile);
+    writeProcess(root, { pid: 101, ppid: 100, starttime: 11 }, ["chromium",
+      "--no-sandbox", "--disable-dev-shm-usage", "--no-first-run",
+      "--no-default-browser-check", "--enable-gpu", "--use-gl=angle",
+      "--use-angle=swiftshader", "--remote-debugging-port=0",
+      `--user-data-dir=${profile}`, "about:blank"]);
+    writeFileMappings(root, 101, executable);
+    const state = { count: 0, browserIdentity: null, first: null };
+    const options = { procRoot: root, rootPid: 100, rootStarttime: 10, tempRoot: root,
+      expectedExecutable: executableExpectation(executable), fileSnapshotState: state };
+    const first = collectSample({ ...options, elapsedMs: 0 });
+    assert.equal(first.processes[1].startupFileSnapshot.ordinal, 1);
+    const early = collectSample({ ...options, elapsedMs: FILE_SNAPSHOT_ELAPSED_MS - 1 });
+    assert.equal("startupFileSnapshot" in early.processes[1], false);
+    const later = collectSample({ ...options, elapsedMs: FILE_SNAPSHOT_ELAPSED_MS });
+    assert.equal(later.processes[1].startupFileSnapshot.ordinal, 2);
+    const after = collectSample({ ...options, elapsedMs: FILE_SNAPSHOT_ELAPSED_MS + 1000 });
+    assert.equal("startupFileSnapshot" in after.processes[1], false);
+    assert.equal(state.count, 2);
   });
 });
 
@@ -220,6 +397,7 @@ test("runs the child once and preserves a nonzero exit without retrying", () => 
     const lines = fs.readFileSync(path.join(root, "visibility-startup-observer.jsonl"), "utf8")
       .trim().split("\n").map(JSON.parse);
     assert.equal(lines.at(-1).exitCode, 7);
+    assert.equal(lines.at(-1).startupFileSnapshots, 0);
     assert.equal(lines.filter(({ kind }) => kind === "complete").length, 1);
   } finally { fs.rmSync(root, { recursive: true, force: true }); }
 });

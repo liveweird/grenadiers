@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -38,6 +39,14 @@ test("streams every regular distribution file once into a closed inventory", () 
     assert.deepEqual(record.files.map(({ path: relative }) => relative),
       ["chrome", "locales/en-US.pak", "resources.pak"]);
     assert.equal(record.bytesRead, "chromium-binarylocaleresources".length);
+    const executableStat = fs.statSync(current.executable, { bigint: true });
+    assert.deepEqual(record.executable, {
+      canonicalPathSHA256: createHash("sha256").update(current.executable).digest("hex"),
+      device: String(executableStat.dev), inode: String(executableStat.ino),
+      size: "chromium-binary".length,
+      contentSHA256: createHash("sha256").update("chromium-binary").digest("hex"),
+    });
+    assert.equal(record.schemaVersion, 2);
     assert(largestRead <= READ_BUFFER_BYTES);
     assert.deepEqual(JSON.parse(fs.readFileSync(current.output, "utf8")), record);
   } finally { cleanup(current.parent); }

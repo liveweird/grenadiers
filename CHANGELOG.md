@@ -8,8 +8,25 @@
   a wire marker, timer or public concealed-content cue.
 - Extend gameplay v10 to the eighteenth lobby switch and all 262,144 settings masks, with pinned
   archive rejection, English/Polish presentation and deterministic production-seed browser source.
-- The published v0.3.42 source parent is integrated. Fresh v0.3.43 gates, native same-image acceptance,
-  hosted CI and publication remain pending; this entry does not claim a released artifact.
+- The published v0.3.42 source parent is integrated. Fresh source-bound gates pass on source
+  `bd34192d8915a8aac4288e3f69bd5898ad01d952` (tree
+  `daa2306e77de0e279a6752aa69e687e0a6c51ba0`): every debug, release and coverage profile passes
+  711 core and 209 server tests with four historical ignores, the web gate passes 797 tests across
+  64 files, all 56 scenarios pass, and all 262,144 masks complete in each Rust profile. Rust line
+  coverage is 92.358954%; web statement/branch/function/line coverage is 95.24/90.88/96/97.66%.
+- At the `2026-10-23 19:48 UTC` native checkpoint, exact image
+  `sha256:e2f02586988e2359404189afbe465ad47a4dd12e8227de8b6d3c627401ad7cfc`
+  passes all 55 Compose plus 55 Kubernetes cases with zero retries or carried passes: 52 reports,
+  122 PNGs, 42 runtime records, 21 Kubernetes identities, 20 fixtures, 40 seed records and all 80
+  latency samples below 250 ms. Independent audit `1c53debae48997b48dbb37c1e9710f21d8dc5b45858707a1cd1368e8dca033a2`,
+  result review `41d6409d3a6f15fadbc07f8e75ef5cacf5406ab4aa2b541a5e221b53c0cd76f1`
+  and binding review `19ca908c65eb5bc430c1b2e2651d1abeed24e7c70d84b016b663b6bffdfa204c`
+  are clear. Final manifest `e2f58e9a171b62eb2607d46a59236f19e2ca99fac0a7cd1148d3a34d5fae1a0e`
+  durably seals 2,661 payloads; seal `da27773490c16bb4f32edc5e153544e2f659f2158df29dcd94e2560d036241b3`
+  and independent review `57dd9fc256ab34bbe6c5e51e070fe0502a69ccf3fd94507e27a26972bf844aff`
+  are clear. Eighteen requested items are native verified; Kick, Punch, Bracelet and Oil Barrel remain.
+  Hosted candidate, master and tag checks, publication and promotion remain pending; this entry does
+  not claim a v0.3.43 release.
 
 ## 0.3.42 — 2026-10-23
 

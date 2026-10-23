@@ -102,7 +102,7 @@ test('Wall Pass crosses one intact block, rejects planting and hard walls, and r
           position: insidePosition, inventory: { equipment: 'wallPass', weapon: null },
         })
       }
-      await expect(one.getByLabel('Player one upgrades')).toContainText('EquipmentWall pass')
+      await expect(one.getByLabel('Player one upgrades')).toContainText('GearWall pass')
       await expect(two.getByLabel('Ulepszenia: Gracz pierwszy'))
         .toContainText('WyposażeniePrzejście przez ściany')
       const occupied = await Promise.all([one, two].map((page) => arenaTilePixels(page, 3, 2)))
@@ -136,7 +136,7 @@ test('Wall Pass crosses one intact block, rejects planting and hard walls, and r
         await one.keyboard.up('ArrowLeft')
       }
       await expectStationary(games[0], 'one')
-      expect(actor(games[0], 'one').position).toEqual({ x: 3392, y: insidePosition.y })
+      expect(actor(games[0], 'one').position).toEqual({ x: 3392, y: 2560 })
       expect(latestSnapshot(games[0])!.state.arena.terrain[2 * 15 + 2]).toBe('wall')
       await moveSeatTo(one, games[0], 'one', { column: 3, row: 2 })
       const resumePosition = actor(games[0], 'one').position

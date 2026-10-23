@@ -1,5 +1,148 @@
 # Repository verification
 
+## v0.3.42 published delivery — 2026-10-23
+
+Published merge `0ff1512c5a8fdbd1e1b16583ae7791e668bf070b`, tree
+`b4201abe9546d22b26b3231506d1e2ab6b1d3613`, is tagged by annotated object
+`ea3930a3490fb483de46692e1009743e20c61648` as prerelease
+[v0.3.42](https://github.com/liveweird/grenadiers/releases/tag/v0.3.42). Master run `39982027955`
+and distinct tag run `39984896509` independently pass all nine jobs, 54 browser cases and 131,072
+settings masks on their first attempt. Publication completed with actual exit zero in root tool
+chunk `959d39`. Promotion root `84311`, chunk `3aee8a`, completed with consumed exit zero and serves
+the exact accepted image `sha256:8ae9818d27c4345bceec6dad77f02e21ee7148626efded48c421d86421285477`
+from container `0a3bcbac08bc2c2cf46365917a3719d3c5e522c4555234da8e1f661f6edcf214`.
+Seventeen of 22 requested item types are published. Wall Pass remains the eighteenth-item v0.3.43
+source candidate, pending fresh gates, native acceptance and final CI.
+
+## Historical Teleporter native acceptance — `2026-10-23 04:37 UTC`
+
+Corrected source `880fff7c67269f2886746b45239cd888576832f4`, tree
+`c1da58099bb00bb0c99b4bd00de38e9c0c6f87d6`, and image
+`sha256:8ae9818d27c4345bceec6dad77f02e21ee7148626efded48c421d86421285477` pass all 54 Compose plus 54 Kubernetes cases with zero retries
+or carried passes. Required totals are 50 decoded reports, 118 PNGs, 40 runtime records,
+20 Kubernetes identities, 19 fixtures, 38 seed-mode records and 80 retained latency observations
+below 250 ms. Audit `0dbb15b27d5a23eae680ca9cfa2d9766a7e64e173f5f8652fd753b4611135521`, result review
+`cf3380353ca06f36cc61f67c8898ed766d6263bdc6108e003a0a9ac17da4923c`, binding review `a1c9c56e213f0b1248009a0bcee13c30208d188c4e5b96221622b9b0ac68e047`, durable manifest
+`d81c0923f5a3d0a50208fe43a12412f60ca09e2fddfc1c6aabfb793779676b7f` and seal review `5c45563d4ae42ddd5bd189e6e021cc43a253f42c1104853c5a0b1fb215e75dec` are clear.
+
+Source gates cover 689 core tests, 208 release protocol/server tests, 657 web tests and 55 static
+E2E scenarios. Exhaustive
+settings validation covers all 131,072 masks in debug, release and coverage profiles. The browser
+Teleporter proof binds success to the authoritative pickup event and shared marker while allowing
+the published snapshot to trail the event by zero to two ticks. Both collection movement and the
+unsafe peer movement require ordered requested-direction to null release and two later stationary
+snapshots. Unsafe consumption proves the settled peer's exact positive-area overlap with the live
+bomb cell using the server's 1,024-unit cells and 320-unit half-footprint, then preserves its exact
+position and both prior teleport markers after collection.
+
+The accepted English desktop and Polish 320px reduced-motion captures are
+`docs/screenshots/teleporter-desktop.png` and `docs/screenshots/teleporter-mobile-pl.png`, with
+SHA-256 values `e262534f6c157678f762519aa03cc2ba7896139f04d9002c1347f68bc12cff63` and
+`30f9e9cd099a2b01ae41c9c64096cb15b50b4850b5198cea54ad8b2eaddd63ba`. At this checkpoint, hosted
+CI, publication, tag verification and promotion remained pending; the delivery record above
+documents their later completion.
+
+## v0.3.41 published delivery — 2026-10-23
+
+Published commit `f5c4adf66f8af9a5ef66b48f9230d17aea14f1d5`, tree
+`a274fb2fe828f3a18a624614f1addf5bf5df4d99`, is tagged by annotated tag object
+`c6719ad04db7a1eb0e50df3200aebe828a85e679` as prerelease `v0.3.41`.
+Post-merge run `39879618476` and distinct tag run `39881306987` each pass all nine jobs,
+53 browser cases and 65,536 settings masks. Both watcher exits were consumed at zero.
+The accepted native image
+`sha256:d063462c3130e3c8653734da72e8dfd6785b0c036e9579d9046cee884ccd9f82`
+is promoted locally; promotion root 71611 completed with consumed exit zero, and health,
+readiness, index and served asset checks returned HTTP 200 with container bytes matching.
+These delivery results do not relabel H's native execution as an execution on the CI-only
+readiness revision. At this v0.3.41 delivery checkpoint, v0.3.42 Teleporter remained the
+seventeenth native-accepted candidate; its later delivery is recorded above.
+
+## v0.3.41 browser file readiness checkpoint — 2026-10-23
+
+The observability-only PR 92 was rejected and closed. Its push workflow
+`39874464155` passed all nine jobs, but PR workflow `39874472446` failed its
+classic-browser job before Chromium exposed a debugging endpoint. Neither result
+contributes acceptance to a later revision. Artifact `12468077225`, SHA-256
+`bb841c019ca21edededed2eb6cae35146609b4b5f510dd20a105010c69021748`, retains the
+startup attachment, bounded process observations and Xvfb output. The failure
+inventory is authenticated under SHA-256
+`8b6493818147ea6b6bf213cb25c2a54c28ca5ab56020830c2609719b75d5e2b3`.
+
+The exact Chromium PID/start time appears in 40 samples: 39 in uninterruptible
+wait and one running; 38 report `folio_wait_bit_common` and two report zero.
+CPU ticks rise from 2 to 11, threads from 1 to 13, and no DevTools file appears.
+This is evidence of repeated kernel waits with intermittent progress, not proof
+of one uninterrupted ten-second hang or a specific backing file, device, swap
+condition or memory-pressure cause. Xvfb explicitly labels its keysym warnings
+nonfatal. Independent failure review preserves these limits.
+
+The CI-only mitigation reads the same installed full Chromium distribution once,
+immediately after latency checks and before the original hardening command. It
+uses bounded streaming reads and rejects path escapes, symlinks, missing or
+changing regular files and read errors. The completed installation is assumed
+immutable during traversal; this is not an atomic snapshot of concurrent directory changes. Inventory, byte counts, hashes and elapsed time
+provide setup evidence. A pre-read prepares the page cache; it does not populate
+the future process's page tables, guarantee residency or cover external libraries.
+No preparatory browser, reused profile, cache dropping or memory pinning is used.
+
+Additional owned-process fault, I/O and memory counters and host pressure totals
+help distinguish later observations. Missing data is reported explicitly. These
+are diagnostic counters, not proof of a particular root cause. Browser flags,
+10-second startup, 60-second visibility test, cleanup grace, zero retries, full
+case inventory and the existing 20-minute job budget remain unchanged.
+
+Source `4a0410b9b529fe30c2d5cad80029d324127db934` checks and independent review: all 18 focused tests pass on macOS and the cached
+repository-pinned Linux Node image. All ten server-mask contract tests, five mirror
+tests, repository policy, four syntax checks and whitespace checks pass.
+Independent CI source review is clear under SHA-256
+`4ef696726449924a54ae8f041d9d5b99449fa47222eec8d7413d90d1190be0b0`;
+the root-consumed check receipt is `aacc1870e829f2a7ca0bad1d463b08ff5aff52fdfbe74752599b2a1014a66ff9`.
+H's 106 native cases and original-source deterministic computations below retain
+their original execution identities under reviewed input equality. They are not
+executions on this CI-only revision. Fresh candidate, post-merge and tag checks
+remained required at this historical checkpoint; delivery is recorded separately above.
+
+## v0.3.41 post-merge startup investigation — 2026-10-23
+
+PR 91 merged Invisible Bombs at `2fbc782fcea536331544ad7b34202d0780e9b465`.
+Its candidate push and pull-request workflows, `39868101870` and `39868112868`,
+each passed all nine jobs, 53 browser cases and 65,536 settings masks per Rust profile.
+Post-merge workflow `39870771097`, attempt one, passed eight jobs but failed the
+classic browser job before Chromium exposed its CDP endpoint. The retained startup
+attachment reports 10,016.954276 ms, zero stderr bytes and no observed endpoint.
+The cause remains unknown; missing exit data does not establish that Chrome stayed alive.
+Failed post-merge results contribute zero accepted hosted cases.
+
+Artifact `12465927804` is preserved under SHA-256
+`e4f8061a52c685ba21765532891bf595d98ba911045f54023d5e63d658b94d09`.
+The terminal metadata, complete raw logs, extracted startup attachment and original
+failed fetches are retained together; their inventory SHA-256 is
+`aefd9f790dcac27558d3caa41c72baf06b5b7ec31ecdbe238f7e1dcb830a5bed`.
+
+The CI observer launches the existing hardening command once inside Xvfb and samples
+only its owned process tree. It records bounded process state and the existence,
+type and size of an owned profile's DevTools file, without retaining its contents,
+command lines, environment values or debugging endpoints. These are sampled observations,
+not an atomic timeout witness. Missing observations remain inconclusive. The command's
+exit or signal remains authoritative; observations do not retry or replace browser checks.
+On an instrumented failure, the workflow retains the process records and Xvfb
+error output in the failure artifact. The preserved failure above predates this observer.
+
+Observer source `064df2000f86ca91b04eba8282df7797295c7f7c` passes all nine
+observer tests on both macOS and the cached repository-pinned Linux Node image,
+all ten server-mask contract tests, five mirror tests, repository policy, syntax
+and whitespace checks. Independent source review is clear under SHA-256
+`858b86cefddfdd4fc2b8f78b0ed6a2ba5fc516b31dfd098848cbfcb41e27ca2c`;
+the consumed check receipt is
+`3b56341d3e356f1a2a0a25fa3758dafc5afecb586b838caa916552a7d78eaf4f`.
+Regression tests cover owned child/grandchild signal forwarding and PID reuse
+without leaking unrelated process metadata. The wrapper forwards signals to its
+command group and waits for its direct child; it does not claim direct control
+of Chromium's separately detached group, which remains owned by the E2E launcher.
+The accepted 53 Compose plus 53 Kubernetes cases below remain executions on source
+`eb0b756df43fdd896cf87573a5224e4eb5f659a3`; they are not executions on the observer
+revision. Application, E2E, dependency, lock and native harness inputs remain identical.
+
 ## v0.3.41 sealed native acceptance checkpoint — 2026-10-22 00:55:23 UTC — 106/106
 
 Corrected source `cb10ec7a143ed62128de3b96765b715cab346acf`, tree
@@ -1696,10 +1839,8 @@ generated contracts and **44-scenario** E2E static parity passed at the reviewed
 
 This source activation adds the mode-0444 seed fixture, read-only Compose override and one CI
 keyboard scenario for safe swap, marker, fresh reconnect admission and unsafe consumption. That
-source-activation checkpoint did not claim predecessor raw-v0.3.41 integration. The current
-candidate incorporates the sealed v0.3.41 parent and still does not claim a fresh v0.3.42 image,
-native Compose/Kubernetes acceptance, hosted CI, publication or a current v0.3.42 localhost
-deployment. Those gates remain before release.
+historical source-activation checkpoint did not claim predecessor raw-v0.3.41 integration or
+later delivery. Fresh native acceptance and the published delivery are recorded above.
 
 ## Prepared v0.3.41 Invisible Bombs source — source-specific local checks
 

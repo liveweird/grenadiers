@@ -29,3 +29,10 @@ Version 0.3.42 adds Teleporter as the seventeenth item, bit 21 of
 Bombs: the all-items pool is 365 and a Teleporter-only pool is 115. All 131,072 subsets are accepted
 without changing earlier masks or generated maps. See [gameplay v10](protocol-v10.md),
 [settings](settings.md), and [production-seed testing](../testing.md#teleporter-production-seed-scenario).
+
+Source `880fff7c67269f2886746b45239cd888576832f4` is native verified by 54 Compose plus
+54 Kubernetes cases with zero retries or carried passes. The accepted scope covers safe swap,
+reconnect, unsafe consumption and exact complete-footprint safety; see the
+[verification record](../verification.md). Reviewed pre-collection examples show
+[English desktop](../screenshots/teleporter-desktop.png) and
+[Polish 320px reduced-motion](../screenshots/teleporter-mobile-pl.png) presentation.

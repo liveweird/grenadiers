@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.3.43 — 2026-10-22 (source candidate)
+## 0.3.43 — 2026-10-23 (source candidate)
 
 - Add opt-in Wall Pass equipment for movement through breakable blocks while hard walls, bombs,
   contact, fire and placement rules remain authoritative.
@@ -8,20 +8,28 @@
   a wire marker, timer or public concealed-content cue.
 - Extend gameplay v10 to the eighteenth lobby switch and all 262,144 settings masks, with pinned
   archive rejection, English/Polish presentation and deterministic production-seed browser source.
-- The final v0.3.42 source parent is integrated. Fresh v0.3.43 gates, native same-image acceptance,
+- The published v0.3.42 source parent is integrated. Fresh v0.3.43 gates, native same-image acceptance,
   hosted CI and publication remain pending; this entry does not claim a released artifact.
 
-## 0.3.42 — 2026-10-22
+## 0.3.42 — 2026-10-23
 
 - Add opt-in Teleporter pickups that atomically swap both living players only when both complete destination footprints are safe; unsafe pickups are consumed without moving either player.
 - Publish a persistent nullable `lastTeleportTick` position epoch in gameplay v10 so clients snap an authoritative swap without fabricating walking or audio.
-- Add the seventeenth lobby switch, all 131,072 settings masks, replay and archived-v9 guards, English/Polish cues, and a deterministic production-seed browser scenario source. The sealed v0.3.41 parent is integrated; v0.3.42 native acceptance and hosted CI remain pending.
+- Add the seventeenth lobby switch, all 131,072 settings masks across debug, release and coverage profiles, replay and archived-v9 guards, English/Polish cues, and a deterministic production-seed browser scenario. Source checks cover 689 core, 208 release server and 657 web tests.
+- At `2026-10-23 04:37 UTC`, source `880fff7c67269f2886746b45239cd888576832f4` and image `sha256:8ae9818d27c4345bceec6dad77f02e21ee7148626efded48c421d86421285477` pass all 54 Compose plus 54 Kubernetes cases with zero retries or carried passes. Independent audit `0dbb15b27d5a23eae680ca9cfa2d9766a7e64e173f5f8652fd753b4611135521` and result review `cf3380353ca06f36cc61f67c8898ed766d6263bdc6108e003a0a9ac17da4923c` are clear; durable manifest `d81c0923f5a3d0a50208fe43a12412f60ca09e2fddfc1c6aabfb793779676b7f` authenticates the sealed evidence. Hosted candidate, merge, tag, publication and promotion checks remain pending at that native checkpoint.
+- Publish merge `0ff1512c5a8fdbd1e1b16583ae7791e668bf070b` (tree `b4201abe9546d22b26b3231506d1e2ab6b1d3613`) as [v0.3.42](https://github.com/liveweird/grenadiers/releases/tag/v0.3.42) through annotated tag object `ea3930a3490fb483de46692e1009743e20c61648`. Master run `39982027955` and tag run `39984896509` independently pass all nine jobs, 54 browser cases and 131,072 masks on their first attempt. Promotion root `84311` exits zero and serves the exact accepted image in container `0a3bcbac08bc2c2cf46365917a3719d3c5e522c4555234da8e1f661f6edcf214`.
 
-## 0.3.41 — 2026-10-22
+## 0.3.41 — 2026-10-23
 
 - Add opt-in Invisible Bombs with a 600-physical-tick refreshable curse that hides every live bomb from the affected recipient while preserving collision, capacity, chains and public flames.
 - Capture placement and detonation audiences at emission, intersecting Cloak ownership privacy with blinded seats, including events visible to neither recipient.
-- Add the sixteenth lobby switch, all 65,536 v9 settings masks, replay and archived-v8 guards, English/Polish cues, and a deterministic production-seed browser scenario. At the 22 October 2026 00:55:23 UTC sealed native checkpoint, corrected source `cb10ec7` passed fresh 53 Compose plus 53 Kubernetes cases and complete debug, release and coverage gates with zero retries or carried passes. Independent audit was clear and 2,492 payloads were durably sealed; hosted CI, PR/merge, publication, tag verification and promotion remained pending then.
+- Add the sixteenth lobby switch, all 65,536 v9 settings masks, replay and archived-v8 guards, English/Polish cues, and a deterministic production-seed browser scenario.
+- Correct Chromium startup evidence handling with a bounded complete-line endpoint parser, redacted diagnostics and cleanup that preserves the original launch failure. Startup, visibility and shutdown deadlines, Chromium flags, retries and gameplay assertions are unchanged.
+- Source `eb0b756df43fdd896cf87573a5224e4eb5f659a3` passes fresh repository, E2E, scenario, startup-parser, server-mask, mirror and current security checks. A single headed diagnostic passes with zero accepted cases. The typed gate assembly retains authenticated Rust/web computations from original source `035c6a1` under an independently reviewed input-equivalence proof; it does not relabel them as executions on the new source.
+- Source-bound native root 40405 completed with consumed exit zero: all 53 Compose plus 53 Kubernetes cases, 48 reports, 114 PNGs, 38 runtime records, 19 Kubernetes identities, 18 fixtures and 36 seed-mode records pass with zero retries or carried passes. The facts bind image `sha256:d063462c3130e3c8653734da72e8dfd6785b0c036e9579d9046cee884ccd9f82`; independent audit and result review are clear under SHA-256 values `b0c72b1ff651257930f0db8df9db3cfc1274bd6882f142336e508e699c41097e` and `0cff7c9dd3bd4895cfcb426f340eca146b8c9627a55bac04c01111819b9008be`. The durable seal byte-verifies 2,503 payloads, 2,504 files and 272 directories under final manifest `25e8d3753b24a5dca94028880922b220afd26a6a8035ac5f14c4db619269d813`; independent seal review is clear. PRs 89 and 90 contribute zero hosted cases, and no v0.3.41 publication or deployment is claimed at that historical checkpoint.
+- Add bounded CI-only process observations for the headed visibility check and preserve Xvfb error output in failure artifacts. Post-merge run 39870771097 failed before CDP startup; its cause remains unknown. The observer does not change browser flags, assertions, retries or deadlines. Native evidence remains bound to original source `eb0b756`; fresh hosted checks are required for the observer revision.
+- Prepare the installed full Chromium distribution with one bounded file pre-read immediately before the headed visibility check, and collect bounded fault, I/O, memory and pressure diagnostics. This targets observed kernel page waits without changing browser invocations or test budgets; the underlying file/storage cause remains unproven.
+- Publish commit `f5c4adf66f8af9a5ef66b48f9230d17aea14f1d5` as prerelease tag `v0.3.41`. Distinct post-merge run `39879618476` and tag run `39881306987` each pass all nine jobs, 53 browser cases and 65,536 settings masks. The sealed native image `sha256:d063462c3130e3c8653734da72e8dfd6785b0c036e9579d9046cee884ccd9f82` is promoted locally with consumed exit zero.
 
 ## 0.3.40 — 2026-10-21
 

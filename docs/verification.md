@@ -1,5 +1,32 @@
 # Repository verification
 
+## Teleporter native acceptance — `2026-10-23 04:37 UTC`
+
+Corrected source `880fff7c67269f2886746b45239cd888576832f4`, tree
+`c1da58099bb00bb0c99b4bd00de38e9c0c6f87d6`, and image
+`sha256:8ae9818d27c4345bceec6dad77f02e21ee7148626efded48c421d86421285477` pass all 54 Compose plus 54 Kubernetes cases with zero retries
+or carried passes. Required totals are 50 decoded reports, 118 PNGs, 40 runtime records,
+20 Kubernetes identities, 19 fixtures, 38 seed-mode records and 80 retained latency observations
+below 250 ms. Audit `0dbb15b27d5a23eae680ca9cfa2d9766a7e64e173f5f8652fd753b4611135521`, result review
+`cf3380353ca06f36cc61f67c8898ed766d6263bdc6108e003a0a9ac17da4923c`, binding review `a1c9c56e213f0b1248009a0bcee13c30208d188c4e5b96221622b9b0ac68e047`, durable manifest
+`d81c0923f5a3d0a50208fe43a12412f60ca09e2fddfc1c6aabfb793779676b7f` and seal review `5c45563d4ae42ddd5bd189e6e021cc43a253f42c1104853c5a0b1fb215e75dec` are clear.
+
+Source gates cover 689 core tests, 208 release protocol/server tests, 657 web tests and 55 static
+E2E scenarios. Exhaustive
+settings validation covers all 131,072 masks in debug, release and coverage profiles. The browser
+Teleporter proof binds success to the authoritative pickup event and shared marker while allowing
+the published snapshot to trail the event by zero to two ticks. Both collection movement and the
+unsafe peer movement require ordered requested-direction to null release and two later stationary
+snapshots. Unsafe consumption proves the settled peer's exact positive-area overlap with the live
+bomb cell using the server's 1,024-unit cells and 320-unit half-footprint, then preserves its exact
+position and both prior teleport markers after collection.
+
+The accepted English desktop and Polish 320px reduced-motion captures are
+`docs/screenshots/teleporter-desktop.png` and `docs/screenshots/teleporter-mobile-pl.png`, with
+SHA-256 values `e262534f6c157678f762519aa03cc2ba7896139f04d9002c1347f68bc12cff63` and
+`30f9e9cd099a2b01ae41c9c64096cb15b50b4850b5198cea54ad8b2eaddd63ba`. Hosted CI, publication, tag verification and promotion
+remain pending.
+
 ## v0.3.41 published delivery — 2026-10-23
 
 Published commit `f5c4adf66f8af9a5ef66b48f9230d17aea14f1d5`, tree
@@ -12,8 +39,8 @@ The accepted native image
 is promoted locally; promotion root 71611 completed with consumed exit zero, and health,
 readiness, index and served asset checks returned HTTP 200 with container bytes matching.
 These delivery results do not relabel H's native execution as an execution on the CI-only
-readiness revision. v0.3.42 Teleporter remains a seventeen-item source candidate with fresh
-acceptance and hosted delivery pending.
+readiness revision. v0.3.42 Teleporter is the seventeenth native-accepted candidate; hosted
+delivery remains pending.
 
 ## v0.3.41 browser file readiness checkpoint — 2026-10-23
 

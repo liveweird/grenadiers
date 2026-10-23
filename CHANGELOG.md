@@ -1,10 +1,11 @@
 # Changelog
 
-## 0.3.42 — 2026-10-22
+## 0.3.42 — 2026-10-23
 
 - Add opt-in Teleporter pickups that atomically swap both living players only when both complete destination footprints are safe; unsafe pickups are consumed without moving either player.
 - Publish a persistent nullable `lastTeleportTick` position epoch in gameplay v10 so clients snap an authoritative swap without fabricating walking or audio.
-- Add the seventeenth lobby switch, all 131,072 settings masks, replay and archived-v9 guards, English/Polish cues, and a deterministic production-seed browser scenario source. The sealed v0.3.41 parent is integrated; v0.3.42 native acceptance and hosted CI remain pending.
+- Add the seventeenth lobby switch, all 131,072 settings masks across debug, release and coverage profiles, replay and archived-v9 guards, English/Polish cues, and a deterministic production-seed browser scenario. Source checks cover 689 core, 208 release server and 657 web tests.
+- At `2026-10-23 04:37 UTC`, source `880fff7c67269f2886746b45239cd888576832f4` and image `sha256:8ae9818d27c4345bceec6dad77f02e21ee7148626efded48c421d86421285477` pass all 54 Compose plus 54 Kubernetes cases with zero retries or carried passes. Independent audit `0dbb15b27d5a23eae680ca9cfa2d9766a7e64e173f5f8652fd753b4611135521` and result review `cf3380353ca06f36cc61f67c8898ed766d6263bdc6108e003a0a9ac17da4923c` are clear; durable manifest `d81c0923f5a3d0a50208fe43a12412f60ca09e2fddfc1c6aabfb793779676b7f` authenticates the sealed evidence. Hosted candidate, merge, tag, publication and promotion checks remain pending at that native checkpoint.
 
 ## 0.3.41 — 2026-10-23
 

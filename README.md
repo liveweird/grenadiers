@@ -7,8 +7,10 @@ Invisible Bombs is published in prerelease v0.3.41 from commit
 `f5c4adf66f8af9a5ef66b48f9230d17aea14f1d5`. Its distinct post-merge and tag workflows each
 pass all nine jobs, 53 browser cases and 65,536 settings masks, and its sealed native image
 `sha256:d063462c3130e3c8653734da72e8dfd6785b0c036e9579d9046cee884ccd9f82` is promoted locally.
-This v0.3.42 source candidate adds Teleporter as the seventeenth item with gameplay v10; fresh
-v0.3.42 acceptance and hosted delivery remain pending.
+The v0.3.42 Teleporter candidate adds the seventeenth item with gameplay v10. Source
+`880fff7c67269f2886746b45239cd888576832f4` and image `sha256:8ae9818d27c4345bceec6dad77f02e21ee7148626efded48c421d86421285477` are native
+verified by 54 Compose plus 54 Kubernetes cases with zero retries or carried passes at
+`2026-10-23 04:37 UTC`. Hosted delivery remains pending.
 
 The **two-player arena match is playable**. Create a room, share its invitation,
 join from another browser, and both choose Ready. Select the courtyard to move with arrows
@@ -30,8 +32,8 @@ for five seconds of immunity; its timer refreshes on collection. The optional
 [Long Fuse curse](docs/game/long-fuse.md) doubles newly planted bomb fuses for ten seconds. Optional
 [Reverse Controls](docs/game/reverse-controls.md) reverses held movement directions for ten seconds. The opt-in [Diarrhea curse](docs/game/diarrhea.md) automatically drops ordinary bombs when placement is possible for ten seconds. [Slow foot](docs/game/slow-foot.md) halves movement speed for ten seconds per independently timed stack. [Remote Bomb](docs/game/remote-bomb.md) stores one manual bomb that waits for its owner's next bomb action. [Piercing Bomb](docs/game/piercing-bomb.md) stores one manual bomb whose blast crosses breakable blocks. [Power Bomb](docs/game/power-bomb.md) stores one manual bomb whose diamond-shaped blast ignores obstruction while preserving hard walls. [Landmine](docs/game/landmine.md) stores one passable contact mine with initial exit grace. [Invisibility Cloak](docs/game/invisibility-cloak.md) hides an active actor's spatial and loadout details from the opponent for ten seconds. [Stopwatch](docs/game/stopwatch.md) freezes the opponent's voluntary actions and pauses Timed bombs for three seconds. [Invisible Bombs](docs/game/invisible-bombs.md) hides every live bomb and its cues from the afflicted player for ten seconds. [Teleporter](docs/game/teleporter.md) consumes an immediate pickup and swaps both living players only when both destinations are safe. Gameplay v10 requires reloading older browser
 clients after an upgrade; see the [compatibility note](docs/game/protocol-v10.md).
-Reviewed pre-collection examples show [English desktop](docs/screenshots/invisible-bombs-desktop.png) and
-[Polish 320px reduced-motion](docs/screenshots/invisible-bombs-mobile-pl.png) presentation.
+Reviewed pre-collection examples show [English desktop](docs/screenshots/teleporter-desktop.png)
+and [Polish 320px reduced-motion](docs/screenshots/teleporter-mobile-pl.png) presentation.
 
 Use **Keyboard controls** below the arena to remap movement and bombs or restore defaults. Preferences
 stay in this browser. Opening settings, losing focus, or hiding the tab releases held movement;

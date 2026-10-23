@@ -2,8 +2,10 @@
 
 Invisible Bombs is published as prerelease v0.3.41, and its sealed accepted image is promoted
 locally after distinct passing post-merge and tag workflows. Sixteen of the 22 requested item
-types are now published. This v0.3.42 source candidate contains Teleporter as the seventeenth
-item; its fresh native acceptance and hosted delivery remain pending.
+types are now published. The v0.3.42 Teleporter candidate is the seventeenth native-accepted item:
+source `880fff7c67269f2886746b45239cd888576832f4` and image
+`sha256:8ae9818d27c4345bceec6dad77f02e21ee7148626efded48c421d86421285477` pass 54 cases per target at `2026-10-23 04:37 UTC`.
+Hosted delivery remains pending.
 
 At the 21 October 2026 16:47 UTC native acceptance checkpoint, Invisibility Cloak was an
 **unreleased source candidate**. Corrected source `1c6724f` and
@@ -97,12 +99,12 @@ no game behavior. Independent audit is clear and 2,492 payloads are durably seal
 and promotion checks have not run. Six requested types remain: Teleporter,
 Wall Pass, Kick, Punch, Bracelet and Oil Barrel. ART-ATLAS follows the completed feature batch.
 
-TURN, CONFIG and the first ART slice are implemented. This v0.3.42 candidate contains seventeen
+TURN, CONFIG and the first ART slice are implemented. The v0.3.42 candidate contains seventeen
 optional pickups: Heart, Shield, Golden Flame, Short Fuse, Short Flame, Long Fuse, Reverse
 Controls, Diarrhea, Slow-foot, Piercing Bomb, Power Bomb, Remote Bomb, Landmine and Invisibility
 Cloak, Stopwatch, Invisible Bombs and Teleporter. The sealed v0.3.41 parent is integrated. This
-candidate still requires independent review of that integration, fresh v0.3.42 native acceptance
-and final CI. The remaining requested pickups stay outside this increment. Current publication status
+candidate's source checks cover 689 core, 208 release server and 657 web tests plus all 131,072
+settings masks across three profiles. Final hosted CI remains pending. The remaining requested pickups stay outside this increment. Current publication status
 is recorded in [release notes](https://github.com/liveweird/grenadiers/releases), with source-bound
 acceptance records in [verification](../verification.md). Richer transitions and artwork remain
 follow-up work; see [pixel-art presentation](pixel-art.md) and
@@ -280,7 +282,7 @@ instant action. Keep both in this requested pickup family without forcing them i
 | CURSE-REVERSE / reverse controls | Up moves down, left moves right, and vice versa. | Apply to logical movement after personal remapping; define held-key transition/expiry without stuck movement or stale replay. |
 | CURSE-BLIND / invisible bombs | The afflicted player cannot see any bombs, including their own. | Recipient-specific bomb/event/effect projection and reconnect; explicitly define retained collision clues, fuse sounds and blast warnings. |
 | CURSE-OIL / oil barrel | Before detonation it blocks passage like a soft wall; after detonation it burns indefinitely. | Define how acquisition creates/places the barrel, detonation/chain triggers, blast footprint and destruction; bound creation and specify cleanup at round end without expiry during play. |
-| CURSE-SWAP / teleporter | **Prepared in v0.3.42.** Immediately attempt the sole two-player rival swap. | Atomic complete-footprint safety, unsafe consumption, actor-specific overlap grace, persistent position epoch, reconnect and privacy are covered locally without RNG; native acceptance remains pending. |
+| CURSE-SWAP / teleporter | **Native-accepted candidate in v0.3.42.** Immediately attempt the sole two-player rival swap. | Atomic complete-footprint safety, unsafe consumption, actor-specific overlap grace, persistent position epoch, reconnect and privacy are covered without RNG. Source `880fff7` passes 54 Compose plus 54 Kubernetes cases; hosted delivery remains pending. |
 
 ## Special weapons: one single-use slot
 

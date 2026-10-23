@@ -102,7 +102,7 @@ test('Wall Pass crosses one intact block, rejects planting and hard walls, and r
           position: insidePosition, inventory: { equipment: 'wallPass', weapon: null },
         })
       }
-      await expect(one.getByLabel('Player one upgrades')).toContainText('EquipmentWall pass')
+      await expect(one.getByLabel('Player one upgrades')).toContainText('GearWall pass')
       await expect(two.getByLabel('Ulepszenia: Gracz pierwszy'))
         .toContainText('WyposażeniePrzejście przez ściany')
       const occupied = await Promise.all([one, two].map((page) => arenaTilePixels(page, 3, 2)))

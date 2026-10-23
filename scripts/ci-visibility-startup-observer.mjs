@@ -1,4 +1,5 @@
 import { spawn } from "node:child_process";
+import { createHash } from "node:crypto";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -6,12 +7,31 @@ import path from "node:path";
 export const SAMPLE_INTERVAL_MS = 250;
 export const MAX_SAMPLES = 400;
 export const MAX_PROCESSES = 64;
+export const FILE_SNAPSHOT_ELAPSED_MS = 8000;
+export const MAX_MAPPING_BYTES = 4 * 1024 * 1024;
+export const MAX_MAPPING_ENTRIES = 4096;
+export const MAX_MAPPING_GROUPS = 512;
 const MAX_SCAN_ENTRIES = 4096;
 const VISIBILITY_ARGS = [
   "--no-sandbox", "--disable-dev-shm-usage", "--no-first-run",
   "--no-default-browser-check", "--enable-gpu", "--use-gl=angle",
   "--use-angle=swiftshader", "--remote-debugging-port=0",
 ];
+
+function sha256(value) {
+  return createHash("sha256").update(value).digest("hex");
+}
+
+function diagnosticIdentity(stat) {
+  const size = Number(stat.size);
+  if (!Number.isSafeInteger(size) || size < 0) return null;
+  return { device: String(stat.dev), inode: String(stat.ino), size };
+}
+
+function sameIdentity(left, right) {
+  return left && right && left.device === right.device && left.inode === right.inode
+    && left.size === right.size;
+}
 
 function safeInteger(value) {
   const parsed = Number(value);
@@ -93,6 +113,206 @@ function readOptional(file, limit) {
   } catch (error) {
     return { value: null, gap: error?.code === "ENOENT" ? "missing" : "unreadable" };
   }
+}
+
+function readMetadataPrefix(file, limit, fsApi) {
+  let descriptor;
+  try {
+    descriptor = fsApi.openSync(file, "r");
+    const buffer = Buffer.alloc(limit + 1);
+    const bytes = fsApi.readSync(descriptor, buffer, 0, buffer.length, 0);
+    return { text: buffer.subarray(0, Math.min(bytes, limit)).toString("utf8"),
+      bytesRead: bytes, truncated: bytes > limit, status: bytes > limit ? "truncated" : "complete" };
+  } catch (error) {
+    return { text: "", bytesRead: 0, truncated: false,
+      status: error?.code === "ENOENT" ? "missing" : "unreadable" };
+  } finally {
+    if (descriptor !== undefined) fsApi.closeSync(descriptor);
+  }
+}
+
+function parseMappingHeader(line) {
+  const match = line.match(/^([0-9a-f]+)-([0-9a-f]+)\s+(\S{4})\s+[0-9a-f]+\s+(\S+)\s+(\d+)(?:\s+(.*))?$/i);
+  if (!match) return null;
+  const start = Number.parseInt(match[1], 16);
+  const end = Number.parseInt(match[2], 16);
+  if (!Number.isSafeInteger(start) || !Number.isSafeInteger(end) || end < start
+    || !/^\d+$/.test(match[5])) return null;
+  return { mappedBytes: end - start, permissions: match[3], device: match[4],
+    inode: BigInt(match[5]).toString(), pathname: (match[6] ?? "").trim() };
+}
+
+function safeMappingPath(pathname, executablePath, browserRoot) {
+  const normalized = pathname.endsWith(" (deleted)")
+    ? pathname.slice(0, -" (deleted)".length) : pathname;
+  const result = { pathSHA256: sha256(normalized), kind: "private-or-unknown" };
+  if (executablePath && browserRoot && path.resolve(normalized) === normalized) {
+    const relative = path.relative(browserRoot, normalized);
+    if (relative !== ".." && !relative.startsWith(`..${path.sep}`) && !path.isAbsolute(relative))
+      return { ...result, kind: "browser", browserRelativePath: relative
+        .split(path.sep).join("/") };
+  }
+  for (const prefix of ["/usr/", "/lib/", "/lib64/"]) {
+    if (normalized.startsWith(prefix) && path.resolve(normalized) === normalized)
+      return { ...result, kind: "system", systemRelativePath: normalized.slice(1) };
+  }
+  return result;
+}
+
+function summarizeMaps(read) {
+  let entriesSeen = 0;
+  let fileBackedEntries = 0;
+  let malformedLines = 0;
+  for (const line of read.text.split("\n")) {
+    if (!line) continue;
+    if (entriesSeen >= MAX_MAPPING_ENTRIES) break;
+    entriesSeen += 1;
+    const header = parseMappingHeader(line);
+    if (!header) { malformedLines += 1; continue; }
+    if (header.inode !== "0" && header.pathname && !header.pathname.startsWith("["))
+      fileBackedEntries += 1;
+  }
+  return { status: read.status, bytesRead: read.bytesRead, truncated: read.truncated,
+    entriesSeen, fileBackedEntries, malformedLines,
+    entryLimitReached: entriesSeen >= MAX_MAPPING_ENTRIES && read.text.split("\n").length - 1 > entriesSeen };
+}
+
+function aggregateSmaps(read, executablePath, browserRoot) {
+  const groups = new Map();
+  let current = null;
+  let entriesSeen = 0;
+  let fileBackedEntries = 0;
+  let malformedHeaders = 0;
+  let entryLimitReached = false;
+  let groupLimitReached = false;
+  const commit = () => {
+    if (!current || current.inode === "0" || !current.pathname
+      || current.pathname.startsWith("[")) return;
+    fileBackedEntries += 1;
+    const key = `${current.device}:${current.inode}`;
+    let group = groups.get(key);
+    if (!group) {
+      if (groups.size >= MAX_MAPPING_GROUPS) { groupLimitReached = true; return; }
+      group = { device: current.device, inode: current.inode, mappedBytes: 0,
+        rssBytes: 0, referencedBytes: 0, permissions: new Set(),
+        rssComplete: true, referencedComplete: true,
+        path: safeMappingPath(current.pathname, executablePath, browserRoot) };
+      groups.set(key, group);
+    }
+    group.mappedBytes += current.mappedBytes;
+    if (current.rssBytes === null) group.rssComplete = false;
+    else group.rssBytes += current.rssBytes;
+    if (current.referencedBytes === null) group.referencedComplete = false;
+    else group.referencedBytes += current.referencedBytes;
+    group.permissions.add(current.permissions);
+  };
+  for (const line of read.text.split("\n")) {
+    const header = parseMappingHeader(line);
+    if (header) {
+      commit();
+      if (entriesSeen >= MAX_MAPPING_ENTRIES) { entryLimitReached = true; current = null; break; }
+      entriesSeen += 1;
+      current = { ...header, rssBytes: null, referencedBytes: null };
+      continue;
+    }
+    if (/^[0-9a-f]+-[0-9a-f]+\s/i.test(line)) { malformedHeaders += 1; current = null; continue; }
+    if (!current) continue;
+    const metric = line.match(/^(Rss|Referenced):\s+(\d+)\s+kB$/);
+    if (!metric) continue;
+    const value = safeInteger(metric[2]);
+    const bytes = value === null ? null : value * 1024;
+    if (Number.isSafeInteger(bytes))
+      current[metric[1] === "Rss" ? "rssBytes" : "referencedBytes"] = bytes;
+  }
+  commit();
+  const mappings = [...groups.values()].map(({ rssComplete, referencedComplete, ...group }) => ({
+    ...group, rssBytes: rssComplete ? group.rssBytes : null,
+    referencedBytes: referencedComplete ? group.referencedBytes : null,
+    permissions: [...group.permissions].sort() }));
+  return { summary: { status: read.status, bytesRead: read.bytesRead,
+    truncated: read.truncated, entriesSeen, fileBackedEntries, malformedHeaders,
+    entryLimitReached, groupLimitReached }, mappings };
+}
+
+function addSnapshotDeltas(mappings, baseline) {
+  const first = new Map((baseline?.mappings ?? []).map((item) =>
+    [`${item.device}:${item.inode}`, item]));
+  for (const item of mappings) {
+    const prior = first.get(`${item.device}:${item.inode}`);
+    item.deltaFromFirst = prior ? {
+      mappedBytes: item.mappedBytes - prior.mappedBytes,
+      rssBytes: item.rssBytes === null || prior.rssBytes === null
+        ? null : item.rssBytes - prior.rssBytes,
+      referencedBytes: item.referencedBytes === null || prior.referencedBytes === null
+        ? null : item.referencedBytes - prior.referencedBytes,
+    } : null;
+  }
+}
+
+function executableMetadata(directory, fsApi) {
+  try {
+    const executablePath = fsApi.readlinkSync(path.join(directory, "exe"));
+    const identity = diagnosticIdentity(fsApi.statSync(path.join(directory, "exe"), { bigint: true }));
+    if (!identity) return { executablePath: null, identity: null, gap: "invalid-metadata" };
+    return { executablePath, identity, canonicalPathSHA256: sha256(executablePath), gap: null };
+  } catch (error) {
+    return { executablePath: null, identity: null, canonicalPathSHA256: null,
+      gap: error?.code === "ENOENT" ? "missing" : "unreadable" };
+  }
+}
+
+function sameExecutableMetadata(left, right) {
+  if (left.gap || right.gap) return left.gap === right.gap;
+  return left.canonicalPathSHA256 === right.canonicalPathSHA256
+    && sameIdentity(left.identity, right.identity);
+}
+
+function safeExecutableMetadata(metadata) {
+  return metadata.gap ? { gap: metadata.gap }
+    : { canonicalPathSHA256: metadata.canonicalPathSHA256, ...metadata.identity };
+}
+
+export function captureStartupFileSnapshot({ procRoot = "/proc", pid, starttime,
+  elapsedMs = 0, expectedExecutable = null, baseline = null, fsApi = fs } = {}) {
+  const directory = path.join(procRoot, String(pid));
+  const statBefore = readMetadataPrefix(path.join(directory, "stat"), 4096, fsApi);
+  const before = parseProcStat(statBefore.text);
+  if (!before || before.starttime !== starttime || before.pid !== pid)
+    return { gap: "process-identity-changed-before-snapshot", pid, starttime };
+  const executableBefore = executableMetadata(directory, fsApi);
+  const executable = executableBefore.gap === null ? {
+    canonicalPathSHA256: executableBefore.canonicalPathSHA256, ...executableBefore.identity,
+    identityMatchesReadiness: sameIdentity(executableBefore.identity, expectedExecutable),
+    pathMatchesReadiness:
+      executableBefore.canonicalPathSHA256 === expectedExecutable?.canonicalPathSHA256,
+    readinessMatch: sameIdentity(executableBefore.identity, expectedExecutable)
+      && executableBefore.canonicalPathSHA256 === expectedExecutable?.canonicalPathSHA256,
+  } : { gap: executableBefore.gap };
+  const browserRoot = executable.readinessMatch ? path.dirname(executableBefore.executablePath) : null;
+  const mapsRead = readMetadataPrefix(path.join(directory, "maps"), MAX_MAPPING_BYTES, fsApi);
+  const smapsRead = readMetadataPrefix(path.join(directory, "smaps"), MAX_MAPPING_BYTES, fsApi);
+  const executableAfter = executableMetadata(directory, fsApi);
+  if (!sameExecutableMetadata(executableBefore, executableAfter))
+    return { gap: "executable-changed-during-snapshot", pid, starttime,
+      executableBefore: safeExecutableMetadata(executableBefore),
+      executableAfter: safeExecutableMetadata(executableAfter) };
+  const mappingSource = smapsRead.status === "complete" || smapsRead.status === "truncated"
+    ? "smaps" : "maps";
+  const aggregated = aggregateSmaps(mappingSource === "smaps" ? smapsRead : mapsRead,
+    executableBefore.executablePath, browserRoot);
+  if (baseline) addSnapshotDeltas(aggregated.mappings, baseline);
+  const statAfter = readMetadataPrefix(path.join(directory, "stat"), 4096, fsApi);
+  const after = parseProcStat(statAfter.text);
+  if (!after || after.starttime !== starttime || after.pid !== pid)
+    return { gap: "process-identity-changed-after-snapshot", pid, starttime };
+  return { elapsedMs, pid, starttime, executable,
+    interpretation: "sampled-mapping-residency-not-file-io-causality",
+    limits: { maxBytesPerProcFile: MAX_MAPPING_BYTES, maxEntries: MAX_MAPPING_ENTRIES,
+      maxGroups: MAX_MAPPING_GROUPS }, maps: summarizeMaps(mapsRead),
+    smaps: { status: smapsRead.status, bytesRead: smapsRead.bytesRead,
+      truncated: smapsRead.truncated },
+    aggregation: { source: mappingSource, ...aggregated.summary },
+    mappingSource, mappings: aggregated.mappings };
 }
 
 function parsedOptional(file, limit, parser, requiredKeys, label, missingFields) {
@@ -189,7 +409,8 @@ function withObserverState(result, profiles) {
 
 export function collectSample({ procRoot = "/proc", rootPid, rootStarttime,
   previousIdentities = new Set(), elapsedMs = 0, tempRoot = os.tmpdir(),
-  knownProfiles = new Set(), beforeMetadata } = {}) {
+  knownProfiles = new Set(), beforeMetadata, expectedExecutable = null,
+  fileSnapshotState = null, snapshotFsApi = fs } = {}) {
   const gaps = [];
   let names;
   try {
@@ -298,6 +519,26 @@ export function collectSample({ procRoot = "/proc", rootPid, rootStarttime,
       record.devToolsActivePort = candidate.devToolsActivePort;
     }
   }
+  if (fileSnapshotState && candidates.length === 1 && observedProfiles.size === 1) {
+    const candidate = candidates[0];
+    const record = records.find(({ pid }) => pid === candidate.pid);
+    const identity = record ? processIdentity(record) : null;
+    const takeFirst = record && fileSnapshotState.count === 0;
+    const takeSecond = record && fileSnapshotState.count === 1
+      && elapsedMs >= FILE_SNAPSHOT_ELAPSED_MS
+      && fileSnapshotState.browserIdentity === identity;
+    if (takeFirst || takeSecond) {
+      const snapshot = captureStartupFileSnapshot({ procRoot, pid: record.pid,
+        starttime: record.starttime, elapsedMs, expectedExecutable,
+        baseline: takeSecond ? fileSnapshotState.first : null, fsApi: snapshotFsApi });
+      record.startupFileSnapshot = { ordinal: fileSnapshotState.count + 1, ...snapshot };
+      fileSnapshotState.count += 1;
+      if (takeFirst && !snapshot.gap) {
+        fileSnapshotState.browserIdentity = identity;
+        fileSnapshotState.first = snapshot;
+      }
+    }
+  }
   return withObserverState({ elapsedMs, processes: records, host,
     gaps, unreadableStatCount, scanTruncated, processTruncated, identities }, observedProfiles);
 }
@@ -307,7 +548,27 @@ function rootStarttime(procRoot, pid) {
   return read.value === null ? null : parseProcStat(read.value.toString("utf8"))?.starttime ?? null;
 }
 
-export function runObserved(command, args, { procRoot = "/proc", output } = {}) {
+function expectedExecutableFromReadiness(readinessPath) {
+  if (!readinessPath) return { executable: null, gap: "path-not-configured" };
+  const read = readOptional(readinessPath, 4 * 1024 * 1024);
+  if (read.value === null) return { executable: null, gap: read.gap };
+  try {
+    const parsed = JSON.parse(read.value.toString("utf8"));
+    const executable = parsed?.executable;
+    if (parsed?.result !== "PASS" || !/^[a-f0-9]{64}$/.test(executable?.canonicalPathSHA256)
+      || !/^\d+$/.test(executable?.device) || !/^\d+$/.test(executable?.inode)
+      || !Number.isSafeInteger(executable?.size) || executable.size < 0
+      || !/^[a-f0-9]{64}$/.test(executable?.contentSHA256))
+      return { executable: null, gap: "invalid" };
+    return { executable, gap: null };
+  } catch {
+    return { executable: null, gap: "malformed" };
+  }
+}
+
+export function runObserved(command, args, { procRoot = "/proc", output,
+  readinessPath = process.env.RUNNER_TEMP
+    ? path.join(process.env.RUNNER_TEMP, "browser-file-readiness.json") : null } = {}) {
   if (!command || !output) throw new Error("observer requires a command and output path");
   const fd = fs.openSync(output, "wx", 0o600);
   const write = (record) => fs.writeSync(fd, `${JSON.stringify(record)}\n`);
@@ -318,6 +579,8 @@ export function runObserved(command, args, { procRoot = "/proc", output } = {}) 
   let samples = 0;
   let previousIdentities = new Set();
   let knownProfiles = new Set();
+  const fileSnapshotState = { count: 0, browserIdentity: null, first: null };
+  const readiness = expectedExecutableFromReadiness(readinessPath);
   let finished = false;
   let forwardedSignal = null;
   const forwardingHandlers = new Map();
@@ -347,12 +610,15 @@ export function runObserved(command, args, { procRoot = "/proc", output } = {}) 
     maxProcessesPerSample: MAX_PROCESSES, childPid: child.pid ?? null,
     childStarttime: starttime, commandArgumentCount: args.length,
     atomicTimeoutWitness: false, interpretation: "sampled-non-atomic-diagnostics-only",
+    startupFileSnapshots: { maximum: 2, laterSnapshotElapsedMs: FILE_SNAPSHOT_ELAPSED_MS,
+      backingFileContentsRead: false, readinessExecutableGap: readiness.gap },
     startupGaps: starttime === null ? ["child-starttime-unavailable"] : [] });
   const sample = () => {
     if (finished || samples >= MAX_SAMPLES || !child.pid || starttime === null) return;
     const elapsedMs = Number((process.hrtime.bigint() - started) / 1_000_000n);
     const result = collectSample({ procRoot, rootPid: child.pid, rootStarttime: starttime,
-      previousIdentities, elapsedMs, knownProfiles });
+      previousIdentities, elapsedMs, knownProfiles, expectedExecutable: readiness.executable,
+      fileSnapshotState });
     previousIdentities = result.identities;
     knownProfiles = result.observedProfiles;
     delete result.identities;
@@ -368,6 +634,7 @@ export function runObserved(command, args, { procRoot = "/proc", output } = {}) 
     clearInterval(interval);
     removeForwardingHandlers();
     write({ kind: "complete", samples, sampleLimitReached: samples >= MAX_SAMPLES,
+      startupFileSnapshots: fileSnapshotState.count,
       visibilityProfilesObserved: knownProfiles.size,
       visibilityProfileUnique: knownProfiles.size === 1,
       exitCode: code, signal, forwardedSignal, spawnError });

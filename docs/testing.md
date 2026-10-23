@@ -278,8 +278,9 @@ The keyboard-only two-browser route enables only Wall Pass, reveals and collects
 `(3,1)`, enters the intact soft block at `(3,2)`, and proves the authoritative block remains opaque
 while the actor and equipment cue remain legible. It rejects planting without consuming a bomb ID,
 capacity or weapon, clamps west against hard wall `(2,2)`, resumes from a strictly newer admission
-inside the block, then exits north without re-entry. A legal post-exit bomb has the immediate
-successor of the reveal bomb's entity ID, so the rejected inside action consumed no allocation.
+inside the block, then exits north without re-entry. A legal post-exit bomb has a later
+entity ID, identical on both clients. The rejected action creates no bomb or event and leaves
+resources unchanged; focused core tests verify no entity allocation.
 English desktop and Polish 320-pixel
 reduced-motion views produce the two named full-page captures. The scenario uses no state
 injection, direct WebSocket commands, seed search or retry. The sole-item fixture cannot prove

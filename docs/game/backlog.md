@@ -1,5 +1,12 @@
 # Gameplay and presentation backlog
 
+Teleporter is published as prerelease
+[v0.3.42](https://github.com/liveweird/grenadiers/releases/tag/v0.3.42), making 17 of the 22
+requested item types published. Merge `0ff1512c5a8fdbd1e1b16583ae7791e668bf070b` and annotated tag
+`ea3930a3490fb483de46692e1009743e20c61648` pass distinct first-attempt master/tag workflows
+`39982027955` and `39984896509`; the exact accepted image is promoted locally. Wall Pass is the
+eighteenth-item v0.3.43 source candidate, pending fresh gates, native acceptance and final CI.
+
 At the 21 October 2026 16:47 UTC native acceptance checkpoint, Invisibility Cloak was an
 **unreleased source candidate**. Corrected source `1c6724f` and
 image `960976c9` pass a fresh 51 Compose plus 51 Kubernetes matrix: all 44 groups/reports,
@@ -95,7 +102,7 @@ Wall Pass, Kick, Punch, Bracelet and Oil Barrel. ART-ATLAS follows the completed
 TURN, CONFIG and the first ART slice are implemented. This provisional v0.3.43 candidate contains eighteen
 optional pickups: Heart, Shield, Golden Flame, Short Fuse, Short Flame, Long Fuse, Reverse
 Controls, Diarrhea, Slow-foot, Piercing Bomb, Power Bomb, Remote Bomb, Landmine and Invisibility
-Cloak, Stopwatch, Invisible Bombs, Teleporter and Wall Pass. The reviewed final v0.3.42 source
+Cloak, Stopwatch, Invisible Bombs, Teleporter and Wall Pass. The published v0.3.42 source
 parent is integrated, including the sealed v0.3.41 history. This candidate still requires
 independent review, fresh v0.3.43 gates and native acceptance, and final CI. The remaining
 requested pickups stay outside this increment. Current publication status
@@ -103,7 +110,7 @@ is recorded in [release notes](https://github.com/liveweird/grenadiers/releases)
 acceptance records in [verification](../verification.md). Richer transitions and artwork remain
 follow-up work; see [pixel-art presentation](pixel-art.md) and
 [expanded item implementation](expanded-items.md).
-Updated 2026-10-22 after provisional Wall Pass parent integration. Release acceptance is recorded in
+Updated 2026-10-23 after v0.3.42 delivery and provisional Wall Pass parent integration. Release acceptance is recorded in
 [verification](../verification.md).
 The [implementation plan](implementation-plan.md) remains the milestone/release reference;
 the [rules](rules.md) describe the current baseline and historical extension catalog.
@@ -276,7 +283,7 @@ instant action. Keep both in this requested pickup family without forcing them i
 | CURSE-REVERSE / reverse controls | Up moves down, left moves right, and vice versa. | Apply to logical movement after personal remapping; define held-key transition/expiry without stuck movement or stale replay. |
 | CURSE-BLIND / invisible bombs | The afflicted player cannot see any bombs, including their own. | Recipient-specific bomb/event/effect projection and reconnect; explicitly define retained collision clues, fuse sounds and blast warnings. |
 | CURSE-OIL / oil barrel | Before detonation it blocks passage like a soft wall; after detonation it burns indefinitely. | Define how acquisition creates/places the barrel, detonation/chain triggers, blast footprint and destruction; bound creation and specify cleanup at round end without expiry during play. |
-| CURSE-SWAP / teleporter | **Prepared in v0.3.42.** Immediately attempt the sole two-player rival swap. | Atomic complete-footprint safety, unsafe consumption, actor-specific overlap grace, persistent position epoch, reconnect and privacy are covered locally without RNG; native acceptance remains pending. |
+| CURSE-SWAP / teleporter | **Published in v0.3.42.** Immediately attempt the sole two-player rival swap. | Atomic complete-footprint safety, unsafe consumption, actor-specific overlap grace, persistent position epoch, reconnect and privacy are covered without RNG. Fresh 54 Compose plus 54 Kubernetes cases pass; distinct first-attempt master/tag workflows pass and the exact accepted image is promoted locally. |
 
 ## Special weapons: one single-use slot
 

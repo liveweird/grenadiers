@@ -4,6 +4,42 @@ Release labels and scope live in the [implementation plan](game/implementation-p
 A completed milestone is verification evidence; a release exists only after its tested commit
 is tagged and its artifacts are published intentionally.
 
+## v0.3.43 Wall Pass native checkpoint — 2026-10-23 19:48 UTC
+
+Wall Pass is the eighteenth requested item and is native verified at source
+`bd34192d8915a8aac4288e3f69bd5898ad01d952`, tree
+`daa2306e77de0e279a6752aa69e687e0a6c51ba0`, on exact image
+`sha256:e2f02586988e2359404189afbe465ad47a4dd12e8227de8b6d3c627401ad7cfc`.
+Fresh gates pass 711 core and 209 server tests with four historical ignores in each Rust profile,
+797 web tests across 64 files, 56 scenarios and all 262,144 masks in debug, release and coverage.
+Rust line coverage is 92.358954%; web statement/branch/function/line coverage is
+95.24/90.88/96/97.66%. The configured security commands pass; the web inventory retains two
+moderate development advisories and no high or critical advisories.
+
+Native root `98418` completes with consumed exit zero: all 55 Compose plus 55 Kubernetes cases,
+52 reports, 122 PNGs, 42 runtime records, 21 Kubernetes identities, 20 fixtures, 40 seed records
+and 80 latency observations below 250 ms pass with zero retries or carried results. Independent
+audit `1c53debae48997b48dbb37c1e9710f21d8dc5b45858707a1cd1368e8dca033a2`, result review
+`41d6409d3a6f15fadbc07f8e75ef5cacf5406ab4aa2b541a5e221b53c0cd76f1` and binding review
+`19ca908c65eb5bc430c1b2e2651d1abeed24e7c70d84b016b663b6bffdfa204c` are clear. Sealer root
+`68301` completes with consumed exit zero; final manifest
+`e2f58e9a171b62eb2607d46a59236f19e2ca99fac0a7cd1148d3a34d5fae1a0e` authenticates 2,661
+payloads, 2,662 files and 284 directories. Seal
+`da27773490c16bb4f32edc5e153544e2f659f2158df29dcd94e2560d036241b3` and independent review
+`57dd9fc256ab34bbe6c5e51e070fe0502a69ccf3fd94507e27a26972bf844aff` are clear.
+
+This is a native checkpoint, not a release. Candidate, master and tag workflows, publication and
+exact-image promotion for v0.3.43 remain pending. Consult current
+[checks](https://github.com/liveweird/grenadiers/actions) and
+[releases](https://github.com/liveweird/grenadiers/releases) rather than treating this dated status
+as a future publication claim. Seventeen of 22 items are published; eighteen are native verified.
+Kick, Punch, Bracelet and Oil Barrel remain before ART-ATLAS.
+
+The reviewed Wall Pass captures are [English desktop](screenshots/wall-pass-desktop.png) and
+[Polish 320px reduced motion](screenshots/wall-pass-mobile-pl.png), with SHA-256 values
+`9200da355aa5fe9273a9a130186c7d8f27d28255f705abd6ded068671e71f9f8` and
+`07a276234fdf8023be1603fd04c27965ef4fa8698afbef63623c84205a0bf4ec`.
+
 ## v0.3.42 published prerelease — 2026-10-23
 
 Merge `0ff1512c5a8fdbd1e1b16583ae7791e668bf070b`, tree
@@ -14,8 +50,8 @@ Merge `0ff1512c5a8fdbd1e1b16583ae7791e668bf070b`, tree
 attempt, with independent reviews clear. Promotion root `84311` completes with consumed exit zero;
 container `0a3bcbac08bc2c2cf46365917a3719d3c5e522c4555234da8e1f661f6edcf214` serves exact native image
 `sha256:8ae9818d27c4345bceec6dad77f02e21ee7148626efded48c421d86421285477`. Seventeen of 22 requested
-item types are published. Wall Pass is the eighteenth-item v0.3.43 source candidate, pending fresh
-gates, native acceptance and final CI.
+item types are published. Wall Pass was the next source candidate at this delivery checkpoint; its
+later native acceptance is recorded above without changing v0.3.42's published history.
 
 ### Historical native-accepted source checkpoint — `2026-10-23 04:37 UTC`
 

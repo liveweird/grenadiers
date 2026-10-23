@@ -18,6 +18,10 @@ function stableFileIdentity(stat) {
   return [stat.dev, stat.ino, stat.size, stat.mtimeNs, stat.ctimeNs].map(String).join(":");
 }
 
+function diagnosticFileIdentity(stat) {
+  return { device: String(stat.dev), inode: String(stat.ino), size: Number(stat.size) };
+}
+
 function assertConfined(root, candidate, fsApi) {
   const resolved = fsApi.realpathSync(candidate);
   if (resolved !== root && !inside(root, resolved))
@@ -48,7 +52,7 @@ function readStableFile(file, expected, buffer, fsApi) {
   } finally {
     fsApi.closeSync(descriptor);
   }
-  return { bytes, sha256: digest.digest("hex") };
+  return { bytes, sha256: digest.digest("hex"), identity: diagnosticFileIdentity(expected) };
 }
 
 export function warmBrowserFiles({ executablePath, outputPath, fsApi = fs,
@@ -108,15 +112,17 @@ export function warmBrowserFiles({ executablePath, outputPath, fsApi = fs,
   const inventory = [];
   const aggregate = createHash("sha256");
   let bytesRead = 0;
+  let executableReadResult = null;
   for (const file of files) {
     const result = readStableFile(file.absolute, file.stat, buffer, fsApi);
+    if (file.absolute === executable) executableReadResult = result;
     bytesRead += result.bytes;
     aggregate.update(`${file.relative}\0${result.bytes}\0${result.sha256}\n`);
-    inventory.push({ path: file.relative, ...result });
+    inventory.push({ path: file.relative, bytes: result.bytes, sha256: result.sha256 });
   }
   if (bytesRead !== declaredBytes) throw new Error("browser distribution byte count changed");
   const record = {
-    schemaVersion: 1,
+    schemaVersion: 2,
     kind: "chromium-distribution-file-readiness",
     result: "PASS",
     interpretation: "bounded-page-cache-pre-read-not-root-cause-proof",
@@ -129,6 +135,12 @@ export function warmBrowserFiles({ executablePath, outputPath, fsApi = fs,
     inventorySHA256: aggregate.digest("hex"),
     elapsedMs: Number((process.hrtime.bigint() - started) / 1_000_000n),
     files: inventory,
+  };
+  if (!executableReadResult) throw new Error("pinned browser executable was not read");
+  record.executable = {
+    canonicalPathSHA256: createHash("sha256").update(executable).digest("hex"),
+    ...executableReadResult.identity,
+    contentSHA256: executableReadResult.sha256,
   };
   fsApi.writeFileSync(outputPath, `${JSON.stringify(record, null, 2)}\n`, { flag: "wx", mode: 0o600 });
   return record;

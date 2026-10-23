@@ -9,6 +9,10 @@ first-to-three progression, and rematches pass exact-image Compose/Kubernetes ac
 M6 reconnect/replay is implemented with all 42 baseline rules mapped to automated assertions.
 M6 is complete and locally verified on 2026-10-17, including exact-image deployment acceptance.
 M7 hardening has started; M8 remains planned.
+Invisible Bombs is published as prerelease v0.3.41 after distinct passing post-merge and tag
+workflows, and its sealed accepted image is promoted locally. Sixteen requested item types are
+published. The v0.3.42 Teleporter source is the seventeenth candidate; its fresh acceptance and
+hosted delivery remain pending.
 The v0.3.16 increment adds classic-v3 forgiving turns and explicit gameplay-v5 compatibility,
 locally verified through both deployment paths on 2026-10-17.
 The v0.3.17 increment adds four shared gameplay settings with configurable-v4 rules and

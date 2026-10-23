@@ -1,5 +1,10 @@
 # Gameplay and presentation backlog
 
+Invisible Bombs is published as prerelease v0.3.41, and its sealed accepted image is promoted
+locally after distinct passing post-merge and tag workflows. Sixteen of the 22 requested item
+types are now published. This v0.3.42 source candidate contains Teleporter as the seventeenth
+item; its fresh native acceptance and hosted delivery remain pending.
+
 At the 21 October 2026 16:47 UTC native acceptance checkpoint, Invisibility Cloak was an
 **unreleased source candidate**. Corrected source `1c6724f` and
 image `960976c9` pass a fresh 51 Compose plus 51 Kubernetes matrix: all 44 groups/reports,

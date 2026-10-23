@@ -3,6 +3,13 @@
 A browser-based multiplayer game inspired by classic Bomberman/Dynablaster.
 The initial playable profile supports two human players. Bots and larger matches follow later.
 
+Invisible Bombs is published in prerelease v0.3.41 from commit
+`f5c4adf66f8af9a5ef66b48f9230d17aea14f1d5`. Its distinct post-merge and tag workflows each
+pass all nine jobs, 53 browser cases and 65,536 settings masks, and its sealed native image
+`sha256:d063462c3130e3c8653734da72e8dfd6785b0c036e9579d9046cee884ccd9f82` is promoted locally.
+This v0.3.42 source candidate adds Teleporter as the seventeenth item with gameplay v10; fresh
+v0.3.42 acceptance and hosted delivery remain pending.
+
 The **two-player arena match is playable**. Create a room, share its invitation,
 join from another browser, and both choose Ready. Select the courtyard to move with arrows
 or W/A/S/D and plant bombs with Space. Rust owns the 60 Hz simulation; PixiJS draws public

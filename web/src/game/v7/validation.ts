@@ -1,7 +1,7 @@
 import Ajv, { type ErrorObject, type ValidateFunction } from 'ajv'
 import gameplayV7Schema from '../../../../api/gameplay-v7.schema.json'
 import { effectSemanticError, itemSetSemanticError, type GameplayV7SemanticError } from './semantics'
-import type { GameServerMessage, GameState, RoomView } from './schema'
+import type { GameServerMessage, GameState, RoomView, WireEvent } from './schema'
 
 export type GameplayV7ValidationResult =
   | { valid: true; value: GameServerMessage }
@@ -18,8 +18,16 @@ function resolveServerValidator(): ValidateFunction<GameServerMessage> {
 
 const validateServer = resolveServerValidator()
 
-function semanticErrorForState(state: GameState | null): GameplayV7SemanticError | null {
+function semanticErrorForState(
+  state: GameState | null, events: readonly WireEvent[] = [],
+): GameplayV7SemanticError | null {
   if (!state) return null
+  if (state.pickups.some(({ kind }) => kind === 'wallPass')
+    || state.actors.some((actor) => actor.type === 'visible'
+      && actor.inventory.equipment === 'wallPass')
+    || events.some(({ kind }) => kind.type === 'pickupCollected' && kind.kind === 'wallPass')) {
+    return 'unsupportedProfile'
+  }
   for (const actor of state.actors) {
     if (actor.type === 'visible') {
       const error = effectSemanticError(actor.effects)
@@ -30,6 +38,9 @@ function semanticErrorForState(state: GameState | null): GameplayV7SemanticError
 }
 
 function semanticErrorForRoom(room: RoomView): GameplayV7SemanticError | null {
+  if (room.availableItems.includes('wallPass') || room.settings.enabledItems.includes('wallPass')) {
+    return 'unsupportedProfile'
+  }
   return itemSetSemanticError(room.settings.enabledItems, room.availableItems)
 }
 
@@ -40,7 +51,7 @@ function semanticErrorForMessage(message: GameServerMessage): GameplayV7Semantic
     case 'roomState':
       return semanticErrorForRoom(message.room)
     case 'snapshot':
-      return semanticErrorForRoom(message.room) ?? semanticErrorForState(message.state)
+      return semanticErrorForRoom(message.room) ?? semanticErrorForState(message.state, message.events)
     default:
       return null
   }

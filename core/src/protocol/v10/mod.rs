@@ -60,6 +60,7 @@ pub fn expanded_settings(
 
 fn expanded_items() -> ItemSet {
     ItemSet::new([
+        ItemId::WallPass,
         ItemId::Heart,
         ItemId::RemoteBomb,
         ItemId::PiercingBomb,
@@ -128,3 +129,5 @@ mod frame_bound_tests;
 mod max_frame_tests;
 #[cfg(test)]
 mod tests;
+#[cfg(test)]
+mod wall_pass_tests;

@@ -24,7 +24,7 @@ pub(crate) fn validate_world_for_items(
 ) -> Result<ValidatedWorld, ProjectionError> {
     validate_clock(&facts)?;
     validate_arena(&facts)?;
-    validate_actors(&facts)?;
+    validate_actors(&facts, supported_items)?;
     validate_bombs(&facts)?;
     validate_flames(&facts)?;
     validate_pickups(&facts)?;
@@ -108,7 +108,10 @@ fn validate_arena(world: &WorldFacts) -> Result<(), ProjectionError> {
     Ok(())
 }
 
-fn validate_actors(world: &WorldFacts) -> Result<(), ProjectionError> {
+fn validate_actors(
+    world: &WorldFacts,
+    supported_items: super::ItemSet,
+) -> Result<(), ProjectionError> {
     let [one, two] = &world.actors;
     if one.seat != Seat::One
         || two.seat != Seat::Two
@@ -128,7 +131,54 @@ fn validate_actors(world: &WorldFacts) -> Result<(), ProjectionError> {
     {
         return Err(ProjectionError::InvalidActors);
     }
+    validate_soft_wall_positions(world, supported_items)?;
     Ok(())
+}
+
+fn validate_soft_wall_positions(
+    world: &WorldFacts,
+    supported_items: super::ItemSet,
+) -> Result<(), ProjectionError> {
+    let wall_pass_supported = supported_items.contains(ItemId::WallPass)
+        && world.available_items.contains(ItemId::WallPass);
+    let wall_pass_enabled = world.enabled_items.contains(ItemId::WallPass);
+    for (actor, grace) in world.actors.iter().zip(&world.soft_wall_grace) {
+        let holder = actor.inventory.equipment == Some(super::EquipmentId::WallPass);
+        if grace.len() > 4
+            || !strict_cells(grace)
+            || (!wall_pass_supported && (!grace.is_empty() || holder))
+            || (!wall_pass_enabled && (!grace.is_empty() || holder))
+            || (!actor.alive && !grace.is_empty())
+            || (holder && !grace.is_empty())
+            || grace.iter().any(|cell| {
+                !world.arena.blocks.contains(cell) || !position_overlaps(actor.position, *cell)
+            })
+        {
+            return Err(ProjectionError::InvalidActors);
+        }
+        if actor.alive
+            && !holder
+            && world
+                .arena
+                .blocks
+                .iter()
+                .any(|cell| position_overlaps(actor.position, *cell) && !grace.contains(cell))
+        {
+            return Err(ProjectionError::InvalidActors);
+        }
+    }
+    Ok(())
+}
+
+fn position_overlaps(position: crate::protocol::Position, cell: crate::protocol::Cell) -> bool {
+    const HALF_FOOTPRINT: i32 = 320;
+    const UNITS_PER_CELL: i32 = 1_024;
+    let left = i32::from(cell.column()) * UNITS_PER_CELL;
+    let top = i32::from(cell.row()) * UNITS_PER_CELL;
+    i32::from(position.x()) - HALF_FOOTPRINT < left + UNITS_PER_CELL
+        && i32::from(position.x()) + HALF_FOOTPRINT > left
+        && i32::from(position.y()) - HALF_FOOTPRINT < top + UNITS_PER_CELL
+        && i32::from(position.y()) + HALF_FOOTPRINT > top
 }
 
 fn validate_bombs(world: &WorldFacts) -> Result<(), ProjectionError> {

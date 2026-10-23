@@ -50,7 +50,7 @@ export class GameClient {
     const room = this.state.room
     const own = room?.seats.find((seat) => seat.seat === this.state.youSeat)
     const canonicalItems = room?.availableItems.filter((item) => settings.enabledItems.includes(item))
-    if (!room || settings.enabledItems.length > 17
+    if (!room || settings.enabledItems.length > 18
       || new Set(settings.enabledItems).size !== settings.enabledItems.length
       || settings.enabledItems.some((item, index) => item !== canonicalItems?.[index])
       || settings.enabledItems.some((item) => !room.availableItems.includes(item))

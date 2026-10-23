@@ -91,12 +91,13 @@ describe('accepted-event audio cursor', () => {
     expect(opponent.consume(state(22, []), true)).toEqual([])
   })
 
-  it('uses only the existing pickup cue for Teleporter collection', () => {
+  it.each(['teleporter', 'wallPass'] as const)(
+    'uses only the existing pickup cue for %s collection', (kind) => {
     const cursor = new AudioCursor()
     cursor.consume(state(20), true)
     const collected = event(21, 0, 'pickupCollected')
     if (collected.kind.type !== 'pickupCollected') throw new Error('pickup event expected')
-    collected.kind.kind = 'teleporter'
+    collected.kind.kind = kind
     expect(cursor.consume(state(21, [collected]), true)).toEqual(['pickup'])
   })
 

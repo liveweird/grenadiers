@@ -20,6 +20,7 @@ export interface ActorDrawing {
   piercing: Graphics
   power: Graphics
   landmine: Graphics
+  wallPass: Graphics
   cloak: Graphics
   poses: Record<Direction, PoseFrames>
   direction: Direction
@@ -38,6 +39,7 @@ export interface ActorDrawing {
   piercingArmed: boolean
   powerArmed: boolean
   landmineStored: boolean
+  wallPassEquipped: boolean
   cloaked: boolean
 }
 
@@ -205,6 +207,11 @@ export function makeActor(seat: Seat): ActorDrawing {
   pixels(landmine, PALETTE.brass, [[-24, 12, 10, 5], [-21, 9, 5, 6]])
   pixels(landmine, PALETTE.brick, [[-20, 12, 3, 3]])
   landmine.visible = false
+  const wallPass = new Graphics()
+  pixels(wallPass, PALETTE.deepInk, [[-16, -23, 5, 43], [11, -23, 5, 43], [-16, -23, 32, 5]])
+  pixels(wallPass, PALETTE.brick, [[-13, -20, 4, 37], [9, -20, 4, 37], [-9, -20, 18, 4]])
+  pixels(wallPass, PALETTE.blueLight, [[-9, -16, 3, 30], [6, -16, 3, 30]])
+  wallPass.visible = false
   const cloak = new Graphics()
   pixels(cloak, PALETTE.deepInk, [
     [-15, -26, 30, 3], [-18, -23, 3, 12], [15, -23, 3, 12],
@@ -222,16 +229,16 @@ export function makeActor(seat: Seat): ActorDrawing {
   root.addChild(
     shadow, protection, shield, goldenFlame, shortFuse, shortFlame, longFuse, reverseControls,
     diarrhea, slowFoot, piercing, power, landmine,
-    ...Object.values(poses).flat(), cloak, stopwatch, frozen,
+    ...Object.values(poses).flat(), cloak, stopwatch, frozen, wallPass,
   )
   const drawing = {
     root, protection, shield, stopwatch, frozen, goldenFlame, shortFuse, shortFlame, longFuse, reverseControls,
-    diarrhea, slowFoot, piercing, power, landmine, cloak, poses,
+    diarrhea, slowFoot, piercing, power, landmine, wallPass, cloak, poses,
     direction: 'south' as Direction, moving: false,
     protected: false, shielded: false, stopwatchActive: false, actionsFrozen: false,
     golden: false, shortFused: false, shortFlamed: false,
     longFused: false, reversed: false, diarrheaActive: false, slowFootStacks: 0,
-    piercingArmed: false, powerArmed: false, landmineStored: false, cloaked: false,
+    piercingArmed: false, powerArmed: false, landmineStored: false, wallPassEquipped: false, cloaked: false,
   }
   setActorPose(drawing, 'south', 0)
   return drawing

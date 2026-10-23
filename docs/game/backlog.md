@@ -1,11 +1,18 @@
 # Gameplay and presentation backlog
 
-Invisible Bombs is published as prerelease v0.3.41, and its sealed accepted image is promoted
-locally after distinct passing post-merge and tag workflows. Sixteen of the 22 requested item
-types are now published. The v0.3.42 Teleporter candidate is the seventeenth native-accepted item:
-source `880fff7c67269f2886746b45239cd888576832f4` and image
-`sha256:8ae9818d27c4345bceec6dad77f02e21ee7148626efded48c421d86421285477` pass 54 cases per target at `2026-10-23 04:37 UTC`.
-Hosted delivery remains pending.
+Teleporter is published as prerelease
+[v0.3.42](https://github.com/liveweird/grenadiers/releases/tag/v0.3.42), making 17 of the 22
+requested item types published. Merge `0ff1512c5a8fdbd1e1b16583ae7791e668bf070b` and annotated tag
+`ea3930a3490fb483de46692e1009743e20c61648` pass distinct first-attempt master/tag workflows
+`39982027955` and `39984896509`; the exact accepted image is promoted locally. Wall Pass is the
+eighteenth native-verified item for v0.3.43: source `bd34192d8915a8aac4288e3f69bd5898ad01d952`
+and image `sha256:e2f02586988e2359404189afbe465ad47a4dd12e8227de8b6d3c627401ad7cfc`
+pass fresh gates and all 55 Compose plus 55 Kubernetes cases with zero retries or carried results.
+Seventeen items are published; candidate/master/tag checks, publication and promotion for v0.3.43
+remain pending. Current status lives in [checks](https://github.com/liveweird/grenadiers/actions),
+[releases](https://github.com/liveweird/grenadiers/releases), and the
+[verification record](../verification.md). Kick, Punch, Bracelet and Oil Barrel remain before
+ART-ATLAS.
 
 At the 21 October 2026 16:47 UTC native acceptance checkpoint, Invisibility Cloak was an
 **unreleased source candidate**. Corrected source `1c6724f` and
@@ -99,17 +106,19 @@ no game behavior. Independent audit is clear and 2,492 payloads are durably seal
 and promotion checks have not run. Six requested types remain: Teleporter,
 Wall Pass, Kick, Punch, Bracelet and Oil Barrel. ART-ATLAS follows the completed feature batch.
 
-TURN, CONFIG and the first ART slice are implemented. The v0.3.42 candidate contains seventeen
+TURN, CONFIG and the first ART slice are implemented. The native-verified v0.3.43 candidate contains eighteen
 optional pickups: Heart, Shield, Golden Flame, Short Fuse, Short Flame, Long Fuse, Reverse
 Controls, Diarrhea, Slow-foot, Piercing Bomb, Power Bomb, Remote Bomb, Landmine and Invisibility
-Cloak, Stopwatch, Invisible Bombs and Teleporter. The sealed v0.3.41 parent is integrated. This
-candidate's source checks cover 689 core, 208 release server and 657 web tests plus all 131,072
-settings masks across three profiles. Final hosted CI remains pending. The remaining requested pickups stay outside this increment. Current publication status
+Cloak, Stopwatch, Invisible Bombs, Teleporter and Wall Pass. The published v0.3.42 source
+parent is integrated, including the sealed v0.3.41 history. Fresh v0.3.43 gates, same-image native
+acceptance, independent audit and durable sealing are complete; hosted candidate, master and tag
+checks, publication and promotion remain pending. The remaining four requested pickups stay
+outside this increment. Current publication status
 is recorded in [release notes](https://github.com/liveweird/grenadiers/releases), with source-bound
 acceptance records in [verification](../verification.md). Richer transitions and artwork remain
 follow-up work; see [pixel-art presentation](pixel-art.md) and
 [expanded item implementation](expanded-items.md).
-Updated 2026-10-22 after final v0.3.41 parent integration. Release acceptance is recorded in
+Updated 2026-10-23 after v0.3.42 delivery and the sealed Wall Pass native checkpoint. Release acceptance is recorded in
 [verification](../verification.md).
 The [implementation plan](implementation-plan.md) remains the milestone/release reference;
 the [rules](rules.md) describe the current baseline and historical extension catalog.
@@ -255,7 +264,7 @@ needs remappable controls, input sequencing, replay and connection-generation fe
 | EQ-KICK / boot | Walking into a planted bomb slides it across the floor until a wall, another bomb or a player stops it. | Sliding speed, soft-block collision, contact priorities, fuse/chain behavior and bomb ownership; no tunneling. |
 | EQ-PUNCH / boxing glove | Punch an adjacent bomb three tiles forward over obstacles, wrapping at arena edges. | Action/direction, airborne collision and fuse behavior, landing on blocked cells, repeated punches; wrap logical arena cells rather than screen pixels, defining treatment of border walls. |
 | EQ-SHOVE / bracelet | Shove rival players when touching them. | Contact detection despite normally non-blocking players, displacement, cooldown, simultaneous shoves and collision/fire along the pushed path. |
-| EQ-WALL / wall pass | Phase through destructible soft blocks. | Hard walls/borders stay solid; interaction with bombs and hazards; safe resolution if replaced/removed while inside a block. |
+| EQ-WALL / wall pass | **Native verified for v0.3.43.** Phase through destructible soft blocks. | Hard walls/borders, bombs and hazards stay authoritative; private per-cell exit grace resolves replacement while overlapping a block. Fresh source gates and 55+55 same-image native cases pass with independent audit and durable seal; hosted CI and publication remain pending. |
 | EQ-HEART / heart | Absorb one lethal explosion or enemy collision, then vanish. | Simultaneous/overlapping hits, remaining in flame, protection precedence with Shield and post-hit grace. Enemy collision applies when an enemy damage system exists. |
 
 ## Timed buffs: multiple active effects allowed
@@ -282,7 +291,7 @@ instant action. Keep both in this requested pickup family without forcing them i
 | CURSE-REVERSE / reverse controls | Up moves down, left moves right, and vice versa. | Apply to logical movement after personal remapping; define held-key transition/expiry without stuck movement or stale replay. |
 | CURSE-BLIND / invisible bombs | The afflicted player cannot see any bombs, including their own. | Recipient-specific bomb/event/effect projection and reconnect; explicitly define retained collision clues, fuse sounds and blast warnings. |
 | CURSE-OIL / oil barrel | Before detonation it blocks passage like a soft wall; after detonation it burns indefinitely. | Define how acquisition creates/places the barrel, detonation/chain triggers, blast footprint and destruction; bound creation and specify cleanup at round end without expiry during play. |
-| CURSE-SWAP / teleporter | **Native-accepted candidate in v0.3.42.** Immediately attempt the sole two-player rival swap. | Atomic complete-footprint safety, unsafe consumption, actor-specific overlap grace, persistent position epoch, reconnect and privacy are covered without RNG. Source `880fff7` passes 54 Compose plus 54 Kubernetes cases; hosted delivery remains pending. |
+| CURSE-SWAP / teleporter | **Published in v0.3.42.** Immediately attempt the sole two-player rival swap. | Atomic complete-footprint safety, unsafe consumption, actor-specific overlap grace, persistent position epoch, reconnect and privacy are covered without RNG. Fresh 54 Compose plus 54 Kubernetes cases pass; distinct first-attempt master/tag workflows pass and the exact accepted image is promoted locally. |
 
 ## Special weapons: one single-use slot
 
@@ -308,5 +317,5 @@ including same-image Compose/Kubernetes acceptance. Bots, mobs and larger matche
 separate tracks; their future interactions must be specified without making them prerequisites.
 
 Complete the entire expanded-item activation batch before starting ART-ATLAS. Wall Pass is the
-next bounded item increment (v0.3.43); melee equipment and Oil remain after it. ART-ATLAS begins
-only after those item increments and their release gates are complete.
+eighteenth native-verified increment (v0.3.43); Kick, Punch, Bracelet and Oil remain after it.
+ART-ATLAS begins only after those item increments and their release gates are complete.

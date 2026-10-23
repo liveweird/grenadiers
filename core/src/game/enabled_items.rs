@@ -4,6 +4,7 @@ pub struct EnabledItems(u32);
 
 impl EnabledItems {
     pub const EMPTY: Self = Self(0);
+    pub const WALL_PASS: Self = Self(1 << 3);
     pub const HEART: Self = Self(1 << 4);
     pub const REMOTE_BOMB: Self = Self(1 << 5);
     pub const PIERCING_BOMB: Self = Self(1 << 6);
@@ -26,7 +27,8 @@ impl EnabledItems {
     pub const HEART_AND_GOLDEN_FLAME: Self = Self(Self::HEART.0 | Self::GOLDEN_FLAME.0);
     pub const SHIELD_AND_GOLDEN_FLAME: Self = Self(Self::SHIELD.0 | Self::GOLDEN_FLAME.0);
     pub const ALL: Self = Self(
-        Self::HEART.0
+        Self::WALL_PASS.0
+            | Self::HEART.0
             | Self::REMOTE_BOMB.0
             | Self::PIERCING_BOMB.0
             | Self::POWER_BOMB.0
@@ -62,6 +64,11 @@ impl EnabledItems {
     #[must_use]
     pub const fn contains_heart(self) -> bool {
         self.0 & Self::HEART.0 != 0
+    }
+
+    #[must_use]
+    pub const fn contains_wall_pass(self) -> bool {
+        self.0 & Self::WALL_PASS.0 != 0
     }
 
     #[must_use]
@@ -174,7 +181,8 @@ mod tests {
         for bits in [8192, 8208, 8704, 8720, 12288, 12304, 12800, 12816] {
             assert_eq!(EnabledItems::from_bits(bits).unwrap().bits(), bits);
         }
-        assert_eq!(EnabledItems::from_bits(3_145_712), Some(EnabledItems::ALL));
+        assert_eq!(EnabledItems::from_bits(3_145_720), Some(EnabledItems::ALL));
+        assert_eq!(EnabledItems::from_bits(8), Some(EnabledItems::WALL_PASS));
         assert_eq!(EnabledItems::from_bits(1), None);
         assert_eq!(EnabledItems::from_bits(17), None);
         assert_eq!(EnabledItems::from_bits(1 << 20), None);
@@ -193,13 +201,13 @@ mod tests {
     }
 
     #[test]
-    fn every_subset_of_the_seventeen_opt_in_items_is_valid() {
-        let item_bits: [u32; 17] = [
-            16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16_384, 32_768, 65_536, 131_072,
+    fn every_subset_of_the_eighteen_opt_in_items_is_valid() {
+        let item_bits: [u32; 18] = [
+            8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16_384, 32_768, 65_536, 131_072,
             262_144, 524_288, 2_097_152,
         ];
         let mut observed = 0;
-        for mask in 0_u32..131_072 {
+        for mask in 0_u32..262_144 {
             let mut bits = 0;
             for (index, bit) in item_bits.iter().enumerate() {
                 if mask & (1 << index) != 0 {
@@ -209,8 +217,8 @@ mod tests {
             assert_eq!(EnabledItems::from_bits(bits).unwrap().bits(), bits);
             observed += 1;
         }
-        assert_eq!(observed, 131_072);
-        assert_eq!(EnabledItems::ALL.bits(), 3_145_712);
+        assert_eq!(observed, 262_144);
+        assert_eq!(EnabledItems::ALL.bits(), 3_145_720);
         assert_eq!(EnabledItems::default(), EnabledItems::EMPTY);
     }
 }

@@ -81,7 +81,15 @@ independent item. The integrated catalog has 65,536 subsets; all earlier mapping
 v8 catalog remain pinned. Prepared-source checks do not establish native acceptance or hosted
 release CI for this integrated candidate, and no v0.3.40 acceptance result is carried forward.
 
-The provisional v0.3.42 source adds [Teleporter](teleporter.md) as the seventeenth optional pickup while preserving every v0.3.41 item. Rules version 5, generator version 2 and journal format 2 remain stable; Teleporter introduces the paired gameplay-v10 contract for its authoritative position epoch. This provisional integration still requires the final accepted v0.3.41 parent, fresh gates, independent review and native acceptance.
+The final v0.3.42 source adds [Teleporter](teleporter.md) as the seventeenth optional pickup while
+preserving every v0.3.41 item. Rules version 5, generator version 2 and journal format 2 remain
+stable; Teleporter introduces the paired gameplay-v10 contract for its authoritative position
+epoch. Its release acceptance remains separately pending.
+
+The provisional v0.3.43 source adds [Wall Pass](wall-pass.md) as the eighteenth optional pickup
+while preserving the reviewed final v0.3.42 source parent and gameplay v10. Its 262,144 settings
+masks require two server-mask partitions. Fresh v0.3.43 gates, independent review, native
+acceptance and hosted CI remain pending.
 This optional track follows the [backlog](backlog.md), shared settings and
 pixel-art increments. The historical catalog in [rules](rules.md) is not an implementation
 claim. Each activation requires its own reviewed behavior, UI, documentation and acceptance.

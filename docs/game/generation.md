@@ -23,11 +23,11 @@ invalid-map fallback, privacy checks, and simulation-level first-bomb escape sur
 Changing the algorithm or draw semantics requires a new generator version and reviewed
 replay/compatibility expectations. Do not replace the golden outputs merely to hide drift.
 
-Expanded generator v2 appends each enabled optional item to a stable weighted pool. Teleporter
-adds the final weight-15 interval after Invisible Bombs. The all-items pool is 365 and a
-Teleporter-only pool is 115. Any mask without Teleporter preserves its earlier pool and exact
-seeded output; all 131,072 item subsets are accepted. The preceding Invisible Bombs interval
-remains weight 15 after Stopwatch, and its earlier 65,536 masks retain their exact outputs.
+Expanded generator v2 appends each enabled optional item to a stable weighted pool. Wall Pass adds
+the final weight-15 interval `[365,380)` after Teleporter. The all-items pool is 380 and a
+Wall-Pass-only pool is 115. Any mask without Wall Pass preserves its earlier pool, draw count and
+exact seeded output; all 262,144 item subsets are accepted. Teleporter retains its preceding
+weight-15 interval, and all 131,072 earlier seventeen-item masks retain their exact outputs.
 
 The server constructs typed worlds at each actual round start and keeps the generation record
 private. Layer transitions, collection, gameplay-v2 projection, and item graphics are integrated.

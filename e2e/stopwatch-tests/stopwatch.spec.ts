@@ -80,7 +80,7 @@ test('Stopwatch freezes voluntary actions while Timed bombs pause', async ({ bro
       two.getByRole('region', { name: 'Dziedziniec Grenadiers', exact: true }).click(),
     ])
     expect(latestSnapshot(games[0])!.room.availableItems).toEqual([
-      'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch',
+      'wallPass', 'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch',
       'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame',
       'longFuse', 'reverseControls', 'invisibleBombs', 'teleporter',
     ])

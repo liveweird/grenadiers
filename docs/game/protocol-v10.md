@@ -1,4 +1,4 @@
-# Gameplay v10: authoritative teleport position epochs
+# Gameplay v10: Teleporter epochs and Wall Pass
 
 The coordinated live contract is `api/gameplay-v10.schema.json`, Rust `core::protocol::v10`, and
 generated `web/src/game/v10/schema.ts`. Deploy the paired server and browser assets together.
@@ -7,9 +7,9 @@ revoke a credential for a v10 connection.
 
 V10 retains Expanded-v5 rules, generated-v2 arenas, journal format 2, all v9 commands, room fields,
 bombs, events, inventory, privacy and voluntary-action freeze semantics. Its independent catalog
-adds Teleporter as the seventeenth item and accepts all 131,072 masks. Archived v9 remains pinned
-to its sixteen-item catalog and rejects Teleporter in settings, pickups and event-only history even
-when the live enabled mask omits it.
+adds Teleporter and Wall Pass as the seventeenth and eighteenth items and accepts all 262,144
+masks. Archived v9 remains pinned to its sixteen-item catalog and rejects either newer item in
+settings, equipment, pickups and event-only history even when the live enabled mask omits it.
 
 Every visible actor adds required nullable `lastTeleportTick`. A successful atomic Teleporter swap
 sets the same marker on both actors. The marker must be after the physical round start and no later
@@ -18,7 +18,10 @@ death and results until a new round state is constructed. A hidden actor remains
 `{type,id,seat,alive}`; its position, loadout, effects and marker remain private.
 
 The server validates the complete canonical world, bounds, enabled catalog and history before
-recipient filtering, including an audience of neither seat. It prepares both bounded recipient
+recipient filtering, including an audience of neither seat. Wall Pass exit grace is canonical,
+private state: each live or dead actor may retain at most four in-bounds soft-block cells that its
+footprint still positively overlaps, and no grace count, timer or marker appears on the wire. It
+prepares both bounded recipient
 frames before publication state or revision commits, and admissions remain event-free. Replay
 checks both perspectives, state, reports and markers. A client accepts a newer marker only after
 the ordinary round/revision/tick freshness checks, then snaps both authoritative positions without

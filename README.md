@@ -3,14 +3,22 @@
 A browser-based multiplayer game inspired by classic Bomberman/Dynablaster.
 The initial playable profile supports two human players. Bots and larger matches follow later.
 
-Invisible Bombs is published in prerelease v0.3.41 from commit
-`f5c4adf66f8af9a5ef66b48f9230d17aea14f1d5`. Its distinct post-merge and tag workflows each
-pass all nine jobs, 53 browser cases and 65,536 settings masks, and its sealed native image
-`sha256:d063462c3130e3c8653734da72e8dfd6785b0c036e9579d9046cee884ccd9f82` is promoted locally.
-The v0.3.42 Teleporter candidate adds the seventeenth item with gameplay v10. Source
-`880fff7c67269f2886746b45239cd888576832f4` and image `sha256:8ae9818d27c4345bceec6dad77f02e21ee7148626efded48c421d86421285477` are native
-verified by 54 Compose plus 54 Kubernetes cases with zero retries or carried passes at
-`2026-10-23 04:37 UTC`. Hosted delivery remains pending.
+Teleporter is published as the seventeenth requested item in prerelease
+[v0.3.42](https://github.com/liveweird/grenadiers/releases/tag/v0.3.42). Published source
+`0ff1512c5a8fdbd1e1b16583ae7791e668bf070b` is tagged by annotated object
+`ea3930a3490fb483de46692e1009743e20c61648`; distinct master and tag runs `39982027955` and
+`39984896509` each pass all nine jobs, 54 browser cases and 131,072 settings masks on their first
+attempt. Its exact native image `sha256:8ae9818d27c4345bceec6dad77f02e21ee7148626efded48c421d86421285477`
+is promoted locally in container `0a3bcbac08bc2c2cf46365917a3719d3c5e522c4555234da8e1f661f6edcf214`.
+Wall Pass is the eighteenth requested item and is native verified for the v0.3.43 candidate at
+source `bd34192d8915a8aac4288e3f69bd5898ad01d952`, tree
+`daa2306e77de0e279a6752aa69e687e0a6c51ba0`, and exact image
+`sha256:e2f02586988e2359404189afbe465ad47a4dd12e8227de8b6d3c627401ad7cfc`.
+At the `2026-10-23 19:48 UTC` native checkpoint all 55 Compose plus 55 Kubernetes cases pass with
+zero retries or carried results. v0.3.43 candidate, master and tag checks, publication and promotion
+remain pending; see current [checks](https://github.com/liveweird/grenadiers/actions) and
+[releases](https://github.com/liveweird/grenadiers/releases). Seventeen items are published and
+eighteen are native verified; Kick, Punch, Bracelet and Oil Barrel remain before ART-ATLAS.
 
 The **two-player arena match is playable**. Create a room, share its invitation,
 join from another browser, and both choose Ready. Select the courtyard to move with arrows
@@ -30,10 +38,12 @@ for five seconds of immunity; its timer refreshes on collection. The optional
 [Short Fuse](docs/game/short-fuse.md) halves newly planted bomb fuses for ten seconds. The opt-in
 [Short Flame curse](docs/game/short-flame.md) limits new bombs to one adjacent cell for ten seconds. The opt-in
 [Long Fuse curse](docs/game/long-fuse.md) doubles newly planted bomb fuses for ten seconds. Optional
-[Reverse Controls](docs/game/reverse-controls.md) reverses held movement directions for ten seconds. The opt-in [Diarrhea curse](docs/game/diarrhea.md) automatically drops ordinary bombs when placement is possible for ten seconds. [Slow foot](docs/game/slow-foot.md) halves movement speed for ten seconds per independently timed stack. [Remote Bomb](docs/game/remote-bomb.md) stores one manual bomb that waits for its owner's next bomb action. [Piercing Bomb](docs/game/piercing-bomb.md) stores one manual bomb whose blast crosses breakable blocks. [Power Bomb](docs/game/power-bomb.md) stores one manual bomb whose diamond-shaped blast ignores obstruction while preserving hard walls. [Landmine](docs/game/landmine.md) stores one passable contact mine with initial exit grace. [Invisibility Cloak](docs/game/invisibility-cloak.md) hides an active actor's spatial and loadout details from the opponent for ten seconds. [Stopwatch](docs/game/stopwatch.md) freezes the opponent's voluntary actions and pauses Timed bombs for three seconds. [Invisible Bombs](docs/game/invisible-bombs.md) hides every live bomb and its cues from the afflicted player for ten seconds. [Teleporter](docs/game/teleporter.md) consumes an immediate pickup and swaps both living players only when both destinations are safe. Gameplay v10 requires reloading older browser
+[Reverse Controls](docs/game/reverse-controls.md) reverses held movement directions for ten seconds. The opt-in [Diarrhea curse](docs/game/diarrhea.md) automatically drops ordinary bombs when placement is possible for ten seconds. [Slow foot](docs/game/slow-foot.md) halves movement speed for ten seconds per independently timed stack. [Wall Pass](docs/game/wall-pass.md) is permanent equipment for crossing breakable blocks while hard walls, bombs and hazards remain effective. [Remote Bomb](docs/game/remote-bomb.md) stores one manual bomb that waits for its owner's next bomb action. [Piercing Bomb](docs/game/piercing-bomb.md) stores one manual bomb whose blast crosses breakable blocks. [Power Bomb](docs/game/power-bomb.md) stores one manual bomb whose diamond-shaped blast ignores obstruction while preserving hard walls. [Landmine](docs/game/landmine.md) stores one passable contact mine with initial exit grace. [Invisibility Cloak](docs/game/invisibility-cloak.md) hides an active actor's spatial and loadout details from the opponent for ten seconds. [Stopwatch](docs/game/stopwatch.md) freezes the opponent's voluntary actions and pauses Timed bombs for three seconds. [Invisible Bombs](docs/game/invisible-bombs.md) hides every live bomb and its cues from the afflicted player for ten seconds. [Teleporter](docs/game/teleporter.md) consumes an immediate pickup and swaps both living players only when both destinations are safe. Gameplay v10 requires reloading older browser
 clients after an upgrade; see the [compatibility note](docs/game/protocol-v10.md).
-Reviewed pre-collection examples show [English desktop](docs/screenshots/teleporter-desktop.png)
-and [Polish 320px reduced-motion](docs/screenshots/teleporter-mobile-pl.png) presentation.
+Reviewed pre-collection examples show Wall Pass in [English desktop](docs/screenshots/wall-pass-desktop.png)
+and [Polish 320px reduced-motion](docs/screenshots/wall-pass-mobile-pl.png) presentation. The
+published Teleporter examples remain available as [English desktop](docs/screenshots/teleporter-desktop.png)
+and [Polish 320px reduced-motion](docs/screenshots/teleporter-mobile-pl.png) captures.
 
 Use **Keyboard controls** below the arena to remap movement and bombs or restore defaults. Preferences
 stay in this browser. Opening settings, losing focus, or hiding the tab releases held movement;

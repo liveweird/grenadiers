@@ -11,7 +11,8 @@ function archivedValue(value: unknown): V9Snapshot {
     room: { availableItems: string[] }
     state: { actors: Array<Record<string, unknown>> }
   }
-  archived.room.availableItems = archived.room.availableItems.filter((item) => item !== 'teleporter')
+  archived.room.availableItems = archived.room.availableItems
+    .filter((item) => item !== 'wallPass' && item !== 'teleporter')
   for (const actor of archived.state.actors) delete actor.lastTeleportTick
   return archived as unknown as V9Snapshot
 }
@@ -45,6 +46,31 @@ describe('gameplay v9 Stopwatch validation', () => {
       message.room.settings.enabledItems = [...enabledItems]
       expect(validateGameplayV9ServerMessage(message)).toEqual({ valid: true, value: message })
     })
+  })
+
+  it('rejects Wall Pass in every archived capability-bearing position', () => {
+    const roomCatalog = archivedSnapshot(1)
+    roomCatalog.room.availableItems = ['wallPass', ...roomCatalog.room.availableItems]
+    expect(validateGameplayV9ServerMessage(roomCatalog)).toMatchObject({ valid: false })
+
+    for (const field of ['equipment', 'pickup', 'event'] as const) {
+      const message = archivedSnapshot(1)
+      if (field === 'equipment') {
+        const actor = message.state.actors[0]
+        if (actor.type !== 'visible') throw new Error('expected visible actor')
+        actor.inventory.equipment = 'wallPass'
+      } else if (field === 'pickup') {
+        message.state.pickups = [{ cell: { column: 2, row: 2 }, kind: 'wallPass' }]
+      } else {
+        message.events = [{ tick: 1, index: 0, kind: {
+          type: 'pickupCollected', id: 1, seat: 'one',
+          cell: { column: 2, row: 2 }, kind: 'wallPass',
+        } }]
+      }
+      expect(validateGameplayV9ServerMessage(message)).toEqual({
+        valid: false, source: 'semantics', error: 'unsupportedProfile',
+      })
+    }
   })
 
   it('binds visible frozen state to the living opponent Stopwatch and keeps hidden actors exact', () => {

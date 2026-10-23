@@ -2,7 +2,7 @@ import type { EffectView, ItemId } from './schema'
 
 export type EffectSemanticError = 'duplicateEffect' | 'slowFootLimit'
 export type ItemSetSemanticError = 'unavailableItem'
-export type GameplayV7SemanticError = EffectSemanticError | ItemSetSemanticError
+export type GameplayV7SemanticError = EffectSemanticError | ItemSetSemanticError | 'unsupportedProfile'
 
 export function effectSemanticError(effects: readonly EffectView[]): EffectSemanticError | null {
   const ordinary = new Set<string>()

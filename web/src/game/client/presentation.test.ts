@@ -82,6 +82,21 @@ describe('v10 arena presentation', () => {
     expect(presented.state.pickups).toEqual(current.snapshot!.state.pickups)
   })
 
+  it('presents only current Wall Pass equipment and never invents private exit-grace state', () => {
+    const current = state()
+    const own = current.snapshot!.state.actors[0]
+    if (own.type !== 'visible') throw new Error('expected visible own actor')
+    own.inventory.equipment = 'wallPass'
+    current.snapshot!.state.pickups = [{ cell: { column: 3, row: 2 }, kind: 'wallPass' }]
+    const presented = presentSnapshot(current)!
+    expect(presented.state.actors[0]).toMatchObject({ wallPassEquipped: true })
+    expect(presented.state.pickups).toEqual(current.snapshot!.state.pickups)
+    expect(Object.keys(presented.state.actors[0])).not.toContain('wallPassExitGrace')
+
+    own.inventory.equipment = 'heart'
+    expect(presentSnapshot(current)!.state.actors[0]).toMatchObject({ wallPassEquipped: false })
+  })
+
 })
 
 describe('Stopwatch presentation', () => {

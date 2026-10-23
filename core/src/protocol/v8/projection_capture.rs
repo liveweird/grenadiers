@@ -59,6 +59,19 @@ pub(crate) fn capture_expanded_for_items(
             result: wire_result(public.result),
             arena: capture_arena(&public.arena)?,
             actors,
+            soft_wall_grace: state
+                .actors()
+                .each_ref()
+                .map(|actor| {
+                    actor
+                        .soft_wall_grace_observations()
+                        .map(wire_cell)
+                        .collect::<Result<Vec<_>, _>>()
+                })
+                .into_iter()
+                .collect::<Result<Vec<_>, _>>()?
+                .try_into()
+                .map_err(|_| ProjectionError::InvalidActors)?,
             bombs: captured_bombs.iter().map(|(bomb, _)| *bomb).collect(),
             timed_bombs: captured_bombs
                 .iter()

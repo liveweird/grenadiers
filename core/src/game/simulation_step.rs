@@ -106,12 +106,20 @@ impl State {
     fn move_living(&mut self, tick: Tick, frozen: [bool; 2]) -> [MovementTrace; 2] {
         let turn_assist = self.rules.turn_assist();
         let slow_foot_enabled = self.rules.enabled_items().contains_slow_foot();
+        let wall_pass_enabled = self.rules.enabled_items().contains_wall_pass();
         let mut index = 0;
         self.actors.each_mut().map(|actor| {
             let current = index;
             index += 1;
             if actor.alive && !frozen[current] {
-                movement::advance_actor(&self.world, actor, turn_assist, tick, slow_foot_enabled)
+                movement::advance_actor(
+                    &self.world,
+                    actor,
+                    turn_assist,
+                    tick,
+                    slow_foot_enabled,
+                    wall_pass_enabled,
+                )
             } else {
                 MovementTrace::new(actor.position)
             }
@@ -263,6 +271,7 @@ impl super::Actor {
         self.residual = 0;
         self.pending_turn = None;
         self.inventory.clear();
+        self.soft_wall_grace.clear();
         self.effects.clear();
         self.damage_grace = None;
     }

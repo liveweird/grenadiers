@@ -43,11 +43,22 @@ impl State {
                 ));
                 continue;
             }
-            let actor = &mut self.actors[seat.index()];
-            if !actor.apply_pickup(pickup, self.rules, tick)? {
+            let applied = match pickup.kind() {
+                PickupKind::WallPass => {
+                    self.replace_actor_equipment(seat, crate::game::Equipment::WallPass);
+                    true
+                }
+                PickupKind::Heart => {
+                    self.replace_actor_equipment(seat, crate::game::Equipment::Heart);
+                    true
+                }
+                _ => self.actors[seat.index()].apply_pickup(pickup, self.rules, tick)?,
+            };
+            if !applied {
                 continue;
             }
             self.world.pickups.exposed.remove(&cell);
+            let actor = &self.actors[seat.index()];
             let audience = if actor.effects.hidden_from_opponents(tick) {
                 EventAudience::only(seat)
             } else {
@@ -110,10 +121,6 @@ impl super::Actor {
                 self.range = self.range.saturating_add(1).min(rules.bomb_range_cap());
             }
             PickupKind::MovementSpeed => self.speed = self.speed.next(),
-            PickupKind::Heart => {
-                self.inventory
-                    .replace_equipment(crate::game::Equipment::Heart);
-            }
             PickupKind::RemoteBomb => {
                 self.inventory
                     .replace_weapon(crate::game::SpecialWeapon::Remote);
@@ -156,6 +163,9 @@ impl super::Actor {
                 if self.effects.reverses_controls(tick) != reversed_before {
                     self.pending_turn = None;
                 }
+            }
+            PickupKind::WallPass | PickupKind::Heart => {
+                unreachable!("equipment pickups use the world-aware transition")
             }
             PickupKind::Teleporter => unreachable!("teleporters are committed after collection"),
         }

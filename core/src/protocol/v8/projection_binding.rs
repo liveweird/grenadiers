@@ -24,6 +24,13 @@ pub(crate) fn bind_expanded_for_items(
     supported_items: ItemSet,
 ) -> Result<BoundPublication, ProjectionError> {
     validate_expanded_room_for_items(room, supported_items)?;
+    let rebound_world = super::projection_validation::validate_world_for_items(
+        capture.world.0.clone(),
+        supported_items,
+    )
+    .map_err(|_| ProjectionError::InvalidExpandedBinding)?;
+    super::projection_validation::validate_reports(&rebound_world, capture.reports.0.clone())
+        .map_err(|_| ProjectionError::InvalidExpandedBinding)?;
     let settings =
         super::projection_room::expanded_settings_for_items(room.settings, supported_items)?;
     let expected_rules = match room.rules_version {
@@ -95,6 +102,8 @@ fn canonical_gameplay(
             world.enabled_items,
         )
     }) && unique_remote_owners(&world.bombs)
+        && (supported_items.contains(ItemId::WallPass)
+            || world.soft_wall_grace.iter().all(Vec::is_empty))
         && world.last_teleport_tick.is_none_or(|_| {
             supported_items.contains(ItemId::Teleporter)
                 && world.enabled_items.contains(ItemId::Teleporter)

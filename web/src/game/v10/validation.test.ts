@@ -1,15 +1,15 @@
 import { describe, expect, it } from 'vitest'
 import { checkedCatalogMaskRanges, executeCatalogMaskRange } from '../../test/catalogMasks'
-import { snapshot } from '../client/testSupport'
+import { admitted, snapshot } from '../client/testSupport'
 import { validateGameplayV10ServerMessage } from './validation'
 
 const supported = [
-  'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch',
+  'wallPass', 'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch',
   'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame',
   'longFuse', 'reverseControls', 'invisibleBombs', 'teleporter',
 ] as const
 const supportedRanges = checkedCatalogMaskRanges({
-  protocol: 'gameplay v10', catalog: supported, expectedCount: 17, expectedOrder: supported,
+  protocol: 'gameplay v10', catalog: supported, expectedCount: 18, expectedOrder: supported,
 })
 
 function withMarker(marker: number | null) {
@@ -22,11 +22,57 @@ function withMarker(marker: number | null) {
   return message
 }
 
-describe('gameplay v10 Teleporter validation', () => {
-  it('pins seventeen unique settings entries before exhaustively enumerating all masks', () => {
-    expect(supported).toHaveLength(17)
-    expect(new Set(supported)).toHaveLength(17)
-    expect(2 ** supported.length).toBe(131_072)
+describe('gameplay v10 item validation', () => {
+  it('pins eighteen unique settings entries before exhaustively enumerating all masks', () => {
+    expect(supported).toHaveLength(18)
+    expect(new Set(supported)).toHaveLength(18)
+    expect(2 ** supported.length).toBe(262_144)
+    expect(supportedRanges).toHaveLength(256)
+  })
+
+  it('accepts enabled Wall Pass equipment, pickups, and collection history', () => {
+    const message = withMarker(null)
+    message.room.settings.enabledItems = ['wallPass']
+    const actor = message.state.actors[0]
+    if (actor.type !== 'visible') throw new Error('expected visible actor')
+    actor.inventory.equipment = 'wallPass'
+    message.state.pickups = [{ cell: { column: 3, row: 2 }, kind: 'wallPass' }]
+    message.events = [{ tick: 2, index: 0, kind: {
+      type: 'pickupCollected', id: actor.id, seat: actor.seat,
+      cell: { column: 2, row: 2 }, kind: 'wallPass',
+    } }]
+    expect(validateGameplayV10ServerMessage(message)).toEqual({ valid: true, value: message })
+
+    message.room.settings.enabledItems = []
+    expect(validateGameplayV10ServerMessage(message)).toEqual({
+      valid: false, source: 'semantics', error: 'unsupportedProfile',
+    })
+  })
+
+  it('accepts the current Wall Pass catalog in fresh admission and lobby messages', () => {
+    const admission = admitted()
+    admission.room.settings.enabledItems = ['wallPass']
+    const actor = admission.state?.actors[0]
+    if (!actor || actor.type !== 'visible') throw new Error('expected visible actor')
+    actor.inventory.equipment = 'wallPass'
+    expect(validateGameplayV10ServerMessage(admission)).toEqual({ valid: true, value: admission })
+
+    const roomState = { type: 'roomState' as const, room: admission.room }
+    expect(validateGameplayV10ServerMessage(roomState)).toEqual({ valid: true, value: roomState })
+  })
+
+  it('accepts a nonholder overlapping a soft block without exposing private exit grace', () => {
+    const message = withMarker(null)
+    const actor = message.state.actors[0]
+    if (actor.type !== 'visible') throw new Error('expected visible actor')
+    actor.position = { x: 2560, y: 2560 }
+    message.state.arena.blocks = [{ column: 2, row: 2 }]
+    expect(validateGameplayV10ServerMessage(message)).toEqual({ valid: true, value: message })
+
+    const leaked = structuredClone(message) as unknown as Record<string, unknown>
+    const leakedActors = (leaked.state as { actors: Array<Record<string, unknown>> }).actors
+    leakedActors[0].wallPassExitGrace = [{ column: 2, row: 2 }]
+    expect(validateGameplayV10ServerMessage(leaked)).toMatchObject({ valid: false, source: 'schema' })
   })
 
   it.each(supportedRanges)('accepts every supported enabled-item mask in [$start, $end)', (range) => {

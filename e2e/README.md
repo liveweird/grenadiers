@@ -20,6 +20,11 @@ and bounded redacted summaries; never print or attach authentication/resume payl
 reconnect probe closes real native transports and authenticates normally without changing
 the authoritative simulation clock, state, or outcomes.
 
+The Wall Pass production route runs separately with the mode-0444 seed fixture:
+`E2E_WALL_PASS_FIXTURE=arena-v2-wall-pass npm run test:wall-pass`. Start the same application image
+with `docker-compose.wall-pass.yaml` first. The route uses only browser controls and read-only socket
+observations; it does not inject state or send gameplay commands over the probe.
+
 ## Natural headed visibility
 
 With the matches fixture ready, run `E2E_MATCH_FIXTURE=arena-v1-matches xvfb-run -a npm --prefix e2e run test:hardening`

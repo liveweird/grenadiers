@@ -1,7 +1,7 @@
 use std::collections::BTreeSet;
 
 use super::State;
-use crate::game::{BombTrigger, EntityId, Position, SeatId, Tick, movement};
+use crate::game::{BombTrigger, CellId, EntityId, Position, SeatId, Tick, movement};
 
 impl State {
     pub(super) fn commit_teleport(&mut self, requests: [bool; 2], tick: Tick) {
@@ -25,8 +25,14 @@ impl State {
 
         let requester_grace = self.retained_grace(requester, to);
         let other_grace = self.retained_grace(other, from);
-        if !self.teleport_destination_is_safe(to, &requester_grace)
-            || !self.teleport_destination_is_safe(from, &other_grace)
+        let requester_soft_grace = self.retained_soft_grace(requester, to);
+        let other_soft_grace = self.retained_soft_grace(other, from);
+        if !self.teleport_destination_is_safe(
+            requester,
+            to,
+            &requester_grace,
+            &requester_soft_grace,
+        ) || !self.teleport_destination_is_safe(other, from, &other_grace, &other_soft_grace)
         {
             return;
         }
@@ -35,11 +41,27 @@ impl State {
         self.actors[requester.index()].residual = 0;
         self.actors[requester.index()].pending_turn = None;
         self.actors[requester.index()].bomb_grace = requester_grace;
+        self.actors[requester.index()].soft_wall_grace = requester_soft_grace;
         self.actors[other.index()].position = from;
         self.actors[other.index()].residual = 0;
         self.actors[other.index()].pending_turn = None;
         self.actors[other.index()].bomb_grace = other_grace;
+        self.actors[other.index()].soft_wall_grace = other_soft_grace;
         self.last_teleport_tick = Some(tick);
+    }
+
+    fn retained_soft_grace(&self, seat: SeatId, destination: Position) -> BTreeSet<CellId> {
+        let actor = &self.actors[seat.index()];
+        actor
+            .soft_wall_grace
+            .iter()
+            .filter(|cell| {
+                self.world.arena.blocks().contains(cell)
+                    && movement::position_overlaps_cell(actor.position, **cell)
+                    && movement::position_overlaps_cell(destination, **cell)
+            })
+            .copied()
+            .collect()
     }
 
     fn retained_grace(&self, seat: SeatId, destination: Position) -> BTreeSet<EntityId> {
@@ -59,10 +81,21 @@ impl State {
 
     fn teleport_destination_is_safe(
         &self,
+        seat: SeatId,
         position: Position,
         retained_grace: &BTreeSet<EntityId>,
+        retained_soft_grace: &BTreeSet<CellId>,
     ) -> bool {
-        if !movement::position_is_free(&self.world, position, retained_grace) {
+        let actor = &self.actors[seat.index()];
+        let can_pass = self.rules.enabled_items().contains_wall_pass()
+            && actor.inventory.can_pass_soft_walls();
+        if !movement::position_is_free(
+            &self.world,
+            position,
+            retained_grace,
+            can_pass,
+            retained_soft_grace,
+        ) {
             return false;
         }
         if self

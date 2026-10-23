@@ -4,7 +4,7 @@ use crate::game::damage::DamageGrace;
 use crate::game::effects::EffectKind;
 use crate::game::events::EventAudience;
 use crate::game::rules::RulesConfig;
-use crate::game::types::{EntityId, SeatId, Tick};
+use crate::game::types::{CellId, EntityId, SeatId, Tick};
 use crate::game::world::World;
 
 impl Actor {
@@ -14,6 +14,10 @@ impl Actor {
 
     pub(crate) const fn damage_grace_observation(&self) -> Option<DamageGrace> {
         self.damage_grace
+    }
+
+    pub(crate) fn soft_wall_grace_observations(&self) -> impl Iterator<Item = CellId> + '_ {
+        self.soft_wall_grace.iter().copied()
     }
 }
 

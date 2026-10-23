@@ -1,6 +1,6 @@
 # Gameplay v6: shared room rules
 
-Archived reference; the live endpoint uses [v9](protocol-v9.md).
+Archived reference; the live endpoint uses [v10](protocol-v10.md).
 
 V6 added revision-bound gameplay configuration to the v5 match/reconnect contract. The complete
 closed contract is `api/gameplay-v6.schema.json`; Rust uses `core::protocol::v6` and generated

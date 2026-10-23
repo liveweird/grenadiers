@@ -4,6 +4,33 @@ Release labels and scope live in the [implementation plan](game/implementation-p
 A completed milestone is verification evidence; a release exists only after its tested commit
 is tagged and its artifacts are published intentionally.
 
+## v0.3.42 native-accepted source checkpoint — `2026-10-23 04:37 UTC`
+
+Source `880fff7c67269f2886746b45239cd888576832f4`, tree
+`c1da58099bb00bb0c99b4bd00de38e9c0c6f87d6`, and image
+`sha256:8ae9818d27c4345bceec6dad77f02e21ee7148626efded48c421d86421285477` pass 54 Compose plus 54 Kubernetes cases with zero retries or
+carried passes. Independent audit `0dbb15b27d5a23eae680ca9cfa2d9766a7e64e173f5f8652fd753b4611135521` and result review
+`cf3380353ca06f36cc61f67c8898ed766d6263bdc6108e003a0a9ac17da4923c` are clear; durable manifest `d81c0923f5a3d0a50208fe43a12412f60ca09e2fddfc1c6aabfb793779676b7f`
+authenticates the sealed evidence. Source gates cover 689 core, 208 release server and 657 web
+tests, 55 static scenarios and all 131,072 settings masks in debug, release and coverage profiles.
+Hosted candidate, post-merge, tag, publication and local promotion remain pending; v0.3.42 is not
+yet released.
+
+The reviewed English desktop and Polish 320px reduced-motion Teleporter captures hash to
+`e262534f6c157678f762519aa03cc2ba7896139f04d9002c1347f68bc12cff63` and `30f9e9cd099a2b01ae41c9c64096cb15b50b4850b5198cea54ad8b2eaddd63ba`.
+
+## v0.3.41 published prerelease — 2026-10-23
+
+Commit `f5c4adf66f8af9a5ef66b48f9230d17aea14f1d5`, tree
+`a274fb2fe828f3a18a624614f1addf5bf5df4d99`, is published as prerelease tag `v0.3.41`.
+Post-merge run `39879618476` and distinct tag run `39881306987` each pass all nine jobs,
+53 browser cases and 65,536 settings masks. The published source retains the accepted application,
+E2E and native inputs, while the CI-only browser readiness and observer changes retain their own
+reviewed identity. The sealed native image
+`sha256:d063462c3130e3c8653734da72e8dfd6785b0c036e9579d9046cee884ccd9f82` is promoted
+locally with consumed exit zero. Sixteen of 22 requested item types are published; Teleporter is
+the seventeenth native-accepted candidate in v0.3.42, whose hosted delivery remains pending.
+
 ## v0.3.41 browser file readiness checkpoint — 2026-10-23
 
 The observability-only PR 92 was closed after its required PR workflow failed
@@ -12,7 +39,7 @@ for a later source. A bounded pre-read of the installed browser files targets th
 observed kernel page waits. Additional fault, I/O and pressure counters preserve
 useful evidence without asserting an exact file or storage cause.
 
-At this checkpoint v0.3.41 was unpublished and localhost:8085 served v0.3.40.
+At this historical checkpoint v0.3.41 was unpublished and localhost:8085 served v0.3.40.
 The application, E2E and native inputs retain H's accepted bytes; the native
 106-case execution remains labeled H. Require independently reviewed input
 identity and fresh push, PR, post-merge and tag checks for the meaningful CI
@@ -26,29 +53,10 @@ was unpublished and the local deployment served v0.3.40. The CI-only observer re
 process and Xvfb diagnostics without changing gameplay or test budgets; a passing
 instrumented run does not establish the cause of the intermittent failure.
 
-Roll forward from the unpublished merged commit `2fbc782`, keeping version 0.3.41.
-Require fresh push and PR checks on the reviewed observer revision, exact-tree squash
-merge, post-merge checks and tag checks before promoting the accepted native image.
-Retain native proofs under their original source identity and require independently
-reviewed input equality. Failed hosted runs contribute zero accepted cases. See the
-[current investigation](verification.md#v0341-post-merge-startup-investigation--2026-10-23).
-
-## v0.3.41 source-bound acceptance checkpoint
-
-The native acceptance source is `eb0b756df43fdd896cf87573a5224e4eb5f659a3`, tree
-`098f2a3beb766b4fefd2316b7c7ceaf37275a826`. Fresh source checks, a diagnostic-only headed
-Chromium run and the full source-bound native matrix pass. Native root 40405 completed with
-consumed exit zero across 53 Compose plus 53 Kubernetes cases, with zero retries or carry.
-Independent audit is clear under SHA-256
-`b0c72b1ff651257930f0db8df9db3cfc1274bd6882f142336e508e699c41097e`; result review is clear under
-`0cff7c9dd3bd4895cfcb426f340eca146b8c9627a55bac04c01111819b9008be`. The evidence is durably
-sealed under receipt SHA-256 `10db792e74f84a7f540e463f04fee5ebaae6a94f984bbb6d2a15317956cf99f1`,
-and independent seal review is clear under SHA-256
-`87666f73ca51ac78e2d726de48f74444059e1aca636864839ab437249f353ec8`.
-With those source-bound records complete, the documentation commit and independent review come
-next, followed by release-contract review. At this native verification checkpoint, no PR, merge, v0.3.41 tag,
-publication or promotion was claimed, and localhost:8085 served the unchanged published v0.3.40
-deployment. Subsequent delivery and deployment state is recorded by the release history.
+The recovery rolled forward from merged commit `2fbc782` while keeping version 0.3.41.
+Native proofs retain their original source identity under independently reviewed input equality.
+Failed hosted runs contribute zero accepted cases. See the
+[historical investigation](verification.md#v0341-post-merge-startup-investigation--2026-10-23).
 
 ## Version ownership
 

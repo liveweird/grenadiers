@@ -13,7 +13,15 @@ use super::{
     MAX_RUNNING_UPDATES, Terrain, validate_effects,
 };
 
+#[cfg(test)]
 pub(crate) fn validate_world(facts: WorldFacts) -> Result<ValidatedWorld, ProjectionError> {
+    validate_world_for_items(facts, super::projection_binding::expanded_items())
+}
+
+pub(crate) fn validate_world_for_items(
+    facts: WorldFacts,
+    supported_items: super::ItemSet,
+) -> Result<ValidatedWorld, ProjectionError> {
     validate_clock(&facts)?;
     validate_arena(&facts)?;
     validate_actors(&facts)?;
@@ -22,7 +30,30 @@ pub(crate) fn validate_world(facts: WorldFacts) -> Result<ValidatedWorld, Projec
     validate_pickups(&facts)?;
     validate_result(&facts)?;
     validate_items(&facts)?;
+    validate_teleporter_history(&facts, supported_items)?;
     Ok(ValidatedWorld(facts))
+}
+
+fn validate_teleporter_history(
+    world: &WorldFacts,
+    supported_items: super::ItemSet,
+) -> Result<(), ProjectionError> {
+    let Some(marker) = world.last_teleport_tick else {
+        return Ok(());
+    };
+    let round_start = world
+        .physical_tick
+        .get()
+        .checked_sub(u64::from(world.running_updates))
+        .ok_or(ProjectionError::InvalidClock)?;
+    if !supported_items.contains(ItemId::Teleporter)
+        || !world.enabled_items.contains(ItemId::Teleporter)
+    {
+        return Err(ProjectionError::InvalidItems);
+    }
+    (marker.get() > round_start && marker <= world.physical_tick)
+        .then_some(())
+        .ok_or(ProjectionError::InvalidClock)
 }
 
 pub(crate) fn validate_reports(

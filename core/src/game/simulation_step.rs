@@ -76,13 +76,17 @@ impl State {
             &mut events,
         )?;
         self.kill_on_final_flames(next_tick, &mut events, &mut shield_prevented);
-        if let Err(error) = self.collect_pickups(next_tick, &mut events) {
-            debug_assert!(matches!(error, StepError::EffectExpiryOverflow(_)));
-            if let Some(snapshot) = rollback {
-                *self = snapshot;
+        let teleport_requests = match self.collect_pickups(next_tick, &mut events) {
+            Ok(requests) => requests,
+            Err(error) => {
+                debug_assert!(matches!(error, StepError::EffectExpiryOverflow(_)));
+                if let Some(snapshot) = rollback {
+                    *self = snapshot;
+                }
+                return Err(error);
             }
-            return Err(error);
-        }
+        };
+        self.commit_teleport(teleport_requests, next_tick);
         self.running_updates += 1;
         if let Some(result) = self.decide_result() {
             events.push(StepEvent::new(

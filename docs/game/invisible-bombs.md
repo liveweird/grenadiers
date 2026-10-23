@@ -1,5 +1,12 @@
 # Invisible Bombs
 
+Invisible Bombs is published as prerelease v0.3.41 from commit
+`f5c4adf66f8af9a5ef66b48f9230d17aea14f1d5`. Distinct post-merge run `39879618476` and tag run
+`39881306987` each pass all nine jobs, 53 browser cases and 65,536 settings masks. The sealed
+accepted image `sha256:d063462c3130e3c8653734da72e8dfd6785b0c036e9579d9046cee884ccd9f82`
+is promoted locally. The dated native checkpoint below retains its original execution identity
+and historical delivery status.
+
 Invisible Bombs is an optional ten-second curse in Expanded-v5 rooms. While it is active, the
 affected player receives no live bomb records and no placement or detonation events. This applies
 to their own and their opponent's Timed, Remote and Contact bombs, including paused Timed bombs and
@@ -23,30 +30,38 @@ Version 0.3.41 adds Invisible Bombs as gameplay v9's sixteenth item and generato
 350)` and the sole-item pool is 115. Every earlier catalog mask and generator path is unchanged.
 Archived gameplay v8 remains pinned to its fourteen-item Cloak-era catalog.
 
-## Verification checkpoint — visibility-startup candidate
+The v0.3.42 source candidate carries the same Invisible Bombs rules into gameplay v10 and adds
+Teleporter as the seventeenth item. Gameplay v9 remains archived at this sixteen-item catalog;
+the v10 candidate accepts all 131,072 seventeen-item masks. Fresh v0.3.42 acceptance remains
+pending.
 
-Source `eb0b756df43fdd896cf87573a5224e4eb5f659a3`, tree
-`098f2a3beb766b4fefd2316b7c7ceaf37275a826`, preserves the Invisible Bombs game contract and
-changes only six E2E startup/proof files. The Chromium launcher now parses complete endpoint lines
-from a bounded stream, retains redacted diagnostics for timeout and exit failures, and preserves
-the original launch error when cleanup also fails. The actual cause of the earlier PR 90 startup
-failure remains unknown; the parser and reporting defects are independently confirmed and tested.
+## Sealed native acceptance checkpoint — 2026-10-22 00:55:23 UTC
 
-Typed gate assembly `813e7c58…` retains the authenticated original-035 Rust/web computations under
-input-equivalence review `1ea0a03b…`: all 65,536 masks per profile, 658 core plus 207 server tests,
-516 web tests and renderer diagnostics. Fresh H repository/E2E lint, Knip, type and scenario checks,
-startup and retained live-pixel units, server-mask contract 10/10, mirror unit 5/5 and current
-security checks pass. A single headed diagnostic passes with zero accepted or carried cases.
+Corrected source `cb10ec7a143ed62128de3b96765b715cab346acf`, tree
+`9d38e0cbe6abf6e7601a44dea1162acdde386e28`, and image
+`sha256:d08b93af6eec7791e63ac423f12b33a43ee8c21e931423750f9a1a37ab63a3bf`
+passed complete 65,536-mask debug, release and coverage runs and fresh 53 Compose plus 53
+Kubernetes cases. All 48 groups passed with zero retries and zero carried passes.
 
-Native root 40405 completed with consumed exit zero. Its source-bound matrix passes 53 Compose plus
-53 Kubernetes cases, 48 reports, 114 runtime PNGs, 38 runtime records, 19 Kubernetes identities,
-18 fixtures and 36 seed-mode records with zero retries and zero carry. All 80 retained latency
-samples remain below 250 ms. Independent audit is clear under SHA-256
-`b0c72b1ff651257930f0db8df9db3cfc1274bd6882f142336e508e699c41097e`; result review is clear under
-`0cff7c9dd3bd4895cfcb426f340eca146b8c9627a55bac04c01111819b9008be`. The evidence is durably
-sealed and byte-verified, with independent seal review clear under SHA-256
-`87666f73ca51ac78e2d726de48f74444059e1aca636864839ab437249f353ec8`.
-The two tracked screenshots are independently reviewed Compose
-pre-collection presentation captures; they do not prove privacy or timing, and no Kubernetes
-screenshot received visual review. PRs 89 and 90 contribute zero hosted cases. This source-bound
-checkpoint makes no v0.3.41 candidate delivery, merge, publication, tag or deployment claim.
+The initial corrected-source native attempts remain zero-carry history. One exposed a stale
+Diarrhea catalog oracle; another exposed the Polish arena locator. A focused run then showed the
+first Invisible Bombs window had expired before the late placement. The final two-window scenario
+derives a fresh 600-tick deadline from each collection, swaps viewer roles, filters privacy at the
+exact event-tick boundary, and polls for the sighted pre-deadline detonation. These were test-oracle
+and route corrections; game behavior, fuse 300, timeout, retry policy and timing bounds did not
+change. The initial Kubernetes premeasurement capture 54425 rejected a filename assumption;
+observer 14269 was deliberately stopped with consumed exit 143 before any latency test. Fresh
+observer 43361 and the complete matrix passed without a test retry.
+
+Root reviewed the fresh Compose [English desktop](../screenshots/invisible-bombs-desktop.png) and
+[Polish 320px reduced-motion](../screenshots/invisible-bombs-mobile-pl.png) pre-collection captures.
+They show the exposed pickup and readable localized presentation; privacy, reconnect and exact
+expiry are proved by paired runtime assertions. Kubernetes stills were retained without visual
+review. Independent audit decoded all 48 raw reports, checked 114 PNG hashes and structures,
+rehashed 285 provenance records (282 unique), and checked 80 raw latency samples. It returned
+CLEAR. The result review is also CLEAR. The final manifest
+seals 2,492 payloads under SHA256
+`819545a47add9a28bb4394fe8b4baa5b66f503090b1a575c4dbf39d2beb5ce15`; 2,493 durable files,
+274 directories and the separate source archive are byte-verified and read-only. Independent seal
+review is CLEAR. Hosted candidate, merge, tag and promotion checks have not run. See the
+[release notes](https://github.com/liveweird/grenadiers/releases) for current release status.

@@ -72,7 +72,7 @@ and [active effect in Polish at 320px](../screenshots/short-fuse-polish-320.png)
 Accepted Short Flame examples: [exposed pickup on desktop](../screenshots/short-flame-desktop.png)
 and [active curse in Polish at 320px](../screenshots/short-flame-polish-320.png).
 
-All active-v9 Playwright configurations disable raw framework traces because personal admission
+All active-v10 Playwright configurations disable raw framework traces because personal admission
 frames contain capabilities. Failure screenshots, public reports, and redacted summaries remain.
 Run reconnect acceptance separately with
 `E2E_MATCH_FIXTURE=arena-v1-matches npm --prefix e2e run test:reconnect`.
@@ -92,7 +92,7 @@ voices. Returning from a hidden tab requires **Resume sound**; old events are di
 
 ## Exposed items and player upgrades
 
-Gameplay-v9 snapshots supply visible pickup cells and kinds under Expanded-v5 rules. Pixi draws distinct bomb,
+Gameplay-v10 snapshots supply visible pickup cells and kinds under Expanded-v5 rules. Pixi draws distinct bomb,
 cross/range, speed, Heart and Shield marks above blocks and below bombs/flames/actors; it never guesses
 concealed contents. Retained drawings are reused while unchanged and destroyed when removed,
 replaced, or reset. The UI performs no collection simulation.

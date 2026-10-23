@@ -1,5 +1,12 @@
 # Gameplay and presentation backlog
 
+Invisible Bombs is published as prerelease v0.3.41, and its sealed accepted image is promoted
+locally after distinct passing post-merge and tag workflows. Sixteen of the 22 requested item
+types are now published. The v0.3.42 Teleporter candidate is the seventeenth native-accepted item:
+source `880fff7c67269f2886746b45239cd888576832f4` and image
+`sha256:8ae9818d27c4345bceec6dad77f02e21ee7148626efded48c421d86421285477` pass 54 cases per target at `2026-10-23 04:37 UTC`.
+Hosted delivery remains pending.
+
 At the 21 October 2026 16:47 UTC native acceptance checkpoint, Invisibility Cloak was an
 **unreleased source candidate**. Corrected source `1c6724f` and
 image `960976c9` pass a fresh 51 Compose plus 51 Kubernetes matrix: all 44 groups/reports,
@@ -78,31 +85,32 @@ tree `07ac34a8`, and image `ec8604af` passed all 32,768 masks in debug, release 
 fresh 52 Compose and 52 Kubernetes cases, all 46 groups, with zero retries or carried passes. The
 failed `bd9d064` attempt remains historical: 51 Compose cases passed, the Stopwatch oracle failed
 once, and Kubernetes did not start. The corrected oracle uses the independently visible deadline,
-`deadline - placedAt - 1`; product behavior did not change. Independent raw audit is clear and 2,434 payloads are durably sealed; hosted CI, PR/merge, publication, tag verification and promotion remained pending at this dated
-checkpoint. Published v0.3.39/PR #85, tag run 39661497383 and local image `9a4dc108` remain the
-release baseline. Fourteen of 22 types were published; Stopwatch is the fifteenth source/native-
-verified type and seven requested types remain after it. See
+`deadline - placedAt - 1`; product behavior did not change. Independent raw audit and durable seal
+are clear. v0.3.40 is now published and its accepted image is the local release baseline. Fifteen of
+22 requested item types are published through v0.3.40. See
 [release notes](https://github.com/liveweird/grenadiers/releases) for current release status.
 
-For v0.3.41, source `eb0b756df43fdd896cf87573a5224e4eb5f659a3`, tree
-`098f2a3beb766b4fefd2316b7c7ceaf37275a826`, retains opt-in
-[Invisible Bombs](invisible-bombs.md) as the sixteenth item and hardens the Chromium launcher used
-by its visibility proof. The confirmed parser and failure-reporting defects are fixed and tested;
-the actual cause of the earlier Chromium startup failure remains unknown. Authenticated original-
-035 Rust/web computations cover all 65,536 masks per profile, 658 core plus 207 server tests and
-516 web tests under input-equivalence review `1ea0a03b…`. Fresh H repository/E2E checks, 54 scenario
-contracts, startup and live-pixel units, server-mask contract 10/10, mirror unit 5/5, current
-security checks and one headed diagnostic pass; the diagnostic accepts and carries zero cases.
-Fresh source-bound acceptance passes 53 Compose plus 53 Kubernetes cases, 48 reports, 114 PNGs,
-38 runtime records, 19 Kubernetes identities, 18 fixtures and 36 seed-mode records with zero
-retries or carried passes. Independent audit is clear under SHA-256
-`b0c72b1ff651257930f0db8df9db3cfc1274bd6882f142336e508e699c41097e`; result review is clear under
-`0cff7c9dd3bd4895cfcb426f340eca146b8c9627a55bac04c01111819b9008be`, and evidence is durably
-sealed and independently reviewed under seal-review SHA-256
-`87666f73ca51ac78e2d726de48f74444059e1aca636864839ab437249f353ec8`.
-PRs 89 and 90 are disqualified with zero hosted carry. Six requested types remain: Teleporter, Wall Pass, Kick,
-Punch, Bracelet and Oil Barrel. ART-ATLAS follows the completed feature batch.
+At the 22 October 2026 00:55:23 UTC sealed checkpoint, v0.3.41 corrected source `cb10ec7`, tree
+`9d38e0cb`, and image `d08b93af` add opt-in [Invisible Bombs](invisible-bombs.md) as the sixteenth
+item and pass all 65,536 masks plus fresh 53 Compose and 53 Kubernetes cases, all 48 groups, with
+zero retries or carried passes. The final browser scenario uses two independently collected
+600-tick privacy windows and a polled sighted detonation witness; these oracle corrections changed
+no game behavior. Independent audit is clear and 2,492 payloads are durably sealed. Hosted candidate, merge, tag
+and promotion checks have not run. Six requested types remain: Teleporter,
+Wall Pass, Kick, Punch, Bracelet and Oil Barrel. ART-ATLAS follows the completed feature batch.
 
+TURN, CONFIG and the first ART slice are implemented. The v0.3.42 candidate contains seventeen
+optional pickups: Heart, Shield, Golden Flame, Short Fuse, Short Flame, Long Fuse, Reverse
+Controls, Diarrhea, Slow-foot, Piercing Bomb, Power Bomb, Remote Bomb, Landmine and Invisibility
+Cloak, Stopwatch, Invisible Bombs and Teleporter. The sealed v0.3.41 parent is integrated. This
+candidate's source checks cover 689 core, 208 release server and 657 web tests plus all 131,072
+settings masks across three profiles. Final hosted CI remains pending. The remaining requested pickups stay outside this increment. Current publication status
+is recorded in [release notes](https://github.com/liveweird/grenadiers/releases), with source-bound
+acceptance records in [verification](../verification.md). Richer transitions and artwork remain
+follow-up work; see [pixel-art presentation](pixel-art.md) and
+[expanded item implementation](expanded-items.md).
+Updated 2026-10-22 after final v0.3.41 parent integration. Release acceptance is recorded in
+[verification](../verification.md).
 The [implementation plan](implementation-plan.md) remains the milestone/release reference;
 the [rules](rules.md) describe the current baseline and historical extension catalog.
 This document records the requested Grenadiers behavior and decisions required before coding.
@@ -274,7 +282,7 @@ instant action. Keep both in this requested pickup family without forcing them i
 | CURSE-REVERSE / reverse controls | Up moves down, left moves right, and vice versa. | Apply to logical movement after personal remapping; define held-key transition/expiry without stuck movement or stale replay. |
 | CURSE-BLIND / invisible bombs | The afflicted player cannot see any bombs, including their own. | Recipient-specific bomb/event/effect projection and reconnect; explicitly define retained collision clues, fuse sounds and blast warnings. |
 | CURSE-OIL / oil barrel | Before detonation it blocks passage like a soft wall; after detonation it burns indefinitely. | Define how acquisition creates/places the barrel, detonation/chain triggers, blast footprint and destruction; bound creation and specify cleanup at round end without expiry during play. |
-| CURSE-SWAP / teleporter | Immediately swap with a random enemy player. | Deterministic recorded randomness; eligible living targets, safe/occupied/soft-block destinations, hazard contact, overlap grace and no-target behavior. Two-player mode has only one eligible rival. |
+| CURSE-SWAP / teleporter | **Native-accepted candidate in v0.3.42.** Immediately attempt the sole two-player rival swap. | Atomic complete-footprint safety, unsafe consumption, actor-specific overlap grace, persistent position epoch, reconnect and privacy are covered without RNG. Source `880fff7` passes 54 Compose plus 54 Kubernetes cases; hosted delivery remains pending. |
 
 ## Special weapons: one single-use slot
 
@@ -298,3 +306,7 @@ effects, expiry/death boundaries, moving/airborne/frozen bombs, capacity and cha
 Retain bounded scheduling, performance budgets, EN/PL documentation and full release gates,
 including same-image Compose/Kubernetes acceptance. Bots, mobs and larger matches remain
 separate tracks; their future interactions must be specified without making them prerequisites.
+
+Complete the entire expanded-item activation batch before starting ART-ATLAS. Wall Pass is the
+next bounded item increment (v0.3.43); melee equipment and Oil remain after it. ART-ATLAS begins
+only after those item increments and their release gates are complete.

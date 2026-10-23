@@ -9,7 +9,7 @@ const changed = {
   enabledItems: [],
 }
 
-describe('v9 authoritative gameplay settings', () => {
+describe('v10 authoritative gameplay settings', () => {
   beforeEach(() => vi.stubGlobal('WebSocket', { OPEN: SocketStub.OPEN }))
 
   it('sends an atomic revision-fenced update and fences readiness until acceptance', async () => {
@@ -114,7 +114,7 @@ describe('v9 authoritative gameplay settings', () => {
       ...baseline.room.settings,
       enabledItems: [
         'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch', 'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame',
-        'longFuse', 'reverseControls', 'invisibleBombs',
+        'longFuse', 'reverseControls', 'invisibleBombs', 'teleporter',
       ],
     })).toBe(true)
     expect(socket.sent).toHaveLength(sent + 1)
@@ -132,7 +132,7 @@ describe('v9 authoritative gameplay settings', () => {
     })).toBe(false)
     expect(value.client.updateSettings({
       ...baseline.room.settings, enabledItems: ['teleporter'],
-    })).toBe(false)
-    expect(socket.sent).toHaveLength(sent + 3)
+    })).toBe(true)
+    expect(socket.sent).toHaveLength(sent + 4)
   })
 })

@@ -49,7 +49,7 @@ async fn connect(url: &str, token: &str) -> ClientSocket {
     send(
         &mut socket,
         json!({
-            "type":"authenticate", "protocolVersion":9, "token":token
+            "type":"authenticate", "protocolVersion":10, "token":token
         }),
     )
     .await;
@@ -124,7 +124,8 @@ async fn two_members_receive_personalized_admission_and_live_waiting_updates() {
             "shortFlame",
             "longFuse",
             "reverseControls",
-            "invisibleBombs"
+            "invisibleBombs",
+            "teleporter"
         ])
     );
     let code = created["room"]["roomCode"].clone();

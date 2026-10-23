@@ -2,12 +2,11 @@
 
 Status: gameplay contracts, checked domain conversion, HTTP session issuance, and authenticated
 gameplay WebSockets with authoritative configurable two-seat matches are implemented.
-`api/gameplay-v9.schema.json`, Rust `core::protocol::v9`, and generated
-`web/src/game/v9/schema.ts` define active socket messages. V2 through v8 remain historical.
-V9 keeps Expanded v5/generator v2 identity and carries the authoritative
-`voluntaryActionsFrozen` visible-actor field used by Stopwatch. Version 0.3.39 introduced that
-field with false-only foundation semantics; version 0.3.40 activates it. See
-[compatibility](protocol-v9.md).
+`api/gameplay-v10.schema.json`, Rust `core::protocol::v10`, and generated
+`web/src/game/v10/schema.ts` define active socket messages. V2 through v9 remain historical.
+V10 keeps Expanded v5/generator v2 identity and adds the nullable authoritative
+`lastTeleportTick` visible-actor position epoch used by Teleporter. See
+[compatibility](protocol-v10.md).
 The browser validates these messages and drives the playable generated-map match. Diagnostic `/api/v1/ws` and
 `api/realtime.schema.json` remain unchanged.
 
@@ -29,13 +28,13 @@ Connect to `/api/v1/game/ws` with one configured non-null Origin and no query pa
 Its first application frame must be:
 
 ```json
-{"type":"authenticate","protocolVersion":9,"token":"0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"}
+{"type":"authenticate","protocolVersion":10,"token":"0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"}
 ```
 
 The token is a secret 64-character lowercase hexadecimal credential, held only in tab memory.
 It never belongs in a URL or log. A syntactically valid unsupported version is parsed so the
 server can return `incompatibleProtocol` before credential binding. Supported gameplay version
-is 9, independently of the product release and diagnostic protocol. Parser failures expose
+is 10, independently of the product release and diagnostic protocol. Parser failures expose
 only a generic error; token Debug formatting is redacted.
 
 A successful claim atomically binds one connection. Duplicate claims receive `connectionInUse`
@@ -84,8 +83,8 @@ All listed fields are required; objects reject extra fields. Counter values are 
 
 | Server type | Additional fields |
 | --- | --- |
-| `authenticated` | `protocolVersion: 9` |
-| `incompatibleProtocol` | `supportedVersion` (0–65,535; this server emits 9) |
+| `authenticated` | `protocolVersion: 10` |
+| `incompatibleProtocol` | `supportedVersion` (0–65,535; this server emits 10) |
 | `admitted` | acknowledged `sequence`, shared `room`, `youSeat`, private `resumeToken`, nullable `lastActionId`, nullable `state` |
 | `roomState` | shared `room` only |
 | `seatReplaced` | `roomId`; old binding closes with code 4001 |
@@ -107,7 +106,8 @@ row-major floor/wall terrain entries, and up to 195 unique soft-block cells.
 
 Visible actors expose ID, seat, position, heading, speed (0–4), alive status, capacity/range
 (1–8), authoritative owned-bomb count, inventory, effects, remaining damage grace and the required
-`voluntaryActionsFrozen` boolean, derived from the living opponent's active Stopwatch. Hidden
+`voluntaryActionsFrozen` boolean, derived from the living opponent's active Stopwatch, plus nullable
+`lastTeleportTick` shared by both visible actors after an authoritative swap. Hidden
 actors contain only ID, seat and alive status; owners always receive their own visible actor.
 Bombs carry ID, cell, owner, range, placement tick, blast mode and a typed trigger. Timed
 triggers report remaining ticks at `physicalTick` and pause state; no untimed deadline is invented.
@@ -136,7 +136,7 @@ completed 60 Hz updates per normal snapshot.
 
 ## Checked domain conversion
 
-Use `core::protocol::v9::capture_expanded` to observe the complete State and reports, then
+Use `core::protocol::v10::capture_expanded` to observe the complete State and reports, then
 `bind_expanded` to certify the room profile, settings, lifecycle epoch, physical tick and
 trusted round generation record.
 Opaque captures cannot be serialized directly. Raw server DTO fields alone do not establish
@@ -181,8 +181,8 @@ spawn/tie assignment uses actual round count rather than command epoch.
 
 Shared room views and snapshot metadata also carry the complete checked `settings`,
 `settingsRevision`, nullable original `settingsEditor`, and `availableItems`. Settings also
-carry `enabledItems`; v8 remains pinned to its fourteen-item Cloak catalog while active v9 has the
-sixteen-item Invisible-Bombs catalog. Heart is enabled by default and every supported subset is allowed.
+carry `enabledItems`; v9 remains pinned to its sixteen-item Invisible-Bombs catalog while active v10
+has the seventeen-item Teleporter catalog. Heart is enabled by default and every supported subset is allowed.
 Only actual changes increment
 the settings revision and clear readiness; Ready commands acknowledge that exact revision.
 See [v6 settings and authority](protocol-v6.md) for bounds, no-op acknowledgements and edit locks.
@@ -217,9 +217,9 @@ rules and generated-v2 arenas. Snapshots initially have an
 empty pickup array because contents are concealed; only exposed items become public.
 Fixed-classic-v1 remains an explicit unit fixture, not a production selector.
 
-Gameplay v9 is incompatible with earlier versions. Reload clients when upgrading the single server. Both
+Gameplay v10 is incompatible with earlier versions. Reload clients when upgrading the single server. Both
 old and future versions are rejected before credential lookup, so rejection cannot claim or
-revoke a token. `supportedVersion` accepts the bounded input range rather than only v9,
+revoke a token. `supportedVersion` accepts the bounded input range rather than only v10,
 allowing a new client to understand an older server's incompatibility response.
 See [ADR 0013](../decisions/0013-gameplay-v2-and-room-profiles.md).
 

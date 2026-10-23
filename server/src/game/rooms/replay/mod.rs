@@ -62,3 +62,6 @@ mod power_bomb_tests;
 
 #[cfg(test)]
 mod remote_bomb_tests;
+
+#[cfg(test)]
+mod teleporter_tests;

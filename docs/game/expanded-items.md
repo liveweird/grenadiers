@@ -93,6 +93,10 @@ while preserving the reviewed final v0.3.42 source parent and gameplay v10. Sour
 settings masks in debug, release and coverage plus 55+55 same-image native cases with zero retries
 or carry. Independent audit, binding review, durable sealing and post-seal review are clear;
 hosted CI remains pending.
+Latest candidate `5dbcd58` adds only the Happy DOM 21.0.4 development-security correction. Its
+fresh web and configured security gates pass, and reviewed retained-artifact comparison preserves
+the accepted host distribution. Native acceptance remains attributed to source `11d0dc7`; the
+corrected candidate still requires exact-head CI and delivery.
 This optional track follows the [backlog](backlog.md), shared settings and
 pixel-art increments. The historical catalog in [rules](rules.md) is not an implementation
 claim. Each activation requires its own reviewed behavior, UI, documentation and acceptance.

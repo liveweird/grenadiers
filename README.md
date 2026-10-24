@@ -26,6 +26,12 @@ This release candidate also pins Zod 4.6.6 in both npm lockfiles, parallelizes o
 English result inspections while preserving all 43 assertions, three captures, fixtures and
 budgets, and includes CI-only diagnostics for complete procfs reads plus coverage-output parent
 creation. Those diagnostics do not establish or claim a specific Chrome I/O cause.
+Latest corrected candidate `5dbcd58e920f852a8036c4bf741e26517793b072` additionally pins the
+development-only Happy DOM dependency to 21.0.4 for GHSA-834v-8h66-3h79. Its fresh web gate passes
+797 tests in 64 files with unchanged 95.24/90.88/96/97.66% coverage, and the full configured
+security gate reports three moderate development advisories (`@vitest/mocker`, `vitest` and
+`fast-uri`) with zero high or critical findings. The earlier PR #104 head failed its security job;
+exact-head hosted CI for this correction, merge, publication and promotion remain pending.
 
 The **two-player arena match is playable**. Create a room, share its invitation,
 join from another browser, and both choose Ready. Select the courtyard to move with arrows

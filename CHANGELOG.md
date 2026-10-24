@@ -18,6 +18,12 @@
   independent English match-result inspections, preserving all 43 assertions, three screenshots,
   fixtures, cases and budgets. CI-only fixes complete bounded procfs metadata reads and create the
   coverage export parent when `CARGO_TARGET_DIR` is external; they do not claim a Chrome I/O cause.
+- Correct GHSA-834v-8h66-3h79 in candidate `5dbcd58e920f852a8036c4bf741e26517793b072`
+  by updating the development-only Happy DOM dependency from 20.14.5 to 21.0.4. The fresh web gate
+  passes 797 tests across 64 files with unchanged coverage, and the complete configured security
+  gate passes with three moderate development advisories and zero high or critical findings. The
+  first PR #104 head (`98dffe5`) failed security in push run `40050321682` and PR run
+  `40050338206`; the corrected head has not yet been pushed for hosted CI.
 - At the `2026-10-24 01:00 UTC` native checkpoint, exact image
   `sha256:577abb32958e45912f35a7f6ae68dd624deb6515d2b4d55519942c44436a2a01`
   passes all 55 Compose plus 55 Kubernetes cases with zero retries or carried passes: 52 reports,

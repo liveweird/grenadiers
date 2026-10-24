@@ -60,3 +60,6 @@ master and tag checks, publication and exact-image promotion remain pending; con
 [checks](https://github.com/liveweird/grenadiers/actions) and
 [releases](https://github.com/liveweird/grenadiers/releases). Kick, Punch, Bracelet and Oil Barrel
 remain before ART-ATLAS.
+The later `5dbcd58` release candidate updates only the two web dependency manifests to Happy DOM
+21.0.4. Its reviewed host distribution remains byte-equal to this accepted image, but that does
+not relabel these 110 native cases; exact-head hosted and delivery checks remain required.

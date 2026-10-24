@@ -36,6 +36,29 @@ coverage-parent fixes in commit `dee44b5ca81d2556d775a54e47948da77b9dbaa3`. Its 
 Docker build inputs remain byte-identical to the sealed native source. Those fixes improve
 diagnostics and gate setup without claiming that a particular Chrome I/O cause was fixed.
 
+Latest corrected candidate `5dbcd58e920f852a8036c4bf741e26517793b072` pins Happy DOM 21.0.4 to
+resolve GHSA-834v-8h66-3h79. Fresh local verification passes the full 797-test, 64-file web gate
+with unchanged 95.24/90.88/96/97.66% coverage and the complete configured security gate: cargo
+deny plus both npm audits exit zero, with three moderate development advisories
+(`@vitest/mocker`, `vitest` and `fast-uri`) and zero high or critical findings. Receipt
+`0a8c605c65bdceff9d04d74752aaafc3ee5e9ee2378e60805a7fecb8cc216ce0` binds the web check, and
+`e0c7363348d4f4092bc0afd3037068e183b78bc99c0969a6a2ef7b6451fdceb6` binds the full security
+result. The two web manifests are the only changed Docker inputs: 554 of 556 entries remain equal.
+The complete host distribution still matches the accepted image byte-for-byte across 17 entries
+(15 files and two directories), using retained server binary
+`26bccf1696b75b33b741b43305429df92cd09870d02d1080b725e05665e3966d`; a fresh scan of that exact
+image passes current policy. Equivalence receipt
+`81bd78943fa8e80bc839b06bcd68c7bb26872f4cf600c2fcc80e2269c7c94209` and independent review
+`42bbbcb68e8a306d9ed611513e186189ab3430f17bf545191edace5bdb6e3b75` are clear. This is retained
+artifact equality, not unchanged build inputs, a new Rust compilation, or Docker-build
+reproducibility; the 110 native cases remain attributed to source `11d0dc7` and accepted image
+`577abb3`.
+
+The first PR #104 head `98dffe5` failed security in push run `40050321682` and PR run
+`40050338206`; other jobs were still finishing at that checkpoint. Corrected head `5dbcd58` has
+not yet been pushed. Its exact-head candidate CI, replacement merge/master and tag checks,
+publication and localhost promotion remain required. The default deployment remains v0.3.42.
+
 This is a native checkpoint, not a release. Candidate, master and tag workflows, publication and
 exact-image promotion for v0.3.43 remain pending. Consult current
 [checks](https://github.com/liveweird/grenadiers/actions) and

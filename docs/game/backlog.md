@@ -13,6 +13,11 @@ remain pending. Current status lives in [checks](https://github.com/liveweird/gr
 [releases](https://github.com/liveweird/grenadiers/releases), and the
 [verification record](../verification.md). Kick, Punch, Bracelet and Oil Barrel remain before
 ART-ATLAS.
+Latest corrected candidate `5dbcd58` pins development-only Happy DOM 21.0.4 after the earlier
+PR #104 head failed security. Its fresh 797-test web gate and full configured security gate pass
+with three moderate development advisories and no high or critical findings. Reviewed retained
+artifact equality preserves the accepted image output, but the 110 native passes remain bound to
+H2; corrected exact-head CI, publication and promotion are still pending.
 
 At the 21 October 2026 16:47 UTC native acceptance checkpoint, Invisibility Cloak was an
 **unreleased source candidate**. Corrected source `1c6724f` and

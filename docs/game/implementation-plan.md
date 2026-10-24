@@ -22,6 +22,11 @@ Independent audit, binding review, durable sealing and post-seal review are clea
 master and tag CI, publication and
 promotion remain pending; current status is in [GitHub Actions](https://github.com/liveweird/grenadiers/actions)
 and [GitHub Releases](https://github.com/liveweird/grenadiers/releases).
+Latest corrected candidate `5dbcd58` resolves the Happy DOM high advisory by pinning 21.0.4.
+Fresh web and complete configured security gates pass with three moderate development findings
+and no high or critical findings. Only two web manifest inputs differ from H2; reviewed retained
+artifact equality preserves the accepted host distribution, while the 110 native cases remain
+attributed to H2. Exact-head hosted CI and all delivery steps remain pending.
 The v0.3.16 increment adds classic-v3 forgiving turns and explicit gameplay-v5 compatibility,
 locally verified through both deployment paths on 2026-10-17.
 The v0.3.17 increment adds four shared gameplay settings with configurable-v4 rules and

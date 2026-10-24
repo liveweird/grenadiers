@@ -55,6 +55,35 @@ created when `CARGO_TARGET_DIR` is external. Production and Docker build inputs 
 byte-identical to the sealed native source. These changes improve attribution and setup, but do
 not establish a Chrome I/O root cause or claim that one was fixed.
 
+### Latest Happy DOM security correction — candidate CI pending
+
+Candidate `5dbcd58e920f852a8036c4bf741e26517793b072` updates only `web/package.json` and
+`web/package-lock.json`, moving the development-only Happy DOM dependency from 20.14.5 to patched
+21.0.4 for GHSA-834v-8h66-3h79. The fresh full web gate passes 797 tests in 64 files with
+95.24/90.88/96/97.66% statement/branch/function/line coverage. The complete configured security
+gate exits zero for cargo deny and both npm audits. Its current web audit contains three moderate
+development findings (`@vitest/mocker` 5.0.1, `vitest` 5.0.1 and `fast-uri` 3.1.8), zero high and
+zero critical findings; the E2E audit remains clear. Web-check receipt
+`0a8c605c65bdceff9d04d74752aaafc3ee5e9ee2378e60805a7fecb8cc216ce0` and full-security result
+`e0c7363348d4f4092bc0afd3037068e183b78bc99c0969a6a2ef7b6451fdceb6` bind those outcomes.
+
+The reviewed retained-artifact comparison finds 554 of 556 Docker inputs unchanged; only the two
+web manifests differ. The corrected host `dist` and accepted image contain the same 17 entries,
+15 files and two directories with identical paths, types, modes and bytes. It retains server
+binary `26bccf1696b75b33b741b43305429df92cd09870d02d1080b725e05665e3966d`, and a fresh scan of exact
+image `sha256:577abb32958e45912f35a7f6ae68dd624deb6515d2b4d55519942c44436a2a01`
+passes current policy. Receipt `81bd78943fa8e80bc839b06bcd68c7bb26872f4cf600c2fcc80e2269c7c94209`
+and independent seven-key review
+`42bbbcb68e8a306d9ed611513e186189ab3430f17bf545191edace5bdb6e3b75` are clear. This proves host
+distribution equality only: it does not claim unchanged Docker build inputs, a new Rust
+compilation, or Docker-build reproducibility, and the 110 native passes remain bound to H2 source
+`11d0dc7`.
+
+The earlier PR #104 head `98dffe5` failed its security job in push run `40050321682` and PR run
+`40050338206`; the other jobs were still finishing at this checkpoint. Corrected head `5dbcd58`
+has not been pushed. Exact-head candidate CI, replacement merge/master and tag checks,
+publication and localhost promotion remain pending; the default deployment remains v0.3.42.
+
 The reviewed Compose pre-collection captures are [English desktop](screenshots/wall-pass-desktop.png)
 and [Polish 320px reduced motion](screenshots/wall-pass-mobile-pl.png), with SHA-256 values
 `d46367b7eeee7c55e94dbcfba6de7de50b27b96c6761ad6a9ff69db2b9332c08` and

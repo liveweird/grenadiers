@@ -16,11 +16,23 @@ const oilAt = (game: ObservedGame, column: number, row: number) =>
     oil.cell.column === column && oil.cell.row === row)
 const hasBlock = (game: ObservedGame, column: number, row: number) =>
   latestSnapshot(game)!.state.arena.blocks.some((cell) => cell.column === column && cell.row === row)
+const oilArt = {
+  deepInk: '23,35,49,255', ink: '38,52,69,255', steel: '100,115,132,255',
+  brass: '239,189,86,255', flame: '240,106,50,255', flameLight: '255,214,90,255',
+  flameCore: '255,240,161,255',
+} as const
 
 function expectUnlitOilArt(pixels: string[]): void {
   const colors = new Set(pixels)
   expect([...colors]).toEqual(expect.arrayContaining([
-    '23,35,49,255', '38,52,69,255', '100,115,132,255', '239,189,86,255',
+    oilArt.deepInk, oilArt.ink, oilArt.steel, oilArt.brass,
+  ]))
+}
+
+function expectBurningOilArt(pixels: string[]): void {
+  const colors = new Set(pixels)
+  expect([...colors]).toEqual(expect.arrayContaining([
+    oilArt.deepInk, oilArt.flame, oilArt.flameLight, oilArt.flameCore,
   ]))
 }
 
@@ -105,9 +117,8 @@ test('Oil Barrel reveals, blocks, burns persistently, and resumes without synthe
       const unlitPixels = await Promise.all([one, two].map((page) => arenaTilePixels(page, 3, 1)))
       unlitPixels.forEach((pixels, index) => {
         expect(pixels).not.toEqual(concealedPixels[index])
-        expect(new Set(pixels).size).toBeGreaterThan(10)
+        expectUnlitOilArt(pixels)
       })
-      expectUnlitOilArt(unlitPixels[0]!)
 
       await moveSeatTo(one, games[0], 'one', { column: 1, row: 1 })
       await moveSeatTo(one, games[0], 'one', { column: 2, row: 1 })
@@ -135,8 +146,11 @@ test('Oil Barrel reveals, blocks, burns persistently, and resumes without synthe
         snapshot.room.revision > cueFloor
           && snapshot.state.oilBarrels.some(({ cell, state }) =>
             cell.column === 3 && cell.row === 1 && state === 'burning'))!.state.physicalTick)
-      const burningPixels = await arenaTilePixels(one, 3, 1)
-      expect(burningPixels).not.toEqual(unlitPixels[0])
+      const burningPixels = await Promise.all([one, two].map((page) => arenaTilePixels(page, 3, 1)))
+      burningPixels.forEach((pixels, index) => {
+        expect(pixels).not.toEqual(unlitPixels[index])
+        expectBurningOilArt(pixels)
+      })
       expect(hasBlock(games[0], 4, 1)).toBe(true)
       expect(hasBlock(games[0], 3, 2)).toBe(true)
       expect(latestSnapshot(games[0])!.state.oilBarrels).toHaveLength(1)
@@ -146,9 +160,12 @@ test('Oil Barrel reveals, blocks, burns persistently, and resumes without synthe
         return state.physicalTick >= ignitionTicks[index]! + 60 && state.flames.length === 0
           ? oilAt(game, 3, 1)?.state : undefined
       }).toBe('burning')))
-      const persistentPixels = await arenaTilePixels(one, 3, 1)
-      expect(persistentPixels).not.toEqual(unlitPixels[0])
-      expect(new Set(persistentPixels).size).toBeGreaterThan(10)
+      const persistentPixels = await Promise.all([one, two]
+        .map((page) => arenaTilePixels(page, 3, 1)))
+      persistentPixels.forEach((pixels, index) => {
+        expect(pixels).not.toEqual(unlitPixels[index])
+        expectBurningOilArt(pixels)
+      })
       await moveSeatTo(one, games[0], 'one', { column: 1, row: 1 })
       await moveSeatTo(one, games[0], 'one', { column: 2, row: 1 })
       for (const game of games) {
@@ -176,7 +193,7 @@ test('Oil Barrel reveals, blocks, burns persistently, and resumes without synthe
       await expect(resumedArena).toHaveAttribute('tabindex', '0')
       const resumedPixels = await arenaTilePixels(one, 3, 1)
       expect(resumedPixels).not.toEqual(unlitPixels[0])
-      expect(new Set(resumedPixels).size).toBeGreaterThan(10)
+      expectBurningOilArt(resumedPixels)
       await delay(250)
       expect(audioNodes).toHaveLength(quietBaseline)
       await Promise.all([

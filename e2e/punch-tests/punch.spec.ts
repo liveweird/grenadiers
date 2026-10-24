@@ -2,10 +2,15 @@ import { expect, test, type Page } from '@playwright/test'
 import { arenaTilePixels } from '../tests/support/compositor'
 import { latestSnapshot, observeGame, visibleActor, type ObservedGame } from '../tests/support/duel'
 import { moveSeatTo } from '../tests/support/movement'
+import { admissionBaseline, disconnectTransport, installTransportProbe } from '../tests/support/reconnect'
 import type { GameServerMessage } from '../../web/src/game/v10/schema'
 
 test.beforeAll(() => expect(process.env.E2E_PUNCH_FIXTURE).toBe('arena-v2-punch'))
 type Snapshot = Extract<GameServerMessage, { type: 'snapshot' }>
+type Admission = Extract<GameServerMessage, { type: 'admitted' }>
+type StatefulAdmission = Admission & { state: NonNullable<Admission['state']> }
+type Bomb = Snapshot['state']['bombs'][number]
+type Command = ObservedGame['commands'][number]
 const snapshots = (game: ObservedGame): Snapshot[] => game.frames.filter(
   (frame): frame is Snapshot => frame.type === 'snapshot')
 const actor = (game: ObservedGame) => visibleActor(latestSnapshot(game), 'one')!
@@ -76,6 +81,89 @@ async function clearPunchRoute(page: Page, game: ObservedGame): Promise<void> {
   await moveSeatTo(page, game, 'one', { column: 4, row: 1 })
 }
 
+async function resumePunchedBombAndSendEquipment(
+  page: Page, games: ObservedGame[], demo: Bomb, punch: Command,
+): Promise<{ actionId: number, commandFloor: number }> {
+  const game = games[0]
+  const beforeReconnect = latestSnapshot(game)!
+  const expectedBomb = beforeReconnect.state.bombs.find(({ id }) => id === demo.id)!
+  if (expectedBomb.trigger.type !== 'timed') throw new Error('Punch resume bomb is not Timed')
+  const fuseDeadline = demo.placedAt + 300
+  expect(beforeReconnect.state.physicalTick + expectedBomb.trigger.remainingTicks).toBe(fuseDeadline)
+  const expectedActor = visibleActor(beforeReconnect, 'one')!
+  const reconnectFrameFloor = game.frames.length
+  const reconnectCommandFloor = game.commands.length
+  const reconnectSocketFloor = game.sockets
+  const baseline = (await admissionBaseline(page))!
+  await disconnectTransport(page)
+  await expect.poll(() => game.sockets).toBeGreaterThan(reconnectSocketFloor)
+  await expect.poll(async () => (await admissionBaseline(page))?.index).toBeGreaterThan(baseline.index)
+  await expect.poll(() => game.frames.slice(reconnectFrameFloor).some((frame) =>
+    frame.type === 'admitted' && frame.room.roomId === beforeReconnect.room.roomId
+    && frame.room.roundId === beforeReconnect.room.roundId && frame.youSeat === 'one'
+    && frame.room.revision > beforeReconnect.room.revision && frame.state !== null)).toBe(true)
+  const resumed = game.frames.slice(reconnectFrameFloor)
+    .findLast((frame): frame is StatefulAdmission => frame.type === 'admitted'
+      && frame.room.roomId === beforeReconnect.room.roomId
+      && frame.room.roundId === beforeReconnect.room.roundId && frame.youSeat === 'one'
+      && frame.room.revision > beforeReconnect.room.revision && frame.state !== null)!
+  expect(resumed.lastActionId).toBe(punch.actionId)
+  const resumedBomb = resumed.state.bombs.find(({ id }) => id === demo.id)!
+  expect(resumedBomb).toMatchObject({
+    id: expectedBomb.id, cell: expectedBomb.cell, owner: expectedBomb.owner,
+    range: expectedBomb.range, placedAt: expectedBomb.placedAt, blast: expectedBomb.blast,
+  })
+  if (resumedBomb.trigger.type !== 'timed') throw new Error('Resumed Punch bomb is not Timed')
+  expect(resumedBomb.trigger.paused).toBe(expectedBomb.trigger.paused)
+  expect(resumedBomb.trigger.remainingTicks).toBeGreaterThan(0)
+  expect(resumedBomb.trigger.remainingTicks).toBeLessThanOrEqual(expectedBomb.trigger.remainingTicks)
+  expect(resumed.state.physicalTick + resumedBomb.trigger.remainingTicks).toBe(fuseDeadline)
+  expect(resumed.state.actors.find((value) => value.type === 'visible' && value.seat === 'one'))
+    .toMatchObject({
+      seat: 'one', alive: expectedActor.alive, position: expectedActor.position,
+      heading: expectedActor.heading, inventory: expectedActor.inventory,
+    })
+  expect(resumed.state.actors.find((value) => value.type === 'visible' && value.seat === 'two'))
+    .toMatchObject({ seat: 'two', alive: true })
+  expect(JSON.stringify(resumed.state)).not.toMatch(punchPrivateFacts)
+  expect('events' in resumed).toBe(false)
+  expect(game.commands.slice(reconnectCommandFloor)
+    .filter((command) => command.type === 'manualAction' && command.action === 'equipment'))
+    .toEqual([])
+  const resumedBaseline = (await admissionBaseline(page))!
+  expect(resumedBaseline).toMatchObject({
+    roomId: resumed.room.roomId, seat: 'one', actionFloor: punch.actionId,
+    hasState: true, stableCapability: true,
+  })
+  expect(resumedBaseline.equipment).toContainEqual({ seat: 'one', equipment: 'punch' })
+  expect(resumedBaseline.bombIds).toContain(demo.id)
+
+  const commandFloor = game.commands.length
+  const postResumeRevision = latestSnapshot(game)!.room.revision
+  await page.getByRole('region', { name: 'Grenadiers courtyard' }).click()
+  await page.keyboard.press('KeyF')
+  const actionId = punch.actionId! + 1
+  await expect.poll(() => game.commands.slice(commandFloor)
+    .filter((command) => command.type === 'manualAction' && command.action === 'equipment'))
+    .toEqual([{ type: 'manualAction', action: 'equipment', actionId }])
+  await expect.poll(() => latestSnapshot(game)!.room.revision).toBeGreaterThan(postResumeRevision)
+  expect(latestSnapshot(game)!.state.bombs.find(({ id }) => id === demo.id)?.cell)
+    .toEqual({ column: 1, row: 1 })
+  return { actionId, commandFloor }
+}
+
+async function confirmResumedEquipmentAccepted(
+  page: Page, game: ObservedGame, proof: { actionId: number, commandFloor: number },
+): Promise<void> {
+  const baseline = (await admissionBaseline(page))!
+  await disconnectTransport(page)
+  await expect.poll(async () => (await admissionBaseline(page))?.index).toBeGreaterThan(baseline.index)
+  expect((await admissionBaseline(page))?.actionFloor).toBe(proof.actionId)
+  expect(game.commands.slice(proof.commandFloor)
+    .filter((command) => command.type === 'manualAction' && command.action === 'equipment'))
+    .toEqual([{ type: 'manualAction', action: 'equipment', actionId: proof.actionId }])
+}
+
 test('Punch wraps one retained bomb three cells without extra cues and preserves its fuse',
   async ({ browser }, info) => {
     const contexts = await Promise.all([
@@ -84,6 +172,7 @@ test('Punch wraps one retained bomb three cells without extra cues and preserves
     ])
     try {
       const [one, two] = await Promise.all(contexts.map((context) => context.newPage()))
+      await Promise.all([one, two].map(installTransportProbe))
       const games = [observeGame(one), observeGame(two)]
       await Promise.all([one.goto('/'), two.goto('/')])
       await one.getByRole('button', { name: 'Keyboard controls', exact: true }).click()
@@ -165,6 +254,8 @@ test('Punch wraps one retained bomb three cells without extra cues and preserves
       await expect.poll(() => games[0].commands.slice(punchCommands)
         .find((command) => command.type === 'manualAction' && command.action === 'equipment'))
         .toMatchObject({ actionId: plant.actionId! + 1 })
+      const punch = games[0].commands.slice(punchCommands)
+        .find((command) => command.type === 'manualAction' && command.action === 'equipment')!
       await Promise.all(games.map((game, index) => expect.poll(() => {
         const snapshot = latestSnapshot(game)!
         if (snapshot.room.revision <= punchFloors[index]!) return undefined
@@ -191,6 +282,8 @@ test('Punch wraps one retained bomb three cells without extra cues and preserves
         expect(moved.state.bombs.some(({ cell }) => cell.column === 4 && cell.row === 1)).toBe(false)
         expect(JSON.stringify(rawPunchFrames)).not.toMatch(punchPrivateFacts)
       }
+
+      const resumedAction = await resumePunchedBombAndSendEquipment(one, games, demo, punch)
 
       await moveSeatTo(one, games[0], 'one', { column: 4, row: 1 })
       await moveSeatTo(one, games[0], 'one', { column: 3, row: 1 })
@@ -232,6 +325,7 @@ test('Punch wraps one retained bomb three cells without extra cues and preserves
           expect(visibleActor(latestSnapshot(game), seat)?.alive).toBe(true)
         }
       }
+      await confirmResumedEquipmentAccepted(one, games[0], resumedAction)
     } finally {
       await Promise.all(contexts.map((context) => context.close()))
     }

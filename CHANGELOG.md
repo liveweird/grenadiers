@@ -8,10 +8,10 @@
   resume and replay; archived protocols reject those facts and no new wire field or event is added.
 - Extend gameplay v10 to the twentieth lobby switch and all 1,048,576 settings masks, with
   English/Polish presentation and deterministic production-seed browser source. The merged
-  v0.3.44 source parent is integrated; native same-image acceptance, final CI and publication
+  published v0.3.44 source parent is integrated; native same-image acceptance, final checks and publication
   remain pending.
 
-## 0.3.44 — 2026-10-24 (native-accepted candidate)
+## 0.3.44 — 2026-10-24
 
 - Add opt-in Kick equipment: walking into a stationary Timed or Remote bomb starts authoritative
   one-cell motion on the next update and every ten updates until blocked; Contact mines never move.
@@ -28,8 +28,10 @@
   passes 56 Compose plus 56 Kubernetes cases with zero retries or carried results: 54 reports, 126
   PNGs, 44 runtime records, 22 Kubernetes identities, 21 fixtures and 42 seed records. Independent
   audit, result/binding review and durable post-seal review are clear under seal
-  `94c60dac44c639f7e9a214061e9daf9475628126d15526346ed7be2ce4c9a947`; hosted CI, publication and
-  promotion follow this dated native checkpoint and are not claimed here.
+  `94c60dac44c639f7e9a214061e9daf9475628126d15526346ed7be2ce4c9a947`.
+- Publish source `f32fd86d8f0c7c4bebba8fa60d1c66c65d1a174a`, tree
+  `a0f2addb9204c40b4b30be2830fde4df368f019c`, through annotated tag object
+  `c5b1ab6d4cad94ba2f16614103903067745c5179`, and promote the accepted image locally.
 
 ## 0.3.43 — 2026-10-24
 

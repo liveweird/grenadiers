@@ -4,7 +4,30 @@ Release labels and scope live in the [implementation plan](game/implementation-p
 A completed milestone is verification evidence; a release exists only after its tested commit
 is tagged and its artifacts are published intentionally.
 
-## v0.3.44 Kick native-acceptance checkpoint — 2026-10-24
+## Release verification policy
+
+For this single-maintainer project, local checks are as authoritative as equivalent remote
+checks. Ship the tested source and reuse its verified artifacts. Remote checks are required only
+when they add coverage not exercised locally; a tag pointing at an already verified commit does
+not require another complete suite.
+
+Record the version, tested commit, applicable checks and outcomes, runtime environment and image
+digest in the release notes. Confirm the tag targets the intended commit and check health,
+readiness and the served artifact after deployment. Repeat affected checks when inputs change;
+do not require separate full push, PR, master and tag runs or elaborate new proof packages for
+each feature. Historical release records retain their original evidence and requirements.
+
+## v0.3.44 published prerelease — 2026-10-24
+
+Source `f32fd86d8f0c7c4bebba8fa60d1c66c65d1a174a`, tree
+`a0f2addb9204c40b4b30be2830fde4df368f019c`, is published as
+[v0.3.44](https://github.com/liveweird/grenadiers/releases/tag/v0.3.44) through annotated tag object
+`c5b1ab6d4cad94ba2f16614103903067745c5179`. It publishes Kick as the nineteenth requested item.
+Localhost serves the accepted image
+`sha256:8ff3005861127f8ac57cc32f7e6c72ce5fa996fe628ad48426dbb8cf133e1af9`.
+Punch v0.3.45 is the current source candidate; its native acceptance and publication remain pending.
+
+## Historical v0.3.44 Kick native-acceptance checkpoint — 2026-10-24
 
 Kick candidate source `cb70cba891ed972380f30f52133622ce36fd9ee8`, tree
 `5be27219ba749d2811396d6f84af7d31f528a692`, passes fresh source-bound Rust, web, E2E and security

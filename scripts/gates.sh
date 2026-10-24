@@ -49,6 +49,11 @@ server() {
   mask_profile release cargo test --workspace --release --locked -- --show-output
   cargo build --workspace --locked
 }
+server_parallel() {
+  require_lock
+  python3 -B scripts/local-server-parallel.py \
+    --workers "${GRENADIERS_LOCAL_SERVER_WORKERS:-4}"
+}
 web() {
   npm --prefix web run lint:api
   npm --prefix web run check:api
@@ -97,11 +102,12 @@ case "${1:-all}" in
   all) repository; server; web; e2e ;;
   repository) repository ;;
   server) repository; server ;;
+  server-parallel) repository; server_parallel ;;
   web) repository; web ;;
   e2e) repository; e2e ;;
   browser) npm --prefix e2e test ;;
   k8s) k8s ;;
   security) security ;;
   coverage) coverage ;;
-  *) echo 'usage: scripts/gates.sh [all|repository|server|web|e2e|browser|k8s|security|coverage]' >&2; exit 2 ;;
+  *) echo 'usage: scripts/gates.sh [all|repository|server|server-parallel|web|e2e|browser|k8s|security|coverage]' >&2; exit 2 ;;
 esac

@@ -1,13 +1,9 @@
 # Expanded item implementation plan
 
-At the 2026-10-24 v0.3.44 native-acceptance checkpoint, 18 of the 22 requested item types are
-published through v0.3.43, including
-[Wall Pass](wall-pass.md). [Kick](kick.md) passes fresh source-bound gates for v0.3.44 at source
-`cb70cba891ed972380f30f52133622ce36fd9ee8`, including every 524,288-item mask. Fresh 56+56 native
-acceptance passes with zero retries or carried results and is independently reviewed and sealed.
-Hosted CI and publication follow. The v0.3.45 source candidate adds opt-in [Punch](punch.md) on
-the merged Kick source parent; Punch native acceptance and final CI remain pending. Bracelet and
-Oil Barrel remain before ART-ATLAS.
+Published [v0.3.44](https://github.com/liveweird/grenadiers/releases/tag/v0.3.44) adds
+[Kick](kick.md) as the nineteenth requested item. The v0.3.45 source candidate adds opt-in
+[Punch](punch.md) on that published parent; Punch native acceptance and release publication remain
+pending. Bracelet and Oil Barrel remain before ART-ATLAS.
 
 ## Historical Heart activation checkpoint
 
@@ -121,9 +117,9 @@ and tag CI and is locally promoted on the accepted image.
 Corrected source `5dbcd58` adds only the Happy DOM 21.0.4 development-security correction. Its
 fresh web and configured security gates pass, and reviewed retained-artifact comparison preserves
 the accepted host distribution. Native acceptance remains attributed to source `11d0dc7`; the
-eight later published-source changes are documentation only. Eighteen of 22 requested items are
-published at this checkpoint. Kick has passed its v0.3.44 source gates and fresh 56+56 native
-acceptance with independent review and sealing; hosted CI and publication follow.
+eight later published-source changes are documentation only. This is the historical v0.3.43
+checkpoint; [v0.3.44](https://github.com/liveweird/grenadiers/releases/tag/v0.3.44) later publishes
+Kick as the nineteenth requested item.
 This optional track follows the [backlog](backlog.md), shared settings and
 pixel-art increments. The historical catalog in [rules](rules.md) is not an implementation
 claim. Each activation requires its own reviewed behavior, UI, documentation and acceptance.
@@ -183,7 +179,7 @@ per seat/tick. Add a remappable equipment action, proposed default **E**, for Pu
 | --- | --- |
 | Punch (**prepared in v0.3.45**) | Move the adjacent facing bomb three interior cells, wrapping playable coordinates. Landing requires floor, no soft block/barrel/other bomb, and no overlap with a living player's footprint. If blocked, try further three-cell landings for at most one axis cycle. Returning to the original cell fails unchanged, with no cooldown; successful punches have a 12-tick cooldown and stop sliding. |
 | Bracelet | New moving contact shoves up to one tile, clamped by obstacles. Require separation to rearm and a 30-tick cooldown. Resolve simultaneous claims using alternating round priority; check swept fire/mines without recursive shoves. |
-| Kick (**prepared in v0.3.44**) | Push stationary Timed or Remote bombs one cell on the next update and every ten updates until blocked; Contact mines are excluded and identity, owner, blast and fuse remain unchanged. |
+| Kick (**published in v0.3.44**) | Push stationary Timed or Remote bombs one cell on the next update and every ten updates until blocked; Contact mines are excluded and identity, owner, blast and fuse remain unchanged. |
 | Wall Pass (**published in v0.3.43**) | Ignore soft blocks, but not hard walls or solid bombs. Placement inside obstacles is illegal. Replacement grants private exit-only grace for positively overlapped soft cells; grace ends individually when the full footprint exits or reaches tangency. |
 | Remote bomb | The next manual bomb action detonates the armed bomb instead of planting. Chains/fire still trigger it; death/disconnect adds no invented fuse. Another unused weapon may occupy the slot while it is armed. |
 | Piercing bomb | Rays spend range through soft blocks/barrels; hard walls stop them. Solid bombs chain and stop the ray. |

@@ -3,35 +3,13 @@
 A browser-based multiplayer game inspired by classic Bomberman/Dynablaster.
 The initial playable profile supports two human players. Bots and larger matches follow later.
 
-Wall Pass is published as the eighteenth requested item in prerelease
-[v0.3.43](https://github.com/liveweird/grenadiers/releases/tag/v0.3.43). Published source
-`c086f719ea470b9fe24963adef84b5e3bdf3e17a`, tree
-`d74fad8a1c870f2834fca48f80ea4e38f0c512d9`, is tagged by annotated object
-`c8395fd7dcc5701842644967802e61c76211931c`. Candidate push/PR runs `40051959641` and
-`40051963999`, master run `40053637247`, and tag run `40055400664` pass all ten jobs, 55 browser
-cases and all 262,144 settings masks in each Rust profile on their first attempts. Localhost serves
-the exact accepted image `sha256:577abb32958e45912f35a7f6ae68dd624deb6515d2b4d55519942c44436a2a01`
-from container `d7f68cc89bfc87d06c202fbedae78c1892f54ea3ccdc6571fee0d1c5ea2f4240`;
-health, readiness and index return 200 and the served script SHA-256 is
-`61d6722543d93559ad980b2f6577897ddbdfcc80b4137d598d7aecf75c6ea637`.
-
-The 110 native cases remain attributed to source `11d0dc7e39e8e2cafcf70c1548be339f52c740ab`
-and final manifest `3ac5e05ccee94c7716376ca9383c75acc924b772447499c6a0dbd857f68ec15c`.
-Reviewed artifact equality connects corrected source `5dbcd58e920f852a8036c4bf741e26517793b072`
-to the published source through eight documentation-only changes; it does not claim unchanged
-Docker inputs, a new Rust compilation or new native execution. Delivery binding
-`40578e13d8a44a3cdb22bc222ac71eedd0005b08f3fb5f0748d07f7e333cf5d1` and its independent review
-are clear. The v0.3.42 image remains retained as the rollback parent. At the 2026-10-24
-native-acceptance checkpoint, eighteen of 22 requested items are published. Kick candidate
-`cb70cba891ed972380f30f52133622ce36fd9ee8` passes fresh Rust, web, security and complete
-524,288-mask gates. Fresh execution on prepared image `sha256:8ff3005861127f8ac57cc32f7e6c72ce5fa996fe628ad48426dbb8cf133e1af9`
-passes all 56 Compose plus 56 Kubernetes cases with zero retries or carried results. Independent
-audit, result/binding review, durable sealing and post-seal review are clear. This is the dated
-v0.3.44 native-acceptance checkpoint; hosted candidate/master/tag CI, publication and promotion
-follow and are not claimed here. Publication status belongs to the authoritative
-[GitHub Releases](https://github.com/liveweird/grenadiers/releases) record. Punch is the current
-v0.3.45 source candidate on the merged Kick source parent; Bracelet and Oil Barrel follow before
-ART-ATLAS.
+[v0.3.44](https://github.com/liveweird/grenadiers/releases/tag/v0.3.44) publishes Kick as the
+nineteenth requested item. Published source `f32fd86d8f0c7c4bebba8fa60d1c66c65d1a174a`, tree
+`a0f2addb9204c40b4b30be2830fde4df368f019c`, is tagged by annotated object
+`c5b1ab6d4cad94ba2f16614103903067745c5179`. Localhost serves the accepted image
+`sha256:8ff3005861127f8ac57cc32f7e6c72ce5fa996fe628ad48426dbb8cf133e1af9`.
+Punch is the current v0.3.45 source candidate on that published parent; native acceptance and
+release publication remain pending. Bracelet and Oil Barrel follow before ART-ATLAS.
 
 The **two-player arena match is playable**. Create a room, share its invitation,
 join from another browser, and both choose Ready. Select the courtyard to move with arrows
@@ -154,6 +132,7 @@ migrations yet. PostgreSQL is intended for users/results, not the per-tick game 
 ```sh
 scripts/gates.sh all           # Rust, contracts, web, and E2E static gates
 scripts/gates.sh server        # rustfmt, Clippy, tests, build (locked)
+scripts/gates.sh server-parallel # server + coverage; compile once/profile, four local workers
 scripts/gates.sh web           # contract drift, lint, dead code, coverage, build
 scripts/gates.sh e2e           # lint, typecheck, dead code, scenario parity
 scripts/gates.sh browser       # default Playwright scenarios; requires the composed stack

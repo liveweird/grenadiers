@@ -25,8 +25,10 @@ security gates. Fresh image `sha256:8ff3005861127f8ac57cc32f7e6c72ce5fa996fe628a
 passes all 56 Compose plus 56 Kubernetes cases with zero retries or carried results. Independent
 audit, result/binding review, durable seal
 `94c60dac44c639f7e9a214061e9daf9475628126d15526346ed7be2ce4c9a947` and post-seal review are
-clear. This establishes the dated native-acceptance checkpoint; hosted CI and publication follow
-and are not claimed here.
+clear. Published source `f32fd86d8f0c7c4bebba8fa60d1c66c65d1a174a`, tree
+`a0f2addb9204c40b4b30be2830fde4df368f019c`, is available as
+[v0.3.44](https://github.com/liveweird/grenadiers/releases/tag/v0.3.44), and the accepted image is
+promoted locally.
 
 Retained native captures show the stopped kicked bomb in [English desktop](../screenshots/kick-desktop.png)
 and [Polish 320px reduced motion](../screenshots/kick-mobile-pl.png). Their SHA-256 values are

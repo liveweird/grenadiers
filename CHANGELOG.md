@@ -8,10 +8,10 @@
   terminal freeze and new-round reset without adding an inventory slot, timer, event or audio cue.
 - Activate gameplay v11 with a 22-item catalog and all 4,194,304 settings masks, English/Polish
   presentation, and a repeating-byte-31 production-seed browser source scenario. This preparation
-  is integrated with the reviewed but unpublished v0.3.46 candidate; final published-parent
-  integration, full gates, native same-image acceptance, final CI and publication remain pending.
+  is integrated with the published v0.3.46 parent; Oil full gates, native same-image acceptance,
+  final CI and publication remain pending.
 
-## 0.3.46 — 2026-10-24 (source candidate)
+## 0.3.46 — 2026-10-24 (published)
 
 - Allow applying the entire advertised item catalog by deriving the client limit from the authoritative room catalog.
 
@@ -21,8 +21,9 @@
   cooldown marker and forced-movement report private across admission, resume and replay.
 - Extend gameplay v10 to 21 lobby switches and all 2,097,152 settings masks, with English/Polish
   presentation and a deterministic production-seed browser scenario. Integration with the
-  published v0.3.45 parent is complete; the full debug mask gate, native same-image acceptance,
-  final CI and publication remain pending.
+  published v0.3.45 parent is complete; scoped native acceptance and final checks are complete on
+  the exact image. [Publish v0.3.46](https://github.com/liveweird/grenadiers/releases/tag/v0.3.46) from source
+  `7b4b47cfdd7dea9efec9d3c2f2fd61f2c232ce54` and promote the accepted image locally.
 
 ## 0.3.45 — 2026-10-24 (published)
 

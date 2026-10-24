@@ -19,10 +19,19 @@ each feature. Historical release records retain their original evidence and requ
 
 ## v0.3.47 Oil Barrel source preparation — 2026-10-24
 
-Reviewed Oil Barrel source is prepared on the unpublished v0.3.46 Bracelet candidate. It retains
-version 0.3.47 and gameplay v11, but is not a release or accepted candidate. After v0.3.46 is
-published, this source must integrate that exact published parent before Oil gates, native
-acceptance, CI or publication can be claimed.
+Reviewed Oil Barrel source is integrated with the published v0.3.46 Bracelet parent. It retains
+version 0.3.47 and gameplay v11, but is not a release or accepted candidate. Oil gates, native
+acceptance, CI and publication remain pending.
+
+## v0.3.46 published prerelease — 2026-10-24
+
+[v0.3.46](https://github.com/liveweird/grenadiers/releases/tag/v0.3.46) publishes Bracelet as the twenty-first requested item from source
+`7b4b47cfdd7dea9efec9d3c2f2fd61f2c232ce54`, tree `7816fe3d0a373523ffe5b4a8b54873dfce3e3b7a`, through verified annotated tag
+`57b9b226a2d1cc07ebe1b8487348e89858678132`. Localhost:8085 serves the exact accepted image
+`sha256:1460278198b6d604595bfbe4fb8278a85ab39725c43516bb8b55ab2e6a47f5bf`. Promotion exits zero; health, readiness and index
+return 200, and served HTML/JavaScript match container bytes. The application retains UID65532,
+a read-only filesystem, dropped capabilities and no new privileges. Punch v0.3.45 is retained
+as the rollback image. No rebuild or repeated full CI was needed.
 
 ## v0.3.45 published prerelease — 2026-10-24
 
@@ -31,8 +40,15 @@ Source `5be42456cee80e06e2f138bdfd458ef821bb34c2` is published as
 `0e6224643ce85bf8f0a77894dcb929ab2655e397`. It publishes Punch as the twentieth requested item.
 Localhost serves the accepted image
 `sha256:3f13b26f7a4a41ba2e90b8cc9261c9e95a60eceeddf49504341e65258eb7d37d`.
-Bracelet v0.3.46 is the current prepared source candidate; its native acceptance and publication
-remain pending.
+Bracelet v0.3.46 is now published and promoted, as recorded above.
+
+## v0.3.46 Bracelet acceptance checkpoint — 2026-10-24
+
+Scoped native acceptance passes all 29 cases (28 Compose plus one Kubernetes), with zero retries.
+The 22 isolated latency cases pass with maxima 62.93 ms local and 160.14 ms with shaped 50 ms
+delay, below the unchanged 250 ms budget. Accepted image:
+`sha256:1460278198b6d604595bfbe4fb8278a85ab39725c43516bb8b55ab2e6a47f5bf`. Publication and
+localhost promotion subsequently completed; see [verification](verification.md).
 
 ## v0.3.44 published prerelease — 2026-10-24
 

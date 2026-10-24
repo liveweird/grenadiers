@@ -31,6 +31,5 @@ consume no replacement draw. Oil-disabled masks retain their prior generated out
 See [settings](settings.md), [generation](generation.md), [gameplay v11](protocol-v11.md), and the
 [production-seed test](../testing.md#oil-barrel-production-seed-scenario).
 
-This document describes reviewed v0.3.47 source prepared on the unpublished v0.3.46 Bracelet
-candidate. Final integration with the eventual published v0.3.46 parent, Oil acceptance, CI and
-publication remain pending.
+This document describes reviewed v0.3.47 source integrated with the published v0.3.46 Bracelet
+parent. Oil full gates, native acceptance, CI and publication remain pending.

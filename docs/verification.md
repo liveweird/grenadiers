@@ -11,6 +11,30 @@ honest about the source and environment actually tested.
 The records below are historical evidence. Their repeated CI runs, receipt graphs and sealing
 procedures do not impose additional requirements on future changes.
 
+## Current v0.3.46 published delivery — 2026-10-24
+
+[v0.3.46](https://github.com/liveweird/grenadiers/releases/tag/v0.3.46) publishes Bracelet as the twenty-first requested item from source
+`7b4b47cfdd7dea9efec9d3c2f2fd61f2c232ce54`, tree `7816fe3d0a373523ffe5b4a8b54873dfce3e3b7a`, through verified annotated tag
+`57b9b226a2d1cc07ebe1b8487348e89858678132`. Localhost:8085 serves the exact accepted image
+`sha256:1460278198b6d604595bfbe4fb8278a85ab39725c43516bb8b55ab2e6a47f5bf`. Promotion exits zero; health, readiness and index
+return 200, and served HTML/JavaScript match container bytes. The application retains UID65532,
+a read-only filesystem, dropped capabilities and no new privileges. Punch v0.3.45 is retained
+as the rollback image. No rebuild or repeated full CI was needed.
+
+## Current v0.3.46 Bracelet acceptance — 2026-10-24
+
+Frozen source `5e55bb46bb71b1b8bf9db8dab0a6403eb7a1e240` passes focused core/server checks, all
+2,097,152 masks in debug/release/coverage, the web gate (2,618 tests across 70 files), E2E static
+and auxiliary checks, dependency/image audits, and distinct Ubuntu Rust CI
+[run 40123865469](https://github.com/liveweird/grenadiers/actions/runs/40123865469). Rust coverage is
+16,315/17,522 (93.111517%); the full gate exits zero in 27m57s using four workers and 16 ranges.
+Same-image native acceptance passes all 29 scoped cases with zero retries: Compose Bracelet,
+Kick, Punch, Landmine, Wall Pass, classic match/rematch and 22 latency cases (28 total), plus
+Kubernetes Bracelet with production-manifest, security and owned-resource cleanup checks. The 22 isolated latency cases pass with maxima
+62.93 ms local and 160.14 ms shaped 50 ms delay, below the unchanged 250 ms budget. Accepted image:
+`sha256:1460278198b6d604595bfbe4fb8278a85ab39725c43516bb8b55ab2e6a47f5bf`. This acceptance
+checkpoint preceded the publication and promotion recorded above.
+
 ## Current v0.3.45 published delivery — 2026-10-24
 
 [v0.3.45](https://github.com/liveweird/grenadiers/releases/tag/v0.3.45) is published from source
@@ -2034,11 +2058,12 @@ two-browser ordinary-input route. It checks pending privacy, exact unlit collisi
 legal adjacent ignition with safe escape, unchanged adjacent blocks, finite-flame expiry after 60
 ticks, persistent painting in English desktop and Polish 320-pixel reduced-motion views, survival,
 quiet reconnect and both recipient streams. Planned captures are `oil-burning-desktop-en.png` and
-`oil-burning-polish-320-reduced.png`. This record does not claim the pending full server mask gates,
-accepted final v0.3.46 parent, native Compose/Kubernetes matrix, final CI or publication.
-Source parity is 49 documented scenarios. After the accepted v0.3.46 native parent is integrated,
-the cumulative same-image native matrix is expected to contain 59 scenarios; it is not executed or
-claimed by this source-only record.
+`oil-burning-polish-320-reduced.png`. The published v0.3.46 parent is now integrated, but this
+record does not claim the pending full server mask gates, native Compose/Kubernetes matrix, final
+CI or Oil publication.
+Source parity at that checkpoint was 49 documented scenarios. Its cumulative same-image native
+expectation was 59 scenarios; no Oil native matrix is executed or claimed by this source-only
+record.
 
 ## Bracelet candidate — 2026-10-21 — source static checks complete
 

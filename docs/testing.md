@@ -4,6 +4,30 @@
 and use the repository's committed Cargo lockfile. Tests must exercise
 behavior and observable contracts rather than merely repeat implementation constants.
 
+## Verification policy
+
+Local checks are the primary gate for this single-maintainer repository. A passing local check
+does not need a second remote run merely because a branch was pushed, a PR was opened, a merge
+was made or a tag was created. Remote checks must add coverage that was not exercised locally,
+such as a different operating system or a clean build environment. A Linux container run already
+counts as Linux coverage for the behavior it actually executes; a container build alone does not
+prove that Rust unit tests ran on Linux.
+
+Use the relevant checks during development and complete the applicable suite before shipping.
+Keep a concise record of the tested commit, commands, results, environment and artifact digest.
+Reuse successful results only while their tested inputs remain applicable; rerun affected checks
+after relevant changes or failures. Documentation-only changes do not require repeating gameplay
+acceptance when application inputs are unchanged.
+
+Parallelize independent checks and gameplay groups using isolated processes, build directories,
+Compose projects, ports and Kubernetes namespaces. Reuse compiled dependencies and tooling.
+Keep latency tests isolated from competing workloads. Scheduling and caching must not reduce
+assertions, exhaustive mask coverage, coverage floors or failure visibility, or introduce retries
+that hide failures. Avoid repeated evidence packaging and review of unchanged results.
+
+The historical verification records below describe the workflow used at the time; they do not
+make repeated remote runs a current release requirement.
+
 ## Rust
 
 Use unit tests for pure validation/serialization and Tower oneshot tests for HTTP behavior.

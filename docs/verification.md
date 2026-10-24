@@ -1,5 +1,16 @@
 # Repository verification
 
+## Current verification policy
+
+Follow the [local-first testing policy](testing.md#verification-policy) and
+[release verification policy](releases.md#release-verification-policy). Local results are primary;
+remote checks must add distinct coverage. Run independent work in parallel, reuse verified
+artifacts, and repeat only checks affected by changes or failures. Keep results concise and
+honest about the source and environment actually tested.
+
+The records below are historical evidence. Their repeated CI runs, receipt graphs and sealing
+procedures do not impose additional requirements on future changes.
+
 ## v0.3.44 Kick sealed native acceptance — 2026-10-24 — 112/112
 
 Candidate source `cb70cba891ed972380f30f52133622ce36fd9ee8`, tree

@@ -4,6 +4,19 @@ Release labels and scope live in the [implementation plan](game/implementation-p
 A completed milestone is verification evidence; a release exists only after its tested commit
 is tagged and its artifacts are published intentionally.
 
+## Release verification policy
+
+For this single-maintainer project, local checks are as authoritative as equivalent remote
+checks. Ship the tested source and reuse its verified artifacts. Remote checks are required only
+when they add coverage not exercised locally; a tag pointing at an already verified commit does
+not require another complete suite.
+
+Record the version, tested commit, applicable checks and outcomes, runtime environment and image
+digest in the release notes. Confirm the tag targets the intended commit and check health,
+readiness and the served artifact after deployment. Repeat affected checks when inputs change;
+do not require separate full push, PR, master and tag runs or elaborate new proof packages for
+each feature. Historical release records retain their original evidence and requirements.
+
 ## v0.3.44 Kick native-acceptance checkpoint — 2026-10-24
 
 Kick candidate source `cb70cba891ed972380f30f52133622ce36fd9ee8`, tree

@@ -206,9 +206,11 @@ test('Punch wraps one retained bomb three cells without extra cues and preserves
         .toBe('punch')))
       await expect(one.getByLabel('Player one upgrades')).toContainText('GearPunch')
       await expect(two.getByLabel('Ulepszenia: Gracz pierwszy')).toContainText('WyposażenieUderzenie')
+      await one.getByRole('button', { name: 'Keyboard controls', exact: true }).focus()
       await expect(one.getByText(/press F to punch/)).toBeVisible()
       await expect(one.getByText(/fixed 0.2 second cooldown/)).toBeVisible()
       await expect(two.getByText(/stałe 0,2 sekundy odnowienia/)).toBeVisible()
+      await one.getByRole('region', { name: 'Grenadiers courtyard' }).click()
 
       const beforePlant = latestSnapshot(games[0])!.room.revision
       const plantCommands = games[0].commands.length

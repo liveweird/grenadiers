@@ -9,6 +9,18 @@ first-to-three progression, and rematches pass exact-image Compose/Kubernetes ac
 M6 reconnect/replay is implemented with all 42 baseline rules mapped to automated assertions.
 M6 is complete and locally verified on 2026-10-17, including exact-image deployment acceptance.
 M7 hardening has started; M8 remains planned.
+Teleporter is published as prerelease v0.3.42 after distinct first-attempt master and tag runs
+`39982027955` and `39984896509` pass all nine jobs, 54 browser cases and 131,072 settings masks.
+Seventeen requested item types are published, and the exact accepted image
+`sha256:8ae9818d27c4345bceec6dad77f02e21ee7148626efded48c421d86421285477` is promoted locally.
+Wall Pass is the eighteenth native-verified item for v0.3.43. Final source
+`bd34192d8915a8aac4288e3f69bd5898ad01d952`, tree
+`daa2306e77de0e279a6752aa69e687e0a6c51ba0`, passes fresh gates and all 55 Compose plus 55
+Kubernetes cases on exact image
+`sha256:e2f02586988e2359404189afbe465ad47a4dd12e8227de8b6d3c627401ad7cfc`.
+Independent audit and durable sealing are clear. Candidate, master and tag CI, publication and
+promotion remain pending; current status is in [GitHub Actions](https://github.com/liveweird/grenadiers/actions)
+and [GitHub Releases](https://github.com/liveweird/grenadiers/releases).
 The v0.3.16 increment adds classic-v3 forgiving turns and explicit gameplay-v5 compatibility,
 locally verified through both deployment paths on 2026-10-17.
 The v0.3.17 increment adds four shared gameplay settings with configurable-v4 rules and
@@ -20,10 +32,13 @@ v0.3.21 adds typed bomb triggers and checked legacy projection without activatin
 v0.3.20 retains ordered manual actions while preserving Classic placement and private replay,
 verified through both deployment paths.
 Published engineering prereleases are listed in `CHANGELOG.md` and GitHub Releases.
-As of the 22 October 2026 v0.3.41 native checkpoint, fifteen requested item types are published
-through v0.3.40. Invisible Bombs is the sixteenth native-verified candidate; its independent audit
-and durable seal are clear, while hosted release stages remain pending. Teleporter, Wall Pass, Kick, Punch, Bracelet
-and Oil Barrel remain, followed by ART-ATLAS after the feature batch.
+Seventeen requested item types are published through v0.3.42. Teleporter source gates cover 689
+core, 208 release server and 657 web tests, 55 static scenarios and all 131,072 settings masks in
+debug, release and coverage profiles. Wall Pass raises the native-verified total to eighteen: each
+Rust profile passes 711 core and 209 server tests with four historical ignores, the web gate passes
+797 tests across 64 files, all 56 scenarios pass, and all 262,144 settings masks complete in each
+profile. Native acceptance covers 55 cases per target with zero retries or carry. Kick, Punch,
+Bracelet and Oil Barrel remain, followed by ART-ATLAS after the feature batch.
 
 New playtest requests and expansion work are tracked in the [gameplay and presentation
 backlog](backlog.md): forgiving turns first, shared gameplay settings, detailed retro pixel art,

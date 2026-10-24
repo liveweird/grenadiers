@@ -268,7 +268,8 @@ The keyboard-only two-browser route reveals both pickups with ordinary movement 
 proves a safe atomic swap, a shared new `lastTeleportTick`, position and marker retention from a
 strictly newer reconnect admission, and unsafe consumption beside a live bomb without movement or
 marker change. The scenario has no seed search, state injection or retries. Native execution
-remains pending until the predecessor-integrated candidate image exists.
+passed fresh 54 Compose plus 54 Kubernetes cases; the factual publication status is recorded in
+the [v0.3.42 published delivery](releases.md#v0342-published-prerelease--2026-10-23).
 
 ## Wall Pass production-seed scenario
 
@@ -278,13 +279,16 @@ The keyboard-only two-browser route enables only Wall Pass, reveals and collects
 `(3,1)`, enters the intact soft block at `(3,2)`, and proves the authoritative block remains opaque
 while the actor and equipment cue remain legible. It rejects planting without consuming a bomb ID,
 capacity or weapon, clamps west against hard wall `(2,2)`, resumes from a strictly newer admission
-inside the block, then exits north without re-entry. A legal post-exit bomb has the immediate
-successor of the reveal bomb's entity ID, so the rejected inside action consumed no allocation.
+inside the block, then exits north without re-entry. A legal post-exit bomb has a later
+entity ID, identical on both clients. The rejected action creates no bomb or event and leaves
+resources unchanged; focused core tests verify no entity allocation.
 English desktop and Polish 320-pixel
 reduced-motion views produce the two named full-page captures. The scenario uses no state
 injection, direct WebSocket commands, seed search or retry. The sole-item fixture cannot prove
 Wall-Pass-to-Heart replacement grace; core and protocol tests provide that coverage. Native
-execution remains pending until the predecessor-integrated candidate image exists.
+execution completed as a sealed 55 Compose plus 55 Kubernetes matrix on source
+`bd34192d8915a8aac4288e3f69bd5898ad01d952`. Hosted candidate, master and tag checks,
+publication and promotion for v0.3.43 remain pending.
 
 ### Kick source scenario
 

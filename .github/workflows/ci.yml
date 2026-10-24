@@ -52,7 +52,7 @@ jobs:
           echo "source=$source" >> "$GITHUB_OUTPUT"
       - id: plan
         run: node scripts/ci-server-mask-plan.mjs '${{ github.event.pull_request.head.sha || github.sha }}'
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: server-mask-plan-${{ steps.source.outputs.source }}
           path: server-mask-plan.json
@@ -100,7 +100,7 @@ jobs:
       # Repository checks only read npm manifests/locks; no npm installation is needed.
       - run: scripts/gates.sh server
       - run: scripts/gates.sh coverage
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: server-mask-partition-${{ needs.server-mask-plan.outputs.source }}-${{ matrix.index }}
@@ -180,7 +180,7 @@ jobs:
           scripts/ci-image-transfer.sh prepare "$RUNNER_TEMP/browser-image" "$SOURCE_SHA" grenadiers-app
           image_id="$(docker image inspect --format '{{.Id}}' grenadiers-app)"
           echo "image-id=$image_id" >> "$GITHUB_OUTPUT"
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: browser-image-${{ github.run_id }}-${{ github.run_attempt }}-${{ github.event.pull_request.head.sha || github.sha }}
           path: ${{ runner.temp }}/browser-image/
@@ -481,7 +481,7 @@ jobs:
       - name: Tear down isolated stack
         if: always()
         run: docker compose down --volumes --remove-orphans
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: failure()
         with:
           name: playwright-report-${{ matrix.shard }}

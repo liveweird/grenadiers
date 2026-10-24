@@ -1,6 +1,6 @@
-# Gameplay v10: Teleporter epochs, Wall Pass, Kick, Punch and Bracelet
+# Archived gameplay v10: Teleporter epochs, Wall Pass, Kick, Punch and Bracelet
 
-The coordinated live contract is `api/gameplay-v10.schema.json`, Rust `core::protocol::v10`, and
+This archived contract is `api/gameplay-v10.schema.json`, Rust `core::protocol::v10`, and
 generated `web/src/game/v10/schema.ts`. Deploy the paired server and browser assets together.
 Gameplay v9 is archived and rejected before credential lookup, so an old client cannot claim or
 revoke a credential for a v10 connection.

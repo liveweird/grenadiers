@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { admitted, authenticate, harness, messages, room, roomId, snapshot, SocketStub } from './testSupport'
 
-describe('v10 session and admission failures', () => {
+describe('v11 session and admission failures', () => {
   beforeEach(() => vi.stubGlobal('WebSocket', { OPEN: SocketStub.OPEN }))
 
   it.each([
@@ -39,8 +39,8 @@ describe('v10 session and admission failures', () => {
     await vi.waitFor(() => expect(value.sockets).toHaveLength(1))
     const socket = value.sockets[0]
     socket.emit('open')
-    socket.message({ type: 'authenticated', protocolVersion: 10 })
-    socket.message({ type: 'authenticated', protocolVersion: 10 })
+    socket.message({ type: 'authenticated', protocolVersion: 11 })
+    socket.message({ type: 'authenticated', protocolVersion: 11 })
     expect(messages(socket).filter((message) => message.type === 'createRoom')).toHaveLength(1)
     socket.message({ ...admitted(), sequence: 2 })
     expect(value.client.getState().room).toBeNull()
@@ -75,7 +75,7 @@ describe('v10 session and admission failures', () => {
   })
 })
 
-describe('v10 authoritative updates and controls', () => {
+describe('v11 authoritative updates and controls', () => {
   beforeEach(() => vi.stubGlobal('WebSocket', { OPEN: SocketStub.OPEN }))
 
   it('accepts only newer same-room nonregressing shared facts', async () => {
@@ -94,6 +94,7 @@ describe('v10 authoritative updates and controls', () => {
     expect(value.client.getState().snapshot?.room.roundId).toBe(2)
     socket.message(snapshot(5, 1))
     expect(value.client.getState().snapshot?.room.revision).toBe(4)
+
   })
 
   it('resets world and bomb floor on a room-only epoch advance', async () => {
@@ -263,7 +264,35 @@ describe('v10 authoritative updates and controls', () => {
   })
 })
 
-describe('v10 live Timed bomb validation', () => {
+describe('v11 required Oil state', () => {
+  beforeEach(() => vi.stubGlobal('WebSocket', { OPEN: SocketStub.OPEN }))
+
+  it('ignores an older valid Oil snapshot without changing the accepted baseline', async () => {
+    const value = harness()
+    const socket = await authenticate(value)
+    socket.message(admitted(4))
+    const staleOil = snapshot(3)
+    staleOil.room.settings.enabledItems = ['oilBarrel']
+    staleOil.state.oilBarrels = [{ cell: { column: 3, row: 1 }, state: 'burning' }]
+    socket.message(staleOil)
+    expect(value.client.getState().snapshot?.room.revision).toBe(4)
+    expect(value.client.getState().snapshot?.state.oilBarrels).toEqual([])
+  })
+
+  it('rejects a snapshot that omits the required Oil array', async () => {
+    const value = harness()
+    const socket = await authenticate(value)
+    socket.message(admitted(1))
+    const missing = structuredClone(snapshot(2)) as unknown as Record<string, unknown>
+    delete (missing.state as Record<string, unknown>).oilBarrels
+    socket.message(missing)
+    expect(value.client.getState()).toMatchObject({
+      connection: 'disconnected', failure: 'invalidServerMessage',
+    })
+  })
+})
+
+describe('v11 live Timed bomb validation', () => {
   beforeEach(() => vi.stubGlobal('WebSocket', { OPEN: SocketStub.OPEN }))
   it.each([false, true])('closes on a zero-tick live Timed bomb with paused=%s', async (paused) => {
     const value = harness()
@@ -284,7 +313,7 @@ describe('v10 live Timed bomb validation', () => {
   })
 })
 
-describe('v10 retry callback fences', () => {
+describe('v11 retry callback fences', () => {
   beforeEach(() => vi.stubGlobal('WebSocket', { OPEN: SocketStub.OPEN }))
 
   it('does not run a canceled reconnect timer after explicit disconnect', async () => {

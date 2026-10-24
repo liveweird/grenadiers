@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test'
-import type { Direction, EquipmentId, GameServerMessage, Seat } from '../../../web/src/game/v10/schema'
+import type { Direction, EquipmentId, GameServerMessage, Seat } from '../../../web/src/game/v11/schema'
 
 type Admission = Extract<GameServerMessage, { type: 'admitted' }>
 export type PublicAdmission = {
@@ -13,6 +13,7 @@ export type PublicAdmission = {
   visibleActors: { seat: Seat; x: number; y: number; lastTeleportTick: number | null }[]
   equipment: { seat: Seat; equipment: EquipmentId | null }[]
   bombIds: number[]
+  oilBarrels: { column: number; row: number; state: 'unlit' | 'burning' }[]
   stableCapability: boolean
 }
 
@@ -36,7 +37,6 @@ export async function installTransportProbe(page: Page): Promise<void> {
     let admissionIndex = 0
     let takeoverBinding: { socket: WebSocket; roomId: string; roundId: number; sequence: number } | null = null
     let sharedLeak = false
-
     function publicAdmission(
       message: Admission, stableCapability: boolean, index: number,
     ): PublicAdmission {
@@ -51,7 +51,7 @@ export async function installTransportProbe(page: Page): Promise<void> {
           : []) ?? [],
         equipment: message.state?.actors.flatMap((actor) => actor.type === 'visible' ? [{ seat: actor.seat, equipment: actor.inventory.equipment }] : []) ?? [],
         bombIds: message.state?.bombs.map((bomb) => bomb.id) ?? [], stableCapability,
-      }
+        oilBarrels: message.state?.oilBarrels.map(({ cell, state }) => ({ ...cell, state })) ?? [] }
     }
 
     window.WebSocket = class extends NativeSocket {
@@ -118,7 +118,7 @@ export async function installTransportProbe(page: Page): Promise<void> {
         socket.addEventListener('close', fail, { once: true })
         socket.addEventListener('open', () => {
           stage = 'open'
-          socket.send(JSON.stringify({ type: 'authenticate', protocolVersion: 10, token: session.token }))
+          socket.send(JSON.stringify({ type: 'authenticate', protocolVersion: 11, token: session.token }))
         }, { once: true })
         const onMessage = (event: MessageEvent): void => {
           const message = JSON.parse(String(event.data)) as GameServerMessage

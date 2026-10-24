@@ -245,8 +245,9 @@ fn classic_pickup(kind: PickupKind) -> bool {
 }
 
 fn canonical_pickup(kind: PickupKind, supported: ItemSet, enabled: ItemSet) -> bool {
-    super::projection_items::pickup_item(kind)
-        .is_none_or(|item| supported.contains(item) && enabled.contains(item))
+    kind != PickupKind::OilBarrel
+        && super::projection_items::pickup_item(kind)
+            .is_none_or(|item| supported.contains(item) && enabled.contains(item))
 }
 
 fn state_binding(room: &RoomView, epoch: Counter, capture: &ExpandedCapture) -> bool {

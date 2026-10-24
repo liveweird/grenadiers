@@ -17,6 +17,13 @@ readiness and the served artifact after deployment. Repeat affected checks when 
 do not require separate full push, PR, master and tag runs or elaborate new proof packages for
 each feature. Historical release records retain their original evidence and requirements.
 
+## v0.3.47 Oil Barrel acceptance — 2026-10-24
+
+The source integrated with published v0.3.46 passes full local checks, the distinct Linux job and
+32 scoped native Compose/Kubernetes cases on one accepted image. Publication and promotion remain
+pending; [verification](verification.md) records exact source, scope, metrics and screenshots.
+Gameplay v11 requires reloading older clients after upgrade.
+
 ## v0.3.46 published prerelease — 2026-10-24
 
 [v0.3.46](https://github.com/liveweird/grenadiers/releases/tag/v0.3.46) publishes Bracelet as the twenty-first requested item from source

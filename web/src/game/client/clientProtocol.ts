@@ -1,5 +1,5 @@
-import type { Direction, GameServerMessage, GameSettings, RoomView, Seat, V10ErrorCode } from '../v10/schema'
-import { validateGameplayV10ServerMessage } from '../v10/validation'
+import type { Direction, GameServerMessage, GameSettings, RoomView, Seat, V11ErrorCode } from '../v11/schema'
+import { validateGameplayV11ServerMessage } from '../v11/validation'
 
 export const MAX_COUNTER = 2_147_483_647
 export const MAX_RECONNECT_ATTEMPTS = 3
@@ -25,7 +25,7 @@ export type PendingSettings = {
   settingsRevision: number
   settings: GameSettings
 }
-export type ControlFailure = ControlCommand & { code: V10ErrorCode }
+export type ControlFailure = ControlCommand & { code: V11ErrorCode }
 
 const TOKEN_PATTERN = /^[0-9a-f]{64}$/
 function unique<T>(values: readonly T[]): boolean {
@@ -59,7 +59,7 @@ function roomRecipientValid(message: GameServerMessage): boolean {
 }
 
 export function validateServerMessage(value: unknown, expectedSeat: Seat | null): value is GameServerMessage {
-  const result = validateGameplayV10ServerMessage(value)
+  const result = validateGameplayV11ServerMessage(value)
   return result.valid && roomRecipientValid(result.value) && stateRecipientValid(result.value, expectedSeat)
 }
 

@@ -1,7 +1,39 @@
 use std::collections::BTreeSet;
 
 use super::{RulesConfig, State, World};
-use crate::game::{BlastKind, BombTrigger, EntityId};
+use crate::game::{BlastKind, BombTrigger, CellId, EnabledItems, EntityId, OilState, Tick};
+
+pub(super) fn unsupported_enabled_items(rules: RulesConfig) -> Option<EnabledItems> {
+    rules
+        .room_settings()
+        .filter(|settings| rules.version() < 5 && settings.enabled_items() != EnabledItems::EMPTY)
+        .map(|settings| settings.enabled_items())
+}
+
+pub(super) fn invalid_oil(world: &World, tick: Tick) -> Option<CellId> {
+    world.oil.iter().find_map(|(cell, state)| {
+        let invalid = match state {
+            OilState::Concealed | OilState::Pending => false,
+            OilState::Unlit => {
+                world.has_fire(cell, tick)
+                    || world.bombs.values().any(|bomb| bomb.cell() == cell)
+                    || world
+                        .pickups
+                        .iter()
+                        .any(|(pickup_cell, _)| pickup_cell == cell)
+            }
+            OilState::Burning => {
+                world.hazards.contains_key(&cell)
+                    || world
+                        .pickups
+                        .iter()
+                        .any(|(pickup_cell, _)| pickup_cell == cell)
+                    || world.bombs.values().any(|bomb| bomb.cell() == cell)
+            }
+        };
+        invalid.then_some(cell)
+    })
+}
 
 pub(super) fn unsupported_trigger(rules: RulesConfig, world: &World) -> Option<EntityId> {
     world.bombs.values().find_map(|bomb| match bomb.trigger() {

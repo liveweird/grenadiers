@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.3.47 — 2026-10-24 (accepted; publication pending)
+
+- Add opt-in Oil Barrel arena objects with an eight-site lifetime cap, private delayed revelation,
+  solid unlit collision, and passable fire that persists until the round ends.
+- Preserve immutable explosion planning, typed Wall Pass exit grace, shared fire hazards, replay,
+  terminal freeze and new-round reset without adding an inventory slot, timer, event or audio cue.
+- Activate gameplay v11 with a 22-item catalog and all 4,194,304 settings masks, English/Polish
+  presentation and a repeating-byte-31 browser scenario. Full checks and 32 scoped same-image
+  Compose/Kubernetes cases pass, including persistent fire, real reconnect and silent restoration.
+  Gameplay v11 requires older browser clients to reload; publication and promotion remain pending.
+- Optimize assertion-enabled test compilation while retaining overflow checks, exhaustive masks
+  and official coverage accounting. The full 4,194,304-mask gate takes 7m53s; Rust coverage is 93.07%.
+
 ## 0.3.46 — 2026-10-24 (published)
 
 - Allow applying the entire advertised item catalog by deriving the client limit from the authoritative room catalog.

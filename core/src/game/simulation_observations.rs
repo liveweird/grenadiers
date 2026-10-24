@@ -7,6 +7,13 @@ use crate::game::rules::RulesConfig;
 use crate::game::types::{CellId, EntityId, SeatId, Tick};
 use crate::game::world::World;
 
+#[allow(dead_code)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) enum ExitGraceObservation {
+    SoftBlock(CellId),
+    UnlitOil(CellId),
+}
+
 impl Actor {
     pub(crate) fn effect_observations(&self) -> impl Iterator<Item = (EffectKind, Tick)> + '_ {
         self.effects.observations()
@@ -18,6 +25,22 @@ impl Actor {
 
     pub(crate) fn soft_wall_grace_observations(&self) -> impl Iterator<Item = CellId> + '_ {
         self.soft_wall_grace.iter().copied()
+    }
+
+    #[allow(dead_code)]
+    pub(crate) fn exit_grace_observations(
+        &self,
+    ) -> impl Iterator<Item = ExitGraceObservation> + '_ {
+        self.soft_wall_grace
+            .iter()
+            .copied()
+            .map(ExitGraceObservation::SoftBlock)
+            .chain(
+                self.unlit_oil_grace
+                    .iter()
+                    .copied()
+                    .map(ExitGraceObservation::UnlitOil),
+            )
     }
 
     // Used by the paired trusted-capture binding once the v10 protocol slice is integrated.

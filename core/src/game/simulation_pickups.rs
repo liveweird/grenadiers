@@ -184,6 +184,7 @@ impl super::Actor {
                 unreachable!("equipment pickups use the world-aware transition")
             }
             PickupKind::Teleporter => unreachable!("teleporters are committed after collection"),
+            PickupKind::OilBarrel => unreachable!("Oil Barrels are arena objects, not pickups"),
         }
         Ok(true)
     }

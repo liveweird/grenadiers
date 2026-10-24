@@ -7,7 +7,7 @@ use super::{
     ArenaView, BombView, EventKind, FlameView, ItemSet, PickupView, RoomView, VisibleActorView,
 };
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, PartialEq, Eq)]
 pub(crate) struct WorldFacts {
     pub(crate) rules_version: super::RulesVersion,
     pub(crate) physical_tick: Tick,
@@ -20,14 +20,37 @@ pub(crate) struct WorldFacts {
     pub(crate) last_successful_punch_ticks: [Option<Tick>; 2],
     pub(crate) last_successful_shove_ticks: [Option<Tick>; 2],
     pub(crate) soft_wall_grace: [Vec<Cell>; 2],
+    pub(crate) unlit_oil_grace: [Vec<Cell>; 2],
     pub(crate) bombs: Vec<BombView>,
     pub(crate) timed_bombs: BTreeMap<EntityId, TimedBombFacts>,
     pub(crate) kick_bombs: BTreeMap<EntityId, KickBombFacts>,
     pub(crate) punch_bombs: BTreeMap<EntityId, PunchBombFacts>,
     pub(crate) flames: Vec<FlameView>,
     pub(crate) pickups: Vec<PickupView>,
+    pub(crate) private_pickup_cells: Vec<Cell>,
+    pub(crate) oil: Vec<OilFacts>,
     pub(crate) available_items: ItemSet,
     pub(crate) enabled_items: ItemSet,
+}
+
+impl std::fmt::Debug for WorldFacts {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        formatter.write_str("WorldFacts(<redacted>)")
+    }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) struct OilFacts {
+    pub(crate) cell: Cell,
+    pub(crate) phase: OilPhase,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) enum OilPhase {
+    Concealed,
+    Pending,
+    Unlit,
+    Burning,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -81,24 +104,58 @@ pub(crate) struct ForcedMovementFacts {
     pub(crate) end: crate::protocol::Position,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, PartialEq, Eq)]
 pub struct ValidatedWorld(pub(crate) WorldFacts);
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, PartialEq, Eq)]
 pub struct ValidatedReports(pub(crate) Vec<ReportFacts>);
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, PartialEq, Eq)]
 pub struct ExpandedCapture {
     pub(crate) rules: RulesConfig,
     pub(crate) world: ValidatedWorld,
     pub(crate) reports: ValidatedReports,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, PartialEq, Eq)]
 pub struct BoundPublication {
     pub(crate) room: RoomView,
     pub(crate) world: ValidatedWorld,
     pub(crate) reports: ValidatedReports,
+}
+
+impl std::fmt::Debug for ValidatedWorld {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        formatter.write_str("ValidatedWorld(<redacted>)")
+    }
+}
+
+impl std::fmt::Debug for ValidatedReports {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        formatter.write_str("ValidatedReports(<redacted>)")
+    }
+}
+
+impl std::fmt::Debug for ExpandedCapture {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        formatter
+            .debug_struct("ExpandedCapture")
+            .field("rules", &self.rules)
+            .field("world", &"<redacted>")
+            .field("reports", &"<redacted>")
+            .finish()
+    }
+}
+
+impl std::fmt::Debug for BoundPublication {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        formatter
+            .debug_struct("BoundPublication")
+            .field("room", &self.room)
+            .field("world", &"<redacted>")
+            .field("reports", &"<redacted>")
+            .finish()
+    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

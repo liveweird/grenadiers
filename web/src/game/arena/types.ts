@@ -65,6 +65,10 @@ export interface SnapshotMessage {
     bombs: PresentedBomb[]
     flames: Array<{ cell: { column: number; row: number }; expiresAt: number }>
     pickups: Array<{ cell: { column: number; row: number }; kind: RenderablePickupKind }>
+    oilBarrels?: Array<{
+      cell: { column: number; row: number }
+      state: 'unlit' | 'burning'
+    }>
   }
 }
 export type Seat = 'one' | 'two'

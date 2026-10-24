@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test'
 import { latestSnapshot, observeGame, visibleActor, type ObservedGame } from '../tests/support/duel'
 import { moveTo } from '../tests/support/movement'
-import type { GameServerMessage } from '../../web/src/game/v10/schema'
+import type { GameServerMessage } from '../../web/src/game/v11/schema'
 
 test.beforeAll(() => expect(process.env.E2E_LANDMINE_FIXTURE).toBe('arena-v2-landmine'))
 
@@ -32,7 +32,7 @@ test('two browsers observe one persistent mine and its contact detonation', asyn
     await Promise.all(games.map((game) => expect.poll(() => latestSnapshot(game)?.room.phase.type).toBe('running')))
     expect(latestSnapshot(games[0])!.room.availableItems).toEqual([
       'kick', 'punch', 'bracelet', 'wallPass', 'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch', 'invisibilityCloak', 'goldenFlame', 'shortFuse',
-      'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls', 'invisibleBombs', 'teleporter',
+      'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls', 'invisibleBombs', 'oilBarrel', 'teleporter',
     ])
     await one.getByRole('region', { name: 'Grenadiers courtyard' }).click()
 

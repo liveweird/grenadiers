@@ -1,6 +1,6 @@
 use grenadiers_core::protocol::{
     Seat,
-    v10::{MatchResult, MatchWinnerReason, RoomPhase},
+    v11::{MatchResult, MatchWinnerReason, RoomPhase},
 };
 use tokio::sync::oneshot;
 

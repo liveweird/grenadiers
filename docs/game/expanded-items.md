@@ -1,8 +1,11 @@
 # Expanded item implementation plan
 
 Published [v0.3.46](https://github.com/liveweird/grenadiers/releases/tag/v0.3.46) adds opt-in [Bracelet](bracelet.md)
-as the twenty-first requested item and is promoted locally. Oil Barrel v0.3.47 is the remaining
-item, followed by ART-ATLAS. See [verification](../verification.md) for accepted scope and checks.
+as the twenty-first requested item and is promoted locally. [Oil Barrel](oil-barrel.md) v0.3.47
+source is prepared on that published parent and migrates the active gameplay transport to v11
+while retaining archived wire contracts. Oil checks and scoped acceptance pass; publication and
+promotion remain pending;
+ART-ATLAS follows the item batch. See [verification](../verification.md) for accepted scope.
 
 ## Historical Heart activation checkpoint
 
@@ -15,8 +18,8 @@ opt-in [Shield](shield.md), [Golden Flame](golden-flame.md), [Short Fuse](short-
 [Power Bomb](power-bomb.md), [Remote Bomb](remote-bomb.md), [Landmine](landmine.md),
 [Invisibility Cloak](invisibility-cloak.md), [Stopwatch](stopwatch.md),
 [Invisible Bombs](invisible-bombs.md), [Teleporter](teleporter.md), [Wall Pass](wall-pass.md),
-[Kick](kick.md), [Punch](punch.md), and [Bracelet](bracelet.md) while retaining their reviewed
-protocol and identities.
+[Kick](kick.md), [Punch](punch.md), [Bracelet](bracelet.md), and [Oil Barrel](oil-barrel.md) while
+retaining Expanded-v5 rules, generator-v2, journal-v2, and their reviewed protocol identities.
 
 At the 21 October 2026 16:47 UTC native acceptance checkpoint, Invisibility Cloak was an
 **unreleased source candidate**. Corrected source `1c6724f` and
@@ -179,6 +182,7 @@ per seat/tick. Add a remappable equipment action, proposed default **E**, for Pu
 | --- | --- |
 | Punch (**prepared in v0.3.45**) | Move the adjacent facing bomb three interior cells, wrapping playable coordinates. Landing requires floor, no soft block/barrel/other bomb, and no overlap with a living player's footprint. If blocked, try further three-cell landings for at most one axis cycle. Returning to the original cell fails unchanged, with no cooldown; successful punches have a 12-tick cooldown and stop sliding. |
 | Bracelet (**published in v0.3.46**) | Moving contact shoves up to one tile, clamped by obstacles. Require separation to rearm and a 30-tick cooldown. Resolve simultaneous claims using alternating round priority; check swept fire/mines without recursive shoves. |
+| Oil Barrel (**prepared in v0.3.47**) | At most eight generated arena objects reveal only when safe, block while unlit, and become passable shared fire until round end when ignited. |
 | Kick (**published in v0.3.44**) | Push stationary Timed or Remote bombs one cell on the next update and every ten updates until blocked; Contact mines are excluded and identity, owner, blast and fuse remain unchanged. |
 | Wall Pass (**published in v0.3.43**) | Ignore soft blocks, but not hard walls or solid bombs. Placement inside obstacles is illegal. Replacement grants private exit-only grace for positively overlapped soft cells; grace ends individually when the full footprint exits or reaches tangency. |
 | Remote bomb | The next manual bomb action detonates the armed bomb instead of planting. Chains/fire still trigger it; death/disconnect adds no invented fuse. Another unused weapon may occupy the slot while it is armed. |

@@ -2,6 +2,7 @@ use std::collections::BTreeMap;
 
 use super::World;
 use crate::game::{
+    OilState,
     bombs::{Bomb, BombTrigger},
     fixtures::fixed_arena,
     generate_arena,
@@ -19,6 +20,53 @@ fn a_new_world_has_independent_empty_dynamic_layers() {
     assert_eq!(
         world.arena().spawns(),
         [CellId::new(1, 1), CellId::new(13, 11)]
+    );
+}
+
+#[test]
+fn oil_is_extracted_before_pickup_layers_and_private_debug_is_redacted() {
+    let concealed = CellId::new(5, 1);
+    let pending = CellId::new(3, 1);
+    let world = World::with_pickups(
+        fixed_arena(),
+        BTreeMap::from([(concealed, PickupKind::OilBarrel)]),
+        BTreeMap::from([(pending, PickupKind::OilBarrel)]),
+        BTreeMap::new(),
+    )
+    .unwrap();
+    assert!(world.pickups.iter().next().is_none());
+    assert_eq!(world.oil.state(concealed), Some(OilState::Concealed));
+    assert_eq!(world.oil.state(pending), Some(OilState::Pending));
+    assert_eq!(
+        format!("{:?}", world.oil),
+        "OilBarrels { sites: \"<redacted>\" }"
+    );
+}
+
+#[test]
+fn oil_rejects_exposed_and_more_than_eight_lifetime_sites() {
+    let exposed = CellId::new(3, 1);
+    assert_eq!(
+        World::with_pickups(
+            fixed_arena(),
+            BTreeMap::new(),
+            BTreeMap::new(),
+            BTreeMap::from([(exposed, PickupKind::OilBarrel)]),
+        ),
+        Err(PickupPlacementError::ExposedOilBarrel(exposed))
+    );
+    let sites = (1..=9)
+        .map(|column| (CellId::new(column, 3), OilState::Unlit))
+        .collect();
+    assert_eq!(
+        World::with_pickups_and_oil(
+            fixed_arena(),
+            BTreeMap::new(),
+            BTreeMap::new(),
+            BTreeMap::new(),
+            sites,
+        ),
+        Err(PickupPlacementError::TooManyOilBarrels)
     );
 }
 

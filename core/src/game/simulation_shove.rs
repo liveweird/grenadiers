@@ -68,9 +68,12 @@ impl State {
             claim.direction,
             UNITS_PER_CELL,
             &victim.bomb_grace,
-            self.rules.enabled_items().contains_wall_pass()
-                && victim.inventory().can_pass_soft_walls(),
-            &victim.soft_wall_grace,
+            crate::game::movement_collision::ObstacleAccess {
+                can_pass: self.rules.enabled_items().contains_wall_pass()
+                    && victim.inventory().can_pass_soft_walls(),
+                soft_grace: &victim.soft_wall_grace,
+                oil_grace: &victim.unlit_oil_grace,
+            },
         );
         let pusher = self.actors[pusher_index].position;
         if !footprints_overlap(victim.position, pusher) {
@@ -92,6 +95,7 @@ impl State {
         victim.pending_turn = None;
         movement::prune_bomb_grace(&self.world, victim);
         movement::prune_soft_wall_grace(&self.world, victim);
+        movement::prune_unlit_oil_grace(&self.world, victim);
         self.actors[pusher_index].last_successful_shove_tick = Some(tick);
         Some(ForcedMovement {
             seat: self.actors[victim_index].seat,

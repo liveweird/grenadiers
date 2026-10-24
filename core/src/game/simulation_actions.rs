@@ -209,6 +209,7 @@ impl State {
                 && self.live_bomb_count(seat) < usize::from(actor.capacity)
                 && self.world.arena.terrain(cell) == Some(Terrain::Floor)
                 && !self.world.arena.blocks().contains(&cell);
+            let eligible = eligible && !self.world.oil.unlit(cell);
             eligible.then_some(cell)
         });
         let contested = targets[0].is_some() && targets[0] == targets[1];
@@ -232,6 +233,7 @@ impl State {
             let has_capacity = self.live_bomb_count(seat) < usize::from(actor.capacity);
             let cell_is_free = self.world.arena.terrain(cell) == Some(Terrain::Floor)
                 && !self.world.arena.blocks().contains(&cell)
+                && !self.world.oil.unlit(cell)
                 && !self.world.bombs.values().any(|bomb| bomb.cell() == cell);
             if requests[seat.index()].is_some()
                 && !placement_veto[seat.index()]

@@ -4,6 +4,7 @@ use std::fmt;
 use super::arena::{ARENA_HEIGHT, ARENA_WIDTH, Arena, Terrain};
 use super::enabled_items::EnabledItems;
 use super::fixtures::{classic_spawns, classic_terrain};
+use super::oil::{generated_pair_fits, ordinary_pickup_count};
 use super::pickups::PickupKind;
 use super::types::CellId;
 use random_words::{ChaChaWords, RandomWords};
@@ -81,10 +82,11 @@ impl GeneratedArena {
 
 impl fmt::Debug for GeneratedArena {
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let ordinary_count = ordinary_pickup_count(&self.concealed_pickups);
         formatter
             .debug_struct("GeneratedArena")
             .field("arena", &self.arena)
-            .field("concealed_pickup_count", &self.concealed_pickups.len())
+            .field("concealed_pickup_count", &ordinary_count)
             .field("record", &self.record)
             .finish()
     }
@@ -170,6 +172,9 @@ fn generate_layers(
             continue;
         }
         let kind = sample_pickup(source, enabled)?;
+        if kind == PickupKind::OilBarrel && !generated_pair_fits(&concealed, cell, mirror) {
+            continue;
+        }
         concealed.insert(cell, kind);
         concealed.insert(mirror, kind);
     }
@@ -205,6 +210,7 @@ fn sample_pickup(source: &mut impl RandomWords, enabled: EnabledItems) -> Option
     let kick_end = wall_pass_end + u32::from(enabled.contains_kick()) * 15;
     let punch_end = kick_end + u32::from(enabled.contains_punch()) * 15;
     let bracelet_end = punch_end + u32::from(enabled.contains_bracelet()) * 15;
+    let oil_end = bracelet_end + u32::from(enabled.contains_oil_barrel()) * 15;
     Some(match value {
         0..40 => PickupKind::BombCapacity,
         40..80 => PickupKind::BlastRange,
@@ -230,6 +236,7 @@ fn sample_pickup(source: &mut impl RandomWords, enabled: EnabledItems) -> Option
         value if value < kick_end => PickupKind::Kick,
         value if value < punch_end => PickupKind::Punch,
         value if value < bracelet_end => PickupKind::Bracelet,
+        value if value < oil_end => PickupKind::OilBarrel,
         _ => unreachable!("sample value is bounded by the enabled item pool"),
     })
 }
@@ -362,6 +369,8 @@ mod invisible_bombs_tests;
 mod landmine_tests;
 #[cfg(test)]
 mod long_fuse_tests;
+#[cfg(test)]
+mod oil_tests;
 #[cfg(test)]
 #[path = "piercing_bomb_generation_tests.rs"]
 mod piercing_bomb_tests;

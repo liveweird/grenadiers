@@ -1,4 +1,4 @@
-import type { Direction, GameClientMessage, GameServerMessage, GameSettings, RoomView, Snapshot, V10ErrorCode } from '../v10/schema'
+import type { Direction, GameClientMessage, GameServerMessage, GameSettings, RoomView, Snapshot, V11ErrorCode } from '../v11/schema'
 import { initialGameClientState, type AdmissionIntent, type GameClientState, type GameFailure } from './clientTypes'
 import { preservesTeleportHistory } from './teleportHistory'
 export { initialGameClientState, type AdmissionIntent, type GameClientState, type GameFailure } from './clientTypes'
@@ -151,7 +151,7 @@ export class GameClient {
     socket.addEventListener('open', () => {
       if (!isCurrentConnection(generation, socket, this.generation, this.socket)) return
       this.update({ connection: 'authenticating' })
-      socket.send(JSON.stringify({ type: 'authenticate', protocolVersion: 10, token: credential }))
+      socket.send(JSON.stringify({ type: 'authenticate', protocolVersion: 11, token: credential }))
       credential = ''
     })
     socket.addEventListener('message', (event) => this.receive(generation, socket, event.data))
@@ -257,7 +257,7 @@ export class GameClient {
     this.update({ room: null, snapshot: null, youSeat: null, admissionBaseline: null,
       leavePending: false, settingsPending: false, failure: null })
   }
-  private acceptError(code: V10ErrorCode, sequence: number | null): void {
+  private acceptError(code: V11ErrorCode, sequence: number | null): void {
     if (code === 'resumeRejected' && sequence === this.admissionSequence && this.capability) {
       this.terminal('resumeRejected', true)
       return

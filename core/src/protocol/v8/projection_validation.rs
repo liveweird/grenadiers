@@ -7,9 +7,8 @@ use super::projection_event_validation::{validate_event, validate_timed_bomb};
 use super::projection_facts::{
     ProjectionError, ReportFacts, ValidatedReports, ValidatedWorld, WorldFacts,
 };
-use super::projection_items::{effect_item, equipment_item, pickup_item, push_item, weapon_item};
 use super::{
-    ARENA_TERRAIN_CELLS, BlastKind, ItemId, MAX_BLOCKS, MAX_BOMBS, MAX_FLAMES, MAX_PICKUPS,
+    ARENA_TERRAIN_CELLS, ItemId, MAX_BLOCKS, MAX_BOMBS, MAX_FLAMES, MAX_PICKUPS,
     MAX_RUNNING_UPDATES, Terrain, validate_effects,
 };
 
@@ -29,8 +28,9 @@ pub(crate) fn validate_world_for_items(
     validate_bombs(&facts, supported_items)?;
     validate_flames(&facts)?;
     validate_pickups(&facts)?;
+    super::projection_oil::validate_world(&facts, supported_items)?;
     validate_result(&facts)?;
-    validate_items(&facts)?;
+    super::projection_items::validate_world_items(&facts)?;
     validate_teleporter_history(&facts, supported_items)?;
     Ok(ValidatedWorld(facts))
 }
@@ -296,10 +296,13 @@ fn validate_pickups(world: &WorldFacts) -> Result<(), ProjectionError> {
             .pickups
             .windows(2)
             .all(|pair| cell_key(pair[0].cell) < cell_key(pair[1].cell))
+        || !strict_cells(&world.private_pickup_cells)
         || world.pickups.iter().any(|pickup| {
             terrain_at(world, pickup.cell) != Some(Terrain::Floor)
                 || blocks.contains(&cell_key(pickup.cell))
                 || flames.contains(&cell_key(pickup.cell))
+                || pickup.kind == super::PickupKind::OilBarrel
+                || !world.private_pickup_cells.contains(&pickup.cell)
         })
     {
         return Err(ProjectionError::InvalidPickups);
@@ -328,55 +331,6 @@ fn validate_result(world: &WorldFacts) -> Result<(), ProjectionError> {
         _ => false,
     };
     valid.then_some(()).ok_or(ProjectionError::InvalidResult)
-}
-
-fn validate_items(world: &WorldFacts) -> Result<(), ProjectionError> {
-    if !world.enabled_items.is_subset_of(world.available_items) {
-        return Err(ProjectionError::InvalidItems);
-    }
-    let mut required = Vec::new();
-    for actor in &world.actors {
-        if let Some(item) = actor.inventory.equipment {
-            push_item(&mut required, equipment_item(item));
-        }
-        if let Some(item) = actor.inventory.weapon {
-            push_item(&mut required, weapon_item(item));
-        }
-        for effect in actor.effects.as_slice() {
-            push_item(&mut required, effect_item(effect.kind()));
-        }
-        if actor.damage_grace_remaining_ticks.get() > 0 {
-            push_item(&mut required, ItemId::Heart);
-        }
-    }
-    for bomb in &world.bombs {
-        match bomb.trigger.observation() {
-            BombTriggerObservation::Remote => push_item(&mut required, ItemId::RemoteBomb),
-            BombTriggerObservation::Contact => push_item(&mut required, ItemId::Landmine),
-            BombTriggerObservation::Timed { paused: true, .. } => {
-                push_item(&mut required, ItemId::Stopwatch);
-            }
-            BombTriggerObservation::Timed { paused: false, .. } => {}
-        }
-        match bomb.blast {
-            BlastKind::Piercing => push_item(&mut required, ItemId::PiercingBomb),
-            BlastKind::Power => push_item(&mut required, ItemId::PowerBomb),
-            BlastKind::Standard => {}
-        }
-    }
-    for pickup in &world.pickups {
-        if let Some(item) = pickup_item(pickup.kind) {
-            push_item(&mut required, item);
-        }
-    }
-    if required
-        .into_iter()
-        .all(|item| world.enabled_items.contains(item))
-    {
-        Ok(())
-    } else {
-        Err(ProjectionError::InvalidItems)
-    }
 }
 
 pub(super) fn terrain_at(world: &WorldFacts, cell: crate::protocol::Cell) -> Option<Terrain> {

@@ -39,7 +39,7 @@ passes 711 core and 209 server tests with four historical ignores, the web gate 
 profile. Native acceptance covers 55 cases per target with zero retries or carry. Kick is now
 published; Punch v0.3.45 is also published and promoted locally on the accepted image. Twenty of 22 requested items are published;
 Bracelet v0.3.46 is published and promoted locally: 21 of 22 requested item types are shipped.
-Oil Barrel v0.3.47 follows, then ART-ATLAS.
+Oil Barrel v0.3.47 has completed scoped acceptance and awaits publication; ART-ATLAS follows.
 
 New playtest requests and expansion work are tracked in the [gameplay and presentation
 backlog](backlog.md): forgiving turns first, shared gameplay settings, detailed retro pixel art,

@@ -28,10 +28,7 @@ pub(crate) fn advance(world: &mut World, actors: &[Actor; 2], tick: Tick) -> Mot
         let motion = bomb.motion().expect("moving set was captured from motion");
         let expired =
             matches!(bomb.trigger(), BombTrigger::Timed { detonates_at } if detonates_at <= tick);
-        let burning = world
-            .hazards
-            .get(&bomb.cell())
-            .is_some_and(|expires| *expires > tick);
+        let burning = world.has_fire(bomb.cell(), tick);
         if expired || burning {
             continue;
         }
@@ -101,6 +98,7 @@ fn blocked(
 ) -> bool {
     world.arena.terrain(target) != Some(Terrain::Floor)
         || world.arena.blocks().contains(&target)
+        || world.oil.unlit(target)
         || world
             .bombs
             .values()

@@ -47,3 +47,8 @@ The Bracelet source route uses `docker-compose.bracelet.yaml` with that same pro
 perimeters with ordinary Bomb and movement input, then prove the stationary rival moves exactly
 one tile in both recipient streams without an Equipment action, public event or private marker.
 Source checks do not claim native acceptance.
+
+The Oil Barrel source route uses `docker-compose.oil-barrel.yaml` with the same read-only seed:
+`E2E_OIL_BARREL_FIXTURE=arena-v2-oil-barrel npm run test:oil-barrel`. Ordinary Bomb and movement
+input proves delayed reveal, the unlit collision edge, safe ignition and persistent burning in both
+recipient streams, then reconnects normally. Source checks do not claim native acceptance.

@@ -5,12 +5,13 @@ application on port 8085. Active matches live in that process, so the initial de
 intentionally runs one replica with a `Recreate` update strategy. A restart ends active matches;
 horizontal scaling and recovery require match routing and persistence designs first.
 
-Deploy the v0.3.43 server and web assets together and reload connected browsers. Gameplay v10 has
-an exact eighteen-item catalog, publishes authoritative teleport position epochs and retains Wall
-Pass exit grace as private server state alongside recipient-private actors, bombs and events.
-Gameplay-v9 clients fail
-version negotiation before credential lookup. No storage migration is required; active matches
-remain process-local.
+Deploy the v0.3.47 server and matching web assets together, then reload connected browsers.
+Gameplay v11 has an exact catalog of 22 item types: 21 collectible pickup types plus the Oil Barrel
+arena object. It publishes materialized Oil state while concealed and pending locations, generation
+data, and typed exit grace remain private. Gameplay-v10 clients fail version negotiation before
+credential lookup. Roll back the server and web assets as one paired image and reload browsers;
+mixing either side across gameplay versions is unsupported. No storage migration is required;
+active matches remain process-local and end on rollout or rollback.
 
 ## Docker Compose
 
@@ -72,7 +73,7 @@ network access to the pinned schemas; successful rendering alone does not pass t
 
 The feature rollout notes below retain their original release versions and catalog counts.
 Reproduction commands use the checked-out paired image; current deployments use
-[gameplay-v10](game/protocol-v10.md) and its current catalog, even for an older optional item.
+[gameplay-v11](game/protocol-v11.md) and its current catalog, even for an older optional item.
 
 ## Reproduce a generated pickup round
 
@@ -442,3 +443,18 @@ event or resource change for rejected placement; focused core tests verify no en
 the English desktop and Polish 320-pixel reduced-motion full-page captures named in the scenario.
 This sole-item route does not cover equipment-replacement grace; focused core and protocol tests do.
 Run it against the final predecessor-integrated image together with the cumulative native matrix.
+
+## Reproduce opt-in Oil Barrel reveal and persistent fire
+
+```sh
+chmod 444 core/tests/fixtures/arena-v2-oil-barrel.seed
+docker compose -f docker-compose.yaml -f docker-compose.oil-barrel.yaml up -d --no-build --force-recreate app
+E2E_OIL_BARREL_FIXTURE=arena-v2-oil-barrel npm --prefix e2e run test:oil-barrel
+docker compose -f docker-compose.yaml -f docker-compose.oil-barrel.yaml down
+```
+
+The read-only repeating-byte-31 fixture enables only Oil Barrel. Ordinary movement and Bomb input
+reveal the `(3,1)` site, prove its exact collision edge, ignite it, escape safely, and retain its
+burning state after finite flames expire and through a normal reconnect. Both recipient streams,
+English desktop and Polish 320-pixel reduced-motion rendering are checked. Run this source route
+against the final predecessor-integrated image together with the cumulative native matrix.

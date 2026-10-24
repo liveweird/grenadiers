@@ -11,6 +11,37 @@ honest about the source and environment actually tested.
 The records below are historical evidence. Their repeated CI runs, receipt graphs and sealing
 procedures do not impose additional requirements on future changes.
 
+## Current v0.3.47 Oil Barrel acceptance — 2026-10-24
+
+Frozen application/Rust/image source `32f5ad4f9bd74cf4b1844404e35d2eac47c6e678` passes full
+local debug/release/coverage, all **4,194,304 masks per profile**, four workers and 32 ranges in
+**7m53s**. Official merged line coverage is **17,043/18,313 (93.065036%)**, above the unchanged
+80% floor. The assertion-enabled optimized profile retains overflow checks; the earlier controlled
+131,072-mask experiment preserved exact executable-line, logical-function and uncovered-line
+inventories. The production release profile remains unchanged.
+
+Web/security source `8332694` has identical relevant inputs after the test-profile integration:
+**6,733 tests / 75 files**, with **95.02/90.71/96.03/97.57%** statement/branch/function/line
+coverage. E2E lint/typecheck/Knip, all 60 scenario titles and auxiliary checks pass. Dependency
+security passes with three moderate web packages, no high/critical findings and no E2E advisories;
+the configured image-audit threshold passes. Distinct Ubuntu debug/release Rust units pass in
+[run 40129204565](https://github.com/liveweird/grenadiers/actions/runs/40129204565).
+
+Exact image `sha256:969ff363f77ad6dfc6e62fa5f98e4a704d017ad1186d43fe774fedc50fd7561e`
+passes **32 scoped native cases** with zero Playwright retries: Compose Oil, Bracelet, Kick, Punch,
+Landmine, Wall Pass, Teleporter, Stopwatch, classic match/rematch and 22 latency cases (31 total),
+plus Kubernetes Oil with production-manifest, image/security and UID-guarded cleanup checks.
+Latency maxima are **66.40 ms local / 159.85 ms shaped**, 20 observations per profile and zero
+exceedances of the unchanged 250 ms budget. Reset/terminal behavior remains domain/protocol
+coverage; the Oil browser route proves persistent fire and real reconnect without synthetic audio.
+
+The corrected Oil scenario uses `b30deb1`; predecessor cases use `3e5ecb8`, differing only in the
+Oil-specific test file. The prepared test's pre-admission Polish lookup, rejection of valid ID zero
+and arbitrary color-count threshold were corrected and independently reviewed; failed attempts
+remain recorded. Palette checks now verify recognizable barrel/fire materials on both views.
+Application inputs and the tested image are unchanged. Publication and promotion remain pending;
+v0.3.46 remains the live baseline at this acceptance checkpoint.
+
 ## Current v0.3.46 published delivery — 2026-10-24
 
 [v0.3.46](https://github.com/liveweird/grenadiers/releases/tag/v0.3.46) publishes Bracelet as the twenty-first requested item from source

@@ -8,8 +8,9 @@ The initial playable profile supports two human players. Bots and larger matches
 `sha256:1460278198b6d604595bfbe4fb8278a85ab39725c43516bb8b55ab2e6a47f5bf`. See [verification](docs/verification.md)
 and the [Bracelet guide and screenshots](docs/game/bracelet.md).
 
-Oil Barrel v0.3.47 source is prepared on that published parent, but its full gates, native
-acceptance, CI and publication remain pending. ART-ATLAS follows the completed item batch.
+Oil Barrel v0.3.47 has completed checks and scoped acceptance; publication and promotion remain
+pending. See [verification](docs/verification.md) and the [Oil guide/captures](docs/game/oil-barrel.md).
+ART-ATLAS follows publication of the completed item batch.
 
 The **two-player arena match is playable**. Create a room, share its invitation,
 join from another browser, and both choose Ready. Select the courtyard to move with arrows

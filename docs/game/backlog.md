@@ -3,8 +3,8 @@
 TURN, CONFIG and the first ART slice are implemented. Published [v0.3.46](https://github.com/liveweird/grenadiers/releases/tag/v0.3.46)
 adds Bracelet, bringing the requested item catalog to **21 of 22 published types**. Source checks,
 scoped Compose/Kubernetes acceptance, publication and localhost promotion are complete.
-Oil Barrel v0.3.47 source is prepared on that published parent, but its acceptance, CI and
-publication remain pending. ART-ATLAS follows the feature batch.
+Oil Barrel v0.3.47 has completed checks and scoped acceptance on that published parent;
+publication and promotion remain pending. ART-ATLAS follows the feature batch.
 
 [v0.3.43](https://github.com/liveweird/grenadiers/releases/tag/v0.3.43) publishes Wall Pass as the
 eighteenth of 22 requested item types. Published source `c086f719ea470b9fe24963adef84b5e3bdf3e17a`,

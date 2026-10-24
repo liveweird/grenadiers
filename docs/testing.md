@@ -378,7 +378,8 @@ and stage the players at `(10,1)` and `(11,1)`. Forward movement shoves the stat
 exactly one tile to `(12,1)` in both public streams. The scenario asserts no victim command,
 Equipment action, public event or private cooldown/report field, then captures English desktop and
 Polish 320-pixel reduced-motion views. It does not inject state, search seeds, retry, send direct
-gameplay commands or extend budgets. Native same-image execution remains pending.
+gameplay commands or extend budgets. Bracelet acceptance passed in v0.3.46; the same scenario
+also passes against the Oil v11 image.
 
 ### Oil Barrel production-seed scenario
 
@@ -389,5 +390,7 @@ proves pending privacy while finite fire remains, safe revelation at `(3,1)`, th
 clamp at `x=2752`, legal adjacent ignition and escape, unchanged `(4,1)` and `(3,2)` soft blocks,
 finite-flame expiry after at least 60 ticks, persistent burning, survival, localized rendering and
 reconnect retention without a pickup event or synthesized audio cue. It does not inject state,
-search seeds, send direct gameplay commands or extend the timeout. Native same-image execution
-remains pending.
+search seeds, send direct gameplay commands or extend the timeout. Accepted Compose/Kubernetes
+execution is part of the [32-case checkpoint](verification.md#current-v0347-oil-barrel-acceptance--2026-10-24).
+Unlit and burning checks assert recognizable material palettes on both views; they accept valid
+zero-based entity IDs and check room-scoped Polish rules after admission.

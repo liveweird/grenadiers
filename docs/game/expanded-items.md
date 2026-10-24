@@ -3,7 +3,8 @@
 Published [v0.3.46](https://github.com/liveweird/grenadiers/releases/tag/v0.3.46) adds opt-in [Bracelet](bracelet.md)
 as the twenty-first requested item and is promoted locally. [Oil Barrel](oil-barrel.md) v0.3.47
 source is prepared on that published parent and migrates the active gameplay transport to v11
-while retaining archived wire contracts. Oil acceptance, CI and publication remain pending;
+while retaining archived wire contracts. Oil checks and scoped acceptance pass; publication and
+promotion remain pending;
 ART-ATLAS follows the item batch. See [verification](../verification.md) for accepted scope.
 
 ## Historical Heart activation checkpoint

@@ -119,8 +119,8 @@ and patterns. Keep generator tests and actual schema validation alongside contra
 `e2e/` is a separate Playwright package against the actual running stack. Install Chromium
 with `npm --prefix e2e run install:browsers`, start Compose, then run
 `scripts/gates.sh browser`. No mocked backend belongs in blackbox tests. Scenario documents
-and spec titles must agree verbatim. E2E static checks run on every pull request; browser
-smoke runs in CI against Compose.
+and spec titles must agree verbatim. Run E2E static checks locally before release. The optional manual full workflow also runs
+those checks and Compose scenarios; automatic PR checks add distinct Linux Rust coverage.
 
 The default suite uses one worker in CI and two locally; `E2E_WORKERS` explicitly overrides
 that choice. Each multiplayer case already owns two browser contexts. Serial CI execution

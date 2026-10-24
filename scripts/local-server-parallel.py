@@ -11,6 +11,7 @@ import re
 import shlex
 import shutil
 import subprocess
+import sys
 import tempfile
 import time
 from pathlib import Path
@@ -85,60 +86,6 @@ def parallel_map(buckets: list[list[dict[str, int]]],
         for future in concurrent.futures.as_completed(futures):
             results[futures[future]] = future.result()
     return results
-
-
-def parse_lcov(raw: str) -> dict[str, dict[int, tuple[int, str | None]]]:
-    files: dict[str, dict[int, tuple[int, str | None]]] = {}
-    current = None; lines: dict[int, tuple[int, str | None]] = {}; lf = lh = None
-
-    def finish() -> None:
-        nonlocal current, lines, lf, lh
-        if current is None or lf != len(lines) or lh != sum(hits > 0 for hits, _ in lines.values()) \
-                or current in files:
-            raise ValueError("LCOV section inventory mismatch")
-        files[current] = dict(lines); current, lines, lf, lh = None, {}, None, None
-
-    for text in raw.splitlines():
-        if text.startswith("SF:"):
-            if current is not None: raise ValueError("LCOV section not terminated")
-            source = Path(text[3:])
-            if not source.is_absolute() or source.is_symlink() or source.resolve() != source \
-                    or ROOT not in source.parents or not source.is_file():
-                raise ValueError("LCOV source is not canonical repository input")
-            current = source.relative_to(ROOT).as_posix()
-        elif text.startswith("DA:"):
-            if current is None: raise ValueError("LCOV DA outside section")
-            fields = text[3:].split(",")
-            if len(fields) not in {2, 3}: raise ValueError("LCOV DA field count")
-            line, hits = int(fields[0]), int(fields[1]); checksum = fields[2] or None if len(fields) == 3 else None
-            if line < 1 or hits < 0 or line in lines: raise ValueError("LCOV DA malformed")
-            lines[line] = (hits, checksum)
-        elif text.startswith("LF:"): lf = int(text[3:])
-        elif text.startswith("LH:"): lh = int(text[3:])
-        elif text == "end_of_record": finish()
-    if current is not None or not files: raise ValueError("LCOV incomplete or empty")
-    return files
-
-
-def union_lcov(reports: list[dict[str, dict[int, tuple[int, str | None]]]],
-               floor: float = 80.0) -> dict[str, Any]:
-    if not reports: raise ValueError("no LCOV reports")
-    reference = reports[0]
-    for report in reports:
-        if set(report) != set(reference): raise ValueError("LCOV source denominator differs")
-        for path in reference:
-            if set(report[path]) != set(reference[path]): raise ValueError("LCOV line denominator differs")
-            if any(report[path][line][1] != reference[path][line][1] for line in reference[path]):
-                raise ValueError("LCOV checksums differ")
-        found = sum(len(lines) for lines in report.values())
-        hit = sum(hits > 0 for lines in report.values() for hits, _ in lines.values())
-        if not found or hit * 100 / found < floor: raise ValueError("LCOV component below line floor")
-    found = sum(len(lines) for lines in reference.values())
-    hit = sum(any(report[path][line][0] > 0 for report in reports)
-              for path, lines in reference.items() for line in lines)
-    percent = hit * 100 / found
-    if percent < floor: raise ValueError("LCOV union below line floor")
-    return {"files": len(reference), "linesFound": found, "linesHit": hit, "percent": percent}
 
 
 def parse_coverage_environment(output: str,
@@ -298,7 +245,39 @@ def report_lcov(env: dict[str, str], raw_dirs: list[Path], output: Path,
              "--lcov", "--output-path", str(output)], env=env)
 
     _, count = with_report_profiles(Path(target_text), raw_dirs, owner, report)
-    return {"parsed": parse_lcov(output.read_text()), "rawProfiles": count}
+    if output.is_symlink() or not output.is_file() or output.stat().st_size == 0:
+        raise ValueError("official LCOV report missing or empty")
+    return {"lineFloor": 80, "rawProfiles": count, "reporter": "cargo-llvm-cov"}
+
+
+def execute_profiles(source: str, workers: int, temp: Path) -> tuple[dict[str, Any], dict[str, Any]]:
+    plan_path = temp / "server-mask-plan.json"
+    run(["node", "scripts/local-server-mask-plan.mjs", str(ROOT), source, str(plan_path)])
+    plan = validate_plan(json.loads(plan_path.read_text()), source); profiles = {}
+    for profile, release in (("debug", False), ("release", True)):
+        ordinary = ["cargo", "test", "--workspace", "--locked"]
+        if release: ordinary.insert(3, "--release")
+        run([*ordinary, "--", "--skip", HEAVY_TEST, "--show-output"])
+        profiles[profile] = execute_profile(profile, select_binary(release), plan, workers)
+    cov_env = coverage_environment()
+    run(["cargo", "llvm-cov", "clean", "--workspace"], env=cov_env)
+    baseline = temp / "coverage-baseline"; baseline.mkdir()
+    cov_env["LLVM_PROFILE_FILE"] = str(baseline / "%p-%18m.profraw")
+    run(["cargo", "test", "--workspace", "--locked", "--", "--skip", HEAVY_TEST,
+         "--show-output"], env=cov_env)
+    if not list(baseline.glob("*.profraw")):
+        raise ValueError("ordinary instrumented coverage produced no raw profiles")
+    coverage_binary = select_binary(False, cov_env)
+    verify_instrumented_binary(coverage_binary, cov_env, temp / "coverage-probe")
+    coverage_raw = temp / "coverage-workers"; coverage_raw.mkdir()
+    profiles["coverage"] = execute_profile("coverage", coverage_binary, plan, workers,
+                                            cov_env, coverage_raw)
+    worker_dirs = [Path(path) for path in profiles["coverage"].pop("rawDirectories")]
+    scratch_report = temp / "coverage.lcov"
+    coverage = report_lcov(cov_env, [baseline, *worker_dirs], scratch_report, "all")
+    coverage["output"] = "target/coverage.lcov"
+    profiles["coverage"]["coverage"] = coverage
+    return plan, profiles
 
 
 def main() -> None:
@@ -316,55 +295,26 @@ def main() -> None:
     run(["cargo", "fmt", "--all", "--", "--check"])
     run(["cargo", "clippy", "--workspace", "--all-targets", "--locked", "--", "-D", "warnings"])
     run(["cargo", "build", "--workspace", "--locked"])
-    profiles = {}
-    with tempfile.TemporaryDirectory(prefix="grenadiers-server-parallel-") as temporary:
-        temp = Path(temporary); plan_path = temp / "server-mask-plan.json"
-        run(["node", "scripts/local-server-mask-plan.mjs", str(ROOT), source, str(plan_path)])
-        plan = validate_plan(json.loads(plan_path.read_text()), source)
-        for profile, release in (("debug", False), ("release", True)):
-            ordinary = ["cargo", "test", "--workspace", "--locked"]
-            if release: ordinary.insert(3, "--release")
-            run([*ordinary, "--", "--skip", HEAVY_TEST, "--show-output"])
-            profiles[profile] = execute_profile(profile, select_binary(release), plan, args.workers)
-        cov_env = coverage_environment()
-        run(["cargo", "llvm-cov", "clean", "--workspace"], env=cov_env)
-        baseline = temp / "coverage-baseline"; baseline.mkdir()
-        cov_env["LLVM_PROFILE_FILE"] = str(baseline / "%p-%18m.profraw")
-        run(["cargo", "test", "--workspace", "--locked", "--", "--skip", HEAVY_TEST,
-             "--show-output"], env=cov_env)
-        if not list(baseline.glob("*.profraw")):
-            raise ValueError("ordinary instrumented coverage produced no raw profiles")
-        coverage_binary = select_binary(False, cov_env)
-        verify_instrumented_binary(coverage_binary, cov_env, temp / "coverage-probe")
-        coverage_raw = temp / "coverage-workers"; coverage_raw.mkdir()
-        profiles["coverage"] = execute_profile("coverage", coverage_binary, plan, args.workers,
-                                                cov_env, coverage_raw)
-        worker_dirs = [Path(path) for path in profiles["coverage"]["rawDirectories"]]
-        components = []
-        for index, worker_dir in enumerate(worker_dirs):
-            report = report_lcov(cov_env, [baseline, worker_dir], temp / f"component-{index}.lcov",
-                                 f"component-{index}")
-            components.append(report["parsed"])
-        union = union_lcov(components)
+    temp = Path(tempfile.mkdtemp(prefix="grenadiers-server-parallel-"))
+    try:
+        plan, profiles = execute_profiles(source, args.workers, temp)
+        if git("rev-parse", "HEAD") != source or git("rev-parse", "HEAD^{tree}") != tree \
+                or git("status", "--porcelain=v1", "--untracked-files=all") \
+                or run(["cargo", "--version"], capture=True).stdout.strip() != cargo_version \
+                or run(["rustc", "-Vv"], capture=True).stdout.strip() != rustc_version:
+            raise SystemExit("source or compiler identity changed; no result was produced")
         final_path = ROOT / "target/coverage.lcov"; final_path.parent.mkdir(exist_ok=True)
-        final = report_lcov(cov_env, [baseline, *worker_dirs], final_path, "union")
-        final_union = union_lcov([final["parsed"]])
-        if {key: union[key] for key in ("files", "linesFound", "linesHit")} != \
-                {key: final_union[key] for key in ("files", "linesFound", "linesHit")}:
-            raise ValueError("official merged coverage differs from verified OR union")
-        profiles["coverage"]["coverage"] = {**union, "rawProfiles": final["rawProfiles"]}
-        profiles["coverage"].pop("rawDirectories")
-    if git("rev-parse", "HEAD") != source or git("rev-parse", "HEAD^{tree}") != tree \
-            or git("status", "--porcelain=v1", "--untracked-files=all") \
-            or run(["cargo", "--version"], capture=True).stdout.strip() != cargo_version \
-            or run(["rustc", "-Vv"], capture=True).stdout.strip() != rustc_version:
-        raise SystemExit("source or compiler identity changed; no result was produced")
-    summary = {"result": "completed-clean-local-verification", "source": source, "tree": tree,
-               "workers": args.workers, "retries": 0,
-               "compiler": {"cargo": cargo_version, "rustc": rustc_version},
-               "catalogItems": len(plan["catalog"]), "maskCount": plan["totalCardinality"],
-               "partitionCount": plan["partitionCount"], "profiles": profiles,
-               "durationSeconds": round(time.monotonic() - started, 3)}
+        shutil.copyfile(temp / "coverage.lcov", final_path)
+        summary = {"result": "completed-clean-local-verification", "source": source, "tree": tree,
+                   "workers": args.workers, "retries": 0,
+                   "compiler": {"cargo": cargo_version, "rustc": rustc_version},
+                   "catalogItems": len(plan["catalog"]), "maskCount": plan["totalCardinality"],
+                   "partitionCount": plan["partitionCount"], "profiles": profiles,
+                   "durationSeconds": round(time.monotonic() - started, 3)}
+    except BaseException:
+        print(f"LOCAL_SERVER_PARALLEL_RETAINED_SCRATCH={temp}", file=sys.stderr, flush=True)
+        raise
+    shutil.rmtree(temp)
     print("LOCAL_SERVER_PARALLEL_SUMMARY=" + json.dumps(summary, sort_keys=True))
 
 

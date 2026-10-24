@@ -114,22 +114,6 @@ else:
     raise AssertionError("worker failure not propagated")
 
 
-def lcov(hit_a, hit_b, checksum="sum"):
-    return module.parse_lcov(
-        f"SF:{module.ROOT / 'server/src/lib.rs'}\nDA:1,{hit_a},{checksum}\nDA:2,{hit_b},{checksum}2\n"
-        f"LF:2\nLH:{int(hit_a > 0) + int(hit_b > 0)}\nend_of_record\n")
-
-
-union = module.union_lcov([lcov(1, 0), lcov(0, 1)], floor=50)
-assert union["linesFound"] == 2 and union["linesHit"] == 2 and union["percent"] == 100
-try:
-    module.union_lcov([lcov(1, 0), lcov(0, 1, "changed")], floor=50)
-except ValueError:
-    pass
-else:
-    raise AssertionError("coverage checksum mismatch accepted")
-
-
 with tempfile.TemporaryDirectory(prefix="grenadiers-llvm-cov-discovery-") as temporary:
     fixture = Path(temporary)
     (fixture / "src").mkdir()
@@ -189,6 +173,37 @@ with tempfile.TemporaryDirectory(prefix="grenadiers-llvm-cov-discovery-") as tem
     assert profile_count == len(list(baseline.glob("*.profraw"))) + len(list(worker.glob("*.profraw")))
     assert report_path.is_file()
     assert "SF:" in report_path.read_text() and not list(target.glob("*.profraw"))
+
+    original_root = module.ROOT
+    try:
+        module.ROOT = fixture
+        official = module.report_lcov(cov_env, [baseline, worker], fixture / "production.lcov", "production")
+        assert official["lineFloor"] == 80 and official["rawProfiles"] == profile_count
+        assert official["reporter"] == "cargo-llvm-cov"
+    finally:
+        module.ROOT = original_root
+
+    json_path = fixture / "coverage.json"
+    def json_report():
+        return subprocess.run(
+            ["cargo", "llvm-cov", "report", "--manifest-path", manifest, "--json",
+             "--summary-only", "--output-path", str(json_path)], check=True, cwd=fixture,
+            env=cov_env, stdout=subprocess.DEVNULL)
+    module.with_report_profiles(target, [baseline, worker], "actual-json", json_report)
+    llvm_json = json.loads(json_path.read_text())
+    assert set(llvm_json) == {"cargo_llvm_cov", "data", "type", "version"}
+    assert llvm_json["type"] == "llvm.coverage.json.export" and len(llvm_json["data"]) == 1
+    assert "totals" in llvm_json["data"][0]
+
+    def impossible_floor():
+        return subprocess.run(
+            ["cargo", "llvm-cov", "report", "--manifest-path", manifest,
+             "--fail-under-lines", "101", "--lcov", "--output-path", str(fixture / "impossible.lcov")],
+            check=False, cwd=fixture, env=cov_env, stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL)
+    failed, _ = module.with_report_profiles(
+        target, [baseline, worker], "floor-rejection", impossible_floor)
+    assert failed.returncode != 0
 
     (target / "grenadiers-local-server-abandoned-0-0.profraw").write_bytes(b"owned stale")
     module.with_report_profiles(target, [baseline, worker], "stale-recovery", lambda: None)

@@ -1,6 +1,7 @@
 # Shield pickup
 
-Status: implementation candidate for v0.3.26; native release acceptance is pending.
+Status: implemented; published in
+[v0.3.26](https://github.com/liveweird/grenadiers/releases/tag/v0.3.26) as an opt-in pickup.
 
 ## Playing with Shield
 
@@ -34,8 +35,8 @@ seeded generation remain unchanged.
 
 With only Heart and Shield enabled, rules 5 / generator 2 sample weights 40 capacity,
 40 range, 20 speed, 25 Heart and 15 Shield. Disabled items contribute no weight or additional random draw.
-Gameplay v10 and private journal format 2 are current; older contracts and journal format-1
-rules retain their original behavior. Checked timer overflow fails the step atomically.
+The live gameplay contract ([v11](protocol-v11.md)) and private journal format 2 are current;
+older contracts and journal format-1 rules retain their original behavior. Checked timer overflow fails the step atomically.
 
 See [the seeded browser scenario](../../e2e/scenarios/shield.md), [deployment reproduction](../deployment.md),
 and [verification](../verification.md) for acceptance status and operational evidence.

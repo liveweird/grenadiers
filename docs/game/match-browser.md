@@ -1,7 +1,7 @@
 # Browser match client
 
 Status: historical v3 browser behavior from the classic-match release. The active application
-and existing gameplay endpoint now use the [v6 reconnect browser](reconnect-browser.md); no
+and existing gameplay endpoint now use the [reconnect browser](reconnect-browser.md); no
 separate route or selectable protocol mode is exposed.
 
 The archived v3 client validated every message against its schema and authenticated with version 3.

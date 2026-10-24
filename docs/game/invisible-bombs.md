@@ -30,10 +30,10 @@ Version 0.3.41 adds Invisible Bombs as gameplay v9's sixteenth item and generato
 350)` and the sole-item pool is 115. Every earlier catalog mask and generator path is unchanged.
 Archived gameplay v8 remains pinned to its fourteen-item Cloak-era catalog.
 
-The v0.3.42 source candidate carries the same Invisible Bombs rules into gameplay v10 and adds
-Teleporter as the seventeenth item. Gameplay v9 remains archived at this sixteen-item catalog;
-the v10 candidate accepts all 131,072 seventeen-item masks. Fresh v0.3.42 acceptance remains
-pending.
+Version 0.3.42 carries the same Invisible Bombs rules into gameplay v10 and adds Teleporter as the
+seventeenth item. Gameplay v9 remains archived at this sixteen-item catalog; v10 accepts all
+131,072 seventeen-item masks. v0.3.42 was accepted and published on 2026-10-23; see
+[releases](../releases.md#v0342-published-prerelease--2026-10-23).
 
 ## Sealed native acceptance checkpoint — 2026-10-22 00:55:23 UTC
 

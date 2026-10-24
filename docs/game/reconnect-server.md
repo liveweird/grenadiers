@@ -1,7 +1,7 @@
 # Reconnect server behavior
 
-The gameplay endpoint uses protocol v4 and keeps one private resume capability for each occupied
-seat. A transport loss changes that seat to `disconnected` and reserves it through the published
+The gameplay endpoint (live contract [v11](protocol-v11.md)) keeps one private resume capability
+for each occupied seat. A transport loss changes that seat to `disconnected` and reserves it through the published
 `expiresAt` tick. The capability stays stable across restore, connected takeover, and rematch. An
 explicit leave releases the seat immediately. Capabilities are independently generated, redacted
 from logs and debug output, and never appear in shared room publications or replay records.

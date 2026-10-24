@@ -1,6 +1,8 @@
 # Gameplay v5: forgiving turns
 
-Product candidate v0.3.16 activates `api/gameplay-v5.schema.json`, Rust
+Archived reference; the live endpoint uses [v11](protocol-v11.md).
+
+Product candidate v0.3.16 activated `api/gameplay-v5.schema.json`, Rust
 `core::protocol::v5` and generated `web/src/game/v5/schema.ts` together.
 
 V5 retains v4 messages, personal admission, ten-second reserved-seat reconnect, bounds and

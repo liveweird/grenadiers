@@ -11,7 +11,7 @@ constructs a context automatically. Muting, hiding the document, reconnecting, l
 or unmounting stops active voices. Hidden return requires **Resume sound**. The preference stores
 only exact `{ "version": 1, "enabled": boolean }` data, with a 64-character input bound.
 
-Audio follows validated v4 state after the client accepts it. Event identity is room ID plus event
+Audio follows validated live-contract state after the client accepts it. Event identity is room ID plus event
 tick and index. The cursor advances while muted, seeds silently on room, round, admission, enable,
 and visibility boundaries, rejects old revisions, and never queues history for replay. Each
 snapshot coalesces every cue kind once in elimination, detonation, pickup, placement priority.

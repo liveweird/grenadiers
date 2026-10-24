@@ -22,9 +22,12 @@ generated TypeScript, conformance tests, and docs change together.
   the connection at the WebSocket transport boundary and need not produce an application error.
 - **API-WS-003:** Bound socket count, frames, messages, inactivity, and sends. Control ping/pong
   frames remain distinct from application ping/pong envelopes. Do not expose credentials in URLs.
-- **API-STATE-001:** Sockets do not reserve player slots. `maxPlayers: 2` describes the future
-  per-match capacity. Clients will submit inputs, never authoritative outcomes.
+- **API-STATE-001:** Sockets do not reserve player slots. Matches are two-seat (`maxPlayers: 2`).
+  Gameplay clients submit inputs, never authoritative outcomes; see
+  [protocol v11](../docs/game/protocol-v11.md).
 
 Spectral checks the machine-verifiable OpenAPI subset. Runtime conformance tests and browser
-smoke tests cover the remaining behavior. No authentication, CRUD, pagination, or retry/idempotency
-policy is claimed before those APIs exist.
+smoke tests cover the remaining behavior. `POST /api/v1/game/session` issues short-lived anonymous
+single-use tokens for the gameplay socket (201; 400, 403, 429, and 503 problems; see
+[security](../docs/security.md)). Durable identity, CRUD, pagination, and retry/idempotency policy
+are not claimed.

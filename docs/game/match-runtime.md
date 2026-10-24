@@ -1,7 +1,7 @@
 # Authoritative match runtime
 
-Status: active behind the v10 endpoint and bounded match owner. No alternate endpoint or
-runtime feature flag is exposed.
+Status: active behind the live gameplay endpoint ([v11](protocol-v11.md)) and bounded match
+owner. No alternate endpoint or runtime feature flag is exposed.
 
 `MatchRuntime` composes the pure `MatchLifecycle`, immutable room profile/identity, private seed
 source, input mailbox, optional simulation, checked revision, and at most three tick reports.

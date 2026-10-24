@@ -8,7 +8,7 @@ export default defineConfig({
   fullyParallel: false,
   workers: Number(process.env.E2E_WORKERS ?? defaultWorkers),
   forbidOnly: Boolean(process.env.CI),
-  retries: process.env.CI ? 2 : 0,
+  retries: 0,
   reporter: [['list'], ['html', { open: 'never' }]],
   timeout: 30_000,
   expect: { timeout: 10_000 },
@@ -20,7 +20,7 @@ export default defineConfig({
     launchOptions: process.env.CI && process.platform === 'linux'
       ? { args: ['--enable-gpu', '--use-gl=angle', '--use-angle=swiftshader'] }
       : undefined,
-    // V4 personal frames contain stable seat capabilities. Native trace capture
+    // Personal gameplay frames contain stable seat capabilities. Native trace capture
     // observes them before application/test redaction, so keep public reports
     // and failure screenshots without persisting credential-bearing traffic.
     trace: 'off',

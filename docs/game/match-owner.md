@@ -1,7 +1,8 @@
 # Bounded match owner
 
-Status: active in the existing registry and v10 endpoint. Authentication, sequence ownership,
-and connection generations remain in their original transport boundaries.
+Status: active in the existing registry and live gameplay endpoint ([v11](protocol-v11.md)).
+Authentication, sequence ownership, and connection generations remain in their original transport
+boundaries.
 
 One task owns the real MatchRuntime, a 32-command queue, two generation-bound capability slots,
 and at most two pending departures/leave replies. Submissions never await inside the owner. A leave

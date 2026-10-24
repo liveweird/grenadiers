@@ -1,8 +1,8 @@
 # Gameplay-v3 match contract
 
 Status: historical contract retained for regression and physical parity checks. The existing
-`/api/v1/game/ws` endpoint accepts only [gameplay v4](protocol-v4.md); there is no alternate
-version-selectable endpoint. See the current [protocol guide](protocol.md).
+`/api/v1/game/ws` endpoint accepts only the live contract,
+[gameplay v11](protocol-v11.md); there is no alternate version-selectable endpoint. See the current [protocol guide](protocol.md).
 
 V3 keeps existing commands and physical snapshot/event shapes, adding
 `rematch {sequence, roomId, roundId, ready}`. Authentication success is fixed to 3;

@@ -10,7 +10,7 @@ playable target remains two human players. M1 implements the
 outcomes](combat.md), including explicit public projections/events. M3 completes
 [gameplay contracts](protocol.md), anonymous sessions, authenticated [rooms](rooms.md),
 authoritative scheduling, and the [playable browser duel](browser.md). The current preview
-plays generated configurable-v4 matches (first to three by default) with upgrades, automatic round resets,
+plays generated Expanded-v5 matches (first to three by default) with upgrades, automatic round resets,
 consensual rematch, and process-local reserved-seat reconnect. Bots, larger matches,
 matchmaking, cross-process recovery, and durable stats follow.
 
@@ -50,8 +50,8 @@ and remaining presentation work are planned extensions to the implemented Classi
 [Room settings](settings.md) covers shared starting speed, turn tolerance, match target and fuse.
 
 [Gameplay v11 compatibility](protocol-v11.md) defines the paired live wire contract, including the
-authoritative teleport position epoch. [Gameplay v9](protocol-v9.md) is the archived sixteen-item
-contract; earlier contracts remain historical references.
+authoritative teleport position epoch. [Gameplay v10](protocol-v10.md) and [v9](protocol-v9.md) are
+archived; earlier contracts remain historical references.
 
 [Pixel-art presentation](pixel-art.md) describes original artwork, animation and resource bounds.
 

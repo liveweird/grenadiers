@@ -6,15 +6,14 @@ Run `npm ci`, `npm run install:browsers`, then `npm test`. Every `test(...)` tit
 
 The suite covers independent diagnostic sockets and real browser session issuance, including
 Origin and cache policy. A gameplay socket scenario proves compatibility-before-claim,
-duplicate-owner protection, and sequence replay rejection. Rendered duel scenarios follow
-with their implemented milestone.
+duplicate-owner protection, and sequence replay rejection.
 
 The generated pickup and full-match fixtures run separately from random-map smoke tests.
 Run the dedicated configurable-controls acceptance with `npm run test:controls`; it needs no
 fixture and verifies persisted UI remapping with native keys against a live round.
 The reconnect suite reuses the full-match fixture; run it with
 `E2E_MATCH_FIXTURE=arena-v1-matches npm run test:reconnect` from this directory.
-Every suite disables native tracing because v5 personal frames contain stable private seat
+Every suite disables native tracing because personal gameplay frames contain stable private seat
 capabilities. Keep failure screenshots, public HTML reports, explicit compositor checkpoints,
 and bounded redacted summaries; never print or attach authentication/resume payloads. The
 reconnect probe closes real native transports and authenticates normally without changing

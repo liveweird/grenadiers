@@ -1,7 +1,7 @@
 # Pure match lifecycle
 
 `core::room::MatchLifecycle` composes occupancy, readiness, the absolute clock, command epochs,
-and `MatchSeries`. The production v6 match owner and runtime use this lifecycle. The archived
+and `MatchSeries`. The production match owner and runtime use this lifecycle. The archived
 `RoomLifecycle` remains covered for the historical single-round model. This API owns no
 physics or I/O.
 

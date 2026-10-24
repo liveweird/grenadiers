@@ -11,7 +11,7 @@ all three maps. `World::new` still creates an item-free world.
 `World::from_generated(generated)` builds the concealed layer and returns the private
 `GenerationRecord` separately to the trusted caller. `exposed_pickups()` is the read-only
 visible layer. Public domain `PickupView { cell, kind }` entries are row-major and contain no
-concealed or pending information; Debug redacts those private layers. Gameplay-v9 transmits only
+concealed or pending information; Debug redacts those private layers. Gameplay v9 introduced transmitting only
 exposed items and collection events. Gameplay v11 retains the visible actor Teleporter position
 epoch, Wall Pass, Kick, Punch and Bracelet equipment kinds, and publishes materialized Oil Barrel
 objects separately from pickups. Wall Pass exit-grace cells remain private

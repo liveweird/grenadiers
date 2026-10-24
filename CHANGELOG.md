@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.3.49 — gameplay atlas candidate
+## 0.3.49 — 2026-10-25 (published)
 
 - Use the canonical artist PNG/JSON for gameplay terrain, actors, pickups, bombs, flames and Oil.
 - Reuse the validated pixel pipeline and shared scene behavior; preserve cached terrain,

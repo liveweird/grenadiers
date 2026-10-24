@@ -1,6 +1,6 @@
 # Arena atlas rendering
 
-The v0.3.49 candidate makes the canonical [artist source](../../assets/art/README.md) the
+Published v0.3.49 makes the canonical [artist source](../../assets/art/README.md) the
 source of gameplay artwork. The server still owns movement, collision, damage, visibility and
 all item rules; changing artwork does not change those rules.
 

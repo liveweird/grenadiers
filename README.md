@@ -3,15 +3,16 @@
 A browser-based multiplayer game inspired by classic Bomberman/Dynablaster.
 The initial playable profile supports two human players. Bots and larger matches follow later.
 
-**[v0.3.48 Artist handoff](https://github.com/liveweird/grenadiers/releases/tag/v0.3.48) is published.**
-All 22 requested item types shipped in v0.3.47. Localhost:8085 serves the accepted v0.3.48 image
-`sha256:751383fe17e23a6ae46e58006017a15862c6b0cf2fd993645bb2c78187b00cb8`. Reload older clients for gameplay v11.
+**[v0.3.49 Gameplay sprite atlas](https://github.com/liveweird/grenadiers/releases/tag/v0.3.49) is published.**
+All 22 requested item types shipped in v0.3.47. Localhost:8085 serves the accepted v0.3.49 image
+`sha256:10aa8554f8f22f968a6bd1852a4c0d6fe43e63b365eafc8220e7fbd826dc4d21`. Reload older clients for gameplay v11.
 See [verification](docs/verification.md) and the [Oil guide/captures](docs/game/oil-barrel.md).
 
 The [artist sprite-sheet handoff](assets/art/README.md) includes editable PNG/JSON, labelled
 guides, validated runtime export and a separate Pixi preview. Download the artist bundle from
 [the release](https://github.com/liveweird/grenadiers/releases/tag/v0.3.48).
-Gameplay adoption is the next bounded increment, v0.3.49.
+Gameplay now uses those canonical inputs; see the [renderer guide](docs/game/art-atlas.md).
+The artist redesign remains separate from the completed sprite-sheet pipeline.
 
 Artists can use `npm --prefix e2e run art:template -- --out target/art-template` and
 `scripts/gates.sh art-atlas` after installing the documented Playwright Chromium prerequisite.

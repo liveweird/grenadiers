@@ -3,9 +3,9 @@
 TURN, CONFIG and the first ART slice are implemented. Published [v0.3.47](https://github.com/liveweird/grenadiers/releases/tag/v0.3.47)
 completes **all 22 requested item types**, including Oil Barrel. Full checks, scoped
 Compose/Kubernetes acceptance, publication and localhost promotion are complete. ART-ATLAS is
-partly shipped: [v0.3.48](https://github.com/liveweird/grenadiers/releases/tag/v0.3.48) publishes
-the artist handoff/export/preview and is promoted locally. The v0.3.49 gameplay adoption
-candidate is now in progress; artist redraws remain separate.
+shipped: [v0.3.48](https://github.com/liveweird/grenadiers/releases/tag/v0.3.48) publishes
+the artist handoff/export/preview. Published [v0.3.49](https://github.com/liveweird/grenadiers/releases/tag/v0.3.49)
+adopts the atlas in gameplay and is promoted locally. Artist redraws remain separate ART work.
 
 [v0.3.43](https://github.com/liveweird/grenadiers/releases/tag/v0.3.43) publishes Wall Pass as the
 eighteenth of 22 requested item types. Published source `c086f719ea470b9fe24963adef84b5e3bdf3e17a`,
@@ -218,7 +218,7 @@ The entire expanded-item batch shipped in v0.3.47. ART-ATLAS is split into two b
 - **v0.3.48:** canonical editable PNG/JSON, 95 stable entries (91 baseline and four reserved),
   separate guides/overview, validated export with optional slices, and real Pixi region preview.
   See the [artist handoff](../../assets/art/README.md) for commands and constraints.
-- **v0.3.49 (in progress):** adopt the reviewed runtime atlas in gameplay, preserving terrain cache behavior,
+- **v0.3.49 (published):** adopt the reviewed runtime atlas in gameplay, preserving terrain cache behavior,
   animation timing, visibility, collision geometry, ownership and current rendering budgets.
 
 The existing code-generated PixiJS art remains the baseline. New artist redraws and new animation
@@ -242,8 +242,8 @@ production follow review of this complete inventory and representative arena pro
   screenshots, reduced-motion checks and measured rendering performance. Preserve collision
   geometry, authoritative visibility, hazard readability, player distinctions and EN/PL UI.
 
-Published v0.3.48 implements the template/export/preview portion above. Gameplay integration
-and artist redraws remain open. The faithful baseline retains a known two-pixel vertical gap in
+Published v0.3.48 implements the template/export/preview portion above. Gameplay integration shipped in v0.3.49;
+artist redraws remain open. The faithful baseline retains a known two-pixel vertical gap in
 flame frame 1; the guide calls it out explicitly rather than claiming seamless replacement art.
 
 ## EFFECTS: inventory and status foundations
@@ -334,4 +334,4 @@ including same-image Compose/Kubernetes acceptance. Bots, mobs and larger matche
 separate tracks; their future interactions must be specified without making them prerequisites.
 
 The expanded-item activation batch and its release gates are complete in v0.3.47. ART-ATLAS
-continues as the two bounded release increments described above.
+is delivered by the published v0.3.48/v0.3.49 releases; artist redraws follow sample review.

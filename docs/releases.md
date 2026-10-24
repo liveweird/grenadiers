@@ -4,7 +4,37 @@ Release labels and scope live in the [implementation plan](game/implementation-p
 A completed milestone is verification evidence; a release exists only after its tested commit
 is tagged and its artifacts are published intentionally.
 
-## v0.3.43 Wall Pass native checkpoint — 2026-10-24 01:00 UTC
+## v0.3.43 published prerelease — 2026-10-24
+
+Published source `c086f719ea470b9fe24963adef84b5e3bdf3e17a`, tree
+`d74fad8a1c870f2834fca48f80ea4e38f0c512d9`, is available as
+[v0.3.43](https://github.com/liveweird/grenadiers/releases/tag/v0.3.43) through annotated tag object
+`c8395fd7dcc5701842644967802e61c76211931c`. Candidate push/PR runs `40051959641` and
+`40051963999`, master run `40053637247`, and tag run `40055400664` each pass all ten jobs, 55
+browser cases and all 262,144 masks in debug, release and coverage on their first attempts.
+
+Localhost serves accepted image
+`sha256:577abb32958e45912f35a7f6ae68dd624deb6515d2b4d55519942c44436a2a01` from container
+`d7f68cc89bfc87d06c202fbedae78c1892f54ea3ccdc6571fee0d1c5ea2f4240`; health, readiness and
+index return 200 and the served script SHA-256 is
+`61d6722543d93559ad980b2f6577897ddbdfcc80b4137d598d7aecf75c6ea637`. The v0.3.42 image is retained
+as the rollback parent. Delivery contract
+`f5696ccb5aba2633f3ecbf7a12353aa5073d61218cf0f717807e516bd69bbeb4`, independent release review
+`da546c5038b3dc514b03a1b3fef658f828b27557c629082d95f2ccd368ba9889`, delivery binding
+`40578e13d8a44a3cdb22bc222ac71eedd0005b08f3fb5f0748d07f7e333cf5d1`, and binding review
+`21f6b544ee9d8e906c056671242c6be73ba742d1bcecb55f39c804ae78d9ec54` are clear.
+
+Native execution remains attributed to source `11d0dc7e39e8e2cafcf70c1548be339f52c740ab`, seal
+`31fe5eef2900a0229d002e45b5a310888f3915829db0aaf23bc3535a8eea5e2c`, and final manifest
+`3ac5e05ccee94c7716376ca9383c75acc924b772447499c6a0dbd857f68ec15c`. Artifact-equivalence receipt
+`81bd78943fa8e80bc839b06bcd68c7bb26872f4cf600c2fcc80e2269c7c94209` and review
+`42bbbcb68e8a306d9ed611513e186189ab3430f17bf545191edace5bdb6e3b75` connect corrected source
+`5dbcd58` to the published source through eight documentation-only changes. They do not claim
+unchanged Docker inputs, a new Rust compilation, or new native execution. Eighteen of 22 requested
+items are published. Kick remains the v0.3.44 source-only candidate; its fresh gates, native
+acceptance and CI remain pending.
+
+## Historical v0.3.43 Wall Pass native checkpoint — 2026-10-24 01:00 UTC
 
 Wall Pass is the eighteenth requested item and is native verified at source
 `11d0dc7e39e8e2cafcf70c1548be339f52c740ab`, tree
@@ -54,17 +84,13 @@ artifact equality, not unchanged build inputs, a new Rust compilation, or Docker
 reproducibility; the 110 native cases remain attributed to source `11d0dc7` and accepted image
 `577abb3`.
 
-The first PR #104 head `98dffe5` failed security in push run `40050321682` and PR run
+At this checkpoint, the first PR #104 head `98dffe5` failed security in push run `40050321682` and PR run
 `40050338206`; other jobs were still finishing at that checkpoint. Corrected head `5dbcd58` has
-not yet been pushed. Its exact-head candidate CI, replacement merge/master and tag checks,
-publication and localhost promotion remain required. The default deployment remains v0.3.42.
+not yet been pushed. Those then-pending steps were later completed by the published delivery above.
 
-This is a native checkpoint, not a release. Candidate, master and tag workflows, publication and
-exact-image promotion for v0.3.43 remain pending. Consult current
-[checks](https://github.com/liveweird/grenadiers/actions) and
-[releases](https://github.com/liveweird/grenadiers/releases) rather than treating this dated status
-as a future publication claim. Seventeen of 22 items are published; eighteen are native verified.
-Kick, Punch, Bracelet and Oil Barrel remain before ART-ATLAS.
+This section is the dated native checkpoint, not the current release status. The published record
+above supersedes its pending statements. Kick, Punch, Bracelet and Oil Barrel remain before
+ART-ATLAS.
 
 The reviewed Wall Pass captures are [English desktop](screenshots/wall-pass-desktop.png) and
 [Polish 320px reduced motion](screenshots/wall-pass-mobile-pl.png), with SHA-256 values

@@ -17,15 +17,26 @@ readiness and the served artifact after deployment. Repeat affected checks when 
 do not require separate full push, PR, master and tag runs or elaborate new proof packages for
 each feature. Historical release records retain their original evidence and requirements.
 
-## v0.3.49 gameplay atlas candidate — 2026-10-25
+## v0.3.49 published prerelease — 2026-10-25
 
-The production renderer uses the canonical artist PNG/JSON through shared atlas regions,
-retaining scene rules, cached terrain and renderer-owned resource lifetime. Normal web/Docker
-builds bundle artist inputs without Chromium. Status pulses now fade each completed icon once;
-the [rendering guide](game/art-atlas.md) explains the intentional overlap-compositing difference.
-The [acceptance record](verification.md#v0349-gameplay-atlas-acceptance--2026-10-25) covers full
-web/static checks, macOS/Linux pixel comparisons and exact-image Compose/Kubernetes/latency.
-Publication and localhost promotion will be recorded when complete.
+[v0.3.49](https://github.com/liveweird/grenadiers/releases/tag/v0.3.49) is published from source
+`4157d534553330b457871554d84e973823068798`, tree `dd6a844d841e76e254ee09b339a4e4c6577f982f`,
+with remotely verified annotated tag object `1a8f141adbf6c18e372a1b6dd344475727664233`.
+Localhost:8085 serves exact accepted image
+`sha256:10aa8554f8f22f968a6bd1852a4c0d6fe43e63b365eafc8220e7fbd826dc4d21`.
+
+Promotion exits zero; health/readiness/index return 200. Served HTML, JavaScript and the hashed
+atlas PNG match container bytes; the PNG also matches canonical source SHA256
+`f2392294ba67207cdaf264ec3343cf096de0281dc281aa4c8c3339ff312d407f`. UID65532, read-only
+filesystem, dropped capabilities and no new privileges are retained. v0.3.48 remains the rollback
+image. An initial local helper path typo stopped before any service change; the corrected helper
+completed promotion and all post-deployment checks. Application inputs match accepted source
+`ee664e5`; publication documentation does not require rebuilding the accepted image.
+
+The artist handoff/export/preview and gameplay atlas integration are now complete. New artist
+redraws remain separate work. The documented completed-icon pulse compositing is intentional.
+
+See the [renderer guide](game/art-atlas.md) and [acceptance record](verification.md#v0349-gameplay-atlas-acceptance--2026-10-25).
 
 ## v0.3.48 published prerelease — 2026-10-24
 

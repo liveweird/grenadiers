@@ -110,9 +110,10 @@ case "${1:-all}" in
   web) repository; web ;;
   e2e) repository; e2e ;;
   art-atlas) repository; art_atlas ;;
+  atlas-gameplay) repository; npm --prefix e2e run test:atlas-gameplay ;;
   browser) npm --prefix e2e test ;;
   k8s) k8s ;;
   security) security ;;
   coverage) coverage ;;
-  *) echo 'usage: scripts/gates.sh [all|repository|server|server-parallel|web|e2e|art-atlas|browser|k8s|security|coverage]' >&2; exit 2 ;;
+  *) echo 'usage: scripts/gates.sh [all|repository|server|server-parallel|web|e2e|art-atlas|atlas-gameplay|browser|k8s|security|coverage]' >&2; exit 2 ;;
 esac

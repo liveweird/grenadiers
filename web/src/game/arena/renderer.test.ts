@@ -5,6 +5,12 @@ import { createArenaRenderer } from './renderer'
 const hooks = vi.hoisted(() => ({
   fail: false,
   partial: true,
+  loadFail: false,
+  artworkFail: false,
+  load: vi.fn(),
+  createArtwork: vi.fn(),
+  regions: { destroy: vi.fn() },
+  artwork: { kind: 'atlas-artwork' },
   applications: [] as Array<{
     canvas: HTMLCanvasElement
     init: ReturnType<typeof vi.fn>
@@ -25,6 +31,7 @@ const hooks = vi.hoisted(() => ({
     restoreContext: ReturnType<typeof vi.fn>
     setReducedMotion: ReturnType<typeof vi.fn>
     resolution: number
+    artwork: object
   }>,
 }))
 
@@ -58,15 +65,31 @@ vi.mock('./scene', () => ({
     restoreContext = vi.fn()
     setReducedMotion = vi.fn()
     resolution: number
-    constructor(resolution: number) { this.resolution = resolution; hooks.scenes.push(this) }
+    artwork: object
+    constructor(resolution: number, artwork: object) {
+      this.resolution = resolution; this.artwork = artwork; hooks.scenes.push(this)
+    }
   },
 }))
+vi.mock('./artAtlas/load', () => ({ loadArenaAtlas: hooks.load }))
+vi.mock('./artAtlas/artwork', () => ({ createAtlasArtwork: hooks.createArtwork }))
 
 beforeEach(() => {
   hooks.fail = false
   hooks.partial = true
+  hooks.loadFail = false
+  hooks.artworkFail = false
   hooks.applications.length = 0
   hooks.scenes.length = 0
+  hooks.regions.destroy.mockReset()
+  hooks.load.mockReset().mockImplementation(async () => {
+    if (hooks.loadFail) throw new Error('atlas unavailable')
+    return hooks.regions
+  })
+  hooks.createArtwork.mockReset().mockImplementation(() => {
+    if (hooks.artworkFail) throw new Error('invalid atlas artwork')
+    return hooks.artwork
+  })
   Object.defineProperty(window, 'devicePixelRatio', { value: 3, configurable: true })
 })
 
@@ -85,6 +108,9 @@ describe('Pixi application lifetime', () => {
     expect(app.canvas.style.imageRendering).toBe('pixelated')
     expect(app.canvas.style.visibility).toBe('hidden')
     expect(scene.resolution).toBe(2)
+    expect(scene.artwork).toBe(hooks.artwork)
+    expect(hooks.load).toHaveBeenCalledOnce()
+    expect(hooks.createArtwork).toHaveBeenCalledWith(hooks.regions)
     expect(app.renderer?.resize).not.toHaveBeenCalled()
     const snapshot = gameSnapshot()
     renderer.update(snapshot)
@@ -128,6 +154,9 @@ describe('Pixi application lifetime', () => {
     expect(scene.update).toHaveBeenCalledTimes(2)
     expect(scene.setReducedMotion).toHaveBeenCalledOnce()
     expect(scene.reset).toHaveBeenCalledTimes(2)
+    expect(hooks.regions.destroy).toHaveBeenCalledOnce()
+    expect(app.destroy.mock.invocationCallOrder[0])
+      .toBeLessThan(hooks.regions.destroy.mock.invocationCallOrder[0])
     app.canvas.dispatchEvent(new Event('webglcontextrestored'))
     expect(scene.restoreContext).toHaveBeenCalledTimes(2)
   })
@@ -139,6 +168,7 @@ describe('Pixi application lifetime', () => {
     expect(hooks.applications[0].init).toHaveBeenCalledWith(expect.objectContaining({ resolution: 1 }))
     expect(hooks.applications[0].renderer?.resize).not.toHaveBeenCalled()
     renderer.destroy()
+    expect(hooks.regions.destroy).toHaveBeenCalledOnce()
     hooks.fail = true
     await expect(createArenaRenderer(host)).rejects.toThrow('GPU unavailable')
     expect(hooks.applications[1].destroy).toHaveBeenCalledOnce()
@@ -146,5 +176,45 @@ describe('Pixi application lifetime', () => {
     await expect(createArenaRenderer(host)).rejects.toThrow('GPU unavailable')
     expect(hooks.applications[2].destroy).not.toHaveBeenCalled()
     expect(host.querySelectorAll('canvas')).toHaveLength(0)
+  })
+
+  it('releases the application and atlas across loading and scene-construction failures', async () => {
+    const host = document.createElement('div')
+    hooks.loadFail = true
+    await expect(createArenaRenderer(host)).rejects.toThrow('atlas unavailable')
+    expect(hooks.applications[0].destroy).toHaveBeenCalledOnce()
+    expect(hooks.regions.destroy).not.toHaveBeenCalled()
+    expect(host.querySelectorAll('canvas')).toHaveLength(0)
+
+    hooks.loadFail = false
+    hooks.artworkFail = true
+    await expect(createArenaRenderer(host)).rejects.toThrow('invalid atlas artwork')
+    expect(hooks.applications[1].destroy).toHaveBeenCalledOnce()
+    expect(hooks.regions.destroy).toHaveBeenCalledOnce()
+    expect(hooks.applications[1].destroy.mock.invocationCallOrder[0])
+      .toBeLessThan(hooks.regions.destroy.mock.invocationCallOrder[0])
+    expect(host.querySelectorAll('canvas')).toHaveLength(0)
+  })
+
+  it('destroys scene nodes and atlas when host attachment fails late in setup', async () => {
+    const host = document.createElement('div')
+    vi.spyOn(host, 'appendChild').mockImplementation(() => { throw new Error('detached host') })
+    await expect(createArenaRenderer(host)).rejects.toThrow('detached host')
+    expect(hooks.scenes[0].reset).toHaveBeenCalledOnce()
+    expect(hooks.applications[0].destroy).toHaveBeenCalledOnce()
+    expect(hooks.regions.destroy).toHaveBeenCalledOnce()
+    expect(hooks.scenes[0].reset.mock.invocationCallOrder[0])
+      .toBeLessThan(hooks.applications[0].destroy.mock.invocationCallOrder[0])
+    expect(hooks.applications[0].destroy.mock.invocationCallOrder[0])
+      .toBeLessThan(hooks.regions.destroy.mock.invocationCallOrder[0])
+  })
+
+  it('still releases the application and atlas when final scene cleanup throws', async () => {
+    const renderer = await createArenaRenderer(document.createElement('div'))
+    hooks.scenes[0].reset.mockImplementation(() => { throw new Error('scene cleanup failed') })
+    expect(() => renderer.destroy()).toThrow('scene cleanup failed')
+    expect(hooks.applications[0].destroy).toHaveBeenCalledOnce()
+    expect(hooks.regions.destroy).toHaveBeenCalledOnce()
+    expect(() => renderer.destroy()).not.toThrow()
   })
 })

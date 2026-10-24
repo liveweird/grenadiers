@@ -47,6 +47,7 @@
     "renderer-diagnostics/main.ts",
     "renderer-diagnostics/terrain-pixel.ts",
     "vite.renderer-diagnostics.config.ts",
-    "renderer-diagnostics/art-atlas.ts"
+    "renderer-diagnostics/art-atlas.ts",
+    "renderer-diagnostics/atlas-gameplay.ts"
   ]
 }

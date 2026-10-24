@@ -2,8 +2,8 @@
 
 This directory contains the reviewed, artist-editable arena source: `arena-source.png` and its
 paired `arena-source.json` manifest. ART-ATLAS v0.3.48 supplies the extraction, validation and
-preview workflow; it does not switch normal gameplay to atlas rendering. Gameplay adoption is
-explicitly deferred to v0.3.49.
+preview workflow. The v0.3.49 candidate adopts these same inputs in gameplay; see the
+[rendering guide](../../docs/game/art-atlas.md) for the build/runtime ownership and checks.
 
 ## Prerequisites
 

@@ -4,10 +4,22 @@ import { PALETTE } from './palette'
 import { pixels } from './pixel'
 
 export interface BombDrawing {
-  root: Container; shadow: Graphics; shell: Graphics; spark: Graphics; pause: Graphics
+  root: Container; shadow: Container; shell: Container; spark: Container; pause: Container
   remote: boolean; contact: boolean; paused: boolean
 }
-export interface FlameDrawing { root: Container; frames: readonly [Graphics, Graphics] }
+export interface FlameDrawing { root: Container; frames: readonly [Container, Container] }
+
+export function assembleBombDrawing(
+  nodes: Pick<BombDrawing, 'root' | 'shadow' | 'shell' | 'spark' | 'pause'>,
+  trigger: 'timed' | 'remote' | 'contact',
+): BombDrawing {
+  nodes.spark.visible = trigger === 'timed'
+  nodes.pause.visible = false
+  nodes.root.addChild(nodes.shadow, nodes.shell, nodes.spark, nodes.pause)
+  return {
+    ...nodes, remote: trigger === 'remote', contact: trigger === 'contact', paused: false,
+  }
+}
 
 export function makeBomb(
   blast: 'standard' | 'piercing' | 'power' = 'standard',
@@ -44,15 +56,9 @@ export function makeBomb(
   const spark = new Graphics()
   pixels(spark, PALETTE.flameCore, [[16, -25, 4, 4], [21, -21, 4, 4], [12, -21, 4, 4]])
   pixels(spark, PALETTE.flame, [[18, -29, 3, 4], [24, -24, 3, 3]])
-  spark.visible = trigger === 'timed'
   const pause = new Graphics()
   pixels(pause, PALETTE.blueLight, [[-8, -7, 5, 15], [3, -7, 5, 15]])
-  pause.visible = false
-  root.addChild(shadow, shell, spark, pause)
-  return {
-    root, shadow, shell, spark, pause,
-    remote: trigger === 'remote', contact: trigger === 'contact', paused: false,
-  }
+  return assembleBombDrawing({ root, shadow, shell, spark, pause }, trigger)
 }
 
 function flameFrame(alternate: boolean): Graphics {
@@ -73,6 +79,12 @@ function flameFrame(alternate: boolean): Graphics {
 export function makeFlame(): FlameDrawing {
   const root = new Container()
   const frames = [flameFrame(false), flameFrame(true)] as const
+  return assembleFlameDrawing(root, frames)
+}
+
+export function assembleFlameDrawing(
+  root: Container, frames: readonly [Container, Container],
+): FlameDrawing {
   frames[1].visible = false
   root.addChild(...frames)
   return { root, frames }
@@ -80,8 +92,8 @@ export function makeFlame(): FlameDrawing {
 
 export interface OilBarrelDrawing {
   root: Container
-  unlit: Graphics
-  charred: Graphics
+  unlit: Container
+  charred: Container
   flame: FlameDrawing
   state: 'unlit' | 'burning'
 }
@@ -97,8 +109,15 @@ export function makeOilBarrel(): OilBarrelDrawing {
   pixels(charred, PALETTE.deepInk, [[7, 34, 34, 8], [11, 29, 26, 11]])
   pixels(charred, PALETTE.ink, [[11, 34, 26, 5], [16, 30, 8, 5], [29, 31, 6, 5]])
   pixels(charred, PALETTE.brickShade, [[14, 36, 8, 3], [27, 34, 7, 3]])
-  charred.visible = false
   const flame = makeFlame()
+  return assembleOilBarrelDrawing(root, unlit, charred, flame)
+}
+
+export function assembleOilBarrelDrawing(
+  root: Container, unlit: Container, charred: Container, flame: FlameDrawing,
+): OilBarrelDrawing {
+  unlit.visible = true
+  charred.visible = false
   flame.root.visible = false
   root.addChild(unlit, charred, flame.root)
   return { root, unlit, charred, flame, state: 'unlit' }

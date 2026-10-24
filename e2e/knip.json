@@ -22,6 +22,7 @@
     "terrain-pixel-tests/**/*.spec.ts",
     "remote-bomb-tests/**/*.spec.ts",
     "wall-pass-tests/**/*.spec.ts",
-    "art-atlas-tests/**/*.spec.ts"
+    "art-atlas-tests/**/*.spec.ts",
+    "atlas-gameplay-tests/**/*.spec.ts"
   ]
 }

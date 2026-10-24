@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.3.49 — gameplay atlas candidate
+
+- Use the canonical artist PNG/JSON for gameplay terrain, actors, pickups, bombs, flames and Oil.
+- Reuse the validated pixel pipeline and shared scene behavior; preserve cached terrain,
+  animation, reduced motion, visibility and renderer resource ownership.
+- Fade completed status icons once, normalizing the previous per-stroke overlap blending while
+  retaining pulse clocks and status visibility.
+- Bundle artist inputs in normal web/Docker builds without requiring Chromium at build time.
+- Add real-Pixi gameplay parity and lifecycle acceptance alongside the artist tooling suite.
+
+
 ## 0.3.48 — 2026-10-24 (published)
 
 - Add the canonical editable arena PNG and stable-ID manifest covering 91 baseline drawings,

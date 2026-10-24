@@ -3,33 +3,35 @@ import type { Direction, Seat } from './types'
 import { PALETTE } from './palette'
 import { pixels } from './pixel'
 
-type PoseFrames = readonly [Graphics, Graphics]
-export interface ActorDrawing {
+type PoseFrames = readonly [Container, Container]
+export interface ActorNodes {
   root: Container
-  shadow: Graphics
-  protection: Graphics
-  shield: Graphics
-  stopwatch: Graphics
-  frozen: Graphics
-  goldenFlame: Graphics
-  shortFuse: Graphics
-  shortFlame: Graphics
-  longFuse: Graphics
-  reverseControls: Graphics
-  diarrhea: Graphics
+  shadow: Container
+  protection: Container
+  shield: Container
+  stopwatch: Container
+  frozen: Container
+  goldenFlame: Container
+  shortFuse: Container
+  shortFlame: Container
+  longFuse: Container
+  reverseControls: Container
+  diarrhea: Container
   slowFoot: Container
-  slowBoot: Graphics
-  slowMarkers: readonly Graphics[]
-  piercing: Graphics
-  power: Graphics
-  landmine: Graphics
+  slowBoot: Container
+  slowMarkers: readonly Container[]
+  piercing: Container
+  power: Container
+  landmine: Container
   equipment: Container
-  kick: Graphics
-  punch: Graphics
-  bracelet: Graphics
-  wallPass: Graphics
-  cloak: Graphics
+  kick: Container
+  punch: Container
+  bracelet: Container
+  wallPass: Container
+  cloak: Container
   poses: Record<Direction, PoseFrames>
+}
+export interface ActorDrawing extends ActorNodes {
   direction: Direction
   moving: boolean
   protected: boolean
@@ -125,7 +127,6 @@ export function makeActor(seat: Seat): ActorDrawing {
     [-21, 11, 3, 10], [-18, 21, 10, 3], [18, 11, 3, 10], [8, 21, 10, 3],
   ])
   pixels(protection, PALETTE.white, [[-18, -21, 3, 5], [15, -21, 3, 5], [-18, 16, 3, 5], [15, 16, 3, 5]])
-  protection.visible = false
   const shield = new Graphics()
   pixels(shield, PALETTE.blue, [
     [-15, -27, 30, 3], [-21, -24, 6, 3], [15, -24, 6, 3],
@@ -135,18 +136,15 @@ export function makeActor(seat: Seat): ActorDrawing {
   pixels(shield, PALETTE.blueLight, [
     [-12, -24, 12, 3], [-24, -9, 3, 12], [21, -9, 3, 12], [0, 24, 12, 3],
   ])
-  shield.visible = false
   const stopwatch = new Graphics()
   pixels(stopwatch, PALETTE.deepInk, [[-8, -34, 16, 16], [-4, -38, 8, 5]])
   pixels(stopwatch, PALETTE.white, [[-5, -31, 10, 10]])
   pixels(stopwatch, PALETTE.blue, [[-1, -30, 3, 7], [-1, -24, 6, 3]])
-  stopwatch.visible = false
   const frozen = new Graphics()
   pixels(frozen, PALETTE.blueLight, [
     [-24, -25, 9, 3], [-24, -25, 3, 9], [15, -25, 9, 3], [21, -25, 3, 9],
     [-24, 20, 9, 3], [-24, 14, 3, 9], [15, 20, 9, 3], [21, 14, 3, 9],
   ])
-  frozen.visible = false
   const goldenFlame = new Graphics()
   pixels(goldenFlame, PALETTE.deepInk, [
     [-8, -30, 16, 3], [-11, -27, 22, 4], [-8, -23, 16, 3],
@@ -154,22 +152,18 @@ export function makeActor(seat: Seat): ActorDrawing {
   pixels(goldenFlame, PALETTE.flame, [[-7, -29, 14, 4], [-4, -34, 8, 9], [-1, -38, 4, 9]])
   pixels(goldenFlame, PALETTE.flameLight, [[-3, -31, 6, 7], [0, -35, 2, 6]])
   pixels(goldenFlame, PALETTE.flameCore, [[-1, -29, 3, 5]])
-  goldenFlame.visible = false
   const shortFuse = new Graphics()
   pixels(shortFuse, PALETTE.deepInk, [[13, -15, 10, 3], [20, -18, 3, 5]])
   pixels(shortFuse, PALETTE.flame, [[22, -23, 4, 5], [26, -20, 4, 4], [18, -23, 3, 3]])
   pixels(shortFuse, PALETTE.flameCore, [[23, -21, 3, 3]])
-  shortFuse.visible = false
   const shortFlame = new Graphics()
   pixels(shortFlame, PALETTE.deepInk, [[-25, -22, 12, 3], [-22, -25, 6, 9], [-19, -29, 3, 6]])
   pixels(shortFlame, PALETTE.blue, [[-22, -22, 6, 6], [-19, -26, 3, 7]])
   pixels(shortFlame, PALETTE.blueLight, [[-20, -23, 2, 4]])
-  shortFlame.visible = false
   const longFuse = new Graphics()
   pixels(longFuse, PALETTE.deepInk, [[-24, -12, 15, 3], [-12, -15, 3, 5]])
   pixels(longFuse, PALETTE.flame, [[-10, -20, 4, 5], [-6, -17, 4, 4]])
   pixels(longFuse, PALETTE.flameCore, [[-9, -18, 3, 3]])
-  longFuse.visible = false
   const reverseControls = new Graphics()
   pixels(reverseControls, PALETTE.deepInk, [
     [-29, -7, 12, 3], [-29, 5, 12, 3], [17, -7, 12, 3], [17, 5, 12, 3],
@@ -179,14 +173,12 @@ export function makeActor(seat: Seat): ActorDrawing {
     [-32, -7, 9, 3], [-29, -10, 3, 9], [23, 5, 9, 3], [26, 2, 3, 9],
   ])
   pixels(reverseControls, PALETTE.brick, [[17, -7, 9, 3], [-26, 5, 9, 3]])
-  reverseControls.visible = false
   const diarrhea = new Graphics()
   pixels(diarrhea, PALETTE.deepInk, [
     [-14, -29, 28, 3], [-17, -26, 34, 3], [-20, -23, 40, 3],
   ])
   pixels(diarrhea, PALETTE.brick, [[-10, -26, 8, 3], [4, -23, 8, 3]])
   pixels(diarrhea, PALETTE.white, [[-3, -32, 6, 9]])
-  diarrhea.visible = false
   const slowFoot = new Container()
   const slowBoot = new Graphics()
   pixels(slowBoot, PALETTE.deepInk, [[-13, 19, 18, 5], [-9, 14, 9, 7], [5, 21, 8, 3]])
@@ -195,48 +187,38 @@ export function makeActor(seat: Seat): ActorDrawing {
   const slowMarkers = Array.from({ length: 6 }, (_, index) => {
     const marker = new Graphics()
     pixels(marker, PALETTE.white, [[-14 + index * 5, 27, 3, 3]])
-    marker.visible = false
     return marker
   })
   slowFoot.addChild(slowBoot, ...slowMarkers)
-  slowFoot.visible = false
   const piercing = new Graphics()
   pixels(piercing, PALETTE.deepInk, [[14, 12, 13, 12], [18, 8, 7, 18]])
   pixels(piercing, PALETTE.white, [[18, 14, 6, 3], [20, 11, 3, 9]])
   pixels(piercing, PALETTE.brick, [[16, 19, 10, 3]])
-  piercing.visible = false
   const power = new Graphics()
   pixels(power, PALETTE.deepInk, [
     [17, 7, 7, 3], [14, 10, 13, 3], [11, 13, 19, 7], [14, 20, 13, 3], [17, 23, 7, 3],
   ])
   pixels(power, PALETTE.flame, [[17, 11, 7, 3], [14, 14, 13, 5], [17, 19, 7, 3]])
   pixels(power, PALETTE.white, [[19, 13, 3, 7]])
-  power.visible = false
   const landmine = new Graphics()
   pixels(landmine, PALETTE.deepInk, [[-27, 13, 16, 7], [-24, 9, 10, 10]])
   pixels(landmine, PALETTE.brass, [[-24, 12, 10, 5], [-21, 9, 5, 6]])
   pixels(landmine, PALETTE.brick, [[-20, 12, 3, 3]])
-  landmine.visible = false
   const kick = new Graphics()
   pixels(kick, PALETTE.deepInk, [[-18, 13, 14, 9], [-14, 9, 8, 13]])
   pixels(kick, PALETTE.brassLight, [[-15, 12, 7, 7], [-17, 17, 11, 3]])
-  kick.visible = false
   const punch = new Graphics()
   pixels(punch, PALETTE.deepInk, [[11, 10, 15, 12], [14, 6, 4, 8], [19, 5, 4, 9], [24, 8, 4, 9]])
   pixels(punch, PALETTE.brassLight, [[14, 11, 10, 8], [16, 8, 3, 6], [20, 7, 3, 7]])
-  punch.visible = false
   const bracelet = new Graphics()
   pixels(bracelet, PALETTE.deepInk, [[-15, -2, 6, 12], [9, -2, 6, 12]])
   pixels(bracelet, PALETTE.blueLight, [[-13, 0, 3, 8], [10, 0, 3, 8]])
-  bracelet.visible = false
   const equipment = new Container()
   equipment.addChild(kick, punch, bracelet)
-  equipment.visible = false
   const wallPass = new Graphics()
   pixels(wallPass, PALETTE.deepInk, [[-16, -23, 5, 43], [11, -23, 5, 43], [-16, -23, 32, 5]])
   pixels(wallPass, PALETTE.brick, [[-13, -20, 4, 37], [9, -20, 4, 37], [-9, -20, 18, 4]])
   pixels(wallPass, PALETTE.blueLight, [[-9, -16, 3, 30], [6, -16, 3, 30]])
-  wallPass.visible = false
   const cloak = new Graphics()
   pixels(cloak, PALETTE.deepInk, [
     [-15, -26, 30, 3], [-18, -23, 3, 12], [15, -23, 3, 12],
@@ -244,22 +226,29 @@ export function makeActor(seat: Seat): ActorDrawing {
   ])
   pixels(cloak, PALETTE.blue, [[-12, -23, 24, 3], [-15, -20, 3, 9], [12, -20, 3, 9]])
   pixels(cloak, PALETTE.white, [[-9, -20, 6, 3], [6, -20, 3, 3]])
-  cloak.visible = false
   const poses = {
     north: [frontOrBack(seat, 'north', 0), frontOrBack(seat, 'north', 1)],
     east: [sidePose(seat, 'east', 0), sidePose(seat, 'east', 1)],
     south: [frontOrBack(seat, 'south', 0), frontOrBack(seat, 'south', 1)],
     west: [sidePose(seat, 'west', 0), sidePose(seat, 'west', 1)],
   } satisfies Record<Direction, PoseFrames>
-  root.addChild(
-    shadow, protection, shield, goldenFlame, shortFuse, shortFlame, longFuse, reverseControls,
-    diarrhea, slowFoot, piercing, power, landmine, equipment,
-    ...Object.values(poses).flat(), cloak, stopwatch, frozen, wallPass,
-  )
-  const drawing = {
+  return assembleActorDrawing({
     root, protection, shield, stopwatch, frozen, goldenFlame, shortFuse, shortFlame, longFuse, reverseControls,
-    shadow, diarrhea, slowFoot, slowBoot, slowMarkers, piercing, power, landmine,
-    equipment, kick, punch, bracelet, wallPass, cloak, poses,
+    shadow, diarrhea, slowFoot, slowBoot, slowMarkers, piercing, power, landmine, equipment,
+    kick, punch, bracelet, wallPass, cloak, poses,
+  })
+}
+
+export function assembleActorDrawing(nodes: ActorNodes): ActorDrawing {
+  for (const cue of [
+    nodes.protection, nodes.shield, nodes.stopwatch, nodes.frozen, nodes.goldenFlame,
+    nodes.shortFuse, nodes.shortFlame, nodes.longFuse, nodes.reverseControls, nodes.diarrhea,
+    nodes.slowFoot, nodes.piercing, nodes.power, nodes.landmine, nodes.equipment,
+    nodes.kick, nodes.punch, nodes.bracelet, nodes.wallPass, nodes.cloak,
+  ]) cue.visible = false
+  for (const marker of nodes.slowMarkers) marker.visible = false
+  const drawing: ActorDrawing = {
+    ...nodes,
     direction: 'south' as Direction, moving: false,
     protected: false, shielded: false, stopwatchActive: false, actionsFrozen: false,
     golden: false, shortFused: false, shortFlamed: false,
@@ -267,6 +256,13 @@ export function makeActor(seat: Seat): ActorDrawing {
     piercingArmed: false, powerArmed: false, landmineStored: false, kickEquipped: false,
     punchEquipped: false, braceletEquipped: false, wallPassEquipped: false, cloaked: false,
   }
+  const { root } = nodes
+  root.addChild(
+    nodes.shadow, nodes.protection, nodes.shield, nodes.goldenFlame, nodes.shortFuse,
+    nodes.shortFlame, nodes.longFuse, nodes.reverseControls, nodes.diarrhea, nodes.slowFoot,
+    nodes.piercing, nodes.power, nodes.landmine, nodes.equipment,
+    ...Object.values(nodes.poses).flat(), nodes.cloak, nodes.stopwatch, nodes.frozen, nodes.wallPass,
+  )
   setActorPose(drawing, 'south', 0)
   return drawing
 }

@@ -1,8 +1,9 @@
-import { Container, Graphics } from 'pixi.js'
-import {
-  makeActor, makeBlock, makeBomb, makeFlame, makeOilBarrel, makePickup, paintTerrain, setActorPose, TILE,
-  type ActorDrawing, type BombDrawing, type FlameDrawing, type OilBarrelDrawing,
-} from './drawing'
+import { Container } from 'pixi.js'
+import { setActorPose, type ActorDrawing } from './actorArt'
+import type { ArenaArtwork } from './artwork'
+import { TILE } from './drawing'
+import type { BombDrawing, FlameDrawing, OilBarrelDrawing } from './entityArt'
+import { graphicsArtwork } from './graphicsArtwork'
 import type { RenderablePickupKind, SnapshotMessage } from './types'
 
 type Cell = { column: number; row: number }
@@ -10,7 +11,7 @@ type Motion = {
   fromX: number; fromY: number; toX: number; toY: number
   lastTeleportTick: number | null | undefined
 }
-type PickupDrawing = { kind: RenderablePickupKind; drawing: Graphics }
+type PickupDrawing = { kind: RenderablePickupKind; drawing: Container }
 type ActorRow = SnapshotMessage['state']['actors'][number]
 const key = (cell: Cell): string => `${cell.column},${cell.row}`
 const unitsToPixels = (units: number): number => units * TILE / 1024
@@ -92,14 +93,15 @@ function updateActorState(drawing: ActorDrawing, actor: ActorRow): void {
 
 export class ArenaScene {
   readonly root = new Container()
-  private readonly terrain = new Graphics()
+  private readonly terrain
   private readonly terrainCacheOptions
+  private readonly artwork: ArenaArtwork
   private readonly blocksLayer = new Container()
   private readonly pickupsLayer = new Container()
   private readonly bombsLayer = new Container()
   private readonly flamesLayer = new Container()
   private readonly actorsLayer = new Container()
-  private readonly blocks = new Map<string, Graphics>()
+  private readonly blocks = new Map<string, Container>()
   private readonly pickups = new Map<string, PickupDrawing>()
   private readonly bombs = new Map<number, BombDrawing>()
   private readonly flames = new Map<string, FlameDrawing>()
@@ -114,10 +116,12 @@ export class ArenaScene {
   private running = false
   private reducedMotion = false
 
-  constructor(resolution: number) {
+  constructor(resolution: number, artwork: ArenaArtwork = graphicsArtwork) {
+    this.artwork = artwork
+    this.terrain = artwork.makeTerrain()
     this.terrainCacheOptions = { resolution, antialias: false, scaleMode: 'nearest' as const }
     this.root.addChild(
-      this.terrain, this.blocksLayer, this.pickupsLayer, this.bombsLayer, this.flamesLayer, this.actorsLayer,
+      this.terrain.root, this.blocksLayer, this.pickupsLayer, this.bombsLayer, this.flamesLayer, this.actorsLayer,
     )
   }
 
@@ -136,9 +140,9 @@ export class ArenaScene {
       snapshot.state.arena.width, snapshot.state.arena.height, ...snapshot.state.arena.terrain,
     ].join(',')
     if (terrainKey !== this.terrainKey) {
-      if (!this.terrain.isCachedAsTexture) this.terrain.cacheAsTexture(this.terrainCacheOptions)
-      paintTerrain(this.terrain, snapshot.state.arena)
-      this.terrain.updateCacheTexture()
+      if (!this.terrain.root.isCachedAsTexture) this.terrain.root.cacheAsTexture(this.terrainCacheOptions)
+      this.terrain.paint(snapshot.state.arena)
+      this.terrain.root.updateCacheTexture()
       this.terrainKey = terrainKey
     }
     this.updateBlocks(snapshot.state.arena.blocks)
@@ -162,7 +166,7 @@ export class ArenaScene {
     this.blocks.clear(); this.pickups.clear(); this.bombs.clear(); this.flames.clear()
     this.oilBarrels.clear(); this.actors.clear()
     this.motions.clear()
-    if (this.terrain.isCachedAsTexture) this.terrain.cacheAsTexture(false)
+    if (this.terrain.root.isCachedAsTexture) this.terrain.root.cacheAsTexture(false)
     this.terrain.clear()
     this.identity = ''
     this.terrainKey = ''
@@ -173,7 +177,7 @@ export class ArenaScene {
   }
 
   restoreContext(): void {
-    if (this.terrainKey) this.terrain.updateCacheTexture()
+    if (this.terrainKey) this.terrain.root.updateCacheTexture()
   }
 
   render(now: number): void {
@@ -214,7 +218,7 @@ export class ArenaScene {
     }
     for (const cell of cells) {
       if (this.blocks.has(key(cell))) continue
-      const drawing = makeBlock()
+      const drawing = this.artwork.makeBlock()
       drawing.position.set(cell.column * TILE, cell.row * TILE)
       this.blocksLayer.addChild(drawing)
       this.blocks.set(key(cell), drawing)
@@ -229,7 +233,7 @@ export class ArenaScene {
     for (const bomb of rows) {
       let drawing = this.bombs.get(bomb.id)
       if (!drawing) {
-        drawing = makeBomb(bomb.blast, bomb.trigger?.type)
+        drawing = this.artwork.makeBomb(bomb.blast, bomb.trigger?.type)
         drawing.root.position.set((bomb.cell.column + 0.5) * TILE, (bomb.cell.row + 0.5) * TILE)
         this.bombsLayer.addChild(drawing.root)
         this.bombs.set(bomb.id, drawing)
@@ -249,7 +253,7 @@ export class ArenaScene {
       const current = this.pickups.get(id)
       if (current?.kind === pickup.kind) continue
       if (current) { current.drawing.destroy(); this.pickups.delete(id) }
-      const drawing = makePickup(pickup.kind)
+      const drawing = this.artwork.makePickup(pickup.kind)
       drawing.position.set(pickup.cell.column * TILE, pickup.cell.row * TILE)
       this.pickupsLayer.addChild(drawing)
       this.pickups.set(id, { kind: pickup.kind, drawing })
@@ -264,7 +268,7 @@ export class ArenaScene {
     }
     for (const flame of visibleRows) {
       if (this.flames.has(key(flame.cell))) continue
-      const drawing = makeFlame()
+      const drawing = this.artwork.makeFlame()
       drawing.root.position.set(flame.cell.column * TILE, flame.cell.row * TILE)
       this.flamesLayer.addChild(drawing.root)
       this.flames.set(key(flame.cell), drawing)
@@ -286,7 +290,7 @@ export class ArenaScene {
       const id = key(barrel.cell)
       let drawing = this.oilBarrels.get(id)
       if (!drawing) {
-        drawing = makeOilBarrel()
+        drawing = this.artwork.makeOilBarrel()
         drawing.root.position.set(barrel.cell.column * TILE, barrel.cell.row * TILE)
         this.flamesLayer.addChild(drawing.root)
         this.oilBarrels.set(id, drawing)
@@ -311,7 +315,7 @@ export class ArenaScene {
       const toX = unitsToPixels(actor.position.x)
       const toY = unitsToPixels(actor.position.y)
       if (!drawing) {
-        drawing = makeActor(actor.seat)
+        drawing = this.artwork.makeActor(actor.seat)
         drawing.root.position.set(toX, toY)
         this.actorsLayer.addChild(drawing.root)
         this.actors.set(actor.id, drawing)

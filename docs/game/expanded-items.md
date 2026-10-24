@@ -1,9 +1,9 @@
 # Expanded item implementation plan
 
 Published [v0.3.44](https://github.com/liveweird/grenadiers/releases/tag/v0.3.44) adds
-[Kick](kick.md) as the nineteenth requested item. The v0.3.45 source candidate adds opt-in
-[Punch](punch.md) on that published parent; Punch native acceptance is complete, while release
-publication remains pending. Bracelet and Oil Barrel remain before ART-ATLAS.
+[Kick](kick.md) as the nineteenth requested item. Published v0.3.45 adds opt-in
+[Punch](punch.md) on that published parent and is promoted locally. Twenty of
+22 requested items are published; Bracelet v0.3.46 and Oil Barrel v0.3.47 remain before ART-ATLAS.
 
 ## Historical Heart activation checkpoint
 

@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.3.45 — 2026-10-24 (native acceptance; publication pending)
+## 0.3.45 — 2026-10-24 (published)
 
 - Add opt-in Punch equipment: the remappable Equipment action moves the adjacent facing bomb to the
   next open three-cell wrapped landing while preserving its identity, ownership, blast and fuse.
@@ -10,8 +10,10 @@
   English/Polish presentation and deterministic production-seed browser source on the published
   v0.3.44 parent. Local native acceptance completed on the exact image
   `sha256:3f13b26f7a4a41ba2e90b8cc9261c9e95a60eceeddf49504341e65258eb7d37d`: 26 Compose cases plus
-  one Kubernetes case (27 total), all with zero retries. Release publication and localhost promotion
-  remain pending.
+  one Kubernetes case (27 total), all with zero retries. The same image is promoted locally.
+  Published source `5be42456cee80e06e2f138bdfd458ef821bb34c2` has tree
+  `94f83a7650e2c57955103d91060af10b1a2f439c` and annotated tag object
+  `0e6224643ce85bf8f0a77894dcb929ab2655e397`.
 
 ## 0.3.44 — 2026-10-24
 

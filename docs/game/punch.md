@@ -27,8 +27,8 @@ is `2`; `ALL` is `3,145,723`. Generator v2 appends weight 15 after Kick, making 
 410 and the Punch interval `[395,410)`. A Punch-only pool is 115. All 1,048,576 catalog subsets are
 validated. Archived gameplay v9 and earlier reject Punch catalog entries, equipment, pickups,
 cooldown and live or historical bomb provenance. This document describes reviewed source on the
-published v0.3.44 parent; native acceptance is complete, while release publication and localhost
-promotion remain pending. See the [verification checkpoint](../verification.md#v0345-punch-native-accepted-checkpoint--2026-10-24--27-cases).
+published v0.3.44 parent; v0.3.45 is now [published](https://github.com/liveweird/grenadiers/releases/tag/v0.3.45)
+and promoted locally. See the [current delivery](../verification.md#current-v0345-published-delivery--2026-10-24).
 
 ## Accepted captures
 

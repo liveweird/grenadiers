@@ -37,9 +37,8 @@ published. For Wall Pass, each Rust profile
 passes 711 core and 209 server tests with four historical ignores, the web gate passes
 797 tests across 64 files, all 56 scenarios pass, and all 262,144 settings masks complete in each
 profile. Native acceptance covers 55 cases per target with zero retries or carry. Kick is now
-published; Punch is the native-accepted v0.3.45 candidate on the published Kick source parent,
-with publication and localhost promotion pending. Bracelet and Oil Barrel follow. ART-ATLAS
-follows the feature batch.
+published; Punch v0.3.45 is also published and promoted locally on the accepted image. Twenty of 22 requested items are published;
+Bracelet v0.3.46 and Oil Barrel v0.3.47 follow, then ART-ATLAS.
 
 New playtest requests and expansion work are tracked in the [gameplay and presentation
 backlog](backlog.md): forgiving turns first, shared gameplay settings, detailed retro pixel art,

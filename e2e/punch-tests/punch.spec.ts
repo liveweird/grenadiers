@@ -91,18 +91,18 @@ async function resumePunchedBombAndSendEquipment(
   const fuseDeadline = demo.placedAt + 300
   expect(beforeReconnect.state.physicalTick + expectedBomb.trigger.remainingTicks).toBe(fuseDeadline)
   const expectedActor = visibleActor(beforeReconnect, 'one')!
-  const reconnectFrameFloor = game.frames.length
   const reconnectCommandFloor = game.commands.length
   const reconnectSocketFloor = game.sockets
   const baseline = (await admissionBaseline(page))!
   await disconnectTransport(page)
   await expect.poll(() => game.sockets).toBeGreaterThan(reconnectSocketFloor)
   await expect.poll(async () => (await admissionBaseline(page))?.index).toBeGreaterThan(baseline.index)
-  await expect.poll(() => game.frames.slice(reconnectFrameFloor).some((frame) =>
+  // The observer retains a bounded buffer; revision fences survive its rotation.
+  await expect.poll(() => game.frames.some((frame) =>
     frame.type === 'admitted' && frame.room.roomId === beforeReconnect.room.roomId
     && frame.room.roundId === beforeReconnect.room.roundId && frame.youSeat === 'one'
     && frame.room.revision > beforeReconnect.room.revision && frame.state !== null)).toBe(true)
-  const resumed = game.frames.slice(reconnectFrameFloor)
+  const resumed = game.frames
     .findLast((frame): frame is StatefulAdmission => frame.type === 'admitted'
       && frame.room.roomId === beforeReconnect.room.roomId
       && frame.room.roundId === beforeReconnect.room.roundId && frame.youSeat === 'one'

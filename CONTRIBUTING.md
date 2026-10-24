@@ -20,6 +20,22 @@ implemented stack.
 
 ## Changes and verification
 
+### Local-first verification
+
+This is a single-maintainer project. Successful local checks are as authoritative as remote
+checks for the same tested source and environment. Run remote checks when they add distinct
+coverage, such as Linux behavior not exercised locally; do not require duplicate full suites
+for branch pushes, pull requests, merges, and release tags.
+
+Run independent checks and isolated test groups in parallel. Reuse dependency/build caches and
+verified artifacts, while retaining assertions, coverage floors, source identity and failure
+reporting. Keep latency measurements isolated from competing test workloads.
+
+Record the tested commit, commands, outcomes, environment and deployed image digest concisely.
+Repeat checks for relevant changes, failures or an identified coverage gap. Do not add repeated
+approval, evidence-generation or review cycles to routine changes. See [testing](docs/testing.md)
+and [release verification](docs/releases.md#release-verification-policy).
+
 Update contracts first for transport changes. Regenerate types, add runtime conformance and
 behavioral tests, and update API guidance in the same change. Add a scenario document with
 verbatim test titles for every Playwright spec. Never edit generated types directly.

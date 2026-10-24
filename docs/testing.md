@@ -4,6 +4,44 @@
 and use the repository's committed Cargo lockfile. Tests must exercise
 behavior and observable contracts rather than merely repeat implementation constants.
 
+## Verification policy
+
+Local checks are the primary gate for this single-maintainer repository. A passing local check
+does not need a second remote run merely because a branch was pushed, a PR was opened, a merge
+was made or a tag was created. Remote checks must add coverage that was not exercised locally,
+such as a different operating system or a clean build environment. A Linux container run already
+counts as Linux coverage for the behavior it actually executes; a container build alone does not
+prove that Rust unit tests ran on Linux.
+
+Use the relevant checks during development and complete the applicable suite before shipping.
+Keep a concise record of the tested commit, commands, results, environment and artifact digest.
+Reuse successful results only while their tested inputs remain applicable; rerun affected checks
+after relevant changes or failures. Documentation-only changes do not require repeating gameplay
+acceptance when application inputs are unchanged.
+
+Parallelize independent checks and gameplay groups using isolated processes, build directories,
+Compose projects, ports and Kubernetes namespaces. Reuse compiled dependencies and tooling.
+Keep latency tests isolated from competing workloads. Scheduling and caching must not reduce
+assertions, exhaustive mask coverage, coverage floors or failure visibility, or introduce retries
+that hide failures. Avoid repeated evidence packaging and review of unchanged results.
+
+The historical verification records below describe the workflow used at the time; they do not
+make repeated remote runs a current release requirement.
+
+### Hosted workflows
+
+The full `checks` workflow is manual: `gh workflow run ci.yml --ref <branch>`. It remains available
+for a clean hosted reproduction, including all exhaustive Rust profiles and browser scenarios.
+It does not run automatically for pushes, PRs, merges or tags.
+
+`platform.yml` runs debug and release Rust unit tests and doctests on Ubuntu for relevant PRs.
+This covers the platform gap when local Rust tests ran on macOS. It skips only the expensive
+exhaustive replay test; local full acceptance and manual full CI retain that test in all three
+profiles. The cheap exhaustive catalog/protocol tests remain in the Linux suite. Compiled Cargo
+dependencies are cached; test outcomes are always executed. The workflow can also be dispatched
+manually when Linux coverage is needed. Equivalent local Linux test execution satisfies the same
+requirement without a remote rerun.
+
 ## Rust
 
 Use unit tests for pure validation/serialization and Tower oneshot tests for HTTP behavior.
@@ -20,7 +58,16 @@ Install with `cargo install cargo-llvm-cov --version 0.9.1 --locked`, then
 `rustup component add llvm-tools-preview` and `scripts/gates.sh coverage`.
 Stable branch coverage equivalent to Flow's Kover gate is not configured.
 
-CI derives the exhaustive server item-mask partition matrix from the checked Rust catalog; the
+`scripts/gates.sh server-parallel` combines the server and coverage checks with four local
+workers by default. It builds each profile once, runs ordinary tests once per profile, and
+executes the exhaustive replay ranges using isolated workers. Set
+`GRENADIERS_LOCAL_SERVER_WORKERS=2` to adjust concurrency (supported range: 1–8). It requires a
+clean committed worktree and retains the same assertions, complete mask catalog and coverage
+floor. The separate `server` and `coverage` commands remain available as the serial fallback.
+Do not run latency acceptance alongside these CPU-intensive checks.
+
+The optional full CI derives the exhaustive server item-mask partition matrix from the checked
+Rust catalog; the
 workflow and JavaScript helpers do not duplicate item bits, cardinality, or ranges. Each partition
 runs the complete debug, release, build, and 80%-floor coverage gates with a 20-minute limit and
 emits source-bound debug, release, and coverage summaries. The stable `server` job accepts only the

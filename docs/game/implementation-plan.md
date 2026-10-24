@@ -9,6 +9,20 @@ first-to-three progression, and rematches pass exact-image Compose/Kubernetes ac
 M6 reconnect/replay is implemented with all 42 baseline rules mapped to automated assertions.
 M6 is complete and locally verified on 2026-10-17, including exact-image deployment acceptance.
 M7 hardening has started; M8 remains planned.
+Wall Pass is published as the eighteenth requested item in
+[v0.3.43](https://github.com/liveweird/grenadiers/releases/tag/v0.3.43). Source
+`c086f719ea470b9fe24963adef84b5e3bdf3e17a`, tree
+`d74fad8a1c870f2834fca48f80ea4e38f0c512d9`, passes first-attempt candidate, master and tag
+workflows and is locally promoted on exact image
+`sha256:577abb32958e45912f35a7f6ae68dd624deb6515d2b4d55519942c44436a2a01`.
+The 110 native cases remain attributed to H2 source `11d0dc7`; reviewed retained-artifact equality
+connects corrected source `5dbcd58` to the published source without claiming unchanged Docker
+inputs, a new Rust compilation or new native execution. At the 2026-10-24 native-acceptance
+checkpoint, eighteen requested item types are published. Kick candidate
+`cb70cba891ed972380f30f52133622ce36fd9ee8` passes fresh source-bound
+Rust, web, security and complete 524,288-mask gates for v0.3.44. Fresh 56+56 native acceptance
+passes with zero retries or carried results and is independently audited, reviewed and sealed;
+hosted CI and publication follow.
 The v0.3.16 increment adds classic-v3 forgiving turns and explicit gameplay-v5 compatibility,
 locally verified through both deployment paths on 2026-10-17.
 The v0.3.17 increment adds four shared gameplay settings with configurable-v4 rules and
@@ -20,10 +34,13 @@ v0.3.21 adds typed bomb triggers and checked legacy projection without activatin
 v0.3.20 retains ordered manual actions while preserving Classic placement and private replay,
 verified through both deployment paths.
 Published engineering prereleases are listed in `CHANGELOG.md` and GitHub Releases.
-As of the 22 October 2026 v0.3.41 native checkpoint, fifteen requested item types are published
-through v0.3.40. Invisible Bombs is the sixteenth native-verified candidate; its independent audit
-and durable seal are clear, while hosted release stages remain pending. Teleporter, Wall Pass, Kick, Punch, Bracelet
-and Oil Barrel remain, followed by ART-ATLAS after the feature batch.
+At the 2026-10-24 native-acceptance checkpoint, eighteen requested item types are published through
+v0.3.43. For Wall Pass, each Rust profile
+passes 711 core and 209 server tests with four historical ignores, the web gate passes
+797 tests across 64 files, all 56 scenarios pass, and all 262,144 settings masks complete in each
+profile. Native acceptance covers 55 cases per target with zero retries or carry. Kick publication
+remains pending; Punch is the current v0.3.45 source candidate on the merged Kick source parent,
+with Bracelet and Oil Barrel afterward. ART-ATLAS follows the feature batch.
 
 New playtest requests and expansion work are tracked in the [gameplay and presentation
 backlog](backlog.md): forgiving turns first, shared gameplay settings, detailed retro pixel art,

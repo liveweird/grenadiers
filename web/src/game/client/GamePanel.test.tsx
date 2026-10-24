@@ -135,7 +135,7 @@ describe('v10 private-state presentation', () => {
     actor.inventory = { equipment: 'wallPass', weapon: null }
     renderPanel(current)
     const stats = screen.getByLabelText('Player one upgrades')
-    expect(stats).toHaveTextContent('EquipmentWall pass')
+    expect(stats).toHaveTextContent('GearWall pass')
     expect(stats).toHaveTextContent('Bomb typeNone')
     expect(stats).not.toHaveTextContent('Wall pass (')
   })
@@ -147,7 +147,7 @@ describe('v10 private-state presentation', () => {
     actor.inventory = { equipment: 'kick', weapon: null }
     renderPanel(current)
     const stats = screen.getByLabelText('Player one upgrades')
-    expect(stats).toHaveTextContent('EquipmentKick')
+    expect(stats).toHaveTextContent('GearKick')
     expect(stats).toHaveTextContent('Bomb typeNone')
     expect(stats).not.toHaveTextContent('Kick (')
   })

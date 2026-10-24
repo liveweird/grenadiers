@@ -145,15 +145,13 @@ test('two browsers finish a drawn round, first-to-three match, and consensual re
       expect(page.getByRole('status')).toHaveText('Player two wins the match with 3 round wins.'),
     ))
     await Promise.all(pages.map((page) => expect(page.getByRole('button', { name: 'Play again', exact: true })).toBeVisible()))
-    for (const page of pages) {
+    await Promise.all(pages.map(async (page, index) => {
       expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false)
       expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([])
       await expect(page.getByLabel('Round wins for Player two')).toContainText('3')
-    }
-    await expectActorStatLabelsContained(one, 4)
-    await Promise.all(pages.map((page, index) =>
-      page.screenshot({ path: testInfo.outputPath(`match-result-${index}.png`), fullPage: true }),
-    ))
+      if (index === 0) await expectActorStatLabelsContained(page, 4)
+      await page.screenshot({ path: testInfo.outputPath(`match-result-${index}.png`), fullPage: true })
+    }))
 
     await two.getByText('Polski', { exact: true }).click()
     await expect(two.getByRole('status')).toHaveText('Gracz drugi wygrywa mecz (wygrane rundy: 3).')

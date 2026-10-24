@@ -208,6 +208,15 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
           cache-dependency-path: e2e/package-lock.json
+      - name: Check visibility startup diagnostics contracts
+        if: matrix.shard == 'classic'
+        run: |
+          node --test scripts/ci-browser-file-readiness.test.mjs
+          node --test scripts/ci-visibility-startup-observer.test.mjs
+      - name: Check browser APT mirror contract
+        run: node --test scripts/ci-browser-apt-mirror.test.mjs
+      - name: Prioritize the Ubuntu archive mirror
+        run: sudo "$(command -v node)" scripts/ci-browser-apt-mirror.mjs /etc/apt/apt-mirrors.txt
       - run: test -s Cargo.lock
       - run: npm --prefix e2e ci
       - run: npm --prefix e2e exec -- playwright install --with-deps chromium
@@ -473,7 +482,8 @@ jobs:
           E2E_MATCH_FIXTURE=arena-v1-matches npm --prefix e2e run test:matches
           E2E_MATCH_FIXTURE=arena-v1-matches npm --prefix e2e run test:reconnect
           E2E_MATCH_FIXTURE=arena-v1-matches npm --prefix e2e run test:latency
-          E2E_MATCH_FIXTURE=arena-v1-matches xvfb-run -a npm --prefix e2e run test:hardening
+          node scripts/ci-browser-file-readiness.mjs
+          E2E_MATCH_FIXTURE=arena-v1-matches xvfb-run -a -e "$RUNNER_TEMP/visibility-xvfb.log" node scripts/ci-visibility-startup-observer.mjs -- npm --prefix e2e run test:hardening
           npm --prefix e2e run test:controls
           xvfb-run -a npm --prefix e2e run test:audio
       - name: Stack logs
@@ -515,6 +525,9 @@ jobs:
             e2e/playwright-reconnect-report/
             e2e/playwright-controls-report/
             e2e/playwright-audio-report/
+            ${{ runner.temp }}/browser-file-readiness.json
+            ${{ runner.temp }}/visibility-startup-observer.jsonl
+            ${{ runner.temp }}/visibility-xvfb.log
           retention-days: 7
 
   kubernetes:

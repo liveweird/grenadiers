@@ -26,5 +26,5 @@ Version 0.3.45 adds Punch as the first item in the twenty-item current catalog. 
 is `2`; `ALL` is `3,145,723`. Generator v2 appends weight 15 after Kick, making the complete pool
 410 and the Punch interval `[395,410)`. A Punch-only pool is 115. All 1,048,576 catalog subsets are
 validated. Archived gameplay v9 and earlier reject Punch catalog entries, equipment, pickups,
-cooldown and live or historical bomb provenance. This document describes reviewed source; native
-same-image acceptance, accepted v0.3.44 parent integration and release publication remain pending.
+cooldown and live or historical bomb provenance. This document describes reviewed source on the
+merged v0.3.44 source parent; native same-image acceptance and release publication remain pending.

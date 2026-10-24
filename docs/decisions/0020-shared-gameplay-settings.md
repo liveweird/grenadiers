@@ -1,6 +1,6 @@
 # ADR 0020: Shared, revision-bound room settings
 
-Status: implementation candidate. Depends on classic-v3 turning and gameplay v5.
+Status: implemented. Depends on classic-v3 turning and gameplay v5.
 
 ## Scope and defaults
 

@@ -2,7 +2,8 @@
 
 This document retains the original single-round domain model. Production now composes the
 [match lifecycle](match-lifecycle.md) and [bounded match owner](match-owner.md) using
-[gameplay v4](protocol.md); their match-result, reconnect, rematch, and retention rules take precedence.
+the live [gameplay contract](protocol.md); their match-result, reconnect, rematch, and retention
+rules take precedence.
 
 
 Status: public `core::room` lifecycle plus server-owned networked two-player rounds. Anonymous
@@ -80,7 +81,7 @@ More than 500 ms behind the next deadline interrupts a nonterminal round with
 immediately; Countdown views and Running/Result snapshots publish every three ticks, with
 immediate phase transitions. A single prechecked encoded snapshot is shared by both seats.
 
-Both Ready starts 180 countdown ticks. At the exact boundary the owner constructs the fixed
+Both Ready starts 180 countdown ticks. At the exact boundary the owner constructs the generated
 arena at the room's absolute tick with zero running updates; physics starts on the next tick.
 Canceling clears both flags and advances the attempt. Commands, including Leave, validate
 the current attempt rather than an admission-time copy. No input carries into another attempt.
@@ -104,6 +105,6 @@ Terminal rooms retire after 30 seconds without activity extending retention. Emp
 release immediately. Terminal retirement closes normally without inventing an expiry error.
 
 Publication validates the next revision, matching lifecycle/state tick and result, at most
-three consecutive reports/64 events, and the 64 KiB encoder limit before replacing the watch
+three consecutive reports/96 events, and the 64 KiB encoder limit before replacing the watch
 value. Failures preserve the last valid publication and retire the unavailable owner; events
 are never truncated to make a frame fit.

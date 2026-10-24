@@ -24,10 +24,11 @@ authoritative position epoch: they snap to the published positions without walki
 invented movement audio. Hidden actors retain their exact four-key privacy shape and expose neither
 position nor marker.
 
-Version 0.3.42 adds Teleporter as the seventeenth item, bit 21 of
-`EnabledItems` (`EnabledItems::ALL = 3145712`). Generator v2 appends weight 15 after Invisible
-Bombs: the all-items pool is 365 and a Teleporter-only pool is 115. All 131,072 subsets are accepted
-without changing earlier masks or generated maps. See [gameplay v11](protocol-v11.md),
+At v0.3.42, Teleporter was added as the seventeenth item, bit 21 of
+`EnabledItems` (`EnabledItems::ALL = 3145712`; now 4194303 with all 22 items). Generator v2
+appended weight 15 after Invisible Bombs: the all-items pool was 365 (now 440) and a
+Teleporter-only pool is 115. All 131,072 subsets were accepted at v0.3.42 without changing earlier
+masks or generated maps. See [gameplay v11](protocol-v11.md),
 [settings](settings.md), and [production-seed testing](../testing.md#teleporter-production-seed-scenario).
 
 Source `880fff7c67269f2886746b45239cd888576832f4` is native verified by 54 Compose plus

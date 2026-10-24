@@ -1,6 +1,6 @@
 # Ordered WebSocket delay measurement
 
-The M7 delayed-WebSocket fixture measures the existing v4 browser and unchanged server through a
+The M7 delayed-WebSocket fixture measures the current browser and unchanged server through a
 bounded application-message delay. It runs two real clients in the generated match fixture and uses
 native keyboard controls. Playwright's WebSocket route calls `connectToServer()` and forwards the
 original text or binary value unchanged. Each direction has its own FIFO with 64-frame and 1MiB

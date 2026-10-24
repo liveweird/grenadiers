@@ -5,7 +5,7 @@ application on port 8085. Active matches live in that process, so the initial de
 intentionally runs one replica with a `Recreate` update strategy. A restart ends active matches;
 horizontal scaling and recovery require match routing and persistence designs first.
 
-Deploy the v0.3.47 server and matching web assets together, then reload connected browsers.
+Deploy the current server and matching web assets together, then reload connected browsers.
 Gameplay v11 has an exact catalog of 22 item types: 21 collectible pickup types plus the Oil Barrel
 arena object. It publishes materialized Oil state while concealed and pending locations, generation
 data, and typed exit grace remain private. Gameplay-v10 clients fail version negotiation before

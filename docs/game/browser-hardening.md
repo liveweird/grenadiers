@@ -1,7 +1,7 @@
 # Browser visibility hardening
 
 The first M7 browser-hardening slice exercises a real hidden and visible Chromium tab transition.
-It uses the existing v4 client, generated match fixture, native keyboard input, authoritative server
+It uses the current client, generated match fixture, native keyboard input, authoritative server
 ticks, and public opponent snapshots. It does not replace visibility APIs, dispatch synthetic DOM
 events, clear controls from the test, alter the game clock, or inject state.
 

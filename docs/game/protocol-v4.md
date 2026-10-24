@@ -1,7 +1,7 @@
 # Gameplay v4 resumable match contract
 
-Status: active on the existing gameplay WebSocket. V4 defines the checked contract for reconnect
-grace and stable seat capabilities; it adds no endpoint or feature flag.
+Status: archived; the live contract is [v11](protocol-v11.md). V4 defined the checked contract for
+reconnect grace and stable seat capabilities; it added no endpoint or feature flag.
 
 V4 retains the v3 physical `GameState` and event definitions. Authentication success is fixed
 to protocol version 4, while authentication input remains bounded to 0..65,535 for negotiation.

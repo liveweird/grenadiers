@@ -5,9 +5,8 @@ Toolchains are pinned in `mise.toml`, `.nvmrc`, `rust-toolchain.toml`, and Docke
 CI uses `.nvmrc` and `rust-toolchain.toml` instead of repeating toolchain versions.
 
 Cargo workspace dependencies are centralized in `Cargo.toml`; commit the resolved `Cargo.lock`
-and use `--locked` for normal builds, tests, and container packaging. The scaffold was authored
-without crates.io access or a Cargo cache, so the initial lock resolution is explicitly outstanding.
-Do not handwrite checksums or claim a locked build passed before generating and reviewing it.
+and use `--locked` for normal builds, tests, and container packaging. `scripts/gates.sh` fails
+without a non-empty `Cargo.lock`. Do not handwrite checksums; generate and review them.
 
 Both npm packages commit lockfiles and exact direct versions. Use `npm ci`, not a fresh
 unreviewed resolution, in CI. If TypeScript 6 requires openapi-typescript's older peer range
@@ -23,10 +22,11 @@ updates like code. Dependabot checks Cargo, both npm packages, GitHub Actions, a
 Cargo-deny covers Rust advisories, allowed licenses, and sources; npm audit covers both complete
 npm trees, including development tools. Pin utility versions in CI and the matching test docs.
 
-Node and PostgreSQL image digests are inherited from Flow. Rust and runtime images currently
-use exact release tags; their immutable digest baseline is deferred until registry access is
-available. Do not invent digests. Review and pin them before a release. The composed application
-is scanned with Flow's pinned Trivy image after the CI browser smoke test.
+The Node, Rust, and Debian runtime images in the `Dockerfile` and the PostgreSQL image in
+`docker-compose.yaml` are pinned by digest. Dependabot's Docker ecosystem refreshes the
+`Dockerfile` images; update the Compose PostgreSQL digest manually. The
+composed application is scanned with Flow's pinned Trivy image in the `browser-image` job, before
+browser acceptance.
 
 Kubernetes validation uses kubeconform 0.8.0 and Kubernetes 1.33.0 schemas from a pinned
 schema-repository commit. CI verifies the kubeconform archive checksum before execution;

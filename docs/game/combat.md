@@ -66,9 +66,10 @@ boundary into reviewed wire messages; it must not serialize the internal world w
 
 ## Current scope and checks
 
-The headless M2 boundary is implemented. Pickups and generated arenas belong to M4.
-Server scheduling, gameplay transport, and PixiJS rendering begin in M3; the browser still
-shows transport diagnostics. Match scoring, countdowns, and rematches follow in M5.
+The headless M2 boundary is implemented. Pickups and generated arenas (M4), server scheduling,
+gameplay transport and PixiJS rendering (M3), and match scoring, countdowns and rematches (M5)
+were delivered later; see [pickups](pickups.md), [match lifecycle](match-lifecycle.md) and
+[the browser client](browser.md).
 
 Run `scripts/gates.sh server` and `scripts/gates.sh coverage`. Regression fixtures cover exact
 fuse/expiry/round-time boundaries, obstruction, chains, simultaneous soft-block hits, bomb-ID

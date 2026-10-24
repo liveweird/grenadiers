@@ -118,8 +118,8 @@ test order and enforces coverage thresholds declared in `web/vite.config.ts`.
 `api-guidelines/spectral.yaml`; it retains the standard and custom rules without the CLI's
 glob dependency. Parser/load errors and error-severity diagnostics fail the command.
 `check:api`, `check:realtime`, and `check:gameplay` compare generated
-contracts without modifying them. Gameplay generation/drift checks cover active v6 and historical
-v2–v5; parity tests compare unchanged physical definitions. AJV validates runtime WebSocket payloads. EN/PL locale
+contracts without modifying them. Gameplay generation/drift checks cover active v11 and historical
+v2–v10; parity tests compare unchanged physical definitions. AJV validates runtime WebSocket payloads. EN/PL locale
 parity is tested. ESLint/SonarJS and Knip must report no findings.
 
 Vitest also discovers `web/scripts/*.test.mjs`: generator tests compile representative
@@ -153,7 +153,7 @@ Install cargo-deny with `cargo install cargo-deny --version 0.20.2 --locked` for
 separately so external advisory outages do not obscure unit-test results. Document any
 reviewed exception with its reason and removal condition; never add blanket suppressions.
 
-All activated-v6 Playwright configurations disable framework trace capture. Raw traces can retain
+All Playwright configurations disable framework trace capture. Raw traces can retain
 personal `admitted` frames and private resume capabilities before test-side redaction. Failure
 screenshots, public reports, and bounded redacted command/snapshot summaries remain available.
 
@@ -193,8 +193,8 @@ redacted public histories; screenshots and Axe cover desktop and 320-pixel final
 
 `E2E_MATCH_FIXTURE=arena-v1-matches npm --prefix e2e run test:reconnect` runs two reconnect
 scenarios against the same match fixture and uses zero retries. It covers transport restore and
-connected takeover with real browsers and sockets. Together with six default, one pickup, and one
-complete-match scenario, scenario parity covers ten documented cases. These checks do not by
+connected takeover with real browsers and sockets. Scenario parity covers every documented case
+across all Playwright suites, not only these. These checks do not by
 themselves claim exact-image or hosted-environment acceptance.
 
 ## Ordered WebSocket delay

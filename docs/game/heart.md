@@ -1,6 +1,8 @@
 # Heart pickup
 
-Status: implementation candidate for v0.3.25; release acceptance is not complete.
+Status: implemented; published in
+[v0.3.25](https://github.com/liveweird/grenadiers/releases/tag/v0.3.25) and enabled by default in
+new rooms.
 
 ## Playing with Heart
 
@@ -37,8 +39,8 @@ terrain, blocks and concealed upgrades; only its recorded generator identity dif
 Generator v1, earlier rules and archived replays retain their original behavior. Future
 disabled items must introduce neither random draws nor pickup weights.
 
-Gameplay-v9 carries the identities. Earlier socket versions are rejected before credential
-claim. Legacy state and event projections reject Heart instead of omitting or relabeling it.
+Gameplay v9 introduced the identities and the live [v11](protocol-v11.md) carries them. Other
+socket versions are rejected before credential claim. Legacy state and event projections reject Heart instead of omitting or relabeling it.
 Private replay format 2 records Expanded v5/generator v2 with the existing lifecycle policy;
 complete settings already carry the enabled mask, so generation records need no extra field.
 

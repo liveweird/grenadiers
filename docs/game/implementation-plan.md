@@ -40,8 +40,8 @@ profile. Native acceptance covers 55 cases per target with zero retries or carry
 published; Punch v0.3.45 is also published and promoted locally on the accepted image. Twenty of 22 requested items are published;
 Bracelet v0.3.46 is published and promoted locally: 21 of 22 requested item types are shipped.
 Oil Barrel v0.3.47 is published and promoted locally, completing all 22 requested item types.
-ART-ATLAS is active: v0.3.48 provides the artist handoff/export/preview; v0.3.49 adopts the
-validated atlas in gameplay. Artist redraws follow sample review.
+ART-ATLAS v0.3.48 artist handoff/export/preview is published and promoted locally. The next
+v0.3.49 increment adopts the validated atlas in gameplay. Artist redraws follow sample review.
 
 New playtest requests and expansion work are tracked in the [gameplay and presentation
 backlog](backlog.md): forgiving turns first, shared gameplay settings, detailed retro pixel art,

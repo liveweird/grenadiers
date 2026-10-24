@@ -3,7 +3,8 @@
 TURN, CONFIG and the first ART slice are implemented. Published [v0.3.47](https://github.com/liveweird/grenadiers/releases/tag/v0.3.47)
 completes **all 22 requested item types**, including Oil Barrel. Full checks, scoped
 Compose/Kubernetes acceptance, publication and localhost promotion are complete. ART-ATLAS is
-in progress: v0.3.48 delivers the artist handoff/export/preview; v0.3.49 adopts it in gameplay.
+partly shipped: [v0.3.48](https://github.com/liveweird/grenadiers/releases/tag/v0.3.48) publishes
+the artist handoff/export/preview and is promoted locally; v0.3.49 gameplay adoption remains next.
 
 [v0.3.43](https://github.com/liveweird/grenadiers/releases/tag/v0.3.43) publishes Wall Pass as the
 eighteenth of 22 requested item types. Published source `c086f719ea470b9fe24963adef84b5e3bdf3e17a`,
@@ -240,7 +241,7 @@ production follow review of this complete inventory and representative arena pro
   screenshots, reduced-motion checks and measured rendering performance. Preserve collision
   geometry, authoritative visibility, hazard readability, player distinctions and EN/PL UI.
 
-The v0.3.48 candidate implements the template/export/preview portion above. Gameplay integration
+Published v0.3.48 implements the template/export/preview portion above. Gameplay integration
 and artist redraws remain open. The faithful baseline retains a known two-pixel vertical gap in
 flame frame 1; the guide calls it out explicitly rather than claiming seamless replacement art.
 

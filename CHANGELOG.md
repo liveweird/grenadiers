@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.3.48 — artist handoff candidate
+## 0.3.48 — 2026-10-24 (published)
 
 - Add the canonical editable arena PNG and stable-ID manifest covering 91 baseline drawings,
   four reserved entries, animation timing, pivots, aliases and compositions.

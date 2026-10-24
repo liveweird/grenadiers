@@ -11,6 +11,22 @@ honest about the source and environment actually tested.
 The records below are historical evidence. Their repeated CI runs, receipt graphs and sealing
 procedures do not impose additional requirements on future changes.
 
+## Current v0.3.48 published delivery — 2026-10-24
+
+[v0.3.48](https://github.com/liveweird/grenadiers/releases/tag/v0.3.48) is published from source
+`f6336810f4a539e5e001aa6b1733f445015ae76f`, tree `87a488cc69b45e61b40b8be340f7b09ea4347930`,
+with remotely verified annotated tag object `372e84642c4e582c4a632508acb2deeaa9a89aba`.
+The uploaded 229,324-byte artist handoff ZIP has verified SHA256
+`1f374dc6a76a05b536decc9620bf43edd448d9cc242bf0b15d4b1e28eed4b135`.
+
+Localhost:8085 serves exact accepted image
+`sha256:751383fe17e23a6ae46e58006017a15862c6b0cf2fd993645bb2c78187b00cb8`.
+Promotion exits zero; health/readiness/index return 200 and served HTML/JavaScript match container
+bytes. UID65532, read-only filesystem, dropped capabilities and no new privileges are retained.
+Oil v0.3.47 is preserved as the rollback image. Application inputs match tested source `cd369f4`;
+subsequent gate/documentation changes do not require rebuilding that image. Gameplay adoption
+remains v0.3.49; current gameplay continues using the existing code-generated drawings.
+
 ## v0.3.48 artist handoff acceptance — 2026-10-24
 
 Application/tooling source `cd369f463a1d4c2a63f3a9da1d5eebfafa770e70` passes the full web gate:

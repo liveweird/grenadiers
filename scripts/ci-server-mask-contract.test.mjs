@@ -229,6 +229,9 @@ test("aggregate requires every partition profile and no extras", () => {
 
 test("workflow aggregate fails closed before pinned runtime and artifact validation", () => {
   const workflow = fs.readFileSync(new URL("../.github/workflows/ci.yml", import.meta.url), "utf8");
+  const trigger = workflow.slice(workflow.indexOf("on:\n"), workflow.indexOf("permissions:\n"));
+  assert.match(trigger, /^on:\n  workflow_dispatch:\n$/);
+  assert.doesNotMatch(trigger, /push:|pull_request:/);
   const partition = workflow.slice(
     workflow.indexOf("\n  server-mask-partition:\n"), workflow.indexOf("\n  server:\n"),
   );

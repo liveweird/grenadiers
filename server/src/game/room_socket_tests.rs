@@ -111,6 +111,7 @@ async fn two_members_receive_personalized_admission_and_live_waiting_updates() {
         json!([
             "kick",
             "punch",
+            "bracelet",
             "wallPass",
             "heart",
             "remoteBomb",

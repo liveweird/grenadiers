@@ -47,6 +47,7 @@
     "test:wall-pass": "playwright test --config playwright.wall-pass.config.ts",
     "test:kick": "playwright test --config playwright.kick.config.ts",
     "test:punch": "playwright test --config playwright.punch.config.ts",
+    "test:bracelet": "playwright test --config playwright.bracelet.config.ts",
     "test:renderer-diagnostics": "playwright test --config playwright.renderer-diagnostics.config.ts",
     "test:terrain-pixels": "playwright test --config playwright.terrain-pixels.config.ts"
   },

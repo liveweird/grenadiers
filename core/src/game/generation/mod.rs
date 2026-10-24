@@ -204,6 +204,7 @@ fn sample_pickup(source: &mut impl RandomWords, enabled: EnabledItems) -> Option
     let wall_pass_end = teleporter_end + u32::from(enabled.contains_wall_pass()) * 15;
     let kick_end = wall_pass_end + u32::from(enabled.contains_kick()) * 15;
     let punch_end = kick_end + u32::from(enabled.contains_punch()) * 15;
+    let bracelet_end = punch_end + u32::from(enabled.contains_bracelet()) * 15;
     Some(match value {
         0..40 => PickupKind::BombCapacity,
         40..80 => PickupKind::BlastRange,
@@ -228,6 +229,7 @@ fn sample_pickup(source: &mut impl RandomWords, enabled: EnabledItems) -> Option
         value if value < wall_pass_end => PickupKind::WallPass,
         value if value < kick_end => PickupKind::Kick,
         value if value < punch_end => PickupKind::Punch,
+        value if value < bracelet_end => PickupKind::Bracelet,
         _ => unreachable!("sample value is bounded by the enabled item pool"),
     })
 }

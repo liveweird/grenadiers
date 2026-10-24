@@ -52,6 +52,10 @@ impl State {
                     self.replace_actor_equipment(seat, crate::game::Equipment::Punch);
                     true
                 }
+                PickupKind::Bracelet => {
+                    self.replace_actor_equipment(seat, crate::game::Equipment::Bracelet);
+                    true
+                }
                 PickupKind::WallPass => {
                     self.replace_actor_equipment(seat, crate::game::Equipment::WallPass);
                     true
@@ -172,7 +176,11 @@ impl super::Actor {
                     self.pending_turn = None;
                 }
             }
-            PickupKind::Kick | PickupKind::Punch | PickupKind::WallPass | PickupKind::Heart => {
+            PickupKind::Kick
+            | PickupKind::Punch
+            | PickupKind::Bracelet
+            | PickupKind::WallPass
+            | PickupKind::Heart => {
                 unreachable!("equipment pickups use the world-aware transition")
             }
             PickupKind::Teleporter => unreachable!("teleporters are committed after collection"),

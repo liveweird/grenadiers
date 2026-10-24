@@ -78,4 +78,5 @@ See the implemented expansion candidates: [Heart](heart.md) and [Shield](shield.
 - [Teleporter](teleporter.md): an immediate, atomic safe-position swap or consumed unsafe attempt.
 - [Kick](kick.md): permanent bomb-kicking equipment with private motion history.
 - [Punch](punch.md): permanent three-cell wrapped bomb movement with private cooldown history.
+- [Bracelet](bracelet.md): passive contact shove equipment with private cooldown history.
 - [Wall Pass](wall-pass.md): permanent soft-block passage with private replacement exit grace.

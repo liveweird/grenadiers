@@ -1,4 +1,4 @@
-use grenadiers_core::game::{EnabledItems, SeatId};
+use grenadiers_core::game::{Direction, EnabledItems, SeatId};
 
 use super::{Operation, ReplayAction, ReplayError, replay};
 use crate::game::rooms::match_runtime::{MatchAction, start_optional_runtime};
@@ -27,10 +27,23 @@ fn equipment_replays_with_the_effective_punch_setting_and_shared_id() {
             _ => None,
         })
         .unwrap();
-    *update = update.with_enabled_items(EnabledItems::EMPTY);
+    *update = update.with_enabled_items(EnabledItems::BRACELET);
     assert_eq!(
         replay(runtime.replay_journal()),
         Err(ReplayError::InvalidActionProfile)
+    );
+}
+
+#[test]
+fn bracelet_settings_replay_as_a_passive_movement_profile() {
+    let mut runtime = start_optional_runtime(EnabledItems::BRACELET, 31);
+    runtime
+        .action(SeatId::One, 1, MatchAction::Movement(Some(Direction::East)))
+        .unwrap();
+    runtime.tick().unwrap();
+    assert_eq!(
+        replay(runtime.replay_journal()).unwrap(),
+        runtime.replay_inspection()
     );
 }
 

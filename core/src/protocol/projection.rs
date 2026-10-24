@@ -370,6 +370,7 @@ pub(super) const fn wire_pickup_kind(kind: game::PickupKind) -> Option<PickupKin
         game::PickupKind::MovementSpeed => Some(PickupKind::MovementSpeed),
         game::PickupKind::Kick
         | game::PickupKind::Punch
+        | game::PickupKind::Bracelet
         | game::PickupKind::WallPass
         | game::PickupKind::Heart
         | game::PickupKind::RemoteBomb

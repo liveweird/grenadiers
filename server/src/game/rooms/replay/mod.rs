@@ -55,6 +55,9 @@ mod punch_tests;
 mod punch_resume_tests;
 
 #[cfg(test)]
+mod bracelet_tests;
+
+#[cfg(test)]
 mod reverse_controls_tests;
 
 #[cfg(test)]

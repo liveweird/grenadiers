@@ -6,6 +6,8 @@ use crate::game::{
     SpeedLevel, State, World,
 };
 
+#[path = "bracelet_tests.rs"]
+mod bracelet_tests;
 #[path = "kick_preservation_tests.rs"]
 mod kick_preservation_tests;
 #[path = "kick_tests.rs"]
@@ -357,6 +359,7 @@ fn signature(generated: &GeneratedArena) -> String {
                 Some(PickupKind::MovementSpeed) => 'S',
                 Some(PickupKind::Kick) => 'K',
                 Some(PickupKind::Punch) => 'U',
+                Some(PickupKind::Bracelet) => 'B',
                 Some(PickupKind::WallPass) => 'A',
                 Some(PickupKind::Heart) => 'H',
                 Some(PickupKind::PiercingBomb) => 'P',

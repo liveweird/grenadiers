@@ -126,4 +126,18 @@ describe('accepted-event audio cursor', () => {
     after.snapshot!.state.bombs = [{ ...before.snapshot!.state.bombs[0], cell: { column: 5, row: 1 } }]
     expect(cursor.consume(after, true)).toEqual([])
   })
+
+  it('does not synthesize audio from Bracelet equipment or authoritative actor movement', () => {
+    const cursor = new AudioCursor()
+    const before = state(20)
+    const holder = before.snapshot!.state.actors[0]
+    if (holder.type !== 'visible') throw new Error('visible holder expected')
+    holder.inventory.equipment = 'bracelet'
+    cursor.consume(before, true)
+    const after = state(21)
+    const moved = after.snapshot!.state.actors[1]
+    if (moved.type !== 'visible') throw new Error('visible victim expected')
+    moved.position = { x: moved.position.x - 1024, y: moved.position.y }
+    expect(cursor.consume(after, true)).toEqual([])
+  })
 })

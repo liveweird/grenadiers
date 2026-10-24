@@ -4,8 +4,10 @@ TURN, CONFIG and the first ART slice are implemented. Published v0.3.45 contains
 optional pickups: Heart, Shield, Golden Flame, Short Fuse, Short Flame, Long Fuse, Reverse
 Controls, Diarrhea, Slow-foot, Piercing Bomb, Power Bomb, Remote Bomb, Landmine and Invisibility
 Cloak, Stopwatch, Invisible Bombs, Teleporter, Wall Pass, Kick and Punch. Reviewed implementation
-source, scoped acceptance, publication and localhost promotion are complete. Twenty of 22 requested
-items are published. Bracelet v0.3.46 and Oil Barrel v0.3.47 follow before ART-ATLAS.
+source, scoped acceptance, publication and localhost promotion are complete. The v0.3.46 source
+candidate adds Bracelet as the twenty-first optional pickup on that published parent. Bracelet
+acceptance and checks are complete; publication and promotion remain pending. Oil Barrel v0.3.47 follows before
+ART-ATLAS.
 
 [v0.3.43](https://github.com/liveweird/grenadiers/releases/tag/v0.3.43) publishes Wall Pass as the
 eighteenth of 22 requested item types. Published source `c086f719ea470b9fe24963adef84b5e3bdf3e17a`,
@@ -124,7 +126,7 @@ status is recorded in [GitHub Releases](https://github.com/liveweird/grenadiers/
 acceptance records in [verification](../verification.md). Richer transitions and artwork remain
 follow-up work; see [pixel-art presentation](pixel-art.md) and
 [expanded item implementation](expanded-items.md).
-Updated 2026-10-24 after Punch native acceptance.
+Updated 2026-10-24 after Bracelet scoped acceptance.
 Release acceptance is recorded in
 [verification](../verification.md).
 The [implementation plan](implementation-plan.md) remains the milestone/release reference;
@@ -323,6 +325,6 @@ Retain bounded scheduling, performance budgets, EN/PL documentation and full rel
 including same-image Compose/Kubernetes acceptance. Bots, mobs and larger matches remain
 separate tracks; their future interactions must be specified without making them prerequisites.
 
-Complete the entire expanded-item activation batch before starting ART-ATLAS. Punch is the
-published v0.3.45 increment on the Kick parent; Bracelet v0.3.46 and Oil v0.3.47 follow.
-ART-ATLAS begins after those item increments and their release gates are complete.
+Complete the entire expanded-item activation batch before starting ART-ATLAS. Bracelet is the
+current bounded source increment (v0.3.46); Oil remains after it. ART-ATLAS begins
+only after those item increments and their release gates are complete.

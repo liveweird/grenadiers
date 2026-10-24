@@ -11,6 +11,20 @@ honest about the source and environment actually tested.
 The records below are historical evidence. Their repeated CI runs, receipt graphs and sealing
 procedures do not impose additional requirements on future changes.
 
+## Current v0.3.46 Bracelet acceptance — 2026-10-24
+
+Frozen source `5e55bb46bb71b1b8bf9db8dab0a6403eb7a1e240` passes focused core/server checks, all
+2,097,152 masks in debug/release/coverage, the web gate (2,618 tests across 70 files), E2E static
+and auxiliary checks, dependency/image audits, and distinct Ubuntu Rust CI
+[run 40123865469](https://github.com/liveweird/grenadiers/actions/runs/40123865469). Rust coverage is
+16,315/17,522 (93.111517%); the full gate exits zero in 27m57s using four workers and 16 ranges.
+Same-image native acceptance passes all 29 scoped cases with zero retries: Compose Bracelet,
+Kick, Punch, Landmine, Wall Pass, classic match/rematch and 22 latency cases (28 total), plus
+Kubernetes Bracelet with production-manifest, security and owned-resource cleanup checks. The 22 isolated latency cases pass with maxima
+62.93 ms local and 160.14 ms shaped 50 ms delay, below the unchanged 250 ms budget. Accepted image:
+`sha256:1460278198b6d604595bfbe4fb8278a85ab39725c43516bb8b55ab2e6a47f5bf`. Publication and
+promotion remain pending.
+
 ## Current v0.3.45 published delivery — 2026-10-24
 
 [v0.3.45](https://github.com/liveweird/grenadiers/releases/tag/v0.3.45) is published from source
@@ -2020,11 +2034,31 @@ Diarrhea.
 Records below are frozen against their named sources. Publication and later CI status are
 recorded in [release notes](https://github.com/liveweird/grenadiers/releases).
 
+## Bracelet candidate — 2026-10-21 — source static checks complete
+
+The v0.3.46 source candidate adds passive Bracelet contact shoves to gameplay v10 without a new
+command, event or wire field. Domain, protocol and replay coverage exercises the one-tile clamp,
+separation rearm, 30-tick cooldown, alternating simultaneous priority, swept hazards and private
+forced-movement history. The current catalog contains 21 items and all **2,097,152 masks**; archived
+v9 and earlier reject Bracelet settings, gear, pickups and history.
+
+The E2E source adds a mode-0444 repeating-byte-31 fixture and two-browser ordinary-input route. It
+clears opposite arena perimeters, stages the players at `(10,1)` and `(11,1)`, and checks the same
+one-tile victim displacement in both recipient streams without a victim command, Equipment action,
+public event or private marker. Planned captures are `bracelet-shoved-desktop-en.png` and
+`bracelet-shoved-polish-320-reduced.png`. E2E lint, type checking, Knip, one-test Playwright
+discovery and **48-scenario parity** pass, as do Cargo metadata/version consistency, formatting,
+repository, YAML syntax and diff checks. Published v0.3.45 parent integration is now complete.
+This historical source record does not claim the pending full debug mask gate, native same-image
+Compose/Kubernetes execution, final CI or publication.
+
 ## Historical Wall Pass source-only candidate — 2026-10-21 — superseded
 
 This source-only chapter is preserved as dated history. Its pending native statement was
 superseded by the final-source sealed checkpoint recorded at the top of this document; it must not
 be read as the current v0.3.43 status.
+
+## Wall Pass candidate — 2026-10-21 — source checks complete
 
 The v0.3.43 source candidate activates permanent Wall Pass equipment in the current gameplay-v10
 catalog. Core coverage exercises ordinary collection, equipment replacement and private per-cell

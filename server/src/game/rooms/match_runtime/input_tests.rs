@@ -42,18 +42,20 @@ fn stale_epoch_and_invalid_phase_do_not_consume_bomb_high_water() {
 
 #[test]
 fn equipment_requires_running_punch_settings_and_uses_the_shared_high_water() {
-    let mut disabled = start_optional_runtime(EnabledItems::EMPTY, 3);
-    assert_eq!(
-        disabled.action(SeatId::One, 1, MatchAction::Equipment(7)),
-        Err(MatchRuntimeError::InvalidPhase)
-    );
-    assert_eq!(
-        disabled
-            .prepare_resume(SeatId::One)
-            .unwrap()
-            .last_bomb_action_id,
-        None
-    );
+    for items in [EnabledItems::EMPTY, EnabledItems::BRACELET] {
+        let mut disabled = start_optional_runtime(items, 3);
+        assert_eq!(
+            disabled.action(SeatId::One, 1, MatchAction::Equipment(7)),
+            Err(MatchRuntimeError::InvalidPhase)
+        );
+        assert_eq!(
+            disabled
+                .prepare_resume(SeatId::One)
+                .unwrap()
+                .last_bomb_action_id,
+            None
+        );
+    }
 
     let mut enabled = start_optional_runtime(EnabledItems::PUNCH, 31);
     enabled

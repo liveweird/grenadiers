@@ -70,6 +70,19 @@ pub(crate) fn capture_expanded_for_items(
                 .collect::<Result<Vec<_>, _>>()?
                 .try_into()
                 .map_err(|_| ProjectionError::InvalidActors)?,
+            last_successful_shove_ticks: state
+                .actors()
+                .each_ref()
+                .map(|actor| {
+                    actor
+                        .last_successful_shove_tick()
+                        .map(wire_tick)
+                        .transpose()
+                })
+                .into_iter()
+                .collect::<Result<Vec<_>, _>>()?
+                .try_into()
+                .map_err(|_| ProjectionError::InvalidActors)?,
             soft_wall_grace: state
                 .actors()
                 .each_ref()

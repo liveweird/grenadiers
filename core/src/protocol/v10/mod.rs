@@ -62,6 +62,7 @@ fn expanded_items() -> ItemSet {
     ItemSet::new([
         ItemId::Kick,
         ItemId::Punch,
+        ItemId::Bracelet,
         ItemId::WallPass,
         ItemId::Heart,
         ItemId::RemoteBomb,
@@ -123,6 +124,8 @@ pub fn encode_server_message(
     super::enforce_server_message_size(encoded)
 }
 
+#[cfg(test)]
+mod bracelet_tests;
 #[cfg(test)]
 #[path = "frame_bound_tests.rs"]
 mod frame_bound_tests;

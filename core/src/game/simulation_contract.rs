@@ -1,4 +1,4 @@
-use crate::game::geometry::MovementTrace;
+use crate::game::geometry::{MovementSegment, MovementTrace};
 use crate::game::input::Direction;
 use crate::game::types::{CellId, EntityId, Position, SeatId, SpeedLevel, Tick};
 use crate::game::{EffectKind, EnabledItems, PickupKind, StepEvent};
@@ -44,6 +44,7 @@ pub enum StateError {
     DuplicateRemoteOwner(EntityId),
     UnsupportedBombKickHistory(EntityId),
     UnsupportedBombPunchHistory(EntityId),
+    UnsupportedShoveHistory(EntityId),
     UnsupportedEnabledItems(EnabledItems),
     UnsupportedPickup { cell: CellId, kind: PickupKind },
 }
@@ -57,6 +58,7 @@ pub enum StepError {
     DuplicateRemoteOwner(EntityId),
     UnsupportedBombKickHistory(EntityId),
     UnsupportedBombPunchHistory(EntityId),
+    UnsupportedShoveHistory(EntityId),
     UnsupportedEquipmentAction,
     EffectExpiryOverflow(EffectKind),
     BombPauseOverflow(EntityId),
@@ -67,4 +69,11 @@ pub struct StepReport {
     pub tick: Tick,
     pub traces: [MovementTrace; 2],
     pub events: Vec<StepEvent>,
+    pub(crate) forced_movement: Option<ForcedMovement>,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) struct ForcedMovement {
+    pub(crate) seat: SeatId,
+    pub(crate) segment: MovementSegment,
 }

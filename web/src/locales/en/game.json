@@ -125,6 +125,7 @@
     "speedCap": "Speed pickups add one level at a time, up to 5 cells/s.",
     "kickDescription": "Permanent equipment that kicks a stationary timed or remote bomb when you walk into it. The bomb moves one tile on the next update, then every 10 updates until blocked; its owner and fuse stay unchanged. Contact mines cannot be kicked, and another equipment pickup replaces Kick.",
     "punchDescription": "Permanent equipment. Press your Equipment key to punch the bomb directly ahead to the next open floor cell in its three-tile path. After a successful punch, Punch has a fixed 0.2 second cooldown; another equipment pickup replaces Punch.",
+    "braceletDescription": "Permanent equipment. Moving forward into the other player shoves them up to 1 tile. After a successful shove, Bracelet has a 0.5 second cooldown and must separate before it can shove again; another equipment pickup replaces Bracelet.",
     "wallPassDescription": "Permanent equipment that lets you move through breakable blocks. Hard walls and bombs still block you, explosions still hurt, and another equipment pickup replaces it. After replacement, you may leave a block you already overlap but cannot re-enter it.",
     "heartDescription": "Absorbs one lethal blast, then grants a brief damage grace period.",
     "remoteBombDescription": "Stores one remotely triggered bomb. Place it with the bomb key, then press the same key later to detonate it.",

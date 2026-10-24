@@ -117,8 +117,8 @@ and patterns. Keep generator tests and actual schema validation alongside contra
 `e2e/` is a separate Playwright package against the actual running stack. Install Chromium
 with `npm --prefix e2e run install:browsers`, start Compose, then run
 `scripts/gates.sh browser`. No mocked backend belongs in blackbox tests. Scenario documents
-and spec titles must agree verbatim. E2E static checks run on every pull request; browser
-smoke runs in CI against Compose.
+and spec titles must agree verbatim. Run E2E static checks locally before release. The optional manual full workflow also runs
+those checks and browser scenarios against Compose; automatic PR checks add distinct Linux Rust coverage.
 
 The default suite uses one worker in CI and two locally; `E2E_WORKERS` explicitly overrides
 that choice. Each multiplayer case already owns two browser contexts. Serial CI execution
@@ -366,3 +366,15 @@ retry, send direct gameplay commands or extend budgets. Native execution is acce
 27-case checkpoint (26 Compose plus one Kubernetes case, zero retries); the full 114-case matrix
 was not run. Natural-fuse, reconnect and screenshot checks are recorded in
 [verification](verification.md#v0345-punch-native-accepted-checkpoint--2026-10-24--27-cases).
+
+### Bracelet source scenario
+
+Use `docker-compose.bracelet.yaml` with the mode-0444 repeating-byte-31 v2 seed fixture and
+`E2E_BRACELET_FIXTURE=arena-v2-bracelet npm --prefix e2e run test:bracelet`. Two browser peers use
+ordinary movement and Bomb input to clear opposite perimeter routes, collect Bracelet naturally,
+and stage the players at `(10,1)` and `(11,1)`. Forward movement shoves the stationary second player
+exactly one tile to `(12,1)` in both public streams. The scenario asserts no victim command,
+Equipment action, public event or private cooldown/report field, then captures English desktop and
+Polish 320-pixel reduced-motion views. It does not inject state, search seeds, retry, send direct
+gameplay commands or extend budgets. Same-image acceptance passes on Compose and Kubernetes
+as part of the [29-case scoped checkpoint](verification.md#current-v0346-bracelet-acceptance--2026-10-24).

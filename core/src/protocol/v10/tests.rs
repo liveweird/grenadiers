@@ -54,16 +54,17 @@ fn authentication_is_version_ten_and_version_nine_stays_archived() {
 }
 
 #[test]
-fn expanded_catalog_activates_punch_after_kick_without_changing_reserved_ids() {
+fn expanded_catalog_activates_bracelet_after_punch_without_changing_reserved_ids() {
     let catalog = super::expanded_items();
-    assert_eq!(catalog.iter().count(), 20);
-    assert_eq!(1_usize << catalog.iter().count(), 1_048_576);
+    assert_eq!(catalog.iter().count(), 21);
+    assert_eq!(1_usize << catalog.iter().count(), 2_097_152);
     assert!(catalog.contains(ItemId::Stopwatch));
     assert!(catalog.contains(ItemId::InvisibleBombs));
     assert!(catalog.contains(ItemId::Teleporter));
     assert!(catalog.contains(ItemId::WallPass));
     assert!(catalog.contains(ItemId::Kick));
     assert!(catalog.contains(ItemId::Punch));
+    assert!(catalog.contains(ItemId::Bracelet));
     for item in RESERVED_ITEMS {
         let settings = GameSettings::new(0, 256, 3, 180, ItemSet::new([item]).unwrap()).unwrap();
         assert_eq!(
@@ -75,18 +76,18 @@ fn expanded_catalog_activates_punch_after_kick_without_changing_reserved_ids() {
     let settings = GameSettings::new(0, 256, 3, 180, catalog).unwrap();
     assert_eq!(
         expanded_settings(settings).unwrap().enabled_items().bits(),
-        3_145_723
+        3_145_727
     );
 }
 
 #[test]
-fn expanded_settings_accept_every_subset_of_the_pinned_twenty_item_catalog() {
+fn expanded_settings_accept_every_subset_of_the_pinned_twenty_one_item_catalog() {
     let bits = [
-        1_u32, 2, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16_384, 32_768, 65_536,
+        1_u32, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16_384, 32_768, 65_536,
         131_072, 262_144, 524_288, 2_097_152,
     ];
-    assert_eq!(bits.len(), 20);
-    for mask in 0_u32..1_048_576 {
+    assert_eq!(bits.len(), 21);
+    for mask in 0_u32..2_097_152 {
         let enabled = bits.iter().enumerate().fold(0, |value, (index, bit)| {
             if mask & (1 << index) == 0 {
                 value

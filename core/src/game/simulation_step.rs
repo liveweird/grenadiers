@@ -5,6 +5,7 @@ use crate::game::damage::{DamageOutcome, DamagePreventionSource, apply_damage};
 use crate::game::events::{EventAudience, StepEvent, StepEventKind};
 use crate::game::geometry::MovementTrace;
 use crate::game::movement;
+use crate::game::movement::MovementOutcome;
 use crate::game::simulation::DrawReason;
 use crate::game::types::{CellId, SeatId, Tick};
 use std::collections::BTreeSet;
@@ -33,6 +34,9 @@ impl State {
         if let Some(id) = super::validation::unsupported_punch_history(self.rules, &self.world) {
             return Err(StepError::UnsupportedBombPunchHistory(id));
         }
+        if let Some(id) = super::validation::unsupported_shove_history(self) {
+            return Err(StepError::UnsupportedShoveHistory(id));
+        }
         if !self.rules.enabled_items().contains_punch()
             && inputs
                 .iter()
@@ -46,6 +50,7 @@ impl State {
                 tick: next_tick,
                 traces: self.stationary_traces(),
                 events: Vec::new(),
+                forced_movement: None,
             });
         }
 
@@ -76,16 +81,25 @@ impl State {
         self.clear_frozen_movement(stopwatch.frozen);
         let alive_at_movement_start = self.actors.each_ref().map(|actor| actor.alive);
         let grace_at_movement_start = self.actors.each_ref().map(|actor| actor.bomb_grace.clone());
-        let (traces, kick_requests) =
+        let (outcomes, kick_requests) =
             self.move_living(next_tick, stopwatch.frozen, &motion.moving_at_start);
+        let traces = outcomes.each_ref().map(|outcome| outcome.trace.clone());
+        self.resolve_kick_requests(kick_requests);
+        let forced_movement = self.resolve_shove(&outcomes, next_tick);
         let contact_targets = super::contacts::accepted_contact_ids(
             &self.world,
             &traces,
+            forced_movement,
             alive_at_movement_start,
             &grace_at_movement_start,
         );
-        self.resolve_kick_requests(kick_requests);
-        self.kill_on_existing_flames(&traces, next_tick, &mut events, &mut shield_prevented);
+        self.kill_on_existing_flames(
+            &traces,
+            forced_movement,
+            next_tick,
+            &mut events,
+            &mut shield_prevented,
+        );
         let remote_targets =
             self.resolve_manual_actions(&manual_actions, next_tick, stopwatch, &mut events);
         self.resolve_explosions(
@@ -120,6 +134,7 @@ impl State {
             tick: next_tick,
             traces,
             events,
+            forced_movement,
         })
     }
 
@@ -129,7 +144,7 @@ impl State {
         frozen: [bool; 2],
         moving_at_start: &BTreeSet<crate::game::EntityId>,
     ) -> (
-        [MovementTrace; 2],
+        [MovementOutcome; 2],
         [Option<(crate::game::EntityId, crate::game::Direction)>; 2],
     ) {
         let turn_assist = self.rules.turn_assist();
@@ -138,7 +153,7 @@ impl State {
         let kick_rule_enabled = self.rules.enabled_items().contains_kick();
         let mut requests = [None; 2];
         let mut index = 0;
-        let traces = self.actors.each_mut().map(|actor| {
+        let outcomes = self.actors.each_mut().map(|actor| {
             let current = index;
             index += 1;
             if actor.alive && !frozen[current] {
@@ -153,12 +168,17 @@ impl State {
                 };
                 let outcome = movement::advance_actor(&self.world, actor, &config);
                 requests[current] = outcome.kick;
-                outcome.trace
+                outcome
             } else {
-                MovementTrace::new(actor.position)
+                MovementOutcome {
+                    trace: MovementTrace::new(actor.position),
+                    kick: None,
+                    original_budget: 0,
+                    forward_segment: None,
+                }
             }
         });
-        (traces, requests)
+        (outcomes, requests)
     }
 
     fn resolve_kick_requests(
@@ -190,12 +210,23 @@ impl State {
     fn kill_on_existing_flames(
         &mut self,
         traces: &[MovementTrace; 2],
+        forced_movement: Option<super::contract::ForcedMovement>,
         tick: Tick,
         events: &mut Vec<StepEvent>,
         shield_prevented: &mut [bool; 2],
     ) {
         for (index, trace) in traces.iter().enumerate() {
-            if self.actors[index].alive && trace_hits_hazards(trace, &self.world.hazards) {
+            let forced_hit = forced_movement.is_some_and(|forced| {
+                forced.seat.index() == index
+                    && self
+                        .world
+                        .hazards
+                        .keys()
+                        .any(|cell| forced.segment.overlaps_cell(*cell))
+            });
+            if self.actors[index].alive
+                && (trace_hits_hazards(trace, &self.world.hazards) || forced_hit)
+            {
                 self.damage_actor(index, tick, events, shield_prevented);
             }
         }

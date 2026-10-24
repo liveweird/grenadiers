@@ -17,6 +17,24 @@ readiness and the served artifact after deployment. Repeat affected checks when 
 do not require separate full push, PR, master and tag runs or elaborate new proof packages for
 each feature. Historical release records retain their original evidence and requirements.
 
+## v0.3.45 published prerelease — 2026-10-24
+
+Source `5be42456cee80e06e2f138bdfd458ef821bb34c2` is published as
+[v0.3.45](https://github.com/liveweird/grenadiers/releases/tag/v0.3.45) through annotated tag object
+`0e6224643ce85bf8f0a77894dcb929ab2655e397`. It publishes Punch as the twentieth requested item.
+Localhost serves the accepted image
+`sha256:3f13b26f7a4a41ba2e90b8cc9261c9e95a60eceeddf49504341e65258eb7d37d`.
+Bracelet v0.3.46 is the accepted source candidate on frozen source
+`5e55bb46bb71b1b8bf9db8dab0a6403eb7a1e240`; publication and promotion remain pending.
+
+## v0.3.46 Bracelet acceptance checkpoint — 2026-10-24
+
+Scoped native acceptance passes all 29 cases (28 Compose plus one Kubernetes), with zero retries.
+The 22 isolated latency cases pass with maxima 62.93 ms local and 160.14 ms with shaped 50 ms
+delay, below the unchanged 250 ms budget. Accepted image:
+`sha256:1460278198b6d604595bfbe4fb8278a85ab39725c43516bb8b55ab2e6a47f5bf`. Publication and
+localhost promotion remain pending; see [verification](verification.md).
+
 ## v0.3.44 published prerelease — 2026-10-24
 
 Source `f32fd86d8f0c7c4bebba8fa60d1c66c65d1a174a`, tree
@@ -25,7 +43,7 @@ Source `f32fd86d8f0c7c4bebba8fa60d1c66c65d1a174a`, tree
 `c5b1ab6d4cad94ba2f16614103903067745c5179`. It publishes Kick as the nineteenth requested item.
 Localhost serves the accepted image
 `sha256:8ff3005861127f8ac57cc32f7e6c72ce5fa996fe628ad48426dbb8cf133e1af9`.
-Punch v0.3.45 is the current source candidate; its native acceptance and publication remain pending.
+This is the published parent recorded for the historical Punch candidate below.
 
 ## Historical v0.3.44 Kick native-acceptance checkpoint — 2026-10-24
 

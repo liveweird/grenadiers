@@ -12,7 +12,8 @@ function archivedValue(value: unknown): V9Snapshot {
     state: { actors: Array<Record<string, unknown>> }
   }
   archived.room.availableItems = archived.room.availableItems
-    .filter((item) => item !== 'kick' && item !== 'punch' && item !== 'wallPass' && item !== 'teleporter')
+    .filter((item) => item !== 'kick' && item !== 'punch' && item !== 'bracelet'
+      && item !== 'wallPass' && item !== 'teleporter')
   for (const actor of archived.state.actors) delete actor.lastTeleportTick
   return archived as unknown as V9Snapshot
 }

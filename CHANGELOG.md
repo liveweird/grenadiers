@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.3.46 — 2026-10-24 (accepted; publication pending)
+
+- Allow applying the entire advertised item catalog by deriving the client limit from the authoritative room catalog.
+
+- Add opt-in Bracelet equipment: moving into the other player shoves them at most one tile along
+  the attempted direction, clamped by authoritative collision and hazard checks.
+- Require separation and a fixed 30-tick cooldown after a successful shove while keeping the
+  cooldown marker and forced-movement report private across admission, resume and replay.
+- Extend gameplay v10 to 21 lobby switches and all 2,097,152 settings masks, with English/Polish
+  presentation and a deterministic production-seed browser scenario. Integration with the
+  published v0.3.45 parent is complete; scoped native acceptance and final checks are complete on
+  the exact image, while publication and promotion remain pending.
+
 ## 0.3.45 — 2026-10-24 (published)
 
 - Add opt-in Punch equipment: the remappable Equipment action moves the adjacent facing bomb to the

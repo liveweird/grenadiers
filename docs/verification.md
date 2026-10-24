@@ -1,5 +1,375 @@
 # Repository verification
 
+## Current verification policy
+
+Follow the [local-first testing policy](testing.md#verification-policy) and
+[release verification policy](releases.md#release-verification-policy). Local results are primary;
+remote checks must add distinct coverage. Run independent work in parallel, reuse verified
+artifacts, and repeat only checks affected by changes or failures. Keep results concise and
+honest about the source and environment actually tested.
+
+The records below are historical evidence. Their repeated CI runs, receipt graphs and sealing
+procedures do not impose additional requirements on future changes.
+
+## Current v0.3.45 published delivery — 2026-10-24
+
+[v0.3.45](https://github.com/liveweird/grenadiers/releases/tag/v0.3.45) is published from source
+`5be42456cee80e06e2f138bdfd458ef821bb34c2`, tree `94f83a7650e2c57955103d91060af10b1a2f439c`,
+with verified annotated tag object `0e6224643ce85bf8f0a77894dcb929ab2655e397`. Promotion exited
+zero: localhost:8085 serves the exact accepted image
+`sha256:3f13b26f7a4a41ba2e90b8cc9261c9e95a60eceeddf49504341e65258eb7d37d`.
+Health/readiness/index return 200, and served index/JS match the container. The non-root UID is
+65532 with a read-only filesystem, all capabilities dropped and no new privileges. Kick v0.3.44
+remains the local rollback image. No rebuild or repeated full CI was needed.
+
+## v0.3.45 Punch native-accepted checkpoint — 2026-10-24 — 27 cases
+
+Application/Rust source `8e6e63aeb55227360fddcad3f81c83e33aaace0a` passed independent backend
+and frontend reviews. Browser-only corrections through `5bc46b5` preserve application inputs.
+Exact image `sha256:3f13b26f7a4a41ba2e90b8cc9261c9e95a60eceeddf49504341e65258eb7d37d`
+passes **27 scoped native cases with zero retries**:
+
+- Compose: Punch, Kick, Remote Bomb, classic match/rematch and 22 latency cases (26 total).
+- Kubernetes: Punch on the same image, with production manifests, image identity, non-root and
+  security settings, service readiness and namespace-UID-guarded cleanup (one case).
+
+Punch checks real transport interruption/resume, retained bomb identity and fuse deadline, private
+state absence, no Equipment replay, and the remapped F successor action. The first bomb remains
+uninterrupted for screenshots and natural detonation; a second fresh bomb proves reconnect.
+Owned resources were cleaned up. Latency maxima are 54.72 ms locally and 148.39 ms with shaped
+50 ms delay, below the unchanged 250 ms budget. The full historical 114-case matrix was not run.
+
+Full local Rust checks exit zero in **14m30s**, covering all **1,048,576 masks per profile**
+(debug/release/coverage) with four workers and eight ranges. Official merged line coverage is
+**15,703/16,901 (92.911662%)**. The web gate passes **1,586 tests across 68 files** with
+**95.12/90.8/95.91/97.63%** statement/branch/function/line coverage. E2E static checks pass,
+including all 58 documented scenarios. Dependency security and configured image-audit thresholds
+pass: three moderate web packages, no high/critical findings, and no E2E advisories.
+
+Distinct [Ubuntu Rust units](https://github.com/liveweird/grenadiers/actions/runs/40120977401)
+pass at `f398be7`; later changes affect browser tests and documentation only. Passing equivalent
+checks and the exact tested image are reused under the local-first policy. Release publication
+and localhost promotion remain pending at this checkpoint.
+
+## v0.3.44 published delivery — 2026-10-24
+
+Source `f32fd86d8f0c7c4bebba8fa60d1c66c65d1a174a`, tree
+`a0f2addb9204c40b4b30be2830fde4df368f019c`, is published as
+[v0.3.44](https://github.com/liveweird/grenadiers/releases/tag/v0.3.44) through annotated tag object
+`c5b1ab6d4cad94ba2f16614103903067745c5179`. Localhost serves the accepted image
+`sha256:8ff3005861127f8ac57cc32f7e6c72ce5fa996fe628ad48426dbb8cf133e1af9`.
+This is the published parent for the v0.3.45 Punch source candidate.
+
+## Historical v0.3.44 Kick sealed native acceptance — 2026-10-24 — 112/112
+
+Candidate source `cb70cba891ed972380f30f52133622ce36fd9ee8`, tree
+`5be27219ba749d2811396d6f84af7d31f528a692`, completed fresh source-bound gates with consumed
+actual exit zero in distinct roots `31818` and `5290`. Receipt
+`.local-checkpoints/2026-10-21/v0344-kick-hud-fix-attempt2/full-gates-actual-exits.json` hashes to
+`903736dda1001d60f83204fa10f58940796c87716a5d9eea151b58e62fd97153`.
+Debug, release and coverage each pass 763 core and 210 server tests with four documented ignores
+and enumerate all 524,288 nineteen-item masks; debug and release each pass two doctests. Rust
+coverage is 15,233/16,429 lines, **92.720190%**.
+
+The web gate passes 1,059 tests across 66 files with **95.26/90.9/96/97.67%**
+statement/branch/function/line coverage, and all 57 static scenarios pass. Cargo deny and both npm
+audits exit zero at the configured threshold. The web audit reports three affected moderate
+packages represented by six distinct GHSA advisories, with zero high or critical findings; the E2E
+audit reports zero vulnerabilities.
+
+Fresh image `sha256:8ff3005861127f8ac57cc32f7e6c72ce5fa996fe628ad48426dbb8cf133e1af9`
+passes all **56 Compose plus 56 Kubernetes** cases with zero retries or carried results. Root session
+`97948` completes with consumed actual exit zero in
+`v0344-final-native-actual-exit-consumed.json` (SHA-256
+`9f2230b3e1c371ec3007aad33ec48c37463e0fafa079594d3e07fe73f9ef43d9`). Native facts SHA-256
+`00542824d775035473b8a2c6bc15ea54d176dbf990c8a2e5004dd28643746915` records 54 reports, 126
+PNGs, 44 runtime records, 22 distinct Kubernetes identities, 21 fixtures and 42 seed records. Each
+target passes 22 latency cases with 80 game observations under the unchanged 250 ms budget. Host
+observers `98744` and `74060` complete with consumed actual exit zero and retain 48 and 43 samples.
+Cleanup SHA-256 `c69c1d93de5be0c4e4c4b9dfe6214175fa5b63041aa7e393ce5b5d2a479cff5a`
+confirms owned resources are absent and the published v0.3.43 default remains healthy.
+
+The earlier attempt failed after 55 Compose cases; none are carried forward. Audit
+`58e03d36c7dc967e71342e0e70e1fb65ac045e0f5a2883800d984d83bfe4654c`, result review
+`8f9f1e7d520a3da7baf52344c551545f6903310af458fdfe6b90465c6d406594`, proof binding
+`dd75bb465bfd97e241bced1a02f385ab6f9de374856438771990593da0d27cd3` and binding review
+`24edf45899b2402c86204eec7516e3a31b39bba8b2704df0a6d2d3b303466dea` are clear. The corrected
+post-runtime validator under independently reviewed code `5e3b4a09e71f2dc29b9a9e4413375d30edc23a1aa37c07f97ec8db800f5ebd85`
+handles the actual published-parent shape without changing source, game behavior or native bytes.
+
+Sealer root `85077` and the proof validator complete with consumed actual exit zero. Final manifest
+`a5d0c54f699629ea732c3f641bad02bd322ebb8c0f1a4a0efd1df293c4126620` is durably bound by
+`native-seal.json` SHA-256 `94c60dac44c639f7e9a214061e9daf9475628126d15526346ed7be2ce4c9a947`;
+independent post-seal review SHA-256
+`97c1b19ff6694746b73ac9d427f30f4840f14300967e4333fed9d634fb05fd51` is clear. This establishes
+the dated native-acceptance checkpoint. Candidate/master/tag CI, publication and promotion follow
+and are not claimed here. At this checkpoint, v0.3.43 is the verified published/deployed baseline;
+authoritative later publication status is on
+[GitHub Releases](https://github.com/liveweird/grenadiers/releases). No v0.3.43 pass is carried
+forward.
+
+## v0.3.43 published delivery — 2026-10-24
+
+Source `c086f719ea470b9fe24963adef84b5e3bdf3e17a`, tree
+`d74fad8a1c870f2834fca48f80ea4e38f0c512d9`, is published as prerelease
+[v0.3.43](https://github.com/liveweird/grenadiers/releases/tag/v0.3.43) through annotated tag object
+`c8395fd7dcc5701842644967802e61c76211931c`. Candidate push/PR runs `40051959641` and
+`40051963999`, master run `40053637247`, and tag run `40055400664` pass all ten jobs, 55 browser
+cases and 262,144 masks in each Rust profile on their first attempts. Delivery binding
+`40578e13d8a44a3cdb22bc222ac71eedd0005b08f3fb5f0748d07f7e333cf5d1` and independent review
+`21f6b544ee9d8e906c056671242c6be73ba742d1bcecb55f39c804ae78d9ec54` authenticate all nine
+delivery receipt hashes.
+
+Localhost serves exact image
+`sha256:577abb32958e45912f35a7f6ae68dd624deb6515d2b4d55519942c44436a2a01` from container
+`d7f68cc89bfc87d06c202fbedae78c1892f54ea3ccdc6571fee0d1c5ea2f4240`; health, readiness and
+index return 200 and the served script hashes to
+`61d6722543d93559ad980b2f6577897ddbdfcc80b4137d598d7aecf75c6ea637`. The v0.3.42 deployment is
+retained as the rollback parent. Native acceptance remains bound to source `11d0dc7`, seal
+`31fe5eef2900a0229d002e45b5a310888f3915829db0aaf23bc3535a8eea5e2c`, and final manifest
+`3ac5e05ccee94c7716376ca9383c75acc924b772447499c6a0dbd857f68ec15c`. Artifact-equivalence
+receipt `81bd78943fa8e80bc839b06bcd68c7bb26872f4cf600c2fcc80e2269c7c94209` and review
+`42bbbcb68e8a306d9ed611513e186189ab3430f17bf545191edace5bdb6e3b75` prove corrected source
+`5dbcd58` produces the retained image output; the later eight documentation-only changes do not
+claim unchanged Docker inputs, a new Rust compilation or new native execution. Eighteen of 22
+requested items are published at this checkpoint. Kick's fresh 56+56 execution is independently
+reviewed and sealed for v0.3.44; hosted CI and publication follow.
+
+## Historical v0.3.43 Wall Pass native checkpoint — 2026-10-24 01:00 UTC — 110/110
+
+Final source `11d0dc7e39e8e2cafcf70c1548be339f52c740ab`, tree
+`655c7d8a80b4dd3fdd3b232534c2cbaa45b054cc`, passes fresh source-bound gates and the complete
+same-image native matrix on
+`sha256:577abb32958e45912f35a7f6ae68dd624deb6515d2b4d55519942c44436a2a01`.
+Native root `45615` completed with consumed actual exit zero.
+All **55 Compose plus 55 Kubernetes** cases pass with zero retries and zero carried passes. The
+reviewed evidence contains 52 decoded reports, 122 verified PNGs, 42 runtime/security records,
+21 distinct Kubernetes UIDs, 20 fixtures and 40 seed-mode records. All 80 latency observations
+are retained below the unchanged 250 ms budget; maxima are 53.325/167.137 ms for local/shaped
+Compose and 61.385/176.151 ms for local/shaped Kubernetes.
+
+Fresh debug, release and coverage profiles each pass 711 core and 209 server tests with four
+historical ignores. Debug and release each add two passing doctests. Every profile enumerates all
+262,144 current masks. Rust coverage is 14,275/15,456 lines, **92.358954%**. The web gate passes
+797 tests across 64 files with **95.24/90.88/96/97.66%** statement/branch/function/line coverage;
+all 56 documented scenarios and renderer diagnostics pass. Cargo deny and both configured npm
+audits exit zero. The web audit retains two moderate development advisories for Vitest 5.0.1 and
+`@vitest/mocker` 5.0.1; there are no high or critical advisories, and the E2E audit reports none.
+
+The authoritative checkpoint inputs are
+`.local-checkpoints/2026-10-21/v0343-wall-pass-native-attempt6-facts.json` under SHA-256
+`4d38019282a62a91fdc1717583e3c8dd766231579af7a68d5991c9bec2d2725a` and
+`v0343-wall-pass-native-attempt6-actual-exit-consumed.json`. Independent audit
+`v0343-wall-pass-native-attempt6-audit.json` is CLEAR under SHA-256
+`25e48638872f7b61fd64c28af30abf5e44910cf29e3e8356246236991819380e`; result review
+`v0343-wall-pass-native-attempt6-result-review.json` is CLEAR under
+`c8652f4e67852002db9e49e2766481e6c58b071d3e93bbb7866bfd6c5194848d`.
+`v0343-wall-pass-native-attempt6-proof-binding-review.json` is CLEAR under SHA-256
+`7c6eda746a703f599ced928798750f05478b78dbf5fc387d03fbe5adac551d46` and authenticates binding
+`5e15b63315ac78b36fbfa176ab1f0d2752b653d18448f23c2850ad9135139550`.
+
+Sealer root `96118`, tool chunk `4409f9`, completes with consumed exit zero; validator chunk
+`ccc3f0` also exits zero. Final manifest
+`3ac5e05ccee94c7716376ca9383c75acc924b772447499c6a0dbd857f68ec15c` byte-verifies 2,665
+payloads, 2,666 files and 284 directories in the immutable durable copy. Seal receipt
+`v0343-wall-pass-native-attempt6-seal.json` hashes to
+`31fe5eef2900a0229d002e45b5a310888f3915829db0aaf23bc3535a8eea5e2c`. The preserved source
+archive hashes to `cb25085949945df4f8dca01e7cdf46186a17a1987ad467ee8ba97684e94d9b19`.
+Independent `v0343-wall-pass-native-attempt6-seal-review.json` is CLEAR under SHA-256
+`5d253559ba95a9d30fc83f16fd0786a6d283356d892f26abed3611771588d33f`. It confirms exact
+manifest path sets and hashes in both copies, one mode-0400 file, 2,654 mode-0444 files, 11
+mode-0555 files, all 284 directories mode 0555, and no writable files, writable directories,
+symlinks or special files.
+
+This source corrects the high-severity Zod advisory by pinning 4.6.6 in both npm lockfiles.
+The complete-match driver parallelizes only independent English result inspections; all 43
+assertions, three screenshots, fixtures, case counts and budgets remain unchanged. The descendant
+release candidate changes four CI tooling files in commit `dee44b5ca81d2556d775a54e47948da77b9dbaa3`:
+bounded procfs metadata reads reach EOF, and the project-relative coverage output parent is
+created when `CARGO_TARGET_DIR` is external. Production and Docker build inputs remain
+byte-identical to the sealed native source. These changes improve attribution and setup, but do
+not establish a Chrome I/O root cause or claim that one was fixed.
+
+### Happy DOM security correction — historical pre-delivery checkpoint
+
+Candidate `5dbcd58e920f852a8036c4bf741e26517793b072` updates only `web/package.json` and
+`web/package-lock.json`, moving the development-only Happy DOM dependency from 20.14.5 to patched
+21.0.4 for GHSA-834v-8h66-3h79. The fresh full web gate passes 797 tests in 64 files with
+95.24/90.88/96/97.66% statement/branch/function/line coverage. The complete configured security
+gate exits zero for cargo deny and both npm audits. Its current web audit contains three moderate
+development findings (`@vitest/mocker` 5.0.1, `vitest` 5.0.1 and `fast-uri` 3.1.8), zero high and
+zero critical findings; the E2E audit remains clear. Web-check receipt
+`0a8c605c65bdceff9d04d74752aaafc3ee5e9ee2378e60805a7fecb8cc216ce0` and full-security result
+`e0c7363348d4f4092bc0afd3037068e183b78bc99c0969a6a2ef7b6451fdceb6` bind those outcomes.
+
+The reviewed retained-artifact comparison finds 554 of 556 Docker inputs unchanged; only the two
+web manifests differ. The corrected host `dist` and accepted image contain the same 17 entries,
+15 files and two directories with identical paths, types, modes and bytes. It retains server
+binary `26bccf1696b75b33b741b43305429df92cd09870d02d1080b725e05665e3966d`, and a fresh scan of exact
+image `sha256:577abb32958e45912f35a7f6ae68dd624deb6515d2b4d55519942c44436a2a01`
+passes current policy. Receipt `81bd78943fa8e80bc839b06bcd68c7bb26872f4cf600c2fcc80e2269c7c94209`
+and independent seven-key review
+`42bbbcb68e8a306d9ed611513e186189ab3430f17bf545191edace5bdb6e3b75` are clear. This proves host
+distribution equality only: it does not claim unchanged Docker build inputs, a new Rust
+compilation, or Docker-build reproducibility, and the 110 native passes remain bound to H2 source
+`11d0dc7`.
+
+At this checkpoint, the earlier PR #104 head `98dffe5` failed its security job in push run `40050321682` and PR run
+`40050338206`; the other jobs were still finishing at this checkpoint. Corrected head `5dbcd58`
+had not been pushed. The published delivery above supersedes those pending statements.
+
+The reviewed Compose pre-collection captures are [English desktop](screenshots/wall-pass-desktop.png)
+and [Polish 320px reduced motion](screenshots/wall-pass-mobile-pl.png), with SHA-256 values
+`d46367b7eeee7c55e94dbcfba6de7de50b27b96c6761ad6a9ff69db2b9332c08` and
+`84843190d2be59a89f5c614c3d17bd78e969dcb7cf692d0e06243b2d3978d72f`.
+
+This dated record certifies the eighteenth native-verified requested item; Kick, Punch, Bracelet
+and Oil Barrel remain before ART-ATLAS. Its then-pending delivery steps are complete in the
+published record above.
+
+## v0.3.42 published delivery — 2026-10-23
+
+Published merge `0ff1512c5a8fdbd1e1b16583ae7791e668bf070b`, tree
+`b4201abe9546d22b26b3231506d1e2ab6b1d3613`, is tagged by annotated object
+`ea3930a3490fb483de46692e1009743e20c61648` as prerelease
+[v0.3.42](https://github.com/liveweird/grenadiers/releases/tag/v0.3.42). Master run `39982027955`
+and distinct tag run `39984896509` independently pass all nine jobs, 54 browser cases and 131,072
+settings masks on their first attempt. Publication completed with actual exit zero in root tool
+chunk `959d39`. Promotion root `84311`, chunk `3aee8a`, completed with consumed exit zero and serves
+the exact accepted image `sha256:8ae9818d27c4345bceec6dad77f02e21ee7148626efded48c421d86421285477`
+from container `0a3bcbac08bc2c2cf46365917a3719d3c5e522c4555234da8e1f661f6edcf214`.
+Seventeen of 22 requested item types are published. At this delivery checkpoint Wall Pass was the
+next v0.3.43 source candidate; its later refreshed native acceptance is recorded above.
+
+## Historical Teleporter native acceptance — `2026-10-23 04:37 UTC`
+
+Corrected source `880fff7c67269f2886746b45239cd888576832f4`, tree
+`c1da58099bb00bb0c99b4bd00de38e9c0c6f87d6`, and image
+`sha256:8ae9818d27c4345bceec6dad77f02e21ee7148626efded48c421d86421285477` pass all 54 Compose plus 54 Kubernetes cases with zero retries
+or carried passes. Required totals are 50 decoded reports, 118 PNGs, 40 runtime records,
+20 Kubernetes identities, 19 fixtures, 38 seed-mode records and 80 retained latency observations
+below 250 ms. Audit `0dbb15b27d5a23eae680ca9cfa2d9766a7e64e173f5f8652fd753b4611135521`, result review
+`cf3380353ca06f36cc61f67c8898ed766d6263bdc6108e003a0a9ac17da4923c`, binding review `a1c9c56e213f0b1248009a0bcee13c30208d188c4e5b96221622b9b0ac68e047`, durable manifest
+`d81c0923f5a3d0a50208fe43a12412f60ca09e2fddfc1c6aabfb793779676b7f` and seal review `5c45563d4ae42ddd5bd189e6e021cc43a253f42c1104853c5a0b1fb215e75dec` are clear.
+
+Source gates cover 689 core tests, 208 release protocol/server tests, 657 web tests and 55 static
+E2E scenarios. Exhaustive
+settings validation covers all 131,072 masks in debug, release and coverage profiles. The browser
+Teleporter proof binds success to the authoritative pickup event and shared marker while allowing
+the published snapshot to trail the event by zero to two ticks. Both collection movement and the
+unsafe peer movement require ordered requested-direction to null release and two later stationary
+snapshots. Unsafe consumption proves the settled peer's exact positive-area overlap with the live
+bomb cell using the server's 1,024-unit cells and 320-unit half-footprint, then preserves its exact
+position and both prior teleport markers after collection.
+
+The accepted English desktop and Polish 320px reduced-motion captures are
+`docs/screenshots/teleporter-desktop.png` and `docs/screenshots/teleporter-mobile-pl.png`, with
+SHA-256 values `e262534f6c157678f762519aa03cc2ba7896139f04d9002c1347f68bc12cff63` and
+`30f9e9cd099a2b01ae41c9c64096cb15b50b4850b5198cea54ad8b2eaddd63ba`. At this checkpoint, hosted
+CI, publication, tag verification and promotion remained pending; the delivery record above
+documents their later completion.
+
+## v0.3.41 published delivery — 2026-10-23
+
+Published commit `f5c4adf66f8af9a5ef66b48f9230d17aea14f1d5`, tree
+`a274fb2fe828f3a18a624614f1addf5bf5df4d99`, is tagged by annotated tag object
+`c6719ad04db7a1eb0e50df3200aebe828a85e679` as prerelease `v0.3.41`.
+Post-merge run `39879618476` and distinct tag run `39881306987` each pass all nine jobs,
+53 browser cases and 65,536 settings masks. Both watcher exits were consumed at zero.
+The accepted native image
+`sha256:d063462c3130e3c8653734da72e8dfd6785b0c036e9579d9046cee884ccd9f82`
+is promoted locally; promotion root 71611 completed with consumed exit zero, and health,
+readiness, index and served asset checks returned HTTP 200 with container bytes matching.
+These delivery results do not relabel H's native execution as an execution on the CI-only
+readiness revision. At this v0.3.41 delivery checkpoint, v0.3.42 Teleporter remained the
+seventeenth native-accepted candidate; its later delivery is recorded above.
+
+## v0.3.41 browser file readiness checkpoint — 2026-10-23
+
+The observability-only PR 92 was rejected and closed. Its push workflow
+`39874464155` passed all nine jobs, but PR workflow `39874472446` failed its
+classic-browser job before Chromium exposed a debugging endpoint. Neither result
+contributes acceptance to a later revision. Artifact `12468077225`, SHA-256
+`bb841c019ca21edededed2eb6cae35146609b4b5f510dd20a105010c69021748`, retains the
+startup attachment, bounded process observations and Xvfb output. The failure
+inventory is authenticated under SHA-256
+`8b6493818147ea6b6bf213cb25c2a54c28ca5ab56020830c2609719b75d5e2b3`.
+
+The exact Chromium PID/start time appears in 40 samples: 39 in uninterruptible
+wait and one running; 38 report `folio_wait_bit_common` and two report zero.
+CPU ticks rise from 2 to 11, threads from 1 to 13, and no DevTools file appears.
+This is evidence of repeated kernel waits with intermittent progress, not proof
+of one uninterrupted ten-second hang or a specific backing file, device, swap
+condition or memory-pressure cause. Xvfb explicitly labels its keysym warnings
+nonfatal. Independent failure review preserves these limits.
+
+The CI-only mitigation reads the same installed full Chromium distribution once,
+immediately after latency checks and before the original hardening command. It
+uses bounded streaming reads and rejects path escapes, symlinks, missing or
+changing regular files and read errors. The completed installation is assumed
+immutable during traversal; this is not an atomic snapshot of concurrent directory changes. Inventory, byte counts, hashes and elapsed time
+provide setup evidence. A pre-read prepares the page cache; it does not populate
+the future process's page tables, guarantee residency or cover external libraries.
+No preparatory browser, reused profile, cache dropping or memory pinning is used.
+
+Additional owned-process fault, I/O and memory counters and host pressure totals
+help distinguish later observations. Missing data is reported explicitly. These
+are diagnostic counters, not proof of a particular root cause. Browser flags,
+10-second startup, 60-second visibility test, cleanup grace, zero retries, full
+case inventory and the existing 20-minute job budget remain unchanged.
+
+Source `4a0410b9b529fe30c2d5cad80029d324127db934` checks and independent review: all 18 focused tests pass on macOS and the cached
+repository-pinned Linux Node image. All ten server-mask contract tests, five mirror
+tests, repository policy, four syntax checks and whitespace checks pass.
+Independent CI source review is clear under SHA-256
+`4ef696726449924a54ae8f041d9d5b99449fa47222eec8d7413d90d1190be0b0`;
+the root-consumed check receipt is `aacc1870e829f2a7ca0bad1d463b08ff5aff52fdfbe74752599b2a1014a66ff9`.
+H's 106 native cases and original-source deterministic computations below retain
+their original execution identities under reviewed input equality. They are not
+executions on this CI-only revision. Fresh candidate, post-merge and tag checks
+remained required at this historical checkpoint; delivery is recorded separately above.
+
+## v0.3.41 post-merge startup investigation — 2026-10-23
+
+PR 91 merged Invisible Bombs at `2fbc782fcea536331544ad7b34202d0780e9b465`.
+Its candidate push and pull-request workflows, `39868101870` and `39868112868`,
+each passed all nine jobs, 53 browser cases and 65,536 settings masks per Rust profile.
+Post-merge workflow `39870771097`, attempt one, passed eight jobs but failed the
+classic browser job before Chromium exposed its CDP endpoint. The retained startup
+attachment reports 10,016.954276 ms, zero stderr bytes and no observed endpoint.
+The cause remains unknown; missing exit data does not establish that Chrome stayed alive.
+Failed post-merge results contribute zero accepted hosted cases.
+
+Artifact `12465927804` is preserved under SHA-256
+`e4f8061a52c685ba21765532891bf595d98ba911045f54023d5e63d658b94d09`.
+The terminal metadata, complete raw logs, extracted startup attachment and original
+failed fetches are retained together; their inventory SHA-256 is
+`aefd9f790dcac27558d3caa41c72baf06b5b7ec31ecdbe238f7e1dcb830a5bed`.
+
+The CI observer launches the existing hardening command once inside Xvfb and samples
+only its owned process tree. It records bounded process state and the existence,
+type and size of an owned profile's DevTools file, without retaining its contents,
+command lines, environment values or debugging endpoints. These are sampled observations,
+not an atomic timeout witness. Missing observations remain inconclusive. The command's
+exit or signal remains authoritative; observations do not retry or replace browser checks.
+On an instrumented failure, the workflow retains the process records and Xvfb
+error output in the failure artifact. The preserved failure above predates this observer.
+
+Observer source `064df2000f86ca91b04eba8282df7797295c7f7c` passes all nine
+observer tests on both macOS and the cached repository-pinned Linux Node image,
+all ten server-mask contract tests, five mirror tests, repository policy, syntax
+and whitespace checks. Independent source review is clear under SHA-256
+`858b86cefddfdd4fc2b8f78b0ed6a2ba5fc516b31dfd098848cbfcb41e27ca2c`;
+the consumed check receipt is
+`3b56341d3e356f1a2a0a25fa3758dafc5afecb586b838caa916552a7d78eaf4f`.
+Regression tests cover owned child/grandchild signal forwarding and PID reuse
+without leaking unrelated process metadata. The wrapper forwards signals to its
+command group and waits for its direct child; it does not claim direct control
+of Chromium's separately detached group, which remains owned by the E2E launcher.
+The accepted 53 Compose plus 53 Kubernetes cases below remain executions on source
+`eb0b756df43fdd896cf87573a5224e4eb5f659a3`; they are not executions on the observer
+revision. Application, E2E, dependency, lock and native harness inputs remain identical.
+
 ## v0.3.41 sealed native acceptance checkpoint — 2026-10-22 00:55:23 UTC — 106/106
 
 Corrected source `cb10ec7a143ed62128de3b96765b715cab346acf`, tree
@@ -1684,9 +2054,15 @@ one-tile victim displacement in both recipient streams without a victim command,
 public event or private marker. Planned captures are `bracelet-shoved-desktop-en.png` and
 `bracelet-shoved-polish-320-reduced.png`. E2E lint, type checking, Knip, one-test Playwright
 discovery and **48-scenario parity** pass, as do Cargo metadata/version consistency, formatting,
-repository, YAML syntax and diff checks. This record does not claim the pending full debug mask
-gate, accepted v0.3.45 parent integration, native same-image Compose/Kubernetes execution, final CI
-or publication.
+repository, YAML syntax and diff checks. Published v0.3.45 parent integration is now complete.
+This historical source record does not claim the pending full debug mask gate, native same-image
+Compose/Kubernetes execution, final CI or publication.
+
+## Historical Wall Pass source-only candidate — 2026-10-21 — superseded
+
+This source-only chapter is preserved as dated history. Its pending native statement was
+superseded by the final-source sealed checkpoint recorded at the top of this document; it must not
+be read as the current v0.3.43 status.
 
 ## Wall Pass candidate — 2026-10-21 — source checks complete
 
@@ -1709,13 +2085,14 @@ checks pass. Its planned localized pre-collection captures are
 
 The repeating-byte-31 route reveals Wall Pass at `(3,1)`, enters intact block `(3,2)`, rejects
 planting, clamps against hard wall `(2,2)`, resumes from a newer admission and exits north. A legal
-post-exit bomb takes the reveal bomb's immediate successor ID, proving the failed placement consumed
-no entity allocation. The route uses
+post-exit bomb has a later entity ID, identical on both clients. E2E verifies that rejected placement
+creates no bomb or event and leaves resources unchanged; focused core tests verify no entity allocation. The route uses
 no state injection, direct WebSocket commands, seed search or retry. The sole-item fixture cannot
 prove replacement grace; the core/protocol layers do. That source-activation record did not claim
-predecessor integration. The current provisional source integrates the reviewed final v0.3.42
-source parent but does not claim a v0.3.43 candidate image, native Compose/Kubernetes execution,
-hosted CI or publication.
+predecessor integration. The then-provisional source integrated the reviewed final v0.3.42 source
+parent but did not claim a v0.3.43 candidate image, native Compose/Kubernetes execution, hosted CI
+or publication. The final source and native acceptance now exist above; hosted CI and publication
+remain pending.
 
 ## Teleporter candidate — 2026-10-21 — source checks complete
 
@@ -1734,10 +2111,8 @@ generated contracts and **44-scenario** E2E static parity passed at the reviewed
 
 This source activation adds the mode-0444 seed fixture, read-only Compose override and one CI
 keyboard scenario for safe swap, marker, fresh reconnect admission and unsafe consumption. That
-source-activation checkpoint did not claim predecessor raw-v0.3.41 integration. The current
-candidate incorporates the sealed v0.3.41 parent and still does not claim a fresh v0.3.42 image,
-native Compose/Kubernetes acceptance, hosted CI, publication or a current v0.3.42 localhost
-deployment. Those gates remain before release.
+historical source-activation checkpoint did not claim predecessor raw-v0.3.41 integration or
+later delivery. Fresh native acceptance and the published delivery are recorded above.
 
 ## Prepared v0.3.41 Invisible Bombs source — source-specific local checks
 
@@ -5318,11 +5693,13 @@ these scaffold checks. These are local results; hosted CI status is separate evi
 The original `AGENTS.md` remains unchanged under the explicit preservation instruction;
 current engineering conventions live in `CONTRIBUTING.md`.
 
-## v0.3.44 Kick source candidate
+## v0.3.44 Kick published parent
 
 The deterministic browser source is configured for the reviewed repeating-byte-31 fixture. Planned
-captures are `kick-stopped-desktop-en.png` and `kick-stopped-polish-320-reduced.png`. Native
-same-image execution and release acceptance remain pending.
+captures are retained as `docs/screenshots/kick-desktop.png` and
+`docs/screenshots/kick-mobile-pl.png`. The fresh source gates and passing same-image execution are
+recorded at the top of this document. Published source and local promotion are recorded in the
+current v0.3.44 delivery section.
 
 ## v0.3.45 Punch source candidate
 
@@ -5330,7 +5707,8 @@ The deterministic two-browser source is configured for the reviewed repeating-by
 Planned captures are `punch-wrapped-desktop-en.png` and
 `punch-wrapped-polish-320-reduced.png`. The source route uses ordinary inputs, a remapped actual
 Equipment key and both recipient streams; it adds no private cooldown/history fields or test hooks.
-Accepted v0.3.44 parent integration, native same-image execution and release acceptance remain pending.
+The published v0.3.44 source parent is integrated. Native same-image execution and Punch release
+acceptance remain pending.
 
 ## Historical Cloak rolling-history source integration — parent acceptance was pending
 

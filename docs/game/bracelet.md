@@ -22,5 +22,5 @@ Version 0.3.46 adds Bracelet to the 21-item current catalog. Its capability bit 
 and the Bracelet interval `[410,425)`. A Bracelet-only pool is 115. All 2,097,152 catalog subsets
 are validated, while all earlier masks preserve their v0.3.45 seeded output. Archived gameplay v9
 and earlier reject Bracelet settings, equipment, pickups, cooldown and forced-movement history.
-This document describes reviewed source; the full debug mask gate, native same-image acceptance,
-accepted v0.3.45 parent integration, final CI and publication remain pending.
+This document describes reviewed source integrated with the published v0.3.45 parent. The full
+debug mask gate, native same-image acceptance, remaining checks and v0.3.46 publication remain pending.

@@ -154,6 +154,67 @@ test("gate context rejects inherited repositories and partial selectors", () => 
   }
 });
 
+test("coverage export creates its project-relative parent with an external Cargo target", () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "grenadiers-coverage-export-"));
+  const externalTarget = fs.mkdtempSync(path.join(os.tmpdir(), "grenadiers-cargo-target-"));
+  const cargoLog = path.join(os.tmpdir(), `grenadiers-cargo-args-${process.pid}.log`);
+  try {
+    fs.mkdirSync(path.join(root, "scripts"));
+    fs.mkdirSync(path.join(root, "bin"));
+    const gates = fs.readFileSync(new URL("./gates.sh", import.meta.url), "utf8");
+    const setup = "  mkdir -p target\n";
+    assert.equal(gates.split(setup).length - 1, 1);
+    fs.writeFileSync(path.join(root, "scripts", "gates.sh"), gates);
+    fs.writeFileSync(path.join(root, "scripts", "gates-without-output-parent.sh"),
+      gates.replace(setup, ""));
+    fs.copyFileSync(new URL("./ci-server-mask-gate-context.sh", import.meta.url),
+      path.join(root, "scripts", "ci-server-mask-gate-context.sh"));
+    fs.writeFileSync(path.join(root, "Cargo.lock"), "# fixture lock\n");
+    fs.writeFileSync(path.join(root, ".gitignore"), "target/\n");
+    const cargo = `#!/usr/bin/env bash
+set -euo pipefail
+printf '%s\n' "$*" > "$STUB_CARGO_LOG"
+[ "$CARGO_TARGET_DIR" = "$EXPECTED_CARGO_TARGET_DIR" ]
+[ "$*" = "llvm-cov --workspace --locked --fail-under-lines 80 --lcov --output-path target/coverage.lcov -- --show-output" ]
+if [ ! -d target ]; then
+  echo 'target output parent missing' >&2
+  exit 73
+fi
+printf 'TN:\n' > target/coverage.lcov
+`;
+    fs.writeFileSync(path.join(root, "bin", "cargo"), cargo, { mode: 0o755 });
+    assert.equal(spawnSync("git", ["init", "-q"], { cwd: root }).status, 0);
+    spawnSync("git", ["config", "user.name", "Test"], { cwd: root });
+    spawnSync("git", ["config", "user.email", "test@example.invalid"], { cwd: root });
+    assert.equal(spawnSync("git", ["add", "."], { cwd: root }).status, 0);
+    assert.equal(spawnSync("git", ["commit", "-qm", "fixture"], { cwd: root }).status, 0);
+    const env = { ...process.env, PATH: `${path.join(root, "bin")}:${process.env.PATH}`,
+      CARGO_TARGET_DIR: externalTarget, EXPECTED_CARGO_TARGET_DIR: externalTarget,
+      STUB_CARGO_LOG: cargoLog };
+    for (const name of ["PARTITION_INDEX", "PARTITION_COUNT", "REPORT_DIR", "PLAN_FILE", "CI_SOURCE"])
+      delete env[`GRENADIERS_SERVER_REPLAY_ITEM_MASK_${name}`];
+
+    const old = spawnSync("bash", ["scripts/gates-without-output-parent.sh", "coverage"],
+      { cwd: root, env, encoding: "utf8" });
+    assert.equal(old.status, 73);
+    assert.match(old.stderr, /target output parent missing/);
+    assert.equal(fs.existsSync(path.join(root, "target", "coverage.lcov")), false);
+
+    const fixed = spawnSync("bash", ["scripts/gates.sh", "coverage"],
+      { cwd: root, env, encoding: "utf8" });
+    assert.equal(fixed.status, 0, fixed.stderr);
+    assert.equal(fs.readFileSync(path.join(root, "target", "coverage.lcov"), "utf8"), "TN:\n");
+    assert.equal(fs.readFileSync(cargoLog, "utf8").trim(),
+      "llvm-cov --workspace --locked --fail-under-lines 80 --lcov --output-path target/coverage.lcov -- --show-output");
+    assert.equal(spawnSync("git", ["status", "--porcelain"],
+      { cwd: root, encoding: "utf8" }).stdout, "");
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+    fs.rmSync(externalTarget, { recursive: true, force: true });
+    fs.rmSync(cargoLog, { force: true });
+  }
+});
+
 test("aggregate requires every partition profile and no extras", () => {
   const artifacts = new Map();
   for (const range of plan.ranges) for (const profile of ["debug", "release", "coverage"]) {
@@ -168,6 +229,9 @@ test("aggregate requires every partition profile and no extras", () => {
 
 test("workflow aggregate fails closed before pinned runtime and artifact validation", () => {
   const workflow = fs.readFileSync(new URL("../.github/workflows/ci.yml", import.meta.url), "utf8");
+  const trigger = workflow.slice(workflow.indexOf("on:\n"), workflow.indexOf("permissions:\n"));
+  assert.match(trigger, /^on:\n  workflow_dispatch:\n$/);
+  assert.doesNotMatch(trigger, /push:|pull_request:/);
   const partition = workflow.slice(
     workflow.indexOf("\n  server-mask-partition:\n"), workflow.indexOf("\n  server:\n"),
   );

@@ -1,11 +1,27 @@
 # Expanded item implementation plan
 
-Status: the **Heart activation candidate is implemented and locally verified**, with native
-release acceptance still pending. Published v0.3.21 has no new optional pickups. The candidate
-introduces Expanded-v5/generator-v2 rooms and gameplay-v8; see [Heart](heart.md).
-Separate candidates add opt-in [Shield](shield.md), [Golden Flame](golden-flame.md), [Short Fuse](short-fuse.md), [Short Flame](short-flame.md), [Long Fuse](long-fuse.md), [Reverse Controls](reverse-controls.md), [Diarrhea](diarrhea.md), [Slow foot](slow-foot.md), [Piercing Bomb](piercing-bomb.md), [Power Bomb](power-bomb.md), [Remote Bomb](remote-bomb.md), [Landmine](landmine.md), [Invisibility Cloak](invisibility-cloak.md), [Stopwatch](stopwatch.md), [Invisible Bombs](invisible-bombs.md), [Teleporter](teleporter.md), [Wall Pass](wall-pass.md), [Kick](kick.md), [Punch](punch.md), [Bracelet](bracelet.md), and [Oil Barrel](oil-barrel.md),
-retaining Expanded-v5 rules, generator-v2, and journal-v2 identities. Oil Barrel migrates the
-active gameplay transport to v11 while the earlier wire contracts remain archived.
+Published [v0.3.44](https://github.com/liveweird/grenadiers/releases/tag/v0.3.44) adds
+[Kick](kick.md) as the nineteenth requested item. Published v0.3.45 adds opt-in
+[Punch](punch.md) on that published parent and is promoted locally. The v0.3.46 source candidate
+adds [Bracelet](bracelet.md) as the twenty-first requested item; its native acceptance, remaining
+checks and publication remain pending. [Oil Barrel](oil-barrel.md) v0.3.47 source is prepared on
+that unpublished candidate and migrates the active gameplay transport to v11 while retaining
+archived wire contracts. It requires final integration with the eventual published v0.3.46 parent
+before Oil acceptance. Neither candidate is published; ART-ATLAS follows them.
+
+## Historical Heart activation checkpoint
+
+At the v0.3.21 checkpoint, the **Heart activation candidate was implemented and locally verified**,
+while native release acceptance was still pending. That candidate introduced
+Expanded-v5/generator-v2 rooms and gameplay-v8; see [Heart](heart.md). Later candidates added
+opt-in [Shield](shield.md), [Golden Flame](golden-flame.md), [Short Fuse](short-fuse.md),
+[Short Flame](short-flame.md), [Long Fuse](long-fuse.md), [Reverse Controls](reverse-controls.md),
+[Diarrhea](diarrhea.md), [Slow foot](slow-foot.md), [Piercing Bomb](piercing-bomb.md),
+[Power Bomb](power-bomb.md), [Remote Bomb](remote-bomb.md), [Landmine](landmine.md),
+[Invisibility Cloak](invisibility-cloak.md), [Stopwatch](stopwatch.md),
+[Invisible Bombs](invisible-bombs.md), [Teleporter](teleporter.md), [Wall Pass](wall-pass.md),
+[Kick](kick.md), [Punch](punch.md), [Bracelet](bracelet.md), and [Oil Barrel](oil-barrel.md) while
+retaining Expanded-v5 rules, generator-v2, journal-v2, and their reviewed protocol identities.
 
 At the 21 October 2026 16:47 UTC native acceptance checkpoint, Invisibility Cloak was an
 **unreleased source candidate**. Corrected source `1c6724f` and
@@ -88,15 +104,27 @@ independent item. The integrated catalog has 65,536 subsets; all earlier mapping
 v8 catalog remain pinned. Prepared-source checks do not establish native acceptance or hosted
 release CI for this integrated candidate, and no v0.3.40 acceptance result is carried forward.
 
-The final v0.3.42 source adds [Teleporter](teleporter.md) as the seventeenth optional pickup while
+Published [v0.3.42](https://github.com/liveweird/grenadiers/releases/tag/v0.3.42) adds
+[Teleporter](teleporter.md) as the seventeenth optional pickup while
 preserving every v0.3.41 item. Rules version 5, generator version 2 and journal format 2 remain
 stable; Teleporter introduces the paired gameplay-v10 contract for its authoritative position
-epoch. Its release acceptance remains separately pending.
+epoch. Its release acceptance and exact-image local promotion are complete; older pending language
+in dated checkpoints remains historical.
 
-The provisional v0.3.43 source adds [Wall Pass](wall-pass.md) as the eighteenth optional pickup
-while preserving the reviewed final v0.3.42 source parent and gameplay v10. Its 262,144 settings
-masks require two server-mask partitions. Fresh v0.3.43 gates, independent review, native
-acceptance and hosted CI remain pending.
+Published [v0.3.43](https://github.com/liveweird/grenadiers/releases/tag/v0.3.43) adds
+[Wall Pass](wall-pass.md) as the eighteenth optional pickup while preserving gameplay v10. Native
+source `11d0dc7e39e8e2cafcf70c1548be339f52c740ab` and exact image
+`sha256:577abb32958e45912f35a7f6ae68dd624deb6515d2b4d55519942c44436a2a01` complete all 262,144
+settings masks in debug, release and coverage plus 55+55 same-image native cases with zero retries
+or carry. Independent audit, binding review, durable sealing and post-seal review are clear;
+published source `c086f719ea470b9fe24963adef84b5e3bdf3e17a` passes first-attempt candidate, master
+and tag CI and is locally promoted on the accepted image.
+Corrected source `5dbcd58` adds only the Happy DOM 21.0.4 development-security correction. Its
+fresh web and configured security gates pass, and reviewed retained-artifact comparison preserves
+the accepted host distribution. Native acceptance remains attributed to source `11d0dc7`; the
+eight later published-source changes are documentation only. This is the historical v0.3.43
+checkpoint; [v0.3.44](https://github.com/liveweird/grenadiers/releases/tag/v0.3.44) later publishes
+Kick as the nineteenth requested item.
 This optional track follows the [backlog](backlog.md), shared settings and
 pixel-art increments. The historical catalog in [rules](rules.md) is not an implementation
 claim. Each activation requires its own reviewed behavior, UI, documentation and acceptance.
@@ -155,10 +183,10 @@ per seat/tick. Add a remappable equipment action, proposed default **E**, for Pu
 | Item | Activation policy |
 | --- | --- |
 | Punch (**prepared in v0.3.45**) | Move the adjacent facing bomb three interior cells, wrapping playable coordinates. Landing requires floor, no soft block/barrel/other bomb, and no overlap with a living player's footprint. If blocked, try further three-cell landings for at most one axis cycle. Returning to the original cell fails unchanged, with no cooldown; successful punches have a 12-tick cooldown and stop sliding. |
-| Bracelet (**prepared in v0.3.46**) | Moving contact shoves up to one tile, clamped by obstacles. Separation rearms it after the 30-tick cooldown; simultaneous claims use alternating round priority, with swept fire/mines and no recursive shoves. |
+| Bracelet (**prepared in v0.3.46**) | Moving contact shoves up to one tile, clamped by obstacles. Require separation to rearm and a 30-tick cooldown. Resolve simultaneous claims using alternating round priority; check swept fire/mines without recursive shoves. |
 | Oil Barrel (**prepared in v0.3.47**) | At most eight generated arena objects reveal only when safe, block while unlit, and become passable shared fire until round end when ignited. |
-| Kick (**prepared in v0.3.44**) | Push stationary Timed or Remote bombs one cell on the next update and every ten updates until blocked; Contact mines are excluded and identity, owner, blast and fuse remain unchanged. |
-| Wall Pass (**prepared in v0.3.43**) | Ignore soft blocks, but not hard walls or solid bombs. Placement inside obstacles is illegal. Replacement grants private exit-only grace for positively overlapped soft cells; grace ends individually when the full footprint exits or reaches tangency. |
+| Kick (**published in v0.3.44**) | Push stationary Timed or Remote bombs one cell on the next update and every ten updates until blocked; Contact mines are excluded and identity, owner, blast and fuse remain unchanged. |
+| Wall Pass (**published in v0.3.43**) | Ignore soft blocks, but not hard walls or solid bombs. Placement inside obstacles is illegal. Replacement grants private exit-only grace for positively overlapped soft cells; grace ends individually when the full footprint exits or reaches tangency. |
 | Remote bomb | The next manual bomb action detonates the armed bomb instead of planting. Chains/fire still trigger it; death/disconnect adds no invented fuse. Another unused weapon may occupy the slot while it is armed. |
 | Piercing bomb | Rays spend range through soft blocks/barrels; hard walls stop them. Solid bombs chain and stop the ray. |
 | Power bomb | Affect eligible cells within Manhattan radius, ignoring line of sight. Hard walls remain intact without fire; blocks, barrels and bombs use the same immutable explosion plan. |

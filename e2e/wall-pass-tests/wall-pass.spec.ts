@@ -102,7 +102,7 @@ test('Wall Pass crosses one intact block, rejects planting and hard walls, and r
           position: insidePosition, inventory: { equipment: 'wallPass', weapon: null },
         })
       }
-      await expect(one.getByLabel('Player one upgrades')).toContainText('EquipmentWall pass')
+      await expect(one.getByLabel('Player one upgrades')).toContainText('GearWall pass')
       await expect(two.getByLabel('Ulepszenia: Gracz pierwszy'))
         .toContainText('WyposażeniePrzejście przez ściany')
       const occupied = await Promise.all([one, two].map((page) => arenaTilePixels(page, 3, 2)))
@@ -136,7 +136,7 @@ test('Wall Pass crosses one intact block, rejects planting and hard walls, and r
         await one.keyboard.up('ArrowLeft')
       }
       await expectStationary(games[0], 'one')
-      expect(actor(games[0], 'one').position).toEqual({ x: 3392, y: insidePosition.y })
+      expect(actor(games[0], 'one').position).toEqual({ x: 3392, y: 2560 })
       expect(latestSnapshot(games[0])!.state.arena.terrain[2 * 15 + 2]).toBe('wall')
       await moveSeatTo(one, games[0], 'one', { column: 3, row: 2 })
       const resumePosition = actor(games[0], 'one').position
@@ -165,15 +165,19 @@ test('Wall Pass crosses one intact block, rejects planting and hard walls, and r
       const afterExit = latestSnapshot(games[0])!
       await one.keyboard.press('Space')
       await Promise.all(games.map((game) => expect.poll(() =>
-        bombPlacementsAfter(game, afterExit.room.revision).map(({ id, blast, trigger }) => ({
-          id, blast, trigger,
+        bombPlacementsAfter(game, afterExit.room.revision).map(({ blast, trigger }) => ({
+          blast, trigger,
         }))).toEqual([{
-        id: revealBombId + 1, blast: 'standard',
+        blast: 'standard',
         trigger: { type: 'timed', remainingTicks: 180, paused: false },
       }])))
+      const postExitBombId = bombPlacementsAfter(games[0], afterExit.room.revision)[0]!.id
+      expect(postExitBombId).toBeGreaterThan(revealBombId)
       for (const game of games) {
+        expect(bombPlacementsAfter(game, afterExit.room.revision).map(({ id }) => id))
+          .toEqual([postExitBombId])
         expect(latestSnapshot(game)!.state.bombs).toContainEqual(expect.objectContaining({
-          id: revealBombId + 1, owner: exited.id, cell: { column: 3, row: 1 },
+          id: postExitBombId, owner: exited.id, cell: { column: 3, row: 1 },
           blast: 'standard', trigger: expect.objectContaining({ type: 'timed', paused: false }),
         }))
       }

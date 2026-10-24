@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.3.46 — 2026-10-24 (accepted; publication pending)
+## 0.3.46 — 2026-10-24 (published)
 
 - Allow applying the entire advertised item catalog by deriving the client limit from the authoritative room catalog.
 
@@ -11,7 +11,8 @@
 - Extend gameplay v10 to 21 lobby switches and all 2,097,152 settings masks, with English/Polish
   presentation and a deterministic production-seed browser scenario. Integration with the
   published v0.3.45 parent is complete; scoped native acceptance and final checks are complete on
-  the exact image, while publication and promotion remain pending.
+  the exact image. [Publish v0.3.46](https://github.com/liveweird/grenadiers/releases/tag/v0.3.46) from source
+  `7b4b47cfdd7dea9efec9d3c2f2fd61f2c232ce54` and promote the accepted image locally.
 
 ## 0.3.45 — 2026-10-24 (published)
 

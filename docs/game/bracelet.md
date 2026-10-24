@@ -24,5 +24,5 @@ are validated, while all earlier masks preserve their v0.3.45 seeded output. Arc
 and earlier reject Bracelet settings, equipment, pickups, cooldown and forced-movement history.
 This document describes reviewed source integrated with the published v0.3.45 parent. Full mask
 checks, scoped native same-image acceptance and security checks are complete for source
-`5e55bb46bb71b1b8bf9db8dab0a6403eb7a1e240`; publication and promotion remain pending. See
+`5e55bb46bb71b1b8bf9db8dab0a6403eb7a1e240`; [v0.3.46 is published](https://github.com/liveweird/grenadiers/releases/tag/v0.3.46) and promoted locally. See
 [English desktop](../screenshots/bracelet-desktop.png) and [Polish 320px](../screenshots/bracelet-mobile-pl.png).

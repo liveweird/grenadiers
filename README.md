@@ -3,14 +3,12 @@
 A browser-based multiplayer game inspired by classic Bomberman/Dynablaster.
 The initial playable profile supports two human players. Bots and larger matches follow later.
 
-**[v0.3.45 Punch](https://github.com/liveweird/grenadiers/releases/tag/v0.3.45) is published:**
-20 of 22 requested items are complete. The release source is `5be42456cee80e06e2f138bdfd458ef821bb34c2` (tree
-`94f83a7650e2c57955103d91060af10b1a2f439c`). Localhost serves the exact accepted image
-`sha256:3f13b26f7a4a41ba2e90b8cc9261c9e95a60eceeddf49504341e65258eb7d37d`.
+**[v0.3.46 Bracelet](https://github.com/liveweird/grenadiers/releases/tag/v0.3.46) is published:**
+21 of 22 requested item types are shipped. Localhost:8085 serves the accepted image
+`sha256:1460278198b6d604595bfbe4fb8278a85ab39725c43516bb8b55ab2e6a47f5bf`. See [verification](docs/verification.md)
+and the [Bracelet guide and screenshots](docs/game/bracelet.md).
 
-Bracelet v0.3.46 is accepted on source `5e55bb46bb71b1b8bf9db8dab0a6403eb7a1e240`; publication
-and promotion remain pending. See [verification](docs/verification.md), [English desktop](docs/screenshots/bracelet-desktop.png),
-and [Polish 320px](docs/screenshots/bracelet-mobile-pl.png). Oil Barrel follows before ART-ATLAS.
+Oil Barrel is the remaining requested item, followed by the ART-ATLAS sprite-sheet workflow.
 
 The **two-player arena match is playable**. Create a room, share its invitation,
 join from another browser, and both choose Ready. Select the courtyard to move with arrows

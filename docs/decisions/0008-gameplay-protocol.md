@@ -7,7 +7,7 @@ playable browser are implemented. Gameplay v2 evolution is recorded in ADR 0013.
 ## Decision
 
 Preserve diagnostic `/api/v1/ws` and its protocol version. Define a separate gameplay schema
-and planned `/api/v1/game/ws` endpoint. Product, diagnostic, gameplay, and rules versions are
+and the `/api/v1/game/ws` endpoint. Product, diagnostic, gameplay, and rules versions are
 independent. Validate the first authentication frame before any seat/room mutation; a bounded
 unsupported version receives an explicit incompatibility response before credential lookup.
 

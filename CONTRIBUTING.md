@@ -12,7 +12,9 @@ implemented stack.
 - Rust modules/functions use `snake_case`, types use `PascalCase`. React components use
   `PascalCase`; hooks use `useCamelCase`. JSON fields are `camelCase`.
 - Keep source files under 400 lines. Split by responsibility rather than moving complexity
-  into a helper with no domain meaning. The repository gate checks this ceiling.
+  into a helper with no domain meaning. The repository gate checks this ceiling for `.rs`,
+  `.ts`, and `.tsx` files under `core/src`, `server/src`, `web/src`, and `e2e/tests`, excluding
+  generated `*schema.ts` and `*realtime.ts` files.
 - Keep `core/` independent of networking, async runtimes, storage, and UI libraries.
 - Fix lint warnings; do not add baselines or lower coverage floors to accommodate new code.
   Any deliberate rule exception needs a local explanation and review.

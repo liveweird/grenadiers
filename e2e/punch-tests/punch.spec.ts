@@ -180,7 +180,7 @@ test('Punch wraps one retained bomb three cells without extra cues and preserves
       await one.keyboard.press('KeyF')
       await expect(one.getByRole('dialog', { name: 'Keyboard controls' })).toContainText('EquipmentF')
       await one.getByRole('button', { name: 'Done', exact: true }).click()
-      await expect(one.getByText(/Equipment: F/)).toBeVisible()
+      await expect(one.getByText(/Use Punch equipment with F/)).toBeVisible()
 
       await one.getByRole('button', { name: 'Create room', exact: true }).click()
       const code = one.getByLabel('Room invitation code', { exact: true })

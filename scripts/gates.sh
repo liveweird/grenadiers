@@ -103,7 +103,7 @@ coverage() {
 }
 
 case "${1:-all}" in
-  all) repository; server; web; e2e; art_atlas ;;
+  all) repository; server; web; e2e ;;
   repository) repository ;;
   server) repository; server ;;
   server-parallel) repository; server_parallel ;;

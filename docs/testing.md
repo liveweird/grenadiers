@@ -48,7 +48,8 @@ requirement without a remote rerun.
 workbench suite. Install both npm workspaces and Playwright Chromium first. The Playwright
 server builds the separate diagnostics target before previewing it, including on a clean
 checkout. Set `RENDERER_DIAGNOSTICS_BASE_URL` only when deliberately testing an already-built
-diagnostics server. `scripts/gates.sh all` and the manual full CI include this gate.
+diagnostics server. The manual full CI includes this gate; `scripts/gates.sh all` retains its
+existing Rust/web/E2E-static scope and does not require an installed browser.
 
 The suite checks canonical PNG/JSON import, decoded frame pixels, deterministic export data,
 invalid sources, concurrent operations, context restoration, one live preview, texture budgets,

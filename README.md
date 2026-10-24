@@ -12,6 +12,9 @@ The v0.3.48 candidate adds the [artist sprite-sheet handoff](assets/art/README.m
 PNG/JSON, labelled guides, validated runtime export and a separate Pixi preview. Gameplay
 adoption is the next bounded increment, v0.3.49.
 
+Artists can use `npm --prefix e2e run art:template -- --out target/art-template` and
+`scripts/gates.sh art-atlas` after installing the documented Playwright Chromium prerequisite.
+
 The **two-player arena match is playable**. Create a room, share its invitation,
 join from another browser, and both choose Ready. Select the courtyard to move with arrows
 or W/A/S/D and plant bombs with Space. Rust owns the 60 Hz simulation; PixiJS draws public

@@ -239,6 +239,11 @@ jobs:
           exit 1
       - run: scripts/gates.sh browser
         if: matrix.shard == 'items'
+      - name: Verify artist export and Pixi atlas preview
+        if: matrix.shard == 'items'
+        run: |
+          npm --prefix web ci
+          scripts/gates.sh art-atlas
       - name: Verify deterministic pickups using the same built image
         if: matrix.shard == 'items'
         run: |
@@ -520,6 +525,7 @@ jobs:
           path: |
             e2e/playwright-report/
             e2e/test-results/
+            e2e/.playwright/art-atlas-test-results/
             e2e/playwright-pickup-report/
             e2e/playwright-heart-report/
             e2e/playwright-shield-report/

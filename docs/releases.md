@@ -17,6 +17,14 @@ readiness and the served artifact after deployment. Repeat affected checks when 
 do not require separate full push, PR, master and tag runs or elaborate new proof packages for
 each feature. Historical release records retain their original evidence and requirements.
 
+## v0.3.48 artist handoff candidate — 2026-10-24
+
+The [artist handoff](../assets/art/README.md) provides the complete stable-ID PNG/JSON source,
+separate guides, optional sliced exports, strict validation and an EN/PL Pixi region workbench.
+Gameplay adoption is a separate v0.3.49 increment. Current checks and accepted image are recorded
+in [verification](verification.md#v0348-artist-handoff-acceptance--2026-10-24). Publication and
+localhost promotion will be recorded after they complete.
+
 ## v0.3.47 published prerelease — 2026-10-24
 
 [v0.3.47](https://github.com/liveweird/grenadiers/releases/tag/v0.3.47) completes all 22 requested item types. Release source

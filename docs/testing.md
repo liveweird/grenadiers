@@ -42,6 +42,23 @@ dependencies are cached; test outcomes are always executed. The workflow can als
 manually when Linux coverage is needed. Equivalent local Linux test execution satisfies the same
 requirement without a remote rerun.
 
+## Artist atlas
+
+`scripts/gates.sh art-atlas` runs CLI resource/path checks and the actual Chromium artist
+workbench suite. Install both npm workspaces and Playwright Chromium first. The Playwright
+server builds the separate diagnostics target before previewing it, including on a clean
+checkout. Set `RENDERER_DIAGNOSTICS_BASE_URL` only when deliberately testing an already-built
+diagnostics server. The manual full CI includes this gate; `scripts/gates.sh all` retains its
+existing Rust/web/E2E-static scope and does not require an installed browser.
+
+The suite checks canonical PNG/JSON import, decoded frame pixels, deterministic export data,
+invalid sources, concurrent operations, context restoration, one live preview, texture budgets,
+EN/PL errors and desktop/320px reduced-motion layouts. Core unit tests cover frame inventory,
+metadata, every extrusion edge/corner, padding, gutters, transparency and texture disposal.
+Generated browser proofs live under ignored `e2e/.playwright/art-atlas-test-results/`. The
+[artist handoff](../assets/art/README.md) documents template/export commands. This tooling
+release does not claim gameplay atlas integration or new visual artwork.
+
 ## Rust
 
 Use unit tests for pure validation/serialization and Tower oneshot tests for HTTP behavior.

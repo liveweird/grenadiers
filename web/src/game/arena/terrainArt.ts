@@ -13,17 +13,34 @@ const FLOOR_CHIPS: readonly (readonly PixelRect[])[] = [
   [[24, 35, 9, 3], [30, 32, 3, 3], [10, 10, 4, 3]],
 ]
 
-function paintFloor(graphics: Graphics, x: number, y: number, column: number, row: number): void {
+function paintFloorPattern(
+  graphics: Graphics, x: number, y: number, chipVariant: number, moss: boolean,
+): void {
   graphics.rect(x, y, TILE, TILE).fill(PALETTE.floorShade)
   graphics.rect(x + 2, y + 2, 44, 44).fill(PALETTE.floor)
   graphics.rect(x + 3, y + 3, 42, 3).fill(PALETTE.floorLight)
   graphics.rect(x + 3, y + 42, 42, 3).fill(0xaeb69a)
-  const variant = deterministicVariant(column, row, FLOOR_CHIPS.length)
-  pixels(graphics, variant % 2 === 0 ? PALETTE.floorLight : PALETTE.floorShade,
-    FLOOR_CHIPS[variant].map(([chipX, chipY, width, height]) => [x + chipX, y + chipY, width, height]))
-  if ((column * 5 + row * 3) % 7 === 0) {
+  pixels(graphics, chipVariant % 2 === 0 ? PALETTE.floorLight : PALETTE.floorShade,
+    FLOOR_CHIPS[chipVariant].map(([chipX, chipY, width, height]) => [x + chipX, y + chipY, width, height]))
+  if (moss) {
     pixels(graphics, PALETTE.moss, [[x + 3, y + 39, 9, 3], [x + 6, y + 36, 6, 3]])
   }
+}
+
+function paintFloor(graphics: Graphics, x: number, y: number, column: number, row: number): void {
+  paintFloorPattern(
+    graphics, x, y, deterministicVariant(column, row, FLOOR_CHIPS.length),
+    (column * 5 + row * 3) % 7 === 0,
+  )
+}
+
+export function makeFloorVariant(variant: number): Graphics {
+  if (!Number.isInteger(variant) || variant < 0 || variant >= 8) {
+    throw new RangeError('floor variant must be an integer from 0 through 7')
+  }
+  const drawing = new Graphics()
+  paintFloorPattern(drawing, 0, 0, variant % FLOOR_CHIPS.length, variant >= FLOOR_CHIPS.length)
+  return drawing
 }
 
 function paintWall(graphics: Graphics, x: number, y: number, column: number, row: number): void {
@@ -42,6 +59,15 @@ function paintWall(graphics: Graphics, x: number, y: number, column: number, row
   if (deterministicVariant(column, row, 3) === 0) {
     pixels(graphics, PALETTE.moss, [[x + 5, y + 34, 10, 3], [x + 8, y + 31, 4, 3]])
   }
+}
+
+export function makeWallVariant(variant: number): Graphics {
+  if (!Number.isInteger(variant) || variant < 0 || variant >= 2) {
+    throw new RangeError('wall variant must be 0 or 1')
+  }
+  const drawing = new Graphics()
+  paintWall(drawing, 0, 0, variant === 0 ? 1 : 0, 0)
+  return drawing
 }
 
 export function paintTerrain(graphics: Graphics, arena: SnapshotMessage['state']['arena']): void {

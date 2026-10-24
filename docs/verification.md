@@ -11,6 +11,37 @@ honest about the source and environment actually tested.
 The records below are historical evidence. Their repeated CI runs, receipt graphs and sealing
 procedures do not impose additional requirements on future changes.
 
+## v0.3.48 artist handoff acceptance — 2026-10-24
+
+Application/tooling source `cd369f463a1d4c2a63f3a9da1d5eebfafa770e70` passes the full web gate:
+**6,748 tests / 78 files**, with **93.27/89.91/90.99/95.91%** statement/branch/function/line
+coverage, above all unchanged 85% floors. Repository pins, API/schema parity, lint, Knip,
+production build, E2E static/auxiliary checks, all 68 scenario titles and workflow contracts pass.
+The first gate exposed unused atlas exports; these were removed before the passing Knip and
+coverage/build checks.
+
+The dedicated artist suite passes **8/8 on macOS Chromium and 8/8 on Linux Chromium**, one
+worker and zero retries. It covers canonical sources, decoded frame pixels, independent export
+reproducibility, WebGL-restored rendered pixels, concurrent ownership, invalid input, EN/PL
+status, 320px reduced-motion layout and texture bounds. Initial Linux setup used a Vite-rejected
+Docker host name (HTTP403); a specific host allowance corrected the environment before the
+passing run. Earlier attempts remain recorded. The checked-in [desktop](screenshots/art-atlas-desktop.png)
+and [mobile](screenshots/art-atlas-mobile-pl-reduced.png) proofs were visually reviewed.
+
+The new production image builds from that clean committed source in 20 seconds and passes the
+configured fixed HIGH/CRITICAL vulnerability threshold with the local cached database. Image:
+`sha256:751383fe17e23a6ae46e58006017a15862c6b0cf2fd993645bb2c78187b00cb8`. Oil passes on
+Compose and Kubernetes using this exact image, including production-manifest/security checks
+and owned-resource cleanup. Classic match/rematch also passes on Compose: three native cases
+total, all with zero retries. An initial classic setup named a nonexistent fixture and started
+no services; the corrected run used the documented `arena-v1-matches` fixture.
+
+Rust source, dependency versions, API, toolchain and production profile are unchanged from
+v0.3.47; Cargo changes only the product/local-package version. Reuse its passing full exhaustive
+Rust and dependency-security results rather than repeat equivalent checks. The new image supplies
+a fresh Linux production compile and scoped native acceptance. Gameplay atlas adoption remains
+v0.3.49; the [handoff](../assets/art/README.md) documents the faithful baseline flame gap.
+
 ## Current v0.3.47 published delivery — 2026-10-24
 
 [v0.3.47](https://github.com/liveweird/grenadiers/releases/tag/v0.3.47) completes all 22 requested item types. Release source

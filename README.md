@@ -8,7 +8,12 @@ are shipped. Localhost:8085 serves the accepted image
 `sha256:969ff363f77ad6dfc6e62fa5f98e4a704d017ad1186d43fe774fedc50fd7561e`. Reload both browser clients for gameplay v11.
 See [verification](docs/verification.md) and the [Oil guide/captures](docs/game/oil-barrel.md).
 
-The ART-ATLAS artist handoff and sprite-sheet pipeline is next.
+The v0.3.48 candidate adds the [artist sprite-sheet handoff](assets/art/README.md): editable
+PNG/JSON, labelled guides, validated runtime export and a separate Pixi preview. Gameplay
+adoption is the next bounded increment, v0.3.49.
+
+Artists can use `npm --prefix e2e run art:template -- --out target/art-template` and
+`scripts/gates.sh art-atlas` after installing the documented Playwright Chromium prerequisite.
 
 The **two-player arena match is playable**. Create a room, share its invitation,
 join from another browser, and both choose Ready. Select the courtyard to move with arrows

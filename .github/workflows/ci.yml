@@ -244,6 +244,7 @@ jobs:
         run: |
           npm --prefix web ci
           scripts/gates.sh art-atlas
+          scripts/gates.sh atlas-gameplay
       - name: Verify deterministic pickups using the same built image
         if: matrix.shard == 'items'
         run: |
@@ -526,6 +527,7 @@ jobs:
             e2e/playwright-report/
             e2e/test-results/
             e2e/.playwright/art-atlas-test-results/
+            e2e/.playwright/atlas-gameplay-test-results/
             e2e/playwright-pickup-report/
             e2e/playwright-heart-report/
             e2e/playwright-shield-report/

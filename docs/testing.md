@@ -56,8 +56,10 @@ invalid sources, concurrent operations, context restoration, one live preview, t
 EN/PL errors and desktop/320px reduced-motion layouts. Core unit tests cover frame inventory,
 metadata, every extrusion edge/corner, padding, gutters, transparency and texture disposal.
 Generated browser proofs live under ignored `e2e/.playwright/art-atlas-test-results/`. The
-[artist handoff](../assets/art/README.md) documents template/export commands. This tooling
-release does not claim gameplay atlas integration or new visual artwork.
+[artist handoff](../assets/art/README.md) documents template/export commands. The dedicated `scripts/gates.sh atlas-gameplay` checks the v0.3.49 gameplay backend against
+procedural reference pixels and real WebGL lifecycle behavior. It uses the same fresh diagnostics
+build and stores proofs in `e2e/.playwright/atlas-gameplay-test-results/`. See the
+[rendering guide](game/art-atlas.md). Artist redraws remain separate from renderer adoption.
 
 ## Rust
 

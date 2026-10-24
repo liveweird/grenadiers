@@ -53,7 +53,8 @@
     "test:terrain-pixels": "playwright test --config playwright.terrain-pixels.config.ts",
     "art:template": "node scripts/art-atlas-cli.mjs template",
     "art:export": "node scripts/art-atlas-cli.mjs export",
-    "test:art-atlas": "playwright test --config playwright.art-atlas.config.ts"
+    "test:art-atlas": "playwright test --config playwright.art-atlas.config.ts",
+    "test:atlas-gameplay": "playwright test --config playwright.atlas-gameplay.config.ts"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.13.0",

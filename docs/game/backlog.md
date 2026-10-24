@@ -4,7 +4,8 @@ TURN, CONFIG and the first ART slice are implemented. Published [v0.3.47](https:
 completes **all 22 requested item types**, including Oil Barrel. Full checks, scoped
 Compose/Kubernetes acceptance, publication and localhost promotion are complete. ART-ATLAS is
 partly shipped: [v0.3.48](https://github.com/liveweird/grenadiers/releases/tag/v0.3.48) publishes
-the artist handoff/export/preview and is promoted locally; v0.3.49 gameplay adoption remains next.
+the artist handoff/export/preview and is promoted locally. The v0.3.49 gameplay adoption
+candidate is now in progress; artist redraws remain separate.
 
 [v0.3.43](https://github.com/liveweird/grenadiers/releases/tag/v0.3.43) publishes Wall Pass as the
 eighteenth of 22 requested item types. Published source `c086f719ea470b9fe24963adef84b5e3bdf3e17a`,
@@ -217,7 +218,7 @@ The entire expanded-item batch shipped in v0.3.47. ART-ATLAS is split into two b
 - **v0.3.48:** canonical editable PNG/JSON, 95 stable entries (91 baseline and four reserved),
   separate guides/overview, validated export with optional slices, and real Pixi region preview.
   See the [artist handoff](../../assets/art/README.md) for commands and constraints.
-- **v0.3.49:** adopt the reviewed runtime atlas in gameplay, preserving terrain cache behavior,
+- **v0.3.49 (in progress):** adopt the reviewed runtime atlas in gameplay, preserving terrain cache behavior,
   animation timing, visibility, collision geometry, ownership and current rendering budgets.
 
 The existing code-generated PixiJS art remains the baseline. New artist redraws and new animation

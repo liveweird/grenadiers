@@ -11,6 +11,48 @@ honest about the source and environment actually tested.
 The records below are historical evidence. Their repeated CI runs, receipt graphs and sealing
 procedures do not impose additional requirements on future changes.
 
+## v0.3.49 gameplay atlas acceptance — 2026-10-25
+
+Frozen application/tooling source `ee664e5a72c0899d92bca7cc9c13e58d0d37c868` passes the web
+gate: **6,760 tests / 82 files**, with **91.13/88.86/89.67/93.70%** statement/branch/function/line
+coverage, above every unchanged 85% floor. API/schema parity, final lint/Knip/build, E2E static
+and auxiliary checks, all 69 scenario titles, CLI lifecycle checks and three workflow contracts
+pass. Construction-time lint and unused-barrel failures were corrected before the relevant
+checks passed; the completed coverage suite was not repeated for diagnostic-only edits.
+
+Real-WebGL gameplay acceptance passes **DPR1 and DPR2 on macOS and Linux**, with zero retries:
+30 stages per case compare the atlas to a normalized procedural reference with **zero differing
+RGBA bytes**. Coverage includes all ten low/high pulsing cues, fractional movement, reduced motion,
+state removal, reset, changed terrain and context restoration. Separate raw-reference assertions
+pin the intentional seven-cue per-stroke/completed-icon opacity difference by pixel/byte counts,
+channel maxima and bounds. See the [rendering guide](game/art-atlas.md); this release does not
+claim byte-identical historical low-alpha overlap blending. The artist suite also passes 8/8
+after the shared pixel-helper extraction, for 12 diagnostic browser cases in total.
+
+Linux records 280 nodes, 267 sprites and **one 2040×320 source / 2,611,200 RGBA bytes**. Fresh
+renderer initialization after the comparison setup measures 45.3/47.5 ms at DPR1/2; this includes
+a fresh renderer-owned atlas, with already-requested HTTP assets. Thirty observed animation
+frames take 493.1/484.3 ms (macOS 689.7/701.3 ms), below the existing 2,000 ms bound. These are
+wall-clock RAF samples, not isolated CPU render-time measurements.
+
+Exact production image `sha256:10aa8554f8f22f968a6bd1852a4c0d6fe43e63b365eafc8220e7fbd826dc4d21`
+builds in 17.4 seconds and passes the configured fixed HIGH/CRITICAL cached image audit. The
+production bundle contains the canonical hashed PNG with matching bytes and excludes diagnostic
+globals. It passes **26 Compose cases plus one Kubernetes case**, all with zero retries and
+owned-resource cleanup: Oil, classic match/rematch, Cloak privacy/reconnect/expiry, Invisible
+Bombs privacy/expiry, 22 isolated latency cases, and Kubernetes Oil with manifest/security checks.
+Latency maxima are **44.56 ms local / 160.20 ms shaped**, 20 observations per profile and zero
+exceedances of the unchanged 250 ms budget. Accepted [desktop](screenshots/atlas-gameplay-desktop-en.png)
+and [320px Polish reduced-motion](screenshots/atlas-gameplay-mobile-pl-reduced.png) captures were
+visually reviewed. A mistyped Python path in one launch exited before starting services; the
+corrected launch and all actual Playwright cases passed without retries.
+
+Rust/API/toolchain/production profile and dependency versions remain unchanged from v0.3.47;
+Cargo changes only product/local-package version numbers. Reuse its exhaustive debug/release/
+coverage and dependency-security evidence. No duplicate hosted run was needed after local Linux
+coverage. Independent architecture and review are complete; the diagnostic atlas leak found in
+review was fixed. Publication and localhost promotion remain pending at this acceptance checkpoint.
+
 ## Current v0.3.48 published delivery — 2026-10-24
 
 [v0.3.48](https://github.com/liveweird/grenadiers/releases/tag/v0.3.48) is published from source

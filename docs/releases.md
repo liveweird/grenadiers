@@ -17,6 +17,16 @@ readiness and the served artifact after deployment. Repeat affected checks when 
 do not require separate full push, PR, master and tag runs or elaborate new proof packages for
 each feature. Historical release records retain their original evidence and requirements.
 
+## v0.3.49 gameplay atlas candidate — 2026-10-25
+
+The production renderer uses the canonical artist PNG/JSON through shared atlas regions,
+retaining scene rules, cached terrain and renderer-owned resource lifetime. Normal web/Docker
+builds bundle artist inputs without Chromium. Status pulses now fade each completed icon once;
+the [rendering guide](game/art-atlas.md) explains the intentional overlap-compositing difference.
+The [acceptance record](verification.md#v0349-gameplay-atlas-acceptance--2026-10-25) covers full
+web/static checks, macOS/Linux pixel comparisons and exact-image Compose/Kubernetes/latency.
+Publication and localhost promotion will be recorded when complete.
+
 ## v0.3.48 published prerelease — 2026-10-24
 
 [v0.3.48](https://github.com/liveweird/grenadiers/releases/tag/v0.3.48) is published from source

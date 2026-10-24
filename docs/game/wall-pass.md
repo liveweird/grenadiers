@@ -37,21 +37,23 @@ exercise equipment replacement; focused core and protocol tests cover replacemen
 
 ## Native verification checkpoint
 
-Final source `bd34192d8915a8aac4288e3f69bd5898ad01d952`, tree
-`daa2306e77de0e279a6752aa69e687e0a6c51ba0`, is native verified on exact image
-`sha256:e2f02586988e2359404189afbe465ad47a4dd12e8227de8b6d3c627401ad7cfc`.
-At the `2026-10-23 19:48 UTC` checkpoint, all 55 Compose plus 55 Kubernetes cases pass with zero
+Final source `11d0dc7e39e8e2cafcf70c1548be339f52c740ab`, tree
+`655c7d8a80b4dd3fdd3b232534c2cbaa45b054cc`, is native verified on exact image
+`sha256:577abb32958e45912f35a7f6ae68dd624deb6515d2b4d55519942c44436a2a01`.
+At the `2026-10-24 01:00 UTC` checkpoint, all 55 Compose plus 55 Kubernetes cases pass with zero
 retries or carried results. The matrix retains 52 reports, 122 PNGs, 42 runtime records, 21
 Kubernetes identities, 20 fixtures, 40 seed records and 80 latency samples below 250 ms. Fresh
 source gates pass all 262,144 masks in each of debug, release and coverage, 711 core and 209 server
 tests per profile with four historical ignores, 797 web tests across 64 files and all 56 scenarios.
-Independent audit and result/binding reviews are clear, and final manifest
-`e2f58e9a171b62eb2607d46a59236f19e2ca99fac0a7cd1148d3a34d5fae1a0e` durably seals the evidence.
+Independent audit, result review and binding review are clear. Final manifest
+`3ac5e05ccee94c7716376ca9383c75acc924b772447499c6a0dbd857f68ec15c` durably seals 2,665
+payloads; seal `31fe5eef2900a0229d002e45b5a310888f3915829db0aaf23bc3535a8eea5e2c`
+is complete, and independent post-seal review is clear.
 
 The reviewed pre-collection captures show the same route in [English desktop](../screenshots/wall-pass-desktop.png)
 and [Polish 320px reduced motion](../screenshots/wall-pass-mobile-pl.png). Their SHA-256 values are
-`9200da355aa5fe9273a9a130186c7d8f27d28255f705abd6ded068671e71f9f8` and
-`07a276234fdf8023be1603fd04c27965ef4fa8698afbef63623c84205a0bf4ec`.
+`d46367b7eeee7c55e94dbcfba6de7de50b27b96c6761ad6a9ff69db2b9332c08` and
+`84843190d2be59a89f5c614c3d17bd78e969dcb7cf692d0e06243b2d3978d72f`.
 
 This is the eighteenth native-verified requested item, not a v0.3.43 publication claim. Candidate,
 master and tag checks, publication and exact-image promotion remain pending; consult current

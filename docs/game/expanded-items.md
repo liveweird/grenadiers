@@ -86,10 +86,13 @@ preserving every v0.3.41 item. Rules version 5, generator version 2 and journal 
 stable; Teleporter introduces the paired gameplay-v10 contract for its authoritative position
 epoch. Its release acceptance remains separately pending.
 
-The provisional v0.3.43 source adds [Wall Pass](wall-pass.md) as the eighteenth optional pickup
-while preserving the reviewed final v0.3.42 source parent and gameplay v10. Its 262,144 settings
-masks require two server-mask partitions. Fresh v0.3.43 gates, independent review, native
-acceptance and hosted CI remain pending.
+The v0.3.43 release candidate adds [Wall Pass](wall-pass.md) as the eighteenth optional pickup
+while preserving the reviewed final v0.3.42 source parent and gameplay v10. Source
+`11d0dc7e39e8e2cafcf70c1548be339f52c740ab` and exact image
+`sha256:577abb32958e45912f35a7f6ae68dd624deb6515d2b4d55519942c44436a2a01` complete all 262,144
+settings masks in debug, release and coverage plus 55+55 same-image native cases with zero retries
+or carry. Independent audit, binding review, durable sealing and post-seal review are clear;
+hosted CI remains pending.
 This optional track follows the [backlog](backlog.md), shared settings and
 pixel-art increments. The historical catalog in [rules](rules.md) is not an implementation
 claim. Each activation requires its own reviewed behavior, UI, documentation and acceptance.

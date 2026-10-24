@@ -5,8 +5,8 @@ Teleporter is published as prerelease
 requested item types published. Merge `0ff1512c5a8fdbd1e1b16583ae7791e668bf070b` and annotated tag
 `ea3930a3490fb483de46692e1009743e20c61648` pass distinct first-attempt master/tag workflows
 `39982027955` and `39984896509`; the exact accepted image is promoted locally. Wall Pass is the
-eighteenth native-verified item for v0.3.43: source `bd34192d8915a8aac4288e3f69bd5898ad01d952`
-and image `sha256:e2f02586988e2359404189afbe465ad47a4dd12e8227de8b6d3c627401ad7cfc`
+eighteenth native-verified item for v0.3.43: source `11d0dc7e39e8e2cafcf70c1548be339f52c740ab`
+and image `sha256:577abb32958e45912f35a7f6ae68dd624deb6515d2b4d55519942c44436a2a01`
 pass fresh gates and all 55 Compose plus 55 Kubernetes cases with zero retries or carried results.
 Seventeen items are published; candidate/master/tag checks, publication and promotion for v0.3.43
 remain pending. Current status lives in [checks](https://github.com/liveweird/grenadiers/actions),
@@ -111,14 +111,15 @@ optional pickups: Heart, Shield, Golden Flame, Short Fuse, Short Flame, Long Fus
 Controls, Diarrhea, Slow-foot, Piercing Bomb, Power Bomb, Remote Bomb, Landmine and Invisibility
 Cloak, Stopwatch, Invisible Bombs, Teleporter and Wall Pass. The published v0.3.42 source
 parent is integrated, including the sealed v0.3.41 history. Fresh v0.3.43 gates, same-image native
-acceptance, independent audit and durable sealing are complete; hosted candidate, master and tag
+acceptance, independent audit, binding review, durable sealing and post-seal review are complete.
+Hosted candidate, master and tag
 checks, publication and promotion remain pending. The remaining four requested pickups stay
 outside this increment. Current publication status
 is recorded in [release notes](https://github.com/liveweird/grenadiers/releases), with source-bound
 acceptance records in [verification](../verification.md). Richer transitions and artwork remain
 follow-up work; see [pixel-art presentation](pixel-art.md) and
 [expanded item implementation](expanded-items.md).
-Updated 2026-10-23 after v0.3.42 delivery and the sealed Wall Pass native checkpoint. Release acceptance is recorded in
+Updated 2026-10-24 after v0.3.42 delivery and the refreshed Wall Pass native checkpoint. Release acceptance is recorded in
 [verification](../verification.md).
 The [implementation plan](implementation-plan.md) remains the milestone/release reference;
 the [rules](rules.md) describe the current baseline and historical extension catalog.
@@ -264,7 +265,7 @@ needs remappable controls, input sequencing, replay and connection-generation fe
 | EQ-KICK / boot | Walking into a planted bomb slides it across the floor until a wall, another bomb or a player stops it. | Sliding speed, soft-block collision, contact priorities, fuse/chain behavior and bomb ownership; no tunneling. |
 | EQ-PUNCH / boxing glove | Punch an adjacent bomb three tiles forward over obstacles, wrapping at arena edges. | Action/direction, airborne collision and fuse behavior, landing on blocked cells, repeated punches; wrap logical arena cells rather than screen pixels, defining treatment of border walls. |
 | EQ-SHOVE / bracelet | Shove rival players when touching them. | Contact detection despite normally non-blocking players, displacement, cooldown, simultaneous shoves and collision/fire along the pushed path. |
-| EQ-WALL / wall pass | **Native verified for v0.3.43.** Phase through destructible soft blocks. | Hard walls/borders, bombs and hazards stay authoritative; private per-cell exit grace resolves replacement while overlapping a block. Fresh source gates and 55+55 same-image native cases pass with independent audit and durable seal; hosted CI and publication remain pending. |
+| EQ-WALL / wall pass | **Native verified for v0.3.43.** Phase through destructible soft blocks. | Hard walls/borders, bombs and hazards stay authoritative; private per-cell exit grace resolves replacement while overlapping a block. Fresh source gates and 55+55 same-image native cases pass with independently reviewed durable evidence; hosted CI and publication remain pending. |
 | EQ-HEART / heart | Absorb one lethal explosion or enemy collision, then vanish. | Simultaneous/overlapping hits, remaining in flame, protection precedence with Shield and post-hit grace. Enemy collision applies when an enemy damage system exists. |
 
 ## Timed buffs: multiple active effects allowed

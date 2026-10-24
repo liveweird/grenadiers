@@ -14,11 +14,12 @@ Teleporter is published as prerelease v0.3.42 after distinct first-attempt maste
 Seventeen requested item types are published, and the exact accepted image
 `sha256:8ae9818d27c4345bceec6dad77f02e21ee7148626efded48c421d86421285477` is promoted locally.
 Wall Pass is the eighteenth native-verified item for v0.3.43. Final source
-`bd34192d8915a8aac4288e3f69bd5898ad01d952`, tree
-`daa2306e77de0e279a6752aa69e687e0a6c51ba0`, passes fresh gates and all 55 Compose plus 55
+`11d0dc7e39e8e2cafcf70c1548be339f52c740ab`, tree
+`655c7d8a80b4dd3fdd3b232534c2cbaa45b054cc`, passes fresh gates and all 55 Compose plus 55
 Kubernetes cases on exact image
-`sha256:e2f02586988e2359404189afbe465ad47a4dd12e8227de8b6d3c627401ad7cfc`.
-Independent audit and durable sealing are clear. Candidate, master and tag CI, publication and
+`sha256:577abb32958e45912f35a7f6ae68dd624deb6515d2b4d55519942c44436a2a01`.
+Independent audit, binding review, durable sealing and post-seal review are clear. Candidate,
+master and tag CI, publication and
 promotion remain pending; current status is in [GitHub Actions](https://github.com/liveweird/grenadiers/actions)
 and [GitHub Releases](https://github.com/liveweird/grenadiers/releases).
 The v0.3.16 increment adds classic-v3 forgiving turns and explicit gameplay-v5 compatibility,

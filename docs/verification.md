@@ -11,6 +11,20 @@ honest about the source and environment actually tested.
 The records below are historical evidence. Their repeated CI runs, receipt graphs and sealing
 procedures do not impose additional requirements on future changes.
 
+## Current v0.3.46 Bracelet acceptance — 2026-10-24
+
+Frozen source `5e55bb46bb71b1b8bf9db8dab0a6403eb7a1e240` passes focused core/server checks, all
+2,097,152 masks in debug/release/coverage, the web gate (2,618 tests across 70 files), E2E static
+and auxiliary checks, dependency/image audits, and distinct Ubuntu Rust CI
+[run 40123865469](https://github.com/liveweird/grenadiers/actions/runs/40123865469). Rust coverage is
+16,315/17,522 (93.111517%); the full gate exits zero in 27m57s using four workers and 16 ranges.
+Same-image native acceptance passes all 29 scoped cases with zero retries: Compose Bracelet,
+Kick, Punch, Landmine, Wall Pass, classic match/rematch and 22 latency cases (28 total), plus
+Kubernetes Bracelet with production-manifest, security and owned-resource cleanup checks. The 22 isolated latency cases pass with maxima
+62.93 ms local and 160.14 ms shaped 50 ms delay, below the unchanged 250 ms budget. Accepted image:
+`sha256:1460278198b6d604595bfbe4fb8278a85ab39725c43516bb8b55ab2e6a47f5bf`. Publication and
+promotion remain pending.
+
 ## Current v0.3.45 published delivery — 2026-10-24
 
 [v0.3.45](https://github.com/liveweird/grenadiers/releases/tag/v0.3.45) is published from source

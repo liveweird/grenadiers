@@ -24,8 +24,16 @@ Source `5be42456cee80e06e2f138bdfd458ef821bb34c2` is published as
 `0e6224643ce85bf8f0a77894dcb929ab2655e397`. It publishes Punch as the twentieth requested item.
 Localhost serves the accepted image
 `sha256:3f13b26f7a4a41ba2e90b8cc9261c9e95a60eceeddf49504341e65258eb7d37d`.
-Bracelet v0.3.46 is the current prepared source candidate; its native acceptance and publication
-remain pending.
+Bracelet v0.3.46 is the accepted source candidate on frozen source
+`5e55bb46bb71b1b8bf9db8dab0a6403eb7a1e240`; publication and promotion remain pending.
+
+## v0.3.46 Bracelet acceptance checkpoint — 2026-10-24
+
+Scoped native acceptance passes all 29 cases (28 Compose plus one Kubernetes), with zero retries.
+The 22 isolated latency cases pass with maxima 62.93 ms local and 160.14 ms with shaped 50 ms
+delay, below the unchanged 250 ms budget. Accepted image:
+`sha256:1460278198b6d604595bfbe4fb8278a85ab39725c43516bb8b55ab2e6a47f5bf`. Publication and
+localhost promotion remain pending; see [verification](verification.md).
 
 ## v0.3.44 published prerelease — 2026-10-24
 

@@ -8,8 +8,9 @@ The initial playable profile supports two human players. Bots and larger matches
 `94f83a7650e2c57955103d91060af10b1a2f439c`). Localhost serves the exact accepted image
 `sha256:3f13b26f7a4a41ba2e90b8cc9261c9e95a60eceeddf49504341e65258eb7d37d`.
 
-Bracelet v0.3.46 is prepared on the published Punch parent; native acceptance, remaining checks and
-publication remain pending. Oil Barrel follows before ART-ATLAS.
+Bracelet v0.3.46 is accepted on source `5e55bb46bb71b1b8bf9db8dab0a6403eb7a1e240`; publication
+and promotion remain pending. See [verification](docs/verification.md), [English desktop](docs/screenshots/bracelet-desktop.png),
+and [Polish 320px](docs/screenshots/bracelet-mobile-pl.png). Oil Barrel follows before ART-ATLAS.
 
 The **two-player arena match is playable**. Create a room, share its invitation,
 join from another browser, and both choose Ready. Select the courtyard to move with arrows

@@ -3,8 +3,8 @@
 Published [v0.3.44](https://github.com/liveweird/grenadiers/releases/tag/v0.3.44) adds
 [Kick](kick.md) as the nineteenth requested item. Published v0.3.45 adds opt-in
 [Punch](punch.md) on that published parent and is promoted locally. The v0.3.46 source candidate
-adds [Bracelet](bracelet.md) as the twenty-first requested item; its native acceptance, final CI
-and publication remain pending. Oil Barrel v0.3.47 follows before ART-ATLAS.
+adds [Bracelet](bracelet.md) as the twenty-first requested item; its acceptance and checks are
+complete, with publication and promotion pending. Oil Barrel v0.3.47 follows before ART-ATLAS.
 
 ## Historical Heart activation checkpoint
 

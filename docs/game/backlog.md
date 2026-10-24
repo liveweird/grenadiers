@@ -6,7 +6,7 @@ Controls, Diarrhea, Slow-foot, Piercing Bomb, Power Bomb, Remote Bomb, Landmine 
 Cloak, Stopwatch, Invisible Bombs, Teleporter, Wall Pass, Kick and Punch. Reviewed implementation
 source, scoped acceptance, publication and localhost promotion are complete. The v0.3.46 source
 candidate adds Bracelet as the twenty-first optional pickup on that published parent. Bracelet
-native acceptance, final CI and publication remain pending; Oil Barrel v0.3.47 follows before
+acceptance and checks are complete; publication and promotion remain pending. Oil Barrel v0.3.47 follows before
 ART-ATLAS.
 
 [v0.3.43](https://github.com/liveweird/grenadiers/releases/tag/v0.3.43) publishes Wall Pass as the
@@ -126,7 +126,7 @@ status is recorded in [GitHub Releases](https://github.com/liveweird/grenadiers/
 acceptance records in [verification](../verification.md). Richer transitions and artwork remain
 follow-up work; see [pixel-art presentation](pixel-art.md) and
 [expanded item implementation](expanded-items.md).
-Updated 2026-10-24 after integrating the Bracelet source candidate with published Punch.
+Updated 2026-10-24 after Bracelet scoped acceptance.
 Release acceptance is recorded in
 [verification](../verification.md).
 The [implementation plan](implementation-plan.md) remains the milestone/release reference;

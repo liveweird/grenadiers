@@ -17,13 +17,23 @@ readiness and the served artifact after deployment. Repeat affected checks when 
 do not require separate full push, PR, master and tag runs or elaborate new proof packages for
 each feature. Historical release records retain their original evidence and requirements.
 
-## v0.3.48 artist handoff candidate — 2026-10-24
+## v0.3.48 published prerelease — 2026-10-24
 
-The [artist handoff](../assets/art/README.md) provides the complete stable-ID PNG/JSON source,
-separate guides, optional sliced exports, strict validation and an EN/PL Pixi region workbench.
-Gameplay adoption is a separate v0.3.49 increment. Current checks and accepted image are recorded
-in [verification](verification.md#v0348-artist-handoff-acceptance--2026-10-24). Publication and
-localhost promotion will be recorded after they complete.
+[v0.3.48](https://github.com/liveweird/grenadiers/releases/tag/v0.3.48) is published from source
+`f6336810f4a539e5e001aa6b1733f445015ae76f`, tree `87a488cc69b45e61b40b8be340f7b09ea4347930`,
+with remotely verified annotated tag object `372e84642c4e582c4a632508acb2deeaa9a89aba`.
+The uploaded 229,324-byte artist handoff ZIP has verified SHA256
+`1f374dc6a76a05b536decc9620bf43edd448d9cc242bf0b15d4b1e28eed4b135`.
+
+Localhost:8085 serves exact accepted image
+`sha256:751383fe17e23a6ae46e58006017a15862c6b0cf2fd993645bb2c78187b00cb8`.
+Promotion exits zero; health/readiness/index return 200 and served HTML/JavaScript match container
+bytes. UID65532, read-only filesystem, dropped capabilities and no new privileges are retained.
+Oil v0.3.47 is preserved as the rollback image. Application inputs match tested source `cd369f4`;
+subsequent gate/documentation changes do not require rebuilding that image. Gameplay adoption
+remains v0.3.49; current gameplay continues using the existing code-generated drawings.
+
+See the [artist guide](../assets/art/README.md) and [acceptance results](verification.md#v0348-artist-handoff-acceptance--2026-10-24).
 
 ## v0.3.47 published prerelease — 2026-10-24
 

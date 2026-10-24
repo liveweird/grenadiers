@@ -63,9 +63,9 @@ test('Oil Barrel reveals, blocks, burns persistently, and resumes without synthe
       await one.getByRole('button', { name: 'Apply rules', exact: true }).click()
       await expect(one.getByText(/up to 8 Oil Barrel objects/)).toBeVisible()
       await two.getByText('Polski', { exact: true }).click()
-      await expect(two.getByText(/do 8 obiektów Beczki oleju/)).toBeVisible()
       await two.getByRole('textbox', { name: 'Kod pokoju', exact: true }).fill(await code.innerText())
       await two.getByRole('button', { name: 'Dołącz do pokoju', exact: true }).click()
+      await expect(two.getByText(/do 8 obiektów Beczki oleju/)).toBeVisible()
       await Promise.all([
         one.getByRole('button', { name: 'Ready', exact: true }).click(),
         two.getByRole('button', { name: 'Gotowy', exact: true }).click(),

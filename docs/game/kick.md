@@ -19,5 +19,16 @@ Version 0.3.44 adds Kick as the first item in the nineteen-item current catalog.
 is `1`; `ALL` is `3,145,721`. Generator v2 appends weight 15 after Wall Pass, making the complete
 pool 395 and Kick interval `[380,395)`. All 524,288 catalog subsets are validated. Archived gameplay
 v9 and earlier reject Kick catalog entries, equipment, pickups, collection history, and trusted bomb
-motion or stopped history. This document describes reviewed source; native same-image acceptance and
-release publication remain pending.
+motion or stopped history. At the 2026-10-24 source-gates checkpoint, candidate
+`cb70cba891ed972380f30f52133622ce36fd9ee8` passes all 524,288 masks plus fresh Rust, web, E2E and
+security gates. Fresh image `sha256:8ff3005861127f8ac57cc32f7e6c72ce5fa996fe628ad48426dbb8cf133e1af9`
+passes all 56 Compose plus 56 Kubernetes cases with zero retries or carried results. Independent
+audit, result/binding review, durable seal
+`94c60dac44c639f7e9a214061e9daf9475628126d15526346ed7be2ce4c9a947` and post-seal review are
+clear. This establishes the dated native-acceptance checkpoint; hosted CI and publication follow
+and are not claimed here.
+
+Retained native captures show the stopped kicked bomb in [English desktop](../screenshots/kick-desktop.png)
+and [Polish 320px reduced motion](../screenshots/kick-mobile-pl.png). Their SHA-256 values are
+`751c65c2aed6e68c8b588ae099b08370008525a63da79d602c388c27262b9d9e` and
+`418752d5ed6b5ce4691e05b4677f8651d811ce9681fdf49432ebc3066a28cb64`.

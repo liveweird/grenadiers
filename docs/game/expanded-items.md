@@ -1,9 +1,11 @@
 # Expanded item implementation plan
 
-Current status: 18 of the 22 requested item types are published through v0.3.43, including
-[Wall Pass](wall-pass.md). [Kick](kick.md) is prepared source-only for v0.3.44; fresh gates,
-56+56 native acceptance and CI remain pending. Punch, Bracelet and Oil Barrel follow before
-ART-ATLAS.
+At the 2026-10-24 v0.3.44 native-acceptance checkpoint, 18 of the 22 requested item types are
+published through v0.3.43, including
+[Wall Pass](wall-pass.md). [Kick](kick.md) passes fresh source-bound gates for v0.3.44 at source
+`cb70cba891ed972380f30f52133622ce36fd9ee8`, including every 524,288-item mask. Fresh 56+56 native
+acceptance passes with zero retries or carried results and is independently reviewed and sealed.
+Hosted CI and publication follow. Punch, Bracelet and Oil Barrel remain before ART-ATLAS.
 
 ## Historical Heart activation checkpoint
 
@@ -118,7 +120,8 @@ Corrected source `5dbcd58` adds only the Happy DOM 21.0.4 development-security c
 fresh web and configured security gates pass, and reviewed retained-artifact comparison preserves
 the accepted host distribution. Native acceptance remains attributed to source `11d0dc7`; the
 eight later published-source changes are documentation only. Eighteen of 22 requested items are
-published. Kick remains source-only for v0.3.44, pending fresh gates, 56+56 native acceptance and CI.
+published at this checkpoint. Kick has passed its v0.3.44 source gates and fresh 56+56 native
+acceptance with independent review and sealing; hosted CI and publication follow.
 This optional track follows the [backlog](backlog.md), shared settings and
 pixel-art increments. The historical catalog in [rules](rules.md) is not an implementation
 claim. Each activation requires its own reviewed behavior, UI, documentation and acceptance.

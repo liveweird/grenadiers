@@ -1,5 +1,53 @@
 # Repository verification
 
+## v0.3.44 Kick sealed native acceptance — 2026-10-24 — 112/112
+
+Candidate source `cb70cba891ed972380f30f52133622ce36fd9ee8`, tree
+`5be27219ba749d2811396d6f84af7d31f528a692`, completed fresh source-bound gates with consumed
+actual exit zero in distinct roots `31818` and `5290`. Receipt
+`.local-checkpoints/2026-10-21/v0344-kick-hud-fix-attempt2/full-gates-actual-exits.json` hashes to
+`903736dda1001d60f83204fa10f58940796c87716a5d9eea151b58e62fd97153`.
+Debug, release and coverage each pass 763 core and 210 server tests with four documented ignores
+and enumerate all 524,288 nineteen-item masks; debug and release each pass two doctests. Rust
+coverage is 15,233/16,429 lines, **92.720190%**.
+
+The web gate passes 1,059 tests across 66 files with **95.26/90.9/96/97.67%**
+statement/branch/function/line coverage, and all 57 static scenarios pass. Cargo deny and both npm
+audits exit zero at the configured threshold. The web audit reports three affected moderate
+packages represented by six distinct GHSA advisories, with zero high or critical findings; the E2E
+audit reports zero vulnerabilities.
+
+Fresh image `sha256:8ff3005861127f8ac57cc32f7e6c72ce5fa996fe628ad48426dbb8cf133e1af9`
+passes all **56 Compose plus 56 Kubernetes** cases with zero retries or carried results. Root session
+`97948` completes with consumed actual exit zero in
+`v0344-final-native-actual-exit-consumed.json` (SHA-256
+`9f2230b3e1c371ec3007aad33ec48c37463e0fafa079594d3e07fe73f9ef43d9`). Native facts SHA-256
+`00542824d775035473b8a2c6bc15ea54d176dbf990c8a2e5004dd28643746915` records 54 reports, 126
+PNGs, 44 runtime records, 22 distinct Kubernetes identities, 21 fixtures and 42 seed records. Each
+target passes 22 latency cases with 80 game observations under the unchanged 250 ms budget. Host
+observers `98744` and `74060` complete with consumed actual exit zero and retain 48 and 43 samples.
+Cleanup SHA-256 `c69c1d93de5be0c4e4c4b9dfe6214175fa5b63041aa7e393ce5b5d2a479cff5a`
+confirms owned resources are absent and the published v0.3.43 default remains healthy.
+
+The earlier attempt failed after 55 Compose cases; none are carried forward. Audit
+`58e03d36c7dc967e71342e0e70e1fb65ac045e0f5a2883800d984d83bfe4654c`, result review
+`8f9f1e7d520a3da7baf52344c551545f6903310af458fdfe6b90465c6d406594`, proof binding
+`dd75bb465bfd97e241bced1a02f385ab6f9de374856438771990593da0d27cd3` and binding review
+`24edf45899b2402c86204eec7516e3a31b39bba8b2704df0a6d2d3b303466dea` are clear. The corrected
+post-runtime validator under independently reviewed code `5e3b4a09e71f2dc29b9a9e4413375d30edc23a1aa37c07f97ec8db800f5ebd85`
+handles the actual published-parent shape without changing source, game behavior or native bytes.
+
+Sealer root `85077` and the proof validator complete with consumed actual exit zero. Final manifest
+`a5d0c54f699629ea732c3f641bad02bd322ebb8c0f1a4a0efd1df293c4126620` is durably bound by
+`native-seal.json` SHA-256 `94c60dac44c639f7e9a214061e9daf9475628126d15526346ed7be2ce4c9a947`;
+independent post-seal review SHA-256
+`97c1b19ff6694746b73ac9d427f30f4840f14300967e4333fed9d634fb05fd51` is clear. This establishes
+the dated native-acceptance checkpoint. Candidate/master/tag CI, publication and promotion follow
+and are not claimed here. At this checkpoint, v0.3.43 is the verified published/deployed baseline;
+authoritative later publication status is on
+[GitHub Releases](https://github.com/liveweird/grenadiers/releases). No v0.3.43 pass is carried
+forward.
+
 ## v0.3.43 published delivery — 2026-10-24
 
 Source `c086f719ea470b9fe24963adef84b5e3bdf3e17a`, tree
@@ -24,7 +72,8 @@ receipt `81bd78943fa8e80bc839b06bcd68c7bb26872f4cf600c2fcc80e2269c7c94209` and r
 `42bbbcb68e8a306d9ed611513e186189ab3430f17bf545191edace5bdb6e3b75` prove corrected source
 `5dbcd58` produces the retained image output; the later eight documentation-only changes do not
 claim unchanged Docker inputs, a new Rust compilation or new native execution. Eighteen of 22
-requested items are published. Kick remains source-only for v0.3.44.
+requested items are published at this checkpoint. Kick's fresh 56+56 execution is independently
+reviewed and sealed for v0.3.44; hosted CI and publication follow.
 
 ## Historical v0.3.43 Wall Pass native checkpoint — 2026-10-24 01:00 UTC — 110/110
 
@@ -5544,11 +5593,13 @@ these scaffold checks. These are local results; hosted CI status is separate evi
 The original `AGENTS.md` remains unchanged under the explicit preservation instruction;
 current engineering conventions live in `CONTRIBUTING.md`.
 
-## v0.3.44 Kick source candidate
+## v0.3.44 Kick native-accepted candidate
 
 The deterministic browser source is configured for the reviewed repeating-byte-31 fixture. Planned
-captures are `kick-stopped-desktop-en.png` and `kick-stopped-polish-320-reduced.png`. Native
-same-image execution and release acceptance remain pending.
+captures are retained as `docs/screenshots/kick-desktop.png` and
+`docs/screenshots/kick-mobile-pl.png`. The fresh source gates and passing same-image execution are
+recorded at the top of this document. Independent review and sealing are clear; hosted release
+acceptance follows this dated checkpoint.
 
 ## Historical Cloak rolling-history source integration — parent acceptance was pending
 

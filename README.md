@@ -21,9 +21,16 @@ Reviewed artifact equality connects corrected source `5dbcd58e920f852a8036c4bf74
 to the published source through eight documentation-only changes; it does not claim unchanged
 Docker inputs, a new Rust compilation or new native execution. Delivery binding
 `40578e13d8a44a3cdb22bc222ac71eedd0005b08f3fb5f0748d07f7e333cf5d1` and its independent review
-are clear. The v0.3.42 image remains retained as the rollback parent. Eighteen of 22 requested
-items are published; Kick is the v0.3.44 source-only candidate, with fresh gates, 56+56 native
-acceptance and CI still pending. Punch, Bracelet and Oil Barrel follow before ART-ATLAS.
+are clear. The v0.3.42 image remains retained as the rollback parent. At the 2026-10-24
+native-acceptance checkpoint, eighteen of 22 requested items are published. Kick candidate
+`cb70cba891ed972380f30f52133622ce36fd9ee8` passes fresh Rust, web, security and complete
+524,288-mask gates. Fresh execution on prepared image `sha256:8ff3005861127f8ac57cc32f7e6c72ce5fa996fe628ad48426dbb8cf133e1af9`
+passes all 56 Compose plus 56 Kubernetes cases with zero retries or carried results. Independent
+audit, result/binding review, durable sealing and post-seal review are clear. This is the dated
+v0.3.44 native-acceptance checkpoint; hosted candidate/master/tag CI, publication and promotion
+follow and are not claimed here. Publication status belongs to the authoritative
+[GitHub Releases](https://github.com/liveweird/grenadiers/releases) record. Punch, Bracelet and Oil
+Barrel follow before ART-ATLAS.
 
 The **two-player arena match is playable**. Create a room, share its invitation,
 join from another browser, and both choose Ready. Select the courtyard to move with arrows

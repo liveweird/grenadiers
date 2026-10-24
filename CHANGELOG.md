@@ -1,14 +1,24 @@
 # Changelog
 
-## 0.3.44 — 2026-10-21 (source candidate)
+## 0.3.44 — 2026-10-24 (native-accepted candidate)
 
 - Add opt-in Kick equipment: walking into a stationary Timed or Remote bomb starts authoritative
   one-cell motion on the next update and every ten updates until blocked; Contact mines never move.
 - Preserve bomb identity, owner, blast and fuse while keeping motion and stopped Kick history private
   across capture, admission, resume and replay; archived protocols reject that provenance.
 - Extend gameplay v10 to the nineteenth lobby switch and all 524,288 settings masks, with
-  English/Polish presentation and deterministic production-seed browser source. Native same-image
-  acceptance, final CI and publication remain pending.
+  English/Polish presentation and deterministic production-seed browser source.
+- Source `cb70cba891ed972380f30f52133622ce36fd9ee8`, tree
+  `5be27219ba749d2811396d6f84af7d31f528a692`, passes fresh source-bound gates: each Rust profile
+  passes 763 core and 210 server tests with four documented ignores, all 524,288 masks complete,
+  and the web gate passes 1,059 tests across 66 files with 57 static scenarios. Configured security
+  passes with three affected moderate packages, six GHSA advisories and no high or critical
+  findings. Fresh image `sha256:8ff3005861127f8ac57cc32f7e6c72ce5fa996fe628ad48426dbb8cf133e1af9`
+  passes 56 Compose plus 56 Kubernetes cases with zero retries or carried results: 54 reports, 126
+  PNGs, 44 runtime records, 22 Kubernetes identities, 21 fixtures and 42 seed records. Independent
+  audit, result/binding review and durable post-seal review are clear under seal
+  `94c60dac44c639f7e9a214061e9daf9475628126d15526346ed7be2ce4c9a947`; hosted CI, publication and
+  promotion follow this dated native checkpoint and are not claimed here.
 
 ## 0.3.43 — 2026-10-24
 

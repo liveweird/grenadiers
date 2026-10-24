@@ -11,8 +11,11 @@ Docker inputs, a new Rust compilation or new native execution. See the
 [verification record](../verification.md) for the delivery chain.
 
 This v0.3.44 source preparation contains the nineteenth opt-in pickup, Kick, while preserving the
-published Wall Pass behavior. Fresh v0.3.44 gates, 56 Compose plus 56 Kubernetes acceptance and CI
-remain pending; Punch, Bracelet and Oil Barrel follow before ART-ATLAS.
+published Wall Pass behavior. At the 2026-10-24 checkpoint, source
+`cb70cba891ed972380f30f52133622ce36fd9ee8` passes fresh Rust, web, security and complete
+524,288-mask gates. Fresh execution passes all 56 Compose plus 56 Kubernetes cases with zero
+retries or carried results; independent audit, reviews and durable post-seal review are clear.
+Hosted CI and publication follow. Punch, Bracelet and Oil Barrel remain before ART-ATLAS.
 
 At the 21 October 2026 16:47 UTC native acceptance checkpoint, Invisibility Cloak was an
 **unreleased source candidate**. Corrected source `1c6724f` and
@@ -111,12 +114,13 @@ optional pickups: Heart, Shield, Golden Flame, Short Fuse, Short Flame, Long Fus
 Controls, Diarrhea, Slow-foot, Piercing Bomb, Power Bomb, Remote Bomb, Landmine and Invisibility
 Cloak, Stopwatch, Invisible Bombs, Teleporter and Wall Pass. Its source, CI, publication and exact
 image promotion are complete. The remaining four requested pickups stay outside that increment;
-Kick is prepared source-only in v0.3.44. Current publication status
-is recorded in [release notes](https://github.com/liveweird/grenadiers/releases), with source-bound
+Kick is source-gates verified and its fresh 56+56 native acceptance is independently reviewed and
+sealed for v0.3.44, while publication follows this dated checkpoint. Authoritative publication
+status is recorded in [GitHub Releases](https://github.com/liveweird/grenadiers/releases), with source-bound
 acceptance records in [verification](../verification.md). Richer transitions and artwork remain
 follow-up work; see [pixel-art presentation](pixel-art.md) and
 [expanded item implementation](expanded-items.md).
-Updated 2026-10-24 after v0.3.43 delivery and preparation of the Kick source integration. Release acceptance is recorded in
+Updated 2026-10-24 after v0.3.43 delivery and the Kick native-acceptance checkpoint. Release acceptance is recorded in
 [verification](../verification.md).
 The [implementation plan](implementation-plan.md) remains the milestone/release reference;
 the [rules](rules.md) describe the current baseline and historical extension catalog.
@@ -315,6 +319,6 @@ including same-image Compose/Kubernetes acceptance. Bots, mobs and larger matche
 separate tracks; their future interactions must be specified without making them prerequisites.
 
 Complete the entire expanded-item activation batch before starting ART-ATLAS. Kick is the
-current bounded source increment (v0.3.44); its predecessor integration and acceptance remain
-pending, and melee equipment and Oil remain after it. ART-ATLAS begins
+current bounded increment (v0.3.44), with native acceptance complete. Hosted release
+acceptance remains pending; melee equipment and Oil follow it. ART-ATLAS begins
 only after those item increments and their release gates are complete.

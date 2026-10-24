@@ -298,3 +298,9 @@ the published source.
 Use `docker-compose.kick.yaml` with the mode-0444 v2 seed fixture and
 `E2E_KICK_FIXTURE=arena-v2-kick npm --prefix e2e run test:kick`. The scenario uses ordinary UI and
 keys, observes public streams, and does not inject state, search seeds, retry, or extend budgets.
+At the 2026-10-24 source-gates checkpoint, source `cb70cba891ed972380f30f52133622ce36fd9ee8`
+passes all 524,288 masks in debug, release and coverage, 763 core and 210 server tests per profile,
+1,059 web tests across 66 files, and 57 static scenarios. Fresh image execution subsequently passes
+all 56 Compose plus 56 Kubernetes cases with zero retries or carried results. Audit, independent
+result/binding review, durable sealing and post-seal review are clear. Hosted release checks remain
+separate follow-up evidence.

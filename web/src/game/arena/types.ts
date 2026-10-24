@@ -3,6 +3,17 @@ import type { KeyboardBindings } from './bindings'
 export type RenderablePickupKind =
   | 'bombCapacity' | 'blastRange' | 'movementSpeed' | 'kick' | 'punch' | 'bracelet' | 'wallPass' | 'heart' | 'remoteBomb' | 'piercingBomb' | 'powerBomb' | 'landmine' | 'shield' | 'stopwatch' | 'invisibilityCloak' | 'goldenFlame' | 'shortFuse'
   | 'diarrhea' | 'slowFoot' | 'shortFlame' | 'longFuse' | 'reverseControls' | 'invisibleBombs' | 'teleporter'
+
+function pickupKinds<const T extends readonly RenderablePickupKind[]>(
+  values: T & ([RenderablePickupKind] extends [T[number]] ? unknown : never),
+): T { return values }
+
+export const RENDERABLE_PICKUP_KINDS = pickupKinds([
+  'bombCapacity', 'blastRange', 'movementSpeed', 'kick', 'punch', 'bracelet', 'wallPass', 'heart',
+  'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch',
+  'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame',
+  'longFuse', 'reverseControls', 'invisibleBombs', 'teleporter',
+] as const)
 interface PresentedActor {
   id: number
   seat: Seat

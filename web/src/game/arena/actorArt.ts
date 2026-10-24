@@ -6,6 +6,7 @@ import { pixels } from './pixel'
 type PoseFrames = readonly [Graphics, Graphics]
 export interface ActorDrawing {
   root: Container
+  shadow: Graphics
   protection: Graphics
   shield: Graphics
   stopwatch: Graphics
@@ -17,6 +18,8 @@ export interface ActorDrawing {
   reverseControls: Graphics
   diarrhea: Graphics
   slowFoot: Container
+  slowBoot: Graphics
+  slowMarkers: readonly Graphics[]
   piercing: Graphics
   power: Graphics
   landmine: Graphics
@@ -255,7 +258,8 @@ export function makeActor(seat: Seat): ActorDrawing {
   )
   const drawing = {
     root, protection, shield, stopwatch, frozen, goldenFlame, shortFuse, shortFlame, longFuse, reverseControls,
-    diarrhea, slowFoot, piercing, power, landmine, equipment, kick, punch, bracelet, wallPass, cloak, poses,
+    shadow, diarrhea, slowFoot, slowBoot, slowMarkers, piercing, power, landmine,
+    equipment, kick, punch, bracelet, wallPass, cloak, poses,
     direction: 'south' as Direction, moving: false,
     protected: false, shielded: false, stopwatchActive: false, actionsFrozen: false,
     golden: false, shortFused: false, shortFlamed: false,

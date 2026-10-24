@@ -4,7 +4,8 @@ import { PALETTE } from './palette'
 import { pixels } from './pixel'
 
 export interface BombDrawing {
-  root: Container; spark: Graphics; pause: Graphics; remote: boolean; contact: boolean; paused: boolean
+  root: Container; shadow: Graphics; shell: Graphics; spark: Graphics; pause: Graphics
+  remote: boolean; contact: boolean; paused: boolean
 }
 export interface FlameDrawing { root: Container; frames: readonly [Graphics, Graphics] }
 
@@ -48,7 +49,10 @@ export function makeBomb(
   pixels(pause, PALETTE.blueLight, [[-8, -7, 5, 15], [3, -7, 5, 15]])
   pause.visible = false
   root.addChild(shadow, shell, spark, pause)
-  return { root, spark, pause, remote: trigger === 'remote', contact: trigger === 'contact', paused: false }
+  return {
+    root, shadow, shell, spark, pause,
+    remote: trigger === 'remote', contact: trigger === 'contact', paused: false,
+  }
 }
 
 function flameFrame(alternate: boolean): Graphics {

@@ -35,3 +35,8 @@ all = { level = "warn", priority = -1 }
 lto = "thin"
 strip = "symbols"
 
+[profile.test]
+opt-level = 1
+debug-assertions = true
+overflow-checks = true
+

@@ -51,7 +51,9 @@ and API/SPA separation. Keep tests independent and use bounded timeouts rather t
 
 `cargo test --workspace --locked` runs the debug suite; `cargo test --workspace --release --locked`
 runs the same behavior in the production profile. The server gate requires both: debug assertions
-must never perform required mutations. Clippy denies warnings. Coverage uses
+must never perform required mutations. The test profile uses optimization level 1 while retaining
+debug assertions and integer overflow checks; exhaustive debug and instrumented coverage runs use
+that same assertion-enabled profile. Clippy denies warnings. Coverage uses
 `cargo-llvm-cov` **0.9.1** and an **80% line floor**, enforced in CI. Current measurements
 and candidate evidence are recorded in [verification](verification.md).
 Install with `cargo install cargo-llvm-cov --version 0.9.1 --locked`, then

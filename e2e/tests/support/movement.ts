@@ -1,6 +1,6 @@
 import { expect, type Page } from '@playwright/test'
 import { visibleActor, latestSnapshot, type ObservedGame } from './duel'
-import type { Seat } from '../../../web/src/game/v10/schema'
+import type { Seat } from '../../../web/src/game/v11/schema'
 
 type Cell = { column: number; row: number }
 const CENTER = 512

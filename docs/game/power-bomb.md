@@ -26,7 +26,7 @@ Diarrhea bombs are always ordinary and never inspect or consume the stored charg
 Power Bomb uses catalog bit 7 and generator weight 15 after Piercing Bomb. Its initial catalog
 supported all 2048 subsets and preserved every earlier 1024-mask path; later items join the
 [current catalog](settings.md). Rules version 5, generator version 2 and journal format 2 remain
-unchanged. Current [gameplay-v10](protocol-v10.md) requires paired server/web deployment and a
+unchanged. Current [gameplay-v11](protocol-v11.md) requires paired server/web deployment and a
 browser reload.
 
 ## Acceptance and presentation

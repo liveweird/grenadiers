@@ -47,6 +47,8 @@ pub enum StateError {
     UnsupportedShoveHistory(EntityId),
     UnsupportedEnabledItems(EnabledItems),
     UnsupportedPickup { cell: CellId, kind: PickupKind },
+    UnsupportedOilBarrels,
+    InvalidOilBarrel(CellId),
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

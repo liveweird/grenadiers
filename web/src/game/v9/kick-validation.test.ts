@@ -4,11 +4,12 @@ import { validateGameplayV9ServerMessage } from './validation'
 import type { Snapshot } from './schema'
 
 function archivedSnapshot(): Snapshot {
-  const archived = structuredClone(snapshot(1)) as unknown as Snapshot
+  const archived = structuredClone(snapshot(1)) as unknown as Snapshot & { state: { oilBarrels?: unknown } }
   archived.room.availableItems = archived.room.availableItems
     .filter((item) => item !== 'kick' && item !== 'punch' && item !== 'bracelet'
-      && item !== 'wallPass' && item !== 'teleporter')
+      && item !== 'wallPass' && item !== 'oilBarrel' && item !== 'teleporter')
   for (const actor of archived.state.actors) delete (actor as unknown as { lastTeleportTick?: number }).lastTeleportTick
+  delete archived.state.oilBarrels
   return archived
 }
 

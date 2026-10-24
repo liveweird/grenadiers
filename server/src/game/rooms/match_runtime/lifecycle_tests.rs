@@ -5,7 +5,7 @@ use std::sync::{
 
 use grenadiers_core::{
     game::{Direction, RoundAssignment, SeatId, SpeedLevel},
-    protocol::v10::{MatchResult, MatchWinnerReason, RoomPhase},
+    protocol::v11::{MatchResult, MatchWinnerReason, RoomPhase},
     room::{DepartureReason, MatchPhase},
 };
 

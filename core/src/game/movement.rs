@@ -1,13 +1,11 @@
-use std::collections::BTreeSet;
-
 use super::geometry::{MovementSegment, MovementTrace};
 use super::input::Direction;
-use super::movement_collision::{allowed_distance, allowed_distance_with_blocker};
+use super::movement_collision::{ObstacleAccess, allowed_distance, allowed_distance_with_blocker};
 pub(crate) use super::movement_collision::{position_is_free, position_overlaps_cell};
 use super::simulation::{Actor, TurnAssist};
 use super::types::{CellId, EntityId, Position, TICKS_PER_SECOND, UNITS_PER_CELL};
 use super::world::World;
-
+use std::collections::BTreeSet;
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub(crate) struct MovementOutcome {
     pub(crate) trace: MovementTrace,
@@ -138,8 +136,11 @@ pub(crate) fn advance_actor(
             correction_direction,
             correction.abs(),
             &actor.bomb_grace,
-            config.wall_pass_enabled && actor.inventory().can_pass_soft_walls(),
-            &actor.soft_wall_grace,
+            ObstacleAccess {
+                can_pass: config.wall_pass_enabled && actor.inventory().can_pass_soft_walls(),
+                soft_grace: &actor.soft_wall_grace,
+                oil_grace: &actor.unlit_oil_grace,
+            },
         ) != correction.abs()
         {
             return MovementOutcome {
@@ -259,8 +260,11 @@ fn move_actor(
         request.direction,
         request.distance,
         &actor.bomb_grace,
-        config.wall_pass_enabled && actor.inventory().can_pass_soft_walls(),
-        &actor.soft_wall_grace,
+        ObstacleAccess {
+            can_pass: config.wall_pass_enabled && actor.inventory().can_pass_soft_walls(),
+            soft_grace: &actor.soft_wall_grace,
+            oil_grace: &actor.unlit_oil_grace,
+        },
     );
     let distance = collision.distance;
     let kick =
@@ -287,6 +291,7 @@ fn move_actor(
     }
     prune_bomb_grace(world, actor);
     prune_soft_wall_grace(world, actor);
+    prune_unlit_oil_grace(world, actor);
 }
 
 pub(crate) fn overlapping_soft_blocks(world: &World, position: Position) -> BTreeSet<CellId> {
@@ -303,6 +308,23 @@ pub(crate) fn prune_soft_wall_grace(world: &World, actor: &mut Actor) {
     actor.soft_wall_grace.retain(|cell| {
         world.arena.blocks().contains(cell) && position_overlaps_cell(actor.position, *cell)
     });
+}
+
+pub(crate) fn overlapping_unlit_oil(world: &World, position: Position) -> BTreeSet<CellId> {
+    world
+        .oil
+        .iter()
+        .filter_map(|(cell, state)| {
+            (state == crate::game::OilState::Unlit && position_overlaps_cell(position, cell))
+                .then_some(cell)
+        })
+        .collect()
+}
+
+pub(crate) fn prune_unlit_oil_grace(world: &World, actor: &mut Actor) {
+    actor
+        .unlit_oil_grace
+        .retain(|cell| world.oil.unlit(*cell) && position_overlaps_cell(actor.position, *cell));
 }
 
 pub(crate) fn prune_bomb_grace(world: &World, actor: &mut Actor) {

@@ -21,7 +21,10 @@ impl State {
     ) -> Result<(), StepError> {
         let plan =
             explosions::plan_with_contacts(&self.world, tick, remote_targets, &contact_targets);
-        if plan.detonated.is_empty() && plan.destroyed_mines.is_empty() {
+        if plan.detonated.is_empty()
+            && plan.destroyed_mines.is_empty()
+            && plan.ignited_oil.is_empty()
+        {
             return Ok(());
         }
 
@@ -51,6 +54,20 @@ impl State {
         self.world
             .pickups
             .apply_explosion(&plan.destroyed_blocks, &plan.flames);
+        let concealed_oil: Vec<_> = self
+            .world
+            .oil
+            .iter()
+            .filter_map(|(cell, state)| {
+                (state == crate::game::OilState::Concealed && plan.destroyed_blocks.contains(&cell))
+                    .then_some(cell)
+            })
+            .collect();
+        for cell in concealed_oil {
+            self.world
+                .oil
+                .set_state(cell, crate::game::OilState::Pending);
+        }
         self.world.arena.remove_blocks(&plan.destroyed_blocks);
         for actor in &mut self.actors {
             crate::game::movement::prune_soft_wall_grace(&self.world, actor);
@@ -59,7 +76,19 @@ impl State {
         // Tick is bounded by u64. On its final representable value there can be
         // no later step, so clamping preserves deterministic terminal state.
         let expiry = Tick(tick.0.saturating_add(self.rules.flame_ticks()));
+        for cell in &plan.ignited_oil {
+            self.world
+                .oil
+                .set_state(*cell, crate::game::OilState::Burning);
+            self.world.hazards.remove(cell);
+        }
+        for actor in &mut self.actors {
+            crate::game::movement::prune_unlit_oil_grace(&self.world, actor);
+        }
         for cell in plan.flames {
+            if self.world.oil.burning(cell) {
+                continue;
+            }
             self.world
                 .hazards
                 .entry(cell)

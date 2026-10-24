@@ -1,7 +1,7 @@
 # Typed pickup layers
 
 Status: visibility, collection, upgrades and round assignment are implemented. [Heart](heart.md)
-was introduced in v0.3.25. Current Expanded-v5/generator-v2 rooms use gameplay-v10 and Pixi.
+was introduced in v0.3.25. Current Expanded-v5/generator-v2 rooms use gameplay-v11 and Pixi.
 
 `World::with_pickups(arena, concealed, pending, exposed)` checks typed cell maps and returns
 `PickupPlacementError` rather than a partial world. A concealed item must lie under a soft
@@ -12,8 +12,9 @@ all three maps. `World::new` still creates an item-free world.
 `GenerationRecord` separately to the trusted caller. `exposed_pickups()` is the read-only
 visible layer. Public domain `PickupView { cell, kind }` entries are row-major and contain no
 concealed or pending information; Debug redacts those private layers. Gameplay-v9 transmits only
-exposed items and collection events. Gameplay v10 adds the visible actor Teleporter position epoch,
-Wall Pass, Kick, Punch and Bracelet equipment kinds. Wall Pass exit-grace cells remain private
+exposed items and collection events. Gameplay v11 retains the visible actor Teleporter position
+epoch, Wall Pass, Kick, Punch and Bracelet equipment kinds, and publishes materialized Oil Barrel
+objects separately from pickups. Wall Pass exit-grace cells remain private
 authoritative state; Kick motion, Punch and Bracelet cooldowns, forced movement and retained bomb
 histories are private too.
 The browser renders the three base upgrades and enabled optional items, with authoritative
@@ -22,6 +23,8 @@ keep private layers and seed records inside the server owner. Teleporter collect
 separate atomic swap rules in [its feature reference](teleporter.md). Kick, Punch and Bracelet
 collection each replace the equipment slot without exposing motion, cooldown or history fields. Wall Pass
 collection and replacement rules are described in [its feature reference](wall-pass.md).
+Oil Barrel never enters these pickup layers or collection events; its private concealed/pending
+and public unlit/burning object phases are described in [its feature reference](oil-barrel.md).
 
 A destroyed block moves its concealed item to Pending. The revealing explosion cannot burn
 that item. It becomes Exposed only after all flames on its cell expire; overlap or renewal

@@ -76,11 +76,7 @@ impl State {
             .values()
             .find(|bomb| bomb.cell() == target)?;
         let source = bomb.cell();
-        let source_burning = self
-            .world
-            .hazards
-            .get(&source)
-            .is_some_and(|expiry| *expiry > tick);
+        let source_burning = self.world.has_fire(source, tick);
         let due =
             matches!(bomb.trigger(), BombTrigger::Timed { detonates_at } if detonates_at <= tick);
         if matches!(bomb.trigger(), BombTrigger::Contact)
@@ -119,6 +115,7 @@ impl State {
             }
             let open = self.world.arena.terrain(candidate) == Some(Terrain::Floor)
                 && !self.world.arena.blocks().contains(&candidate)
+                && !self.world.oil.unlit(candidate)
                 && !self
                     .world
                     .bombs

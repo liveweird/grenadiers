@@ -85,6 +85,46 @@ describe('sound control gesture and localization', () => {
       <Subject current={later} />
     </StrictMode></MantineProvider>)
     await vi.waitFor(() => expect(fake.oscillator).toHaveBeenCalledOnce())
+
+    const oil = state()
+    oil.room!.revision = 22
+    oil.snapshot!.room.revision = 22
+    oil.snapshot!.state.physicalTick = 22
+    oil.snapshot!.room.settings.enabledItems = ['oilBarrel']
+    oil.snapshot!.state.oilBarrels = [{ cell: { column: 3, row: 1 }, state: 'unlit' }]
+    oil.admissionBaseline = initial.admissionBaseline
+    rendered.rerender(<MantineProvider env="test"><StrictMode>
+      <Subject current={oil} />
+    </StrictMode></MantineProvider>)
+    await vi.waitFor(() => expect(screen.getByText('Sound on')).toBeVisible())
+    expect(fake.oscillator).toHaveBeenCalledOnce()
+
+    const ignited = state()
+    ignited.room!.revision = 23
+    ignited.snapshot!.room.revision = 23
+    ignited.snapshot!.state.physicalTick = 23
+    ignited.snapshot!.room.settings.enabledItems = ['oilBarrel']
+    ignited.snapshot!.state.oilBarrels = [{ cell: { column: 3, row: 1 }, state: 'burning' }]
+    ignited.admissionBaseline = initial.admissionBaseline
+    rendered.rerender(<MantineProvider env="test"><StrictMode>
+      <Subject current={ignited} />
+    </StrictMode></MantineProvider>)
+    await vi.waitFor(() => expect(fake.oscillator).toHaveBeenCalledOnce())
+
+    const resumed = state()
+    resumed.room!.revision = 30
+    resumed.snapshot!.room.revision = 30
+    resumed.snapshot!.state.physicalTick = 30
+    resumed.snapshot!.room.settings.enabledItems = ['oilBarrel']
+    resumed.snapshot!.state.oilBarrels = [{ cell: { column: 3, row: 1 }, state: 'unlit' }]
+    resumed.admissionBaseline = {
+      roomId: resumed.room!.roomId, revision: 30, tick: 30, physicalTick: 30,
+    }
+    rendered.rerender(<MantineProvider env="test"><StrictMode>
+      <Subject current={resumed} />
+    </StrictMode></MantineProvider>)
+    await vi.waitFor(() => expect(screen.getByText('Sound on')).toBeVisible())
+    expect(fake.oscillator).toHaveBeenCalledOnce()
   })
 
   it('creates from the native button gesture and reports local failure', async () => {

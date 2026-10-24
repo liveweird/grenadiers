@@ -2,11 +2,10 @@
 
 Status: gameplay contracts, checked domain conversion, HTTP session issuance, and authenticated
 gameplay WebSockets with authoritative configurable two-seat matches are implemented.
-`api/gameplay-v10.schema.json`, Rust `core::protocol::v10`, and generated
-`web/src/game/v10/schema.ts` define active socket messages. V2 through v9 remain historical.
-V10 keeps Expanded v5/generator v2 identity and adds the nullable authoritative
-`lastTeleportTick` visible-actor position epoch used by Teleporter. See
-[compatibility](protocol-v10.md).
+`api/gameplay-v11.schema.json`, Rust `core::protocol::v11`, and generated
+`web/src/game/v11/schema.ts` define active socket messages. V2 through v10 remain historical.
+V11 keeps Expanded v5/generator v2 identity and the v10 Teleporter position epoch, then adds
+materialized Oil Barrel state. See [compatibility](protocol-v11.md).
 The browser validates these messages and drives the playable generated-map match. Diagnostic `/api/v1/ws` and
 `api/realtime.schema.json` remain unchanged.
 
@@ -28,13 +27,13 @@ Connect to `/api/v1/game/ws` with one configured non-null Origin and no query pa
 Its first application frame must be:
 
 ```json
-{"type":"authenticate","protocolVersion":10,"token":"0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"}
+{"type":"authenticate","protocolVersion":11,"token":"0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"}
 ```
 
 The token is a secret 64-character lowercase hexadecimal credential, held only in tab memory.
 It never belongs in a URL or log. A syntactically valid unsupported version is parsed so the
 server can return `incompatibleProtocol` before credential binding. Supported gameplay version
-is 10, independently of the product release and diagnostic protocol. Parser failures expose
+is 11, independently of the product release and diagnostic protocol. Parser failures expose
 only a generic error; token Debug formatting is redacted.
 
 A successful claim atomically binds one connection. Duplicate claims receive `connectionInUse`
@@ -83,8 +82,8 @@ All listed fields are required; objects reject extra fields. Counter values are 
 
 | Server type | Additional fields |
 | --- | --- |
-| `authenticated` | `protocolVersion: 10` |
-| `incompatibleProtocol` | `supportedVersion` (0–65,535; this server emits 10) |
+| `authenticated` | `protocolVersion: 11` |
+| `incompatibleProtocol` | `supportedVersion` (0–65,535; this server emits 11) |
 | `admitted` | acknowledged `sequence`, shared `room`, `youSeat`, private `resumeToken`, nullable `lastActionId`, nullable `state` |
 | `roomState` | shared `room` only |
 | `seatReplaced` | `roomId`; old binding closes with code 4001 |
@@ -101,7 +100,8 @@ The default Heart-only enabled set produces equal perspectives. Personal
 `admitted` carries seat identity, capability, action floor and an optional recipient baseline,
 without historical events. `state` contains `physicalTick`, `runningUpdates` and `remainingTicks`
 (each running counter 0–10,800), the arena, exactly two
-actors, up to 16 bombs, up to 195 flames, and up to 195 exposed pickups. The arena has width 15, height 13, exactly 195
+actors, up to 16 bombs, up to 195 finite flames, and up to 195 exposed pickups. Finite flames and
+burning Oil together occupy at most 195 distinct cells. The arena has width 15, height 13, exactly 195
 row-major floor/wall terrain entries, and up to 195 unique soft-block cells.
 
 Visible actors expose ID, seat, position, heading, speed (0–4), alive status, capacity/range
@@ -115,6 +115,9 @@ Timed bombs may pause only with enabled Stopwatch and validated private captured
 Enabled Piercing and Power bombs retain their special blasts. Enabled Remote and Contact bombs use
 untimed Standard triggers with no invented fuse.
 Flames include cell and exclusive expiry tick.
+The required sorted `oilBarrels` array contains at most eight materialized arena objects in `unlit`
+or `burning` state. Burning Oil is persistent round fire and remains separate from finite flames.
+Concealed/pending locations and typed Oil grace never enter recipient frames.
 Room metadata carries the global tick, rules/map versions, scores, actual round number,
 latest completed round, and independent match outcome; these are not duplicated in game state.
 The required `pickups` array contains closed `{cell, kind}` entries for ordinary upgrades or an
@@ -136,7 +139,7 @@ completed 60 Hz updates per normal snapshot.
 
 ## Checked domain conversion
 
-Use `core::protocol::v10::capture_expanded` to observe the complete State and reports, then
+Use `core::protocol::v11::capture_expanded` to observe the complete State and reports, then
 `bind_expanded` to certify the room profile, settings, lifecycle epoch, physical tick and
 trusted round generation record.
 Opaque captures cannot be serialized directly. Raw server DTO fields alone do not establish
@@ -181,9 +184,9 @@ spawn/tie assignment uses actual round count rather than command epoch.
 
 Shared room views and snapshot metadata also carry the complete checked `settings`,
 `settingsRevision`, nullable original `settingsEditor`, and `availableItems`. Settings also
-carry `enabledItems`; v9 remains pinned to its sixteen-item Invisible-Bombs catalog while active v10
-has the 21-item catalog beginning with Kick, Punch, Bracelet and Wall Pass, and ending in Teleporter. Heart is enabled by default and
-every supported subset is allowed.
+carry `enabledItems`; v10 remains pinned to its 21-item Bracelet catalog while active v11
+has the 22-item catalog beginning with Kick, Punch, Bracelet and Wall Pass, with Oil Barrel immediately
+before Teleporter. Heart is enabled by default and every supported subset is allowed.
 Only actual changes increment
 the settings revision and clear readiness; Ready commands acknowledge that exact revision.
 See [v6 settings and authority](protocol-v6.md) for bounds, no-op acknowledgements and edit locks.
@@ -218,9 +221,9 @@ rules and generated-v2 arenas. Snapshots initially have an
 empty pickup array because contents are concealed; only exposed items become public.
 Fixed-classic-v1 remains an explicit unit fixture, not a production selector.
 
-Gameplay v10 is incompatible with earlier versions. Reload clients when upgrading the single server. Both
+Gameplay v11 is incompatible with earlier versions. Reload clients when upgrading the single server. Both
 old and future versions are rejected before credential lookup, so rejection cannot claim or
-revoke a token. `supportedVersion` accepts the bounded input range rather than only v10,
+revoke a token. `supportedVersion` accepts the bounded input range rather than only v11,
 allowing a new client to understand an older server's incompatibility response.
 See [ADR 0013](../decisions/0013-gameplay-v2-and-room-profiles.md).
 

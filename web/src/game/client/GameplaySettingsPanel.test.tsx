@@ -70,7 +70,7 @@ describe('gameplay settings items', () => {
   it('toggles all optional items independently and keeps defaults distinct from Classic', async () => {
     const apply = vi.fn(() => true)
     const user = userEvent.setup()
-    const view = render(<MantineProvider env="test"><GameplaySettingsPanel room={room(1)} youSeat="one"
+    render(<MantineProvider env="test"><GameplaySettingsPanel room={room(1)} youSeat="one"
       pending={false} copy={en} onApply={apply} /></MantineProvider>)
 
     expect(screen.getByRole('checkbox', { name: 'Kick' })).not.toBeChecked()
@@ -88,6 +88,7 @@ describe('gameplay settings items', () => {
     expect(screen.getByRole('checkbox', { name: 'Long fuse' })).not.toBeChecked()
     expect(screen.getByRole('checkbox', { name: 'Reverse controls' })).not.toBeChecked()
     expect(screen.getByRole('checkbox', { name: 'Invisible bombs' })).not.toBeChecked()
+    expect(screen.getByRole('checkbox', { name: 'Oil barrel' })).not.toBeChecked()
     expect(screen.getByRole('checkbox', { name: 'Teleporter' })).not.toBeChecked()
     expect(screen.getByText(/move through breakable blocks/)).toBeVisible()
     expect(screen.getByText(/Hard walls and bombs still block/)).toBeVisible()
@@ -109,6 +110,8 @@ describe('gameplay settings items', () => {
     expect(screen.getByText(/Reverses movement controls for 10 seconds/)).toBeVisible()
     expect(screen.getByText(/Hides every bomb and its placement or detonation cue/)).toBeVisible()
     expect(screen.getByText(/unsafe pickup is still consumed/)).toBeVisible()
+    expect(screen.getByText(/up to 8 Oil Barrel objects/)).toBeVisible()
+    expect(screen.getByText(/Wall Pass can cross an unlit barrel but does not protect/)).toBeVisible()
     await user.click(screen.getByRole('checkbox', { name: 'Kick' }))
     expect(screen.getByText(/Press your Equipment key to punch/)).toBeVisible()
     await user.click(screen.getByRole('checkbox', { name: 'Punch' }))
@@ -130,16 +133,17 @@ describe('gameplay settings items', () => {
     await user.click(screen.getByRole('checkbox', { name: 'Long fuse' }))
     await user.click(screen.getByRole('checkbox', { name: 'Reverse controls' }))
     await user.click(screen.getByRole('checkbox', { name: 'Invisible bombs' }))
+    await user.click(screen.getByRole('checkbox', { name: 'Oil barrel' }))
     await user.click(screen.getByRole('checkbox', { name: 'Teleporter' }))
     expect(screen.getByRole('checkbox', { name: 'Heart' })).toBeChecked()
     await user.click(screen.getByRole('button', { name: 'Apply rules' }))
     expect(apply).toHaveBeenLastCalledWith(expect.objectContaining({
-      enabledItems: ['kick', 'punch', 'bracelet', 'wallPass', 'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch', 'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls', 'invisibleBombs', 'teleporter'],
+      enabledItems: ['kick', 'punch', 'bracelet', 'wallPass', 'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch', 'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls', 'invisibleBombs', 'oilBarrel', 'teleporter'],
     }))
     await user.click(screen.getByRole('checkbox', { name: 'Golden flame' }))
     await user.click(screen.getByRole('button', { name: 'Apply rules' }))
     expect(apply).toHaveBeenLastCalledWith(expect.objectContaining({
-      enabledItems: ['kick', 'punch', 'bracelet', 'wallPass', 'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch', 'invisibilityCloak', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls', 'invisibleBombs', 'teleporter'],
+      enabledItems: ['kick', 'punch', 'bracelet', 'wallPass', 'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch', 'invisibilityCloak', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls', 'invisibleBombs', 'oilBarrel', 'teleporter'],
     }))
     await user.click(screen.getByRole('checkbox', { name: 'Golden flame' }))
     await user.click(screen.getByRole('checkbox', { name: 'Heart' }))
@@ -156,21 +160,22 @@ describe('gameplay settings items', () => {
     expect(screen.getByRole('checkbox', { name: 'Short flame' })).toBeChecked()
     expect(screen.getByRole('checkbox', { name: 'Long fuse' })).toBeChecked()
     expect(screen.getByRole('checkbox', { name: 'Reverse controls' })).toBeChecked()
+    expect(screen.getByRole('checkbox', { name: 'Oil barrel' })).toBeChecked()
     expect(screen.getByRole('checkbox', { name: 'Teleporter' })).toBeChecked()
     await user.click(screen.getByRole('button', { name: 'Apply rules' }))
     expect(apply).toHaveBeenLastCalledWith(expect.objectContaining({
-      enabledItems: ['kick', 'punch', 'bracelet', 'wallPass', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch', 'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls', 'invisibleBombs', 'teleporter'],
+      enabledItems: ['kick', 'punch', 'bracelet', 'wallPass', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch', 'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls', 'invisibleBombs', 'oilBarrel', 'teleporter'],
     }))
     await user.click(screen.getByRole('checkbox', { name: 'Shield' }))
     expect(screen.getByRole('checkbox', { name: 'Golden flame' })).toBeChecked()
     await user.click(screen.getByRole('button', { name: 'Apply rules' }))
     expect(apply).toHaveBeenLastCalledWith(expect.objectContaining({
-      enabledItems: ['kick', 'punch', 'bracelet', 'wallPass', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'stopwatch', 'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls', 'invisibleBombs', 'teleporter'],
+      enabledItems: ['kick', 'punch', 'bracelet', 'wallPass', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'stopwatch', 'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls', 'invisibleBombs', 'oilBarrel', 'teleporter'],
     }))
     await user.click(screen.getByRole('checkbox', { name: 'Heart' }))
     await user.click(screen.getByRole('button', { name: 'Apply rules' }))
     expect(apply).toHaveBeenLastCalledWith(expect.objectContaining({
-      enabledItems: ['kick', 'punch', 'bracelet', 'wallPass', 'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'stopwatch', 'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls', 'invisibleBombs', 'teleporter'],
+      enabledItems: ['kick', 'punch', 'bracelet', 'wallPass', 'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'stopwatch', 'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls', 'invisibleBombs', 'oilBarrel', 'teleporter'],
     }))
     await user.click(screen.getByRole('button', { name: 'Classic settings' }))
     expect(screen.getByRole('checkbox', { name: 'Kick' })).not.toBeChecked()
@@ -191,6 +196,7 @@ describe('gameplay settings items', () => {
     expect(screen.getByRole('checkbox', { name: 'Short flame' })).not.toBeChecked()
     expect(screen.getByRole('checkbox', { name: 'Long fuse' })).not.toBeChecked()
     expect(screen.getByRole('checkbox', { name: 'Reverse controls' })).not.toBeChecked()
+    expect(screen.getByRole('checkbox', { name: 'Oil barrel' })).not.toBeChecked()
     expect(screen.getByRole('checkbox', { name: 'Teleporter' })).not.toBeChecked()
     await user.click(screen.getByRole('button', { name: 'Apply rules' }))
     expect(apply).toHaveBeenLastCalledWith({
@@ -203,11 +209,16 @@ describe('gameplay settings items', () => {
     expect(screen.getByRole('checkbox', { name: 'Heart' })).toBeChecked()
     expect(screen.getByRole('checkbox', { name: 'Shield' })).not.toBeChecked()
     expect(screen.getByRole('checkbox', { name: 'Short flame' })).not.toBeChecked()
+  })
+})
+
+describe('gameplay settings Oil locale', () => {
+  it('hides unavailable Oil and explains its complete Polish rules', () => {
     const unavailable = room(2)
     unavailable.availableItems = []
     unavailable.settings.enabledItems = []
-    view.rerender(<MantineProvider env="test"><GameplaySettingsPanel room={unavailable} youSeat="one"
-      pending={false} copy={pl} onApply={apply} /></MantineProvider>)
+    render(<MantineProvider env="test"><GameplaySettingsPanel room={unavailable} youSeat="one"
+      pending={false} copy={pl} onApply={() => true} /></MantineProvider>)
     expect(screen.queryByRole('checkbox', { name: 'Serce' })).not.toBeInTheDocument()
     expect(screen.queryByRole('checkbox', { name: 'Przejście przez ściany' })).not.toBeInTheDocument()
     expect(screen.queryByRole('checkbox', { name: 'Tarcza' })).not.toBeInTheDocument()
@@ -218,6 +229,7 @@ describe('gameplay settings items', () => {
     expect(screen.queryByRole('checkbox', { name: 'Krótki płomień' })).not.toBeInTheDocument()
     expect(screen.queryByRole('checkbox', { name: 'Długi lont' })).not.toBeInTheDocument()
     expect(screen.queryByRole('checkbox', { name: 'Odwrócone sterowanie' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('checkbox', { name: 'Beczka oleju' })).not.toBeInTheDocument()
     expect(screen.queryByRole('checkbox', { name: 'Teleporter' })).not.toBeInTheDocument()
     expect(pl.settings.heartDescription).toMatch(/śmiertelnym wybuchem/)
     expect(pl.settings.wallPassDescription).toMatch(/zniszczalne bloki/)
@@ -240,6 +252,9 @@ describe('gameplay settings items', () => {
     expect(pl.settings.longFuseDescription).toMatch(/10 sekund/)
     expect(pl.settings.longFuseDescription).toMatch(/znoszą się/)
     expect(pl.settings.reverseControlsDescription).toMatch(/10 sekund/)
+    expect(pl.settings.oilBarrelDescription).toMatch(/do 8 obiektów/)
+    expect(pl.settings.oilBarrelDescription).toMatch(/do końca rundy/)
+    expect(pl.settings.oilBarrelDescription).toMatch(/nie chroni/)
     expect(pl.settings.teleporterDescription).toMatch(/niebezpieczny przedmiot także znika/)
   })
 })
@@ -261,5 +276,6 @@ describe('gameplay settings locks', () => {
     expect(screen.getByRole('checkbox', { name: 'Short flame' })).toBeDisabled()
     expect(screen.getByRole('checkbox', { name: 'Reverse controls' })).toBeDisabled()
     expect(screen.getByRole('checkbox', { name: 'Teleporter' })).toBeDisabled()
+    expect(screen.getByRole('checkbox', { name: 'Oil barrel' })).toBeDisabled()
   })
 })

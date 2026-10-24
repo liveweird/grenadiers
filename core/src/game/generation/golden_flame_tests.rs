@@ -159,6 +159,7 @@ fn signature(generated: &GeneratedArena) -> String {
                 Some(PickupKind::Stopwatch) => 'T',
                 Some(PickupKind::InvisibleBombs) => 'I',
                 Some(PickupKind::Teleporter) => 'E',
+                Some(PickupKind::OilBarrel) => 'O',
                 None => '.',
             });
         }

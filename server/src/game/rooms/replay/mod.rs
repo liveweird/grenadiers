@@ -80,3 +80,6 @@ mod teleporter_tests;
 
 #[cfg(test)]
 mod wall_pass_tests;
+
+#[cfg(test)]
+mod oil_tests;

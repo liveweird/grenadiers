@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use grenadiers_core::protocol::v10::{MapId, RulesVersion};
+use grenadiers_core::protocol::v11::{MapId, RulesVersion};
 
 use crate::{
     AppState, StartupError,

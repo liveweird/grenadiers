@@ -17,7 +17,7 @@ function state(): GameClientState {
   }
 }
 
-describe('v10 arena presentation', () => {
+describe('v11 arena presentation', () => {
   it('removes hidden actors and reveals them only at their new public position', () => {
     const current = state()
     expect(presentSnapshot(current)?.state.actors.map((actor) => actor.seat)).toEqual(['one', 'two'])
@@ -145,6 +145,20 @@ describe('v10 arena presentation', () => {
     expect(presentSnapshot(current)!.state.actors.map(({ id }) => id)).toEqual([holder.id])
   })
 
+  it('presents only materialized Oil objects without inventory, timers, or pending facts', () => {
+    const current = state()
+    current.snapshot!.room.settings.enabledItems = ['oilBarrel']
+    current.snapshot!.state.oilBarrels = [
+      { cell: { column: 3, row: 1 }, state: 'unlit' },
+      { cell: { column: 5, row: 1 }, state: 'burning' },
+    ]
+    const presented = presentSnapshot(current)!
+    expect(presented.state.oilBarrels).toEqual(current.snapshot!.state.oilBarrels)
+    expect(presented.state.pickups).toEqual([])
+    expect(Object.keys(presented.state)).not.toContain('pendingOilSites')
+    expect(Object.keys(presented.state.actors[0])).not.toContain('oilBarrel')
+  })
+
 })
 
 describe('Stopwatch presentation', () => {
@@ -167,7 +181,7 @@ describe('Stopwatch presentation', () => {
   })
 })
 
-describe('v10 timed item presentation', () => {
+describe('v11 timed item presentation', () => {
   it('presents Golden Flame pickups and its reconnect-safe authoritative clock', () => {
     const current = state()
     const own = current.snapshot!.state.actors[0]

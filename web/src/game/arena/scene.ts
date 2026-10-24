@@ -1,7 +1,7 @@
 import { Container, Graphics } from 'pixi.js'
 import {
-  makeActor, makeBlock, makeBomb, makeFlame, makePickup, paintTerrain, setActorPose, TILE,
-  type ActorDrawing, type BombDrawing, type FlameDrawing,
+  makeActor, makeBlock, makeBomb, makeFlame, makeOilBarrel, makePickup, paintTerrain, setActorPose, TILE,
+  type ActorDrawing, type BombDrawing, type FlameDrawing, type OilBarrelDrawing,
 } from './drawing'
 import type { RenderablePickupKind, SnapshotMessage } from './types'
 
@@ -103,6 +103,7 @@ export class ArenaScene {
   private readonly pickups = new Map<string, PickupDrawing>()
   private readonly bombs = new Map<number, BombDrawing>()
   private readonly flames = new Map<string, FlameDrawing>()
+  private readonly oilBarrels = new Map<string, OilBarrelDrawing>()
   private readonly actors = new Map<number, ActorDrawing>()
   private readonly motions = new Map<number, Motion>()
   private identity = ''
@@ -143,7 +144,8 @@ export class ArenaScene {
     this.updateBlocks(snapshot.state.arena.blocks)
     this.updatePickups(snapshot.state.pickups)
     this.updateBombs(snapshot.state.bombs)
-    this.updateFlames(snapshot.state.flames)
+    const burningOil = this.updateOilBarrels(snapshot.state.oilBarrels ?? [])
+    this.updateFlames(snapshot.state.flames, burningOil)
     this.updateActors(snapshot.state.actors, reset)
     this.render(now)
   }
@@ -155,8 +157,10 @@ export class ArenaScene {
     for (const pickup of this.pickups.values()) pickup.drawing.destroy()
     for (const drawing of this.bombs.values()) drawing.root.destroy({ children: true, context: true })
     for (const drawing of this.flames.values()) drawing.root.destroy({ children: true, context: true })
+    for (const drawing of this.oilBarrels.values()) drawing.root.destroy({ children: true, context: true })
     for (const drawing of this.actors.values()) drawing.root.destroy({ children: true, context: true })
-    this.blocks.clear(); this.pickups.clear(); this.bombs.clear(); this.flames.clear(); this.actors.clear()
+    this.blocks.clear(); this.pickups.clear(); this.bombs.clear(); this.flames.clear()
+    this.oilBarrels.clear(); this.actors.clear()
     this.motions.clear()
     if (this.terrain.isCachedAsTexture) this.terrain.cacheAsTexture(false)
     this.terrain.clear()
@@ -192,6 +196,11 @@ export class ArenaScene {
       const frame = effects ? Math.floor(now / 80) % 2 : 0
       flame.frames[0].visible = frame === 0
       flame.frames[1].visible = frame === 1
+    }
+    for (const barrel of this.oilBarrels.values()) {
+      const frame = effects ? Math.floor(now / 80) % 2 : 0
+      barrel.flame.frames[0].visible = barrel.state === 'burning' && frame === 0
+      barrel.flame.frames[1].visible = barrel.state === 'burning' && frame === 1
     }
     for (const [id, actor] of this.actors) {
       renderActor(actor, id, effects, now)
@@ -247,18 +256,48 @@ export class ArenaScene {
     }
   }
 
-  private updateFlames(rows: SnapshotMessage['state']['flames']): void {
-    const present = new Set(rows.map((flame) => key(flame.cell)))
+  private updateFlames(rows: SnapshotMessage['state']['flames'], burningOil: ReadonlySet<string>): void {
+    const visibleRows = rows.filter((flame) => !burningOil.has(key(flame.cell)))
+    const present = new Set(visibleRows.map((flame) => key(flame.cell)))
     for (const [id, drawing] of this.flames) {
       if (!present.has(id)) { drawing.root.destroy({ children: true, context: true }); this.flames.delete(id) }
     }
-    for (const flame of rows) {
+    for (const flame of visibleRows) {
       if (this.flames.has(key(flame.cell))) continue
       const drawing = makeFlame()
       drawing.root.position.set(flame.cell.column * TILE, flame.cell.row * TILE)
       this.flamesLayer.addChild(drawing.root)
       this.flames.set(key(flame.cell), drawing)
     }
+  }
+
+  private updateOilBarrels(
+    rows: NonNullable<SnapshotMessage['state']['oilBarrels']>,
+  ): Set<string> {
+    const present = new Set(rows.map((barrel) => key(barrel.cell)))
+    for (const [id, drawing] of this.oilBarrels) {
+      if (!present.has(id)) {
+        drawing.root.destroy({ children: true, context: true })
+        this.oilBarrels.delete(id)
+      }
+    }
+    const burning = new Set<string>()
+    for (const barrel of rows) {
+      const id = key(barrel.cell)
+      let drawing = this.oilBarrels.get(id)
+      if (!drawing) {
+        drawing = makeOilBarrel()
+        drawing.root.position.set(barrel.cell.column * TILE, barrel.cell.row * TILE)
+        this.flamesLayer.addChild(drawing.root)
+        this.oilBarrels.set(id, drawing)
+      }
+      drawing.state = barrel.state
+      drawing.unlit.visible = barrel.state === 'unlit'
+      drawing.charred.visible = barrel.state === 'burning'
+      drawing.flame.root.visible = barrel.state === 'burning'
+      if (barrel.state === 'burning') burning.add(id)
+    }
+    return burning
   }
 
   private updateActors(rows: SnapshotMessage['state']['actors'], reset: boolean): void {

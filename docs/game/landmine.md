@@ -25,7 +25,7 @@ Version 0.3.37 introduced Landmine with generator weight 15 after Remote Bomb, g
 to 305 entries while preserving every earlier 4096-mask path. Its original thirteen-item catalog
 supported all 8192 subsets; those paths remain stable in the [current catalog](settings.md).
 Rules version 5, generator version 2 and journal format 2 remain unchanged. Current deployments
-use [gameplay-v10](protocol-v10.md); reload older browsers with the paired server/web upgrade.
+use [gameplay-v11](protocol-v11.md); reload older browsers with the paired server/web upgrade.
 
 ## Historical v0.3.37 native acceptance
 

@@ -65,6 +65,7 @@ export function presentSnapshot(state: GameClientState): SnapshotMessage | null 
         })),
       bombs: bombsHidden ? [] : snapshot.state.bombs,
       flames: snapshot.state.flames,
+      oilBarrels: snapshot.state.oilBarrels,
       pickups: snapshot.state.pickups.filter(
         (pickup): pickup is typeof pickup & {
           kind: 'bombCapacity' | 'blastRange' | 'movementSpeed' | 'kick' | 'punch' | 'bracelet' | 'wallPass' | 'heart' | 'remoteBomb' | 'piercingBomb' | 'powerBomb' | 'landmine' | 'shield' | 'stopwatch' | 'invisibilityCloak'

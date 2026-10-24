@@ -17,6 +17,12 @@ readiness and the served artifact after deployment. Repeat affected checks when 
 do not require separate full push, PR, master and tag runs or elaborate new proof packages for
 each feature. Historical release records retain their original evidence and requirements.
 
+## v0.3.47 Oil Barrel source preparation — 2026-10-24
+
+Reviewed Oil Barrel source is integrated with the published v0.3.46 Bracelet parent. It retains
+version 0.3.47 and gameplay v11, but is not a release or accepted candidate. Oil gates, native
+acceptance, CI and publication remain pending.
+
 ## v0.3.46 published prerelease — 2026-10-24
 
 [v0.3.46](https://github.com/liveweird/grenadiers/releases/tag/v0.3.46) publishes Bracelet as the twenty-first requested item from source

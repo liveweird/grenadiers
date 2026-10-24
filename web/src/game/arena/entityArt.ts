@@ -74,6 +74,32 @@ export function makeFlame(): FlameDrawing {
   return { root, frames }
 }
 
+export interface OilBarrelDrawing {
+  root: Container
+  unlit: Graphics
+  charred: Graphics
+  flame: FlameDrawing
+  state: 'unlit' | 'burning'
+}
+
+export function makeOilBarrel(): OilBarrelDrawing {
+  const root = new Container()
+  const unlit = new Graphics()
+  pixels(unlit, PALETTE.deepInk, [[8, 7, 32, 36], [5, 12, 38, 26]])
+  pixels(unlit, PALETTE.ink, [[9, 10, 30, 30], [7, 15, 34, 20]])
+  pixels(unlit, PALETTE.brass, [[9, 13, 30, 5], [9, 31, 30, 5]])
+  pixels(unlit, 0x647384, [[13, 10, 7, 21]])
+  const charred = new Graphics()
+  pixels(charred, PALETTE.deepInk, [[7, 34, 34, 8], [11, 29, 26, 11]])
+  pixels(charred, PALETTE.ink, [[11, 34, 26, 5], [16, 30, 8, 5], [29, 31, 6, 5]])
+  pixels(charred, PALETTE.brickShade, [[14, 36, 8, 3], [27, 34, 7, 3]])
+  charred.visible = false
+  const flame = makeFlame()
+  flame.root.visible = false
+  root.addChild(unlit, charred, flame.root)
+  return { root, unlit, charred, flame, state: 'unlit' }
+}
+
 function pickupFrame(): Graphics {
   const drawing = new Graphics()
   pixels(drawing, PALETTE.deepInk, [[7, 8, 34, 32], [10, 5, 28, 38], [4, 12, 40, 24]])

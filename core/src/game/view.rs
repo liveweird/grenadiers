@@ -1,6 +1,7 @@
 use super::arena::{ARENA_CELL_COUNT, ARENA_HEIGHT, ARENA_WIDTH, Terrain};
 use super::bombs::{BlastKind, Bomb, BombTrigger};
 use super::input::Direction;
+use super::oil::{OilBarrelState, OilState};
 use super::pickups::PickupKind;
 use super::simulation::{RoundResult, State};
 use super::types::{CellId, EntityId, Position, SeatId, SpeedLevel, Tick};
@@ -15,6 +16,7 @@ pub struct PublicState {
     pub actors: [ActorView; 2],
     pub bombs: Vec<BombView>,
     pub flames: Vec<FlameView>,
+    pub oil_barrels: Vec<OilBarrelView>,
     pub pickups: Vec<PickupView>,
     pub result: Option<RoundResult>,
 }
@@ -77,6 +79,12 @@ pub struct PickupView {
     pub kind: PickupKind,
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct OilBarrelView {
+    pub cell: CellId,
+    pub state: OilBarrelState,
+}
+
 impl State {
     #[must_use]
     pub fn public_view(&self) -> PublicState {
@@ -132,6 +140,18 @@ impl State {
                 .hazards()
                 .iter()
                 .map(|(&cell, &expires_at)| FlameView { cell, expires_at })
+                .collect(),
+            oil_barrels: self
+                .world()
+                .oil_barrels()
+                .filter_map(|(cell, state)| {
+                    let state = match state {
+                        OilState::Unlit => OilBarrelState::Unlit,
+                        OilState::Burning => OilBarrelState::Burning,
+                        OilState::Concealed | OilState::Pending => return None,
+                    };
+                    Some(OilBarrelView { cell, state })
+                })
                 .collect(),
             pickups: self
                 .world()

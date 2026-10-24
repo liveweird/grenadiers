@@ -1,6 +1,6 @@
 use grenadiers_core::{
     game::{BombTrigger, Direction, EnabledItems, SeatId},
-    protocol::{Counter, Seat, v10::ResumeToken},
+    protocol::{Counter, Seat, v11::ResumeToken},
     room::{DepartureReason, MatchPhase},
 };
 
@@ -13,7 +13,7 @@ use crate::game::rooms::match_runtime::{
 fn admission(runtime: &MatchRuntime, seat: SeatId) -> (serde_json::Value, Option<Counter>) {
     let prepared = runtime.prepare_resume(seat).unwrap();
     let action_id = prepared.last_bomb_action_id;
-    let encoded = grenadiers_core::protocol::v10::prepare_expanded_admission(
+    let encoded = grenadiers_core::protocol::v11::prepare_expanded_admission(
         &prepared.room,
         prepared.state_epoch,
         prepared.capture.as_ref(),

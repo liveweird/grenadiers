@@ -119,8 +119,8 @@ and patterns. Keep generator tests and actual schema validation alongside contra
 `e2e/` is a separate Playwright package against the actual running stack. Install Chromium
 with `npm --prefix e2e run install:browsers`, start Compose, then run
 `scripts/gates.sh browser`. No mocked backend belongs in blackbox tests. Scenario documents
-and spec titles must agree verbatim. Run E2E static checks locally before release. The optional manual full workflow also runs
-those checks and browser scenarios against Compose; automatic PR checks add distinct Linux Rust coverage.
+and spec titles must agree verbatim. E2E static checks run on every pull request; browser
+smoke runs in CI against Compose.
 
 The default suite uses one worker in CI and two locally; `E2E_WORKERS` explicitly overrides
 that choice. Each multiplayer case already owns two browser contexts. Serial CI execution
@@ -378,5 +378,16 @@ and stage the players at `(10,1)` and `(11,1)`. Forward movement shoves the stat
 exactly one tile to `(12,1)` in both public streams. The scenario asserts no victim command,
 Equipment action, public event or private cooldown/report field, then captures English desktop and
 Polish 320-pixel reduced-motion views. It does not inject state, search seeds, retry, send direct
-gameplay commands or extend budgets. Same-image acceptance passes on Compose and Kubernetes
-as part of the [29-case scoped checkpoint](verification.md#current-v0346-bracelet-acceptance--2026-10-24).
+gameplay commands or extend budgets. Native same-image execution remains pending.
+
+### Oil Barrel production-seed scenario
+
+Use `docker-compose.oil-barrel.yaml` with the mode-0444 repeating-byte-31 v2 seed fixture and
+`E2E_OIL_BARREL_FIXTURE=arena-v2-oil-barrel npm --prefix e2e run test:oil-barrel`. The 90-second,
+retry-free two-browser route enables only Oil Barrel and uses ordinary movement and Bomb input. It
+proves pending privacy while finite fire remains, safe revelation at `(3,1)`, the exact unlit east
+clamp at `x=2752`, legal adjacent ignition and escape, unchanged `(4,1)` and `(3,2)` soft blocks,
+finite-flame expiry after at least 60 ticks, persistent burning, survival, localized rendering and
+reconnect retention without a pickup event or synthesized audio cue. It does not inject state,
+search seeds, send direct gameplay commands or extend the timeout. Native same-image execution
+remains pending.

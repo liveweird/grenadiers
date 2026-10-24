@@ -3,7 +3,8 @@
 TURN, CONFIG and the first ART slice are implemented. Published [v0.3.46](https://github.com/liveweird/grenadiers/releases/tag/v0.3.46)
 adds Bracelet, bringing the requested item catalog to **21 of 22 published types**. Source checks,
 scoped Compose/Kubernetes acceptance, publication and localhost promotion are complete.
-Oil Barrel v0.3.47 is the remaining item; ART-ATLAS follows the feature batch.
+Oil Barrel v0.3.47 source is prepared on that published parent, but its acceptance, CI and
+publication remain pending. ART-ATLAS follows the feature batch.
 
 [v0.3.43](https://github.com/liveweird/grenadiers/releases/tag/v0.3.43) publishes Wall Pass as the
 eighteenth of 22 requested item types. Published source `c086f719ea470b9fe24963adef84b5e3bdf3e17a`,
@@ -122,7 +123,7 @@ status is recorded in [GitHub Releases](https://github.com/liveweird/grenadiers/
 acceptance records in [verification](../verification.md). Richer transitions and artwork remain
 follow-up work; see [pixel-art presentation](pixel-art.md) and
 [expanded item implementation](expanded-items.md).
-Updated 2026-10-24 after Bracelet publication and promotion.
+Updated 2026-10-24 after Bracelet publication and Oil source integration with that parent.
 Release acceptance is recorded in
 [verification](../verification.md).
 The [implementation plan](implementation-plan.md) remains the milestone/release reference;
@@ -295,7 +296,7 @@ instant action. Keep both in this requested pickup family without forcing them i
 | CURSE-FUSE / long fuse | Increase new bombs' detonation delay by 100% (double it). | Rounding, stacking/re-pick policy and composition with Short fuse, remote bombs and mines. |
 | CURSE-REVERSE / reverse controls | Up moves down, left moves right, and vice versa. | Apply to logical movement after personal remapping; define held-key transition/expiry without stuck movement or stale replay. |
 | CURSE-BLIND / invisible bombs | The afflicted player cannot see any bombs, including their own. | Recipient-specific bomb/event/effect projection and reconnect; explicitly define retained collision clues, fuse sounds and blast warnings. |
-| CURSE-OIL / oil barrel | Before detonation it blocks passage like a soft wall; after detonation it burns indefinitely. | Define how acquisition creates/places the barrel, detonation/chain triggers, blast footprint and destruction; bound creation and specify cleanup at round end without expiry during play. |
+| CURSE-OIL / oil barrel | **Prepared in v0.3.47.** Generated sites reveal as solid arena objects and burn until round end after ignition. | Eight-site lifetime cap, safe private revelation, immutable blast blocking, typed Wall Pass grace, shared fire hazards, replay and v11 publication are covered locally; native acceptance remains pending. |
 | CURSE-SWAP / teleporter | **Published in v0.3.42.** Immediately attempt the sole two-player rival swap. | Atomic complete-footprint safety, unsafe consumption, actor-specific overlap grace, persistent position epoch, reconnect and privacy are covered without RNG. Fresh 54 Compose plus 54 Kubernetes cases pass; distinct first-attempt master/tag workflows pass and the exact accepted image is promoted locally. |
 
 ## Special weapons: one single-use slot
@@ -321,6 +322,6 @@ Retain bounded scheduling, performance budgets, EN/PL documentation and full rel
 including same-image Compose/Kubernetes acceptance. Bots, mobs and larger matches remain
 separate tracks; their future interactions must be specified without making them prerequisites.
 
-Complete the expanded-item activation batch before starting ART-ATLAS. Bracelet v0.3.46 is
-published and promoted; Oil v0.3.47 remains. ART-ATLAS begins
+Complete the entire expanded-item activation batch before starting ART-ATLAS. Oil Barrel is the
+current bounded source increment (v0.3.47) and completes the planned item sequence. ART-ATLAS begins
 only after those item increments and their release gates are complete.

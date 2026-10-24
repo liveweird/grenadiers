@@ -4,7 +4,9 @@ use std::collections::BTreeMap;
 
 use super::projection_capture_events::capture_report;
 use super::projection_capture_wire::*;
-use super::projection_facts::{ExpandedCapture, ProjectionError, TimedBombFacts, WorldFacts};
+use super::projection_facts::{
+    ExpandedCapture, OilFacts, OilPhase, ProjectionError, TimedBombFacts, WorldFacts,
+};
 use super::projection_validation::{validate_reports, validate_world_for_items};
 use super::{
     ArenaView, BlastKind, BombTrigger, BombView, DamageGraceTicks, EffectView, EffectViews,
@@ -96,6 +98,21 @@ pub(crate) fn capture_expanded_for_items(
                 .collect::<Result<Vec<_>, _>>()?
                 .try_into()
                 .map_err(|_| ProjectionError::InvalidActors)?,
+            unlit_oil_grace: state
+                .actors()
+                .each_ref()
+                .map(|actor| {
+                    actor
+                        .unlit_oil_grace
+                        .iter()
+                        .copied()
+                        .map(wire_cell)
+                        .collect::<Result<Vec<_>, _>>()
+                })
+                .into_iter()
+                .collect::<Result<Vec<_>, _>>()?
+                .try_into()
+                .map_err(|_| ProjectionError::InvalidActors)?,
             bombs: captured_bombs.iter().map(|(bomb, _, _, _)| *bomb).collect(),
             timed_bombs: captured_bombs
                 .iter()
@@ -126,6 +143,31 @@ pub(crate) fn capture_expanded_for_items(
                     Ok(PickupView {
                         cell: wire_cell(pickup.cell)?,
                         kind: wire_pickup(pickup.kind),
+                    })
+                })
+                .collect::<Result<_, ProjectionError>>()?,
+            private_pickup_cells: {
+                let mut cells = state
+                    .world()
+                    .pickups
+                    .iter()
+                    .map(|(cell, _)| wire_cell(cell))
+                    .collect::<Result<Vec<_>, _>>()?;
+                cells.sort_by_key(|cell| (cell.row(), cell.column()));
+                cells
+            },
+            oil: state
+                .world()
+                .oil_barrels()
+                .map(|(cell, phase)| {
+                    Ok(OilFacts {
+                        cell: wire_cell(cell)?,
+                        phase: match phase {
+                            game::OilState::Concealed => OilPhase::Concealed,
+                            game::OilState::Pending => OilPhase::Pending,
+                            game::OilState::Unlit => OilPhase::Unlit,
+                            game::OilState::Burning => OilPhase::Burning,
+                        },
                     })
                 })
                 .collect::<Result<_, ProjectionError>>()?,

@@ -49,7 +49,7 @@ and remaining presentation work are planned extensions to the implemented Classi
 
 [Room settings](settings.md) covers shared starting speed, turn tolerance, match target and fuse.
 
-[Gameplay v10 compatibility](protocol-v10.md) defines the paired live wire contract, including the
+[Gameplay v11 compatibility](protocol-v11.md) defines the paired live wire contract, including the
 authoritative teleport position epoch. [Gameplay v9](protocol-v9.md) is the archived sixteen-item
 contract; earlier contracts remain historical references.
 
@@ -79,4 +79,5 @@ See the implemented expansion candidates: [Heart](heart.md) and [Shield](shield.
 - [Kick](kick.md): permanent bomb-kicking equipment with private motion history.
 - [Punch](punch.md): permanent three-cell wrapped bomb movement with private cooldown history.
 - [Bracelet](bracelet.md): passive contact shove equipment with private cooldown history.
+- [Oil Barrel](oil-barrel.md): bounded arena objects that reveal solid and burn until round end.
 - [Wall Pass](wall-pass.md): permanent soft-block passage with private replacement exit grace.

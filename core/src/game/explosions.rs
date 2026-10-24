@@ -12,6 +12,7 @@ pub(crate) struct ExplosionPlan {
     pub(crate) destroyed_mines: BTreeSet<EntityId>,
     pub(crate) flames: BTreeSet<CellId>,
     pub(crate) destroyed_blocks: BTreeSet<CellId>,
+    pub(crate) ignited_oil: BTreeSet<CellId>,
 }
 
 #[cfg(test)]
@@ -38,10 +39,7 @@ pub(crate) fn plan_with_contacts(
         .bombs
         .values()
         .filter(|bomb| {
-            let burning = world
-                .hazards
-                .get(&bomb.cell())
-                .is_some_and(|expiry| *expiry > tick);
+            let burning = world.has_fire(bomb.cell(), tick);
             (match bomb.trigger() {
                 BombTrigger::Contact => contact_targets.contains(&bomb.id()),
                 BombTrigger::Timed { detonates_at } => detonates_at <= tick,
@@ -52,14 +50,16 @@ pub(crate) fn plan_with_contacts(
         .collect();
     let mut result = ExplosionPlan::default();
     result
+        .ignited_oil
+        .extend(world.oil.iter().filter_map(|(cell, state)| {
+            (state == crate::game::OilState::Unlit && world.has_fire(cell, tick)).then_some(cell)
+        }));
+    result
         .destroyed_mines
         .extend(world.bombs.values().filter_map(|bomb| {
             (matches!(bomb.trigger(), BombTrigger::Contact)
                 && !contact_targets.contains(&bomb.id())
-                && world
-                    .hazards
-                    .get(&bomb.cell())
-                    .is_some_and(|expiry| *expiry > tick))
+                && world.has_fire(bomb.cell(), tick))
             .then_some(bomb.id())
         }));
 
@@ -113,6 +113,9 @@ fn plan_power_blast(
                 continue;
             }
             result.flames.insert(cell);
+            if world.oil.unlit(cell) {
+                result.ignited_oil.insert(cell);
+            }
             if world.arena.blocks().contains(&cell) {
                 result.destroyed_blocks.insert(cell);
             }
@@ -155,6 +158,12 @@ fn trace_ray(
             break;
         }
         result.flames.insert(cell);
+        if world.oil.unlit(cell) {
+            result.ignited_oil.insert(cell);
+            if bomb.blast() == BlastKind::Standard {
+                break;
+            }
+        }
         if world.arena.blocks().contains(&cell) {
             result.destroyed_blocks.insert(cell);
             if bomb.blast() == BlastKind::Standard {

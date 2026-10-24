@@ -40,6 +40,7 @@ pub mod input;
 pub mod inventory;
 mod movement;
 mod movement_collision;
+pub mod oil;
 pub mod pickups;
 pub mod rules;
 pub mod simulation;
@@ -64,6 +65,8 @@ pub use generation::{
 pub use geometry::{MovementSegment, MovementTrace};
 pub use input::{Direction, HeldDirections};
 pub use inventory::{Equipment, Inventory, SpecialWeapon};
+pub(crate) use oil::OilState;
+pub use oil::{MAX_OIL_BARRELS, OilBarrelState};
 pub use pickups::{Pickup, PickupKind, PickupLayer, PickupPlacementError};
 pub use rules::RulesConfig;
 pub use simulation::{
@@ -71,7 +74,7 @@ pub use simulation::{
     StepError, StepReport,
 };
 pub use types::{CellId, EntityId, Position, SeatId, SpeedLevel, Tick};
-pub use view::{ActorView, ArenaView, BombView, FlameView, PickupView, PublicState};
+pub use view::{ActorView, ArenaView, BombView, FlameView, OilBarrelView, PickupView, PublicState};
 pub use world::World;
 
 #[cfg(test)]
@@ -85,3 +88,5 @@ mod invisibility_cloak_tests;
 
 #[cfg(test)]
 mod invisible_bombs_tests;
+#[cfg(test)]
+mod oil_route_tests;

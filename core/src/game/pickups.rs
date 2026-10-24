@@ -30,6 +30,7 @@ pub enum PickupKind {
     LongFuse,
     ReverseControls,
     InvisibleBombs,
+    OilBarrel,
     Teleporter,
 }
 
@@ -56,6 +57,7 @@ impl PickupKind {
             Self::LongFuse => enabled.contains_long_fuse(),
             Self::ReverseControls => enabled.contains_reverse_controls(),
             Self::InvisibleBombs => enabled.contains_invisible_bombs(),
+            Self::OilBarrel => enabled.contains_oil_barrel(),
             Self::Teleporter => enabled.contains_teleporter(),
             _ => true,
         }
@@ -112,6 +114,9 @@ pub enum PickupPlacementError {
     NotOnFloor { cell: CellId, layer: PickupLayer },
     ConcealedWithoutBlock(CellId),
     RetainedBlock { cell: CellId, layer: PickupLayer },
+    ExposedOilBarrel(CellId),
+    InvalidOilBarrel(CellId),
+    TooManyOilBarrels,
 }
 
 #[derive(Clone, Default, PartialEq, Eq)]

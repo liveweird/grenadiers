@@ -11,6 +11,7 @@ export default defineConfig({
       input: {
         lifecycle: resolve(import.meta.dirname, 'renderer-diagnostics/index.html'),
         terrainPixel: resolve(import.meta.dirname, 'renderer-diagnostics/terrain-pixel.html'),
+        artAtlas: resolve(import.meta.dirname, 'renderer-diagnostics/art-atlas.html'),
       },
     },
   },

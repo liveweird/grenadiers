@@ -1,0 +1,44 @@
+# ART-ATLAS artist handoff
+
+## Scenario: baseline regions match source pixels and one edited sprite keeps its import position
+
+The browser extracts the baseline sheet from the existing Pixi factories, packs it, imports the
+runtime regions through Pixi, and compares decoded pixels. A one-pixel artist edit remains in the
+same named frame and position after export.
+
+## Scenario: source validation rejects path-like IDs and painting in authoring gutters
+
+An unsafe stable ID is rejected before it can become a slice path. Opaque paint outside a baseline
+frame, including slot gutters and reserved slots, is rejected before packing or allocation.
+
+## Scenario: repeated preview reset and WebGL context restoration do not accumulate canvases or sprites
+
+Three complete resets retain one preview canvas and the same bounded sprite count. A forced WebGL
+context loss and restoration preserves decoded pixels from an actual imported terrain region
+without duplicating scene contents.
+
+## Scenario: independent exports match decoded runtime pixels and canonical JSON
+
+Two independent exports of the adopted artist source decode to identical RGBA pixels. Their
+canonical JSON is identical; the test deliberately makes no promise about compressed PNG bytes.
+
+## Scenario: committed artist source validates and exports through the browser pipeline
+
+The checked-in transparent PNG and stable-ID JSON pair passes source and runtime validation in the
+actual browser pipeline, retaining 91 baseline frames and excluding four reserved entries.
+
+## Scenario: workbench captures desktop and 320px reduced-motion proofs with one bounded RGBA texture
+
+The English desktop and Polish 320-pixel reduced-motion workbenches are captured. The preview uses
+one RGBA atlas inside the texture budget and a short fixed render sample remains bounded.
+
+## Scenario: concurrent exports and reset serialize different sources without mixing files or preview ownership
+
+Two differently edited source sheets and a reset are requested together. Each export keeps its own
+PNG result, mutations complete in request order, and the final preview retains exactly one live
+canvas and one owned Pixi texture set.
+
+## Scenario: invalid upload remains visible while language and selected asset details switch to Polish
+
+After an invalid manifest reports its concrete stable-ID error, changing the workbench language
+does not replace that error with a ready message. The selected asset facts are rerendered in Polish.

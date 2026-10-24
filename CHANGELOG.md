@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.3.48 — artist handoff candidate
+
+- Add the canonical editable arena PNG and stable-ID manifest covering 91 baseline drawings,
+  four reserved entries, animation timing, pivots, aliases and compositions.
+- Add reproducible template/export commands, optional individual slices, strict pixel/metadata
+  validation, and a single padded/extruded nearest-neighbour Pixi atlas.
+- Add an EN/PL artist workbench with composed arena proof, desktop/narrow reduced-motion
+  checks, context restoration and export lifecycle regressions.
+- Keep gameplay on the existing renderer pending the bounded v0.3.49 adoption. The baseline
+  flame-frame gap is documented for the artist; this release preserves the existing drawings.
+
 ## 0.3.47 — 2026-10-24 (published)
 
 - Add opt-in Oil Barrel arena objects with an eight-site lifetime cap, private delayed revelation,

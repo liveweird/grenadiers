@@ -70,6 +70,10 @@ e2e() {
   npm --prefix e2e run typecheck
   npm --prefix e2e run check:scenarios
 }
+art_atlas() {
+  node e2e/scripts/art-atlas-tools.check.mjs
+  npm --prefix e2e run test:art-atlas
+}
 k8s() {
   command -v kubectl >/dev/null || { echo 'kubectl is required to render k8s/' >&2; exit 1; }
   K8S_RENDERED_FILE="$(mktemp "${TMPDIR:-/tmp}/grenadiers-k8s.XXXXXX")"
@@ -99,15 +103,16 @@ coverage() {
 }
 
 case "${1:-all}" in
-  all) repository; server; web; e2e ;;
+  all) repository; server; web; e2e; art_atlas ;;
   repository) repository ;;
   server) repository; server ;;
   server-parallel) repository; server_parallel ;;
   web) repository; web ;;
   e2e) repository; e2e ;;
+  art-atlas) repository; art_atlas ;;
   browser) npm --prefix e2e test ;;
   k8s) k8s ;;
   security) security ;;
   coverage) coverage ;;
-  *) echo 'usage: scripts/gates.sh [all|repository|server|server-parallel|web|e2e|browser|k8s|security|coverage]' >&2; exit 2 ;;
+  *) echo 'usage: scripts/gates.sh [all|repository|server|server-parallel|web|e2e|art-atlas|browser|k8s|security|coverage]' >&2; exit 2 ;;
 esac

@@ -1,0 +1,2073 @@
+{
+  "aliases": {
+    "bomb.shell.contact.piercing": "bomb.shell.contact.standard",
+    "bomb.shell.contact.power": "bomb.shell.contact.standard"
+  },
+  "animations": {
+    "actor.one.east.walk": {
+      "frameDurationMs": 110,
+      "frameIds": [
+        "actor.one.east.0",
+        "actor.one.east.1"
+      ],
+      "reducedMotionFrame": "actor.one.east.0"
+    },
+    "actor.one.north.walk": {
+      "frameDurationMs": 110,
+      "frameIds": [
+        "actor.one.north.0",
+        "actor.one.north.1"
+      ],
+      "reducedMotionFrame": "actor.one.north.0"
+    },
+    "actor.one.south.walk": {
+      "frameDurationMs": 110,
+      "frameIds": [
+        "actor.one.south.0",
+        "actor.one.south.1"
+      ],
+      "reducedMotionFrame": "actor.one.south.0"
+    },
+    "actor.one.west.walk": {
+      "frameDurationMs": 110,
+      "frameIds": [
+        "actor.one.west.0",
+        "actor.one.west.1"
+      ],
+      "reducedMotionFrame": "actor.one.west.0"
+    },
+    "actor.two.east.walk": {
+      "frameDurationMs": 110,
+      "frameIds": [
+        "actor.two.east.0",
+        "actor.two.east.1"
+      ],
+      "reducedMotionFrame": "actor.two.east.0"
+    },
+    "actor.two.north.walk": {
+      "frameDurationMs": 110,
+      "frameIds": [
+        "actor.two.north.0",
+        "actor.two.north.1"
+      ],
+      "reducedMotionFrame": "actor.two.north.0"
+    },
+    "actor.two.south.walk": {
+      "frameDurationMs": 110,
+      "frameIds": [
+        "actor.two.south.0",
+        "actor.two.south.1"
+      ],
+      "reducedMotionFrame": "actor.two.south.0"
+    },
+    "actor.two.west.walk": {
+      "frameDurationMs": 110,
+      "frameIds": [
+        "actor.two.west.0",
+        "actor.two.west.1"
+      ],
+      "reducedMotionFrame": "actor.two.west.0"
+    },
+    "flame": {
+      "frameDurationMs": 80,
+      "frameIds": [
+        "effect.flame.0",
+        "effect.flame.1"
+      ],
+      "reducedMotionFrame": "effect.flame.0"
+    },
+    "spark": {
+      "frameDurationMs": 90,
+      "frameIds": [
+        "bomb.spark"
+      ],
+      "reducedMotionFrame": "bomb.spark"
+    }
+  },
+  "compositions": {
+    "oil.burning.0": [
+      "oil.charred",
+      "effect.flame.0"
+    ],
+    "oil.burning.1": [
+      "oil.charred",
+      "effect.flame.1"
+    ]
+  },
+  "frames": [
+    {
+      "id": "terrain.floor.0",
+      "localBounds": {
+        "height": 48,
+        "width": 48,
+        "x": 0,
+        "y": 0
+      },
+      "pivot": {
+        "x": 0,
+        "y": 0
+      },
+      "sourceRect": {
+        "height": 48,
+        "width": 48,
+        "x": 0,
+        "y": 0
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "terrain.floor.1",
+      "localBounds": {
+        "height": 48,
+        "width": 48,
+        "x": 0,
+        "y": 0
+      },
+      "pivot": {
+        "x": 0,
+        "y": 0
+      },
+      "sourceRect": {
+        "height": 48,
+        "width": 48,
+        "x": 112,
+        "y": 0
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "terrain.floor.2",
+      "localBounds": {
+        "height": 48,
+        "width": 48,
+        "x": 0,
+        "y": 0
+      },
+      "pivot": {
+        "x": 0,
+        "y": 0
+      },
+      "sourceRect": {
+        "height": 48,
+        "width": 48,
+        "x": 224,
+        "y": 0
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "terrain.floor.3",
+      "localBounds": {
+        "height": 48,
+        "width": 48,
+        "x": 0,
+        "y": 0
+      },
+      "pivot": {
+        "x": 0,
+        "y": 0
+      },
+      "sourceRect": {
+        "height": 48,
+        "width": 48,
+        "x": 336,
+        "y": 0
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "terrain.floor.4",
+      "localBounds": {
+        "height": 48,
+        "width": 48,
+        "x": 0,
+        "y": 0
+      },
+      "pivot": {
+        "x": 0,
+        "y": 0
+      },
+      "sourceRect": {
+        "height": 48,
+        "width": 48,
+        "x": 448,
+        "y": 0
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "terrain.floor.5",
+      "localBounds": {
+        "height": 48,
+        "width": 48,
+        "x": 0,
+        "y": 0
+      },
+      "pivot": {
+        "x": 0,
+        "y": 0
+      },
+      "sourceRect": {
+        "height": 48,
+        "width": 48,
+        "x": 560,
+        "y": 0
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "terrain.floor.6",
+      "localBounds": {
+        "height": 48,
+        "width": 48,
+        "x": 0,
+        "y": 0
+      },
+      "pivot": {
+        "x": 0,
+        "y": 0
+      },
+      "sourceRect": {
+        "height": 48,
+        "width": 48,
+        "x": 672,
+        "y": 0
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "terrain.floor.7",
+      "localBounds": {
+        "height": 48,
+        "width": 48,
+        "x": 0,
+        "y": 0
+      },
+      "pivot": {
+        "x": 0,
+        "y": 0
+      },
+      "sourceRect": {
+        "height": 48,
+        "width": 48,
+        "x": 784,
+        "y": 0
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "terrain.wall.0",
+      "localBounds": {
+        "height": 48,
+        "width": 48,
+        "x": 0,
+        "y": 0
+      },
+      "pivot": {
+        "x": 0,
+        "y": 0
+      },
+      "sourceRect": {
+        "height": 48,
+        "width": 48,
+        "x": 896,
+        "y": 0
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "terrain.wall.1",
+      "localBounds": {
+        "height": 48,
+        "width": 48,
+        "x": 0,
+        "y": 0
+      },
+      "pivot": {
+        "x": 0,
+        "y": 0
+      },
+      "sourceRect": {
+        "height": 48,
+        "width": 48,
+        "x": 1008,
+        "y": 0
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "terrain.block.brick",
+      "localBounds": {
+        "height": 48,
+        "width": 48,
+        "x": 0,
+        "y": 0
+      },
+      "pivot": {
+        "x": 0,
+        "y": 0
+      },
+      "sourceRect": {
+        "height": 48,
+        "width": 48,
+        "x": 0,
+        "y": 112
+      },
+      "status": "baseline"
+    },
+    {
+      "footAnchor": {
+        "x": 40,
+        "y": 65
+      },
+      "id": "actor.one.north.0",
+      "localBounds": {
+        "height": 80,
+        "width": 80,
+        "x": -40,
+        "y": -44
+      },
+      "pivot": {
+        "x": 40,
+        "y": 44
+      },
+      "sourceRect": {
+        "height": 80,
+        "width": 80,
+        "x": 112,
+        "y": 112
+      },
+      "status": "baseline"
+    },
+    {
+      "footAnchor": {
+        "x": 40,
+        "y": 65
+      },
+      "id": "actor.one.north.1",
+      "localBounds": {
+        "height": 80,
+        "width": 80,
+        "x": -40,
+        "y": -44
+      },
+      "pivot": {
+        "x": 40,
+        "y": 44
+      },
+      "sourceRect": {
+        "height": 80,
+        "width": 80,
+        "x": 224,
+        "y": 112
+      },
+      "status": "baseline"
+    },
+    {
+      "footAnchor": {
+        "x": 40,
+        "y": 65
+      },
+      "id": "actor.one.east.0",
+      "localBounds": {
+        "height": 80,
+        "width": 80,
+        "x": -40,
+        "y": -44
+      },
+      "pivot": {
+        "x": 40,
+        "y": 44
+      },
+      "sourceRect": {
+        "height": 80,
+        "width": 80,
+        "x": 336,
+        "y": 112
+      },
+      "status": "baseline"
+    },
+    {
+      "footAnchor": {
+        "x": 40,
+        "y": 65
+      },
+      "id": "actor.one.east.1",
+      "localBounds": {
+        "height": 80,
+        "width": 80,
+        "x": -40,
+        "y": -44
+      },
+      "pivot": {
+        "x": 40,
+        "y": 44
+      },
+      "sourceRect": {
+        "height": 80,
+        "width": 80,
+        "x": 448,
+        "y": 112
+      },
+      "status": "baseline"
+    },
+    {
+      "footAnchor": {
+        "x": 40,
+        "y": 65
+      },
+      "id": "actor.one.south.0",
+      "localBounds": {
+        "height": 80,
+        "width": 80,
+        "x": -40,
+        "y": -44
+      },
+      "pivot": {
+        "x": 40,
+        "y": 44
+      },
+      "sourceRect": {
+        "height": 80,
+        "width": 80,
+        "x": 560,
+        "y": 112
+      },
+      "status": "baseline"
+    },
+    {
+      "footAnchor": {
+        "x": 40,
+        "y": 65
+      },
+      "id": "actor.one.south.1",
+      "localBounds": {
+        "height": 80,
+        "width": 80,
+        "x": -40,
+        "y": -44
+      },
+      "pivot": {
+        "x": 40,
+        "y": 44
+      },
+      "sourceRect": {
+        "height": 80,
+        "width": 80,
+        "x": 672,
+        "y": 112
+      },
+      "status": "baseline"
+    },
+    {
+      "footAnchor": {
+        "x": 40,
+        "y": 65
+      },
+      "id": "actor.one.west.0",
+      "localBounds": {
+        "height": 80,
+        "width": 80,
+        "x": -40,
+        "y": -44
+      },
+      "pivot": {
+        "x": 40,
+        "y": 44
+      },
+      "sourceRect": {
+        "height": 80,
+        "width": 80,
+        "x": 784,
+        "y": 112
+      },
+      "status": "baseline"
+    },
+    {
+      "footAnchor": {
+        "x": 40,
+        "y": 65
+      },
+      "id": "actor.one.west.1",
+      "localBounds": {
+        "height": 80,
+        "width": 80,
+        "x": -40,
+        "y": -44
+      },
+      "pivot": {
+        "x": 40,
+        "y": 44
+      },
+      "sourceRect": {
+        "height": 80,
+        "width": 80,
+        "x": 896,
+        "y": 112
+      },
+      "status": "baseline"
+    },
+    {
+      "footAnchor": {
+        "x": 40,
+        "y": 65
+      },
+      "id": "actor.two.north.0",
+      "localBounds": {
+        "height": 80,
+        "width": 80,
+        "x": -40,
+        "y": -44
+      },
+      "pivot": {
+        "x": 40,
+        "y": 44
+      },
+      "sourceRect": {
+        "height": 80,
+        "width": 80,
+        "x": 1008,
+        "y": 112
+      },
+      "status": "baseline"
+    },
+    {
+      "footAnchor": {
+        "x": 40,
+        "y": 65
+      },
+      "id": "actor.two.north.1",
+      "localBounds": {
+        "height": 80,
+        "width": 80,
+        "x": -40,
+        "y": -44
+      },
+      "pivot": {
+        "x": 40,
+        "y": 44
+      },
+      "sourceRect": {
+        "height": 80,
+        "width": 80,
+        "x": 0,
+        "y": 224
+      },
+      "status": "baseline"
+    },
+    {
+      "footAnchor": {
+        "x": 40,
+        "y": 65
+      },
+      "id": "actor.two.east.0",
+      "localBounds": {
+        "height": 80,
+        "width": 80,
+        "x": -40,
+        "y": -44
+      },
+      "pivot": {
+        "x": 40,
+        "y": 44
+      },
+      "sourceRect": {
+        "height": 80,
+        "width": 80,
+        "x": 112,
+        "y": 224
+      },
+      "status": "baseline"
+    },
+    {
+      "footAnchor": {
+        "x": 40,
+        "y": 65
+      },
+      "id": "actor.two.east.1",
+      "localBounds": {
+        "height": 80,
+        "width": 80,
+        "x": -40,
+        "y": -44
+      },
+      "pivot": {
+        "x": 40,
+        "y": 44
+      },
+      "sourceRect": {
+        "height": 80,
+        "width": 80,
+        "x": 224,
+        "y": 224
+      },
+      "status": "baseline"
+    },
+    {
+      "footAnchor": {
+        "x": 40,
+        "y": 65
+      },
+      "id": "actor.two.south.0",
+      "localBounds": {
+        "height": 80,
+        "width": 80,
+        "x": -40,
+        "y": -44
+      },
+      "pivot": {
+        "x": 40,
+        "y": 44
+      },
+      "sourceRect": {
+        "height": 80,
+        "width": 80,
+        "x": 336,
+        "y": 224
+      },
+      "status": "baseline"
+    },
+    {
+      "footAnchor": {
+        "x": 40,
+        "y": 65
+      },
+      "id": "actor.two.south.1",
+      "localBounds": {
+        "height": 80,
+        "width": 80,
+        "x": -40,
+        "y": -44
+      },
+      "pivot": {
+        "x": 40,
+        "y": 44
+      },
+      "sourceRect": {
+        "height": 80,
+        "width": 80,
+        "x": 448,
+        "y": 224
+      },
+      "status": "baseline"
+    },
+    {
+      "footAnchor": {
+        "x": 40,
+        "y": 65
+      },
+      "id": "actor.two.west.0",
+      "localBounds": {
+        "height": 80,
+        "width": 80,
+        "x": -40,
+        "y": -44
+      },
+      "pivot": {
+        "x": 40,
+        "y": 44
+      },
+      "sourceRect": {
+        "height": 80,
+        "width": 80,
+        "x": 560,
+        "y": 224
+      },
+      "status": "baseline"
+    },
+    {
+      "footAnchor": {
+        "x": 40,
+        "y": 65
+      },
+      "id": "actor.two.west.1",
+      "localBounds": {
+        "height": 80,
+        "width": 80,
+        "x": -40,
+        "y": -44
+      },
+      "pivot": {
+        "x": 40,
+        "y": 44
+      },
+      "sourceRect": {
+        "height": 80,
+        "width": 80,
+        "x": 672,
+        "y": 224
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "actor.shadow",
+      "localBounds": {
+        "height": 80,
+        "width": 80,
+        "x": -40,
+        "y": -44
+      },
+      "opacity": 0.3,
+      "pivot": {
+        "x": 40,
+        "y": 44
+      },
+      "sourceRect": {
+        "height": 80,
+        "width": 80,
+        "x": 784,
+        "y": 224
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "actor.cue.protection",
+      "localBounds": {
+        "height": 80,
+        "width": 80,
+        "x": -40,
+        "y": -44
+      },
+      "pivot": {
+        "x": 40,
+        "y": 44
+      },
+      "sourceRect": {
+        "height": 80,
+        "width": 80,
+        "x": 896,
+        "y": 224
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "actor.cue.shield",
+      "localBounds": {
+        "height": 80,
+        "width": 80,
+        "x": -40,
+        "y": -44
+      },
+      "pivot": {
+        "x": 40,
+        "y": 44
+      },
+      "sourceRect": {
+        "height": 80,
+        "width": 80,
+        "x": 1008,
+        "y": 224
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "actor.cue.stopwatch",
+      "localBounds": {
+        "height": 80,
+        "width": 80,
+        "x": -40,
+        "y": -44
+      },
+      "pivot": {
+        "x": 40,
+        "y": 44
+      },
+      "sourceRect": {
+        "height": 80,
+        "width": 80,
+        "x": 0,
+        "y": 336
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "actor.cue.frozen",
+      "localBounds": {
+        "height": 80,
+        "width": 80,
+        "x": -40,
+        "y": -44
+      },
+      "pivot": {
+        "x": 40,
+        "y": 44
+      },
+      "sourceRect": {
+        "height": 80,
+        "width": 80,
+        "x": 112,
+        "y": 336
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "actor.cue.goldenFlame",
+      "localBounds": {
+        "height": 80,
+        "width": 80,
+        "x": -40,
+        "y": -44
+      },
+      "pivot": {
+        "x": 40,
+        "y": 44
+      },
+      "sourceRect": {
+        "height": 80,
+        "width": 80,
+        "x": 224,
+        "y": 336
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "actor.cue.shortFuse",
+      "localBounds": {
+        "height": 80,
+        "width": 80,
+        "x": -40,
+        "y": -44
+      },
+      "pivot": {
+        "x": 40,
+        "y": 44
+      },
+      "sourceRect": {
+        "height": 80,
+        "width": 80,
+        "x": 336,
+        "y": 336
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "actor.cue.shortFlame",
+      "localBounds": {
+        "height": 80,
+        "width": 80,
+        "x": -40,
+        "y": -44
+      },
+      "pivot": {
+        "x": 40,
+        "y": 44
+      },
+      "sourceRect": {
+        "height": 80,
+        "width": 80,
+        "x": 448,
+        "y": 336
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "actor.cue.longFuse",
+      "localBounds": {
+        "height": 80,
+        "width": 80,
+        "x": -40,
+        "y": -44
+      },
+      "pivot": {
+        "x": 40,
+        "y": 44
+      },
+      "sourceRect": {
+        "height": 80,
+        "width": 80,
+        "x": 560,
+        "y": 336
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "actor.cue.reverseControls",
+      "localBounds": {
+        "height": 80,
+        "width": 80,
+        "x": -40,
+        "y": -44
+      },
+      "pivot": {
+        "x": 40,
+        "y": 44
+      },
+      "sourceRect": {
+        "height": 80,
+        "width": 80,
+        "x": 672,
+        "y": 336
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "actor.cue.diarrhea",
+      "localBounds": {
+        "height": 80,
+        "width": 80,
+        "x": -40,
+        "y": -44
+      },
+      "pivot": {
+        "x": 40,
+        "y": 44
+      },
+      "sourceRect": {
+        "height": 80,
+        "width": 80,
+        "x": 784,
+        "y": 336
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "actor.cue.slowBoot",
+      "localBounds": {
+        "height": 80,
+        "width": 80,
+        "x": -40,
+        "y": -44
+      },
+      "pivot": {
+        "x": 40,
+        "y": 44
+      },
+      "sourceRect": {
+        "height": 80,
+        "width": 80,
+        "x": 896,
+        "y": 336
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "actor.cue.piercing",
+      "localBounds": {
+        "height": 80,
+        "width": 80,
+        "x": -40,
+        "y": -44
+      },
+      "pivot": {
+        "x": 40,
+        "y": 44
+      },
+      "sourceRect": {
+        "height": 80,
+        "width": 80,
+        "x": 1008,
+        "y": 336
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "actor.cue.power",
+      "localBounds": {
+        "height": 80,
+        "width": 80,
+        "x": -40,
+        "y": -44
+      },
+      "pivot": {
+        "x": 40,
+        "y": 44
+      },
+      "sourceRect": {
+        "height": 80,
+        "width": 80,
+        "x": 0,
+        "y": 448
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "actor.cue.landmine",
+      "localBounds": {
+        "height": 80,
+        "width": 80,
+        "x": -40,
+        "y": -44
+      },
+      "pivot": {
+        "x": 40,
+        "y": 44
+      },
+      "sourceRect": {
+        "height": 80,
+        "width": 80,
+        "x": 112,
+        "y": 448
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "actor.cue.kick",
+      "localBounds": {
+        "height": 80,
+        "width": 80,
+        "x": -40,
+        "y": -44
+      },
+      "pivot": {
+        "x": 40,
+        "y": 44
+      },
+      "sourceRect": {
+        "height": 80,
+        "width": 80,
+        "x": 224,
+        "y": 448
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "actor.cue.punch",
+      "localBounds": {
+        "height": 80,
+        "width": 80,
+        "x": -40,
+        "y": -44
+      },
+      "pivot": {
+        "x": 40,
+        "y": 44
+      },
+      "sourceRect": {
+        "height": 80,
+        "width": 80,
+        "x": 336,
+        "y": 448
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "actor.cue.bracelet",
+      "localBounds": {
+        "height": 80,
+        "width": 80,
+        "x": -40,
+        "y": -44
+      },
+      "pivot": {
+        "x": 40,
+        "y": 44
+      },
+      "sourceRect": {
+        "height": 80,
+        "width": 80,
+        "x": 448,
+        "y": 448
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "actor.cue.wallPass",
+      "localBounds": {
+        "height": 80,
+        "width": 80,
+        "x": -40,
+        "y": -44
+      },
+      "pivot": {
+        "x": 40,
+        "y": 44
+      },
+      "sourceRect": {
+        "height": 80,
+        "width": 80,
+        "x": 560,
+        "y": 448
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "actor.cue.cloak",
+      "localBounds": {
+        "height": 80,
+        "width": 80,
+        "x": -40,
+        "y": -44
+      },
+      "pivot": {
+        "x": 40,
+        "y": 44
+      },
+      "sourceRect": {
+        "height": 80,
+        "width": 80,
+        "x": 672,
+        "y": 448
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "actor.cue.slowMarker.1",
+      "localBounds": {
+        "height": 80,
+        "width": 80,
+        "x": -40,
+        "y": -44
+      },
+      "pivot": {
+        "x": 40,
+        "y": 44
+      },
+      "sourceRect": {
+        "height": 80,
+        "width": 80,
+        "x": 784,
+        "y": 448
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "actor.cue.slowMarker.2",
+      "localBounds": {
+        "height": 80,
+        "width": 80,
+        "x": -40,
+        "y": -44
+      },
+      "pivot": {
+        "x": 40,
+        "y": 44
+      },
+      "sourceRect": {
+        "height": 80,
+        "width": 80,
+        "x": 896,
+        "y": 448
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "actor.cue.slowMarker.3",
+      "localBounds": {
+        "height": 80,
+        "width": 80,
+        "x": -40,
+        "y": -44
+      },
+      "pivot": {
+        "x": 40,
+        "y": 44
+      },
+      "sourceRect": {
+        "height": 80,
+        "width": 80,
+        "x": 1008,
+        "y": 448
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "actor.cue.slowMarker.4",
+      "localBounds": {
+        "height": 80,
+        "width": 80,
+        "x": -40,
+        "y": -44
+      },
+      "pivot": {
+        "x": 40,
+        "y": 44
+      },
+      "sourceRect": {
+        "height": 80,
+        "width": 80,
+        "x": 0,
+        "y": 560
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "actor.cue.slowMarker.5",
+      "localBounds": {
+        "height": 80,
+        "width": 80,
+        "x": -40,
+        "y": -44
+      },
+      "pivot": {
+        "x": 40,
+        "y": 44
+      },
+      "sourceRect": {
+        "height": 80,
+        "width": 80,
+        "x": 112,
+        "y": 560
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "actor.cue.slowMarker.6",
+      "localBounds": {
+        "height": 80,
+        "width": 80,
+        "x": -40,
+        "y": -44
+      },
+      "pivot": {
+        "x": 40,
+        "y": 44
+      },
+      "sourceRect": {
+        "height": 80,
+        "width": 80,
+        "x": 224,
+        "y": 560
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "bomb.shadow",
+      "localBounds": {
+        "height": 80,
+        "width": 80,
+        "x": -40,
+        "y": -40
+      },
+      "opacity": 0.28,
+      "pivot": {
+        "x": 40,
+        "y": 40
+      },
+      "sourceRect": {
+        "height": 80,
+        "width": 80,
+        "x": 336,
+        "y": 560
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "bomb.shell.timed.standard",
+      "localBounds": {
+        "height": 80,
+        "width": 80,
+        "x": -40,
+        "y": -40
+      },
+      "pivot": {
+        "x": 40,
+        "y": 40
+      },
+      "sourceRect": {
+        "height": 80,
+        "width": 80,
+        "x": 448,
+        "y": 560
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "bomb.shell.timed.piercing",
+      "localBounds": {
+        "height": 80,
+        "width": 80,
+        "x": -40,
+        "y": -40
+      },
+      "pivot": {
+        "x": 40,
+        "y": 40
+      },
+      "sourceRect": {
+        "height": 80,
+        "width": 80,
+        "x": 560,
+        "y": 560
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "bomb.shell.timed.power",
+      "localBounds": {
+        "height": 80,
+        "width": 80,
+        "x": -40,
+        "y": -40
+      },
+      "pivot": {
+        "x": 40,
+        "y": 40
+      },
+      "sourceRect": {
+        "height": 80,
+        "width": 80,
+        "x": 672,
+        "y": 560
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "bomb.shell.remote.standard",
+      "localBounds": {
+        "height": 80,
+        "width": 80,
+        "x": -40,
+        "y": -40
+      },
+      "pivot": {
+        "x": 40,
+        "y": 40
+      },
+      "sourceRect": {
+        "height": 80,
+        "width": 80,
+        "x": 784,
+        "y": 560
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "bomb.shell.remote.piercing",
+      "localBounds": {
+        "height": 80,
+        "width": 80,
+        "x": -40,
+        "y": -40
+      },
+      "pivot": {
+        "x": 40,
+        "y": 40
+      },
+      "sourceRect": {
+        "height": 80,
+        "width": 80,
+        "x": 896,
+        "y": 560
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "bomb.shell.remote.power",
+      "localBounds": {
+        "height": 80,
+        "width": 80,
+        "x": -40,
+        "y": -40
+      },
+      "pivot": {
+        "x": 40,
+        "y": 40
+      },
+      "sourceRect": {
+        "height": 80,
+        "width": 80,
+        "x": 1008,
+        "y": 560
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "bomb.shell.contact.standard",
+      "localBounds": {
+        "height": 80,
+        "width": 80,
+        "x": -40,
+        "y": -40
+      },
+      "pivot": {
+        "x": 40,
+        "y": 40
+      },
+      "sourceRect": {
+        "height": 80,
+        "width": 80,
+        "x": 0,
+        "y": 672
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "bomb.spark",
+      "localBounds": {
+        "height": 80,
+        "width": 80,
+        "x": -40,
+        "y": -40
+      },
+      "pivot": {
+        "x": 40,
+        "y": 40
+      },
+      "sourceRect": {
+        "height": 80,
+        "width": 80,
+        "x": 112,
+        "y": 672
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "bomb.pause",
+      "localBounds": {
+        "height": 80,
+        "width": 80,
+        "x": -40,
+        "y": -40
+      },
+      "pivot": {
+        "x": 40,
+        "y": 40
+      },
+      "sourceRect": {
+        "height": 80,
+        "width": 80,
+        "x": 224,
+        "y": 672
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "effect.flame.0",
+      "localBounds": {
+        "height": 48,
+        "width": 48,
+        "x": 0,
+        "y": 0
+      },
+      "pivot": {
+        "x": 0,
+        "y": 0
+      },
+      "sourceRect": {
+        "height": 48,
+        "width": 48,
+        "x": 336,
+        "y": 672
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "effect.flame.1",
+      "localBounds": {
+        "height": 48,
+        "width": 48,
+        "x": 0,
+        "y": 0
+      },
+      "pivot": {
+        "x": 0,
+        "y": 0
+      },
+      "sourceRect": {
+        "height": 48,
+        "width": 48,
+        "x": 448,
+        "y": 672
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "oil.unlit",
+      "localBounds": {
+        "height": 48,
+        "width": 48,
+        "x": 0,
+        "y": 0
+      },
+      "pivot": {
+        "x": 0,
+        "y": 0
+      },
+      "sourceRect": {
+        "height": 48,
+        "width": 48,
+        "x": 560,
+        "y": 672
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "oil.charred",
+      "localBounds": {
+        "height": 48,
+        "width": 48,
+        "x": 0,
+        "y": 0
+      },
+      "pivot": {
+        "x": 0,
+        "y": 0
+      },
+      "sourceRect": {
+        "height": 48,
+        "width": 48,
+        "x": 672,
+        "y": 672
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "pickup.bombCapacity",
+      "localBounds": {
+        "height": 48,
+        "width": 48,
+        "x": 0,
+        "y": 0
+      },
+      "pivot": {
+        "x": 0,
+        "y": 0
+      },
+      "sourceRect": {
+        "height": 48,
+        "width": 48,
+        "x": 784,
+        "y": 672
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "pickup.blastRange",
+      "localBounds": {
+        "height": 48,
+        "width": 48,
+        "x": 0,
+        "y": 0
+      },
+      "pivot": {
+        "x": 0,
+        "y": 0
+      },
+      "sourceRect": {
+        "height": 48,
+        "width": 48,
+        "x": 896,
+        "y": 672
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "pickup.movementSpeed",
+      "localBounds": {
+        "height": 48,
+        "width": 48,
+        "x": 0,
+        "y": 0
+      },
+      "pivot": {
+        "x": 0,
+        "y": 0
+      },
+      "sourceRect": {
+        "height": 48,
+        "width": 48,
+        "x": 1008,
+        "y": 672
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "pickup.kick",
+      "localBounds": {
+        "height": 48,
+        "width": 48,
+        "x": 0,
+        "y": 0
+      },
+      "pivot": {
+        "x": 0,
+        "y": 0
+      },
+      "sourceRect": {
+        "height": 48,
+        "width": 48,
+        "x": 0,
+        "y": 784
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "pickup.punch",
+      "localBounds": {
+        "height": 48,
+        "width": 48,
+        "x": 0,
+        "y": 0
+      },
+      "pivot": {
+        "x": 0,
+        "y": 0
+      },
+      "sourceRect": {
+        "height": 48,
+        "width": 48,
+        "x": 112,
+        "y": 784
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "pickup.bracelet",
+      "localBounds": {
+        "height": 48,
+        "width": 48,
+        "x": 0,
+        "y": 0
+      },
+      "pivot": {
+        "x": 0,
+        "y": 0
+      },
+      "sourceRect": {
+        "height": 48,
+        "width": 48,
+        "x": 224,
+        "y": 784
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "pickup.wallPass",
+      "localBounds": {
+        "height": 48,
+        "width": 48,
+        "x": 0,
+        "y": 0
+      },
+      "pivot": {
+        "x": 0,
+        "y": 0
+      },
+      "sourceRect": {
+        "height": 48,
+        "width": 48,
+        "x": 336,
+        "y": 784
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "pickup.heart",
+      "localBounds": {
+        "height": 48,
+        "width": 48,
+        "x": 0,
+        "y": 0
+      },
+      "pivot": {
+        "x": 0,
+        "y": 0
+      },
+      "sourceRect": {
+        "height": 48,
+        "width": 48,
+        "x": 448,
+        "y": 784
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "pickup.remoteBomb",
+      "localBounds": {
+        "height": 48,
+        "width": 48,
+        "x": 0,
+        "y": 0
+      },
+      "pivot": {
+        "x": 0,
+        "y": 0
+      },
+      "sourceRect": {
+        "height": 48,
+        "width": 48,
+        "x": 560,
+        "y": 784
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "pickup.piercingBomb",
+      "localBounds": {
+        "height": 48,
+        "width": 48,
+        "x": 0,
+        "y": 0
+      },
+      "pivot": {
+        "x": 0,
+        "y": 0
+      },
+      "sourceRect": {
+        "height": 48,
+        "width": 48,
+        "x": 672,
+        "y": 784
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "pickup.powerBomb",
+      "localBounds": {
+        "height": 48,
+        "width": 48,
+        "x": 0,
+        "y": 0
+      },
+      "pivot": {
+        "x": 0,
+        "y": 0
+      },
+      "sourceRect": {
+        "height": 48,
+        "width": 48,
+        "x": 784,
+        "y": 784
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "pickup.landmine",
+      "localBounds": {
+        "height": 48,
+        "width": 48,
+        "x": 0,
+        "y": 0
+      },
+      "pivot": {
+        "x": 0,
+        "y": 0
+      },
+      "sourceRect": {
+        "height": 48,
+        "width": 48,
+        "x": 896,
+        "y": 784
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "pickup.shield",
+      "localBounds": {
+        "height": 48,
+        "width": 48,
+        "x": 0,
+        "y": 0
+      },
+      "pivot": {
+        "x": 0,
+        "y": 0
+      },
+      "sourceRect": {
+        "height": 48,
+        "width": 48,
+        "x": 1008,
+        "y": 784
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "pickup.stopwatch",
+      "localBounds": {
+        "height": 48,
+        "width": 48,
+        "x": 0,
+        "y": 0
+      },
+      "pivot": {
+        "x": 0,
+        "y": 0
+      },
+      "sourceRect": {
+        "height": 48,
+        "width": 48,
+        "x": 0,
+        "y": 896
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "pickup.invisibilityCloak",
+      "localBounds": {
+        "height": 48,
+        "width": 48,
+        "x": 0,
+        "y": 0
+      },
+      "pivot": {
+        "x": 0,
+        "y": 0
+      },
+      "sourceRect": {
+        "height": 48,
+        "width": 48,
+        "x": 112,
+        "y": 896
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "pickup.goldenFlame",
+      "localBounds": {
+        "height": 48,
+        "width": 48,
+        "x": 0,
+        "y": 0
+      },
+      "pivot": {
+        "x": 0,
+        "y": 0
+      },
+      "sourceRect": {
+        "height": 48,
+        "width": 48,
+        "x": 224,
+        "y": 896
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "pickup.shortFuse",
+      "localBounds": {
+        "height": 48,
+        "width": 48,
+        "x": 0,
+        "y": 0
+      },
+      "pivot": {
+        "x": 0,
+        "y": 0
+      },
+      "sourceRect": {
+        "height": 48,
+        "width": 48,
+        "x": 336,
+        "y": 896
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "pickup.diarrhea",
+      "localBounds": {
+        "height": 48,
+        "width": 48,
+        "x": 0,
+        "y": 0
+      },
+      "pivot": {
+        "x": 0,
+        "y": 0
+      },
+      "sourceRect": {
+        "height": 48,
+        "width": 48,
+        "x": 448,
+        "y": 896
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "pickup.slowFoot",
+      "localBounds": {
+        "height": 48,
+        "width": 48,
+        "x": 0,
+        "y": 0
+      },
+      "pivot": {
+        "x": 0,
+        "y": 0
+      },
+      "sourceRect": {
+        "height": 48,
+        "width": 48,
+        "x": 560,
+        "y": 896
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "pickup.shortFlame",
+      "localBounds": {
+        "height": 48,
+        "width": 48,
+        "x": 0,
+        "y": 0
+      },
+      "pivot": {
+        "x": 0,
+        "y": 0
+      },
+      "sourceRect": {
+        "height": 48,
+        "width": 48,
+        "x": 672,
+        "y": 896
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "pickup.longFuse",
+      "localBounds": {
+        "height": 48,
+        "width": 48,
+        "x": 0,
+        "y": 0
+      },
+      "pivot": {
+        "x": 0,
+        "y": 0
+      },
+      "sourceRect": {
+        "height": 48,
+        "width": 48,
+        "x": 784,
+        "y": 896
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "pickup.reverseControls",
+      "localBounds": {
+        "height": 48,
+        "width": 48,
+        "x": 0,
+        "y": 0
+      },
+      "pivot": {
+        "x": 0,
+        "y": 0
+      },
+      "sourceRect": {
+        "height": 48,
+        "width": 48,
+        "x": 896,
+        "y": 896
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "pickup.invisibleBombs",
+      "localBounds": {
+        "height": 48,
+        "width": 48,
+        "x": 0,
+        "y": 0
+      },
+      "pivot": {
+        "x": 0,
+        "y": 0
+      },
+      "sourceRect": {
+        "height": 48,
+        "width": 48,
+        "x": 1008,
+        "y": 896
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "pickup.teleporter",
+      "localBounds": {
+        "height": 48,
+        "width": 48,
+        "x": 0,
+        "y": 0
+      },
+      "pivot": {
+        "x": 0,
+        "y": 0
+      },
+      "sourceRect": {
+        "height": 48,
+        "width": 48,
+        "x": 0,
+        "y": 1008
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "reserved.actor.one.death",
+      "localBounds": {
+        "height": 48,
+        "width": 48,
+        "x": 0,
+        "y": 0
+      },
+      "pivot": {
+        "x": 0,
+        "y": 0
+      },
+      "sourceRect": {
+        "height": 48,
+        "width": 48,
+        "x": 112,
+        "y": 1008
+      },
+      "status": "reserved"
+    },
+    {
+      "id": "reserved.actor.two.death",
+      "localBounds": {
+        "height": 48,
+        "width": 48,
+        "x": 0,
+        "y": 0
+      },
+      "pivot": {
+        "x": 0,
+        "y": 0
+      },
+      "sourceRect": {
+        "height": 48,
+        "width": 48,
+        "x": 224,
+        "y": 1008
+      },
+      "status": "reserved"
+    },
+    {
+      "id": "reserved.terrain.block.destruction",
+      "localBounds": {
+        "height": 48,
+        "width": 48,
+        "x": 0,
+        "y": 0
+      },
+      "pivot": {
+        "x": 0,
+        "y": 0
+      },
+      "sourceRect": {
+        "height": 48,
+        "width": 48,
+        "x": 336,
+        "y": 1008
+      },
+      "status": "reserved"
+    },
+    {
+      "id": "reserved.pickup.collection",
+      "localBounds": {
+        "height": 48,
+        "width": 48,
+        "x": 0,
+        "y": 0
+      },
+      "pivot": {
+        "x": 0,
+        "y": 0
+      },
+      "sourceRect": {
+        "height": 48,
+        "width": 48,
+        "x": 448,
+        "y": 1008
+      },
+      "status": "reserved"
+    }
+  ],
+  "schemaVersion": 1,
+  "sheet": {
+    "columns": 10,
+    "height": 1120,
+    "slotSize": 112,
+    "width": 1120
+  },
+  "tileSize": 48
+}

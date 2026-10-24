@@ -3,7 +3,7 @@
 TURN, CONFIG and the first ART slice are implemented. Published [v0.3.47](https://github.com/liveweird/grenadiers/releases/tag/v0.3.47)
 completes **all 22 requested item types**, including Oil Barrel. Full checks, scoped
 Compose/Kubernetes acceptance, publication and localhost promotion are complete. ART-ATLAS is
-next: the artist handoff and sprite-sheet pipeline described below.
+in progress: v0.3.48 delivers the artist handoff/export/preview; v0.3.49 adopts it in gameplay.
 
 [v0.3.43](https://github.com/liveweird/grenadiers/releases/tag/v0.3.43) publishes Wall Pass as the
 eighteenth of 22 requested item types. Published source `c086f719ea470b9fe24963adef84b5e3bdf3e17a`,
@@ -18,7 +18,7 @@ Docker inputs, a new Rust compilation or new native execution. See the
 [v0.3.44](https://github.com/liveweird/grenadiers/releases/tag/v0.3.44) publishes Kick as the
 nineteenth requested item from source `f32fd86d8f0c7c4bebba8fa60d1c66c65d1a174a`, tree
 `a0f2addb9204c40b4b30be2830fde4df368f019c`. Its accepted image was promoted locally before Punch v0.3.45.
-Bracelet and Oil Barrel have since shipped; ART-ATLAS is next.
+Bracelet and Oil Barrel have since shipped; the ART-ATLAS pipeline is the active increment.
 
 At the 21 October 2026 16:47 UTC native acceptance checkpoint, Invisibility Cloak was an
 **unreleased source candidate**. Corrected source `1c6724f` and
@@ -211,8 +211,16 @@ The artist handoff and sprite-sheet pipeline are queued separately under ART-ATL
 
 ## ART-ATLAS: artist handoff and sprite-sheet pipeline
 
-The entire expanded-item batch shipped in v0.3.47; ART-ATLAS is now the next work item. The
-existing code-generated PixiJS art remains the baseline.
+The entire expanded-item batch shipped in v0.3.47. ART-ATLAS is split into two bounded releases:
+
+- **v0.3.48:** canonical editable PNG/JSON, 95 stable entries (91 baseline and four reserved),
+  separate guides/overview, validated export with optional slices, and real Pixi region preview.
+  See the [artist handoff](../../assets/art/README.md) for commands and constraints.
+- **v0.3.49:** adopt the reviewed runtime atlas in gameplay, preserving terrain cache behavior,
+  animation timing, visibility, collision geometry, ownership and current rendering budgets.
+
+The existing code-generated PixiJS art remains the baseline. New artist redraws and new animation
+production follow review of this complete inventory and representative arena proof.
 
 - Export the current drawings into a labelled visual inventory, including terrain variants,
   directional player frames, bombs, connected flames, pickups and status overlays. Reserve
@@ -232,7 +240,9 @@ existing code-generated PixiJS art remains the baseline.
   screenshots, reduced-motion checks and measured rendering performance. Preserve collision
   geometry, authoritative visibility, hazard readability, player distinctions and EN/PL UI.
 
-This is a backlog specification; the authoring templates and export pipeline are not implemented.
+The v0.3.48 candidate implements the template/export/preview portion above. Gameplay integration
+and artist redraws remain open. The faithful baseline retains a known two-pixel vertical gap in
+flame frame 1; the guide calls it out explicitly rather than claiming seamless replacement art.
 
 ## EFFECTS: inventory and status foundations
 
@@ -322,4 +332,4 @@ including same-image Compose/Kubernetes acceptance. Bots, mobs and larger matche
 separate tracks; their future interactions must be specified without making them prerequisites.
 
 The expanded-item activation batch and its release gates are complete in v0.3.47. ART-ATLAS
-follows as the next bounded release increment.
+continues as the two bounded release increments described above.

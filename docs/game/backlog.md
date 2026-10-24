@@ -4,9 +4,8 @@ TURN, CONFIG and the first ART slice are implemented. This v0.3.45 source candid
 optional pickups: Heart, Shield, Golden Flame, Short Fuse, Short Flame, Long Fuse, Reverse
 Controls, Diarrhea, Slow-foot, Piercing Bomb, Power Bomb, Remote Bomb, Landmine and Invisibility
 Cloak, Stopwatch, Invisible Bombs, Teleporter, Wall Pass, Kick and Punch. Reviewed implementation
-source is complete; the published v0.3.44 source parent is integrated, while fresh Punch native
-acceptance and final checks remain pending. The remaining requested pickups stay outside this
-increment.
+source and all scoped acceptance checks are complete on the published v0.3.44 parent. Publication
+and localhost promotion remain pending. Bracelet and Oil Barrel follow before ART-ATLAS.
 
 [v0.3.43](https://github.com/liveweird/grenadiers/releases/tag/v0.3.43) publishes Wall Pass as the
 eighteenth of 22 requested item types. Published source `c086f719ea470b9fe24963adef84b5e3bdf3e17a`,
@@ -125,7 +124,7 @@ status is recorded in [GitHub Releases](https://github.com/liveweird/grenadiers/
 acceptance records in [verification](../verification.md). Richer transitions and artwork remain
 follow-up work; see [pixel-art presentation](pixel-art.md) and
 [expanded item implementation](expanded-items.md).
-Updated 2026-10-24 after integrating the published Kick source into the Punch source candidate.
+Updated 2026-10-24 after Punch native acceptance.
 Release acceptance is recorded in
 [verification](../verification.md).
 The [implementation plan](implementation-plan.md) remains the milestone/release reference;
@@ -325,7 +324,7 @@ including same-image Compose/Kubernetes acceptance. Bots, mobs and larger matche
 separate tracks; their future interactions must be specified without making them prerequisites.
 
 Complete the entire expanded-item activation batch before starting ART-ATLAS. Punch is the
-current bounded source increment (v0.3.45) on the published Kick parent; Punch native acceptance
-and publication remain pending. Bracelet and Oil remain after Punch.
+native-accepted v0.3.45 increment on the published Kick parent; publication remains pending.
+Bracelet and Oil remain after Punch.
 ART-ATLAS begins
 only after those item increments and their release gates are complete.

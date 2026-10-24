@@ -11,6 +11,35 @@ honest about the source and environment actually tested.
 The records below are historical evidence. Their repeated CI runs, receipt graphs and sealing
 procedures do not impose additional requirements on future changes.
 
+## v0.3.45 Punch native-accepted checkpoint — 2026-10-24 — 27 cases
+
+Application/Rust source `8e6e63aeb55227360fddcad3f81c83e33aaace0a` passed independent backend
+and frontend reviews. Browser-only corrections through `5bc46b5` preserve application inputs.
+Exact image `sha256:3f13b26f7a4a41ba2e90b8cc9261c9e95a60eceeddf49504341e65258eb7d37d`
+passes **27 scoped native cases with zero retries**:
+
+- Compose: Punch, Kick, Remote Bomb, classic match/rematch and 22 latency cases (26 total).
+- Kubernetes: Punch on the same image, with production manifests, image identity, non-root and
+  security settings, service readiness and namespace-UID-guarded cleanup (one case).
+
+Punch checks real transport interruption/resume, retained bomb identity and fuse deadline, private
+state absence, no Equipment replay, and the remapped F successor action. The first bomb remains
+uninterrupted for screenshots and natural detonation; a second fresh bomb proves reconnect.
+Owned resources were cleaned up. Latency maxima are 54.72 ms locally and 148.39 ms with shaped
+50 ms delay, below the unchanged 250 ms budget. The full historical 114-case matrix was not run.
+
+Full local Rust checks exit zero in **14m30s**, covering all **1,048,576 masks per profile**
+(debug/release/coverage) with four workers and eight ranges. Official merged line coverage is
+**15,703/16,901 (92.911662%)**. The web gate passes **1,586 tests across 68 files** with
+**95.12/90.8/95.91/97.63%** statement/branch/function/line coverage. E2E static checks pass,
+including all 58 documented scenarios. Dependency security and configured image-audit thresholds
+pass: three moderate web packages, no high/critical findings, and no E2E advisories.
+
+Distinct [Ubuntu Rust units](https://github.com/liveweird/grenadiers/actions/runs/40120977401)
+pass at `f398be7`; later changes affect browser tests and documentation only. Passing equivalent
+checks and the exact tested image are reused under the local-first policy. Release publication
+and localhost promotion remain pending at this checkpoint.
+
 ## v0.3.44 published delivery — 2026-10-24
 
 Source `f32fd86d8f0c7c4bebba8fa60d1c66c65d1a174a`, tree

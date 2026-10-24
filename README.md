@@ -3,13 +3,19 @@
 A browser-based multiplayer game inspired by classic Bomberman/Dynablaster.
 The initial playable profile supports two human players. Bots and larger matches follow later.
 
+**v0.3.45 Punch native-accepted checkpoint — publication pending (2026-10-24).** Local native
+acceptance is complete for the Punch candidate: 26 Compose cases plus one Kubernetes case (27 total),
+all with zero retries, on image `sha256:3f13b26f7a4a41ba2e90b8cc9261c9e95a60eceeddf49504341e65258eb7d37d`.
+Release publication and localhost promotion remain pending. See [verification](docs/verification.md)
+and [Punch captures](docs/game/punch.md#accepted-captures).
+
 [v0.3.44](https://github.com/liveweird/grenadiers/releases/tag/v0.3.44) publishes Kick as the
 nineteenth requested item. Published source `f32fd86d8f0c7c4bebba8fa60d1c66c65d1a174a`, tree
 `a0f2addb9204c40b4b30be2830fde4df368f019c`, is tagged by annotated object
 `c5b1ab6d4cad94ba2f16614103903067745c5179`. Localhost serves the accepted image
 `sha256:8ff3005861127f8ac57cc32f7e6c72ce5fa996fe628ad48426dbb8cf133e1af9`.
-Punch is the current v0.3.45 source candidate on that published parent; native acceptance and
-release publication remain pending. Bracelet and Oil Barrel follow before ART-ATLAS.
+Punch is the v0.3.45 native-accepted candidate on that published parent; release publication and
+localhost promotion remain pending. Bracelet and Oil Barrel follow before ART-ATLAS.
 
 The **two-player arena match is playable**. Create a room, share its invitation,
 join from another browser, and both choose Ready. Select the courtyard to move with arrows

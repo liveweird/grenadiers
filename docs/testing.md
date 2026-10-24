@@ -362,4 +362,7 @@ Equipment to F, enables only Punch, reveals the natural pickup, clears the appro
 moves one ordinary bomb from `(4,1)` to wrapped `(1,1)`. It proves the shared action-ID successor,
 same public bomb identity and fuse, no placement/detonation event, recipient parity, safe escape,
 and natural detonation using ordinary UI and native keys. It does not inject state, search seeds,
-retry, send direct gameplay commands or extend budgets. Native same-image execution remains pending.
+retry, send direct gameplay commands or extend budgets. Native execution is accepted in the scoped
+27-case checkpoint (26 Compose plus one Kubernetes case, zero retries); the full 114-case matrix
+was not run. Natural-fuse, reconnect and screenshot checks are recorded in
+[verification](verification.md#v0345-punch-native-accepted-checkpoint--2026-10-24--27-cases).

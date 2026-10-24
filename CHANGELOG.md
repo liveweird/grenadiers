@@ -1,14 +1,16 @@
 # Changelog
 
-## 0.3.45 — 2026-10-21 (source candidate)
+## 0.3.45 — 2026-10-24 (native acceptance; publication pending)
 
 - Add opt-in Punch equipment: the remappable Equipment action moves the adjacent facing bomb to the
   next open three-cell wrapped landing while preserving its identity, ownership, blast and fuse.
 - Keep the fixed 12-tick success cooldown and Punch history private across capture, admission,
   resume and replay; archived protocols reject those facts and no new wire field or event is added.
 - Extend gameplay v10 to the twentieth lobby switch and all 1,048,576 settings masks, with
-  English/Polish presentation and deterministic production-seed browser source. The merged
-  published v0.3.44 source parent is integrated; native same-image acceptance, final checks and publication
+  English/Polish presentation and deterministic production-seed browser source on the published
+  v0.3.44 parent. Local native acceptance completed on the exact image
+  `sha256:3f13b26f7a4a41ba2e90b8cc9261c9e95a60eceeddf49504341e65258eb7d37d`: 26 Compose cases plus
+  one Kubernetes case (27 total), all with zero retries. Release publication and localhost promotion
   remain pending.
 
 ## 0.3.44 — 2026-10-24

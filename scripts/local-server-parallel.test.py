@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import importlib.util
+import json
 import os
 import shutil
 import subprocess
@@ -9,6 +10,33 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 spec = importlib.util.spec_from_file_location("local_server_parallel", HERE / "local-server-parallel.py")
 module = importlib.util.module_from_spec(spec); spec.loader.exec_module(module)
+
+
+with tempfile.TemporaryDirectory(prefix="grenadiers-cargo-json-stream-") as temporary:
+    binary = Path(temporary) / "server-libtest"
+    binary.write_text("fixture executable")
+    cargo_message = json.dumps({"reason": "compiler-artifact",
+        "target": {"name": "grenadiers_server", "kind": ["lib"]},
+        "profile": {"test": True}, "executable": str(binary)}) + "\n"
+    original_run = module.run
+
+    def fake_run(command, **kwargs):
+        if command[0] == "cargo":
+            assert kwargs.get("capture") is True and kwargs.get("merge_stderr") is False
+            return subprocess.CompletedProcess(command, 0, stdout=cargo_message)
+        if command[0] == str(binary.resolve()):
+            return subprocess.CompletedProcess(command, 0, stdout=f"{module.HEAVY_TEST}: test\n")
+        raise AssertionError(f"unexpected command: {command}")
+
+    module.run = fake_run
+    try:
+        assert module.select_binary(False) == binary.resolve()
+    finally:
+        module.run = original_run
+
+progress = "import sys; print('{\"reason\":\"build-finished\",\"success\":true}'); print('Finished test profile', file=sys.stderr)"
+captured = module.run(["python3", "-c", progress], capture=True, merge_stderr=False)
+assert json.loads(captured.stdout)["success"] is True and "Finished" not in captured.stdout
 
 
 def plan(count):

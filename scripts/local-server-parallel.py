@@ -24,11 +24,11 @@ RANGE_KEYS = {"index", "startOrdinal", "endOrdinalExclusive"}
 
 
 def run(command: list[str], *, env: dict[str, str] | None = None,
-        capture: bool = False) -> subprocess.CompletedProcess[str]:
+        capture: bool = False, merge_stderr: bool = True) -> subprocess.CompletedProcess[str]:
     print("+", shlex.join(command), flush=True)
     return subprocess.run(command, cwd=ROOT, env=env, check=True, text=True,
                           stdout=subprocess.PIPE if capture else None,
-                          stderr=subprocess.STDOUT if capture else None)
+                          stderr=subprocess.STDOUT if capture and merge_stderr else None)
 
 
 def git(*args: str) -> str:
@@ -154,7 +154,7 @@ def select_binary(release: bool, env: dict[str, str] | None = None) -> Path:
     command = ["cargo", "test", "-p", "grenadiers-server", "--lib", "--locked", "--no-run",
                "--message-format=json"]
     if release: command.insert(6, "--release")
-    messages = run(command, env=env, capture=True).stdout
+    messages = run(command, env=env, capture=True, merge_stderr=False).stdout
     selected = subprocess.run(["node", "scripts/measure-game-artifact.mjs", "select"], cwd=ROOT,
                               input=messages, text=True, check=True, stdout=subprocess.PIPE).stdout.strip()
     binary = Path(selected).resolve()

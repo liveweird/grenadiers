@@ -11,14 +11,27 @@ Teleporter is published as the seventeenth requested item in prerelease
 attempt. Its exact native image `sha256:8ae9818d27c4345bceec6dad77f02e21ee7148626efded48c421d86421285477`
 is promoted locally in container `0a3bcbac08bc2c2cf46365917a3719d3c5e522c4555234da8e1f661f6edcf214`.
 Wall Pass is the eighteenth requested item and is native verified for the v0.3.43 candidate at
-source `bd34192d8915a8aac4288e3f69bd5898ad01d952`, tree
-`daa2306e77de0e279a6752aa69e687e0a6c51ba0`, and exact image
-`sha256:e2f02586988e2359404189afbe465ad47a4dd12e8227de8b6d3c627401ad7cfc`.
-At the `2026-10-23 19:48 UTC` native checkpoint all 55 Compose plus 55 Kubernetes cases pass with
+source `11d0dc7e39e8e2cafcf70c1548be339f52c740ab`, tree
+`655c7d8a80b4dd3fdd3b232534c2cbaa45b054cc`, and exact image
+`sha256:577abb32958e45912f35a7f6ae68dd624deb6515d2b4d55519942c44436a2a01`.
+At the `2026-10-24 01:00 UTC` native checkpoint all 55 Compose plus 55 Kubernetes cases pass with
 zero retries or carried results. v0.3.43 candidate, master and tag checks, publication and promotion
 remain pending; see current [checks](https://github.com/liveweird/grenadiers/actions) and
 [releases](https://github.com/liveweird/grenadiers/releases). Seventeen items are published and
 eighteen are native verified; Kick, Punch, Bracelet and Oil Barrel remain before ART-ATLAS.
+Binding review is clear and final manifest
+`3ac5e05ccee94c7716376ca9383c75acc924b772447499c6a0dbd857f68ec15c` durably seals the native
+evidence; independent post-seal review is clear.
+This release candidate also pins Zod 4.6.6 in both npm lockfiles, parallelizes only the independent
+English result inspections while preserving all 43 assertions, three captures, fixtures and
+budgets, and includes CI-only diagnostics for complete procfs reads plus coverage-output parent
+creation. Those diagnostics do not establish or claim a specific Chrome I/O cause.
+Latest corrected candidate `5dbcd58e920f852a8036c4bf741e26517793b072` additionally pins the
+development-only Happy DOM dependency to 21.0.4 for GHSA-834v-8h66-3h79. Its fresh web gate passes
+797 tests in 64 files with unchanged 95.24/90.88/96/97.66% coverage, and the full configured
+security gate reports three moderate development advisories (`@vitest/mocker`, `vitest` and
+`fast-uri`) with zero high or critical findings. The earlier PR #104 head failed its security job;
+exact-head hosted CI for this correction, merge, publication and promotion remain pending.
 
 The **two-player arena match is playable**. Create a room, share its invitation,
 join from another browser, and both choose Ready. Select the courtyard to move with arrows

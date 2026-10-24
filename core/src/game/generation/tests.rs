@@ -10,6 +10,8 @@ use crate::game::{
 mod kick_preservation_tests;
 #[path = "kick_tests.rs"]
 mod kick_tests;
+#[path = "punch_tests.rs"]
+mod punch_tests;
 
 struct Sequence {
     words: VecDeque<u32>,
@@ -354,6 +356,7 @@ fn signature(generated: &GeneratedArena) -> String {
                 Some(PickupKind::BlastRange) => 'R',
                 Some(PickupKind::MovementSpeed) => 'S',
                 Some(PickupKind::Kick) => 'K',
+                Some(PickupKind::Punch) => 'U',
                 Some(PickupKind::WallPass) => 'A',
                 Some(PickupKind::Heart) => 'H',
                 Some(PickupKind::PiercingBomb) => 'P',

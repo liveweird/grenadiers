@@ -62,7 +62,7 @@ test('two browsers observe Diarrhea auto placement and death reset', async ({ br
     await Promise.all(games.map((game) => expect.poll(() => latestSnapshot(game)?.room.phase.type)
       .toBe('running')))
     expect(latestSnapshot(games[0])!.room.availableItems).toEqual([
-      'kick', 'wallPass', 'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch', 'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse',
+      'kick', 'punch', 'wallPass', 'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch', 'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse',
       'reverseControls', 'invisibleBombs', 'teleporter',
     ])
     await one.getByRole('region', { name: 'Grenadiers courtyard' }).click()

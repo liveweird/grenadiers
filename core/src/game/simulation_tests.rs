@@ -14,6 +14,8 @@ use crate::game::world::World;
 mod kick_route_tests;
 #[path = "kick_tests.rs"]
 mod kick_tests;
+#[path = "simulation/punch_route_tests.rs"]
+mod punch_route_tests;
 
 fn open_world() -> World {
     let mut terrain = [Terrain::Floor; ARENA_CELL_COUNT];

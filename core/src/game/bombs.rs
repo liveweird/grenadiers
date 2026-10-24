@@ -60,6 +60,7 @@ pub struct Bomb {
     timed_history: Option<TimedBombHistory>,
     motion: Option<BombMotion>,
     has_been_kicked: bool,
+    has_been_punched: bool,
 }
 
 impl Bomb {
@@ -114,6 +115,7 @@ impl Bomb {
             timed_history,
             motion: None,
             has_been_kicked: false,
+            has_been_punched: false,
         })
     }
 
@@ -175,6 +177,11 @@ impl Bomb {
         self.has_been_kicked
     }
 
+    #[must_use]
+    pub const fn has_been_punched(self) -> bool {
+        self.has_been_punched
+    }
+
     pub(crate) fn arm_kick(&mut self, direction: Direction) {
         self.motion = Some(BombMotion {
             direction,
@@ -200,6 +207,18 @@ impl Bomb {
 
     pub(crate) fn set_cell(&mut self, cell: CellId) {
         self.cell = cell;
+    }
+
+    pub(crate) fn apply_punch(&mut self, cell: CellId) {
+        self.cell = cell;
+        self.motion = None;
+        self.has_been_punched = true;
+    }
+
+    // Used by the paired trusted-capture binding once the v10 protocol slice is integrated.
+    #[allow(dead_code)]
+    pub(crate) fn restore_punch_history(&mut self, has_been_punched: bool) {
+        self.has_been_punched = has_been_punched;
     }
 
     pub(crate) fn pause_one_tick(&mut self) -> Result<(), BombError> {

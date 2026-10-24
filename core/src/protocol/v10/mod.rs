@@ -61,6 +61,7 @@ pub fn expanded_settings(
 fn expanded_items() -> ItemSet {
     ItemSet::new([
         ItemId::Kick,
+        ItemId::Punch,
         ItemId::WallPass,
         ItemId::Heart,
         ItemId::RemoteBomb,
@@ -130,6 +131,8 @@ mod kick_tests;
 #[cfg(test)]
 #[path = "max_frame_tests.rs"]
 mod max_frame_tests;
+#[cfg(test)]
+mod punch_tests;
 #[cfg(test)]
 mod tests;
 #[cfg(test)]

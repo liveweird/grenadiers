@@ -3,34 +3,19 @@
 A browser-based multiplayer game inspired by classic Bomberman/Dynablaster.
 The initial playable profile supports two human players. Bots and larger matches follow later.
 
-Wall Pass is published as the eighteenth requested item in prerelease
-[v0.3.43](https://github.com/liveweird/grenadiers/releases/tag/v0.3.43). Published source
-`c086f719ea470b9fe24963adef84b5e3bdf3e17a`, tree
-`d74fad8a1c870f2834fca48f80ea4e38f0c512d9`, is tagged by annotated object
-`c8395fd7dcc5701842644967802e61c76211931c`. Candidate push/PR runs `40051959641` and
-`40051963999`, master run `40053637247`, and tag run `40055400664` pass all ten jobs, 55 browser
-cases and all 262,144 settings masks in each Rust profile on their first attempts. Localhost serves
-the exact accepted image `sha256:577abb32958e45912f35a7f6ae68dd624deb6515d2b4d55519942c44436a2a01`
-from container `d7f68cc89bfc87d06c202fbedae78c1892f54ea3ccdc6571fee0d1c5ea2f4240`;
-health, readiness and index return 200 and the served script SHA-256 is
-`61d6722543d93559ad980b2f6577897ddbdfcc80b4137d598d7aecf75c6ea637`.
+**v0.3.45 Punch native-accepted checkpoint — publication pending (2026-10-24).** Local native
+acceptance is complete for the Punch candidate: 26 Compose cases plus one Kubernetes case (27 total),
+all with zero retries, on image `sha256:3f13b26f7a4a41ba2e90b8cc9261c9e95a60eceeddf49504341e65258eb7d37d`.
+Release publication and localhost promotion remain pending. See [verification](docs/verification.md)
+and [Punch captures](docs/game/punch.md#accepted-captures).
 
-The 110 native cases remain attributed to source `11d0dc7e39e8e2cafcf70c1548be339f52c740ab`
-and final manifest `3ac5e05ccee94c7716376ca9383c75acc924b772447499c6a0dbd857f68ec15c`.
-Reviewed artifact equality connects corrected source `5dbcd58e920f852a8036c4bf741e26517793b072`
-to the published source through eight documentation-only changes; it does not claim unchanged
-Docker inputs, a new Rust compilation or new native execution. Delivery binding
-`40578e13d8a44a3cdb22bc222ac71eedd0005b08f3fb5f0748d07f7e333cf5d1` and its independent review
-are clear. The v0.3.42 image remains retained as the rollback parent. At the 2026-10-24
-native-acceptance checkpoint, eighteen of 22 requested items are published. Kick candidate
-`cb70cba891ed972380f30f52133622ce36fd9ee8` passes fresh Rust, web, security and complete
-524,288-mask gates. Fresh execution on prepared image `sha256:8ff3005861127f8ac57cc32f7e6c72ce5fa996fe628ad48426dbb8cf133e1af9`
-passes all 56 Compose plus 56 Kubernetes cases with zero retries or carried results. Independent
-audit, result/binding review, durable sealing and post-seal review are clear. This is the dated
-v0.3.44 native-acceptance checkpoint; hosted candidate/master/tag CI, publication and promotion
-follow and are not claimed here. Publication status belongs to the authoritative
-[GitHub Releases](https://github.com/liveweird/grenadiers/releases) record. Punch, Bracelet and Oil
-Barrel follow before ART-ATLAS.
+[v0.3.44](https://github.com/liveweird/grenadiers/releases/tag/v0.3.44) publishes Kick as the
+nineteenth requested item. Published source `f32fd86d8f0c7c4bebba8fa60d1c66c65d1a174a`, tree
+`a0f2addb9204c40b4b30be2830fde4df368f019c`, is tagged by annotated object
+`c5b1ab6d4cad94ba2f16614103903067745c5179`. Localhost serves the accepted image
+`sha256:8ff3005861127f8ac57cc32f7e6c72ce5fa996fe628ad48426dbb8cf133e1af9`.
+Punch is the v0.3.45 native-accepted candidate on that published parent; release publication and
+localhost promotion remain pending. Bracelet and Oil Barrel follow before ART-ATLAS.
 
 The **two-player arena match is playable**. Create a room, share its invitation,
 join from another browser, and both choose Ready. Select the courtyard to move with arrows
@@ -50,14 +35,14 @@ for five seconds of immunity; its timer refreshes on collection. The optional
 [Short Fuse](docs/game/short-fuse.md) halves newly planted bomb fuses for ten seconds. The opt-in
 [Short Flame curse](docs/game/short-flame.md) limits new bombs to one adjacent cell for ten seconds. The opt-in
 [Long Fuse curse](docs/game/long-fuse.md) doubles newly planted bomb fuses for ten seconds. Optional
-[Reverse Controls](docs/game/reverse-controls.md) reverses held movement directions for ten seconds. The opt-in [Diarrhea curse](docs/game/diarrhea.md) automatically drops ordinary bombs when placement is possible for ten seconds. [Slow foot](docs/game/slow-foot.md) halves movement speed for ten seconds per independently timed stack. [Kick](docs/game/kick.md) is permanent equipment that pushes stationary Timed and Remote bombs on a fixed cadence while preserving their fuse and ownership. [Wall Pass](docs/game/wall-pass.md) is permanent equipment for crossing breakable blocks while hard walls, bombs and hazards remain effective. [Remote Bomb](docs/game/remote-bomb.md) stores one manual bomb that waits for its owner's next bomb action. [Piercing Bomb](docs/game/piercing-bomb.md) stores one manual bomb whose blast crosses breakable blocks. [Power Bomb](docs/game/power-bomb.md) stores one manual bomb whose diamond-shaped blast ignores obstruction while preserving hard walls. [Landmine](docs/game/landmine.md) stores one passable contact mine with initial exit grace. [Invisibility Cloak](docs/game/invisibility-cloak.md) hides an active actor's spatial and loadout details from the opponent for ten seconds. [Stopwatch](docs/game/stopwatch.md) freezes the opponent's voluntary actions and pauses Timed bombs for three seconds. [Invisible Bombs](docs/game/invisible-bombs.md) hides every live bomb and its cues from the afflicted player for ten seconds. [Teleporter](docs/game/teleporter.md) consumes an immediate pickup and swaps both living players only when both destinations are safe. Gameplay v10 requires reloading older browser
+[Reverse Controls](docs/game/reverse-controls.md) reverses held movement directions for ten seconds. The opt-in [Diarrhea curse](docs/game/diarrhea.md) automatically drops ordinary bombs when placement is possible for ten seconds. [Slow foot](docs/game/slow-foot.md) halves movement speed for ten seconds per independently timed stack. [Punch](docs/game/punch.md) is permanent equipment that moves an adjacent facing bomb to the next open three-cell wrapped landing through a remappable Equipment action. [Kick](docs/game/kick.md) is permanent equipment that pushes stationary Timed and Remote bombs on a fixed cadence while preserving their fuse and ownership. [Wall Pass](docs/game/wall-pass.md) is permanent equipment for crossing breakable blocks while hard walls, bombs and hazards remain effective. [Remote Bomb](docs/game/remote-bomb.md) stores one manual bomb that waits for its owner's next bomb action. [Piercing Bomb](docs/game/piercing-bomb.md) stores one manual bomb whose blast crosses breakable blocks. [Power Bomb](docs/game/power-bomb.md) stores one manual bomb whose diamond-shaped blast ignores obstruction while preserving hard walls. [Landmine](docs/game/landmine.md) stores one passable contact mine with initial exit grace. [Invisibility Cloak](docs/game/invisibility-cloak.md) hides an active actor's spatial and loadout details from the opponent for ten seconds. [Stopwatch](docs/game/stopwatch.md) freezes the opponent's voluntary actions and pauses Timed bombs for three seconds. [Invisible Bombs](docs/game/invisible-bombs.md) hides every live bomb and its cues from the afflicted player for ten seconds. [Teleporter](docs/game/teleporter.md) consumes an immediate pickup and swaps both living players only when both destinations are safe. Gameplay v10 requires reloading older browser
 clients after an upgrade; see the [compatibility note](docs/game/protocol-v10.md).
 Reviewed pre-collection examples show Wall Pass in [English desktop](docs/screenshots/wall-pass-desktop.png)
 and [Polish 320px reduced-motion](docs/screenshots/wall-pass-mobile-pl.png) presentation. The
 published Teleporter examples remain available as [English desktop](docs/screenshots/teleporter-desktop.png)
 and [Polish 320px reduced-motion](docs/screenshots/teleporter-mobile-pl.png) captures.
 
-Use **Keyboard controls** below the arena to remap movement and bombs or restore defaults. Preferences
+Use **Keyboard controls** below the arena to remap movement, bombs and Punch equipment or restore defaults. Preferences
 stay in this browser. Opening settings, losing focus, or hiding the tab releases held movement;
 returning requires a fresh key press. See the [keyboard guide](docs/game/controls.md).
 

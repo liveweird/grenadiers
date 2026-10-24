@@ -25,6 +25,7 @@ export interface GameActions {
   rematch(ready: boolean): boolean
   movement(direction: Direction | null): boolean
   placeBomb(): boolean
+  useEquipment(): boolean
   leave(): boolean
 }
 
@@ -243,10 +244,13 @@ function arenaFocusHint(state: GameClientState, snapshot: ReturnType<typeof pres
   bindings: KeyboardBindings, copy: ReturnType<typeof useGameCopy>): string {
   const actor = state.youSeat && snapshot?.state.actors.find(({ seat }) => seat === state.youSeat)
   const bomb = bindings.bomb.map((code) => keyLabel(code, copy)).join(' / ')
+  const equipment = bindings.equipment.map((code) => keyLabel(code, copy)).join(' / ')
   if (actor?.invisibleBombsRemainingTicks && state.room?.settings.enabledItems.includes('remoteBomb')) {
     return format(copy.arena.blindBombHint, { bomb })
   }
-  return actor?.remoteArmed ? format(copy.arena.remoteHint, { bomb }) : copy.arena.focusHint
+  if (actor?.remoteArmed) return format(copy.arena.remoteHint, { bomb })
+  return actor?.punchEquipped
+    ? format(copy.arena.punchHint, { equipment }) : copy.arena.focusHint
 }
 
 export function GamePanelView({ state, actions }: { state: GameClientState; actions: GameActions }) {
@@ -279,7 +283,8 @@ export function GamePanelView({ state, actions }: { state: GameClientState; acti
           focusHint={focusHint} instructionsId="game-instructions" snapshot={arenaSnapshot}
           youSeat={state.youSeat} enabled={Boolean(enabled)}
           bindings={bindings}
-          onDirection={(direction) => actions.movement(direction)} onBomb={() => actions.placeBomb()} />
+          onDirection={(direction) => actions.movement(direction)} onBomb={() => actions.placeBomb()}
+          onEquipment={() => actions.useEquipment()} />
         <p id="game-instructions" className="game-instructions">{bindingsSummary(bindings, copy)}</p>
         <div className="local-controls">
           <Button className="controls-button" variant="subtle" color="dark" size="compact-sm"

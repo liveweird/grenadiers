@@ -17,10 +17,12 @@ pub(crate) struct WorldFacts {
     pub(crate) result: Option<WireRoundResult>,
     pub(crate) arena: ArenaView,
     pub(crate) actors: [VisibleActorView; 2],
+    pub(crate) last_successful_punch_ticks: [Option<Tick>; 2],
     pub(crate) soft_wall_grace: [Vec<Cell>; 2],
     pub(crate) bombs: Vec<BombView>,
     pub(crate) timed_bombs: BTreeMap<EntityId, TimedBombFacts>,
     pub(crate) kick_bombs: BTreeMap<EntityId, KickBombFacts>,
+    pub(crate) punch_bombs: BTreeMap<EntityId, PunchBombFacts>,
     pub(crate) flames: Vec<FlameView>,
     pub(crate) pickups: Vec<PickupView>,
     pub(crate) available_items: ItemSet,
@@ -34,6 +36,7 @@ pub(crate) struct EventFacts {
     pub(crate) kind: EventKind,
     pub(crate) timed_bomb: Option<TimedBombFacts>,
     pub(crate) kick_bomb: Option<KickBombFacts>,
+    pub(crate) punch_bomb: Option<PunchBombFacts>,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -55,6 +58,12 @@ pub(crate) struct KickBombFacts {
     pub(crate) bomb: BombView,
     pub(crate) motion: Option<BombMotionFacts>,
     pub(crate) has_been_kicked: bool,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) struct PunchBombFacts {
+    pub(crate) bomb: BombView,
+    pub(crate) has_been_punched: bool,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]

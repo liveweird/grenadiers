@@ -21,6 +21,7 @@ struct SeatMailbox {
 #[derive(Clone, Copy, Debug)]
 enum ManualAction {
     PlaceBomb,
+    UseEquipment,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -31,7 +32,7 @@ pub(super) enum InputError {
 }
 
 impl InputMailbox {
-    pub(super) fn last_bomb_action(&self, seat: SeatId) -> Option<u32> {
+    pub(super) fn last_manual_action(&self, seat: SeatId) -> Option<u32> {
         self.seats[seat.index()].manual_action_high_water
     }
 
@@ -75,6 +76,10 @@ impl InputMailbox {
         self.manual_action(seat, action_id, ManualAction::PlaceBomb)
     }
 
+    pub(super) fn equipment(&mut self, seat: SeatId, action_id: u32) -> Result<(), InputError> {
+        self.manual_action(seat, action_id, ManualAction::UseEquipment)
+    }
+
     fn manual_action(
         &mut self,
         seat: SeatId,
@@ -115,6 +120,7 @@ impl InputMailbox {
             for action in self.seats[seat.index()].manual_actions.drain(..) {
                 let action = match action {
                     ManualAction::PlaceBomb => InputAction::PlaceBomb,
+                    ManualAction::UseEquipment => InputAction::UseEquipment,
                 };
                 inputs.push(SeatInput { seat, action });
             }

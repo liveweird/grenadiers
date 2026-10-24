@@ -24,11 +24,10 @@ Changing the algorithm or draw semantics requires a new generator version and re
 replay/compatibility expectations. Do not replace the golden outputs merely to hide drift.
 
 Expanded generator v2 appends each enabled optional item to a stable weighted pool. Wall Pass adds
-the weight-15 interval `[365,380)` after Teleporter. Kick then appends weight 15 at `[380,395)`.
-The all-items pool is 395; either equipment-only pool is 115. Any mask without Kick preserves its
-v0.3.43 pool, draw count and exact seeded output; all 524,288 item subsets are accepted. Teleporter
-retains its preceding weight-15 interval, and all 262,144 earlier eighteen-item masks retain their
-exact outputs.
+the weight-15 interval `[365,380)` after Teleporter, Kick adds `[380,395)`, and Punch adds
+`[395,410)`. The all-items pool is 410; each equipment-only pool is 115. Any mask without Punch
+preserves its v0.3.44 pool, draw count and exact seeded output; all 1,048,576 item subsets are
+accepted. All 524,288 earlier nineteen-item masks retain their exact outputs.
 
 The server constructs typed worlds at each actual round start and keeps the generation record
 private. Layer transitions, collection, gameplay-v2 projection, and item graphics are integrated.

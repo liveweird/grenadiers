@@ -262,7 +262,8 @@ fn validate_bombs(
             return Err(ProjectionError::InvalidBombs);
         }
     }
-    super::projection_kick::validate_world(world, supported_items)
+    super::projection_kick::validate_world(world, supported_items)?;
+    super::projection_punch::validate_world(world, supported_items)
 }
 
 fn validate_flames(world: &WorldFacts) -> Result<(), ProjectionError> {

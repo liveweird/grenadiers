@@ -137,6 +137,7 @@ fn signature(generated: &GeneratedArena) -> String {
                 Some(PickupKind::BlastRange) => 'R',
                 Some(PickupKind::MovementSpeed) => 'S',
                 Some(PickupKind::Kick) => 'K',
+                Some(PickupKind::Punch) => 'U',
                 Some(PickupKind::WallPass) => 'A',
                 Some(PickupKind::Heart) => 'H',
                 Some(PickupKind::PiercingBomb) => 'P',

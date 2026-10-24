@@ -97,7 +97,7 @@ impl MatchRuntime {
         let state_epoch = body.map(|sim| wire_counter(sim.epoch)).transpose()?;
         let last_bomb_action_id = if state_epoch == Some(room.round_id) {
             self.inputs
-                .last_bomb_action(seat)
+                .last_manual_action(seat)
                 .map(|value| wire_counter(u64::from(value)))
                 .transpose()?
         } else {

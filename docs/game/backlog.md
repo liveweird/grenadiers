@@ -1,5 +1,12 @@
 # Gameplay and presentation backlog
 
+TURN, CONFIG and the first ART slice are implemented. This v0.3.45 source candidate contains twenty
+optional pickups: Heart, Shield, Golden Flame, Short Fuse, Short Flame, Long Fuse, Reverse
+Controls, Diarrhea, Slow-foot, Piercing Bomb, Power Bomb, Remote Bomb, Landmine and Invisibility
+Cloak, Stopwatch, Invisible Bombs, Teleporter, Wall Pass, Kick and Punch. Reviewed implementation
+source and all scoped acceptance checks are complete on the published v0.3.44 parent. Publication
+and localhost promotion remain pending. Bracelet and Oil Barrel follow before ART-ATLAS.
+
 [v0.3.43](https://github.com/liveweird/grenadiers/releases/tag/v0.3.43) publishes Wall Pass as the
 eighteenth of 22 requested item types. Published source `c086f719ea470b9fe24963adef84b5e3bdf3e17a`,
 tree `d74fad8a1c870f2834fca48f80ea4e38f0c512d9`, and annotated tag
@@ -10,12 +17,10 @@ artifact equality connects corrected `5dbcd58` to the published source without c
 Docker inputs, a new Rust compilation or new native execution. See the
 [verification record](../verification.md) for the delivery chain.
 
-This v0.3.44 source preparation contains the nineteenth opt-in pickup, Kick, while preserving the
-published Wall Pass behavior. At the 2026-10-24 checkpoint, source
-`cb70cba891ed972380f30f52133622ce36fd9ee8` passes fresh Rust, web, security and complete
-524,288-mask gates. Fresh execution passes all 56 Compose plus 56 Kubernetes cases with zero
-retries or carried results; independent audit, reviews and durable post-seal review are clear.
-Hosted CI and publication follow. Punch, Bracelet and Oil Barrel remain before ART-ATLAS.
+[v0.3.44](https://github.com/liveweird/grenadiers/releases/tag/v0.3.44) publishes Kick as the
+nineteenth requested item from source `f32fd86d8f0c7c4bebba8fa60d1c66c65d1a174a`, tree
+`a0f2addb9204c40b4b30be2830fde4df368f019c`. Its accepted image is promoted locally. Punch is the
+current source increment; Bracelet and Oil Barrel remain before ART-ATLAS.
 
 At the 21 October 2026 16:47 UTC native acceptance checkpoint, Invisibility Cloak was an
 **unreleased source candidate**. Corrected source `1c6724f` and
@@ -109,18 +114,18 @@ no game behavior. Independent audit is clear and 2,492 payloads are durably seal
 and promotion checks have not run. Six requested types remain: Teleporter,
 Wall Pass, Kick, Punch, Bracelet and Oil Barrel. ART-ATLAS follows the completed feature batch.
 
-TURN, CONFIG and the first ART slice are implemented. Published v0.3.43 contains eighteen
+TURN, CONFIG and the first ART slice are implemented. Published v0.3.44 contains nineteen
 optional pickups: Heart, Shield, Golden Flame, Short Fuse, Short Flame, Long Fuse, Reverse
 Controls, Diarrhea, Slow-foot, Piercing Bomb, Power Bomb, Remote Bomb, Landmine and Invisibility
-Cloak, Stopwatch, Invisible Bombs, Teleporter and Wall Pass. Its source, CI, publication and exact
-image promotion are complete. The remaining four requested pickups stay outside that increment;
-Kick is source-gates verified and its fresh 56+56 native acceptance is independently reviewed and
-sealed for v0.3.44, while publication follows this dated checkpoint. Authoritative publication
+Cloak, Stopwatch, Invisible Bombs, Teleporter, Wall Pass and Kick. Its source, publication and exact
+image promotion are complete. The remaining three requested pickups stay outside that increment.
+Authoritative publication
 status is recorded in [GitHub Releases](https://github.com/liveweird/grenadiers/releases), with source-bound
 acceptance records in [verification](../verification.md). Richer transitions and artwork remain
 follow-up work; see [pixel-art presentation](pixel-art.md) and
 [expanded item implementation](expanded-items.md).
-Updated 2026-10-24 after v0.3.43 delivery and the Kick native-acceptance checkpoint. Release acceptance is recorded in
+Updated 2026-10-24 after Punch native acceptance.
+Release acceptance is recorded in
 [verification](../verification.md).
 The [implementation plan](implementation-plan.md) remains the milestone/release reference;
 the [rules](rules.md) describe the current baseline and historical extension catalog.
@@ -318,7 +323,8 @@ Retain bounded scheduling, performance budgets, EN/PL documentation and full rel
 including same-image Compose/Kubernetes acceptance. Bots, mobs and larger matches remain
 separate tracks; their future interactions must be specified without making them prerequisites.
 
-Complete the entire expanded-item activation batch before starting ART-ATLAS. Kick is the
-current bounded increment (v0.3.44), with native acceptance complete. Hosted release
-acceptance remains pending; melee equipment and Oil follow it. ART-ATLAS begins
+Complete the entire expanded-item activation batch before starting ART-ATLAS. Punch is the
+native-accepted v0.3.45 increment on the published Kick parent; publication remains pending.
+Bracelet and Oil remain after Punch.
+ART-ATLAS begins
 only after those item increments and their release gates are complete.

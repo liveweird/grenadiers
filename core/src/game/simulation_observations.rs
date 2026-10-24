@@ -19,6 +19,18 @@ impl Actor {
     pub(crate) fn soft_wall_grace_observations(&self) -> impl Iterator<Item = CellId> + '_ {
         self.soft_wall_grace.iter().copied()
     }
+
+    // Used by the paired trusted-capture binding once the v10 protocol slice is integrated.
+    #[allow(dead_code)]
+    pub(crate) const fn last_successful_punch_tick(&self) -> Option<Tick> {
+        self.last_successful_punch_tick
+    }
+
+    // Used by the paired trusted-capture binding once the v10 protocol slice is integrated.
+    #[allow(dead_code)]
+    pub(crate) fn restore_punch_cooldown(&mut self, tick: Option<Tick>) {
+        self.last_successful_punch_tick = tick;
+    }
 }
 
 impl State {

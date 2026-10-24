@@ -113,4 +113,17 @@ describe('accepted-event audio cursor', () => {
     expect(cursor.consume(resumed, true)).toEqual([])
     expect(cursor.consume(state(31, [], 2), true)).toEqual([])
   })
+
+  it('does not synthesize audio from a retained bomb changing public cells', () => {
+    const cursor = new AudioCursor()
+    const before = state(20)
+    before.snapshot!.state.bombs = [{
+      id: 3, cell: { column: 2, row: 1 }, owner: 1, range: 2, placedAt: 1,
+      trigger: { type: 'timed', remainingTicks: 100, paused: false }, blast: 'standard',
+    }]
+    cursor.consume(before, true)
+    const after = state(21)
+    after.snapshot!.state.bombs = [{ ...before.snapshot!.state.bombs[0], cell: { column: 5, row: 1 } }]
+    expect(cursor.consume(after, true)).toEqual([])
+  })
 })

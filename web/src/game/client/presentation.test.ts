@@ -116,6 +116,18 @@ describe('v10 arena presentation', () => {
     ])
   })
 
+  it('presents Punch equipment and its distinct pickup without private cooldown or bomb history', () => {
+    const current = state()
+    const own = current.snapshot!.state.actors[0]
+    if (own.type !== 'visible') throw new Error('expected visible own actor')
+    own.inventory.equipment = 'punch'
+    current.snapshot!.state.pickups = [{ cell: { column: 3, row: 2 }, kind: 'punch' }]
+    const presented = presentSnapshot(current)!
+    expect(presented.state.actors[0]).toMatchObject({ punchEquipped: true })
+    expect(presented.state.pickups).toEqual(current.snapshot!.state.pickups)
+    expect(Object.keys(presented.state.actors[0])).not.toContain('lastSuccessfulPunchTick')
+  })
+
 })
 
 describe('Stopwatch presentation', () => {

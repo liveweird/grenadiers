@@ -3,7 +3,6 @@ use std::collections::BTreeSet;
 use super::assignment::RoundAssignment;
 use super::damage::DamageGrace;
 use super::effects::{EffectiveSpeed, TimedEffects};
-use super::events::StepEvent;
 use super::geometry::MovementTrace;
 use super::input::{Direction, HeldDirections};
 use super::inventory::Inventory;
@@ -12,28 +11,11 @@ use super::rules::RulesConfig;
 use super::types::{CellId, EntityId, Position, SeatId, SpeedLevel, Tick};
 use super::world::World;
 
-pub const MAX_INPUTS_PER_TICK: usize = 64;
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub struct ActorInit {
-    pub id: EntityId,
-    pub seat: SeatId,
-    pub position: Position,
-    pub heading: Direction,
-    pub speed: SpeedLevel,
-}
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum InputAction {
-    Press(Direction),
-    Release(Direction),
-    Clear,
-    PlaceBomb,
-}
-
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub struct SeatInput {
-    pub seat: SeatId,
-    pub action: InputAction,
-}
+#[path = "simulation_contract.rs"]
+mod contract;
+pub use contract::{
+    ActorInit, InputAction, MAX_INPUTS_PER_TICK, SeatInput, StateError, StepError, StepReport,
+};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) struct TurnAssist {
@@ -59,6 +41,7 @@ pub struct Actor {
     inventory: Inventory,
     effects: TimedEffects,
     damage_grace: Option<DamageGrace>,
+    last_successful_punch_tick: Option<Tick>,
 }
 
 impl Actor {
@@ -126,49 +109,6 @@ pub enum DrawReason {
 pub enum RoundResult {
     Winner(SeatId),
     Draw(DrawReason),
-}
-
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum StateError {
-    DuplicateActorId(EntityId),
-    DuplicateSeat(SeatId),
-    IllegalActorPosition(EntityId),
-    DuplicateEntityId(EntityId),
-    IllegalBombCell(CellId),
-    OccupiedBombCell(CellId),
-    UnknownBombOwner(EntityId),
-    BombIdMismatch {
-        key: EntityId,
-        id: EntityId,
-    },
-    UnsupportedBombTrigger(EntityId),
-    UnsupportedBombBlast(EntityId),
-    DuplicateRemoteOwner(EntityId),
-    UnsupportedBombKickHistory(EntityId),
-    UnsupportedEnabledItems(crate::game::EnabledItems),
-    UnsupportedPickup {
-        cell: CellId,
-        kind: crate::game::PickupKind,
-    },
-}
-
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum StepError {
-    TooManyInputs { count: usize, maximum: usize },
-    TickOverflow,
-    UnsupportedBombTrigger(EntityId),
-    UnsupportedBombBlast(EntityId),
-    DuplicateRemoteOwner(EntityId),
-    UnsupportedBombKickHistory(EntityId),
-    EffectExpiryOverflow(super::effects::EffectKind),
-    BombPauseOverflow(EntityId),
-}
-
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub struct StepReport {
-    pub tick: Tick,
-    pub traces: [MovementTrace; 2],
-    pub events: Vec<StepEvent>,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -266,6 +206,9 @@ impl State {
         if let Some(id) = validation::unsupported_kick_history(rules, &world) {
             return Err(StateError::UnsupportedBombKickHistory(id));
         }
+        if let Some(id) = validation::unsupported_punch_history(rules, &world) {
+            return Err(StateError::UnsupportedBombPunchHistory(id));
+        }
 
         let mut canonical = actors;
         canonical.sort_by_key(|actor| actor.seat.index());
@@ -345,6 +288,35 @@ mod placement_tests;
 #[cfg(test)]
 #[path = "projection_tests.rs"]
 mod projection_tests;
+#[path = "simulation_punch.rs"]
+mod punch;
+#[cfg(test)]
+#[path = "punch_claim_proof_tests.rs"]
+mod punch_claim_proof_tests;
+#[cfg(test)]
+#[path = "punch_cooldown_proof_tests.rs"]
+mod punch_cooldown_proof_tests;
+#[cfg(test)]
+#[path = "punch_interaction_proof_tests.rs"]
+mod punch_interaction_proof_tests;
+#[cfg(test)]
+#[path = "punch_rollback_tests.rs"]
+mod punch_rollback_tests;
+#[cfg(test)]
+#[path = "punch_target_tests.rs"]
+mod punch_target_tests;
+#[cfg(test)]
+#[path = "punch_tests.rs"]
+mod punch_tests;
+#[cfg(test)]
+#[path = "punch_validation_tests.rs"]
+mod punch_validation_tests;
+#[cfg(test)]
+#[path = "punch_wave_proof_tests.rs"]
+mod punch_wave_proof_tests;
+#[cfg(test)]
+#[path = "punch_wave_tests.rs"]
+mod punch_wave_tests;
 #[cfg(test)]
 #[path = "round_result_tests.rs"]
 mod round_result_tests;

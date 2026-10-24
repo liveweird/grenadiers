@@ -11,7 +11,45 @@ honest about the source and environment actually tested.
 The records below are historical evidence. Their repeated CI runs, receipt graphs and sealing
 procedures do not impose additional requirements on future changes.
 
-## v0.3.44 Kick sealed native acceptance — 2026-10-24 — 112/112
+## v0.3.45 Punch native-accepted checkpoint — 2026-10-24 — 27 cases
+
+Application/Rust source `8e6e63aeb55227360fddcad3f81c83e33aaace0a` passed independent backend
+and frontend reviews. Browser-only corrections through `5bc46b5` preserve application inputs.
+Exact image `sha256:3f13b26f7a4a41ba2e90b8cc9261c9e95a60eceeddf49504341e65258eb7d37d`
+passes **27 scoped native cases with zero retries**:
+
+- Compose: Punch, Kick, Remote Bomb, classic match/rematch and 22 latency cases (26 total).
+- Kubernetes: Punch on the same image, with production manifests, image identity, non-root and
+  security settings, service readiness and namespace-UID-guarded cleanup (one case).
+
+Punch checks real transport interruption/resume, retained bomb identity and fuse deadline, private
+state absence, no Equipment replay, and the remapped F successor action. The first bomb remains
+uninterrupted for screenshots and natural detonation; a second fresh bomb proves reconnect.
+Owned resources were cleaned up. Latency maxima are 54.72 ms locally and 148.39 ms with shaped
+50 ms delay, below the unchanged 250 ms budget. The full historical 114-case matrix was not run.
+
+Full local Rust checks exit zero in **14m30s**, covering all **1,048,576 masks per profile**
+(debug/release/coverage) with four workers and eight ranges. Official merged line coverage is
+**15,703/16,901 (92.911662%)**. The web gate passes **1,586 tests across 68 files** with
+**95.12/90.8/95.91/97.63%** statement/branch/function/line coverage. E2E static checks pass,
+including all 58 documented scenarios. Dependency security and configured image-audit thresholds
+pass: three moderate web packages, no high/critical findings, and no E2E advisories.
+
+Distinct [Ubuntu Rust units](https://github.com/liveweird/grenadiers/actions/runs/40120977401)
+pass at `f398be7`; later changes affect browser tests and documentation only. Passing equivalent
+checks and the exact tested image are reused under the local-first policy. Release publication
+and localhost promotion remain pending at this checkpoint.
+
+## v0.3.44 published delivery — 2026-10-24
+
+Source `f32fd86d8f0c7c4bebba8fa60d1c66c65d1a174a`, tree
+`a0f2addb9204c40b4b30be2830fde4df368f019c`, is published as
+[v0.3.44](https://github.com/liveweird/grenadiers/releases/tag/v0.3.44) through annotated tag object
+`c5b1ab6d4cad94ba2f16614103903067745c5179`. Localhost serves the accepted image
+`sha256:8ff3005861127f8ac57cc32f7e6c72ce5fa996fe628ad48426dbb8cf133e1af9`.
+This is the published parent for the v0.3.45 Punch source candidate.
+
+## Historical v0.3.44 Kick sealed native acceptance — 2026-10-24 — 112/112
 
 Candidate source `cb70cba891ed972380f30f52133622ce36fd9ee8`, tree
 `5be27219ba749d2811396d6f84af7d31f528a692`, completed fresh source-bound gates with consumed
@@ -5604,13 +5642,22 @@ these scaffold checks. These are local results; hosted CI status is separate evi
 The original `AGENTS.md` remains unchanged under the explicit preservation instruction;
 current engineering conventions live in `CONTRIBUTING.md`.
 
-## v0.3.44 Kick native-accepted candidate
+## v0.3.44 Kick published parent
 
 The deterministic browser source is configured for the reviewed repeating-byte-31 fixture. Planned
 captures are retained as `docs/screenshots/kick-desktop.png` and
 `docs/screenshots/kick-mobile-pl.png`. The fresh source gates and passing same-image execution are
-recorded at the top of this document. Independent review and sealing are clear; hosted release
-acceptance follows this dated checkpoint.
+recorded at the top of this document. Published source and local promotion are recorded in the
+current v0.3.44 delivery section.
+
+## v0.3.45 Punch source candidate
+
+The deterministic two-browser source is configured for the reviewed repeating-byte-31 fixture.
+Planned captures are `punch-wrapped-desktop-en.png` and
+`punch-wrapped-polish-320-reduced.png`. The source route uses ordinary inputs, a remapped actual
+Equipment key and both recipient streams; it adds no private cooldown/history fields or test hooks.
+The published v0.3.44 source parent is integrated. Native same-image execution and Punch release
+acceptance remain pending.
 
 ## Historical Cloak rolling-history source integration — parent acceptance was pending
 

@@ -17,7 +17,7 @@ function props(): GameArenaProps {
     label: 'Game arena', waitingText: 'Waiting for the round', failureText: 'Graphics unavailable',
     focusHint: 'Click to play', instructionsId: 'controls-help',
     snapshot: gameSnapshot(), youSeat: 'one', enabled: true,
-    onDirection: vi.fn(), onBomb: vi.fn(),
+    onDirection: vi.fn(), onBomb: vi.fn(), onEquipment: vi.fn(),
   }
 }
 async function imports(): Promise<void> {

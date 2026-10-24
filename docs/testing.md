@@ -350,4 +350,19 @@ passes all 524,288 masks in debug, release and coverage, 763 core and 210 server
 1,059 web tests across 66 files, and 57 static scenarios. Fresh image execution subsequently passes
 all 56 Compose plus 56 Kubernetes cases with zero retries or carried results. Audit, independent
 result/binding review, durable sealing and post-seal review are clear. Hosted release checks remain
-separate follow-up evidence.
+historical checkpoint evidence. Published source `f32fd86d8f0c7c4bebba8fa60d1c66c65d1a174a`
+is available as [v0.3.44](https://github.com/liveweird/grenadiers/releases/tag/v0.3.44), and the
+accepted image is promoted locally.
+
+### Punch source scenario
+
+Use `docker-compose.punch.yaml` with the mode-0444 repeating-byte-31 v2 seed fixture and
+`E2E_PUNCH_FIXTURE=arena-v2-punch npm --prefix e2e run test:punch`. The two-browser route remaps
+Equipment to F, enables only Punch, reveals the natural pickup, clears the approved corridor and
+moves one ordinary bomb from `(4,1)` to wrapped `(1,1)`. It proves the shared action-ID successor,
+same public bomb identity and fuse, no placement/detonation event, recipient parity, safe escape,
+and natural detonation using ordinary UI and native keys. It does not inject state, search seeds,
+retry, send direct gameplay commands or extend budgets. Native execution is accepted in the scoped
+27-case checkpoint (26 Compose plus one Kubernetes case, zero retries); the full 114-case matrix
+was not run. Natural-fuse, reconnect and screenshot checks are recorded in
+[verification](verification.md#v0345-punch-native-accepted-checkpoint--2026-10-24--27-cases).

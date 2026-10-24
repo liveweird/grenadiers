@@ -19,7 +19,7 @@ if (!resolved) throw new Error(`AJV did not resolve ${schemaReference}`)
 const validateServer: ValidateFunction<GameServerMessage> = resolved
 
 const supportedItems = [
-  'kick', 'wallPass', 'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch',
+  'kick', 'punch', 'wallPass', 'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch',
   'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame',
   'longFuse', 'reverseControls', 'invisibleBombs', 'teleporter',
 ] as const

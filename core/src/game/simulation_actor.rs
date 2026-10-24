@@ -21,6 +21,7 @@ impl Actor {
             inventory: Inventory::default(),
             effects: TimedEffects::default(),
             damage_grace: None,
+            last_successful_punch_tick: None,
         }
     }
 }

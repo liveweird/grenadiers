@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
-import { arenaTilePixels } from '../tests/support/compositor'
+import { captureArenaTiles } from '../tests/support/compositor'
 import { latestSnapshot, observeGame, visibleActor, type ObservedGame } from '../tests/support/duel'
 import { moveSeatTo } from '../tests/support/movement'
 import { admissionBaseline, disconnectTransport, installTransportProbe } from '../tests/support/reconnect'
@@ -333,16 +333,17 @@ test('Punch wraps one retained bomb three cells without extra cues and preserves
       await moveSeatTo(one, games[0], 'one', { column: 3, row: 2 })
       const capturePosition = actor(games[0]).position
       await expectLiveCaptureScene(games, demo.id, capturePosition)
-      const punchedPixels = await Promise.all([one, two].map((page) => arenaTilePixels(page, 1, 1)))
-      const sourcePixels = await Promise.all([one, two].map((page) => arenaTilePixels(page, 4, 1)))
-      await expectLiveCaptureScene(games, demo.id, capturePosition)
-      expect(punchedPixels[0]).not.toEqual(sourcePixels[0])
-      expect(punchedPixels[1]).not.toEqual(sourcePixels[1])
-      expect(await two.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false)
-      await Promise.all([
-        one.screenshot({ path: info.outputPath('punch-wrapped-desktop-en.png'), fullPage: true }),
-        two.screenshot({ path: info.outputPath('punch-wrapped-polish-320-reduced.png'), fullPage: true }),
+      const cells = [{ column: 1, row: 1 }, { column: 4, row: 1 }]
+      const captures = await Promise.all([
+        captureArenaTiles(one, info.outputPath('punch-wrapped-desktop-en.png'), cells),
+        captureArenaTiles(two, info.outputPath('punch-wrapped-polish-320-reduced.png'), cells),
       ])
+      await expectLiveCaptureScene(games, demo.id, capturePosition)
+      expect(captures[0].pixels[0]).not.toEqual(captures[0].pixels[1])
+      expect(captures[1].pixels[0]).not.toEqual(captures[1].pixels[1])
+      expect(await two.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false)
+      expect(captures[0].screenshot.length).toBeGreaterThan(0)
+      expect(captures[1].screenshot.length).toBeGreaterThan(0)
       await expectLiveCaptureScene(games, demo.id, capturePosition)
 
       await expectNaturalDetonation(games, demo, beforePlant, punchFloors, movedRevisions)

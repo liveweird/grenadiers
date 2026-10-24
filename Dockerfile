@@ -5,6 +5,7 @@ COPY web/package.json web/package-lock.json web/.npmrc ./
 RUN npm ci
 COPY web/ ./
 COPY api/ /build/api/
+COPY assets/art/arena-source.png assets/art/arena-source.json /build/assets/art/
 RUN npm run build
 
 FROM rust:1.99.1-bookworm@sha256:e12566d5abc17a0da741628782cdb504b68b8961f5bfcf677936bf3e8b32de29 AS server

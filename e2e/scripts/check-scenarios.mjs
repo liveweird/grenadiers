@@ -8,40 +8,12 @@ async function files(directory, suffix) {
 }
 
 const scenarioText = (await Promise.all((await files(scenarioDirectory, '.md')).map((name) => readFile(new URL(name, scenarioDirectory), 'utf8')))).join('\n')
+const e2eDirectory = new URL('../', import.meta.url)
 const testDirectories = [
   testDirectory,
-  new URL('../pickup-tests/', import.meta.url),
-  new URL('../controls-tests/', import.meta.url),
-  new URL('../match-tests/', import.meta.url),
-  new URL('../reconnect-tests/', import.meta.url),
-  new URL('../hardening-tests/', import.meta.url),
-  new URL('../latency-tests/', import.meta.url),
-  new URL('../audio-tests/', import.meta.url),
-  new URL('../heart-tests/', import.meta.url),
-  new URL('../shield-tests/', import.meta.url),
-  new URL('../golden-flame-tests/', import.meta.url),
-  new URL('../short-fuse-tests/', import.meta.url),
-  new URL('../short-flame-tests/', import.meta.url),
-  new URL('../long-fuse-tests/', import.meta.url),
-  new URL('../reverse-controls-tests/', import.meta.url),
-  new URL('../diarrhea-tests/', import.meta.url),
-  new URL('../slow-foot-tests/', import.meta.url),
-  new URL('../piercing-bomb-tests/', import.meta.url),
-  new URL('../power-bomb-tests/', import.meta.url),
-  new URL('../remote-bomb-tests/', import.meta.url),
-  new URL('../landmine-tests/', import.meta.url),
-  new URL('../invisibility-cloak-tests/', import.meta.url),
-  new URL('../stopwatch-tests/', import.meta.url),
-  new URL('../invisible-bombs-tests/', import.meta.url),
-  new URL('../teleporter-tests/', import.meta.url),
-  new URL('../wall-pass-tests/', import.meta.url),
-  new URL('../kick-tests/', import.meta.url),
-  new URL('../punch-tests/', import.meta.url),
-  new URL('../bracelet-tests/', import.meta.url),
-  new URL('../oil-barrel-tests/', import.meta.url),
-  new URL('../art-atlas-tests/', import.meta.url),
-  new URL('../atlas-gameplay-tests/', import.meta.url),
-  new URL('../terrain-pixel-tests/', import.meta.url),
+  ...(await readdir(e2eDirectory, { withFileTypes: true }))
+    .filter((entry) => entry.isDirectory() && entry.name.endsWith('-tests'))
+    .map((entry) => new URL(`${entry.name}/`, e2eDirectory)),
 ]
 const testText = (await Promise.all(testDirectories.map(async (directory) =>
   (await Promise.all((await files(directory, '.ts')).map((name) => readFile(new URL(name, directory), 'utf8')))).join('\n'),

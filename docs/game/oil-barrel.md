@@ -32,7 +32,7 @@ See [settings](settings.md), [generation](generation.md), [gameplay v11](protoco
 [production-seed test](../testing.md#oil-barrel-production-seed-scenario).
 
 Application source `32f5ad4` and corrected browser scenario `b30deb1` pass full checks and scoped
-same-image acceptance. Publication and promotion remain pending. Reload older clients for gameplay
+same-image acceptance. [v0.3.47 is published](https://github.com/liveweird/grenadiers/releases/tag/v0.3.47) and promoted locally. Reload older clients for gameplay
 v11 after upgrade. See [verification](../verification.md#current-v0347-oil-barrel-acceptance--2026-10-24)
 and accepted [English desktop](../screenshots/oil-barrel-desktop.png) and
 [Polish 320px reduced-motion](../screenshots/oil-barrel-mobile-pl.png) captures.

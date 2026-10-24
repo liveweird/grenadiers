@@ -78,7 +78,9 @@ test('Kick moves one retained bomb through authoritative cells without extra cue
       await prepareEscape(one, games[0])
       await Promise.all(games.map((game) => expect.poll(() => actor(game).inventory.equipment)
         .toBe('kick')))
-      await expect(one.getByLabel('Player one upgrades')).toContainText('EquipmentKick')
+      // Expanded-v5 starts at range two; the sole Kick route must not change that baseline.
+      await Promise.all(games.map((game) => expect.poll(() => actor(game).bombRange).toBe(2)))
+      await expect(one.getByLabel('Player one upgrades')).toContainText('GearKick')
       await expect(two.getByLabel('Ulepszenia: Gracz pierwszy')).toContainText('WyposażenieKopnięcie')
 
       const beforePlant = latestSnapshot(games[0])!.room.revision
@@ -86,7 +88,7 @@ test('Kick moves one retained bomb through authoritative cells without extra cue
       await expect.poll(() => placedAfter(games[0], beforePlant)).toHaveLength(1)
       const demo = placedAfter(games[0], beforePlant)[0]!
       expect(demo).toMatchObject({
-        cell: { column: 3, row: 1 }, owner: actor(games[0]).id, range: 1,
+        cell: { column: 3, row: 1 }, owner: actor(games[0]).id, range: 2,
         blast: 'standard', trigger: { type: 'timed', remainingTicks: 300, paused: false },
       })
       await moveSeatTo(one, games[0], 'one', { column: 4, row: 1 })

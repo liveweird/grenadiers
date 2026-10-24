@@ -286,9 +286,12 @@ English desktop and Polish 320-pixel
 reduced-motion views produce the two named full-page captures. The scenario uses no state
 injection, direct WebSocket commands, seed search or retry. The sole-item fixture cannot prove
 Wall-Pass-to-Heart replacement grace; core and protocol tests provide that coverage. Native
-execution completed as a sealed 55 Compose plus 55 Kubernetes matrix on source
-`bd34192d8915a8aac4288e3f69bd5898ad01d952`. Hosted candidate, master and tag checks,
-publication and promotion for v0.3.43 remain pending.
+execution completed as a sealed 55 Compose plus 55 Kubernetes matrix on H2 source
+`11d0dc7e39e8e2cafcf70c1548be339f52c740ab`. Published source
+`c086f719ea470b9fe24963adef84b5e3bdf3e17a` later passed candidate, master and tag checks;
+[v0.3.43](https://github.com/liveweird/grenadiers/releases/tag/v0.3.43) publication and exact-image
+local promotion are complete. The native result remains attributed to H2 rather than relabeled to
+the published source.
 
 ### Kick source scenario
 

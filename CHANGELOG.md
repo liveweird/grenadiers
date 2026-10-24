@@ -10,7 +10,7 @@
   English/Polish presentation and deterministic production-seed browser source. Native same-image
   acceptance, final CI and publication remain pending.
 
-## 0.3.43 — 2026-10-24 (source candidate)
+## 0.3.43 — 2026-10-24
 
 - Add opt-in Wall Pass equipment for movement through breakable blocks while hard walls, bombs,
   contact, fire and placement rules remain authoritative.
@@ -33,7 +33,7 @@
   passes 797 tests across 64 files with unchanged coverage, and the complete configured security
   gate passes with three moderate development advisories and zero high or critical findings. The
   first PR #104 head (`98dffe5`) failed security in push run `40050321682` and PR run
-  `40050338206`; the corrected head has not yet been pushed for hosted CI.
+  `40050338206`; that failure is preserved as history and superseded by the published delivery.
 - At the `2026-10-24 01:00 UTC` native checkpoint, exact image
   `sha256:577abb32958e45912f35a7f6ae68dd624deb6515d2b4d55519942c44436a2a01`
   passes all 55 Compose plus 55 Kubernetes cases with zero retries or carried passes: 52 reports,
@@ -47,8 +47,18 @@
   is durable. Independent post-seal review
   `5d253559ba95a9d30fc83f16fd0786a6d283356d892f26abed3611771588d33f` is clear. Eighteen requested items are native
   verified; Kick, Punch, Bracelet and Oil Barrel remain.
-  Hosted candidate, master and tag checks, publication and promotion remain pending; this entry does
-  not claim a v0.3.43 release.
+- Publish source `c086f719ea470b9fe24963adef84b5e3bdf3e17a`, tree
+  `d74fad8a1c870f2834fca48f80ea4e38f0c512d9`, as
+  [v0.3.43](https://github.com/liveweird/grenadiers/releases/tag/v0.3.43) through annotated tag
+  object `c8395fd7dcc5701842644967802e61c76211931c`. Candidate push/PR runs `40051959641` and
+  `40051963999`, master run `40053637247`, and tag run `40055400664` pass all ten jobs, 55 browser
+  cases and 262,144 masks per Rust profile on their first attempts. Promote accepted image
+  `sha256:577abb32958e45912f35a7f6ae68dd624deb6515d2b4d55519942c44436a2a01`
+  in container `d7f68cc89bfc87d06c202fbedae78c1892f54ea3ccdc6571fee0d1c5ea2f4240`.
+  The 110 native passes remain attributed to `11d0dc7`; reviewed artifact equality bridges
+  corrected `5dbcd58` to the published source through eight documentation-only changes without
+  claiming unchanged Docker inputs, a new Rust compilation or new native execution. Eighteen of
+  22 requested items are published.
 
 ## 0.3.42 — 2026-10-23
 

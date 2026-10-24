@@ -1,6 +1,32 @@
 # Repository verification
 
-## v0.3.43 Wall Pass native checkpoint — 2026-10-24 01:00 UTC — 110/110
+## v0.3.43 published delivery — 2026-10-24
+
+Source `c086f719ea470b9fe24963adef84b5e3bdf3e17a`, tree
+`d74fad8a1c870f2834fca48f80ea4e38f0c512d9`, is published as prerelease
+[v0.3.43](https://github.com/liveweird/grenadiers/releases/tag/v0.3.43) through annotated tag object
+`c8395fd7dcc5701842644967802e61c76211931c`. Candidate push/PR runs `40051959641` and
+`40051963999`, master run `40053637247`, and tag run `40055400664` pass all ten jobs, 55 browser
+cases and 262,144 masks in each Rust profile on their first attempts. Delivery binding
+`40578e13d8a44a3cdb22bc222ac71eedd0005b08f3fb5f0748d07f7e333cf5d1` and independent review
+`21f6b544ee9d8e906c056671242c6be73ba742d1bcecb55f39c804ae78d9ec54` authenticate all nine
+delivery receipt hashes.
+
+Localhost serves exact image
+`sha256:577abb32958e45912f35a7f6ae68dd624deb6515d2b4d55519942c44436a2a01` from container
+`d7f68cc89bfc87d06c202fbedae78c1892f54ea3ccdc6571fee0d1c5ea2f4240`; health, readiness and
+index return 200 and the served script hashes to
+`61d6722543d93559ad980b2f6577897ddbdfcc80b4137d598d7aecf75c6ea637`. The v0.3.42 deployment is
+retained as the rollback parent. Native acceptance remains bound to source `11d0dc7`, seal
+`31fe5eef2900a0229d002e45b5a310888f3915829db0aaf23bc3535a8eea5e2c`, and final manifest
+`3ac5e05ccee94c7716376ca9383c75acc924b772447499c6a0dbd857f68ec15c`. Artifact-equivalence
+receipt `81bd78943fa8e80bc839b06bcd68c7bb26872f4cf600c2fcc80e2269c7c94209` and review
+`42bbbcb68e8a306d9ed611513e186189ab3430f17bf545191edace5bdb6e3b75` prove corrected source
+`5dbcd58` produces the retained image output; the later eight documentation-only changes do not
+claim unchanged Docker inputs, a new Rust compilation or new native execution. Eighteen of 22
+requested items are published. Kick remains source-only for v0.3.44.
+
+## Historical v0.3.43 Wall Pass native checkpoint — 2026-10-24 01:00 UTC — 110/110
 
 Final source `11d0dc7e39e8e2cafcf70c1548be339f52c740ab`, tree
 `655c7d8a80b4dd3fdd3b232534c2cbaa45b054cc`, passes fresh source-bound gates and the complete
@@ -55,7 +81,7 @@ created when `CARGO_TARGET_DIR` is external. Production and Docker build inputs 
 byte-identical to the sealed native source. These changes improve attribution and setup, but do
 not establish a Chrome I/O root cause or claim that one was fixed.
 
-### Latest Happy DOM security correction — candidate CI pending
+### Happy DOM security correction — historical pre-delivery checkpoint
 
 Candidate `5dbcd58e920f852a8036c4bf741e26517793b072` updates only `web/package.json` and
 `web/package-lock.json`, moving the development-only Happy DOM dependency from 20.14.5 to patched
@@ -79,10 +105,9 @@ distribution equality only: it does not claim unchanged Docker build inputs, a n
 compilation, or Docker-build reproducibility, and the 110 native passes remain bound to H2 source
 `11d0dc7`.
 
-The earlier PR #104 head `98dffe5` failed its security job in push run `40050321682` and PR run
+At this checkpoint, the earlier PR #104 head `98dffe5` failed its security job in push run `40050321682` and PR run
 `40050338206`; the other jobs were still finishing at this checkpoint. Corrected head `5dbcd58`
-has not been pushed. Exact-head candidate CI, replacement merge/master and tag checks,
-publication and localhost promotion remain pending; the default deployment remains v0.3.42.
+had not been pushed. The published delivery above supersedes those pending statements.
 
 The reviewed Compose pre-collection captures are [English desktop](screenshots/wall-pass-desktop.png)
 and [Polish 320px reduced motion](screenshots/wall-pass-mobile-pl.png), with SHA-256 values
@@ -90,11 +115,8 @@ and [Polish 320px reduced motion](screenshots/wall-pass-mobile-pl.png), with SHA
 `84843190d2be59a89f5c614c3d17bd78e969dcb7cf692d0e06243b2d3978d72f`.
 
 This dated record certifies the eighteenth native-verified requested item; Kick, Punch, Bracelet
-and Oil Barrel remain before ART-ATLAS. It does **not** claim candidate, master or tag CI,
-publication, or promotion for v0.3.43. Those steps remain pending; consult current
-[checks](https://github.com/liveweird/grenadiers/actions) and
-[releases](https://github.com/liveweird/grenadiers/releases). The v0.3.42 delivery below remains
-the published baseline.
+and Oil Barrel remain before ART-ATLAS. Its then-pending delivery steps are complete in the
+published record above.
 
 ## v0.3.42 published delivery — 2026-10-23
 

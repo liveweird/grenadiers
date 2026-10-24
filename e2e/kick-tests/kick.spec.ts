@@ -2,11 +2,11 @@ import { expect, test, type Page } from '@playwright/test'
 import { arenaTilePixels } from '../tests/support/compositor'
 import { latestSnapshot, observeGame, visibleActor, type ObservedGame } from '../tests/support/duel'
 import { moveSeatTo } from '../tests/support/movement'
+import { retainedKickTimeline } from './kick-timeline'
 import type { GameServerMessage } from '../../web/src/game/v10/schema'
 
 test.beforeAll(() => expect(process.env.E2E_KICK_FIXTURE).toBe('arena-v2-kick'))
 type Snapshot = Extract<GameServerMessage, { type: 'snapshot' }>
-type Bomb = Snapshot['state']['bombs'][number]
 const snapshots = (game: ObservedGame): Snapshot[] => game.frames.filter(
   (frame): frame is Snapshot => frame.type === 'snapshot')
 const actor = (game: ObservedGame) => visibleActor(latestSnapshot(game), 'one')!
@@ -92,23 +92,34 @@ test('Kick moves one retained bomb through authoritative cells without extra cue
         blast: 'standard', trigger: { type: 'timed', remainingTicks: 300, paused: false },
       })
       await moveSeatTo(one, games[0], 'one', { column: 4, row: 1 })
-      const kickFloor = latestSnapshot(games[0])!.room.revision
+      const kickBaselines = await Promise.all(games.map(async (game) => {
+        await expect.poll(() => latestSnapshot(game)!.state.bombs
+          .find(({ id }) => id === demo.id)).toMatchObject({
+          id: demo.id, cell: { column: 3, row: 1 }, owner: demo.owner,
+          range: demo.range, placedAt: demo.placedAt, blast: demo.blast,
+          trigger: expect.objectContaining({ type: 'timed', paused: false }),
+        })
+        const baseline = latestSnapshot(game)!
+        expect(baseline.state.bombs.find(({ id }) => id === demo.id)?.cell)
+          .toEqual({ column: 3, row: 1 })
+        return baseline
+      }))
       await one.keyboard.down('ArrowLeft')
       try {
         await Promise.all(games.map((game) => expect.poll(() =>
           latestSnapshot(game)!.state.bombs.find(({ id }) => id === demo.id)?.cell)
           .toEqual({ column: 1, row: 1 })))
       } finally { await one.keyboard.up('ArrowLeft') }
-      for (const game of games) {
-        const stream = snapshots(game).filter(({ room }) => room.revision > kickFloor)
-          .map(({ state }) => state.bombs.find(({ id }) => id === demo.id))
-          .filter((bomb): bomb is Bomb => bomb !== undefined)
+      for (const [index, game] of games.entries()) {
+        const baseline = kickBaselines[index]!
+        const stream = retainedKickTimeline(baseline, snapshots(game), demo)
         const cells = stream.map(({ cell }) => `${cell.column},${cell.row}`)
           .filter((cell, index, all) => index === 0 || cell !== all[index - 1])
         expect(cells).toEqual(expect.arrayContaining(['3,1', '2,1', '1,1']))
         expect(cells.indexOf('3,1')).toBeLessThan(cells.indexOf('2,1'))
         expect(cells.indexOf('2,1')).toBeLessThan(cells.indexOf('1,1'))
-        expect(eventsAfter(game, kickFloor).filter(({ kind }) => kind.type === 'bombPlaced')).toEqual([])
+        expect(eventsAfter(game, baseline.room.revision)
+          .filter(({ kind }) => kind.type === 'bombPlaced')).toEqual([])
         for (const bomb of stream) expect(bomb).toMatchObject({
           id: demo.id, owner: demo.owner, range: demo.range, placedAt: demo.placedAt,
           blast: demo.blast, trigger: expect.objectContaining({ type: 'timed', paused: false }),

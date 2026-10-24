@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
+import hashlib
 import importlib.util
 import json
 import os
-import shutil
 import subprocess
 import tempfile
 from pathlib import Path
@@ -25,7 +25,8 @@ with tempfile.TemporaryDirectory(prefix="grenadiers-cargo-json-stream-") as temp
             assert kwargs.get("capture") is True and kwargs.get("merge_stderr") is False
             return subprocess.CompletedProcess(command, 0, stdout=cargo_message)
         if command[0] == str(binary.resolve()):
-            return subprocess.CompletedProcess(command, 0, stdout=f"{module.HEAVY_TEST}: test\n")
+            return subprocess.CompletedProcess(command, 0, stdout=
+                f"{module.HEAVY_TEST}: test\n{module.INSTRUMENTATION_PROBE_TEST}: test\n")
         raise AssertionError(f"unexpected command: {command}")
 
     module.run = fake_run
@@ -33,6 +34,21 @@ with tempfile.TemporaryDirectory(prefix="grenadiers-cargo-json-stream-") as temp
         assert module.select_binary(False) == binary.resolve()
     finally:
         module.run = original_run
+
+    inherited = {"CARGO_LLVM_COV": "1", "CARGO_LLVM_COV_TARGET_DIR": "/stale-target",
+        "__CARGO_LLVM_COV_RUSTC_WRAPPER": "1", "LLVM_PROFILE_FILE": "/stale.profraw",
+        "RUSTC_WRAPPER": "/tool/cargo-llvm-cov", "RUSTFLAGS": "-C debuginfo=1"}
+    previous = {key: os.environ.get(key) for key in inherited}
+    try:
+        os.environ.update(inherited)
+        base = module.coverage_base_environment(Path(temporary) / "isolated-coverage")
+        assert not any(key in base for key in inherited if key != "RUSTFLAGS")
+        assert base["RUSTFLAGS"] == inherited["RUSTFLAGS"]
+        assert base["CARGO_TARGET_DIR"].endswith("/isolated-coverage")
+    finally:
+        for key, value in previous.items():
+            if value is None: os.environ.pop(key, None)
+            else: os.environ[key] = value
 
 progress = "import sys; print('{\"reason\":\"build-finished\",\"success\":true}'); print('Finished test profile', file=sys.stderr)"
 captured = module.run(["python3", "-c", progress], capture=True, merge_stderr=False)
@@ -122,37 +138,65 @@ with tempfile.TemporaryDirectory(prefix="grenadiers-llvm-cov-discovery-") as tem
     )
     (fixture / "src/lib.rs").write_text(
         "pub fn covered(value: bool) -> u8 { if value { 1 } else { 0 } }\n"
-        "#[test]\nfn records_coverage() { assert_eq!(covered(true), 1); }\n"
+        "#[cfg(test)] mod tests { use super::*; #[test]\n"
+        "fn blank_database_url_disables_postgres() { assert_eq!(covered(true), 1); } }\n"
     )
-    subprocess.run(["cargo", "llvm-cov", "--manifest-path", str(fixture / "Cargo.toml"),
-                    "test", "--no-report"], check=True, cwd=fixture,
+    manifest = str(fixture / "Cargo.toml")
+    subprocess.run(["cargo", "test", "--manifest-path", manifest], check=True, cwd=fixture,
                    stdout=subprocess.DEVNULL)
-    profiles = sorted((fixture / "target").rglob("*.profraw"))
-    assert profiles
-    target = profiles[0].parent
-    assert all(profile.parent == target for profile in profiles)
-    private = fixture / "private"; private.mkdir()
-    for profile in profiles:
-        shutil.move(profile, private / profile.name)
+    ordinary = [path for path in (fixture / "target/debug/deps").glob("llvm_cov_discovery_fixture-*")
+                if path.is_file() and os.access(path, os.X_OK)]
+    assert len(ordinary) == 1
+    ordinary_hash = hashlib.sha256(ordinary[0].read_bytes()).hexdigest()
+    coverage_target = fixture / "coverage-target"
+    coverage_base = module.coverage_base_environment(coverage_target)
+    shown = subprocess.run(["cargo", "llvm-cov", "--manifest-path", manifest, "show-env", "--sh"],
+                           check=True, cwd=fixture, env=coverage_base, text=True,
+                           stdout=subprocess.PIPE).stdout
+    cov_env = module.parse_coverage_environment(shown, coverage_base)
+    assert Path(cov_env["CARGO_LLVM_COV_TARGET_DIR"]).resolve() == coverage_target.resolve()
+    subprocess.run(["cargo", "llvm-cov", "--manifest-path", manifest, "clean", "--workspace"],
+                   check=True, cwd=fixture, env=cov_env, stdout=subprocess.DEVNULL)
+    assert ordinary[0].is_file()
+    assert hashlib.sha256(ordinary[0].read_bytes()).hexdigest() == ordinary_hash
+    baseline = fixture / "baseline"; baseline.mkdir()
+    baseline_env = dict(cov_env); baseline_env["LLVM_PROFILE_FILE"] = str(baseline / "%p-%18m.profraw")
+    subprocess.run(["cargo", "test", "--manifest-path", manifest], check=True, cwd=fixture,
+                   env=baseline_env, stdout=subprocess.DEVNULL)
+    assert list(baseline.glob("*.profraw"))
+    messages = subprocess.run(
+        ["cargo", "test", "--manifest-path", manifest, "--no-run", "--message-format=json"],
+        check=True, cwd=fixture, env=cov_env, text=True, stdout=subprocess.PIPE).stdout
+    artifacts = [json.loads(line) for line in messages.splitlines() if line]
+    binaries = [Path(item["executable"]) for item in artifacts
+                if item.get("reason") == "compiler-artifact" and item.get("executable")]
+    assert len(binaries) == 1
+    assert coverage_target.resolve() in binaries[0].resolve().parents
+    assert binaries[0].resolve() != ordinary[0].resolve()
+    worker = fixture / "worker"
+    module.verify_instrumented_binary(binaries[0], cov_env, worker)
+    assert list(worker.glob("*.profraw"))
+    target = Path(cov_env["CARGO_LLVM_COV_TARGET_DIR"]).resolve()
     report_path = fixture / "coverage.lcov"
 
     def actual_report():
         return subprocess.run(
-            ["cargo", "llvm-cov", "report", "--manifest-path", str(fixture / "Cargo.toml"),
+            ["cargo", "llvm-cov", "report", "--manifest-path", manifest,
              "--lcov", "--output-path", str(report_path)], check=True, cwd=fixture,
-            stdout=subprocess.DEVNULL)
+            env=cov_env, stdout=subprocess.DEVNULL)
 
-    _, profile_count = module.with_report_profiles(target, [private], "actual-tool", actual_report)
-    assert profile_count == len(profiles) and report_path.is_file()
+    _, profile_count = module.with_report_profiles(target, [baseline, worker], "actual-tool", actual_report)
+    assert profile_count == len(list(baseline.glob("*.profraw"))) + len(list(worker.glob("*.profraw")))
+    assert report_path.is_file()
     assert "SF:" in report_path.read_text() and not list(target.glob("*.profraw"))
 
     (target / "grenadiers-local-server-abandoned-0-0.profraw").write_bytes(b"owned stale")
-    module.with_report_profiles(target, [private], "stale-recovery", lambda: None)
+    module.with_report_profiles(target, [baseline, worker], "stale-recovery", lambda: None)
     assert not list(target.glob("*.profraw"))
 
     foreign = target / "foreign.profraw"; foreign.write_bytes(b"not accepted")
     try:
-        module.with_report_profiles(target, [private], "contaminated", actual_report)
+        module.with_report_profiles(target, [baseline, worker], "contaminated", actual_report)
     except ValueError as error:
         assert "contaminate" in str(error)
     else:
@@ -162,7 +206,7 @@ with tempfile.TemporaryDirectory(prefix="grenadiers-llvm-cov-discovery-") as tem
     late = target / "late.profraw"
     try:
         module.with_report_profiles(
-            target, [private], "late-change", lambda: late.write_bytes(b"late profile"))
+            target, [baseline, worker], "late-change", lambda: late.write_bytes(b"late profile"))
     except ValueError as error:
         assert "changed during report" in str(error)
     else:

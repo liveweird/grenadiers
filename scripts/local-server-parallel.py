@@ -17,7 +17,9 @@ from pathlib import Path
 from typing import Any, Callable
 
 ROOT = Path(__file__).resolve().parent.parent
+COVERAGE_TARGET = ROOT / "target/grenadiers-local-server-coverage"
 HEAVY_TEST = "game::rooms::replay::settings_tests::expanded_item_masks_and_disabled_preset_replay_deterministically"
+INSTRUMENTATION_PROBE_TEST = "tests::blank_database_url_disables_postgres"
 SUMMARY_PREFIX = "GRENADIERS_SERVER_REPLAY_ITEM_MASK_SUMMARY="
 PLAN_KEYS = {"schemaVersion", "source", "catalog", "capacity", "totalCardinality", "partitionCount", "ranges"}
 RANGE_KEYS = {"index", "startOrdinal", "endOrdinalExclusive"}
@@ -139,15 +141,36 @@ def union_lcov(reports: list[dict[str, dict[int, tuple[int, str | None]]]],
     return {"files": len(reference), "linesFound": found, "linesHit": hit, "percent": percent}
 
 
-def coverage_environment() -> dict[str, str]:
-    output = run(["cargo", "llvm-cov", "show-env", "--sh"], capture=True).stdout
-    env = dict(os.environ)
+def parse_coverage_environment(output: str,
+                               base: dict[str, str] | None = None) -> dict[str, str]:
+    env = dict(base or os.environ)
     for line in output.splitlines():
         if line.startswith("export "):
             assignment = shlex.split(line[7:])
             if len(assignment) != 1 or "=" not in assignment[0]: raise ValueError("unsafe llvm-cov environment")
             key, value = assignment[0].split("=", 1); env[key] = value
     return env
+
+
+def coverage_base_environment(target_dir: Path = COVERAGE_TARGET) -> dict[str, str]:
+    env = dict(os.environ)
+    coverage_keys = {"LLVM_PROFILE_FILE", "LLVM_PROFILE_FILE_NAME", "CARGO_LLVM_COV",
+                     "CARGO_LLVM_COV_SHOW_ENV", "CARGO_LLVM_COV_TARGET_DIR",
+                     "CARGO_LLVM_COV_BUILD_DIR", "__CARGO_LLVM_COV_RUSTC_WRAPPER",
+                     "__CARGO_LLVM_COV_RUSTC_WRAPPER_RUSTFLAGS",
+                     "__CARGO_LLVM_COV_RUSTC_WRAPPER_CRATE_NAMES"}
+    coverage_wrapper = Path(env.get("RUSTC_WRAPPER", "")).name == "cargo-llvm-cov" \
+        or any(key.startswith("__CARGO_LLVM_COV_") for key in env)
+    for key in coverage_keys: env.pop(key, None)
+    if coverage_wrapper: env.pop("RUSTC_WRAPPER", None)
+    env["CARGO_TARGET_DIR"] = str(target_dir.resolve())
+    return env
+
+
+def coverage_environment() -> dict[str, str]:
+    base = coverage_base_environment()
+    output = run(["cargo", "llvm-cov", "show-env", "--sh"], env=base, capture=True).stdout
+    return parse_coverage_environment(output, base)
 
 
 def select_binary(release: bool, env: dict[str, str] | None = None) -> Path:
@@ -160,9 +183,21 @@ def select_binary(release: bool, env: dict[str, str] | None = None) -> Path:
     binary = Path(selected).resolve()
     if binary.is_symlink() or not binary.is_file(): raise ValueError("server test binary missing")
     listed = run([str(binary), "--list"], env=env, capture=True).stdout.splitlines()
-    if sum(line == f"{HEAVY_TEST}: test" for line in listed) != 1:
-        raise ValueError("exact heavy server test missing or duplicated")
+    if sum(line == f"{HEAVY_TEST}: test" for line in listed) != 1 \
+            or sum(line == f"{INSTRUMENTATION_PROBE_TEST}: test" for line in listed) != 1:
+        raise ValueError("exact server tests missing or duplicated")
     return binary
+
+
+def verify_instrumented_binary(binary: Path, env: dict[str, str], raw_dir: Path) -> None:
+    raw_dir.mkdir()
+    probe_env = dict(env); probe_env["LLVM_PROFILE_FILE"] = str(raw_dir / "%p-%18m.profraw")
+    before = hashlib.sha256(binary.read_bytes()).hexdigest()
+    run([str(binary), INSTRUMENTATION_PROBE_TEST, "--exact", "--test-threads=1"], env=probe_env)
+    if not list(raw_dir.glob("*.profraw")):
+        raise ValueError("coverage binary instrumentation probe produced no raw profiles")
+    if hashlib.sha256(binary.read_bytes()).hexdigest() != before:
+        raise ValueError("coverage binary changed during instrumentation probe")
 
 
 def verify_summary(output: str, plan: dict[str, Any], profile: str, index: int) -> None:
@@ -291,17 +326,20 @@ def main() -> None:
             if release: ordinary.insert(3, "--release")
             run([*ordinary, "--", "--skip", HEAVY_TEST, "--show-output"])
             profiles[profile] = execute_profile(profile, select_binary(release), plan, args.workers)
-        run(["cargo", "llvm-cov", "clean", "--workspace"])
-        cov_env = coverage_environment(); baseline = temp / "coverage-baseline"; baseline.mkdir()
+        cov_env = coverage_environment()
+        run(["cargo", "llvm-cov", "clean", "--workspace"], env=cov_env)
+        baseline = temp / "coverage-baseline"; baseline.mkdir()
         cov_env["LLVM_PROFILE_FILE"] = str(baseline / "%p-%18m.profraw")
         run(["cargo", "test", "--workspace", "--locked", "--", "--skip", HEAVY_TEST,
              "--show-output"], env=cov_env)
+        if not list(baseline.glob("*.profraw")):
+            raise ValueError("ordinary instrumented coverage produced no raw profiles")
         coverage_binary = select_binary(False, cov_env)
+        verify_instrumented_binary(coverage_binary, cov_env, temp / "coverage-probe")
         coverage_raw = temp / "coverage-workers"; coverage_raw.mkdir()
         profiles["coverage"] = execute_profile("coverage", coverage_binary, plan, args.workers,
                                                 cov_env, coverage_raw)
         worker_dirs = [Path(path) for path in profiles["coverage"]["rawDirectories"]]
-        if not list(baseline.glob("*.profraw")): raise ValueError("ordinary coverage produced no raw profiles")
         components = []
         for index, worker_dir in enumerate(worker_dirs):
             report = report_lcov(cov_env, [baseline, worker_dir], temp / f"component-{index}.lcov",

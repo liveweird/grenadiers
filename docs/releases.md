@@ -4,29 +4,60 @@ Release labels and scope live in the [implementation plan](game/implementation-p
 A completed milestone is verification evidence; a release exists only after its tested commit
 is tagged and its artifacts are published intentionally.
 
-## v0.3.43 Wall Pass native checkpoint — 2026-10-23 19:48 UTC
+## v0.3.43 Wall Pass native checkpoint — 2026-10-24 01:00 UTC
 
 Wall Pass is the eighteenth requested item and is native verified at source
-`bd34192d8915a8aac4288e3f69bd5898ad01d952`, tree
-`daa2306e77de0e279a6752aa69e687e0a6c51ba0`, on exact image
-`sha256:e2f02586988e2359404189afbe465ad47a4dd12e8227de8b6d3c627401ad7cfc`.
+`11d0dc7e39e8e2cafcf70c1548be339f52c740ab`, tree
+`655c7d8a80b4dd3fdd3b232534c2cbaa45b054cc`, on exact image
+`sha256:577abb32958e45912f35a7f6ae68dd624deb6515d2b4d55519942c44436a2a01`.
 Fresh gates pass 711 core and 209 server tests with four historical ignores in each Rust profile,
 797 web tests across 64 files, 56 scenarios and all 262,144 masks in debug, release and coverage.
 Rust line coverage is 92.358954%; web statement/branch/function/line coverage is
 95.24/90.88/96/97.66%. The configured security commands pass; the web inventory retains two
 moderate development advisories and no high or critical advisories.
 
-Native root `98418` completes with consumed exit zero: all 55 Compose plus 55 Kubernetes cases,
+Native root `45615` completes with consumed exit zero: all 55 Compose plus 55 Kubernetes cases,
 52 reports, 122 PNGs, 42 runtime records, 21 Kubernetes identities, 20 fixtures, 40 seed records
 and 80 latency observations below 250 ms pass with zero retries or carried results. Independent
-audit `1c53debae48997b48dbb37c1e9710f21d8dc5b45858707a1cd1368e8dca033a2`, result review
-`41d6409d3a6f15fadbc07f8e75ef5cacf5406ab4aa2b541a5e221b53c0cd76f1` and binding review
-`19ca908c65eb5bc430c1b2e2651d1abeed24e7c70d84b016b663b6bffdfa204c` are clear. Sealer root
-`68301` completes with consumed exit zero; final manifest
-`e2f58e9a171b62eb2607d46a59236f19e2ca99fac0a7cd1148d3a34d5fae1a0e` authenticates 2,661
-payloads, 2,662 files and 284 directories. Seal
-`da27773490c16bb4f32edc5e153544e2f659f2158df29dcd94e2560d036241b3` and independent review
-`57dd9fc256ab34bbe6c5e51e070fe0502a69ccf3fd94507e27a26972bf844aff` are clear.
+audit `25e48638872f7b61fd64c28af30abf5e44910cf29e3e8356246236991819380e` and result review
+`c8652f4e67852002db9e49e2766481e6c58b071d3e93bbb7866bfd6c5194848d` are clear. Binding review
+`7c6eda746a703f599ced928798750f05478b78dbf5fc387d03fbe5adac551d46` is clear. Sealer root
+`96118` completes with consumed exit zero; final manifest
+`3ac5e05ccee94c7716376ca9383c75acc924b772447499c6a0dbd857f68ec15c` authenticates 2,665
+payloads, 2,666 files and 284 directories. Seal
+`31fe5eef2900a0229d002e45b5a310888f3915829db0aaf23bc3535a8eea5e2c` is durable; independent
+post-seal review `5d253559ba95a9d30fc83f16fd0786a6d283356d892f26abed3611771588d33f`
+is clear.
+
+The source includes the reviewed Zod 4.6.6 lockfile correction and parallel independent English
+match-result inspections without changing the 43 assertions, three screenshots, fixtures or
+budgets. The descendant release candidate adds CI-only procfs short-read and external-target
+coverage-parent fixes in commit `dee44b5ca81d2556d775a54e47948da77b9dbaa3`. Its production and
+Docker build inputs remain byte-identical to the sealed native source. Those fixes improve
+diagnostics and gate setup without claiming that a particular Chrome I/O cause was fixed.
+
+Latest corrected candidate `5dbcd58e920f852a8036c4bf741e26517793b072` pins Happy DOM 21.0.4 to
+resolve GHSA-834v-8h66-3h79. Fresh local verification passes the full 797-test, 64-file web gate
+with unchanged 95.24/90.88/96/97.66% coverage and the complete configured security gate: cargo
+deny plus both npm audits exit zero, with three moderate development advisories
+(`@vitest/mocker`, `vitest` and `fast-uri`) and zero high or critical findings. Receipt
+`0a8c605c65bdceff9d04d74752aaafc3ee5e9ee2378e60805a7fecb8cc216ce0` binds the web check, and
+`e0c7363348d4f4092bc0afd3037068e183b78bc99c0969a6a2ef7b6451fdceb6` binds the full security
+result. The two web manifests are the only changed Docker inputs: 554 of 556 entries remain equal.
+The complete host distribution still matches the accepted image byte-for-byte across 17 entries
+(15 files and two directories), using retained server binary
+`26bccf1696b75b33b741b43305429df92cd09870d02d1080b725e05665e3966d`; a fresh scan of that exact
+image passes current policy. Equivalence receipt
+`81bd78943fa8e80bc839b06bcd68c7bb26872f4cf600c2fcc80e2269c7c94209` and independent review
+`42bbbcb68e8a306d9ed611513e186189ab3430f17bf545191edace5bdb6e3b75` are clear. This is retained
+artifact equality, not unchanged build inputs, a new Rust compilation, or Docker-build
+reproducibility; the 110 native cases remain attributed to source `11d0dc7` and accepted image
+`577abb3`.
+
+The first PR #104 head `98dffe5` failed security in push run `40050321682` and PR run
+`40050338206`; other jobs were still finishing at that checkpoint. Corrected head `5dbcd58` has
+not yet been pushed. Its exact-head candidate CI, replacement merge/master and tag checks,
+publication and localhost promotion remain required. The default deployment remains v0.3.42.
 
 This is a native checkpoint, not a release. Candidate, master and tag workflows, publication and
 exact-image promotion for v0.3.43 remain pending. Consult current
@@ -37,8 +68,8 @@ Kick, Punch, Bracelet and Oil Barrel remain before ART-ATLAS.
 
 The reviewed Wall Pass captures are [English desktop](screenshots/wall-pass-desktop.png) and
 [Polish 320px reduced motion](screenshots/wall-pass-mobile-pl.png), with SHA-256 values
-`9200da355aa5fe9273a9a130186c7d8f27d28255f705abd6ded068671e71f9f8` and
-`07a276234fdf8023be1603fd04c27965ef4fa8698afbef63623c84205a0bf4ec`.
+`d46367b7eeee7c55e94dbcfba6de7de50b27b96c6761ad6a9ff69db2b9332c08` and
+`84843190d2be59a89f5c614c3d17bd78e969dcb7cf692d0e06243b2d3978d72f`.
 
 ## v0.3.42 published prerelease — 2026-10-23
 

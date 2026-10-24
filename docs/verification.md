@@ -1,18 +1,17 @@
 # Repository verification
 
-## v0.3.43 Wall Pass sealed native checkpoint — 2026-10-23 19:48 UTC — 110/110
+## v0.3.43 Wall Pass native checkpoint — 2026-10-24 01:00 UTC — 110/110
 
-Final source `bd34192d8915a8aac4288e3f69bd5898ad01d952`, tree
-`daa2306e77de0e279a6752aa69e687e0a6c51ba0`, passes fresh source-bound gates and the complete
+Final source `11d0dc7e39e8e2cafcf70c1548be339f52c740ab`, tree
+`655c7d8a80b4dd3fdd3b232534c2cbaa45b054cc`, passes fresh source-bound gates and the complete
 same-image native matrix on
-`sha256:e2f02586988e2359404189afbe465ad47a4dd12e8227de8b6d3c627401ad7cfc`.
-Native root `98418`, tool chunk `465b91`, completed at `2026-10-23T19:48:00.902929Z`; its actual
-exit zero is consumed.
+`sha256:577abb32958e45912f35a7f6ae68dd624deb6515d2b4d55519942c44436a2a01`.
+Native root `45615` completed with consumed actual exit zero.
 All **55 Compose plus 55 Kubernetes** cases pass with zero retries and zero carried passes. The
 reviewed evidence contains 52 decoded reports, 122 verified PNGs, 42 runtime/security records,
 21 distinct Kubernetes UIDs, 20 fixtures and 40 seed-mode records. All 80 latency observations
-are retained below the unchanged 250 ms budget; maxima are 55.210/158.614 ms for local/shaped
-Compose and 56.475/166.412 ms for local/shaped Kubernetes.
+are retained below the unchanged 250 ms budget; maxima are 53.325/167.137 ms for local/shaped
+Compose and 61.385/176.151 ms for local/shaped Kubernetes.
 
 Fresh debug, release and coverage profiles each pass 711 core and 209 server tests with four
 historical ignores. Debug and release each add two passing doctests. Every profile enumerates all
@@ -23,27 +22,72 @@ audits exit zero. The web audit retains two moderate development advisories for 
 `@vitest/mocker` 5.0.1; there are no high or critical advisories, and the E2E audit reports none.
 
 The authoritative checkpoint inputs are
-`.local-checkpoints/2026-10-21/v0343-wall-pass-native-attempt4-facts.json` and
-`v0343-wall-pass-native-attempt4-actual-exit-consumed.json`. Independent audit
-`v0343-wall-pass-native-attempt4-audit.json` is CLEAR under SHA-256
-`1c53debae48997b48dbb37c1e9710f21d8dc5b45858707a1cd1368e8dca033a2`; result review
-`v0343-wall-pass-native-attempt4-result-review.json` is CLEAR under
-`41d6409d3a6f15fadbc07f8e75ef5cacf5406ab4aa2b541a5e221b53c0cd76f1`; proof binding review
-`v0343-wall-pass-native-attempt4-proof-binding-review.json` is CLEAR under
-`19ca908c65eb5bc430c1b2e2651d1abeed24e7c70d84b016b663b6bffdfa204c`.
+`.local-checkpoints/2026-10-21/v0343-wall-pass-native-attempt6-facts.json` under SHA-256
+`4d38019282a62a91fdc1717583e3c8dd766231579af7a68d5991c9bec2d2725a` and
+`v0343-wall-pass-native-attempt6-actual-exit-consumed.json`. Independent audit
+`v0343-wall-pass-native-attempt6-audit.json` is CLEAR under SHA-256
+`25e48638872f7b61fd64c28af30abf5e44910cf29e3e8356246236991819380e`; result review
+`v0343-wall-pass-native-attempt6-result-review.json` is CLEAR under
+`c8652f4e67852002db9e49e2766481e6c58b071d3e93bbb7866bfd6c5194848d`.
+`v0343-wall-pass-native-attempt6-proof-binding-review.json` is CLEAR under SHA-256
+`7c6eda746a703f599ced928798750f05478b78dbf5fc387d03fbe5adac551d46` and authenticates binding
+`5e15b63315ac78b36fbfa176ab1f0d2752b653d18448f23c2850ad9135139550`.
 
-Sealer root `68301`, tool chunk `0c4202`, completes with consumed exit zero. Final manifest
-`e2f58e9a171b62eb2607d46a59236f19e2ca99fac0a7cd1148d3a34d5fae1a0e` byte-verifies 2,661
-payloads, 2,662 files and 284 directories in the immutable durable copy. Seal receipt
-`v0343-wall-pass-native-attempt4-seal.json` hashes to
-`da27773490c16bb4f32edc5e153544e2f659f2158df29dcd94e2560d036241b3`; independent
-`v0343-wall-pass-native-attempt4-seal-review.json` is CLEAR under
-`57dd9fc256ab34bbe6c5e51e070fe0502a69ccf3fd94507e27a26972bf844aff`.
+Sealer root `96118`, tool chunk `4409f9`, completes with consumed exit zero; validator chunk
+`ccc3f0` also exits zero. Final manifest
+`3ac5e05ccee94c7716376ca9383c75acc924b772447499c6a0dbd857f68ec15c` byte-verifies 2,665
+payloads, 2,666 files and 284 directories in the immutable durable copy. Seal receipt
+`v0343-wall-pass-native-attempt6-seal.json` hashes to
+`31fe5eef2900a0229d002e45b5a310888f3915829db0aaf23bc3535a8eea5e2c`. The preserved source
+archive hashes to `cb25085949945df4f8dca01e7cdf46186a17a1987ad467ee8ba97684e94d9b19`.
+Independent `v0343-wall-pass-native-attempt6-seal-review.json` is CLEAR under SHA-256
+`5d253559ba95a9d30fc83f16fd0786a6d283356d892f26abed3611771588d33f`. It confirms exact
+manifest path sets and hashes in both copies, one mode-0400 file, 2,654 mode-0444 files, 11
+mode-0555 files, all 284 directories mode 0555, and no writable files, writable directories,
+symlinks or special files.
+
+This source corrects the high-severity Zod advisory by pinning 4.6.6 in both npm lockfiles.
+The complete-match driver parallelizes only independent English result inspections; all 43
+assertions, three screenshots, fixtures, case counts and budgets remain unchanged. The descendant
+release candidate changes four CI tooling files in commit `dee44b5ca81d2556d775a54e47948da77b9dbaa3`:
+bounded procfs metadata reads reach EOF, and the project-relative coverage output parent is
+created when `CARGO_TARGET_DIR` is external. Production and Docker build inputs remain
+byte-identical to the sealed native source. These changes improve attribution and setup, but do
+not establish a Chrome I/O root cause or claim that one was fixed.
+
+### Latest Happy DOM security correction — candidate CI pending
+
+Candidate `5dbcd58e920f852a8036c4bf741e26517793b072` updates only `web/package.json` and
+`web/package-lock.json`, moving the development-only Happy DOM dependency from 20.14.5 to patched
+21.0.4 for GHSA-834v-8h66-3h79. The fresh full web gate passes 797 tests in 64 files with
+95.24/90.88/96/97.66% statement/branch/function/line coverage. The complete configured security
+gate exits zero for cargo deny and both npm audits. Its current web audit contains three moderate
+development findings (`@vitest/mocker` 5.0.1, `vitest` 5.0.1 and `fast-uri` 3.1.8), zero high and
+zero critical findings; the E2E audit remains clear. Web-check receipt
+`0a8c605c65bdceff9d04d74752aaafc3ee5e9ee2378e60805a7fecb8cc216ce0` and full-security result
+`e0c7363348d4f4092bc0afd3037068e183b78bc99c0969a6a2ef7b6451fdceb6` bind those outcomes.
+
+The reviewed retained-artifact comparison finds 554 of 556 Docker inputs unchanged; only the two
+web manifests differ. The corrected host `dist` and accepted image contain the same 17 entries,
+15 files and two directories with identical paths, types, modes and bytes. It retains server
+binary `26bccf1696b75b33b741b43305429df92cd09870d02d1080b725e05665e3966d`, and a fresh scan of exact
+image `sha256:577abb32958e45912f35a7f6ae68dd624deb6515d2b4d55519942c44436a2a01`
+passes current policy. Receipt `81bd78943fa8e80bc839b06bcd68c7bb26872f4cf600c2fcc80e2269c7c94209`
+and independent seven-key review
+`42bbbcb68e8a306d9ed611513e186189ab3430f17bf545191edace5bdb6e3b75` are clear. This proves host
+distribution equality only: it does not claim unchanged Docker build inputs, a new Rust
+compilation, or Docker-build reproducibility, and the 110 native passes remain bound to H2 source
+`11d0dc7`.
+
+The earlier PR #104 head `98dffe5` failed its security job in push run `40050321682` and PR run
+`40050338206`; the other jobs were still finishing at this checkpoint. Corrected head `5dbcd58`
+has not been pushed. Exact-head candidate CI, replacement merge/master and tag checks,
+publication and localhost promotion remain pending; the default deployment remains v0.3.42.
 
 The reviewed Compose pre-collection captures are [English desktop](screenshots/wall-pass-desktop.png)
 and [Polish 320px reduced motion](screenshots/wall-pass-mobile-pl.png), with SHA-256 values
-`9200da355aa5fe9273a9a130186c7d8f27d28255f705abd6ded068671e71f9f8` and
-`07a276234fdf8023be1603fd04c27965ef4fa8698afbef63623c84205a0bf4ec`.
+`d46367b7eeee7c55e94dbcfba6de7de50b27b96c6761ad6a9ff69db2b9332c08` and
+`84843190d2be59a89f5c614c3d17bd78e969dcb7cf692d0e06243b2d3978d72f`.
 
 This dated record certifies the eighteenth native-verified requested item; Kick, Punch, Bracelet
 and Oil Barrel remain before ART-ATLAS. It does **not** claim candidate, master or tag CI,
@@ -64,7 +108,7 @@ chunk `959d39`. Promotion root `84311`, chunk `3aee8a`, completed with consumed 
 the exact accepted image `sha256:8ae9818d27c4345bceec6dad77f02e21ee7148626efded48c421d86421285477`
 from container `0a3bcbac08bc2c2cf46365917a3719d3c5e522c4555234da8e1f661f6edcf214`.
 Seventeen of 22 requested item types are published. At this delivery checkpoint Wall Pass was the
-next v0.3.43 source candidate; its later sealed native acceptance is recorded above.
+next v0.3.43 source candidate; its later refreshed native acceptance is recorded above.
 
 ## Historical Teleporter native acceptance — `2026-10-23 04:37 UTC`
 

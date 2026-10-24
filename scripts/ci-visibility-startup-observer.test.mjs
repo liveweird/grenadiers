@@ -56,6 +56,13 @@ function executableExpectation(executable) {
     device: String(stat.dev), inode: String(stat.ino), size: Number(stat.size) };
 }
 
+function chunkedFsApi(maxChunk) {
+  const fsApi = Object.create(fs);
+  fsApi.readSync = (descriptor, buffer, offset, length, position) =>
+    fs.readSync(descriptor, buffer, offset, Math.min(length, maxChunk), position);
+  return fsApi;
+}
+
 function withProc(assertion) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "visibility-observer-proc-"));
   try { return assertion(root); }
@@ -141,6 +148,99 @@ test("attributes matching executable mappings, aggregates residency, and reports
     assert.equal(mismatch.executable.pathMatchesReadiness, true);
     assert.equal(mismatch.mappings[0].path.kind, "private-or-unknown");
     assert.equal("browserRelativePath" in mismatch.mappings[0].path, false);
+  });
+});
+
+test("continues positive short reads through EOF and includes later mapping groups and deltas", () => {
+  withProc((root) => {
+    const browserRoot = path.join(root, "browser");
+    fs.mkdirSync(browserRoot);
+    const executable = path.join(browserRoot, "chrome");
+    const later = path.join(browserRoot, "later.pak");
+    fs.writeFileSync(executable, "browser-binary");
+    fs.writeFileSync(later, "later-file");
+    writeProcess(root, { pid: 101, ppid: 1, starttime: 11 });
+    writeFileMappings(root, 101, executable, later);
+    const fsApi = chunkedFsApi(17);
+    const first = captureStartupFileSnapshot({ procRoot: root, pid: 101, starttime: 11,
+      expectedExecutable: executableExpectation(executable), fsApi });
+    assert.equal(first.smaps.status, "complete");
+    assert.equal(first.smaps.bytesRead,
+      fs.statSync(path.join(root, "101", "smaps")).size);
+    assert.equal(first.mappings.length, 2);
+    assert.equal(first.mappings[1].inode, "42");
+    assert.equal(first.mappings[1].rssBytes, 4 * 1024);
+
+    const smapsPath = path.join(root, "101", "smaps");
+    fs.writeFileSync(smapsPath, fs.readFileSync(smapsPath, "utf8")
+      .replace("Rss: 4 kB", "Rss: 9 kB")
+      .replace("Referenced: 3 kB", "Referenced: 7 kB"));
+    const second = captureStartupFileSnapshot({ procRoot: root, pid: 101, starttime: 11,
+      elapsedMs: FILE_SNAPSHOT_ELAPSED_MS,
+      expectedExecutable: executableExpectation(executable), baseline: first, fsApi });
+    assert.deepEqual(second.mappings[1].deltaFromFirst,
+      { mappedBytes: 0, rssBytes: 5 * 1024, referencedBytes: 4 * 1024 });
+  });
+});
+
+test("probes exact limit for EOF and marks only an extra byte truncated", () => {
+  withProc((root) => {
+    const executable = path.join(root, "chrome");
+    fs.writeFileSync(executable, "browser-binary");
+    writeProcess(root, { pid: 101, ppid: 1, starttime: 11 });
+    fs.symlinkSync(executable, path.join(root, "101", "exe"));
+    const mapsPath = path.join(root, "101", "maps");
+    fs.writeFileSync(mapsPath, "x".repeat(MAX_MAPPING_BYTES));
+    const exact = captureStartupFileSnapshot({ procRoot: root, pid: 101, starttime: 11,
+      expectedExecutable: executableExpectation(executable), fsApi: chunkedFsApi(4096) });
+    assert.deepEqual({ status: exact.maps.status, bytesRead: exact.maps.bytesRead,
+      truncated: exact.maps.truncated },
+    { status: "complete", bytesRead: MAX_MAPPING_BYTES, truncated: false });
+
+    fs.writeFileSync(mapsPath, "x".repeat(MAX_MAPPING_BYTES + 1));
+    const over = captureStartupFileSnapshot({ procRoot: root, pid: 101, starttime: 11,
+      expectedExecutable: executableExpectation(executable), fsApi: chunkedFsApi(4096) });
+    assert.deepEqual({ status: over.maps.status, bytesRead: over.maps.bytesRead,
+      truncated: over.maps.truncated },
+    { status: "truncated", bytesRead: MAX_MAPPING_BYTES + 1, truncated: true });
+  });
+});
+
+test("reports a midstream metadata read error and still closes its descriptor", () => {
+  withProc((root) => {
+    const executable = path.join(root, "chrome");
+    fs.writeFileSync(executable, "browser-binary");
+    writeProcess(root, { pid: 101, ppid: 1, starttime: 11 });
+    writeFileMappings(root, 101, executable);
+    const mapsPath = path.join(root, "101", "maps");
+    const files = new Map();
+    const mapsDescriptors = new Set();
+    const reads = new Map();
+    const closed = new Set();
+    const fsApi = Object.create(fs);
+    fsApi.openSync = (file, ...args) => {
+      const descriptor = fs.openSync(file, ...args);
+      files.set(descriptor, file);
+      if (file === mapsPath) mapsDescriptors.add(descriptor);
+      return descriptor;
+    };
+    fsApi.readSync = (descriptor, buffer, offset, length, position) => {
+      if (files.get(descriptor) === mapsPath) {
+        const count = (reads.get(descriptor) ?? 0) + 1;
+        reads.set(descriptor, count);
+        if (count === 2) { const error = new Error("synthetic EIO"); error.code = "EIO"; throw error; }
+        return fs.readSync(descriptor, buffer, offset, Math.min(length, 8), position);
+      }
+      return fs.readSync(descriptor, buffer, offset, length, position);
+    };
+    fsApi.closeSync = (descriptor) => { closed.add(descriptor); fs.closeSync(descriptor); };
+    const snapshot = captureStartupFileSnapshot({ procRoot: root, pid: 101, starttime: 11,
+      expectedExecutable: executableExpectation(executable), fsApi });
+    assert.equal(snapshot.maps.status, "unreadable");
+    assert.equal(snapshot.maps.bytesRead, 8);
+    assert.equal(snapshot.maps.truncated, false);
+    assert.equal(mapsDescriptors.size, 1);
+    assert.equal([...mapsDescriptors].every((descriptor) => closed.has(descriptor)), true);
   });
 });
 

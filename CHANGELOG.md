@@ -10,7 +10,7 @@
   English/Polish presentation and deterministic production-seed browser source. Native same-image
   acceptance, final CI and publication remain pending.
 
-## 0.3.43 — 2026-10-23 (source candidate)
+## 0.3.43 — 2026-10-24 (source candidate)
 
 - Add opt-in Wall Pass equipment for movement through breakable blocks while hard walls, bombs,
   contact, fire and placement rules remain authoritative.
@@ -19,22 +19,34 @@
 - Extend gameplay v10 to the eighteenth lobby switch and all 262,144 settings masks, with pinned
   archive rejection, English/Polish presentation and deterministic production-seed browser source.
 - The published v0.3.42 source parent is integrated. Fresh source-bound gates pass on source
-  `bd34192d8915a8aac4288e3f69bd5898ad01d952` (tree
-  `daa2306e77de0e279a6752aa69e687e0a6c51ba0`): every debug, release and coverage profile passes
+  `11d0dc7e39e8e2cafcf70c1548be339f52c740ab` (tree
+  `655c7d8a80b4dd3fdd3b232534c2cbaa45b054cc`): every debug, release and coverage profile passes
   711 core and 209 server tests with four historical ignores, the web gate passes 797 tests across
   64 files, all 56 scenarios pass, and all 262,144 masks complete in each Rust profile. Rust line
   coverage is 92.358954%; web statement/branch/function/line coverage is 95.24/90.88/96/97.66%.
-- At the `2026-10-23 19:48 UTC` native checkpoint, exact image
-  `sha256:e2f02586988e2359404189afbe465ad47a4dd12e8227de8b6d3c627401ad7cfc`
+- Correct the Zod advisory by pinning 4.6.6 in the web and E2E lockfiles. Parallelize only the
+  independent English match-result inspections, preserving all 43 assertions, three screenshots,
+  fixtures, cases and budgets. CI-only fixes complete bounded procfs metadata reads and create the
+  coverage export parent when `CARGO_TARGET_DIR` is external; they do not claim a Chrome I/O cause.
+- Correct GHSA-834v-8h66-3h79 in candidate `5dbcd58e920f852a8036c4bf741e26517793b072`
+  by updating the development-only Happy DOM dependency from 20.14.5 to 21.0.4. The fresh web gate
+  passes 797 tests across 64 files with unchanged coverage, and the complete configured security
+  gate passes with three moderate development advisories and zero high or critical findings. The
+  first PR #104 head (`98dffe5`) failed security in push run `40050321682` and PR run
+  `40050338206`; the corrected head has not yet been pushed for hosted CI.
+- At the `2026-10-24 01:00 UTC` native checkpoint, exact image
+  `sha256:577abb32958e45912f35a7f6ae68dd624deb6515d2b4d55519942c44436a2a01`
   passes all 55 Compose plus 55 Kubernetes cases with zero retries or carried passes: 52 reports,
   122 PNGs, 42 runtime records, 21 Kubernetes identities, 20 fixtures, 40 seed records and all 80
-  latency samples below 250 ms. Independent audit `1c53debae48997b48dbb37c1e9710f21d8dc5b45858707a1cd1368e8dca033a2`,
-  result review `41d6409d3a6f15fadbc07f8e75ef5cacf5406ab4aa2b541a5e221b53c0cd76f1`
-  and binding review `19ca908c65eb5bc430c1b2e2651d1abeed24e7c70d84b016b663b6bffdfa204c`
-  are clear. Final manifest `e2f58e9a171b62eb2607d46a59236f19e2ca99fac0a7cd1148d3a34d5fae1a0e`
-  durably seals 2,661 payloads; seal `da27773490c16bb4f32edc5e153544e2f659f2158df29dcd94e2560d036241b3`
-  and independent review `57dd9fc256ab34bbe6c5e51e070fe0502a69ccf3fd94507e27a26972bf844aff`
-  are clear. Eighteen requested items are native verified; Kick, Punch, Bracelet and Oil Barrel remain.
+  latency samples below 250 ms. Independent audit `25e48638872f7b61fd64c28af30abf5e44910cf29e3e8356246236991819380e`
+  and result review `c8652f4e67852002db9e49e2766481e6c58b071d3e93bbb7866bfd6c5194848d`
+  are clear. Binding review `7c6eda746a703f599ced928798750f05478b78dbf5fc387d03fbe5adac551d46`
+  is clear. Sealer root `96118` completes with consumed exit zero; final manifest
+  `3ac5e05ccee94c7716376ca9383c75acc924b772447499c6a0dbd857f68ec15c` authenticates 2,665
+  payloads, while seal `31fe5eef2900a0229d002e45b5a310888f3915829db0aaf23bc3535a8eea5e2c`
+  is durable. Independent post-seal review
+  `5d253559ba95a9d30fc83f16fd0786a6d283356d892f26abed3611771588d33f` is clear. Eighteen requested items are native
+  verified; Kick, Punch, Bracelet and Oil Barrel remain.
   Hosted candidate, master and tag checks, publication and promotion remain pending; this entry does
   not claim a v0.3.43 release.
 

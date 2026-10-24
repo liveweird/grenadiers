@@ -117,14 +117,25 @@ function readOptional(file, limit) {
 
 function readMetadataPrefix(file, limit, fsApi) {
   let descriptor;
+  let bytesRead = 0;
   try {
     descriptor = fsApi.openSync(file, "r");
     const buffer = Buffer.alloc(limit + 1);
-    const bytes = fsApi.readSync(descriptor, buffer, 0, buffer.length, 0);
-    return { text: buffer.subarray(0, Math.min(bytes, limit)).toString("utf8"),
-      bytesRead: bytes, truncated: bytes > limit, status: bytes > limit ? "truncated" : "complete" };
+    let eof = false;
+    while (bytesRead < buffer.length) {
+      const bytes = fsApi.readSync(descriptor, buffer, bytesRead,
+        buffer.length - bytesRead, bytesRead);
+      if (!Number.isSafeInteger(bytes) || bytes < 0
+        || bytes > buffer.length - bytesRead)
+        throw new Error("invalid metadata read length");
+      if (bytes === 0) { eof = true; break; }
+      bytesRead += bytes;
+    }
+    const truncated = bytesRead > limit;
+    return { text: buffer.subarray(0, Math.min(bytesRead, limit)).toString("utf8"),
+      bytesRead, truncated, status: truncated ? "truncated" : eof ? "complete" : "unreadable" };
   } catch (error) {
-    return { text: "", bytesRead: 0, truncated: false,
+    return { text: "", bytesRead, truncated: false,
       status: error?.code === "ENOENT" ? "missing" : "unreadable" };
   } finally {
     if (descriptor !== undefined) fsApi.closeSync(descriptor);

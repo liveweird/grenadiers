@@ -368,7 +368,8 @@ pub(super) const fn wire_pickup_kind(kind: game::PickupKind) -> Option<PickupKin
         game::PickupKind::BombCapacity => Some(PickupKind::BombCapacity),
         game::PickupKind::BlastRange => Some(PickupKind::BlastRange),
         game::PickupKind::MovementSpeed => Some(PickupKind::MovementSpeed),
-        game::PickupKind::WallPass
+        game::PickupKind::Kick
+        | game::PickupKind::WallPass
         | game::PickupKind::Heart
         | game::PickupKind::RemoteBomb
         | game::PickupKind::PiercingBomb

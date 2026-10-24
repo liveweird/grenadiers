@@ -182,7 +182,7 @@ spawn/tie assignment uses actual round count rather than command epoch.
 Shared room views and snapshot metadata also carry the complete checked `settings`,
 `settingsRevision`, nullable original `settingsEditor`, and `availableItems`. Settings also
 carry `enabledItems`; v9 remains pinned to its sixteen-item Invisible-Bombs catalog while active v10
-has the eighteen-item catalog beginning with Wall Pass and ending in Teleporter. Heart is enabled by default and
+has the nineteen-item catalog beginning with Kick, followed by Wall Pass, and ending in Teleporter. Heart is enabled by default and
 every supported subset is allowed.
 Only actual changes increment
 the settings revision and clear readiness; Ready commands acknowledge that exact revision.

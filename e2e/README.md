@@ -32,3 +32,7 @@ on Linux. The dedicated harness launches fresh Chromium and uses the existing de
 with `connectOverCDP({ noDefaults: true })`; default Playwright focus emulation forces all targets
 visible and cannot establish a genuine hidden tab. The scenario observes actual visibility events.
 Owned processes/profiles have bounded cleanup; private CDP endpoints and capabilities are not attached.
+
+The Kick source route uses `docker-compose.kick.yaml` with the mode-0444 repeating-byte-31 seed:
+`E2E_KICK_FIXTURE=arena-v2-kick npm run test:kick`. It uses native controls and read-only public
+observations; source checks do not claim native acceptance.

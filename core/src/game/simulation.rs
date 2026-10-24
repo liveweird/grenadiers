@@ -144,6 +144,7 @@ pub enum StateError {
     UnsupportedBombTrigger(EntityId),
     UnsupportedBombBlast(EntityId),
     DuplicateRemoteOwner(EntityId),
+    UnsupportedBombKickHistory(EntityId),
     UnsupportedEnabledItems(crate::game::EnabledItems),
     UnsupportedPickup {
         cell: CellId,
@@ -158,6 +159,7 @@ pub enum StepError {
     UnsupportedBombTrigger(EntityId),
     UnsupportedBombBlast(EntityId),
     DuplicateRemoteOwner(EntityId),
+    UnsupportedBombKickHistory(EntityId),
     EffectExpiryOverflow(super::effects::EffectKind),
     BombPauseOverflow(EntityId),
 }
@@ -261,6 +263,9 @@ impl State {
                 return Err(StateError::UnknownBombOwner(bomb.owner()));
             }
         }
+        if let Some(id) = validation::unsupported_kick_history(rules, &world) {
+            return Err(StateError::UnsupportedBombKickHistory(id));
+        }
 
         let mut canonical = actors;
         canonical.sort_by_key(|actor| actor.seat.index());
@@ -316,6 +321,9 @@ mod invisibility_cloak_acceptance_tests;
 #[cfg(test)]
 #[path = "item_foundation_tests.rs"]
 mod item_foundation_tests;
+#[cfg(test)]
+#[path = "kick_validation_tests.rs"]
+mod kick_validation_tests;
 #[cfg(test)]
 #[path = "simulation/landmine_acceptance_tests.rs"]
 mod landmine_acceptance_tests;

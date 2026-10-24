@@ -4,7 +4,73 @@ Release labels and scope live in the [implementation plan](game/implementation-p
 A completed milestone is verification evidence; a release exists only after its tested commit
 is tagged and its artifacts are published intentionally.
 
-## v0.3.43 Wall Pass native checkpoint — 2026-10-24 01:00 UTC
+## v0.3.44 Kick native-acceptance checkpoint — 2026-10-24
+
+Kick candidate source `cb70cba891ed972380f30f52133622ce36fd9ee8`, tree
+`5be27219ba749d2811396d6f84af7d31f528a692`, passes fresh source-bound Rust, web, E2E and security
+gates. Every Rust profile passes 763 core and 210 server tests with four documented ignores and
+enumerates all 524,288 settings masks; debug and release each pass two doctests. Rust line coverage
+is 15,233/16,429 (92.720190%). The web gate passes 1,059 tests across 66 files with
+95.26/90.9/96/97.67% coverage and 57 static scenarios. Configured security retains three affected
+moderate packages represented by six GHSA advisories, with no high or critical findings; E2E audit
+reports zero vulnerabilities. Gate receipt
+`903736dda1001d60f83204fa10f58940796c87716a5d9eea151b58e62fd97153` binds actual-zero roots
+`31818` and `5290`.
+
+Fresh image `sha256:8ff3005861127f8ac57cc32f7e6c72ce5fa996fe628ad48426dbb8cf133e1af9`
+passes all 56 Compose plus 56 Kubernetes cases with zero retries or carried results. Root `97948`
+finishes with consumed actual exit zero; the matrix retains 54 reports, 126 PNGs, 44 runtime
+records, 22 distinct Kubernetes identities, 21 fixtures and 42 seed records. Each target passes 22
+latency cases and retains 80 game observations under the unchanged 250 ms budget. The earlier
+failed attempt's 55 cases are not carried.
+
+Facts receipt `00542824d775035473b8a2c6bc15ea54d176dbf990c8a2e5004dd28643746915`
+records this completed execution, and cleanup receipt
+`c69c1d93de5be0c4e4c4b9dfe6214175fa5b63041aa7e393ce5b5d2a479cff5a`
+records owned-resource removal. Audit `58e03d36c7dc967e71342e0e70e1fb65ac045e0f5a2883800d984d83bfe4654c`,
+result review `8f9f1e7d520a3da7baf52344c551545f6903310af458fdfe6b90465c6d406594`
+and proof-binding review `24edf45899b2402c86204eec7516e3a31b39bba8b2704df0a6d2d3b303466dea`
+are clear. Final manifest `a5d0c54f699629ea732c3f641bad02bd322ebb8c0f1a4a0efd1df293c4126620`
+is durably bound by seal `94c60dac44c639f7e9a214061e9daf9475628126d15526346ed7be2ce4c9a947`;
+independent post-seal review `97c1b19ff6694746b73ac9d427f30f4840f14300967e4333fed9d634fb05fd51`
+is clear.
+
+At this dated acceptance checkpoint, candidate/master/tag CI, publication and local promotion have
+not run. v0.3.43 remains the verified published/deployed baseline for this checkpoint; consult
+[GitHub Releases](https://github.com/liveweird/grenadiers/releases) for authoritative publication
+status after it.
+
+## v0.3.43 published prerelease — 2026-10-24
+
+Published source `c086f719ea470b9fe24963adef84b5e3bdf3e17a`, tree
+`d74fad8a1c870f2834fca48f80ea4e38f0c512d9`, is available as
+[v0.3.43](https://github.com/liveweird/grenadiers/releases/tag/v0.3.43) through annotated tag object
+`c8395fd7dcc5701842644967802e61c76211931c`. Candidate push/PR runs `40051959641` and
+`40051963999`, master run `40053637247`, and tag run `40055400664` each pass all ten jobs, 55
+browser cases and all 262,144 masks in debug, release and coverage on their first attempts.
+
+Localhost serves accepted image
+`sha256:577abb32958e45912f35a7f6ae68dd624deb6515d2b4d55519942c44436a2a01` from container
+`d7f68cc89bfc87d06c202fbedae78c1892f54ea3ccdc6571fee0d1c5ea2f4240`; health, readiness and
+index return 200 and the served script SHA-256 is
+`61d6722543d93559ad980b2f6577897ddbdfcc80b4137d598d7aecf75c6ea637`. The v0.3.42 image is retained
+as the rollback parent. Delivery contract
+`f5696ccb5aba2633f3ecbf7a12353aa5073d61218cf0f717807e516bd69bbeb4`, independent release review
+`da546c5038b3dc514b03a1b3fef658f828b27557c629082d95f2ccd368ba9889`, delivery binding
+`40578e13d8a44a3cdb22bc222ac71eedd0005b08f3fb5f0748d07f7e333cf5d1`, and binding review
+`21f6b544ee9d8e906c056671242c6be73ba742d1bcecb55f39c804ae78d9ec54` are clear.
+
+Native execution remains attributed to source `11d0dc7e39e8e2cafcf70c1548be339f52c740ab`, seal
+`31fe5eef2900a0229d002e45b5a310888f3915829db0aaf23bc3535a8eea5e2c`, and final manifest
+`3ac5e05ccee94c7716376ca9383c75acc924b772447499c6a0dbd857f68ec15c`. Artifact-equivalence receipt
+`81bd78943fa8e80bc839b06bcd68c7bb26872f4cf600c2fcc80e2269c7c94209` and review
+`42bbbcb68e8a306d9ed611513e186189ab3430f17bf545191edace5bdb6e3b75` connect corrected source
+`5dbcd58` to the published source through eight documentation-only changes. They do not claim
+unchanged Docker inputs, a new Rust compilation, or new native execution. Eighteen of 22 requested
+items are published at this checkpoint. Kick is the v0.3.44 native-accepted candidate; hosted CI
+and publication follow.
+
+## Historical v0.3.43 Wall Pass native checkpoint — 2026-10-24 01:00 UTC
 
 Wall Pass is the eighteenth requested item and is native verified at source
 `11d0dc7e39e8e2cafcf70c1548be339f52c740ab`, tree
@@ -54,17 +120,13 @@ artifact equality, not unchanged build inputs, a new Rust compilation, or Docker
 reproducibility; the 110 native cases remain attributed to source `11d0dc7` and accepted image
 `577abb3`.
 
-The first PR #104 head `98dffe5` failed security in push run `40050321682` and PR run
+At this checkpoint, the first PR #104 head `98dffe5` failed security in push run `40050321682` and PR run
 `40050338206`; other jobs were still finishing at that checkpoint. Corrected head `5dbcd58` has
-not yet been pushed. Its exact-head candidate CI, replacement merge/master and tag checks,
-publication and localhost promotion remain required. The default deployment remains v0.3.42.
+not yet been pushed. Those then-pending steps were later completed by the published delivery above.
 
-This is a native checkpoint, not a release. Candidate, master and tag workflows, publication and
-exact-image promotion for v0.3.43 remain pending. Consult current
-[checks](https://github.com/liveweird/grenadiers/actions) and
-[releases](https://github.com/liveweird/grenadiers/releases) rather than treating this dated status
-as a future publication claim. Seventeen of 22 items are published; eighteen are native verified.
-Kick, Punch, Bracelet and Oil Barrel remain before ART-ATLAS.
+This section is the dated native checkpoint, not the current release status. The published record
+above supersedes its pending statements. Kick, Punch, Bracelet and Oil Barrel remain before
+ART-ATLAS.
 
 The reviewed Wall Pass captures are [English desktop](screenshots/wall-pass-desktop.png) and
 [Polish 320px reduced motion](screenshots/wall-pass-mobile-pl.png), with SHA-256 values

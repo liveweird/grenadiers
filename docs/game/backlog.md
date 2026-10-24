@@ -1,23 +1,21 @@
 # Gameplay and presentation backlog
 
-Teleporter is published as prerelease
-[v0.3.42](https://github.com/liveweird/grenadiers/releases/tag/v0.3.42), making 17 of the 22
-requested item types published. Merge `0ff1512c5a8fdbd1e1b16583ae7791e668bf070b` and annotated tag
-`ea3930a3490fb483de46692e1009743e20c61648` pass distinct first-attempt master/tag workflows
-`39982027955` and `39984896509`; the exact accepted image is promoted locally. Wall Pass is the
-eighteenth native-verified item for v0.3.43: source `11d0dc7e39e8e2cafcf70c1548be339f52c740ab`
-and image `sha256:577abb32958e45912f35a7f6ae68dd624deb6515d2b4d55519942c44436a2a01`
-pass fresh gates and all 55 Compose plus 55 Kubernetes cases with zero retries or carried results.
-Seventeen items are published; candidate/master/tag checks, publication and promotion for v0.3.43
-remain pending. Current status lives in [checks](https://github.com/liveweird/grenadiers/actions),
-[releases](https://github.com/liveweird/grenadiers/releases), and the
-[verification record](../verification.md). Kick, Punch, Bracelet and Oil Barrel remain before
-ART-ATLAS.
-Latest corrected candidate `5dbcd58` pins development-only Happy DOM 21.0.4 after the earlier
-PR #104 head failed security. Its fresh 797-test web gate and full configured security gate pass
-with three moderate development advisories and no high or critical findings. Reviewed retained
-artifact equality preserves the accepted image output, but the 110 native passes remain bound to
-H2; corrected exact-head CI, publication and promotion are still pending.
+[v0.3.43](https://github.com/liveweird/grenadiers/releases/tag/v0.3.43) publishes Wall Pass as the
+eighteenth of 22 requested item types. Published source `c086f719ea470b9fe24963adef84b5e3bdf3e17a`,
+tree `d74fad8a1c870f2834fca48f80ea4e38f0c512d9`, and annotated tag
+`c8395fd7dcc5701842644967802e61c76211931c` pass first-attempt candidate, master and tag workflows;
+the exact accepted image `sha256:577abb32958e45912f35a7f6ae68dd624deb6515d2b4d55519942c44436a2a01`
+is promoted locally. Native acceptance remains attributed to H2 source `11d0dc7`; reviewed
+artifact equality connects corrected `5dbcd58` to the published source without claiming unchanged
+Docker inputs, a new Rust compilation or new native execution. See the
+[verification record](../verification.md) for the delivery chain.
+
+This v0.3.44 source preparation contains the nineteenth opt-in pickup, Kick, while preserving the
+published Wall Pass behavior. At the 2026-10-24 checkpoint, source
+`cb70cba891ed972380f30f52133622ce36fd9ee8` passes fresh Rust, web, security and complete
+524,288-mask gates. Fresh execution passes all 56 Compose plus 56 Kubernetes cases with zero
+retries or carried results; independent audit, reviews and durable post-seal review are clear.
+Hosted CI and publication follow. Punch, Bracelet and Oil Barrel remain before ART-ATLAS.
 
 At the 21 October 2026 16:47 UTC native acceptance checkpoint, Invisibility Cloak was an
 **unreleased source candidate**. Corrected source `1c6724f` and
@@ -111,20 +109,18 @@ no game behavior. Independent audit is clear and 2,492 payloads are durably seal
 and promotion checks have not run. Six requested types remain: Teleporter,
 Wall Pass, Kick, Punch, Bracelet and Oil Barrel. ART-ATLAS follows the completed feature batch.
 
-TURN, CONFIG and the first ART slice are implemented. The native-verified v0.3.43 candidate contains eighteen
+TURN, CONFIG and the first ART slice are implemented. Published v0.3.43 contains eighteen
 optional pickups: Heart, Shield, Golden Flame, Short Fuse, Short Flame, Long Fuse, Reverse
 Controls, Diarrhea, Slow-foot, Piercing Bomb, Power Bomb, Remote Bomb, Landmine and Invisibility
-Cloak, Stopwatch, Invisible Bombs, Teleporter and Wall Pass. The published v0.3.42 source
-parent is integrated, including the sealed v0.3.41 history. Fresh v0.3.43 gates, same-image native
-acceptance, independent audit, binding review, durable sealing and post-seal review are complete.
-Hosted candidate, master and tag
-checks, publication and promotion remain pending. The remaining four requested pickups stay
-outside this increment. Current publication status
-is recorded in [release notes](https://github.com/liveweird/grenadiers/releases), with source-bound
+Cloak, Stopwatch, Invisible Bombs, Teleporter and Wall Pass. Its source, CI, publication and exact
+image promotion are complete. The remaining four requested pickups stay outside that increment;
+Kick is source-gates verified and its fresh 56+56 native acceptance is independently reviewed and
+sealed for v0.3.44, while publication follows this dated checkpoint. Authoritative publication
+status is recorded in [GitHub Releases](https://github.com/liveweird/grenadiers/releases), with source-bound
 acceptance records in [verification](../verification.md). Richer transitions and artwork remain
 follow-up work; see [pixel-art presentation](pixel-art.md) and
 [expanded item implementation](expanded-items.md).
-Updated 2026-10-24 after v0.3.42 delivery and the refreshed Wall Pass native checkpoint. Release acceptance is recorded in
+Updated 2026-10-24 after v0.3.43 delivery and the Kick native-acceptance checkpoint. Release acceptance is recorded in
 [verification](../verification.md).
 The [implementation plan](implementation-plan.md) remains the milestone/release reference;
 the [rules](rules.md) describe the current baseline and historical extension catalog.
@@ -270,7 +266,7 @@ needs remappable controls, input sequencing, replay and connection-generation fe
 | EQ-KICK / boot | Walking into a planted bomb slides it across the floor until a wall, another bomb or a player stops it. | Sliding speed, soft-block collision, contact priorities, fuse/chain behavior and bomb ownership; no tunneling. |
 | EQ-PUNCH / boxing glove | Punch an adjacent bomb three tiles forward over obstacles, wrapping at arena edges. | Action/direction, airborne collision and fuse behavior, landing on blocked cells, repeated punches; wrap logical arena cells rather than screen pixels, defining treatment of border walls. |
 | EQ-SHOVE / bracelet | Shove rival players when touching them. | Contact detection despite normally non-blocking players, displacement, cooldown, simultaneous shoves and collision/fire along the pushed path. |
-| EQ-WALL / wall pass | **Native verified for v0.3.43.** Phase through destructible soft blocks. | Hard walls/borders, bombs and hazards stay authoritative; private per-cell exit grace resolves replacement while overlapping a block. Fresh source gates and 55+55 same-image native cases pass with independently reviewed durable evidence; hosted CI and publication remain pending. |
+| EQ-WALL / wall pass | **Published in v0.3.43.** Phase through destructible soft blocks. | Hard walls/borders, bombs and hazards stay authoritative; private per-cell exit grace resolves replacement while overlapping a block. Fresh source gates, 55+55 same-image native cases, first-attempt hosted CI, publication and exact-image promotion pass with independently reviewed evidence. |
 | EQ-HEART / heart | Absorb one lethal explosion or enemy collision, then vanish. | Simultaneous/overlapping hits, remaining in flame, protection precedence with Shield and post-hit grace. Enemy collision applies when an enemy damage system exists. |
 
 ## Timed buffs: multiple active effects allowed
@@ -322,6 +318,7 @@ Retain bounded scheduling, performance budgets, EN/PL documentation and full rel
 including same-image Compose/Kubernetes acceptance. Bots, mobs and larger matches remain
 separate tracks; their future interactions must be specified without making them prerequisites.
 
-Complete the entire expanded-item activation batch before starting ART-ATLAS. Wall Pass is the
-eighteenth native-verified increment (v0.3.43); Kick, Punch, Bracelet and Oil remain after it.
-ART-ATLAS begins only after those item increments and their release gates are complete.
+Complete the entire expanded-item activation batch before starting ART-ATLAS. Kick is the
+current bounded increment (v0.3.44), with native acceptance complete. Hosted release
+acceptance remains pending; melee equipment and Oil follow it. ART-ATLAS begins
+only after those item increments and their release gates are complete.

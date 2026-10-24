@@ -10,6 +10,7 @@ pub enum PickupKind {
     BombCapacity,
     BlastRange,
     MovementSpeed,
+    Kick,
     WallPass,
     Heart,
     RemoteBomb,
@@ -33,6 +34,7 @@ pub enum PickupKind {
 impl PickupKind {
     pub(crate) const fn enabled_by(self, enabled: super::EnabledItems) -> bool {
         match self {
+            Self::Kick => enabled.contains_kick(),
             Self::WallPass => enabled.contains_wall_pass(),
             Self::Heart => enabled.contains_heart(),
             Self::RemoteBomb => enabled.contains_remote_bomb(),

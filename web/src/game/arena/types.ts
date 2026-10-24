@@ -1,7 +1,7 @@
 import type { KeyboardBindings } from './bindings'
 
 export type RenderablePickupKind =
-  | 'bombCapacity' | 'blastRange' | 'movementSpeed' | 'wallPass' | 'heart' | 'remoteBomb' | 'piercingBomb' | 'powerBomb' | 'landmine' | 'shield' | 'stopwatch' | 'invisibilityCloak' | 'goldenFlame' | 'shortFuse'
+  | 'bombCapacity' | 'blastRange' | 'movementSpeed' | 'kick' | 'wallPass' | 'heart' | 'remoteBomb' | 'piercingBomb' | 'powerBomb' | 'landmine' | 'shield' | 'stopwatch' | 'invisibilityCloak' | 'goldenFlame' | 'shortFuse'
   | 'diarrhea' | 'slowFoot' | 'shortFlame' | 'longFuse' | 'reverseControls' | 'invisibleBombs' | 'teleporter'
 interface PresentedActor {
   id: number
@@ -27,6 +27,7 @@ interface PresentedActor {
   powerArmed?: boolean
   landmineStored?: boolean
   remoteArmed?: boolean
+  kickEquipped?: boolean
   wallPassEquipped?: boolean
 }
 interface PresentedBomb {

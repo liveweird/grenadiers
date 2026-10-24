@@ -26,6 +26,7 @@
 
 pub mod arena;
 pub mod assignment;
+mod bomb_motion;
 pub mod bombs;
 pub mod damage;
 pub mod effects;
@@ -38,6 +39,7 @@ pub mod geometry;
 pub mod input;
 pub mod inventory;
 mod movement;
+mod movement_collision;
 pub mod pickups;
 pub mod rules;
 pub mod simulation;
@@ -49,7 +51,7 @@ pub mod world;
 
 pub use arena::{Arena, ArenaError, Terrain};
 pub use assignment::RoundAssignment;
-pub use bombs::{BlastKind, Bomb, BombError, BombTrigger, TimedBombHistory};
+pub use bombs::{BlastKind, Bomb, BombError, BombMotion, BombTrigger, TimedBombHistory};
 pub use damage::{DamageGrace, DamageOutcome, DamagePreventionSource};
 pub use effects::{EffectApplication, EffectError, EffectKind, EffectiveSpeed, TimedEffects};
 pub use enabled_items::EnabledItems;

@@ -141,6 +141,18 @@ describe('v10 private-state presentation', () => {
     expect(stats).not.toHaveTextContent('Wall pass (')
   })
 
+  it('labels Kick as permanent equipment without adding an action or timer', () => {
+    const current = state()
+    const actor = current.snapshot!.state.actors[0]
+    if (actor.type !== 'visible') throw new Error('expected visible own actor')
+    actor.inventory = { equipment: 'kick', weapon: null }
+    renderPanel(current)
+    const stats = screen.getByLabelText('Player one upgrades')
+    expect(stats).toHaveTextContent('GearKick')
+    expect(stats).toHaveTextContent('Bomb typeNone')
+    expect(stats).not.toHaveTextContent('Kick (')
+  })
+
   it('uses the existing bomb binding in the armed Remote detonation hint', () => {
     const current = state()
     const actor = current.snapshot!.state.actors[0]

@@ -7,6 +7,7 @@ use crate::game::geometry::MovementTrace;
 use crate::game::movement;
 use crate::game::simulation::DrawReason;
 use crate::game::types::{CellId, SeatId, Tick};
+use std::collections::BTreeSet;
 
 impl State {
     pub fn step(&mut self, inputs: &[SeatInput]) -> Result<StepReport, StepError> {
@@ -25,6 +26,9 @@ impl State {
         }
         if let Some(owner) = super::validation::duplicate_remote_owner(&self.world) {
             return Err(StepError::DuplicateRemoteOwner(owner));
+        }
+        if let Some(id) = super::validation::unsupported_kick_history(self.rules, &self.world) {
+            return Err(StepError::UnsupportedBombKickHistory(id));
         }
         if self.result.is_some() {
             self.tick = next_tick;
@@ -54,17 +58,23 @@ impl State {
         self.expire_actor_effects(self.tick, next_tick);
         self.apply_timed_pause(stopwatch);
         self.world.expose_flame_free_pickups();
+        let motion = crate::game::bomb_motion::advance(&mut self.world, &self.actors, next_tick);
+        for actor in &mut self.actors {
+            actor.bomb_grace.retain(|id| !motion.moved.contains(id));
+        }
         let manual_actions = self.apply_inputs(inputs);
         self.clear_frozen_movement(stopwatch.frozen);
         let alive_at_movement_start = self.actors.each_ref().map(|actor| actor.alive);
         let grace_at_movement_start = self.actors.each_ref().map(|actor| actor.bomb_grace.clone());
-        let traces = self.move_living(next_tick, stopwatch.frozen);
+        let (traces, kick_requests) =
+            self.move_living(next_tick, stopwatch.frozen, &motion.moving_at_start);
         let contact_targets = super::contacts::accepted_contact_ids(
             &self.world,
             &traces,
             alive_at_movement_start,
             &grace_at_movement_start,
         );
+        self.resolve_kick_requests(kick_requests);
         self.kill_on_existing_flames(&traces, next_tick, &mut events, &mut shield_prevented);
         let remote_targets =
             self.resolve_classic_manual_actions(&manual_actions, next_tick, stopwatch, &mut events);
@@ -103,27 +113,68 @@ impl State {
         })
     }
 
-    fn move_living(&mut self, tick: Tick, frozen: [bool; 2]) -> [MovementTrace; 2] {
+    fn move_living(
+        &mut self,
+        tick: Tick,
+        frozen: [bool; 2],
+        moving_at_start: &BTreeSet<crate::game::EntityId>,
+    ) -> (
+        [MovementTrace; 2],
+        [Option<(crate::game::EntityId, crate::game::Direction)>; 2],
+    ) {
         let turn_assist = self.rules.turn_assist();
         let slow_foot_enabled = self.rules.enabled_items().contains_slow_foot();
         let wall_pass_enabled = self.rules.enabled_items().contains_wall_pass();
+        let kick_rule_enabled = self.rules.enabled_items().contains_kick();
+        let mut requests = [None; 2];
         let mut index = 0;
-        self.actors.each_mut().map(|actor| {
+        let traces = self.actors.each_mut().map(|actor| {
             let current = index;
             index += 1;
             if actor.alive && !frozen[current] {
-                movement::advance_actor(
-                    &self.world,
-                    actor,
+                let can_kick = kick_rule_enabled && actor.inventory().can_kick();
+                let config = movement::AdvanceConfig {
                     turn_assist,
                     tick,
                     slow_foot_enabled,
                     wall_pass_enabled,
-                )
+                    kick_enabled: can_kick,
+                    moving_at_start,
+                };
+                let outcome = movement::advance_actor(&self.world, actor, &config);
+                requests[current] = outcome.kick;
+                outcome.trace
             } else {
                 MovementTrace::new(actor.position)
             }
-        })
+        });
+        (traces, requests)
+    }
+
+    fn resolve_kick_requests(
+        &mut self,
+        requests: [Option<(crate::game::EntityId, crate::game::Direction)>; 2],
+    ) {
+        let contested = requests[0]
+            .zip(requests[1])
+            .filter(|(left, right)| left.0 == right.0)
+            .map(|(left, _)| left.0);
+        for seat in SeatId::ALL {
+            let Some((id, direction)) = requests[seat.index()] else {
+                continue;
+            };
+            if contested == Some(id) && seat != self.assignment.priority_seat() {
+                continue;
+            }
+            let Some(bomb) = self.world.bombs.get_mut(&id) else {
+                continue;
+            };
+            if bomb.motion().is_none()
+                && !matches!(bomb.trigger(), crate::game::BombTrigger::Contact)
+            {
+                bomb.arm_kick(direction);
+            }
+        }
     }
 
     fn kill_on_existing_flames(

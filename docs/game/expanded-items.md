@@ -1,5 +1,25 @@
 # Expanded item implementation plan
 
+At the 2026-10-24 v0.3.44 native-acceptance checkpoint, 18 of the 22 requested item types are
+published through v0.3.43, including
+[Wall Pass](wall-pass.md). [Kick](kick.md) passes fresh source-bound gates for v0.3.44 at source
+`cb70cba891ed972380f30f52133622ce36fd9ee8`, including every 524,288-item mask. Fresh 56+56 native
+acceptance passes with zero retries or carried results and is independently reviewed and sealed.
+Hosted CI and publication follow. Punch, Bracelet and Oil Barrel remain before ART-ATLAS.
+
+## Historical Heart activation checkpoint
+
+At the v0.3.21 checkpoint, the **Heart activation candidate was implemented and locally verified**,
+while native release acceptance was still pending. That candidate introduced
+Expanded-v5/generator-v2 rooms and gameplay-v8; see [Heart](heart.md). Later candidates added
+opt-in [Shield](shield.md), [Golden Flame](golden-flame.md), [Short Fuse](short-fuse.md),
+[Short Flame](short-flame.md), [Long Fuse](long-fuse.md), [Reverse Controls](reverse-controls.md),
+[Diarrhea](diarrhea.md), [Slow foot](slow-foot.md), [Piercing Bomb](piercing-bomb.md),
+[Power Bomb](power-bomb.md), [Remote Bomb](remote-bomb.md), [Landmine](landmine.md),
+[Invisibility Cloak](invisibility-cloak.md), [Stopwatch](stopwatch.md),
+[Invisible Bombs](invisible-bombs.md), [Teleporter](teleporter.md), and Wall Pass while retaining
+their reviewed protocol and identities.
+
 At the 21 October 2026 16:47 UTC native acceptance checkpoint, Invisibility Cloak was an
 **unreleased source candidate**. Corrected source `1c6724f` and
 image `960976c9` pass a fresh 51 Compose plus 51 Kubernetes matrix with zero retries or carried
@@ -81,22 +101,27 @@ independent item. The integrated catalog has 65,536 subsets; all earlier mapping
 v8 catalog remain pinned. Prepared-source checks do not establish native acceptance or hosted
 release CI for this integrated candidate, and no v0.3.40 acceptance result is carried forward.
 
-The final v0.3.42 source adds [Teleporter](teleporter.md) as the seventeenth optional pickup while
+Published [v0.3.42](https://github.com/liveweird/grenadiers/releases/tag/v0.3.42) adds
+[Teleporter](teleporter.md) as the seventeenth optional pickup while
 preserving every v0.3.41 item. Rules version 5, generator version 2 and journal format 2 remain
 stable; Teleporter introduces the paired gameplay-v10 contract for its authoritative position
-epoch. Its release acceptance remains separately pending.
+epoch. Its release acceptance and exact-image local promotion are complete; older pending language
+in dated checkpoints remains historical.
 
-The v0.3.43 release candidate adds [Wall Pass](wall-pass.md) as the eighteenth optional pickup
-while preserving the reviewed final v0.3.42 source parent and gameplay v10. Source
-`11d0dc7e39e8e2cafcf70c1548be339f52c740ab` and exact image
+Published [v0.3.43](https://github.com/liveweird/grenadiers/releases/tag/v0.3.43) adds
+[Wall Pass](wall-pass.md) as the eighteenth optional pickup while preserving gameplay v10. Native
+source `11d0dc7e39e8e2cafcf70c1548be339f52c740ab` and exact image
 `sha256:577abb32958e45912f35a7f6ae68dd624deb6515d2b4d55519942c44436a2a01` complete all 262,144
 settings masks in debug, release and coverage plus 55+55 same-image native cases with zero retries
 or carry. Independent audit, binding review, durable sealing and post-seal review are clear;
-hosted CI remains pending.
-Latest candidate `5dbcd58` adds only the Happy DOM 21.0.4 development-security correction. Its
+published source `c086f719ea470b9fe24963adef84b5e3bdf3e17a` passes first-attempt candidate, master
+and tag CI and is locally promoted on the accepted image.
+Corrected source `5dbcd58` adds only the Happy DOM 21.0.4 development-security correction. Its
 fresh web and configured security gates pass, and reviewed retained-artifact comparison preserves
 the accepted host distribution. Native acceptance remains attributed to source `11d0dc7`; the
-corrected candidate still requires exact-head CI and delivery.
+eight later published-source changes are documentation only. Eighteen of 22 requested items are
+published at this checkpoint. Kick has passed its v0.3.44 source gates and fresh 56+56 native
+acceptance with independent review and sealing; hosted CI and publication follow.
 This optional track follows the [backlog](backlog.md), shared settings and
 pixel-art increments. The historical catalog in [rules](rules.md) is not an implementation
 claim. Each activation requires its own reviewed behavior, UI, documentation and acceptance.
@@ -154,10 +179,10 @@ per seat/tick. Add a remappable equipment action, proposed default **E**, for Pu
 
 | Item | Activation policy |
 | --- | --- |
-| Kick | Walking into a solid bomb starts sliding next tick, one cell per ten ticks. Swept collisions stop at the last legal cell before walls, blocks, barrels, bombs or living players. |
 | Punch | Move the adjacent facing bomb three interior cells, wrapping playable coordinates. Landing requires floor, no soft block/barrel/other bomb, and no overlap with a living player's footprint. If blocked, try further three-cell landings for at most one axis cycle. Returning to the original cell fails unchanged, with no cooldown; successful punches have a 12-tick cooldown and stop sliding. |
 | Bracelet | New moving contact shoves up to one tile, clamped by obstacles. Require separation to rearm and a 30-tick cooldown. Resolve simultaneous claims using alternating round priority; check swept fire/mines without recursive shoves. |
-| Wall pass | Ignore soft blocks and unlit barrels, but not hard walls or solid bombs. Placement inside obstacles is illegal. Replacement grants exit-only grace for obstacles currently overlapped; grace ends individually on exit. |
+| Kick (**prepared in v0.3.44**) | Push stationary Timed or Remote bombs one cell on the next update and every ten updates until blocked; Contact mines are excluded and identity, owner, blast and fuse remain unchanged. |
+| Wall Pass (**published in v0.3.43**) | Ignore soft blocks, but not hard walls or solid bombs. Placement inside obstacles is illegal. Replacement grants private exit-only grace for positively overlapped soft cells; grace ends individually when the full footprint exits or reaches tangency. |
 | Remote bomb | The next manual bomb action detonates the armed bomb instead of planting. Chains/fire still trigger it; death/disconnect adds no invented fuse. Another unused weapon may occupy the slot while it is armed. |
 | Piercing bomb | Rays spend range through soft blocks/barrels; hard walls stop them. Solid bombs chain and stop the ray. |
 | Power bomb | Affect eligible cells within Manhattan radius, ignoring line of sight. Hard walls remain intact without fire; blocks, barrels and bombs use the same immutable explosion plan. |

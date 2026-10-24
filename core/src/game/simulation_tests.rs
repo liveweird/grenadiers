@@ -10,6 +10,11 @@ use crate::game::types::{
 };
 use crate::game::world::World;
 
+#[path = "simulation/kick_route_tests.rs"]
+mod kick_route_tests;
+#[path = "kick_tests.rs"]
+mod kick_tests;
+
 fn open_world() -> World {
     let mut terrain = [Terrain::Floor; ARENA_CELL_COUNT];
     for row in 0..ARENA_HEIGHT {

@@ -44,6 +44,10 @@ impl State {
                 continue;
             }
             let applied = match pickup.kind() {
+                PickupKind::Kick => {
+                    self.replace_actor_equipment(seat, crate::game::Equipment::Kick);
+                    true
+                }
                 PickupKind::WallPass => {
                     self.replace_actor_equipment(seat, crate::game::Equipment::WallPass);
                     true
@@ -164,7 +168,7 @@ impl super::Actor {
                     self.pending_turn = None;
                 }
             }
-            PickupKind::WallPass | PickupKind::Heart => {
+            PickupKind::Kick | PickupKind::WallPass | PickupKind::Heart => {
                 unreachable!("equipment pickups use the world-aware transition")
             }
             PickupKind::Teleporter => unreachable!("teleporters are committed after collection"),

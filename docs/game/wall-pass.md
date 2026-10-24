@@ -35,7 +35,7 @@ later entity ID, identical on both clients. E2E verifies no bomb, event or resou
 placement; focused core tests verify no entity allocation. That sole-item fixture cannot
 exercise equipment replacement; focused core and protocol tests cover replacement exit grace.
 
-## Native verification checkpoint
+## Native verification and published delivery
 
 Final source `11d0dc7e39e8e2cafcf70c1548be339f52c740ab`, tree
 `655c7d8a80b4dd3fdd3b232534c2cbaa45b054cc`, is native verified on exact image
@@ -55,11 +55,16 @@ and [Polish 320px reduced motion](../screenshots/wall-pass-mobile-pl.png). Their
 `d46367b7eeee7c55e94dbcfba6de7de50b27b96c6761ad6a9ff69db2b9332c08` and
 `84843190d2be59a89f5c614c3d17bd78e969dcb7cf692d0e06243b2d3978d72f`.
 
-This is the eighteenth native-verified requested item, not a v0.3.43 publication claim. Candidate,
-master and tag checks, publication and exact-image promotion remain pending; consult current
-[checks](https://github.com/liveweird/grenadiers/actions) and
-[releases](https://github.com/liveweird/grenadiers/releases). Kick, Punch, Bracelet and Oil Barrel
-remain before ART-ATLAS.
-The later `5dbcd58` release candidate updates only the two web dependency manifests to Happy DOM
-21.0.4. Its reviewed host distribution remains byte-equal to this accepted image, but that does
-not relabel these 110 native cases; exact-head hosted and delivery checks remain required.
+Wall Pass is published as the eighteenth requested item in
+[v0.3.43](https://github.com/liveweird/grenadiers/releases/tag/v0.3.43). Published source
+`c086f719ea470b9fe24963adef84b5e3bdf3e17a`, tree
+`d74fad8a1c870f2834fca48f80ea4e38f0c512d9`, annotated tag
+`c8395fd7dcc5701842644967802e61c76211931c`, and first-attempt candidate/master/tag workflows are
+independently reviewed. Localhost serves the accepted image above from container
+`d7f68cc89bfc87d06c202fbedae78c1892f54ea3ccdc6571fee0d1c5ea2f4240`.
+
+The 110 native cases remain attributed to source `11d0dc7`. Corrected source `5dbcd58` updates the
+two web dependency manifests to Happy DOM 21.0.4; reviewed artifact equality connects it to the
+published source through eight documentation-only changes. This does not claim unchanged Docker
+inputs, a new Rust compilation or new native execution. Kick is the v0.3.44 source-only candidate;
+Punch, Bracelet and Oil Barrel remain before ART-ATLAS.

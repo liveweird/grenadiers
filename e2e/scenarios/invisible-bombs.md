@@ -15,12 +15,16 @@ live-bomb counts but receives an empty bomb list and no placement or detonation 
 ticks precede the exact expiry. Player Two's sighted stream witnesses a real pre-expiry detonation,
 so the cue filtering proof is non-vacuous.
 
-Player One reconnects immediately after both live bombs are observed, while still blinded. A raw
+Player Two starts the normal escape while Player One moves only to 2,1, off the photographed tile.
+Player One reconnects there immediately after both live bombs are observed, while still blinded. A raw
 post-disconnect admission from the current round has no bombs, retains the positive effect, and
 preserves the original physical expiry deadline exactly. Subsequent publications keep the bomb
-hidden from Player One and show Player One's original live timed bomb to Player Two. Parallel,
-viewport-bounded 3,1 PNG captures are immediately bracketed by those live-bomb and deadline proofs;
-PNG decoding is deferred outside that live capture boundary. After the bombs and public flames
+hidden from Player One and show both original live timed bombs and both authoritative live-bomb
+counts. Canvas scrolling and tile geometry are prepared before collection. The parallel,
+viewport-bounded 3,1 PNG captures revalidate that unchanged geometry without scrolling and run
+while Player One completes the normal retreat from 2,1 to 1,2. Their post-capture live-bomb guard
+runs immediately after both screenshots and before the enclosing phase awaits both retreats. PNG
+decoding is deferred outside that live capture boundary. After the bombs and public flames
 clear, clean PNGs are captured and all four images are decoded. Each live capture is then compared
 with a clean tile from the same page: Player One's hidden tile matches and Player Two's sighted tile
 differs. The sighted stream also supplies the awaited pre-expiry detonation witness. The mirrored
@@ -35,6 +39,16 @@ from Player Two and visible to Player One. The first paired publication at `T2+6
 reveals the same ID and cell with equal current remaining fuse on both views, without replaying the
 placement cue to Player Two. While the same surviving timed bomb remains live after expiry, a
 bracketed 12,11 capture from Player Two's page differs from that page's earlier empty 12,11 capture;
-both PNGs are decoded only after the live post-capture proof. Pure-core tests establish exact domain
+both use geometry prepared before the second collection and are decoded only after the live
+post-capture proof. Its remaining fuse equals placement plus 300 ticks minus the paired publication
+tick. Pure-core tests establish exact domain
 expiry at 600 ticks. The route uses normal controls, no state injection, seed search, retries,
 duration override or extended timeout.
+
+The scenario always attaches a bounded public JSON receipt with wall and monotonic phase times,
+the original reconnect-preserved curse deadline, selected bomb IDs/cells/fuses, capture boundaries,
+pixel comparison hashes/results, and synchronously retained placement/detonation facts. It never
+stores admission payloads or credentials. Every returned comparison tile buffer is retained as
+soon as its screenshot completes. The hidden live, sighted live, hidden clean, sighted clean,
+empty, and revealed buffers are attached as PNGs only when the scenario fails; a successful run
+adds no PNG to the established inventory.

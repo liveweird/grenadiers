@@ -52,6 +52,9 @@ mod kick_tests;
 mod punch_tests;
 
 #[cfg(test)]
+mod punch_resume_tests;
+
+#[cfg(test)]
 mod bracelet_tests;
 
 #[cfg(test)]

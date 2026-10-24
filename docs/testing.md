@@ -4,6 +4,44 @@
 and use the repository's committed Cargo lockfile. Tests must exercise
 behavior and observable contracts rather than merely repeat implementation constants.
 
+## Verification policy
+
+Local checks are the primary gate for this single-maintainer repository. A passing local check
+does not need a second remote run merely because a branch was pushed, a PR was opened, a merge
+was made or a tag was created. Remote checks must add coverage that was not exercised locally,
+such as a different operating system or a clean build environment. A Linux container run already
+counts as Linux coverage for the behavior it actually executes; a container build alone does not
+prove that Rust unit tests ran on Linux.
+
+Use the relevant checks during development and complete the applicable suite before shipping.
+Keep a concise record of the tested commit, commands, results, environment and artifact digest.
+Reuse successful results only while their tested inputs remain applicable; rerun affected checks
+after relevant changes or failures. Documentation-only changes do not require repeating gameplay
+acceptance when application inputs are unchanged.
+
+Parallelize independent checks and gameplay groups using isolated processes, build directories,
+Compose projects, ports and Kubernetes namespaces. Reuse compiled dependencies and tooling.
+Keep latency tests isolated from competing workloads. Scheduling and caching must not reduce
+assertions, exhaustive mask coverage, coverage floors or failure visibility, or introduce retries
+that hide failures. Avoid repeated evidence packaging and review of unchanged results.
+
+The historical verification records below describe the workflow used at the time; they do not
+make repeated remote runs a current release requirement.
+
+### Hosted workflows
+
+The full `checks` workflow is manual: `gh workflow run ci.yml --ref <branch>`. It remains available
+for a clean hosted reproduction, including all exhaustive Rust profiles and browser scenarios.
+It does not run automatically for pushes, PRs, merges or tags.
+
+`platform.yml` runs debug and release Rust unit tests and doctests on Ubuntu for relevant PRs.
+This covers the platform gap when local Rust tests ran on macOS. It skips only the expensive
+exhaustive replay test; local full acceptance and manual full CI retain that test in all three
+profiles. The cheap exhaustive catalog/protocol tests remain in the Linux suite. Compiled Cargo
+dependencies are cached; test outcomes are always executed. The workflow can also be dispatched
+manually when Linux coverage is needed. Equivalent local Linux test execution satisfies the same
+requirement without a remote rerun.
+
 ## Rust
 
 Use unit tests for pure validation/serialization and Tower oneshot tests for HTTP behavior.
@@ -20,7 +58,16 @@ Install with `cargo install cargo-llvm-cov --version 0.9.1 --locked`, then
 `rustup component add llvm-tools-preview` and `scripts/gates.sh coverage`.
 Stable branch coverage equivalent to Flow's Kover gate is not configured.
 
-CI derives the exhaustive server item-mask partition matrix from the checked Rust catalog; the
+`scripts/gates.sh server-parallel` combines the server and coverage checks with four local
+workers by default. It builds each profile once, runs ordinary tests once per profile, and
+executes the exhaustive replay ranges using isolated workers. Set
+`GRENADIERS_LOCAL_SERVER_WORKERS=2` to adjust concurrency (supported range: 1–8). It requires a
+clean committed worktree and retains the same assertions, complete mask catalog and coverage
+floor. The separate `server` and `coverage` commands remain available as the serial fallback.
+Do not run latency acceptance alongside these CPU-intensive checks.
+
+The optional full CI derives the exhaustive server item-mask partition matrix from the checked
+Rust catalog; the
 workflow and JavaScript helpers do not duplicate item bits, cardinality, or ranges. Each partition
 runs the complete debug, release, build, and 80%-floor coverage gates with a 20-minute limit and
 emits source-bound debug, release, and coverage summaries. The stable `server` job accepts only the
@@ -268,7 +315,8 @@ The keyboard-only two-browser route reveals both pickups with ordinary movement 
 proves a safe atomic swap, a shared new `lastTeleportTick`, position and marker retention from a
 strictly newer reconnect admission, and unsafe consumption beside a live bomb without movement or
 marker change. The scenario has no seed search, state injection or retries. Native execution
-remains pending until the predecessor-integrated candidate image exists.
+passed fresh 54 Compose plus 54 Kubernetes cases; the factual publication status is recorded in
+the [v0.3.42 published delivery](releases.md#v0342-published-prerelease--2026-10-23).
 
 ## Wall Pass production-seed scenario
 
@@ -278,19 +326,33 @@ The keyboard-only two-browser route enables only Wall Pass, reveals and collects
 `(3,1)`, enters the intact soft block at `(3,2)`, and proves the authoritative block remains opaque
 while the actor and equipment cue remain legible. It rejects planting without consuming a bomb ID,
 capacity or weapon, clamps west against hard wall `(2,2)`, resumes from a strictly newer admission
-inside the block, then exits north without re-entry. A legal post-exit bomb has the immediate
-successor of the reveal bomb's entity ID, so the rejected inside action consumed no allocation.
+inside the block, then exits north without re-entry. A legal post-exit bomb has a later
+entity ID, identical on both clients. The rejected action creates no bomb or event and leaves
+resources unchanged; focused core tests verify no entity allocation.
 English desktop and Polish 320-pixel
 reduced-motion views produce the two named full-page captures. The scenario uses no state
 injection, direct WebSocket commands, seed search or retry. The sole-item fixture cannot prove
 Wall-Pass-to-Heart replacement grace; core and protocol tests provide that coverage. Native
-execution remains pending until the predecessor-integrated candidate image exists.
+execution completed as a sealed 55 Compose plus 55 Kubernetes matrix on H2 source
+`11d0dc7e39e8e2cafcf70c1548be339f52c740ab`. Published source
+`c086f719ea470b9fe24963adef84b5e3bdf3e17a` later passed candidate, master and tag checks;
+[v0.3.43](https://github.com/liveweird/grenadiers/releases/tag/v0.3.43) publication and exact-image
+local promotion are complete. The native result remains attributed to H2 rather than relabeled to
+the published source.
 
 ### Kick source scenario
 
 Use `docker-compose.kick.yaml` with the mode-0444 v2 seed fixture and
 `E2E_KICK_FIXTURE=arena-v2-kick npm --prefix e2e run test:kick`. The scenario uses ordinary UI and
 keys, observes public streams, and does not inject state, search seeds, retry, or extend budgets.
+At the 2026-10-24 source-gates checkpoint, source `cb70cba891ed972380f30f52133622ce36fd9ee8`
+passes all 524,288 masks in debug, release and coverage, 763 core and 210 server tests per profile,
+1,059 web tests across 66 files, and 57 static scenarios. Fresh image execution subsequently passes
+all 56 Compose plus 56 Kubernetes cases with zero retries or carried results. Audit, independent
+result/binding review, durable sealing and post-seal review are clear. Hosted release checks remain
+historical checkpoint evidence. Published source `f32fd86d8f0c7c4bebba8fa60d1c66c65d1a174a`
+is available as [v0.3.44](https://github.com/liveweird/grenadiers/releases/tag/v0.3.44), and the
+accepted image is promoted locally.
 
 ### Punch source scenario
 
@@ -300,7 +362,10 @@ Equipment to F, enables only Punch, reveals the natural pickup, clears the appro
 moves one ordinary bomb from `(4,1)` to wrapped `(1,1)`. It proves the shared action-ID successor,
 same public bomb identity and fuse, no placement/detonation event, recipient parity, safe escape,
 and natural detonation using ordinary UI and native keys. It does not inject state, search seeds,
-retry, send direct gameplay commands or extend budgets. Native same-image execution remains pending.
+retry, send direct gameplay commands or extend budgets. Native execution is accepted in the scoped
+27-case checkpoint (26 Compose plus one Kubernetes case, zero retries); the full 114-case matrix
+was not run. Natural-fuse, reconnect and screenshot checks are recorded in
+[verification](verification.md#v0345-punch-native-accepted-checkpoint--2026-10-24--27-cases).
 
 ### Bracelet source scenario
 

@@ -1,0 +1,58 @@
+name: Linux Rust units
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/ci.yml
+      - .github/workflows/platform.yml
+      - Cargo.lock
+      - Cargo.toml
+      - .cargo/**
+      - rust-toolchain.toml
+      - api/**
+      - core/**
+      - server/**
+      - scripts/gates.sh
+      - scripts/ci-server-mask-*.mjs
+      - scripts/ci-workflow-contract.test.mjs
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: linux-rust-units-${{ github.event.pull_request.head.sha || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  rust-units:
+    name: Rust units on Linux
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      CARGO_INCREMENTAL: 0
+    steps:
+      # Local macOS gates cannot execute the Linux production target. This job closes only that
+      # platform gap; workflow_dispatch is optional when the same checks already ran on Linux.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Bind exact source
+        env:
+          EXPECTED_SOURCE: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SOURCE"
+      - name: Install declared Rust toolchain
+        run: rustup show
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        with:
+          cache-targets: true
+          cache-workspace-crates: false
+          cache-on-failure: false
+      - name: Run debug workspace unit tests and doctests
+        run: >-
+          cargo test --workspace --locked --
+          --skip expanded_item_masks_and_disabled_preset_replay_deterministically
+      - name: Run release workspace unit tests and doctests
+        run: >-
+          cargo test --workspace --release --locked --
+          --skip expanded_item_masks_and_disabled_preset_replay_deterministically

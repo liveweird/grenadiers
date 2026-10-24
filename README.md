@@ -3,6 +3,14 @@
 A browser-based multiplayer game inspired by classic Bomberman/Dynablaster.
 The initial playable profile supports two human players. Bots and larger matches follow later.
 
+**[v0.3.45 Punch](https://github.com/liveweird/grenadiers/releases/tag/v0.3.45) is published:**
+20 of 22 requested items are complete. The release source is `5be42456cee80e06e2f138bdfd458ef821bb34c2` (tree
+`94f83a7650e2c57955103d91060af10b1a2f439c`). Localhost serves the exact accepted image
+`sha256:3f13b26f7a4a41ba2e90b8cc9261c9e95a60eceeddf49504341e65258eb7d37d`.
+
+Bracelet v0.3.46 is prepared on the published Punch parent; native acceptance, final CI and
+publication remain pending. Oil Barrel follows before ART-ATLAS.
+
 The **two-player arena match is playable**. Create a room, share its invitation,
 join from another browser, and both choose Ready. Select the courtyard to move with arrows
 or W/A/S/D and plant bombs with Space. Rust owns the 60 Hz simulation; PixiJS draws public
@@ -23,8 +31,10 @@ for five seconds of immunity; its timer refreshes on collection. The optional
 [Long Fuse curse](docs/game/long-fuse.md) doubles newly planted bomb fuses for ten seconds. Optional
 [Reverse Controls](docs/game/reverse-controls.md) reverses held movement directions for ten seconds. The opt-in [Diarrhea curse](docs/game/diarrhea.md) automatically drops ordinary bombs when placement is possible for ten seconds. [Slow foot](docs/game/slow-foot.md) halves movement speed for ten seconds per independently timed stack. [Bracelet](docs/game/bracelet.md) is permanent equipment that shoves a contacted rival up to one tile after movement collision checks. [Punch](docs/game/punch.md) is permanent equipment that moves an adjacent facing bomb to the next open three-cell wrapped landing through a remappable Equipment action. [Kick](docs/game/kick.md) is permanent equipment that pushes stationary Timed and Remote bombs on a fixed cadence while preserving their fuse and ownership. [Wall Pass](docs/game/wall-pass.md) is permanent equipment for crossing breakable blocks while hard walls, bombs and hazards remain effective. [Remote Bomb](docs/game/remote-bomb.md) stores one manual bomb that waits for its owner's next bomb action. [Piercing Bomb](docs/game/piercing-bomb.md) stores one manual bomb whose blast crosses breakable blocks. [Power Bomb](docs/game/power-bomb.md) stores one manual bomb whose diamond-shaped blast ignores obstruction while preserving hard walls. [Landmine](docs/game/landmine.md) stores one passable contact mine with initial exit grace. [Invisibility Cloak](docs/game/invisibility-cloak.md) hides an active actor's spatial and loadout details from the opponent for ten seconds. [Stopwatch](docs/game/stopwatch.md) freezes the opponent's voluntary actions and pauses Timed bombs for three seconds. [Invisible Bombs](docs/game/invisible-bombs.md) hides every live bomb and its cues from the afflicted player for ten seconds. [Teleporter](docs/game/teleporter.md) consumes an immediate pickup and swaps both living players only when both destinations are safe. Gameplay v10 requires reloading older browser
 clients after an upgrade; see the [compatibility note](docs/game/protocol-v10.md).
-Reviewed pre-collection examples show [English desktop](docs/screenshots/invisible-bombs-desktop.png) and
-[Polish 320px reduced-motion](docs/screenshots/invisible-bombs-mobile-pl.png) presentation.
+Reviewed pre-collection examples show Wall Pass in [English desktop](docs/screenshots/wall-pass-desktop.png)
+and [Polish 320px reduced-motion](docs/screenshots/wall-pass-mobile-pl.png) presentation. The
+published Teleporter examples remain available as [English desktop](docs/screenshots/teleporter-desktop.png)
+and [Polish 320px reduced-motion](docs/screenshots/teleporter-mobile-pl.png) captures.
 
 Use **Keyboard controls** below the arena to remap movement, bombs and Punch equipment or restore defaults. Preferences
 stay in this browser. Opening settings, losing focus, or hiding the tab releases held movement;
@@ -122,6 +132,7 @@ migrations yet. PostgreSQL is intended for users/results, not the per-tick game 
 ```sh
 scripts/gates.sh all           # Rust, contracts, web, and E2E static gates
 scripts/gates.sh server        # rustfmt, Clippy, tests, build (locked)
+scripts/gates.sh server-parallel # server + coverage; compile once/profile, four local workers
 scripts/gates.sh web           # contract drift, lint, dead code, coverage, build
 scripts/gates.sh e2e           # lint, typecheck, dead code, scenario parity
 scripts/gates.sh browser       # default Playwright scenarios; requires the composed stack

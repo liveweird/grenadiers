@@ -12,7 +12,7 @@ contents, while paired pixel and position assertions prove the crossing. A bomb 
 creates no bomb or event and consumes no inventory. Movement west
 clamps at the hard wall `(2,2)`. A strictly newer ordinary reconnect admission retains the
 equipment and position, after which normal movement exits north. The scenario uses native keys,
-ordinary UI actions, and read-only socket observation. A legal bomb placed after exit has the
-immediate successor of the reveal bomb's entity ID, proving the rejected inside action consumed no
-entity allocation. Equipment-loss exit grace remains covered
+ordinary UI actions, and read-only socket observation. A legal bomb placed after exit has a later entity ID, identical on both clients. The rejected
+action creates no bomb or event and leaves resources unchanged; focused core tests verify that it
+also consumes no entity allocation. Equipment-loss exit grace remains covered
 by core and protocol tests because the sole-item fixture has no replacement pickup.

@@ -198,7 +198,7 @@ Propagate rules identity/settings through contracts, replay metadata and reconne
 
 The first code-generated pixel-art slice shipped in v0.3.18. Extend it with detailed, coherent
 artwork using the existing PixiJS renderer, keeping collision and simulation independent of art.
-The artist handoff and sprite-sheet pipeline are queued separately under ART-ATLAS below.
+The artist handoff and sprite-sheet pipeline shipped in v0.3.48/v0.3.49; see ART-ATLAS below.
 
 - Establish a palette, pixel grid, sprite scale, lighting and silhouette guide before production.
   Use crisp nearest-neighbor sampling and deliberate scaling at desktop and narrow viewports.

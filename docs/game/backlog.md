@@ -1,13 +1,9 @@
 # Gameplay and presentation backlog
 
-TURN, CONFIG and the first ART slice are implemented. Published v0.3.45 contains twenty
-optional pickups: Heart, Shield, Golden Flame, Short Fuse, Short Flame, Long Fuse, Reverse
-Controls, Diarrhea, Slow-foot, Piercing Bomb, Power Bomb, Remote Bomb, Landmine and Invisibility
-Cloak, Stopwatch, Invisible Bombs, Teleporter, Wall Pass, Kick and Punch. Reviewed implementation
-source, scoped acceptance, publication and localhost promotion are complete. The v0.3.46 source
-candidate adds Bracelet as the twenty-first optional pickup on that published parent. Bracelet
-acceptance and checks are complete; publication and promotion remain pending. Oil Barrel v0.3.47 follows before
-ART-ATLAS.
+TURN, CONFIG and the first ART slice are implemented. Published [v0.3.46](https://github.com/liveweird/grenadiers/releases/tag/v0.3.46)
+adds Bracelet, bringing the requested item catalog to **21 of 22 published types**. Source checks,
+scoped Compose/Kubernetes acceptance, publication and localhost promotion are complete.
+Oil Barrel v0.3.47 is the remaining item; ART-ATLAS follows the feature batch.
 
 [v0.3.43](https://github.com/liveweird/grenadiers/releases/tag/v0.3.43) publishes Wall Pass as the
 eighteenth of 22 requested item types. Published source `c086f719ea470b9fe24963adef84b5e3bdf3e17a`,
@@ -22,7 +18,7 @@ Docker inputs, a new Rust compilation or new native execution. See the
 [v0.3.44](https://github.com/liveweird/grenadiers/releases/tag/v0.3.44) publishes Kick as the
 nineteenth requested item from source `f32fd86d8f0c7c4bebba8fa60d1c66c65d1a174a`, tree
 `a0f2addb9204c40b4b30be2830fde4df368f019c`. Its accepted image was promoted locally before Punch v0.3.45.
-Bracelet and Oil Barrel remain before ART-ATLAS.
+Bracelet has since shipped; Oil Barrel remains before ART-ATLAS.
 
 At the 21 October 2026 16:47 UTC native acceptance checkpoint, Invisibility Cloak was an
 **unreleased source candidate**. Corrected source `1c6724f` and
@@ -120,13 +116,13 @@ TURN, CONFIG and the first ART slice are implemented. Published v0.3.45 contains
 optional pickups: Heart, Shield, Golden Flame, Short Fuse, Short Flame, Long Fuse, Reverse
 Controls, Diarrhea, Slow-foot, Piercing Bomb, Power Bomb, Remote Bomb, Landmine and Invisibility
 Cloak, Stopwatch, Invisible Bombs, Teleporter, Wall Pass, Kick and Punch. Source, publication and
-exact-image promotion are complete. Bracelet and Oil Barrel remain.
+exact-image promotion were complete at that checkpoint. Bracelet has since shipped; Oil Barrel remains.
 Authoritative publication
 status is recorded in [GitHub Releases](https://github.com/liveweird/grenadiers/releases), with source-bound
 acceptance records in [verification](../verification.md). Richer transitions and artwork remain
 follow-up work; see [pixel-art presentation](pixel-art.md) and
 [expanded item implementation](expanded-items.md).
-Updated 2026-10-24 after Bracelet scoped acceptance.
+Updated 2026-10-24 after Bracelet publication and promotion.
 Release acceptance is recorded in
 [verification](../verification.md).
 The [implementation plan](implementation-plan.md) remains the milestone/release reference;
@@ -325,6 +321,6 @@ Retain bounded scheduling, performance budgets, EN/PL documentation and full rel
 including same-image Compose/Kubernetes acceptance. Bots, mobs and larger matches remain
 separate tracks; their future interactions must be specified without making them prerequisites.
 
-Complete the entire expanded-item activation batch before starting ART-ATLAS. Bracelet is the
-current bounded source increment (v0.3.46); Oil remains after it. ART-ATLAS begins
+Complete the expanded-item activation batch before starting ART-ATLAS. Bracelet v0.3.46 is
+published and promoted; Oil v0.3.47 remains. ART-ATLAS begins
 only after those item increments and their release gates are complete.

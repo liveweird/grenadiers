@@ -11,6 +11,16 @@ honest about the source and environment actually tested.
 The records below are historical evidence. Their repeated CI runs, receipt graphs and sealing
 procedures do not impose additional requirements on future changes.
 
+## Current v0.3.46 published delivery — 2026-10-24
+
+[v0.3.46](https://github.com/liveweird/grenadiers/releases/tag/v0.3.46) publishes Bracelet as the twenty-first requested item from source
+`7b4b47cfdd7dea9efec9d3c2f2fd61f2c232ce54`, tree `7816fe3d0a373523ffe5b4a8b54873dfce3e3b7a`, through verified annotated tag
+`57b9b226a2d1cc07ebe1b8487348e89858678132`. Localhost:8085 serves the exact accepted image
+`sha256:1460278198b6d604595bfbe4fb8278a85ab39725c43516bb8b55ab2e6a47f5bf`. Promotion exits zero; health, readiness and index
+return 200, and served HTML/JavaScript match container bytes. The application retains UID65532,
+a read-only filesystem, dropped capabilities and no new privileges. Punch v0.3.45 is retained
+as the rollback image. No rebuild or repeated full CI was needed.
+
 ## Current v0.3.46 Bracelet acceptance — 2026-10-24
 
 Frozen source `5e55bb46bb71b1b8bf9db8dab0a6403eb7a1e240` passes focused core/server checks, all
@@ -22,8 +32,8 @@ Same-image native acceptance passes all 29 scoped cases with zero retries: Compo
 Kick, Punch, Landmine, Wall Pass, classic match/rematch and 22 latency cases (28 total), plus
 Kubernetes Bracelet with production-manifest, security and owned-resource cleanup checks. The 22 isolated latency cases pass with maxima
 62.93 ms local and 160.14 ms shaped 50 ms delay, below the unchanged 250 ms budget. Accepted image:
-`sha256:1460278198b6d604595bfbe4fb8278a85ab39725c43516bb8b55ab2e6a47f5bf`. Publication and
-promotion remain pending.
+`sha256:1460278198b6d604595bfbe4fb8278a85ab39725c43516bb8b55ab2e6a47f5bf`. This acceptance
+checkpoint preceded the publication and promotion recorded above.
 
 ## Current v0.3.45 published delivery — 2026-10-24
 

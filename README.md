@@ -135,11 +135,14 @@ migrations yet. PostgreSQL is intended for users/results, not the per-tick game 
 
 ```sh
 scripts/gates.sh all           # Rust, contracts, web, and E2E static gates
+scripts/gates.sh repository    # toolchain pins, versions, lock roots, source-size ceiling
 scripts/gates.sh server        # rustfmt, Clippy, tests, build (locked)
 scripts/gates.sh server-parallel # server + coverage; compile once/profile, four local workers
 scripts/gates.sh web           # contract drift, lint, dead code, coverage, build
 scripts/gates.sh e2e           # lint, typecheck, dead code, scenario parity
 scripts/gates.sh browser       # default Playwright scenarios; requires the composed stack
+scripts/gates.sh art-atlas     # artist atlas CLI checks and Chromium workbench suite
+scripts/gates.sh atlas-gameplay # gameplay atlas pixel parity and WebGL lifecycle suite
 scripts/gates.sh k8s           # Kustomize render + strict Kubernetes schema validation
 scripts/gates.sh security      # cargo-deny and npm dependency audits
 scripts/gates.sh coverage      # cargo-llvm-cov line coverage floor

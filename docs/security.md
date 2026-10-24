@@ -34,7 +34,8 @@ append-only when introduced; runtime application code will not create tables opp
 For Compose app+database use a network URL with hostname `postgres:5432`; for a host Rust process
 use `127.0.0.1:5436`. Never reuse the local demo password in a deployment.
 
-Containers run without root, writable root filesystems, Linux capabilities, or elevated privileges.
+The application container runs without root, a writable root filesystem, Linux capabilities, or
+elevated privileges. The optional Compose PostgreSQL service uses the upstream image defaults.
 The manual `checks` workflow builds one Compose image in `browser-image` and scans it there, then
 the `browser` jobs run the default, classic, and per-item suites against that image.
 Publishing and deploying the application by immutable registry digest remains outstanding; exact release tags alone do not provide immutable provenance.

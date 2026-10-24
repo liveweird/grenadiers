@@ -142,7 +142,9 @@ and spec titles must agree verbatim. Run E2E static checks locally before releas
 those checks and Compose scenarios; automatic PR checks add distinct Linux Rust coverage.
 
 The default suite uses one worker in CI and two locally; `E2E_WORKERS` explicitly overrides
-that choice. Each multiplayer case already owns two browser contexts. Serial CI execution
+that choice. `E2E_CAPTURE_PROFILE=1` enables the opt-in capture workload profiler and turns off
+the default configuration's failure screenshots; see the
+[capture profile](game/renderer-diagnostics.md#original-reconnect-capture-profile). Each multiplayer case already owns two browser contexts. Serial CI execution
 keeps software WebGL within the two-player reference on two-core runners; specialized suites
 also use one worker. Existing deadlines and assertions remain strict. Frozen-result checks
 select retained snapshots by round and revision so automatic progression cannot change the

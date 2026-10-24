@@ -115,7 +115,7 @@ test('Punch wraps one retained bomb three cells without extra cues and preserves
       await clearPunchRoute(one, games[0])
       await Promise.all(games.map((game) => expect.poll(() => actor(game).inventory.equipment)
         .toBe('punch')))
-      await expect(one.getByLabel('Player one upgrades')).toContainText('EquipmentPunch')
+      await expect(one.getByLabel('Player one upgrades')).toContainText('GearPunch')
       await expect(two.getByLabel('Ulepszenia: Gracz pierwszy')).toContainText('WyposażenieUderzenie')
       await expect(one.getByText(/press F to punch/)).toBeVisible()
       await expect(one.getByText(/fixed 0.2 second cooldown/)).toBeVisible()

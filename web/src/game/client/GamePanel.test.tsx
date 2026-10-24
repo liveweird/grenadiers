@@ -163,7 +163,7 @@ describe('v10 private-state presentation', () => {
     actor.inventory = { equipment: 'punch', weapon: null }
     renderPanel(current)
     const stats = screen.getByLabelText('Player one upgrades')
-    expect(stats).toHaveTextContent('EquipmentPunch')
+    expect(stats).toHaveTextContent('GearPunch')
     expect(stats).not.toHaveTextContent('cooldown')
     expect(screen.getByRole('region', { name: 'Grenadiers courtyard' })).toHaveAttribute('data-focus-hint',
       'Punch equipped. Select the courtyard and press F to punch the bomb ahead.')

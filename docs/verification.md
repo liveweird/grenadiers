@@ -11,6 +11,17 @@ honest about the source and environment actually tested.
 The records below are historical evidence. Their repeated CI runs, receipt graphs and sealing
 procedures do not impose additional requirements on future changes.
 
+## Current v0.3.45 published delivery — 2026-10-24
+
+[v0.3.45](https://github.com/liveweird/grenadiers/releases/tag/v0.3.45) is published from source
+`5be42456cee80e06e2f138bdfd458ef821bb34c2`, tree `94f83a7650e2c57955103d91060af10b1a2f439c`,
+with verified annotated tag object `0e6224643ce85bf8f0a77894dcb929ab2655e397`. Promotion exited
+zero: localhost:8085 serves the exact accepted image
+`sha256:3f13b26f7a4a41ba2e90b8cc9261c9e95a60eceeddf49504341e65258eb7d37d`.
+Health/readiness/index return 200, and served index/JS match the container. The non-root UID is
+65532 with a read-only filesystem, all capabilities dropped and no new privileges. Kick v0.3.44
+remains the local rollback image. No rebuild or repeated full CI was needed.
+
 ## v0.3.45 Punch native-accepted checkpoint — 2026-10-24 — 27 cases
 
 Application/Rust source `8e6e63aeb55227360fddcad3f81c83e33aaace0a` passed independent backend

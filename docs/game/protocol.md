@@ -6,6 +6,8 @@ gameplay WebSockets with authoritative configurable two-seat matches are impleme
 `web/src/game/v11/schema.ts` define active socket messages. V2 through v10 remain historical.
 V11 keeps Expanded v5/generator v2 identity and the v10 Teleporter position epoch, then adds
 materialized Oil Barrel state. See [compatibility](protocol-v11.md).
+See [ADR 0021](../decisions/0021-gameplay-retention.md) for the distinction between live support,
+archived wire contracts and private replay retention.
 The browser validates these messages and drives the playable generated-map match. Diagnostic `/api/v1/ws` and
 `api/realtime.schema.json` remain unchanged.
 

@@ -1,7 +1,7 @@
 # Generated arena API
 
-Status: this source candidate uses generator-v2 with Expanded-v5 rules, gameplay-v11, and
-multi-round matches. Generator-v1 and classic-v2 are retained historical identities.
+Expanded rooms use generator-v2 with Expanded-v5 rules, gameplay-v11, and multi-round matches.
+Generator-v1 and classic-v2 are retained historical identities.
 
 `core::game::generate_arena([u8; 32])` produces `GeneratedArena`. Its getters expose the
 validated arena, concealed `BTreeMap<CellId, PickupKind>`, and private `GenerationRecord`.
@@ -28,8 +28,9 @@ the weight-15 interval `[365,380)` after Teleporter, Kick adds `[380,395)`, Punc
 `[395,410)`, Bracelet adds `[410,425)`, and Oil Barrel adds `[425,440)`. The all-items pool is 440;
 each sole-item pool is 115. Oil accepts whole mirrored placements only while its lifetime eight-site
 cap permits them; an over-cap draw keeps the soft blocks and makes no replacement draw. Any mask
-without Oil Barrel preserves its v0.3.46 pool, draw count and exact seeded output. All 4,194,304
-item subsets are accepted, and all 2,097,152 earlier masks retain their exact outputs.
+without Oil Barrel preserves its earlier pool, draw count and exact seeded output. Every subset
+of the supported item catalog is valid. Historical activation and verification details are in the
+[release record](../history/configuration-activation.md#generated-arena-activation).
 
 The server constructs typed worlds at each actual round start and keeps the generation record
 private. Layer transitions, collection, gameplay-v11 projection, and item graphics are integrated.

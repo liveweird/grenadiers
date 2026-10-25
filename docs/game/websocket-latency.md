@@ -73,29 +73,7 @@ packet loss, reordering, bandwidth limits, or a WAN. Twenty observations describ
 do not establish a tail-latency guarantee or precise corner playability. The slice also does not add a
 disconnect/resume case; reconnect correctness remains covered by the dedicated v4 recovery suite.
 
-Early harness diagnostics are retained as invalid measurement evidence. Runs using a two-CPU CFS
-quota on an eighteen-visible-core environment observed 284–300ms maxima. A later affinity-only run
-reported 113.05ms, but its observer watched Playwright's pre-delay network socket rather than actual
-page delivery and therefore cannot support the envelope.
+Historical invalid runs, corrected reference measurements and final deployment observations are
+preserved in [game acceptance history](../history/game-acceptance.md#ordered-websocket-reference-measurements).
 
-The corrected retries-zero reference used Node 24.21.0, Playwright 1.63.0, pinned Playwright Chromium revision 1243,
-accepted application image `sha256:b1cee9317f0d30cee36d05c9a32a7d2933a4394f08c83a324cb713f5846b13ee`,
-and Linux containers restricted to CPUs 0–1 by affinity with `cpu.max` unlimited and no observed CFS
-throttling at startup. All eight cases passed in 19.4 seconds. Twenty unshaped observations measured
-26.95ms minimum, 39.39ms median, and 54.47ms observed p95/maximum. Twenty shaped observations
-measured 133.63ms minimum, 145.82ms median, and 157.30ms observed p95/maximum, with no 250ms
-exceedance. The shaped queues peaked at two frames and 7,204 bytes. These twenty observations describe
-this exact profile; they remain an observed envelope rather than a tail guarantee.
-
-## Final deployment reference
-
-The corrected greater-clearance trajectory passes all nine latency cases on each deployment,
-including all twenty mandatory observations per native profile. Compose's shaped median/max is
-148.672/161.787 ms; Kubernetes is 147.674/160.793 ms. Both remain below the unchanged 250 ms
-budget. The [exact-image record](../verification.md) identifies the clean application and harness
-sources, shared image, failed trajectory diagnostic and complete 21-case matrices.
-
-Browser helpers use two-core affinity with no CFS quota. Compose applies the same app affinity;
-Kubernetes keeps its committed 500m CPU limit and scheduler-managed CPUs. Actual Kubernetes app
-throttling remains zero across the observed window. These stated profiles do not imply identical
-CPU allocation or an unmeasured capacity/tail guarantee.
+<a id="final-deployment-reference"></a>

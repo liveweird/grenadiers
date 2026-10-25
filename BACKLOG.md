@@ -10,22 +10,27 @@ waiting on a stated dependency. Explicit user requests and accepted plans are co
 new assistant suggestions start as `[new]`. Existing authorization carries forward without
 repeated approval for routine implementation choices. Entries are not delivery-date promises.
 
-## Current delivery — single-player
+## Current delivery — Claude review
 
-- [next] **SOLO-CPU — deliver the approved staged hybrid.** A private human-versus-CPU duel uses
+- [next] **ENG-REVIEW — finish the remaining agreed review work before CPU mode.** The user
+  confirmed this priority on 2026-10-25. Audit completion against the original findings and
+  [dispositions](docs/quality-review.md), then ship bounded fixes: typed startup configuration,
+  transport cleanup, genuine fixture/protocol consolidation and evidence-led profiling. Retain
+  privacy, exhaustive masks, coverage floors and local-first verification. Explicit disagreements
+  and requirements-dependent proposals are not silently treated as unfinished implementation.
+
+## Single-player
+
+- [todo] **SOLO-CPU — deliver the approved staged hybrid.** A private human-versus-CPU duel uses
   the normal rules/input path, restricted observations, interval hazard forecasts, bounded goal
   planning and recorded bot inputs. Follow the [accepted design](docs/game/single-player-cpu.md)
-  following the shipped QoL work; expose a playable slice early and support the all-features-on default before
+  after the remaining agreed Claude review work; expose a playable slice early and support the all-features-on default before
   the public preview.
 - [parked] **More seats and campaign mobs.** Revisit after the two-seat CPU mode is stable;
   neither is part of the initial solo duel.
 
 ## Engineering follow-ups
 
-- [todo] **ENG-REVIEW — finish the remaining agreed review work.** Use the open dispositions in
-  [quality review](docs/quality-review.md): typed configuration/transport cleanup, genuinely shared
-  fixtures, measured renderer/registry behavior and the remaining protocol foundations. Keep
-  privacy, exhaustive masks, coverage floors and local-first verification intact.
 - [new] **Capability rotation and production replay export.** Establish recovery/consumer needs
   before changing authentication or adding durable storage. Current limitations are documented
   in [security](docs/security.md) and [architecture](docs/architecture.md).

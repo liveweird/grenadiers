@@ -2,7 +2,8 @@
 
 Status: **accepted design; not implemented**. On 2026-10-25 the user chose the tightened staged
 hybrid after comparing an independent proposal with [Claude's original proposal](../history/single-player-cpu-proposal.md).
-QoL improvements come first. Open work is tracked in the [product backlog](../../BACKLOG.md#single-player).
+QoL shipped in v0.3.60. The user confirmed that all remaining agreed Claude review work must
+finish before CPU implementation. Open work is tracked in the [product backlog](../../BACKLOG.md#single-player).
 
 ## Chosen approach
 

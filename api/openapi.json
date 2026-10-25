@@ -59,6 +59,9 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Status"
+                },
+                "example": {
+                  "status": "ok"
                 }
               }
             }
@@ -86,6 +89,9 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Status"
+                },
+                "example": {
+                  "status": "ok"
                 }
               }
             }
@@ -140,6 +146,9 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/GameSession"
+                },
+                "example": {
+                  "token": "0000000000000000000000000000000000000000000000000000000000000000"
                 }
               }
             }

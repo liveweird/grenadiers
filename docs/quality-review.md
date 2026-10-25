@@ -23,15 +23,19 @@ The original review remains unchanged in the local review folder.
 - **DOC-06, partial:** add the [contributor index](README.md). The broader history split and
   item-development guide remain follow-up work.
 
-## Subsequent HTTP contract repair
+## Further reviewed fixes
 
 **API-02/03 and HTTP examples from API-07:** unknown API paths return no-store problem 404s;
 unsupported methods return problem 405s with route-specific `Allow`. WebSocket HEAD rejects
 with problem representation headers and no body, while health/readiness HEAD still succeeds.
 Both WebSocket routes apply no-store even to framework-generated errors and successful upgrades.
 Fallback statuses are documented separately from supported OpenAPI operations; shared cache/retry
-headers and problem examples match the implementation. Game-message descriptions and close-code
-documentation remain separate follow-up work.
+headers and problem examples match the implementation.
+
+**API-06/07:** the live v11 message unions, principal messages/actions/settings and Oil/privacy
+overview have descriptions. HTTP status/session examples are valid, and the active close-code
+table distinguishes application policy from transport termination. Schema constraints and wire
+types are unchanged; deeper definition documentation can be added as those areas evolve.
 
 **BE-06 / CX-06:** stale dead-code exemptions are removed. Test-only restoration and Oil-grace
 observation helpers compile only in core unit tests; the unused punch-cooldown restoration
@@ -63,7 +67,8 @@ Related IDs are grouped to avoid treating one architectural problem as several i
 | API-02/03 | Agree; HTTP repair implemented. | Problem 404/405 fallbacks, route-specific `Allow`, shared cache/retry headers and API/SPA/HEAD tests are in place; fallback responses are separate from supported operation responses. |
 | API-04, BE-02, SEC-02 | Agree; first batch implements this. | Independent diagnostic permits/rate budget and shared strict transport guards, with saturation, Origin, flood, cache-header and shutdown tests. |
 | API-05 | Optional improvement, not a demonstrated defect. | Add stable Problem codes only when a consumer needs distinctions beyond HTTP status. Do not unify diagnostic and gameplay error vocabularies merely for symmetry. |
-| API-06/07/08 | Agree on missing documentation/enforcement. | Document actual close codes; describe live messages and add valid examples. Enforce useful API conventions incrementally with positive/negative lint fixtures. |
+| API-06/07 | Agree; primary live-reference gaps addressed. | Actual close behavior, principal live-message descriptions and valid HTTP examples are documented without changing schemas or wire types. |
+| API-08 | Agree on enforcement opportunities. | Enforce useful API conventions incrementally with positive/negative lint fixtures. |
 | API-09 | Agree on duplicated contract inventories. | Share contract discovery with explicit filename/version validation; unexpected files must not silently become supported contracts. |
 | API-10, CX-09 | Coverage question, not yet established as a defect. | Enumerate live message variants against schema conformance tests, then add any missing cases. |
 | BE-01 | Confirmed cost, intentional documented behavior. | Decide whether production replay recording has an operational consumer. If not, feature-gate allocation/recording while retaining replay acceptance tests; document memory effects. |
@@ -123,7 +128,7 @@ Related IDs are grouped to avoid treating one architectural problem as several i
 
 ## Next bounded batches
 
-1. Complete close-code/live-message documentation and a compatible CSP/validator strategy.
+1. Develop a compatible CSP/validator strategy and additional API lint fixtures.
 2. Peer-keyed hosting admission design and credential-free denial telemetry.
 3. Test-wiring cleanup and denominator-correct coverage measurement.
 4. Contributor/history separation and shared E2E fixture/configuration helpers.

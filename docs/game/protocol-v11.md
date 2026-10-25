@@ -20,3 +20,25 @@ Canonical validation checks the lifetime cap, phase exclusivity, floor/block/lay
 bomb and finite-fire conflicts, actor capability or exact typed grace, and the shared 195-cell fire
 bound. Both recipient frames must validate and encode before publication state, revision or pending
 reports commit. Reload an older browser when the server reports `supportedVersion: 11`.
+
+## Errors and connection closure
+
+An `error` message has a command `sequence` when it replies to a sequenced command; uncorrelated
+transport errors use `null`. After authentication, a correlated command error, including
+`rateLimited`, is a reply and keeps the socket open. A sequenced command sent before authentication
+can receive a correlated `notAuthenticated` error followed by a policy close. Exhausting the inbound budget
+is an uncorrelated flood and closes with policy code 1008 after its error.
+
+Application-initiated close codes are:
+
+| Code | Meaning |
+| --- | --- |
+| 1000 | Normal end: inactivity, session expiry, or a room becoming unavailable, expired, or retired. |
+| 1001 | Server shutdown. |
+| 1008 | Authentication or protocol policy failure, invalid input, or an inbound flood. |
+| 1011 | Internal room failure. |
+| 4001 | This connection's seat binding was replaced by a successful resume. |
+
+The WebSocket library enforces frame and message size before application dispatch. An oversized
+frame can therefore surface as a transport failure or disconnect without an observable application
+close frame; clients must not depend on receiving close code 1009.

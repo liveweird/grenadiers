@@ -1,6 +1,6 @@
 # Stopwatch
 
-Stopwatch is an opt-in Expanded-v5 pickup active for 180 physical ticks. Recollection refreshes
+Stopwatch is a configurable Expanded-v5 pickup, enabled in new rooms and active for 180 physical ticks. Recollection refreshes
 the holder's deadline. While a living actor holds it, the opponent's voluntary movement and manual
 actions are frozen. Network input is still admitted and fresh direction state replaces old state;
 manual actions attempted while frozen are consumed rather than replayed after thaw. Two holders

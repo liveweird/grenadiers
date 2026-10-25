@@ -4,6 +4,7 @@ import { arenaTilePixels } from '../tests/support/compositor'
 import { expectPaintedCanvas, latestSnapshot, observeGame, visibleActor, type ObservedGame } from '../tests/support/duel'
 import { moveSeatTo } from '../tests/support/movement'
 import { admissionBaseline, disconnectTransport, installTransportProbe } from '../tests/support/reconnect'
+import { applyItemSettings } from '../tests/support/settings'
 import type { GameServerMessage, Seat } from '../../web/src/game/v11/schema'
 
 test.beforeAll(() => expect(process.env.E2E_WALL_PASS_FIXTURE).toBe('arena-v2-wall-pass'))
@@ -53,9 +54,7 @@ test('Wall Pass crosses one intact block, rejects planting and hard walls, and r
       await one.getByRole('button', { name: 'Create room', exact: true }).click()
       const code = one.getByLabel('Room invitation code', { exact: true })
       await expect(code).toHaveText(/^[A-HJ-NP-Z2-9]{8}$/)
-      await one.getByRole('checkbox', { name: 'Heart', exact: true }).uncheck()
-      await one.getByRole('checkbox', { name: 'Wall pass', exact: true }).check()
-      await one.getByRole('button', { name: 'Apply rules', exact: true }).click()
+      await applyItemSettings(one, games[0], [{ id: 'wallPass', label: 'Wall pass' }])
       await two.getByText('Polski', { exact: true }).click()
       await two.getByRole('textbox', { name: 'Kod pokoju', exact: true }).fill(await code.innerText())
       await two.getByRole('button', { name: 'Dołącz do pokoju', exact: true }).click()

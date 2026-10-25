@@ -2,6 +2,7 @@ import { createResponsiveBrowserContexts } from '../tests/support/browser-contex
 import { expect, test } from '@playwright/test'
 import { latestSnapshot, observeGame, visibleActor, type ObservedGame } from '../tests/support/duel'
 import { moveTo } from '../tests/support/movement'
+import { applyItemSettings } from '../tests/support/settings'
 import type { GameServerMessage } from '../../web/src/game/v11/schema'
 
 test.beforeAll(() => expect(process.env.E2E_DIARRHEA_FIXTURE).toBe('arena-v2-diarrhea'))
@@ -47,10 +48,8 @@ test('two browsers observe Diarrhea auto placement and death reset', async ({ br
     await one.getByRole('button', { name: 'Create room', exact: true }).click()
     const code = one.getByLabel('Room invitation code', { exact: true })
     await expect(code).toHaveText(/^[A-HJ-NP-Z2-9]{8}$/)
-    await one.getByRole('checkbox', { name: 'Heart', exact: true }).uncheck()
-    await one.getByRole('checkbox', { name: 'Diarrhea', exact: true }).check()
-    await one.getByLabel('Bomb fuse').selectOption('120')
-    await one.getByRole('button', { name: 'Apply rules', exact: true }).click()
+    await applyItemSettings(one, games[0], [{ id: 'diarrhea', label: 'Diarrhea' }],
+      () => one.getByLabel('Bomb fuse').selectOption('120'))
     await expect.poll(() => room(games[0])?.settings.enabledItems).toEqual(['diarrhea'])
     await two.getByRole('textbox', { name: 'Room code', exact: true }).fill(await code.innerText())
     await two.getByRole('button', { name: 'Join room', exact: true }).click()

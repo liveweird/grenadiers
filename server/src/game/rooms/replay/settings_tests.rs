@@ -208,18 +208,21 @@ fn expanded_item_masks_and_disabled_preset_replay_deterministically() {
         runtime.initial_notice().unwrap();
         runtime.occupy(SeatId::One).unwrap();
         runtime.occupy(SeatId::Two).unwrap();
-        if enabled != EnabledItems::HEART {
+        let initial_settings = runtime.lifecycle().settings();
+        let initial_revision = runtime.replay_inspection().settings_revision;
+        if enabled != initial_settings.enabled_items() {
             runtime
                 .action(
                     SeatId::One,
                     1,
                     MatchAction::UpdateSettings {
-                        settings_revision: 1,
+                        settings_revision: initial_revision,
                         settings: RoomSettings::DEFAULT.with_enabled_items(enabled),
                     },
                 )
                 .unwrap();
         }
+        let accepted_revision = runtime.replay_inspection().settings_revision;
         for seat in SeatId::ALL {
             runtime
                 .action(
@@ -227,7 +230,7 @@ fn expanded_item_masks_and_disabled_preset_replay_deterministically() {
                     1,
                     MatchAction::ReadyChecked {
                         ready: true,
-                        settings_revision: if enabled != EnabledItems::HEART { 2 } else { 1 },
+                        settings_revision: accepted_revision,
                     },
                 )
                 .unwrap();
@@ -239,11 +242,71 @@ fn expanded_item_masks_and_disabled_preset_replay_deterministically() {
         assert_eq!(journal.header.format_version, 2);
         assert_eq!(journal.header.rules_version, 5);
         assert_eq!(journal.header.generator_version, 2);
+        assert_eq!(journal.header.initial_settings, initial_settings);
         assert_eq!(runtime.lifecycle().settings().enabled_items(), enabled);
         assert_eq!(replay(journal).unwrap(), runtime.replay_inspection());
         observed += 1;
     }
     plan.emit_completion(&selection, &context, observed);
+}
+
+#[test]
+fn expanded_default_all_items_round_replays_exactly() {
+    let mut runtime = MatchRuntime::new(
+        identity_for_profile(RoomProfile::ExpandedV5),
+        RoundSeedSource::with_entropy(|bytes| {
+            bytes.fill(3);
+            Ok(())
+        }),
+    );
+    runtime.initial_notice().unwrap();
+    runtime.occupy(SeatId::One).unwrap();
+    runtime.occupy(SeatId::Two).unwrap();
+    let revision = runtime.replay_inspection().settings_revision;
+    for seat in SeatId::ALL {
+        runtime
+            .action(
+                seat,
+                1,
+                MatchAction::ReadyChecked {
+                    ready: true,
+                    settings_revision: revision,
+                },
+            )
+            .unwrap();
+    }
+    while runtime.lifecycle().phase() != MatchPhase::Running {
+        runtime.tick().unwrap();
+    }
+
+    assert_eq!(
+        runtime.lifecycle().settings().enabled_items(),
+        EnabledItems::ALL
+    );
+    assert_eq!(
+        runtime.replay_journal().header.initial_settings,
+        runtime.lifecycle().settings()
+    );
+    assert_eq!(
+        replay(runtime.replay_journal()).unwrap(),
+        runtime.replay_inspection()
+    );
+}
+
+#[test]
+fn archived_expanded_and_classic_headers_keep_their_historical_defaults() {
+    assert_eq!(
+        Header::expanded_v5().initial_settings.enabled_items(),
+        EnabledItems::HEART
+    );
+    assert_eq!(
+        Header::m6_v3([false; 2]).initial_settings,
+        RoomSettings::DEFAULT
+    );
+    assert_eq!(
+        Header::m6([false; 2]).initial_settings,
+        RoomSettings::new(SpeedLevel::Base, 128, 3, 180).unwrap()
+    );
 }
 
 #[test]

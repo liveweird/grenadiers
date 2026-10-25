@@ -9,11 +9,9 @@ const TURN_ASSISTS = [64, 128, 192, 256] as const
 const WINS = [1, 2, 3, 4, 5, 6, 7, 8, 9] as const
 const FUSES = [60, 90, 120, 150, 180, 210, 240, 270, 300] as const
 type AvailableItem = typeof ITEM_IDS[number]
-const DEFAULT_SETTINGS: GameSettings = {
+const DEFAULT_NUMERICS = {
   startingSpeedLevel: 0, turnAssistUnits: 256, winsToFinish: 3, bombFuseTicks: 180,
-  enabledItems: ['heart'],
-}
-const CLASSIC_SETTINGS: GameSettings = { ...DEFAULT_SETTINGS, enabledItems: [] }
+} satisfies Omit<GameSettings, 'enabledItems'>
 
 const speedText = (level: number): string => `${3 + level * 0.5}`
 const turnText = (units: number): string => {
@@ -53,7 +51,14 @@ function editLockText(room: RoomView, youSeat: Seat | null, ownReady: boolean, c
 }
 
 export function GameplaySettingsPanel({ room, youSeat, pending, copy, onApply }: Props) {
-  const [draft, setDraft] = useState<GameSettings>(room.settings)
+  const availableItems = useMemo(
+    () => ITEM_IDS.filter((item) => room.availableItems.includes(item)),
+    [room.availableItems],
+  )
+  const [draft, setDraft] = useState<GameSettings>(() => ({
+    ...room.settings,
+    enabledItems: availableItems.filter((item) => room.settings.enabledItems.includes(item)),
+  }))
   const own = room.seats.find((seat) => seat.seat === youSeat)
   const editable = room.phase.type === 'waiting' && room.settingsEditor === youSeat
     && own?.connection.type === 'connected' && !own.ready
@@ -64,7 +69,7 @@ export function GameplaySettingsPanel({ room, youSeat, pending, copy, onApply }:
   const toggleItem = (item: AvailableItem, enabled: boolean): void => {
     setDraft((current) => ({
       ...current,
-      enabledItems: ITEM_IDS.filter((candidate) =>
+      enabledItems: availableItems.filter((candidate) =>
         candidate === item ? enabled : current.enabledItems.includes(candidate)),
     }))
   }
@@ -112,10 +117,15 @@ export function GameplaySettingsPanel({ room, youSeat, pending, copy, onApply }:
       {dirty && <Text className="settings-lock" size="sm">{copy.settings.unapplied}</Text>}
       {lockText && <Text className="settings-lock" size="sm">{lockText}</Text>}
       <Group gap="sm">
+        <Button size="sm" variant="outline" disabled={!editable || pending}
+          onClick={() => update('enabledItems', availableItems)}>{copy.settings.allOn}</Button>
+        <Button size="sm" variant="outline" disabled={!editable || pending}
+          onClick={() => update('enabledItems', [])}>{copy.settings.allOff}</Button>
         <Button size="sm" variant="subtle" color="dark" disabled={!editable || pending}
-          onClick={() => setDraft(DEFAULT_SETTINGS)}>{copy.settings.restore}</Button>
+          onClick={() => setDraft({ ...DEFAULT_NUMERICS, enabledItems: availableItems })}>
+          {copy.settings.restore}</Button>
         <Button size="sm" variant="subtle" color="dark" disabled={!editable || pending}
-          onClick={() => setDraft(CLASSIC_SETTINGS)}>{copy.settings.classic}</Button>
+          onClick={() => setDraft({ ...DEFAULT_NUMERICS, enabledItems: [] })}>{copy.settings.classic}</Button>
         <Button size="sm" variant="outline" loading={pending} disabled={!editable || !dirty || pending}
           onClick={() => onApply(draft)}>{copy.settings.apply}</Button>
       </Group>

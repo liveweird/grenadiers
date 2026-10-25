@@ -4,6 +4,7 @@ import { captureArenaTiles } from '../tests/support/compositor'
 import { latestSnapshot, observeGame, visibleActor, type ObservedGame } from '../tests/support/duel'
 import { moveSeatTo } from '../tests/support/movement'
 import { admissionBaseline, disconnectTransport, installTransportProbe } from '../tests/support/reconnect'
+import { applyItemSettings } from '../tests/support/settings'
 import type { GameServerMessage } from '../../web/src/game/v11/schema'
 
 test.beforeAll(() => expect(process.env.E2E_PUNCH_FIXTURE).toBe('arena-v2-punch'))
@@ -296,10 +297,8 @@ test('Punch wraps one retained bomb three cells without extra cues and preserves
       await one.getByRole('button', { name: 'Create room', exact: true }).click()
       const code = one.getByLabel('Room invitation code', { exact: true })
       await expect(code).toHaveText(/^[A-HJ-NP-Z2-9]{8}$/)
-      await one.getByRole('checkbox', { name: 'Heart', exact: true }).uncheck()
-      await one.getByRole('checkbox', { name: 'Punch', exact: true }).check()
-      await one.getByLabel('Bomb fuse').selectOption('300')
-      await one.getByRole('button', { name: 'Apply rules', exact: true }).click()
+      await applyItemSettings(one, games[0], [{ id: 'punch', label: 'Punch' }],
+        () => one.getByLabel('Bomb fuse').selectOption('300'))
       await two.getByText('Polski', { exact: true }).click()
       await two.getByRole('textbox', { name: 'Kod pokoju', exact: true }).fill(await code.innerText())
       await two.getByRole('button', { name: 'Dołącz do pokoju', exact: true }).click()

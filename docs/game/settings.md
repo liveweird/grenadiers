@@ -12,33 +12,35 @@ The creator can configure these rules before either starts the match:
 | Wins to finish | 1–9 | Sets round wins needed for match victory. Draws award no point. |
 | Bomb fuse | 1–5 seconds, steps of 0.5 | Sets the delay for successfully planted ordinary bombs. |
 | Heart | Enabled or disabled; enabled by default | Adds the one-hit protection pickup to generated soft blocks. |
-| Bracelet | Enabled or disabled; disabled by default | Adds passive equipment that shoves a contacted rival up to one tile. |
-| Punch | Enabled or disabled; disabled by default | Adds permanent equipment for moving the adjacent facing bomb to the next open three-cell wrapped landing. |
-| Kick | Enabled or disabled; disabled by default | Adds permanent equipment for kicking stationary Timed and Remote bombs; Contact mines are excluded. |
-| Wall Pass | Enabled or disabled; disabled by default | Adds permanent equipment for crossing breakable blocks; hard walls, bombs and damage remain effective. |
-| Shield | Enabled or disabled; disabled by default | Adds five-second immunity pickups; recollection refreshes the timer. |
-| Stopwatch | Enabled or disabled; disabled by default | Freezes the opponent's voluntary actions and pauses Timed bombs for three seconds. |
-| Golden Flame | Enabled or disabled; disabled by default | Adds ten-second maximum-range pickups; recollection refreshes the timer. |
-| Short Fuse | Enabled or disabled; disabled by default | Adds ten-second pickups that halve newly planted bomb fuses; recollection refreshes the timer. |
-| Diarrhea | Enabled or disabled; disabled by default | Adds ten-second curses that automatically attempt one ordinary bomb placement per physical tick. |
-| Slow foot | Enabled or disabled; disabled by default | Adds independently timed ten-second stacks that each halve movement speed, up to six stacks. |
-| Piercing Bomb | Enabled or disabled; disabled by default | Stores one special manual bomb whose blast crosses breakable blocks. |
-| Power Bomb | Enabled or disabled; disabled by default | Stores one special manual bomb whose diamond-shaped blast ignores obstruction while leaving hard walls intact. |
-| Remote Bomb | Enabled or disabled; disabled by default | Stores one manual bomb with no fuse; the owner's next bomb action detonates the armed bomb. |
-| Landmine | Enabled or disabled; disabled by default | Stores one passable manual mine that detonates on swept actor contact after initial exit grace. |
-| Invisibility Cloak | Enabled or disabled; disabled by default | Hides the actor's position and gameplay details from the opponent for ten seconds. |
-| Invisible Bombs | Enabled or disabled; disabled by default | Hides every bomb and its placement or detonation cue from the affected player for ten seconds. |
-| Oil Barrel | Enabled or disabled; disabled by default | Adds at most eight arena objects that reveal solid and become passable fire until round end. |
-| Teleporter | Enabled or disabled; disabled by default | Atomically swaps both living players when both destination footprints are safe; an unsafe pickup is consumed without movement. |
-| Short Flame | Enabled or disabled; disabled by default | Adds ten-second curses that limit new bombs to range one, overriding Golden Flame. |
-| Long Fuse | Enabled or disabled; disabled by default | Adds ten-second curses that double new ordinary timed bomb fuses. Short and Long Fuse cancel while both are active. |
-| Reverse Controls | Enabled or disabled; disabled by default | Adds ten-second curses that reverse held movement directions. |
+| Bracelet | Enabled or disabled; enabled by default | Adds passive equipment that shoves a contacted rival up to one tile. |
+| Punch | Enabled or disabled; enabled by default | Adds permanent equipment for moving the adjacent facing bomb to the next open three-cell wrapped landing. |
+| Kick | Enabled or disabled; enabled by default | Adds permanent equipment for kicking stationary Timed and Remote bombs; Contact mines are excluded. |
+| Wall Pass | Enabled or disabled; enabled by default | Adds permanent equipment for crossing breakable blocks; hard walls, bombs and damage remain effective. |
+| Shield | Enabled or disabled; enabled by default | Adds five-second immunity pickups; recollection refreshes the timer. |
+| Stopwatch | Enabled or disabled; enabled by default | Freezes the opponent's voluntary actions and pauses Timed bombs for three seconds. |
+| Golden Flame | Enabled or disabled; enabled by default | Adds ten-second maximum-range pickups; recollection refreshes the timer. |
+| Short Fuse | Enabled or disabled; enabled by default | Adds ten-second pickups that halve newly planted bomb fuses; recollection refreshes the timer. |
+| Diarrhea | Enabled or disabled; enabled by default | Adds ten-second curses that automatically attempt one ordinary bomb placement per physical tick. |
+| Slow foot | Enabled or disabled; enabled by default | Adds independently timed ten-second stacks that each halve movement speed, up to six stacks. |
+| Piercing Bomb | Enabled or disabled; enabled by default | Stores one special manual bomb whose blast crosses breakable blocks. |
+| Power Bomb | Enabled or disabled; enabled by default | Stores one special manual bomb whose diamond-shaped blast ignores obstruction while leaving hard walls intact. |
+| Remote Bomb | Enabled or disabled; enabled by default | Stores one manual bomb with no fuse; the owner's next bomb action detonates the armed bomb. |
+| Landmine | Enabled or disabled; enabled by default | Stores one passable manual mine that detonates on swept actor contact after initial exit grace. |
+| Invisibility Cloak | Enabled or disabled; enabled by default | Hides the actor's position and gameplay details from the opponent for ten seconds. |
+| Invisible Bombs | Enabled or disabled; enabled by default | Hides every bomb and its placement or detonation cue from the affected player for ten seconds. |
+| Oil Barrel | Enabled or disabled; enabled by default | Adds at most eight arena objects that reveal solid and become passable fire until round end. |
+| Teleporter | Enabled or disabled; enabled by default | Atomically swaps both living players when both destination footprints are safe; an unsafe pickup is consumed without movement. |
+| Short Flame | Enabled or disabled; enabled by default | Adds ten-second curses that limit new bombs to range one, overriding Golden Flame. |
+| Long Fuse | Enabled or disabled; enabled by default | Adds ten-second curses that double new ordinary timed bomb fuses. Short and Long Fuse cancel while both are active. |
+| Reverse Controls | Enabled or disabled; enabled by default | Adds ten-second curses that reverse held movement directions. |
 
 Both players see accepted values. Editing requires the original creator to be connected,
 unready and in the waiting lobby. Apply changes to update the shared rules; a genuine change
-clears both players' readiness. Restore defaults prepares Expanded defaults, including Heart.
-Classic settings prepares the original four values with optional items disabled. Both presets
-require Apply rules before changing the shared configuration.
+clears both players' readiness. **All on** and **All off** change only the item switches in the
+draft; they do not reset numeric rules or submit automatically. Restore defaults prepares the
+numeric Expanded defaults with every currently available item enabled. Classic settings prepares
+the original four values with optional items disabled. Every draft change requires **Apply rules**
+before it changes the shared configuration.
 Once a match starts, settings stay locked through all automatic rounds. Both players can
 consent to a rematch and then edit in the unready lobby again.
 

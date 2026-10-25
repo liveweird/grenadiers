@@ -2,6 +2,7 @@ import { createResponsiveBrowserContexts } from '../tests/support/browser-contex
 import { expect, test } from '@playwright/test'
 import { latestSnapshot, observeGame, visibleActor, type ObservedGame } from '../tests/support/duel'
 import { moveTo } from '../tests/support/movement'
+import { applyItemSettings } from '../tests/support/settings'
 import type { GameServerMessage } from '../../web/src/game/v11/schema'
 
 test.beforeAll(() => expect(process.env.E2E_REVERSE_CONTROLS_FIXTURE)
@@ -60,9 +61,7 @@ test('two browsers hold raw east through Reverse Controls and exact expiry', asy
     await one.getByRole('button', { name: 'Create room', exact: true }).click()
     const code = one.getByLabel('Room invitation code', { exact: true })
     await expect(code).toHaveText(/^[A-HJ-NP-Z2-9]{8}$/)
-    await one.getByRole('checkbox', { name: 'Heart', exact: true }).uncheck()
-    await one.getByRole('checkbox', { name: 'Reverse controls', exact: true }).check()
-    await one.getByRole('button', { name: 'Apply rules', exact: true }).click()
+    await applyItemSettings(one, games[0], [{ id: 'reverseControls', label: 'Reverse controls' }])
     await expect.poll(() => room(games[0])?.settings.enabledItems).toEqual(['reverseControls'])
     await two.getByRole('textbox', { name: 'Room code', exact: true }).fill(await code.innerText())
     await two.getByRole('button', { name: 'Join room', exact: true }).click()

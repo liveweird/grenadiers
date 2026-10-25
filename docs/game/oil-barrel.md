@@ -1,6 +1,6 @@
 # Oil Barrel
 
-Oil Barrel is an opt-in arena object in Expanded-v5 rooms. It is disabled by default. Enabling it
+Oil Barrel is a configurable arena object enabled in new Expanded-v5 rooms. When enabled, it
 allows generated-v2 arenas to reserve at most eight Oil sites for the whole round; the object is
 never inventory, a timed effect, or a collectible pickup.
 

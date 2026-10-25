@@ -1,6 +1,6 @@
 # Bracelet
 
-Bracelet is opt-in permanent equipment in Expanded-v5 rooms. It has no manual action. When its
+Bracelet is configurable permanent equipment enabled in new Expanded-v5 rooms. It has no manual action. When its
 holder moves forward into the other living player, the authoritative movement step may shove that
 player along the attempted direction. The victim moves by at most one tile; walls, soft blocks,
 bombs, arena bounds and other collision rules clamp the destination. Swept fire and mine contact

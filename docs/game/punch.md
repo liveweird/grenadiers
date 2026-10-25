@@ -1,6 +1,6 @@
 # Punch
 
-Punch is opt-in permanent equipment in Expanded-v5 rooms. Press the remappable Equipment key to
+Punch is configurable permanent equipment, enabled in new Expanded-v5 rooms. Press the remappable Equipment key to
 punch the bomb in the adjacent cell indicated by the actor's authoritative heading. The target cell
 does not wrap. Timed or Remote bombs with Standard, Piercing or Power blasts are eligible, including
 a bomb whose Kick motion is active; Contact mines are excluded. A source touching active fire, a

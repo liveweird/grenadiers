@@ -60,8 +60,8 @@ describe('v11 reconnect presentation', () => {
     expect(arena).toHaveAttribute('data-enabled', 'false')
     expect(screen.getByRole('alert')).toHaveTextContent('Controls will return after a fresh game state arrives.')
     expect(screen.getByRole('timer')).toHaveTextContent('0:10')
+    expect(screen.queryByRole('region', { name: 'Your items' })).not.toBeInTheDocument()
   })
-
   it('enables input only after a connected admitted baseline', () => {
     renderPanel(state('authenticated'))
     expect(screen.getByRole('region', { name: 'Grenadiers courtyard' })).toHaveAttribute('data-enabled', 'true')
@@ -112,7 +112,7 @@ describe('v11 private-state presentation', () => {
     actor.damageGraceRemainingTicks = 60
     renderPanel(current)
 
-    const stats = screen.getByLabelText('Player one upgrades')
+    const stats = screen.getByLabelText('Your items')
     expect(stats).toHaveTextContent('Bombs available1')
     expect(stats).toHaveTextContent('GearHeart')
     expect(stats).toHaveTextContent('Bomb typeRemote bomb')
@@ -122,7 +122,7 @@ describe('v11 private-state presentation', () => {
     expect(stats).toHaveTextContent('Slow foot ×2 (1/4 speed; 0:10, 0:02)')
     expect(stats).toHaveTextContent('Short flame (0:01)')
     expect(stats).toHaveTextContent('Damage grace0:01')
-    expect(screen.getByLabelText('Protected from damage')).toHaveTextContent('0:01')
+    expect(screen.getByLabelText('Protected from damage, 0:01 remaining')).toHaveTextContent('0:01')
     expect(stats).not.toHaveAttribute('role', 'status')
     expect(stats.closest('[aria-live]')).toBeNull()
     expect(screen.getByText('Round in progress')).toHaveAttribute('aria-live', 'polite')
@@ -134,7 +134,7 @@ describe('v11 private-state presentation', () => {
     if (actor.type !== 'visible') throw new Error('expected visible own actor')
     actor.inventory = { equipment: 'wallPass', weapon: null }
     renderPanel(current)
-    const stats = screen.getByLabelText('Player one upgrades')
+    const stats = screen.getByLabelText('Your items')
     expect(stats).toHaveTextContent('GearWall pass')
     expect(stats).toHaveTextContent('Bomb typeNone')
     expect(stats).not.toHaveTextContent('Wall pass (')
@@ -146,7 +146,7 @@ describe('v11 private-state presentation', () => {
     if (actor.type !== 'visible') throw new Error('expected visible own actor')
     actor.inventory = { equipment: 'kick', weapon: null }
     renderPanel(current)
-    const stats = screen.getByLabelText('Player one upgrades')
+    const stats = screen.getByLabelText('Your items')
     expect(stats).toHaveTextContent('GearKick')
     expect(stats).toHaveTextContent('Bomb typeNone')
     expect(stats).not.toHaveTextContent('Kick (')
@@ -162,7 +162,7 @@ describe('v11 private-state presentation', () => {
     if (actor.type !== 'visible') throw new Error('expected visible own actor')
     actor.inventory = { equipment: 'punch', weapon: null }
     renderPanel(current)
-    const stats = screen.getByLabelText('Player one upgrades')
+    const stats = screen.getByLabelText('Your items')
     expect(stats).toHaveTextContent('GearPunch')
     expect(stats).not.toHaveTextContent('cooldown')
     expect(screen.getByRole('region', { name: 'Grenadiers courtyard' })).toHaveAttribute('data-focus-hint',
@@ -182,7 +182,7 @@ describe('v11 private-state presentation', () => {
     expect(screen.getByRole('region', { name: 'Grenadiers courtyard' })).toHaveAttribute(
       'data-focus-hint', 'Remote bomb armed. Select the courtyard and press Space to detonate it.',
     )
-    expect(screen.getByLabelText('Player one upgrades')).toHaveTextContent('Bomb typeNone')
+    expect(screen.getByLabelText('Your items')).toHaveTextContent('Bomb typeNone')
   })
 
   it('uses a generic bomb hint while the recipient cannot observe Remote state', () => {
@@ -205,7 +205,7 @@ describe('v11 private-state presentation', () => {
     if (actor.type !== 'visible') throw new Error('expected visible own actor')
     actor.voluntaryActionsFrozen = true
     renderPanel(current)
-    const stats = screen.getByLabelText('Player one upgrades')
+    const stats = screen.getByLabelText('Your items')
     expect(stats).toHaveTextContent('ActionsFrozen by Stopwatch')
     expect(stats).not.toHaveTextContent('Stopwatch (')
   })
@@ -219,16 +219,16 @@ describe('v11 private-state presentation', () => {
     const view = render(<MantineProvider env="test">
       <GamePanelView state={current} actions={actions()} />
     </MantineProvider>)
-    let stats = screen.getByLabelText('Player one upgrades')
-    expect(stats.querySelectorAll('dt')).toHaveLength(8)
+    let stats = screen.getByLabelText('Your items')
+    expect(stats.querySelectorAll('.own-status-item')).toHaveLength(8)
     expect(stats).toHaveTextContent('Slow foot ×6 (1/64 speed; 0:10, 0:09, 0:07, 0:05, 0:03, 0:01)')
 
     await i18n.changeLanguage('pl')
     view.rerender(<MantineProvider env="test">
       <GamePanelView state={{ ...current }} actions={actions()} />
     </MantineProvider>)
-    stats = screen.getByLabelText('Ulepszenia: Gracz pierwszy')
-    expect(stats.querySelectorAll('dt')).toHaveLength(8)
+    stats = screen.getByLabelText('Twoje przedmioty')
+    expect(stats.querySelectorAll('.own-status-item')).toHaveLength(8)
     expect(stats).toHaveTextContent('Wolna stopa ×6 (prędkość 1/64; 0:10, 0:09, 0:07, 0:05, 0:03, 0:01)')
   })
 })

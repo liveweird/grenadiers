@@ -1,6 +1,6 @@
 # Piercing Bomb
 
-Piercing Bomb is an opt-in Expanded v5 pickup. It occupies the one-charge weapon slot, replacing
+Piercing Bomb is a configurable Expanded v5 pickup enabled in new rooms. It occupies the one-charge weapon slot, replacing
 another stored weapon. A successful manual bomb placement consumes the charge and captures a
 Piercing blast. Failed placements retain it, and collecting a replacement on the same tick follows
 placement, so the old charge is used before the new one is stored.

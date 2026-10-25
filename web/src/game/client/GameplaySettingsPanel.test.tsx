@@ -61,7 +61,7 @@ describe('gameplay settings panel', () => {
     await user.click(screen.getByRole('button', { name: 'Apply rules' }))
     expect(apply).toHaveBeenCalledWith({
       startingSpeedLevel: 0, turnAssistUnits: 256, winsToFinish: 3, bombFuseTicks: 180,
-      enabledItems: ['heart'],
+      enabledItems: custom.availableItems,
     })
   })
 })
@@ -207,8 +207,49 @@ describe('gameplay settings items', () => {
     await user.click(screen.getByRole('checkbox', { name: 'Short flame' }))
     await user.click(screen.getByRole('button', { name: 'Restore match defaults' }))
     expect(screen.getByRole('checkbox', { name: 'Heart' })).toBeChecked()
-    expect(screen.getByRole('checkbox', { name: 'Shield' })).not.toBeChecked()
-    expect(screen.getByRole('checkbox', { name: 'Short flame' })).not.toBeChecked()
+    expect(screen.getByRole('checkbox', { name: 'Shield' })).toBeChecked()
+    expect(screen.getByRole('checkbox', { name: 'Short flame' })).toBeChecked()
+  })
+})
+
+describe('gameplay settings bulk actions', () => {
+  it('selects only canonical available items without changing numeric drafts or applying', async () => {
+    const apply = vi.fn(() => true)
+    const user = userEvent.setup()
+    const partial = room(4)
+    partial.availableItems = ['teleporter', 'heart', 'shield']
+    partial.settings = {
+      startingSpeedLevel: 3, turnAssistUnits: 128, winsToFinish: 7,
+      bombFuseTicks: 270, enabledItems: ['heart'],
+    }
+    render(<MantineProvider env="test"><GameplaySettingsPanel room={partial} youSeat="one"
+      pending={false} copy={en} onApply={apply} /></MantineProvider>)
+    await user.click(screen.getByRole('button', { name: 'All on' }))
+    expect(apply).not.toHaveBeenCalled()
+    await user.click(screen.getByRole('button', { name: 'Apply rules' }))
+    expect(apply).toHaveBeenCalledWith({
+      startingSpeedLevel: 3, turnAssistUnits: 128, winsToFinish: 7, bombFuseTicks: 270,
+      enabledItems: ['heart', 'shield', 'teleporter'],
+    })
+    await user.click(screen.getByRole('button', { name: 'All off' }))
+    expect(screen.getByRole('checkbox', { name: 'Heart' })).not.toBeChecked()
+    await user.click(screen.getByRole('button', { name: 'Apply rules' }))
+    expect(apply).toHaveBeenLastCalledWith(expect.objectContaining({
+      startingSpeedLevel: 3, turnAssistUnits: 128, winsToFinish: 7,
+      bombFuseTicks: 270, enabledItems: [],
+    }))
+  })
+
+  it('keeps empty catalogs safe and provides the agreed Polish bulk actions', async () => {
+    const user = userEvent.setup()
+    const empty = room(5)
+    empty.availableItems = []
+    empty.settings.enabledItems = []
+    render(<MantineProvider env="test"><GameplaySettingsPanel room={empty} youSeat="one"
+      pending={false} copy={pl} onApply={() => true} /></MantineProvider>)
+    await user.click(screen.getByRole('button', { name: 'Włącz wszystkie' }))
+    await user.click(screen.getByRole('button', { name: 'Wyłącz wszystkie' }))
+    expect(screen.getByRole('button', { name: 'Zastosuj zasady' })).toBeDisabled()
   })
 })
 
@@ -260,6 +301,19 @@ describe('gameplay settings Oil locale', () => {
 })
 
 describe('gameplay settings locks', () => {
+  it.each(['editor', 'disconnected', 'match', 'pending'] as const)(
+    'locks bulk actions when blocked by %s state', (lock) => {
+      const locked = room(3)
+      if (lock === 'editor') locked.settingsEditor = 'two'
+      if (lock === 'disconnected') locked.seats[0].connection = { type: 'disconnected', expiresAt: 20 }
+      if (lock === 'match') locked.phase = { type: 'running' }
+      render(<MantineProvider env="test"><GameplaySettingsPanel room={locked} youSeat="one"
+        pending={lock === 'pending'} copy={en} onApply={() => true} /></MantineProvider>)
+      expect(screen.getByRole('button', { name: 'All on' })).toBeDisabled()
+      expect(screen.getByRole('button', { name: 'All off' })).toBeDisabled()
+    },
+  )
+
   it('locks all item rules with the rest of the lobby settings', () => {
     const locked = room(3)
     locked.seats[0].ready = true
@@ -277,5 +331,9 @@ describe('gameplay settings locks', () => {
     expect(screen.getByRole('checkbox', { name: 'Reverse controls' })).toBeDisabled()
     expect(screen.getByRole('checkbox', { name: 'Teleporter' })).toBeDisabled()
     expect(screen.getByRole('checkbox', { name: 'Oil barrel' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'All on' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'All off' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Restore match defaults' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Classic settings' })).toBeDisabled()
   })
 })

@@ -1,6 +1,6 @@
 # Remote Bomb
 
-Remote Bomb is an opt-in Expanded v5 pickup. It occupies the one-charge weapon slot and replaces
+Remote Bomb is a configurable Expanded v5 pickup enabled in new rooms. It occupies the one-charge weapon slot and replaces
 another stored weapon. A successful manual placement consumes the charge and creates one armed
 Standard bomb for that owner. Failed placements retain it. Placement precedes pickup collection,
 so an old charge is used before a new weapon at the same cell is stored.

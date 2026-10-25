@@ -97,7 +97,7 @@ They describe one coherent baseline rather than exact timing from a historical c
 | Starting movement speed | 3 cells per second |
 | Bomb fuse | 3 seconds |
 | Flame duration | 0.5 seconds |
-| Health | One lethal hit at round start; no respawn. The [Heart](heart.md) pickup (enabled by default) and opt-in [Shield](shield.md) can add protection |
+| Health | One lethal hit at round start; no respawn. The configurable [Heart](heart.md) and [Shield](shield.md) pickups are enabled in new rooms and can add protection |
 | Permanent upgrades enabled | Bomb capacity, blast range, movement speed |
 | Capacity and range caps | 8 live bombs and 8 cells per ray |
 | Speed upgrade levels | 3, 3.5, 4, 4.5, and 5 cells per second |

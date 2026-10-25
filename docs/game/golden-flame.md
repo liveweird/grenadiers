@@ -1,8 +1,8 @@
 # Golden Flame
 
-Golden Flame is an opt-in timed pickup in the v0.3.27 candidate. The creator enables it in
-shared lobby settings before readiness. Heart remains the only optional item enabled by default;
-Classic settings clears every optional item. Native release acceptance is recorded in
+Golden Flame is a configurable timed pickup introduced in the v0.3.27 candidate. New rooms
+enable it with every available item; the creator can change the draft in shared lobby settings
+before readiness, while Classic settings clears every optional item. Native release acceptance is recorded in
 [verification](../verification.md).
 
 ## Collection and blast range

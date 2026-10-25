@@ -3,12 +3,14 @@
 ## Scenario: two browsers enable a generated Shield and observe immunity end before a later blast
 
 Run the production image with external mode-0444 `core/tests/fixtures/arena-v2-shield.seed`
-(repeating byte 31) and `E2E_SHIELD_FIXTURE=arena-v2-shield`. The creator turns off default
-Heart, turns on Shield, applies the rules, and waits for authoritative settings acceptance.
+(repeating byte 31) and `E2E_SHIELD_FIXTURE=arena-v2-shield`. The creator turns off all items,
+turns on Shield, applies the rules, and waits for authoritative settings acceptance.
 Both players ready into rules 5 / generator 2. No state or inventory is injected.
 
 Player One bombs from (2,1), escapes through (1,1) to (1,2), and returns after fire clears
-to collect the generated Shield at (3,1). Both perspectives observe its timed effect. Capture
+to collect the generated Shield at (3,1). Both perspectives observe its timed effect. The
+collector's **Your items** region and one pickup announcement show Shield with authoritative
+remaining time; after exact expiry the region returns to no active effects. Capture
 the exposed pickup on desktop and the active effect in Polish at 320 pixels with reduced motion.
 
 The collector stays on a second bomb. Both perspectives observe protection and a living

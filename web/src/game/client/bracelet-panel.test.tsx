@@ -26,7 +26,7 @@ it('labels Bracelet as passive equipment without an action hint or cooldown time
     movement: action, placeBomb: action, useEquipment: action, leave: action,
   }
   render(<MantineProvider env="test"><GamePanelView state={state} actions={actions} /></MantineProvider>)
-  const stats = screen.getByLabelText('Player one upgrades')
+  const stats = screen.getByLabelText('Your items')
   expect(stats).toHaveTextContent('GearBracelet')
   expect(stats).not.toHaveTextContent('Bracelet (')
   expect(screen.getByRole('region', { name: 'Grenadiers courtyard' })).toHaveAttribute(

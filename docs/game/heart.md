@@ -1,12 +1,12 @@
 # Heart pickup
 
 Status: implemented; published in
-[v0.3.25](https://github.com/liveweird/grenadiers/releases/tag/v0.3.25) and enabled by default in
-new rooms.
+[v0.3.25](https://github.com/liveweird/grenadiers/releases/tag/v0.3.25) and included with every
+other configurable item in new-room defaults.
 
 ## Playing with Heart
 
-New Expanded rooms enable Heart by default. The room creator can disable it in the lobby
+New Expanded rooms enable every available item, including Heart. The room creator can disable it in the lobby
 before becoming ready. Applying settings clears both players' readiness and publishes a new
 settings revision. The **Classic settings** preset disables optional items and restores the
 four original settings. Changes persist through the match and consensual rematches.

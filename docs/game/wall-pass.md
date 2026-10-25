@@ -1,7 +1,7 @@
 # Wall Pass
 
-Wall Pass is opt-in permanent equipment in Expanded-v5 rooms. Heart remains the default preset;
-room creators must enable Wall Pass explicitly. It occupies the equipment slot independently of
+Wall Pass is configurable permanent equipment in Expanded-v5 rooms and is enabled with every
+available item in new rooms. It occupies the equipment slot independently of
 the single-use weapon slot, has no timer, and is replaced by another equipment pickup.
 
 While held, a living actor may move through intact breakable blocks. Hard walls, arena bounds and

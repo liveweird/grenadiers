@@ -17,8 +17,9 @@ epoch, Wall Pass, Kick, Punch and Bracelet equipment kinds, and publishes materi
 objects separately from pickups. Wall Pass exit-grace cells remain private
 authoritative state; Kick motion, Punch and Bracelet cooldowns, forced movement and retained bomb
 histories are private too.
-The browser renders the three base upgrades and enabled optional items, with authoritative
-upgrade, inventory and effect state; see the [current catalog](settings.md). Live generated rounds
+The browser renders the three base upgrades and enabled configurable items. Its own-item bar uses
+authoritative upgrade, inventory and effect state, while a bounded polite notice announces a fresh
+own collection once; see the [current catalog](settings.md). Live generated rounds
 keep private layers and seed records inside the server owner. Teleporter collection follows the
 separate atomic swap rules in [its feature reference](teleporter.md). Kick, Punch and Bracelet
 collection each replace the equipment slot without exposing motion, cooldown or history fields. Wall Pass

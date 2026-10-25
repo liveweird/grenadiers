@@ -1,6 +1,6 @@
 # Invisibility Cloak
 
-Invisibility Cloak is an opt-in Expanded-v5 pickup that lasts 600 physical ticks. Recollection
+Invisibility Cloak is a configurable Expanded-v5 pickup enabled in new rooms that lasts 600 physical ticks. Recollection
 refreshes that deadline. It coexists with equipment, weapons and other effects, changes no movement,
 damage or bomb rule, and clears on death and round reset.
 

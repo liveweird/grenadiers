@@ -17,7 +17,9 @@ pub(super) fn journal(profile: RoomProfile) -> Journal {
         RoomProfile::GeneratedClassicV2 => Journal::new(Header::m6([false; 2])),
         RoomProfile::GeneratedClassicV3 => Journal::new(Header::m6_v3([false; 2])),
         RoomProfile::GeneratedConfigurableV4 => Journal::new(Header::configurable_v4()),
-        RoomProfile::ExpandedV5 => Journal::new(Header::expanded_v5()),
+        RoomProfile::ExpandedV5 => Journal::new(Header::expanded_v5_with_settings(
+            profile.initial_settings(),
+        )),
         #[cfg(test)]
         RoomProfile::FixedClassicV1 => Journal::unsupported_profile(),
     }

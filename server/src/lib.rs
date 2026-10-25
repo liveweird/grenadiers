@@ -18,6 +18,7 @@ use serde::Serialize;
 use sqlx::{PgPool, postgres::PgPoolOptions};
 use tokio::{sync::Semaphore, time::timeout};
 
+mod browser_response;
 mod diagnostics;
 mod game;
 mod round_seed;
@@ -238,12 +239,14 @@ pub fn app(state: AppState, web_dist_dir: Option<PathBuf>) -> Router {
         )
         .with_state(state);
 
-    match web_dist_dir {
+    let router = match web_dist_dir {
         Some(directory) => router.fallback_service(
             ServeDir::new(directory.clone()).fallback(ServeFile::new(directory.join("index.html"))),
         ),
         None => router,
-    }
+    };
+
+    router.layer(middleware::from_fn(browser_response::headers_and_cache))
 }
 
 fn http_request_span<B>(request: &axum::http::Request<B>) -> tracing::Span {
@@ -333,6 +336,8 @@ async fn api_method_not_allowed(uri: Uri) -> Response {
     response
 }
 
+#[cfg(test)]
+mod browser_response_tests;
 #[cfg(test)]
 mod diagnostics_tests;
 #[cfg(test)]

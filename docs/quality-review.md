@@ -43,6 +43,11 @@ The browser performs at most three correlated same-socket resume retries within 
 recovery budget. Pending recovery keeps the last world visible with controls disabled; stale
 callbacks and late responses cannot revive it. Per-socket flood closure remains unchanged.
 
+**SEC-04, partial / SEC-10:** global nosniff, frame-denial and referrer headers cover API,
+static and fallback responses. HTML revalidates; recognized eight-character Vite hashes use
+immutable caching, including hashes containing hyphens. API/WebSocket no-store is preserved.
+Strict CSP still requires compatible validator/style handling and is not enabled by this change.
+
 ## Finding dispositions and proposed solutions
 
 “Agree” accepts the observed issue, not every implementation proposed in the review.
@@ -118,7 +123,7 @@ Related IDs are grouped to avoid treating one architectural problem as several i
 
 ## Next bounded batches
 
-1. Complete close-code/live-message documentation and basic browser response headers.
+1. Complete close-code/live-message documentation and a compatible CSP/validator strategy.
 2. Peer-keyed hosting admission design and credential-free denial telemetry.
 3. Test-wiring cleanup and denominator-correct coverage measurement.
 4. Contributor/history separation and shared E2E fixture/configuration helpers.

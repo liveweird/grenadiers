@@ -11,6 +11,14 @@ cross-process routing, and abuse controls.
 Vite connections originate at port 5177; built SPA connections originate at port 8085.
 Use deployment-specific origins outside local development.
 
+Every response sets `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, and
+`Referrer-Policy: no-referrer`, including API errors and static/SPA fallbacks. HTML and unhashed
+static files use `Cache-Control: no-cache`; successful non-HTML files with the configured
+eight-character Vite content-hash suffix under `/assets/` use a one-year immutable cache policy.
+API and WebSocket responses retain their stricter `no-store` policy. Content Security Policy
+remains future work because the current Ajv runtime compilation and Mantine integration need an
+explicit compatible policy.
+
 The diagnostic and gameplay WebSockets use separate connection and upgrade-admission budgets.
 Both apply the same strict Origin validation and bound message/frame size, inbound rate, idle time,
 write buffering, commands, and sends. Diagnostic connections are capped at 16; gameplay

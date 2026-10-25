@@ -4,6 +4,8 @@
 
 ### Fixed
 
+- Add browser response hardening and revalidate HTML while caching content-hashed assets
+  immutably; preserve API/WebSocket no-store responses.
 - Keep throttled room operations connected, isolate create/join/resume budgets, and recover
   seats using bounded same-socket retries with an absolute ten-second client deadline.
 - Return no-store problem responses for unknown API paths and unsupported methods, preserve

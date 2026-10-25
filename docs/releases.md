@@ -65,43 +65,34 @@ interrupted state but cannot preserve process-local matches or credentials.
 Keep the previous immutable image reference for rollback; database migration compatibility
 must be designed when durable application data is introduced.
 
-## v0.3.61 — 2026-10-25
+## v0.3.62 — 2026-10-25
 
-[v0.3.61](https://github.com/liveweird/grenadiers/releases/tag/v0.3.61) centralizes production
-startup in a typed configuration. Invalid address/origin settings fail with value-free errors;
-OS-native paths, proxy → seed → lazy database validation, existing AppState constructors and
-invalid-log fallback remain supported. An explicitly empty origin list still denies browser
-access and now emits one warning. Docker logging matches Compose/Kubernetes; the
-[defaults table](security.md#startup-configuration) distinguishes intentional development and
-container values. No gameplay, protocol, replay or dependency changes are introduced.
+[v0.3.62](https://github.com/liveweird/grenadiers/releases/tag/v0.3.62) removes 120 copied mock
+lines from Diarrhea, Slow Foot and Reverse Controls scene tests. All three reuse the existing
+Vitest-safe Pixi mock; test bodies, titles and assertions remain unchanged. Specialized renderer
+and atlas mocks remain intentional. Production behavior, protocols and dependencies are unchanged.
 
-Tested application source is `29093f3a50297f97cba0033a0f34b2244872c98b`; publication adds only
-documentation. Localhost:8085 serves accepted image
-`sha256:a22899d0d0e0c45063bf658c089ce55428ac02f37d6417a4270705cc02c42696`.
-Independent review, 12 focused startup cases and nine origin cases pass. Fresh source-bound Rust
-acceptance completes every 4,194,304 mask in debug, release and official coverage in 499.886s,
-with zero retries. Ordinary profiles pass 930 core / 304 server tests and two doctests; four
-existing performance cases remain ignored. Coverage is 17,388/18,598 lines (93.49%) at the 90%
-floor. Rustfmt, Clippy, runner fixtures, repository checks and
-[distinct Linux units](https://github.com/liveweird/grenadiers/actions/runs/40234533129) pass.
+Fresh full web acceptance at `50e57080aaf90fc03f2675f940be3d4adac9ca95` passes 6,812 tests /
+91 files in 307.97s, with 91.10/89.47/90.12/93.47% coverage and 337,937/36,505-byte gzip JS/CSS.
+Focused tests, lint, TypeScript, Knip and repository checks pass. Integration of v0.3.61 changes
+no tested web files. Application image inputs match `ea90eaf91390db05dfdc0398be0328e1ccc7bede`;
+publication adds documentation. Accepted image is
+`sha256:a5025d0406d61cdaf1bfd6cd3800a7440f72b39c04c003c5dd3b4a6460ff11af`.
 
-The exact image passes eight native browser cases through Compose and eight through Kubernetes.
-Five actual-image startup probes verify typed/redacted address, database, seed and proxy errors,
-plus healthy startup/log fallback, one empty-origin warning and browser-session denial.
-A fresh pinned Trivy scan reports zero fixable HIGH/CRITICAL findings. Web/contracts/dependency
-inputs are unchanged; reuse v0.3.60 web acceptance and v0.3.57 Cargo/npm audits. Served HTML,
-JavaScript and atlas bytes match the accepted v0.3.60 artifacts exactly.
+Rust/runtime sources match v0.3.61 apart from product-version metadata, so reuse its complete
+source-bound 4,194,304-mask acceptance (93.49% lines), distinct Linux units, 16 native cases
+and five startup probes. Dependency inputs also reuse the existing Cargo/npm audit results.
+A fresh pinned exact-image scan reports zero fixable HIGH/CRITICAL findings; the project-owned
+Trivy cache avoids repeated database downloads without bypassing updates or failures.
 
-Initial temporary checks needed corrections: Compose override setup, browser sandbox permission,
-the absent host Trivy binary (use the pinned container), and a helper expecting API cache policy
-for HTML. These were setup failures; final checks use documented policies and unchanged product
-assertions. Failed outputs or tool excerpts are retained; no hidden retries were added.
+Localhost:8085 serves this image. Health/readiness, runtime security, CSP/cache and exact
+HTML/JavaScript/atlas equality with the accepted v0.3.60 web artifacts pass, along with one
+fresh native admission/room smoke. Control is `.local-checkpoints/runtime/compose-v0.3.62.yaml`;
+`rollback-v0.3.61.yaml` retains the previous image. No migration is required. Remaining agreed
+Claude review work still precedes CPU implementation.
 
-Promotion passes image/runtime security, health/readiness, CSP/cache/artifact equality and one
-additional native room-admission smoke. Temporary acceptance resources are removed. Control is
-`.local-checkpoints/runtime/compose-v0.3.61.yaml`; `rollback-v0.3.60.yaml` retains the prior image.
-Restarts still end process-local matches. The review status now separates shipped fixes from
-remaining agreed work; CPU implementation waits for that work to finish.
+<a id="v0361--2026-10-25"></a>
+The [v0.3.61 record](history/releases.md#v0361--2026-10-25) is preserved in release history.
 
 <a id="v0360--2026-10-25"></a>
 The [v0.3.60 record](history/releases.md#v0360--2026-10-25) is preserved in release history.

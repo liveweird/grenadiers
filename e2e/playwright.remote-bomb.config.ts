@@ -1,9 +1,5 @@
-import { defineConfig } from '@playwright/test'
-import base from './playwright.config'
+import { gameplaySuiteConfig } from './playwright-gameplay-suite.ts'
 
-export default defineConfig({
-  ...base,
-  testDir: './remote-bomb-tests', workers: 1, retries: 0, timeout: 90_000,
-  reporter: [['list'], ['html', { open: 'never', outputFolder: 'playwright-remote-bomb-report' }]],
-  outputDir: 'remote-bomb-test-results',
+export default gameplaySuiteConfig({
+  testDir: './remote-bomb-tests', artifactStem: 'remote-bomb',
 })

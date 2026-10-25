@@ -1,6 +1,6 @@
 # Power Bomb
 
-Power Bomb is an opt-in Expanded v5 pickup. It occupies the one-charge weapon slot and replaces
+Power Bomb is a configurable Expanded v5 pickup enabled in new rooms. It occupies the one-charge weapon slot and replaces
 another stored weapon. A successful manual bomb placement consumes the charge and captures a
 Power blast. Failed placements retain it. Placement precedes pickup collection, so an old charge
 is used before a new weapon at the same cell is stored.

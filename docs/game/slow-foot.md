@@ -1,6 +1,6 @@
 # Slow foot
 
-Slow foot is an opt-in Expanded v5 curse. Each pickup adds one independent 600-physical-tick
+Slow foot is a configurable Expanded v5 curse enabled in new rooms. Each pickup adds one independent 600-physical-tick
 stack, up to six. A stack halves movement speed, so one through six active stacks use
 `1/2`, `1/4`, `1/8`, `1/16`, `1/32`, or `1/64` of the actor's current speed upgrade.
 

@@ -98,7 +98,7 @@ HTTP session responses are separate from socket messages.
 ## Public snapshots and events
 
 Room metadata is shared; physical snapshots are prepared separately for each authenticated seat.
-The default Heart-only enabled set produces equal perspectives. Personal
+The default all-items enabled set still uses recipient-specific projections. Personal
 `admitted` carries seat identity, capability, action floor and an optional recipient baseline,
 without historical events. `state` contains `physicalTick`, `runningUpdates` and `remainingTicks`
 (each running counter 0–10,800), the arena, exactly two
@@ -188,7 +188,7 @@ Shared room views and snapshot metadata also carry the complete checked `setting
 `settingsRevision`, nullable original `settingsEditor`, and `availableItems`. Settings also
 carry `enabledItems`; v10 remains pinned to its 21-item Bracelet catalog while active v11
 has the 22-item catalog beginning with Kick, Punch, Bracelet and Wall Pass, with Oil Barrel immediately
-before Teleporter. Heart is enabled by default and every supported subset is allowed.
+before Teleporter. New live rooms enable the full available catalog and every supported subset is allowed.
 Only actual changes increment
 the settings revision and clear readiness; Ready commands acknowledge that exact revision.
 See [v6 settings and authority](protocol-v6.md) for bounds, no-op acknowledgements and edit locks.

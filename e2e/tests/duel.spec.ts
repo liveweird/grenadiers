@@ -1,7 +1,9 @@
 import { selectClassicSettings } from './support/settings'
 import AxeBuilder from '@axe-core/playwright'
 import { expect, test } from '@playwright/test'
-import { EMPTY_ACTIVE_ACTOR_STATS, expectActorStats } from './support/actor-stats'
+import {
+  EMPTY_ACTIVE_ACTOR_STATS, expectActorStatGeometry, expectActorStats,
+} from './support/actor-stats'
 import { visibleActor, expectPaintedCanvas, latestSnapshot, observeGame } from './support/duel'
 
 test('two players complete a rendered keyboard duel with shared authoritative results', async ({ browser }, testInfo) => {
@@ -51,9 +53,10 @@ test('two players complete a rendered keyboard duel with shared authoritative re
     await expect.poll(() => latestSnapshot(games[0])?.room.phase.type).toBe('running')
     await expect.poll(() => latestSnapshot(games[1])?.room.phase.type).toBe('running')
     await Promise.all([one, two].map(expectPaintedCanvas))
-    for (const page of [one, two]) {
+    for (const [index, page] of [one, two].entries()) {
+      const ownSeat = index === 0 ? 'one' : 'two'
       for (const player of ['one', 'two'] as const) {
-        await expectActorStats(page, player, {
+        await expectActorStats(page, player, ownSeat, {
           available: '1', capacity: '1', range: '2', speed: '1',
           ...EMPTY_ACTIVE_ACTOR_STATS,
         })
@@ -61,17 +64,7 @@ test('two players complete a rendered keyboard duel with shared authoritative re
     }
     await two.setViewportSize({ width: 320, height: 844 })
     expect(await two.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false)
-    const statBounds = await two.locator('.actor-stats').evaluateAll((elements) => elements.map((element) => {
-      const { x, width, height } = element.getBoundingClientRect()
-      return { x, width, height }
-    }))
-    expect(statBounds).toHaveLength(2)
-    for (const bounds of statBounds) {
-      expect(bounds.width).toBeGreaterThan(0)
-      expect(bounds.height).toBeGreaterThan(0)
-      expect(bounds.x).toBeGreaterThanOrEqual(0)
-      expect(bounds.x + bounds.width).toBeLessThanOrEqual(320)
-    }
+    await expectActorStatGeometry(two, 2)
     await two.screenshot({ path: testInfo.outputPath('running-320.png'), fullPage: true })
     await two.setViewportSize({ width: 390, height: 844 })
     for (const page of [one, two]) {
@@ -101,8 +94,8 @@ test('two players complete a rendered keyboard duel with shared authoritative re
     await one.keyboard.down('Space')
     await expect.poll(() => games[0].commands.filter((command) => command.type === 'manualAction')).toEqual([{ type: 'manualAction', action: 'bomb', actionId: 1 }])
     await expect.poll(() => latestSnapshot(games[0])?.state.bombs.length).toBe(1)
-    for (const page of [one, two]) {
-      await expectActorStats(page, 'one', {
+    for (const [index, page] of [one, two].entries()) {
+      await expectActorStats(page, 'one', index === 0 ? 'one' : 'two', {
         available: '0', capacity: '1', range: '2', speed: '1',
         ...EMPTY_ACTIVE_ACTOR_STATS,
       })
@@ -121,7 +114,7 @@ test('two players complete a rendered keyboard duel with shared authoritative re
       expect(result.state.actors.find((candidate) => candidate.seat === 'one')?.alive).toBe(false)
       await expect(page.getByLabel('Phase time remaining')).toHaveText(/^0:0[123]$/)
       await expect(page.getByRole('status')).toContainText('Player two wins the round.')
-      await expectActorStats(page, 'one', {
+      await expectActorStats(page, 'one', index === 0 ? 'one' : 'two', {
         available: '1', capacity: '1', range: '2', speed: '1',
         ...EMPTY_ACTIVE_ACTOR_STATS,
       })

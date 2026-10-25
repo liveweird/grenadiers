@@ -3,6 +3,7 @@ import { expect, test, type Page } from '@playwright/test'
 import { expectPaintedCanvas, latestSnapshot, observeGame, visibleActor,
   type ObservedGame } from '../tests/support/duel'
 import { moveSeatTo } from '../tests/support/movement'
+import { applyItemSettings } from '../tests/support/settings'
 import type { GameServerMessage, Seat } from '../../web/src/game/v11/schema'
 test.beforeAll(() => expect(process.env.E2E_STOPWATCH_FIXTURE).toBe('arena-v2-stopwatch'))
 const snapshots = (game: ObservedGame) => game.frames.filter(
@@ -61,9 +62,7 @@ test('Stopwatch freezes voluntary actions while Timed bombs pause', async ({ bro
     await one.getByRole('button', { name: 'Create room', exact: true }).click()
     const code = one.getByLabel('Room invitation code', { exact: true })
     await expect(code).toHaveText(/^[A-HJ-NP-Z2-9]{8}$/)
-    await one.getByRole('checkbox', { name: 'Heart', exact: true }).uncheck()
-    await one.getByRole('checkbox', { name: 'Stopwatch', exact: true }).check()
-    await one.getByRole('button', { name: 'Apply rules', exact: true }).click()
+    await applyItemSettings(one, games[0], [{ id: 'stopwatch', label: 'Stopwatch' }])
     await two.getByText('Polski', { exact: true }).click()
     await two.getByRole('textbox', { name: 'Kod pokoju', exact: true }).fill(await code.innerText())
     await two.getByRole('button', { name: 'Dołącz do pokoju', exact: true }).click()

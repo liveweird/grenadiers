@@ -3,6 +3,7 @@ import { expect, test, type Page } from '@playwright/test'
 import { latestSnapshot, observeGame, visibleActor, type ObservedGame } from '../tests/support/duel'
 import { moveTo } from '../tests/support/movement'
 import { admissionBaseline, disconnectTransport, installTransportProbe } from '../tests/support/reconnect'
+import { applyItemSettings } from '../tests/support/settings'
 import type { GameServerMessage } from '../../web/src/game/v11/schema'
 
 test.beforeAll(() => {
@@ -56,11 +57,7 @@ test('two browsers collect Golden Flame and restore base bomb range after its ex
     await one.getByRole('button', { name: 'Create room', exact: true }).click()
     const code = one.getByLabel('Room invitation code', { exact: true })
     await expect(code).toHaveText(/^[A-HJ-NP-Z2-9]{8}$/)
-    await expect(one.getByRole('checkbox', { name: 'Heart', exact: true })).toBeChecked()
-    await expect(one.getByRole('checkbox', { name: 'Golden flame', exact: true })).not.toBeChecked()
-    await one.getByRole('checkbox', { name: 'Heart', exact: true }).uncheck()
-    await one.getByRole('checkbox', { name: 'Golden flame', exact: true }).check()
-    await one.getByRole('button', { name: 'Apply rules', exact: true }).click()
+    await applyItemSettings(one, games[0], [{ id: 'goldenFlame', label: 'Golden flame' }])
     await expect.poll(() => publicRoom(games[0])?.settings.enabledItems).toEqual(['goldenFlame'])
     await two.getByRole('textbox', { name: 'Room code', exact: true }).fill(await code.innerText())
     await two.getByRole('button', { name: 'Join room', exact: true }).click()

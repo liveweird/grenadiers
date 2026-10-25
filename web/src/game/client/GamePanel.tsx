@@ -15,6 +15,8 @@ import { loadControlBindings, saveControlBindings } from './controlPreferences'
 import { SoundControl } from '../audio/SoundControl'
 import { GameplaySettingsPanel } from './GameplaySettingsPanel'
 import { presentSnapshot } from './presentation'
+import { ActorDetails, OwnStatusBar } from './OwnStatusBar'
+import { OwnPickupNotice } from './OwnPickupNotice'
 
 const CODE_PATTERN = /^[A-HJ-NP-Z2-9]{8}$/
 
@@ -103,39 +105,6 @@ function visibleActor(state: GameClientState, seat: Seat): VisibleActorView | nu
   return actor?.type === 'visible' ? actor : null
 }
 
-function ActorDetails({ actor, copy }: { actor: VisibleActorView; copy: GameCopy }) {
-  const equipment = actor.inventory.equipment ? copy.items[actor.inventory.equipment] : copy.stats.none
-  const weapon = actor.inventory.weapon ? copy.items[actor.inventory.weapon] : copy.stats.none
-  const slowFoot = actor.effects.filter((effect) => effect.kind === 'slowFoot')
-  const effectLabels = actor.effects.filter((effect) => effect.kind !== 'slowFoot')
-    .map((effect) => format(copy.stats.effectTimer, {
-      item: copy.items[effect.kind], time: clock(effect.remainingTicks),
-    }))
-  if (slowFoot.length > 0) effectLabels.push(format(copy.stats.slowFootGroup, {
-    item: copy.items.slowFoot, count: slowFoot.length, multiplier: `1/${2 ** slowFoot.length}`,
-    timers: slowFoot.map((effect) => clock(effect.remainingTicks)).join(', '),
-  }))
-  const effects = effectLabels.length === 0 ? copy.stats.none : effectLabels.join(', ')
-  return <>
-    <div><dt>{copy.stats.available}</dt><dd>{actor.bombCapacity - actor.liveBombCount}</dd></div>
-    <div><dt>{copy.stats.capacity}</dt><dd>{actor.bombCapacity}</dd></div>
-    <div><dt>{copy.stats.range}</dt><dd>{actor.bombRange}</dd></div>
-    <div><dt>{copy.stats.speed}</dt><dd>{actor.speedLevel + 1}</dd></div>
-    <div><dt>{copy.stats.equipment}</dt><dd>{equipment}</dd></div>
-    <div><dt>{copy.stats.weapon}</dt><dd>{weapon}</dd></div>
-    <div><dt>{copy.stats.effects}</dt><dd>{effects}</dd></div>
-    {actor.voluntaryActionsFrozen && <div className="actions-frozen">
-      <dt>{copy.stats.actions}</dt><dd role="status">{copy.stats.frozen}</dd>
-    </div>}
-    <div className={actor.damageGraceRemainingTicks > 0 ? 'grace-active' : undefined}>
-      <dt>{copy.stats.damageGrace}</dt>
-      <dd aria-label={actor.damageGraceRemainingTicks > 0 ? copy.stats.protected : undefined}>
-        {clock(actor.damageGraceRemainingTicks)}
-      </dd>
-    </div>
-  </>
-}
-
 function SeatLine({ state, seat, copy }: { state: GameClientState; seat: Seat; copy: GameCopy }) {
   const room = state.room!
   const status = room.seats.find((candidate) => candidate.seat === seat)
@@ -152,7 +121,7 @@ function SeatLine({ state, seat, copy }: { state: GameClientState; seat: Seat; c
           <small>{copy.seat[seatState]}</small>
           {grace && <small role="timer">{format(copy.reconnect.grace, { time: grace })}</small>}
         </span>
-        {actor && status?.occupied && (
+        {actor && status?.occupied && state.youSeat !== seat && (
           <dl className="actor-stats" aria-label={format(copy.stats.label, { player: copy.player[seat] })}>
             <ActorDetails actor={actor} copy={copy} />
           </dl>
@@ -242,6 +211,11 @@ function gameInputEnabled(state: GameClientState): boolean {
     && state.room?.phase.type === 'running' && ownActorAlive(state)
 }
 
+function ownStatusActor(state: GameClientState): VisibleActorView | null {
+  if (state.connection !== 'authenticated' || state.admissionPending || !state.youSeat) return null
+  return visibleActor(state, state.youSeat)
+}
+
 function arenaFocusHint(state: GameClientState, snapshot: ReturnType<typeof presentSnapshot>,
   bindings: KeyboardBindings, copy: ReturnType<typeof useGameCopy>): string {
   const actor = state.youSeat && snapshot?.state.actors.find(({ seat }) => seat === state.youSeat)
@@ -266,6 +240,7 @@ export function GamePanelView({ state, actions }: { state: GameClientState; acti
   const reconnecting = state.room && (state.admissionPending
     || ['reconnecting', 'connecting', 'authenticating'].includes(state.connection))
   const arenaSnapshot = useMemo(() => presentSnapshot(state), [state])
+  const ownActor = ownStatusActor(state)
   const focusHint = arenaFocusHint(state, arenaSnapshot, bindings, copy)
   const updateBindings = (next: KeyboardBindings): void => {
     setBindings(next)
@@ -288,6 +263,8 @@ export function GamePanelView({ state, actions }: { state: GameClientState; acti
           bindings={bindings}
           onDirection={(direction) => actions.movement(direction)} onBomb={() => actions.placeBomb()}
           onEquipment={() => actions.useEquipment()} />
+        {ownActor && <OwnStatusBar actor={ownActor} copy={copy} />}
+        <OwnPickupNotice state={state} copy={copy} />
         <p id="game-instructions" className="game-instructions">{bindingsSummary(bindings, copy)}</p>
         <div className="local-controls">
           <Button className="controls-button" variant="subtle" color="dark" size="compact-sm"

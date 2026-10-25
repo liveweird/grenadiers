@@ -46,6 +46,19 @@ pub(in crate::game::rooms) fn expanded_heart_runtime() -> MatchRuntime {
 
 pub(in crate::game::rooms) fn start_expanded_heart_round(runtime: &mut MatchRuntime) {
     occupy_both(runtime);
+    let settings_revision = runtime.replay_inspection().settings_revision;
+    runtime
+        .action(
+            SeatId::One,
+            1,
+            MatchAction::UpdateSettings {
+                settings_revision,
+                settings: grenadiers_core::room::RoomSettings::DEFAULT
+                    .with_enabled_items(grenadiers_core::game::EnabledItems::HEART),
+            },
+        )
+        .unwrap();
+    let settings_revision = runtime.replay_inspection().settings_revision;
     for seat in SeatId::ALL {
         runtime
             .action(
@@ -53,7 +66,7 @@ pub(in crate::game::rooms) fn start_expanded_heart_round(runtime: &mut MatchRunt
                 1,
                 MatchAction::ReadyChecked {
                     ready: true,
-                    settings_revision: 1,
+                    settings_revision,
                 },
             )
             .unwrap();

@@ -111,6 +111,28 @@ fn expanded_profile_binds_settings_to_v5_and_generator_v2() {
 }
 
 #[test]
+fn live_expanded_defaults_enable_every_available_item_without_changing_numerics() {
+    let settings = RoomProfile::ExpandedV5.initial_settings();
+
+    assert_eq!(settings.enabled_items(), EnabledItems::ALL);
+    assert_eq!(
+        settings.starting_speed(),
+        grenadiers_core::game::SpeedLevel::Base
+    );
+    assert_eq!(settings.turn_assist_units(), 256);
+    assert_eq!(settings.wins_to_finish(), 3);
+    assert_eq!(settings.bomb_fuse_ticks(), 180);
+    assert_eq!(
+        RoomProfile::GeneratedClassicV3.initial_settings(),
+        RoomSettings::DEFAULT
+    );
+    assert_eq!(
+        RoomProfile::GeneratedConfigurableV4.initial_settings(),
+        RoomSettings::DEFAULT
+    );
+}
+
+#[test]
 fn profile_honors_later_round_assignment_for_spawns_and_facing() {
     let lifecycle = running();
     let assignment = RoundAssignment::new(std::num::NonZeroU32::new(2).unwrap());

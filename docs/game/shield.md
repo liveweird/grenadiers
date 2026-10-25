@@ -5,9 +5,9 @@ Status: implemented; published in
 
 ## Playing with Shield
 
-The creator can enable Shield in the unready lobby, independently of Heart. Apply rules before
-both players ready. Default settings keep Heart enabled and Shield disabled; Classic settings
-disable both. Settings remain immutable during play and persist through rounds/rematches.
+The creator can configure Shield in the unready lobby, independently of Heart. Apply rules before
+both players ready. New-room defaults enable both; Classic settings disables every optional item.
+Settings remain immutable during play and persist through rounds/rematches.
 
 Destroy a soft block containing Shield, wait for fire to clear, then walk over the exposed blue
 shield. Collection grants **300 physical simulation ticks (five seconds)** of immunity. Another
@@ -30,8 +30,8 @@ both timed protection and equipment.
 
 Shield uses bit 9 in the checked optional-item mask. Its initial release supported masks
 0, 16 (Heart), 512 (Shield), and 528 (both); those masks retain their generation paths.
-The [current catalog](settings.md) also supports later items. Default and empty/Heart-only
-seeded generation remain unchanged.
+The [current catalog](settings.md) also supports later items. The historical empty and Heart-only
+seeded generation paths remain unchanged.
 
 With only Heart and Shield enabled, rules 5 / generator 2 sample weights 40 capacity,
 40 range, 20 speed, 25 Heart and 15 Shield. Disabled items contribute no weight or additional random draw.

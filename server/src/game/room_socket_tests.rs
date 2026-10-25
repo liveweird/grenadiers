@@ -104,11 +104,12 @@ async fn two_members_receive_personalized_admission_and_live_waiting_updates() {
     assert_eq!(created["room"]["rulesVersion"], 5);
     assert_eq!(created["room"]["settingsRevision"], 1);
     assert_eq!(created["room"]["settingsEditor"], "one");
+    let available_items = created["room"]["availableItems"].clone();
     assert_eq!(
         created["room"]["settings"],
         json!({
             "startingSpeedLevel":0, "turnAssistUnits":256,
-            "winsToFinish":3, "bombFuseTicks":180, "enabledItems":["heart"]
+            "winsToFinish":3, "bombFuseTicks":180, "enabledItems":available_items.clone()
         })
     );
     assert_eq!(
@@ -138,6 +139,7 @@ async fn two_members_receive_personalized_admission_and_live_waiting_updates() {
             "teleporter"
         ])
     );
+    assert_eq!(available_items.as_array().unwrap().len(), 22);
     let code = created["room"]["roomCode"].clone();
     let room_id = created["room"]["roomId"].clone();
 

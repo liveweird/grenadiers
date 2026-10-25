@@ -50,9 +50,20 @@
     "frozen": "Frozen by Stopwatch",
     "damageGrace": "Damage grace",
     "protected": "Protected from damage",
+    "protectedTime": "Protected from damage, {{time}} remaining",
     "none": "None",
     "effectTimer": "{{item}} ({{time}})",
     "slowFootGroup": "{{item}} ×{{count}} ({{multiplier}} speed; {{timers}})"
+  },
+  "ownItems": {
+    "label": "Your items",
+    "heading": "Your items"
+  },
+  "pickups": {
+    "bombCapacity": "Bomb capacity",
+    "blastRange": "Blast range",
+    "movementSpeed": "Movement speed",
+    "collected": "Picked up {{item}}."
   },
   "items": {
     "kick": "Kick",
@@ -146,6 +157,8 @@
     "longFuseDescription": "Doubles the fuse of new bombs for 10 seconds. Short and Long fuse cancel while both are active; existing bombs stay unchanged. Another pickup refreshes it.",
     "reverseControlsDescription": "Reverses movement controls for 10 seconds. Held keys stay physically held; another pickup refreshes the timer.",
     "unapplied": "Apply these changes before readying up.",
+    "allOn": "All on",
+    "allOff": "All off",
     "restore": "Restore match defaults",
     "classic": "Classic settings",
     "apply": "Apply rules",

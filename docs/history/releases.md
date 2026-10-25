@@ -4,6 +4,42 @@ This archive preserves the older release records originally maintained in
 [`docs/releases.md`](../releases.md). Records remain in their original order; the current
 release procedure and current release record stay in the [release guide](../releases.md).
 
+## v0.3.59 — 2026-10-25
+
+[v0.3.59](https://github.com/liveweird/grenadiers/releases/tag/v0.3.59) generates browser item
+catalogs from each v7–v11 schema's own `ItemId` enum. Live settings and validation reuse those
+tuples; retained validators preserve their narrower activation subsets. V2–v6 generated output,
+schema JSON, standalone validators, rules, generation, replay identities and dependencies are
+unchanged. An E2E privacy assertion now checks the actual unique secret and redaction markers
+rather than rejecting a harmless `/private/tmp` checkout path; sanitizer behavior is unchanged.
+
+Application inputs match `473d1e6e889cfecd5c08178f3b881ca74d775fae`; later source adds only the
+E2E test correction and release documentation. Accepted image is
+`sha256:946a5f6fbab0c8b573c66badff34157b445cc57cc65798d519bc7fdc6a303fc0`.
+Independent catalog review is clear. Fresh full web acceptance passes 6,799 tests / 88 files
+in 314.30s; coverage is 90.94/89.49/89.85/93.30% above the unchanged floors. Production gzip
+JavaScript/CSS sizes are 336,404/36,292 bytes. All retained generation/standalone drift checks,
+API conventions, lint, unused-code, repository and corrected full E2E static checks pass.
+
+Rust behavior is unchanged: reuse v0.3.58's complete 4,194,304-mask debug/release/official-coverage
+acceptance (93.50% application lines), plus its shutdown and separate graphics diagnostics.
+Dependency inputs are unchanged, so v0.3.57's fresh Cargo-deny and both zero-finding npm audits
+remain applicable. The exact new image receives its own scan and runtime acceptance below.
+
+Fresh pinned Trivy 0.74.0 acceptance reports zero fixable HIGH/CRITICAL vulnerabilities.
+Native Chromium passes eight default cases through Compose (36.4s) and eight through Kubernetes
+(40.3s), with unchanged assertions and no configured retries. The first Kubernetes setup used an
+8085 origin allowlist with a browser on 18086; correcting only that isolated environment fixed
+session admission. Its original failure log was overwritten; the verifier's command-output
+excerpt is retained as a limitation. The initial scan lacked Docker socket access; the corrected
+exact-image scan is authoritative. Health/readiness, runtime security and CSP/cache headers pass.
+
+Localhost:8085 now serves that accepted image. Promotion verifies exact HTML/JavaScript/atlas
+bytes against the local build and image, runtime security, headers and one additional native
+realtime smoke. Temporary acceptance services, namespaces and forwards are removed. Control is
+`.local-checkpoints/runtime/compose-v0.3.59.yaml`; `rollback-v0.3.58.yaml` retains the previous
+image. No migration or gameplay configuration change is introduced by this release.
+
 ## v0.3.58 — 2026-10-25
 
 [v0.3.58](https://github.com/liveweird/grenadiers/releases/tag/v0.3.58) bounds HTTP serving and

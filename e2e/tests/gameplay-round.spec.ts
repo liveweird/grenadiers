@@ -47,7 +47,7 @@ test('two native gameplay sockets finish one authoritative generated classic rou
     await sendGame(two, { type: 'joinRoom', roomCode: created.room.roomCode })
     const joined = await roomFrame(two)
     const binding = { roomId: created.room.roomId, roundId: joined.room.roundId }
-    expect(joined.room.settings.enabledItems).toEqual(['heart'])
+    expect(joined.room.settings.enabledItems).toEqual(joined.room.availableItems)
     await sendGame(one, {
       type: 'updateSettings', ...binding, settingsRevision: joined.room.settingsRevision,
       settings: { ...joined.room.settings, enabledItems: [] },

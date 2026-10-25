@@ -83,10 +83,12 @@ async function escapeBomb(
   await moveTo(page, game, destination)
 }
 
-async function expectStats(pages: Page[],
+async function expectStats(pages: Array<[Page, 'one' | 'two']>,
   values: Pick<ActorStatsExpectation, 'available' | 'capacity' | 'range' | 'speed'>) {
-  for (const page of pages) {
-    await expectActorStats(page, 'one', { ...values, ...EMPTY_ACTIVE_ACTOR_STATS })
+  for (const [page, ownSeat] of pages) {
+    await expectActorStats(page, 'one', ownSeat, {
+      ...values, ...EMPTY_ACTIVE_ACTOR_STATS,
+    })
   }
 }
 
@@ -130,7 +132,9 @@ test('two browsers collect generated upgrades while old bombs keep their capture
     await one.screenshot({ path: testInfo.outputPath('capacity-revealed.png'), fullPage: true })
     await moveTo(one, games[0], { column: 1, row: 1 })
     await moveTo(one, games[0], { column: 3, row: 1 })
-    await expectStats(pages, { available: '2', capacity: '2', range: '2', speed: '1' })
+    await expectStats([[one, 'one'], [two, 'two']], {
+      available: '2', capacity: '2', range: '2', speed: '1',
+    })
 
     await moveTo(one, games[0], { column: 1, row: 1 })
     await moveTo(one, games[0], { column: 1, row: 2 })
@@ -161,7 +165,9 @@ test('two browsers collect generated upgrades while old bombs keep their capture
     await Promise.all(pages.map(async (page, index) => {
       await expect.poll(() => latestSnapshot(games[index])!.state.bombs)
         .toEqual(expect.arrayContaining([expect.objectContaining({ id: old.id, range: 2 }), expect.objectContaining({ id: upgraded.id, range: 3 })]))
-      await expectStats([page], { available: '0', capacity: '2', range: '3', speed: '1' })
+      await expectStats([[page, index === 0 ? 'one' : 'two']], {
+        available: '0', capacity: '2', range: '3', speed: '1',
+      })
     }))
     await Promise.all(pages.map((page, index) =>
       page.screenshot({ path: testInfo.outputPath(`upgraded-bombs-${index}.png`), fullPage: true }),

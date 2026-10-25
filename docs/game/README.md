@@ -58,8 +58,9 @@ archived; earlier contracts remain historical references.
 
 [Pixel-art presentation](pixel-art.md) describes original artwork, animation and resource bounds.
 
-[Expanded item implementation](expanded-items.md) records the optional inventory, effects,
-weapons, visibility and incremental activation decisions; each item remains opt-in except Heart.
+[Expanded item implementation](expanded-items.md) records the inventory, effects, weapons,
+visibility and historical incremental activation decisions; new rooms now enable the complete
+available catalog and creators may configure any subset.
 
 [Ordered WebSocket delay](websocket-latency.md) defines the measured profile, causal observations and limits.
 
@@ -67,9 +68,9 @@ weapons, visibility and incremental activation decisions; each item remains opt-
 
 See the implemented expansion candidates: [Heart](heart.md) and [Shield](shield.md).
 
-- [Golden Flame](golden-flame.md): opt-in ten-second maximum-range pickup and captured bomb behavior.
-- [Reverse Controls](reverse-controls.md): opt-in ten-second movement inversion with exact boundaries.
-- [Diarrhea](diarrhea.md): opt-in ten-second automatic ordinary-bomb placement curse.
+- [Golden Flame](golden-flame.md): ten-second maximum-range pickup and captured bomb behavior.
+- [Reverse Controls](reverse-controls.md): ten-second movement inversion with exact boundaries.
+- [Diarrhea](diarrhea.md): ten-second automatic ordinary-bomb placement curse.
 - [Slow foot](slow-foot.md): up to six independent ten-second movement-slowing stacks.
 - [Piercing Bomb](piercing-bomb.md): one stored charge for a manual bomb that crosses soft blocks.
 - [Power Bomb](power-bomb.md): one stored charge for a Manhattan blast that ignores obstruction.

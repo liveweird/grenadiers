@@ -1,6 +1,6 @@
 # Kick
 
-Kick is opt-in permanent equipment in Expanded-v5 rooms. Walking voluntarily into a stationary
+Kick is configurable permanent equipment enabled in new Expanded-v5 rooms. Walking voluntarily into a stationary
 Timed or Remote bomb arms motion in the effective movement direction. The first one-cell hop occurs
 on the next running update and later hops occur every ten updates until a hard wall, breakable block,
 any bomb, or a living actor blocks the swept cells. Contact mines cannot be kicked.

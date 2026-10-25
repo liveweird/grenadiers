@@ -3,7 +3,8 @@
 ## Scenario: two native gameplay sockets finish one authoritative generated classic round
 
 Two independent browser contexts authenticate, create/join one room, disable optional items
-through revision-fenced settings, ready, and receive live public snapshots with
+through revision-fenced settings after confirming a fresh room enables every available item,
+ready, and receive live public snapshots with
 generated-v2/Expanded-v5 metadata, the original Classic layouts, mirrored blocks, safe spawn
 openings, and no initially exposed pickups. Refreshed logical movement moves the first actor through its spawn
 opening. Equipment with Punch disabled is rejected with `invalidPhase` without consuming its manual action ID;

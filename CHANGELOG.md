@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+## 0.3.60 — 2026-10-25
+
+### Added
+
+- Enable every configurable item by default in new live rooms; add All on/All off draft controls
+  and restore all available items with match defaults, preserving existing and recorded settings.
+- Show a recipient-only item bar with upgrade totals, equipment/weapon slots, active effect and
+  Slow Foot stack timers, damage grace, and recent pickup announcements in English and Polish.
+
 ## 0.3.59 — 2026-10-25
 
 ### Changed

@@ -2,7 +2,7 @@
 
 Corrected-source acceptance at `420d8df` passes fresh **50 Compose plus 50 Kubernetes** cases with zero retries or carried results. Remote and Landmine use fresh placement-ID checks across rolling observer history. Product behavior is unchanged; the new evidence is audited/sealed, while exact-head CI/post-merge CI and publication remain pending. See [verification](../verification.md).
 
-Landmine is an opt-in Expanded-v5 one-charge weapon. A successful manual bomb action consumes
+Landmine is a configurable Expanded-v5 one-charge weapon enabled in new rooms. A successful manual bomb action consumes
 the stored charge and places a visible, passable, capacity-counted Standard bomb with a Contact
 trigger. It has no fuse. Automatic Diarrhea placements remain ordinary Timed bombs and do not
 consume the charge.

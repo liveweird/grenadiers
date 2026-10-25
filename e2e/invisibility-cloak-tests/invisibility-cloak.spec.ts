@@ -3,6 +3,7 @@ import { expect, test, type Page } from '@playwright/test'
 import { expectPaintedCanvas, latestSnapshot, observeGame, visibleActor, type ObservedGame } from '../tests/support/duel'
 import { moveTo } from '../tests/support/movement'
 import { admissionBaseline, disconnectTransport, installTransportProbe } from '../tests/support/reconnect'
+import { applyItemSettings } from '../tests/support/settings'
 import type { GameServerMessage } from '../../web/src/game/v11/schema'
 
 test.beforeAll(() => expect(process.env.E2E_INVISIBILITY_CLOAK_FIXTURE)
@@ -53,9 +54,7 @@ test('two browsers observe recipient-private Cloak through reconnect and exact e
     await one.getByRole('button', { name: 'Create room', exact: true }).click()
     const code = one.getByLabel('Room invitation code', { exact: true })
     await expect(code).toHaveText(/^[A-HJ-NP-Z2-9]{8}$/)
-    await one.getByRole('checkbox', { name: 'Heart', exact: true }).uncheck()
-    await one.getByRole('checkbox', { name: 'Invisibility cloak', exact: true }).check()
-    await one.getByRole('button', { name: 'Apply rules', exact: true }).click()
+    await applyItemSettings(one, games[0], [{ id: 'invisibilityCloak', label: 'Invisibility cloak' }])
     await two.getByText('Polski', { exact: true }).click()
     await two.getByRole('textbox', { name: 'Kod pokoju', exact: true }).fill(await code.innerText())
     await two.getByRole('button', { name: 'Dołącz do pokoju', exact: true }).click()

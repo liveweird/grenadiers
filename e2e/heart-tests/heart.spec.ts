@@ -4,6 +4,7 @@ import {
   latestSnapshot, observeGame, visibleActor, type ObservedGame,
 } from '../tests/support/duel'
 import { moveTo } from '../tests/support/movement'
+import { applyItemSettings } from '../tests/support/settings'
 
 test.beforeAll(() => {
   expect(process.env.E2E_HEART_FIXTURE, 'Configure the documented production Heart seed')
@@ -32,7 +33,7 @@ test('two browsers reveal a generated Heart and observe one charge protect its c
     await one.getByRole('button', { name: 'Create room', exact: true }).click()
     const code = one.getByLabel('Room invitation code', { exact: true })
     await expect(code).toHaveText(/^[A-HJ-NP-Z2-9]{8}$/)
-    await expect(one.getByRole('checkbox', { name: 'Heart', exact: true })).toBeChecked()
+    await applyItemSettings(one, games[0], [{ id: 'heart', label: 'Heart' }])
     await two.getByRole('textbox', { name: 'Room code', exact: true }).fill(await code.innerText())
     await two.getByRole('button', { name: 'Join room', exact: true }).click()
     await Promise.all([one, two].map((page) =>
@@ -64,10 +65,24 @@ test('two browsers reveal a generated Heart and observe one charge protect its c
     await moveTo(one, games[0], { column: 3, row: 1 })
     await Promise.all(games.map((game) => expect.poll(() =>
       visibleActor(latestSnapshot(game), 'one')?.inventory.equipment).toBe('heart')))
+    await expect(one.getByRole('region', { name: 'Your items' })).toContainText('GearHeart')
+    await expect(one.getByText('Picked up Heart.', { exact: true })).toBeVisible()
     await two.getByText('Polski', { exact: true }).click()
+    const polishOwnItems = two.getByRole('region', { name: 'Twoje przedmioty' })
+    await expect(polishOwnItems).toContainText('WyposażenieBrak')
+    await expect(polishOwnItems).not.toContainText('Serce')
     expect(await two.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false)
     await two.screenshot({ path: testInfo.outputPath('heart-equipped-polish-320.png'), fullPage: true })
 
+    await one.setViewportSize({ width: 320, height: 844 })
+    await one.getByText('Polski', { exact: true }).click()
+    const collectorOwnItems = one.getByRole('region', { name: 'Twoje przedmioty' })
+    await expect(collectorOwnItems).toContainText('WyposażenieSerce')
+    expect(await one.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false)
+    await one.screenshot({
+      path: testInfo.outputPath('heart-collector-equipped-polish-320.png'), fullPage: true,
+    })
+    await one.getByRole('region', { name: 'Dziedziniec Grenadiers' }).click()
     await plant(one, games[0])
     await Promise.all(games.map((game) => expect.poll(() => Boolean(protectionFrame(game))).toBe(true)))
     for (const game of games) {
@@ -79,8 +94,12 @@ test('two browsers reveal a generated Heart and observe one charge protect its c
       expect(protectedActor.damageGraceRemainingTicks).toBeGreaterThan(0)
       expect(frame.room.phase.type).toBe('running')
     }
+    await expect(collectorOwnItems).toContainText('WyposażenieBrak')
+    await expect(collectorOwnItems.getByLabel(/^Ochrona przed obrażeniami aktywna, pozostało 0:0[1-9]$/))
+      .not.toHaveText('0:00')
     await expect.poll(() => visibleActor(latestSnapshot(games[0]), 'one')
       ?.damageGraceRemainingTicks, { intervals: [15] }).toBe(0)
+    await expect(collectorOwnItems).toContainText('Ochrona przed obrażeniami0:00')
     expect(visibleActor(latestSnapshot(games[0]), 'one')?.alive).toBe(true)
     await plant(one, games[0])
     await Promise.all(games.map((game) => expect.poll(() =>

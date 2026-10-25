@@ -3,6 +3,7 @@ import { expect, test, type Page } from '@playwright/test'
 import { arenaTilePixels } from '../tests/support/compositor'
 import { latestSnapshot, observeGame, visibleActor, type ObservedGame } from '../tests/support/duel'
 import { moveSeatTo } from '../tests/support/movement'
+import { applyItemSettings } from '../tests/support/settings'
 import type { GameServerMessage, Seat } from '../../web/src/game/v11/schema'
 
 test.beforeAll(() => expect(process.env.E2E_BRACELET_FIXTURE).toBe('arena-v2-bracelet'))
@@ -105,10 +106,8 @@ test('Bracelet shoves a stationary rival one tile without an action or private c
       await one.getByRole('button', { name: 'Create room', exact: true }).click()
       const code = one.getByLabel('Room invitation code', { exact: true })
       await expect(code).toHaveText(/^[A-HJ-NP-Z2-9]{8}$/)
-      await one.getByRole('checkbox', { name: 'Heart', exact: true }).uncheck()
-      await one.getByRole('checkbox', { name: 'Bracelet', exact: true }).check()
-      await one.getByLabel('Bomb fuse').selectOption('120')
-      await one.getByRole('button', { name: 'Apply rules', exact: true }).click()
+      await applyItemSettings(one, games[0], [{ id: 'bracelet', label: 'Bracelet' }],
+        () => one.getByLabel('Bomb fuse').selectOption('120'))
       await expect(one.getByText(/shoves them up to 1 tile/)).toBeVisible()
       await expect(one.getByText(/0.5 second cooldown/)).toBeVisible()
       await two.getByText('Polski', { exact: true }).click()
@@ -137,7 +136,7 @@ test('Bracelet shoves a stationary rival one tile without an action or private c
         bracelet: 'bracelet', one: { column: 10, row: 1 },
         two: { column: 11, row: 1 }, hazards: 0,
       })))
-      await expect(one.getByLabel('Player one upgrades')).toContainText('GearBracelet')
+      await expect(one.getByRole('region', { name: 'Your items' })).toContainText('GearBracelet')
       await expect(two.getByLabel('Ulepszenia: Gracz pierwszy')).toContainText('WyposażenieBransoleta')
       expect(games.flatMap(({ commands }) => commands)
         .some((command) => command.type === 'manualAction' && command.action === 'equipment')).toBe(false)

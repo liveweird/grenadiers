@@ -51,6 +51,13 @@ The [pixel-art courtyard](pixel-art.md) uses weathered terrain, original directi
 poses, grenades, connected flame cells and distinct pickup symbols. Reduced motion fixes
 decorative animation frames while preserving authoritative position and hazard information.
 
+Beside the arena, the localized **Your items** / **Twoje przedmioty** region is derived only
+from the viewer's visible actor. It shows permanent upgrade totals, equipment and weapon slots,
+active effect timers, independent Slow-foot stack timers, frozen-action status and remaining
+damage grace. Opponent-private cached state never enters this region. Timers use authoritative
+snapshot ticks and are not live announcements; a separate polite notice announces each fresh
+own pickup once and clears across death, round changes, departure and fresh admission.
+
 ## Development and verification
 
 Use the pinned Node version and run `npm --prefix web ci`, then `scripts/gates.sh web`.
@@ -134,3 +141,7 @@ Initialization uses the latest snapshot. A result arriving after final unmount i
 a result arriving while waiting stays suspended. Failed initialization disables controls and
 can retry on a later room activation, without retrying on every snapshot. Reduced-motion
 preferences and focus/input clearing retain their existing behavior.
+
+See the [active own-player bar at 320px in Polish](../screenshots/item-bar-polish-320.png).
+This real Heart-fixture capture uses v0.3.60 image `ab7cf594…` and source `c5b668f`; the
+collector is equipped, while inventory and timers still come from authoritative snapshots.

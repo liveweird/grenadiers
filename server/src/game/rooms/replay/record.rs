@@ -84,6 +84,15 @@ impl Header {
             initial_settings_editor: Some(SeatId::One),
         }
     }
+
+    pub(in crate::game::rooms) fn expanded_v5_with_settings(
+        initial_settings: RoomSettings,
+    ) -> Self {
+        Self {
+            initial_settings,
+            ..Self::expanded_v5()
+        }
+    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

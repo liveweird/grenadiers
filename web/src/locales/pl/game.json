@@ -50,9 +50,20 @@
     "frozen": "Zatrzymane przez Stoper",
     "damageGrace": "Ochrona przed obrażeniami",
     "protected": "Ochrona przed obrażeniami jest aktywna",
+    "protectedTime": "Ochrona przed obrażeniami aktywna, pozostało {{time}}",
     "none": "Brak",
     "effectTimer": "{{item}} ({{time}})",
     "slowFootGroup": "{{item}} ×{{count}} (prędkość {{multiplier}}; {{timers}})"
+  },
+  "ownItems": {
+    "label": "Twoje przedmioty",
+    "heading": "Twoje przedmioty"
+  },
+  "pickups": {
+    "bombCapacity": "Limit bomb",
+    "blastRange": "Zasięg wybuchu",
+    "movementSpeed": "Prędkość ruchu",
+    "collected": "Zdobyto: {{item}}."
   },
   "items": {
     "kick": "Kopnięcie",
@@ -146,6 +157,8 @@
     "longFuseDescription": "Podwaja lont nowych bomb przez 10 sekund. Krótki i Długi lont znoszą się, gdy oba są aktywne; podłożone bomby się nie zmieniają. Kolejny przedmiot odnawia ten czas.",
     "reverseControlsDescription": "Odwraca kierunki ruchu na 10 sekund. Wciśnięte klawisze pozostają wciśnięte, a kolejny przedmiot odnawia czas.",
     "unapplied": "Zastosuj te zmiany przed zgłoszeniem gotowości.",
+    "allOn": "Włącz wszystkie",
+    "allOff": "Wyłącz wszystkie",
     "restore": "Przywróć domyślne zasady",
     "classic": "Ustawienia klasyczne",
     "apply": "Zastosuj zasady",

@@ -1,7 +1,7 @@
 # Teleporter
 
-Teleporter is an opt-in immediate pickup in Expanded-v5 rooms. The default preset remains
-Heart-only, so operators must enable Teleporter explicitly.
+Teleporter is a configurable immediate pickup enabled with every available item in new
+Expanded-v5 rooms. Creators can still disable it explicitly before readiness.
 
 When a living player collects one and the other seat has a living actor, the game considers one
 atomic exchange of their current positions. Both complete actor footprints must be within bounds

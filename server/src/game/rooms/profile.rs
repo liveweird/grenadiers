@@ -52,6 +52,10 @@ impl RoomProfile {
     }
 
     pub(super) fn initial_settings(self) -> RoomSettings {
+        if matches!(self, Self::ExpandedV5) {
+            return RoomSettings::DEFAULT
+                .with_enabled_items(grenadiers_core::game::EnabledItems::ALL);
+        }
         let settings =
             grenadiers_core::protocol::v11::GameSettings::for_rules(self.rules_version());
         grenadiers_core::protocol::v11::expanded_settings(settings)

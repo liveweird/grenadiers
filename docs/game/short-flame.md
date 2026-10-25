@@ -1,8 +1,8 @@
 # Short Flame
 
-Short Flame is an opt-in timed curse in the v0.3.29 candidate. Enable it in shared lobby
-settings before readiness. Heart remains the only optional item enabled by default;
-Classic settings disables all optional items. See [verification](../verification.md) for
+Short Flame is a configurable timed curse introduced in the v0.3.29 candidate. New rooms enable
+it with every available item; change it in shared lobby settings before readiness. Classic settings
+disables all optional items. See [verification](../verification.md) for
 acceptance status.
 
 ## Collection and blast range

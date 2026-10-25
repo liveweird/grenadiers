@@ -2,6 +2,7 @@ import { createResponsiveBrowserContexts } from '../tests/support/browser-contex
 import { expect, test, type Page } from '@playwright/test'
 import { latestSnapshot, observeGame, visibleActor, type ObservedGame } from '../tests/support/duel'
 import { moveTo } from '../tests/support/movement'
+import { applyItemSettings } from '../tests/support/settings'
 import type { BombView, GameServerMessage } from '../../web/src/game/v11/schema'
 
 test.beforeAll(() => {
@@ -59,11 +60,7 @@ test('two browsers enable a generated Shield and observe immunity end before a l
     await one.getByRole('button', { name: 'Create room', exact: true }).click()
     const code = one.getByLabel('Room invitation code', { exact: true })
     await expect(code).toHaveText(/^[A-HJ-NP-Z2-9]{8}$/)
-    await expect(one.getByRole('checkbox', { name: 'Heart', exact: true })).toBeChecked()
-    await expect(one.getByRole('checkbox', { name: 'Shield', exact: true })).not.toBeChecked()
-    await one.getByRole('checkbox', { name: 'Heart', exact: true }).uncheck()
-    await one.getByRole('checkbox', { name: 'Shield', exact: true }).check()
-    await one.getByRole('button', { name: 'Apply rules', exact: true }).click()
+    await applyItemSettings(one, games[0], [{ id: 'shield', label: 'Shield' }])
     await expect.poll(() => publicRoom(games[0])?.settings.enabledItems).toEqual(['shield'])
     await two.getByRole('textbox', { name: 'Room code', exact: true }).fill(await code.innerText())
     await two.getByRole('button', { name: 'Join room', exact: true }).click()
@@ -91,6 +88,9 @@ test('two browsers enable a generated Shield and observe immunity end before a l
     await moveTo(one, games[0], { column: 1, row: 1 })
     await moveTo(one, games[0], { column: 3, row: 1 })
     await Promise.all(games.map((game) => expect.poll(() => shieldTicks(game)).toBeGreaterThan(0)))
+    const ownItems = one.getByRole('region', { name: 'Your items' })
+    await expect(ownItems).toContainText(/EffectsShield \(0:0[1-5]\)/)
+    await expect(one.getByText('Picked up Shield.', { exact: true })).toBeVisible()
     const collectedAt = games.map(collectionTick)
     expect(collectedAt[0]).toBe(collectedAt[1])
     const protectedBomb = await plant(one, games[0])
@@ -107,6 +107,7 @@ test('two browsers enable a generated Shield and observe immunity end before a l
     expect(await two.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false)
     await two.screenshot({ path: testInfo.outputPath('shield-active-polish-320.png'), fullPage: true })
     await Promise.all(games.map((game) => expect.poll(() => shieldTicks(game), { intervals: [15] }).toBe(0)))
+    await expect(ownItems).toContainText('EffectsNone')
     games.forEach((game, index) => expectExactShieldDeadline(game, collectedAt[index]))
     expect(visibleActor(latestSnapshot(games[0]), 'one')?.alive).toBe(true)
     await plant(one, games[0])

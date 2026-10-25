@@ -32,6 +32,20 @@ Use patch releases within the current milestone for bounded engineering incremen
 independently reviewed candidates, then publish the corresponding prerelease tag.
 The repository gate checks that both local Cargo packages and their dependency agree.
 
+### Release preparation helper
+
+Stage the candidate notes under `CHANGELOG.md`'s Unreleased heading, then preview the bounded
+version preparation with:
+
+```sh
+node scripts/prepare-release.mjs --version 0.3.61 --date 2026-10-26
+```
+
+The default is a dry run. Add `--write` only after reviewing the plan; it updates the Cargo
+workspace and local-package lock versions, then moves the Unreleased notes into the requested
+dated release while retaining an empty Unreleased section. It does not run checks or perform
+Git, tag, publish, or network operations. Run the applicable release checks separately.
+
 ## Candidate checklist
 
 1. Update package metadata, lockfiles, contracts, and affected documentation intentionally.

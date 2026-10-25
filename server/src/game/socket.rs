@@ -9,8 +9,8 @@ use axum::{
     response::Response,
 };
 use grenadiers_core::protocol::v11::{
-    GAMEPLAY_PROTOCOL_VERSION, GameClientMessage, GameServerMessage, GameplayVersion,
-    V11ErrorCode as ErrorCode, encode_server_message, parse_client_message,
+    GAMEPLAY_PROTOCOL_VERSION, GameServerMessage, GameplayVersion, V11ErrorCode as ErrorCode,
+    encode_server_message, parse_client_message,
 };
 use grenadiers_core::protocol::{Counter, MAX_CLIENT_MESSAGE_BYTES, ProtocolVersionInput};
 use tokio::{
@@ -18,7 +18,10 @@ use tokio::{
     time::{Instant, timeout, timeout_at},
 };
 
-use super::{http::origin_allowed, limits::InboundLimit, sessions::SessionClaimError};
+use super::{
+    command::InboundMessage, http::origin_allowed, limits::InboundLimit,
+    sessions::SessionClaimError,
+};
 use crate::{AppState, Problem, with_no_store};
 use crate::{
     admission::{
@@ -30,7 +33,6 @@ use crate::{
 };
 
 const AUTH_TIMEOUT: Duration = Duration::from_secs(5);
-const SEND_TIMEOUT: Duration = Duration::from_secs(5);
 const MAX_WRITE_BUFFER: usize = 131_072;
 
 pub(crate) async fn game_websocket(
@@ -218,18 +220,20 @@ async fn game_session(mut socket: WebSocket, context: GameSessionContext) {
                     fail_and_close(&mut socket, ErrorCode::InvalidMessage, None).await;
                     return;
                 };
-                let GameClientMessage::Authenticate {
-                    protocol_version,
-                    token,
-                } = message
-                else {
-                    fail_and_close(
-                        &mut socket,
-                        ErrorCode::NotAuthenticated,
-                        command_sequence(&message),
-                    )
-                    .await;
-                    return;
+                let (protocol_version, token) = match InboundMessage::from(message) {
+                    InboundMessage::Authenticate {
+                        protocol_version,
+                        token,
+                    } => (protocol_version, token),
+                    InboundMessage::Command(command) => {
+                        fail_and_close(
+                            &mut socket,
+                            ErrorCode::NotAuthenticated,
+                            Some(command.sequence()),
+                        )
+                        .await;
+                        return;
+                    }
                 };
                 if protocol_version.get() != GAMEPLAY_PROTOCOL_VERSION {
                     let _ = send_game(
@@ -322,21 +326,6 @@ fn policy_response(state: &AppState, denial: PolicyDenial) -> Response {
     )
 }
 
-pub(super) fn command_sequence(message: &GameClientMessage) -> Option<Counter> {
-    match message {
-        GameClientMessage::Authenticate { .. } => None,
-        GameClientMessage::CreateRoom { sequence }
-        | GameClientMessage::JoinRoom { sequence, .. }
-        | GameClientMessage::ResumeRoom { sequence, .. }
-        | GameClientMessage::Ready { sequence, .. }
-        | GameClientMessage::UpdateSettings { sequence, .. }
-        | GameClientMessage::Movement { sequence, .. }
-        | GameClientMessage::ManualAction { sequence, .. }
-        | GameClientMessage::LeaveRoom { sequence, .. }
-        | GameClientMessage::Rematch { sequence, .. } => Some(*sequence),
-    }
-}
-
 pub(super) async fn send_error(
     socket: &mut WebSocket,
     code: ErrorCode,
@@ -363,7 +352,7 @@ pub(super) async fn send_game(
 }
 
 pub(super) async fn send_raw(socket: &mut WebSocket, message: Message) -> Result<(), ()> {
-    timeout(SEND_TIMEOUT, socket.send(message))
+    timeout(crate::websocket_policy::SEND_TIMEOUT, socket.send(message))
         .await
         .map_err(|_| ())?
         .map_err(|_| ())

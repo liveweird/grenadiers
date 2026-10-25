@@ -30,7 +30,8 @@ clear. Published source `f32fd86d8f0c7c4bebba8fa60d1c66c65d1a174a`, tree
 [v0.3.44](https://github.com/liveweird/grenadiers/releases/tag/v0.3.44), and the accepted image is
 promoted locally.
 
-Retained native captures show the stopped kicked bomb in [English desktop](../screenshots/kick-desktop.png)
-and [Polish 320px reduced motion](../screenshots/kick-mobile-pl.png). Their SHA-256 values are
-`751c65c2aed6e68c8b588ae099b08370008525a63da79d602c388c27262b9d9e` and
-`418752d5ed6b5ce4691e05b4677f8651d811ce9681fdf49432ebc3066a28cb64`.
+Captures refreshed on 2026-10-25 for the Napoleonic arena art show the stopped kicked bomb in
+[English desktop](../screenshots/kick-desktop.png) and
+[Polish 320px reduced motion](../screenshots/kick-mobile-pl.png). Their SHA-256 values are
+`4a50e5883b603954bd35ca82b26032482c93d58a399793917e0bb64e0c9db823` and
+`4819920b713180dbedce93e32d60a600e2fb4cd6caf851c7865ffc5e5e22e7dd`.

@@ -31,9 +31,11 @@ mod game;
 pub(crate) mod peer_identity;
 mod rate_limit;
 mod round_seed;
+mod shutdown;
 
 pub use configuration::StartupError;
 use game::{GameRooms, GameSessions, UpgradeLimit, game_websocket, issue_session};
+pub use shutdown::{ShutdownOutcome, run_with_shutdown};
 use tower_http::{
     services::{ServeDir, ServeFile},
     trace::TraceLayer,
@@ -72,25 +74,27 @@ impl AppState {
     }
 
     pub async fn wait_for_shutdown(&self) -> bool {
-        timeout(SHUTDOWN_DRAIN_TIMEOUT, async {
-            let gameplay_permits = self
-                .connections
-                .clone()
-                .acquire_many_owned(MAX_CONNECTIONS as u32);
-            let diagnostic_permits = self
-                .diagnostic_connections
-                .clone()
-                .acquire_many_owned(MAX_DIAGNOSTIC_CONNECTIONS as u32);
-            let (gameplay_permits, diagnostic_permits, ()) = tokio::join!(
-                gameplay_permits,
-                diagnostic_permits,
-                self.game_rooms.wait_empty()
-            );
-            drop(gameplay_permits.expect("gameplay connection semaphore remains open"));
-            drop(diagnostic_permits.expect("diagnostic connection semaphore remains open"));
-        })
-        .await
-        .is_ok()
+        timeout(SHUTDOWN_DRAIN_TIMEOUT, self.drain_shutdown())
+            .await
+            .is_ok()
+    }
+
+    async fn drain_shutdown(&self) {
+        let gameplay_permits = self
+            .connections
+            .clone()
+            .acquire_many_owned(MAX_CONNECTIONS as u32);
+        let diagnostic_permits = self
+            .diagnostic_connections
+            .clone()
+            .acquire_many_owned(MAX_DIAGNOSTIC_CONNECTIONS as u32);
+        let (gameplay_permits, diagnostic_permits, ()) = tokio::join!(
+            gameplay_permits,
+            diagnostic_permits,
+            self.game_rooms.wait_empty()
+        );
+        drop(gameplay_permits.expect("gameplay connection semaphore remains open"));
+        drop(diagnostic_permits.expect("diagnostic connection semaphore remains open"));
     }
 }
 
@@ -306,6 +310,12 @@ mod http_fallback_tests;
 mod round_seed_tests;
 #[cfg(test)]
 mod session_listener_tests;
+#[cfg(test)]
+mod shutdown_coordinator_tests;
+#[cfg(test)]
+mod shutdown_listener_test_support;
+#[cfg(test)]
+mod shutdown_listener_tests;
 #[cfg(test)]
 mod shutdown_tests;
 #[cfg(test)]

@@ -194,8 +194,7 @@ impl Bomb {
         self.motion = motion;
     }
 
-    // Used by the paired trusted-capture binding once the v10 protocol slice is integrated.
-    #[allow(dead_code)]
+    #[cfg(test)]
     pub(crate) fn restore_kick_history(
         &mut self,
         motion: Option<BombMotion>,
@@ -215,8 +214,7 @@ impl Bomb {
         self.has_been_punched = true;
     }
 
-    // Used by the paired trusted-capture binding once the v10 protocol slice is integrated.
-    #[allow(dead_code)]
+    #[cfg(test)]
     pub(crate) fn restore_punch_history(&mut self, has_been_punched: bool) {
         self.has_been_punched = has_been_punched;
     }

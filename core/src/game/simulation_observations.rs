@@ -7,7 +7,7 @@ use crate::game::rules::RulesConfig;
 use crate::game::types::{CellId, EntityId, SeatId, Tick};
 use crate::game::world::World;
 
-#[allow(dead_code)]
+#[cfg(test)]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) enum ExitGraceObservation {
     SoftBlock(CellId),
@@ -27,7 +27,7 @@ impl Actor {
         self.soft_wall_grace.iter().copied()
     }
 
-    #[allow(dead_code)]
+    #[cfg(test)]
     pub(crate) fn exit_grace_observations(
         &self,
     ) -> impl Iterator<Item = ExitGraceObservation> + '_ {
@@ -43,24 +43,15 @@ impl Actor {
             )
     }
 
-    // Used by the paired trusted-capture binding once the v10 protocol slice is integrated.
-    #[allow(dead_code)]
     pub(crate) const fn last_successful_punch_tick(&self) -> Option<Tick> {
         self.last_successful_punch_tick
     }
 
-    // Used by the paired trusted-capture binding once the v10 protocol slice is integrated.
-    #[allow(dead_code)]
-    pub(crate) fn restore_punch_cooldown(&mut self, tick: Option<Tick>) {
-        self.last_successful_punch_tick = tick;
-    }
-
-    #[allow(dead_code)]
     pub(crate) const fn last_successful_shove_tick(&self) -> Option<Tick> {
         self.last_successful_shove_tick
     }
 
-    #[allow(dead_code)]
+    #[cfg(test)]
     pub(crate) fn restore_shove_cooldown(&mut self, tick: Option<Tick>) {
         self.last_successful_shove_tick = tick;
     }

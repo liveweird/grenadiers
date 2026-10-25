@@ -6,10 +6,31 @@ identity. Origin checks remain a browser boundary; non-browser clients can suppl
 themselves. Before public hosting, define durable identity policy if needed, TLS, proxy trust,
 cross-process routing, and abuse controls.
 
-`SERVER_ADDR` defaults to `127.0.0.1:8085`. Compose binds its published ports to loopback only.
+## Startup configuration
+
+Startup reads and validates configuration once before binding the listener. The executable does
+not load dotenv files. These are the intentional defaults; Compose binds its published ports to
+loopback only, while its process listens on the container interface.
+
+| Setting | Standalone executable default | Compose/Kubernetes default |
+| --- | --- | --- |
+| `SERVER_ADDR` | `127.0.0.1:8085` | `0.0.0.0:8085` |
+| `WEB_DIST_DIR` | unset (API only) | `/app/web/dist` |
+| `RUST_LOG` | `info` | `grenadiers_server=info,tower_http=info` |
+| `ALLOWED_ORIGINS` | localhost and 127.0.0.1 on ports 5177 and 8085 | localhost and 127.0.0.1 on port 8085 only |
+| `TRUSTED_PROXY_IPS` | empty | empty |
+| `DATABASE_URL` | unset | empty (database readiness disabled) |
+| `GAME_ROUND_SEED_FILE` | unset (fresh OS randomness) | unset (fresh OS randomness) |
+
 `ALLOWED_ORIGINS` is a comma-separated exact allowlist; no wildcard or substring matching.
-Vite connections originate at port 5177; built SPA connections originate at port 8085.
-Use deployment-specific origins outside local development.
+Vite connections originate at port 5177; built SPA connections originate at port 8085. An
+explicit value containing no origins remains fail-closed and logs a startup warning. Use
+deployment-specific origins outside local development. Invalid addresses and non-Unicode textual
+state settings fail startup without including their values in diagnostics. Invalid or non-Unicode
+`RUST_LOG` values retain the standalone `info` fallback. Path settings preserve non-Unicode OS
+paths.
+
+## Response security
 
 Every response sets `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, and
 `Referrer-Policy: no-referrer`, including API errors and static/SPA fallbacks. HTML and unhashed
@@ -111,7 +132,7 @@ redacted summaries remain suitable artifacts.
 a configured database outage must not make liveness fail. PostgreSQL migrations will be
 append-only when introduced; runtime application code will not create tables opportunistically.
 
-`.env.example` contains local demo values only. The Rust executable does not load dotenv files.
+`.env.example` contains local demo values only.
 For Compose app+database use a network URL with hostname `postgres:5432`; for a host Rust process
 use `127.0.0.1:5436`. Never reuse the local demo password in a deployment.
 

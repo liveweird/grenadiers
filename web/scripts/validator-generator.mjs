@@ -118,14 +118,15 @@ export async function bundleStandaloneValidator(name, commonJs, webDirectory) {
   const webUrl = directoryUrl(webDirectory)
   const entry = `/grenadiers-validator-entry/${name}.cjs`
   const entryUrl = pathToFileURL(entry).href
+  const virtualEntry = `\0grenadiers-validator-entry/${name}.cjs`
   const result = await build({
     root: fileURLToPath(webUrl),
     configFile: false,
     logLevel: 'silent',
     plugins: [{
       name: 'grenadiers-standalone-validator',
-      resolveId(id) { if (id === entry || id === entryUrl) return entry },
-      load(id) { if (id === entry) return commonJs },
+      resolveId(id) { if (id === entry || id === entryUrl) return virtualEntry },
+      load(id) { if (id === virtualEntry) return commonJs },
     }],
     build: {
       write: false,

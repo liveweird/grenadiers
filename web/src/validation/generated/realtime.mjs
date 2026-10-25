@@ -1,7 +1,7 @@
 //#region \0rolldown/runtime.js
 var __commonJSMin = (cb, mod) => () => (mod || (cb((mod = { exports: {} }).exports, mod, mod.exports), cb = null), mod.exports);
 //#endregion
-//#region ../../../../../grenadiers-validator-entry/realtime.cjs
+//#region \0grenadiers-validator-entry/realtime.cjs
 var require_realtime = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 	module.exports = validate10;
 	module.exports.default = validate10;

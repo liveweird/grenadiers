@@ -13,9 +13,10 @@ afterEach(async () => {
   await Promise.all(temporaryDirectories.splice(0).map((directory) => rm(directory, { recursive: true, force: true })))
 })
 
-async function temporaryCheckout() {
-  const checkout = await mkdtemp(join(tmpdir(), 'grenadiers-validators-'))
-  temporaryDirectories.push(checkout)
+async function temporaryCheckout(nested = false) {
+  const temporaryRoot = await mkdtemp(join(tmpdir(), 'grenadiers-validators-'))
+  temporaryDirectories.push(temporaryRoot)
+  const checkout = nested ? join(temporaryRoot, 'different', 'nested', 'checkout') : temporaryRoot
   await mkdir(join(checkout, 'web', 'src', 'validation', 'generated'), { recursive: true })
   await mkdir(join(checkout, 'web', 'scripts'))
   await mkdir(join(checkout, 'api'))
@@ -24,7 +25,13 @@ async function temporaryCheckout() {
     cp(join(import.meta.dirname, '..', '..', 'api', 'realtime.schema.json'), join(checkout, 'api', 'realtime.schema.json')),
     cp(join(import.meta.dirname, 'validator-generator.mjs'), join(checkout, 'web', 'scripts', 'validator-generator.mjs')),
   ])
-  await symlink(join(import.meta.dirname, '..', 'node_modules'), join(checkout, 'web', 'node_modules'), 'dir')
+  const sourceModules = join(import.meta.dirname, '..', 'node_modules')
+  const targetModules = join(checkout, 'web', 'node_modules')
+  await mkdir(targetModules)
+  await Promise.all(['ajv', 'fast-deep-equal', 'fast-uri', 'json-schema-traverse', 'require-from-string']
+    .map((name) => cp(join(sourceModules, name), join(targetModules, name), { recursive: true })))
+  await Promise.all(['typescript', 'vite']
+    .map((name) => symlink(join(sourceModules, name), join(targetModules, name), 'dir')))
   return checkout
 }
 
@@ -90,11 +97,12 @@ test('the real bundling path rejects dynamic imports and indirect code generatio
 
 test('validator output is independent of the checkout path', async () => {
   const firstCheckout = await temporaryCheckout()
-  const secondCheckout = await temporaryCheckout()
+  const secondCheckout = await temporaryCheckout(true)
   const generate = `(generator, web) => generator.generateValidators(web).then((value) => Object.fromEntries(value))`
   const first = standaloneCallIn(join(firstCheckout, 'web'), generate, join(firstCheckout, 'web'))
   const second = standaloneCallIn(join(secondCheckout, 'web'), generate, join(secondCheckout, 'web'))
   assert.deepEqual(first, second)
+  assert.match(first.realtime.code, /#region \\0grenadiers-validator-entry\/realtime\.cjs/)
 })
 
 test('drift detection covers generated code, declarations, and schema inputs', async () => {

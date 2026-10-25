@@ -61,7 +61,7 @@ var require_equal = /* @__PURE__ */ __commonJSMin(((exports) => {
 	exports.default = equal;
 }));
 //#endregion
-//#region ../../../../../grenadiers-validator-entry/gameplay-v11.cjs
+//#region \0grenadiers-validator-entry/gameplay-v11.cjs
 var require_gameplay_v11 = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 	module.exports = validate109;
 	module.exports.default = validate109;

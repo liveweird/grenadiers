@@ -5,6 +5,7 @@ import { expect, test, type Page } from '@playwright/test'
 import type { RoomView } from '../../web/src/game/v11/schema'
 import { expectPaintedCanvas, latestSnapshot, observeGame, type ObservedGame } from '../tests/support/duel'
 import { moveTo } from '../tests/support/movement'
+import { expectActorStatGeometry } from '../tests/support/actor-stats'
 
 test.beforeAll(() => {
   expect(process.env.E2E_MATCH_FIXTURE, 'Configure the documented generated match fixture before acceptance')
@@ -42,38 +43,6 @@ async function plant(page: Page, game: ObservedGame) {
   await page.getByRole('region', { name: 'Grenadiers courtyard', exact: true }).click()
   await page.keyboard.press('Space')
   await expect.poll(() => latestSnapshot(game)?.state.bombs.length, { intervals: [15] }).toBe(1)
-}
-
-async function expectActorStatLabelsContained(page: Page, expectedColumnCount: number) {
-  const geometry = await page.locator('.actor-stats').evaluateAll((grids) => grids.map((grid) => {
-    const cells = [...grid.querySelectorAll<HTMLElement>(':scope > div')]
-    const labels = cells.map((cell, index) => {
-      const range = document.createRange()
-      range.selectNodeContents(cell.querySelector('dt')!)
-      return { cell: cell.getBoundingClientRect(), index, text: [...range.getClientRects()] }
-    })
-    const overflow = labels.flatMap(({ cell, index, text }) => text
-      .filter(({ left, right }) => left < cell.left - 0.5 || right > cell.right + 0.5)
-      .map(() => index))
-    const overlaps: string[] = []
-    for (const [index, label] of labels.entries()) {
-      for (const other of labels.slice(index + 1)) {
-        if (label.text.some((first) => other.text.some((second) =>
-          first.left < second.right - 0.5 && first.right > second.left + 0.5
-          && first.top < second.bottom - 0.5 && first.bottom > second.top + 0.5))) {
-          overlaps.push(`${label.index}:${other.index}`)
-        }
-      }
-    }
-    const columnCount = new Set(labels.map(({ cell }) => Math.round(cell.left * 2) / 2)).size
-    return { cellCount: cells.length, columnCount, fragmentCounts: labels.map(({ text }) => text.length), overflow, overlaps }
-  }))
-  expect(geometry).toHaveLength(2)
-  for (const grid of geometry) {
-    expect(grid).toMatchObject({ cellCount: 8, columnCount: expectedColumnCount, overflow: [], overlaps: [] })
-    expect(grid.fragmentCounts).toHaveLength(8)
-    expect(grid.fragmentCounts.every((count) => count > 0)).toBe(true)
-  }
 }
 
 async function finished(games: ObservedGame[], roundNumber: number, final: boolean) {
@@ -147,14 +116,14 @@ test('two browsers finish a drawn round, first-to-three match, and consensual re
       expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false)
       expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([])
       await expect(page.getByLabel('Round wins for Player two')).toContainText('3')
-      if (index === 0) await expectActorStatLabelsContained(page, 4)
+      if (index === 0) await expectActorStatGeometry(page, 4)
       await page.screenshot({ path: testInfo.outputPath(`match-result-${index}.png`), fullPage: true })
     }))
 
     await two.getByText('Polski', { exact: true }).click()
     await expect(two.getByRole('status')).toHaveText('Gracz drugi wygrywa mecz (wygrane rundy: 3).')
     await expect(two.getByLabel('Wygrane rundy: Gracz drugi')).toContainText('3')
-    await expectActorStatLabelsContained(two, 2)
+    await expectActorStatGeometry(two, 2)
     expect(await two.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false)
     expect((await new AxeBuilder({ page: two }).analyze()).violations).toEqual([])
     await two.screenshot({ path: testInfo.outputPath('match-result-polish-mobile.png'), fullPage: true })

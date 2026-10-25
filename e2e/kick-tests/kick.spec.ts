@@ -77,7 +77,7 @@ test('Kick moves one retained bomb through authoritative cells without extra cue
         .toBe('kick')))
       // Expanded-v5 starts at range two; the sole Kick route must not change that baseline.
       await Promise.all(games.map((game) => expect.poll(() => actor(game).bombRange).toBe(2)))
-      await expect(one.getByLabel('Player one upgrades')).toContainText('GearKick')
+      await expect(one.getByRole('region', { name: 'Your items' })).toContainText('GearKick')
       await expect(two.getByLabel('Ulepszenia: Gracz pierwszy')).toContainText('WyposażenieKopnięcie')
 
       const beforePlant = latestSnapshot(games[0])!.room.revision

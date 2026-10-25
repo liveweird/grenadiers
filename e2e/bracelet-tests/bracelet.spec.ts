@@ -136,7 +136,7 @@ test('Bracelet shoves a stationary rival one tile without an action or private c
         bracelet: 'bracelet', one: { column: 10, row: 1 },
         two: { column: 11, row: 1 }, hazards: 0,
       })))
-      await expect(one.getByLabel('Player one upgrades')).toContainText('GearBracelet')
+      await expect(one.getByRole('region', { name: 'Your items' })).toContainText('GearBracelet')
       await expect(two.getByLabel('Ulepszenia: Gracz pierwszy')).toContainText('WyposażenieBransoleta')
       expect(games.flatMap(({ commands }) => commands)
         .some((command) => command.type === 'manualAction' && command.action === 'equipment')).toBe(false)

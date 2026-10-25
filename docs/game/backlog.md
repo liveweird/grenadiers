@@ -4,6 +4,9 @@ All 22 requested item types shipped in published
 [v0.3.47](https://github.com/liveweird/grenadiers/releases/tag/v0.3.47). The artist handoff and
 runtime atlas shipped in v0.3.48/v0.3.49, and published
 [v0.3.53](../releases.md#v0353--2026-10-25) includes the adopted full AI-generated redraw.
+A later owner-supplied Napoleonic sheet is adopted on master in
+[PR #162](https://github.com/liveweird/grenadiers/pull/162); use the artist handoff for the
+canonical artwork and release records for published/deployed image status.
 Those delivered features are context, not open backlog work. Dated source, image, matrix,
 candidate, “pending,” and “unreleased” statements retain their original checkpoint meaning in the
 [historical backlog](../history/backlog.md); use [releases](../releases.md) and

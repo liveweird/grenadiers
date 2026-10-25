@@ -7,6 +7,13 @@
 - Apply one shutdown deadline to HTTP serving and application drain so incomplete requests
   cannot keep the process waiting before the game/session drain budget starts.
 
+### Changed
+
+- Replace the adopted arena sheet with a Napoleonic redraw: an orange-and-white shako grenadier
+  and a blue bicorne grenadier, repainted terrain, bombs, flames, Oil, pickups and status cues.
+  The manifest, frame rectangles, pivots, anchors and texture budget are unchanged; the Oil
+  Barrel scenario now pins the new Oil palette.
+
 ## 0.3.57 — 2026-10-25
 
 ### Changed

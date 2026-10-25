@@ -60,8 +60,9 @@ and admission hardening.
 The testing guide now indexes configured suites separately from execution evidence; its former
 acceptance narratives live in `docs/history/testing.md`, with facts and incoming anchors preserved.
 Deployment now uses a common fixture procedure and exact manifest/acknowledgement index; its
-old narrative is preserved in `docs/history/deployment.md`. Backlog consolidation remains
-separate. Preserve merged artist changes and reconcile concurrent screenshot documentation.
+old narrative is preserved in `docs/history/deployment.md`. The backlog now separates delivered
+features and implemented settings policies from actual open requests; all old narrative remains
+in `docs/history/backlog.md`. Preserve artist changes and concurrent screenshot documentation.
 
 **API-08/09, TS-07 and BE-10/TL-04:** API lint now enforces closed object schemas, camelCase
 properties and shared problem responses, with a narrow documented upgrade exception and
@@ -197,8 +198,8 @@ Related IDs are grouped to avoid treating one architectural problem as several i
 
 | IDs | Disposition | Solution / next action |
 | --- | --- | --- |
-| DOC-01/02/04/05/07/08/09/14 | Agree: contributor guidance is buried in repeated release evidence. | Verification/release history is separated from current procedures; the index links both archives. Unreleased changelog organization is in place. Testing and deployment use linked suite/fixture tables and archive all prior prose; backlog consolidation remains. |
-| DOC-03 | Agree on organization, not the claimed stale checkpoint status. | Move dated release narrative out of backlog; its explicitly historical “unreleased” state must not be rewritten as a current fact. |
+| DOC-01/02/04/05/07/08/09/14 | Agree: contributor guidance is buried in repeated release evidence. | Verification/release history is separated from current procedures; the index links both archives. Unreleased changelog organization is in place. Testing, deployment and backlog have current indexes with complete historical archives and retained incoming anchors. |
+| DOC-03 | Agree on organization; current backlog and full history are separated. | Preserve dated “pending”/“unreleased” statements historically. Current status distinguishes shipped controls/authority from open extensions and treats the rules specification as design, not implementation evidence. |
 | DOC-06/10/11/13 | Agree; index, item guide, ADR index and retention policy implemented. | Continue consistent item headings and implemented/future rule markers; move archived protocol guides with link checks. |
 | DOC-12 | Factually stale, deliberately preserved. | Keep `AGENTS.md` untouched under the user's instruction; point readers to current conventions and the index. |
 | API-01, CX-01/02, BE-07, FE-01, TS-08 | Agree on duplication; browser retirement and helper extraction implemented. | ADR 0021 separates retention. V3 UI is removed with unique regressions moved to v11; its schema/conformance remain. Shared browser semantics and Rust item/effect/mapping/numeric foundations are neutral. Assess retained adapters and genuinely equivalent frame fixtures separately. |

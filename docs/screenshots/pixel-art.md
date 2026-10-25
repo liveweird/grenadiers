@@ -1,8 +1,12 @@
 # Retro pixel-art application captures
 
-Actual v0.3.18 application frames from clean source
-`1f591c2e86c78e19e4af1fb12a020f3ecd72c1ed`, 2026-10-17. Both deployments use image
-`sha256:d8a99fef496cd0cb719308e62d77914945d4f695d04ec718354922db6c0b1967`.
+Refreshed captures of the redrawn arena art, taken 2026-10-25 from source commit `66222b1`
+using the locally built image
+`sha256:705187f65d1e9a9a9905a81e08ef67002d0e3d88d8b24704515b98afe50cbfd6`. They replace the
+v0.3.18 frames from 2026-10-17 (source `1f591c2e86c78e19e4af1fb12a020f3ecd72c1ed`), which remain
+in git history. The desktop running round and exposed pickup come from the Classic duel and
+pickup browser scenarios; the Polish 320-pixel view is the terminal frame of the classic match
+scenario.
 Invitations belong to removed test rooms and are public discovery data. These are native
 gameplay captures, separate from the earlier visual studies.
 

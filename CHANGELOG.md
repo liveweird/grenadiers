@@ -9,6 +9,7 @@
   status cues. The manifest, frame rectangles, pivots, anchors and texture budget are unchanged.
 - Run atlas gameplay parity on the packed procedural baseline so artist redraws no longer change
   its expectations; the production-renderer lifecycle checks still load the bundled source.
+- Refresh gameplay documentation captures with the redrawn arena art.
 
 ## 0.3.52 — 2026-10-25
 

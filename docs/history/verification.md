@@ -3,6 +3,10 @@
 This archive preserves the historical verification records from source `5a7ed31`, originally
 kept in [`docs/verification.md`](../verification.md), in their original order.
 
+> **2026-10-25 note.** The gameplay captures under `docs/screenshots/` were refreshed for the
+> redrawn arena art (source `66222b1`). Hashes and descriptions in earlier entries refer to the
+> prior images, which remain in git history.
+
 ## Current v0.3.49 published delivery — 2026-10-25
 
 [v0.3.49](https://github.com/liveweird/grenadiers/releases/tag/v0.3.49) is published from source

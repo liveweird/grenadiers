@@ -50,10 +50,11 @@ Independent audit, result review and binding review are clear. Final manifest
 payloads; seal `31fe5eef2900a0229d002e45b5a310888f3915829db0aaf23bc3535a8eea5e2c`
 is complete, and independent post-seal review is clear.
 
-The reviewed pre-collection captures show the same route in [English desktop](../screenshots/wall-pass-desktop.png)
-and [Polish 320px reduced motion](../screenshots/wall-pass-mobile-pl.png). Their SHA-256 values are
-`d46367b7eeee7c55e94dbcfba6de7de50b27b96c6761ad6a9ff69db2b9332c08` and
-`84843190d2be59a89f5c614c3d17bd78e969dcb7cf692d0e06243b2d3978d72f`.
+The pre-collection captures, refreshed on 2026-10-25 for the redrawn arena art, show the same
+route in [English desktop](../screenshots/wall-pass-desktop.png) and
+[Polish 320px reduced motion](../screenshots/wall-pass-mobile-pl.png). Their SHA-256 values are
+`04951259c954e8cd6e5ec52e18c672814c2dafb62fc3057af54347dafd026e34` and
+`4983bf22cc625073d106a7718b97237009b8fb07cbc47010274c01fcd452b0d9`.
 
 Wall Pass is published as the eighteenth requested item in
 [v0.3.43](https://github.com/liveweird/grenadiers/releases/tag/v0.3.43). Published source

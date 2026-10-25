@@ -30,7 +30,8 @@ clear. Published source `f32fd86d8f0c7c4bebba8fa60d1c66c65d1a174a`, tree
 [v0.3.44](https://github.com/liveweird/grenadiers/releases/tag/v0.3.44), and the accepted image is
 promoted locally.
 
-Retained native captures show the stopped kicked bomb in [English desktop](../screenshots/kick-desktop.png)
-and [Polish 320px reduced motion](../screenshots/kick-mobile-pl.png). Their SHA-256 values are
-`751c65c2aed6e68c8b588ae099b08370008525a63da79d602c388c27262b9d9e` and
-`418752d5ed6b5ce4691e05b4677f8651d811ce9681fdf49432ebc3066a28cb64`.
+Captures refreshed on 2026-10-25 for the redrawn arena art show the stopped kicked bomb in
+[English desktop](../screenshots/kick-desktop.png) and
+[Polish 320px reduced motion](../screenshots/kick-mobile-pl.png). Their SHA-256 values are
+`37fa63a63c653f923e20f602a6573824f8ce2b11d48f93d53ae03ba7ce96ec92` and
+`ed6beb3f9d29b980d3f82f8d03bffd4a04c8bd8f3815fe9c2ad5c8299771b90d`.

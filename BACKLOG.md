@@ -10,22 +10,13 @@ waiting on a stated dependency. Explicit user requests and accepted plans are co
 new assistant suggestions start as `[new]`. Existing authorization carries forward without
 repeated approval for routine implementation choices. Entries are not delivery-date promises.
 
-## Current delivery
+## Current delivery — requested QoL
 
-- [next] **ENG-SHUTDOWN — publish the accepted v0.3.58 fix and Napoleonic sheet.** One signal-time
-  deadline covers HTTP and application drain. Finish release verification, exact-image promotion
-  and publication; preserve the artist's merged changes. See [quality review](docs/quality-review.md).
-- [todo] **ENG-CATALOG — integrate schema-owned browser item catalogs.** The reviewed isolated
-  implementation derives each version's IDs from its own schema and preserves archived activation
-  subsets. Complete integrated coverage/native acceptance before publication.
-
-## Requested QoL
-
-- [todo] **QOL-FEATURES — all features on by default and bulk selection.** New live rooms and
+- [next] **QOL-FEATURES — all features on by default and bulk selection.** New live rooms and
   Restore match defaults enable all 22 configurable items, including curses. Add All on/All off
   buttons that preserve numeric settings, editing permissions and the explicit Apply lifecycle.
   Existing rooms, rematches, historical defaults and recorded games retain their settings.
-- [todo] **QOL-STATUS — make collected items obvious.** Add a wrapping own-player bar with upgrade
+- [next] **QOL-STATUS — make collected items obvious.** Add a wrapping own-player bar with upgrade
   totals, equipment/weapon slots, buffs/curses and authoritative expiry timers, including each
   Slow Foot stack. Announce recent own pickups once. Preserve replacement/consumption/death/reset
   and recipient privacy; Oil remains a world object and Teleporter an immediate pickup.

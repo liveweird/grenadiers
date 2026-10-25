@@ -47,11 +47,14 @@ callers under older protocol namespaces. Find those callers before changing or d
 Change the chosen contract first, then its checked Rust DTO/projection and browser runtime
 validation. Regenerate types with `npm --prefix web run gen:gameplay`; never edit generated
 `schema.ts`. Run `npm --prefix web run check:gameplay` to check every retained contract.
-A new protocol version also requires an intentional update to the shared generator inventory.
+For v7 and later, the gameplay generator emits `ITEM_IDS` from that version’s own
+`$defs.ItemId.enum`; the live settings panel and validators consume this generated catalog.
+Archived validators keep their narrower activation subsets. A new protocol version also
+requires an intentional update to the shared generator inventory.
 
 Review `web/src/game/v11/validation.ts` and the shared helpers in `web/src/game/validation/`,
-the available-item list in
-`web/src/game/client/GameplaySettingsPanel.tsx`, and settings/client tests. Add matching labels
+the generated catalog consumed by `web/src/game/client/GameplaySettingsPanel.tsx`, and
+settings/client tests. Add matching labels
 and descriptions to `web/src/locales/{en,pl}/game.json`. Preserve private recipient fields and
 resume behavior; a hidden item must not leak through events, HUD, art or diagnostics.
 

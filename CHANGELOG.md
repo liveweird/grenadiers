@@ -2,6 +2,20 @@
 
 ## [Unreleased]
 
+## 0.3.59 — 2026-10-25
+
+### Changed
+
+- Generate each retained browser gameplay item catalog from its own schema and reuse it in
+  live settings and validation while preserving archived activation subsets.
+
+## 0.3.58 — 2026-10-25
+
+### Fixed
+
+- Apply one shutdown deadline to HTTP serving and application drain so incomplete requests
+  cannot keep the process waiting before the game/session drain budget starts.
+
 ### Changed
 
 - Replace the adopted arena sheet with a Napoleonic redraw: an orange-and-white shako grenadier

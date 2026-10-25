@@ -65,43 +65,47 @@ interrupted state but cannot preserve process-local matches or credentials.
 Keep the previous immutable image reference for rollback; database migration compatibility
 must be designed when durable application data is introduced.
 
-## v0.3.57 — 2026-10-25
+## v0.3.59 — 2026-10-25
 
-[v0.3.57](https://github.com/liveweird/grenadiers/releases/tag/v0.3.57) gives shared Rust item/
-effect DTOs, common item projections and bounded-number input neutral protocol ownership.
-V7–V11 retain their public names and shared type identity. Reserved bits, activation subsets,
-validation stages/errors, generation order, schema JSON and replay identities are unchanged.
-Four independent regressions pin identity, retained schemas, serialization and numeric boundaries.
-Application inputs match `a94aaddea8211e262c1d0acf3cf3103db797db05`; the source tag includes
-release documentation. Localhost:8085 serves accepted image
-`sha256:170e5d071feeabf6d62c55dcb1dce6b6191d7bcdbeccee511e1c9a1c8a72b9bf`.
+[v0.3.59](https://github.com/liveweird/grenadiers/releases/tag/v0.3.59) generates browser item
+catalogs from each v7–v11 schema's own `ItemId` enum. Live settings and validation reuse those
+tuples; retained validators preserve their narrower activation subsets. V2–v6 generated output,
+schema JSON, standalone validators, rules, generation, replay identities and dependencies are
+unchanged. An E2E privacy assertion now checks the actual unique secret and redaction markers
+rather than rejecting a harmless `/private/tmp` checkout path; sanitizer behavior is unchanged.
 
-Independent review is clear; moved bodies and mappings match baseline after path relocation.
-Fresh source-bound Rust acceptance passes all 4,194,304 replay masks in debug, release and
-reported coverage in 8m06s, without retries. Each ordinary profile passes 930 core and 287
-server tests plus two doctests; four existing performance tests remain ignored, and the heavy
-case runs separately across 32 complete partitions. Official line coverage is 17,248/18,445
-(93.51%) at the unchanged 90% floor, with helper exclusions intact. Clippy/rustfmt, repository
-checks and the [distinct Linux units](https://github.com/liveweird/grenadiers/actions/runs/40222285097) pass.
+Application inputs match `473d1e6e889cfecd5c08178f3b881ca74d775fae`; later source adds only the
+E2E test correction and release documentation. Accepted image is
+`sha256:946a5f6fbab0c8b573c66badff34157b445cc57cc65798d519bc7fdc6a303fc0`.
+Independent catalog review is clear. Fresh full web acceptance passes 6,799 tests / 88 files
+in 314.30s; coverage is 90.94/89.49/89.85/93.30% above the unchanged floors. Production gzip
+JavaScript/CSS sizes are 336,404/36,292 bytes. All retained generation/standalone drift checks,
+API conventions, lint, unused-code, repository and corrected full E2E static checks pass.
 
-The fresh web gate passes 6,791 tests / 88 files with 90.95/89.49/89.80/93.32% coverage.
-JavaScript/CSS gzip sizes remain 336,437/36,292 bytes within their budgets. All retained
-contract/standalone drift checks pass. Fresh Cargo-deny, both zero-finding npm audits and the
-pinned exact-image scan pass; the latter reports zero fixable HIGH/CRITICAL findings.
+Rust behavior is unchanged: reuse v0.3.58's complete 4,194,304-mask debug/release/official-coverage
+acceptance (93.50% application lines), plus its shutdown and separate graphics diagnostics.
+Dependency inputs are unchanged, so v0.3.57's fresh Cargo-deny and both zero-finding npm audits
+remain applicable. The exact new image receives its own scan and runtime acceptance below.
 
-The exact image passes twenty native Chromium cases without retries: eight default cases
-through Compose, eight through Kubernetes, and seeded Landmine, Heart, Cloak/reconnect/expiry
-and Oil Barrel scenarios through Compose. Post-promotion checks pass runtime/image/security,
-health/readiness, enforced CSP/cache headers, exact served HTML/JavaScript/atlas equality and
-one additional native diagnostic/gameplay smoke. Claude's redraw is unchanged. Temporary
-acceptance services and port-forwards are removed. Durable control is
-`.local-checkpoints/runtime/compose-v0.3.57.yaml`; `rollback-v0.3.56.yaml` retains the prior image.
-No migration is needed; restarts still end process-local matches.
+Fresh pinned Trivy 0.74.0 acceptance reports zero fixable HIGH/CRITICAL vulnerabilities.
+Native Chromium passes eight default cases through Compose (36.4s) and eight through Kubernetes
+(40.3s), with unchanged assertions and no configured retries. The first Kubernetes setup used an
+8085 origin allowlist with a browser on 18086; correcting only that isolated environment fixed
+session admission. Its original failure log was overwritten; the verifier's command-output
+excerpt is retained as a limitation. The initial scan lacked Docker socket access; the corrected
+exact-image scan is authoritative. Health/readiness, runtime security and CSP/cache headers pass.
 
-A separate quiet probe of the unchanged shutdown path in v0.3.56 confirms a follow-up issue:
-an incomplete HTTP request keeps the process running beyond seven seconds after SIGTERM,
-before the application drain timer is reached. This release does not fix that ordering;
-bounding total shutdown is the next isolated fix. Keep the configured external stop grace.
+Localhost:8085 now serves that accepted image. Promotion verifies exact HTML/JavaScript/atlas
+bytes against the local build and image, runtime security, headers and one additional native
+realtime smoke. Temporary acceptance services, namespaces and forwards are removed. Control is
+`.local-checkpoints/runtime/compose-v0.3.59.yaml`; `rollback-v0.3.58.yaml` retains the previous
+image. No migration or gameplay configuration change is introduced by this release.
+
+<a id="v0358--2026-10-25"></a>
+The [v0.3.58 record](history/releases.md#v0358--2026-10-25) is preserved in release history.
+
+<a id="v0357--2026-10-25"></a>
+The [v0.3.57 record](history/releases.md#v0357--2026-10-25) is preserved in release history.
 
 <a id="v0356--2026-10-25"></a>
 The [v0.3.56 record](history/releases.md#v0356--2026-10-25) is preserved in release history.

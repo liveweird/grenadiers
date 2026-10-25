@@ -4,6 +4,87 @@ This archive preserves the older release records originally maintained in
 [`docs/releases.md`](../releases.md). Records remain in their original order; the current
 release procedure and current release record stay in the [release guide](../releases.md).
 
+## v0.3.58 — 2026-10-25
+
+[v0.3.58](https://github.com/liveweird/grenadiers/releases/tag/v0.3.58) bounds HTTP serving and
+application drain with one five-second deadline measured from the shutdown signal. Incomplete
+HTTP requests cannot postpone the game/session drain budget. Graceful final state, socket
+closure and startup/I/O errors are preserved. On expiry, main returns and runtime teardown
+releases remaining asynchronous I/O; this is an asynchronous budget, not a hard real-time bound.
+The release also adopts the merged Napoleonic sheet and refreshed gameplay captures without
+changing manifest slots, anchors, gameplay or texture budgets.
+
+Application inputs match tested source `e758ad249a066854c35d200cf8e7ce866d8bda74`; the release
+source adds documentation. Localhost:8085 serves accepted image
+`sha256:cc8f5d0308b8e1d6b774f20dfcee20fdb49691c080e95ac95624d6c2bd3ce0af`.
+Independent code, timing and artwork reviews are clear. Nineteen focused shutdown tests pass;
+a deliberate nine-second mutant fails all three deadline cases. A real Linux container with
+incomplete headers held until process exit terminates successfully in 5.127s with one deadline
+warning. A graceful room/diagnostic probe exits in 0.115s, publishes `serverStopped` and closes
+member, unseated and diagnostic sockets with code 1001. No frames or credentials are recorded.
+
+Fresh source-bound Rust acceptance completes all 4,194,304 replay masks in debug, release and
+official coverage in 433.085s, with zero retries. Each ordinary profile passes 930 core and
+293 server tests plus two doctests; four existing performance tests remain ignored and the
+heavy case runs separately across 32 complete partitions. Coverage is 17,278/18,480 lines
+(93.50%) at the unchanged 90% floor. Rustfmt, Clippy, repository checks and the
+[distinct Linux units](https://github.com/liveweird/grenadiers/actions/runs/40228900957) pass.
+The first runner-fixture setup failed from an inherited target-directory override; the unchanged
+fixture suite passed with its isolated environment before the complete runner passed.
+
+The fresh web gate passes 6,791 tests / 88 files with 90.95/89.49/89.80/93.32% coverage.
+JavaScript/CSS gzip sizes are 336,430/36,292 bytes within their budgets; contract, standalone
+validator, lint and unused-code checks pass. Dependency inputs are unchanged from v0.3.57,
+whose fresh Cargo-deny and both zero-finding npm audits are reused. A fresh pinned Trivy scan
+of this exact image reports zero fixable HIGH/CRITICAL findings under the existing policy.
+
+Exact-image Chromium acceptance passes nine Compose cases (eight default plus Oil Barrel)
+and eight Kubernetes cases. Separate diagnostics under the enforced browser policy pass
+14 artist, terrain, atlas and isolated renderer-lifecycle cases. These are representative
+checks, not a rerun of every configured browser suite. Post-promotion runtime/security,
+health/readiness, CSP/cache, exact HTML/JavaScript/atlas equality and one additional browser
+smoke pass. Temporary acceptance resources are removed. Durable control is
+`.local-checkpoints/runtime/compose-v0.3.58.yaml`; `rollback-v0.3.57.yaml` retains the previous
+image. No migration is needed; restarts still end process-local matches. Keep external stop grace.
+
+## v0.3.57 — 2026-10-25
+
+[v0.3.57](https://github.com/liveweird/grenadiers/releases/tag/v0.3.57) gives shared Rust item/
+effect DTOs, common item projections and bounded-number input neutral protocol ownership.
+V7–V11 retain their public names and shared type identity. Reserved bits, activation subsets,
+validation stages/errors, generation order, schema JSON and replay identities are unchanged.
+Four independent regressions pin identity, retained schemas, serialization and numeric boundaries.
+Application inputs match `a94aaddea8211e262c1d0acf3cf3103db797db05`; the source tag includes
+release documentation. Localhost:8085 serves accepted image
+`sha256:170e5d071feeabf6d62c55dcb1dce6b6191d7bcdbeccee511e1c9a1c8a72b9bf`.
+
+Independent review is clear; moved bodies and mappings match baseline after path relocation.
+Fresh source-bound Rust acceptance passes all 4,194,304 replay masks in debug, release and
+reported coverage in 8m06s, without retries. Each ordinary profile passes 930 core and 287
+server tests plus two doctests; four existing performance tests remain ignored, and the heavy
+case runs separately across 32 complete partitions. Official line coverage is 17,248/18,445
+(93.51%) at the unchanged 90% floor, with helper exclusions intact. Clippy/rustfmt, repository
+checks and the [distinct Linux units](https://github.com/liveweird/grenadiers/actions/runs/40222285097) pass.
+
+The fresh web gate passes 6,791 tests / 88 files with 90.95/89.49/89.80/93.32% coverage.
+JavaScript/CSS gzip sizes remain 336,437/36,292 bytes within their budgets. All retained
+contract/standalone drift checks pass. Fresh Cargo-deny, both zero-finding npm audits and the
+pinned exact-image scan pass; the latter reports zero fixable HIGH/CRITICAL findings.
+
+The exact image passes twenty native Chromium cases without retries: eight default cases
+through Compose, eight through Kubernetes, and seeded Landmine, Heart, Cloak/reconnect/expiry
+and Oil Barrel scenarios through Compose. Post-promotion checks pass runtime/image/security,
+health/readiness, enforced CSP/cache headers, exact served HTML/JavaScript/atlas equality and
+one additional native diagnostic/gameplay smoke. Claude's redraw is unchanged. Temporary
+acceptance services and port-forwards are removed. Durable control is
+`.local-checkpoints/runtime/compose-v0.3.57.yaml`; `rollback-v0.3.56.yaml` retains the prior image.
+No migration is needed; restarts still end process-local matches.
+
+A separate quiet probe of the unchanged shutdown path in v0.3.56 confirms a follow-up issue:
+an incomplete HTTP request keeps the process running beyond seven seconds after SIGTERM,
+before the application drain timer is reached. This release does not fix that ordering;
+bounding total shutdown is the next isolated fix. Keep the configured external stop grace.
+
 ## v0.3.56 — 2026-10-25
 
 [v0.3.56](https://github.com/liveweird/grenadiers/releases/tag/v0.3.56) shares the common

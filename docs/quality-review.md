@@ -55,8 +55,8 @@ That initial v0.3.50 change did not enable CSP; v0.3.52 follows below.
 **DOC-01/02/04/14, partial:** the current verification policy and release procedures are now
 short entry points. Dated verification and older release records live in `docs/history/`, with
 their facts and headings preserved and relative links rebased. Known incoming fragments retain
-aliases. The latest release is v0.3.59, deriving browser item catalogs from retained schemas after
-bounded asynchronous shutdown, the merged Napoleonic sheet and shared wire-item cleanup.
+aliases. The latest release is v0.3.60, adding the requested live defaults and item bar after schema-owned
+browser catalogs, bounded asynchronous shutdown and the merged Napoleonic sheet.
 The testing guide now indexes configured suites separately from execution evidence; its former
 acceptance narratives live in `docs/history/testing.md`, with facts and incoming anchors preserved.
 Deployment now uses a common fixture procedure and exact manifest/acknowledgement index; its

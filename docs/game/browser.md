@@ -141,3 +141,7 @@ Initialization uses the latest snapshot. A result arriving after final unmount i
 a result arriving while waiting stays suspended. Failed initialization disables controls and
 can retry on a later room activation, without retrying on every snapshot. Reduced-motion
 preferences and focus/input clearing retain their existing behavior.
+
+See the [active own-player bar at 320px in Polish](../screenshots/item-bar-polish-320.png).
+This real Heart-fixture capture uses v0.3.60 image `ab7cf594…` and source `c5b668f`; the
+collector is equipped, while inventory and timers still come from authoritative snapshots.

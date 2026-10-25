@@ -10,23 +10,12 @@ waiting on a stated dependency. Explicit user requests and accepted plans are co
 new assistant suggestions start as `[new]`. Existing authorization carries forward without
 repeated approval for routine implementation choices. Entries are not delivery-date promises.
 
-## Current delivery — requested QoL
+## Current delivery — single-player
 
-- [next] **QOL-FEATURES — all features on by default and bulk selection.** New live rooms and
-  Restore match defaults enable all 22 configurable items, including curses. Add All on/All off
-  buttons that preserve numeric settings, editing permissions and the explicit Apply lifecycle.
-  Existing rooms, rematches, historical defaults and recorded games retain their settings.
-- [next] **QOL-STATUS — make collected items obvious.** Add a wrapping own-player bar with upgrade
-  totals, equipment/weapon slots, buffs/curses and authoritative expiry timers, including each
-  Slow Foot stack. Announce recent own pickups once. Preserve replacement/consumption/death/reset
-  and recipient privacy; Oil remains a world object and Teleporter an immediate pickup.
-
-## Single-player
-
-- [todo] **SOLO-CPU — deliver the approved staged hybrid.** A private human-versus-CPU duel uses
+- [next] **SOLO-CPU — deliver the approved staged hybrid.** A private human-versus-CPU duel uses
   the normal rules/input path, restricted observations, interval hazard forecasts, bounded goal
   planning and recorded bot inputs. Follow the [accepted design](docs/game/single-player-cpu.md)
-  after the QoL work; expose a playable slice early and support the all-features-on default before
+  following the shipped QoL work; expose a playable slice early and support the all-features-on default before
   the public preview.
 - [parked] **More seats and campaign mobs.** Revisit after the two-seat CPU mode is stable;
   neither is part of the initial solo duel.

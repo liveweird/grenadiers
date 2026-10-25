@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## 0.3.60 — 2026-10-25
+
 ### Added
 
 - Enable every configurable item by default in new live rooms; add All on/All off draft controls

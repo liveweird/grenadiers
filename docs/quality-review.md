@@ -55,7 +55,8 @@ That initial v0.3.50 change did not enable CSP; v0.3.52 follows below.
 **DOC-01/02/04/14, partial:** the current verification policy and release procedures are now
 short entry points. Dated verification and older release records live in `docs/history/`, with
 their facts and headings preserved and relative links rebased. Known incoming fragments retain
-aliases. The latest release is v0.3.54, extending test guardrails after peer admission and the arena redraw.
+aliases. The latest release is v0.3.55, sharing browser-test setup after test-guard and
+admission hardening.
 Testing, deployment and backlog consolidation remain separate work. Preserve the merged artist
 changes and reconcile any concurrent screenshot documentation before editing overlapping files.
 
@@ -156,11 +157,12 @@ scan and Compose/Kubernetes acceptance pass; all fifteen production module decla
 their names, paths and order. Broader fixture sharing
 remains separate work.
 
-**CX-08 / TS-06 / TL-05, v0.3.55 candidate:** equivalent gameplay scenarios share only
+**CX-08 / TS-06 / TL-05, v0.3.55:** equivalent gameplay scenarios share only
 native responsive browser-context construction. Desktop/mobile ordering, independent sessions,
 viewport overrides and mobile reduced motion remain explicit; each scenario still owns its
-pages, game setup, observations, assertions and cleanup. Configuration factories and broader
-behavioral fixtures remain separate work.
+pages, game setup, observations, assertions and cleanup. Independent review, static checks and
+twenty exact-image native cases pass. Configuration factories and broader behavioral fixtures
+remain separate work.
 
 ## Finding dispositions and proposed solutions
 
@@ -192,7 +194,7 @@ Related IDs are grouped to avoid treating one architectural problem as several i
 | BE-11, TS-09/10 | Mostly intentional tests/benchmarks. | Use virtual time where it preserves the real socket deadline being tested. Keep performance tests separate from ordinary suites. Do not replace useful waits or ignored benchmarks solely to improve counts. |
 | BE-12/13 | Plausible shutdown/latency concerns. | Reproduce shutdown with a non-reading client; measure registry-lock work before moving bounded construction/entropy outside it. No demonstrated hang yet. |
 | CX-03 | Agree on cross-layer item duplication, not the proposed enum choice. | Define one domain item specification and derive configurable wire catalogs from each schema's `ItemId`, not `PickupKind`; preserve archived subsets. Parameterize configuration scaffolding independently. |
-| CX-08, TS-06, TL-05 | Agree on E2E/configuration sprawl. | Introduce a config factory, fixture parameter and shared behavioral helpers; prove representative item and privacy suites retain their distinct setup/assertions before deleting wrappers. |
+| CX-08, TS-06, TL-05 | Agree; native context reuse shipped in v0.3.55. | Twenty-six equivalent setups share one constructor; representative default/390px/private native suites pass with assertions unchanged. Configuration factories and genuinely equivalent behavioral fixtures remain next. |
 | FE-02 | Agree; measured bundle budget implemented. | Initial baseline was 356,970 JS / 36,292 CSS gzip bytes; limits remain 400,000/40,000 and the URI security patch also fits them. Profile CSS/import reductions separately; no reduction is claimed by the guard itself. |
 | FE-03 | Partly disagree; see corrections below. | Typed i18next consolidation is reasonable cleanup. Add plural forms where grammar needs them, not for multiplication/count notation. |
 | FE-04 | Mechanism confirmed; performance cost unmeasured. | Profile 20 Hz gameplay and commit durations first. Change arena/HUD subscriptions only for a demonstrated budget problem. |

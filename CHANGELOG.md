@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## 0.3.55 — 2026-10-25
+
 ### Changed
 
 - Share native desktop/mobile browser-context setup across equivalent acceptance scenarios,

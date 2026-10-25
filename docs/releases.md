@@ -65,33 +65,42 @@ interrupted state but cannot preserve process-local matches or credentials.
 Keep the previous immutable image reference for rollback; database migration compatibility
 must be designed when durable application data is introduced.
 
-## v0.3.54 — 2026-10-25
+## v0.3.55 — 2026-10-25
 
-[v0.3.54](https://github.com/liveweird/grenadiers/releases/tag/v0.3.54) extends the source-size
-guard to every current and future item test tree and aggregates simulation test declarations.
-All 926 core test names and all fifteen production module declarations retain their identity.
-Application inputs match `c72da79b41b8b8ca83b0396b9cd9f18ab882f77c`; the source tag includes
+[v0.3.55](https://github.com/liveweird/grenadiers/releases/tag/v0.3.55) shares native responsive
+browser-context setup across 26 gameplay scenarios. Two independent contexts still start
+concurrently and return in desktop/mobile order. Viewports, mobile reduced motion, pickup's
+390px override, privacy observations, assertions and caller-owned cleanup remain unchanged.
+Application inputs match `8b7bacb82de085988e1592a280c0119ba3a41bfa`; the source tag includes
 release documentation. Localhost:8085 serves accepted image
-`sha256:fd3d8bc815b6169208640b33df4690cb75b7ba98dbcd0d861d087f268760a829`.
+`sha256:a053abd96387ebe50f85b68aeecffcaa48160ccacb70a2f26f7808c1d7cee6d2`.
 
-Independent review is clear. The repository gate passes eight new filesystem fixtures plus
-its existing workflow/dependency checks. Fresh ordinary debug and release runs each pass 926
-core and 287 server tests plus two doctests; four existing performance tests remain ignored
-and the exhaustive replay is excluded from these ordinary runs. Clippy, rustfmt and the
-[distinct Linux unit job](https://github.com/liveweird/grenadiers/actions/runs/40218140208) pass.
-The declaration-only change reuses exhaustive debug/release/coverage acceptance measured at
-`055d1d2` (all 4,194,304 masks, 93.15% line coverage at the 90% floor). Unchanged frontend,
-API, assets and server logic reuse v0.3.53 web, security and renderer evidence; these are not
-claimed as freshly rerun v0.3.54 suites.
+Independent review and fresh E2E types, lint, unused-code, repository and scenario checks pass.
+The scenario gate includes the new exact-options, concurrency, reverse-resolution ordering and
+native-identity regression. All 46 spec title inventories are unchanged; every migrated spec
+is byte-identical outside its new import and equivalent setup block. Seventy-four mapped
+scenarios remain registered; this static count is not a claim that all ran natively.
 
-The exact new image passes eight Chromium cases through Compose and eight through Kubernetes,
-with no retries. The pinned image scan reports zero fixable HIGH/CRITICAL findings. Promotion
-checks pass health/readiness, image/security identity, CSP/cache headers, exact served
-HTML/JavaScript/atlas equality and one fresh real-browser diagnostic/gameplay smoke. The
-frontend bytes, including Claude's redraw, match v0.3.53. Temporary acceptance services are
-removed; `.local-checkpoints/runtime/compose-v0.3.54.yaml` controls the live image and
-`rollback-v0.3.53.yaml` retains the previous image. Matches remain process-local; no migration
-is needed.
+The exact image passes twenty Chromium cases without retries: eight default cases through
+Compose, eight through Kubernetes, and four seeded Compose cases covering Landmine, 390px
+pickups, recipient-private Cloak/reconnect/expiry and Invisible Bombs' live pixel/privacy window.
+The pinned image scan reports zero fixable HIGH/CRITICAL findings. Post-promotion checks pass
+health/readiness, runtime security, CSP/cache headers, exact served HTML/JavaScript/atlas bytes
+and one fresh real-browser diagnostic/gameplay smoke. Claude's graphics are preserved.
+
+Production Rust, API, frontend and asset sources are unchanged from v0.3.54; Cargo changes only
+local package versions. Reuse v0.3.54 ordinary Rust/Linux results and v0.3.53 frontend/security/
+renderer evidence. Exhaustive replay/coverage remains attributed to measured `055d1d2`
+(all 4,194,304 masks, 93.15% line coverage at the 90% floor); none is claimed as freshly rerun
+for test setup reuse. The production image is rebuilt and accepted independently.
+
+Temporary acceptance services are removed. Durable control is
+`.local-checkpoints/runtime/compose-v0.3.55.yaml`, with `rollback-v0.3.54.yaml` retaining the
+previous accepted image. No migration is needed; restarting still ends process-local matches.
+Configuration factories and broader fixture sharing remain separate work.
+
+<a id="v0354--2026-10-25"></a>
+The [v0.3.54 record](history/releases.md#v0354--2026-10-25) is preserved in release history.
 
 <a id="v0353--2026-10-25"></a>
 The [v0.3.53 record](history/releases.md#v0353--2026-10-25) is preserved in release history.

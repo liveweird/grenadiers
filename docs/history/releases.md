@@ -4,6 +4,34 @@ This archive preserves the older release records originally maintained in
 [`docs/releases.md`](../releases.md). Records remain in their original order; the current
 release procedure and current release record stay in the [release guide](../releases.md).
 
+## v0.3.54 — 2026-10-25
+
+[v0.3.54](https://github.com/liveweird/grenadiers/releases/tag/v0.3.54) extends the source-size
+guard to every current and future item test tree and aggregates simulation test declarations.
+All 926 core test names and all fifteen production module declarations retain their identity.
+Application inputs match `c72da79b41b8b8ca83b0396b9cd9f18ab882f77c`; the source tag includes
+release documentation. Localhost:8085 serves accepted image
+`sha256:fd3d8bc815b6169208640b33df4690cb75b7ba98dbcd0d861d087f268760a829`.
+
+Independent review is clear. The repository gate passes eight new filesystem fixtures plus
+its existing workflow/dependency checks. Fresh ordinary debug and release runs each pass 926
+core and 287 server tests plus two doctests; four existing performance tests remain ignored
+and the exhaustive replay is excluded from these ordinary runs. Clippy, rustfmt and the
+[distinct Linux unit job](https://github.com/liveweird/grenadiers/actions/runs/40218140208) pass.
+The declaration-only change reuses exhaustive debug/release/coverage acceptance measured at
+`055d1d2` (all 4,194,304 masks, 93.15% line coverage at the 90% floor). Unchanged frontend,
+API, assets and server logic reuse v0.3.53 web, security and renderer evidence; these are not
+claimed as freshly rerun v0.3.54 suites.
+
+The exact new image passes eight Chromium cases through Compose and eight through Kubernetes,
+with no retries. The pinned image scan reports zero fixable HIGH/CRITICAL findings. Promotion
+checks pass health/readiness, image/security identity, CSP/cache headers, exact served
+HTML/JavaScript/atlas equality and one fresh real-browser diagnostic/gameplay smoke. The
+frontend bytes, including Claude's redraw, match v0.3.53. Temporary acceptance services are
+removed; `.local-checkpoints/runtime/compose-v0.3.54.yaml` controls the live image and
+`rollback-v0.3.53.yaml` retains the previous image. Matches remain process-local; no migration
+is needed.
+
 ## v0.3.53 — 2026-10-25
 
 [v0.3.53](https://github.com/liveweird/grenadiers/releases/tag/v0.3.53) adds bounded peer

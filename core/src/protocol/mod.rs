@@ -1,7 +1,9 @@
 mod client;
 mod event_projection;
 mod events;
+mod item_foundation;
 mod projection;
+mod scalar_input;
 mod scalars;
 mod server;
 mod snapshot;

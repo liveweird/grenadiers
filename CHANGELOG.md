@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Move shared Rust wire-item types, effect validation, item projection mappings and bounded-number
+  input into neutral protocol modules while retaining versioned public APIs and replay behavior.
+
 ## 0.3.56 — 2026-10-25
 
 ### Changed

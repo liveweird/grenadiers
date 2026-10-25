@@ -174,6 +174,14 @@ and the pickup/match/reconnect inheritance chain stay separate. Independent revi
 checks pass; all 96 exported-configuration comparisons match across four simulated profiles.
 Nineteen exact-image native cases and post-promotion acceptance pass.
 
+**API-01 / CX-01/02 / BE-07, v0.3.57 candidate:** extract shared Rust item/effect wire types,
+common item projections and bounded-number input into neutral protocol modules. Preserve every
+versioned public export, reserved item bit, activation subset, validation stage and error;
+generation sampling and replay identities stay unchanged. This is partial ownership/mechanics
+cleanup, not a cross-layer item specification or authorization to delete archived adapters.
+Implementation and independent review are complete; four focused regressions and all 930 core
+tests pass. Full source-bound replay/coverage, web/drift and runtime acceptance remain pending.
+
 ## Finding dispositions and proposed solutions
 
 “Agree” accepts the observed issue, not every implementation proposed in the review.

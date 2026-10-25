@@ -2,7 +2,7 @@ use serde::{Serialize, Serializer};
 
 use super::GAMEPLAY_PROTOCOL_VERSION;
 
-pub(crate) use crate::protocol::v7::deserialize_bounded;
+pub(crate) use crate::protocol::scalar_input::deserialize_bounded;
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub struct GameplayVersion;

@@ -74,6 +74,12 @@ explicit archived wire contracts and independent private replay compatibility. U
 applications can be removed after moving unique regressions; adapters still serving the live
 path require helper extraction first.
 
+**FE-01 / API-01, first retirement:** remove the isolated v3 browser application and its
+obsolete UI/client tests while retaining the v3 schema and conformance suite unchanged. Move
+unique socket-factory, session POST/abort, native-fetch receiver and phase-error/correlation
+regressions to the active v11 client. The production bundle is unchanged because that application
+was already unreachable; this reduces maintained source rather than claiming a download saving.
+
 ## Finding dispositions and proposed solutions
 
 “Agree” accepts the observed issue, not every implementation proposed in the review.
@@ -85,7 +91,7 @@ Related IDs are grouped to avoid treating one architectural problem as several i
 | DOC-03 | Agree on organization, not the claimed stale checkpoint status. | Move dated release narrative out of backlog; its explicitly historical “unreleased” state must not be rewritten as a current fact. |
 | DOC-06/10/11/13 | Agree; index, item guide, ADR index and retention policy implemented. | Continue consistent item headings and implemented/future rule markers; move archived protocol guides with link checks. |
 | DOC-12 | Factually stale, deliberately preserved. | Keep `AGENTS.md` untouched under the user's instruction; point readers to current conventions and the index. |
-| API-01, CX-01/02, BE-07, FE-01, TS-08 | Agree on duplication; blanket deletion is unsafe. | ADR 0021 separates live-wire, archived contract and replay retention. Extract the v8/v9 helpers used by v11, remove demonstrably unused client UI while moving unique regressions, then assess obsolete adapters. Parameterize retained frame-bound tests. |
+| API-01, CX-01/02, BE-07, FE-01, TS-08 | Agree on duplication; first browser retirement implemented. | ADR 0021 separates retention. The unused v3 application is removed with unique regressions moved to v11; its schema/conformance remain. Extract the v8/v9 helpers used by v11, then assess obsolete adapters and parameterize retained frame-bound tests. |
 | API-02/03 | Agree; HTTP repair implemented. | Problem 404/405 fallbacks, route-specific `Allow`, shared cache/retry headers and API/SPA/HEAD tests are in place; fallback responses are separate from supported operation responses. |
 | API-04, BE-02, SEC-02 | Agree; first batch implements this. | Independent diagnostic permits/rate budget and shared strict transport guards, with saturation, Origin, flood, cache-header and shutdown tests. |
 | API-05 | Optional improvement, not a demonstrated defect. | Add stable Problem codes only when a consumer needs distinctions beyond HTTP status. Do not unify diagnostic and gameplay error vocabularies merely for symmetry. |

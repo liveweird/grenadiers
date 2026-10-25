@@ -11,7 +11,10 @@ export class SocketStub {
   readonly listeners = new Map<string, Array<(event: Event | MessageEvent | CloseEvent) => void>>()
   readonly sent: string[] = []
   readonly close = vi.fn()
+  readonly url: string
   readyState = 0
+
+  constructor(url: string) { this.url = url }
 
   addEventListener(name: string, listener: (event: Event | MessageEvent | CloseEvent) => void): void {
     this.listeners.set(name, [...(this.listeners.get(name) ?? []), listener])
@@ -108,8 +111,8 @@ export function harness(payload: unknown = { token: sessionToken }): Harness {
   const fetcher = vi.fn().mockResolvedValue({ ok: true, json: async () => payload })
   const client = new GameClient((state) => states.push(state), {
     fetch: fetcher as typeof fetch,
-    socket: () => {
-      const socket = new SocketStub()
+    socket: (url) => {
+      const socket = new SocketStub(url)
       sockets.push(socket)
       return socket as unknown as WebSocket
     },

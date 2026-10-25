@@ -38,7 +38,7 @@ carry no position or clock authority.
 Pixi retains terrain, block, bomb, flame, and actor layers. Public actor positions interpolate
 over the 50 ms publication interval without extrapolation. Terminal states snap to the
 accepted final position; reduced motion disables interpolation and pulsing effects. Player
-colors, cap shapes and marks (pompom/flame or feather/star), and HTML seat names distinguish the
+colors, headgear (plumed shako or cockaded bicorne), and HTML seat names distinguish the
 two players. The canvas itself
 is decorative to assistive technology; room controls, countdown/timer, and result remain HTML.
 

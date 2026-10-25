@@ -18,22 +18,22 @@ const oilAt = (game: ObservedGame, column: number, row: number) =>
 const hasBlock = (game: ObservedGame, column: number, row: number) =>
   latestSnapshot(game)!.state.arena.blocks.some((cell) => cell.column === column && cell.row === row)
 const oilArt = {
-  deepInk: '23,35,49,255', ink: '38,52,69,255', steel: '100,115,132,255',
-  brass: '239,189,86,255', flame: '240,106,50,255', flameLight: '255,214,90,255',
-  flameCore: '255,240,161,255',
+  hoop: '79,86,105,255', hoopShade: '57,60,76,255', stave: '203,109,40,255',
+  staveShade: '183,94,35,255', char: '26,22,24,255', flame: '239,112,25,255',
+  flameLight: '255,221,118,255', flameCore: '255,246,209,255',
 } as const
 
 function expectUnlitOilArt(pixels: string[]): void {
   const colors = new Set(pixels)
   expect([...colors]).toEqual(expect.arrayContaining([
-    oilArt.deepInk, oilArt.ink, oilArt.steel, oilArt.brass,
+    oilArt.hoop, oilArt.hoopShade, oilArt.stave, oilArt.staveShade,
   ]))
 }
 
 function expectBurningOilArt(pixels: string[]): void {
   const colors = new Set(pixels)
   expect([...colors]).toEqual(expect.arrayContaining([
-    oilArt.deepInk, oilArt.flame, oilArt.flameLight, oilArt.flameCore,
+    oilArt.char, oilArt.flame, oilArt.flameLight, oilArt.flameCore,
   ]))
 }
 

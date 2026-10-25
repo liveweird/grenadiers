@@ -1,6 +1,7 @@
 # Releases
 
-Release labels and scope live in the [implementation plan](game/implementation-plan.md).
+Planned release scope and work status live in the [backlog](../BACKLOG.md).
+The [implementation plan](game/implementation-plan.md) defines the release checklist and future tracks.
 A completed milestone is verification evidence; a release exists only after its tested commit
 is tagged and its artifacts are published intentionally.
 
@@ -26,11 +27,24 @@ remain `0.0.0`: they are build inputs and are not separately published or produc
 The WebSocket `protocolVersion` is an independent compatibility contract, not a release number.
 
 Each shipped feature PR bumps the product version and records its scope in `CHANGELOG.md`.
-Use patch releases within the current milestone for bounded engineering increments.
-`0.2.0` is the first playable duel preview; `0.3.0` adds classic match progression. Subsequent
-`0.3.x` increments stage reconnect support and activate it at `0.3.9`; `0.4.0` remains the resilient playtest milestone. Keep PRs focused on one behavior and its tests. Merge passing,
+Use patch releases for bounded engineering increments; historical milestone labels are preserved
+in the [plan archive](history/implementation-plan.md). Keep PRs focused on one behavior and its tests. Merge passing,
 independently reviewed candidates, then publish the corresponding prerelease tag.
 The repository gate checks that both local Cargo packages and their dependency agree.
+
+### Release preparation helper
+
+Stage the candidate notes under `CHANGELOG.md`'s Unreleased heading. Set `NEXT_VERSION` to the
+chosen newer product version and `RELEASE_DATE` to its `YYYY-MM-DD` date, then preview:
+
+```sh
+node scripts/prepare-release.mjs --version "$NEXT_VERSION" --date "$RELEASE_DATE"
+```
+
+The default is a dry run. Add `--write` only after reviewing the plan; it updates the Cargo
+workspace and local-package lock versions, then moves the Unreleased notes into the requested
+dated release while retaining an empty Unreleased section. It does not run checks or perform
+Git, tag, publish, or network operations. Run the applicable release checks separately.
 
 ## Candidate checklist
 
@@ -65,31 +79,41 @@ interrupted state but cannot preserve process-local matches or credentials.
 Keep the previous immutable image reference for rollback; database migration compatibility
 must be designed when durable application data is introduced.
 
-## v0.3.62 — 2026-10-25
+## v0.3.64 — 2026-10-26
 
-[v0.3.62](https://github.com/liveweird/grenadiers/releases/tag/v0.3.62) removes 120 copied mock
-lines from Diarrhea, Slow Foot and Reverse Controls scene tests. All three reuse the existing
-Vitest-safe Pixi mock; test bodies, titles and assertions remain unchanged. Specialized renderer
-and atlas mocks remain intentional. Production behavior, protocols and dependencies are unchanged.
+[v0.3.64](https://github.com/liveweird/grenadiers/releases/tag/v0.3.64) adds a validated,
+dry-run-first release preparation helper and Cargo caches for container builds. The helper updates
+aligned Cargo versions and dated changelog entries without running Git, publication or checks.
+BuildKit reuses locked registry/Git caches and a platform-specific target cache; touching the
+production crate roots forces changed workspace code to rebuild even when source mtimes are old.
+The binary is copied outside the cache mount. Static OCI metadata identifies the project.
+The existing bundled build frontend and runtime security policy are retained.
 
-Fresh full web acceptance at `50e57080aaf90fc03f2675f940be3d4adac9ca95` passes 6,812 tests /
-91 files in 307.97s, with 91.10/89.47/90.12/93.47% coverage and 337,937/36,505-byte gzip JS/CSS.
-Focused tests, lint, TypeScript, Knip and repository checks pass. Integration of v0.3.61 changes
-no tested web files. Application image inputs match `ea90eaf91390db05dfdc0398be0328e1ccc7bede`;
-publication adds documentation. Accepted image is
-`sha256:a5025d0406d61cdaf1bfd6cd3800a7440f72b39c04c003c5dd3b4a6460ff11af`.
+Independent helper/cache review is clear. All fourteen helper cases pass on macOS and Linux;
+repository checks pass. Actual cold, older-mtime mutant and restored-source builds execute the
+compile step: the mutant changes health to its probe value, and restoring source reproduces the
+original binary. These are cache-correctness observations, not capacity or performance guarantees.
 
-Rust/runtime sources match v0.3.61 apart from product-version metadata, so reuse its complete
-source-bound 4,194,304-mask acceptance (93.49% lines), distinct Linux units, 16 native cases
-and five startup probes. Dependency inputs also reuse the existing Cargo/npm audit results.
-A fresh pinned exact-image scan reports zero fixable HIGH/CRITICAL findings; the project-owned
-Trivy cache avoids repeated database downloads without bypassing updates or failures.
+Accepted image source `332e3608a64cf9832e62afd6c80a7e9dcb2c7f49` builds
+`sha256:1c6bd4094db67619c4f2c77c234bbaee34e5b4cccc17e5cb49bd8f38b0d2e27a`.
+Eight native Compose cases and eight Kubernetes cases pass, including actual image identity,
+startup/readiness, security, origins, probes/resources and browser gameplay. The pinned image
+scan reports zero fixable HIGH/CRITICAL findings; one additional post-promotion native
+authentication case passes. [Linux units](https://github.com/liveweird/grenadiers/actions/runs/40245664447) pass.
 
-Localhost:8085 serves this image. Health/readiness, runtime security, CSP/cache and exact
-HTML/JavaScript/atlas equality with the accepted v0.3.60 web artifacts pass, along with one
-fresh native admission/room smoke. Control is `.local-checkpoints/runtime/compose-v0.3.62.yaml`;
-`rollback-v0.3.61.yaml` retains the previous image. No migration is required. Remaining agreed
-Claude review work still precedes CPU implementation.
+Application sources, contracts, web assets and external dependency versions are unchanged from
+v0.3.63. Reuse that source's full Rust/exhaustive acceptance and dependency audits, plus the
+unchanged v0.3.62 web acceptance. Release-documentation edits do not change Docker inputs.
+Localhost:8085 serves the accepted image, with exact HTML/JavaScript/atlas equality and runtime,
+CSP/cache, health/readiness checks passing. Control is
+`.local-checkpoints/runtime/compose-v0.3.64.yaml`; `rollback-v0.3.63.yaml` retains the prior image.
+Temporary acceptance resources are removed. There is no migration.
+
+<a id="v0363--2026-10-25"></a>
+The [v0.3.63 record](history/releases.md#v0363--2026-10-25) is preserved in release history.
+
+<a id="v0362--2026-10-25"></a>
+The [v0.3.62 record](history/releases.md#v0362--2026-10-25) is preserved in release history.
 
 <a id="v0361--2026-10-25"></a>
 The [v0.3.61 record](history/releases.md#v0361--2026-10-25) is preserved in release history.

@@ -1,7 +1,11 @@
 # Teleporter
 
+## Availability
+
 Teleporter is a configurable immediate pickup enabled with every available item in new
 Expanded-v5 rooms. Creators can still disable it explicitly before readiness.
+
+## Rules
 
 When a living player collects one and the other seat has a living actor, the game considers one
 atomic exchange of their current positions. Both complete actor footprints must be within bounds
@@ -17,6 +21,8 @@ headings, apply no damage, trigger no swept Contact mine, collect no destination
 no extra action. Collection does not draw RNG, occupy an inventory slot or start a timer. Existing
 equipment, weapons and effects remain unchanged.
 
+## State and privacy
+
 Both visible actors receive the same persistent `lastTeleportTick` after a successful swap. It
 does not change for an unsafe collection, persists through pause, results and reconnect, and clears
 only with a newly constructed round state. Gameplay v11 clients treat a newer marker as an
@@ -24,16 +30,16 @@ authoritative position epoch: they snap to the published positions without walki
 invented movement audio. Hidden actors retain their exact four-key privacy shape and expose neither
 position nor marker.
 
-At v0.3.42, Teleporter was added as the seventeenth item, bit 21 of
-`EnabledItems` (`EnabledItems::ALL = 3145712`; now 4194303 with all 22 items). Generator v2
-appended weight 15 after Invisible Bombs: the all-items pool was 365 (now 440) and a
-Teleporter-only pool is 115. All 131,072 subsets were accepted at v0.3.42 without changing earlier
-masks or generated maps. See [gameplay v11](protocol-v11.md),
+## Compatibility
+
+Teleporter uses bit 21 of `EnabledItems` and generator-v2 weight 15 after Invisible Bombs. See
+[gameplay v11](protocol-v11.md),
 [settings](settings.md), and [production-seed testing](../testing.md#teleporter-production-seed-scenario).
 
-Source `880fff7c67269f2886746b45239cd888576832f4` is native verified by 54 Compose plus
-54 Kubernetes cases with zero retries or carried passes. The accepted scope covers safe swap,
-reconnect, unsafe consumption and exact complete-footprint safety; see the
-[verification record](../verification.md). Reviewed pre-collection examples show
+## Verification
+
+The browser scenario covers safe swap, reconnect, unsafe consumption and exact complete-footprint
+safety. Reviewed pre-collection examples show
 [English desktop](../screenshots/teleporter-desktop.png) and
-[Polish 320px reduced-motion](../screenshots/teleporter-mobile-pl.png) presentation.
+[Polish 320px reduced-motion](../screenshots/teleporter-mobile-pl.png) presentation. The release
+record is in [item acceptance history](../history/game-acceptance.md#teleporter-v0342).

@@ -1,23 +1,21 @@
 # Grenadiers game specification
 
-This design describes the classic Bomberman-style game loop and a proposed, implementable
-Grenadiers ruleset. It covers player abilities, arena contents, bombs, damage, power-ups,
-enemies, bots, modes, timing, and acceptance scenarios.
+This guide describes the classic Bomberman-style game loop and the Grenadiers ruleset. It covers
+player abilities, arena contents, bombs, damage, power-ups, enemies, bots, modes, timing and
+acceptance scenarios. Numerical tuning remains subject to playtesting.
 
-Status: **working baseline**, with numerical tuning still subject to playtesting. The first
-playable target remains two human players. M1 implements the
-[headless world and movement model](movement.md); M2 adds [bombs, flames, damage, and round
-outcomes](combat.md), including explicit public projections/events. M3 completes
-[gameplay contracts](protocol.md), anonymous sessions, authenticated [rooms](rooms.md),
-authoritative scheduling, and the [playable browser duel](browser.md). The current preview
-plays generated Expanded-v5 matches (first to three by default) with upgrades, automatic round resets,
-consensual rematch, and process-local reserved-seat reconnect. Bots, larger matches,
-matchmaking, cross-process recovery, and durable stats follow.
+The implemented two-human game uses the [headless world and movement model](movement.md),
+[combat](combat.md), versioned [gameplay contracts](protocol.md), authenticated [rooms](rooms.md),
+authoritative scheduling and the [browser duel](browser.md). Generated Expanded-v5 matches are
+first-to-three by default, with upgrades, automatic round resets, consensual rematch and
+process-local reserved-seat reconnect. The [product backlog](../../BACKLOG.md) is the sole source
+for planned work and delivery status.
 
 Start with [the rules specification](rules.md) and the
-[implementation and release plan](implementation-plan.md). Historical examples and optional extensions
-are distinguished from the proposed initial rules. Exact historical fidelity requires choosing
-a particular release and platform; “Bomberman” and “Dyna Blaster” do not identify one universal ruleset.
+[release checklist and future-track boundaries](implementation-plan.md). Historical examples and
+optional extensions are distinguished from the initial rules. Exact historical fidelity requires
+choosing a particular release and platform; “Bomberman” and “Dyna Blaster” do not identify one
+universal ruleset.
 
 ## Suggested reading
 
@@ -27,17 +25,20 @@ a particular release and platform; “Bomberman” and “Dyna Blaster” do not
 - [Bot competitors](rules.md#bot-competitors), [round lifecycle](rules.md#round-and-match-life-cycle), and [disconnects](rules.md#disconnects-and-browser-behavior).
 - [Event order](rules.md#authoritative-timing-and-event-order) and [acceptance scenarios](rules.md#acceptance-scenarios).
 
-## Implementation sequence
+<a id="implementation-sequence"></a>
 
-The release plan defines the maintained milestone dependencies, work packages, RULE coverage,
-and release gates. The near-term sequence is verified foundation, playable two-browser duel,
-classic match progression, then reconnect resilience and playtest hardening. Mark a milestone complete only when its exit evidence exists in the maintained plan and
-verification record.
+## Implementation and release references
+
+The [live implementation guide](implementation-plan.md) owns the reusable release checklist and
+future-track design boundaries. The original M0–M8 sequence, work packages and baseline
+acceptance traceability are preserved in the
+[implementation-plan archive](../history/implementation-plan.md). Use the
+[product backlog](../../BACKLOG.md) for current priorities and progress.
 
 [Baseline rule coverage](rule-coverage.md) maps all 42 acceptance rules to concrete automated assertions.
 
-[Single-player versus CPU design](single-player-cpu.md) records the accepted staged hybrid;
-implementation follows completion of the remaining agreed Claude review work.
+[Single-player versus CPU design](single-player-cpu.md) records the accepted staged hybrid and
+its static acceptance boundary; the backlog owns its prerequisite and staged work.
 
 The [product backlog](../../BACKLOG.md) contains open work; [legacy backlog links](backlog.md)
 remain valid. Feature guides document implemented movement, shared settings, presentation and
@@ -53,8 +54,9 @@ for current defaults and behavior, rather than treating design proposals as deli
 [Room settings](settings.md) covers shared starting speed, turn tolerance, match target and fuse.
 
 [Gameplay v11 compatibility](protocol-v11.md) defines the paired live wire contract, including the
-authoritative teleport position epoch. [Gameplay v10](protocol-v10.md) and [v9](protocol-v9.md) are
-archived; earlier contracts remain historical references.
+authoritative teleport position epoch. [Gameplay v10](../history/protocols/protocol-v10.md) and
+[v9](../history/protocols/protocol-v9.md) are archived; the
+[protocol history index](../history/protocols/README.md) links every standalone historical guide.
 
 [Pixel-art presentation](pixel-art.md) describes original artwork, animation and resource bounds.
 
@@ -66,7 +68,7 @@ available catalog and creators may configure any subset.
 
 [Procedural sound](audio.md) explains gesture activation, mute, visibility recovery and event baselines.
 
-See the implemented expansion candidates: [Heart](heart.md) and [Shield](shield.md).
+Protection mechanics: [Heart](heart.md) and [Shield](shield.md).
 
 - [Golden Flame](golden-flame.md): ten-second maximum-range pickup and captured bomb behavior.
 - [Reverse Controls](reverse-controls.md): ten-second movement inversion with exact boundaries.

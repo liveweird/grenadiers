@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Generate each retained browser gameplay item catalog from its own schema and reuse it in
+  live settings and validation while preserving archived activation subsets.
+
 ## 0.3.58 — 2026-10-25
 
 ### Fixed

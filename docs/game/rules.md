@@ -536,7 +536,8 @@ grant faster movement, extra bombs, knowledge of concealed pickups, or immunity.
 
 Bots receive the same public arena information as players, with an explicit policy for any
 fog of war. Use deterministic decision schedules and seeded tie-breaking where repeatable
-simulation is required. Human and bot commands enter the same validation and action path.
+simulation is required. Human and bot commands enter the same validation and action path. The
+[single-player versus CPU proposal](single-player-cpu.md) describes a recommended implementation.
 
 ## Optional sudden death and arena hazards
 

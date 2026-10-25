@@ -18,6 +18,12 @@
   "protocol": "Protokół v{{version}} · do {{players}} graczy",
   "invalidMessage": "Serwer wysłał nieprawidłową wiadomość.",
   "connectionFailed": "Połączenie czasu rzeczywistego nie powiodło się.",
+  "errorBoundary": {
+    "title": "Coś poszło nie tak.",
+    "message": "Nie udało się wyświetlić tego ekranu. Spróbuj ponownie, a jeśli problem nie ustąpi, wczytaj stronę ponownie.",
+    "retry": "Spróbuj ponownie",
+    "reload": "Wczytaj stronę ponownie"
+  },
   "language": "Język",
   "english": "English",
   "polish": "Polski"

@@ -4,6 +4,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './i18n'
 import { App } from './App'
+import { ErrorBoundary } from './ErrorBoundary'
 
 const theme = createTheme({
   colors: {
@@ -20,8 +21,10 @@ const theme = createTheme({
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <MantineProvider theme={theme} defaultColorScheme="light">
-      <App />
-    </MantineProvider>
+    <ErrorBoundary>
+      <MantineProvider theme={theme} defaultColorScheme="light">
+        <App />
+      </MantineProvider>
+    </ErrorBoundary>
   </StrictMode>,
 )

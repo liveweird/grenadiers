@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## 0.3.63 — 2026-10-25
+
 ### Changed
 
 - Separate authenticated commands from authentication at the server dispatch boundary and

@@ -6,6 +6,8 @@ identity. Origin checks remain a browser boundary; non-browser clients can suppl
 themselves. Before public hosting, define durable identity policy if needed, TLS, proxy trust,
 cross-process routing, and abuse controls.
 
+## Startup configuration
+
 Startup reads and validates configuration once before binding the listener. The executable does
 not load dotenv files. These are the intentional defaults; Compose binds its published ports to
 loopback only, while its process listens on the container interface.
@@ -27,6 +29,8 @@ deployment-specific origins outside local development. Invalid addresses and non
 state settings fail startup without including their values in diagnostics. Invalid or non-Unicode
 `RUST_LOG` values retain the standalone `info` fallback. Path settings preserve non-Unicode OS
 paths.
+
+## Response security
 
 Every response sets `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, and
 `Referrer-Policy: no-referrer`, including API errors and static/SPA fallbacks. HTML and unhashed

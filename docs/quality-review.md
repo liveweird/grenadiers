@@ -59,8 +59,8 @@ That initial v0.3.50 change did not enable CSP; v0.3.52 follows below.
 **DOC-01/02/04/14, partial:** the current verification policy and release procedures are now
 short entry points. Dated verification and older release records live in `docs/history/`, with
 their facts and headings preserved and relative links rebased. Known incoming fragments retain
-aliases. The latest release is v0.3.60, adding the requested live defaults and item bar after schema-owned
-browser catalogs, bounded asynchronous shutdown and the merged Napoleonic sheet.
+aliases. The latest release is v0.3.62, sharing equivalent scene mocks after typed startup configuration,
+requested QoL, schema-owned browser catalogs and bounded shutdown.
 The testing guide now indexes configured suites separately from execution evidence; its former
 acceptance narratives live in `docs/history/testing.md`, with facts and incoming anchors preserved.
 Deployment now uses a common fixture procedure and exact manifest/acknowledgement index; its
@@ -225,7 +225,7 @@ Related IDs are grouped to avoid treating one architectural problem as several i
 | BE-01 | Confirmed cost, intentional documented behavior. | Decide whether production replay recording has an operational consumer. If not, feature-gate allocation/recording while retaining replay acceptance tests; document memory effects. |
 | BE-03, SEC-01 | Agree; implemented in v0.3.53. | Strict transport/proxy identity, bounded independent peer tables, rate/concurrency/session quotas and global backstops are integrated. Source-bound/runtime acceptance passes; actual public proxy topology and ingress configuration remain operator requirements. |
 | BE-04 | Agree; bucket implementation shared. | Independent caller budgets and clock/lock behavior are preserved. Consolidate repeated transport timeout definitions separately; no generic clock abstraction is introduced. |
-| BE-05 | Agree; typed startup configuration is the current bounded fix. | Centralize production environment reads and defaults, warn on an explicitly empty origin set, preserve redacted errors/lazy database and intentional development/container defaults. |
+| BE-05 | Implemented in v0.3.61. | Typed production capture, an explicit empty-origin warning, redacted errors/lazy database and intentional development/container defaults have focused, full source-bound and actual-image acceptance. |
 | TS-14 | Coverage observation; not automatically closed by extracting configuration. | Exercise active startup paths meaningfully; assess retained low-coverage adapters alongside the protocol inventory. Do not add sibling tests merely to change counts. |
 | BE-06, CX-06 | Agree; safe exemption cleanup implemented. | Removed the unused restoration method and stale exemptions; gated test-only hooks and preserved production cooldown observations. Admission-argument refactoring remains separate. |
 | BE-08, CX-04/05 | Agree; aggregation and source-size coverage shipped in v0.3.54. | Test-only declaration aggregation preserves every test name and production module. Dynamic item-tree discovery and eight wired regressions close the guard gap; consolidate genuinely equivalent fixtures separately. |
@@ -242,7 +242,8 @@ Related IDs are grouped to avoid treating one architectural problem as several i
 | FE-06 | Type-hygiene observation, not a broad defect. | Replace the isolated double cast when touching binding construction; no repository-wide type rewrite. |
 | FE-07, SEC-04/10 | Basic headers/cache, standalone validators and compatible CSP implemented. | Pixi static paths, Mantine styles and same-origin HTTP/WS + HTTPS/WSS pass enforced trials. Actual server-header and same-image Compose/Kubernetes acceptance pass; retain the explicit style exception and Chromium support boundary. |
 | FE-08 | Selector counts do not describe the current web tests. | Current web tests use role queries rather than test IDs. Assess E2E selectors in their own scope; a selector ratio alone is not an accessibility defect. Retain actual accessibility audits. |
-| FE-09/10 | Agree, lower-priority consistency work. | Consolidate copied scene mocks, preserving specialized renderer/atlas mocks; introduce semantic color tokens incrementally. |
+| FE-09 | Implemented in v0.3.62. | Three copied scene mocks reuse the existing shared helper with unchanged test bodies/titles/assertions and full web acceptance; specialized renderer/atlas mocks remain intentional. |
+| FE-10 | Agree, lower-priority consistency work. | Introduce semantic color tokens incrementally while preserving visuals and accessibility. |
 | TS-01/02 | Agree on cost; sampling is a policy change. | Measure a structured fast feedback suite while retaining exhaustive acceptance. Compare fault detection before proposing a new cadence; keep current assertions and exhaustive coverage meanwhile. |
 | TS-03/04 | Agree; helper exclusions and threshold recalibration implemented. | Fresh application coverage supports web floors of 90% lines / 88% other metrics and Rust 90% lines. The full Rust measurement ran at the prior floor before ratcheting; execution and exhaustive masks remain unchanged. Optional tool-dependent gates stay explicit. |
 | TS-05, TL-02/03, SEC-05 | Aggregate scope is documented; diagnostic coverage/wiring still needs an explicit disposition. | Audit the renderer/terrain manual suites and protocol coverage inventory. Preserve local-first verification and documented optional tools; a new blanket full target or duplicate automatic pipeline is not required. |
@@ -287,11 +288,10 @@ Each ships with relevant tests and a version bump; no new approval or evidence p
 
 | Package | Remaining scope and completion evidence |
 | --- | --- |
-| Startup / BE-05, active TS-14 | Typed startup parsing, empty-origin warning, one defaults table, meaningful default/error/redaction tests. Existing parsing is a foundation, not completion. |
 | Transport / BE-04, accepted BE-09/CX-07 | Share equivalent send policy; type authenticated commands and sequences; improve admission arguments. Preserve distinct timeout purposes, authorization, ordering and close behavior; current `expect`/`unreachable` sites are not proven reachable defects. |
 | Fixtures / CX-05, CX-02/TS-08, residual CX-08/TS-06/TL-05/07 | Share truly equivalent Rust worlds/frame fixtures, E2E selectors/collection and Compose seed scaffolding. Preserve every test identity/assertion, version-specific rejection, seed and independent session. Responsive contexts and simple config factories are already delivered. |
 | Protocol / API-01/CX-01/02/BE-07/FE-01, CX-03 | Map remaining consumers and unique tests; reduce selected adapters under ADR 0021 and establish a domain item specification. Preserve archived schemas/conformance, replay identity, item bits, activation subsets, generation order and privacy. Browser schema-owned catalogs are delivered. |
-| Docs/frontend / DOC-10/11, FE-03/09/10 | Archive older protocol guides with compatible links; make item headings useful/consistent; consolidate typed translation access and equivalent scene mocks; introduce semantic colors without changing visuals. Keep specialized renderer/atlas mocks. |
+| Docs/frontend / DOC-10/11, FE-03/10 | Archive older protocol guides with compatible links; make item headings useful/consistent; consolidate typed translation access and introduce semantic colors without changing visuals. Keep specialized renderer/atlas mocks. |
 | Release/build / TL-06, selected TL-08/09, TL-11/12 | Optional version/changelog helper, selected pinned shell/workflow checks, verified tool/dependency caches, OCI metadata and a defined security-refresh policy. Stricter lint rules require actionable findings; do not introduce another mandatory release receipt process. |
 | Deployment / accepted SEC-08 | Appropriate Compose memory/PID limits and Kubernetes storage/security-context regression guards, plus actual runtime acceptance. Public ingress and NetworkPolicy require a real hosting/network model. |
 | Production replay / BE-01 | Record an explicit operational decision about journal allocation without a consumer, then implement the chosen recording policy and tests. Building a durable export product is not a prerequisite. |

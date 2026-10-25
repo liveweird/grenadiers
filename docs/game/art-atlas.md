@@ -31,9 +31,9 @@ reuses that source and refreshes the terrain cache. Failed initialization follow
 localized renderer-error flow rather than substituting different artwork.
 
 Procedural drawings remain available for template extraction and reference comparisons.
-v0.3.53 replaces the adopted source with a redrawn, AI-generated sheet (chibi-proportioned
-actors, new terrain, bombs, flames, pickups and cues; see the
-[provenance](../../assets/art/README.md#provenance)). The manifest, frame rectangles, pivots,
+v0.3.53 replaced the adopted source with a redrawn, AI-generated sheet; the current source is
+a Napoleonic redraw (shako and bicorne actors, repainted terrain, bombs, flames, pickups and
+cues; see the [provenance](../../assets/art/README.md#provenance)). The manifest, frame rectangles, pivots,
 foot anchors and texture budget are unchanged, so gameplay positions and collisions do not move.
 v0.3.49 adopted the baseline artwork, with one explicit compositing change: status pulses
 fade each completed icon once. The old procedural renderer faded every overlapping paint

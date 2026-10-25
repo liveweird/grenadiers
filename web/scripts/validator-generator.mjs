@@ -1,4 +1,5 @@
 import { readFile } from 'node:fs/promises'
+import { createRequire } from 'node:module'
 import { join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import Ajv from 'ajv'
@@ -44,6 +45,13 @@ export default validate
 }
 
 const validatorNames = Object.freeze(Object.keys(validatorDefinitions))
+const resolveInstalled = createRequire(import.meta.url).resolve
+const helperSourcePaths = new Map([
+  'ajv/dist/runtime/ucs2length',
+  'ajv/dist/runtime/equal',
+  'fast-deep-equal',
+].map((specifier) => [specifier, resolveInstalled(specifier)]))
+const helperPrefix = '\0grenadiers-validator-helper/'
 
 function directoryUrl(value) {
   if (typeof value === 'string') return pathToFileURL(`${value}/`)
@@ -58,6 +66,9 @@ function assertSingleSelfContainedChunk(output, name) {
   if (chunk.imports.length > 0 || chunk.dynamicImports.length > 0) {
     throw new Error(`${name} validator build is not self-contained`)
   }
+  const unstableModule = chunk.moduleIds.find((id) => id !== '\0rolldown/runtime.js'
+    && !id.startsWith('\0grenadiers-validator-'))
+  if (unstableModule) throw new Error(`${name} validator build contains path-dependent module ${unstableModule}`)
   assertNoExecutableCodeGeneration(chunk.code, name)
   return chunk.code
 }
@@ -125,13 +136,24 @@ export async function bundleStandaloneValidator(name, commonJs, webDirectory) {
     logLevel: 'silent',
     plugins: [{
       name: 'grenadiers-standalone-validator',
-      resolveId(id) { if (id === entry || id === entryUrl) return virtualEntry },
-      load(id) { if (id === virtualEntry) return commonJs },
+      enforce: 'pre',
+      resolveId(id) {
+        if (id === entry || id === entryUrl) return virtualEntry
+        if (helperSourcePaths.has(id)) return `${helperPrefix}${id}`
+      },
+      async load(id) {
+        if (id === virtualEntry) return commonJs
+        if (id.startsWith(helperPrefix)) {
+          const source = helperSourcePaths.get(id.slice(helperPrefix.length))
+          if (source) return readFile(source, 'utf8')
+        }
+      },
     }],
     build: {
       write: false,
       minify: false,
       sourcemap: false,
+      rolldownOptions: { cwd: fileURLToPath(webUrl) },
       lib: { entry, formats: ['es'], fileName: name },
     },
   })

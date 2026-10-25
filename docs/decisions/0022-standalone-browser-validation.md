@@ -26,6 +26,11 @@ handwritten rewriting would be fragile. Require one ESM chunk without external o
 imports, executable `require`, dynamic function construction or evaluation. Helper metadata
 strings are data and must not be mistaken for executable calls.
 
+Load the entry and its three installed runtime helpers through stable virtual module IDs,
+and bind the bundler working directory explicitly. Reject unexpected physical module IDs.
+This prevents generated region comments from depending on checkout depth or invocation
+directory; compare complete artifacts across both variations and the pinned Linux build.
+
 Generated declarations describe the interface actually supplied: a callable type guard with
 optional nullable validation errors. They must not claim the standalone function has every
 property of Ajv's compiler-side `ValidateFunction`.

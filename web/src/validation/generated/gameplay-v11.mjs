@@ -1,7 +1,7 @@
 //#region \0rolldown/runtime.js
 var __commonJSMin = (cb, mod) => () => (mod || (cb((mod = { exports: {} }).exports, mod, mod.exports), cb = null), mod.exports);
 //#endregion
-//#region node_modules/ajv/dist/runtime/ucs2length.js
+//#region \0grenadiers-validator-helper/ajv/dist/runtime/ucs2length
 var require_ucs2length = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	function ucs2length(str) {
@@ -23,7 +23,7 @@ var require_ucs2length = /* @__PURE__ */ __commonJSMin(((exports) => {
 	ucs2length.code = "require(\"ajv/dist/runtime/ucs2length\").default";
 }));
 //#endregion
-//#region node_modules/fast-deep-equal/index.js
+//#region \0grenadiers-validator-helper/fast-deep-equal
 var require_fast_deep_equal = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 	module.exports = function equal(a, b) {
 		if (a === b) return true;
@@ -53,7 +53,7 @@ var require_fast_deep_equal = /* @__PURE__ */ __commonJSMin(((exports, module) =
 	};
 }));
 //#endregion
-//#region node_modules/ajv/dist/runtime/equal.js
+//#region \0grenadiers-validator-helper/ajv/dist/runtime/equal
 var require_equal = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	var equal = require_fast_deep_equal();

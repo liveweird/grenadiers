@@ -35,8 +35,8 @@ async function temporaryCheckout(nested = false) {
   return checkout
 }
 
-function standaloneCallIn(cwd, expression, ...arguments_) {
-  const moduleUrl = pathToFileURL(join(cwd, 'scripts', 'validator-generator.mjs')).href
+function standaloneCallWithModule(cwd, modulePath, expression, ...arguments_) {
+  const moduleUrl = pathToFileURL(modulePath).href
   const source = `import * as generator from ${JSON.stringify(moduleUrl)};
 const result = await (${expression})(generator, ...JSON.parse(process.argv[1]));
 process.stdout.write(JSON.stringify(result));`
@@ -44,6 +44,10 @@ process.stdout.write(JSON.stringify(result));`
     cwd, encoding: 'utf8', maxBuffer: 2 * 1024 * 1024,
   })
   return JSON.parse(output)
+}
+
+function standaloneCallIn(cwd, expression, ...arguments_) {
+  return standaloneCallWithModule(cwd, join(cwd, 'scripts', 'validator-generator.mjs'), expression, ...arguments_)
 }
 
 test('checked-in validators and declarations are reproducible and executable', async () => {
@@ -95,7 +99,7 @@ test('the real bundling path rejects dynamic imports and indirect code generatio
   }
 })
 
-test('validator output is independent of the checkout path', async () => {
+test('validator artifacts are independent of checkout depth', async () => {
   const firstCheckout = await temporaryCheckout()
   const secondCheckout = await temporaryCheckout(true)
   const generate = `(generator, web) => generator.generateValidators(web).then((value) => Object.fromEntries(value))`
@@ -103,6 +107,15 @@ test('validator output is independent of the checkout path', async () => {
   const second = standaloneCallIn(join(secondCheckout, 'web'), generate, join(secondCheckout, 'web'))
   assert.deepEqual(first, second)
   assert.match(first.realtime.code, /#region \\0grenadiers-validator-entry\/realtime\.cjs/)
+})
+
+test('validator output is independent of the invoking working directory', () => {
+  const webDirectory = join(import.meta.dirname, '..')
+  const modulePath = join(import.meta.dirname, 'validator-generator.mjs')
+  const generate = `(generator, web) => generator.generateValidators(web).then((value) => Object.fromEntries(value))`
+  const fromWeb = standaloneCallWithModule(webDirectory, modulePath, generate, webDirectory)
+  const fromRepository = standaloneCallWithModule(join(webDirectory, '..'), modulePath, generate, webDirectory)
+  assert.deepEqual(fromWeb, fromRepository)
 })
 
 test('drift detection covers generated code, declarations, and schema inputs', async () => {

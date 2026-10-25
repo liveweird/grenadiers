@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Added
+
+- Add bounded peer admission alongside process-global limits, strict opt-in immediate-proxy
+  identity, outstanding-session quotas and credential-free aggregate denial telemetry.
+
 ## 0.3.52 — 2026-10-25
 
 ### Added

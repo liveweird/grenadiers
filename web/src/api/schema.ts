@@ -55,7 +55,7 @@ export interface paths {
         put?: never;
         /**
          * Create an anonymous gameplay session
-         * @description Issues a gameplay credential that expires if unclaimed after 300 seconds. Browser Origin must exactly match the configured allowlist. Credentials must remain outside URLs and logs; query parameters are rejected.
+         * @description Issues a gameplay credential that expires if unclaimed after 300 seconds. Browser Origin must exactly match the configured allowlist. Credentials must remain outside URLs and logs; query parameters are rejected. Admission applies independent process-global and bounded peer budgets. Peer identity comes from transport metadata or an explicitly trusted immediate proxy; minting does not bind a bearer credential to that peer for authentication.
          */
         post: operations["createGameSession"];
         delete?: never;
@@ -73,7 +73,7 @@ export interface paths {
         };
         /**
          * Connect an authenticated gameplay WebSocket
-         * @description Upgrades to the gameplay protocol. The first application frame must authenticate with a credential created by POST /api/v1/game/session. Credentials are never accepted in URLs.
+         * @description Upgrades to the gameplay protocol. The first application frame must authenticate with a credential created by POST /api/v1/game/session. Credentials are never accepted in URLs. Peer and process-global admission budgets apply independently; ordinary headers from untrusted peers cannot override transport identity.
          */
         get: operations["connectGame"];
         put?: never;
@@ -93,7 +93,7 @@ export interface paths {
         };
         /**
          * Upgrade to the version 1 diagnostic WebSocket
-         * @description Browser Origin must match the configured allowlist. Messages follow api/realtime.schema.json; this scaffold does not create rooms or reserve player seats. Invalid upgrades are rejected by Axum.
+         * @description Browser Origin must match the configured allowlist. Messages follow api/realtime.schema.json; this scaffold does not create rooms or reserve player seats. Invalid upgrades are rejected by Axum. Peer and process-global admission budgets apply independently; ordinary headers from untrusted peers cannot override transport identity.
          */
         get: operations["connectRealtime"];
         put?: never;
@@ -269,7 +269,7 @@ export interface operations {
                     "application/json": components["schemas"]["GameSession"];
                 };
             };
-            /** @description Query parameters are not supported */
+            /** @description Query parameters are unsupported or an explicitly trusted proxy supplied an invalid client identity. */
             400: {
                 headers: {
                     "Cache-Control": components["headers"]["NoStore"];
@@ -289,7 +289,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Global session issuance rate exceeded */
+            /** @description Peer or process-global session issuance rate exceeded. */
             429: {
                 headers: {
                     "Cache-Control": components["headers"]["NoStore"];
@@ -300,7 +300,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Session registry capacity exhausted or credential generation unavailable */
+            /** @description Peer outstanding-session quota, peer tracking or global registry capacity exhausted; transport identity or credential generation unavailable; or server shutdown in progress. */
             503: {
                 headers: {
                     "Cache-Control": components["headers"]["NoStore"];
@@ -332,7 +332,7 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description Query parameters are unsupported or the WebSocket handshake is malformed. */
+            /** @description Unsupported query parameters or invalid client identity from an explicitly trusted proxy (problem details), or a malformed WebSocket handshake (framework plain text). */
             400: {
                 headers: {
                     "Cache-Control": components["headers"]["NoStore"];
@@ -353,7 +353,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Global gameplay connection rate exceeded */
+            /** @description Peer or process-global gameplay upgrade rate exceeded. */
             429: {
                 headers: {
                     "Cache-Control": components["headers"]["NoStore"];
@@ -364,7 +364,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Shared WebSocket connection capacity exhausted */
+            /** @description Peer or process-global gameplay connection capacity or bounded peer tracking exhausted; transport identity unavailable; or server shutdown in progress. */
             503: {
                 headers: {
                     "Cache-Control": components["headers"]["NoStore"];
@@ -396,7 +396,7 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description Malformed WebSocket handshake; framework-generated rejection (plain text). */
+            /** @description Malformed WebSocket handshake (framework plain text), or invalid client identity from an explicitly trusted proxy (problem details). */
             400: {
                 headers: {
                     "Cache-Control": components["headers"]["NoStore"];
@@ -404,6 +404,7 @@ export interface operations {
                 };
                 content: {
                     "text/plain": string;
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Missing or disallowed Origin */
@@ -416,7 +417,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Diagnostic WebSocket upgrade rate exceeded */
+            /** @description Peer or process-global diagnostic upgrade rate exceeded. */
             429: {
                 headers: {
                     "Cache-Control": components["headers"]["NoStore"];
@@ -427,7 +428,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Diagnostic WebSocket connection capacity exhausted or server shutdown in progress */
+            /** @description Peer or process-global diagnostic connection capacity or bounded peer tracking exhausted; transport identity unavailable; or server shutdown in progress. */
             503: {
                 headers: {
                     "Cache-Control": components["headers"]["NoStore"];

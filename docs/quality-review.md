@@ -55,8 +55,8 @@ That initial v0.3.50 change did not enable CSP; v0.3.52 follows below.
 **DOC-01/02/04/14, partial:** the current verification policy and release procedures are now
 short entry points. Dated verification and older release records live in `docs/history/`, with
 their facts and headings preserved and relative links rebased. Known incoming fragments retain
-aliases. The latest release is v0.3.58, bounding total asynchronous shutdown and adopting the merged
-Napoleonic sheet after shared wire-item and browser-test cleanup.
+aliases. The latest release is v0.3.59, deriving browser item catalogs from retained schemas after
+bounded asynchronous shutdown, the merged Napoleonic sheet and shared wire-item cleanup.
 The testing guide now indexes configured suites separately from execution evidence; its former
 acceptance narratives live in `docs/history/testing.md`, with facts and incoming anchors preserved.
 Deployment now uses a common fixture procedure and exact manifest/acknowledgement index; its
@@ -192,6 +192,12 @@ cases. Exact virtual completion and a consumed-header TCP regression prevent fal
 full source-bound acceptance passes at 93.50% line coverage. The exact-image held-header probe
 exits successfully in 5.127s; graceful room/diagnostic shutdown exits in 0.115s with finality and
 1001 closes. Seventeen app-browser cases, fourteen separate graphics cases and promotion pass.
+
+**CX-03, partial / v0.3.59:** generate browser `ITEM_IDS` from each v7–v11 schema's own
+`ItemId` enum; live settings and validators reuse it while archived activation subsets remain
+explicit. V2–v6 output and all contracts, sampling, replay and dependencies are unchanged.
+Independent review and fresh full web acceptance pass (6,799 tests; existing coverage floors).
+This removes browser catalog repetition; it is not a cross-layer domain specification.
 
 ## Finding dispositions and proposed solutions
 

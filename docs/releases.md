@@ -65,48 +65,44 @@ interrupted state but cannot preserve process-local matches or credentials.
 Keep the previous immutable image reference for rollback; database migration compatibility
 must be designed when durable application data is introduced.
 
-## v0.3.58 — 2026-10-25
+## v0.3.59 — 2026-10-25
 
-[v0.3.58](https://github.com/liveweird/grenadiers/releases/tag/v0.3.58) bounds HTTP serving and
-application drain with one five-second deadline measured from the shutdown signal. Incomplete
-HTTP requests cannot postpone the game/session drain budget. Graceful final state, socket
-closure and startup/I/O errors are preserved. On expiry, main returns and runtime teardown
-releases remaining asynchronous I/O; this is an asynchronous budget, not a hard real-time bound.
-The release also adopts the merged Napoleonic sheet and refreshed gameplay captures without
-changing manifest slots, anchors, gameplay or texture budgets.
+[v0.3.59](https://github.com/liveweird/grenadiers/releases/tag/v0.3.59) generates browser item
+catalogs from each v7–v11 schema's own `ItemId` enum. Live settings and validation reuse those
+tuples; retained validators preserve their narrower activation subsets. V2–v6 generated output,
+schema JSON, standalone validators, rules, generation, replay identities and dependencies are
+unchanged. An E2E privacy assertion now checks the actual unique secret and redaction markers
+rather than rejecting a harmless `/private/tmp` checkout path; sanitizer behavior is unchanged.
 
-Application inputs match tested source `e758ad249a066854c35d200cf8e7ce866d8bda74`; the release
-source adds documentation. Localhost:8085 serves accepted image
-`sha256:cc8f5d0308b8e1d6b774f20dfcee20fdb49691c080e95ac95624d6c2bd3ce0af`.
-Independent code, timing and artwork reviews are clear. Nineteen focused shutdown tests pass;
-a deliberate nine-second mutant fails all three deadline cases. A real Linux container with
-incomplete headers held until process exit terminates successfully in 5.127s with one deadline
-warning. A graceful room/diagnostic probe exits in 0.115s, publishes `serverStopped` and closes
-member, unseated and diagnostic sockets with code 1001. No frames or credentials are recorded.
+Application inputs match `473d1e6e889cfecd5c08178f3b881ca74d775fae`; later source adds only the
+E2E test correction and release documentation. Accepted image is
+`sha256:946a5f6fbab0c8b573c66badff34157b445cc57cc65798d519bc7fdc6a303fc0`.
+Independent catalog review is clear. Fresh full web acceptance passes 6,799 tests / 88 files
+in 314.30s; coverage is 90.94/89.49/89.85/93.30% above the unchanged floors. Production gzip
+JavaScript/CSS sizes are 336,404/36,292 bytes. All retained generation/standalone drift checks,
+API conventions, lint, unused-code, repository and corrected full E2E static checks pass.
 
-Fresh source-bound Rust acceptance completes all 4,194,304 replay masks in debug, release and
-official coverage in 433.085s, with zero retries. Each ordinary profile passes 930 core and
-293 server tests plus two doctests; four existing performance tests remain ignored and the
-heavy case runs separately across 32 complete partitions. Coverage is 17,278/18,480 lines
-(93.50%) at the unchanged 90% floor. Rustfmt, Clippy, repository checks and the
-[distinct Linux units](https://github.com/liveweird/grenadiers/actions/runs/40228900957) pass.
-The first runner-fixture setup failed from an inherited target-directory override; the unchanged
-fixture suite passed with its isolated environment before the complete runner passed.
+Rust behavior is unchanged: reuse v0.3.58's complete 4,194,304-mask debug/release/official-coverage
+acceptance (93.50% application lines), plus its shutdown and separate graphics diagnostics.
+Dependency inputs are unchanged, so v0.3.57's fresh Cargo-deny and both zero-finding npm audits
+remain applicable. The exact new image receives its own scan and runtime acceptance below.
 
-The fresh web gate passes 6,791 tests / 88 files with 90.95/89.49/89.80/93.32% coverage.
-JavaScript/CSS gzip sizes are 336,430/36,292 bytes within their budgets; contract, standalone
-validator, lint and unused-code checks pass. Dependency inputs are unchanged from v0.3.57,
-whose fresh Cargo-deny and both zero-finding npm audits are reused. A fresh pinned Trivy scan
-of this exact image reports zero fixable HIGH/CRITICAL findings under the existing policy.
+Fresh pinned Trivy 0.74.0 acceptance reports zero fixable HIGH/CRITICAL vulnerabilities.
+Native Chromium passes eight default cases through Compose (36.4s) and eight through Kubernetes
+(40.3s), with unchanged assertions and no configured retries. The first Kubernetes setup used an
+8085 origin allowlist with a browser on 18086; correcting only that isolated environment fixed
+session admission. Its original failure log was overwritten; the verifier's command-output
+excerpt is retained as a limitation. The initial scan lacked Docker socket access; the corrected
+exact-image scan is authoritative. Health/readiness, runtime security and CSP/cache headers pass.
 
-Exact-image Chromium acceptance passes nine Compose cases (eight default plus Oil Barrel)
-and eight Kubernetes cases. Separate diagnostics under the enforced browser policy pass
-14 artist, terrain, atlas and isolated renderer-lifecycle cases. These are representative
-checks, not a rerun of every configured browser suite. Post-promotion runtime/security,
-health/readiness, CSP/cache, exact HTML/JavaScript/atlas equality and one additional browser
-smoke pass. Temporary acceptance resources are removed. Durable control is
-`.local-checkpoints/runtime/compose-v0.3.58.yaml`; `rollback-v0.3.57.yaml` retains the previous
-image. No migration is needed; restarts still end process-local matches. Keep external stop grace.
+Localhost:8085 now serves that accepted image. Promotion verifies exact HTML/JavaScript/atlas
+bytes against the local build and image, runtime security, headers and one additional native
+realtime smoke. Temporary acceptance services, namespaces and forwards are removed. Control is
+`.local-checkpoints/runtime/compose-v0.3.59.yaml`; `rollback-v0.3.58.yaml` retains the previous
+image. No migration or gameplay configuration change is introduced by this release.
+
+<a id="v0358--2026-10-25"></a>
+The [v0.3.58 record](history/releases.md#v0358--2026-10-25) is preserved in release history.
 
 <a id="v0357--2026-10-25"></a>
 The [v0.3.57 record](history/releases.md#v0357--2026-10-25) is preserved in release history.

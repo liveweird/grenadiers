@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## 0.3.59 — 2026-10-25
+
 ### Changed
 
 - Generate each retained browser gameplay item catalog from its own schema and reuse it in

@@ -36,6 +36,9 @@ verification record.
 
 [Baseline rule coverage](rule-coverage.md) maps all 42 acceptance rules to concrete automated assertions.
 
+[Single-player versus CPU proposal](single-player-cpu.md) recommends a scored-goal bot on the
+deterministic core.
+
 [Gameplay and presentation backlog](backlog.md) records playtest requests for forgiving turns,
 shared room settings, detailed pixel art, equipment, timed effects and single-use weapons.
 Forgiving turns, shared settings and the first pixel-art slice are available. New item activation

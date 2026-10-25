@@ -4,6 +4,40 @@ This archive preserves the older release records originally maintained in
 [`docs/releases.md`](../releases.md). Records remain in their original order; the current
 release procedure and current release record stay in the [release guide](../releases.md).
 
+## v0.3.55 — 2026-10-25
+
+[v0.3.55](https://github.com/liveweird/grenadiers/releases/tag/v0.3.55) shares native responsive
+browser-context setup across 26 gameplay scenarios. Two independent contexts still start
+concurrently and return in desktop/mobile order. Viewports, mobile reduced motion, pickup's
+390px override, privacy observations, assertions and caller-owned cleanup remain unchanged.
+Application inputs match `8b7bacb82de085988e1592a280c0119ba3a41bfa`; the source tag includes
+release documentation. Localhost:8085 serves accepted image
+`sha256:a053abd96387ebe50f85b68aeecffcaa48160ccacb70a2f26f7808c1d7cee6d2`.
+
+Independent review and fresh E2E types, lint, unused-code, repository and scenario checks pass.
+The scenario gate includes the new exact-options, concurrency, reverse-resolution ordering and
+native-identity regression. All 46 spec title inventories are unchanged; every migrated spec
+is byte-identical outside its new import and equivalent setup block. Seventy-four mapped
+scenarios remain registered; this static count is not a claim that all ran natively.
+
+The exact image passes twenty Chromium cases without retries: eight default cases through
+Compose, eight through Kubernetes, and four seeded Compose cases covering Landmine, 390px
+pickups, recipient-private Cloak/reconnect/expiry and Invisible Bombs' live pixel/privacy window.
+The pinned image scan reports zero fixable HIGH/CRITICAL findings. Post-promotion checks pass
+health/readiness, runtime security, CSP/cache headers, exact served HTML/JavaScript/atlas bytes
+and one fresh real-browser diagnostic/gameplay smoke. Claude's graphics are preserved.
+
+Production Rust, API, frontend and asset sources are unchanged from v0.3.54; Cargo changes only
+local package versions. Reuse v0.3.54 ordinary Rust/Linux results and v0.3.53 frontend/security/
+renderer evidence. Exhaustive replay/coverage remains attributed to measured `055d1d2`
+(all 4,194,304 masks, 93.15% line coverage at the 90% floor); none is claimed as freshly rerun
+for test setup reuse. The production image is rebuilt and accepted independently.
+
+Temporary acceptance services are removed. Durable control is
+`.local-checkpoints/runtime/compose-v0.3.55.yaml`, with `rollback-v0.3.54.yaml` retaining the
+previous accepted image. No migration is needed; restarting still ends process-local matches.
+Configuration factories and broader fixture sharing remain separate work.
+
 ## v0.3.54 — 2026-10-25
 
 [v0.3.54](https://github.com/liveweird/grenadiers/releases/tag/v0.3.54) extends the source-size

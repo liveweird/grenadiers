@@ -65,39 +65,42 @@ interrupted state but cannot preserve process-local matches or credentials.
 Keep the previous immutable image reference for rollback; database migration compatibility
 must be designed when durable application data is introduced.
 
-## v0.3.55 — 2026-10-25
+## v0.3.56 — 2026-10-25
 
-[v0.3.55](https://github.com/liveweird/grenadiers/releases/tag/v0.3.55) shares native responsive
-browser-context setup across 26 gameplay scenarios. Two independent contexts still start
-concurrently and return in desktop/mobile order. Viewports, mobile reduced motion, pickup's
-390px override, privacy observations, assertions and caller-owned cleanup remain unchanged.
-Application inputs match `8b7bacb82de085988e1592a280c0119ba3a41bfa`; the source tag includes
-release documentation. Localhost:8085 serves accepted image
-`sha256:a053abd96387ebe50f85b68aeecffcaa48160ccacb70a2f26f7808c1d7cee6d2`.
+[v0.3.56](https://github.com/liveweird/grenadiers/releases/tag/v0.3.56) shares the common
+Playwright configuration across 24 simple gameplay wrappers. Public config names and commands,
+artifact paths, worker/retry limits and base browser/environment settings are unchanged.
+Audio keeps its 60-second timeout; the other 23 keep 90 seconds. Trace capture remains disabled.
+Specialized configurations and the pickup/matches/reconnect chain remain separate.
+Application inputs match `d7849292fed30d728bffcf0c106aff7d4a1cf6f8`; the source tag adds release
+documentation. Localhost:8085 serves accepted image
+`sha256:5f1e0627b21d18162c6b12e53516a934ea4d370a0e1a285b75bff2d551a6e603`.
 
-Independent review and fresh E2E types, lint, unused-code, repository and scenario checks pass.
-The scenario gate includes the new exact-options, concurrency, reverse-resolution ordering and
-native-identity regression. All 46 spec title inventories are unchanged; every migrated spec
-is byte-identical outside its new import and equivalent setup block. Seventy-four mapped
-scenarios remain registered; this static count is not a claim that all ran natively.
+Independent review, fresh types/lint/unused-code/scenario/repository checks and the wired
+configuration regression pass. Complete before/after exports match in all 96 comparisons
+(24 wrappers across four simulated environment/platform profiles), using pinned Playwright
+`defineConfig` and device defaults, including undefined/symbol keys. This source evaluation
+preserves Linux ANGLE and capture-profile settings; it is not native Linux browser execution.
 
-The exact image passes twenty Chromium cases without retries: eight default cases through
-Compose, eight through Kubernetes, and four seeded Compose cases covering Landmine, 390px
-pickups, recipient-private Cloak/reconnect/expiry and Invisible Bombs' live pixel/privacy window.
-The pinned image scan reports zero fixable HIGH/CRITICAL findings. Post-promotion checks pass
-health/readiness, runtime security, CSP/cache headers, exact served HTML/JavaScript/atlas bytes
-and one fresh real-browser diagnostic/gameplay smoke. Claude's graphics are preserved.
+The exact image passes nineteen Chromium cases without retries: eight default cases through
+Compose, eight through Kubernetes, plus controls, natural headed audio and a seeded Landmine
+scenario through Compose. The pinned image scan reports zero fixable HIGH/CRITICAL findings.
+Post-promotion checks pass image/runtime security, health/readiness, CSP/cache headers, exact
+served HTML/JavaScript/atlas bytes and one additional native diagnostic/gameplay smoke.
+Claude's redraw is unchanged. Temporary acceptance services are removed.
 
-Production Rust, API, frontend and asset sources are unchanged from v0.3.54; Cargo changes only
-local package versions. Reuse v0.3.54 ordinary Rust/Linux results and v0.3.53 frontend/security/
-renderer evidence. Exhaustive replay/coverage remains attributed to measured `055d1d2`
-(all 4,194,304 masks, 93.15% line coverage at the 90% floor); none is claimed as freshly rerun
-for test setup reuse. The production image is rebuilt and accepted independently.
+Production Rust, API, frontend, asset and deployment sources are unchanged; Cargo changes only
+local package versions. Reuse ordinary Rust/Linux results from v0.3.54, frontend/dependency/
+renderer evidence from v0.3.53 and exhaustive replay/coverage measured at `055d1d2`
+(all 4,194,304 masks, 93.15% line coverage at the 90% floor). These results are not claimed as
+freshly rerun for configuration reuse. The new production image is built and accepted separately.
 
-Temporary acceptance services are removed. Durable control is
-`.local-checkpoints/runtime/compose-v0.3.55.yaml`, with `rollback-v0.3.54.yaml` retaining the
-previous accepted image. No migration is needed; restarting still ends process-local matches.
-Configuration factories and broader fixture sharing remain separate work.
+Durable control is `.local-checkpoints/runtime/compose-v0.3.56.yaml`; `rollback-v0.3.55.yaml`
+retains the previous accepted image. No migration is needed; restarts end process-local matches.
+The testing index/archive cleanup is included; its historical labels do not impose current gates.
+
+<a id="v0355--2026-10-25"></a>
+The [v0.3.55 record](history/releases.md#v0355--2026-10-25) is preserved in release history.
 
 <a id="v0354--2026-10-25"></a>
 The [v0.3.54 record](history/releases.md#v0354--2026-10-25) is preserved in release history.

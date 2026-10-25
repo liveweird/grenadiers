@@ -7,6 +7,8 @@ use std::{
 use grenadiers_core::protocol::SessionToken;
 use serde::Serialize;
 
+use crate::rate_limit::TokenBucket;
+
 const MAX_ISSUED_SESSIONS: usize = 128;
 const SESSION_LIFETIME: Duration = Duration::from_secs(300);
 const MINT_BURST: f64 = 32.0;
@@ -41,13 +43,13 @@ pub(crate) struct GameSessions {
 }
 
 pub(crate) struct UpgradeLimit {
-    bucket: Mutex<MintBucket>,
+    bucket: Mutex<TokenBucket>,
 }
 
 impl UpgradeLimit {
     pub(crate) fn new(now: Instant) -> Self {
         Self {
-            bucket: Mutex::new(MintBucket::new(now, MINT_BURST)),
+            bucket: Mutex::new(TokenBucket::new(now, MINT_BURST, MINTS_PER_SECOND)),
         }
     }
 
@@ -55,7 +57,7 @@ impl UpgradeLimit {
         self.bucket
             .lock()
             .unwrap_or_else(|error| error.into_inner())
-            .take(now, MINTS_PER_SECOND)
+            .take(now)
     }
 }
 
@@ -144,7 +146,7 @@ impl GameSessions {
             .unwrap_or_else(|error| error.into_inner());
         let now = registry.effective_now(now);
         registry.prune(now);
-        if !registry.rate_limit.take(now, MINTS_PER_SECOND) {
+        if !registry.rate_limit.take(now) {
             return Err(SessionIssueError::RateLimited);
         }
 
@@ -182,7 +184,7 @@ impl GameSessions {
 
 struct Registry {
     sessions: HashMap<SessionToken, SessionState>,
-    rate_limit: MintBucket,
+    rate_limit: TokenBucket,
     latest_now: Instant,
     next_connection_id: u64,
 }
@@ -196,7 +198,7 @@ impl Registry {
     fn new(now: Instant) -> Self {
         Self {
             sessions: HashMap::new(),
-            rate_limit: MintBucket::new(now, MINT_BURST),
+            rate_limit: TokenBucket::new(now, MINT_BURST, MINTS_PER_SECOND),
             latest_now: now,
             next_connection_id: 1,
         }
@@ -214,38 +216,6 @@ impl Registry {
             SessionState::Issued { expires_at } => *expires_at > now,
             SessionState::Claimed { .. } => true,
         });
-    }
-}
-
-struct MintBucket {
-    available: f64,
-    updated_at: Instant,
-}
-
-impl MintBucket {
-    fn new(now: Instant, available: f64) -> Self {
-        Self {
-            available,
-            updated_at: now,
-        }
-    }
-
-    fn take(&mut self, now: Instant, per_second: f64) -> bool {
-        self.refill(now, per_second);
-        if self.available < 1.0 {
-            false
-        } else {
-            self.available -= 1.0;
-            true
-        }
-    }
-
-    fn refill(&mut self, now: Instant, per_second: f64) {
-        let Some(elapsed) = now.checked_duration_since(self.updated_at) else {
-            return;
-        };
-        self.available = (self.available + elapsed.as_secs_f64() * per_second).min(MINT_BURST);
-        self.updated_at = now;
     }
 }
 

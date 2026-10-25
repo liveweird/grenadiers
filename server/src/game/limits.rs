@@ -2,35 +2,26 @@ use std::time::Duration;
 
 use tokio::time::Instant;
 
+use crate::rate_limit::TokenBucket;
+
 const INBOUND_BURST: f64 = 30.0;
 const INBOUND_REFILL_PER_SECOND: f64 = 60.0;
 const INACTIVITY_TIMEOUT: Duration = Duration::from_secs(30);
 const UNSEATED_LIFETIME: Duration = Duration::from_secs(300);
 
 pub(crate) struct InboundLimit {
-    available: f64,
-    updated_at: Instant,
+    bucket: TokenBucket,
 }
 
 impl InboundLimit {
     pub(crate) fn new(now: Instant) -> Self {
         Self {
-            available: INBOUND_BURST,
-            updated_at: now,
+            bucket: TokenBucket::new(now.into_std(), INBOUND_BURST, INBOUND_REFILL_PER_SECOND),
         }
     }
 
     pub(crate) fn take(&mut self, now: Instant) -> bool {
-        let elapsed = now.saturating_duration_since(self.updated_at);
-        self.available =
-            (self.available + elapsed.as_secs_f64() * INBOUND_REFILL_PER_SECOND).min(INBOUND_BURST);
-        self.updated_at = self.updated_at.max(now);
-        if self.available < 1.0 {
-            false
-        } else {
-            self.available -= 1.0;
-            true
-        }
+        self.bucket.take(now.into_std())
     }
 }
 
@@ -93,16 +84,18 @@ impl SessionDeadlines {
 mod tests {
     use super::*;
 
-    #[test]
-    fn inbound_limit_counts_controls_and_refills_at_sixty_per_second() {
+    #[tokio::test(start_paused = true)]
+    async fn inbound_limit_counts_controls_and_refills_on_paused_tokio_time() {
         let now = Instant::now();
         let mut limit = InboundLimit::new(now);
         for _ in 0..30 {
             assert!(limit.take(now));
         }
         assert!(!limit.take(now));
-        assert!(!limit.take(now + Duration::from_millis(16)));
-        assert!(limit.take(now + Duration::from_millis(17)));
+        tokio::time::advance(Duration::from_millis(16)).await;
+        assert!(!limit.take(Instant::now()));
+        tokio::time::advance(Duration::from_millis(1)).await;
+        assert!(limit.take(Instant::now()));
     }
 
     #[test]

@@ -36,8 +36,8 @@ and I/O outside pure simulation. A terrain-like object such as Oil needs world c
 rules as well as collection behavior; it is not just another timed-effect entry.
 
 `ItemId` and `PickupKind` serve different purposes. Review catalog order, bit bounds, default
-settings, generation filtering and projection together. Shared code currently lives under older
-protocol namespaces: find its live callers before changing or deleting it.
+settings, generation filtering and projection together. Some shared Rust code currently lives
+under older protocol namespaces: find its live callers before changing or deleting it.
 
 ## Update contracts and presentation
 
@@ -46,8 +46,8 @@ validation. Regenerate types with `npm --prefix web run gen:gameplay`; never edi
 `schema.ts`. Run `npm --prefix web run check:gameplay` to check every retained contract.
 A new protocol version also requires an intentional update to the shared generator inventory.
 
-Review `web/src/game/v11/validation.ts` and its shared helpers in
-`web/src/game/v8/semantics.ts` and `web/src/game/v9/freezeValidation.ts`, the available-item list in
+Review `web/src/game/v11/validation.ts` and the shared helpers in `web/src/game/validation/`,
+the available-item list in
 `web/src/game/client/GameplaySettingsPanel.tsx`, and settings/client tests. Add matching labels
 and descriptions to `web/src/locales/{en,pl}/game.json`. Preserve private recipient fields and
 resume behavior; a hidden item must not leak through events, HUD, art or diagnostics.

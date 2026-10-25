@@ -1,11 +1,11 @@
 import Ajv, { type ErrorObject, type ValidateFunction } from 'ajv'
 import gameplayV9Schema from '../../../../api/gameplay-v9.schema.json'
 import { effectSemanticError, expandedProfileSemanticErrorFor, itemSetSemanticError,
-  type GameplayV8SemanticError } from '../v8/semantics'
+  type GameplayProfileSemanticError } from '../validation/profileSemantics'
 import type { GameServerMessage, GameState, RoomView } from './schema'
 import { freezeSemanticError } from './freezeValidation'
 
-type GameplayV9SemanticError = GameplayV8SemanticError | 'invalidFrozenState'
+type GameplayV9SemanticError = GameplayProfileSemanticError | 'invalidFrozenState'
 export type GameplayV9ValidationResult =
   | { valid: true; value: GameServerMessage }
   | { valid: false; source: 'schema'; errors: ErrorObject[] }

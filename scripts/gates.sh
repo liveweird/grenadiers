@@ -122,7 +122,7 @@ coverage() {
   fi
   coverage_exclusions="${coverage_exclusion_lines[0]}"
   mkdir -p target
-  mask_profile coverage cargo llvm-cov --workspace --locked --fail-under-lines 80 \
+  mask_profile coverage cargo llvm-cov --workspace --locked --fail-under-lines 90 \
     --ignore-filename-regex "$coverage_exclusions" \
     --lcov --output-path target/coverage.lcov -- --show-output
 }

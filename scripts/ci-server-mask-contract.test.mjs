@@ -177,7 +177,7 @@ test("coverage export creates its project-relative parent with an external Cargo
 set -euo pipefail
 printf '%s\n' "$*" > "$STUB_CARGO_LOG"
 [ "$CARGO_TARGET_DIR" = "$EXPECTED_CARGO_TARGET_DIR" ]
-[ "$*" = "llvm-cov --workspace --locked --fail-under-lines 80 --ignore-filename-regex (^|/)([^/]*_)?test_support\\.rs$ --lcov --output-path target/coverage.lcov -- --show-output" ]
+[ "$*" = "llvm-cov --workspace --locked --fail-under-lines 90 --ignore-filename-regex (^|/)([^/]*_)?test_support\\.rs$ --lcov --output-path target/coverage.lcov -- --show-output" ]
 if [ ! -d target ]; then
   echo 'target output parent missing' >&2
   exit 73
@@ -207,7 +207,7 @@ printf 'TN:\n' > target/coverage.lcov
     assert.equal(fixed.status, 0, fixed.stderr);
     assert.equal(fs.readFileSync(path.join(root, "target", "coverage.lcov"), "utf8"), "TN:\n");
     assert.equal(fs.readFileSync(cargoLog, "utf8").trim(),
-      "llvm-cov --workspace --locked --fail-under-lines 80 --ignore-filename-regex (^|/)([^/]*_)?test_support\\.rs$ --lcov --output-path target/coverage.lcov -- --show-output");
+      "llvm-cov --workspace --locked --fail-under-lines 90 --ignore-filename-regex (^|/)([^/]*_)?test_support\\.rs$ --lcov --output-path target/coverage.lcov -- --show-output");
     assert.equal(spawnSync("git", ["status", "--porcelain"],
       { cwd: root, encoding: "utf8" }).stdout, "");
 

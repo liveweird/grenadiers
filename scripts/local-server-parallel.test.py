@@ -184,7 +184,7 @@ with tempfile.TemporaryDirectory(prefix="grenadiers-llvm-cov-discovery-") as tem
     try:
         module.ROOT = fixture
         official = module.report_lcov(cov_env, [baseline, worker], fixture / "production.lcov", "production")
-        assert official["lineFloor"] == 80 and official["rawProfiles"] == profile_count
+        assert official["lineFloor"] == 90 and official["rawProfiles"] == profile_count
         assert official["reporter"] == "cargo-llvm-cov"
         official_sources = [line[3:] for line in (fixture / "production.lcov").read_text().splitlines()
                             if line.startswith("SF:")]

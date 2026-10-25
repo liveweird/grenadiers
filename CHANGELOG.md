@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## 0.3.62 — 2026-10-25
+
 ### Changed
 
 - Reuse the existing Pixi scene mock in Diarrhea, Slow Foot and Reverse Controls tests,

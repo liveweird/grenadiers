@@ -4,6 +4,44 @@ This archive preserves the older release records originally maintained in
 [`docs/releases.md`](../releases.md). Records remain in their original order; the current
 release procedure and current release record stay in the [release guide](../releases.md).
 
+## v0.3.61 — 2026-10-25
+
+[v0.3.61](https://github.com/liveweird/grenadiers/releases/tag/v0.3.61) centralizes production
+startup in a typed configuration. Invalid address/origin settings fail with value-free errors;
+OS-native paths, proxy → seed → lazy database validation, existing AppState constructors and
+invalid-log fallback remain supported. An explicitly empty origin list still denies browser
+access and now emits one warning. Docker logging matches Compose/Kubernetes; the
+[defaults table](../security.md#startup-configuration) distinguishes intentional development and
+container values. No gameplay, protocol, replay or dependency changes are introduced.
+
+Tested application source is `29093f3a50297f97cba0033a0f34b2244872c98b`; publication adds only
+documentation. Localhost:8085 serves accepted image
+`sha256:a22899d0d0e0c45063bf658c089ce55428ac02f37d6417a4270705cc02c42696`.
+Independent review, 12 focused startup cases and nine origin cases pass. Fresh source-bound Rust
+acceptance completes every 4,194,304 mask in debug, release and official coverage in 499.886s,
+with zero retries. Ordinary profiles pass 930 core / 304 server tests and two doctests; four
+existing performance cases remain ignored. Coverage is 17,388/18,598 lines (93.49%) at the 90%
+floor. Rustfmt, Clippy, runner fixtures, repository checks and
+[distinct Linux units](https://github.com/liveweird/grenadiers/actions/runs/40234533129) pass.
+
+The exact image passes eight native browser cases through Compose and eight through Kubernetes.
+Five actual-image startup probes verify typed/redacted address, database, seed and proxy errors,
+plus healthy startup/log fallback, one empty-origin warning and browser-session denial.
+A fresh pinned Trivy scan reports zero fixable HIGH/CRITICAL findings. Web/contracts/dependency
+inputs are unchanged; reuse v0.3.60 web acceptance and v0.3.57 Cargo/npm audits. Served HTML,
+JavaScript and atlas bytes match the accepted v0.3.60 artifacts exactly.
+
+Initial temporary checks needed corrections: Compose override setup, browser sandbox permission,
+the absent host Trivy binary (use the pinned container), and a helper expecting API cache policy
+for HTML. These were setup failures; final checks use documented policies and unchanged product
+assertions. Failed outputs or tool excerpts are retained; no hidden retries were added.
+
+Promotion passes image/runtime security, health/readiness, CSP/cache/artifact equality and one
+additional native room-admission smoke. Temporary acceptance resources are removed. Control is
+`.local-checkpoints/runtime/compose-v0.3.61.yaml`; `rollback-v0.3.60.yaml` retains the prior image.
+Restarts still end process-local matches. The review status now separates shipped fixes from
+remaining agreed work; CPU implementation waits for that work to finish.
+
 ## v0.3.60 — 2026-10-25
 
 [v0.3.60](https://github.com/liveweird/grenadiers/releases/tag/v0.3.60) enables all 22 configurable

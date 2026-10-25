@@ -26,9 +26,13 @@ audit fixture or game state is injected into this gameplay scenario. Screenshot 
 use version-checked instance-local hooks to retain bounded fixed stage timings for the original
 capture. They issue no extra browser commands and retain no arguments, results or image bytes.
 
-## Scenario: two offline tabs stop recovery after a late reserved-seat rejection
+## Scenario: two offline tabs stop at the recovery deadline while session requests are held
 
-Both native transports close while fresh-session HTTP requests are held. After eleven real seconds, both resume attempts receive terminal reserved-seat rejection and return to a usable lobby without a retry loop. Exact599/600 expiry and abandonment precedence belong to deterministic core/server tests; this browser scenario verifies late network recovery behavior.
+Both native transports close while fresh-session HTTP requests remain held. Each browser's real
+ten-second recovery deadline returns it to a usable lobby with a connection failure, without
+opening another socket or sending a resume command. Releasing the held requests afterward must
+not revive recovery. No browser/game clock or authoritative state is replaced. Exact599/600
+reservation expiry and abandonment precedence belong to deterministic core/server tests.
 
 The safe second-bomb route ends in cell(5,1) using the movement helper's documented
 128-unit center tolerance. Connected takeover must preserve the exact stationary position

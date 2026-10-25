@@ -256,3 +256,65 @@ async fn overload_and_closed_owner_normalize_resume_without_replacing_binding() 
         Err(RoomError::ResumeRejected)
     ));
 }
+
+#[tokio::test(flavor = "current_thread", start_paused = true)]
+async fn full_owner_queue_rate_limits_resume_without_replacing_until_retry() {
+    let value = started();
+    let mut admission = join(&value.handle, binding(1, 1)).await;
+    let mut queued = Vec::new();
+    for _ in 0..super::types::COMMAND_CAPACITY {
+        queued.push(value.handle.action(
+            binding(1, 1),
+            admission.room_id.clone(),
+            admission.round_id,
+            MatchAction::Ready(false),
+        ));
+    }
+
+    let mut throttled = value.handle.resume(
+        binding(2, 1),
+        sequence(2),
+        admission.room_id.clone(),
+        admission.resume_token.clone(),
+    );
+    assert!(matches!(
+        throttled.try_recv(),
+        Ok(Err(RoomError::RateLimited))
+    ));
+    assert_eq!(
+        admission.replaced.try_recv(),
+        Err(oneshot::error::TryRecvError::Empty)
+    );
+
+    for response in queued {
+        assert_eq!(response.await.unwrap(), Ok(()));
+    }
+    assert_eq!(
+        value
+            .handle
+            .action(
+                binding(1, 1),
+                admission.room_id.clone(),
+                admission.round_id,
+                MatchAction::Ready(false),
+            )
+            .await
+            .unwrap(),
+        Ok(())
+    );
+
+    let replacement = value
+        .handle
+        .resume(
+            binding(2, 1),
+            sequence(2),
+            admission.room_id.clone(),
+            admission.resume_token.clone(),
+        )
+        .await
+        .unwrap()
+        .unwrap();
+    assert_eq!(admission.replaced.await, Ok(()));
+    assert_eq!(replacement.seat, admission.seat);
+    assert_eq!(replacement.resume_token, admission.resume_token);
+}

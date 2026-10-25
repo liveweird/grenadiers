@@ -26,13 +26,11 @@ pub(crate) use match_owner::{
 };
 pub(crate) use match_runtime::MatchAction as RoomAction;
 pub(crate) use match_runtime::MatchNotice;
-use rate_limit::Bucket;
+use rate_limit::OperationBudgets;
 use types::RoomIdentity;
 pub(crate) use types::{BindingKey, RoomError};
 
 const MAX_ROOMS: usize = 32;
-const OPERATION_BURST: f64 = 32.0;
-const OPERATIONS_PER_SECOND: f64 = 8.0;
 const COLLISION_RETRIES: usize = 3;
 const CODE_ALPHABET: &[u8; 32] = b"ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 
@@ -57,7 +55,7 @@ struct Registry {
     codes: HashMap<RoomCode, RoomId>,
     prefix: Option<u64>,
     next_serial: u64,
-    operations: Bucket,
+    operations: OperationBudgets,
 }
 
 impl GameRooms {
@@ -69,7 +67,7 @@ impl GameRooms {
                 codes: HashMap::new(),
                 prefix: None,
                 next_serial: 1,
-                operations: Bucket::new(now),
+                operations: OperationBudgets::new(now),
             }),
             random_fill: Arc::new(|bytes| getrandom::fill(bytes).map_err(|_| ())),
             round_seed_source,
@@ -91,7 +89,7 @@ impl GameRooms {
                 codes: HashMap::new(),
                 prefix: None,
                 next_serial: 1,
-                operations: Bucket::new(now),
+                operations: OperationBudgets::new(now),
             }),
             random_fill: Arc::new(fill),
             round_seed_source: RoundSeedSource::from_optional_path(None)
@@ -116,7 +114,7 @@ impl GameRooms {
                 codes: HashMap::new(),
                 prefix: None,
                 next_serial: 1,
-                operations: Bucket::new(now),
+                operations: OperationBudgets::new(now),
             }),
             random_fill: Arc::new(fill),
             round_seed_source,
@@ -138,7 +136,7 @@ impl GameRooms {
             if self.is_stopping() {
                 return Err(RoomError::RoomNotFound);
             }
-            if !registry.operations.take(now) {
+            if !registry.operations.take_create(now) {
                 return Err(RoomError::RateLimited);
             }
             if registry.rooms.len() >= MAX_ROOMS {
@@ -191,7 +189,7 @@ impl GameRooms {
             if self.is_stopping() {
                 return Err(RoomError::RoomNotFound);
             }
-            if !registry.operations.take(now) {
+            if !registry.operations.take_join(now) {
                 return Err(RoomError::RateLimited);
             }
             let id = registry.codes.get(code).ok_or(RoomError::RoomNotFound)?;
@@ -238,7 +236,7 @@ impl GameRooms {
             if self.is_stopping() {
                 return Err(RoomError::RoomNotFound);
             }
-            if !registry.operations.take(now) {
+            if !registry.operations.take_resume(now) {
                 return Err(RoomError::RateLimited);
             }
             registry

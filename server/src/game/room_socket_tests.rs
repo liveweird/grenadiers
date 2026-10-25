@@ -383,3 +383,7 @@ async fn unavailable_resume_is_uniformly_rejected_on_the_wire() {
     assert_eq!(rejected["sequence"], 1);
     server.abort();
 }
+
+#[cfg(test)]
+#[path = "room_socket_tests/rate_limit_tests.rs"]
+mod rate_limit_tests;

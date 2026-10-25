@@ -1,5 +1,6 @@
 import type { Direction, GameServerMessage, GameSettings, RoomView, Seat, V11ErrorCode } from '../v11/schema'
 import { validateGameplayV11ServerMessage } from '../v11/validation'
+import type { GameClientState } from './clientTypes'
 
 export const MAX_COUNTER = 2_147_483_647
 export const MAX_RECONNECT_ATTEMPTS = 3
@@ -10,6 +11,7 @@ export interface Dependencies {
   location: Location
   schedule: (callback: () => void, delay: number) => ReturnType<typeof setTimeout>
   cancel: (timer: ReturnType<typeof setTimeout>) => void
+  now: () => number
 }
 
 export type Capability = { roomId: string; seat: Seat; token: string }
@@ -70,6 +72,7 @@ export function dependenciesWithDefaults(overrides?: Partial<Dependencies>): Dep
     location: overrides?.location ?? window.location,
     schedule: overrides?.schedule ?? ((callback, delay) => setTimeout(callback, delay)),
     cancel: overrides?.cancel ?? ((timer) => clearTimeout(timer)),
+    now: overrides?.now ?? (() => performance.now()),
   }
 }
 
@@ -118,6 +121,17 @@ export function newerRoom(next: RoomView, current: RoomView): boolean {
 export function controlIsObsolete(control: ControlCommand, room: RoomView | null): boolean {
   return Boolean(room && room.roomId === control.roomId && room.revision > control.revision
     && (room.roundId > control.roundId || room.phase.type !== 'running'))
+}
+
+export function ownSeatConnected(state: GameClientState): boolean {
+  return state.room?.seats.find((seat) => seat.seat === state.youSeat)?.connection.type === 'connected'
+}
+
+export function canControl(state: GameClientState): boolean {
+  if (state.connection !== 'authenticated' || state.admissionPending
+    || state.leavePending || state.room?.phase.type !== 'running') return false
+  const actor = state.snapshot?.state.actors.find((candidate) => candidate.seat === state.youSeat)
+  return Boolean(ownSeatConnected(state) && state.youSeat && actor?.type === 'visible' && actor.alive)
 }
 
 export function isCurrentConnection(

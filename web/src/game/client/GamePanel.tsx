@@ -164,7 +164,8 @@ function SeatLine({ state, seat, copy }: { state: GameClientState; seat: Seat; c
 
 function LobbyControls({ state, actions, copy }: { state: GameClientState; actions: GameActions; copy: GameCopy }) {
   const [code, setCode] = useState('')
-  const busy = state.connection !== 'disconnected' || state.admissionPending
+  const busy = state.admissionPending
+    || ['connecting', 'authenticating', 'reconnecting'].includes(state.connection)
   return (
     <div className="lobby-controls">
       <Title order={2}>{copy.lobby.title}</Title>
@@ -217,14 +218,15 @@ function RoomControls({ state, actions, copy }: { state: GameClientState; action
       </ol>
       <AuthoritativeOutcome state={state} copy={copy} />
       <GameplaySettingsPanel key={room.settingsRevision} room={room} youSeat={state.youSeat}
-        pending={state.settingsPending} copy={copy}
+        pending={state.settingsPending || state.admissionPending} copy={copy}
         onApply={(settings) => actions.updateSettings(settings)} />
       <Stack gap="sm">
         {canReady && own && <Button disabled={!connected || state.leavePending || state.admissionPending
           || state.settingsPending}
           onClick={() => actions.ready(!own.ready)}>{own.ready ? copy.room.cancelReady : copy.room.ready}</Button>}
         <RematchControl state={state} actions={actions} copy={copy} />
-        <Button variant="subtle" color="dark" disabled={state.connection !== 'authenticated'}
+        <Button variant="subtle" color="dark"
+          disabled={state.connection !== 'authenticated' || state.admissionPending}
           loading={state.leavePending} onClick={() => actions.leave()}>{copy.room.leave}</Button>
       </Stack>
     </div>
@@ -261,7 +263,8 @@ export function GamePanelView({ state, actions }: { state: GameClientState; acti
   const enabled = !controlsOpen && gameInputEnabled(state)
   const waitingText = state.room ? phaseText(copy, state.room.phase) : copy.connection[state.connection]
   const round = state.room?.roundNumber
-  const reconnecting = state.room && ['reconnecting', 'connecting', 'authenticating'].includes(state.connection)
+  const reconnecting = state.room && (state.admissionPending
+    || ['reconnecting', 'connecting', 'authenticating'].includes(state.connection))
   const arenaSnapshot = useMemo(() => presentSnapshot(state), [state])
   const focusHint = arenaFocusHint(state, arenaSnapshot, bindings, copy)
   const updateBindings = (next: KeyboardBindings): void => {

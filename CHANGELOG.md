@@ -4,6 +4,8 @@
 
 ### Fixed
 
+- Keep throttled room operations connected, isolate create/join/resume budgets, and recover
+  seats using bounded same-socket retries with an absolute ten-second client deadline.
 - Return no-store problem responses for unknown API paths and unsupported methods, preserve
   route-specific `Allow` headers, and handle WebSocket HEAD requests without response bodies.
 - Isolate diagnostic WebSocket connection and upgrade-rate limits from gameplay, enforce

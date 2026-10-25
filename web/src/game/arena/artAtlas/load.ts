@@ -3,20 +3,25 @@ import sourceManifestJson from '../../../../../assets/art/arena-source.json'
 import { pixelCanvas, decodePng, packRuntimePixels } from './pixels'
 import { createAtlasRegions, type AtlasRegions } from './regions'
 import { buildRuntimeManifest } from './runtime'
-import type { ArtManifest } from './types'
+import type { ArtManifest, PixelBuffer } from './types'
 import { assertValidRuntimeManifest, assertValidSourceManifest } from './validate'
 
-const sourceManifest = sourceManifestJson as ArtManifest
+export const arenaSourceManifest = sourceManifestJson as ArtManifest
 const sourceUrl = new URL('../../../../../assets/art/arena-source.png', import.meta.url)
 
 export async function loadArenaAtlas(): Promise<AtlasRegions> {
-  assertValidSourceManifest(sourceManifest)
+  assertValidSourceManifest(arenaSourceManifest)
   const response = await fetch(sourceUrl)
   if (!response.ok) throw new Error(`Arena artwork failed to load (${response.status})`)
-  const sourcePixels = await decodePng(new Uint8Array(await response.arrayBuffer()), sourceManifest)
-  assertValidSourceManifest(sourceManifest, sourcePixels)
-  const runtimeManifest = buildRuntimeManifest(sourceManifest)
-  const runtimePixels = packRuntimePixels(sourcePixels, sourceManifest, runtimeManifest)
+  return createArenaAtlas(
+    await decodePng(new Uint8Array(await response.arrayBuffer()), arenaSourceManifest),
+  )
+}
+
+export function createArenaAtlas(sourcePixels: PixelBuffer): AtlasRegions {
+  assertValidSourceManifest(arenaSourceManifest, sourcePixels)
+  const runtimeManifest = buildRuntimeManifest(arenaSourceManifest)
+  const runtimePixels = packRuntimePixels(sourcePixels, arenaSourceManifest, runtimeManifest)
   assertValidRuntimeManifest(runtimeManifest, runtimePixels)
   const source = new CanvasSource({
     resource: pixelCanvas(runtimePixels),

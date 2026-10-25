@@ -41,7 +41,8 @@ published; Punch v0.3.45 is also published and promoted locally on the accepted 
 Bracelet v0.3.46 is published and promoted locally: 21 of 22 requested item types are shipped.
 Oil Barrel v0.3.47 is published and promoted locally, completing all 22 requested item types.
 ART-ATLAS v0.3.48 handoff/export/preview and v0.3.49 gameplay adoption are published and
-promoted locally. Artist redraws follow sample review; the sprite-sheet pipeline is complete.
+promoted locally; the sprite-sheet pipeline is complete. The unreleased v0.3.53 sheet is a full
+AI-generated redraw.
 
 New playtest requests and expansion work are tracked in the [gameplay and presentation
 backlog](backlog.md): forgiving turns first, shared gameplay settings, detailed retro pixel art,

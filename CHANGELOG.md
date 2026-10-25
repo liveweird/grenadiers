@@ -9,6 +9,14 @@
 - Add bounded peer admission alongside process-global limits, strict opt-in immediate-proxy
   identity, outstanding-session quotas and credential-free aggregate denial telemetry.
 
+### Changed
+
+- Replace the adopted arena sheet with a full AI-generated redraw: chibi-proportioned actors with
+  pompom/feather caps and flame/star marks, new terrain, bombs, gap-free flames, Oil, pickups and
+  status cues. The manifest, frame rectangles, pivots, anchors and texture budget are unchanged.
+- Run atlas gameplay parity on the packed procedural baseline so artist redraws no longer change
+  its expectations; the production-renderer lifecycle checks still load the bundled source.
+
 ## 0.3.52 — 2026-10-25
 
 ### Added

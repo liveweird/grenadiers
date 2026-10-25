@@ -11,7 +11,8 @@ The [artist sprite-sheet handoff](assets/art/README.md) includes editable PNG/JS
 guides, validated runtime export and a separate Pixi preview. Download the artist bundle from
 [the release](https://github.com/liveweird/grenadiers/releases/tag/v0.3.48).
 Gameplay now uses those canonical inputs; see the [renderer guide](docs/game/art-atlas.md).
-The artist redesign remains separate from the completed sprite-sheet pipeline.
+The unreleased v0.3.53 sheet is a full, AI-generated redraw; see its
+[provenance](assets/art/README.md#provenance).
 
 Artists can use `npm --prefix e2e run art:template -- --out target/art-template` and
 `scripts/gates.sh art-atlas` after installing the documented Playwright Chromium prerequisite.

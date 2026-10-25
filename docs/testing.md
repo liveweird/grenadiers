@@ -83,6 +83,10 @@ Install with `cargo install cargo-llvm-cov --version 0.9.1 --locked`, then
 `rustup component add llvm-tools-preview` and `scripts/gates.sh coverage`.
 Stable branch coverage equivalent to Flow's Kover gate is not configured.
 
+Cargo coverage excludes test-only `test_support.rs` and `*_test_support.rs` helpers from the
+denominator using `scripts/coverage-exclusions.txt`. Standalone and parallel reporting share
+that policy; helper code still executes and the 80% floor and exhaustive acceptance remain.
+
 `scripts/gates.sh server-parallel` combines the server and coverage checks with four local
 workers by default. It builds each profile once, runs ordinary tests once per profile, and
 executes the exhaustive replay ranges using isolated workers. Set
@@ -123,6 +127,16 @@ Vitest, happy-dom, and Testing Library exercise UI and transport behavior. Co-lo
 as `*.test.ts` or `*.test.tsx`. Mock the browser boundary for component tests; restore mocks,
 listeners, and timers after each test. Keep default test isolation. The shared gate shuffles
 test order and enforces coverage thresholds declared in `web/vite.config.ts`.
+Test-only `src/**/testSupport.ts` fixtures execute with the tests but are excluded from the
+application coverage denominator.
+After a fresh measurement with those helpers excluded, the web floors are 90% lines and
+88% statements, functions and branches. Thresholds must not be lowered to accommodate changes.
+
+Ordinary `npm --prefix web run build` also checks aggregate gzip sizes against
+`web/bundle-budget.json`: 400,000 bytes of JavaScript and 40,000 bytes of CSS. These initial
+ceilings come from a measured build; review bundle contributors before changing them. Images,
+source maps and diagnostics/workbench builds are outside this budget. The checker reports
+the largest contributors on failure; Vite's existing per-chunk warning remains visible.
 
 `lint:api` checks the fixed OpenAPI file with Spectral's programmatic API and
 `api-guidelines/spectral.yaml`; it retains the standard and custom rules without the CLI's

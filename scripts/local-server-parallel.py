@@ -120,6 +120,13 @@ def coverage_environment() -> dict[str, str]:
     return parse_coverage_environment(output, base)
 
 
+def coverage_exclusion_regex() -> str:
+    lines = (ROOT / "scripts/coverage-exclusions.txt").read_text().splitlines()
+    if len(lines) != 1 or not lines[0]:
+        raise ValueError("coverage exclusions must contain exactly one non-empty regex")
+    return lines[0]
+
+
 def select_binary(release: bool, env: dict[str, str] | None = None) -> Path:
     command = ["cargo", "test", "-p", "grenadiers-server", "--lib", "--locked", "--no-run",
                "--message-format=json"]
@@ -242,7 +249,8 @@ def report_lcov(env: dict[str, str], raw_dirs: list[Path], output: Path,
 
     def report() -> None:
         run(["cargo", "llvm-cov", "report", "--workspace", "--locked", "--fail-under-lines", "80",
-             "--lcov", "--output-path", str(output)], env=env)
+             "--ignore-filename-regex", coverage_exclusion_regex(), "--lcov", "--output-path",
+             str(output)], env=env)
 
     _, count = with_report_profiles(Path(target_text), raw_dirs, owner, report)
     if output.is_symlink() or not output.is_file() or output.stat().st_size == 0:

@@ -111,8 +111,19 @@ security() {
 }
 coverage() {
   require_lock
+  local -a coverage_exclusion_lines=()
+  local coverage_exclusion_line coverage_exclusions
+  while IFS= read -r coverage_exclusion_line || [ -n "$coverage_exclusion_line" ]; do
+    coverage_exclusion_lines+=("$coverage_exclusion_line")
+  done < scripts/coverage-exclusions.txt
+  if [ "${#coverage_exclusion_lines[@]}" -ne 1 ] || [ -z "${coverage_exclusion_lines[0]}" ]; then
+    echo 'scripts/coverage-exclusions.txt must contain exactly one non-empty regex' >&2
+    return 1
+  fi
+  coverage_exclusions="${coverage_exclusion_lines[0]}"
   mkdir -p target
   mask_profile coverage cargo llvm-cov --workspace --locked --fail-under-lines 80 \
+    --ignore-filename-regex "$coverage_exclusions" \
     --lcov --output-path target/coverage.lcov -- --show-output
 }
 

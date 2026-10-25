@@ -167,6 +167,8 @@ test("coverage export creates its project-relative parent with an external Cargo
     fs.writeFileSync(path.join(root, "scripts", "gates.sh"), gates);
     fs.writeFileSync(path.join(root, "scripts", "gates-without-output-parent.sh"),
       gates.replace(setup, ""));
+    fs.copyFileSync(new URL("./coverage-exclusions.txt", import.meta.url),
+      path.join(root, "scripts", "coverage-exclusions.txt"));
     fs.copyFileSync(new URL("./ci-server-mask-gate-context.sh", import.meta.url),
       path.join(root, "scripts", "ci-server-mask-gate-context.sh"));
     fs.writeFileSync(path.join(root, "Cargo.lock"), "# fixture lock\n");
@@ -175,7 +177,7 @@ test("coverage export creates its project-relative parent with an external Cargo
 set -euo pipefail
 printf '%s\n' "$*" > "$STUB_CARGO_LOG"
 [ "$CARGO_TARGET_DIR" = "$EXPECTED_CARGO_TARGET_DIR" ]
-[ "$*" = "llvm-cov --workspace --locked --fail-under-lines 80 --lcov --output-path target/coverage.lcov -- --show-output" ]
+[ "$*" = "llvm-cov --workspace --locked --fail-under-lines 80 --ignore-filename-regex (^|/)([^/]*_)?test_support\\.rs$ --lcov --output-path target/coverage.lcov -- --show-output" ]
 if [ ! -d target ]; then
   echo 'target output parent missing' >&2
   exit 73
@@ -205,9 +207,20 @@ printf 'TN:\n' > target/coverage.lcov
     assert.equal(fixed.status, 0, fixed.stderr);
     assert.equal(fs.readFileSync(path.join(root, "target", "coverage.lcov"), "utf8"), "TN:\n");
     assert.equal(fs.readFileSync(cargoLog, "utf8").trim(),
-      "llvm-cov --workspace --locked --fail-under-lines 80 --lcov --output-path target/coverage.lcov -- --show-output");
+      "llvm-cov --workspace --locked --fail-under-lines 80 --ignore-filename-regex (^|/)([^/]*_)?test_support\\.rs$ --lcov --output-path target/coverage.lcov -- --show-output");
     assert.equal(spawnSync("git", ["status", "--porcelain"],
       { cwd: root, encoding: "utf8" }).stdout, "");
+
+    const exclusions = path.join(root, "scripts", "coverage-exclusions.txt");
+    for (const invalidPolicy of ["", "(^|/)([^/]*_)?test_support\\.rs$\n\n"]) {
+      fs.writeFileSync(exclusions, invalidPolicy);
+      fs.rmSync(cargoLog, { force: true });
+      const rejected = spawnSync("bash", ["scripts/gates.sh", "coverage"],
+        { cwd: root, env, encoding: "utf8" });
+      assert.notEqual(rejected.status, 0);
+      assert.match(rejected.stderr, /must contain exactly one non-empty regex/);
+      assert.equal(fs.existsSync(cargoLog), false, "invalid policy must fail before Cargo");
+    }
   } finally {
     fs.rmSync(root, { recursive: true, force: true });
     fs.rmSync(externalTarget, { recursive: true, force: true });

@@ -4,7 +4,10 @@ use std::{
     net::{IpAddr, Ipv4Addr, SocketAddr},
 };
 
-use axum::http::HeaderMap;
+use axum::{
+    extract::{ConnectInfo, FromRequestParts, connect_info::MockConnectInfo},
+    http::{HeaderMap, request::Parts},
+};
 
 const MAX_TRUSTED_PROXIES: usize = 32;
 const MAX_TRUSTED_PROXY_CONFIG_BYTES: usize = 2_048;
@@ -20,6 +23,29 @@ pub(crate) enum PeerKey {
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) struct PeerIdentity {
     key: PeerKey,
+}
+
+pub(crate) struct TransportPeer(pub(crate) Option<SocketAddr>);
+
+impl<S> FromRequestParts<S> for TransportPeer
+where
+    S: Send + Sync,
+{
+    type Rejection = std::convert::Infallible;
+
+    async fn from_request_parts(parts: &mut Parts, _state: &S) -> Result<Self, Self::Rejection> {
+        let address = parts
+            .extensions
+            .get::<ConnectInfo<SocketAddr>>()
+            .map(|connect| connect.0)
+            .or_else(|| {
+                parts
+                    .extensions
+                    .get::<MockConnectInfo<SocketAddr>>()
+                    .map(|connect| connect.0)
+            });
+        Ok(Self(address))
+    }
 }
 
 impl PeerIdentity {

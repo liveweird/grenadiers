@@ -19,6 +19,15 @@ pub(crate) enum DenialOperation {
 
 impl DenialOperation {
     const COUNT: usize = 7;
+    const ALL: [Self; Self::COUNT] = [
+        Self::Mint,
+        Self::GameplayUpgrade,
+        Self::DiagnosticUpgrade,
+        Self::Create,
+        Self::Join,
+        Self::Resume,
+        Self::RoomAdmission,
+    ];
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -37,11 +46,50 @@ pub(crate) enum DenialReason {
 
 impl DenialReason {
     const COUNT: usize = 9;
+    const ALL: [Self; Self::COUNT] = [
+        Self::PeerRate,
+        Self::GlobalRate,
+        Self::PeerCapacity,
+        Self::GlobalCapacity,
+        Self::TrackingCapacity,
+        Self::InvalidProxyIdentity,
+        Self::OriginRejected,
+        Self::AuthenticationFailed,
+        Self::ResumeRejected,
+    ];
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 struct DenialSummary {
     counts: [[u64; DenialReason::COUNT]; DenialOperation::COUNT],
+}
+
+#[derive(Debug, PartialEq, Eq)]
+struct DenialCount {
+    operation: DenialOperation,
+    reason: DenialReason,
+    count: u64,
+}
+
+impl DenialSummary {
+    fn nonzero(&self) -> Vec<DenialCount> {
+        DenialOperation::ALL
+            .into_iter()
+            .enumerate()
+            .flat_map(|(operation_index, operation)| {
+                DenialReason::ALL.into_iter().enumerate().filter_map(
+                    move |(reason_index, reason)| {
+                        let count = self.counts[operation_index][reason_index];
+                        (count != 0).then_some(DenialCount {
+                            operation,
+                            reason,
+                            count,
+                        })
+                    },
+                )
+            })
+            .collect()
+    }
 }
 
 pub(crate) struct DenialTelemetry {
@@ -86,7 +134,7 @@ impl DenialTelemetry {
             summary
         };
         if let Some(summary) = summary {
-            tracing::warn!(target: "grenadiers::admission", counts = ?summary.counts, "admission denials");
+            tracing::warn!(target: "grenadiers::admission", denials = ?summary.nonzero(), "admission denials");
         }
     }
 
@@ -155,6 +203,21 @@ mod tests {
         assert_eq!(
             current.counts[DenialOperation::Join as usize][DenialReason::GlobalRate as usize],
             1
+        );
+    }
+
+    #[test]
+    fn readable_summary_contains_only_nonzero_typed_pairs() {
+        let mut counts = [[0; DenialReason::COUNT]; DenialOperation::COUNT];
+        counts[DenialOperation::Mint as usize][DenialReason::PeerRate as usize] = 3;
+        let entries = DenialSummary { counts }.nonzero();
+        assert_eq!(
+            entries,
+            vec![DenialCount {
+                operation: DenialOperation::Mint,
+                reason: DenialReason::PeerRate,
+                count: 3,
+            }]
         );
     }
 }

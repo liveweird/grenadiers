@@ -9,7 +9,7 @@ use crate::{
 
 #[tokio::test]
 async fn default_configuration_creates_expanded_v5_rooms() {
-    let state = AppState::from_configuration(None, None, None).unwrap();
+    let state = AppState::from_configuration(None, None, None, None).unwrap();
 
     let admission = state
         .game_rooms
@@ -33,7 +33,7 @@ fn seed_configuration_failure_is_redacted_and_distinct_from_database_failure() {
         "/tmp/grenadiers-secret-missing-seed-{}",
         std::process::id()
     ));
-    let result = AppState::from_configuration(None, None, Some(secret_path.clone()));
+    let result = AppState::from_configuration(None, None, Some(secret_path.clone()), None);
     let Err(error) = result else {
         panic!("missing seed configuration should fail");
     };
@@ -42,6 +42,32 @@ fn seed_configuration_failure_is_redacted_and_distinct_from_database_failure() {
     let diagnostics = format!("{error:?} {error}");
     assert!(!diagnostics.contains(secret_path.to_string_lossy().as_ref()));
 
-    let result = AppState::from_configuration(None, Some("not a postgres URL".to_owned()), None);
+    let result =
+        AppState::from_configuration(None, Some("not a postgres URL".to_owned()), None, None);
     assert!(matches!(result, Err(StartupError::Database)));
+}
+
+#[test]
+fn trusted_proxy_configuration_is_strict_and_redacted() {
+    let result = AppState::from_configuration(None, None, None, Some("127.0.0.1, ::1".into()));
+    let Err(error) = result else {
+        panic!("spaced literals are invalid");
+    };
+    assert_eq!(error, StartupError::TrustedProxy);
+    assert_eq!(
+        format!("{error:?} {error}"),
+        "StartupError::TrustedProxy trusted proxy configuration failed"
+    );
+}
+
+#[cfg(unix)]
+#[test]
+fn non_unicode_trusted_proxy_configuration_fails_closed() {
+    use std::os::unix::ffi::OsStringExt;
+
+    let value = std::ffi::OsString::from_vec(vec![0xff, b'1']);
+    assert!(matches!(
+        AppState::from_configuration(None, None, None, Some(value)),
+        Err(StartupError::TrustedProxy)
+    ));
 }

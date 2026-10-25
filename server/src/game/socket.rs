@@ -20,6 +20,14 @@ use tokio::{
 
 use super::{http::origin_allowed, limits::InboundLimit, sessions::SessionClaimError};
 use crate::{AppState, Problem, with_no_store};
+use crate::{
+    admission::{
+        DenialOperation, DenialReason, DenialTelemetry, GameplayAdmission, GameplayOperation,
+        GameplaySocketPermit, PolicyDenial,
+    },
+    peer_identity::{PeerKey, TransportPeer},
+    peer_identity_response, resolve_request_peer,
+};
 
 const AUTH_TIMEOUT: Duration = Duration::from_secs(5);
 const SEND_TIMEOUT: Duration = Duration::from_secs(5);
@@ -29,6 +37,7 @@ pub(crate) async fn game_websocket(
     State(state): State<AppState>,
     uri: Uri,
     headers: HeaderMap,
+    transport: TransportPeer,
     upgrade: WebSocketUpgrade,
 ) -> Response {
     if uri.query().is_some_and(|query| !query.is_empty()) {
@@ -42,6 +51,11 @@ pub(crate) async fn game_websocket(
         );
     }
     if !origin_allowed(&headers, &state) {
+        state.denial_telemetry.record(
+            DenialOperation::GameplayUpgrade,
+            DenialReason::OriginRejected,
+            StdInstant::now(),
+        );
         return with_no_store(
             Problem::new(StatusCode::FORBIDDEN, "Forbidden", "Origin is not allowed").response(),
         );
@@ -56,7 +70,32 @@ pub(crate) async fn game_websocket(
             .response(),
         );
     }
-    if !state.game_sessions.allow_upgrade(StdInstant::now()) {
+    let peer = match resolve_request_peer(
+        transport,
+        &headers,
+        &state,
+        DenialOperation::GameplayUpgrade,
+    ) {
+        Ok(peer) => peer,
+        Err(error) => return peer_identity_response(error),
+    };
+    let now = StdInstant::now();
+    if let Err(denial) = state
+        .gameplay_admission
+        .check(peer.key(), GameplayOperation::Upgrade, now)
+    {
+        return policy_response(&state, denial);
+    }
+    let peer_permit = match state.gameplay_admission.acquire_socket(peer.key(), now) {
+        Ok(permit) => permit,
+        Err(denial) => return policy_response(&state, denial),
+    };
+    if !state.game_sessions.allow_upgrade(now) {
+        state.denial_telemetry.record(
+            DenialOperation::GameplayUpgrade,
+            DenialReason::GlobalRate,
+            now,
+        );
         let mut response = Problem::new(
             StatusCode::TOO_MANY_REQUESTS,
             "Too Many Requests",
@@ -69,6 +108,11 @@ pub(crate) async fn game_websocket(
         return with_no_store(response);
     }
     let Ok(permit) = state.connections.clone().try_acquire_owned() else {
+        state.denial_telemetry.record(
+            DenialOperation::GameplayUpgrade,
+            DenialReason::GlobalCapacity,
+            now,
+        );
         return with_no_store(
             Problem::new(
                 StatusCode::SERVICE_UNAVAILABLE,
@@ -80,22 +124,53 @@ pub(crate) async fn game_websocket(
     };
     let sessions = state.game_sessions;
     let rooms = state.game_rooms;
+    let admission = state.gameplay_admission;
+    let telemetry = state.denial_telemetry;
     let shutdown = rooms.shutdown();
     upgrade
         .max_frame_size(MAX_CLIENT_MESSAGE_BYTES)
         .max_message_size(MAX_CLIENT_MESSAGE_BYTES)
         .write_buffer_size(0)
         .max_write_buffer_size(MAX_WRITE_BUFFER)
-        .on_upgrade(move |socket| game_session(socket, permit, sessions, rooms, shutdown))
+        .on_upgrade(move |socket| {
+            game_session(
+                socket,
+                GameSessionContext {
+                    _global_permit: permit,
+                    _peer_permit: peer_permit,
+                    peer_key: peer.key(),
+                    sessions,
+                    rooms,
+                    admission,
+                    telemetry,
+                    shutdown,
+                },
+            )
+        })
 }
 
-async fn game_session(
-    mut socket: WebSocket,
-    _permit: OwnedSemaphorePermit,
+struct GameSessionContext {
+    _global_permit: OwnedSemaphorePermit,
+    _peer_permit: GameplaySocketPermit,
+    peer_key: PeerKey,
     sessions: std::sync::Arc<super::sessions::GameSessions>,
     rooms: std::sync::Arc<super::rooms::GameRooms>,
-    mut shutdown: tokio::sync::watch::Receiver<bool>,
-) {
+    admission: GameplayAdmission,
+    telemetry: std::sync::Arc<DenialTelemetry>,
+    shutdown: tokio::sync::watch::Receiver<bool>,
+}
+
+async fn game_session(mut socket: WebSocket, context: GameSessionContext) {
+    let GameSessionContext {
+        _global_permit,
+        _peer_permit,
+        peer_key,
+        sessions,
+        rooms,
+        admission,
+        telemetry,
+        mut shutdown,
+    } = context;
     let mut inbound = InboundLimit::new(Instant::now());
     let deadline = Instant::now() + AUTH_TIMEOUT;
     let lease = loop {
@@ -183,6 +258,17 @@ async fn game_session(
                         break lease;
                     }
                     Err(error) => {
+                        telemetry.record(
+                            DenialOperation::GameplayUpgrade,
+                            match error {
+                                SessionClaimError::CapacityReached => DenialReason::GlobalCapacity,
+                                SessionClaimError::AuthenticationFailed
+                                | SessionClaimError::ConnectionInUse => {
+                                    DenialReason::AuthenticationFailed
+                                }
+                            },
+                            StdInstant::now(),
+                        );
                         let code = match error {
                             SessionClaimError::AuthenticationFailed => {
                                 ErrorCode::AuthenticationFailed
@@ -197,9 +283,43 @@ async fn game_session(
             }
         }
     };
-    super::connection::authenticated_loop(&mut socket, &mut inbound, lease.connection_id(), rooms)
-        .await;
+    super::connection::authenticated_loop(
+        &mut socket,
+        &mut inbound,
+        lease.connection_id(),
+        peer_key,
+        rooms,
+        admission,
+        telemetry,
+    )
+    .await;
     drop(lease);
+}
+
+fn policy_response(state: &AppState, denial: PolicyDenial) -> Response {
+    state
+        .denial_telemetry
+        .record(denial.operation, denial.reason, StdInstant::now());
+    if denial.reason == DenialReason::PeerRate {
+        let mut response = Problem::new(
+            StatusCode::TOO_MANY_REQUESTS,
+            "Too Many Requests",
+            "Connection rate limit reached",
+        )
+        .response();
+        response
+            .headers_mut()
+            .insert(RETRY_AFTER, "1".parse().expect("valid retry after"));
+        return with_no_store(response);
+    }
+    with_no_store(
+        Problem::new(
+            StatusCode::SERVICE_UNAVAILABLE,
+            "Service Unavailable",
+            "Peer connection capacity reached",
+        )
+        .response(),
+    )
 }
 
 pub(super) fn command_sequence(message: &GameClientMessage) -> Option<Counter> {

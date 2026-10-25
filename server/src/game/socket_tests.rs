@@ -40,7 +40,12 @@ async fn start_server(state: AppState) -> (String, JoinHandle<()>) {
     let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
     let address = listener.local_addr().unwrap();
     let task = tokio::spawn(async move {
-        axum::serve(listener, app(state, None)).await.unwrap();
+        axum::serve(
+            listener,
+            app(state, None).into_make_service_with_connect_info::<std::net::SocketAddr>(),
+        )
+        .await
+        .unwrap();
     });
     (format!("ws://{address}/api/v1/game/ws"), task)
 }
@@ -59,10 +64,19 @@ async fn wait_for_available_connection(state: &AppState) {
 }
 
 async fn connect(url: &str) -> ClientSocket {
+    connect_with_forwarded(url, None).await
+}
+
+async fn connect_with_forwarded(url: &str, forwarded: Option<&str>) -> ClientSocket {
     let mut request = url.into_client_request().unwrap();
     request
         .headers_mut()
         .insert(axum::http::header::ORIGIN, ORIGIN.parse().unwrap());
+    if let Some(forwarded) = forwarded {
+        request
+            .headers_mut()
+            .insert("x-forwarded-for", forwarded.parse().unwrap());
+    }
     let (socket, response) = within(connect_async(request)).await.unwrap();
     assert_eq!(
         response.status(),
@@ -81,6 +95,22 @@ async fn rejected(url: &str, origins: &[&str]) -> axum::http::StatusCode {
         request
             .headers_mut()
             .append(axum::http::header::ORIGIN, origin.parse().unwrap());
+    }
+    match within(connect_async(request)).await {
+        Err(WebSocketError::Http(response)) => response.status(),
+        other => panic!("expected rejected handshake, got {other:?}"),
+    }
+}
+
+async fn rejected_forwarded(url: &str, forwarded: Option<&str>) -> axum::http::StatusCode {
+    let mut request = url.into_client_request().unwrap();
+    request
+        .headers_mut()
+        .insert(axum::http::header::ORIGIN, ORIGIN.parse().unwrap());
+    if let Some(forwarded) = forwarded {
+        request
+            .headers_mut()
+            .insert("x-forwarded-for", forwarded.parse().unwrap());
     }
     match within(connect_async(request)).await {
         Err(WebSocketError::Http(response)) => response.status(),
@@ -137,29 +167,34 @@ async fn authenticates_and_consumes_fresh_sequences_before_semantics() {
 
 #[tokio::test]
 async fn version_precedes_claim_and_duplicate_cannot_revoke_owner() {
-    let state = state();
+    let mut state = state();
     let token = issue_token(&state);
+    state.trusted_proxies = std::sync::Arc::new(
+        crate::peer_identity::TrustedProxyIps::parse(Some("127.0.0.1"))
+            .expect("trusted test proxy"),
+    );
     let (url, server) = start_server(state).await;
 
     for version in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] {
-        let mut wrong = connect(&url).await;
+        let forwarded = format!("198.51.100.{version}");
+        let mut wrong = connect_with_forwarded(&url, Some(&forwarded)).await;
         assert_eq!(
             authenticate(&mut wrong, &token, version).await,
             json!({"type":"incompatibleProtocol", "supportedVersion":11})
         );
     }
 
-    let mut owner = connect(&url).await;
+    let mut owner = connect_with_forwarded(&url, Some("198.51.100.20")).await;
     assert_eq!(
         authenticate(&mut owner, &token, 11).await["type"],
         "authenticated"
     );
-    let mut claimed_wrong_version = connect(&url).await;
+    let mut claimed_wrong_version = connect_with_forwarded(&url, Some("198.51.100.21")).await;
     assert_eq!(
         authenticate(&mut claimed_wrong_version, &token, 2).await["type"],
         "incompatibleProtocol"
     );
-    let mut duplicate = connect(&url).await;
+    let mut duplicate = connect_with_forwarded(&url, Some("198.51.100.22")).await;
     assert_eq!(
         authenticate(&mut duplicate, &token, 11).await["code"],
         "connectionInUse"
@@ -169,7 +204,7 @@ async fn version_precedes_claim_and_duplicate_cannot_revoke_owner() {
     owner.close(None).await.unwrap();
 
     tokio::task::yield_now().await;
-    let mut consumed = connect(&url).await;
+    let mut consumed = connect_with_forwarded(&url, Some("198.51.100.23")).await;
     assert_eq!(
         authenticate(&mut consumed, &token, 11).await["code"],
         "authenticationFailed"
@@ -335,3 +370,6 @@ async fn abrupt_authenticated_disconnect_releases_lease_and_connection_permit() 
     );
     server.abort();
 }
+
+#[path = "peer_socket_tests.rs"]
+mod peer_tests;

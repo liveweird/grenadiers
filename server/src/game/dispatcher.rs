@@ -12,6 +12,7 @@ use super::{
     rooms::{Admission, BindingKey, GameRooms, RoomAction, RoomError},
     socket::{send_error, send_game, send_raw},
 };
+use crate::admission::{DenialOperation, GameplayOperation};
 
 pub(super) async fn dispatch(
     socket: &mut WebSocket,
@@ -32,10 +33,30 @@ pub(super) async fn dispatch(
                 connection_id: state.connection_id,
                 generation: next_generation,
             };
+            // Retain the handler permit through the correlated response attempt.
+            let _room_permit = match super::peer_policy::acquire(
+                socket,
+                state,
+                GameplayOperation::Create,
+                sequence,
+            )
+            .await
+            {
+                Ok(permit) => permit,
+                Err(alive) => return alive,
+            };
             let result = rooms
                 .create_sequenced(binding, sequence, std::time::Instant::now())
                 .await;
-            admit(socket, result, binding, state, sequence).await
+            admit(
+                socket,
+                result,
+                binding,
+                state,
+                sequence,
+                DenialOperation::Create,
+            )
+            .await
         }
         GameClientMessage::JoinRoom { room_code, .. } => {
             if state.membership.is_some() {
@@ -48,10 +69,25 @@ pub(super) async fn dispatch(
                 connection_id: state.connection_id,
                 generation: next_generation,
             };
+            let _room_permit =
+                match super::peer_policy::acquire(socket, state, GameplayOperation::Join, sequence)
+                    .await
+                {
+                    Ok(permit) => permit,
+                    Err(alive) => return alive,
+                };
             let result = rooms
                 .join_sequenced(&room_code, binding, sequence, std::time::Instant::now())
                 .await;
-            admit(socket, result, binding, state, sequence).await
+            admit(
+                socket,
+                result,
+                binding,
+                state,
+                sequence,
+                DenialOperation::Join,
+            )
+            .await
         }
         GameClientMessage::ResumeRoom {
             room_id,
@@ -68,6 +104,17 @@ pub(super) async fn dispatch(
                 connection_id: state.connection_id,
                 generation: next_generation,
             };
+            let _room_permit = match super::peer_policy::acquire(
+                socket,
+                state,
+                GameplayOperation::Resume,
+                sequence,
+            )
+            .await
+            {
+                Ok(permit) => permit,
+                Err(alive) => return alive,
+            };
             let result = rooms
                 .resume(
                     room_id,
@@ -77,7 +124,15 @@ pub(super) async fn dispatch(
                     std::time::Instant::now(),
                 )
                 .await;
-            admit(socket, result, binding, state, sequence).await
+            admit(
+                socket,
+                result,
+                binding,
+                state,
+                sequence,
+                DenialOperation::Resume,
+            )
+            .await
         }
         GameClientMessage::LeaveRoom {
             room_id, round_id, ..
@@ -211,7 +266,9 @@ async fn admit(
     binding: BindingKey,
     state: &mut ConnectionState,
     sequence: Counter,
+    operation: DenialOperation,
 ) -> bool {
+    super::peer_policy::record_room_result(state, operation, &result);
     match result {
         Ok(admission) => {
             debug_assert_eq!(admission.round_id, u64::from(admission.room.round_id.get()));

@@ -33,6 +33,11 @@ Fallback statuses are documented separately from supported OpenAPI operations; s
 headers and problem examples match the implementation. Game-message descriptions and close-code
 documentation remain separate follow-up work.
 
+**BE-06 / CX-06:** stale dead-code exemptions are removed. Test-only restoration and Oil-grace
+observation helpers compile only in core unit tests; the unused punch-cooldown restoration
+method is deleted. Production cooldown observations used by the live projection are retained.
+No physics, wire representation or public admission API changed.
+
 ## Finding dispositions and proposed solutions
 
 “Agree” accepts the observed issue, not every implementation proposed in the review.
@@ -55,7 +60,7 @@ Related IDs are grouped to avoid treating one architectural problem as several i
 | BE-03, SEC-01 | Agree: public-hosting blocker. | Design trusted peer/proxy identity, bounded keyed mint/upgrade/room budgets, per-client outstanding limits and global backstops together. Keep denial telemetry credential-free. |
 | BE-04 | Agree on repeated mechanics. | Share the bucket implementation and timeout definitions while preserving distinct budget instances and clock behavior. Avoid a generic clock abstraction unless it improves actual callers. |
 | BE-05, TS-14 | Agree for active startup/configuration paths. | Centralize typed parsing and defaults; test invalid configuration and empty-origin behavior without logging credentials. Revisit archived low-coverage code with the retention decision. |
-| BE-06, CX-06 | Agree on stale exemptions; removals need usage checks. | Remove definition-only `restore_punch_cooldown`; gate test-only restoration/observation helpers; retain production cooldown getters used transitively by v11. Treat admission-argument refactoring separately. |
+| BE-06, CX-06 | Agree; safe exemption cleanup implemented. | Removed the unused restoration method and stale exemptions; gated test-only hooks and preserved production cooldown observations. Admission-argument refactoring remains separate. |
 | BE-08, CX-04/05 | Agree on test wiring/helper repetition. | Move simulation test-module declarations into a test aggregator; consolidate genuinely equivalent fixtures; extend source-size discovery to item E2E directories. Keep responsibility-based production modules. |
 | BE-09, CX-07 | Mixed: maintainability concerns, not proven reachable panics. | Replace transport-state assumptions with typed authenticated commands where useful; split orchestration around domain operations. Audit narrowing conversions before changing public APIs. |
 | BE-10, TL-04 | Agree on rationale/update-management gaps. | Document deterministic/entropy dependency constraints, group compatible updates, and review incompatible upgrades deliberately. Exact pins do not justify indefinitely suppressing upgrade/security notices. |
@@ -110,7 +115,7 @@ Related IDs are grouped to avoid treating one architectural problem as several i
 
 1. Complete close-code/live-message documentation and basic browser response headers.
 2. Coordinated room rate-limit/client recovery, followed by peer-keyed hosting admission design.
-3. Safe dead-code/test-wiring cleanup and denominator-correct coverage measurement.
+3. Test-wiring cleanup and denominator-correct coverage measurement.
 4. Contributor/history separation and shared E2E fixture/configuration helpers.
 5. Retention ADR, then historical protocol reduction and a single item specification.
 6. Measured bundle/render improvements and compatible dependency updates.

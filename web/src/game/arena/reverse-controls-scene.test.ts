@@ -2,46 +2,7 @@ import { expect, it, vi } from 'vitest'
 import { gameSnapshot } from '../../test/game-snapshot'
 import { ArenaScene } from './scene'
 
-vi.mock('pixi.js', () => {
-  class Node {
-    children: Node[] = []
-    parent: Node | null = null
-    x = 0
-    y = 0
-    visible = true
-    alpha = 1
-    rotation = 0
-    cached = false
-    scaleValue = 1
-    position = { set: (x: number, y: number) => { this.x = x; this.y = y } }
-    scale = { set: (value: number) => { this.scaleValue = value } }
-    get isCachedAsTexture(): boolean { return this.cached }
-    cacheAsTexture(value: false | object): void { this.cached = value !== false }
-    updateCacheTexture(): void {}
-    addChild(...nodes: Node[]): Node {
-      for (const node of nodes) { node.parent = this; this.children.push(node) }
-      return nodes[0]
-    }
-    destroy(options?: { children?: boolean }): void {
-      if (options?.children) for (const child of [...this.children]) child.destroy(options)
-      if (this.parent) this.parent.children = this.parent.children.filter((child) => child !== this)
-    }
-  }
-  class Graphics extends Node {
-    shapes: string[] = []
-    clear(): this { this.shapes = []; return this }
-    rect(): this { this.shapes.push('rect'); return this }
-    roundRect(): this { return this }
-    ellipse(): this { return this }
-    circle(): this { return this }
-    poly(): this { return this }
-    fill(): this { return this }
-    stroke(): this { return this }
-    moveTo(): this { return this }
-    lineTo(): this { return this }
-  }
-  return { Container: Node, Graphics }
-})
+vi.mock('pixi.js', async () => (await import('../../test/arena-pixi-mock')).arenaPixiMock())
 
 type NodeView = { children: NodeView[]; visible: boolean; alpha: number; shapes: string[] }
 

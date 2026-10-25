@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Reuse the existing Pixi scene mock in Diarrhea, Slow Foot and Reverse Controls tests,
+  preserving their assertions and specialized renderer/atlas mocks.
+
 ## 0.3.60 — 2026-10-25
 
 ### Added

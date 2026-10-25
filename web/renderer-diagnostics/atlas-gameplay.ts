@@ -2,13 +2,14 @@ import '../src/game/arena/pixiCompatibility'
 import { Application, Container, Sprite } from 'pixi.js'
 import type { ActorDrawing } from '../src/game/arena/actorArt'
 import { createAtlasArtwork } from '../src/game/arena/artAtlas/artwork'
-import { loadArenaAtlas } from '../src/game/arena/artAtlas/load'
+import { arenaSourceManifest, createArenaAtlas } from '../src/game/arena/artAtlas/load'
 import type { ArenaArtwork } from '../src/game/arena/artwork'
 import { GROUND, TILE } from '../src/game/arena/drawing'
 import { graphicsArtwork } from '../src/game/arena/graphicsArtwork'
 import { createArenaRenderer, type ArenaRenderer } from '../src/game/arena/renderer'
 import { ArenaScene } from '../src/game/arena/scene'
 import type { SnapshotMessage } from '../src/game/arena/types'
+import { renderBaselineSource } from './art-atlas-render'
 import { diagnosticSnapshot } from './snapshot'
 
 type Pixels = { pixels: Uint8Array | Uint8ClampedArray; width: number; height: number }
@@ -191,7 +192,9 @@ async function run(): Promise<AtlasGameplayResult> {
     autoStart: false, resolution, powerPreference: 'low-power',
   })
   document.body.appendChild(app.canvas)
-  const regions = await loadArenaAtlas()
+  // Parity packs the procedural baseline, so it checks the atlas pipeline independently of the
+  // adopted artist pixels; the renderer lifecycle below still loads the bundled source.
+  const regions = createArenaAtlas(await renderBaselineSource(arenaSourceManifest))
   const atlas = new ArenaScene(resolution, createAtlasArtwork(regions))
   const graphics = new ArenaScene(resolution, normalizedGraphicsArtwork())
   const historicalGraphics = new ArenaScene(resolution, graphicsArtwork)

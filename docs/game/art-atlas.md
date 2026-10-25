@@ -31,20 +31,26 @@ reuses that source and refreshes the terrain cache. Failed initialization follow
 localized renderer-error flow rather than substituting different artwork.
 
 Procedural drawings remain available for template extraction and reference comparisons.
-This release adopts the baseline artwork, with one explicit compositing change: status pulses
+v0.3.53 replaces the adopted source with a redrawn, AI-generated sheet (chibi-proportioned
+actors, new terrain, bombs, flames, pickups and cues; see the
+[provenance](../../assets/art/README.md#provenance)). The manifest, frame rectangles, pivots,
+foot anchors and texture budget are unchanged, so gameplay positions and collisions do not move.
+v0.3.49 adopted the baseline artwork, with one explicit compositing change: status pulses
 fade each completed icon once. The old procedural renderer faded every overlapping paint
 stroke separately, exposing underlying colors during a pulse. A flat artist PNG retains the
 finished icon rather than those hidden strokes. Pulse timing and status visibility stay shared;
-this normalization affects only those decorative overlap pixels. The documented flame-frame
-gap and future artist redesign remain separate visual changes.
+this normalization affects only those decorative overlap pixels.
 
 ## Verification
 
 Run `scripts/gates.sh web`, `scripts/gates.sh e2e`, `scripts/gates.sh art-atlas` and
 `scripts/gates.sh atlas-gameplay`. The last command builds the diagnostics target and runs real
-Pixi/WebGL comparisons, including a flattened-opaque reference for pulsing icons and separately
-reported differences from the historical per-stroke reference. Keep the required Playwright Chromium installation for browser checks;
-`scripts/gates.sh all` retains its existing source/static scope.
+Pixi/WebGL comparisons. Its parity scenes pack the procedural baseline sheet through the same
+atlas pipeline, so they verify the renderer independently of the adopted artist pixels; its
+production-renderer lifecycle checks load the bundled source. Comparisons include a
+flattened-opaque reference for pulsing icons and separately reported differences from the
+historical per-stroke reference. Keep the required Playwright Chromium installation for browser
+checks; `scripts/gates.sh all` retains its existing source/static scope.
 
 Before release, also exercise the production image through two-player gameplay and privacy
 scenarios, desktop/320px reduced-motion captures, context restoration and measured rendering

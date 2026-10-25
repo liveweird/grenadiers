@@ -208,7 +208,9 @@ reduced-motion captures, exact filenames, and capture timing.
 ## Graceful stop
 
 SIGTERM/Ctrl+C signal unfinished rooms with ServerStopped while preserving already-final match
-outcomes. The process explicitly waits up to five seconds for upgraded game/diagnostic
-sessions and room cleanup; final publication/close is best effort. Keep Compose's ten-second
+outcomes. One five-second asynchronous budget starts when the signal is observed and covers HTTP
+serving plus upgraded game/diagnostic sessions and room cleanup concurrently. Final publication
+and close are best effort within that budget. On expiry the executable logs a warning and
+returns, allowing Tokio runtime teardown to release remaining asynchronous I/O. Keep Compose's ten-second
 and Kubernetes' fifteen-second stop grace periods. Transport reconnect reserves a seat for 600 authoritative ticks while this process remains alive.
 A process restart still discards matches and capabilities; this is not restart recovery.

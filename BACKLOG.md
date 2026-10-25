@@ -12,10 +12,7 @@ repeated approval for routine implementation choices. Entries are not delivery-d
 
 ## Current delivery
 
-- [next] **ENG-SHUTDOWN — publish the accepted v0.3.58 fix and Napoleonic sheet.** One signal-time
-  deadline covers HTTP and application drain. Finish release verification, exact-image promotion
-  and publication; preserve the artist's merged changes. See [quality review](docs/quality-review.md).
-- [todo] **ENG-CATALOG — integrate schema-owned browser item catalogs.** The reviewed isolated
+- [next] **ENG-CATALOG — integrate schema-owned browser item catalogs.** The reviewed isolated
   implementation derives each version's IDs from its own schema and preserves archived activation
   subsets. Complete integrated coverage/native acceptance before publication.
 

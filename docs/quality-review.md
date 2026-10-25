@@ -55,8 +55,8 @@ That initial v0.3.50 change did not enable CSP; v0.3.52 follows below.
 **DOC-01/02/04/14, partial:** the current verification policy and release procedures are now
 short entry points. Dated verification and older release records live in `docs/history/`, with
 their facts and headings preserved and relative links rebased. Known incoming fragments retain
-aliases. The latest release is v0.3.57, giving shared Rust wire items neutral ownership after browser-test
-and admission hardening.
+aliases. The latest release is v0.3.58, bounding total asynchronous shutdown and adopting the merged
+Napoleonic sheet after shared wire-item and browser-test cleanup.
 The testing guide now indexes configured suites separately from execution evidence; its former
 acceptance narratives live in `docs/history/testing.md`, with facts and incoming anchors preserved.
 Deployment now uses a common fixture procedure and exact manifest/acknowledgement index; its
@@ -184,6 +184,15 @@ Implementation and independent review are complete; four focused regressions and
 tests pass. Full source-bound debug/release/coverage passes every 4,194,304-mask case at the
 90% floor (93.51% measured); fresh web/drift, security and twenty exact-image native cases pass.
 
+**BE-12, v0.3.58:** bound HTTP serving and application drain together with one
+signal-time five-second asynchronous deadline. Preserve startup/I/O errors, graceful room
+finality and the compatibility drain wrapper; no second budget follows expiry. Nineteen focused
+shutdown regressions pass, and deliberate nine-second mutation is rejected by all three timing
+cases. Exact virtual completion and a consumed-header TCP regression prevent false positives;
+full source-bound acceptance passes at 93.50% line coverage. The exact-image held-header probe
+exits successfully in 5.127s; graceful room/diagnostic shutdown exits in 0.115s with finality and
+1001 closes. Seventeen app-browser cases, fourteen separate graphics cases and promotion pass.
+
 ## Finding dispositions and proposed solutions
 
 “Agree” accepts the observed issue, not every implementation proposed in the review.
@@ -212,7 +221,7 @@ Related IDs are grouped to avoid treating one architectural problem as several i
 | BE-09, CX-07 | Mixed: maintainability concerns, not proven reachable panics. | Replace transport-state assumptions with typed authenticated commands where useful; split orchestration around domain operations. Audit narrowing conversions before changing public APIs. |
 | BE-10, TL-04 | Agree; rationale and grouping implemented. | Cargo patch, per-workspace npm minor/patch and Actions minor/patch groups preserve individual pinned RNG, Docker, major and security proposals. Document compatibility review; no version ignores or automatic merges. |
 | BE-11, TS-09/10 | Mostly intentional tests/benchmarks. | Use virtual time where it preserves the real socket deadline being tested. Keep performance tests separate from ordinary suites. Do not replace useful waits or ignored benchmarks solely to improve counts. |
-| BE-12/13 | Shutdown ordering defect reproduced; registry latency still unmeasured. | A quiet v0.3.56 probe holds incomplete HTTP headers and remains running 7.07s after SIGTERM before the five-second app drain is reached. Bound HTTP serve and application drain with one signal-time deadline next; separately test non-reading upgraded clients and measure registry-lock work. |
+| BE-12/13 | Shutdown ordering defect reproduced; registry latency still unmeasured. | A quiet v0.3.56 probe holds incomplete HTTP headers and remains running 7.07s after SIGTERM before the five-second app drain is reached. Released v0.3.58 applies one signal-time deadline to both drains. Strengthened timing, consumed-header regressions, full source-bound coverage and actual-image probes pass (held-header exit 5.127s; graceful exit 0.115s). Separately measure registry-lock work and non-reading upgraded clients. |
 | CX-03 | Agree on cross-layer item duplication, not the proposed enum choice. | Define one domain item specification and derive configurable wire catalogs from each schema's `ItemId`, not `PickupKind`; preserve archived subsets. Parameterize configuration scaffolding independently. |
 | CX-08, TS-06, TL-05 | Agree; context reuse shipped in v0.3.55 and simple configurations in v0.3.56. | Twenty-six setups and 24 simple config wrappers share narrow helpers. Native representative suites and complete config-export comparisons pass; specialized configurations stay distinct. Further behavioral fixtures require equivalent semantics. |
 | FE-02 | Agree; measured bundle budget implemented. | Initial baseline was 356,970 JS / 36,292 CSS gzip bytes; limits remain 400,000/40,000 and the URI security patch also fits them. Profile CSS/import reductions separately; no reduction is claimed by the guard itself. |

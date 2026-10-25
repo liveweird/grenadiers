@@ -2,7 +2,7 @@
 
 use std::{net::SocketAddr, path::PathBuf};
 
-use grenadiers_server::{AppState, app};
+use grenadiers_server::{AppState, ShutdownOutcome, app, run_with_shutdown};
 use tokio::net::TcpListener;
 use tracing_subscriber::EnvFilter;
 
@@ -21,19 +21,24 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let web_dist_dir = std::env::var_os("WEB_DIST_DIR").map(PathBuf::from);
     let listener = TcpListener::bind(address).await?;
     tracing::info!(%address, "server listening");
-    axum::serve(
-        listener,
-        app(state.clone(), web_dist_dir).into_make_service_with_connect_info::<SocketAddr>(),
-    )
-    .with_graceful_shutdown(shutdown_signal(state.clone()))
+    let router = app(state.clone(), web_dist_dir);
+    let outcome = run_with_shutdown(state, shutdown_signal(), |shutdown| {
+        axum::serve(
+            listener,
+            router.into_make_service_with_connect_info::<SocketAddr>(),
+        )
+        .with_graceful_shutdown(async move {
+            let _ = shutdown.await;
+        })
+    })
     .await?;
-    if !state.wait_for_shutdown().await {
-        tracing::warn!("shutdown drain deadline elapsed");
+    if outcome == ShutdownOutcome::DeadlineElapsed {
+        tracing::warn!("shutdown deadline elapsed; terminating runtime");
     }
     Ok(())
 }
 
-async fn shutdown_signal(state: AppState) {
+async fn shutdown_signal() {
     let ctrl_c = async {
         tokio::signal::ctrl_c()
             .await
@@ -53,5 +58,4 @@ async fn shutdown_signal(state: AppState) {
         () = ctrl_c => {},
         () = terminate => {},
     }
-    state.begin_shutdown();
 }

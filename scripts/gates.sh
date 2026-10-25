@@ -13,6 +13,14 @@ require_lock() {
 }
 repository() {
   node scripts/check-repository.mjs
+  node --test scripts/ci-workflow-contract.test.mjs
+  node --test scripts/check-installed-dependencies.test.mjs
+}
+installed_dependencies() {
+  local workspace
+  for workspace in "$@"; do
+    node scripts/check-installed-dependencies.mjs "$workspace"
+  done
 }
 mask_profile() (
   profile="$1"
@@ -51,10 +59,14 @@ server() {
 }
 server_parallel() {
   require_lock
+  # This suite exercises real cargo-llvm-cov discovery and profile isolation. Keep it
+  # with the coverage runner, rather than requiring coverage tooling for every gate.
+  python3 -I -B scripts/local-server-parallel.test.py
   python3 -B scripts/local-server-parallel.py \
     --workers "${GRENADIERS_LOCAL_SERVER_WORKERS:-4}"
 }
 web() {
+  installed_dependencies web
   npm --prefix web run lint:api
   npm --prefix web run check:api
   npm --prefix web run check:realtime
@@ -65,12 +77,14 @@ web() {
   npm --prefix web run build
 }
 e2e() {
+  installed_dependencies e2e
   npm --prefix e2e run lint
   npm --prefix e2e run knip
   npm --prefix e2e run typecheck
   npm --prefix e2e run check:scenarios
 }
 art_atlas() {
+  installed_dependencies web e2e
   node e2e/scripts/art-atlas-tools.check.mjs
   npm --prefix e2e run test:art-atlas
 }
@@ -110,8 +124,8 @@ case "${1:-all}" in
   web) repository; web ;;
   e2e) repository; e2e ;;
   art-atlas) repository; art_atlas ;;
-  atlas-gameplay) repository; npm --prefix e2e run test:atlas-gameplay ;;
-  browser) npm --prefix e2e test ;;
+  atlas-gameplay) repository; installed_dependencies web e2e; npm --prefix e2e run test:atlas-gameplay ;;
+  browser) installed_dependencies e2e; npm --prefix e2e test ;;
   k8s) k8s ;;
   security) security ;;
   coverage) coverage ;;

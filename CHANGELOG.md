@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## 0.3.65 — 2026-10-25
+
+### Changed
+
+- Name shared CSS color roles while preserving every resolved visual value, selector and layout.
+
 ## 0.3.62 — 2026-10-25
 
 ### Changed

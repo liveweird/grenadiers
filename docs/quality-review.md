@@ -67,6 +67,13 @@ with specific specs; duplicates, missing files and unsupported ambiguous declara
 explicitly. Dependabot groups routine version updates without suppressing major or security
 proposals, and exact entropy/generator pins have documented rationale.
 
+**DOC-06/10 and API-01 policy:** an [item-development guide](game/adding-items.md) maps current
+domain, contract, presentation and test extension points. The [ADR index](decisions/README.md)
+includes [retention policy](decisions/0021-gameplay-retention.md): one live network version,
+explicit archived wire contracts and independent private replay compatibility. Unused historical
+applications can be removed after moving unique regressions; adapters still serving the live
+path require helper extraction first.
+
 ## Finding dispositions and proposed solutions
 
 “Agree” accepts the observed issue, not every implementation proposed in the review.
@@ -76,9 +83,9 @@ Related IDs are grouped to avoid treating one architectural problem as several i
 | --- | --- | --- |
 | DOC-01/02/04/05/07/08/09/14 | Agree: contributor guidance is buried in repeated release evidence. | Verification/release history is separated from current procedures; the index links both archives. Unreleased changelog organization is in place. Continue with testing/deployment/backlog and replace repeated per-item testing prose with a linked table. |
 | DOC-03 | Agree on organization, not the claimed stale checkpoint status. | Move dated release narrative out of backlog; its explicitly historical “unreleased” state must not be rewritten as a current fact. |
-| DOC-06/10/11/13 | Agree: discovery and document structure need improvement. | Start with the new index; add an item how-to, ADR index and retention ADR, consistent item headings, and implemented/future rule markers. Move archived protocol guides with link checks. |
+| DOC-06/10/11/13 | Agree; index, item guide, ADR index and retention policy implemented. | Continue consistent item headings and implemented/future rule markers; move archived protocol guides with link checks. |
 | DOC-12 | Factually stale, deliberately preserved. | Keep `AGENTS.md` untouched under the user's instruction; point readers to current conventions and the index. |
-| API-01, CX-01/02, BE-07, FE-01, TS-08 | Agree on duplication; blanket deletion is unsafe. | Define live-wire and replay retention separately. Extract the v8/v9 helpers used by v11, remove demonstrably unused client UI, then retire obsolete adapters/tests under the stated policy. Parameterize retained frame-bound tests. |
+| API-01, CX-01/02, BE-07, FE-01, TS-08 | Agree on duplication; blanket deletion is unsafe. | ADR 0021 separates live-wire, archived contract and replay retention. Extract the v8/v9 helpers used by v11, remove demonstrably unused client UI while moving unique regressions, then assess obsolete adapters. Parameterize retained frame-bound tests. |
 | API-02/03 | Agree; HTTP repair implemented. | Problem 404/405 fallbacks, route-specific `Allow`, shared cache/retry headers and API/SPA/HEAD tests are in place; fallback responses are separate from supported operation responses. |
 | API-04, BE-02, SEC-02 | Agree; first batch implements this. | Independent diagnostic permits/rate budget and shared strict transport guards, with saturation, Origin, flood, cache-header and shutdown tests. |
 | API-05 | Optional improvement, not a demonstrated defect. | Add stable Problem codes only when a consumer needs distinctions beyond HTTP status. Do not unify diagnostic and gameplay error vocabularies merely for symmetry. |
@@ -143,14 +150,14 @@ Related IDs are grouped to avoid treating one architectural problem as several i
 
 ## Next bounded batches
 
-1. Develop a compatible CSP/validator strategy and additional API lint fixtures.
+1. Develop a compatible CSP/validator strategy.
 2. Peer-keyed hosting admission design and credential-free denial telemetry.
 3. Test-wiring cleanup and denominator-correct coverage measurement.
-4. Contributor/history separation and shared E2E fixture/configuration helpers.
-5. Retention ADR, then historical protocol reduction and a single item specification.
+4. Complete contributor/history separation and share E2E fixture/configuration helpers.
+5. Apply the retention policy to historical protocol reduction and a single item specification.
 6. Measured bundle/render improvements and compatible dependency updates.
 
-Public-hosting identity, historical replay retention and any reduced exhaustive-test cadence
-need explicit requirements. None blocks the isolated fixes in the first batch. Fresh profiling,
+Public-hosting identity, durable replay export and any reduced exhaustive-test cadence need
+explicit requirements. None blocks the isolated fixes in the first batch. Fresh profiling,
 fuzzing, a stuck-client shutdown reproduction and a complete protocol-deletion audit remain
 outstanding; the review's baseline is not evidence those experiments ran.

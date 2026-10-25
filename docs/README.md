@@ -6,8 +6,8 @@ the time; they do not add approval steps to the current workflow.
 | Task | Start here |
 | --- | --- |
 | Install, run and contribute | [Project README](../README.md), [conventions](../CONTRIBUTING.md) |
-| Understand the boundaries | [Architecture](architecture.md), [design decisions](decisions/) |
-| Change gameplay | [Rules](game/rules.md), [implementation plan](game/implementation-plan.md) |
+| Understand the boundaries | [Architecture](architecture.md), [design decisions](decisions/README.md) |
+| Change gameplay | [Rules](game/rules.md), [adding an item](game/adding-items.md), [implementation plan](game/implementation-plan.md) |
 | Change a transport contract | [API guidelines](../api-guidelines/API-GUIDELINES.md), [gameplay protocol](game/protocol.md) |
 | Change sprites or tiles | [Artist handoff](../assets/art/README.md), [atlas renderer](game/art-atlas.md) |
 | Choose and run checks | [Testing](testing.md) |

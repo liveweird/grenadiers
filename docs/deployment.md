@@ -85,90 +85,125 @@ of an autoscaler targeting the game Deployment, and consistent Service routing. 
 duplicate YAML keys. Local installations require the appropriate platform binary. Schema validation may require
 network access to the pinned schemas; successful rendering alone does not pass this gate.
 
-The feature rollout notes below retain their original release versions and catalog counts.
-Reproduction commands use the checked-out paired image; current deployments use
+The archived feature rollout notes retain their original release versions and catalog counts.
+The current reproduction commands below use the checked-out paired image; deployments use
 [gameplay-v11](game/protocol-v11.md) and its current catalog, even for an older optional item.
 
-## Reproduce a generated pickup round
+## Fixture-backed browser acceptance
 
-Default rooms draw fresh private OS randomness only at an actual round start. For isolated
-reproduction, set `GAME_ROUND_SEED_FILE` to a readable file containing exactly 64 lowercase
-hex characters, optionally followed by one LF. Startup reads once before listening and fails
-on missing/unreadable/malformed/oversized input. The loaded seed repeats for every room/round;
-file edits require restart. Keep ordinary deployments in the default random mode.
+This section is the current operator procedure. It describes configured reproduction routes, not
+whether a candidate, image, commit, or release passed them. Use [testing](testing.md) for suite
+scope and [verification](verification.md) for dated execution evidence. The former per-feature
+release and candidate narrative is retained as a [historical record](history/deployment.md).
 
-After the default browser gate, reuse the built image with the checked public fixture:
+### Seed contract and one-image workflow
+
+Default rooms draw fresh private OS randomness only when a round starts. Fixture reproduction sets
+`GAME_ROUND_SEED_FILE` to a readable file containing exactly 64 lowercase hexadecimal characters,
+optionally followed by one LF. Startup reads it once before listening and fails on a missing,
+unreadable, malformed, or oversized file. The loaded seed repeats for every room and round; edits
+take effect only after a process restart. Keep ordinary deployments in random mode.
+
+Build the paired server/web image once, prove the ordinary route first, and reuse that image for
+each fixture. Fixture changes force-recreate the process and therefore end all live matches and
+invalidate in-memory capabilities on port 8085.
 
 ```sh
+docker compose up --build -d app
+curl --fail http://127.0.0.1:8085/api/v1/health
+curl --fail http://127.0.0.1:8085/api/v1/ready
+npm --prefix e2e test
+```
+
+For example, run the generated-pickup fixture below. For another row, use that row's exact
+override, seed filename, and acknowledgement command:
+
+```sh
+chmod 444 core/tests/fixtures/arena-v1-pickups.seed
 docker compose -f docker-compose.yaml -f docker-compose.pickups.yaml up -d --no-build --force-recreate app
+curl --fail http://127.0.0.1:8085/api/v1/health
 curl --fail http://127.0.0.1:8085/api/v1/ready
 E2E_PICKUP_FIXTURE=arena-v1-pickups npm --prefix e2e run test:pickups
 docker compose -f docker-compose.yaml -f docker-compose.pickups.yaml down
 ```
 
-The override mounts `core/tests/fixtures/arena-v1-pickups.seed` read-only. That fixture is
-outside browser assets and the final runtime image. To reproduce in isolated Kubernetes,
-create a temporary Secret from the same file, mount its key at `/run/grenadiers/round.seed`
-with `defaultMode: 0444`, and set the environment variable to that path. UID 65532 must be
-able to read it. Retain base probes, one replica, and all security restrictions; use the same
-image digest, wait for rollout/readiness, port-forward, and run the same fixture command.
-Remove the temporary Secret/namespace afterward. No seed is sent through an API or browser flag.
+Every checked override mounts its tracked seed at `/run/grenadiers/round.seed` read-only and sets
+`GAME_ROUND_SEED_FILE` to that path. Keep the file external to the runtime image and browser assets;
+never send it through an API or browser flag. Preserve the base read-only container, dropped
+capabilities, `no-new-privileges`, one-process topology, and stop grace. The suite acknowledgement
+does not select the server seed: it makes a mismatched or forgotten fixture fail instead of skip.
 
-## Reproduce Heart collection and protection
+The base Compose origin allowlist permits `http://localhost:8085` and
+`http://127.0.0.1:8085`. If the browser uses another origin, set `ALLOWED_ORIGINS` to that exact
+origin before recreating the app and set `E2E_BASE_URL` consistently; do not weaken the allowlist.
 
-Use the same built image and the explicit Heart fixture:
-
-```sh
-chmod 444 core/tests/fixtures/arena-v2-heart.seed
-docker compose -f docker-compose.yaml -f docker-compose.heart.yaml up -d --no-build --force-recreate app
-curl --fail http://127.0.0.1:8085/api/v1/ready
-E2E_HEART_FIXTURE=arena-v2-heart npm --prefix e2e run test:heart
-docker compose -f docker-compose.yaml -f docker-compose.heart.yaml down
-```
-
-Wait for readiness before running the scenario. It retains the default Heart-enabled settings,
-reveals and collects a generated Heart through ordinary controls, absorbs one blast, then proves
-the charge is gone with a later lethal blast. Kubernetes uses the same isolated Secret procedure
-and a fresh port-forward after every rollout. Keep this seed outside the final runtime image.
-
-## Reproduce opt-in Shield protection
-
-Use the same built image with the separate Shield fixture:
+After fixture work, remove the override and restore the same image in ordinary random mode. This
+restart also ends fixture matches and capabilities. Require fresh health/readiness before use.
 
 ```sh
-chmod 444 core/tests/fixtures/arena-v2-shield.seed
-docker compose -f docker-compose.yaml -f docker-compose.shield.yaml up -d --no-build --force-recreate app
+docker compose up -d --no-build --force-recreate app
+curl --fail http://127.0.0.1:8085/api/v1/health
 curl --fail http://127.0.0.1:8085/api/v1/ready
-E2E_SHIELD_FIXTURE=arena-v2-shield npm --prefix e2e run test:shield
-docker compose -f docker-compose.yaml -f docker-compose.shield.yaml down
 ```
 
-Wait for readiness after recreating the service. The scenario enables Shield through the real
-lobby, reveals and collects the generated pickup, survives a blast, waits for expiry, then
-proves a later blast is lethal. Mount fixtures externally and read-only; keep seeds out of images.
-
-## Reproduce a complete classic match
-
-The existing seeded scenarios select the Classic settings preset before readiness, keeping
-their original generated layouts while the room retains Expanded-v5/generator-v2 identity.
-
-Reuse the same image after default and pickup acceptance, with the tracked open-corridor
-fixture. This is the same strict read-once seed-file mechanism, with a different public seed.
+For isolated Kubernetes reproduction, create a temporary Secret from the row's same seed file.
+Mount its `round.seed` key at `/run/grenadiers/round.seed` with `defaultMode: 0444`, set
+`GAME_ROUND_SEED_FILE` to that path, and ensure UID 65532 can read it. Retain the base probes,
+Recreate strategy, one replica, security context, Service, and exact paired image digest. After
+a Secret content change, explicitly restart the Deployment: the process reads its seed only at
+startup. Applying a seed environment/volume change to the Pod template triggers a rollout itself.
+After changing Secret contents, run:
 
 ```sh
-docker compose -f docker-compose.yaml -f docker-compose.matches.yaml up -d --no-build --force-recreate app
-curl --fail http://127.0.0.1:8085/api/v1/ready
-E2E_MATCH_FIXTURE=arena-v1-matches npm --prefix e2e run test:matches
-E2E_MATCH_FIXTURE=arena-v1-matches npm --prefix e2e run test:reconnect
-docker compose -f docker-compose.yaml -f docker-compose.matches.yaml down
+kubectl -n grenadiers rollout restart deployment/grenadiers
+kubectl -n grenadiers rollout status deployment/grenadiers
 ```
 
-Poll readiness before tests. The fixture requires explicit acknowledgement and proves a real
-draw, three wins, resets, and rematch over two existing sockets. The separate reconnect suite
-checks a real transport loss, full-world restore and action high-water, connected takeover,
-uniform rejection, and expiry after eleven real seconds. Kubernetes reproduction uses
-the same temporary read-only 0444 Secret procedure with `arena-v1-matches.seed`. The seed is
-never packaged into the runtime image or sent to a browser.
+Wait for the replacement Pod to become ready. After every rollout or old-forward failure, stop
+the old port-forward, start a fresh `service/grenadiers 8085:8085` forward to the replacement Pod,
+and require successful health/readiness. Remove the temporary Secret or namespace and remove
+the seed env/volume patch to
+restore ordinary random mode. A healthy replacement never repairs an old port-forward.
+
+On Linux, the headed visibility command is
+`E2E_MATCH_FIXTURE=arena-v1-matches xvfb-run -a npm --prefix e2e run test:hardening`.
+On macOS, use the table's command without the wrapper. See the
+[natural visibility setup](../e2e/README.md#natural-headed-visibility).
+
+### Fixture index
+
+All fixture paths and Compose mounts below are checked repository files. Follow the linked scenario
+for privacy, pixel/compositor, localization, timing-sensitive capture, and allowed evidence rules;
+do not replace those observations with state injection, direct gameplay messages, retries, or seed
+searches. Where a scenario names visual proofs, preserve its English desktop and Polish 320-pixel
+reduced-motion captures, exact filenames, and capture timing.
+
+| Feature | Override and read-only seed | Required acknowledgement and command | Scenario-specific contract |
+| --- | --- | --- | --- |
+| <a id="reproduce-a-generated-pickup-round"></a>Generated pickups | [`docker-compose.pickups.yaml`](../docker-compose.pickups.yaml)<br>[`arena-v1-pickups.seed`](../core/tests/fixtures/arena-v1-pickups.seed) | `E2E_PICKUP_FIXTURE=arena-v1-pickups npm --prefix e2e run test:pickups` | [Generated pickup scenario](../e2e/scenarios/pickups.md): native collection, both HUDs, captured ranges, screenshots/checkpoints and redacted summaries; per-key DOM/compositor capture stays disabled because its overhead distorts real-time escape. |
+| <a id="reproduce-heart-collection-and-protection"></a>Heart | [`docker-compose.heart.yaml`](../docker-compose.heart.yaml)<br>[`arena-v2-heart.seed`](../core/tests/fixtures/arena-v2-heart.seed) | `E2E_HEART_FIXTURE=arena-v2-heart npm --prefix e2e run test:heart` | [Heart scenario](../e2e/scenarios/heart.md): default-enabled collection, one protected hit, later lethal hit, localized views. |
+| <a id="reproduce-opt-in-shield-protection"></a>Shield | [`docker-compose.shield.yaml`](../docker-compose.shield.yaml)<br>[`arena-v2-shield.seed`](../core/tests/fixtures/arena-v2-shield.seed) | `E2E_SHIELD_FIXTURE=arena-v2-shield npm --prefix e2e run test:shield` | [Shield scenario](../e2e/scenarios/shield.md): lobby opt-in, protection expiry, later lethal hit, localized views. |
+| <a id="reproduce-a-complete-classic-match"></a>Classic match fixture | [`docker-compose.matches.yaml`](../docker-compose.matches.yaml)<br>[`arena-v1-matches.seed`](../core/tests/fixtures/arena-v1-matches.seed) | `E2E_MATCH_FIXTURE=arena-v1-matches npm --prefix e2e run test:matches`<br>`E2E_MATCH_FIXTURE=arena-v1-matches npm --prefix e2e run test:reconnect`<br>`E2E_MATCH_FIXTURE=arena-v1-matches npm --prefix e2e run test:latency`<br>`E2E_MATCH_FIXTURE=arena-v1-matches npm --prefix e2e run test:hardening` | [Match](../e2e/scenarios/matches.md), [reconnect](../e2e/scenarios/reconnect.md), [latency](../e2e/scenarios/websocket-latency.md), and [headed visibility](../e2e/scenarios/browser-hardening.md); Classic settings retain the fixture's generator identity. |
+| <a id="reproduce-opt-in-golden-flame-range"></a>Golden Flame | [`docker-compose.golden-flame.yaml`](../docker-compose.golden-flame.yaml)<br>[`arena-v2-golden-flame.seed`](../core/tests/fixtures/arena-v2-golden-flame.seed) | `E2E_GOLDEN_FLAME_FIXTURE=arena-v2-golden-flame npm --prefix e2e run test:golden-flame` | [Golden Flame scenario](../e2e/scenarios/golden-flame.md): captured range, reconnect deadline, exact expiry, and base range. |
+| <a id="reproduce-opt-in-short-fuse-timing"></a>Short Fuse | [`docker-compose.short-fuse.yaml`](../docker-compose.short-fuse.yaml)<br>[`arena-v2-short-fuse.seed`](../core/tests/fixtures/arena-v2-short-fuse.seed) | `E2E_SHORT_FUSE_FIXTURE=arena-v2-short-fuse npm --prefix e2e run test:short-fuse` | [Short Fuse scenario](../e2e/scenarios/short-fuse.md): selected base fuse, captured shortened fuse, reconnect, expiry, and ordinary timing. |
+| <a id="reproduce-opt-in-short-flame-range"></a>Short Flame | [`docker-compose.short-flame.yaml`](../docker-compose.short-flame.yaml)<br>[`arena-v2-short-flame.seed`](../core/tests/fixtures/arena-v2-short-flame.seed) | `E2E_SHORT_FLAME_FIXTURE=arena-v2-short-flame npm --prefix e2e run test:short-flame` | [Short Flame scenario](../e2e/scenarios/short-flame.md): real range-one fire boundary, reconnect, exact expiry, and restored damage. |
+| <a id="reproduce-opt-in-long-fuse-timing"></a>Long Fuse | [`docker-compose.long-fuse.yaml`](../docker-compose.long-fuse.yaml)<br>[`arena-v2-long-fuse.seed`](../core/tests/fixtures/arena-v2-long-fuse.seed) | `E2E_LONG_FUSE_FIXTURE=arena-v2-long-fuse npm --prefix e2e run test:long-fuse` | [Long Fuse scenario](../e2e/scenarios/long-fuse.md): retained placement history, zero-valid IDs, exact expiry, and restored timing. |
+| <a id="reproduce-opt-in-reverse-controls-movement"></a>Reverse Controls | [`docker-compose.reverse-controls.yaml`](../docker-compose.reverse-controls.yaml)<br>[`arena-v2-reverse-controls.seed`](../core/tests/fixtures/arena-v2-reverse-controls.seed) | `E2E_REVERSE_CONTROLS_FIXTURE=arena-v2-reverse-controls npm --prefix e2e run test:reverse-controls` | [Reverse Controls scenario](../e2e/scenarios/reverse-controls.md): one held raw key through collection, reverse travel, exact expiry, and restoration. |
+| <a id="reproduce-opt-in-diarrhea-automatic-placement"></a>Diarrhea | [`docker-compose.diarrhea.yaml`](../docker-compose.diarrhea.yaml)<br>[`arena-v2-diarrhea.seed`](../core/tests/fixtures/arena-v2-diarrhea.seed) | `E2E_DIARRHEA_FIXTURE=arena-v2-diarrhea npm --prefix e2e run test:diarrhea` | [Diarrhea scenario](../e2e/scenarios/diarrhea.md): automatic next-tick placement without another browser bomb action, death, and clean round. |
+| <a id="reproduce-opt-in-slow-foot-movement"></a>Slow foot | [`docker-compose.slow-foot.yaml`](../docker-compose.slow-foot.yaml)<br>[`arena-v2-slow-foot.seed`](../core/tests/fixtures/arena-v2-slow-foot.seed) | `E2E_SLOW_FOOT_FIXTURE=arena-v2-slow-foot npm --prefix e2e run test:slow-foot` | [Slow-foot scenario](../e2e/scenarios/slow-foot.md): authoritative unclamped half/base-rate windows, exact timers, and key release. |
+| <a id="reproduce-opt-in-piercing-bomb-penetration"></a>Piercing Bomb | [`docker-compose.piercing-bomb.yaml`](../docker-compose.piercing-bomb.yaml)<br>[`arena-v2-piercing-bomb.seed`](../core/tests/fixtures/arena-v2-piercing-bomb.seed) | `E2E_PIERCING_BOMB_FIXTURE=arena-v2-piercing-bomb npm --prefix e2e run test:piercing-bomb` | [Piercing Bomb scenario](../e2e/scenarios/piercing-bomb.md): localized armed views, two burned blocks, charge consumption, ordinary successor. |
+| <a id="reproduce-opt-in-power-bomb-hard-wall-traversal"></a>Power Bomb | [`docker-compose.power-bomb.yaml`](../docker-compose.power-bomb.yaml)<br>[`arena-v2-power-bomb.seed`](../core/tests/fixtures/arena-v2-power-bomb.seed) | `E2E_POWER_BOMB_FIXTURE=arena-v2-power-bomb npm --prefix e2e run test:power-bomb` | [Power Bomb scenario](../e2e/scenarios/power-bomb.md): hard-wall traversal, safe footprint boundary, consumption, and fresh ordinary placement. |
+| <a id="reproduce-opt-in-remote-bomb-manual-detonation"></a>Remote Bomb | [`docker-compose.remote-bomb.yaml`](../docker-compose.remote-bomb.yaml)<br>[`arena-v2-remote-bomb.seed`](../core/tests/fixtures/arena-v2-remote-bomb.seed) | `E2E_REMOTE_BOMB_FIXTURE=arena-v2-remote-bomb npm --prefix e2e run test:remote-bomb` | [Remote Bomb scenario](../e2e/scenarios/remote-bomb.md): same ID beyond ordinary fuse, manual detonation without placement, ordinary successor. |
+| <a id="reproduce-opt-in-landmine-contact-detonation"></a>Landmine | [`docker-compose.landmine.yaml`](../docker-compose.landmine.yaml)<br>[`arena-v2-landmine.seed`](../core/tests/fixtures/arena-v2-landmine.seed) | `E2E_LANDMINE_FIXTURE=arena-v2-landmine npm --prefix e2e run test:landmine` | [Landmine scenario](../e2e/scenarios/landmine.md): safe overlap exit, same-ID persistence, keyboard contact, and two-recipient detonation parity. |
+| <a id="reproduce-opt-in-invisibility-cloak-recipient-privacy"></a>Invisibility Cloak | [`docker-compose.invisibility-cloak.yaml`](../docker-compose.invisibility-cloak.yaml)<br>[`arena-v2-invisibility-cloak.seed`](../core/tests/fixtures/arena-v2-invisibility-cloak.seed) | `E2E_INVISIBILITY_CLOAK_FIXTURE=arena-v2-invisibility-cloak npm --prefix e2e run test:invisibility-cloak` | [Cloak privacy scenario](../e2e/scenarios/invisibility-cloak.md): recipient-local actor/protocol and compositor pixels, reconnect without replay/refresh, exact reveal. |
+| <a id="reproduce-opt-in-stopwatch-action-and-fuse-pausing"></a>Stopwatch | [`docker-compose.stopwatch.yaml`](../docker-compose.stopwatch.yaml)<br>[`arena-v2-stopwatch.seed`](../core/tests/fixtures/arena-v2-stopwatch.seed) | `E2E_STOPWATCH_FIXTURE=arena-v2-stopwatch npm --prefix e2e run test:stopwatch` | [Stopwatch scenario](../e2e/scenarios/stopwatch.md): two holder windows, blocked actions, thaw, paused fuse, natural detonation. |
+| <a id="reproduce-opt-in-invisible-bombs-privacy"></a>Invisible Bombs | [`docker-compose.invisible-bombs.yaml`](../docker-compose.invisible-bombs.yaml)<br>[`arena-v2-invisible-bombs.seed`](../core/tests/fixtures/arena-v2-invisible-bombs.seed) | `E2E_INVISIBLE_BOMBS_FIXTURE=arena-v2-invisible-bombs npm --prefix e2e run test:invisible-bombs` | [Invisible Bombs privacy scenario](../e2e/scenarios/invisible-bombs.md): recipient-local live pixels/events, truthful public state, reconnect boundary, expiry, and reveal. |
+| <a id="reproduce-opt-in-teleporter-swaps"></a>Teleporter | [`docker-compose.teleporter.yaml`](../docker-compose.teleporter.yaml)<br>[`arena-v2-teleporter.seed`](../core/tests/fixtures/arena-v2-teleporter.seed) | `E2E_TELEPORTER_FIXTURE=arena-v2-teleporter npm --prefix e2e run test:teleporter` | [Teleporter scenario](../e2e/scenarios/teleporter.md): safe swap/marker, fresh reconnect state, and unsafe consumption without movement. |
+| <a id="reproduce-opt-in-wall-pass-movement"></a>Wall Pass | [`docker-compose.wall-pass.yaml`](../docker-compose.wall-pass.yaml)<br>[`arena-v2-wall-pass.seed`](../core/tests/fixtures/arena-v2-wall-pass.seed) | `E2E_WALL_PASS_FIXTURE=arena-v2-wall-pass npm --prefix e2e run test:wall-pass` | [Wall Pass scenario](../e2e/scenarios/wall-pass.md): opaque-block passage/pixels, rejected allocation, reconnect inside, exit, and EN/PL reduced-motion captures. |
+| Kick | [`docker-compose.kick.yaml`](../docker-compose.kick.yaml)<br>[`arena-v2-kick.seed`](../core/tests/fixtures/arena-v2-kick.seed) | `E2E_KICK_FIXTURE=arena-v2-kick npm --prefix e2e run test:kick` | [Kick scenario](../e2e/scenarios/kick.md): ordinary native input, retained pre-input timeline, same bomb identity/fuse, no injection or direct gameplay commands. |
+| Punch | [`docker-compose.punch.yaml`](../docker-compose.punch.yaml)<br>[`arena-v2-punch.seed`](../core/tests/fixtures/arena-v2-punch.seed) | `E2E_PUNCH_FIXTURE=arena-v2-punch npm --prefix e2e run test:punch` | [Punch scenario](../e2e/scenarios/punch.md): remapped Equipment key, wrapped bomb move, public parity, safe escape, and natural fuse. |
+| Bracelet | [`docker-compose.bracelet.yaml`](../docker-compose.bracelet.yaml)<br>[`arena-v2-bracelet.seed`](../core/tests/fixtures/arena-v2-bracelet.seed) | `E2E_BRACELET_FIXTURE=arena-v2-bracelet npm --prefix e2e run test:bracelet` | [Bracelet scenario](../e2e/scenarios/bracelet.md): exact one-tile shove with no victim command, Equipment action, event, or private marker; localized captures. |
+| <a id="reproduce-opt-in-oil-barrel-reveal-and-persistent-fire"></a>Oil Barrel | [`docker-compose.oil-barrel.yaml`](../docker-compose.oil-barrel.yaml)<br>[`arena-v2-oil-barrel.seed`](../core/tests/fixtures/arena-v2-oil-barrel.seed) | `E2E_OIL_BARREL_FIXTURE=arena-v2-oil-barrel npm --prefix e2e run test:oil-barrel` | [Oil Barrel scenario](../e2e/scenarios/oil-barrel.md): pending privacy, unlit collision pixels, ignition/escape, finite and persistent fire, reconnect, and localized rendering. |
 
 ## Graceful stop
 
@@ -177,298 +212,3 @@ outcomes. The process explicitly waits up to five seconds for upgraded game/diag
 sessions and room cleanup; final publication/close is best effort. Keep Compose's ten-second
 and Kubernetes' fifteen-second stop grace periods. Transport reconnect reserves a seat for 600 authoritative ticks while this process remains alive.
 A process restart still discards matches and capabilities; this is not restart recovery.
-
-## Reproduce opt-in Golden Flame range
-
-Use the same built image with the separate production fixture:
-
-```sh
-chmod 444 core/tests/fixtures/arena-v2-golden-flame.seed
-docker compose -f docker-compose.yaml -f docker-compose.golden-flame.yaml up -d --no-build --force-recreate app
-# Wait for /api/v1/ready before running the scenario.
-E2E_GOLDEN_FLAME_FIXTURE=arena-v2-golden-flame npm --prefix e2e run test:golden-flame
-docker compose -f docker-compose.yaml -f docker-compose.golden-flame.yaml down
-```
-
-The scenario enables Golden Flame through shared settings, reveals and collects its generated
-pickup, escapes a radius-eight blast, resumes with the same deadline and verifies base range
-after exact expiry. The seed file stays external to the image and must remain read-only.
-
-## Reproduce opt-in Short Fuse timing
-
-Use the paired candidate image with its separate production-seed fixture:
-
-```sh
-chmod 444 core/tests/fixtures/arena-v2-short-fuse.seed
-docker compose -f docker-compose.yaml -f docker-compose.short-fuse.yaml up -d --no-build --force-recreate app
-# Wait for /api/v1/ready to return 200 before running the scenario.
-E2E_SHORT_FUSE_FIXTURE=arena-v2-short-fuse npm --prefix e2e run test:short-fuse
-docker compose -f docker-compose.yaml -f docker-compose.short-fuse.yaml down
-```
-
-The scenario enables only Short Fuse and a five-second base fuse through the actual shared
-settings, reveals and collects the pickup, checks shortened deadlines and detonation on both
-peers, reconnects, and checks expiry followed by ordinary timing. The fixture remains external;
-never bake it into the application image. Equivalent Kubernetes acceptance mounts the same
-mode-0444 seed and runs the scenario through the Service port-forward. Recorded acceptance
-status remains in [verification](verification.md); these reproduction commands do not imply a pass.
-
-## Reproduce opt-in Short Flame range
-
-Use the paired candidate image with its separate external production seed:
-
-```sh
-chmod 444 core/tests/fixtures/arena-v2-short-flame.seed
-docker compose -f docker-compose.yaml -f docker-compose.short-flame.yaml up -d --no-build --force-recreate app
-# Wait for /api/v1/ready to return 200 before running the scenario.
-E2E_SHORT_FLAME_FIXTURE=arena-v2-short-flame npm --prefix e2e run test:short-flame
-docker compose -f docker-compose.yaml -f docker-compose.short-flame.yaml down
-```
-
-The real settings panel enables only Short Flame. The scenario reveals and collects its
-pickup, observes an actual range-one blast in the cleared corridor, reconnects without
-extending the timer, and verifies base range after expiry. Equivalent Kubernetes acceptance
-mounts the same mode-0444 seed and runs through the Service port-forward. Never bake the seed
-into the application image. Consult [verification](verification.md) for actual candidate results.
-
-## Reproduce opt-in Long Fuse timing
-
-Corrected source `e0ffd635f9aa0b25c1f2dc00a5d20d8fc00be831` passes fresh 32/32 Compose and
-32/32 Kubernetes browser cases, with wrapper exit zero and no retries or carried results.
-See [verification](verification.md) for the exact image, sealed evidence, earlier failed
-attempts, independent review and final CI/publication status.
-
-Use the paired candidate image with its separate external production seed:
-
-```sh
-chmod 444 core/tests/fixtures/arena-v2-long-fuse.seed
-docker compose -f docker-compose.yaml -f docker-compose.long-fuse.yaml up -d --no-build --force-recreate app
-# Wait for /api/v1/ready to return 200 before running the scenario.
-E2E_LONG_FUSE_FIXTURE=arena-v2-long-fuse npm --prefix e2e run test:long-fuse
-docker compose -f docker-compose.yaml -f docker-compose.long-fuse.yaml down
-```
-
-The real settings panel enables only Long Fuse with a 120-tick base. The scenario follows the
-ordinary generated pickup path, proves each emitted manual bomb action against retained placement
-history, observes a captured 240-tick bomb on both peers, crosses the exact 600-tick expiry, and
-verifies restored 120-tick timing. The first two escapes must retain the same running round and a
-living collector. Bomb identifiers are numeric and zero is valid; the placement poll therefore
-requires a defined ID rather than a truthy ID.
-
-The earlier source-`39e764a9a20fc0c25e663fd4921491c5268c8358` attempt passed 31 Compose
-cases before this truthiness defect rejected observed bomb ID `0`; Kubernetes was not started.
-It is sealed at `/tmp/grenadiers-v0330-ready-native-acceptance` with 14 reports, 37 PNGs,
-an unchanged 988-entry preparation-manifest SHA-256 of
-`9e5b2ddc43d44f8fac51d78d071093c56ba93de5388673e5626636b61243bb95`, and a
-1,380-entry final-manifest SHA-256 of
-`0c782387e843cf3c9e8e40a22e9c767e35741c91a8ee8cba5dd3dd21a4aaad86`. It has no
-accepted or carried matrix. The preceding source-`04b89a6` attempt lacked retained command/frame
-history, so its similar symptom remains historically unproven. Fresh full acceptance is required
-after this bounded driver correction. Never bake the seed into the image.
-
-## Reproduce opt-in Reverse Controls movement
-
-Use the paired candidate image with its separate external production seed:
-
-```sh
-chmod 444 core/tests/fixtures/arena-v2-reverse-controls.seed
-docker compose -f docker-compose.yaml -f docker-compose.reverse-controls.yaml up -d --no-build --force-recreate app
-# Wait for /api/v1/ready to return 200 before running the scenario.
-E2E_REVERSE_CONTROLS_FIXTURE=arena-v2-reverse-controls npm --prefix e2e run test:reverse-controls
-docker compose -f docker-compose.yaml -f docker-compose.reverse-controls.yaml down
-```
-
-The real settings panel enables only Reverse Controls. The scenario holds a raw east key through
-ordinary approach, collection, reversed travel to the left wall, exact expiry and restored east
-movement. Both peers check the authoritative timer. Keep the seed external and read-only.
-
-## Reproduce opt-in Diarrhea automatic placement
-
-Use the already built candidate image and the pinned production seed:
-
-```sh
-chmod 444 core/tests/fixtures/arena-v2-diarrhea.seed
-docker compose -f docker-compose.yaml -f docker-compose.diarrhea.yaml up -d --no-build --force-recreate app
-E2E_DIARRHEA_FIXTURE=arena-v2-diarrhea npm --prefix e2e run test:diarrhea
-docker compose -f docker-compose.yaml -f docker-compose.diarrhea.yaml down
-```
-
-Deploy the v0.3.32 server and web assets together and reload connected browsers. The exact v8
-`availableItems` array grows to eight entries, so older v8 web clients reject the room even when
-Diarrhea is disabled. No storage migration is required; active matches remain process-local.
-
-## Reproduce opt-in Slow-foot movement
-
-Use the already built candidate image and the pinned production seed:
-
-```sh
-chmod 444 core/tests/fixtures/arena-v2-slow-foot.seed
-docker compose -f docker-compose.yaml -f docker-compose.slow-foot.yaml up -d --no-build --force-recreate app
-E2E_SLOW_FOOT_FIXTURE=arena-v2-slow-foot npm --prefix e2e run test:slow-foot
-docker compose -f docker-compose.yaml -f docker-compose.slow-foot.yaml down
-```
-
-The scenario enables only Slow foot, reveals and collects one generated stack, measures half-rate
-and restored base-rate movement in unclamped corridor windows, and checks both peers' exact timer.
-Deploy the v0.3.34 server and web assets together and reload connected browsers. The exact v8
-`availableItems` array grows to ten entries, so older v8 clients reject the room even when Piercing
-Bomb is disabled. No storage migration is required; active matches remain process-local.
-
-## Reproduce opt-in Piercing Bomb penetration
-
-```sh
-chmod 444 core/tests/fixtures/arena-v2-piercing-bomb.seed
-docker compose -f docker-compose.yaml -f docker-compose.piercing-bomb.yaml up -d --no-build --force-recreate app
-E2E_PIERCING_BOMB_FIXTURE=arena-v2-piercing-bomb npm --prefix e2e run test:piercing-bomb
-docker compose -f docker-compose.yaml -f docker-compose.piercing-bomb.yaml down
-```
-
-The scenario enables only Piercing Bomb, reveals the deterministic charge, captures localized
-armed views, crosses two consecutive blocks with one manual bomb, and verifies the next manual
-bomb is ordinary.
-
-Deploy the v0.3.35 server and web assets together and reload connected browsers. The exact v8
-`availableItems` array grows to eleven entries, so older v8 clients reject the room even when
-Power Bomb is disabled. No storage migration is required; active matches remain process-local.
-
-## Reproduce opt-in Power Bomb hard-wall traversal
-
-```sh
-chmod 444 core/tests/fixtures/arena-v2-power-bomb.seed
-docker compose -f docker-compose.yaml -f docker-compose.power-bomb.yaml up -d --no-build --force-recreate app
-E2E_POWER_BOMB_FIXTURE=arena-v2-power-bomb npm --prefix e2e run test:power-bomb
-docker compose -f docker-compose.yaml -f docker-compose.power-bomb.yaml down
-```
-
-The scenario enables only Power Bomb and reveals the deterministic charge at (3,1). A manual
-bomb planted at (1,2) burns and destroys the block at (3,2) beyond the retained, unburned hard
-wall at (2,2), leaves the escape cell (3,1) safe, and consumes the charge. Both peers must then
-agree on a fresh ordinary manual placement. Native execution remains a candidate gate.
-
-Deploy the v0.3.36 server and web assets together and reload connected browsers. The exact v8
-`availableItems` array grows to twelve entries, so older v8 clients reject the room even when
-Remote Bomb is disabled. No storage migration is required; active matches remain process-local.
-
-## Reproduce opt-in Remote Bomb manual detonation
-
-```sh
-chmod 444 core/tests/fixtures/arena-v2-remote-bomb.seed
-docker compose -f docker-compose.yaml -f docker-compose.remote-bomb.yaml up -d --no-build --force-recreate app
-E2E_REMOTE_BOMB_FIXTURE=arena-v2-remote-bomb npm --prefix e2e run test:remote-bomb
-docker compose -f docker-compose.yaml -f docker-compose.remote-bomb.yaml down
-```
-
-The scenario enables only Remote Bomb, reveals the deterministic charge at (3,1), and plants it
-there before escaping to (1,2). Both peers prove that the same bomb remains armed beyond the
-ordinary fuse duration. One fresh bomb action detonates that ID without another placement, after
-which a fresh Timed Standard bomb proves the normal path. Native execution remains a candidate gate.
-
-Deploy the v0.3.37 server and web assets together and reload connected browsers. The exact v8
-`availableItems` array grows to thirteen entries, so older v8 clients reject the room even when
-Landmine is disabled. No storage migration is required; active matches remain process-local.
-
-## Reproduce opt-in Landmine contact detonation
-
-```sh
-chmod 444 core/tests/fixtures/arena-v2-landmine.seed
-docker compose -f docker-compose.yaml -f docker-compose.landmine.yaml up -d --no-build --force-recreate app
-E2E_LANDMINE_FIXTURE=arena-v2-landmine npm --prefix e2e run test:landmine
-docker compose -f docker-compose.yaml -f docker-compose.landmine.yaml down
-```
-
-The scenario enables only Landmine, reveals and collects the deterministic charge at (3,1),
-places the mine there, exits safely, and proves that it remains armed past the ordinary fuse.
-Normal keyboard re-entry detonates the same Contact bomb for both peers without another manual
-action. Native execution remains a candidate gate.
-
-Deploy the v0.3.38 server and web assets together and reload connected browsers. The exact v8
-`availableItems` array grows to fourteen entries, so older v8 clients reject the room even when
-Invisibility Cloak is disabled. No storage migration is required; active matches remain process-local.
-
-## Reproduce opt-in Invisibility Cloak recipient privacy
-
-```sh
-chmod 444 core/tests/fixtures/arena-v2-invisibility-cloak.seed
-docker compose -f docker-compose.yaml -f docker-compose.invisibility-cloak.yaml up -d --no-build --force-recreate app
-E2E_INVISIBILITY_CLOAK_FIXTURE=arena-v2-invisibility-cloak npm --prefix e2e run test:invisibility-cloak
-docker compose -f docker-compose.yaml -f docker-compose.invisibility-cloak.yaml down
-```
-
-The scenario enables only Invisibility Cloak, captures localized views and empty-floor compositor
-pixels before collection, then verifies owner-visible and opponent-hidden rendering. Opponent
-reconnect neither refreshes the physical deadline nor replays private collection history; exact
-expiry reveals the actor at its current position. Native execution remains a candidate gate.
-
-## Reproduce opt-in Stopwatch action and fuse pausing
-
-```sh
-chmod 444 core/tests/fixtures/arena-v2-stopwatch.seed
-docker compose -f docker-compose.yaml -f docker-compose.stopwatch.yaml up -d --no-build --force-recreate app
-E2E_STOPWATCH_FIXTURE=arena-v2-stopwatch npm --prefix e2e run test:stopwatch
-docker compose -f docker-compose.yaml -f docker-compose.stopwatch.yaml down
-```
-
-The scenario enables only Stopwatch and follows the deterministic mirrored pickups with ordinary
-movement and bombs. Two sequential holder windows prove blocked voluntary actions, held-input thaw,
-constant paused fuses, full-fuse placement during a pause and exact natural detonation. Native
-execution remains a candidate gate.
-
-## Reproduce opt-in Invisible Bombs privacy
-
-```sh
-chmod 444 core/tests/fixtures/arena-v2-invisible-bombs.seed
-docker compose -f docker-compose.yaml -f docker-compose.invisible-bombs.yaml up -d --no-build --force-recreate app
-E2E_INVISIBLE_BOMBS_FIXTURE=arena-v2-invisible-bombs npm --prefix e2e run test:invisible-bombs
-docker compose -f docker-compose.yaml -f docker-compose.invisible-bombs.yaml down
-```
-
-The scenario enables only Invisible Bombs and proves its deterministic pickup, recipient-local
-bomb privacy, reconnect boundary, exact expiry and current-state reveal. Run it against one final
-built image together with the cumulative native matrix before release.
-
-## Reproduce opt-in Teleporter swaps
-
-```sh
-chmod 444 core/tests/fixtures/arena-v2-teleporter.seed
-docker compose -f docker-compose.yaml -f docker-compose.teleporter.yaml up -d --no-build --force-recreate app
-E2E_TELEPORTER_FIXTURE=arena-v2-teleporter npm --prefix e2e run test:teleporter
-docker compose -f docker-compose.yaml -f docker-compose.teleporter.yaml down
-```
-
-The read-only repeating-byte-31 fixture enables an ordinary keyboard route with only Teleporter.
-The two-browser scenario proves a safe atomic swap and new position marker, reconnect state taken
-directly from a fresh admission, and an unsafe consumed pickup without movement or marker change.
-Run it against the final predecessor-integrated image together with the cumulative native matrix.
-
-## Reproduce opt-in Wall Pass movement
-
-```sh
-chmod 444 core/tests/fixtures/arena-v2-wall-pass.seed
-docker compose -f docker-compose.yaml -f docker-compose.wall-pass.yaml up -d --no-build --force-recreate app
-E2E_WALL_PASS_FIXTURE=arena-v2-wall-pass npm --prefix e2e run test:wall-pass
-docker compose -f docker-compose.yaml -f docker-compose.wall-pass.yaml down
-```
-
-The read-only repeating-byte-31 fixture enables an ordinary keyboard route with only Wall Pass.
-The two-browser scenario proves intact-block passage and presentation, rejected placement, hard-wall
-clamping, and state from a strictly newer reconnect admission before exiting the block. A legal
-post-exit bomb must have a later entity ID, identical on both clients. The route verifies no bomb,
-event or resource change for rejected placement; focused core tests verify no entity allocation. The route writes
-the English desktop and Polish 320-pixel reduced-motion full-page captures named in the scenario.
-This sole-item route does not cover equipment-replacement grace; focused core and protocol tests do.
-Run it against the final predecessor-integrated image together with the cumulative native matrix.
-
-## Reproduce opt-in Oil Barrel reveal and persistent fire
-
-```sh
-chmod 444 core/tests/fixtures/arena-v2-oil-barrel.seed
-docker compose -f docker-compose.yaml -f docker-compose.oil-barrel.yaml up -d --no-build --force-recreate app
-E2E_OIL_BARREL_FIXTURE=arena-v2-oil-barrel npm --prefix e2e run test:oil-barrel
-docker compose -f docker-compose.yaml -f docker-compose.oil-barrel.yaml down
-```
-
-The read-only repeating-byte-31 fixture enables only Oil Barrel. Ordinary movement and Bomb input
-reveal the `(3,1)` site, prove its exact collision edge, ignite it, escape safely, and retain its
-burning state after finite flames expire and through a normal reconnect. Both recipient streams,
-English desktop and Polish 320-pixel reduced-motion rendering are checked. Run this source route
-against the final predecessor-integrated image together with the cumulative native matrix.

@@ -11,7 +11,7 @@ The [artist sprite-sheet handoff](assets/art/README.md) includes editable PNG/JS
 guides, validated runtime export and a separate Pixi preview. Download the artist bundle from
 [the release](https://github.com/liveweird/grenadiers/releases/tag/v0.3.48).
 Gameplay now uses those canonical inputs; see the [renderer guide](docs/game/art-atlas.md).
-The current sheet is a Napoleonic redraw supplied by the repository owner; see its
+The current sheet is a Napoleonic redraw generated with ChatGPT; see its
 [provenance](assets/art/README.md#provenance).
 
 Artists can use `npm --prefix e2e run art:template -- --out target/art-template` and

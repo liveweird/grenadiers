@@ -1,181 +1,117 @@
-# Single-player mode: human versus CPU (proposal)
+# Single-player: human versus CPU
 
-Status: **proposal, not implemented.** This records the recommended approach for a one-player
-mode in which a CPU competitor occupies seat two. It builds on the policy in
-[Bot competitors](rules.md#bot-competitors), which stays authoritative: a bot obeys every human
-rule, receives no privileged information and enters the same validation and action path.
+Status: **accepted design; not implemented**. On 2026-10-25 the user chose the tightened staged
+hybrid after comparing an independent proposal with [Claude's original proposal](../history/single-player-cpu-proposal.md).
+QoL improvements come first. Open work is tracked in the [product backlog](../../BACKLOG.md#single-player).
 
-## Recommendation
+## Chosen approach
 
-Build a **hand-written, scored-goal bot in Rust** on top of the existing deterministic core. It
-should not use a neural network, and it should not be a fixed decision tree. The bot:
+Build a deterministic Rust bot with scored goals and time-aware routing. A private match has
+one human and one server-controlled CPU, using the existing two-seat simulation and ordinary
+input/action validation. Keep campaign mobs, larger matches and learned policies outside this
+initial implementation.
 
-1. computes a **danger map**: for every cell, the tick at which it will next burn;
-2. finds **time-aware safe routes** with a breadth-first search over (cell, arrival tick);
-3. **scores candidate goals** (escape, collect, open, trap, use an item) and pursues the best;
-4. optionally **looks ahead** a few seconds with the real rules at higher difficulty.
+The bot policy is a pure component: observable state and bounded memory go in; ordinary input
+intent comes out. A server adapter owns its lifecycle, timing, controller identity and input
+submission. It does not mint a fake human session or bypass bomb limits, cooldowns, curses,
+collision, damage or equipment rules.
 
-Difficulty comes from reaction delay, decision frequency, look-ahead depth and deliberate
-imperfection, never from extra speed, capacity or hidden knowledge.
+## Comparison and decision
 
-A learned bot can be evaluated later as a drop-in alternative once the bot interface exists. It
-is not the first step.
+Both proposals favored a server-side deterministic bot, fair observations, danger prediction,
+goal scoring and incremental development. The selected design keeps that common foundation.
 
-## Options considered
+| Area | Original proposal | Selected refinement |
+| --- | --- | --- |
+| Prediction | Rebuild a sandbox `State` from the recipient view | First define a restricted observation/forecast API; prove which rule kernels can be reused without private state. |
+| Hazards | Next burn tick and duration per cell | Preserve all relevant danger intervals, moving occupancy, safe gaps and persistent fire. |
+| Difficulty | Different prediction depth, reaction and mistakes | Share correct known-hazard mechanics; vary reaction, goals and bounded search. |
+| Scheduling | Inline or separate task left open; example millisecond target | Keep planning off the authoritative tick's critical path, with bounded queues/work and stale-result rejection; measure time separately. |
+| Delivery | Product integration after the main AI/item phases | Connect a real solo room early, then improve the same playable slice. |
+| Verification | Fixture tests, tournaments and timing checks | Add observation-privacy, replay-input and work-bound guarantees; keep expensive balance/benchmarks separate from routine feedback. |
 
-| Approach | Strengths | Weaknesses here | Verdict |
-|---|---|---|---|
-| Scored goals ("utility AI") + danger map + pathfinding | Transparent, tunable, cheap per tick, easy to test, rule changes become small score edits | Hand-tuning effort; needs careful hazard modelling | **Recommended baseline** |
-| Decision / behaviour trees | Simple to read for a few behaviours | Rigid priority ordering; grows brittle with 24 pickups and many status effects; difficulty tuning is awkward | Use only as a thin top-level wrapper, if at all |
-| Look-ahead search (beam search, Monte Carlo tree search) on the real rules | Handles chains, kicks, punches and traps without special cases | CPU cost per room; still needs a heuristic evaluation; needs care with hidden information | **Add later** for the hard level |
-| Reinforcement learning (neural network via self-play) | Can discover non-obvious tactics | Expensive training pipeline; retraining after each rule or item change; opaque failures; hard to make "weaker but natural"; Bomberman-style rewards are sparse, so agents tend to learn never to place bombs | **Not now**; optional experiment later |
-| Imitation learning from recorded human matches | Human-like play | Needs a large set of recorded matches (replay journals help); same opacity and retraining costs as RL | Not now |
+The original already forbids cloning the authoritative state. The concern is its reconstruction
+assumption: recipient snapshots omit movement residuals, grace/cooldown histories and other
+simulation bookkeeping. Existing `State::new*` constructors reset internal fields; they are not
+lossless snapshot restoration APIs. A sandbox needs a deliberate partial-information model.
 
-## Reasoning
+## Observation and prediction boundary
 
-- **The core is already a simulator.** `grenadiers_core::game::State` is `Clone` and
-  `State::step(&[SeatInput])` advances one deterministic 60 Hz tick
-  (`core/src/game/simulation_step.rs`). A bot can predict blasts, chain reactions, Oil ignition
-  and kicked bombs with the same code that judges the match. It does not need a second rules
-  model, and it cannot drift from the real rules.
-- **The bot acts like a player.** Player input is a small set of actions per seat: `Press`,
-  `Release`, `Clear`, `PlaceBomb` and `UseEquipment` (`core/src/game/simulation_contract.rs`).
-  A bot that only emits these is held to the same rules as a human.
-- **Rules change often.** Each new item would invalidate a trained network. With scored goals,
-  a new item needs one new goal or one new term in an existing score.
-- **Difficulty must feel fair.** Players expect an "easy" bot that hesitates and errs plausibly.
-  That is easy to express as explicit parameters and hard to extract from a trained policy.
-- **The repo's testing style needs determinism.** Seeded, deterministic bots fit fixture-based
-  Rust tests and zero-retry browser scenarios. Learned policies are harder to pin down.
-- **Grid size and tick rate are small.** A 15×13 arena with a decision every few ticks leaves
-  ample CPU budget for search on the server.
+- Observe only what the CPU seat may know under the current recipient/privacy rules. Avoid
+  coupling the bot to an archived protocol adapter; use a neutral bot observation and a server
+  adapter for the current live projection.
+- Never expose concealed pickups/Oil, hidden bombs, a cloaked rival's private details, arena
+  seeds or opponent intent. Bounded memory may retain previously observed facts and the bot's
+  own actions; reset it at round/room identity boundaries.
+- Reuse pure movement/explosion rule kernels where their inputs are sufficient. Represent
+  unknowns explicitly; never silently fill a full simulation with invented authoritative facts.
+- Forecast lethal intervals and occupancy over time, including chains, flame expiry, moving
+  bombs, Oil ignition and persistent fire, modifiers and pauses. A tile may burn more than once.
+- Routing must account for waiting, effective speed, continuous actor footprint and the actual
+  movement/turn rules. Use a search suited to timed transitions; a cell-only shortest path is
+  insufficient.
+- Plan a bomb only when an escape exists under the observed facts and chosen forecast. This is
+  a planning guarantee, not a promise that an opponent or newly revealed hazard cannot kill it.
 
-## Proposed design
+## Decisions, scheduling and replay
 
-### Placement and information
+Score survival, useful pickups, opening terrain and offensive pressure. Survival has priority;
+tactical search extends this policy rather than creating a separate rules implementation.
+Use each item's existing semantics: Shield and Teleporter apply on collection, stored weapons
+change Bomb behavior, and Equipment invokes the existing equipment action.
 
-- The bot runs **on the server**, inside the room's runtime, as the occupant of seat two. It
-  submits `SeatInput` values through the same path as a human session.
-- It observes **only what seat two would receive**: the recipient-specific projection
-  (`core/src/protocol/v8/projection_recipient.rs`). It does not see invisible bombs, a cloaked
-  opponent, concealed pickups or hidden Oil. Unknowns are treated conservatively, for example
-  assuming a recently seen invisible bomb is still live.
-- For prediction, the bot builds a **sandbox `State`** from its view: visible terrain, blocks,
-  bombs, flames, pickups and actor states, with hidden facts filled in conservatively. It then
-  steps that sandbox with no further inputs (blast timeline) or with candidate inputs
-  (look-ahead). It never clones the authoritative state, because that state holds private
-  facts.
+Give decisions a fixed work allowance, such as node expansions and bounded horizon. Use a
+bounded planning queue/worker arrangement so the room tick never waits for an unfinished
+search. Results carry room, round and observation identity; discard stale results and avoid
+unbounded catch-up queues. Planning performs no external I/O and participates in room shutdown.
+Choose concrete work limits through measurement, not an assumed sub-millisecond CI budget.
 
-### Decision loop
+Use a separate deterministic RNG stream for tie-breaking/imperfection; never consume arena
+randomness. Record the accepted bot inputs through the existing replay path. Store policy,
+difficulty and seed metadata compatibly when needed; replay should consume recorded actions,
+not rerun whichever bot version is installed later.
 
-- **Decision rate:** decide every N ticks (for example every 6 ticks, 10 Hz) and re-plan at once
-  when an event invalidates the plan, such as a new bomb, a kick, a flame or a teleport.
-- **Danger map:** from the sandbox, record when each cell first burns and for how long. Include
-  chains, piercing and power ranges, Golden Flame, fuse modifiers, the Stopwatch pause, Oil and
-  moving bombs.
-- **Safe routing:** breadth-first search over (cell, arrival tick) using the bot's effective
-  speed, the heuristic distance being Manhattan. A route is valid only if no cell on it burns
-  while the bot occupies it.
-- **Bomb placement rule:** place a bomb only if, after simulating the placement, a safe route
-  still exists before detonation, taking chains into account. This one check prevents most
-  suicides.
-- **Goal scoring:** for each candidate goal, compute `value × urgency ÷ cost`. Candidates:
-  - **Survive:** reach the nearest safe cell, overriding everything else when in danger.
-  - **Collect:** reach a visible pickup, weighted by its usefulness and penalised for harmful
-    pickups such as Diarrhea, Slow Foot and Reverse Controls.
-  - **Open:** bomb a block that opens space or exposes likely pickups.
-  - **Pressure:** place a bomb that cuts the opponent's escape routes; kick or punch a bomb
-    toward them.
-  - **Use equipment:** use Remote, Landmine, Teleporter, Shield and similar items when their
-    trigger condition holds.
-- **Input emission:** translate the chosen route into press and release actions, including
-  forgiving turns, and avoid flooding the 64-inputs-per-tick limit.
+All difficulty levels obey the same physics and knowledge boundary. Tune reaction cadence,
+goal quality, aggression and search allowance. Balance tables and win-rate targets need
+measured fixtures and playtesting; they are not correctness guarantees.
 
-### Difficulty levels (initial proposal)
+## Room and product contract
 
-| Knob | Easy | Normal | Hard |
-|---|---|---|---|
-| Reaction delay | 300–450 ms | 150–250 ms | 50–100 ms |
-| Decision rate | 4 Hz | 8 Hz | 15 Hz |
-| Danger prediction horizon | Current bombs only | Plus chains | Plus chains and opponent options |
-| Offensive bombing | Rare | Opportunistic | Deliberate traps |
-| Item use | Basic pickups | Most items | All items, combinations |
-| Deliberate mistakes | Occasional sub-optimal goal | Rare | None |
-| Look-ahead search | None | None | Short beam or tree search |
+- Add an explicit solo room mode and CPU label/difficulty. The human occupies seat one, CPU
+  seat two; retain the current two-seat core and global room/admission/resource limits.
+- The CPU's controller is server-owned. A remote client cannot claim its seat or forge its
+  actions. Update public mode/seat metadata with the repository's contract-first compatibility
+  process rather than disguising the CPU as a network participant.
+- Define creator settings, start, rematch, transient reconnect and permanent departure in the
+  first vertical slice. Preserve bot state across human reconnect; close the CPU room when its
+  human permanently leaves. Record the exact disconnect/pause policy before implementation.
+- Mark future history/stats as CPU matches. Durable stats/storage are not prerequisites.
+- Develop narrow mechanic fixtures first, but support the all-features-on product default
+  before a public solo preview. Advanced item tactics may improve later; legal play, privacy,
+  correct effects and bounded execution must work throughout.
 
-All randomness, such as mistakes and tie-breaking, uses a seeded `rand_chacha` stream, so
-matches are reproducible in tests and replays.
+## Milestones
 
-### Room and product changes
+1. **CPU0 — contracts and seams.** Define participant/mode metadata, observation, intent, work
+   budget and replay/lifecycle policy. Build a deterministic fixture harness.
+2. **CPU1 — internal playable slice.** Create a solo room, submit legal bot input, reach a real
+   match result and rematch/reconnect. A stand-still controller is a harness step, not a release.
+3. **CPU2 — survival.** Add interval forecasts, timed routing, safe planting and bounded memory;
+   compare forecasts with actual rules on fully known fixtures.
+4. **CPU3 — public preview.** Add goals, default-all item compatibility, clear HUD/difficulty
+   presentation, docs and real-browser acceptance of the complete solo flow.
+5. **CPU4 — stronger play.** Tune difficulty, tactical look-ahead and measured performance using
+   deterministic tournaments and human feedback.
 
-- A room mode "versus CPU" with a difficulty choice. The creator takes seat one, a bot takes
-  seat two and is ready at once. The current lifecycle requires two occupied and ready seats
-  before Countdown (see [rooms](rooms.md)).
-- The HUD names the CPU seat and its difficulty. The rematch, reconnect and departure rules
-  need a bot-specific policy: for example, a human leaving ends the room, and the bot never
-  disconnects.
-- Admission and rate limits count a bot room like any other room. Recorded results and any
-  future stats mark bot matches separately.
-- The protocol version and docs change if public seat metadata gains a "bot" flag.
+## Acceptance
 
-### Testing
+Fast deterministic tests cover escape, multiple burn windows, chains, movement/turning, Oil,
+modifiers, item categories and lifecycle resets. Identical observation histories and bot seed
+must produce identical intent despite different hidden authoritative facts. Keep ordinary
+input validation, recorded-input replay determinism and bounded-work exhaustion tests.
 
-- **Core unit tests** on fixture arenas: the bot escapes its own bomb, refuses placements with
-  no escape route, survives a chain reaction, and does not step into Oil about to ignite.
-- **Seeded bot-versus-bot tournaments** in `cargo test`, with a few hundred generated rounds:
-  - the easy bot's self-kill rate stays below a threshold;
-  - the hard bot beats the easy bot above a threshold;
-  - matches are deterministic for a fixed seed.
-- **Performance test:** the decision time per tick at the hard level stays within a budget, for
-  example under 1 ms on CI, so many rooms fit in one process.
-- **Browser scenario:** create a versus-CPU room, play to a result and rematch, using the same
-  zero-retry policy as the other suites.
-
-## Suggested phases
-
-1. **Bot interface and sandbox:** the bot seat in the room runtime, building a sandbox from the
-   recipient view, input emission, and a "stand still" bot.
-2. **Survival:** danger map, safe routing and the placement safety rule. This is an easy bot
-   that never suicides.
-3. **Offence and pickups:** block opening, collection scoring and trap placement. This becomes
-   the normal bot.
-4. **Items:** goals for equipment and weapons, item by item with tests.
-5. **Product:** room mode, difficulty selection, HUD, docs and the browser scenario.
-6. **Hard level:** short look-ahead search with a time budget.
-7. **Optional experiment:** a learned policy behind the same interface, compared through
-   bot-versus-bot tournaments.
-
-## Tools and libraries
-
-The baseline needs **no new runtime dependency**. A 15×13 grid search is a few dozen lines of
-Rust, and the repository adds dependencies deliberately (see [dependencies](../dependencies.md)).
-
-| Purpose | Suggestion | Notes |
-|---|---|---|
-| Seeded randomness | `rand_chacha` (already a pinned workspace dependency) | Tie-breaking and deliberate mistakes |
-| Pathfinding | Hand-written BFS; the [`pathfinding`](https://crates.io/crates/pathfinding) crate as an option | Time-aware search is easier to write directly than to adapt |
-| Behaviour trees, if wanted | [`bonsai-bt`](https://crates.io/crates/bonsai-bt) | Only if a tree wrapper proves clearer than plain Rust |
-| Look-ahead search | Hand-written beam search or Monte Carlo tree search | Existing MCTS crates are small and loosely maintained; the core's `Clone` + `step` is all that is needed |
-| Benchmarks | [`criterion`](https://crates.io/crates/criterion) (dev-only) | Decision time per tick at each difficulty |
-| Property tests | [`proptest`](https://crates.io/crates/proptest) (dev-only) | "Never places a bomb without an escape route" across generated arenas |
-
-For a later machine-learning experiment only:
-
-| Purpose | Suggestion | Notes |
-|---|---|---|
-| Expose the Rust core as a training environment | [PyO3](https://pyo3.rs) with [maturin](https://www.maturin.rs) | Python training against the real rules |
-| Environment API | [Gymnasium](https://gymnasium.farama.org) / [PettingZoo](https://pettingzoo.farama.org) (multi-agent) | Standard interfaces for self-play |
-| Training | [PyTorch](https://pytorch.org) with [Stable-Baselines3](https://stable-baselines3.readthedocs.io) or [CleanRL](https://github.com/vwxyzjn/cleanrl) | Proximal Policy Optimization (PPO) self-play is the usual starting point |
-| Inference in the server | [`tract`](https://crates.io/crates/tract-onnx) (pure Rust ONNX), or [`ort`](https://crates.io/crates/ort) / [`candle`](https://crates.io/crates/candle-core) / [`burn`](https://crates.io/crates/burn) | `tract` avoids a native library in the hardened container |
-| Reference benchmark | [Pommerman](https://github.com/MultiAgentLearning/playground) | A Bomberman-style multi-agent research environment. Its published results show how hard pure RL finds bomb placement, and that search and heuristics stay competitive. |
-
-## Open questions
-
-- Should a bot match count toward future stats or match history, or be excluded?
-- Fog-of-war policy for the bot: should it remember things it saw earlier but no longer sees
-  (for example where an invisible bomb was placed), and for how long? Humans can remember too,
-  so bounded memory seems fair.
-- One CPU opponent only, or a later two-humans-plus-bots mode? The core currently models
-  exactly two seats (`actors: [Actor; 2]`).
-- Where the bot runs: inline in the room task, or a separate task with a bounded channel so a
-  slow decision can never delay the simulation tick.
+Use seeded tournaments for balance and isolated reference workloads for performance. Do not
+add hundreds of slow rounds or hardware-sensitive one-millisecond assertions to every routine
+change. Public acceptance includes human-versus-CPU start/result/rematch/reconnect, all-on item
+rules, privacy, localization and narrow-screen accessibility, with existing floors and no
+hidden retries.

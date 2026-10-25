@@ -13,6 +13,7 @@
   and a blue bicorne grenadier, repainted terrain, bombs, flames, Oil, pickups and status cues.
   The manifest, frame rectangles, pivots, anchors and texture budget are unchanged; the Oil
   Barrel scenario now pins the new Oil palette.
+- Refresh gameplay documentation captures with the Napoleonic arena art.
 
 ## 0.3.57 — 2026-10-25
 

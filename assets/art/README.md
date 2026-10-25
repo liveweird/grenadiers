@@ -86,10 +86,10 @@ and adjacent flames. It is not linked from the gameplay or product flow.
 
 ## Provenance
 
-The adopted source is a Napoleonic redraw supplied by the repository owner. Player one wears an
-orange-and-white uniform with a plumed shako, player two a blue uniform with a cockaded bicorne;
-terrain, bombs, flames, Oil, pickups and status cues are repainted inside the previous
-silhouettes. It keeps the v0.3.48 manifest unchanged, every frame rectangle, pivot and anchor,
+The adopted source is a Napoleonic redraw, AI-generated with ChatGPT (OpenAI) and supplied by
+the repository owner. Player one wears an orange-and-white uniform with a plumed shako, player
+two a blue uniform with a cockaded bicorne; terrain, bombs, flames, Oil, pickups and status cues
+are repainted inside the previous silhouettes. It keeps the v0.3.48 manifest unchanged, every frame rectangle, pivot and anchor,
 binary alpha and the flame edge bands. Its new Oil palette is pinned by the Oil Barrel browser
 scenario. Repository licensing applies.
 

@@ -37,7 +37,7 @@ verification record.
 [Baseline rule coverage](rule-coverage.md) maps all 42 acceptance rules to concrete automated assertions.
 
 [Single-player versus CPU design](single-player-cpu.md) records the accepted staged hybrid;
-implementation follows the requested QoL work.
+implementation follows completion of the remaining agreed Claude review work.
 
 The [product backlog](../../BACKLOG.md) contains open work; [legacy backlog links](backlog.md)
 remain valid. Feature guides document implemented movement, shared settings, presentation and

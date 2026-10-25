@@ -4,6 +4,11 @@
 
 ### Changed
 
+- Separate authenticated commands from authentication at the server dispatch boundary and
+  share equivalent per-frame send policy while retaining outer final-delivery deadlines.
+
+### Changed
+
 - Capture production startup settings through a typed configuration, with redacted address/
   origin errors, preserved lazy database and OS-native paths, and an explicit empty-origin warning.
 - Document standalone/container defaults and align Docker logging with Compose and Kubernetes.

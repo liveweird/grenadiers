@@ -2,12 +2,13 @@ use std::sync::Arc;
 
 use axum::extract::ws::{Message, WebSocket};
 use grenadiers_core::protocol::v11::{
-    GameClientMessage, GameServerMessage, ManualActionKind, V11ErrorCode as ErrorCode,
+    GameServerMessage, ManualActionKind, V11ErrorCode as ErrorCode,
 };
 use grenadiers_core::protocol::{Counter, Direction as WireDirection, RoomId};
 use tokio::time::Instant;
 
 use super::{
+    command::{Command, SequencedCommand},
     connection::{ConnectionState, Membership},
     rooms::{Admission, BindingKey, GameRooms, RoomAction, RoomError},
     socket::{send_error, send_game, send_raw},
@@ -16,13 +17,13 @@ use crate::admission::{DenialOperation, GameplayOperation};
 
 pub(super) async fn dispatch(
     socket: &mut WebSocket,
-    message: GameClientMessage,
-    sequence: Counter,
+    command: SequencedCommand,
     rooms: &Arc<GameRooms>,
     state: &mut ConnectionState,
 ) -> bool {
-    match message {
-        GameClientMessage::CreateRoom { .. } => {
+    let (sequence, body) = command.into_parts();
+    match body {
+        Command::CreateRoom => {
             if state.membership.is_some() {
                 return reply_error(socket, ErrorCode::AlreadyInRoom, sequence).await;
             }
@@ -58,7 +59,7 @@ pub(super) async fn dispatch(
             )
             .await
         }
-        GameClientMessage::JoinRoom { room_code, .. } => {
+        Command::JoinRoom { room_code } => {
             if state.membership.is_some() {
                 return reply_error(socket, ErrorCode::AlreadyInRoom, sequence).await;
             }
@@ -89,10 +90,9 @@ pub(super) async fn dispatch(
             )
             .await
         }
-        GameClientMessage::ResumeRoom {
+        Command::ResumeRoom {
             room_id,
             resume_token,
-            ..
         } => {
             if state.membership.is_some() {
                 return reply_error(socket, ErrorCode::AlreadyInRoom, sequence).await;
@@ -134,9 +134,7 @@ pub(super) async fn dispatch(
             )
             .await
         }
-        GameClientMessage::LeaveRoom {
-            room_id, round_id, ..
-        } => {
+        Command::LeaveRoom { room_id, round_id } => {
             leave(
                 socket,
                 rooms,
@@ -147,12 +145,11 @@ pub(super) async fn dispatch(
             )
             .await
         }
-        GameClientMessage::Ready {
+        Command::Ready {
             room_id,
             round_id,
             ready,
             settings_revision,
-            ..
         } => {
             action(
                 socket,
@@ -168,12 +165,11 @@ pub(super) async fn dispatch(
             )
             .await
         }
-        GameClientMessage::UpdateSettings {
+        Command::UpdateSettings {
             room_id,
             round_id,
             settings_revision,
             settings,
-            ..
         } => {
             action(
                 socket,
@@ -194,11 +190,10 @@ pub(super) async fn dispatch(
             )
             .await
         }
-        GameClientMessage::Movement {
+        Command::Movement {
             room_id,
             round_id,
             direction,
-            ..
         } => {
             action(
                 socket,
@@ -211,12 +206,11 @@ pub(super) async fn dispatch(
             )
             .await
         }
-        GameClientMessage::ManualAction {
+        Command::ManualAction {
             room_id,
             round_id,
             action_id,
             action: manual,
-            ..
         } => match manual_room_action(manual, action_id) {
             Some(manual) => {
                 action(
@@ -232,11 +226,10 @@ pub(super) async fn dispatch(
             }
             None => reply_error(socket, ErrorCode::InvalidMessage, sequence).await,
         },
-        GameClientMessage::Rematch {
+        Command::Rematch {
             room_id,
             round_id,
             ready,
-            ..
         } => {
             action(
                 socket,
@@ -249,7 +242,6 @@ pub(super) async fn dispatch(
             )
             .await
         }
-        GameClientMessage::Authenticate { .. } => unreachable!(),
     }
 }
 

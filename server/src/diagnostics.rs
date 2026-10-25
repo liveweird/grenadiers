@@ -23,7 +23,6 @@ use crate::{
 };
 
 const INACTIVITY_TIMEOUT: Duration = Duration::from_secs(30);
-const SEND_TIMEOUT: Duration = Duration::from_secs(5);
 const MAX_WRITE_BUFFER: usize = 131_072;
 
 pub(crate) async fn websocket(
@@ -166,7 +165,11 @@ async fn websocket_session(
             },
             Some(Ok(Message::Ping(data))) => {
                 if !matches!(
-                    timeout(SEND_TIMEOUT, socket.send(Message::Pong(data))).await,
+                    timeout(
+                        crate::websocket_policy::SEND_TIMEOUT,
+                        socket.send(Message::Pong(data)),
+                    )
+                    .await,
                     Ok(Ok(()))
                 ) {
                     return;
@@ -211,15 +214,18 @@ fn policy_response(state: &AppState, denial: PolicyDenial) -> Response {
 
 async fn send_json(socket: &mut WebSocket, message: &ServerMessage) -> Result<(), ()> {
     let text = serde_json::to_string(message).map_err(|_| ())?;
-    timeout(SEND_TIMEOUT, socket.send(Message::Text(text.into())))
-        .await
-        .map_err(|_| ())?
-        .map_err(|_| ())
+    timeout(
+        crate::websocket_policy::SEND_TIMEOUT,
+        socket.send(Message::Text(text.into())),
+    )
+    .await
+    .map_err(|_| ())?
+    .map_err(|_| ())
 }
 
 async fn close(socket: &mut WebSocket, code: u16, reason: &'static str) {
     let _ = timeout(
-        SEND_TIMEOUT,
+        crate::websocket_policy::SEND_TIMEOUT,
         socket.send(Message::Close(Some(CloseFrame {
             code,
             reason: reason.into(),

@@ -3,15 +3,16 @@ use std::{future::pending, sync::Arc, time::Duration};
 use axum::extract::ws::{Message, WebSocket};
 use grenadiers_core::protocol::Counter;
 use grenadiers_core::protocol::v11::{
-    GameClientMessage, GameServerMessage, V11ErrorCode as ErrorCode, parse_client_message,
+    GameServerMessage, V11ErrorCode as ErrorCode, parse_client_message,
 };
 use tokio::time::{Instant, MissedTickBehavior, interval_at, sleep_until, timeout};
 
 use super::{
+    command::InboundMessage,
     limits::{InboundLimit, SessionDeadline, SessionDeadlines},
     rooms::{Admission, BindingKey, ClosingReason, GameRooms, RoomNotice},
     sessions::ConnectionId,
-    socket::{close, command_sequence, fail_and_close, send_error, send_game, send_raw},
+    socket::{close, fail_and_close, send_error, send_game, send_raw},
 };
 use crate::{
     admission::{DenialTelemetry, GameplayAdmission},
@@ -19,6 +20,7 @@ use crate::{
 };
 
 const PING_INTERVAL: Duration = Duration::from_secs(10);
+const FINAL_DELIVERY_TIMEOUT: Duration = Duration::from_secs(5);
 
 pub(super) struct Membership {
     pub(super) admission: Admission,
@@ -157,7 +159,7 @@ pub(super) async fn authenticated_loop(
                     .admission
                     .room_id
                     .clone();
-                let _ = timeout(Duration::from_secs(5), async {
+                let _ = timeout(FINAL_DELIVERY_TIMEOUT, async {
                     let _ = send_game(socket, &GameServerMessage::SeatReplaced { room_id }).await;
                     close(socket, 4001, "Seat replaced").await;
                 })
@@ -216,7 +218,7 @@ async fn send_notice(socket: &mut WebSocket, notice: PreparedNotice) -> Result<(
 }
 
 async fn finish_closing(socket: &mut WebSocket, last: PreparedNotice, reason: ClosingReason) {
-    let _ = timeout(Duration::from_secs(5), async {
+    let _ = timeout(FINAL_DELIVERY_TIMEOUT, async {
         let _ = send_notice(socket, last).await;
         match reason {
             ClosingReason::Expired => {
@@ -257,18 +259,22 @@ async fn handle_message(
                 fail_and_close(socket, ErrorCode::InvalidMessage, None).await;
                 return false;
             };
-            if matches!(message, GameClientMessage::Authenticate { .. }) {
-                fail_and_close(socket, ErrorCode::AlreadyAuthenticated, None).await;
-                return false;
+            match InboundMessage::from(message) {
+                InboundMessage::Authenticate { .. } => {
+                    fail_and_close(socket, ErrorCode::AlreadyAuthenticated, None).await;
+                    false
+                }
+                InboundMessage::Command(command) => {
+                    let sequence = command.sequence();
+                    if state.highwater.is_some_and(|seen| sequence <= seen) {
+                        return send_error(socket, ErrorCode::StaleSequence, Some(sequence))
+                            .await
+                            .is_ok();
+                    }
+                    state.highwater = Some(sequence);
+                    super::dispatcher::dispatch(socket, command, rooms, state).await
+                }
             }
-            let sequence = command_sequence(&message).expect("command has sequence");
-            if state.highwater.is_some_and(|seen| sequence <= seen) {
-                return send_error(socket, ErrorCode::StaleSequence, Some(sequence))
-                    .await
-                    .is_ok();
-            }
-            state.highwater = Some(sequence);
-            super::dispatcher::dispatch(socket, message, sequence, rooms, state).await
         }
     }
 }

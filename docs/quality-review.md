@@ -156,6 +156,12 @@ scan and Compose/Kubernetes acceptance pass; all fifteen production module decla
 their names, paths and order. Broader fixture sharing
 remains separate work.
 
+**CX-08 / TS-06 / TL-05, v0.3.55 candidate:** equivalent gameplay scenarios share only
+native responsive browser-context construction. Desktop/mobile ordering, independent sessions,
+viewport overrides and mobile reduced motion remain explicit; each scenario still owns its
+pages, game setup, observations, assertions and cleanup. Configuration factories and broader
+behavioral fixtures remain separate work.
+
 ## Finding dispositions and proposed solutions
 
 “Agree” accepts the observed issue, not every implementation proposed in the review.

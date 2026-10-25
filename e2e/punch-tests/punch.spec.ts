@@ -1,3 +1,4 @@
+import { createResponsiveBrowserContexts } from '../tests/support/browser-contexts'
 import { expect, test, type Page } from '@playwright/test'
 import { captureArenaTiles } from '../tests/support/compositor'
 import { latestSnapshot, observeGame, visibleActor, type ObservedGame } from '../tests/support/duel'
@@ -279,10 +280,7 @@ async function confirmResumedEquipmentAccepted(
 
 test('Punch wraps one retained bomb three cells without extra cues and preserves its fuse',
   async ({ browser }, info) => {
-    const contexts = await Promise.all([
-      browser.newContext({ viewport: { width: 1440, height: 1050 } }),
-      browser.newContext({ viewport: { width: 320, height: 844 }, reducedMotion: 'reduce' }),
-    ])
+    const contexts = await createResponsiveBrowserContexts(browser)
     try {
       const [one, two] = await Promise.all(contexts.map((context) => context.newPage()))
       await Promise.all([one, two].map(installTransportProbe))

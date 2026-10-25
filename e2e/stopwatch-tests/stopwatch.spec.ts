@@ -1,3 +1,4 @@
+import { createResponsiveBrowserContexts } from '../tests/support/browser-contexts'
 import { expect, test, type Page } from '@playwright/test'
 import { expectPaintedCanvas, latestSnapshot, observeGame, visibleActor,
   type ObservedGame } from '../tests/support/duel'
@@ -52,10 +53,7 @@ async function expectNaturalDetonation(game: ObservedGame, id: number, pausedTic
   expect(found.kind.bomb.trigger).toEqual({ type: 'timed', remainingTicks: 0, paused: false })
 }
 test('Stopwatch freezes voluntary actions while Timed bombs pause', async ({ browser }, info) => {
-  const contexts = await Promise.all([
-    browser.newContext({ viewport: { width: 1440, height: 1050 } }),
-    browser.newContext({ viewport: { width: 320, height: 844 }, reducedMotion: 'reduce' }),
-  ])
+  const contexts = await createResponsiveBrowserContexts(browser)
   try {
     const [one, two] = await Promise.all(contexts.map((context) => context.newPage()))
     const games = [observeGame(one), observeGame(two)]

@@ -1,3 +1,4 @@
+import { createResponsiveBrowserContexts } from '../tests/support/browser-contexts'
 import { selectClassicSettings } from '../tests/support/settings'
 import { setTimeout as delay } from 'node:timers/promises'
 import { expect, test, type Page, type Route, type TestInfo } from '@playwright/test'
@@ -81,10 +82,7 @@ async function auditRecoveryPage(page: Page, index: number, game: ObservedGame,
 }
 
 test('a browser restores its full live world and action floor before a fenced takeover', async ({ browser }, testInfo) => {
-  const contexts = await Promise.all([
-    browser.newContext({ viewport: { width: 1440, height: 1050 } }),
-    browser.newContext({ viewport: { width: 320, height: 844 }, reducedMotion: 'reduce' }),
-  ])
+  const contexts = await createResponsiveBrowserContexts(browser)
   let release: (() => void) | undefined
   const games: ObservedGame[] = []
   const diagnostics = startBrowserStallDiagnostics()

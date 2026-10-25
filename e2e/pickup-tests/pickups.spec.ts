@@ -1,3 +1,4 @@
+import { createResponsiveBrowserContexts } from '../tests/support/browser-contexts'
 import { selectClassicSettings } from '../tests/support/settings'
 import { expect, test, type Page } from '@playwright/test'
 import {
@@ -90,10 +91,7 @@ async function expectStats(pages: Page[],
 }
 
 test('two browsers collect generated upgrades while old bombs keep their captured range', async ({ browser }, testInfo) => {
-  const contexts = await Promise.all([
-    browser.newContext({ viewport: { width: 1440, height: 1050 } }),
-    browser.newContext({ viewport: { width: 390, height: 844 }, reducedMotion: 'reduce' }),
-  ])
+  const contexts = await createResponsiveBrowserContexts(browser, { mobileWidth: 390 })
   const games: ObservedGame[] = []
   try {
     const pages = await Promise.all(contexts.map((context) => context.newPage()))

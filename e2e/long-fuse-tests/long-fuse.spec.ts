@@ -1,3 +1,4 @@
+import { createResponsiveBrowserContexts } from '../tests/support/browser-contexts'
 import { expect, test, type Page } from '@playwright/test'
 import { latestSnapshot, observeGame, visibleActor, type ObservedGame } from '../tests/support/duel'
 import { moveTo } from '../tests/support/movement'
@@ -139,10 +140,7 @@ async function focusIdentity(page: Page) {
 }
 
 test('two browsers collect Long Fuse and restore ordinary bomb timing after its exact deadline', async ({ browser }, info) => {
-  const contexts = await Promise.all([
-    browser.newContext({ viewport: { width: 1440, height: 1050 } }),
-    browser.newContext({ viewport: { width: 320, height: 844 }, reducedMotion: 'reduce' }),
-  ])
+  const contexts = await createResponsiveBrowserContexts(browser)
   const pages: Page[] = []
   const games: ObservedGame[] = []
   try {

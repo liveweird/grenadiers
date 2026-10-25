@@ -1,3 +1,4 @@
+import { createResponsiveBrowserContexts } from '../tests/support/browser-contexts'
 import { selectClassicSettings } from '../tests/support/settings'
 import AxeBuilder from '@axe-core/playwright'
 import { expect, test, type Page } from '@playwright/test'
@@ -16,10 +17,7 @@ function firstActor(game: ObservedGame) {
 }
 
 test('custom controls persist and drive only their assigned native keys', async ({ browser }, testInfo) => {
-  const contexts = await Promise.all([
-    browser.newContext({ viewport: { width: 1440, height: 1050 } }),
-    browser.newContext({ viewport: { width: 320, height: 844 }, reducedMotion: 'reduce' }),
-  ])
+  const contexts = await createResponsiveBrowserContexts(browser)
   const games: ObservedGame[] = []
   try {
     const policies = await Promise.all(contexts.map(observeBrowserPolicy))

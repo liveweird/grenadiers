@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Share native desktop/mobile browser-context setup across equivalent acceptance scenarios,
+  preserving independent sessions, viewport differences, reduced motion and scenario assertions.
+
 ## 0.3.54 — 2026-10-25
 
 ### Changed

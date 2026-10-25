@@ -1,5 +1,8 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
+  "ignore": [
+    "src/validation/generated/*.d.mts"
+  ],
   "ignoreIssues": {
     "src/game/schema.ts": [
       "exports",

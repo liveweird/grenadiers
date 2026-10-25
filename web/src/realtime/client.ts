@@ -1,12 +1,8 @@
-import Ajv from 'ajv'
-import realtimeSchema from '../../../api/realtime.schema.json'
 import type { ClientMessage, ServerMessage } from './schema'
+import validateServerMessage from '../validation/generated/realtime.mjs'
 
 type Listener = (message: ServerMessage) => void
 type FailureListener = (message: string) => void
-
-const ajv = new Ajv({ allErrors: true })
-const validateServerMessage = ajv.compile<ServerMessage>(realtimeSchema)
 
 export function realtimeUrl(location: Location = window.location): string {
   const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:'

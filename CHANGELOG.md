@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Precompile the live gameplay and diagnostic browser validators while preserving schema,
+  semantic/privacy and complete error behavior; check generated code/declaration drift before builds.
+
 ## 0.3.50 — 2026-10-25
 
 ### Fixed

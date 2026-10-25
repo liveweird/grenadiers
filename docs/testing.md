@@ -146,6 +146,16 @@ contracts without modifying them. Gameplay generation/drift checks cover active 
 v2–v10; parity tests compare unchanged physical definitions. AJV validates runtime WebSocket payloads. EN/PL locale
 parity is tested. ESLint/SonarJS and Knip must report no findings.
 
+Live gameplay-v11 and realtime browser consumers use generated standalone Ajv validators;
+archived validators retain their own compiler/schema checks. Run
+`npm --prefix web run gen:validators` after changing a live schema or its generation tools.
+`check:validators` regenerates in memory and checks both ESM and declarations before production
+builds. Parity tests compare complete ordered errors with the original compilation routes;
+generated output rejects executable imports/evaluation while allowing inert helper metadata.
+Generated MJS is excluded narrowly from handwritten lint rules; its adjacent declarations are
+checked by TypeScript/drift checks and ignored only by Knip's unused-file discovery. Handwritten
+tests and helpers remain in scope. This change does not yet enforce CSP; see [ADR 0022](decisions/0022-standalone-browser-validation.md).
+
 Vitest also discovers `web/scripts/*.test.mjs`: generator tests compile representative
 TypeScript assignments, API linter tests prove rule enforcement, and Kubernetes checker tests
 exercise rendered YAML invariants.

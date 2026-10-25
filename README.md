@@ -149,6 +149,9 @@ scripts/gates.sh coverage      # cargo-llvm-cov line coverage floor
 
 Generate frontend contracts with `npm --prefix web run gen:api` and
 `npm --prefix web run gen:realtime`; gameplay controls use `npm --prefix web run gen:gameplay`.
+After changing a live message schema, also run `npm --prefix web run gen:validators` to update
+its standalone browser validator. `check:validators` checks code/declaration drift without writing;
+ordinary production builds run that check first. See [ADR 0022](docs/decisions/0022-standalone-browser-validation.md).
 Commit generated files with contract changes. The [gameplay protocol](docs/game/protocol.md)
 defines authentication, room controls, and public snapshot/event messages. Session issuance,
 authenticated sockets, room admission, authoritative rounds, and browser controls are implemented.

@@ -55,7 +55,7 @@ Strict CSP still requires compatible validator/style handling and is not enabled
 **DOC-01/02/04/14, partial:** the current verification policy and release procedures are now
 short entry points. Dated verification and older release records live in `docs/history/`, with
 their facts and headings preserved and relative links rebased. Known incoming fragments retain
-aliases. The latest published release remains v0.3.49; v0.3.50 is still an unreleased candidate.
+aliases. The latest published release is v0.3.50; v0.3.51 is the standalone-validator candidate.
 Testing, deployment and backlog consolidation remain separate work, including reconciliation
 with the pending artist PR before changing its overlapping documents.
 
@@ -110,6 +110,17 @@ policy-derived 151-frame burst, flush once and bound the complete exchange by th
 two-second deadline. The test still requires an actual rate-limit error, policy close and permit
 release; no retry, timeout increase or production hook is introduced.
 
+**FE-07 / SEC-04, v0.3.51 candidate:** live gameplay/realtime validators are compiled at build
+time into self-contained ESM, preserving schema, semantic/privacy and complete ordered error
+behavior. Generation/drift and executable-syntax checks guard the artifacts; archived compilers
+remain tested. The measured candidate bundle is 333,442 JavaScript gzip bytes versus 357,324 in
+v0.3.50. CSP is not enforced yet: Pixi's static compatibility path, Mantine styles and actual
+HTTP/WS policy behavior still require browser proof before server delivery.
+The integrated candidate web gate passes 6,789 tests across 88 files; coverage is
+90.95/89.49/89.78/93.32% (statements/branches/functions/lines). Lint, contract and validator drift,
+unused-code checks, TypeScript and the production build pass. Real-browser acceptance follows
+before publication; the deployed localhost image remains v0.3.50.
+
 ## Finding dispositions and proposed solutions
 
 “Agree” accepts the observed issue, not every implementation proposed in the review.
@@ -146,7 +157,7 @@ Related IDs are grouped to avoid treating one architectural problem as several i
 | FE-04 | Mechanism confirmed; performance cost unmeasured. | Profile 20 Hz gameplay and commit durations first. Change arena/HUD subscriptions only for a demonstrated budget problem. |
 | FE-05 | Agree; first batch implements this. | Localized accessible error recovery with explicit actions and component/parity tests. |
 | FE-06 | Type-hygiene observation, not a broad defect. | Replace the isolated double cast when touching binding construction; no repository-wide type rewrite. |
-| FE-07, SEC-04/10 | Agree on hardening/cache gaps; suggested CSP is incompatible as written. | Add basic response hardening and correct HTML/hashed-asset cache policy; precompile validators before enforcing a restrictive CSP. Verify Mantine/Pixi and connection policy in real browsers. |
+| FE-07, SEC-04/10 | Basic headers/cache implemented; standalone validator candidate follows. | Live browser compilation is removed in the v0.3.51 candidate with parity/drift guards. Verify Pixi's static path, Mantine styles and same-origin connections under an enforced policy before adding server CSP. |
 | FE-08 | Selector counts do not describe the current web tests. | Current web tests use role queries rather than test IDs. Assess E2E selectors in their own scope; a selector ratio alone is not an accessibility defect. Retain actual accessibility audits. |
 | FE-09/10 | Agree, lower-priority consistency work. | Consolidate copied scene mocks, preserving specialized renderer/atlas mocks; introduce semantic color tokens incrementally. |
 | TS-01/02 | Agree on cost; sampling is a policy change. | Measure a structured fast feedback suite while retaining exhaustive acceptance. Compare fault detection before proposing a new cadence; keep current assertions and exhaustive coverage meanwhile. |
@@ -186,7 +197,7 @@ Related IDs are grouped to avoid treating one architectural problem as several i
 
 ## Next bounded batches
 
-1. Develop a compatible CSP/validator strategy.
+1. Complete standalone-validator acceptance, then browser-prove a compatible Pixi/style/CSP policy.
 2. Peer-keyed hosting admission design and credential-free denial telemetry.
 3. Complete remaining test-wiring and fixture cleanup.
 4. Complete contributor/history separation and share E2E fixture/configuration helpers.

@@ -150,7 +150,7 @@ describe('v11 authoritative updates and controls', () => {
     expect(value.client.getState().room?.revision).toBe(2)
     socket.emit('close')
     expect(value.client.getState().connection).toBe('reconnecting')
-    expect(value.scheduled).toHaveLength(1)
+    expect(value.scheduled).toHaveLength(2)
   })
 
   it('clears personal room state only for the matching leave acknowledgement', async () => {

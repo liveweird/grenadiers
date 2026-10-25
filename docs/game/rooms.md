@@ -53,10 +53,17 @@ carries `youSeat`, the stable private resume capability, nullable current physic
 high-water. Shared `roomState` contains no identity or capability. Codes are public discovery
 identifiers, not credentials.
 
-The process holds at most 32 rooms. Create/join share a burst of 32 operations refilling at
-eight per second. Each owner has a 32-command mailbox; slow sockets consume only the
+The process holds at most 32 rooms. Create, join and resume each have an independent process-global
+burst of 32 operations refilling at eight per second: an aggregate burst of 96 and refill of 24
+operations per second. One operation cannot consume another's allowance. These limits provide
+operation isolation; peer-keyed fairness remains a public-hosting requirement. Each owner has a
+32-command mailbox; slow sockets consume only the
 latest watch update. OS randomness supplies codes and a process ID prefix, with bounded
 collision retries and checked serials. No room state is persisted or shared across replicas.
+
+Operation/owner-queue throttles produce a correlated `rateLimited` error and preserve the socket
+and membership. The rejected sequence is consumed; a retry uses a higher sequence. The separate
+per-socket inbound flood limit still produces an uncorrelated error and policy close (1008).
 
 Connection ID plus admission generation fences membership. Explicit `leaveRoom` validates the
 room/attempt, removes occupancy, then sends correlated `leftRoom`; only that acknowledgement

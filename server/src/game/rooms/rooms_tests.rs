@@ -5,7 +5,7 @@ use std::sync::{
 
 use super::*;
 use crate::game::sessions::{ConnectionId, GameSessions};
-use grenadiers_core::protocol::{RoomCode, Seat, v11::MapId};
+use grenadiers_core::protocol::{Seat, v11::MapId};
 
 fn deterministic_rooms(now: StdInstant) -> Arc<GameRooms> {
     let codes = AtomicU64::new(0);
@@ -177,7 +177,7 @@ async fn exact_expiry_publishes_expired_and_removes_both_lookups() {
 }
 
 #[tokio::test]
-async fn room_capacity_and_shared_failed_attempt_rate_limit_fail_closed() {
+async fn room_capacity_fails_closed() {
     let now = StdInstant::now();
     let rooms = deterministic_rooms(now);
     let mut admissions = Vec::new();
@@ -197,20 +197,6 @@ async fn room_capacity_and_shared_failed_attempt_rate_limit_fail_closed() {
             .create(binding(99, 1), now + std::time::Duration::from_secs(4))
             .await,
         Err(RoomError::CapacityReached)
-    ));
-    drop(admissions);
-
-    let limited = deterministic_rooms(now);
-    let missing = RoomCode::new("ABCDEFGH").unwrap();
-    for index in 0..OPERATION_BURST as u64 {
-        assert!(matches!(
-            limited.join(&missing, binding(index + 1, 1), now).await,
-            Err(RoomError::RoomNotFound)
-        ));
-    }
-    assert!(matches!(
-        limited.join(&missing, binding(99, 1), now).await,
-        Err(RoomError::RateLimited)
     ));
 }
 

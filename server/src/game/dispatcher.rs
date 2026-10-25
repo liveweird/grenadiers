@@ -10,7 +10,7 @@ use tokio::time::Instant;
 use super::{
     connection::{ConnectionState, Membership},
     rooms::{Admission, BindingKey, GameRooms, RoomAction, RoomError},
-    socket::{fail_and_close, send_error, send_game, send_raw},
+    socket::{send_error, send_game, send_raw},
 };
 
 pub(super) async fn dispatch(
@@ -292,24 +292,19 @@ async fn action(
 }
 
 async fn room_error(socket: &mut WebSocket, error: RoomError, sequence: Counter) -> bool {
-    let (code, close_after) = match error {
-        RoomError::RateLimited => (ErrorCode::RateLimited, true),
-        RoomError::CapacityReached => (ErrorCode::CapacityReached, false),
-        RoomError::RoomNotFound => (ErrorCode::RoomNotFound, false),
-        RoomError::RoomFull => (ErrorCode::RoomFull, false),
-        RoomError::StaleRoom => (ErrorCode::StaleRoom, false),
-        RoomError::StaleSettings => (ErrorCode::StaleSettings, false),
-        RoomError::SettingsLocked => (ErrorCode::SettingsLocked, false),
-        RoomError::InvalidPhase => (ErrorCode::InvalidPhase, false),
-        RoomError::DuplicateAction => (ErrorCode::DuplicateAction, false),
-        RoomError::ResumeRejected => (ErrorCode::ResumeRejected, false),
+    let code = match error {
+        RoomError::RateLimited => ErrorCode::RateLimited,
+        RoomError::CapacityReached => ErrorCode::CapacityReached,
+        RoomError::RoomNotFound => ErrorCode::RoomNotFound,
+        RoomError::RoomFull => ErrorCode::RoomFull,
+        RoomError::StaleRoom => ErrorCode::StaleRoom,
+        RoomError::StaleSettings => ErrorCode::StaleSettings,
+        RoomError::SettingsLocked => ErrorCode::SettingsLocked,
+        RoomError::InvalidPhase => ErrorCode::InvalidPhase,
+        RoomError::DuplicateAction => ErrorCode::DuplicateAction,
+        RoomError::ResumeRejected => ErrorCode::ResumeRejected,
     };
-    if close_after {
-        fail_and_close(socket, code, Some(sequence)).await;
-        false
-    } else {
-        reply_error(socket, code, sequence).await
-    }
+    reply_error(socket, code, sequence).await
 }
 
 const fn domain_direction(direction: WireDirection) -> grenadiers_core::game::Direction {

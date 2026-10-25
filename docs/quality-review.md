@@ -38,6 +38,11 @@ observation helpers compile only in core unit tests; the unused punch-cooldown r
 method is deleted. Production cooldown observations used by the live projection are retained.
 No physics, wire representation or public admission API changed.
 
+**SEC-03:** operation throttles preserve the socket and are isolated across create/join/resume.
+The browser performs at most three correlated same-socket resume retries within one ten-second
+recovery budget. Pending recovery keeps the last world visible with controls disabled; stale
+callbacks and late responses cannot revive it. Per-socket flood closure remains unchanged.
+
 ## Finding dispositions and proposed solutions
 
 “Agree” accepts the observed issue, not every implementation proposed in the review.
@@ -88,7 +93,7 @@ Related IDs are grouped to avoid treating one architectural problem as several i
 | TL-10/11 | Agree on visibility/cache opportunities, not mandatory policy changes. | Review moderate advisories by impact; reuse verified tool/build caches. Keep security failures visible and pin tool provenance. |
 | TL-12 | Agree on build-cache/reproducibility tradeoffs. | Add dependency caching and OCI metadata. Replace unbounded package upgrades with a documented base-image/security-refresh policy; simply dropping upgrades can retain known vulnerabilities. |
 | TL-13/14/15/16 | Mixed low-priority tooling/documentation concerns. | Scope the peer-dependency workaround, document supported Python/tooling prerequisites, name gate commands in the PR template, and retain existing pin consistency checks. |
-| SEC-03 | Agree with the defect, not a server-only fix. | Pair reply-only throttling with bounded same-socket client resume retries, increasing sequences and preserved capability/cancellation fencing. Keep per-socket flood closure. |
+| SEC-03 | Agree; coordinated server/client fix implemented. | Correlated throttles retain the socket; bounded same-socket retries use fresh sequences and fenced timers within one deadline. Initial admission remains manually retryable; per-socket floods still close. |
 | SEC-06/07 | Documented capability tradeoff; missing denial visibility. | Explain capability-leak/takeover consequences and add redacted counters. Rotation requires a recoverable protocol design, not a silent behavior change. |
 | SEC-08/09/11 | Sensible deployment hardening; some risks remain unmeasured. | Test container/pod limits and security-context requirements; define proxy/header/idle/connection limits before public hosting. NetworkPolicy needs an actual network/DB model. |
 
@@ -114,7 +119,7 @@ Related IDs are grouped to avoid treating one architectural problem as several i
 ## Next bounded batches
 
 1. Complete close-code/live-message documentation and basic browser response headers.
-2. Coordinated room rate-limit/client recovery, followed by peer-keyed hosting admission design.
+2. Peer-keyed hosting admission design and credential-free denial telemetry.
 3. Test-wiring cleanup and denominator-correct coverage measurement.
 4. Contributor/history separation and shared E2E fixture/configuration helpers.
 5. Retention ADR, then historical protocol reduction and a single item specification.

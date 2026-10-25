@@ -240,7 +240,7 @@ test('a browser restores its full live world and action floor before a fenced ta
   if (cleanupFailed) throw cleanupFailure
 })
 
-test('two offline tabs stop recovery after a late reserved-seat rejection', async ({ browser }, testInfo) => {
+test('two offline tabs stop at the recovery deadline while session requests are held', async ({ browser }, testInfo) => {
   const contexts = await Promise.all([browser.newContext(), browser.newContext()])
   const releases: (() => void)[] = []
   const games: ObservedGame[] = []
@@ -250,19 +250,20 @@ test('two offline tabs stop recovery after a late reserved-seat rejection', asyn
     games.push(...pages.map(observeGame))
     await joinMatch(pages, games)
     for (const page of pages) releases.push(await holdSessions(page))
+    const counts = games.map((game) => game.sockets)
     await Promise.all(pages.map(disconnectTransport))
-    // Let the real authoritative ten-second reservation run out. No game clock
-    // or state is replaced; the eventual server rejection decides the outcome.
-    await delay(11_000)
-    await Promise.all(releases.splice(0).map((release) => release()))
+    // Observe the real browser deadline while HTTP remains unavailable. Exact
+    // server reservation expiry is covered by the deterministic server tests.
     for (const page of pages) {
-      await expect(page.getByText('This reserved seat is no longer available.', { exact: true })).toBeVisible()
+      await expect(page.getByText('The game connection ended. Try again.', { exact: true }))
+        .toBeVisible({ timeout: 12_000 })
       await expect(page.getByRole('button', { name: 'Create room', exact: true })).toBeEnabled()
     }
-    const counts = games.map((game) => game.sockets)
+    expect(games.map((game) => game.sockets)).toEqual(counts)
+    await Promise.all(releases.splice(0).map((release) => release()))
     await delay(1_000)
     expect(games.map((game) => game.sockets)).toEqual(counts)
-    expect(games.map((game) => game.commands.filter((command) => command.type === 'resumeRoom').length)).toEqual([1, 1])
+    expect(games.map((game) => game.commands.filter((command) => command.type === 'resumeRoom').length)).toEqual([0, 0])
     await assertPublicOnly(pages)
   } catch (error) {
     await attachPublicSummary(testInfo, games)

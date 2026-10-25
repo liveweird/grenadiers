@@ -15,6 +15,9 @@ The diagnostic and gameplay WebSockets use separate connection and upgrade-admis
 Both apply the same strict Origin validation and bound message/frame size, inbound rate, idle time,
 write buffering, commands, and sends. Diagnostic connections are capped at 16; gameplay
 connections are capped at 128.
+Room create/join/resume operations have separate process-global budgets (32 burst and eight per
+second each). A correlated operation throttle preserves authentication; per-socket inbound floods
+still close with policy code 1008. Peer-keyed quotas and denial telemetry remain hosting work.
 Malformed text messages yield a typed error and policy close. Control frames remain protocol
 control frames. The diagnostic envelope remains v1; authenticated gameplay requires v11;
 older versions are rejected before credential lookup.
@@ -22,7 +25,9 @@ older versions are rejected before credential lookup.
 Resume capabilities are independent 32-byte random values encoded as lowercase hexadecimal. They
 exist only in the room owner and the admitted browser tab, remain stable across restore/takeover,
 and are never placed in URLs, shared room state, logs, replay journals, local/session storage, or
-database fields. Browser retries obtain a fresh ordinary session before presenting the capability.
+database fields. Transport reconnects obtain a fresh ordinary session before presenting the
+capability; a correlated resume throttle uses bounded retries on that authenticated socket.
+All recovery shares one ten-second client deadline. See [browser recovery](game/reconnect-browser.md).
 Explicit leave clears it only after acknowledgement; `resumeRejected`, replacement, and exhausted
 retry terminate recovery. Playwright traces are disabled in every configuration because raw framework traces can
 capture personal admission frames before redaction. Screenshots, public reports, and bounded

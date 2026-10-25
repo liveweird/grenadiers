@@ -19,15 +19,30 @@ that epoch. Commands sent before a disconnect are never buffered or resent.
 
 ## Recovery and fencing
 
-An unexpected close with a capability starts at most three reconnect attempts. Every attempt
-obtains a fresh HTTP session, authenticates, and only then sends `resumeRoom`. Fetch, socket and
+An unexpected close with a capability starts one recovery episode with a ten-second monotonic
+deadline and at most three reconnect attempts. Every transport attempt obtains a fresh HTTP
+session, authenticates, and only then sends `resumeRoom`. Fetch, socket and
 message callbacks carry a connection generation so callbacks from replaced attempts cannot change
 state. Shared room and snapshot frames received while the personal baseline is pending are ignored.
 The resumed admission must keep the same room, seat and capability and cannot move revision or
 command epoch backward.
 
-The last authoritative room and world remain visible during recovery, while readiness, rematch,
-movement and bomb controls stay disabled. The shared arena controller already releases held input
+A correlated `rateLimited` response to the pending resume keeps authentication, capability and
+the last baseline. The client retries on that socket after 250, 500 and 750 milliseconds, using
+a fresh increasing sequence each time. Those three additional retries are shared across the
+episode; reconnecting or authenticating does not reset the count or deadline. Initial create/join
+throttles settle for manual retry on the authenticated socket. Rejected gameplay actions are
+never automatically replayed.
+
+At the deadline, pending fetches and timers are canceled, the socket closes, and recovery ends
+with `connectionFailed`. A late admission or throttle cannot bypass that deadline. Exhausting
+same-socket retries ends with `rateLimited`; other correlated resume errors terminate recovery.
+This local time budget does not guarantee how much authoritative seat reservation remains.
+Timer-registration tokens and connection generations fence callbacks already queued at cancellation.
+
+The last authoritative room and world remain visible during recovery, including an authenticated
+socket still awaiting personal admission. Readiness, rematch, settings, Leave, movement and bomb
+controls stay disabled. The shared arena controller already releases held input
 when disabled, blurred, hidden, or replaced by a new room/epoch identity. Controls return only after
 the admitted full baseline arrives, so a hidden tab does not replay held movement on return.
 

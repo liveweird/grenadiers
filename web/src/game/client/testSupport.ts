@@ -34,12 +34,77 @@ export interface Harness {
   sockets: SocketStub[]
   states: GameClientState[]
   scheduled: Array<() => void>
+  clock: FakeClock
+}
+
+interface ClockTask {
+  due: number
+  canceled: boolean
+  completed: boolean
+  callback: () => void
+  run: () => void
+}
+
+export class FakeClock {
+  now = 0
+  readonly scheduled: Array<() => void> = []
+  private readonly tasks = new Map<ReturnType<typeof setTimeout>, ClockTask>()
+
+  schedule = (callback: () => void, delay: number): ReturnType<typeof setTimeout> => {
+    const handle = {} as ReturnType<typeof setTimeout>
+    const task: ClockTask = {
+      due: this.now + delay, canceled: false, completed: false, callback, run: () => undefined,
+    }
+    task.run = () => {
+      if (task.canceled || task.completed) return
+      task.completed = true
+      this.remove(task.run)
+      this.tasks.delete(handle)
+      this.now = Math.max(this.now, task.due)
+      callback()
+    }
+    this.tasks.set(handle, task)
+    const index = this.scheduled.findIndex((run) => this.taskFor(run)!.due > task.due)
+    this.scheduled.splice(index < 0 ? this.scheduled.length : index, 0, task.run)
+    return handle
+  }
+
+  cancel = (handle: ReturnType<typeof setTimeout>): void => {
+    const task = this.tasks.get(handle)
+    if (!task) return
+    task.canceled = true
+    this.remove(task.run)
+    this.tasks.delete(handle)
+  }
+
+  advanceBy(milliseconds: number): void {
+    const target = this.now + milliseconds
+    while (this.scheduled.length > 0 && this.taskFor(this.scheduled[0])!.due <= target) {
+      this.scheduled[0]()
+    }
+    this.now = target
+  }
+
+  rawCallback(run: () => void): () => void {
+    const task = this.taskFor(run)
+    if (!task) throw new Error('scheduled callback not found')
+    return task.callback
+  }
+
+  private remove(run: () => void): void {
+    const index = this.scheduled.indexOf(run)
+    if (index >= 0) this.scheduled.splice(index, 1)
+  }
+
+  private taskFor(run: () => void): ClockTask | undefined {
+    return [...this.tasks.values()].find((task) => task.run === run)
+  }
 }
 
 export function harness(payload: unknown = { token: sessionToken }): Harness {
   const sockets: SocketStub[] = []
   const states: GameClientState[] = []
-  const scheduled: Array<() => void> = []
+  const clock = new FakeClock()
   const fetcher = vi.fn().mockResolvedValue({ ok: true, json: async () => payload })
   const client = new GameClient((state) => states.push(state), {
     fetch: fetcher as typeof fetch,
@@ -49,10 +114,11 @@ export function harness(payload: unknown = { token: sessionToken }): Harness {
       return socket as unknown as WebSocket
     },
     location: { protocol: 'https:', host: 'play.test' } as Location,
-    schedule: (callback) => { scheduled.push(callback); return scheduled.length as unknown as ReturnType<typeof setTimeout> },
-    cancel: vi.fn(),
+    schedule: clock.schedule,
+    cancel: clock.cancel,
+    now: () => clock.now,
   })
-  return { client, fetcher, sockets, states, scheduled }
+  return { client, fetcher, sockets, states, scheduled: clock.scheduled, clock }
 }
 
 export async function authenticate(value: Harness, intent: AdmissionIntent = { type: 'create' }): Promise<SocketStub> {

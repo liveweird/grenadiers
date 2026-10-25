@@ -1,16 +1,17 @@
 import type { Direction, GameClientMessage, GameServerMessage, GameSettings, RoomView, Snapshot, V11ErrorCode } from '../v11/schema'
 import { initialGameClientState, type AdmissionIntent, type GameClientState, type GameFailure } from './clientTypes'
+import { ClientRecovery } from './clientRecovery'
 import { preservesTeleportHistory } from './teleportHistory'
 export { initialGameClientState, type AdmissionIntent, type GameClientState, type GameFailure } from './clientTypes'
-import { acceptableBaseline, controlIsObsolete, dependenciesWithDefaults, gameplayUrl,
+import { acceptableBaseline, canControl, controlIsObsolete, dependenciesWithDefaults, gameplayUrl,
   isCurrentConnection, MAX_COUNTER, MAX_RECONNECT_ATTEMPTS, newerRoom, sessionToken,
-  settlesPendingSettings, validateServerMessage, type Capability, type ControlCommand,
+  ownSeatConnected, settlesPendingSettings, validateServerMessage, type Capability, type ControlCommand,
   type ControlFailure, type Dependencies, type PendingSettings, type RoomCommand } from './clientProtocol'
 export { gameplayUrl } from './clientProtocol'
 export class GameClient {
   private state = initialGameClientState()
   private generation = 0; private controller: AbortController | null = null
-  private socket: WebSocket | null = null; private retryTimer: ReturnType<typeof setTimeout> | null = null
+  private socket: WebSocket | null = null
   private nextSequence = 1; private nextAction = 1
   private admission: AdmissionIntent | null = null
   private capability: Capability | null = null
@@ -23,8 +24,10 @@ export class GameClient {
   private stopped = false
   private readonly onChange: (state: GameClientState) => void
   private readonly dependencies: Dependencies
+  private readonly recovery: ClientRecovery
   constructor(onChange: (state: GameClientState) => void, dependencies?: Partial<Dependencies>) {
     this.onChange = onChange; this.dependencies = dependenciesWithDefaults(dependencies)
+    this.recovery = new ClientRecovery(this.dependencies, () => this.terminal('connectionFailed', true))
   }
   getState(): GameClientState { return this.state }
   admit(intent: AdmissionIntent): boolean {
@@ -41,7 +44,7 @@ export class GameClient {
     const room = this.state.room
     const phase = this.state.room?.phase
     const initial = phase?.type === 'waiting' || (phase?.type === 'countdown' && phase.kind === 'initial')
-    return Boolean(initial && this.ownConnected() && !this.state.admissionPending && !this.state.leavePending
+    return Boolean(initial && ownSeatConnected(this.state) && !this.state.admissionPending && !this.state.leavePending
       && !this.state.settingsPending && room
       && this.sendRoomCommand({ type: 'ready', ready, settingsRevision: room.settingsRevision }))
   }
@@ -76,13 +79,13 @@ export class GameClient {
       && this.sendRoomCommand({ type: 'rematch', ready })
   }
   movement(direction: Direction | null): boolean {
-    return this.canControl() && this.sendRoomCommand({ type: 'movement', direction }) }
+    return canControl(this.state) && this.sendRoomCommand({ type: 'movement', direction }) }
   placeBomb(): boolean { return this.manualAction('bomb') }
   useEquipment(): boolean {
     return Boolean(this.state.room?.settings.enabledItems.includes('punch') && this.manualAction('equipment'))
   }
   private manualAction(action: 'bomb' | 'equipment'): boolean {
-    if (!this.canControl() || this.nextAction > MAX_COUNTER) {
+    if (!canControl(this.state) || this.nextAction > MAX_COUNTER) {
       if (this.nextAction > MAX_COUNTER) this.update({ failure: 'sequenceExhausted' })
       return false
     }
@@ -92,7 +95,8 @@ export class GameClient {
   }
   leave(): boolean {
     const room = this.state.room
-    if (!room || this.leaveSequence !== null || this.state.connection !== 'authenticated') return false
+    if (!room || this.state.admissionPending || this.leaveSequence !== null
+      || this.state.connection !== 'authenticated') return false
     const sequence = this.sequence()
     if (sequence === null) return false
     if (!this.send({ type: 'leaveRoom', sequence, roomId: room.roomId, roundId: room.roundId })) return false
@@ -107,23 +111,13 @@ export class GameClient {
     this.generation += 1
     this.controller?.abort()
     this.controller = null
-    if (this.retryTimer) this.dependencies.cancel(this.retryTimer)
-    this.retryTimer = null
+    this.recovery.complete()
     const socket = this.socket
     this.socket = null
     socket?.close()
-    this.capability = null
-    this.admission = null
-    this.admissionSequence = null
-    this.leaveSequence = null
-    this.settingsSequence = null
-    this.pendingSettings = null
-    this.sentControls = []
-    this.controlFailure = null
-    this.nextSequence = 1
-    this.nextAction = 1
+    this.clearMembership()
     this.state = { ...initialGameClientState(), failure: this.state.failure }
-    if (notify) this.emit()
+    if (notify) this.onChange(this.state)
   }
   private async connect(resume: boolean): Promise<void> {
     const generation = ++this.generation
@@ -135,9 +129,11 @@ export class GameClient {
         method: 'POST', headers: { Accept: 'application/json' }, signal: controller.signal,
       })
       if (generation !== this.generation) return
+      if (resume && !this.recovery.hasTime()) { this.terminal('connectionFailed', true); return }
       if (!response.ok) { this.retryOrFail(resume, 'sessionFailed'); return }
       const token = sessionToken(await response.json())
       if (generation !== this.generation) return
+      if (resume && !this.recovery.hasTime()) { this.terminal('connectionFailed', true); return }
       if (!token) { this.retryOrFail(resume, 'sessionFailed'); return }
       this.openSocket(generation, token, resume)
     } catch {
@@ -188,6 +184,7 @@ export class GameClient {
   }
   private acceptAdmitted(message: Extract<GameServerMessage, { type: 'admitted' }>): void {
     if (message.sequence !== this.admissionSequence || this.state.connection !== 'authenticated') return
+    if (this.capability && !this.recovery.hasTime()) { this.terminal('connectionFailed', true); return }
     const existing = this.capability
     if (existing && (message.room.roomId !== existing.roomId || message.youSeat !== existing.seat
       || message.resumeToken !== existing.token || !acceptableBaseline(message.room, this.state.room))) return
@@ -196,12 +193,9 @@ export class GameClient {
     }
     this.capability = { roomId: message.room.roomId, seat: message.youSeat, token: message.resumeToken }
     this.admission = null
-    this.admissionSequence = null
     this.nextAction = message.lastActionId === null ? 1 : message.lastActionId + 1
-    this.sentControls = []
-    this.controlFailure = null
-    this.settingsSequence = null
-    this.pendingSettings = null
+    this.clearPendingCommands()
+    this.recovery.complete()
     this.update({
       room: message.room, youSeat: message.youSeat,
       snapshot: message.state ? { type: 'snapshot', room: message.room, state: message.state, events: [] } : null,
@@ -248,28 +242,27 @@ export class GameClient {
   private acceptLeft(roomId: string, sequence: number): void {
     if (sequence !== this.leaveSequence || roomId !== this.state.room?.roomId) return
     this.capability = null
-    this.leaveSequence = null
-    this.settingsSequence = null
-    this.pendingSettings = null
     this.nextAction = 1
-    this.sentControls = []
-    this.controlFailure = null
+    this.clearPendingCommands()
     this.update({ room: null, snapshot: null, youSeat: null, admissionBaseline: null,
       leavePending: false, settingsPending: false, failure: null })
   }
   private acceptError(code: V11ErrorCode, sequence: number | null): void {
-    if (code === 'resumeRejected' && sequence === this.admissionSequence && this.capability) {
-      this.terminal('resumeRejected', true)
+    const admissionError = sequence !== null && sequence === this.admissionSequence
+    if (admissionError && this.capability && this.state.admissionPending) {
+      this.acceptAdmissionError(code)
       return
     }
     this.controlFailure = null
-    if (sequence === this.admissionSequence) {
+    if (admissionError) {
       this.admission = null
       this.admissionSequence = null
       this.update({ admissionPending: false })
     }
-    if (sequence === this.leaveSequence) { this.leaveSequence = null; this.update({ leavePending: false }) }
-    if (sequence === this.settingsSequence) {
+    if (sequence !== null && sequence === this.leaveSequence) {
+      this.leaveSequence = null; this.update({ leavePending: false })
+    }
+    if (sequence !== null && sequence === this.settingsSequence) {
       this.settingsSequence = null
       this.pendingSettings = null
       this.update({ settingsPending: false })
@@ -284,6 +277,7 @@ export class GameClient {
   }
   private sendAdmission(): boolean {
     if (this.state.connection !== 'authenticated') return false
+    if (this.capability && !this.recovery.hasTime()) { this.terminal('connectionFailed', true); return false }
     const sequence = this.sequence()
     if (sequence === null) return false
     let message: GameClientMessage
@@ -311,16 +305,6 @@ export class GameClient {
     if (this.nextSequence > MAX_COUNTER) { this.update({ failure: 'sequenceExhausted' }); return null }
     return this.nextSequence++
   }
-  private canControl(): boolean {
-    if (this.state.connection !== 'authenticated' || this.state.admissionPending
-      || this.state.leavePending || this.state.room?.phase.type !== 'running') return false
-    const seat = this.state.youSeat
-    const actor = this.state.snapshot?.state.actors.find((candidate) => candidate.seat === seat)
-    return Boolean(this.ownConnected() && seat && actor?.type === 'visible' && actor.alive)
-  }
-  private ownConnected(): boolean {
-    return this.state.room?.seats.find((seat) => seat.seat === this.state.youSeat)?.connection.type === 'connected'
-  }
   private send(message: GameClientMessage): boolean {
     if (this.state.connection !== 'authenticated' || this.socket?.readyState !== WebSocket.OPEN) return false
     this.socket.send(JSON.stringify(message))
@@ -328,31 +312,45 @@ export class GameClient {
   }
   private closed(generation: number, socket: WebSocket, code: number, wasResume: boolean): void {
     if (!isCurrentConnection(generation, socket, this.generation, this.socket)) return
+    this.recovery.cancelRetry()
     const leaving = this.leaveSequence !== null
     this.socket = null
     this.controller = null
-    this.admissionSequence = null
-    this.leaveSequence = null
-    this.settingsSequence = null
-    this.pendingSettings = null
-    this.sentControls = []
-    this.controlFailure = null
+    this.clearPendingCommands()
     this.nextSequence = 1
     if (code === 4001) { this.terminal('seatReplaced'); return }
     if (this.stopped) return
     if (leaving) { this.terminal('connectionFailed'); return }
-    if (this.capability) { this.scheduleReconnect(); return }
+    if (this.capability) { this.recovery.start(); this.scheduleReconnect(); return }
     this.retryOrFail(wasResume, 'connectionFailed')
   }
   private scheduleReconnect(): void {
     const attempt = this.state.reconnectAttempt + 1
+    const generation = this.generation
     if (attempt > MAX_RECONNECT_ATTEMPTS) { this.terminal('connectionFailed'); return }
     this.update({ connection: 'reconnecting', reconnectAttempt: attempt, admissionPending: true,
       settingsPending: false, failure: null })
-    this.retryTimer = this.dependencies.schedule(() => {
-      this.retryTimer = null
-      if (!this.stopped && this.capability) void this.connect(true)
-    }, attempt * 250)
+    if (!this.recovery.schedule(attempt * 250, () => {
+      if (generation === this.generation && !this.stopped && this.capability
+        && this.state.admissionPending && this.leaveSequence === null) {
+        void this.connect(true)
+      }
+    })) this.terminal('connectionFailed', true)
+  }
+  private retryThrottledResume(): void {
+    const delay = this.recovery.nextRateLimitDelay()
+    const generation = this.generation
+    const socket = this.socket
+    if (delay === null || !socket || !this.recovery.schedule(delay, () => {
+      if (isCurrentConnection(generation, socket, this.generation, this.socket)
+        && this.state.connection === 'authenticated' && this.state.admissionPending
+        && this.admissionSequence === null && this.leaveSequence === null && this.capability) this.sendAdmission()
+    })) this.terminal(this.recovery.hasTime() ? 'rateLimited' : 'connectionFailed', true)
+  }
+  private acceptAdmissionError(code: V11ErrorCode): void {
+    this.admissionSequence = null
+    if (code === 'rateLimited' && this.recovery.hasTime()) { this.retryThrottledResume(); return }
+    this.terminal(code === 'rateLimited' ? 'connectionFailed' : code, true)
   }
   private retryOrFail(resume: boolean, failure: 'connectionFailed' | 'sessionFailed'): void {
     this.socket = null
@@ -366,20 +364,11 @@ export class GameClient {
   }
   private terminal(failure: GameFailure, close = false): void {
     this.stopped = true
+    this.generation += 1
     this.controller?.abort()
     this.controller = null
-    if (this.retryTimer) this.dependencies.cancel(this.retryTimer)
-    this.retryTimer = null
-    this.capability = null
-    this.admission = null
-    this.admissionSequence = null
-    this.leaveSequence = null
-    this.settingsSequence = null
-    this.pendingSettings = null
-    this.sentControls = []
-    this.controlFailure = null
-    this.nextSequence = 1
-    this.nextAction = 1
+    this.recovery.complete()
+    this.clearMembership()
     const socket = this.socket
     this.socket = null
     if (close) socket?.close()
@@ -395,6 +384,16 @@ export class GameClient {
     this.controlFailure = null
     return { failure: null }
   }
-  private update(change: Partial<GameClientState>): void { this.state = { ...this.state, ...change }; this.emit() }
-  private emit(): void { this.onChange(this.state) }
+  private clearPendingCommands(): void {
+    this.admissionSequence = null; this.leaveSequence = null; this.settingsSequence = null
+    this.pendingSettings = null
+    this.sentControls = []
+    this.controlFailure = null
+  }
+  private clearMembership(): void {
+    this.capability = null; this.admission = null
+    this.clearPendingCommands()
+    this.nextSequence = 1; this.nextAction = 1
+  }
+  private update(change: Partial<GameClientState>): void { this.state = { ...this.state, ...change }; this.onChange(this.state) }
 }

@@ -134,7 +134,7 @@ impl DenialTelemetry {
             summary
         };
         if let Some(summary) = summary {
-            tracing::warn!(target: "grenadiers::admission", denials = ?summary.nonzero(), "admission denials");
+            tracing::warn!(target: "grenadiers_server::admission", denials = ?summary.nonzero(), "admission denials");
         }
     }
 

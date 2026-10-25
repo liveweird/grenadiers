@@ -62,6 +62,31 @@ impl Visit for FieldVisitor {
 }
 
 #[test]
+fn denial_summary_is_visible_under_documented_deployment_filter() {
+    let fields = Arc::new(Mutex::new(Vec::new()));
+    let subscriber = tracing_subscriber::registry()
+        .with(tracing_subscriber::EnvFilter::new(
+            "grenadiers_server=info,tower_http=info",
+        ))
+        .with(CapturedFields(Arc::clone(&fields)));
+    let started = Instant::now();
+    let telemetry = DenialTelemetry::new(started);
+    tracing::subscriber::with_default(subscriber, || {
+        telemetry.record(DenialOperation::Mint, DenialReason::PeerRate, started);
+        telemetry.record(
+            DenialOperation::Mint,
+            DenialReason::PeerRate,
+            started + Duration::from_secs(61),
+        );
+    });
+
+    let captured = fields.lock().unwrap().join(" ");
+    assert!(captured.contains("admission denials"));
+    assert!(captured.contains("Mint"));
+    assert!(captured.contains("PeerRate"));
+}
+
+#[test]
 fn trace_spans_exclude_query_credentials() {
     const CREDENTIAL: &str = "private-query-credential";
     let fields = Arc::new(Mutex::new(Vec::new()));

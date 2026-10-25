@@ -196,6 +196,11 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
+                    /**
+                     * @example {
+                     *       "status": "ok"
+                     *     }
+                     */
                     "application/json": components["schemas"]["Status"];
                 };
             };
@@ -217,6 +222,11 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
+                    /**
+                     * @example {
+                     *       "status": "ok"
+                     *     }
+                     */
                     "application/json": components["schemas"]["Status"];
                 };
             };
@@ -251,6 +261,11 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
+                    /**
+                     * @example {
+                     *       "token": "0000000000000000000000000000000000000000000000000000000000000000"
+                     *     }
+                     */
                     "application/json": components["schemas"]["GameSession"];
                 };
             };

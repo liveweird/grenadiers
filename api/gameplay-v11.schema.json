@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://grenadiers.local/schemas/gameplay-v11.json",
   "title": "Grenadiers gameplay protocol v11",
-  "description": "Active gameplay contract with expanded item settings and generated-v2 arenas.",
+  "description": "Live gameplay contract for the 22-item Expanded-v5 catalog, generated-v2 arenas, materialized Oil Barrel state, and recipient-private projections.",
   "$ref": "#/$defs/GameServerMessage",
   "$defs": {
     "ProtocolVersionInput": {
@@ -761,6 +761,7 @@
       }
     },
     "GameClientMessage": {
+      "description": "Client message union: authenticate first, then sequenced room and gameplay commands.",
       "oneOf": [
         {
           "$ref": "#/$defs/Authenticate"
@@ -795,6 +796,7 @@
       ]
     },
     "Authenticate": {
+      "description": "First client message; presents the live protocol version and a single-use session token.",
       "type": "object",
       "additionalProperties": false,
       "required": [
@@ -815,6 +817,7 @@
       }
     },
     "CreateRoom": {
+      "description": "Creates a room and admits the authenticated connection to its first seat.",
       "type": "object",
       "additionalProperties": false,
       "required": [
@@ -831,6 +834,7 @@
       }
     },
     "JoinRoom": {
+      "description": "Joins an existing room by its public room code.",
       "type": "object",
       "additionalProperties": false,
       "required": [
@@ -851,6 +855,7 @@
       }
     },
     "Ready": {
+      "description": "Sets this seat's readiness against the identified round and settings revision.",
       "type": "object",
       "additionalProperties": false,
       "required": [
@@ -883,6 +888,7 @@
       }
     },
     "Movement": {
+      "description": "Sets or clears the seat's current movement direction for the active round.",
       "type": "object",
       "additionalProperties": false,
       "required": [
@@ -918,6 +924,7 @@
       }
     },
     "LeaveRoom": {
+      "description": "Leaves the identified room and invalidates that seat's resume capability.",
       "type": "object",
       "additionalProperties": false,
       "required": [
@@ -942,6 +949,7 @@
       }
     },
     "GameServerMessage": {
+      "description": "Server message union for authentication, admission, recipient-filtered state, acknowledgements, and errors.",
       "oneOf": [
         {
           "$ref": "#/$defs/Authenticated"
@@ -970,6 +978,7 @@
       ]
     },
     "Authenticated": {
+      "description": "Confirms session authentication and the selected live protocol version.",
       "type": "object",
       "additionalProperties": false,
       "required": [
@@ -986,6 +995,7 @@
       }
     },
     "IncompatibleProtocol": {
+      "description": "Rejects an unsupported protocol version and reports the version accepted by the server.",
       "type": "object",
       "additionalProperties": false,
       "required": [
@@ -1002,6 +1012,7 @@
       }
     },
     "RoomState": {
+      "description": "Publishes recipient-visible room metadata and lifecycle state outside a running simulation snapshot.",
       "type": "object",
       "additionalProperties": false,
       "required": [
@@ -1018,6 +1029,7 @@
       }
     },
     "Snapshot": {
+      "description": "Publishes a recipient-filtered simulation state and its bounded event batch.",
       "type": "object",
       "additionalProperties": false,
       "required": [
@@ -1047,6 +1059,7 @@
       }
     },
     "LeftRoom": {
+      "description": "Acknowledges the sequenced leave command for the identified room.",
       "type": "object",
       "additionalProperties": false,
       "required": [
@@ -1067,6 +1080,7 @@
       }
     },
     "Error": {
+      "description": "Reports a protocol or command error; sequence is non-null only when correlated to a command.",
       "type": "object",
       "additionalProperties": false,
       "required": [
@@ -1240,6 +1254,7 @@
       }
     },
     "Rematch": {
+      "description": "Sets this seat's rematch readiness after a completed match.",
       "type": "object",
       "additionalProperties": false,
       "required": [
@@ -1342,6 +1357,7 @@
       }
     },
     "ResumeRoom": {
+      "description": "Restores a room seat using its private resume capability.",
       "type": "object",
       "additionalProperties": false,
       "required": [
@@ -1366,6 +1382,7 @@
       }
     },
     "Admitted": {
+      "description": "Confirms room admission with recipient-private seat, resume capability, and nullable current state.",
       "type": "object",
       "additionalProperties": false,
       "required": [
@@ -1416,6 +1433,7 @@
       }
     },
     "SeatReplaced": {
+      "description": "Notifies the previous connection that a successful resume replaced its seat binding.",
       "type": "object",
       "additionalProperties": false,
       "required": [
@@ -1432,6 +1450,7 @@
       }
     },
     "GameSettings": {
+      "description": "Validated live room settings, including the enabled subset of the 22-item catalog.",
       "type": "object",
       "additionalProperties": false,
       "required": [
@@ -1485,6 +1504,7 @@
       }
     },
     "UpdateSettingsCommand": {
+      "description": "Replaces editable room settings using optimistic revision matching.",
       "type": "object",
       "additionalProperties": false,
       "required": [
@@ -2040,6 +2060,7 @@
       }
     },
     "ManualAction": {
+      "description": "Requests a deduplicated bomb or equipment action for the active round.",
       "type": "object",
       "additionalProperties": false,
       "required": [

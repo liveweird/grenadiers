@@ -49,6 +49,10 @@ have an exact `## Scenario:` counterpart in the document assigned by
 `npm run check:scenarios` gate tests the checker, rejects unmapped documents/specs and duplicate
 or computed titles, then enforces the mapped pairing. Also run `npm run typecheck`, `npm run lint`,
 and `npm run knip` after editing the suite.
+Two-browser responsive scenarios should use `createResponsiveBrowserContexts` from
+`tests/support/browser-contexts.ts`. It creates native desktop 1440x1050 and reduced-motion
+mobile 320x844 contexts concurrently; pass `{ mobileWidth: 390 }` only for the wider pickup
+acceptance layout. Keep specialized context options local to their scenario.
 Conditional `test.skip`, `test.fixme`, and `test.fail` annotations are statically recognized when
 their reason is a string literal or an identifier declared as a string; ambiguous overloads fail
 with a source location instead of being omitted from parity checks.

@@ -1,3 +1,4 @@
+import { createResponsiveBrowserContexts } from '../tests/support/browser-contexts'
 import { expect, test, type Page } from '@playwright/test'
 import { latestSnapshot, observeGame, visibleActor, type ObservedGame } from '../tests/support/duel'
 import { moveTo } from '../tests/support/movement'
@@ -45,10 +46,7 @@ function expectExactShortDeadline(game: ObservedGame, collectedAt: number): void
 }
 
 test('two browsers collect Short Flame and restore base bomb range after its exact deadline', async ({ browser }, testInfo) => {
-  const contexts = await Promise.all([
-    browser.newContext({ viewport: { width: 1440, height: 1050 } }),
-    browser.newContext({ viewport: { width: 320, height: 844 }, reducedMotion: 'reduce' }),
-  ])
+  const contexts = await createResponsiveBrowserContexts(browser)
   const games: ObservedGame[] = []
   try {
     const [one, two] = await Promise.all(contexts.map((context) => context.newPage()))

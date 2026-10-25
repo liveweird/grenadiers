@@ -1,3 +1,4 @@
+import { createResponsiveBrowserContexts } from '../tests/support/browser-contexts'
 import { setTimeout as delay } from 'node:timers/promises'
 import { expect, test, type Page } from '@playwright/test'
 import { arenaTilePixels } from '../tests/support/compositor'
@@ -57,10 +58,7 @@ async function expectStationary(game: ObservedGame, seat: Seat, after: number): 
 test('Oil Barrel reveals, blocks, burns persistently, and resumes without synthetic cues',
   async ({ browser, browserName }, info) => {
     expect(browserName).toBe('chromium')
-    const contexts = await Promise.all([
-      browser.newContext({ viewport: { width: 1440, height: 1050 } }),
-      browser.newContext({ viewport: { width: 320, height: 844 }, reducedMotion: 'reduce' }),
-    ])
+    const contexts = await createResponsiveBrowserContexts(browser)
     try {
       const [one, two] = await Promise.all(contexts.map((context) => context.newPage()))
       await Promise.all([one, two].map(installTransportProbe))

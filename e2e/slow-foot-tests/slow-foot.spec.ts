@@ -1,3 +1,4 @@
+import { createResponsiveBrowserContexts } from '../tests/support/browser-contexts'
 import { expect, test } from '@playwright/test'
 import { latestSnapshot, observeGame, visibleActor, type ObservedGame } from '../tests/support/duel'
 import { moveTo } from '../tests/support/movement'
@@ -84,10 +85,7 @@ function expectRate(window: NonNullable<ReturnType<typeof sharedDisplacementWind
 }
 
 test('two browsers observe one Slow-foot stack and exact restored movement', async ({ browser }, info) => {
-  const contexts = await Promise.all([
-    browser.newContext({ viewport: { width: 1440, height: 1050 } }),
-    browser.newContext({ viewport: { width: 320, height: 844 }, reducedMotion: 'reduce' }),
-  ])
+  const contexts = await createResponsiveBrowserContexts(browser)
   try {
     const [one, two] = await Promise.all(contexts.map((context) => context.newPage()))
     const games = [observeGame(one), observeGame(two)]

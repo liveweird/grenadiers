@@ -1,3 +1,4 @@
+import { createResponsiveBrowserContexts } from '../tests/support/browser-contexts'
 import { expect, test, type Page } from '@playwright/test'
 import { arenaTilePixels } from '../tests/support/compositor'
 import { latestSnapshot, observeGame, visibleActor, type ObservedGame } from '../tests/support/duel'
@@ -48,10 +49,7 @@ async function prepareEscape(page: Page, game: ObservedGame): Promise<void> {
 
 test('Kick moves one retained bomb through authoritative cells without extra cues and preserves its fuse',
   async ({ browser }, info) => {
-    const contexts = await Promise.all([
-      browser.newContext({ viewport: { width: 1440, height: 1050 } }),
-      browser.newContext({ viewport: { width: 320, height: 844 }, reducedMotion: 'reduce' }),
-    ])
+    const contexts = await createResponsiveBrowserContexts(browser)
     try {
       const [one, two] = await Promise.all(contexts.map((context) => context.newPage()))
       const games = [observeGame(one), observeGame(two)]

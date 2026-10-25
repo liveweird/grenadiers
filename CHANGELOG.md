@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## 0.3.57 — 2026-10-25
+
 ### Changed
 
 - Move shared Rust wire-item types, effect validation, item projection mappings and bounded-number

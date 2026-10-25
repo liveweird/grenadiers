@@ -28,6 +28,7 @@ identifies the active network contract. Check a record's status and later decisi
 | [0019](0019-reserved-seat-reconnect-and-replay.md) | Reserved-seat reconnect and private replay evidence |
 | [0020](0020-shared-gameplay-settings.md) | Revision-bound shared room settings |
 | [0021](0021-gameplay-retention.md) | Live protocol support, archived contracts and private replay retention |
+| [0022](0022-standalone-browser-validation.md) | Deterministic standalone validation for live browser messages |
 
 For a new decision, use the next numeric prefix and a descriptive filename. State the context,
 decision, consequences and acceptance requirements. When replacing an earlier decision, link

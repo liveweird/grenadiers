@@ -65,35 +65,40 @@ interrupted state but cannot preserve process-local matches or credentials.
 Keep the previous immutable image reference for rollback; database migration compatibility
 must be designed when durable application data is introduced.
 
-## v0.3.50 — 2026-10-25
+## v0.3.51 — 2026-10-25
 
-[v0.3.50](https://github.com/liveweird/grenadiers/releases/tag/v0.3.50) hardens transport,
-room recovery, browser responses and contributor checks. Application inputs match tested source
-`9122e330379f4ac1bb3e0edd236dcdc5538655f0`; the source tag identifies the complete release.
-Localhost:8085 serves the exact accepted image
-`sha256:76980168a517474e680d8e346b6b8c38240a1b534eb403ad919b347168d0f5c6`.
+[v0.3.51](https://github.com/liveweird/grenadiers/releases/tag/v0.3.51) precompiles the live
+browser validators, preserving schemas, complete errors and semantic/privacy checks.
+Application inputs match `a7ac65b36592ad8871a1a78f64f4e9adcc24eb36`; the source tag includes
+release documentation. Localhost:8085 serves the accepted image
+`sha256:cb7be95e9b5c6c291d8c828579b3de5facff9efb466d5a61e4dcdcadd2c7c76f`.
 
-Full Rust acceptance covers all 4,194,304 masks in debug, release and official coverage with no
-retries (6m40s). Application line coverage is 92.97%; that fresh 80%-gated measurement supports
-raising the Rust floor to 90%, verified by reporter contract/real-LLVM tests. The patched web gate
-passes 6,780 tests in 86 files at the raised 90% line / 88% other floors. API/E2E static checks,
-Cargo-deny, zero-finding full/production npm audits and the pinned image scan pass; the image has
-zero fixable HIGH/CRITICAL findings under the existing scanner policy.
+The full web gate passes 6,789 tests / 88 files at `31219c0`, with coverage
+90.95/89.49/89.78/93.32% (statements/branches/functions/lines). Later portability corrections
+change generated comments only; 13 focused tests, lint, Knip, drift, TypeScript and fresh
+production builds pass on the final generator. Exact artifacts match across checkout depths,
+invocation directories and pinned Linux. Compressed JavaScript falls from 357,324 to 333,442
+bytes; CSS remains 36,292 bytes, within unchanged budgets. Independent review is clear.
 
-Eighteen native cases pass on this image: sixteen Compose cases covering the default suite,
-controls, audio, match progression, reconnect/deadline, Cloak, Stopwatch and Oil; two Kubernetes
-reconnect cases retain the base pod security/probes/resources. Failed sandbox launches, the
-socket timing regression and the stale Equipment-error assertion were corrected and are not
-carried as passes. Fresh accepted suites use no retries.
+Actual Chromium development and production flows validate live diagnostic welcome/pong and
+gameplay admission. Sixteen native cases pass without retries: the default eight each in
+Compose and Kubernetes on the same image. Kubernetes retains base security, probes and resource
+limits. Strict schema checks and the pinned image scan pass, with zero fixable HIGH/CRITICAL
+findings under the existing scanner policy. Isolated acceptance services are removed.
 
-Promotion health/readiness/index are 200; served HTML/JavaScript/atlas bytes match the image,
-and atlas pixels match canonical source. UID65532, read-only filesystem, dropped capabilities
-and no new privileges remain. v0.3.49 is retained for rollback. Runtime control files now live
-in `.local-checkpoints/runtime/`, rather than `/tmp`. Reload existing tabs; active matches and
-capabilities remain process-local. No database migration is required.
+Rust source, wire contracts and external dependencies are unchanged from v0.3.50. Reuse its
+full exhaustive/coverage acceptance; Linux debug/release units additionally pass at `b366958`,
+whose Rust inputs equal the final candidate. Do not treat these reused results as a new full
+Rust run. Docker's clean dependency install reports zero npm vulnerabilities.
 
-The artist redraw remains a separate pending change. Further CSP, hosting and structural work
-is tracked in the [quality-review response](quality-review.md).
+Promotion health/readiness/index are 200. Served HTML/JavaScript/atlas match the image; the
+atlas still matches canonical source. Runtime hardening remains intact. Durable deployment
+control is `.local-checkpoints/runtime/compose-v0.3.51.yaml`; v0.3.50 is retained for rollback.
+Reload browser tabs after upgrading; matches remain process-local. No database migration is
+needed. CSP enforcement and the separate artist redraw remain pending.
+
+<a id="v0350--2026-10-25"></a>
+The [v0.3.50 record](history/releases.md#v0350--2026-10-25) is preserved in release history.
 
 <a id="v0349-published-prerelease--2026-10-25"></a>
 [v0.3.49 published prerelease](history/releases.md#v0349-published-prerelease--2026-10-25)

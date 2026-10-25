@@ -1,5 +1,5 @@
-import Ajv, { type ErrorObject, type ValidateFunction } from 'ajv'
-import gameplayV11Schema from '../../../../api/gameplay-v11.schema.json'
+import type { ErrorObject } from 'ajv'
+import validateServer from '../../validation/generated/gameplay-v11.mjs'
 import { freezeSemanticError } from '../validation/freezeSemantics'
 import { effectSemanticError, expandedProfileSemanticErrorFor, itemSetSemanticError,
   type GameplayProfileSemanticError } from '../validation/profileSemantics'
@@ -11,12 +11,6 @@ export type GameplayV11ValidationResult =
   | { valid: true; value: GameServerMessage }
   | { valid: false; source: 'schema'; errors: ErrorObject[] }
   | { valid: false; source: 'semantics'; error: GameplayV11SemanticError }
-
-const ajv = new Ajv({ allErrors: true }).addSchema(gameplayV11Schema)
-const schemaReference = `${gameplayV11Schema.$id}#/$defs/GameServerMessage`
-const resolved = ajv.getSchema<GameServerMessage>(schemaReference)
-if (!resolved) throw new Error(`AJV did not resolve ${schemaReference}`)
-const validateServer: ValidateFunction<GameServerMessage> = resolved
 
 const supportedItems = [
   'kick', 'punch', 'bracelet', 'wallPass', 'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch',

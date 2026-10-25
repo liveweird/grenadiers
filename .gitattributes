@@ -1,0 +1,2 @@
+web/src/validation/generated/*.mjs linguist-generated=true
+web/src/validation/generated/*.d.mts linguist-generated=true

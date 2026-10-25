@@ -9,7 +9,7 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build && node scripts/check-bundle.mjs",
+    "build": "node scripts/check-validators.mjs && tsc -b && vite build && node scripts/check-bundle.mjs",
     "lint": "eslint . --max-warnings 0",
     "knip": "knip",
     "test": "vitest run",
@@ -22,6 +22,8 @@
     "check:realtime": "node scripts/check-realtime.mjs",
     "gen:gameplay": "node scripts/generate-gameplay.mjs",
     "check:gameplay": "node scripts/check-gameplay.mjs",
+    "gen:validators": "node scripts/generate-validators.mjs",
+    "check:validators": "node scripts/check-validators.mjs",
     "build:renderer-diagnostics": "tsc --project tsconfig.renderer-diagnostics.json && vite build --config vite.renderer-diagnostics.config.ts",
     "preview:renderer-diagnostics": "vite preview --config vite.renderer-diagnostics.config.ts --host 0.0.0.0 --port 5188 --strictPort",
     "preview:art-atlas": "vite preview --config vite.renderer-diagnostics.config.ts --host 127.0.0.1 --port 5188 --strictPort --open /art-atlas.html",

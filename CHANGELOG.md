@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## 0.3.52 — 2026-10-25
+
 ### Added
 
 - Enforce a static browser content policy after real HTTP/WS and HTTPS/WSS trials, using

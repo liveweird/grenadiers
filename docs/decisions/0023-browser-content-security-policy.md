@@ -1,6 +1,6 @@
 # ADR 0023: Enforced browser content policy
 
-Status: accepted for the v0.3.52 candidate after enforced browser trials.
+Status: accepted for v0.3.52 after enforced trials and real server-header acceptance.
 
 ## Context
 

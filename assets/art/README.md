@@ -76,7 +76,7 @@ target after review.
 - Keep IDs path-safe and stable. The exporter rejects missing, duplicate, unexpected or path-like
   IDs, changed required animations, invalid dimensions and texture-budget overflow.
 - Flame frames must reach all four edges so adjacent rays join. The procedural template's
-  `effect.flame.1` keeps its historical vertical two-pixel gap; the adopted v0.3.53 source fills a
+  `effect.flame.1` keeps its historical vertical two-pixel gap; the adopted source fills a
   continuous 22-pixel band on every edge of both frames.
 
 Use the standalone `art-atlas.html` renderer diagnostic to load a source PNG and manifest, inspect
@@ -86,12 +86,16 @@ and adjacent flames. It is not linked from the gameplay or product flow.
 
 ## Provenance
 
-The adopted v0.3.53 source is a full redraw (terrain, actors, bombs, flames, Oil, pickups and
-status cues) and is AI-generated: Claude (Anthropic, via Claude Code) wrote a procedural
-Python/Pillow script that painted every frame, directed and reviewed by the repository owner.
-It keeps the v0.3.48 manifest unchanged, every frame rectangle, pivot and anchor, binary alpha and
-the Oil colour anchors. It contains no external artwork, franchise sprites or downloaded fonts;
-repository licensing applies. The generating script is not committed; edit the PNG directly.
+The adopted source is a Napoleonic redraw supplied by the repository owner. Player one wears an
+orange-and-white uniform with a plumed shako, player two a blue uniform with a cockaded bicorne;
+terrain, bombs, flames, Oil, pickups and status cues are repainted inside the previous
+silhouettes. It keeps the v0.3.48 manifest unchanged, every frame rectangle, pivot and anchor,
+binary alpha and the flame edge bands. Its new Oil palette is pinned by the Oil Barrel browser
+scenario. Repository licensing applies.
+
+It replaces the v0.3.53 redraw, which was AI-generated: Claude (Anthropic, via Claude Code) wrote
+a procedural Python/Pillow script that painted every frame, directed and reviewed by the
+repository owner.
 
 The v0.3.48 baseline, still produced by `art:template`, is rendered at resolution 1 from
 Grenadiers' existing code-generated Pixi factories in `web/src/game/arena/`; it introduced no

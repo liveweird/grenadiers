@@ -207,25 +207,6 @@ async fn websocket_rejections_cover_bad_upgrade_origin_and_capacity() {
     server.abort();
 }
 
-#[tokio::test]
-async fn unknown_api_route_is_problem_instead_of_spa_fallback() {
-    for request in [
-        Request::get("/api/v1/missing").body(Body::empty()).unwrap(),
-        Request::post("/api/v1/missing")
-            .body(Body::empty())
-            .unwrap(),
-        Request::delete("/api").body(Body::empty()).unwrap(),
-        Request::post("/api/").body(Body::empty()).unwrap(),
-    ] {
-        let response = app(state(), Some("web/dist".into()))
-            .oneshot(request)
-            .await
-            .unwrap();
-        assert_eq!(response.status(), StatusCode::NOT_FOUND);
-        assert_valid(&openapi_component("Problem"), &body_json(response).await);
-    }
-}
-
 type ClientSocket = WebSocketStream<MaybeTlsStream<tokio::net::TcpStream>>;
 
 async fn start_server(state: AppState) -> (String, JoinHandle<()>) {

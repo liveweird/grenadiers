@@ -1,13 +1,11 @@
 use std::time::{Duration, Instant as StdInstant};
 
 use axum::{
-    body::Body,
     extract::{
         State, WebSocketUpgrade,
         ws::{CloseFrame, Message, WebSocket},
     },
-    http::{HeaderMap, Request, StatusCode, header::RETRY_AFTER},
-    middleware::Next,
+    http::{HeaderMap, StatusCode, header::RETRY_AFTER},
     response::Response,
 };
 use grenadiers_core::{ClientMessage, ServerMessage};
@@ -25,10 +23,6 @@ use crate::{
 const INACTIVITY_TIMEOUT: Duration = Duration::from_secs(30);
 const SEND_TIMEOUT: Duration = Duration::from_secs(5);
 const MAX_WRITE_BUFFER: usize = 131_072;
-
-pub(crate) async fn no_store(request: Request<Body>, next: Next) -> Response {
-    with_no_store(next.run(request).await)
-}
 
 pub(crate) async fn websocket(
     State(state): State<AppState>,

@@ -12,8 +12,10 @@ generated TypeScript, conformance tests, and docs change together.
   is an explicit scaffold exception; transport control errors are WebSocket messages/close codes.
 - **API-DOC-001:** Document actual methods, statuses, media types, and examples; do not list
   hypothetical errors. Keep OpenAPI 3.0 compatibility for the inherited code generation flow.
-- **API-ERR-001:** Unknown API paths yield problem JSON, including when static SPA fallback is enabled.
-  Dependency failure returns readiness 503, with liveness 200.
+- **API-ERR-001:** Unknown API paths yield a no-store 404 problem response, including when static
+  SPA fallback is enabled. Known API paths called with an unsupported method yield a no-store 405
+  problem response and Axum's route-derived `Allow` header. Dependency failure returns readiness
+  503, with liveness 200.
 - **API-WS-001:** Require an exact allowed browser Origin before upgrading. Origin is not identity.
   HTTP documents the upgrade; JSON Schema validates traffic after it.
 - **API-WS-002:** Inbound messages are tagged JSON objects with no extra fields. Ping sequence

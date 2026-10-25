@@ -68,6 +68,10 @@ async fn connect(url: &str) -> ClientSocket {
         response.status(),
         axum::http::StatusCode::SWITCHING_PROTOCOLS
     );
+    assert_eq!(
+        response.headers()[axum::http::header::CACHE_CONTROL],
+        "no-store"
+    );
     socket
 }
 

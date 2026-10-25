@@ -1,52 +1,86 @@
-use std::time::Duration;
+use std::time::{Duration, Instant as StdInstant};
 
 use axum::{
+    body::Body,
     extract::{
         State, WebSocketUpgrade,
         ws::{CloseFrame, Message, WebSocket},
     },
-    http::{HeaderMap, StatusCode, header::ORIGIN},
+    http::{HeaderMap, Request, StatusCode, header::RETRY_AFTER},
+    middleware::Next,
     response::Response,
 };
 use grenadiers_core::{ClientMessage, ServerMessage};
-use tokio::{sync::OwnedSemaphorePermit, time::timeout};
+use tokio::{
+    sync::OwnedSemaphorePermit,
+    time::{Instant, timeout},
+};
 
-use crate::{AppState, MAX_MESSAGE_BYTES, Problem};
+use crate::{
+    AppState, MAX_MESSAGE_BYTES, Problem,
+    game::{InboundLimit, origin_allowed},
+    with_no_store,
+};
 
 const INACTIVITY_TIMEOUT: Duration = Duration::from_secs(30);
 const SEND_TIMEOUT: Duration = Duration::from_secs(5);
+const MAX_WRITE_BUFFER: usize = 131_072;
+
+pub(crate) async fn no_store(request: Request<Body>, next: Next) -> Response {
+    with_no_store(next.run(request).await)
+}
 
 pub(crate) async fn websocket(
     State(state): State<AppState>,
     headers: HeaderMap,
     upgrade: WebSocketUpgrade,
 ) -> Response {
-    let origin = headers.get(ORIGIN).and_then(|value| value.to_str().ok());
-    if origin.is_none_or(|value| !state.allowed_origins.contains(value)) {
-        return Problem::new(StatusCode::FORBIDDEN, "Forbidden", "Origin is not allowed")
-            .response();
+    if !origin_allowed(&headers, &state) {
+        return with_no_store(
+            Problem::new(StatusCode::FORBIDDEN, "Forbidden", "Origin is not allowed").response(),
+        );
     }
     if state.game_rooms.is_stopping() {
-        return Problem::new(
-            StatusCode::SERVICE_UNAVAILABLE,
-            "Service Unavailable",
-            "Server is shutting down",
-        )
-        .response();
+        return with_no_store(
+            Problem::new(
+                StatusCode::SERVICE_UNAVAILABLE,
+                "Service Unavailable",
+                "Server is shutting down",
+            )
+            .response(),
+        );
     }
-    let Ok(permit) = state.connections.clone().try_acquire_owned() else {
-        return Problem::new(
-            StatusCode::SERVICE_UNAVAILABLE,
-            "Service Unavailable",
-            "WebSocket connection limit reached",
+    if !state.diagnostic_upgrade_limit.allow(StdInstant::now()) {
+        let mut response = Problem::new(
+            StatusCode::TOO_MANY_REQUESTS,
+            "Too Many Requests",
+            "Connection rate limit reached",
         )
         .response();
+        response
+            .headers_mut()
+            .insert(RETRY_AFTER, "1".parse().expect("valid retry after"));
+        return with_no_store(response);
+    }
+    let Ok(permit) = state.diagnostic_connections.clone().try_acquire_owned() else {
+        return with_no_store(
+            Problem::new(
+                StatusCode::SERVICE_UNAVAILABLE,
+                "Service Unavailable",
+                "Diagnostic WebSocket connection limit reached",
+            )
+            .response(),
+        );
     };
     let shutdown = state.game_rooms.shutdown();
-    upgrade
-        .max_frame_size(MAX_MESSAGE_BYTES)
-        .max_message_size(MAX_MESSAGE_BYTES)
-        .on_upgrade(move |socket| websocket_session(socket, permit, shutdown))
+    with_no_store(
+        upgrade
+            .max_frame_size(MAX_MESSAGE_BYTES)
+            .max_message_size(MAX_MESSAGE_BYTES)
+            .write_buffer_size(0)
+            .max_write_buffer_size(MAX_WRITE_BUFFER)
+            .on_upgrade(move |socket| websocket_session(socket, permit, shutdown)),
+    )
 }
 
 async fn websocket_session(
@@ -54,6 +88,7 @@ async fn websocket_session(
     _permit: OwnedSemaphorePermit,
     mut shutdown: tokio::sync::watch::Receiver<bool>,
 ) {
+    let mut inbound = InboundLimit::new(Instant::now());
     if *shutdown.borrow() {
         close(&mut socket, 1001, "Server shutting down").await;
         return;
@@ -79,6 +114,10 @@ async fn websocket_session(
                 return;
             }
         };
+        if !inbound.take(Instant::now()) {
+            close(&mut socket, 1008, "Rate limit exceeded").await;
+            return;
+        }
         match incoming {
             Some(Ok(Message::Text(text))) => match serde_json::from_str::<ClientMessage>(&text) {
                 Ok(ClientMessage::Ping { sequence }) => {

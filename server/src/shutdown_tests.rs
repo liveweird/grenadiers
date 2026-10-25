@@ -182,6 +182,26 @@ async fn shutdown_drain_has_a_five_second_deadline_for_a_hung_connection_permit(
 }
 
 #[tokio::test(start_paused = true)]
+async fn shutdown_drain_waits_for_diagnostic_connection_permits() {
+    let state = AppState::without_database([ORIGIN.to_owned()]);
+    let permit = state
+        .diagnostic_connections
+        .clone()
+        .acquire_owned()
+        .await
+        .unwrap();
+    state.begin_shutdown();
+    let waiting = tokio::spawn({
+        let state = state.clone();
+        async move { state.wait_for_shutdown().await }
+    });
+    tokio::task::yield_now().await;
+    tokio::time::advance(Duration::from_secs(5)).await;
+    assert!(!waiting.await.unwrap());
+    drop(permit);
+}
+
+#[tokio::test(start_paused = true)]
 async fn app_shutdown_interrupts_a_running_room_with_its_real_frozen_snapshot() {
     let state = AppState::without_database([ORIGIN.to_owned()]);
     let (mut first, _second) = running_room(&state).await;

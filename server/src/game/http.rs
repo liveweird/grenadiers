@@ -74,7 +74,7 @@ pub(crate) async fn issue_session(
     }
 }
 
-pub(super) fn origin_allowed(headers: &HeaderMap, state: &AppState) -> bool {
+pub(crate) fn origin_allowed(headers: &HeaderMap, state: &AppState) -> bool {
     let mut origins = headers.get_all(ORIGIN).iter();
     let origin = origins.next().and_then(|value| value.to_str().ok());
     origins.next().is_none()

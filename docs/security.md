@@ -11,8 +11,10 @@ cross-process routing, and abuse controls.
 Vite connections originate at port 5177; built SPA connections originate at port 8085.
 Use deployment-specific origins outside local development.
 
-The diagnostic and gameplay WebSockets bound message/frame size, connection count, idle time,
-queues, commands, and sends.
+The diagnostic and gameplay WebSockets use separate connection and upgrade-admission budgets.
+Both apply the same strict Origin validation and bound message/frame size, inbound rate, idle time,
+write buffering, commands, and sends. Diagnostic connections are capped at 16; gameplay
+connections are capped at 128.
 Malformed text messages yield a typed error and policy close. Control frames remain protocol
 control frames. The diagnostic envelope remains v1; authenticated gameplay requires v11;
 older versions are rejected before credential lookup.

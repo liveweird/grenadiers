@@ -4,6 +4,10 @@
 and use the repository's committed Cargo lockfile. Tests must exercise
 behavior and observable contracts rather than merely repeat implementation constants.
 
+The web, E2E-static and browser/atlas gates check the installed direct dependency versions of
+the workspaces they use before executing tools. After a manifest/lock update, rerun `npm ci`;
+matching committed lockfiles alone do not prove an existing `node_modules` is current.
+
 ## Verification policy
 
 Local checks are the primary gate for this single-maintainer repository. A passing local check
@@ -86,6 +90,12 @@ executes the exhaustive replay ranges using isolated workers. Set
 clean committed worktree and retains the same assertions, complete mask catalog and coverage
 floor. The separate `server` and `coverage` commands remain available as the serial fallback.
 Do not run latency acceptance alongside these CPU-intensive checks.
+
+The repository gate also runs the hosted-workflow contract tests. Before the parallel server
+runner starts, its regression suite checks scheduling, failure propagation and real
+`cargo-llvm-cov` binary/profile isolation using a disposable crate. Run that suite separately
+with `python3 -I -B scripts/local-server-parallel.test.py`; it requires the coverage tooling
+listed above. Coverage tools are not prerequisites for repository, web or E2E-static checks.
 
 The optional full CI derives the exhaustive server item-mask partition matrix from the checked
 Rust catalog; the

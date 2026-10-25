@@ -1,5 +1,19 @@
 # Changelog
 
+## [Unreleased] — 0.3.50
+
+### Fixed
+
+- Isolate diagnostic WebSocket connection and upgrade-rate limits from gameplay, enforce
+  strict Origin/inbound/write guards, and drain both connection pools during shutdown.
+- Show a localized recovery screen for application rendering failures.
+- Run previously orphaned workflow/coverage-runner tests through the relevant local gates
+  and reject stale installed web/E2E dependency versions before checking code.
+
+### Added
+
+- Contributor documentation index and an adjudicated quality-review remediation plan.
+
 ## 0.3.49 — 2026-10-25 (published)
 
 - Use the canonical artist PNG/JSON for gameplay terrain, actors, pickups, bombs, flames and Oil.

@@ -264,44 +264,41 @@ async fn game_upgrade_rejects_query_origin_and_shared_capacity() {
 }
 
 #[tokio::test]
-async fn diagnostic_and_authenticated_game_sockets_share_capacity_both_directions() {
+async fn diagnostic_and_game_sockets_have_isolated_capacity_both_directions() {
     let app_state = state();
     let token = issue_token(&app_state);
-    let _reserved = app_state
-        .connections
+    let diagnostic_permits = app_state
+        .diagnostic_connections
         .clone()
-        .acquire_many_owned((MAX_CONNECTIONS - 1) as u32)
+        .acquire_many_owned(MAX_DIAGNOSTIC_CONNECTIONS as u32)
         .await
         .unwrap();
     let (game_url, server) = start_server(app_state.clone()).await;
     let diagnostic_url = diagnostic_url(&game_url);
 
+    let mut game = connect(&game_url).await;
+    assert_eq!(
+        authenticate(&mut game, &token, 11).await["type"],
+        "authenticated"
+    );
+    game.close(None).await.unwrap();
+    wait_for_available_connection(&app_state).await;
+    drop(diagnostic_permits);
+
+    let gameplay_permits = app_state
+        .connections
+        .clone()
+        .acquire_many_owned(MAX_CONNECTIONS as u32)
+        .await
+        .unwrap();
     let mut diagnostic = connect(&diagnostic_url).await;
     assert_eq!(next_json(&mut diagnostic).await["type"], "welcome");
     assert_eq!(
         rejected(&game_url, &[ORIGIN]).await,
         axum::http::StatusCode::SERVICE_UNAVAILABLE
     );
-
     diagnostic.close(None).await.unwrap();
-    wait_for_available_connection(&app_state).await;
-    let mut game = connect(&game_url).await;
-    assert_eq!(
-        authenticate(&mut game, &token, 11).await["type"],
-        "authenticated"
-    );
-    assert_eq!(
-        rejected(&diagnostic_url, &[ORIGIN]).await,
-        axum::http::StatusCode::SERVICE_UNAVAILABLE
-    );
-
-    game.close(None).await.unwrap();
-    wait_for_available_connection(&app_state).await;
-    let mut replacement_diagnostic = connect(&diagnostic_url).await;
-    assert_eq!(
-        next_json(&mut replacement_diagnostic).await["type"],
-        "welcome"
-    );
+    drop(gameplay_permits);
     server.abort();
 }
 

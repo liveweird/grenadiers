@@ -18,6 +18,12 @@
   "protocol": "Protocol v{{version}} · up to {{players}} players",
   "invalidMessage": "The server sent an invalid message.",
   "connectionFailed": "The realtime connection failed.",
+  "errorBoundary": {
+    "title": "Something went wrong.",
+    "message": "Grenadiers could not display this screen. Try again, or reload the page if the problem continues.",
+    "retry": "Try again",
+    "reload": "Reload page"
+  },
   "language": "Language",
   "english": "English",
   "polish": "Polski"

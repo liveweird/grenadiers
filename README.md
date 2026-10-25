@@ -169,3 +169,7 @@ See [security and configuration](docs/security.md) before exposing the scaffold 
 The original `AGENTS.md` still describes the empty workspace. It is preserved under the
 initial instruction not to modify an existing file; use `CONTRIBUTING.md` and `docs/` for
 current commands and conventions.
+
+Start with the [contributor documentation index](docs/README.md). The
+[quality-review response](docs/quality-review.md) tracks confirmed fixes, proposed work and
+corrections to the October 2026 review.

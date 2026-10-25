@@ -9,6 +9,7 @@ use axum::{
         StatusCode,
         header::{CACHE_CONTROL, CONTENT_TYPE},
     },
+    middleware,
     response::{IntoResponse, Response},
     routing::{any, get, post},
 };
@@ -20,7 +21,7 @@ mod diagnostics;
 mod game;
 mod round_seed;
 
-use game::{GameRooms, GameSessions, game_websocket, issue_session};
+use game::{GameRooms, GameSessions, UpgradeLimit, game_websocket, issue_session};
 use round_seed::RoundSeedSource;
 use tower_http::{
     services::{ServeDir, ServeFile},
@@ -34,6 +35,7 @@ const DEFAULT_ORIGINS: [&str; 4] = [
     "http://127.0.0.1:8085",
 ];
 pub(crate) const MAX_CONNECTIONS: usize = 128;
+pub(crate) const MAX_DIAGNOSTIC_CONNECTIONS: usize = 16;
 const MAX_MESSAGE_BYTES: usize = 4096;
 const READINESS_TIMEOUT: Duration = Duration::from_secs(2);
 const SHUTDOWN_DRAIN_TIMEOUT: Duration = Duration::from_secs(5);
@@ -43,6 +45,8 @@ pub struct AppState {
     database: Option<PgPool>,
     allowed_origins: Arc<HashSet<String>>,
     connections: Arc<Semaphore>,
+    diagnostic_connections: Arc<Semaphore>,
+    diagnostic_upgrade_limit: Arc<UpgradeLimit>,
     game_sessions: Arc<GameSessions>,
     game_rooms: Arc<GameRooms>,
 }
@@ -56,6 +60,8 @@ impl AppState {
             database: None,
             allowed_origins: Arc::new(allowed_origins.into_iter().collect()),
             connections: Arc::new(Semaphore::new(MAX_CONNECTIONS)),
+            diagnostic_connections: Arc::new(Semaphore::new(MAX_DIAGNOSTIC_CONNECTIONS)),
+            diagnostic_upgrade_limit: Arc::new(UpgradeLimit::new(std::time::Instant::now())),
             game_sessions: Arc::new(GameSessions::new(std::time::Instant::now())),
             game_rooms: GameRooms::new(std::time::Instant::now(), round_seed_source),
         }
@@ -92,6 +98,8 @@ impl AppState {
             database,
             allowed_origins: Arc::new(allowed_origins),
             connections: Arc::new(Semaphore::new(MAX_CONNECTIONS)),
+            diagnostic_connections: Arc::new(Semaphore::new(MAX_DIAGNOSTIC_CONNECTIONS)),
+            diagnostic_upgrade_limit: Arc::new(UpgradeLimit::new(std::time::Instant::now())),
             game_sessions: Arc::new(GameSessions::new(std::time::Instant::now())),
             game_rooms: GameRooms::new(std::time::Instant::now(), round_seed_source),
         })
@@ -103,12 +111,21 @@ impl AppState {
 
     pub async fn wait_for_shutdown(&self) -> bool {
         timeout(SHUTDOWN_DRAIN_TIMEOUT, async {
-            let permits = self
+            let gameplay_permits = self
                 .connections
                 .clone()
                 .acquire_many_owned(MAX_CONNECTIONS as u32);
-            let (permits, ()) = tokio::join!(permits, self.game_rooms.wait_empty());
-            drop(permits.expect("connection semaphore remains open"));
+            let diagnostic_permits = self
+                .diagnostic_connections
+                .clone()
+                .acquire_many_owned(MAX_DIAGNOSTIC_CONNECTIONS as u32);
+            let (gameplay_permits, diagnostic_permits, ()) = tokio::join!(
+                gameplay_permits,
+                diagnostic_permits,
+                self.game_rooms.wait_empty()
+            );
+            drop(gameplay_permits.expect("gameplay connection semaphore remains open"));
+            drop(diagnostic_permits.expect("diagnostic connection semaphore remains open"));
         })
         .await
         .is_ok()
@@ -197,7 +214,10 @@ pub fn app(state: AppState, web_dist_dir: Option<PathBuf>) -> Router {
     let router = Router::new()
         .route("/api/v1/health", get(health))
         .route("/api/v1/ready", get(ready))
-        .route("/api/v1/ws", get(diagnostics::websocket))
+        .route(
+            "/api/v1/ws",
+            get(diagnostics::websocket).layer(middleware::from_fn(diagnostics::no_store)),
+        )
         .route("/api/v1/game/session", post(issue_session))
         .route("/api/v1/game/ws", get(game_websocket))
         .route("/api", any(api_not_found))
@@ -281,6 +301,8 @@ async fn api_not_found() -> Response {
     .response()
 }
 
+#[cfg(test)]
+mod diagnostics_tests;
 #[cfg(test)]
 #[path = "game/http_tests.rs"]
 mod game_http_tests;

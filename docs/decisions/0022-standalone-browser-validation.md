@@ -1,6 +1,6 @@
 # ADR 0022: Build-time validation for live browser messages
 
-Status: accepted for the v0.3.51 candidate. CSP enforcement is a later change.
+Status: accepted for v0.3.51. CSP enforcement is a later change.
 
 ## Context
 

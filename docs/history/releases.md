@@ -4,6 +4,36 @@ This archive preserves the older release records originally maintained in
 [`docs/releases.md`](../releases.md). Records remain in their original order; the current
 release procedure and current release record stay in the [release guide](../releases.md).
 
+## v0.3.50 — 2026-10-25
+
+[v0.3.50](https://github.com/liveweird/grenadiers/releases/tag/v0.3.50) hardens transport,
+room recovery, browser responses and contributor checks. Application inputs match tested source
+`9122e330379f4ac1bb3e0edd236dcdc5538655f0`; the source tag identifies the complete release.
+Localhost:8085 serves the exact accepted image
+`sha256:76980168a517474e680d8e346b6b8c38240a1b534eb403ad919b347168d0f5c6`.
+
+Full Rust acceptance covers all 4,194,304 masks in debug, release and official coverage with no
+retries (6m40s). Application line coverage is 92.97%; that fresh 80%-gated measurement supports
+raising the Rust floor to 90%, verified by reporter contract/real-LLVM tests. The patched web gate
+passes 6,780 tests in 86 files at the raised 90% line / 88% other floors. API/E2E static checks,
+Cargo-deny, zero-finding full/production npm audits and the pinned image scan pass; the image has
+zero fixable HIGH/CRITICAL findings under the existing scanner policy.
+
+Eighteen native cases pass on this image: sixteen Compose cases covering the default suite,
+controls, audio, match progression, reconnect/deadline, Cloak, Stopwatch and Oil; two Kubernetes
+reconnect cases retain the base pod security/probes/resources. Failed sandbox launches, the
+socket timing regression and the stale Equipment-error assertion were corrected and are not
+carried as passes. Fresh accepted suites use no retries.
+
+Promotion health/readiness/index are 200; served HTML/JavaScript/atlas bytes match the image,
+and atlas pixels match canonical source. UID65532, read-only filesystem, dropped capabilities
+and no new privileges remain. v0.3.49 is retained for rollback. Runtime control files now live
+in `.local-checkpoints/runtime/`, rather than `/tmp`. Reload existing tabs; active matches and
+capabilities remain process-local. No database migration is required.
+
+The artist redraw remains a separate pending change. Further CSP, hosting and structural work
+is tracked in the [quality-review response](../quality-review.md).
+
 ## v0.3.49 published prerelease — 2026-10-25
 
 [v0.3.49](https://github.com/liveweird/grenadiers/releases/tag/v0.3.49) is published from source

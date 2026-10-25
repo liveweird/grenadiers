@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## 0.3.51 — 2026-10-25
+
 ### Changed
 
 - Precompile the live gameplay and diagnostic browser validators while preserving schema,

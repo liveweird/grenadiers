@@ -69,10 +69,10 @@ must be designed when durable application data is introduced.
 
 [v0.3.53](https://github.com/liveweird/grenadiers/releases/tag/v0.3.53) adds bounded peer
 admission, strict opt-in immediate-proxy identity, outstanding-session quotas and readable,
-credential-free denial summaries. Application inputs match
-`79a6527e40f61df43479e1401ed27ca2fce59ff1`; the source tag includes release documentation.
+credential-free denial summaries, alongside the merged arena redraw. Application inputs match
+`e1e10b0d889aa110c268bc17167b694423f6c8f2`; the source tag includes release documentation.
 Localhost:8085 serves accepted image
-`sha256:4669b215b3f2e9cd5bbbc67b565dc61a22afac444b8d24f8985e0176c73fadde`.
+`sha256:6035b215bd8ab428a749b9effa63261cc99b2bd4eee3d8bc69cb6c0dfe83ea7f`.
 
 Full source-bound Rust acceptance at `055d1d2` passes every 4,194,304-mask case in debug,
 release and official coverage at the 90% floor (7m45s, no retries). Measured application line
@@ -82,29 +82,34 @@ summaries visible under the documented filter: final-source ordinary debug/relea
 replay and coverage results remain attributed to their measured source, rather than claimed
 as rerun after that literal change. Distinct Linux debug/release units pass at final source.
 
-The full web gate passes 6,790 tests / 88 files at `62d8a28`, with unchanged coverage floors.
-Two later status-description/JSDoc corrections pass focused API lint/drift/type/build checks;
-types and runtime bytes are unchanged. Compressed JavaScript/CSS remain 336,413/36,292 bytes.
-Fresh Cargo-deny, both zero-finding npm audits, strict changed Kubernetes checks and the pinned
-image scan pass; the image has zero fixable HIGH/CRITICAL findings under the existing policy.
-Independent foundation, integration and log-filter reviews are clear.
+After artist PR #123 merges, Rust/Cargo/API inputs remain unchanged and the packaged server
+binary is byte-identical to accepted `79a6527` (SHA-256 `13837b25c859c22a7d358c500e86cb304c94732c048823acd11385ae6438b97d`).
+The affected full web gate passes 6,791 tests / 88 files at `e1e10b0`, with
+90.95/89.49/89.80/93.32% coverage and unchanged floors. Compressed JavaScript/CSS are
+336,437/36,292 bytes. Fresh Cargo-deny, both zero-finding npm audits, strict changed Kubernetes
+checks and the final image scan pass; the image has zero fixable HIGH/CRITICAL findings under
+the existing policy. Independent admission, log-filter and graphics integration reviews are clear.
 
 The final image passes 26 Chromium cases without retries: twelve gameplay cases through
 Compose (default eight, controls, audio, two reconnect), six HTTP/WS + HTTPS/WSS CSP cases and
-eight through Kubernetes. Three relay/config regressions pass. Separate real container TCP
+eight through Kubernetes. Three relay/config regressions and fourteen separate enforced-policy renderer/artist cases pass,
+including actual exports and an isolated active lifecycle cell. Separate real container TCP
 checks prove untrusted forwarding is ignored, trusted malformed forwarding returns 400, sixteen
 issued sessions exhaust only their minting peer with 429, and another peer remains eligible.
-Actual default-filter summaries are visible and exclude the sentinel request value.
+Actual default-filter summaries are visible and exclude the sentinel request value; unchanged server bytes preserve
+that proof across the frontend-only merge.
 
 Promotion health/readiness, exact runtime/image/security identity, real CSP/cache headers,
-served HTML/JavaScript/atlas and a fresh browser diagnostic/gameplay flow pass. Proxy trust is
+served HTML/JavaScript/atlas and a fresh browser diagnostic/gameplay flow pass. The served redraw
+matches canonical SHA-256 `b057bafe7b32b76dd187fa44bf4bd6ebbb686b1aa0e8bbf8c5f633aea7ac7a6e`. Proxy trust is
 empty for the direct local deployment. Temporary services, keys, worktree and branch are removed.
 Durable control is `.local-checkpoints/runtime/compose-v0.3.53.yaml`; v0.3.52 remains for rollback.
 Reload browser tabs; matches and quotas remain process-local. No database migration is needed.
 
 These quotas are engineering defaults, not durable identity or a public deployment design.
 Actual proxy addresses, overwrite behavior, restricted backend access, TLS and ingress limits
-remain operator requirements. The separate artist redraw remains pending.
+remain operator requirements. Claude's redraw is included; its manifest/frame geometry is unchanged,
+and parity explicitly uses the packed procedural baseline while lifecycle tests load shipped art.
 
 <a id="v0352--2026-10-25"></a>
 The [v0.3.52 record](history/releases.md#v0352--2026-10-25) is preserved in release history.

@@ -55,7 +55,7 @@ That initial v0.3.50 change did not enable CSP; v0.3.52 follows below.
 **DOC-01/02/04/14, partial:** the current verification policy and release procedures are now
 short entry points. Dated verification and older release records live in `docs/history/`, with
 their facts and headings preserved and relative links rebased. Known incoming fragments retain
-aliases. The latest release is v0.3.53, adding bounded peer admission.
+aliases. The latest release is v0.3.53, adding bounded peer admission and the merged arena redraw.
 Testing, deployment and backlog consolidation remain separate work, including reconciliation
 with the pending artist PR before changing its overlapping documents.
 
@@ -144,7 +144,9 @@ authentication to an address. Typed permits cover socket lifetime and complete r
 handlers, including response attempts. Fixed-label readable denial summaries exclude request
 data and credentials. Independent review, full source-bound acceptance, final ordinary tests,
 26 same-image browser cases and real proxy/quota/logging proofs pass. Exact source attribution
-is recorded in the [release record](releases.md#v0353--2026-10-25). See [ADR 0024](decisions/0024-peer-admission.md).
+is recorded in the [release record](releases.md#v0353--2026-10-25). Artist PR #123 is preserved in
+the same release: the new image passes 6,791 web tests, 26 native cases and fourteen separate
+renderer/artist cases; Rust inputs and the server binary remain unchanged. See [ADR 0024](decisions/0024-peer-admission.md).
 
 ## Finding dispositions and proposed solutions
 

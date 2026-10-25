@@ -34,11 +34,11 @@ The repository gate checks that both local Cargo packages and their dependency a
 
 ### Release preparation helper
 
-Stage the candidate notes under `CHANGELOG.md`'s Unreleased heading, then preview the bounded
-version preparation with:
+Stage the candidate notes under `CHANGELOG.md`'s Unreleased heading. Set `NEXT_VERSION` to the
+chosen newer product version and `RELEASE_DATE` to its `YYYY-MM-DD` date, then preview:
 
 ```sh
-node scripts/prepare-release.mjs --version 0.3.61 --date 2026-10-26
+node scripts/prepare-release.mjs --version "$NEXT_VERSION" --date "$RELEASE_DATE"
 ```
 
 The default is a dry run. Add `--write` only after reviewing the plan; it updates the Cargo

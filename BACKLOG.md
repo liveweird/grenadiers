@@ -13,14 +13,10 @@ repeated approval for routine implementation choices. Entries are not delivery-d
 ## Current delivery — Claude review
 
 - [next] **ENG-REVIEW — finish the remaining agreed review work before CPU mode.** The user confirmed
-  this priority on 2026-10-25. The published source baseline is v0.3.63; detailed delivered
+  this priority on 2026-10-25. The published source baseline is v0.3.64; detailed delivered
   evidence and finding dispositions belong in the [quality-review record](docs/quality-review.md),
   not this backlog. Preserve privacy, exhaustive masks, coverage floors and local-first
   verification. Current release lanes and remaining accepted scope are:
-  - **REV-PIPELINE (v0.3.64):** finish cache proof, integration, independent review and
-    publication for the optional release helper, pinned platform checks, dependency cache and
-    static OCI metadata. Helper checks on macOS/Linux are recorded; those checks do not prove
-    the cache or complete the release.
   - **REV-CSS (v0.3.65):** integrate, image-test, review and publish the semantic-color change.
     The 252-declaration replacement and full web gate are recorded; release acceptance remains.
   - **REV-ITEM-SPEC (v0.3.66):** complete exact-image integration and publication of the

@@ -4,6 +4,37 @@ This archive preserves the older release records originally maintained in
 [`docs/releases.md`](../releases.md). Records remain in their original order; the current
 release procedure and current release record stay in the [release guide](../releases.md).
 
+## v0.3.63 — 2026-10-25
+
+[v0.3.63](https://github.com/liveweird/grenadiers/releases/tag/v0.3.63) separates authentication
+from the nine sequenced commands before dispatch. Authenticated dispatch now accepts a private
+sequenced type, preserving high-water advancement before semantic checks, error correlation,
+quotas, admission ownership and every close sequence. Gameplay and diagnostics share the same
+five-second per-frame send policy; whole final-delivery sequences retain their independent outer
+budget. No wire, schema, replay, dependency or client behavior changes.
+
+Independent review and focused real-socket regressions pass, including all nine pre-auth command
+variants, semantic-failure sequence consumption, reauthentication closure and distinct counters.
+Fresh source-bound Rust acceptance at `c8cc672812ea04d74a074a9570c9f473bd91dd62` completes every
+4,194,304 mask in debug, release and official coverage in 428.571s with zero retries. Each ordinary
+profile passes 930 core / 307 server tests plus two doctests; four existing performance cases
+remain ignored. Coverage is 17,514/18,719 lines (93.56%) at the 90% floor. Rustfmt, Clippy,
+runner/repository checks and [Linux units](https://github.com/liveweird/grenadiers/actions/runs/40237196707) pass.
+
+Integrated image source `c50773d764ea0fd897de809de746719f9a7cde8e` has identical Rust inputs and
+the unchanged v0.3.62 web tree. Accepted image is
+`sha256:efa9be5a847ed7334388b1129a6be980e5df5fe25c72fc3d7d7620bc9dfc87f9`.
+The image passes eight native Compose cases and eight Kubernetes cases, with exact image,
+security/probes/resources/origin/CSP/cache and readiness checks. A fresh pinned image scan reports
+zero fixable HIGH/CRITICAL findings. Reuse v0.3.62 web acceptance and unchanged dependency audits.
+
+Localhost:8085 serves the accepted image. Runtime security, health/readiness, CSP/cache and exact
+HTML/JavaScript/atlas equality with accepted unchanged assets pass, plus one fresh native
+authentication smoke. Temporary acceptance resources are removed. Control is
+`.local-checkpoints/runtime/compose-v0.3.63.yaml`; `rollback-v0.3.62.yaml` retains the prior image.
+There is no migration. Core admission argument grouping and other remaining review work stay
+separate; CPU implementation remains deferred.
+
 ## v0.3.62 — 2026-10-25
 
 [v0.3.62](https://github.com/liveweird/grenadiers/releases/tag/v0.3.62) removes 120 copied mock

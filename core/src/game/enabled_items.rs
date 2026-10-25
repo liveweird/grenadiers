@@ -1,183 +1,40 @@
-/// Compact set of item kinds enabled for a round.
-#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
-pub struct EnabledItems(u32);
+macro_rules! define_enabled_items {
+    ($(($variant:ident, $bit:literal, $constant:ident, $contains:ident),)*) => {
+        /// Compact set of item kinds enabled for a round.
+        #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+        pub struct EnabledItems(u32);
 
-impl EnabledItems {
-    pub const EMPTY: Self = Self(0);
-    pub const KICK: Self = Self(1 << 0);
-    pub const PUNCH: Self = Self(1 << 1);
-    pub const BRACELET: Self = Self(1 << 2);
-    pub const WALL_PASS: Self = Self(1 << 3);
-    pub const HEART: Self = Self(1 << 4);
-    pub const REMOTE_BOMB: Self = Self(1 << 5);
-    pub const PIERCING_BOMB: Self = Self(1 << 6);
-    pub const POWER_BOMB: Self = Self(1 << 7);
-    pub const LANDMINE: Self = Self(1 << 8);
-    pub const SHIELD: Self = Self(1 << 9);
-    pub const STOPWATCH: Self = Self(1 << 10);
-    pub const INVISIBILITY_CLOAK: Self = Self(1 << 11);
-    pub const GOLDEN_FLAME: Self = Self(1 << 12);
-    pub const SHORT_FUSE: Self = Self(1 << 13);
-    pub const DIARRHEA: Self = Self(1 << 14);
-    pub const SLOW_FOOT: Self = Self(1 << 15);
-    pub const SHORT_FLAME: Self = Self(1 << 16);
-    pub const LONG_FUSE: Self = Self(1 << 17);
-    pub const REVERSE_CONTROLS: Self = Self(1 << 18);
-    pub const INVISIBLE_BOMBS: Self = Self(1 << 19);
-    pub const OIL_BARREL: Self = Self(1 << 20);
-    pub const TELEPORTER: Self = Self(1 << 21);
-    pub const HEART_AND_SHIELD: Self = Self(Self::HEART.0 | Self::SHIELD.0);
-    pub const HEART_AND_GOLDEN_FLAME: Self = Self(Self::HEART.0 | Self::GOLDEN_FLAME.0);
-    pub const SHIELD_AND_GOLDEN_FLAME: Self = Self(Self::SHIELD.0 | Self::GOLDEN_FLAME.0);
-    pub const ALL: Self = Self(
-        Self::KICK.0
-            | Self::PUNCH.0
-            | Self::BRACELET.0
-            | Self::WALL_PASS.0
-            | Self::HEART.0
-            | Self::REMOTE_BOMB.0
-            | Self::PIERCING_BOMB.0
-            | Self::POWER_BOMB.0
-            | Self::LANDMINE.0
-            | Self::SHIELD.0
-            | Self::STOPWATCH.0
-            | Self::INVISIBILITY_CLOAK.0
-            | Self::GOLDEN_FLAME.0
-            | Self::SHORT_FUSE.0
-            | Self::DIARRHEA.0
-            | Self::SLOW_FOOT.0
-            | Self::SHORT_FLAME.0
-            | Self::LONG_FUSE.0
-            | Self::REVERSE_CONTROLS.0
-            | Self::INVISIBLE_BOMBS.0
-            | Self::OIL_BARREL.0
-            | Self::TELEPORTER.0,
-    );
+        impl EnabledItems {
+            pub const EMPTY: Self = Self(0);
+            $(pub const $constant: Self = Self(1 << $bit);)*
+            pub const HEART_AND_SHIELD: Self = Self(Self::HEART.0 | Self::SHIELD.0);
+            pub const HEART_AND_GOLDEN_FLAME: Self =
+                Self(Self::HEART.0 | Self::GOLDEN_FLAME.0);
+            pub const SHIELD_AND_GOLDEN_FLAME: Self =
+                Self(Self::SHIELD.0 | Self::GOLDEN_FLAME.0);
+            pub const ALL: Self = Self(0 $(| Self::$constant.0)*);
 
-    #[must_use]
-    pub const fn bits(self) -> u32 {
-        self.0
-    }
+            #[must_use]
+            pub const fn bits(self) -> u32 {
+                self.0
+            }
 
-    #[must_use]
-    pub const fn from_bits(bits: u32) -> Option<Self> {
-        if bits & !Self::ALL.0 == 0 {
-            Some(Self(bits))
-        } else {
-            None
+            #[must_use]
+            pub const fn from_bits(bits: u32) -> Option<Self> {
+                if bits & !Self::ALL.0 == 0 { Some(Self(bits)) } else { None }
+            }
+
+            $(
+                #[must_use]
+                pub const fn $contains(self) -> bool {
+                    self.0 & Self::$constant.0 != 0
+                }
+            )*
         }
-    }
-
-    #[must_use]
-    pub const fn contains_heart(self) -> bool {
-        self.0 & Self::HEART.0 != 0
-    }
-
-    #[must_use]
-    pub const fn contains_kick(self) -> bool {
-        self.0 & Self::KICK.0 != 0
-    }
-
-    #[must_use]
-    pub const fn contains_punch(self) -> bool {
-        self.0 & Self::PUNCH.0 != 0
-    }
-
-    #[must_use]
-    pub const fn contains_bracelet(self) -> bool {
-        self.0 & Self::BRACELET.0 != 0
-    }
-
-    #[must_use]
-    pub const fn contains_wall_pass(self) -> bool {
-        self.0 & Self::WALL_PASS.0 != 0
-    }
-
-    #[must_use]
-    pub const fn contains_remote_bomb(self) -> bool {
-        self.0 & Self::REMOTE_BOMB.0 != 0
-    }
-
-    #[must_use]
-    pub const fn contains_piercing_bomb(self) -> bool {
-        self.0 & Self::PIERCING_BOMB.0 != 0
-    }
-
-    #[must_use]
-    pub const fn contains_power_bomb(self) -> bool {
-        self.0 & Self::POWER_BOMB.0 != 0
-    }
-
-    #[must_use]
-    pub const fn contains_landmine(self) -> bool {
-        self.0 & Self::LANDMINE.0 != 0
-    }
-
-    #[must_use]
-    pub const fn contains_shield(self) -> bool {
-        self.0 & Self::SHIELD.0 != 0
-    }
-
-    #[must_use]
-    pub const fn contains_stopwatch(self) -> bool {
-        self.0 & Self::STOPWATCH.0 != 0
-    }
-
-    #[must_use]
-    pub const fn contains_invisibility_cloak(self) -> bool {
-        self.0 & Self::INVISIBILITY_CLOAK.0 != 0
-    }
-
-    #[must_use]
-    pub const fn contains_golden_flame(self) -> bool {
-        self.0 & Self::GOLDEN_FLAME.0 != 0
-    }
-
-    #[must_use]
-    pub const fn contains_short_fuse(self) -> bool {
-        self.0 & Self::SHORT_FUSE.0 != 0
-    }
-
-    #[must_use]
-    pub const fn contains_diarrhea(self) -> bool {
-        self.0 & Self::DIARRHEA.0 != 0
-    }
-
-    #[must_use]
-    pub const fn contains_slow_foot(self) -> bool {
-        self.0 & Self::SLOW_FOOT.0 != 0
-    }
-
-    #[must_use]
-    pub const fn contains_short_flame(self) -> bool {
-        self.0 & Self::SHORT_FLAME.0 != 0
-    }
-
-    #[must_use]
-    pub const fn contains_long_fuse(self) -> bool {
-        self.0 & Self::LONG_FUSE.0 != 0
-    }
-
-    #[must_use]
-    pub const fn contains_reverse_controls(self) -> bool {
-        self.0 & Self::REVERSE_CONTROLS.0 != 0
-    }
-
-    #[must_use]
-    pub const fn contains_invisible_bombs(self) -> bool {
-        self.0 & Self::INVISIBLE_BOMBS.0 != 0
-    }
-
-    #[must_use]
-    pub const fn contains_teleporter(self) -> bool {
-        self.0 & Self::TELEPORTER.0 != 0
-    }
-
-    #[must_use]
-    pub const fn contains_oil_barrel(self) -> bool {
-        self.0 & Self::OIL_BARREL.0 != 0
-    }
+    };
 }
+
+crate::item_spec::with_item_spec!(define_enabled_items);
 
 #[cfg(test)]
 mod tests {
@@ -253,5 +110,65 @@ mod tests {
         assert_eq!(observed, 4_194_304);
         assert_eq!(EnabledItems::ALL.bits(), 4_194_303);
         assert_eq!(EnabledItems::default(), EnabledItems::EMPTY);
+    }
+
+    #[test]
+    fn each_single_item_bit_enables_only_its_matching_predicate() {
+        type ItemCheck = (EnabledItems, fn(EnabledItems) -> bool);
+        let items: [ItemCheck; 22] = [
+            (EnabledItems::KICK, EnabledItems::contains_kick),
+            (EnabledItems::PUNCH, EnabledItems::contains_punch),
+            (EnabledItems::BRACELET, EnabledItems::contains_bracelet),
+            (EnabledItems::WALL_PASS, EnabledItems::contains_wall_pass),
+            (EnabledItems::HEART, EnabledItems::contains_heart),
+            (
+                EnabledItems::REMOTE_BOMB,
+                EnabledItems::contains_remote_bomb,
+            ),
+            (
+                EnabledItems::PIERCING_BOMB,
+                EnabledItems::contains_piercing_bomb,
+            ),
+            (EnabledItems::POWER_BOMB, EnabledItems::contains_power_bomb),
+            (EnabledItems::LANDMINE, EnabledItems::contains_landmine),
+            (EnabledItems::SHIELD, EnabledItems::contains_shield),
+            (EnabledItems::STOPWATCH, EnabledItems::contains_stopwatch),
+            (
+                EnabledItems::INVISIBILITY_CLOAK,
+                EnabledItems::contains_invisibility_cloak,
+            ),
+            (
+                EnabledItems::GOLDEN_FLAME,
+                EnabledItems::contains_golden_flame,
+            ),
+            (EnabledItems::SHORT_FUSE, EnabledItems::contains_short_fuse),
+            (EnabledItems::DIARRHEA, EnabledItems::contains_diarrhea),
+            (EnabledItems::SLOW_FOOT, EnabledItems::contains_slow_foot),
+            (
+                EnabledItems::SHORT_FLAME,
+                EnabledItems::contains_short_flame,
+            ),
+            (EnabledItems::LONG_FUSE, EnabledItems::contains_long_fuse),
+            (
+                EnabledItems::REVERSE_CONTROLS,
+                EnabledItems::contains_reverse_controls,
+            ),
+            (
+                EnabledItems::INVISIBLE_BOMBS,
+                EnabledItems::contains_invisible_bombs,
+            ),
+            (EnabledItems::OIL_BARREL, EnabledItems::contains_oil_barrel),
+            (EnabledItems::TELEPORTER, EnabledItems::contains_teleporter),
+        ];
+        for (selected_index, (selected, _)) in items.iter().enumerate() {
+            let enabled = EnabledItems::from_bits(selected.bits()).unwrap();
+            for (candidate_index, (_, contains)) in items.iter().enumerate() {
+                assert_eq!(contains(enabled), selected_index == candidate_index);
+            }
+        }
+        for (_, contains) in items {
+            assert!(!contains(EnabledItems::EMPTY));
+        }
+        assert_eq!(EnabledItems::from_bits(1 << 22), None);
     }
 }

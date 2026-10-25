@@ -1,6 +1,7 @@
 import { selectClassicSettings } from '../tests/support/settings'
 import { setTimeout as delay } from 'node:timers/promises'
 import { expect, test, type Page, type Route, type TestInfo } from '@playwright/test'
+import { observeBrowserPolicy } from '../tests/support/browser-policy'
 import { visibleActor, latestSnapshot, observeGame, type ObservedGame } from '../tests/support/duel'
 import { readViewportFits } from '../tests/support/diagnostic-phases'
 import { runGuardedLegacyAxeAudit } from '../tests/support/guarded-axe-audit'
@@ -93,6 +94,7 @@ test('a browser restores its full live world and action floor before a fenced ta
   let cleanupFailed = false
   let cleanupFailure: unknown
   try {
+    const policies = await Promise.all(contexts.map(observeBrowserPolicy))
     const pages = await Promise.all(contexts.map((context) => context.newPage()))
     await Promise.all(pages.map(installTransportProbe))
     await Promise.all(pages.map((page, index) => diagnostics.observePage(
@@ -212,6 +214,7 @@ test('a browser restores its full live world and action floor before a fenced ta
       await auditRecoveryPage(page, index, games[0], { diagnostics, captureProfile }, testInfo)
     }
     expect(games[0].commands.filter((command) => command.type === 'resumeRoom')).toHaveLength(4)
+    expect(policies.flatMap((policy) => policy.violations)).toEqual([])
   } catch (error) {
     testFailed = true
     testFailure = error
@@ -245,6 +248,7 @@ test('two offline tabs stop at the recovery deadline while session requests are 
   const releases: (() => void)[] = []
   const games: ObservedGame[] = []
   try {
+    const policies = await Promise.all(contexts.map(observeBrowserPolicy))
     const pages = await Promise.all(contexts.map((context) => context.newPage()))
     await Promise.all(pages.map(installTransportProbe))
     games.push(...pages.map(observeGame))
@@ -265,6 +269,7 @@ test('two offline tabs stop at the recovery deadline while session requests are 
     expect(games.map((game) => game.sockets)).toEqual(counts)
     expect(games.map((game) => game.commands.filter((command) => command.type === 'resumeRoom').length)).toEqual([0, 0])
     await assertPublicOnly(pages)
+    expect(policies.flatMap((policy) => policy.violations)).toEqual([])
   } catch (error) {
     await attachPublicSummary(testInfo, games)
     throw error

@@ -27,6 +27,11 @@ canonical JSON is identical; the test deliberately makes no promise about compre
 The checked-in transparent PNG and stable-ID JSON pair passes source and runtime validation in the
 actual browser pipeline, retaining 91 baseline frames and excluding four reserved entries.
 
+## Scenario: workbench Export button downloads the validated runtime pack
+
+The visible Export runtime pack control performs the browser download path after validation. Four
+download events expose the canonical atlas PNG and JSON plus the overview and preview PNGs.
+
 ## Scenario: workbench captures desktop and 320px reduced-motion proofs with one bounded RGBA texture
 
 The English desktop and Polish 320-pixel reduced-motion workbenches are captured. The preview uses

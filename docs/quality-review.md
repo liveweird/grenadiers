@@ -50,7 +50,7 @@ callbacks and late responses cannot revive it. Per-socket flood closure remains 
 **SEC-04, partial / SEC-10:** global nosniff, frame-denial and referrer headers cover API,
 static and fallback responses. HTML revalidates; recognized eight-character Vite hashes use
 immutable caching, including hashes containing hyphens. API/WebSocket no-store is preserved.
-Strict CSP still requires compatible validator/style handling and is not enabled by this change.
+That initial v0.3.50 change did not enable CSP; the v0.3.52 candidate follows below.
 
 **DOC-01/02/04/14, partial:** the current verification policy and release procedures are now
 short entry points. Dated verification and older release records live in `docs/history/`, with
@@ -114,8 +114,8 @@ release; no retry, timeout increase or production hook is introduced.
 time into self-contained ESM, preserving schema, semantic/privacy and complete ordered error
 behavior. Generation/drift and executable-syntax checks guard the artifacts; archived compilers
 remain tested. The measured candidate bundle is 333,442 JavaScript gzip bytes versus 357,324 in
-v0.3.50. CSP is not enforced yet: Pixi's static compatibility path, Mantine styles and actual
-HTTP/WS policy behavior still require browser proof before server delivery.
+v0.3.50. That release did not enforce CSP; compatible Pixi/style and transport trials follow
+in the v0.3.52 candidate.
 The integrated web gate passes 6,789 tests across 88 files; coverage is
 90.95/89.49/89.78/93.32% (statements/branches/functions/lines). Lint, contract and validator drift,
 unused-code checks, TypeScript and the production build pass. Subsequent comment-only
@@ -123,6 +123,15 @@ portability corrections pass 13 focused tests and fresh lint/drift/build checks.
 match across checkout depths, invocation directories and pinned Linux. Real development and
 production browser flows pass, as do eight native cases each in Compose and Kubernetes.
 Localhost:8085 now serves the accepted v0.3.51 image; see the [release record](releases.md#v0351--2026-10-25).
+
+**FE-07 / SEC-04, v0.3.52 candidate:** shared Pixi static compatibility initializes before every
+renderer. A static enforcing response policy restricts scripts/connections to self while allowing
+Mantine's inline styles; diagnostic policies permit their real atlas fetches. Header tests cover
+fallbacks, HEAD, revalidation and untrusted request sources. Pre-header enforced browser trials
+cover HTTP/WS, HTTPS/WSS, actual blocked execution/connections, WebGL/context restoration,
+artist upload/export, controls, audio and reconnect. The relay reset/config regressions pass;
+final real server-header acceptance remains integration work. See
+[ADR 0023](decisions/0023-browser-content-security-policy.md).
 
 ## Finding dispositions and proposed solutions
 
@@ -160,7 +169,7 @@ Related IDs are grouped to avoid treating one architectural problem as several i
 | FE-04 | Mechanism confirmed; performance cost unmeasured. | Profile 20 Hz gameplay and commit durations first. Change arena/HUD subscriptions only for a demonstrated budget problem. |
 | FE-05 | Agree; first batch implements this. | Localized accessible error recovery with explicit actions and component/parity tests. |
 | FE-06 | Type-hygiene observation, not a broad defect. | Replace the isolated double cast when touching binding construction; no repository-wide type rewrite. |
-| FE-07, SEC-04/10 | Basic headers/cache and standalone validators implemented. | Live browser compilation is removed in v0.3.51 with parity/drift guards. Verify Pixi's static path, Mantine styles and same-origin connections under an enforced policy before adding server CSP. |
+| FE-07, SEC-04/10 | Basic headers/cache and standalone validators implemented; compatible CSP is the v0.3.52 candidate. | Pixi static paths, Mantine styles and same-origin HTTP/WS + HTTPS/WSS pass enforced trials. Complete real server-header acceptance; retain the explicit style exception and browser-support boundary. |
 | FE-08 | Selector counts do not describe the current web tests. | Current web tests use role queries rather than test IDs. Assess E2E selectors in their own scope; a selector ratio alone is not an accessibility defect. Retain actual accessibility audits. |
 | FE-09/10 | Agree, lower-priority consistency work. | Consolidate copied scene mocks, preserving specialized renderer/atlas mocks; introduce semantic color tokens incrementally. |
 | TS-01/02 | Agree on cost; sampling is a policy change. | Measure a structured fast feedback suite while retaining exhaustive acceptance. Compare fault detection before proposing a new cadence; keep current assertions and exhaustive coverage meanwhile. |

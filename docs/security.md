@@ -16,8 +16,19 @@ Every response sets `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, 
 static files use `Cache-Control: no-cache`; successful non-HTML files with the configured
 eight-character Vite content-hash suffix under `/assets/` use a one-year immutable cache policy.
 API and WebSocket responses retain their stricter `no-store` policy. Content Security Policy
-remains future work because the current Ajv runtime compilation and Mantine integration need an
-explicit compatible policy.
+is enforced on every response, including HTML HEAD and conditional responses. Scripts and
+connections are restricted to the same origin; inline scripts, string compilation, workers,
+objects, base URLs, form submissions and framing are denied. Images allow self and data URLs;
+fonts and media fetches are denied. `style-src 'self' 'unsafe-inline'` deliberately supports
+Mantine's style elements and attributes; nonce-only styling remains separate work.
+
+Live schema validation is precompiled. Pixi's shared `pixi.js/unsafe-eval` compatibility import
+uses static implementations despite its name; the script policy does not allow `unsafe-eval`.
+Diagnostic pages use corresponding meta policies; `frame-ancestors` requires an HTTP header.
+HTTP/WS and HTTPS/WSS same-origin behavior is verified in Chromium. Other browsers still need
+acceptance before claiming support. The policy never derives permissions from Host, Origin or
+forwarding headers. The incoming Origin allowlist remains a separate transport boundary.
+See [CSP browser acceptance](../e2e/README.md#content-security-policy-acceptance).
 
 The diagnostic and gameplay WebSockets use separate connection and upgrade-admission budgets.
 Both apply the same strict Origin validation and bound message/frame size, inbound rate, idle time,

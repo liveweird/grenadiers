@@ -1,3 +1,4 @@
+import '../src/game/arena/pixiCompatibility'
 import { Application, Container, Rectangle, Texture } from 'pixi.js'
 import {
   createArtCatalog, createAtlasRegions, type ArtManifest, type AtlasRegions,

@@ -2,6 +2,7 @@ import { selectClassicSettings } from '../tests/support/settings'
 import { setTimeout as delay } from 'node:timers/promises'
 import AxeBuilder from '@axe-core/playwright'
 import { expect, test } from '@playwright/test'
+import { observeBrowserPolicy } from '../tests/support/browser-policy'
 import { startBrowserStallDiagnostics } from '../tests/support/browser-stall-diagnostics'
 import { latestSnapshot, observeGame } from '../tests/support/duel'
 import { expectVisibility, launchNaturalVisibilityBrowser } from '../tests/support/visibility'
@@ -14,6 +15,9 @@ test('native sound gesture creates Web Audio cues and mute prevents later playba
     const peerContext = await launched.browser.newContext({
       viewport: { width: 320, height: 844 }, reducedMotion: 'reduce',
     })
+    const policies = await Promise.all([
+      observeBrowserPolicy(launched.context), observeBrowserPolicy(peerContext),
+    ])
     const one = launched.context.pages()[0]
     await one.setViewportSize({ width: 1440, height: 1050 })
     const two = await peerContext.newPage()
@@ -109,6 +113,7 @@ test('native sound gesture creates Web Audio cues and mute prevents later playba
       .toBe('running')
     await delay(250)
     expect(nodes).toHaveLength(hiddenNodes)
+    expect(policies.flatMap((policy) => policy.violations)).toEqual([])
   } finally {
     try { await launched.close() } finally {
       diagnostics.stop()

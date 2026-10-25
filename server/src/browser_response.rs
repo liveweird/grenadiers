@@ -2,7 +2,7 @@ use axum::{
     body::Body,
     http::{
         HeaderName, HeaderValue, Request, Response,
-        header::{CACHE_CONTROL, CONTENT_TYPE},
+        header::{CACHE_CONTROL, CONTENT_SECURITY_POLICY, CONTENT_TYPE},
     },
     middleware::Next,
 };
@@ -13,6 +13,13 @@ const REFERRER_POLICY: HeaderName = HeaderName::from_static("referrer-policy");
 
 const NO_CACHE: HeaderValue = HeaderValue::from_static("no-cache");
 const IMMUTABLE: HeaderValue = HeaderValue::from_static("public, max-age=31536000, immutable");
+// Static sources: never derive script/connect permissions from request or forwarding headers.
+const BROWSER_POLICY: &str = concat!(
+    "default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; ",
+    "connect-src 'self'; img-src 'self' data:; font-src 'none'; media-src 'none'; ",
+    "worker-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; ",
+    "frame-ancestors 'none'"
+);
 
 pub(crate) async fn headers_and_cache(request: Request<Body>, next: Next) -> Response<Body> {
     let path = request.uri().path().to_owned();
@@ -21,6 +28,10 @@ pub(crate) async fn headers_and_cache(request: Request<Body>, next: Next) -> Res
     headers.insert(X_CONTENT_TYPE_OPTIONS, HeaderValue::from_static("nosniff"));
     headers.insert(X_FRAME_OPTIONS, HeaderValue::from_static("DENY"));
     headers.insert(REFERRER_POLICY, HeaderValue::from_static("no-referrer"));
+    headers.insert(
+        CONTENT_SECURITY_POLICY,
+        HeaderValue::from_static(BROWSER_POLICY),
+    );
 
     if !headers.contains_key(CACHE_CONTROL) {
         let html = headers

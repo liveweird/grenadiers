@@ -2,17 +2,13 @@ import { Button, Checkbox, Group, NativeSelect, SimpleGrid, Text, Title } from '
 import { useMemo, useState } from 'react'
 import { sameGameSettings } from './clientProtocol'
 import type { GameCopy } from './locale'
-import type { GameSettings, RoomView, Seat } from '../v11/schema'
+import { ITEM_IDS, type GameSettings, type RoomView, type Seat } from '../v11/schema'
 
 const SPEEDS = [0, 1, 2, 3, 4] as const
 const TURN_ASSISTS = [64, 128, 192, 256] as const
 const WINS = [1, 2, 3, 4, 5, 6, 7, 8, 9] as const
 const FUSES = [60, 90, 120, 150, 180, 210, 240, 270, 300] as const
-const AVAILABLE_ITEMS = [
-  'kick', 'punch', 'bracelet', 'wallPass', 'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch', 'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse',
-  'reverseControls', 'invisibleBombs', 'oilBarrel', 'teleporter',
-] as const
-type AvailableItem = typeof AVAILABLE_ITEMS[number]
+type AvailableItem = typeof ITEM_IDS[number]
 const DEFAULT_SETTINGS: GameSettings = {
   startingSpeedLevel: 0, turnAssistUnits: 256, winsToFinish: 3, bombFuseTicks: 180,
   enabledItems: ['heart'],
@@ -68,7 +64,7 @@ export function GameplaySettingsPanel({ room, youSeat, pending, copy, onApply }:
   const toggleItem = (item: AvailableItem, enabled: boolean): void => {
     setDraft((current) => ({
       ...current,
-      enabledItems: AVAILABLE_ITEMS.filter((candidate) =>
+      enabledItems: ITEM_IDS.filter((candidate) =>
         candidate === item ? enabled : current.enabledItems.includes(candidate)),
     }))
   }
@@ -109,7 +105,7 @@ export function GameplaySettingsPanel({ room, youSeat, pending, copy, onApply }:
           }))} />
       </SimpleGrid>
       <Text className="settings-note" size="xs">{copy.settings.speedCap}</Text>
-      {AVAILABLE_ITEMS.map((item) => <ItemSetting key={item} item={item}
+      {ITEM_IDS.map((item) => <ItemSetting key={item} item={item}
         visible={room.availableItems.includes(item)} checked={draft.enabledItems.includes(item)}
         disabled={!editable || pending} copy={copy}
         onChange={(enabled) => toggleItem(item, enabled)} />)}

@@ -498,3 +498,28 @@ export interface ManualAction {
 }
 
 export type V10ErrorCode = "invalidMessage" | "authenticationFailed" | "connectionInUse" | "notAuthenticated" | "alreadyAuthenticated" | "alreadyInRoom" | "notInRoom" | "roomNotFound" | "roomFull" | "staleRoom" | "invalidPhase" | "staleSequence" | "duplicateAction" | "rateLimited" | "capacityReached" | "resumeRejected" | "staleSettings" | "settingsLocked"
+
+export const ITEM_IDS = [
+  "kick",
+  "punch",
+  "bracelet",
+  "wallPass",
+  "heart",
+  "remoteBomb",
+  "piercingBomb",
+  "powerBomb",
+  "landmine",
+  "shield",
+  "stopwatch",
+  "invisibilityCloak",
+  "goldenFlame",
+  "shortFuse",
+  "diarrhea",
+  "slowFoot",
+  "shortFlame",
+  "longFuse",
+  "reverseControls",
+  "invisibleBombs",
+  "oilBarrel",
+  "teleporter"
+] as const satisfies readonly ItemId[]

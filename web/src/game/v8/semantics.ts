@@ -1,4 +1,4 @@
-import type { GameState, RoomView, WireEvent } from './schema'
+import { ITEM_IDS, type GameState, type ItemId, type RoomView, type WireEvent } from './schema'
 import {
   effectSemanticError,
   expandedProfileSemanticErrorFor,
@@ -9,11 +9,12 @@ import {
 export type GameplayV8SemanticError = GameplayProfileSemanticError
 export { effectSemanticError, itemSetSemanticError }
 
-const supportedItems = [
+const activeItemIds = new Set<ItemId>([
   'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield',
   'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame',
   'longFuse', 'reverseControls',
-] as const
+] satisfies readonly ItemId[])
+const supportedItems = ITEM_IDS.filter((item) => activeItemIds.has(item))
 
 export function expandedProfileSemanticError(
   room: RoomView, state: GameState | null, events: readonly WireEvent[] = [],

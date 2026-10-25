@@ -2,7 +2,7 @@ import Ajv, { type ErrorObject, type ValidateFunction } from 'ajv'
 import gameplayV9Schema from '../../../../api/gameplay-v9.schema.json'
 import { effectSemanticError, expandedProfileSemanticErrorFor, itemSetSemanticError,
   type GameplayProfileSemanticError } from '../validation/profileSemantics'
-import type { GameServerMessage, GameState, RoomView } from './schema'
+import { ITEM_IDS, type GameServerMessage, type GameState, type ItemId, type RoomView } from './schema'
 import { freezeSemanticError } from './freezeValidation'
 
 type GameplayV9SemanticError = GameplayProfileSemanticError | 'invalidFrozenState'
@@ -20,11 +20,12 @@ function resolveServerValidator(): ValidateFunction<GameServerMessage> {
 }
 const validateServer = resolveServerValidator()
 
-const supportedItems = [
+const activeItemIds = new Set<ItemId>([
   'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch',
   'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame',
   'longFuse', 'reverseControls', 'invisibleBombs',
-] as const
+] satisfies readonly ItemId[])
+const supportedItems = ITEM_IDS.filter((item) => activeItemIds.has(item))
 
 function stateSemanticError(
   state: GameState | null, stopwatchEnabled: boolean,

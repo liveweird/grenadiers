@@ -3,7 +3,7 @@ import gameplayV10Schema from '../../../../api/gameplay-v10.schema.json'
 import { freezeSemanticError } from '../validation/freezeSemantics'
 import { effectSemanticError, expandedProfileSemanticErrorFor, itemSetSemanticError,
   type GameplayProfileSemanticError } from '../validation/profileSemantics'
-import type { GameServerMessage, GameState, RoomView } from './schema'
+import { ITEM_IDS, type GameServerMessage, type GameState, type ItemId, type RoomView } from './schema'
 
 type GameplayV10SemanticError = GameplayProfileSemanticError
   | 'invalidFrozenState' | 'invalidTeleportMarker'
@@ -18,11 +18,12 @@ const resolved = ajv.getSchema<GameServerMessage>(schemaReference)
 if (!resolved) throw new Error(`AJV did not resolve ${schemaReference}`)
 const validateServer: ValidateFunction<GameServerMessage> = resolved
 
-const supportedItems = [
+const activeItemIds = new Set<ItemId>([
   'kick', 'punch', 'bracelet', 'wallPass', 'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch',
   'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame',
   'longFuse', 'reverseControls', 'invisibleBombs', 'teleporter',
-] as const
+] satisfies readonly ItemId[])
+const supportedItems = ITEM_IDS.filter((item) => activeItemIds.has(item))
 
 function stateSemanticError(
   state: GameState | null, room: RoomView,

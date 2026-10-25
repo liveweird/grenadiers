@@ -101,6 +101,12 @@ fresh full Rust coverage and any corresponding floor recalibration remain pendin
 audits report zero vulnerabilities after a clean install. The URI parser is a production
 dependency, so its patch is included in build/contract and final web verification.
 
+**Integration test reliability:** full acceptance exposed a race in the new real-socket flood
+test: per-frame flushing could either allow refill or race the server's close. Buffer a
+policy-derived 151-frame burst, flush once and bound the complete exchange by the existing
+two-second deadline. The test still requires an actual rate-limit error, policy close and permit
+release; no retry, timeout increase or production hook is introduced.
+
 ## Finding dispositions and proposed solutions
 
 “Agree” accepts the observed issue, not every implementation proposed in the review.

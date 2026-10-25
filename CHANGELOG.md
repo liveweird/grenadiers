@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+## 0.3.54 — 2026-10-25
+
+### Changed
+
+- Apply the source-size guard to all current and future `e2e/*-tests` trees, with boundary,
+  discovery and exclusion regressions wired into the repository gate.
+- Aggregate simulation test declarations without changing production modules, private access,
+  full test names or the executed test inventory.
+
 ## 0.3.53 — 2026-10-25
 
 ### Added

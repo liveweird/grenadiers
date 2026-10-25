@@ -55,9 +55,9 @@ That initial v0.3.50 change did not enable CSP; v0.3.52 follows below.
 **DOC-01/02/04/14, partial:** the current verification policy and release procedures are now
 short entry points. Dated verification and older release records live in `docs/history/`, with
 their facts and headings preserved and relative links rebased. Known incoming fragments retain
-aliases. The latest release is v0.3.53, adding bounded peer admission and the merged arena redraw.
-Testing, deployment and backlog consolidation remain separate work, including reconciliation
-with the pending artist PR before changing its overlapping documents.
+aliases. The latest release is v0.3.54, extending test guardrails after peer admission and the arena redraw.
+Testing, deployment and backlog consolidation remain separate work. Preserve the merged artist
+changes and reconcile any concurrent screenshot documentation before editing overlapping files.
 
 **API-08/09, TS-07 and BE-10/TL-04:** API lint now enforces closed object schemas, camelCase
 properties and shared problem responses, with a narrow documented upgrade exception and
@@ -148,6 +148,14 @@ is recorded in the [release record](releases.md#v0353--2026-10-25). Artist PR #1
 the same release: the new image passes 6,791 web tests, 26 native cases and fourteen separate
 renderer/artist cases; Rust inputs and the server binary remain unchanged. See [ADR 0024](decisions/0024-peer-admission.md).
 
+**BE-08 / CX-04/05, v0.3.54:** the source-size guard discovers every current/future
+`e2e/*-tests` directory, preserving existing limits/exclusions; eight fixture regressions run in
+the repository gate. Simulation test declarations move to a test-only include with the exact
+same 926 test names and private namespace. Repository, ordinary debug/release, Linux, image
+scan and Compose/Kubernetes acceptance pass; all fifteen production module declarations retain
+their names, paths and order. Broader fixture sharing
+remains separate work.
+
 ## Finding dispositions and proposed solutions
 
 “Agree” accepts the observed issue, not every implementation proposed in the review.
@@ -172,7 +180,7 @@ Related IDs are grouped to avoid treating one architectural problem as several i
 | BE-04 | Agree; bucket implementation shared. | Independent caller budgets and clock/lock behavior are preserved. Consolidate repeated transport timeout definitions separately; no generic clock abstraction is introduced. |
 | BE-05, TS-14 | Agree for active startup/configuration paths. | Centralize typed parsing and defaults; test invalid configuration and empty-origin behavior without logging credentials. Revisit archived low-coverage code with the retention decision. |
 | BE-06, CX-06 | Agree; safe exemption cleanup implemented. | Removed the unused restoration method and stale exemptions; gated test-only hooks and preserved production cooldown observations. Admission-argument refactoring remains separate. |
-| BE-08, CX-04/05 | Agree on test wiring/helper repetition. | Move simulation test-module declarations into a test aggregator; consolidate genuinely equivalent fixtures; extend source-size discovery to item E2E directories. Keep responsibility-based production modules. |
+| BE-08, CX-04/05 | Agree; aggregation and source-size coverage shipped in v0.3.54. | Test-only declaration aggregation preserves every test name and production module. Dynamic item-tree discovery and eight wired regressions close the guard gap; consolidate genuinely equivalent fixtures separately. |
 | BE-09, CX-07 | Mixed: maintainability concerns, not proven reachable panics. | Replace transport-state assumptions with typed authenticated commands where useful; split orchestration around domain operations. Audit narrowing conversions before changing public APIs. |
 | BE-10, TL-04 | Agree; rationale and grouping implemented. | Cargo patch, per-workspace npm minor/patch and Actions minor/patch groups preserve individual pinned RNG, Docker, major and security proposals. Document compatibility review; no version ignores or automatic merges. |
 | BE-11, TS-09/10 | Mostly intentional tests/benchmarks. | Use virtual time where it preserves the real socket deadline being tested. Keep performance tests separate from ordinary suites. Do not replace useful waits or ignored benchmarks solely to improve counts. |
@@ -224,11 +232,10 @@ Related IDs are grouped to avoid treating one architectural problem as several i
 
 ## Next bounded batches
 
-1. Complete remaining test-wiring, simulation test aggregation and source-size guard coverage.
-2. Complete contributor/history separation and share E2E fixture/configuration helpers.
-3. Apply the retention policy to historical protocol reduction and a single item specification.
-4. Measure bundle/render and lock/shutdown behavior before performance changes.
-5. Continue compatible dependency/tooling hardening and capability/replay operational decisions.
+1. Consolidate repeated testing/deployment documentation and share E2E context/configuration helpers.
+2. Apply the retention policy to historical protocol reduction and a single item specification.
+3. Measure bundle/render and lock/shutdown behavior before performance changes.
+4. Continue compatible dependency/tooling hardening and capability/replay operational decisions.
 
 Public-hosting topology, durable replay export and any reduced exhaustive-test cadence need
 explicit requirements. None blocks the isolated fixes in the first batch. Fresh profiling,

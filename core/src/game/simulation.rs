@@ -240,159 +240,27 @@ mod actions;
 #[path = "simulation_actor.rs"]
 mod actor_state;
 #[cfg(test)]
-#[path = "bomb_order_acceptance_tests.rs"]
-mod bomb_order_acceptance_tests;
-#[cfg(test)]
-#[path = "bomb_trigger_tests.rs"]
-mod bomb_trigger_tests;
-#[cfg(test)]
-#[path = "bracelet_geometry_proof_tests.rs"]
-mod bracelet_geometry_proof_tests;
-#[cfg(test)]
-#[path = "bracelet_history_proof_tests.rs"]
-mod bracelet_history_proof_tests;
-#[cfg(test)]
-#[path = "bracelet_phase_proof_tests.rs"]
-mod bracelet_phase_proof_tests;
-#[cfg(test)]
-#[path = "bracelet_test_support.rs"]
-mod bracelet_test_support;
-#[cfg(test)]
-#[path = "bracelet_tests.rs"]
-mod bracelet_tests;
-#[cfg(test)]
-#[path = "simulation_constructor_tests.rs"]
-mod constructor_tests;
+include!("simulation_test_modules.rs");
 mod contacts;
-#[cfg(test)]
-#[path = "damage_tests.rs"]
-mod damage_tests;
 #[path = "simulation_explosions.rs"]
 mod explosion_step;
-#[cfg(test)]
-#[path = "flame_tests.rs"]
-mod flame_tests;
-#[cfg(test)]
-#[path = "golden_flame_tests.rs"]
-mod golden_flame_tests;
-#[cfg(test)]
-#[path = "simulation/invisibility_cloak_acceptance_tests.rs"]
-mod invisibility_cloak_acceptance_tests;
-#[cfg(test)]
-#[path = "item_foundation_tests.rs"]
-mod item_foundation_tests;
-#[cfg(test)]
-#[path = "kick_validation_tests.rs"]
-mod kick_validation_tests;
-#[cfg(test)]
-#[path = "simulation/landmine_acceptance_tests.rs"]
-mod landmine_acceptance_tests;
-#[cfg(test)]
-#[path = "simulation/landmine_route_tests.rs"]
-mod landmine_route_tests;
-#[cfg(test)]
-mod landmine_tests;
 #[path = "simulation_observations.rs"]
 mod observations;
-#[cfg(test)]
-#[path = "oil_proof_tests.rs"]
-mod oil_proof_tests;
 #[path = "simulation_oil.rs"]
 mod oil_step;
 #[path = "simulation_pickups.rs"]
 mod pickup_step;
-#[cfg(test)]
-#[path = "pickup_tests.rs"]
-mod pickup_tests;
-#[cfg(test)]
-#[path = "placement_tests.rs"]
-mod placement_tests;
-#[cfg(test)]
-#[path = "projection_tests.rs"]
-mod projection_tests;
 #[path = "simulation_punch.rs"]
 mod punch;
-#[cfg(test)]
-#[path = "punch_claim_proof_tests.rs"]
-mod punch_claim_proof_tests;
-#[cfg(test)]
-#[path = "punch_cooldown_proof_tests.rs"]
-mod punch_cooldown_proof_tests;
-#[cfg(test)]
-#[path = "punch_interaction_proof_tests.rs"]
-mod punch_interaction_proof_tests;
-#[cfg(test)]
-#[path = "punch_rollback_tests.rs"]
-mod punch_rollback_tests;
-#[cfg(test)]
-#[path = "punch_target_tests.rs"]
-mod punch_target_tests;
-#[cfg(test)]
-#[path = "punch_tests.rs"]
-mod punch_tests;
-#[cfg(test)]
-#[path = "punch_validation_tests.rs"]
-mod punch_validation_tests;
-#[cfg(test)]
-#[path = "punch_wave_proof_tests.rs"]
-mod punch_wave_proof_tests;
-#[cfg(test)]
-#[path = "punch_wave_tests.rs"]
-mod punch_wave_tests;
-#[cfg(test)]
-#[path = "round_result_tests.rs"]
-mod round_result_tests;
-#[cfg(test)]
-#[path = "short_fuse_tests.rs"]
-mod short_fuse_tests;
 #[path = "simulation_shove.rs"]
 mod shove;
 #[path = "shove_geometry.rs"]
 mod shove_geometry;
 #[path = "simulation_step.rs"]
 mod step;
-#[cfg(test)]
-#[path = "step_event_tests.rs"]
-mod step_event_tests;
 #[path = "simulation_stopwatch.rs"]
 mod stopwatch;
-#[cfg(test)]
-#[path = "stopwatch_interaction_tests.rs"]
-mod stopwatch_interaction_tests;
-#[cfg(test)]
-#[path = "simulation/stopwatch_route_tests.rs"]
-mod stopwatch_route_tests;
-#[cfg(test)]
-#[path = "stopwatch_tests.rs"]
-mod stopwatch_tests;
 #[path = "simulation_teleport.rs"]
 mod teleport;
-#[cfg(test)]
-#[path = "simulation/teleporter_acceptance_tests.rs"]
-mod teleporter_acceptance_tests;
-#[cfg(test)]
-#[path = "simulation/teleporter_route_tests.rs"]
-mod teleporter_route_tests;
-#[cfg(test)]
-#[path = "teleporter_tests.rs"]
-mod teleporter_tests;
-#[cfg(test)]
-#[path = "simulation_test_support.rs"]
-mod test_support;
-#[cfg(test)]
-#[path = "simulation_tests.rs"]
-mod tests;
-#[cfg(test)]
-#[path = "upgrade_tests.rs"]
-mod upgrade_tests;
 #[path = "simulation_validation.rs"]
 mod validation;
-#[cfg(test)]
-#[path = "simulation/wall_pass_contract_tests.rs"]
-mod wall_pass_contract_tests;
-#[cfg(test)]
-#[path = "simulation/wall_pass_route_tests.rs"]
-mod wall_pass_route_tests;
-#[cfg(test)]
-#[path = "wall_pass_tests.rs"]
-mod wall_pass_tests;

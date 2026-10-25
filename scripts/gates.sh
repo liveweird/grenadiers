@@ -13,6 +13,7 @@ require_lock() {
 }
 repository() {
   node scripts/check-repository.mjs
+  node --test scripts/source-size.test.mjs
   node --test scripts/ci-workflow-contract.test.mjs
   node --test scripts/check-installed-dependencies.test.mjs
 }

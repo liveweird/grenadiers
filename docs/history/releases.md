@@ -4,6 +4,42 @@ This archive preserves the older release records originally maintained in
 [`docs/releases.md`](../releases.md). Records remain in their original order; the current
 release procedure and current release record stay in the [release guide](../releases.md).
 
+## v0.3.51 — 2026-10-25
+
+[v0.3.51](https://github.com/liveweird/grenadiers/releases/tag/v0.3.51) precompiles the live
+browser validators, preserving schemas, complete errors and semantic/privacy checks.
+Application inputs match `a7ac65b36592ad8871a1a78f64f4e9adcc24eb36`; the source tag includes
+release documentation. Localhost:8085 serves the accepted image
+`sha256:cb7be95e9b5c6c291d8c828579b3de5facff9efb466d5a61e4dcdcadd2c7c76f`.
+
+The full web gate passes 6,789 tests / 88 files at `31219c0`, with coverage
+90.95/89.49/89.78/93.32% (statements/branches/functions/lines). Later portability corrections
+change generated comments only; 13 focused tests, lint, Knip, drift, TypeScript and fresh
+production builds pass on the final generator. Exact artifacts match across checkout depths,
+invocation directories and pinned Linux. Compressed JavaScript falls from 357,324 to 333,442
+bytes; CSS remains 36,292 bytes, within unchanged budgets. Independent review is clear.
+
+Actual Chromium development and production flows validate live diagnostic welcome/pong and
+gameplay admission. Sixteen native cases pass without retries: the default eight each in
+Docker and Kubernetes on the same image. Kubernetes retains base security, probes and resource
+limits. Strict schema checks and the pinned image scan pass, with zero fixable HIGH/CRITICAL
+findings under the existing scanner policy. Isolated acceptance services are removed.
+
+Rust source, wire contracts and external dependencies are unchanged from v0.3.50. Reuse its
+full exhaustive/coverage acceptance; Linux debug/release units additionally pass at `b366958`,
+whose Rust inputs equal the final candidate. Do not treat these reused results as a new full
+Rust run. Docker's clean dependency install reports zero npm vulnerabilities.
+
+Promotion health/readiness/index are 200. Served HTML/JavaScript/atlas match the image; the
+atlas still matches canonical source. Runtime hardening remains intact. Durable deployment
+control is `.local-checkpoints/runtime/compose-v0.3.51.yaml`; v0.3.50 is retained for rollback.
+Reload browser tabs after upgrading; matches remain process-local. No database migration is
+needed. CSP enforcement and the separate artist redraw remain pending.
+
+Runtime attribution correction recorded with v0.3.52: the eight Docker cases used direct
+`docker run`; the separately verified localhost promotion used Docker Compose. The original
+source tag remains unchanged.
+
 ## v0.3.50 — 2026-10-25
 
 [v0.3.50](https://github.com/liveweird/grenadiers/releases/tag/v0.3.50) hardens transport,

@@ -3,6 +3,7 @@ import { chromium, expect, test, type Browser, type BrowserContext, type Page } 
 import { readViewportFits } from '../tests/support/diagnostic-phases'
 import { runGuardedLegacyAxeAudit } from '../tests/support/guarded-axe-audit'
 import { startBrowserStallDiagnostics } from '../tests/support/browser-stall-diagnostics'
+import { observeBrowserPolicy, type BrowserPolicyObservation } from '../tests/support/browser-policy'
 import {
   assertCapturePreservedState, assertFixedState, attachLifecycle, guardStaticOrigin, matrixCell,
   finishLifecycle, initializeLifecycle, readFixedState, warmLifecycle, type LifecycleEvidence,
@@ -33,6 +34,7 @@ test('real Pixi renderer lifecycle matrix cell remains observable during full-pa
     const timestamps: LifecycleTimestamp[] = [{ stage: 'started', nodeAt: performance.now() }]
     const states: LifecycleEvidence = { preCapture: {}, postCapture: {} }
     const guards: RequestGuard[] = []
+    const policies: BrowserPolicyObservation[] = []
     const contexts: BrowserContext[] = []
     let launched: Browser | undefined
     let primaryFailed = false
@@ -54,6 +56,9 @@ test('real Pixi renderer lifecycle matrix cell remains observable during full-pa
         serviceWorkers: 'block',
       })
       contexts.push(peerContext)
+      policies.push(...await Promise.all([
+        observeBrowserPolicy(primaryContext), observeBrowserPolicy(peerContext),
+      ]))
       const contextPair: ContextPair = {
         primary: primaryContext,
         peer: peerContext,
@@ -101,6 +106,7 @@ test('real Pixi renderer lifecycle matrix cell remains observable during full-pa
       assertFixedState(second[0], cell.primary, 'primary')
       assertFixedState(second[1], cell.peer, 'peer')
       expect(guards.flatMap((guard) => guard.unexpected)).toEqual([])
+      expect(policies.flatMap((policy) => policy.violations)).toEqual([])
       await auditAndMeasure(pages, diagnostics)
       await diagnostics.screenshot(pages.primary, 1, () => pages.primary.screenshot({
         path: testInfo.outputPath(`${cell.name.replace('/', '-')}-primary-full-page.png`),
@@ -116,6 +122,7 @@ test('real Pixi renderer lifecycle matrix cell remains observable during full-pa
       assertCapturePreservedState(second[0], postCapture[0])
       assertCapturePreservedState(second[1], postCapture[1])
       expect(guards.flatMap((guard) => guard.unexpected)).toEqual([])
+      expect(policies.flatMap((policy) => policy.violations)).toEqual([])
       timestamps.push({ stage: 'capture-completed', nodeAt: performance.now() })
     } catch (error) {
       primaryFailed = true

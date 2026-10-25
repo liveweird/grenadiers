@@ -6,7 +6,7 @@ use std::{
 
 use axum::{
     body::Body,
-    http::{Request, Response, StatusCode, header},
+    http::{Method, Request, Response, StatusCode, header},
 };
 use http_body_util::BodyExt;
 use tower::ServiceExt;
@@ -47,6 +47,20 @@ fn assert_browser_headers(response: &Response<Body>) {
     assert_eq!(response.headers()["x-content-type-options"], "nosniff");
     assert_eq!(response.headers()["x-frame-options"], "DENY");
     assert_eq!(response.headers()["referrer-policy"], "no-referrer");
+    assert_eq!(
+        response.headers()[header::CONTENT_SECURITY_POLICY],
+        concat!(
+            "default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; ",
+            "connect-src 'self'; img-src 'self' data:; font-src 'none'; media-src 'none'; ",
+            "worker-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; ",
+            "frame-ancestors 'none'"
+        )
+    );
+    assert!(
+        !response
+            .headers()
+            .contains_key("content-security-policy-report-only")
+    );
 }
 
 async fn body_text(response: Response<Body>) -> String {
@@ -216,6 +230,41 @@ async fn html_conditional_revalidation_keeps_security_and_no_cache_headers() {
             .to_bytes()
             .is_empty()
     );
+    fs::remove_dir_all(directory).unwrap();
+}
+
+#[tokio::test]
+async fn html_head_and_fallback_policy_does_not_trust_request_sources() {
+    let directory = fixture_directory();
+    let router = app(state(), Some(directory.clone()));
+    for path in ["/", "/rooms/demo"] {
+        for method in [Method::GET, Method::HEAD] {
+            let response = router
+                .clone()
+                .oneshot(
+                    Request::builder()
+                        .method(method.clone())
+                        .uri(path)
+                        .header(header::HOST, "untrusted.example:9999")
+                        .header(header::ORIGIN, "https://untrusted.example")
+                        .header("forwarded", "host=untrusted.example;proto=https")
+                        .header("x-forwarded-host", "untrusted.example")
+                        .header("x-forwarded-proto", "https")
+                        .body(Body::empty())
+                        .unwrap(),
+                )
+                .await
+                .unwrap();
+            assert_eq!(response.status(), StatusCode::OK);
+            assert_browser_headers(&response);
+            assert_eq!(response.headers()[header::CACHE_CONTROL], "no-cache");
+            if method == Method::HEAD {
+                assert!(body_text(response).await.is_empty());
+            } else {
+                assert!(body_text(response).await.contains("fresh index"));
+            }
+        }
+    }
     fs::remove_dir_all(directory).unwrap();
 }
 

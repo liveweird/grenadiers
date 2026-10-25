@@ -154,7 +154,12 @@ builds. Parity tests compare complete ordered errors with the original compilati
 generated output rejects executable imports/evaluation while allowing inert helper metadata.
 Generated MJS is excluded narrowly from handwritten lint rules; its adjacent declarations are
 checked by TypeScript/drift checks and ignored only by Knip's unused-file discovery. Handwritten
-tests and helpers remain in scope. This change does not yet enforce CSP; see [ADR 0022](decisions/0022-standalone-browser-validation.md).
+tests and helpers remain in scope; see [ADR 0022](decisions/0022-standalone-browser-validation.md).
+The compatible enforced browser policy uses Pixi's static implementations and retains Mantine's
+inline styles. Run the separate HTTP/WS and HTTPS/WSS `test:csp` acceptance with the documented
+[isolated backend, certificate and relay setup](../e2e/README.md#content-security-policy-acceptance).
+That suite requires the real server header without trial injection; diagnostic suites also observe
+policy violations before navigation through drawing, context restoration and artist export.
 
 Vitest also discovers `web/scripts/*.test.mjs`: generator tests compile representative
 TypeScript assignments, API linter tests prove rule enforcement, and Kubernetes checker tests

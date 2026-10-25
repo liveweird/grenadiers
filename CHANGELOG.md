@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+## 0.3.52 — 2026-10-25
+
+### Added
+
+- Enforce a static browser content policy after real HTTP/WS and HTTPS/WSS trials, using
+  Pixi's static compatibility implementations and preserving Mantine's inline styling.
+- Add executable CSP probes, directive-only observers and an isolated TLS browser relay;
+  verify diagnostic context restoration and actual artist export-button downloads.
+
 ## 0.3.51 — 2026-10-25
 
 ### Changed

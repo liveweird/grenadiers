@@ -1,6 +1,7 @@
 import { selectClassicSettings } from '../tests/support/settings'
 import AxeBuilder from '@axe-core/playwright'
 import { expect, test, type Page } from '@playwright/test'
+import { observeBrowserPolicy } from '../tests/support/browser-policy'
 import { visibleActor, latestSnapshot, observeGame, type ObservedGame } from '../tests/support/duel'
 
 async function changeKey(page: Page, action: string, key: string): Promise<void> {
@@ -21,6 +22,7 @@ test('custom controls persist and drive only their assigned native keys', async 
   ])
   const games: ObservedGame[] = []
   try {
+    const policies = await Promise.all(contexts.map(observeBrowserPolicy))
     const [one, two] = await Promise.all(contexts.map((context) => context.newPage()))
     games.push(observeGame(one), observeGame(two))
     await Promise.all([one, two].map((page) => page.goto('/')))
@@ -81,6 +83,7 @@ test('custom controls persist and drive only their assigned native keys', async 
     await expect(one.getByText(/East: Right arrow \/ D/)).toBeVisible()
     expect(await one.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false)
     await one.screenshot({ path: testInfo.outputPath('controls-reset-desktop.png'), fullPage: true })
+    expect(policies.flatMap((policy) => policy.violations)).toEqual([])
   } catch (error) {
     await testInfo.attach('controls-public-summary', {
       contentType: 'application/json',

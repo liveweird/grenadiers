@@ -1,3 +1,4 @@
+import '../src/game/arena/pixiCompatibility'
 import { Application, Graphics } from 'pixi.js'
 import { GROUND, paintTerrain, TILE } from '../src/game/arena/drawing'
 import { ArenaScene } from '../src/game/arena/scene'

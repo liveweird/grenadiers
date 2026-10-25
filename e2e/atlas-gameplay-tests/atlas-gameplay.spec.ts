@@ -1,4 +1,9 @@
 import { expect, test } from '@playwright/test'
+import { observeBrowserPolicy, type BrowserPolicyObservation } from '../tests/support/browser-policy'
+
+let browserPolicy: BrowserPolicyObservation
+test.beforeEach(async ({ context }) => { browserPolicy = await observeBrowserPolicy(context) })
+test.afterEach(() => { expect(browserPolicy.violations).toEqual([]) })
 
 type Result = {
   resolution: number

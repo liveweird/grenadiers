@@ -2,6 +2,47 @@
 
 These Playwright tests treat the deployed app as a black box. They require a complete stack at `http://127.0.0.1:8085`, or at `E2E_BASE_URL`; the test command never starts or mocks a server.
 
+## Content security policy acceptance
+
+`npm run test:csp` checks real enforced headers, live HTTP/WS and HTTPS/WSS, and blocked
+execution/connections/framing. From `e2e/`, build and start an isolated complete app at
+`http://127.0.0.1:8086`, leaving the normal game on 8085:
+
+```sh
+docker build -t grenadiers-csp-check:local ..
+docker run -d --rm --name grenadiers-csp-check --init --read-only --cap-drop ALL \
+  --security-opt no-new-privileges:true -p 127.0.0.1:8086:8085 \
+  -e ALLOWED_ORIGINS=http://127.0.0.1:8086,https://127.0.0.1:8443 grenadiers-csp-check:local
+```
+
+Generate a short-lived local test certificate (OpenSSL is a test prerequisite):
+
+```sh
+mkdir -p .playwright/csp-tls
+openssl req -x509 -newkey rsa:2048 -nodes -days 2 -subj /CN=localhost \
+  -addext subjectAltName=DNS:localhost,IP:127.0.0.1 \
+  -keyout .playwright/csp-tls/key.pem -out .playwright/csp-tls/cert.pem
+node scripts/local-browser-proxy.mjs --upstream http://127.0.0.1:8086 \
+  --https-port 8443 --cert .playwright/csp-tls/cert.pem --key .playwright/csp-tls/key.pem
+```
+
+In another terminal, run:
+
+```sh
+E2E_CSP_HTTP_URL=http://127.0.0.1:8086 \
+E2E_CSP_HTTPS_URL=https://127.0.0.1:8443 npm run test:csp
+```
+
+The loopback-only relay preserves Origin and WebSocket upgrades; it is test tooling, not a
+public deployment proxy. Only the HTTPS project accepts the local test certificate. Actual
+execution fails if `E2E_CSP_HTTPS_URL` is missing. The optional `--policy-file` relay flag is
+for pre-header development trials; omit it for final acceptance of the server's own header.
+Stop the relay afterward, run `docker stop grenadiers-csp-check`, and remove
+`.playwright/csp-tls/` and the test image when no longer needed.
+Never commit test keys or record credential-bearing WebSocket frames.
+
+## General suite
+
 Run `npm ci`, `npm run install:browsers`, then `npm test`. Every Playwright test title must
 have an exact `## Scenario:` counterpart in the document assigned by
 `scripts/scenario-map.mjs`; one document may explicitly cover multiple specs. The

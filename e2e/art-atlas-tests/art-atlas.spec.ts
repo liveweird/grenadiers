@@ -1,5 +1,10 @@
 import { readFile } from 'node:fs/promises'
-import { expect, test, type Page } from '@playwright/test'
+import { expect, test, type Download, type Page } from '@playwright/test'
+import { observeBrowserPolicy, type BrowserPolicyObservation } from '../tests/support/browser-policy'
+
+let browserPolicy: BrowserPolicyObservation
+test.beforeEach(async ({ context }) => { browserPolicy = await observeBrowserPolicy(context) })
+test.afterEach(() => { expect(browserPolicy.violations).toEqual([]) })
 
 type DiagnosticState = {
   initialized: boolean
@@ -226,6 +231,19 @@ test('committed artist source validates and exports through the browser pipeline
   ])
 })
 
+test('workbench Export button downloads the validated runtime pack', async ({ page }) => {
+  await openWorkbench(page)
+  const downloads: Download[] = []
+  page.on('download', (download) => downloads.push(download))
+  await page.locator('#export').click()
+  await expect(page.locator('#status')).toHaveText('Runtime files prepared for download.')
+  await expect.poll(() => downloads.length).toBe(4)
+  expect(downloads.map((download) => download.suggestedFilename()).sort()).toEqual([
+    'arena-atlas.json', 'arena-atlas.png', 'arena-overview.png', 'arena-preview.png',
+  ])
+  for (const download of downloads) expect(await download.failure()).toBeNull()
+})
+
 test('concurrent exports and reset serialize different sources without mixing files or preview ownership', async ({ page }) => {
   const initial = await openWorkbench(page)
   const result = await page.evaluate(async () => {
@@ -294,6 +312,7 @@ test('workbench captures desktop and 320px reduced-motion proofs with one bounde
       viewport: { width: 320, height: 844 }, reducedMotion: 'reduce', serviceWorkers: 'block',
     })
     try {
+      const mobilePolicy = await observeBrowserPolicy(context)
       const mobile = await context.newPage()
       await openWorkbench(mobile)
       expect(await mobile.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
@@ -303,6 +322,7 @@ test('workbench captures desktop and 320px reduced-motion proofs with one bounde
       await expect(mobile.locator('#source-canvas'))
         .toHaveAttribute('aria-label', 'Edytowalny przezroczysty arkusz źródłowy grafiki')
       await mobile.screenshot({ path: testInfo.outputPath('art-atlas-mobile-pl-reduced.png'), fullPage: true })
+      expect(mobilePolicy.violations).toEqual([])
     } finally {
       await context.close()
     }

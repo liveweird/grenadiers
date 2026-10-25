@@ -1,3 +1,4 @@
+import './pixiCompatibility'
 import { Application } from 'pixi.js'
 import { createAtlasArtwork } from './artAtlas/artwork'
 import { loadArenaAtlas } from './artAtlas/load'

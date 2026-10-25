@@ -10,6 +10,7 @@
   },
   "scripts": {
     "test": "playwright test",
+    "test:csp": "node --test scripts/local-browser-proxy.test.mjs && playwright test --config playwright.csp.config.ts",
     "test:pickups": "playwright test --config playwright.pickups.config.ts",
     "test:heart": "playwright test --config playwright.heart.config.ts",
     "test:shield": "playwright test --config playwright.shield.config.ts",

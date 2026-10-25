@@ -1,3 +1,4 @@
+import '../src/game/arena/pixiCompatibility'
 import { Application, Container, Sprite } from 'pixi.js'
 import type { ActorDrawing } from '../src/game/arena/actorArt'
 import { createAtlasArtwork } from '../src/game/arena/artAtlas/artwork'

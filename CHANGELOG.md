@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## 0.3.66 — 2026-10-25
+
+### Changed
+
+- Derive reserved item identities, bits, pickup declarations and total mappings from one
+  private specification while preserving generation order, activation subsets and replay values.
+
 ## 0.3.63 — 2026-10-25
 
 ### Changed

@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## 0.3.64 — 2026-10-25
+
+### Added
+
+- Add an optional dry-run-first helper for aligned Cargo versions and dated changelog entries,
+  with validation before writes and no hidden Git, publishing or check execution.
+
 ## 0.3.63 — 2026-10-25
 
 ### Changed

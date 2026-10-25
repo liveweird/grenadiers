@@ -4,65 +4,31 @@ use std::fmt;
 use super::arena::{Arena, Terrain};
 use super::types::{CellId, Tick};
 
-/// A permanent upgrade type carried by a pickup.
-#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
-pub enum PickupKind {
-    BombCapacity,
-    BlastRange,
-    MovementSpeed,
-    Kick,
-    Punch,
-    Bracelet,
-    WallPass,
-    Heart,
-    RemoteBomb,
-    PiercingBomb,
-    PowerBomb,
-    Landmine,
-    Shield,
-    Stopwatch,
-    InvisibilityCloak,
-    GoldenFlame,
-    ShortFuse,
-    Diarrhea,
-    SlowFoot,
-    ShortFlame,
-    LongFuse,
-    ReverseControls,
-    InvisibleBombs,
-    OilBarrel,
-    Teleporter,
+macro_rules! define_pickup_kind {
+    ($(($variant:ident, $bit:literal, $constant:ident, $contains:ident),)*) => {
+        /// A permanent upgrade type carried by a pickup.
+        #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
+        pub enum PickupKind {
+            BombCapacity,
+            BlastRange,
+            MovementSpeed,
+            $($variant,)*
+        }
+
+        impl PickupKind {
+            pub(crate) const fn enabled_by(self, enabled: super::EnabledItems) -> bool {
+                match self {
+                    Self::BombCapacity | Self::BlastRange | Self::MovementSpeed => true,
+                    $(Self::$variant => enabled.$contains(),)*
+                }
+            }
+        }
+    };
 }
 
-impl PickupKind {
-    pub(crate) const fn enabled_by(self, enabled: super::EnabledItems) -> bool {
-        match self {
-            Self::Kick => enabled.contains_kick(),
-            Self::Punch => enabled.contains_punch(),
-            Self::Bracelet => enabled.contains_bracelet(),
-            Self::WallPass => enabled.contains_wall_pass(),
-            Self::Heart => enabled.contains_heart(),
-            Self::RemoteBomb => enabled.contains_remote_bomb(),
-            Self::PiercingBomb => enabled.contains_piercing_bomb(),
-            Self::PowerBomb => enabled.contains_power_bomb(),
-            Self::Landmine => enabled.contains_landmine(),
-            Self::Shield => enabled.contains_shield(),
-            Self::Stopwatch => enabled.contains_stopwatch(),
-            Self::InvisibilityCloak => enabled.contains_invisibility_cloak(),
-            Self::GoldenFlame => enabled.contains_golden_flame(),
-            Self::ShortFuse => enabled.contains_short_fuse(),
-            Self::Diarrhea => enabled.contains_diarrhea(),
-            Self::SlowFoot => enabled.contains_slow_foot(),
-            Self::ShortFlame => enabled.contains_short_flame(),
-            Self::LongFuse => enabled.contains_long_fuse(),
-            Self::ReverseControls => enabled.contains_reverse_controls(),
-            Self::InvisibleBombs => enabled.contains_invisible_bombs(),
-            Self::OilBarrel => enabled.contains_oil_barrel(),
-            Self::Teleporter => enabled.contains_teleporter(),
-            _ => true,
-        }
-    }
+crate::item_spec::with_item_spec!(define_pickup_kind);
 
+impl PickupKind {
     pub(crate) const fn timed_effect(self) -> Option<super::EffectKind> {
         match self {
             Self::Shield => Some(super::EffectKind::Shield),

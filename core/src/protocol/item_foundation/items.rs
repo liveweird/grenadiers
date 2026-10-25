@@ -1,65 +1,27 @@
 use serde::{Deserialize, Deserializer, Serialize, Serializer, de};
 
-const ITEM_COUNT: usize = 22;
-const ALL_ITEM_BITS: u32 = (1 << ITEM_COUNT) - 1;
+macro_rules! define_item_ids {
+    ($(($variant:ident, $bit:literal, $constant:ident, $contains:ident),)*) => {
+        const ITEM_COUNT: usize = [$(stringify!($variant),)*].len();
+        const ALL_ITEM_BITS: u32 = 0 $(| 1 << $bit)*;
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub enum ItemId {
-    Kick,
-    Punch,
-    Bracelet,
-    WallPass,
-    Heart,
-    RemoteBomb,
-    PiercingBomb,
-    PowerBomb,
-    Landmine,
-    Shield,
-    Stopwatch,
-    InvisibilityCloak,
-    GoldenFlame,
-    ShortFuse,
-    Diarrhea,
-    SlowFoot,
-    ShortFlame,
-    LongFuse,
-    ReverseControls,
-    InvisibleBombs,
-    OilBarrel,
-    Teleporter,
+        #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
+        #[serde(rename_all = "camelCase")]
+        pub enum ItemId {
+            $($variant = $bit,)*
+        }
+
+        pub const ALL_ITEMS: [ItemId; ITEM_COUNT] = [$(ItemId::$variant,)*];
+
+        impl ItemId {
+            const fn bit(self) -> u32 {
+                1 << (self as u32)
+            }
+        }
+    };
 }
 
-pub const ALL_ITEMS: [ItemId; ITEM_COUNT] = [
-    ItemId::Kick,
-    ItemId::Punch,
-    ItemId::Bracelet,
-    ItemId::WallPass,
-    ItemId::Heart,
-    ItemId::RemoteBomb,
-    ItemId::PiercingBomb,
-    ItemId::PowerBomb,
-    ItemId::Landmine,
-    ItemId::Shield,
-    ItemId::Stopwatch,
-    ItemId::InvisibilityCloak,
-    ItemId::GoldenFlame,
-    ItemId::ShortFuse,
-    ItemId::Diarrhea,
-    ItemId::SlowFoot,
-    ItemId::ShortFlame,
-    ItemId::LongFuse,
-    ItemId::ReverseControls,
-    ItemId::InvisibleBombs,
-    ItemId::OilBarrel,
-    ItemId::Teleporter,
-];
-
-impl ItemId {
-    const fn bit(self) -> u32 {
-        1 << (self as u32)
-    }
-}
+crate::item_spec::with_item_spec!(define_item_ids);
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize)]
 #[serde(transparent)]
@@ -189,41 +151,26 @@ fn required_weapon<'de, D: Deserializer<'de>>(d: D) -> Result<Option<WeaponId>, 
     Option::deserialize(d)
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub enum PickupKind {
-    BombCapacity,
-    BlastRange,
-    MovementSpeed,
-    Kick,
-    Punch,
-    Bracelet,
-    WallPass,
-    Heart,
-    RemoteBomb,
-    PiercingBomb,
-    PowerBomb,
-    Landmine,
-    Shield,
-    Stopwatch,
-    InvisibilityCloak,
-    GoldenFlame,
-    ShortFuse,
-    Diarrhea,
-    SlowFoot,
-    ShortFlame,
-    LongFuse,
-    ReverseControls,
-    InvisibleBombs,
-    OilBarrel,
-    Teleporter,
+macro_rules! define_pickup_kind {
+    ($(($variant:ident, $bit:literal, $constant:ident, $contains:ident),)*) => {
+        #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+        #[serde(rename_all = "camelCase")]
+        pub enum PickupKind {
+            BombCapacity,
+            BlastRange,
+            MovementSpeed,
+            $($variant,)*
+        }
+    };
 }
+
+crate::item_spec::with_item_spec!(define_pickup_kind);
 
 #[cfg(test)]
 mod tests {
     use serde_json::{Value, json};
 
-    use super::{ItemId, ItemMask, ItemSet, PickupKind};
+    use super::{ALL_ITEMS, ItemId, ItemMask, ItemSet, PickupKind};
     use crate::game::EnabledItems;
     use crate::protocol::item_foundation::projection_items::pickup_item;
 
@@ -331,6 +278,15 @@ mod tests {
         }
         assert_eq!(EnabledItems::ALL.bits(), 4_194_303);
         assert_eq!(ItemMask::new(4_194_303).unwrap().bits(), 4_194_303);
+        assert_eq!(ALL_ITEMS, FIXTURE.map(|(item, _, _, _)| item));
+        assert_eq!(
+            serde_json::to_value(ItemSet::from_mask(ItemMask::new(4_194_303).unwrap())).unwrap(),
+            Value::Array(
+                FIXTURE
+                    .map(|(_, name, _, _)| Value::String(name.to_owned()))
+                    .to_vec()
+            )
+        );
     }
 
     #[test]
@@ -377,5 +333,26 @@ mod tests {
                 Value::Array(expected.clone())
             );
         }
+    }
+
+    #[test]
+    fn retained_protocols_export_the_concrete_foundation_types() {
+        const fn item(value: ItemId) -> ItemId {
+            value
+        }
+        const fn pickup(value: PickupKind) -> PickupKind {
+            value
+        }
+
+        let _ = item(crate::protocol::v7::ItemId::Kick);
+        let _ = item(crate::protocol::v8::ItemId::Kick);
+        let _ = item(crate::protocol::v9::ItemId::Kick);
+        let _ = item(crate::protocol::v10::ItemId::Kick);
+        let _ = item(crate::protocol::v11::ItemId::Kick);
+        let _ = pickup(crate::protocol::v7::PickupKind::BombCapacity);
+        let _ = pickup(crate::protocol::v8::PickupKind::BombCapacity);
+        let _ = pickup(crate::protocol::v9::PickupKind::BombCapacity);
+        let _ = pickup(crate::protocol::v10::PickupKind::BombCapacity);
+        let _ = pickup(crate::protocol::v11::PickupKind::BombCapacity);
     }
 }

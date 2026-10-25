@@ -58,14 +58,22 @@ async fn within<T>(future: impl Future<Output = T>) -> T {
 
 #[test]
 fn blank_database_url_disables_postgres() {
-    assert!(database_pool(None).unwrap().is_none());
-    assert!(database_pool(Some(String::new())).unwrap().is_none());
-    assert!(database_pool(Some(" \t ".to_owned())).unwrap().is_none());
+    assert!(configuration::database_pool(None).unwrap().is_none());
+    assert!(
+        configuration::database_pool(Some(String::new()))
+            .unwrap()
+            .is_none()
+    );
+    assert!(
+        configuration::database_pool(Some(" \t ".to_owned()))
+            .unwrap()
+            .is_none()
+    );
 }
 
 #[tokio::test]
 async fn app_state_configuration_uses_defaults_and_normalizes_overrides() {
-    let defaults = AppState::from_configuration(None, None, None).unwrap();
+    let defaults = AppState::from_configuration(None, None, None, None).unwrap();
     assert_eq!(
         defaults.allowed_origins.as_ref(),
         &DEFAULT_ORIGINS
@@ -79,6 +87,7 @@ async fn app_state_configuration_uses_defaults_and_normalizes_overrides() {
         Some(" https://game.example, ,https://admin.example ".to_owned()),
         Some(" postgres://postgres:postgres@localhost/grenadiers ".to_owned()),
         None,
+        None,
     )
     .unwrap();
     assert_eq!(
@@ -91,7 +100,8 @@ async fn app_state_configuration_uses_defaults_and_normalizes_overrides() {
     assert!(configured.database.is_some());
 
     assert!(
-        AppState::from_configuration(None, Some("not a postgres URL".to_owned()), None).is_err()
+        AppState::from_configuration(None, Some("not a postgres URL".to_owned()), None, None,)
+            .is_err()
     );
 }
 
@@ -213,7 +223,12 @@ async fn start_server(state: AppState) -> (String, JoinHandle<()>) {
     let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
     let address = listener.local_addr().unwrap();
     let task = tokio::spawn(async move {
-        axum::serve(listener, app(state, None)).await.unwrap();
+        axum::serve(
+            listener,
+            app(state, None).into_make_service_with_connect_info::<std::net::SocketAddr>(),
+        )
+        .await
+        .unwrap();
     });
     (format!("ws://{address}/api/v1/ws"), task)
 }

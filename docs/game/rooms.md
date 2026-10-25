@@ -55,8 +55,11 @@ identifiers, not credentials.
 
 The process holds at most 32 rooms. Create, join and resume each have an independent process-global
 burst of 32 operations refilling at eight per second: an aggregate burst of 96 and refill of 24
-operations per second. One operation cannot consume another's allowance. These limits provide
-operation isolation; peer-keyed fairness remains a public-hosting requirement. Each owner has a
+operations per second. One operation cannot consume another's allowance. Additional
+[peer admission](../security.md#peer-identity-and-admission) gives create, join and resume separate
+burst-eight/two-per-second budgets and at most four concurrent admission attempts per peer.
+The connection's resolved peer key remains fixed for its lifetime; it does not bind seat
+capabilities to an address. Each owner has a
 32-command mailbox; slow sockets consume only the
 latest watch update. OS randomness supplies codes and a process ID prefix, with bounded
 collision retries and checked serials. No room state is persisted or shared across replicas.

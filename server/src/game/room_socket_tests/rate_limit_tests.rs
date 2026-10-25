@@ -129,6 +129,43 @@ async fn throttled_unseated_socket_still_closes_and_drains_on_shutdown() {
 }
 
 #[tokio::test]
+async fn peer_room_throttle_is_correlated_and_keeps_the_socket_open() {
+    let state = AppState::without_database([ORIGIN.to_owned()]);
+    let token = issue_token(&state);
+    let (url, server) = start_server(state).await;
+    let mut socket = connect(&url, &token).await;
+
+    for sequence in 1..=8 {
+        send(
+            &mut socket,
+            json!({
+                "type":"resumeRoom", "sequence":sequence,
+                "roomId":"ffffffffffffffffffffffffffffffff",
+                "resumeToken":"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+            }),
+        )
+        .await;
+        assert_eq!(next(&mut socket).await["code"], "resumeRejected");
+    }
+    send(
+        &mut socket,
+        json!({
+            "type":"resumeRoom", "sequence":9,
+            "roomId":"ffffffffffffffffffffffffffffffff",
+            "resumeToken":"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+        }),
+    )
+    .await;
+    assert_eq!(
+        next(&mut socket).await,
+        json!({"type":"error", "code":"rateLimited", "sequence":9})
+    );
+    send(&mut socket, json!({"type":"createRoom", "sequence":10})).await;
+    assert_eq!(next(&mut socket).await["type"], "admitted");
+    server.abort();
+}
+
+#[tokio::test]
 async fn inbound_flood_keeps_policy_close_and_releases_connection_permit() {
     const FLOOD_FRAMES: usize = 151;
 

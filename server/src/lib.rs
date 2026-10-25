@@ -1,13 +1,18 @@
 #![forbid(unsafe_code)]
 
-use std::{collections::HashSet, fmt, path::PathBuf, sync::Arc, time::Duration};
+use std::{
+    collections::HashSet,
+    path::PathBuf,
+    sync::Arc,
+    time::{Duration, Instant},
+};
 
 use axum::{
     Json, Router,
     body::Body,
     extract::State,
     http::{
-        Request, StatusCode, Uri,
+        HeaderMap, Request, StatusCode, Uri,
         header::{ALLOW, CACHE_CONTROL, CONTENT_TYPE},
     },
     middleware,
@@ -15,17 +20,20 @@ use axum::{
     routing::{any, get, post},
 };
 use serde::Serialize;
-use sqlx::{PgPool, postgres::PgPoolOptions};
+use sqlx::PgPool;
 use tokio::{sync::Semaphore, time::timeout};
 
+pub(crate) mod admission;
 mod browser_response;
+mod configuration;
 mod diagnostics;
 mod game;
+pub(crate) mod peer_identity;
 mod rate_limit;
 mod round_seed;
 
+pub use configuration::StartupError;
 use game::{GameRooms, GameSessions, UpgradeLimit, game_websocket, issue_session};
-use round_seed::RoundSeedSource;
 use tower_http::{
     services::{ServeDir, ServeFile},
     trace::TraceLayer,
@@ -52,62 +60,13 @@ pub struct AppState {
     diagnostic_upgrade_limit: Arc<UpgradeLimit>,
     game_sessions: Arc<GameSessions>,
     game_rooms: Arc<GameRooms>,
+    trusted_proxies: Arc<peer_identity::TrustedProxyIps>,
+    gameplay_admission: admission::GameplayAdmission,
+    diagnostic_admission: admission::DiagnosticAdmission,
+    denial_telemetry: Arc<admission::DenialTelemetry>,
 }
 
 impl AppState {
-    #[must_use]
-    pub fn without_database(allowed_origins: impl IntoIterator<Item = String>) -> Self {
-        let round_seed_source = RoundSeedSource::from_optional_path(None)
-            .expect("OS entropy source construction cannot fail");
-        Self {
-            database: None,
-            allowed_origins: Arc::new(allowed_origins.into_iter().collect()),
-            connections: Arc::new(Semaphore::new(MAX_CONNECTIONS)),
-            diagnostic_connections: Arc::new(Semaphore::new(MAX_DIAGNOSTIC_CONNECTIONS)),
-            diagnostic_upgrade_limit: Arc::new(UpgradeLimit::new(std::time::Instant::now())),
-            game_sessions: Arc::new(GameSessions::new(std::time::Instant::now())),
-            game_rooms: GameRooms::new(std::time::Instant::now(), round_seed_source),
-        }
-    }
-
-    pub fn from_environment() -> Result<Self, StartupError> {
-        Self::from_configuration(
-            std::env::var("ALLOWED_ORIGINS").ok(),
-            std::env::var("DATABASE_URL").ok(),
-            std::env::var_os("GAME_ROUND_SEED_FILE").map(PathBuf::from),
-        )
-    }
-
-    fn from_configuration(
-        allowed_origins: Option<String>,
-        database_url: Option<String>,
-        round_seed_file: Option<PathBuf>,
-    ) -> Result<Self, StartupError> {
-        let allowed_origins = allowed_origins.map_or_else(
-            || DEFAULT_ORIGINS.iter().map(ToString::to_string).collect(),
-            |value| {
-                value
-                    .split(',')
-                    .map(str::trim)
-                    .filter(|origin| !origin.is_empty())
-                    .map(ToString::to_string)
-                    .collect()
-            },
-        );
-        let round_seed_source = RoundSeedSource::from_optional_path(round_seed_file.as_deref())
-            .map_err(|_| StartupError::RoundSeed)?;
-        let database = database_pool(database_url).map_err(|_| StartupError::Database)?;
-        Ok(Self {
-            database,
-            allowed_origins: Arc::new(allowed_origins),
-            connections: Arc::new(Semaphore::new(MAX_CONNECTIONS)),
-            diagnostic_connections: Arc::new(Semaphore::new(MAX_DIAGNOSTIC_CONNECTIONS)),
-            diagnostic_upgrade_limit: Arc::new(UpgradeLimit::new(std::time::Instant::now())),
-            game_sessions: Arc::new(GameSessions::new(std::time::Instant::now())),
-            game_rooms: GameRooms::new(std::time::Instant::now(), round_seed_source),
-        })
-    }
-
     pub fn begin_shutdown(&self) {
         self.game_rooms.stop();
     }
@@ -133,47 +92,6 @@ impl AppState {
         .await
         .is_ok()
     }
-}
-
-#[derive(Clone, Copy, PartialEq, Eq)]
-pub enum StartupError {
-    Database,
-    RoundSeed,
-}
-
-impl fmt::Debug for StartupError {
-    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Self::Database => formatter.write_str("StartupError::Database"),
-            Self::RoundSeed => formatter.write_str("StartupError::RoundSeed"),
-        }
-    }
-}
-
-impl fmt::Display for StartupError {
-    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Self::Database => formatter.write_str("database configuration failed"),
-            Self::RoundSeed => formatter.write_str("round seed configuration failed"),
-        }
-    }
-}
-
-impl std::error::Error for StartupError {}
-
-fn database_pool(database_url: Option<String>) -> Result<Option<PgPool>, sqlx::Error> {
-    let Some(database_url) = database_url
-        .as_deref()
-        .map(str::trim)
-        .filter(|url| !url.is_empty())
-    else {
-        return Ok(None);
-    };
-    PgPoolOptions::new()
-        .max_connections(10)
-        .acquire_timeout(READINESS_TIMEOUT)
-        .connect_lazy(database_url)
-        .map(Some)
 }
 
 #[derive(Debug, Serialize)]
@@ -305,6 +223,39 @@ fn with_no_store(mut response: Response) -> Response {
     response
 }
 
+fn resolve_request_peer(
+    transport: peer_identity::TransportPeer,
+    headers: &HeaderMap,
+    state: &AppState,
+    operation: admission::DenialOperation,
+) -> Result<peer_identity::PeerIdentity, peer_identity::PeerIdentityError> {
+    peer_identity::resolve_peer_identity(transport.0, headers, &state.trusted_proxies).inspect_err(
+        |_| {
+            state.denial_telemetry.record(
+                operation,
+                admission::DenialReason::InvalidProxyIdentity,
+                Instant::now(),
+            );
+        },
+    )
+}
+
+fn peer_identity_response(error: peer_identity::PeerIdentityError) -> Response {
+    let (status, title, detail) = match error {
+        peer_identity::PeerIdentityError::Unavailable => (
+            StatusCode::SERVICE_UNAVAILABLE,
+            "Service Unavailable",
+            "Connection identity is unavailable",
+        ),
+        peer_identity::PeerIdentityError::InvalidForwardedFor => (
+            StatusCode::BAD_REQUEST,
+            "Bad Request",
+            "Forwarded client identity is invalid",
+        ),
+    };
+    with_no_store(Problem::new(status, title, detail).response())
+}
+
 async fn no_store_middleware(request: Request<Body>, next: middleware::Next) -> Response {
     with_no_store(next.run(request).await)
 }
@@ -338,6 +289,8 @@ async fn api_method_not_allowed(uri: Uri) -> Response {
 }
 
 #[cfg(test)]
+mod admission_telemetry_tests;
+#[cfg(test)]
 mod browser_response_tests;
 #[cfg(test)]
 mod diagnostics_tests;
@@ -351,6 +304,8 @@ mod game_socket_tests;
 mod http_fallback_tests;
 #[cfg(test)]
 mod round_seed_tests;
+#[cfg(test)]
+mod session_listener_tests;
 #[cfg(test)]
 mod shutdown_tests;
 #[cfg(test)]

@@ -19,6 +19,10 @@ fn deterministic_sessions(now: Instant) -> GameSessions {
     })
 }
 
+fn peer(index: u32) -> PeerKey {
+    PeerKey::Ipv4(std::net::Ipv4Addr::from(0xc000_0200 + index))
+}
+
 #[test]
 fn issues_unique_canonical_tokens_and_refills_at_eight_per_second() {
     let start = Instant::now();
@@ -26,7 +30,10 @@ fn issues_unique_canonical_tokens_and_refills_at_eight_per_second() {
     let mut tokens = Vec::new();
     for index in 0..40 {
         let response = sessions
-            .issue(start + Duration::from_millis(index * 125))
+            .issue_for_peer(
+                peer((index / 16) as u32),
+                start + Duration::from_millis(index * 125),
+            )
             .unwrap();
         assert_eq!(response.token.as_str().len(), 64);
         assert!(
@@ -47,36 +54,38 @@ fn issues_unique_canonical_tokens_and_refills_at_eight_per_second() {
 fn rate_limit_has_burst_of_32_and_refills_fractionally() {
     let start = Instant::now();
     let sessions = deterministic_sessions(start);
-    for _ in 0..32 {
-        sessions.issue(start).unwrap();
+    for index in 0..32 {
+        sessions.issue_for_peer(peer(index / 16), start).unwrap();
     }
     assert!(matches!(
-        sessions.issue(start),
+        sessions.issue_for_peer(peer(2), start),
         Err(SessionIssueError::RateLimited)
     ));
     assert!(matches!(
-        sessions.issue(start + Duration::from_millis(124)),
+        sessions.issue_for_peer(peer(2), start + Duration::from_millis(124)),
         Err(SessionIssueError::RateLimited)
     ));
-    sessions.issue(start + Duration::from_millis(125)).unwrap();
+    sessions
+        .issue_for_peer(peer(2), start + Duration::from_millis(125))
+        .unwrap();
 }
 
 #[test]
 fn out_of_order_captured_time_credits_each_refill_interval_once() {
     let start = Instant::now();
     let sessions = deterministic_sessions(start);
-    for _ in 0..32 {
-        sessions.issue(start).unwrap();
+    for index in 0..32 {
+        sessions.issue_for_peer(peer(index / 16), start).unwrap();
     }
 
     let later = start + Duration::from_millis(125);
-    sessions.issue(later).unwrap();
+    sessions.issue_for_peer(peer(2), later).unwrap();
     assert!(matches!(
-        sessions.issue(start),
+        sessions.issue_for_peer(peer(2), start),
         Err(SessionIssueError::RateLimited)
     ));
     assert!(matches!(
-        sessions.issue(later),
+        sessions.issue_for_peer(peer(2), later),
         Err(SessionIssueError::RateLimited)
     ));
 }
@@ -93,7 +102,7 @@ fn out_of_order_issuance_uses_effective_time_for_expiry() {
     assert_eq!(registry.sessions.len(), 2);
     assert!(registry.sessions.values().all(|state| matches!(
         state,
-        SessionState::Issued { expires_at }
+        SessionState::Issued { expires_at, .. }
             if *expires_at == later + SESSION_LIFETIME
     )));
 }
@@ -104,21 +113,24 @@ fn capacity_is_128_and_expiry_is_inclusive() {
     let sessions = deterministic_sessions(start);
     for index in 0..128 {
         sessions
-            .issue(start + Duration::from_millis(index * 125))
+            .issue_for_peer(
+                peer((index / 16) as u32),
+                start + Duration::from_millis(index * 125),
+            )
             .unwrap();
     }
-    for _ in 0..32 {
+    for index in 0..32 {
         assert!(matches!(
-            sessions.issue(start + Duration::from_secs(16)),
+            sessions.issue_for_peer(peer(8 + index), start + Duration::from_secs(16)),
             Err(SessionIssueError::CapacityReached)
         ));
     }
     assert!(matches!(
-        sessions.issue(start + Duration::from_secs(16)),
+        sessions.issue_for_peer(peer(40), start + Duration::from_secs(16)),
         Err(SessionIssueError::RateLimited)
     ));
     sessions
-        .issue(start + Duration::from_secs(300))
+        .issue_for_peer(peer(0), start + Duration::from_secs(300))
         .expect("sessions expiring exactly now are pruned");
 }
 
@@ -146,15 +158,18 @@ fn concurrent_issuance_never_exceeds_capacity() {
     let sessions = Arc::new(deterministic_sessions(start));
     for index in 0..120 {
         sessions
-            .issue(start + Duration::from_millis(index * 125))
+            .issue_for_peer(
+                peer((index / 16) as u32),
+                start + Duration::from_millis(index * 125),
+            )
             .unwrap();
     }
 
     let issue_at = start + Duration::from_secs(100);
     let handles = (0..32)
-        .map(|_| {
+        .map(|index| {
             let sessions = Arc::clone(&sessions);
-            thread::spawn(move || sessions.issue(issue_at))
+            thread::spawn(move || sessions.issue_for_peer(peer(8 + index), issue_at))
         })
         .collect::<Vec<_>>();
     let issued = handles
@@ -164,7 +179,7 @@ fn concurrent_issuance_never_exceeds_capacity() {
         .count();
     assert_eq!(issued, 8);
     assert!(matches!(
-        sessions.issue(issue_at),
+        sessions.issue_for_peer(peer(100), issue_at),
         Err(SessionIssueError::CapacityReached | SessionIssueError::RateLimited)
     ));
 }
@@ -200,7 +215,7 @@ fn random_failures_consume_rate_limit_without_mutating_existing_session() {
     assert_eq!(registry.sessions.len(), 1);
     assert!(matches!(
         registry.sessions.get(&issued.token),
-        Some(SessionState::Issued { expires_at }) if *expires_at == now + SESSION_LIFETIME
+        Some(SessionState::Issued { expires_at, .. }) if *expires_at == now + SESSION_LIFETIME
     ));
 }
 
@@ -219,6 +234,62 @@ fn claim_is_exclusive_and_lease_drop_permanently_consumes_token() {
         sessions.claim(&issued.token, now),
         Err(SessionClaimError::AuthenticationFailed)
     ));
+}
+
+#[test]
+fn issued_and_claimed_sessions_share_the_minting_peer_quota() {
+    let now = Instant::now();
+    let sessions = Arc::new(deterministic_sessions(now));
+    let mut tokens = Vec::new();
+    for _ in 0..MAX_PEER_SESSIONS {
+        tokens.push(sessions.issue_for_peer(peer(1), now).unwrap().token);
+    }
+    let lease = sessions
+        .claim(&tokens[0], now)
+        .expect("claim preserves mint owner");
+    assert!(matches!(
+        sessions.issue_for_peer(peer(1), now),
+        Err(SessionIssueError::PeerCapacity)
+    ));
+    assert!(sessions.issue_for_peer(peer(2), now).is_ok());
+
+    drop(lease);
+    assert!(sessions.issue_for_peer(peer(1), now).is_ok());
+    assert!(
+        sessions
+            .issue_for_peer(peer(1), now + SESSION_LIFETIME)
+            .is_ok()
+    );
+}
+
+#[test]
+fn concurrent_same_peer_issuance_never_exceeds_peer_quota() {
+    let now = Instant::now();
+    let sessions = Arc::new(deterministic_sessions(now));
+    let start = Arc::new(Barrier::new(33));
+    let handles = (0..32)
+        .map(|_| {
+            let sessions = Arc::clone(&sessions);
+            let start = Arc::clone(&start);
+            thread::spawn(move || {
+                start.wait();
+                sessions.issue_for_peer(peer(7), now)
+            })
+        })
+        .collect::<Vec<_>>();
+    start.wait();
+    let outcomes = handles
+        .into_iter()
+        .map(|handle| handle.join().unwrap())
+        .collect::<Vec<_>>();
+    assert_eq!(outcomes.iter().filter(|result| result.is_ok()).count(), 16);
+    assert_eq!(
+        outcomes
+            .iter()
+            .filter(|result| matches!(result, Err(SessionIssueError::PeerCapacity)))
+            .count(),
+        16
+    );
 }
 
 #[test]

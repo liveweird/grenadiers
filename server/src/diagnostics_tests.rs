@@ -131,17 +131,75 @@ async fn start_server(app_state: AppState) -> (String, JoinHandle<()>) {
     let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
     let address = listener.local_addr().unwrap();
     let task = tokio::spawn(async move {
-        axum::serve(listener, app(app_state, None)).await.unwrap();
+        axum::serve(
+            listener,
+            app(app_state, None).into_make_service_with_connect_info::<std::net::SocketAddr>(),
+        )
+        .await
+        .unwrap();
     });
     (format!("ws://{address}/api/v1/ws"), task)
 }
 
 async fn connect(url: &str) -> ClientSocket {
+    connect_forwarded(url, None).await
+}
+
+async fn connect_forwarded(url: &str, forwarded: Option<&str>) -> ClientSocket {
     let mut request = url.into_client_request().unwrap();
     request
         .headers_mut()
         .insert(header::ORIGIN, ORIGIN.parse().unwrap());
+    if let Some(forwarded) = forwarded {
+        request
+            .headers_mut()
+            .insert("x-forwarded-for", forwarded.parse().unwrap());
+    }
     within(connect_async(request)).await.unwrap().0
+}
+
+#[tokio::test]
+async fn peer_diagnostic_exhaustion_does_not_consume_gameplay_or_another_peer() {
+    let mut app_state = state();
+    app_state.trusted_proxies = std::sync::Arc::new(
+        crate::peer_identity::TrustedProxyIps::parse(Some("127.0.0.1"))
+            .expect("trusted test proxy"),
+    );
+    let (diagnostic_url, server) = start_server(app_state).await;
+    let mut peer_a = Vec::new();
+    for _ in 0..4 {
+        peer_a.push(connect_forwarded(&diagnostic_url, Some("198.51.100.1")).await);
+    }
+    let denied = rejected_handshake_forwarded(&diagnostic_url, "198.51.100.1").await;
+    assert_eq!(denied.status(), StatusCode::TOO_MANY_REQUESTS);
+    tokio::time::sleep(Duration::from_millis(1_050)).await;
+    let capacity = rejected_handshake_forwarded(&diagnostic_url, "198.51.100.1").await;
+    assert_eq!(capacity.status(), StatusCode::SERVICE_UNAVAILABLE);
+
+    let gameplay_url = diagnostic_url.replace("/api/v1/ws", "/api/v1/game/ws");
+    let mut gameplay = connect_forwarded(&gameplay_url, Some("198.51.100.1")).await;
+    gameplay.close(None).await.unwrap();
+    let mut peer_b = connect_forwarded(&diagnostic_url, Some("198.51.100.2")).await;
+    peer_b.close(None).await.unwrap();
+    drop(peer_a);
+    server.abort();
+}
+
+async fn rejected_handshake_forwarded(
+    url: &str,
+    forwarded: &str,
+) -> tokio_tungstenite::tungstenite::http::Response<Option<Vec<u8>>> {
+    let mut request = url.into_client_request().unwrap();
+    request
+        .headers_mut()
+        .insert(header::ORIGIN, ORIGIN.parse().unwrap());
+    request
+        .headers_mut()
+        .insert("x-forwarded-for", forwarded.parse().unwrap());
+    match within(connect_async(request)).await {
+        Err(WebSocketError::Http(response)) => *response,
+        other => panic!("expected HTTP rejection, got {other:?}"),
+    }
 }
 
 #[tokio::test]

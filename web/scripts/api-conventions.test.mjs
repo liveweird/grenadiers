@@ -21,7 +21,7 @@ function cloneContract() {
 }
 
 describe('API-STRUCT-001 lint enforcement', () => {
-  test('accepts the canonical contract, including the exact malformed-upgrade exception', async () => {
+  test('accepts the canonical contract, including both documented upgrade error representations', async () => {
     assert.deepEqual(await errorsFor(cloneContract()), [])
   })
 
@@ -154,15 +154,15 @@ describe('API-STRUCT-001 lint enforcement', () => {
     )))
   })
 
-  test('does not broaden the malformed-upgrade exception to a different schema', async () => {
-    const contract = cloneContract()
-    contract.paths['/api/v1/ws'].get.responses['400']
-      .content['text/plain'].schema.maxLength = 100
-
-    const diagnostics = await errorsFor(contract)
-    assert(diagnostics.some(({ code, message }) => (
-      code === 'error-problem-details'
-      && message.includes('must provide application/problem+json')
-    )))
+  test('requires problem details alongside framework text for both upgrade routes', async () => {
+    for (const path of ['/api/v1/ws', '/api/v1/game/ws']) {
+      const contract = cloneContract()
+      delete contract.paths[path].get.responses['400'].content['application/problem+json']
+      const diagnostics = await errorsFor(contract)
+      assert(diagnostics.some(({ code, message }) => (
+        code === 'error-problem-details'
+        && message.includes('must provide application/problem+json')
+      )), path)
+    }
   })
 })

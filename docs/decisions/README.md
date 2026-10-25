@@ -30,6 +30,7 @@ identifies the active network contract. Check a record's status and later decisi
 | [0021](0021-gameplay-retention.md) | Live protocol support, archived contracts and private replay retention |
 | [0022](0022-standalone-browser-validation.md) | Deterministic standalone validation for live browser messages |
 | [0023](0023-browser-content-security-policy.md) | Enforced browser content policy |
+| [0024](0024-peer-admission.md) | Bounded peer admission and explicit proxy identity |
 
 For a new decision, use the next numeric prefix and a descriptive filename. State the context,
 decision, consequences and acceptance requirements. When replacing an earlier decision, link

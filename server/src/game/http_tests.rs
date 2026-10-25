@@ -1,13 +1,15 @@
 use std::{
     sync::{
-        Arc, Mutex,
+        Arc,
         atomic::{AtomicUsize, Ordering},
     },
     time::{Duration, Instant},
 };
 
 use axum::{
+    Router,
     body::Body,
+    extract::connect_info::MockConnectInfo,
     http::{Request, StatusCode, header},
     response::Response,
 };
@@ -15,15 +17,21 @@ use http_body_util::BodyExt;
 use jsonschema::validator_for;
 use serde_json::{Value, json};
 use tower::ServiceExt;
-use tracing::{Subscriber, field::Visit, span::Attributes};
-use tracing_subscriber::{Layer, layer::SubscriberExt};
 
 use super::*;
+use crate::peer_identity::{PeerKey, TrustedProxyIps};
 
 const ORIGIN: &str = "http://localhost:5177";
 
 fn test_state() -> AppState {
     AppState::without_database([ORIGIN.to_owned()])
+}
+
+fn test_app(state: AppState) -> Router {
+    app(state, None).layer(MockConnectInfo(std::net::SocketAddr::from((
+        [192, 0, 2, 1],
+        1234,
+    ))))
 }
 
 async fn body_json(response: Response) -> Value {
@@ -47,12 +55,21 @@ async fn issue(state: AppState, origin: Option<&str>) -> Response {
     issue_path(state, "/api/v1/game/session", origin).await
 }
 
+async fn issue_forwarded(state: AppState, client: &str) -> Response {
+    let request = Request::post("/api/v1/game/session")
+        .header(header::ORIGIN, ORIGIN)
+        .header("x-forwarded-for", client)
+        .body(Body::empty())
+        .unwrap();
+    test_app(state).oneshot(request).await.unwrap()
+}
+
 async fn issue_path(state: AppState, path: &str, origin: Option<&str>) -> Response {
     let mut request = Request::post(path);
     if let Some(origin) = origin {
         request = request.header(header::ORIGIN, origin);
     }
-    app(state, None)
+    test_app(state)
         .oneshot(request.body(Body::empty()).unwrap())
         .await
         .unwrap()
@@ -84,6 +101,74 @@ async fn session_route_returns_exact_contract_response_without_caching() {
     assert_valid(schema, &body);
     assert_eq!(body.as_object().unwrap().len(), 1);
     assert_eq!(body["token"].as_str().unwrap().len(), 64);
+}
+
+#[tokio::test]
+async fn session_identity_failures_are_typed_and_not_cached() {
+    let request = Request::post("/api/v1/game/session")
+        .header(header::ORIGIN, ORIGIN)
+        .body(Body::empty())
+        .unwrap();
+    let missing = app(test_state(), None).oneshot(request).await.unwrap();
+    assert_problem(
+        missing,
+        StatusCode::SERVICE_UNAVAILABLE,
+        "Connection identity is unavailable",
+    )
+    .await;
+
+    let mut trusted = test_state();
+    trusted.trusted_proxies =
+        Arc::new(TrustedProxyIps::parse(Some("192.0.2.1")).expect("trusted test transport"));
+    let request = Request::post("/api/v1/game/session")
+        .header(header::ORIGIN, ORIGIN)
+        .body(Body::empty())
+        .unwrap();
+    let invalid = test_app(trusted).oneshot(request).await.unwrap();
+    assert_problem(
+        invalid,
+        StatusCode::BAD_REQUEST,
+        "Forwarded client identity is invalid",
+    )
+    .await;
+}
+
+#[tokio::test]
+async fn untrusted_forwarding_cannot_reset_the_direct_peer_budget() {
+    let state = test_state();
+    for index in 0..8 {
+        assert_eq!(
+            issue_forwarded(state.clone(), &format!("198.51.100.{}", index + 1))
+                .await
+                .status(),
+            StatusCode::CREATED
+        );
+    }
+    let denied = issue_forwarded(state, "203.0.113.250").await;
+    assert_eq!(denied.status(), StatusCode::TOO_MANY_REQUESTS);
+    assert_eq!(denied.headers()[header::RETRY_AFTER], "1");
+}
+
+#[tokio::test]
+async fn outstanding_session_quota_is_a_peer_429() {
+    let state = test_state();
+    let peer = PeerKey::Ipv4(std::net::Ipv4Addr::new(192, 0, 2, 1));
+    let base = Instant::now();
+    for index in 0..16 {
+        state
+            .game_sessions
+            .issue_for_peer(peer, base + Duration::from_millis(index * 125))
+            .unwrap();
+    }
+    let response = issue(state, Some(ORIGIN)).await;
+    assert_eq!(response.status(), StatusCode::TOO_MANY_REQUESTS);
+    assert_eq!(response.headers()[header::RETRY_AFTER], "1");
+    assert_problem(
+        response,
+        StatusCode::TOO_MANY_REQUESTS,
+        "Outstanding session limit reached",
+    )
+    .await;
 }
 
 #[tokio::test]
@@ -130,7 +215,7 @@ async fn session_route_rejects_duplicate_origin_and_query_before_entropy() {
     let mut duplicate = Request::post("/api/v1/game/session");
     duplicate = duplicate.header(header::ORIGIN, ORIGIN);
     duplicate = duplicate.header(header::ORIGIN, ORIGIN);
-    let response = app(state.clone(), None)
+    let response = test_app(state.clone())
         .oneshot(duplicate.body(Body::empty()).unwrap())
         .await
         .unwrap();
@@ -143,7 +228,7 @@ async fn session_route_rejects_duplicate_origin_and_query_before_entropy() {
         )
         .body(Body::empty())
         .unwrap();
-    let response = app(state.clone(), None).oneshot(malformed).await.unwrap();
+    let response = test_app(state.clone()).oneshot(malformed).await.unwrap();
     assert_problem(response, StatusCode::FORBIDDEN, "Origin is not allowed").await;
 
     let response = issue_path(
@@ -175,14 +260,18 @@ async fn session_route_rejects_duplicate_origin_and_query_before_entropy() {
 
 #[tokio::test]
 async fn session_route_reports_rate_limit_without_private_values() {
-    let state = test_state();
-    for _ in 0..32 {
+    let mut state = test_state();
+    state.trusted_proxies =
+        Arc::new(TrustedProxyIps::parse(Some("192.0.2.1")).expect("trusted test transport"));
+    for index in 0..32 {
         assert_eq!(
-            issue(state.clone(), Some(ORIGIN)).await.status(),
+            issue_forwarded(state.clone(), &format!("198.51.100.{}", index / 8 + 1))
+                .await
+                .status(),
             StatusCode::CREATED
         );
     }
-    let response = issue(state, Some(ORIGIN)).await;
+    let response = issue_forwarded(state, "198.51.100.5").await;
     assert_eq!(response.status(), StatusCode::TOO_MANY_REQUESTS);
     assert_eq!(response.headers()[header::CACHE_CONTROL], "no-store");
     assert_eq!(response.headers()[header::RETRY_AFTER], "1");
@@ -234,7 +323,10 @@ async fn session_route_reports_capacity_without_exposing_registry_state() {
     }));
     for index in 0..128 {
         sessions
-            .issue(base + Duration::from_millis(index * 125))
+            .issue_for_peer(
+                PeerKey::Ipv4(std::net::Ipv4Addr::from(0xc633_6400 + index as u32 / 16)),
+                base + Duration::from_millis(index * 125),
+            )
             .unwrap();
     }
     let mut state = test_state();
@@ -246,48 +338,4 @@ async fn session_route_reports_capacity_without_exposing_registry_state() {
         "Session capacity reached",
     )
     .await;
-}
-
-#[derive(Clone)]
-struct CapturedFields(Arc<Mutex<Vec<String>>>);
-
-impl<Registry> Layer<Registry> for CapturedFields
-where
-    Registry: Subscriber,
-{
-    fn on_new_span(
-        &self,
-        attributes: &Attributes<'_>,
-        _id: &tracing::span::Id,
-        _context: tracing_subscriber::layer::Context<'_, Registry>,
-    ) {
-        attributes.record(&mut FieldVisitor(Arc::clone(&self.0)));
-    }
-}
-
-struct FieldVisitor(Arc<Mutex<Vec<String>>>);
-
-impl Visit for FieldVisitor {
-    fn record_debug(&mut self, field: &tracing::field::Field, value: &dyn std::fmt::Debug) {
-        self.0
-            .lock()
-            .unwrap()
-            .push(format!("{}={value:?}", field.name()));
-    }
-}
-
-#[test]
-fn trace_spans_exclude_query_credentials() {
-    const CREDENTIAL: &str = "private-query-credential";
-    let fields = Arc::new(Mutex::new(Vec::new()));
-    let subscriber = tracing_subscriber::registry().with(CapturedFields(Arc::clone(&fields)));
-    let request = Request::post(format!("/api/v1/game/session?token={CREDENTIAL}"))
-        .body(Body::empty())
-        .unwrap();
-    tracing::subscriber::with_default(subscriber, || drop(http_request_span(&request)));
-
-    let captured = fields.lock().unwrap().join(" ");
-    assert!(captured.contains("/api/v1/game/session"));
-    assert!(!captured.contains(CREDENTIAL));
-    assert!(!captured.contains("token="));
 }

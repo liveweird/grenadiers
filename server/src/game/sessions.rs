@@ -7,9 +7,10 @@ use std::{
 use grenadiers_core::protocol::SessionToken;
 use serde::Serialize;
 
-use crate::rate_limit::TokenBucket;
+use crate::{peer_identity::PeerKey, rate_limit::TokenBucket};
 
 const MAX_ISSUED_SESSIONS: usize = 128;
+const MAX_PEER_SESSIONS: usize = 16;
 const SESSION_LIFETIME: Duration = Duration::from_secs(300);
 const MINT_BURST: f64 = 32.0;
 const MINTS_PER_SECOND: f64 = 8.0;
@@ -31,6 +32,7 @@ impl SessionResponse {
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) enum SessionIssueError {
+    PeerCapacity,
     RateLimited,
     CapacityReached,
     CreationUnavailable,
@@ -124,14 +126,23 @@ impl GameSessions {
             Some(SessionState::Claimed { .. }) => return Err(SessionClaimError::ConnectionInUse),
             Some(SessionState::Issued { .. }) => {}
         }
+        let minting_peer = registry
+            .sessions
+            .get(token)
+            .map(SessionState::minting_peer)
+            .expect("session was checked above");
         let connection_id = ConnectionId(registry.next_connection_id);
         registry.next_connection_id = registry
             .next_connection_id
             .checked_add(1)
             .ok_or(SessionClaimError::CapacityReached)?;
-        registry
-            .sessions
-            .insert(token.clone(), SessionState::Claimed { connection_id });
+        registry.sessions.insert(
+            token.clone(),
+            SessionState::Claimed {
+                connection_id,
+                minting_peer,
+            },
+        );
         Ok(SessionLease {
             sessions: Arc::clone(self),
             token: token.clone(),
@@ -139,13 +150,26 @@ impl GameSessions {
         })
     }
 
-    pub(crate) fn issue(&self, now: Instant) -> Result<SessionResponse, SessionIssueError> {
+    pub(crate) fn issue_for_peer(
+        &self,
+        minting_peer: PeerKey,
+        now: Instant,
+    ) -> Result<SessionResponse, SessionIssueError> {
         let mut registry = self
             .registry
             .lock()
             .unwrap_or_else(|error| error.into_inner());
         let now = registry.effective_now(now);
         registry.prune(now);
+        if registry
+            .sessions
+            .values()
+            .filter(|state| state.minting_peer() == minting_peer)
+            .count()
+            >= MAX_PEER_SESSIONS
+        {
+            return Err(SessionIssueError::PeerCapacity);
+        }
         if !registry.rate_limit.take(now) {
             return Err(SessionIssueError::RateLimited);
         }
@@ -161,12 +185,18 @@ impl GameSessions {
                     token.clone(),
                     SessionState::Issued {
                         expires_at: now + SESSION_LIFETIME,
+                        minting_peer,
                     },
                 );
                 return Ok(SessionResponse::new(token));
             }
         }
         Err(SessionIssueError::CreationUnavailable)
+    }
+
+    #[cfg(test)]
+    pub(crate) fn issue(&self, now: Instant) -> Result<SessionResponse, SessionIssueError> {
+        self.issue_for_peer(PeerKey::Ipv4(std::net::Ipv4Addr::LOCALHOST), now)
     }
 
     fn generate_token(&self) -> Result<SessionToken, SessionIssueError> {
@@ -190,8 +220,22 @@ struct Registry {
 }
 
 enum SessionState {
-    Issued { expires_at: Instant },
-    Claimed { connection_id: ConnectionId },
+    Issued {
+        expires_at: Instant,
+        minting_peer: PeerKey,
+    },
+    Claimed {
+        connection_id: ConnectionId,
+        minting_peer: PeerKey,
+    },
+}
+
+impl SessionState {
+    fn minting_peer(&self) -> PeerKey {
+        match self {
+            Self::Issued { minting_peer, .. } | Self::Claimed { minting_peer, .. } => *minting_peer,
+        }
+    }
 }
 
 impl Registry {
@@ -213,7 +257,7 @@ impl Registry {
 
     fn prune(&mut self, now: Instant) {
         self.sessions.retain(|_, state| match state {
-            SessionState::Issued { expires_at } => *expires_at > now,
+            SessionState::Issued { expires_at, .. } => *expires_at > now,
             SessionState::Claimed { .. } => true,
         });
     }
@@ -228,7 +272,7 @@ impl Drop for SessionLease {
             .unwrap_or_else(|error| error.into_inner());
         if matches!(
             registry.sessions.get(&self.token),
-            Some(SessionState::Claimed { connection_id }) if *connection_id == self.connection_id
+            Some(SessionState::Claimed { connection_id, .. }) if *connection_id == self.connection_id
         ) {
             registry.sessions.remove(&self.token);
         }

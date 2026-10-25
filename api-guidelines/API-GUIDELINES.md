@@ -8,8 +8,9 @@ generated TypeScript, conformance tests, and docs change together.
   version 1. A breaking realtime change requires an explicit version/migration decision.
 - **API-STRUCT-001:** HTTP JSON success bodies are objects, with camelCase properties.
   Error responses use problem details (`type`, `title`, `status`, `detail`) and
-  `application/problem+json`. The malformed upgrade's framework-generated plain-text 400
-  is an explicit scaffold exception; transport control errors are WebSocket messages/close codes.
+  `application/problem+json`. Malformed upgrades can produce framework plain-text 400s;
+  both upgrade contracts also document problem details for application validation failures.
+  Transport control errors are WebSocket messages/close codes.
 - **API-DOC-001:** Document actual methods, statuses, media types, and examples; do not list
   hypothetical errors. Keep OpenAPI 3.0 compatibility for the inherited code generation flow.
 - **API-ERR-001:** Unknown API paths yield a no-store 404 problem response, including when static
@@ -30,8 +31,9 @@ generated TypeScript, conformance tests, and docs change together.
 
 Spectral checks the machine-verifiable OpenAPI subset: explicit errors use
 `application/problem+json` with the shared `Problem` schema, object schemas are closed, and JSON
-property names are camelCase. The plain-text-only exception is limited to the exact documented
-`GET /api/v1/ws` malformed-upgrade 400 schema. Runtime conformance tests and browser smoke tests
+property names are camelCase. Both upgrade 400s must include the shared problem representation
+alongside their framework plain text; the old plain-text-only lint exception is retired.
+Runtime conformance tests and browser smoke tests
 cover the remaining behavior. `POST /api/v1/game/session` issues short-lived anonymous
 single-use tokens for the gameplay socket (201; 400, 403, 429, and 503 problems; see
 [security](../docs/security.md)). Durable identity, CRUD, pagination, and retry/idempotency policy

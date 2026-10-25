@@ -21,9 +21,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let web_dist_dir = std::env::var_os("WEB_DIST_DIR").map(PathBuf::from);
     let listener = TcpListener::bind(address).await?;
     tracing::info!(%address, "server listening");
-    axum::serve(listener, app(state.clone(), web_dist_dir))
-        .with_graceful_shutdown(shutdown_signal(state.clone()))
-        .await?;
+    axum::serve(
+        listener,
+        app(state.clone(), web_dist_dir).into_make_service_with_connect_info::<SocketAddr>(),
+    )
+    .with_graceful_shutdown(shutdown_signal(state.clone()))
+    .await?;
     if !state.wait_for_shutdown().await {
         tracing::warn!("shutdown drain deadline elapsed");
     }

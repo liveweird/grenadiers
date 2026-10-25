@@ -36,10 +36,60 @@ write buffering, commands, and sends. Diagnostic connections are capped at 16; g
 connections are capped at 128.
 Room create/join/resume operations have separate process-global budgets (32 burst and eight per
 second each). A correlated operation throttle preserves authentication; per-socket inbound floods
-still close with policy code 1008. Peer-keyed quotas and denial telemetry remain hosting work.
+still close with policy code 1008. Peer admission below adds independent budgets without replacing
+these global backstops.
 Malformed text messages yield a typed error and policy close. Control frames remain protocol
 control frames. The diagnostic envelope remains v1; authenticated gameplay requires v11;
 older versions are rejected before credential lookup.
+
+## Peer identity and admission
+
+The transport address identifies an admission peer, not a durable user. IPv4-mapped IPv6 is
+normalized to IPv4; budgets group IPv4 by address and native IPv6 by /64. Source ports, Origin,
+credentials and room identifiers never determine this key. Missing transport metadata rejects
+admission with a no-store 503 rather than sharing an unknown-peer budget.
+
+`TRUSTED_PROXY_IPS` defaults empty: no proxy is trusted, including loopback. Configure at most
+32 exact immediate proxy IP literals, comma-separated without whitespace, within 2,048 bytes.
+Hostnames, CIDRs, ports and malformed/non-Unicode values fail startup. Full normalized addresses
+determine proxy trust before /64 budget grouping. Untrusted forwarding headers are ignored.
+
+A trusted immediate proxy must **overwrite** `X-Forwarded-For` with exactly one client IP.
+Missing, duplicate, empty, oversized, non-UTF8, comma-separated, quoted, port-bearing or scoped
+values reject with a no-store 400. Alternative identity headers do not establish trust. Multi-hop
+chains require a separate explicit design; never trust every private network automatically.
+
+| Peer budget | Default |
+| --- | --- |
+| Mint, gameplay upgrade, create, join, resume | Separate burst 8, refill 2/second each |
+| Diagnostic upgrade | Burst 4, refill 1/second |
+| Outstanding issued plus claimed sessions per minting peer | 16 |
+| Gameplay sockets, including upgrade/unauthenticated lifetime | 8 |
+| Diagnostic sockets | 4 |
+| Concurrent room-admission attempts | 4 |
+
+These are engineering defaults, not measured public-hosting capacity. Peers sharing NAT or a
+local proxy share budgets. Session claiming does not release its minting quota; expiry or lease
+drop does. A credential can be claimed from a different peer: address quotas do not change bearer
+authentication. Socket and room-attempt permits release on failure, cancellation and disconnect.
+Room-attempt permits remain held through the response attempt, so stalled responses stay within
+the concurrent-handler bound.
+
+Gameplay and diagnostics have independent tables capped at 4,096 peer keys each. Only entries
+without live permits and inactive for at least 60 seconds can be evicted; attempts and permit
+release refresh activity. Sweeping is bounded and at most once per second. Full tracking rejects
+new keys with 503 while existing keys remain eligible. Peer checks precede global token use.
+HTTP rate and per-peer outstanding-session denials use 429 and `Retry-After: 1`. Socket,
+tracking and global registry capacity, or unavailable identity, use 503. WebSocket
+room throttles remain correlated and non-closing, preserving bounded browser resume recovery.
+
+Denial counters use finite operation/reason labels and bounded aggregate tracing summaries.
+Addresses, headers, credentials, room IDs and arbitrary error strings are not telemetry labels.
+Restart clears process-local counters and quotas. Public exposure still requires actual proxy
+addresses/overwrite behavior, restricted backend reachability, TLS and ingress connection/header
+limits; IP budgets do not establish authentication or solve distributed attacks.
+
+## Credentials and persistence
 
 Resume capabilities are independent 32-byte random values encoded as lowercase hexadecimal. They
 exist only in the room owner and the admitted browser tab, remain stable across restore/takeover,
@@ -47,6 +97,11 @@ and are never placed in URLs, shared room state, logs, replay journals, local/se
 database fields. Transport reconnects obtain a fresh ordinary session before presenting the
 capability; a correlated resume throttle uses bounded retries on that authenticated socket.
 All recovery shares one ten-second client deadline. See [browser recovery](game/reconnect-browser.md).
+A leaked resume capability together with its room identifier lets another authenticated holder
+restore or take over that seat. Anonymous session issuance does not establish durable ownership;
+peer quotas do not prevent use of a stolen capability. Recoverable rotation needs a separate
+protocol design so a lost response does not lock out the legitimate holder.
+
 Explicit leave clears it only after acknowledgement; `resumeRejected`, replacement, and exhausted
 retry terminate recovery. Playwright traces are disabled in every configuration because raw framework traces can
 capture personal admission frames before redaction. Screenshots, public reports, and bounded

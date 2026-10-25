@@ -4,6 +4,40 @@ This archive preserves the older release records originally maintained in
 [`docs/releases.md`](../releases.md). Records remain in their original order; the current
 release procedure and current release record stay in the [release guide](../releases.md).
 
+## v0.3.52 — 2026-10-25
+
+[v0.3.52](https://github.com/liveweird/grenadiers/releases/tag/v0.3.52) enforces a compatible
+browser content policy using static Pixi implementations and precompiled validators.
+Application inputs match `578f581be1593b56ab589c6a8da2dce8a8e4fc8f`; the source tag includes
+release documentation. Localhost:8085 serves accepted image
+`sha256:9b5918458c30fd8dc8e877c8430607f09dd773abdec52f407bc139e5b58ddb85`.
+
+Full source-bound Rust acceptance passes all 4,194,304 masks in debug, release and official
+coverage at the 90% floor, with no retries. Application line coverage is 16,394/17,634 (92.97%).
+The parallel gate phase completes in 7m23s while the web gate and image build also run. Web
+passes 6,790 tests / 88 files with 90.95/89.49/89.78/93.32% coverage and unchanged floors;
+compressed JavaScript/CSS are 336,413/36,292 bytes, within budgets. E2E static checks, three wired
+relay/config regressions, the pinned image scan and the distinct Linux Rust unit job pass.
+The image has zero fixable HIGH/CRITICAL findings under the existing scanner policy.
+
+Before server delivery, enforced policy trials pass fourteen renderer/artist cases and controls,
+audio and both reconnect cases with zero observed violations. Final acceptance uses the actual
+server image without relay policy injection: eight native cases through Docker Compose, eight
+through Kubernetes and six HTTP/WS + HTTPS/WSS CSP cases pass, with no retries. Real page scripts
+prove execution/connection/worker blocking; the frame test isolates CSP from XFO and includes
+an attachment control. An earlier relay reset crash and no-test selector are retained as failed
+attempts, not passes. Independent review is clear.
+
+Promotion health/readiness/index and a fresh native browser diagnostic/gameplay flow pass.
+Served HTML/JavaScript/atlas bytes and runtime security identity match the accepted artifact;
+CSP is enforced, including on API responses. Temporary acceptance services are removed.
+Durable control is `.local-checkpoints/runtime/compose-v0.3.52.yaml`; v0.3.51 is retained for
+rollback. Reload existing tabs; matches remain process-local. No migration is needed.
+
+The style policy explicitly permits Mantine inline styles; scripts do not allow inline
+execution or string compilation. Browser acceptance covers Chromium, not an untested wider
+matrix. Peer-keyed hosting admission and the separate artist redraw remain future releases.
+
 ## v0.3.51 — 2026-10-25
 
 [v0.3.51](https://github.com/liveweird/grenadiers/releases/tag/v0.3.51) precompiles the live

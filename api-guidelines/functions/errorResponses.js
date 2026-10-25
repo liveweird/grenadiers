@@ -11,16 +11,6 @@ const HTTP_METHODS = new Set([
 
 const PROBLEM_SCHEMA_REF = '#/components/schemas/Problem'
 
-function isPlainTextUpgradeException(path, method, status, response) {
-  if (path !== '/api/v1/ws' || method !== 'get' || status !== '400') return false
-
-  const content = response?.content
-  if (!content || Object.keys(content).length !== 1) return false
-
-  const schema = content['text/plain']?.schema
-  return schema?.type === 'string' && Object.keys(schema).length === 1
-}
-
 function validateProblemResponse(response, path) {
   const mediaType = response?.content?.['application/problem+json']
   if (!mediaType) {
@@ -71,8 +61,6 @@ export default function errorResponses(_resolvedDocument, _options, context) {
 
       for (const [status, response] of Object.entries(operation?.responses ?? {})) {
         if (!/^[45][0-9]{2}$/.test(status)) continue
-        if (isPlainTextUpgradeException(apiPath, method, status, response)) continue
-
         errors.push(...validateResponseOrReference(
           document,
           response,

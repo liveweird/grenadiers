@@ -16,8 +16,10 @@ use tokio::{
 
 use crate::{
     AppState, MAX_MESSAGE_BYTES, Problem,
+    admission::{DenialOperation, DenialReason, DiagnosticSocketPermit, PolicyDenial},
     game::{InboundLimit, origin_allowed},
-    with_no_store,
+    peer_identity::TransportPeer,
+    peer_identity_response, resolve_request_peer, with_no_store,
 };
 
 const INACTIVITY_TIMEOUT: Duration = Duration::from_secs(30);
@@ -27,9 +29,15 @@ const MAX_WRITE_BUFFER: usize = 131_072;
 pub(crate) async fn websocket(
     State(state): State<AppState>,
     headers: HeaderMap,
+    transport: TransportPeer,
     upgrade: WebSocketUpgrade,
 ) -> Response {
     if !origin_allowed(&headers, &state) {
+        state.denial_telemetry.record(
+            DenialOperation::DiagnosticUpgrade,
+            DenialReason::OriginRejected,
+            StdInstant::now(),
+        );
         return with_no_store(
             Problem::new(StatusCode::FORBIDDEN, "Forbidden", "Origin is not allowed").response(),
         );
@@ -44,7 +52,29 @@ pub(crate) async fn websocket(
             .response(),
         );
     }
-    if !state.diagnostic_upgrade_limit.allow(StdInstant::now()) {
+    let peer = match resolve_request_peer(
+        transport,
+        &headers,
+        &state,
+        DenialOperation::DiagnosticUpgrade,
+    ) {
+        Ok(peer) => peer,
+        Err(error) => return peer_identity_response(error),
+    };
+    let now = StdInstant::now();
+    if let Err(denial) = state.diagnostic_admission.check_upgrade(peer.key(), now) {
+        return policy_response(&state, denial);
+    }
+    let peer_permit = match state.diagnostic_admission.acquire_socket(peer.key(), now) {
+        Ok(permit) => permit,
+        Err(denial) => return policy_response(&state, denial),
+    };
+    if !state.diagnostic_upgrade_limit.allow(now) {
+        state.denial_telemetry.record(
+            DenialOperation::DiagnosticUpgrade,
+            DenialReason::GlobalRate,
+            now,
+        );
         let mut response = Problem::new(
             StatusCode::TOO_MANY_REQUESTS,
             "Too Many Requests",
@@ -57,6 +87,11 @@ pub(crate) async fn websocket(
         return with_no_store(response);
     }
     let Ok(permit) = state.diagnostic_connections.clone().try_acquire_owned() else {
+        state.denial_telemetry.record(
+            DenialOperation::DiagnosticUpgrade,
+            DenialReason::GlobalCapacity,
+            now,
+        );
         return with_no_store(
             Problem::new(
                 StatusCode::SERVICE_UNAVAILABLE,
@@ -73,13 +108,14 @@ pub(crate) async fn websocket(
             .max_message_size(MAX_MESSAGE_BYTES)
             .write_buffer_size(0)
             .max_write_buffer_size(MAX_WRITE_BUFFER)
-            .on_upgrade(move |socket| websocket_session(socket, permit, shutdown)),
+            .on_upgrade(move |socket| websocket_session(socket, permit, peer_permit, shutdown)),
     )
 }
 
 async fn websocket_session(
     mut socket: WebSocket,
     _permit: OwnedSemaphorePermit,
+    _peer_permit: DiagnosticSocketPermit,
     mut shutdown: tokio::sync::watch::Receiver<bool>,
 ) {
     let mut inbound = InboundLimit::new(Instant::now());
@@ -145,6 +181,32 @@ async fn websocket_session(
             }
         }
     }
+}
+
+fn policy_response(state: &AppState, denial: PolicyDenial) -> Response {
+    state
+        .denial_telemetry
+        .record(denial.operation, denial.reason, StdInstant::now());
+    if denial.reason == DenialReason::PeerRate {
+        let mut response = Problem::new(
+            StatusCode::TOO_MANY_REQUESTS,
+            "Too Many Requests",
+            "Connection rate limit reached",
+        )
+        .response();
+        response
+            .headers_mut()
+            .insert(RETRY_AFTER, "1".parse().expect("valid retry after"));
+        return with_no_store(response);
+    }
+    with_no_store(
+        Problem::new(
+            StatusCode::SERVICE_UNAVAILABLE,
+            "Service Unavailable",
+            "Peer connection capacity reached",
+        )
+        .response(),
+    )
 }
 
 async fn send_json(socket: &mut WebSocket, message: &ServerMessage) -> Result<(), ()> {

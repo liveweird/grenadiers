@@ -2,6 +2,7 @@ mod connection;
 mod dispatcher;
 mod http;
 mod limits;
+mod peer_policy;
 mod rooms;
 mod sessions;
 mod socket;

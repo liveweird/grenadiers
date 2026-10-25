@@ -50,7 +50,7 @@ artwork while waiting. A new baseline is painted before the canvas becomes visib
 Actual component unmount still releases the renderer and WebGL resources.
 
 Since v0.3.49 gameplay draws these from the [artist sheet](../../assets/art/README.md); the
-unreleased v0.3.53 redraw gives players chibi proportions, a pompom or feather cap and a flame or
+v0.3.53 redraw gives players chibi proportions, a pompom or feather cap and a flame or
 star mark. The procedural sources below still produce the template and parity reference.
 
 Sources: `web/src/game/arena/terrainArt.ts`, `actorArt.ts`, `entityArt.ts`, `palette.ts` and

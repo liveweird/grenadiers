@@ -55,7 +55,7 @@ That initial v0.3.50 change did not enable CSP; v0.3.52 follows below.
 **DOC-01/02/04/14, partial:** the current verification policy and release procedures are now
 short entry points. Dated verification and older release records live in `docs/history/`, with
 their facts and headings preserved and relative links rebased. Known incoming fragments retain
-aliases. The latest release is v0.3.52, adding an enforced browser content policy.
+aliases. The latest release is v0.3.53, adding bounded peer admission and the merged arena redraw.
 Testing, deployment and backlog consolidation remain separate work, including reconciliation
 with the pending artist PR before changing its overlapping documents.
 
@@ -134,8 +134,19 @@ artist upload/export, controls, audio and reconnect. The relay reset/config regr
 Final same-image acceptance passes eight cases each in Compose and Kubernetes plus six
 HTTP/WS + HTTPS/WSS policy cases, without relay injection.
 Full Rust exhaustive/90%-floor coverage and the 6,790-test web gate pass; localhost:8085 serves
-the accepted v0.3.52 image. See
+the accepted v0.3.52 image at that release. See
 [ADR 0023](decisions/0023-browser-content-security-policy.md).
+
+**BE-03 / SEC-01/07, v0.3.53:** add transport-derived peer identity with strict opt-in
+immediate-proxy forwarding, independent bounded gameplay/diagnostic tables and per-peer budgets
+before global backstops. Minting quotas count issued and claimed sessions without binding bearer
+authentication to an address. Typed permits cover socket lifetime and complete room-admission
+handlers, including response attempts. Fixed-label readable denial summaries exclude request
+data and credentials. Independent review, full source-bound acceptance, final ordinary tests,
+26 same-image browser cases and real proxy/quota/logging proofs pass. Exact source attribution
+is recorded in the [release record](releases.md#v0353--2026-10-25). Artist PR #123 is preserved in
+the same release: the new image passes 6,791 web tests, 26 native cases and fourteen separate
+renderer/artist cases; Rust inputs and the server binary remain unchanged. See [ADR 0024](decisions/0024-peer-admission.md).
 
 ## Finding dispositions and proposed solutions
 
@@ -157,7 +168,7 @@ Related IDs are grouped to avoid treating one architectural problem as several i
 | API-09 | Agree; shared inventory implemented. | Generation/check/reproducibility use explicit v2–v11 discovery with filename and declared version/ID checks; unexpected or incomplete inventories fail. |
 | API-10, CX-09 | Live receive variants enumerated in v0.3.51; broader coverage remains a question. | Standalone parity tests explicitly accept all eight gameplay-v11 and three diagnostic server-message variants through both compilation routes. Audit client-message and archived-contract coverage separately before claiming a complete protocol matrix. |
 | BE-01 | Confirmed cost, intentional documented behavior. | Decide whether production replay recording has an operational consumer. If not, feature-gate allocation/recording while retaining replay acceptance tests; document memory effects. |
-| BE-03, SEC-01 | Agree: public-hosting blocker. | Design trusted peer/proxy identity, bounded keyed mint/upgrade/room budgets, per-client outstanding limits and global backstops together. Keep denial telemetry credential-free. |
+| BE-03, SEC-01 | Agree; implemented in v0.3.53. | Strict transport/proxy identity, bounded independent peer tables, rate/concurrency/session quotas and global backstops are integrated. Source-bound/runtime acceptance passes; actual public proxy topology and ingress configuration remain operator requirements. |
 | BE-04 | Agree; bucket implementation shared. | Independent caller budgets and clock/lock behavior are preserved. Consolidate repeated transport timeout definitions separately; no generic clock abstraction is introduced. |
 | BE-05, TS-14 | Agree for active startup/configuration paths. | Centralize typed parsing and defaults; test invalid configuration and empty-origin behavior without logging credentials. Revisit archived low-coverage code with the retention decision. |
 | BE-06, CX-06 | Agree; safe exemption cleanup implemented. | Removed the unused restoration method and stale exemptions; gated test-only hooks and preserved production cooldown observations. Admission-argument refactoring remains separate. |
@@ -189,7 +200,7 @@ Related IDs are grouped to avoid treating one architectural problem as several i
 | TL-12 | Agree on build-cache/reproducibility tradeoffs. | Add dependency caching and OCI metadata. Replace unbounded package upgrades with a documented base-image/security-refresh policy; simply dropping upgrades can retain known vulnerabilities. |
 | TL-13/14/15/16 | Mixed low-priority tooling/documentation concerns. | Scope the peer-dependency workaround, document supported Python/tooling prerequisites, name gate commands in the PR template, and retain existing pin consistency checks. |
 | SEC-03 | Agree; coordinated server/client fix implemented. | Correlated throttles retain the socket; bounded same-socket retries use fresh sequences and fenced timers within one deadline. Initial admission remains manually retryable; per-socket floods still close. |
-| SEC-06/07 | Documented capability tradeoff; missing denial visibility. | Explain capability-leak/takeover consequences and add redacted counters. Rotation requires a recoverable protocol design, not a silent behavior change. |
+| SEC-06/07 | Capability tradeoff documented; denial visibility implemented in v0.3.53. | Fixed operation/reason counters and readable bounded summaries work under the default filter and exclude request data. The security guide explains leaked-capability takeover; recoverable rotation remains separate protocol work. |
 | SEC-08/09/11 | Sensible deployment hardening; some risks remain unmeasured. | Test container/pod limits and security-context requirements; define proxy/header/idle/connection limits before public hosting. NetworkPolicy needs an actual network/DB model. |
 
 ## Corrections that change the implementation plan
@@ -213,14 +224,13 @@ Related IDs are grouped to avoid treating one architectural problem as several i
 
 ## Next bounded batches
 
-1. Integrate peer-keyed hosting admission and credential-free denial telemetry; independently reviewed foundations are in progress.
-2. Complete caller/session quota and real-listener acceptance for that hosting layer.
-3. Complete remaining test-wiring and fixture cleanup.
-4. Complete contributor/history separation and share E2E fixture/configuration helpers.
-5. Apply the retention policy to historical protocol reduction and a single item specification.
-6. Measured bundle/render improvements and compatible dependency updates.
+1. Complete remaining test-wiring, simulation test aggregation and source-size guard coverage.
+2. Complete contributor/history separation and share E2E fixture/configuration helpers.
+3. Apply the retention policy to historical protocol reduction and a single item specification.
+4. Measure bundle/render and lock/shutdown behavior before performance changes.
+5. Continue compatible dependency/tooling hardening and capability/replay operational decisions.
 
-Public-hosting identity, durable replay export and any reduced exhaustive-test cadence need
+Public-hosting topology, durable replay export and any reduced exhaustive-test cadence need
 explicit requirements. None blocks the isolated fixes in the first batch. Fresh profiling,
 fuzzing, a stuck-client shutdown reproduction and a complete protocol-deletion audit remain
 outstanding; the review's baseline is not evidence those experiments ran.

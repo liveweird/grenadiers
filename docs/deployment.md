@@ -13,6 +13,20 @@ credential lookup. Roll back the server and web assets as one paired image and r
 mixing either side across gameplay versions is unsupported. No storage migration is required;
 active matches remain process-local and end on rollout or rollback.
 
+## Peer identity behind a proxy
+
+Direct local deployment needs no trusted proxy configuration. `TRUSTED_PROXY_IPS` defaults
+empty in Compose and Kubernetes. For a real reverse proxy, set only its exact immediate
+transport IP literals and make it overwrite `X-Forwarded-For` with one client IP. Do not append
+forwarding chains or accept a client-supplied value. Restrict backend access to that proxy;
+choose addresses from the actual container/cluster topology, not an assumed loopback address.
+See [identity and quotas](security.md#peer-identity-and-admission) for strict parsing and limits.
+
+TLS termination, proxy addresses and ingress connection/header/idle limits remain deployment
+choices. Test the paired image through the actual proxy before public exposure. An older image
+lacks these peer protections even if the same environment variable is present; restrict exposure
+when rolling back. Process restarts clear quotas as well as matches and capabilities.
+
 ## Docker Compose
 
 The image build uses the repository's reviewed `Cargo.lock` and pinned base-image digests:

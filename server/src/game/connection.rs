@@ -13,6 +13,10 @@ use super::{
     sessions::ConnectionId,
     socket::{close, command_sequence, fail_and_close, send_error, send_game, send_raw},
 };
+use crate::{
+    admission::{DenialTelemetry, GameplayAdmission},
+    peer_identity::PeerKey,
+};
 
 const PING_INTERVAL: Duration = Duration::from_secs(10);
 
@@ -28,13 +32,19 @@ pub(super) struct ConnectionState {
     pub(super) membership: Option<Membership>,
     pub(super) highwater: Option<Counter>,
     pub(super) deadlines: SessionDeadlines,
+    pub(super) peer_key: PeerKey,
+    pub(super) peer_admission: GameplayAdmission,
+    pub(super) denial_telemetry: Arc<DenialTelemetry>,
 }
 
 pub(super) async fn authenticated_loop(
     socket: &mut WebSocket,
     inbound: &mut InboundLimit,
     connection_id: ConnectionId,
+    peer_key: PeerKey,
     rooms: Arc<GameRooms>,
+    peer_admission: GameplayAdmission,
+    denial_telemetry: Arc<DenialTelemetry>,
 ) {
     let started = Instant::now();
     let mut state = ConnectionState {
@@ -43,6 +53,9 @@ pub(super) async fn authenticated_loop(
         membership: None,
         highwater: None,
         deadlines: SessionDeadlines::new(started),
+        peer_key,
+        peer_admission,
+        denial_telemetry,
     };
     let mut pings = interval_at(started + PING_INTERVAL, PING_INTERVAL);
     pings.set_missed_tick_behavior(MissedTickBehavior::Delay);

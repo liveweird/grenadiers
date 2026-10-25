@@ -59,8 +59,8 @@ That initial v0.3.50 change did not enable CSP; v0.3.52 follows below.
 **DOC-01/02/04/14, partial:** the current verification policy and release procedures are now
 short entry points. Dated verification and older release records live in `docs/history/`, with
 their facts and headings preserved and relative links rebased. Known incoming fragments retain
-aliases. The latest release is v0.3.62, sharing equivalent scene mocks after typed startup configuration,
-requested QoL, schema-owned browser catalogs and bounded shutdown.
+aliases. The latest release is v0.3.63, typing authenticated commands and sharing send policy after
+equivalent scene mocks, typed startup configuration and the requested QoL.
 The testing guide now indexes configured suites separately from execution evidence; its former
 acceptance narratives live in `docs/history/testing.md`, with facts and incoming anchors preserved.
 Deployment now uses a common fixture procedure and exact manifest/acknowledgement index; its
@@ -224,12 +224,12 @@ Related IDs are grouped to avoid treating one architectural problem as several i
 | API-10, CX-09 | Live receive variants enumerated in v0.3.51; broader coverage remains a question. | Standalone parity tests explicitly accept all eight gameplay-v11 and three diagnostic server-message variants through both compilation routes. Audit client-message and archived-contract coverage separately before claiming a complete protocol matrix. |
 | BE-01 | Confirmed cost, intentional documented behavior. | Decide whether production replay recording has an operational consumer. If not, feature-gate allocation/recording while retaining replay acceptance tests; document memory effects. |
 | BE-03, SEC-01 | Agree; implemented in v0.3.53. | Strict transport/proxy identity, bounded independent peer tables, rate/concurrency/session quotas and global backstops are integrated. Source-bound/runtime acceptance passes; actual public proxy topology and ingress configuration remain operator requirements. |
-| BE-04 | Agree; bucket implementation shared. | Independent caller budgets and clock/lock behavior are preserved. Consolidate repeated transport timeout definitions separately; no generic clock abstraction is introduced. |
+| BE-04 | Implemented: shared bucket and equivalent send policy (v0.3.63). | Independent caller budgets and clock/lock behavior are preserved; per-frame sends share one timeout while outer final-delivery, authentication, idle and shutdown budgets remain distinct. |
 | BE-05 | Implemented in v0.3.61. | Typed production capture, an explicit empty-origin warning, redacted errors/lazy database and intentional development/container defaults have focused, full source-bound and actual-image acceptance. |
 | TS-14 | Coverage observation; not automatically closed by extracting configuration. | Exercise active startup paths meaningfully; assess retained low-coverage adapters alongside the protocol inventory. Do not add sibling tests merely to change counts. |
 | BE-06, CX-06 | Agree; safe exemption cleanup implemented. | Removed the unused restoration method and stale exemptions; gated test-only hooks and preserved production cooldown observations. Admission-argument refactoring remains separate. |
 | BE-08, CX-04/05 | Agree; aggregation and source-size coverage shipped in v0.3.54. | Test-only declaration aggregation preserves every test name and production module. Dynamic item-tree discovery and eight wired regressions close the guard gap; consolidate genuinely equivalent fixtures separately. |
-| BE-09, CX-07 | Mixed: maintainability concerns, not proven reachable panics. | Replace transport-state assumptions with typed authenticated commands where useful; split orchestration around domain operations. Audit narrowing conversions before changing public APIs. |
+| BE-09, CX-07 | Mixed: transport boundary implemented in v0.3.63; remaining admission/invariant audit is separate. | Dispatch cannot receive Authenticate and owns its sequence. Group the core projection arguments separately; assess owner invariants/narrowing before changing APIs, without treating every expect/cast as a reachable defect. |
 | BE-10, TL-04 | Agree; rationale and grouping implemented. | Cargo patch, per-workspace npm minor/patch and Actions minor/patch groups preserve individual pinned RNG, Docker, major and security proposals. Document compatibility review; no version ignores or automatic merges. |
 | BE-11, TS-09/10 | Mostly intentional tests/benchmarks. | Use virtual time where it preserves the real socket deadline being tested. Keep performance tests separate from ordinary suites. Do not replace useful waits or ignored benchmarks solely to improve counts. |
 | BE-12/13 | Shutdown ordering defect reproduced; registry latency still unmeasured. | A quiet v0.3.56 probe holds incomplete HTTP headers and remains running 7.07s after SIGTERM before the five-second app drain is reached. Released v0.3.58 applies one signal-time deadline to both drains. Strengthened timing, consumed-header regressions, full source-bound coverage and actual-image probes pass (held-header exit 5.127s; graceful exit 0.115s). Separately measure registry-lock work and non-reading upgraded clients. |
@@ -288,7 +288,7 @@ Each ships with relevant tests and a version bump; no new approval or evidence p
 
 | Package | Remaining scope and completion evidence |
 | --- | --- |
-| Transport / BE-04, accepted BE-09/CX-07 | Share equivalent send policy; type authenticated commands and sequences; improve admission arguments. Preserve distinct timeout purposes, authorization, ordering and close behavior; current `expect`/`unreachable` sites are not proven reachable defects. |
+| Core admission / residual BE-09/CX-07 | Group projection inputs and personal metadata while retaining old public signatures and validation/privacy/order. Assess remaining owner invariants and narrowing; typed transport and equivalent send policy are already shipped in v0.3.63. |
 | Fixtures / CX-05, CX-02/TS-08, residual CX-08/TS-06/TL-05/07 | Share truly equivalent Rust worlds/frame fixtures, E2E selectors/collection and Compose seed scaffolding. Preserve every test identity/assertion, version-specific rejection, seed and independent session. Responsive contexts and simple config factories are already delivered. |
 | Protocol / API-01/CX-01/02/BE-07/FE-01, CX-03 | Map remaining consumers and unique tests; reduce selected adapters under ADR 0021 and establish a domain item specification. Preserve archived schemas/conformance, replay identity, item bits, activation subsets, generation order and privacy. Browser schema-owned catalogs are delivered. |
 | Docs/frontend / DOC-10/11, FE-03/10 | Archive older protocol guides with compatible links; make item headings useful/consistent; consolidate typed translation access and introduce semantic colors without changing visuals. Keep specialized renderer/atlas mocks. |

@@ -1,3 +1,4 @@
+mod command;
 mod connection;
 mod dispatcher;
 mod http;

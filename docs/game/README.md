@@ -37,7 +37,7 @@ verification record.
 [Baseline rule coverage](rule-coverage.md) maps all 42 acceptance rules to concrete automated assertions.
 
 [Single-player versus CPU design](single-player-cpu.md) records the accepted staged hybrid;
-implementation follows the requested QoL work.
+implementation follows completion of the remaining agreed Claude review work.
 
 The [product backlog](../../BACKLOG.md) contains open work; [legacy backlog links](backlog.md)
 remain valid. Feature guides document implemented movement, shared settings, presentation and
@@ -53,8 +53,9 @@ for current defaults and behavior, rather than treating design proposals as deli
 [Room settings](settings.md) covers shared starting speed, turn tolerance, match target and fuse.
 
 [Gameplay v11 compatibility](protocol-v11.md) defines the paired live wire contract, including the
-authoritative teleport position epoch. [Gameplay v10](protocol-v10.md) and [v9](protocol-v9.md) are
-archived; earlier contracts remain historical references.
+authoritative teleport position epoch. [Gameplay v10](../history/protocols/protocol-v10.md) and
+[v9](../history/protocols/protocol-v9.md) are archived; the
+[protocol history index](../history/protocols/README.md) links every standalone historical guide.
 
 [Pixel-art presentation](pixel-art.md) describes original artwork, animation and resource bounds.
 

@@ -23,7 +23,7 @@ RUN apt-get update && apt-get upgrade -y --no-install-recommends \
 WORKDIR /app
 COPY --from=server /build/target/release/grenadiers-server /app/grenadiers-server
 COPY --from=web /build/web/dist /app/web/dist
-ENV SERVER_ADDR=0.0.0.0:8085 WEB_DIST_DIR=/app/web/dist RUST_LOG=grenadiers_server=info
+ENV SERVER_ADDR=0.0.0.0:8085 WEB_DIST_DIR=/app/web/dist RUST_LOG=grenadiers_server=info,tower_http=info
 USER 65532:65532
 EXPOSE 8085
 ENTRYPOINT ["/app/grenadiers-server"]

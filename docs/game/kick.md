@@ -1,5 +1,7 @@
 # Kick
 
+## Availability and rules
+
 Kick is configurable permanent equipment enabled in new Expanded-v5 rooms. Walking voluntarily into a stationary
 Timed or Remote bomb arms motion in the effective movement direction. The first one-cell hop occurs
 on the next running update and later hops occur every ten updates until a hard wall, breakable block,
@@ -10,10 +12,14 @@ and captured fuse remain unchanged. A moved bomb remains fully solid in its curr
 hops. Movement creates no placement, detonation or audio event. Timed bombs still detonate at their
 captured deadline; Remote bombs retain their owner action trigger.
 
+## State and privacy
+
 Direction, countdown and persistent `hasBeenKicked` provenance are private trusted state used for
 capture, resume, replay and archive rejection. They never appear in gameplay-v11 wire state or
 events. Public clients render the latest authoritative cell on the retained bomb drawing. Invisible
 Bombs filtering and Invisibility Cloak attribution rules remain unchanged.
+
+## Compatibility and verification
 
 Version 0.3.44 added Kick as the first item in its nineteen-item catalog. Its capability bit
 is `1`; `ALL` is `3,145,721`. Generator v2 appends weight 15 after Wall Pass, making the complete

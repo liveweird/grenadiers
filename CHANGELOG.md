@@ -2,6 +2,28 @@
 
 ## [Unreleased]
 
+## 0.3.63 — 2026-10-25
+
+### Changed
+
+- Separate authenticated commands from authentication at the server dispatch boundary and
+  share equivalent per-frame send policy while retaining outer final-delivery deadlines.
+
+## 0.3.62 — 2026-10-25
+
+### Changed
+
+- Reuse the existing Pixi scene mock in Diarrhea, Slow Foot and Reverse Controls tests,
+  preserving their assertions and specialized renderer/atlas mocks.
+
+## 0.3.61 — 2026-10-25
+
+### Changed
+
+- Capture production startup settings through a typed configuration, with redacted address/
+  origin errors, preserved lazy database and OS-native paths, and an explicit empty-origin warning.
+- Document standalone/container defaults and align Docker logging with Compose and Kubernetes.
+
 ## 0.3.60 — 2026-10-25
 
 ### Added

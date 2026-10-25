@@ -32,8 +32,9 @@ pub(crate) mod peer_identity;
 mod rate_limit;
 mod round_seed;
 mod shutdown;
+mod websocket_policy;
 
-pub use configuration::StartupError;
+pub use configuration::{Config, StartupError, StartupWarning};
 use game::{GameRooms, GameSessions, UpgradeLimit, game_websocket, issue_session};
 pub use shutdown::{ShutdownOutcome, run_with_shutdown};
 use tower_http::{

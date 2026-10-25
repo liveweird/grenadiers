@@ -5,7 +5,14 @@ read. Findings were checked against source, imports, configuration and tests; ca
 figures remain historical observations. Unmeasured risks below are not confirmed defects.
 The original review remains unchanged in the local review folder.
 
+**Status: remediation is in progress, not complete.** The user confirmed on 25 October that
+remaining agreed review work takes priority over single-player implementation. Completed
+remediation and remaining work are separated below; read [the backlog](../BACKLOG.md) for status.
+
 ## First implementation batch
+
+These entries preserve the initial batch scope. The current dispositions and remaining-work
+table below determine completion; historical “partial” labels here are not new open requests.
 
 - **BE-02 / SEC-02 / API-04:** isolate diagnostic connection permits and upgrade-rate tokens
   from gameplay; reuse strict Origin checks and inbound limits; bound writes and sends;
@@ -55,8 +62,8 @@ That initial v0.3.50 change did not enable CSP; v0.3.52 follows below.
 **DOC-01/02/04/14, partial:** the current verification policy and release procedures are now
 short entry points. Dated verification and older release records live in `docs/history/`, with
 their facts and headings preserved and relative links rebased. Known incoming fragments retain
-aliases. The latest release is v0.3.60, adding the requested live defaults and item bar after schema-owned
-browser catalogs, bounded asynchronous shutdown and the merged Napoleonic sheet.
+aliases. The latest release is v0.3.63, typing authenticated commands and sharing send policy after
+equivalent scene mocks, typed startup configuration and the requested QoL.
 The testing guide now indexes configured suites separately from execution evidence; its former
 acceptance narratives live in `docs/history/testing.md`, with facts and incoming anchors preserved.
 Deployment now uses a common fixture procedure and exact manifest/acknowledgement index; its
@@ -208,7 +215,7 @@ Related IDs are grouped to avoid treating one architectural problem as several i
 | --- | --- | --- |
 | DOC-01/02/04/05/07/08/09/14 | Agree: contributor guidance is buried in repeated release evidence. | Verification/release history is separated from current procedures; the index links both archives. Unreleased changelog organization is in place. Testing, deployment and backlog have current indexes with complete historical archives and retained incoming anchors. |
 | DOC-03 | Agree on organization; current backlog and full history are separated. | Preserve dated “pending”/“unreleased” statements historically. Current status distinguishes shipped controls/authority from open extensions and treats the rules specification as design, not implementation evidence. |
-| DOC-06/10/11/13 | Agree; index, item guide, ADR index and retention policy implemented. | Continue consistent item headings and implemented/future rule markers; move archived protocol guides with link checks. |
+| DOC-06/10/11/13 | Implemented: indexes/retention plus protocol archival and useful item headings. | V3–V10 guides are preserved in history with every prior URL/fragment retained; v11 remains live. Thirteen under-structured item guides gained headings without changing facts. Independent preservation and local-link checks pass. |
 | DOC-12 | Factually stale, deliberately preserved. | Keep `AGENTS.md` untouched under the user's instruction; point readers to current conventions and the index. |
 | API-01, CX-01/02, BE-07, FE-01, TS-08 | Agree on duplication; browser retirement and helper extraction implemented. | ADR 0021 separates retention. V3 UI is removed with unique regressions moved to v11; its schema/conformance remain. Shared browser semantics and Rust item/effect/mapping/numeric foundations are neutral. Assess retained adapters and genuinely equivalent frame fixtures separately. |
 | API-02/03 | Agree; HTTP repair implemented. | Problem 404/405 fallbacks, route-specific `Allow`, shared cache/retry headers and API/SPA/HEAD tests are in place; fallback responses are separate from supported operation responses. |
@@ -220,11 +227,13 @@ Related IDs are grouped to avoid treating one architectural problem as several i
 | API-10, CX-09 | Live receive variants enumerated in v0.3.51; broader coverage remains a question. | Standalone parity tests explicitly accept all eight gameplay-v11 and three diagnostic server-message variants through both compilation routes. Audit client-message and archived-contract coverage separately before claiming a complete protocol matrix. |
 | BE-01 | Confirmed cost, intentional documented behavior. | Decide whether production replay recording has an operational consumer. If not, feature-gate allocation/recording while retaining replay acceptance tests; document memory effects. |
 | BE-03, SEC-01 | Agree; implemented in v0.3.53. | Strict transport/proxy identity, bounded independent peer tables, rate/concurrency/session quotas and global backstops are integrated. Source-bound/runtime acceptance passes; actual public proxy topology and ingress configuration remain operator requirements. |
-| BE-04 | Agree; bucket implementation shared. | Independent caller budgets and clock/lock behavior are preserved. Consolidate repeated transport timeout definitions separately; no generic clock abstraction is introduced. |
-| BE-05, TS-14 | Agree for active startup/configuration paths. | Centralize typed parsing and defaults; test invalid configuration and empty-origin behavior without logging credentials. Revisit archived low-coverage code with the retention decision. |
+| BE-04 | Implemented: shared bucket and equivalent send policy (v0.3.63). | Independent caller budgets and clock/lock behavior are preserved; per-frame sends share one timeout while outer final-delivery, authentication, idle and shutdown budgets remain distinct. |
+| BE-05 | Implemented in v0.3.61. | Typed production capture, an explicit empty-origin warning, redacted errors/lazy database and intentional development/container defaults have focused, full source-bound and actual-image acceptance. |
+| TS-14 | Coverage observation; not automatically closed by extracting configuration. | Exercise active startup paths meaningfully; assess retained low-coverage adapters alongside the protocol inventory. Do not add sibling tests merely to change counts. |
 | BE-06, CX-06 | Agree; safe exemption cleanup implemented. | Removed the unused restoration method and stale exemptions; gated test-only hooks and preserved production cooldown observations. Admission-argument refactoring remains separate. |
 | BE-08, CX-04/05 | Agree; aggregation and source-size coverage shipped in v0.3.54. | Test-only declaration aggregation preserves every test name and production module. Dynamic item-tree discovery and eight wired regressions close the guard gap; consolidate genuinely equivalent fixtures separately. |
-| BE-09, CX-07 | Mixed: maintainability concerns, not proven reachable panics. | Replace transport-state assumptions with typed authenticated commands where useful; split orchestration around domain operations. Audit narrowing conversions before changing public APIs. |
+| BE-09 | Addressed by v0.3.63 and the bounded invariant audit. | Typed dispatch removes the distant authentication/sequence assumptions. Remaining cited owner expects follow locally proven serial slot validation; projection narrowings follow explicit bounds. No reachable defect was found, so retain those checks rather than add fallible-conversion churn. |
+| CX-07 | Core admission argument grouping remains. | Replace the live eight-positional-argument projection call with named inputs, retaining old public wrappers and exact validation/privacy/order. Broader orchestrator rewriting is not justified by the audited sites. |
 | BE-10, TL-04 | Agree; rationale and grouping implemented. | Cargo patch, per-workspace npm minor/patch and Actions minor/patch groups preserve individual pinned RNG, Docker, major and security proposals. Document compatibility review; no version ignores or automatic merges. |
 | BE-11, TS-09/10 | Mostly intentional tests/benchmarks. | Use virtual time where it preserves the real socket deadline being tested. Keep performance tests separate from ordinary suites. Do not replace useful waits or ignored benchmarks solely to improve counts. |
 | BE-12/13 | Shutdown ordering defect reproduced; registry latency still unmeasured. | A quiet v0.3.56 probe holds incomplete HTTP headers and remains running 7.07s after SIGTERM before the five-second app drain is reached. Released v0.3.58 applies one signal-time deadline to both drains. Strengthened timing, consumed-header regressions, full source-bound coverage and actual-image probes pass (held-header exit 5.127s; graceful exit 0.115s). Separately measure registry-lock work and non-reading upgraded clients. |
@@ -237,10 +246,12 @@ Related IDs are grouped to avoid treating one architectural problem as several i
 | FE-06 | Type-hygiene observation, not a broad defect. | Replace the isolated double cast when touching binding construction; no repository-wide type rewrite. |
 | FE-07, SEC-04/10 | Basic headers/cache, standalone validators and compatible CSP implemented. | Pixi static paths, Mantine styles and same-origin HTTP/WS + HTTPS/WSS pass enforced trials. Actual server-header and same-image Compose/Kubernetes acceptance pass; retain the explicit style exception and Chromium support boundary. |
 | FE-08 | Selector counts do not describe the current web tests. | Current web tests use role queries rather than test IDs. Assess E2E selectors in their own scope; a selector ratio alone is not an accessibility defect. Retain actual accessibility audits. |
-| FE-09/10 | Agree, lower-priority consistency work. | Consolidate copied scene mocks, preserving specialized renderer/atlas mocks; introduce semantic color tokens incrementally. |
+| FE-09 | Implemented in v0.3.62. | Three copied scene mocks reuse the existing shared helper with unchanged test bodies/titles/assertions and full web acceptance; specialized renderer/atlas mocks remain intentional. |
+| FE-10 | Agree, lower-priority consistency work. | Introduce semantic color tokens incrementally while preserving visuals and accessibility. |
 | TS-01/02 | Agree on cost; sampling is a policy change. | Measure a structured fast feedback suite while retaining exhaustive acceptance. Compare fault detection before proposing a new cadence; keep current assertions and exhaustive coverage meanwhile. |
 | TS-03/04 | Agree; helper exclusions and threshold recalibration implemented. | Fresh application coverage supports web floors of 90% lines / 88% other metrics and Rust 90% lines. The full Rust measurement ran at the prior floor before ratcheting; execution and exhaustive masks remain unchanged. Optional tool-dependent gates stay explicit. |
-| TS-05, TL-01/02/03, SEC-05 | Partly agree: orphan callers and gate discoverability need work. | Wire the orphan script tests now; audit manual diagnostic-suite coverage and document aggregate scope. Preserve local-first verification; duplicated automatic remote gates are not a default requirement. |
+| TS-05, TL-02/03, SEC-05 | Aggregate scope is documented; diagnostic coverage/wiring still needs an explicit disposition. | Audit the renderer/terrain manual suites and protocol coverage inventory. Preserve local-first verification and documented optional tools; a new blanket full target or duplicate automatic pipeline is not required. |
+| TL-01 | Implemented. | Repository checks call the workflow-contract tests and the server-parallel gate calls the real Python runner tests. |
 | TS-07 | Agree; mapped AST-based check implemented. | Explicit document/spec inventory and title parity reject duplicates and unknown/missing files; static string/template/alias forms work, while ambiguous modifiers fail with documented guidance. |
 | TS-11/12 | Factual suggestions, not established missing-risk coverage. | Target parser mutation/property checks and simultaneous competing-resume tests at explicit invariants; existing concurrency tests already use synchronized claimants. |
 | TS-13 | Disagree with sibling-test filenames as a coverage measure. | Use behavior and coverage of actual call paths. Indirectly covered components do not require duplicate tests solely to match filenames. |
@@ -249,7 +260,7 @@ Related IDs are grouped to avoid treating one architectural problem as several i
 | TL-08/09 | Useful incremental guardrails, not all immediate defects. | Add selected shell/workflow checks with documented tool versions; evaluate stricter TS/lint rules by actionable findings rather than enabling everything at once. |
 | TL-10/11 | Moderate audit findings patched; cache opportunities remain. | Vitest/coverage and transitive URI patches yield zero npm findings. Reuse verified tool/build caches, keep security failures visible and pin tool provenance. |
 | TL-12 | Agree on build-cache/reproducibility tradeoffs. | Add dependency caching and OCI metadata. Replace unbounded package upgrades with a documented base-image/security-refresh policy; simply dropping upgrades can retain known vulnerabilities. |
-| TL-13/14/15/16 | Mixed low-priority tooling/documentation concerns. | Scope the peer-dependency workaround, document supported Python/tooling prerequisites, name gate commands in the PR template, and retain existing pin consistency checks. |
+| TL-13/14/15/16 | Current documentation and guardrails satisfy the accepted scope. | The web peer workaround and removal condition, Python/tool prerequisites, PR gate commands and existing pin checks are documented/retained. This does not authorize an unrelated compiler upgrade. |
 | SEC-03 | Agree; coordinated server/client fix implemented. | Correlated throttles retain the socket; bounded same-socket retries use fresh sequences and fenced timers within one deadline. Initial admission remains manually retryable; per-socket floods still close. |
 | SEC-06/07 | Capability tradeoff documented; denial visibility implemented in v0.3.53. | Fixed operation/reason counters and readable bounded summaries work under the default filter and exclude request data. The security guide explains leaked-capability takeover; recoverable rotation remains separate protocol work. |
 | SEC-08/09/11 | Sensible deployment hardening; some risks remain unmeasured. | Test container/pod limits and security-context requirements; define proxy/header/idle/connection limits before public hosting. NetworkPolicy needs an actual network/DB model. |
@@ -273,14 +284,48 @@ Related IDs are grouped to avoid treating one architectural problem as several i
    they supply distinct coverage. Dependabot validation can be designed without restoring the
    old duplicate branch/PR/merge/tag pipeline.
 
-## Next bounded batches
+## Bounded invariant audit
 
-1. Consolidate repeated testing/deployment documentation and share E2E context/configuration helpers.
-2. Apply the retention policy to historical protocol reduction and a single item specification.
-3. Measure bundle/render and lock/shutdown behavior before performance changes.
-4. Continue compatible dependency/tooling hardening and capability/replay operational decisions.
+The residual BE-09 audit traced the originally cited owner and projection sites. `Driver` is
+owned by one serial runner; the relevant synchronous operations validate a live/pending slot
+and access that same slot without intervening mutation. Resume preparation/commit changes
+runtime state rather than the validated driver slot. Existing rollback, departure and takeover
+tests remain the behavioral coverage. Projection casts follow explicit 1–8 bounds; cell and
+position conversion is already checked, event indices are bounded to 63, and generation’s two
+private conversions receive fixed escape-route cells. No reachable error was found. This is an
+assessment result, not a claim that every assertion/cast in the repository was reviewed.
 
-Public-hosting topology, durable replay export and any reduced exhaustive-test cadence need
-explicit requirements. None blocks the isolated fixes in the first batch. Fresh profiling,
-fuzzing, a stuck-client shutdown reproduction and a complete protocol-deletion audit remain
-outstanding; the review's baseline is not evidence those experiments ran.
+## Remaining agreed work before CPU mode
+
+The completion audit at v0.3.60 distinguishes delivered fixes from the remaining accepted
+scope. These packages are independent where their files and verification permit parallel work.
+Each ships with relevant tests and a version bump; no new approval or evidence pipeline is added.
+
+| Package | Remaining scope and completion evidence |
+| --- | --- |
+| Core admission / CX-07 | Group projection inputs and personal metadata while retaining old public signatures and validation/privacy/order. Typed transport and equivalent send policy are shipped; BE-09’s remaining cited invariants were audited without a defect. |
+| Fixtures / CX-05, CX-02/TS-08, residual CX-08/TS-06/TL-05/07 | Share truly equivalent Rust worlds/frame fixtures, E2E selectors/collection and Compose seed scaffolding. Preserve every test identity/assertion, version-specific rejection, seed and independent session. Responsive contexts and simple config factories are already delivered. |
+| Protocol / API-01/CX-01/02/BE-07/FE-01, CX-03 | Map remaining consumers and unique tests; reduce selected adapters under ADR 0021 and establish a domain item specification. Preserve archived schemas/conformance, replay identity, item bits, activation subsets, generation order and privacy. Browser schema-owned catalogs are delivered. |
+| Frontend / FE-03/10 | Consolidate typed translation access and introduce semantic colors without changing visuals. Protocol archival, item heading consistency and equivalent scene mocks are implemented. |
+| Release/build / TL-06, selected TL-08/09, TL-11/12 | Optional version/changelog helper, selected pinned shell/workflow checks, verified tool/dependency caches, OCI metadata and a defined security-refresh policy. Stricter lint rules require actionable findings; do not introduce another mandatory release receipt process. |
+| Deployment / accepted SEC-08 | Appropriate Compose memory/PID limits and Kubernetes storage/security-context regression guards, plus actual runtime acceptance. Public ingress and NetworkPolicy require a real hosting/network model. |
+| Production replay / BE-01 | Record an explicit operational decision about journal allocation without a consumer, then implement the chosen recording policy and tests. Building a durable export product is not a prerequisite. |
+
+Agreed investigations must produce a recorded conclusion before speculative fixes:
+
+- **FE-02/04:** measure CSS/import opportunities and React commits at the 20 Hz publication rate.
+  Bundle budgets already exist; restructure subscriptions only if measurements justify it.
+- **BE-13 / residual BE-12:** measure registry-lock work and non-reading upgraded WebSockets.
+  The incomplete-HTTP-header/global shutdown defect was reproduced and fixed in v0.3.58.
+- **TS-01/02:** measure structured fast feedback/fault detection while retaining exhaustive
+  acceptance. Sampling has not been accepted as a replacement.
+- **API-10/CX-09 / TS-05:** inventory client/retained/cross-language protocol coverage and
+  diagnostic-suite wiring; the eleven recorded live receive variants are only part of it.
+- **TS-11/12:** assess parser mutation/property checks and competing-resume invariants at
+  concrete boundaries. Existing synchronized concurrency tests count as actual coverage.
+
+Completion means every accepted concrete item has implementation and relevant verification,
+and each agreed investigation has a result and disposition. Conditional/declined proposals
+remain explicit: consumer-dependent Problem codes, capability rotation, durable replay export,
+public-hosting topology, blanket duplicate CI, historical schema deletion, arbitrary sibling
+tests and selector-ratio rewrites do not silently become CPU prerequisites.

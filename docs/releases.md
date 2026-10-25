@@ -79,60 +79,45 @@ interrupted state but cannot preserve process-local matches or credentials.
 Keep the previous immutable image reference for rollback; database migration compatibility
 must be designed when durable application data is introduced.
 
-## v0.3.60 — 2026-10-25
+## v0.3.63 — 2026-10-25
 
-[v0.3.60](https://github.com/liveweird/grenadiers/releases/tag/v0.3.60) enables all 22 configurable
-items in newly created live rooms, including curses and Oil. All on/All off edit only the item
-draft; numeric settings, editing locks and explicit Apply remain intact. Restore match defaults
-enables all available items; Classic disables optional items. Existing rooms, rematches and
-historical replay defaults retain their settings. Live replay headers record explicit defaults;
-no wire, rules, generator or replay format version changes.
+[v0.3.63](https://github.com/liveweird/grenadiers/releases/tag/v0.3.63) separates authentication
+from the nine sequenced commands before dispatch. Authenticated dispatch now accepts a private
+sequenced type, preserving high-water advancement before semantic checks, error correlation,
+quotas, admission ownership and every close sequence. Gameplay and diagnostics share the same
+five-second per-frame send policy; whole final-delivery sequences retain their independent outer
+budget. No wire, schema, replay, dependency or client behavior changes.
 
-A responsive own-player bar shows upgrade totals, equipment/weapon slots, every effect timer,
-all Slow Foot stack timers, freeze and damage grace. Counts come from authoritative snapshots;
-an opponent's Stopwatch freeze has no invented countdown. Recent own pickups, including basic
-upgrades and Teleporter, are announced once, with reconnect/round/death boundaries respected.
-Oil remains a world object. English/Polish text and icons reuse the current sheet. See
-[settings](game/settings.md) and [browser presentation](game/browser.md).
+Independent review and focused real-socket regressions pass, including all nine pre-auth command
+variants, semantic-failure sequence consumption, reauthentication closure and distinct counters.
+Fresh source-bound Rust acceptance at `c8cc672812ea04d74a074a9570c9f473bd91dd62` completes every
+4,194,304 mask in debug, release and official coverage in 428.571s with zero retries. Each ordinary
+profile passes 930 core / 307 server tests plus two doctests; four existing performance cases
+remain ignored. Coverage is 17,514/18,719 lines (93.56%) at the 90% floor. Rustfmt, Clippy,
+runner/repository checks and [Linux units](https://github.com/liveweird/grenadiers/actions/runs/40237196707) pass.
 
-Application inputs match `c5b668f9fddf8cf95a582c499192a92f658a0e95`; later source changes only E2E
-assertions, artifact ignores and documentation. Accepted image is
-`sha256:ab7cf594b833c7d5c9b3c7dec15a34292dc22854affa00a949b3a309b7df1e8b`.
-Independent server, web and scenario reviews are clear. Corrections prove the active collector's
-Polish 320px bar and expose remaining grace time in its accessible name. Own/rival numeric and
-label-geometry assertions are preserved after moving the own bar.
+Integrated image source `c50773d764ea0fd897de809de746719f9a7cde8e` has identical Rust inputs and
+the unchanged v0.3.62 web tree. Accepted image is
+`sha256:efa9be5a847ed7334388b1129a6be980e5df5fe25c72fc3d7d7620bc9dfc87f9`.
+The image passes eight native Compose cases and eight Kubernetes cases, with exact image,
+security/probes/resources/origin/CSP/cache and readiness checks. A fresh pinned image scan reports
+zero fixable HIGH/CRITICAL findings. Reuse v0.3.62 web acceptance and unchanged dependency audits.
 
-Fresh Rust acceptance at clean source `5e4743d8d868ee86cf7a078aa88af150688d8d1b` has identical
-Cargo/core/server inputs. All 4,194,304 replay masks pass in debug, release and official coverage
-in 544.996s, with 32 complete partitions per profile and zero retries. Ordinary profiles pass
-930 core and 296 server tests plus two doctests; four existing performance cases stay ignored.
-Coverage is 17,290/18,492 lines (93.50%) at the 90% floor, with helper exclusions intact. The
-initial sandbox denied local listener binds; the unchanged suite passed with socket permission.
-Rustfmt, Clippy and the runner fixture checks pass.
+Localhost:8085 serves the accepted image. Runtime security, health/readiness, CSP/cache and exact
+HTML/JavaScript/atlas equality with accepted unchanged assets pass, plus one fresh native
+authentication smoke. Temporary acceptance resources are removed. Control is
+`.local-checkpoints/runtime/compose-v0.3.63.yaml`; `rollback-v0.3.62.yaml` retains the prior image.
+There is no migration. Core admission argument grouping and other remaining review work stay
+separate; CPU implementation remains deferred.
 
-The fresh web gate passes 6,812 tests / 91 files in 292.82s. Coverage is
-91.10/89.47/90.12/93.47% above the existing floors; gzip JavaScript/CSS are 337,937/36,505 bytes.
-API/schema/standalone drift, lint, unused-code, build, repository and full E2E static checks pass.
-The pre-review coverage attempt was interrupted for the accessible-name fix; this final run
-uses the corrected source. Dependency inputs are unchanged; reuse v0.3.57's fresh Cargo-deny
-and both zero-finding npm audits. A fresh pinned Trivy scan of this exact image reports zero
-fixable HIGH/CRITICAL findings under the existing policy.
+<a id="v0362--2026-10-25"></a>
+The [v0.3.62 record](history/releases.md#v0362--2026-10-25) is preserved in release history.
 
-Exact-image native Chromium passes 32 Compose cases: all 22 item scenarios, generated upgrades,
-a complete classic match/rematch, and eight default cases. Eight more default cases pass
-through Kubernetes (40 total), with zero configured retries. Collector-side Polish 320px Heart
-capture, pickup feedback, replacement/consumption, expiry, privacy and own/rival geometry are
-covered. The [distinct Linux units](https://github.com/liveweird/grenadiers/actions/runs/40232475529)
-pass. Two temporary Kubernetes helper preflights failed (resource path and omitted empty env
-values) before browser execution; corrected helpers pass, and failed logs remain retained.
+<a id="v0361--2026-10-25"></a>
+The [v0.3.61 record](history/releases.md#v0361--2026-10-25) is preserved in release history.
 
-Localhost:8085 serves the accepted image. Promotion verifies runtime security, health/readiness,
-CSP/cache and exact HTML/JavaScript/atlas equality with the image/local build; one additional
-native configured-rules smoke verifies fresh defaults and EN/PL bulk controls. Temporary
-Compose projects, namespaces and port-forwards are removed. Control is
-`.local-checkpoints/runtime/compose-v0.3.60.yaml`; `rollback-v0.3.59.yaml` retains the prior image.
-No migration is required; restarts end process-local matches. The accepted CPU design is next;
-this release does not implement single-player mode or finish every quality-review follow-up.
+<a id="v0360--2026-10-25"></a>
+The [v0.3.60 record](history/releases.md#v0360--2026-10-25) is preserved in release history.
 
 <a id="v0359--2026-10-25"></a>
 The [v0.3.59 record](history/releases.md#v0359--2026-10-25) is preserved in release history.

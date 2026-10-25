@@ -14,7 +14,7 @@ the time; they do not add approval steps to the current workflow.
 | Configure or expose the server | [Security](security.md), [deployment](deployment.md) |
 | Prepare a release | [Release policy](releases.md#release-verification-policy), [release checklist](game/implementation-plan.md#release-checklist) |
 | Find planned work | [Product backlog](../BACKLOG.md), [milestones](game/implementation-plan.md), [quality-review response](quality-review.md) |
-| Inspect past acceptance | [Verification history](history/verification.md), [release history](history/releases.md), [testing narrative archive](history/testing.md), [deployment narrative archive](history/deployment.md), [backlog history](history/backlog.md) |
+| Inspect past acceptance or contracts | [Verification history](history/verification.md), [release history](history/releases.md), [protocol guide archive](history/protocols/README.md), [testing narrative archive](history/testing.md), [deployment narrative archive](history/deployment.md), [backlog history](history/backlog.md) |
 
 Behavior, transport contracts, generated types, tests and the relevant topic document change
 together. Local checks are authoritative for the environment they exercise; use remote checks

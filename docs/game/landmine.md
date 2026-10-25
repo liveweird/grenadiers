@@ -1,11 +1,17 @@
 # Landmine
 
+## Current verification
+
 Corrected-source acceptance at `420d8df` passes fresh **50 Compose plus 50 Kubernetes** cases with zero retries or carried results. Remote and Landmine use fresh placement-ID checks across rolling observer history. Product behavior is unchanged; the new evidence is audited/sealed, while exact-head CI/post-merge CI and publication remain pending. See [verification](../verification.md).
+
+## Availability and rules
 
 Landmine is a configurable Expanded-v5 one-charge weapon enabled in new rooms. A successful manual bomb action consumes
 the stored charge and places a visible, passable, capacity-counted Standard bomb with a Contact
 trigger. It has no fuse. Automatic Diarrhea placements remain ordinary Timed bombs and do not
 consume the charge.
+
+## State and contact
 
 Every actor overlapping a mine during initial State construction receives exit grace, and newly
 placed mines grant grace to actors overlapping their cell. Reconnect and resume preserve the
@@ -20,6 +26,8 @@ Fire and other bomb blasts destroy an untriggered mine without detonating it, pu
 `BombDetonated` event, or extending flames. Blast rays continue through the destroyed mine. An
 accepted contact wins over destruction in the same immutable explosion plan. Timed and Remote
 bombs retain their original obstruction snapshot and chain behavior.
+
+## Compatibility
 
 Version 0.3.37 introduced Landmine with generator weight 15 after Remote Bomb, growing the pool
 to 305 entries while preserving every earlier 4096-mask path. Its original thirteen-item catalog

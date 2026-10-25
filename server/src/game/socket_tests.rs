@@ -161,7 +161,12 @@ async fn authenticates_and_consumes_fresh_sequences_before_semantics() {
         json!({"type":"authenticate", "protocolVersion":11, "token":token}),
     )
     .await;
-    assert_eq!(next_json(&mut socket).await["code"], "alreadyAuthenticated");
+    assert_eq!(
+        next_json(&mut socket).await,
+        json!({"type":"error", "code":"alreadyAuthenticated", "sequence":null})
+    );
+    let close = within(socket.next()).await.unwrap().unwrap();
+    assert!(matches!(close, Message::Close(Some(frame)) if u16::from(frame.code) == 1008));
     server.abort();
 }
 
@@ -370,6 +375,9 @@ async fn abrupt_authenticated_disconnect_releases_lease_and_connection_permit() 
     );
     server.abort();
 }
+
+#[path = "socket_tests/command_boundary_tests.rs"]
+mod command_boundary_tests;
 
 #[path = "peer_socket_tests.rs"]
 mod peer_tests;

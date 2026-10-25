@@ -1,5 +1,7 @@
 # Invisible Bombs
 
+## Release status
+
 Invisible Bombs is published as prerelease v0.3.41 from commit
 `f5c4adf66f8af9a5ef66b48f9230d17aea14f1d5`. Distinct post-merge run `39879618476` and tag run
 `39881306987` each pass all nine jobs, 53 browser cases and 65,536 settings masks. The sealed
@@ -7,11 +9,15 @@ accepted image `sha256:d063462c3130e3c8653734da72e8dfd6785b0c036e9579d9046cee884
 is promoted locally. The dated native checkpoint below retains its original execution identity
 and historical delivery status.
 
+## Availability and rules
+
 Invisible Bombs is an optional ten-second curse in Expanded-v5 rooms. While it is active, the
 affected player receives no live bomb records and no placement or detonation events. This applies
 to their own and their opponent's Timed, Remote and Contact bombs, including paused Timed bombs and
 special blast types. Bomb collision, capacity, contact, chains and detonation remain authoritative;
 flames, terrain, pickups, results and each actor's live-bomb count stay public.
+
+## State and privacy
 
 The effect lasts exactly 600 physical ticks. Collection applies immediately through tick `T+599`,
 expiry happens before actions at `T+600`, and recollection refreshes the deadline. Death and round
@@ -24,6 +30,8 @@ audience, then removes every seat blinded at that tick. An event may therefore b
 one seat, or neither. Earlier visible history remains visible after collection, and hidden history
 does not become visible after expiry. Complete bomb and event facts are validated before either
 recipient view is filtered and both recipient frames are prepared before publication advances.
+
+## Compatibility
 
 Version 0.3.41 adds Invisible Bombs as gameplay v9's sixteenth item and generator-v2's final weight
 15. The all-items mask is `1048560`; all 65,536 subsets are accepted. The new interval is `[335,

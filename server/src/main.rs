@@ -1,24 +1,22 @@
 #![forbid(unsafe_code)]
 
-use std::{net::SocketAddr, path::PathBuf};
+use std::net::SocketAddr;
 
-use grenadiers_server::{AppState, ShutdownOutcome, app, run_with_shutdown};
+use grenadiers_server::{Config, ShutdownOutcome, app, run_with_shutdown};
 use tokio::net::TcpListener;
 use tracing_subscriber::EnvFilter;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let configuration = Config::from_environment()?;
     tracing_subscriber::fmt()
-        .with_env_filter(
-            EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info")),
-        )
+        .with_env_filter(EnvFilter::new(configuration.log_filter()))
         .init();
 
-    let state = AppState::from_environment()?;
-    let address: SocketAddr = std::env::var("SERVER_ADDR")
-        .unwrap_or_else(|_| "127.0.0.1:8085".to_owned())
-        .parse()?;
-    let web_dist_dir = std::env::var_os("WEB_DIST_DIR").map(PathBuf::from);
+    for warning in configuration.warnings() {
+        tracing::warn!(%warning, "startup configuration warning");
+    }
+    let (state, address, web_dist_dir) = configuration.into_parts();
     let listener = TcpListener::bind(address).await?;
     tracing::info!(%address, "server listening");
     let router = app(state.clone(), web_dist_dir);

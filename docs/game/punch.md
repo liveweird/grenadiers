@@ -1,5 +1,7 @@
 # Punch
 
+## Availability and rules
+
 Punch is configurable permanent equipment, enabled in new Expanded-v5 rooms. Press the remappable Equipment key to
 punch the bomb in the adjacent cell indicated by the actor's authoritative heading. The target cell
 does not wrap. Timed or Remote bombs with Standard, Piercing or Power blasts are eligible, including
@@ -15,12 +17,16 @@ and returning to the source fails unchanged. The logical hop is instantaneous: i
 do not cause fire, mine, collision or pickup interaction. Landing on fire is legal and participates
 in the update's one later explosion plan.
 
+## State and privacy
+
 Success preserves the bomb's entity ID, owner, range, blast, placement tick, trigger and captured
 fuse. It stops active Kick motion, retains Kick history, removes every actor's grace for the moved
 bomb and creates no placement, movement or sound event. Success at physical tick T blocks another
 success through T+11 and permits one at T+12. The cooldown and persistent `hasBeenPunched` facts are
 private trusted state retained through replacement, reconnect, death and results, then cleared by a
 new round. No countdown, target highlight, blocked reason or success cue is published.
+
+## Compatibility
 
 Version 0.3.45 adds Punch after Kick in the twenty-item current catalog. Its capability bit
 is `2`; `ALL` is `3,145,723`. Generator v2 appends weight 15 after Kick, making the complete pool

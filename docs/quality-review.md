@@ -52,6 +52,13 @@ static and fallback responses. HTML revalidates; recognized eight-character Vite
 immutable caching, including hashes containing hyphens. API/WebSocket no-store is preserved.
 Strict CSP still requires compatible validator/style handling and is not enabled by this change.
 
+**DOC-01/02/04/14, partial:** the current verification policy and release procedures are now
+short entry points. Dated verification and older release records live in `docs/history/`, with
+their facts and headings preserved and relative links rebased. Known incoming fragments retain
+aliases. The latest published release remains v0.3.49; v0.3.50 is still an unreleased candidate.
+Testing, deployment and backlog consolidation remain separate work, including reconciliation
+with the pending artist PR before changing its overlapping documents.
+
 ## Finding dispositions and proposed solutions
 
 “Agree” accepts the observed issue, not every implementation proposed in the review.
@@ -59,7 +66,7 @@ Related IDs are grouped to avoid treating one architectural problem as several i
 
 | IDs | Disposition | Solution / next action |
 | --- | --- | --- |
-| DOC-01/02/04/05/07/08/09/14 | Agree: contributor guidance is buried in repeated release evidence. | Separate current procedures from history; retain old acceptance facts unchanged, use one release summary, and replace repeated per-item testing prose with a linked table. Adopt an Unreleased changelog section for future work. |
+| DOC-01/02/04/05/07/08/09/14 | Agree: contributor guidance is buried in repeated release evidence. | Verification/release history is separated from current procedures; the index links both archives. Unreleased changelog organization is in place. Continue with testing/deployment/backlog and replace repeated per-item testing prose with a linked table. |
 | DOC-03 | Agree on organization, not the claimed stale checkpoint status. | Move dated release narrative out of backlog; its explicitly historical “unreleased” state must not be rewritten as a current fact. |
 | DOC-06/10/11/13 | Agree: discovery and document structure need improvement. | Start with the new index; add an item how-to, ADR index and retention ADR, consistent item headings, and implemented/future rule markers. Move archived protocol guides with link checks. |
 | DOC-12 | Factually stale, deliberately preserved. | Keep `AGENTS.md` untouched under the user's instruction; point readers to current conventions and the index. |

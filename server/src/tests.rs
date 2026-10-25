@@ -101,7 +101,7 @@ fn openapi_declares_every_implemented_http_status() {
     let cases = [
         ("/api/v1/health", ["200"].as_slice()),
         ("/api/v1/ready", ["200", "503"].as_slice()),
-        ("/api/v1/ws", ["101", "400", "403", "503"].as_slice()),
+        ("/api/v1/ws", ["101", "400", "403", "429", "503"].as_slice()),
         (
             "/api/v1/game/ws",
             ["101", "400", "403", "429", "503"].as_slice(),
@@ -175,11 +175,13 @@ async fn websocket_rejections_cover_bad_upgrade_origin_and_capacity() {
         .await
         .unwrap();
     assert_eq!(malformed.status(), StatusCode::BAD_REQUEST);
+    assert_eq!(malformed.headers()[header::CACHE_CONTROL], "no-store");
 
     let (url, server) = start_server(state()).await;
     for origin in [None, Some("https://attacker.invalid")] {
         let forbidden = rejected_handshake(&url, origin).await;
         assert_eq!(forbidden.status(), StatusCode::FORBIDDEN);
+        assert_eq!(forbidden.headers()[header::CACHE_CONTROL], "no-store");
         assert_valid(
             &openapi_component("Problem"),
             &serde_json::from_slice(forbidden.body().as_deref().unwrap()).unwrap(),
@@ -189,14 +191,15 @@ async fn websocket_rejections_cover_bad_upgrade_origin_and_capacity() {
 
     let saturated = state();
     let _permits = saturated
-        .connections
+        .diagnostic_connections
         .clone()
-        .acquire_many_owned(MAX_CONNECTIONS.try_into().unwrap())
+        .acquire_many_owned(MAX_DIAGNOSTIC_CONNECTIONS.try_into().unwrap())
         .await
         .unwrap();
     let (url, server) = start_server(saturated).await;
     let response = rejected_handshake(&url, Some(ORIGIN)).await;
     assert_eq!(response.status(), StatusCode::SERVICE_UNAVAILABLE);
+    assert_eq!(response.headers()[header::CACHE_CONTROL], "no-store");
     assert_valid(
         &openapi_component("Problem"),
         &serde_json::from_slice(response.body().as_deref().unwrap()).unwrap(),
@@ -258,6 +261,7 @@ async fn connect(url: &str) -> ClientSocket {
         .insert(header::ORIGIN, ORIGIN.parse().unwrap());
     let (socket, response) = within(connect_async(request)).await.unwrap();
     assert_eq!(response.status(), StatusCode::SWITCHING_PROTOCOLS);
+    assert_eq!(response.headers()[header::CACHE_CONTROL], "no-store");
     socket
 }
 

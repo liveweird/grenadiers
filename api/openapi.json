@@ -283,10 +283,32 @@
         ],
         "responses": {
           "101": {
-            "description": "Switching protocols; server sends a welcome message."
+            "description": "Switching protocols; server sends a welcome message.",
+            "headers": {
+              "Cache-Control": {
+                "description": "Prevents storage of the upgrade response.",
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                }
+              }
+            }
           },
           "400": {
             "description": "Malformed WebSocket handshake; framework-generated rejection (plain text).",
+            "headers": {
+              "Cache-Control": {
+                "description": "Prevents storage of the rejection.",
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                }
+              }
+            },
             "content": {
               "text/plain": {
                 "schema": {
@@ -297,6 +319,47 @@
           },
           "403": {
             "description": "Missing or disallowed Origin",
+            "headers": {
+              "Cache-Control": {
+                "description": "Prevents storage of the rejection.",
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                }
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Diagnostic WebSocket upgrade rate exceeded",
+            "headers": {
+              "Cache-Control": {
+                "description": "Prevents storage of the rejection.",
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                }
+              },
+              "Retry-After": {
+                "description": "Minimum delay in seconds before retrying.",
+                "schema": {
+                  "type": "integer",
+                  "enum": [
+                    1
+                  ]
+                }
+              }
+            },
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -306,7 +369,18 @@
             }
           },
           "503": {
-            "description": "WebSocket connection capacity exhausted",
+            "description": "Diagnostic WebSocket connection capacity exhausted or server shutdown in progress",
+            "headers": {
+              "Cache-Control": {
+                "description": "Prevents storage of the rejection.",
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                }
+              }
+            },
             "content": {
               "application/problem+json": {
                 "schema": {

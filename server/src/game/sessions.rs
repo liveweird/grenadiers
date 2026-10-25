@@ -36,8 +36,27 @@ pub(crate) enum SessionIssueError {
 
 pub(crate) struct GameSessions {
     registry: Mutex<Registry>,
-    upgrade_limit: Mutex<MintBucket>,
+    upgrade_limit: UpgradeLimit,
     random_fill: Arc<RandomFill>,
+}
+
+pub(crate) struct UpgradeLimit {
+    bucket: Mutex<MintBucket>,
+}
+
+impl UpgradeLimit {
+    pub(crate) fn new(now: Instant) -> Self {
+        Self {
+            bucket: Mutex::new(MintBucket::new(now, MINT_BURST)),
+        }
+    }
+
+    pub(crate) fn allow(&self, now: Instant) -> bool {
+        self.bucket
+            .lock()
+            .unwrap_or_else(|error| error.into_inner())
+            .take(now, MINTS_PER_SECOND)
+    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -66,7 +85,7 @@ impl GameSessions {
     pub(crate) fn new(now: Instant) -> Self {
         Self {
             registry: Mutex::new(Registry::new(now)),
-            upgrade_limit: Mutex::new(MintBucket::new(now, MINT_BURST)),
+            upgrade_limit: UpgradeLimit::new(now),
             random_fill: Arc::new(|bytes| getrandom::fill(bytes).map_err(|_| ())),
         }
     }
@@ -78,16 +97,13 @@ impl GameSessions {
     ) -> Self {
         Self {
             registry: Mutex::new(Registry::new(now)),
-            upgrade_limit: Mutex::new(MintBucket::new(now, MINT_BURST)),
+            upgrade_limit: UpgradeLimit::new(now),
             random_fill: Arc::new(random_fill),
         }
     }
 
     pub(crate) fn allow_upgrade(&self, now: Instant) -> bool {
-        self.upgrade_limit
-            .lock()
-            .unwrap_or_else(|error| error.into_inner())
-            .take(now, MINTS_PER_SECOND)
+        self.upgrade_limit.allow(now)
     }
 
     pub(crate) fn claim(

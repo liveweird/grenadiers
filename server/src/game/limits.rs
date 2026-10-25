@@ -7,20 +7,20 @@ const INBOUND_REFILL_PER_SECOND: f64 = 60.0;
 const INACTIVITY_TIMEOUT: Duration = Duration::from_secs(30);
 const UNSEATED_LIFETIME: Duration = Duration::from_secs(300);
 
-pub(super) struct InboundLimit {
+pub(crate) struct InboundLimit {
     available: f64,
     updated_at: Instant,
 }
 
 impl InboundLimit {
-    pub(super) fn new(now: Instant) -> Self {
+    pub(crate) fn new(now: Instant) -> Self {
         Self {
             available: INBOUND_BURST,
             updated_at: now,
         }
     }
 
-    pub(super) fn take(&mut self, now: Instant) -> bool {
+    pub(crate) fn take(&mut self, now: Instant) -> bool {
         let elapsed = now.saturating_duration_since(self.updated_at);
         self.available =
             (self.available + elapsed.as_secs_f64() * INBOUND_REFILL_PER_SECOND).min(INBOUND_BURST);

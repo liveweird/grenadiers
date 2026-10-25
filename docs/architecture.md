@@ -57,8 +57,9 @@ snapshot/event wire shapes. [ADR 0013](decisions/0013-gameplay-v2-and-room-profi
 adds gameplay-v2 exposed items/events and immutable construction/publication profiles. Explicit fallible adapters check public domain state and bounded
 report windows before wire publication. `POST /api/v1/game/session` now issues bounded,
 short-lived anonymous credentials using OS randomness. The gameplay WebSocket handler
-atomically claims one owner, shares diagnostic capacity, and enforces bounded connection
-policy. A bounded room registry now routes code-based admission to one owner task per room.
+atomically claims one owner and enforces bounded connection policy. Diagnostics uses separate
+connection and upgrade-rate budgets, so diagnostic traffic cannot consume gameplay admission
+capacity. A bounded room registry routes code-based admission to one owner task per room.
 
 [ADR 0009](decisions/0009-room-lifecycle.md) keeps the implemented headless two-seat
 [lifecycle](game/rooms.md) in `core::room`. Credentials, discovery, binding generations,

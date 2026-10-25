@@ -317,6 +317,8 @@ export interface operations {
             /** @description Switching protocols; server sends a welcome message. */
             101: {
                 headers: {
+                    /** @description Prevents storage of the upgrade response. */
+                    "Cache-Control"?: "no-store";
                     [name: string]: unknown;
                 };
                 content?: never;
@@ -324,6 +326,8 @@ export interface operations {
             /** @description Malformed WebSocket handshake; framework-generated rejection (plain text). */
             400: {
                 headers: {
+                    /** @description Prevents storage of the rejection. */
+                    "Cache-Control"?: "no-store";
                     [name: string]: unknown;
                 };
                 content: {
@@ -333,15 +337,32 @@ export interface operations {
             /** @description Missing or disallowed Origin */
             403: {
                 headers: {
+                    /** @description Prevents storage of the rejection. */
+                    "Cache-Control"?: "no-store";
                     [name: string]: unknown;
                 };
                 content: {
                     "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description WebSocket connection capacity exhausted */
+            /** @description Diagnostic WebSocket upgrade rate exceeded */
+            429: {
+                headers: {
+                    /** @description Prevents storage of the rejection. */
+                    "Cache-Control"?: "no-store";
+                    /** @description Minimum delay in seconds before retrying. */
+                    "Retry-After"?: 1;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Diagnostic WebSocket connection capacity exhausted or server shutdown in progress */
             503: {
                 headers: {
+                    /** @description Prevents storage of the rejection. */
+                    "Cache-Control"?: "no-store";
                     [name: string]: unknown;
                 };
                 content: {

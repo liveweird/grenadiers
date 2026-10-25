@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- Apply one shutdown deadline to HTTP serving and application drain so incomplete requests
+  cannot keep the process waiting before the game/session drain budget starts.
+
 ## 0.3.57 — 2026-10-25
 
 ### Changed

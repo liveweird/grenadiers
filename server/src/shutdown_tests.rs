@@ -1,4 +1,4 @@
-use std::{future::Future, time::Duration};
+use std::{future::Future, io, time::Duration};
 
 use axum::{
     body::Body,
@@ -6,7 +6,7 @@ use axum::{
 };
 use futures_util::{SinkExt, StreamExt};
 use serde_json::{Value, json};
-use tokio::{net::TcpListener, task::JoinHandle, time::timeout};
+use tokio::{net::TcpListener, sync::oneshot, task::JoinHandle, time::timeout};
 use tokio_tungstenite::{
     MaybeTlsStream, WebSocketStream, connect_async,
     tungstenite::{Error as WebSocketError, Message, client::IntoClientRequest},
@@ -50,6 +50,34 @@ async fn server(state: AppState) -> (String, JoinHandle<()>) {
         .unwrap();
     });
     (format!("ws://{address}"), task)
+}
+
+async fn coordinated_server(
+    state: AppState,
+) -> (
+    String,
+    oneshot::Sender<()>,
+    JoinHandle<io::Result<ShutdownOutcome>>,
+) {
+    let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
+    let address = listener.local_addr().unwrap();
+    let (signal_tx, signal_rx) = oneshot::channel();
+    let task = tokio::spawn(run_with_shutdown(
+        state.clone(),
+        async move {
+            signal_rx.await.unwrap();
+        },
+        move |graceful| {
+            axum::serve(
+                listener,
+                app(state, None).into_make_service_with_connect_info::<std::net::SocketAddr>(),
+            )
+            .with_graceful_shutdown(async move {
+                let _ = graceful.await;
+            })
+        },
+    ));
+    (format!("ws://{address}"), signal_tx, task)
 }
 
 async fn connect(base: &str, path: &str) -> ClientSocket {
@@ -140,7 +168,7 @@ async fn closing(admission: &mut Admission) -> RoomNotice {
 async fn shutdown_delivers_member_finality_and_closes_every_socket_before_drain_completes() {
     let state = AppState::without_database([ORIGIN.to_owned()]);
     let tokens = [token(&state), token(&state)];
-    let (base, task) = server(state.clone()).await;
+    let (base, signal, task) = coordinated_server(state.clone()).await;
     let mut member = connect(&base, "/api/v1/game/ws").await;
     authenticate(&mut member, &tokens[0]).await;
     send(&mut member, json!({"type":"createRoom", "sequence":1})).await;
@@ -150,7 +178,7 @@ async fn shutdown_delivers_member_finality_and_closes_every_socket_before_drain_
     let mut diagnostic = connect(&base, "/api/v1/ws").await;
     assert!(matches!(next(&mut diagnostic).await, Message::Text(_)));
 
-    state.begin_shutdown();
+    signal.send(()).unwrap();
     let Message::Text(final_text) = next(&mut member).await else {
         panic!("member must receive the final room state");
     };
@@ -167,8 +195,10 @@ async fn shutdown_delivers_member_finality_and_closes_every_socket_before_drain_
             tokio_tungstenite::tungstenite::protocol::frame::coding::CloseCode::Away
         );
     }
-    assert!(state.wait_for_shutdown().await);
-    task.abort();
+    assert_eq!(
+        within(task).await.unwrap().unwrap(),
+        ShutdownOutcome::Completed
+    );
 }
 
 #[tokio::test(start_paused = true)]

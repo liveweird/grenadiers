@@ -4,10 +4,11 @@ use std::{collections::HashSet, fmt, path::PathBuf, sync::Arc, time::Duration};
 
 use axum::{
     Json, Router,
+    body::Body,
     extract::State,
     http::{
-        StatusCode,
-        header::{CACHE_CONTROL, CONTENT_TYPE},
+        Request, StatusCode, Uri,
+        header::{ALLOW, CACHE_CONTROL, CONTENT_TYPE},
     },
     middleware,
     response::{IntoResponse, Response},
@@ -216,13 +217,21 @@ pub fn app(state: AppState, web_dist_dir: Option<PathBuf>) -> Router {
         .route("/api/v1/ready", get(ready))
         .route(
             "/api/v1/ws",
-            get(diagnostics::websocket).layer(middleware::from_fn(diagnostics::no_store)),
+            get(diagnostics::websocket)
+                .head(api_method_not_allowed)
+                .layer(middleware::from_fn(no_store_middleware)),
         )
         .route("/api/v1/game/session", post(issue_session))
-        .route("/api/v1/game/ws", get(game_websocket))
+        .route(
+            "/api/v1/game/ws",
+            get(game_websocket)
+                .head(api_method_not_allowed)
+                .layer(middleware::from_fn(no_store_middleware)),
+        )
         .route("/api", any(api_not_found))
         .route("/api/", any(api_not_found))
         .route("/api/{*path}", any(api_not_found))
+        .method_not_allowed_fallback(api_method_not_allowed)
         .layer(
             TraceLayer::new_for_http()
                 .make_span_with(|request: &axum::http::Request<_>| http_request_span(request)),
@@ -292,13 +301,36 @@ fn with_no_store(mut response: Response) -> Response {
     response
 }
 
+async fn no_store_middleware(request: Request<Body>, next: middleware::Next) -> Response {
+    with_no_store(next.run(request).await)
+}
+
 async fn api_not_found() -> Response {
-    Problem::new(
-        StatusCode::NOT_FOUND,
-        "Not Found",
-        "API route does not exist",
+    with_no_store(
+        Problem::new(
+            StatusCode::NOT_FOUND,
+            "Not Found",
+            "API route does not exist",
+        )
+        .response(),
     )
-    .response()
+}
+
+async fn api_method_not_allowed(uri: Uri) -> Response {
+    let mut response = with_no_store(
+        Problem::new(
+            StatusCode::METHOD_NOT_ALLOWED,
+            "Method Not Allowed",
+            "HTTP method is not supported for this API route",
+        )
+        .response(),
+    );
+    if matches!(uri.path(), "/api/v1/ws" | "/api/v1/game/ws") {
+        response
+            .headers_mut()
+            .insert(ALLOW, "GET".parse().expect("valid allow header"));
+    }
+    response
 }
 
 #[cfg(test)]
@@ -309,6 +341,8 @@ mod game_http_tests;
 #[cfg(test)]
 #[path = "game/socket_tests.rs"]
 mod game_socket_tests;
+#[cfg(test)]
+mod http_fallback_tests;
 #[cfg(test)]
 mod round_seed_tests;
 #[cfg(test)]

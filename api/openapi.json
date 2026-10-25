@@ -15,6 +15,15 @@
     }
   ],
   "security": [],
+  "x-api-fallback-responses": {
+    "description": "Responses for requests that do not match a documented operation.",
+    "404": {
+      "$ref": "#/components/responses/NotFound"
+    },
+    "405": {
+      "$ref": "#/components/responses/MethodNotAllowed"
+    }
+  },
   "tags": [
     {
       "name": "system",
@@ -41,6 +50,11 @@
         "responses": {
           "200": {
             "description": "Process is alive",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/NoStore"
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -63,6 +77,11 @@
         "responses": {
           "200": {
             "description": "Ready to accept traffic",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/NoStore"
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -73,6 +92,11 @@
           },
           "503": {
             "description": "Configured PostgreSQL is unavailable",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/NoStore"
+              }
+            },
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -109,13 +133,7 @@
             "description": "Anonymous gameplay session created",
             "headers": {
               "Cache-Control": {
-                "description": "Prevents credential storage by caches.",
-                "schema": {
-                  "type": "string",
-                  "enum": [
-                    "no-store"
-                  ]
-                }
+                "$ref": "#/components/headers/NoStore"
               }
             },
             "content": {
@@ -128,6 +146,11 @@
           },
           "400": {
             "description": "Query parameters are not supported",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/NoStore"
+              }
+            },
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -138,6 +161,11 @@
           },
           "403": {
             "description": "Missing or disallowed Origin",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/NoStore"
+              }
+            },
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -149,14 +177,11 @@
           "429": {
             "description": "Global session issuance rate exceeded",
             "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/NoStore"
+              },
               "Retry-After": {
-                "description": "Minimum delay in seconds before retrying.",
-                "schema": {
-                  "type": "integer",
-                  "enum": [
-                    1
-                  ]
-                }
+                "$ref": "#/components/headers/RetryAfter"
               }
             },
             "content": {
@@ -169,6 +194,11 @@
           },
           "503": {
             "description": "Session registry capacity exhausted or credential generation unavailable",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/NoStore"
+              }
+            },
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -202,10 +232,20 @@
         ],
         "responses": {
           "101": {
-            "description": "Switching protocols; client must send an authenticate frame first."
+            "description": "Switching protocols; client must send an authenticate frame first.",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/NoStore"
+              }
+            }
           },
           "400": {
             "description": "Query parameters are unsupported or the WebSocket handshake is malformed.",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/NoStore"
+              }
+            },
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -221,6 +261,11 @@
           },
           "403": {
             "description": "Missing, duplicated, null, malformed, or disallowed Origin",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/NoStore"
+              }
+            },
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -232,12 +277,11 @@
           "429": {
             "description": "Global gameplay connection rate exceeded",
             "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/NoStore"
+              },
               "Retry-After": {
-                "description": "Minimum delay in seconds before retrying.",
-                "schema": {
-                  "type": "integer",
-                  "enum": [1]
-                }
+                "$ref": "#/components/headers/RetryAfter"
               }
             },
             "content": {
@@ -250,6 +294,11 @@
           },
           "503": {
             "description": "Shared WebSocket connection capacity exhausted",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/NoStore"
+              }
+            },
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -286,13 +335,7 @@
             "description": "Switching protocols; server sends a welcome message.",
             "headers": {
               "Cache-Control": {
-                "description": "Prevents storage of the upgrade response.",
-                "schema": {
-                  "type": "string",
-                  "enum": [
-                    "no-store"
-                  ]
-                }
+                "$ref": "#/components/headers/NoStore"
               }
             }
           },
@@ -300,13 +343,7 @@
             "description": "Malformed WebSocket handshake; framework-generated rejection (plain text).",
             "headers": {
               "Cache-Control": {
-                "description": "Prevents storage of the rejection.",
-                "schema": {
-                  "type": "string",
-                  "enum": [
-                    "no-store"
-                  ]
-                }
+                "$ref": "#/components/headers/NoStore"
               }
             },
             "content": {
@@ -321,13 +358,7 @@
             "description": "Missing or disallowed Origin",
             "headers": {
               "Cache-Control": {
-                "description": "Prevents storage of the rejection.",
-                "schema": {
-                  "type": "string",
-                  "enum": [
-                    "no-store"
-                  ]
-                }
+                "$ref": "#/components/headers/NoStore"
               }
             },
             "content": {
@@ -342,22 +373,10 @@
             "description": "Diagnostic WebSocket upgrade rate exceeded",
             "headers": {
               "Cache-Control": {
-                "description": "Prevents storage of the rejection.",
-                "schema": {
-                  "type": "string",
-                  "enum": [
-                    "no-store"
-                  ]
-                }
+                "$ref": "#/components/headers/NoStore"
               },
               "Retry-After": {
-                "description": "Minimum delay in seconds before retrying.",
-                "schema": {
-                  "type": "integer",
-                  "enum": [
-                    1
-                  ]
-                }
+                "$ref": "#/components/headers/RetryAfter"
               }
             },
             "content": {
@@ -372,13 +391,7 @@
             "description": "Diagnostic WebSocket connection capacity exhausted or server shutdown in progress",
             "headers": {
               "Cache-Control": {
-                "description": "Prevents storage of the rejection.",
-                "schema": {
-                  "type": "string",
-                  "enum": [
-                    "no-store"
-                  ]
-                }
+                "$ref": "#/components/headers/NoStore"
               }
             },
             "content": {
@@ -394,6 +407,77 @@
     }
   },
   "components": {
+    "headers": {
+      "NoStore": {
+        "description": "Prevents storage of the response by caches.",
+        "schema": {
+          "type": "string",
+          "enum": [
+            "no-store"
+          ]
+        },
+        "example": "no-store"
+      },
+      "RetryAfter": {
+        "description": "Minimum delay in seconds before retrying.",
+        "schema": {
+          "type": "string",
+          "pattern": "^[0-9]+$"
+        },
+        "example": "1"
+      }
+    },
+    "responses": {
+      "NotFound": {
+        "description": "No API route matches the requested path.",
+        "headers": {
+          "Cache-Control": {
+            "$ref": "#/components/headers/NoStore"
+          }
+        },
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/Problem"
+            },
+            "example": {
+              "type": "about:blank",
+              "title": "Not Found",
+              "status": 404,
+              "detail": "API route does not exist"
+            }
+          }
+        }
+      },
+      "MethodNotAllowed": {
+        "description": "The API path exists but does not support the requested method.",
+        "headers": {
+          "Allow": {
+            "description": "Methods supported by the matched API route.",
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "Cache-Control": {
+            "$ref": "#/components/headers/NoStore"
+          }
+        },
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/Problem"
+            },
+            "example": {
+              "type": "about:blank",
+              "title": "Method Not Allowed",
+              "status": 405,
+              "detail": "HTTP method is not supported for this API route"
+            }
+          }
+        }
+      }
+    },
     "schemas": {
       "GameSession": {
         "type": "object",

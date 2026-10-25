@@ -4,6 +4,8 @@
 
 ### Fixed
 
+- Return no-store problem responses for unknown API paths and unsupported methods, preserve
+  route-specific `Allow` headers, and handle WebSocket HEAD requests without response bodies.
 - Isolate diagnostic WebSocket connection and upgrade-rate limits from gameplay, enforce
   strict Origin/inbound/write guards, and drain both connection pools during shutdown.
 - Show a localized recovery screen for application rendering failures.

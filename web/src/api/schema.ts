@@ -122,10 +122,60 @@ export interface components {
             detail: string;
         };
     };
-    responses: never;
+    responses: {
+        /** @description No API route matches the requested path. */
+        NotFound: {
+            headers: {
+                "Cache-Control": components["headers"]["NoStore"];
+                [name: string]: unknown;
+            };
+            content: {
+                /**
+                 * @example {
+                 *       "type": "about:blank",
+                 *       "title": "Not Found",
+                 *       "status": 404,
+                 *       "detail": "API route does not exist"
+                 *     }
+                 */
+                "application/problem+json": components["schemas"]["Problem"];
+            };
+        };
+        /** @description The API path exists but does not support the requested method. */
+        MethodNotAllowed: {
+            headers: {
+                /** @description Methods supported by the matched API route. */
+                Allow?: string;
+                "Cache-Control": components["headers"]["NoStore"];
+                [name: string]: unknown;
+            };
+            content: {
+                /**
+                 * @example {
+                 *       "type": "about:blank",
+                 *       "title": "Method Not Allowed",
+                 *       "status": 405,
+                 *       "detail": "HTTP method is not supported for this API route"
+                 *     }
+                 */
+                "application/problem+json": components["schemas"]["Problem"];
+            };
+        };
+    };
     parameters: never;
     requestBodies: never;
-    headers: never;
+    headers: {
+        /**
+         * @description Prevents storage of the response by caches.
+         * @example no-store
+         */
+        NoStore: "no-store";
+        /**
+         * @description Minimum delay in seconds before retrying.
+         * @example 1
+         */
+        RetryAfter: string;
+    };
     pathItems: never;
 }
 export type $defs = Record<string, never>;
@@ -142,6 +192,7 @@ export interface operations {
             /** @description Process is alive */
             200: {
                 headers: {
+                    "Cache-Control": components["headers"]["NoStore"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -162,6 +213,7 @@ export interface operations {
             /** @description Ready to accept traffic */
             200: {
                 headers: {
+                    "Cache-Control": components["headers"]["NoStore"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -171,6 +223,7 @@ export interface operations {
             /** @description Configured PostgreSQL is unavailable */
             503: {
                 headers: {
+                    "Cache-Control": components["headers"]["NoStore"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -194,8 +247,7 @@ export interface operations {
             /** @description Anonymous gameplay session created */
             201: {
                 headers: {
-                    /** @description Prevents credential storage by caches. */
-                    "Cache-Control"?: "no-store";
+                    "Cache-Control": components["headers"]["NoStore"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -205,6 +257,7 @@ export interface operations {
             /** @description Query parameters are not supported */
             400: {
                 headers: {
+                    "Cache-Control": components["headers"]["NoStore"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -214,6 +267,7 @@ export interface operations {
             /** @description Missing or disallowed Origin */
             403: {
                 headers: {
+                    "Cache-Control": components["headers"]["NoStore"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -223,8 +277,8 @@ export interface operations {
             /** @description Global session issuance rate exceeded */
             429: {
                 headers: {
-                    /** @description Minimum delay in seconds before retrying. */
-                    "Retry-After"?: 1;
+                    "Cache-Control": components["headers"]["NoStore"];
+                    "Retry-After": components["headers"]["RetryAfter"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -234,6 +288,7 @@ export interface operations {
             /** @description Session registry capacity exhausted or credential generation unavailable */
             503: {
                 headers: {
+                    "Cache-Control": components["headers"]["NoStore"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -257,6 +312,7 @@ export interface operations {
             /** @description Switching protocols; client must send an authenticate frame first. */
             101: {
                 headers: {
+                    "Cache-Control": components["headers"]["NoStore"];
                     [name: string]: unknown;
                 };
                 content?: never;
@@ -264,6 +320,7 @@ export interface operations {
             /** @description Query parameters are unsupported or the WebSocket handshake is malformed. */
             400: {
                 headers: {
+                    "Cache-Control": components["headers"]["NoStore"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -274,6 +331,7 @@ export interface operations {
             /** @description Missing, duplicated, null, malformed, or disallowed Origin */
             403: {
                 headers: {
+                    "Cache-Control": components["headers"]["NoStore"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -283,8 +341,8 @@ export interface operations {
             /** @description Global gameplay connection rate exceeded */
             429: {
                 headers: {
-                    /** @description Minimum delay in seconds before retrying. */
-                    "Retry-After"?: 1;
+                    "Cache-Control": components["headers"]["NoStore"];
+                    "Retry-After": components["headers"]["RetryAfter"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -294,6 +352,7 @@ export interface operations {
             /** @description Shared WebSocket connection capacity exhausted */
             503: {
                 headers: {
+                    "Cache-Control": components["headers"]["NoStore"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -317,8 +376,7 @@ export interface operations {
             /** @description Switching protocols; server sends a welcome message. */
             101: {
                 headers: {
-                    /** @description Prevents storage of the upgrade response. */
-                    "Cache-Control"?: "no-store";
+                    "Cache-Control": components["headers"]["NoStore"];
                     [name: string]: unknown;
                 };
                 content?: never;
@@ -326,8 +384,7 @@ export interface operations {
             /** @description Malformed WebSocket handshake; framework-generated rejection (plain text). */
             400: {
                 headers: {
-                    /** @description Prevents storage of the rejection. */
-                    "Cache-Control"?: "no-store";
+                    "Cache-Control": components["headers"]["NoStore"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -337,8 +394,7 @@ export interface operations {
             /** @description Missing or disallowed Origin */
             403: {
                 headers: {
-                    /** @description Prevents storage of the rejection. */
-                    "Cache-Control"?: "no-store";
+                    "Cache-Control": components["headers"]["NoStore"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -348,10 +404,8 @@ export interface operations {
             /** @description Diagnostic WebSocket upgrade rate exceeded */
             429: {
                 headers: {
-                    /** @description Prevents storage of the rejection. */
-                    "Cache-Control"?: "no-store";
-                    /** @description Minimum delay in seconds before retrying. */
-                    "Retry-After"?: 1;
+                    "Cache-Control": components["headers"]["NoStore"];
+                    "Retry-After": components["headers"]["RetryAfter"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -361,8 +415,7 @@ export interface operations {
             /** @description Diagnostic WebSocket connection capacity exhausted or server shutdown in progress */
             503: {
                 headers: {
-                    /** @description Prevents storage of the rejection. */
-                    "Cache-Control"?: "no-store";
+                    "Cache-Control": components["headers"]["NoStore"];
                     [name: string]: unknown;
                 };
                 content: {

@@ -23,6 +23,16 @@ The original review remains unchanged in the local review folder.
 - **DOC-06, partial:** add the [contributor index](README.md). The broader history split and
   item-development guide remain follow-up work.
 
+## Subsequent HTTP contract repair
+
+**API-02/03 and HTTP examples from API-07:** unknown API paths return no-store problem 404s;
+unsupported methods return problem 405s with route-specific `Allow`. WebSocket HEAD rejects
+with problem representation headers and no body, while health/readiness HEAD still succeeds.
+Both WebSocket routes apply no-store even to framework-generated errors and successful upgrades.
+Fallback statuses are documented separately from supported OpenAPI operations; shared cache/retry
+headers and problem examples match the implementation. Game-message descriptions and close-code
+documentation remain separate follow-up work.
+
 ## Finding dispositions and proposed solutions
 
 “Agree” accepts the observed issue, not every implementation proposed in the review.
@@ -35,7 +45,7 @@ Related IDs are grouped to avoid treating one architectural problem as several i
 | DOC-06/10/11/13 | Agree: discovery and document structure need improvement. | Start with the new index; add an item how-to, ADR index and retention ADR, consistent item headings, and implemented/future rule markers. Move archived protocol guides with link checks. |
 | DOC-12 | Factually stale, deliberately preserved. | Keep `AGENTS.md` untouched under the user's instruction; point readers to current conventions and the index. |
 | API-01, CX-01/02, BE-07, FE-01, TS-08 | Agree on duplication; blanket deletion is unsafe. | Define live-wire and replay retention separately. Extract the v8/v9 helpers used by v11, remove demonstrably unused client UI, then retire obsolete adapters/tests under the stated policy. Parameterize retained frame-bound tests. |
-| API-02/03 | Agree: error/status/header contract gaps. | Add a problem+json 405 fallback while preserving `Allow`; document API 404 and cache/retry headers, regenerate types, and exercise API/SPA separation with wrong-method tests. |
+| API-02/03 | Agree; HTTP repair implemented. | Problem 404/405 fallbacks, route-specific `Allow`, shared cache/retry headers and API/SPA/HEAD tests are in place; fallback responses are separate from supported operation responses. |
 | API-04, BE-02, SEC-02 | Agree; first batch implements this. | Independent diagnostic permits/rate budget and shared strict transport guards, with saturation, Origin, flood, cache-header and shutdown tests. |
 | API-05 | Optional improvement, not a demonstrated defect. | Add stable Problem codes only when a consumer needs distinctions beyond HTTP status. Do not unify diagnostic and gameplay error vocabularies merely for symmetry. |
 | API-06/07/08 | Agree on missing documentation/enforcement. | Document actual close codes; describe live messages and add valid examples. Enforce useful API conventions incrementally with positive/negative lint fixtures. |
@@ -98,7 +108,7 @@ Related IDs are grouped to avoid treating one architectural problem as several i
 
 ## Next bounded batches
 
-1. HTTP 404/405 contract repair, close-code/examples documentation and basic response headers.
+1. Complete close-code/live-message documentation and basic browser response headers.
 2. Coordinated room rate-limit/client recovery, followed by peer-keyed hosting admission design.
 3. Safe dead-code/test-wiring cleanup and denominator-correct coverage measurement.
 4. Contributor/history separation and shared E2E fixture/configuration helpers.

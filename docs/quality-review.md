@@ -11,6 +11,9 @@ remediation and remaining work are separated below; read [the backlog](../BACKLO
 
 ## First implementation batch
 
+These entries preserve the initial batch scope. The current dispositions and remaining-work
+table below determine completion; historical “partial” labels here are not new open requests.
+
 - **BE-02 / SEC-02 / API-04:** isolate diagnostic connection permits and upgrade-rate tokens
   from gameplay; reuse strict Origin checks and inbound limits; bound writes and sends;
   apply `no-store` to upgrades/rejections; drain both pools under the same shutdown deadline.
@@ -212,7 +215,7 @@ Related IDs are grouped to avoid treating one architectural problem as several i
 | --- | --- | --- |
 | DOC-01/02/04/05/07/08/09/14 | Agree: contributor guidance is buried in repeated release evidence. | Verification/release history is separated from current procedures; the index links both archives. Unreleased changelog organization is in place. Testing, deployment and backlog have current indexes with complete historical archives and retained incoming anchors. |
 | DOC-03 | Agree on organization; current backlog and full history are separated. | Preserve dated “pending”/“unreleased” statements historically. Current status distinguishes shipped controls/authority from open extensions and treats the rules specification as design, not implementation evidence. |
-| DOC-06/10/11/13 | Agree; index, item guide, ADR index and retention policy implemented. | Continue consistent item headings and implemented/future rule markers; move archived protocol guides with link checks. |
+| DOC-06/10/11/13 | Implemented: indexes/retention plus protocol archival and useful item headings. | V3–V10 guides are preserved in history with every prior URL/fragment retained; v11 remains live. Thirteen under-structured item guides gained headings without changing facts. Independent preservation and local-link checks pass. |
 | DOC-12 | Factually stale, deliberately preserved. | Keep `AGENTS.md` untouched under the user's instruction; point readers to current conventions and the index. |
 | API-01, CX-01/02, BE-07, FE-01, TS-08 | Agree on duplication; browser retirement and helper extraction implemented. | ADR 0021 separates retention. V3 UI is removed with unique regressions moved to v11; its schema/conformance remain. Shared browser semantics and Rust item/effect/mapping/numeric foundations are neutral. Assess retained adapters and genuinely equivalent frame fixtures separately. |
 | API-02/03 | Agree; HTTP repair implemented. | Problem 404/405 fallbacks, route-specific `Allow`, shared cache/retry headers and API/SPA/HEAD tests are in place; fallback responses are separate from supported operation responses. |
@@ -229,7 +232,8 @@ Related IDs are grouped to avoid treating one architectural problem as several i
 | TS-14 | Coverage observation; not automatically closed by extracting configuration. | Exercise active startup paths meaningfully; assess retained low-coverage adapters alongside the protocol inventory. Do not add sibling tests merely to change counts. |
 | BE-06, CX-06 | Agree; safe exemption cleanup implemented. | Removed the unused restoration method and stale exemptions; gated test-only hooks and preserved production cooldown observations. Admission-argument refactoring remains separate. |
 | BE-08, CX-04/05 | Agree; aggregation and source-size coverage shipped in v0.3.54. | Test-only declaration aggregation preserves every test name and production module. Dynamic item-tree discovery and eight wired regressions close the guard gap; consolidate genuinely equivalent fixtures separately. |
-| BE-09, CX-07 | Mixed: transport boundary implemented in v0.3.63; remaining admission/invariant audit is separate. | Dispatch cannot receive Authenticate and owns its sequence. Group the core projection arguments separately; assess owner invariants/narrowing before changing APIs, without treating every expect/cast as a reachable defect. |
+| BE-09 | Addressed by v0.3.63 and the bounded invariant audit. | Typed dispatch removes the distant authentication/sequence assumptions. Remaining cited owner expects follow locally proven serial slot validation; projection narrowings follow explicit bounds. No reachable defect was found, so retain those checks rather than add fallible-conversion churn. |
+| CX-07 | Core admission argument grouping remains. | Replace the live eight-positional-argument projection call with named inputs, retaining old public wrappers and exact validation/privacy/order. Broader orchestrator rewriting is not justified by the audited sites. |
 | BE-10, TL-04 | Agree; rationale and grouping implemented. | Cargo patch, per-workspace npm minor/patch and Actions minor/patch groups preserve individual pinned RNG, Docker, major and security proposals. Document compatibility review; no version ignores or automatic merges. |
 | BE-11, TS-09/10 | Mostly intentional tests/benchmarks. | Use virtual time where it preserves the real socket deadline being tested. Keep performance tests separate from ordinary suites. Do not replace useful waits or ignored benchmarks solely to improve counts. |
 | BE-12/13 | Shutdown ordering defect reproduced; registry latency still unmeasured. | A quiet v0.3.56 probe holds incomplete HTTP headers and remains running 7.07s after SIGTERM before the five-second app drain is reached. Released v0.3.58 applies one signal-time deadline to both drains. Strengthened timing, consumed-header regressions, full source-bound coverage and actual-image probes pass (held-header exit 5.127s; graceful exit 0.115s). Separately measure registry-lock work and non-reading upgraded clients. |
@@ -280,6 +284,17 @@ Related IDs are grouped to avoid treating one architectural problem as several i
    they supply distinct coverage. Dependabot validation can be designed without restoring the
    old duplicate branch/PR/merge/tag pipeline.
 
+## Bounded invariant audit
+
+The residual BE-09 audit traced the originally cited owner and projection sites. `Driver` is
+owned by one serial runner; the relevant synchronous operations validate a live/pending slot
+and access that same slot without intervening mutation. Resume preparation/commit changes
+runtime state rather than the validated driver slot. Existing rollback, departure and takeover
+tests remain the behavioral coverage. Projection casts follow explicit 1–8 bounds; cell and
+position conversion is already checked, event indices are bounded to 63, and generation’s two
+private conversions receive fixed escape-route cells. No reachable error was found. This is an
+assessment result, not a claim that every assertion/cast in the repository was reviewed.
+
 ## Remaining agreed work before CPU mode
 
 The completion audit at v0.3.60 distinguishes delivered fixes from the remaining accepted
@@ -288,10 +303,10 @@ Each ships with relevant tests and a version bump; no new approval or evidence p
 
 | Package | Remaining scope and completion evidence |
 | --- | --- |
-| Core admission / residual BE-09/CX-07 | Group projection inputs and personal metadata while retaining old public signatures and validation/privacy/order. Assess remaining owner invariants and narrowing; typed transport and equivalent send policy are already shipped in v0.3.63. |
+| Core admission / CX-07 | Group projection inputs and personal metadata while retaining old public signatures and validation/privacy/order. Typed transport and equivalent send policy are shipped; BE-09’s remaining cited invariants were audited without a defect. |
 | Fixtures / CX-05, CX-02/TS-08, residual CX-08/TS-06/TL-05/07 | Share truly equivalent Rust worlds/frame fixtures, E2E selectors/collection and Compose seed scaffolding. Preserve every test identity/assertion, version-specific rejection, seed and independent session. Responsive contexts and simple config factories are already delivered. |
 | Protocol / API-01/CX-01/02/BE-07/FE-01, CX-03 | Map remaining consumers and unique tests; reduce selected adapters under ADR 0021 and establish a domain item specification. Preserve archived schemas/conformance, replay identity, item bits, activation subsets, generation order and privacy. Browser schema-owned catalogs are delivered. |
-| Docs/frontend / DOC-10/11, FE-03/10 | Archive older protocol guides with compatible links; make item headings useful/consistent; consolidate typed translation access and introduce semantic colors without changing visuals. Keep specialized renderer/atlas mocks. |
+| Frontend / FE-03/10 | Consolidate typed translation access and introduce semantic colors without changing visuals. Protocol archival, item heading consistency and equivalent scene mocks are implemented. |
 | Release/build / TL-06, selected TL-08/09, TL-11/12 | Optional version/changelog helper, selected pinned shell/workflow checks, verified tool/dependency caches, OCI metadata and a defined security-refresh policy. Stricter lint rules require actionable findings; do not introduce another mandatory release receipt process. |
 | Deployment / accepted SEC-08 | Appropriate Compose memory/PID limits and Kubernetes storage/security-context regression guards, plus actual runtime acceptance. Public ingress and NetworkPolicy require a real hosting/network model. |
 | Production replay / BE-01 | Record an explicit operational decision about journal allocation without a consumer, then implement the chosen recording policy and tests. Building a durable export product is not a prerequisite. |

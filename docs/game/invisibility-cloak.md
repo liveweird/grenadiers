@@ -1,8 +1,12 @@
 # Invisibility Cloak
 
+## Availability and rules
+
 Invisibility Cloak is a configurable Expanded-v5 pickup enabled in new rooms that lasts 600 physical ticks. Recollection
 refreshes that deadline. It coexists with equipment, weapons and other effects, changes no movement,
 damage or bomb rule, and clears on death and round reset.
+
+## State and privacy
 
 The owner receives their complete actor. An opponent receives exactly the actor's ID, seat and alive
 status while the effect is active; position, heading, inventory, effects, grace and derived stats are
@@ -16,6 +20,8 @@ Audience is captured at emission and is not recomputed from the final world in a
 Both complete recipient encodings are validated before either is published; legacy protocols reject
 the private semantics.
 
+## Compatibility
+
 Version 0.3.38 introduced Invisibility Cloak with generator weight 15 after Landmine. Its expanded
 pool contained 320 entries and preserved every earlier 8192-mask path. That fourteen-item catalog
 supports all 16384 subsets and remains pinned by archived gameplay v8. Archived gameplay v10 had
@@ -23,6 +29,8 @@ seventeen items through Teleporter and 131072 subsets; the live [gameplay v11](p
 22 items and supports all 4,194,304 subsets.
 Rules version 5, generator version 2 and journal format 2 remain unchanged. Reload older browsers
 when deploying the paired server/web upgrade.
+
+## Verification
 
 At the 21 October 2026 16:47 UTC native acceptance checkpoint, corrected source `1c6724f`, tree
 `403bb73f`, and image `960976c9` passed fresh 51 Compose plus

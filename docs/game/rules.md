@@ -767,8 +767,9 @@ example, kick plus conveyor plus portal is a combined behavior, not three isolat
 
 ## Delivery stages and decisions still needed
 
-The [implementation and release plan](implementation-plan.md) maintains detailed milestones,
-dependencies, release scope, and test ownership. The stages below summarize the gameplay sequence.
+The [backlog](backlog.md) is the sole current status tracker. The
+[implementation and release plan](implementation-plan.md) retains the release checklist. The stages
+below summarize the gameplay sequence.
 
 1. **Review the reference and baseline.** Confirm the historical anchor, proposed movement feel,
    values, timeout/result policy, map dimensions, and which items belong in the initial release.

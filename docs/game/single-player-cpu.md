@@ -1,9 +1,10 @@
 # Single-player: human versus CPU
 
-Status: **accepted design; not implemented**. On 2026-10-25 the user chose the tightened staged
-hybrid after comparing an independent proposal with [Claude's original proposal](../history/single-player-cpu-proposal.md).
-QoL shipped in v0.3.60. The user confirmed that all remaining agreed Claude review work must
-finish before CPU implementation. Open work is tracked in the [product backlog](../../BACKLOG.md#single-player).
+This is the accepted design boundary for the staged hybrid chosen on 2026-10-25 after comparing
+an independent proposal with [Claude's original proposal](../history/single-player-cpu-proposal.md).
+It defines invariants and acceptance, not delivery status. All sequencing and open work,
+including the prerequisite review and CPU0–CPU4 packages, live in the
+[product backlog](../../BACKLOG.md#single-player).
 
 ## Chosen approach
 
@@ -91,18 +92,10 @@ measured fixtures and playtesting; they are not correctness guarantees.
   before a public solo preview. Advanced item tactics may improve later; legal play, privacy,
   correct effects and bounded execution must work throughout.
 
-## Milestones
+<a id="milestones"></a>
 
-1. **CPU0 — contracts and seams.** Define participant/mode metadata, observation, intent, work
-   budget and replay/lifecycle policy. Build a deterministic fixture harness.
-2. **CPU1 — internal playable slice.** Create a solo room, submit legal bot input, reach a real
-   match result and rematch/reconnect. A stand-still controller is a harness step, not a release.
-3. **CPU2 — survival.** Add interval forecasts, timed routing, safe planting and bounded memory;
-   compare forecasts with actual rules on fully known fixtures.
-4. **CPU3 — public preview.** Add goals, default-all item compatibility, clear HUD/difficulty
-   presentation, docs and real-browser acceptance of the complete solo flow.
-5. **CPU4 — stronger play.** Tune difficulty, tactical look-ahead and measured performance using
-   deterministic tournaments and human feedback.
+The former milestone section is maintained as scoped CPU0–CPU4 work in the
+[product backlog](../../BACKLOG.md#single-player), the sole source for delivery status.
 
 ## Acceptance
 

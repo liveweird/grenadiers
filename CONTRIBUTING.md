@@ -49,6 +49,11 @@ and release profiles; required state changes must execute outside assertions. Us
 independent test state; never rely on test order or shared developer database contents.
 Update the canonical topic document when behavior or operational requirements change.
 
+Keep work status and priorities only in `BACKLOG.md`. Feature guides describe current behavior;
+move dated acceptance results, source/image identities, seals and screenshot fingerprints into
+`docs/history/` or release records, and link to them once. An artwork-only update should not
+require refreshing narrative hashes in feature guides; retain automated asset integrity checks.
+
 Use Conventional Commits, following Flow's convention: `feat:`, `fix:`, `docs:`, `chore:`,
 `test:`, or `ci:`, optionally scoped (`fix(server): reject invalid input`). No local Git
 history existed at scaffold creation; this is an adopted convention.

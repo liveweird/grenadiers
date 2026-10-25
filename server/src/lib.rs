@@ -21,6 +21,7 @@ use tokio::{sync::Semaphore, time::timeout};
 mod browser_response;
 mod diagnostics;
 mod game;
+mod rate_limit;
 mod round_seed;
 
 use game::{GameRooms, GameSessions, UpgradeLimit, game_websocket, issue_session};

@@ -80,6 +80,10 @@ unique socket-factory, session POST/abort, native-fetch receiver and phase-error
 regressions to the active v11 client. The production bundle is unchanged because that application
 was already unreachable; this reduces maintained source rather than claiming a download saving.
 
+**BE-04, bucket mechanics:** session minting/upgrades, room admission and inbound limits share
+one configurable token bucket. Each caller retains its own budget, rates, lock and timeline;
+the Tokio inbound wrapper is tested with paused time. Shared timeout policy remains follow-up.
+
 ## Finding dispositions and proposed solutions
 
 “Agree” accepts the observed issue, not every implementation proposed in the review.
@@ -101,7 +105,7 @@ Related IDs are grouped to avoid treating one architectural problem as several i
 | API-10, CX-09 | Coverage question, not yet established as a defect. | Enumerate live message variants against schema conformance tests, then add any missing cases. |
 | BE-01 | Confirmed cost, intentional documented behavior. | Decide whether production replay recording has an operational consumer. If not, feature-gate allocation/recording while retaining replay acceptance tests; document memory effects. |
 | BE-03, SEC-01 | Agree: public-hosting blocker. | Design trusted peer/proxy identity, bounded keyed mint/upgrade/room budgets, per-client outstanding limits and global backstops together. Keep denial telemetry credential-free. |
-| BE-04 | Agree on repeated mechanics. | Share the bucket implementation and timeout definitions while preserving distinct budget instances and clock behavior. Avoid a generic clock abstraction unless it improves actual callers. |
+| BE-04 | Agree; bucket implementation shared. | Independent caller budgets and clock/lock behavior are preserved. Consolidate repeated transport timeout definitions separately; no generic clock abstraction is introduced. |
 | BE-05, TS-14 | Agree for active startup/configuration paths. | Centralize typed parsing and defaults; test invalid configuration and empty-origin behavior without logging credentials. Revisit archived low-coverage code with the retention decision. |
 | BE-06, CX-06 | Agree; safe exemption cleanup implemented. | Removed the unused restoration method and stale exemptions; gated test-only hooks and preserved production cooldown observations. Admission-argument refactoring remains separate. |
 | BE-08, CX-04/05 | Agree on test wiring/helper repetition. | Move simulation test-module declarations into a test aggregator; consolidate genuinely equivalent fixtures; extend source-size discovery to item E2E directories. Keep responsibility-based production modules. |

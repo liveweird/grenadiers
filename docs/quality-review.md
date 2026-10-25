@@ -96,6 +96,11 @@ without changing executed tests or exhaustive acceptance. A fresh web baseline i
 for the other metrics. The Rust helper exclusion is shared by serial/parallel reporters;
 fresh full Rust coverage and any corresponding floor recalibration remain pending.
 
+**TL-10, audit findings:** update the aligned Vitest/coverage pair to 5.0.5 and Ajv's transitive
+`fast-uri` to 3.1.9, with no unrelated direct dependency upgrades. Full and production npm
+audits report zero vulnerabilities after a clean install. The URI parser is a production
+dependency, so its patch is included in build/contract and final web verification.
+
 ## Finding dispositions and proposed solutions
 
 “Agree” accepts the observed issue, not every implementation proposed in the review.
@@ -127,7 +132,7 @@ Related IDs are grouped to avoid treating one architectural problem as several i
 | BE-12/13 | Plausible shutdown/latency concerns. | Reproduce shutdown with a non-reading client; measure registry-lock work before moving bounded construction/entropy outside it. No demonstrated hang yet. |
 | CX-03 | Agree on cross-layer item duplication, not the proposed enum choice. | Define one domain item specification and derive configurable wire catalogs from each schema's `ItemId`, not `PickupKind`; preserve archived subsets. Parameterize configuration scaffolding independently. |
 | CX-08, TS-06, TL-05 | Agree on E2E/configuration sprawl. | Introduce a config factory, fixture parameter and shared behavioral helpers; prove representative item and privacy suites retain their distinct setup/assertions before deleting wrappers. |
-| FE-02 | Agree; measured bundle budget implemented. | Aggregate gzip limits pass at 356,970 JS / 36,292 CSS bytes. Profile CSS/import reductions separately; no download reduction is claimed by the guard itself. |
+| FE-02 | Agree; measured bundle budget implemented. | Initial baseline was 356,970 JS / 36,292 CSS gzip bytes; limits remain 400,000/40,000 and the URI security patch also fits them. Profile CSS/import reductions separately; no reduction is claimed by the guard itself. |
 | FE-03 | Partly disagree; see corrections below. | Typed i18next consolidation is reasonable cleanup. Add plural forms where grammar needs them, not for multiplication/count notation. |
 | FE-04 | Mechanism confirmed; performance cost unmeasured. | Profile 20 Hz gameplay and commit durations first. Change arena/HUD subscriptions only for a demonstrated budget problem. |
 | FE-05 | Agree; first batch implements this. | Localized accessible error recovery with explicit actions and component/parity tests. |
@@ -144,7 +149,7 @@ Related IDs are grouped to avoid treating one architectural problem as several i
 | TL-06 | Agree on release bookkeeping cost. | Reduce duplicated release facts first; then automate version/changelog updates and applicable checks, without introducing another mandatory evidence pipeline. |
 | TL-07 | Root fixture clutter is real; local checkpoint claim is historical. | Consolidate Compose fixtures. Local scratch/worktrees/images were already cleaned separately; retained history is compressed and recoverable. |
 | TL-08/09 | Useful incremental guardrails, not all immediate defects. | Add selected shell/workflow checks with documented tool versions; evaluate stricter TS/lint rules by actionable findings rather than enabling everything at once. |
-| TL-10/11 | Agree on visibility/cache opportunities, not mandatory policy changes. | Review moderate advisories by impact; reuse verified tool/build caches. Keep security failures visible and pin tool provenance. |
+| TL-10/11 | Moderate audit findings patched; cache opportunities remain. | Vitest/coverage and transitive URI patches yield zero npm findings. Reuse verified tool/build caches, keep security failures visible and pin tool provenance. |
 | TL-12 | Agree on build-cache/reproducibility tradeoffs. | Add dependency caching and OCI metadata. Replace unbounded package upgrades with a documented base-image/security-refresh policy; simply dropping upgrades can retain known vulnerabilities. |
 | TL-13/14/15/16 | Mixed low-priority tooling/documentation concerns. | Scope the peer-dependency workaround, document supported Python/tooling prerequisites, name gate commands in the PR template, and retain existing pin consistency checks. |
 | SEC-03 | Agree; coordinated server/client fix implemented. | Correlated throttles retain the socket; bounded same-socket retries use fresh sequences and fenced timers within one deadline. Initial admission remains manually retryable; per-socket floods still close. |

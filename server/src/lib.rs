@@ -21,6 +21,8 @@ use tokio::{sync::Semaphore, time::timeout};
 mod browser_response;
 mod diagnostics;
 mod game;
+pub(crate) mod admission;
+pub(crate) mod peer_identity;
 mod rate_limit;
 mod round_seed;
 

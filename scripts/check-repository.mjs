@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict'
-import { readdir, readFile } from 'node:fs/promises'
+import { readFile } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
+import { checkSourceSizes } from './source-size.mjs'
 
 const root = fileURLToPath(new URL('../', import.meta.url))
 const read = (name) => readFile(path.join(root, name), 'utf8')
@@ -38,17 +39,5 @@ for (const workspace of ['web', 'e2e']) {
     }
   }
 }
-const ignored = new Set(['node_modules', 'dist', 'coverage', 'target', 'playwright-report', 'test-results'])
-async function checkSize(directory) {
-  for (const entry of await readdir(path.join(root, directory), { withFileTypes: true })) {
-    if (ignored.has(entry.name)) continue
-    const relative = path.join(directory, entry.name)
-    if (entry.isDirectory()) await checkSize(relative)
-    else if (/\.(rs|ts|tsx)$/.test(entry.name) && !/(schema|realtime)\.ts$/.test(entry.name)) {
-      const lines = (await read(relative)).trimEnd().split('\n').length
-      assert(lines <= 400, `${relative}: ${lines} lines exceeds 400-line ceiling`)
-    }
-  }
-}
-for (const directory of ['core/src', 'server/src', 'web/src', 'e2e/tests']) await checkSize(directory)
+await checkSourceSizes(root)
 console.log('Repository pins, product version, lock roots, exact dependencies, and source sizes agree.')

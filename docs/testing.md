@@ -74,6 +74,12 @@ Real WebSocket tests bind ephemeral listeners and connect over actual sockets wi
 Origin headers. Cover readiness failure, invalid payloads, denied origins, connection limits,
 and API/SPA separation. Keep tests independent and use bounded timeouts rather than sleeps.
 
+Register simulation child tests in `core/src/game/simulation_test_modules.rs`. The test-only
+include keeps the original simulation namespace, private access and full test names; production
+module declarations stay in `simulation.rs`. Repository checks also cover every immediate
+`e2e/*-tests` tree, including nested typed sources. `scripts/source-size.test.mjs` exercises the
+400-line boundary, future-directory discovery and unchanged exclusions through the real checker.
+
 `cargo test --workspace --locked` runs the debug suite; `cargo test --workspace --release --locked`
 runs the same behavior in the production profile. The server gate requires both: debug assertions
 must never perform required mutations. The test profile uses optimization level 1 while retaining

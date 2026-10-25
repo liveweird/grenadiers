@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## 0.3.54 — 2026-10-25
+
 ### Changed
 
 - Apply the source-size guard to all current and future `e2e/*-tests` trees, with boundary,

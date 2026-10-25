@@ -1,9 +1,9 @@
 use std::fmt;
 
-use serde::de::{self, Visitor};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
 use super::GAMEPLAY_PROTOCOL_VERSION;
+pub(super) use crate::protocol::scalar_input::deserialize_bounded;
 
 const MAX_ROUND_COUNT: u32 = 2_147_483_647;
 const MAX_WINS: u8 = 9;
@@ -95,55 +95,3 @@ macro_rules! bounded_scalar {
 
 bounded_scalar!(RoundCount, u32, MAX_ROUND_COUNT, "invalid round count");
 bounded_scalar!(Wins, u8, MAX_WINS, "invalid wins");
-
-pub(super) fn deserialize_bounded<'de, D>(
-    deserializer: D,
-    maximum: u64,
-    expectation: &'static str,
-) -> Result<u64, D::Error>
-where
-    D: Deserializer<'de>,
-{
-    struct BoundedVisitor {
-        maximum: u64,
-        expectation: &'static str,
-    }
-    impl Visitor<'_> for BoundedVisitor {
-        type Value = u64;
-        fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
-            formatter.write_str(self.expectation)
-        }
-        fn visit_u64<E: de::Error>(self, value: u64) -> Result<u64, E> {
-            self.validate(value)
-        }
-        fn visit_i64<E: de::Error>(self, value: i64) -> Result<u64, E> {
-            u64::try_from(value)
-                .map_err(|_| E::custom(self.expectation))
-                .and_then(|value| self.validate(value))
-        }
-        fn visit_f64<E: de::Error>(self, value: f64) -> Result<u64, E> {
-            if value.is_finite()
-                && value.fract() == 0.0
-                && value >= 0.0
-                && value <= self.maximum as f64
-            {
-                Ok(value as u64)
-            } else {
-                Err(E::custom(self.expectation))
-            }
-        }
-    }
-    impl BoundedVisitor {
-        fn validate<E: de::Error>(self, value: u64) -> Result<u64, E> {
-            if value <= self.maximum {
-                Ok(value)
-            } else {
-                Err(E::custom(self.expectation))
-            }
-        }
-    }
-    deserializer.deserialize_any(BoundedVisitor {
-        maximum,
-        expectation,
-    })
-}

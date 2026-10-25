@@ -6,16 +6,20 @@ mod state;
 
 use std::fmt;
 
+pub use crate::protocol::item_foundation::effects::{
+    EffectKind, EffectValidationError, EffectView, EffectViews, validate_effects,
+};
+pub use crate::protocol::item_foundation::items::{
+    EquipmentId, InventoryView, ItemId, ItemMask, ItemSet, PickupKind, WeaponId,
+};
 pub use crate::protocol::v8::{
     ARENA_TERRAIN_CELLS, ArenaView, BlastKind, BombTrigger, BombView, CompletedRound,
-    ConnectionStatus, CountdownKind, DamageGraceTicks, DamagePreventionSource, EffectKind,
-    EffectValidationError, EffectView, EffectViews, EquipmentId, EventIndex, EventKind, FlameView,
-    GameClientMessage, GameSettings, HiddenActorView, InventoryView, ItemId, ItemMask, ItemSet,
-    MAX_BLOCKS, MAX_BOMBS, MAX_FLAMES, MAX_PICKUPS, MAX_RUNNING_UPDATES, ManualActionKind, MapId,
-    MatchInterruptReason, MatchResult, MatchWinnerReason, PickupKind, PickupView, ResumeToken,
-    RoomMetadata, RoomPhase, RoomView, RoundCount, RulesVersion, Scores, SeatStatus,
-    SettingsContextError, SnapshotEvents, Terrain, V8ErrorCode as V9ErrorCode, WeaponId, Wins,
-    WireEvent, validate_effects, validate_settings_context,
+    ConnectionStatus, CountdownKind, DamageGraceTicks, DamagePreventionSource, EventIndex,
+    EventKind, FlameView, GameClientMessage, GameSettings, HiddenActorView, MAX_BLOCKS, MAX_BOMBS,
+    MAX_FLAMES, MAX_PICKUPS, MAX_RUNNING_UPDATES, ManualActionKind, MapId, MatchInterruptReason,
+    MatchResult, MatchWinnerReason, PickupView, ResumeToken, RoomMetadata, RoomPhase, RoomView,
+    RoundCount, RulesVersion, Scores, SeatStatus, SettingsContextError, SnapshotEvents, Terrain,
+    V8ErrorCode as V9ErrorCode, Wins, WireEvent, validate_settings_context,
 };
 pub use crate::protocol::v8::{BoundPublication, ExpandedCapture, ProjectionError};
 pub use projection_admission::prepare_expanded_admission;

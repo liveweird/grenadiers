@@ -62,7 +62,7 @@ struct RawEffectView {
 }
 
 fn remaining_ticks<'de, D: serde::Deserializer<'de>>(deserializer: D) -> Result<u16, D::Error> {
-    super::scalars::deserialize_bounded(deserializer, 600, "invalid effect duration")
+    super::super::scalar_input::deserialize_bounded(deserializer, 600, "invalid effect duration")
         .map(|value| value as u16)
 }
 

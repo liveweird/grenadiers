@@ -23,14 +23,18 @@ mod settings;
 
 use std::fmt;
 
+pub use crate::protocol::item_foundation::effects::{
+    EffectKind, EffectValidationError, EffectView, EffectViews, validate_effects,
+};
+pub use crate::protocol::item_foundation::items::{
+    EquipmentId, InventoryView, ItemId, ItemMask, ItemSet, PickupKind, WeaponId,
+};
 pub(crate) use crate::protocol::v7::BombTriggerObservation;
 pub use crate::protocol::v7::{
     ARENA_TERRAIN_CELLS, ActorView, ArenaView, BlastKind, BombTrigger, BombView, DamageGraceTicks,
-    DamagePreventionSource, EffectKind, EffectValidationError, EffectView, EffectViews,
-    EquipmentId, EventIndex, EventKind, FlameView, GameState, HiddenActorView, InventoryView,
-    ItemId, ItemMask, ItemSet, MAX_BLOCKS, MAX_BOMBS, MAX_FLAMES, MAX_PICKUPS, MAX_RUNNING_UPDATES,
-    PickupKind, PickupView, ResumeToken, RoundCount, SnapshotEvents, Terrain, VisibleActorView,
-    WeaponId, Wins, WireEvent, validate_effects,
+    DamagePreventionSource, EventIndex, EventKind, FlameView, GameState, HiddenActorView,
+    MAX_BLOCKS, MAX_BOMBS, MAX_FLAMES, MAX_PICKUPS, MAX_RUNNING_UPDATES, PickupView, ResumeToken,
+    RoundCount, SnapshotEvents, Terrain, VisibleActorView, Wins, WireEvent,
 };
 pub use client::{GameClientMessage, ManualActionKind};
 pub use identity::{MapId, RulesVersion};

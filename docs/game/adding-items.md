@@ -12,23 +12,24 @@ effects, single-use weapons, and world objects. Record a focused [ADR](../decisi
 when the change introduces a new invariant or simulation phase.
 
 The server currently accepts only gameplay v11. Decide whether the change needs a new wire,
-rules, generator or replay identity before editing contracts. Old schemas have smaller item
-catalogs; do not expand them merely to satisfy a current catalog assertion. Historical adapter
-retirement and replay migration follow the [retention policy](../decisions/0021-gameplay-retention.md);
+rules, generator or replay identity before editing contracts. Retained schemas reserve wire
+vocabularies while adapters choose their activation catalogs; do not expand a retained contract
+merely to satisfy a current catalog assertion. Historical adapter retirement and replay migration
+follow the [retention policy](../decisions/0021-gameplay-retention.md);
 this does not authorize deleting adapters still used by the live path.
 
 ## Extend the domain once
 
 | Responsibility | Current extension point |
 | --- | --- |
-| Configurable item identity/order | `core/src/protocol/v7/items.rs` (`ItemId`, currently 22 items) |
+| Configurable item identity/order | `core/src/protocol/item_foundation/items.rs` (`ItemId`, currently 22 items) |
 | Enabled settings bits | `core/src/game/enabled_items.rs` |
 | Pickup kinds and optional-item mapping | `core/src/game/pickups.rs` (`PickupKind`, including three basic upgrades) |
 | Replaceable equipment and weapon slots | `core/src/game/inventory.rs` |
 | Timed effects, expiry and stacking | `core/src/game/effects.rs` (`TimedEffects`) |
 | Collection, actions and simulation phases | `core/src/game/simulation_*.rs`, relevant damage/bomb/world modules |
 | Deterministic placement and seeds | `core/src/game/generation/` |
-| Checked public and recipient-private projection | `core/src/protocol/v11/`, shared projection helpers in v7/v8 |
+| Checked public and recipient-private projection | `core/src/protocol/v11/`, shared item mappings in `protocol/item_foundation/` and version-specific helpers in v7/v8 |
 
 Reuse the matching category's lifecycle. For example, use `TimedEffects::apply` and its tick
 expiry rules for a timed buff instead of introducing a separate timer. Keep clocks, randomness
@@ -36,8 +37,10 @@ and I/O outside pure simulation. A terrain-like object such as Oil needs world c
 rules as well as collection behavior; it is not just another timed-effect entry.
 
 `ItemId` and `PickupKind` serve different purposes. Review catalog order, bit bounds, default
-settings, generation filtering and projection together. Some shared Rust code currently lives
-under older protocol namespaces: find its live callers before changing or deleting it.
+settings, generation filtering and projection together. Stable item-bit/catalog order differs
+from weighted generation sampling order; preserve both when changing deterministic placement.
+Shared item/effect wire types now have neutral ownership; other shared Rust code still has live
+callers under older protocol namespaces. Find those callers before changing or deleting it.
 
 ## Update contracts and presentation
 

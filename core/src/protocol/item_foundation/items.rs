@@ -85,7 +85,7 @@ impl ItemMask {
 
 impl<'de> Deserialize<'de> for ItemMask {
     fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
-        super::scalars::deserialize_bounded(
+        super::super::scalar_input::deserialize_bounded(
             deserializer,
             u64::from(ALL_ITEM_BITS),
             "item mask contains unknown bits",
@@ -217,4 +217,165 @@ pub enum PickupKind {
     InvisibleBombs,
     OilBarrel,
     Teleporter,
+}
+
+#[cfg(test)]
+mod tests {
+    use serde_json::{Value, json};
+
+    use super::{ItemId, ItemMask, ItemSet, PickupKind};
+    use crate::game::EnabledItems;
+    use crate::protocol::item_foundation::projection_items::pickup_item;
+
+    const FIXTURE: [(ItemId, &str, EnabledItems, u32); 22] = [
+        (ItemId::Kick, "kick", EnabledItems::KICK, 1),
+        (ItemId::Punch, "punch", EnabledItems::PUNCH, 2),
+        (ItemId::Bracelet, "bracelet", EnabledItems::BRACELET, 4),
+        (ItemId::WallPass, "wallPass", EnabledItems::WALL_PASS, 8),
+        (ItemId::Heart, "heart", EnabledItems::HEART, 16),
+        (
+            ItemId::RemoteBomb,
+            "remoteBomb",
+            EnabledItems::REMOTE_BOMB,
+            32,
+        ),
+        (
+            ItemId::PiercingBomb,
+            "piercingBomb",
+            EnabledItems::PIERCING_BOMB,
+            64,
+        ),
+        (
+            ItemId::PowerBomb,
+            "powerBomb",
+            EnabledItems::POWER_BOMB,
+            128,
+        ),
+        (ItemId::Landmine, "landmine", EnabledItems::LANDMINE, 256),
+        (ItemId::Shield, "shield", EnabledItems::SHIELD, 512),
+        (
+            ItemId::Stopwatch,
+            "stopwatch",
+            EnabledItems::STOPWATCH,
+            1_024,
+        ),
+        (
+            ItemId::InvisibilityCloak,
+            "invisibilityCloak",
+            EnabledItems::INVISIBILITY_CLOAK,
+            2_048,
+        ),
+        (
+            ItemId::GoldenFlame,
+            "goldenFlame",
+            EnabledItems::GOLDEN_FLAME,
+            4_096,
+        ),
+        (
+            ItemId::ShortFuse,
+            "shortFuse",
+            EnabledItems::SHORT_FUSE,
+            8_192,
+        ),
+        (ItemId::Diarrhea, "diarrhea", EnabledItems::DIARRHEA, 16_384),
+        (
+            ItemId::SlowFoot,
+            "slowFoot",
+            EnabledItems::SLOW_FOOT,
+            32_768,
+        ),
+        (
+            ItemId::ShortFlame,
+            "shortFlame",
+            EnabledItems::SHORT_FLAME,
+            65_536,
+        ),
+        (
+            ItemId::LongFuse,
+            "longFuse",
+            EnabledItems::LONG_FUSE,
+            131_072,
+        ),
+        (
+            ItemId::ReverseControls,
+            "reverseControls",
+            EnabledItems::REVERSE_CONTROLS,
+            262_144,
+        ),
+        (
+            ItemId::InvisibleBombs,
+            "invisibleBombs",
+            EnabledItems::INVISIBLE_BOMBS,
+            524_288,
+        ),
+        (
+            ItemId::OilBarrel,
+            "oilBarrel",
+            EnabledItems::OIL_BARREL,
+            1_048_576,
+        ),
+        (
+            ItemId::Teleporter,
+            "teleporter",
+            EnabledItems::TELEPORTER,
+            2_097_152,
+        ),
+    ];
+
+    #[test]
+    fn reserved_ids_pin_literal_names_order_and_domain_bits() {
+        for (item, name, domain_item, bit) in FIXTURE {
+            assert_eq!(serde_json::to_value(item).unwrap(), name);
+            assert_eq!(ItemSet::new([item]).unwrap().mask().bits(), bit);
+            assert_eq!(domain_item.bits(), bit);
+        }
+        assert_eq!(EnabledItems::ALL.bits(), 4_194_303);
+        assert_eq!(ItemMask::new(4_194_303).unwrap().bits(), 4_194_303);
+    }
+
+    #[test]
+    fn item_set_wire_form_is_canonical_and_rejects_ambiguous_input() {
+        let shuffled = ItemSet::new([
+            ItemId::Teleporter,
+            ItemId::Kick,
+            ItemId::OilBarrel,
+            ItemId::Shield,
+        ])
+        .unwrap();
+        assert_eq!(
+            serde_json::to_value(shuffled).unwrap(),
+            json!(["kick", "shield", "oilBarrel", "teleporter"])
+        );
+        assert!(serde_json::from_value::<ItemSet>(json!(["kick", "kick"])).is_err());
+        assert!(serde_json::from_value::<ItemSet>(json!(["kick", "unknown"])).is_err());
+        assert!(serde_json::from_value::<ItemMask>(json!(4_194_304)).is_err());
+        for pickup in [
+            PickupKind::BombCapacity,
+            PickupKind::BlastRange,
+            PickupKind::MovementSpeed,
+        ] {
+            assert_eq!(pickup_item(pickup), None);
+        }
+    }
+
+    #[test]
+    fn retained_v7_through_v11_schemas_reserve_the_same_ids() {
+        let expected: Vec<Value> = FIXTURE
+            .iter()
+            .map(|(_, name, _, _)| Value::String((*name).to_owned()))
+            .collect();
+        for source in [
+            include_str!("../../../../api/gameplay-v7.schema.json"),
+            include_str!("../../../../api/gameplay-v8.schema.json"),
+            include_str!("../../../../api/gameplay-v9.schema.json"),
+            include_str!("../../../../api/gameplay-v10.schema.json"),
+            include_str!("../../../../api/gameplay-v11.schema.json"),
+        ] {
+            let schema: Value = serde_json::from_str(source).unwrap();
+            assert_eq!(
+                schema["$defs"]["ItemId"]["enum"],
+                Value::Array(expected.clone())
+            );
+        }
+    }
 }

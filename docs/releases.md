@@ -65,39 +65,46 @@ interrupted state but cannot preserve process-local matches or credentials.
 Keep the previous immutable image reference for rollback; database migration compatibility
 must be designed when durable application data is introduced.
 
-## v0.3.56 — 2026-10-25
+## v0.3.57 — 2026-10-25
 
-[v0.3.56](https://github.com/liveweird/grenadiers/releases/tag/v0.3.56) shares the common
-Playwright configuration across 24 simple gameplay wrappers. Public config names and commands,
-artifact paths, worker/retry limits and base browser/environment settings are unchanged.
-Audio keeps its 60-second timeout; the other 23 keep 90 seconds. Trace capture remains disabled.
-Specialized configurations and the pickup/matches/reconnect chain remain separate.
-Application inputs match `d7849292fed30d728bffcf0c106aff7d4a1cf6f8`; the source tag adds release
-documentation. Localhost:8085 serves accepted image
-`sha256:5f1e0627b21d18162c6b12e53516a934ea4d370a0e1a285b75bff2d551a6e603`.
+[v0.3.57](https://github.com/liveweird/grenadiers/releases/tag/v0.3.57) gives shared Rust item/
+effect DTOs, common item projections and bounded-number input neutral protocol ownership.
+V7–V11 retain their public names and shared type identity. Reserved bits, activation subsets,
+validation stages/errors, generation order, schema JSON and replay identities are unchanged.
+Four independent regressions pin identity, retained schemas, serialization and numeric boundaries.
+Application inputs match `a94aaddea8211e262c1d0acf3cf3103db797db05`; the source tag includes
+release documentation. Localhost:8085 serves accepted image
+`sha256:170e5d071feeabf6d62c55dcb1dce6b6191d7bcdbeccee511e1c9a1c8a72b9bf`.
 
-Independent review, fresh types/lint/unused-code/scenario/repository checks and the wired
-configuration regression pass. Complete before/after exports match in all 96 comparisons
-(24 wrappers across four simulated environment/platform profiles), using pinned Playwright
-`defineConfig` and device defaults, including undefined/symbol keys. This source evaluation
-preserves Linux ANGLE and capture-profile settings; it is not native Linux browser execution.
+Independent review is clear; moved bodies and mappings match baseline after path relocation.
+Fresh source-bound Rust acceptance passes all 4,194,304 replay masks in debug, release and
+reported coverage in 8m06s, without retries. Each ordinary profile passes 930 core and 287
+server tests plus two doctests; four existing performance tests remain ignored, and the heavy
+case runs separately across 32 complete partitions. Official line coverage is 17,248/18,445
+(93.51%) at the unchanged 90% floor, with helper exclusions intact. Clippy/rustfmt, repository
+checks and the [distinct Linux units](https://github.com/liveweird/grenadiers/actions/runs/40222285097) pass.
 
-The exact image passes nineteen Chromium cases without retries: eight default cases through
-Compose, eight through Kubernetes, plus controls, natural headed audio and a seeded Landmine
-scenario through Compose. The pinned image scan reports zero fixable HIGH/CRITICAL findings.
-Post-promotion checks pass image/runtime security, health/readiness, CSP/cache headers, exact
-served HTML/JavaScript/atlas bytes and one additional native diagnostic/gameplay smoke.
-Claude's redraw is unchanged. Temporary acceptance services are removed.
+The fresh web gate passes 6,791 tests / 88 files with 90.95/89.49/89.80/93.32% coverage.
+JavaScript/CSS gzip sizes remain 336,437/36,292 bytes within their budgets. All retained
+contract/standalone drift checks pass. Fresh Cargo-deny, both zero-finding npm audits and the
+pinned exact-image scan pass; the latter reports zero fixable HIGH/CRITICAL findings.
 
-Production Rust, API, frontend, asset and deployment sources are unchanged; Cargo changes only
-local package versions. Reuse ordinary Rust/Linux results from v0.3.54, frontend/dependency/
-renderer evidence from v0.3.53 and exhaustive replay/coverage measured at `055d1d2`
-(all 4,194,304 masks, 93.15% line coverage at the 90% floor). These results are not claimed as
-freshly rerun for configuration reuse. The new production image is built and accepted separately.
+The exact image passes twenty native Chromium cases without retries: eight default cases
+through Compose, eight through Kubernetes, and seeded Landmine, Heart, Cloak/reconnect/expiry
+and Oil Barrel scenarios through Compose. Post-promotion checks pass runtime/image/security,
+health/readiness, enforced CSP/cache headers, exact served HTML/JavaScript/atlas equality and
+one additional native diagnostic/gameplay smoke. Claude's redraw is unchanged. Temporary
+acceptance services and port-forwards are removed. Durable control is
+`.local-checkpoints/runtime/compose-v0.3.57.yaml`; `rollback-v0.3.56.yaml` retains the prior image.
+No migration is needed; restarts still end process-local matches.
 
-Durable control is `.local-checkpoints/runtime/compose-v0.3.56.yaml`; `rollback-v0.3.55.yaml`
-retains the previous accepted image. No migration is needed; restarts end process-local matches.
-The testing index/archive cleanup is included; its historical labels do not impose current gates.
+A separate quiet probe of the unchanged shutdown path in v0.3.56 confirms a follow-up issue:
+an incomplete HTTP request keeps the process running beyond seven seconds after SIGTERM,
+before the application drain timer is reached. This release does not fix that ordering;
+bounding total shutdown is the next isolated fix. Keep the configured external stop grace.
+
+<a id="v0356--2026-10-25"></a>
+The [v0.3.56 record](history/releases.md#v0356--2026-10-25) is preserved in release history.
 
 <a id="v0355--2026-10-25"></a>
 The [v0.3.55 record](history/releases.md#v0355--2026-10-25) is preserved in release history.

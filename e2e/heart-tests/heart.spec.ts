@@ -95,7 +95,7 @@ test('two browsers reveal a generated Heart and observe one charge protect its c
       expect(frame.room.phase.type).toBe('running')
     }
     await expect(collectorOwnItems).toContainText('WyposażenieBrak')
-    await expect(collectorOwnItems.getByLabel('Ochrona przed obrażeniami jest aktywna'))
+    await expect(collectorOwnItems.getByLabel(/^Ochrona przed obrażeniami aktywna, pozostało 0:0[1-9]$/))
       .not.toHaveText('0:00')
     await expect.poll(() => visibleActor(latestSnapshot(games[0]), 'one')
       ?.damageGraceRemainingTicks, { intervals: [15] }).toBe(0)

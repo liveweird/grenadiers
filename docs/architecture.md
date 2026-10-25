@@ -79,8 +79,8 @@ dependent work; preserve the specified lifecycle and gameplay rules.
 The [game specification](game/README.md) is the working two-player baseline and catalogs
 classic mechanics and optional extensions. Its initial profile drives the simulation; tuning
 remains subject to playtesting. Optional extensions do not become baseline requirements.
-The [implementation plan](game/implementation-plan.md) identifies when each dependent decision
-must be recorded and how the two-player baseline will be delivered and verified.
+The [implementation plan](game/implementation-plan.md) defines delivery tracks and release
+verification; the [backlog](../BACKLOG.md) owns sequencing and work status.
 
 [ADR 0012](decisions/0012-pickup-phases-and-upgrades.md) defines the implemented typed
 [pickup layers](game/pickups.md) with classic-v2 collection/upgrades and explicit round-number spawn/tie assignment.

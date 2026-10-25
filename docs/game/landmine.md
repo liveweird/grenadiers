@@ -2,7 +2,8 @@
 
 ## Current verification
 
-Corrected-source acceptance at `420d8df` passes fresh **50 Compose plus 50 Kubernetes** cases with zero retries or carried results. Remote and Landmine use fresh placement-ID checks across rolling observer history. Product behavior is unchanged; the new evidence is audited/sealed, while exact-head CI/post-merge CI and publication remain pending. See [verification](../verification.md).
+Remote and Landmine use fresh placement-ID checks across rolling observer history. The release
+record is in [item acceptance history](../history/game-acceptance.md#landmine-v0337).
 
 ## Availability and rules
 
@@ -29,27 +30,23 @@ bombs retain their original obstruction snapshot and chain behavior.
 
 ## Compatibility
 
-Version 0.3.37 introduced Landmine with generator weight 15 after Remote Bomb, growing the pool
-to 305 entries while preserving every earlier 4096-mask path. Its original thirteen-item catalog
-supported all 8192 subsets; those paths remain stable in the [current catalog](settings.md).
+Landmine uses generator weight 15 after Remote Bomb.
 Rules version 5, generator version 2 and journal format 2 remain unchanged. Current deployments
 use [gameplay-v11](protocol-v11.md); reload older browsers with the paired server/web upgrade.
 
-## Historical v0.3.37 native acceptance
+<a id="historical-v0337-native-acceptance"></a>
+
+## Verification and examples
 
 
 
-Fresh same-image native acceptance passes 50 Compose and 50 Kubernetes cases, with zero retries
-or carried passes. Independent raw review is clear and the final evidence manifest is sealed.
 Both clients observe the single consumed charge, Contact/Standard bomb, persistence beyond
 183 ticks, exact-ID contact detonation with a live origin flame, no extra placement, owner
 elimination and seat Two's round win. The following fresh Timed Standard bomb is covered by
 `consumed_landmine_is_followed_by_a_fresh_standard_timed_bomb_in_the_same_state` in the
 [core tests](../../core/src/game/simulation/landmine_tests.rs), rather than a separate browser
-assertion. Exact-head candidate/post-merge CI and publication remain required release gates.
+assertion.
 
-Reviewed Compose [English desktop](../screenshots/landmine-desktop.png) and
+The [English desktop](../screenshots/landmine-desktop.png) and
 [Polish 320px reduced-motion](../screenshots/landmine-polish-320.png) captures show the planted
-pressure plate before detonation and normal HUD layout. Kubernetes captures were retained but
-not visually reviewed. See [verification](../verification.md) for source/image identities,
-latency, seal, historical attempts and measurement limits.
+pressure plate before detonation and normal HUD layout.

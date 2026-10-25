@@ -4,18 +4,52 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    groups:
+      cargo-patch:
+        applies-to: version-updates
+        patterns:
+          - "*"
+        exclude-patterns:
+          - getrandom
+          - rand_chacha
+        update-types:
+          - patch
   - package-ecosystem: npm
     directory: /web
     schedule:
       interval: weekly
+    groups:
+      web-minor-patch:
+        applies-to: version-updates
+        patterns:
+          - "*"
+        update-types:
+          - minor
+          - patch
   - package-ecosystem: npm
     directory: /e2e
     schedule:
       interval: weekly
+    groups:
+      e2e-minor-patch:
+        applies-to: version-updates
+        patterns:
+          - "*"
+        update-types:
+          - minor
+          - patch
   - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: weekly
+    groups:
+      actions-minor-patch:
+        applies-to: version-updates
+        patterns:
+          - "*"
+        update-types:
+          - minor
+          - patch
   - package-ecosystem: docker
     directory: /
     schedule:

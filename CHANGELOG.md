@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## 0.3.61 — 2026-10-25
+
 ### Changed
 
 - Capture production startup settings through a typed configuration, with redacted address/

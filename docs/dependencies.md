@@ -9,8 +9,16 @@ and use `--locked` for normal builds, tests, and container packaging. `scripts/g
 without a non-empty `Cargo.lock`. Do not handwrite checksums; generate and review them.
 
 Both npm packages commit lockfiles and exact direct versions. Use `npm ci`, not a fresh
-unreviewed resolution, in CI. If TypeScript 6 requires openapi-typescript's older peer range
-exception, keep that compatibility setting explicit in `web/.npmrc` and verify generation/builds.
+unreviewed resolution, in CI. The installed `openapi-typescript` 7.13.0 declares a
+`typescript ^5.x` peer range while this repository pins TypeScript 6.0.3. The
+`legacy-peer-deps=true` setting in `web/.npmrc` applies across the web workspace; remove it
+when the upstream peer range supports the pinned compiler, after generation, type, and build
+checks pass. The E2E workspace does not inherit this web project setting and needs no
+configuration change.
+
+The optional `local-server-parallel` prerequisite uses Python's standard library plus
+separately installed `cargo-llvm-cov`/LLVM tools for its regression suite; Python is not an
+application-runtime dependency. The supported local Python versions tested are 3.14 and 3.15.
 
 For intentional updates: change the manifest/toolchain, resolve with the package manager,
 review the dependency graph and checksums, regenerate contracts where necessary, and run the

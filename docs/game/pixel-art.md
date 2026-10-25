@@ -49,6 +49,10 @@ renderer during mounted room/reconnect transitions, suspending its ticker and cl
 artwork while waiting. A new baseline is painted before the canvas becomes visible again.
 Actual component unmount still releases the renderer and WebGL resources.
 
+Since v0.3.49 gameplay draws these from the [artist sheet](../../assets/art/README.md); the
+unreleased v0.3.53 redraw gives players chibi proportions, a pompom or feather cap and a flame or
+star mark. The procedural sources below still produce the template and parity reference.
+
 Sources: `web/src/game/arena/terrainArt.ts`, `actorArt.ts`, `entityArt.ts`, `palette.ts` and
 `pixel.ts`. All patterns were authored for this repository; no franchise sprites, external
 texture packs, downloaded fonts or new rendering dependency are included.

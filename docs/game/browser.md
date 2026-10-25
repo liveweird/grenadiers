@@ -38,7 +38,8 @@ carry no position or clock authority.
 Pixi retains terrain, block, bomb, flame, and actor layers. Public actor positions interpolate
 over the 50 ms publication interval without extrapolation. Terminal states snap to the
 accepted final position; reduced motion disables interpolation and pulsing effects. Player
-colors, helmet shapes, and HTML seat names distinguish the two players. The canvas itself
+colors, cap shapes and marks (pompom/flame or feather/star), and HTML seat names distinguish the
+two players. The canvas itself
 is decorative to assistive technology; room controls, countdown/timer, and result remain HTML.
 
 The canvas resizes to the fixed 15:13 arena aspect ratio, with device pixel ratio capped at

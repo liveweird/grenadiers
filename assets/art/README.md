@@ -75,9 +75,9 @@ target after review.
   -localBounds.y)`. All 16 directional actor poses retain the shared `(40, 65)` foot anchor.
 - Keep IDs path-safe and stable. The exporter rejects missing, duplicate, unexpected or path-like
   IDs, changed required animations, invalid dimensions and texture-budget overflow.
-- The existing baseline `effect.flame.1` has a vertical two-pixel gap. The template, adjacent-flame
-  proof and runtime export preserve it faithfully; v0.3.48 does not claim that baseline frame is
-  already seamless. An artist may correct it in the canonical editable PNG.
+- Flame frames must reach all four edges so adjacent rays join. The procedural template's
+  `effect.flame.1` keeps its historical vertical two-pixel gap; the adopted v0.3.53 source fills a
+  continuous 22-pixel band on every edge of both frames.
 
 Use the standalone `art-atlas.html` renderer diagnostic to load a source PNG and manifest, inspect
 all labelled drawings, and see the representative arena rebuilt from actual Pixi atlas regions.
@@ -86,9 +86,16 @@ and adjacent flames. It is not linked from the gameplay or product flow.
 
 ## Provenance
 
-The v0.3.48 baseline is rendered at resolution 1 from Grenadiers' existing code-generated Pixi
-factories in `web/src/game/arena/`. No AI-generated art, external artwork, external font download
-or new visual style is introduced by this handoff. The generated guide and preview files derive
-from those same repository sources. Record the author, tool and license/provenance of future
-artist revisions alongside the adopted source; repository licensing remains authoritative for
-distribution.
+The adopted v0.3.53 source is a full redraw (terrain, actors, bombs, flames, Oil, pickups and
+status cues) and is AI-generated: Claude (Anthropic, via Claude Code) wrote a procedural
+Python/Pillow script that painted every frame, directed and reviewed by the repository owner.
+It keeps the v0.3.48 manifest unchanged, every frame rectangle, pivot and anchor, binary alpha and
+the Oil colour anchors. It contains no external artwork, franchise sprites or downloaded fonts;
+repository licensing applies. The generating script is not committed; edit the PNG directly.
+
+The v0.3.48 baseline, still produced by `art:template`, is rendered at resolution 1 from
+Grenadiers' existing code-generated Pixi factories in `web/src/game/arena/`; it introduced no
+AI-generated art, external artwork, external font download or new visual style. The generated
+guide and preview files derive from those same repository sources. Record the author, tool and
+license/provenance of future artist revisions alongside the adopted source; repository licensing
+remains authoritative for distribution.

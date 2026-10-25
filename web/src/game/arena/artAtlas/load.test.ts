@@ -30,7 +30,7 @@ vi.mock('./validate', () => ({
   assertValidSourceManifest: mocks.assertValidSourceManifest,
 }))
 
-import { loadArenaAtlas } from './load'
+import { createArenaAtlas, loadArenaAtlas } from './load'
 
 const sourcePixels = { width: 1120, height: 1120, data: new Uint8Array() }
 const runtimePixels = { width: 2040, height: 320, data: new Uint8Array() }
@@ -74,5 +74,15 @@ describe('arena atlas loading', () => {
     await expect(loadArenaAtlas()).resolves.toBeDefined()
     expect(mocks.sources).toHaveLength(2)
     expect(mocks.sources[1]?.destroyed).toBe(false)
+  })
+
+  it('packs supplied source pixels without fetching the bundled artwork', () => {
+    const regions = createArenaAtlas(sourcePixels)
+
+    expect(regions).toEqual({ source: mocks.sources[0] })
+    expect(fetch).not.toHaveBeenCalled()
+    expect(mocks.decodePng).not.toHaveBeenCalled()
+    expect(mocks.assertValidSourceManifest).toHaveBeenCalledWith(expect.anything(), sourcePixels)
+    expect(mocks.packRuntimePixels.mock.calls[0]?.[0]).toBe(sourcePixels)
   })
 })

@@ -5,7 +5,8 @@ completes **all 22 requested item types**, including Oil Barrel. Full checks, sc
 Compose/Kubernetes acceptance, publication and localhost promotion are complete. ART-ATLAS is
 shipped: [v0.3.48](https://github.com/liveweird/grenadiers/releases/tag/v0.3.48) publishes
 the artist handoff/export/preview. Published [v0.3.49](https://github.com/liveweird/grenadiers/releases/tag/v0.3.49)
-adopts the atlas in gameplay and is promoted locally. Artist redraws remain separate ART work.
+adopts the atlas in gameplay and is promoted locally. The unreleased v0.3.53 sheet is a full
+AI-generated redraw ([provenance](../../assets/art/README.md#provenance)).
 
 [v0.3.43](https://github.com/liveweird/grenadiers/releases/tag/v0.3.43) publishes Wall Pass as the
 eighteenth of 22 requested item types. Published source `c086f719ea470b9fe24963adef84b5e3bdf3e17a`,
@@ -221,8 +222,8 @@ The entire expanded-item batch shipped in v0.3.47. ART-ATLAS is split into two b
 - **v0.3.49 (published):** adopt the reviewed runtime atlas in gameplay, preserving terrain cache behavior,
   animation timing, visibility, collision geometry, ownership and current rendering budgets.
 
-The existing code-generated PixiJS art remains the baseline. New artist redraws and new animation
-production follow review of this complete inventory and representative arena proof.
+The code-generated PixiJS art remains the template and parity baseline. The unreleased v0.3.53
+redraw replaces the adopted sheet; new animation production follows review of the inventory.
 
 - Export the current drawings into a labelled visual inventory, including terrain variants,
   directional player frames, bombs, connected flames, pickups and status overlays. Reserve
@@ -243,8 +244,8 @@ production follow review of this complete inventory and representative arena pro
   geometry, authoritative visibility, hazard readability, player distinctions and EN/PL UI.
 
 Published v0.3.48 implements the template/export/preview portion above. Gameplay integration shipped in v0.3.49;
-artist redraws remain open. The faithful baseline retains a known two-pixel vertical gap in
-flame frame 1; the guide calls it out explicitly rather than claiming seamless replacement art.
+the unreleased v0.3.53 redraw replaces the adopted sheet. The procedural template still retains a
+known two-pixel vertical gap in flame frame 1; the redrawn flame frames are gap-free.
 
 ## EFFECTS: inventory and status foundations
 
@@ -334,4 +335,4 @@ including same-image Compose/Kubernetes acceptance. Bots, mobs and larger matche
 separate tracks; their future interactions must be specified without making them prerequisites.
 
 The expanded-item activation batch and its release gates are complete in v0.3.47. ART-ATLAS
-is delivered by the published v0.3.48/v0.3.49 releases; artist redraws follow sample review.
+is delivered by the published v0.3.48/v0.3.49 releases; the v0.3.53 redraw is unreleased.

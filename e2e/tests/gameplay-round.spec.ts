@@ -85,7 +85,7 @@ test('two native gameplay sockets finish one authoritative generated classic rou
     await sendGame(one, { type: 'movement', ...binding, direction: null })
     const equipment = await sendGame(one, { type: 'manualAction', action: 'equipment', ...binding, actionId: 1 })
     await expect.poll(() => gameFrames(one)).toContainEqual({
-      type: 'error', code: 'invalidMessage', sequence: equipment,
+      type: 'error', code: 'invalidPhase', sequence: equipment,
     })
     await sendGame(one, { type: 'manualAction', action: 'bomb', ...binding, actionId: 1 })
     await expect.poll(async () => snapshot(await gameFrames(one))?.state.bombs.length).toBe(1)

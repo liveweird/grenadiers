@@ -1,31 +1,14 @@
-import { readFile, readdir } from 'node:fs/promises'
+import { fileURLToPath } from 'node:url'
 
-const scenarioDirectory = new URL('../scenarios/', import.meta.url)
-const testDirectory = new URL('../tests/', import.meta.url)
+import { scenarioSpecMap } from './scenario-map.mjs'
+import { checkScenarioContract } from './scenario-contract.mjs'
 
-async function files(directory, suffix) {
-  return (await readdir(directory)).filter((name) => name.endsWith(suffix))
-}
+const rootDirectory = fileURLToPath(new URL('../', import.meta.url))
 
-const scenarioText = (await Promise.all((await files(scenarioDirectory, '.md')).map((name) => readFile(new URL(name, scenarioDirectory), 'utf8')))).join('\n')
-const e2eDirectory = new URL('../', import.meta.url)
-const testDirectories = [
-  testDirectory,
-  ...(await readdir(e2eDirectory, { withFileTypes: true }))
-    .filter((entry) => entry.isDirectory() && entry.name.endsWith('-tests'))
-    .map((entry) => new URL(`${entry.name}/`, e2eDirectory)),
-]
-const testText = (await Promise.all(testDirectories.map(async (directory) =>
-  (await Promise.all((await files(directory, '.ts')).map((name) => readFile(new URL(name, directory), 'utf8')))).join('\n'),
-))).join('\n')
-const scenarios = [...scenarioText.matchAll(/^## Scenario: (.+)$/gm)].map((match) => match[1])
-const tests = [...testText.matchAll(/test\(['"]([^'"]+)['"]/g)].map((match) => match[1])
-const missingTests = scenarios.filter((name) => !tests.includes(name))
-const missingScenarios = tests.filter((name) => !scenarios.includes(name))
-
-if (missingTests.length || missingScenarios.length) {
-  console.error('Scenario/test parity failed.', { missingTests, missingScenarios })
+try {
+  const count = await checkScenarioContract({ rootDirectory, mapping: scenarioSpecMap })
+  console.log(`${count} documented scenarios match their mapped Playwright specs.`)
+} catch (error) {
+  console.error(error instanceof Error ? error.message : error)
   process.exitCode = 1
-} else {
-  console.log(`${scenarios.length} documented scenario matches its Playwright test.`)
 }

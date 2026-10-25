@@ -59,6 +59,14 @@ aliases. The latest published release remains v0.3.49; v0.3.50 is still an unrel
 Testing, deployment and backlog consolidation remain separate work, including reconciliation
 with the pending artist PR before changing its overlapping documents.
 
+**API-08/09, TS-07 and BE-10/TL-04:** API lint now enforces closed object schemas, camelCase
+properties and shared problem responses, with a narrow documented upgrade exception and
+positive/negative fixtures. Gameplay generation, drift checks and reproducibility tests share
+one explicit inventory that also checks each schema's identity. Browser scenarios are paired
+with specific specs; duplicates, missing files and unsupported ambiguous declarations fail
+explicitly. Dependabot groups routine version updates without suppressing major or security
+proposals, and exact entropy/generator pins have documented rationale.
+
 ## Finding dispositions and proposed solutions
 
 “Agree” accepts the observed issue, not every implementation proposed in the review.
@@ -75,8 +83,8 @@ Related IDs are grouped to avoid treating one architectural problem as several i
 | API-04, BE-02, SEC-02 | Agree; first batch implements this. | Independent diagnostic permits/rate budget and shared strict transport guards, with saturation, Origin, flood, cache-header and shutdown tests. |
 | API-05 | Optional improvement, not a demonstrated defect. | Add stable Problem codes only when a consumer needs distinctions beyond HTTP status. Do not unify diagnostic and gameplay error vocabularies merely for symmetry. |
 | API-06/07 | Agree; primary live-reference gaps addressed. | Actual close behavior, principal live-message descriptions and valid HTTP examples are documented without changing schemas or wire types. |
-| API-08 | Agree on enforcement opportunities. | Enforce useful API conventions incrementally with positive/negative lint fixtures. |
-| API-09 | Agree on duplicated contract inventories. | Share contract discovery with explicit filename/version validation; unexpected files must not silently become supported contracts. |
+| API-08 | Agree; initial enforcement implemented. | Spectral checks error media/shared Problem references, object closure and camelCase, including referenced fallback responses; mutation fixtures guard enforcement and exceptions. |
+| API-09 | Agree; shared inventory implemented. | Generation/check/reproducibility use explicit v2–v11 discovery with filename and declared version/ID checks; unexpected or incomplete inventories fail. |
 | API-10, CX-09 | Coverage question, not yet established as a defect. | Enumerate live message variants against schema conformance tests, then add any missing cases. |
 | BE-01 | Confirmed cost, intentional documented behavior. | Decide whether production replay recording has an operational consumer. If not, feature-gate allocation/recording while retaining replay acceptance tests; document memory effects. |
 | BE-03, SEC-01 | Agree: public-hosting blocker. | Design trusted peer/proxy identity, bounded keyed mint/upgrade/room budgets, per-client outstanding limits and global backstops together. Keep denial telemetry credential-free. |
@@ -85,7 +93,7 @@ Related IDs are grouped to avoid treating one architectural problem as several i
 | BE-06, CX-06 | Agree; safe exemption cleanup implemented. | Removed the unused restoration method and stale exemptions; gated test-only hooks and preserved production cooldown observations. Admission-argument refactoring remains separate. |
 | BE-08, CX-04/05 | Agree on test wiring/helper repetition. | Move simulation test-module declarations into a test aggregator; consolidate genuinely equivalent fixtures; extend source-size discovery to item E2E directories. Keep responsibility-based production modules. |
 | BE-09, CX-07 | Mixed: maintainability concerns, not proven reachable panics. | Replace transport-state assumptions with typed authenticated commands where useful; split orchestration around domain operations. Audit narrowing conversions before changing public APIs. |
-| BE-10, TL-04 | Agree on rationale/update-management gaps. | Document deterministic/entropy dependency constraints, group compatible updates, and review incompatible upgrades deliberately. Exact pins do not justify indefinitely suppressing upgrade/security notices. |
+| BE-10, TL-04 | Agree; rationale and grouping implemented. | Cargo patch, per-workspace npm minor/patch and Actions minor/patch groups preserve individual pinned RNG, Docker, major and security proposals. Document compatibility review; no version ignores or automatic merges. |
 | BE-11, TS-09/10 | Mostly intentional tests/benchmarks. | Use virtual time where it preserves the real socket deadline being tested. Keep performance tests separate from ordinary suites. Do not replace useful waits or ignored benchmarks solely to improve counts. |
 | BE-12/13 | Plausible shutdown/latency concerns. | Reproduce shutdown with a non-reading client; measure registry-lock work before moving bounded construction/entropy outside it. No demonstrated hang yet. |
 | CX-03 | Agree on cross-layer item duplication, not the proposed enum choice. | Define one domain item specification and derive configurable wire catalogs from each schema's `ItemId`, not `PickupKind`; preserve archived subsets. Parameterize configuration scaffolding independently. |
@@ -101,7 +109,7 @@ Related IDs are grouped to avoid treating one architectural problem as several i
 | TS-01/02 | Agree on cost; sampling is a policy change. | Measure a structured fast feedback suite while retaining exhaustive acceptance. Compare fault detection before proposing a new cadence; keep current assertions and exhaustive coverage meanwhile. |
 | TS-03/04 | Agree on denominator hygiene; thresholds require recalibration. | Exclude narrowly identified test support, collect fresh coverage, then choose floors. Distinguish `all` from optional full/tool-dependent checks; do not require coverage tooling for every quick gate. |
 | TS-05, TL-01/02/03, SEC-05 | Partly agree: orphan callers and gate discoverability need work. | Wire the orphan script tests now; audit manual diagnostic-suite coverage and document aggregate scope. Preserve local-first verification; duplicated automatic remote gates are not a default requirement. |
-| TS-07 | Agree: global title sets miss duplicates/mappings. | Reject duplicate titles and validate documented scenario-to-spec mappings; support the actual title syntax through parsing or explicit metadata. |
+| TS-07 | Agree; mapped AST-based check implemented. | Explicit document/spec inventory and title parity reject duplicates and unknown/missing files; static string/template/alias forms work, while ambiguous modifiers fail with documented guidance. |
 | TS-11/12 | Factual suggestions, not established missing-risk coverage. | Target parser mutation/property checks and simultaneous competing-resume tests at explicit invariants; existing concurrency tests already use synchronized claimants. |
 | TS-13 | Disagree with sibling-test filenames as a coverage measure. | Use behavior and coverage of actual call paths. Indirectly covered components do not require duplicate tests solely to match filenames. |
 | TL-06 | Agree on release bookkeeping cost. | Reduce duplicated release facts first; then automate version/changelog updates and applicable checks, without introducing another mandatory evidence pipeline. |

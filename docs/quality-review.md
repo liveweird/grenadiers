@@ -93,8 +93,11 @@ retain their distinct behavior.
 budgets (400,000 JavaScript bytes, 40,000 CSS bytes). Coverage excludes test-only helper files
 without changing executed tests or exhaustive acceptance. A fresh web baseline is
 90.90/89.40/89.56/93.31% (statements/branches/functions/lines); floors rise to 90% lines and 88%
-for the other metrics. The Rust helper exclusion is shared by serial/parallel reporters;
-fresh full Rust coverage and any corresponding floor recalibration remain pending.
+for the other metrics. Rust's shared helper exclusion was verified by full debug/release/coverage
+acceptance over all 4,194,304 masks at `9122e33` (6m40s, no retries). The official LCOV contains
+16,391/17,631 hit lines (92.97%) and no helper records. That measurement passed the previous
+80% gate and supports raising both Rust reporting paths to 90%; command and real-LLVM fixture
+tests verify the new threshold without repeating unchanged exhaustive execution.
 
 **TL-10, audit findings:** update the aligned Vitest/coverage pair to 5.0.5 and Ajv's transitive
 `fast-uri` to 3.1.9, with no unrelated direct dependency upgrades. Full and production npm
@@ -147,7 +150,7 @@ Related IDs are grouped to avoid treating one architectural problem as several i
 | FE-08 | Selector counts do not describe the current web tests. | Current web tests use role queries rather than test IDs. Assess E2E selectors in their own scope; a selector ratio alone is not an accessibility defect. Retain actual accessibility audits. |
 | FE-09/10 | Agree, lower-priority consistency work. | Consolidate copied scene mocks, preserving specialized renderer/atlas mocks; introduce semantic color tokens incrementally. |
 | TS-01/02 | Agree on cost; sampling is a policy change. | Measure a structured fast feedback suite while retaining exhaustive acceptance. Compare fault detection before proposing a new cadence; keep current assertions and exhaustive coverage meanwhile. |
-| TS-03/04 | Agree; helper exclusions and web recalibration implemented. | Web floors rise from 85% to 90% lines / 88% other metrics against a fresh denominator. Rust floor stays 80% until fresh full measurement. Test execution and exhaustive masks remain unchanged; optional tool-dependent gates stay explicit. |
+| TS-03/04 | Agree; helper exclusions and threshold recalibration implemented. | Fresh application coverage supports web floors of 90% lines / 88% other metrics and Rust 90% lines. The full Rust measurement ran at the prior floor before ratcheting; execution and exhaustive masks remain unchanged. Optional tool-dependent gates stay explicit. |
 | TS-05, TL-01/02/03, SEC-05 | Partly agree: orphan callers and gate discoverability need work. | Wire the orphan script tests now; audit manual diagnostic-suite coverage and document aggregate scope. Preserve local-first verification; duplicated automatic remote gates are not a default requirement. |
 | TS-07 | Agree; mapped AST-based check implemented. | Explicit document/spec inventory and title parity reject duplicates and unknown/missing files; static string/template/alias forms work, while ambiguous modifiers fail with documented guidance. |
 | TS-11/12 | Factual suggestions, not established missing-risk coverage. | Target parser mutation/property checks and simultaneous competing-resume tests at explicit invariants; existing concurrency tests already use synchronized claimants. |
@@ -185,7 +188,7 @@ Related IDs are grouped to avoid treating one architectural problem as several i
 
 1. Develop a compatible CSP/validator strategy.
 2. Peer-keyed hosting admission design and credential-free denial telemetry.
-3. Test-wiring cleanup and denominator-correct coverage measurement.
+3. Complete remaining test-wiring and fixture cleanup.
 4. Complete contributor/history separation and share E2E fixture/configuration helpers.
 5. Apply the retention policy to historical protocol reduction and a single item specification.
 6. Measured bundle/render improvements and compatible dependency updates.

@@ -248,14 +248,14 @@ def report_lcov(env: dict[str, str], raw_dirs: list[Path], output: Path,
         raise ValueError("cargo-llvm-cov target directory unavailable")
 
     def report() -> None:
-        run(["cargo", "llvm-cov", "report", "--workspace", "--locked", "--fail-under-lines", "80",
+        run(["cargo", "llvm-cov", "report", "--workspace", "--locked", "--fail-under-lines", "90",
              "--ignore-filename-regex", coverage_exclusion_regex(), "--lcov", "--output-path",
              str(output)], env=env)
 
     _, count = with_report_profiles(Path(target_text), raw_dirs, owner, report)
     if output.is_symlink() or not output.is_file() or output.stat().st_size == 0:
         raise ValueError("official LCOV report missing or empty")
-    return {"lineFloor": 80, "rawProfiles": count, "reporter": "cargo-llvm-cov"}
+    return {"lineFloor": 90, "rawProfiles": count, "reporter": "cargo-llvm-cov"}
 
 
 def execute_profiles(source: str, workers: int, temp: Path) -> tuple[dict[str, Any], dict[str, Any]]:

@@ -77,7 +77,7 @@ runs the same behavior in the production profile. The server gate requires both:
 must never perform required mutations. The test profile uses optimization level 1 while retaining
 debug assertions and integer overflow checks; exhaustive debug and instrumented coverage runs use
 that same assertion-enabled profile. Clippy denies warnings. Coverage uses
-`cargo-llvm-cov` **0.9.1** and an **80% line floor**, enforced in CI. Current measurements
+`cargo-llvm-cov` **0.9.1** and a **90% line floor**, enforced in CI. Current measurements
 and candidate evidence are recorded in [verification](verification.md).
 Install with `cargo install cargo-llvm-cov --version 0.9.1 --locked`, then
 `rustup component add llvm-tools-preview` and `scripts/gates.sh coverage`.
@@ -85,7 +85,7 @@ Stable branch coverage equivalent to Flow's Kover gate is not configured.
 
 Cargo coverage excludes test-only `test_support.rs` and `*_test_support.rs` helpers from the
 denominator using `scripts/coverage-exclusions.txt`. Standalone and parallel reporting share
-that policy; helper code still executes and the 80% floor and exhaustive acceptance remain.
+that policy; helper code still executes and the 90% floor and exhaustive acceptance remain.
 
 `scripts/gates.sh server-parallel` combines the server and coverage checks with four local
 workers by default. It builds each profile once, runs ordinary tests once per profile, and
@@ -104,7 +104,7 @@ listed above. Coverage tools are not prerequisites for repository, web or E2E-st
 The optional full CI derives the exhaustive server item-mask partition matrix from the checked
 Rust catalog; the
 workflow and JavaScript helpers do not duplicate item bits, cardinality, or ranges. Each partition
-runs the complete debug, release, build, and 80%-floor coverage gates with a 20-minute limit and
+runs the complete debug, release, build, and 90%-floor coverage gates with a 20-minute limit and
 emits source-bound debug, release, and coverage summaries. The stable `server` job accepts only the
 complete, disjoint set of successful partition artifacts. With both partition variables absent,
 local debug, release, and coverage commands still execute every mask. Clean Git worktrees report

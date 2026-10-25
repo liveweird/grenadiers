@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## 0.3.53 — 2026-10-25
+
 ### Added
 
 - Add bounded peer admission alongside process-global limits, strict opt-in immediate-proxy

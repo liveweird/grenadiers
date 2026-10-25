@@ -1,6 +1,6 @@
 # ADR 0024: Bounded peer admission and explicit proxy identity
 
-Status: v0.3.53 candidate; implementation reviewed, final image/runtime acceptance pending.
+Status: accepted for v0.3.53 after source-bound and final image/runtime acceptance.
 
 ## Context
 

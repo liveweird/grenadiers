@@ -97,6 +97,11 @@ and are never placed in URLs, shared room state, logs, replay journals, local/se
 database fields. Transport reconnects obtain a fresh ordinary session before presenting the
 capability; a correlated resume throttle uses bounded retries on that authenticated socket.
 All recovery shares one ten-second client deadline. See [browser recovery](game/reconnect-browser.md).
+A leaked resume capability together with its room identifier lets another authenticated holder
+restore or take over that seat. Anonymous session issuance does not establish durable ownership;
+peer quotas do not prevent use of a stolen capability. Recoverable rotation needs a separate
+protocol design so a lost response does not lock out the legitimate holder.
+
 Explicit leave clears it only after acknowledgement; `resumeRejected`, replacement, and exhausted
 retry terminate recovery. Playwright traces are disabled in every configuration because raw framework traces can
 capture personal admission frames before redaction. Screenshots, public reports, and bounded

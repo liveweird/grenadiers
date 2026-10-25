@@ -72,12 +72,15 @@ These are engineering defaults, not measured public-hosting capacity. Peers shar
 local proxy share budgets. Session claiming does not release its minting quota; expiry or lease
 drop does. A credential can be claimed from a different peer: address quotas do not change bearer
 authentication. Socket and room-attempt permits release on failure, cancellation and disconnect.
+Room-attempt permits remain held through the response attempt, so stalled responses stay within
+the concurrent-handler bound.
 
 Gameplay and diagnostics have independent tables capped at 4,096 peer keys each. Only entries
 without live permits and inactive for at least 60 seconds can be evicted; attempts and permit
 release refresh activity. Sweeping is bounded and at most once per second. Full tracking rejects
 new keys with 503 while existing keys remain eligible. Peer checks precede global token use.
-HTTP rate denials use 429 and `Retry-After: 1`; capacity/unavailable identity uses 503. WebSocket
+HTTP rate and per-peer outstanding-session denials use 429 and `Retry-After: 1`. Socket,
+tracking and global registry capacity, or unavailable identity, use 503. WebSocket
 room throttles remain correlated and non-closing, preserving bounded browser resume recovery.
 
 Denial counters use finite operation/reason labels and bounded aggregate tracing summaries.

@@ -137,6 +137,14 @@ Full Rust exhaustive/90%-floor coverage and the 6,790-test web gate pass; localh
 the accepted v0.3.52 image. See
 [ADR 0023](decisions/0023-browser-content-security-policy.md).
 
+**BE-03 / SEC-01/07, v0.3.53 candidate:** add transport-derived peer identity with strict opt-in
+immediate-proxy forwarding, independent bounded gameplay/diagnostic tables and per-peer budgets
+before global backstops. Minting quotas count issued and claimed sessions without binding bearer
+authentication to an address. Typed permits cover socket lifetime and complete room-admission
+handlers, including response attempts. Fixed-label readable denial summaries exclude request
+data and credentials. Independent review and ordinary debug/release tests pass; final exhaustive,
+image and browser acceptance remain pending. See [ADR 0024](decisions/0024-peer-admission.md).
+
 ## Finding dispositions and proposed solutions
 
 “Agree” accepts the observed issue, not every implementation proposed in the review.
@@ -157,7 +165,7 @@ Related IDs are grouped to avoid treating one architectural problem as several i
 | API-09 | Agree; shared inventory implemented. | Generation/check/reproducibility use explicit v2–v11 discovery with filename and declared version/ID checks; unexpected or incomplete inventories fail. |
 | API-10, CX-09 | Live receive variants enumerated in v0.3.51; broader coverage remains a question. | Standalone parity tests explicitly accept all eight gameplay-v11 and three diagnostic server-message variants through both compilation routes. Audit client-message and archived-contract coverage separately before claiming a complete protocol matrix. |
 | BE-01 | Confirmed cost, intentional documented behavior. | Decide whether production replay recording has an operational consumer. If not, feature-gate allocation/recording while retaining replay acceptance tests; document memory effects. |
-| BE-03, SEC-01 | Agree: public-hosting blocker. | Design trusted peer/proxy identity, bounded keyed mint/upgrade/room budgets, per-client outstanding limits and global backstops together. Keep denial telemetry credential-free. |
+| BE-03, SEC-01 | Agree; implementation is the v0.3.53 candidate. | Strict transport/proxy identity, bounded independent peer tables, rate/concurrency/session quotas and global backstops are integrated. Complete source-bound/runtime acceptance; actual public proxy topology and ingress configuration remain operator requirements. |
 | BE-04 | Agree; bucket implementation shared. | Independent caller budgets and clock/lock behavior are preserved. Consolidate repeated transport timeout definitions separately; no generic clock abstraction is introduced. |
 | BE-05, TS-14 | Agree for active startup/configuration paths. | Centralize typed parsing and defaults; test invalid configuration and empty-origin behavior without logging credentials. Revisit archived low-coverage code with the retention decision. |
 | BE-06, CX-06 | Agree; safe exemption cleanup implemented. | Removed the unused restoration method and stale exemptions; gated test-only hooks and preserved production cooldown observations. Admission-argument refactoring remains separate. |
@@ -189,7 +197,7 @@ Related IDs are grouped to avoid treating one architectural problem as several i
 | TL-12 | Agree on build-cache/reproducibility tradeoffs. | Add dependency caching and OCI metadata. Replace unbounded package upgrades with a documented base-image/security-refresh policy; simply dropping upgrades can retain known vulnerabilities. |
 | TL-13/14/15/16 | Mixed low-priority tooling/documentation concerns. | Scope the peer-dependency workaround, document supported Python/tooling prerequisites, name gate commands in the PR template, and retain existing pin consistency checks. |
 | SEC-03 | Agree; coordinated server/client fix implemented. | Correlated throttles retain the socket; bounded same-socket retries use fresh sequences and fenced timers within one deadline. Initial admission remains manually retryable; per-socket floods still close. |
-| SEC-06/07 | Documented capability tradeoff; missing denial visibility. | Explain capability-leak/takeover consequences and add redacted counters. Rotation requires a recoverable protocol design, not a silent behavior change. |
+| SEC-06/07 | Capability tradeoff remains; denial visibility is in the v0.3.53 candidate. | Fixed operation/reason counters and bounded readable summaries exclude credentials and request data. Capability-leak/takeover documentation and recoverable rotation remain separate protocol work. |
 | SEC-08/09/11 | Sensible deployment hardening; some risks remain unmeasured. | Test container/pod limits and security-context requirements; define proxy/header/idle/connection limits before public hosting. NetworkPolicy needs an actual network/DB model. |
 
 ## Corrections that change the implementation plan
@@ -220,7 +228,7 @@ Related IDs are grouped to avoid treating one architectural problem as several i
 5. Apply the retention policy to historical protocol reduction and a single item specification.
 6. Measured bundle/render improvements and compatible dependency updates.
 
-Public-hosting identity, durable replay export and any reduced exhaustive-test cadence need
+Public-hosting topology, durable replay export and any reduced exhaustive-test cadence need
 explicit requirements. None blocks the isolated fixes in the first batch. Fresh profiling,
 fuzzing, a stuck-client shutdown reproduction and a complete protocol-deletion audit remain
 outstanding; the review's baseline is not evidence those experiments ran.

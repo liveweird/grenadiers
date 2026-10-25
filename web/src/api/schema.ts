@@ -289,7 +289,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Peer or process-global session issuance rate exceeded. */
+            /** @description Peer issuance rate or outstanding-session quota, or process-global issuance rate, exceeded. */
             429: {
                 headers: {
                     "Cache-Control": components["headers"]["NoStore"];
@@ -300,7 +300,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Peer outstanding-session quota, peer tracking or global registry capacity exhausted; transport identity or credential generation unavailable; or server shutdown in progress. */
+            /** @description Peer tracking or global registry capacity exhausted; transport identity or credential generation unavailable; or server shutdown in progress. */
             503: {
                 headers: {
                     "Cache-Control": components["headers"]["NoStore"];

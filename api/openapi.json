@@ -184,7 +184,7 @@
             }
           },
           "429": {
-            "description": "Peer or process-global session issuance rate exceeded.",
+            "description": "Peer issuance rate or outstanding-session quota, or process-global issuance rate, exceeded.",
             "headers": {
               "Cache-Control": {
                 "$ref": "#/components/headers/NoStore"
@@ -202,7 +202,7 @@
             }
           },
           "503": {
-            "description": "Peer outstanding-session quota, peer tracking or global registry capacity exhausted; transport identity or credential generation unavailable; or server shutdown in progress.",
+            "description": "Peer tracking or global registry capacity exhausted; transport identity or credential generation unavailable; or server shutdown in progress.",
             "headers": {
               "Cache-Control": {
                 "$ref": "#/components/headers/NoStore"

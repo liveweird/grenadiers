@@ -11,6 +11,21 @@ archived wire contracts and private replay retention.
 The browser validates these messages and drives the playable generated-map match. Diagnostic `/api/v1/ws` and
 `api/realtime.schema.json` remain unchanged.
 
+## Protocol version guide
+
+| Version | Guide | Network support |
+| --- | --- | --- |
+| v2 | [ADR 0013](../decisions/0013-gameplay-v2-and-room-profiles.md) (no standalone guide) | Archived contract |
+| v3 | [Historical guide](../history/protocols/protocol-v3.md) | Archived contract |
+| v4 | [Historical guide](../history/protocols/protocol-v4.md) | Archived contract |
+| v5 | [Historical guide](../history/protocols/protocol-v5.md) | Archived contract |
+| v6 | [Historical guide](../history/protocols/protocol-v6.md) | Archived contract |
+| v7 | [Historical guide](../history/protocols/protocol-v7.md) | Archived contract |
+| v8 | [Historical guide](../history/protocols/protocol-v8.md) | Archived contract |
+| v9 | [Historical guide](../history/protocols/protocol-v9.md) | Archived contract |
+| v10 | [Historical guide](../history/protocols/protocol-v10.md) | Archived contract |
+| v11 | [Live compatibility guide](protocol-v11.md) | Supported |
+
 ## Authentication and compatibility
 
 `POST /api/v1/game/session` issues an anonymous credential. Send exactly one configured
@@ -191,13 +206,15 @@ has the 22-item catalog beginning with Kick, Punch, Bracelet and Wall Pass, with
 before Teleporter. New live rooms enable the full available catalog and every supported subset is allowed.
 Only actual changes increment
 the settings revision and clear readiness; Ready commands acknowledge that exact revision.
-See [v6 settings and authority](protocol-v6.md) for bounds, no-op acknowledgements and edit locks.
+See [v6 settings and authority](../history/protocols/protocol-v6.md) for bounds, no-op
+acknowledgements and edit locks.
 
 Phases are Waiting; initial/inter-round Countdown with deadline; Running; nonfinal Result
 with `holdUntil`; MatchResult with independent outcome, end time, and `rematchAt`;
 or prematch Interrupted with reason/end time. Holds last 180 ticks, followed by a 180-tick
 inter-round countdown. Draws award no score. Last-round records persist across later rounds,
-forfeits, and interruptions; rematch clears them. See [v4 field reference](protocol-v4.md).
+forfeits, and interruptions; rematch clears them. See the
+[v4 field reference](../history/protocols/protocol-v4.md).
 
 Two occupied players may set/withdraw rematch votes after the final hold. Consensus advances
 one epoch and returns occupied, unready Waiting without changing transport sequence or room

@@ -4,6 +4,32 @@ This archive preserves the older release records originally maintained in
 [`docs/releases.md`](../releases.md). Records remain in their original order; the current
 release procedure and current release record stay in the [release guide](../releases.md).
 
+## v0.3.62 — 2026-10-25
+
+[v0.3.62](https://github.com/liveweird/grenadiers/releases/tag/v0.3.62) removes 120 copied mock
+lines from Diarrhea, Slow Foot and Reverse Controls scene tests. All three reuse the existing
+Vitest-safe Pixi mock; test bodies, titles and assertions remain unchanged. Specialized renderer
+and atlas mocks remain intentional. Production behavior, protocols and dependencies are unchanged.
+
+Fresh full web acceptance at `50e57080aaf90fc03f2675f940be3d4adac9ca95` passes 6,812 tests /
+91 files in 307.97s, with 91.10/89.47/90.12/93.47% coverage and 337,937/36,505-byte gzip JS/CSS.
+Focused tests, lint, TypeScript, Knip and repository checks pass. Integration of v0.3.61 changes
+no tested web files. Application image inputs match `ea90eaf91390db05dfdc0398be0328e1ccc7bede`;
+publication adds documentation. Accepted image is
+`sha256:a5025d0406d61cdaf1bfd6cd3800a7440f72b39c04c003c5dd3b4a6460ff11af`.
+
+Rust/runtime sources match v0.3.61 apart from product-version metadata, so reuse its complete
+source-bound 4,194,304-mask acceptance (93.49% lines), distinct Linux units, 16 native cases
+and five startup probes. Dependency inputs also reuse the existing Cargo/npm audit results.
+A fresh pinned exact-image scan reports zero fixable HIGH/CRITICAL findings; the project-owned
+Trivy cache avoids repeated database downloads without bypassing updates or failures.
+
+Localhost:8085 serves this image. Health/readiness, runtime security, CSP/cache and exact
+HTML/JavaScript/atlas equality with the accepted v0.3.60 web artifacts pass, along with one
+fresh native admission/room smoke. Control is `.local-checkpoints/runtime/compose-v0.3.62.yaml`;
+`rollback-v0.3.61.yaml` retains the previous image. No migration is required. Remaining agreed
+Claude review work still precedes CPU implementation.
+
 ## v0.3.61 — 2026-10-25
 
 [v0.3.61](https://github.com/liveweird/grenadiers/releases/tag/v0.3.61) centralizes production

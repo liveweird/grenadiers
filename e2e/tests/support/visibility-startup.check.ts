@@ -194,12 +194,16 @@ function serializedError(error: Error): string {
   const fake = child()
   const profile = '/private/profile'
   const wait = waitForChromiumEndpoint(fake as never, profile)
-  const cause = new Error(`cause ws://127.0.0.1:9222/devtools/browser/private ${profile}`)
+  const capability = 'ws://127.0.0.1:9222/devtools/browser/private-cdp-capability'
+  const cause = new Error(`cause ${capability} ${profile}`)
   fake.emit('error', new Error(`spawn ${profile}`, { cause }))
   const rejected = await expectRejected(wait.endpoint, /spawn failed/)
   const serialized = serializedError(rejected)
-  assert.equal(serialized.includes('/private/profile'), false)
-  assert.equal(serialized.includes('/private'), false)
+  assert.equal(serialized.includes(profile), false)
+  // A checkout may itself live under /private/tmp; assert the actual secret instead.
+  assert.equal(serialized.includes('private-cdp-capability'), false)
+  assert.match(serialized, /<redacted-profile>/)
+  assert.match(serialized, /<redacted-cdp-endpoint>/)
   wait.dispose()
 }
 

@@ -3,7 +3,7 @@ import validateServer from '../../validation/generated/gameplay-v11.mjs'
 import { freezeSemanticError } from '../validation/freezeSemantics'
 import { effectSemanticError, expandedProfileSemanticErrorFor, itemSetSemanticError,
   type GameplayProfileSemanticError } from '../validation/profileSemantics'
-import type { GameServerMessage, GameState, RoomView } from './schema'
+import { ITEM_IDS, type GameServerMessage, type GameState, type RoomView } from './schema'
 
 type GameplayV11SemanticError = GameplayProfileSemanticError
   | 'invalidFrozenState' | 'invalidTeleportMarker' | 'invalidOilBarrels'
@@ -11,12 +11,6 @@ export type GameplayV11ValidationResult =
   | { valid: true; value: GameServerMessage }
   | { valid: false; source: 'schema'; errors: ErrorObject[] }
   | { valid: false; source: 'semantics'; error: GameplayV11SemanticError }
-
-const supportedItems = [
-  'kick', 'punch', 'bracelet', 'wallPass', 'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch',
-  'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame',
-  'longFuse', 'reverseControls', 'invisibleBombs', 'oilBarrel', 'teleporter',
-] as const
 
 const cellKey = ({ column, row }: { column: number; row: number }): string => `${column},${row}`
 function oilSemanticError(state: GameState, room: RoomView): GameplayV11SemanticError | null {
@@ -82,7 +76,7 @@ function messageSemanticError(message: GameServerMessage): GameplayV11SemanticEr
     return 'invalidOilBarrels'
   }
   return stateSemanticError(state, message.room)
-    ?? expandedProfileSemanticErrorFor(message.room, state, events, supportedItems, true)
+    ?? expandedProfileSemanticErrorFor(message.room, state, events, ITEM_IDS, true)
 }
 
 export function validateGameplayV11ServerMessage(value: unknown): GameplayV11ValidationResult {

@@ -496,3 +496,28 @@ export interface ManualAction {
   "actionId": Counter;
   "action": "bomb" | "equipment";
 }
+
+export const ITEM_IDS = [
+  "kick",
+  "punch",
+  "bracelet",
+  "wallPass",
+  "heart",
+  "remoteBomb",
+  "piercingBomb",
+  "powerBomb",
+  "landmine",
+  "shield",
+  "stopwatch",
+  "invisibilityCloak",
+  "goldenFlame",
+  "shortFuse",
+  "diarrhea",
+  "slowFoot",
+  "shortFlame",
+  "longFuse",
+  "reverseControls",
+  "invisibleBombs",
+  "oilBarrel",
+  "teleporter"
+] as const satisfies readonly ItemId[]

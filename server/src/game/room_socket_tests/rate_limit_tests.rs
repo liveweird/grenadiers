@@ -130,33 +130,38 @@ async fn throttled_unseated_socket_still_closes_and_drains_on_shutdown() {
 
 #[tokio::test]
 async fn inbound_flood_keeps_policy_close_and_releases_connection_permit() {
+    const FLOOD_FRAMES: usize = 151;
+
     let state = AppState::without_database([ORIGIN.to_owned()]);
     let token = issue_token(&state);
     let (url, server) = start_server(state.clone()).await;
     let mut socket = connect(&url, &token).await;
 
-    for _ in 0..36 {
-        if within(socket.send(Message::Ping(Vec::new().into())))
-            .await
-            .is_err()
-        {
-            break;
+    let (rate_limited, close) = within(async {
+        // The two-second observation window can grant at most the 30-token burst
+        // plus 120 refills. Buffer one more frame and flush the flood as one write
+        // so client scheduling cannot turn it into an allowed 60-frame-per-second stream.
+        for _ in 0..FLOOD_FRAMES {
+            socket.feed(Message::Ping(Vec::new().into())).await.unwrap();
         }
-    }
-    let mut rate_limited = false;
-    let close = loop {
-        match within(socket.next()).await.unwrap().unwrap() {
-            Message::Pong(_) => {}
-            Message::Text(text) => {
-                let message: Value = serde_json::from_str(&text).unwrap();
-                if message["type"] == "error" && message["code"] == "rateLimited" {
-                    rate_limited = true;
+        socket.flush().await.unwrap();
+
+        let mut rate_limited = false;
+        loop {
+            match socket.next().await.unwrap().unwrap() {
+                Message::Pong(_) => {}
+                Message::Text(text) => {
+                    let message: Value = serde_json::from_str(&text).unwrap();
+                    if message["type"] == "error" && message["code"] == "rateLimited" {
+                        rate_limited = true;
+                    }
                 }
+                Message::Close(frame) => break (rate_limited, frame),
+                other => panic!("unexpected flood response: {other:?}"),
             }
-            Message::Close(frame) => break frame,
-            other => panic!("unexpected flood response: {other:?}"),
         }
-    };
+    })
+    .await;
     assert!(rate_limited);
     assert!(matches!(close, Some(frame) if u16::from(frame.code) == 1008));
     drop(socket);

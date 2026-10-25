@@ -166,6 +166,13 @@ pages, game setup, observations, assertions and cleanup. Independent review, sta
 twenty exact-image native cases pass. Configuration factories and broader behavioral fixtures
 remain separate work.
 
+**CX-08 / TS-06 / TL-05, v0.3.56 candidate:** a narrow factory shares the common gameplay
+Playwright configuration across 24 simple wrappers. Exact timeouts, artifact paths, base
+browser/environment settings and trace privacy remain unchanged. Specialized configurations
+and the pickup/match/reconnect inheritance chain stay separate. Independent review and static
+checks pass; all 96 exported-configuration comparisons match across four simulated profiles.
+Native browser acceptance remains pending.
+
 ## Finding dispositions and proposed solutions
 
 “Agree” accepts the observed issue, not every implementation proposed in the review.

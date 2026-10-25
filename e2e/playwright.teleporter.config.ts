@@ -1,9 +1,5 @@
-import { defineConfig } from '@playwright/test'
-import base from './playwright.config'
+import { gameplaySuiteConfig } from './playwright-gameplay-suite.ts'
 
-export default defineConfig({
-  ...base,
-  testDir: './teleporter-tests', workers: 1, retries: 0, timeout: 90_000,
-  reporter: [['list'], ['html', { open: 'never', outputFolder: 'playwright-teleporter-report' }]],
-  outputDir: 'teleporter-test-results',
+export default gameplaySuiteConfig({
+  testDir: './teleporter-tests', artifactStem: 'teleporter',
 })

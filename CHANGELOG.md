@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Share the common gameplay Playwright configuration while retaining each suite's exact
+  timeouts, artifact paths, browser defaults and trace privacy policy.
+
 ## 0.3.55 — 2026-10-25
 
 ### Changed

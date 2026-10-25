@@ -1,9 +1,5 @@
-import { defineConfig } from '@playwright/test'
-import base from './playwright.config'
+import { gameplaySuiteConfig } from './playwright-gameplay-suite.ts'
 
-export default defineConfig({
-  ...base,
-  testDir: './piercing-bomb-tests', workers: 1, retries: 0, timeout: 90_000,
-  reporter: [['list'], ['html', { open: 'never', outputFolder: 'playwright-piercing-bomb-report' }]],
-  outputDir: 'piercing-bomb-test-results',
+export default gameplaySuiteConfig({
+  testDir: './piercing-bomb-tests', artifactStem: 'piercing-bomb',
 })

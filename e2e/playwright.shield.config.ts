@@ -1,12 +1,5 @@
-import { defineConfig } from '@playwright/test'
-import base from './playwright.config'
+import { gameplaySuiteConfig } from './playwright-gameplay-suite.ts'
 
-export default defineConfig({
-  ...base,
-  testDir: './shield-tests',
-  workers: 1,
-  retries: 0,
-  timeout: 90_000,
-  reporter: [['list'], ['html', { open: 'never', outputFolder: 'playwright-shield-report' }]],
-  outputDir: 'shield-test-results',
+export default gameplaySuiteConfig({
+  testDir: './shield-tests', artifactStem: 'shield',
 })

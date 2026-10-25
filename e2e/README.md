@@ -53,6 +53,9 @@ Two-browser responsive scenarios should use `createResponsiveBrowserContexts` fr
 `tests/support/browser-contexts.ts`. It creates native desktop 1440x1050 and reduced-motion
 mobile 320x844 contexts concurrently; pass `{ mobileWidth: 390 }` only for the wider pickup
 acceptance layout. Keep specialized context options local to their scenario.
+Simple gameplay-suite Playwright wrappers should use `gameplaySuiteConfig` from
+`playwright-gameplay-suite.ts` with only their test directory, artifact stem, and any non-default
+timeout. Keep specialized projects, servers, launch behavior, and chained fixture configs local.
 Conditional `test.skip`, `test.fixme`, and `test.fail` annotations are statically recognized when
 their reason is a string literal or an identifier declared as a string; ambiguous overloads fail
 with a source location instead of being omitted from parity checks.

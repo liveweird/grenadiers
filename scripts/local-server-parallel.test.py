@@ -122,9 +122,15 @@ with tempfile.TemporaryDirectory(prefix="grenadiers-llvm-cov-discovery-") as tem
     )
     (fixture / "src/lib.rs").write_text(
         "pub fn covered(value: bool) -> u8 { if value { 1 } else { 0 } }\n"
+        "#[cfg(test)] mod test_support;\n"
         "#[cfg(test)] mod tests { use super::*; #[test]\n"
-        "fn blank_database_url_disables_postgres() { assert_eq!(covered(true), 1); } }\n"
+        "fn blank_database_url_disables_postgres() { assert_eq!(covered(true), 1); "
+        "assert_eq!(test_support::helper(), 7); } }\n"
     )
+    (fixture / "src/test_support.rs").write_text("pub fn helper() -> u8 { 7 }\n")
+    (fixture / "scripts").mkdir()
+    (fixture / "scripts/coverage-exclusions.txt").write_text(
+        "(^|/)([^/]*_)?test_support\\.rs$\n")
     manifest = str(fixture / "Cargo.toml")
     subprocess.run(["cargo", "test", "--manifest-path", manifest], check=True, cwd=fixture,
                    stdout=subprocess.DEVNULL)
@@ -180,6 +186,10 @@ with tempfile.TemporaryDirectory(prefix="grenadiers-llvm-cov-discovery-") as tem
         official = module.report_lcov(cov_env, [baseline, worker], fixture / "production.lcov", "production")
         assert official["lineFloor"] == 80 and official["rawProfiles"] == profile_count
         assert official["reporter"] == "cargo-llvm-cov"
+        official_sources = [line[3:] for line in (fixture / "production.lcov").read_text().splitlines()
+                            if line.startswith("SF:")]
+        assert any(Path(source).name == "lib.rs" for source in official_sources)
+        assert not any(Path(source).name == "test_support.rs" for source in official_sources)
     finally:
         module.ROOT = original_root
 
@@ -198,7 +208,9 @@ with tempfile.TemporaryDirectory(prefix="grenadiers-llvm-cov-discovery-") as tem
     def impossible_floor():
         return subprocess.run(
             ["cargo", "llvm-cov", "report", "--manifest-path", manifest,
-             "--fail-under-lines", "101", "--lcov", "--output-path", str(fixture / "impossible.lcov")],
+             "--fail-under-lines", "101", "--ignore-filename-regex",
+             module.coverage_exclusion_regex(), "--lcov", "--output-path",
+             str(fixture / "impossible.lcov")],
             check=False, cwd=fixture, env=cov_env, stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL)
     failed, _ = module.with_report_profiles(

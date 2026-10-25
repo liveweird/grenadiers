@@ -28,10 +28,12 @@ export default defineConfig({
         'src/realtime/schema.ts',
         'src/**/*.test.{ts,tsx}',
         'src/test/**',
+        // Test-only fixtures are executed but do not belong in application coverage totals.
+        'src/**/testSupport.ts',
         'src/main.tsx',
         'src/**/*.d.ts',
       ],
-      thresholds: { lines: 85, statements: 85, functions: 85, branches: 85 },
+      thresholds: { lines: 90, statements: 88, functions: 88, branches: 88 },
     },
   },
 })

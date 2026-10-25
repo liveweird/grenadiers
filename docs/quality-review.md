@@ -84,6 +84,18 @@ was already unreachable; this reduces maintained source rather than claiming a d
 one configurable token bucket. Each caller retains its own budget, rates, lock and timeline;
 the Tokio inbound wrapper is tested with paused time. Shared timeout policy remains follow-up.
 
+**API-01 / CX-01, shared browser foundation:** profile/effect/item and freeze checks live in
+`web/src/game/validation/` with minimal structural types. Active v11 no longer imports archived
+browser helper namespaces; per-version AJV schemas/catalogs and v8/v9 compatibility wrappers
+retain their distinct behavior.
+
+**FE-02 and TS-03/04, partial:** normal production builds enforce measured aggregate gzip
+budgets (400,000 JavaScript bytes, 40,000 CSS bytes). Coverage excludes test-only helper files
+without changing executed tests or exhaustive acceptance. A fresh web baseline is
+90.90/89.40/89.56/93.31% (statements/branches/functions/lines); floors rise to 90% lines and 88%
+for the other metrics. The Rust helper exclusion is shared by serial/parallel reporters;
+fresh full Rust coverage and any corresponding floor recalibration remain pending.
+
 ## Finding dispositions and proposed solutions
 
 “Agree” accepts the observed issue, not every implementation proposed in the review.
@@ -95,7 +107,7 @@ Related IDs are grouped to avoid treating one architectural problem as several i
 | DOC-03 | Agree on organization, not the claimed stale checkpoint status. | Move dated release narrative out of backlog; its explicitly historical “unreleased” state must not be rewritten as a current fact. |
 | DOC-06/10/11/13 | Agree; index, item guide, ADR index and retention policy implemented. | Continue consistent item headings and implemented/future rule markers; move archived protocol guides with link checks. |
 | DOC-12 | Factually stale, deliberately preserved. | Keep `AGENTS.md` untouched under the user's instruction; point readers to current conventions and the index. |
-| API-01, CX-01/02, BE-07, FE-01, TS-08 | Agree on duplication; first browser retirement implemented. | ADR 0021 separates retention. The unused v3 application is removed with unique regressions moved to v11; its schema/conformance remain. Extract the v8/v9 helpers used by v11, then assess obsolete adapters and parameterize retained frame-bound tests. |
+| API-01, CX-01/02, BE-07, FE-01, TS-08 | Agree on duplication; browser retirement and helper extraction implemented. | ADR 0021 separates retention. V3 UI is removed with unique regressions moved to v11; its schema/conformance remain. Shared browser semantics are neutral; extract Rust foundations before assessing obsolete adapters and parameterizing frame-bound tests. |
 | API-02/03 | Agree; HTTP repair implemented. | Problem 404/405 fallbacks, route-specific `Allow`, shared cache/retry headers and API/SPA/HEAD tests are in place; fallback responses are separate from supported operation responses. |
 | API-04, BE-02, SEC-02 | Agree; first batch implements this. | Independent diagnostic permits/rate budget and shared strict transport guards, with saturation, Origin, flood, cache-header and shutdown tests. |
 | API-05 | Optional improvement, not a demonstrated defect. | Add stable Problem codes only when a consumer needs distinctions beyond HTTP status. Do not unify diagnostic and gameplay error vocabularies merely for symmetry. |
@@ -115,7 +127,7 @@ Related IDs are grouped to avoid treating one architectural problem as several i
 | BE-12/13 | Plausible shutdown/latency concerns. | Reproduce shutdown with a non-reading client; measure registry-lock work before moving bounded construction/entropy outside it. No demonstrated hang yet. |
 | CX-03 | Agree on cross-layer item duplication, not the proposed enum choice. | Define one domain item specification and derive configurable wire catalogs from each schema's `ItemId`, not `PickupKind`; preserve archived subsets. Parameterize configuration scaffolding independently. |
 | CX-08, TS-06, TL-05 | Agree on E2E/configuration sprawl. | Introduce a config factory, fixture parameter and shared behavioral helpers; prove representative item and privacy suites retain their distinct setup/assertions before deleting wrappers. |
-| FE-02 | Agree: no bundle budget. | Measure a fresh production build, set an honest budget, then test CSS/import reductions. Do not adopt an already-failing target or assume a specific reduction without measuring it. |
+| FE-02 | Agree; measured bundle budget implemented. | Aggregate gzip limits pass at 356,970 JS / 36,292 CSS bytes. Profile CSS/import reductions separately; no download reduction is claimed by the guard itself. |
 | FE-03 | Partly disagree; see corrections below. | Typed i18next consolidation is reasonable cleanup. Add plural forms where grammar needs them, not for multiplication/count notation. |
 | FE-04 | Mechanism confirmed; performance cost unmeasured. | Profile 20 Hz gameplay and commit durations first. Change arena/HUD subscriptions only for a demonstrated budget problem. |
 | FE-05 | Agree; first batch implements this. | Localized accessible error recovery with explicit actions and component/parity tests. |
@@ -124,7 +136,7 @@ Related IDs are grouped to avoid treating one architectural problem as several i
 | FE-08 | Selector counts do not describe the current web tests. | Current web tests use role queries rather than test IDs. Assess E2E selectors in their own scope; a selector ratio alone is not an accessibility defect. Retain actual accessibility audits. |
 | FE-09/10 | Agree, lower-priority consistency work. | Consolidate copied scene mocks, preserving specialized renderer/atlas mocks; introduce semantic color tokens incrementally. |
 | TS-01/02 | Agree on cost; sampling is a policy change. | Measure a structured fast feedback suite while retaining exhaustive acceptance. Compare fault detection before proposing a new cadence; keep current assertions and exhaustive coverage meanwhile. |
-| TS-03/04 | Agree on denominator hygiene; thresholds require recalibration. | Exclude narrowly identified test support, collect fresh coverage, then choose floors. Distinguish `all` from optional full/tool-dependent checks; do not require coverage tooling for every quick gate. |
+| TS-03/04 | Agree; helper exclusions and web recalibration implemented. | Web floors rise from 85% to 90% lines / 88% other metrics against a fresh denominator. Rust floor stays 80% until fresh full measurement. Test execution and exhaustive masks remain unchanged; optional tool-dependent gates stay explicit. |
 | TS-05, TL-01/02/03, SEC-05 | Partly agree: orphan callers and gate discoverability need work. | Wire the orphan script tests now; audit manual diagnostic-suite coverage and document aggregate scope. Preserve local-first verification; duplicated automatic remote gates are not a default requirement. |
 | TS-07 | Agree; mapped AST-based check implemented. | Explicit document/spec inventory and title parity reject duplicates and unknown/missing files; static string/template/alias forms work, while ambiguous modifiers fail with documented guidance. |
 | TS-11/12 | Factual suggestions, not established missing-risk coverage. | Target parser mutation/property checks and simultaneous competing-resume tests at explicit invariants; existing concurrency tests already use synchronized claimants. |

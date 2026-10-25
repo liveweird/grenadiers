@@ -34,7 +34,8 @@ fn production_journal_allocation_measurement() {
     let source_identity = required_metadata("GRENADIERS_MEASUREMENT_SOURCE");
     let toolchain = required_metadata("GRENADIERS_MEASUREMENT_TOOLCHAIN");
 
-    let mut construction = Vec::with_capacity(CONSTRUCTION_SAMPLES);
+    let mut disabled_construction = Vec::with_capacity(CONSTRUCTION_SAMPLES);
+    let mut recorded_construction = Vec::with_capacity(CONSTRUCTION_SAMPLES);
     let mut observed_capacity = None;
     for _ in 0..CONSTRUCTION_SAMPLES {
         let identity = identity_for_profile(RoomProfile::ExpandedV5);
@@ -42,31 +43,48 @@ fn production_journal_allocation_measurement() {
         let started = Instant::now();
         let runtime = MatchRuntime::new(identity, seeds);
         black_box(&runtime);
-        construction.push(started.elapsed());
+        disabled_construction.push(started.elapsed());
+        assert!(!runtime.recording_enabled_for_test());
+        drop(runtime);
+
+        let identity = identity_for_profile(RoomProfile::ExpandedV5);
+        let seeds = deterministic_source();
+        let started = Instant::now();
+        let runtime = MatchRuntime::new_recording(identity, seeds);
+        black_box(&runtime);
+        recorded_construction.push(started.elapsed());
         observed_capacity = Some(runtime.replay_journal().records.capacity());
         drop(runtime);
     }
 
-    let mut workload = Vec::with_capacity(WORKLOAD_SAMPLES);
-    let mut reference = None;
+    let mut disabled_workload = Vec::with_capacity(WORKLOAD_SAMPLES);
+    let mut recorded_workload = Vec::with_capacity(WORKLOAD_SAMPLES);
     let mut final_record_count = 0;
-    for _ in 0..WORKLOAD_SAMPLES {
-        let mut runtime = MatchRuntime::new(
+    for sample in 0..WORKLOAD_SAMPLES {
+        let mut disabled = MatchRuntime::new(
             identity_for_profile(RoomProfile::ExpandedV5),
             deterministic_source(),
         );
-        let started = Instant::now();
-        exercise(&mut runtime);
-        workload.push(started.elapsed());
-        let inspection = runtime.replay_inspection();
-        if let Some(expected) = &reference {
-            assert_eq!(&inspection, expected);
+        let mut recorded = MatchRuntime::new_recording(
+            identity_for_profile(RoomProfile::ExpandedV5),
+            deterministic_source(),
+        );
+        if sample.is_multiple_of(2) {
+            disabled_workload.push(measure_workload(&mut disabled));
+            recorded_workload.push(measure_workload(&mut recorded));
         } else {
-            reference = Some(inspection);
+            recorded_workload.push(measure_workload(&mut recorded));
+            disabled_workload.push(measure_workload(&mut disabled));
         }
-        final_record_count = runtime.replay_journal().len();
+        assert_eq!(disabled.replay_inspection(), recorded.replay_inspection());
+        assert_eq!(
+            disabled.publication_revision_for_test(),
+            recorded.publication_revision_for_test()
+        );
+        final_record_count = recorded.replay_journal().len();
         assert!(final_record_count < MAX_RECORDS);
-        drop(runtime);
+        drop(disabled);
+        drop(recorded);
     }
 
     let vector_capacity = observed_capacity.expect("construction samples exist");
@@ -79,23 +97,41 @@ fn production_journal_allocation_measurement() {
             "invocationDeclaredCargoProfile": "release",
             "optimizedBuild": !cfg!(debug_assertions),
             "roomProfile": "ExpandedV5",
-            "recordingPolicy": "eager-production-journal",
-            "construction": duration_summary(&construction),
+            "recordingPolicy": "production-disabled-test-opt-in",
+            "construction": {
+                "disabled": duration_summary(&disabled_construction),
+                "recorded": duration_summary(&recorded_construction),
+            },
             "workload": {
                 "description": "initial notice, two occupants, two ready actions, 220 ticks, periodic movement",
-                "timings": duration_summary(&workload),
+                "disabledTimings": duration_summary(&disabled_workload),
+                "recordedTimings": duration_summary(&recorded_workload),
                 "ticksPerSample": WORKLOAD_TICKS,
                 "finalRecordCount": final_record_count,
+                "stateEquivalentOutsideTiming": true,
             },
             "allocation": {
                 "recordBytes": record_bytes,
-                "vectorCapacityRecords": vector_capacity,
                 "maxRecords": MAX_RECORDS,
-                "vectorReservedBytes": vector_capacity * record_bytes,
                 "maxReservedBytes": MAX_RECORDS * record_bytes,
+                "disabled": {
+                    "journalAllocated": false,
+                    "vectorReservedBytes": 0,
+                },
+                "recorded": {
+                    "journalAllocated": true,
+                    "vectorCapacityRecords": vector_capacity,
+                    "vectorReservedBytes": vector_capacity * record_bytes,
+                },
             },
         }),
     );
+}
+
+fn measure_workload(runtime: &mut MatchRuntime) -> Duration {
+    let started = Instant::now();
+    exercise(runtime);
+    started.elapsed()
 }
 
 fn exercise(runtime: &mut MatchRuntime) {

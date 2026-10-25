@@ -13,9 +13,9 @@ procedures do not impose additional requirements on future changes.
 
 The complete record is preserved in the [verification history](history/verification.md).
 
-## Latest published verification
+## Latest release verification
 
-The canonical release record is [v0.3.49 published prerelease](releases.md#v0349-published-prerelease--2026-10-25).
+The canonical release record is [v0.3.50 release](releases.md#v0350--2026-10-25).
 
 ## Historical fragment compatibility
 

@@ -1,6 +1,8 @@
 # Changelog
 
-## [Unreleased] — 0.3.50
+## [Unreleased]
+
+## 0.3.50 — 2026-10-25
 
 ### Fixed
 
@@ -16,9 +18,18 @@
 - Run previously orphaned workflow/coverage-runner tests through the relevant local gates
   and reject stale installed web/E2E dependency versions before checking code.
 
+- Patch the aligned Vitest/coverage tools and transitive URI parser; full npm audits report zero findings.
+- Replace copied rate-bucket and browser semantic mechanics with shared implementations while
+  retaining separate budgets and per-version contracts; retire the unused v3 browser application.
+- Correct stale native Equipment-error coverage and make the socket-flood regression deterministic.
+
 ### Added
 
-- Contributor documentation index and an adjudicated quality-review remediation plan.
+- Contributor/item-development guides, ADR index, retention policy and separate historical records.
+- API convention/mutation guards, validated contract inventory and mapped browser scenario checks.
+- Measured compressed-bundle limits and application-only coverage floors: Rust 90% lines,
+  web 90% lines / 88% statements, functions and branches.
+- Grouped routine dependency proposals with explicit entropy/generator pin rationale.
 
 ## 0.3.49 — 2026-10-25 (published)
 

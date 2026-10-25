@@ -65,26 +65,39 @@ interrupted state but cannot preserve process-local matches or credentials.
 Keep the previous immutable image reference for rollback; database migration compatibility
 must be designed when durable application data is introduced.
 
-## v0.3.49 published prerelease — 2026-10-25
+## v0.3.50 — 2026-10-25
 
-[v0.3.49](https://github.com/liveweird/grenadiers/releases/tag/v0.3.49) is published from source
-`4157d534553330b457871554d84e973823068798`, tree `dd6a844d841e76e254ee09b339a4e4c6577f982f`,
-with remotely verified annotated tag object `1a8f141adbf6c18e372a1b6dd344475727664233`.
-Localhost:8085 serves exact accepted image
-`sha256:10aa8554f8f22f968a6bd1852a4c0d6fe43e63b365eafc8220e7fbd826dc4d21`.
+[v0.3.50](https://github.com/liveweird/grenadiers/releases/tag/v0.3.50) hardens transport,
+room recovery, browser responses and contributor checks. Application inputs match tested source
+`9122e330379f4ac1bb3e0edd236dcdc5538655f0`; the source tag identifies the complete release.
+Localhost:8085 serves the exact accepted image
+`sha256:76980168a517474e680d8e346b6b8c38240a1b534eb403ad919b347168d0f5c6`.
 
-Promotion exits zero; health/readiness/index return 200. Served HTML, JavaScript and the hashed
-atlas PNG match container bytes; the PNG also matches canonical source SHA256
-`f2392294ba67207cdaf264ec3343cf096de0281dc281aa4c8c3339ff312d407f`. UID65532, read-only
-filesystem, dropped capabilities and no new privileges are retained. v0.3.48 remains the rollback
-image. An initial local helper path typo stopped before any service change; the corrected helper
-completed promotion and all post-deployment checks. Application inputs match accepted source
-`ee664e5`; publication documentation does not require rebuilding the accepted image.
+Full Rust acceptance covers all 4,194,304 masks in debug, release and official coverage with no
+retries (6m40s). Application line coverage is 92.97%; that fresh 80%-gated measurement supports
+raising the Rust floor to 90%, verified by reporter contract/real-LLVM tests. The patched web gate
+passes 6,780 tests in 86 files at the raised 90% line / 88% other floors. API/E2E static checks,
+Cargo-deny, zero-finding full/production npm audits and the pinned image scan pass; the image has
+zero fixable HIGH/CRITICAL findings under the existing scanner policy.
 
-The artist handoff/export/preview and gameplay atlas integration are now complete. New artist
-redraws remain separate work. The documented completed-icon pulse compositing is intentional.
+Eighteen native cases pass on this image: sixteen Compose cases covering the default suite,
+controls, audio, match progression, reconnect/deadline, Cloak, Stopwatch and Oil; two Kubernetes
+reconnect cases retain the base pod security/probes/resources. Failed sandbox launches, the
+socket timing regression and the stale Equipment-error assertion were corrected and are not
+carried as passes. Fresh accepted suites use no retries.
 
-See the [renderer guide](game/art-atlas.md) and [acceptance record](verification.md#v0349-gameplay-atlas-acceptance--2026-10-25).
+Promotion health/readiness/index are 200; served HTML/JavaScript/atlas bytes match the image,
+and atlas pixels match canonical source. UID65532, read-only filesystem, dropped capabilities
+and no new privileges remain. v0.3.49 is retained for rollback. Runtime control files now live
+in `.local-checkpoints/runtime/`, rather than `/tmp`. Reload existing tabs; active matches and
+capabilities remain process-local. No database migration is required.
+
+The artist redraw remains a separate pending change. Further CSP, hosting and structural work
+is tracked in the [quality-review response](quality-review.md).
+
+<a id="v0349-published-prerelease--2026-10-25"></a>
+[v0.3.49 published prerelease](history/releases.md#v0349-published-prerelease--2026-10-25)
+is preserved in the release history.
 
 <a id="v0342-published-prerelease--2026-10-23"></a>
 Older release records, including [v0.3.42 published prerelease — 2026-10-23](history/releases.md#v0342-published-prerelease--2026-10-23),

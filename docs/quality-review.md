@@ -55,13 +55,14 @@ That initial v0.3.50 change did not enable CSP; v0.3.52 follows below.
 **DOC-01/02/04/14, partial:** the current verification policy and release procedures are now
 short entry points. Dated verification and older release records live in `docs/history/`, with
 their facts and headings preserved and relative links rebased. Known incoming fragments retain
-aliases. The latest release is v0.3.56, sharing browser-test setup and simple configurations after
-test-guard and admission hardening.
+aliases. The latest release is v0.3.57, giving shared Rust wire items neutral ownership after browser-test
+and admission hardening.
 The testing guide now indexes configured suites separately from execution evidence; its former
 acceptance narratives live in `docs/history/testing.md`, with facts and incoming anchors preserved.
 Deployment now uses a common fixture procedure and exact manifest/acknowledgement index; its
-old narrative is preserved in `docs/history/deployment.md`. Backlog consolidation remains
-separate. Preserve merged artist changes and reconcile concurrent screenshot documentation.
+old narrative is preserved in `docs/history/deployment.md`. The backlog now separates delivered
+features and implemented settings policies from actual open requests; all old narrative remains
+in `docs/history/backlog.md`. Preserve artist changes and concurrent screenshot documentation.
 
 **API-08/09, TS-07 and BE-10/TL-04:** API lint now enforces closed object schemas, camelCase
 properties and shared problem responses, with a narrow documented upgrade exception and
@@ -174,13 +175,14 @@ and the pickup/match/reconnect inheritance chain stay separate. Independent revi
 checks pass; all 96 exported-configuration comparisons match across four simulated profiles.
 Nineteen exact-image native cases and post-promotion acceptance pass.
 
-**API-01 / CX-01/02 / BE-07, v0.3.57 candidate:** extract shared Rust item/effect wire types,
+**API-01 / CX-01/02 / BE-07, v0.3.57:** extract shared Rust item/effect wire types,
 common item projections and bounded-number input into neutral protocol modules. Preserve every
 versioned public export, reserved item bit, activation subset, validation stage and error;
 generation sampling and replay identities stay unchanged. This is partial ownership/mechanics
 cleanup, not a cross-layer item specification or authorization to delete archived adapters.
 Implementation and independent review are complete; four focused regressions and all 930 core
-tests pass. Full source-bound replay/coverage, web/drift and runtime acceptance remain pending.
+tests pass. Full source-bound debug/release/coverage passes every 4,194,304-mask case at the
+90% floor (93.51% measured); fresh web/drift, security and twenty exact-image native cases pass.
 
 ## Finding dispositions and proposed solutions
 
@@ -189,11 +191,11 @@ Related IDs are grouped to avoid treating one architectural problem as several i
 
 | IDs | Disposition | Solution / next action |
 | --- | --- | --- |
-| DOC-01/02/04/05/07/08/09/14 | Agree: contributor guidance is buried in repeated release evidence. | Verification/release history is separated from current procedures; the index links both archives. Unreleased changelog organization is in place. Testing and deployment use linked suite/fixture tables and archive all prior prose; backlog consolidation remains. |
-| DOC-03 | Agree on organization, not the claimed stale checkpoint status. | Move dated release narrative out of backlog; its explicitly historical “unreleased” state must not be rewritten as a current fact. |
+| DOC-01/02/04/05/07/08/09/14 | Agree: contributor guidance is buried in repeated release evidence. | Verification/release history is separated from current procedures; the index links both archives. Unreleased changelog organization is in place. Testing, deployment and backlog have current indexes with complete historical archives and retained incoming anchors. |
+| DOC-03 | Agree on organization; current backlog and full history are separated. | Preserve dated “pending”/“unreleased” statements historically. Current status distinguishes shipped controls/authority from open extensions and treats the rules specification as design, not implementation evidence. |
 | DOC-06/10/11/13 | Agree; index, item guide, ADR index and retention policy implemented. | Continue consistent item headings and implemented/future rule markers; move archived protocol guides with link checks. |
 | DOC-12 | Factually stale, deliberately preserved. | Keep `AGENTS.md` untouched under the user's instruction; point readers to current conventions and the index. |
-| API-01, CX-01/02, BE-07, FE-01, TS-08 | Agree on duplication; browser retirement and helper extraction implemented. | ADR 0021 separates retention. V3 UI is removed with unique regressions moved to v11; its schema/conformance remain. Shared browser semantics are neutral; extract Rust foundations before assessing obsolete adapters and parameterizing frame-bound tests. |
+| API-01, CX-01/02, BE-07, FE-01, TS-08 | Agree on duplication; browser retirement and helper extraction implemented. | ADR 0021 separates retention. V3 UI is removed with unique regressions moved to v11; its schema/conformance remain. Shared browser semantics and Rust item/effect/mapping/numeric foundations are neutral. Assess retained adapters and genuinely equivalent frame fixtures separately. |
 | API-02/03 | Agree; HTTP repair implemented. | Problem 404/405 fallbacks, route-specific `Allow`, shared cache/retry headers and API/SPA/HEAD tests are in place; fallback responses are separate from supported operation responses. |
 | API-04, BE-02, SEC-02 | Agree; first batch implements this. | Independent diagnostic permits/rate budget and shared strict transport guards, with saturation, Origin, flood, cache-header and shutdown tests. |
 | API-05 | Optional improvement, not a demonstrated defect. | Add stable Problem codes only when a consumer needs distinctions beyond HTTP status. Do not unify diagnostic and gameplay error vocabularies merely for symmetry. |
@@ -210,7 +212,7 @@ Related IDs are grouped to avoid treating one architectural problem as several i
 | BE-09, CX-07 | Mixed: maintainability concerns, not proven reachable panics. | Replace transport-state assumptions with typed authenticated commands where useful; split orchestration around domain operations. Audit narrowing conversions before changing public APIs. |
 | BE-10, TL-04 | Agree; rationale and grouping implemented. | Cargo patch, per-workspace npm minor/patch and Actions minor/patch groups preserve individual pinned RNG, Docker, major and security proposals. Document compatibility review; no version ignores or automatic merges. |
 | BE-11, TS-09/10 | Mostly intentional tests/benchmarks. | Use virtual time where it preserves the real socket deadline being tested. Keep performance tests separate from ordinary suites. Do not replace useful waits or ignored benchmarks solely to improve counts. |
-| BE-12/13 | Plausible shutdown/latency concerns. | Reproduce shutdown with a non-reading client; measure registry-lock work before moving bounded construction/entropy outside it. No demonstrated hang yet. |
+| BE-12/13 | Shutdown ordering defect reproduced; registry latency still unmeasured. | A quiet v0.3.56 probe holds incomplete HTTP headers and remains running 7.07s after SIGTERM before the five-second app drain is reached. Bound HTTP serve and application drain with one signal-time deadline next; separately test non-reading upgraded clients and measure registry-lock work. |
 | CX-03 | Agree on cross-layer item duplication, not the proposed enum choice. | Define one domain item specification and derive configurable wire catalogs from each schema's `ItemId`, not `PickupKind`; preserve archived subsets. Parameterize configuration scaffolding independently. |
 | CX-08, TS-06, TL-05 | Agree; context reuse shipped in v0.3.55 and simple configurations in v0.3.56. | Twenty-six setups and 24 simple config wrappers share narrow helpers. Native representative suites and complete config-export comparisons pass; specialized configurations stay distinct. Further behavioral fixtures require equivalent semantics. |
 | FE-02 | Agree; measured bundle budget implemented. | Initial baseline was 356,970 JS / 36,292 CSS gzip bytes; limits remain 400,000/40,000 and the URI security patch also fits them. Profile CSS/import reductions separately; no reduction is claimed by the guard itself. |

@@ -36,10 +36,13 @@ verification record.
 
 [Baseline rule coverage](rule-coverage.md) maps all 42 acceptance rules to concrete automated assertions.
 
-[Gameplay and presentation backlog](backlog.md) records playtest requests for forgiving turns,
-shared room settings, detailed pixel art, equipment, timed effects and single-use weapons.
-Forgiving turns, shared settings and the first pixel-art slice are available. New item activation
-and remaining presentation work are planned extensions to the implemented Classic baseline.
+[Single-player versus CPU design](single-player-cpu.md) records the accepted staged hybrid;
+implementation follows the requested QoL work.
+
+The [product backlog](../../BACKLOG.md) contains open work; [legacy backlog links](backlog.md)
+remain valid. Feature guides document implemented movement, shared settings, presentation and
+the expanded item catalog. Use [settings](settings.md) and [expanded items](expanded-items.md)
+for current defaults and behavior, rather than treating design proposals as delivery evidence.
 
 [Runtime reference measurements](performance.md) documents bounded workloads, selected budgets and evidence limits.
 

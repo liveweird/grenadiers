@@ -54,6 +54,11 @@ The Node, Rust, and Debian runtime images in the `Dockerfile` and the PostgreSQL
 composed application is scanned with Flow's pinned Trivy image in the `browser-image` job, before
 browser acceptance.
 
+BuildKit keeps locked Cargo registry and Git caches plus a platform-isolated target cache between
+container builds. The build touches every workspace crate root before compiling so restored target
+entries cannot substitute stale workspace code, then copies the new server binary out of the cache
+mount for the runtime image. Keep the touched-root list aligned when adding production Cargo targets.
+
 Docker updates stay individual and are not blanket-ignored by major version. A Node or Rust
 builder-image proposal must be coordinated with the repository's matching toolchain pins and
 pass `scripts/gates.sh repository`; the image change alone is not a valid toolchain update.

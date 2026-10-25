@@ -17,7 +17,7 @@
     "test:coverage": "vitest run --coverage",
     "gen:api": "openapi-typescript ../api/openapi.json -o src/api/schema.ts",
     "check:api": "node scripts/check-api.mjs",
-    "lint:api": "node scripts/lint-api.mjs",
+    "lint:api": "vitest run scripts/lint-api.test.mjs scripts/api-conventions.test.mjs && node scripts/lint-api.mjs",
     "gen:realtime": "node scripts/generate-realtime.mjs",
     "check:realtime": "node scripts/check-realtime.mjs",
     "gen:gameplay": "node scripts/generate-gameplay.mjs",

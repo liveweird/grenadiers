@@ -1,4 +1,9 @@
 extends: [spectral:oas]
+functionsDir: ./functions
+functions:
+  - closedObjectSchemas
+  - errorResponses
+  - schemaPropertyNames
 rules:
   # No project license has been chosen; do not invent one for contract metadata.
   info-license: off
@@ -25,6 +30,27 @@ rules:
       function: pattern
       functionOptions:
         notMatch: '^array$'
+  error-problem-details:
+    description: API-STRUCT-001 — documented HTTP errors use the shared problem-details schema.
+    message: '{{error}}'
+    severity: error
+    given: $
+    then:
+      function: errorResponses
+  closed-object-schemas:
+    description: API-STRUCT-001 — object schemas reject undocumented properties.
+    message: '{{error}}'
+    severity: error
+    given: $
+    then:
+      function: closedObjectSchemas
+  camel-case-properties:
+    description: API-STRUCT-001 — JSON schema property names use camelCase.
+    message: '{{error}}'
+    severity: error
+    given: $
+    then:
+      function: schemaPropertyNames
   declared-success:
     description: API-DOC-001 — document an actual success, including switching protocols.
     severity: error

@@ -28,8 +28,11 @@ generated TypeScript, conformance tests, and docs change together.
   Gameplay clients submit inputs, never authoritative outcomes; see
   [protocol v11](../docs/game/protocol-v11.md).
 
-Spectral checks the machine-verifiable OpenAPI subset. Runtime conformance tests and browser
-smoke tests cover the remaining behavior. `POST /api/v1/game/session` issues short-lived anonymous
+Spectral checks the machine-verifiable OpenAPI subset: explicit errors use
+`application/problem+json` with the shared `Problem` schema, object schemas are closed, and JSON
+property names are camelCase. The plain-text-only exception is limited to the exact documented
+`GET /api/v1/ws` malformed-upgrade 400 schema. Runtime conformance tests and browser smoke tests
+cover the remaining behavior. `POST /api/v1/game/session` issues short-lived anonymous
 single-use tokens for the gameplay socket (201; 400, 403, 429, and 503 problems; see
 [security](../docs/security.md)). Durable identity, CRUD, pagination, and retry/idempotency policy
 are not claimed.

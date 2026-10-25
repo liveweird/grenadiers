@@ -57,8 +57,10 @@ short entry points. Dated verification and older release records live in `docs/h
 their facts and headings preserved and relative links rebased. Known incoming fragments retain
 aliases. The latest release is v0.3.55, sharing browser-test setup after test-guard and
 admission hardening.
-Testing, deployment and backlog consolidation remain separate work. Preserve the merged artist
-changes and reconcile any concurrent screenshot documentation before editing overlapping files.
+The testing guide now indexes configured suites separately from execution evidence; its former
+acceptance narratives live in `docs/history/testing.md`, with facts and incoming anchors preserved.
+Deployment and backlog consolidation remain separate work. Preserve the merged artist changes
+and reconcile concurrent screenshot documentation before editing overlapping files.
 
 **API-08/09, TS-07 and BE-10/TL-04:** API lint now enforces closed object schemas, camelCase
 properties and shared problem responses, with a narrow documented upgrade exception and
@@ -171,7 +173,7 @@ Related IDs are grouped to avoid treating one architectural problem as several i
 
 | IDs | Disposition | Solution / next action |
 | --- | --- | --- |
-| DOC-01/02/04/05/07/08/09/14 | Agree: contributor guidance is buried in repeated release evidence. | Verification/release history is separated from current procedures; the index links both archives. Unreleased changelog organization is in place. Continue with testing/deployment/backlog and replace repeated per-item testing prose with a linked table. |
+| DOC-01/02/04/05/07/08/09/14 | Agree: contributor guidance is buried in repeated release evidence. | Verification/release history is separated from current procedures; the index links both archives. Unreleased changelog organization is in place. The testing guide uses a linked suite table and archives all prior acceptance prose; deployment/backlog consolidation remains. |
 | DOC-03 | Agree on organization, not the claimed stale checkpoint status. | Move dated release narrative out of backlog; its explicitly historical “unreleased” state must not be rewritten as a current fact. |
 | DOC-06/10/11/13 | Agree; index, item guide, ADR index and retention policy implemented. | Continue consistent item headings and implemented/future rule markers; move archived protocol guides with link checks. |
 | DOC-12 | Factually stale, deliberately preserved. | Keep `AGENTS.md` untouched under the user's instruction; point readers to current conventions and the index. |

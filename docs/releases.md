@@ -1,6 +1,7 @@
 # Releases
 
-Release labels and scope live in the [implementation plan](game/implementation-plan.md).
+Planned release scope and work status live in the [backlog](../BACKLOG.md).
+The [implementation plan](game/implementation-plan.md) defines the release checklist and future tracks.
 A completed milestone is verification evidence; a release exists only after its tested commit
 is tagged and its artifacts are published intentionally.
 
@@ -26,9 +27,8 @@ remain `0.0.0`: they are build inputs and are not separately published or produc
 The WebSocket `protocolVersion` is an independent compatibility contract, not a release number.
 
 Each shipped feature PR bumps the product version and records its scope in `CHANGELOG.md`.
-Use patch releases within the current milestone for bounded engineering increments.
-`0.2.0` is the first playable duel preview; `0.3.0` adds classic match progression. Subsequent
-`0.3.x` increments stage reconnect support and activate it at `0.3.9`; `0.4.0` remains the resilient playtest milestone. Keep PRs focused on one behavior and its tests. Merge passing,
+Use patch releases for bounded engineering increments; historical milestone labels are preserved
+in the [plan archive](history/implementation-plan.md). Keep PRs focused on one behavior and its tests. Merge passing,
 independently reviewed candidates, then publish the corresponding prerelease tag.
 The repository gate checks that both local Cargo packages and their dependency agree.
 

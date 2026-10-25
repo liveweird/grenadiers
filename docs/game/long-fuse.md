@@ -2,7 +2,7 @@
 
 ## Availability
 
-Long Fuse is a configurable timed curse introduced in v0.3.30 and enabled in new rooms. Its shared lobby switch controls whether generated arenas include it.
+Long Fuse is a configurable timed curse enabled in new rooms. Its shared lobby switch controls whether generated arenas include it.
 
 ## Rules
 
@@ -20,4 +20,5 @@ explicit empty expanded settings remain supported.
 
 Screenshots: [desktop pickup](../screenshots/long-fuse-desktop.png) and
 [Polish 320px active curse](../screenshots/long-fuse-polish-320.png).
-See [verification](../verification.md) for acceptance and publication status.
+The release record is in
+[item acceptance history](../history/game-acceptance.md#expanded-item-delivery-sequence).

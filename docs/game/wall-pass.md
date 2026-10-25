@@ -1,5 +1,7 @@
 # Wall Pass
 
+## Availability and rules
+
 Wall Pass is configurable permanent equipment in Expanded-v5 rooms and is enabled with every
 available item in new rooms. It occupies the equipment slot independently of
 the single-use weapon slot, has no timer, and is replaced by another equipment pickup.
@@ -10,12 +12,16 @@ rules: Wall Pass does not grant protection, destroy blocks, reveal concealed con
 item hidden under a block. Bomb placement still requires a legal center cell, so pressing the bomb
 key while centered inside a breakable block creates no bomb and consumes no ID, capacity or weapon.
 
+## State and privacy
+
 If another equipment pickup replaces Wall Pass while the actor overlaps one or more breakable
 blocks, private per-cell exit grace lets the actor leave only those current overlaps. Grace ends for
 each block when the complete actor footprint exits or merely touches its boundary; that block cannot
 be re-entered. It has no timer, wire field, public marker or UI indicator. Heart consumption retains
 existing exit grace. Death, reset and new-round construction clear it, while an ordinary reconnect
 preserves authoritative state without granting new grace.
+
+## Compatibility
 
 Teleporter validates each destination against the arriving actor's current Wall Pass capability and
 own existing exit grace. A successful swap transfers no grace and prunes obsolete cells; a failed

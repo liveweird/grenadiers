@@ -15,7 +15,7 @@ The complete record is preserved in the [verification history](history/verificat
 
 ## Latest release verification
 
-The canonical release record is [v0.3.79 release](releases.md#v0379--2026-10-26).
+The canonical release record is [v0.3.80 release](releases.md#v0380--2026-10-26).
 
 ## Historical fragment compatibility
 

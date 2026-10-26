@@ -33,8 +33,10 @@ public command epoch is not a physical-round identity.
 
 Memory belongs to a room instance, physical round and CPU seat. Decision admission separately
 checks the current command epoch, observation tick and request serial. Reconnect preserves
-memory; a new physical world resets it. Stale, duplicate or exhausted work yields Stop without
-a manual action. History has bounded, deterministic retention, and work is counted in logical
+memory; a new physical world resets it. The local rejection fallback is Stop without a manual
+action; it grants no submission authority. Discard stale or wrong-world completions instead of
+injecting their fallback into a newer request. Only the current controller's missing/exhausted
+request may submit its ordinary Stop. History has bounded, deterministic retention, and work is counted in logical
 units rather than hardware milliseconds.
 
 Tie-breaking uses its own seeded ChaCha stream and never draws from arena generation. Fixture

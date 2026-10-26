@@ -9,8 +9,8 @@ use super::model::{ForecastBomb, Trigger, index, terrain, unused_id};
 use super::stationary::simulate_stationary;
 use super::uncertainty::add_uncertainties;
 use super::{
-    CellForecast, ForecastFailure, ForecastLimits, HazardForecast, HypotheticalPlacement,
-    ObservedHazardMemory, TickWindow,
+    CellForecast, ForecastEvolution, ForecastFailure, ForecastLimits, HazardForecast,
+    HypotheticalPlacement, ObservedHazardMemory, TickWindow,
 };
 
 pub fn forecast(
@@ -47,6 +47,7 @@ pub fn forecast(
     take(work, ARENA_CELL_COUNT as u32)?;
 
     let mut cells = vec![CellForecast::default(); ARENA_CELL_COUNT];
+    let mut evolution = ForecastEvolution::new(observation, horizon_end)?;
     let mut bombs = observed_bombs
         .iter()
         .map(|bomb| {
@@ -106,9 +107,18 @@ pub fn forecast(
         limits,
         work,
         &mut cells,
+        &mut evolution,
     )?;
     add_uncertainties(observation, &bombs, horizon_end, limits, work, &mut cells)?;
-    HazardForecast::from_parts(key, parts.tick, horizon_end, cells, assumptions, limits)
+    HazardForecast::from_parts(
+        key,
+        parts.tick,
+        horizon_end,
+        cells,
+        assumptions,
+        evolution,
+        limits,
+    )
 }
 
 fn validate_limits(limits: ForecastLimits) -> Result<(), ForecastFailure> {

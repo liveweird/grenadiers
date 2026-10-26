@@ -5,10 +5,12 @@ use crate::cpu::{Observation, WorkBudget};
 use crate::game::blast_geometry::{BlastSource, BlastVisit, visit_blast};
 use crate::game::{CellId, EntityId, OilBarrelState, Tick};
 
+use super::evolution::FlameChange;
 use super::intervals::{add_window, take};
 use super::model::{ForecastBomb, ForecastField, Trigger, index};
-use super::{CellForecast, ForecastFailure, ForecastLimits, TickWindow};
+use super::{CellForecast, ForecastEvolution, ForecastFailure, ForecastLimits, TickWindow};
 
+#[allow(clippy::too_many_arguments)]
 pub(super) fn simulate_stationary(
     observation: &Observation,
     bombs: &[ForecastBomb],
@@ -17,6 +19,7 @@ pub(super) fn simulate_stationary(
     limits: ForecastLimits,
     work: &mut WorkBudget,
     cells: &mut [CellForecast],
+    evolution: &mut ForecastEvolution,
 ) -> Result<(), ForecastFailure> {
     let parts = observation.parts();
     let mut blocks = parts.arena.blocks.iter().copied().collect::<BTreeSet<_>>();
@@ -61,12 +64,33 @@ pub(super) fn simulate_stationary(
             oil_ignitions.entry(*cell).or_insert(removal_end);
             oil.remove(cell);
         }
-        let finite_end = Tick(
+        let physical_end = Tick(
             tick.0
                 .checked_add(flame_ticks)
                 .ok_or(ForecastFailure::ClockOverflow)?,
-        )
-        .min(horizon_end);
+        );
+        let finite_end = physical_end.min(horizon_end);
+        evolution.record(
+            tick,
+            phase
+                .detonated
+                .iter()
+                .chain(&phase.destroyed_mines)
+                .copied(),
+            phase.destroyed_blocks.iter().copied(),
+            phase.ignited_oil.iter().copied(),
+            phase.flames.iter().copied().map(|cell| FlameChange {
+                at: tick,
+                cell,
+                expires_at: (!phase.ignited_oil.contains(&cell)
+                    && !oil_ignitions.contains_key(&cell)
+                    && !observation.parts().oil.iter().any(|barrel| {
+                        barrel.cell == cell && barrel.state == OilBarrelState::Burning
+                    }))
+                .then_some(physical_end),
+            }),
+            work,
+        )?;
         for cell in phase.flames {
             add_window(
                 &mut cells[index(cell)].lethal,

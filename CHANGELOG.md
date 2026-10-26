@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## 0.3.73 — 2026-10-26
+
+### Added
+
+- Exercise competing stable-capability resumes, canceled admissions and live socket takeover fencing in both submission orders.
+
 ## 0.3.68 — 2026-10-26
 
 ### Changed

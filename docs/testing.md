@@ -125,6 +125,13 @@ The CI-only selector pair is
 count that differs from the checked plan fails before mask execution. Profile and source context
 are assigned by `scripts/gates.sh`; callers must not infer or relabel coverage output.
 
+The shared expanded client corpus is `api/fixtures/gameplay-expanded-client-conformance.json`.
+Rust parsers and schemas for v8–v11 and the browser consume the same valid/invalid cases.
+`expanded_client_contract_tests` and `expanded_client_mutation_tests` add deterministic malformed
+field, byte-boundary and rejection checks; these are bounded regressions, not a general fuzzing
+engine. Run `cargo test -p grenadiers-core --locked expanded_client_` and
+`npm --prefix web test -- src/game/validation/expanded-client-conformance.test.ts` for focused feedback.
+
 There is no durable schema yet, so no Testcontainers suite is needed. When persistence is
 added, run migrations against an isolated real PostgreSQL instance and test query behavior,
 constraints, and rollback; never use the developer's database as a test fixture.

@@ -79,31 +79,40 @@ interrupted state but cannot preserve process-local matches or credentials.
 Keep the previous immutable image reference for rollback; database migration compatibility
 must be designed when durable application data is introduced.
 
-## v0.3.70 — 2026-10-26
+## v0.3.72 — 2026-10-26
 
-[v0.3.70](https://github.com/liveweird/grenadiers/releases/tag/v0.3.70) derives game-copy types
-from the canonical locale registry, returns stable raw copy objects and uses public i18next
-interpolation. Existing EN/PL text, fallback, timers and stack notation remain unchanged.
-Literal templates carry typed interpolation names; widened dynamic strings retain their dynamic
-parameter map rather than claiming compile-time placeholder validation.
+[v0.3.72](https://github.com/liveweird/grenadiers/releases/tag/v0.3.72) shares expanded client
+conformance cases across v8–v11 Rust parsers/schemas and the browser, with deterministic malformed
+frame, retired-action, required-field and byte-boundary regressions. Production parsers and
+schemas remain unchanged. Independent review is clear.
 
-Independent review is clear. Full web acceptance at
-`cdd6226ea6fb990f210ac14ac119045336a05443` passes 6,817 tests / 92 files in 226.02s with
-91.07/89.40/90.12/93.48% coverage; gzip JavaScript/CSS is 337,939/36,695 bytes. TypeScript, lint,
-contract drift, dead-code and repository checks pass. Integrated source
-`1890db16d9f4eec5190390fe664a8897733d167b` preserves the tested web/assets/API inputs. Backend,
-exhaustive Rust, Linux and dependency acceptance reuse v0.3.68/v0.3.69 unchanged inputs.
+At `f8457ef351af5822996b4f143efe0831abe45909`, ordinary profiles pass 951 core / 312 server
+tests plus two doctests; all 4,194,304 masks complete in debug, release and official coverage
+with zero product retries. The final runner report initially failed because stale cache objects
+contaminated discovery. An official isolated report using the same three executed binaries and
+38 profiles passes the unchanged 90% floor: 17,863/19,553 lines (91.356825%). The
+[recovery record](history/coverage-cache-recovery.md) preserves the original failure and provenance;
+no successful canonical runner summary or Rust duration is invented.
 
-Accepted image is `sha256:8f913babc354d219c9d7b2a69669fc79f6e65f2981314a5fcbbeacee8c6a33bc`.
-Trivy 0.74.0 reports zero fixable HIGH/CRITICAL findings. Eight native Compose cases pass in
-35.7s and eight Kubernetes cases in 36.3s, with exact image/security/probe/resource checks.
-A Polish 320px responsive locale switch and native create-room smoke also pass. Temporary
-acceptance projects/namespaces are removed.
+Full web acceptance passes 6,822 tests / 93 files in 264.03s with 91.07/89.40/90.12/93.48%
+coverage. Local gzip JavaScript/CSS is 337,162/36,695 bytes; the accepted Docker build is
+337,939/36,695 bytes, within the same budgets. Repository, lint, types and drift pass.
+[Integrated Linux units](https://github.com/liveweird/grenadiers/actions/runs/40373348609)
+pass at `5db1d0e46c14b7278fe854af9578567999b3ebdf`, whose client corpus/test inputs are identical.
 
-Localhost:8085 serves the accepted image with verified health/readiness, CSP/cache and exact
-served HTML/JavaScript/CSS/atlas bytes. Control is `.local-checkpoints/runtime/compose-v0.3.70.yaml`;
-`rollback-v0.3.69.yaml` retains the previous image. There is no gameplay, wire, artwork or migration
-change. Distribution remains source tags and GitHub prerelease notes.
+Accepted image source is the tested `f8457ef351af5822996b4f143efe0831abe45909`, image
+`sha256:e4989f32b30bb78400a12229dd3eb13c86a0a7f4ffd4bfea2bf3c943a286b5c1`.
+Trivy 0.74.0 reports zero fixable HIGH/CRITICAL findings; eight Compose cases pass in 35.4s and
+eight Kubernetes cases in 35.9s with exact-image/security/probe/resource checks. Temporary resources
+are removed. Localhost:8085 has verified health/readiness, CSP/cache and exact accepted web bytes.
+Control is `.local-checkpoints/runtime/compose-v0.3.72.yaml`; `rollback-v0.3.71.yaml` retains the
+prior image. No gameplay, wire, artwork or migration change; distribution remains source prereleases.
+
+<a id="v0371--2026-10-26"></a>
+The [v0.3.71 record](history/releases.md#v0371--2026-10-26) is preserved in release history.
+
+<a id="v0370--2026-10-26"></a>
+The [v0.3.70 record](history/releases.md#v0370--2026-10-26) is preserved in release history.
 
 <a id="v0369--2026-10-26"></a>
 The [v0.3.69 record](history/releases.md#v0369--2026-10-26) is preserved in release history.

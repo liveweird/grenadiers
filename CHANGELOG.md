@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## 0.3.78 — 2026-10-26
+
+### Changed
+
+- Share equivalent expanded frame-bound builders, open-border test arenas and timed-effect browser helpers while preserving assertions, seeds and scenario identities.
+
 ## 0.3.68 — 2026-10-26
 
 ### Changed

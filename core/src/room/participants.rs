@@ -8,6 +8,17 @@ use crate::game::SeatId;
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum CpuPolicy {
     UtilityV1,
+    UtilityV2,
+}
+
+impl CpuPolicy {
+    #[must_use]
+    pub const fn version(self) -> u16 {
+        match self {
+            Self::UtilityV1 => 1,
+            Self::UtilityV2 => 2,
+        }
+    }
 }
 
 /// Initial profile identity; tuning and additional levels require measured playtesting.
@@ -23,8 +34,15 @@ pub struct CpuProfile {
 }
 
 impl CpuProfile {
+    /// Original policy identity, retained for archived projections and replays.
     pub const INITIAL: Self = Self {
         policy: CpuPolicy::UtilityV1,
+        difficulty: CpuDifficulty::Standard,
+    };
+
+    /// The only policy profile used to create a new live CPU controller.
+    pub const CURRENT: Self = Self {
+        policy: CpuPolicy::UtilityV2,
         difficulty: CpuDifficulty::Standard,
     };
 }
@@ -73,6 +91,16 @@ mod tests {
                 policy: CpuPolicy::UtilityV1,
                 difficulty: CpuDifficulty::Standard,
             })
+        );
+    }
+
+    #[test]
+    fn policy_versions_are_independent_of_controller_assignment() {
+        assert_eq!(CpuProfile::INITIAL.policy.version(), 1);
+        assert_eq!(CpuProfile::CURRENT.policy.version(), 2);
+        assert_eq!(
+            RoomMode::Solo(CpuProfile::CURRENT).controller(SeatId::Two),
+            ControllerKind::Cpu(CpuProfile::CURRENT)
         );
     }
 }

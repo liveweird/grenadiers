@@ -135,16 +135,17 @@ impl Header {
     pub(in crate::game::rooms) fn expanded_v5_solo(
         initial_settings: RoomSettings,
         private_seed: [u8; 32],
+        profile: grenadiers_core::room::CpuProfile,
     ) -> Self {
         Self {
             format_version: SOLO_FORMAT_VERSION,
             initial_seats: [false, true],
             initial_settings,
-            mode: grenadiers_core::room::RoomMode::Solo(grenadiers_core::room::CpuProfile::INITIAL),
+            mode: grenadiers_core::room::RoomMode::Solo(profile),
             solo: Some(SoloProvenance {
-                profile: grenadiers_core::room::CpuProfile::INITIAL,
+                profile,
                 seat: SeatId::Two,
-                policy_version: 1,
+                policy_version: profile.policy.version(),
                 private_seed: PrivateCpuSeed(private_seed),
             }),
             ..Self::expanded_v5()

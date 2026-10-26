@@ -6,9 +6,13 @@ use std::sync::{
 
 use grenadiers_core::cpu::{
     CpuRng, Intent, ManualIntent, MemoryKey, WorkBudget,
+    forecast::{ForecastLimits, ObservedHazardMemory, TickWindow, forecast},
     policy::{ControlPlan, UtilityMemory, plan},
+    routing::{PulseRequest, RouteMode, certify_pulse},
+    survival::PulseStatus,
+    survival::SurvivalPlan,
 };
-use grenadiers_core::game::{SeatId, Tick};
+use grenadiers_core::game::{Direction, SeatId, Tick};
 
 use super::{CpuController, Pending};
 use crate::game::rooms::cpu::worker::{CpuPlanner, PlanResult};
@@ -27,13 +31,30 @@ fn inject(controller: &mut CpuController, decision: grenadiers_core::cpu::Decisi
     let mut rng = CpuRng::from_seed(key, [9; 32]);
     let _ = rng.bounded_u32(2).unwrap();
     let memory = UtilityMemory::new(key);
+    let basis = crate::game::rooms::cpu::tests::observation();
+    controller.latest_observation = Some(basis.clone());
+    controller.settled_stop_tick = Some(basis.parts().tick);
+    inject_plan(
+        controller,
+        decision,
+        SurvivalPlan {
+            control: ControlPlan::stop(memory),
+            lease: None,
+        },
+        basis,
+        rng,
+    );
+}
+
+fn inject_plan(
+    controller: &mut CpuController,
+    decision: grenadiers_core::cpu::DecisionId,
+    plan: SurvivalPlan,
+    basis: grenadiers_core::cpu::Observation,
+    rng: CpuRng,
+) {
     let (sender, receiver) = sync_channel(1);
-    sender
-        .send(PlanResult {
-            plan: ControlPlan::stop(memory),
-            rng,
-        })
-        .unwrap();
+    sender.send(PlanResult { plan, basis, rng }).unwrap();
     controller.pending = Some(Pending {
         decision,
         receiver,
@@ -86,6 +107,27 @@ fn admission_age_boundary_is_six_physical_ticks() {
 }
 
 #[test]
+fn fresh_world_change_rejects_even_a_non_lease_result() {
+    let mut controller = controller();
+    let basis = crate::game::rooms::cpu::tests::observation();
+    assert!(controller.accept_observation(&basis));
+    controller.settled_stop_tick = Some(Tick(20));
+    let current = decision(&controller);
+    inject(&mut controller, current);
+    let mut changed_parts = basis.into_parts();
+    changed_parts.tick = Tick(21);
+    changed_parts
+        .arena
+        .blocks
+        .push(grenadiers_core::game::CellId::new(5, 5));
+    let changed = grenadiers_core::cpu::Observation::new(changed_parts).unwrap();
+    assert!(controller.accept_observation(&changed));
+
+    assert!(controller.poll(Tick(21), 4).is_none());
+    assert_eq!(controller.rng.as_ref().unwrap().draws(), 0);
+}
+
+#[test]
 fn expired_empty_request_is_canceled_and_does_not_block_retry() {
     let mut controller = controller();
     let (sender, receiver) = sync_channel(1);
@@ -100,7 +142,14 @@ fn expired_empty_request_is_canceled_and_does_not_block_retry() {
     assert!(controller.poll(Tick(27), 4).is_none());
     assert!(!live.load(Ordering::Acquire));
     assert!(!controller.has_pending());
-    assert!(controller.submit(crate::game::rooms::cpu::tests::observation(), 4));
+    let before = crate::game::rooms::cpu::tests::observation();
+    assert!(controller.accept_observation(&before));
+    controller.on_stop_admitted(Tick(20));
+    let mut stopped_parts = before.into_parts();
+    stopped_parts.tick = Tick(21);
+    let stopped = grenadiers_core::cpu::Observation::new(stopped_parts).unwrap();
+    assert!(controller.accept_observation(&stopped));
+    assert!(controller.submit(stopped, 4));
     drop(sender);
 }
 
@@ -124,6 +173,7 @@ fn rejected_bomb_clears_prospective_escape_but_commits_rng() {
         hold_ticks: planned.hold_ticks,
         next_memory: planned.next_memory,
         next_rng: rng.clone(),
+        committed_pulse: None,
     };
 
     controller.commit(
@@ -145,6 +195,151 @@ fn repeated_observation_tick_is_considered_only_once() {
     let observation = crate::game::rooms::cpu::tests::observation();
     assert!(controller.accept_observation(&observation));
     assert!(!controller.accept_observation(&observation));
+}
+
+#[test]
+fn stop_confirmation_waits_for_the_first_post_admission_snapshot() {
+    let mut controller = controller();
+    let initial = observation_at(Tick(20), 37);
+    assert!(controller.accept_observation(&initial));
+    controller.on_stop_admitted(Tick(22));
+
+    let too_early = observation_at(Tick(21), 37);
+    assert!(controller.accept_observation(&too_early));
+    assert!(!controller.submit(too_early, 4));
+
+    let settled = observation_at(Tick(23), 37);
+    assert!(controller.accept_observation(&settled));
+    assert!(controller.submit(settled, 4));
+}
+
+#[test]
+fn post_stop_snapshot_confirms_its_new_non_center_pose() {
+    let mut controller = controller();
+    let initial = observation_at(Tick(20), 37);
+    assert!(controller.accept_observation(&initial));
+    controller.on_stop_admitted(Tick(20));
+    assert!(controller.accept_observation(&observation_at(Tick(21), 89)));
+    assert!(!controller.needs_stop_confirmation());
+
+    controller.on_movement_admitted();
+
+    assert!(controller.needs_stop_confirmation());
+}
+
+#[test]
+fn admitted_long_pulse_waits_for_its_scheduled_stop_update() {
+    let mut controller = controller();
+    let basis = crate::game::rooms::cpu::tests::observation();
+    assert!(controller.accept_observation(&basis));
+    controller.settled_stop_tick = Some(basis.parts().tick);
+    let key = key_for(&controller);
+    let forecast = forecast(
+        &basis,
+        &ObservedHazardMemory::new(key),
+        None,
+        ForecastLimits::default(),
+        &mut WorkBudget::new(65_536),
+    )
+    .unwrap();
+    let lease = certify_pulse(
+        &basis,
+        &forecast,
+        PulseRequest {
+            movement: grenadiers_core::cpu::MovementIntent::Direction(Direction::West),
+            hold_ticks: 12,
+            start_window: TickWindow {
+                start: Tick(21),
+                end: Tick(22),
+            },
+            stopped_safe_until: Tick(50),
+            mode: RouteMode::CertifiedOnly,
+            settled_stop_tick: Tick(20),
+        },
+        &mut WorkBudget::new(65_536),
+    )
+    .unwrap();
+    let final_pose = lease.pose_after(12);
+    let intent = Intent::moving(Direction::West);
+    let control = ControlPlan {
+        intent,
+        hold_ticks: 12,
+        next_memory: UtilityMemory::new(key),
+    };
+    let pulse_decision = decision(&controller);
+    inject_plan(
+        &mut controller,
+        pulse_decision,
+        SurvivalPlan {
+            control,
+            lease: Some(lease),
+        },
+        basis.clone(),
+        CpuRng::from_seed(key, [8; 32]),
+    );
+    let accepted = controller.poll(Tick(20), 4).unwrap();
+    controller.on_movement_admitted();
+    controller.commit(accepted, intent);
+    assert_eq!(
+        controller.validate_pulse(&basis, Tick(20)),
+        Some(PulseStatus::Continue)
+    );
+
+    let waiting = observation_with_pose(Tick(32), final_pose.min(), final_pose.heading_mask());
+    assert!(controller.accept_observation(&waiting));
+    assert_eq!(
+        controller.validate_pulse(&waiting, Tick(32)),
+        Some(PulseStatus::Wait)
+    );
+    let completed = observation_with_pose(Tick(33), final_pose.min(), final_pose.heading_mask());
+    assert!(controller.accept_observation(&completed));
+    assert_eq!(
+        controller.validate_pulse(&completed, Tick(33)),
+        Some(PulseStatus::Completed)
+    );
+}
+
+fn observation_at(tick: Tick, x_offset: i32) -> grenadiers_core::cpu::Observation {
+    let mut parts = crate::game::rooms::cpu::tests::observation().into_parts();
+    parts.tick = tick;
+    let grenadiers_core::cpu::ObservedActor::Visible(cpu) = &mut parts.actors[SeatId::Two.index()]
+    else {
+        unreachable!()
+    };
+    cpu.position.x += x_offset;
+    grenadiers_core::cpu::Observation::new(parts).unwrap()
+}
+
+fn observation_with_pose(
+    tick: Tick,
+    position: grenadiers_core::game::Position,
+    heading_mask: u8,
+) -> grenadiers_core::cpu::Observation {
+    let mut parts = crate::game::rooms::cpu::tests::observation().into_parts();
+    parts.tick = tick;
+    let grenadiers_core::cpu::ObservedActor::Visible(cpu) = &mut parts.actors[SeatId::Two.index()]
+    else {
+        unreachable!()
+    };
+    cpu.position = position;
+    cpu.heading = [
+        Direction::North,
+        Direction::East,
+        Direction::South,
+        Direction::West,
+    ]
+    .into_iter()
+    .find(|direction| {
+        let bit = match direction {
+            Direction::North => 1,
+            Direction::East => 2,
+            Direction::South => 4,
+            Direction::West => 8,
+        };
+        heading_mask & bit != 0
+    })
+    .unwrap_or(Direction::West);
+    grenadiers_core::cpu::Observation::new(parts).unwrap()
 }
 
 fn key_for(controller: &CpuController) -> MemoryKey {

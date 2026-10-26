@@ -146,6 +146,13 @@ impl PreparedMatchOwner {
         cpu_planner: crate::game::rooms::cpu::CpuPlanner,
         shutdown: watch::Receiver<ShutdownState>,
     ) -> Result<(MatchOwnerHandle, Self), MatchRuntimeError> {
+        // Retained profiles identify archived projections/replays. A live
+        // worker must never execute today's policy under an older identity.
+        if matches!(identity.mode, grenadiers_core::room::RoomMode::Solo(profile)
+            if profile != grenadiers_core::room::CpuProfile::CURRENT)
+        {
+            return Err(MatchRuntimeError::Publication);
+        }
         let cpu = identity.private_cpu_seed.map(|seed| {
             crate::game::rooms::cpu::CpuController::new(cpu_planner, identity.registry_serial, seed)
         });

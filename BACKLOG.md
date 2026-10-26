@@ -17,8 +17,10 @@ repeated approval for routine implementation choices. Entries are not delivery-d
   broader item tactics and measured difficulty. Preserve ordinary rules/input, restricted
   observations, bounded work and accepted-input replay. Follow the
   [accepted design](docs/game/single-player-cpu.md).
-  - **CPU2 — survival:** interval forecasts, timed routing, safe planting and bounded memory,
-    checked against fully known rule fixtures.
+  - **CPU2 — survival:** finish acceptance of the first bounded forecast/pulse increment;
+    then add pulse-aware multi-leg routing and waiting, complete escape proofs for broader
+    planting, and stronger survival selection. Preserve stopped/publication/worker-delay
+    timing, explicit uncertainty and bounded memory; check known fixtures against the rules.
   - **CPU3 — public preview:** stronger scored goals and all-features-on item tactics beyond
     the initial conservative controls, with browser acceptance of the expanded interactions.
   - **CPU4 — stronger play:** difficulty tuning, tactical look-ahead and measured performance

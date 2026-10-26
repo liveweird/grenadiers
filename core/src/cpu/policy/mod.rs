@@ -6,7 +6,8 @@ mod movement;
 mod planner;
 mod types;
 
-pub use execution::follow_committed_escape;
+pub use execution::{EscapeExecution, follow_checked_escape, follow_committed_escape};
+pub(crate) use planner::goal;
 pub use planner::plan;
 pub use types::{ControlPlan, MAX_HOLD_TICKS, MAX_ROUTE_CELLS, PolicyError, UtilityMemory};
 
@@ -17,4 +18,4 @@ mod execution_tests;
 #[cfg(test)]
 mod simulation_tests;
 #[cfg(test)]
-mod tests;
+pub(crate) mod tests;

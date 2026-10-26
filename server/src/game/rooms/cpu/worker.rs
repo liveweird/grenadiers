@@ -7,21 +7,25 @@ use std::thread::{self, JoinHandle};
 
 use grenadiers_core::cpu::{
     CpuRng, Observation, WorkBudget,
-    policy::{ControlPlan, UtilityMemory, plan},
+    forecast::ObservedHazardMemory,
+    policy::UtilityMemory,
+    survival::{SurvivalPlan, WORK_ALLOWANCE, plan},
 };
+use grenadiers_core::game::Tick;
 
 const WORKERS: usize = 2;
 const QUEUE_CAPACITY: usize = 32;
-pub(super) const WORK_ALLOWANCE: u32 = 256;
-
 pub(super) struct PlanResult {
-    pub(super) plan: ControlPlan,
+    pub(super) plan: SurvivalPlan,
+    pub(super) basis: Observation,
     pub(super) rng: CpuRng,
 }
 
 pub(super) struct PlanJob {
     pub(super) observation: Observation,
     pub(super) memory: UtilityMemory,
+    pub(super) hazard_memory: ObservedHazardMemory,
+    pub(super) settled_stop_tick: Tick,
     pub(super) rng: CpuRng,
     pub(super) live: Arc<AtomicBool>,
     pub(super) result: SyncSender<PlanResult>,
@@ -109,11 +113,22 @@ fn worker_loop(receiver: &Arc<Mutex<Receiver<PlanJob>>>) {
             continue;
         }
         let mut work = WorkBudget::new(WORK_ALLOWANCE);
-        let Ok(plan) = plan(&job.observation, &job.memory, &mut job.rng, &mut work) else {
+        let Ok(plan) = plan(
+            &job.observation,
+            &job.memory,
+            &job.hazard_memory,
+            job.settled_stop_tick,
+            &mut job.rng,
+            &mut work,
+        ) else {
             continue;
         };
         if job.live.load(Ordering::Acquire) {
-            let _ = job.result.try_send(PlanResult { plan, rng: job.rng });
+            let _ = job.result.try_send(PlanResult {
+                plan,
+                basis: job.observation,
+                rng: job.rng,
+            });
         }
     }
 }

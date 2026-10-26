@@ -83,9 +83,13 @@ fn validate_provenance(header: super::record::Header) -> Result<(), ReplayError>
         }
         SOLO_FORMAT_VERSION => header.solo.is_some_and(|solo| {
             header.mode == grenadiers_core::room::RoomMode::Solo(solo.profile)
-                && solo.profile == grenadiers_core::room::CpuProfile::INITIAL
+                && matches!(
+                    solo.profile,
+                    grenadiers_core::room::CpuProfile::INITIAL
+                        | grenadiers_core::room::CpuProfile::CURRENT
+                )
                 && solo.seat == SeatId::Two
-                && solo.policy_version == 1
+                && solo.policy_version == solo.profile.policy.version()
                 && header.initial_seats == [false, true]
         }),
         _ => false,

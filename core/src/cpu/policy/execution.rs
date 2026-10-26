@@ -4,6 +4,14 @@ use super::hazards::{escape_step_clear, unsupported_control_effect};
 use super::movement::{direction, hold_ticks, input_direction};
 use super::{ControlPlan, PolicyError, UtilityMemory};
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum EscapeExecution {
+    Continue(ControlPlan),
+    Wait(ControlPlan),
+    Completed,
+    Invalidated,
+}
+
 /// Follows an already committed bounded escape without invoking policy search.
 ///
 /// `Some` is an active escape action and never contains a manual action. `None`
@@ -13,6 +21,18 @@ pub fn follow_committed_escape(
     observation: &Observation,
     memory: &UtilityMemory,
 ) -> Result<Option<ControlPlan>, PolicyError> {
+    Ok(match follow_checked_escape(observation, memory)? {
+        EscapeExecution::Continue(plan) | EscapeExecution::Wait(plan) => Some(plan),
+        EscapeExecution::Completed => None,
+        EscapeExecution::Invalidated => Some(ControlPlan::stop(*memory)),
+    })
+}
+
+/// Distinguishes refuge waiting from an invalid route so a controller can replan.
+pub fn follow_checked_escape(
+    observation: &Observation,
+    memory: &UtilityMemory,
+) -> Result<EscapeExecution, PolicyError> {
     let parts = observation.parts();
     let key = MemoryKey {
         world: parts.world,
@@ -22,7 +42,7 @@ pub fn follow_committed_escape(
         return Err(PolicyError::IdentityMismatch);
     }
     if memory.planted_origin().is_none() {
-        return Ok(None);
+        return Ok(EscapeExecution::Completed);
     }
     let actor = parts
         .actors
@@ -37,31 +57,41 @@ pub fn follow_committed_escape(
         || unsupported_control_effect(actor)
         || matches!(&parts.bombs, BombKnowledge::Unavailable)
     {
-        return Ok(Some(ControlPlan::stop(*memory)));
+        return Ok(EscapeExecution::Invalidated);
     }
     let current = actor
         .position
         .cell()
         .ok_or(PolicyError::InvalidObservation)?;
+    if let BombKnowledge::Visible(bombs) = &parts.bombs
+        && bombs
+            .iter()
+            .any(|bomb| Some(bomb.cell) != memory.planted_origin() || bomb.owner != actor.id)
+    {
+        return Ok(EscapeExecution::Invalidated);
+    }
     if let Some((next, advanced)) = memory.next(current, actor.position) {
         if !escape_step_clear(observation, next) {
-            return Ok(Some(ControlPlan::stop(*memory)));
+            return Ok(EscapeExecution::Invalidated);
         }
         let Some(desired) = committed_direction(actor, current, next) else {
-            return Ok(Some(ControlPlan::stop(*memory)));
+            return Ok(EscapeExecution::Invalidated);
         };
-        return Ok(Some(ControlPlan {
+        return Ok(EscapeExecution::Continue(ControlPlan {
             intent: Intent::moving(input_direction(actor, desired)),
             hold_ticks: hold_ticks(actor, next, desired),
             next_memory: advanced,
         }));
     }
+    if memory.refuge() != Some(current) || !escape_step_clear(observation, current) {
+        return Ok(EscapeExecution::Invalidated);
+    }
     if matches!(&parts.bombs, BombKnowledge::Visible(bombs) if bombs.is_empty())
         && parts.flames.is_empty()
     {
-        Ok(None)
+        Ok(EscapeExecution::Completed)
     } else {
-        Ok(Some(ControlPlan::stop(*memory)))
+        Ok(EscapeExecution::Wait(ControlPlan::stop(*memory)))
     }
 }
 

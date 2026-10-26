@@ -11,6 +11,7 @@ mod observation;
 pub mod policy;
 mod random;
 pub mod routing;
+pub mod survival;
 mod work;
 
 pub use identity::{

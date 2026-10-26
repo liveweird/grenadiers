@@ -1,7 +1,13 @@
 use std::{collections::BTreeSet, sync::Arc};
 
 use grenadiers_core::{
-    cpu::{ManualIntent, Observation, ObservedActor},
+    cpu::{
+        Intent, ManualIntent, MemoryKey, MovementIntent, Observation, ObservedActor, WorkBudget,
+        forecast::{ForecastLimits, ObservedHazardMemory, TickWindow, forecast},
+        policy::{ControlPlan, UtilityMemory},
+        routing::{PulseRequest, RouteMode, certify_pulse},
+        survival::SurvivalPlan,
+    },
     game::{
         ActorInit, Arena, CellId, Direction, EntityId, Position, RulesConfig, SeatId, SpeedLevel,
         State, Terrain, World,
@@ -21,10 +27,10 @@ use crate::{
     round_seed::RoundSeedSource,
 };
 
-fn running_driver(round_seed: u8) -> Driver {
+pub(super) fn running_driver(round_seed: u8) -> Driver {
     let (_, shutdown) = watch::channel(false);
     let mut room = identity(RoomProfile::ExpandedV5);
-    room.mode = RoomMode::Solo(CpuProfile::INITIAL);
+    room.mode = RoomMode::Solo(CpuProfile::CURRENT);
     room.private_cpu_seed = Some([17; 32]);
     let (_, owner) = PreparedMatchOwner::new_with_planner(
         room,
@@ -147,7 +153,128 @@ fn accepted_bomb_uses_only_committed_escape_until_hazard_clears() {
     );
 }
 
-fn open_fixture_state(tick: grenadiers_core::game::Tick) -> State {
+#[test]
+fn first_cpu_plan_waits_for_an_executed_stop_snapshot() {
+    let mut driver = running_driver(23);
+    driver
+        .runtime
+        .replace_state_for_test(open_fixture_state(driver.runtime.lifecycle().tick()));
+    let notice = driver.runtime.current_notice().unwrap();
+
+    driver.consider_cpu_observation(&notice);
+
+    assert!(!driver.cpu.as_ref().unwrap().has_pending());
+    assert!(driver.cpu_stationary);
+    assert!(driver.cpu_stop_at.is_none());
+
+    for _ in 0..3 {
+        if let Some(notice) = driver.runtime.settle_boundary([None; 2]).unwrap() {
+            driver.publish(notice);
+            break;
+        }
+    }
+
+    assert!(
+        driver.cpu.as_ref().unwrap().has_pending(),
+        "planning starts only after a later snapshot confirms the admitted Stop"
+    );
+}
+
+#[test]
+fn certified_long_pulse_executes_and_replans_after_its_actual_stop_snapshot() {
+    let mut driver = running_driver(23);
+    driver
+        .runtime
+        .replace_state_for_test(open_fixture_state(driver.runtime.lifecycle().tick()));
+    let initial = driver.runtime.current_notice().unwrap();
+    driver.consider_cpu_observation(&initial);
+    let basis = publish_next_cpu_observation(&mut driver);
+    driver.cpu.as_mut().unwrap().cancel();
+    let key = MemoryKey {
+        world: basis.parts().world,
+        cpu_seat: SeatId::Two,
+    };
+    let forecast = forecast(
+        &basis,
+        &ObservedHazardMemory::new(key),
+        None,
+        ForecastLimits::default(),
+        &mut WorkBudget::new(65_536),
+    )
+    .unwrap();
+    let admission_tick = driver.runtime.lifecycle().tick();
+    let lease = certify_pulse(
+        &basis,
+        &forecast,
+        PulseRequest {
+            movement: MovementIntent::Direction(Direction::West),
+            hold_ticks: 12,
+            start_window: TickWindow {
+                start: grenadiers_core::game::Tick(admission_tick.0 + 1),
+                end: grenadiers_core::game::Tick(admission_tick.0 + 2),
+            },
+            stopped_safe_until: grenadiers_core::game::Tick(admission_tick.0 + 40),
+            mode: RouteMode::CertifiedOnly,
+            settled_stop_tick: basis.parts().tick,
+        },
+        &mut WorkBudget::new(65_536),
+    )
+    .unwrap();
+    driver.cpu.as_mut().unwrap().inject_plan_result_for_test(
+        basis.clone(),
+        driver.runtime.lifecycle().round_attempt(),
+        SurvivalPlan {
+            control: ControlPlan {
+                intent: Intent::moving(Direction::West),
+                hold_ticks: 12,
+                next_memory: UtilityMemory::new(key),
+            },
+            lease: Some(lease),
+        },
+    );
+
+    driver.poll_cpu_result().unwrap();
+    assert_eq!(
+        driver.cpu_stop_at,
+        Some(grenadiers_core::game::Tick(admission_tick.0 + 12))
+    );
+    assert!(!driver.cpu_stationary);
+
+    let origin = cpu_position(&basis);
+    let mut saw_non_center = false;
+    let mut latest = basis;
+    while driver.runtime.lifecycle().tick().0 <= admission_tick.0 + 12 {
+        driver.apply_cpu_stop().unwrap();
+        latest = publish_next_cpu_observation(&mut driver);
+        let position = cpu_position(&latest);
+        saw_non_center |= position != Position::center(position.cell().unwrap());
+    }
+
+    assert_ne!(cpu_position(&latest), origin);
+    assert!(
+        saw_non_center,
+        "the lease was checked during continuous movement"
+    );
+    assert!(driver.cpu_stationary);
+    assert!(driver.cpu_stop_at.is_none());
+    assert!(
+        driver.cpu.as_ref().unwrap().has_pending(),
+        "the first fresh post-Stop snapshot must settle the new pose and replan"
+    );
+}
+
+pub(super) fn publish_next_cpu_observation(driver: &mut Driver) -> Observation {
+    for _ in 0..3 {
+        if let Some(notice) = driver.runtime.settle_boundary([None; 2]).unwrap() {
+            let observation = notice.cpu_observation.clone().unwrap();
+            driver.publish(notice);
+            return observation;
+        }
+    }
+    panic!("expected a CPU observation publication");
+}
+
+pub(super) fn open_fixture_state(tick: grenadiers_core::game::Tick) -> State {
     use grenadiers_core::game::arena::{ARENA_CELL_COUNT, ARENA_HEIGHT, ARENA_WIDTH};
 
     let mut terrain = [Terrain::Floor; ARENA_CELL_COUNT];

@@ -8,7 +8,7 @@ use grenadiers_core::{
     cpu::{
         BombKnowledge, CpuRng, ManualIntent, MemoryKey, Observation, ObservationParts,
         ObservedActor, ObservedArena, ObservedRules, UnknownActorFacts, VisibleActor, WorldId,
-        policy::UtilityMemory,
+        forecast::ObservedHazardMemory, policy::UtilityMemory,
     },
     game::{CellId, Direction, EntityId, Position, SeatId, SpeedLevel, Terrain, Tick},
     room::RoomSettings,
@@ -91,10 +91,15 @@ pub(super) fn observation() -> Observation {
 
 fn job(live: Arc<AtomicBool>) -> (PlanJob, Receiver<PlanResult>) {
     let (sender, receiver) = sync_channel(1);
+    let observation = observation();
+    let mut hazard_memory = ObservedHazardMemory::new(key());
+    hazard_memory.observe(&observation).unwrap();
     (
         PlanJob {
-            observation: observation(),
+            settled_stop_tick: observation.parts().tick,
+            observation,
             memory: UtilityMemory::new(key()),
+            hazard_memory,
             rng: CpuRng::from_seed(key(), [4; 32]),
             live,
             result: sender,
@@ -109,12 +114,12 @@ fn bounded_worker_returns_a_legal_moving_bomb_plan() {
     let (job, result) = job(Arc::new(AtomicBool::new(true)));
     assert!(planner.try_submit(job));
     let result = result.recv().unwrap();
-    assert_eq!(result.plan.intent.manual, Some(ManualIntent::Bomb));
+    assert_eq!(result.plan.control.intent.manual, Some(ManualIntent::Bomb));
     assert_ne!(
-        result.plan.intent.movement,
+        result.plan.control.intent.movement,
         grenadiers_core::cpu::MovementIntent::Stop
     );
-    assert!((1..=12).contains(&result.plan.hold_ticks));
+    assert!((1..=12).contains(&result.plan.control.hold_ticks));
 }
 
 #[test]

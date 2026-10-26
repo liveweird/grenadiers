@@ -12,7 +12,7 @@ use crate::room::RoomSettings;
 
 use super::*;
 
-pub(super) fn key() -> MemoryKey {
+pub(crate) fn key() -> MemoryKey {
     MemoryKey {
         world: WorldId {
             room_instance: 4,
@@ -22,7 +22,7 @@ pub(super) fn key() -> MemoryKey {
     }
 }
 
-pub(super) fn observation(position: CellId) -> Observation {
+pub(crate) fn observation(position: CellId) -> Observation {
     let mut terrain = vec![Terrain::Floor; ARENA_CELL_COUNT];
     for column in 0..ARENA_WIDTH {
         terrain[usize::from(column)] = Terrain::Wall;

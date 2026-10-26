@@ -22,9 +22,9 @@ this does not authorize deleting adapters still used by the live path.
 
 | Responsibility | Current extension point |
 | --- | --- |
-| Configurable item identity/order | `core/src/protocol/item_foundation/items.rs` (`ItemId`, currently 22 items) |
-| Enabled settings bits | `core/src/game/enabled_items.rs` |
-| Pickup kinds and optional-item mapping | `core/src/game/pickups.rs` (`PickupKind`, including three basic upgrades) |
+| Canonical item identity/order, bit and predicate names | `core/src/item_spec.rs` (`with_item_spec!` rows) |
+| Generated catalog and enabled settings | `core/src/protocol/item_foundation/items.rs` and `core/src/game/enabled_items.rs` consume the canonical rows |
+| Generated pickup kinds and optional-item mappings | `core/src/game/pickups.rs` and `core/src/protocol/item_foundation/projection_items.rs`; the three basic upgrades stay separate |
 | Replaceable equipment and weapon slots | `core/src/game/inventory.rs` |
 | Timed effects, expiry and stacking | `core/src/game/effects.rs` (`TimedEffects`) |
 | Collection, actions and simulation phases | `core/src/game/simulation_*.rs`, relevant damage/bomb/world modules |
@@ -35,6 +35,11 @@ Reuse the matching category's lifecycle. For example, use `TimedEffects::apply` 
 expiry rules for a timed buff instead of introducing a separate timer. Keep clocks, randomness
 and I/O outside pure simulation. A terrain-like object such as Oil needs world collision/reveal
 rules as well as collection behavior; it is not just another timed-effect entry.
+
+Add identity metadata once in the canonical specification; do not hand-maintain a second enum,
+bit table or total pickup mapping. Equipment, weapons, effects and generation weights remain
+explicit behavior decisions. Preserve reserved bit positions and every retained protocol's
+activation subset; adding a row does not authorize expanding historical contracts.
 
 `ItemId` and `PickupKind` serve different purposes. Review catalog order, bit bounds, default
 settings, generation filtering and projection together. Stable item-bit/catalog order differs

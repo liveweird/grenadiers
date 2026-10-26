@@ -66,7 +66,7 @@ verification record identify locally tested artifacts; no production registry or
 has been configured. A source prerelease does not claim a production deployment.
 
 Evidence may name a clean candidate commit from before rebase or squash. Before merging,
-compare its Docker build inputs with the final PR head, require every configured push/PR check to pass,
+compare its Docker build inputs with the final PR head, require the applicable local-first checks to pass,
 and verify that the merged tree equals that head. Use the corresponding release tag for the
 published source. Retain the accepted image when exact artifact reuse is required; a later
 rebuild can receive different operating-system security updates and needs its own acceptance.
@@ -79,35 +79,49 @@ interrupted state but cannot preserve process-local matches or credentials.
 Keep the previous immutable image reference for rollback; database migration compatibility
 must be designed when durable application data is introduced.
 
-## v0.3.64 — 2026-10-26
+## v0.3.70 — 2026-10-26
 
-[v0.3.64](https://github.com/liveweird/grenadiers/releases/tag/v0.3.64) adds a validated,
-dry-run-first release preparation helper and Cargo caches for container builds. The helper updates
-aligned Cargo versions and dated changelog entries without running Git, publication or checks.
-BuildKit reuses locked registry/Git caches and a platform-specific target cache; touching the
-production crate roots forces changed workspace code to rebuild even when source mtimes are old.
-The binary is copied outside the cache mount. Static OCI metadata identifies the project.
-The existing bundled build frontend and runtime security policy are retained.
+[v0.3.70](https://github.com/liveweird/grenadiers/releases/tag/v0.3.70) derives game-copy types
+from the canonical locale registry, returns stable raw copy objects and uses public i18next
+interpolation. Existing EN/PL text, fallback, timers and stack notation remain unchanged.
+Literal templates carry typed interpolation names; widened dynamic strings retain their dynamic
+parameter map rather than claiming compile-time placeholder validation.
 
-Independent helper/cache review is clear. All fourteen helper cases pass on macOS and Linux;
-repository checks pass. Actual cold, older-mtime mutant and restored-source builds execute the
-compile step: the mutant changes health to its probe value, and restoring source reproduces the
-original binary. These are cache-correctness observations, not capacity or performance guarantees.
+Independent review is clear. Full web acceptance at
+`cdd6226ea6fb990f210ac14ac119045336a05443` passes 6,817 tests / 92 files in 226.02s with
+91.07/89.40/90.12/93.48% coverage; gzip JavaScript/CSS is 337,939/36,695 bytes. TypeScript, lint,
+contract drift, dead-code and repository checks pass. Integrated source
+`1890db16d9f4eec5190390fe664a8897733d167b` preserves the tested web/assets/API inputs. Backend,
+exhaustive Rust, Linux and dependency acceptance reuse v0.3.68/v0.3.69 unchanged inputs.
 
-Accepted image source `332e3608a64cf9832e62afd6c80a7e9dcb2c7f49` builds
-`sha256:1c6bd4094db67619c4f2c77c234bbaee34e5b4cccc17e5cb49bd8f38b0d2e27a`.
-Eight native Compose cases and eight Kubernetes cases pass, including actual image identity,
-startup/readiness, security, origins, probes/resources and browser gameplay. The pinned image
-scan reports zero fixable HIGH/CRITICAL findings; one additional post-promotion native
-authentication case passes. [Linux units](https://github.com/liveweird/grenadiers/actions/runs/40245664447) pass.
+Accepted image is `sha256:8f913babc354d219c9d7b2a69669fc79f6e65f2981314a5fcbbeacee8c6a33bc`.
+Trivy 0.74.0 reports zero fixable HIGH/CRITICAL findings. Eight native Compose cases pass in
+35.7s and eight Kubernetes cases in 36.3s, with exact image/security/probe/resource checks.
+A Polish 320px responsive locale switch and native create-room smoke also pass. Temporary
+acceptance projects/namespaces are removed.
 
-Application sources, contracts, web assets and external dependency versions are unchanged from
-v0.3.63. Reuse that source's full Rust/exhaustive acceptance and dependency audits, plus the
-unchanged v0.3.62 web acceptance. Release-documentation edits do not change Docker inputs.
-Localhost:8085 serves the accepted image, with exact HTML/JavaScript/atlas equality and runtime,
-CSP/cache, health/readiness checks passing. Control is
-`.local-checkpoints/runtime/compose-v0.3.64.yaml`; `rollback-v0.3.63.yaml` retains the prior image.
-Temporary acceptance resources are removed. There is no migration.
+Localhost:8085 serves the accepted image with verified health/readiness, CSP/cache and exact
+served HTML/JavaScript/CSS/atlas bytes. Control is `.local-checkpoints/runtime/compose-v0.3.70.yaml`;
+`rollback-v0.3.69.yaml` retains the previous image. There is no gameplay, wire, artwork or migration
+change. Distribution remains source tags and GitHub prerelease notes.
+
+<a id="v0369--2026-10-26"></a>
+The [v0.3.69 record](history/releases.md#v0369--2026-10-26) is preserved in release history.
+
+<a id="v0368--2026-10-26"></a>
+The [v0.3.68 record](history/releases.md#v0368--2026-10-26) is preserved in release history.
+
+<a id="v0367--2026-10-26"></a>
+The [v0.3.67 record](history/releases.md#v0367--2026-10-26) is preserved in release history.
+
+<a id="v0366--2026-10-26"></a>
+The [v0.3.66 record](history/releases.md#v0366--2026-10-26) is preserved in release history.
+
+<a id="v0365--2026-10-26"></a>
+The [v0.3.65 record](history/releases.md#v0365--2026-10-26) is preserved in release history.
+
+<a id="v0364--2026-10-26"></a>
+The [v0.3.64 record](history/releases.md#v0364--2026-10-26) is preserved in release history.
 
 <a id="v0363--2026-10-25"></a>
 The [v0.3.63 record](history/releases.md#v0363--2026-10-25) is preserved in release history.

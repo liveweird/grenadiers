@@ -65,6 +65,22 @@ Origin and cache policy. A gameplay socket scenario proves compatibility-before-
 duplicate-owner protection, and sequence replay rejection.
 
 The generated pickup and full-match fixtures run separately from random-map smoke tests.
+Start every deterministic fixture from the repository root with the base file first and the exact
+seed from the [fixture index](../docs/deployment.md#fixture-index):
+
+```sh
+GRENADIERS_FIXTURE_SEED_FILE=./core/tests/fixtures/<exact-name>.seed \
+  docker compose -f docker-compose.yaml -f e2e/compose/fixture.yaml \
+  up -d --no-build --force-recreate app
+```
+
+`GRENADIERS_FIXTURE_SEED_FILE` is required host-side Compose interpolation; it is not passed into
+the container or browser. Supply an absolute host file path or a relative path beginning with `./`;
+the latter is resolved from the first, root Compose file. An unset or empty selector fails Compose
+configuration. The bind disables host-path creation, so a missing source is rejected before the
+application starts and is not created as a directory. Keep each suite's separate
+`E2E_*_FIXTURE` acknowledgement. Tear down with `docker compose -f docker-compose.yaml down` so
+cleanup does not require the selector.
 Run the dedicated configurable-controls acceptance with `npm run test:controls`; it needs no
 fixture and verifies persisted UI remapping with native keys against a live round.
 The reconnect suite reuses the full-match fixture; run it with
@@ -77,8 +93,9 @@ the authoritative simulation clock, state, or outcomes.
 
 The Wall Pass production route runs separately with the mode-0444 seed fixture:
 `E2E_WALL_PASS_FIXTURE=arena-v2-wall-pass npm run test:wall-pass`. Start the same application image
-with `docker-compose.wall-pass.yaml` first. The route uses only browser controls and read-only socket
-observations; it does not inject state or send gameplay commands over the probe.
+with the shared override and `core/tests/fixtures/arena-v2-wall-pass.seed` first. The route uses only
+browser controls and read-only socket observations; it does not inject state or send gameplay
+commands over the probe.
 
 ## Natural headed visibility
 
@@ -88,22 +105,26 @@ with `connectOverCDP({ noDefaults: true })`; default Playwright focus emulation 
 visible and cannot establish a genuine hidden tab. The scenario observes actual visibility events.
 Owned processes/profiles have bounded cleanup; private CDP endpoints and capabilities are not attached.
 
-The Kick source route uses `docker-compose.kick.yaml` with the mode-0444 repeating-byte-31 seed:
+The Kick source route uses the shared override with the mode-0444
+`core/tests/fixtures/arena-v2-kick.seed`:
 `E2E_KICK_FIXTURE=arena-v2-kick npm run test:kick`. It uses native controls and read-only public
 observations; source checks do not claim native acceptance.
 
-The Punch source route uses `docker-compose.punch.yaml` with the mode-0444 repeating-byte-31 seed:
+The Punch source route uses the shared override with the mode-0444
+`core/tests/fixtures/arena-v2-punch.seed`:
 `E2E_PUNCH_FIXTURE=arena-v2-punch npm run test:punch`. It remaps and uses the actual Equipment key,
 uses native movement/Bomb input and observes both public recipient streams without injection or
 direct gameplay messages. Source checks do not claim native acceptance.
 
-The Bracelet source route uses `docker-compose.bracelet.yaml` with that same production seed:
+The Bracelet source route uses the shared override with the mode-0444
+`core/tests/fixtures/arena-v2-bracelet.seed`:
 `E2E_BRACELET_FIXTURE=arena-v2-bracelet npm run test:bracelet`. Two browsers clear opposite
 perimeters with ordinary Bomb and movement input, then prove the stationary rival moves exactly
 one tile in both recipient streams without an Equipment action, public event or private marker.
 Source checks do not claim native acceptance.
 
-The Oil Barrel source route uses `docker-compose.oil-barrel.yaml` with the same read-only seed:
+The Oil Barrel source route uses the shared override with the read-only
+`core/tests/fixtures/arena-v2-oil-barrel.seed`:
 `E2E_OIL_BARREL_FIXTURE=arena-v2-oil-barrel npm run test:oil-barrel`. Ordinary Bomb and movement
 input proves delayed reveal, the unlit collision edge, safe ignition and persistent burning in both
 recipient streams, then reconnects normally. Source checks do not claim native acceptance.

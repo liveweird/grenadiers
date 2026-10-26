@@ -231,7 +231,7 @@ jobs:
       - run: docker compose up -d --no-build
       - name: Wait for actual service readiness
         run: |
-          for attempt in $(seq 1 60); do
+          for _attempt in $(seq 1 60); do
             if curl --fail --silent http://127.0.0.1:8085/api/v1/ready; then exit 0; fi
             sleep 1
           done
@@ -248,8 +248,8 @@ jobs:
       - name: Verify deterministic pickups using the same built image
         if: matrix.shard == 'items'
         run: |
-          docker compose -f docker-compose.yaml -f docker-compose.pickups.yaml up -d --no-build --force-recreate app
-          for attempt in $(seq 1 60); do
+          GRENADIERS_FIXTURE_SEED_FILE=./core/tests/fixtures/arena-v1-pickups.seed docker compose -f docker-compose.yaml -f e2e/compose/fixture.yaml up -d --no-build --force-recreate app
+          for _attempt in $(seq 1 60); do
             if curl --fail --silent http://127.0.0.1:8085/api/v1/ready; then break; fi
             sleep 1
           done
@@ -259,8 +259,8 @@ jobs:
         if: matrix.shard == 'items'
         run: |
           chmod 444 core/tests/fixtures/arena-v2-heart.seed
-          docker compose -f docker-compose.yaml -f docker-compose.heart.yaml up -d --no-build --force-recreate app
-          for attempt in $(seq 1 60); do
+          GRENADIERS_FIXTURE_SEED_FILE=./core/tests/fixtures/arena-v2-heart.seed docker compose -f docker-compose.yaml -f e2e/compose/fixture.yaml up -d --no-build --force-recreate app
+          for _attempt in $(seq 1 60); do
             if curl --fail --silent http://127.0.0.1:8085/api/v1/ready; then break; fi
             sleep 1
           done
@@ -270,8 +270,8 @@ jobs:
         if: matrix.shard == 'items'
         run: |
           chmod 444 core/tests/fixtures/arena-v2-shield.seed
-          docker compose -f docker-compose.yaml -f docker-compose.shield.yaml up -d --no-build --force-recreate app
-          for attempt in $(seq 1 60); do
+          GRENADIERS_FIXTURE_SEED_FILE=./core/tests/fixtures/arena-v2-shield.seed docker compose -f docker-compose.yaml -f e2e/compose/fixture.yaml up -d --no-build --force-recreate app
+          for _attempt in $(seq 1 60); do
             if curl --fail --silent http://127.0.0.1:8085/api/v1/ready; then break; fi
             sleep 1
           done
@@ -281,8 +281,8 @@ jobs:
         if: matrix.shard == 'items'
         run: |
           chmod 444 core/tests/fixtures/arena-v2-golden-flame.seed
-          docker compose -f docker-compose.yaml -f docker-compose.golden-flame.yaml up -d --no-build --force-recreate app
-          for attempt in $(seq 1 60); do
+          GRENADIERS_FIXTURE_SEED_FILE=./core/tests/fixtures/arena-v2-golden-flame.seed docker compose -f docker-compose.yaml -f e2e/compose/fixture.yaml up -d --no-build --force-recreate app
+          for _attempt in $(seq 1 60); do
             if curl --fail --silent http://127.0.0.1:8085/api/v1/ready; then break; fi
             sleep 1
           done
@@ -292,8 +292,8 @@ jobs:
         if: matrix.shard == 'items'
         run: |
           chmod 444 core/tests/fixtures/arena-v2-short-fuse.seed
-          docker compose -f docker-compose.yaml -f docker-compose.short-fuse.yaml up -d --no-build --force-recreate app
-          for attempt in $(seq 1 60); do
+          GRENADIERS_FIXTURE_SEED_FILE=./core/tests/fixtures/arena-v2-short-fuse.seed docker compose -f docker-compose.yaml -f e2e/compose/fixture.yaml up -d --no-build --force-recreate app
+          for _attempt in $(seq 1 60); do
             if curl --fail --silent http://127.0.0.1:8085/api/v1/ready; then break; fi
             sleep 1
           done
@@ -303,8 +303,8 @@ jobs:
         if: matrix.shard == 'items'
         run: |
           chmod 444 core/tests/fixtures/arena-v2-short-flame.seed
-          docker compose -f docker-compose.yaml -f docker-compose.short-flame.yaml up -d --no-build --force-recreate app
-          for attempt in $(seq 1 60); do
+          GRENADIERS_FIXTURE_SEED_FILE=./core/tests/fixtures/arena-v2-short-flame.seed docker compose -f docker-compose.yaml -f e2e/compose/fixture.yaml up -d --no-build --force-recreate app
+          for _attempt in $(seq 1 60); do
             if curl --fail --silent http://127.0.0.1:8085/api/v1/ready; then break; fi
             sleep 1
           done
@@ -314,8 +314,8 @@ jobs:
         if: matrix.shard == 'items'
         run: |
           chmod 444 core/tests/fixtures/arena-v2-long-fuse.seed
-          docker compose -f docker-compose.yaml -f docker-compose.long-fuse.yaml up -d --no-build --force-recreate app
-          for attempt in $(seq 1 60); do
+          GRENADIERS_FIXTURE_SEED_FILE=./core/tests/fixtures/arena-v2-long-fuse.seed docker compose -f docker-compose.yaml -f e2e/compose/fixture.yaml up -d --no-build --force-recreate app
+          for _attempt in $(seq 1 60); do
             if curl --fail --silent http://127.0.0.1:8085/api/v1/ready; then break; fi
             sleep 1
           done
@@ -325,8 +325,8 @@ jobs:
         if: matrix.shard == 'items'
         run: |
           chmod 444 core/tests/fixtures/arena-v2-reverse-controls.seed
-          docker compose -f docker-compose.yaml -f docker-compose.reverse-controls.yaml up -d --no-build --force-recreate app
-          for attempt in $(seq 1 60); do
+          GRENADIERS_FIXTURE_SEED_FILE=./core/tests/fixtures/arena-v2-reverse-controls.seed docker compose -f docker-compose.yaml -f e2e/compose/fixture.yaml up -d --no-build --force-recreate app
+          for _attempt in $(seq 1 60); do
             if curl --fail --silent http://127.0.0.1:8085/api/v1/ready; then break; fi
             sleep 1
           done
@@ -336,8 +336,8 @@ jobs:
         if: matrix.shard == 'items'
         run: |
           chmod 444 core/tests/fixtures/arena-v2-diarrhea.seed
-          docker compose -f docker-compose.yaml -f docker-compose.diarrhea.yaml up -d --no-build --force-recreate app
-          for attempt in $(seq 1 60); do
+          GRENADIERS_FIXTURE_SEED_FILE=./core/tests/fixtures/arena-v2-diarrhea.seed docker compose -f docker-compose.yaml -f e2e/compose/fixture.yaml up -d --no-build --force-recreate app
+          for _attempt in $(seq 1 60); do
             if curl --fail --silent http://127.0.0.1:8085/api/v1/ready; then break; fi
             sleep 1
           done
@@ -347,8 +347,8 @@ jobs:
         if: matrix.shard == 'items'
         run: |
           chmod 444 core/tests/fixtures/arena-v2-slow-foot.seed
-          docker compose -f docker-compose.yaml -f docker-compose.slow-foot.yaml up -d --no-build --force-recreate app
-          for attempt in $(seq 1 60); do
+          GRENADIERS_FIXTURE_SEED_FILE=./core/tests/fixtures/arena-v2-slow-foot.seed docker compose -f docker-compose.yaml -f e2e/compose/fixture.yaml up -d --no-build --force-recreate app
+          for _attempt in $(seq 1 60); do
             if curl --fail --silent http://127.0.0.1:8085/api/v1/ready; then break; fi
             sleep 1
           done
@@ -358,8 +358,8 @@ jobs:
         if: matrix.shard == 'items'
         run: |
           chmod 444 core/tests/fixtures/arena-v2-piercing-bomb.seed
-          docker compose -f docker-compose.yaml -f docker-compose.piercing-bomb.yaml up -d --no-build --force-recreate app
-          for attempt in $(seq 1 60); do
+          GRENADIERS_FIXTURE_SEED_FILE=./core/tests/fixtures/arena-v2-piercing-bomb.seed docker compose -f docker-compose.yaml -f e2e/compose/fixture.yaml up -d --no-build --force-recreate app
+          for _attempt in $(seq 1 60); do
             if curl --fail --silent http://127.0.0.1:8085/api/v1/ready; then break; fi
             sleep 1
           done
@@ -369,8 +369,8 @@ jobs:
         if: matrix.shard == 'items'
         run: |
           chmod 444 core/tests/fixtures/arena-v2-power-bomb.seed
-          docker compose -f docker-compose.yaml -f docker-compose.power-bomb.yaml up -d --no-build --force-recreate app
-          for attempt in $(seq 1 60); do
+          GRENADIERS_FIXTURE_SEED_FILE=./core/tests/fixtures/arena-v2-power-bomb.seed docker compose -f docker-compose.yaml -f e2e/compose/fixture.yaml up -d --no-build --force-recreate app
+          for _attempt in $(seq 1 60); do
             if curl --fail --silent http://127.0.0.1:8085/api/v1/ready; then break; fi
             sleep 1
           done
@@ -380,8 +380,8 @@ jobs:
         if: matrix.shard == 'items'
         run: |
           chmod 444 core/tests/fixtures/arena-v2-remote-bomb.seed
-          docker compose -f docker-compose.yaml -f docker-compose.remote-bomb.yaml up -d --no-build --force-recreate app
-          for attempt in $(seq 1 60); do
+          GRENADIERS_FIXTURE_SEED_FILE=./core/tests/fixtures/arena-v2-remote-bomb.seed docker compose -f docker-compose.yaml -f e2e/compose/fixture.yaml up -d --no-build --force-recreate app
+          for _attempt in $(seq 1 60); do
             if curl --fail --silent http://127.0.0.1:8085/api/v1/ready; then break; fi
             sleep 1
           done
@@ -391,8 +391,8 @@ jobs:
         if: matrix.shard == 'items'
         run: |
           chmod 444 core/tests/fixtures/arena-v2-landmine.seed
-          docker compose -f docker-compose.yaml -f docker-compose.landmine.yaml up -d --no-build --force-recreate app
-          for attempt in $(seq 1 60); do
+          GRENADIERS_FIXTURE_SEED_FILE=./core/tests/fixtures/arena-v2-landmine.seed docker compose -f docker-compose.yaml -f e2e/compose/fixture.yaml up -d --no-build --force-recreate app
+          for _attempt in $(seq 1 60); do
             if curl --fail --silent http://127.0.0.1:8085/api/v1/ready; then break; fi
             sleep 1
           done
@@ -402,8 +402,8 @@ jobs:
         if: matrix.shard == 'items'
         run: |
           chmod 444 core/tests/fixtures/arena-v2-invisibility-cloak.seed
-          docker compose -f docker-compose.yaml -f docker-compose.invisibility-cloak.yaml up -d --no-build --force-recreate app
-          for attempt in $(seq 1 60); do
+          GRENADIERS_FIXTURE_SEED_FILE=./core/tests/fixtures/arena-v2-invisibility-cloak.seed docker compose -f docker-compose.yaml -f e2e/compose/fixture.yaml up -d --no-build --force-recreate app
+          for _attempt in $(seq 1 60); do
             if curl --fail --silent http://127.0.0.1:8085/api/v1/ready; then break; fi
             sleep 1
           done
@@ -413,8 +413,8 @@ jobs:
         if: matrix.shard == 'items'
         run: |
           chmod 444 core/tests/fixtures/arena-v2-stopwatch.seed
-          docker compose -f docker-compose.yaml -f docker-compose.stopwatch.yaml up -d --no-build --force-recreate app
-          for attempt in $(seq 1 60); do
+          GRENADIERS_FIXTURE_SEED_FILE=./core/tests/fixtures/arena-v2-stopwatch.seed docker compose -f docker-compose.yaml -f e2e/compose/fixture.yaml up -d --no-build --force-recreate app
+          for _attempt in $(seq 1 60); do
             if curl --fail --silent http://127.0.0.1:8085/api/v1/ready; then break; fi
             sleep 1
           done
@@ -424,8 +424,8 @@ jobs:
         if: matrix.shard == 'items'
         run: |
           chmod 444 core/tests/fixtures/arena-v2-invisible-bombs.seed
-          docker compose -f docker-compose.yaml -f docker-compose.invisible-bombs.yaml up -d --no-build --force-recreate app
-          for attempt in $(seq 1 60); do
+          GRENADIERS_FIXTURE_SEED_FILE=./core/tests/fixtures/arena-v2-invisible-bombs.seed docker compose -f docker-compose.yaml -f e2e/compose/fixture.yaml up -d --no-build --force-recreate app
+          for _attempt in $(seq 1 60); do
             if curl --fail --silent http://127.0.0.1:8085/api/v1/ready; then break; fi
             sleep 1
           done
@@ -435,8 +435,8 @@ jobs:
         if: matrix.shard == 'items'
         run: |
           chmod 444 core/tests/fixtures/arena-v2-teleporter.seed
-          docker compose -f docker-compose.yaml -f docker-compose.teleporter.yaml up -d --no-build --force-recreate app
-          for attempt in $(seq 1 60); do
+          GRENADIERS_FIXTURE_SEED_FILE=./core/tests/fixtures/arena-v2-teleporter.seed docker compose -f docker-compose.yaml -f e2e/compose/fixture.yaml up -d --no-build --force-recreate app
+          for _attempt in $(seq 1 60); do
             if curl --fail --silent http://127.0.0.1:8085/api/v1/ready; then break; fi
             sleep 1
           done
@@ -446,8 +446,8 @@ jobs:
         if: matrix.shard == 'items'
         run: |
           chmod 444 core/tests/fixtures/arena-v2-wall-pass.seed
-          docker compose -f docker-compose.yaml -f docker-compose.wall-pass.yaml up -d --no-build --force-recreate app
-          for attempt in $(seq 1 60); do
+          GRENADIERS_FIXTURE_SEED_FILE=./core/tests/fixtures/arena-v2-wall-pass.seed docker compose -f docker-compose.yaml -f e2e/compose/fixture.yaml up -d --no-build --force-recreate app
+          for _attempt in $(seq 1 60); do
             if curl --fail --silent http://127.0.0.1:8085/api/v1/ready; then break; fi
             sleep 1
           done
@@ -457,8 +457,8 @@ jobs:
         if: matrix.shard == 'items'
         run: |
           chmod 444 core/tests/fixtures/arena-v2-kick.seed
-          docker compose -f docker-compose.yaml -f docker-compose.kick.yaml up -d --no-build --force-recreate app
-          for attempt in $(seq 1 60); do
+          GRENADIERS_FIXTURE_SEED_FILE=./core/tests/fixtures/arena-v2-kick.seed docker compose -f docker-compose.yaml -f e2e/compose/fixture.yaml up -d --no-build --force-recreate app
+          for _attempt in $(seq 1 60); do
             if curl --fail --silent http://127.0.0.1:8085/api/v1/ready; then break; fi
             sleep 1
           done
@@ -468,8 +468,8 @@ jobs:
         if: matrix.shard == 'items'
         run: |
           chmod 444 core/tests/fixtures/arena-v2-punch.seed
-          docker compose -f docker-compose.yaml -f docker-compose.punch.yaml up -d --no-build --force-recreate app
-          for attempt in $(seq 1 60); do
+          GRENADIERS_FIXTURE_SEED_FILE=./core/tests/fixtures/arena-v2-punch.seed docker compose -f docker-compose.yaml -f e2e/compose/fixture.yaml up -d --no-build --force-recreate app
+          for _attempt in $(seq 1 60); do
             if curl --fail --silent http://127.0.0.1:8085/api/v1/ready; then break; fi
             sleep 1
           done
@@ -479,8 +479,8 @@ jobs:
         if: matrix.shard == 'items'
         run: |
           chmod 444 core/tests/fixtures/arena-v2-bracelet.seed
-          docker compose -f docker-compose.yaml -f docker-compose.bracelet.yaml up -d --no-build --force-recreate app
-          for attempt in $(seq 1 60); do
+          GRENADIERS_FIXTURE_SEED_FILE=./core/tests/fixtures/arena-v2-bracelet.seed docker compose -f docker-compose.yaml -f e2e/compose/fixture.yaml up -d --no-build --force-recreate app
+          for _attempt in $(seq 1 60); do
             if curl --fail --silent http://127.0.0.1:8085/api/v1/ready; then break; fi
             sleep 1
           done
@@ -490,8 +490,8 @@ jobs:
         if: matrix.shard == 'items'
         run: |
           chmod 444 core/tests/fixtures/arena-v2-oil-barrel.seed
-          docker compose -f docker-compose.yaml -f docker-compose.oil-barrel.yaml up -d --no-build --force-recreate app
-          for attempt in $(seq 1 60); do
+          GRENADIERS_FIXTURE_SEED_FILE=./core/tests/fixtures/arena-v2-oil-barrel.seed docker compose -f docker-compose.yaml -f e2e/compose/fixture.yaml up -d --no-build --force-recreate app
+          for _attempt in $(seq 1 60); do
             if curl --fail --silent http://127.0.0.1:8085/api/v1/ready; then break; fi
             sleep 1
           done
@@ -500,8 +500,8 @@ jobs:
       - name: Verify a full classic match and rematch using the same image
         if: matrix.shard == 'classic'
         run: |
-          docker compose -f docker-compose.yaml -f docker-compose.matches.yaml up -d --no-build --force-recreate app
-          for attempt in $(seq 1 60); do
+          GRENADIERS_FIXTURE_SEED_FILE=./core/tests/fixtures/arena-v1-matches.seed docker compose -f docker-compose.yaml -f e2e/compose/fixture.yaml up -d --no-build --force-recreate app
+          for _attempt in $(seq 1 60); do
             if curl --fail --silent http://127.0.0.1:8085/api/v1/ready; then break; fi
             sleep 1
           done

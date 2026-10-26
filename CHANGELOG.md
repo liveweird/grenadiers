@@ -8,6 +8,13 @@
 
 - Add reproducible registry/entropy admission measurements and real non-reading WebSocket recovery and shutdown regressions; preserve production locking and timeout policy.
 
+## 0.3.70 — 2026-10-26
+
+### Changed
+
+- Use the canonical typed locale registry for stable raw game copy and i18next for
+  interpolation, preserving current EN/PL text and timer/stack notation.
+
 ## 0.3.69 — 2026-10-26
 
 ### Changed

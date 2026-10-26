@@ -4,6 +4,34 @@ This archive preserves the older release records originally maintained in
 [`docs/releases.md`](../releases.md). Records remain in their original order; the current
 release procedure and current release record stay in the [release guide](../releases.md).
 
+## v0.3.69 — 2026-10-26
+
+[v0.3.69](https://github.com/liveweird/grenadiers/releases/tag/v0.3.69) replaces 24 repeated
+Compose seed overlays with `e2e/compose/fixture.yaml`. Set `GRENADIERS_FIXTURE_SEED_FILE` to the
+exact seed path; the read-only bind rejects missing files instead of creating host directories.
+Feature seeds, browser acknowledgements, scenario identities and base-only teardown remain.
+See [fixture usage](../deployment.md).
+
+Independent review and repository/workflow contracts pass. The 96 rendered-model comparisons
+cover 24 features, default/custom environment and persistence off/on; the only intentional
+model difference is `create_host_path: false`. Missing/unset/empty selectors fail safely.
+Integration preserves the v0.3.68 backend and v0.3.65 web inputs; their full Rust, exhaustive,
+Linux, web, coverage and dependency results are reused without duplicate suites.
+
+Accepted image source is `137bdd68a4cae1d751bc98183c5fb5b9e1829ae0`, image
+`sha256:9eade53a5b910f55627d6ef8f8d06a726698e7879316e41242142122e0266c95`.
+Its OS layer was refreshed for the newly reported OpenSSL fix. Trivy 0.74.0 reports zero fixable
+HIGH/CRITICAL findings. Fresh exact-image Compose acceptance passes eight default cases in 35.4s
+and Heart, Kick, Cloak and Oil cases through the new shared overlay with exact read-only mounts.
+Eight Kubernetes cases pass in 36.5s with exact-image/security/probe/resource checks. Temporary
+Compose projects and Kubernetes namespaces are removed. Earlier runs using superseded overlays
+are retained separately and are excluded from these shared-fixture results.
+
+Localhost:8085 serves the accepted image; runtime/security, health/readiness, CSP/cache and exact
+served HTML/JavaScript/CSS/atlas checks pass. Control is
+`.local-checkpoints/runtime/compose-v0.3.69.yaml`; `rollback-v0.3.68.yaml` retains the prior image.
+No gameplay, protocol, artwork or migration changes. Distribution remains source prereleases.
+
 ## v0.3.68 — 2026-10-26
 
 [v0.3.68](https://github.com/liveweird/grenadiers/releases/tag/v0.3.68) makes replay recording

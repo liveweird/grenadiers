@@ -4,6 +4,36 @@ This archive preserves the older release records originally maintained in
 [`docs/releases.md`](../releases.md). Records remain in their original order; the current
 release procedure and current release record stay in the [release guide](../releases.md).
 
+## v0.3.64 — 2026-10-26
+
+[v0.3.64](https://github.com/liveweird/grenadiers/releases/tag/v0.3.64) adds a validated,
+dry-run-first release preparation helper and Cargo caches for container builds. The helper updates
+aligned Cargo versions and dated changelog entries without running Git, publication or checks.
+BuildKit reuses locked registry/Git caches and a platform-specific target cache; touching the
+production crate roots forces changed workspace code to rebuild even when source mtimes are old.
+The binary is copied outside the cache mount. Static OCI metadata identifies the project.
+The existing bundled build frontend and runtime security policy are retained.
+
+Independent helper/cache review is clear. All fourteen helper cases pass on macOS and Linux;
+repository checks pass. Actual cold, older-mtime mutant and restored-source builds execute the
+compile step: the mutant changes health to its probe value, and restoring source reproduces the
+original binary. These are cache-correctness observations, not capacity or performance guarantees.
+
+Accepted image source `332e3608a64cf9832e62afd6c80a7e9dcb2c7f49` builds
+`sha256:1c6bd4094db67619c4f2c77c234bbaee34e5b4cccc17e5cb49bd8f38b0d2e27a`.
+Eight native Compose cases and eight Kubernetes cases pass, including actual image identity,
+startup/readiness, security, origins, probes/resources and browser gameplay. The pinned image
+scan reports zero fixable HIGH/CRITICAL findings; one additional post-promotion native
+authentication case passes. [Linux units](https://github.com/liveweird/grenadiers/actions/runs/40245664447) pass.
+
+Application sources, contracts, web assets and external dependency versions are unchanged from
+v0.3.63. Reuse that source's full Rust/exhaustive acceptance and dependency audits, plus the
+unchanged v0.3.62 web acceptance. Release-documentation edits do not change Docker inputs.
+Localhost:8085 serves the accepted image, with exact HTML/JavaScript/atlas equality and runtime,
+CSP/cache, health/readiness checks passing. Control is
+`.local-checkpoints/runtime/compose-v0.3.64.yaml`; `rollback-v0.3.63.yaml` retains the prior image.
+Temporary acceptance resources are removed. There is no migration.
+
 ## v0.3.63 — 2026-10-25
 
 [v0.3.63](https://github.com/liveweird/grenadiers/releases/tag/v0.3.63) separates authentication

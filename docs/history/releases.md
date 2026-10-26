@@ -4,6 +4,35 @@ This archive preserves the older release records originally maintained in
 [`docs/releases.md`](../releases.md). Records remain in their original order; the current
 release procedure and current release record stay in the [release guide](../releases.md).
 
+## v0.3.68 — 2026-10-26
+
+[v0.3.68](https://github.com/liveweird/grenadiers/releases/tag/v0.3.68) makes replay recording
+explicitly opt-in for test fixtures. Production rooms reserve no journal vector and skip replay-only
+capture work; live snapshots, replay compatibility, reconnect and exhaustive assertions remain.
+The allocation observation is 3,840,000 fewer reserved vector bytes per default room, not an RSS
+or throughput claim; see [the measurements](replay-allocation.md).
+
+Independent review is clear. Full Rust acceptance at
+`6c01cc4c97324ddef87e588a1bdbe8fb1deea135` passes in 431.697s: every 4,194,304 mask in debug,
+release and official coverage, zero retries, 940 core / 309 ordinary server tests and two doctests
+per profile. Coverage is 17,833/18,933 lines (94.1900%), above the 90% floor. Integrated image
+source `6f443a2056b91b713b5fd45d3e2e8de9a7e40056` preserves those core/server/API inputs.
+[Distinct Linux debug/release units](https://github.com/liveweird/grenadiers/actions/runs/40369574894)
+pass. Unchanged web, dependencies and audits reuse v0.3.65/v0.3.67 acceptance.
+
+The runtime OS layer was refreshed after a current scan found fixable OpenSSL findings in the
+older candidate. The replacement image is
+`sha256:0bb13e287162a7ba79937dba4f95dd161bb343248ea4e0cbf026f9c74c2d5fc3`;
+Trivy 0.74.0 reports zero fixable HIGH/CRITICAL findings. Eight fresh native Compose cases pass
+in 35.3s on this exact replacement. Eight fresh Kubernetes cases pass in 36.9s, including exact-image, security, readiness, probe
+and resource checks; the temporary namespace is removed.
+
+Localhost:8085 serves the replacement image. Image identity/security, health/readiness, CSP/cache
+and served HTML/JavaScript/CSS/atlas bytes match the accepted web artifacts. Control is
+`.local-checkpoints/runtime/compose-v0.3.68.yaml`; `rollback-v0.3.67.yaml` retains the previous
+release. There is no migration or public replay export. Source tags and GitHub prerelease notes
+are the distribution; no production registry is configured.
+
 ## v0.3.67 — 2026-10-26
 
 [v0.3.67](https://github.com/liveweird/grenadiers/releases/tag/v0.3.67) adds named admission

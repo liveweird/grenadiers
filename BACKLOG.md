@@ -17,10 +17,10 @@ repeated approval for routine implementation choices. Entries are not delivery-d
   planning and recorded bot inputs. Follow the [accepted design](docs/game/single-player-cpu.md)
   and expose a playable slice early and support the all-features-on default before the
   public preview.
-  - **CPU0 — contracts and seams:** participant/mode metadata, neutral observation and intent,
-    work budget, replay/lifecycle policy and deterministic fixture harness.
-  - **CPU1 — internal playable slice:** solo room, legal bot input, real result and
-    rematch/reconnect; a stand-still controller is only a harness step.
+  - **CPU1 — internal playable slice:** mode/controller protocol contracts, purposeful bounded
+    policy, solo room, legal bot input, real result and rematch/reconnect. Keep the contract,
+    policy and runtime changes focused, with one coordinated playable release; a stand-still
+    controller is only a harness step.
   - **CPU2 — survival:** interval forecasts, timed routing, safe planting and bounded memory,
     checked against fully known rule fixtures.
   - **CPU3 — public preview:** scored goals, all-features-on compatibility, localized accessible

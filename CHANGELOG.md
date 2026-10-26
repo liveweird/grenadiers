@@ -23,6 +23,12 @@
 - Derive reserved item identities, bits, pickup declarations and total mappings from one
   private specification while preserving generation order, activation subsets and replay values.
 
+## 0.3.65 — 2026-10-26
+
+### Changed
+
+- Name shared CSS color roles while preserving every resolved visual value, selector and layout.
+
 ## 0.3.64 — 2026-10-26
 
 ### Added

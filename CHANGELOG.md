@@ -9,7 +9,7 @@
 - Add named admission projection and personal metadata inputs for v8–v11, preserve legacy
   Rust wrappers, and migrate the live caller without changing wire validation or ownership.
 
-## 0.3.66 — 2026-10-25
+## 0.3.66 — 2026-10-26
 
 ### Changed
 

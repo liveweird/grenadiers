@@ -4,6 +4,31 @@ This archive preserves the older release records originally maintained in
 [`docs/releases.md`](../releases.md). Records remain in their original order; the current
 release procedure and current release record stay in the [release guide](../releases.md).
 
+## v0.3.65 — 2026-10-26
+
+[v0.3.65](https://github.com/liveweird/grenadiers/releases/tag/v0.3.65) names recurring UI color
+roles in `App.css`. All 252 existing resolved declarations, selectors, dimensions and visual
+values remain unchanged; distinct one-off shades remain explicit. No artwork or gameplay changes.
+
+Independent review checks resolved values, scope, undefined variables and cycles. Full web
+acceptance at `9e4b020cada15c5e36f2e2dd297e4cb7eecc437e` passes 6,812 tests / 91 files in
+226.72s with 91.10/89.47/90.12/93.47% coverage. JavaScript/CSS gzip sizes are 337,921/36,695 bytes,
+within existing budgets. Repository, TypeScript, lint, drift and dead-code checks pass.
+
+Integrated image source `0a46613dde32585dcf2a08faea98a271d2e10db9` preserves that tested web tree
+and the v0.3.64 backend. Accepted image is
+`sha256:6aed11a165885225691ae10b70ab349999853a7c14e398a38d12b65b4b90b596`.
+Eight native Compose cases and eight Kubernetes cases pass, with exact-image/runtime security,
+origin, readiness/probes/resources and gameplay checks. The pinned image scan reports zero
+fixable HIGH/CRITICAL findings. Reuse v0.3.64 backend/exhaustive/Linux and dependency acceptance;
+there is no distinct Rust behavior to recheck remotely.
+
+Localhost:8085 serves the accepted image. Exact served HTML, JavaScript, CSS and atlas bytes match
+the tested build; CSP/cache, health/readiness and runtime security pass, plus one fresh native
+authentication case. Release-documentation changes preserve Docker inputs and skip duplicate CI.
+Control is `.local-checkpoints/runtime/compose-v0.3.65.yaml`; `rollback-v0.3.64.yaml` retains the
+prior image. Temporary acceptance resources are removed. There is no migration.
+
 ## v0.3.64 — 2026-10-26
 
 [v0.3.64](https://github.com/liveweird/grenadiers/releases/tag/v0.3.64) adds a validated,

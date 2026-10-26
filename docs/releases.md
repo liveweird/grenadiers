@@ -79,31 +79,69 @@ interrupted state but cannot preserve process-local matches or credentials.
 Keep the previous immutable image reference for rollback; database migration compatibility
 must be designed when durable application data is introduced.
 
-## v0.3.70 — 2026-10-26
+### Runtime operating-system refresh
 
-[v0.3.70](https://github.com/liveweird/grenadiers/releases/tag/v0.3.70) derives game-copy types
-from the canonical locale registry, returns stable raw copy objects and uses public i18next
-interpolation. Existing EN/PL text, fallback, timers and stack notation remain unchanged.
-Literal templates carry typed interpolation names; widened dynamic strings retain their dynamic
-parameter map rather than claiming compile-time placeholder validation.
+Perform a controlled runtime refresh weekly and when a relevant Debian or runtime advisory
+requires it. Keep the reviewed base digest and rebuild only the runtime stage without its cached
+layer, following Buildx's
+[`--no-cache-filter` contract](https://docs.docker.com/reference/cli/docker/buildx/build/#no-cache-filter):
 
-Independent review is clear. Full web acceptance at
-`cdd6226ea6fb990f210ac14ac119045336a05443` passes 6,817 tests / 92 files in 226.02s with
-91.07/89.40/90.12/93.48% coverage; gzip JavaScript/CSS is 337,939/36,695 bytes. TypeScript, lint,
-contract drift, dead-code and repository checks pass. Integrated source
-`1890db16d9f4eec5190390fe664a8897733d167b` preserves the tested web/assets/API inputs. Backend,
-exhaustive Rust, Linux and dependency acceptance reuse v0.3.68/v0.3.69 unchanged inputs.
+```sh
+docker buildx build --no-cache-filter runtime --load --tag grenadiers:candidate-os-refresh .
+```
 
-Accepted image is `sha256:8f913babc354d219c9d7b2a69669fc79f6e65f2981314a5fcbbeacee8c6a33bc`.
-Trivy 0.74.0 reports zero fixable HIGH/CRITICAL findings. Eight native Compose cases pass in
-35.7s and eight Kubernetes cases in 36.3s, with exact image/security/probe/resource checks.
-A Polish 320px responsive locale switch and native create-room smoke also pass. Temporary
-acceptance projects/namespaces are removed.
+Record the resulting exact image ID, scan that ID with the pinned release vulnerability scanner,
+and run the applicable runtime acceptance against that same ID. Promote only the accepted ID and
+retain the previous immutable image reference for rollback. The runtime stage intentionally runs
+rolling Debian package updates, so a later build may resolve newer packages and is not expected to
+be byte-identical; treat it as a new candidate with new evidence rather than reusing acceptance.
 
-Localhost:8085 serves the accepted image with verified health/readiness, CSP/cache and exact
-served HTML/JavaScript/CSS/atlas bytes. Control is `.local-checkpoints/runtime/compose-v0.3.70.yaml`;
-`rollback-v0.3.69.yaml` retains the previous image. There is no gameplay, wire, artwork or migration
-change. Distribution remains source tags and GitHub prerelease notes.
+## v0.3.78 — 2026-10-26
+
+[v0.3.78](https://github.com/liveweird/grenadiers/releases/tag/v0.3.78) shares equivalent Rust
+frame-bound builders and open-border arenas plus timed-effect browser helpers. Independent review
+confirms identical helper contents, per-version largest states, test names/assertions, seeds,
+routes and screenshots. V8–v11 encoded frame sizes remain exact; the browser helper binds each
+assertion to the bomb planted by that native key action.
+
+Full source-bound Rust acceptance at `936f4e627fa3ec101f759b02f717b745d0d550f2` passes in
+449.469s, including every 4,194,304 mask in debug, release and official coverage with
+zero retries. Coverage is 18,049/19,738 lines (91.4429%).
+Focused debug/release, Clippy, repository and E2E static checks pass. Application web acceptance
+reuses the identical v0.3.77 input; existing Linux acceptance covers unchanged production code.
+
+Accepted image source is `f4fd65220cf4fbdc7322fe54bca36af2c5abd288`, whose Docker inputs match
+the tested source; image is `sha256:5281acc1e3a9b2f7959e2952edf57ee8bbee2eaf645fff81648ae3cedf175b5d`.
+Trivy 0.74.0 reports zero fixable HIGH/CRITICAL findings. Eight Compose cases pass in 36.1s and
+eight Kubernetes cases in 36.5s, with effective memory/PID/ephemeral-storage limits, security and
+probes verified. Golden Flame, Short Fuse and Short Flame cases also pass through the new helpers
+and exact read-only fixture mounts. Temporary resources are removed. Localhost:8085 has verified
+health/readiness, CSP/cache and the exact accepted web bytes. Control is
+`.local-checkpoints/runtime/compose-v0.3.78.yaml`; `rollback-v0.3.77.yaml` retains the prior image.
+
+<a id="v0377--2026-10-26"></a>
+The [v0.3.77 record](history/releases.md#v0377--2026-10-26) is preserved in release history.
+
+<a id="v0376--2026-10-26"></a>
+The [v0.3.76 record](history/releases.md#v0376--2026-10-26) is preserved in release history.
+
+<a id="v0375--2026-10-26"></a>
+The [v0.3.75 record](history/releases.md#v0375--2026-10-26) is preserved in release history.
+
+<a id="v0374--2026-10-26"></a>
+The [v0.3.74 record](history/releases.md#v0374--2026-10-26) is preserved in release history.
+
+<a id="v0373--2026-10-26"></a>
+The [v0.3.73 record](history/releases.md#v0373--2026-10-26) is preserved in release history.
+
+<a id="v0372--2026-10-26"></a>
+The [v0.3.72 record](history/releases.md#v0372--2026-10-26) is preserved in release history.
+
+<a id="v0371--2026-10-26"></a>
+The [v0.3.71 record](history/releases.md#v0371--2026-10-26) is preserved in release history.
+
+<a id="v0370--2026-10-26"></a>
+The [v0.3.70 record](history/releases.md#v0370--2026-10-26) is preserved in release history.
 
 <a id="v0369--2026-10-26"></a>
 The [v0.3.69 record](history/releases.md#v0369--2026-10-26) is preserved in release history.

@@ -13,14 +13,10 @@ repeated approval for routine implementation choices. Entries are not delivery-d
 ## Current delivery — Claude review
 
 - [next] **ENG-REVIEW — finish the remaining agreed review work before CPU mode.** The user confirmed
-  this priority on 2026-10-25. The published source baseline is v0.3.66; detailed delivered
+  this priority on 2026-10-25. The published source baseline is v0.3.67; detailed delivered
   evidence and finding dispositions belong in the [quality-review record](docs/quality-review.md),
   not this backlog. Preserve privacy, exhaustive masks, coverage floors and local-first
   verification. Current release lanes and remaining accepted scope are:
-  - **REV-ADMISSION (v0.3.67):** complete image integration, runtime acceptance and publication for
-    named admission inputs while preserving old wrappers, validation, privacy and ordering.
-    Independent review and the source-bound Rust gate passed on the v0.3.66-based candidate;
-    publication remains outstanding.
   - **REV-REPLAY:** decide and test production journal allocation when no consumer exists. Use
     explicit recording fixtures and before/after measurements; durable replay export is not a
     prerequisite.

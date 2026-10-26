@@ -35,8 +35,10 @@ impl MatchRuntime {
     ) -> Self {
         let settings = identity.profile.initial_settings();
         let settings_editor = identity.profile.initial_editor();
-        let journal = if let Some(seed) = identity.private_cpu_seed {
-            Journal::new(Header::expanded_v5_solo(settings, seed))
+        let journal = if let (Some(seed), grenadiers_core::room::RoomMode::Solo(profile)) =
+            (identity.private_cpu_seed, identity.mode)
+        {
+            Journal::new(Header::expanded_v5_solo(settings, seed, profile))
         } else {
             journal(&identity)
         };

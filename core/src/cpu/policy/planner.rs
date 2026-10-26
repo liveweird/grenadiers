@@ -197,7 +197,7 @@ fn navigate(
     })
 }
 
-fn goal(observation: &Observation, current: CellId) -> CellId {
+pub(crate) fn goal(observation: &Observation, current: CellId) -> CellId {
     if let Some(pickup) = observation.parts().pickups.iter().min_by_key(|pickup| {
         (
             manhattan(current, pickup.cell),

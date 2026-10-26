@@ -156,7 +156,7 @@ fn room_from_common(
     let wire_mode = match mode {
         crate::room::RoomMode::HumanDuel => RoomMode::HumanDuel,
         crate::room::RoomMode::Solo(profile)
-            if profile.policy == CpuPolicy::UtilityV1
+            if matches!(profile.policy, CpuPolicy::UtilityV1 | CpuPolicy::UtilityV2)
                 && profile.difficulty == CpuDifficulty::Standard =>
         {
             RoomMode::Solo {

@@ -20,7 +20,7 @@ fn prepared_solo() -> (
 ) {
     let (shutdown, shutdown_rx) = watch::channel(false);
     let mut room = identity(RoomProfile::ExpandedV5);
-    room.mode = RoomMode::Solo(CpuProfile::INITIAL);
+    room.mode = RoomMode::Solo(CpuProfile::CURRENT);
     room.private_cpu_seed = Some([17; 32]);
     PreparedMatchOwner::new(
         room,
@@ -345,4 +345,30 @@ async fn completed_solo_match_requires_human_rematch_and_resets_cpu_ready() {
     assert!(reset.seats[1].ready);
     assert!(!reset.seats[0].ready);
     value.task.abort();
+}
+
+#[test]
+fn archived_cpu_profile_cannot_label_a_current_live_worker() {
+    let mut room = identity(RoomProfile::ExpandedV5);
+    room.mode = RoomMode::Solo(CpuProfile::INITIAL);
+    room.private_cpu_seed = Some([17; 32]);
+    let (_, shutdown) = watch::channel(false);
+    let result = PreparedMatchOwner::new_with_planner(
+        room,
+        Instant::now(),
+        RoundSeedSource::with_entropy(|bytes| {
+            bytes.fill(23);
+            Ok(())
+        }),
+        Arc::new(|bytes: &mut [u8]| {
+            bytes.fill(31);
+            Ok(())
+        }),
+        crate::game::rooms::cpu::CpuPlanner::without_workers(),
+        shutdown,
+    );
+    assert!(matches!(
+        result,
+        Err(crate::game::rooms::match_runtime::MatchRuntimeError::Publication)
+    ));
 }

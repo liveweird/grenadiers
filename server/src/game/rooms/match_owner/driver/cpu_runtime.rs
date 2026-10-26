@@ -1,5 +1,5 @@
 use grenadiers_core::{
-    cpu::{Intent, ManualIntent, MovementIntent},
+    cpu::{Intent, ManualIntent, MovementIntent, policy::EscapeExecution, survival::PulseStatus},
     game::{SeatId, Tick},
     room::{MatchPhase, reconnect::ReservationState},
 };
@@ -59,10 +59,13 @@ impl Driver {
         } else {
             None
         };
-        self.cpu
-            .as_mut()
-            .expect("accepted plan has controller")
-            .commit(plan, actual);
+        let cpu = self.cpu.as_mut().expect("accepted plan has controller");
+        if movement.is_some() {
+            cpu.on_movement_admitted();
+        } else {
+            cpu.on_stop_admitted(tick);
+        }
+        cpu.commit(plan, actual);
         Ok(())
     }
 
@@ -89,10 +92,13 @@ impl Driver {
             .is_some()
             .then(|| tick.0.checked_add(u64::from(plan.hold_ticks)).map(Tick))
             .flatten();
-        self.cpu
-            .as_mut()
-            .expect("escape plan has controller")
-            .commit_escape(plan);
+        let cpu = self.cpu.as_mut().expect("escape plan has controller");
+        if movement.is_some() {
+            cpu.on_movement_admitted();
+        } else {
+            cpu.on_stop_admitted(tick);
+        }
+        cpu.commit_escape(plan);
         Ok(())
     }
 
@@ -136,6 +142,9 @@ impl Driver {
         }
         self.cpu_stop_at = None;
         self.cpu_stationary = true;
+        if let Some(cpu) = self.cpu.as_mut() {
+            cpu.on_stop_admitted(tick);
+        }
         Ok(())
     }
 
@@ -155,11 +164,36 @@ impl Driver {
         if !cpu.accept_observation(observation) {
             return;
         }
-        if self.cpu_stationary && cpu.is_escaping() {
-            let plan = cpu.follow_escape(observation).ok().flatten();
-            if let Some(plan) = plan {
-                let _ = self.apply_escape_plan(plan);
+        let pulse = cpu.validate_pulse(observation, observation.parts().tick);
+        if pulse == Some(PulseStatus::Invalidated) && !self.cpu_stationary {
+            self.cpu_stop_at = Some(self.runtime.lifecycle().tick());
+            let _ = self.apply_cpu_stop();
+            return;
+        }
+        if matches!(pulse, Some(PulseStatus::Continue | PulseStatus::Wait)) {
+            return;
+        }
+        if cpu.is_escaping() {
+            let execution = cpu.follow_escape(observation).ok();
+            match execution {
+                Some(EscapeExecution::Continue(plan) | EscapeExecution::Wait(plan))
+                    if self.cpu_stationary =>
+                {
+                    let _ = self.apply_escape_plan(plan);
+                    return;
+                }
+                Some(EscapeExecution::Continue(_) | EscapeExecution::Wait(_)) => return,
+                Some(EscapeExecution::Invalidated) if !self.cpu_stationary => {
+                    self.cpu_stop_at = Some(self.runtime.lifecycle().tick());
+                    let _ = self.apply_cpu_stop();
+                    return;
+                }
+                Some(EscapeExecution::Completed | EscapeExecution::Invalidated) | None => {}
             }
+        }
+        if self.cpu_stationary && cpu.needs_stop_confirmation() {
+            self.cpu_stop_at = Some(self.runtime.lifecycle().tick());
+            let _ = self.apply_cpu_stop();
             return;
         }
         if self.cpu_stationary && !cpu.has_pending() {
@@ -205,3 +239,7 @@ impl Driver {
 #[cfg(test)]
 #[path = "cpu_runtime_tests.rs"]
 mod tests;
+
+#[cfg(test)]
+#[path = "cpu_runtime_cpu2_tests.rs"]
+mod cpu2_tests;

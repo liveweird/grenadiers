@@ -5,16 +5,16 @@ use std::sync::{
     mpsc::{Receiver, TryRecvError, sync_channel},
 };
 
-use grenadiers_core::cpu::policy::{ControlPlan, MAX_HOLD_TICKS, PolicyError};
+use grenadiers_core::cpu::forecast::ObservedHazardMemory;
+use grenadiers_core::cpu::policy::{ControlPlan, EscapeExecution, MAX_HOLD_TICKS, PolicyError};
+use grenadiers_core::cpu::survival::{CommittedPulse, MAX_PLAN_AGE_TICKS, PulseStatus};
 use grenadiers_core::cpu::{
-    AdmissionContext, CpuMemory, CpuRng, DecisionId, Intent, MemoryKey, Observation, WorldId,
+    AdmissionContext, CpuMemory, CpuRng, DecisionId, Intent, Observation, WorldId,
     policy::UtilityMemory,
 };
-use grenadiers_core::game::{SeatId, Tick};
+use grenadiers_core::game::Tick;
 
 use super::worker::{CpuPlanner, PlanJob, PlanResult};
-
-pub(super) const MAX_OBSERVATION_AGE: u64 = 6;
 
 struct Pending {
     decision: DecisionId,
@@ -28,6 +28,12 @@ pub(in crate::game::rooms) struct AcceptedPlan {
     pub(in crate::game::rooms) hold_ticks: u8,
     next_memory: UtilityMemory,
     next_rng: CpuRng,
+    committed_pulse: Option<CommittedPulse>,
+}
+
+#[derive(Clone, Copy)]
+struct StopAdmission {
+    tick: Tick,
 }
 
 pub(in crate::game::rooms) struct CpuController {
@@ -37,11 +43,16 @@ pub(in crate::game::rooms) struct CpuController {
     world: Option<WorldId>,
     admission_memory: Option<CpuMemory>,
     memory: Option<UtilityMemory>,
+    hazard_memory: Option<ObservedHazardMemory>,
     rng: Option<CpuRng>,
     pending: Option<Pending>,
     request_serial: u64,
     escaping: bool,
     last_observation_tick: Option<Tick>,
+    latest_observation: Option<Observation>,
+    stop_admission: Option<StopAdmission>,
+    settled_stop_tick: Option<Tick>,
+    committed_pulse: Option<CommittedPulse>,
 }
 
 impl fmt::Debug for CpuController {
@@ -71,44 +82,17 @@ impl CpuController {
             world: None,
             admission_memory: None,
             memory: None,
+            hazard_memory: None,
             rng: None,
             pending: None,
             request_serial: 0,
             escaping: false,
             last_observation_tick: None,
+            latest_observation: None,
+            stop_admission: None,
+            settled_stop_tick: None,
+            committed_pulse: None,
         }
-    }
-
-    pub(in crate::game::rooms) fn reset_world(&mut self, physical_round: u64) {
-        self.cancel();
-        let world = WorldId {
-            room_instance: self.room_instance,
-            physical_round,
-        };
-        let key = MemoryKey {
-            world,
-            cpu_seat: SeatId::Two,
-        };
-        self.world = Some(world);
-        self.admission_memory = CpuMemory::new(key, 64).ok();
-        self.memory = Some(UtilityMemory::new(key));
-        self.rng = Some(CpuRng::from_seed(
-            key,
-            derive_round_seed(self.private_seed, physical_round),
-        ));
-        self.escaping = false;
-        self.last_observation_tick = None;
-    }
-
-    pub(in crate::game::rooms) fn accept_observation(&mut self, observation: &Observation) -> bool {
-        if self.world != Some(observation.parts().world) {
-            self.reset_world(observation.parts().world.physical_round);
-        }
-        if self.last_observation_tick == Some(observation.parts().tick) {
-            return false;
-        }
-        self.last_observation_tick = Some(observation.parts().tick);
-        true
     }
 
     pub(in crate::game::rooms) fn submit(
@@ -116,10 +100,16 @@ impl CpuController {
         observation: Observation,
         command_epoch: u64,
     ) -> bool {
-        if self.escaping || self.pending.is_some() || self.world != Some(observation.parts().world)
+        if self.escaping
+            || self.committed_pulse.is_some()
+            || self.pending.is_some()
+            || self.world != Some(observation.parts().world)
         {
             return false;
         }
+        let Some(settled_stop_tick) = self.settled_stop_tick else {
+            return false;
+        };
         let Some(serial) = self.request_serial.checked_add(1) else {
             return false;
         };
@@ -134,6 +124,12 @@ impl CpuController {
         let job = PlanJob {
             observation,
             memory: *self.memory.as_ref().expect("world memory initialized"),
+            hazard_memory: self
+                .hazard_memory
+                .as_ref()
+                .expect("world hazard memory initialized")
+                .clone(),
+            settled_stop_tick,
             rng: self.rng.as_ref().expect("world rng initialized").clone(),
             live: Arc::clone(&live),
             result: sender,
@@ -155,7 +151,7 @@ impl CpuController {
         current_tick: Tick,
         command_epoch: u64,
     ) -> Option<AcceptedPlan> {
-        if self.escaping {
+        if self.escaping || self.committed_pulse.is_some() {
             self.cancel();
             return None;
         }
@@ -167,7 +163,7 @@ impl CpuController {
             self.cancel();
             return None;
         };
-        if age > MAX_OBSERVATION_AGE
+        if age > MAX_PLAN_AGE_TICKS
             || pending.decision.command_epoch != command_epoch
             || self.world != Some(pending.decision.world)
         {
@@ -183,13 +179,19 @@ impl CpuController {
             }
         };
         let pending = self.pending.take().expect("pending was checked");
+        let latest = self.latest_observation.as_ref()?;
+        if self.settled_stop_tick.is_none()
+            || !grenadiers_core::cpu::survival::can_admit_ordinary(&result.basis, latest)
+        {
+            return None;
+        }
         let current = AdmissionContext {
             world: self.world?,
             command_epoch,
             observation_tick: pending.decision.observation_tick,
             checked_request_serial: self.request_serial,
         };
-        if !(1..=MAX_HOLD_TICKS).contains(&result.plan.hold_ticks)
+        if !(1..=MAX_HOLD_TICKS).contains(&result.plan.control.hold_ticks)
             || grenadiers_core::cpu::admit_decision(
                 self.admission_memory.as_mut()?,
                 current,
@@ -199,12 +201,19 @@ impl CpuController {
         {
             return None;
         }
+        let committed_pulse = match result.plan.lease {
+            Some(lease) => {
+                Some(CommittedPulse::admit(lease, result.basis, latest, current_tick).ok()?)
+            }
+            None => None,
+        };
         Some(AcceptedPlan {
             decision: pending.decision,
-            intent: result.plan.intent,
-            hold_ticks: result.plan.hold_ticks,
-            next_memory: result.plan.next_memory,
+            intent: result.plan.control.intent,
+            hold_ticks: result.plan.control.hold_ticks,
+            next_memory: result.plan.control.next_memory,
             next_rng: result.rng,
+            committed_pulse,
         })
     }
 
@@ -221,6 +230,7 @@ impl CpuController {
         );
         self.rng = Some(accepted.next_rng);
         self.escaping = planted;
+        self.committed_pulse = accepted.committed_pulse;
         if planted {
             self.cancel();
         }
@@ -233,22 +243,46 @@ impl CpuController {
         self.escaping
     }
 
+    pub(in crate::game::rooms) fn validate_pulse(
+        &mut self,
+        observation: &Observation,
+        current_tick: Tick,
+    ) -> Option<PulseStatus> {
+        let status = self
+            .committed_pulse
+            .as_ref()?
+            .validate(observation, current_tick);
+        if matches!(status, PulseStatus::Completed | PulseStatus::Invalidated) {
+            self.committed_pulse = None;
+        }
+        if status == PulseStatus::Invalidated {
+            self.cancel();
+            self.memory = Some(UtilityMemory::new(
+                self.memory
+                    .as_ref()
+                    .expect("world memory initialized")
+                    .key(),
+            ));
+        }
+        Some(status)
+    }
+
     pub(in crate::game::rooms) fn follow_escape(
         &mut self,
         observation: &Observation,
-    ) -> Result<Option<ControlPlan>, PolicyError> {
+    ) -> Result<EscapeExecution, PolicyError> {
         if !self.escaping {
-            return Ok(None);
+            return Ok(EscapeExecution::Completed);
         }
-        let plan = grenadiers_core::cpu::policy::follow_committed_escape(
+        let execution = grenadiers_core::cpu::policy::follow_checked_escape(
             observation,
             self.memory.as_ref().expect("world memory initialized"),
         )?;
-        if let Some(plan) = plan {
+        if let EscapeExecution::Continue(plan) | EscapeExecution::Wait(plan) = execution {
             if !(1..=MAX_HOLD_TICKS).contains(&plan.hold_ticks) || plan.intent.manual.is_some() {
                 return Err(PolicyError::InvalidObservation);
             }
-            return Ok(Some(plan));
+            return Ok(execution);
         }
         self.escaping = false;
         self.memory = Some(UtilityMemory::new(
@@ -257,7 +291,7 @@ impl CpuController {
                 .expect("world memory initialized")
                 .key(),
         ));
-        Ok(None)
+        Ok(execution)
     }
 
     pub(in crate::game::rooms) fn commit_escape(&mut self, plan: ControlPlan) {
@@ -304,6 +338,7 @@ impl CpuController {
             hold_ticks: plan.hold_ticks,
             next_memory: plan.next_memory,
             next_rng: rng,
+            committed_pulse: None,
         }
     }
 
@@ -318,6 +353,13 @@ impl Drop for CpuController {
         self.cancel();
     }
 }
+
+#[path = "controller_observation.rs"]
+mod observation;
+
+#[cfg(test)]
+#[path = "controller_test_support.rs"]
+mod test_support;
 
 fn derive_round_seed(mut seed: [u8; 32], physical_round: u64) -> [u8; 32] {
     let round = physical_round.to_le_bytes();

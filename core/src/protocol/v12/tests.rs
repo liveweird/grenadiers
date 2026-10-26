@@ -92,6 +92,19 @@ fn projected_modes_assign_only_the_approved_controllers() {
 }
 
 #[test]
+fn current_and_original_cpu_policies_share_the_v12_room_shape() {
+    let mut lifecycle = MatchLifecycle::with_settings(RoomSettings::DEFAULT);
+    lifecycle.occupy(SeatId::One).unwrap();
+    lifecycle.occupy(SeatId::Two).unwrap();
+    let current = project_expanded_room(
+        metadata(crate::room::RoomMode::Solo(CpuProfile::CURRENT)),
+        &lifecycle,
+    )
+    .unwrap();
+    assert_eq!(current, solo_room());
+}
+
+#[test]
 fn metadata_validation_rejects_cross_mode_and_controller_combinations() {
     let base = solo_room();
     let mutations: [fn(&mut RoomView); 7] = [

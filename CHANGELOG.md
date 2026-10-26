@@ -2,6 +2,25 @@
 
 ## [Unreleased]
 
+## 0.3.82 — 2026-10-26
+
+### Added
+
+- Share authoritative blast geometry with bounded recipient-visible forecasts of timed
+  chains, separate burn intervals, bomb uncertainty and persistent Oil fire.
+- Check short CPU movement/waiting pulses through their stopped safety window, with
+  modifier-expiry arithmetic, explicit stationary assumptions and fresh-snapshot invalidation.
+
+### Fixed
+
+- Resume planning after invalidated bomb escapes and correctly confirm Stop after movement
+  that ended between publications. Reject stale planting proofs when public facts change.
+
+### Changed
+
+- Identify the updated opponent as UtilityV2 while preserving UtilityV1 replay input support
+  and the existing v12 wire shape. Multi-leg survival and broader planting remain future work.
+
 ## 0.3.81 — 2026-10-26
 
 ### Added

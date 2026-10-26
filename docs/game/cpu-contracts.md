@@ -8,8 +8,11 @@ These Rust contracts support the [solo opponent](single-player.md) and the broad
 
 `core::room::RoomMode` derives controller kinds independently of occupancy and socket state.
 Human duels have two human controllers. Solo fixes the human at seat One and the CPU at seat
-Two. `CpuProfile::INITIAL` identifies `UtilityV1` with `Standard` difficulty; these are policy
-identities, not claims about measured strength. Seeds are outside participant metadata.
+Two. `CpuProfile::CURRENT` identifies `UtilityV2` with `Standard` difficulty;
+`INITIAL` preserves the original `UtilityV1` replay identity. These are policy identities, not
+claims about measured strength. Seeds are outside participant metadata.
+Live owner construction accepts only the current profile; retaining a historical replay
+identity does not re-enable that older policy for new matches.
 
 `core::cpu` accepts neutral observations and emits movement or Stop, with at most one Bomb or
 Equipment intent. Intent carries no credentials, seat authority, readiness, settings mutation
@@ -40,10 +43,12 @@ request may submit its ordinary Stop. History has bounded, deterministic retenti
 counted in logical units rather than hardware milliseconds.
 
 Tie-breaking uses its own seeded ChaCha stream and never draws from arena generation. Small
-fixture policies remain test-only; production uses UtilityV1. Replays consume recorded accepted
+fixture policies remain test-only; production uses UtilityV2. Replays consume recorded accepted
 actions rather than invoking a policy again. Production journal allocation remains disabled;
 explicit solo recording adds format-3 header provenance while preserving formats 1/2 and
 accepted-input record capacity.
+Policy versions 1/2 are accepted only with their matching profile; new recordings retain the
+actual room profile. Both policies share the unchanged v12 room shape.
 
 ## Planning and committed execution
 
@@ -54,12 +59,46 @@ ticks old; the observation tick identifies that request, while runtime age is ch
 Only accepted current input commits prospective memory/RNG.
 
 Plans hold ordinary movement for 1–12 updates, then the owner submits ordinary Stop at its
-committed deadline. Once a Bomb request is accepted, `follow_committed_escape` executes only
+committed deadline. Once a Bomb request is accepted, `follow_checked_escape` executes only
 the already planned route of at most four cells from fresh checked snapshots. It performs no
 goal/path search, random draws or manual action and does not wait for another worker. This
 keeps worker contention outside the route's scheduling bound. Unsupported effects, unknown
 bombs, blocked or displaced route geometry stop the executor rather than inventing safe facts.
 New hazards may still invalidate its game-world assumptions.
+The executor distinguishes continuing, waiting, completed and invalidated routes. Invalidation
+clears committed mode so planning can resume after ordinary Stop executes.
+
+## Hazard forecasts and executable pulses
+
+The authoritative game and forecast share immutable blast geometry. Forecasts retain absolute
+half-open lethal/blocking intervals, separate safe gaps and persistent Oil fire. Same-tick
+chains see unchanged blockers; later waves see destruction. Destroyed soft-block cells remain
+blocked for traversal until newly revealed contents are observed.
+
+Nominal stationary hazards are separate from conservative motion/trigger/pause uncertainty.
+Unknown motion can advance immediately and then every ten updates. Uncertain chain outcomes
+may extend through the 840-tick horizon; conservative uncertainty can prevent an otherwise
+possible move. History retains at most 16 bomb identities and two observations each, with a
+sticky displacement flag. Capacity, clock overflow, hidden bomb vision and exhausted work
+return failure rather than a truncated safe forecast. Each decision has 65,536 logical units;
+each cell layer holds at most 32 intervals.
+
+`certify_pulse` checks every first-execution update in its admission window, exact movement,
+modifier expiry and swept footprint. A known executed Stop establishes zero residual and no
+pending turn before planning; merely admitting Stop does not establish that fact. Certified
+pulses hold at most 12 updates; conditional pulses hold at most three and may waive only named
+motion assumptions for bombs never observed moving. Trigger/pause uncertainty is never waived.
+Every possible endpoint must remain safe through the exclusive stopped-lease deadline,
+including publication and accepted-worker-age delays. Known pickup-changing paths are withheld.
+
+The executor admits one pulse, checks intermediate snapshots at their own timestamps and
+submits ordinary Stop at its deadline. Fresh hazards, displaced bombs, changed effects/geometry
+or mismatched poses invalidate it. Missing workers cannot extend certification. Static steering
+is guidance only; no guidance suffix or conditional pulse authorizes planting or certifies a
+complete multi-leg escape. Clear-board goals and narrow CPU1 planting retain their own guards.
+Clear-board ordinary movement has no hazard lease: it retains its accepted hold through
+intermediate publications and can meet newly introduced hazards before the next decision.
+The lease's intermediate-pose and hazard-invalidation guarantees apply only to leased actions.
 
 ## Focused verification
 

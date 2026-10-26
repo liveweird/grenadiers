@@ -33,11 +33,22 @@ avoids known hazards and plants an ordinary bomb only when its restricted observ
 a short escape route. Accepted movement and manual actions use the same validation as humans.
 This is an initial opponent, with conservative tactics rather than tuned difficulty levels.
 
-Unknown bomb visibility, Diarrhea, Slow Foot and Reverse Controls stop its voluntary movement
-until the unsupported condition ends. The normal game still applies automatic curses and other
-effects. It does not predict general chain reactions, moving bombs or an opponent's future
-actions. A proved route cannot protect it from newly introduced hazards or control effects.
-Stored special weapons are held rather than used tactically by this initial opponent.
+Around observed hazards, the CPU forecasts timed blasts, chains, flame expiry and persistent
+Oil fire. It can wait for a clear interval or choose a short movement pulse, including Slow Foot
+and Reverse Controls expiry. Each checked pulse includes a stopped safety window; it replans
+after stopping. This does not guarantee completion of a multi-step escape under worker delay.
+
+Bomb motion remains partially unknown. Short conditional pulses may explicitly assume a bomb
+has stayed stationary; observing it move withdraws that assumption. Pauses and remote/contact
+triggers cannot use this exception. Unknown bomb visibility, Diarrhea, unsupported collision
+grace or an unavailable safe action produce Stop. New hazards can invalidate an active pulse.
+The normal game still applies automatic curses and other effects.
+
+Clear-board pickup collection and the restricted ordinary-bomb escape remain separate from
+hazard pulses. Ordinary clear-board movement retains its accepted hold and can meet new hazards
+before the next decision. Checked hazard movement avoids pickup-changing paths; stored weapons are held
+rather than used tactically. This opponent does not predict new enemy actions or promise
+survival against hidden facts.
 
 The [CPU contracts](cpu-contracts.md) explain execution and privacy; the
 [accepted design](single-player-cpu.md) specifies the broader model. Remaining work and tuning

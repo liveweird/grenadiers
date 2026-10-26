@@ -94,7 +94,7 @@ impl From<GameClientMessage> for InboundMessage {
                         }
                         grenadiers_core::protocol::v12::RoomMode::Solo { .. } => {
                             grenadiers_core::room::RoomMode::Solo(
-                                grenadiers_core::room::CpuProfile::INITIAL,
+                                grenadiers_core::room::CpuProfile::CURRENT,
                             )
                         }
                     },
@@ -217,7 +217,7 @@ mod tests {
                 _,
                 Command::CreateRoom {
                     mode: grenadiers_core::room::RoomMode::Solo(
-                        grenadiers_core::room::CpuProfile::INITIAL
+                        grenadiers_core::room::CpuProfile::CURRENT
                     )
                 }
             )

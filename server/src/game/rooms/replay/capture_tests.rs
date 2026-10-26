@@ -13,7 +13,7 @@ use super::{Operation, ReplayError, ReplayStatus, record::MAX_RECORDS, replay, r
 use crate::round_seed::RoundSeedSource;
 
 fn generated(source: RoundSeedSource) -> MatchRuntime {
-    let mut runtime = MatchRuntime::new(identity(), source);
+    let mut runtime = MatchRuntime::new_recording(identity(), source);
     runtime.initial_notice().unwrap();
     runtime
 }
@@ -313,7 +313,7 @@ fn truncation_is_bounded_and_cannot_change_runtime_or_fixed_test_profile() {
         Err(ReplayError::Truncated)
     );
 
-    let mut fixed = MatchRuntime::new(
+    let mut fixed = MatchRuntime::new_recording(
         RoomIdentity {
             id: RoomId::new("00000000000000000000000000000002").unwrap(),
             code: RoomCode::new("BCDEFGHJ").unwrap(),

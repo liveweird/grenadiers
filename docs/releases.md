@@ -79,30 +79,46 @@ interrupted state but cannot preserve process-local matches or credentials.
 Keep the previous immutable image reference for rollback; database migration compatibility
 must be designed when durable application data is introduced.
 
-## v0.3.65 — 2026-10-26
+## v0.3.70 — 2026-10-26
 
-[v0.3.65](https://github.com/liveweird/grenadiers/releases/tag/v0.3.65) names recurring UI color
-roles in `App.css`. All 252 existing resolved declarations, selectors, dimensions and visual
-values remain unchanged; distinct one-off shades remain explicit. No artwork or gameplay changes.
+[v0.3.70](https://github.com/liveweird/grenadiers/releases/tag/v0.3.70) derives game-copy types
+from the canonical locale registry, returns stable raw copy objects and uses public i18next
+interpolation. Existing EN/PL text, fallback, timers and stack notation remain unchanged.
+Literal templates carry typed interpolation names; widened dynamic strings retain their dynamic
+parameter map rather than claiming compile-time placeholder validation.
 
-Independent review checks resolved values, scope, undefined variables and cycles. Full web
-acceptance at `9e4b020cada15c5e36f2e2dd297e4cb7eecc437e` passes 6,812 tests / 91 files in
-226.72s with 91.10/89.47/90.12/93.47% coverage. JavaScript/CSS gzip sizes are 337,921/36,695 bytes,
-within existing budgets. Repository, TypeScript, lint, drift and dead-code checks pass.
+Independent review is clear. Full web acceptance at
+`cdd6226ea6fb990f210ac14ac119045336a05443` passes 6,817 tests / 92 files in 226.02s with
+91.07/89.40/90.12/93.48% coverage; gzip JavaScript/CSS is 337,939/36,695 bytes. TypeScript, lint,
+contract drift, dead-code and repository checks pass. Integrated source
+`1890db16d9f4eec5190390fe664a8897733d167b` preserves the tested web/assets/API inputs. Backend,
+exhaustive Rust, Linux and dependency acceptance reuse v0.3.68/v0.3.69 unchanged inputs.
 
-Integrated image source `0a46613dde32585dcf2a08faea98a271d2e10db9` preserves that tested web tree
-and the v0.3.64 backend. Accepted image is
-`sha256:6aed11a165885225691ae10b70ab349999853a7c14e398a38d12b65b4b90b596`.
-Eight native Compose cases and eight Kubernetes cases pass, with exact-image/runtime security,
-origin, readiness/probes/resources and gameplay checks. The pinned image scan reports zero
-fixable HIGH/CRITICAL findings. Reuse v0.3.64 backend/exhaustive/Linux and dependency acceptance;
-there is no distinct Rust behavior to recheck remotely.
+Accepted image is `sha256:8f913babc354d219c9d7b2a69669fc79f6e65f2981314a5fcbbeacee8c6a33bc`.
+Trivy 0.74.0 reports zero fixable HIGH/CRITICAL findings. Eight native Compose cases pass in
+35.7s and eight Kubernetes cases in 36.3s, with exact image/security/probe/resource checks.
+A Polish 320px responsive locale switch and native create-room smoke also pass. Temporary
+acceptance projects/namespaces are removed.
 
-Localhost:8085 serves the accepted image. Exact served HTML, JavaScript, CSS and atlas bytes match
-the tested build; CSP/cache, health/readiness and runtime security pass, plus one fresh native
-authentication case. Release-documentation changes preserve Docker inputs and skip duplicate CI.
-Control is `.local-checkpoints/runtime/compose-v0.3.65.yaml`; `rollback-v0.3.64.yaml` retains the
-prior image. Temporary acceptance resources are removed. There is no migration.
+Localhost:8085 serves the accepted image with verified health/readiness, CSP/cache and exact
+served HTML/JavaScript/CSS/atlas bytes. Control is `.local-checkpoints/runtime/compose-v0.3.70.yaml`;
+`rollback-v0.3.69.yaml` retains the previous image. There is no gameplay, wire, artwork or migration
+change. Distribution remains source tags and GitHub prerelease notes.
+
+<a id="v0369--2026-10-26"></a>
+The [v0.3.69 record](history/releases.md#v0369--2026-10-26) is preserved in release history.
+
+<a id="v0368--2026-10-26"></a>
+The [v0.3.68 record](history/releases.md#v0368--2026-10-26) is preserved in release history.
+
+<a id="v0367--2026-10-26"></a>
+The [v0.3.67 record](history/releases.md#v0367--2026-10-26) is preserved in release history.
+
+<a id="v0366--2026-10-26"></a>
+The [v0.3.66 record](history/releases.md#v0366--2026-10-26) is preserved in release history.
+
+<a id="v0365--2026-10-26"></a>
+The [v0.3.65 record](history/releases.md#v0365--2026-10-26) is preserved in release history.
 
 <a id="v0364--2026-10-26"></a>
 The [v0.3.64 record](history/releases.md#v0364--2026-10-26) is preserved in release history.

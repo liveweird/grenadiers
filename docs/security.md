@@ -146,6 +146,8 @@ The checked-in mutable image tag is for local developer clusters. Other environm
 exact accepted image reference; immutable registry digests identify exact image content, while
 release tags alone do not provide immutable provenance.
 
-Rooms, capabilities, and private replay journals are in-memory and process-local. Restarting or
-routing a reconnect attempt to another replica loses the room; multi-replica capability routing
-and durable recovery are not implemented.
+Rooms and capabilities are in-memory and process-local. Production replay recording is disabled;
+explicit test recordings contain private seeds and remain subject to the same redaction rules.
+Restarting or routing a reconnect attempt to another replica loses the room; multi-replica
+capability routing and durable recovery are not implemented. See the
+[recording policy](decisions/0025-production-replay-recording.md).

@@ -17,6 +17,8 @@ mod departure_tests;
 #[cfg(test)]
 mod performance_tests;
 #[cfg(test)]
+mod resume_race_tests;
+#[cfg(test)]
 mod resume_tests;
 #[cfg(test)]
 mod round_tests;

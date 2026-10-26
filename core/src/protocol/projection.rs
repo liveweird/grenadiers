@@ -363,32 +363,17 @@ fn project_pickups(view: &game::PublicState) -> Result<Vec<PickupView>, Projecti
         .collect()
 }
 
-pub(super) const fn wire_pickup_kind(kind: game::PickupKind) -> Option<PickupKind> {
-    match kind {
-        game::PickupKind::BombCapacity => Some(PickupKind::BombCapacity),
-        game::PickupKind::BlastRange => Some(PickupKind::BlastRange),
-        game::PickupKind::MovementSpeed => Some(PickupKind::MovementSpeed),
-        game::PickupKind::Kick
-        | game::PickupKind::Punch
-        | game::PickupKind::Bracelet
-        | game::PickupKind::WallPass
-        | game::PickupKind::Heart
-        | game::PickupKind::RemoteBomb
-        | game::PickupKind::PiercingBomb
-        | game::PickupKind::PowerBomb
-        | game::PickupKind::Landmine
-        | game::PickupKind::Shield
-        | game::PickupKind::Stopwatch
-        | game::PickupKind::InvisibilityCloak
-        | game::PickupKind::GoldenFlame
-        | game::PickupKind::ShortFuse
-        | game::PickupKind::Diarrhea
-        | game::PickupKind::SlowFoot
-        | game::PickupKind::ShortFlame
-        | game::PickupKind::LongFuse
-        | game::PickupKind::ReverseControls
-        | game::PickupKind::InvisibleBombs
-        | game::PickupKind::OilBarrel
-        | game::PickupKind::Teleporter => None,
-    }
+macro_rules! define_early_pickup_projection {
+    ($(($variant:ident, $bit:literal, $constant:ident, $contains:ident),)*) => {
+        pub(super) const fn wire_pickup_kind(kind: game::PickupKind) -> Option<PickupKind> {
+            match kind {
+                game::PickupKind::BombCapacity => Some(PickupKind::BombCapacity),
+                game::PickupKind::BlastRange => Some(PickupKind::BlastRange),
+                game::PickupKind::MovementSpeed => Some(PickupKind::MovementSpeed),
+                $(game::PickupKind::$variant => None,)*
+            }
+        }
+    };
 }
+
+crate::item_spec::with_item_spec!(define_early_pickup_projection);

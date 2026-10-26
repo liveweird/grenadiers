@@ -1,19 +1,31 @@
 use std::{fmt, mem::size_of};
 
+#[cfg(test)]
+use grenadiers_core::game::SpeedLevel;
 use grenadiers_core::{
-    game::{Direction, GenerationRecord, RoundAssignment, SeatId, SpeedLevel, Tick},
+    game::{Direction, GenerationRecord, RoundAssignment, SeatId, Tick},
     room::{DepartureReason, InterruptReason, RoomSettings},
 };
 
+#[cfg(test)]
 pub(super) const FORMAT_VERSION: u16 = 1;
+#[cfg(test)]
 pub(super) const EXPANDED_FORMAT_VERSION: u16 = 2;
+#[cfg(test)]
 pub(in crate::game::rooms) const M5_LIFECYCLE_PROFILE: u16 = 1;
+#[cfg(test)]
 pub(super) const M6_LIFECYCLE_PROFILE: u16 = 2;
+#[cfg(test)]
 pub(super) const CLASSIC_V2_RULES: u16 = 2;
+#[cfg(test)]
 pub(super) const CLASSIC_V3_RULES: u16 = 3;
+#[cfg(test)]
 pub(super) const CONFIGURABLE_V4_RULES: u16 = 4;
+#[cfg(test)]
 pub(super) const EXPANDED_V5_RULES: u16 = 5;
+#[cfg(test)]
 pub(super) const GENERATED_V1: u16 = 1;
+#[cfg(test)]
 pub(super) const GENERATED_V2: u16 = 2;
 pub(super) const MAX_RECORDS: usize = 60_000;
 
@@ -30,6 +42,7 @@ pub(in crate::game::rooms) struct Header {
     pub(super) initial_settings_editor: Option<SeatId>,
 }
 
+#[cfg(test)]
 impl Header {
     pub(in crate::game::rooms) fn m5(initial_seats: [bool; 2]) -> Self {
         Self {
@@ -179,6 +192,7 @@ pub(in crate::game::rooms) struct Journal {
 }
 
 impl Journal {
+    #[cfg(test)]
     pub(in crate::game::rooms) fn new(header: Header) -> Self {
         Self {
             header,

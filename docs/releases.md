@@ -79,30 +79,42 @@ interrupted state but cannot preserve process-local matches or credentials.
 Keep the previous immutable image reference for rollback; database migration compatibility
 must be designed when durable application data is introduced.
 
-## v0.3.65 — 2026-10-26
+## v0.3.67 — 2026-10-26
 
-[v0.3.65](https://github.com/liveweird/grenadiers/releases/tag/v0.3.65) names recurring UI color
-roles in `App.css`. All 252 existing resolved declarations, selectors, dimensions and visual
-values remain unchanged; distinct one-off shades remain explicit. No artwork or gameplay changes.
+[v0.3.67](https://github.com/liveweird/grenadiers/releases/tag/v0.3.67) adds named admission
+projection and personal-metadata inputs for protocol v8–v11. Legacy Rust wrappers remain
+available, and the live caller uses the named input without changing wire validation, ownership,
+ordering, privacy, schemas or gameplay behavior. The existing v0.3.65 web build is reused.
 
-Independent review checks resolved values, scope, undefined variables and cycles. Full web
-acceptance at `9e4b020cada15c5e36f2e2dd297e4cb7eecc437e` passes 6,812 tests / 91 files in
-226.72s with 91.10/89.47/90.12/93.47% coverage. JavaScript/CSS gzip sizes are 337,921/36,695 bytes,
-within existing budgets. Repository, TypeScript, lint, drift and dead-code checks pass.
+Fresh source-bound Rust acceptance at `46a1e3320e2ecf5e8c6291884d1304d0dfaa6d22` completes every
+4,194,304 mask in debug, release and official coverage in 432.208s with zero retries. The ordinary
+profiles each pass 940 core / 307 server tests plus two doctests. Coverage is 17,809/18,909 lines
+(94.1827%) at the 90% floor. Integrated source `43dcd78050d5a306b8822b62a17728cb56c8c926`
+has identical core, server and API inputs. Full v0.3.65 web acceptance is reused: 6,812 tests / 91
+files with 91.10/89.47/90.12/93.47% coverage. Dependency inputs and accepted audits are unchanged.
+[Distinct Linux debug/release units](https://github.com/liveweird/grenadiers/actions/runs/40256918030)
+pass on the final candidate.
 
-Integrated image source `0a46613dde32585dcf2a08faea98a271d2e10db9` preserves that tested web tree
-and the v0.3.64 backend. Accepted image is
-`sha256:6aed11a165885225691ae10b70ab349999853a7c14e398a38d12b65b4b90b596`.
-Eight native Compose cases and eight Kubernetes cases pass, with exact-image/runtime security,
-origin, readiness/probes/resources and gameplay checks. The pinned image scan reports zero
-fixable HIGH/CRITICAL findings. Reuse v0.3.64 backend/exhaustive/Linux and dependency acceptance;
-there is no distinct Rust behavior to recheck remotely.
+Accepted image source is `43dcd78050d5a306b8822b62a17728cb56c8c926`; its image is
+`sha256:0845bc797cc6082e9c331f9d0b0c871695c13e206cdcc8ddb1b9bf525f9c7f84`.
+The pinned image scan reports zero fixable HIGH/CRITICAL findings. Eight fresh native Compose
+cases plus Invisibility Cloak and Oil scenarios pass. Eight Kubernetes cases pass in 36.6s,
+including exact-image, runtime-security, readiness, probe and resource checks; the temporary
+namespace is absent afterward. An initial attempt passed a bad helper argument and stopped before
+any test ran; the corrected acceptance above passed without product retries.
 
-Localhost:8085 serves the accepted image. Exact served HTML, JavaScript, CSS and atlas bytes match
-the tested build; CSP/cache, health/readiness and runtime security pass, plus one fresh native
-authentication case. Release-documentation changes preserve Docker inputs and skip duplicate CI.
-Control is `.local-checkpoints/runtime/compose-v0.3.65.yaml`; `rollback-v0.3.64.yaml` retains the
-prior image. Temporary acceptance resources are removed. There is no migration.
+Localhost:8085 serves the accepted image. Exact image, runtime security, health/readiness,
+CSP/cache and served HTML/JavaScript/PNG equality with the accepted unchanged web artifacts pass,
+plus one fresh native authentication case in 364ms. Release-documentation changes preserve Docker
+and application inputs. Control is `.local-checkpoints/runtime/compose-v0.3.67.yaml`;
+`rollback-v0.3.66.yaml` retains the prior image. Temporary acceptance resources are removed.
+There is no migration.
+
+<a id="v0366--2026-10-26"></a>
+The [v0.3.66 record](history/releases.md#v0366--2026-10-26) is preserved in release history.
+
+<a id="v0365--2026-10-26"></a>
+The [v0.3.65 record](history/releases.md#v0365--2026-10-26) is preserved in release history.
 
 <a id="v0364--2026-10-26"></a>
 The [v0.3.64 record](history/releases.md#v0364--2026-10-26) is preserved in release history.

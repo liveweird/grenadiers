@@ -79,31 +79,61 @@ interrupted state but cannot preserve process-local matches or credentials.
 Keep the previous immutable image reference for rollback; database migration compatibility
 must be designed when durable application data is introduced.
 
-## v0.3.70 — 2026-10-26
+### Runtime operating-system refresh
 
-[v0.3.70](https://github.com/liveweird/grenadiers/releases/tag/v0.3.70) derives game-copy types
-from the canonical locale registry, returns stable raw copy objects and uses public i18next
-interpolation. Existing EN/PL text, fallback, timers and stack notation remain unchanged.
-Literal templates carry typed interpolation names; widened dynamic strings retain their dynamic
-parameter map rather than claiming compile-time placeholder validation.
+Perform a controlled runtime refresh weekly and when a relevant Debian or runtime advisory
+requires it. Keep the reviewed base digest and rebuild only the runtime stage without its cached
+layer, following Buildx's
+[`--no-cache-filter` contract](https://docs.docker.com/reference/cli/docker/buildx/build/#no-cache-filter):
 
-Independent review is clear. Full web acceptance at
-`cdd6226ea6fb990f210ac14ac119045336a05443` passes 6,817 tests / 92 files in 226.02s with
-91.07/89.40/90.12/93.48% coverage; gzip JavaScript/CSS is 337,939/36,695 bytes. TypeScript, lint,
-contract drift, dead-code and repository checks pass. Integrated source
-`1890db16d9f4eec5190390fe664a8897733d167b` preserves the tested web/assets/API inputs. Backend,
-exhaustive Rust, Linux and dependency acceptance reuse v0.3.68/v0.3.69 unchanged inputs.
+```sh
+docker buildx build --no-cache-filter runtime --load --tag grenadiers:candidate-os-refresh .
+```
 
-Accepted image is `sha256:8f913babc354d219c9d7b2a69669fc79f6e65f2981314a5fcbbeacee8c6a33bc`.
-Trivy 0.74.0 reports zero fixable HIGH/CRITICAL findings. Eight native Compose cases pass in
-35.7s and eight Kubernetes cases in 36.3s, with exact image/security/probe/resource checks.
-A Polish 320px responsive locale switch and native create-room smoke also pass. Temporary
-acceptance projects/namespaces are removed.
+Record the resulting exact image ID, scan that ID with the pinned release vulnerability scanner,
+and run the applicable runtime acceptance against that same ID. Promote only the accepted ID and
+retain the previous immutable image reference for rollback. The runtime stage intentionally runs
+rolling Debian package updates, so a later build may resolve newer packages and is not expected to
+be byte-identical; treat it as a new candidate with new evidence rather than reusing acceptance.
 
-Localhost:8085 serves the accepted image with verified health/readiness, CSP/cache and exact
-served HTML/JavaScript/CSS/atlas bytes. Control is `.local-checkpoints/runtime/compose-v0.3.70.yaml`;
-`rollback-v0.3.69.yaml` retains the previous image. There is no gameplay, wire, artwork or migration
-change. Distribution remains source tags and GitHub prerelease notes.
+## v0.3.76 — 2026-10-26
+
+[v0.3.76](https://github.com/liveweird/grenadiers/releases/tag/v0.3.76) adds optional pinned
+ShellCheck/actionlint checks, verified tool/dependency cache restoration, selected terrain-pixel
+acceptance, exact failure-artifact allowlists and controlled runtime OS refresh guidance.
+Cache hits never skip verification; no hosted-cache timing benefit is claimed.
+
+Independent review, repository/workflow contracts and pinned tooling checks pass. The terrain
+comparison passes at DPR 1 and 2: baseline, repaint, reset and context restoration each have zero
+differing bytes. The separate six-cell lifecycle experiment remains opt-in. Unchanged Rust,
+exhaustive, Linux, application web and dependency acceptance reuse the published baseline.
+
+Accepted image source is `8af26e21b420b2f609fc6b5cccf2303a339608c1`; image is
+`sha256:f98095085aa41ba03e97a25523a9682393864dc7a798151f066c22d8151e8424`.
+Trivy 0.74.0 reports zero fixable HIGH/CRITICAL findings. Eight Compose cases pass in 35.5s and
+eight Kubernetes cases in 36.1s, with exact image, effective v0.3.75 resource limits, restricted
+security and probes verified. Temporary projects/namespaces and diagnostic preview are stopped.
+Localhost:8085 has verified health/readiness, CSP/cache and exact unchanged web bytes. Control is
+`.local-checkpoints/runtime/compose-v0.3.76.yaml`; `rollback-v0.3.75.yaml` retains the prior image.
+No gameplay, wire, artwork or migration changes; distribution remains source prereleases.
+
+<a id="v0375--2026-10-26"></a>
+The [v0.3.75 record](history/releases.md#v0375--2026-10-26) is preserved in release history.
+
+<a id="v0374--2026-10-26"></a>
+The [v0.3.74 record](history/releases.md#v0374--2026-10-26) is preserved in release history.
+
+<a id="v0373--2026-10-26"></a>
+The [v0.3.73 record](history/releases.md#v0373--2026-10-26) is preserved in release history.
+
+<a id="v0372--2026-10-26"></a>
+The [v0.3.72 record](history/releases.md#v0372--2026-10-26) is preserved in release history.
+
+<a id="v0371--2026-10-26"></a>
+The [v0.3.71 record](history/releases.md#v0371--2026-10-26) is preserved in release history.
+
+<a id="v0370--2026-10-26"></a>
+The [v0.3.70 record](history/releases.md#v0370--2026-10-26) is preserved in release history.
 
 <a id="v0369--2026-10-26"></a>
 The [v0.3.69 record](history/releases.md#v0369--2026-10-26) is preserved in release history.

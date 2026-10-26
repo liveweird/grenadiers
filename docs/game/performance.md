@@ -115,3 +115,9 @@ cargo test -p grenadiers-server --release --locked \
 The Cargo profile is declared by that invocation; the probe rejects builds with debug assertions enabled.
 [Recorded observations](../history/replay-allocation.md) retain source, workload and timing limits.
 This optional measurement is separate from routine correctness and exhaustive replay gates.
+
+## Registry admission and write pressure
+
+The ignored `measurement::construction`, `measurement::registry` and `measurement::entropy` profiles separately exercise prepared owners, real registry admissions and entropy requests. Use the reproduction commands and limitations in the [recorded registry reference](../history/registry-admission.md). Barrier release does not establish simultaneous mutex contention; first-poll duration is an upper bound around acquisition and guarded work. Keep timing collection separate from builds and browser workloads.
+
+WebSocket pressure regressions use real non-reading TCP peers and independently verify recovery after draining, bounded shutdown, healthy-peer delivery and resource cleanup. They preserve the production deadlines and are ordinary platform unit tests, rather than timing-capacity benchmarks.

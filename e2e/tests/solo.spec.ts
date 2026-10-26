@@ -116,6 +116,7 @@ test('Polish solo controls stay accessible without horizontal overflow at 320 pi
   await page.setViewportSize({ width: 320, height: 844 })
   await page.goto('/')
   await page.getByText('Polski', { exact: true }).click()
+  expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false)
   await page.getByRole('button', { name: 'Zagraj solo z komputerem', exact: true }).click()
 
   await expect(page.getByText('Prywatny mecz solo · Standardowy komputer', { exact: true })).toBeVisible()

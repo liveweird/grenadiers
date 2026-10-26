@@ -15,6 +15,7 @@ the private room is removed. A transport loss before the first start is not resu
 
 ## Scenario: Polish solo controls stay accessible without horizontal overflow at 320 pixels
 
-At a 320-pixel viewport the Polish lobby starts a real solo room. The private-match difficulty,
+At a 320-pixel viewport the Polish lobby has no horizontal overflow and starts a real solo room.
+The private-match difficulty,
 Komputer player label, and Gotowy action remain visible while the invitation code stays hidden.
 The waiting room has no horizontal overflow and passes the Axe accessibility audit.

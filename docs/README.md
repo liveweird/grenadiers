@@ -8,13 +8,13 @@ the time; they do not add approval steps to the current workflow.
 | Install, run and contribute | [Project README](../README.md), [conventions](../CONTRIBUTING.md) |
 | Understand the boundaries | [Architecture](architecture.md), [design decisions](decisions/README.md) |
 | Change gameplay | [Rules](game/rules.md), [adding an item](game/adding-items.md), [future-track boundaries](game/implementation-plan.md#expansion-tracks-after-the-two-player-baseline) |
-| Change a transport contract | [API guidelines](../api-guidelines/API-GUIDELINES.md), [gameplay protocol](game/protocol.md) |
+| Change a transport contract | [API guidelines](../api-guidelines/API-GUIDELINES.md), [gameplay protocol](game/protocol.md), [protocol consumer inventory](game/protocol-consumers.md) |
 | Change sprites or tiles | [Artist handoff](../assets/art/README.md), [atlas renderer](game/art-atlas.md) |
 | Choose and run checks | [Testing](testing.md) |
 | Configure or expose the server | [Security](security.md), [deployment](deployment.md) |
 | Prepare a release | [Release policy](releases.md#release-verification-policy), [release checklist](game/implementation-plan.md#release-checklist) |
 | Find planned work and status | [Product backlog](../BACKLOG.md) |
-| Inspect review dispositions | [Quality-review response](quality-review.md) |
+| Inspect review dispositions | [Archived quality-review assessment](history/quality-review-assessment.md) |
 | Inspect feature release evidence | [Item and graphics acceptance](history/game-acceptance.md), [configuration activation](history/configuration-activation.md), [review snapshot](history/quality-review.md) |
 | Inspect past acceptance or contracts | [Verification history](history/verification.md), [release history](history/releases.md), [implementation-plan archive](history/implementation-plan.md), [protocol guide archive](history/protocols/README.md), [testing narrative archive](history/testing.md), [deployment narrative archive](history/deployment.md), [backlog history](history/backlog.md) |
 

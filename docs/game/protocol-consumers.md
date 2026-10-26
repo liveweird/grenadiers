@@ -1,0 +1,36 @@
+# Gameplay protocol consumer inventory
+
+This inventory applies [ADR 0021](../decisions/0021-gameplay-retention.md): gameplay v11 is the
+only live network version, while archived schemas, compatibility exports, shared implementation
+and regression corpora remain repository consumers. Retention does not mean an old client can
+connect, and no complete historical Rust version directory is selected for deletion.
+
+Wire versions, rules profiles, generator versions and private journal/replay identities are
+separate compatibility axes. In particular, rules profile 5 is not a gameplay-v5 wire consumer.
+
+| Wire contract | Current consumers | Unique retained coverage |
+| --- | --- | --- |
+| v2 | Generic root Rust protocol modules under `core/src/protocol/`, `api/gameplay.schema.json`, and generated `web/src/game/schema.ts`. | Root server/contract tests retain v2 parsing, projection, rules and map closure; Rust and browser assertions pin physical parity with v3. |
+| v3 | The archived schema/generated declarations, browser conformance suite and dedicated Rust `v3` adapter. | Its physical model is the parity baseline. No server runtime serves v3. |
+| v4 | `api/gameplay-v4.schema.json`, generated `web/src/game/v4/schema.ts`, browser conformance and v6 historical schema-identity assertions; there is no Rust `v4` module. | Authentication, reconnect and capability behavior, plus complete v3 physical parity and v4 rules `[1, 2]`. |
+| v5 | `api/gameplay-v5.schema.json`, generated browser declarations and browser conformance only; there is no Rust `v5` module. | Authentication/reconnect and v3 physical parity, excluding `RulesVersion` because v5 adds rules `[1, 2, 3]`. |
+| v6 | The dedicated Rust/browser adapter and private replay's legacy-default settings path. | Reconnect/settings validation and direct use by v7 bindings/scalars. Its physical-parity test compares v6 with v3; the separate v4 assertion covers only protocol 4 and rules `[1, 2]`. |
+| v7 | Dedicated classic projection/item adapter, archived schema/browser semantics and conformance, and shared callbacks consumed by later adapters. | Classic projection, admission, recipient and semantic fixtures; its capture path also checks the generic root projections. No server runtime serves v7. |
+| v8 | Shared expanded-mechanics implementation re-exported by v9-v11, plus its archived wire tests and retained corpora. | Expanded item mechanics, checked capture/binding, recipient privacy and version-specific validation. |
+| v9 | The v8 shared implementation with a v9 item/catalog boundary. | Freeze and preceding-version rejection, including frozen recipient pairs in the server corpus. |
+| v10 | An expanded adapter delegating common mechanics to v8, with teleport-aware capture and binding. | Teleporter and related version edges, including archived-v10 privacy controls in the server corpus. |
+| v11 | Rust `core::protocol::v11`; server connection, socket, command and dispatcher paths; browser `clientProtocol`; and current E2E suites. | Oil Barrel validation and live identity/metadata/privacy controls. This is the sole live server/browser contract. |
+
+The shared client corpus exercises the closed client-message union across retained v8-v11 Rust
+parsers, schemas and browser validators. The server corpus checks actual Rust-produced
+admissions/snapshot pairs with frozen actors, Teleporter epochs, empty/materialized Oil,
+recipient identity and concealment controls. Existing control/error-frame conformance remains.
+See [Testing](../testing.md) for commands and the release/history records for executed results.
+
+## Diagnostic coverage disposition
+
+Renderer diagnostics remain separate from gameplay wire retention. The CI item shard runs
+`art-atlas`, `atlas-gameplay` and the DPR 1/2 `terrain-pixels` checks. Terrain coverage compares
+baseline, repaint, reset and context-restored pixels. The six-cell renderer lifecycle experiment
+is explicitly opt-in: it is not a new CI or performance gate and is not claimed as automated
+six-cell acceptance. See [Testing](../testing.md#artist-atlas) for current commands and scope.

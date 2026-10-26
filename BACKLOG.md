@@ -10,36 +10,12 @@ waiting on a stated dependency. Explicit user requests and accepted plans are co
 new assistant suggestions start as `[new]`. Existing authorization carries forward without
 repeated approval for routine implementation choices. Entries are not delivery-date promises.
 
-## Current delivery — Claude review
-
-- [next] **ENG-REVIEW — finish the remaining agreed review work before CPU mode.** The user confirmed
-  this priority on 2026-10-25. The published source baseline is v0.3.79; detailed delivered
-  evidence and finding dispositions belong in the [quality-review record](docs/quality-review.md),
-  not this backlog. Preserve privacy, exhaustive masks, coverage floors and local-first
-  verification. Current release lanes and remaining accepted scope are:
-  - **REV-PROTOCOL:** audit retained consumers and unique tests under ADR 0021, reduce selected
-    adapters, and complete client/archived/cross-language contract coverage. Preserve archived
-    schemas/conformance, replay identity, item bits, activation subsets, generation order and
-    privacy. Shared expanded client/server corpora are released. Complete the retained-consumer inventory
-    and its adapter/diagnostic disposition.
-  - **REV-TOOLCHAIN:** finish the final compiler-option assessment and document existing lint
-    rationales with the measured frontend release. Pinned tooling, caches, terrain acceptance,
-    OS refresh policy and web exact-optionals are released.
-  - **REV-FAST:** measure a structured fast-feedback suite and fault detection while retaining
-    exhaustive acceptance; sampling is not approved as a replacement.
-  - **REV-DIAGNOSTICS:** record the renderer/terrain manual-suite and diagnostic wiring
-    disposition as part of the protocol coverage inventory.
-
-  Consumer-dependent stable Problem codes, capability rotation, durable replay export, public
-  hosting topology, blanket duplicate CI, arbitrary sibling tests, selector-ratio rewrites and
-  historical-schema deletion are not silently CPU prerequisites.
-
 ## Single-player
 
-- [todo] **SOLO-CPU — deliver the approved staged hybrid.** A private human-versus-CPU duel uses
+- [next] **SOLO-CPU — deliver the approved staged hybrid.** A private human-versus-CPU duel uses
   the normal rules/input path, restricted observations, interval hazard forecasts, bounded goal
   planning and recorded bot inputs. Follow the [accepted design](docs/game/single-player-cpu.md)
-  after ENG-REVIEW; expose a playable slice early and support the all-features-on default before the
+  and expose a playable slice early and support the all-features-on default before the
   public preview.
   - **CPU0 — contracts and seams:** participant/mode metadata, neutral observation and intent,
     work budget, replay/lifecycle policy and deterministic fixture harness.

@@ -103,6 +103,14 @@ clean committed worktree and retains the same assertions, complete mask catalog 
 floor. The separate `server` and `coverage` commands remain available as the serial fallback.
 Do not run latency acceptance alongside these CPU-intensive checks.
 
+The parallel runner checks Cargo-owned coverage-cache cleanup before expensive execution and
+fails immediately if Cargo rejects an existing cache. Preserve the complete cache metadata when
+restoring a cache; do not bypass an invalid ownership marker. Instrumented workspace executables
+come from one Cargo JSON build stream. Reporting copies that exact complete set into a fresh
+private target and uses only the ordinary-plus-exhaustive profiles from this run. The official
+reporter, exclusions and 90% floor remain unchanged; retained scratch includes execution evidence
+before reporting so a report failure does not erase completed-test provenance.
+
 The repository gate also runs the hosted-workflow contract tests. Before the parallel server
 runner starts, its regression suite checks scheduling, failure propagation and real
 `cargo-llvm-cov` binary/profile isolation using a disposable crate. Run that suite separately

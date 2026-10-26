@@ -16,6 +16,25 @@
 - Derive reserved item identities, bits, pickup declarations and total mappings from one
   private specification while preserving generation order, activation subsets and replay values.
 
+## 0.3.65 — 2026-10-26
+
+### Changed
+
+- Name shared CSS color roles while preserving every resolved visual value, selector and layout.
+
+## 0.3.64 — 2026-10-26
+
+### Added
+
+- Add an optional dry-run-first helper for aligned Cargo versions and dated changelog entries,
+  with validation before writes and no hidden Git, publishing or check execution.
+
+### Changed
+
+- Reuse locked Cargo registry, Git and platform-specific target caches in Docker builds while
+  rebuilding workspace targets to prevent stale source reuse.
+- Add static OCI title, source and documentation metadata to runtime images.
+
 ## 0.3.63 — 2026-10-25
 
 ### Changed

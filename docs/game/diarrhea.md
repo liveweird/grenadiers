@@ -32,12 +32,11 @@ reconnect action floor.
 
 Placement follows movement and existing-fire damage, then explosions and final-fire damage.
 Capacity released by an explosion can therefore be reused on the next physical tick. New rooms
-enable the option with every available item; Classic settings still disables it. Local checks
-and fresh same-image browser acceptance pass: 45 Compose and 45 Kubernetes cases, without
-retries. Final exact-head CI and publication remain separate gates tracked in [verification](../verification.md).
+enable the option with every available item; Classic settings still disables it.
 
 ## Verification captures
 
 Screenshots show the exposed pickup before collection: [English desktop](../screenshots/diarrhea-desktop.png)
 and [Polish 320px reduced motion](../screenshots/diarrhea-polish-320.png). The active curse,
 automatic placement and death/reset behavior are verified by domain and paired-browser assertions.
+The release record is in [item acceptance history](../history/game-acceptance.md#diarrhea-v0332).

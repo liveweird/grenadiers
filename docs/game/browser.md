@@ -143,5 +143,6 @@ can retry on a later room activation, without retrying on every snapshot. Reduce
 preferences and focus/input clearing retain their existing behavior.
 
 See the [active own-player bar at 320px in Polish](../screenshots/item-bar-polish-320.png).
-This real Heart-fixture capture uses v0.3.60 image `ab7cf594…` and source `c5b668f`; the
-collector is equipped, while inventory and timers still come from authoritative snapshots.
+The collector is equipped, while inventory and timers still come from authoritative snapshots.
+Capture provenance is preserved in
+[game acceptance history](../history/game-acceptance.md#own-player-bar-v0360).

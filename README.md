@@ -3,8 +3,8 @@
 A browser-based multiplayer game inspired by classic Bomberman/Dynablaster.
 The initial playable profile supports two human players. Bots and larger matches follow later.
 
-**[v0.3.63 Typed authenticated commands](https://github.com/liveweird/grenadiers/releases/tag/v0.3.63).**
-All 22 requested item types shipped in v0.3.47. See the [release record](docs/releases.md#v0363--2026-10-25)
+**[v0.3.65 Semantic UI color roles](https://github.com/liveweird/grenadiers/releases/tag/v0.3.65).**
+All 22 requested item types shipped in v0.3.47. See the [release record](docs/releases.md#v0365--2026-10-26)
 for verification, the exact deployed image and rollback. Reload browser tabs after upgrading the paired server/web image.
 
 The [artist sprite-sheet handoff](assets/art/README.md) includes editable PNG/JSON, labelled
@@ -53,7 +53,7 @@ reserved seat for 600 server ticks using a private in-memory capability; a conne
 fences the old tab. The match requires a keyboard and keeps active state and capabilities in
 one server process and browser memory. Matchmaking, durable stats, bots, and larger matches
 follow later. Read the [browser guide](docs/game/browser.md), [game specification](docs/game/README.md),
-and [implementation/release plan](docs/game/implementation-plan.md) for behavior and scope.
+and [product backlog](BACKLOG.md) for behavior and planned work.
 
 ## Stack and layout
 
@@ -174,5 +174,5 @@ initial instruction not to modify an existing file; use `CONTRIBUTING.md` and `d
 current commands and conventions.
 
 Start with the [contributor documentation index](docs/README.md). The
-[quality-review response](docs/quality-review.md) tracks confirmed fixes, proposed work and
-corrections to the October 2026 review.
+[quality-review assessment](docs/quality-review.md) explains decisions and corrections to the
+October 2026 review. [BACKLOG.md](BACKLOG.md) is the sole source of work status and priorities.

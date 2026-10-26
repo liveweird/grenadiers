@@ -9,19 +9,30 @@ COPY assets/art/arena-source.png assets/art/arena-source.json /build/assets/art/
 RUN npm run build
 
 FROM rust:1.99.1-bookworm@sha256:e12566d5abc17a0da741628782cdb504b68b8961f5bfcf677936bf3e8b32de29 AS server
+ARG TARGETPLATFORM
 WORKDIR /build
 COPY Cargo.toml Cargo.lock rust-toolchain.toml ./
 COPY core/ core/
 COPY server/ server/
 COPY api/ api/
-RUN cargo build --release --locked -p grenadiers-server
+# Force workspace rebuilds even when source mtimes predate restored cache entries.
+# Keep these roots aligned with the production Cargo targets.
+RUN --mount=type=cache,id=grenadiers-cargo-registry,target=/usr/local/cargo/registry,sharing=locked \
+    --mount=type=cache,id=grenadiers-cargo-git,target=/usr/local/cargo/git,sharing=locked \
+    --mount=type=cache,id=grenadiers-cargo-target-${TARGETPLATFORM},target=/build/target,sharing=locked \
+    touch core/src/lib.rs server/src/lib.rs server/src/main.rs \
+    && cargo build --release --locked -p grenadiers-server \
+    && cp target/release/grenadiers-server /build/grenadiers-server
 
 FROM debian:bookworm-slim@sha256:7c7b2c966bc9ee8cedfeef67e0e279108992c77681fa595db4a9d65c06ccc587 AS runtime
+LABEL org.opencontainers.image.title="Grenadiers" \
+      org.opencontainers.image.source="https://github.com/liveweird/grenadiers" \
+      org.opencontainers.image.documentation="https://github.com/liveweird/grenadiers#readme"
 RUN apt-get update && apt-get upgrade -y --no-install-recommends \
     && apt-get install -y --no-install-recommends ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
-COPY --from=server /build/target/release/grenadiers-server /app/grenadiers-server
+COPY --from=server /build/grenadiers-server /app/grenadiers-server
 COPY --from=web /build/web/dist /app/web/dist
 ENV SERVER_ADDR=0.0.0.0:8085 WEB_DIST_DIR=/app/web/dist RUST_LOG=grenadiers_server=info,tower_http=info
 USER 65532:65532

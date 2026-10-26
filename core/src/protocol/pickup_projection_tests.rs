@@ -2,8 +2,53 @@ use super::*;
 use crate::game::{PickupKind, PickupView};
 use std::collections::BTreeMap;
 
+use crate::protocol::projection::wire_pickup_kind;
+use crate::protocol::snapshot::PickupKind as WirePickupKind;
+
 fn pickup(cell: CellId, kind: PickupKind) -> PickupView {
     PickupView { cell, kind }
+}
+
+#[test]
+fn early_projection_accepts_three_basics_and_rejects_every_configured_item() {
+    assert_eq!(
+        wire_pickup_kind(PickupKind::BombCapacity),
+        Some(WirePickupKind::BombCapacity)
+    );
+    assert_eq!(
+        wire_pickup_kind(PickupKind::BlastRange),
+        Some(WirePickupKind::BlastRange)
+    );
+    assert_eq!(
+        wire_pickup_kind(PickupKind::MovementSpeed),
+        Some(WirePickupKind::MovementSpeed)
+    );
+    for kind in [
+        PickupKind::Kick,
+        PickupKind::Punch,
+        PickupKind::Bracelet,
+        PickupKind::WallPass,
+        PickupKind::Heart,
+        PickupKind::RemoteBomb,
+        PickupKind::PiercingBomb,
+        PickupKind::PowerBomb,
+        PickupKind::Landmine,
+        PickupKind::Shield,
+        PickupKind::Stopwatch,
+        PickupKind::InvisibilityCloak,
+        PickupKind::GoldenFlame,
+        PickupKind::ShortFuse,
+        PickupKind::Diarrhea,
+        PickupKind::SlowFoot,
+        PickupKind::ShortFlame,
+        PickupKind::LongFuse,
+        PickupKind::ReverseControls,
+        PickupKind::InvisibleBombs,
+        PickupKind::OilBarrel,
+        PickupKind::Teleporter,
+    ] {
+        assert_eq!(wire_pickup_kind(kind), None);
+    }
 }
 
 #[test]

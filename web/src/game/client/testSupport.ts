@@ -8,7 +8,9 @@ export const roomId = 'b'.repeat(32)
 
 export class SocketStub {
   static readonly OPEN = 1
-  readonly listeners = new Map<string, Array<(event: Event | MessageEvent | CloseEvent) => void>>()
+  readonly listeners: { [K in keyof WebSocketEventMap]: Array<(event: WebSocketEventMap[K]) => void> } = {
+    close: [], error: [], message: [], open: [],
+  }
   readonly sent: string[] = []
   readonly close = vi.fn()
   readonly url: string
@@ -16,16 +18,35 @@ export class SocketStub {
 
   constructor(url: string) { this.url = url }
 
-  addEventListener(name: string, listener: (event: Event | MessageEvent | CloseEvent) => void): void {
-    this.listeners.set(name, [...(this.listeners.get(name) ?? []), listener])
+  addEventListener<K extends keyof WebSocketEventMap>(
+    name: K, listener: (event: WebSocketEventMap[K]) => void,
+  ): void {
+    this.listeners[name].push(listener)
   }
 
   send(value: string): void { this.sent.push(value) }
 
-  emit(name: string, data?: unknown): void {
-    if (name === 'open') this.readyState = SocketStub.OPEN
-    const event = name === 'close' ? { code: data ?? 1006 } : { data }
-    for (const listener of this.listeners.get(name) ?? []) listener(event as MessageEvent & CloseEvent)
+  emit(name: 'open' | 'error'): void
+  emit(name: 'message', data: unknown): void
+  emit(name: 'close', code?: number): void
+  emit(name: keyof WebSocketEventMap, data?: unknown): void {
+    switch (name) {
+      case 'open':
+        this.readyState = SocketStub.OPEN
+        for (const listener of this.listeners.open) listener(new Event(name))
+        break
+      case 'error':
+        for (const listener of this.listeners.error) listener(new Event(name))
+        break
+      case 'message':
+        for (const listener of this.listeners.message) listener(new MessageEvent(name, { data }))
+        break
+      case 'close':
+        for (const listener of this.listeners.close) {
+          listener(new CloseEvent(name, { code: typeof data === 'number' ? data : 1006 }))
+        }
+        break
+    }
   }
 
   message(message: GameServerMessage | object): void { this.emit('message', JSON.stringify(message)) }

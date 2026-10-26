@@ -12,7 +12,7 @@ type Bindings = {
   selectAt(clientX: number, clientY: number): void
   resetPreview(): Promise<unknown>
   exportSource(request: { pngBase64: string; manifestJson: string }): Promise<{ files: OutputFile[] }>
-  currentSource(): { manifest?: ArtManifest; pixels?: PixelBuffer }
+  currentSource(): { manifest: ArtManifest | undefined; pixels: PixelBuffer | undefined }
   canonicalJson(value: unknown): string
 }
 

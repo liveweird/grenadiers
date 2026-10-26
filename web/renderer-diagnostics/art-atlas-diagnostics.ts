@@ -6,10 +6,10 @@ import { inspectImportedFrame, renderBaselineSource } from './art-atlas-render'
 
 export type PixelEdit = { x: number; y: number; rgba: readonly [number, number, number, number] }
 export type ImportState = {
-  source?: PixelBuffer
-  sourceManifest?: ArtManifest
-  runtime?: PixelBuffer
-  runtimeManifest?: RuntimeArtManifest
+  source: PixelBuffer | undefined
+  sourceManifest: ArtManifest | undefined
+  runtime: PixelBuffer | undefined
+  runtimeManifest: RuntimeArtManifest | undefined
 }
 
 export async function createEditedTemplate(

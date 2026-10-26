@@ -4,6 +4,34 @@ This archive preserves the older release records originally maintained in
 [`docs/releases.md`](../releases.md). Records remain in their original order; the current
 release procedure and current release record stay in the [release guide](../releases.md).
 
+## v0.3.71 — 2026-10-26
+
+[v0.3.71](https://github.com/liveweird/grenadiers/releases/tag/v0.3.71) adds isolated owner,
+registry and entropy measurements plus real non-reading TCP regressions. The regressions verify
+write recovery, bounded shutdown, healthy-peer delivery and cleanup. Production registry locking,
+entropy boundaries and timeout values remain. The [measured reference](registry-admission.md)
+does not justify a locking refactor or establish running-match capacity.
+
+Independent review is clear. Full source-bound Rust acceptance at
+`0a3c586cd58ce3938763502017e13fb9e8fdd2c9` passes in 490.564s: every 4,194,304 mask in debug,
+release and official coverage, zero retries, 940 core / 312 ordinary server tests and two doctests
+per profile. Coverage is 17,847/19,553 lines (91.2750%) at the 90% floor.
+[Distinct Linux debug/release units](https://github.com/liveweird/grenadiers/actions/runs/40370445863)
+pass, including the real socket-pressure cases. Integrated image source
+`56639524da946f6d3cab3185fc58df045c766a1c` preserves the tested core/server/API inputs.
+Unchanged v0.3.70 web and dependency acceptance are reused.
+
+Accepted image is `sha256:fe1dbe95746a3a608e4070c4045d0d725ff606209f76c336301d7503fedff8ca`.
+Trivy 0.74.0 reports zero fixable HIGH/CRITICAL findings. Eight fresh Compose cases pass in
+35.4s and eight Kubernetes cases in 37.7s, with exact-image/security/probe/resource checks.
+Temporary acceptance projects and namespaces are removed.
+
+Localhost:8085 serves the accepted image. Health/readiness, runtime security, CSP/cache and exact
+HTML/JavaScript/CSS/atlas equality with v0.3.70 pass. Control is
+`.local-checkpoints/runtime/compose-v0.3.71.yaml`; `rollback-v0.3.70.yaml` retains the prior image.
+There is no gameplay, protocol, artwork or migration change. Distribution remains source
+prereleases; measurement profiles are test-only and do not add production endpoints.
+
 ## v0.3.70 — 2026-10-26
 
 [v0.3.70](https://github.com/liveweird/grenadiers/releases/tag/v0.3.70) derives game-copy types

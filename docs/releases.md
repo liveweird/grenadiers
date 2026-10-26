@@ -79,33 +79,37 @@ interrupted state but cannot preserve process-local matches or credentials.
 Keep the previous immutable image reference for rollback; database migration compatibility
 must be designed when durable application data is introduced.
 
-## v0.3.71 — 2026-10-26
+## v0.3.72 — 2026-10-26
 
-[v0.3.71](https://github.com/liveweird/grenadiers/releases/tag/v0.3.71) adds isolated owner,
-registry and entropy measurements plus real non-reading TCP regressions. The regressions verify
-write recovery, bounded shutdown, healthy-peer delivery and cleanup. Production registry locking,
-entropy boundaries and timeout values remain. The [measured reference](history/registry-admission.md)
-does not justify a locking refactor or establish running-match capacity.
+[v0.3.72](https://github.com/liveweird/grenadiers/releases/tag/v0.3.72) shares expanded client
+conformance cases across v8–v11 Rust parsers/schemas and the browser, with deterministic malformed
+frame, retired-action, required-field and byte-boundary regressions. Production parsers and
+schemas remain unchanged. Independent review is clear.
 
-Independent review is clear. Full source-bound Rust acceptance at
-`0a3c586cd58ce3938763502017e13fb9e8fdd2c9` passes in 490.564s: every 4,194,304 mask in debug,
-release and official coverage, zero retries, 940 core / 312 ordinary server tests and two doctests
-per profile. Coverage is 17,847/19,553 lines (91.2750%) at the 90% floor.
-[Distinct Linux debug/release units](https://github.com/liveweird/grenadiers/actions/runs/40370445863)
-pass, including the real socket-pressure cases. Integrated image source
-`56639524da946f6d3cab3185fc58df045c766a1c` preserves the tested core/server/API inputs.
-Unchanged v0.3.70 web and dependency acceptance are reused.
+At `f8457ef351af5822996b4f143efe0831abe45909`, ordinary profiles pass 951 core / 312 server
+tests plus two doctests; all 4,194,304 masks complete in debug, release and official coverage
+with zero product retries. The final runner report initially failed because stale cache objects
+contaminated discovery. An official isolated report using the same three executed binaries and
+38 profiles passes the unchanged 90% floor: 17,863/19,553 lines (91.356825%). The
+[recovery record](history/coverage-cache-recovery.md) preserves the original failure and provenance;
+no successful canonical runner summary or Rust duration is invented.
 
-Accepted image is `sha256:fe1dbe95746a3a608e4070c4045d0d725ff606209f76c336301d7503fedff8ca`.
-Trivy 0.74.0 reports zero fixable HIGH/CRITICAL findings. Eight fresh Compose cases pass in
-35.4s and eight Kubernetes cases in 37.7s, with exact-image/security/probe/resource checks.
-Temporary acceptance projects and namespaces are removed.
+Full web acceptance passes 6,822 tests / 93 files in 264.03s with 91.07/89.40/90.12/93.48%
+coverage. Local gzip JavaScript/CSS is 337,162/36,695 bytes; the accepted Docker build is
+337,939/36,695 bytes, within the same budgets. Repository, lint, types and drift pass.
+[Integrated Linux units](https://github.com/liveweird/grenadiers/actions/runs/40373348609)
+pass at `5db1d0e46c14b7278fe854af9578567999b3ebdf`, whose client corpus/test inputs are identical.
 
-Localhost:8085 serves the accepted image. Health/readiness, runtime security, CSP/cache and exact
-HTML/JavaScript/CSS/atlas equality with v0.3.70 pass. Control is
-`.local-checkpoints/runtime/compose-v0.3.71.yaml`; `rollback-v0.3.70.yaml` retains the prior image.
-There is no gameplay, protocol, artwork or migration change. Distribution remains source
-prereleases; measurement profiles are test-only and do not add production endpoints.
+Accepted image source is the tested `f8457ef351af5822996b4f143efe0831abe45909`, image
+`sha256:e4989f32b30bb78400a12229dd3eb13c86a0a7f4ffd4bfea2bf3c943a286b5c1`.
+Trivy 0.74.0 reports zero fixable HIGH/CRITICAL findings; eight Compose cases pass in 35.4s and
+eight Kubernetes cases in 35.9s with exact-image/security/probe/resource checks. Temporary resources
+are removed. Localhost:8085 has verified health/readiness, CSP/cache and exact accepted web bytes.
+Control is `.local-checkpoints/runtime/compose-v0.3.72.yaml`; `rollback-v0.3.71.yaml` retains the
+prior image. No gameplay, wire, artwork or migration change; distribution remains source prereleases.
+
+<a id="v0371--2026-10-26"></a>
+The [v0.3.71 record](history/releases.md#v0371--2026-10-26) is preserved in release history.
 
 <a id="v0370--2026-10-26"></a>
 The [v0.3.70 record](history/releases.md#v0370--2026-10-26) is preserved in release history.

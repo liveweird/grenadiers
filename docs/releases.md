@@ -79,34 +79,36 @@ interrupted state but cannot preserve process-local matches or credentials.
 Keep the previous immutable image reference for rollback; database migration compatibility
 must be designed when durable application data is introduced.
 
-## v0.3.68 — 2026-10-26
+## v0.3.69 — 2026-10-26
 
-[v0.3.68](https://github.com/liveweird/grenadiers/releases/tag/v0.3.68) makes replay recording
-explicitly opt-in for test fixtures. Production rooms reserve no journal vector and skip replay-only
-capture work; live snapshots, replay compatibility, reconnect and exhaustive assertions remain.
-The allocation observation is 3,840,000 fewer reserved vector bytes per default room, not an RSS
-or throughput claim; see [the measurements](history/replay-allocation.md).
+[v0.3.69](https://github.com/liveweird/grenadiers/releases/tag/v0.3.69) replaces 24 repeated
+Compose seed overlays with `e2e/compose/fixture.yaml`. Set `GRENADIERS_FIXTURE_SEED_FILE` to the
+exact seed path; the read-only bind rejects missing files instead of creating host directories.
+Feature seeds, browser acknowledgements, scenario identities and base-only teardown remain.
+See [fixture usage](deployment.md).
 
-Independent review is clear. Full Rust acceptance at
-`6c01cc4c97324ddef87e588a1bdbe8fb1deea135` passes in 431.697s: every 4,194,304 mask in debug,
-release and official coverage, zero retries, 940 core / 309 ordinary server tests and two doctests
-per profile. Coverage is 17,833/18,933 lines (94.1900%), above the 90% floor. Integrated image
-source `6f443a2056b91b713b5fd45d3e2e8de9a7e40056` preserves those core/server/API inputs.
-[Distinct Linux debug/release units](https://github.com/liveweird/grenadiers/actions/runs/40369574894)
-pass. Unchanged web, dependencies and audits reuse v0.3.65/v0.3.67 acceptance.
+Independent review and repository/workflow contracts pass. The 96 rendered-model comparisons
+cover 24 features, default/custom environment and persistence off/on; the only intentional
+model difference is `create_host_path: false`. Missing/unset/empty selectors fail safely.
+Integration preserves the v0.3.68 backend and v0.3.65 web inputs; their full Rust, exhaustive,
+Linux, web, coverage and dependency results are reused without duplicate suites.
 
-The runtime OS layer was refreshed after a current scan found fixable OpenSSL findings in the
-older candidate. The replacement image is
-`sha256:0bb13e287162a7ba79937dba4f95dd161bb343248ea4e0cbf026f9c74c2d5fc3`;
-Trivy 0.74.0 reports zero fixable HIGH/CRITICAL findings. Eight fresh native Compose cases pass
-in 35.3s on this exact replacement. Eight fresh Kubernetes cases pass in 36.9s, including exact-image, security, readiness, probe
-and resource checks; the temporary namespace is removed.
+Accepted image source is `137bdd68a4cae1d751bc98183c5fb5b9e1829ae0`, image
+`sha256:9eade53a5b910f55627d6ef8f8d06a726698e7879316e41242142122e0266c95`.
+Its OS layer was refreshed for the newly reported OpenSSL fix. Trivy 0.74.0 reports zero fixable
+HIGH/CRITICAL findings. Fresh exact-image Compose acceptance passes eight default cases in 35.4s
+and Heart, Kick, Cloak and Oil cases through the new shared overlay with exact read-only mounts.
+Eight Kubernetes cases pass in 36.5s with exact-image/security/probe/resource checks. Temporary
+Compose projects and Kubernetes namespaces are removed. Earlier runs using superseded overlays
+are retained separately and are excluded from these shared-fixture results.
 
-Localhost:8085 serves the replacement image. Image identity/security, health/readiness, CSP/cache
-and served HTML/JavaScript/CSS/atlas bytes match the accepted web artifacts. Control is
-`.local-checkpoints/runtime/compose-v0.3.68.yaml`; `rollback-v0.3.67.yaml` retains the previous
-release. There is no migration or public replay export. Source tags and GitHub prerelease notes
-are the distribution; no production registry is configured.
+Localhost:8085 serves the accepted image; runtime/security, health/readiness, CSP/cache and exact
+served HTML/JavaScript/CSS/atlas checks pass. Control is
+`.local-checkpoints/runtime/compose-v0.3.69.yaml`; `rollback-v0.3.68.yaml` retains the prior image.
+No gameplay, protocol, artwork or migration changes. Distribution remains source prereleases.
+
+<a id="v0368--2026-10-26"></a>
+The [v0.3.68 record](history/releases.md#v0368--2026-10-26) is preserved in release history.
 
 <a id="v0367--2026-10-26"></a>
 The [v0.3.67 record](history/releases.md#v0367--2026-10-26) is preserved in release history.

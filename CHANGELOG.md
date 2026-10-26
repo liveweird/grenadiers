@@ -9,6 +9,12 @@
 - Use the canonical typed locale registry for stable raw game copy and i18next for
   interpolation, preserving current EN/PL text and timer/stack notation.
 
+## 0.3.65 — 2026-10-25
+
+### Changed
+
+- Name shared CSS color roles while preserving every resolved visual value, selector and layout.
+
 ## 0.3.64 — 2026-10-26
 
 ### Added

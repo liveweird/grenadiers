@@ -13,13 +13,10 @@ repeated approval for routine implementation choices. Entries are not delivery-d
 ## Current delivery — Claude review
 
 - [next] **ENG-REVIEW — finish the remaining agreed review work before CPU mode.** The user confirmed
-  this priority on 2026-10-25. The published source baseline is v0.3.70; detailed delivered
+  this priority on 2026-10-25. The published source baseline is v0.3.71; detailed delivered
   evidence and finding dispositions belong in the [quality-review record](docs/quality-review.md),
   not this backlog. Preserve privacy, exhaustive masks, coverage floors and local-first
   verification. Current release lanes and remaining accepted scope are:
-  - **REV-RUNTIME (v0.3.71):** registry/entropy measurements and real non-reading socket regressions
-    are committed and reviewed; full Rust acceptance passes. Finish Linux socket verification,
-    release integration and publication. Measurements currently justify retaining the registry lock.
   - **REV-FIXTURES:** consolidate genuinely equivalent Rust worlds/frames, E2E
     selectors/collection and Compose seed/CLI scaffolding without changing identities, assertions,
     version-specific rejection, seeds or independent sessions. The shared Compose extraction is released. Narrow frame-bound and open-arena extractions are

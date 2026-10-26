@@ -4,6 +4,32 @@ This archive preserves the older release records originally maintained in
 [`docs/releases.md`](../releases.md). Records remain in their original order; the current
 release procedure and current release record stay in the [release guide](../releases.md).
 
+## v0.3.70 — 2026-10-26
+
+[v0.3.70](https://github.com/liveweird/grenadiers/releases/tag/v0.3.70) derives game-copy types
+from the canonical locale registry, returns stable raw copy objects and uses public i18next
+interpolation. Existing EN/PL text, fallback, timers and stack notation remain unchanged.
+Literal templates carry typed interpolation names; widened dynamic strings retain their dynamic
+parameter map rather than claiming compile-time placeholder validation.
+
+Independent review is clear. Full web acceptance at
+`cdd6226ea6fb990f210ac14ac119045336a05443` passes 6,817 tests / 92 files in 226.02s with
+91.07/89.40/90.12/93.48% coverage; gzip JavaScript/CSS is 337,939/36,695 bytes. TypeScript, lint,
+contract drift, dead-code and repository checks pass. Integrated source
+`1890db16d9f4eec5190390fe664a8897733d167b` preserves the tested web/assets/API inputs. Backend,
+exhaustive Rust, Linux and dependency acceptance reuse v0.3.68/v0.3.69 unchanged inputs.
+
+Accepted image is `sha256:8f913babc354d219c9d7b2a69669fc79f6e65f2981314a5fcbbeacee8c6a33bc`.
+Trivy 0.74.0 reports zero fixable HIGH/CRITICAL findings. Eight native Compose cases pass in
+35.7s and eight Kubernetes cases in 36.3s, with exact image/security/probe/resource checks.
+A Polish 320px responsive locale switch and native create-room smoke also pass. Temporary
+acceptance projects/namespaces are removed.
+
+Localhost:8085 serves the accepted image with verified health/readiness, CSP/cache and exact
+served HTML/JavaScript/CSS/atlas bytes. Control is `.local-checkpoints/runtime/compose-v0.3.70.yaml`;
+`rollback-v0.3.69.yaml` retains the previous image. There is no gameplay, wire, artwork or migration
+change. Distribution remains source tags and GitHub prerelease notes.
+
 ## v0.3.69 — 2026-10-26
 
 [v0.3.69](https://github.com/liveweird/grenadiers/releases/tag/v0.3.69) replaces 24 repeated

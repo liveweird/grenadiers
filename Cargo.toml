@@ -14,7 +14,7 @@ futures-util = "0.3"
 getrandom = "=0.3.4"
 grenadiers-core = { path = "core", version = "=0.3.72" }
 http-body-util = "0.1"
-jsonschema = { version = "0.33", default-features = false }
+jsonschema = { version = "0.60", default-features = false }
 # Exact: the ChaCha20 word stream is part of versioned arena generation and replay compatibility.
 rand_chacha = "=0.9.0"
 serde = { version = "1.0", features = ["derive"] }

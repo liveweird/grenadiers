@@ -6,6 +6,47 @@ const fullPath = new URL("../.github/workflows/ci.yml", import.meta.url);
 const platformPath = new URL("../.github/workflows/platform.yml", import.meta.url);
 const fixturePath = new URL("../e2e/compose/fixture.yaml", import.meta.url);
 const exhaustive = "expanded_item_masks_and_disabled_preset_replay_deterministically";
+const rustCache = "Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3";
+const failureArtifactPaths = [
+  "e2e/playwright-report/",
+  "e2e/test-results/",
+  "e2e/.playwright/art-atlas-test-results/",
+  "e2e/.playwright/atlas-gameplay-test-results/",
+  "e2e/.playwright/terrain-pixel-test-results/",
+  "e2e/playwright-pickup-report/",
+  "e2e/playwright-heart-report/",
+  "e2e/playwright-shield-report/",
+  "e2e/playwright-golden-flame-report/",
+  "e2e/playwright-short-fuse-report/",
+  "e2e/playwright-short-flame-report/",
+  "e2e/playwright-long-fuse-report/",
+  "e2e/playwright-reverse-controls-report/",
+  "e2e/playwright-diarrhea-report/",
+  "e2e/playwright-slow-foot-report/",
+  "e2e/playwright-piercing-bomb-report/",
+  "e2e/playwright-power-bomb-report/",
+  "e2e/playwright-remote-bomb-report/",
+  "e2e/playwright-landmine-report/",
+  "e2e/playwright-invisibility-cloak-report/",
+  "e2e/playwright-stopwatch-report/",
+  "e2e/playwright-invisible-bombs-report/",
+  "e2e/playwright-teleporter-report/",
+  "e2e/playwright-wall-pass-report/",
+  "e2e/playwright-kick-report/",
+  "e2e/playwright-punch-report/",
+  "e2e/punch-test-results/",
+  "e2e/playwright-bracelet-report/",
+  "e2e/bracelet-test-results/",
+  "e2e/playwright-oil-barrel-report/",
+  "e2e/oil-barrel-test-results/",
+  "e2e/playwright-match-report/",
+  "e2e/playwright-reconnect-report/",
+  "e2e/playwright-controls-report/",
+  "e2e/playwright-audio-report/",
+  "${{ runner.temp }}/browser-file-readiness.json",
+  "${{ runner.temp }}/visibility-startup-observer.jsonl",
+  "${{ runner.temp }}/visibility-xvfb.log",
+];
 const fixtures = {
   "bracelet": "arena-v2-bracelet.seed",
   "diarrhea": "arena-v2-diarrhea.seed",
@@ -47,6 +88,29 @@ export function validateFullWorkflow(workflow) {
   assert.match(workflow, /scripts\/gates\.sh server/);
   assert.match(workflow, /scripts\/gates\.sh coverage/);
   assert.match(workflow, /scripts\/ci-server-mask-aggregate\.mjs/);
+  assert.equal(workflow.split(rustCache).length - 1, 2);
+  assert.match(workflow, /key: llvm-cov-0\.9\.1\n[\s\S]*?cache-targets: true\n[\s\S]*?cache-workspace-crates: false\n[\s\S]*?cache-on-failure: false\n[\s\S]*?cache-bin: true\n[\s\S]*?save-if: \$\{\{ matrix\.index == 0 \}\}/);
+  assert.match(workflow, /key: cargo-deny-0\.20\.2\n[\s\S]*?cache-targets: false\n[\s\S]*?cache-workspace-crates: false\n[\s\S]*?cache-on-failure: false\n[\s\S]*?cache-bin: true/);
+  assert.match(workflow, /installed_version="\$\(cargo llvm-cov --version 2>\/dev\/null \|\| true\)"[\s\S]*?if \[ "\$installed_version" != 'cargo-llvm-cov 0\.9\.1' \]; then[\s\S]*?cargo install cargo-llvm-cov --version 0\.9\.1 --locked[\s\S]*?test "\$\(cargo llvm-cov --version\)" = 'cargo-llvm-cov 0\.9\.1'/);
+  assert.match(workflow, /installed_version="\$\(cargo deny --version 2>\/dev\/null \|\| true\)"[\s\S]*?if \[ "\$installed_version" != 'cargo-deny 0\.20\.2' \]; then[\s\S]*?cargo install cargo-deny --version 0\.20\.2 --locked[\s\S]*?test "\$\(cargo deny --version\)" = 'cargo-deny 0\.20\.2'/);
+  assert.doesNotMatch(workflow, /cache-hit/);
+
+  const atlas = workflow.indexOf("scripts/gates.sh atlas-gameplay");
+  const terrain = workflow.indexOf("npm --prefix e2e run test:terrain-pixels");
+  const nextItemScenario = workflow.indexOf("Verify deterministic pickups", terrain);
+  assert.ok(atlas < terrain && terrain < nextItemScenario);
+  const failureArtifact = workflow.slice(
+    workflow.indexOf("name: playwright-report-${{ matrix.shard }}"),
+    workflow.indexOf("\n\n  kubernetes:"),
+  );
+  assert.match(failureArtifact, /include-hidden-files: true/);
+  const artifactPathBlock = failureArtifact.match(/^          path: \|\n((?:^ {12}.+\n)+)/m);
+  assert.ok(artifactPathBlock, "missing failure artifact path block");
+  const artifactPaths = artifactPathBlock[1].trim().split("\n")
+    .map((line) => line.trim());
+  assert.deepEqual(artifactPaths, failureArtifactPaths);
+  assert.equal((workflow.match(/for _attempt in \$\(seq 1 60\); do/g) ?? []).length, 25);
+  assert.doesNotMatch(workflow, /for attempt in \$\(seq 1 60\); do/);
 }
 
 export function validatePlatformWorkflow(workflow) {
@@ -129,6 +193,13 @@ test("contracts reject automatic full verification and weakened mask coverage", 
   const full = fs.readFileSync(fullPath, "utf8");
   assert.throws(() => validateFullWorkflow(full.replace("  workflow_dispatch:\n", "  push:\n")));
   assert.throws(() => validateFullWorkflow(full.replace("scripts/gates.sh coverage", "true")));
+  assert.throws(() => validateFullWorkflow(full.replace("cache-bin: true", "cache-bin: false")));
+  assert.throws(() => validateFullWorkflow(full.replace(
+    "          npm --prefix e2e run test:terrain-pixels\n", "")));
+  assert.throws(() => validateFullWorkflow(full.replace("          include-hidden-files: true\n", "")));
+  assert.throws(() => validateFullWorkflow(full.replace(
+    "installed_version=\"$(cargo llvm-cov --version 2>/dev/null || true)\"",
+    "installed_version='cargo-llvm-cov 0.9.1'")));
 
   const platform = fs.readFileSync(platformPath, "utf8");
   assert.throws(() => validatePlatformWorkflow(platform.replace("  workflow_dispatch:\n", "  push:\n")));
@@ -139,6 +210,26 @@ test("contracts reject automatic full verification and weakened mask coverage", 
     `--skip ${exhaustive}`, `--skip ${exhaustive}\n          --skip rejects_invalid_catalogs_and_cardinality_overflow`)));
   assert.throws(() => validatePlatformWorkflow(platform.replace(
     "cargo test --workspace --locked --\n", "cargo test --workspace --locked --\n          replay\n")));
+});
+
+test("failure artifact paths reject broad parents and hidden subtree patterns", () => {
+  const full = fs.readFileSync(fullPath, "utf8");
+  const firstPath = "          path: |\n            e2e/playwright-report/";
+
+  for (const parentPath of ["e2e/", "e2e/*", "e2e/**"]) {
+    assert.throws(() => validateFullWorkflow(full.replace(
+      firstPath, `          path: |\n            ${parentPath}\n            e2e/playwright-report/`)));
+    assert.throws(() => validateFullWorkflow(full.replace(
+      "e2e/playwright-report/", parentPath)));
+  }
+  for (const hiddenSubtree of ["e2e/.playwright/*", "e2e/.playwright/**"]) {
+    assert.throws(() => validateFullWorkflow(full.replace(
+      "e2e/.playwright/terrain-pixel-test-results/", hiddenSubtree)));
+  }
+  for (const rootGlob of ["*", "**"]) {
+    assert.throws(() => validateFullWorkflow(full.replace(
+      "e2e/playwright-report/", rootGlob)));
+  }
 });
 
 test("fixture contracts reject missing selectors, reversed files, and selector-dependent cleanup", () => {

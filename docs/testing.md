@@ -46,6 +46,15 @@ dependencies are cached; test outcomes are always executed. The workflow can als
 manually when Linux coverage is needed. Equivalent local Linux test execution satisfies the same
 requirement without a remote rerun.
 
+The manual full workflow also caches compiled dependencies and its pinned `cargo-llvm-cov` and
+`cargo-deny` binaries. Cache restoration never skips a check, and each restored binary must report
+its exact required version before use.
+
+The optional `scripts/gates.sh tooling` gate requires ShellCheck 0.11.0 and actionlint 1.7.12 to
+already be installed. It installs nothing and checks the repository Bash entry points plus all
+GitHub workflows. It intentionally remains outside `all`, `repository`, server, and automatic
+platform checks so these developer tools do not become application or platform prerequisites.
+
 ## Artist atlas
 
 `scripts/gates.sh art-atlas` runs CLI resource/path checks and the actual Chromium artist
@@ -66,6 +75,9 @@ pixels, by packing the procedural baseline sheet rather than the adopted artist 
 WebGL lifecycle behavior with the bundled source. It uses the same fresh diagnostics build and
 stores proofs in `e2e/.playwright/atlas-gameplay-test-results/`. See the
 [rendering guide](game/art-atlas.md). Artist redraws therefore change no parity expectation.
+The same item-shard step runs the DPR 1/2 terrain-pixel suite and retains failures under
+`e2e/.playwright/terrain-pixel-test-results/`; the separate six-cell renderer lifecycle suite
+remains opt-in.
 
 ## Rust
 

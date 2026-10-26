@@ -50,7 +50,7 @@ else
     exit 1
   fi
   source_commit="$(printf '%s' "$source_commit" | tr '[:upper:]' '[:lower:]')"
-  source_state=export
+  source_state='export'
 fi
 image_identity="${MEASUREMENT_IMAGE_IDENTITY:-none-native}"
 if [[ -z "$image_identity" ]]; then

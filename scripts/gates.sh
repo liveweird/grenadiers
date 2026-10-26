@@ -24,6 +24,41 @@ installed_dependencies() {
     node scripts/check-installed-dependencies.mjs "$workspace"
   done
 }
+require_tool_version() {
+  local command_name="$1"
+  local expected_version="$2"
+  local actual_version
+  if ! command -v "$command_name" >/dev/null 2>&1; then
+    echo "$command_name $expected_version is required; install it outside this repository" >&2
+    return 1
+  fi
+  case "$command_name" in
+    shellcheck)
+      actual_version="$(shellcheck --version | sed -n 's/^version: //p')"
+      ;;
+    actionlint)
+      actual_version="$(actionlint -version | sed -n '1p')"
+      ;;
+    *)
+      echo "unsupported tooling version check: $command_name" >&2
+      return 1
+      ;;
+  esac
+  if [ "$actual_version" != "$expected_version" ]; then
+    echo "$command_name $expected_version is required; found ${actual_version:-unknown}" >&2
+    return 1
+  fi
+}
+tooling() {
+  require_tool_version shellcheck 0.11.0
+  require_tool_version actionlint 1.7.12
+  shellcheck --external-sources --shell=bash \
+    scripts/gates.sh \
+    scripts/ci-image-transfer.sh \
+    scripts/measure-game.sh \
+    scripts/ci-server-mask-gate-context.sh
+  actionlint -oneline
+}
 mask_profile() (
   profile="$1"
   shift
@@ -142,5 +177,6 @@ case "${1:-all}" in
   k8s) k8s ;;
   security) security ;;
   coverage) coverage ;;
-  *) echo 'usage: scripts/gates.sh [all|repository|server|server-parallel|web|e2e|art-atlas|atlas-gameplay|browser|k8s|security|coverage]' >&2; exit 2 ;;
+  tooling) tooling ;;
+  *) echo 'usage: scripts/gates.sh [all|repository|server|server-parallel|web|e2e|art-atlas|atlas-gameplay|browser|k8s|security|coverage|tooling]' >&2; exit 2 ;;
 esac

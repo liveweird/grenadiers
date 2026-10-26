@@ -95,7 +95,21 @@ jobs:
         run: |
           rustup show
           rustup component add rustfmt clippy llvm-tools-preview
-      - run: cargo install cargo-llvm-cov --version 0.9.1 --locked
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        with:
+          key: llvm-cov-0.9.1
+          cache-targets: true
+          cache-workspace-crates: false
+          cache-on-failure: false
+          cache-bin: true
+          save-if: ${{ matrix.index == 0 }}
+      - name: Require cargo-llvm-cov 0.9.1
+        run: |
+          installed_version="$(cargo llvm-cov --version 2>/dev/null || true)"
+          if [ "$installed_version" != 'cargo-llvm-cov 0.9.1' ]; then
+            cargo install cargo-llvm-cov --version 0.9.1 --locked
+          fi
+          test "$(cargo llvm-cov --version)" = 'cargo-llvm-cov 0.9.1'
       # Repository checks only read npm manifests/locks; no npm installation is needed.
       - run: scripts/gates.sh server
       - run: scripts/gates.sh coverage
@@ -148,7 +162,20 @@ jobs:
           node-version-file: .nvmrc
       - run: test -s Cargo.lock
       - run: rustup show
-      - run: cargo install cargo-deny --version 0.20.2 --locked
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        with:
+          key: cargo-deny-0.20.2
+          cache-targets: false
+          cache-workspace-crates: false
+          cache-on-failure: false
+          cache-bin: true
+      - name: Require cargo-deny 0.20.2
+        run: |
+          installed_version="$(cargo deny --version 2>/dev/null || true)"
+          if [ "$installed_version" != 'cargo-deny 0.20.2' ]; then
+            cargo install cargo-deny --version 0.20.2 --locked
+          fi
+          test "$(cargo deny --version)" = 'cargo-deny 0.20.2'
       - run: scripts/gates.sh security
 
   browser-image:
@@ -245,6 +272,7 @@ jobs:
           npm --prefix web ci
           scripts/gates.sh art-atlas
           scripts/gates.sh atlas-gameplay
+          npm --prefix e2e run test:terrain-pixels
       - name: Verify deterministic pickups using the same built image
         if: matrix.shard == 'items'
         run: |
@@ -528,6 +556,7 @@ jobs:
             e2e/test-results/
             e2e/.playwright/art-atlas-test-results/
             e2e/.playwright/atlas-gameplay-test-results/
+            e2e/.playwright/terrain-pixel-test-results/
             e2e/playwright-pickup-report/
             e2e/playwright-heart-report/
             e2e/playwright-shield-report/
@@ -561,6 +590,7 @@ jobs:
             ${{ runner.temp }}/browser-file-readiness.json
             ${{ runner.temp }}/visibility-startup-observer.jsonl
             ${{ runner.temp }}/visibility-xvfb.log
+          include-hidden-files: true
           retention-days: 7
 
   kubernetes:

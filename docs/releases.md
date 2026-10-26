@@ -79,25 +79,46 @@ interrupted state but cannot preserve process-local matches or credentials.
 Keep the previous immutable image reference for rollback; database migration compatibility
 must be designed when durable application data is introduced.
 
-## v0.3.75 — 2026-10-26
+### Runtime operating-system refresh
 
-[v0.3.75](https://github.com/liveweird/grenadiers/releases/tag/v0.3.75) bounds the Compose app to
-256 MiB and 128 PIDs and requests/limits Kubernetes ephemeral storage at 16/64 MiB. Deployment
-checks reject weakened effective security contexts and invalid resource quantities.
+Perform a controlled runtime refresh weekly and when a relevant Debian or runtime advisory
+requires it. Keep the reviewed base digest and rebuild only the runtime stage without its cached
+layer, following Buildx's
+[`--no-cache-filter` contract](https://docs.docker.com/reference/cli/docker/buildx/build/#no-cache-filter):
 
-Independent review, 42 focused resource/security tests, repository checks, rendered-manifest
-validation and strict Kubernetes schema validation pass. Rust, exhaustive, Linux and application
-web inputs reuse accepted v0.3.74 results; the resource-checker cases are exercised separately.
+```sh
+docker buildx build --no-cache-filter runtime --load --tag grenadiers:candidate-os-refresh .
+```
 
-Accepted image source is `bfb0141e0373a75073d7ab922990f87a570e776a`; image is
-`sha256:2ce17b3d8712817628504d6d472fe2a2a938290388e462e9eec08b479c01ea4b`.
-Trivy 0.74.0 reports zero fixable HIGH/CRITICAL findings. Eight Compose cases pass in 36.0s and
-eight Kubernetes cases in 36.5s. Docker HostConfig and live cgroups enforce 268,435,456 bytes and
-128 PIDs; the live Pod has exact CPU/memory/ephemeral-storage requests/limits, restricted namespace,
-security contexts and probes. No destructive resource stress was introduced. Temporary resources
-are removed. Localhost:8085 has verified identity, security, health/readiness, CSP/cache and exact
-accepted web bytes. Control is `.local-checkpoints/runtime/compose-v0.3.75.yaml`;
-`rollback-v0.3.74.yaml` retains the prior image. No gameplay, protocol, artwork or migration changes.
+Record the resulting exact image ID, scan that ID with the pinned release vulnerability scanner,
+and run the applicable runtime acceptance against that same ID. Promote only the accepted ID and
+retain the previous immutable image reference for rollback. The runtime stage intentionally runs
+rolling Debian package updates, so a later build may resolve newer packages and is not expected to
+be byte-identical; treat it as a new candidate with new evidence rather than reusing acceptance.
+
+## v0.3.76 — 2026-10-26
+
+[v0.3.76](https://github.com/liveweird/grenadiers/releases/tag/v0.3.76) adds optional pinned
+ShellCheck/actionlint checks, verified tool/dependency cache restoration, selected terrain-pixel
+acceptance, exact failure-artifact allowlists and controlled runtime OS refresh guidance.
+Cache hits never skip verification; no hosted-cache timing benefit is claimed.
+
+Independent review, repository/workflow contracts and pinned tooling checks pass. The terrain
+comparison passes at DPR 1 and 2: baseline, repaint, reset and context restoration each have zero
+differing bytes. The separate six-cell lifecycle experiment remains opt-in. Unchanged Rust,
+exhaustive, Linux, application web and dependency acceptance reuse the published baseline.
+
+Accepted image source is `8af26e21b420b2f609fc6b5cccf2303a339608c1`; image is
+`sha256:f98095085aa41ba03e97a25523a9682393864dc7a798151f066c22d8151e8424`.
+Trivy 0.74.0 reports zero fixable HIGH/CRITICAL findings. Eight Compose cases pass in 35.5s and
+eight Kubernetes cases in 36.1s, with exact image, effective v0.3.75 resource limits, restricted
+security and probes verified. Temporary projects/namespaces and diagnostic preview are stopped.
+Localhost:8085 has verified health/readiness, CSP/cache and exact unchanged web bytes. Control is
+`.local-checkpoints/runtime/compose-v0.3.76.yaml`; `rollback-v0.3.75.yaml` retains the prior image.
+No gameplay, wire, artwork or migration changes; distribution remains source prereleases.
+
+<a id="v0375--2026-10-26"></a>
+The [v0.3.75 record](history/releases.md#v0375--2026-10-26) is preserved in release history.
 
 <a id="v0374--2026-10-26"></a>
 The [v0.3.74 record](history/releases.md#v0374--2026-10-26) is preserved in release history.

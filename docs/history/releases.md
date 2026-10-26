@@ -4,6 +4,26 @@ This archive preserves the older release records originally maintained in
 [`docs/releases.md`](../releases.md). Records remain in their original order; the current
 release procedure and current release record stay in the [release guide](../releases.md).
 
+## v0.3.75 — 2026-10-26
+
+[v0.3.75](https://github.com/liveweird/grenadiers/releases/tag/v0.3.75) bounds the Compose app to
+256 MiB and 128 PIDs and requests/limits Kubernetes ephemeral storage at 16/64 MiB. Deployment
+checks reject weakened effective security contexts and invalid resource quantities.
+
+Independent review, 42 focused resource/security tests, repository checks, rendered-manifest
+validation and strict Kubernetes schema validation pass. Rust, exhaustive, Linux and application
+web inputs reuse accepted v0.3.74 results; the resource-checker cases are exercised separately.
+
+Accepted image source is `bfb0141e0373a75073d7ab922990f87a570e776a`; image is
+`sha256:2ce17b3d8712817628504d6d472fe2a2a938290388e462e9eec08b479c01ea4b`.
+Trivy 0.74.0 reports zero fixable HIGH/CRITICAL findings. Eight Compose cases pass in 36.0s and
+eight Kubernetes cases in 36.5s. Docker HostConfig and live cgroups enforce 268,435,456 bytes and
+128 PIDs; the live Pod has exact CPU/memory/ephemeral-storage requests/limits, restricted namespace,
+security contexts and probes. No destructive resource stress was introduced. Temporary resources
+are removed. Localhost:8085 has verified identity, security, health/readiness, CSP/cache and exact
+accepted web bytes. Control is `.local-checkpoints/runtime/compose-v0.3.75.yaml`;
+`rollback-v0.3.74.yaml` retains the prior image. No gameplay, protocol, artwork or migration changes.
+
 ## v0.3.74 — 2026-10-26
 
 [v0.3.74](https://github.com/liveweird/grenadiers/releases/tag/v0.3.74) shares 16 Rust-produced

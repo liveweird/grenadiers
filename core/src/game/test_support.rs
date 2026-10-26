@@ -1,9 +1,24 @@
+use std::collections::BTreeSet;
+
 use super::{
+    arena::{ARENA_CELL_COUNT, ARENA_HEIGHT, ARENA_WIDTH, Arena, Terrain},
     bombs::BombTrigger,
     rules::RulesConfig,
     simulation::{State, StateError},
     types::{CellId, EntityId, Tick},
 };
+
+pub(crate) fn open_border_arena(blocks: BTreeSet<CellId>) -> Arena {
+    let mut terrain = [Terrain::Floor; ARENA_CELL_COUNT];
+    for row in 0..ARENA_HEIGHT {
+        for column in 0..ARENA_WIDTH {
+            if column == 0 || row == 0 || column == ARENA_WIDTH - 1 || row == ARENA_HEIGHT - 1 {
+                terrain[usize::from(row * ARENA_WIDTH + column)] = Terrain::Wall;
+            }
+        }
+    }
+    Arena::new(terrain, blocks, [CellId::new(1, 1), CellId::new(13, 11)]).unwrap()
+}
 
 pub(crate) fn add_test_bomb(
     state: &mut State,

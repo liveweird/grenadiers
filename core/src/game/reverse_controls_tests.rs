@@ -1,9 +1,9 @@
 use std::collections::{BTreeMap, BTreeSet};
 
-use crate::game::arena::{ARENA_CELL_COUNT, ARENA_HEIGHT, ARENA_WIDTH, Arena, Terrain};
 use crate::game::simulation::{
     ActorInit, InputAction, SeatInput, State, StateError, StepError, TurnAssist,
 };
+use crate::game::test_support::open_border_arena;
 use crate::game::types::HALF_FOOTPRINT;
 use crate::game::{
     CellId, Direction, EffectKind, EnabledItems, EntityId, Pickup, PickupKind, Position,
@@ -14,22 +14,9 @@ use crate::room::settings::MAX_TURN_ASSIST_UNITS;
 
 const CENTER: CellId = CellId::new(7, 6);
 
-fn open_arena(blocks: BTreeSet<CellId>) -> Arena {
-    let mut terrain = [Terrain::Floor; ARENA_CELL_COUNT];
-    for row in 0..ARENA_HEIGHT {
-        for column in 0..ARENA_WIDTH {
-            if column == 0 || row == 0 || column == ARENA_WIDTH - 1 || row == ARENA_HEIGHT - 1 {
-                terrain[usize::from(row) * usize::from(ARENA_WIDTH) + usize::from(column)] =
-                    Terrain::Wall;
-            }
-        }
-    }
-    Arena::new(terrain, blocks, [CellId::new(1, 1), CellId::new(13, 11)]).unwrap()
-}
-
 fn state(pickup: bool, tick: Tick) -> State {
     let world = World::with_pickups(
-        open_arena(BTreeSet::new()),
+        open_border_arena(BTreeSet::new()),
         BTreeMap::new(),
         BTreeMap::new(),
         if pickup {
@@ -189,7 +176,7 @@ fn disabled_reverse_controls_is_rejected_in_every_pickup_layer() {
     for layer in 0..3 {
         let pickup = BTreeMap::from([(CENTER, PickupKind::ReverseControls)]);
         let world = World::with_pickups(
-            open_arena(if layer == 0 {
+            open_border_arena(if layer == 0 {
                 BTreeSet::from([CENTER])
             } else {
                 BTreeSet::new()
@@ -273,7 +260,7 @@ fn stationary_inversion_preserves_heading_and_fractional_budget() {
 #[test]
 fn reversed_motion_obeys_blocking_geometry() {
     let mut game = state(false, Tick(0));
-    game.world.arena = open_arena(BTreeSet::from([CellId::new(6, 6)]));
+    game.world.arena = open_border_arena(BTreeSet::from([CellId::new(6, 6)]));
     game.actors[0]
         .effects
         .apply(EffectKind::ReverseControls, Tick(0))

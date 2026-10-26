@@ -2,31 +2,18 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use super::{ActorInit, InputAction, SeatInput, State, StepError};
 use crate::game::EnabledItems;
-use crate::game::arena::{ARENA_CELL_COUNT, ARENA_HEIGHT, ARENA_WIDTH, Arena, Terrain};
 use crate::game::bombs::BombTrigger;
 use crate::game::effects::{EffectKind, GOLDEN_FLAME_RANGE, ORDINARY_EFFECT_TICKS};
 use crate::game::input::Direction;
 use crate::game::inventory::Equipment;
 use crate::game::pickups::{Pickup, PickupKind};
 use crate::game::rules::RulesConfig;
+use crate::game::test_support::open_border_arena;
 use crate::game::types::{CellId, EntityId, Position, SeatId, SpeedLevel, Tick};
 use crate::game::world::World;
 use crate::room::RoomSettings;
 
 const TARGET: CellId = CellId::new(5, 5);
-
-fn open_arena(blocks: BTreeSet<CellId>) -> Arena {
-    let mut terrain = [Terrain::Floor; ARENA_CELL_COUNT];
-    for row in 0..ARENA_HEIGHT {
-        for column in 0..ARENA_WIDTH {
-            if column == 0 || row == 0 || column == ARENA_WIDTH - 1 || row == ARENA_HEIGHT - 1 {
-                terrain[usize::from(row) * usize::from(ARENA_WIDTH) + usize::from(column)] =
-                    Terrain::Wall;
-            }
-        }
-    }
-    Arena::new(terrain, blocks, [CellId::new(1, 1), CellId::new(13, 11)]).unwrap()
-}
 
 fn actor(id: u32, seat: SeatId, cell: CellId) -> ActorInit {
     ActorInit {
@@ -55,7 +42,7 @@ fn state_with(world: World, tick: Tick, one: CellId) -> State {
 
 fn exposed(kind: PickupKind) -> World {
     World::with_pickups(
-        open_arena(BTreeSet::new()),
+        open_border_arena(BTreeSet::new()),
         BTreeMap::new(),
         BTreeMap::new(),
         BTreeMap::from([(TARGET, kind)]),
@@ -167,7 +154,7 @@ fn captured_range_reaches_chain_bombs_but_still_stops_at_blockers() {
     let blocker = CellId::new(2, 3);
     let chain = CellId::new(7, 5);
     let mut state = state_with(
-        World::new(open_arena(BTreeSet::from([blocker]))),
+        World::new(open_border_arena(BTreeSet::from([blocker]))),
         Tick(0),
         CellId::new(2, 5),
     );
@@ -205,7 +192,7 @@ fn captured_range_reaches_chain_bombs_but_still_stops_at_blockers() {
 #[test]
 fn concealed_golden_flame_reveals_then_collects_through_the_ordinary_layers() {
     let world = World::with_pickups(
-        open_arena(BTreeSet::from([TARGET])),
+        open_border_arena(BTreeSet::from([TARGET])),
         BTreeMap::from([(TARGET, PickupKind::GoldenFlame)]),
         BTreeMap::new(),
         BTreeMap::new(),
@@ -301,7 +288,7 @@ fn golden_pickups_are_rejected_in_every_layer_unless_enabled() {
     for layer in 0..3 {
         let pickup = BTreeMap::from([(TARGET, PickupKind::GoldenFlame)]);
         let world = World::with_pickups(
-            open_arena(if layer == 0 {
+            open_border_arena(if layer == 0 {
                 BTreeSet::from([TARGET])
             } else {
                 BTreeSet::new()

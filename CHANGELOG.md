@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+## 0.3.73 — 2026-10-26
+
+### Added
+
+- Exercise competing stable-capability resumes, canceled admissions and live socket takeover fencing in both submission orders.
+
+### Fixed
+
+- Fail early on invalid coverage caches and isolate official reports to the complete Cargo-selected instrumented executable set.
+
 ## 0.3.72 — 2026-10-26
 
 ### Added

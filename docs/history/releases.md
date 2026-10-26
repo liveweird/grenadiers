@@ -4,6 +4,35 @@ This archive preserves the older release records originally maintained in
 [`docs/releases.md`](../releases.md). Records remain in their original order; the current
 release procedure and current release record stay in the [release guide](../releases.md).
 
+## v0.3.72 — 2026-10-26
+
+[v0.3.72](https://github.com/liveweird/grenadiers/releases/tag/v0.3.72) shares expanded client
+conformance cases across v8–v11 Rust parsers/schemas and the browser, with deterministic malformed
+frame, retired-action, required-field and byte-boundary regressions. Production parsers and
+schemas remain unchanged. Independent review is clear.
+
+At `f8457ef351af5822996b4f143efe0831abe45909`, ordinary profiles pass 951 core / 312 server
+tests plus two doctests; all 4,194,304 masks complete in debug, release and official coverage
+with zero product retries. The final runner report initially failed because stale cache objects
+contaminated discovery. An official isolated report using the same three executed binaries and
+38 profiles passes the unchanged 90% floor: 17,863/19,553 lines (91.356825%). The
+[recovery record](coverage-cache-recovery.md) preserves the original failure and provenance;
+no successful canonical runner summary or Rust duration is invented.
+
+Full web acceptance passes 6,822 tests / 93 files in 264.03s with 91.07/89.40/90.12/93.48%
+coverage. Local gzip JavaScript/CSS is 337,162/36,695 bytes; the accepted Docker build is
+337,939/36,695 bytes, within the same budgets. Repository, lint, types and drift pass.
+[Integrated Linux units](https://github.com/liveweird/grenadiers/actions/runs/40373348609)
+pass at `5db1d0e46c14b7278fe854af9578567999b3ebdf`, whose client corpus/test inputs are identical.
+
+Accepted image source is the tested `f8457ef351af5822996b4f143efe0831abe45909`, image
+`sha256:e4989f32b30bb78400a12229dd3eb13c86a0a7f4ffd4bfea2bf3c943a286b5c1`.
+Trivy 0.74.0 reports zero fixable HIGH/CRITICAL findings; eight Compose cases pass in 35.4s and
+eight Kubernetes cases in 35.9s with exact-image/security/probe/resource checks. Temporary resources
+are removed. Localhost:8085 has verified health/readiness, CSP/cache and exact accepted web bytes.
+Control is `.local-checkpoints/runtime/compose-v0.3.72.yaml`; `rollback-v0.3.71.yaml` retains the
+prior image. No gameplay, wire, artwork or migration change; distribution remains source prereleases.
+
 ## v0.3.71 — 2026-10-26
 
 [v0.3.71](https://github.com/liveweird/grenadiers/releases/tag/v0.3.71) adds isolated owner,

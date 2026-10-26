@@ -33,8 +33,11 @@ keep only eligible reservations and their original deadlines; they do not extend
 loss. Shutdown interrupts and settles accepted departures before the final closing publication,
 within the process-wide five-second drain budget.
 
-Private semantic replay profile 2 records grace departures, restore or replacement, expiry, and
+Explicitly recorded test fixtures use semantic replay profile 2 for grace departures, restore or replacement, expiry, and
 report flushes in lifecycle order. It records no capability, binding, socket frame, or session
 identity. The journal remains bounded to 60,000 records and less than 4 MiB; truncation or an
 unreproducible round-construction failure makes it explicitly incomplete and prevents a certified
 complete replay.
+
+Production rooms do not allocate semantic journals. Reconnect correctness still uses authoritative
+state, generation records and checked personal admission; see the [replay policy](replay.md).

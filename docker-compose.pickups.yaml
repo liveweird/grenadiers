@@ -1,7 +1,0 @@
-# Explicit operator reproduction mode, for isolated pickup acceptance only.
-services:
-  app:
-    environment:
-      GAME_ROUND_SEED_FILE: /run/grenadiers/round.seed
-    volumes:
-      - ./core/tests/fixtures/arena-v1-pickups.seed:/run/grenadiers/round.seed:ro

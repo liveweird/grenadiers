@@ -68,7 +68,7 @@ pub(in crate::game::rooms) struct MatchRuntime {
     inputs: InputMailbox,
     sim: Option<SimRound>,
     reports: Vec<StepReport>,
-    journal: super::super::replay::Journal,
+    journal: Option<super::super::replay::Journal>,
 }
 
 pub(in crate::game::rooms) struct SimRound {
@@ -82,8 +82,16 @@ impl MatchRuntime {
         identity: RoomIdentity,
         round_seed_source: RoundSeedSource,
     ) -> Self {
-        let journal = capture::journal(identity.profile);
-        Self::with_journal(identity, round_seed_source, journal)
+        let settings = identity.profile.initial_settings();
+        let settings_editor = identity.profile.initial_editor();
+        Self::with_configuration(
+            identity,
+            round_seed_source,
+            None,
+            settings,
+            1,
+            settings_editor,
+        )
     }
 
     #[cfg(test)]

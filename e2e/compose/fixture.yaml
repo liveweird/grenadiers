@@ -1,0 +1,12 @@
+# Shared operator reproduction mode for deterministic browser acceptance.
+services:
+  app:
+    environment:
+      GAME_ROUND_SEED_FILE: /run/grenadiers/round.seed
+    volumes:
+      - type: bind
+        source: '${GRENADIERS_FIXTURE_SEED_FILE:?Set the exact fixture seed file}'
+        target: /run/grenadiers/round.seed
+        read_only: true
+        bind:
+          create_host_path: false

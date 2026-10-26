@@ -1,7 +1,9 @@
 use crate::game;
 use crate::protocol::{Cell, Direction, Position, Seat, Tick, WireRoundResult};
 
-use super::{EffectKind, EquipmentId, ItemSet, PickupKind, ProjectionError, WeaponId};
+use super::{EffectKind, EquipmentId, ItemSet, ProjectionError, WeaponId};
+
+pub(super) use crate::protocol::item_foundation::projection_items::wire_pickup;
 
 pub(super) fn wire_tick(value: game::Tick) -> Result<Tick, ProjectionError> {
     Tick::new(value.0).map_err(|_| ProjectionError::InvalidClock)
@@ -56,36 +58,6 @@ pub(super) fn wire_result(value: Option<game::RoundResult>) -> Option<WireRoundR
         },
     })
 }
-pub(super) fn wire_pickup(value: game::PickupKind) -> PickupKind {
-    match value {
-        game::PickupKind::BombCapacity => PickupKind::BombCapacity,
-        game::PickupKind::BlastRange => PickupKind::BlastRange,
-        game::PickupKind::MovementSpeed => PickupKind::MovementSpeed,
-        game::PickupKind::Kick => PickupKind::Kick,
-        game::PickupKind::Punch => PickupKind::Punch,
-        game::PickupKind::Bracelet => PickupKind::Bracelet,
-        game::PickupKind::WallPass => PickupKind::WallPass,
-        game::PickupKind::Heart => PickupKind::Heart,
-        game::PickupKind::RemoteBomb => PickupKind::RemoteBomb,
-        game::PickupKind::PiercingBomb => PickupKind::PiercingBomb,
-        game::PickupKind::PowerBomb => PickupKind::PowerBomb,
-        game::PickupKind::Landmine => PickupKind::Landmine,
-        game::PickupKind::Shield => PickupKind::Shield,
-        game::PickupKind::Stopwatch => PickupKind::Stopwatch,
-        game::PickupKind::InvisibilityCloak => PickupKind::InvisibilityCloak,
-        game::PickupKind::GoldenFlame => PickupKind::GoldenFlame,
-        game::PickupKind::ShortFuse => PickupKind::ShortFuse,
-        game::PickupKind::Diarrhea => PickupKind::Diarrhea,
-        game::PickupKind::SlowFoot => PickupKind::SlowFoot,
-        game::PickupKind::ShortFlame => PickupKind::ShortFlame,
-        game::PickupKind::LongFuse => PickupKind::LongFuse,
-        game::PickupKind::ReverseControls => PickupKind::ReverseControls,
-        game::PickupKind::InvisibleBombs => PickupKind::InvisibleBombs,
-        game::PickupKind::OilBarrel => PickupKind::OilBarrel,
-        game::PickupKind::Teleporter => PickupKind::Teleporter,
-    }
-}
-
 pub(super) fn item_set(enabled: game::EnabledItems) -> Result<ItemSet, ProjectionError> {
     let mask = super::ItemMask::new(enabled.bits()).map_err(|_| ProjectionError::InvalidItems)?;
     Ok(ItemSet::from_mask(mask))

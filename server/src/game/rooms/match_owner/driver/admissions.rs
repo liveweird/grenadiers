@@ -187,15 +187,19 @@ fn admission_frame(
     if FAIL_NEXT_ADMISSION_ENCODING.with(|fail| fail.replace(false)) {
         return Err(MatchRuntimeError::Publication);
     }
-    grenadiers_core::protocol::v11::prepare_expanded_admission(
-        &prepared.room,
-        prepared.state_epoch,
-        prepared.capture.as_ref(),
-        prepared.generation,
-        wire_seat(seat),
-        prepared.last_bomb_action_id,
-        sequence,
-        token,
+    grenadiers_core::protocol::v11::prepare_admission(
+        grenadiers_core::protocol::v11::AdmissionProjection {
+            room: &prepared.room,
+            state_epoch: prepared.state_epoch,
+            capture: prepared.capture.as_ref(),
+            generation: prepared.generation,
+        },
+        grenadiers_core::protocol::v11::PersonalAdmission {
+            recipient: wire_seat(seat),
+            last_action_id: prepared.last_bomb_action_id,
+            sequence,
+            resume_token: token,
+        },
     )
     .map(std::sync::Arc::from)
     .map_err(|_| MatchRuntimeError::Publication)

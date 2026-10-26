@@ -38,6 +38,8 @@ does not authorize changing generation streams, old rule semantics or replay acc
 
 Production journal allocation/recording is a separate operational decision. Removing the old
 browser UI neither changes recording nor creates a replay migration requirement.
+[ADR 0025](0025-production-replay-recording.md) disables default production recording while
+preserving explicit test recordings and every retained format/profile.
 
 ## Cleanup and acceptance
 

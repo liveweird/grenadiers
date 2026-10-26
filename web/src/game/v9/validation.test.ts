@@ -9,9 +9,11 @@ import type { Snapshot as V9Snapshot } from './schema'
 
 function archivedValue(value: unknown): V9Snapshot {
   const archived = structuredClone(value) as {
-    room: { availableItems: string[] }
+    room: { availableItems: string[]; mode?: unknown; seats: Array<{ controller?: unknown }> }
     state: { actors: Array<Record<string, unknown>>; oilBarrels?: unknown }
   }
+  delete archived.room.mode
+  for (const seat of archived.room.seats) delete seat.controller
   archived.room.availableItems = archived.room.availableItems
     .filter((item) => item !== 'kick' && item !== 'punch' && item !== 'bracelet'
       && item !== 'wallPass' && item !== 'oilBarrel' && item !== 'teleporter')

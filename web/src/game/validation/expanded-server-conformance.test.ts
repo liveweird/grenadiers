@@ -27,6 +27,15 @@ function frame(caseId: string): RecordValue {
   return JSON.parse(fixture.frame) as RecordValue
 }
 
+// The retained corpus stays byte-for-byte v11; only the live metadata layer is added here.
+function liveMetadata(value: RecordValue): RecordValue {
+  const result = structuredClone(value)
+  const room = record(result.room)
+  room.mode = { type: 'humanDuel' }
+  for (const seat of room.seats as RecordValue[]) seat.controller = { type: 'human' }
+  return result
+}
+
 describe('expanded gameplay server conformance', () => {
   it('accepts actual Rust-produced frames through each retained validator', () => {
     for (const fixture of fixtures.cases) {
@@ -38,7 +47,7 @@ describe('expanded gameplay server conformance', () => {
       if (fixture.version === 11) {
         const recipient = fixture.recipient === 'one' || fixture.recipient === 'two'
           ? fixture.recipient : null
-        expect(validateServerMessage(JSON.parse(fixture.frame), recipient), fixture.caseId).toBe(true)
+        expect(validateServerMessage(liveMetadata(JSON.parse(fixture.frame) as RecordValue), recipient), fixture.caseId).toBe(true)
       }
     }
   })
@@ -94,12 +103,12 @@ describe('expanded gameplay server conformance', () => {
     })
   })
 
-  it('exercises live v11 recipient privacy and identity checks after generic validation', () => {
+  it('exercises live v12 recipient privacy and identity checks after generic validation', () => {
     const forOne = frame('v11-runningOilMaterialized-one')
     const forTwo = frame('v11-runningOilMaterialized-two')
     expect(validateGameplayV11ServerMessage(forOne).valid).toBe(true)
-    expect(validateServerMessage(forOne, 'one')).toBe(true)
-    expect(validateServerMessage(forOne, 'two')).toBe(false)
+    expect(validateServerMessage(liveMetadata(forOne), 'one')).toBe(true)
+    expect(validateServerMessage(liveMetadata(forOne), 'two')).toBe(false)
     const oneActors = record(forOne.state).actors as RecordValue[]
     const twoActors = record(forTwo.state).actors as RecordValue[]
     expect(oneActors[1]?.type).toBe('hidden')
@@ -109,7 +118,7 @@ describe('expanded gameplay server conformance', () => {
     const actors = record(duplicateIdentity.state).actors as RecordValue[]
     actors[1]!.id = actors[0]!.id
     expect(validateGameplayV11ServerMessage(duplicateIdentity).valid).toBe(true)
-    expect(validateServerMessage(duplicateIdentity, 'two')).toBe(false)
+    expect(validateServerMessage(liveMetadata(duplicateIdentity), 'two')).toBe(false)
   })
 
   it('rejects changed physical state in the preceding retained version', () => {

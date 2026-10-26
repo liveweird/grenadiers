@@ -153,8 +153,8 @@ After a fresh measurement with those helpers excluded, the web floors are 90% li
 88% statements, functions and branches. Thresholds must not be lowered to accommodate changes.
 
 Ordinary `npm --prefix web run build` also checks aggregate gzip sizes against
-`web/bundle-budget.json`: 400,000 bytes of JavaScript and 40,000 bytes of CSS. These initial
-ceilings come from a measured build; review bundle contributors before changing them. Images,
+`web/bundle-budget.json`: 400,000 bytes of JavaScript and 20,000 bytes of CSS. The CSS ceiling follows the
+[measured stylesheet reduction](history/mantine-css.md); review bundle contributors before changing either budget. Images,
 source maps and diagnostics/workbench builds are outside this budget. The checker reports
 the largest contributors on failure; Vite's existing per-chunk warning remains visible.
 

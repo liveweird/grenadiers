@@ -35,9 +35,13 @@ export default defineConfig([
     ],
     languageOptions: { globals: { ...globals.browser, ...globals.node } },
     rules: {
+      // Loopback HTTP/WS addresses are intentional development and contract fixtures.
       'sonarjs/no-clear-text-protocols': 'off',
+      // Fixtures use explicit fake credentials; runtime capabilities come from the server.
       'sonarjs/no-hardcoded-passwords': 'off',
+      // Explicit version/scenario assertions are valid; table-driven style is optional.
       'sonarjs/parameterized-tests': 'off',
+      // Small typed projections may use ternaries; complexity and depth remain bounded.
       'sonarjs/no-nested-conditional': 'off',
       'sonarjs/cognitive-complexity': ['error', 20],
       complexity: ['error', 20],

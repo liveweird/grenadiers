@@ -36,7 +36,9 @@ the candidate differs only in `web/src/main.tsx` style imports.
 
 `web/scripts/check-bundle.mjs` passed for both builds. The candidate remains below
 the existing 400,000-byte JavaScript and 40,000-byte CSS gzip budgets; no budget
-or lazy-loading behavior changed.
+or lazy-loading behavior changed during that A/B comparison. The integrated candidate subsequently
+ratcheted the CSS gzip budget to 20,000 bytes, preserving 4,950 bytes of headroom above the
+measured output; the JavaScript budget remains 400,000 bytes.
 
 ## Rendered A/B comparison
 

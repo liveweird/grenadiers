@@ -24,6 +24,8 @@ readiness checks optional PostgreSQL only when configured.
 
 One in-process task owns each room and advances a server-controlled fixed tick. Human inputs
 arrive through bounded queues; future bot adapters must use the same command boundary.
+The pure [CPU contracts](game/cpu-contracts.md) define controller identity, restricted
+observations, ordinary intentions and bounded decision state for that integration.
 Clients do not submit authoritative positions, damage, or outcomes.
 The owner executes bounded logical intentions; public snapshots carry the accepted results.
 

@@ -92,6 +92,30 @@ measured fixtures and playtesting; they are not correctness guarantees.
   before a public solo preview. Advanced item tactics may improve later; legal play, privacy,
   correct effects and bounded execution must work throughout.
 
+### Lifecycle policy
+
+The human in seat One owns settings. The CPU in seat Two supplies ordinary revision-checked
+readiness after admission, settings changes, canceled initial countdowns and rematch reset.
+Human readiness starts the existing 180-tick countdown. After the rematch eligibility deadline,
+the CPU consents while the human is connected; the human must still opt in. Consensus returns
+the room to Waiting with readiness cleared.
+
+During a running transport loss, clear human input immediately and continue physics and CPU
+decisions through the existing 600-tick reservation grace. Preserve CPU memory and randomness.
+Keep existing result holds and inter-round countdown cancellation/restart behavior; disconnect
+does not pause physics or extend reservation deadlines. Before the first start, and for a new
+disconnect after the final match result, the existing lifecycle releases the human immediately;
+close the solo room. A reservation established before finality retains its original deadline.
+
+On explicit departure or grace expiry, settle the ordinary result/forfeit precedence before
+canceling CPU work and releasing the room. Do not submit a simultaneous CPU departure that
+would turn a human forfeit into abandonment. Room retention follows the human's eligibility;
+the CPU alone cannot keep a room alive.
+
+New physical rounds and rematches reset round memory and pending inputs. Socket replacement
+alone preserves memory and RNG. Command epochs are a separate fence: countdown cancellation
+can invalidate pending decisions without creating a new physical world.
+
 <a id="milestones"></a>
 
 The former milestone section is maintained as scoped CPU0–CPU4 work in the

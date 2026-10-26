@@ -42,7 +42,7 @@ in its authoritative document and link to it. Read the relevant guide before cha
 | Rules, items and shared configuration | Implemented feature guides under `game/`, including [settings](game/settings.md) and [item extension](game/adding-items.md) | [Rust, web and browser checks](testing.md) |
 | Protocol changes | [API guidelines](../api-guidelines/API-GUIDELINES.md) and the live versioned protocol guide | Contract generation/drift, conformance and recipient privacy |
 | Graphics | [Artist handoff](../assets/art/README.md), [atlas guide](game/art-atlas.md) | [Artist/renderer checks](testing.md#artist-atlas) |
-| Planned CPU mode | [Accepted design](game/single-player-cpu.md) | Static acceptance in that design; [backlog](../BACKLOG.md#single-player) owns progress |
+| CPU contracts and planned mode | [Contracts](game/cpu-contracts.md), [accepted design](game/single-player-cpu.md) | Static acceptance in that design; [backlog](../BACKLOG.md#single-player) owns progress |
 | Operations and releases | [Deployment](deployment.md), [release policy](releases.md) | [Latest verification](verification.md) |
 
 Keep local-first verification and existing authorization rules in [CONTRIBUTING](../CONTRIBUTING.md).

@@ -15,6 +15,8 @@ use runner::{ReplayError, replay};
 #[cfg(test)]
 mod capture_tests;
 #[cfg(test)]
+mod cpu_contract_tests;
+#[cfg(test)]
 mod item_mask_plan;
 #[cfg(test)]
 mod optional_recording_tests;

@@ -1,3 +1,5 @@
+mod cpu_observation;
+mod cpu_observation_types;
 mod projection_admission;
 mod projection_recipient;
 mod scalars;
@@ -23,6 +25,7 @@ pub use crate::protocol::v8::{
     validate_settings_context,
 };
 pub use crate::protocol::v8::{BoundPublication, ExpandedCapture, ProjectionError};
+pub use cpu_observation::observe_cpu_recipient;
 pub use projection_admission::{prepare_admission, prepare_expanded_admission};
 pub use projection_recipient::prepare_snapshot_pair;
 pub use scalars::GameplayVersion;
@@ -134,6 +137,12 @@ pub fn encode_server_message(
 mod admission_edge_tests;
 #[cfg(test)]
 mod archive_oil_tests;
+#[cfg(test)]
+mod cpu_observation_item_tests;
+#[cfg(test)]
+mod cpu_observation_privacy_tests;
+#[cfg(test)]
+mod cpu_observation_tests;
 #[cfg(test)]
 #[path = "frame_bound_tests.rs"]
 mod frame_bound_tests;

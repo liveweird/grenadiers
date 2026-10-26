@@ -2,6 +2,17 @@
 
 ## [Unreleased]
 
+## 0.3.80 — 2026-10-26
+
+### Added
+
+- Add pure CPU observation/intent contracts, bounded memory/work accounting, independent
+  seeded randomness and separate world/decision identities for single-player integration.
+- Derive CPU observations from the current recipient-filtered v11 projection, preserving
+  cloak and Invisible Bombs privacy; exercise ordinary accepted inputs through replay fixtures.
+- Define internal human/CPU controller profiles and document start, rematch, reconnect and
+  permanent-departure policy. Playable solo admission and planning remain the next increment.
+
 ## 0.3.79 — 2026-10-26
 
 ### Changed

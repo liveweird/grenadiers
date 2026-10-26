@@ -13,7 +13,7 @@ repeated approval for routine implementation choices. Entries are not delivery-d
 ## Current delivery — Claude review
 
 - [next] **ENG-REVIEW — finish the remaining agreed review work before CPU mode.** The user confirmed
-  this priority on 2026-10-25. The published source baseline is v0.3.74; detailed delivered
+  this priority on 2026-10-25. The published source baseline is v0.3.75; detailed delivered
   evidence and finding dispositions belong in the [quality-review record](docs/quality-review.md),
   not this backlog. Preserve privacy, exhaustive masks, coverage floors and local-first
   verification. Current release lanes and remaining accepted scope are:
@@ -31,10 +31,6 @@ repeated approval for routine implementation choices. Entries are not delivery-d
     close this scope. A reviewed tooling/cache/terrain/policy candidate is committed; finish
     final integration and acceptance. The separate web exact-optional candidate passes focused
     tests and independent review; complete its release checks before publication.
-  - **REV-DEPLOY:** add Compose PID/memory limits and Kubernetes ephemeral-storage/security-context
-    regression guards, then run actual runtime acceptance. Public ingress and NetworkPolicy wait
-    for a real hosting/network model. Resource/security guards are committed and reviewed with
-    focused tests passing; actual constrained-runtime acceptance and publication remain.
   - **REV-FAST:** measure a structured fast-feedback suite and fault detection while retaining
     exhaustive acceptance; sampling is not approved as a replacement.
   - **REV-PERF:** measure CSS/import opportunities and React commits at the 20 Hz publication

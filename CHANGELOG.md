@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## 0.3.75 — 2026-10-26
+
+### Changed
+
+- Bound Compose application memory/PIDs and Kubernetes ephemeral storage; reject weakened effective security contexts and invalid resource quantities in deployment checks.
+
 ## 0.3.74 — 2026-10-26
 
 ### Added

@@ -4,6 +4,31 @@ This archive preserves the older release records originally maintained in
 [`docs/releases.md`](../releases.md). Records remain in their original order; the current
 release procedure and current release record stay in the [release guide](../releases.md).
 
+## v0.3.74 — 2026-10-26
+
+[v0.3.74](https://github.com/liveweird/grenadiers/releases/tag/v0.3.74) shares 16 Rust-produced
+admission/snapshot frames across retained v8–v11 adapters, schemas and browser validators.
+Cases retain freeze, teleport and Oil differences, recipient privacy, identity and metadata
+negative controls. Production projection, schemas and gameplay remain unchanged. Independent review is clear.
+
+Full source-bound Rust acceptance at `28ab639e6dd1a7def1147b514480d8341d6c2163` passes in
+488.608s: 955 core / 316 ordinary server tests plus two doctests, all 4,194,304 masks in debug,
+release and official coverage, zero retries. Coverage is 18,049/19,738 lines (91.4429%).
+Full web acceptance passes 6,828 tests / 94 files in 286.25s with 91.24/89.87/90.12/93.60%
+coverage and local gzip JavaScript/CSS 337,162/36,695 bytes.
+[Integrated Linux debug/release units](https://github.com/liveweird/grenadiers/actions/runs/40373348609)
+pass at `5db1d0e46c14b7278fe854af9578567999b3ebdf`, with identical core/server/API inputs.
+Repository, lint, types and contract drift pass; dependency acceptance is unchanged.
+
+Accepted image source is `28ab639e6dd1a7def1147b514480d8341d6c2163`, image
+`sha256:4d4189e6dd868fb831f5aea82371320ba0d44b78da70fc77f406f6faeb4bf469`.
+Docker gzip JavaScript/CSS is 337,939/36,695 bytes. Trivy 0.74.0 reports zero fixable HIGH/CRITICAL
+findings. Eight Compose and eight Kubernetes cases each pass in 36.9s with exact-image/security/
+probe/resource checks; temporary projects/namespaces are removed. Localhost:8085 has verified
+health/readiness, CSP/cache and unchanged accepted HTML/JS/CSS/atlas bytes. Control is
+`.local-checkpoints/runtime/compose-v0.3.74.yaml`; `rollback-v0.3.73.yaml` retains the prior image.
+No gameplay, wire, artwork or migration change; distribution remains source prereleases.
+
 ## v0.3.73 — 2026-10-26
 
 [v0.3.73](https://github.com/liveweird/grenadiers/releases/tag/v0.3.73) adds competing-resume

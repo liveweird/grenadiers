@@ -40,7 +40,9 @@ docker compose down
 
 PostgreSQL is optional and disabled by default. The `persistence` Compose profile starts a local
 database, but the app only uses it when `DATABASE_URL` is explicitly set. No application schema
-exists yet.
+exists yet. The app container has a 256 MiB memory ceiling and a 128-process PID ceiling. These
+are local operational defaults, not measured hosting capacity. The optional PostgreSQL service
+continues to use the upstream image's resource profile.
 
 ## Local Kubernetes
 
@@ -61,6 +63,11 @@ manifests. The explicit rollout restart recreates the Pod after reusing the muta
 tag; applying unchanged manifests alone would leave the previous binary running. Then open <http://localhost:8085> or call the health endpoints above. The WebSocket
 origin allowlist accepts the `localhost:8085` and `127.0.0.1:8085` port-forward URLs.
 
+The committed `grenadiers-app:local` tag is a developer-cluster default. Deployment overlays for
+another environment supply that environment's exact accepted image reference; an immutable
+registry digest records the precise paired server/web image when one is available. Registry
+publication and authentication remain environment-specific operations.
+
 A port-forward remains attached to the selected pod even when started through a Service.
 After any rollout or fixture change, stop the old forward, wait for the replacement pod,
 start a new forward, and require successful health/readiness responses before opening the
@@ -69,6 +76,11 @@ game or running browser tests. A healthy replacement does not repair an old forw
 The base manifests contain no credentials or PostgreSQL resources. If durable data is introduced,
 supply `DATABASE_URL` from a Kubernetes Secret and deploy the database separately. Readiness has a
 three-second probe timeout because a configured database check may take up to two seconds.
+The app requests 50 millicores, 64 MiB memory, and 16 MiB ephemeral storage, with limits of
+500 millicores, 256 MiB memory, and 64 MiB ephemeral storage. The ephemeral-storage values are
+explicit local scheduling and eviction budgets, not storage capacity or performance guarantees.
+Kubernetes does not define a portable per-Pod PID field; cluster operators apply kubelet/runtime
+PID policy separately when needed.
 
 The manifests can be checked offline with `kubectl kustomize k8s`. A successful render validates
 composition only; image startup, probes, WebSockets, and cluster policy still require a live deploy.
@@ -81,8 +93,13 @@ commit. Install `kubectl`, kubeconform, and the web package's locked npm depende
 The CI workflow downloads the Linux
 kubeconform archive and verifies its SHA-256 inherited from Flow before running this gate.
 The gate checks the same rendered YAML for one replica, the Recreate strategy, absence
-of an autoscaler targeting the game Deployment, and consistent Service routing. It rejects
-duplicate YAML keys. Local installations require the appropriate platform binary. Schema validation may require
+of an autoscaler targeting the game Deployment, consistent Service routing, the committed
+restricted Pod Security namespace labels, effective non-root UID/GID and restricted container
+security context, disabled service-account token automounting, and positive CPU, memory, and
+ephemeral-storage requests and limits. Container overrides cannot weaken the inherited identity or
+seccomp settings, and capabilities cannot be added after dropping `ALL`. It rejects duplicate YAML
+keys. Resource quantities may be adjusted by deployment overlays as long as they remain present and
+positive. Local installations require the appropriate platform binary. Schema validation may require
 network access to the pinned schemas; successful rendering alone does not pass this gate.
 
 The archived feature rollout notes retain their original release versions and catalog counts.

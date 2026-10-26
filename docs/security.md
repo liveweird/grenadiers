@@ -137,10 +137,14 @@ For Compose app+database use a network URL with hostname `postgres:5432`; for a 
 use `127.0.0.1:5436`. Never reuse the local demo password in a deployment.
 
 The application container runs without root, a writable root filesystem, Linux capabilities, or
-elevated privileges. The optional Compose PostgreSQL service uses the upstream image defaults.
+elevated privileges. Kubernetes also disables service-account token automounting and uses the
+runtime-default seccomp profile; the namespace applies restricted Pod Security enforcement,
+auditing, and warnings. The optional Compose PostgreSQL service uses the upstream image defaults.
 The manual `checks` workflow builds one Compose image in `browser-image` and scans it there, then
 the `browser` jobs run the default, classic, and per-item suites against that image.
-Publishing and deploying the application by immutable registry digest remains outstanding; exact release tags alone do not provide immutable provenance.
+The checked-in mutable image tag is for local developer clusters. Other environments supply their
+exact accepted image reference; immutable registry digests identify exact image content, while
+release tags alone do not provide immutable provenance.
 
 Rooms and capabilities are in-memory and process-local. Production replay recording is disabled;
 explicit test recordings contain private seeds and remain subject to the same redaction rules.

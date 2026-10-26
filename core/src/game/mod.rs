@@ -26,6 +26,7 @@
 
 pub mod arena;
 pub mod assignment;
+pub(crate) mod blast_geometry;
 mod bomb_motion;
 pub mod bombs;
 pub mod damage;

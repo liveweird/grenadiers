@@ -1,9 +1,9 @@
 //! Pure, transport-neutral contracts for server-controlled players.
 //!
-//! This module deliberately contains no policy or authoritative simulation state.
-//! A server adapter projects a recipient-filtered view into [`Observation`], and a
-//! policy may return only an ordinary [`Intent`].
+//! Policies consume recipient-filtered [`Observation`] values rather than
+//! authoritative simulation state and return only ordinary [`Intent`] values.
 
+pub mod forecast;
 mod identity;
 mod intent;
 mod memory;

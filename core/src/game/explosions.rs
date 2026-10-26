@@ -1,8 +1,9 @@
 use std::collections::{BTreeMap, BTreeSet};
+use std::ops::ControlFlow;
 
 use super::arena::Terrain;
-use super::bombs::{BlastKind, Bomb, BombTrigger};
-use super::input::Direction;
+use super::blast_geometry::{BlastBomb, BlastField, BlastSource, BlastVisit, visit_blast};
+use super::bombs::BombTrigger;
 use super::types::{CellId, EntityId, Tick};
 use super::world::World;
 
@@ -35,6 +36,10 @@ pub(crate) fn plan_with_contacts(
         .values()
         .map(|bomb| (bomb.cell(), bomb.id()))
         .collect();
+    let field = WorldBlastField {
+        world,
+        bombs_by_cell: &bombs_by_cell,
+    };
     let mut pending: BTreeSet<_> = world
         .bombs
         .values()
@@ -70,143 +75,78 @@ pub(crate) fn plan_with_contacts(
         let Some(bomb) = world.bombs.get(&id) else {
             continue;
         };
-        if bomb.blast() == BlastKind::Power {
-            plan_power_blast(world, *bomb, contact_targets, &mut pending, &mut result);
-            continue;
-        }
-        result.flames.insert(bomb.cell());
-        for direction in [
-            Direction::North,
-            Direction::East,
-            Direction::South,
-            Direction::West,
-        ] {
-            trace_ray(
-                world,
-                &bombs_by_cell,
-                *bomb,
-                direction,
-                contact_targets,
-                &mut pending,
-                &mut result,
-            );
-        }
+        let completed = visit_blast(
+            &field,
+            BlastSource {
+                cell: bomb.cell(),
+                range: bomb.range(),
+                kind: bomb.blast(),
+            },
+            |visit| {
+                apply_visit(visit, contact_targets, &mut pending, &mut result);
+                ControlFlow::<()>::Continue(())
+            },
+        );
+        debug_assert!(completed.is_continue());
     }
     result
 }
 
-fn plan_power_blast(
-    world: &World,
-    bomb: Bomb,
+fn apply_visit(
+    visit: BlastVisit,
     contact_targets: &BTreeSet<EntityId>,
     pending: &mut BTreeSet<EntityId>,
     result: &mut ExplosionPlan,
 ) {
-    for row in 0..super::arena::ARENA_HEIGHT {
-        for column in 0..super::arena::ARENA_WIDTH {
-            let cell = CellId::new(column, row);
-            let distance = u32::from(column.abs_diff(bomb.cell().column))
-                + u32::from(row.abs_diff(bomb.cell().row));
-            if distance > u32::from(bomb.range())
-                || world.arena.terrain(cell) != Some(Terrain::Floor)
-            {
-                continue;
-            }
-            result.flames.insert(cell);
-            if world.oil.unlit(cell) {
-                result.ignited_oil.insert(cell);
-            }
-            if world.arena.blocks().contains(&cell) {
-                result.destroyed_blocks.insert(cell);
-            }
-        }
+    result.flames.insert(visit.cell);
+    if visit.unlit_oil {
+        result.ignited_oil.insert(visit.cell);
     }
-    for other in world.bombs.values().filter(|other| {
-        let cell = other.cell();
-        let distance = u32::from(cell.column.abs_diff(bomb.cell().column))
-            + u32::from(cell.row.abs_diff(bomb.cell().row));
-        distance <= u32::from(bomb.range()) && world.arena.terrain(cell) == Some(Terrain::Floor)
-    }) {
-        if matches!(other.trigger(), BombTrigger::Contact) {
-            if contact_targets.contains(&other.id()) {
-                pending.insert(other.id());
+    if visit.soft_block {
+        result.destroyed_blocks.insert(visit.cell);
+    }
+    if let Some(bomb) = visit.bomb {
+        if bomb.contact {
+            if contact_targets.contains(&bomb.id) {
+                pending.insert(bomb.id);
             } else {
-                result.destroyed_mines.insert(other.id());
+                result.destroyed_mines.insert(bomb.id);
             }
         } else {
-            pending.insert(other.id());
+            pending.insert(bomb.id);
         }
     }
 }
 
-fn trace_ray(
-    world: &World,
-    bombs_by_cell: &BTreeMap<CellId, EntityId>,
-    bomb: Bomb,
-    direction: Direction,
-    contact_targets: &BTreeSet<EntityId>,
-    pending: &mut BTreeSet<EntityId>,
-    result: &mut ExplosionPlan,
-) {
-    let mut cell = bomb.cell();
-    for _ in 0..bomb.range() {
-        let Some(next) = adjacent(cell, direction) else {
-            break;
-        };
-        cell = next;
-        if world.arena.terrain(cell) != Some(Terrain::Floor) {
-            break;
-        }
-        result.flames.insert(cell);
-        if world.oil.unlit(cell) {
-            result.ignited_oil.insert(cell);
-            if bomb.blast() == BlastKind::Standard {
-                break;
-            }
-        }
-        if world.arena.blocks().contains(&cell) {
-            result.destroyed_blocks.insert(cell);
-            if bomb.blast() == BlastKind::Standard {
-                break;
-            }
-        }
-        if let Some(id) = bombs_by_cell.get(&cell) {
-            let other = world
-                .bombs
-                .get(id)
-                .expect("bomb-cell index references existing bombs");
-            if matches!(other.trigger(), BombTrigger::Contact) {
-                if contact_targets.contains(id) {
-                    pending.insert(*id);
-                } else {
-                    result.destroyed_mines.insert(*id);
-                }
-            } else {
-                pending.insert(*id);
-                break;
-            }
-        }
-    }
+struct WorldBlastField<'a> {
+    world: &'a World,
+    bombs_by_cell: &'a BTreeMap<CellId, EntityId>,
 }
 
-fn adjacent(cell: CellId, direction: Direction) -> Option<CellId> {
-    match direction {
-        Direction::North => cell
-            .row
-            .checked_sub(1)
-            .map(|row| CellId::new(cell.column, row)),
-        Direction::East => cell
-            .column
-            .checked_add(1)
-            .map(|column| CellId::new(column, cell.row)),
-        Direction::South => cell
-            .row
-            .checked_add(1)
-            .map(|row| CellId::new(cell.column, row)),
-        Direction::West => cell
-            .column
-            .checked_sub(1)
-            .map(|column| CellId::new(column, cell.row)),
+impl BlastField for WorldBlastField<'_> {
+    fn is_floor(&self, cell: CellId) -> bool {
+        self.world.arena.terrain(cell) == Some(Terrain::Floor)
+    }
+
+    fn has_soft_block(&self, cell: CellId) -> bool {
+        self.world.arena.blocks().contains(&cell)
+    }
+
+    fn has_unlit_oil(&self, cell: CellId) -> bool {
+        self.world.oil.unlit(cell)
+    }
+
+    fn bomb_at(&self, cell: CellId) -> Option<BlastBomb> {
+        let id = *self.bombs_by_cell.get(&cell)?;
+        let bomb = self
+            .world
+            .bombs
+            .get(&id)
+            .expect("bomb-cell index references existing bombs");
+        Some(BlastBomb {
+            id,
+            contact: matches!(bomb.trigger(), BombTrigger::Contact),
+        })
     }
 }
 

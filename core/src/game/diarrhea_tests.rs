@@ -1,8 +1,8 @@
 use std::collections::{BTreeMap, BTreeSet};
 
-use crate::game::arena::{ARENA_CELL_COUNT, ARENA_HEIGHT, ARENA_WIDTH, Arena, Terrain};
+use crate::game::arena::Arena;
 use crate::game::inventory::{Equipment, SpecialWeapon};
-use crate::game::test_support::add_test_bomb_with_deadline;
+use crate::game::test_support::{add_test_bomb_with_deadline, open_border_arena};
 use crate::game::types::UNITS_PER_CELL;
 use crate::game::{
     ActorInit, CellId, Direction, EffectKind, EnabledItems, EntityId, InputAction, Pickup,
@@ -15,20 +15,7 @@ const CENTER: CellId = CellId::new(7, 6);
 const OTHER: CellId = CellId::new(10, 6);
 
 fn arena() -> Arena {
-    arena_with_blocks(BTreeSet::new())
-}
-
-fn arena_with_blocks(blocks: BTreeSet<CellId>) -> Arena {
-    let mut terrain = [Terrain::Floor; ARENA_CELL_COUNT];
-    for row in 0..ARENA_HEIGHT {
-        for column in 0..ARENA_WIDTH {
-            if column == 0 || row == 0 || column == ARENA_WIDTH - 1 || row == ARENA_HEIGHT - 1 {
-                terrain[usize::from(row) * usize::from(ARENA_WIDTH) + usize::from(column)] =
-                    Terrain::Wall;
-            }
-        }
-    }
-    Arena::new(terrain, blocks, [CellId::new(1, 1), CellId::new(13, 11)]).unwrap()
+    open_border_arena(BTreeSet::new())
 }
 
 fn state_at(tick: Tick, shared: bool, pickup: bool) -> State {
@@ -350,7 +337,7 @@ fn disabled_diarrhea_is_rejected_in_every_pickup_layer() {
     for layer in 0..3 {
         let pickup = BTreeMap::from([(CENTER, PickupKind::Diarrhea)]);
         let world = World::with_pickups(
-            arena_with_blocks(if layer == 0 {
+            open_border_arena(if layer == 0 {
                 BTreeSet::from([CENTER])
             } else {
                 BTreeSet::new()

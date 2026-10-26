@@ -1,50 +1,20 @@
 import { createResponsiveBrowserContexts } from '../tests/support/browser-contexts'
-import { expect, test, type Page } from '@playwright/test'
+import { expect, test } from '@playwright/test'
 import { latestSnapshot, observeGame, visibleActor, type ObservedGame } from '../tests/support/duel'
+import {
+  effectTicks, expectExact600TickExpiry, latestPublicRoom, ownCollectionTick,
+  plantBombWithNativeSpace,
+} from '../tests/support/effect-pickups'
 import { moveTo } from '../tests/support/movement'
 import { admissionBaseline, disconnectTransport, installTransportProbe } from '../tests/support/reconnect'
 import { applyItemSettings } from '../tests/support/settings'
-import type { GameServerMessage } from '../../web/src/game/v11/schema'
 
 test.beforeAll(() => {
   expect(process.env.E2E_SHORT_FLAME_FIXTURE, 'Configure the documented production Short Flame seed')
     .toBe('arena-v2-short-flame')
 })
 
-async function plant(page: Page, game: ObservedGame): Promise<void> {
-  const previous = latestSnapshot(game)!.state.bombs.map((bomb) => bomb.id)
-  await page.keyboard.press('Space')
-  await expect.poll(() => latestSnapshot(game)?.state.bombs
-    .some((bomb) => !previous.includes(bomb.id)), { intervals: [15] }).toBe(true)
-}
-
-const shortTicks = (game: ObservedGame) => visibleActor(latestSnapshot(game), 'one')?.effects
-  .find((effect) => effect.kind === 'shortFlame')?.remainingTicks ?? 0
-
-const publicRoom = (game: ObservedGame) => game.frames.filter((frame) =>
-  frame.type === 'admitted' || frame.type === 'roomState' || frame.type === 'snapshot').at(-1)?.room
-
-function collectionTick(game: ObservedGame): number {
-  const event = game.frames.flatMap((frame) => frame.type === 'snapshot' ? frame.events : [])
-    .find(({ kind }) => kind.type === 'pickupCollected' && kind.seat === 'one' && kind.kind === 'shortFlame')
-  expect(event, 'The real pickup event establishes the effect deadline').toBeDefined()
-  return event!.tick
-}
-
-function expectExactShortDeadline(game: ObservedGame, collectedAt: number): void {
-  const expiresAt = collectedAt + 600
-  const frames = game.frames.filter((frame): frame is Extract<GameServerMessage, { type: 'snapshot' }> => frame.type === 'snapshot'
-    && frame.state.physicalTick >= collectedAt)
-  expect(frames.length).toBeGreaterThan(1)
-  for (const frame of frames) {
-    const effect = visibleActor(frame, 'one')?.effects.find((value) => value.kind === 'shortFlame')
-    expect(effect?.remainingTicks ?? 0, `Short Flame at physical tick ${frame.state.physicalTick}`)
-      .toBe(Math.max(0, expiresAt - frame.state.physicalTick))
-  }
-  const firstExpired = frames.find((frame) => frame.state.physicalTick >= expiresAt)
-  expect(firstExpired, 'A publication must cross the exact effect deadline').toBeDefined()
-  expect(frames.some((frame) => frame.state.physicalTick < expiresAt)).toBe(true)
-}
+const shortTicks = (game: ObservedGame) => effectTicks(game, 'shortFlame')
 
 test('two browsers collect Short Flame and restore base bomb range after its exact deadline', async ({ browser }, testInfo) => {
   const contexts = await createResponsiveBrowserContexts(browser)
@@ -58,7 +28,7 @@ test('two browsers collect Short Flame and restore base bomb range after its exa
     const code = one.getByLabel('Room invitation code', { exact: true })
     await expect(code).toHaveText(/^[A-HJ-NP-Z2-9]{8}$/)
     await applyItemSettings(one, games[0], [{ id: 'shortFlame', label: 'Short flame' }])
-    await expect.poll(() => publicRoom(games[0])?.settings.enabledItems).toEqual(['shortFlame'])
+    await expect.poll(() => latestPublicRoom(games[0])?.settings.enabledItems).toEqual(['shortFlame'])
     await two.getByRole('textbox', { name: 'Room code', exact: true }).fill(await code.innerText())
     await two.getByRole('button', { name: 'Join room', exact: true }).click()
     await Promise.all([one, two].map((page) => page.getByRole('button', { name: 'Ready', exact: true }).click()))
@@ -69,7 +39,7 @@ test('two browsers collect Short Flame and restore base bomb range after its exa
     })
     await one.getByRole('region', { name: 'Grenadiers courtyard' }).click()
     await moveTo(one, games[0], { column: 2, row: 1 })
-    await plant(one, games[0])
+    await plantBombWithNativeSpace(one, games[0])
     await moveTo(one, games[0], { column: 1, row: 1 })
     await moveTo(one, games[0], { column: 1, row: 2 })
     await expect.poll(() => latestSnapshot(games[0])!.state.bombs.length
@@ -86,10 +56,9 @@ test('two browsers collect Short Flame and restore base bomb range after its exa
     await moveTo(one, games[0], { column: 1, row: 1 })
     await moveTo(one, games[0], { column: 3, row: 1 })
     await Promise.all(games.map((game) => expect.poll(() => shortTicks(game)).toBeGreaterThan(0)))
-    const collectedAt = games.map(collectionTick)
+    const collectedAt = games.map((game) => ownCollectionTick(game, 'shortFlame'))
     expect(collectedAt[0]).toBe(collectedAt[1])
-    await plant(one, games[0])
-    const cursedBomb = latestSnapshot(games[0])!.state.bombs[0].id
+    const cursedBomb = await plantBombWithNativeSpace(one, games[0])
     await Promise.all(games.map((game) => expect.poll(() => latestSnapshot(game)?.state.bombs)
       .toContainEqual(expect.objectContaining({ id: cursedBomb, range: 1, trigger: {
         type: 'timed', remainingTicks: expect.any(Number), paused: false,
@@ -123,10 +92,12 @@ test('two browsers collect Short Flame and restore base bomb range after its exa
     expect((await admissionBaseline(one))?.stableCapability).toBe(true)
     await Promise.all(games.map((game) => expect.poll(() => shortTicks(game)).toBeGreaterThan(0)))
     await Promise.all(games.map((game) => expect.poll(() => shortTicks(game), { intervals: [15] }).toBe(0)))
-    games.forEach((game, index) => expectExactShortDeadline(game, collectedAt[index]))
+    games.forEach((game, index) => expectExact600TickExpiry(
+      game, collectedAt[index], 'shortFlame', 'Short Flame',
+    ))
     expect(visibleActor(latestSnapshot(games[0]), 'one')?.alive).toBe(true)
     await one.getByRole('region', { name: 'Grenadiers courtyard' }).click()
-    await plant(one, games[0])
+    await plantBombWithNativeSpace(one, games[0])
     await Promise.all(games.map((game) => expect.poll(() => latestSnapshot(game)?.state.bombs)
       .toContainEqual(expect.objectContaining({ range: 2 }))))
     await Promise.all(games.map((game) => expect.poll(() =>

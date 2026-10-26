@@ -1,11 +1,11 @@
 use std::collections::{BTreeMap, BTreeSet};
 
 use super::{ActorInit, RoundResult, State};
-use crate::game::arena::{ARENA_CELL_COUNT, ARENA_HEIGHT, ARENA_WIDTH, Arena, Terrain};
+use crate::game::arena::Arena;
 use crate::game::input::Direction;
 use crate::game::pickups::PickupKind;
 use crate::game::rules::RulesConfig;
-use crate::game::test_support::add_test_bomb_with_deadline;
+use crate::game::test_support::{add_test_bomb_with_deadline, open_border_arena};
 use crate::game::types::{CellId, EntityId, Position, SeatId, SpeedLevel, Tick};
 use crate::game::world::World;
 use crate::game::{DamagePreventionSource, EnabledItems, Equipment, StepEventKind};
@@ -19,15 +19,7 @@ mod heart_damage_tests;
 mod shield_damage_tests;
 
 fn arena_with_blocks(blocks: BTreeSet<CellId>) -> Arena {
-    let mut terrain = [Terrain::Floor; ARENA_CELL_COUNT];
-    for row in 0..ARENA_HEIGHT {
-        for column in 0..ARENA_WIDTH {
-            if column == 0 || row == 0 || column == ARENA_WIDTH - 1 || row == ARENA_HEIGHT - 1 {
-                terrain[usize::from(row * ARENA_WIDTH + column)] = Terrain::Wall;
-            }
-        }
-    }
-    Arena::new(terrain, blocks, [CellId::new(1, 1), CellId::new(13, 11)]).unwrap()
+    open_border_arena(blocks)
 }
 
 fn actor(id: u32, seat: SeatId, cell: CellId) -> ActorInit {
@@ -74,7 +66,7 @@ fn expanded_state_with_items(
 
 fn concealed_state() -> State {
     let world = World::with_pickups(
-        arena_with_blocks(BTreeSet::from([TARGET])),
+        open_border_arena(BTreeSet::from([TARGET])),
         BTreeMap::from([(TARGET, PickupKind::BombCapacity)]),
         BTreeMap::new(),
         BTreeMap::new(),
@@ -180,7 +172,7 @@ fn reveal_followed_by_a_new_blast_in_the_same_tick_burns_the_pickup() {
 #[test]
 fn exposed_pickup_burns_without_shielding_cells_behind_it() {
     let world = World::with_pickups(
-        arena_with_blocks(BTreeSet::new()),
+        open_border_arena(BTreeSet::new()),
         BTreeMap::new(),
         BTreeMap::new(),
         BTreeMap::from([(TARGET, PickupKind::MovementSpeed)]),
@@ -198,7 +190,7 @@ fn exposed_pickup_burns_without_shielding_cells_behind_it() {
 
 #[test]
 fn concealed_and_pending_layers_do_not_change_public_state() {
-    let blocked = arena_with_blocks(BTreeSet::from([TARGET]));
+    let blocked = open_border_arena(BTreeSet::from([TARGET]));
     let hidden = state_in(
         World::with_pickups(
             blocked.clone(),
@@ -212,7 +204,7 @@ fn concealed_and_pending_layers_do_not_change_public_state() {
     assert_eq!(hidden.public_view(), no_hidden.public_view());
     assert!(!format!("{:?}", hidden.world()).contains("BlastRange"));
 
-    let open = arena_with_blocks(BTreeSet::new());
+    let open = open_border_arena(BTreeSet::new());
     let pending = state_in(
         World::with_pickups(
             open.clone(),
@@ -228,7 +220,7 @@ fn concealed_and_pending_layers_do_not_change_public_state() {
 
 #[test]
 fn completed_result_freezes_pending_reveal_and_exposed_burn() {
-    let open = arena_with_blocks(BTreeSet::new());
+    let open = open_border_arena(BTreeSet::new());
     let mut world = World::with_pickups(
         open,
         BTreeMap::new(),
@@ -260,7 +252,7 @@ fn completed_result_freezes_pending_reveal_and_exposed_burn() {
 fn ordinary_heart_pickup_replaces_equipment_and_is_consumed_once() {
     let cell = CellId::new(5, 5);
     let world = World::with_pickups(
-        arena_with_blocks(BTreeSet::new()),
+        open_border_arena(BTreeSet::new()),
         BTreeMap::new(),
         BTreeMap::new(),
         BTreeMap::from([(cell, PickupKind::Heart)]),
@@ -306,7 +298,7 @@ fn ordinary_heart_pickup_replaces_equipment_and_is_consumed_once() {
 fn ordinary_kick_pickup_uses_the_equipment_replacement_path() {
     let cell = CellId::new(5, 5);
     let world = World::with_pickups(
-        arena_with_blocks(BTreeSet::new()),
+        open_border_arena(BTreeSet::new()),
         BTreeMap::new(),
         BTreeMap::new(),
         BTreeMap::from([(cell, PickupKind::Kick)]),
@@ -338,7 +330,7 @@ fn second_heart_during_grace_does_not_extend_or_repeat_prevention() {
     let cell = CellId::new(5, 5);
     let mut state = expanded_state_in(
         World::with_pickups(
-            arena_with_blocks(BTreeSet::new()),
+            open_border_arena(BTreeSet::new()),
             BTreeMap::new(),
             BTreeMap::new(),
             BTreeMap::from([(cell, PickupKind::Heart)]),

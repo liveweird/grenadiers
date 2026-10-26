@@ -1,6 +1,8 @@
 mod client;
 mod event_projection;
 mod events;
+#[cfg(test)]
+mod expanded_frame_test_support;
 mod item_foundation;
 mod projection;
 mod scalar_input;

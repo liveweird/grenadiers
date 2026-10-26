@@ -9,6 +9,12 @@
 - Import the used Mantine stylesheet dependency closure in canonical order, preserve rendered UI, and ratchet the CSS gzip budget after measured savings.
 - Record real React publication measurements and the decision to retain the current subscription model.
 
+## 0.3.78 — 2026-10-26
+
+### Changed
+
+- Share equivalent expanded frame-bound builders, open-border test arenas and timed-effect browser helpers while preserving assertions, seeds and scenario identities.
+
 ## 0.3.77 — 2026-10-26
 
 ### Changed

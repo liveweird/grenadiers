@@ -1,0 +1,309 @@
+use std::collections::{BTreeMap, BTreeSet};
+
+use crate::cpu::{
+    BombKnowledge, MAX_OBSERVED_BOMBS, MemoryKey, Observation, ObservedBomb, ObservedBombTrigger,
+    WorkBudget,
+};
+use crate::game::arena::ARENA_CELL_COUNT;
+use crate::game::{CellId, EntityId, MAX_OIL_BARRELS, OilBarrelState, Tick};
+
+use super::ForecastFailure;
+use super::intervals::take;
+
+const MAX_FLAME_CHANGES: usize = MAX_OBSERVED_BOMBS * ARENA_CELL_COUNT;
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(super) struct FlameChange {
+    pub(super) at: Tick,
+    pub(super) cell: CellId,
+    pub(super) expires_at: Option<Tick>,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct ForecastEvolution {
+    key: MemoryKey,
+    basis_tick: Tick,
+    horizon_end: Tick,
+    bomb_owners: Vec<(EntityId, EntityId)>,
+    bomb_removals: Vec<(EntityId, Tick)>,
+    block_removals: Vec<(CellId, Tick)>,
+    oil_ignitions: Vec<(CellId, Tick)>,
+    flame_changes: Vec<FlameChange>,
+}
+
+impl ForecastEvolution {
+    pub(super) fn new(
+        observation: &Observation,
+        horizon_end: Tick,
+    ) -> Result<Self, ForecastFailure> {
+        let parts = observation.parts();
+        let BombKnowledge::Visible(bombs) = &parts.bombs else {
+            return Err(ForecastFailure::BombKnowledgeUnavailable);
+        };
+        if bombs.len() > MAX_OBSERVED_BOMBS {
+            return Err(ForecastFailure::IntervalCapacity);
+        }
+        Ok(Self {
+            key: MemoryKey {
+                world: parts.world,
+                cpu_seat: parts.recipient,
+            },
+            basis_tick: parts.tick,
+            horizon_end,
+            bomb_owners: bombs.iter().map(|bomb| (bomb.id, bomb.owner)).collect(),
+            bomb_removals: Vec::new(),
+            block_removals: Vec::new(),
+            oil_ignitions: Vec::new(),
+            flame_changes: Vec::new(),
+        })
+    }
+
+    pub(super) fn record(
+        &mut self,
+        tick: Tick,
+        removed_bombs: impl IntoIterator<Item = EntityId>,
+        destroyed_blocks: impl IntoIterator<Item = CellId>,
+        ignited_oil: impl IntoIterator<Item = CellId>,
+        flames: impl IntoIterator<Item = FlameChange>,
+        work: &mut WorkBudget,
+    ) -> Result<(), ForecastFailure> {
+        let removed = removed_bombs
+            .into_iter()
+            .filter(|id| self.bomb_owners.iter().any(|(known, _)| known == id))
+            .collect::<Vec<_>>();
+        let blocks = destroyed_blocks.into_iter().collect::<Vec<_>>();
+        let oil = ignited_oil.into_iter().collect::<Vec<_>>();
+        let flames = flames.into_iter().collect::<Vec<_>>();
+        if self.bomb_removals.len() + removed.len() > MAX_OBSERVED_BOMBS
+            || self.block_removals.len() + blocks.len() > ARENA_CELL_COUNT
+            || self.oil_ignitions.len() + oil.len() > MAX_OIL_BARRELS
+            || self.flame_changes.len() + flames.len() > MAX_FLAME_CHANGES
+        {
+            return Err(ForecastFailure::IntervalCapacity);
+        }
+        let units = removed.len() + blocks.len() + oil.len() + flames.len() + 1;
+        take(
+            work,
+            u32::try_from(units).map_err(|_| ForecastFailure::WorkExhausted)?,
+        )?;
+        self.bomb_removals
+            .extend(removed.into_iter().map(|id| (id, tick)));
+        self.block_removals
+            .extend(blocks.into_iter().map(|cell| (cell, tick)));
+        self.oil_ignitions
+            .extend(oil.into_iter().map(|cell| (cell, tick)));
+        self.flame_changes.extend(flames);
+        Ok(())
+    }
+
+    #[must_use]
+    pub fn matches_scene(&self, basis: &Observation, current: &Observation) -> bool {
+        let old = basis.parts();
+        let new = current.parts();
+        let Some(elapsed) = new.tick.0.checked_sub(old.tick.0) else {
+            return false;
+        };
+        if old.tick != self.basis_tick
+            || new.tick >= self.horizon_end
+            || (MemoryKey {
+                world: old.world,
+                cpu_seat: old.recipient,
+            }) != self.key
+            || old.world != new.world
+            || old.recipient != new.recipient
+            || old.rules.version != new.rules.version
+            || old.rules.tick_rate != new.rules.tick_rate
+            || old.rules.settings != new.rules.settings
+            || u64::from(old.rules.running_updates).checked_add(elapsed)
+                != Some(u64::from(new.rules.running_updates))
+            || u64::from(old.rules.remaining_ticks).checked_sub(elapsed)
+                != Some(u64::from(new.rules.remaining_ticks))
+            || old.arena.width != new.arena.width
+            || old.arena.height != new.arena.height
+            || old.arena.terrain != new.arena.terrain
+            || old.pickups != new.pickups
+        {
+            return false;
+        }
+        self.blocks_match(basis, current)
+            && self.bombs_match(basis, current, elapsed)
+            && self.oil_matches(basis, current)
+            && self.flames_match(basis, current)
+    }
+
+    #[must_use]
+    pub fn expected_live_bombs(&self, owner: EntityId, tick: Tick) -> Option<u16> {
+        if tick < self.basis_tick || tick >= self.horizon_end {
+            return None;
+        }
+        u16::try_from(
+            self.bomb_owners
+                .iter()
+                .filter(|(id, bomb_owner)| *bomb_owner == owner && !self.removed(*id, tick))
+                .count(),
+        )
+        .ok()
+    }
+
+    fn blocks_match(&self, basis: &Observation, current: &Observation) -> bool {
+        let expected = basis
+            .parts()
+            .arena
+            .blocks
+            .iter()
+            .copied()
+            .filter(|cell| {
+                !self
+                    .block_removals
+                    .iter()
+                    .any(|(removed, at)| removed == cell && *at <= current.parts().tick)
+            })
+            .collect::<BTreeSet<_>>();
+        current
+            .parts()
+            .arena
+            .blocks
+            .iter()
+            .copied()
+            .collect::<BTreeSet<_>>()
+            == expected
+    }
+
+    fn bombs_match(&self, basis: &Observation, current: &Observation, elapsed: u64) -> bool {
+        let (BombKnowledge::Visible(old), BombKnowledge::Visible(new)) =
+            (&basis.parts().bombs, &current.parts().bombs)
+        else {
+            return false;
+        };
+        let expected_count = old
+            .iter()
+            .filter(|bomb| !self.removed(bomb.id, current.parts().tick))
+            .count();
+        new.len() == expected_count
+            && old
+                .iter()
+                .filter(|bomb| !self.removed(bomb.id, current.parts().tick))
+                .all(|bomb| {
+                    new.iter()
+                        .any(|candidate| bomb_matches(*bomb, *candidate, elapsed))
+                })
+    }
+
+    fn oil_matches(&self, basis: &Observation, current: &Observation) -> bool {
+        let old = &basis.parts().oil;
+        let new = &current.parts().oil;
+        old.len() == new.len()
+            && old.iter().all(|oil| {
+                let expected = if self
+                    .oil_ignitions
+                    .iter()
+                    .any(|(cell, at)| *cell == oil.cell && *at <= current.parts().tick)
+                {
+                    OilBarrelState::Burning
+                } else {
+                    oil.state
+                };
+                new.iter()
+                    .any(|candidate| candidate.cell == oil.cell && candidate.state == expected)
+            })
+    }
+
+    fn flames_match(&self, basis: &Observation, current: &Observation) -> bool {
+        let tick = current.parts().tick;
+        let mut expected = basis
+            .parts()
+            .flames
+            .iter()
+            .filter(|flame| {
+                !basis
+                    .parts()
+                    .oil
+                    .iter()
+                    .any(|oil| oil.cell == flame.cell && oil.state == OilBarrelState::Burning)
+            })
+            .filter_map(|flame| {
+                let expires = basis
+                    .parts()
+                    .tick
+                    .0
+                    .checked_add(u64::from(flame.remaining_ticks))
+                    .map(Tick)?;
+                (expires > tick).then_some((flame.cell, expires))
+            })
+            .collect::<BTreeMap<_, _>>();
+        for change in self.flame_changes.iter().filter(|change| change.at <= tick) {
+            if let Some(expires) = change.expires_at {
+                if expires > tick {
+                    expected
+                        .entry(change.cell)
+                        .and_modify(|old| *old = (*old).max(expires))
+                        .or_insert(expires);
+                }
+            } else {
+                expected.remove(&change.cell);
+            }
+        }
+        expected.retain(|_, expires| *expires > tick);
+        let actual = current
+            .parts()
+            .flames
+            .iter()
+            .filter(|flame| {
+                !current
+                    .parts()
+                    .oil
+                    .iter()
+                    .any(|oil| oil.cell == flame.cell && oil.state == OilBarrelState::Burning)
+            })
+            .map(|flame| {
+                tick.0
+                    .checked_add(u64::from(flame.remaining_ticks))
+                    .map(|expires| (flame.cell, Tick(expires)))
+            })
+            .collect::<Option<BTreeMap<_, _>>>();
+        actual.is_some_and(|actual| actual == expected)
+    }
+
+    fn removed(&self, id: EntityId, tick: Tick) -> bool {
+        self.bomb_removals
+            .iter()
+            .any(|(removed, at)| *removed == id && *at <= tick)
+    }
+}
+
+fn bomb_matches(before: ObservedBomb, after: ObservedBomb, elapsed: u64) -> bool {
+    before.id == after.id
+        && before.cell == after.cell
+        && before.owner == after.owner
+        && before.range == after.range
+        && before.blast == after.blast
+        && before.unknown == after.unknown
+        && trigger_matches(before.trigger, after.trigger, elapsed)
+}
+
+fn trigger_matches(before: ObservedBombTrigger, after: ObservedBombTrigger, elapsed: u64) -> bool {
+    match (before, after) {
+        (
+            ObservedBombTrigger::Timed {
+                remaining_ticks: old,
+                paused: old_pause,
+            },
+            ObservedBombTrigger::Timed {
+                remaining_ticks: new,
+                paused: new_pause,
+            },
+        ) => {
+            old_pause == new_pause
+                && if old_pause {
+                    old == new
+                } else {
+                    u64::from(old).checked_sub(elapsed) == Some(u64::from(new))
+                }
+        }
+        (ObservedBombTrigger::Remote, ObservedBombTrigger::Remote)
+        | (ObservedBombTrigger::Contact, ObservedBombTrigger::Contact) => true,
+        _ => false,
+    }
+}
+
+const _: () = assert!(MAX_FLAME_CHANGES == 3_120);

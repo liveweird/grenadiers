@@ -1,6 +1,7 @@
 //! Bounded hazard forecasting from recipient-visible facts.
 
 mod engine;
+mod evolution;
 mod history;
 mod intervals;
 mod model;
@@ -12,6 +13,7 @@ use crate::game::{BlastKind, CellId, EntityId, Tick};
 use super::MemoryKey;
 
 pub use engine::forecast;
+pub use evolution::ForecastEvolution;
 pub use history::{HazardMemoryError, ObservedHazardMemory};
 
 pub const MAX_FORECAST_HORIZON_TICKS: u16 = 840;
@@ -64,6 +66,7 @@ pub struct HazardForecast {
     horizon_end: Tick,
     cells: Vec<CellForecast>,
     stationary_assumptions: Vec<EntityId>,
+    evolution: ForecastEvolution,
 }
 
 impl HazardForecast {
@@ -100,12 +103,18 @@ impl HazardForecast {
         &self.stationary_assumptions
     }
 
+    #[must_use]
+    pub const fn evolution(&self) -> &ForecastEvolution {
+        &self.evolution
+    }
+
     pub(super) fn from_parts(
         key: MemoryKey,
         basis_tick: Tick,
         horizon_end: Tick,
         cells: Vec<CellForecast>,
         stationary_assumptions: Vec<EntityId>,
+        evolution: ForecastEvolution,
         limits: ForecastLimits,
     ) -> Result<Self, ForecastFailure> {
         if horizon_end.0 <= basis_tick.0
@@ -125,6 +134,7 @@ impl HazardForecast {
             horizon_end,
             cells,
             stationary_assumptions,
+            evolution,
         })
     }
 }
@@ -176,3 +186,7 @@ mod phase_tests;
 #[cfg(test)]
 #[path = "safety_review_tests.rs"]
 mod safety_review_tests;
+
+#[cfg(test)]
+#[path = "evolution_tests.rs"]
+mod evolution_tests;

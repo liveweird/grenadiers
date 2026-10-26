@@ -55,7 +55,7 @@ fn terrain() -> Vec<Terrain> {
     value
 }
 
-pub(super) fn observation(flames: Vec<ObservedFlame>, pickups: Vec<ObservedPickup>) -> Observation {
+pub(crate) fn observation(flames: Vec<ObservedFlame>, pickups: Vec<ObservedPickup>) -> Observation {
     Observation::new(ObservationParts {
         world: key().world,
         tick: Tick(0),
@@ -85,7 +85,7 @@ pub(super) fn observation(flames: Vec<ObservedFlame>, pickups: Vec<ObservedPicku
     .unwrap()
 }
 
-pub(super) fn forecast_for(observation: &Observation) -> crate::cpu::forecast::HazardForecast {
+pub(crate) fn forecast_for(observation: &Observation) -> crate::cpu::forecast::HazardForecast {
     forecast(
         observation,
         &ObservedHazardMemory::new(key()),
@@ -96,7 +96,7 @@ pub(super) fn forecast_for(observation: &Observation) -> crate::cpu::forecast::H
     .unwrap()
 }
 
-pub(super) fn with_bomb(observation: Observation, trigger: ObservedBombTrigger) -> Observation {
+pub(crate) fn with_bomb(observation: Observation, trigger: ObservedBombTrigger) -> Observation {
     let mut parts = observation.into_parts();
     parts.bombs = BombKnowledge::Visible(vec![ObservedBomb {
         id: EntityId(90),

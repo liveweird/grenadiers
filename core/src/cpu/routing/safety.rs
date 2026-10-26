@@ -87,7 +87,7 @@ pub(super) fn stationary_segment(position: Position) -> [MovementSegment; 1] {
     [MovementSegment::new(position, position)]
 }
 
-fn static_blocked(observation: &Observation, cell: CellId) -> bool {
+pub(super) fn static_blocked(observation: &Observation, cell: CellId) -> bool {
     let parts = observation.parts();
     let index = usize::from(cell.row) * usize::from(ARENA_WIDTH) + usize::from(cell.column);
     parts.arena.terrain[index] == Terrain::Wall

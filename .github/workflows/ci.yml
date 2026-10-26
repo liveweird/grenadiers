@@ -590,6 +590,7 @@ jobs:
             ${{ runner.temp }}/browser-file-readiness.json
             ${{ runner.temp }}/visibility-startup-observer.jsonl
             ${{ runner.temp }}/visibility-xvfb.log
+          include-hidden-files: true
           retention-days: 7
 
   kubernetes:

@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## 0.3.72 — 2026-10-26
+
+### Added
+
+- Share expanded client conformance fixtures across retained Rust parsers, schemas and the browser; add deterministic malformed-frame mutations and boundary regressions.
+
 ## 0.3.68 — 2026-10-26
 
 ### Changed

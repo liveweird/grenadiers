@@ -36,9 +36,14 @@ export function validateFullWorkflow(workflow) {
     workflow.indexOf("name: playwright-report-${{ matrix.shard }}"),
     workflow.indexOf("\n\n  kubernetes:"),
   );
-  assert.match(failureArtifact, /e2e\/\.playwright\/terrain-pixel-test-results\//);
   assert.match(failureArtifact, /include-hidden-files: true/);
-  assert.doesNotMatch(failureArtifact, /^\s+e2e\/\.playwright\/$/m);
+  const hiddenArtifactPaths = [...failureArtifact.matchAll(/^\s+(e2e\/\.playwright\/.*)$/gm)]
+    .map(([, path]) => path);
+  assert.deepEqual(hiddenArtifactPaths, [
+    "e2e/.playwright/art-atlas-test-results/",
+    "e2e/.playwright/atlas-gameplay-test-results/",
+    "e2e/.playwright/terrain-pixel-test-results/",
+  ]);
   assert.equal((workflow.match(/for _attempt in \$\(seq 1 60\); do/g) ?? []).length, 25);
   assert.doesNotMatch(workflow, /for attempt in \$\(seq 1 60\); do/);
 }
@@ -90,6 +95,10 @@ test("contracts reject automatic full verification and weakened mask coverage", 
   assert.throws(() => validateFullWorkflow(full.replace(
     "          npm --prefix e2e run test:terrain-pixels\n", "")));
   assert.throws(() => validateFullWorkflow(full.replace("          include-hidden-files: true\n", "")));
+  assert.throws(() => validateFullWorkflow(full.replace(
+    "e2e/.playwright/terrain-pixel-test-results/", "e2e/.playwright/*")));
+  assert.throws(() => validateFullWorkflow(full.replace(
+    "e2e/.playwright/terrain-pixel-test-results/", "e2e/.playwright/**")));
   assert.throws(() => validateFullWorkflow(full.replace(
     "installed_version=\"$(cargo llvm-cov --version 2>/dev/null || true)\"",
     "installed_version='cargo-llvm-cov 0.9.1'")));

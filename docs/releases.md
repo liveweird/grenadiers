@@ -79,31 +79,40 @@ interrupted state but cannot preserve process-local matches or credentials.
 Keep the previous immutable image reference for rollback; database migration compatibility
 must be designed when durable application data is introduced.
 
-## v0.3.70 — 2026-10-26
+## v0.3.75 — 2026-10-26
 
-[v0.3.70](https://github.com/liveweird/grenadiers/releases/tag/v0.3.70) derives game-copy types
-from the canonical locale registry, returns stable raw copy objects and uses public i18next
-interpolation. Existing EN/PL text, fallback, timers and stack notation remain unchanged.
-Literal templates carry typed interpolation names; widened dynamic strings retain their dynamic
-parameter map rather than claiming compile-time placeholder validation.
+[v0.3.75](https://github.com/liveweird/grenadiers/releases/tag/v0.3.75) bounds the Compose app to
+256 MiB and 128 PIDs and requests/limits Kubernetes ephemeral storage at 16/64 MiB. Deployment
+checks reject weakened effective security contexts and invalid resource quantities.
 
-Independent review is clear. Full web acceptance at
-`cdd6226ea6fb990f210ac14ac119045336a05443` passes 6,817 tests / 92 files in 226.02s with
-91.07/89.40/90.12/93.48% coverage; gzip JavaScript/CSS is 337,939/36,695 bytes. TypeScript, lint,
-contract drift, dead-code and repository checks pass. Integrated source
-`1890db16d9f4eec5190390fe664a8897733d167b` preserves the tested web/assets/API inputs. Backend,
-exhaustive Rust, Linux and dependency acceptance reuse v0.3.68/v0.3.69 unchanged inputs.
+Independent review, 42 focused resource/security tests, repository checks, rendered-manifest
+validation and strict Kubernetes schema validation pass. Rust, exhaustive, Linux and application
+web inputs reuse accepted v0.3.74 results; the resource-checker cases are exercised separately.
 
-Accepted image is `sha256:8f913babc354d219c9d7b2a69669fc79f6e65f2981314a5fcbbeacee8c6a33bc`.
-Trivy 0.74.0 reports zero fixable HIGH/CRITICAL findings. Eight native Compose cases pass in
-35.7s and eight Kubernetes cases in 36.3s, with exact image/security/probe/resource checks.
-A Polish 320px responsive locale switch and native create-room smoke also pass. Temporary
-acceptance projects/namespaces are removed.
+Accepted image source is `bfb0141e0373a75073d7ab922990f87a570e776a`; image is
+`sha256:2ce17b3d8712817628504d6d472fe2a2a938290388e462e9eec08b479c01ea4b`.
+Trivy 0.74.0 reports zero fixable HIGH/CRITICAL findings. Eight Compose cases pass in 36.0s and
+eight Kubernetes cases in 36.5s. Docker HostConfig and live cgroups enforce 268,435,456 bytes and
+128 PIDs; the live Pod has exact CPU/memory/ephemeral-storage requests/limits, restricted namespace,
+security contexts and probes. No destructive resource stress was introduced. Temporary resources
+are removed. Localhost:8085 has verified identity, security, health/readiness, CSP/cache and exact
+accepted web bytes. Control is `.local-checkpoints/runtime/compose-v0.3.75.yaml`;
+`rollback-v0.3.74.yaml` retains the prior image. No gameplay, protocol, artwork or migration changes.
 
-Localhost:8085 serves the accepted image with verified health/readiness, CSP/cache and exact
-served HTML/JavaScript/CSS/atlas bytes. Control is `.local-checkpoints/runtime/compose-v0.3.70.yaml`;
-`rollback-v0.3.69.yaml` retains the previous image. There is no gameplay, wire, artwork or migration
-change. Distribution remains source tags and GitHub prerelease notes.
+<a id="v0374--2026-10-26"></a>
+The [v0.3.74 record](history/releases.md#v0374--2026-10-26) is preserved in release history.
+
+<a id="v0373--2026-10-26"></a>
+The [v0.3.73 record](history/releases.md#v0373--2026-10-26) is preserved in release history.
+
+<a id="v0372--2026-10-26"></a>
+The [v0.3.72 record](history/releases.md#v0372--2026-10-26) is preserved in release history.
+
+<a id="v0371--2026-10-26"></a>
+The [v0.3.71 record](history/releases.md#v0371--2026-10-26) is preserved in release history.
+
+<a id="v0370--2026-10-26"></a>
+The [v0.3.70 record](history/releases.md#v0370--2026-10-26) is preserved in release history.
 
 <a id="v0369--2026-10-26"></a>
 The [v0.3.69 record](history/releases.md#v0369--2026-10-26) is preserved in release history.

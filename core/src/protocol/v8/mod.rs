@@ -38,7 +38,9 @@ pub use crate::protocol::v7::{
 };
 pub use client::{GameClientMessage, ManualActionKind};
 pub use identity::{MapId, RulesVersion};
-pub use projection_admission::prepare_expanded_admission;
+pub use projection_admission::{
+    AdmissionProjection, PersonalAdmission, prepare_admission, prepare_expanded_admission,
+};
 pub use projection_binding::bind_expanded;
 pub use projection_capture::capture_expanded;
 pub use projection_facts::{
@@ -83,6 +85,9 @@ pub fn encode_server_message(
     super::enforce_server_message_size(encoded)
 }
 
+#[cfg(test)]
+#[path = "../admission_tests.rs"]
+mod admission_tests;
 #[cfg(test)]
 #[path = "frame_bound_tests.rs"]
 mod frame_bound_tests;

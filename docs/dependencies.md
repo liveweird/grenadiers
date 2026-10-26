@@ -29,6 +29,12 @@ CI actions use full commit SHAs inherited from Flow's verified workflow. Review 
 updates like code. Dependabot checks Cargo, both npm packages, GitHub Actions, and Docker weekly.
 Cargo-deny covers Rust advisories, allowed licenses, and sources; npm audit covers both complete
 npm trees, including development tools. Pin utility versions in CI and the matching test docs.
+The manual workflow uses the pinned
+[`Swatinem/rust-cache`](https://raw.githubusercontent.com/Swatinem/rust-cache/d1527c8f67ef9af357290475d4af4b0fab8f12e0/README.md)
+action to cache compiled Cargo dependencies and the exact `cargo-llvm-cov` 0.9.1 and `cargo-deny`
+0.20.2 binaries. A cache hit never substitutes for version validation or any gate execution.
+ShellCheck 0.11.0 and actionlint 1.7.12 are optional developer tools: the tooling gate requires
+them from the caller's environment and does not install or cache them.
 
 Dependabot groups routine Cargo patch updates, minor and patch updates separately for `web` and
 `e2e`, and minor and patch GitHub Actions updates. These are semantic-version classifications,
@@ -62,6 +68,11 @@ mount for the runtime image. Keep the touched-root list aligned when adding prod
 Docker updates stay individual and are not blanket-ignored by major version. A Node or Rust
 builder-image proposal must be coordinated with the repository's matching toolchain pins and
 pass `scripts/gates.sh repository`; the image change alone is not a valid toolchain update.
+
+The Playwright browser download is intentionally not cached. Playwright's
+[CI guidance](https://playwright.dev/docs/ci#caching-browsers) recommends installing the browser
+on each run because restoring browser binaries commonly saves little once operating-system
+dependencies still need installation. npm's locked package cache remains enabled.
 
 Kubernetes validation uses kubeconform 0.8.0 and Kubernetes 1.33.0 schemas from a pinned
 schema-repository commit. CI verifies the kubeconform archive checksum before execution;

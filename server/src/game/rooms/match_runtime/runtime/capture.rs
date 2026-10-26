@@ -6,13 +6,15 @@ use grenadiers_core::{
 use super::{MatchAction, MatchRuntime};
 use crate::game::rooms::{
     input::InputMailbox,
-    profile::RoomProfile,
-    replay::{Header, Journal, Operation, ReplayAction},
+    replay::{Journal, Operation, ReplayAction},
     types::RoomIdentity,
 };
+#[cfg(test)]
+use crate::game::rooms::{profile::RoomProfile, replay::Header};
 use crate::round_seed::RoundSeedSource;
 
-pub(super) fn journal(profile: RoomProfile) -> Journal {
+#[cfg(test)]
+fn journal(profile: RoomProfile) -> Journal {
     match profile {
         RoomProfile::GeneratedClassicV2 => Journal::new(Header::m6([false; 2])),
         RoomProfile::GeneratedClassicV3 => Journal::new(Header::m6_v3([false; 2])),
@@ -26,27 +28,28 @@ pub(super) fn journal(profile: RoomProfile) -> Journal {
 }
 
 impl MatchRuntime {
-    pub(super) fn with_journal(
+    #[cfg(test)]
+    pub(in crate::game::rooms) fn new_recording(
         identity: RoomIdentity,
         round_seed_source: RoundSeedSource,
-        journal: Journal,
     ) -> Self {
         let settings = identity.profile.initial_settings();
         let settings_editor = identity.profile.initial_editor();
+        let journal = journal(identity.profile);
         Self::with_configuration(
             identity,
             round_seed_source,
-            journal,
+            Some(journal),
             settings,
             1,
             settings_editor,
         )
     }
 
-    fn with_configuration(
+    pub(super) fn with_configuration(
         identity: RoomIdentity,
         round_seed_source: RoundSeedSource,
-        journal: Journal,
+        journal: Option<Journal>,
         settings: grenadiers_core::room::RoomSettings,
         settings_revision: u32,
         settings_editor: Option<SeatId>,
@@ -66,7 +69,10 @@ impl MatchRuntime {
     }
 
     pub(super) fn capture(&mut self, tick: Tick, operation: Operation) {
-        self.journal.record(tick, operation);
+        let Some(journal) = self.journal.as_mut() else {
+            return;
+        };
+        journal.record(tick, operation);
     }
 
     pub(super) fn capture_action(
@@ -76,6 +82,9 @@ impl MatchRuntime {
         epoch: u64,
         action: MatchAction,
     ) {
+        if self.journal.is_none() {
+            return;
+        }
         let action = match action {
             MatchAction::Ready(value) => ReplayAction::Ready(value),
             MatchAction::ReadyChecked {
@@ -108,6 +117,9 @@ impl MatchRuntime {
     }
 
     pub(super) fn capture_tick(&mut self, previous_tick: Tick, previous_phase: MatchPhase) {
+        if self.journal.is_none() {
+            return;
+        }
         self.capture(previous_tick, Operation::Tick);
         if previous_phase == MatchPhase::Running {
             return;
@@ -130,18 +142,30 @@ impl MatchRuntime {
         } else if matches!(previous_phase, MatchPhase::Countdown { .. })
             && internal_error(self.lifecycle.phase())
         {
-            self.journal.mark_round_construction_incomplete();
+            self.journal
+                .as_mut()
+                .expect("recording was checked above")
+                .mark_round_construction_incomplete();
         }
     }
 
     #[cfg(test)]
     pub(in crate::game::rooms) fn replay_journal(&self) -> &Journal {
-        &self.journal
+        self.journal
+            .as_ref()
+            .expect("runtime recording is disabled")
     }
 
     #[cfg(test)]
     pub(in crate::game::rooms) fn replay_journal_mut(&mut self) -> &mut Journal {
-        &mut self.journal
+        self.journal
+            .as_mut()
+            .expect("runtime recording is disabled")
+    }
+
+    #[cfg(test)]
+    pub(in crate::game::rooms) const fn recording_enabled_for_test(&self) -> bool {
+        self.journal.is_some()
     }
 
     #[cfg(test)]
@@ -155,7 +179,7 @@ impl MatchRuntime {
         Self::with_configuration(
             identity,
             round_seed_source,
-            Journal::unsupported_profile(),
+            None,
             settings,
             settings_revision,
             settings_editor,

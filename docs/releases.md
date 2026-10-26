@@ -79,36 +79,43 @@ interrupted state but cannot preserve process-local matches or credentials.
 Keep the previous immutable image reference for rollback; database migration compatibility
 must be designed when durable application data is introduced.
 
-## v0.3.66 — 2026-10-26
+## v0.3.70 — 2026-10-26
 
-[v0.3.66](https://github.com/liveweird/grenadiers/releases/tag/v0.3.66) derives reserved item
-identities, bits, pickup declarations and total mappings from one private 22-item specification.
-Generation order, activation subsets, replay values, public schemas and gameplay behavior remain
-unchanged. The existing v0.3.65 web build is reused.
+[v0.3.70](https://github.com/liveweird/grenadiers/releases/tag/v0.3.70) derives game-copy types
+from the canonical locale registry, returns stable raw copy objects and uses public i18next
+interpolation. Existing EN/PL text, fallback, timers and stack notation remain unchanged.
+Literal templates carry typed interpolation names; widened dynamic strings retain their dynamic
+parameter map rather than claiming compile-time placeholder validation.
 
-Independent review is clear. Fresh source-bound Rust acceptance at
-`c244193ae048f3dea2864bd120511be60981bb09` completes every 4,194,304 mask in debug, release and
-official coverage in 429.862s with zero retries. The ordinary profiles each pass 934 core / 307
-server tests plus two doctests. Coverage is 17,615/18,793 lines (93.7317%) at the 90% floor.
-Rustfmt, Clippy, repository checks and
-[distinct Linux units](https://github.com/liveweird/grenadiers/actions/runs/40240422294) pass.
-Full v0.3.65 web acceptance is reused: 6,812 tests / 91 files with
-91.10/89.47/90.12/93.47% coverage.
+Independent review is clear. Full web acceptance at
+`cdd6226ea6fb990f210ac14ac119045336a05443` passes 6,817 tests / 92 files in 226.02s with
+91.07/89.40/90.12/93.48% coverage; gzip JavaScript/CSS is 337,939/36,695 bytes. TypeScript, lint,
+contract drift, dead-code and repository checks pass. Integrated source
+`1890db16d9f4eec5190390fe664a8897733d167b` preserves the tested web/assets/API inputs. Backend,
+exhaustive Rust, Linux and dependency acceptance reuse v0.3.68/v0.3.69 unchanged inputs.
 
-Accepted image source is `c244193ae048f3dea2864bd120511be60981bb09`; its image is
-`sha256:d4906dd81f0c86803e8d7a96bd890723ec180718d9cc015c286d7d94ebfc941d`.
-Eight fresh native Compose cases and eight Kubernetes cases pass in 36.1s and 36.9s,
-respectively, including exact-image, runtime-security, origin, readiness/probe/resource and
-gameplay checks. Heart, Kick, Invisibility Cloak and Oil browser scenarios pass. The pinned image
-scan reports zero fixable HIGH/CRITICAL findings.
+Accepted image is `sha256:8f913babc354d219c9d7b2a69669fc79f6e65f2981314a5fcbbeacee8c6a33bc`.
+Trivy 0.74.0 reports zero fixable HIGH/CRITICAL findings. Eight native Compose cases pass in
+35.7s and eight Kubernetes cases in 36.3s, with exact image/security/probe/resource checks.
+A Polish 320px responsive locale switch and native create-room smoke also pass. Temporary
+acceptance projects/namespaces are removed.
 
-Localhost:8085 serves the accepted image. Runtime security, health/readiness, CSP/cache and exact
-served-artifact checks pass, plus one fresh native authentication case. An initial attempt found
-missing E2E dependencies before any case ran; after installing the declared dependencies, the
-fresh acceptance above passed without product retries. Release-documentation changes preserve
-Docker and application inputs and skip duplicate CI. Control is
-`.local-checkpoints/runtime/compose-v0.3.66.yaml`; `rollback-v0.3.65.yaml` retains the prior image.
-Temporary acceptance resources are removed. There is no migration.
+Localhost:8085 serves the accepted image with verified health/readiness, CSP/cache and exact
+served HTML/JavaScript/CSS/atlas bytes. Control is `.local-checkpoints/runtime/compose-v0.3.70.yaml`;
+`rollback-v0.3.69.yaml` retains the previous image. There is no gameplay, wire, artwork or migration
+change. Distribution remains source tags and GitHub prerelease notes.
+
+<a id="v0369--2026-10-26"></a>
+The [v0.3.69 record](history/releases.md#v0369--2026-10-26) is preserved in release history.
+
+<a id="v0368--2026-10-26"></a>
+The [v0.3.68 record](history/releases.md#v0368--2026-10-26) is preserved in release history.
+
+<a id="v0367--2026-10-26"></a>
+The [v0.3.67 record](history/releases.md#v0367--2026-10-26) is preserved in release history.
+
+<a id="v0366--2026-10-26"></a>
+The [v0.3.66 record](history/releases.md#v0366--2026-10-26) is preserved in release history.
 
 <a id="v0365--2026-10-26"></a>
 The [v0.3.65 record](history/releases.md#v0365--2026-10-26) is preserved in release history.

@@ -1,9 +1,10 @@
 # Private deterministic replay evidence
 
-The production MatchRuntime records accepted semantic operations in a private in-memory
-journal. The test-only replay runner drives the real MatchRuntime, InputMailbox, generated-world
-profile, and entropy seam; it does not run a second simulator. Replay inspection remains
-test-only. No endpoint, public export, or persistent journal is available.
+Production `MatchRuntime::new` allocates no journal and skips replay-only capture work.
+Explicit `new_recording` test fixtures retain real bounded journals; the test-only runner drives
+the same runtime, mailbox, generated-world profile and entropy seam. Replay inspection is test-only.
+There is no operator toggle, endpoint, public export or persistent journal.
+[ADR 0025](../decisions/0025-production-replay-recording.md) defines this allocation policy.
 
 A versioned header identifies format 2, lifecycle profile 2, Expanded-v5 physics and generator-v2.
 Archived format-1 journals retain configurable-v4/classic-v2/v3 physics and generator-v1.
@@ -22,8 +23,9 @@ Every actual round consumes its own recorded seed; canceled countdowns consume n
 Movement refreshes and immediate input clearing are significant: recording only a later
 lifecycle departure cannot reproduce a vulnerable running character or queued bomb.
 
-The journal preallocates 60,000 records, measured at 64 bytes each on the verification target
-(3,840,000 bytes of record capacity, below the 4 MiB journal budget). Header/container overhead
+An explicitly recorded test runtime preallocates 60,000 records, with a 64-byte record on the
+verified target (3,840,000 bytes of capacity, below the 4 MiB journal budget). Production rooms
+reserve no journal vector capacity. These are record-storage bounds, not whole-room memory or RSS. Header/container overhead
 fits the remaining space. Once full, it records `Truncated { last_complete_index }` and stops
 growing; the runner refuses to certify a truncated replay as complete. Unbounded draws cannot
 have guaranteed full retention in a finite buffer. Replay working state is separate from this
@@ -44,7 +46,7 @@ and `scripts/gates.sh coverage`. Fixtures exercise generated draws, three real w
 cancellation, interruption, grace restore/expiry, TTL refresh, input-fence ordering, and an
 archived profile-1 gameplay result, plus malformed journals.
 
-Capture happens only after successful semantic mutation, including unchanged readiness and
+When explicitly enabled in tests, capture happens only after successful semantic mutation, including unchanged readiness and
 same-direction TTL refreshes. Wrong epoch/phase, rate-limited, duplicate, and out-of-wire-range
 bomb commands create no records. Input fencing remains separate from later boundary departure.
 Replay disables its own capture privately to avoid recursive journals.
@@ -52,9 +54,12 @@ Replay disables its own capture privately to avoid recursive journals.
 The profile construction API reports unavailable entropy or failed construction as the same
 absence. Capture therefore marks `Incomplete { reason: RoundConstruction }` after the truthful
 interrupted tick; replay refuses completeness instead of inventing a seed or world. Fixed-v1
-unit fixtures are explicitly unsupported. Journal overhead plus actual allocated record
-capacity measures 3,840,056 bytes on the verification target. Owner destruction frees it;
-32 bounded rooms retain below 128 MiB of journal storage. No restart recovery is promised.
+unit fixtures remain explicitly unsupported for recording. Disabled recording is absence of
+evidence, not an empty complete replay. Recorded-fixture destruction frees its journal. Live
+publication, private generation records, recipient filtering and reconnect state remain intact;
+none depends on keeping a semantic journal. No restart recovery is promised.
+Measured allocation/timing evidence is preserved in the
+[allocation history](../history/replay-allocation.md).
 
 Configurable journals also retain initial settings, settings revision and editor identity. Accepted
 revision-fenced readiness/settings actions and permanent authority release replay deterministically.

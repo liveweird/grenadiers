@@ -2,8 +2,8 @@
 
 # Expanded items
 
-Expanded-v5 rooms expose all 22 requested item types, use generator v2 and journal v2, and pair
-with gameplay v11. Older clients must reload. The incremental delivery record is in
+Expanded-v5 rooms expose all 22 requested item types, use generator v2, retain journal-v2 replay
+compatibility and pair with gameplay v11. Older clients must reload. The incremental delivery record is in
 [item acceptance history](../history/game-acceptance.md#expanded-item-delivery-sequence).
 
 <a id="historical-heart-activation-checkpoint"></a>

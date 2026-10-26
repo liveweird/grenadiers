@@ -1,7 +1,0 @@
-# Explicit operator reproduction mode for isolated production Reverse Controls acceptance.
-services:
-  app:
-    environment:
-      GAME_ROUND_SEED_FILE: /run/grenadiers/round.seed
-    volumes:
-      - ./core/tests/fixtures/arena-v2-reverse-controls.seed:/run/grenadiers/round.seed:ro

@@ -188,6 +188,10 @@ def file_identity(path: Path, require_executable: bool = True) -> dict[str, Any]
 
 def capture_workspace_executables(env: dict[str, str]) -> tuple[list[dict[str, Any]], Path]:
     """Capture every executable emitted by one complete instrumented workspace test build."""
+    target_text = env.get("CARGO_LLVM_COV_TARGET_DIR")
+    if target_text is None or not Path(target_text).is_absolute():
+        raise ValueError("cargo-llvm-cov target directory unavailable")
+    coverage_target = Path(target_text).resolve()
     messages = run(["cargo", "test", "--workspace", "--locked", "--no-run",
                     "--message-format=json"], env=env, capture=True, merge_stderr=False).stdout
     artifacts: list[dict[str, Any]] = []
@@ -206,11 +210,16 @@ def capture_workspace_executables(env: dict[str, str]) -> tuple[list[dict[str, A
         profile, target = message.get("profile"), message.get("target")
         if type(profile) is not dict or profile.get("test") is not True or type(target) is not dict:
             raise ValueError("malformed cargo workspace test artifact")
-        path = Path(message["executable"]).resolve()
+        reported_path = Path(message["executable"])
+        identity = file_identity(reported_path)
+        path = Path(identity["path"])
+        try:
+            path.relative_to(coverage_target)
+        except ValueError as error:
+            raise ValueError("workspace test executable outside coverage target") from error
         if path in seen:
             raise ValueError("duplicate cargo workspace test executable")
         seen.add(path)
-        identity = file_identity(path)
         identity.update({"packageId": message.get("package_id"), "targetName": target.get("name"),
                          "targetKind": target.get("kind")})
         if type(identity["packageId"]) is not str or not identity["packageId"] \
@@ -350,10 +359,9 @@ def with_report_profiles(target_dir: Path, raw_dirs: list[Path], owner: str,
 def stage_report_executables(source_target: Path, report_target: Path,
                              artifacts: list[dict[str, Any]]) -> list[dict[str, Any]]:
     source_target = source_target.resolve()
-    if report_target.exists() or report_target.is_symlink():
-        raise ValueError("coverage report target must be fresh")
+    if report_target.is_symlink() or not report_target.is_dir() or any(report_target.iterdir()):
+        raise ValueError("coverage report target is not an owned empty directory")
     verify_file_identities(artifacts)
-    report_target.mkdir(parents=True)
     staged: list[dict[str, Any]] = []
     for artifact in artifacts:
         source = Path(artifact["path"])
@@ -411,6 +419,7 @@ def report_lcov(env: dict[str, str], raw_dirs: list[Path], output: Path,
     if target_text is None or not Path(target_text).is_absolute():
         raise ValueError("cargo-llvm-cov target directory unavailable")
     staged: list[dict[str, Any]] = []
+    owns_report_target = False
 
     def report() -> None:
         run(["cargo", "llvm-cov", "report", "--workspace", "--locked", "--fail-under-lines", "90",
@@ -418,6 +427,11 @@ def report_lcov(env: dict[str, str], raw_dirs: list[Path], output: Path,
              str(output)], env=private_env)
 
     try:
+        try:
+            report_target.mkdir()
+        except FileExistsError as error:
+            raise ValueError("coverage report target must be fresh") from error
+        owns_report_target = True
         staged = stage_report_executables(Path(target_text), report_target, artifacts)
         private_env = report_environment(env, report_target)
         _, count = with_report_profiles(report_target, raw_dirs, owner, report)
@@ -426,7 +440,8 @@ def report_lcov(env: dict[str, str], raw_dirs: list[Path], output: Path,
             if staged:
                 verify_file_identities(staged)
         finally:
-            shutil.rmtree(report_target, ignore_errors=True)
+            if owns_report_target:
+                shutil.rmtree(report_target)
     if output.is_symlink() or not output.is_file() or output.stat().st_size == 0:
         raise ValueError("official LCOV report missing or empty")
     return {"lineFloor": 90, "rawProfiles": count, "reporter": "cargo-llvm-cov"}

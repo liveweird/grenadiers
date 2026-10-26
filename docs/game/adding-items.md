@@ -11,7 +11,7 @@ interaction order, and what each player may observe. Separate persistent equipme
 effects, single-use weapons, and world objects. Record a focused [ADR](../decisions/README.md)
 when the change introduces a new invariant or simulation phase.
 
-The server currently accepts only gameplay v11. Decide whether the change needs a new wire,
+The server currently accepts only gameplay v12. Decide whether the change needs a new wire,
 rules, generator or replay identity before editing contracts. Retained schemas reserve wire
 vocabularies while adapters choose their activation catalogs; do not expand a retained contract
 merely to satisfy a current catalog assertion. Historical adapter retirement and replay migration

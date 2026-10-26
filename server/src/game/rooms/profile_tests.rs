@@ -24,6 +24,9 @@ fn identity(profile: RoomProfile) -> RoomIdentity {
         id: RoomId::new("00000000000000000000000000000001").unwrap(),
         code: RoomCode::new("ABCDEFGH").unwrap(),
         profile,
+        mode: grenadiers_core::room::RoomMode::HumanDuel,
+        registry_serial: 1,
+        private_cpu_seed: None,
     }
 }
 

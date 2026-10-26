@@ -67,5 +67,8 @@ fn identity(serial: usize) -> RoomIdentity {
         id: RoomId::new(&format!("{serial:032x}")).expect("measurement serial is a valid room id"),
         code: RoomCode::new("ABCDEFGH").expect("static room code"),
         profile: RoomProfile::ExpandedV5,
+        mode: grenadiers_core::room::RoomMode::HumanDuel,
+        registry_serial: serial as u64,
+        private_cpu_seed: None,
     }
 }

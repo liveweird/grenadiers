@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use axum::extract::ws::{Message, WebSocket};
-use grenadiers_core::protocol::v11::{
+use grenadiers_core::protocol::v12::{
     GameServerMessage, ManualActionKind, V11ErrorCode as ErrorCode,
 };
 use grenadiers_core::protocol::{Counter, Direction as WireDirection, RoomId};
@@ -23,7 +23,7 @@ pub(super) async fn dispatch(
 ) -> bool {
     let (sequence, body) = command.into_parts();
     match body {
-        Command::CreateRoom => {
+        Command::CreateRoom { mode } => {
             if state.membership.is_some() {
                 return reply_error(socket, ErrorCode::AlreadyInRoom, sequence).await;
             }
@@ -47,7 +47,7 @@ pub(super) async fn dispatch(
                 Err(alive) => return alive,
             };
             let result = rooms
-                .create_sequenced(binding, sequence, std::time::Instant::now())
+                .create_sequenced_mode(binding, sequence, std::time::Instant::now(), mode)
                 .await;
             admit(
                 socket,
@@ -178,7 +178,7 @@ pub(super) async fn dispatch(
                 u64::from(round_id.get()),
                 RoomAction::UpdateSettings {
                     settings_revision: settings_revision.get(),
-                    settings: match grenadiers_core::protocol::v11::expanded_settings(settings) {
+                    settings: match grenadiers_core::protocol::v12::expanded_settings(settings) {
                         Ok(settings) => settings,
                         Err(_) => {
                             return reply_error(socket, ErrorCode::InvalidMessage, sequence).await;

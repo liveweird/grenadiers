@@ -17,7 +17,7 @@ function state(): GameClientState {
   }
 }
 
-describe('v11 arena presentation', () => {
+describe('v12 arena presentation', () => {
   it('removes hidden actors and reveals them only at their new public position', () => {
     const current = state()
     expect(presentSnapshot(current)?.state.actors.map((actor) => actor.seat)).toEqual(['one', 'two'])
@@ -181,7 +181,7 @@ describe('Stopwatch presentation', () => {
   })
 })
 
-describe('v11 timed item presentation', () => {
+describe('v12 timed item presentation', () => {
   it('presents Golden Flame pickups and its reconnect-safe authoritative clock', () => {
     const current = state()
     const own = current.snapshot!.state.actors[0]

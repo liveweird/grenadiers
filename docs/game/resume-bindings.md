@@ -1,6 +1,6 @@
 # Private resume credentials and binding fences
 
-Status: active in the room owner and gameplay socket ([v11](protocol-v11.md)).
+Status: active in the room owner and gameplay socket ([v12](protocol-v12.md)).
 
 Each occupied seat receives an independently generated 32-byte resume capability. The bytes
 are encoded through the active `ResumeToken` type as exactly 64 lowercase hexadecimal characters.

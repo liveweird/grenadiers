@@ -1,5 +1,5 @@
 import { expect, type Page } from '@playwright/test'
-import type { GameServerMessage } from '../../../web/src/game/v11/schema'
+import type { GameServerMessage } from '../../../web/src/game/v12/schema'
 
 type RoomFrame = Extract<GameServerMessage, { type: 'roomState' | 'admitted' }>
 type AdmissionFrame = Extract<GameServerMessage, { type: 'admitted' }>
@@ -27,7 +27,7 @@ export async function openGame(page: Page): Promise<void> {
     const first = new Promise<GameServerMessage>((resolve, reject) => {
       const timer = setTimeout(() => reject(new Error('Authentication timed out')), 10_000)
       socket.addEventListener('open', () => {
-        socket.send(JSON.stringify({ type: 'authenticate', protocolVersion: 11, token: session.token }))
+        socket.send(JSON.stringify({ type: 'authenticate', protocolVersion: 12, token: session.token }))
       }, { once: true })
       socket.addEventListener('error', () => {
         clearTimeout(timer)
@@ -56,15 +56,18 @@ export async function openGame(page: Page): Promise<void> {
     }
     return first
   })
-  expect(authenticated).toEqual({ type: 'authenticated', protocolVersion: 11 })
+  expect(authenticated).toEqual({ type: 'authenticated', protocolVersion: 12 })
 }
 
 export async function sendGame(page: Page, command: Record<string, unknown>): Promise<number> {
+  const message = command.type === 'createRoom' && command.mode === undefined
+    ? { ...command, mode: { type: 'humanDuel' } }
+    : command
   return page.evaluate((message) => {
     const driver = (window as GameWindow).grenadiersTestGame
     if (!driver) throw new Error('Game socket is not installed')
     return driver.send(message)
-  }, command)
+  }, message)
 }
 
 export async function gameFrames(page: Page): Promise<GameServerMessage[]> {

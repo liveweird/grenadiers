@@ -2,6 +2,24 @@
 
 ## [Unreleased]
 
+## 0.3.81 — 2026-10-26
+
+### Added
+
+- Add a private solo match against an initial Standard CPU, with shared settings, automatic
+  CPU readiness/rematch consent, running reconnect grace and human-owned room cleanup.
+- Add bounded utility planning and committed bomb-escape execution through ordinary game
+  input, preserving recipient privacy and independent randomness under worker contention.
+- Add gameplay v12 mode/controller contracts and solo replay format-3 provenance while
+  retaining archived wire contracts, replay formats 1/2 and disabled production recording.
+- Add English/Polish Solo controls, CPU labels and browser acceptance for result, rematch,
+  reconnect, authority isolation and narrow-screen accessibility.
+
+### Changed
+
+- Require explicit human-duel/solo mode when creating a gameplay room; server and browser
+  must upgrade together. Keep existing rules, items, generation and two-human behavior.
+
 ## 0.3.80 — 2026-10-26
 
 ### Added

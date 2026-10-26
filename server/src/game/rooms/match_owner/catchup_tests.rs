@@ -54,6 +54,7 @@ async fn staged_admissions_are_explicitly_bounded_to_one_command_batch() {
         stage_admission(
             &mut admissions,
             OwnerCommand::Join {
+                personal: false,
                 binding: binding(index as u64 + 1, 1),
                 sequence: Counter::new(1).unwrap(),
                 reply,

@@ -12,7 +12,7 @@ function mark<T extends ReturnType<typeof admitted> | ReturnType<typeof snapshot
   return message
 }
 
-describe('v11 teleport position epochs', () => {
+describe('v12 teleport position epochs', () => {
   beforeEach(() => vi.stubGlobal('WebSocket', { OPEN: SocketStub.OPEN }))
 
   it('accepts equal and increasing history but rejects a same-round rollback atomically', async () => {
@@ -53,7 +53,7 @@ describe('v11 teleport position epochs', () => {
     await vi.waitFor(() => expect(value.sockets).toHaveLength(2))
     const resumed = value.sockets[1]
     resumed.emit('open')
-    resumed.message({ type: 'authenticated', protocolVersion: 11 })
+    resumed.message({ type: 'authenticated', protocolVersion: 12 })
     resumed.message(mark(admitted(2), null))
     expect(value.client.getState().failure).toBe('invalidServerMessage')
 

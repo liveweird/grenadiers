@@ -6,6 +6,42 @@ use grenadiers_core::{
 use super::{MatchNotice, MatchRuntime, MatchRuntimeError, map_lifecycle_error};
 
 impl MatchRuntime {
+    pub(in crate::game::rooms) const fn mode(&self) -> grenadiers_core::room::RoomMode {
+        self.identity.mode
+    }
+
+    pub(in crate::game::rooms) fn cpu_ready(
+        &mut self,
+    ) -> Result<Option<MatchNotice>, MatchRuntimeError> {
+        let epoch = self.lifecycle.round_attempt();
+        self.action(
+            SeatId::Two,
+            epoch,
+            super::super::MatchAction::ReadyChecked {
+                ready: true,
+                settings_revision: self.settings_revision,
+            },
+        )
+    }
+
+    pub(in crate::game::rooms) fn cpu_rematch(
+        &mut self,
+    ) -> Result<Option<MatchNotice>, MatchRuntimeError> {
+        self.action(
+            SeatId::Two,
+            self.lifecycle.round_attempt(),
+            super::super::MatchAction::Rematch(true),
+        )
+    }
+
+    pub(in crate::game::rooms) fn next_cpu_manual_action(&self) -> Option<u32> {
+        self.inputs
+            .last_manual_action(SeatId::Two)
+            .unwrap_or(0)
+            .checked_add(1)
+            .filter(|value| grenadiers_core::protocol::Counter::new(*value).is_ok())
+    }
+
     pub(in crate::game::rooms) const fn lifecycle(&self) -> &grenadiers_core::room::MatchLifecycle {
         &self.lifecycle
     }
@@ -22,7 +58,11 @@ impl MatchRuntime {
             None,
         )?;
         self.revision = next;
-        Ok(MatchNotice { room, frames: None })
+        Ok(MatchNotice {
+            room,
+            frames: None,
+            cpu_observation: None,
+        })
     }
 
     pub(in crate::game::rooms) fn current_notice(

@@ -13,6 +13,7 @@ use super::super::{
     types::{BindingKey, RoomError},
 };
 pub(super) mod admissions;
+mod cpu_runtime;
 
 use super::types::{
     ClosingReason, MatchOwnerNotice, OwnerCommand, PendingDeparture, SeatSlot, map_runtime_error,
@@ -27,6 +28,9 @@ pub(super) struct Driver {
     pub(super) terminal_at: Option<Instant>,
     pub(super) lobby_deadline: Option<Instant>,
     random_fill: Arc<RandomFill>,
+    pub(super) cpu: Option<crate::game::rooms::cpu::CpuController>,
+    cpu_stop_at: Option<grenadiers_core::game::Tick>,
+    cpu_stationary: bool,
 }
 
 impl Driver {
@@ -36,6 +40,7 @@ impl Driver {
         notices: watch::Sender<MatchOwnerNotice>,
         lobby_deadline: Instant,
         random_fill: Arc<RandomFill>,
+        cpu: Option<crate::game::rooms::cpu::CpuController>,
     ) -> Self {
         Self {
             runtime,
@@ -46,6 +51,9 @@ impl Driver {
             terminal_at: None,
             lobby_deadline: Some(lobby_deadline),
             random_fill,
+            cpu,
+            cpu_stop_at: None,
+            cpu_stationary: true,
         }
     }
 
@@ -56,10 +64,11 @@ impl Driver {
     ) -> Result<(), MatchRuntimeError> {
         match command {
             OwnerCommand::Join {
+                personal,
                 binding,
                 sequence,
                 reply,
-            } => self.join(binding, sequence, reply),
+            } => self.join(personal, binding, sequence, reply),
             OwnerCommand::Resume {
                 binding,
                 sequence,
@@ -123,6 +132,7 @@ impl Driver {
         if let Some(notice) = self.runtime.action(seat, round_id, action)? {
             self.publish(notice);
         }
+        self.reconcile_cpu_lifecycle()?;
         if was_terminal && self.runtime.lifecycle().phase() == MatchPhase::Waiting {
             self.terminal_at = None;
             self.lobby_deadline = Some(now + super::runner::LOBBY_LIFETIME);
@@ -256,12 +266,14 @@ impl Driver {
     }
 
     pub(super) fn tick(&mut self, now: Instant) -> Result<(), MatchRuntimeError> {
+        self.apply_cpu_stop()?;
         let departures = self.pending_reasons();
         if let Some(notice) = self.runtime.settle_boundary(departures)? {
             self.publish(notice);
         }
         self.finish_pending();
         self.drop_expired_credentials();
+        self.reconcile_cpu_lifecycle()?;
         self.observe_phase(now);
         Ok(())
     }
@@ -317,14 +329,11 @@ impl Driver {
         })
     }
 
-    pub(super) fn is_empty(&self) -> bool {
-        self.seats.iter().all(Option::is_none)
-    }
-
     fn publish(&mut self, notice: MatchNotice) {
         self.last = notice.clone();
         self.notices
-            .send_replace(MatchOwnerNotice::Publication(notice));
+            .send_replace(MatchOwnerNotice::Publication(notice.clone()));
+        self.consider_cpu_observation(&notice);
     }
 
     fn close_retained(&mut self, reason: ClosingReason) {

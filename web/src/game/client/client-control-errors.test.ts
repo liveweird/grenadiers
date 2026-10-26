@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { admitted, authenticate, harness, messages, room, snapshot, SocketStub } from './testSupport'
 
-describe('v11 phase-boundary control errors', () => {
+describe('v12 phase-boundary control errors', () => {
   beforeEach(() => vi.stubGlobal('WebSocket', { OPEN: SocketStub.OPEN }))
 
   it.each(['invalidPhase', 'staleRoom'] as const)(

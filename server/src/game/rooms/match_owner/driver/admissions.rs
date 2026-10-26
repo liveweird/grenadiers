@@ -1,6 +1,6 @@
 use grenadiers_core::{
     game::SeatId,
-    protocol::{Counter, RoomId, v11::ResumeToken},
+    protocol::{Counter, RoomId, v12::ResumeToken},
 };
 use tokio::sync::oneshot;
 
@@ -15,11 +15,20 @@ use crate::game::rooms::{
 impl Driver {
     pub(super) fn join(
         &mut self,
+        personal: bool,
         binding: BindingKey,
         sequence: Counter,
         reply: oneshot::Sender<Result<MatchAdmission, RoomError>>,
     ) -> Result<(), MatchRuntimeError> {
         if reply.is_closed() {
+            return Ok(());
+        }
+        if matches!(
+            self.runtime.mode(),
+            grenadiers_core::room::RoomMode::Solo(_)
+        ) && !personal
+        {
+            let _ = reply.send(Err(RoomError::RoomFull));
             return Ok(());
         }
         if self.has_pending()
@@ -38,6 +47,14 @@ impl Driver {
             return Ok(());
         };
         let seat = SeatId::ALL[index];
+        if matches!(
+            self.runtime.mode(),
+            grenadiers_core::room::RoomMode::Solo(_)
+        ) && seat != SeatId::One
+        {
+            let _ = reply.send(Err(RoomError::RoomFull));
+            return Ok(());
+        }
         let other = self
             .seats
             .iter()
@@ -50,7 +67,11 @@ impl Driver {
                 return Ok(());
             }
         };
-        let prepared = match self.runtime.prepare_join(seat) {
+        let prepared = match if self.cpu.is_some() {
+            self.runtime.prepare_solo_creator(seat)
+        } else {
+            self.runtime.prepare_join(seat)
+        } {
             Ok(prepared) => prepared,
             Err(error) => {
                 let _ = reply.send(Err(map_runtime_error(error)));
@@ -93,6 +114,7 @@ impl Driver {
             }),
         });
         self.publish(notice);
+        self.reconcile_cpu_lifecycle()?;
         Ok(())
     }
 
@@ -187,14 +209,14 @@ fn admission_frame(
     if FAIL_NEXT_ADMISSION_ENCODING.with(|fail| fail.replace(false)) {
         return Err(MatchRuntimeError::Publication);
     }
-    grenadiers_core::protocol::v11::prepare_admission(
-        grenadiers_core::protocol::v11::AdmissionProjection {
+    grenadiers_core::protocol::v12::prepare_admission(
+        grenadiers_core::protocol::v12::AdmissionProjection {
             room: &prepared.room,
             state_epoch: prepared.state_epoch,
             capture: prepared.capture.as_ref(),
             generation: prepared.generation,
         },
-        grenadiers_core::protocol::v11::PersonalAdmission {
+        grenadiers_core::protocol::v12::PersonalAdmission {
             recipient: wire_seat(seat),
             last_action_id: prepared.last_bomb_action_id,
             sequence,

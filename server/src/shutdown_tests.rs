@@ -107,7 +107,7 @@ async fn next(socket: &mut ClientSocket) -> Message {
 async fn authenticate(socket: &mut ClientSocket, token: &str) {
     send(
         socket,
-        json!({"type":"authenticate", "protocolVersion":11, "token":token}),
+        json!({"type":"authenticate", "protocolVersion":12, "token":token}),
     )
     .await;
     let Message::Text(text) = next(socket).await else {
@@ -171,7 +171,11 @@ async fn shutdown_delivers_member_finality_and_closes_every_socket_before_drain_
     let (base, signal, task) = coordinated_server(state.clone()).await;
     let mut member = connect(&base, "/api/v1/game/ws").await;
     authenticate(&mut member, &tokens[0]).await;
-    send(&mut member, json!({"type":"createRoom", "sequence":1})).await;
+    send(
+        &mut member,
+        json!({"type":"createRoom", "sequence":1, "mode":{"type":"humanDuel"}}),
+    )
+    .await;
     assert!(matches!(next(&mut member).await, Message::Text(_)));
     let mut unseated = connect(&base, "/api/v1/game/ws").await;
     authenticate(&mut unseated, &tokens[1]).await;
@@ -249,9 +253,9 @@ async fn app_shutdown_interrupts_a_running_room_with_its_real_frozen_snapshot() 
     assert!(last.frame(grenadiers_core::game::SeatId::One).is_some());
     assert!(matches!(
         last.room.phase,
-        grenadiers_core::protocol::v11::RoomPhase::MatchResult {
-            result: grenadiers_core::protocol::v11::MatchResult::Interrupted {
-                reason: grenadiers_core::protocol::v11::MatchInterruptReason::ServerStopped
+        grenadiers_core::protocol::v12::RoomPhase::MatchResult {
+            result: grenadiers_core::protocol::v12::MatchResult::Interrupted {
+                reason: grenadiers_core::protocol::v12::MatchInterruptReason::ServerStopped
             },
             ..
         }
@@ -282,9 +286,9 @@ async fn app_shutdown_preserves_an_already_final_forfeit_outcome() {
     };
     assert!(matches!(
         last.room.phase,
-        grenadiers_core::protocol::v11::RoomPhase::MatchResult {
-            result: grenadiers_core::protocol::v11::MatchResult::Winner {
-                reason: grenadiers_core::protocol::v11::MatchWinnerReason::Forfeit,
+        grenadiers_core::protocol::v12::RoomPhase::MatchResult {
+            result: grenadiers_core::protocol::v12::MatchResult::Winner {
+                reason: grenadiers_core::protocol::v12::MatchWinnerReason::Forfeit,
                 ..
             },
             ..

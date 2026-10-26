@@ -3,7 +3,7 @@
 Historical v4 reference. Gameplay v11 now serves the endpoint; see the current
 [server reconnect guide](reconnect-server.md), [browser reconnect guide](reconnect-browser.md),
 and [v11 contract](protocol-v11.md). The v4 schema, generated types and browser conformance remain
-archived; the active Rust/browser implementation uses v11.
+archived; the active Rust/browser implementation uses v12.
 
 Gameplay v4 is retained in `api/gameplay-v4.schema.json` and generated
 `web/src/game/v4/schema.ts`; there is no current Rust v4 module. At activation the existing

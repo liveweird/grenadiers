@@ -1,8 +1,8 @@
 # Gameplay v11: materialized Oil Barrel state
 
-The coordinated live contract is `api/gameplay-v11.schema.json`, Rust `core::protocol::v11`, and
-generated `web/src/game/v11/schema.ts`. Server and browser must deploy together. Gameplay v10 and
-earlier contracts remain archived and reject Oil settings and every private Oil phase or grace.
+The retained physical contract is `api/gameplay-v11.schema.json`, Rust `core::protocol::v11`, and
+generated `web/src/game/v11/schema.ts`. The live [v12 contract](protocol-v12.md) reuses its physical model and extends room metadata.
+Gameplay v10 and earlier contracts remain archived and reject Oil settings and every private Oil phase or grace.
 
 V11 retains Expanded-v5 rules, generated-v2 arenas, journal format 2, and the v10 actor, bomb,
 event, command, Teleporter epoch, Kick, Punch and Bracelet shapes. It extends the canonical catalog

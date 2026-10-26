@@ -10,7 +10,7 @@ async function beginResume() {
   await vi.waitFor(() => expect(value.sockets).toHaveLength(2))
   const socket = value.sockets[1]
   socket.emit('open')
-  socket.message({ type: 'authenticated', protocolVersion: 11 })
+  socket.message({ type: 'authenticated', protocolVersion: 12 })
   return { value, socket }
 }
 
@@ -18,7 +18,7 @@ function throttle(socket: SocketStub, sequence: number): void {
   socket.message({ type: 'error', code: 'rateLimited', sequence })
 }
 
-describe('v11 coordinated resume recovery', () => {
+describe('v12 coordinated resume recovery', () => {
   beforeEach(() => vi.stubGlobal('WebSocket', { OPEN: SocketStub.OPEN }))
 
   it('runs a scheduled fake-clock task only once', () => {
@@ -105,7 +105,7 @@ describe('v11 coordinated resume recovery', () => {
         await vi.waitFor(() => expect(value.sockets).toHaveLength(2))
         if (phase === 'admission') {
           value.sockets[1].emit('open')
-          value.sockets[1].message({ type: 'authenticated', protocolVersion: 11 })
+          value.sockets[1].message({ type: 'authenticated', protocolVersion: 12 })
         }
       }
       value.clock.advanceBy(10_000 - value.clock.now)

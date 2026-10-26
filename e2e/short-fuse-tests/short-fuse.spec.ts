@@ -8,7 +8,7 @@ import {
 import { moveTo } from '../tests/support/movement'
 import { admissionBaseline, disconnectTransport, installTransportProbe } from '../tests/support/reconnect'
 import { applyItemSettings } from '../tests/support/settings'
-import type { GameServerMessage } from '../../web/src/game/v11/schema'
+import type { GameServerMessage } from '../../web/src/game/v12/schema'
 
 test.beforeAll(() => {
   expect(process.env.E2E_SHORT_FUSE_FIXTURE, 'Configure the documented production Short Fuse seed')

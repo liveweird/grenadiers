@@ -28,6 +28,11 @@ impl MatchRuntime {
         self.sim.as_ref()
     }
 
+    pub(in crate::game::rooms) fn replace_state_for_test(&mut self, state: State) {
+        self.sim.as_mut().expect("running simulation").state = state;
+        self.reports.clear();
+    }
+
     pub(in crate::game::rooms) fn set_revision(&mut self, revision: u32) {
         self.revision = revision;
     }

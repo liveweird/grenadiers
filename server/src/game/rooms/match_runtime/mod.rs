@@ -45,3 +45,26 @@ pub(in crate::game::rooms) use test_support::{
     expanded_heart_runtime, move_cells, plant, start_expanded_heart_round, start_optional_runtime,
     start_optional_runtime_with_fuse, start_shield_runtime, wait_clear,
 };
+
+#[cfg(test)]
+macro_rules! prepare_expanded_admission {
+    ($room:expr, $epoch:expr, $capture:expr, $generation:expr, $recipient:expr,
+     $last_action:expr, $sequence:expr, $token:expr $(,)?) => {
+        grenadiers_core::protocol::v12::prepare_admission(
+            grenadiers_core::protocol::v12::AdmissionProjection {
+                room: $room,
+                state_epoch: $epoch,
+                capture: $capture,
+                generation: $generation,
+            },
+            grenadiers_core::protocol::v12::PersonalAdmission {
+                recipient: $recipient,
+                last_action_id: $last_action,
+                sequence: $sequence,
+                resume_token: $token,
+            },
+        )
+    };
+}
+#[cfg(test)]
+pub(in crate::game::rooms) use prepare_expanded_admission;

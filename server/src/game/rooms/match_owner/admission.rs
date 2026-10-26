@@ -1,4 +1,4 @@
-use grenadiers_core::protocol::{Counter, RoomId, v11::ResumeToken};
+use grenadiers_core::protocol::{Counter, RoomId, v12::ResumeToken};
 use tokio::sync::oneshot;
 
 use super::super::{
@@ -14,6 +14,20 @@ impl MatchOwnerHandle {
         sequence: Counter,
     ) -> Reply<MatchAdmission> {
         self.submit(|reply| OwnerCommand::Join {
+            personal: false,
+            binding,
+            sequence,
+            reply,
+        })
+    }
+
+    pub(in crate::game::rooms) fn admit_creator(
+        &self,
+        binding: BindingKey,
+        sequence: Counter,
+    ) -> Reply<MatchAdmission> {
+        self.submit(|reply| OwnerCommand::Join {
+            personal: true,
             binding,
             sequence,
             reply,
@@ -95,6 +109,7 @@ impl MatchOwnerHandle {
         let (reply, response) = oneshot::channel();
         drop(response);
         let _ = self.commands.try_send(OwnerCommand::Join {
+            personal: false,
             binding,
             sequence: Counter::new(1).expect("test sequence"),
             reply,

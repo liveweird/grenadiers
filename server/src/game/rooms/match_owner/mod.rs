@@ -25,4 +25,6 @@ mod round_tests;
 #[cfg(test)]
 mod runner_tests;
 #[cfg(test)]
+mod solo_tests;
+#[cfg(test)]
 mod test_support;

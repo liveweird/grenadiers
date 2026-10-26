@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { GameClient } from './client'
 import { authenticate, harness, sessionToken, SocketStub } from './testSupport'
 
-describe('v11 session transport', () => {
+describe('v12 session transport', () => {
   beforeEach(() => vi.stubGlobal('WebSocket', { OPEN: SocketStub.OPEN }))
   afterEach(() => vi.unstubAllGlobals())
 

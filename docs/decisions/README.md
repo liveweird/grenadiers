@@ -32,6 +32,7 @@ identifies the active network contract. Check a record's status and later decisi
 | [0023](0023-browser-content-security-policy.md) | Enforced browser content policy |
 | [0024](0024-peer-admission.md) | Bounded peer admission and explicit proxy identity |
 | [0025](0025-production-replay-recording.md) | Production journal allocation and explicit test recording |
+| [0026](0026-solo-controllers.md) | Server-owned solo controllers and bounded planning |
 
 For a new decision, use the next numeric prefix and a descriptive filename. State the context,
 decision, consequences and acceptance requirements. When replacing an earlier decision, link

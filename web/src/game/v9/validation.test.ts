@@ -2,15 +2,18 @@ import { describe, expect, it } from 'vitest'
 import { checkedCatalogMaskRanges, executeCatalogMaskRange } from '../../test/catalogMasks'
 import { validateServerMessage } from '../client/clientProtocol'
 import { snapshot } from '../client/testSupport'
+import { snapshot as v11Snapshot } from '../validation/archived-v11-fixtures'
 import { validateGameplayV8ServerMessage } from '../v8/validation'
 import { validateGameplayV9ServerMessage } from './validation'
 import type { Snapshot as V9Snapshot } from './schema'
 
 function archivedValue(value: unknown): V9Snapshot {
   const archived = structuredClone(value) as {
-    room: { availableItems: string[] }
+    room: { availableItems: string[]; mode?: unknown; seats: Array<{ controller?: unknown }> }
     state: { actors: Array<Record<string, unknown>>; oilBarrels?: unknown }
   }
+  delete archived.room.mode
+  for (const seat of archived.room.seats) delete seat.controller
   archived.room.availableItems = archived.room.availableItems
     .filter((item) => item !== 'kick' && item !== 'punch' && item !== 'bracelet'
       && item !== 'wallPass' && item !== 'oilBarrel' && item !== 'teleporter')
@@ -18,7 +21,7 @@ function archivedValue(value: unknown): V9Snapshot {
   delete archived.state.oilBarrels
   return archived as unknown as V9Snapshot
 }
-const archivedSnapshot = (revision: number): V9Snapshot => archivedValue(snapshot(revision))
+const archivedSnapshot = (revision: number): V9Snapshot => archivedValue(v11Snapshot(revision))
 
 const supported = [
   'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch',

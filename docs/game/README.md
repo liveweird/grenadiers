@@ -4,7 +4,7 @@ This guide describes the classic Bomberman-style game loop and the Grenadiers ru
 player abilities, arena contents, bombs, damage, power-ups, enemies, bots, modes, timing and
 acceptance scenarios. Numerical tuning remains subject to playtesting.
 
-The implemented two-human game uses the [headless world and movement model](movement.md),
+The implemented human-duel and [solo game](single-player.md) use the [headless world and movement model](movement.md),
 [combat](combat.md), versioned [gameplay contracts](protocol.md), authenticated [rooms](rooms.md),
 authoritative scheduling and the [browser duel](browser.md). Generated Expanded-v5 matches are
 first-to-three by default, with upgrades, automatic round resets, consensual rematch and

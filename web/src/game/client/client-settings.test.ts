@@ -9,7 +9,7 @@ const changed = {
   enabledItems: [],
 }
 
-describe('v11 authoritative gameplay settings', () => {
+describe('v12 authoritative gameplay settings', () => {
   beforeEach(() => vi.stubGlobal('WebSocket', { OPEN: SocketStub.OPEN }))
 
   it('sends an atomic revision-fenced update and fences readiness until acceptance', async () => {

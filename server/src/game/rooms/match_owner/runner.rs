@@ -18,6 +18,7 @@ pub(super) async fn run(mut owner: PreparedMatchOwner) {
         owner.notices,
         owner.created_at + LOBBY_LIFETIME,
         owner.random_fill,
+        owner.cpu,
     );
     let mut admissions = VecDeque::with_capacity(COMMAND_CAPACITY);
     let mut catching_up = false;
@@ -54,6 +55,10 @@ pub(super) async fn run(mut owner: PreparedMatchOwner) {
             return;
         }
         if close_at_boundaries(&mut driver) {
+            return;
+        }
+        if !catching_up && driver.poll_cpu_result().is_err() {
+            driver.fail();
             return;
         }
         match wake {

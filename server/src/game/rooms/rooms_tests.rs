@@ -5,7 +5,7 @@ use std::sync::{
 
 use super::*;
 use crate::game::sessions::{ConnectionId, GameSessions};
-use grenadiers_core::protocol::{Seat, v11::MapId};
+use grenadiers_core::protocol::{Seat, v12::MapId};
 
 fn deterministic_rooms(now: StdInstant) -> Arc<GameRooms> {
     let codes = AtomicU64::new(0);
@@ -209,7 +209,7 @@ fn id_and_random_failures_preserve_registry_state() {
         registry.prefix = Some(1);
         registry.next_serial = u64::MAX;
         assert!(matches!(
-            rooms.generate_identity(&mut registry),
+            rooms.generate_identity(&mut registry, grenadiers_core::room::RoomMode::HumanDuel),
             Err(RoomError::CapacityReached)
         ));
         assert_eq!(registry.next_serial, u64::MAX);
@@ -219,7 +219,7 @@ fn id_and_random_failures_preserve_registry_state() {
     let failing = GameRooms::with_random_fill(now, |_| Err(()));
     let mut registry = failing.lock();
     assert!(matches!(
-        failing.generate_identity(&mut registry),
+        failing.generate_identity(&mut registry, grenadiers_core::room::RoomMode::HumanDuel,),
         Err(RoomError::CapacityReached)
     ));
     assert!(registry.prefix.is_none());
@@ -358,8 +358,8 @@ async fn excessive_lag_interrupts_then_terminal_retention_releases_registration(
     let view = notice.room;
     assert!(matches!(
         view.phase,
-        grenadiers_core::protocol::v11::RoomPhase::Interrupted {
-            reason: grenadiers_core::protocol::v11::MatchInterruptReason::ServerOverloaded,
+        grenadiers_core::protocol::v12::RoomPhase::Interrupted {
+            reason: grenadiers_core::protocol::v12::MatchInterruptReason::ServerOverloaded,
             ..
         }
     ));

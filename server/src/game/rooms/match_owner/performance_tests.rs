@@ -6,7 +6,7 @@ use std::time::Duration;
 
 use grenadiers_core::{
     game::Direction,
-    protocol::{RoomCode, RoomId, v11::GameServerMessage},
+    protocol::{RoomCode, RoomId, v12::GameServerMessage},
 };
 use serde_json::json;
 use tokio::{
@@ -165,7 +165,7 @@ async fn run_owner_profile(room_count: usize) {
     for room in &rooms {
         assert!(matches!(
             current_notice(room).room.phase,
-            grenadiers_core::protocol::v11::RoomPhase::Running
+            grenadiers_core::protocol::v12::RoomPhase::Running
         ));
     }
 
@@ -210,6 +210,9 @@ async fn start_room(index: usize) -> MeasuredRoom {
         id: RoomId::new(&room_id).unwrap(),
         code: RoomCode::new("ABCDEFGH").unwrap(),
         profile: RoomProfile::GeneratedClassicV2,
+        mode: grenadiers_core::room::RoomMode::HumanDuel,
+        registry_serial: (index + 1) as u64,
+        private_cpu_seed: None,
     };
     let seed_byte = u8::try_from(index + 1).unwrap();
     let seeds = RoundSeedSource::with_entropy(move |bytes| {
@@ -246,7 +249,7 @@ async fn start_room(index: usize) -> MeasuredRoom {
         loop {
             if matches!(
                 notice(&running).room.phase,
-                grenadiers_core::protocol::v11::RoomPhase::Running
+                grenadiers_core::protocol::v12::RoomPhase::Running
             ) {
                 break;
             }
@@ -284,7 +287,7 @@ fn observe(
                 .as_ref()
                 .map_or_else(
                     || {
-                        grenadiers_core::protocol::v11::encode_server_message(
+                        grenadiers_core::protocol::v12::encode_server_message(
                             &GameServerMessage::RoomState {
                                 room: current.room.clone(),
                             },
@@ -313,6 +316,9 @@ async fn queue_pressure() -> usize {
             id: RoomId::new("ffffffffffffffffffffffffffffffff").unwrap(),
             code: RoomCode::new("ABCDEFGH").unwrap(),
             profile: RoomProfile::GeneratedClassicV2,
+            mode: grenadiers_core::room::RoomMode::HumanDuel,
+            registry_serial: u64::MAX,
+            private_cpu_seed: None,
         },
         created_at,
         RoundSeedSource::with_entropy(|bytes| {

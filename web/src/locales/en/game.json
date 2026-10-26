@@ -256,5 +256,11 @@
     "staleSettings": "The match rules changed. Review the latest values and try again.",
     "settingsLocked": "Only the current rules editor can change settings before the match.",
     "seatReplaced": "This seat was resumed in another tab."
+  },
+  "solo": {
+    "label": "Solo match",
+    "opponent": "CPU opponent",
+    "play": "Play solo against CPU",
+    "difficulty": "Private solo match · Standard CPU"
   }
 }

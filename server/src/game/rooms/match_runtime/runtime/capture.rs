@@ -14,13 +14,13 @@ use crate::game::rooms::{profile::RoomProfile, replay::Header};
 use crate::round_seed::RoundSeedSource;
 
 #[cfg(test)]
-fn journal(profile: RoomProfile) -> Journal {
-    match profile {
+fn journal(identity: &RoomIdentity) -> Journal {
+    match identity.profile {
         RoomProfile::GeneratedClassicV2 => Journal::new(Header::m6([false; 2])),
         RoomProfile::GeneratedClassicV3 => Journal::new(Header::m6_v3([false; 2])),
         RoomProfile::GeneratedConfigurableV4 => Journal::new(Header::configurable_v4()),
         RoomProfile::ExpandedV5 => Journal::new(Header::expanded_v5_with_settings(
-            profile.initial_settings(),
+            identity.profile.initial_settings(),
         )),
         #[cfg(test)]
         RoomProfile::FixedClassicV1 => Journal::unsupported_profile(),
@@ -35,7 +35,11 @@ impl MatchRuntime {
     ) -> Self {
         let settings = identity.profile.initial_settings();
         let settings_editor = identity.profile.initial_editor();
-        let journal = journal(identity.profile);
+        let journal = if let Some(seed) = identity.private_cpu_seed {
+            Journal::new(Header::expanded_v5_solo(settings, seed))
+        } else {
+            journal(&identity)
+        };
         Self::with_configuration(
             identity,
             round_seed_source,
@@ -54,9 +58,15 @@ impl MatchRuntime {
         settings_revision: u32,
         settings_editor: Option<SeatId>,
     ) -> Self {
+        let mut lifecycle = MatchLifecycle::with_settings(settings);
+        if matches!(identity.mode, grenadiers_core::room::RoomMode::Solo(_)) {
+            lifecycle
+                .occupy(SeatId::Two)
+                .expect("solo CPU seat occupation is valid at construction");
+        }
         Self {
             identity,
-            lifecycle: MatchLifecycle::with_settings(settings),
+            lifecycle,
             revision: 0,
             settings_revision,
             settings_editor,

@@ -6,7 +6,7 @@ use std::time::Duration;
 
 use grenadiers_core::protocol::{
     Seat,
-    v11::{CountdownKind, MatchResult, MatchWinnerReason, RoomPhase},
+    v12::{CountdownKind, MatchResult, MatchWinnerReason, RoomPhase},
 };
 
 use super::test_support::*;

@@ -40,6 +40,7 @@ fn inject(controller: &mut CpuController, decision: grenadiers_core::cpu::Decisi
         SurvivalPlan {
             control: ControlPlan::stop(memory),
             lease: None,
+            route: None,
         },
         basis,
         rng,
@@ -174,6 +175,7 @@ fn rejected_bomb_clears_prospective_escape_but_commits_rng() {
         next_memory: planned.next_memory,
         next_rng: rng.clone(),
         committed_pulse: None,
+        committed_route: None,
     };
 
     controller.commit(
@@ -273,6 +275,7 @@ fn admitted_long_pulse_waits_for_its_scheduled_stop_update() {
         SurvivalPlan {
             control,
             lease: Some(lease),
+            route: None,
         },
         basis.clone(),
         CpuRng::from_seed(key, [8; 32]),

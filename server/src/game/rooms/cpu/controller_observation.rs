@@ -31,6 +31,8 @@ impl CpuController {
         self.stop_admission = None;
         self.settled_stop_tick = None;
         self.committed_pulse = None;
+        self.committed_route = None;
+        self.committed_route_epoch = None;
     }
 
     pub(in crate::game::rooms) fn accept_observation(&mut self, observation: &Observation) -> bool {

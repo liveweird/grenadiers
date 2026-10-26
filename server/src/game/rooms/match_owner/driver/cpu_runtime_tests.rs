@@ -28,6 +28,10 @@ use crate::{
 };
 
 pub(super) fn running_driver(round_seed: u8) -> Driver {
+    running_driver_with_fuse(round_seed, 60)
+}
+
+pub(super) fn running_driver_with_fuse(round_seed: u8, fuse_ticks: u64) -> Driver {
     let (_, shutdown) = watch::channel(false);
     let mut room = identity(RoomProfile::ExpandedV5);
     room.mode = RoomMode::Solo(CpuProfile::CURRENT);
@@ -64,7 +68,7 @@ pub(super) fn running_driver(round_seed: u8) -> Driver {
             driver.runtime.lifecycle().round_attempt(),
             MatchAction::UpdateSettings {
                 settings_revision: 1,
-                settings: RoomSettings::new(SpeedLevel::Four, 64, 1, 60).unwrap(),
+                settings: RoomSettings::new(SpeedLevel::Four, 64, 1, fuse_ticks).unwrap(),
             },
         )
         .unwrap();
@@ -230,6 +234,7 @@ fn certified_long_pulse_executes_and_replans_after_its_actual_stop_snapshot() {
                 next_memory: UtilityMemory::new(key),
             },
             lease: Some(lease),
+            route: None,
         },
     );
 

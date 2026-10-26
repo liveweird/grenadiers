@@ -14,6 +14,7 @@ use super::super::{
 };
 pub(super) mod admissions;
 mod cpu_runtime;
+mod cpu_runtime_route;
 
 use super::types::{
     ClosingReason, MatchOwnerNotice, OwnerCommand, PendingDeparture, SeatSlot, map_runtime_error,
@@ -266,6 +267,7 @@ impl Driver {
     }
 
     pub(super) fn tick(&mut self, now: Instant) -> Result<(), MatchRuntimeError> {
+        self.apply_cpu_route()?;
         self.apply_cpu_stop()?;
         let departures = self.pending_reasons();
         if let Some(notice) = self.runtime.settle_boundary(departures)? {

@@ -160,7 +160,7 @@ fn accepted_solo_inputs_replay_from_format_three_without_worker_or_policy() {
         grenadiers_core::room::RoomMode::Solo(grenadiers_core::room::CpuProfile::CURRENT)
     );
     assert_eq!(journal.header.solo.unwrap().seat, SeatId::Two);
-    assert_eq!(journal.header.solo.unwrap().policy_version, 2);
+    assert_eq!(journal.header.solo.unwrap().policy_version, 3);
     let expected = runtime.replay_inspection();
     assert_eq!(replay(journal).unwrap(), expected);
 }
@@ -232,24 +232,29 @@ fn rejected_cpu_like_actions_never_create_accepted_records() {
 
 #[test]
 fn original_cpu_journals_replay_without_policy_reexecution() {
-    let mut runtime = solo_recording_runtime(grenadiers_core::room::CpuProfile::INITIAL);
-    start(&mut runtime);
-    submit_intent(&mut runtime, SeatId::Two, 1, fixture_policy(0)).unwrap();
-    runtime.tick().unwrap();
-    assert_eq!(
-        runtime.replay_journal().header.solo.unwrap().policy_version,
-        1
-    );
-    assert_eq!(
-        replay(runtime.replay_journal()).unwrap(),
-        runtime.replay_inspection()
-    );
+    for (profile, version) in [
+        (grenadiers_core::room::CpuProfile::INITIAL, 1),
+        (grenadiers_core::room::CpuProfile::PULSE_V2, 2),
+    ] {
+        let mut runtime = solo_recording_runtime(profile);
+        start(&mut runtime);
+        submit_intent(&mut runtime, SeatId::Two, 1, fixture_policy(0)).unwrap();
+        runtime.tick().unwrap();
+        assert_eq!(
+            runtime.replay_journal().header.solo.unwrap().policy_version,
+            version
+        );
+        assert_eq!(
+            replay(runtime.replay_journal()).unwrap(),
+            runtime.replay_inspection()
+        );
+    }
 }
 
 #[test]
 fn solo_journal_rejects_mismatched_and_unknown_policy_versions() {
     let mut runtime = solo_recording_runtime(grenadiers_core::room::CpuProfile::CURRENT);
-    for version in [0, 1, 3, u16::MAX] {
+    for version in [0, 1, 2, 4, u16::MAX] {
         let journal = runtime.replay_journal_mut();
         journal.header.solo.as_mut().unwrap().policy_version = version;
         assert_eq!(replay(journal), Err(super::ReplayError::UnsupportedFormat));

@@ -8,8 +8,8 @@ These Rust contracts support the [solo opponent](single-player.md) and the broad
 
 `core::room::RoomMode` derives controller kinds independently of occupancy and socket state.
 Human duels have two human controllers. Solo fixes the human at seat One and the CPU at seat
-Two. `CpuProfile::CURRENT` identifies `UtilityV2` with `Standard` difficulty;
-`INITIAL` preserves the original `UtilityV1` replay identity. These are policy identities, not
+Two. `CpuProfile::CURRENT` identifies `UtilityV3` with `Standard` difficulty;
+`INITIAL` and `PULSE_V2` preserve the `UtilityV1` and `UtilityV2` replay identities. These are policy identities, not
 claims about measured strength. Seeds are outside participant metadata.
 Live owner construction accepts only the current profile; retaining a historical replay
 identity does not re-enable that older policy for new matches.
@@ -43,12 +43,12 @@ request may submit its ordinary Stop. History has bounded, deterministic retenti
 counted in logical units rather than hardware milliseconds.
 
 Tie-breaking uses its own seeded ChaCha stream and never draws from arena generation. Small
-fixture policies remain test-only; production uses UtilityV2. Replays consume recorded accepted
+fixture policies remain test-only; production uses UtilityV3. Replays consume recorded accepted
 actions rather than invoking a policy again. Production journal allocation remains disabled;
 explicit solo recording adds format-3 header provenance while preserving formats 1/2 and
 accepted-input record capacity.
-Policy versions 1/2 are accepted only with their matching profile; new recordings retain the
-actual room profile. Both policies share the unchanged v12 room shape.
+Policy versions 1/2/3 are accepted only with their matching profile; new recordings retain the
+actual room profile. All three policies share the unchanged v12 room shape.
 
 ## Planning and committed execution
 
@@ -99,6 +99,27 @@ complete multi-leg escape. Clear-board goals and narrow CPU1 planting retain the
 Clear-board ordinary movement has no hazard lease: it retains its accepted hold through
 intermediate publications and can meet newly introduced hazards before the next decision.
 The lease's intermediate-pose and hazard-invalidation guarantees apply only to leased actions.
+
+## Committed timed routes
+
+`plan_route` checks one common program against up to seven exact initial execution times.
+Each lane retains its own positions, headings and absolute effect clocks; aggregated bounds
+never seed later movement. The planner reuses the pulse motion kernel and returns only a
+complete certificate, including a safe terminal stop through the requested survival deadline.
+Search has at most eight steps and 2,048 expansions within the shared decision work allowance.
+
+Each movement is followed by exactly three stopped physics updates. The owner admits the next
+scheduled input before its boundary, after a checked post-Stop observation. It continues the
+committed program without another worker result. Proposed commands advance the executor only
+after ordinary input acceptance; missing observations, rejected commands or missed deadlines
+invalidate the schedule rather than shifting it. Explicit waits permit travel through a later
+safe interval. Conditional routes retain their named assumptions and never authorize planting.
+
+A bounded expected-scene ledger distinguishes predicted bomb removals, destruction, known Oil
+ignition and exact flame-expiry changes from unexpected facts. Normal predicted explosions do
+not cancel the route. New bombs, displaced bombs, revealed items or other unmodeled changes do.
+The owner performs bounded observation/deadline checks; forecasting and search stay on workers.
+If complete route planning fails, the independently checked one-pulse fallback remains available.
 
 ## Focused verification
 

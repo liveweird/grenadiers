@@ -1,12 +1,15 @@
 # Archived v4 reconnect contract
 
-Historical v4 reference. Gameplay v11 now serves the endpoint; see [the migration note](protocol-v11.md).
-The v4 schema and generated types remain archived; the active Rust/browser implementation uses v11.
+Historical v4 reference. Gameplay v11 now serves the endpoint; see the current
+[server reconnect guide](reconnect-server.md), [browser reconnect guide](reconnect-browser.md),
+and [v11 contract](protocol-v11.md). The v4 schema, generated types and browser conformance remain
+archived; the active Rust/browser implementation uses v11.
 
-Gameplay v4 is defined in `api/gameplay-v4.schema.json`, Rust `core::protocol::v4`, and generated
-`web/src/game/v4/schema.ts`. At activation the existing gameplay endpoint and its single
-owner/runtime used v4, without an alternate endpoint or runtime selector. Diagnostic v1, classic-v2 physics, and
-generator-v1 are unchanged. V2 and v3 remain historical contracts.
+Gameplay v4 is retained in `api/gameplay-v4.schema.json` and generated
+`web/src/game/v4/schema.ts`; there is no current Rust v4 module. At activation the existing
+gameplay endpoint and its single owner/runtime used v4, without an alternate endpoint or runtime
+selector. Diagnostic v1, classic-v2 physics, and generator-v1 were unchanged. V2 and v3 were
+already historical contracts.
 
 A new distinct, redacted ResumeToken is a 64-character lowercase-hex seat capability. Ordinary
 session authentication precedes `resumeRoom {sequence, roomId, resumeToken}`. Only personal
@@ -30,7 +33,9 @@ fixtures encode a complete Snapshot to 44,874 bytes and Admitted to 31,444 bytes
 widest scalar metadata, full arrays, capability, seat and action high-water. These are structural
 bounds, not reachable gameplay claims. Oversized encoding is rejected.
 
-Run `npm --prefix web run gen:gameplay` / `check:gameplay` for all three retained versions,
-plus `cargo test -p grenadiers-core protocol::v4`. Rust and AJV tests cover every variant,
-credentials/redaction, missing/null/extra fields, physical parity and complete frame bounds.
-Semantic projection, server publication, and browser validation are active together.
+Run `npm --prefix web run check:gameplay` for retained-schema generation drift and
+`npm --prefix web test -- src/game/v4/conformance.test.ts` for the archived v4 browser contract.
+Use `npm --prefix web run gen:gameplay` only when intentionally regenerating retained declarations.
+The archived conformance suite covers authentication, reconnect capability handling,
+missing/null/extra fields and physical parity. Current Rust publication and reconnect behavior
+are covered by v11 and the linked reconnect guides; there is no `protocol::v4` Rust test filter.

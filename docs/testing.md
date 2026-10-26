@@ -23,6 +23,23 @@ Reuse successful results only while their tested inputs remain applicable; rerun
 after relevant changes or failures. Documentation-only changes do not require repeating gameplay
 acceptance when application inputs are unchanged.
 
+### Focused gameplay feedback
+
+For cached, focused feedback while editing the gameplay client or shared contract corpora, run:
+
+```sh
+npm --prefix web test -- src/game/validation/expanded-client-conformance.test.ts src/game/validation/expanded-server-conformance.test.ts src/game/client/client.test.ts src/game/client/client-settings.test.ts src/game/client/locale.test.tsx src/App.test.tsx src/game/arena/GameArena.test.tsx
+cargo test -p grenadiers-core --locked 'protocol::expanded_client_'
+cargo test -p grenadiers-core --locked 'protocol::expanded_server_contract_tests'
+cargo test -p grenadiers-core --locked 'admission_tests'
+```
+
+The Rust filters intentionally select only `grenadiers-core`; the `admission_tests` filter covers
+the protocol admission module, not server match-owner admission. These commands are an early
+feedback loop, not a replacement for the applicable acceptance gates, exhaustive profiles or
+coverage floors. See the [historical fast-feedback measurement](history/fast-feedback.md) for the
+measured environment, cache conditions and fault-detection evidence.
+
 Parallelize independent checks and gameplay groups using isolated processes, build directories,
 Compose projects, ports and Kubernetes namespaces. Reuse compiled dependencies and tooling.
 Keep latency tests isolated from competing workloads. Scheduling and caching must not reduce

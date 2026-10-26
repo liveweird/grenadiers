@@ -111,6 +111,13 @@ private target and uses only the ordinary-plus-exhaustive profiles from this run
 reporter, exclusions and 90% floor remain unchanged; retained scratch includes execution evidence
 before reporting so a report failure does not erase completed-test provenance.
 
+`api/fixtures/gameplay-expanded-server-conformance.json` is checked against actual Rust-produced
+v8–v11 admissions/snapshot pairs and the corresponding browser validators. It covers retained
+freeze/teleport/Oil differences and recipient identity/privacy, alongside structural/semantic
+negative controls; it does not replace existing control/error-frame conformance tests.
+Run `cargo test -p grenadiers-core --locked expanded_server_contract_tests` and
+`npm --prefix web test -- src/game/validation/expanded-server-conformance.test.ts` for focused feedback.
+
 The repository gate also runs the hosted-workflow contract tests. Before the parallel server
 runner starts, its regression suite checks scheduling, failure propagation and real
 `cargo-llvm-cov` binary/profile isolation using a disposable crate. Run that suite separately

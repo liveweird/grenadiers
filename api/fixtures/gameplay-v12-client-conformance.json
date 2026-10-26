@@ -1,0 +1,55 @@
+{
+  "validCreateRooms": [
+    {
+      "caseId": "human-duel",
+      "value": { "type": "createRoom", "sequence": 1, "mode": { "type": "humanDuel" } }
+    },
+    {
+      "caseId": "solo-standard",
+      "value": {
+        "type": "createRoom",
+        "sequence": 1,
+        "mode": { "type": "solo", "difficulty": "standard" }
+      }
+    }
+  ],
+  "invalidCreateRooms": [
+    { "caseId": "missing-mode", "value": { "type": "createRoom", "sequence": 1 } },
+    {
+      "caseId": "missing-difficulty",
+      "value": { "type": "createRoom", "sequence": 1, "mode": { "type": "solo" } }
+    },
+    {
+      "caseId": "unknown-difficulty",
+      "value": {
+        "type": "createRoom",
+        "sequence": 1,
+        "mode": { "type": "solo", "difficulty": "easy" }
+      }
+    },
+    {
+      "caseId": "client-seed-control",
+      "value": {
+        "type": "createRoom",
+        "sequence": 1,
+        "mode": { "type": "solo", "difficulty": "standard", "seed": 7 }
+      }
+    },
+    {
+      "caseId": "client-policy-control",
+      "value": {
+        "type": "createRoom",
+        "sequence": 1,
+        "mode": { "type": "solo", "difficulty": "standard", "policy": "utilityV1" }
+      }
+    },
+    {
+      "caseId": "client-seat-control",
+      "value": {
+        "type": "createRoom",
+        "sequence": 1,
+        "mode": { "type": "solo", "difficulty": "standard", "seat": "two" }
+      }
+    }
+  ]
+}

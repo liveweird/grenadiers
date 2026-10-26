@@ -1,7 +1,8 @@
 mod cpu_observation;
 mod cpu_observation_types;
 mod projection_admission;
-mod projection_recipient;
+// v12 reuses the checked v11 physical/privacy projection without reopening archived wire types.
+pub(crate) mod projection_recipient;
 mod scalars;
 mod server;
 mod state;
@@ -56,6 +57,14 @@ pub fn bind_expanded(
         state_epoch,
         capture,
         generation,
+        expanded_items(),
+    )
+}
+
+// v12 normalizes only its checked controller metadata, then reuses the full v11 room validator.
+pub(crate) fn validate_expanded_room(room: &RoomView) -> Result<(), ProjectionError> {
+    crate::protocol::v8::projection_binding::validate_expanded_room_for_items(
+        room,
         expanded_items(),
     )
 }

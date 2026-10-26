@@ -24,7 +24,8 @@ fn prepare(publication: &BoundPublication, recipient: Seat) -> Result<String, Pr
     super::encode_server_message(&message).map_err(|_| ProjectionError::EncodingFailed)
 }
 
-pub(super) fn recipient_state(publication: &BoundPublication, recipient: Seat) -> GameState {
+// Crate-visible so v12 can reuse this privacy projection after validating its own metadata.
+pub(crate) fn recipient_state(publication: &BoundPublication, recipient: Seat) -> GameState {
     let facts = &publication.world.0;
     let recipient_actor = &facts.actors[seat_index(recipient)];
     let hides_bombs = has_effect(recipient_actor, EffectKind::InvisibleBombs);
@@ -108,7 +109,7 @@ fn voluntary_actions_frozen(actors: &[crate::protocol::v8::VisibleActorView; 2])
     ]
 }
 
-fn recipient_events(
+pub(crate) fn recipient_events(
     publication: &BoundPublication,
     recipient: Seat,
 ) -> Result<SnapshotEvents, ProjectionError> {

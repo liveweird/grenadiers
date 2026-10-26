@@ -4,6 +4,35 @@ This archive preserves the older release records originally maintained in
 [`docs/releases.md`](../releases.md). Records remain in their original order; the current
 release procedure and current release record stay in the [release guide](../releases.md).
 
+## v0.3.73 — 2026-10-26
+
+[v0.3.73](https://github.com/liveweird/grenadiers/releases/tag/v0.3.73) adds competing-resume
+and cancellation regressions, including real socket takeover fencing. Two valid queued resumes
+may both commit in order; the last binding is authoritative. Canceled admissions do not commit.
+Production ownership and wire behavior remain unchanged.
+
+The parallel Rust runner now fails early when Cargo rejects a restored coverage cache and
+isolates official reporting to every instrumented workspace executable selected from one Cargo
+JSON stream. Binary/profile identities, the 90% floor, exclusions and every mask assertion remain.
+Independent review covers stale-object reproduction, complete lib/main selection, artifact mutation,
+preexisting-target preservation, owned cleanup and symlink rejection. A scratch execution record
+is written before reporting. This closes the [earlier report-contamination failure](coverage-cache-recovery.md).
+
+Full source-bound acceptance at `822991f6e22817d525d4a300ebb24e21f48bac49` passes in 452.372s:
+951 core / 316 ordinary server tests and two doctests per profile, all 4,194,304 masks in debug,
+release and official coverage, zero retries. Coverage is 17,864/19,553 lines (91.3619%).
+[Integrated Linux debug/release units](https://github.com/liveweird/grenadiers/actions/runs/40373348609)
+pass with identical competing-resume tests. Unchanged web/dependency acceptance reuses v0.3.72.
+
+Accepted image source is `806c13d0f25ac7327df49237f08fddd50ea94259`, whose Docker inputs equal
+those of the tested source; runner-only changes are outside the image. Accepted image is
+`sha256:06d7c75d4148ee2ff9897d984407450a465f4b34ac4ca404ef9473a9ec616121`.
+Trivy 0.74.0 reports zero fixable HIGH/CRITICAL findings. Eight Compose and eight Kubernetes
+cases each pass in 36.6s, including exact-image/security/probe/resource checks; temporary resources
+are removed. Localhost:8085 has verified health/readiness, CSP/cache and unchanged served web bytes.
+Control is `.local-checkpoints/runtime/compose-v0.3.73.yaml`; `rollback-v0.3.72.yaml` retains the
+prior image. No gameplay, protocol, artwork or migration change; distribution remains source prereleases.
+
 ## v0.3.72 — 2026-10-26
 
 [v0.3.72](https://github.com/liveweird/grenadiers/releases/tag/v0.3.72) shares expanded client

@@ -79,34 +79,33 @@ interrupted state but cannot preserve process-local matches or credentials.
 Keep the previous immutable image reference for rollback; database migration compatibility
 must be designed when durable application data is introduced.
 
-## v0.3.73 — 2026-10-26
+## v0.3.74 — 2026-10-26
 
-[v0.3.73](https://github.com/liveweird/grenadiers/releases/tag/v0.3.73) adds competing-resume
-and cancellation regressions, including real socket takeover fencing. Two valid queued resumes
-may both commit in order; the last binding is authoritative. Canceled admissions do not commit.
-Production ownership and wire behavior remain unchanged.
+[v0.3.74](https://github.com/liveweird/grenadiers/releases/tag/v0.3.74) shares 16 Rust-produced
+admission/snapshot frames across retained v8–v11 adapters, schemas and browser validators.
+Cases retain freeze, teleport and Oil differences, recipient privacy, identity and metadata
+negative controls. Production projection, schemas and gameplay remain unchanged. Independent review is clear.
 
-The parallel Rust runner now fails early when Cargo rejects a restored coverage cache and
-isolates official reporting to every instrumented workspace executable selected from one Cargo
-JSON stream. Binary/profile identities, the 90% floor, exclusions and every mask assertion remain.
-Independent review covers stale-object reproduction, complete lib/main selection, artifact mutation,
-preexisting-target preservation, owned cleanup and symlink rejection. A scratch execution record
-is written before reporting. This closes the [earlier report-contamination failure](history/coverage-cache-recovery.md).
-
-Full source-bound acceptance at `822991f6e22817d525d4a300ebb24e21f48bac49` passes in 452.372s:
-951 core / 316 ordinary server tests and two doctests per profile, all 4,194,304 masks in debug,
-release and official coverage, zero retries. Coverage is 17,864/19,553 lines (91.3619%).
+Full source-bound Rust acceptance at `28ab639e6dd1a7def1147b514480d8341d6c2163` passes in
+488.608s: 955 core / 316 ordinary server tests plus two doctests, all 4,194,304 masks in debug,
+release and official coverage, zero retries. Coverage is 18,049/19,738 lines (91.4429%).
+Full web acceptance passes 6,828 tests / 94 files in 286.25s with 91.24/89.87/90.12/93.60%
+coverage and local gzip JavaScript/CSS 337,162/36,695 bytes.
 [Integrated Linux debug/release units](https://github.com/liveweird/grenadiers/actions/runs/40373348609)
-pass with identical competing-resume tests. Unchanged web/dependency acceptance reuses v0.3.72.
+pass at `5db1d0e46c14b7278fe854af9578567999b3ebdf`, with identical core/server/API inputs.
+Repository, lint, types and contract drift pass; dependency acceptance is unchanged.
 
-Accepted image source is `806c13d0f25ac7327df49237f08fddd50ea94259`, whose Docker inputs equal
-those of the tested source; runner-only changes are outside the image. Accepted image is
-`sha256:06d7c75d4148ee2ff9897d984407450a465f4b34ac4ca404ef9473a9ec616121`.
-Trivy 0.74.0 reports zero fixable HIGH/CRITICAL findings. Eight Compose and eight Kubernetes
-cases each pass in 36.6s, including exact-image/security/probe/resource checks; temporary resources
-are removed. Localhost:8085 has verified health/readiness, CSP/cache and unchanged served web bytes.
-Control is `.local-checkpoints/runtime/compose-v0.3.73.yaml`; `rollback-v0.3.72.yaml` retains the
-prior image. No gameplay, protocol, artwork or migration change; distribution remains source prereleases.
+Accepted image source is `28ab639e6dd1a7def1147b514480d8341d6c2163`, image
+`sha256:4d4189e6dd868fb831f5aea82371320ba0d44b78da70fc77f406f6faeb4bf469`.
+Docker gzip JavaScript/CSS is 337,939/36,695 bytes. Trivy 0.74.0 reports zero fixable HIGH/CRITICAL
+findings. Eight Compose and eight Kubernetes cases each pass in 36.9s with exact-image/security/
+probe/resource checks; temporary projects/namespaces are removed. Localhost:8085 has verified
+health/readiness, CSP/cache and unchanged accepted HTML/JS/CSS/atlas bytes. Control is
+`.local-checkpoints/runtime/compose-v0.3.74.yaml`; `rollback-v0.3.73.yaml` retains the prior image.
+No gameplay, wire, artwork or migration change; distribution remains source prereleases.
+
+<a id="v0373--2026-10-26"></a>
+The [v0.3.73 record](history/releases.md#v0373--2026-10-26) is preserved in release history.
 
 <a id="v0372--2026-10-26"></a>
 The [v0.3.72 record](history/releases.md#v0372--2026-10-26) is preserved in release history.

@@ -318,6 +318,9 @@ fn truncation_is_bounded_and_cannot_change_runtime_or_fixed_test_profile() {
             id: RoomId::new("00000000000000000000000000000002").unwrap(),
             code: RoomCode::new("BCDEFGHJ").unwrap(),
             profile: RoomProfile::FixedClassicV1,
+            mode: grenadiers_core::room::RoomMode::HumanDuel,
+            registry_serial: 2,
+            private_cpu_seed: None,
         },
         RoundSeedSource::with_entropy(|_| panic!("fixed profile entropy")),
     );

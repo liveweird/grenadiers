@@ -4,7 +4,7 @@ import { arenaTilePixels } from '../tests/support/compositor'
 import { latestSnapshot, observeGame, visibleActor, type ObservedGame } from '../tests/support/duel'
 import { moveSeatTo } from '../tests/support/movement'
 import { applyItemSettings } from '../tests/support/settings'
-import type { GameServerMessage } from '../../web/src/game/v11/schema'
+import type { GameServerMessage } from '../../web/src/game/v12/schema'
 import { retainedKickTimeline } from './kick-timeline'
 
 test.beforeAll(() => expect(process.env.E2E_KICK_FIXTURE).toBe('arena-v2-kick'))

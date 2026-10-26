@@ -1,4 +1,7 @@
-use grenadiers_core::protocol::{RoomCode, RoomId};
+use grenadiers_core::{
+    protocol::{RoomCode, RoomId},
+    room::RoomMode,
+};
 use tokio::sync::oneshot;
 
 use super::super::sessions::ConnectionId;
@@ -38,6 +41,9 @@ pub(super) struct RoomIdentity {
     pub(super) id: RoomId,
     pub(super) code: RoomCode,
     pub(super) profile: super::profile::RoomProfile,
+    pub(super) mode: RoomMode,
+    pub(super) registry_serial: u64,
+    pub(super) private_cpu_seed: Option<[u8; 32]>,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

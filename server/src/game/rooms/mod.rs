@@ -4,12 +4,16 @@ use std::{
     time::Instant as StdInstant,
 };
 
-use grenadiers_core::protocol::{Counter, RoomCode, RoomId, v11::ResumeToken};
+use grenadiers_core::{
+    protocol::{Counter, RoomCode, RoomId, v12::ResumeToken},
+    room::RoomMode,
+};
 use tokio::{
     sync::{Notify, watch},
     time::Instant,
 };
 
+mod cpu;
 mod input;
 mod match_owner;
 mod match_runtime;
@@ -17,6 +21,7 @@ mod match_runtime;
 mod measurement;
 mod profile;
 mod rate_limit;
+mod registry_identity;
 mod replay;
 mod resume;
 mod types;
@@ -40,6 +45,7 @@ pub(crate) struct GameRooms {
     registry: Mutex<Registry>,
     random_fill: Arc<RandomFill>,
     round_seed_source: RoundSeedSource,
+    cpu_planner: cpu::CpuPlanner,
     profile: profile::RoomProfile,
     shutdown: watch::Sender<bool>,
     empty: Notify,
@@ -71,6 +77,7 @@ impl GameRooms {
             }),
             random_fill: Arc::new(|bytes| getrandom::fill(bytes).map_err(|_| ())),
             round_seed_source,
+            cpu_planner: cpu::CpuPlanner::new().expect("CPU planner workers must start"),
             profile: profile::RoomProfile::ExpandedV5,
             shutdown,
             empty: Notify::new(),
@@ -94,6 +101,7 @@ impl GameRooms {
             random_fill: Arc::new(fill),
             round_seed_source: RoundSeedSource::from_optional_path(None)
                 .expect("OS entropy source construction cannot fail"),
+            cpu_planner: cpu::CpuPlanner::new().expect("CPU planner workers must start"),
             profile: profile::RoomProfile::FixedClassicV1,
             shutdown,
             empty: Notify::new(),
@@ -118,6 +126,7 @@ impl GameRooms {
             }),
             random_fill: Arc::new(fill),
             round_seed_source,
+            cpu_planner: cpu::CpuPlanner::new().expect("CPU planner workers must start"),
             profile: profile::RoomProfile::ExpandedV5,
             shutdown,
             empty: Notify::new(),
@@ -125,11 +134,23 @@ impl GameRooms {
         .into()
     }
 
+    #[cfg(test)]
     pub(crate) async fn create_sequenced(
         self: &Arc<Self>,
         binding: BindingKey,
         sequence: Counter,
         now: StdInstant,
+    ) -> Result<Admission, RoomError> {
+        self.create_sequenced_mode(binding, sequence, now, RoomMode::HumanDuel)
+            .await
+    }
+
+    pub(crate) async fn create_sequenced_mode(
+        self: &Arc<Self>,
+        binding: BindingKey,
+        sequence: Counter,
+        now: StdInstant,
+        mode: RoomMode,
     ) -> Result<Admission, RoomError> {
         let (handle, owner, id, code) = {
             let mut registry = self.lock();
@@ -142,14 +163,15 @@ impl GameRooms {
             if registry.rooms.len() >= MAX_ROOMS {
                 return Err(RoomError::CapacityReached);
             }
-            let identity = self.generate_identity(&mut registry)?;
+            let identity = self.generate_identity(&mut registry, mode)?;
             let cleanup_id = identity.id.clone();
             let cleanup_code = identity.code.clone();
-            let (owner_handle, owner) = match_owner::PreparedMatchOwner::new(
+            let (owner_handle, owner) = match_owner::PreparedMatchOwner::new_with_planner(
                 identity.clone(),
                 Instant::now(),
                 self.round_seed_source.clone(),
                 Arc::clone(&self.random_fill),
+                self.cpu_planner.clone(),
                 self.shutdown(),
             )
             .map_err(|_| RoomError::CapacityReached)?;
@@ -170,7 +192,7 @@ impl GameRooms {
                 registry.cleanup(&id, &code);
             }
         }));
-        let result = self.admit(handle, binding, sequence).await;
+        let result = self.admit(handle, binding, sequence, true).await;
         if result.is_err() {
             self.cleanup(&cleanup_id, &cleanup_code);
         }
@@ -199,7 +221,7 @@ impl GameRooms {
                 .cloned()
                 .ok_or(RoomError::RoomNotFound)?
         };
-        self.admit(handle, binding, sequence).await
+        self.admit(handle, binding, sequence, false).await
     }
 
     #[cfg(test)]
@@ -304,53 +326,16 @@ impl GameRooms {
         handle: RoomHandle,
         binding: BindingKey,
         sequence: Counter,
+        creator: bool,
     ) -> Result<Admission, RoomError> {
-        let mut admission = handle
-            .owner
-            .join_sequenced(binding, sequence)
-            .await
-            .unwrap_or(Err(RoomError::RoomNotFound))?;
+        let reply = if creator {
+            handle.owner.admit_creator(binding, sequence)
+        } else {
+            handle.owner.join_sequenced(binding, sequence)
+        };
+        let mut admission = reply.await.unwrap_or(Err(RoomError::RoomNotFound))?;
         admission.notices.borrow_and_update();
         Ok(admission)
-    }
-
-    fn generate_identity(&self, registry: &mut Registry) -> Result<RoomIdentity, RoomError> {
-        let prefix = match registry.prefix {
-            Some(prefix) => prefix,
-            None => {
-                let mut bytes = [0; 8];
-                (self.random_fill)(&mut bytes).map_err(|_| RoomError::CapacityReached)?;
-                let prefix = u64::from_be_bytes(bytes);
-                registry.prefix = Some(prefix);
-                prefix
-            }
-        };
-        let serial = registry.next_serial;
-        let next_serial = serial.checked_add(1).ok_or(RoomError::CapacityReached)?;
-        for _ in 0..COLLISION_RETRIES {
-            let code = self.generate_code()?;
-            if !registry.codes.contains_key(&code) {
-                let id = RoomId::new(&format!("{prefix:016x}{serial:016x}"))
-                    .map_err(|_| RoomError::CapacityReached)?;
-                registry.next_serial = next_serial;
-                return Ok(RoomIdentity {
-                    id,
-                    code,
-                    profile: self.profile,
-                });
-            }
-        }
-        Err(RoomError::CapacityReached)
-    }
-
-    fn generate_code(&self) -> Result<RoomCode, RoomError> {
-        let mut bytes = [0; 5];
-        (self.random_fill)(&mut bytes).map_err(|_| RoomError::CapacityReached)?;
-        let bits = u64::from_be_bytes([0, 0, 0, bytes[0], bytes[1], bytes[2], bytes[3], bytes[4]]);
-        let code = (0..8)
-            .map(|shift| CODE_ALPHABET[((bits >> (35 - shift * 5)) & 31) as usize] as char)
-            .collect::<String>();
-        RoomCode::new(&code).map_err(|_| RoomError::CapacityReached)
     }
 
     pub(super) fn cleanup(&self, id: &RoomId, code: &RoomCode) {

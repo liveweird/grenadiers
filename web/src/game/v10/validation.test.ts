@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { checkedCatalogMaskRanges, executeCatalogMaskRange } from '../../test/catalogMasks'
-import { admitted as currentAdmitted, snapshot as currentSnapshot } from '../client/testSupport'
+import { admitted as currentAdmitted, snapshot as currentSnapshot } from '../validation/archived-v11-fixtures'
 import { validateGameplayV10ServerMessage } from './validation'
 import type { Admitted, Snapshot } from './schema'
 

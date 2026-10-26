@@ -1,6 +1,6 @@
 use grenadiers_core::{
     game::{Direction, EnabledItems, SeatId},
-    protocol::{Counter, Seat, v11::ResumeToken},
+    protocol::{Counter, Seat, v12::ResumeToken},
     room::{DepartureReason, MatchPhase},
 };
 
@@ -11,7 +11,7 @@ use crate::game::rooms::match_runtime::{
 
 fn personal_state(runtime: &MatchRuntime) -> serde_json::Value {
     let prepared = runtime.prepare_resume(SeatId::One).unwrap();
-    let encoded = grenadiers_core::protocol::v11::prepare_expanded_admission(
+    let encoded = crate::game::rooms::match_runtime::prepare_expanded_admission!(
         &prepared.room,
         prepared.state_epoch,
         prepared.capture.as_ref(),

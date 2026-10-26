@@ -1,6 +1,6 @@
 use grenadiers_core::{
     game::{Direction, GenerationRecord, SeatId, State, StepReport, Tick},
-    protocol::v11::RoomView,
+    protocol::v12::RoomView,
     room::{
         DepartureReason, InterruptReason, MatchChange, MatchLifecycle, MatchPhase, RoomSettings,
     },
@@ -45,6 +45,7 @@ pub(crate) enum MatchAction {
 pub(crate) struct MatchNotice {
     pub(crate) room: RoomView,
     pub(super) frames: Option<SeatFrames>,
+    pub(in crate::game::rooms) cpu_observation: Option<grenadiers_core::cpu::Observation>,
 }
 
 impl MatchNotice {
@@ -334,7 +335,11 @@ impl MatchRuntime {
             self.settings_editor,
         )?;
         self.revision = next;
-        Ok(MatchNotice { room, frames: None })
+        Ok(MatchNotice {
+            room,
+            frames: None,
+            cpu_observation: None,
+        })
     }
 
     fn publish_snapshot(&mut self) -> Result<MatchNotice, MatchRuntimeError> {

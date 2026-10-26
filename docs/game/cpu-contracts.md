@@ -1,7 +1,7 @@
 # CPU contracts
 
-These internal Rust foundations support the [accepted single-player design](single-player-cpu.md).
-They do not add a Solo button, a running bot or a new wire/replay format. The
+These Rust contracts support the [solo opponent](single-player.md) and the broader
+[accepted design](single-player-cpu.md). The
 [backlog](../../BACKLOG.md#single-player) owns delivery status.
 
 ## Controllers and ordinary inputs
@@ -13,7 +13,7 @@ identities, not claims about measured strength. Seeds are outside participant me
 
 `core::cpu` accepts neutral observations and emits movement or Stop, with at most one Bomb or
 Equipment intent. Intent carries no credentials, seat authority, readiness, settings mutation
-or manual action ID. The server integration must allocate those IDs and use ordinary input
+or manual action ID. The server allocates those IDs and uses ordinary input
 validation; tests exercise accepted actions through the existing runtime and replay path.
 
 ## Information boundary
@@ -36,13 +36,30 @@ checks the current command epoch, observation tick and request serial. Reconnect
 memory; a new physical world resets it. The local rejection fallback is Stop without a manual
 action; it grants no submission authority. Discard stale or wrong-world completions instead of
 injecting their fallback into a newer request. Only the current controller's missing/exhausted
-request may submit its ordinary Stop. History has bounded, deterministic retention, and work is counted in logical
-units rather than hardware milliseconds.
+request may submit its ordinary Stop. History has bounded, deterministic retention, and work is
+counted in logical units rather than hardware milliseconds.
 
-Tie-breaking uses its own seeded ChaCha stream and never draws from arena generation. Fixture
-policies exist only in tests. Replays consume recorded accepted actions rather than invoking a
-policy again. Production journal allocation remains opt-in; policy provenance needs an explicit
-compatible format extension when real CPU execution is connected.
+Tie-breaking uses its own seeded ChaCha stream and never draws from arena generation. Small
+fixture policies remain test-only; production uses UtilityV1. Replays consume recorded accepted
+actions rather than invoking a policy again. Production journal allocation remains disabled;
+explicit solo recording adds format-3 header provenance while preserving formats 1/2 and
+accepted-input record capacity.
+
+## Planning and committed execution
+
+Two shared workers accept at most 32 queued jobs; a controller has one outstanding request and
+one bounded result slot. Planning uses neutral observations and a cloned independent RNG. The
+owner never waits for it. Results must still match the issued request and be at most six logical
+ticks old; the observation tick identifies that request, while runtime age is checked separately.
+Only accepted current input commits prospective memory/RNG.
+
+Plans hold ordinary movement for 1–12 updates, then the owner submits ordinary Stop at its
+committed deadline. Once a Bomb request is accepted, `follow_committed_escape` executes only
+the already planned route of at most four cells from fresh checked snapshots. It performs no
+goal/path search, random draws or manual action and does not wait for another worker. This
+keeps worker contention outside the route's scheduling bound. Unsupported effects, unknown
+bombs, blocked or displaced route geometry stop the executor rather than inventing safe facts.
+New hazards may still invalidate its game-world assumptions.
 
 ## Focused verification
 

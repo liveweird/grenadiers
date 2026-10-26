@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { setTimeout as delay } from 'node:timers/promises'
 import { chromium, expect, type Browser, type BrowserContext, type Page } from '@playwright/test'
-import type { GameServerMessage, Position, Seat } from '../../../web/src/game/v11/schema'
+import type { GameServerMessage, Position, Seat } from '../../../web/src/game/v12/schema'
 import { visibleActor, latestSnapshot, type ObservedGame } from './duel'
 import {
   publicErrorSummary, runSanitizedCleanup, sanitizePublicError, sanitizeStartupText,

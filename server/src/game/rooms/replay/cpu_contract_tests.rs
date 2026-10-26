@@ -25,6 +25,24 @@ fn recording_runtime() -> MatchRuntime {
     runtime
 }
 
+fn solo_recording_runtime() -> MatchRuntime {
+    let mut identity = identity_for_profile(RoomProfile::ExpandedV5);
+    identity.mode =
+        grenadiers_core::room::RoomMode::Solo(grenadiers_core::room::CpuProfile::INITIAL);
+    identity.private_cpu_seed = Some([73; 32]);
+    let mut runtime = MatchRuntime::new_recording(
+        identity,
+        RoundSeedSource::with_entropy(|bytes| {
+            bytes.fill(91);
+            Ok(())
+        }),
+    );
+    runtime.initial_notice().unwrap();
+    let creator = runtime.prepare_solo_creator(SeatId::One).unwrap();
+    runtime.commit_admission(creator);
+    runtime
+}
+
 fn start(runtime: &mut MatchRuntime) {
     let revision = runtime.replay_inspection().settings_revision;
     for seat in SeatId::ALL {
@@ -120,6 +138,32 @@ fn accepted_fixture_intents_replay_exactly_without_rerunning_policy() {
         "replay must consume records, not the policy"
     );
     assert_eq!(replayed, expected);
+}
+
+#[test]
+fn accepted_solo_inputs_replay_from_format_three_without_worker_or_policy() {
+    let mut runtime = solo_recording_runtime();
+    start(&mut runtime);
+    for step in 0..4 {
+        submit_intent(
+            &mut runtime,
+            SeatId::Two,
+            step as u32 + 1,
+            fixture_policy(step),
+        )
+        .unwrap();
+        runtime.tick().unwrap();
+    }
+    let journal = runtime.replay_journal();
+    assert_eq!(journal.header.format_version, 3);
+    assert_eq!(
+        journal.header.mode,
+        grenadiers_core::room::RoomMode::Solo(grenadiers_core::room::CpuProfile::INITIAL)
+    );
+    assert_eq!(journal.header.solo.unwrap().seat, SeatId::Two);
+    assert_eq!(journal.header.solo.unwrap().policy_version, 1);
+    let expected = runtime.replay_inspection();
+    assert_eq!(replay(journal).unwrap(), expected);
 }
 
 #[test]

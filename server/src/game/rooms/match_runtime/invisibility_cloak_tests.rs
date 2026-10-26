@@ -1,12 +1,12 @@
 use grenadiers_core::{
     game::{EnabledItems, SeatId},
-    protocol::{Counter, Seat, v11::ResumeToken},
+    protocol::{Counter, Seat, v12::ResumeToken},
 };
 
 use super::test_support::{collect_generated_pickup, start_optional_runtime};
 
 fn admission(prepared: &super::PreparedRuntimeAdmission, recipient: Seat) -> serde_json::Value {
-    let encoded = grenadiers_core::protocol::v11::prepare_expanded_admission(
+    let encoded = crate::game::rooms::match_runtime::prepare_expanded_admission!(
         &prepared.room,
         prepared.state_epoch,
         prepared.capture.as_ref(),

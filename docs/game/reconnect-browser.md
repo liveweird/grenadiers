@@ -1,6 +1,6 @@
 # Reconnect browser
 
-Status: active. The application uses the live gameplay client ([v11](protocol-v11.md)) against
+Status: active. The application uses the live gameplay client ([v12](protocol-v12.md)) against
 the existing gameplay endpoint. The client retains the reconnect lifecycle introduced in v4 and [shared settings](settings.md).
 
 ## Private admission state

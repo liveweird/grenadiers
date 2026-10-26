@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use grenadiers_core::{
     game::{Direction, SeatId},
-    protocol::v11::RoomPhase,
+    protocol::v12::RoomPhase,
     protocol::{RoomCode, RoomId},
     room::MatchPhase,
 };
@@ -16,6 +16,9 @@ pub(super) fn identity(profile: RoomProfile) -> RoomIdentity {
         id: RoomId::new("00000000000000000000000000000001").unwrap(),
         code: RoomCode::new("ABCDEFGH").unwrap(),
         profile,
+        mode: grenadiers_core::room::RoomMode::HumanDuel,
+        registry_serial: 1,
+        private_cpu_seed: None,
     }
 }
 

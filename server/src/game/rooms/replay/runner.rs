@@ -7,7 +7,7 @@ use std::{
 };
 
 use grenadiers_core::{
-    game::{EXPANDED_GENERATOR_VERSION, EnabledItems, GENERATOR_VERSION, SeatId},
+    game::{EnabledItems, SeatId},
     protocol::{MAX_COUNTER, RoomCode, RoomId},
     room::MatchPhase,
 };
@@ -18,9 +18,8 @@ use super::super::{
     types::RoomIdentity,
 };
 use super::record::{
-    CLASSIC_V2_RULES, CLASSIC_V3_RULES, CONFIGURABLE_V4_RULES, EXPANDED_FORMAT_VERSION,
-    EXPANDED_V5_RULES, FORMAT_VERSION, GENERATED_V1, GENERATED_V2, Journal, M5_LIFECYCLE_PROFILE,
-    M6_LIFECYCLE_PROFILE, Operation, ReplayAction, ReplayStatus,
+    CLASSIC_V2_RULES, CLASSIC_V3_RULES, CONFIGURABLE_V4_RULES, EXPANDED_V5_RULES, Journal,
+    M6_LIFECYCLE_PROFILE, Operation, ReplayAction,
 };
 use crate::round_seed::RoundSeedSource;
 
@@ -46,7 +45,7 @@ pub(super) enum ReplayError {
 }
 
 pub(super) fn replay(journal: &Journal) -> Result<RuntimeInspection, ReplayError> {
-    validate_header(journal)?;
+    super::validation::validate_header(journal)?;
     validate_order(&journal.records)?;
     let seeds = journal
         .records
@@ -70,14 +69,16 @@ pub(super) fn replay(journal: &Journal) -> Result<RuntimeInspection, ReplayError
         Ok(())
     });
     let mut runtime = MatchRuntime::new_without_replay(
-        identity_for_rules(journal.header.rules_version)?,
+        identity_for_header(journal.header)?,
         source,
         journal.header.initial_settings,
         journal.header.initial_settings_revision,
         journal.header.initial_settings_editor,
     );
     for seat in SeatId::ALL {
-        if journal.header.initial_seats[seat.index()] {
+        if journal.header.initial_seats[seat.index()]
+            && !runtime.lifecycle().seats()[seat.index()].occupied()
+        {
             runtime.occupy(seat).map_err(|_| ReplayError::Runtime)?;
         }
     }
@@ -145,73 +146,6 @@ pub(super) fn replay(journal: &Journal) -> Result<RuntimeInspection, ReplayError
         return Err(ReplayError::ExtraSeed);
     }
     Ok(runtime.replay_inspection())
-}
-
-fn validate_header(journal: &Journal) -> Result<(), ReplayError> {
-    match journal.status {
-        ReplayStatus::Complete => {}
-        ReplayStatus::Truncated { .. } => return Err(ReplayError::Truncated),
-        ReplayStatus::Incomplete { .. } => return Err(ReplayError::Incomplete),
-        #[cfg(test)]
-        ReplayStatus::UnsupportedProfile => return Err(ReplayError::UnsupportedProfile),
-    }
-    let header = journal.header;
-    if !matches!(
-        header.format_version,
-        FORMAT_VERSION | EXPANDED_FORMAT_VERSION
-    ) {
-        return Err(ReplayError::UnsupportedFormat);
-    }
-    if !matches!(
-        header.lifecycle_profile,
-        M5_LIFECYCLE_PROFILE | M6_LIFECYCLE_PROFILE
-    ) {
-        return Err(ReplayError::UnsupportedLifecycle);
-    }
-    let valid_rules = match header.format_version {
-        FORMAT_VERSION => matches!(
-            header.rules_version,
-            CLASSIC_V2_RULES | CLASSIC_V3_RULES | CONFIGURABLE_V4_RULES
-        ),
-        EXPANDED_FORMAT_VERSION => header.rules_version == EXPANDED_V5_RULES,
-        _ => false,
-    };
-    if !valid_rules {
-        return Err(ReplayError::UnsupportedRules);
-    }
-    if header.lifecycle_profile == M5_LIFECYCLE_PROFILE && header.rules_version != CLASSIC_V2_RULES
-    {
-        return Err(ReplayError::UnsupportedLifecycle);
-    }
-    let expected_generator = if header.format_version == FORMAT_VERSION {
-        GENERATED_V1
-    } else {
-        GENERATED_V2
-    };
-    if header.generator_version != expected_generator
-        || expected_generator == GENERATED_V1 && expected_generator != GENERATOR_VERSION
-        || expected_generator == GENERATED_V2 && expected_generator != EXPANDED_GENERATOR_VERSION
-    {
-        return Err(ReplayError::UnsupportedGenerator);
-    }
-    if header.initial_tick.0 != 0 {
-        return Err(ReplayError::UnsupportedInitialTick);
-    }
-    let invalid_configuration = if matches!(
-        header.rules_version,
-        CONFIGURABLE_V4_RULES | EXPANDED_V5_RULES
-    ) {
-        header.initial_settings_editor != Some(SeatId::One)
-            || header.rules_version == CONFIGURABLE_V4_RULES
-                && header.initial_settings.enabled_items() != EnabledItems::EMPTY
-    } else {
-        header.initial_settings != legacy_default_settings(header.rules_version)?
-            || header.initial_settings_editor.is_some()
-    };
-    if header.initial_settings_revision != 1 || invalid_configuration {
-        return Err(ReplayError::UnsupportedRules);
-    }
-    Ok(())
 }
 
 fn validate_order(records: &[super::record::Record]) -> Result<(), ReplayError> {
@@ -364,21 +298,18 @@ pub(super) fn identity() -> RoomIdentity {
     identity_for_profile(RoomProfile::GeneratedClassicV2)
 }
 
-fn identity_for_rules(rules_version: u16) -> Result<RoomIdentity, ReplayError> {
-    let profile = match rules_version {
+fn identity_for_header(header: super::record::Header) -> Result<RoomIdentity, ReplayError> {
+    let profile = match header.rules_version {
         CLASSIC_V2_RULES => RoomProfile::GeneratedClassicV2,
         CLASSIC_V3_RULES => RoomProfile::GeneratedClassicV3,
         CONFIGURABLE_V4_RULES => RoomProfile::GeneratedConfigurableV4,
         EXPANDED_V5_RULES => RoomProfile::ExpandedV5,
         _ => return Err(ReplayError::UnsupportedRules),
     };
-    Ok(identity_for_profile(profile))
-}
-
-fn legacy_default_settings(rules: u16) -> Result<grenadiers_core::room::RoomSettings, ReplayError> {
-    let version = grenadiers_core::protocol::RulesVersion::try_from(rules)
-        .map_err(|_| ReplayError::UnsupportedRules)?;
-    Ok(grenadiers_core::protocol::v6::GameSettings::for_rules(version).domain())
+    let mut identity = identity_for_profile(profile);
+    identity.mode = header.mode;
+    identity.private_cpu_seed = header.solo.map(|solo| solo.private_seed.0);
+    Ok(identity)
 }
 
 pub(super) fn identity_for_profile(profile: RoomProfile) -> RoomIdentity {
@@ -386,5 +317,8 @@ pub(super) fn identity_for_profile(profile: RoomProfile) -> RoomIdentity {
         id: RoomId::new("00000000000000000000000000000001").expect("static room id"),
         code: RoomCode::new("ABCDEFGH").expect("static room code"),
         profile,
+        mode: grenadiers_core::room::RoomMode::HumanDuel,
+        registry_serial: 1,
+        private_cpu_seed: None,
     }
 }

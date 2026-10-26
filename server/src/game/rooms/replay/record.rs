@@ -12,6 +12,8 @@ pub(super) const FORMAT_VERSION: u16 = 1;
 #[cfg(test)]
 pub(super) const EXPANDED_FORMAT_VERSION: u16 = 2;
 #[cfg(test)]
+pub(super) const SOLO_FORMAT_VERSION: u16 = 3;
+#[cfg(test)]
 pub(in crate::game::rooms) const M5_LIFECYCLE_PROFILE: u16 = 1;
 #[cfg(test)]
 pub(super) const M6_LIFECYCLE_PROFILE: u16 = 2;
@@ -30,6 +32,23 @@ pub(super) const GENERATED_V2: u16 = 2;
 pub(super) const MAX_RECORDS: usize = 60_000;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(in crate::game::rooms) struct SoloProvenance {
+    pub(super) profile: grenadiers_core::room::CpuProfile,
+    pub(super) seat: SeatId,
+    pub(super) policy_version: u16,
+    pub(super) private_seed: PrivateCpuSeed,
+}
+
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub(in crate::game::rooms) struct PrivateCpuSeed(pub(super) [u8; 32]);
+
+impl fmt::Debug for PrivateCpuSeed {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter.write_str("<redacted>")
+    }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(in crate::game::rooms) struct Header {
     pub(super) format_version: u16,
     pub(super) lifecycle_profile: u16,
@@ -40,6 +59,8 @@ pub(in crate::game::rooms) struct Header {
     pub(super) initial_settings: RoomSettings,
     pub(super) initial_settings_revision: u32,
     pub(super) initial_settings_editor: Option<SeatId>,
+    pub(super) mode: grenadiers_core::room::RoomMode,
+    pub(super) solo: Option<SoloProvenance>,
 }
 
 #[cfg(test)]
@@ -56,6 +77,8 @@ impl Header {
                 .expect("valid classic v2 settings"),
             initial_settings_revision: 1,
             initial_settings_editor: None,
+            mode: grenadiers_core::room::RoomMode::HumanDuel,
+            solo: None,
         }
     }
 
@@ -95,6 +118,8 @@ impl Header {
                 .with_enabled_items(grenadiers_core::game::EnabledItems::HEART),
             initial_settings_revision: 1,
             initial_settings_editor: Some(SeatId::One),
+            mode: grenadiers_core::room::RoomMode::HumanDuel,
+            solo: None,
         }
     }
 
@@ -103,6 +128,25 @@ impl Header {
     ) -> Self {
         Self {
             initial_settings,
+            ..Self::expanded_v5()
+        }
+    }
+
+    pub(in crate::game::rooms) fn expanded_v5_solo(
+        initial_settings: RoomSettings,
+        private_seed: [u8; 32],
+    ) -> Self {
+        Self {
+            format_version: SOLO_FORMAT_VERSION,
+            initial_seats: [false, true],
+            initial_settings,
+            mode: grenadiers_core::room::RoomMode::Solo(grenadiers_core::room::CpuProfile::INITIAL),
+            solo: Some(SoloProvenance {
+                profile: grenadiers_core::room::CpuProfile::INITIAL,
+                seat: SeatId::Two,
+                policy_version: 1,
+                private_seed: PrivateCpuSeed(private_seed),
+            }),
             ..Self::expanded_v5()
         }
     }

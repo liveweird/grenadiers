@@ -54,7 +54,7 @@ async fn connect(url: &str, token: &str) -> ClientSocket {
     send(
         &mut socket,
         json!({
-            "type":"authenticate", "protocolVersion":11, "token":token
+            "type":"authenticate", "protocolVersion":12, "token":token
         }),
     )
     .await;
@@ -92,7 +92,11 @@ async fn two_members_receive_personalized_admission_and_live_waiting_updates() {
     let mut two = connect(&url, &tokens[1]).await;
     let mut third = connect(&url, &tokens[2]).await;
 
-    send(&mut one, json!({"type":"createRoom", "sequence":1})).await;
+    send(
+        &mut one,
+        json!({"type":"createRoom", "sequence":1, "mode":{"type":"humanDuel"}}),
+    )
+    .await;
     let created = next(&mut one).await;
     assert_eq!(created["youSeat"], "one");
     assert_eq!(created["room"]["revision"], 2);
@@ -257,7 +261,11 @@ async fn binding_checks_precede_placeholder_phase_and_leave_allows_rejoin() {
     let mut owner = connect(&url, &tokens[0]).await;
     let mut unbound = connect(&url, &tokens[1]).await;
 
-    send(&mut owner, json!({"type":"createRoom", "sequence":1})).await;
+    send(
+        &mut owner,
+        json!({"type":"createRoom", "sequence":1, "mode":{"type":"humanDuel"}}),
+    )
+    .await;
     let created = next(&mut owner).await;
     let room_id = created["room"]["roomId"].clone();
     let code = created["room"]["roomCode"].clone();
@@ -305,7 +313,11 @@ async fn binding_checks_precede_placeholder_phase_and_leave_allows_rejoin() {
     .await;
     assert_eq!(next(&mut owner).await["youSeat"], "one");
     assert_eq!(next(&mut unbound).await["room"]["revision"], 5);
-    send(&mut owner, json!({"type":"createRoom", "sequence":5})).await;
+    send(
+        &mut owner,
+        json!({"type":"createRoom", "sequence":5, "mode":{"type":"humanDuel"}}),
+    )
+    .await;
     assert_eq!(next(&mut owner).await["code"], "alreadyInRoom");
     server.abort();
 }
@@ -317,7 +329,11 @@ async fn disconnect_removes_seat_even_when_no_more_commands_arrive() {
     let (url, server) = start_server(state).await;
     let mut one = connect(&url, &tokens[0]).await;
     let mut two = connect(&url, &tokens[1]).await;
-    send(&mut one, json!({"type":"createRoom", "sequence":1})).await;
+    send(
+        &mut one,
+        json!({"type":"createRoom", "sequence":1, "mode":{"type":"humanDuel"}}),
+    )
+    .await;
     let created = next(&mut one).await;
     send(
         &mut two,
@@ -342,7 +358,11 @@ async fn connected_resume_replaces_old_socket_with_private_admission_and_close_4
     let tokens = [issue_token(&state), issue_token(&state)];
     let (url, server) = start_server(state).await;
     let mut original = connect(&url, &tokens[0]).await;
-    send(&mut original, json!({"type":"createRoom", "sequence":1})).await;
+    send(
+        &mut original,
+        json!({"type":"createRoom", "sequence":1, "mode":{"type":"humanDuel"}}),
+    )
+    .await;
     let created = next(&mut original).await;
     let room_id = created["room"]["roomId"].clone();
     let resume_token = created["resumeToken"].clone();
@@ -368,32 +388,12 @@ async fn connected_resume_replaces_old_socket_with_private_admission_and_close_4
     server.abort();
 }
 
-#[tokio::test]
-async fn unavailable_resume_is_uniformly_rejected_on_the_wire() {
-    let state = AppState::without_database([ORIGIN.to_owned()]);
-    let token = issue_token(&state);
-    let (url, server) = start_server(state).await;
-    let mut socket = connect(&url, &token).await;
-    send(
-        &mut socket,
-        json!({
-            "type":"resumeRoom", "sequence":1,
-            "roomId":"00000000000000000000000000000001",
-            "resumeToken":"0000000000000000000000000000000000000000000000000000000000000000"
-        }),
-    )
-    .await;
-
-    let rejected = next(&mut socket).await;
-    assert_eq!(rejected["type"], "error");
-    assert_eq!(rejected["code"], "resumeRejected");
-    assert_eq!(rejected["sequence"], 1);
-    server.abort();
-}
-
 #[cfg(test)]
 #[path = "room_socket_tests/rate_limit_tests.rs"]
 mod rate_limit_tests;
 #[cfg(test)]
 #[path = "room_socket_tests/resume_race_tests.rs"]
 mod resume_race_tests;
+#[cfg(test)]
+#[path = "room_socket_tests/unavailable_resume_tests.rs"]
+mod unavailable_resume_tests;

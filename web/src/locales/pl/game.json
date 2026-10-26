@@ -256,5 +256,11 @@
     "staleSettings": "Zasady meczu uległy zmianie. Sprawdź nowe wartości i spróbuj ponownie.",
     "settingsLocked": "Tylko bieżący edytor może zmieniać zasady przed meczem.",
     "seatReplaced": "To miejsce wznowiono w innej karcie."
+  },
+  "solo": {
+    "label": "Mecz solo",
+    "opponent": "Komputer",
+    "play": "Zagraj solo z komputerem",
+    "difficulty": "Prywatny mecz solo · Standardowy komputer"
   }
 }

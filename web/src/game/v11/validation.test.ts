@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { checkedCatalogMaskRanges, executeCatalogMaskRange } from '../../test/catalogMasks'
-import { snapshot } from '../client/testSupport'
+import { snapshot } from '../validation/archived-v11-fixtures'
 import { validateGameplayV11ServerMessage } from './validation'
 
 const supported = [

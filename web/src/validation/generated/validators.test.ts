@@ -1,28 +1,58 @@
 import Ajv, { type ErrorObject, type ValidateFunction } from 'ajv'
 import { describe, expect, it } from 'vitest'
-import gameplaySchema from '../../../../api/gameplay-v11.schema.json'
+import gameplayV11Schema from '../../../../api/gameplay-v11.schema.json'
+import gameplayV12Schema from '../../../../api/gameplay-v12.schema.json'
 import realtimeSchema from '../../../../api/realtime.schema.json'
-import { admitted, room, roomId, snapshot } from '../../game/client/testSupport'
-import generatedGameplay from './gameplay-v11.mjs'
+import {
+  admitted as liveAdmitted, room as liveRoom, roomId, snapshot as liveSnapshot,
+} from '../../game/client/testSupport'
+import {
+  admitted as archivedAdmitted, room as archivedRoom, snapshot as archivedSnapshot,
+} from '../../game/validation/archived-v11-fixtures'
+import generatedGameplayV11 from './gameplay-v11.mjs'
+import generatedGameplayV12 from './gameplay-v12.mjs'
 import generatedRealtime from './realtime.mjs'
 
-function originalGameplayValidator(): ValidateFunction {
-  const ajv = new Ajv({ allErrors: true }).addSchema(gameplaySchema)
-  const reference = `${gameplaySchema.$id}#/$defs/GameServerMessage`
+type GeneratedValidator = ((value: unknown) => boolean) & { errors?: ErrorObject[] | null }
+type SnapshotFixture = {
+  room: { roomCode: string; revision: number; settings: { enabledItems: string[] } }
+}
+type FixtureSet = {
+  admitted: () => unknown
+  room: (revision: number) => unknown
+  snapshot: (revision: number) => SnapshotFixture
+}
+
+function originalGameplayValidator(schema: typeof gameplayV11Schema): ValidateFunction {
+  const ajv = new Ajv({ allErrors: true }).addSchema(schema)
+  const reference = `${schema.$id}#/$defs/GameServerMessage`
   const validate = ajv.getSchema(reference)
   if (!validate) throw new Error(`AJV did not resolve ${reference}`)
   return validate
 }
 
-const gameplayVariants = [
-  ['authenticated', { type: 'authenticated', protocolVersion: 11 }],
-  ['incompatibleProtocol', { type: 'incompatibleProtocol', supportedVersion: 11 }],
-  ['admitted', admitted()],
-  ['roomState', { type: 'roomState', room: room(2) }],
-  ['snapshot', snapshot(2)],
-  ['leftRoom', { type: 'leftRoom', roomId, sequence: 1 }],
-  ['seatReplaced', { type: 'seatReplaced', roomId }],
-  ['error', { type: 'error', code: 'invalidMessage', sequence: null }],
+function gameplayVariants(version: 11 | 12, fixtures: FixtureSet) {
+  return [
+    ['authenticated', { type: 'authenticated', protocolVersion: version }],
+    ['incompatibleProtocol', { type: 'incompatibleProtocol', supportedVersion: version }],
+    ['admitted', fixtures.admitted()],
+    ['roomState', { type: 'roomState', room: fixtures.room(2) }],
+    ['snapshot', fixtures.snapshot(2)],
+    ['leftRoom', { type: 'leftRoom', roomId, sequence: 1 }],
+    ['seatReplaced', { type: 'seatReplaced', roomId }],
+    ['error', { type: 'error', code: 'invalidMessage', sequence: null }],
+  ] as const
+}
+
+const gameplayRoutes = [
+  {
+    version: 11, schema: gameplayV11Schema, generated: generatedGameplayV11,
+    fixtures: { admitted: archivedAdmitted, room: archivedRoom, snapshot: archivedSnapshot },
+  },
+  {
+    version: 12, schema: gameplayV12Schema, generated: generatedGameplayV12,
+    fixtures: { admitted: liveAdmitted, room: liveRoom, snapshot: liveSnapshot },
+  },
 ] as const
 
 const realtimeVariants = [
@@ -31,16 +61,16 @@ const realtimeVariants = [
   ['error', { type: 'error', code: 'invalidMessage', message: 'Invalid client message' }],
 ] as const
 
-function gameplayBoundaryCases(): unknown[] {
+function gameplayBoundaryCases(version: 11 | 12, fixtures: FixtureSet): unknown[] {
   const missing = { type: 'authenticated' }
-  const additional = { type: 'authenticated', protocolVersion: 11, unexpected: true }
-  const duplicate = snapshot(2)
+  const additional = { type: 'authenticated', protocolVersion: version, unexpected: true }
+  const duplicate = fixtures.snapshot(2)
   duplicate.room.settings.enabledItems = ['heart', 'heart']
-  const unicode = snapshot(2)
+  const unicode = fixtures.snapshot(2)
   unicode.room.roomCode = 'ŻÓŁWIK🐢'
-  const counter = snapshot(2)
+  const counter = fixtures.snapshot(2)
   counter.room.revision = 2_147_483_648
-  const nested = snapshot(2) as unknown as Record<string, unknown>
+  const nested = fixtures.snapshot(2) as unknown as Record<string, unknown>
   const state = nested.state as { actors: Array<Record<string, unknown>> }
   state.actors[0].position = { x: '512', y: 512 }
   return [{ type: 'nonsense' }, missing, additional, duplicate, unicode, counter, nested]
@@ -62,7 +92,7 @@ function errors(validate: { errors?: ErrorObject[] | null }): ErrorObject[] | nu
 }
 
 function expectParity(
-  generated: ((value: unknown) => boolean) & { errors?: ErrorObject[] | null },
+  generated: GeneratedValidator,
   original: ValidateFunction,
   cases: readonly unknown[],
 ): void {
@@ -73,7 +103,7 @@ function expectParity(
 }
 
 function expectValidParity(
-  generated: ((value: unknown) => boolean) & { errors?: ErrorObject[] | null },
+  generated: GeneratedValidator,
   original: ValidateFunction,
   cases: readonly (readonly [string, unknown])[],
 ): void {
@@ -85,12 +115,12 @@ function expectValidParity(
 }
 
 describe('standalone validator parity', () => {
-  it('matches the original gameplay compile route for all variants and malformed boundaries', () => {
-    const original = originalGameplayValidator()
-    expectValidParity(generatedGameplay, original, gameplayVariants)
-    expectParity(generatedGameplay, original, gameplayBoundaryCases())
-    expect(generatedGameplay({ type: 'nonsense' })).toBe(false)
-    expect(generatedGameplay.errors).toHaveLength(26)
+  it.each(gameplayRoutes)('matches the original gameplay v$version compile route for all variants and malformed boundaries', (route) => {
+    const original = originalGameplayValidator(route.schema)
+    expectValidParity(route.generated, original, gameplayVariants(route.version, route.fixtures))
+    expectParity(route.generated, original, gameplayBoundaryCases(route.version, route.fixtures))
+    expect(route.generated({ type: 'nonsense' })).toBe(false)
+    expect(route.generated.errors).toHaveLength(26)
   })
 
   it('matches the original realtime root compile for all variants and malformed boundaries', () => {
@@ -100,7 +130,10 @@ describe('standalone validator parity', () => {
   })
 
   it.each([
-    ['gameplay', generatedGameplay, originalGameplayValidator(), { type: 'nonsense' }, gameplayVariants[0][1]],
+    ...gameplayRoutes.map((route) => [
+      `gameplay v${route.version}`, route.generated, originalGameplayValidator(route.schema),
+      { type: 'nonsense' }, gameplayVariants(route.version, route.fixtures)[0][1],
+    ] as const),
     ['realtime', generatedRealtime, new Ajv({ allErrors: true }).compile(realtimeSchema),
       { type: 'nonsense' }, realtimeVariants[0][1]],
   ] as const)('retains old %s errors across invalid-valid-invalid transitions', (_name, generated, original, invalid, valid) => {

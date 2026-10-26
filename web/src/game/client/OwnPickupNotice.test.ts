@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { GameClientState } from './clientTypes'
-import type { PickupKind, WireEvent } from '../v11/schema'
+import type { PickupKind, WireEvent } from '../v12/schema'
 import { snapshot } from './testSupport'
 import { OwnPickupCursor } from './ownPickupCursor'
 

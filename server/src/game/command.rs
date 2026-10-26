@@ -1,4 +1,4 @@
-use grenadiers_core::protocol::v11::{
+use grenadiers_core::protocol::v12::{
     GameClientMessage, GameSettings, ManualActionKind, ResumeToken,
 };
 use grenadiers_core::protocol::{
@@ -29,7 +29,9 @@ impl SequencedCommand {
 }
 
 pub(super) enum Command {
-    CreateRoom,
+    CreateRoom {
+        mode: grenadiers_core::room::RoomMode,
+    },
     JoinRoom {
         room_code: RoomCode,
     },
@@ -83,7 +85,21 @@ impl From<GameClientMessage> for InboundMessage {
                     token,
                 };
             }
-            GameClientMessage::CreateRoom { sequence } => (sequence, Command::CreateRoom),
+            GameClientMessage::CreateRoom { sequence, mode } => (
+                sequence,
+                Command::CreateRoom {
+                    mode: match mode {
+                        grenadiers_core::protocol::v12::RoomMode::HumanDuel => {
+                            grenadiers_core::room::RoomMode::HumanDuel
+                        }
+                        grenadiers_core::protocol::v12::RoomMode::Solo { .. } => {
+                            grenadiers_core::room::RoomMode::Solo(
+                                grenadiers_core::room::CpuProfile::INITIAL,
+                            )
+                        }
+                    },
+                },
+            ),
             GameClientMessage::JoinRoom {
                 sequence,
                 room_code,
@@ -182,9 +198,31 @@ impl From<GameClientMessage> for InboundMessage {
 
 #[cfg(test)]
 mod tests {
-    use grenadiers_core::protocol::v11::parse_client_message;
+    use grenadiers_core::protocol::v12::parse_client_message;
 
     use super::{Command, InboundMessage};
+
+    #[test]
+    fn solo_creation_maps_only_to_the_fixed_server_cpu_profile() {
+        let message = parse_client_message(
+            r#"{"type":"createRoom","sequence":1,"mode":{"type":"solo","difficulty":"standard"}}"#,
+        )
+        .unwrap();
+        let InboundMessage::Command(command) = InboundMessage::from(message) else {
+            panic!("create is sequenced");
+        };
+        assert!(matches!(
+            command.into_parts(),
+            (
+                _,
+                Command::CreateRoom {
+                    mode: grenadiers_core::room::RoomMode::Solo(
+                        grenadiers_core::room::CpuProfile::INITIAL
+                    )
+                }
+            )
+        ));
+    }
 
     #[test]
     fn conversion_keeps_sequence_round_settings_revision_and_action_id_distinct() {

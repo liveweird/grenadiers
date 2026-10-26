@@ -1,6 +1,6 @@
 use grenadiers_core::{
     game::SeatId,
-    protocol::{Counter, RoomId, Seat, v11::ResumeToken},
+    protocol::{Counter, RoomId, Seat, v12::ResumeToken},
     room::DepartureReason,
 };
 use tokio::{
@@ -42,7 +42,7 @@ pub(crate) struct MatchAdmission {
     pub(crate) room_id: RoomId,
     pub(crate) round_id: u64,
     pub(crate) seat: Seat,
-    pub(crate) room: grenadiers_core::protocol::v11::RoomView,
+    pub(crate) room: grenadiers_core::protocol::v12::RoomView,
     #[cfg_attr(not(test), allow(dead_code))]
     pub(crate) resume_token: ResumeToken,
     #[cfg_attr(not(test), allow(dead_code))]
@@ -55,6 +55,7 @@ pub(crate) struct MatchAdmission {
 
 pub(super) enum OwnerCommand {
     Join {
+        personal: bool,
         binding: BindingKey,
         sequence: Counter,
         reply: oneshot::Sender<Result<MatchAdmission, RoomError>>,
@@ -119,10 +120,12 @@ pub(in crate::game::rooms) struct PreparedMatchOwner {
     pub(super) initial: MatchNotice,
     pub(super) runtime: super::super::match_runtime::MatchRuntime,
     pub(super) random_fill: Arc<RandomFill>,
+    pub(super) cpu: Option<crate::game::rooms::cpu::CpuController>,
     pub(super) shutdown: watch::Receiver<ShutdownState>,
 }
 
 impl PreparedMatchOwner {
+    #[cfg(test)]
     pub(in crate::game::rooms) fn new(
         identity: RoomIdentity,
         created_at: Instant,
@@ -130,6 +133,22 @@ impl PreparedMatchOwner {
         random_fill: Arc<RandomFill>,
         shutdown: watch::Receiver<ShutdownState>,
     ) -> Result<(MatchOwnerHandle, Self), MatchRuntimeError> {
+        let planner = crate::game::rooms::cpu::CpuPlanner::new()
+            .map_err(|()| MatchRuntimeError::CapacityReached)?;
+        Self::new_with_planner(identity, created_at, seeds, random_fill, planner, shutdown)
+    }
+
+    pub(in crate::game::rooms) fn new_with_planner(
+        identity: RoomIdentity,
+        created_at: Instant,
+        seeds: RoundSeedSource,
+        random_fill: Arc<RandomFill>,
+        cpu_planner: crate::game::rooms::cpu::CpuPlanner,
+        shutdown: watch::Receiver<ShutdownState>,
+    ) -> Result<(MatchOwnerHandle, Self), MatchRuntimeError> {
+        let cpu = identity.private_cpu_seed.map(|seed| {
+            crate::game::rooms::cpu::CpuController::new(cpu_planner, identity.registry_serial, seed)
+        });
         let mut runtime =
             super::super::match_runtime::MatchRuntime::new(identity.clone(), seeds.clone());
         let initial = runtime.initial_notice()?;
@@ -145,6 +164,7 @@ impl PreparedMatchOwner {
                 initial,
                 runtime,
                 random_fill,
+                cpu,
                 shutdown,
             },
         ))

@@ -2,7 +2,7 @@ use grenadiers_core::{
     game::SeatId,
     protocol::{
         Counter,
-        v11::{ExpandedCapture, RoomView, capture_expanded},
+        v12::{ExpandedCapture, RoomView, capture_expanded},
     },
     room::{MatchLifecycle, reconnect::ReservationState},
 };
@@ -21,6 +21,7 @@ pub(in crate::game::rooms) struct PreparedRuntimeAdmission {
     revision: u32,
     seat: SeatId,
     kind: AdmissionKind,
+    cpu_ready: bool,
     pub(in crate::game::rooms) room: RoomView,
     pub(in crate::game::rooms) state_epoch: Option<Counter>,
     pub(in crate::game::rooms) capture: Option<ExpandedCapture>,
@@ -42,7 +43,31 @@ impl MatchRuntime {
     ) -> Result<PreparedRuntimeAdmission, MatchRuntimeError> {
         let mut lifecycle = self.lifecycle.clone();
         lifecycle.occupy(seat).map_err(super::map_lifecycle_error)?;
-        self.prepare_admission(seat, lifecycle, AdmissionKind::Join)
+        self.prepare_admission(
+            seat,
+            lifecycle,
+            AdmissionKind::Join,
+            false,
+            self.next_revision()?,
+        )
+    }
+
+    pub(in crate::game::rooms) fn prepare_solo_creator(
+        &self,
+        seat: SeatId,
+    ) -> Result<PreparedRuntimeAdmission, MatchRuntimeError> {
+        let mut lifecycle = self.lifecycle.clone();
+        lifecycle.occupy(seat).map_err(super::map_lifecycle_error)?;
+        lifecycle
+            .set_ready(SeatId::Two, true)
+            .map_err(super::map_lifecycle_error)?;
+        let revision = self
+            .revision
+            .checked_add(2)
+            .and_then(|value| Counter::new(value).ok())
+            .map(Counter::get)
+            .ok_or(MatchRuntimeError::CapacityReached)?;
+        self.prepare_admission(seat, lifecycle, AdmissionKind::Join, true, revision)
     }
 
     pub(in crate::game::rooms) fn prepare_resume(
@@ -62,7 +87,13 @@ impl MatchRuntime {
                 return Err(MatchRuntimeError::StaleEpoch);
             }
         };
-        self.prepare_admission(seat, lifecycle, AdmissionKind::Resume(kind))
+        self.prepare_admission(
+            seat,
+            lifecycle,
+            AdmissionKind::Resume(kind),
+            false,
+            self.next_revision()?,
+        )
     }
 
     fn prepare_admission(
@@ -70,8 +101,9 @@ impl MatchRuntime {
         seat: SeatId,
         lifecycle: MatchLifecycle,
         kind: AdmissionKind,
+        cpu_ready: bool,
+        revision: u32,
     ) -> Result<PreparedRuntimeAdmission, MatchRuntimeError> {
-        let revision = self.next_revision()?;
         let room = publication::room_view(
             &self.identity,
             &lifecycle,
@@ -117,6 +149,7 @@ impl MatchRuntime {
             MatchNotice {
                 room: room.clone(),
                 frames: None,
+                cpu_observation: None,
             }
         };
         Ok(PreparedRuntimeAdmission {
@@ -124,6 +157,7 @@ impl MatchRuntime {
             revision,
             seat,
             kind,
+            cpu_ready,
             room,
             state_epoch,
             capture,
@@ -149,6 +183,17 @@ impl MatchRuntime {
                     tick,
                     crate::game::rooms::replay::Operation::Occupy(prepared.seat),
                 );
+                if prepared.cpu_ready {
+                    self.capture_action(
+                        tick,
+                        SeatId::Two,
+                        self.lifecycle.round_attempt(),
+                        super::super::MatchAction::ReadyChecked {
+                            ready: true,
+                            settings_revision: self.settings_revision,
+                        },
+                    );
+                }
                 ResumeKind::Restore
             }
             AdmissionKind::Resume(kind) => {

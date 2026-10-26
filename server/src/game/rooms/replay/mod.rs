@@ -1,6 +1,8 @@
 mod record;
 #[cfg(test)]
 mod runner;
+#[cfg(test)]
+mod validation;
 
 #[cfg(test)]
 pub(in crate::game::rooms) use record::Header;

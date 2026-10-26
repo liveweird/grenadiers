@@ -1,6 +1,6 @@
 use std::time::{Duration, Instant as StdInstant};
 
-use grenadiers_core::protocol::{Counter, RoomId, v11::ResumeToken};
+use grenadiers_core::protocol::{Counter, RoomId, v12::ResumeToken};
 use tokio_tungstenite::tungstenite::Message;
 
 use super::*;
@@ -37,7 +37,11 @@ async fn throttled_resume_is_correlated_and_retryable_on_the_same_socket() {
     let tokens = [issue_token(&state), issue_token(&state)];
     let (url, server) = start_server(state.clone()).await;
     let mut original = connect(&url, &tokens[0]).await;
-    send(&mut original, json!({"type":"createRoom", "sequence":1})).await;
+    send(
+        &mut original,
+        json!({"type":"createRoom", "sequence":1, "mode":{"type":"humanDuel"}}),
+    )
+    .await;
     let created = next(&mut original).await;
     let room_id = created["room"]["roomId"].clone();
     let resume_token = created["resumeToken"].clone();
@@ -160,7 +164,11 @@ async fn peer_room_throttle_is_correlated_and_keeps_the_socket_open() {
         next(&mut socket).await,
         json!({"type":"error", "code":"rateLimited", "sequence":9})
     );
-    send(&mut socket, json!({"type":"createRoom", "sequence":10})).await;
+    send(
+        &mut socket,
+        json!({"type":"createRoom", "sequence":10, "mode":{"type":"humanDuel"}}),
+    )
+    .await;
     assert_eq!(next(&mut socket).await["type"], "admitted");
     server.abort();
 }

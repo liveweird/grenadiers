@@ -43,7 +43,11 @@ async fn concurrent_wire_resumes_commit_serially_and_the_last_admission_owns_the
     let mut original = connect(&url, &tokens[0]).await;
     let mut replacement_a = connect(&url, &tokens[1]).await;
     let mut replacement_b = connect(&url, &tokens[2]).await;
-    send(&mut original, json!({"type":"createRoom", "sequence":1})).await;
+    send(
+        &mut original,
+        json!({"type":"createRoom", "sequence":1, "mode":{"type":"humanDuel"}}),
+    )
+    .await;
     let created = next(&mut original).await;
     let room_id = created["room"]["roomId"].clone();
     let request = json!({

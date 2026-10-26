@@ -40,6 +40,9 @@ pub(super) fn identity(profile: RoomProfile) -> RoomIdentity {
         id: RoomId::new("00000000000000000000000000000001").unwrap(),
         code: RoomCode::new("ABCDEFGH").unwrap(),
         profile,
+        mode: grenadiers_core::room::RoomMode::HumanDuel,
+        registry_serial: 1,
+        private_cpu_seed: None,
     }
 }
 
@@ -168,7 +171,7 @@ pub(super) async fn finish_round(
         advance_ticks(1).await;
         if !matches!(
             publication(notices).room.phase,
-            grenadiers_core::protocol::v11::RoomPhase::Running
+            grenadiers_core::protocol::v12::RoomPhase::Running
         ) {
             return;
         }
@@ -181,7 +184,7 @@ pub(super) async fn advance_to_running(notices: &watch::Receiver<MatchOwnerNotic
         advance_ticks(1).await;
         if matches!(
             publication(notices).room.phase,
-            grenadiers_core::protocol::v11::RoomPhase::Running
+            grenadiers_core::protocol::v12::RoomPhase::Running
         ) {
             return;
         }
@@ -200,6 +203,6 @@ pub(super) fn publication(receiver: &watch::Receiver<MatchOwnerNotice>) -> Match
 pub(super) fn assert_running(receiver: &watch::Receiver<MatchOwnerNotice>) {
     assert_eq!(
         publication(receiver).room.phase,
-        grenadiers_core::protocol::v11::RoomPhase::Running
+        grenadiers_core::protocol::v12::RoomPhase::Running
     );
 }

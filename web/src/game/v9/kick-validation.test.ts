@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { snapshot } from '../client/testSupport'
+import { snapshot } from '../validation/archived-v11-fixtures'
 import { validateGameplayV9ServerMessage } from './validation'
 import type { Snapshot } from './schema'
 

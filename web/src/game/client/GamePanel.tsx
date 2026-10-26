@@ -7,7 +7,7 @@ import type { AdmissionIntent, GameClientState } from './client'
 import { format, useGameCopy, type GameCopy } from './locale'
 import type {
   GameSettings, MatchInterruptReason, MatchResult, RoomPhase, RoundResult, Seat, VisibleActorView,
-} from '../v11/schema'
+} from '../v12/schema'
 import { useGameClient } from './useGameClient'
 import { ControlsDialog } from './ControlsDialog'
 import { bindingsSummary, keyLabel } from './controlLabels'
@@ -17,6 +17,7 @@ import { GameplaySettingsPanel } from './GameplaySettingsPanel'
 import { presentSnapshot } from './presentation'
 import { ActorDetails, OwnStatusBar } from './OwnStatusBar'
 import { OwnPickupNotice } from './OwnPickupNotice'
+import { controllersAvailable, roomCopy } from './roomControllers'
 
 const CODE_PATTERN = /^[A-HJ-NP-Z2-9]{8}$/
 
@@ -140,6 +141,10 @@ function LobbyControls({ state, actions, copy }: { state: GameClientState; actio
       <Title order={2}>{copy.lobby.title}</Title>
       <Text>{copy.lobby.explanation}</Text>
       <Button size="lg" onClick={() => actions.admit({ type: 'create' })} loading={busy}>{copy.lobby.create}</Button>
+      <Button size="lg" variant="light" disabled={busy}
+        onClick={() => actions.admit({ type: 'create', mode: { type: 'solo', difficulty: 'standard' } })}>
+        {copy.solo.play}
+      </Button>
       <div className="join-rule"><span>{copy.lobby.or}</span></div>
       <TextInput
         label={copy.lobby.code} value={code} maxLength={8} autoComplete="off" spellCheck={false}
@@ -156,7 +161,7 @@ function RematchControl({ state, actions, copy }: { state: GameClientState; acti
   const room = state.room!
   if (room.phase.type !== 'matchResult') return null
   const own = room.seats.find((seat) => seat.seat === state.youSeat)
-  if (!room.seats.every((seat) => seat.connection.type === 'connected')) return <Text>{copy.rematch.needsPlayers}</Text>
+  if (!controllersAvailable(room)) return <Text>{copy.rematch.needsPlayers}</Text>
   if (room.tick < room.phase.rematchAt) return <Text>{copy.rematch.locked}</Text>
   if (!own) return null
   return (
@@ -174,11 +179,12 @@ function RoomControls({ state, actions, copy }: { state: GameClientState; action
   const canReady = room.phase.type === 'waiting'
     || (room.phase.type === 'countdown' && room.phase.kind === 'initial')
   const held = room.phase.type === 'result' && room.tick >= room.phase.holdUntil
-    && room.seats.some((seat) => seat.connection.type !== 'connected')
+    && !controllersAvailable(room)
   return (
     <div className="room-controls">
-      <div><Text size="sm">{copy.room.invitation}</Text>
-        <Text className="room-code" aria-label={copy.room.codeLabel}>{room.roomCode}</Text></div>
+      {room.mode.type === 'solo' ? <Text>{copy.solo.difficulty}</Text>
+        : <div><Text size="sm">{copy.room.invitation}</Text>
+          <Text className="room-code" aria-label={copy.room.codeLabel}>{room.roomCode}</Text></div>}
       <Text className="phase-line" aria-live="polite">{phaseText(copy, room.phase)}</Text>
       {held && <Text role="status">{copy.reconnect.resultHeld}</Text>}
       <ol className="seat-list" aria-label={copy.room.players}>
@@ -230,7 +236,8 @@ function arenaFocusHint(state: GameClientState, snapshot: ReturnType<typeof pres
 }
 
 export function GamePanelView({ state, actions }: { state: GameClientState; actions: GameActions }) {
-  const copy = useGameCopy()
+  const translatedCopy = useGameCopy()
+  const copy = useMemo(() => roomCopy(translatedCopy, state.room), [translatedCopy, state.room])
   const [bindings, setBindings] = useState(loadControlBindings)
   const [controlsOpen, setControlsOpen] = useState(false)
   const failureText = state.failure ? copy.error[state.failure as keyof typeof copy.error] : ''

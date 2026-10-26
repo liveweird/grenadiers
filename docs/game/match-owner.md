@@ -1,6 +1,6 @@
 # Bounded match owner
 
-Status: active in the existing registry and live gameplay endpoint ([v11](protocol-v11.md)).
+Status: active in the existing registry and live gameplay endpoint ([v12](protocol-v12.md)).
 Authentication, sequence ownership, and connection generations remain in their original transport
 boundaries.
 

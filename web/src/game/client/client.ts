@@ -1,4 +1,5 @@
-import type { Direction, GameClientMessage, GameServerMessage, GameSettings, RoomView, Snapshot, V11ErrorCode } from '../v11/schema'
+import { controllersAvailable } from './roomControllers'
+import type { Direction, GameClientMessage, GameServerMessage, GameSettings, RoomView, Snapshot, V11ErrorCode } from '../v12/schema'
 import { initialGameClientState, type AdmissionIntent, type GameClientState, type GameFailure } from './clientTypes'
 import { ClientRecovery } from './clientRecovery'
 import { preservesTeleportHistory } from './teleportHistory'
@@ -74,7 +75,7 @@ export class GameClient {
   rematch(ready: boolean): boolean {
     const room = this.state.room
     if (!room || room.phase.type !== 'matchResult' || room.tick < room.phase.rematchAt) return false
-    if (!room.seats.every((seat) => seat.connection.type === 'connected')) return false
+    if (!controllersAvailable(room)) return false
     return !this.state.admissionPending && !this.state.leavePending
       && this.sendRoomCommand({ type: 'rematch', ready })
   }
@@ -147,7 +148,7 @@ export class GameClient {
     socket.addEventListener('open', () => {
       if (!isCurrentConnection(generation, socket, this.generation, this.socket)) return
       this.update({ connection: 'authenticating' })
-      socket.send(JSON.stringify({ type: 'authenticate', protocolVersion: 11, token: credential }))
+      socket.send(JSON.stringify({ type: 'authenticate', protocolVersion: 12, token: credential }))
       credential = ''
     })
     socket.addEventListener('message', (event) => this.receive(generation, socket, event.data))
@@ -283,7 +284,7 @@ export class GameClient {
     let message: GameClientMessage
     if (this.capability) {
       message = { type: 'resumeRoom', sequence, roomId: this.capability.roomId, resumeToken: this.capability.token }
-    } else if (this.admission?.type === 'create') message = { type: 'createRoom', sequence }
+    } else if (this.admission?.type === 'create') message = { type: 'createRoom', sequence, mode: this.admission.mode ?? { type: 'humanDuel' } }
     else if (this.admission?.type === 'join') message = { type: 'joinRoom', sequence, roomCode: this.admission.roomCode }
     else return false
     if (!this.send(message)) return false

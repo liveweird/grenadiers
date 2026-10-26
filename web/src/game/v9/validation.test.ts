@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { checkedCatalogMaskRanges, executeCatalogMaskRange } from '../../test/catalogMasks'
 import { validateServerMessage } from '../client/clientProtocol'
 import { snapshot } from '../client/testSupport'
+import { snapshot as v11Snapshot } from '../validation/archived-v11-fixtures'
 import { validateGameplayV8ServerMessage } from '../v8/validation'
 import { validateGameplayV9ServerMessage } from './validation'
 import type { Snapshot as V9Snapshot } from './schema'
@@ -18,7 +19,7 @@ function archivedValue(value: unknown): V9Snapshot {
   delete archived.state.oilBarrels
   return archived as unknown as V9Snapshot
 }
-const archivedSnapshot = (revision: number): V9Snapshot => archivedValue(snapshot(revision))
+const archivedSnapshot = (revision: number): V9Snapshot => archivedValue(v11Snapshot(revision))
 
 const supported = [
   'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch',

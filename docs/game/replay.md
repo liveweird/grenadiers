@@ -8,7 +8,12 @@ There is no operator toggle, endpoint, public export or persistent journal.
 
 A versioned header identifies format 2, lifecycle profile 2, Expanded-v5 physics and generator-v2.
 Archived format-1 journals retain configurable-v4/classic-v2/v3 physics and generator-v1.
-Both formats retain
+Solo format 3 adds mode, CPU seat/profile/policy version and private CPU seed provenance to the
+header, retaining lifecycle profile 2, Expanded-v5 physics, generator-v2 and the same record
+capacity. Formats 1/2 remain human-duel journals. The runner constructs no CPU worker and never
+reruns a policy: controller readiness, movement, manual input, scheduled Stop and rematch are
+ordinary recorded operations. CPU seed Debug output is redacted.
+All formats retain
 initial occupied seats, and initial absolute tick zero. Operations record the
 authoritative tick and increasing order within that tick: occupation, accepted readiness/
 movement/bomb/rematch, immediate input fencing, tick advancement, committed departure batches,

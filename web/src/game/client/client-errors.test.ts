@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { admitted, authenticate, harness, messages, room, roomId, snapshot, SocketStub } from './testSupport'
 
-describe('v11 session and admission failures', () => {
+describe('v12 session and admission failures', () => {
   beforeEach(() => vi.stubGlobal('WebSocket', { OPEN: SocketStub.OPEN }))
 
   it.each([
@@ -39,8 +39,8 @@ describe('v11 session and admission failures', () => {
     await vi.waitFor(() => expect(value.sockets).toHaveLength(1))
     const socket = value.sockets[0]
     socket.emit('open')
-    socket.message({ type: 'authenticated', protocolVersion: 11 })
-    socket.message({ type: 'authenticated', protocolVersion: 11 })
+    socket.message({ type: 'authenticated', protocolVersion: 12 })
+    socket.message({ type: 'authenticated', protocolVersion: 12 })
     expect(messages(socket).filter((message) => message.type === 'createRoom')).toHaveLength(1)
     socket.message({ ...admitted(), sequence: 2 })
     expect(value.client.getState().room).toBeNull()
@@ -75,7 +75,7 @@ describe('v11 session and admission failures', () => {
   })
 })
 
-describe('v11 authoritative updates and controls', () => {
+describe('v12 authoritative updates and controls', () => {
   beforeEach(() => vi.stubGlobal('WebSocket', { OPEN: SocketStub.OPEN }))
 
   it('accepts only newer same-room nonregressing shared facts', async () => {
@@ -171,7 +171,7 @@ describe('v11 authoritative updates and controls', () => {
     socket.message({ type: 'error', code: 'roomFull', sequence: 1 })
     expect(value.client.getState()).toMatchObject({ admissionPending: false, failure: 'roomFull' })
     expect(value.client.admit({ type: 'create' })).toBe(true)
-    expect(messages(socket).at(-1)).toEqual({ type: 'createRoom', sequence: 2 })
+    expect(messages(socket).at(-1)).toEqual({ type: 'createRoom', sequence: 2, mode: { type: 'humanDuel' } })
   })
 
   it('clears a correlated obsolete movement error after authoritative progress', async () => {
@@ -264,7 +264,7 @@ describe('v11 authoritative updates and controls', () => {
   })
 })
 
-describe('v11 required Oil state', () => {
+describe('v12 required Oil state', () => {
   beforeEach(() => vi.stubGlobal('WebSocket', { OPEN: SocketStub.OPEN }))
 
   it('ignores an older valid Oil snapshot without changing the accepted baseline', async () => {
@@ -292,7 +292,7 @@ describe('v11 required Oil state', () => {
   })
 })
 
-describe('v11 live Timed bomb validation', () => {
+describe('v12 live Timed bomb validation', () => {
   beforeEach(() => vi.stubGlobal('WebSocket', { OPEN: SocketStub.OPEN }))
   it.each([false, true])('closes on a zero-tick live Timed bomb with paused=%s', async (paused) => {
     const value = harness()
@@ -313,7 +313,7 @@ describe('v11 live Timed bomb validation', () => {
   })
 })
 
-describe('v11 retry callback fences', () => {
+describe('v12 retry callback fences', () => {
   beforeEach(() => vi.stubGlobal('WebSocket', { OPEN: SocketStub.OPEN }))
 
   it('does not run a canceled reconnect timer after explicit disconnect', async () => {

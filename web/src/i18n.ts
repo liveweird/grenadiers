@@ -8,7 +8,7 @@ import plGame from './locales/pl/game.json'
 
 /** @public Used by the i18next type augmentation. */
 export const en = { app: enApp, game: enGame }
-const resources = { en: { translation: en }, pl: { translation: { app: plApp, game: plGame } } }
+export const resources = { en: { translation: en }, pl: { translation: { app: plApp, game: plGame } } }
 
 void i18n.use(LanguageDetector).use(initReactI18next).init({
   resources,

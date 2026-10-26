@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## 0.3.69 — 2026-10-26
+
+### Changed
+
+- Replace 24 equivalent Compose seed overlays with one explicit file selector; reject missing host seed files without creating directories, while preserving browser scenarios and fixture acknowledgements.
+
 ## 0.3.67 — 2026-10-25
 
 ### Changed

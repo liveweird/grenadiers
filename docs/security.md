@@ -142,6 +142,8 @@ The manual `checks` workflow builds one Compose image in `browser-image` and sca
 the `browser` jobs run the default, classic, and per-item suites against that image.
 Publishing and deploying the application by immutable registry digest remains outstanding; exact release tags alone do not provide immutable provenance.
 
-Rooms, capabilities, and private replay journals are in-memory and process-local. Restarting or
-routing a reconnect attempt to another replica loses the room; multi-replica capability routing
-and durable recovery are not implemented.
+Rooms and capabilities are in-memory and process-local. Production replay recording is disabled;
+explicit test recordings contain private seeds and remain subject to the same redaction rules.
+Restarting or routing a reconnect attempt to another replica loses the room; multi-replica
+capability routing and durable recovery are not implemented. See the
+[recording policy](decisions/0025-production-replay-recording.md).

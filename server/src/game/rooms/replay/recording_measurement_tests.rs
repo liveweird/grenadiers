@@ -95,7 +95,7 @@ fn production_journal_allocation_measurement() {
             "sourceIdentity": source_identity,
             "toolchain": toolchain,
             "invocationDeclaredCargoProfile": "release",
-            "optimizedBuild": !cfg!(debug_assertions),
+            "debugAssertions": cfg!(debug_assertions),
             "roomProfile": "ExpandedV5",
             "recordingPolicy": "production-disabled-test-opt-in",
             "construction": {

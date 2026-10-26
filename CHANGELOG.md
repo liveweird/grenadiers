@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## 0.3.76 — 2026-10-26
+
+### Changed
+
+- Add optional pinned shell/workflow linting, verified dependency/tool cache reuse, selected terrain acceptance, narrow hidden-artifact uploads and the controlled OS-refresh policy.
+
 ## 0.3.65 — 2026-10-26
 
 ### Changed

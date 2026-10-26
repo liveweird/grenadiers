@@ -79,6 +79,23 @@ interrupted state but cannot preserve process-local matches or credentials.
 Keep the previous immutable image reference for rollback; database migration compatibility
 must be designed when durable application data is introduced.
 
+### Runtime operating-system refresh
+
+Perform a controlled runtime refresh weekly and when a relevant Debian or runtime advisory
+requires it. Keep the reviewed base digest and rebuild only the runtime stage without its cached
+layer, following Buildx's
+[`--no-cache-filter` contract](https://docs.docker.com/reference/cli/docker/buildx/build/#no-cache-filter):
+
+```sh
+docker buildx build --no-cache-filter runtime --load --tag grenadiers:candidate-os-refresh .
+```
+
+Record the resulting exact image ID, scan that ID with the pinned release vulnerability scanner,
+and run the applicable runtime acceptance against that same ID. Promote only the accepted ID and
+retain the previous immutable image reference for rollback. The runtime stage intentionally runs
+rolling Debian package updates, so a later build may resolve newer packages and is not expected to
+be byte-identical; treat it as a new candidate with new evidence rather than reusing acceptance.
+
 ## v0.3.65 — 2026-10-26
 
 [v0.3.65](https://github.com/liveweird/grenadiers/releases/tag/v0.3.65) names recurring UI color

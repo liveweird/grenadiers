@@ -12,6 +12,7 @@ export default defineConfig({
   workers: 1,
   retries: 0,
   timeout: 30_000,
+  outputDir: '.playwright/terrain-pixel-test-results',
   reporter: 'list',
   use: {
     baseURL,

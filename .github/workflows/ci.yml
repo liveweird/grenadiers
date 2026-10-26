@@ -95,7 +95,21 @@ jobs:
         run: |
           rustup show
           rustup component add rustfmt clippy llvm-tools-preview
-      - run: cargo install cargo-llvm-cov --version 0.9.1 --locked
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        with:
+          key: llvm-cov-0.9.1
+          cache-targets: true
+          cache-workspace-crates: false
+          cache-on-failure: false
+          cache-bin: true
+          save-if: ${{ matrix.index == 0 }}
+      - name: Require cargo-llvm-cov 0.9.1
+        run: |
+          installed_version="$(cargo llvm-cov --version 2>/dev/null || true)"
+          if [ "$installed_version" != 'cargo-llvm-cov 0.9.1' ]; then
+            cargo install cargo-llvm-cov --version 0.9.1 --locked
+          fi
+          test "$(cargo llvm-cov --version)" = 'cargo-llvm-cov 0.9.1'
       # Repository checks only read npm manifests/locks; no npm installation is needed.
       - run: scripts/gates.sh server
       - run: scripts/gates.sh coverage
@@ -148,7 +162,20 @@ jobs:
           node-version-file: .nvmrc
       - run: test -s Cargo.lock
       - run: rustup show
-      - run: cargo install cargo-deny --version 0.20.2 --locked
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        with:
+          key: cargo-deny-0.20.2
+          cache-targets: false
+          cache-workspace-crates: false
+          cache-on-failure: false
+          cache-bin: true
+      - name: Require cargo-deny 0.20.2
+        run: |
+          installed_version="$(cargo deny --version 2>/dev/null || true)"
+          if [ "$installed_version" != 'cargo-deny 0.20.2' ]; then
+            cargo install cargo-deny --version 0.20.2 --locked
+          fi
+          test "$(cargo deny --version)" = 'cargo-deny 0.20.2'
       - run: scripts/gates.sh security
 
   browser-image:
@@ -231,7 +258,7 @@ jobs:
       - run: docker compose up -d --no-build
       - name: Wait for actual service readiness
         run: |
-          for attempt in $(seq 1 60); do
+          for _attempt in $(seq 1 60); do
             if curl --fail --silent http://127.0.0.1:8085/api/v1/ready; then exit 0; fi
             sleep 1
           done
@@ -245,11 +272,12 @@ jobs:
           npm --prefix web ci
           scripts/gates.sh art-atlas
           scripts/gates.sh atlas-gameplay
+          npm --prefix e2e run test:terrain-pixels
       - name: Verify deterministic pickups using the same built image
         if: matrix.shard == 'items'
         run: |
           docker compose -f docker-compose.yaml -f docker-compose.pickups.yaml up -d --no-build --force-recreate app
-          for attempt in $(seq 1 60); do
+          for _attempt in $(seq 1 60); do
             if curl --fail --silent http://127.0.0.1:8085/api/v1/ready; then break; fi
             sleep 1
           done
@@ -260,7 +288,7 @@ jobs:
         run: |
           chmod 444 core/tests/fixtures/arena-v2-heart.seed
           docker compose -f docker-compose.yaml -f docker-compose.heart.yaml up -d --no-build --force-recreate app
-          for attempt in $(seq 1 60); do
+          for _attempt in $(seq 1 60); do
             if curl --fail --silent http://127.0.0.1:8085/api/v1/ready; then break; fi
             sleep 1
           done
@@ -271,7 +299,7 @@ jobs:
         run: |
           chmod 444 core/tests/fixtures/arena-v2-shield.seed
           docker compose -f docker-compose.yaml -f docker-compose.shield.yaml up -d --no-build --force-recreate app
-          for attempt in $(seq 1 60); do
+          for _attempt in $(seq 1 60); do
             if curl --fail --silent http://127.0.0.1:8085/api/v1/ready; then break; fi
             sleep 1
           done
@@ -282,7 +310,7 @@ jobs:
         run: |
           chmod 444 core/tests/fixtures/arena-v2-golden-flame.seed
           docker compose -f docker-compose.yaml -f docker-compose.golden-flame.yaml up -d --no-build --force-recreate app
-          for attempt in $(seq 1 60); do
+          for _attempt in $(seq 1 60); do
             if curl --fail --silent http://127.0.0.1:8085/api/v1/ready; then break; fi
             sleep 1
           done
@@ -293,7 +321,7 @@ jobs:
         run: |
           chmod 444 core/tests/fixtures/arena-v2-short-fuse.seed
           docker compose -f docker-compose.yaml -f docker-compose.short-fuse.yaml up -d --no-build --force-recreate app
-          for attempt in $(seq 1 60); do
+          for _attempt in $(seq 1 60); do
             if curl --fail --silent http://127.0.0.1:8085/api/v1/ready; then break; fi
             sleep 1
           done
@@ -304,7 +332,7 @@ jobs:
         run: |
           chmod 444 core/tests/fixtures/arena-v2-short-flame.seed
           docker compose -f docker-compose.yaml -f docker-compose.short-flame.yaml up -d --no-build --force-recreate app
-          for attempt in $(seq 1 60); do
+          for _attempt in $(seq 1 60); do
             if curl --fail --silent http://127.0.0.1:8085/api/v1/ready; then break; fi
             sleep 1
           done
@@ -315,7 +343,7 @@ jobs:
         run: |
           chmod 444 core/tests/fixtures/arena-v2-long-fuse.seed
           docker compose -f docker-compose.yaml -f docker-compose.long-fuse.yaml up -d --no-build --force-recreate app
-          for attempt in $(seq 1 60); do
+          for _attempt in $(seq 1 60); do
             if curl --fail --silent http://127.0.0.1:8085/api/v1/ready; then break; fi
             sleep 1
           done
@@ -326,7 +354,7 @@ jobs:
         run: |
           chmod 444 core/tests/fixtures/arena-v2-reverse-controls.seed
           docker compose -f docker-compose.yaml -f docker-compose.reverse-controls.yaml up -d --no-build --force-recreate app
-          for attempt in $(seq 1 60); do
+          for _attempt in $(seq 1 60); do
             if curl --fail --silent http://127.0.0.1:8085/api/v1/ready; then break; fi
             sleep 1
           done
@@ -337,7 +365,7 @@ jobs:
         run: |
           chmod 444 core/tests/fixtures/arena-v2-diarrhea.seed
           docker compose -f docker-compose.yaml -f docker-compose.diarrhea.yaml up -d --no-build --force-recreate app
-          for attempt in $(seq 1 60); do
+          for _attempt in $(seq 1 60); do
             if curl --fail --silent http://127.0.0.1:8085/api/v1/ready; then break; fi
             sleep 1
           done
@@ -348,7 +376,7 @@ jobs:
         run: |
           chmod 444 core/tests/fixtures/arena-v2-slow-foot.seed
           docker compose -f docker-compose.yaml -f docker-compose.slow-foot.yaml up -d --no-build --force-recreate app
-          for attempt in $(seq 1 60); do
+          for _attempt in $(seq 1 60); do
             if curl --fail --silent http://127.0.0.1:8085/api/v1/ready; then break; fi
             sleep 1
           done
@@ -359,7 +387,7 @@ jobs:
         run: |
           chmod 444 core/tests/fixtures/arena-v2-piercing-bomb.seed
           docker compose -f docker-compose.yaml -f docker-compose.piercing-bomb.yaml up -d --no-build --force-recreate app
-          for attempt in $(seq 1 60); do
+          for _attempt in $(seq 1 60); do
             if curl --fail --silent http://127.0.0.1:8085/api/v1/ready; then break; fi
             sleep 1
           done
@@ -370,7 +398,7 @@ jobs:
         run: |
           chmod 444 core/tests/fixtures/arena-v2-power-bomb.seed
           docker compose -f docker-compose.yaml -f docker-compose.power-bomb.yaml up -d --no-build --force-recreate app
-          for attempt in $(seq 1 60); do
+          for _attempt in $(seq 1 60); do
             if curl --fail --silent http://127.0.0.1:8085/api/v1/ready; then break; fi
             sleep 1
           done
@@ -381,7 +409,7 @@ jobs:
         run: |
           chmod 444 core/tests/fixtures/arena-v2-remote-bomb.seed
           docker compose -f docker-compose.yaml -f docker-compose.remote-bomb.yaml up -d --no-build --force-recreate app
-          for attempt in $(seq 1 60); do
+          for _attempt in $(seq 1 60); do
             if curl --fail --silent http://127.0.0.1:8085/api/v1/ready; then break; fi
             sleep 1
           done
@@ -392,7 +420,7 @@ jobs:
         run: |
           chmod 444 core/tests/fixtures/arena-v2-landmine.seed
           docker compose -f docker-compose.yaml -f docker-compose.landmine.yaml up -d --no-build --force-recreate app
-          for attempt in $(seq 1 60); do
+          for _attempt in $(seq 1 60); do
             if curl --fail --silent http://127.0.0.1:8085/api/v1/ready; then break; fi
             sleep 1
           done
@@ -403,7 +431,7 @@ jobs:
         run: |
           chmod 444 core/tests/fixtures/arena-v2-invisibility-cloak.seed
           docker compose -f docker-compose.yaml -f docker-compose.invisibility-cloak.yaml up -d --no-build --force-recreate app
-          for attempt in $(seq 1 60); do
+          for _attempt in $(seq 1 60); do
             if curl --fail --silent http://127.0.0.1:8085/api/v1/ready; then break; fi
             sleep 1
           done
@@ -414,7 +442,7 @@ jobs:
         run: |
           chmod 444 core/tests/fixtures/arena-v2-stopwatch.seed
           docker compose -f docker-compose.yaml -f docker-compose.stopwatch.yaml up -d --no-build --force-recreate app
-          for attempt in $(seq 1 60); do
+          for _attempt in $(seq 1 60); do
             if curl --fail --silent http://127.0.0.1:8085/api/v1/ready; then break; fi
             sleep 1
           done
@@ -425,7 +453,7 @@ jobs:
         run: |
           chmod 444 core/tests/fixtures/arena-v2-invisible-bombs.seed
           docker compose -f docker-compose.yaml -f docker-compose.invisible-bombs.yaml up -d --no-build --force-recreate app
-          for attempt in $(seq 1 60); do
+          for _attempt in $(seq 1 60); do
             if curl --fail --silent http://127.0.0.1:8085/api/v1/ready; then break; fi
             sleep 1
           done
@@ -436,7 +464,7 @@ jobs:
         run: |
           chmod 444 core/tests/fixtures/arena-v2-teleporter.seed
           docker compose -f docker-compose.yaml -f docker-compose.teleporter.yaml up -d --no-build --force-recreate app
-          for attempt in $(seq 1 60); do
+          for _attempt in $(seq 1 60); do
             if curl --fail --silent http://127.0.0.1:8085/api/v1/ready; then break; fi
             sleep 1
           done
@@ -447,7 +475,7 @@ jobs:
         run: |
           chmod 444 core/tests/fixtures/arena-v2-wall-pass.seed
           docker compose -f docker-compose.yaml -f docker-compose.wall-pass.yaml up -d --no-build --force-recreate app
-          for attempt in $(seq 1 60); do
+          for _attempt in $(seq 1 60); do
             if curl --fail --silent http://127.0.0.1:8085/api/v1/ready; then break; fi
             sleep 1
           done
@@ -458,7 +486,7 @@ jobs:
         run: |
           chmod 444 core/tests/fixtures/arena-v2-kick.seed
           docker compose -f docker-compose.yaml -f docker-compose.kick.yaml up -d --no-build --force-recreate app
-          for attempt in $(seq 1 60); do
+          for _attempt in $(seq 1 60); do
             if curl --fail --silent http://127.0.0.1:8085/api/v1/ready; then break; fi
             sleep 1
           done
@@ -469,7 +497,7 @@ jobs:
         run: |
           chmod 444 core/tests/fixtures/arena-v2-punch.seed
           docker compose -f docker-compose.yaml -f docker-compose.punch.yaml up -d --no-build --force-recreate app
-          for attempt in $(seq 1 60); do
+          for _attempt in $(seq 1 60); do
             if curl --fail --silent http://127.0.0.1:8085/api/v1/ready; then break; fi
             sleep 1
           done
@@ -480,7 +508,7 @@ jobs:
         run: |
           chmod 444 core/tests/fixtures/arena-v2-bracelet.seed
           docker compose -f docker-compose.yaml -f docker-compose.bracelet.yaml up -d --no-build --force-recreate app
-          for attempt in $(seq 1 60); do
+          for _attempt in $(seq 1 60); do
             if curl --fail --silent http://127.0.0.1:8085/api/v1/ready; then break; fi
             sleep 1
           done
@@ -491,7 +519,7 @@ jobs:
         run: |
           chmod 444 core/tests/fixtures/arena-v2-oil-barrel.seed
           docker compose -f docker-compose.yaml -f docker-compose.oil-barrel.yaml up -d --no-build --force-recreate app
-          for attempt in $(seq 1 60); do
+          for _attempt in $(seq 1 60); do
             if curl --fail --silent http://127.0.0.1:8085/api/v1/ready; then break; fi
             sleep 1
           done
@@ -501,7 +529,7 @@ jobs:
         if: matrix.shard == 'classic'
         run: |
           docker compose -f docker-compose.yaml -f docker-compose.matches.yaml up -d --no-build --force-recreate app
-          for attempt in $(seq 1 60); do
+          for _attempt in $(seq 1 60); do
             if curl --fail --silent http://127.0.0.1:8085/api/v1/ready; then break; fi
             sleep 1
           done
@@ -528,6 +556,7 @@ jobs:
             e2e/test-results/
             e2e/.playwright/art-atlas-test-results/
             e2e/.playwright/atlas-gameplay-test-results/
+            e2e/.playwright/terrain-pixel-test-results/
             e2e/playwright-pickup-report/
             e2e/playwright-heart-report/
             e2e/playwright-shield-report/

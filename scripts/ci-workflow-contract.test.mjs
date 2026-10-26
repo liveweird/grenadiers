@@ -5,6 +5,7 @@ import test from "node:test";
 const fullPath = new URL("../.github/workflows/ci.yml", import.meta.url);
 const platformPath = new URL("../.github/workflows/platform.yml", import.meta.url);
 const exhaustive = "expanded_item_masks_and_disabled_preset_replay_deterministically";
+const rustCache = "Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3";
 
 function trigger(workflow) {
   return workflow.slice(workflow.indexOf("on:\n"), workflow.indexOf("permissions:\n"));
@@ -20,6 +21,20 @@ export function validateFullWorkflow(workflow) {
   assert.match(workflow, /scripts\/gates\.sh server/);
   assert.match(workflow, /scripts\/gates\.sh coverage/);
   assert.match(workflow, /scripts\/ci-server-mask-aggregate\.mjs/);
+  assert.equal(workflow.split(rustCache).length - 1, 2);
+  assert.match(workflow, /key: llvm-cov-0\.9\.1\n[\s\S]*?cache-targets: true\n[\s\S]*?cache-workspace-crates: false\n[\s\S]*?cache-on-failure: false\n[\s\S]*?cache-bin: true\n[\s\S]*?save-if: \$\{\{ matrix\.index == 0 \}\}/);
+  assert.match(workflow, /key: cargo-deny-0\.20\.2\n[\s\S]*?cache-targets: false\n[\s\S]*?cache-workspace-crates: false\n[\s\S]*?cache-on-failure: false\n[\s\S]*?cache-bin: true/);
+  assert.match(workflow, /installed_version="\$\(cargo llvm-cov --version 2>\/dev\/null \|\| true\)"[\s\S]*?if \[ "\$installed_version" != 'cargo-llvm-cov 0\.9\.1' \]; then[\s\S]*?cargo install cargo-llvm-cov --version 0\.9\.1 --locked[\s\S]*?test "\$\(cargo llvm-cov --version\)" = 'cargo-llvm-cov 0\.9\.1'/);
+  assert.match(workflow, /installed_version="\$\(cargo deny --version 2>\/dev\/null \|\| true\)"[\s\S]*?if \[ "\$installed_version" != 'cargo-deny 0\.20\.2' \]; then[\s\S]*?cargo install cargo-deny --version 0\.20\.2 --locked[\s\S]*?test "\$\(cargo deny --version\)" = 'cargo-deny 0\.20\.2'/);
+  assert.doesNotMatch(workflow, /cache-hit/);
+
+  const atlas = workflow.indexOf("scripts/gates.sh atlas-gameplay");
+  const terrain = workflow.indexOf("npm --prefix e2e run test:terrain-pixels");
+  const nextItemScenario = workflow.indexOf("Verify deterministic pickups", terrain);
+  assert.ok(atlas < terrain && terrain < nextItemScenario);
+  assert.match(workflow, /e2e\/\.playwright\/terrain-pixel-test-results\//);
+  assert.equal((workflow.match(/for _attempt in \$\(seq 1 60\); do/g) ?? []).length, 25);
+  assert.doesNotMatch(workflow, /for attempt in \$\(seq 1 60\); do/);
 }
 
 export function validatePlatformWorkflow(workflow) {
@@ -65,6 +80,12 @@ test("contracts reject automatic full verification and weakened mask coverage", 
   const full = fs.readFileSync(fullPath, "utf8");
   assert.throws(() => validateFullWorkflow(full.replace("  workflow_dispatch:\n", "  push:\n")));
   assert.throws(() => validateFullWorkflow(full.replace("scripts/gates.sh coverage", "true")));
+  assert.throws(() => validateFullWorkflow(full.replace("cache-bin: true", "cache-bin: false")));
+  assert.throws(() => validateFullWorkflow(full.replace(
+    "          npm --prefix e2e run test:terrain-pixels\n", "")));
+  assert.throws(() => validateFullWorkflow(full.replace(
+    "installed_version=\"$(cargo llvm-cov --version 2>/dev/null || true)\"",
+    "installed_version='cargo-llvm-cov 0.9.1'")));
 
   const platform = fs.readFileSync(platformPath, "utf8");
   assert.throws(() => validatePlatformWorkflow(platform.replace("  workflow_dispatch:\n", "  push:\n")));

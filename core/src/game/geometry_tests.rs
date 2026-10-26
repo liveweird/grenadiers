@@ -1,4 +1,5 @@
-use super::{MovementSegment, MovementTrace};
+use super::{MovementSegment, MovementTrace, boundary_distance, distance_to_blocking_cell};
+use crate::game::Direction;
 use crate::game::types::{CellId, HALF_FOOTPRINT, Position, UNITS_PER_CELL};
 
 #[test]
@@ -39,4 +40,21 @@ fn trace_checks_each_piece_instead_of_a_diagonal_chord() {
     assert!(!trace.overlaps_cell(CellId::new(1, 0)));
     assert!(trace.overlaps_cell(CellId::new(0, 1)));
     assert!(trace.overlaps_cell(CellId::new(1, 1)));
+}
+
+#[test]
+fn neutral_clipping_matches_footprint_edges() {
+    let position = Position::center(CellId::new(1, 1));
+    assert_eq!(
+        boundary_distance(position, Direction::West, i32::MAX, 15, 13),
+        position.x - HALF_FOOTPRINT
+    );
+    assert_eq!(
+        distance_to_blocking_cell(position, Direction::East, CellId::new(2, 1)),
+        Some(UNITS_PER_CELL / 2 - HALF_FOOTPRINT)
+    );
+    assert_eq!(
+        distance_to_blocking_cell(position, Direction::East, CellId::new(2, 2)),
+        None
+    );
 }

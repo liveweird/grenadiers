@@ -1,6 +1,7 @@
 use std::collections::BTreeSet;
 
 use super::arena::{ARENA_HEIGHT, ARENA_WIDTH, Terrain};
+use super::geometry::{boundary_distance, distance_to_blocking_cell, position_overlaps_cell};
 use super::input::Direction;
 use super::types::{CellId, EntityId, HALF_FOOTPRINT, Position, UNITS_PER_CELL};
 use super::world::World;
@@ -45,15 +46,6 @@ pub(crate) fn position_is_free(
     })
 }
 
-pub(crate) fn position_overlaps_cell(position: Position, cell: CellId) -> bool {
-    let left = i32::from(cell.column) * UNITS_PER_CELL;
-    let top = i32::from(cell.row) * UNITS_PER_CELL;
-    position.x - HALF_FOOTPRINT < left + UNITS_PER_CELL
-        && position.x + HALF_FOOTPRINT > left
-        && position.y - HALF_FOOTPRINT < top + UNITS_PER_CELL
-        && position.y + HALF_FOOTPRINT > top
-}
-
 pub(crate) fn allowed_distance(
     world: &World,
     position: Position,
@@ -75,14 +67,7 @@ pub(crate) fn allowed_distance_with_blocker(
     access: ObstacleAccess<'_>,
 ) -> Collision {
     let mut allowed = requested.max(0);
-    let arena_right = i32::from(ARENA_WIDTH) * UNITS_PER_CELL;
-    let arena_bottom = i32::from(ARENA_HEIGHT) * UNITS_PER_CELL;
-    let boundary = match direction {
-        Direction::East => allowed.min(arena_right - HALF_FOOTPRINT - position.x),
-        Direction::West => allowed.min(position.x - HALF_FOOTPRINT),
-        Direction::South => allowed.min(arena_bottom - HALF_FOOTPRINT - position.y),
-        Direction::North => allowed.min(position.y - HALF_FOOTPRINT),
-    };
+    let boundary = boundary_distance(position, direction, allowed, ARENA_WIDTH, ARENA_HEIGHT);
     let mut bomb = None;
     let mut ambiguous = boundary < allowed;
     allowed = allowed.min(boundary);
@@ -93,35 +78,8 @@ pub(crate) fn allowed_distance_with_blocker(
         {
             continue;
         }
-        let left = i32::from(cell.column) * UNITS_PER_CELL;
-        let top = i32::from(cell.row) * UNITS_PER_CELL;
-        let right = left + UNITS_PER_CELL;
-        let bottom = top + UNITS_PER_CELL;
-        let transverse_overlap = match direction {
-            Direction::East | Direction::West => {
-                position.y - HALF_FOOTPRINT < bottom && position.y + HALF_FOOTPRINT > top
-            }
-            Direction::North | Direction::South => {
-                position.x - HALF_FOOTPRINT < right && position.x + HALF_FOOTPRINT > left
-            }
-        };
-        if !transverse_overlap {
+        let Some(candidate) = distance_to_blocking_cell(position, direction, cell) else {
             continue;
-        }
-        let candidate = match direction {
-            Direction::East if position.x + HALF_FOOTPRINT <= left => {
-                left - HALF_FOOTPRINT - position.x
-            }
-            Direction::West if position.x - HALF_FOOTPRINT >= right => {
-                position.x - HALF_FOOTPRINT - right
-            }
-            Direction::South if position.y + HALF_FOOTPRINT <= top => {
-                top - HALF_FOOTPRINT - position.y
-            }
-            Direction::North if position.y - HALF_FOOTPRINT >= bottom => {
-                position.y - HALF_FOOTPRINT - bottom
-            }
-            _ => continue,
         };
         if candidate < allowed {
             allowed = candidate;

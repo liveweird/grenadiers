@@ -10,6 +10,7 @@ mod memory;
 mod observation;
 pub mod policy;
 mod random;
+pub mod routing;
 mod work;
 
 pub use identity::{

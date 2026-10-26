@@ -1,9 +1,9 @@
 # Golden Flame
 
-Golden Flame is a configurable timed pickup introduced in the v0.3.27 candidate. New rooms
+Golden Flame is a configurable timed pickup. New rooms
 enable it with every available item; the creator can change the draft in shared lobby settings
-before readiness, while Classic settings clears every optional item. Native release acceptance is recorded in
-[verification](../verification.md).
+before readiness, while Classic settings clears every optional item. Its release record is in
+[item acceptance history](../history/game-acceptance.md#expanded-item-delivery-sequence).
 
 ## Collection and blast range
 

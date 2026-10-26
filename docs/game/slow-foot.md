@@ -23,23 +23,17 @@ before distance and tie arbitration, allowing an eligible rival to collect it. I
 capped, the pickup remains and no collection event is emitted. Expiry frees capacity before pickup
 collection on that tick; the replacement stack affects movement on the next tick.
 
-Slow foot uses catalog bit 15 and generator weight 15 after Diarrhea. Its initial catalog
-supported all 512 subsets and preserved every earlier 256-mask path; later items join the
-[current catalog](settings.md). Rules version 5, generator version 2 and journal format 2 remain
+Slow foot uses catalog bit 15 and generator weight 15 after Diarrhea. Rules version 5, generator version 2 and journal format 2 remain
 unchanged. Current paired server/browser deployments use [gameplay-v11](protocol-v11.md).
 
 ## Acceptance and presentation
 
-Fresh same-image acceptance passes 46 Compose and 46 Kubernetes cases. The ordinary-key
-Slow Foot scenario proves one stack's half-speed movement, matching peer positions, exact
+The ordinary-key Slow Foot scenario proves one stack's half-speed movement, matching peer positions, exact
 600-tick expiry, restored base speed and stopped movement after key release. Domain and server
-checks cover independently expiring stacks, the six-stack cap, death/reset and replay. Required
-candidate and post-merge CI pass, and [v0.3.33](https://github.com/liveweird/grenadiers/releases/tag/v0.3.33)
-is published as a source prerelease. At publication, the exact accepted image was deployed at
-the local default endpoint with successful readiness, health and index probes.
+checks cover independently expiring stacks, the six-stack cap, death/reset and replay.
 
 The [English desktop capture](../screenshots/slow-foot-desktop.png) and
 [Polish 320px reduced-motion capture](../screenshots/slow-foot-polish-320.png) show the exposed
 pickup and ninth lobby switch before collection. No active Slow Foot timer is visible in these
-stills. Runtime behavior is established by assertions; see [verification](../verification.md)
-for the preserved failed route, unexecuted preparation and final accepted-source evidence.
+stills. Runtime behavior is established by assertions. The release record is in
+[item acceptance history](../history/game-acceptance.md#slow-foot-v0333).

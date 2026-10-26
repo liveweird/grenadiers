@@ -1,9 +1,9 @@
 # Short Flame
 
-Short Flame is a configurable timed curse introduced in the v0.3.29 candidate. New rooms enable
+Short Flame is a configurable timed curse. New rooms enable
 it with every available item; change it in shared lobby settings before readiness. Classic settings
-disables all optional items. See [verification](../verification.md) for
-acceptance status.
+disables all optional items. Its release record is in
+[item acceptance history](../history/game-acceptance.md#expanded-item-delivery-sequence).
 
 ## Collection and blast range
 
@@ -31,9 +31,8 @@ collection effects. Result screens freeze the physical clock.
 
 ## Generation and compatibility
 
-The enabled weight is 15, appended after Short Fuse. All sixteen previous pool masks retain
-their exact generation paths. All thirty-two subsets of the five items available at
-introduction remain valid; see the [current catalog](settings.md) for later items.
+The enabled weight is 15, appended after Short Fuse. Earlier pool masks retain their exact
+generation paths; see the [current catalog](settings.md) for the complete set.
 Rules version 5, generator version 2 and journal format 2 remain unchanged. The active
 wire contract is [gameplay-v11](protocol-v11.md).
 Deploy the paired server/browser build together: older clients require a reload for the current

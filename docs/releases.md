@@ -1,6 +1,7 @@
 # Releases
 
-Release labels and scope live in the [implementation plan](game/implementation-plan.md).
+Planned release scope and work status live in the [backlog](../BACKLOG.md).
+The [implementation plan](game/implementation-plan.md) defines the release checklist and future tracks.
 A completed milestone is verification evidence; a release exists only after its tested commit
 is tagged and its artifacts are published intentionally.
 
@@ -26,11 +27,24 @@ remain `0.0.0`: they are build inputs and are not separately published or produc
 The WebSocket `protocolVersion` is an independent compatibility contract, not a release number.
 
 Each shipped feature PR bumps the product version and records its scope in `CHANGELOG.md`.
-Use patch releases within the current milestone for bounded engineering increments.
-`0.2.0` is the first playable duel preview; `0.3.0` adds classic match progression. Subsequent
-`0.3.x` increments stage reconnect support and activate it at `0.3.9`; `0.4.0` remains the resilient playtest milestone. Keep PRs focused on one behavior and its tests. Merge passing,
+Use patch releases for bounded engineering increments; historical milestone labels are preserved
+in the [plan archive](history/implementation-plan.md). Keep PRs focused on one behavior and its tests. Merge passing,
 independently reviewed candidates, then publish the corresponding prerelease tag.
 The repository gate checks that both local Cargo packages and their dependency agree.
+
+### Release preparation helper
+
+Stage the candidate notes under `CHANGELOG.md`'s Unreleased heading. Set `NEXT_VERSION` to the
+chosen newer product version and `RELEASE_DATE` to its `YYYY-MM-DD` date, then preview:
+
+```sh
+node scripts/prepare-release.mjs --version "$NEXT_VERSION" --date "$RELEASE_DATE"
+```
+
+The default is a dry run. Add `--write` only after reviewing the plan; it updates the Cargo
+workspace and local-package lock versions, then moves the Unreleased notes into the requested
+dated release while retaining an empty Unreleased section. It does not run checks or perform
+Git, tag, publish, or network operations. Run the applicable release checks separately.
 
 ## Candidate checklist
 
@@ -52,7 +66,7 @@ verification record identify locally tested artifacts; no production registry or
 has been configured. A source prerelease does not claim a production deployment.
 
 Evidence may name a clean candidate commit from before rebase or squash. Before merging,
-compare its Docker build inputs with the final PR head, require every configured push/PR check to pass,
+compare its Docker build inputs with the final PR head, require the applicable local-first checks to pass,
 and verify that the merged tree equals that head. Use the corresponding release tag for the
 published source. Retain the accepted image when exact artifact reuse is required; a later
 rebuild can receive different operating-system security updates and needs its own acceptance.
@@ -65,36 +79,36 @@ interrupted state but cannot preserve process-local matches or credentials.
 Keep the previous immutable image reference for rollback; database migration compatibility
 must be designed when durable application data is introduced.
 
-## v0.3.63 — 2026-10-25
+## v0.3.65 — 2026-10-26
 
-[v0.3.63](https://github.com/liveweird/grenadiers/releases/tag/v0.3.63) separates authentication
-from the nine sequenced commands before dispatch. Authenticated dispatch now accepts a private
-sequenced type, preserving high-water advancement before semantic checks, error correlation,
-quotas, admission ownership and every close sequence. Gameplay and diagnostics share the same
-five-second per-frame send policy; whole final-delivery sequences retain their independent outer
-budget. No wire, schema, replay, dependency or client behavior changes.
+[v0.3.65](https://github.com/liveweird/grenadiers/releases/tag/v0.3.65) names recurring UI color
+roles in `App.css`. All 252 existing resolved declarations, selectors, dimensions and visual
+values remain unchanged; distinct one-off shades remain explicit. No artwork or gameplay changes.
 
-Independent review and focused real-socket regressions pass, including all nine pre-auth command
-variants, semantic-failure sequence consumption, reauthentication closure and distinct counters.
-Fresh source-bound Rust acceptance at `c8cc672812ea04d74a074a9570c9f473bd91dd62` completes every
-4,194,304 mask in debug, release and official coverage in 428.571s with zero retries. Each ordinary
-profile passes 930 core / 307 server tests plus two doctests; four existing performance cases
-remain ignored. Coverage is 17,514/18,719 lines (93.56%) at the 90% floor. Rustfmt, Clippy,
-runner/repository checks and [Linux units](https://github.com/liveweird/grenadiers/actions/runs/40237196707) pass.
+Independent review checks resolved values, scope, undefined variables and cycles. Full web
+acceptance at `9e4b020cada15c5e36f2e2dd297e4cb7eecc437e` passes 6,812 tests / 91 files in
+226.72s with 91.10/89.47/90.12/93.47% coverage. JavaScript/CSS gzip sizes are 337,921/36,695 bytes,
+within existing budgets. Repository, TypeScript, lint, drift and dead-code checks pass.
 
-Integrated image source `c50773d764ea0fd897de809de746719f9a7cde8e` has identical Rust inputs and
-the unchanged v0.3.62 web tree. Accepted image is
-`sha256:efa9be5a847ed7334388b1129a6be980e5df5fe25c72fc3d7d7620bc9dfc87f9`.
-The image passes eight native Compose cases and eight Kubernetes cases, with exact image,
-security/probes/resources/origin/CSP/cache and readiness checks. A fresh pinned image scan reports
-zero fixable HIGH/CRITICAL findings. Reuse v0.3.62 web acceptance and unchanged dependency audits.
+Integrated image source `0a46613dde32585dcf2a08faea98a271d2e10db9` preserves that tested web tree
+and the v0.3.64 backend. Accepted image is
+`sha256:6aed11a165885225691ae10b70ab349999853a7c14e398a38d12b65b4b90b596`.
+Eight native Compose cases and eight Kubernetes cases pass, with exact-image/runtime security,
+origin, readiness/probes/resources and gameplay checks. The pinned image scan reports zero
+fixable HIGH/CRITICAL findings. Reuse v0.3.64 backend/exhaustive/Linux and dependency acceptance;
+there is no distinct Rust behavior to recheck remotely.
 
-Localhost:8085 serves the accepted image. Runtime security, health/readiness, CSP/cache and exact
-HTML/JavaScript/atlas equality with accepted unchanged assets pass, plus one fresh native
-authentication smoke. Temporary acceptance resources are removed. Control is
-`.local-checkpoints/runtime/compose-v0.3.63.yaml`; `rollback-v0.3.62.yaml` retains the prior image.
-There is no migration. Core admission argument grouping and other remaining review work stay
-separate; CPU implementation remains deferred.
+Localhost:8085 serves the accepted image. Exact served HTML, JavaScript, CSS and atlas bytes match
+the tested build; CSP/cache, health/readiness and runtime security pass, plus one fresh native
+authentication case. Release-documentation changes preserve Docker inputs and skip duplicate CI.
+Control is `.local-checkpoints/runtime/compose-v0.3.65.yaml`; `rollback-v0.3.64.yaml` retains the
+prior image. Temporary acceptance resources are removed. There is no migration.
+
+<a id="v0364--2026-10-26"></a>
+The [v0.3.64 record](history/releases.md#v0364--2026-10-26) is preserved in release history.
+
+<a id="v0363--2026-10-25"></a>
+The [v0.3.63 record](history/releases.md#v0363--2026-10-25) is preserved in release history.
 
 <a id="v0362--2026-10-25"></a>
 The [v0.3.62 record](history/releases.md#v0362--2026-10-25) is preserved in release history.

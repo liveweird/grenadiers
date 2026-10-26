@@ -16,6 +16,7 @@ repository() {
   node --test scripts/source-size.test.mjs
   node --test scripts/ci-workflow-contract.test.mjs
   node --test scripts/check-installed-dependencies.test.mjs
+  node --test scripts/prepare-release.test.mjs
 }
 installed_dependencies() {
   local workspace

@@ -23,23 +23,17 @@ Diarrhea bombs are always ordinary and never inspect or consume the stored charg
 
 ## Compatibility
 
-Power Bomb uses catalog bit 7 and generator weight 15 after Piercing Bomb. Its initial catalog
-supported all 2048 subsets and preserved every earlier 1024-mask path; later items join the
-[current catalog](settings.md). Rules version 5, generator version 2 and journal format 2 remain
+Power Bomb uses catalog bit 7 and generator weight 15 after Piercing Bomb. Rules version 5, generator version 2 and journal format 2 remain
 unchanged. Current [gameplay-v11](protocol-v11.md) requires paired server/web deployment and a
 browser reload.
 
 ## Acceptance and presentation
 
-Fresh same-image native acceptance passes all 48 Compose and 48 Kubernetes browser cases with
-zero retries. The paired-browser scenario collects the pickup with ordinary key input, places an
+The paired-browser scenario collects the pickup with ordinary key input, places an
 armed Power bomb, verifies the Manhattan footprint through obstructing hard walls, and proves
 consumption by placing a fresh Standard bomb afterward on both peers.
 
-The accepted Compose run produced the [English desktop](../screenshots/power-bomb-desktop.png)
-and [Polish 320px](../screenshots/power-bomb-polish-320.png) captures. They precede detonation and
-show no active bombs or flames. The English HUD wraps “Power bomb” normally between words; the
-Polish narrow view uses normal vertical scrolling and shows the unfocused-arena prompt. Neither
-reviewed capture has unintended overlap. Native assertions establish blast geometry, consumption
-and the following Standard bomb. The evidence is sealed and independently audited; exact-head CI
-and publication remain subsequent gates. See [verification](../verification.md).
+See the [English desktop](../screenshots/power-bomb-desktop.png) and
+[Polish 320px](../screenshots/power-bomb-polish-320.png) examples. Native assertions establish
+blast geometry, consumption and the following Standard bomb. The release record is in
+[item acceptance history](../history/game-acceptance.md#power-bomb-v0335).

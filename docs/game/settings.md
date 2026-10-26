@@ -1,7 +1,7 @@
 # Room gameplay settings
 
-Implemented in v0.3.17; see [ADR 0020](../decisions/0020-shared-gameplay-settings.md) and
-the [verification record](../verification.md) for accepted deployment evidence.
+See [ADR 0020](../decisions/0020-shared-gameplay-settings.md) for the shared configuration model.
+Historical activation details are in the [release record](../history/configuration-activation.md#room-settings-activation).
 
 The creator can configure these rules before either starts the match:
 
@@ -50,9 +50,8 @@ room to edit again. A replacement occupant does not become creator.
 
 Local keyboard and sound preferences are independent. Turn assistance still uses the normal
 movement budget and swept collision/fire checks. Extra configuration for arena generation,
-round/flame duration, loadouts and additional item pools remains in the [backlog](backlog.md).
+round/flame duration, loadouts and additional item pools is tracked in the [backlog](../../BACKLOG.md).
 
-Heart is introduced by the v0.3.25 implementation candidate. Expanded rooms retain immutable
-rules version 5/map `generated_v2` when Heart is disabled, including after preset changes.
-Shield is available separately in the v0.3.26 candidate, Golden Flame in v0.3.27, Short Fuse in v0.3.28, Short Flame in v0.3.29, Long Fuse in v0.3.30, Reverse Controls in v0.3.31, Diarrhea in v0.3.32, Slow foot in v0.3.33, Piercing Bomb in v0.3.34, Power Bomb in v0.3.35, Remote Bomb in v0.3.36, Landmine in v0.3.37, Invisibility Cloak in v0.3.38, Stopwatch in v0.3.40, Invisible Bombs in v0.3.41, Teleporter in v0.3.42, Wall Pass in v0.3.43, Kick in v0.3.44, Punch in v0.3.45, Bracelet in v0.3.46, and Oil Barrel in v0.3.47; all 22 switches preserve one another.
+Expanded rooms retain immutable rules version 5/map `generated_v2` when Heart is disabled,
+including after preset changes. All 22 item switches preserve one another.
 See [Oil Barrel](oil-barrel.md), [Heart behavior](heart.md), [Bracelet](bracelet.md), [Punch](punch.md), [Kick](kick.md), [Wall Pass](wall-pass.md), [Remote Bomb](remote-bomb.md), [Piercing Bomb](piercing-bomb.md), [Power Bomb](power-bomb.md), [Landmine](landmine.md), [Stopwatch](stopwatch.md), [Invisibility Cloak](invisibility-cloak.md), [Invisible Bombs](invisible-bombs.md), [Teleporter](teleporter.md), [Shield behavior](shield.md), [Golden Flame](golden-flame.md), [Short Fuse](short-fuse.md), [Short Flame](short-flame.md), [Long Fuse](long-fuse.md), [Reverse Controls](reverse-controls.md), [Diarrhea](diarrhea.md), [Slow foot](slow-foot.md), and [protocol compatibility](protocol-v11.md).

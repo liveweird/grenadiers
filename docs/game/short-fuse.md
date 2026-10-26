@@ -1,9 +1,9 @@
 # Short Fuse
 
-Short Fuse is a configurable timed pickup introduced in the v0.3.28 candidate. New rooms enable
+Short Fuse is a configurable timed pickup. New rooms enable
 it with every available item; change it in shared lobby settings before readiness. Classic settings
-disables all optional items. See [verification](../verification.md) for
-acceptance status.
+disables all optional items. Its release record is in
+[item acceptance history](../history/game-acceptance.md#expanded-item-delivery-sequence).
 
 ## Collection and bomb timing
 
@@ -28,10 +28,8 @@ its indicator static.
 
 ## Generation and compatibility
 
-The enabled weight is 15, appended after Golden Flame. All eight previous item-pool masks
-retain their exact generation paths. All sixteen subsets of Heart, Shield, Golden Flame and
-Short Fuse were supported at introduction and remain valid; later items join the
-[current catalog](settings.md). Those historical subset paths remain stable while current new rooms enable all items.
+The enabled weight is 15, appended after Golden Flame. Earlier item-pool masks retain their exact
+generation paths; the [current catalog](settings.md) defines the complete set.
 
 Rules version 5, generator version 2 and journal format 2 remain unchanged. The active
 wire contract is [gameplay-v11](protocol-v11.md).

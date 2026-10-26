@@ -1,8 +1,7 @@
 # Heart pickup
 
-Status: implemented; published in
-[v0.3.25](https://github.com/liveweird/grenadiers/releases/tag/v0.3.25) and included with every
-other configurable item in new-room defaults.
+Heart is included with every other configurable item in new-room defaults. Its release record is
+in [item acceptance history](../history/game-acceptance.md#heart-v0325).
 
 ## Playing with Heart
 

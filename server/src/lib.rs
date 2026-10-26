@@ -312,6 +312,10 @@ mod round_seed_tests;
 #[cfg(test)]
 mod session_listener_tests;
 #[cfg(test)]
+mod shutdown_backpressure_test_support;
+#[cfg(test)]
+mod shutdown_backpressure_tests;
+#[cfg(test)]
 mod shutdown_coordinator_tests;
 #[cfg(test)]
 mod shutdown_listener_test_support;

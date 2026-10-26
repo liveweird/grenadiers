@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## 0.3.71 — 2026-10-26
+
+### Changed
+
+- Add reproducible registry/entropy admission measurements and real non-reading WebSocket recovery and shutdown regressions; preserve production locking and timeout policy.
+
 ## 0.3.70 — 2026-10-26
 
 ### Changed

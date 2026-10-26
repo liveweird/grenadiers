@@ -95,7 +95,8 @@ workload; its lossy browser trace did not establish a screenshot-delay cause. Ev
 workload using [the opt-in observer](renderer-diagnostics.md), reporting indices per observed
 animation callback or per measured interval. Callbacks are not rendered frames, source-span bounds
 are not actual uploads, and absolute CPU totals from different-duration windows are not comparable
-per-frame costs. Final-head CI and native application acceptance remain separate requirements.
+per-frame costs. Run native application acceptance and use remote checks only for distinct
+coverage, following the [local-first policy](../../CONTRIBUTING.md#local-first-verification).
 
 ## Replay allocation probe
 
@@ -115,3 +116,9 @@ cargo test -p grenadiers-server --release --locked \
 The Cargo profile is declared by that invocation; the probe rejects builds with debug assertions enabled.
 [Recorded observations](../history/replay-allocation.md) retain source, workload and timing limits.
 This optional measurement is separate from routine correctness and exhaustive replay gates.
+
+## Registry admission and write pressure
+
+The ignored `measurement::construction`, `measurement::registry` and `measurement::entropy` profiles separately exercise prepared owners, real registry admissions and entropy requests. Use the reproduction commands and limitations in the [recorded registry reference](../history/registry-admission.md). Barrier release does not establish simultaneous mutex contention; first-poll duration is an upper bound around acquisition and guarded work. Keep timing collection separate from builds and browser workloads.
+
+WebSocket pressure regressions use real non-reading TCP peers and independently verify recovery after draining, bounded shutdown, healthy-peer delivery and resource cleanup. They preserve the production deadlines and are ordinary platform unit tests, rather than timing-capacity benchmarks.

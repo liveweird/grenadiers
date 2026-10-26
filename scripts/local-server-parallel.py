@@ -10,6 +10,7 @@ import os
 import re
 import shlex
 import shutil
+import stat
 import subprocess
 import sys
 import tempfile
@@ -114,10 +115,35 @@ def coverage_base_environment(target_dir: Path = COVERAGE_TARGET) -> dict[str, s
     return env
 
 
-def coverage_environment() -> dict[str, str]:
-    base = coverage_base_environment()
+def coverage_environment(target_dir: Path = COVERAGE_TARGET) -> dict[str, str]:
+    base = coverage_base_environment(target_dir)
     output = run(["cargo", "llvm-cov", "show-env", "--sh"], env=base, capture=True).stdout
     return parse_coverage_environment(output, base)
+
+
+def workspace_packages() -> list[str]:
+    output = run(["cargo", "metadata", "--locked", "--format-version=1", "--no-deps"],
+                 capture=True).stdout
+    metadata = json.loads(output)
+    members = metadata.get("workspace_members")
+    packages = metadata.get("packages")
+    if type(members) is not list or not members or type(packages) is not list:
+        raise ValueError("cargo workspace metadata missing")
+    by_id = {package.get("id"): package.get("name") for package in packages
+             if type(package) is dict}
+    names = [by_id.get(member) for member in members]
+    if any(type(name) is not str or not name for name in names) or len(names) != len(set(names)):
+        raise ValueError("cargo workspace package selection invalid")
+    return sorted(names)
+
+
+def preflight_coverage_target(target_dir: Path = COVERAGE_TARGET) -> None:
+    """Make Cargo itself validate and clean the existing private coverage cache."""
+    target_dir = target_dir.resolve()
+    command = ["cargo", "clean", "--target-dir", str(target_dir)]
+    for package in workspace_packages():
+        command.extend(["--package", package])
+    run(command, env=coverage_base_environment(target_dir))
 
 
 def coverage_exclusion_regex() -> str:
@@ -141,6 +167,86 @@ def select_binary(release: bool, env: dict[str, str] | None = None) -> Path:
             or sum(line == f"{INSTRUMENTATION_PROBE_TEST}: test" for line in listed) != 1:
         raise ValueError("exact server tests missing or duplicated")
     return binary
+
+
+def file_sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as source:
+        for chunk in iter(lambda: source.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def file_identity(path: Path, require_executable: bool = True) -> dict[str, Any]:
+    canonical = path.resolve()
+    if path.is_symlink() or not canonical.is_file() \
+            or (require_executable and not os.access(canonical, os.X_OK)):
+        raise ValueError("workspace test executable missing or unsafe")
+    return {"path": str(canonical), "sha256": file_sha256(canonical),
+            "mode": stat.S_IMODE(canonical.stat().st_mode)}
+
+
+def capture_workspace_executables(env: dict[str, str]) -> tuple[list[dict[str, Any]], Path]:
+    """Capture every executable emitted by one complete instrumented workspace test build."""
+    messages = run(["cargo", "test", "--workspace", "--locked", "--no-run",
+                    "--message-format=json"], env=env, capture=True, merge_stderr=False).stdout
+    artifacts: list[dict[str, Any]] = []
+    build_finished: list[bool] = []
+    seen: set[Path] = set()
+    for line in messages.splitlines():
+        try:
+            message = json.loads(line)
+        except json.JSONDecodeError as error:
+            raise ValueError("malformed cargo workspace artifact stream") from error
+        if message.get("reason") == "build-finished":
+            build_finished.append(message.get("success"))
+            continue
+        if message.get("reason") != "compiler-artifact" or not message.get("executable"):
+            continue
+        profile, target = message.get("profile"), message.get("target")
+        if type(profile) is not dict or profile.get("test") is not True or type(target) is not dict:
+            raise ValueError("malformed cargo workspace test artifact")
+        path = Path(message["executable"]).resolve()
+        if path in seen:
+            raise ValueError("duplicate cargo workspace test executable")
+        seen.add(path)
+        identity = file_identity(path)
+        identity.update({"packageId": message.get("package_id"), "targetName": target.get("name"),
+                         "targetKind": target.get("kind")})
+        if type(identity["packageId"]) is not str or not identity["packageId"] \
+                or type(identity["targetName"]) is not str or not identity["targetName"] \
+                or type(identity["targetKind"]) is not list or not identity["targetKind"] \
+                or any(type(kind) is not str for kind in identity["targetKind"]):
+            raise ValueError("incomplete cargo workspace test artifact")
+        artifacts.append(identity)
+    if build_finished != [True]:
+        raise ValueError("cargo workspace artifact stream did not finish exactly once")
+    if not artifacts:
+        raise ValueError("cargo workspace emitted no test executables")
+
+    heavy: list[Path] = []
+    for artifact in artifacts:
+        binary = Path(artifact["path"])
+        listed = run([str(binary), "--list"], env=env, capture=True).stdout.splitlines()
+        has_heavy = sum(line == f"{HEAVY_TEST}: test" for line in listed)
+        has_probe = sum(line == f"{INSTRUMENTATION_PROBE_TEST}: test" for line in listed)
+        if has_heavy or has_probe:
+            if has_heavy != 1 or has_probe != 1:
+                raise ValueError("exact server tests missing or duplicated")
+            heavy.append(binary)
+    if len(heavy) != 1:
+        raise ValueError("instrumented heavy server test executable selection is not exact")
+    return artifacts, heavy[0]
+
+
+def verify_file_identities(artifacts: list[dict[str, Any]]) -> None:
+    if not artifacts:
+        raise ValueError("workspace test executable inventory empty")
+    for artifact in artifacts:
+        current = file_identity(Path(artifact["path"]))
+        if current["path"] != artifact["path"] or current["sha256"] != artifact["sha256"] \
+                or current["mode"] != artifact["mode"]:
+            raise ValueError("workspace test executable changed")
 
 
 def verify_instrumented_binary(binary: Path, env: dict[str, str], raw_dir: Path) -> None:
@@ -241,24 +347,93 @@ def with_report_profiles(target_dir: Path, raw_dirs: list[Path], owner: str,
             path.unlink(missing_ok=True)
 
 
+def stage_report_executables(source_target: Path, report_target: Path,
+                             artifacts: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    source_target = source_target.resolve()
+    if report_target.exists() or report_target.is_symlink():
+        raise ValueError("coverage report target must be fresh")
+    verify_file_identities(artifacts)
+    report_target.mkdir(parents=True)
+    staged: list[dict[str, Any]] = []
+    for artifact in artifacts:
+        source = Path(artifact["path"])
+        try:
+            relative = source.relative_to(source_target)
+        except ValueError as error:
+            raise ValueError("workspace test executable outside coverage target") from error
+        destination = report_target / relative
+        if destination.exists() or destination.is_symlink():
+            raise ValueError("duplicate staged report executable")
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        with source.open("rb") as input_file, destination.open("xb") as output_file:
+            shutil.copyfileobj(input_file, output_file)
+        destination.chmod(artifact["mode"])
+        identity = file_identity(destination)
+        if identity["sha256"] != artifact["sha256"] or identity["mode"] != artifact["mode"]:
+            raise ValueError("staged report executable identity mismatch")
+        staged.append(identity)
+    return staged
+
+
+def report_environment(env: dict[str, str], report_target: Path) -> dict[str, str]:
+    private = dict(env); target = str(report_target.resolve())
+    for key in ("CARGO_TARGET_DIR", "CARGO_LLVM_COV_TARGET_DIR",
+                "CARGO_BUILD_BUILD_DIR", "CARGO_LLVM_COV_BUILD_DIR"):
+        private[key] = target
+    return private
+
+
+def raw_profile_inventory(raw_dirs: list[Path]) -> list[dict[str, Any]]:
+    inventory: list[dict[str, Any]] = []
+    for directory in raw_dirs:
+        if not directory.is_absolute() or directory.is_symlink() or not directory.is_dir():
+            raise ValueError("unsafe coverage raw directory")
+        files = sorted(directory.glob("*.profraw"))
+        if not files:
+            raise ValueError("coverage raw directory empty")
+        inventory.append({"directory": str(directory.resolve()),
+                          "files": [file_identity(path, require_executable=False) for path in files]})
+    return inventory
+
+
+def write_execution_proof(path: Path, source: str, tree: str, compiler: dict[str, str],
+                          plan: dict[str, Any], profiles: dict[str, Any],
+                          artifacts: list[dict[str, Any]], raw_dirs: list[Path]) -> None:
+    proof = {"schemaVersion": 1, "source": source, "tree": tree, "compiler": compiler,
+             "plan": plan, "completedProfiles": profiles, "workspaceExecutables": artifacts,
+             "rawProfiles": raw_profile_inventory(raw_dirs)}
+    path.write_text(json.dumps(proof, indent=2, sort_keys=True) + "\n")
+
+
 def report_lcov(env: dict[str, str], raw_dirs: list[Path], output: Path,
-                owner: str) -> dict[str, Any]:
+                owner: str, artifacts: list[dict[str, Any]], report_target: Path) -> dict[str, Any]:
     target_text = env.get("CARGO_LLVM_COV_TARGET_DIR")
     if target_text is None or not Path(target_text).is_absolute():
         raise ValueError("cargo-llvm-cov target directory unavailable")
+    staged: list[dict[str, Any]] = []
 
     def report() -> None:
         run(["cargo", "llvm-cov", "report", "--workspace", "--locked", "--fail-under-lines", "90",
              "--ignore-filename-regex", coverage_exclusion_regex(), "--lcov", "--output-path",
-             str(output)], env=env)
+             str(output)], env=private_env)
 
-    _, count = with_report_profiles(Path(target_text), raw_dirs, owner, report)
+    try:
+        staged = stage_report_executables(Path(target_text), report_target, artifacts)
+        private_env = report_environment(env, report_target)
+        _, count = with_report_profiles(report_target, raw_dirs, owner, report)
+    finally:
+        try:
+            if staged:
+                verify_file_identities(staged)
+        finally:
+            shutil.rmtree(report_target, ignore_errors=True)
     if output.is_symlink() or not output.is_file() or output.stat().st_size == 0:
         raise ValueError("official LCOV report missing or empty")
     return {"lineFloor": 90, "rawProfiles": count, "reporter": "cargo-llvm-cov"}
 
 
-def execute_profiles(source: str, workers: int, temp: Path) -> tuple[dict[str, Any], dict[str, Any]]:
+def execute_profiles(source: str, tree: str, compiler: dict[str, str], workers: int,
+                     temp: Path) -> tuple[dict[str, Any], dict[str, Any]]:
     plan_path = temp / "server-mask-plan.json"
     run(["node", "scripts/local-server-mask-plan.mjs", str(ROOT), source, str(plan_path)])
     plan = validate_plan(json.loads(plan_path.read_text()), source); profiles = {}
@@ -268,21 +443,25 @@ def execute_profiles(source: str, workers: int, temp: Path) -> tuple[dict[str, A
         run([*ordinary, "--", "--skip", HEAVY_TEST, "--show-output"])
         profiles[profile] = execute_profile(profile, select_binary(release), plan, workers)
     cov_env = coverage_environment()
-    run(["cargo", "llvm-cov", "clean", "--workspace"], env=cov_env)
+    artifacts, coverage_binary = capture_workspace_executables(cov_env)
     baseline = temp / "coverage-baseline"; baseline.mkdir()
     cov_env["LLVM_PROFILE_FILE"] = str(baseline / "%p-%18m.profraw")
     run(["cargo", "test", "--workspace", "--locked", "--", "--skip", HEAVY_TEST,
          "--show-output"], env=cov_env)
     if not list(baseline.glob("*.profraw")):
         raise ValueError("ordinary instrumented coverage produced no raw profiles")
-    coverage_binary = select_binary(False, cov_env)
     verify_instrumented_binary(coverage_binary, cov_env, temp / "coverage-probe")
     coverage_raw = temp / "coverage-workers"; coverage_raw.mkdir()
     profiles["coverage"] = execute_profile("coverage", coverage_binary, plan, workers,
                                             cov_env, coverage_raw)
     worker_dirs = [Path(path) for path in profiles["coverage"].pop("rawDirectories")]
+    verify_file_identities(artifacts)
+    report_raw_dirs = [baseline, *worker_dirs]
+    write_execution_proof(temp / "execution-proof.json", source, tree, compiler, plan, profiles,
+                          artifacts, report_raw_dirs)
     scratch_report = temp / "coverage.lcov"
-    coverage = report_lcov(cov_env, [baseline, *worker_dirs], scratch_report, "all")
+    coverage = report_lcov(cov_env, report_raw_dirs, scratch_report, "all", artifacts,
+                           temp / "coverage-report-target")
     coverage["output"] = "target/coverage.lcov"
     profiles["coverage"]["coverage"] = coverage
     return plan, profiles
@@ -297,6 +476,7 @@ def main() -> None:
         raise SystemExit("server-parallel requires a clean worktree; no clean result was produced")
     cargo_version = run(["cargo", "--version"], capture=True).stdout.strip()
     rustc_version = run(["rustc", "-Vv"], capture=True).stdout.strip()
+    preflight_coverage_target()
     run(["bash", "-n", "scripts/measure-game.sh"])
     run(["node", "--test", "scripts/measure-game-artifact.test.mjs"])
     run(["node", "--test", "scripts/ci-server-mask-contract.test.mjs"])
@@ -305,7 +485,8 @@ def main() -> None:
     run(["cargo", "build", "--workspace", "--locked"])
     temp = Path(tempfile.mkdtemp(prefix="grenadiers-server-parallel-"))
     try:
-        plan, profiles = execute_profiles(source, args.workers, temp)
+        compiler = {"cargo": cargo_version, "rustc": rustc_version}
+        plan, profiles = execute_profiles(source, tree, compiler, args.workers, temp)
         if git("rev-parse", "HEAD") != source or git("rev-parse", "HEAD^{tree}") != tree \
                 or git("status", "--porcelain=v1", "--untracked-files=all") \
                 or run(["cargo", "--version"], capture=True).stdout.strip() != cargo_version \
@@ -315,7 +496,7 @@ def main() -> None:
         shutil.copyfile(temp / "coverage.lcov", final_path)
         summary = {"result": "completed-clean-local-verification", "source": source, "tree": tree,
                    "workers": args.workers, "retries": 0,
-                   "compiler": {"cargo": cargo_version, "rustc": rustc_version},
+                   "compiler": compiler,
                    "catalogItems": len(plan["catalog"]), "maskCount": plan["totalCardinality"],
                    "partitionCount": plan["partitionCount"], "profiles": profiles,
                    "durationSeconds": round(time.monotonic() - started, 3)}

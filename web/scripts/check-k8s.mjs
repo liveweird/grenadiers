@@ -19,7 +19,14 @@ function requireSingle(resources, kind) {
 }
 
 function validateNamespace(resources) {
-  requireSingle(resources, 'Namespace')
+  const namespace = requireSingle(resources, 'Namespace')
+  for (const policy of ['enforce', 'audit', 'warn']) {
+    if (namespace.metadata?.labels?.[`pod-security.kubernetes.io/${policy}`] !== 'restricted') {
+      throw new Error(
+        `Namespace ${targetName} must retain the restricted Pod Security ${policy} policy.`,
+      )
+    }
+  }
 }
 
 function validateDeployment(resources) {
@@ -34,6 +41,96 @@ function validateDeployment(resources) {
     throw new Error(`Deployment ${targetName} must use the Recreate strategy.`)
   }
   return deployment
+}
+
+function requireAppContainer(deployment) {
+  const containers = deployment.spec?.template?.spec?.containers ?? []
+  const matches = containers.filter((container) => container?.name === 'app')
+  if (matches.length !== 1) {
+    throw new Error(`Deployment ${targetName} must contain exactly one app container.`)
+  }
+  return matches[0]
+}
+
+function isPositiveResourceQuantity(value) {
+  if (typeof value === 'number') {
+    return Number.isFinite(value) && value > 0
+  }
+  if (typeof value !== 'string') {
+    return false
+  }
+
+  // Kubernetes schema validation owns quantity syntax. This guard only establishes
+  // that the supplied quantity has a positive numeric coefficient.
+  const coefficient = value.match(/^\+?((?:\d+(?:\.\d*)?|\.\d+))/)?.[1]
+  return coefficient !== undefined && Number(coefficient) > 0
+}
+
+function validateServiceAccountToken(podSpec) {
+  if (podSpec?.automountServiceAccountToken !== false) {
+    throw new Error(`Deployment ${targetName} must disable service-account token automounting.`)
+  }
+}
+
+function validateEffectiveIdentity(podSecurity, containerSecurity) {
+  const runAsNonRoot = containerSecurity?.runAsNonRoot ?? podSecurity?.runAsNonRoot
+  const runAsUser = containerSecurity?.runAsUser ?? podSecurity?.runAsUser
+  const runAsGroup = containerSecurity?.runAsGroup ?? podSecurity?.runAsGroup
+  if (runAsNonRoot !== true) {
+    throw new Error(`Deployment ${targetName} must require a non-root runtime identity.`)
+  }
+  if (runAsUser !== 65532 || runAsGroup !== 65532) {
+    throw new Error(`Deployment ${targetName} must run with UID and GID 65532.`)
+  }
+}
+
+function validateEffectiveSeccomp(podSecurity, containerSecurity) {
+  const seccompType = containerSecurity?.seccompProfile?.type ?? podSecurity?.seccompProfile?.type
+  if (seccompType !== 'RuntimeDefault') {
+    throw new Error(`Deployment ${targetName} must use the RuntimeDefault seccomp profile.`)
+  }
+}
+
+function validateEffectiveSecurity(deployment, app) {
+  const podSpec = deployment.spec?.template?.spec
+  const podSecurity = podSpec?.securityContext
+  const containerSecurity = app.securityContext
+  validateServiceAccountToken(podSpec)
+  validateEffectiveIdentity(podSecurity, containerSecurity)
+  validateEffectiveSeccomp(podSecurity, containerSecurity)
+}
+
+function validateContainerSecurity(app) {
+  const containerSecurity = app.securityContext
+  if (containerSecurity?.readOnlyRootFilesystem !== true) {
+    throw new Error(`Deployment ${targetName} app must use a read-only root filesystem.`)
+  }
+  if (containerSecurity?.allowPrivilegeEscalation !== false) {
+    throw new Error(`Deployment ${targetName} app must disable privilege escalation.`)
+  }
+  const droppedCapabilities = containerSecurity?.capabilities?.drop
+  if (!Array.isArray(droppedCapabilities) || !droppedCapabilities.includes('ALL')) {
+    throw new Error(`Deployment ${targetName} app must drop all Linux capabilities.`)
+  }
+  const addedCapabilities = containerSecurity?.capabilities?.add
+  if (
+    addedCapabilities !== undefined &&
+    (!Array.isArray(addedCapabilities) || addedCapabilities.length !== 0)
+  ) {
+    throw new Error(`Deployment ${targetName} app must not add Linux capabilities.`)
+  }
+}
+
+function validateResourceBudgets(app) {
+  for (const budget of ['requests', 'limits']) {
+    for (const resource of ['cpu', 'memory', 'ephemeral-storage']) {
+      if (!isPositiveResourceQuantity(app.resources?.[budget]?.[resource])) {
+        throw new Error(
+          `Deployment ${targetName} app must define a positive ${resource} ${budget} quantity.`,
+        )
+      }
+    }
+  }
 }
 
 function validateAutoscalers(resources) {
@@ -89,6 +186,10 @@ export function validateRenderedK8s(source) {
   const resources = documents.map((document) => document.toJS()).filter(Boolean)
   validateNamespace(resources)
   const deployment = validateDeployment(resources)
+  const app = requireAppContainer(deployment)
+  validateEffectiveSecurity(deployment, app)
+  validateContainerSecurity(app)
+  validateResourceBudgets(app)
   validateAutoscalers(resources)
   validateService(resources, deployment)
 }

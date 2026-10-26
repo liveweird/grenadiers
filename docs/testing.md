@@ -115,6 +115,21 @@ clean committed worktree and retains the same assertions, complete mask catalog 
 floor. The separate `server` and `coverage` commands remain available as the serial fallback.
 Do not run latency acceptance alongside these CPU-intensive checks.
 
+The parallel runner checks Cargo-owned coverage-cache cleanup before expensive execution and
+fails immediately if Cargo rejects an existing cache. Preserve the complete cache metadata when
+restoring a cache; do not bypass an invalid ownership marker. Instrumented workspace executables
+come from one Cargo JSON build stream. Reporting copies that exact complete set into a fresh
+private target and uses only the ordinary-plus-exhaustive profiles from this run. The official
+reporter, exclusions and 90% floor remain unchanged; retained scratch includes execution evidence
+before reporting so a report failure does not erase completed-test provenance.
+
+`api/fixtures/gameplay-expanded-server-conformance.json` is checked against actual Rust-produced
+v8–v11 admissions/snapshot pairs and the corresponding browser validators. It covers retained
+freeze/teleport/Oil differences and recipient identity/privacy, alongside structural/semantic
+negative controls; it does not replace existing control/error-frame conformance tests.
+Run `cargo test -p grenadiers-core --locked expanded_server_contract_tests` and
+`npm --prefix web test -- src/game/validation/expanded-server-conformance.test.ts` for focused feedback.
+
 The repository gate also runs the hosted-workflow contract tests. Before the parallel server
 runner starts, its regression suite checks scheduling, failure propagation and real
 `cargo-llvm-cov` binary/profile isolation using a disposable crate. Run that suite separately
@@ -136,6 +151,13 @@ The CI-only selector pair is
 `GRENADIERS_SERVER_REPLAY_ITEM_MASK_PARTITION_COUNT`. Supplying only one, a malformed value, or a
 count that differs from the checked plan fails before mask execution. Profile and source context
 are assigned by `scripts/gates.sh`; callers must not infer or relabel coverage output.
+
+The shared expanded client corpus is `api/fixtures/gameplay-expanded-client-conformance.json`.
+Rust parsers and schemas for v8–v11 and the browser consume the same valid/invalid cases.
+`expanded_client_contract_tests` and `expanded_client_mutation_tests` add deterministic malformed
+field, byte-boundary and rejection checks; these are bounded regressions, not a general fuzzing
+engine. Run `cargo test -p grenadiers-core --locked expanded_client_` and
+`npm --prefix web test -- src/game/validation/expanded-client-conformance.test.ts` for focused feedback.
 
 There is no durable schema yet, so no Testcontainers suite is needed. When persistence is
 added, run migrations against an isolated real PostgreSQL instance and test query behavior,

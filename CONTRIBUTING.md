@@ -19,6 +19,9 @@ implemented stack.
   generated `*schema.ts` and `*realtime.ts` files.
 - Use `--color-*` semantic properties in `web/src/App.css` for recurring UI roles; retain
   distinct one-off shades when their meanings differ.
+- Import the used Mantine stylesheet dependency closure in canonical stylesheet order,
+  with globals first and application overrides afterward. Recheck rendered states when
+  introducing a new Mantine component.
 - Keep `core/` independent of networking, async runtimes, storage, and UI libraries.
 - Fix lint warnings; do not add baselines or lower coverage floors to accommodate new code.
   Any deliberate rule exception needs a local explanation and review.

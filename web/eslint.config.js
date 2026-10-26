@@ -22,6 +22,7 @@ export default defineConfig([
     'src/game/v9/schema.ts',
     'src/game/v10/schema.ts',
     'src/game/v11/schema.ts',
+    'src/game/v12/schema.ts',
     'src/validation/generated/*.mjs',
   ]),
   {

@@ -22,6 +22,7 @@ async function temporaryCheckout(nested = false) {
   await mkdir(join(checkout, 'api'))
   await Promise.all([
     cp(join(import.meta.dirname, '..', '..', 'api', 'gameplay-v11.schema.json'), join(checkout, 'api', 'gameplay-v11.schema.json')),
+    cp(join(import.meta.dirname, '..', '..', 'api', 'gameplay-v12.schema.json'), join(checkout, 'api', 'gameplay-v12.schema.json')),
     cp(join(import.meta.dirname, '..', '..', 'api', 'realtime.schema.json'), join(checkout, 'api', 'realtime.schema.json')),
     cp(join(import.meta.dirname, 'validator-generator.mjs'), join(checkout, 'web', 'scripts', 'validator-generator.mjs')),
   ])

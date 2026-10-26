@@ -8,7 +8,7 @@ use super::RouteFailure;
 use super::pulse_geometry::{
     alignment_coordinate, correction_direction, nearest_center, opposite, same_axis, translated,
 };
-use super::safety::{footprint_cells, static_blocked};
+use super::safety::footprint_cells;
 use super::validation::Context;
 
 #[derive(Clone)]
@@ -133,7 +133,8 @@ fn clipped_static(
     let mut allowed = boundary_distance(position, direction, requested, ARENA_WIDTH, ARENA_HEIGHT);
     let end = translated(position, direction, allowed);
     for cell in footprint_cells(&[MovementSegment::new(position, end)]) {
-        if static_blocked(context.observation, cell)
+        let index = usize::from(cell.row) * usize::from(ARENA_WIDTH) + usize::from(cell.column);
+        if context.observation.parts().arena.terrain[index] == crate::game::Terrain::Wall
             && let Some(distance) = distance_to_blocking_cell(position, direction, cell)
         {
             allowed = allowed.min(distance);

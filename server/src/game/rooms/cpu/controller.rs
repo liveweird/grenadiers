@@ -7,7 +7,7 @@ use std::sync::{
 
 use grenadiers_core::cpu::forecast::ObservedHazardMemory;
 use grenadiers_core::cpu::policy::{ControlPlan, EscapeExecution, MAX_HOLD_TICKS, PolicyError};
-use grenadiers_core::cpu::survival::{CommittedPulse, MAX_PLAN_AGE_TICKS, PulseStatus};
+use grenadiers_core::cpu::survival::{CommittedPulse, CommittedRoute, MAX_PLAN_AGE_TICKS};
 use grenadiers_core::cpu::{
     AdmissionContext, CpuMemory, CpuRng, DecisionId, Intent, Observation, WorldId,
     policy::UtilityMemory,
@@ -29,6 +29,7 @@ pub(in crate::game::rooms) struct AcceptedPlan {
     next_memory: UtilityMemory,
     next_rng: CpuRng,
     committed_pulse: Option<CommittedPulse>,
+    committed_route: Option<CommittedRoute>,
 }
 
 #[derive(Clone, Copy)]
@@ -53,6 +54,8 @@ pub(in crate::game::rooms) struct CpuController {
     stop_admission: Option<StopAdmission>,
     settled_stop_tick: Option<Tick>,
     committed_pulse: Option<CommittedPulse>,
+    committed_route: Option<CommittedRoute>,
+    committed_route_epoch: Option<u64>,
 }
 
 impl fmt::Debug for CpuController {
@@ -92,6 +95,8 @@ impl CpuController {
             stop_admission: None,
             settled_stop_tick: None,
             committed_pulse: None,
+            committed_route: None,
+            committed_route_epoch: None,
         }
     }
 
@@ -102,6 +107,7 @@ impl CpuController {
     ) -> bool {
         if self.escaping
             || self.committed_pulse.is_some()
+            || self.committed_route.is_some()
             || self.pending.is_some()
             || self.world != Some(observation.parts().world)
         {
@@ -151,7 +157,7 @@ impl CpuController {
         current_tick: Tick,
         command_epoch: u64,
     ) -> Option<AcceptedPlan> {
-        if self.escaping || self.committed_pulse.is_some() {
+        if self.escaping || self.committed_pulse.is_some() || self.committed_route.is_some() {
             self.cancel();
             return None;
         }
@@ -181,7 +187,8 @@ impl CpuController {
         let pending = self.pending.take().expect("pending was checked");
         let latest = self.latest_observation.as_ref()?;
         if self.settled_stop_tick.is_none()
-            || !grenadiers_core::cpu::survival::can_admit_ordinary(&result.basis, latest)
+            || (result.plan.route.is_none()
+                && !grenadiers_core::cpu::survival::can_admit_ordinary(&result.basis, latest))
         {
             return None;
         }
@@ -201,19 +208,41 @@ impl CpuController {
         {
             return None;
         }
-        let committed_pulse = match result.plan.lease {
-            Some(lease) => {
-                Some(CommittedPulse::admit(lease, result.basis, latest, current_tick).ok()?)
-            }
+        let grenadiers_core::cpu::survival::SurvivalPlan {
+            control,
+            lease,
+            route,
+        } = result.plan;
+        if route.is_some() && (lease.is_some() || control.intent.manual.is_some()) {
+            return None;
+        }
+        let committed_pulse = match lease {
+            Some(lease) => Some(
+                CommittedPulse::admit(lease, result.basis.clone(), latest, current_tick).ok()?,
+            ),
+            None => None,
+        };
+        let committed_route = match route {
+            Some(route) => Some(
+                CommittedRoute::admit(
+                    route,
+                    result.basis,
+                    latest,
+                    current_tick,
+                    control.intent.movement,
+                )
+                .ok()?,
+            ),
             None => None,
         };
         Some(AcceptedPlan {
             decision: pending.decision,
-            intent: result.plan.control.intent,
-            hold_ticks: result.plan.control.hold_ticks,
-            next_memory: result.plan.control.next_memory,
+            intent: control.intent,
+            hold_ticks: control.hold_ticks,
+            next_memory: control.next_memory,
             next_rng: result.rng,
             committed_pulse,
+            committed_route,
         })
     }
 
@@ -231,6 +260,11 @@ impl CpuController {
         self.rng = Some(accepted.next_rng);
         self.escaping = planted;
         self.committed_pulse = accepted.committed_pulse;
+        self.committed_route_epoch = accepted
+            .committed_route
+            .as_ref()
+            .map(|_| accepted.decision.command_epoch);
+        self.committed_route = accepted.committed_route;
         if planted {
             self.cancel();
         }
@@ -241,30 +275,6 @@ impl CpuController {
 
     pub(in crate::game::rooms) const fn is_escaping(&self) -> bool {
         self.escaping
-    }
-
-    pub(in crate::game::rooms) fn validate_pulse(
-        &mut self,
-        observation: &Observation,
-        current_tick: Tick,
-    ) -> Option<PulseStatus> {
-        let status = self
-            .committed_pulse
-            .as_ref()?
-            .validate(observation, current_tick);
-        if matches!(status, PulseStatus::Completed | PulseStatus::Invalidated) {
-            self.committed_pulse = None;
-        }
-        if status == PulseStatus::Invalidated {
-            self.cancel();
-            self.memory = Some(UtilityMemory::new(
-                self.memory
-                    .as_ref()
-                    .expect("world memory initialized")
-                    .key(),
-            ));
-        }
-        Some(status)
     }
 
     pub(in crate::game::rooms) fn follow_escape(
@@ -339,6 +349,7 @@ impl CpuController {
             next_memory: plan.next_memory,
             next_rng: rng,
             committed_pulse: None,
+            committed_route: None,
         }
     }
 
@@ -357,6 +368,12 @@ impl Drop for CpuController {
 #[path = "controller_observation.rs"]
 mod observation;
 
+#[path = "controller_route.rs"]
+mod route;
+
+#[path = "controller_pulse.rs"]
+mod pulse;
+
 #[cfg(test)]
 #[path = "controller_test_support.rs"]
 mod test_support;
@@ -373,3 +390,7 @@ fn derive_round_seed(mut seed: [u8; 32], physical_round: u64) -> [u8; 32] {
 #[cfg(test)]
 #[path = "controller_tests.rs"]
 mod tests;
+
+#[cfg(test)]
+#[path = "controller_route_tests.rs"]
+mod route_tests;

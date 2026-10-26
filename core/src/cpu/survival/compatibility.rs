@@ -1,3 +1,4 @@
+use crate::cpu::forecast::ForecastEvolution;
 use crate::cpu::{BombKnowledge, Observation, ObservedActor, ObservedBombTrigger, VisibleActor};
 use crate::game::Tick;
 
@@ -61,30 +62,7 @@ pub(super) fn compatible(basis: &Observation, current: &Observation) -> bool {
     {
         return false;
     }
-    let expected_effects = before
-        .effects
-        .iter()
-        .filter(|effect| u64::from(effect.remaining_ticks) > elapsed)
-        .count();
-    if expected_effects != after.effects.len()
-        || after.effects.iter().any(|effect| {
-            let expected = before
-                .effects
-                .iter()
-                .filter(|candidate| {
-                    candidate.kind == effect.kind
-                        && u64::from(candidate.remaining_ticks).checked_sub(elapsed)
-                            == Some(u64::from(effect.remaining_ticks))
-                })
-                .count();
-            let actual = after
-                .effects
-                .iter()
-                .filter(|candidate| **candidate == *effect)
-                .count();
-            expected != actual
-        })
-    {
+    if !effects_match(before, after, elapsed) {
         return false;
     }
     let (BombKnowledge::Visible(old_bombs), BombKnowledge::Visible(new_bombs)) =
@@ -118,6 +96,68 @@ pub(super) fn compatible(basis: &Observation, current: &Observation) -> bool {
                     && expiry(old.tick, previous.remaining_ticks)
                         == expiry(new.tick, flame.remaining_ticks)
             })
+        })
+}
+
+/// Checks the actor facts which are outside the forecast's expected public
+/// scene evolution. The route lane separately checks the exact CPU pose.
+pub(super) fn route_compatible(
+    basis: &Observation,
+    current: &Observation,
+    evolution: &ForecastEvolution,
+) -> bool {
+    if !evolution.matches_scene(basis, current) {
+        return false;
+    }
+    let old = basis.parts();
+    let new = current.parts();
+    let Some(elapsed) = new.tick.0.checked_sub(old.tick.0) else {
+        return false;
+    };
+    let (Some(before), Some(after)) = (actor(basis), actor(current)) else {
+        return false;
+    };
+    let expected_damage_grace =
+        u64::from(before.damage_grace_remaining_ticks).saturating_sub(elapsed);
+    if !after.alive
+        || after.voluntary_actions_frozen
+        || before.id != after.id
+        || before.speed != after.speed
+        || before.equipment != after.equipment
+        || before.weapon != after.weapon
+        || before.bomb_capacity != after.bomb_capacity
+        || evolution.expected_live_bombs(before.id, new.tick) != Some(after.live_bomb_count)
+        || before.last_teleport_tick != after.last_teleport_tick
+        || expected_damage_grace != u64::from(after.damage_grace_remaining_ticks)
+    {
+        return false;
+    }
+    effects_match(before, after, elapsed)
+}
+
+fn effects_match(before: &VisibleActor, after: &VisibleActor, elapsed: u64) -> bool {
+    let expected_effects = before
+        .effects
+        .iter()
+        .filter(|effect| u64::from(effect.remaining_ticks) > elapsed)
+        .count();
+    expected_effects == after.effects.len()
+        && after.effects.iter().all(|effect| {
+            let expected = before
+                .effects
+                .iter()
+                .filter(|candidate| {
+                    candidate.kind == effect.kind
+                        && u64::from(candidate.remaining_ticks).checked_sub(elapsed)
+                            == Some(u64::from(effect.remaining_ticks))
+                })
+                .count();
+            let actual = after
+                .effects
+                .iter()
+                .filter(|candidate| **candidate == *effect)
+                .count();
+            expected == actual
         })
 }
 

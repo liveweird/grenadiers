@@ -34,20 +34,23 @@ a short escape route. Accepted movement and manual actions use the same validati
 This is an initial opponent, with conservative tactics rather than tuned difficulty levels.
 
 Around observed hazards, the CPU forecasts timed blasts, chains, flame expiry and persistent
-Oil fire. It can wait for a clear interval or choose a short movement pulse, including Slow Foot
-and Reverse Controls expiry. Each checked pulse includes a stopped safety window; it replans
-after stopping. This does not guarantee completion of a multi-step escape under worker delay.
+Oil fire. It can plan several movement pulses and waits through a clear interval, including
+Slow Foot and Reverse Controls expiry. A committed route continues without another planning
+job, using short stops between moves and checking fresh observations against its schedule.
+When complete route planning fails, a checked single-pulse fallback can still make progress;
+that fallback does not guarantee completion of a later escape under worker delay.
 
 Bomb motion remains partially unknown. Short conditional pulses may explicitly assume a bomb
-has stayed stationary; observing it move withdraws that assumption. Pauses and remote/contact
+has stayed stationary; observing it move withdraws that assumption. Complete conditional routes
+retain the same explicit assumptions. Pauses and remote/contact
 triggers cannot use this exception. Unknown bomb visibility, Diarrhea, unsupported collision
 grace or an unavailable safe action produce Stop. New hazards can invalidate an active pulse.
 The normal game still applies automatic curses and other effects.
 
 Clear-board pickup collection and the restricted ordinary-bomb escape remain separate from
 hazard pulses. Ordinary clear-board movement retains its accepted hold and can meet new hazards
-before the next decision. Checked hazard movement avoids pickup-changing paths; stored weapons are held
-rather than used tactically. This opponent does not predict new enemy actions or promise
+before the next decision. Checked hazard movement avoids pickup-changing paths; stored weapons
+are held rather than used tactically. This opponent does not predict new enemy actions or promise
 survival against hidden facts.
 
 The [CPU contracts](cpu-contracts.md) explain execution and privacy; the

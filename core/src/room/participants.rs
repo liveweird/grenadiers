@@ -9,6 +9,7 @@ use crate::game::SeatId;
 pub enum CpuPolicy {
     UtilityV1,
     UtilityV2,
+    UtilityV3,
 }
 
 impl CpuPolicy {
@@ -17,6 +18,7 @@ impl CpuPolicy {
         match self {
             Self::UtilityV1 => 1,
             Self::UtilityV2 => 2,
+            Self::UtilityV3 => 3,
         }
     }
 }
@@ -40,9 +42,15 @@ impl CpuProfile {
         difficulty: CpuDifficulty::Standard,
     };
 
+    /// First pulse policy, retained for archived projections and replays.
+    pub const PULSE_V2: Self = Self {
+        policy: CpuPolicy::UtilityV2,
+        difficulty: CpuDifficulty::Standard,
+    };
+
     /// The only policy profile used to create a new live CPU controller.
     pub const CURRENT: Self = Self {
-        policy: CpuPolicy::UtilityV2,
+        policy: CpuPolicy::UtilityV3,
         difficulty: CpuDifficulty::Standard,
     };
 }
@@ -97,7 +105,8 @@ mod tests {
     #[test]
     fn policy_versions_are_independent_of_controller_assignment() {
         assert_eq!(CpuProfile::INITIAL.policy.version(), 1);
-        assert_eq!(CpuProfile::CURRENT.policy.version(), 2);
+        assert_eq!(CpuProfile::PULSE_V2.policy.version(), 2);
+        assert_eq!(CpuProfile::CURRENT.policy.version(), 3);
         assert_eq!(
             RoomMode::Solo(CpuProfile::CURRENT).controller(SeatId::Two),
             ControllerKind::Cpu(CpuProfile::CURRENT)

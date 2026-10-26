@@ -1,6 +1,9 @@
 use crate::cpu::forecast::{ForecastLimits, ObservedHazardMemory, TickWindow, forecast};
 use crate::cpu::policy::{ControlPlan, PolicyError, UtilityMemory};
-use crate::cpu::routing::{PulseLease, PulseRequest, RouteMode, certify_pulse};
+use crate::cpu::routing::{
+    PulseLease, PulseRequest, RouteCertificate, RouteLimits, RouteMode, RouteRequest, RouteStep,
+    certify_pulse, plan_route,
+};
 use crate::cpu::{BombKnowledge, CpuRng, Intent, MovementIntent, Observation, WorkBudget};
 use crate::game::{Direction, Tick};
 
@@ -11,6 +14,7 @@ use super::compatibility::actor;
 pub struct SurvivalPlan {
     pub control: ControlPlan,
     pub lease: Option<PulseLease>,
+    pub route: Option<RouteCertificate>,
 }
 
 /// Produces at most one executable action. Existing narrow planting retains its
@@ -34,6 +38,7 @@ pub fn plan(
     let stop = || SurvivalPlan {
         control: ControlPlan::stop(UtilityMemory::new(memory.key())),
         lease: None,
+        route: None,
     };
     if settled_stop_tick > parts.tick {
         return Ok(stop());
@@ -49,6 +54,7 @@ pub fn plan(
         return Ok(SurvivalPlan {
             control: ordinary,
             lease: None,
+            route: None,
         });
     }
     // Preserve the existing clear-board goals and pickup collection. Hazard
@@ -62,6 +68,7 @@ pub fn plan(
         return Ok(SurvivalPlan {
             control: ordinary,
             lease: None,
+            route: None,
         });
     }
     let Ok(forecast) = forecast(observation, history, None, ForecastLimits::default(), work) else {
@@ -93,6 +100,7 @@ pub fn plan(
     if !choices.contains(&MovementIntent::Stop) {
         choices.push(MovementIntent::Stop);
     }
+    let mut fallback = None;
     for mode in [
         RouteMode::CertifiedOnly,
         RouteMode::AllowStationaryAssumptions,
@@ -132,6 +140,7 @@ pub fn plan(
                         },
                     },
                     lease: Some(lease),
+                    route: None,
                 };
                 if best.as_ref().is_none_or(|(previous, _)| score < *previous) {
                     best = Some((score, candidate));
@@ -139,8 +148,43 @@ pub fn plan(
             }
         }
         if let Some((_, candidate)) = best {
-            return Ok(candidate);
+            fallback = Some(candidate);
+            break;
         }
     }
-    Ok(stop())
+    for mode in [
+        RouteMode::CertifiedOnly,
+        RouteMode::AllowStationaryAssumptions,
+    ] {
+        let request = RouteRequest {
+            start_window,
+            settled_stop_tick,
+            survive_until: forecast.horizon_end(),
+            mode,
+            limits: RouteLimits::default(),
+        };
+        let Ok(route) = plan_route(observation, &forecast, request, work) else {
+            continue;
+        };
+        let (movement, hold_ticks) = match route.steps().first() {
+            Some(RouteStep::Move { direction, updates }) => {
+                (MovementIntent::Direction(*direction), *updates)
+            }
+            Some(RouteStep::Wait { .. }) => (MovementIntent::Stop, 1),
+            None => continue,
+        };
+        return Ok(SurvivalPlan {
+            control: ControlPlan {
+                intent: Intent {
+                    movement,
+                    manual: None,
+                },
+                hold_ticks,
+                next_memory: UtilityMemory::new(memory.key()),
+            },
+            lease: None,
+            route: Some(route),
+        });
+    }
+    Ok(fallback.unwrap_or_else(stop))
 }

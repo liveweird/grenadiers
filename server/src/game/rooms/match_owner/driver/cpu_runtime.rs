@@ -1,5 +1,9 @@
 use grenadiers_core::{
-    cpu::{Intent, ManualIntent, MovementIntent, policy::EscapeExecution, survival::PulseStatus},
+    cpu::{
+        Intent, ManualIntent, MovementIntent,
+        policy::EscapeExecution,
+        survival::{PulseStatus, RouteStatus},
+    },
     game::{SeatId, Tick},
     room::{MatchPhase, reconnect::ReservationState},
 };
@@ -40,12 +44,17 @@ impl Driver {
             MovementIntent::Direction(direction) => Some(direction),
             MovementIntent::Stop => None,
         };
+        let has_route = plan.has_route();
         match self
             .runtime
             .action(SeatId::Two, epoch, MatchAction::Movement(movement))
         {
             Ok(_) => {}
             Err(error) if fatal(error) => return Err(error),
+            Err(_) if has_route => {
+                self.cpu_stop_at = Some(tick);
+                return self.apply_cpu_stop();
+            }
             Err(_) => return Ok(()),
         }
         let manual = self.apply_cpu_manual(epoch, plan.intent.manual)?;
@@ -54,7 +63,7 @@ impl Driver {
             manual,
         };
         self.cpu_stationary = movement.is_none();
-        self.cpu_stop_at = if movement.is_some() {
+        self.cpu_stop_at = if movement.is_some() && !has_route {
             tick.0.checked_add(u64::from(plan.hold_ticks)).map(Tick)
         } else {
             None
@@ -154,6 +163,9 @@ impl Driver {
         };
         if self.runtime.lifecycle().phase() != MatchPhase::Running {
             cpu.cancel();
+            if cpu.has_committed_route() {
+                cpu.invalidate_route();
+            }
             self.cpu_stop_at = None;
             self.cpu_stationary = true;
             return;
@@ -162,6 +174,18 @@ impl Driver {
             return;
         };
         if !cpu.accept_observation(observation) {
+            return;
+        }
+        let route = cpu.observe_route(observation);
+        if route == Some(RouteStatus::Invalidated) {
+            self.cpu_stop_at = Some(self.runtime.lifecycle().tick());
+            let _ = self.apply_cpu_stop();
+            return;
+        }
+        if matches!(
+            route,
+            Some(RouteStatus::Continue | RouteStatus::Wait | RouteStatus::Submit(_))
+        ) {
             return;
         }
         let pulse = cpu.validate_pulse(observation, observation.parts().tick);
@@ -243,3 +267,7 @@ mod tests;
 #[cfg(test)]
 #[path = "cpu_runtime_cpu2_tests.rs"]
 mod cpu2_tests;
+
+#[cfg(test)]
+#[path = "cpu_runtime_route_tests.rs"]
+mod route_tests;

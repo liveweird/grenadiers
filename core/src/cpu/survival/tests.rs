@@ -43,7 +43,12 @@ fn lease(
     .unwrap()
 }
 
-fn later(basis: &Observation, tick: u64, position: Position, heading: Direction) -> Observation {
+pub(super) fn later(
+    basis: &Observation,
+    tick: u64,
+    position: Position,
+    heading: Direction,
+) -> Observation {
     let mut parts = basis.clone().into_parts();
     let elapsed = u16::try_from(tick - parts.tick.0).unwrap();
     parts.tick = Tick(tick);
@@ -53,6 +58,17 @@ fn later(basis: &Observation, tick: u64, position: Position, heading: Direction)
         flame.remaining_ticks = flame.remaining_ticks.saturating_sub(elapsed);
     }
     parts.flames.retain(|flame| flame.remaining_ticks > 0);
+    if let crate::cpu::BombKnowledge::Visible(bombs) = &mut parts.bombs {
+        for bomb in bombs {
+            if let crate::cpu::ObservedBombTrigger::Timed {
+                remaining_ticks,
+                paused: false,
+            } = &mut bomb.trigger
+            {
+                *remaining_ticks = remaining_ticks.saturating_sub(elapsed);
+            }
+        }
+    }
     let ObservedActor::Visible(actor) = &mut parts.actors[1] else {
         unreachable!()
     };
@@ -187,8 +203,8 @@ fn planner_waits_for_a_temporary_blocked_goal_then_resumes_ordinary_input() {
     let waiting = run(&basis);
     assert_eq!(waiting.control.intent, Intent::STOP);
     assert!(
-        waiting.lease.is_some(),
-        "waiting has an explicit safety lease"
+        waiting.lease.is_some() || waiting.route.is_some(),
+        "waiting has an explicit safety certificate"
     );
     let clear = later(
         &basis,
@@ -230,9 +246,14 @@ fn planner_marks_unknown_motion_as_conditional_and_never_plants() {
     )
     .unwrap();
     assert!(planned.control.intent.manual.is_none());
-    assert_eq!(planned.control.hold_ticks, 3);
+    let assurance = planned
+        .route
+        .as_ref()
+        .map(crate::cpu::routing::RouteCertificate::assurance)
+        .or_else(|| planned.lease.as_ref().map(|lease| lease.assurance()))
+        .expect("a conditional safety certificate");
     assert_eq!(
-        planned.lease.unwrap().assurance(),
+        assurance,
         &crate::cpu::routing::RouteAssurance::ConditionalStationary {
             bombs: vec![crate::game::EntityId(7)]
         }

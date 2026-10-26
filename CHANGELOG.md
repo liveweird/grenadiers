@@ -2,6 +2,25 @@
 
 ## [Unreleased]
 
+## 0.3.83 — 2026-10-27
+
+### Added
+
+- Plan complete bounded CPU movement/waiting routes across exact execution-time lanes,
+  using the shared pulse motion kernel and fixed stopped intervals between moves.
+- Execute committed routes without further worker results; distinguish predicted scene
+  evolution from new hazards and invalidate missed or rejected scheduled commands.
+
+### Fixed
+
+- Reject escape certificates that rely on temporary obstacle clipping when WallPass,
+  soft-block destruction or Oil ignition lets the actual actor travel farther.
+
+### Changed
+
+- Identify the route policy as UtilityV3 while preserving recorded UtilityV1/UtilityV2
+  inputs and the unchanged v12 wire shape. Broader planting proofs remain separate.
+
 ## 0.3.82 — 2026-10-26
 
 ### Added

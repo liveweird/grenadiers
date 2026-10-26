@@ -96,44 +96,49 @@ retain the previous immutable image reference for rollback. The runtime stage in
 rolling Debian package updates, so a later build may resolve newer packages and is not expected to
 be byte-identical; treat it as a new candidate with new evidence rather than reusing acceptance.
 
-## v0.3.81 — 2026-10-26
+## v0.3.82 — 2026-10-26
 
-[v0.3.81](https://github.com/liveweird/grenadiers/releases/tag/v0.3.81) adds the first playable
-[private Solo match](game/single-player.md). Human seat One controls settings; the server CPU
-occupies seat Two without credentials. Settings, result, rematch, running reconnect and permanent
-human departure use ordinary lifecycle/input rules. The initial opponent pursues simple goals
-and plants only with a restricted escape proof. Committed escape execution does not wait for
-another worker. Conservative item/tactical limitations are documented in the feature guide.
+[v0.3.82](https://github.com/liveweird/grenadiers/releases/tag/v0.3.82) improves the
+[private Solo opponent](game/single-player.md) with shared blast forecasting and one checked
+movement/waiting pulse at a time. Forecasts retain separate burn windows, timed chains,
+persistent Oil and explicit motion/trigger/pause uncertainty. Checked actions include swept
+footprints, modifier expiry and a stopped safety lease. Fresh observations invalidate unsafe
+leased execution; stopped-input provenance and invalidated bomb escapes permit replanning.
 
-The coordinated [v12 contract](game/protocol-v12.md) adds mode/controller metadata; server and
-browser must upgrade together. Rules 5, generator 2 and all 22 default-enabled items remain.
-Solo replay adds format-3 header provenance; formats 1/2 and disabled production recording stay
-intact. Independent review is clear. Actual driver escape and replay equality are tested
-separately, with ordinary-input capture ordering traced statically.
+The opponent is UtilityV2; live controllers reject older profile labels. Recorded UtilityV1
+inputs remain replayable and the v12 wire shape, rules 5, generator 2 and all 22 default items stay
+unchanged. Clear-board goals and restricted CPU1 planting remain separate. Ordinary clear-board
+movement retains its hold without a hazard lease. Conditional motion assumptions never justify
+planting; complete multi-leg survival and broader planting remain in the
+[backlog](../BACKLOG.md#single-player). This release does not claim those guarantees.
 
-Full Rust acceptance at `d7b88a39fc30fddaebcd7c27686593a10f4da8da` passes in 558.091s:
-all 4,194,304 masks across debug/release/official coverage, 32 partitions/four workers, zero
-retries, 37 raw profiles, and 20,051/21,897 lines (91.57%). The final
-[Linux run](https://github.com/liveweird/grenadiers/actions/runs/40404217347) passes. Full web
-acceptance at `87f975e64764333e541e219059505b1283af4cc9` passes 6,874 tests / 97 files in
-244.81s; coverage is 91.31/90.03/90.44/93.71% (statements/branches/functions/lines). Initial
-archived/live fixture expectations were corrected without dropping assertions or masks.
-Repository, formatting, Clippy, generated-contract/API, E2E static and dependency/security checks
-pass; both npm audits report zero vulnerabilities.
+Tested source is `ded10b58fba4bae0c7d1e1c31b49b5534be6c672`. Independent forecast, movement and
+integration reviews are clear after fixing reported chain-provenance and Stop-scheduling issues.
+Full local Rust acceptance passes in 468.227s with all 4,194,304 masks in each of debug,
+release and official coverage, 32 partitions/four workers and zero retries. Official coverage is
+22,143/24,125 lines (91.78%). The distinct
+[Linux debug/release run](https://github.com/liveweird/grenadiers/actions/runs/40413774406) passes.
+Workspace formatting/Clippy, repository/tooling, API/generated-contract/E2E static checks and
+security audits pass; npm audits have zero vulnerabilities.
 
-The responsive follow-up changes CSS and its native browser regression only; Rust and web
-TS/JS unit inputs are unchanged, so their evidence is reused. Its clean source is
-`dd457a922a225fe82a633b938432be658b95b6e9`. Accepted image is
-`sha256:5799213a545744c2ff5d777abcf8c214529d736cedbcb4e7515708511e5308ab`.
-Pinned Trivy 0.74.0 reports zero fixable HIGH/CRITICAL findings. Ten Compose cases pass in 49.2s
-and ten Kubernetes cases in 51.6s, including Solo authority/movement/result/rematch/reconnect/
-leave, both game modes and Polish 320px accessibility. The strict Polish lobby/create smoke
-also passes after fixing button wrapping. Exact image/resource/security/probe checks pass;
-temporary projects/namespaces are removed. Gzip budgets remain 400,000-byte JS / 20,000-byte CSS.
+Web, API, artwork, E2E and deployment inputs are unchanged from the accepted v0.3.81 baseline.
+Reuse its 6,874-test/97-file web result and coverage (91.31/90.03/90.44/93.71% statements/branches/
+functions/lines). The candidate rebuild and native acceptance confirm identical served HTML,
+JS, CSS and PNG. Exact accepted image is
+`sha256:48e830f6d2533dc4a1c6fff271571c28fb52ea8492cced60f82936b110dc8a28`.
+Pinned Trivy 0.74.0 reports zero fixable HIGH/CRITICAL findings. Ten Compose browser cases pass in
+49.9s and ten Kubernetes cases in 51.2s, including real Solo result/rematch/reconnect/leave,
+two-human play and Polish 320px accessibility. Strict lobby/create, resource/security/probe and
+served-asset checks pass; temporary runtime resources are removed. The exact image is promoted
+to localhost:8085, with v0.3.81 retained for rollback. Restart ends in-memory matches. Policy-version 2 journals require the updated reader;
+production recording remains disabled.
 
-Localhost:8085 runs the exact accepted image with verified health/readiness, limits, CSP/cache
-and served assets. The atlas is unchanged. Control is
-`.local-checkpoints/runtime/compose-v0.3.81.yaml`; `rollback-v0.3.80.yaml` retains the prior image.
+Evidence is retained locally under `target/quality-review/cpu2-v0382-*`; dependency/build caches
+remain reusable. Distribution is a source prerelease and local accepted image, without a
+production registry or hosted-service claim.
+
+<a id="v0381--2026-10-26"></a>
+The [v0.3.81 record](history/releases.md#v0381--2026-10-26) is preserved in release history.
 
 <a id="v0380--2026-10-26"></a>
 The [v0.3.80 record](history/releases.md#v0380--2026-10-26) is preserved in release history.

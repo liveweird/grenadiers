@@ -56,6 +56,19 @@ pub struct EffectiveSpeed {
 
 impl EffectiveSpeed {
     #[must_use]
+    pub const fn from_slow_foot_stacks(base: SpeedLevel, stacks: usize) -> Self {
+        let bounded = if stacks > MAX_SLOW_FOOT_STACKS {
+            MAX_SLOW_FOOT_STACKS
+        } else {
+            stacks
+        };
+        Self {
+            numerator: base.units_per_second(),
+            denominator: 1_u16 << bounded,
+        }
+    }
+
+    #[must_use]
     pub const fn numerator(self) -> u16 {
         self.numerator
     }
@@ -63,6 +76,21 @@ impl EffectiveSpeed {
     #[must_use]
     pub const fn denominator(self) -> u16 {
         self.denominator
+    }
+
+    #[must_use]
+    pub const fn units_per_second(self) -> u16 {
+        self.numerator / self.denominator
+    }
+
+    /// Advances the authoritative coordinate-unit remainder by one 60 Hz update.
+    #[must_use]
+    pub const fn advance(self, residual: u16) -> (i32, u16) {
+        let total = residual as u32 + self.units_per_second() as u32;
+        (
+            (total / super::types::TICKS_PER_SECOND as u32) as i32,
+            (total % super::types::TICKS_PER_SECOND as u32) as u16,
+        )
     }
 }
 
@@ -134,10 +162,7 @@ impl TimedEffects {
 
     #[must_use]
     pub fn effective_speed(&self, base: SpeedLevel, at: Tick) -> EffectiveSpeed {
-        EffectiveSpeed {
-            numerator: base.units_per_second(),
-            denominator: 1_u16 << self.slow_foot_stacks(at),
-        }
+        EffectiveSpeed::from_slow_foot_stacks(base, self.slow_foot_stacks(at))
     }
 
     #[must_use]
@@ -317,6 +342,16 @@ mod tests {
                 .denominator(),
             1
         );
+    }
+
+    #[test]
+    fn effective_speed_advances_the_authoritative_remainder_exactly() {
+        let speed = super::EffectiveSpeed::from_slow_foot_stacks(SpeedLevel::Base, 0);
+        assert_eq!(speed.advance(0), (51, 12));
+        assert_eq!(speed.advance(59), (52, 11));
+        let slow = super::EffectiveSpeed::from_slow_foot_stacks(SpeedLevel::Four, 2);
+        assert_eq!(slow.units_per_second(), 1_280);
+        assert_eq!(slow.advance(0), (21, 20));
     }
 
     #[test]

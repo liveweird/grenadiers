@@ -1,7 +1,8 @@
+pub(crate) use super::geometry::position_overlaps_cell;
 use super::geometry::{MovementSegment, MovementTrace};
 use super::input::Direction;
+pub(crate) use super::movement_collision::position_is_free;
 use super::movement_collision::{ObstacleAccess, allowed_distance, allowed_distance_with_blocker};
-pub(crate) use super::movement_collision::{position_is_free, position_overlaps_cell};
 use super::simulation::{Actor, TurnAssist};
 use super::types::{CellId, EntityId, Position, TICKS_PER_SECOND, UNITS_PER_CELL};
 use super::world::World;
@@ -69,7 +70,7 @@ pub(crate) fn advance_actor(
     // existing remainder continues to represent coordinate-unit sixtieths.
     let speed = if config.slow_foot_enabled {
         let effective = actor.effects().effective_speed(actor.speed, config.tick);
-        effective.numerator() / effective.denominator()
+        effective.units_per_second()
     } else {
         actor.speed.units_per_second()
     };

@@ -4,6 +4,151 @@ This archive preserves the older release records originally maintained in
 [`docs/releases.md`](../releases.md). Records remain in their original order; the current
 release procedure and current release record stay in the [release guide](../releases.md).
 
+## v0.3.69 — 2026-10-26
+
+[v0.3.69](https://github.com/liveweird/grenadiers/releases/tag/v0.3.69) replaces 24 repeated
+Compose seed overlays with `e2e/compose/fixture.yaml`. Set `GRENADIERS_FIXTURE_SEED_FILE` to the
+exact seed path; the read-only bind rejects missing files instead of creating host directories.
+Feature seeds, browser acknowledgements, scenario identities and base-only teardown remain.
+See [fixture usage](../deployment.md).
+
+Independent review and repository/workflow contracts pass. The 96 rendered-model comparisons
+cover 24 features, default/custom environment and persistence off/on; the only intentional
+model difference is `create_host_path: false`. Missing/unset/empty selectors fail safely.
+Integration preserves the v0.3.68 backend and v0.3.65 web inputs; their full Rust, exhaustive,
+Linux, web, coverage and dependency results are reused without duplicate suites.
+
+Accepted image source is `137bdd68a4cae1d751bc98183c5fb5b9e1829ae0`, image
+`sha256:9eade53a5b910f55627d6ef8f8d06a726698e7879316e41242142122e0266c95`.
+Its OS layer was refreshed for the newly reported OpenSSL fix. Trivy 0.74.0 reports zero fixable
+HIGH/CRITICAL findings. Fresh exact-image Compose acceptance passes eight default cases in 35.4s
+and Heart, Kick, Cloak and Oil cases through the new shared overlay with exact read-only mounts.
+Eight Kubernetes cases pass in 36.5s with exact-image/security/probe/resource checks. Temporary
+Compose projects and Kubernetes namespaces are removed. Earlier runs using superseded overlays
+are retained separately and are excluded from these shared-fixture results.
+
+Localhost:8085 serves the accepted image; runtime/security, health/readiness, CSP/cache and exact
+served HTML/JavaScript/CSS/atlas checks pass. Control is
+`.local-checkpoints/runtime/compose-v0.3.69.yaml`; `rollback-v0.3.68.yaml` retains the prior image.
+No gameplay, protocol, artwork or migration changes. Distribution remains source prereleases.
+
+## v0.3.68 — 2026-10-26
+
+[v0.3.68](https://github.com/liveweird/grenadiers/releases/tag/v0.3.68) makes replay recording
+explicitly opt-in for test fixtures. Production rooms reserve no journal vector and skip replay-only
+capture work; live snapshots, replay compatibility, reconnect and exhaustive assertions remain.
+The allocation observation is 3,840,000 fewer reserved vector bytes per default room, not an RSS
+or throughput claim; see [the measurements](replay-allocation.md).
+
+Independent review is clear. Full Rust acceptance at
+`6c01cc4c97324ddef87e588a1bdbe8fb1deea135` passes in 431.697s: every 4,194,304 mask in debug,
+release and official coverage, zero retries, 940 core / 309 ordinary server tests and two doctests
+per profile. Coverage is 17,833/18,933 lines (94.1900%), above the 90% floor. Integrated image
+source `6f443a2056b91b713b5fd45d3e2e8de9a7e40056` preserves those core/server/API inputs.
+[Distinct Linux debug/release units](https://github.com/liveweird/grenadiers/actions/runs/40369574894)
+pass. Unchanged web, dependencies and audits reuse v0.3.65/v0.3.67 acceptance.
+
+The runtime OS layer was refreshed after a current scan found fixable OpenSSL findings in the
+older candidate. The replacement image is
+`sha256:0bb13e287162a7ba79937dba4f95dd161bb343248ea4e0cbf026f9c74c2d5fc3`;
+Trivy 0.74.0 reports zero fixable HIGH/CRITICAL findings. Eight fresh native Compose cases pass
+in 35.3s on this exact replacement. Eight fresh Kubernetes cases pass in 36.9s, including exact-image, security, readiness, probe
+and resource checks; the temporary namespace is removed.
+
+Localhost:8085 serves the replacement image. Image identity/security, health/readiness, CSP/cache
+and served HTML/JavaScript/CSS/atlas bytes match the accepted web artifacts. Control is
+`.local-checkpoints/runtime/compose-v0.3.68.yaml`; `rollback-v0.3.67.yaml` retains the previous
+release. There is no migration or public replay export. Source tags and GitHub prerelease notes
+are the distribution; no production registry is configured.
+
+## v0.3.67 — 2026-10-26
+
+[v0.3.67](https://github.com/liveweird/grenadiers/releases/tag/v0.3.67) adds named admission
+projection and personal-metadata inputs for protocol v8–v11. Legacy Rust wrappers remain
+available, and the live caller uses the named input without changing wire validation, ownership,
+ordering, privacy, schemas or gameplay behavior. The existing v0.3.65 web build is reused.
+
+Fresh source-bound Rust acceptance at `46a1e3320e2ecf5e8c6291884d1304d0dfaa6d22` completes every
+4,194,304 mask in debug, release and official coverage in 432.208s with zero retries. The ordinary
+profiles each pass 940 core / 307 server tests plus two doctests. Coverage is 17,809/18,909 lines
+(94.1827%) at the 90% floor. Integrated source `43dcd78050d5a306b8822b62a17728cb56c8c926`
+has identical core, server and API inputs. Full v0.3.65 web acceptance is reused: 6,812 tests / 91
+files with 91.10/89.47/90.12/93.47% coverage. Dependency inputs and accepted audits are unchanged.
+[Distinct Linux debug/release units](https://github.com/liveweird/grenadiers/actions/runs/40256918030)
+pass on the final candidate.
+
+Accepted image source is `43dcd78050d5a306b8822b62a17728cb56c8c926`; its image is
+`sha256:0845bc797cc6082e9c331f9d0b0c871695c13e206cdcc8ddb1b9bf525f9c7f84`.
+The pinned image scan reports zero fixable HIGH/CRITICAL findings. Eight fresh native Compose
+cases plus Invisibility Cloak and Oil scenarios pass. Eight Kubernetes cases pass in 36.6s,
+including exact-image, runtime-security, readiness, probe and resource checks; the temporary
+namespace is absent afterward. An initial attempt passed a bad helper argument and stopped before
+any test ran; the corrected acceptance above passed without product retries.
+
+Localhost:8085 serves the accepted image. Exact image, runtime security, health/readiness,
+CSP/cache and served HTML/JavaScript/PNG equality with the accepted unchanged web artifacts pass,
+plus one fresh native authentication case in 364ms. Release-documentation changes preserve Docker
+and application inputs. Control is `.local-checkpoints/runtime/compose-v0.3.67.yaml`;
+`rollback-v0.3.66.yaml` retains the prior image. Temporary acceptance resources are removed.
+There is no migration.
+
+## v0.3.66 — 2026-10-26
+
+[v0.3.66](https://github.com/liveweird/grenadiers/releases/tag/v0.3.66) derives reserved item
+identities, bits, pickup declarations and total mappings from one private 22-item specification.
+Generation order, activation subsets, replay values, public schemas and gameplay behavior remain
+unchanged. The existing v0.3.65 web build is reused.
+
+Independent review is clear. Fresh source-bound Rust acceptance at
+`ba7d6eea4728f4feae6c60ddb67c45451c39b8c0` completes every 4,194,304 mask in debug, release and
+official coverage in 429.862s with zero retries. The ordinary profiles each pass 934 core / 307
+server tests plus two doctests. Coverage is 17,615/18,793 lines (93.7317%) at the 90% floor.
+Rustfmt, Clippy, repository checks and
+[distinct Linux units](https://github.com/liveweird/grenadiers/actions/runs/40240422294) pass.
+Full v0.3.65 web acceptance is reused: 6,812 tests / 91 files with
+91.10/89.47/90.12/93.47% coverage.
+
+Integrated image source `c244193ae048f3dea2864bd120511be60981bb09` preserves those tested
+core, server and API inputs. Its accepted image is
+`sha256:d4906dd81f0c86803e8d7a96bd890723ec180718d9cc015c286d7d94ebfc941d`.
+Eight fresh native Compose cases and eight Kubernetes cases pass in 36.1s and 36.9s,
+respectively, including exact-image, runtime-security, origin, readiness/probe/resource and
+gameplay checks. Heart, Kick, Invisibility Cloak and Oil browser scenarios pass. The pinned image
+scan reports zero fixable HIGH/CRITICAL findings.
+
+Localhost:8085 serves the accepted image. Runtime security, health/readiness, CSP/cache and exact
+served-artifact checks pass, plus one fresh native authentication case. An initial attempt found
+missing E2E dependencies before any case ran; after installing the declared dependencies, the
+fresh acceptance above passed without product retries. Release-documentation changes preserve
+Docker and application inputs and skip duplicate CI. Control is
+`.local-checkpoints/runtime/compose-v0.3.66.yaml`; `rollback-v0.3.65.yaml` retains the prior image.
+Temporary acceptance resources are removed. There is no migration.
+
+## v0.3.65 — 2026-10-26
+
+[v0.3.65](https://github.com/liveweird/grenadiers/releases/tag/v0.3.65) names recurring UI color
+roles in `App.css`. All 252 existing resolved declarations, selectors, dimensions and visual
+values remain unchanged; distinct one-off shades remain explicit. No artwork or gameplay changes.
+
+Independent review checks resolved values, scope, undefined variables and cycles. Full web
+acceptance at `9e4b020cada15c5e36f2e2dd297e4cb7eecc437e` passes 6,812 tests / 91 files in
+226.72s with 91.10/89.47/90.12/93.47% coverage. JavaScript/CSS gzip sizes are 337,921/36,695 bytes,
+within existing budgets. Repository, TypeScript, lint, drift and dead-code checks pass.
+
+Integrated image source `0a46613dde32585dcf2a08faea98a271d2e10db9` preserves that tested web tree
+and the v0.3.64 backend. Accepted image is
+`sha256:6aed11a165885225691ae10b70ab349999853a7c14e398a38d12b65b4b90b596`.
+Eight native Compose cases and eight Kubernetes cases pass, with exact-image/runtime security,
+origin, readiness/probes/resources and gameplay checks. The pinned image scan reports zero
+fixable HIGH/CRITICAL findings. Reuse v0.3.64 backend/exhaustive/Linux and dependency acceptance;
+there is no distinct Rust behavior to recheck remotely.
+
+Localhost:8085 serves the accepted image. Exact served HTML, JavaScript, CSS and atlas bytes match
+the tested build; CSP/cache, health/readiness and runtime security pass, plus one fresh native
+authentication case. Release-documentation changes preserve Docker inputs and skip duplicate CI.
+Control is `.local-checkpoints/runtime/compose-v0.3.65.yaml`; `rollback-v0.3.64.yaml` retains the
+prior image. Temporary acceptance resources are removed. There is no migration.
+
 ## v0.3.64 — 2026-10-26
 
 [v0.3.64](https://github.com/liveweird/grenadiers/releases/tag/v0.3.64) adds a validated,

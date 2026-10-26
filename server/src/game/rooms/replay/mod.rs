@@ -3,10 +3,12 @@ mod record;
 mod runner;
 
 #[cfg(test)]
+pub(in crate::game::rooms) use record::Header;
+#[cfg(test)]
 pub(in crate::game::rooms) use record::M5_LIFECYCLE_PROFILE;
 #[cfg(test)]
 use record::ReplayStatus;
-pub(in crate::game::rooms) use record::{Header, Journal, Operation, ReplayAction};
+pub(in crate::game::rooms) use record::{Journal, Operation, ReplayAction};
 #[cfg(test)]
 use runner::{ReplayError, replay};
 
@@ -14,6 +16,10 @@ use runner::{ReplayError, replay};
 mod capture_tests;
 #[cfg(test)]
 mod item_mask_plan;
+#[cfg(test)]
+mod optional_recording_tests;
+#[cfg(test)]
+mod recording_measurement_tests;
 #[cfg(test)]
 mod settings_tests;
 #[cfg(test)]

@@ -35,7 +35,7 @@ pub(super) fn configurable_runtime(source: RoundSeedSource) -> MatchRuntime {
 }
 
 pub(in crate::game::rooms) fn expanded_heart_runtime() -> MatchRuntime {
-    MatchRuntime::new(
+    MatchRuntime::new_recording(
         identity(RoomProfile::ExpandedV5),
         RoundSeedSource::with_entropy(|bytes| {
             bytes.fill(3);
@@ -90,7 +90,7 @@ pub(in crate::game::rooms) fn start_optional_runtime_with_fuse(
     seed_byte: u8,
     fuse_ticks: u64,
 ) -> MatchRuntime {
-    let mut runtime = MatchRuntime::new(
+    let mut runtime = MatchRuntime::new_recording(
         identity(RoomProfile::ExpandedV5),
         RoundSeedSource::with_entropy(move |bytes| {
             bytes.fill(seed_byte);

@@ -394,3 +394,6 @@ async fn unavailable_resume_is_uniformly_rejected_on_the_wire() {
 #[cfg(test)]
 #[path = "room_socket_tests/rate_limit_tests.rs"]
 mod rate_limit_tests;
+#[cfg(test)]
+#[path = "room_socket_tests/resume_race_tests.rs"]
+mod resume_race_tests;

@@ -1,7 +1,0 @@
-# Explicit operator reproduction mode for isolated production Invisibility Cloak acceptance.
-services:
-  app:
-    environment:
-      GAME_ROUND_SEED_FILE: /run/grenadiers/round.seed
-    volumes:
-      - ./core/tests/fixtures/arena-v2-invisibility-cloak.seed:/run/grenadiers/round.seed:ro

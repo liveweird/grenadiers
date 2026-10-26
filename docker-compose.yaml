@@ -13,6 +13,8 @@ services:
       # Set a Compose-network URL explicitly to opt into database readiness.
       DATABASE_URL: '${DATABASE_URL:-}'
     init: true
+    mem_limit: 256m
+    pids_limit: 128
     read_only: true
     cap_drop: [ALL]
     security_opt: ['no-new-privileges:true']

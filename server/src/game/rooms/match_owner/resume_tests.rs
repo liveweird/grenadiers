@@ -46,7 +46,14 @@ async fn connected_takeover_fences_old_binding_and_drop_then_restore_keeps_priva
     assert_eq!(replacement.resume_token, first.resume_token);
     assert_eq!(replacement.last_bomb_action_id, Some(sequence(MAX_COUNTER)));
     let admitted: serde_json::Value = serde_json::from_str(&replacement.personal_frame).unwrap();
+    assert_eq!(admitted["type"], "admitted");
+    assert_eq!(admitted["sequence"], 9);
+    assert_eq!(admitted["youSeat"], "one");
+    assert_eq!(admitted["resumeToken"], replacement.resume_token.as_str());
+    assert_eq!(admitted["lastActionId"], MAX_COUNTER);
+    assert_eq!(admitted["room"]["roomId"], replacement.room_id.as_str());
     assert!(!admitted["state"].is_null());
+    assert!(admitted.get("events").is_none());
     assert_eq!(
         replacement.room.seats[0].connection,
         ConnectionStatus::Connected
@@ -118,7 +125,17 @@ async fn connected_takeover_fences_old_binding_and_drop_then_restore_keeps_priva
     );
     assert_eq!(restored.last_bomb_action_id, Some(sequence(MAX_COUNTER)));
     let restored_frame: serde_json::Value = serde_json::from_str(&restored.personal_frame).unwrap();
+    assert_eq!(restored_frame["type"], "admitted");
+    assert_eq!(restored_frame["sequence"], 1);
+    assert_eq!(restored_frame["youSeat"], "one");
+    assert_eq!(
+        restored_frame["resumeToken"],
+        restored.resume_token.as_str()
+    );
+    assert_eq!(restored_frame["lastActionId"], MAX_COUNTER);
+    assert_eq!(restored_frame["room"]["roomId"], restored.room_id.as_str());
     assert!(!restored_frame["state"].is_null());
+    assert!(restored_frame.get("events").is_none());
     drop(restored);
     drop(second);
 }

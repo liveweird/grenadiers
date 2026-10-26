@@ -13,16 +13,17 @@ pub use crate::protocol::item_foundation::items::{
     EquipmentId, InventoryView, ItemId, ItemMask, ItemSet, PickupKind, WeaponId,
 };
 pub use crate::protocol::v8::{
-    ARENA_TERRAIN_CELLS, ArenaView, BlastKind, BombTrigger, BombView, CompletedRound,
-    ConnectionStatus, CountdownKind, DamageGraceTicks, DamagePreventionSource, EventIndex,
-    EventKind, FlameView, GameClientMessage, GameSettings, HiddenActorView, MAX_BLOCKS, MAX_BOMBS,
-    MAX_FLAMES, MAX_PICKUPS, MAX_RUNNING_UPDATES, ManualActionKind, MapId, MatchInterruptReason,
-    MatchResult, MatchWinnerReason, PickupView, ResumeToken, RoomMetadata, RoomPhase, RoomView,
-    RoundCount, RulesVersion, Scores, SeatStatus, SettingsContextError, SnapshotEvents, Terrain,
-    V8ErrorCode as V11ErrorCode, Wins, WireEvent, validate_settings_context,
+    ARENA_TERRAIN_CELLS, AdmissionProjection, ArenaView, BlastKind, BombTrigger, BombView,
+    CompletedRound, ConnectionStatus, CountdownKind, DamageGraceTicks, DamagePreventionSource,
+    EventIndex, EventKind, FlameView, GameClientMessage, GameSettings, HiddenActorView, MAX_BLOCKS,
+    MAX_BOMBS, MAX_FLAMES, MAX_PICKUPS, MAX_RUNNING_UPDATES, ManualActionKind, MapId,
+    MatchInterruptReason, MatchResult, MatchWinnerReason, PersonalAdmission, PickupView,
+    ResumeToken, RoomMetadata, RoomPhase, RoomView, RoundCount, RulesVersion, Scores, SeatStatus,
+    SettingsContextError, SnapshotEvents, Terrain, V8ErrorCode as V11ErrorCode, Wins, WireEvent,
+    validate_settings_context,
 };
 pub use crate::protocol::v8::{BoundPublication, ExpandedCapture, ProjectionError};
-pub use projection_admission::prepare_expanded_admission;
+pub use projection_admission::{prepare_admission, prepare_expanded_admission};
 pub use projection_recipient::prepare_snapshot_pair;
 pub use scalars::GameplayVersion;
 pub use server::GameServerMessage;
@@ -129,6 +130,8 @@ pub fn encode_server_message(
     super::enforce_server_message_size(encoded)
 }
 
+#[cfg(test)]
+mod admission_edge_tests;
 #[cfg(test)]
 mod archive_oil_tests;
 #[cfg(test)]

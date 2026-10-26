@@ -4,6 +4,32 @@ This archive preserves the older release records originally maintained in
 [`docs/releases.md`](../releases.md). Records remain in their original order; the current
 release procedure and current release record stay in the [release guide](../releases.md).
 
+## v0.3.79 — 2026-10-26
+
+[v0.3.79](https://github.com/liveweird/grenadiers/releases/tag/v0.3.79) imports the used Mantine
+stylesheet closure in canonical cascade order. CSS gzip falls from 36,695 to 15,050 bytes (59%);
+the CSS budget is ratcheted to 20,000 bytes. Actual A/B screenshots and computed geometry/styles
+match across desktop, Polish 320px, focus, disabled controls and modal/settings states. See the
+[CSS measurements](mantine-css.md). Existing lint exceptions now have local rationales.
+
+The [real 20Hz React measurement](react-publication.md) supports retaining the current
+publication model: inclusive subtree render p95 is at most 2.1ms and max 2.6ms in these profiles,
+with one renderer update per accepted snapshot, no remounts and zero duplicate-revision work.
+Both the original pacing diagnostic and corrected absolute-deadline run are recorded.
+
+Independent review is clear. Full web acceptance at `218b4ba2341d7d23ebc7a8c85b4a3d5517e9b0e7`
+passes 6,861 tests / 94 files in 237.31s with 91.24/89.88/90.12/93.60% coverage. Local gzip
+JS/CSS is 337,178/15,050 bytes; Docker is 337,967/15,050, within 400,000/20,000-byte budgets.
+Unchanged Rust/exhaustive/Linux/dependency inputs reuse the accepted baseline.
+
+Accepted image source is the tested commit; image is
+`sha256:0638ae3a9fbe7a289566378337c20ef05356bc96eaa59a05a05ffa490e75c739`.
+Trivy 0.74.0 reports zero fixable HIGH/CRITICAL findings. Eight Compose cases pass in 36.3s and
+eight Kubernetes cases in 36.7s with exact image/resource/security/probe checks. Golden Flame
+active-HUD and Polish 320px room flows pass. Temporary resources are removed. Localhost:8085 has
+verified health/readiness, CSP/cache and the exact new HTML/JS/CSS with the unchanged atlas.
+Control is `.local-checkpoints/runtime/compose-v0.3.79.yaml`; `rollback-v0.3.78.yaml` retains the prior image.
+
 ## v0.3.78 — 2026-10-26
 
 [v0.3.78](https://github.com/liveweird/grenadiers/releases/tag/v0.3.78) shares equivalent Rust

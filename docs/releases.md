@@ -96,31 +96,35 @@ retain the previous immutable image reference for rollback. The runtime stage in
 rolling Debian package updates, so a later build may resolve newer packages and is not expected to
 be byte-identical; treat it as a new candidate with new evidence rather than reusing acceptance.
 
-## v0.3.79 — 2026-10-26
+## v0.3.80 — 2026-10-26
 
-[v0.3.79](https://github.com/liveweird/grenadiers/releases/tag/v0.3.79) imports the used Mantine
-stylesheet closure in canonical cascade order. CSS gzip falls from 36,695 to 15,050 bytes (59%);
-the CSS budget is ratcheted to 20,000 bytes. Actual A/B screenshots and computed geometry/styles
-match across desktop, Polish 320px, focus, disabled controls and modal/settings states. See the
-[CSS measurements](history/mantine-css.md). Existing lint exceptions now have local rationales.
+[v0.3.80](https://github.com/liveweird/grenadiers/releases/tag/v0.3.80) establishes the pure
+[CPU contracts](game/cpu-contracts.md): restricted observations, ordinary intents, bounded
+memory/work, independent seeded randomness and distinct world/decision identities. The current
+v11 recipient projection supplies observations, including cloak and Invisible Bombs privacy.
+Internal controller metadata and the [lifecycle policy](game/single-player-cpu.md#lifecycle-policy)
+prepare the next playable slice. Solo admission, a production policy and a Solo UI are not
+introduced here. Wire v11, rules 5, generator 2 and replay formats 1/2 remain unchanged.
 
-The [real 20Hz React measurement](history/react-publication.md) supports retaining the current
-publication model: inclusive subtree render p95 is at most 2.1ms and max 2.6ms in these profiles,
-with one renderer update per accepted snapshot, no remounts and zero duplicate-revision work.
-Both the original pacing diagnostic and corrected absolute-deadline run are recorded.
+Independent review is clear. At clean source `b43bacf6113471296ca29c170c76496356660ba1`, the
+source-bound Rust gate passes in 456.334s: all 4,194,304 masks across debug, release and official
+coverage, 32 partitions/four workers, zero retries, 37 raw profiles, and 18,566/20,325 lines
+(91.35%, above the unchanged 90% floor). Focused contracts, recipient privacy and accepted-input
+replay pass 10/5/2 tests; ordinary Equipment and Stop are included. The distinct
+[Linux debug/release run](https://github.com/liveweird/grenadiers/actions/runs/40394057002) passes.
+Repository, formatting, Clippy and dependency/security policy pass; both npm audits report zero
+vulnerabilities. Unchanged frontend/tooling inputs reuse the accepted v0.3.79 web evidence.
 
-Independent review is clear. Full web acceptance at `218b4ba2341d7d23ebc7a8c85b4a3d5517e9b0e7`
-passes 6,861 tests / 94 files in 237.31s with 91.24/89.88/90.12/93.60% coverage. Local gzip
-JS/CSS is 337,178/15,050 bytes; Docker is 337,967/15,050, within 400,000/20,000-byte budgets.
-Unchanged Rust/exhaustive/Linux/dependency inputs reuse the accepted baseline.
+Accepted image is `sha256:a56de297988f094b73a6757729e707e321e56f36e746a51bafc2c487ee3f6374`,
+built from that clean source. Pinned Trivy 0.74.0's fixable HIGH/CRITICAL gate exits zero. Eight
+Compose cases pass in 36.4s and eight Kubernetes cases in 37.2s, with exact image, security,
+resource and probe checks; temporary resources are removed. Localhost:8085 runs that image with
+verified health/readiness, limits and exact served assets. HTML, JavaScript, CSS and atlas bytes
+match v0.3.79. Control is `.local-checkpoints/runtime/compose-v0.3.80.yaml`; rollback retains
+v0.3.79 in `rollback-v0.3.79.yaml`.
 
-Accepted image source is the tested commit; image is
-`sha256:0638ae3a9fbe7a289566378337c20ef05356bc96eaa59a05a05ffa490e75c739`.
-Trivy 0.74.0 reports zero fixable HIGH/CRITICAL findings. Eight Compose cases pass in 36.3s and
-eight Kubernetes cases in 36.7s with exact image/resource/security/probe checks. Golden Flame
-active-HUD and Polish 320px room flows pass. Temporary resources are removed. Localhost:8085 has
-verified health/readiness, CSP/cache and the exact new HTML/JS/CSS with the unchanged atlas.
-Control is `.local-checkpoints/runtime/compose-v0.3.79.yaml`; `rollback-v0.3.78.yaml` retains the prior image.
+<a id="v0379--2026-10-26"></a>
+The [v0.3.79 record](history/releases.md#v0379--2026-10-26) is preserved in release history.
 
 <a id="v0378--2026-10-26"></a>
 The [v0.3.78 record](history/releases.md#v0378--2026-10-26) is preserved in release history.

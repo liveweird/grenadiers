@@ -1,0 +1,173 @@
+{
+  "validCases": [
+    {
+      "caseId": "authenticate-protocol-minimum",
+      "variant": "authenticate",
+      "value": {
+        "type": "authenticate",
+        "protocolVersion": 0,
+        "token": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      }
+    },
+    {
+      "caseId": "authenticate-protocol-maximum",
+      "variant": "authenticate",
+      "value": {
+        "type": "authenticate",
+        "protocolVersion": 65535,
+        "token": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+      }
+    },
+    {
+      "caseId": "create-room-counter-minimum",
+      "variant": "createRoom",
+      "value": { "type": "createRoom", "sequence": 1 }
+    },
+    {
+      "caseId": "create-room-counter-maximum",
+      "variant": "createRoom",
+      "value": { "type": "createRoom", "sequence": 2147483647 }
+    },
+    {
+      "caseId": "join-room-canonical-code",
+      "variant": "joinRoom",
+      "value": { "type": "joinRoom", "sequence": 2, "roomCode": "ABCDEFGH" }
+    },
+    {
+      "caseId": "resume-room-canonical-identifiers",
+      "variant": "resumeRoom",
+      "value": {
+        "type": "resumeRoom",
+        "sequence": 3,
+        "roomId": "0123456789abcdef0123456789abcdef",
+        "resumeToken": "fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210"
+      }
+    },
+    {
+      "caseId": "ready-independent-revisions",
+      "variant": "ready",
+      "value": {
+        "type": "ready",
+        "sequence": 4,
+        "roomId": "0123456789abcdef0123456789abcdef",
+        "roundId": 17,
+        "ready": true,
+        "settingsRevision": 2147483647
+      }
+    },
+    {
+      "caseId": "movement-required-null-direction",
+      "variant": "movement",
+      "value": {
+        "type": "movement",
+        "sequence": 5,
+        "roomId": "0123456789abcdef0123456789abcdef",
+        "roundId": 18,
+        "direction": null
+      }
+    },
+    {
+      "caseId": "movement-cardinal-direction",
+      "variant": "movement",
+      "value": {
+        "type": "movement",
+        "sequence": 6,
+        "roomId": "0123456789abcdef0123456789abcdef",
+        "roundId": 19,
+        "direction": "west"
+      }
+    },
+    {
+      "caseId": "manual-action-bomb",
+      "variant": "manualAction",
+      "value": {
+        "type": "manualAction",
+        "sequence": 7,
+        "roomId": "0123456789abcdef0123456789abcdef",
+        "roundId": 20,
+        "actionId": 31,
+        "action": "bomb"
+      }
+    },
+    {
+      "caseId": "manual-action-equipment-independent-counter",
+      "variant": "manualAction",
+      "value": {
+        "type": "manualAction",
+        "sequence": 8,
+        "roomId": "0123456789abcdef0123456789abcdef",
+        "roundId": 21,
+        "actionId": 2147483647,
+        "action": "equipment"
+      }
+    },
+    {
+      "caseId": "leave-room",
+      "variant": "leaveRoom",
+      "value": {
+        "type": "leaveRoom",
+        "sequence": 9,
+        "roomId": "0123456789abcdef0123456789abcdef",
+        "roundId": 22
+      }
+    },
+    {
+      "caseId": "rematch-not-ready",
+      "variant": "rematch",
+      "value": {
+        "type": "rematch",
+        "sequence": 10,
+        "roomId": "0123456789abcdef0123456789abcdef",
+        "roundId": 23,
+        "ready": false
+      }
+    },
+    {
+      "caseId": "update-settings-boundaries-and-unique-items",
+      "variant": "updateSettings",
+      "value": {
+        "type": "updateSettings",
+        "sequence": 11,
+        "roomId": "0123456789abcdef0123456789abcdef",
+        "roundId": 24,
+        "settingsRevision": 29,
+        "settings": {
+          "startingSpeedLevel": 4,
+          "turnAssistUnits": 64,
+          "winsToFinish": 9,
+          "bombFuseTicks": 300,
+          "enabledItems": ["kick", "oilBarrel", "teleporter"]
+        }
+      }
+    }
+  ],
+  "invalidCases": [
+    { "caseId": "authenticate-protocol-negative", "value": { "type": "authenticate", "protocolVersion": -1, "token": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" } },
+    { "caseId": "authenticate-protocol-overflow", "value": { "type": "authenticate", "protocolVersion": 65536, "token": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" } },
+    { "caseId": "authenticate-token-too-short", "value": { "type": "authenticate", "protocolVersion": 8, "token": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" } },
+    { "caseId": "authenticate-token-uppercase", "value": { "type": "authenticate", "protocolVersion": 8, "token": "Aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" } },
+    { "caseId": "create-room-counter-zero", "value": { "type": "createRoom", "sequence": 0 } },
+    { "caseId": "create-room-counter-overflow", "value": { "type": "createRoom", "sequence": 2147483648 } },
+    { "caseId": "join-room-code-too-short", "value": { "type": "joinRoom", "sequence": 1, "roomCode": "ABCDEFG" } },
+    { "caseId": "join-room-code-ambiguous-character", "value": { "type": "joinRoom", "sequence": 1, "roomCode": "ABCDEFIH" } },
+    { "caseId": "resume-room-id-too-long", "value": { "type": "resumeRoom", "sequence": 1, "roomId": "0123456789abcdef0123456789abcdef0", "resumeToken": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" } },
+    { "caseId": "resume-token-non-hex", "value": { "type": "resumeRoom", "sequence": 1, "roomId": "0123456789abcdef0123456789abcdef", "resumeToken": "zaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" } },
+    { "caseId": "movement-missing-required-direction", "value": { "type": "movement", "sequence": 1, "roomId": "0123456789abcdef0123456789abcdef", "roundId": 1 } },
+    { "caseId": "movement-unknown-direction", "value": { "type": "movement", "sequence": 1, "roomId": "0123456789abcdef0123456789abcdef", "roundId": 1, "direction": "up" } },
+    { "caseId": "unknown-manual-action-place-bomb-name", "value": { "type": "manualAction", "sequence": 1, "roomId": "0123456789abcdef0123456789abcdef", "roundId": 1, "actionId": 1, "action": "placeBomb" } },
+    { "caseId": "retired-place-bomb-command", "value": { "type": "placeBomb", "sequence": 1, "roomId": "0123456789abcdef0123456789abcdef", "roundId": 1, "actionId": 1 } },
+    { "caseId": "unknown-use-equipment-command-name", "value": { "type": "useEquipment", "sequence": 1, "roomId": "0123456789abcdef0123456789abcdef", "roundId": 1 } },
+    { "caseId": "ready-wrong-boolean-type", "value": { "type": "ready", "sequence": 1, "roomId": "0123456789abcdef0123456789abcdef", "roundId": 1, "ready": 1, "settingsRevision": 1 } },
+    { "caseId": "settings-speed-below-minimum", "value": { "type": "updateSettings", "sequence": 1, "roomId": "0123456789abcdef0123456789abcdef", "roundId": 1, "settingsRevision": 1, "settings": { "startingSpeedLevel": -1, "turnAssistUnits": 256, "winsToFinish": 3, "bombFuseTicks": 180, "enabledItems": [] } } },
+    { "caseId": "settings-speed-above-maximum", "value": { "type": "updateSettings", "sequence": 1, "roomId": "0123456789abcdef0123456789abcdef", "roundId": 1, "settingsRevision": 1, "settings": { "startingSpeedLevel": 5, "turnAssistUnits": 256, "winsToFinish": 3, "bombFuseTicks": 180, "enabledItems": [] } } },
+    { "caseId": "settings-turn-assist-not-enumerated", "value": { "type": "updateSettings", "sequence": 1, "roomId": "0123456789abcdef0123456789abcdef", "roundId": 1, "settingsRevision": 1, "settings": { "startingSpeedLevel": 0, "turnAssistUnits": 65, "winsToFinish": 3, "bombFuseTicks": 180, "enabledItems": [] } } },
+    { "caseId": "settings-wins-below-minimum", "value": { "type": "updateSettings", "sequence": 1, "roomId": "0123456789abcdef0123456789abcdef", "roundId": 1, "settingsRevision": 1, "settings": { "startingSpeedLevel": 0, "turnAssistUnits": 256, "winsToFinish": 0, "bombFuseTicks": 180, "enabledItems": [] } } },
+    { "caseId": "settings-wins-above-maximum", "value": { "type": "updateSettings", "sequence": 1, "roomId": "0123456789abcdef0123456789abcdef", "roundId": 1, "settingsRevision": 1, "settings": { "startingSpeedLevel": 0, "turnAssistUnits": 256, "winsToFinish": 10, "bombFuseTicks": 180, "enabledItems": [] } } },
+    { "caseId": "settings-fuse-below-minimum", "value": { "type": "updateSettings", "sequence": 1, "roomId": "0123456789abcdef0123456789abcdef", "roundId": 1, "settingsRevision": 1, "settings": { "startingSpeedLevel": 0, "turnAssistUnits": 256, "winsToFinish": 3, "bombFuseTicks": 59, "enabledItems": [] } } },
+    { "caseId": "settings-fuse-non-step", "value": { "type": "updateSettings", "sequence": 1, "roomId": "0123456789abcdef0123456789abcdef", "roundId": 1, "settingsRevision": 1, "settings": { "startingSpeedLevel": 0, "turnAssistUnits": 256, "winsToFinish": 3, "bombFuseTicks": 61, "enabledItems": [] } } },
+    { "caseId": "settings-fuse-above-maximum", "value": { "type": "updateSettings", "sequence": 1, "roomId": "0123456789abcdef0123456789abcdef", "roundId": 1, "settingsRevision": 1, "settings": { "startingSpeedLevel": 0, "turnAssistUnits": 256, "winsToFinish": 3, "bombFuseTicks": 301, "enabledItems": [] } } },
+    { "caseId": "settings-duplicate-enabled-item", "value": { "type": "updateSettings", "sequence": 1, "roomId": "0123456789abcdef0123456789abcdef", "roundId": 1, "settingsRevision": 1, "settings": { "startingSpeedLevel": 0, "turnAssistUnits": 256, "winsToFinish": 3, "bombFuseTicks": 180, "enabledItems": ["kick", "kick"] } } },
+    { "caseId": "settings-unknown-enabled-item", "value": { "type": "updateSettings", "sequence": 1, "roomId": "0123456789abcdef0123456789abcdef", "roundId": 1, "settingsRevision": 1, "settings": { "startingSpeedLevel": 0, "turnAssistUnits": 256, "winsToFinish": 3, "bombFuseTicks": 180, "enabledItems": ["extraLife"] } } },
+    { "caseId": "top-level-unknown-field", "value": { "type": "leaveRoom", "sequence": 1, "roomId": "0123456789abcdef0123456789abcdef", "roundId": 1, "debug": true } }
+  ]
+}

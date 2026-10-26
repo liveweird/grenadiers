@@ -23,12 +23,8 @@ reason. The private cooldown marker and forced-movement report do not appear in 
 
 ## Compatibility and verification
 
-Version 0.3.46 adds Bracelet to the 21-item current catalog. Its capability bit is
-`4`; `ALL` is `3,145,727`. Generator v2 appends weight 15 after Punch, making the complete pool 425
-and the Bracelet interval `[410,425)`. A Bracelet-only pool is 115. All 2,097,152 catalog subsets
-are validated, while all earlier masks preserve their v0.3.45 seeded output. Archived gameplay v9
+Bracelet uses equipment capability bit `4` and generator-v2 weight 15 after Punch. Archived gameplay v9
 and earlier reject Bracelet settings, equipment, pickups, cooldown and forced-movement history.
-This document describes reviewed source integrated with the published v0.3.45 parent. Full mask
-checks, scoped native same-image acceptance and security checks are complete for source
-`5e55bb46bb71b1b8bf9db8dab0a6403eb7a1e240`; [v0.3.46 is published](https://github.com/liveweird/grenadiers/releases/tag/v0.3.46) and promoted locally. See
-[English desktop](../screenshots/bracelet-desktop.png) and [Polish 320px](../screenshots/bracelet-mobile-pl.png).
+See [English desktop](../screenshots/bracelet-desktop.png) and
+[Polish 320px](../screenshots/bracelet-mobile-pl.png). The release record is in
+[item acceptance history](../history/game-acceptance.md#bracelet-v0346).

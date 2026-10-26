@@ -2,6 +2,10 @@
 
 Status: accepted; staged in v0.3.1–v0.3.8 and activated with gameplay v4 in v0.3.9.
 
+The original production-allocation policy below is superseded by
+[ADR 0025](0025-production-replay-recording.md). Reconnect ordering and replay formats remain
+unchanged; explicit test recordings retain the original bounded evidence.
+
 ## Decision
 
 Keep ordinary session credentials single-connection. A separate stable random seat capability

@@ -37,7 +37,7 @@ impl RecordingRuntime {
     fn new_with_profile(profile: RoomProfile, seeds: impl IntoIterator<Item = [u8; 32]>) -> Self {
         let seeds = Arc::new(Mutex::new(seeds.into_iter().collect::<VecDeque<_>>()));
         let source = Arc::clone(&seeds);
-        let mut runtime = MatchRuntime::new(
+        let mut runtime = MatchRuntime::new_recording(
             identity_for_profile(profile),
             RoundSeedSource::with_entropy(move |bytes| {
                 let seed = source.lock().map_err(|_| ())?.pop_front().ok_or(())?;

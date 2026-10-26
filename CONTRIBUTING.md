@@ -17,6 +17,8 @@ implemented stack.
   immediate `e2e/*-tests` directory, including nested source files. It skips directories named
   `node_modules`, `dist`, `coverage`, `target`, `playwright-report`, or `test-results`, plus
   generated `*schema.ts` and `*realtime.ts` files.
+- Use `--color-*` semantic properties in `web/src/App.css` for recurring UI roles; retain
+  distinct one-off shades when their meanings differ.
 - Keep `core/` independent of networking, async runtimes, storage, and UI libraries.
 - Fix lint warnings; do not add baselines or lower coverage floors to accommodate new code.
   Any deliberate rule exception needs a local explanation and review.
@@ -48,6 +50,11 @@ Run the relevant `scripts/gates.sh` targets before submitting. The server gate t
 and release profiles; required state changes must execute outside assertions. Use ephemeral listeners and
 independent test state; never rely on test order or shared developer database contents.
 Update the canonical topic document when behavior or operational requirements change.
+
+Keep work status and priorities only in `BACKLOG.md`. Feature guides describe current behavior;
+move dated acceptance results, source/image identities, seals and screenshot fingerprints into
+`docs/history/` or release records, and link to them once. An artwork-only update should not
+require refreshing narrative hashes in feature guides; retain automated asset integrity checks.
 
 Use Conventional Commits, following Flow's convention: `feat:`, `fix:`, `docs:`, `chore:`,
 `test:`, or `ci:`, optionally scoped (`fix(server): reject invalid input`). No local Git

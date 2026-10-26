@@ -22,22 +22,21 @@ The HUD shows the stored weapon and armed Remote state independently. A placed R
 antenna and no burning-fuse spark; the bomb-key hint changes to the localized detonation action
 while the owner has an armed bomb.
 
-## Native acceptance
+<a id="native-acceptance"></a>
 
-Fresh same-image acceptance passes all 49 Compose and 49 Kubernetes cases with zero retries.
+## Verification and examples
+
 The dedicated paired-browser scenario proves the planted Remote remains live for 183 ticks,
 the next bomb action activates that exact ID without placing another bomb, and the later manual
-placement is a fresh Standard bomb. The reviewed Compose [English desktop](../screenshots/remote-bomb-desktop.png)
+placement is a fresh Standard bomb. The [English desktop](../screenshots/remote-bomb-desktop.png)
 and [Polish 320px](../screenshots/remote-bomb-polish-320.png) captures show the planted Remote at
 (3,1), consumed charge, owner availability zero, both players alive and no flames. The English
 Gear label fits normally; the Polish view uses vertical scrolling and shows the unfocused-arena
-prompt. No unintended overlap was observed. Kubernetes screenshots were not visually reviewed.
-The raw evidence audit is clear and its final manifest is sealed. Native evidence and documentation review are clear; publication requires exact-head candidate and post-merge CI.
+prompt.
+The release record is in [item acceptance history](../history/game-acceptance.md#remote-bomb-v0336).
 
 ## Compatibility
 
-Remote Bomb uses catalog bit 5 and generator weight 15 after Power Bomb. Its initial release
-supported all 4096 subsets and preserved every earlier 2048-mask generator path; those paths
-remain stable as later items join the [current catalog](settings.md). Rules version 5, generator
+Remote Bomb uses catalog bit 5 and generator weight 15 after Power Bomb. Rules version 5, generator
 version 2 and journal format 2 remain unchanged. Current deployments use [gameplay-v11](protocol-v11.md)
 and require the paired server/web assets plus a browser reload.

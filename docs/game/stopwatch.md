@@ -27,25 +27,15 @@ history even when a bomb is no longer paused.
 
 ## Compatibility
 
-Version 0.3.40 adds Stopwatch as the fifteenth item and final generator weight 15. The all-items
-pool grows from 320 to 335 entries. Every earlier 16,384-mask path is unchanged, while gameplay v9
-supports all 32,768 subsets. Rules version 5, generator version 2 and journal format 2 are unchanged.
+Stopwatch uses generator weight 15. Rules version 5, generator version 2 and journal format 2 are
+unchanged.
 
-## Native acceptance checkpoint — 2026-10-21 20:56:41 UTC
+<a id="native-acceptance-checkpoint--2026-10-21-205641-utc"></a>
 
-Corrected source `fa25467b11038a9073d52f35e44ac6cee5380bcc`, tree
-`07ac34a87a368d2c9425fcbc04020295ef9fe4e3`, and image
-`sha256:ec8604af4317d188d7b00ab7cfa27115114430e0a11fb9821856617ad9409906`
-passed complete 32,768-mask debug, release and coverage runs and fresh 52 Compose plus 52
-Kubernetes cases. All 46 groups passed with zero retries and zero carried passes. The earlier
-`bd9d064` attempt remains failed history: its fresh bomb was planted 34 ticks into the second
-Stopwatch window, so the test oracle incorrectly expected 359 ticks instead of the correct 325;
-Kubernetes never started. The correction derives remaining pause independently as
-`deadline - placedAt - 1` and changes no product behavior, timeout, sample budget or retry policy.
+## Examples
 
-Root reviewed two fresh Compose pre-collection captures: [English desktop](../screenshots/stopwatch-desktop.png)
+Two pre-collection captures, [English desktop](../screenshots/stopwatch-desktop.png)
 and [Polish 320px reduced motion](../screenshots/stopwatch-mobile-pl.png). They show exposed clock
 pickups and readable localized HUD/settings; they do not prove action freeze or bomb-pause behavior.
-Those facts are established by the native assertions. Independent raw audit is clear and 2,434 payloads are durably sealed; hosted CI, PR/merge, publication, tag verification and promotion remained pending at this dated
-checkpoint. Published/local v0.3.39 image `9a4dc108` remained the release baseline; see the
-[release notes](https://github.com/liveweird/grenadiers/releases) for current status.
+Those facts are established by the native assertions. The release record is in
+[item acceptance history](../history/game-acceptance.md#stopwatch-v0340).

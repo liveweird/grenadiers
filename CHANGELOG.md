@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## 0.3.74 — 2026-10-26
+
+### Added
+
+- Validate shared Rust-produced server frames across retained protocols and the browser, including recipient privacy and metadata mutation controls.
+
 ## 0.3.68 — 2026-10-26
 
 ### Changed

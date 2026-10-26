@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## 0.3.79 — 2026-10-26
+
+### Changed
+
+- Import the used Mantine stylesheet dependency closure in canonical order, preserve rendered UI, and ratchet the CSS gzip budget after measured savings.
+- Record real React publication measurements and the decision to retain the current subscription model.
+
 ## 0.3.78 — 2026-10-26
 
 ### Changed

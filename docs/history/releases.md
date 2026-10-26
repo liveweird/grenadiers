@@ -4,6 +4,29 @@ This archive preserves the older release records originally maintained in
 [`docs/releases.md`](../releases.md). Records remain in their original order; the current
 release procedure and current release record stay in the [release guide](../releases.md).
 
+## v0.3.78 — 2026-10-26
+
+[v0.3.78](https://github.com/liveweird/grenadiers/releases/tag/v0.3.78) shares equivalent Rust
+frame-bound builders and open-border arenas plus timed-effect browser helpers. Independent review
+confirms identical helper contents, per-version largest states, test names/assertions, seeds,
+routes and screenshots. V8–v11 encoded frame sizes remain exact; the browser helper binds each
+assertion to the bomb planted by that native key action.
+
+Full source-bound Rust acceptance at `936f4e627fa3ec101f759b02f717b745d0d550f2` passes in
+449.469s, including every 4,194,304 mask in debug, release and official coverage with
+zero retries. Coverage is 18,049/19,738 lines (91.4429%).
+Focused debug/release, Clippy, repository and E2E static checks pass. Application web acceptance
+reuses the identical v0.3.77 input; existing Linux acceptance covers unchanged production code.
+
+Accepted image source is `f4fd65220cf4fbdc7322fe54bca36af2c5abd288`, whose Docker inputs match
+the tested source; image is `sha256:5281acc1e3a9b2f7959e2952edf57ee8bbee2eaf645fff81648ae3cedf175b5d`.
+Trivy 0.74.0 reports zero fixable HIGH/CRITICAL findings. Eight Compose cases pass in 36.1s and
+eight Kubernetes cases in 36.5s, with effective memory/PID/ephemeral-storage limits, security and
+probes verified. Golden Flame, Short Fuse and Short Flame cases also pass through the new helpers
+and exact read-only fixture mounts. Temporary resources are removed. Localhost:8085 has verified
+health/readiness, CSP/cache and the exact accepted web bytes. Control is
+`.local-checkpoints/runtime/compose-v0.3.78.yaml`; `rollback-v0.3.77.yaml` retains the prior image.
+
 ## v0.3.77 — 2026-10-26
 
 [v0.3.77](https://github.com/liveweird/grenadiers/releases/tag/v0.3.77) enables exact optional

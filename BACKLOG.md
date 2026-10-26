@@ -13,7 +13,7 @@ repeated approval for routine implementation choices. Entries are not delivery-d
 ## Current delivery — Claude review
 
 - [next] **ENG-REVIEW — finish the remaining agreed review work before CPU mode.** The user confirmed
-  this priority on 2026-10-25. The published source baseline is v0.3.78; detailed delivered
+  this priority on 2026-10-25. The published source baseline is v0.3.79; detailed delivered
   evidence and finding dispositions belong in the [quality-review record](docs/quality-review.md),
   not this backlog. Preserve privacy, exhaustive masks, coverage floors and local-first
   verification. Current release lanes and remaining accepted scope are:
@@ -27,8 +27,6 @@ repeated approval for routine implementation choices. Entries are not delivery-d
     OS refresh policy and web exact-optionals are released.
   - **REV-FAST:** measure a structured fast-feedback suite and fault detection while retaining
     exhaustive acceptance; sampling is not approved as a replacement.
-  - **REV-PERF:** measure CSS/import opportunities and React commits at the 20 Hz publication
-    rate; change subscriptions only if the evidence justifies it.
   - **REV-DIAGNOSTICS:** record the renderer/terrain manual-suite and diagnostic wiring
     disposition as part of the protocol coverage inventory.
 

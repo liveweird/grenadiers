@@ -4,6 +4,37 @@ This archive preserves the older release records originally maintained in
 [`docs/releases.md`](../releases.md). Records remain in their original order; the current
 release procedure and current release record stay in the [release guide](../releases.md).
 
+## v0.3.67 — 2026-10-26
+
+[v0.3.67](https://github.com/liveweird/grenadiers/releases/tag/v0.3.67) adds named admission
+projection and personal-metadata inputs for protocol v8–v11. Legacy Rust wrappers remain
+available, and the live caller uses the named input without changing wire validation, ownership,
+ordering, privacy, schemas or gameplay behavior. The existing v0.3.65 web build is reused.
+
+Fresh source-bound Rust acceptance at `46a1e3320e2ecf5e8c6291884d1304d0dfaa6d22` completes every
+4,194,304 mask in debug, release and official coverage in 432.208s with zero retries. The ordinary
+profiles each pass 940 core / 307 server tests plus two doctests. Coverage is 17,809/18,909 lines
+(94.1827%) at the 90% floor. Integrated source `43dcd78050d5a306b8822b62a17728cb56c8c926`
+has identical core, server and API inputs. Full v0.3.65 web acceptance is reused: 6,812 tests / 91
+files with 91.10/89.47/90.12/93.47% coverage. Dependency inputs and accepted audits are unchanged.
+[Distinct Linux debug/release units](https://github.com/liveweird/grenadiers/actions/runs/40256918030)
+pass on the final candidate.
+
+Accepted image source is `43dcd78050d5a306b8822b62a17728cb56c8c926`; its image is
+`sha256:0845bc797cc6082e9c331f9d0b0c871695c13e206cdcc8ddb1b9bf525f9c7f84`.
+The pinned image scan reports zero fixable HIGH/CRITICAL findings. Eight fresh native Compose
+cases plus Invisibility Cloak and Oil scenarios pass. Eight Kubernetes cases pass in 36.6s,
+including exact-image, runtime-security, readiness, probe and resource checks; the temporary
+namespace is absent afterward. An initial attempt passed a bad helper argument and stopped before
+any test ran; the corrected acceptance above passed without product retries.
+
+Localhost:8085 serves the accepted image. Exact image, runtime security, health/readiness,
+CSP/cache and served HTML/JavaScript/PNG equality with the accepted unchanged web artifacts pass,
+plus one fresh native authentication case in 364ms. Release-documentation changes preserve Docker
+and application inputs. Control is `.local-checkpoints/runtime/compose-v0.3.67.yaml`;
+`rollback-v0.3.66.yaml` retains the prior image. Temporary acceptance resources are removed.
+There is no migration.
+
 ## v0.3.66 — 2026-10-26
 
 [v0.3.66](https://github.com/liveweird/grenadiers/releases/tag/v0.3.66) derives reserved item

@@ -79,36 +79,37 @@ interrupted state but cannot preserve process-local matches or credentials.
 Keep the previous immutable image reference for rollback; database migration compatibility
 must be designed when durable application data is introduced.
 
-## v0.3.67 — 2026-10-26
+## v0.3.68 — 2026-10-26
 
-[v0.3.67](https://github.com/liveweird/grenadiers/releases/tag/v0.3.67) adds named admission
-projection and personal-metadata inputs for protocol v8–v11. Legacy Rust wrappers remain
-available, and the live caller uses the named input without changing wire validation, ownership,
-ordering, privacy, schemas or gameplay behavior. The existing v0.3.65 web build is reused.
+[v0.3.68](https://github.com/liveweird/grenadiers/releases/tag/v0.3.68) makes replay recording
+explicitly opt-in for test fixtures. Production rooms reserve no journal vector and skip replay-only
+capture work; live snapshots, replay compatibility, reconnect and exhaustive assertions remain.
+The allocation observation is 3,840,000 fewer reserved vector bytes per default room, not an RSS
+or throughput claim; see [the measurements](history/replay-allocation.md).
 
-Fresh source-bound Rust acceptance at `46a1e3320e2ecf5e8c6291884d1304d0dfaa6d22` completes every
-4,194,304 mask in debug, release and official coverage in 432.208s with zero retries. The ordinary
-profiles each pass 940 core / 307 server tests plus two doctests. Coverage is 17,809/18,909 lines
-(94.1827%) at the 90% floor. Integrated source `43dcd78050d5a306b8822b62a17728cb56c8c926`
-has identical core, server and API inputs. Full v0.3.65 web acceptance is reused: 6,812 tests / 91
-files with 91.10/89.47/90.12/93.47% coverage. Dependency inputs and accepted audits are unchanged.
-[Distinct Linux debug/release units](https://github.com/liveweird/grenadiers/actions/runs/40256918030)
-pass on the final candidate.
+Independent review is clear. Full Rust acceptance at
+`6c01cc4c97324ddef87e588a1bdbe8fb1deea135` passes in 431.697s: every 4,194,304 mask in debug,
+release and official coverage, zero retries, 940 core / 309 ordinary server tests and two doctests
+per profile. Coverage is 17,833/18,933 lines (94.1900%), above the 90% floor. Integrated image
+source `6f443a2056b91b713b5fd45d3e2e8de9a7e40056` preserves those core/server/API inputs.
+[Distinct Linux debug/release units](https://github.com/liveweird/grenadiers/actions/runs/40369574894)
+pass. Unchanged web, dependencies and audits reuse v0.3.65/v0.3.67 acceptance.
 
-Accepted image source is `43dcd78050d5a306b8822b62a17728cb56c8c926`; its image is
-`sha256:0845bc797cc6082e9c331f9d0b0c871695c13e206cdcc8ddb1b9bf525f9c7f84`.
-The pinned image scan reports zero fixable HIGH/CRITICAL findings. Eight fresh native Compose
-cases plus Invisibility Cloak and Oil scenarios pass. Eight Kubernetes cases pass in 36.6s,
-including exact-image, runtime-security, readiness, probe and resource checks; the temporary
-namespace is absent afterward. An initial attempt passed a bad helper argument and stopped before
-any test ran; the corrected acceptance above passed without product retries.
+The runtime OS layer was refreshed after a current scan found fixable OpenSSL findings in the
+older candidate. The replacement image is
+`sha256:0bb13e287162a7ba79937dba4f95dd161bb343248ea4e0cbf026f9c74c2d5fc3`;
+Trivy 0.74.0 reports zero fixable HIGH/CRITICAL findings. Eight fresh native Compose cases pass
+in 35.3s on this exact replacement. Eight fresh Kubernetes cases pass in 36.9s, including exact-image, security, readiness, probe
+and resource checks; the temporary namespace is removed.
 
-Localhost:8085 serves the accepted image. Exact image, runtime security, health/readiness,
-CSP/cache and served HTML/JavaScript/PNG equality with the accepted unchanged web artifacts pass,
-plus one fresh native authentication case in 364ms. Release-documentation changes preserve Docker
-and application inputs. Control is `.local-checkpoints/runtime/compose-v0.3.67.yaml`;
-`rollback-v0.3.66.yaml` retains the prior image. Temporary acceptance resources are removed.
-There is no migration.
+Localhost:8085 serves the replacement image. Image identity/security, health/readiness, CSP/cache
+and served HTML/JavaScript/CSS/atlas bytes match the accepted web artifacts. Control is
+`.local-checkpoints/runtime/compose-v0.3.68.yaml`; `rollback-v0.3.67.yaml` retains the previous
+release. There is no migration or public replay export. Source tags and GitHub prerelease notes
+are the distribution; no production registry is configured.
+
+<a id="v0367--2026-10-26"></a>
+The [v0.3.67 record](history/releases.md#v0367--2026-10-26) is preserved in release history.
 
 <a id="v0366--2026-10-26"></a>
 The [v0.3.66 record](history/releases.md#v0366--2026-10-26) is preserved in release history.

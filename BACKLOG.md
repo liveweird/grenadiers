@@ -17,30 +17,39 @@ repeated approval for routine implementation choices. Entries are not delivery-d
   evidence and finding dispositions belong in the [quality-review record](docs/quality-review.md),
   not this backlog. Preserve privacy, exhaustive masks, coverage floors and local-first
   verification. Current release lanes and remaining accepted scope are:
-  - **REV-REPLAY:** decide and test production journal allocation when no consumer exists. Use
-    explicit recording fixtures and before/after measurements; durable replay export is not a
-    prerequisite.
-  - **REV-RUNTIME:** measure registry creation/contention and non-reading upgraded WebSockets,
-    then record a disposition. The fixed incomplete-header shutdown defect is historical evidence.
+  - **REV-REPLAY (v0.3.68):** reviewed implementation, before/after measurements, full Rust
+    acceptance and exact-image runtime checks pass on the candidate. Integrate the published
+    baseline, obtain distinct Linux coverage and publish; durable replay export is separate.
+  - **REV-RUNTIME (v0.3.71):** registry/entropy measurements and real non-reading socket regressions
+    are committed and reviewed; full Rust acceptance passes. Finish Linux socket verification,
+    release integration and publication. Measurements currently justify retaining the registry lock.
   - **REV-FIXTURES:** consolidate genuinely equivalent Rust worlds/frames, E2E
     selectors/collection and Compose seed/CLI scaffolding without changing identities, assertions,
-    version-specific rejection, seeds or independent sessions.
+    version-specific rejection, seeds or independent sessions. The shared Compose candidate
+    (v0.3.69) is reviewed and passes rendered-model parity plus selected native scenarios; finish
+    acceptance/publication. Narrow frame-bound, open-arena and timed-effect helper extractions remain.
   - **REV-PROTOCOL:** audit retained consumers and unique tests under ADR 0021, reduce selected
     adapters, and complete client/archived/cross-language contract coverage. Preserve archived
     schemas/conformance, replay identity, item bits, activation subsets, generation order and
-    privacy.
-  - **REV-I18N:** consolidate typed locale access and the raw interpolation path without changing
-    visible text or plural behavior.
+    privacy. Shared expanded client/server corpus candidates are committed and independently
+    reviewed; complete integrated acceptance, retained-consumer inventory and publication.
+  - **REV-I18N (v0.3.70):** typed locale access/interpolation is committed and reviewed; full web
+    acceptance passes. Finish integrated image/runtime acceptance and publication.
   - **REV-TOOLCHAIN:** define the OS security-refresh policy; add selected pinned shell/workflow
     rules and verified tool/dependency caches. The v0.3.64 Docker cache/OCI work alone does not
-    close this scope.
+    close this scope. A reviewed tooling/cache/terrain/policy candidate is committed; finish
+    final integration and acceptance. The separate web exact-optional candidate passes focused
+    tests and independent review; complete its release checks before publication.
   - **REV-DEPLOY:** add Compose PID/memory limits and Kubernetes ephemeral-storage/security-context
     regression guards, then run actual runtime acceptance. Public ingress and NetworkPolicy wait
-    for a real hosting/network model.
+    for a real hosting/network model. Resource/security guards are committed and reviewed with
+    focused tests passing; actual constrained-runtime acceptance and publication remain.
   - **REV-FAST:** measure a structured fast-feedback suite and fault detection while retaining
     exhaustive acceptance; sampling is not approved as a replacement.
   - **REV-PARSER:** assess parser mutation/property tests and simultaneous competing-resume
     invariants at concrete boundaries, crediting existing synchronized concurrency coverage.
+    Expanded parser and competing-resume regressions are committed and reviewed; finish
+    integrated acceptance and publish them.
   - **REV-PERF:** measure CSS/import opportunities and React commits at the 20 Hz publication
     rate; change subscriptions only if the evidence justifies it.
   - **REV-DIAGNOSTICS:** record the renderer/terrain manual-suite and diagnostic wiring

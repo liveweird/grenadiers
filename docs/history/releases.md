@@ -12,7 +12,7 @@ Generation order, activation subsets, replay values, public schemas and gameplay
 unchanged. The existing v0.3.65 web build is reused.
 
 Independent review is clear. Fresh source-bound Rust acceptance at
-`c244193ae048f3dea2864bd120511be60981bb09` completes every 4,194,304 mask in debug, release and
+`ba7d6eea4728f4feae6c60ddb67c45451c39b8c0` completes every 4,194,304 mask in debug, release and
 official coverage in 429.862s with zero retries. The ordinary profiles each pass 934 core / 307
 server tests plus two doctests. Coverage is 17,615/18,793 lines (93.7317%) at the 90% floor.
 Rustfmt, Clippy, repository checks and
@@ -20,7 +20,8 @@ Rustfmt, Clippy, repository checks and
 Full v0.3.65 web acceptance is reused: 6,812 tests / 91 files with
 91.10/89.47/90.12/93.47% coverage.
 
-Accepted image source is `c244193ae048f3dea2864bd120511be60981bb09`; its image is
+Integrated image source `c244193ae048f3dea2864bd120511be60981bb09` preserves those tested
+core, server and API inputs. Its accepted image is
 `sha256:d4906dd81f0c86803e8d7a96bd890723ec180718d9cc015c286d7d94ebfc941d`.
 Eight fresh native Compose cases and eight Kubernetes cases pass in 36.1s and 36.9s,
 respectively, including exact-image, runtime-security, origin, readiness/probe/resource and

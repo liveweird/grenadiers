@@ -212,7 +212,9 @@ This index describes the currently configured suites, not whether a particular c
 commit, or release has passed them. Record current execution evidence in
 [verification](verification.md) and release status in [releases](releases.md); do not carry a
 historical “pending” or “passed” label forward without a new run. The former narrative is retained
-unchanged as a [historical testing record](history/testing.md).
+unchanged as a [historical testing record](history/testing.md). Its deleted per-feature Compose
+filenames and commands describe the v0.3.63-era procedure; use the current deployment guide and
+shared override for present-day runs.
 
 The package scripts and setup procedures in the [E2E guide](../e2e/README.md) and
 [deployment guide](deployment.md) are authoritative. The linked scenario documents define the
@@ -274,9 +276,9 @@ assertions and evidence for each suite.
 | <a id="invisible-bombs-production-seed-scenario"></a>`npm --prefix e2e run test:invisible-bombs` | [Invisible Bombs fixture](deployment.md#reproduce-opt-in-invisible-bombs-privacy) | Recipient-local live-bomb/event privacy, truthful capacity/flames, reconnect without replay, expiry, and reveal. |
 | <a id="teleporter-production-seed-scenario"></a>`npm --prefix e2e run test:teleporter` | [Teleporter fixture](deployment.md#reproduce-opt-in-teleporter-swaps) | Safe atomic swap, shared marker, newer reconnect admission, and unsafe consumption without movement. |
 | <a id="wall-pass-production-seed-scenario"></a>`npm --prefix e2e run test:wall-pass` | [Wall Pass fixture](deployment.md#reproduce-opt-in-wall-pass-movement) | Intact-block traversal/rendering, rejected planting without allocation, reconnect inside, legal exit/placement, and localized captures. |
-| <a id="kick-source-scenario"></a>`npm --prefix e2e run test:kick` | [Kick Compose fixture](../docker-compose.kick.yaml) and [scenario](../e2e/scenarios/kick.md) | Same bomb identity/fuse across native kick movement and the retained pre-input timeline. |
-| <a id="punch-source-scenario"></a>`npm --prefix e2e run test:punch` | [Punch Compose fixture](../docker-compose.punch.yaml) and [scenario](../e2e/scenarios/punch.md) | Remapped Equipment input, wrapped bomb movement, action-ID successor, public parity, and natural detonation. |
-| <a id="bracelet-source-scenario"></a>`npm --prefix e2e run test:bracelet` | [Bracelet Compose fixture](../docker-compose.bracelet.yaml) and [scenario](../e2e/scenarios/bracelet.md) | One-tile stationary-rival shove with no victim command, equipment action, public event, or private marker. |
+| <a id="kick-source-scenario"></a>`npm --prefix e2e run test:kick` | [Shared Compose fixture](../e2e/compose/fixture.yaml), exact [`arena-v2-kick.seed`](../core/tests/fixtures/arena-v2-kick.seed), and [scenario](../e2e/scenarios/kick.md) | Same bomb identity/fuse across native kick movement and the retained pre-input timeline. |
+| <a id="punch-source-scenario"></a>`npm --prefix e2e run test:punch` | [Shared Compose fixture](../e2e/compose/fixture.yaml), exact [`arena-v2-punch.seed`](../core/tests/fixtures/arena-v2-punch.seed), and [scenario](../e2e/scenarios/punch.md) | Remapped Equipment input, wrapped bomb movement, action-ID successor, public parity, and natural detonation. |
+| <a id="bracelet-source-scenario"></a>`npm --prefix e2e run test:bracelet` | [Shared Compose fixture](../e2e/compose/fixture.yaml), exact [`arena-v2-bracelet.seed`](../core/tests/fixtures/arena-v2-bracelet.seed), and [scenario](../e2e/scenarios/bracelet.md) | One-tile stationary-rival shove with no victim command, equipment action, public event, or private marker. |
 | <a id="oil-barrel-production-seed-scenario"></a>`npm --prefix e2e run test:oil-barrel` | [Oil Barrel fixture](deployment.md#reproduce-opt-in-oil-barrel-reveal-and-persistent-fire) | Pending privacy, unlit collision, legal ignition/escape, finite and persistent fire, rendering, and reconnect retention. |
 | `npm --prefix e2e run test:renderer-diagnostics` | [Renderer lifecycle scenario](../e2e/scenarios/renderer-diagnostics.md) | Six real Pixi lifecycle cells, cross-origin blocking, accessibility/fit, capture stability, and bounded cleanup diagnostics. |
 | `npm --prefix e2e run test:terrain-pixels` | [Terrain pixel scenario](../e2e/scenarios/terrain-pixels.md) | Exact cached/uncached Pixi terrain parity across DPRs, repaint/reset, and context restoration. |

@@ -17,6 +17,8 @@ implemented stack.
   immediate `e2e/*-tests` directory, including nested source files. It skips directories named
   `node_modules`, `dist`, `coverage`, `target`, `playwright-report`, or `test-results`, plus
   generated `*schema.ts` and `*realtime.ts` files.
+- Use `--color-*` semantic properties in `web/src/App.css` for recurring UI roles; retain
+  distinct one-off shades when their meanings differ.
 - Keep `core/` independent of networking, async runtimes, storage, and UI libraries.
 - Fix lint warnings; do not add baselines or lower coverage floors to accommodate new code.
   Any deliberate rule exception needs a local explanation and review.

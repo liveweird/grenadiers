@@ -13,43 +13,37 @@ repeated approval for routine implementation choices. Entries are not delivery-d
 ## Current delivery — Claude review
 
 - [next] **ENG-REVIEW — finish the remaining agreed review work before CPU mode.** The user confirmed
-  this priority on 2026-10-25. The published source baseline is v0.3.64; detailed delivered
+  this priority on 2026-10-25. The published source baseline is v0.3.70; detailed delivered
   evidence and finding dispositions belong in the [quality-review record](docs/quality-review.md),
   not this backlog. Preserve privacy, exhaustive masks, coverage floors and local-first
   verification. Current release lanes and remaining accepted scope are:
-  - **REV-CSS (v0.3.65):** integrate, image-test, review and publish the semantic-color change.
-    The 252-declaration replacement and full web gate are recorded; release acceptance remains.
-  - **REV-ITEM-SPEC (v0.3.66):** complete exact-image integration and publication of the
-    canonical 22-item specification. Independent review and the full 4,194,304-mask runs in all
-    three required profiles passed; PR #174 remains open at this documentation cut.
-  - **REV-ADMISSION (v0.3.67):** complete image integration, runtime acceptance and publication for
-    named admission inputs while preserving old wrappers, validation, privacy and ordering.
-    Independent review and the source-bound Rust gate passed on the v0.3.66-based candidate;
-    publication remains outstanding.
-  - **REV-REPLAY:** decide and test production journal allocation when no consumer exists. Use
-    explicit recording fixtures and before/after measurements; durable replay export is not a
-    prerequisite.
-  - **REV-RUNTIME:** measure registry creation/contention and non-reading upgraded WebSockets,
-    then record a disposition. The fixed incomplete-header shutdown defect is historical evidence.
+  - **REV-RUNTIME (v0.3.71):** registry/entropy measurements and real non-reading socket regressions
+    are committed and reviewed; full Rust acceptance passes. Finish Linux socket verification,
+    release integration and publication. Measurements currently justify retaining the registry lock.
   - **REV-FIXTURES:** consolidate genuinely equivalent Rust worlds/frames, E2E
     selectors/collection and Compose seed/CLI scaffolding without changing identities, assertions,
-    version-specific rejection, seeds or independent sessions.
+    version-specific rejection, seeds or independent sessions. The shared Compose extraction is released. Narrow frame-bound and open-arena extractions are
+    committed and independently reviewed; integrated acceptance and the timed-effect extraction remain.
   - **REV-PROTOCOL:** audit retained consumers and unique tests under ADR 0021, reduce selected
     adapters, and complete client/archived/cross-language contract coverage. Preserve archived
     schemas/conformance, replay identity, item bits, activation subsets, generation order and
-    privacy.
-  - **REV-I18N:** consolidate typed locale access and the raw interpolation path without changing
-    visible text or plural behavior.
+    privacy. Shared expanded client/server corpus candidates are committed and independently
+    reviewed; complete integrated acceptance, retained-consumer inventory and publication.
   - **REV-TOOLCHAIN:** define the OS security-refresh policy; add selected pinned shell/workflow
     rules and verified tool/dependency caches. The v0.3.64 Docker cache/OCI work alone does not
-    close this scope.
+    close this scope. A reviewed tooling/cache/terrain/policy candidate is committed; finish
+    final integration and acceptance. The separate web exact-optional candidate passes focused
+    tests and independent review; complete its release checks before publication.
   - **REV-DEPLOY:** add Compose PID/memory limits and Kubernetes ephemeral-storage/security-context
     regression guards, then run actual runtime acceptance. Public ingress and NetworkPolicy wait
-    for a real hosting/network model.
+    for a real hosting/network model. Resource/security guards are committed and reviewed with
+    focused tests passing; actual constrained-runtime acceptance and publication remain.
   - **REV-FAST:** measure a structured fast-feedback suite and fault detection while retaining
     exhaustive acceptance; sampling is not approved as a replacement.
   - **REV-PARSER:** assess parser mutation/property tests and simultaneous competing-resume
     invariants at concrete boundaries, crediting existing synchronized concurrency coverage.
+    Expanded parser and competing-resume regressions are committed and reviewed; finish
+    integrated acceptance and publish them.
   - **REV-PERF:** measure CSS/import opportunities and React commits at the 20 Hz publication
     rate; change subscriptions only if the evidence justifies it.
   - **REV-DIAGNOSTICS:** record the renderer/terrain manual-suite and diagnostic wiring

@@ -92,6 +92,8 @@ profiles each pass 940 core / 307 server tests plus two doctests. Coverage is 17
 (94.1827%) at the 90% floor. Integrated source `43dcd78050d5a306b8822b62a17728cb56c8c926`
 has identical core, server and API inputs. Full v0.3.65 web acceptance is reused: 6,812 tests / 91
 files with 91.10/89.47/90.12/93.47% coverage. Dependency inputs and accepted audits are unchanged.
+[Distinct Linux debug/release units](https://github.com/liveweird/grenadiers/actions/runs/40256918030)
+pass on the final candidate.
 
 Accepted image source is `43dcd78050d5a306b8822b62a17728cb56c8c926`; its image is
 `sha256:0845bc797cc6082e9c331f9d0b0c871695c13e206cdcc8ddb1b9bf525f9c7f84`.

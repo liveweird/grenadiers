@@ -12,19 +12,15 @@ repeated approval for routine implementation choices. Entries are not delivery-d
 
 ## Single-player
 
-- [next] **SOLO-CPU — deliver the approved staged hybrid.** A private human-versus-CPU duel uses
-  the normal rules/input path, restricted observations, interval hazard forecasts, bounded goal
-  planning and recorded bot inputs. Follow the [accepted design](docs/game/single-player-cpu.md)
-  and expose a playable slice early and support the all-features-on default before the
-  public preview.
-  - **CPU1 — internal playable slice:** mode/controller protocol contracts, purposeful bounded
-    policy, solo room, legal bot input, real result and rematch/reconnect. Keep the contract,
-    policy and runtime changes focused, with one coordinated playable release; a stand-still
-    controller is only a harness step.
+- [next] **SOLO-CPU — complete the approved staged hybrid.** Improve the
+  [private Solo opponent](docs/game/single-player.md) with interval forecasts, timed survival,
+  broader item tactics and measured difficulty. Preserve ordinary rules/input, restricted
+  observations, bounded work and accepted-input replay. Follow the
+  [accepted design](docs/game/single-player-cpu.md).
   - **CPU2 — survival:** interval forecasts, timed routing, safe planting and bounded memory,
     checked against fully known rule fixtures.
-  - **CPU3 — public preview:** scored goals, all-features-on compatibility, localized accessible
-    presentation and real-browser acceptance of the complete solo flow.
+  - **CPU3 — public preview:** stronger scored goals and all-features-on item tactics beyond
+    the initial conservative controls, with browser acceptance of the expanded interactions.
   - **CPU4 — stronger play:** difficulty tuning, tactical look-ahead and measured performance
     from deterministic tournaments and human feedback.
 - [parked] **More seats and campaign mobs.** Revisit after the two-seat CPU mode is stable;

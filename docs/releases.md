@@ -96,32 +96,47 @@ retain the previous immutable image reference for rollback. The runtime stage in
 rolling Debian package updates, so a later build may resolve newer packages and is not expected to
 be byte-identical; treat it as a new candidate with new evidence rather than reusing acceptance.
 
-## v0.3.80 — 2026-10-26
+## v0.3.81 — 2026-10-26
 
-[v0.3.80](https://github.com/liveweird/grenadiers/releases/tag/v0.3.80) establishes the pure
-[CPU contracts](game/cpu-contracts.md): restricted observations, ordinary intents, bounded
-memory/work, independent seeded randomness and distinct world/decision identities. The current
-v11 recipient projection supplies observations, including cloak and Invisible Bombs privacy.
-Internal controller metadata and the [lifecycle policy](game/single-player-cpu.md#lifecycle-policy)
-prepare the next playable slice. Solo admission, a production policy and a Solo UI are not
-introduced here. Wire v11, rules 5, generator 2 and replay formats 1/2 remain unchanged.
+[v0.3.81](https://github.com/liveweird/grenadiers/releases/tag/v0.3.81) adds the first playable
+[private Solo match](game/single-player.md). Human seat One controls settings; the server CPU
+occupies seat Two without credentials. Settings, result, rematch, running reconnect and permanent
+human departure use ordinary lifecycle/input rules. The initial opponent pursues simple goals
+and plants only with a restricted escape proof. Committed escape execution does not wait for
+another worker. Conservative item/tactical limitations are documented in the feature guide.
 
-Independent review is clear. At clean source `b43bacf6113471296ca29c170c76496356660ba1`, the
-source-bound Rust gate passes in 456.334s: all 4,194,304 masks across debug, release and official
-coverage, 32 partitions/four workers, zero retries, 37 raw profiles, and 18,566/20,325 lines
-(91.35%, above the unchanged 90% floor). Focused contracts, recipient privacy and accepted-input
-replay pass 10/5/2 tests; ordinary Equipment and Stop are included. The distinct
-[Linux debug/release run](https://github.com/liveweird/grenadiers/actions/runs/40394057002) passes.
-Repository, formatting, Clippy and dependency/security policy pass; both npm audits report zero
-vulnerabilities. Unchanged frontend/tooling inputs reuse the accepted v0.3.79 web evidence.
+The coordinated [v12 contract](game/protocol-v12.md) adds mode/controller metadata; server and
+browser must upgrade together. Rules 5, generator 2 and all 22 default-enabled items remain.
+Solo replay adds format-3 header provenance; formats 1/2 and disabled production recording stay
+intact. Independent review is clear. Actual driver escape and replay equality are tested
+separately, with ordinary-input capture ordering traced statically.
 
-Accepted image is `sha256:a56de297988f094b73a6757729e707e321e56f36e746a51bafc2c487ee3f6374`,
-built from that clean source. Pinned Trivy 0.74.0's fixable HIGH/CRITICAL gate exits zero. Eight
-Compose cases pass in 36.4s and eight Kubernetes cases in 37.2s, with exact image, security,
-resource and probe checks; temporary resources are removed. Localhost:8085 runs that image with
-verified health/readiness, limits and exact served assets. HTML, JavaScript, CSS and atlas bytes
-match v0.3.79. Control is `.local-checkpoints/runtime/compose-v0.3.80.yaml`; rollback retains
-v0.3.79 in `rollback-v0.3.79.yaml`.
+Full Rust acceptance at `d7b88a39fc30fddaebcd7c27686593a10f4da8da` passes in 558.091s:
+all 4,194,304 masks across debug/release/official coverage, 32 partitions/four workers, zero
+retries, 37 raw profiles, and 20,051/21,897 lines (91.57%). The final
+[Linux run](https://github.com/liveweird/grenadiers/actions/runs/40404217347) passes. Full web
+acceptance at `87f975e64764333e541e219059505b1283af4cc9` passes 6,874 tests / 97 files in
+244.81s; coverage is 91.31/90.03/90.44/93.71% (statements/branches/functions/lines). Initial
+archived/live fixture expectations were corrected without dropping assertions or masks.
+Repository, formatting, Clippy, generated-contract/API, E2E static and dependency/security checks
+pass; both npm audits report zero vulnerabilities.
+
+The responsive follow-up changes CSS and its native browser regression only; Rust and web
+TS/JS unit inputs are unchanged, so their evidence is reused. Its clean source is
+`dd457a922a225fe82a633b938432be658b95b6e9`. Accepted image is
+`sha256:5799213a545744c2ff5d777abcf8c214529d736cedbcb4e7515708511e5308ab`.
+Pinned Trivy 0.74.0 reports zero fixable HIGH/CRITICAL findings. Ten Compose cases pass in 49.2s
+and ten Kubernetes cases in 51.6s, including Solo authority/movement/result/rematch/reconnect/
+leave, both game modes and Polish 320px accessibility. The strict Polish lobby/create smoke
+also passes after fixing button wrapping. Exact image/resource/security/probe checks pass;
+temporary projects/namespaces are removed. Gzip budgets remain 400,000-byte JS / 20,000-byte CSS.
+
+Localhost:8085 runs the exact accepted image with verified health/readiness, limits, CSP/cache
+and served assets. The atlas is unchanged. Control is
+`.local-checkpoints/runtime/compose-v0.3.81.yaml`; `rollback-v0.3.80.yaml` retains the prior image.
+
+<a id="v0380--2026-10-26"></a>
+The [v0.3.80 record](history/releases.md#v0380--2026-10-26) is preserved in release history.
 
 <a id="v0379--2026-10-26"></a>
 The [v0.3.79 record](history/releases.md#v0379--2026-10-26) is preserved in release history.

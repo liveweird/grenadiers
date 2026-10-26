@@ -37,6 +37,7 @@ Unknown bomb visibility, Diarrhea, Slow Foot and Reverse Controls stop its volun
 until the unsupported condition ends. The normal game still applies automatic curses and other
 effects. It does not predict general chain reactions, moving bombs or an opponent's future
 actions. A proved route cannot protect it from newly introduced hazards or control effects.
+Stored special weapons are held rather than used tactically by this initial opponent.
 
 The [CPU contracts](cpu-contracts.md) explain execution and privacy; the
 [accepted design](single-player-cpu.md) specifies the broader model. Remaining work and tuning

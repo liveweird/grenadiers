@@ -4,6 +4,33 @@ This archive preserves the older release records originally maintained in
 [`docs/releases.md`](../releases.md). Records remain in their original order; the current
 release procedure and current release record stay in the [release guide](../releases.md).
 
+## v0.3.80 — 2026-10-26
+
+[v0.3.80](https://github.com/liveweird/grenadiers/releases/tag/v0.3.80) establishes the pure
+[CPU contracts](../game/cpu-contracts.md): restricted observations, ordinary intents, bounded
+memory/work, independent seeded randomness and distinct world/decision identities. The current
+v11 recipient projection supplies observations, including cloak and Invisible Bombs privacy.
+Internal controller metadata and the [lifecycle policy](../game/single-player-cpu.md#lifecycle-policy)
+prepare the next playable slice. Solo admission, a production policy and a Solo UI are not
+introduced here. Wire v11, rules 5, generator 2 and replay formats 1/2 remain unchanged.
+
+Independent review is clear. At clean source `b43bacf6113471296ca29c170c76496356660ba1`, the
+source-bound Rust gate passes in 456.334s: all 4,194,304 masks across debug, release and official
+coverage, 32 partitions/four workers, zero retries, 37 raw profiles, and 18,566/20,325 lines
+(91.35%, above the unchanged 90% floor). Focused contracts, recipient privacy and accepted-input
+replay pass 10/5/2 tests; ordinary Equipment and Stop are included. The distinct
+[Linux debug/release run](https://github.com/liveweird/grenadiers/actions/runs/40394057002) passes.
+Repository, formatting, Clippy and dependency/security policy pass; both npm audits report zero
+vulnerabilities. Unchanged frontend/tooling inputs reuse the accepted v0.3.79 web evidence.
+
+Accepted image is `sha256:a56de297988f094b73a6757729e707e321e56f36e746a51bafc2c487ee3f6374`,
+built from that clean source. Pinned Trivy 0.74.0's fixable HIGH/CRITICAL gate exits zero. Eight
+Compose cases pass in 36.4s and eight Kubernetes cases in 37.2s, with exact image, security,
+resource and probe checks; temporary resources are removed. Localhost:8085 runs that image with
+verified health/readiness, limits and exact served assets. HTML, JavaScript, CSS and atlas bytes
+match v0.3.79. Control is `.local-checkpoints/runtime/compose-v0.3.80.yaml`; rollback retains
+v0.3.79 in `rollback-v0.3.79.yaml`.
+
 ## v0.3.79 — 2026-10-26
 
 [v0.3.79](https://github.com/liveweird/grenadiers/releases/tag/v0.3.79) imports the used Mantine

@@ -11,6 +11,11 @@
 - Execute committed routes without further worker results; distinguish predicted scene
   evolution from new hazards and invalidate missed or rejected scheduled commands.
 
+### Fixed
+
+- Reject escape certificates that rely on temporary obstacle clipping when WallPass,
+  soft-block destruction or Oil ignition lets the actual actor travel farther.
+
 ### Changed
 
 - Identify the route policy as UtilityV3 while preserving recorded UtilityV1/UtilityV2

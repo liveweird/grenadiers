@@ -9,8 +9,8 @@ These Rust contracts support the [solo opponent](single-player.md) and the broad
 `core::room::RoomMode` derives controller kinds independently of occupancy and socket state.
 Human duels have two human controllers. Solo fixes the human at seat One and the CPU at seat
 Two. `CpuProfile::CURRENT` identifies `UtilityV3` with `Standard` difficulty;
-`INITIAL` and `PULSE_V2` preserve the `UtilityV1` and `UtilityV2` replay identities. These are policy identities, not
-claims about measured strength. Seeds are outside participant metadata.
+`INITIAL` and `PULSE_V2` preserve the `UtilityV1` and `UtilityV2` replay identities. These are
+policy identities, not claims about measured strength. Seeds are outside participant metadata.
 Live owner construction accepts only the current profile; retaining a historical replay
 identity does not re-enable that older policy for new matches.
 
@@ -74,6 +74,9 @@ The authoritative game and forecast share immutable blast geometry. Forecasts re
 half-open lethal/blocking intervals, separate safe gaps and persistent Oil fire. Same-tick
 chains see unchanged blockers; later waves see destruction. Destroyed soft-block cells remain
 blocked for traversal until newly revealed contents are observed.
+Neutral motion clips only against permanent terrain and arena boundaries. Sweeps touching
+soft blocks or unlit Oil are rejected instead of relying on temporary collision; this remains
+conservative when WallPass or a predicted explosion changes passability during a held input.
 
 Nominal stationary hazards are separate from conservative motion/trigger/pause uncertainty.
 Unknown motion can advance immediately and then every ten updates. Uncertain chain outcomes

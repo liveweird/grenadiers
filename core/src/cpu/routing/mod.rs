@@ -33,3 +33,7 @@ mod boundary_tests;
 #[cfg(test)]
 #[path = "route_tests.rs"]
 mod route_tests;
+
+#[cfg(test)]
+#[path = "motion_regression_tests.rs"]
+mod motion_regression_tests;

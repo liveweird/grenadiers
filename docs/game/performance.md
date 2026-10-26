@@ -8,7 +8,7 @@ credential-free JSON Lines to `target/m7-measurements/results.jsonl`, records th
 and captures process resource usage with the platform `time` tool. A selected budget failure or
 missing result exits nonzero.
 
-These tests exercise production `MatchRuntime` capture, checked projection, JSON encoding, and
+These tests exercise production `MatchRuntime` stepping, checked projection, JSON encoding, and
 `PreparedMatchOwner` scheduling. They do not include HTTP, WebSocket, network, browser, container-startup,
 or database costs and do not establish capacity at the configured 32-room ceiling.
 
@@ -96,3 +96,22 @@ workload using [the opt-in observer](renderer-diagnostics.md), reporting indices
 animation callback or per measured interval. Callbacks are not rendered frames, source-span bounds
 are not actual uploads, and absolute CPU totals from different-duration windows are not comparable
 per-frame costs. Final-head CI and native application acceptance remain separate requirements.
+
+## Replay allocation probe
+
+Production construction reserves no semantic journal buffer; explicit recording fixtures retain
+the bounded buffer. The separate ignored probe compares construction and identical deterministic
+workloads, with full private-state equality outside timing. It reports reserved vector bytes,
+not RSS or registry-lock contention. Run from a clean checkout on an otherwise quiet machine:
+
+```sh
+GRENADIERS_MEASUREMENT_SOURCE="$(git rev-parse HEAD)" \
+GRENADIERS_MEASUREMENT_TOOLCHAIN="$(rustc --version)" \
+cargo test -p grenadiers-server --release --locked \
+  game::rooms::replay::recording_measurement_tests::production_journal_allocation_measurement \
+  -- --ignored --exact --nocapture
+```
+
+The Cargo profile is declared by that invocation; the probe rejects builds with debug assertions enabled.
+[Recorded observations](../history/replay-allocation.md) retain source, workload and timing limits.
+This optional measurement is separate from routine correctness and exhaustive replay gates.

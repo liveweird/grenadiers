@@ -22,7 +22,7 @@ use crate::{
 
 #[test]
 fn configurable_settings_actions_and_authority_replay_exactly() {
-    let mut runtime = MatchRuntime::new(
+    let mut runtime = MatchRuntime::new_recording(
         identity_for_profile(RoomProfile::GeneratedConfigurableV4),
         RoundSeedSource::with_entropy(|bytes| {
             bytes.fill(53);
@@ -90,7 +90,7 @@ fn configurable_settings_actions_and_authority_replay_exactly() {
 
 #[test]
 fn permanent_editor_release_is_part_of_the_replayed_state() {
-    let mut runtime = MatchRuntime::new(
+    let mut runtime = MatchRuntime::new_recording(
         identity_for_profile(RoomProfile::GeneratedConfigurableV4),
         RoundSeedSource::with_entropy(|_| panic!("no round starts")),
     );
@@ -198,7 +198,7 @@ fn expanded_item_masks_and_disabled_preset_replay_deterministically() {
     for ordinal in selection.range.clone() {
         let enabled_bits = plan.enabled_bits(ordinal);
         let enabled = EnabledItems::from_bits(enabled_bits).unwrap();
-        let mut runtime = MatchRuntime::new(
+        let mut runtime = MatchRuntime::new_recording(
             identity_for_profile(RoomProfile::ExpandedV5),
             RoundSeedSource::with_entropy(|bytes| {
                 bytes.fill(3);
@@ -252,7 +252,7 @@ fn expanded_item_masks_and_disabled_preset_replay_deterministically() {
 
 #[test]
 fn expanded_default_all_items_round_replays_exactly() {
-    let mut runtime = MatchRuntime::new(
+    let mut runtime = MatchRuntime::new_recording(
         identity_for_profile(RoomProfile::ExpandedV5),
         RoundSeedSource::with_entropy(|bytes| {
             bytes.fill(3);

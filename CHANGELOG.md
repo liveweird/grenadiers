@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## 0.3.68 — 2026-10-26
+
+### Changed
+
+- Disable unused production replay journal allocation and replay-only capture work; retain
+  explicit recorded fixtures, replay compatibility and complete exhaustive assertions.
+
 ## 0.3.67 — 2026-10-26
 
 ### Changed

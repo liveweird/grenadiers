@@ -95,7 +95,8 @@ workload; its lossy browser trace did not establish a screenshot-delay cause. Ev
 workload using [the opt-in observer](renderer-diagnostics.md), reporting indices per observed
 animation callback or per measured interval. Callbacks are not rendered frames, source-span bounds
 are not actual uploads, and absolute CPU totals from different-duration windows are not comparable
-per-frame costs. Final-head CI and native application acceptance remain separate requirements.
+per-frame costs. Run native application acceptance and use remote checks only for distinct
+coverage, following the [local-first policy](../../CONTRIBUTING.md#local-first-verification).
 
 ## Replay allocation probe
 

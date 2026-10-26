@@ -79,30 +79,45 @@ interrupted state but cannot preserve process-local matches or credentials.
 Keep the previous immutable image reference for rollback; database migration compatibility
 must be designed when durable application data is introduced.
 
-## v0.3.65 — 2026-10-26
+## v0.3.69 — 2026-10-26
 
-[v0.3.65](https://github.com/liveweird/grenadiers/releases/tag/v0.3.65) names recurring UI color
-roles in `App.css`. All 252 existing resolved declarations, selectors, dimensions and visual
-values remain unchanged; distinct one-off shades remain explicit. No artwork or gameplay changes.
+[v0.3.69](https://github.com/liveweird/grenadiers/releases/tag/v0.3.69) replaces 24 repeated
+Compose seed overlays with `e2e/compose/fixture.yaml`. Set `GRENADIERS_FIXTURE_SEED_FILE` to the
+exact seed path; the read-only bind rejects missing files instead of creating host directories.
+Feature seeds, browser acknowledgements, scenario identities and base-only teardown remain.
+See [fixture usage](deployment.md).
 
-Independent review checks resolved values, scope, undefined variables and cycles. Full web
-acceptance at `9e4b020cada15c5e36f2e2dd297e4cb7eecc437e` passes 6,812 tests / 91 files in
-226.72s with 91.10/89.47/90.12/93.47% coverage. JavaScript/CSS gzip sizes are 337,921/36,695 bytes,
-within existing budgets. Repository, TypeScript, lint, drift and dead-code checks pass.
+Independent review and repository/workflow contracts pass. The 96 rendered-model comparisons
+cover 24 features, default/custom environment and persistence off/on; the only intentional
+model difference is `create_host_path: false`. Missing/unset/empty selectors fail safely.
+Integration preserves the v0.3.68 backend and v0.3.65 web inputs; their full Rust, exhaustive,
+Linux, web, coverage and dependency results are reused without duplicate suites.
 
-Integrated image source `0a46613dde32585dcf2a08faea98a271d2e10db9` preserves that tested web tree
-and the v0.3.64 backend. Accepted image is
-`sha256:6aed11a165885225691ae10b70ab349999853a7c14e398a38d12b65b4b90b596`.
-Eight native Compose cases and eight Kubernetes cases pass, with exact-image/runtime security,
-origin, readiness/probes/resources and gameplay checks. The pinned image scan reports zero
-fixable HIGH/CRITICAL findings. Reuse v0.3.64 backend/exhaustive/Linux and dependency acceptance;
-there is no distinct Rust behavior to recheck remotely.
+Accepted image source is `137bdd68a4cae1d751bc98183c5fb5b9e1829ae0`, image
+`sha256:9eade53a5b910f55627d6ef8f8d06a726698e7879316e41242142122e0266c95`.
+Its OS layer was refreshed for the newly reported OpenSSL fix. Trivy 0.74.0 reports zero fixable
+HIGH/CRITICAL findings. Fresh exact-image Compose acceptance passes eight default cases in 35.4s
+and Heart, Kick, Cloak and Oil cases through the new shared overlay with exact read-only mounts.
+Eight Kubernetes cases pass in 36.5s with exact-image/security/probe/resource checks. Temporary
+Compose projects and Kubernetes namespaces are removed. Earlier runs using superseded overlays
+are retained separately and are excluded from these shared-fixture results.
 
-Localhost:8085 serves the accepted image. Exact served HTML, JavaScript, CSS and atlas bytes match
-the tested build; CSP/cache, health/readiness and runtime security pass, plus one fresh native
-authentication case. Release-documentation changes preserve Docker inputs and skip duplicate CI.
-Control is `.local-checkpoints/runtime/compose-v0.3.65.yaml`; `rollback-v0.3.64.yaml` retains the
-prior image. Temporary acceptance resources are removed. There is no migration.
+Localhost:8085 serves the accepted image; runtime/security, health/readiness, CSP/cache and exact
+served HTML/JavaScript/CSS/atlas checks pass. Control is
+`.local-checkpoints/runtime/compose-v0.3.69.yaml`; `rollback-v0.3.68.yaml` retains the prior image.
+No gameplay, protocol, artwork or migration changes. Distribution remains source prereleases.
+
+<a id="v0368--2026-10-26"></a>
+The [v0.3.68 record](history/releases.md#v0368--2026-10-26) is preserved in release history.
+
+<a id="v0367--2026-10-26"></a>
+The [v0.3.67 record](history/releases.md#v0367--2026-10-26) is preserved in release history.
+
+<a id="v0366--2026-10-26"></a>
+The [v0.3.66 record](history/releases.md#v0366--2026-10-26) is preserved in release history.
+
+<a id="v0365--2026-10-26"></a>
+The [v0.3.65 record](history/releases.md#v0365--2026-10-26) is preserved in release history.
 
 <a id="v0364--2026-10-26"></a>
 The [v0.3.64 record](history/releases.md#v0364--2026-10-26) is preserved in release history.

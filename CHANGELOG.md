@@ -8,6 +8,12 @@
 
 - Add reproducible registry/entropy admission measurements and real non-reading WebSocket recovery and shutdown regressions; preserve production locking and timeout policy.
 
+## 0.3.69 — 2026-10-26
+
+### Changed
+
+- Replace 24 equivalent Compose seed overlays with one explicit file selector; reject missing host seed files without creating directories, while preserving browser scenarios and fixture acknowledgements.
+
 ## 0.3.68 — 2026-10-26
 
 ### Changed
@@ -15,14 +21,14 @@
 - Disable unused production replay journal allocation and replay-only capture work; retain
   explicit recorded fixtures, replay compatibility and complete exhaustive assertions.
 
-## 0.3.67 — 2026-10-25
+## 0.3.67 — 2026-10-26
 
 ### Changed
 
 - Add named admission projection and personal metadata inputs for v8–v11, preserve legacy
   Rust wrappers, and migrate the live caller without changing wire validation or ownership.
 
-## 0.3.66 — 2026-10-25
+## 0.3.66 — 2026-10-26
 
 ### Changed
 
@@ -200,7 +206,6 @@
   retaining pulse clocks and status visibility.
 - Bundle artist inputs in normal web/Docker builds without requiring Chromium at build time.
 - Add real-Pixi gameplay parity and lifecycle acceptance alongside the artist tooling suite.
-
 
 ## 0.3.48 — 2026-10-24 (published)
 

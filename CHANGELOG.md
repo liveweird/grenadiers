@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## 0.3.77 — 2026-10-26
+
+### Changed
+
+- Enable exact optional-property semantics in web and tooling TypeScript, omit absent request/UI properties, and use correctly typed diagnostic and test events.
+
 ## 0.3.76 — 2026-10-26
 
 ### Changed

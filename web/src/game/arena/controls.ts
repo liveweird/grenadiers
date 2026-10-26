@@ -3,7 +3,8 @@ import { defaultKeyboardBindings, type KeyboardBindings } from './bindings'
 
 type Configuration = {
   enabled: boolean
-  bindings?: KeyboardBindings
+  // eslint-disable-next-line sonarjs/no-redundant-optional -- Configuration normalizes absence and explicit undefined identically.
+  bindings?: KeyboardBindings | undefined
   onDirection: (direction: Direction | null) => void
   onBomb: () => void
   onEquipment: () => void

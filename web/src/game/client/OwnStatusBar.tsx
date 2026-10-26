@@ -80,9 +80,11 @@ export function OwnStatusBar({ actor, copy }: { actor: VisibleActorView; copy: G
       <StatusItem icon="bombCapacity" label={copy.stats.capacity} value={actor.bombCapacity} />
       <StatusItem icon="blastRange" label={copy.stats.range} value={actor.bombRange} />
       <StatusItem icon="movementSpeed" label={copy.stats.speed} value={actor.speedLevel + 1} />
-      <StatusItem icon={actor.inventory.equipment ?? undefined} label={copy.stats.equipment}
+      <StatusItem {...(actor.inventory.equipment ? { icon: actor.inventory.equipment } : {})}
+        label={copy.stats.equipment}
         value={actor.inventory.equipment ? copy.items[actor.inventory.equipment] : copy.stats.none} />
-      <StatusItem icon={actor.inventory.weapon ?? undefined} label={copy.stats.weapon}
+      <StatusItem {...(actor.inventory.weapon ? { icon: actor.inventory.weapon } : {})}
+        label={copy.stats.weapon}
         value={actor.inventory.weapon ? copy.items[actor.inventory.weapon] : copy.stats.none} />
       {activeEffects.map(({ kind, label }) =>
         <StatusItem key={kind} icon={kind} label={copy.stats.effects} value={label} active />)}
@@ -91,8 +93,9 @@ export function OwnStatusBar({ actor, copy }: { actor: VisibleActorView; copy: G
         value={copy.stats.frozen} active />}
       <StatusItem icon="heart" label={copy.stats.damageGrace}
         value={time(actor.damageGraceRemainingTicks)} active={actor.damageGraceRemainingTicks > 0}
-        valueLabel={actor.damageGraceRemainingTicks > 0
-          ? format(copy.stats.protectedTime, { time: time(actor.damageGraceRemainingTicks) }) : undefined} />
+        {...(actor.damageGraceRemainingTicks > 0 ? {
+          valueLabel: format(copy.stats.protectedTime, { time: time(actor.damageGraceRemainingTicks) }),
+        } : {})} />
     </div>
   </section>
 }

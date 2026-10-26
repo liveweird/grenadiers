@@ -343,3 +343,12 @@ separate tracks; their future interactions must be specified without making them
 
 The expanded-item activation batch and its release gates are complete in v0.3.47. ART-ATLAS
 is delivered by the published v0.3.48/v0.3.49 releases; the v0.3.53 redraw is unreleased.
+
+## Accepted engineering review closure — 2026-10-26
+
+Accepted remediation was delivered through v0.3.79, followed by the documentation closure.
+The retained-consumer inventory, compiler-option assessment and fast-feedback evidence record
+scope and intentional dispositions. Every exhaustive mask profile and coverage floor remains;
+no React subscription rewrite was justified by the measured workload. Single-player is the next
+confirmed delivery track in the root backlog. See the [assessment archive](quality-review-assessment.md),
+[release records](../releases.md), and [focused-feedback evidence](fast-feedback.md).

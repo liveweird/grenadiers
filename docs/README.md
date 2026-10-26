@@ -14,7 +14,7 @@ the time; they do not add approval steps to the current workflow.
 | Configure or expose the server | [Security](security.md), [deployment](deployment.md) |
 | Prepare a release | [Release policy](releases.md#release-verification-policy), [release checklist](game/implementation-plan.md#release-checklist) |
 | Find planned work and status | [Product backlog](../BACKLOG.md) |
-| Inspect review dispositions | [Quality-review response](quality-review.md) |
+| Inspect review dispositions | [Archived quality-review assessment](history/quality-review-assessment.md) |
 | Inspect feature release evidence | [Item and graphics acceptance](history/game-acceptance.md), [configuration activation](history/configuration-activation.md), [review snapshot](history/quality-review.md) |
 | Inspect past acceptance or contracts | [Verification history](history/verification.md), [release history](history/releases.md), [implementation-plan archive](history/implementation-plan.md), [protocol guide archive](history/protocols/README.md), [testing narrative archive](history/testing.md), [deployment narrative archive](history/deployment.md), [backlog history](history/backlog.md) |
 

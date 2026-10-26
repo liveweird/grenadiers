@@ -8,6 +8,7 @@ mod identity;
 mod intent;
 mod memory;
 mod observation;
+pub mod policy;
 mod random;
 mod work;
 

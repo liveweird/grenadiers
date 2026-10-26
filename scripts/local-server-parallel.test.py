@@ -63,10 +63,12 @@ with tempfile.TemporaryDirectory(prefix="grenadiers-workspace-artifacts-") as te
             "profile": {"test": True}, "executable": str(binary)}))
     messages.append(json.dumps({"reason": "build-finished", "success": True}))
     original_run = module.run
+    listed_commands = []
 
     def fake_workspace_run(command, **kwargs):
         if command[:3] == ["cargo", "test", "--workspace"]:
             return subprocess.CompletedProcess(command, 0, stdout="\n".join(messages) + "\n")
+        listed_commands.append(command)
         if command[0] == str(binaries[1].resolve()):
             return subprocess.CompletedProcess(command, 0, stdout=
                 f"{module.HEAVY_TEST}: test\n{module.INSTRUMENTATION_PROBE_TEST}: test\n")
@@ -76,24 +78,39 @@ with tempfile.TemporaryDirectory(prefix="grenadiers-workspace-artifacts-") as te
 
     module.run = fake_workspace_run
     try:
-        artifacts, selected_binary = module.capture_workspace_executables({})
+        artifact_env = {"CARGO_LLVM_COV_TARGET_DIR": str(root.resolve())}
+        artifacts, selected_binary = module.capture_workspace_executables(artifact_env)
         assert selected_binary == binaries[1].resolve() and len(artifacts) == 3
         assert {item["targetKind"][0] for item in artifacts} == {"lib", "bin"}
         empty_messages = messages
         messages = [json.dumps({"reason": "build-finished", "success": True})]
         try:
-            module.capture_workspace_executables({})
+            module.capture_workspace_executables(artifact_env)
         except ValueError as error:
             assert "no test executables" in str(error)
         else:
             raise AssertionError("empty workspace executable selection accepted")
         messages = ["not-json"]
         try:
-            module.capture_workspace_executables({})
+            module.capture_workspace_executables(artifact_env)
         except ValueError as error:
             assert "malformed" in str(error)
         else:
             raise AssertionError("malformed workspace executable selection accepted")
+        messages = empty_messages
+        leaf_symlink = root / "server-libtest-link"
+        leaf_symlink.symlink_to(binaries[1])
+        linked_messages = list(messages)
+        linked_messages[1] = linked_messages[1].replace(str(binaries[1]), str(leaf_symlink))
+        messages = linked_messages
+        listed_before = len(listed_commands)
+        try:
+            module.capture_workspace_executables(artifact_env)
+        except ValueError as error:
+            assert "missing or unsafe" in str(error)
+        else:
+            raise AssertionError("leaf-symlink Cargo executable accepted")
+        assert len(listed_commands) == listed_before
         messages = empty_messages
     finally:
         module.run = original_run
@@ -346,11 +363,35 @@ with tempfile.TemporaryDirectory(prefix="grenadiers-llvm-cov-discovery-") as tem
             raise AssertionError("late report profile accepted")
         late.unlink()
 
+        preexisting_target = fixture_root / "preexisting-report-target"
+        preexisting_target.mkdir()
+        marker = preexisting_target / "marker"
+        marker.write_text("preserve me")
+        try:
+            module.report_lcov(cov_env, [baseline, worker], fixture_root / "preexisting.lcov",
+                               "preexisting", artifacts, preexisting_target)
+        except ValueError as error:
+            assert "must be fresh" in str(error)
+        else:
+            raise AssertionError("preexisting report target accepted")
+        assert marker.read_text() == "preserve me"
+
+        symlink_target = fixture_root / "symlink-report-target"
+        symlink_target.symlink_to(preexisting_target, target_is_directory=True)
+        try:
+            module.report_lcov(cov_env, [baseline, worker], fixture_root / "symlink.lcov",
+                               "symlink", artifacts, symlink_target)
+        except ValueError as error:
+            assert "must be fresh" in str(error)
+        else:
+            raise AssertionError("symlink report target accepted")
+        assert symlink_target.is_symlink() and marker.read_text() == "preserve me"
+
         outside_artifact = module.file_identity(ordinary[0])
         malformed_target = fixture_root / "malformed-report-target"
         try:
             module.report_lcov(cov_env, [baseline, worker], fixture_root / "malformed.lcov",
-                               "malformed", [outside_artifact], malformed_target)
+                               "malformed", [artifacts[0], outside_artifact], malformed_target)
         except ValueError as error:
             assert "outside coverage target" in str(error)
         else:

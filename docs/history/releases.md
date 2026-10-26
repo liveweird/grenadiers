@@ -4,6 +4,27 @@ This archive preserves the older release records originally maintained in
 [`docs/releases.md`](../releases.md). Records remain in their original order; the current
 release procedure and current release record stay in the [release guide](../releases.md).
 
+## v0.3.77 — 2026-10-26
+
+[v0.3.77](https://github.com/liveweird/grenadiers/releases/tag/v0.3.77) enables exact optional
+properties in application/tooling TypeScript, omits absent request/UI properties and uses correctly
+typed diagnostic state and test events. Wire and visible behavior remain unchanged.
+
+Independent review and all three TypeScript projects pass. Full web acceptance at
+`e34bc505906eec657bf03d899ecc1b1eea2a7fef` passes 6,861 tests / 94 files in 249.42s with
+91.24/89.88/90.12/93.60% coverage. Local gzip JavaScript/CSS is 337,188/36,695 bytes; the Docker
+build is 337,956/36,695 bytes. Repository, lint, drift and dead-code checks pass. Unchanged Rust,
+exhaustive, Linux and dependency acceptance are reused.
+
+Accepted image source is that tested commit; image is
+`sha256:46079733b7f6682f8460ba438a766c632a90a00f0d6af26f0a57e5a0fb43e166`.
+Trivy 0.74.0 reports zero fixable HIGH/CRITICAL findings. Eight Compose cases pass in 36.8s and
+eight Kubernetes cases in 36.7s, including exact-image/security/probe/effective resource checks.
+Polish 320px locale switching and room creation pass; temporary resources are removed.
+Localhost:8085 has verified health/readiness, CSP/cache and the exact new HTML/JS plus unchanged
+CSS/atlas bytes. Control is `.local-checkpoints/runtime/compose-v0.3.77.yaml`;
+`rollback-v0.3.76.yaml` retains the prior image. No gameplay, protocol, artwork or migration changes.
+
 ## v0.3.76 — 2026-10-26
 
 [v0.3.76](https://github.com/liveweird/grenadiers/releases/tag/v0.3.76) adds optional pinned

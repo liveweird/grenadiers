@@ -13,14 +13,10 @@ repeated approval for routine implementation choices. Entries are not delivery-d
 ## Current delivery — Claude review
 
 - [next] **ENG-REVIEW — finish the remaining agreed review work before CPU mode.** The user confirmed
-  this priority on 2026-10-25. The published source baseline is v0.3.77; detailed delivered
+  this priority on 2026-10-25. The published source baseline is v0.3.78; detailed delivered
   evidence and finding dispositions belong in the [quality-review record](docs/quality-review.md),
   not this backlog. Preserve privacy, exhaustive masks, coverage floors and local-first
   verification. Current release lanes and remaining accepted scope are:
-  - **REV-FIXTURES:** consolidate genuinely equivalent Rust worlds/frames, E2E
-    selectors/collection and Compose seed/CLI scaffolding without changing identities, assertions,
-    version-specific rejection, seeds or independent sessions. The shared Compose extraction is released. Narrow frame-bound, open-arena and timed-effect extractions are committed and independently
-    reviewed, including native effect scenarios; integrated acceptance/publication remain.
   - **REV-PROTOCOL:** audit retained consumers and unique tests under ADR 0021, reduce selected
     adapters, and complete client/archived/cross-language contract coverage. Preserve archived
     schemas/conformance, replay identity, item bits, activation subsets, generation order and

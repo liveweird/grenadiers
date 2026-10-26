@@ -96,26 +96,31 @@ retain the previous immutable image reference for rollback. The runtime stage in
 rolling Debian package updates, so a later build may resolve newer packages and is not expected to
 be byte-identical; treat it as a new candidate with new evidence rather than reusing acceptance.
 
-## v0.3.77 — 2026-10-26
+## v0.3.78 — 2026-10-26
 
-[v0.3.77](https://github.com/liveweird/grenadiers/releases/tag/v0.3.77) enables exact optional
-properties in application/tooling TypeScript, omits absent request/UI properties and uses correctly
-typed diagnostic state and test events. Wire and visible behavior remain unchanged.
+[v0.3.78](https://github.com/liveweird/grenadiers/releases/tag/v0.3.78) shares equivalent Rust
+frame-bound builders and open-border arenas plus timed-effect browser helpers. Independent review
+confirms identical helper contents, per-version largest states, test names/assertions, seeds,
+routes and screenshots. V8–v11 encoded frame sizes remain exact; the browser helper binds each
+assertion to the bomb planted by that native key action.
 
-Independent review and all three TypeScript projects pass. Full web acceptance at
-`e34bc505906eec657bf03d899ecc1b1eea2a7fef` passes 6,861 tests / 94 files in 249.42s with
-91.24/89.88/90.12/93.60% coverage. Local gzip JavaScript/CSS is 337,188/36,695 bytes; the Docker
-build is 337,956/36,695 bytes. Repository, lint, drift and dead-code checks pass. Unchanged Rust,
-exhaustive, Linux and dependency acceptance are reused.
+Full source-bound Rust acceptance at `936f4e627fa3ec101f759b02f717b745d0d550f2` passes in
+449.469s, including every 4,194,304 mask in debug, release and official coverage with
+zero retries. Coverage is 18,049/19,738 lines (91.4429%).
+Focused debug/release, Clippy, repository and E2E static checks pass. Application web acceptance
+reuses the identical v0.3.77 input; existing Linux acceptance covers unchanged production code.
 
-Accepted image source is that tested commit; image is
-`sha256:46079733b7f6682f8460ba438a766c632a90a00f0d6af26f0a57e5a0fb43e166`.
-Trivy 0.74.0 reports zero fixable HIGH/CRITICAL findings. Eight Compose cases pass in 36.8s and
-eight Kubernetes cases in 36.7s, including exact-image/security/probe/effective resource checks.
-Polish 320px locale switching and room creation pass; temporary resources are removed.
-Localhost:8085 has verified health/readiness, CSP/cache and the exact new HTML/JS plus unchanged
-CSS/atlas bytes. Control is `.local-checkpoints/runtime/compose-v0.3.77.yaml`;
-`rollback-v0.3.76.yaml` retains the prior image. No gameplay, protocol, artwork or migration changes.
+Accepted image source is `f4fd65220cf4fbdc7322fe54bca36af2c5abd288`, whose Docker inputs match
+the tested source; image is `sha256:5281acc1e3a9b2f7959e2952edf57ee8bbee2eaf645fff81648ae3cedf175b5d`.
+Trivy 0.74.0 reports zero fixable HIGH/CRITICAL findings. Eight Compose cases pass in 36.1s and
+eight Kubernetes cases in 36.5s, with effective memory/PID/ephemeral-storage limits, security and
+probes verified. Golden Flame, Short Fuse and Short Flame cases also pass through the new helpers
+and exact read-only fixture mounts. Temporary resources are removed. Localhost:8085 has verified
+health/readiness, CSP/cache and the exact accepted web bytes. Control is
+`.local-checkpoints/runtime/compose-v0.3.78.yaml`; `rollback-v0.3.77.yaml` retains the prior image.
+
+<a id="v0377--2026-10-26"></a>
+The [v0.3.77 record](history/releases.md#v0377--2026-10-26) is preserved in release history.
 
 <a id="v0376--2026-10-26"></a>
 The [v0.3.76 record](history/releases.md#v0376--2026-10-26) is preserved in release history.

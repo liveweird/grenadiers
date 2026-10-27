@@ -74,6 +74,11 @@ impl CpuController {
         let pending = self.pending.take()?;
         let result = pending.completed?;
         let latest = self.latest_observation.as_ref()?;
+        let escape_origin = match (&result.escape_origin, &self.escape_origin) {
+            (None, None) => false,
+            (Some(result), Some(current)) if result.same_origin(current) => true,
+            _ => return None,
+        };
         if self.settled_stop_tick.is_none()
             || (result.plan.execution.is_none()
                 && !grenadiers_core::cpu::survival::can_admit_ordinary(&result.basis, latest))
@@ -94,7 +99,13 @@ impl CpuController {
         let invalid_manual = execution.as_ref().is_some_and(|certificate| {
             certificate.plant().is_some() != (control.intent.manual == Some(ManualIntent::Bomb))
         });
-        if execution.is_some() && (lease.is_some() || invalid_manual) {
+        if (escape_origin
+            && (control.intent.manual.is_some()
+                || execution.is_some()
+                || (control.intent.movement != grenadiers_core::cpu::MovementIntent::Stop
+                    && lease.is_none())))
+            || (execution.is_some() && (lease.is_some() || invalid_manual))
+        {
             return None;
         }
         let committed_pulse = match lease {
@@ -140,6 +151,7 @@ impl CpuController {
             committed_pulse,
             committed_route,
             certified_plant,
+            escape_origin,
         })
     }
 }

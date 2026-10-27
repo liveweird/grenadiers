@@ -2,6 +2,18 @@
 
 ## [Unreleased]
 
+## 0.3.90 — 2026-10-27
+
+### Fixed
+
+- Recover from interrupted confirmed planting with fresh bounded escape proofs, preserving
+  narrow origin provenance until exit while retaining ordinary scene invalidation.
+
+### Changed
+
+- Identify confirmed-origin recovery as UtilityV9; preserve V1–V8 accepted-input replay
+  and the unchanged v12 wire shape.
+
 ## 0.3.89 — 2026-10-27
 
 ### Added

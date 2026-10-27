@@ -18,15 +18,6 @@ pub(super) fn static_segment_clear(
         .all(|cell| !static_blocked(observation, cell))
 }
 
-pub(super) fn check_segments(
-    forecast: &HazardForecast,
-    segments: &[MovementSegment],
-    time: TickWindow,
-    mode: RouteMode,
-) -> Result<BTreeSet<EntityId>, RouteFailure> {
-    check_segments_with_grace(forecast, segments, time, mode, None)
-}
-
 pub(super) fn check_segments_with_grace(
     forecast: &HazardForecast,
     segments: &[MovementSegment],

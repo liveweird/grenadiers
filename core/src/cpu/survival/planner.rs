@@ -8,8 +8,8 @@ use crate::cpu::routing::{
 use crate::cpu::{CpuRng, Intent, ManualIntent, MovementIntent, Observation, WorkBudget};
 use crate::game::{Direction, Tick};
 
-use super::MAX_PLAN_AGE_TICKS;
 use super::compatibility::actor;
+use super::{MAX_PLAN_AGE_TICKS, PlantEscapeOrigin};
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct SurvivalPlan {
@@ -51,6 +51,27 @@ pub fn plan(
     rng: &mut CpuRng,
     work: &mut WorkBudget,
 ) -> Result<SurvivalPlan, PolicyError> {
+    plan_with_origin(
+        observation,
+        memory,
+        history,
+        settled_stop_tick,
+        None,
+        rng,
+        work,
+    )
+}
+
+#[allow(clippy::too_many_arguments)]
+pub fn plan_with_origin(
+    observation: &Observation,
+    memory: &UtilityMemory,
+    history: &ObservedHazardMemory,
+    settled_stop_tick: Tick,
+    origin: Option<&PlantEscapeOrigin>,
+    rng: &mut CpuRng,
+    work: &mut WorkBudget,
+) -> Result<SurvivalPlan, PolicyError> {
     let parts = observation.parts();
     if memory.key().world != parts.world
         || memory.key().cpu_seat != parts.recipient
@@ -72,6 +93,17 @@ pub fn plan(
     };
     if !actor.alive || actor.voluntary_actions_frozen {
         return Ok(stop());
+    }
+    if let Some(origin) = origin {
+        return Ok(super::origin_planner::plan(
+            observation,
+            history,
+            settled_stop_tick,
+            memory,
+            origin,
+            work,
+        )
+        .unwrap_or_else(stop));
     }
     let ordinary = crate::cpu::policy::plan(observation, memory, rng, work)?;
     let clear_movement = super::deadline::ordinary_movement_is_clear(

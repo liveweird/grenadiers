@@ -2,6 +2,7 @@ use std::sync::{Arc, atomic::AtomicBool, mpsc::sync_channel};
 
 use grenadiers_core::cpu::forecast::ObservedHazardMemory;
 use grenadiers_core::cpu::policy::UtilityMemory;
+use grenadiers_core::cpu::routing::RouteCertificate;
 use grenadiers_core::cpu::survival::{ExecutionCertificate, SurvivalPlan, WORK_ALLOWANCE};
 use grenadiers_core::cpu::{
     BombKnowledge, CpuRng, DecisionId, Intent, ManualIntent, MemoryKey, Observation, ObservedActor,
@@ -226,7 +227,7 @@ fn accepted_manual_without_physical_placement_selects_absent() {
     assert!(controller.has_committed_route());
 }
 
-fn prepared(basis: &Observation) -> CpuController {
+pub(super) fn prepared(basis: &Observation) -> CpuController {
     let mut controller = CpuController::new(CpuPlanner::without_workers(), 7, [5; 32]);
     controller.reset_world(3);
     assert!(controller.accept_observation(basis));
@@ -234,14 +235,18 @@ fn prepared(basis: &Observation) -> CpuController {
     controller
 }
 
-struct PlantFixture {
-    placement: grenadiers_core::cpu::routing::PlannedBomb,
-    movement: grenadiers_core::cpu::MovementIntent,
-    position: grenadiers_core::game::Position,
-    heading: grenadiers_core::game::Direction,
+pub(super) struct PlantFixture {
+    pub(super) placement: grenadiers_core::cpu::routing::PlannedBomb,
+    pub(super) movement: grenadiers_core::cpu::MovementIntent,
+    pub(super) position: grenadiers_core::game::Position,
+    pub(super) heading: grenadiers_core::game::Direction,
+    pub(super) route: RouteCertificate,
 }
 
-fn inject_certified(controller: &mut CpuController, basis: &Observation) -> PlantFixture {
+pub(super) fn inject_certified(
+    controller: &mut CpuController,
+    basis: &Observation,
+) -> PlantFixture {
     let key = MemoryKey {
         world: basis.parts().world,
         cpu_seat: basis.parts().recipient,
@@ -271,6 +276,7 @@ fn inject_certified(controller: &mut CpuController, basis: &Observation) -> Plan
         movement: plan.control.intent.movement,
         position,
         heading,
+        route: certificate.route().clone(),
     };
     inject(controller, basis.clone(), plan, rng);
     fixture
@@ -284,7 +290,14 @@ fn inject(controller: &mut CpuController, basis: Observation, plan: SurvivalPlan
         checked_request_serial: 1,
     };
     let (sender, receiver) = sync_channel(1);
-    sender.send(PlanResult { plan, basis, rng }).unwrap();
+    sender
+        .send(PlanResult {
+            plan,
+            basis,
+            rng,
+            escape_origin: None,
+        })
+        .unwrap();
     controller.pending = Some(Pending {
         decision,
         receiver,
@@ -294,7 +307,7 @@ fn inject(controller: &mut CpuController, basis: Observation, plan: SurvivalPlan
     controller.request_serial = 1;
 }
 
-fn advanced(basis: &Observation, tick: Tick) -> Observation {
+pub(super) fn advanced(basis: &Observation, tick: Tick) -> Observation {
     let mut parts = basis.clone().into_parts();
     let elapsed = u16::try_from(tick.0 - parts.tick.0).unwrap();
     parts.tick = tick;
@@ -350,7 +363,7 @@ fn mutated(observation: Observation, mutation: ActorMutation) -> Observation {
     Observation::new(parts).unwrap()
 }
 
-fn placement_observation(
+pub(super) fn placement_observation(
     basis: &Observation,
     fixture: &PlantFixture,
     id: Option<EntityId>,

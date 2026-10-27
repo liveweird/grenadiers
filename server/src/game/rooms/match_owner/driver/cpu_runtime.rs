@@ -52,10 +52,20 @@ impl Driver {
             Ok(_) => {}
             Err(error) if fatal(error) => return Err(error),
             Err(_) if has_route => {
+                self.cpu
+                    .as_mut()
+                    .expect("accepted plan has controller")
+                    .clear_escape_origin();
                 self.cpu_stop_at = Some(tick);
                 return self.apply_cpu_stop();
             }
-            Err(_) => return Ok(()),
+            Err(_) => {
+                self.cpu
+                    .as_mut()
+                    .expect("accepted plan has controller")
+                    .clear_escape_origin();
+                return Ok(());
+            }
         }
         let manual = self.apply_cpu_manual(epoch, plan.intent.manual)?;
         let actual = Intent {
@@ -146,7 +156,12 @@ impl Driver {
             ) {
                 Ok(_) => {}
                 Err(error) if fatal(error) => return Err(error),
-                Err(_) => return Ok(()),
+                Err(_) => {
+                    if let Some(cpu) = self.cpu.as_mut() {
+                        cpu.clear_escape_origin();
+                    }
+                    return Ok(());
+                }
             }
         }
         self.cpu_stop_at = None;
@@ -163,6 +178,7 @@ impl Driver {
         };
         if self.runtime.lifecycle().phase() != MatchPhase::Running {
             cpu.cancel();
+            cpu.clear_escape_origin();
             if cpu.has_committed_route() {
                 cpu.invalidate_route();
             }
@@ -173,6 +189,7 @@ impl Driver {
         let Some(observation) = notice.cpu_observation.as_ref() else {
             return;
         };
+        cpu.validate_escape_epoch(self.runtime.lifecycle().round_attempt());
         if !cpu.accept_observation(observation) {
             return;
         }
@@ -295,3 +312,7 @@ pub(super) mod evaluation_support;
 #[cfg(test)]
 #[path = "cpu_evaluation_tests.rs"]
 mod evaluation_tests;
+
+#[cfg(test)]
+#[path = "cpu_escape_recovery_tests.rs"]
+mod escape_recovery_tests;

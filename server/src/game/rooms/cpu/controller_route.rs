@@ -33,7 +33,13 @@ impl CpuController {
     ) -> Option<RouteStatus> {
         let status = self.committed_route.as_mut()?.observe(observation);
         if matches!(status, RouteStatus::Completed | RouteStatus::Invalidated) {
+            let origin = (status == RouteStatus::Invalidated)
+                .then(|| self.committed_route.as_ref()?.escape_origin(observation))
+                .flatten();
+            let origin_epoch = origin.as_ref().and(self.committed_route_epoch);
             self.clear_route(status == RouteStatus::Invalidated);
+            self.escape_origin = origin;
+            self.escape_origin_epoch = origin_epoch;
         }
         Some(status)
     }
@@ -72,6 +78,7 @@ impl CpuController {
         self.committed_route = None;
         self.committed_route_epoch = None;
         self.cancel();
+        self.clear_escape_origin();
         if reset_memory {
             self.memory = Some(UtilityMemory::new(
                 self.memory

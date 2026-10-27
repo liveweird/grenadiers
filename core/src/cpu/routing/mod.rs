@@ -25,6 +25,7 @@ pub use types::{PoseBounds, PulseLease, PulseRequest, RouteAssurance, RouteFailu
 
 pub use plant::{plan_ordinary_plant, plan_timed_weapon_plant};
 pub use pulse::certify_pulse;
+pub(crate) use pulse::{PulseOriginGrace, certify_escape_pulse};
 pub use route::plan_route;
 
 pub(crate) const CERTIFIED_MOVE_UPDATES: u8 = 12;
@@ -48,7 +49,7 @@ mod motion_regression_tests;
 
 #[cfg(test)]
 #[path = "plant_tests.rs"]
-mod plant_tests;
+pub(crate) mod plant_tests;
 
 #[cfg(test)]
 #[path = "plant_failure_tests.rs"]

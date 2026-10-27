@@ -57,9 +57,9 @@ test('gameplay authentication preserves credentials and connection ownership', a
     }
 
     try {
-      const incompatible = await connect(10)
-      const owner = await connect(12)
-      const duplicate = await connect(12)
+      const incompatible = await connect(12)
+      const owner = await connect(13)
+      const duplicate = await connect(13)
       const command = {
         type: 'movement', sequence: 1, roomId: 'a'.repeat(32), roundId: 1, direction: null,
       }
@@ -80,7 +80,7 @@ test('gameplay authentication preserves credentials and connection ownership', a
     }
   })
 
-  expect(frames.incompatible).toEqual({ type: 'incompatibleProtocol', supportedVersion: 12 })
+  expect(frames.incompatible).toEqual({ type: 'incompatibleProtocol', supportedVersion: 13 })
   expect(frames.authenticated).toEqual({ type: 'authenticated', protocolVersion: 13 })
   expect(frames.duplicate).toEqual({ type: 'error', code: 'connectionInUse', sequence: null })
   expect(frames.firstCommand).toEqual({ type: 'error', code: 'notInRoom', sequence: 1 })

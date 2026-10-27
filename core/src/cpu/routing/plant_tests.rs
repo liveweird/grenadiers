@@ -6,7 +6,7 @@ use crate::cpu::{
 use crate::game::geometry::position_overlaps_cell;
 use crate::game::types::UNITS_PER_CELL;
 use crate::game::{
-    BlastKind, Direction, EffectKind, EntityId, InputAction, RulesConfig, SeatId, SeatInput, Tick,
+    Direction, EffectKind, EntityId, InputAction, RulesConfig, SeatId, SeatInput, Tick,
 };
 use crate::room::RoomSettings;
 
@@ -38,7 +38,7 @@ fn plan(first_movement: MovementIntent) -> (Observation, super::PlantCertificate
     (observed, certificate)
 }
 
-fn current_scene(
+pub(super) fn current_scene(
     basis: &Observation,
     certificate: &super::PlantCertificate,
     tick: Tick,
@@ -58,6 +58,13 @@ fn current_scene(
         actor.heading = heading;
     }
     actor.live_bomb_count = u16::from(present.is_some());
+    actor.weapon = certificate.expected_weapon(if let Some((id, _)) = present {
+        PlantPresence::Present(id)
+    } else if tick < certificate.placement().placed_at {
+        PlantPresence::Awaiting
+    } else {
+        PlantPresence::Absent
+    });
     parts.bombs = BombKnowledge::Visible(
         present
             .map(|(id, range)| {
@@ -72,7 +79,7 @@ fn current_scene(
                         remaining_ticks: u16::try_from(placement.detonates_at.0 - tick.0).unwrap(),
                         paused: false,
                     },
-                    blast: BlastKind::Standard,
+                    blast: placement.blast,
                     unknown: UnknownBombFacts::ALL,
                 }
             })

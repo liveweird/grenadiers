@@ -24,3 +24,5 @@ mod goal_tests;
 mod simulation_tests;
 #[cfg(test)]
 pub(crate) mod tests;
+#[cfg(test)]
+mod weapon_goal_tests;

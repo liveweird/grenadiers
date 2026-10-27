@@ -8,8 +8,8 @@ These Rust contracts support the [solo opponent](single-player.md) and the broad
 
 `core::room::RoomMode` derives controller kinds independently of occupancy and socket state.
 Human duels have two human controllers. Solo fixes the human at seat One and the CPU at seat
-Two. `CpuProfile::CURRENT` identifies `UtilityV5` with `Standard` difficulty;
-`INITIAL`, `PULSE_V2`, `ROUTE_V3` and `PLANT_V4` preserve the V1–V4 replay identities. These are
+Two. `CpuProfile::CURRENT` identifies `UtilityV6` with `Standard` difficulty;
+`INITIAL`, `PULSE_V2`, `ROUTE_V3`, `PLANT_V4` and `GOALS_V5` preserve V1–V5 replay identities. These are
 policy identities, not claims about measured strength. Seeds are outside participant metadata.
 Live owner construction accepts only the current profile; retaining a historical replay
 identity does not re-enable that older policy for new matches.
@@ -43,12 +43,12 @@ request may submit its ordinary Stop. History has bounded, deterministic retenti
 counted in logical units rather than hardware milliseconds.
 
 Tie-breaking uses its own seeded ChaCha stream and never draws from arena generation. Small
-fixture policies remain test-only; production uses UtilityV5. Replays consume recorded accepted
+fixture policies remain test-only; production uses UtilityV6. Replays consume recorded accepted
 actions rather than invoking a policy again. Production journal allocation remains disabled;
 explicit solo recording adds format-3 header provenance while preserving formats 1/2 and
 accepted-input record capacity.
-Policy versions 1/2/3/4/5 are accepted only with their matching profile; new recordings retain the
-actual room profile. All five policies share the unchanged v12 room shape.
+Policy versions 1/2/3/4/5/6 are accepted only with their matching profile; new recordings retain the
+actual room profile. All six policies share the unchanged v12 room shape.
 
 ## Goal guidance
 
@@ -61,7 +61,11 @@ Known curses, Oil, Teleporter and unsupported stored weapons are excluded from d
 and ordinary navigation transit. Harmless capped upgrades or duplicate/long-duration buffs remain
 transitable. Equipment shares one replaceable slot: navigation preserves held Heart rather than
 replacing it with an unused capability. Remembered ordinary next steps use the same eligibility
-check. Stable ordering and the independent RNG resolve genuine ties; exhausted work yields Stop.
+check. Supported Piercing/Power charges can be goals for an empty slot or replacement of an
+unsupported charge. Duplicate charges remain transitable without collection priority; navigation
+does not seek a replacement for a usable charge, while both supported alternatives remain
+transitable. Heart uses a separate slot.
+Stable ordering and the independent RNG resolve genuine ties; exhausted work yields Stop.
 
 This is static guidance. Existing hazard checks, planting certificates and pickup-changing-path
 restrictions retain authority, and hidden contents never enter goal selection.
@@ -168,6 +172,26 @@ insufficient capacity,
 unsupported uncertainty, an unobservable early chain or an incomplete horizon cause refusal.
 The full blast expiry and final stopped margin must fit; no fuse or escape deadline is shortened
 to fit the forecast. The guarded CPU1 planting fallback remains available where applicable.
+
+## Certified timed weapons
+
+`plan_timed_weapon_plant` accepts enabled, held Piercing or Power and shares the ordinary planting
+proof. The ordinary-only entry point still rejects stored weapons. Both scenarios retain the
+same exact input program, movement-before-placement timing, full blast-expiry horizon and work
+allowance. The certificate records the actual blast kind; confirmation rejects a different kind.
+
+Awaiting placement and confirmed absence require the captured weapon to remain held. Confirmed
+successful placement requires exactly that charge to be consumed. Presence is confirmed before
+checking this transition, and every other actor invariant uses the same shared guard. Unexpected
+replacement, loss, recollection or a changed certificate basis invalidates execution. A confirmed
+Present outcome cannot be downgraded to Absent. Ordinary rejection or physical placement veto
+preserves the charge and continues the absent route without an immediate Bomb retry.
+
+Usefulness uses the shared blast geometry: Piercing can affect blocks beyond another soft block,
+and Power can threaten a diagonal cell within its diamond. Field construction and full traversal
+are charged before accepting utility; exhaustion preserves the checked fallback. Remote, Landmine
+and any live own Remote remain unsupported by timed placement because their triggers differ.
+Certified movement still rejects pickup-changing paths and never assumes hidden facts.
 
 ## Focused verification
 

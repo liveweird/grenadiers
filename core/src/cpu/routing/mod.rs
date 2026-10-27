@@ -23,7 +23,7 @@ pub use route_types::{
 };
 pub use types::{PoseBounds, PulseLease, PulseRequest, RouteAssurance, RouteFailure, RouteMode};
 
-pub use plant::plan_ordinary_plant;
+pub use plant::{plan_ordinary_plant, plan_timed_weapon_plant};
 pub use pulse::certify_pulse;
 pub use route::plan_route;
 
@@ -50,3 +50,7 @@ mod plant_tests;
 #[cfg(test)]
 #[path = "plant_failure_tests.rs"]
 mod plant_failure_tests;
+
+#[cfg(test)]
+#[path = "weapon_plant_tests.rs"]
+mod weapon_plant_tests;

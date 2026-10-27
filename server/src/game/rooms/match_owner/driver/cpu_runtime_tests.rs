@@ -32,6 +32,13 @@ pub(super) fn running_driver(round_seed: u8) -> Driver {
 }
 
 pub(super) fn running_driver_with_fuse(round_seed: u8, fuse_ticks: u64) -> Driver {
+    running_driver_with_settings(
+        round_seed,
+        RoomSettings::new(SpeedLevel::Four, 64, 1, fuse_ticks).unwrap(),
+    )
+}
+
+pub(super) fn running_driver_with_settings(round_seed: u8, settings: RoomSettings) -> Driver {
     let (_, shutdown) = watch::channel(false);
     let mut room = identity(RoomProfile::ExpandedV5);
     room.mode = RoomMode::Solo(CpuProfile::CURRENT);
@@ -68,7 +75,7 @@ pub(super) fn running_driver_with_fuse(round_seed: u8, fuse_ticks: u64) -> Drive
             driver.runtime.lifecycle().round_attempt(),
             MatchAction::UpdateSettings {
                 settings_revision: 1,
-                settings: RoomSettings::new(SpeedLevel::Four, 64, 1, fuse_ticks).unwrap(),
+                settings,
             },
         )
         .unwrap();

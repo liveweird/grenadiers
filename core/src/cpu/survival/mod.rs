@@ -6,6 +6,7 @@
 mod compatibility;
 mod execution;
 mod planner;
+mod plant_value;
 mod route_execution;
 mod steering;
 

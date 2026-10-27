@@ -4,7 +4,7 @@ use crate::cpu::{MemoryKey, MovementIntent, Observation};
 use crate::game::Tick;
 
 use super::MAX_PLAN_AGE_TICKS;
-use super::compatibility::{actor, actor_compatible, route_compatible};
+use super::compatibility::{actor, plant_actor_compatible, route_compatible};
 use super::planner::ExecutionCertificate;
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum RouteStatus {
@@ -268,6 +268,9 @@ impl CommittedRoute {
         let Some(plant) = self.plant.as_mut() else {
             return false;
         };
+        if matches!(plant.presence, PlantPresence::Present(_)) {
+            return false;
+        }
         plant.presence = PlantPresence::Absent;
         true
     }
@@ -280,16 +283,22 @@ impl CommittedRoute {
         let Some(plant) = self.plant.as_mut() else {
             return route_compatible(&self.basis, current, self.certificate.evolution());
         };
-        if plant.presence == PlantPresence::Awaiting {
+        let candidate = if plant.presence == PlantPresence::Awaiting {
             let Ok(presence) = plant.certificate.confirm(&self.basis, current) else {
                 return false;
             };
-            plant.presence = presence;
-        }
-        plant
+            presence
+        } else {
+            plant.presence
+        };
+        let compatible = plant
             .certificate
-            .matches_scene(&self.basis, current, plant.presence)
-            && plant_actor_compatible(&self.basis, current, &plant.certificate, plant.presence)
+            .matches_scene(&self.basis, current, candidate)
+            && plant_actor_compatible(&self.basis, current, &plant.certificate, candidate);
+        if compatible {
+            plant.presence = candidate;
+        }
+        compatible
     }
 
     fn active_status(&self) -> RouteStatus {
@@ -299,18 +308,6 @@ impl CommittedRoute {
             RouteStatus::Continue
         }
     }
-}
-
-fn plant_actor_compatible(
-    basis: &Observation,
-    observation: &Observation,
-    certificate: &PlantCertificate,
-    presence: PlantPresence,
-) -> bool {
-    let owner = certificate.placement().owner;
-    let expected = certificate.expected_live_bombs(owner, observation.parts().tick, presence);
-    actor(basis).is_some_and(|actor| actor.id == owner)
-        && actor_compatible(basis, observation, expected)
 }
 
 fn transitions(

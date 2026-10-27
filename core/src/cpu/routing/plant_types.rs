@@ -1,6 +1,6 @@
 use crate::cpu::forecast::{ForecastEvolution, ForecastFailure};
 use crate::cpu::{BombKnowledge, MemoryKey, MovementIntent, Observation};
-use crate::game::{BlastKind, CellId, EntityId, Tick};
+use crate::game::{BlastKind, CellId, EntityId, SpecialWeapon, Tick};
 
 use super::{RouteCertificate, RouteFailure, RouteLimits};
 
@@ -18,6 +18,7 @@ pub struct PlannedBomb {
     pub owner: EntityId,
     pub cell: CellId,
     pub range: u16,
+    pub blast: BlastKind,
     pub detonates_at: Tick,
 }
 
@@ -46,6 +47,7 @@ pub struct PlantCertificate {
     hypothetical_id: EntityId,
     absent: ForecastEvolution,
     present: ForecastEvolution,
+    weapon_before: Option<SpecialWeapon>,
 }
 
 impl PlantCertificate {
@@ -55,6 +57,7 @@ impl PlantCertificate {
         hypothetical_id: EntityId,
         absent: ForecastEvolution,
         present: ForecastEvolution,
+        weapon_before: Option<SpecialWeapon>,
     ) -> Self {
         Self {
             key: route.key(),
@@ -63,6 +66,7 @@ impl PlantCertificate {
             hypothetical_id,
             absent,
             present,
+            weapon_before,
         }
     }
 
@@ -74,6 +78,19 @@ impl PlantCertificate {
     #[must_use]
     pub const fn placement(&self) -> &PlannedBomb {
         &self.placement
+    }
+
+    #[must_use]
+    pub const fn expected_weapon(&self, presence: PlantPresence) -> Option<SpecialWeapon> {
+        match presence {
+            PlantPresence::Awaiting | PlantPresence::Absent => self.weapon_before,
+            PlantPresence::Present(_) => None,
+        }
+    }
+
+    #[must_use]
+    pub(crate) const fn weapon_before(&self) -> Option<SpecialWeapon> {
+        self.weapon_before
     }
 
     pub fn confirm(
@@ -172,7 +189,7 @@ impl PlantCertificate {
                 && bomb.owner == self.placement.owner
                 && bomb.cell == self.placement.cell
                 && bomb.range == self.placement.range
-                && bomb.blast == BlastKind::Standard
+                && bomb.blast == self.placement.blast
                 && matches!(
                     bomb.trigger,
                     crate::cpu::ObservedBombTrigger::Timed {

@@ -275,3 +275,7 @@ mod route_tests;
 #[cfg(test)]
 #[path = "cpu_runtime_plant_tests.rs"]
 mod plant_tests;
+
+#[cfg(test)]
+#[path = "cpu_runtime_weapon_tests.rs"]
+mod weapon_tests;

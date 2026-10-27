@@ -81,9 +81,9 @@ fn run_punch_case(profile: CpuProfile, reject_manual: bool) {
                 .unwrap();
         }
     }
-    let manual_before = driver.runtime.next_cpu_manual_action();
+    let manual_before = driver.runtime.next_cpu_manual_action(SeatId::Two);
     driver.poll_cpu_result().unwrap();
-    let manual_after = driver.runtime.next_cpu_manual_action();
+    let manual_after = driver.runtime.next_cpu_manual_action(SeatId::Two);
     assert_eq!(driver.runtime.lifecycle().tick(), admission);
     assert!(driver.cpu_stationary);
     assert!(
@@ -143,7 +143,10 @@ fn run_punch_case(profile: CpuProfile, reject_manual: bool) {
         "CPU must survive full fuse and flame expiry: reject={reject_manual} saw={saw_flame} lastTick={last_observation_tick:?} alive={last_alive} phase={:?}",
         driver.runtime.lifecycle().phase()
     );
-    assert_eq!(driver.runtime.next_cpu_manual_action(), manual_after);
+    assert_eq!(
+        driver.runtime.next_cpu_manual_action(SeatId::Two),
+        manual_after
+    );
 }
 
 fn prepared_driver(profile: CpuProfile) -> (Driver, CpuPlanner, Observation) {
@@ -230,7 +233,7 @@ fn running_driver(settings: RoomSettings, profile: CpuProfile) -> (Driver, CpuPl
             },
         )
         .unwrap();
-    driver.runtime.cpu_ready().unwrap();
+    driver.runtime.cpu_ready(SeatId::Two).unwrap();
     driver
         .runtime
         .action(

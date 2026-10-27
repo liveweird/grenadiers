@@ -19,6 +19,7 @@ use crate::game::rooms::cpu::worker::{CpuPlanner, PlanResult};
 fn controller() -> CpuController {
     let mut controller = CpuController::new(
         CpuPlanner::without_workers(),
+        SeatId::Two,
         7,
         [5; 32],
         grenadiers_core::room::CpuProfile::CURRENT,

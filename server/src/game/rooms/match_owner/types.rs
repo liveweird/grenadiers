@@ -158,8 +158,11 @@ impl PreparedMatchOwner {
             grenadiers_core::room::RoomMode::HumanDuel => None,
         };
         let cpu = identity.private_cpu_seed.map(|seed| {
+            let cpu_seat = super::super::match_runtime::cpu_seat_for_mode(identity.mode)
+                .expect("private CPU seed belongs to a solo room");
             crate::game::rooms::cpu::CpuController::new(
                 cpu_planner,
+                cpu_seat,
                 identity.registry_serial,
                 seed,
                 cpu_profile.expect("private CPU seed belongs to a solo room"),

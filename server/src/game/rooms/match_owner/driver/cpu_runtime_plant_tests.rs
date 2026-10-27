@@ -194,10 +194,13 @@ fn rejected_initial_movement(profile: CpuProfile) {
             )
             .unwrap();
     }
-    let manual_before = driver.runtime.next_cpu_manual_action();
+    let manual_before = driver.runtime.next_cpu_manual_action(SeatId::Two);
     driver.poll_cpu_result().unwrap();
 
-    assert_eq!(driver.runtime.next_cpu_manual_action(), manual_before);
+    assert_eq!(
+        driver.runtime.next_cpu_manual_action(SeatId::Two),
+        manual_before
+    );
     assert!(!driver.cpu.as_ref().unwrap().has_committed_route());
     assert!(!driver.cpu.as_ref().unwrap().is_escaping());
 }
@@ -249,9 +252,9 @@ fn accepted_bomb_with_same_cell_veto_selects_absent_and_keeps_route() {
         .runtime
         .action(SeatId::One, epoch, MatchAction::Bomb(1))
         .unwrap();
-    let cpu_manual_before = driver.runtime.next_cpu_manual_action();
+    let cpu_manual_before = driver.runtime.next_cpu_manual_action(SeatId::Two);
     driver.poll_cpu_result().unwrap();
-    let cpu_manual_after = driver.runtime.next_cpu_manual_action();
+    let cpu_manual_after = driver.runtime.next_cpu_manual_action(SeatId::Two);
     assert_eq!(
         cpu_manual_after,
         cpu_manual_before.and_then(|id| id.checked_add(1))
@@ -285,7 +288,10 @@ fn accepted_bomb_with_same_cell_veto_selects_absent_and_keeps_route() {
     for _ in 0..2 {
         driver.tick(Instant::now()).unwrap();
     }
-    assert_eq!(driver.runtime.next_cpu_manual_action(), cpu_manual_after);
+    assert_eq!(
+        driver.runtime.next_cpu_manual_action(SeatId::Two),
+        cpu_manual_after
+    );
 }
 
 fn shared_cell_fixture(tick: Tick) -> State {

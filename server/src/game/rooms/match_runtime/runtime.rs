@@ -78,6 +78,15 @@ pub(in crate::game::rooms) struct SimRound {
     pub(in crate::game::rooms) generation_record: Option<GenerationRecord>,
 }
 
+pub(in crate::game::rooms) const fn cpu_seat_for_mode(
+    mode: grenadiers_core::room::RoomMode,
+) -> Option<SeatId> {
+    match mode {
+        grenadiers_core::room::RoomMode::Solo(_) => Some(SeatId::Two),
+        grenadiers_core::room::RoomMode::HumanDuel => None,
+    }
+}
+
 impl MatchRuntime {
     pub(in crate::game::rooms) fn new(
         identity: RoomIdentity,

@@ -226,6 +226,7 @@ fn accepted_manual_without_physical_placement_selects_absent() {
 pub(super) fn prepared(basis: &Observation) -> CpuController {
     let mut controller = CpuController::new(
         CpuPlanner::without_workers(),
+        grenadiers_core::game::SeatId::Two,
         7,
         [5; 32],
         CpuProfile::CURRENT,

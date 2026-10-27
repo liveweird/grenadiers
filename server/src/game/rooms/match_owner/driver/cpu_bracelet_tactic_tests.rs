@@ -177,7 +177,7 @@ fn running_driver_with_queued_planner(settings: RoomSettings) -> (Driver, CpuPla
             },
         )
         .unwrap();
-    driver.runtime.cpu_ready().unwrap();
+    driver.runtime.cpu_ready(SeatId::Two).unwrap();
     driver
         .runtime
         .action(

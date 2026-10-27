@@ -202,7 +202,13 @@ mod tests {
     }
 
     fn armed_controller(profile: CpuProfile) -> CpuController {
-        let mut controller = CpuController::new(CpuPlanner::without_workers(), 7, [5; 32], profile);
+        let mut controller = CpuController::new(
+            CpuPlanner::without_workers(),
+            grenadiers_core::game::SeatId::Two,
+            7,
+            [5; 32],
+            profile,
+        );
         let basis = observation_at(20);
         assert!(controller.accept_observation(&basis));
         controller.settled_stop_tick = Some(basis.parts().tick);

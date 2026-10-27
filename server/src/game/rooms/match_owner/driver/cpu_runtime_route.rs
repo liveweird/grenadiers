@@ -1,6 +1,5 @@
 use grenadiers_core::{
     cpu::{MovementIntent, survival::RouteStatus},
-    game::SeatId,
     room::MatchPhase,
 };
 
@@ -14,6 +13,9 @@ impl Driver {
         }
         let tick = self.runtime.lifecycle().tick();
         let epoch = self.runtime.lifecycle().round_attempt();
+        let Some(cpu_seat) = self.cpu.as_ref().map(|cpu| cpu.seat()) else {
+            return Ok(());
+        };
         let Some(status) = self
             .cpu
             .as_mut()
@@ -34,7 +36,7 @@ impl Driver {
         };
         match self
             .runtime
-            .action(SeatId::Two, epoch, MatchAction::Movement(movement))
+            .submit_cpu_intent(cpu_seat, epoch, MatchAction::Movement(movement))
         {
             Ok(_) => {}
             Err(error) if fatal(error) => return Err(error),

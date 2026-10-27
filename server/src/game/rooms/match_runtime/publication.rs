@@ -100,11 +100,11 @@ pub(super) fn snapshot(
         sim.generation_record,
     )
     .map_err(|_| MatchRuntimeError::Publication)?;
-    let cpu_observation = if matches!(identity.mode, grenadiers_core::room::RoomMode::Solo(_)) {
+    let cpu_observation = if let Some(cpu_seat) = super::cpu_seat_for_mode(identity.mode) {
         Some(
             grenadiers_core::protocol::v13::observe_cpu_recipient(
                 &bound,
-                grenadiers_core::protocol::Seat::Two,
+                wire_seat(cpu_seat),
                 grenadiers_core::cpu::WorldId {
                     room_instance: identity.registry_serial,
                     physical_round: sim.epoch,

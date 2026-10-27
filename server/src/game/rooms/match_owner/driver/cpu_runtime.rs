@@ -13,11 +13,16 @@ use crate::game::rooms::match_runtime::{MatchAction, MatchRuntimeError};
 
 impl Driver {
     pub(in crate::game::rooms) fn is_empty(&self) -> bool {
-        if self.cpu.is_some() {
-            return matches!(
-                self.runtime.lifecycle().reconnect_grace().seat(SeatId::One),
-                ReservationState::Vacant | ReservationState::Expired
-            );
+        if let Some(cpu_seat) = self.cpu.as_ref().map(|cpu| cpu.seat()) {
+            return SeatId::ALL
+                .into_iter()
+                .filter(|seat| *seat != cpu_seat)
+                .all(|seat| {
+                    matches!(
+                        self.runtime.lifecycle().reconnect_grace().seat(seat),
+                        ReservationState::Vacant | ReservationState::Expired
+                    )
+                });
         }
         self.seats.iter().all(Option::is_none)
     }
@@ -40,6 +45,11 @@ impl Driver {
     ) -> Result<(), MatchRuntimeError> {
         let tick = self.runtime.lifecycle().tick();
         let epoch = self.runtime.lifecycle().round_attempt();
+        let cpu_seat = self
+            .cpu
+            .as_ref()
+            .expect("accepted plan has controller")
+            .seat();
         let movement = match plan.intent.movement {
             MovementIntent::Direction(direction) => Some(direction),
             MovementIntent::Stop => None,
@@ -47,7 +57,7 @@ impl Driver {
         let has_route = plan.has_route();
         match self
             .runtime
-            .action(SeatId::Two, epoch, MatchAction::Movement(movement))
+            .submit_cpu_intent(cpu_seat, epoch, MatchAction::Movement(movement))
         {
             Ok(_) => {}
             Err(error) if fatal(error) => return Err(error),
@@ -93,12 +103,17 @@ impl Driver {
         plan: grenadiers_core::cpu::policy::ControlPlan,
     ) -> Result<(), MatchRuntimeError> {
         let tick = self.runtime.lifecycle().tick();
+        let cpu_seat = self
+            .cpu
+            .as_ref()
+            .expect("escape plan has controller")
+            .seat();
         let movement = match plan.intent.movement {
             MovementIntent::Direction(direction) => Some(direction),
             MovementIntent::Stop => None,
         };
-        match self.runtime.action(
-            SeatId::Two,
+        match self.runtime.submit_cpu_intent(
+            cpu_seat,
             self.runtime.lifecycle().round_attempt(),
             MatchAction::Movement(movement),
         ) {
@@ -129,14 +144,19 @@ impl Driver {
         let Some(manual) = manual else {
             return Ok(None);
         };
-        let Some(id) = self.runtime.next_cpu_manual_action() else {
+        let cpu_seat = self
+            .cpu
+            .as_ref()
+            .expect("manual plan has controller")
+            .seat();
+        let Some(id) = self.runtime.next_cpu_manual_action(cpu_seat) else {
             return Ok(None);
         };
         let action = match manual {
             ManualIntent::Bomb => MatchAction::Bomb(id),
             ManualIntent::Equipment => MatchAction::Equipment(id),
         };
-        match self.runtime.action(SeatId::Two, epoch, action) {
+        match self.runtime.submit_cpu_intent(cpu_seat, epoch, action) {
             Ok(_) => Ok(Some(manual)),
             Err(error) if fatal(error) => Err(error),
             Err(_) => Ok(None),
@@ -148,9 +168,13 @@ impl Driver {
         if !self.cpu_stop_at.is_some_and(|deadline| tick >= deadline) {
             return Ok(());
         }
+        let Some(cpu_seat) = self.cpu.as_ref().map(|cpu| cpu.seat()) else {
+            self.cpu_stop_at = None;
+            return Ok(());
+        };
         if self.runtime.lifecycle().phase() == MatchPhase::Running {
-            match self.runtime.action(
-                SeatId::Two,
+            match self.runtime.submit_cpu_intent(
+                cpu_seat,
                 self.runtime.lifecycle().round_attempt(),
                 MatchAction::Movement(None),
             ) {
@@ -249,11 +273,16 @@ impl Driver {
         if self.cpu.is_none() {
             return Ok(());
         }
+        let cpu_seat = self
+            .cpu
+            .as_ref()
+            .expect("CPU lifecycle has controller")
+            .seat();
         let phase = self.runtime.lifecycle().phase();
         if phase == MatchPhase::Waiting
-            && !self.runtime.lifecycle().seats()[SeatId::Two.index()].ready()
+            && !self.runtime.lifecycle().seats()[cpu_seat.index()].ready()
         {
-            if let Some(notice) = self.runtime.cpu_ready()? {
+            if let Some(notice) = self.runtime.cpu_ready(cpu_seat)? {
                 self.publish(notice);
             }
             return Ok(());
@@ -261,15 +290,20 @@ impl Driver {
         let MatchPhase::MatchResult { rematch_at, .. } = phase else {
             return Ok(());
         };
-        let human_connected = matches!(
-            self.runtime.lifecycle().reconnect_grace().seat(SeatId::One),
-            ReservationState::Connected
-        );
-        let cpu_voted = self.runtime.lifecycle().series().rematch_votes()[SeatId::Two.index()];
+        let human_connected = SeatId::ALL
+            .into_iter()
+            .filter(|seat| *seat != cpu_seat)
+            .any(|seat| {
+                matches!(
+                    self.runtime.lifecycle().reconnect_grace().seat(seat),
+                    ReservationState::Connected
+                )
+            });
+        let cpu_voted = self.runtime.lifecycle().series().rematch_votes()[cpu_seat.index()];
         if human_connected
             && !cpu_voted
             && self.runtime.lifecycle().tick() >= rematch_at
-            && let Some(notice) = self.runtime.cpu_rematch()?
+            && let Some(notice) = self.runtime.cpu_rematch(cpu_seat)?
         {
             self.publish(notice);
         }

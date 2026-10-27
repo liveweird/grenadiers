@@ -18,6 +18,7 @@ fn route_admission_accepts_predicted_detonation_but_rejects_an_extra_hazard() {
     let make_controller = || {
         let mut controller = CpuController::new(
             CpuPlanner::without_workers(),
+            grenadiers_core::game::SeatId::Two,
             7,
             [5; 32],
             grenadiers_core::room::CpuProfile::CURRENT,
@@ -46,6 +47,7 @@ fn route_admission_accepts_predicted_detonation_but_rejects_an_extra_hazard() {
     let unexpected_observation = grenadiers_core::cpu::Observation::new(unexpected).unwrap();
     let mut rejected = CpuController::new(
         CpuPlanner::without_workers(),
+        grenadiers_core::game::SeatId::Two,
         7,
         [5; 32],
         grenadiers_core::room::CpuProfile::CURRENT,
@@ -98,6 +100,7 @@ fn committed_wait_controller() -> (CpuController, grenadiers_core::cpu::Observat
     let (basis, current, route, key) = detonation_fixture();
     let mut controller = CpuController::new(
         CpuPlanner::without_workers(),
+        grenadiers_core::game::SeatId::Two,
         7,
         [5; 32],
         grenadiers_core::room::CpuProfile::CURRENT,

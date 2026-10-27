@@ -8,6 +8,7 @@ pub(crate) use frames::SeatFrames;
 pub(super) use runtime::MatchRuntime;
 pub(super) use runtime::admission::PreparedRuntimeAdmission;
 pub(super) use runtime::admission::ResumeKind;
+pub(in crate::game::rooms) use runtime::cpu_seat_for_mode;
 #[cfg(test)]
 pub(super) use runtime::replay::RuntimeInspection;
 pub(crate) use runtime::{MatchAction, MatchNotice};

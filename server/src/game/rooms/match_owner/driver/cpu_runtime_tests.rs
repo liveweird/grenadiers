@@ -104,7 +104,7 @@ pub(super) fn running_driver_and_planner_with_profile(
             },
         )
         .unwrap();
-    driver.runtime.cpu_ready().unwrap();
+    driver.runtime.cpu_ready(SeatId::Two).unwrap();
     driver
         .runtime
         .action(

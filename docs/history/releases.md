@@ -4,6 +4,22 @@ This archive preserves the older release records originally maintained in
 [`docs/releases.md`](../releases.md). Records remain in their original order; the current
 release procedure and current release record stay in the [release guide](../releases.md).
 
+## v0.3.99 — 2026-10-28
+
+[v0.3.99](https://github.com/liveweird/grenadiers/releases/tag/v0.3.99) prepares multiplayer with explicit CPU seat identity and distinct forest-green/cream/silver and plum-purple/cream/gold uniform appearances. Controllers validate their recipient before changing memory or world state; current Solo runtime authority remains seat Two. The artist sheet adds 16 directional frames while preserving all original 95 frame definitions and decoded pixels. See the [artist handoff](../../assets/art/README.md) and [multiplayer design](../game/multiplayer-design.md).
+
+This release retains two-player live rooms, gameplay v13, replay format 3 and existing simulation/generation identities. Additional appearances are ready for artist review; three-/four-player rooms and configurable arenas are subsequent work. Deploy the paired server/browser and reload clients for the updated atlas.
+
+Independent CPU/art review is clear. Full web passes 6,892 tests/98 files: lines 93.64%, statements 91.31%, functions 90.42%, branches 89.95%. Compressed JS is 369,324/400,000 bytes; CSS 15,092/20,000. Formatting, warnings-denied Clippy, source caps, contract/static checks and tooling pass. Atlas browser acceptance passes 10 cases plus two gameplay cases. All 64 CPU reference cases retain exact v0.3.98 metrics and accepted-input replay; isolated Standard opening/full runs take 2.37s/12.20s and Easy 2.10s/10.48s. These comparisons establish compatibility rather than human balance.
+
+The complete server gate passes on source `f01610a39ce7b2a8d7745583d17ddead0f0b6001`, tree `8aabec7789a18ba086687a269e6040140b8264ed`: 495.393s; 27,722/30,098 lines (**92.1058%**); all 4,194,304 masks in each debug/release/official coverage profile; 32 partitions, four workers, zero hidden retries and 37 raw profiles. Official LCOV was copied before releasing the source/target freeze. Unique Linux [run 40599801460](https://github.com/liveweird/grenadiers/actions/runs/40599801460) passes.
+
+Exact image `sha256:a5654f65a6aaaae14b32e684486665429c7441c9d203bf4dfffa8b90e92d8350` passes pinned Trivy 0.74.0 with zero fixable HIGH/CRITICAL findings; Compose 10 cases/49.9s; Kubernetes 10 cases/51.3s; CPU item collection 1 case/16.4s; Polish 320px, keyboard, asset identity, runtime security/resources and probes. The adopted uniforms were visually inspected. Temporary acceptance stacks were removed. Unchanged external dependencies retain prior audit acceptance.
+
+The initial full-web run exposed a stale status-bar expectation for the taller atlas; the fixture was corrected and the complete suite rerun without lowering assertions or floors. Generated uniform color noise was normalized to the intended bounded palettes before final review and acceptance, with binary alpha and unchanged original pixels verified.
+
+This is a source prerelease with a verified local image, not a registry publication. Localhost runs the accepted image; v0.3.98 is retained for rollback. Work priorities remain in the [backlog](../../BACKLOG.md).
+
 ## v0.3.98 — 2026-10-27
 
 [v0.3.98](https://github.com/liveweird/grenadiers/releases/tag/v0.3.98) adds Easy/Standard solo selection, defaulting to Standard, with English/Polish labels and server-authoritative difficulty retained through reconnect/rematch. Easy adds a provisional 12-tick pause after confirmed Stop ending ordinary clear-board navigation. Unknown bombs, new hazards or unsupported control effects bypass that pause. Committed escapes, Stops, manual confirmation, work limits and Standard cadence remain unchanged.

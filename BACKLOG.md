@@ -17,13 +17,10 @@ repeated approval for routine implementation choices. Entries are not delivery-d
   difficulty. Preserve ordinary rules/input, restricted
   observations, bounded work and accepted-input replay. Follow the
   [accepted design](docs/game/single-player-cpu.md).
-  - **CPU4 — stronger play:** fix ordinary steering that repeatedly requests a perpendicular
-    turn outside configured alignment tolerance. The unchanged a0/a2 reference cases confirm
-    accepted inputs with no movement, ample work and a retained goal; align before turning
-    without bypassing movement rules, dropping that goal or weakening hazard proofs.
-    Keep the real queued-driver regression, both evaluation matrices and exact replay;
-    check speed/tolerance combinations and planning cost. Then extend weapon/equipment
-    tactics, difficulty tuning, tactical look-ahead and human feedback.
+  - **CPU4 — stronger play:** extend weapon/equipment tactics, difficulty tuning and tactical
+    look-ahead, then validate with human feedback. Preserve real queued-driver physical-progress
+    regressions, both evaluation matrices, bounded planning work and exact accepted-input replay;
+    measure trajectory and cost changes alongside survival and outcomes.
 - [parked] **More seats and campaign mobs.** Revisit after the two-seat CPU mode is stable;
   neither is part of the initial solo duel.
 

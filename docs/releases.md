@@ -96,50 +96,54 @@ retain the previous immutable image reference for rollback. The runtime stage in
 rolling Debian package updates, so a later build may resolve newer packages and is not expected to
 be byte-identical; treat it as a new candidate with new evidence rather than reusing acceptance.
 
-## v0.3.93 — 2026-10-27
+## v0.3.94 — 2026-10-27
 
-[v0.3.93](https://github.com/liveweird/grenadiers/releases/tag/v0.3.93) resumes CPU goals after a
-[stationary hazard route](game/cpu-contracts.md#finite-hazard-responsiveness) observes a real clear
-gap. Full-horizon Wait routes previously remained installed after all bombs and flames disappeared,
-preventing ordinary pickup navigation during repeated rival bombing. Completion now requires an
-originally visible nonempty bomb set, a currently visible empty set, no flames or burning Oil,
-only Wait steps, consumed transitions, an executed Stop in bounds, and existing scene/actor/exact-pose
-validation. Planting, moving routes, legacy escape and origin/pulse recovery retain their paths.
-Completion grants no input: the existing controller requests a fresh ordinary decision.
+[v0.3.94](https://github.com/liveweird/grenadiers/releases/tag/v0.3.94) fixes ordinary CPU
+navigation that kept requesting a perpendicular turn outside configured tolerance. The CPU
+first aligns along its current heading axis, retains the chosen next cell, then turns from a
+fresh stopped pose. Existing pulse arithmetic bounds both residual endpoints within the center
+window; an unjustified correction yields Stop. Normal movement, settings, planting and hazard
+certification retain authority. UtilityV12 preserves V1–V11 accepted-input replay identities
+and the unchanged v12 room shape.
 
-The unchanged real queued-driver case records 64 directional inputs after tick 1,600, visits seven
-cells instead of five and remains alive through 3,600 ticks. Repeated traces and accepted-input replay
-match exactly. Core/public-API and controller tests cover Stop bounds, missing confirmation,
-finite-flame-only waits, active/hidden hazards, invalid pose, movement preservation and completion
-once. Independent source review is clear. UtilityV11 preserves V1–V10 replay identities and wire v12.
-Forecast horizons, pickup-changing pulse guards and the 65,536-unit work allowance are unchanged.
+Both recorded a0/c0 and a2/c0 queued-driver cases require physical movement and a new cell after
+running tick 2200, survival, deterministic repetition and exact replay. Focused tests cover both
+poses, signs/headings, supported speeds/tolerances and residual boundaries; an authoritative
+alignment→Stop→turn sweep covers all five speeds and four tolerances. Independent review is
+clear. Rust arithmetic tests sample boundary offsets; the separate exhaustive design calculation
+covers the full offset domain. The authoritative sweep uses one axis/sign.
 
-Clean-source opening/full-round matrices verify all 32 replays. Opening remains 16 censored/alive
-opponents; full rounds remain 15 natural timeout draws and one CPU win, with no losses or censoring.
-Every retreat case explores beyond its prior four/five-cell opening: six to 43 cells. Some still
-stall later; broader tactics and human feedback remain in the [backlog](../BACKLOG.md#single-player).
-Full-round planning rises from 2,294 to 4,118 calls, while elapsed time rises from 9.38s to 11.15s.
-Planner p95/max are 3.679/5.127ms on macOS/aarch64. These deterministic host observations do not
-establish balanced difficulty or hardware thresholds. A sandboxed measurement wrapper initially
-could not read macOS resource statistics after its successful test; the explicit permitted rerun
-produced the accepted clean-source artifacts.
+The unchanged opening and full-round matrices each replay all 16 episodes exactly. Full rounds
+retain 15 timeout draws and the same CPU win, with no CPU loss or censoring. The four formerly
+stalled retreat cases visit 33–39 cells rather than 6–7; retreat totals rise from 133 to 252 cells
+and 114 to 208 manual actions. Full calls fall 4,118→4,010 while logical work rises
+61,017,649→89,659,046 (+46.9%); the per-job maximum stays 65,536. Host elapsed rises
+11.15→12.23s, with p95/max planner observations 3.724/4.951ms. Most added work belongs to the
+restored cases, but a1/c0 retreat also costs more for 37→38 cells and the same safe draw. These
+scripted workloads and timings do not establish tuned difficulty or performance thresholds.
 
-Tested source is `6936e18df5b2624b6fc796a755ef1f6ef5272e92`.
-Full local Rust acceptance passes in 470.886s: all 4,194,304 item masks in debug,
-release and official coverage, 32 partitions/four workers, zero retries and 37 raw profiles.
-Coverage is 25,999/28,234 lines (92.08%). The distinct
-[Linux run](https://github.com/liveweird/grenadiers/actions/runs/40456096514) passes. Formatting,
-workspace Clippy and repository/source-size/tooling checks pass. Proven unchanged frontend,
-API, artwork, E2E and external dependencies retain accepted static/audit/full-web evidence
-(6,874 tests/97 files).
-Accepted image is
-`sha256:2001793700caa8a97032ce61a2ba1b4500cbe920b0e36737ca26db4fd643c6e2`.
-Pinned Trivy 0.74.0 reports zero fixable HIGH/CRITICAL findings. Compose passes ten browser cases
-in 50.1s, Kubernetes ten in 51.1s and dedicated all-items CPU pickup acceptance one in 16.4s.
-Polish 320px, resources/security/probes and served assets pass; temporary projects/namespaces are
-removed. The exact image is promoted to localhost:8085 with v0.3.92 retained for rollback;
-restarting ends in-memory matches. Evidence is under `target/quality-review/cpu4-v0393-*`.
-Distribution remains a source prerelease and local image.
+One exhaustive local server gate passes on tested source
+`63db5126b868db66f1473e280b6753f41319fad5` (tree
+`4fa6e9663254f1f2ac26eb3dee0c489d4ab8491c`): 487.449s,
+26,089/28,323 lines (**92.1124%**), all 4,194,304 item masks separately in debug,
+release and official coverage, 32 partitions/four workers/zero hidden retries and 37 raw
+profiles. Official LCOV was copied before releasing the source/target freeze. Unique Linux
+[run 40546313960](https://github.com/liveweird/grenadiers/actions/runs/40546313960) passes.
+
+Exact local image
+`sha256:f26653fc40e26616639324e5dbc99f99928672485b54097fc09471def96227da`
+passes pinned Trivy 0.74.0 with zero fixable HIGH/CRITICAL findings, Compose 10 cases/49.9s,
+Kubernetes 10 cases/51.1s, CPU-item collection 1 case/16.5s, Polish 320px, served-asset identity
+and runtime security/resources/probes. Temporary projects/namespaces were removed. Unchanged
+frontend/API/art/E2E/tooling inputs preserve the accepted full-web 6,874 tests/97 files and
+static/audit evidence; no duplicate full web run was required.
+
+This is a source prerelease with a verified local image, not a container-registry publication.
+Localhost uses this exact image; v0.3.93 is retained for rollback. Further CPU tactics, difficulty
+and human validation remain in the [backlog](../BACKLOG.md#single-player).
+
+<a id="v0393--2026-10-27"></a>
+The [v0.3.93 record](history/releases.md#v0393--2026-10-27) is preserved in release history.
 
 <a id="v0392--2026-10-27"></a>
 The [v0.3.92 record](history/releases.md#v0392--2026-10-27) is preserved in release history.

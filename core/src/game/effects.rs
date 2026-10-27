@@ -167,25 +167,12 @@ impl TimedEffects {
 
     #[must_use]
     pub fn bomb_range(&self, base: u16, at: Tick) -> u16 {
-        if self.active(EffectKind::ShortFlame, at) {
-            1
-        } else if self.active(EffectKind::GoldenFlame, at) {
-            GOLDEN_FLAME_RANGE
-        } else {
-            base
-        }
+        effective_bomb_range(base, |kind| self.active(kind, at))
     }
 
     #[must_use]
     pub fn bomb_fuse_ticks(&self, base: u64, at: Tick) -> Option<u64> {
-        match (
-            self.active(EffectKind::ShortFuse, at),
-            self.active(EffectKind::LongFuse, at),
-        ) {
-            (true, false) => Some(base.div_ceil(2).max(1)),
-            (false, true) => base.checked_mul(2),
-            _ => Some(base),
-        }
+        effective_bomb_fuse_ticks(base, |kind| self.active(kind, at))
     }
 
     #[must_use]
@@ -216,6 +203,28 @@ impl TimedEffects {
     #[must_use]
     pub fn hides_bombs(&self, at: Tick) -> bool {
         self.active(EffectKind::InvisibleBombs, at)
+    }
+}
+
+/// Applies the authoritative range modifiers to any exact effect snapshot.
+#[must_use]
+pub fn effective_bomb_range(base: u16, active: impl Fn(EffectKind) -> bool) -> u16 {
+    if active(EffectKind::ShortFlame) {
+        1
+    } else if active(EffectKind::GoldenFlame) {
+        GOLDEN_FLAME_RANGE
+    } else {
+        base
+    }
+}
+
+/// Applies the authoritative fuse modifiers to any exact effect snapshot.
+#[must_use]
+pub fn effective_bomb_fuse_ticks(base: u64, active: impl Fn(EffectKind) -> bool) -> Option<u64> {
+    match (active(EffectKind::ShortFuse), active(EffectKind::LongFuse)) {
+        (true, false) => Some(base.div_ceil(2).max(1)),
+        (false, true) => base.checked_mul(2),
+        _ => Some(base),
     }
 }
 

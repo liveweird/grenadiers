@@ -67,6 +67,7 @@ pub struct HazardForecast {
     cells: Vec<CellForecast>,
     stationary_assumptions: Vec<EntityId>,
     evolution: ForecastEvolution,
+    hypothetical_id: Option<EntityId>,
 }
 
 impl HazardForecast {
@@ -108,6 +109,12 @@ impl HazardForecast {
         &self.evolution
     }
 
+    #[must_use]
+    pub(crate) const fn hypothetical_id(&self) -> Option<EntityId> {
+        self.hypothetical_id
+    }
+
+    #[allow(clippy::too_many_arguments)]
     pub(super) fn from_parts(
         key: MemoryKey,
         basis_tick: Tick,
@@ -115,6 +122,7 @@ impl HazardForecast {
         cells: Vec<CellForecast>,
         stationary_assumptions: Vec<EntityId>,
         evolution: ForecastEvolution,
+        hypothetical_id: Option<EntityId>,
         limits: ForecastLimits,
     ) -> Result<Self, ForecastFailure> {
         if horizon_end.0 <= basis_tick.0
@@ -135,6 +143,7 @@ impl HazardForecast {
             cells,
             stationary_assumptions,
             evolution,
+            hypothetical_id,
         })
     }
 }
@@ -156,6 +165,8 @@ impl Default for ForecastLimits {
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct HypotheticalPlacement {
+    pub placed_at: Tick,
+    pub owner: EntityId,
     pub cell: CellId,
     pub range: u16,
     pub blast: BlastKind,
@@ -190,3 +201,7 @@ mod safety_review_tests;
 #[cfg(test)]
 #[path = "evolution_tests.rs"]
 mod evolution_tests;
+
+#[cfg(test)]
+#[path = "temporal_placement_tests.rs"]
+mod temporal_placement_tests;

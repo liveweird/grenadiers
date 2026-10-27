@@ -24,11 +24,22 @@ pub(super) fn check_segments(
     time: TickWindow,
     mode: RouteMode,
 ) -> Result<BTreeSet<EntityId>, RouteFailure> {
+    check_segments_with_grace(forecast, segments, time, mode, None)
+}
+
+pub(super) fn check_segments_with_grace(
+    forecast: &HazardForecast,
+    segments: &[MovementSegment],
+    time: TickWindow,
+    mode: RouteMode,
+    blocking_grace: Option<CellId>,
+) -> Result<BTreeSet<EntityId>, RouteFailure> {
     let mut assumptions = BTreeSet::new();
     for cell_id in footprint_cells(segments) {
         let cell = forecast.cell(cell_id).ok_or(RouteFailure::InvalidRequest)?;
         if cell.lethal.iter().any(|window| intersects(*window, time))
-            || cell.blocking.iter().any(|window| intersects(*window, time))
+            || (blocking_grace != Some(cell_id)
+                && cell.blocking.iter().any(|window| intersects(*window, time)))
         {
             return Err(RouteFailure::NoRoute);
         }

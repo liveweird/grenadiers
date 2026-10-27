@@ -39,6 +39,7 @@ pub(super) fn simulate_stationary(
         let snapshot = active
             .iter()
             .filter_map(|id| bombs.iter().find(|bomb| bomb.id == *id).copied())
+            .filter(|bomb| bomb.active_from <= tick)
             .map(|bomb| (bomb.cell, bomb))
             .collect::<BTreeMap<_, _>>();
         let field = ForecastField {
@@ -131,17 +132,33 @@ fn seed_events(
         {
             events.entry(at).or_default().insert(bomb.id);
         }
-        if !matches!(bomb.trigger, Trigger::Contact)
-            && observation
-                .parts()
-                .flames
-                .iter()
-                .any(|flame| flame.cell == bomb.cell && flame.remaining_ticks > 1)
-        {
-            events
-                .entry(Tick(observation.parts().tick.0 + 1))
-                .or_default()
-                .insert(bomb.id);
+        if !matches!(bomb.trigger, Trigger::Contact) {
+            let ignition = if bomb.hypothetical {
+                observation
+                    .parts()
+                    .flames
+                    .iter()
+                    .any(|flame| {
+                        flame.cell == bomb.cell
+                            && observation
+                                .parts()
+                                .tick
+                                .0
+                                .checked_add(u64::from(flame.remaining_ticks))
+                                .is_some_and(|expiry| expiry > bomb.active_from.0)
+                    })
+                    .then_some(bomb.active_from)
+            } else {
+                observation
+                    .parts()
+                    .flames
+                    .iter()
+                    .any(|flame| flame.cell == bomb.cell && flame.remaining_ticks > 1)
+                    .then_some(Tick(observation.parts().tick.0 + 1))
+            };
+            if let Some(at) = ignition {
+                events.entry(at).or_default().insert(bomb.id);
+            }
         }
     }
 }
@@ -227,7 +244,16 @@ fn add_blocking_windows(
             add_window(
                 &mut cells[index(bomb.cell)].blocking,
                 TickWindow {
-                    start: basis,
+                    start: if bomb.hypothetical {
+                        Tick(
+                            bomb.active_from
+                                .0
+                                .checked_add(1)
+                                .ok_or(ForecastFailure::ClockOverflow)?,
+                        )
+                    } else {
+                        basis
+                    },
                     end: removals.get(&bomb.id).copied().unwrap_or(horizon_end),
                 },
                 limits,

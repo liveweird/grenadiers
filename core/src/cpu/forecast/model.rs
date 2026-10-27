@@ -21,6 +21,7 @@ pub(super) struct ForecastBomb {
     pub(super) blast: BlastKind,
     pub(super) trigger: Trigger,
     pub(super) hypothetical: bool,
+    pub(super) active_from: Tick,
 }
 
 pub(super) struct ForecastField<'a> {

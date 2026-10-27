@@ -4,7 +4,9 @@ use crate::cpu::WorkBudget;
 use crate::cpu::forecast::{HazardForecast, TickWindow};
 use crate::game::{EntityId, MovementSegment, Position, Tick};
 
-use super::safety::{check_segments, footprint_cells, static_segment_clear, stationary_segment};
+use super::safety::{
+    check_segments_with_grace, footprint_cells, static_segment_clear, stationary_segment,
+};
 use super::validation::Context;
 use super::{RouteFailure, RouteMode, RouteRequest};
 
@@ -55,16 +57,20 @@ pub(super) fn stationary_risk(
     Ok(risk)
 }
 
-pub(super) fn check_transition(
+pub(super) fn check_transition_all(
     context: &Context<'_>,
-    forecast: &HazardForecast,
+    forecasts: &[&HazardForecast],
     segments: &[MovementSegment],
     window: TickWindow,
     mode: RouteMode,
+    blocking_grace: Option<crate::game::CellId>,
     work: &mut WorkBudget,
 ) -> Result<BTreeSet<EntityId>, RouteFailure> {
-    let units =
-        u32::try_from(footprint_cells(segments).len()).map_err(|_| RouteFailure::Capacity)?;
+    let units = footprint_cells(segments)
+        .len()
+        .checked_mul(forecasts.len())
+        .and_then(|count| u32::try_from(count).ok())
+        .ok_or(RouteFailure::Capacity)?;
     work.try_take(units.max(1))
         .map_err(|_| RouteFailure::WorkExhausted)?;
     if !static_segment_clear(context.observation, segments)
@@ -76,25 +82,49 @@ pub(super) fn check_transition(
     {
         return Err(RouteFailure::NoRoute);
     }
-    check_segments(forecast, segments, window, mode)
+    let mut assumptions = BTreeSet::new();
+    for forecast in forecasts {
+        assumptions.extend(check_segments_with_grace(
+            forecast,
+            segments,
+            window,
+            mode,
+            blocking_grace,
+        )?);
+    }
+    Ok(assumptions)
 }
 
-pub(super) fn check_stationary(
-    forecast: &HazardForecast,
+pub(super) fn check_stationary_all(
+    forecasts: &[&HazardForecast],
     position: Position,
     window: TickWindow,
     mode: RouteMode,
+    blocking_grace: Option<crate::game::CellId>,
     work: &mut WorkBudget,
 ) -> Result<BTreeSet<EntityId>, RouteFailure> {
     if window.start >= window.end {
         return Ok(BTreeSet::new());
     }
     let segment = stationary_segment(position);
-    work.try_take(
-        u32::try_from(footprint_cells(&segment).len()).map_err(|_| RouteFailure::Capacity)?,
-    )
-    .map_err(|_| RouteFailure::WorkExhausted)?;
-    check_segments(forecast, &segment, window, mode)
+    let units = footprint_cells(&segment)
+        .len()
+        .checked_mul(forecasts.len())
+        .and_then(|count| u32::try_from(count).ok())
+        .ok_or(RouteFailure::Capacity)?;
+    work.try_take(units)
+        .map_err(|_| RouteFailure::WorkExhausted)?;
+    let mut assumptions = BTreeSet::new();
+    for forecast in forecasts {
+        assumptions.extend(check_segments_with_grace(
+            forecast,
+            &segment,
+            window,
+            mode,
+            blocking_grace,
+        )?);
+    }
+    Ok(assumptions)
 }
 
 pub(super) fn wait_boundaries(

@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+## 0.3.99 — 2026-10-28
+
+- Make CPU seat identity explicit through controller memory, recipient validation and ordinary
+  runtime input, retaining the current two-seat solo behavior and authority boundary.
+- Add forest-green and plum-purple uniform appearances, with directional walk frames and
+  distinct headgear, to the shared artist atlas; preserve all existing artwork and anchors.
+- Prepare the atlas and diagnostics for four appearances without activating additional live seats.
+
 ## 0.3.98 — 2026-10-27
 
 - Add Easy and Standard solo selection with server-owned profile metadata and reconnect/rematch retention.

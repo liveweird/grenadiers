@@ -7,7 +7,7 @@ import { gameFrames, openGame, sendGame } from './support/game'
 const latestRoom = (game: ObservedGame) => game.frames.filter((frame) =>
   frame.type === 'admitted' || frame.type === 'roomState' || frame.type === 'snapshot').at(-1)?.room
 
-test('a solo player completes, rematches, reconnects and leaves a real CPU match', async ({ browser }) => {
+test('an Easy solo player completes, rematches, reconnects and leaves a real CPU match', async ({ browser }) => {
   test.setTimeout(60_000)
   const contexts = await Promise.all([browser.newContext(), browser.newContext()])
   try {
@@ -16,21 +16,24 @@ test('a solo player completes, rematches, reconnects and leaves a real CPU match
     const game = observeGame(player)
     await Promise.all([player.goto('/'), openGame(authority)])
 
+    const difficulty = player.getByRole('combobox', { name: 'CPU difficulty', exact: true })
+    await expect(difficulty).toHaveValue('standard')
+    await difficulty.selectOption('easy')
     await player.getByRole('button', { name: 'Play solo against CPU', exact: true }).click()
     await expect.poll(() => latestRoom(game)).toBeTruthy()
     const created = latestRoom(game)!
-    expect(created.mode).toEqual({ type: 'solo', difficulty: 'standard' })
+    expect(created.mode).toEqual({ type: 'solo', difficulty: 'easy' })
     expect(created.seats).toEqual([
       expect.objectContaining({
         seat: 'one', occupied: true, controller: { type: 'human' }, connection: { type: 'connected' },
       }),
       expect.objectContaining({
-        seat: 'two', occupied: true, controller: { type: 'cpu', difficulty: 'standard' },
+        seat: 'two', occupied: true, controller: { type: 'cpu', difficulty: 'easy' },
         connection: { type: 'serverControlled' },
       }),
     ])
     expect(created.settings.enabledItems).toEqual(created.availableItems)
-    await expect(player.getByText('Private solo match · Standard CPU', { exact: true })).toBeVisible()
+    await expect(player.getByText('Private solo match · Easy CPU', { exact: true })).toBeVisible()
     await expect(player.getByRole('list', { name: 'Players' })).toContainText('CPU opponent')
     await expect(player.getByLabel('Room invitation code', { exact: true })).toHaveCount(0)
 
@@ -89,6 +92,7 @@ test('a solo player completes, rematches, reconnects and leaves a real CPU match
     await expect(rematch).toBeEnabled({ timeout: 10_000 })
     await rematch.click()
     await expect.poll(() => latestRoom(game)?.phase.type).toBe('waiting')
+    await expect(player.getByText('Private solo match · Easy CPU', { exact: true })).toBeVisible()
     expect(latestRoom(game)?.settings).toMatchObject({
       winsToFinish: 1, bombFuseTicks: 60, enabledItems: created.availableItems,
     })
@@ -104,8 +108,9 @@ test('a solo player completes, rematches, reconnects and leaves a real CPU match
     const restored = (await admissionBaseline(player))!
     expect(restored).toMatchObject({ roomId: created.roomId, seat: 'one', stableCapability: true })
     expect(latestRoom(game)?.seats[1]).toMatchObject({
-      controller: { type: 'cpu', difficulty: 'standard' }, connection: { type: 'serverControlled' },
+      controller: { type: 'cpu', difficulty: 'easy' }, connection: { type: 'serverControlled' },
     })
+    await expect(player.getByText('Private solo match · Easy CPU', { exact: true })).toBeVisible()
 
     await player.getByRole('button', { name: 'Leave room', exact: true }).click()
     await expect(player.getByRole('button', { name: 'Play solo against CPU', exact: true })).toBeEnabled()
@@ -118,11 +123,18 @@ test('a solo player completes, rematches, reconnects and leaves a real CPU match
   }
 })
 
-test('Polish solo controls stay accessible without horizontal overflow at 320 pixels', async ({ page }) => {
+test('Polish solo controls default to Standard and stay keyboard accessible without horizontal overflow at 320 pixels', async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 844 })
   await page.goto('/')
   await page.getByText('Polski', { exact: true }).click()
   expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false)
+  const difficulty = page.getByRole('combobox', { name: 'Poziom trudności komputera', exact: true })
+  await expect(difficulty).toHaveValue('standard')
+  await difficulty.focus()
+  await page.keyboard.press('Home')
+  await expect(difficulty).toHaveValue('easy')
+  await page.keyboard.press('End')
+  await expect(difficulty).toHaveValue('standard')
   await page.getByRole('button', { name: 'Zagraj solo z komputerem', exact: true }).click()
 
   await expect(page.getByText('Prywatny mecz solo · Standardowy komputer', { exact: true })).toBeVisible()

@@ -1,4 +1,4 @@
-import { Alert, Button, Group, Stack, Text, TextInput, Title } from '@mantine/core'
+import { Alert, Button, Group, NativeSelect, Stack, Text, TextInput, Title } from '@mantine/core'
 import { useMemo, useState } from 'react'
 import type { KeyboardBindings } from '../arena/bindings'
 import { GameArena } from '../arena/GameArena'
@@ -6,8 +6,8 @@ import type { Direction } from '../arena/types'
 import type { AdmissionIntent, GameClientState } from './client'
 import { format, useGameCopy, type GameCopy } from './locale'
 import type {
-  GameSettings, MatchInterruptReason, MatchResult, RoomPhase, RoundResult, Seat, VisibleActorView,
-} from '../v12/schema'
+  Difficulty, GameSettings, MatchInterruptReason, MatchResult, RoomPhase, RoundResult, Seat, VisibleActorView,
+} from '../v13/schema'
 import { useGameClient } from './useGameClient'
 import { ControlsDialog } from './ControlsDialog'
 import { bindingsSummary, keyLabel } from './controlLabels'
@@ -134,15 +134,24 @@ function SeatLine({ state, seat, copy }: { state: GameClientState; seat: Seat; c
 
 function LobbyControls({ state, actions, copy }: { state: GameClientState; actions: GameActions; copy: GameCopy }) {
   const [code, setCode] = useState('')
+  const [difficulty, setDifficulty] = useState<Difficulty>('standard')
   const busy = state.admissionPending
     || ['connecting', 'authenticating', 'reconnecting'].includes(state.connection)
+  const selectDifficulty = (value: string): void => {
+    if (value === 'easy' || value === 'standard') setDifficulty(value)
+  }
   return (
     <div className="lobby-controls">
       <Title order={2}>{copy.lobby.title}</Title>
       <Text>{copy.lobby.explanation}</Text>
       <Button size="lg" onClick={() => actions.admit({ type: 'create' })} loading={busy}>{copy.lobby.create}</Button>
+      <NativeSelect label={copy.solo.difficultyLabel} value={difficulty} disabled={busy}
+        onChange={(event) => selectDifficulty(event.currentTarget.value)} data={[
+          { value: 'easy', label: copy.solo.easy },
+          { value: 'standard', label: copy.solo.standard },
+        ]} />
       <Button size="lg" variant="light" disabled={busy}
-        onClick={() => actions.admit({ type: 'create', mode: { type: 'solo', difficulty: 'standard' } })}>
+        onClick={() => actions.admit({ type: 'create', mode: { type: 'solo', difficulty } })}>
         {copy.solo.play}
       </Button>
       <div className="join-rule"><span>{copy.lobby.or}</span></div>
@@ -182,7 +191,7 @@ function RoomControls({ state, actions, copy }: { state: GameClientState; action
     && !controllersAvailable(room)
   return (
     <div className="room-controls">
-      {room.mode.type === 'solo' ? <Text>{copy.solo.difficulty}</Text>
+      {room.mode.type === 'solo' ? <Text>{copy.solo.roomDifficulty[room.mode.difficulty]}</Text>
         : <div><Text size="sm">{copy.room.invitation}</Text>
           <Text className="room-code" aria-label={copy.room.codeLabel}>{room.roomCode}</Text></div>}
       <Text className="phase-line" aria-live="polite">{phaseText(copy, room.phase)}</Text>

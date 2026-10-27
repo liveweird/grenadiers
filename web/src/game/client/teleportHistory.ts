@@ -1,4 +1,4 @@
-import type { GameState, RoomView, Snapshot } from '../v12/schema'
+import type { GameState, RoomView, Snapshot } from '../v13/schema'
 
 export function preservesTeleportHistory(
   previous: Snapshot | null, room: RoomView, next: GameState | null,

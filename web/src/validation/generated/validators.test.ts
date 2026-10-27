@@ -2,6 +2,7 @@ import Ajv, { type ErrorObject, type ValidateFunction } from 'ajv'
 import { describe, expect, it } from 'vitest'
 import gameplayV11Schema from '../../../../api/gameplay-v11.schema.json'
 import gameplayV12Schema from '../../../../api/gameplay-v12.schema.json'
+import gameplayV13Schema from '../../../../api/gameplay-v13.schema.json'
 import realtimeSchema from '../../../../api/realtime.schema.json'
 import {
   admitted as liveAdmitted, room as liveRoom, roomId, snapshot as liveSnapshot,
@@ -11,6 +12,7 @@ import {
 } from '../../game/validation/archived-v11-fixtures'
 import generatedGameplayV11 from './gameplay-v11.mjs'
 import generatedGameplayV12 from './gameplay-v12.mjs'
+import generatedGameplayV13 from './gameplay-v13.mjs'
 import generatedRealtime from './realtime.mjs'
 
 type GeneratedValidator = ((value: unknown) => boolean) & { errors?: ErrorObject[] | null }
@@ -31,7 +33,7 @@ function originalGameplayValidator(schema: typeof gameplayV11Schema): ValidateFu
   return validate
 }
 
-function gameplayVariants(version: 11 | 12, fixtures: FixtureSet) {
+function gameplayVariants(version: 11 | 12 | 13, fixtures: FixtureSet) {
   return [
     ['authenticated', { type: 'authenticated', protocolVersion: version }],
     ['incompatibleProtocol', { type: 'incompatibleProtocol', supportedVersion: version }],
@@ -53,6 +55,10 @@ const gameplayRoutes = [
     version: 12, schema: gameplayV12Schema, generated: generatedGameplayV12,
     fixtures: { admitted: liveAdmitted, room: liveRoom, snapshot: liveSnapshot },
   },
+  {
+    version: 13, schema: gameplayV13Schema, generated: generatedGameplayV13,
+    fixtures: { admitted: liveAdmitted, room: liveRoom, snapshot: liveSnapshot },
+  },
 ] as const
 
 const realtimeVariants = [
@@ -61,7 +67,7 @@ const realtimeVariants = [
   ['error', { type: 'error', code: 'invalidMessage', message: 'Invalid client message' }],
 ] as const
 
-function gameplayBoundaryCases(version: 11 | 12, fixtures: FixtureSet): unknown[] {
+function gameplayBoundaryCases(version: 11 | 12 | 13, fixtures: FixtureSet): unknown[] {
   const missing = { type: 'authenticated' }
   const additional = { type: 'authenticated', protocolVersion: version, unexpected: true }
   const duplicate = fixtures.snapshot(2)

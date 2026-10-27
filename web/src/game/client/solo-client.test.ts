@@ -1,16 +1,19 @@
 import { expect, it } from 'vitest'
+import type { Difficulty } from '../v13/schema'
 import { admitted, authenticate, harness, messages, room } from './testSupport'
 
-it('creates solo explicitly and retains human settings/readiness authority with a server controller', async () => {
+it.each(['easy', 'standard'] as const)(
+  'creates %s solo explicitly and retains human authority with a matching server controller',
+  async (difficulty: Difficulty) => {
   const value = harness()
-  const socket = await authenticate(value, { type: 'create', mode: { type: 'solo', difficulty: 'standard' } })
+  const socket = await authenticate(value, { type: 'create', mode: { type: 'solo', difficulty } })
   expect(messages(socket).at(-1)).toEqual({
-    type: 'createRoom', sequence: 1, mode: { type: 'solo', difficulty: 'standard' },
+    type: 'createRoom', sequence: 1, mode: { type: 'solo', difficulty },
   })
   const current = room(2)
-  current.mode = { type: 'solo', difficulty: 'standard' }
+  current.mode = { type: 'solo', difficulty }
   current.seats[1] = {
-    seat: 'two', controller: { type: 'cpu', difficulty: 'standard' },
+    seat: 'two', controller: { type: 'cpu', difficulty },
     occupied: true, ready: true, rematchReady: false, connection: { type: 'serverControlled' },
   }
   socket.message({ ...admitted(), room: current, state: null })

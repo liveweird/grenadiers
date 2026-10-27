@@ -15,16 +15,16 @@ const actions = (): GameActions => ({
   useEquipment: vi.fn(() => true), leave: vi.fn(() => true),
 })
 
-function soloState(): GameClientState {
+function soloState(difficulty: 'easy' | 'standard' = 'standard'): GameClientState {
   const current = room(200, {
     type: 'matchResult', endedAt: 20, rematchAt: 200,
     result: { type: 'winner', seat: 'two', reason: 'roundWins' },
   })
-  current.mode = { type: 'solo', difficulty: 'standard' }
+  current.mode = { type: 'solo', difficulty }
   current.scores.two = 3
   current.roundNumber = 3
   current.seats[1] = {
-    seat: 'two', controller: { type: 'cpu', difficulty: 'standard' }, occupied: true,
+    seat: 'two', controller: { type: 'cpu', difficulty }, occupied: true,
     ready: false, rematchReady: true, connection: { type: 'serverControlled' },
   }
   return { ...initialGameClientState(), connection: 'authenticated', room: current, youSeat: 'one' }
@@ -33,14 +33,38 @@ function soloState(): GameClientState {
 beforeEach(async () => { localStorage.clear(); await i18n.changeLanguage('en') })
 afterEach(cleanup)
 
-it('offers an explicit solo admission and disables it during an outstanding admission', () => {
+it('defaults solo admission to Standard, accepts Easy, and disables the selector while busy', () => {
   const controls = actions()
   const state = initialGameClientState()
   const view = render(<MantineProvider env="test"><GamePanelView state={state} actions={controls} /></MantineProvider>)
+  const difficulty = screen.getByRole('combobox', { name: 'CPU difficulty' })
+  fireEvent.change(difficulty, { target: { value: 'unsupported' } })
   fireEvent.click(screen.getByRole('button', { name: 'Play solo against CPU' }))
   expect(controls.admit).toHaveBeenCalledWith({ type: 'create', mode: { type: 'solo', difficulty: 'standard' } })
-  view.rerender(<MantineProvider env="test"><GamePanelView state={{ ...state, admissionPending: true }} actions={controls} /></MantineProvider>)
-  expect(screen.getByRole('button', { name: 'Play solo against CPU' })).toBeDisabled()
+  fireEvent.change(difficulty, { target: { value: 'easy' } })
+  fireEvent.click(screen.getByRole('button', { name: 'Play solo against CPU' }))
+  expect(controls.admit).toHaveBeenLastCalledWith({ type: 'create', mode: { type: 'solo', difficulty: 'easy' } })
+  for (const pending of [
+    { admissionPending: true },
+    { connection: 'connecting' as const },
+    { connection: 'authenticating' as const },
+    { connection: 'reconnecting' as const },
+  ]) {
+    view.rerender(<MantineProvider env="test"><GamePanelView state={{ ...state, ...pending }} actions={controls} /></MantineProvider>)
+    expect(screen.getByRole('combobox', { name: 'CPU difficulty' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Play solo against CPU' })).toBeDisabled()
+  }
+})
+
+it.each([
+  ['en', 'easy', 'Private solo match · Easy CPU'],
+  ['en', 'standard', 'Private solo match · Standard CPU'],
+  ['pl', 'easy', 'Prywatny mecz solo · Łatwy komputer'],
+  ['pl', 'standard', 'Prywatny mecz solo · Standardowy komputer'],
+] as const)('renders the server-provided %s %s difficulty', async (language, difficulty, label) => {
+  await i18n.changeLanguage(language)
+  render(<MantineProvider env="test"><GamePanelView state={soloState(difficulty)} actions={actions()} /></MantineProvider>)
+  expect(screen.getByText(label)).toBeVisible()
 })
 
 it.each([

@@ -261,6 +261,12 @@
     "label": "Solo match",
     "opponent": "CPU opponent",
     "play": "Play solo against CPU",
-    "difficulty": "Private solo match · Standard CPU"
+    "difficultyLabel": "CPU difficulty",
+    "easy": "Easy",
+    "standard": "Standard",
+    "roomDifficulty": {
+      "easy": "Private solo match · Easy CPU",
+      "standard": "Private solo match · Standard CPU"
+    }
   }
 }

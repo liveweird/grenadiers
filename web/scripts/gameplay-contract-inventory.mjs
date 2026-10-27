@@ -1,7 +1,7 @@
 import { readFile, readdir } from 'node:fs/promises'
 import { pathToFileURL } from 'node:url'
 
-const supportedVersions = Object.freeze([2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
+const supportedVersions = Object.freeze([2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13])
 const supportedVersionSet = new Set(supportedVersions)
 const scriptsDirectory = pathToFileURL(`${import.meta.dirname}/`)
 

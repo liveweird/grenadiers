@@ -96,46 +96,49 @@ retain the previous immutable image reference for rollback. The runtime stage in
 rolling Debian package updates, so a later build may resolve newer packages and is not expected to
 be byte-identical; treat it as a new candidate with new evidence rather than reusing acceptance.
 
-## v0.3.89 — 2026-10-27
+## v0.3.90 — 2026-10-27
 
-[v0.3.89](https://github.com/liveweird/grenadiers/releases/tag/v0.3.89) adds
-[deterministic Solo evaluation](game/cpu-evaluation.md). A bounded test-only queue pump executes
-actual planning jobs, delivers their advanced RNG and uses normal controller admission and Driver
-physics. Production worker execution is shared; live cancellation, work and delivery limits remain
-unchanged. No public mode or difficulty profile changes; UtilityV8 and v12 remain current.
+[v0.3.90](https://github.com/liveweird/grenadiers/releases/tag/v0.3.90) fixes
+[interrupted confirmed planting](game/cpu-contracts.md#interrupted-confirmed-planting).
+A newly visible enemy bomb still invalidates the old escape route. Validated confirmed-placement
+provenance permits fresh short escape pulses after ordinary Stop, covering all seven admission
+lanes and permanently withdrawing origin grace on exit. Sole-bomb/floor checks, actor and placement
+signatures, lethal hazards, uncertainty, work limits and the conditional three-update cap remain
+strict. Legacy or unconfirmed placement cannot grant origin authority. Worker results cannot
+restore revoked provenance; ordinary queue lateness preserves independently valid stopped proof.
 
-Routine cases cover cancellation, queue limits, failed/disconnected/full delivery, a forced RNG
-draw, ordered accepted-input repeatability, separate arena/CPU seed axes and observed event metrics.
-The fixed human Bomb/retreat script refreshes held input every ten ticks, respects the normal
-15-tick expiry and proves centered refuge plus first-blast survival. First placement/pickup fields
-mean observed CPU-recipient events, independently of accepted action counts. Work and physical
-outcomes stay separate from wall-clock samples; a capped run remains censored.
+The real generated a2-c0 case plants at 190, is interrupted at 204, moves again and survives its
+own full flame expiry at 400 with one Bomb action and no injected plans. Core and controller cases
+cover provenance refusal, clock/pose changes, hostile origin occupancy, exit/reentry, delayed
+admission, failed Stop and stale/malformed results. Independent review is clear. UtilityV9 retains
+V1–V8 accepted-input replay and the unchanged v12 shape.
 
-The isolated, clean-source release matrix completes all 16 declared cases in 0.93s without retries:
-four arena seeds × two private CPU seeds × idle/Bomb-retreat scripts, up to 1,800 ticks each.
-Across 612 actual planning calls, p50/p95/p99/max are 0.068/3.427/3.922/4.580ms on macOS/aarch64;
-these are host observations, not thresholds. Ten cases are censored with CPU alive and six end in
-CPU loss; two observe a CPU pickup. This is reference-workload evidence, not a strength rating.
-The new losses motivate the [backlog](../BACKLOG.md#single-player) escape investigation.
+The unchanged clean-source 16-case matrix runs in 1.09s: CPU losses decrease 6→4, with no previously
+surviving case regressing. Both arena 3 retreat cases now reach 1,800 ticks alive; arena 2 survives
+its first blast but loses later. Twelve cases are censored/alive; four end in CPU loss. Across 576
+actual planning calls, p95/max are 3.591/4.163ms on macOS/aarch64. These reference workloads establish
+a focused repair, not general strength or hardware thresholds; later losses remain in the
+[backlog](../BACKLOG.md#single-player).
 
-Independently reviewed source is `63283cbef9333f9e06d9bf6039e9dd70342b1652`.
-Full local Rust acceptance passes in 462.572s with all 4,194,304 masks in debug, release and
-official coverage, 32 partitions/four workers, zero retries and 37 raw profiles. Coverage is
-25,319/27,470 lines (92.17%). The distinct
-[Linux run](https://github.com/liveweird/grenadiers/actions/runs/40444429486) passes.
-Formatting, workspace Clippy, repository/source-size, ShellCheck/actionlint, exact-artifact
-selection and CLI checks pass. Proven unchanged frontend/API/art/E2E/external dependencies retain
-accepted static/audit/full-web evidence (6,874 tests/97 files).
+Tested source is `b041f1de235cc8614185bc2f9b9b53194c45b8e3` (core and activation commits).
+Full local Rust acceptance passes in 471.381s: every 4,194,304 mask in debug, release and official
+coverage, 32 partitions/four workers, zero retries and 37 raw profiles. Coverage is 25,806/27,929
+lines (92.40%). The distinct
+[Linux run](https://github.com/liveweird/grenadiers/actions/runs/40447665174) passes. Formatting,
+workspace Clippy and repository/source-size checks pass. Proven unchanged frontend/API/art/E2E,
+tooling and external dependencies retain accepted static/audit/full-web evidence (6,874 tests/97 files).
 
 Accepted image is
-`sha256:bfc528c594ab295da5d871d65a89863dabbb79a59579565a3eef86b2e8b7f5aa`.
+`sha256:529c18269a65fb7049f90fca39a6d5fe037d00e2a343b6c76492c230506a3583`.
 Pinned Trivy 0.74.0 reports zero fixable HIGH/CRITICAL findings. Compose passes ten browser cases
-in 49.4s, Kubernetes ten in 51.0s, and dedicated all-items CPU pickup acceptance one in 16.5s.
-Polish 320px, strict lobby/create, resources/security/probes and served assets pass. Temporary
-projects/namespaces are removed. The exact image is promoted to localhost:8085 with v0.3.88 retained
-for rollback; restarting ends in-memory matches. Source/image/binary/environment and matrix
-artifacts remain under `target/quality-review/cpu4-v0389-*`. Distribution remains a source
-prerelease and local image.
+in 49.6s, Kubernetes ten in 51.3s and dedicated CPU pickup acceptance one in 16.5s. Polish 320px,
+strict lobby/create, resources/security/probes and served assets pass. Temporary projects/namespaces
+are removed. The exact image is promoted to localhost:8085; v0.3.89 remains available for rollback.
+Restarting ends in-memory matches. Evidence is under `target/quality-review/cpu4-v0390-*`;
+distribution remains a source prerelease and local image.
+
+<a id="v0389--2026-10-27"></a>
+The [v0.3.89 record](history/releases.md#v0389--2026-10-27) is preserved in release history.
 
 <a id="v0388--2026-10-27"></a>
 The [v0.3.88 record](history/releases.md#v0388--2026-10-27) is preserved in release history.

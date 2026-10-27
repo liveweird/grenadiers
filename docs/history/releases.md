@@ -4,6 +4,47 @@ This archive preserves the older release records originally maintained in
 [`docs/releases.md`](../releases.md). Records remain in their original order; the current
 release procedure and current release record stay in the [release guide](../releases.md).
 
+## v0.3.89 — 2026-10-27
+
+[v0.3.89](https://github.com/liveweird/grenadiers/releases/tag/v0.3.89) adds
+[deterministic Solo evaluation](../game/cpu-evaluation.md). A bounded test-only queue pump executes
+actual planning jobs, delivers their advanced RNG and uses normal controller admission and Driver
+physics. Production worker execution is shared; live cancellation, work and delivery limits remain
+unchanged. No public mode or difficulty profile changes; UtilityV8 and v12 remain current.
+
+Routine cases cover cancellation, queue limits, failed/disconnected/full delivery, a forced RNG
+draw, ordered accepted-input repeatability, separate arena/CPU seed axes and observed event metrics.
+The fixed human Bomb/retreat script refreshes held input every ten ticks, respects the normal
+15-tick expiry and proves centered refuge plus first-blast survival. First placement/pickup fields
+mean observed CPU-recipient events, independently of accepted action counts. Work and physical
+outcomes stay separate from wall-clock samples; a capped run remains censored.
+
+The isolated, clean-source release matrix completes all 16 declared cases in 0.93s without retries:
+four arena seeds × two private CPU seeds × idle/Bomb-retreat scripts, up to 1,800 ticks each.
+Across 612 actual planning calls, p50/p95/p99/max are 0.068/3.427/3.922/4.580ms on macOS/aarch64;
+these are host observations, not thresholds. Ten cases are censored with CPU alive and six end in
+CPU loss; two observe a CPU pickup. This is reference-workload evidence, not a strength rating.
+The new losses motivate the [backlog](../../BACKLOG.md#single-player) escape investigation.
+
+Independently reviewed source is `63283cbef9333f9e06d9bf6039e9dd70342b1652`.
+Full local Rust acceptance passes in 462.572s with all 4,194,304 masks in debug, release and
+official coverage, 32 partitions/four workers, zero retries and 37 raw profiles. Coverage is
+25,319/27,470 lines (92.17%). The distinct
+[Linux run](https://github.com/liveweird/grenadiers/actions/runs/40444429486) passes.
+Formatting, workspace Clippy, repository/source-size, ShellCheck/actionlint, exact-artifact
+selection and CLI checks pass. Proven unchanged frontend/API/art/E2E/external dependencies retain
+accepted static/audit/full-web evidence (6,874 tests/97 files).
+
+Accepted image is
+`sha256:bfc528c594ab295da5d871d65a89863dabbb79a59579565a3eef86b2e8b7f5aa`.
+Pinned Trivy 0.74.0 reports zero fixable HIGH/CRITICAL findings. Compose passes ten browser cases
+in 49.4s, Kubernetes ten in 51.0s, and dedicated all-items CPU pickup acceptance one in 16.5s.
+Polish 320px, strict lobby/create, resources/security/probes and served assets pass. Temporary
+projects/namespaces are removed. The exact image is promoted to localhost:8085 with v0.3.88 retained
+for rollback; restarting ends in-memory matches. Source/image/binary/environment and matrix
+artifacts remain under `target/quality-review/cpu4-v0389-*`. Distribution remains a source
+prerelease and local image.
+
 ## v0.3.88 — 2026-10-27
 
 [v0.3.88](https://github.com/liveweird/grenadiers/releases/tag/v0.3.88) fixes unnecessarily

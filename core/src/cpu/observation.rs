@@ -113,6 +113,7 @@ pub enum ObservedBombTrigger {
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct ObservedBomb {
     pub id: EntityId,
+    pub placed_at: Tick,
     pub cell: CellId,
     pub owner: EntityId,
     pub range: u16,
@@ -195,7 +196,7 @@ impl Observation {
         validate_clock(parts.tick, parts.rules)?;
         validate_arena(&parts.arena)?;
         validate_actors(parts.recipient, &parts.actors)?;
-        validate_bombs(&parts.arena, &parts.bombs)?;
+        validate_bombs(parts.tick, &parts.arena, &parts.bombs)?;
         if parts.flames.len() > ARENA_CELL_COUNT {
             return Err(ObservationError::InvalidFlames);
         }
@@ -291,7 +292,11 @@ fn validate_effects(effects: &[ObservedEffect]) -> Result<(), ObservationError> 
     Ok(())
 }
 
-fn validate_bombs(arena: &ObservedArena, bombs: &BombKnowledge) -> Result<(), ObservationError> {
+fn validate_bombs(
+    tick: Tick,
+    arena: &ObservedArena,
+    bombs: &BombKnowledge,
+) -> Result<(), ObservationError> {
     let BombKnowledge::Visible(bombs) = bombs else {
         return Ok(());
     };
@@ -300,7 +305,10 @@ fn validate_bombs(arena: &ObservedArena, bombs: &BombKnowledge) -> Result<(), Ob
     }
     let mut ids = BTreeSet::new();
     if bombs.iter().any(|bomb| {
-        bomb.unknown != UnknownBombFacts::ALL || !contains(arena, bomb.cell) || !ids.insert(bomb.id)
+        bomb.unknown != UnknownBombFacts::ALL
+            || bomb.placed_at > tick
+            || !contains(arena, bomb.cell)
+            || !ids.insert(bomb.id)
     }) {
         return Err(ObservationError::InvalidBombs);
     }

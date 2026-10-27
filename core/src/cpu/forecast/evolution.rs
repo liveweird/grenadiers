@@ -96,8 +96,44 @@ impl ForecastEvolution {
         Ok(())
     }
 
+    pub(super) fn add_hypothetical(
+        &mut self,
+        id: EntityId,
+        owner: EntityId,
+    ) -> Result<(), ForecastFailure> {
+        if self.bomb_owners.len() >= MAX_OBSERVED_BOMBS
+            || self.bomb_owners.iter().any(|(known, _)| *known == id)
+        {
+            return Err(ForecastFailure::IntervalCapacity);
+        }
+        self.bomb_owners.push((id, owner));
+        Ok(())
+    }
+
     #[must_use]
     pub fn matches_scene(&self, basis: &Observation, current: &Observation) -> bool {
+        self.header_matches(basis, current)
+            && self.blocks_match(basis, current)
+            && self.bombs_match(basis, current, None)
+            && self.oil_matches(basis, current)
+            && self.flames_match(basis, current)
+    }
+
+    pub(crate) fn matches_scene_with_hypothetical(
+        &self,
+        basis: &Observation,
+        current: &Observation,
+        hypothetical: EntityId,
+        actual: EntityId,
+    ) -> bool {
+        self.header_matches(basis, current)
+            && self.blocks_match(basis, current)
+            && self.bombs_match(basis, current, Some((hypothetical, actual)))
+            && self.oil_matches(basis, current)
+            && self.flames_match(basis, current)
+    }
+
+    fn header_matches(&self, basis: &Observation, current: &Observation) -> bool {
         let old = basis.parts();
         let new = current.parts();
         let Some(elapsed) = new.tick.0.checked_sub(old.tick.0) else {
@@ -125,10 +161,7 @@ impl ForecastEvolution {
         {
             return false;
         }
-        self.blocks_match(basis, current)
-            && self.bombs_match(basis, current, elapsed)
-            && self.oil_matches(basis, current)
-            && self.flames_match(basis, current)
+        true
     }
 
     #[must_use]
@@ -143,6 +176,11 @@ impl ForecastEvolution {
                 .count(),
         )
         .ok()
+    }
+
+    #[must_use]
+    pub(crate) fn hypothetical_removed(&self, id: EntityId, tick: Tick) -> bool {
+        self.removed(id, tick)
     }
 
     fn blocks_match(&self, basis: &Observation, current: &Observation) -> bool {
@@ -169,24 +207,40 @@ impl ForecastEvolution {
             == expected
     }
 
-    fn bombs_match(&self, basis: &Observation, current: &Observation, elapsed: u64) -> bool {
+    fn bombs_match(
+        &self,
+        basis: &Observation,
+        current: &Observation,
+        mapping: Option<(EntityId, EntityId)>,
+    ) -> bool {
         let (BombKnowledge::Visible(old), BombKnowledge::Visible(new)) =
             (&basis.parts().bombs, &current.parts().bombs)
         else {
             return false;
         };
+        let elapsed = current.parts().tick.0 - basis.parts().tick.0;
+        let mapped_alive = mapping
+            .is_some_and(|(hypothetical, _)| !self.removed(hypothetical, current.parts().tick));
         let expected_count = old
             .iter()
             .filter(|bomb| !self.removed(bomb.id, current.parts().tick))
-            .count();
+            .count()
+            + usize::from(mapped_alive);
         new.len() == expected_count
             && old
                 .iter()
                 .filter(|bomb| !self.removed(bomb.id, current.parts().tick))
                 .all(|bomb| {
                     new.iter()
+                        .filter(|candidate| {
+                            !mapping.is_some_and(|(_, actual)| candidate.id == actual)
+                        })
                         .any(|candidate| bomb_matches(*bomb, *candidate, elapsed))
                 })
+            && mapping.is_none_or(|(hypothetical, actual)| {
+                self.removed(hypothetical, current.parts().tick)
+                    || new.iter().any(|bomb| bomb.id == actual)
+            })
     }
 
     fn oil_matches(&self, basis: &Observation, current: &Observation) -> bool {
@@ -273,6 +327,7 @@ impl ForecastEvolution {
 
 fn bomb_matches(before: ObservedBomb, after: ObservedBomb, elapsed: u64) -> bool {
     before.id == after.id
+        && before.placed_at == after.placed_at
         && before.cell == after.cell
         && before.owner == after.owner
         && before.range == after.range

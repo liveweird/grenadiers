@@ -225,6 +225,7 @@ fn planner_marks_unknown_motion_as_conditional_and_never_plants() {
     let mut parts = observation(CellId::new(7, 7)).into_parts();
     parts.bombs = crate::cpu::BombKnowledge::Visible(vec![crate::cpu::ObservedBomb {
         id: crate::game::EntityId(7),
+        placed_at: crate::game::Tick(0),
         cell: CellId::new(4, 7),
         owner: crate::game::EntityId(1),
         range: 3,

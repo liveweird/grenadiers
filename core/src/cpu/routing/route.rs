@@ -6,8 +6,9 @@ use crate::game::types::UNITS_PER_CELL;
 use crate::game::{Direction, EntityId, Tick};
 
 use super::motion::{Motion, advance};
-use super::route_checks::{check_transition, stationary_risk, wait_boundaries, wait_lengths};
+use super::route_checks::{check_transition_all, wait_boundaries, wait_lengths};
 use super::route_expand::{apply_move, apply_wait, finish, terminal};
+use super::route_priority::{dominated, risk, state_key};
 use super::route_time::add_tick;
 use super::safety::stationary_segment;
 use super::validation::{self, Context};
@@ -24,6 +25,7 @@ pub(super) struct LaneState {
     pub(super) motion: Motion,
     pub(super) ready: Tick,
     pub(super) last_stop: Option<Tick>,
+    pub(super) origin_grace: Option<crate::game::CellId>,
 }
 
 #[derive(Clone)]
@@ -33,14 +35,31 @@ pub(super) struct SearchNode {
     pub(super) assumptions: BTreeSet<EntityId>,
 }
 
-type StateKey = (Vec<(i32, i32, u8, u64, Option<u64>)>, Vec<u32>);
-
 pub fn plan_route(
     observation: &Observation,
     forecast: &HazardForecast,
     request: RouteRequest,
     work: &mut WorkBudget,
 ) -> Result<RouteCertificate, RouteFailure> {
+    plan_route_seeded(observation, &[forecast], request, None, None, work)
+}
+
+pub(super) fn plan_route_seeded(
+    observation: &Observation,
+    forecasts: &[&HazardForecast],
+    request: RouteRequest,
+    first_step: Option<RouteStep>,
+    origin_grace: Option<crate::game::CellId>,
+    work: &mut WorkBudget,
+) -> Result<RouteCertificate, RouteFailure> {
+    let forecast = *forecasts.first().ok_or(RouteFailure::InvalidRequest)?;
+    if forecasts.iter().any(|candidate| {
+        candidate.key() != forecast.key()
+            || candidate.basis_tick() != forecast.basis_tick()
+            || candidate.horizon_end() != forecast.horizon_end()
+    }) {
+        return Err(RouteFailure::IdentityMismatch);
+    }
     let context = validation::validate(
         observation,
         forecast,
@@ -48,22 +67,48 @@ pub fn plan_route(
         request.survive_until,
     )?;
     validate_request(&context, forecast, request)?;
-    let (lanes, assumptions) = initial_lanes(&context, forecast, request, work)?;
-    let wait_boundaries = wait_boundaries(&context, forecast, work)?;
+    let (lanes, assumptions) = initial_lanes(&context, forecasts, request, origin_grace, work)?;
+    let mut boundaries = Vec::new();
+    for candidate in forecasts {
+        boundaries.extend(wait_boundaries(&context, candidate, work)?);
+    }
+    boundaries.sort_unstable();
+    boundaries.dedup();
     let mut root = SearchNode {
         steps: Vec::new(),
         lanes,
         assumptions,
     };
-    if terminal(forecast, request, &mut root, work)? {
+    if let Some(step) = first_step {
+        match step {
+            RouteStep::Move { direction, updates } => apply_move(
+                &context,
+                forecasts,
+                request.mode,
+                direction,
+                updates,
+                false,
+                &mut root,
+                work,
+            )?,
+            RouteStep::Wait { updates } => {
+                apply_wait(forecasts, request.mode, updates, &mut root, work)?
+            }
+        }
+        root.steps.push(step);
+        if terminal(forecasts, request, &mut root, work)? {
+            return finish(&context, forecast, request, root, work);
+        }
+    }
+    if terminal(forecasts, request, &mut root, work)? {
         let mut stopped = root.clone();
-        apply_wait(forecast, request.mode, 1, &mut stopped, work)?;
+        apply_wait(forecasts, request.mode, 1, &mut stopped, work)?;
         stopped.steps.push(RouteStep::Wait { updates: 1 });
-        if terminal(forecast, request, &mut stopped, work)? {
+        if terminal(forecasts, request, &mut stopped, work)? {
             return finish(&context, forecast, request, stopped, work);
         }
     }
-    let root_risk = risk(forecast, request, &root, work)?;
+    let root_risk = risk(forecasts, request, &root, origin_grace, work)?;
     let mut queue = vec![(root_risk, 0_u32, root)];
     let mut visited = BTreeMap::new();
     let mut expansions = 0_u16;
@@ -100,10 +145,11 @@ pub fn plan_route(
                 let mut next = node.clone();
                 match apply_move(
                     &context,
-                    forecast,
+                    forecasts,
                     request.mode,
                     direction,
                     updates,
+                    true,
                     &mut next,
                     work,
                 ) {
@@ -112,80 +158,32 @@ pub fn plan_route(
                     Err(error) => return Err(error),
                 }
                 next.steps.push(RouteStep::Move { direction, updates });
-                if terminal(forecast, request, &mut next, work)? {
+                if terminal(forecasts, request, &mut next, work)? {
                     return finish(&context, forecast, request, next, work);
                 }
-                let candidate_risk = risk(forecast, request, &next, work)?;
+                let candidate_risk = risk(forecasts, request, &next, origin_grace, work)?;
                 queue.push((candidate_risk, order, next));
                 order = order.checked_add(1).ok_or(RouteFailure::Capacity)?;
             }
         }
         let ready_ticks = node.lanes.iter().map(|lane| lane.ready).collect::<Vec<_>>();
-        for updates in wait_lengths(&wait_boundaries, request, &ready_ticks)? {
+        for updates in wait_lengths(&boundaries, request, &ready_ticks)? {
             let mut next = node.clone();
-            match apply_wait(forecast, request.mode, updates, &mut next, work) {
+            match apply_wait(forecasts, request.mode, updates, &mut next, work) {
                 Ok(()) => {}
                 Err(RouteFailure::NoRoute) => continue,
                 Err(error) => return Err(error),
             }
             next.steps.push(RouteStep::Wait { updates });
-            if terminal(forecast, request, &mut next, work)? {
+            if terminal(forecasts, request, &mut next, work)? {
                 return finish(&context, forecast, request, next, work);
             }
-            let candidate_risk = risk(forecast, request, &next, work)?;
+            let candidate_risk = risk(forecasts, request, &next, origin_grace, work)?;
             queue.push((candidate_risk, order, next));
             order = order.checked_add(1).ok_or(RouteFailure::Capacity)?;
         }
     }
     Err(RouteFailure::NoRoute)
-}
-
-fn risk(
-    forecast: &HazardForecast,
-    request: RouteRequest,
-    node: &SearchNode,
-    work: &mut WorkBudget,
-) -> Result<u32, RouteFailure> {
-    let lanes = node
-        .lanes
-        .iter()
-        .map(|lane| (lane.motion.position, lane.ready))
-        .collect::<Vec<_>>();
-    let risk = stationary_risk(forecast, &lanes, request.survive_until, request.mode, work)?;
-    Ok(
-        if matches!(node.steps.last(), Some(RouteStep::Wait { updates }) if *updates > 1) {
-            risk.saturating_sub(100_000)
-        } else {
-            risk
-        },
-    )
-}
-
-fn state_key(node: &SearchNode) -> StateKey {
-    let lanes = node
-        .lanes
-        .iter()
-        .map(|lane| {
-            (
-                lane.motion.position.x,
-                lane.motion.position.y,
-                direction_key(lane.motion.heading),
-                lane.ready.0,
-                lane.last_stop.map(|tick| tick.0),
-            )
-        })
-        .collect();
-    let assumptions = node.assumptions.iter().map(|id| id.0).collect();
-    (lanes, assumptions)
-}
-
-const fn direction_key(direction: Direction) -> u8 {
-    match direction {
-        Direction::North => 0,
-        Direction::East => 1,
-        Direction::South => 2,
-        Direction::West => 3,
-    }
 }
 
 fn validate_request(
@@ -222,8 +220,9 @@ fn validate_request(
 
 fn initial_lanes(
     context: &Context<'_>,
-    forecast: &HazardForecast,
+    forecasts: &[&HazardForecast],
     request: RouteRequest,
+    origin_grace: Option<crate::game::CellId>,
     work: &mut WorkBudget,
 ) -> Result<(Vec<LaneState>, BTreeSet<EntityId>), RouteFailure> {
     let mut lanes = Vec::new();
@@ -231,21 +230,23 @@ fn initial_lanes(
     for value in request.start_window.start.0..request.start_window.end.0 {
         let first = Tick(value);
         let segment = stationary_segment(context.actor.position);
-        assumptions.extend(check_transition(
+        assumptions.extend(check_transition_all(
             context,
-            forecast,
+            forecasts,
             &segment,
             TickWindow {
-                start: Tick(forecast.basis_tick().0 + 1),
+                start: add_tick(context.observation.parts().tick, 1)?,
                 end: first,
             },
             request.mode,
+            None,
             work,
         )?);
         lanes.push(LaneState {
             motion: Motion::stopped(context, first),
             ready: first,
             last_stop: None,
+            origin_grace,
         });
     }
     Ok((lanes, assumptions))
@@ -311,27 +312,4 @@ fn in_turn_band(
             .rules
             .settings
             .turn_assist_units()
-}
-
-fn dominated(visited: &mut BTreeMap<StateKey, usize>, key: StateKey, depth: usize) -> bool {
-    if visited.get(&key).is_some_and(|old| *old <= depth) {
-        true
-    } else {
-        visited.insert(key, depth);
-        false
-    }
-}
-
-#[cfg(test)]
-mod search_tests {
-    use super::*;
-
-    #[test]
-    fn shallower_converging_wait_state_is_not_suppressed() {
-        let key = (vec![(1, 2, 0, 10, None)], Vec::new());
-        let mut visited = BTreeMap::new();
-        assert!(!dominated(&mut visited, key.clone(), 2));
-        assert!(!dominated(&mut visited, key.clone(), 1));
-        assert!(dominated(&mut visited, key, 2));
-    }
 }

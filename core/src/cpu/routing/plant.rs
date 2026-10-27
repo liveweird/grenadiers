@@ -1,0 +1,222 @@
+use crate::cpu::forecast::{
+    ForecastLimits, HypotheticalPlacement, ObservedHazardMemory, TickWindow, forecast,
+};
+use crate::cpu::{
+    BombKnowledge, MovementIntent, Observation, ObservedActor, ObservedBombTrigger, WorkBudget,
+};
+use crate::game::effects::{effective_bomb_fuse_ticks, effective_bomb_range};
+use crate::game::{BlastKind, EffectKind, OilBarrelState, RulesConfig, Terrain, Tick};
+
+use super::motion::{Motion, advance};
+use super::route::plan_route_seeded;
+use super::validation;
+use super::{
+    PlannedBomb, PlantCertificate, PlantFailure, PlantRequest, RouteMode, RouteRequest, RouteStep,
+};
+
+pub fn plan_ordinary_plant(
+    observation: &Observation,
+    memory: &ObservedHazardMemory,
+    request: PlantRequest,
+    work: &mut WorkBudget,
+) -> Result<PlantCertificate, PlantFailure> {
+    let parts = observation.parts();
+    let expected = parts
+        .tick
+        .0
+        .checked_add(7)
+        .map(Tick)
+        .ok_or(PlantFailure::InvalidRequest)?;
+    if request.execution_tick != expected || request.settled_stop_tick > parts.tick {
+        return Err(PlantFailure::InvalidRequest);
+    }
+    let ObservedActor::Visible(actor) = parts
+        .actors
+        .iter()
+        .find(|actor| actor.seat() == parts.recipient)
+        .ok_or(PlantFailure::InvalidRequest)?
+    else {
+        return Err(PlantFailure::InvalidRequest);
+    };
+    if !actor.alive
+        || actor.voluntary_actions_frozen
+        || actor.weapon.is_some()
+        || matches!(
+            &parts.bombs,
+            BombKnowledge::Visible(bombs)
+                if bombs.iter().any(|bomb| {
+                    bomb.owner == actor.id && bomb.trigger == ObservedBombTrigger::Remote
+                })
+        )
+        || effect_active(
+            parts.tick,
+            request.execution_tick,
+            actor,
+            EffectKind::Diarrhea,
+        )?
+        || effect_active(
+            parts.tick,
+            request.execution_tick,
+            actor,
+            EffectKind::Stopwatch,
+        )?
+    {
+        return Err(PlantFailure::Unsupported);
+    }
+
+    let absent = forecast(observation, memory, None, ForecastLimits::default(), work)?;
+    if absent.evolution().expected_live_bombs(actor.id, parts.tick) != Some(actor.live_bomb_count)
+        || absent
+            .evolution()
+            .expected_live_bombs(actor.id, request.execution_tick)
+            .is_none_or(|count| count >= actor.bomb_capacity)
+    {
+        return Err(PlantFailure::Unsupported);
+    }
+    let start_window = TickWindow {
+        start: request.execution_tick,
+        end: add_tick(request.execution_tick, 1)?,
+    };
+    let context = validation::validate(observation, &absent, start_window, request.execution_tick)?;
+    let (position, first_step) = match request.first_movement {
+        MovementIntent::Direction(direction) => {
+            let mut motion = Motion::stopped(&context, request.execution_tick);
+            let _ = advance(
+                &context,
+                &mut motion,
+                request.first_movement,
+                request.execution_tick,
+            )?;
+            (
+                motion.position,
+                RouteStep::Move {
+                    direction,
+                    updates: 1,
+                },
+            )
+        }
+        MovementIntent::Stop => (actor.position, RouteStep::Wait { updates: 4 }),
+    };
+    let cell = position.cell().ok_or(PlantFailure::Unsupported)?;
+    if !origin_is_free(observation, cell) {
+        return Err(PlantFailure::Unsupported);
+    }
+
+    let rules = RulesConfig::expanded_v5(parts.rules.settings);
+    let (range, fuse) = derive_bomb_modifiers(actor, parts.tick, request.execution_tick, rules)?;
+    let detonates_at = add_tick(request.execution_tick, fuse)?;
+    let survive_until = add_tick(detonates_at, rules.flame_ticks())?;
+    let placement = PlannedBomb {
+        placed_at: request.execution_tick,
+        owner: actor.id,
+        cell,
+        range,
+        detonates_at,
+    };
+    let present = forecast(
+        observation,
+        memory,
+        Some(HypotheticalPlacement {
+            placed_at: placement.placed_at,
+            owner: placement.owner,
+            cell: placement.cell,
+            range: placement.range,
+            blast: BlastKind::Standard,
+            detonates_at: placement.detonates_at,
+        }),
+        ForecastLimits::default(),
+        work,
+    )?;
+    let hypothetical_id = present
+        .hypothetical_id()
+        .ok_or(PlantFailure::InvalidRequest)?;
+    let first_publication = add_tick(request.execution_tick, 2)?;
+    if present
+        .evolution()
+        .hypothetical_removed(hypothetical_id, first_publication)
+    {
+        return Err(PlantFailure::Unsupported);
+    }
+    let route = plan_route_seeded(
+        observation,
+        &[&absent, &present],
+        RouteRequest {
+            start_window,
+            settled_stop_tick: request.settled_stop_tick,
+            survive_until,
+            mode: RouteMode::CertifiedOnly,
+            limits: request.limits,
+        },
+        Some(first_step),
+        Some(cell),
+        work,
+    )?;
+    Ok(PlantCertificate::new(
+        route,
+        placement,
+        hypothetical_id,
+        absent.evolution().clone(),
+        present.evolution().clone(),
+    ))
+}
+
+fn effect_active(
+    basis: Tick,
+    at: Tick,
+    actor: &crate::cpu::VisibleActor,
+    kind: EffectKind,
+) -> Result<bool, PlantFailure> {
+    actor
+        .effects
+        .iter()
+        .filter(|effect| effect.kind == kind)
+        .try_fold(false, |active, effect| {
+            let expiry = basis
+                .0
+                .checked_add(u64::from(effect.remaining_ticks))
+                .ok_or(PlantFailure::InvalidRequest)?;
+            Ok(active || expiry > at.0)
+        })
+}
+
+pub(super) fn derive_bomb_modifiers(
+    actor: &crate::cpu::VisibleActor,
+    basis: Tick,
+    at: Tick,
+    rules: RulesConfig,
+) -> Result<(u16, u64), PlantFailure> {
+    let short_flame = effect_active(basis, at, actor, EffectKind::ShortFlame)?;
+    let golden_flame = effect_active(basis, at, actor, EffectKind::GoldenFlame)?;
+    let short_fuse = effect_active(basis, at, actor, EffectKind::ShortFuse)?;
+    let long_fuse = effect_active(basis, at, actor, EffectKind::LongFuse)?;
+    let active = |kind| match kind {
+        EffectKind::ShortFlame => short_flame,
+        EffectKind::GoldenFlame => golden_flame,
+        EffectKind::ShortFuse => short_fuse,
+        EffectKind::LongFuse => long_fuse,
+        _ => false,
+    };
+    let range = effective_bomb_range(actor.bomb_range, active);
+    let fuse = effective_bomb_fuse_ticks(rules.bomb_fuse_ticks(), active)
+        .ok_or(PlantFailure::InvalidRequest)?;
+    Ok((range, fuse))
+}
+
+fn origin_is_free(observation: &Observation, cell: crate::game::CellId) -> bool {
+    let parts = observation.parts();
+    let index = usize::from(cell.row) * usize::from(parts.arena.width) + usize::from(cell.column);
+    parts.arena.terrain.get(index) == Some(&Terrain::Floor)
+        && !parts.arena.blocks.contains(&cell)
+        && !parts
+            .oil
+            .iter()
+            .any(|oil| oil.cell == cell && oil.state == OilBarrelState::Unlit)
+        && matches!(&parts.bombs, BombKnowledge::Visible(bombs) if !bombs.iter().any(|bomb| bomb.cell == cell))
+}
+
+fn add_tick(tick: Tick, amount: u64) -> Result<Tick, PlantFailure> {
+    tick.0
+        .checked_add(amount)
+        .map(Tick)
+        .ok_or(PlantFailure::InvalidRequest)
+}

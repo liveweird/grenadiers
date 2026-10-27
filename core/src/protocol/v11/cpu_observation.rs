@@ -164,6 +164,7 @@ fn bomb(value: super::BombView) -> ObservedBomb {
     };
     ObservedBomb {
         id: entity(value.id),
+        placed_at: crate::game::Tick(value.placed_at.get()),
         cell: cell(value.cell),
         owner: entity(value.owner),
         range: u16::from(value.range),

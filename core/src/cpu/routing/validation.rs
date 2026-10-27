@@ -45,12 +45,19 @@ pub(super) fn validate<'a>(
             _ => None,
         })
         .ok_or(RouteFailure::InvalidRequest)?;
+    let active_at_start = |kind| {
+        actor.effects.iter().any(|effect| {
+            effect.kind == kind
+                && parts
+                    .tick
+                    .0
+                    .checked_add(u64::from(effect.remaining_ticks))
+                    .is_some_and(|expiry| expiry > start_window.start.0)
+        })
+    };
     if !actor.alive
         || actor.voluntary_actions_frozen
-        || actor
-            .effects
-            .iter()
-            .any(|effect| effect.kind == EffectKind::Diarrhea)
+        || active_at_start(EffectKind::Diarrhea)
         || !position_in_arena(actor.position)
         || overlaps_static_blocker(observation, actor.position)
     {

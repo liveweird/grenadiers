@@ -100,6 +100,7 @@ pub(crate) fn with_bomb(observation: Observation, trigger: ObservedBombTrigger) 
     let mut parts = observation.into_parts();
     parts.bombs = BombKnowledge::Visible(vec![ObservedBomb {
         id: EntityId(90),
+        placed_at: crate::game::Tick(0),
         cell: CellId::new(5, 1),
         owner: EntityId(1),
         range: 3,

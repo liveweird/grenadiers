@@ -251,6 +251,7 @@ fn route_waits_for_a_flame_gap_then_moves_to_refuge() {
     let mut parts = observation(Vec::new(), Vec::new()).into_parts();
     parts.bombs = BombKnowledge::Visible(vec![ObservedBomb {
         id: EntityId(90),
+        placed_at: crate::game::Tick(0),
         cell: CellId::new(2, 4),
         owner: EntityId(1),
         range: 3,

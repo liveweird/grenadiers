@@ -53,6 +53,7 @@ fn observed(state: &State, settings: RoomSettings) -> crate::cpu::Observation {
             .values()
             .map(|bomb| ObservedBomb {
                 id: bomb.id(),
+                placed_at: bomb.placed_at(),
                 cell: bomb.cell(),
                 owner: bomb.owner(),
                 range: bomb.range(),

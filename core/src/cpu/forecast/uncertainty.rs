@@ -197,11 +197,18 @@ fn add_blast_closure(
     };
     let mut queue = positions
         .into_iter()
-        .map(|cell| (*initial, cell, reason))
+        .map(|cell| (*initial, cell, reason, initial.active_from))
         .collect::<VecDeque<_>>();
     let mut expanded = BTreeSet::from([(initial.id, reason_key(reason))]);
-    while let Some((source, cell, cause)) = queue.pop_front() {
+    while let Some((source, cell, cause, active_from)) = queue.pop_front() {
         take(work, 1)?;
+        let source_window = TickWindow {
+            start: propagated_window.start.max(active_from),
+            end: propagated_window.end,
+        };
+        if source_window.start >= source_window.end {
+            continue;
+        }
         let mut failure = None;
         let result = visit_blast(
             &field,
@@ -215,7 +222,7 @@ fn add_blast_closure(
                     add_uncertain(
                         &mut cells[index(visit.cell)].uncertainty,
                         UncertainWindow {
-                            window: propagated_window,
+                            window: source_window,
                             kind: HazardKind::Lethal,
                             reason: cause,
                         },
@@ -230,7 +237,7 @@ fn add_blast_closure(
                     && let Err(error) = add_uncertain(
                         &mut cells[index(visit.cell)].uncertainty,
                         UncertainWindow {
-                            window: propagated_window,
+                            window: source_window,
                             kind: HazardKind::Lethal,
                             reason: cause,
                         },
@@ -273,7 +280,7 @@ fn add_blast_closure(
 }
 
 fn enqueue(
-    queue: &mut VecDeque<(ForecastBomb, CellId, UncertaintyReason)>,
+    queue: &mut VecDeque<(ForecastBomb, CellId, UncertaintyReason, Tick)>,
     expanded: &mut BTreeSet<(EntityId, (u8, u32))>,
     bomb: ForecastBomb,
     reason: UncertaintyReason,
@@ -284,7 +291,7 @@ fn enqueue(
             motion_positions[&bomb.id]
                 .iter()
                 .copied()
-                .map(|cell| (bomb, cell, reason)),
+                .map(|cell| (bomb, cell, reason, bomb.active_from)),
         );
     }
 }

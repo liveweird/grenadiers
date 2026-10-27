@@ -85,6 +85,8 @@ fn hypothetical_blast_can_chain_a_bomb_at_its_possible_moved_cell() {
         &observed,
         &ObservedHazardMemory::new(key()),
         Some(HypotheticalPlacement {
+            placed_at: Tick(7),
+            owner: EntityId(2),
             cell: CellId::new(7, 5),
             range: 2,
             blast: BlastKind::Standard,

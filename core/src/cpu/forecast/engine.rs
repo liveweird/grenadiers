@@ -79,18 +79,24 @@ pub fn forecast(
                 blast: bomb.blast,
                 trigger,
                 hypothetical: false,
+                active_from: parts.tick,
             })
         })
         .collect::<Result<Vec<_>, ForecastFailure>>()?;
+    let mut hypothetical_id = None;
     if let Some(placement) = hypothetical {
+        let id = unused_id(&bombs);
         bombs.push(ForecastBomb {
-            id: unused_id(&bombs),
+            id,
             cell: placement.cell,
             range: placement.range,
             blast: placement.blast,
             trigger: Trigger::Timed(placement.detonates_at),
             hypothetical: true,
+            active_from: placement.placed_at,
         });
+        evolution.add_hypothetical(id, placement.owner)?;
+        hypothetical_id = Some(id);
     }
 
     add_existing_hazards(observation, horizon_end, limits, work, &mut cells)?;
@@ -117,6 +123,7 @@ pub fn forecast(
         cells,
         assumptions,
         evolution,
+        hypothetical_id,
         limits,
     )
 }
@@ -166,6 +173,8 @@ fn validate_observed(
             || placement.range > rules.bomb_range_cap()
             || placement.detonates_at.0 <= parts.tick.0
             || placement.detonates_at.0 >= horizon_end.0
+            || placement.placed_at.0 <= parts.tick.0
+            || placement.placed_at >= placement.detonates_at
             || terrain(parts, placement.cell) != Some(Terrain::Floor)
             || occupied.contains(&placement.cell)
             || parts.arena.blocks.contains(&placement.cell)

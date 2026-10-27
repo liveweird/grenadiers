@@ -277,7 +277,10 @@ fn bomb_placement_tick_remains_exact_across_later_publications() {
         };
         assert_eq!(bombs.len(), 1);
         assert_eq!(bombs[0].placed_at, placed_at);
-        assert_eq!(bombs[0].id, state.world().bombs().values().next().unwrap().id());
+        assert_eq!(
+            bombs[0].id,
+            state.world().bombs().values().next().unwrap().id()
+        );
         state.step(&[]).unwrap();
     }
     assert_eq!(placed_at, Tick(2));

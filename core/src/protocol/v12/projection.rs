@@ -158,7 +158,10 @@ fn room_from_common(
         crate::room::RoomMode::Solo(profile)
             if matches!(
                 profile.policy,
-                CpuPolicy::UtilityV1 | CpuPolicy::UtilityV2 | CpuPolicy::UtilityV3
+                CpuPolicy::UtilityV1
+                    | CpuPolicy::UtilityV2
+                    | CpuPolicy::UtilityV3
+                    | CpuPolicy::UtilityV4
             ) && profile.difficulty == CpuDifficulty::Standard =>
         {
             RoomMode::Solo {

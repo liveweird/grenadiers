@@ -36,7 +36,7 @@ fn non_lease_long_move_keeps_its_deadline_across_intermediate_publications() {
                 next_memory: UtilityMemory::new(key),
             },
             lease: None,
-            route: None,
+            execution: None,
         },
     );
 

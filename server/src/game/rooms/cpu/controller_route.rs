@@ -1,5 +1,9 @@
 use grenadiers_core::cpu::Observation;
 use grenadiers_core::cpu::policy::UtilityMemory;
+#[cfg(test)]
+use grenadiers_core::cpu::routing::PlantPresence;
+#[cfg(test)]
+use grenadiers_core::cpu::survival::CommittedRoute;
 use grenadiers_core::cpu::survival::{RouteCommand, RouteStatus};
 use grenadiers_core::game::Tick;
 
@@ -14,6 +18,13 @@ impl AcceptedPlan {
 impl CpuController {
     pub(in crate::game::rooms) const fn has_committed_route(&self) -> bool {
         self.committed_route.is_some()
+    }
+
+    #[cfg(test)]
+    pub(in crate::game::rooms) fn plant_presence(&self) -> Option<PlantPresence> {
+        self.committed_route
+            .as_ref()
+            .and_then(CommittedRoute::plant_presence)
     }
 
     pub(in crate::game::rooms) fn observe_route(

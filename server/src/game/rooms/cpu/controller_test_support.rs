@@ -33,6 +33,7 @@ impl CpuController {
             decision,
             receiver,
             live: Arc::new(AtomicBool::new(true)),
+            completed: None,
         });
     }
 }

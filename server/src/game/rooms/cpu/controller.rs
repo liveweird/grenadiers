@@ -2,15 +2,14 @@ use std::fmt;
 use std::sync::{
     Arc,
     atomic::{AtomicBool, Ordering},
-    mpsc::{Receiver, TryRecvError, sync_channel},
+    mpsc::{Receiver, sync_channel},
 };
 
 use grenadiers_core::cpu::forecast::ObservedHazardMemory;
 use grenadiers_core::cpu::policy::{ControlPlan, EscapeExecution, MAX_HOLD_TICKS, PolicyError};
-use grenadiers_core::cpu::survival::{CommittedPulse, CommittedRoute, MAX_PLAN_AGE_TICKS};
+use grenadiers_core::cpu::survival::{CommittedPulse, CommittedRoute};
 use grenadiers_core::cpu::{
-    AdmissionContext, CpuMemory, CpuRng, DecisionId, Intent, Observation, WorldId,
-    policy::UtilityMemory,
+    CpuMemory, CpuRng, DecisionId, Intent, Observation, WorldId, policy::UtilityMemory,
 };
 use grenadiers_core::game::Tick;
 
@@ -20,6 +19,7 @@ struct Pending {
     decision: DecisionId,
     receiver: Receiver<PlanResult>,
     live: Arc<AtomicBool>,
+    completed: Option<PlanResult>,
 }
 
 pub(in crate::game::rooms) struct AcceptedPlan {
@@ -30,6 +30,7 @@ pub(in crate::game::rooms) struct AcceptedPlan {
     next_rng: CpuRng,
     committed_pulse: Option<CommittedPulse>,
     committed_route: Option<CommittedRoute>,
+    certified_plant: bool,
 }
 
 #[derive(Clone, Copy)]
@@ -148,109 +149,19 @@ impl CpuController {
             decision,
             receiver,
             live,
+            completed: None,
         });
         true
     }
 
-    pub(in crate::game::rooms) fn poll(
-        &mut self,
-        current_tick: Tick,
-        command_epoch: u64,
-    ) -> Option<AcceptedPlan> {
-        if self.escaping || self.committed_pulse.is_some() || self.committed_route.is_some() {
-            self.cancel();
-            return None;
-        }
-        let pending = self.pending.as_ref()?;
-        let Some(age) = current_tick
-            .0
-            .checked_sub(pending.decision.observation_tick.0)
-        else {
-            self.cancel();
-            return None;
-        };
-        if age > MAX_PLAN_AGE_TICKS
-            || pending.decision.command_epoch != command_epoch
-            || self.world != Some(pending.decision.world)
-        {
-            self.cancel();
-            return None;
-        }
-        let result = match pending.receiver.try_recv() {
-            Ok(result) => result,
-            Err(TryRecvError::Empty) => return None,
-            Err(TryRecvError::Disconnected) => {
-                self.pending = None;
-                return None;
-            }
-        };
-        let pending = self.pending.take().expect("pending was checked");
-        let latest = self.latest_observation.as_ref()?;
-        if self.settled_stop_tick.is_none()
-            || (result.plan.route.is_none()
-                && !grenadiers_core::cpu::survival::can_admit_ordinary(&result.basis, latest))
-        {
-            return None;
-        }
-        let current = AdmissionContext {
-            world: self.world?,
-            command_epoch,
-            observation_tick: pending.decision.observation_tick,
-            checked_request_serial: self.request_serial,
-        };
-        if !(1..=MAX_HOLD_TICKS).contains(&result.plan.control.hold_ticks)
-            || grenadiers_core::cpu::admit_decision(
-                self.admission_memory.as_mut()?,
-                current,
-                pending.decision,
-                &mut grenadiers_core::cpu::WorkBudget::new(1),
-            ) != grenadiers_core::cpu::DecisionAdmission::Accepted
-        {
-            return None;
-        }
-        let grenadiers_core::cpu::survival::SurvivalPlan {
-            control,
-            lease,
-            route,
-        } = result.plan;
-        if route.is_some() && (lease.is_some() || control.intent.manual.is_some()) {
-            return None;
-        }
-        let committed_pulse = match lease {
-            Some(lease) => Some(
-                CommittedPulse::admit(lease, result.basis.clone(), latest, current_tick).ok()?,
-            ),
-            None => None,
-        };
-        let committed_route = match route {
-            Some(route) => Some(
-                CommittedRoute::admit(
-                    route,
-                    result.basis,
-                    latest,
-                    current_tick,
-                    control.intent.movement,
-                )
-                .ok()?,
-            ),
-            None => None,
-        };
-        Some(AcceptedPlan {
-            decision: pending.decision,
-            intent: control.intent,
-            hold_ticks: control.hold_ticks,
-            next_memory: control.next_memory,
-            next_rng: result.rng,
-            committed_pulse,
-            committed_route,
-        })
-    }
-
     pub(in crate::game::rooms) fn commit(&mut self, accepted: AcceptedPlan, actual_intent: Intent) {
-        let planted = accepted.intent.manual == Some(grenadiers_core::cpu::ManualIntent::Bomb)
+        let planted_input = accepted.intent.manual
+            == Some(grenadiers_core::cpu::ManualIntent::Bomb)
             && actual_intent.manual == accepted.intent.manual;
         self.memory = Some(
-            if accepted.intent.manual == Some(grenadiers_core::cpu::ManualIntent::Bomb) && !planted
+            if !accepted.certified_plant
+                && accepted.intent.manual == Some(grenadiers_core::cpu::ManualIntent::Bomb)
+                && !planted_input
             {
                 UtilityMemory::new(accepted.next_memory.key())
             } else {
@@ -258,14 +169,20 @@ impl CpuController {
             },
         );
         self.rng = Some(accepted.next_rng);
-        self.escaping = planted;
+        self.escaping = !accepted.certified_plant && planted_input;
         self.committed_pulse = accepted.committed_pulse;
         self.committed_route_epoch = accepted
             .committed_route
             .as_ref()
             .map(|_| accepted.decision.command_epoch);
         self.committed_route = accepted.committed_route;
-        if planted {
+        if accepted.certified_plant && !planted_input {
+            let _ = self
+                .committed_route
+                .as_mut()
+                .is_some_and(CommittedRoute::select_absent_plant);
+        }
+        if self.escaping {
             self.cancel();
         }
         if let Some(memory) = self.admission_memory.as_mut() {
@@ -350,6 +267,7 @@ impl CpuController {
             next_rng: rng,
             committed_pulse: None,
             committed_route: None,
+            certified_plant: false,
         }
     }
 
@@ -370,6 +288,9 @@ mod observation;
 
 #[path = "controller_route.rs"]
 mod route;
+
+#[path = "controller_admission.rs"]
+mod admission;
 
 #[path = "controller_pulse.rs"]
 mod pulse;
@@ -394,3 +315,7 @@ mod tests;
 #[cfg(test)]
 #[path = "controller_route_tests.rs"]
 mod route_tests;
+
+#[cfg(test)]
+#[path = "controller_plant_tests.rs"]
+mod plant_tests;

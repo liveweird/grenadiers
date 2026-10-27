@@ -30,7 +30,7 @@ an empty room. Restarting the server ends solo and human-duel matches alike.
 
 The CPU pursues exposed pickups, useful block-opening positions and visible rival pressure. It
 avoids known hazards and plants an ordinary bomb only when its restricted observation supports
-a short escape route. Accepted movement and manual actions use the same validation as humans.
+a checked escape. Accepted movement and manual actions use the same validation as humans.
 This is an initial opponent, with conservative tactics rather than tuned difficulty levels.
 
 Around observed hazards, the CPU forecasts timed blasts, chains, flame expiry and persistent
@@ -39,6 +39,12 @@ Slow Foot and Reverse Controls expiry. A committed route continues without anoth
 job, using short stops between moves and checking fresh observations against its schedule.
 When complete route planning fails, a checked single-pulse fallback can still make progress;
 that fallback does not guarantee completion of a later escape under worker delay.
+
+For useful ordinary bombs, the CPU can check a complete escape against both successful placement
+and no placement. It accounts for movement before planting, range/fuse modifiers and effect expiry,
+then confirms the actual visible bomb or the absent outcome. The same committed escape continues
+without another worker. A rejected Bomb action is not retried. Conservative limits can still
+refuse a useful bomb; the earlier restricted planting fallback remains available.
 
 Bomb motion remains partially unknown. Short conditional pulses may explicitly assume a bomb
 has stayed stationary; observing it move withdraws that assumption. Complete conditional routes

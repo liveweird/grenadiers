@@ -11,7 +11,7 @@ mod steering;
 
 pub use compatibility::can_admit_ordinary;
 pub use execution::{CommittedPulse, PulseStatus};
-pub use planner::{SurvivalPlan, plan};
+pub use planner::{ExecutionCertificate, SurvivalPlan, plan};
 pub use route_execution::{CommittedRoute, RouteCommand, RouteStatus};
 
 pub const MAX_PLAN_AGE_TICKS: u64 = 6;

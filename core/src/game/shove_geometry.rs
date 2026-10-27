@@ -1,6 +1,6 @@
 use std::cmp::Ordering;
 
-use super::{Direction, SeatId};
+use super::Direction;
 use crate::game::MovementSegment;
 use crate::game::movement::MovementOutcome;
 use crate::game::types::HALF_FOOTPRINT;
@@ -24,7 +24,7 @@ pub(crate) fn stationary_contact_entry(holder: MovementSegment, rival: super::Po
         original_budget: 0,
         forward_segment: None,
     };
-    contact_entry_direction(SeatId::One, &[holder, rival]).is_some()
+    contact_entry(&holder, &rival).is_some()
 }
 
 #[derive(Clone, Copy)]
@@ -37,6 +37,18 @@ struct Velocity {
 struct Fraction {
     numerator: i64,
     denominator: i64,
+}
+
+#[derive(Clone, Copy)]
+pub(super) struct ContactEntry {
+    pub(super) direction: Direction,
+    time: Fraction,
+}
+
+impl ContactEntry {
+    pub(super) fn compare_time(self, other: Self) -> Ordering {
+        self.time.compare(other.time)
+    }
 }
 
 impl Fraction {
@@ -68,29 +80,28 @@ impl Fraction {
     }
 }
 
-pub(super) fn contact_entry_direction(
-    seat: SeatId,
-    outcomes: &[MovementOutcome; 2],
-) -> Option<Direction> {
-    let holder = &outcomes[seat.index()];
-    let rival = &outcomes[1 - seat.index()];
+pub(super) fn contact_entry(
+    holder: &MovementOutcome,
+    rival: &MovementOutcome,
+) -> Option<ContactEntry> {
     let forward = holder.forward_segment?;
     let direction = segment_direction(forward)?;
     if holder.original_budget <= 0 {
         return None;
     }
+    let outcomes = [holder, rival];
     debug_assert!(
         outcomes
             .iter()
             .all(|outcome| (0..=86).contains(&outcome.original_budget)),
         "supported speeds produce at most 86 units per update"
     );
-    let denominator = i64::from(outcomes[0].original_budget.max(1))
-        * i64::from(outcomes[1].original_budget.max(1));
+    let denominator =
+        i64::from(holder.original_budget.max(1)) * i64::from(rival.original_budget.max(1));
     // The common denominator is at most 86²=7,396 and relative axis velocity is at most 172.
     // Arena coordinates are below 15,360, so widened i64 position products stay below 114M;
     // Fraction cross-products widen again to i128 before comparison.
-    let boundaries = merged_boundaries(outcomes, denominator);
+    let boundaries = merged_boundaries(&outcomes, denominator);
     debug_assert!(
         boundaries.len() <= 6,
         "two paths create at most five intervals"
@@ -119,13 +130,27 @@ pub(super) fn contact_entry_direction(
             && holder_velocity.forward == Some(forward)
             && leading_face_entry(direction, relative, relative_velocity, entry, denominator)
         {
-            return Some(direction);
+            return Some(ContactEntry {
+                direction,
+                time: Fraction::new(
+                    start * entry.denominator + entry.numerator,
+                    denominator * entry.denominator,
+                ),
+            });
         }
     }
     None
 }
 
-fn merged_boundaries(outcomes: &[MovementOutcome; 2], denominator: i64) -> Vec<i64> {
+#[cfg(test)]
+pub(super) fn contact_entry_direction(
+    seat: super::SeatId,
+    outcomes: &[MovementOutcome; 2],
+) -> Option<Direction> {
+    contact_entry(&outcomes[seat.index()], &outcomes[1 - seat.index()]).map(|entry| entry.direction)
+}
+
+fn merged_boundaries(outcomes: &[&MovementOutcome; 2], denominator: i64) -> Vec<i64> {
     let mut boundaries = vec![0, denominator];
     for outcome in outcomes {
         let budget = i64::from(outcome.original_budget.max(1));

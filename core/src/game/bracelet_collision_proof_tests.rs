@@ -70,7 +70,7 @@ fn priority_winner_blocked_at_zero_does_not_fall_back_to_viable_loser() {
         ])
         .unwrap();
 
-    assert!(report.forced_movement.is_none());
+    assert!(report.forced_movements.is_empty());
     assert_eq!(game.actors[0].position, Position { x: 4_262, y: 4_096 });
     assert_eq!(game.actors[1].position, Position { x: 4_800, y: 4_096 });
     assert_eq!(game.actors[0].last_successful_shove_tick(), None);
@@ -85,8 +85,7 @@ fn overlapping_pusher_ahead_is_ignored_but_separated_pusher_still_clamps() {
         Position { x: 4_800, y: 4_096 },
     );
     let forced = overlapping
-        .resolve_shove(&east_claim(), Tick(1))
-        .expect("initial overlap permits the victim to depart through the pusher");
+        .resolve_shove(&east_claim(), Tick(1)).into_iter().next().expect("initial overlap permits the victim to depart through the pusher");
     assert_eq!(forced.segment.end(), Position { x: 5_824, y: 4_096 });
 
     let mut separated = simple_state(
@@ -95,8 +94,7 @@ fn overlapping_pusher_ahead_is_ignored_but_separated_pusher_still_clamps() {
         Position { x: 4_800, y: 4_096 },
     );
     let forced = separated
-        .resolve_shove(&east_claim(), Tick(1))
-        .expect("the non-overlapping actor leaves a positive sixty-unit gap");
+        .resolve_shove(&east_claim(), Tick(1)).into_iter().next().expect("the non-overlapping actor leaves a positive sixty-unit gap");
     assert_eq!(forced.segment.end(), Position { x: 4_860, y: 4_096 });
 }
 
@@ -117,13 +115,13 @@ fn victim_soft_wall_grace_allows_exit_is_pruned_and_cannot_authorize_reentry() {
     game.replace_actor_equipment(SeatId::Two, Equipment::Heart);
     assert_eq!(game.actors[1].soft_wall_grace, BTreeSet::from([block]));
 
-    let exit = game.resolve_shove(&east_claim(), Tick(1)).unwrap();
+    let exit = game.resolve_shove(&east_claim(), Tick(1)).into_iter().next().unwrap();
     assert_eq!(exit.segment.end().x, 7_524);
     assert!(game.actors[1].soft_wall_grace.is_empty());
 
     game.actors[0].restore_shove_cooldown(None);
     game.actors[0].position = Position { x: 8_124, y: 4_608 };
-    let reentry = game.resolve_shove(&west_claim(), Tick(2)).unwrap();
+    let reentry = game.resolve_shove(&west_claim(), Tick(2)).into_iter().next().unwrap();
     assert_eq!(reentry.segment.start().x, 7_524);
     assert_eq!(reentry.segment.end().x, 7_488);
 }
@@ -145,7 +143,7 @@ fn initiator_reachable_soft_wall_grace_does_not_transfer_to_victim() {
     game.replace_actor_equipment(SeatId::One, Equipment::Bracelet);
     assert_eq!(game.actors[0].soft_wall_grace, BTreeSet::from([block]));
 
-    let forced = game.resolve_shove(&east_claim(), Tick(1)).unwrap();
+    let forced = game.resolve_shove(&east_claim(), Tick(1)).into_iter().next().unwrap();
     assert_eq!(forced.segment.end().x, 5_824);
 }
 
@@ -177,13 +175,13 @@ fn victim_bomb_grace_allows_exit_is_pruned_and_cannot_authorize_reentry() {
     ));
     game.actors[1].bomb_grace.insert(EntityId(30));
 
-    let exit = game.resolve_shove(&east_claim(), Tick(1)).unwrap();
+    let exit = game.resolve_shove(&east_claim(), Tick(1)).into_iter().next().unwrap();
     assert_eq!(exit.segment.end().x, 7_524);
     assert!(game.actors[1].bomb_grace.is_empty());
 
     game.actors[0].restore_shove_cooldown(None);
     game.actors[0].position = Position { x: 8_124, y: 4_608 };
-    let reentry = game.resolve_shove(&west_claim(), Tick(2)).unwrap();
+    let reentry = game.resolve_shove(&west_claim(), Tick(2)).into_iter().next().unwrap();
     assert_eq!(reentry.segment.start().x, 7_524);
     assert_eq!(reentry.segment.end().x, 7_488);
 }
@@ -200,7 +198,7 @@ fn initiator_bomb_grace_does_not_transfer_to_victim() {
     ));
     game.actors[0].bomb_grace.insert(EntityId(30));
 
-    let forced = game.resolve_shove(&east_claim(), Tick(1)).unwrap();
+    let forced = game.resolve_shove(&east_claim(), Tick(1)).into_iter().next().unwrap();
     assert_eq!(forced.segment.end().x, 5_824);
 }
 
@@ -215,8 +213,7 @@ fn frozen_victim_can_be_shoved_but_frozen_holder_cannot_initiate() {
         frozen_victim
             .step(&[press(SeatId::One, Direction::East)])
             .unwrap()
-            .forced_movement
-            .is_some()
+            .forced_movements.len() == 1
     );
 
     let mut frozen_holder = simple_state(enabled, one, two);
@@ -225,7 +222,6 @@ fn frozen_victim_can_be_shoved_but_frozen_holder_cannot_initiate() {
         frozen_holder
             .step(&[press(SeatId::One, Direction::East)])
             .unwrap()
-            .forced_movement
-            .is_none()
+            .forced_movements.is_empty()
     );
 }

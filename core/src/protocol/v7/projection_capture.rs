@@ -330,9 +330,12 @@ fn validate_legacy_reports(reports: &[game::StepReport]) -> Result<(), Projectio
                 .events
                 .iter()
                 .any(|event| !event.audience.is_subset_of(game::EventAudience::Both))
-            || report
-                .forced_movement
-                .is_some_and(|forced| !game::SeatId::DUEL.contains(&forced.seat))
+            || report.forced_movements.len() > 1
+            || report.forced_movements.iter().any(|forced| {
+                !game::SeatId::DUEL.contains(&forced.seat)
+                    || !game::SeatId::DUEL.contains(&forced.pusher)
+                    || forced.pusher == forced.seat
+            })
     }) {
         Err(ProjectionError::InvalidReports)
     } else {

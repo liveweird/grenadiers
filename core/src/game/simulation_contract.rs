@@ -76,11 +76,12 @@ pub struct StepReport {
     pub tick: Tick,
     pub traces: Vec<MovementTrace>,
     pub events: Vec<StepEvent>,
-    pub(crate) forced_movement: Option<ForcedMovement>,
+    pub(crate) forced_movements: Vec<ForcedMovement>,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) struct ForcedMovement {
+    pub(crate) pusher: SeatId,
     pub(crate) seat: SeatId,
     pub(crate) segment: MovementSegment,
 }

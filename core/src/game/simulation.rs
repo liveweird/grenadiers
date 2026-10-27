@@ -167,9 +167,7 @@ impl State {
             });
         }
         let enabled = rules.enabled_items();
-        let unsupported_multiplayer_items = enabled.contains_punch()
-            || enabled.contains_bracelet()
-            || enabled.contains_teleporter();
+        let unsupported_multiplayer_items = enabled.contains_teleporter();
         if player_count != PlayerCount::Two && unsupported_multiplayer_items {
             return Err(StateError::UnsupportedEnabledItems(enabled));
         }

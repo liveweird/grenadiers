@@ -78,18 +78,24 @@ fn capture_event_bomb(
 
 pub(super) fn capture_report(report: &game::StepReport) -> Result<ReportFacts, ProjectionError> {
     let tick = wire_tick(report.tick)?;
+    let forced_movement = match report.forced_movements.as_slice() {
+        [] => None,
+        [forced]
+            if game::SeatId::DUEL.contains(&forced.seat)
+                && game::SeatId::DUEL.contains(&forced.pusher)
+                && forced.pusher != forced.seat =>
+        {
+            Some(ForcedMovementFacts {
+                victim: wire_seat(forced.seat).map_err(|_| ProjectionError::InvalidEvent)?,
+                start: wire_position(forced.segment.start())?,
+                end: wire_position(forced.segment.end())?,
+            })
+        }
+        _ => return Err(ProjectionError::InvalidReports),
+    };
     Ok(ReportFacts {
         tick,
-        forced_movement: report
-            .forced_movement
-            .map(|forced| {
-                Ok(ForcedMovementFacts {
-                    victim: wire_seat(forced.seat).map_err(|_| ProjectionError::InvalidEvent)?,
-                    start: wire_position(forced.segment.start())?,
-                    end: wire_position(forced.segment.end())?,
-                })
-            })
-            .transpose()?,
+        forced_movement,
         events: report
             .events
             .iter()

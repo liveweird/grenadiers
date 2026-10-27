@@ -43,19 +43,36 @@ pub(super) fn bracelet_shove() -> (State, StepReport) {
             action: InputAction::Press(Direction::East),
         }])
         .unwrap();
-    assert_eq!(report.forced_movement.as_ref().unwrap().seat, SeatId::Two);
+    assert_eq!(report.forced_movements.len(), 1);
+    assert_eq!(report.forced_movements[0].pusher, SeatId::One);
+    assert_eq!(report.forced_movements[0].seat, SeatId::Two);
     (state, report)
 }
 
 #[test]
-fn base_event_projection_rejects_only_unsupported_forced_movement_victims() {
+fn base_event_projection_rejects_non_legacy_forced_movement_facts() {
     let report = bracelet_shove_report();
     assert!(super::project_events(std::slice::from_ref(&report)).is_ok());
 
+    let mut multiple = report.clone();
+    let second = multiple.forced_movements[0];
+    multiple.forced_movements.push(second);
+    assert_eq!(
+        super::project_events(&[multiple]),
+        Err(super::ProjectionError::InvalidEvent)
+    );
+
     let mut malicious = report;
-    malicious.forced_movement.as_mut().unwrap().seat = SeatId::Three;
+    malicious.forced_movements[0].seat = SeatId::Three;
     assert_eq!(
         super::project_events(&[malicious]),
+        Err(super::ProjectionError::InvalidEvent)
+    );
+
+    let mut unsupported_pusher = bracelet_shove_report();
+    unsupported_pusher.forced_movements[0].pusher = SeatId::Four;
+    assert_eq!(
+        super::project_events(&[unsupported_pusher]),
         Err(super::ProjectionError::InvalidEvent)
     );
 }

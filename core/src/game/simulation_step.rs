@@ -58,7 +58,7 @@ impl State {
                 tick: next_tick,
                 traces: self.stationary_traces(),
                 events: Vec::new(),
-                forced_movement: None,
+                forced_movements: Vec::new(),
             });
         }
 
@@ -101,17 +101,17 @@ impl State {
             .map(|outcome| outcome.trace.clone())
             .collect();
         self.resolve_kick_requests(kick_requests);
-        let forced_movement = self.resolve_shove(&outcomes, next_tick);
+        let forced_movements = self.resolve_shove(&outcomes, next_tick);
         let contact_targets = super::contacts::accepted_contact_ids(
             &self.world,
             &traces,
-            forced_movement,
+            &forced_movements,
             &alive_at_movement_start,
             &grace_at_movement_start,
         );
         self.kill_on_existing_flames(
             &traces,
-            forced_movement,
+            &forced_movements,
             next_tick,
             &mut events,
             &mut shield_prevented,
@@ -150,7 +150,7 @@ impl State {
             tick: next_tick,
             traces,
             events,
-            forced_movement,
+            forced_movements,
         })
     }
 
@@ -225,13 +225,13 @@ impl State {
     fn kill_on_existing_flames(
         &mut self,
         traces: &[MovementTrace],
-        forced_movement: Option<super::contract::ForcedMovement>,
+        forced_movements: &[super::contract::ForcedMovement],
         tick: Tick,
         events: &mut Vec<StepEvent>,
         shield_prevented: &mut [bool],
     ) {
         for (index, trace) in traces.iter().enumerate() {
-            let forced_hit = forced_movement.is_some_and(|forced| {
+            let forced_hit = forced_movements.iter().any(|forced| {
                 forced.seat.index() == index
                     && self
                         .world

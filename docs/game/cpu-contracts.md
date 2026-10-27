@@ -8,8 +8,8 @@ These Rust contracts support the [solo opponent](single-player.md) and the broad
 
 `core::room::RoomMode` derives controller kinds independently of occupancy and socket state.
 Human duels have two human controllers. Solo fixes the human at seat One and the CPU at seat
-Two. `CpuProfile::CURRENT` identifies `UtilityV4` with `Standard` difficulty;
-`INITIAL`, `PULSE_V2` and `ROUTE_V3` preserve the V1/V2/V3 replay identities. These are
+Two. `CpuProfile::CURRENT` identifies `UtilityV5` with `Standard` difficulty;
+`INITIAL`, `PULSE_V2`, `ROUTE_V3` and `PLANT_V4` preserve the V1–V4 replay identities. These are
 policy identities, not claims about measured strength. Seeds are outside participant metadata.
 Live owner construction accepts only the current profile; retaining a historical replay
 identity does not re-enable that older policy for new matches.
@@ -43,12 +43,28 @@ request may submit its ordinary Stop. History has bounded, deterministic retenti
 counted in logical units rather than hardware milliseconds.
 
 Tie-breaking uses its own seeded ChaCha stream and never draws from arena generation. Small
-fixture policies remain test-only; production uses UtilityV4. Replays consume recorded accepted
+fixture policies remain test-only; production uses UtilityV5. Replays consume recorded accepted
 actions rather than invoking a policy again. Production journal allocation remains disabled;
 explicit solo recording adds format-3 header provenance while preserving formats 1/2 and
 accepted-input record capacity.
-Policy versions 1/2/3/4 are accepted only with their matching profile; new recordings retain the
-actual room profile. All four policies share the unchanged v12 room shape.
+Policy versions 1/2/3/4/5 are accepted only with their matching profile; new recordings retain the
+actual room profile. All five policies share the unchanged v12 room shape.
+
+## Goal guidance
+
+A single bounded static flood-fill records reachable distance and the first step toward useful
+pickups, block openings and a visible rival. Pickup value depends on observed upgrades, current
+equipment and remaining buff duration. Useful upgrades, Heart and beneficial effects can be goals;
+capped upgrades, duplicates and unnecessary refreshes have no collection priority.
+
+Known curses, Oil, Teleporter and unsupported stored weapons are excluded from deliberate goals
+and ordinary navigation transit. Harmless capped upgrades or duplicate/long-duration buffs remain
+transitable. Equipment shares one replaceable slot: navigation preserves held Heart rather than
+replacing it with an unused capability. Remembered ordinary next steps use the same eligibility
+check. Stable ordering and the independent RNG resolve genuine ties; exhausted work yields Stop.
+
+This is static guidance. Existing hazard checks, planting certificates and pickup-changing-path
+restrictions retain authority, and hidden contents never enter goal selection.
 
 ## Planning and committed execution
 

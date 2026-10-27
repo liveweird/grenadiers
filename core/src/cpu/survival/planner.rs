@@ -120,7 +120,7 @@ pub fn plan(
         start: Tick(parts.tick.0 + 1),
         end: Tick(end),
     };
-    let Some(target) = super::steering::target(observation, &forecast, actor.position, work) else {
+    let Some(target) = super::steering::target(observation, &forecast, &ordinary, work) else {
         return Ok(stop());
     };
     let mut choices = Vec::with_capacity(5);

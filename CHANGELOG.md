@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+## 0.3.85 — 2026-10-27
+
+### Changed
+
+- Score reachable useful pickups and goals with bounded static navigation, including
+  detours and category-aware avoidance of curses, unsupported weapons and harmful replacement.
+- Preserve harmless pickup transit and revalidate remembered movement against the same policy.
+- Identify the navigation policy as UtilityV5 while retaining V1–V4 recorded-input replay
+  and the unchanged v12 wire shape.
+
 ## 0.3.84 — 2026-10-27
 
 ### Added

@@ -5,9 +5,10 @@ use crate::cpu::policy::{
 };
 use crate::cpu::routing::{PulseRequest, RouteMode, certify_pulse};
 use crate::cpu::{
-    CpuRng, Intent, MovementIntent, Observation, ObservedActor, ObservedFlame, WorkBudget,
+    CpuRng, Intent, MovementIntent, Observation, ObservedActor, ObservedEffect, ObservedFlame,
+    WorkBudget,
 };
-use crate::game::{CellId, Direction, Position, Tick};
+use crate::game::{CellId, Direction, EffectKind, Position, Tick};
 
 use super::*;
 
@@ -175,6 +176,39 @@ fn waiting_lease_is_explicit_and_exhausted_planning_never_plants() {
     .unwrap();
     assert_eq!(result.control.intent, Intent::STOP);
     assert!(result.lease.is_none());
+}
+
+#[test]
+fn stationary_guidance_allows_a_plant_after_control_effect_expiry() {
+    let mut parts = observation(CellId::new(7, 7)).into_parts();
+    parts.arena.blocks.push(CellId::new(8, 7));
+    let ObservedActor::Visible(actor) = &mut parts.actors[1] else {
+        unreachable!()
+    };
+    actor.effects.push(ObservedEffect {
+        kind: EffectKind::SlowFoot,
+        remaining_ticks: 3,
+    });
+    let basis = Observation::new(parts).unwrap();
+    let planned = plan(
+        &basis,
+        &UtilityMemory::new(key()),
+        &ObservedHazardMemory::new(key()),
+        basis.parts().tick,
+        &mut CpuRng::from_seed(key(), [8; 32]),
+        &mut WorkBudget::new(WORK_ALLOWANCE),
+    )
+    .unwrap();
+
+    assert!(matches!(
+        planned.execution,
+        Some(ExecutionCertificate::Plant(_))
+    ));
+    assert_eq!(planned.control.intent.movement, MovementIntent::Stop);
+    assert_eq!(
+        planned.control.intent.manual,
+        Some(crate::cpu::ManualIntent::Bomb)
+    );
 }
 
 #[test]

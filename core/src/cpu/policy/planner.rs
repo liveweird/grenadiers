@@ -7,10 +7,13 @@ use crate::game::CellId;
 use crate::game::types::UNITS_PER_CELL;
 
 use super::execution::follow_committed_escape;
-use super::hazards::{immediately_safe, manhattan, planting_supported, unsupported_control_effect};
+use super::goals::{select, transit_allowed};
+use super::hazards::{immediately_safe, planting_supported, unsupported_control_effect};
 use super::movement::{
     STEPS, direction, hold_ticks, input_direction, offset, pulse_minimum_distance,
 };
+pub(super) use super::placement::alignment_direction;
+use super::placement::{centered_for_placement, placement_center_threshold};
 use super::{ControlPlan, MAX_HOLD_TICKS, MAX_ROUTE_CELLS, PolicyError, UtilityMemory};
 
 const PER_PULSE_IDLE_TICKS: u64 = 10;
@@ -59,6 +62,7 @@ pub fn plan(
     if memory.planted_origin().is_none()
         && let Some((next, advanced)) = memory.next(current, actor.position)
         && immediately_safe(observation, next)
+        && transit_allowed(observation, actor, next)
     {
         return Ok(movement_plan(actor, current, next, advanced));
     }
@@ -99,57 +103,6 @@ pub fn plan(
     navigate(observation, actor, current, key, rng, work)
 }
 
-pub(super) fn alignment_direction(
-    actor: &crate::cpu::VisibleActor,
-    cell: CellId,
-    threshold: u32,
-) -> Option<crate::game::Direction> {
-    let center = crate::game::Position::center(cell);
-    let x_difference = actor.position.x.abs_diff(center.x);
-    let y_difference = actor.position.y.abs_diff(center.y);
-    let x_violates = x_difference > threshold;
-    let y_violates = y_difference > threshold;
-    let align_x = x_violates
-        && (!y_violates
-            || matches!(
-                actor.heading,
-                crate::game::Direction::East | crate::game::Direction::West
-            ));
-    if !x_violates && !y_violates {
-        None
-    } else if align_x && actor.position.x > center.x {
-        Some(crate::game::Direction::West)
-    } else if align_x && actor.position.x < center.x {
-        Some(crate::game::Direction::East)
-    } else if actor.position.y > center.y {
-        Some(crate::game::Direction::North)
-    } else if actor.position.y < center.y {
-        Some(crate::game::Direction::South)
-    } else {
-        None
-    }
-}
-
-fn centered_for_placement(
-    observation: &Observation,
-    actor: &crate::cpu::VisibleActor,
-    cell: CellId,
-) -> bool {
-    let center = crate::game::Position::center(cell);
-    let threshold = placement_center_threshold(observation);
-    actor.position.x.abs_diff(center.x) <= threshold
-        && actor.position.y.abs_diff(center.y) <= threshold
-}
-
-fn placement_center_threshold(observation: &Observation) -> u32 {
-    observation
-        .parts()
-        .rules
-        .settings
-        .turn_assist_units()
-        .min(64) as u32
-}
-
 fn navigate(
     observation: &Observation,
     actor: &crate::cpu::VisibleActor,
@@ -158,83 +111,23 @@ fn navigate(
     rng: &mut CpuRng,
     work: &mut WorkBudget,
 ) -> Result<ControlPlan, PolicyError> {
-    let target = goal(observation, current);
-    let mut choices = Vec::new();
-    for (desired, dc, dr) in STEPS {
-        if work.try_take(1).is_err() {
-            return Ok(ControlPlan::stop(UtilityMemory::new(key)));
-        }
-        if let Some(cell) = offset(current, dc, dr)
-            && immediately_safe(observation, cell)
-        {
-            choices.push((
-                manhattan(cell, target),
-                cell.row,
-                cell.column,
-                desired,
-                cell,
-            ));
-        }
-    }
-    if choices.is_empty() {
+    let Some(guidance) = select(observation, actor, current, rng, work) else {
         return Ok(ControlPlan::stop(UtilityMemory::new(key)));
-    }
-    choices.sort_unstable_by_key(|choice| (choice.0, choice.1, choice.2));
-    let tied = choices
-        .iter()
-        .take_while(|choice| choice.0 == choices[0].0)
-        .count();
-    let chosen = if tied > 1 {
-        rng.bounded_u32(tied as u32).unwrap_or(0) as usize
-    } else {
-        0
     };
-    let (_, _, _, desired, next) = choices[chosen];
+    let next = guidance.first_step;
+    if !immediately_safe(observation, next) {
+        return Ok(ControlPlan::stop(UtilityMemory::from_route(
+            key,
+            &[next],
+            false,
+        )));
+    }
+    let desired = direction(current, next).ok_or(PolicyError::InvalidObservation)?;
     Ok(ControlPlan {
         intent: Intent::moving(input_direction(actor, desired)),
         hold_ticks: hold_ticks(actor, next, desired),
         next_memory: UtilityMemory::from_route(key, &[next], false),
     })
-}
-
-pub(crate) fn goal(observation: &Observation, current: CellId) -> CellId {
-    if let Some(pickup) = observation.parts().pickups.iter().min_by_key(|pickup| {
-        (
-            manhattan(current, pickup.cell),
-            pickup.cell.row,
-            pickup.cell.column,
-        )
-    }) {
-        return pickup.cell;
-    }
-    if let Some(opening) = observation
-        .parts()
-        .arena
-        .blocks
-        .iter()
-        .flat_map(|block| {
-            STEPS
-                .iter()
-                .filter_map(move |(_, dc, dr)| offset(*block, *dc, *dr))
-        })
-        .filter(|cell| immediately_safe(observation, *cell))
-        .min_by_key(|cell| (manhattan(current, *cell), cell.row, cell.column))
-    {
-        return opening;
-    }
-    observation
-        .parts()
-        .actors
-        .iter()
-        .find_map(|actor| match actor {
-            ObservedActor::Visible(actor)
-                if actor.seat != observation.parts().recipient && actor.alive =>
-            {
-                actor.position.cell()
-            }
-            _ => None,
-        })
-        .unwrap_or(current)
 }
 
 fn escape_route(

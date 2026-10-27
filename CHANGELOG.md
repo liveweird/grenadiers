@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+## 0.3.92 — 2026-10-27
+
+### Added
+
+- Add a separate full-round Solo reference matrix through natural results or the existing
+  round limit, while retaining the unchanged opening workload.
+- Verify generated CPU episodes by replaying accepted inputs through the existing engine,
+  keeping replay checks separate from planner timing and preserving journal limits.
+
 ## 0.3.91 — 2026-10-27
 
 ### Fixed

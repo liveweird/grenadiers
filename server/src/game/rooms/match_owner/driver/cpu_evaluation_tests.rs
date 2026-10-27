@@ -1,10 +1,13 @@
 use std::collections::BTreeSet;
 
 use grenadiers_core::cpu::survival::WORK_ALLOWANCE;
-use serde_json::{Value, json};
 
-use super::evaluation_support::{EvaluationCase, EvaluationRun, HumanScript, default_cases, run};
-use crate::game::rooms::measurement;
+#[path = "cpu_evaluation_report.rs"]
+mod report;
+
+use super::evaluation_support::{
+    EvaluationCase, HumanScript, default_cases, full_round_cases, run,
+};
 
 #[test]
 fn cpu_evaluation_exact_repeat_is_bounded_and_censored() {
@@ -13,6 +16,7 @@ fn cpu_evaluation_exact_repeat_is_bounded_and_censored() {
     let bounded = run(routine_case("bounded", [11; 32], [17; 32], 1)).unwrap();
 
     assert_eq!(first.trace, second.trace);
+    assert!(first.trace.replay_verified);
     assert!(!first.trace.accepted_actions.is_empty());
     assert_eq!(first.trace.accepted_actions, second.trace.accepted_actions);
     assert_eq!(first.trace.running_ticks, 80);
@@ -173,51 +177,30 @@ fn cpu_evaluation_default_matrix_is_complete_without_hidden_retries() {
 }
 
 #[test]
+fn full_round_matrix_changes_only_the_declared_tick_cap() {
+    let short = default_cases();
+    let full = full_round_cases();
+    assert_eq!(full.len(), 16);
+    for (short, full) in short.into_iter().zip(full) {
+        assert_eq!(short.id, full.id);
+        assert_eq!(short.arena_seed_id, full.arena_seed_id);
+        assert_eq!(short.cpu_seed_id, full.cpu_seed_id);
+        assert_eq!(short.script, full.script);
+        assert_eq!(short.tick_cap, 1_800);
+        assert_eq!(full.tick_cap, 10_800);
+    }
+}
+
+#[test]
 #[ignore = "isolated release evaluation; run through scripts/measure-game.sh --cpu"]
 fn cpu_scripted_evaluation_measurement() {
-    measurement::require_release();
-    let source_identity = required_metadata("GRENADIERS_MEASUREMENT_SOURCE");
-    let toolchain = required_metadata("GRENADIERS_MEASUREMENT_TOOLCHAIN");
-    let mut planner_times = Vec::new();
-    let mut results = Vec::new();
-    for case in default_cases() {
-        let evaluation = run(case).unwrap();
-        assert!(
-            evaluation
-                .trace
-                .planning
-                .work
-                .iter()
-                .all(|work| *work <= WORK_ALLOWANCE)
-        );
-        planner_times.extend(evaluation.planner_times.iter().copied());
-        results.push(case_report(&evaluation));
-    }
-    assert_eq!(results.len(), 16);
-    assert!(!planner_times.is_empty());
+    report::emit_matrix("solo-scripted-evaluation", default_cases(), 1_800);
+}
 
-    measurement::emit(
-        "solo-scripted-evaluation",
-        json!({
-            "sourceIdentity": source_identity,
-            "toolchain": toolchain,
-            "invocationDeclaredCargoProfile": "release",
-            "debugAssertions": cfg!(debug_assertions),
-            "roomProfile": "ExpandedV5",
-            "recordingPolicy": "evaluation-test-recording-enabled",
-            "matrix": {
-                "arenaSeeds": 4,
-                "cpuSeeds": 2,
-                "scripts": ["idle", "bomb-retreat"],
-                "cases": 16,
-                "tickCap": 1_800,
-                "hiddenRetries": 0,
-            },
-            "plannerTimings": measurement::summary_ns(&planner_times),
-            "results": results,
-            "interpretation": "fixed scripted workloads; not evidence of human-level strength",
-        }),
-    );
+#[test]
+#[ignore = "isolated full-round evaluation; run through scripts/measure-game.sh --cpu-rounds"]
+fn cpu_full_round_evaluation_measurement() {
+    report::emit_matrix("solo-full-round-evaluation", full_round_cases(), 10_800);
 }
 
 fn routine_case(
@@ -235,72 +218,4 @@ fn routine_case(
         HumanScript::Idle,
         tick_cap,
     )
-}
-
-fn case_report(evaluation: &EvaluationRun) -> Value {
-    let trace = &evaluation.trace;
-    json!({
-        "case": trace.case_id,
-        "arenaSeed": trace.arena_seed_id,
-        "cpuSeed": trace.cpu_seed_id,
-        "script": trace.script,
-        "tickCap": trace.tick_cap,
-        "profile": format!("{:?}", trace.profile),
-        "settings": format!("{:?}", trace.settings),
-        "source": trace.source,
-        "schedule": trace.schedule,
-        "terminal": trace.terminal.map(|terminal| format!("{terminal:?}")),
-        "censored": trace.censored,
-        "runningTicks": trace.running_ticks,
-        "cpuAlive": trace.cpu_alive,
-        "acceptedMovementActions": trace.accepted_movement_actions,
-        "acceptedManualActions": trace.accepted_manual_actions,
-        "firstObservedCpuBombPlacedTick": trace
-            .first_observed_cpu_bomb_placed_tick
-            .map(|tick| tick.0),
-        "firstObservedCpuPickupTick": trace.first_observed_cpu_pickup_tick.map(|tick| tick.0),
-        "visitedCells": trace.visited_cells.iter().map(|cell| json!({
-            "column": cell.column,
-            "row": cell.row,
-        })).collect::<Vec<_>>(),
-        "stationaryTicks": trace.stationary_ticks,
-        "planning": {
-            "attempts": trace.planning.attempts,
-            "delivered": trace.planning.delivered,
-            "cancelled": trace.planning.cancelled,
-            "failed": trace.planning.failed,
-            "dropped": trace.planning.dropped,
-            "work": work_summary(&trace.planning.work),
-        },
-        "workSum": trace.work_sum,
-        "workMax": trace.work_max,
-        "rngDraws": trace.rng_draws,
-    })
-}
-
-fn work_summary(samples: &[u32]) -> Value {
-    if samples.is_empty() {
-        return json!({ "count": 0, "sum": 0, "max": 0 });
-    }
-    let mut sorted = samples.to_vec();
-    sorted.sort_unstable();
-    json!({
-        "count": sorted.len(),
-        "sum": sorted.iter().map(|value| u64::from(*value)).sum::<u64>(),
-        "p50": percentile(&sorted, 50),
-        "p95": percentile(&sorted, 95),
-        "p99": percentile(&sorted, 99),
-        "max": sorted.last().copied().unwrap(),
-    })
-}
-
-fn percentile(sorted: &[u32], value: usize) -> u32 {
-    let rank = (value * sorted.len()).div_ceil(100);
-    sorted[rank.saturating_sub(1)]
-}
-
-fn required_metadata(name: &str) -> String {
-    let value = std::env::var(name).unwrap_or_else(|_| panic!("{name} must be explicit"));
-    assert!(!value.trim().is_empty(), "{name} must not be blank");
-    value
 }

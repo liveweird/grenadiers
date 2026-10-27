@@ -15,6 +15,17 @@ pub(in crate::game::rooms) use record::{Journal, Operation, ReplayAction};
 use runner::{ReplayError, replay};
 
 #[cfg(test)]
+pub(in crate::game::rooms) fn verify_exact(
+    journal: &Journal,
+    expected: &super::match_runtime::RuntimeInspection,
+) -> Result<(), String> {
+    let actual = replay(journal).map_err(|error| format!("replay failed: {error:?}"))?;
+    (actual == *expected)
+        .then_some(())
+        .ok_or_else(|| format!("replay mismatch: actual={actual:?} expected={expected:?}"))
+}
+
+#[cfg(test)]
 mod capture_tests;
 #[cfg(test)]
 mod cpu_contract_tests;

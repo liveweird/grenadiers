@@ -123,6 +123,7 @@ pub(super) struct EvaluationTrace {
     pub(super) initial_public_world: InitialPublicWorld,
     pub(super) terminal: Option<RoundResult>,
     pub(super) censored: bool,
+    pub(super) replay_verified: bool,
     pub(super) running_ticks: u64,
     pub(super) cpu_alive: bool,
     pub(super) accepted_movement_actions: usize,
@@ -150,6 +151,10 @@ pub(super) struct EvaluationRun {
 
 pub(super) fn default_cases() -> Vec<EvaluationCase> {
     fixture::default_cases()
+}
+
+pub(super) fn full_round_cases() -> Vec<EvaluationCase> {
+    fixture::full_round_cases()
 }
 
 pub(super) fn run(case: EvaluationCase) -> Result<EvaluationRun, MatchRuntimeError> {
@@ -286,6 +291,12 @@ impl Accumulator {
     }
 
     fn finish(self, driver: &super::super::Driver) -> EvaluationRun {
+        if let Err(error) = super::super::super::super::replay::verify_exact(
+            driver.runtime.replay_journal(),
+            &driver.runtime.replay_inspection(),
+        ) {
+            panic!("generated evaluation episode did not replay exactly: {error}");
+        }
         let mut movement = 0;
         let mut manual = 0;
         let accepted_actions = driver
@@ -332,6 +343,7 @@ impl Accumulator {
                 initial_public_world: self.initial_world,
                 terminal: self.terminal,
                 censored: self.terminal.is_none(),
+                replay_verified: true,
                 running_ticks: self.running_ticks,
                 cpu_alive,
                 accepted_movement_actions: movement,

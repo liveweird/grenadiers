@@ -4,6 +4,43 @@ This archive preserves the older release records originally maintained in
 [`docs/releases.md`](../releases.md). Records remain in their original order; the current
 release procedure and current release record stay in the [release guide](../releases.md).
 
+## v0.3.88 — 2026-10-27
+
+[v0.3.88](https://github.com/liveweird/grenadiers/releases/tag/v0.3.88) fixes unnecessarily
+long CPU waits after finite flames and around harmless unlit Oil. Non-plant route deadlines
+cover the latest current flame expiry and the existing admission/movement/stopped margin;
+the complete 840-tick forecast remains intact. Active bombs and burning Oil retain the full
+horizon. Unlit Oil remains an obstacle. Metered scans and checked arithmetic fail closed;
+planting proofs, pulse safety, route execution and pickup restrictions are unchanged.
+
+The actual Driver regression executes a 30-tick Wait, completes at flame expiry, admits fresh
+movement at that same tick and physically collects Bomb Capacity 21 ticks later. Initial/fresh
+planning costs are 1,215/20 work units. The previous 840-tick certificate span is source-derived;
+the new 30-tick span and Driver progression are measured. Boundary, overflow, budget, all-seven-
+lane, multiple-flame and bomb/Oil cases pass. UtilityV8 retains V1–V7 accepted-input replay and
+the unchanged v12 wire shape. Independent review is clear.
+
+Tested source is `26ceae8b86b4d1661cd3125c10ae225edcc40077`. Full local Rust acceptance passes
+in 470.932s: all 4,194,304 masks in debug, release and official coverage, 32 partitions/four
+workers, zero retries and 37 raw profiles. Coverage is 24,883/27,028 lines (92.06%). The distinct
+[Linux run](https://github.com/liveweird/grenadiers/actions/runs/40441117382) passes.
+Formatting, Clippy and repository/source-size checks pass. Proven unchanged frontend, API,
+artwork, E2E, tooling and external dependencies retain accepted static/audit/full-web evidence
+(6,874 tests/97 files); changed gameplay receives fresh native runtime acceptance.
+
+Accepted image is
+`sha256:2fc8cfc5695ea92e694fb845c8b2a31d3e42cc7755c1c55408db4d35a2831e4d`.
+Pinned Trivy 0.74.0 reports zero fixable HIGH/CRITICAL findings. Compose passes ten browser
+cases in 49.3s, Kubernetes ten in 51.3s, and dedicated all-items CPU pickup acceptance one in
+16.5s. Polish 320px, strict lobby/create, resources/security/probes and served assets pass.
+Temporary projects/namespaces are removed. The exact image is promoted to localhost:8085;
+v0.3.87 remains available for rollback. Restarting ends in-memory matches.
+
+Evidence is under `target/quality-review/cpu4-v0388-*`. After official coverage was copied,
+153 application incremental cache directories were removed, freeing 28.53 GiB while retaining
+dependencies, binaries and evidence. Distribution remains a source prerelease and local image;
+remaining tactics, evaluation and human feedback stay in the [backlog](../../BACKLOG.md#single-player).
+
 ## v0.3.87 — 2026-10-27
 
 [v0.3.87](https://github.com/liveweird/grenadiers/releases/tag/v0.3.87) completes the

@@ -7,14 +7,18 @@ cd "$root"
 mode=runtime
 if [[ "$#" -eq 1 && "${1:-}" == --cpu ]]; then
   mode=cpu
+elif [[ "$#" -eq 1 && "${1:-}" == --cpu-rounds ]]; then
+  mode=cpu-rounds
 elif [[ "$#" -ne 0 ]]; then
-  echo 'usage: scripts/measure-game.sh [--cpu]' >&2
+  echo 'usage: scripts/measure-game.sh [--cpu|--cpu-rounds]' >&2
   exit 2
 fi
 
 output="$root/target/m7-measurements"
 if [[ "$mode" == cpu ]]; then
   output="$root/target/cpu-measurements"
+elif [[ "$mode" == cpu-rounds ]]; then
+  output="$root/target/cpu-round-measurements"
 fi
 mkdir -p "$output"
 : > "$output/results.jsonl"
@@ -139,11 +143,15 @@ run_case() {
       <<< "$record" >> "$output/results.jsonl"
 }
 
-if [[ "$mode" == cpu ]]; then
+if [[ "$mode" == cpu || "$mode" == cpu-rounds ]]; then
   export GRENADIERS_MEASUREMENT_SOURCE="$source_commit:$source_state"
   GRENADIERS_MEASUREMENT_TOOLCHAIN="$(rustc -Vv)"
   export GRENADIERS_MEASUREMENT_TOOLCHAIN
-  run_case cpu cpu_scripted_evaluation_measurement
+  if [[ "$mode" == cpu-rounds ]]; then
+    run_case cpu-rounds cpu_full_round_evaluation_measurement
+  else
+    run_case cpu cpu_scripted_evaluation_measurement
+  fi
 else
   run_case runtime runtime_reference_measurement
   run_case owner-1 owner_one_room_30s_measurement

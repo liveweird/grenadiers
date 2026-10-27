@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use grenadiers_core::game::{EnabledItems, SeatId};
+use grenadiers_core::game::{EnabledItems, RulesConfig, SeatId};
 use grenadiers_core::room::{CpuProfile, MatchPhase, RoomMode, RoomSettings};
 use tokio::{sync::watch, time::Instant};
 
@@ -56,6 +56,18 @@ pub(super) fn default_cases() -> Vec<EvaluationCase> {
         }
     }
     cases
+}
+
+pub(super) fn full_round_cases() -> Vec<EvaluationCase> {
+    let cap = RulesConfig::expanded_v5(RoomSettings::DEFAULT.with_enabled_items(EnabledItems::ALL))
+        .round_ticks();
+    default_cases()
+        .into_iter()
+        .map(|case| EvaluationCase {
+            tick_cap: cap,
+            ..case
+        })
+        .collect()
 }
 
 pub(super) fn running_recording_driver(

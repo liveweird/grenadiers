@@ -57,7 +57,9 @@ release measurements, run `scripts/measure-game.sh --cpu`; it writes environment
 identity and structured results under `target/cpu-measurements/`. This mode runs only the CPU
 reference matrix, keeping the existing runtime/owner measurements available through the default
 command. Fixed input scripts provide regression evidence; they do not replace human playtesting
-or establish balanced difficulty. Keep timing runs separate from other checks.
+or establish balanced difficulty. `scripts/measure-game.sh --cpu-rounds` runs the separate
+full-round matrix and verifies generated accepted-input replays. Keep timing runs separate
+from other checks.
 
 ### Hosted workflows
 

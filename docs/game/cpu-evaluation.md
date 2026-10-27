@@ -25,7 +25,7 @@ human scripts:
   past the first ordinary fuse and flame window before returning. This is a fixed safe-opening
   workload, not a guarantee against later CPU interference.
 
-Each combination runs once for at most 1,800 running ticks, without hidden retries. A case that
+The opening matrix runs each combination once for at most 1,800 running ticks, without hidden retries. A case that
 reaches its bound is reported as `censored`, never converted into a draw or win. A physical round
 result terminates the case normally.
 
@@ -56,6 +56,22 @@ deterministic case results and planner timing percentiles. Planner timings measu
 work separately from deterministic decisions; they are descriptive observations with no hardware
 threshold. The evaluator does not claim the production-disabled replay recording policy because
 this test harness records evaluation data.
+
+## Full rounds and replay
+
+Use the same declared seed/script combinations through the first natural round result or the
+existing 10,800-update round limit:
+
+```sh
+scripts/measure-game.sh --cpu-rounds
+```
+
+This separate workload writes to `target/cpu-round-measurements/`; `--cpu` retains its opening
+matrix and output path. A natural timeout is a real Draw result. A measurement cap without a
+result stays censored. Every generated episode must replay its accepted inputs to the exact
+runtime inspection through the existing replay engine, without rerunning the CPU policy.
+Truncated journals and replay mismatches fail the run; recording capacity is unchanged.
+Replay verification is reported separately and is outside planner timing samples.
 
 ## Interpretation and limits
 

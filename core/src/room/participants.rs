@@ -17,6 +17,7 @@ pub enum CpuPolicy {
     UtilityV8,
     UtilityV9,
     UtilityV10,
+    UtilityV11,
 }
 
 impl CpuPolicy {
@@ -33,6 +34,7 @@ impl CpuPolicy {
             Self::UtilityV8 => 8,
             Self::UtilityV9 => 9,
             Self::UtilityV10 => 10,
+            Self::UtilityV11 => 11,
         }
     }
 }
@@ -104,9 +106,15 @@ impl CpuProfile {
         difficulty: CpuDifficulty::Standard,
     };
 
+    /// First observed-placement and guided-origin policy, retained for replays.
+    pub const GUIDED_V10: Self = Self {
+        policy: CpuPolicy::UtilityV10,
+        difficulty: CpuDifficulty::Standard,
+    };
+
     /// The only policy profile used to create a new live CPU controller.
     pub const CURRENT: Self = Self {
-        policy: CpuPolicy::UtilityV10,
+        policy: CpuPolicy::UtilityV11,
         difficulty: CpuDifficulty::Standard,
     };
 }
@@ -169,7 +177,8 @@ mod tests {
         assert_eq!(CpuProfile::WALL_PASS_V7.policy.version(), 7);
         assert_eq!(CpuProfile::RESPONSIVE_V8.policy.version(), 8);
         assert_eq!(CpuProfile::ORIGIN_V9.policy.version(), 9);
-        assert_eq!(CpuProfile::CURRENT.policy.version(), 10);
+        assert_eq!(CpuProfile::GUIDED_V10.policy.version(), 10);
+        assert_eq!(CpuProfile::CURRENT.policy.version(), 11);
         assert_eq!(
             RoomMode::Solo(CpuProfile::CURRENT).controller(SeatId::Two),
             ControllerKind::Cpu(CpuProfile::CURRENT)

@@ -320,3 +320,7 @@ mod escape_recovery_tests;
 #[cfg(test)]
 #[path = "cpu_late_escape_recovery_tests.rs"]
 mod late_escape_recovery_tests;
+
+#[cfg(test)]
+#[path = "cpu_pressure_progress_tests.rs"]
+mod pressure_progress_tests;

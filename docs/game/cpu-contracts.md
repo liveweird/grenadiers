@@ -8,8 +8,8 @@ These Rust contracts support the [solo opponent](single-player.md) and the broad
 
 `core::room::RoomMode` derives controller kinds independently of occupancy and socket state.
 Human duels have two human controllers. Solo fixes the human at seat One and the CPU at seat
-Two. `CpuProfile::CURRENT` identifies `UtilityV10` with `Standard` difficulty;
-`INITIAL`, `PULSE_V2`, `ROUTE_V3`, `PLANT_V4`, `GOALS_V5`, `WEAPONS_V6`, `WALL_PASS_V7`, `RESPONSIVE_V8` and `ORIGIN_V9` preserve V1–V9
+Two. `CpuProfile::CURRENT` identifies `UtilityV11` with `Standard` difficulty;
+`INITIAL`, `PULSE_V2`, `ROUTE_V3`, `PLANT_V4`, `GOALS_V5`, `WEAPONS_V6`, `WALL_PASS_V7`, `RESPONSIVE_V8`, `ORIGIN_V9` and `GUIDED_V10` preserve V1–V10
 replay identities. These are
 policy identities, not claims about measured strength. Seeds are outside participant metadata.
 Live owner construction accepts only the current profile; retaining a historical replay
@@ -44,12 +44,12 @@ request may submit its ordinary Stop. History has bounded, deterministic retenti
 counted in logical units rather than hardware milliseconds.
 
 Tie-breaking uses its own seeded ChaCha stream and never draws from arena generation. Small
-fixture policies remain test-only; production uses UtilityV10. Replays consume recorded accepted
+fixture policies remain test-only; production uses UtilityV11. Replays consume recorded accepted
 actions rather than invoking a policy again. Production journal allocation remains disabled;
 explicit solo recording adds format-3 header provenance while preserving formats 1/2 and
 accepted-input record capacity.
-Policy versions 1/2/3/4/5/6/7/8/9/10 are accepted only with their matching profile; new recordings retain the
-actual room profile. All ten policies share the unchanged v12 room shape.
+Policy versions 1/2/3/4/5/6/7/8/9/10/11 are accepted only with their matching profile; new recordings retain the
+actual room profile. All eleven policies share the unchanged v12 room shape.
 
 ## Goal guidance
 
@@ -207,6 +207,15 @@ admission lanes therefore require at least 29 ticks from the observation. The fu
 forecast remains intact; only the request deadline changes. Active bombs and persistent Oil
 fire retain the full horizon. Additional scans consume the same bounded work budget, and
 checked arithmetic failure withholds the plan. Planting proofs and execution guards are unchanged.
+
+A stationary non-plant route can finish before its original deadline after a real public
+hazard gap. This requires an originally visible nonempty bomb set, a current visible empty
+bomb set, no flames or burning Oil, only Wait steps, no pending transition and an executed
+Stop confirmed at or after first execution. Normal scene, actor and exact pose validation
+still runs first. Hidden bombs, unconfirmed Stop, planting, movement, legacy escape and origin
+recovery do not use this completion. Completion authorizes no input; the controller requests
+a fresh ordinary decision, which can resume existing clear-board pickup navigation. Forecasts,
+proof horizons, work limits and pickup-changing pulse restrictions remain unchanged.
 
 ## Interrupted confirmed planting
 

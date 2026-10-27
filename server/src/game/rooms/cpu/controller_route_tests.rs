@@ -49,6 +49,73 @@ fn route_admission_accepts_predicted_detonation_but_rejects_an_extra_hazard() {
     assert_eq!(rejected.rng_draws(), 0);
 }
 
+#[test]
+fn clear_gap_requires_an_unencumbered_settled_stop() {
+    let (mut completed, clear) = committed_wait_controller();
+    assert_eq!(
+        completed.observe_route(&clear),
+        Some(grenadiers_core::cpu::survival::RouteStatus::Completed)
+    );
+    assert!(!completed.has_committed_route());
+    assert_eq!(completed.observe_route(&clear), None);
+
+    let (mut unsettled, clear) = committed_wait_controller();
+    unsettled.settled_stop_tick = None;
+    assert_ne!(
+        unsettled.observe_route(&clear),
+        Some(grenadiers_core::cpu::survival::RouteStatus::Completed)
+    );
+    assert!(unsettled.has_committed_route());
+
+    let (mut too_early, clear) = committed_wait_controller();
+    too_early.settled_stop_tick = Some(Tick(21));
+    assert_ne!(
+        too_early.observe_route(&clear),
+        Some(grenadiers_core::cpu::survival::RouteStatus::Completed)
+    );
+    assert!(too_early.has_committed_route());
+
+    let (mut legacy, clear) = committed_wait_controller();
+    legacy.escaping = true;
+    assert_ne!(
+        legacy.observe_route(&clear),
+        Some(grenadiers_core::cpu::survival::RouteStatus::Completed)
+    );
+    assert!(legacy.has_committed_route());
+}
+
+fn committed_wait_controller() -> (CpuController, grenadiers_core::cpu::Observation) {
+    let (basis, current, route, key) = detonation_fixture();
+    let mut controller = CpuController::new(CpuPlanner::without_workers(), 7, [5; 32]);
+    controller.reset_world(3);
+    assert!(controller.accept_observation(&basis));
+    controller.settled_stop_tick = Some(basis.parts().tick);
+    assert!(controller.accept_observation(&current));
+    controller.inject_plan_result_for_test(
+        basis,
+        4,
+        SurvivalPlan {
+            control: ControlPlan::stop(UtilityMemory::new(key)),
+            lease: None,
+            execution: Some(ExecutionCertificate::Route(Box::new(route))),
+        },
+    );
+    let accepted = controller.poll(Tick(21), 4).unwrap();
+    let actual = accepted.intent;
+    controller.commit(accepted, actual);
+    controller.settled_stop_tick = Some(Tick(22));
+
+    let mut clear = current.into_parts();
+    clear.tick = Tick(52);
+    clear.rules.running_updates += 31;
+    clear.rules.remaining_ticks -= 31;
+    clear.flames.clear();
+    (
+        controller,
+        grenadiers_core::cpu::Observation::new(clear).unwrap(),
+    )
+}
+
 fn detonation_fixture() -> (
     grenadiers_core::cpu::Observation,
     grenadiers_core::cpu::Observation,

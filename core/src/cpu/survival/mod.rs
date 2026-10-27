@@ -3,6 +3,7 @@
 //! A lease certifies only its stated interval. It never grants authority to
 //! execute a guidance suffix or to plant a bomb.
 
+mod clear_gap;
 mod compatibility;
 mod deadline;
 mod execution;
@@ -30,6 +31,9 @@ mod tests;
 
 #[cfg(test)]
 mod route_tests;
+
+#[cfg(test)]
+mod clear_gap_tests;
 
 #[cfg(test)]
 mod origin_tests;

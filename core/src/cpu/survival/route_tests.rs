@@ -76,6 +76,118 @@ fn multi_leg_route() -> (Observation, RouteCertificate) {
     (basis, route)
 }
 
+pub(super) fn cleared_wait_route() -> (Observation, RouteCertificate, Observation) {
+    let mut parts = observation(CellId::new(2, 1)).into_parts();
+    parts.bombs = crate::cpu::BombKnowledge::Visible(vec![crate::cpu::ObservedBomb {
+        id: crate::game::EntityId(91),
+        placed_at: Tick(10),
+        cell: CellId::new(10, 10),
+        owner: crate::game::EntityId(1),
+        range: 1,
+        trigger: crate::cpu::ObservedBombTrigger::Timed {
+            remaining_ticks: 100,
+            paused: false,
+        },
+        blast: crate::game::BlastKind::Standard,
+        unknown: crate::cpu::UnknownBombFacts::ALL,
+    }]);
+    let basis = Observation::new(parts).unwrap();
+    let hazards = forecast(
+        &basis,
+        &ObservedHazardMemory::new(key()),
+        None,
+        ForecastLimits::default(),
+        &mut WorkBudget::new(WORK_ALLOWANCE),
+    )
+    .unwrap();
+    let route = plan_route(
+        &basis,
+        &hazards,
+        RouteRequest {
+            start_window: TickWindow {
+                start: Tick(11),
+                end: Tick(18),
+            },
+            settled_stop_tick: Tick(10),
+            survive_until: hazards.horizon_end(),
+            mode: RouteMode::CertifiedOnly,
+            limits: RouteLimits::default(),
+        },
+        &mut WorkBudget::new(WORK_ALLOWANCE),
+    )
+    .unwrap();
+    assert!(
+        route
+            .steps()
+            .iter()
+            .all(|step| matches!(step, RouteStep::Wait { .. }))
+    );
+    let mut clear = basis.clone().into_parts();
+    clear.tick = Tick(150);
+    clear.rules.running_updates += 140;
+    clear.rules.remaining_ticks -= 140;
+    clear.bombs = crate::cpu::BombKnowledge::Visible(Vec::new());
+    (basis, route, Observation::new(clear).unwrap())
+}
+
+#[test]
+fn stopped_wait_completes_only_after_its_visible_hazard_fully_clears() {
+    let (basis, route, clear) = cleared_wait_route();
+    let admit = || {
+        CommittedRoute::admit(
+            route.clone(),
+            basis.clone(),
+            &basis,
+            Tick(10),
+            MovementIntent::Stop,
+        )
+        .unwrap()
+    };
+    assert_eq!(
+        admit().observe_with_stop(&clear, Some(Tick(11))),
+        RouteStatus::Completed
+    );
+    assert_eq!(admit().observe_with_stop(&clear, None), RouteStatus::Wait);
+
+    let mut wrong_pose = clear.clone().into_parts();
+    let ObservedActor::Visible(actor) = &mut wrong_pose.actors[1] else {
+        unreachable!()
+    };
+    actor.position.x += 1;
+    assert_eq!(
+        admit().observe_with_stop(&Observation::new(wrong_pose).unwrap(), Some(Tick(11))),
+        RouteStatus::Invalidated
+    );
+    let mut unknown = clear.clone().into_parts();
+    unknown.bombs = crate::cpu::BombKnowledge::Unavailable;
+    assert_eq!(
+        admit().observe_with_stop(&Observation::new(unknown).unwrap(), Some(Tick(11))),
+        RouteStatus::Invalidated
+    );
+    let mut flame = clear.clone().into_parts();
+    flame.flames.push(crate::cpu::ObservedFlame {
+        cell: CellId::new(10, 10),
+        remaining_ticks: 1,
+    });
+    assert_eq!(
+        admit().observe_with_stop(&Observation::new(flame).unwrap(), Some(Tick(11))),
+        RouteStatus::Invalidated
+    );
+    let mut oil = clear.into_parts();
+    oil.oil.push(crate::cpu::ObservedOil {
+        cell: CellId::new(10, 10),
+        state: crate::game::OilBarrelState::Burning,
+    });
+    assert_eq!(
+        admit().observe_with_stop(&Observation::new(oil).unwrap(), Some(Tick(11))),
+        RouteStatus::Invalidated
+    );
+    assert_eq!(
+        admit().observe_with_stop(&basis, Some(Tick(11))),
+        RouteStatus::Invalidated
+    );
+}
+
 #[test]
 fn every_start_lane_and_stop_deadline_are_exact() {
     let (basis, route) = multi_leg_route();

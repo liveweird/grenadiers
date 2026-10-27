@@ -4,7 +4,7 @@ use grenadiers_core::cpu::{
     forecast::{ForecastLimits, ObservedHazardMemory, TickWindow, forecast},
     policy::{ControlPlan, UtilityMemory},
     routing::{RouteLimits, RouteMode, RouteRequest, plan_route},
-    survival::SurvivalPlan,
+    survival::{ExecutionCertificate, SurvivalPlan},
 };
 use grenadiers_core::game::arena::ARENA_WIDTH;
 use grenadiers_core::game::{BlastKind, CellId, EntityId, SeatId, Tick};
@@ -26,7 +26,7 @@ fn route_admission_accepts_predicted_detonation_but_rejects_an_extra_hazard() {
     let plan = || SurvivalPlan {
         control: ControlPlan::stop(UtilityMemory::new(key)),
         lease: None,
-        route: Some(route.clone()),
+        execution: Some(ExecutionCertificate::Route(Box::new(route.clone()))),
     };
 
     let mut accepted = make_controller();

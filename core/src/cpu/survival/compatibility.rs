@@ -46,23 +46,8 @@ pub(super) fn compatible(basis: &Observation, current: &Observation) -> bool {
     {
         return false;
     }
-    let (Some(before), Some(after)) = (actor(basis), actor(current)) else {
-        return false;
-    };
-    if !after.alive
-        || after.voluntary_actions_frozen
-        || before.id != after.id
-        || before.speed != after.speed
-        || before.equipment != after.equipment
-        || before.weapon != after.weapon
-        || before.bomb_capacity != after.bomb_capacity
-        || before.bomb_range != after.bomb_range
-        || before.live_bomb_count != after.live_bomb_count
-        || before.last_teleport_tick != after.last_teleport_tick
-    {
-        return false;
-    }
-    if !effects_match(before, after, elapsed) {
+    let expected_live_bombs = actor(basis).map(|before| before.live_bomb_count);
+    if !actor_compatible(basis, current, expected_live_bombs) {
         return false;
     }
     let (BombKnowledge::Visible(old_bombs), BombKnowledge::Visible(new_bombs)) =
@@ -109,9 +94,17 @@ pub(super) fn route_compatible(
     if !evolution.matches_scene(basis, current) {
         return false;
     }
-    let old = basis.parts();
-    let new = current.parts();
-    let Some(elapsed) = new.tick.0.checked_sub(old.tick.0) else {
+    let expected = actor(basis)
+        .and_then(|before| evolution.expected_live_bombs(before.id, current.parts().tick));
+    actor_compatible(basis, current, expected)
+}
+
+pub(super) fn actor_compatible(
+    basis: &Observation,
+    current: &Observation,
+    expected_live_bombs: Option<u16>,
+) -> bool {
+    let Some(elapsed) = current.parts().tick.0.checked_sub(basis.parts().tick.0) else {
         return false;
     };
     let (Some(before), Some(after)) = (actor(basis), actor(current)) else {
@@ -119,20 +112,19 @@ pub(super) fn route_compatible(
     };
     let expected_damage_grace =
         u64::from(before.damage_grace_remaining_ticks).saturating_sub(elapsed);
-    if !after.alive
-        || after.voluntary_actions_frozen
-        || before.id != after.id
-        || before.speed != after.speed
-        || before.equipment != after.equipment
-        || before.weapon != after.weapon
-        || before.bomb_capacity != after.bomb_capacity
-        || evolution.expected_live_bombs(before.id, new.tick) != Some(after.live_bomb_count)
-        || before.last_teleport_tick != after.last_teleport_tick
-        || expected_damage_grace != u64::from(after.damage_grace_remaining_ticks)
-    {
-        return false;
-    }
-    effects_match(before, after, elapsed)
+    before.alive
+        && after.alive
+        && !after.voluntary_actions_frozen
+        && before.id == after.id
+        && before.speed == after.speed
+        && before.equipment == after.equipment
+        && before.weapon == after.weapon
+        && before.bomb_capacity == after.bomb_capacity
+        && before.bomb_range == after.bomb_range
+        && Some(after.live_bomb_count) == expected_live_bombs
+        && before.last_teleport_tick == after.last_teleport_tick
+        && expected_damage_grace == u64::from(after.damage_grace_remaining_ticks)
+        && effects_match(before, after, elapsed)
 }
 
 fn effects_match(before: &VisibleActor, after: &VisibleActor, elapsed: u64) -> bool {

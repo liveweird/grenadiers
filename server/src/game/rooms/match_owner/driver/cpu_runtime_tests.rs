@@ -234,7 +234,7 @@ fn certified_long_pulse_executes_and_replans_after_its_actual_stop_snapshot() {
                 next_memory: UtilityMemory::new(key),
             },
             lease: Some(lease),
-            route: None,
+            execution: None,
         },
     );
 

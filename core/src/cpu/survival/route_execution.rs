@@ -1,11 +1,11 @@
 use crate::cpu::policy::PolicyError;
-use crate::cpu::routing::{RouteCertificate, RouteStep};
+use crate::cpu::routing::{PlantCertificate, PlantPresence, RouteCertificate, RouteStep};
 use crate::cpu::{MemoryKey, MovementIntent, Observation};
 use crate::game::Tick;
 
 use super::MAX_PLAN_AGE_TICKS;
-use super::compatibility::{actor, route_compatible};
-
+use super::compatibility::{actor, actor_compatible, route_compatible};
+use super::planner::ExecutionCertificate;
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum RouteStatus {
     Continue,
@@ -33,7 +33,6 @@ impl RouteCommand {
         self.admission_tick
     }
 
-    #[must_use]
     pub const fn step_index(self) -> u8 {
         self.step_index
     }
@@ -48,6 +47,7 @@ struct Transition {
 #[derive(Clone, Debug)]
 pub struct CommittedRoute {
     certificate: RouteCertificate,
+    plant: Option<CommittedPlant>,
     basis: Observation,
     first_update: Tick,
     transitions: Vec<Transition>,
@@ -55,10 +55,65 @@ pub struct CommittedRoute {
     last_observation_tick: Tick,
     movement: MovementIntent,
 }
+#[derive(Clone, Debug)]
+struct CommittedPlant {
+    certificate: PlantCertificate,
+    presence: PlantPresence,
+}
 
 impl CommittedRoute {
     pub fn admit(
         certificate: RouteCertificate,
+        basis: Observation,
+        current: &Observation,
+        admission_tick: Tick,
+        accepted_movement: MovementIntent,
+    ) -> Result<Self, PolicyError> {
+        Self::admit_inner(
+            certificate,
+            None,
+            basis,
+            current,
+            admission_tick,
+            accepted_movement,
+        )
+    }
+
+    pub fn admit_execution(
+        execution: ExecutionCertificate,
+        basis: Observation,
+        current: &Observation,
+        admission_tick: Tick,
+        accepted_movement: MovementIntent,
+    ) -> Result<Self, PolicyError> {
+        match execution {
+            ExecutionCertificate::Route(certificate) => Self::admit(
+                *certificate,
+                basis,
+                current,
+                admission_tick,
+                accepted_movement,
+            ),
+            ExecutionCertificate::Plant(certificate) => {
+                let route = certificate.route().clone();
+                Self::admit_inner(
+                    route,
+                    Some(CommittedPlant {
+                        certificate: *certificate,
+                        presence: PlantPresence::Awaiting,
+                    }),
+                    basis,
+                    current,
+                    admission_tick,
+                    accepted_movement,
+                )
+            }
+        }
+    }
+
+    fn admit_inner(
+        certificate: RouteCertificate,
+        plant: Option<CommittedPlant>,
         basis: Observation,
         current: &Observation,
         admission_tick: Tick,
@@ -84,12 +139,27 @@ impl CommittedRoute {
             .pose_at(current.parts().tick)
             .ok_or(PolicyError::InvalidObservation)?;
         let current_actor = actor(current).ok_or(PolicyError::InvalidObservation)?;
+        let scene_matches = plant.as_ref().map_or_else(
+            || route_compatible(&basis, current, certificate.evolution()),
+            |plant| {
+                current.parts().tick == admission_tick
+                    && plant
+                        .certificate
+                        .matches_scene(&basis, current, PlantPresence::Awaiting)
+                    && plant_actor_compatible(
+                        &basis,
+                        current,
+                        &plant.certificate,
+                        PlantPresence::Awaiting,
+                    )
+            },
+        );
         if age > MAX_PLAN_AGE_TICKS
             || current.parts().tick > admission_tick
             || certificate.key() != key
             || certificate.basis_tick() != basis.parts().tick
             || !certificate.start_window().contains(first_update)
-            || !route_compatible(&basis, current, certificate.evolution())
+            || !scene_matches
             || expected_pose != (current_actor.position, current_actor.heading)
         {
             return Err(PolicyError::InvalidObservation);
@@ -105,6 +175,7 @@ impl CommittedRoute {
         }
         Ok(Self {
             certificate,
+            plant,
             basis,
             first_update,
             transitions,
@@ -117,6 +188,9 @@ impl CommittedRoute {
     pub fn observe(&mut self, current: &Observation) -> RouteStatus {
         let tick = current.parts().tick;
         if tick <= self.last_observation_tick {
+            return RouteStatus::Invalidated;
+        }
+        if !self.scene_matches(current) {
             return RouteStatus::Invalidated;
         }
         if tick >= self.certificate.survive_until() {
@@ -135,9 +209,6 @@ impl CommittedRoute {
             }
             self.last_observation_tick = tick;
             return RouteStatus::Completed;
-        }
-        if !route_compatible(&self.basis, current, self.certificate.evolution()) {
-            return RouteStatus::Invalidated;
         }
         let Some(expected) = self
             .certificate
@@ -193,6 +264,34 @@ impl CommittedRoute {
         true
     }
 
+    pub fn select_absent_plant(&mut self) -> bool {
+        let Some(plant) = self.plant.as_mut() else {
+            return false;
+        };
+        plant.presence = PlantPresence::Absent;
+        true
+    }
+
+    pub fn plant_presence(&self) -> Option<PlantPresence> {
+        self.plant.as_ref().map(|plant| plant.presence)
+    }
+
+    fn scene_matches(&mut self, current: &Observation) -> bool {
+        let Some(plant) = self.plant.as_mut() else {
+            return route_compatible(&self.basis, current, self.certificate.evolution());
+        };
+        if plant.presence == PlantPresence::Awaiting {
+            let Ok(presence) = plant.certificate.confirm(&self.basis, current) else {
+                return false;
+            };
+            plant.presence = presence;
+        }
+        plant
+            .certificate
+            .matches_scene(&self.basis, current, plant.presence)
+            && plant_actor_compatible(&self.basis, current, &plant.certificate, plant.presence)
+    }
+
     fn active_status(&self) -> RouteStatus {
         if self.movement == MovementIntent::Stop {
             RouteStatus::Wait
@@ -200,6 +299,18 @@ impl CommittedRoute {
             RouteStatus::Continue
         }
     }
+}
+
+fn plant_actor_compatible(
+    basis: &Observation,
+    observation: &Observation,
+    certificate: &PlantCertificate,
+    presence: PlantPresence,
+) -> bool {
+    let owner = certificate.placement().owner;
+    let expected = certificate.expected_live_bombs(owner, observation.parts().tick, presence);
+    actor(basis).is_some_and(|actor| actor.id == owner)
+        && actor_compatible(basis, observation, expected)
 }
 
 fn transitions(

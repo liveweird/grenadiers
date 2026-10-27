@@ -9,8 +9,7 @@ use grenadiers_core::cpu::{
     forecast::{ForecastLimits, ObservedHazardMemory, TickWindow, forecast},
     policy::{ControlPlan, UtilityMemory, plan},
     routing::{PulseRequest, RouteMode, certify_pulse},
-    survival::PulseStatus,
-    survival::SurvivalPlan,
+    survival::{PulseStatus, SurvivalPlan},
 };
 use grenadiers_core::game::{Direction, SeatId, Tick};
 
@@ -40,7 +39,7 @@ fn inject(controller: &mut CpuController, decision: grenadiers_core::cpu::Decisi
         SurvivalPlan {
             control: ControlPlan::stop(memory),
             lease: None,
-            route: None,
+            execution: None,
         },
         basis,
         rng,
@@ -60,6 +59,7 @@ fn inject_plan(
         decision,
         receiver,
         live: Arc::new(AtomicBool::new(true)),
+        completed: None,
     });
     controller.request_serial = decision.checked_request_serial;
 }
@@ -137,6 +137,7 @@ fn expired_empty_request_is_canceled_and_does_not_block_retry() {
         decision: decision(&controller),
         receiver,
         live: Arc::clone(&live),
+        completed: None,
     });
     controller.request_serial = 1;
 
@@ -176,6 +177,7 @@ fn rejected_bomb_clears_prospective_escape_but_commits_rng() {
         next_rng: rng.clone(),
         committed_pulse: None,
         committed_route: None,
+        certified_plant: false,
     };
 
     controller.commit(
@@ -275,7 +277,7 @@ fn admitted_long_pulse_waits_for_its_scheduled_stop_update() {
         SurvivalPlan {
             control,
             lease: Some(lease),
-            route: None,
+            execution: None,
         },
         basis.clone(),
         CpuRng::from_seed(key, [8; 32]),

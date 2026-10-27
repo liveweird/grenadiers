@@ -154,6 +154,34 @@ fn exact_stop_confirmation_allows_the_second_leg_without_a_worker() {
 }
 
 #[test]
+fn route_rejects_bomb_range_change_at_admission_and_midroute() {
+    let (basis, route) = multi_leg_route();
+    let movement = first_movement(&route);
+    let mut changed = basis.clone().into_parts();
+    let ObservedActor::Visible(cpu) = &mut changed.actors[1] else {
+        unreachable!()
+    };
+    cpu.bomb_range += 1;
+    let changed = Observation::new(changed).unwrap();
+    assert!(
+        CommittedRoute::admit(route.clone(), basis.clone(), &changed, Tick(0), movement).is_err()
+    );
+
+    let mut committed =
+        CommittedRoute::admit(route.clone(), basis.clone(), &basis, Tick(0), movement).unwrap();
+    let (position, heading) = route.lane(Tick(1)).unwrap().pose_at(Tick(1)).unwrap();
+    let mut changed = later(&basis, 1, position, heading).into_parts();
+    let ObservedActor::Visible(cpu) = &mut changed.actors[1] else {
+        unreachable!()
+    };
+    cpu.bomb_range += 1;
+    assert_eq!(
+        committed.observe(&Observation::new(changed).unwrap()),
+        RouteStatus::Invalidated
+    );
+}
+
+#[test]
 fn leading_wait_requires_its_post_stop_snapshot_before_moving() {
     let mut parts = crate::cpu::routing::tests::observation(Vec::new(), Vec::new()).into_parts();
     parts.bombs = crate::cpu::BombKnowledge::Visible(vec![crate::cpu::ObservedBomb {

@@ -8,8 +8,8 @@ These Rust contracts support the [solo opponent](single-player.md) and the broad
 
 `core::room::RoomMode` derives controller kinds independently of occupancy and socket state.
 Human duels have two human controllers. Solo fixes the human at seat One and the CPU at seat
-Two. `CpuProfile::CURRENT` identifies `UtilityV3` with `Standard` difficulty;
-`INITIAL` and `PULSE_V2` preserve the `UtilityV1` and `UtilityV2` replay identities. These are
+Two. `CpuProfile::CURRENT` identifies `UtilityV4` with `Standard` difficulty;
+`INITIAL`, `PULSE_V2` and `ROUTE_V3` preserve the V1/V2/V3 replay identities. These are
 policy identities, not claims about measured strength. Seeds are outside participant metadata.
 Live owner construction accepts only the current profile; retaining a historical replay
 identity does not re-enable that older policy for new matches.
@@ -27,7 +27,7 @@ rival exposes only identity, seat and alive status. Invisible Bombs makes all bo
 unavailable, including the observer's bombs; unavailable differs from an empty visible list.
 
 Observations retain public terrain, settings, effects, exposed pickups/Oil, flames and visible
-bomb triggers. Private movement residuals, collision grace, action cooldown histories and bomb
+bomb triggers and original placement ticks. Private movement residuals, collision grace, action cooldown histories and bomb
 motion timing remain explicitly unknown. Concealed content, seeds and opponent intent never
 enter observations. The adapter receives server-owned world identity separately because a
 public command epoch is not a physical-round identity.
@@ -43,12 +43,12 @@ request may submit its ordinary Stop. History has bounded, deterministic retenti
 counted in logical units rather than hardware milliseconds.
 
 Tie-breaking uses its own seeded ChaCha stream and never draws from arena generation. Small
-fixture policies remain test-only; production uses UtilityV3. Replays consume recorded accepted
+fixture policies remain test-only; production uses UtilityV4. Replays consume recorded accepted
 actions rather than invoking a policy again. Production journal allocation remains disabled;
 explicit solo recording adds format-3 header provenance while preserving formats 1/2 and
 accepted-input record capacity.
-Policy versions 1/2/3 are accepted only with their matching profile; new recordings retain the
-actual room profile. All three policies share the unchanged v12 room shape.
+Policy versions 1/2/3/4 are accepted only with their matching profile; new recordings retain the
+actual room profile. All four policies share the unchanged v12 room shape.
 
 ## Planning and committed execution
 
@@ -59,7 +59,7 @@ ticks old; the observation tick identifies that request, while runtime age is ch
 Only accepted current input commits prospective memory/RNG.
 
 Plans hold ordinary movement for 1–12 updates, then the owner submits ordinary Stop at its
-committed deadline. Once a Bomb request is accepted, `follow_checked_escape` executes only
+committed deadline. The narrow CPU1 planting fallback uses `follow_checked_escape` to execute only
 the already planned route of at most four cells from fresh checked snapshots. It performs no
 goal/path search, random draws or manual action and does not wait for another worker. This
 keeps worker contention outside the route's scheduling bound. Unsupported effects, unknown
@@ -123,6 +123,35 @@ ignition and exact flame-expiry changes from unexpected facts. Normal predicted 
 not cancel the route. New bombs, displaced bombs, revealed items or other unmodeled changes do.
 The owner performs bounded observation/deadline checks; forecasting and search stay on workers.
 If complete route planning fails, the independently checked one-pulse fallback remains available.
+
+## Certified ordinary planting
+
+`plan_ordinary_plant` derives an ordinary timed bomb and proves one complete escape program in
+both its placed and absent futures. Acceptance of a Bomb input does not prove physical placement;
+absence can change blast shielding and chain timing. Both forecasts, search and replay consume
+the same decision work allowance. A failed speculative proof preserves the checked fallback.
+Only unconditional certificates authorize this path.
+
+The first execution is exactly seven updates after the basis observation. Early completed results
+stay in the controller's one pending slot until admission at basis + 6; waiting commits no RNG or
+memory. Recheck the scene, identity, epoch and stopped pose then. Late or stale results are discarded.
+First movement executes before placement, so the origin comes from its resulting position. The
+new bomb affects same-tick explosions and blocks movement from the next update. Placement-derived
+origin grace permits departure and is permanently consumed when the footprint leaves the cell.
+
+The first move lasts one update, followed by three stopped updates; an initial Stop waits four.
+A fresh publication must confirm exactly one new matching own bomb by public placement tick,
+cell, range, standard blast and timed trigger, or match the absent future. Confirmation binds its
+actual identity. Manual rejection chooses the already-proved absent branch without retrying Bomb.
+Unexpected facts invalidate execution; continuation uses the existing committed route schedule.
+
+Range and fuse use shared game rules at the absolute placement tick, including Golden Flame,
+Short Flame, Short Fuse and Long Fuse. Slow Foot and Reverse Controls expiry use shared motion.
+Stored special weapons or a live own Remote, active Diarrhea/own Stopwatch, hidden bomb vision,
+insufficient capacity,
+unsupported uncertainty, an unobservable early chain or an incomplete horizon cause refusal.
+The full blast expiry and final stopped margin must fit; no fuse or escape deadline is shortened
+to fit the forecast. The guarded CPU1 planting fallback remains available where applicable.
 
 ## Focused verification
 

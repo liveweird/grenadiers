@@ -203,7 +203,7 @@ fn planner_waits_for_a_temporary_blocked_goal_then_resumes_ordinary_input() {
     let waiting = run(&basis);
     assert_eq!(waiting.control.intent, Intent::STOP);
     assert!(
-        waiting.lease.is_some() || waiting.route.is_some(),
+        waiting.lease.is_some() || waiting.execution.is_some(),
         "waiting has an explicit safety certificate"
     );
     let clear = later(
@@ -248,9 +248,9 @@ fn planner_marks_unknown_motion_as_conditional_and_never_plants() {
     .unwrap();
     assert!(planned.control.intent.manual.is_none());
     let assurance = planned
-        .route
+        .execution
         .as_ref()
-        .map(crate::cpu::routing::RouteCertificate::assurance)
+        .map(|execution| execution.route().assurance())
         .or_else(|| planned.lease.as_ref().map(|lease| lease.assurance()))
         .expect("a conditional safety certificate");
     assert_eq!(

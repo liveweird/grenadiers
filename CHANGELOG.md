@@ -2,6 +2,20 @@
 
 ## [Unreleased]
 
+## 0.3.84 — 2026-10-27
+
+### Added
+
+- Prove one complete ordinary-bomb escape against both placed and absent outcomes,
+  with temporal placement, consumed origin grace and absolute range/fuse modifiers.
+- Retain early planting decisions until their exact admission update and continue the
+  checked route after public placement confirmation or ordinary Bomb rejection.
+
+### Changed
+
+- Identify certified planting as UtilityV4 while retaining V1/V2/V3 accepted-input
+  replay identities and the unchanged v12 wire shape.
+
 ## 0.3.83 — 2026-10-27
 
 ### Added

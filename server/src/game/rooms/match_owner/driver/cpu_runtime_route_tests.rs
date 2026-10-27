@@ -4,7 +4,7 @@ use grenadiers_core::{
         forecast::{ForecastLimits, ObservedHazardMemory, TickWindow, forecast},
         policy::{ControlPlan, UtilityMemory},
         routing::{RouteLimits, RouteMode, RouteRequest, RouteStep, plan_route},
-        survival::SurvivalPlan,
+        survival::{ExecutionCertificate, SurvivalPlan},
     },
     game::{
         ActorInit, Arena, CellId, Direction, InputAction, Position, RulesConfig, SeatId, SeatInput,
@@ -91,7 +91,7 @@ fn committed_route_finishes_without_a_worker_result() {
                 next_memory: UtilityMemory::new(key),
             },
             lease: None,
-            route: Some(route),
+            execution: Some(ExecutionCertificate::Route(Box::new(route))),
         },
     );
 
@@ -262,7 +262,7 @@ fn admit_turning_route() -> (super::super::Driver, Tick, Tick) {
                 next_memory: UtilityMemory::new(key),
             },
             lease: None,
-            route: Some(route),
+            execution: Some(ExecutionCertificate::Route(Box::new(route))),
         },
     );
     driver.poll_cpu_result().unwrap();

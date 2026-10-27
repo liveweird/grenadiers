@@ -4,7 +4,18 @@ set -euo pipefail
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$root"
 
+mode=runtime
+if [[ "$#" -eq 1 && "${1:-}" == --cpu ]]; then
+  mode=cpu
+elif [[ "$#" -ne 0 ]]; then
+  echo 'usage: scripts/measure-game.sh [--cpu]' >&2
+  exit 2
+fi
+
 output="$root/target/m7-measurements"
+if [[ "$mode" == cpu ]]; then
+  output="$root/target/cpu-measurements"
+fi
 mkdir -p "$output"
 : > "$output/results.jsonl"
 
@@ -128,9 +139,16 @@ run_case() {
       <<< "$record" >> "$output/results.jsonl"
 }
 
-run_case runtime runtime_reference_measurement
-run_case owner-1 owner_one_room_30s_measurement
-run_case owner-8 owner_eight_rooms_30s_measurement
-run_case owner-queue-pressure owner_queue_pressure_measurement
+if [[ "$mode" == cpu ]]; then
+  export GRENADIERS_MEASUREMENT_SOURCE="$source_commit:$source_state"
+  GRENADIERS_MEASUREMENT_TOOLCHAIN="$(rustc -Vv)"
+  export GRENADIERS_MEASUREMENT_TOOLCHAIN
+  run_case cpu cpu_scripted_evaluation_measurement
+else
+  run_case runtime runtime_reference_measurement
+  run_case owner-1 owner_one_room_30s_measurement
+  run_case owner-8 owner_eight_rooms_30s_measurement
+  run_case owner-queue-pressure owner_queue_pressure_measurement
+fi
 
 echo "Measurements passed; results: $output/results.jsonl"

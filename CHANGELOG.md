@@ -12,6 +12,11 @@
 - Identify the navigation policy as UtilityV5 while retaining V1–V4 recorded-input replay
   and the unchanged v12 wire shape.
 
+### Fixed
+
+- Validate the authoritative Solo winner, survivor, score and status instead of assuming
+  a particular winner against independently randomized CPU and arena seeds.
+
 ## 0.3.84 — 2026-10-27
 
 ### Added

@@ -8,7 +8,9 @@ no invitation code in the interface, and retains the default all-on item selecti
 creator changes the match target to one win and the fuse to 60 ticks. A separate authenticated
 native socket cannot join the occupied room or resume the CPU seat with a fabricated capability.
 The human alone readies the room, the real CPU moves, and the human plants a real bomb without
-leaving its initial position. The explosion eliminates the human and awards the CPU the match.
+leaving its initial position. Either player may win because the arena and CPU decisions are
+independently seeded. The authoritative winner must be alive, the loser eliminated, and the exact
+one-win score and rendered status must name that winner.
 One human rematch action gets the CPU's automatic consent, preserving the configured rules.
 The human starts the rematch before reconnecting to its original running seat, then leaves;
 the private room is removed. A transport loss before the first start is not resumable.

@@ -160,7 +160,7 @@ fn accepted_solo_inputs_replay_from_format_three_without_worker_or_policy() {
         grenadiers_core::room::RoomMode::Solo(grenadiers_core::room::CpuProfile::CURRENT)
     );
     assert_eq!(journal.header.solo.unwrap().seat, SeatId::Two);
-    assert_eq!(journal.header.solo.unwrap().policy_version, 15);
+    assert_eq!(journal.header.solo.unwrap().policy_version, 16);
     let expected = runtime.replay_inspection();
     assert_eq!(replay(journal).unwrap(), expected);
 }
@@ -247,6 +247,7 @@ fn original_cpu_journals_replay_without_policy_reexecution() {
         (grenadiers_core::room::CpuProfile::STEERING_V12, 12),
         (grenadiers_core::room::CpuProfile::BRACELET_V13, 13),
         (grenadiers_core::room::CpuProfile::PUNCH_V14, 14),
+        (grenadiers_core::room::CpuProfile::EQUIPMENT_GOALS_V15, 15),
     ] {
         let mut runtime = solo_recording_runtime(profile);
         start(&mut runtime);
@@ -261,6 +262,39 @@ fn original_cpu_journals_replay_without_policy_reexecution() {
             runtime.replay_inspection()
         );
     }
+}
+
+#[test]
+fn format_three_accepts_both_exact_current_difficulty_profiles() {
+    for profile in [
+        grenadiers_core::room::CpuProfile::CURRENT,
+        grenadiers_core::room::CpuProfile::CURRENT_EASY,
+    ] {
+        let mut runtime = solo_recording_runtime(profile);
+        start(&mut runtime);
+        submit_intent(&mut runtime, SeatId::Two, 1, fixture_policy(0)).unwrap();
+        runtime.tick().unwrap();
+        assert_eq!(
+            replay(runtime.replay_journal()).unwrap(),
+            runtime.replay_inspection()
+        );
+    }
+}
+
+#[test]
+fn format_three_rejects_easy_with_an_archived_policy_version() {
+    let mut runtime = solo_recording_runtime(grenadiers_core::room::CpuProfile::CURRENT_EASY);
+    runtime
+        .replay_journal_mut()
+        .header
+        .solo
+        .as_mut()
+        .unwrap()
+        .policy_version = 15;
+    assert_eq!(
+        replay(runtime.replay_journal()),
+        Err(super::ReplayError::UnsupportedFormat)
+    );
 }
 
 #[test]

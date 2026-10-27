@@ -22,6 +22,7 @@ pub enum CpuPolicy {
     UtilityV13,
     UtilityV14,
     UtilityV15,
+    UtilityV16,
 }
 
 impl CpuPolicy {
@@ -43,6 +44,7 @@ impl CpuPolicy {
             Self::UtilityV13 => 13,
             Self::UtilityV14 => 14,
             Self::UtilityV15 => 15,
+            Self::UtilityV16 => 16,
         }
     }
 }
@@ -50,6 +52,7 @@ impl CpuPolicy {
 /// Initial profile identity; tuning and additional levels require measured playtesting.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum CpuDifficulty {
+    Easy,
     Standard,
 }
 
@@ -144,11 +147,29 @@ impl CpuProfile {
         difficulty: CpuDifficulty::Standard,
     };
 
-    /// The only policy profile used to create a new live CPU controller.
-    pub const CURRENT: Self = Self {
+    /// First equipment-goal policy, retained for archived replays.
+    pub const EQUIPMENT_GOALS_V15: Self = Self {
         policy: CpuPolicy::UtilityV15,
         difficulty: CpuDifficulty::Standard,
     };
+
+    /// Standard profile used to create a new live CPU controller.
+    pub const CURRENT: Self = Self {
+        policy: CpuPolicy::UtilityV16,
+        difficulty: CpuDifficulty::Standard,
+    };
+
+    /// Easy profile used to create a new live CPU controller.
+    pub const CURRENT_EASY: Self = Self {
+        policy: CpuPolicy::UtilityV16,
+        difficulty: CpuDifficulty::Easy,
+    };
+
+    /// Only the two current profiles may be selected for a new live controller.
+    #[must_use]
+    pub const fn is_current(self) -> bool {
+        matches!(self, Self::CURRENT | Self::CURRENT_EASY)
+    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -214,7 +235,19 @@ mod tests {
         assert_eq!(CpuProfile::STEERING_V12.policy.version(), 12);
         assert_eq!(CpuProfile::BRACELET_V13.policy.version(), 13);
         assert_eq!(CpuProfile::PUNCH_V14.policy.version(), 14);
-        assert_eq!(CpuProfile::CURRENT.policy.version(), 15);
+        assert_eq!(CpuProfile::EQUIPMENT_GOALS_V15.policy.version(), 15);
+        assert_eq!(CpuProfile::CURRENT.policy.version(), 16);
+        assert_eq!(CpuProfile::CURRENT_EASY.policy.version(), 16);
+        assert!(CpuProfile::CURRENT.is_current());
+        assert!(CpuProfile::CURRENT_EASY.is_current());
+        assert!(!CpuProfile::EQUIPMENT_GOALS_V15.is_current());
+        assert!(
+            !CpuProfile {
+                policy: CpuPolicy::UtilityV15,
+                difficulty: CpuDifficulty::Easy,
+            }
+            .is_current()
+        );
         assert_eq!(
             RoomMode::Solo(CpuProfile::CURRENT).controller(SeatId::Two),
             ControllerKind::Cpu(CpuProfile::CURRENT)

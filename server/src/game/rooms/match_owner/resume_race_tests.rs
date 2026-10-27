@@ -2,7 +2,7 @@ use std::sync::atomic::Ordering;
 
 use grenadiers_core::{
     game::{Direction, SeatId},
-    protocol::{Counter, MAX_COUNTER, v12::ConnectionStatus},
+    protocol::{Counter, MAX_COUNTER, v13::ConnectionStatus},
 };
 use tokio::sync::{oneshot, watch};
 

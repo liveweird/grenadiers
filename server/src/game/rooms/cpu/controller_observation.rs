@@ -35,6 +35,7 @@ impl CpuController {
         self.committed_route_epoch = None;
         self.escape_origin = None;
         self.escape_origin_epoch = None;
+        self.cadence = super::CadenceState::default();
     }
 
     pub(in crate::game::rooms) fn accept_observation(&mut self, observation: &Observation) -> bool {
@@ -54,6 +55,7 @@ impl CpuController {
             .observe(observation);
         self.last_observation_tick = Some(observation.parts().tick);
         self.confirm_stop(observation);
+        self.observe_cadence(observation);
         self.retain_escape_origin(observation);
         self.latest_observation = Some(observation.clone());
         true

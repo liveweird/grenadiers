@@ -1,6 +1,6 @@
 use std::time::{Duration, Instant as StdInstant};
 
-use grenadiers_core::protocol::{Counter, RoomId, v12::ResumeToken};
+use grenadiers_core::protocol::{Counter, RoomId, v13::ResumeToken};
 use tokio_tungstenite::tungstenite::Message;
 
 use super::*;

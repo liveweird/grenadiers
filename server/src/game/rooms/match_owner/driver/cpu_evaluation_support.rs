@@ -145,10 +145,8 @@ pub(super) struct EvaluationTrace {
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub(super) struct EvaluationRun {
     pub(super) trace: EvaluationTrace,
-    /// Test-only wall-time samples. Never included in deterministic trace equality.
     pub(super) planner_times: Vec<Duration>,
 }
-
 pub(super) fn default_cases() -> Vec<EvaluationCase> {
     fixture::default_cases()
 }
@@ -157,9 +155,12 @@ pub(super) fn full_round_cases() -> Vec<EvaluationCase> {
     fixture::full_round_cases()
 }
 
-pub(super) fn run(case: EvaluationCase) -> Result<EvaluationRun, MatchRuntimeError> {
+pub(super) fn run(
+    case: EvaluationCase,
+    profile: CpuProfile,
+) -> Result<EvaluationRun, MatchRuntimeError> {
     let (mut driver, planner, settings) =
-        fixture::running_recording_driver(case.arena_seed, case.cpu_seed);
+        fixture::running_recording_driver(case.arena_seed, case.cpu_seed, profile);
     let initial = driver.runtime.current_notice()?;
     let initial_world = initial
         .cpu_observation
@@ -179,7 +180,8 @@ pub(super) fn run(case: EvaluationCase) -> Result<EvaluationRun, MatchRuntimeErr
         .actors()[SeatId::Two.index()]
     .position();
     driver.publish(initial);
-    let mut accumulator = Accumulator::new(case, settings, initial_world, initial_position);
+    let mut accumulator =
+        Accumulator::new(case, profile, settings, initial_world, initial_position);
     let mut manual_id = 1_u32;
 
     while accumulator.running_ticks < case.tick_cap && accumulator.terminal.is_none() {
@@ -199,6 +201,7 @@ pub(super) fn run(case: EvaluationCase) -> Result<EvaluationRun, MatchRuntimeErr
 
 struct Accumulator {
     case: EvaluationCase,
+    profile: CpuProfile,
     settings: RoomSettings,
     initial_world: InitialPublicWorld,
     running_ticks: u64,
@@ -218,6 +221,7 @@ struct Accumulator {
 impl Accumulator {
     fn new(
         case: EvaluationCase,
+        profile: CpuProfile,
         settings: RoomSettings,
         initial_world: InitialPublicWorld,
         initial_position: Position,
@@ -226,6 +230,7 @@ impl Accumulator {
         visited.extend(initial_position.cell());
         Self {
             case,
+            profile,
             settings,
             initial_world,
             running_ticks: 0,
@@ -336,7 +341,7 @@ impl Accumulator {
                 cpu_seed_id: self.case.cpu_seed_id,
                 script: self.case.script.name(),
                 tick_cap: self.case.tick_cap,
-                profile: CpuProfile::CURRENT,
+                profile: self.profile,
                 settings: self.settings,
                 source: SOURCE,
                 schedule: SCHEDULE,

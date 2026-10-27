@@ -1,6 +1,6 @@
 use grenadiers_core::{
     game::{EnabledItems, SeatId},
-    protocol::{Counter, Seat, v12::ResumeToken},
+    protocol::{Counter, Seat, v13::ResumeToken},
 };
 
 use super::test_support::{collect_generated_pickup, start_optional_runtime};

@@ -12,7 +12,9 @@ use grenadiers_core::cpu::{
     CpuMemory, CpuRng, DecisionId, Intent, Observation, WorldId, policy::UtilityMemory,
 };
 use grenadiers_core::game::Tick;
+use grenadiers_core::room::CpuProfile;
 
+use self::cadence::CadenceState;
 use super::worker::{CpuPlanner, PlanJob, PlanResult};
 
 struct Pending {
@@ -32,6 +34,7 @@ pub(in crate::game::rooms) struct AcceptedPlan {
     committed_route: Option<CommittedRoute>,
     certified_manual: Option<grenadiers_core::cpu::ManualIntent>,
     escape_origin: bool,
+    ordinary_navigation: bool,
 }
 
 #[derive(Clone, Copy)]
@@ -60,6 +63,8 @@ pub(in crate::game::rooms) struct CpuController {
     committed_route_epoch: Option<u64>,
     escape_origin: Option<PlantEscapeOrigin>,
     escape_origin_epoch: Option<u64>,
+    profile: CpuProfile,
+    cadence: CadenceState,
 }
 
 impl fmt::Debug for CpuController {
@@ -81,6 +86,7 @@ impl CpuController {
         planner: CpuPlanner,
         room_instance: u64,
         private_seed: [u8; 32],
+        profile: CpuProfile,
     ) -> Self {
         Self {
             planner,
@@ -103,6 +109,8 @@ impl CpuController {
             committed_route_epoch: None,
             escape_origin: None,
             escape_origin_epoch: None,
+            profile,
+            cadence: CadenceState::default(),
         }
     }
 
@@ -123,6 +131,9 @@ impl CpuController {
         let Some(settled_stop_tick) = self.settled_stop_tick else {
             return false;
         };
+        if self.defer_planning(&observation, command_epoch) {
+            return false;
+        }
         let Some(serial) = self.request_serial.checked_add(1) else {
             return false;
         };
@@ -162,6 +173,7 @@ impl CpuController {
     }
 
     pub(in crate::game::rooms) fn commit(&mut self, accepted: AcceptedPlan, actual_intent: Intent) {
+        self.arm_cadence_after(&accepted, actual_intent);
         let manual_admitted =
             accepted.intent.manual.is_some() && actual_intent.manual == accepted.intent.manual;
         self.memory = Some(
@@ -314,6 +326,7 @@ impl CpuController {
             committed_route: None,
             certified_manual: None,
             escape_origin: false,
+            ordinary_navigation: false,
         }
     }
 
@@ -340,6 +353,9 @@ mod admission;
 
 #[path = "controller_pulse.rs"]
 mod pulse;
+
+#[path = "controller_cadence.rs"]
+mod cadence;
 
 #[cfg(test)]
 #[path = "controller_test_support.rs"]

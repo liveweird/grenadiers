@@ -261,6 +261,12 @@
     "label": "Mecz solo",
     "opponent": "Komputer",
     "play": "Zagraj solo z komputerem",
-    "difficulty": "Prywatny mecz solo · Standardowy komputer"
+    "difficultyLabel": "Poziom trudności komputera",
+    "easy": "Łatwy",
+    "standard": "Standardowy",
+    "roomDifficulty": {
+      "easy": "Prywatny mecz solo · Łatwy komputer",
+      "standard": "Prywatny mecz solo · Standardowy komputer"
+    }
   }
 }

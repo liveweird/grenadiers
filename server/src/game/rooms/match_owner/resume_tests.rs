@@ -2,7 +2,7 @@ use grenadiers_core::{
     game::Direction,
     protocol::{
         Counter, MAX_COUNTER,
-        v12::{ConnectionStatus, ResumeToken},
+        v13::{ConnectionStatus, ResumeToken},
     },
 };
 use tokio::sync::oneshot;

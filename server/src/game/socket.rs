@@ -8,7 +8,7 @@ use axum::{
     http::{HeaderMap, StatusCode, Uri, header::RETRY_AFTER},
     response::Response,
 };
-use grenadiers_core::protocol::v12::{
+use grenadiers_core::protocol::v13::{
     GAMEPLAY_PROTOCOL_VERSION, GameServerMessage, GameplayVersion, V11ErrorCode as ErrorCode,
     encode_server_message, parse_client_message,
 };

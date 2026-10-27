@@ -7,16 +7,24 @@ use grenadiers_core::game::{
     ActorInit, Arena, CellId, Direction, EntityId, Position, RulesConfig, SeatId, SpeedLevel,
     State, Terrain, Tick, World,
 };
-use grenadiers_core::room::RoomSettings;
+use grenadiers_core::room::{CpuProfile, RoomSettings};
 use std::collections::BTreeSet;
 use tokio::time::Instant;
 
-use super::tests::{open_fixture_state, publish_next_cpu_observation, running_driver};
+use super::tests::{
+    open_fixture_state, publish_next_cpu_observation, running_driver, running_driver_for_profile,
+};
 use crate::game::rooms::match_runtime::MatchAction;
 
 #[test]
 fn real_driver_binds_a_certified_ordinary_plant_without_workers() {
-    let mut driver = running_driver(23);
+    for profile in [CpuProfile::CURRENT, CpuProfile::CURRENT_EASY] {
+        real_driver_plant(profile);
+    }
+}
+
+fn real_driver_plant(profile: CpuProfile) {
+    let mut driver = running_driver_for_profile(23, profile);
     driver
         .runtime
         .replace_state_for_test(open_fixture_state(driver.runtime.lifecycle().tick()));
@@ -130,7 +138,13 @@ fn real_driver_binds_a_certified_ordinary_plant_without_workers() {
 
 #[test]
 fn rejected_initial_movement_never_submits_the_bomb_input() {
-    let mut driver = running_driver(23);
+    for profile in [CpuProfile::CURRENT, CpuProfile::CURRENT_EASY] {
+        rejected_initial_movement(profile);
+    }
+}
+
+fn rejected_initial_movement(profile: CpuProfile) {
+    let mut driver = running_driver_for_profile(23, profile);
     driver
         .runtime
         .replace_state_for_test(open_fixture_state(driver.runtime.lifecycle().tick()));

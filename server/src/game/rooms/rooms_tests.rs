@@ -5,7 +5,7 @@ use std::sync::{
 
 use super::*;
 use crate::game::sessions::{ConnectionId, GameSessions};
-use grenadiers_core::protocol::{Seat, v12::MapId};
+use grenadiers_core::protocol::{Seat, v13::MapId};
 
 fn deterministic_rooms(now: StdInstant) -> Arc<GameRooms> {
     let codes = AtomicU64::new(0);
@@ -358,8 +358,8 @@ async fn excessive_lag_interrupts_then_terminal_retention_releases_registration(
     let view = notice.room;
     assert!(matches!(
         view.phase,
-        grenadiers_core::protocol::v12::RoomPhase::Interrupted {
-            reason: grenadiers_core::protocol::v12::MatchInterruptReason::ServerOverloaded,
+        grenadiers_core::protocol::v13::RoomPhase::Interrupted {
+            reason: grenadiers_core::protocol::v13::MatchInterruptReason::ServerOverloaded,
             ..
         }
     ));

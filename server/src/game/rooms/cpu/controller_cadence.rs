@@ -1,0 +1,239 @@
+use grenadiers_core::cpu::{BombKnowledge, Intent, Observation, ObservedActor, WorldId};
+use grenadiers_core::game::{EffectKind, OilBarrelState, Tick};
+use grenadiers_core::room::CpuProfile;
+
+use super::{AcceptedPlan, CpuController};
+
+const EASY_PAUSE_TICKS: u64 = 12;
+
+#[derive(Clone, Copy)]
+struct CadenceKey {
+    world: WorldId,
+    command_epoch: u64,
+}
+
+#[derive(Clone, Copy)]
+struct CadenceDeadline {
+    key: CadenceKey,
+    tick: Tick,
+}
+
+#[derive(Default)]
+pub(super) struct CadenceState {
+    armed: Option<CadenceKey>,
+    deadline: Option<CadenceDeadline>,
+}
+
+impl CpuController {
+    pub(super) fn arm_cadence_after(&mut self, accepted: &AcceptedPlan, actual: Intent) {
+        if self.profile != CpuProfile::CURRENT_EASY
+            || !accepted.ordinary_navigation
+            || actual.manual.is_some()
+            || actual.movement == grenadiers_core::cpu::MovementIntent::Stop
+        {
+            return;
+        }
+        self.cadence.armed = Some(CadenceKey {
+            world: accepted.decision.world,
+            command_epoch: accepted.decision.command_epoch,
+        });
+        self.cadence.deadline = None;
+    }
+
+    pub(super) fn observe_cadence(&mut self, observation: &Observation) {
+        if self.profile != CpuProfile::CURRENT_EASY || !is_clear_for_easy(observation) {
+            self.cadence = CadenceState::default();
+            return;
+        }
+        let world = observation.parts().world;
+        if self.cadence.armed.is_some_and(|key| key.world != world)
+            || self
+                .cadence
+                .deadline
+                .is_some_and(|deadline| deadline.key.world != world)
+        {
+            self.cadence = CadenceState::default();
+            return;
+        }
+        if self.escaping
+            || self.escape_origin.is_some()
+            || self.committed_route.is_some()
+            || self.committed_pulse.is_some()
+        {
+            self.cadence = CadenceState::default();
+            return;
+        }
+        let Some(stopped) = self.settled_stop_tick else {
+            return;
+        };
+        let Some(armed) = self.cadence.armed.take() else {
+            return;
+        };
+        let Some(deadline) = stopped.0.checked_add(EASY_PAUSE_TICKS).map(Tick) else {
+            self.cadence = CadenceState::default();
+            return;
+        };
+        self.cadence.deadline = Some(CadenceDeadline {
+            key: armed,
+            tick: deadline,
+        });
+    }
+
+    pub(super) fn defer_planning(&mut self, observation: &Observation, command_epoch: u64) -> bool {
+        let Some(deadline) = self.cadence.deadline else {
+            return false;
+        };
+        if deadline.key.world != observation.parts().world
+            || deadline.key.command_epoch != command_epoch
+            || !is_clear_for_easy(observation)
+        {
+            self.cadence = CadenceState::default();
+            return false;
+        }
+        if observation.parts().tick < deadline.tick {
+            return true;
+        }
+        self.cadence.deadline = None;
+        false
+    }
+}
+
+pub(super) fn is_clear_for_easy(observation: &Observation) -> bool {
+    let parts = observation.parts();
+    if !matches!(&parts.bombs, BombKnowledge::Visible(bombs) if bombs.is_empty())
+        || !parts.flames.is_empty()
+        || parts
+            .oil
+            .iter()
+            .any(|oil| oil.state == OilBarrelState::Burning)
+    {
+        return false;
+    }
+    parts.actors.iter().any(|actor| {
+        matches!(actor,
+            ObservedActor::Visible(actor)
+                if actor.seat == parts.recipient
+                    && actor.alive
+                    && !actor.voluntary_actions_frozen
+                    && !actor.effects.iter().any(|effect| matches!(
+                        effect.kind,
+                        EffectKind::Diarrhea
+                            | EffectKind::SlowFoot
+                            | EffectKind::ReverseControls
+                    ))
+        )
+    })
+}
+
+#[cfg(test)]
+mod tests {
+    use grenadiers_core::cpu::{DecisionId, MovementIntent, policy::UtilityMemory};
+    use grenadiers_core::game::{CellId, Direction};
+
+    use super::*;
+    use crate::game::rooms::cpu::CpuPlanner;
+
+    #[test]
+    fn easy_pause_is_bounded_and_repeated_observations_do_not_restart_it() {
+        let mut controller = armed_controller(CpuProfile::CURRENT_EASY);
+        controller.on_stop_admitted(Tick(20));
+
+        for tick in 21..33 {
+            let observation = observation_at(tick);
+            assert!(controller.accept_observation(&observation));
+            assert!(!controller.submit(observation, 4));
+            assert!(!controller.has_pending());
+        }
+
+        let due = observation_at(33);
+        assert!(controller.accept_observation(&due));
+        assert!(controller.submit(due, 4));
+    }
+
+    #[test]
+    fn standard_replans_immediately_after_the_same_confirmed_stop() {
+        let mut controller = armed_controller(CpuProfile::CURRENT);
+        controller.on_stop_admitted(Tick(20));
+        let stopped = observation_at(21);
+
+        assert!(controller.accept_observation(&stopped));
+        assert!(controller.submit(stopped, 4));
+    }
+
+    #[test]
+    fn newly_visible_danger_bypasses_and_clears_the_easy_pause() {
+        let mut controller = armed_controller(CpuProfile::CURRENT_EASY);
+        controller.on_stop_admitted(Tick(20));
+        let stopped = observation_at(21);
+        assert!(controller.accept_observation(&stopped));
+        assert!(!controller.submit(stopped, 4));
+
+        let mut parts = observation_at(22).into_parts();
+        parts.flames.push(grenadiers_core::cpu::ObservedFlame {
+            cell: CellId::new(6, 6),
+            remaining_ticks: 2,
+        });
+        let danger = Observation::new(parts).unwrap();
+        assert!(controller.accept_observation(&danger));
+        assert!(controller.submit(danger, 4));
+    }
+
+    #[test]
+    fn unsupported_control_effects_bypass_and_clear_the_easy_pause() {
+        for kind in [EffectKind::SlowFoot, EffectKind::ReverseControls] {
+            let mut controller = armed_controller(CpuProfile::CURRENT_EASY);
+            controller.on_stop_admitted(Tick(20));
+            let stopped = observation_at(21);
+            assert!(controller.accept_observation(&stopped));
+            assert!(!controller.submit(stopped, 4));
+
+            let mut parts = observation_at(22).into_parts();
+            let ObservedActor::Visible(cpu) = &mut parts.actors[1] else {
+                unreachable!()
+            };
+            cpu.effects.push(grenadiers_core::cpu::ObservedEffect {
+                kind,
+                remaining_ticks: 10,
+            });
+            let changed = Observation::new(parts).unwrap();
+            assert!(controller.accept_observation(&changed));
+            assert!(controller.submit(changed, 4), "effect {kind:?}");
+        }
+    }
+
+    fn armed_controller(profile: CpuProfile) -> CpuController {
+        let mut controller = CpuController::new(CpuPlanner::without_workers(), 7, [5; 32], profile);
+        let basis = observation_at(20);
+        assert!(controller.accept_observation(&basis));
+        controller.settled_stop_tick = Some(basis.parts().tick);
+        let key = controller.memory.as_ref().unwrap().key();
+        let intent = Intent::moving(Direction::West);
+        let accepted = AcceptedPlan {
+            decision: DecisionId {
+                world: basis.parts().world,
+                command_epoch: 4,
+                observation_tick: basis.parts().tick,
+                checked_request_serial: 1,
+            },
+            intent,
+            hold_ticks: 1,
+            next_memory: UtilityMemory::new(key),
+            next_rng: controller.rng.as_ref().unwrap().clone(),
+            committed_pulse: None,
+            committed_route: None,
+            certified_manual: None,
+            escape_origin: false,
+            ordinary_navigation: true,
+        };
+        controller.on_movement_admitted();
+        controller.commit(accepted, intent);
+        assert_eq!(intent.movement, MovementIntent::Direction(Direction::West));
+        controller
+    }
+
+    fn observation_at(tick: u64) -> Observation {
+        let mut parts = crate::game::rooms::cpu::tests::observation().into_parts();
+        parts.tick = Tick(tick);
+        Observation::new(parts).unwrap()
+    }
+}

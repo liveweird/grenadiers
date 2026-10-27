@@ -1,6 +1,6 @@
 use std::time::{Duration, Instant};
 
-use grenadiers_core::protocol::{Counter, RoomCode, RoomId, v12::ResumeToken};
+use grenadiers_core::protocol::{Counter, RoomCode, RoomId, v13::ResumeToken};
 
 use super::{OPERATION_BURST, OperationBudgets};
 use crate::game::{

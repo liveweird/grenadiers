@@ -1,6 +1,6 @@
 use grenadiers_core::{
     game::StepReport,
-    protocol::v12::{
+    protocol::v13::{
         RoomMetadata, RoomView, capture_expanded, prepare_snapshot_pair, project_expanded_room,
     },
     room::MatchLifecycle,
@@ -12,7 +12,7 @@ use super::{
     SeatFrames,
     runtime::{MatchNotice, SimRound},
 };
-use grenadiers_core::protocol::v12::RoomPhase;
+use grenadiers_core::protocol::v13::RoomPhase;
 
 pub(super) fn room_view(
     identity: &RoomIdentity,
@@ -93,7 +93,7 @@ pub(super) fn snapshot(
         u32::try_from(sim.epoch).map_err(|_| MatchRuntimeError::CapacityReached)?,
     )
     .map_err(|_| MatchRuntimeError::CapacityReached)?;
-    let bound = grenadiers_core::protocol::v12::bind_expanded(
+    let bound = grenadiers_core::protocol::v13::bind_expanded(
         &room,
         epoch,
         &capture,
@@ -102,7 +102,7 @@ pub(super) fn snapshot(
     .map_err(|_| MatchRuntimeError::Publication)?;
     let cpu_observation = if matches!(identity.mode, grenadiers_core::room::RoomMode::Solo(_)) {
         Some(
-            grenadiers_core::protocol::v12::observe_cpu_recipient(
+            grenadiers_core::protocol::v13::observe_cpu_recipient(
                 &bound,
                 grenadiers_core::protocol::Seat::Two,
                 grenadiers_core::cpu::WorldId {
@@ -125,14 +125,14 @@ pub(super) fn snapshot(
 
 fn wire_settings(
     settings: grenadiers_core::room::RoomSettings,
-) -> Result<grenadiers_core::protocol::v12::GameSettings, MatchRuntimeError> {
-    grenadiers_core::protocol::v12::GameSettings::new(
+) -> Result<grenadiers_core::protocol::v13::GameSettings, MatchRuntimeError> {
+    grenadiers_core::protocol::v13::GameSettings::new(
         speed_level(settings.starting_speed()),
         settings.turn_assist_units(),
         settings.wins_to_finish(),
         u16::try_from(settings.bomb_fuse_ticks()).map_err(|_| MatchRuntimeError::Publication)?,
-        grenadiers_core::protocol::v12::ItemSet::from_mask(
-            grenadiers_core::protocol::v12::ItemMask::new(settings.enabled_items().bits())
+        grenadiers_core::protocol::v13::ItemSet::from_mask(
+            grenadiers_core::protocol::v13::ItemMask::new(settings.enabled_items().bits())
                 .map_err(|_| MatchRuntimeError::Publication)?,
         ),
     )

@@ -1,5 +1,5 @@
-use std::sync::{Arc, atomic::AtomicBool, mpsc::sync_channel};
-
+use super::{CpuController, Pending};
+use crate::game::rooms::cpu::worker::{CpuPlanner, PlanResult};
 use grenadiers_core::cpu::forecast::ObservedHazardMemory;
 use grenadiers_core::cpu::policy::UtilityMemory;
 use grenadiers_core::cpu::routing::RouteCertificate;
@@ -10,16 +10,13 @@ use grenadiers_core::cpu::{
 };
 use grenadiers_core::game::{BlastKind, EntityId, SeatId, Tick};
 use grenadiers_core::game::{EffectKind, Equipment, SpecialWeapon, SpeedLevel};
-
-use super::{CpuController, Pending};
-use crate::game::rooms::cpu::worker::{CpuPlanner, PlanResult};
-
+use grenadiers_core::room::CpuProfile;
+use std::sync::{Arc, atomic::AtomicBool, mpsc::sync_channel};
 #[test]
 fn completed_plant_result_waits_for_exact_admission() {
     let basis = crate::game::rooms::cpu::tests::observation();
     let mut controller = prepared(&basis);
     inject_certified(&mut controller, &basis);
-
     assert!(controller.poll(Tick(20), 4).is_none());
     assert!(controller.has_pending());
     assert_eq!(controller.rng_draws(), 0);
@@ -35,21 +32,20 @@ fn completed_plant_result_waits_for_exact_admission() {
 #[test]
 fn completed_plant_result_cancels_when_late_or_epoch_changes() {
     let basis = crate::game::rooms::cpu::tests::observation();
-    let make = || {
-        let mut controller = prepared(&basis);
-        inject_certified(&mut controller, &basis);
-        controller
-    };
-
-    let mut late = make();
-    assert!(late.poll(Tick(27), 4).is_none());
-    assert!(!late.has_pending());
-    assert_eq!(late.rng_draws(), 0);
-
-    let mut changed_epoch = make();
-    assert!(changed_epoch.poll(Tick(20), 5).is_none());
-    assert!(!changed_epoch.has_pending());
-    assert_eq!(changed_epoch.rng_draws(), 0);
+    for profile in [CpuProfile::CURRENT, CpuProfile::CURRENT_EASY] {
+        let make = || {
+            let mut controller = prepared(&basis);
+            controller.profile = profile;
+            inject_certified(&mut controller, &basis);
+            controller
+        };
+        for (tick, epoch) in [(Tick(27), 4), (Tick(20), 5)] {
+            let mut rejected = make();
+            assert!(rejected.poll(tick, epoch).is_none());
+            assert!(!rejected.has_pending());
+            assert_eq!(rejected.rng_draws(), 0);
+        }
+    }
 }
 
 #[test]
@@ -228,7 +224,12 @@ fn accepted_manual_without_physical_placement_selects_absent() {
 }
 
 pub(super) fn prepared(basis: &Observation) -> CpuController {
-    let mut controller = CpuController::new(CpuPlanner::without_workers(), 7, [5; 32]);
+    let mut controller = CpuController::new(
+        CpuPlanner::without_workers(),
+        7,
+        [5; 32],
+        CpuProfile::CURRENT,
+    );
     controller.reset_world(3);
     assert!(controller.accept_observation(basis));
     controller.settled_stop_tick = Some(basis.parts().tick);

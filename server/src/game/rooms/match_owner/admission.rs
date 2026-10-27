@@ -1,4 +1,4 @@
-use grenadiers_core::protocol::{Counter, RoomId, v12::ResumeToken};
+use grenadiers_core::protocol::{Counter, RoomId, v13::ResumeToken};
 use tokio::sync::oneshot;
 
 use super::super::{

@@ -340,3 +340,7 @@ mod pressure_progress_tests;
 #[cfg(test)]
 #[path = "cpu_turn_alignment_tests.rs"]
 mod turn_alignment_tests;
+
+#[cfg(test)]
+#[path = "cpu_runtime_cadence_tests.rs"]
+mod cadence_tests;

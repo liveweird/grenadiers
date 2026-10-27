@@ -5,7 +5,7 @@ use std::{
 };
 
 use grenadiers_core::{
-    protocol::{Counter, RoomCode, RoomId, v12::ResumeToken},
+    protocol::{Counter, RoomCode, RoomId, v13::ResumeToken},
     room::RoomMode,
 };
 use tokio::{

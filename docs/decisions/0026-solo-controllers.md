@@ -1,6 +1,6 @@
 # ADR 0026: Server-owned solo controllers and bounded planning
 
-Status: accepted.
+Status: accepted. Extended by [ADR 0027](0027-solo-difficulty.md) for selectable difficulty.
 
 ## Context
 

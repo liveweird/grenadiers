@@ -73,16 +73,18 @@ pub(super) fn full_round_cases() -> Vec<EvaluationCase> {
 pub(super) fn running_recording_driver(
     arena_seed: [u8; 32],
     cpu_seed: [u8; 32],
+    profile: CpuProfile,
 ) -> (Driver, CpuPlanner, RoomSettings) {
     let settings = RoomSettings::DEFAULT.with_enabled_items(EnabledItems::ALL);
     let mut room = identity(RoomProfile::ExpandedV5);
-    room.mode = RoomMode::Solo(CpuProfile::CURRENT);
+    room.mode = RoomMode::Solo(profile);
     room.private_cpu_seed = Some(cpu_seed);
     let planner = CpuPlanner::without_workers();
     let cpu = Some(CpuController::new(
         planner.clone(),
         room.registry_serial,
         cpu_seed,
+        profile,
     ));
     let mut runtime = MatchRuntime::new_recording(
         room,

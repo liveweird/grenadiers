@@ -110,6 +110,7 @@ fn current_and_original_cpu_policies_share_the_v12_room_shape() {
         CpuProfile::STEERING_V12,
         CpuProfile::BRACELET_V13,
         CpuProfile::PUNCH_V14,
+        CpuProfile::EQUIPMENT_GOALS_V15,
         CpuProfile::CURRENT,
     ] {
         let current =
@@ -117,6 +118,26 @@ fn current_and_original_cpu_policies_share_the_v12_room_shape() {
                 .unwrap();
         assert_eq!(current, solo_room());
     }
+}
+
+#[test]
+fn v12_projects_new_standard_policy_but_rejects_easy_without_changing_wire_meaning() {
+    let mut lifecycle = MatchLifecycle::with_settings(RoomSettings::DEFAULT);
+    lifecycle.occupy(SeatId::One).unwrap();
+    lifecycle.occupy(SeatId::Two).unwrap();
+    let standard = project_expanded_room(
+        metadata(crate::room::RoomMode::Solo(CpuProfile::CURRENT)),
+        &lifecycle,
+    )
+    .unwrap();
+    assert_eq!(standard, solo_room());
+    assert_eq!(
+        project_expanded_room(
+            metadata(crate::room::RoomMode::Solo(CpuProfile::CURRENT_EASY)),
+            &lifecycle,
+        ),
+        Err(ProjectionError::InvalidExpandedBinding)
+    );
 }
 
 #[test]

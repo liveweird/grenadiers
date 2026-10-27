@@ -1,6 +1,6 @@
 use grenadiers_core::{
     game::SeatId,
-    protocol::{Counter, RoomId, Seat, v12::ResumeToken},
+    protocol::{Counter, RoomId, Seat, v13::ResumeToken},
     room::DepartureReason,
 };
 use tokio::{
@@ -42,7 +42,7 @@ pub(crate) struct MatchAdmission {
     pub(crate) room_id: RoomId,
     pub(crate) round_id: u64,
     pub(crate) seat: Seat,
-    pub(crate) room: grenadiers_core::protocol::v12::RoomView,
+    pub(crate) room: grenadiers_core::protocol::v13::RoomView,
     #[cfg_attr(not(test), allow(dead_code))]
     pub(crate) resume_token: ResumeToken,
     #[cfg_attr(not(test), allow(dead_code))]
@@ -149,12 +149,21 @@ impl PreparedMatchOwner {
         // Retained profiles identify archived projections/replays. A live
         // worker must never execute today's policy under an older identity.
         if matches!(identity.mode, grenadiers_core::room::RoomMode::Solo(profile)
-            if profile != grenadiers_core::room::CpuProfile::CURRENT)
+            if !profile.is_current())
         {
             return Err(MatchRuntimeError::Publication);
         }
+        let cpu_profile = match identity.mode {
+            grenadiers_core::room::RoomMode::Solo(profile) => Some(profile),
+            grenadiers_core::room::RoomMode::HumanDuel => None,
+        };
         let cpu = identity.private_cpu_seed.map(|seed| {
-            crate::game::rooms::cpu::CpuController::new(cpu_planner, identity.registry_serial, seed)
+            crate::game::rooms::cpu::CpuController::new(
+                cpu_planner,
+                identity.registry_serial,
+                seed,
+                cpu_profile.expect("private CPU seed belongs to a solo room"),
+            )
         });
         let mut runtime =
             super::super::match_runtime::MatchRuntime::new(identity.clone(), seeds.clone());

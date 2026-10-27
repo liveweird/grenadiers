@@ -16,7 +16,12 @@ use crate::game::rooms::cpu::worker::CpuPlanner;
 fn route_admission_accepts_predicted_detonation_but_rejects_an_extra_hazard() {
     let (basis, current, route, key) = detonation_fixture();
     let make_controller = || {
-        let mut controller = CpuController::new(CpuPlanner::without_workers(), 7, [5; 32]);
+        let mut controller = CpuController::new(
+            CpuPlanner::without_workers(),
+            7,
+            [5; 32],
+            grenadiers_core::room::CpuProfile::CURRENT,
+        );
         controller.reset_world(3);
         assert!(controller.accept_observation(&basis));
         controller.settled_stop_tick = Some(basis.parts().tick);
@@ -39,7 +44,12 @@ fn route_admission_accepts_predicted_detonation_but_rejects_an_extra_hazard() {
         remaining_ticks: 4,
     });
     let unexpected_observation = grenadiers_core::cpu::Observation::new(unexpected).unwrap();
-    let mut rejected = CpuController::new(CpuPlanner::without_workers(), 7, [5; 32]);
+    let mut rejected = CpuController::new(
+        CpuPlanner::without_workers(),
+        7,
+        [5; 32],
+        grenadiers_core::room::CpuProfile::CURRENT,
+    );
     rejected.reset_world(3);
     assert!(rejected.accept_observation(&basis));
     rejected.settled_stop_tick = Some(basis.parts().tick);
@@ -86,7 +96,12 @@ fn clear_gap_requires_an_unencumbered_settled_stop() {
 
 fn committed_wait_controller() -> (CpuController, grenadiers_core::cpu::Observation) {
     let (basis, current, route, key) = detonation_fixture();
-    let mut controller = CpuController::new(CpuPlanner::without_workers(), 7, [5; 32]);
+    let mut controller = CpuController::new(
+        CpuPlanner::without_workers(),
+        7,
+        [5; 32],
+        grenadiers_core::room::CpuProfile::CURRENT,
+    );
     controller.reset_world(3);
     assert!(controller.accept_observation(&basis));
     controller.settled_stop_tick = Some(basis.parts().tick);

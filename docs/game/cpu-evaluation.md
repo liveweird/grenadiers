@@ -83,3 +83,11 @@ not be mixed into trace equality or gameplay acceptance.
 The matrix can expose regressions in liveness, admission, bounded work and repeatability. It cannot
 establish balanced difficulty, general strategy quality or performance against people. Those
 questions require broader workloads and human feedback tracked outside this guide.
+
+## Comparing difficulty settings
+
+Use `scripts/measure-game.sh --cpu-easy` and `--cpu-easy-rounds` for separately labeled Easy
+matrices under `target/cpu-easy-measurements/` and `target/cpu-easy-round-measurements/`.
+Standard retains `--cpu` and `--cpu-rounds`. Both use the same seeds, scripts, caps and replay
+checks. Compare cadence, pickup/progress, stationary time, planning cost and outcomes; slower
+decisions need not produce a monotonic survival or win-rate ordering.

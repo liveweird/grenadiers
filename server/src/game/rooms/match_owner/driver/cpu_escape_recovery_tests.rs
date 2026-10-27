@@ -5,15 +5,18 @@ use crate::game::rooms::replay::ReplayAction;
 
 #[test]
 fn a2_c0_recovers_from_confirmed_plant_invalidation_and_survives_its_flames() {
-    let evaluation = run(EvaluationCase::new(
-        "a2-c0-retreat-recovery",
-        "a2",
-        [73; 32],
-        "c0",
-        [17; 32],
-        HumanScript::BombRetreat,
-        260,
-    ))
+    let evaluation = run(
+        EvaluationCase::new(
+            "a2-c0-retreat-recovery",
+            "a2",
+            [73; 32],
+            "c0",
+            [17; 32],
+            HumanScript::BombRetreat,
+            260,
+        ),
+        grenadiers_core::room::CpuProfile::CURRENT,
+    )
     .unwrap();
     let trace = &evaluation.trace;
     let planted_at = trace

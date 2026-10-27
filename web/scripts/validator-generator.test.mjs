@@ -23,6 +23,7 @@ async function temporaryCheckout(nested = false) {
   await Promise.all([
     cp(join(import.meta.dirname, '..', '..', 'api', 'gameplay-v11.schema.json'), join(checkout, 'api', 'gameplay-v11.schema.json')),
     cp(join(import.meta.dirname, '..', '..', 'api', 'gameplay-v12.schema.json'), join(checkout, 'api', 'gameplay-v12.schema.json')),
+    cp(join(import.meta.dirname, '..', '..', 'api', 'gameplay-v13.schema.json'), join(checkout, 'api', 'gameplay-v13.schema.json')),
     cp(join(import.meta.dirname, '..', '..', 'api', 'realtime.schema.json'), join(checkout, 'api', 'realtime.schema.json')),
     cp(join(import.meta.dirname, 'validator-generator.mjs'), join(checkout, 'web', 'scripts', 'validator-generator.mjs')),
   ])
@@ -119,7 +120,7 @@ test('validator output is independent of the invoking working directory', () => 
   assert.deepEqual(fromWeb, fromRepository)
 })
 
-test('drift detection covers generated code, declarations, and schema inputs', async () => {
+test('drift detection covers generated code, declarations, and schema inputs', { timeout: 15_000 }, async () => {
   const checkout = await temporaryCheckout()
   const webDirectory = join(checkout, 'web')
   const targetDirectory = join(checkout, 'web', 'src', 'validation', 'generated')

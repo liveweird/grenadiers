@@ -1,5 +1,5 @@
-import type { RoomMode, RoomView, Seat, V11ErrorCode } from '../v12/schema'
-import type { Snapshot } from '../v12/schema'
+import type { RoomMode, RoomView, Seat, V11ErrorCode } from '../v13/schema'
+import type { Snapshot } from '../v13/schema'
 
 type GameConnection =
   | 'disconnected'

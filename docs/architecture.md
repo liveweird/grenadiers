@@ -100,14 +100,14 @@ V4 checked room projection derives facts directly from `MatchLifecycle`; its pub
 rejects semantically impossible bounded DTOs before server adapters publish them.
 
 The active `match_runtime` server adapter owns real per-round physics, assignment-aware
-generation, epoch-fenced input, settled reconnect grace, and checked v12 publication. Result
+generation, epoch-fenced input, settled reconnect grace, and checked v13 publication. Result
 physics freezes while the global lifecycle clock and reservation deadlines advance.
 
-The active v12 client/panel shares the Pixi presentation boundary, validates v12 messages, keeps
+The active v13 client/panel shares the Pixi presentation boundary, validates v13 messages, keeps
 the resume capability only in tab memory, and renders scores, recovery, grace, and rematch from
-authoritative facts. Production routing uses v12 on the existing endpoint. Gameplay v7–v11 added
+authoritative facts. Production routing uses v13 on the existing endpoint. Gameplay v7–v11 added
 the expanded item inventory and recipient-private projections; the live contract is
-[protocol v12](game/protocol-v12.md). See [reconnect browser](game/reconnect-browser.md).
+[protocol v13](game/protocol-v13.md). See [reconnect browser](game/reconnect-browser.md).
 
 The active [bounded match owner](game/match-owner.md) adds generation-fenced admission,
 scheduled departure batches, absolute deadlines, retention, and sticky shutdown. Its closing

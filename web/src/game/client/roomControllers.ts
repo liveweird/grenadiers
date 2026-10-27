@@ -1,4 +1,4 @@
-import type { RoomView } from '../v12/schema'
+import type { RoomView } from '../v13/schema'
 import type { GameCopy } from './locale'
 
 export function controllersAvailable(room: RoomView): boolean {

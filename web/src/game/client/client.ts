@@ -1,5 +1,5 @@
 import { controllersAvailable } from './roomControllers'
-import type { Direction, GameClientMessage, GameServerMessage, GameSettings, RoomView, Snapshot, V11ErrorCode } from '../v12/schema'
+import type { Direction, GameClientMessage, GameServerMessage, GameSettings, RoomView, Snapshot, V11ErrorCode } from '../v13/schema'
 import { initialGameClientState, type AdmissionIntent, type GameClientState, type GameFailure } from './clientTypes'
 import { ClientRecovery } from './clientRecovery'
 import { preservesTeleportHistory } from './teleportHistory'
@@ -148,7 +148,7 @@ export class GameClient {
     socket.addEventListener('open', () => {
       if (!isCurrentConnection(generation, socket, this.generation, this.socket)) return
       this.update({ connection: 'authenticating' })
-      socket.send(JSON.stringify({ type: 'authenticate', protocolVersion: 12, token: credential }))
+      socket.send(JSON.stringify({ type: 'authenticate', protocolVersion: 13, token: credential }))
       credential = ''
     })
     socket.addEventListener('message', (event) => this.receive(generation, socket, event.data))

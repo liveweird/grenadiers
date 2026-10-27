@@ -316,3 +316,7 @@ mod evaluation_tests;
 #[cfg(test)]
 #[path = "cpu_escape_recovery_tests.rs"]
 mod escape_recovery_tests;
+
+#[cfg(test)]
+#[path = "cpu_late_escape_recovery_tests.rs"]
+mod late_escape_recovery_tests;

@@ -1,5 +1,7 @@
 use crate::cpu::forecast::{ForecastEvolution, ForecastFailure};
-use crate::cpu::{BombKnowledge, MemoryKey, MovementIntent, Observation};
+use crate::cpu::{
+    BombKnowledge, MemoryKey, MovementIntent, Observation, ObservedBomb, ObservedBombTrigger,
+};
 use crate::game::{BlastKind, CellId, EntityId, SpecialWeapon, Tick};
 
 use super::{RouteCertificate, RouteFailure, RouteLimits};
@@ -20,6 +22,25 @@ pub struct PlannedBomb {
     pub range: u16,
     pub blast: BlastKind,
     pub detonates_at: Tick,
+}
+
+impl PlannedBomb {
+    pub(crate) fn matches_observed(&self, bomb: &ObservedBomb, tick: Tick) -> bool {
+        bomb.placed_at == self.placed_at
+            && bomb.cell == self.cell
+            && bomb.owner == self.owner
+            && bomb.range == self.range
+            && bomb.blast == self.blast
+            && matches!(
+                bomb.trigger,
+                ObservedBombTrigger::Timed {
+                    remaining_ticks,
+                    paused: false,
+                } if remaining_ticks > 0
+                    && tick.0.checked_add(u64::from(remaining_ticks))
+                        == Some(self.detonates_at.0)
+            )
+    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -105,11 +126,7 @@ impl PlantCertificate {
                 .then_some(PlantPresence::Awaiting)
                 .ok_or(PlantFailure::SceneMismatch);
         }
-        let candidates = self.matching_new_bombs(basis, current);
-        if candidates.len() > 1 {
-            return Err(PlantFailure::AmbiguousPresence);
-        }
-        if let Some(id) = candidates.first().copied() {
+        if let Some(id) = self.observed_placement_id(basis, current)? {
             return self
                 .matches_scene(basis, current, PlantPresence::Present(id))
                 .then_some(PlantPresence::Present(id))
@@ -118,6 +135,22 @@ impl PlantCertificate {
         self.matches_scene(basis, current, PlantPresence::Absent)
             .then_some(PlantPresence::Absent)
             .ok_or(PlantFailure::SceneMismatch)
+    }
+
+    pub(crate) fn observed_placement_id(
+        &self,
+        basis: &Observation,
+        current: &Observation,
+    ) -> Result<Option<EntityId>, PlantFailure> {
+        if current.parts().tick < self.placement.placed_at {
+            return Ok(None);
+        }
+        let candidates = self.matching_new_bombs(basis, current);
+        match candidates.as_slice() {
+            [] => Ok(None),
+            [id] => Ok(Some(*id)),
+            _ => Err(PlantFailure::AmbiguousPresence),
+        }
     }
 
     #[must_use]
@@ -174,7 +207,7 @@ impl PlantCertificate {
         };
         new.iter()
             .filter(|bomb| !old.iter().any(|known| known.id == bomb.id))
-            .filter(|bomb| self.bomb_matches(current, bomb.id))
+            .filter(|bomb| self.placement.matches_observed(bomb, current.parts().tick))
             .map(|bomb| bomb.id)
             .collect()
     }
@@ -184,20 +217,7 @@ impl PlantCertificate {
             return false;
         };
         bombs.iter().any(|bomb| {
-            bomb.id == id
-                && bomb.placed_at == self.placement.placed_at
-                && bomb.owner == self.placement.owner
-                && bomb.cell == self.placement.cell
-                && bomb.range == self.placement.range
-                && bomb.blast == self.placement.blast
-                && matches!(
-                    bomb.trigger,
-                    crate::cpu::ObservedBombTrigger::Timed {
-                        remaining_ticks,
-                        paused: false,
-                    } if current.parts().tick.0.checked_add(u64::from(remaining_ticks))
-                        == Some(self.placement.detonates_at.0)
-                )
+            bomb.id == id && self.placement.matches_observed(bomb, current.parts().tick)
         })
     }
 }

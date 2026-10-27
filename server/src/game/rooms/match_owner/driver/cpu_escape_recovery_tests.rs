@@ -77,7 +77,8 @@ fn a2_c0_recovers_from_confirmed_plant_invalidation_and_survives_its_flames() {
     assert!(
         trace.frames[cleared..]
             .iter()
+            .take_while(|frame| frame.physical_tick <= flame_expiry)
             .all(|frame| !frame.recovery_origin && !frame.recovery_pulse),
-        "origin must never return after the footprint exits"
+        "cleared provenance must not return during its certified hazard"
     );
 }

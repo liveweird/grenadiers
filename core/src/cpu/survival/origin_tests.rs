@@ -38,6 +38,22 @@ fn confirmed_origin() -> (
     crate::cpu::Observation,
     PlantEscapeOrigin,
 ) {
+    let (basis, certificate, mut committed) = awaiting_route();
+    let present = current_scene(&basis, &certificate, Tick(7), Some((EntityId(700), 2)));
+    assert_ne!(committed.observe(&present), RouteStatus::Invalidated);
+    assert_eq!(
+        committed.plant_presence(),
+        Some(PlantPresence::Present(EntityId(700)))
+    );
+    let origin = committed.escape_origin(&present).expect("confirmed origin");
+    (basis, certificate, present, origin)
+}
+
+fn awaiting_route() -> (
+    crate::cpu::Observation,
+    crate::cpu::routing::PlantCertificate,
+    CommittedRoute,
+) {
     let basis = observation(Vec::new(), Vec::new());
     let certificate = plan_ordinary_plant(
         &basis,
@@ -56,7 +72,7 @@ fn confirmed_origin() -> (
         RouteStep::Wait { .. } => MovementIntent::Stop,
     };
     let awaiting = current_scene(&basis, &certificate, Tick(6), None);
-    let mut committed = CommittedRoute::admit_execution(
+    let committed = CommittedRoute::admit_execution(
         ExecutionCertificate::Plant(Box::new(certificate.clone())),
         basis.clone(),
         &awaiting,
@@ -66,14 +82,33 @@ fn confirmed_origin() -> (
     .unwrap();
     assert_eq!(committed.plant_presence(), Some(PlantPresence::Awaiting));
     assert!(committed.escape_origin(&awaiting).is_none());
-    let present = current_scene(&basis, &certificate, Tick(7), Some((EntityId(700), 2)));
-    assert_ne!(committed.observe(&present), RouteStatus::Invalidated);
+    (basis, certificate, committed)
+}
+
+#[test]
+fn awaiting_route_mints_from_exact_birth_despite_unrelated_scene_change() {
+    let (basis, certificate, committed) = awaiting_route();
+    let mut changed = current_scene(
+        &basis,
+        &certificate,
+        Tick(7),
+        Some((EntityId(702), certificate.placement().range)),
+    )
+    .into_parts();
+    changed.pickups.push(crate::cpu::ObservedPickup {
+        cell: crate::game::CellId::new(8, 7),
+        kind: crate::game::PickupKind::RemoteBomb,
+    });
+    let changed = crate::cpu::Observation::new(changed).unwrap();
     assert_eq!(
-        committed.plant_presence(),
-        Some(PlantPresence::Present(EntityId(700)))
+        certificate.confirm(&basis, &changed),
+        Err(crate::cpu::routing::PlantFailure::SceneMismatch)
     );
-    let origin = committed.escape_origin(&present).expect("confirmed origin");
-    (basis, certificate, present, origin)
+    assert!(committed.escape_origin(&changed).is_some());
+
+    let (_, _, mut rejected) = awaiting_route();
+    assert!(rejected.select_absent_plant());
+    assert!(rejected.escape_origin(&changed).is_none());
 }
 
 #[test]

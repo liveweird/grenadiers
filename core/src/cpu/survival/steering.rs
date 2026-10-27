@@ -2,7 +2,7 @@ use std::collections::{BTreeSet, VecDeque};
 
 use crate::cpu::forecast::HazardForecast;
 use crate::cpu::policy::ControlPlan;
-use crate::cpu::{Observation, WorkBudget};
+use crate::cpu::{BombKnowledge, Observation, WorkBudget};
 use crate::game::geometry::position_overlaps_cell;
 use crate::game::{CellId, Position, Terrain};
 
@@ -33,18 +33,46 @@ pub(super) fn target(
             .find(|cell| *cell != current)
             .or(Some(current));
     }
-    let mut queue = VecDeque::from([(current, current)]);
-    let mut visited = BTreeSet::from([current]);
+    refuge_step(observation, forecast, current, &BTreeSet::new(), work)
+}
+
+pub(super) fn origin_target(
+    observation: &Observation,
+    forecast: &HazardForecast,
+    origin: CellId,
+    work: &mut WorkBudget,
+) -> Option<CellId> {
+    let BombKnowledge::Visible(bombs) = &observation.parts().bombs else {
+        return None;
+    };
+    work.try_take(u32::try_from(bombs.len()).ok()?).ok()?;
+    let occupied = bombs
+        .iter()
+        .filter(|bomb| bomb.cell != origin)
+        .map(|bomb| bomb.cell)
+        .collect();
+    refuge_step(observation, forecast, origin, &occupied, work)
+}
+
+fn refuge_step(
+    observation: &Observation,
+    forecast: &HazardForecast,
+    root: CellId,
+    occupied: &BTreeSet<CellId>,
+    work: &mut WorkBudget,
+) -> Option<CellId> {
+    let mut queue = VecDeque::from([(root, root)]);
+    let mut visited = BTreeSet::from([root]);
     while let Some((cell, first)) = queue.pop_front() {
         work.try_take(1).ok()?;
-        let reached = cell != current && forecast.cell(cell)?.lethal.is_empty();
+        let reached = cell != root && forecast.cell(cell)?.lethal.is_empty();
         if reached {
             return Some(first);
         }
         for next in adjacent(cell) {
             work.try_take(1).ok()?;
-            if visited.insert(next) && traversable(observation, next) {
-                queue.push_back((next, if cell == current { next } else { first }));
+            if visited.insert(next) && !occupied.contains(&next) && traversable(observation, next) {
+                queue.push_back((next, if cell == root { next } else { first }));
             }
         }
     }
@@ -88,4 +116,120 @@ pub(super) fn score(lease: &crate::cpu::routing::PulseLease, target: CellId) -> 
             .y
             .abs_diff(target.y)
             .max(bounds.max().y.abs_diff(target.y))
+}
+
+pub(super) fn distance(position: Position, target: CellId) -> u32 {
+    let target = Position::center(target);
+    position
+        .x
+        .abs_diff(target.x)
+        .saturating_add(position.y.abs_diff(target.y))
+}
+
+#[cfg(test)]
+mod origin_tests {
+    use super::*;
+    use crate::cpu::forecast::{ForecastLimits, ObservedHazardMemory, forecast};
+    use crate::cpu::routing::tests::{key, observation};
+    use crate::cpu::{
+        BombKnowledge, ObservedActor, ObservedBomb, ObservedBombTrigger, ObservedPickup,
+        UnknownBombFacts,
+    };
+    use crate::game::{BlastKind, EnabledItems, EntityId, Equipment, PickupKind, Tick};
+
+    fn guided(observation: &Observation, work: u32) -> Option<CellId> {
+        let mut forecast_work = WorkBudget::new(65_536);
+        let hazards = forecast(
+            observation,
+            &ObservedHazardMemory::new(key()),
+            None,
+            ForecastLimits::default(),
+            &mut forecast_work,
+        )
+        .unwrap();
+        origin_target(
+            observation,
+            &hazards,
+            CellId::new(2, 1),
+            &mut WorkBudget::new(work),
+        )
+    }
+
+    #[test]
+    fn origin_guidance_reuses_static_eligibility_and_excludes_other_bombs() {
+        let clear = observation(Vec::new(), Vec::new());
+        assert_eq!(guided(&clear, 128), Some(CellId::new(3, 1)));
+        assert_eq!(guided(&clear, 0), None);
+
+        let mut blocked = clear.clone().into_parts();
+        blocked.arena.blocks.push(CellId::new(3, 1));
+        assert_eq!(
+            guided(&Observation::new(blocked.clone()).unwrap(), 128),
+            Some(CellId::new(2, 2))
+        );
+
+        blocked.rules.settings = blocked
+            .rules
+            .settings
+            .with_enabled_items(EnabledItems::WALL_PASS);
+        let ObservedActor::Visible(actor) = &mut blocked.actors[1] else {
+            unreachable!()
+        };
+        actor.equipment = Some(Equipment::WallPass);
+        assert_eq!(
+            guided(&Observation::new(blocked).unwrap(), 128),
+            Some(CellId::new(3, 1))
+        );
+
+        let mut pickup = clear.clone().into_parts();
+        pickup.pickups.push(ObservedPickup {
+            cell: CellId::new(3, 1),
+            kind: PickupKind::BombCapacity,
+        });
+        assert_eq!(
+            guided(&Observation::new(pickup).unwrap(), 128),
+            Some(CellId::new(2, 2))
+        );
+
+        let mut bomb = clear.into_parts();
+        bomb.bombs = BombKnowledge::Visible(vec![ObservedBomb {
+            id: EntityId(91),
+            placed_at: Tick(0),
+            cell: CellId::new(3, 1),
+            owner: EntityId(1),
+            range: 1,
+            trigger: ObservedBombTrigger::Timed {
+                remaining_ticks: 60,
+                paused: false,
+            },
+            blast: BlastKind::Standard,
+            unknown: UnknownBombFacts::ALL,
+        }]);
+        assert_eq!(
+            guided(&Observation::new(bomb).unwrap(), 128),
+            Some(CellId::new(2, 2))
+        );
+    }
+
+    #[test]
+    fn fixed_refuge_progress_rejects_the_observed_two_pulse_cycle() {
+        let refuge = CellId::new(13, 11);
+        let start = Position {
+            x: 13_824,
+            y: 10_599,
+        };
+        let aligned = Position {
+            x: 13_824,
+            y: 10_752,
+        };
+        let continued = Position {
+            x: 13_824,
+            y: 10_905,
+        };
+        assert_eq!(distance(start, refuge), 1_177);
+        assert_eq!(distance(aligned, refuge), 1_024);
+        assert_eq!(distance(continued, refuge), 871);
+        assert!(distance(continued, refuge) < distance(aligned, refuge));
+        assert!(distance(start, refuge) >= distance(aligned, refuge));
+    }
 }

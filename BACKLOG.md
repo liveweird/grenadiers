@@ -17,9 +17,11 @@ repeated approval for routine implementation choices. Entries are not delivery-d
   difficulty. Preserve ordinary rules/input, restricted
   observations, bounded work and accepted-input replay. Follow the
   [accepted design](docs/game/single-player-cpu.md).
-  - **CPU4 — stronger play:** extend deterministic evaluation through full rounds and verify
-    actual generated CPU input replays. Then extend weapon/equipment tactics,
-    difficulty tuning, tactical look-ahead and broader evaluation with human feedback.
+  - **CPU4 — stronger play:** resolve stationary progress under repeated rival bomb pressure.
+    Full-round reference evaluation now exposes retreat cases that survive but remain within
+    their opening cells. Preserve full-horizon safety, pickup-change guards, bounded work and
+    exact accepted-input replay; validate a fix in the real queued-driver case and both matrices.
+    Then extend weapon/equipment tactics, difficulty tuning, tactical look-ahead and human feedback.
 - [parked] **More seats and campaign mobs.** Revisit after the two-seat CPU mode is stable;
   neither is part of the initial solo duel.
 

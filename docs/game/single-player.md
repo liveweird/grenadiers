@@ -89,7 +89,13 @@ It checks a straight approach and an open victim sweep, then certifies its own m
 stopped suffix. This narrow tactic requires visible empty bombs, no exposed pickups and a
 visible rival without Bracelet; changed facts withdraw the tactic. It uses ordinary movement
 without a manual action. The rival may move away, and private cooldown or contact history may
-prevent a shove. The CPU does not seek Bracelet specifically or relocate bombs for this tactic.
+prevent a shove. The CPU does not relocate bombs for this tactic.
+
+Without equipment or while holding Kick, the CPU can seek Punch or Bracelet below useful buffs
+and upgrades in its goal priorities. Once it holds either, it can cross a duplicate but avoids
+replacing it with Kick or the other tactical equipment. Heart and Wall Pass retain their
+existing protection and priority; collecting equipment does not guarantee an opportunity to
+use its restricted tactic.
 
 With Punch held, the CPU can check one stopped Equipment action against a single adjacent,
 unpaused Standard timed bomb. It uses one complete escape for both relocation and cooldown

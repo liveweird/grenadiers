@@ -8,8 +8,8 @@ These Rust contracts support the [solo opponent](single-player.md) and the broad
 
 `core::room::RoomMode` derives controller kinds independently of occupancy and socket state.
 Human duels have two human controllers. Solo fixes the human at seat One and the CPU at seat
-Two. `CpuProfile::CURRENT` identifies `UtilityV14` with `Standard` difficulty;
-`INITIAL`, `PULSE_V2`, `ROUTE_V3`, `PLANT_V4`, `GOALS_V5`, `WEAPONS_V6`, `WALL_PASS_V7`, `RESPONSIVE_V8`, `ORIGIN_V9`, `GUIDED_V10`, `CLEAR_GAP_V11`, `STEERING_V12` and `BRACELET_V13` preserve V1–V13
+Two. `CpuProfile::CURRENT` identifies `UtilityV15` with `Standard` difficulty;
+`INITIAL`, `PULSE_V2`, `ROUTE_V3`, `PLANT_V4`, `GOALS_V5`, `WEAPONS_V6`, `WALL_PASS_V7`, `RESPONSIVE_V8`, `ORIGIN_V9`, `GUIDED_V10`, `CLEAR_GAP_V11`, `STEERING_V12`, `BRACELET_V13` and `PUNCH_V14` preserve V1–V14
 replay identities. These are
 policy identities, not claims about measured strength. Seeds are outside participant metadata.
 Live owner construction accepts only the current profile; retaining a historical replay
@@ -44,12 +44,12 @@ request may submit its ordinary Stop. History has bounded, deterministic retenti
 counted in logical units rather than hardware milliseconds.
 
 Tie-breaking uses its own seeded ChaCha stream and never draws from arena generation. Small
-fixture policies remain test-only; production uses UtilityV14. Replays consume recorded accepted
+fixture policies remain test-only; production uses UtilityV15. Replays consume recorded accepted
 actions rather than invoking a policy again. Production journal allocation remains disabled;
 explicit solo recording adds format-3 header provenance while preserving formats 1/2 and
 accepted-input record capacity.
-Policy versions 1–14 are accepted only with their matching profile; new recordings retain the
-actual room profile. All fourteen policies share the unchanged v12 room shape.
+Policy versions 1–15 are accepted only with their matching profile; new recordings retain the
+actual room profile. All fifteen policies share the unchanged v12 room shape.
 
 ## Goal guidance
 

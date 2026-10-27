@@ -91,6 +91,14 @@ visible rival without Bracelet; changed facts withdraw the tactic. It uses ordin
 without a manual action. The rival may move away, and private cooldown or contact history may
 prevent a shove. The CPU does not seek Bracelet specifically or relocate bombs for this tactic.
 
+With Punch held, the CPU can check one stopped Equipment action against a single adjacent,
+unpaused Standard timed bomb. It uses one complete escape for both relocation and cooldown
+failure, then confirms the observed bomb identity and position. The narrow tactic requires a
+centered CPU, no exposed pickups, Oil or existing flames, and a visible rival without Kick,
+Punch or Bracelet. An ambiguous landing or failed proof withholds the action. This uses the
+existing manual Punch rule and does not change player controls. New observations can invalidate
+the route and require a fresh decision.
+
 The [CPU contracts](cpu-contracts.md) explain execution and privacy; the
 [accepted design](single-player-cpu.md) specifies the broader model. Remaining work and tuning
 belong only in the [backlog](../../BACKLOG.md#single-player).

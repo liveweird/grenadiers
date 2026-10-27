@@ -8,6 +8,7 @@ mod clear_gap;
 mod compatibility;
 mod deadline;
 mod execution;
+mod manual_execution;
 mod origin;
 mod origin_planner;
 mod planner;
@@ -17,8 +18,9 @@ mod steering;
 
 pub use compatibility::can_admit_ordinary;
 pub use execution::{CommittedPulse, PulseStatus};
+pub use manual_execution::ExecutionCertificate;
 pub use origin::PlantEscapeOrigin;
-pub use planner::{ExecutionCertificate, SurvivalPlan, plan, plan_with_origin};
+pub use planner::{SurvivalPlan, plan, plan_with_origin};
 pub use route_execution::{CommittedRoute, RouteCommand, RouteStatus};
 
 pub const MAX_PLAN_AGE_TICKS: u64 = 6;

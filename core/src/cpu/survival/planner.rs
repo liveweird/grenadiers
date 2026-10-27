@@ -1,45 +1,20 @@
 use crate::cpu::forecast::{ForecastLimits, ObservedHazardMemory, TickWindow, forecast};
 use crate::cpu::policy::{ControlPlan, PolicyError, UtilityMemory};
 use crate::cpu::routing::{
-    PlantCertificate, PlantRequest, PulseLease, PulseRequest, RouteCertificate, RouteLimits,
-    RouteMode, RouteRequest, RouteStep, certify_pulse, plan_ordinary_plant, plan_route,
-    plan_timed_weapon_plant,
+    PlantRequest, PulseLease, PulseRequest, PunchRequest, RouteLimits, RouteMode, RouteRequest,
+    RouteStep, certify_pulse, plan_ordinary_plant, plan_punch, plan_route, plan_timed_weapon_plant,
 };
 use crate::cpu::{CpuRng, Intent, ManualIntent, MovementIntent, Observation, WorkBudget};
 use crate::game::{Direction, Tick};
 
 use super::compatibility::actor;
-use super::{MAX_PLAN_AGE_TICKS, PlantEscapeOrigin};
+use super::{ExecutionCertificate, MAX_PLAN_AGE_TICKS, PlantEscapeOrigin};
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct SurvivalPlan {
     pub control: ControlPlan,
     pub lease: Option<PulseLease>,
     pub execution: Option<ExecutionCertificate>,
-}
-
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub enum ExecutionCertificate {
-    Route(Box<RouteCertificate>),
-    Plant(Box<PlantCertificate>),
-}
-
-impl ExecutionCertificate {
-    #[must_use]
-    pub fn route(&self) -> &RouteCertificate {
-        match self {
-            Self::Route(route) => route,
-            Self::Plant(plant) => plant.route(),
-        }
-    }
-
-    #[must_use]
-    pub const fn plant(&self) -> Option<&PlantCertificate> {
-        match self {
-            Self::Route(_) => None,
-            Self::Plant(plant) => Some(plant),
-        }
-    }
 }
 
 /// Produces one action; pulse leases never authorize manual input.
@@ -139,6 +114,11 @@ pub fn plan_with_origin(
             lease: None,
             execution: None,
         });
+    }
+    if actor.equipment == Some(crate::game::Equipment::Punch)
+        && let Some(plan) = certified_punch(observation, history, settled_stop_tick, memory, work)
+    {
+        return Ok(plan);
     }
     let Ok(forecast) = forecast(observation, history, None, ForecastLimits::default(), work) else {
         return Ok(stop());
@@ -328,5 +308,39 @@ fn certified_plant(
             lease: None,
             execution: Some(ExecutionCertificate::Plant(Box::new(certificate))),
         }
+    })
+}
+
+fn certified_punch(
+    observation: &Observation,
+    history: &ObservedHazardMemory,
+    settled_stop_tick: Tick,
+    memory: &UtilityMemory,
+    work: &mut WorkBudget,
+) -> Option<SurvivalPlan> {
+    let execution_tick = observation.parts().tick.0.checked_add(7).map(Tick)?;
+    // Keep at least half the remaining allowance for ordinary survival if this
+    // optional tactic cannot prove a complete escape. All child work is charged.
+    let mut tactic_work = WorkBudget::new(work.remaining() / 2);
+    let certificate = plan_punch(
+        observation,
+        history,
+        PunchRequest {
+            execution_tick,
+            settled_stop_tick,
+            limits: RouteLimits::default(),
+        },
+        &mut tactic_work,
+    );
+    work.try_take(tactic_work.spent()).ok()?;
+    let certificate = certificate.ok()?;
+    Some(SurvivalPlan {
+        control: ControlPlan {
+            intent: Intent::STOP.with_manual(ManualIntent::Equipment),
+            hold_ticks: 1,
+            next_memory: UtilityMemory::new(memory.key()),
+        },
+        lease: None,
+        execution: Some(ExecutionCertificate::Punch(Box::new(certificate))),
     })
 }

@@ -2,13 +2,20 @@ use std::collections::BTreeSet;
 
 use crate::cpu::WorkBudget;
 use crate::cpu::forecast::{HazardForecast, TickWindow};
-use crate::game::{EntityId, MovementSegment, Position, Tick};
+use crate::game::{CellId, EntityId, MovementSegment, Position, Tick};
 
 use super::safety::{
-    check_segments_with_grace, footprint_cells, static_segment_clear, stationary_segment,
+    RecipientBarrier, check_segments_with_grace, footprint_cells, static_segment_clear,
+    stationary_segment,
 };
 use super::validation::Context;
 use super::{RouteFailure, RouteMode, RouteRequest};
+
+#[derive(Clone, Copy)]
+pub(super) struct CollisionProofs {
+    pub(super) placement_origin: Option<CellId>,
+    pub(super) recipient_barrier: Option<RecipientBarrier>,
+}
 
 pub(super) fn stationary_risk(
     forecast: &HazardForecast,
@@ -63,7 +70,7 @@ pub(super) fn check_transition_all(
     segments: &[MovementSegment],
     window: TickWindow,
     mode: RouteMode,
-    blocking_grace: Option<crate::game::CellId>,
+    proofs: CollisionProofs,
     work: &mut WorkBudget,
 ) -> Result<BTreeSet<EntityId>, RouteFailure> {
     let units = footprint_cells(segments)
@@ -89,7 +96,8 @@ pub(super) fn check_transition_all(
             segments,
             window,
             mode,
-            blocking_grace,
+            proofs.placement_origin,
+            proofs.recipient_barrier,
         )?);
     }
     Ok(assumptions)
@@ -100,7 +108,7 @@ pub(super) fn check_stationary_all(
     position: Position,
     window: TickWindow,
     mode: RouteMode,
-    blocking_grace: Option<crate::game::CellId>,
+    proofs: CollisionProofs,
     work: &mut WorkBudget,
 ) -> Result<BTreeSet<EntityId>, RouteFailure> {
     if window.start >= window.end {
@@ -121,7 +129,8 @@ pub(super) fn check_stationary_all(
             &segment,
             window,
             mode,
-            blocking_grace,
+            proofs.placement_origin,
+            proofs.recipient_barrier,
         )?);
     }
     Ok(assumptions)

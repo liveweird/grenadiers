@@ -181,6 +181,7 @@ fn plan_timed_plant(
         },
         Some(first_step),
         Some(cell),
+        None,
         work,
     )?;
     Ok(PlantCertificate::new(

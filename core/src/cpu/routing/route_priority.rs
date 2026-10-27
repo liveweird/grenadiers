@@ -9,7 +9,15 @@ use super::route_checks::stationary_risk;
 use super::{RouteFailure, RouteRequest, RouteStep};
 
 pub(super) type StateKey = (
-    Vec<(i32, i32, u8, u64, Option<u64>, Option<CellId>)>,
+    Vec<(
+        i32,
+        i32,
+        u8,
+        u64,
+        Option<u64>,
+        Option<CellId>,
+        Option<(CellId, u32)>,
+    )>,
     Vec<u32>,
 );
 
@@ -68,6 +76,8 @@ pub(super) fn state_key(node: &SearchNode) -> StateKey {
                 lane.ready.0,
                 lane.last_stop.map(|tick| tick.0),
                 lane.origin_grace,
+                lane.recipient_barrier
+                    .map(|barrier| (barrier.cell, barrier.bomb_id.0)),
             )
         })
         .collect();
@@ -103,7 +113,7 @@ mod tests {
 
     #[test]
     fn shallower_converging_wait_state_is_not_suppressed() {
-        let key = (vec![(1, 2, 0, 10, None, None)], Vec::new());
+        let key = (vec![(1, 2, 0, 10, None, None, None)], Vec::new());
         let mut visited = BTreeMap::new();
         assert!(!dominated(&mut visited, key.clone(), 2));
         assert!(!dominated(&mut visited, key.clone(), 1));

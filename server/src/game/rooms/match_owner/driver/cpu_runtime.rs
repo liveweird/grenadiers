@@ -306,6 +306,10 @@ mod wall_pass_tests;
 mod bracelet_tactic_tests;
 
 #[cfg(test)]
+#[path = "cpu_runtime_punch_tests.rs"]
+mod punch_tests;
+
+#[cfg(test)]
 #[path = "cpu_runtime_responsiveness_tests.rs"]
 mod responsiveness_tests;
 

@@ -30,7 +30,7 @@ pub(in crate::game::rooms) struct AcceptedPlan {
     next_rng: CpuRng,
     committed_pulse: Option<CommittedPulse>,
     committed_route: Option<CommittedRoute>,
-    certified_plant: bool,
+    certified_manual: Option<grenadiers_core::cpu::ManualIntent>,
     escape_origin: bool,
 }
 
@@ -162,13 +162,12 @@ impl CpuController {
     }
 
     pub(in crate::game::rooms) fn commit(&mut self, accepted: AcceptedPlan, actual_intent: Intent) {
-        let planted_input = accepted.intent.manual
-            == Some(grenadiers_core::cpu::ManualIntent::Bomb)
-            && actual_intent.manual == accepted.intent.manual;
+        let manual_admitted =
+            accepted.intent.manual.is_some() && actual_intent.manual == accepted.intent.manual;
         self.memory = Some(
-            if !accepted.certified_plant
+            if accepted.certified_manual.is_none()
                 && accepted.intent.manual == Some(grenadiers_core::cpu::ManualIntent::Bomb)
-                && !planted_input
+                && !manual_admitted
             {
                 UtilityMemory::new(accepted.next_memory.key())
             } else {
@@ -176,7 +175,9 @@ impl CpuController {
             },
         );
         self.rng = Some(accepted.next_rng);
-        self.escaping = !accepted.certified_plant && planted_input;
+        self.escaping = accepted.certified_manual.is_none()
+            && accepted.intent.manual == Some(grenadiers_core::cpu::ManualIntent::Bomb)
+            && manual_admitted;
         self.committed_pulse = accepted.committed_pulse;
         if accepted.escape_origin
             && actual_intent.movement != grenadiers_core::cpu::MovementIntent::Stop
@@ -189,11 +190,22 @@ impl CpuController {
             .as_ref()
             .map(|_| accepted.decision.command_epoch);
         self.committed_route = accepted.committed_route;
-        if accepted.certified_plant && !planted_input {
-            let _ = self
-                .committed_route
-                .as_mut()
-                .is_some_and(CommittedRoute::select_absent_plant);
+        if !manual_admitted {
+            match accepted.certified_manual {
+                Some(grenadiers_core::cpu::ManualIntent::Bomb) => {
+                    let _ = self
+                        .committed_route
+                        .as_mut()
+                        .is_some_and(CommittedRoute::select_absent_plant);
+                }
+                Some(grenadiers_core::cpu::ManualIntent::Equipment) => {
+                    let _ = self
+                        .committed_route
+                        .as_mut()
+                        .is_some_and(CommittedRoute::select_unchanged_punch);
+                }
+                None => {}
+            }
         }
         if self.escaping {
             self.cancel();
@@ -300,7 +312,7 @@ impl CpuController {
             next_rng: rng,
             committed_pulse: None,
             committed_route: None,
-            certified_plant: false,
+            certified_manual: None,
             escape_origin: false,
         }
     }

@@ -5,7 +5,7 @@ use crate::game::Tick;
 
 use super::MAX_PLAN_AGE_TICKS;
 use super::compatibility::{actor, plant_actor_compatible, route_compatible};
-use super::planner::ExecutionCertificate;
+use super::manual_execution::CommittedPunch;
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum RouteStatus {
     Continue,
@@ -48,6 +48,7 @@ struct Transition {
 pub struct CommittedRoute {
     pub(super) certificate: RouteCertificate,
     pub(super) plant: Option<CommittedPlant>,
+    pub(super) punch: Option<CommittedPunch>,
     pub(super) basis: Observation,
     pub(super) first_update: Tick,
     transitions: Vec<Transition>,
@@ -79,39 +80,7 @@ impl CommittedRoute {
         )
     }
 
-    pub fn admit_execution(
-        execution: ExecutionCertificate,
-        basis: Observation,
-        current: &Observation,
-        admission_tick: Tick,
-        accepted_movement: MovementIntent,
-    ) -> Result<Self, PolicyError> {
-        match execution {
-            ExecutionCertificate::Route(certificate) => Self::admit(
-                *certificate,
-                basis,
-                current,
-                admission_tick,
-                accepted_movement,
-            ),
-            ExecutionCertificate::Plant(certificate) => {
-                let route = certificate.route().clone();
-                Self::admit_inner(
-                    route,
-                    Some(CommittedPlant {
-                        certificate: *certificate,
-                        presence: PlantPresence::Awaiting,
-                    }),
-                    basis,
-                    current,
-                    admission_tick,
-                    accepted_movement,
-                )
-            }
-        }
-    }
-
-    fn admit_inner(
+    pub(super) fn admit_inner(
         certificate: RouteCertificate,
         plant: Option<CommittedPlant>,
         basis: Observation,
@@ -176,6 +145,7 @@ impl CommittedRoute {
         Ok(Self {
             certificate,
             plant,
+            punch: None,
             basis,
             first_update,
             transitions,
@@ -235,7 +205,7 @@ impl CommittedRoute {
             basis: &self.basis,
             current,
             certificate: &self.certificate,
-            nonplant: self.plant.is_none(),
+            nonplant: self.plant.is_none() && self.punch.is_none(),
             movement: self.movement,
             no_pending: self.next_transition == self.transitions.len(),
             first_update: self.first_update,
@@ -283,28 +253,6 @@ impl CommittedRoute {
         self.next_transition += 1;
         self.movement = command.movement;
         true
-    }
-
-    fn scene_matches(&mut self, current: &Observation) -> bool {
-        let Some(plant) = self.plant.as_mut() else {
-            return route_compatible(&self.basis, current, self.certificate.evolution());
-        };
-        let candidate = if plant.presence == PlantPresence::Awaiting {
-            let Ok(presence) = plant.certificate.confirm(&self.basis, current) else {
-                return false;
-            };
-            presence
-        } else {
-            plant.presence
-        };
-        let compatible = plant
-            .certificate
-            .matches_scene(&self.basis, current, candidate)
-            && plant_actor_compatible(&self.basis, current, &plant.certificate, candidate);
-        if compatible {
-            plant.presence = candidate;
-        }
-        compatible
     }
 
     fn active_status(&self) -> RouteStatus {

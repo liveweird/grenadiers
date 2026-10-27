@@ -5,6 +5,7 @@ mod evolution;
 mod history;
 mod intervals;
 mod model;
+mod punch;
 mod stationary;
 mod uncertainty;
 
@@ -15,6 +16,7 @@ use super::MemoryKey;
 pub use engine::forecast;
 pub use evolution::ForecastEvolution;
 pub use history::{HazardMemoryError, ObservedHazardMemory};
+pub(crate) use punch::forecast_punch_branch;
 
 pub const MAX_FORECAST_HORIZON_TICKS: u16 = 840;
 pub const MAX_INTERVALS_PER_CELL: u8 = 32;
@@ -205,3 +207,7 @@ mod evolution_tests;
 #[cfg(test)]
 #[path = "temporal_placement_tests.rs"]
 mod temporal_placement_tests;
+
+#[cfg(test)]
+#[path = "punch_tests.rs"]
+mod punch_tests;

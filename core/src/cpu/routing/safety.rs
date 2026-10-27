@@ -1,13 +1,19 @@
 use std::collections::BTreeSet;
 
 use crate::cpu::Observation;
-use crate::cpu::forecast::{HazardForecast, TickWindow, UncertaintyReason};
+use crate::cpu::forecast::{HazardForecast, HazardKind, TickWindow, UncertaintyReason};
 use crate::game::arena::{ARENA_HEIGHT, ARENA_WIDTH};
 use crate::game::geometry::MovementSegment;
 use crate::game::types::{HALF_FOOTPRINT, UNITS_PER_CELL};
 use crate::game::{CellId, EntityId, OilBarrelState, Position, Terrain};
 
 use super::{RouteFailure, RouteMode};
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(super) struct RecipientBarrier {
+    pub(super) cell: CellId,
+    pub(super) bomb_id: EntityId,
+}
 
 pub(super) fn static_segment_clear(
     observation: &Observation,
@@ -24,6 +30,7 @@ pub(super) fn check_segments_with_grace(
     time: TickWindow,
     mode: RouteMode,
     blocking_grace: Option<CellId>,
+    recipient_barrier: Option<RecipientBarrier>,
 ) -> Result<BTreeSet<EntityId>, RouteFailure> {
     let mut assumptions = BTreeSet::new();
     for cell_id in footprint_cells(segments) {
@@ -36,6 +43,13 @@ pub(super) fn check_segments_with_grace(
         }
         for uncertain in &cell.uncertainty {
             if !intersects(uncertain.window, time) {
+                continue;
+            }
+            if recipient_barrier.is_some_and(|barrier| {
+                barrier.cell == cell_id
+                    && uncertain.kind == HazardKind::Blocking
+                    && uncertain.reason == UncertaintyReason::BombMotion(barrier.bomb_id)
+            }) {
                 continue;
             }
             match (mode, uncertain.reason) {

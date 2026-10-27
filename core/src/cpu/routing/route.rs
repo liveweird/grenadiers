@@ -6,10 +6,11 @@ use crate::game::types::UNITS_PER_CELL;
 use crate::game::{Direction, EntityId, Tick};
 
 use super::motion::{Motion, advance};
-use super::route_checks::{check_transition_all, wait_boundaries, wait_lengths};
+use super::route_checks::{CollisionProofs, check_transition_all, wait_boundaries, wait_lengths};
 use super::route_expand::{apply_move, apply_wait, finish, terminal};
 use super::route_priority::{dominated, risk, state_key};
 use super::route_time::add_tick;
+use super::safety::RecipientBarrier;
 use super::safety::stationary_segment;
 use super::validation::{self, Context};
 use super::{
@@ -25,6 +26,7 @@ pub(super) struct LaneState {
     pub(super) ready: Tick,
     pub(super) last_stop: Option<Tick>,
     pub(super) origin_grace: Option<crate::game::CellId>,
+    pub(super) recipient_barrier: Option<RecipientBarrier>,
 }
 
 #[derive(Clone)]
@@ -40,7 +42,7 @@ pub fn plan_route(
     request: RouteRequest,
     work: &mut WorkBudget,
 ) -> Result<RouteCertificate, RouteFailure> {
-    plan_route_seeded(observation, &[forecast], request, None, None, work)
+    plan_route_seeded(observation, &[forecast], request, None, None, None, work)
 }
 
 pub(super) fn plan_route_seeded(
@@ -49,6 +51,7 @@ pub(super) fn plan_route_seeded(
     request: RouteRequest,
     first_step: Option<RouteStep>,
     origin_grace: Option<crate::game::CellId>,
+    recipient_barrier: Option<RecipientBarrier>,
     work: &mut WorkBudget,
 ) -> Result<RouteCertificate, RouteFailure> {
     let forecast = *forecasts.first().ok_or(RouteFailure::InvalidRequest)?;
@@ -66,7 +69,14 @@ pub(super) fn plan_route_seeded(
         request.survive_until,
     )?;
     validate_request(&context, forecast, request)?;
-    let (lanes, assumptions) = initial_lanes(&context, forecasts, request, origin_grace, work)?;
+    let (lanes, assumptions) = initial_lanes(
+        &context,
+        forecasts,
+        request,
+        origin_grace,
+        recipient_barrier,
+        work,
+    )?;
     let mut boundaries = Vec::new();
     for candidate in forecasts {
         boundaries.extend(wait_boundaries(&context, candidate, work)?);
@@ -222,6 +232,7 @@ fn initial_lanes(
     forecasts: &[&HazardForecast],
     request: RouteRequest,
     origin_grace: Option<crate::game::CellId>,
+    recipient_barrier: Option<RecipientBarrier>,
     work: &mut WorkBudget,
 ) -> Result<(Vec<LaneState>, BTreeSet<EntityId>), RouteFailure> {
     let mut lanes = Vec::new();
@@ -238,7 +249,10 @@ fn initial_lanes(
                 end: first,
             },
             request.mode,
-            None,
+            CollisionProofs {
+                placement_origin: None,
+                recipient_barrier,
+            },
             work,
         )?);
         lanes.push(LaneState {
@@ -246,6 +260,7 @@ fn initial_lanes(
             ready: first,
             last_stop: None,
             origin_grace,
+            recipient_barrier,
         });
     }
     Ok((lanes, assumptions))

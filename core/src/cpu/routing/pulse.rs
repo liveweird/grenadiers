@@ -88,6 +88,7 @@ fn certify_pulse_inner(
                 one_tick(tick)?,
                 request.mode,
                 origin.filter(|_| origin_active).map(|value| value.cell),
+                None,
             )?);
             update_origin(origin, &segments, &mut origin_active)?;
             next.push((start, motion, origin_active));
@@ -182,6 +183,7 @@ fn certify_wait_before_start(
         TickWindow { start, end },
         request.mode,
         origin.map(|value| value.cell),
+        None,
     )?);
     Ok(())
 }
@@ -215,6 +217,7 @@ fn certify_stopped_suffix(
             },
             request.mode,
             origin.filter(|_| *origin_active).map(|value| value.cell),
+            None,
         )?);
     }
     Ok(())

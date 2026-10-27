@@ -38,6 +38,8 @@ mod landmine_route_tests;
 mod landmine_tests;
 #[path = "multiplayer_headless_tests.rs"]
 mod multiplayer_headless_tests;
+#[path = "multiplayer_item_behavior_tests.rs"]
+mod multiplayer_item_behavior_tests;
 #[path = "multiplayer_item_tests.rs"]
 mod multiplayer_item_tests;
 #[path = "multiplayer_kick_tests.rs"]

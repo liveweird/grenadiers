@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## 0.3.100 — 2026-10-28
+
+- Adopt the owner-supplied third/fourth-player uniform redraw, preserving all existing atlas
+  geometry and the original 95 frame pixels while matching the established character style.
+- Document a bounded 48-color artist palette and retain transparency, frame and color-family
+  regressions; remove the duplicate source PNG from the repository root.
+
 ## 0.3.99 — 2026-10-28
 
 - Make CPU seat identity explicit through controller memory, recipient validation and ordinary

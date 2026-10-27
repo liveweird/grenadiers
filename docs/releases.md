@@ -96,43 +96,45 @@ retain the previous immutable image reference for rollback. The runtime stage in
 rolling Debian package updates, so a later build may resolve newer packages and is not expected to
 be byte-identical; treat it as a new candidate with new evidence rather than reusing acceptance.
 
-## v0.3.87 — 2026-10-27
+## v0.3.88 — 2026-10-27
 
-[v0.3.87](https://github.com/liveweird/grenadiers/releases/tag/v0.3.87) completes the
-CPU public-preview item slice with held, enabled Wall Pass and native item acceptance.
-A shared capability permits known intact soft-block traversal and certified starts inside
-those blocks. Predicted destruction retains an unknown-content fence. Combined blocking,
-Oil, bombs, blast geometry, legal planting origins and equipment-change guards remain strict.
-Wall Pass cannot become an opening/plant goal; used Wall Pass and held Heart are preserved.
+[v0.3.88](https://github.com/liveweird/grenadiers/releases/tag/v0.3.88) fixes unnecessarily
+long CPU waits after finite flames and around harmless unlit Oil. Non-plant route deadlines
+cover the latest current flame expiry and the existing admission/movement/stopped margin;
+the complete 840-tick forecast remains intact. Active bombs and burning Oil retain the full
+horizon. Unlit Oil remains an obstacle. Metered scans and checked arithmetic fail closed;
+planting proofs, pulse safety, route execution and pickup restrictions are unchanged.
 
-Actual-State/Driver cases exercise traversal and placement constraints. Three authoritative
-worlds with empty, concealed pickup and concealed Oil contents produce identical checked
-observations and current-policy results while the CPU stands inside the intact block.
-UtilityV7 retains V1–V6 accepted-input replay without changing v12, rules 5 or generator 2.
-A host-only, read-only arena fixture verifies the actual all-22-items CPU pickup event,
-public inventory and rendered gear; private CPU randomness remains independent.
+The actual Driver regression executes a 30-tick Wait, completes at flame expiry, admits fresh
+movement at that same tick and physically collects Bomb Capacity 21 ticks later. Initial/fresh
+planning costs are 1,215/20 work units. The previous 840-tick certificate span is source-derived;
+the new 30-tick span and Driver progression are measured. Boundary, overflow, budget, all-seven-
+lane, multiple-flame and bomb/Oil cases pass. UtilityV8 retains V1–V7 accepted-input replay and
+the unchanged v12 wire shape. Independent review is clear.
 
-Independently reviewed source is `fd549c227e306b9be51800a99629fdcb31bee2fb`.
-Full local Rust acceptance passes in 459.517s with all 4,194,304 masks in each of debug,
-release and official coverage, 32 partitions/four workers, zero retries and 37 raw profiles.
-Coverage is 24,817/26,977 lines (91.99%). The distinct
-[Linux run](https://github.com/liveweird/grenadiers/actions/runs/40438620884) passes.
-Formatting, workspace Clippy, repository/source-size checks, E2E type/lint, CI contracts and
-tooling pass. Unchanged external dependencies and frontend/API/art retain accepted audits
-and full web evidence (6,874 tests/97 files); changed E2E/CI inputs were checked anew.
+Tested source is `26ceae8b86b4d1661cd3125c10ae225edcc40077`. Full local Rust acceptance passes
+in 470.932s: all 4,194,304 masks in debug, release and official coverage, 32 partitions/four
+workers, zero retries and 37 raw profiles. Coverage is 24,883/27,028 lines (92.06%). The distinct
+[Linux run](https://github.com/liveweird/grenadiers/actions/runs/40441117382) passes.
+Formatting, Clippy and repository/source-size checks pass. Proven unchanged frontend, API,
+artwork, E2E, tooling and external dependencies retain accepted static/audit/full-web evidence
+(6,874 tests/97 files); changed gameplay receives fresh native runtime acceptance.
 
 Accepted image is
-`sha256:55b54b5a88c3b9fff161747a89fc0bb3048fc84129ccdf5d2a15c682eb4004f2`.
+`sha256:2fc8cfc5695ea92e694fb845c8b2a31d3e42cc7755c1c55408db4d35a2831e4d`.
 Pinned Trivy 0.74.0 reports zero fixable HIGH/CRITICAL findings. Compose passes ten browser
-cases in 50.1s, Kubernetes ten in 51.3s, and dedicated CPU item acceptance one in 16.5s on the
-same image. Polish 320px, strict lobby/create, security/resources/probes and served assets
-pass. Temporary projects/namespaces are removed. The exact image is promoted to
-localhost:8085 with v0.3.86 retained for rollback; restarting ends in-memory matches.
+cases in 49.3s, Kubernetes ten in 51.3s, and dedicated all-items CPU pickup acceptance one in
+16.5s. Polish 320px, strict lobby/create, resources/security/probes and served assets pass.
+Temporary projects/namespaces are removed. The exact image is promoted to localhost:8085;
+v0.3.87 remains available for rollback. Restarting ends in-memory matches.
 
-Development fixture encoding and semantic locators were corrected before acceptance;
-original failed evidence remains retained. Evidence is under `target/quality-review/cpu3-v0387-*`.
-Distribution remains a source prerelease and local image. Remaining tactics, responsiveness
-and difficulty measurements stay in the [backlog](../BACKLOG.md#single-player).
+Evidence is under `target/quality-review/cpu4-v0388-*`. After official coverage was copied,
+153 application incremental cache directories were removed, freeing 28.53 GiB while retaining
+dependencies, binaries and evidence. Distribution remains a source prerelease and local image;
+remaining tactics, evaluation and human feedback stay in the [backlog](../BACKLOG.md#single-player).
+
+<a id="v0387--2026-10-27"></a>
+The [v0.3.87 record](history/releases.md#v0387--2026-10-27) is preserved in release history.
 
 <a id="v0386--2026-10-27"></a>
 The [v0.3.86 record](history/releases.md#v0386--2026-10-27) is preserved in release history.

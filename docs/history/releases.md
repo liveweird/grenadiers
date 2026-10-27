@@ -4,6 +4,44 @@ This archive preserves the older release records originally maintained in
 [`docs/releases.md`](../releases.md). Records remain in their original order; the current
 release procedure and current release record stay in the [release guide](../releases.md).
 
+## v0.3.87 — 2026-10-27
+
+[v0.3.87](https://github.com/liveweird/grenadiers/releases/tag/v0.3.87) completes the
+CPU public-preview item slice with held, enabled Wall Pass and native item acceptance.
+A shared capability permits known intact soft-block traversal and certified starts inside
+those blocks. Predicted destruction retains an unknown-content fence. Combined blocking,
+Oil, bombs, blast geometry, legal planting origins and equipment-change guards remain strict.
+Wall Pass cannot become an opening/plant goal; used Wall Pass and held Heart are preserved.
+
+Actual-State/Driver cases exercise traversal and placement constraints. Three authoritative
+worlds with empty, concealed pickup and concealed Oil contents produce identical checked
+observations and current-policy results while the CPU stands inside the intact block.
+UtilityV7 retains V1–V6 accepted-input replay without changing v12, rules 5 or generator 2.
+A host-only, read-only arena fixture verifies the actual all-22-items CPU pickup event,
+public inventory and rendered gear; private CPU randomness remains independent.
+
+Independently reviewed source is `fd549c227e306b9be51800a99629fdcb31bee2fb`.
+Full local Rust acceptance passes in 459.517s with all 4,194,304 masks in each of debug,
+release and official coverage, 32 partitions/four workers, zero retries and 37 raw profiles.
+Coverage is 24,817/26,977 lines (91.99%). The distinct
+[Linux run](https://github.com/liveweird/grenadiers/actions/runs/40438620884) passes.
+Formatting, workspace Clippy, repository/source-size checks, E2E type/lint, CI contracts and
+tooling pass. Unchanged external dependencies and frontend/API/art retain accepted audits
+and full web evidence (6,874 tests/97 files); changed E2E/CI inputs were checked anew.
+
+Accepted image is
+`sha256:55b54b5a88c3b9fff161747a89fc0bb3048fc84129ccdf5d2a15c682eb4004f2`.
+Pinned Trivy 0.74.0 reports zero fixable HIGH/CRITICAL findings. Compose passes ten browser
+cases in 50.1s, Kubernetes ten in 51.3s, and dedicated CPU item acceptance one in 16.5s on the
+same image. Polish 320px, strict lobby/create, security/resources/probes and served assets
+pass. Temporary projects/namespaces are removed. The exact image is promoted to
+localhost:8085 with v0.3.86 retained for rollback; restarting ends in-memory matches.
+
+Development fixture encoding and semantic locators were corrected before acceptance;
+original failed evidence remains retained. Evidence is under `target/quality-review/cpu3-v0387-*`.
+Distribution remains a source prerelease and local image. Remaining tactics, responsiveness
+and difficulty measurements stay in the [backlog](../../BACKLOG.md#single-player).
+
 ## v0.3.86 — 2026-10-27
 
 [v0.3.86](https://github.com/liveweird/grenadiers/releases/tag/v0.3.86) adds

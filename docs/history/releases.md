@@ -4,6 +4,22 @@ This archive preserves the older release records originally maintained in
 [`docs/releases.md`](../releases.md). Records remain in their original order; the current
 release procedure and current release record stay in the [release guide](../releases.md).
 
+## v0.3.96 — 2026-10-27
+
+[v0.3.96](https://github.com/liveweird/grenadiers/releases/tag/v0.3.96) adds a guarded held-Punch tactic. One stopped Equipment action has a common certified escape for relocation and a no-op, preserving the original bomb identity and absolute fuse. The narrow scene requires a centered CPU, one adjacent Standard timed bomb, no exposed pickups/Oil/flames and a visible rival without bomb-moving equipment. New incompatible observations withdraw the route. Manual player controls remain unchanged.
+
+A recipient-footprint barrier follows the authoritative bomb collision rule: only the named bomb’s motion uncertainty at the continuously occupied origin is waived; lethal checks remain and leaving the cell consumes the exception. Exact basis+6 admission/basis+7 execution and typed manual rejection preserve the checked schedule without retry or legacy Bomb escape. Optional proof work uses at most half of the remaining global allowance. UtilityV14 retains V1–V13 replay identities and wire v12.
+
+Focused tests cover geometry, timing, branch identity and complete physical routes through fuse/flame expiry. A core-private fixture compares ready/cooling histories with identical observations; a queued Driver fixture covers accepted/rejected Equipment in a Kick-enabled ruleset. These compose cooldown and queue coverage; the Driver fixture does not create bomb motion or combine accepted input with private cooldown. Crafted replacement-state fixtures do not claim generated-world replay. Independent review, formatting, Clippy, repository/tooling checks and the 400-line ceiling pass.
+
+Both 16-case matrices replay exactly with unchanged per-case trajectories, outcomes, calls and work versus v0.3.95: 594/4,010 calls, 17,958,825/89,659,046 work units and a 65,536 maximum. Opening cases remain alive/censored; full rounds retain 15 timeout draws and the same CPU win. Isolated host observations were 2.38s opening and 12.13s full; planner p95/max were 3.995/5.248ms and 3.756/4.973ms. These are reference observations, not a strength or performance guarantee.
+
+One exhaustive server gate passes on source `27d074ca5c83544a12b5a31cd97ae410b036b6f5` (tree `a6d3e77e7c95118583b4a75dc2ecb1356222e065`): 521.69s, 27,100/29,389 lines (**92.2114%**), all 4,194,304 masks separately in debug/release/official coverage, 32 partitions/four workers/zero hidden retries and 37 raw profiles. Official LCOV was preserved before releasing the source/target freeze. Unique Linux [run 40583437112](https://github.com/liveweird/grenadiers/actions/runs/40583437112) passes.
+
+Exact image `sha256:5d967f51f91aaea9361cea8dc0878fb7332d37e980c2aeb3ff0ccf38b0f32b15` passes pinned Trivy 0.74.0 with zero fixable HIGH/CRITICAL findings, Compose 10 cases/51.4s, Kubernetes 10 cases/53.0s, CPU-item collection 1 case/15.6s, Polish 320px, served-asset identity and runtime security/resources/probes. The initial scanner configuration-digest lookup failed; the corrected immutable-image scan is retained separately. Temporary stacks were removed. Unchanged frontend/API/art/E2E/tooling/external dependency inputs retain accepted full-web 6,874 tests/97 files and static/audit checks.
+
+This source prerelease has a verified local image; no production registry publication is claimed. Localhost runs the accepted image with v0.3.95 retained for rollback. CPU4 difficulty, broader tactics and human validation remain in the [backlog](../../BACKLOG.md#single-player).
+
 ## v0.3.95 — 2026-10-27
 
 [v0.3.95](https://github.com/liveweird/grenadiers/releases/tag/v0.3.95) adds an opportunistic

@@ -18,6 +18,7 @@ pub enum CpuPolicy {
     UtilityV9,
     UtilityV10,
     UtilityV11,
+    UtilityV12,
 }
 
 impl CpuPolicy {
@@ -35,6 +36,7 @@ impl CpuPolicy {
             Self::UtilityV9 => 9,
             Self::UtilityV10 => 10,
             Self::UtilityV11 => 11,
+            Self::UtilityV12 => 12,
         }
     }
 }
@@ -112,9 +114,15 @@ impl CpuProfile {
         difficulty: CpuDifficulty::Standard,
     };
 
+    /// First clear-gap route-completion policy, retained for archived replays.
+    pub const CLEAR_GAP_V11: Self = Self {
+        policy: CpuPolicy::UtilityV11,
+        difficulty: CpuDifficulty::Standard,
+    };
+
     /// The only policy profile used to create a new live CPU controller.
     pub const CURRENT: Self = Self {
-        policy: CpuPolicy::UtilityV11,
+        policy: CpuPolicy::UtilityV12,
         difficulty: CpuDifficulty::Standard,
     };
 }
@@ -178,7 +186,8 @@ mod tests {
         assert_eq!(CpuProfile::RESPONSIVE_V8.policy.version(), 8);
         assert_eq!(CpuProfile::ORIGIN_V9.policy.version(), 9);
         assert_eq!(CpuProfile::GUIDED_V10.policy.version(), 10);
-        assert_eq!(CpuProfile::CURRENT.policy.version(), 11);
+        assert_eq!(CpuProfile::CLEAR_GAP_V11.policy.version(), 11);
+        assert_eq!(CpuProfile::CURRENT.policy.version(), 12);
         assert_eq!(
             RoomMode::Solo(CpuProfile::CURRENT).controller(SeatId::Two),
             ControllerKind::Cpu(CpuProfile::CURRENT)

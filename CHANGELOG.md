@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+## 0.3.94 — 2026-10-27
+
+- Align ordinary CPU navigation before perpendicular turns outside the configured tolerance,
+  preserving its target and using normal movement rules and bounded pulses.
+- Add physical-progress regressions for both recorded queued-driver stalls, with deterministic
+  traces and exact accepted-input replay.
+- Identify the steering change as UtilityV12; retain V1–V11 accepted-input replay identities
+  and the unchanged v12 room protocol.
+
 ## 0.3.93 — 2026-10-27
 
 ### Fixed

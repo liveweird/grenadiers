@@ -63,6 +63,36 @@ pub(super) fn pulse_minimum_distance(actor: &VisibleActor, ticks: u8) -> u64 {
     (u64::from(ticks) * u64::from(numerator)) / (u64::from(TICKS_PER_SECOND) * denominator)
 }
 
+pub(super) fn bounded_alignment_hold_ticks(
+    actor: &VisibleActor,
+    cell: CellId,
+    direction: Direction,
+    tolerance: u32,
+) -> Option<u8> {
+    let ticks = hold_ticks(actor, cell, direction);
+    let distance = u64::try_from(axis_distance(
+        actor.position,
+        Position::center(cell),
+        direction,
+    ))
+    .ok()?;
+    let minimum = pulse_minimum_distance(actor, ticks);
+    let (numerator, denominator) = speed_ratio(actor);
+    let maximum = (u64::from(ticks) * u64::from(numerator))
+        .div_ceil(u64::from(TICKS_PER_SECOND) * denominator);
+    let window = u64::from(tolerance.min(64));
+    let minimum_endpoint = distance.abs_diff(minimum);
+    let maximum_endpoint = distance.abs_diff(maximum);
+    // The correction changes only this coordinate. Ending within 64 units of its
+    // center keeps it in `cell`; the unchanged perpendicular coordinate was
+    // already in `cell` because `cell` is the actor's containing cell.
+    (minimum_endpoint <= window
+        && maximum_endpoint <= window
+        && minimum_endpoint < distance
+        && maximum_endpoint < distance)
+        .then_some(ticks)
+}
+
 fn speed_ratio(actor: &VisibleActor) -> (u16, u64) {
     let stacks = actor
         .effects

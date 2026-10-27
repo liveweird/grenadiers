@@ -232,7 +232,7 @@ fn transport_loss_fences_input_but_preserves_fuse_damage_and_grace() {
         .unwrap();
 
     let disconnected_at = runtime.lifecycle().tick();
-    let ReservationState::Disconnected { expires_at } =
+    let Some(ReservationState::Disconnected { expires_at }) =
         runtime.lifecycle().reconnect_grace().seat(SeatId::One)
     else {
         panic!("transport loss did not reserve the seat");
@@ -280,7 +280,7 @@ fn transport_loss_fences_input_but_preserves_fuse_damage_and_grace() {
     ));
     assert_eq!(
         runtime.lifecycle().reconnect_grace().seat(SeatId::One),
-        ReservationState::Disconnected { expires_at }
+        Some(ReservationState::Disconnected { expires_at })
     );
     assert!(runtime.lifecycle().tick().0 < expires_at.0);
 }

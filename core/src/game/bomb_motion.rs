@@ -13,7 +13,7 @@ pub(crate) struct MotionPhase {
     pub(crate) moved: BTreeSet<EntityId>,
 }
 
-pub(crate) fn advance(world: &mut World, actors: &[Actor; 2], tick: Tick) -> MotionPhase {
+pub(crate) fn advance(world: &mut World, actors: &[Actor], tick: Tick) -> MotionPhase {
     let moving_at_start: BTreeSet<_> = world
         .bombs
         .values()
@@ -89,13 +89,7 @@ pub(crate) fn advance(world: &mut World, actors: &[Actor; 2], tick: Tick) -> Mot
     }
 }
 
-fn blocked(
-    world: &World,
-    actors: &[Actor; 2],
-    id: EntityId,
-    source: CellId,
-    target: CellId,
-) -> bool {
+fn blocked(world: &World, actors: &[Actor], id: EntityId, source: CellId, target: CellId) -> bool {
     world.arena.terrain(target) != Some(Terrain::Floor)
         || world.arena.blocks().contains(&target)
         || world.oil.unlit(target)

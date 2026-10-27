@@ -8,8 +8,8 @@ use crate::game::{World, fixed_arena};
 
 fn actors() -> [ActorInit; 2] {
     let arena = fixed_arena();
-    let spawns = arena.spawns();
-    SeatId::ALL.map(|seat| ActorInit {
+    let spawns = arena.spawns().to_vec();
+    SeatId::DUEL.map(|seat| ActorInit {
         id: EntityId(seat.index() as u32 + 10),
         seat,
         position: Position::center(spawns[seat.index()]),

@@ -7,7 +7,7 @@
 //! };
 //!
 //! let arena = fixed_arena();
-//! let spawns = arena.spawns();
+//! let spawns = arena.spawns().to_vec();
 //! let actors = [SeatId::One, SeatId::Two].map(|seat| ActorInit {
 //!     id: EntityId(seat.index() as u32 + 1),
 //!     seat,
@@ -80,7 +80,7 @@ pub use simulation::{
     Actor, ActorInit, DrawReason, InputAction, RoundResult, SeatInput, State, StateError,
     StepError, StepReport,
 };
-pub use types::{CellId, EntityId, Position, SeatId, SpeedLevel, Tick};
+pub use types::{CellId, EntityId, PlayerCount, Position, SeatId, SpeedLevel, Tick};
 pub use view::{ActorView, ArenaView, BombView, FlameView, OilBarrelView, PickupView, PublicState};
 pub use world::World;
 

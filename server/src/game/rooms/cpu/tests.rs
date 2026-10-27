@@ -64,7 +64,7 @@ pub(super) fn observation_for(cpu_seat: SeatId) -> Observation {
             terrain,
             blocks: vec![CellId::new(8, 7)],
         },
-        actors: SeatId::ALL.map(|seat| {
+        actors: SeatId::DUEL.map(|seat| {
             if seat == cpu_seat {
                 ObservedActor::Visible(VisibleActor {
                     id: EntityId(seat.index() as u32 + 1),

@@ -21,8 +21,8 @@ pub(super) fn enabled(items: &[ItemId]) -> EnabledItems {
 }
 
 fn actors(world: &World, speed: SpeedLevel) -> [ActorInit; 2] {
-    let spawns = world.arena().spawns();
-    SeatId::ALL.map(|seat| ActorInit {
+    let spawns = world.arena().spawns().to_vec();
+    SeatId::DUEL.map(|seat| ActorInit {
         id: EntityId(seat.index() as u32 + 1),
         seat,
         position: Position::center(spawns[seat.index()]),

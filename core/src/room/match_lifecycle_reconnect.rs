@@ -94,9 +94,12 @@ impl MatchLifecycle {
     ) -> Result<(), MatchError> {
         for (index, departure) in admitted.into_iter().enumerate() {
             if departure == Some(DepartureReason::Explicit)
-                && !self.reconnect.seat(SeatId::ALL[index]).connected()
+                && !self
+                    .reconnect
+                    .seat(SeatId::DUEL[index])
+                    .is_some_and(ReservationState::connected)
             {
-                return Err(ReconnectError::SeatNotConnected(SeatId::ALL[index]).into());
+                return Err(ReconnectError::SeatNotConnected(SeatId::DUEL[index]).into());
             }
         }
         Ok(())
@@ -131,16 +134,16 @@ impl MatchLifecycle {
         // Represent every loss before releasing either explicit departure, so
         // expiry and mixed-batch policy always observe one complete boundary.
         for (index, departure) in admitted.into_iter().enumerate() {
-            let seat = SeatId::ALL[index];
+            let seat = SeatId::DUEL[index];
             if departure == Some(DepartureReason::TransportLoss)
-                && self.reconnect.seat(seat) == ReservationState::Connected
+                && self.reconnect.seat(seat) == Some(ReservationState::Connected)
             {
                 let status = self.reconnect.disconnect(seat, self.tick)?;
                 changed |= matches!(status, DisconnectStatus::Started { .. });
             }
         }
         for (index, departure) in admitted.into_iter().enumerate() {
-            let seat = SeatId::ALL[index];
+            let seat = SeatId::DUEL[index];
             if departure == Some(DepartureReason::Explicit) {
                 self.reconnect.release(seat, self.tick)?;
                 self.seats[index] = SeatState::default();
@@ -162,10 +165,10 @@ impl MatchLifecycle {
         let terminal = if explicit == [true; 2] {
             Some(None)
         } else if explicit[0] || explicit[1] {
-            let opponent = SeatId::ALL[usize::from(explicit[0])];
+            let opponent = SeatId::DUEL[usize::from(explicit[0])];
             let eligible = matches!(
                 self.reconnect.seat(opponent),
-                ReservationState::Connected | ReservationState::Disconnected { .. }
+                Some(ReservationState::Connected | ReservationState::Disconnected { .. })
             );
             Some(eligible.then_some(opponent))
         } else {
@@ -201,10 +204,10 @@ impl MatchLifecycle {
         self.validate_explicit_departures(admitted)?;
         let before = *self.reconnect.seats();
         for (index, departure) in admitted.into_iter().enumerate() {
-            let seat = SeatId::ALL[index];
+            let seat = SeatId::DUEL[index];
             match (departure, self.reconnect.seat(seat)) {
                 (Some(DepartureReason::Explicit), _)
-                | (Some(DepartureReason::TransportLoss), ReservationState::Connected) => {
+                | (Some(DepartureReason::TransportLoss), Some(ReservationState::Connected)) => {
                     self.reconnect.release(seat, self.tick)?;
                     self.seats[index] = SeatState::default();
                 }
@@ -230,7 +233,7 @@ impl MatchLifecycle {
         for index in 0..2 {
             if affected[index] && votes[index] {
                 self.series
-                    .set_rematch_vote(SeatId::ALL[index], false, self.tick)?;
+                    .set_rematch_vote(SeatId::DUEL[index], false, self.tick)?;
             }
         }
         Ok(())

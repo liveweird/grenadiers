@@ -53,8 +53,8 @@ fn seed_31_proves_the_ordinary_reveal_clamp_ignite_and_persistent_route() {
     for cell in [CellId::new(4, 1), CellId::new(3, 2)] {
         assert!(arena.blocks().contains(&cell));
     }
-    let spawns = arena.spawns();
-    let actors = SeatId::ALL.map(|seat| ActorInit {
+    let spawns = arena.spawns().to_vec();
+    let actors = SeatId::DUEL.map(|seat| ActorInit {
         id: EntityId(seat.index() as u32 + 10),
         seat,
         position: Position::center(spawns[seat.index()]),

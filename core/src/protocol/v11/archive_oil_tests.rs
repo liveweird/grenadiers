@@ -18,11 +18,11 @@ type ArchiveBinder = fn(
 
 fn neutral_capture() -> ExpandedCapture {
     let arena = game::fixed_arena();
-    let spawns = arena.spawns();
+    let spawns = arena.spawns().to_vec();
     let state = State::new(
         RulesConfig::expanded_v5(RoomSettings::DEFAULT),
         World::new(arena),
-        SeatId::ALL.map(|seat| ActorInit {
+        SeatId::DUEL.map(|seat| ActorInit {
             id: GameEntityId(seat.index() as u32 + 1),
             seat,
             position: GamePosition::center(spawns[seat.index()]),

@@ -188,7 +188,7 @@ impl Driver {
                 slot.as_ref()
                     .and_then(|slot| slot.live.as_ref())
                     .filter(|live| live.fence.matches(binding) && live.pending.is_none())
-                    .map(|_| SeatId::ALL[index])
+                    .map(|_| SeatId::DUEL[index])
             })
             .ok_or(RoomError::StaleRoom)
     }
@@ -203,7 +203,7 @@ impl Driver {
             }
             match live.departure.try_recv() {
                 Ok(reason) => {
-                    self.runtime.stop_seat_inputs(SeatId::ALL[index]);
+                    self.runtime.stop_seat_inputs(SeatId::DUEL[index]);
                     live.pending = Some(PendingDeparture {
                         binding: live.fence.current(),
                         reason,

@@ -58,9 +58,9 @@ fn public_fixture_reveals_collects_and_preserves_captured_bomb_ranges() {
         generated.concealed_pickups().get(&CellId::new(1, 3)),
         Some(&PickupKind::BlastRange)
     );
-    let spawns = generated.arena().spawns();
+    let spawns = generated.arena().spawns().to_vec();
     let (world, _record) = World::from_generated(generated).unwrap();
-    let actors = SeatId::ALL.map(|seat| ActorInit {
+    let actors = SeatId::DUEL.map(|seat| ActorInit {
         id: EntityId(seat.index() as u32 + 1),
         seat,
         position: Position::center(spawns[seat.index()]),

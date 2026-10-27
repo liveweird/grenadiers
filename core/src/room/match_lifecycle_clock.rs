@@ -24,8 +24,10 @@ impl MatchLifecycle {
     }
 
     pub(super) fn both_connected(&self) -> bool {
-        SeatId::ALL
-            .into_iter()
-            .all(|seat| self.reconnect.seat(seat).connected())
+        SeatId::DUEL.into_iter().all(|seat| {
+            self.reconnect
+                .seat(seat)
+                .is_some_and(crate::room::reconnect::ReservationState::connected)
+        })
     }
 }

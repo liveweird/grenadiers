@@ -124,7 +124,7 @@ fn wall_pass_fixture(tick: grenadiers_core::game::Tick, settings: RoomSettings) 
         [CellId::new(1, 1), CellId::new(13, 11)],
     )
     .unwrap();
-    let actors = SeatId::ALL.map(|seat| ActorInit {
+    let actors = SeatId::DUEL.map(|seat| ActorInit {
         id: EntityId(seat.index() as u32 + 1),
         seat,
         position: Position::center(if seat == SeatId::Two {

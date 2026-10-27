@@ -97,7 +97,7 @@ fn project_completed_round(
         round_id: wire_counter(completed.epoch())?,
         round_number: wire_counter(u64::from(completed.assignment().round_number().get()))?,
         ended_at: wire_tick(completed.ended_at().0)?,
-        result: wire_round_result(completed.result()),
+        result: wire_round_result(completed.result())?,
     })
 }
 
@@ -133,11 +133,11 @@ fn project_phase(phase: DomainMatchPhase) -> Result<RoomPhase, RoomProjectionErr
 fn wire_match_result(result: DomainMatchResult) -> Result<MatchResult, RoomProjectionError> {
     Ok(match result {
         DomainMatchResult::ScoreWinner(seat) => MatchResult::Winner {
-            seat: wire_seat(seat),
+            seat: wire_seat(seat)?,
             reason: MatchWinnerReason::RoundWins,
         },
         DomainMatchResult::ForfeitWinner(seat) => MatchResult::Winner {
-            seat: wire_seat(seat),
+            seat: wire_seat(seat)?,
             reason: MatchWinnerReason::Forfeit,
         },
         DomainMatchResult::Abandoned => MatchResult::Abandoned,
@@ -157,10 +157,10 @@ fn wire_interrupt(reason: InterruptReason) -> Result<MatchInterruptReason, RoomP
     }
 }
 
-fn wire_round_result(result: RoundResult) -> WireRoundResult {
-    match result {
+fn wire_round_result(result: RoundResult) -> Result<WireRoundResult, RoomProjectionError> {
+    Ok(match result {
         RoundResult::Winner(seat) => WireRoundResult::Winner {
-            seat: wire_seat(seat),
+            seat: wire_seat(seat)?,
         },
         RoundResult::Draw(DomainDrawReason::MutualElimination) => WireRoundResult::Draw {
             reason: DrawReason::MutualElimination,
@@ -168,14 +168,11 @@ fn wire_round_result(result: RoundResult) -> WireRoundResult {
         RoundResult::Draw(DomainDrawReason::Timeout) => WireRoundResult::Draw {
             reason: DrawReason::Timeout,
         },
-    }
+    })
 }
 
-const fn wire_seat(seat: SeatId) -> Seat {
-    match seat {
-        SeatId::One => Seat::One,
-        SeatId::Two => Seat::Two,
-    }
+fn wire_seat(seat: SeatId) -> Result<Seat, RoomProjectionError> {
+    Seat::try_from(seat).map_err(|_| RoomProjectionError::InvalidMatchResult)
 }
 
 fn wire_counter(value: u64) -> Result<Counter, RoomProjectionError> {

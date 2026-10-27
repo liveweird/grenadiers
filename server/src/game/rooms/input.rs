@@ -100,7 +100,7 @@ impl InputMailbox {
 
     pub(super) fn take(&mut self, tick: Tick) -> Vec<SeatInput> {
         let mut inputs = Vec::new();
-        for seat in SeatId::ALL {
+        for seat in SeatId::DUEL {
             let mailbox = &mut self.seats[seat.index()];
             if mailbox
                 .direction
@@ -116,7 +116,7 @@ impl InputMailbox {
             inputs.append(&mut mailbox.inputs);
             mailbox.admitted = 0;
         }
-        for seat in SeatId::ALL {
+        for seat in SeatId::DUEL {
             for action in self.seats[seat.index()].manual_actions.drain(..) {
                 let action = match action {
                     ManualAction::PlaceBomb => InputAction::PlaceBomb,

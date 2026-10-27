@@ -9,7 +9,7 @@ fn generated_teleport_marker_survives_both_admissions_and_replays_exactly() {
     collect_generated_pickup(&mut runtime);
     let mut marker = None;
 
-    for seat in SeatId::ALL {
+    for seat in SeatId::DUEL {
         let admission = runtime.prepare_resume(seat).unwrap();
         let frame = admission
             .notice

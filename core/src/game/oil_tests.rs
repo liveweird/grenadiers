@@ -343,14 +343,40 @@ fn teleport_rejects_burning_oil_at_either_landing() {
         actors(),
     )
     .unwrap();
-    let original = state.actors.each_ref().map(|actor| actor.position);
+    let original = state
+        .actors
+        .iter()
+        .map(|actor| actor.position)
+        .collect::<Vec<_>>();
     state.actors[1].position = Position::center(oil);
-    let before = state.actors.each_ref().map(|actor| actor.position);
+    let before = state
+        .actors
+        .iter()
+        .map(|actor| actor.position)
+        .collect::<Vec<_>>();
     state.commit_teleport([true, false], Tick(1));
-    assert_eq!(state.actors.each_ref().map(|actor| actor.position), before);
+    assert_eq!(
+        state
+            .actors
+            .iter()
+            .map(|actor| actor.position)
+            .collect::<Vec<_>>(),
+        before
+    );
     state.actors[0].position = Position::center(oil);
     state.actors[1].position = original[1];
-    let before = state.actors.each_ref().map(|actor| actor.position);
+    let before = state
+        .actors
+        .iter()
+        .map(|actor| actor.position)
+        .collect::<Vec<_>>();
     state.commit_teleport([true, false], Tick(1));
-    assert_eq!(state.actors.each_ref().map(|actor| actor.position), before);
+    assert_eq!(
+        state
+            .actors
+            .iter()
+            .map(|actor| actor.position)
+            .collect::<Vec<_>>(),
+        before
+    );
 }

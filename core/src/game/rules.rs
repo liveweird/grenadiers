@@ -86,6 +86,15 @@ impl RulesConfig {
         }
     }
 
+    /// Dormant headless multiplayer profile. Live room activation is intentionally separate.
+    #[must_use]
+    pub const fn multiplayer_v6(settings: RoomSettings) -> Self {
+        Self {
+            version: 6,
+            ..Self::expanded_v5(settings)
+        }
+    }
+
     #[must_use]
     pub const fn enabled_items(self) -> crate::game::EnabledItems {
         match self.room_settings {

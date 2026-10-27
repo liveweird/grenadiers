@@ -83,7 +83,11 @@ fn teleport_uses_each_actors_own_wall_pass_capability() {
     state.replace_actor_equipment(SeatId::One, Equipment::WallPass);
     state.replace_actor_equipment(SeatId::Two, Equipment::WallPass);
     state.actors[1].position = Position::center(oil);
-    let before = state.actors.each_ref().map(|actor| actor.position);
+    let before = state
+        .actors
+        .iter()
+        .map(|actor| actor.position)
+        .collect::<Vec<_>>();
 
     state.commit_teleport([true, false], Tick(1));
 
@@ -112,7 +116,11 @@ fn teleport_retains_only_the_owners_oil_grace_across_a_successful_swap() {
         x: Position::center(oil).x + 100,
         ..Position::center(oil)
     };
-    let before = state.actors.each_ref().map(|actor| actor.position);
+    let before = state
+        .actors
+        .iter()
+        .map(|actor| actor.position)
+        .collect::<Vec<_>>();
 
     state.commit_teleport([true, false], Tick(1));
 

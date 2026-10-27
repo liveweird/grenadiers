@@ -120,7 +120,7 @@ fn completed_round(value: DomainCompletedRound) -> Result<CompletedRound, Projec
         round_id: counter(value.epoch())?,
         round_number: counter(u64::from(value.assignment().round_number().get()))?,
         ended_at: tick(value.ended_at().0)?,
-        result: round_result(value.result()),
+        result: round_result(value.result())?,
     })
 }
 
@@ -156,11 +156,11 @@ fn phase(value: DomainMatchPhase) -> Result<RoomPhase, ProjectionError> {
 fn match_result(value: DomainMatchResult) -> Result<MatchResult, ProjectionError> {
     Ok(match value {
         DomainMatchResult::ScoreWinner(seat) => MatchResult::Winner {
-            seat: wire_seat(seat),
+            seat: wire_seat(seat)?,
             reason: MatchWinnerReason::RoundWins,
         },
         DomainMatchResult::ForfeitWinner(seat) => MatchResult::Winner {
-            seat: wire_seat(seat),
+            seat: wire_seat(seat)?,
             reason: MatchWinnerReason::Forfeit,
         },
         DomainMatchResult::Abandoned => MatchResult::Abandoned,
@@ -187,13 +187,14 @@ fn seat(
     wire: Seat,
 ) -> Result<SeatStatus, ProjectionError> {
     let domain = lifecycle.seats()[index];
-    let connection = match lifecycle.reconnect_grace().seat(SeatId::ALL[index]) {
-        ReservationState::Vacant => ConnectionStatus::Vacant,
-        ReservationState::Connected => ConnectionStatus::Connected,
-        ReservationState::Disconnected { expires_at } => ConnectionStatus::Disconnected {
+    let connection = match lifecycle.reconnect_grace().seat(SeatId::DUEL[index]) {
+        Some(ReservationState::Vacant) => ConnectionStatus::Vacant,
+        Some(ReservationState::Connected) => ConnectionStatus::Connected,
+        Some(ReservationState::Disconnected { expires_at }) => ConnectionStatus::Disconnected {
             expires_at: tick(expires_at.0)?,
         },
-        ReservationState::Expired => ConnectionStatus::Expired,
+        Some(ReservationState::Expired) => ConnectionStatus::Expired,
+        None => return Err(ProjectionError::InvalidActors),
     };
     Ok(SeatStatus {
         seat: wire,
@@ -204,10 +205,10 @@ fn seat(
     })
 }
 
-fn round_result(value: RoundResult) -> WireRoundResult {
-    match value {
+fn round_result(value: RoundResult) -> Result<WireRoundResult, ProjectionError> {
+    Ok(match value {
         RoundResult::Winner(seat) => WireRoundResult::Winner {
-            seat: wire_seat(seat),
+            seat: wire_seat(seat)?,
         },
         RoundResult::Draw(DomainDrawReason::MutualElimination) => WireRoundResult::Draw {
             reason: crate::protocol::DrawReason::MutualElimination,
@@ -215,14 +216,11 @@ fn round_result(value: RoundResult) -> WireRoundResult {
         RoundResult::Draw(DomainDrawReason::Timeout) => WireRoundResult::Draw {
             reason: crate::protocol::DrawReason::Timeout,
         },
-    }
+    })
 }
 
-fn wire_seat(value: SeatId) -> Seat {
-    match value {
-        SeatId::One => Seat::One,
-        SeatId::Two => Seat::Two,
-    }
+fn wire_seat(value: SeatId) -> Result<Seat, ProjectionError> {
+    Seat::try_from(value).map_err(|_| ProjectionError::InvalidResult)
 }
 
 fn counter(value: u64) -> Result<Counter, ProjectionError> {

@@ -330,7 +330,7 @@ fn planted_route_crosses_the_visible_own_blast_toward_refuge() {
 fn conservative_pulses_reach_minimum_turn_window_in_real_simulation() {
     let settings = RoomSettings::new(SpeedLevel::Base, 64, 3, 180).unwrap();
     let arena = fixed_arena();
-    let spawns = arena.spawns();
+    let spawns = arena.spawns().to_vec();
     let actors = [SeatId::One, SeatId::Two].map(|seat| ActorInit {
         id: EntityId(seat.index() as u32 + 1),
         seat,

@@ -20,14 +20,14 @@ fn move_cells(game: &mut State, seat: SeatId, direction: Direction, cells: usize
 fn generated_state(fuse: u64) -> State {
     let generated = generate_expanded_arena([31; 32], EnabledItems::INVISIBLE_BOMBS);
     let (arena, concealed, _) = generated.into_parts();
-    let spawns = arena.spawns();
+    let spawns = arena.spawns().to_vec();
     let settings = RoomSettings::new(SpeedLevel::Base, 256, 3, fuse)
         .unwrap()
         .with_enabled_items(EnabledItems::INVISIBLE_BOMBS);
     State::new(
         RulesConfig::expanded_v5(settings),
         World::with_pickups(arena, concealed, BTreeMap::new(), BTreeMap::new()).unwrap(),
-        SeatId::ALL.map(|seat| ActorInit {
+        SeatId::DUEL.map(|seat| ActorInit {
             id: EntityId(seat.index() as u32 + 10),
             seat,
             position: Position::center(spawns[seat.index()]),
@@ -276,7 +276,7 @@ fn bomb_audience_uses_effect_state_at_emission_across_both_damage_phases() {
 fn late_collection_overflow_rolls_back_placement_input_and_world() {
     let at = Tick(u64::MAX - EffectKind::InvisibleBombs.duration_ticks());
     let arena = fixed_arena();
-    let spawns = arena.spawns();
+    let spawns = arena.spawns().to_vec();
     let world = World::with_pickups(
         arena,
         BTreeMap::new(),
@@ -289,7 +289,7 @@ fn late_collection_overflow_rolls_back_placement_input_and_world() {
             RoomSettings::DEFAULT.with_enabled_items(EnabledItems::INVISIBLE_BOMBS),
         ),
         world,
-        SeatId::ALL.map(|seat| ActorInit {
+        SeatId::DUEL.map(|seat| ActorInit {
             id: EntityId(seat.index() as u32 + 10),
             seat,
             position: Position::center(spawns[seat.index()]),

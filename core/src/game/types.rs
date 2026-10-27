@@ -38,16 +38,66 @@ pub struct EntityId(pub u32);
 pub enum SeatId {
     One,
     Two,
+    Three,
+    Four,
 }
 
 impl SeatId {
-    pub const ALL: [Self; 2] = [Self::One, Self::Two];
+    pub const ALL: [Self; 4] = [Self::One, Self::Two, Self::Three, Self::Four];
+    pub const DUEL: [Self; 2] = [Self::One, Self::Two];
 
     #[must_use]
     pub const fn index(self) -> usize {
         match self {
             Self::One => 0,
             Self::Two => 1,
+            Self::Three => 2,
+            Self::Four => 3,
+        }
+    }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub enum PlayerCount {
+    Two,
+    Three,
+    Four,
+}
+
+impl PlayerCount {
+    #[must_use]
+    pub const fn get(self) -> usize {
+        match self {
+            Self::Two => 2,
+            Self::Three => 3,
+            Self::Four => 4,
+        }
+    }
+
+    #[must_use]
+    pub const fn seats(self) -> &'static [SeatId] {
+        match self {
+            Self::Two => &[SeatId::One, SeatId::Two],
+            Self::Three => &[SeatId::One, SeatId::Two, SeatId::Three],
+            Self::Four => &[SeatId::One, SeatId::Two, SeatId::Three, SeatId::Four],
+        }
+    }
+
+    #[must_use]
+    pub const fn contains(self, seat: SeatId) -> bool {
+        seat.index() < self.get()
+    }
+}
+
+impl TryFrom<usize> for PlayerCount {
+    type Error = ();
+
+    fn try_from(value: usize) -> Result<Self, Self::Error> {
+        match value {
+            2 => Ok(Self::Two),
+            3 => Ok(Self::Three),
+            4 => Ok(Self::Four),
+            _ => Err(()),
         }
     }
 }

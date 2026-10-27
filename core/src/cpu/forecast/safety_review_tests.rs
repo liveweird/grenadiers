@@ -129,7 +129,7 @@ fn moved_chain_target_keeps_its_own_nonwaivable_provenance() {
 fn authoritative_motion_into_burning_oil_detonates_on_the_move_tick() {
     let oil = CellId::new(5, 5);
     let arena = open_arena();
-    let spawns = arena.spawns();
+    let spawns = arena.spawns().to_vec();
     let mut world = World::with_pickups_and_oil(
         arena,
         BTreeMap::new(),

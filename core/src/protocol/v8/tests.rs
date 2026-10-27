@@ -3,7 +3,6 @@ use crate::protocol::{Counter, RoomCode, RoomId, Seat, Tick};
 use crate::room::{MatchLifecycle, RoomSettings};
 
 use super::*;
-
 fn metadata(settings: GameSettings) -> RoomMetadata {
     RoomMetadata {
         settings,
@@ -204,11 +203,11 @@ fn null_admission_validates_the_complete_raw_room_dto() {
 fn classic_state_at(tick: u64) -> crate::game::State {
     use crate::game::{ActorInit, Direction, EntityId, Position, RulesConfig, SeatId, World};
     let arena = crate::game::fixed_arena();
-    let spawns = arena.spawns();
+    let spawns = arena.spawns().to_vec();
     crate::game::State::new_at_tick(
         RulesConfig::classic_v1(),
         World::new(arena),
-        SeatId::ALL.map(|seat| ActorInit {
+        SeatId::DUEL.map(|seat| ActorInit {
             id: EntityId(seat.index() as u32 + 1),
             seat,
             position: Position::center(spawns[seat.index()]),
@@ -256,8 +255,9 @@ fn bomb_report(
     let view = bomb.into();
     crate::game::StepReport {
         tick,
-        traces: crate::game::SeatId::ALL
-            .map(|seat| crate::game::MovementTrace::new(state.actors()[seat.index()].position())),
+        traces: crate::game::SeatId::DUEL
+            .map(|seat| crate::game::MovementTrace::new(state.actors()[seat.index()].position()))
+            .to_vec(),
         forced_movement: None,
         events: vec![StepEvent::bomb(
             tick,
@@ -337,7 +337,7 @@ fn v8_binding_allows_positive_remaining_fuse_for_chain_detonation() {
 #[test]
 fn v8_capture_and_binding_reject_overdue_frozen_bombs_and_accept_the_deadline() {
     let mut finished = classic_state_at(180);
-    for seat in crate::game::SeatId::ALL {
+    for seat in crate::game::SeatId::DUEL {
         let cell = finished.actors()[seat.index()].position().cell().unwrap();
         finished.insert_test_flame(cell, crate::game::Tick(182));
     }

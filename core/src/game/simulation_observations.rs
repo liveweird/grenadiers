@@ -4,7 +4,7 @@ use crate::game::damage::DamageGrace;
 use crate::game::effects::EffectKind;
 use crate::game::events::EventAudience;
 use crate::game::rules::RulesConfig;
-use crate::game::types::{CellId, EntityId, SeatId, Tick};
+use crate::game::types::{CellId, EntityId, PlayerCount, SeatId, Tick};
 use crate::game::world::World;
 
 #[cfg(test)]
@@ -63,7 +63,10 @@ impl State {
             .actors
             .iter()
             .find(|actor| actor.id == id && actor.effects.hidden_from_opponents(at))
-            .map_or(EventAudience::Both, |actor| EventAudience::only(actor.seat));
+            .map_or_else(
+                || EventAudience::all(self.player_count),
+                |actor| EventAudience::only(actor.seat),
+            );
         for actor in &self.actors {
             if actor.effects.hides_bombs(at) {
                 audience = audience.without(actor.seat);
@@ -83,8 +86,20 @@ impl State {
     }
 
     #[must_use]
-    pub const fn actors(&self) -> &[Actor; 2] {
+    pub fn actors(&self) -> &[Actor] {
         &self.actors
+    }
+
+    #[must_use]
+    pub fn actor(&self, seat: SeatId) -> Option<&Actor> {
+        self.player_count
+            .contains(seat)
+            .then(|| &self.actors[seat.index()])
+    }
+
+    #[must_use]
+    pub const fn player_count(&self) -> PlayerCount {
+        self.player_count
     }
 
     #[must_use]
@@ -113,7 +128,7 @@ impl State {
     }
 
     #[must_use]
-    pub fn voluntary_actions_frozen(&self) -> [bool; 2] {
+    pub fn voluntary_actions_frozen(&self) -> Vec<bool> {
         self.stopwatch_context(self.tick).frozen
     }
 
@@ -124,7 +139,9 @@ impl State {
 
     #[must_use]
     pub fn live_bomb_count(&self, seat: SeatId) -> usize {
-        let owner = self.actors[seat.index()].id;
+        let Some(owner) = self.actor(seat).map(|actor| actor.id) else {
+            return 0;
+        };
         self.world
             .bombs
             .values()

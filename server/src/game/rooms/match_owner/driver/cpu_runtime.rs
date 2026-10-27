@@ -14,13 +14,13 @@ use crate::game::rooms::match_runtime::{MatchAction, MatchRuntimeError};
 impl Driver {
     pub(in crate::game::rooms) fn is_empty(&self) -> bool {
         if let Some(cpu_seat) = self.cpu.as_ref().map(|cpu| cpu.seat()) {
-            return SeatId::ALL
+            return SeatId::DUEL
                 .into_iter()
                 .filter(|seat| *seat != cpu_seat)
                 .all(|seat| {
                     matches!(
                         self.runtime.lifecycle().reconnect_grace().seat(seat),
-                        ReservationState::Vacant | ReservationState::Expired
+                        Some(ReservationState::Vacant | ReservationState::Expired)
                     )
                 });
         }
@@ -290,13 +290,13 @@ impl Driver {
         let MatchPhase::MatchResult { rematch_at, .. } = phase else {
             return Ok(());
         };
-        let human_connected = SeatId::ALL
+        let human_connected = SeatId::DUEL
             .into_iter()
             .filter(|seat| *seat != cpu_seat)
             .any(|seat| {
                 matches!(
                     self.runtime.lifecycle().reconnect_grace().seat(seat),
-                    ReservationState::Connected
+                    Some(ReservationState::Connected)
                 )
             });
         let cpu_voted = self.runtime.lifecycle().series().rematch_votes()[cpu_seat.index()];

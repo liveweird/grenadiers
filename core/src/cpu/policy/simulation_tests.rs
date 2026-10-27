@@ -54,7 +54,7 @@ fn run_pulse(state: &mut State, direction: Direction, ticks: u8) {
 fn fastest_speed_pulse_and_maximum_idle_delay_preserve_the_turn() {
     let settings = RoomSettings::new(SpeedLevel::Four, 64, 3, 180).unwrap();
     let arena = fixed_arena();
-    let spawns = arena.spawns();
+    let spawns = arena.spawns().to_vec();
     let actors = [SeatId::One, SeatId::Two].map(|seat| ActorInit {
         id: EntityId(seat.index() as u32 + 1),
         seat,
@@ -121,7 +121,7 @@ fn fastest_speed_pulse_and_maximum_idle_delay_preserve_the_turn() {
 fn both_axes_converge_along_current_heading_axis_without_illegal_turns() {
     let settings = RoomSettings::new(SpeedLevel::Base, 64, 3, 180).unwrap();
     let arena = fixed_arena();
-    let spawns = arena.spawns();
+    let spawns = arena.spawns().to_vec();
     let mut first = Position::center(spawns[0]);
     first.x += 65;
     first.y += 65;

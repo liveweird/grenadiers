@@ -229,11 +229,8 @@ pub(super) struct LiveBinding {
     pub(super) pending: Option<PendingDeparture>,
 }
 
-pub(super) const fn wire_seat(seat: SeatId) -> Seat {
-    match seat {
-        SeatId::One => Seat::One,
-        SeatId::Two => Seat::Two,
-    }
+pub(super) fn wire_seat(seat: SeatId) -> Result<Seat, MatchRuntimeError> {
+    Seat::try_from(seat).map_err(|_| MatchRuntimeError::Publication)
 }
 
 pub(super) fn map_runtime_error(error: MatchRuntimeError) -> RoomError {

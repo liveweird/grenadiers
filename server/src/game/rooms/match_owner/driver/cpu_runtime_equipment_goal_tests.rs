@@ -205,7 +205,7 @@ fn equipment_fixture(
     if let Some(kind) = held {
         assert!(exposed.insert(CPU_CELL, kind).is_none());
     }
-    let actors = SeatId::ALL.map(|seat| ActorInit {
+    let actors = SeatId::DUEL.map(|seat| ActorInit {
         id: EntityId(seat.index() as u32 + 1),
         seat,
         position: Position::center(if seat == SeatId::Two {

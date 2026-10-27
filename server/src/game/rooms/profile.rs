@@ -173,9 +173,9 @@ fn actors_at_assignment_spawns(
     speed: SpeedLevel,
 ) -> [ActorInit; 2] {
     let assigned = assignment.spawns(arena);
-    let mut corners = arena.spawns();
+    let mut corners = arena.spawns().to_vec();
     corners.sort();
-    SeatId::ALL.map(|seat| {
+    SeatId::DUEL.map(|seat| {
         let spawn = assigned[seat.index()];
         ActorInit {
             id: EntityId(seat.index() as u32 + 1),

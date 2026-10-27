@@ -1,6 +1,14 @@
 use super::*;
 
 impl MatchLifecycle {
+    pub(super) fn ensure_duel_seat(seat: SeatId) -> Result<(), MatchError> {
+        if SeatId::DUEL.contains(&seat) {
+            Ok(())
+        } else {
+            Err(MatchError::UnsupportedSeat(seat))
+        }
+    }
+
     pub(super) fn depart_batch_inner(
         &mut self,
         departures: [Option<DepartureReason>; 2],
@@ -19,7 +27,7 @@ impl MatchLifecycle {
             for (index, departure) in admitted.iter().enumerate() {
                 if departure.is_some() && votes[index] {
                     self.series
-                        .set_rematch_vote(SeatId::ALL[index], false, self.tick)?;
+                        .set_rematch_vote(SeatId::DUEL[index], false, self.tick)?;
                 }
             }
             self.remove_departed(admitted)?;
@@ -98,7 +106,11 @@ impl MatchLifecycle {
         if !self.seats[seat.index()].occupied {
             return Err(MatchError::SeatVacant(seat));
         }
-        if !self.reconnect.seat(seat).connected() {
+        if !self
+            .reconnect
+            .seat(seat)
+            .is_some_and(crate::room::reconnect::ReservationState::connected)
+        {
             return Err(MatchError::Reconnect(ReconnectError::SeatNotConnected(
                 seat,
             )));
@@ -106,9 +118,14 @@ impl MatchLifecycle {
         let votes = self.series.rematch_votes();
         let other_index = 1 - seat.index();
         let starts = ready && votes[other_index];
-        if starts && !self.reconnect.seat(SeatId::ALL[other_index]).connected() {
+        if starts
+            && !self
+                .reconnect
+                .seat(SeatId::DUEL[other_index])
+                .is_some_and(crate::room::reconnect::ReservationState::connected)
+        {
             return Err(MatchError::Reconnect(ReconnectError::SeatNotConnected(
-                SeatId::ALL[other_index],
+                SeatId::DUEL[other_index],
             )));
         }
         let next_attempt = starts.then(|| self.next_attempt()).transpose()?;
@@ -131,7 +148,7 @@ impl MatchLifecycle {
     ) -> Result<(), MatchError> {
         for (index, departure) in departures.into_iter().enumerate() {
             if departure.is_some() {
-                self.reconnect.release(SeatId::ALL[index], self.tick)?;
+                self.reconnect.release(SeatId::DUEL[index], self.tick)?;
                 self.seats[index] = SeatState::default();
             }
         }

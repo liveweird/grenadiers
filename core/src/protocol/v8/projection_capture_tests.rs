@@ -40,3 +40,14 @@ fn remote_trigger_is_captured_without_inventing_a_fuse() {
         BombTrigger::remote()
     );
 }
+
+#[test]
+fn expanded_capture_rejects_an_unsupported_forced_movement_victim() {
+    let (state, report) = crate::protocol::forced_movement_test_support::bracelet_shove();
+    let mut malicious = report;
+    malicious.forced_movement.as_mut().unwrap().seat = game::SeatId::Four;
+    assert_eq!(
+        capture_expanded(&state, &[malicious]),
+        Err(ProjectionError::InvalidReports)
+    );
+}

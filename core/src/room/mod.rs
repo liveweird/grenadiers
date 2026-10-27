@@ -103,6 +103,7 @@ pub enum Change {
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum LifecycleError {
     InvalidPhase,
+    UnsupportedSeat(SeatId),
     SeatOccupied(SeatId),
     SeatVacant(SeatId),
     TickOverflow,
@@ -113,6 +114,7 @@ impl std::fmt::Display for LifecycleError {
     fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         formatter.write_str(match self {
             Self::InvalidPhase => "operation is invalid in the current room phase",
+            Self::UnsupportedSeat(_) => "seat is not supported by the two-seat room",
             Self::SeatOccupied(_) => "room seat is already occupied",
             Self::SeatVacant(_) => "room seat is vacant",
             Self::TickOverflow => "room tick overflow",
@@ -172,6 +174,7 @@ impl RoomLifecycle {
     }
 
     pub fn occupy(&mut self, seat: SeatId) -> Result<Change, LifecycleError> {
+        ensure_duel_seat(seat)?;
         if self.phase != Phase::Waiting {
             return Err(LifecycleError::InvalidPhase);
         }
@@ -184,6 +187,7 @@ impl RoomLifecycle {
     }
 
     pub fn set_ready(&mut self, seat: SeatId, ready: bool) -> Result<Change, LifecycleError> {
+        ensure_duel_seat(seat)?;
         if !matches!(self.phase, Phase::Waiting | Phase::Countdown { .. }) {
             return Err(LifecycleError::InvalidPhase);
         }
@@ -229,6 +233,7 @@ impl RoomLifecycle {
         seat: SeatId,
         reason: DepartureReason,
     ) -> Result<Change, LifecycleError> {
+        ensure_duel_seat(seat)?;
         let index = seat.index();
         if !self.seats[index].occupied {
             return Ok(Change::Unchanged);
@@ -285,6 +290,9 @@ impl RoomLifecycle {
         &mut self,
         result: Option<RoundResult>,
     ) -> Result<Change, LifecycleError> {
+        if let Some(RoundResult::Winner(seat)) = result {
+            ensure_duel_seat(seat)?;
+        }
         if self.phase != Phase::Running {
             return Err(LifecycleError::InvalidPhase);
         }
@@ -329,6 +337,14 @@ impl RoomLifecycle {
 
     fn clear_readiness(&mut self) {
         self.seats.iter_mut().for_each(|seat| seat.ready = false);
+    }
+}
+
+fn ensure_duel_seat(seat: SeatId) -> Result<(), LifecycleError> {
+    if SeatId::DUEL.contains(&seat) {
+        Ok(())
+    } else {
+        Err(LifecycleError::UnsupportedSeat(seat))
     }
 }
 

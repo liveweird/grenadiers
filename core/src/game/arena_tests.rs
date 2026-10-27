@@ -33,6 +33,24 @@ fn accepts_opposite_corner_spawns_in_either_seat_order() {
 }
 
 #[test]
+fn accepts_three_or_four_distinct_interior_corners_with_clear_escapes() {
+    let corners = [
+        CellId::new(1, 1),
+        CellId::new(13, 1),
+        CellId::new(1, 11),
+        CellId::new(13, 11),
+    ];
+    assert!(Arena::new(open_terrain(), BTreeSet::new(), corners[..3].to_vec()).is_ok());
+    assert!(Arena::new(open_terrain(), BTreeSet::new(), corners).is_ok());
+
+    let blocks = BTreeSet::from([CellId::new(12, 1)]);
+    assert_eq!(
+        Arena::new(open_terrain(), blocks, corners),
+        Err(ArenaError::ReservedCellHasBlock(CellId::new(12, 1)))
+    );
+}
+
+#[test]
 fn terrain_lookup_is_checked_at_arena_bounds() {
     let arena = Arena::new(open_terrain(), BTreeSet::new(), spawns()).unwrap();
 

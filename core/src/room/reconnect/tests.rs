@@ -17,7 +17,7 @@ fn resume_is_allowed_at_599_and_rejected_at_600() {
         })
     );
     assert_eq!(before.resume(SeatId::One, Tick(609)), Ok(()));
-    assert_eq!(before.seat(SeatId::One), ReservationState::Connected);
+    assert_eq!(before.seat(SeatId::One), Some(ReservationState::Connected));
 
     let mut boundary = occupied_pair(10);
     boundary.disconnect(SeatId::One, Tick(10)).unwrap();
@@ -48,14 +48,23 @@ fn duplicate_loss_never_extends_the_original_deadline() {
     assert_eq!(grace.latest_tick(), Tick(400));
     assert_eq!(
         grace.seat(SeatId::Two),
-        ReservationState::Disconnected {
+        Some(ReservationState::Disconnected {
             expires_at: Tick(620)
-        }
+        })
     );
     assert_eq!(
         grace.expire_due(Tick(620)).unwrap().newly_expired(),
         [false, true]
     );
+}
+
+#[test]
+fn unsupported_seat_queries_are_safe_and_do_not_alias_a_duel_seat() {
+    let grace = occupied_pair(7);
+
+    assert_eq!(grace.seat(SeatId::Three), None);
+    assert_eq!(grace.seat(SeatId::Four), None);
+    assert_eq!(grace.seats(), &[ReservationState::Connected; 2]);
 }
 
 #[test]
@@ -156,4 +165,23 @@ fn invalid_state_operations_do_not_change_clock_or_seats() {
         Err(ReconnectError::SeatVacant(SeatId::Two))
     );
     assert_eq!(grace, vacant);
+}
+
+#[test]
+fn unsupported_seat_mutations_leave_reconnect_facts_unchanged() {
+    let mut vacant = ReconnectGrace::new();
+    let before = vacant.clone();
+    assert_eq!(
+        vacant.occupy(SeatId::Three, Tick(1)),
+        Err(ReconnectError::UnsupportedSeat(SeatId::Three))
+    );
+    assert_eq!(vacant, before);
+
+    let mut occupied = occupied_pair(4);
+    let before = occupied.clone();
+    assert_eq!(
+        occupied.disconnect(SeatId::Four, Tick(5)),
+        Err(ReconnectError::UnsupportedSeat(SeatId::Four))
+    );
+    assert_eq!(occupied, before);
 }

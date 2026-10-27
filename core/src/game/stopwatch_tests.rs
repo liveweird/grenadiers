@@ -10,11 +10,11 @@ use crate::room::RoomSettings;
 
 fn state(at: Tick) -> State {
     let arena = fixed_arena();
-    let spawns = arena.spawns();
+    let spawns = arena.spawns().to_vec();
     State::new_at_tick(
         RulesConfig::expanded_v5(RoomSettings::DEFAULT.with_enabled_items(EnabledItems::STOPWATCH)),
         World::new(arena),
-        SeatId::ALL.map(|seat| ActorInit {
+        SeatId::DUEL.map(|seat| ActorInit {
             id: EntityId(seat.index() as u32 + 10),
             seat,
             position: Position::center(spawns[seat.index()]),
@@ -156,9 +156,10 @@ fn refresh_and_multiple_pause_periods_keep_one_physical_deadline_history() {
     game.step(&[]).unwrap();
     game.actors[0].effects.clear();
     game.step(&[]).unwrap();
+    let tick = game.tick();
     game.actors[0]
         .effects
-        .apply(EffectKind::Stopwatch, game.tick())
+        .apply(EffectKind::Stopwatch, tick)
         .unwrap();
     game.step(&[]).unwrap();
     let bomb = game.world.bombs[&EntityId(30)];
@@ -185,7 +186,7 @@ fn refresh_and_multiple_pause_periods_keep_one_physical_deadline_history() {
 fn late_stopwatch_pickup_failure_rolls_back_pause_input_and_world_mutations() {
     let at = Tick(u64::MAX - EffectKind::Stopwatch.duration_ticks());
     let arena = fixed_arena();
-    let spawns = arena.spawns();
+    let spawns = arena.spawns().to_vec();
     let pickup_cell = spawns[1];
     let world = World::with_pickups(
         arena,
@@ -197,7 +198,7 @@ fn late_stopwatch_pickup_failure_rolls_back_pause_input_and_world_mutations() {
     let mut game = State::new_at_tick(
         RulesConfig::expanded_v5(RoomSettings::DEFAULT.with_enabled_items(EnabledItems::STOPWATCH)),
         world,
-        SeatId::ALL.map(|seat| ActorInit {
+        SeatId::DUEL.map(|seat| ActorInit {
             id: EntityId(seat.index() as u32 + 10),
             seat,
             position: Position::center(spawns[seat.index()]),
@@ -247,11 +248,11 @@ fn timed_history_captures_base_half_double_and_combined_fuse_choices_once() {
         )
         .unwrap();
         let arena = fixed_arena();
-        let spawns = arena.spawns();
+        let spawns = arena.spawns().to_vec();
         let mut game = State::new(
             RulesConfig::expanded_v5(RoomSettings::DEFAULT.with_enabled_items(enabled)),
             World::new(arena),
-            SeatId::ALL.map(|seat| ActorInit {
+            SeatId::DUEL.map(|seat| ActorInit {
                 id: EntityId(seat.index() as u32 + 10),
                 seat,
                 position: Position::center(spawns[seat.index()]),

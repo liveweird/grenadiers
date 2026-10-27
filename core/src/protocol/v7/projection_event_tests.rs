@@ -9,8 +9,9 @@ fn pickup_report(state: &crate::game::State, cell: crate::game::CellId) -> crate
     let tick = state.tick();
     crate::game::StepReport {
         tick,
-        traces: crate::game::SeatId::ALL
-            .map(|seat| crate::game::MovementTrace::new(state.actors()[seat.index()].position())),
+        traces: crate::game::SeatId::DUEL
+            .map(|seat| crate::game::MovementTrace::new(state.actors()[seat.index()].position()))
+            .to_vec(),
         forced_movement: None,
         events: vec![StepEvent::new(
             tick,
@@ -68,9 +69,11 @@ fn classic_capture_rejects_expanded_item_only_event_records() {
     ] {
         let prevented = crate::game::StepReport {
             tick,
-            traces: crate::game::SeatId::ALL.map(|seat| {
-                crate::game::MovementTrace::new(state.actors()[seat.index()].position())
-            }),
+            traces: crate::game::SeatId::DUEL
+                .map(|seat| {
+                    crate::game::MovementTrace::new(state.actors()[seat.index()].position())
+                })
+                .to_vec(),
             forced_movement: None,
             events: vec![StepEvent::new(
                 tick,
@@ -87,4 +90,55 @@ fn classic_capture_rejects_expanded_item_only_event_records() {
             Err(ProjectionError::InvalidItems)
         );
     }
+}
+
+#[test]
+fn classic_capture_rejects_extra_seat_collector_audience_and_winner_facts() {
+    let state = classic_state_at(1);
+    let floor = state.actors()[0].position().cell().unwrap();
+    let mut report = pickup_report(&state, floor);
+    let StepEventKind::PickupCollected { ref mut seat, .. } = report.events[0].kind else {
+        unreachable!()
+    };
+    *seat = crate::game::SeatId::Three;
+    assert_eq!(
+        capture_classic(&state, &[report]),
+        Err(ProjectionError::InvalidEvent)
+    );
+
+    let mut report = pickup_report(&state, floor);
+    report.events[0].audience = EventAudience::only(crate::game::SeatId::Four);
+    assert_eq!(
+        capture_classic(&state, &[report]),
+        Err(ProjectionError::InvalidReports)
+    );
+
+    let mut report = pickup_report(&state, floor);
+    report.events[0].kind =
+        StepEventKind::RoundEnded(crate::game::RoundResult::Winner(crate::game::SeatId::Four));
+    assert_eq!(
+        capture_classic(&state, &[report]),
+        Err(ProjectionError::InvalidResult)
+    );
+
+    let mut report = pickup_report(&state, floor);
+    report.traces.push(report.traces[0].clone());
+    assert_eq!(
+        capture_classic(&state, &[report]),
+        Err(ProjectionError::InvalidReports)
+    );
+}
+
+#[test]
+fn classic_capture_rejects_only_unsupported_forced_movement_victims() {
+    let report = crate::protocol::forced_movement_test_support::bracelet_shove_report();
+    let state = classic_state_at(report.tick.0);
+    assert!(capture_classic(&state, std::slice::from_ref(&report)).is_ok());
+
+    let mut malicious = report;
+    malicious.forced_movement.as_mut().unwrap().seat = crate::game::SeatId::Four;
+    assert_eq!(
+        capture_classic(&state, &[malicious]),
+        Err(ProjectionError::InvalidReports)
+    );
 }

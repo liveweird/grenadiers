@@ -22,7 +22,7 @@ fn state_at_with_pickup(
     pickup: Option<game::PickupKind>,
 ) -> State {
     let arena = game::fixed_arena();
-    let spawns = arena.spawns();
+    let spawns = arena.spawns().to_vec();
     let exposed = pickup.map_or_else(BTreeMap::new, |kind| BTreeMap::from([(spawns[0], kind)]));
     let world = World::with_pickups(arena, BTreeMap::new(), BTreeMap::new(), exposed).unwrap();
     State::new_at_tick(
@@ -32,7 +32,7 @@ fn state_at_with_pickup(
                 .with_enabled_items(enabled),
         ),
         world,
-        SeatId::ALL.map(|seat| ActorInit {
+        SeatId::DUEL.map(|seat| ActorInit {
             id: game::EntityId(seat.index() as u32 + 1),
             seat,
             position: game::Position::center(spawns[seat.index()]),

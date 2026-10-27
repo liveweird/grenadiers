@@ -15,11 +15,11 @@ fn state(exposed: BTreeMap<game::CellId, PickupKind>) -> State {
 
 fn state_with(exposed: BTreeMap<game::CellId, PickupKind>, enabled: EnabledItems) -> State {
     let arena = game::fixed_arena();
-    let spawns = arena.spawns();
+    let spawns = arena.spawns().to_vec();
     State::new(
         RulesConfig::expanded_v5(RoomSettings::DEFAULT.with_enabled_items(enabled)),
         World::with_pickups(arena, BTreeMap::new(), BTreeMap::new(), exposed).unwrap(),
-        SeatId::ALL.map(|seat| ActorInit {
+        SeatId::DUEL.map(|seat| ActorInit {
             id: game::EntityId(seat.index() as u32 + 10),
             seat,
             position: game::Position::center(spawns[seat.index()]),
@@ -65,12 +65,9 @@ fn publication(state: &State, reports: &[game::StepReport]) -> BoundPublication 
     let mut room = room(state.tick().0, capture.world.0.enabled_items);
     if let Some(result) = state.result() {
         let result = match result {
-            game::RoundResult::Winner(SeatId::One) => {
-                crate::protocol::WireRoundResult::Winner { seat: Seat::One }
-            }
-            game::RoundResult::Winner(SeatId::Two) => {
-                crate::protocol::WireRoundResult::Winner { seat: Seat::Two }
-            }
+            game::RoundResult::Winner(seat) => crate::protocol::WireRoundResult::Winner {
+                seat: Seat::try_from(seat).unwrap(),
+            },
             game::RoundResult::Draw(game::DrawReason::MutualElimination) => {
                 crate::protocol::WireRoundResult::Draw {
                     reason: crate::protocol::DrawReason::MutualElimination,
@@ -112,7 +109,7 @@ fn place(state: &mut State, seat: SeatId) -> game::StepReport {
 
 #[test]
 fn each_blinded_recipient_gets_no_live_bombs_or_cues_while_counts_stay_truthful() {
-    let spawns = game::fixed_arena().spawns();
+    let spawns = game::fixed_arena().spawns().to_vec();
     let mut state = state(BTreeMap::from([
         (spawns[0], PickupKind::InvisibleBombs),
         (spawns[1], PickupKind::InvisibleBombs),
@@ -131,7 +128,7 @@ fn each_blinded_recipient_gets_no_live_bombs_or_cues_while_counts_stay_truthful(
 
 #[test]
 fn one_blinded_recipient_hides_every_bomb_kind_and_paused_timing_without_hiding_fire() {
-    let spawns = game::fixed_arena().spawns();
+    let spawns = game::fixed_arena().spawns().to_vec();
     let enabled = EnabledItems::from_bits(
         EnabledItems::INVISIBLE_BOMBS.bits() | EnabledItems::STOPWATCH.bits(),
     )
@@ -164,7 +161,7 @@ fn one_blinded_recipient_hides_every_bomb_kind_and_paused_timing_without_hiding_
 
 #[test]
 fn captured_history_does_not_follow_final_blindness_or_reappear_after_death() {
-    let spawns = game::fixed_arena().spawns();
+    let spawns = game::fixed_arena().spawns().to_vec();
     let mut state = state(BTreeMap::from([(spawns[0], PickupKind::InvisibleBombs)]));
     let public_before_collection = place(&mut state, SeatId::Two);
     let collected = state.step(&[]).unwrap();
@@ -226,7 +223,7 @@ fn binding_rejects_blind_audiences_without_capability_and_invalid_hidden_facts()
         Err(ProjectionError::InvalidExpandedBinding)
     );
 
-    let spawns = game::fixed_arena().spawns();
+    let spawns = game::fixed_arena().spawns().to_vec();
     let mut blinded = state(BTreeMap::from([(spawns[0], PickupKind::InvisibleBombs)]));
     blinded.step(&[]).unwrap();
     place(&mut blinded, SeatId::Two);

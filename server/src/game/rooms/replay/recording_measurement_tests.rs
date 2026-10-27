@@ -136,14 +136,14 @@ fn measure_workload(runtime: &mut MatchRuntime) -> Duration {
 
 fn exercise(runtime: &mut MatchRuntime) {
     runtime.initial_notice().unwrap();
-    for seat in SeatId::ALL {
+    for seat in SeatId::DUEL {
         runtime.occupy(seat).unwrap();
         runtime.action(seat, 1, MatchAction::Ready(true)).unwrap();
     }
     for index in 0..WORKLOAD_TICKS {
         if runtime.lifecycle().phase() == MatchPhase::Running && index.is_multiple_of(11) {
             let epoch = runtime.lifecycle().round_attempt();
-            for seat in SeatId::ALL {
+            for seat in SeatId::DUEL {
                 runtime
                     .action(seat, epoch, MatchAction::Movement(Some(Direction::East)))
                     .unwrap();

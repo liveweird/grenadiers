@@ -10,7 +10,7 @@ use crate::room::RoomSettings;
 
 fn state_at(tick: Tick) -> State {
     let arena = fixed_arena();
-    let spawns = arena.spawns();
+    let spawns = arena.spawns().to_vec();
     let world = World::with_pickups(
         arena,
         BTreeMap::new(),
@@ -30,7 +30,7 @@ fn state_at(tick: Tick) -> State {
             ),
         ),
         world,
-        SeatId::ALL.map(|seat| ActorInit {
+        SeatId::DUEL.map(|seat| ActorInit {
             id: EntityId(seat.index() as u32 + 1),
             seat,
             position: Position::center(spawns[seat.index()]),

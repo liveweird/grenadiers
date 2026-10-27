@@ -99,10 +99,10 @@ impl MatchRuntime {
     }
 
     pub(super) fn release_departed_editor(&mut self, departures: [Option<DepartureReason>; 2]) {
-        for (seat, departure) in SeatId::ALL.into_iter().zip(departures) {
+        for (seat, departure) in SeatId::DUEL.into_iter().zip(departures) {
             let permanently_released = matches!(
                 self.lifecycle.reconnect_grace().seat(seat),
-                ReservationState::Vacant | ReservationState::Expired
+                Some(ReservationState::Vacant | ReservationState::Expired)
             );
             if departure == Some(DepartureReason::Explicit) || permanently_released {
                 self.release_settings_editor(seat);
@@ -114,7 +114,7 @@ impl MatchRuntime {
         if self.settings_editor.is_some_and(|seat| {
             matches!(
                 self.lifecycle.reconnect_grace().seat(seat),
-                ReservationState::Expired
+                Some(ReservationState::Expired)
             )
         }) {
             self.settings_editor = None;

@@ -234,7 +234,11 @@ fn teleport_retains_only_own_source_and_destination_grace() {
     };
     game.actors[0].soft_wall_grace.insert(block);
     game.actors[1].soft_wall_grace.insert(block);
-    let positions = game.actors.each_ref().map(|actor| actor.position);
+    let positions = game
+        .actors
+        .iter()
+        .map(|actor| actor.position)
+        .collect::<Vec<_>>();
 
     game.commit_teleport([true, false], Tick(1));
 

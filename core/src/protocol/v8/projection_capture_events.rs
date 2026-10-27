@@ -84,7 +84,7 @@ pub(super) fn capture_report(report: &game::StepReport) -> Result<ReportFacts, P
             .forced_movement
             .map(|forced| {
                 Ok(ForcedMovementFacts {
-                    victim: wire_seat(forced.seat),
+                    victim: wire_seat(forced.seat).map_err(|_| ProjectionError::InvalidEvent)?,
                     start: wire_position(forced.segment.start())?,
                     end: wire_position(forced.segment.end())?,
                 })
@@ -130,7 +130,7 @@ pub(super) fn capture_report(report: &game::StepReport) -> Result<ReportFacts, P
                     game::StepEventKind::ActorEliminated { id, seat } => (
                         EventKind::ActorEliminated {
                             id: EntityId::new(id.0),
-                            seat: wire_seat(seat),
+                            seat: wire_seat(seat).map_err(|_| ProjectionError::InvalidEvent)?,
                         },
                         None,
                         None,
@@ -144,7 +144,7 @@ pub(super) fn capture_report(report: &game::StepReport) -> Result<ReportFacts, P
                     } => (
                         EventKind::PickupCollected {
                             id: EntityId::new(id.0),
-                            seat: wire_seat(seat),
+                            seat: wire_seat(seat).map_err(|_| ProjectionError::InvalidEvent)?,
                             cell: wire_cell(cell)?,
                             kind: wire_pickup(kind),
                         },
@@ -154,7 +154,7 @@ pub(super) fn capture_report(report: &game::StepReport) -> Result<ReportFacts, P
                     ),
                     game::StepEventKind::RoundEnded(result) => (
                         EventKind::RoundEnded {
-                            result: wire_result(Some(result))
+                            result: wire_result(Some(result))?
                                 .ok_or(ProjectionError::InvalidEvent)?,
                         },
                         None,
@@ -164,7 +164,7 @@ pub(super) fn capture_report(report: &game::StepReport) -> Result<ReportFacts, P
                     game::StepEventKind::DamagePrevented { id, seat, source } => (
                         EventKind::DamagePrevented {
                             id: EntityId::new(id.0),
-                            seat: wire_seat(seat),
+                            seat: wire_seat(seat).map_err(|_| ProjectionError::InvalidEvent)?,
                             source: match source {
                                 game::DamagePreventionSource::Heart => {
                                     super::DamagePreventionSource::Heart

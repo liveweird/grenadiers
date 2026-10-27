@@ -40,11 +40,11 @@ fn running_fixture(
 ) -> (RoomView, ExpandedCapture, game::GenerationRecord) {
     let generated = game::generate_expanded_arena([7; 32], game::EnabledItems::EMPTY);
     let (world, generation) = World::from_generated(generated).unwrap();
-    let spawns = world.arena().spawns();
+    let spawns = world.arena().spawns().to_vec();
     let state = State::new(
         RulesConfig::expanded_v5(RoomSettings::DEFAULT),
         world,
-        SeatId::ALL.map(|seat| ActorInit {
+        SeatId::DUEL.map(|seat| ActorInit {
             id: game::EntityId(seat.index() as u32 + 1),
             seat,
             position: game::Position::center(spawns[seat.index()]),

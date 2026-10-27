@@ -62,7 +62,7 @@ pub(in crate::game::rooms) fn start_expanded_heart_round(runtime: &mut MatchRunt
         )
         .unwrap();
     let settings_revision = runtime.replay_inspection().settings_revision;
-    for seat in SeatId::ALL {
+    for seat in SeatId::DUEL {
         runtime
             .action(
                 seat,
@@ -118,7 +118,7 @@ pub(in crate::game::rooms) fn start_optional_runtime_with_fuse(
             },
         )
         .unwrap();
-    for seat in SeatId::ALL {
+    for seat in SeatId::DUEL {
         runtime
             .action(
                 seat,

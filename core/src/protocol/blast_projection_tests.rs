@@ -82,8 +82,9 @@ fn legacy_event_projection_rejects_every_special_blast_without_final_state_bombs
         ] {
             let report = StepReport {
                 tick: Tick(0),
-                traces: SeatId::ALL
-                    .map(|seat| MovementTrace::new(state.actors()[seat.index()].position())),
+                traces: SeatId::DUEL
+                    .map(|seat| MovementTrace::new(state.actors()[seat.index()].position()))
+                    .to_vec(),
                 forced_movement: None,
                 events: vec![StepEvent::new(Tick(0), EventAudience::Both, kind)],
             };

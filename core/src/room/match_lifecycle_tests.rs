@@ -80,6 +80,26 @@ fn defaults_to_a_vacant_unstarted_match() {
 }
 
 #[test]
+fn unsupported_seats_and_winners_leave_match_lifecycle_unchanged() {
+    let mut waiting = MatchLifecycle::new();
+    let before = waiting.clone();
+    assert_eq!(
+        waiting.occupy(SeatId::Three),
+        Err(MatchError::UnsupportedSeat(SeatId::Three))
+    );
+    assert_eq!(waiting, before);
+
+    let mut running = occupied();
+    start_initial_round(&mut running);
+    let before = running.clone();
+    assert_eq!(
+        running.complete_running_tick(Some(RoundResult::Winner(SeatId::Four))),
+        Err(MatchError::UnsupportedSeat(SeatId::Four))
+    );
+    assert_eq!(running, before);
+}
+
+#[test]
 fn initial_countdown_starts_at_the_exact_180_tick_boundary() {
     let mut lifecycle = occupied();
     begin_countdown(&mut lifecycle);

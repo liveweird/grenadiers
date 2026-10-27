@@ -1,6 +1,6 @@
 use crate::game::geometry::{MovementSegment, MovementTrace};
 use crate::game::input::Direction;
-use crate::game::types::{CellId, EntityId, Position, SeatId, SpeedLevel, Tick};
+use crate::game::types::{CellId, EntityId, PlayerCount, Position, SeatId, SpeedLevel, Tick};
 use crate::game::{EffectKind, EnabledItems, PickupKind, StepEvent};
 
 pub const MAX_INPUTS_PER_TICK: usize = 64;
@@ -31,6 +31,10 @@ pub struct SeatInput {
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum StateError {
+    InvalidPlayerCount(usize),
+    UnsupportedPlayerCount { version: u16, count: PlayerCount },
+    NonCanonicalSeats,
+    SpawnCountMismatch { actors: usize, spawns: usize },
     DuplicateActorId(EntityId),
     DuplicateSeat(SeatId),
     IllegalActorPosition(EntityId),
@@ -54,6 +58,7 @@ pub enum StateError {
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum StepError {
     TooManyInputs { count: usize, maximum: usize },
+    SeatNotParticipating(SeatId),
     TickOverflow,
     UnsupportedBombTrigger(EntityId),
     UnsupportedBombBlast(EntityId),
@@ -69,7 +74,7 @@ pub enum StepError {
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct StepReport {
     pub tick: Tick,
-    pub traces: [MovementTrace; 2],
+    pub traces: Vec<MovementTrace>,
     pub events: Vec<StepEvent>,
     pub(crate) forced_movement: Option<ForcedMovement>,
 }

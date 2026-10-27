@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+## 0.3.100 — 2026-10-28
+
+- Add checked two-/three-/four-participant headless state, canonical seat ordering,
+  participant-sized simulation storage and survivor-based outcomes under dormant rules v6.
+- Rotate simultaneous-action priority across real participants; reject nonparticipant input
+  before mutation and publish event audiences to the configured headless roster.
+- Keep historical two-seat protocol/lifecycle entry points closed, rejecting unsupported
+  seats and reports explicitly; additional live rooms and optional-item activation are separate.
+
 ## 0.3.99 — 2026-10-28
 
 - Make CPU seat identity explicit through controller memory, recipient validation and ordinary

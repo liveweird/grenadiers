@@ -8,11 +8,11 @@ use crate::room::RoomSettings;
 
 fn state(enabled: EnabledItems) -> State {
     let arena = fixed_arena();
-    let spawns = arena.spawns();
+    let spawns = arena.spawns().to_vec();
     State::new(
         RulesConfig::expanded_v5(RoomSettings::DEFAULT.with_enabled_items(enabled)),
         World::new(arena),
-        SeatId::ALL.map(|seat| ActorInit {
+        SeatId::DUEL.map(|seat| ActorInit {
             id: EntityId(seat.index() as u32 + 10),
             seat,
             position: Position::center(spawns[seat.index()]),

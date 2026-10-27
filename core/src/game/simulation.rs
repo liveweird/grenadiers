@@ -8,7 +8,7 @@ use super::input::{Direction, HeldDirections};
 use super::inventory::Inventory;
 use super::movement;
 use super::rules::RulesConfig;
-use super::types::{CellId, EntityId, Position, SeatId, SpeedLevel, Tick};
+use super::types::{CellId, EntityId, PlayerCount, Position, SeatId, SpeedLevel, Tick};
 use super::world::World;
 
 #[path = "simulation_contract.rs"]
@@ -117,7 +117,8 @@ pub enum RoundResult {
 pub struct State {
     rules: RulesConfig,
     world: World,
-    actors: [Actor; 2],
+    actors: Vec<Actor>,
+    player_count: PlayerCount,
     tick: Tick,
     next_entity_id: u64,
     running_updates: u64,
@@ -131,14 +132,14 @@ impl State {
     pub fn new(
         rules: RulesConfig,
         world: World,
-        actors: [ActorInit; 2],
+        actors: impl Into<Vec<ActorInit>>,
     ) -> Result<Self, StateError> {
         Self::new_at_tick(rules, world, actors, Tick(0))
     }
     pub fn new_at_tick(
         rules: RulesConfig,
         world: World,
-        actors: [ActorInit; 2],
+        actors: impl Into<Vec<ActorInit>>,
         tick: Tick,
     ) -> Result<Self, StateError> {
         Self::new_at_tick_with_assignment(rules, world, actors, tick, RoundAssignment::first())
@@ -146,12 +147,33 @@ impl State {
     pub fn new_at_tick_with_assignment(
         rules: RulesConfig,
         world: World,
-        actors: [ActorInit; 2],
+        actors: impl Into<Vec<ActorInit>>,
         tick: Tick,
         assignment: RoundAssignment,
     ) -> Result<Self, StateError> {
-        if actors[0].id == actors[1].id {
-            return Err(StateError::DuplicateActorId(actors[0].id));
+        let mut actors = actors.into();
+        let player_count = PlayerCount::try_from(actors.len())
+            .map_err(|()| StateError::InvalidPlayerCount(actors.len()))?;
+        if world.arena.spawns().len() != actors.len() {
+            return Err(StateError::SpawnCountMismatch {
+                actors: actors.len(),
+                spawns: world.arena.spawns().len(),
+            });
+        }
+        if rules.version() < 6 && player_count != PlayerCount::Two {
+            return Err(StateError::UnsupportedPlayerCount {
+                version: rules.version(),
+                count: player_count,
+            });
+        }
+        if player_count != PlayerCount::Two && rules.enabled_items() != super::EnabledItems::EMPTY {
+            return Err(StateError::UnsupportedEnabledItems(rules.enabled_items()));
+        }
+        let mut ids = BTreeSet::new();
+        for actor in &actors {
+            if !ids.insert(actor.id) {
+                return Err(StateError::DuplicateActorId(actor.id));
+            }
         }
         if let Some(enabled) = validation::unsupported_enabled_items(rules) {
             return Err(StateError::UnsupportedEnabledItems(enabled));
@@ -167,8 +189,19 @@ impl State {
         if let Some(cell) = validation::invalid_oil(&world, tick) {
             return Err(StateError::InvalidOilBarrel(cell));
         }
-        if actors[0].seat == actors[1].seat {
-            return Err(StateError::DuplicateSeat(actors[0].seat));
+        let mut seats = BTreeSet::new();
+        for actor in &actors {
+            if !seats.insert(actor.seat) {
+                return Err(StateError::DuplicateSeat(actor.seat));
+            }
+        }
+        actors.sort_by_key(|actor| actor.seat.index());
+        if actors
+            .iter()
+            .map(|actor| actor.seat)
+            .ne(player_count.seats().iter().copied())
+        {
+            return Err(StateError::NonCanonicalSeats);
         }
         for (&key, bomb) in &world.bombs {
             if key != bomb.id() {
@@ -184,7 +217,7 @@ impl State {
         if let Some(owner) = validation::duplicate_remote_owner(&world) {
             return Err(StateError::DuplicateRemoteOwner(owner));
         }
-        for actor in actors {
+        for actor in &actors {
             if world.bombs.contains_key(&actor.id) {
                 return Err(StateError::DuplicateEntityId(actor.id));
             }
@@ -211,19 +244,21 @@ impl State {
             return Err(StateError::UnsupportedBombPunchHistory(id));
         }
 
-        let mut canonical = actors;
-        canonical.sort_by_key(|actor| actor.seat.index());
         let next_entity_id = world
             .bombs
             .keys()
             .next_back()
             .map_or(0, |id| u64::from(id.0) + 1);
-        let mut initialized = canonical.map(|actor| Actor::new(actor, rules));
+        let mut initialized: Vec<_> = actors
+            .into_iter()
+            .map(|actor| Actor::new(actor, rules))
+            .collect();
         contacts::initialize_grace(&world, &mut initialized);
         Ok(Self {
             rules,
             world,
             actors: initialized,
+            player_count,
             tick,
             next_entity_id,
             running_updates: 0,
@@ -239,6 +274,8 @@ impl State {
 mod actions;
 #[path = "simulation_actor.rs"]
 mod actor_state;
+#[path = "simulation_manual_actions.rs"]
+mod manual_actions;
 #[cfg(test)]
 include!("simulation_test_modules.rs");
 mod contacts;

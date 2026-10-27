@@ -162,11 +162,21 @@ fn stale_or_other_actor_grace_cannot_authorize_a_swap() {
     .unwrap();
     game.actors[0].bomb_grace.insert(EntityId(30));
     game.actors[0].bomb_grace.insert(EntityId(999));
-    let before = game.actors.each_ref().map(|actor| actor.position);
+    let before = game
+        .actors
+        .iter()
+        .map(|actor| actor.position)
+        .collect::<Vec<_>>();
 
     game.step(&[]).unwrap();
 
-    assert_eq!(game.actors.each_ref().map(|actor| actor.position), before);
+    assert_eq!(
+        game.actors
+            .iter()
+            .map(|actor| actor.position)
+            .collect::<Vec<_>>(),
+        before
+    );
     assert_eq!(game.last_teleport_tick, None);
     assert!(game.world.pickups.exposed.is_empty());
 }
@@ -204,7 +214,10 @@ fn valid_source_and_destination_grace_is_preserved_per_actor() {
         )
         .unwrap();
         assert_eq!(
-            game.actors.each_ref().map(|actor| actor.bomb_grace.clone()),
+            game.actors
+                .iter()
+                .map(|actor| actor.bomb_grace.clone())
+                .collect::<Vec<_>>(),
             [
                 BTreeSet::from([EntityId(30)]),
                 BTreeSet::from([EntityId(30)])
@@ -214,11 +227,17 @@ fn valid_source_and_destination_grace_is_preserved_per_actor() {
         game.step(&[]).unwrap();
 
         assert_eq!(
-            game.actors.each_ref().map(|actor| actor.position),
+            game.actors
+                .iter()
+                .map(|actor| actor.position)
+                .collect::<Vec<_>>(),
             [two, one]
         );
         assert_eq!(
-            game.actors.each_ref().map(|actor| actor.bomb_grace.clone()),
+            game.actors
+                .iter()
+                .map(|actor| actor.bomb_grace.clone())
+                .collect::<Vec<_>>(),
             [
                 BTreeSet::from([EntityId(30)]),
                 BTreeSet::from([EntityId(30)])

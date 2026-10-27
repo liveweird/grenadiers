@@ -44,7 +44,7 @@ fn solo_recording_runtime(profile: grenadiers_core::room::CpuProfile) -> MatchRu
 
 fn start(runtime: &mut MatchRuntime) {
     let revision = runtime.replay_inspection().settings_revision;
-    for seat in SeatId::ALL {
+    for seat in SeatId::DUEL {
         runtime
             .action(
                 seat,

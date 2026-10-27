@@ -187,10 +187,13 @@ pub enum RoomMode {
 
 impl RoomMode {
     #[must_use]
-    pub const fn controller(self, seat: SeatId) -> ControllerKind {
+    pub const fn controller(self, seat: SeatId) -> Option<ControllerKind> {
         match (self, seat) {
-            (Self::HumanDuel, _) | (Self::Solo(_), SeatId::One) => ControllerKind::Human,
-            (Self::Solo(profile), SeatId::Two) => ControllerKind::Cpu(profile),
+            (Self::HumanDuel, SeatId::One | SeatId::Two) | (Self::Solo(_), SeatId::One) => {
+                Some(ControllerKind::Human)
+            }
+            (Self::Solo(profile), SeatId::Two) => Some(ControllerKind::Cpu(profile)),
+            (_, SeatId::Three | SeatId::Four) => None,
         }
     }
 }
@@ -201,21 +204,26 @@ mod tests {
 
     #[test]
     fn human_duel_has_two_human_controllers() {
-        for seat in SeatId::ALL {
-            assert_eq!(RoomMode::HumanDuel.controller(seat), ControllerKind::Human);
+        for seat in SeatId::DUEL {
+            assert_eq!(
+                RoomMode::HumanDuel.controller(seat),
+                Some(ControllerKind::Human)
+            );
         }
+        assert_eq!(RoomMode::HumanDuel.controller(SeatId::Three), None);
+        assert_eq!(RoomMode::HumanDuel.controller(SeatId::Four), None);
     }
 
     #[test]
     fn solo_keeps_creator_human_and_cpu_profile_on_second_seat() {
         let mode = RoomMode::Solo(CpuProfile::INITIAL);
-        assert_eq!(mode.controller(SeatId::One), ControllerKind::Human);
+        assert_eq!(mode.controller(SeatId::One), Some(ControllerKind::Human));
         assert_eq!(
             mode.controller(SeatId::Two),
-            ControllerKind::Cpu(CpuProfile {
+            Some(ControllerKind::Cpu(CpuProfile {
                 policy: CpuPolicy::UtilityV1,
                 difficulty: CpuDifficulty::Standard,
-            })
+            }))
         );
     }
 
@@ -250,7 +258,7 @@ mod tests {
         );
         assert_eq!(
             RoomMode::Solo(CpuProfile::CURRENT).controller(SeatId::Two),
-            ControllerKind::Cpu(CpuProfile::CURRENT)
+            Some(ControllerKind::Cpu(CpuProfile::CURRENT))
         );
     }
 }

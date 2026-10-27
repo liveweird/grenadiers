@@ -33,7 +33,7 @@ fn generated_wall_pass_holder_inside_block_resumes_and_replays_without_private_w
         Some(block)
     );
 
-    for seat in SeatId::ALL {
+    for seat in SeatId::DUEL {
         let admission = runtime.prepare_resume(seat).unwrap();
         let frame = admission
             .notice

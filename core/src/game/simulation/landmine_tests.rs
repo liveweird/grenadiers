@@ -167,9 +167,10 @@ fn consumed_landmine_is_followed_by_a_fresh_standard_timed_bomb_in_the_same_stat
         y: Position::center(mine_cell).y,
     };
     game.actors[1].heading = Direction::East;
+    let tick = game.tick();
     game.actors[1]
         .effects
-        .apply(EffectKind::Shield, game.tick())
+        .apply(EffectKind::Shield, tick)
         .unwrap();
     assert!(!game.actors[1].bomb_grace.contains(&placed_mine.id()));
 

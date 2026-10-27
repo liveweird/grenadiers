@@ -76,7 +76,7 @@ fn generated_kick_motion_resume_publication_and_replay_preserve_active_and_stopp
     assert_eq!(active.motion().unwrap().countdown(), 0);
     assert_replay(&runtime);
 
-    for seat in SeatId::ALL {
+    for seat in SeatId::DUEL {
         let admission = runtime.prepare_resume(seat).unwrap();
         let frame = admission.notice.frame(seat).unwrap();
         assert_private_motion_absent(&frame);

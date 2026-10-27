@@ -135,7 +135,7 @@ fn publication_rejects_profile_rule_mismatch_and_oversized_report_window() {
 
     let identity = identity(super::super::profile::RoomProfile::FixedClassicV1);
     let mut lifecycle = MatchLifecycle::new();
-    for seat in SeatId::ALL {
+    for seat in SeatId::DUEL {
         lifecycle.occupy(seat).unwrap();
         lifecycle.set_ready(seat, true).unwrap();
     }

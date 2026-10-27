@@ -223,7 +223,7 @@ fn expanded_item_masks_and_disabled_preset_replay_deterministically() {
                 .unwrap();
         }
         let accepted_revision = runtime.replay_inspection().settings_revision;
-        for seat in SeatId::ALL {
+        for seat in SeatId::DUEL {
             runtime
                 .action(
                     seat,
@@ -263,7 +263,7 @@ fn expanded_default_all_items_round_replays_exactly() {
     runtime.occupy(SeatId::One).unwrap();
     runtime.occupy(SeatId::Two).unwrap();
     let revision = runtime.replay_inspection().settings_revision;
-    for seat in SeatId::ALL {
+    for seat in SeatId::DUEL {
         runtime
             .action(
                 seat,

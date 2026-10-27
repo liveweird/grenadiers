@@ -45,6 +45,9 @@ impl MatchSeries {
         winner: SeatId,
         at: Tick,
     ) -> Result<Option<MatchOutcome>, SeriesError> {
+        if !SeatId::DUEL.contains(&winner) {
+            return Err(SeriesError::UnsupportedSeat(winner));
+        }
         self.terminal_fact(MatchResult::ForfeitWinner(winner), at)
     }
 

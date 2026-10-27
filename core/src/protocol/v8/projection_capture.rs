@@ -25,6 +25,10 @@ pub(crate) fn capture_expanded_for_items(
     reports: &[game::StepReport],
     supported_items: ItemSet,
 ) -> Result<ExpandedCapture, ProjectionError> {
+    if state.actors().len() != game::SeatId::DUEL.len() {
+        return Err(ProjectionError::InvalidActors);
+    }
+    validate_legacy_reports(reports)?;
     let public = state.public_view();
     let physical_tick = wire_tick(public.tick)?;
     let rules_version =
@@ -56,51 +60,48 @@ pub(crate) fn capture_expanded_for_items(
                 .map_err(|_| ProjectionError::InvalidClock)?,
             remaining_ticks: u16::try_from(public.remaining_ticks)
                 .map_err(|_| ProjectionError::InvalidClock)?,
-            result: wire_result(public.result),
+            result: wire_result(public.result)?,
             arena: capture_arena(&public.arena)?,
             actors,
             last_successful_punch_ticks: state
                 .actors()
-                .each_ref()
+                .iter()
                 .map(|actor| {
                     actor
                         .last_successful_punch_tick()
                         .map(wire_tick)
                         .transpose()
                 })
-                .into_iter()
                 .collect::<Result<Vec<_>, _>>()?
                 .try_into()
                 .map_err(|_| ProjectionError::InvalidActors)?,
             last_successful_shove_ticks: state
                 .actors()
-                .each_ref()
+                .iter()
                 .map(|actor| {
                     actor
                         .last_successful_shove_tick()
                         .map(wire_tick)
                         .transpose()
                 })
-                .into_iter()
                 .collect::<Result<Vec<_>, _>>()?
                 .try_into()
                 .map_err(|_| ProjectionError::InvalidActors)?,
             soft_wall_grace: state
                 .actors()
-                .each_ref()
+                .iter()
                 .map(|actor| {
                     actor
                         .soft_wall_grace_observations()
                         .map(wire_cell)
                         .collect::<Result<Vec<_>, _>>()
                 })
-                .into_iter()
                 .collect::<Result<Vec<_>, _>>()?
                 .try_into()
                 .map_err(|_| ProjectionError::InvalidActors)?,
             unlit_oil_grace: state
                 .actors()
-                .each_ref()
+                .iter()
                 .map(|actor| {
                     actor
                         .unlit_oil_grace
@@ -109,7 +110,6 @@ pub(crate) fn capture_expanded_for_items(
                         .map(wire_cell)
                         .collect::<Result<Vec<_>, _>>()
                 })
-                .into_iter()
                 .collect::<Result<Vec<_>, _>>()?
                 .try_into()
                 .map_err(|_| ProjectionError::InvalidActors)?,
@@ -201,7 +201,7 @@ fn capture_actor(
     seat: game::SeatId,
     physical_tick: Tick,
 ) -> Result<VisibleActorView, ProjectionError> {
-    let actor = &state.actors()[seat.index()];
+    let actor = state.actor(seat).ok_or(ProjectionError::InvalidActors)?;
     let effects = actor
         .effect_observations()
         .map(|(kind, expires_at)| {
@@ -230,7 +230,7 @@ fn capture_actor(
     let inventory = *actor.inventory();
     Ok(VisibleActorView {
         id: EntityId::new(actor.id().0),
-        seat: wire_seat(actor.seat()),
+        seat: wire_seat(actor.seat())?,
         position: wire_position(actor.position())?,
         heading: wire_direction(actor.heading()),
         speed_level: wire_speed(actor.speed()),
@@ -248,6 +248,23 @@ fn capture_actor(
         damage_grace_remaining_ticks: DamageGraceTicks::new(grace)
             .map_err(|_| ProjectionError::InvalidEffects)?,
     })
+}
+
+fn validate_legacy_reports(reports: &[game::StepReport]) -> Result<(), ProjectionError> {
+    if reports.iter().any(|report| {
+        report.traces.len() != game::SeatId::DUEL.len()
+            || report
+                .events
+                .iter()
+                .any(|event| !event.audience.is_subset_of(game::EventAudience::Both))
+            || report
+                .forced_movement
+                .is_some_and(|forced| !game::SeatId::DUEL.contains(&forced.seat))
+    }) {
+        Err(ProjectionError::InvalidReports)
+    } else {
+        Ok(())
+    }
 }
 
 fn capture_arena(arena: &game::ArenaView) -> Result<ArenaView, ProjectionError> {

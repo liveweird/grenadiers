@@ -26,13 +26,13 @@ fn move_cells(game: &mut State, direction: Direction, cells: usize) {
 fn seed_31_proves_the_entire_reveal_collect_plant_wait_exit_and_contact_route() {
     let generated = generate_expanded_arena([31; 32], EnabledItems::LANDMINE);
     let (arena, concealed, _) = generated.into_parts();
-    let spawns = arena.spawns();
+    let spawns = arena.spawns().to_vec();
     let rules =
         RulesConfig::expanded_v5(RoomSettings::DEFAULT.with_enabled_items(EnabledItems::LANDMINE));
     let mut game = State::new(
         rules,
         World::with_pickups(arena, concealed, BTreeMap::new(), BTreeMap::new()).unwrap(),
-        SeatId::ALL.map(|seat| ActorInit {
+        SeatId::DUEL.map(|seat| ActorInit {
             id: EntityId(seat.index() as u32 + 10),
             seat,
             position: Position::center(spawns[seat.index()]),

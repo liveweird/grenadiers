@@ -1,4 +1,4 @@
-use super::{CellId, Position, SeatId, SpeedLevel, UNITS_PER_CELL};
+use super::{CellId, PlayerCount, Position, SeatId, SpeedLevel, UNITS_PER_CELL};
 
 #[test]
 fn cell_ids_sort_in_row_major_order() {
@@ -24,9 +24,18 @@ fn cell_ids_sort_in_row_major_order() {
 
 #[test]
 fn seats_have_stable_indexes() {
-    assert_eq!(SeatId::ALL, [SeatId::One, SeatId::Two]);
+    assert_eq!(SeatId::DUEL, [SeatId::One, SeatId::Two]);
+    assert_eq!(
+        SeatId::ALL,
+        [SeatId::One, SeatId::Two, SeatId::Three, SeatId::Four]
+    );
     assert_eq!(SeatId::One.index(), 0);
     assert_eq!(SeatId::Two.index(), 1);
+    assert_eq!(SeatId::Three.index(), 2);
+    assert_eq!(SeatId::Four.index(), 3);
+    assert_eq!(PlayerCount::try_from(3), Ok(PlayerCount::Three));
+    assert_eq!(PlayerCount::try_from(1), Err(()));
+    assert_eq!(PlayerCount::Four.seats(), SeatId::ALL);
 }
 
 #[test]

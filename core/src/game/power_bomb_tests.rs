@@ -9,7 +9,7 @@ use crate::room::RoomSettings;
 
 fn state(enabled: EnabledItems, pickup: Option<PickupKind>, tick: Tick) -> State {
     let arena = fixed_arena();
-    let spawns = arena.spawns();
+    let spawns = arena.spawns().to_vec();
     State::new_at_tick(
         RulesConfig::expanded_v5(RoomSettings::DEFAULT.with_enabled_items(enabled)),
         World::with_pickups(
@@ -21,7 +21,7 @@ fn state(enabled: EnabledItems, pickup: Option<PickupKind>, tick: Tick) -> State
                 .unwrap_or_default(),
         )
         .unwrap(),
-        SeatId::ALL.map(|seat| ActorInit {
+        SeatId::DUEL.map(|seat| ActorInit {
             id: EntityId(seat.index() as u32 + 10),
             seat,
             position: Position::center(spawns[seat.index()]),
@@ -327,13 +327,13 @@ fn canceled_and_duplicate_requests_get_one_attempt_and_retain_on_failure() {
 fn seed_31_survives_the_ordinary_reveal_collect_plant_and_escape_route() {
     let generated = generate_expanded_arena([31; 32], EnabledItems::POWER_BOMB);
     let (arena, concealed, _) = generated.into_parts();
-    let spawns = arena.spawns();
+    let spawns = arena.spawns().to_vec();
     let mut game = State::new(
         RulesConfig::expanded_v5(
             RoomSettings::DEFAULT.with_enabled_items(EnabledItems::POWER_BOMB),
         ),
         World::with_pickups(arena, concealed, BTreeMap::new(), BTreeMap::new()).unwrap(),
-        SeatId::ALL.map(|seat| ActorInit {
+        SeatId::DUEL.map(|seat| ActorInit {
             id: EntityId(seat.index() as u32 + 10),
             seat,
             position: Position::center(spawns[seat.index()]),

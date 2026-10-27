@@ -105,7 +105,7 @@ fn draws_advance_actual_rounds_without_awarding_points() {
 
 #[test]
 fn third_win_finalizes_immediately_and_keeps_round_result_distinct() {
-    for winner in SeatId::ALL {
+    for winner in SeatId::DUEL {
         let series = score_finished_series(winner);
         let completed = series.latest_completed_round().unwrap();
         let outcome = series.outcome().unwrap();

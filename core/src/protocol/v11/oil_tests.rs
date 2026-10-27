@@ -18,7 +18,7 @@ pub(super) fn enabled() -> EnabledItems {
 
 pub(super) fn oil_state() -> State {
     let arena = game::fixed_arena();
-    let spawns = arena.spawns();
+    let spawns = arena.spawns().to_vec();
     State::new(
         RulesConfig::expanded_v5(RoomSettings::DEFAULT.with_enabled_items(enabled())),
         World::with_pickups_and_oil(
@@ -34,7 +34,7 @@ pub(super) fn oil_state() -> State {
             ]),
         )
         .unwrap(),
-        SeatId::ALL.map(|seat| ActorInit {
+        SeatId::DUEL.map(|seat| ActorInit {
             id: GameEntityId(seat.index() as u32 + 1),
             seat,
             position: GamePosition::center(spawns[seat.index()]),
@@ -154,11 +154,11 @@ fn private_capture_debug_redacts_locations_phases_grace_and_history() {
 #[test]
 fn archived_v10_rejects_oil_settings_private_phases_and_typed_grace() {
     let arena = game::fixed_arena();
-    let spawns = arena.spawns();
+    let spawns = arena.spawns().to_vec();
     let neutral = State::new(
         RulesConfig::expanded_v5(RoomSettings::DEFAULT),
         World::new(arena),
-        SeatId::ALL.map(|seat| ActorInit {
+        SeatId::DUEL.map(|seat| ActorInit {
             id: GameEntityId(seat.index() as u32 + 1),
             seat,
             position: GamePosition::center(spawns[seat.index()]),

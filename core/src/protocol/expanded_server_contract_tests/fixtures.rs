@@ -105,8 +105,8 @@ fn running_lifecycle(enabled: EnabledItems) -> MatchLifecycle {
 }
 
 fn actors(world: &World) -> [ActorInit; 2] {
-    let spawns = world.arena().spawns();
-    SeatId::ALL.map(|seat| ActorInit {
+    let spawns = world.arena().spawns().to_vec();
+    SeatId::DUEL.map(|seat| ActorInit {
         id: game::EntityId(seat.index() as u32 + 1),
         seat,
         position: Position::center(spawns[seat.index()]),

@@ -1,7 +1,7 @@
 use super::damage::DamagePreventionSource;
 use super::pickups::PickupKind;
 use super::simulation::RoundResult;
-use super::types::{CellId, EntityId, SeatId, Tick};
+use super::types::{CellId, EntityId, PlayerCount, SeatId, Tick};
 use super::view::BombView;
 use super::{Bomb, BombMotion, TimedBombHistory};
 
@@ -13,38 +13,42 @@ pub(crate) struct TimedBombEvent {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum EventAudience {
-    Neither,
-    One,
-    Two,
-    Both,
-}
+pub struct EventAudience(u8);
 
 impl EventAudience {
+    // These mixed-case names are a compatibility surface used by archived captures.
+    #[allow(non_upper_case_globals)]
+    pub const Neither: Self = Self(0);
+    #[allow(non_upper_case_globals)]
+    pub const One: Self = Self(1 << SeatId::One.index());
+    #[allow(non_upper_case_globals)]
+    pub const Two: Self = Self(1 << SeatId::Two.index());
+    #[allow(non_upper_case_globals)]
+    pub const Both: Self = Self(Self::One.0 | Self::Two.0);
+
+    #[must_use]
+    pub const fn all(count: PlayerCount) -> Self {
+        Self((1_u8 << count.get()) - 1)
+    }
+
     #[must_use]
     pub const fn only(seat: SeatId) -> Self {
-        match seat {
-            SeatId::One => Self::One,
-            SeatId::Two => Self::Two,
-        }
+        Self(1 << seat.index())
     }
 
     #[must_use]
     pub const fn includes(self, seat: SeatId) -> bool {
-        matches!(
-            (self, seat),
-            (Self::One | Self::Both, SeatId::One) | (Self::Two | Self::Both, SeatId::Two)
-        )
+        self.0 & Self::only(seat).0 != 0
     }
 
     #[must_use]
     pub const fn without(self, seat: SeatId) -> Self {
-        match (self, seat) {
-            (Self::Both, SeatId::One) => Self::Two,
-            (Self::Both, SeatId::Two) => Self::One,
-            (Self::One, SeatId::One) | (Self::Two, SeatId::Two) => Self::Neither,
-            _ => self,
-        }
+        Self(self.0 & !Self::only(seat).0)
+    }
+
+    #[must_use]
+    pub const fn is_subset_of(self, other: Self) -> bool {
+        self.0 & !other.0 == 0
     }
 }
 
@@ -120,3 +124,7 @@ pub enum StepEventKind {
     },
     RoundEnded(RoundResult),
 }
+
+#[cfg(test)]
+#[path = "events_tests.rs"]
+mod tests;

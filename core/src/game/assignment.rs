@@ -1,7 +1,7 @@
 use std::num::NonZeroU32;
 
 use super::arena::Arena;
-use super::types::{CellId, SeatId};
+use super::types::{CellId, PlayerCount, SeatId};
 
 /// Deterministic seat roles for one nonzero match round number.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -29,27 +29,32 @@ impl RoundAssignment {
 
     #[must_use]
     pub const fn priority_seat(self) -> SeatId {
-        if self.round.get() % 2 == 1 {
-            SeatId::One
-        } else {
-            SeatId::Two
-        }
+        self.priority_seat_for(PlayerCount::Two)
     }
 
-    /// Maps seats to the arena's row-major first and second spawn cells.
     #[must_use]
-    pub fn spawns(self, arena: &Arena) -> [CellId; 2] {
-        let mut spawns = arena.spawns();
+    pub const fn priority_seat_for(self, count: PlayerCount) -> SeatId {
+        count.seats()[((self.round.get() - 1) as usize) % count.get()]
+    }
+
+    pub fn priority_order(self, count: PlayerCount) -> impl Iterator<Item = SeatId> {
+        let start = ((self.round.get() - 1) as usize) % count.get();
+        (0..count.get()).map(move |offset| count.seats()[(start + offset) % count.get()])
+    }
+
+    /// Rotates seats across this round's supplied spawn cells in row-major order.
+    #[must_use]
+    pub fn spawns(self, arena: &Arena) -> Vec<CellId> {
+        let mut spawns = arena.spawns().to_vec();
         spawns.sort();
-        if self.priority_seat() == SeatId::Two {
-            spawns.swap(0, 1);
-        }
+        let rotation = ((self.round.get() - 1) as usize) % spawns.len();
+        spawns.rotate_left(rotation);
         spawns
     }
 
     #[must_use]
-    pub fn spawn_for(self, arena: &Arena, seat: SeatId) -> CellId {
-        self.spawns(arena)[seat.index()]
+    pub fn spawn_for(self, arena: &Arena, seat: SeatId) -> Option<CellId> {
+        self.spawns(arena).get(seat.index()).copied()
     }
 }
 

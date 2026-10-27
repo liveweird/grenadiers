@@ -80,11 +80,11 @@ fn internal_binding_uses_the_selected_catalog_for_room_and_captured_world() {
 
     let generated = game::generate_expanded_arena([7; 32], EnabledItems::HEART);
     let (arena, concealed, record) = generated.into_parts();
-    let spawns = arena.spawns();
+    let spawns = arena.spawns().to_vec();
     let state = State::new(
         RulesConfig::expanded_v5(RoomSettings::DEFAULT.with_enabled_items(EnabledItems::HEART)),
         World::with_pickups(arena, concealed, BTreeMap::new(), BTreeMap::new()).unwrap(),
-        SeatId::ALL.map(|seat| ActorInit {
+        SeatId::DUEL.map(|seat| ActorInit {
             id: DomainEntityId(seat.index() as u32 + 1),
             seat,
             position: Position::center(spawns[seat.index()]),

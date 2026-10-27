@@ -96,42 +96,49 @@ retain the previous immutable image reference for rollback. The runtime stage in
 rolling Debian package updates, so a later build may resolve newer packages and is not expected to
 be byte-identical; treat it as a new candidate with new evidence rather than reusing acceptance.
 
-## v0.3.88 — 2026-10-27
+## v0.3.89 — 2026-10-27
 
-[v0.3.88](https://github.com/liveweird/grenadiers/releases/tag/v0.3.88) fixes unnecessarily
-long CPU waits after finite flames and around harmless unlit Oil. Non-plant route deadlines
-cover the latest current flame expiry and the existing admission/movement/stopped margin;
-the complete 840-tick forecast remains intact. Active bombs and burning Oil retain the full
-horizon. Unlit Oil remains an obstacle. Metered scans and checked arithmetic fail closed;
-planting proofs, pulse safety, route execution and pickup restrictions are unchanged.
+[v0.3.89](https://github.com/liveweird/grenadiers/releases/tag/v0.3.89) adds
+[deterministic Solo evaluation](game/cpu-evaluation.md). A bounded test-only queue pump executes
+actual planning jobs, delivers their advanced RNG and uses normal controller admission and Driver
+physics. Production worker execution is shared; live cancellation, work and delivery limits remain
+unchanged. No public mode or difficulty profile changes; UtilityV8 and v12 remain current.
 
-The actual Driver regression executes a 30-tick Wait, completes at flame expiry, admits fresh
-movement at that same tick and physically collects Bomb Capacity 21 ticks later. Initial/fresh
-planning costs are 1,215/20 work units. The previous 840-tick certificate span is source-derived;
-the new 30-tick span and Driver progression are measured. Boundary, overflow, budget, all-seven-
-lane, multiple-flame and bomb/Oil cases pass. UtilityV8 retains V1–V7 accepted-input replay and
-the unchanged v12 wire shape. Independent review is clear.
+Routine cases cover cancellation, queue limits, failed/disconnected/full delivery, a forced RNG
+draw, ordered accepted-input repeatability, separate arena/CPU seed axes and observed event metrics.
+The fixed human Bomb/retreat script refreshes held input every ten ticks, respects the normal
+15-tick expiry and proves centered refuge plus first-blast survival. First placement/pickup fields
+mean observed CPU-recipient events, independently of accepted action counts. Work and physical
+outcomes stay separate from wall-clock samples; a capped run remains censored.
 
-Tested source is `26ceae8b86b4d1661cd3125c10ae225edcc40077`. Full local Rust acceptance passes
-in 470.932s: all 4,194,304 masks in debug, release and official coverage, 32 partitions/four
-workers, zero retries and 37 raw profiles. Coverage is 24,883/27,028 lines (92.06%). The distinct
-[Linux run](https://github.com/liveweird/grenadiers/actions/runs/40441117382) passes.
-Formatting, Clippy and repository/source-size checks pass. Proven unchanged frontend, API,
-artwork, E2E, tooling and external dependencies retain accepted static/audit/full-web evidence
-(6,874 tests/97 files); changed gameplay receives fresh native runtime acceptance.
+The isolated, clean-source release matrix completes all 16 declared cases in 0.93s without retries:
+four arena seeds × two private CPU seeds × idle/Bomb-retreat scripts, up to 1,800 ticks each.
+Across 612 actual planning calls, p50/p95/p99/max are 0.068/3.427/3.922/4.580ms on macOS/aarch64;
+these are host observations, not thresholds. Ten cases are censored with CPU alive and six end in
+CPU loss; two observe a CPU pickup. This is reference-workload evidence, not a strength rating.
+The new losses motivate the [backlog](../BACKLOG.md#single-player) escape investigation.
+
+Independently reviewed source is `63283cbef9333f9e06d9bf6039e9dd70342b1652`.
+Full local Rust acceptance passes in 462.572s with all 4,194,304 masks in debug, release and
+official coverage, 32 partitions/four workers, zero retries and 37 raw profiles. Coverage is
+25,319/27,470 lines (92.17%). The distinct
+[Linux run](https://github.com/liveweird/grenadiers/actions/runs/40444429486) passes.
+Formatting, workspace Clippy, repository/source-size, ShellCheck/actionlint, exact-artifact
+selection and CLI checks pass. Proven unchanged frontend/API/art/E2E/external dependencies retain
+accepted static/audit/full-web evidence (6,874 tests/97 files).
 
 Accepted image is
-`sha256:2fc8cfc5695ea92e694fb845c8b2a31d3e42cc7755c1c55408db4d35a2831e4d`.
-Pinned Trivy 0.74.0 reports zero fixable HIGH/CRITICAL findings. Compose passes ten browser
-cases in 49.3s, Kubernetes ten in 51.3s, and dedicated all-items CPU pickup acceptance one in
-16.5s. Polish 320px, strict lobby/create, resources/security/probes and served assets pass.
-Temporary projects/namespaces are removed. The exact image is promoted to localhost:8085;
-v0.3.87 remains available for rollback. Restarting ends in-memory matches.
+`sha256:bfc528c594ab295da5d871d65a89863dabbb79a59579565a3eef86b2e8b7f5aa`.
+Pinned Trivy 0.74.0 reports zero fixable HIGH/CRITICAL findings. Compose passes ten browser cases
+in 49.4s, Kubernetes ten in 51.0s, and dedicated all-items CPU pickup acceptance one in 16.5s.
+Polish 320px, strict lobby/create, resources/security/probes and served assets pass. Temporary
+projects/namespaces are removed. The exact image is promoted to localhost:8085 with v0.3.88 retained
+for rollback; restarting ends in-memory matches. Source/image/binary/environment and matrix
+artifacts remain under `target/quality-review/cpu4-v0389-*`. Distribution remains a source
+prerelease and local image.
 
-Evidence is under `target/quality-review/cpu4-v0388-*`. After official coverage was copied,
-153 application incremental cache directories were removed, freeing 28.53 GiB while retaining
-dependencies, binaries and evidence. Distribution remains a source prerelease and local image;
-remaining tactics, evaluation and human feedback stay in the [backlog](../BACKLOG.md#single-player).
+<a id="v0388--2026-10-27"></a>
+The [v0.3.88 record](history/releases.md#v0388--2026-10-27) is preserved in release history.
 
 <a id="v0387--2026-10-27"></a>
 The [v0.3.87 record](history/releases.md#v0387--2026-10-27) is preserved in release history.

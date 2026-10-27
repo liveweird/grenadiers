@@ -362,6 +362,7 @@ fn archived_cpu_profile_cannot_label_a_current_live_worker() {
         CpuProfile::GUIDED_V10,
         CpuProfile::CLEAR_GAP_V11,
         CpuProfile::STEERING_V12,
+        CpuProfile::BRACELET_V13,
     ] {
         let mut room = identity(RoomProfile::ExpandedV5);
         room.mode = RoomMode::Solo(profile);

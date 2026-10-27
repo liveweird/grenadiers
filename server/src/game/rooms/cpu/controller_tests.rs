@@ -184,7 +184,7 @@ fn rejected_bomb_clears_prospective_escape_but_commits_rng() {
         next_rng: rng.clone(),
         committed_pulse: None,
         committed_route: None,
-        certified_plant: false,
+        certified_manual: None,
         escape_origin: false,
     };
 

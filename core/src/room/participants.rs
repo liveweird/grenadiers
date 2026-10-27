@@ -20,6 +20,7 @@ pub enum CpuPolicy {
     UtilityV11,
     UtilityV12,
     UtilityV13,
+    UtilityV14,
 }
 
 impl CpuPolicy {
@@ -39,6 +40,7 @@ impl CpuPolicy {
             Self::UtilityV11 => 11,
             Self::UtilityV12 => 12,
             Self::UtilityV13 => 13,
+            Self::UtilityV14 => 14,
         }
     }
 }
@@ -128,9 +130,15 @@ impl CpuProfile {
         difficulty: CpuDifficulty::Standard,
     };
 
+    /// First guarded Bracelet tactic, retained for archived replays.
+    pub const BRACELET_V13: Self = Self {
+        policy: CpuPolicy::UtilityV13,
+        difficulty: CpuDifficulty::Standard,
+    };
+
     /// The only policy profile used to create a new live CPU controller.
     pub const CURRENT: Self = Self {
-        policy: CpuPolicy::UtilityV13,
+        policy: CpuPolicy::UtilityV14,
         difficulty: CpuDifficulty::Standard,
     };
 }
@@ -196,7 +204,8 @@ mod tests {
         assert_eq!(CpuProfile::GUIDED_V10.policy.version(), 10);
         assert_eq!(CpuProfile::CLEAR_GAP_V11.policy.version(), 11);
         assert_eq!(CpuProfile::STEERING_V12.policy.version(), 12);
-        assert_eq!(CpuProfile::CURRENT.policy.version(), 13);
+        assert_eq!(CpuProfile::BRACELET_V13.policy.version(), 13);
+        assert_eq!(CpuProfile::CURRENT.policy.version(), 14);
         assert_eq!(
             RoomMode::Solo(CpuProfile::CURRENT).controller(SeatId::Two),
             ControllerKind::Cpu(CpuProfile::CURRENT)

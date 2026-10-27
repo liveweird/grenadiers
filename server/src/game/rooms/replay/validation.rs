@@ -97,6 +97,7 @@ fn validate_provenance(header: super::record::Header) -> Result<(), ReplayError>
                         | grenadiers_core::room::CpuProfile::GUIDED_V10
                         | grenadiers_core::room::CpuProfile::CLEAR_GAP_V11
                         | grenadiers_core::room::CpuProfile::STEERING_V12
+                        | grenadiers_core::room::CpuProfile::BRACELET_V13
                         | grenadiers_core::room::CpuProfile::CURRENT
                 )
                 && solo.seat == SeatId::Two

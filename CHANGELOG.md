@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+## 0.3.96 — 2026-10-27
+
+- Add a checked held-Punch tactic with one common escape for successful relocation and
+  no-op outcomes, preserving the bomb's actual identity and fuse.
+- Derive a narrow recipient-footprint barrier from bomb collision rules, keeping lethal
+  checks and permanent exit consumption intact.
+- Schedule certified Equipment actions at their exact checked tick and select the unchanged
+  branch when input is rejected, without retrying or entering legacy Bomb escape mode.
+- Identify the policy as UtilityV14; retain V1–V13 accepted-input replay and wire v12.
+
 ## 0.3.95 — 2026-10-27
 
 - Add a bounded held-Bracelet tactic that attempts ordinary contact shoves into existing

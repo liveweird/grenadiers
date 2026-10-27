@@ -4,7 +4,7 @@ use grenadiers_core::cpu::policy::MAX_HOLD_TICKS;
 use grenadiers_core::cpu::survival::{
     CommittedPulse, CommittedRoute, ExecutionCertificate, MAX_PLAN_AGE_TICKS,
 };
-use grenadiers_core::cpu::{AdmissionContext, DecisionAdmission, ManualIntent, WorkBudget};
+use grenadiers_core::cpu::{AdmissionContext, DecisionAdmission, WorkBudget};
 use grenadiers_core::game::Tick;
 
 use super::{AcceptedPlan, CpuController};
@@ -50,14 +50,14 @@ impl CpuController {
             self.pending.as_mut()?.completed = Some(result);
         }
         let result = self.pending.as_ref()?.completed.as_ref()?;
-        let plant_admission = result
+        let manual_admission = result
             .plan
             .execution
             .as_ref()
-            .and_then(ExecutionCertificate::plant)
-            .and_then(|plant| plant.placement().placed_at.0.checked_sub(1))
+            .and_then(ExecutionCertificate::manual_execution_tick)
+            .and_then(|execution| execution.0.checked_sub(1))
             .map(Tick);
-        if let Some(admission) = plant_admission {
+        if let Some(admission) = manual_admission {
             match current_tick.cmp(&admission) {
                 std::cmp::Ordering::Less => return None,
                 std::cmp::Ordering::Greater => {
@@ -93,12 +93,12 @@ impl CpuController {
             lease,
             execution,
         } = result.plan;
-        let certified_plant = execution
+        let certified_manual = execution
             .as_ref()
-            .is_some_and(|certificate| certificate.plant().is_some());
-        let invalid_manual = execution.as_ref().is_some_and(|certificate| {
-            certificate.plant().is_some() != (control.intent.manual == Some(ManualIntent::Bomb))
-        });
+            .and_then(ExecutionCertificate::manual_intent);
+        let invalid_manual = execution
+            .as_ref()
+            .is_some_and(|_| certified_manual != control.intent.manual);
         if (escape_origin
             && (control.intent.manual.is_some()
                 || execution.is_some()
@@ -150,7 +150,7 @@ impl CpuController {
             next_rng: result.rng,
             committed_pulse,
             committed_route,
-            certified_plant,
+            certified_manual,
             escape_origin,
         })
     }

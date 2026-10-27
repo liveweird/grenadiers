@@ -16,6 +16,8 @@ mod bracelet_test_support;
 mod bracelet_tests;
 #[path = "simulation_constructor_tests.rs"]
 mod constructor_tests;
+#[path = "cpu_punch_route_tests.rs"]
+mod cpu_punch_route_tests;
 #[path = "damage_tests.rs"]
 mod damage_tests;
 #[path = "flame_tests.rs"]

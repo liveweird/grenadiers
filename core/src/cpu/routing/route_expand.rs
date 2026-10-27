@@ -6,7 +6,7 @@ use crate::game::Direction;
 
 use super::motion::advance;
 use super::route::{CONDITIONAL_MOVE_UPDATES, SearchNode};
-use super::route_checks::{check_stationary_all, check_transition_all, one_tick};
+use super::route_checks::{CollisionProofs, check_stationary_all, check_transition_all, one_tick};
 use super::route_replay::build_lanes;
 use super::route_time::add_tick;
 use super::safety::stationary_segment;
@@ -47,7 +47,10 @@ pub(super) fn apply_move(
                 &segments,
                 one_tick(tick)?,
                 mode,
-                lane.origin_grace,
+                CollisionProofs {
+                    placement_origin: lane.origin_grace,
+                    recipient_barrier: lane.recipient_barrier,
+                },
                 work,
             )?);
             if lane.origin_grace.is_some_and(|cell| {
@@ -55,6 +58,7 @@ pub(super) fn apply_move(
             }) {
                 lane.origin_grace = None;
             }
+            lane.recipient_barrier = retain_recipient_barrier(lane.recipient_barrier, &segments);
         }
         let stop = add_tick(lane.ready, u64::from(updates))?;
         lane.motion.stop();
@@ -68,7 +72,10 @@ pub(super) fn apply_move(
                 end: add_tick(stop, 3)?,
             },
             mode,
-            lane.origin_grace,
+            CollisionProofs {
+                placement_origin: lane.origin_grace,
+                recipient_barrier: lane.recipient_barrier,
+            },
             work,
         )?);
         lane.ready = add_tick(stop, 3)?;
@@ -89,6 +96,18 @@ pub(super) fn apply_move(
     Ok(())
 }
 
+pub(super) fn retain_recipient_barrier(
+    barrier: Option<super::safety::RecipientBarrier>,
+    segments: &[crate::game::MovementSegment],
+) -> Option<super::safety::RecipientBarrier> {
+    barrier.filter(|barrier| {
+        segments.iter().all(|segment| {
+            crate::game::geometry::position_overlaps_cell(segment.start(), barrier.cell)
+                && crate::game::geometry::position_overlaps_cell(segment.end(), barrier.cell)
+        })
+    })
+}
+
 pub(super) fn apply_wait(
     forecasts: &[&HazardForecast],
     mode: RouteMode,
@@ -106,7 +125,10 @@ pub(super) fn apply_wait(
                 end,
             },
             mode,
-            lane.origin_grace,
+            CollisionProofs {
+                placement_origin: lane.origin_grace,
+                recipient_barrier: lane.recipient_barrier,
+            },
             work,
         )?);
         lane.motion.stop();
@@ -139,7 +161,10 @@ pub(super) fn terminal(
                 end: request.survive_until,
             },
             request.mode,
-            lane.origin_grace,
+            CollisionProofs {
+                placement_origin: lane.origin_grace,
+                recipient_barrier: lane.recipient_barrier,
+            },
             work,
         ) {
             Ok(found) => assumptions.extend(found),

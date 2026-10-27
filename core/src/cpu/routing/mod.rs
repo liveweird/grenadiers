@@ -6,6 +6,8 @@ mod plant;
 mod plant_types;
 mod pulse;
 mod pulse_geometry;
+mod punch;
+mod punch_types;
 mod route;
 mod route_checks;
 mod route_expand;
@@ -18,6 +20,7 @@ mod types;
 mod validation;
 
 pub use plant_types::{PlannedBomb, PlantCertificate, PlantFailure, PlantPresence, PlantRequest};
+pub use punch_types::{PunchCertificate, PunchFailure, PunchOutcome, PunchRequest};
 pub use route_types::{
     MAX_ROUTE_EXPANSIONS, MAX_ROUTE_STEPS, RouteCertificate, RouteLane, RouteLimits, RouteRequest,
     RouteStep,
@@ -29,6 +32,7 @@ pub(crate) use bracelet_guard::BraceletGuard;
 pub use plant::{plan_ordinary_plant, plan_timed_weapon_plant};
 pub use pulse::certify_pulse;
 pub(crate) use pulse::{PulseOriginGrace, certify_escape_pulse};
+pub use punch::plan_punch;
 pub use route::plan_route;
 
 pub(crate) const CERTIFIED_MOVE_UPDATES: u8 = 12;
@@ -57,6 +61,10 @@ pub(crate) mod plant_tests;
 #[cfg(test)]
 #[path = "plant_failure_tests.rs"]
 mod plant_failure_tests;
+
+#[cfg(test)]
+#[path = "punch_tests.rs"]
+mod punch_tests;
 
 #[cfg(test)]
 #[path = "weapon_plant_tests.rs"]

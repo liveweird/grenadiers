@@ -5,9 +5,7 @@ use crate::cpu::routing::{
     RouteMode, RouteRequest, RouteStep, certify_pulse, plan_ordinary_plant, plan_route,
     plan_timed_weapon_plant,
 };
-use crate::cpu::{
-    BombKnowledge, CpuRng, Intent, ManualIntent, MovementIntent, Observation, WorkBudget,
-};
+use crate::cpu::{CpuRng, Intent, ManualIntent, MovementIntent, Observation, WorkBudget};
 use crate::game::{Direction, Tick};
 
 use super::MAX_PLAN_AGE_TICKS;
@@ -76,10 +74,11 @@ pub fn plan(
         return Ok(stop());
     }
     let ordinary = crate::cpu::policy::plan(observation, memory, rng, work)?;
-    let clear_movement = matches!(&parts.bombs, BombKnowledge::Visible(bombs) if bombs.is_empty())
-        && parts.flames.is_empty()
-        && parts.oil.is_empty()
-        && ordinary.intent.movement != MovementIntent::Stop;
+    let clear_movement = super::deadline::ordinary_movement_is_clear(
+        observation,
+        ordinary.intent.movement != MovementIntent::Stop,
+        work,
+    );
     if (ordinary.intent.manual.is_some() || clear_movement)
         && let Some(plan) = certified_plant(
             observation,
@@ -118,6 +117,14 @@ pub fn plan(
     let start_window = TickWindow {
         start: Tick(parts.tick.0 + 1),
         end: Tick(end),
+    };
+    let Some(route_survive_until) = super::deadline::ordinary_route_end(
+        observation,
+        start_window,
+        forecast.horizon_end(),
+        work,
+    ) else {
+        return Ok(stop());
     };
     let Some(target) = super::steering::target(observation, &forecast, &ordinary, work) else {
         return Ok(stop());
@@ -198,7 +205,7 @@ pub fn plan(
         let request = RouteRequest {
             start_window,
             settled_stop_tick,
-            survive_until: forecast.horizon_end(),
+            survive_until: route_survive_until,
             mode,
             limits: RouteLimits::default(),
         };

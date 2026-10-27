@@ -4,6 +4,7 @@
 //! execute a guidance suffix or to plant a bomb.
 
 mod compatibility;
+mod deadline;
 mod execution;
 mod planner;
 mod plant_value;
@@ -17,6 +18,9 @@ pub use route_execution::{CommittedRoute, RouteCommand, RouteStatus};
 
 pub const MAX_PLAN_AGE_TICKS: u64 = 6;
 pub const WORK_ALLOWANCE: u32 = 65_536;
+
+#[cfg(test)]
+mod deadline_tests;
 
 #[cfg(test)]
 mod tests;

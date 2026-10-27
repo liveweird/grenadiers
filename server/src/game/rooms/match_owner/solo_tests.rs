@@ -356,6 +356,7 @@ fn archived_cpu_profile_cannot_label_a_current_live_worker() {
         CpuProfile::PLANT_V4,
         CpuProfile::GOALS_V5,
         CpuProfile::WEAPONS_V6,
+        CpuProfile::WALL_PASS_V7,
     ] {
         let mut room = identity(RoomProfile::ExpandedV5);
         room.mode = RoomMode::Solo(profile);

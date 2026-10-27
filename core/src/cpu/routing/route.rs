@@ -13,11 +13,10 @@ use super::route_time::add_tick;
 use super::safety::stationary_segment;
 use super::validation::{self, Context};
 use super::{
-    MAX_ROUTE_EXPANSIONS, MAX_ROUTE_STEPS, RouteCertificate, RouteFailure, RouteMode, RouteRequest,
-    RouteStep,
+    CERTIFIED_MOVE_UPDATES, MAX_ROUTE_EXPANSIONS, MAX_ROUTE_STEPS, RouteCertificate, RouteFailure,
+    RouteMode, RouteRequest, RouteStep,
 };
 
-const CERTIFIED_MOVE_UPDATES: u8 = 12;
 pub(super) const CONDITIONAL_MOVE_UPDATES: u8 = 3;
 
 #[derive(Clone)]

@@ -27,6 +27,9 @@ pub use plant::{plan_ordinary_plant, plan_timed_weapon_plant};
 pub use pulse::certify_pulse;
 pub use route::plan_route;
 
+pub(crate) const CERTIFIED_MOVE_UPDATES: u8 = 12;
+pub(crate) const MIN_FINAL_STOP_UPDATES: u64 = 10;
+
 #[cfg(test)]
 #[path = "tests.rs"]
 pub(crate) mod tests;

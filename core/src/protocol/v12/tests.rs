@@ -102,6 +102,7 @@ fn current_and_original_cpu_policies_share_the_v12_room_shape() {
         CpuProfile::PLANT_V4,
         CpuProfile::GOALS_V5,
         CpuProfile::WEAPONS_V6,
+        CpuProfile::WALL_PASS_V7,
         CpuProfile::CURRENT,
     ] {
         let current =

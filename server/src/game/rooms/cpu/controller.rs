@@ -319,3 +319,7 @@ mod route_tests;
 #[cfg(test)]
 #[path = "controller_plant_tests.rs"]
 mod plant_tests;
+
+#[cfg(test)]
+#[path = "controller_weapon_tests.rs"]
+mod weapon_tests;

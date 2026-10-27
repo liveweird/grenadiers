@@ -1,4 +1,4 @@
-use std::collections::BTreeSet;
+use std::collections::{BTreeMap, BTreeSet};
 
 use crate::cpu::forecast::{ForecastLimits, ObservedHazardMemory, TickWindow, forecast};
 use crate::cpu::*;
@@ -131,6 +131,16 @@ pub(super) fn actual_state(
     speed: SpeedLevel,
     settings: RoomSettings,
 ) -> State {
+    actual_state_with_pickup(position, heading, speed, settings, None)
+}
+
+pub(super) fn actual_state_with_pickup(
+    position: Position,
+    heading: Direction,
+    speed: SpeedLevel,
+    settings: RoomSettings,
+    pickup: Option<crate::game::PickupKind>,
+) -> State {
     let mut arena_terrain = [Terrain::Floor; ARENA_CELL_COUNT];
     arena_terrain.copy_from_slice(&terrain());
     let arena = Arena::new(
@@ -155,12 +165,11 @@ pub(super) fn actual_state(
             speed,
         },
     ];
-    State::new(
-        RulesConfig::expanded_v5(settings),
-        World::new(arena),
-        actors,
-    )
-    .unwrap()
+    let exposed = pickup
+        .map(|kind| std::collections::BTreeMap::from([(position.cell().unwrap(), kind)]))
+        .unwrap_or_default();
+    let world = World::with_pickups(arena, BTreeMap::new(), BTreeMap::new(), exposed).unwrap();
+    State::new(RulesConfig::expanded_v5(settings), world, actors).unwrap()
 }
 
 #[test]

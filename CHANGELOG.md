@@ -2,6 +2,20 @@
 
 ## [Unreleased]
 
+## 0.3.86 — 2026-10-27
+
+### Added
+
+- Use held Piercing and Power charges with one escape proved against placed and absent
+  outcomes, exact blast confirmation and presence-aware single-use consumption.
+- Value supported weapon pickups with explicit duplicate and replacement behavior;
+  score useful blasts through shared geometry, including Power diagonals and Piercing blocks.
+
+### Changed
+
+- Identify timed-weapon tactics as UtilityV6 while preserving V1–V5 input replay and
+  the unchanged v12 wire shape.
+
 ## 0.3.85 — 2026-10-27
 
 ### Changed

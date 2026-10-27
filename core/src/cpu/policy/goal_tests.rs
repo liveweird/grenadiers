@@ -296,8 +296,6 @@ fn candidate_preparation_is_charged_before_search_or_rng() {
 fn all_twenty_five_pickup_kinds_have_explicit_transit_policy() {
     let harmful = [
         PickupKind::RemoteBomb,
-        PickupKind::PiercingBomb,
-        PickupKind::PowerBomb,
         PickupKind::Landmine,
         PickupKind::Diarrhea,
         PickupKind::SlowFoot,
@@ -322,6 +320,8 @@ fn all_twenty_five_pickup_kinds_have_explicit_transit_policy() {
         PickupKind::InvisibilityCloak,
         PickupKind::GoldenFlame,
         PickupKind::ShortFuse,
+        PickupKind::PiercingBomb,
+        PickupKind::PowerBomb,
     ];
     assert_eq!(harmful.len() + harmless.len(), 25);
     for (expected, kind) in harmful

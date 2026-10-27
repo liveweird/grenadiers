@@ -12,6 +12,7 @@ pub enum CpuPolicy {
     UtilityV3,
     UtilityV4,
     UtilityV5,
+    UtilityV6,
 }
 
 impl CpuPolicy {
@@ -23,6 +24,7 @@ impl CpuPolicy {
             Self::UtilityV3 => 3,
             Self::UtilityV4 => 4,
             Self::UtilityV5 => 5,
+            Self::UtilityV6 => 6,
         }
     }
 }
@@ -64,9 +66,15 @@ impl CpuProfile {
         difficulty: CpuDifficulty::Standard,
     };
 
+    /// First scored-navigation policy, retained for archived projections and replays.
+    pub const GOALS_V5: Self = Self {
+        policy: CpuPolicy::UtilityV5,
+        difficulty: CpuDifficulty::Standard,
+    };
+
     /// The only policy profile used to create a new live CPU controller.
     pub const CURRENT: Self = Self {
-        policy: CpuPolicy::UtilityV5,
+        policy: CpuPolicy::UtilityV6,
         difficulty: CpuDifficulty::Standard,
     };
 }
@@ -124,7 +132,8 @@ mod tests {
         assert_eq!(CpuProfile::PULSE_V2.policy.version(), 2);
         assert_eq!(CpuProfile::ROUTE_V3.policy.version(), 3);
         assert_eq!(CpuProfile::PLANT_V4.policy.version(), 4);
-        assert_eq!(CpuProfile::CURRENT.policy.version(), 5);
+        assert_eq!(CpuProfile::GOALS_V5.policy.version(), 5);
+        assert_eq!(CpuProfile::CURRENT.policy.version(), 6);
         assert_eq!(
             RoomMode::Solo(CpuProfile::CURRENT).controller(SeatId::Two),
             ControllerKind::Cpu(CpuProfile::CURRENT)

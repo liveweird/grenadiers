@@ -1,4 +1,5 @@
 use crate::cpu::forecast::ForecastEvolution;
+use crate::cpu::routing::{PlantCertificate, PlantPresence};
 use crate::cpu::{BombKnowledge, Observation, ObservedActor, ObservedBombTrigger, VisibleActor};
 use crate::game::Tick;
 
@@ -47,7 +48,8 @@ pub(super) fn compatible(basis: &Observation, current: &Observation) -> bool {
         return false;
     }
     let expected_live_bombs = actor(basis).map(|before| before.live_bomb_count);
-    if !actor_compatible(basis, current, expected_live_bombs) {
+    let expected_weapon = actor(basis).and_then(|before| before.weapon);
+    if !actor_compatible(basis, current, expected_live_bombs, expected_weapon) {
         return false;
     }
     let (BombKnowledge::Visible(old_bombs), BombKnowledge::Visible(new_bombs)) =
@@ -96,13 +98,15 @@ pub(super) fn route_compatible(
     }
     let expected = actor(basis)
         .and_then(|before| evolution.expected_live_bombs(before.id, current.parts().tick));
-    actor_compatible(basis, current, expected)
+    let expected_weapon = actor(basis).and_then(|before| before.weapon);
+    actor_compatible(basis, current, expected, expected_weapon)
 }
 
 pub(super) fn actor_compatible(
     basis: &Observation,
     current: &Observation,
     expected_live_bombs: Option<u16>,
+    expected_weapon: Option<crate::game::SpecialWeapon>,
 ) -> bool {
     let Some(elapsed) = current.parts().tick.0.checked_sub(basis.parts().tick.0) else {
         return false;
@@ -118,13 +122,31 @@ pub(super) fn actor_compatible(
         && before.id == after.id
         && before.speed == after.speed
         && before.equipment == after.equipment
-        && before.weapon == after.weapon
+        && after.weapon == expected_weapon
         && before.bomb_capacity == after.bomb_capacity
         && before.bomb_range == after.bomb_range
         && Some(after.live_bomb_count) == expected_live_bombs
         && before.last_teleport_tick == after.last_teleport_tick
         && expected_damage_grace == u64::from(after.damage_grace_remaining_ticks)
         && effects_match(before, after, elapsed)
+}
+
+pub(super) fn plant_actor_compatible(
+    basis: &Observation,
+    observation: &Observation,
+    certificate: &PlantCertificate,
+    presence: PlantPresence,
+) -> bool {
+    let owner = certificate.placement().owner;
+    let expected = certificate.expected_live_bombs(owner, observation.parts().tick, presence);
+    actor(basis)
+        .is_some_and(|actor| actor.id == owner && actor.weapon == certificate.weapon_before())
+        && actor_compatible(
+            basis,
+            observation,
+            expected,
+            certificate.expected_weapon(presence),
+        )
 }
 
 fn effects_match(before: &VisibleActor, after: &VisibleActor, elapsed: u64) -> bool {
@@ -179,5 +201,38 @@ fn trigger_matches(before: ObservedBombTrigger, after: ObservedBombTrigger, elap
         (ObservedBombTrigger::Remote, ObservedBombTrigger::Remote)
         | (ObservedBombTrigger::Contact, ObservedBombTrigger::Contact) => true,
         _ => false,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::cpu::policy::tests::observation;
+    use crate::cpu::{Observation, ObservedActor};
+    use crate::game::{CellId, SpecialWeapon};
+
+    use super::actor_compatible;
+
+    #[test]
+    fn actor_compatibility_allows_only_the_proven_weapon_transition() {
+        let mut basis_parts = observation(CellId::new(7, 7)).into_parts();
+        let ObservedActor::Visible(before) = &mut basis_parts.actors[1] else {
+            unreachable!()
+        };
+        before.weapon = Some(SpecialWeapon::Power);
+        let basis = Observation::new(basis_parts).unwrap();
+        let mut current_parts = basis.clone().into_parts();
+        let ObservedActor::Visible(after) = &mut current_parts.actors[1] else {
+            unreachable!()
+        };
+        after.weapon = None;
+        let current = Observation::new(current_parts).unwrap();
+
+        assert!(actor_compatible(&basis, &current, Some(0), None));
+        assert!(!actor_compatible(
+            &basis,
+            &current,
+            Some(0),
+            Some(SpecialWeapon::Power)
+        ));
     }
 }

@@ -1,15 +1,14 @@
 use crate::cpu::forecast::{ForecastLimits, ObservedHazardMemory, TickWindow, forecast};
 use crate::cpu::policy::{ControlPlan, PolicyError, UtilityMemory};
 use crate::cpu::routing::{
-    PlannedBomb, PlantCertificate, PlantRequest, PulseLease, PulseRequest, RouteCertificate,
-    RouteLimits, RouteMode, RouteRequest, RouteStep, certify_pulse, plan_ordinary_plant,
-    plan_route,
+    PlantCertificate, PlantRequest, PulseLease, PulseRequest, RouteCertificate, RouteLimits,
+    RouteMode, RouteRequest, RouteStep, certify_pulse, plan_ordinary_plant, plan_route,
+    plan_timed_weapon_plant,
 };
 use crate::cpu::{
-    BombKnowledge, CpuRng, Intent, ManualIntent, MovementIntent, Observation, ObservedActor,
-    WorkBudget,
+    BombKnowledge, CpuRng, Intent, ManualIntent, MovementIntent, Observation, WorkBudget,
 };
-use crate::game::{CellId, Direction, Terrain, Tick};
+use crate::game::{Direction, Tick};
 
 use super::MAX_PLAN_AGE_TICKS;
 use super::compatibility::actor;
@@ -251,150 +250,34 @@ fn certified_plant(
     if ordinary.intent.manual == Some(ManualIntent::Equipment) {
         return None;
     }
-    if !could_be_useful(observation, work) {
+    if !super::plant_value::could_be_useful(observation, work) {
         return None;
     }
     let execution_tick = observation.parts().tick.0.checked_add(7).map(Tick)?;
-    let certificate = plan_ordinary_plant(
-        observation,
-        history,
-        PlantRequest {
-            execution_tick,
-            settled_stop_tick,
-            first_movement: ordinary.intent.movement,
-            limits: RouteLimits::default(),
-        },
-        work,
-    )
-    .ok()?;
-    useful_plant(observation, certificate.placement()).then(|| SurvivalPlan {
-        control: ControlPlan {
-            intent: Intent {
-                movement: ordinary.intent.movement,
-                manual: Some(ManualIntent::Bomb),
-            },
-            hold_ticks: 1,
-            next_memory: UtilityMemory::new(memory.key()),
-        },
-        lease: None,
-        execution: Some(ExecutionCertificate::Plant(Box::new(certificate))),
-    })
-}
-
-fn could_be_useful(observation: &Observation, work: &mut WorkBudget) -> bool {
-    let Some(actor) = actor(observation) else {
-        return false;
+    let request = PlantRequest {
+        execution_tick,
+        settled_stop_tick,
+        first_movement: ordinary.intent.movement,
+        limits: RouteLimits::default(),
     };
-    let Some(origin) = actor.position.cell() else {
-        return false;
-    };
-    let parts = observation.parts();
-    std::iter::once(Some(origin))
-        .chain(adjacent_cells(origin))
-        .flatten()
-        .any(|candidate| {
-            if work.try_take(1).is_err() {
-                return false;
-            }
-            adjacent_cells(candidate)
-                .into_iter()
-                .flatten()
-                .any(|cell| parts.arena.blocks.contains(&cell))
-                || parts.actors.iter().any(|observed| {
-                    let ObservedActor::Visible(rival) = observed else {
-                        return false;
-                    };
-                    rival.id != actor.id
-                        && rival.alive
-                        && rival.position.cell().is_some_and(|target| {
-                            (candidate.column == target.column || candidate.row == target.row)
-                                && candidate.column.abs_diff(target.column)
-                                    + candidate.row.abs_diff(target.row)
-                                    <= 8
-                        })
-                })
-        })
-}
-
-fn useful_plant(observation: &Observation, bomb: &PlannedBomb) -> bool {
-    let parts = observation.parts();
-    if adjacent_cells(bomb.cell)
-        .into_iter()
-        .flatten()
-        .any(|cell| parts.arena.blocks.contains(&cell))
-    {
-        return true;
-    }
-    parts.actors.iter().any(|actor| {
-        let ObservedActor::Visible(actor) = actor else {
-            return false;
-        };
-        actor.id != bomb.owner
-            && actor.alive
-            && actor.position.cell().is_some_and(|target| {
-                blast_reaches(
-                    bomb.cell,
-                    target,
-                    bomb.range,
-                    parts.arena.width,
-                    &parts.arena.terrain,
-                    &parts.arena.blocks,
-                )
-            })
-    })
-}
-
-fn adjacent_cells(cell: CellId) -> [Option<CellId>; 4] {
-    [
-        cell.row
-            .checked_sub(1)
-            .map(|row| CellId::new(cell.column, row)),
-        cell.column
-            .checked_add(1)
-            .map(|column| CellId::new(column, cell.row)),
-        cell.row
-            .checked_add(1)
-            .map(|row| CellId::new(cell.column, row)),
-        cell.column
-            .checked_sub(1)
-            .map(|column| CellId::new(column, cell.row)),
-    ]
-}
-
-fn blast_reaches(
-    origin: CellId,
-    target: CellId,
-    range: u16,
-    width: u16,
-    terrain: &[Terrain],
-    blocks: &[CellId],
-) -> bool {
-    let (dc, dr, distance) = if origin.column == target.column {
-        (
-            0_i16,
-            if target.row > origin.row { 1 } else { -1 },
-            origin.row.abs_diff(target.row),
-        )
-    } else if origin.row == target.row {
-        (
-            if target.column > origin.column { 1 } else { -1 },
-            0_i16,
-            origin.column.abs_diff(target.column),
-        )
+    let certificate = if actor(observation)?.weapon.is_some() {
+        plan_timed_weapon_plant(observation, history, request, work)
     } else {
-        return false;
-    };
-    if distance == 0 || distance > range {
-        return false;
+        plan_ordinary_plant(observation, history, request, work)
     }
-    (1..=distance).all(|step| {
-        let column = i32::from(origin.column) + i32::from(dc) * i32::from(step);
-        let row = i32::from(origin.row) + i32::from(dr) * i32::from(step);
-        let (Ok(column), Ok(row)) = (u16::try_from(column), u16::try_from(row)) else {
-            return false;
-        };
-        let cell = CellId::new(column, row);
-        let index = usize::from(row) * usize::from(width) + usize::from(column);
-        terrain.get(index) == Some(&Terrain::Floor) && !blocks.contains(&cell)
+    .ok()?;
+    super::plant_value::useful_plant(observation, certificate.placement(), work)?.then(|| {
+        SurvivalPlan {
+            control: ControlPlan {
+                intent: Intent {
+                    movement: ordinary.intent.movement,
+                    manual: Some(ManualIntent::Bomb),
+                },
+                hold_ticks: 1,
+                next_memory: UtilityMemory::new(memory.key()),
+            },
+            lease: None,
+            execution: Some(ExecutionCertificate::Plant(Box::new(certificate))),
+        }
     })
 }

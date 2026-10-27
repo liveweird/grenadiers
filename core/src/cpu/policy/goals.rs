@@ -4,7 +4,9 @@ use std::collections::VecDeque;
 use crate::cpu::{CpuRng, Observation, ObservedActor, VisibleActor, WorkBudget};
 use crate::game::arena::ARENA_CELL_COUNT;
 use crate::game::effects::GOLDEN_FLAME_RANGE;
-use crate::game::{CellId, EffectKind, Equipment, PickupKind, RulesConfig, SpeedLevel, Terrain};
+use crate::game::{
+    CellId, EffectKind, Equipment, PickupKind, RulesConfig, SpecialWeapon, SpeedLevel, Terrain,
+};
 
 use super::movement::{STEPS, offset};
 
@@ -246,6 +248,9 @@ impl SearchMap {
 
 fn pickup_value(observation: &Observation, actor: &VisibleActor, kind: PickupKind) -> Option<u8> {
     let rules = RulesConfig::expanded_v5(observation.parts().rules.settings);
+    if let Some((value, _)) = supported_weapon(actor, kind) {
+        return value;
+    }
     match kind {
         PickupKind::BombCapacity if actor.bomb_capacity < rules.bomb_capacity_cap() => Some(7),
         PickupKind::BlastRange if actor.bomb_range < rules.bomb_range_cap() => Some(6),
@@ -285,6 +290,9 @@ fn pickup_value(observation: &Observation, actor: &VisibleActor, kind: PickupKin
 }
 
 fn pickup_transitable(actor: &VisibleActor, kind: PickupKind) -> bool {
+    if let Some((_, transitable)) = supported_weapon(actor, kind) {
+        return transitable;
+    }
     match kind {
         PickupKind::RemoteBomb
         | PickupKind::PiercingBomb
@@ -311,6 +319,22 @@ fn pickup_transitable(actor: &VisibleActor, kind: PickupKind) -> bool {
         | PickupKind::GoldenFlame
         | PickupKind::ShortFuse => true,
     }
+}
+
+pub(super) fn supported_weapon(
+    actor: &VisibleActor,
+    kind: PickupKind,
+) -> Option<(Option<u8>, bool)> {
+    let incoming = match kind {
+        PickupKind::PiercingBomb => SpecialWeapon::Piercing,
+        PickupKind::PowerBomb => SpecialWeapon::Power,
+        _ => return None,
+    };
+    Some(match actor.weapon {
+        None | Some(SpecialWeapon::Remote | SpecialWeapon::Landmine) => (Some(7), true),
+        Some(current) if current == incoming => (None, true),
+        Some(SpecialWeapon::Piercing | SpecialWeapon::Power) => (None, true),
+    })
 }
 
 fn useful_effect(actor: &VisibleActor, kind: EffectKind) -> bool {

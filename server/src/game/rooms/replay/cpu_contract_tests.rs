@@ -160,7 +160,7 @@ fn accepted_solo_inputs_replay_from_format_three_without_worker_or_policy() {
         grenadiers_core::room::RoomMode::Solo(grenadiers_core::room::CpuProfile::CURRENT)
     );
     assert_eq!(journal.header.solo.unwrap().seat, SeatId::Two);
-    assert_eq!(journal.header.solo.unwrap().policy_version, 5);
+    assert_eq!(journal.header.solo.unwrap().policy_version, 6);
     let expected = runtime.replay_inspection();
     assert_eq!(replay(journal).unwrap(), expected);
 }
@@ -237,6 +237,7 @@ fn original_cpu_journals_replay_without_policy_reexecution() {
         (grenadiers_core::room::CpuProfile::PULSE_V2, 2),
         (grenadiers_core::room::CpuProfile::ROUTE_V3, 3),
         (grenadiers_core::room::CpuProfile::PLANT_V4, 4),
+        (grenadiers_core::room::CpuProfile::GOALS_V5, 5),
     ] {
         let mut runtime = solo_recording_runtime(profile);
         start(&mut runtime);
@@ -256,7 +257,7 @@ fn original_cpu_journals_replay_without_policy_reexecution() {
 #[test]
 fn solo_journal_rejects_mismatched_and_unknown_policy_versions() {
     let mut runtime = solo_recording_runtime(grenadiers_core::room::CpuProfile::CURRENT);
-    for version in [0, 1, 2, 3, 4, 6, u16::MAX] {
+    for version in [0, 1, 2, 3, 4, 5, 7, u16::MAX] {
         let journal = runtime.replay_journal_mut();
         journal.header.solo.as_mut().unwrap().policy_version = version;
         assert_eq!(replay(journal), Err(super::ReplayError::UnsupportedFormat));

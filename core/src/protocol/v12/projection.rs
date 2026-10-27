@@ -163,6 +163,7 @@ fn room_from_common(
                     | CpuPolicy::UtilityV3
                     | CpuPolicy::UtilityV4
                     | CpuPolicy::UtilityV5
+                    | CpuPolicy::UtilityV6
             ) && profile.difficulty == CpuDifficulty::Standard =>
         {
             RoomMode::Solo {

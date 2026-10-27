@@ -5,7 +5,9 @@ use crate::cpu::{
     BombKnowledge, MovementIntent, Observation, ObservedActor, ObservedBombTrigger, WorkBudget,
 };
 use crate::game::effects::{effective_bomb_fuse_ticks, effective_bomb_range};
-use crate::game::{BlastKind, EffectKind, OilBarrelState, RulesConfig, Terrain, Tick};
+use crate::game::{
+    BlastKind, EffectKind, OilBarrelState, RulesConfig, SpecialWeapon, Terrain, Tick,
+};
 
 use super::motion::{Motion, advance};
 use super::route::plan_route_seeded;
@@ -19,6 +21,35 @@ pub fn plan_ordinary_plant(
     memory: &ObservedHazardMemory,
     request: PlantRequest,
     work: &mut WorkBudget,
+) -> Result<PlantCertificate, PlantFailure> {
+    plan_timed_plant(observation, memory, request, work, None)
+}
+
+pub fn plan_timed_weapon_plant(
+    observation: &Observation,
+    memory: &ObservedHazardMemory,
+    request: PlantRequest,
+    work: &mut WorkBudget,
+) -> Result<PlantCertificate, PlantFailure> {
+    let weapon = actor_weapon(observation).ok_or(PlantFailure::Unsupported)?;
+    let enabled = observation.parts().rules.settings.enabled_items();
+    let blast = match weapon {
+        SpecialWeapon::Piercing if enabled.contains_piercing_bomb() => BlastKind::Piercing,
+        SpecialWeapon::Power if enabled.contains_power_bomb() => BlastKind::Power,
+        SpecialWeapon::Remote
+        | SpecialWeapon::Landmine
+        | SpecialWeapon::Piercing
+        | SpecialWeapon::Power => return Err(PlantFailure::Unsupported),
+    };
+    plan_timed_plant(observation, memory, request, work, Some((weapon, blast)))
+}
+
+fn plan_timed_plant(
+    observation: &Observation,
+    memory: &ObservedHazardMemory,
+    request: PlantRequest,
+    work: &mut WorkBudget,
+    weapon: Option<(SpecialWeapon, BlastKind)>,
 ) -> Result<PlantCertificate, PlantFailure> {
     let parts = observation.parts();
     let expected = parts
@@ -40,7 +71,7 @@ pub fn plan_ordinary_plant(
     };
     if !actor.alive
         || actor.voluntary_actions_frozen
-        || actor.weapon.is_some()
+        || actor.weapon != weapon.map(|(weapon, _)| weapon)
         || matches!(
             &parts.bombs,
             BombKnowledge::Visible(bombs)
@@ -111,6 +142,7 @@ pub fn plan_ordinary_plant(
         owner: actor.id,
         cell,
         range,
+        blast: weapon.map_or(BlastKind::Standard, |(_, blast)| blast),
         detonates_at,
     };
     let present = forecast(
@@ -121,7 +153,7 @@ pub fn plan_ordinary_plant(
             owner: placement.owner,
             cell: placement.cell,
             range: placement.range,
-            blast: BlastKind::Standard,
+            blast: placement.blast,
             detonates_at: placement.detonates_at,
         }),
         ForecastLimits::default(),
@@ -157,7 +189,20 @@ pub fn plan_ordinary_plant(
         hypothetical_id,
         absent.evolution().clone(),
         present.evolution().clone(),
+        actor.weapon,
     ))
+}
+
+fn actor_weapon(observation: &Observation) -> Option<SpecialWeapon> {
+    observation
+        .parts()
+        .actors
+        .iter()
+        .find(|actor| actor.seat() == observation.parts().recipient)
+        .and_then(|actor| match actor {
+            ObservedActor::Visible(actor) => actor.weapon,
+            ObservedActor::Hidden { .. } => None,
+        })
 }
 
 fn effect_active(

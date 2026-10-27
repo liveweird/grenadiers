@@ -1,5 +1,8 @@
 # Gameplay v12: solo controllers
 
+This Standard-only wire contract is archived. The [live v13 guide](protocol-v13.md) adds
+selectable difficulty; v12 clients must reload for a current server.
+
 The paired contract is `api/gameplay-v12.schema.json`, Rust `core::protocol::v12`, and generated
 `web/src/game/v12/schema.ts`. Deploy server and browser together; older clients must reload.
 V12 retains the [v11 physical state, items and recipient privacy](protocol-v11.md), Expanded-v5

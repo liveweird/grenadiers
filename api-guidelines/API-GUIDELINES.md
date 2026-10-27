@@ -27,7 +27,7 @@ generated TypeScript, conformance tests, and docs change together.
   frames remain distinct from application ping/pong envelopes. Do not expose credentials in URLs.
 - **API-STATE-001:** Sockets do not reserve player slots. Matches are two-seat (`maxPlayers: 2`).
   Gameplay clients submit inputs, never authoritative outcomes; see
-  [protocol v11](../docs/game/protocol-v11.md).
+  [live gameplay protocol](../docs/game/protocol.md).
 
 Spectral checks the machine-verifiable OpenAPI subset: explicit errors use
 `application/problem+json` with the shared `Problem` schema, object schemas are closed, and JSON

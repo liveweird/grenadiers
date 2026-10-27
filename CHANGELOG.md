@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+## 0.3.98 — 2026-10-27
+
+- Add Easy and Standard solo selection with server-owned profile metadata and reconnect/rematch retention.
+- Give Easy a bounded pause between ordinary clear-board navigation decisions while sharing
+  hazard checks, escape execution and planning limits with Standard.
+- Introduce gameplay wire v13 for difficulty metadata, retaining the Standard-only v12 archive
+  and historical accepted-input replay profiles.
+
 ## 0.3.97 — 2026-10-27
 
 - Let the CPU seek Punch or Bracelet when unequipped or holding Kick, below useful upgrades

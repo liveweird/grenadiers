@@ -59,7 +59,8 @@ reference matrix, keeping the existing runtime/owner measurements available thro
 command. Fixed input scripts provide regression evidence; they do not replace human playtesting
 or establish balanced difficulty. `scripts/measure-game.sh --cpu-rounds` runs the separate
 full-round matrix and verifies generated accepted-input replays. Keep timing runs separate
-from other checks.
+from other checks. Easy has separately labeled `--cpu-easy` and `--cpu-easy-rounds` modes
+with the same workloads and independent output directories.
 
 ### Hosted workflows
 
@@ -217,11 +218,11 @@ the largest contributors on failure; Vite's existing per-chunk warning remains v
 `api-guidelines/spectral.yaml`; it retains the standard and custom rules without the CLI's
 glob dependency. Parser/load errors and error-severity diagnostics fail the command.
 `check:api`, `check:realtime`, and `check:gameplay` compare generated
-contracts without modifying them. Gameplay generation/drift checks cover active v12 and historical
-v2–v11; parity tests compare unchanged physical definitions. AJV validates runtime WebSocket payloads. EN/PL locale
+contracts without modifying them. Gameplay generation/drift checks cover active v13 and historical
+v2–v12; parity tests compare unchanged physical definitions. AJV validates runtime WebSocket payloads. EN/PL locale
 parity is tested. ESLint/SonarJS and Knip must report no findings.
 
-Live gameplay-v12 and realtime browser consumers use generated standalone Ajv validators;
+Live gameplay-v13 and realtime browser consumers use generated standalone Ajv validators;
 archived validators retain their own compiler/schema checks. Run
 `npm --prefix web run gen:validators` after changing a live schema or its generation tools.
 `check:validators` regenerates in memory and checks both ESM and declarations before production

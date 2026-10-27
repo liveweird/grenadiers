@@ -1,6 +1,6 @@
 # Gameplay protocol consumer inventory
 
-This inventory applies [ADR 0021](../decisions/0021-gameplay-retention.md): gameplay v12 is the
+This inventory applies [ADR 0021](../decisions/0021-gameplay-retention.md): gameplay v13 is the
 only live network version, while archived schemas, compatibility exports, shared implementation
 and regression corpora remain repository consumers. Retention does not mean an old client can
 connect, and no complete historical Rust version directory is selected for deletion.
@@ -16,11 +16,12 @@ separate compatibility axes. In particular, rules profile 5 is not a gameplay-v5
 | v5 | `api/gameplay-v5.schema.json`, generated browser declarations and browser conformance only; there is no Rust `v5` module. | Authentication/reconnect and v3 physical parity, excluding `RulesVersion` because v5 adds rules `[1, 2, 3]`. |
 | v6 | The dedicated Rust/browser adapter and private replay's legacy-default settings path. | Reconnect/settings validation and direct use by v7 bindings/scalars. Its physical-parity test compares v6 with v3; the separate v4 assertion covers only protocol 4 and rules `[1, 2]`. |
 | v7 | Dedicated classic projection/item adapter, archived schema/browser semantics and conformance, and shared callbacks consumed by later adapters. | Classic projection, admission, recipient and semantic fixtures; its capture path also checks the generic root projections. No server runtime serves v7. |
-| v8 | Shared expanded-mechanics implementation consumed by v9-v12, plus its archived wire tests and retained corpora. | Expanded item mechanics, checked capture/binding, recipient privacy and version-specific validation. |
+| v8 | Shared expanded-mechanics implementation consumed by v9-v13, plus its archived wire tests and retained corpora. | Expanded item mechanics, checked capture/binding, recipient privacy and version-specific validation. |
 | v9 | The v8 shared implementation with a v9 item/catalog boundary. | Freeze and preceding-version rejection, including frozen recipient pairs in the server corpus. |
 | v10 | An expanded adapter delegating common mechanics to v8, with teleport-aware capture and binding. | Teleporter and related version edges, including archived-v10 privacy controls in the server corpus. |
-| v11 | Retained Rust/browser adapter and standalone validator, plus physical binding, recipient projection and neutral observations consumed by v12. | Closed Oil Barrel contract, all item masks, archived metadata rejection and physical/privacy regressions. |
-| v12 | Rust `core::protocol::v12`; live server connection/socket/command/dispatcher, browser client and E2E suites. | Solo controller metadata/authority, human-duel compatibility and inherited physical/privacy semantics. This is the sole live network contract. |
+| v11 | Retained Rust/browser adapter and standalone validator, plus physical binding, recipient projection and neutral observations consumed by v12/v13. | Closed Oil Barrel contract, all item masks, archived metadata rejection and physical/privacy regressions. |
+| v12 | Archived Rust/browser adapter, schema and conformance fixtures. | Standard-only solo controller metadata/authority, human-duel compatibility and inherited physical/privacy semantics. |
+| v13 | Rust `core::protocol::v13`; live server connection/socket/command/dispatcher, browser client and E2E suites. | Easy/Standard selection, consistent controller metadata and inherited physical/privacy semantics. This is the sole live network contract. |
 
 The shared client corpus exercises the closed client-message union across retained v8-v11 Rust
 parsers, schemas and browser validators. The server corpus checks actual Rust-produced
@@ -28,7 +29,7 @@ admissions/snapshot pairs with frozen actors, Teleporter epochs, empty/materiali
 recipient identity and concealment controls. Existing control/error-frame conformance remains.
 V12 adds its closed client corpus and checks inherited server fixtures with controller metadata.
 A typed fixture bridge preserves archived v11 metadata without cloning physical data; standalone
-validator parity covers both v11 and v12.
+validator parity retains v11/v12 and covers live v13.
 See [Testing](../testing.md) for commands and the release/history records for executed results.
 
 ## Diagnostic coverage disposition

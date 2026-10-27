@@ -29,11 +29,11 @@ timer without replaying collection effects. Result screens freeze physical progr
 
 The HUD shows its current timer. A distinct pixel pickup and actor indicator identify it;
 reduced-motion presentation keeps the indicator static. Server and browser must be upgraded
-together: older clients require reload for the [current gameplay-v12 contract](protocol-v12.md).
+together: older clients require reload for the [current gameplay-v13 contract](protocol-v13.md).
 
 ## Generation and compatibility
 
 The enabled Golden Flame weight is 15, appended to capacity 40, range 40, speed 20, enabled
 Heart 25 and enabled Shield 15. Existing item-pool masks retain their exact generation path.
-The current rules/generator identity remains Expanded v5/generated v2; gameplay-v12 and human-duel journal
+The current rules/generator identity remains Expanded v5/generated v2; gameplay-v13 and human-duel journal
 format 2 represent the effect. Archived schemas and generator-v1 behavior remain frozen.

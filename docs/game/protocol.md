@@ -2,10 +2,10 @@
 
 Status: gameplay contracts, checked domain conversion, HTTP session issuance, and authenticated
 gameplay WebSockets with authoritative configurable two-seat matches are implemented.
-`api/gameplay-v12.schema.json`, Rust `core::protocol::v12`, and generated
-`web/src/game/v12/schema.ts` define active socket messages. V2 through v11 remain historical.
-V12 retains Expanded v5/generator v2 and the v11 physical/privacy model, adding immutable
-solo mode and controller metadata. See [compatibility](protocol-v12.md).
+`api/gameplay-v13.schema.json`, Rust `core::protocol::v13`, and generated
+`web/src/game/v13/schema.ts` define active socket messages. V2 through v12 remain historical.
+V13 retains Expanded v5/generator v2 and the v11 physical/privacy model, extending immutable
+solo controller metadata with Easy and Standard difficulty. See [compatibility](protocol-v13.md).
 See [ADR 0021](../decisions/0021-gameplay-retention.md) for the distinction between live support,
 archived wire contracts and private replay retention.
 The browser validates these messages and drives the playable generated-map match. Diagnostic `/api/v1/ws` and
@@ -25,7 +25,8 @@ The browser validates these messages and drives the playable generated-map match
 | v9 | [Historical guide](../history/protocols/protocol-v9.md) | Archived contract |
 | v10 | [Historical guide](../history/protocols/protocol-v10.md) | Archived contract |
 | v11 | [Physical compatibility guide](protocol-v11.md) | Archived contract |
-| v12 | [Live compatibility guide](protocol-v12.md) | Supported |
+| v12 | [Standard-only solo guide](protocol-v12.md) | Archived contract |
+| v13 | [Live compatibility guide](protocol-v13.md) | Supported |
 
 ## Authentication and compatibility
 
@@ -45,13 +46,13 @@ Connect to `/api/v1/game/ws` with one configured non-null Origin and no query pa
 Its first application frame must be:
 
 ```json
-{"type":"authenticate","protocolVersion":12,"token":"0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"}
+{"type":"authenticate","protocolVersion":13,"token":"0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"}
 ```
 
 The token is a secret 64-character lowercase hexadecimal credential, held only in tab memory.
 It never belongs in a URL or log. A syntactically valid unsupported version is parsed so the
 server can return `incompatibleProtocol` before credential binding. Supported gameplay version
-is 12, independently of the product release and diagnostic protocol. Parser failures expose
+is 13, independently of the product release and diagnostic protocol. Parser failures expose
 only a generic error; token Debug formatting is redacted.
 
 A successful claim atomically binds one connection. Duplicate claims receive `connectionInUse`
@@ -88,7 +89,7 @@ All listed fields are required; objects reject extra fields. Counter values are 
 | Client type | Additional fields |
 | --- | --- |
 | `authenticate` | `protocolVersion` (0–65,535), `token` |
-| `createRoom` | `sequence`, `mode` (`humanDuel` or `solo` with `standard` difficulty) |
+| `createRoom` | `sequence`, `mode` (`humanDuel` or `solo` with `easy` or `standard` difficulty) |
 | `joinRoom` | `sequence`, `roomCode` |
 | `resumeRoom` | `sequence`, `roomId`, private `resumeToken` |
 | `ready` | `sequence`, `roomId`, `roundId`, `settingsRevision`, `ready` |
@@ -100,8 +101,8 @@ All listed fields are required; objects reject extra fields. Counter values are 
 
 | Server type | Additional fields |
 | --- | --- |
-| `authenticated` | `protocolVersion: 12` |
-| `incompatibleProtocol` | `supportedVersion` (0–65,535; this server emits 11) |
+| `authenticated` | `protocolVersion: 13` |
+| `incompatibleProtocol` | `supportedVersion` (0–65,535; this server emits 13) |
 | `admitted` | acknowledged `sequence`, shared `room`, `youSeat`, private `resumeToken`, nullable `lastActionId`, nullable `state` |
 | `roomState` | shared `room` only |
 | `seatReplaced` | `roomId`; old binding closes with code 4001 |
@@ -202,7 +203,7 @@ spawn/tie assignment uses actual round count rather than command epoch.
 
 Shared room views and snapshot metadata also carry the complete checked `settings`,
 `settingsRevision`, nullable original `settingsEditor`, and `availableItems`. Settings also
-carry `enabledItems`; v10 remains pinned to its 21-item Bracelet catalog while active v12
+carry `enabledItems`; v10 remains pinned to its 21-item Bracelet catalog while active v13
 has the unchanged 22-item catalog beginning with Kick, Punch, Bracelet and Wall Pass, with Oil Barrel immediately
 before Teleporter. New live rooms enable the full available catalog and every supported subset is allowed.
 Only actual changes increment
@@ -281,5 +282,5 @@ failure does not advance revision or discard reports. Current Expanded rules als
 and Contact bombs when their corresponding items are enabled; archived v6 continues to reject
 untimed live and event-only records.
 
-Room mode and per-seat controller/connection metadata follow the [v12 contract](protocol-v12.md).
+Room mode and per-seat controller/connection metadata follow the [v13 contract](protocol-v13.md).
 Solo admits only its human creator; its server-controlled seat has no network capability.

@@ -8,12 +8,11 @@ These Rust contracts support the [solo opponent](single-player.md) and the broad
 
 `core::room::RoomMode` derives controller kinds independently of occupancy and socket state.
 Human duels have two human controllers. Solo fixes the human at seat One and the CPU at seat
-Two. `CpuProfile::CURRENT` identifies `UtilityV15` with `Standard` difficulty;
-`INITIAL`, `PULSE_V2`, `ROUTE_V3`, `PLANT_V4`, `GOALS_V5`, `WEAPONS_V6`, `WALL_PASS_V7`, `RESPONSIVE_V8`, `ORIGIN_V9`, `GUIDED_V10`, `CLEAR_GAP_V11`, `STEERING_V12`, `BRACELET_V13` and `PUNCH_V14` preserve V1–V14
-replay identities. These are
-policy identities, not claims about measured strength. Seeds are outside participant metadata.
-Live owner construction accepts only the current profile; retaining a historical replay
-identity does not re-enable that older policy for new matches.
+Two. `CpuProfile::CURRENT` selects Standard and `CURRENT_EASY` selects Easy in the current
+policy family. Named archive constants preserve historical Standard replay identities. Policy
+identity describes decision semantics, not measured strength; seeds stay private. Live owner
+construction accepts only the two exact current profiles. Retaining a historical replay identity
+does not re-enable that older policy for new matches.
 
 `core::cpu` accepts neutral observations and emits movement or Stop, with at most one Bomb or
 Equipment intent. Intent carries no credentials, seat authority, readiness, settings mutation
@@ -44,12 +43,22 @@ request may submit its ordinary Stop. History has bounded, deterministic retenti
 counted in logical units rather than hardware milliseconds.
 
 Tie-breaking uses its own seeded ChaCha stream and never draws from arena generation. Small
-fixture policies remain test-only; production uses UtilityV15. Replays consume recorded accepted
+fixture policies remain test-only; production uses the current policy family. Replays consume recorded accepted
 actions rather than invoking a policy again. Production journal allocation remains disabled;
 explicit solo recording adds format-3 header provenance while preserving formats 1/2 and
 accepted-input record capacity.
-Policy versions 1–15 are accepted only with their matching profile; new recordings retain the
-actual room profile. All fifteen policies share the unchanged v12 room shape.
+Historical policy identities accept only their matching Standard profile; the current family
+supports both levels. New recordings retain the actual room profile. The live v13 room shape
+publishes the chosen difficulty; archived v12 remains Standard-only.
+
+## Difficulty cadence
+
+Standard does not add delays. Easy arms one bounded pause after accepted ordinary navigation,
+starting its 12-tick deadline once the stopped pose is confirmed. Repeated observations cannot
+restart it. Deferral happens before a fresh request, preserving six-tick result admission and
+exact manual execution times. Active escapes/routes/pulses and unavailable or newly dangerous
+observations bypass the pause. Reconnect preserves cadence; world/command-epoch changes reset
+it. Goal scores, RNG, worker budgets and known-hazard mechanics are shared.
 
 ## Goal guidance
 
@@ -65,7 +74,7 @@ replacing it with an unused capability. Remembered ordinary next steps use the s
 check. Supported Piercing/Power charges can be goals for an empty slot or replacement of an
 unsupported charge. Duplicate charges remain transitable without collection priority; navigation
 does not seek a replacement for a usable charge, while both supported alternatives remain
-transitable. Heart uses a separate slot.
+transitable. The weapon slot is separate from equipment.
 Stable ordering and the independent RNG resolve genuine ties; exhausted work yields Stop.
 
 This is static guidance. Existing hazard checks, planting certificates and pickup-changing-path

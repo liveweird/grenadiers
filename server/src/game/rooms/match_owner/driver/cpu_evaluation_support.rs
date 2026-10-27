@@ -18,7 +18,6 @@ mod fixture;
 mod script;
 #[path = "cpu_evaluation_support_tests.rs"]
 mod tests;
-
 const SOURCE: &str = "generated-v2/test-recording-enabled";
 const SCHEDULE: &str = "pump-max32,poll,script,driver-tick";
 
@@ -130,6 +129,7 @@ pub(super) struct EvaluationTrace {
     pub(super) accepted_manual_actions: usize,
     pub(super) accepted_actions: Vec<(Tick, SeatId, ReplayAction)>,
     pub(super) first_observed_cpu_bomb_placed_tick: Option<Tick>,
+    pub(super) observed_cpu_bomb_placements: Vec<ObservedBombPlacement>,
     pub(super) first_observed_cpu_pickup_tick: Option<Tick>,
     pub(super) first_observed_human_bomb_placement: Option<ObservedBombPlacement>,
     pub(super) visited_cells: Vec<CellId>,
@@ -202,6 +202,7 @@ struct Accumulator {
     stationary_ticks: u64,
     previous_position: Option<Position>,
     first_bomb: Option<Tick>,
+    cpu_bombs: Vec<ObservedBombPlacement>,
     first_pickup: Option<Tick>,
     first_human_bomb: Option<ObservedBombPlacement>,
     planning: PlanningMetrics,
@@ -228,6 +229,7 @@ impl Accumulator {
             stationary_ticks: 0,
             previous_position: Some(initial_position),
             first_bomb: None,
+            cpu_bombs: Vec::new(),
             first_pickup: None,
             first_human_bomb: None,
             planning: PlanningMetrics::default(),
@@ -336,6 +338,7 @@ impl Accumulator {
                 accepted_manual_actions: manual,
                 accepted_actions,
                 first_observed_cpu_bomb_placed_tick: self.first_bomb,
+                observed_cpu_bomb_placements: self.cpu_bombs,
                 first_observed_cpu_pickup_tick: self.first_pickup,
                 first_observed_human_bomb_placement: self.first_human_bomb,
                 visited_cells: self.visited.into_iter().collect(),
@@ -358,6 +361,11 @@ impl Accumulator {
     ) {
         if let Some(frame) = driver.last.frame(SeatId::Two) {
             let (bomb, pickup) = events::cpu_event_ticks(&frame, cpu_id);
+            if let Some(placement) = events::bomb_placement(&frame, cpu_id)
+                && self.cpu_bombs.last() != Some(&placement)
+            {
+                self.cpu_bombs.push(placement);
+            }
             if self.first_bomb.is_none() {
                 self.first_bomb = bomb;
             }

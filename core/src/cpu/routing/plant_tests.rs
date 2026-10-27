@@ -216,9 +216,57 @@ fn confirmation_binds_a_real_id_or_proves_exact_absence() {
         Ok(PlantPresence::Absent)
     );
     let wrong = current_scene(&basis, &certificate, Tick(8), Some((EntityId(401), 7)));
+    assert_eq!(certificate.observed_placement_id(&basis, &wrong), Ok(None));
     assert_eq!(
         certificate.confirm(&basis, &wrong),
         Err(PlantFailure::SceneMismatch)
+    );
+}
+
+#[test]
+fn observed_placement_is_independent_of_unrelated_scene_changes() {
+    let (basis, certificate) = plan(MovementIntent::Direction(Direction::East));
+    let mut changed = current_scene(
+        &basis,
+        &certificate,
+        Tick(8),
+        Some((EntityId(450), certificate.placement().range)),
+    )
+    .into_parts();
+    changed.pickups.push(crate::cpu::ObservedPickup {
+        cell: crate::game::CellId::new(8, 7),
+        kind: crate::game::PickupKind::RemoteBomb,
+    });
+    let changed = Observation::new(changed).unwrap();
+    assert_eq!(
+        certificate.observed_placement_id(&basis, &changed),
+        Ok(Some(EntityId(450)))
+    );
+    assert_eq!(
+        certificate.confirm(&basis, &changed),
+        Err(PlantFailure::SceneMismatch)
+    );
+
+    let before_birth = current_scene(&basis, &certificate, Tick(6), None);
+    assert_eq!(
+        certificate.observed_placement_id(&basis, &before_birth),
+        Ok(None)
+    );
+    let mut paused = changed.into_parts();
+    let BombKnowledge::Visible(bombs) = &mut paused.bombs else {
+        unreachable!()
+    };
+    let ObservedBombTrigger::Timed {
+        paused: trigger_paused,
+        ..
+    } = &mut bombs[0].trigger
+    else {
+        unreachable!()
+    };
+    *trigger_paused = true;
+    assert_eq!(
+        certificate.observed_placement_id(&basis, &Observation::new(paused).unwrap()),
+        Ok(None)
     );
 }
 

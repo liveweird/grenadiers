@@ -1,8 +1,6 @@
 use crate::cpu::forecast::{ForecastLimits, ObservedHazardMemory, TickWindow, forecast};
 use crate::cpu::policy::{ControlPlan, UtilityMemory};
-use crate::cpu::routing::{
-    PulseLease, PulseOriginGrace, PulseRequest, RouteMode, certify_escape_pulse,
-};
+use crate::cpu::routing::{PulseOriginGrace, PulseRequest, RouteMode, certify_escape_pulse};
 use crate::cpu::{Intent, MovementIntent, Observation, WorkBudget};
 use crate::game::{Direction, Tick};
 
@@ -18,6 +16,9 @@ pub(super) fn plan(
 ) -> Option<SurvivalPlan> {
     origin.retain_stopped(observation)?;
     let forecast = forecast(observation, history, None, ForecastLimits::default(), work).ok()?;
+    let actor = super::compatibility::actor(observation)?;
+    let target = super::steering::origin_target(observation, &forecast, origin.cell(), work)?;
+    let current_distance = super::steering::distance(actor.position, target);
     let basis = observation.parts().tick.0;
     let start_window = TickWindow {
         start: Tick(basis.checked_add(1)?),
@@ -61,7 +62,10 @@ pub(super) fn plan(
             ) else {
                 continue;
             };
-            let distance = distance_from_origin(&lease, origin.cell());
+            let score = super::steering::score(&lease, target);
+            if score >= current_distance {
+                continue;
+            }
             let candidate = SurvivalPlan {
                 control: ControlPlan {
                     intent: Intent {
@@ -74,11 +78,8 @@ pub(super) fn plan(
                 lease: Some(lease),
                 execution: None,
             };
-            if best
-                .as_ref()
-                .is_none_or(|(previous, _)| distance > *previous)
-            {
-                best = Some((distance, candidate));
+            if best.as_ref().is_none_or(|(previous, _)| score < *previous) {
+                best = Some((score, candidate));
             }
         }
         if best.is_some() {
@@ -86,24 +87,4 @@ pub(super) fn plan(
         }
     }
     best.map(|(_, plan)| plan)
-}
-
-fn distance_from_origin(lease: &PulseLease, origin: crate::game::CellId) -> u32 {
-    let bounds = lease.pose_after(lease.hold_ticks());
-    let center = crate::game::Position::center(origin);
-    let dx = if center.x < bounds.min().x {
-        center.x.abs_diff(bounds.min().x)
-    } else if center.x > bounds.max().x {
-        center.x.abs_diff(bounds.max().x)
-    } else {
-        0
-    };
-    let dy = if center.y < bounds.min().y {
-        center.y.abs_diff(bounds.min().y)
-    } else if center.y > bounds.max().y {
-        center.y.abs_diff(bounds.max().y)
-    } else {
-        0
-    };
-    dx.saturating_add(dy)
 }

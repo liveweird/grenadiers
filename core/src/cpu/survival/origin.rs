@@ -1,5 +1,5 @@
 use crate::cpu::routing::{PlantCertificate, PlantPresence};
-use crate::cpu::{BombKnowledge, MemoryKey, Observation, ObservedBomb, ObservedBombTrigger};
+use crate::cpu::{BombKnowledge, MemoryKey, Observation};
 use crate::game::arena::Terrain;
 use crate::game::geometry::position_overlaps_cell;
 use crate::game::{Direction, EntityId, Position, Tick};
@@ -14,8 +14,13 @@ impl CommittedRoute {
             return None;
         }
         let plant = self.plant.as_ref()?;
-        let PlantPresence::Present(actual_id) = plant.presence else {
-            return None;
+        let actual_id = match plant.presence {
+            PlantPresence::Present(id) => id,
+            PlantPresence::Awaiting => plant
+                .certificate
+                .observed_placement_id(&self.basis, current)
+                .ok()??,
+            PlantPresence::Absent => return None,
         };
         let expected = self
             .certificate
@@ -142,30 +147,5 @@ pub(super) fn valid_origin(origin: &PlantEscapeOrigin, current: &Observation) ->
         && bombs
             .iter()
             .find(|bomb| bomb.id == origin.actual_id)
-            .is_some_and(|bomb| matches_placement(bomb, placement, parts.tick))
-}
-
-fn matches_placement(
-    bomb: &ObservedBomb,
-    placement: &crate::cpu::routing::PlannedBomb,
-    tick: Tick,
-) -> bool {
-    let remaining = placement
-        .detonates_at
-        .0
-        .checked_sub(tick.0)
-        .filter(|value| *value > 0)
-        .and_then(|value| u16::try_from(value).ok());
-    bomb.placed_at == placement.placed_at
-        && bomb.cell == placement.cell
-        && bomb.owner == placement.owner
-        && bomb.range == placement.range
-        && bomb.blast == placement.blast
-        && matches!(
-            bomb.trigger,
-            ObservedBombTrigger::Timed {
-                remaining_ticks,
-                paused: false
-            } if Some(remaining_ticks) == remaining
-        )
+            .is_some_and(|bomb| placement.matches_observed(bomb, parts.tick))
 }

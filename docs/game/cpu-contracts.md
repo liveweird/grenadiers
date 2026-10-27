@@ -8,8 +8,8 @@ These Rust contracts support the [solo opponent](single-player.md) and the broad
 
 `core::room::RoomMode` derives controller kinds independently of occupancy and socket state.
 Human duels have two human controllers. Solo fixes the human at seat One and the CPU at seat
-Two. `CpuProfile::CURRENT` identifies `UtilityV9` with `Standard` difficulty;
-`INITIAL`, `PULSE_V2`, `ROUTE_V3`, `PLANT_V4`, `GOALS_V5`, `WEAPONS_V6`, `WALL_PASS_V7` and `RESPONSIVE_V8` preserve V1–V8
+Two. `CpuProfile::CURRENT` identifies `UtilityV10` with `Standard` difficulty;
+`INITIAL`, `PULSE_V2`, `ROUTE_V3`, `PLANT_V4`, `GOALS_V5`, `WEAPONS_V6`, `WALL_PASS_V7`, `RESPONSIVE_V8` and `ORIGIN_V9` preserve V1–V9
 replay identities. These are
 policy identities, not claims about measured strength. Seeds are outside participant metadata.
 Live owner construction accepts only the current profile; retaining a historical replay
@@ -44,12 +44,12 @@ request may submit its ordinary Stop. History has bounded, deterministic retenti
 counted in logical units rather than hardware milliseconds.
 
 Tie-breaking uses its own seeded ChaCha stream and never draws from arena generation. Small
-fixture policies remain test-only; production uses UtilityV9. Replays consume recorded accepted
+fixture policies remain test-only; production uses UtilityV10. Replays consume recorded accepted
 actions rather than invoking a policy again. Production journal allocation remains disabled;
 explicit solo recording adds format-3 header provenance while preserving formats 1/2 and
 accepted-input record capacity.
-Policy versions 1/2/3/4/5/6/7/8/9 are accepted only with their matching profile; new recordings retain the
-actual room profile. All nine policies share the unchanged v12 room shape.
+Policy versions 1/2/3/4/5/6/7/8/9/10 are accepted only with their matching profile; new recordings retain the
+actual room profile. All ten policies share the unchanged v12 room shape.
 
 ## Goal guidance
 
@@ -215,14 +215,19 @@ the controller can retain an opaque origin record from the route's exact current
 live bomb, then submit ordinary Stop. Fresh planning uses the current checked observation and
 unchanged forecast to prove short escape pulses. All seven admission lanes, their stopped waits,
 movement and stopped suffix retain the normal lethal/uncertainty checks. Conditional motion keeps
-the three-update cap and named stationary assumptions.
+the three-update cap and named stationary assumptions. Guidance selects a legal exit from the
+fixed origin through the shared refuge search. Every admitted pulse must improve its worst-case
+endpoint distance toward that exit; necessary turn alignment counts as progress. The selected
+guidance never authorizes movement without a fresh pulse proof.
 
 The origin exception applies only where floor, Oil, soft-block and bomb checks prove that the
 matching sole bomb contributes the blocking interval. Every lane permanently withdraws the
 exception at footprint exit. Actor/loadout/effect, pose, own-bomb signature, world or command
 changes withdraw provenance; unknown bomb vision also prevents its use. A confirmed route is the
-source of this record, rather than arbitrary overlap or private simulation state. Legacy planting
-and unconfirmed placement do not issue it.
+source of this record, rather than arbitrary overlap or private simulation state. Legacy planting does not issue it. An Awaiting certificate can issue origin only when a
+unique newly observed bomb matches its exact certified birth, actor and pose. Missing, ambiguous,
+mismatched or explicitly absent placement grants no record. Whole-scene confirmation and route
+invalidation remain strict even when that independent birth check succeeds.
 
 The controller retains the record only through checked pulse or settled Stop observations.
 Worker results must match its still-active origin before input or RNG can commit; late or cancelled

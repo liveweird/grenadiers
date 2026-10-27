@@ -2,6 +2,20 @@
 
 ## [Unreleased]
 
+## 0.3.91 — 2026-10-27
+
+### Fixed
+
+- Recognize an exact certified placement for fresh escape recovery when an unrelated item
+  appears in the first confirmation snapshot, retaining whole-scene route invalidation.
+- Guide recovery toward a stable legal exit with strictly improving pulse endpoints,
+  allowing turn alignment without repeated reversal or wallward movement.
+
+### Changed
+
+- Identify observed placement and directed escape as UtilityV10; retain V1–V9 accepted-input replay
+  and the unchanged v12 wire shape.
+
 ## 0.3.90 — 2026-10-27
 
 ### Fixed

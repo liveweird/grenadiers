@@ -64,6 +64,11 @@ Power charges use the same checked escape and consumption rules; Remote and Land
 This opponent does not predict new enemy actions or promise
 survival against hidden facts.
 
+Held Wall Pass lets the CPU route through known intact soft blocks. It keeps that equipment
+rather than replacing it while relying on the passage. Known Oil remains conservatively avoided;
+newly destroyed blocks stay fenced until their contents can be handled from fresh information.
+Wall Pass never grants permission to plant inside a block or ignore fire, bombs or hard walls.
+
 The [CPU contracts](cpu-contracts.md) explain execution and privacy; the
 [accepted design](single-player-cpu.md) specifies the broader model. Remaining work and tuning
 belong only in the [backlog](../../BACKLOG.md#single-player).

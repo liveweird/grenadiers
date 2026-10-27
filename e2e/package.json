@@ -15,6 +15,7 @@
     "test:heart": "playwright test --config playwright.heart.config.ts",
     "test:shield": "playwright test --config playwright.shield.config.ts",
     "test:controls": "playwright test --config playwright.controls.config.ts",
+    "test:cpu-item": "playwright test --config playwright.cpu-item.config.ts",
     "test:headed": "playwright test --headed",
     "test:ui": "playwright test --ui",
     "install:browsers": "playwright install chromium",

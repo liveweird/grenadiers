@@ -8,8 +8,9 @@ These Rust contracts support the [solo opponent](single-player.md) and the broad
 
 `core::room::RoomMode` derives controller kinds independently of occupancy and socket state.
 Human duels have two human controllers. Solo fixes the human at seat One and the CPU at seat
-Two. `CpuProfile::CURRENT` identifies `UtilityV6` with `Standard` difficulty;
-`INITIAL`, `PULSE_V2`, `ROUTE_V3`, `PLANT_V4` and `GOALS_V5` preserve V1–V5 replay identities. These are
+Two. `CpuProfile::CURRENT` identifies `UtilityV7` with `Standard` difficulty;
+`INITIAL`, `PULSE_V2`, `ROUTE_V3`, `PLANT_V4`, `GOALS_V5` and `WEAPONS_V6` preserve V1–V6
+replay identities. These are
 policy identities, not claims about measured strength. Seeds are outside participant metadata.
 Live owner construction accepts only the current profile; retaining a historical replay
 identity does not re-enable that older policy for new matches.
@@ -43,12 +44,12 @@ request may submit its ordinary Stop. History has bounded, deterministic retenti
 counted in logical units rather than hardware milliseconds.
 
 Tie-breaking uses its own seeded ChaCha stream and never draws from arena generation. Small
-fixture policies remain test-only; production uses UtilityV6. Replays consume recorded accepted
+fixture policies remain test-only; production uses UtilityV7. Replays consume recorded accepted
 actions rather than invoking a policy again. Production journal allocation remains disabled;
 explicit solo recording adds format-3 header provenance while preserving formats 1/2 and
 accepted-input record capacity.
-Policy versions 1/2/3/4/5/6 are accepted only with their matching profile; new recordings retain the
-actual room profile. All six policies share the unchanged v12 room shape.
+Policy versions 1/2/3/4/5/6/7 are accepted only with their matching profile; new recordings retain the
+actual room profile. All seven policies share the unchanged v12 room shape.
 
 ## Goal guidance
 
@@ -95,8 +96,8 @@ half-open lethal/blocking intervals, separate safe gaps and persistent Oil fire.
 chains see unchanged blockers; later waves see destruction. Destroyed soft-block cells remain
 blocked for traversal until newly revealed contents are observed.
 Neutral motion clips only against permanent terrain and arena boundaries. Sweeps touching
-soft blocks or unlit Oil are rejected instead of relying on temporary collision; this remains
-conservative when WallPass or a predicted explosion changes passability during a held input.
+soft blocks without usable Wall Pass, or touching known unlit Oil, are rejected rather than
+relying on temporary collision. Equipped Wall Pass uses the intact-block rules below.
 
 Nominal stationary hazards are separate from conservative motion/trigger/pause uncertainty.
 Unknown motion can advance immediately and then every ten updates. Uncertain chain outcomes
@@ -192,6 +193,25 @@ and Power can threaten a diagonal cell within its diamond. Field construction an
 are charged before accepting utility; exhaustion preserves the checked fallback. Remote, Landmine
 and any live own Remote remain unsupported by timed placement because their triggers differ.
 Certified movement still rejects pickup-changing paths and never assumes hidden facts.
+
+## Held Wall Pass
+
+One capability check requires rules v5, enabled Wall Pass and a visible living recipient holding
+it. Static guidance and certified motion may cross known intact soft blocks or begin stopped
+inside one. Hard walls, bounds, bombs, mines, fire, uncertainty and known unlit Oil remain strict;
+the opponent conservatively avoids Oil even though the game capability permits passage.
+
+Forecast construction omits only intact-block collision for that recipient. A predicted block
+destruction adds blocking from its destruction tick through the horizon, including after finite
+flames expire: concealed pickups or Oil cannot be assumed absent. Combined hazard checks and
+blast geometry are unchanged. Crossing an intact block neither reveals nor collects its contents.
+Equipment changes invalidate execution; the policy never invents private exit grace.
+
+Opening goals remain legal empty floor. Wall Pass holders preserve the capability instead of
+seeking or crossing replacement equipment; Heart holders likewise retain Heart. Duplicate
+Wall Pass remains harmless ordinary transit. Weapons use their independent slot policy.
+Planting inside a block is refused. The first certified move may leave a block and plant on free
+floor; active Wall Pass uses complete timed planting proof rather than the legacy shortcut.
 
 ## Focused verification
 

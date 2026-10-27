@@ -54,3 +54,7 @@ mod plant_failure_tests;
 #[cfg(test)]
 #[path = "weapon_plant_tests.rs"]
 mod weapon_plant_tests;
+
+#[cfg(test)]
+#[path = "wall_pass_plant_tests.rs"]
+mod wall_pass_plant_tests;

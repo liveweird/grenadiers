@@ -1,7 +1,13 @@
 use std::collections::{BTreeMap, BTreeSet};
 
-use crate::cpu::{BombKnowledge, CpuRng, Intent, MemoryKey, MovementIntent, Observation};
-use crate::game::{self, BombTrigger, CellId, EffectKind, EntityId, OilState, SeatId, Tick, World};
+use crate::cpu::policy::UtilityMemory;
+use crate::cpu::{
+    BombKnowledge, CpuRng, Intent, MemoryKey, MovementIntent, Observation, WorkBudget,
+};
+use crate::game::{
+    self, BombTrigger, CellId, Direction, EffectKind, EntityId, Equipment, InputAction, OilState,
+    PickupKind, SeatId, SeatInput, Tick, World,
+};
 use crate::protocol::{Cell, Seat};
 use crate::room::RoomSettings;
 
@@ -97,6 +103,110 @@ fn concealed_differences_are_observation_and_decision_inert_for_both_seats() {
             MovementIntent::Direction(_)
         ));
     }
+}
+
+#[derive(Clone, Copy)]
+enum ConcealedUnderBlock {
+    Empty,
+    Pickup,
+    Oil,
+}
+
+fn stopped_inside_intact_block(kind: ConcealedUnderBlock) -> (crate::game::State, RoomSettings) {
+    let start = CellId::new(1, 1);
+    let block = CellId::new(3, 1);
+    let settings = RoomSettings::DEFAULT.with_enabled_items(enabled(&[
+        ItemId::WallPass,
+        ItemId::Shield,
+        ItemId::OilBarrel,
+    ]));
+    let arena = game::test_support::open_border_arena(BTreeSet::from([block]));
+    let concealed = matches!(kind, ConcealedUnderBlock::Pickup)
+        .then_some((block, PickupKind::Shield))
+        .into_iter()
+        .collect();
+    let oil = matches!(kind, ConcealedUnderBlock::Oil)
+        .then_some((block, OilState::Concealed))
+        .into_iter()
+        .collect();
+    let world = World::with_pickups_and_oil(
+        arena,
+        concealed,
+        BTreeMap::new(),
+        BTreeMap::from([(start, PickupKind::WallPass)]),
+        oil,
+    )
+    .unwrap();
+    let mut state = state(settings, world);
+
+    state.step(&[]).unwrap();
+    assert_eq!(
+        state.actors()[SeatId::One.index()].inventory().equipment(),
+        Some(Equipment::WallPass)
+    );
+    state
+        .step(&[SeatInput {
+            seat: SeatId::One,
+            action: InputAction::Press(Direction::East),
+        }])
+        .unwrap();
+    for _ in 0..31 {
+        state.step(&[]).unwrap();
+    }
+    state
+        .step(&[SeatInput {
+            seat: SeatId::One,
+            action: InputAction::Release(Direction::East),
+        }])
+        .unwrap();
+
+    assert_eq!(
+        state.actors()[SeatId::One.index()].position().cell(),
+        Some(block)
+    );
+    assert!(state.world().arena().blocks().contains(&block));
+    assert!(state.world().exposed_pickups().is_empty());
+    (state, settings)
+}
+
+#[test]
+fn wall_pass_crossing_an_intact_block_does_not_observe_or_plan_from_concealed_contents() {
+    let mut observations = Vec::new();
+    let mut plans = Vec::new();
+    let key = MemoryKey {
+        world: WORLD,
+        cpu_seat: SeatId::One,
+    };
+
+    for kind in [
+        ConcealedUnderBlock::Empty,
+        ConcealedUnderBlock::Pickup,
+        ConcealedUnderBlock::Oil,
+    ] {
+        let (state, settings) = stopped_inside_intact_block(kind);
+        let observation = observe_cpu_recipient(
+            &bind_capture(&capture_expanded(&state, &[]).unwrap(), settings),
+            Seat::One,
+            WORLD,
+        )
+        .unwrap();
+        let mut rng = CpuRng::from_seed(key, [87; 32]);
+        let plan = crate::cpu::policy::plan(
+            &observation,
+            &UtilityMemory::new(key),
+            &mut rng,
+            &mut WorkBudget::new(65_536),
+        )
+        .unwrap();
+        observations.push(observation);
+        plans.push(plan);
+    }
+
+    assert_eq!(observations[0], observations[1]);
+    assert_eq!(observations[0], observations[2]);
+    assert_eq!(plans[0], plans[1]);
+    assert_eq!(plans[0], plans[2]);
+    assert_ne!(plans[0].intent, Intent::STOP);
 }
 
 fn swap_private_bombs(capture: &mut ExpandedCapture) {

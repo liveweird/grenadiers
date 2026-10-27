@@ -102,7 +102,8 @@ pub(super) fn static_blocked(observation: &Observation, cell: CellId) -> bool {
     let parts = observation.parts();
     let index = usize::from(cell.row) * usize::from(ARENA_WIDTH) + usize::from(cell.column);
     parts.arena.terrain[index] == Terrain::Wall
-        || parts.arena.blocks.contains(&cell)
+        || (!crate::cpu::capabilities::can_pass_known_soft_blocks(observation)
+            && parts.arena.blocks.contains(&cell))
         || parts
             .oil
             .iter()

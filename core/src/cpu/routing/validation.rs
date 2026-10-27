@@ -125,11 +125,13 @@ fn position_in_arena(position: Position) -> bool {
 
 fn overlaps_static_blocker(observation: &Observation, position: Position) -> bool {
     let parts = observation.parts();
+    let pass_blocks = crate::cpu::capabilities::can_pass_known_soft_blocks(observation);
     (0..ARENA_HEIGHT).any(|row| {
         (0..ARENA_WIDTH).any(|column| {
             let cell = crate::game::CellId::new(column, row);
             let index = usize::from(row) * usize::from(ARENA_WIDTH) + usize::from(column);
-            (parts.arena.terrain[index] == Terrain::Wall || parts.arena.blocks.contains(&cell))
+            (parts.arena.terrain[index] == Terrain::Wall
+                || (!pass_blocks && parts.arena.blocks.contains(&cell)))
                 && position_overlaps_cell(position, cell)
         })
     }) || parts.oil.iter().any(|oil| {

@@ -3,6 +3,7 @@
 //! Policies consume recipient-filtered [`Observation`] values rather than
 //! authoritative simulation state and return only ordinary [`Intent`] values.
 
+mod capabilities;
 pub mod forecast;
 mod identity;
 mod intent;

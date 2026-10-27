@@ -21,6 +21,8 @@ mod goal_game_tests;
 #[cfg(test)]
 mod goal_tests;
 #[cfg(test)]
+mod ordinary_turn_tests;
+#[cfg(test)]
 mod simulation_tests;
 #[cfg(test)]
 pub(crate) mod tests;

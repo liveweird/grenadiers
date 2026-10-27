@@ -106,6 +106,7 @@ fn current_and_original_cpu_policies_share_the_v12_room_shape() {
         CpuProfile::RESPONSIVE_V8,
         CpuProfile::ORIGIN_V9,
         CpuProfile::GUIDED_V10,
+        CpuProfile::CLEAR_GAP_V11,
         CpuProfile::CURRENT,
     ] {
         let current =

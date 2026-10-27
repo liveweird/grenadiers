@@ -324,3 +324,7 @@ mod late_escape_recovery_tests;
 #[cfg(test)]
 #[path = "cpu_pressure_progress_tests.rs"]
 mod pressure_progress_tests;
+
+#[cfg(test)]
+#[path = "cpu_turn_alignment_tests.rs"]
+mod turn_alignment_tests;

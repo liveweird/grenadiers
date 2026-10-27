@@ -80,6 +80,10 @@ rather than replacing it while relying on the passage. Known Oil remains conserv
 newly destroyed blocks stay fenced until their contents can be handled from fresh information.
 Wall Pass never grants permission to plant inside a block or ignore fire, bombs or hard walls.
 
+Ordinary navigation aligns within its current cell before attempting a turn outside the configured
+turn tolerance. It keeps the chosen next cell, then decides the turn from a fresh stopped pose.
+Alignment uses the normal movement speed and collision rules.
+
 The [CPU contracts](cpu-contracts.md) explain execution and privacy; the
 [accepted design](single-player-cpu.md) specifies the broader model. Remaining work and tuning
 belong only in the [backlog](../../BACKLOG.md#single-player).

@@ -10,10 +10,13 @@ use super::execution::follow_committed_escape;
 use super::goals::{select, transit_allowed};
 use super::hazards::{immediately_safe, planting_supported, unsupported_control_effect};
 use super::movement::{
-    STEPS, direction, hold_ticks, input_direction, offset, pulse_minimum_distance,
+    STEPS, bounded_alignment_hold_ticks, direction, hold_ticks, input_direction, offset,
+    pulse_minimum_distance,
 };
 pub(super) use super::placement::alignment_direction;
-use super::placement::{centered_for_placement, placement_center_threshold};
+use super::placement::{
+    TurnAlignment, centered_for_placement, ordinary_turn_alignment, placement_center_threshold,
+};
 use super::{ControlPlan, MAX_HOLD_TICKS, MAX_ROUTE_CELLS, PolicyError, UtilityMemory};
 
 const PER_PULSE_IDLE_TICKS: u64 = 10;
@@ -64,7 +67,13 @@ pub fn plan(
         && immediately_safe(observation, next)
         && transit_allowed(observation, actor, next)
     {
-        return Ok(movement_plan(actor, current, next, advanced));
+        return Ok(movement_plan(
+            actor,
+            current,
+            next,
+            advanced,
+            parts.rules.settings.turn_assist_units() as u32,
+        ));
     }
 
     let can_prepare_bomb = adjacent_block(observation, current) && planting_supported(observation);
@@ -122,12 +131,14 @@ fn navigate(
             false,
         )));
     }
-    let desired = direction(current, next).ok_or(PolicyError::InvalidObservation)?;
-    Ok(ControlPlan {
-        intent: Intent::moving(input_direction(actor, desired)),
-        hold_ticks: hold_ticks(actor, next, desired),
-        next_memory: UtilityMemory::from_route(key, &[next], false),
-    })
+    direction(current, next).ok_or(PolicyError::InvalidObservation)?;
+    Ok(movement_plan(
+        actor,
+        current,
+        next,
+        UtilityMemory::from_route(key, &[next], false),
+        observation.parts().rules.settings.turn_assist_units() as u32,
+    ))
 }
 
 fn escape_route(
@@ -191,8 +202,21 @@ fn movement_plan(
     current: CellId,
     next: CellId,
     memory: UtilityMemory,
+    turn_tolerance: u32,
 ) -> ControlPlan {
     let desired = direction(current, next).unwrap_or(actor.heading);
+    if let TurnAlignment::Correct(correction) =
+        ordinary_turn_alignment(actor, current, desired, turn_tolerance)
+    {
+        return match bounded_alignment_hold_ticks(actor, current, correction, turn_tolerance) {
+            Some(hold_ticks) => ControlPlan {
+                intent: Intent::moving(input_direction(actor, correction)),
+                hold_ticks,
+                next_memory: memory,
+            },
+            None => ControlPlan::stop(memory),
+        };
+    }
     ControlPlan {
         intent: Intent::moving(input_direction(actor, desired)),
         hold_ticks: hold_ticks(actor, next, desired),

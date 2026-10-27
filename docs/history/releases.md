@@ -4,6 +4,52 @@ This archive preserves the older release records originally maintained in
 [`docs/releases.md`](../releases.md). Records remain in their original order; the current
 release procedure and current release record stay in the [release guide](../releases.md).
 
+## v0.3.83 — 2026-10-27
+
+[v0.3.83](https://github.com/liveweird/grenadiers/releases/tag/v0.3.83) adds complete bounded
+[timed CPU routes](../game/cpu-contracts.md#committed-timed-routes): several moves and waits share
+one checked program across exact admission-time lanes. The owner executes it without another
+worker result. Each move includes three stopped updates; missing post-Stop observations,
+rejected commands or missed deadlines invalidate the schedule. Expected bomb removals, blasts,
+flame expiry and known Oil ignition are distinguished from new hazards.
+
+The updated opponent is UtilityV3. V1/V2 recorded inputs remain readable and the v12 wire shape,
+rules 5, generator 2 and all 22 default items stay unchanged. Conditional routes retain explicit
+motion assumptions and never authorize planting. Existing clear-board movement and restricted
+CPU1 planting remain separate; broader ordinary planting is next in the
+[backlog](../../BACKLOG.md#single-player). New enemy actions and unknown facts can invalidate a plan.
+The injected-State driver escape and generation-journal replay are tested separately; this
+release does not claim a combined oracle.
+
+Final tested source is `58798266517582bf96b263fbd2655f9c405d54f9`. Independent reviews are clear
+after fixing concrete Oil, search dominance, clock, Stop-confirmation and admission issues.
+A pre-publication correction also prevents certificates from relying on temporary collision:
+neutral motion clips only permanent terrain/boundaries, while sweeps through soft blocks or
+unlit Oil are rejected. Actual-State regressions cover WallPass and mid-pulse destruction/
+ignition. The earlier passing source is retained as superseded evidence; acceptance below
+belongs to the corrected source.
+
+Full local Rust acceptance passes in 500.817s with all 4,194,304 masks in each of debug,
+release and official coverage, 32 partitions/four workers, zero retries and 37 raw profiles.
+Coverage is 23,552/25,629 lines (91.90%). The distinct
+[Linux debug/release run](https://github.com/liveweird/grenadiers/actions/runs/40422219725) passes.
+Formatting, Clippy, repository/source-size checks and dependency audits pass; both npm audits
+have zero vulnerabilities. Unchanged web/API/artwork/E2E/deployment/tooling inputs reuse their
+accepted full web (6,874 tests/97 files), coverage and static evidence; rebuilt served assets
+remain byte-identical to v0.3.82.
+
+Exact accepted image is
+`sha256:b7f7475fd87d0a47739dc7a7e6264a4342ac0953ff2b6c1bcd198bbb8b3ea580`.
+Pinned Trivy 0.74.0 reports zero fixable HIGH/CRITICAL findings. Compose passes ten native browser
+cases in 55.1s; Kubernetes passes ten in 55.6s. Actual Solo result/rematch/reconnect/leave,
+two-human play, Polish 320px accessibility, strict lobby/create, security/resources/probes and
+served-asset checks pass. Temporary projects/namespaces are removed. The exact image is promoted
+to localhost:8085 with v0.3.82 retained for rollback; restarting ends in-memory matches.
+
+Evidence remains under `target/quality-review/cpu2-v0383-*`; superseded evidence is explicitly
+prefixed `cpu2-v0383-pre-motion-*`. Distribution is a source prerelease and local accepted image,
+without a production registry or hosted-service claim.
+
 ## v0.3.82 — 2026-10-26
 
 [v0.3.82](https://github.com/liveweird/grenadiers/releases/tag/v0.3.82) improves the

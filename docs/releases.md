@@ -96,51 +96,52 @@ retain the previous immutable image reference for rollback. The runtime stage in
 rolling Debian package updates, so a later build may resolve newer packages and is not expected to
 be byte-identical; treat it as a new candidate with new evidence rather than reusing acceptance.
 
-## v0.3.83 — 2026-10-27
+## v0.3.84 — 2026-10-27
 
-[v0.3.83](https://github.com/liveweird/grenadiers/releases/tag/v0.3.83) adds complete bounded
-[timed CPU routes](game/cpu-contracts.md#committed-timed-routes): several moves and waits share
-one checked program across exact admission-time lanes. The owner executes it without another
-worker result. Each move includes three stopped updates; missing post-Stop observations,
-rejected commands or missed deadlines invalidate the schedule. Expected bomb removals, blasts,
-flame expiry and known Oil ignition are distinguished from new hazards.
+[v0.3.84](https://github.com/liveweird/grenadiers/releases/tag/v0.3.84) adds
+[certified ordinary planting](game/cpu-contracts.md#certified-ordinary-planting). One complete
+escape is proved against both a placed bomb and no physical placement: absence can change
+blast shielding and chains. The same bounded route continues without another worker or Bomb
+retry. First movement precedes placement; future bomb occupancy, consumed origin grace and
+absolute range/fuse modifiers follow the shared game rules.
 
-The updated opponent is UtilityV3. V1/V2 recorded inputs remain readable and the v12 wire shape,
-rules 5, generator 2 and all 22 default items stay unchanged. Conditional routes retain explicit
-motion assumptions and never authorize planting. Existing clear-board movement and restricted
-CPU1 planting remain separate; broader ordinary planting is next in the
-[backlog](../BACKLOG.md#single-player). New enemy actions and unknown facts can invalidate a plan.
-The injected-State driver escape and generation-journal replay are tested separately; this
-release does not claim a combined oracle.
+Early results remain in the existing bounded slot until exact admission. Scene, pose, actor,
+effect, epoch and deadline checks fence execution. Public observations bind the actual bomb ID
+or the absent outcome. Actual Driver tests cover accepted inputs whose simultaneous placement
+veto creates neither bomb, rejected movement/manual input and workerless continuation.
+Independent review is clear after correcting temporal flame insertion, opponent-Stopwatch
+freeze handling and the shared actor-invariant guard. Regressions cover absent-shielding danger,
+partial work exhaustion, modifier expiry and changed actor facts at both execution boundaries.
 
-Final tested source is `58798266517582bf96b263fbd2655f9c405d54f9`. Independent reviews are clear
-after fixing concrete Oil, search dominance, clock, Stop-confirmation and admission issues.
-A pre-publication correction also prevents certificates from relying on temporary collision:
-neutral motion clips only permanent terrain/boundaries, while sweeps through soft blocks or
-unlit Oil are rejected. Actual-State regressions cover WallPass and mid-pulse destruction/
-ignition. The earlier passing source is retained as superseded evidence; acceptance below
-belongs to the corrected source.
+The policy is UtilityV4; V1–V3 recorded inputs remain readable. The v12 wire shape, rules 5,
+generator 2 and all 22 default items are unchanged. Conditional routes never authorize planting.
+Stored special weapons and a live own Remote remain outside ordinary placement. Existing narrow
+CPU1 planting remains a guarded fallback. New enemy actions and unknown facts can invalidate a
+route. Injected-State driver execution and generation-journal replay are separate test oracles.
 
-Full local Rust acceptance passes in 500.817s with all 4,194,304 masks in each of debug,
-release and official coverage, 32 partitions/four workers, zero retries and 37 raw profiles.
-Coverage is 23,552/25,629 lines (91.90%). The distinct
-[Linux debug/release run](https://github.com/liveweird/grenadiers/actions/runs/40422219725) passes.
-Formatting, Clippy, repository/source-size checks and dependency audits pass; both npm audits
-have zero vulnerabilities. Unchanged web/API/artwork/E2E/deployment/tooling inputs reuse their
-accepted full web (6,874 tests/97 files), coverage and static evidence; rebuilt served assets
-remain byte-identical to v0.3.82.
+Final tested source is `af29f6a59e36c525379fb31534780b367fcfa48e`. Full local Rust acceptance
+passes in 481.898s: all 4,194,304 masks in each of debug, release and official coverage,
+32 partitions/four workers, zero retries and 37 raw profiles. Coverage is 24,331/26,509 lines
+(91.78%). The distinct [Linux run](https://github.com/liveweird/grenadiers/actions/runs/40426511318)
+passes, along with formatting, Clippy and repository/source-size checks. Exact unchanged external
+dependencies and frontend inputs reuse accepted audit, API/static and full web evidence
+(6,874 tests/97 files); the image is rebuilt and tested independently.
 
-Exact accepted image is
-`sha256:b7f7475fd87d0a47739dc7a7e6264a4342ac0953ff2b6c1bcd198bbb8b3ea580`.
+Accepted image is
+`sha256:5ef2bca49de2ba8ae664077a9a14e6d58036d4b8530576e478206283e0ad35cf`.
 Pinned Trivy 0.74.0 reports zero fixable HIGH/CRITICAL findings. Compose passes ten native browser
-cases in 55.1s; Kubernetes passes ten in 55.6s. Actual Solo result/rematch/reconnect/leave,
-two-human play, Polish 320px accessibility, strict lobby/create, security/resources/probes and
-served-asset checks pass. Temporary projects/namespaces are removed. The exact image is promoted
-to localhost:8085 with v0.3.82 retained for rollback; restarting ends in-memory matches.
+cases in 50.2s and Kubernetes ten in 51.8s. Solo lifecycle, human duel, Polish 320px accessibility,
+strict lobby/create, security/resources/probes and served-asset checks pass. Temporary projects
+and namespaces are removed. The exact image is promoted to localhost:8085 with v0.3.83 retained
+for rollback; restarting ends in-memory matches.
 
-Evidence remains under `target/quality-review/cpu2-v0383-*`; superseded evidence is explicitly
-prefixed `cpu2-v0383-pre-motion-*`. Distribution is a source prerelease and local accepted image,
-without a production registry or hosted-service claim.
+Canonical source-bound summary, official LCOV and image/runtime evidence remain under
+`target/quality-review/cpu2-v0384-*`; the console capture is partial because verbose tool output
+was truncated. Distribution remains a source prerelease and local image, without a production
+registry or hosted-service claim. Item tactics are next in the [backlog](../BACKLOG.md#single-player).
+
+<a id="v0383--2026-10-27"></a>
+The [v0.3.83 record](history/releases.md#v0383--2026-10-27) is preserved in release history.
 
 <a id="v0382--2026-10-26"></a>
 The [v0.3.82 record](history/releases.md#v0382--2026-10-26) is preserved in release history.

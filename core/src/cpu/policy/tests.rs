@@ -309,6 +309,7 @@ fn planted_route_crosses_the_visible_own_blast_toward_refuge() {
     let mut escape_parts = observation(origin).into_parts();
     escape_parts.bombs = BombKnowledge::Visible(vec![ObservedBomb {
         id: EntityId(9),
+        placed_at: crate::game::Tick(0),
         cell: origin,
         owner: EntityId(2),
         range: 2,

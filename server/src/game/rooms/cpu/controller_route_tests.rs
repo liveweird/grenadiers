@@ -58,6 +58,7 @@ fn detonation_fixture() -> (
     let mut parts = crate::game::rooms::cpu::tests::observation().into_parts();
     parts.bombs = BombKnowledge::Visible(vec![ObservedBomb {
         id: EntityId(90),
+        placed_at: grenadiers_core::game::Tick(0),
         cell: CellId::new(5, 5),
         owner: EntityId(1),
         range: 1,

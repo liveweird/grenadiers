@@ -138,6 +138,7 @@ fn unavailable_bombs_are_distinct_from_a_visible_empty_layer() {
 fn observation_rejects_structural_overflow_and_hidden_recipient() {
     let bomb = ObservedBomb {
         id: EntityId(9),
+        placed_at: crate::game::Tick(0),
         cell: CellId::new(1, 1),
         owner: EntityId(2),
         range: 2,

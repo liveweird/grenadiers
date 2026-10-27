@@ -113,6 +113,7 @@ pub enum ObservedBombTrigger {
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct ObservedBomb {
     pub id: EntityId,
+    pub placed_at: Tick,
     pub cell: CellId,
     pub owner: EntityId,
     pub range: u16,

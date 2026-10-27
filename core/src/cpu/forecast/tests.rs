@@ -80,6 +80,7 @@ pub(super) fn observation(tick: u64, bombs: BombKnowledge) -> Observation {
 pub(super) fn timed(id: u32, cell: CellId, remaining: u16, blast: BlastKind) -> ObservedBomb {
     ObservedBomb {
         id: EntityId(id),
+        placed_at: crate::game::Tick(0),
         cell,
         owner: EntityId(10),
         range: 3,

@@ -37,6 +37,7 @@ fn multi_leg_route() -> (Observation, RouteCertificate) {
     });
     parts.bombs = crate::cpu::BombKnowledge::Visible(vec![crate::cpu::ObservedBomb {
         id: crate::game::EntityId(90),
+        placed_at: crate::game::Tick(0),
         cell: CellId::new(5, 1),
         owner: crate::game::EntityId(1),
         range: 3,
@@ -157,6 +158,7 @@ fn leading_wait_requires_its_post_stop_snapshot_before_moving() {
     let mut parts = crate::cpu::routing::tests::observation(Vec::new(), Vec::new()).into_parts();
     parts.bombs = crate::cpu::BombKnowledge::Visible(vec![crate::cpu::ObservedBomb {
         id: crate::game::EntityId(90),
+        placed_at: crate::game::Tick(0),
         cell: CellId::new(2, 4),
         owner: crate::game::EntityId(1),
         range: 3,

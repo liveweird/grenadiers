@@ -46,6 +46,7 @@ fn committed_steps_never_emit_manual_actions_or_choose_new_goals() {
     let mut parts = observation(CellId::new(7, 7)).into_parts();
     parts.bombs = BombKnowledge::Visible(vec![ObservedBomb {
         id: EntityId(9),
+        placed_at: crate::game::Tick(0),
         cell: CellId::new(7, 7),
         owner: EntityId(2),
         range: 2,

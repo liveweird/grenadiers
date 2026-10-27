@@ -43,6 +43,7 @@ fn observed_with(block: bool, oil: bool, wall_pass: bool, bomb: bool) -> Observa
     if bomb {
         parts.bombs = BombKnowledge::Visible(vec![ObservedBomb {
             id: EntityId(90),
+            placed_at: crate::game::Tick(0),
             cell: CellId::new(5, 1),
             owner: EntityId(1),
             range: 2,

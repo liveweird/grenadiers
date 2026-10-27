@@ -224,6 +224,7 @@ fn visible_bomb_trigger_variants_are_exact_recipient_facts() {
             panic!("bomb layer must be available")
         };
         assert_eq!(bombs[0].trigger, expected);
+        assert_eq!(bombs[0].placed_at, Tick(0));
     }
 
     let settings = RoomSettings::DEFAULT.with_enabled_items(enabled(&[ItemId::Stopwatch]));
@@ -254,6 +255,32 @@ fn visible_bomb_trigger_variants_are_exact_recipient_facts() {
             paused: true,
         }
     );
+}
+
+#[test]
+fn bomb_placement_tick_remains_exact_across_later_publications() {
+    let settings = RoomSettings::DEFAULT;
+    let world = World::new(game::test_support::open_border_arena(BTreeSet::new()));
+    let mut state = state(settings, world);
+    state.step(&[]).unwrap();
+    state
+        .step(&[game::SeatInput {
+            seat: SeatId::Two,
+            action: game::InputAction::PlaceBomb,
+        }])
+        .unwrap();
+    let placed_at = state.tick();
+    for _ in 0..3 {
+        let observation = observe(&state, settings, Seat::Two);
+        let BombKnowledge::Visible(bombs) = &observation.parts().bombs else {
+            panic!("bomb layer must be available")
+        };
+        assert_eq!(bombs.len(), 1);
+        assert_eq!(bombs[0].placed_at, placed_at);
+        assert_eq!(bombs[0].id, state.world().bombs().values().next().unwrap().id());
+        state.step(&[]).unwrap();
+    }
+    assert_eq!(placed_at, Tick(2));
 }
 
 #[test]

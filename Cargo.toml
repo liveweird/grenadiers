@@ -3,7 +3,7 @@ members = ["core", "server"]
 resolver = "3"
 
 [workspace.package]
-version = "0.3.87"
+version = "0.3.88"
 edition = "2024"
 rust-version = "1.99.1"
 
@@ -12,7 +12,7 @@ axum = { version = "0.8", features = ["ws"] }
 futures-util = "0.3"
 # Exact: entropy API/platform changes affect credentials, room identity and private round seeds.
 getrandom = "=0.3.4"
-grenadiers-core = { path = "core", version = "=0.3.87" }
+grenadiers-core = { path = "core", version = "=0.3.88" }
 http-body-util = "0.1"
 jsonschema = { version = "0.33", default-features = false }
 # Exact: the ChaCha20 word stream is part of versioned arena generation and replay compatibility.

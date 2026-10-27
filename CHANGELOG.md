@@ -2,6 +2,18 @@
 
 ## [Unreleased]
 
+## 0.3.88 — 2026-10-27
+
+### Fixed
+
+- Resume CPU goal decisions after finite flame hazards instead of retaining an unnecessary
+  full-horizon wait; keep the complete hazard forecast and existing execution safeguards.
+- Allow ordinary CPU movement around static unlit Oil while preserving its collision checks.
+
+### Changed
+
+- Identify bounded responsiveness as UtilityV8, retaining V1–V7 input replay and wire v12.
+
 ## 0.3.87 — 2026-10-27
 
 ### Added

@@ -43,6 +43,11 @@ job, using short stops between moves and checking fresh observations against its
 When complete route planning fails, a checked single-pulse fallback can still make progress;
 that fallback does not guarantee completion of a later escape under worker delay.
 
+When only finite flames remain, a committed route covers their expiry and its execution
+margin, allowing a fresh decision afterward. Unlit Oil elsewhere does not suspend ordinary
+goal movement; its own cell remains an obstacle. Active bombs and burning Oil retain the
+longer conservative planning window.
+
 For useful ordinary, Piercing and Power bombs, the CPU can check a complete escape against both
 successful placement
 and no placement. It accounts for movement before planting, range/fuse modifiers and effect expiry,

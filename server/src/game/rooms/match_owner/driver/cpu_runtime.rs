@@ -283,3 +283,7 @@ mod weapon_tests;
 #[cfg(test)]
 #[path = "cpu_runtime_wall_pass_tests.rs"]
 mod wall_pass_tests;
+
+#[cfg(test)]
+#[path = "cpu_runtime_responsiveness_tests.rs"]
+mod responsiveness_tests;

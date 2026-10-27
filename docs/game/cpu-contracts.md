@@ -8,8 +8,8 @@ These Rust contracts support the [solo opponent](single-player.md) and the broad
 
 `core::room::RoomMode` derives controller kinds independently of occupancy and socket state.
 Human duels have two human controllers. Solo fixes the human at seat One and the CPU at seat
-Two. `CpuProfile::CURRENT` identifies `UtilityV7` with `Standard` difficulty;
-`INITIAL`, `PULSE_V2`, `ROUTE_V3`, `PLANT_V4`, `GOALS_V5` and `WEAPONS_V6` preserve V1–V6
+Two. `CpuProfile::CURRENT` identifies `UtilityV8` with `Standard` difficulty;
+`INITIAL`, `PULSE_V2`, `ROUTE_V3`, `PLANT_V4`, `GOALS_V5`, `WEAPONS_V6` and `WALL_PASS_V7` preserve V1–V7
 replay identities. These are
 policy identities, not claims about measured strength. Seeds are outside participant metadata.
 Live owner construction accepts only the current profile; retaining a historical replay
@@ -44,12 +44,12 @@ request may submit its ordinary Stop. History has bounded, deterministic retenti
 counted in logical units rather than hardware milliseconds.
 
 Tie-breaking uses its own seeded ChaCha stream and never draws from arena generation. Small
-fixture policies remain test-only; production uses UtilityV7. Replays consume recorded accepted
+fixture policies remain test-only; production uses UtilityV8. Replays consume recorded accepted
 actions rather than invoking a policy again. Production journal allocation remains disabled;
 explicit solo recording adds format-3 header provenance while preserving formats 1/2 and
 accepted-input record capacity.
-Policy versions 1/2/3/4/5/6/7 are accepted only with their matching profile; new recordings retain the
-actual room profile. All seven policies share the unchanged v12 room shape.
+Policy versions 1/2/3/4/5/6/7/8 are accepted only with their matching profile; new recordings retain the
+actual room profile. All eight policies share the unchanged v12 room shape.
 
 ## Goal guidance
 
@@ -193,6 +193,20 @@ and Power can threaten a diagonal cell within its diamond. Field construction an
 are charged before accepting utility; exhaustion preserves the checked fallback. Remote, Landmine
 and any live own Remote remain unsupported by timed placement because their triggers differ.
 Certified movement still rejects pickup-changing paths and never assumes hidden facts.
+
+## Finite-hazard responsiveness
+
+Unlit Oil is a static obstacle, so its presence elsewhere does not prevent ordinary movement
+when bomb knowledge is visibly empty and no flames or burning Oil remain. Existing transit
+and collision checks still exclude the Oil cell.
+
+For non-plant routes with visibly empty bombs and no burning Oil, the survival deadline covers
+the latest current flame expiry and at least the latest admission start plus the 12-update
+movement cap and 10-tick stopped margin, clipped to the forecast horizon. The existing seven
+admission lanes therefore require at least 29 ticks from the observation. The full 840-tick
+forecast remains intact; only the request deadline changes. Active bombs and persistent Oil
+fire retain the full horizon. Additional scans consume the same bounded work budget, and
+checked arithmetic failure withholds the plan. Planting proofs and execution guards are unchanged.
 
 ## Held Wall Pass
 

@@ -11,7 +11,10 @@ use super::route_replay::build_lanes;
 use super::route_time::add_tick;
 use super::safety::stationary_segment;
 use super::validation::Context;
-use super::{RouteAssurance, RouteCertificate, RouteFailure, RouteMode, RouteRequest, RouteStep};
+use super::{
+    MIN_FINAL_STOP_UPDATES, RouteAssurance, RouteCertificate, RouteFailure, RouteMode,
+    RouteRequest, RouteStep,
+};
 
 #[allow(clippy::too_many_arguments)]
 pub(super) fn apply_move(
@@ -124,7 +127,7 @@ pub(super) fn terminal(
             return Ok(false);
         }
         if let Some(stop) = lane.last_stop
-            && add_tick(stop, 10)? > request.survive_until
+            && add_tick(stop, MIN_FINAL_STOP_UPDATES)? > request.survive_until
         {
             return Ok(false);
         }

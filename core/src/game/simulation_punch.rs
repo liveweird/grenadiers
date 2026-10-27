@@ -20,25 +20,36 @@ impl State {
         tick: Tick,
         remote_reservations: &BTreeSet<EntityId>,
     ) {
-        // Multiplayer construction rejects Punch until pair conflict semantics are generalized.
-        let Ok(requests) = <&[Option<SeatId>; 2]>::try_from(requests) else {
-            return;
-        };
-        let claims = requests.map(|request| {
-            request.and_then(|seat| self.punch_claim(seat, tick, remote_reservations))
-        });
-        let accepted = match claims {
-            [Some(left), Some(right)] if left.bomb == right.bomb => {
-                if left.seat == self.assignment.priority_seat() {
-                    [Some(left), None]
-                } else {
-                    [None, Some(right)]
-                }
+        let claims: Vec<_> = requests
+            .iter()
+            .filter_map(|request| {
+                request.and_then(|seat| self.punch_claim(seat, tick, remote_reservations))
+            })
+            .collect();
+        let priority: Vec<_> = self.assignment.priority_order(self.player_count).collect();
+        let mut retained = Vec::new();
+        for seat in priority {
+            let Some(claim) = claims.iter().find(|claim| claim.seat == seat) else {
+                continue;
+            };
+            if retained
+                .iter()
+                .any(|winner: &PunchClaim| winner.bomb == claim.bomb)
+            {
+                continue;
             }
-            [Some(left), Some(right)] if left.landing == right.landing => [None, None],
-            _ => claims,
-        };
-        for claim in accepted.into_iter().flatten() {
+            retained.push(*claim);
+        }
+        let accepted: Vec<_> = retained
+            .iter()
+            .copied()
+            .filter(|claim| {
+                !retained
+                    .iter()
+                    .any(|other| other.bomb != claim.bomb && other.landing == claim.landing)
+            })
+            .collect();
+        for claim in accepted {
             let bomb = self
                 .world
                 .bombs

@@ -29,7 +29,7 @@ fn bomb_report(
         traces: crate::game::SeatId::DUEL
             .map(|seat| crate::game::MovementTrace::new(state.actors()[seat.index()].position()))
             .to_vec(),
-        forced_movement: None,
+        forced_movements: Vec::new(),
         events: vec![StepEvent::new(
             tick,
             EventAudience::Both,

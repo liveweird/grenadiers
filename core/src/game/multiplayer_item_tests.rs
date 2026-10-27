@@ -57,7 +57,7 @@ fn state(count: PlayerCount, enabled: EnabledItems) -> State {
     State::new(rules(enabled), World::new(arena(count)), actors(count)).unwrap()
 }
 
-fn supported_items() -> [EnabledItems; 19] {
+fn supported_items() -> [EnabledItems; 21] {
     [
         EnabledItems::KICK,
         EnabledItems::WALL_PASS,
@@ -78,6 +78,8 @@ fn supported_items() -> [EnabledItems; 19] {
         EnabledItems::REVERSE_CONTROLS,
         EnabledItems::INVISIBLE_BOMBS,
         EnabledItems::OIL_BARREL,
+        EnabledItems::PUNCH,
+        EnabledItems::BRACELET,
     ]
 }
 
@@ -92,9 +94,7 @@ fn supported_mask() -> EnabledItems {
 
 #[test]
 fn every_supported_item_and_the_combined_mask_construct_and_step_for_three_and_four_players() {
-    let unsupported = EnabledItems::PUNCH.bits()
-        | EnabledItems::BRACELET.bits()
-        | EnabledItems::TELEPORTER.bits();
+    let unsupported = EnabledItems::TELEPORTER.bits();
     assert_eq!(
         supported_mask().bits() | unsupported,
         EnabledItems::ALL.bits()
@@ -111,18 +111,22 @@ fn every_supported_item_and_the_combined_mask_construct_and_step_for_three_and_f
 }
 
 #[test]
-fn punch_bracelet_and_teleporter_remain_explicit_multiplayer_boundaries() {
+fn punch_and_bracelet_are_multiplayer_enabled_while_teleporter_remains_blocked() {
     for count in [PlayerCount::Three, PlayerCount::Four] {
-        for unsupported in [
-            EnabledItems::PUNCH,
-            EnabledItems::BRACELET,
-            EnabledItems::TELEPORTER,
-        ] {
-            assert_eq!(
-                State::new(rules(unsupported), World::new(arena(count)), actors(count)),
-                Err(StateError::UnsupportedEnabledItems(unsupported))
-            );
+        for enabled in [EnabledItems::PUNCH, EnabledItems::BRACELET] {
+            let mut game = state(count, enabled);
+            assert_eq!(game.step(&[]).unwrap().traces.len(), count.get());
         }
+        assert_eq!(
+            State::new(
+                rules(EnabledItems::TELEPORTER),
+                World::new(arena(count)),
+                actors(count)
+            ),
+            Err(StateError::UnsupportedEnabledItems(
+                EnabledItems::TELEPORTER
+            ))
+        );
     }
 }
 

@@ -74,8 +74,7 @@ fn forward_positive_area_entry_shoves_one_cell_and_records_a_separate_segment() 
     let report = state.step(&[press(SeatId::One, Direction::East)]).unwrap();
 
     let forced = report
-        .forced_movement
-        .expect("the contact produces a shove");
+        .forced_movements.into_iter().next().expect("the contact produces a shove");
     assert_eq!(forced.seat, SeatId::Two);
     assert_eq!(forced.segment.start(), two);
     assert_eq!(
@@ -99,7 +98,7 @@ fn tangent_stationary_and_correction_only_motion_do_not_shove() {
         y: one.y,
     };
     let mut stationary = state(one, two, BTreeSet::new());
-    assert!(stationary.step(&[]).unwrap().forced_movement.is_none());
+    assert!(stationary.step(&[]).unwrap().forced_movements.is_empty());
 
     let mut correction = state(
         Position {
@@ -114,8 +113,7 @@ fn tangent_stationary_and_correction_only_motion_do_not_shove() {
         correction
             .step(&[press(SeatId::One, Direction::East)])
             .unwrap()
-            .forced_movement
-            .is_none()
+            .forced_movements.is_empty()
     );
 }
 
@@ -129,7 +127,7 @@ fn transverse_side_entry_does_not_arm_but_longitudinal_leading_face_entry_does()
             press(SeatId::Two, Direction::North),
         ])
         .unwrap();
-    assert!(side_report.forced_movement.is_none());
+    assert!(side_report.forced_movements.is_empty());
     assert_eq!(side_entry.actors[0].last_successful_shove_tick(), None);
 
     let mut leading_entry = state(holder, Position { x: 4_638, y: 4_716 }, BTreeSet::new());
@@ -139,7 +137,7 @@ fn transverse_side_entry_does_not_arm_but_longitudinal_leading_face_entry_does()
             press(SeatId::Two, Direction::North),
         ])
         .unwrap();
-    assert_eq!(leading_report.forced_movement.unwrap().seat, SeatId::Two);
+    assert_eq!(leading_report.forced_movements.into_iter().next().unwrap().seat, SeatId::Two);
     assert_eq!(
         leading_entry.actors[0].last_successful_shove_tick(),
         Some(Tick(1))
@@ -158,8 +156,7 @@ fn victim_collision_capability_controls_partial_clamp() {
 
     let report = state.step(&[press(SeatId::One, Direction::East)]).unwrap();
     let forced = report
-        .forced_movement
-        .expect("room before the block remains");
+        .forced_movements.into_iter().next().expect("room before the block remains");
 
     assert!(forced.segment.end().x > two.x);
     assert!(forced.segment.end().x < two.x + 1_024);
@@ -178,8 +175,7 @@ fn initial_overlap_must_separate_before_a_later_entry_can_shove() {
         state
             .step(&[press(SeatId::One, Direction::East)])
             .unwrap()
-            .forced_movement
-            .is_none()
+            .forced_movements.is_empty()
     );
 }
 
@@ -210,7 +206,7 @@ fn all_cardinal_axes_use_the_actual_forward_segment() {
     ] {
         let mut state = state(center, victim, BTreeSet::new());
         let report = state.step(&[press(SeatId::One, direction)]).unwrap();
-        assert_eq!(report.forced_movement.unwrap().segment.end(), expected);
+        assert_eq!(report.forced_movements.into_iter().next().unwrap().segment.end(), expected);
     }
 }
 
@@ -231,7 +227,7 @@ fn competing_entries_choose_round_priority_before_collision_clamping() {
                 press(SeatId::One, Direction::East),
             ])
             .unwrap();
-        assert_eq!(report.forced_movement.unwrap().seat, expected_victim);
+        assert_eq!(report.forced_movements.into_iter().next().unwrap().seat, expected_victim);
     }
 }
 
@@ -247,21 +243,20 @@ fn cooldown_blocks_through_t_plus_29_and_allows_a_new_entry_at_t_plus_30() {
         state
             .step(&[press(SeatId::One, Direction::East)])
             .unwrap()
-            .forced_movement
-            .is_some()
+            .forced_movements.len() == 1
     );
     for tick in 2..=30 {
         state.actors[0].position = one;
         state.actors[1].position = two;
         let report = state.step(&[]).unwrap();
         assert!(
-            report.forced_movement.is_none(),
+            report.forced_movements.is_empty(),
             "tick {tick} is still cooling down"
         );
     }
     state.actors[0].position = one;
     state.actors[1].position = two;
-    assert!(state.step(&[]).unwrap().forced_movement.is_some());
+    assert!(state.step(&[]).unwrap().forced_movements.len() == 1);
     assert_eq!(state.actors[0].last_successful_shove_tick(), Some(Tick(31)));
 }
 

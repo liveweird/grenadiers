@@ -23,20 +23,19 @@ fn shove_cooldown_uses_physical_ticks_elapsed_while_holder_was_frozen() {
     assert!(
         game.step(&[press(SeatId::One, Direction::East)])
             .unwrap()
-            .forced_movement
-            .is_some()
+            .forced_movements.len() == 1
     );
     assert_eq!(game.actors[0].last_successful_shove_tick(), Some(Tick(1)));
 
     game.apply_test_effect(SeatId::Two, EffectKind::Stopwatch, Tick(1));
     for expected_tick in 2..=30 {
         reset_contact(&mut game);
-        assert!(game.step(&[]).unwrap().forced_movement.is_none());
+        assert!(game.step(&[]).unwrap().forced_movements.is_empty());
         assert_eq!(game.tick(), Tick(expected_tick));
     }
     game.clear_test_effects(SeatId::Two);
     reset_contact(&mut game);
-    assert!(game.step(&[]).unwrap().forced_movement.is_some());
+    assert!(game.step(&[]).unwrap().forced_movements.len() == 1);
     assert_eq!(game.tick(), Tick(31));
     assert_eq!(game.running_updates(), 31);
 }
@@ -67,7 +66,7 @@ fn gear_replacement_keeps_shove_history_and_punch_cooldown_is_independent() {
 
     game.replace_actor_equipment(SeatId::One, Equipment::Bracelet);
     reset_contact(&mut game);
-    assert!(game.step(&[]).unwrap().forced_movement.is_none());
+    assert!(game.step(&[]).unwrap().forced_movements.is_empty());
     assert_eq!(game.actors[0].last_successful_shove_tick(), Some(Tick(1)));
 }
 

@@ -49,7 +49,7 @@ fn voluntary_grace_exit_then_forced_reentry_accepts_contact_before_old_fire_deat
         ])
         .unwrap();
 
-    assert_eq!(report.forced_movement.unwrap().segment.start().x, 4_800);
+    assert_eq!(report.forced_movements.into_iter().next().unwrap().segment.start().x, 4_800);
     assert!(!game.actors[1].alive);
     assert!(!game.world.bombs.contains_key(&EntityId(30)));
     let eliminated = report
@@ -107,7 +107,7 @@ fn old_fire_reached_only_by_forced_segment_uses_shield_once_before_heart() {
         .unwrap();
 
     assert!(report.traces[1].is_empty());
-    assert!(report.forced_movement.unwrap().segment.overlaps_cell(fire));
+    assert!(report.forced_movements.into_iter().next().unwrap().segment.overlaps_cell(fire));
     assert!(game.actors[1].alive);
     assert_eq!(game.actors[1].inventory.equipment(), Some(Equipment::Heart));
     let shield_prevention = report
@@ -189,7 +189,7 @@ fn victim_manual_actions_resolve_once_from_post_shove_cell() {
         ])
         .unwrap();
 
-    assert_eq!(report.forced_movement.unwrap().segment.end().x, 5_760);
+    assert_eq!(report.forced_movements.into_iter().next().unwrap().segment.end().x, 5_760);
     let placed: Vec<_> = report
         .events
         .iter()
@@ -225,7 +225,7 @@ fn endpoint_pickup_teleports_state_but_report_keeps_preteleport_forced_segment()
     );
 
     let report = game.step(&[press(SeatId::One, Direction::East)]).unwrap();
-    let forced = report.forced_movement.unwrap();
+    let forced = report.forced_movements.into_iter().next().unwrap();
 
     assert_eq!(forced.segment.start(), Position { x: 4_736, y: 4_096 });
     assert_eq!(forced.segment.end(), Position { x: 5_760, y: 4_096 });

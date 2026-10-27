@@ -27,9 +27,12 @@ pub fn project_events(reports: &[game::StepReport]) -> Result<Vec<WireEvent>, Pr
         if report.traces.len() != game::SeatId::DUEL.len() {
             return Err(ProjectionError::InvalidReportWindow);
         }
-        if report
-            .forced_movement
-            .is_some_and(|forced| !game::SeatId::DUEL.contains(&forced.seat))
+        if report.forced_movements.len() > 1
+            || report.forced_movements.iter().any(|forced| {
+                !game::SeatId::DUEL.contains(&forced.seat)
+                    || !game::SeatId::DUEL.contains(&forced.pusher)
+                    || forced.pusher == forced.seat
+            })
         {
             return Err(ProjectionError::InvalidEvent);
         }

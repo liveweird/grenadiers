@@ -31,7 +31,14 @@ impl CpuController {
         &mut self,
         observation: &Observation,
     ) -> Option<RouteStatus> {
-        let status = self.committed_route.as_mut()?.observe(observation);
+        let settled_stop_tick =
+            (!self.escaping && self.escape_origin.is_none() && self.committed_pulse.is_none())
+                .then_some(self.settled_stop_tick)
+                .flatten();
+        let status = self
+            .committed_route
+            .as_mut()?
+            .observe_with_stop(observation, settled_stop_tick);
         if matches!(status, RouteStatus::Completed | RouteStatus::Invalidated) {
             let origin = (status == RouteStatus::Invalidated)
                 .then(|| self.committed_route.as_ref()?.escape_origin(observation))

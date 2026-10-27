@@ -186,6 +186,14 @@ impl CommittedRoute {
     }
 
     pub fn observe(&mut self, current: &Observation) -> RouteStatus {
+        self.observe_with_stop(current, None)
+    }
+
+    pub fn observe_with_stop(
+        &mut self,
+        current: &Observation,
+        settled_stop_tick: Option<Tick>,
+    ) -> RouteStatus {
         let tick = current.parts().tick;
         if tick <= self.last_observation_tick {
             return RouteStatus::Invalidated;
@@ -222,6 +230,19 @@ impl CommittedRoute {
         };
         if expected != (current_actor.position, current_actor.heading) {
             return RouteStatus::Invalidated;
+        }
+        if super::clear_gap::can_complete(super::clear_gap::Input {
+            basis: &self.basis,
+            current,
+            certificate: &self.certificate,
+            nonplant: self.plant.is_none(),
+            movement: self.movement,
+            no_pending: self.next_transition == self.transitions.len(),
+            first_update: self.first_update,
+            settled_stop_tick,
+        }) {
+            self.last_observation_tick = tick;
+            return RouteStatus::Completed;
         }
         self.last_observation_tick = tick;
         self.active_status()
@@ -262,21 +283,6 @@ impl CommittedRoute {
         self.next_transition += 1;
         self.movement = command.movement;
         true
-    }
-
-    pub fn select_absent_plant(&mut self) -> bool {
-        let Some(plant) = self.plant.as_mut() else {
-            return false;
-        };
-        if matches!(plant.presence, PlantPresence::Present(_)) {
-            return false;
-        }
-        plant.presence = PlantPresence::Absent;
-        true
-    }
-
-    pub fn plant_presence(&self) -> Option<PlantPresence> {
-        self.plant.as_ref().map(|plant| plant.presence)
     }
 
     fn scene_matches(&mut self, current: &Observation) -> bool {

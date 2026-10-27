@@ -8,6 +8,21 @@ use super::CommittedRoute;
 use super::compatibility::{actor, plant_actor_compatible};
 
 impl CommittedRoute {
+    pub fn select_absent_plant(&mut self) -> bool {
+        let Some(plant) = self.plant.as_mut() else {
+            return false;
+        };
+        if matches!(plant.presence, PlantPresence::Present(_)) {
+            return false;
+        }
+        plant.presence = PlantPresence::Absent;
+        true
+    }
+
+    pub fn plant_presence(&self) -> Option<PlantPresence> {
+        self.plant.as_ref().map(|plant| plant.presence)
+    }
+
     #[must_use]
     pub fn escape_origin(&self, current: &Observation) -> Option<PlantEscapeOrigin> {
         if current.parts().tick < self.last_observation_tick {

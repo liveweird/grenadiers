@@ -2,6 +2,19 @@
 
 ## [Unreleased]
 
+## 0.3.93 — 2026-10-27
+
+### Fixed
+
+- Resume CPU goal decisions after a stationary hazard route observes a real clear gap,
+  requiring validated pose, confirmed Stop and fully visible expired danger before completion.
+  Keep movement, planting and origin recovery on their existing execution paths.
+
+### Changed
+
+- Identify clear-gap route completion as UtilityV11; retain V1–V10 accepted-input replay
+  and the unchanged v12 wire shape.
+
 ## 0.3.92 — 2026-10-27
 
 ### Added

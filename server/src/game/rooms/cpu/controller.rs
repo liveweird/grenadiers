@@ -351,6 +351,10 @@ mod tests;
 mod route_tests;
 
 #[cfg(test)]
+#[path = "controller_bracelet_tests.rs"]
+mod bracelet_tests;
+
+#[cfg(test)]
 #[path = "controller_plant_tests.rs"]
 mod plant_tests;
 

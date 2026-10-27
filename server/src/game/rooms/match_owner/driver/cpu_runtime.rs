@@ -302,6 +302,10 @@ mod weapon_tests;
 mod wall_pass_tests;
 
 #[cfg(test)]
+#[path = "cpu_bracelet_tactic_tests.rs"]
+mod bracelet_tactic_tests;
+
+#[cfg(test)]
 #[path = "cpu_runtime_responsiveness_tests.rs"]
 mod responsiveness_tests;
 

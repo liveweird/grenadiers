@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+## 0.3.95 — 2026-10-27
+
+- Add a bounded held-Bracelet tactic that attempts ordinary contact shoves into existing
+  visible fire, backed by a certified safe CPU movement pulse.
+- Carry the tactic's public-fact guard through admission and execution; rival invisibility,
+  countershove equipment, bombs or exposed pickups withdraw the tactic.
+- Identify the changed policy as UtilityV13, retaining V1–V12 accepted-input replay identities
+  and the unchanged v12 room protocol.
+
 ## 0.3.94 — 2026-10-27
 
 - Align ordinary CPU navigation before perpendicular turns outside the configured tolerance,

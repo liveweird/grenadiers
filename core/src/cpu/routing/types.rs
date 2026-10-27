@@ -3,6 +3,7 @@ use crate::cpu::forecast::TickWindow;
 use crate::game::{Direction, EntityId, Position, Tick};
 
 use super::super::MovementIntent;
+use super::BraceletGuard;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum RouteMode {
@@ -74,6 +75,7 @@ pub struct PulseLease {
     initial_position: Position,
     initial_heading: Direction,
     poses: Vec<PoseBounds>,
+    bracelet_guard: Option<BraceletGuard>,
 }
 
 impl PulseLease {
@@ -104,7 +106,21 @@ impl PulseLease {
             initial_position,
             initial_heading,
             poses,
+            bracelet_guard: None,
         })
+    }
+
+    /// Restricts this lease to the public facts used by the Bracelet tactic.
+    #[must_use]
+    pub(crate) fn with_bracelet_guard(mut self, rival: EntityId) -> Self {
+        self.bracelet_guard = Some(BraceletGuard::new(rival));
+        self
+    }
+
+    #[must_use]
+    pub(crate) fn bracelet_guard_allows(&self, observation: &crate::cpu::Observation) -> bool {
+        self.bracelet_guard
+            .is_none_or(|guard| guard.allows(observation))
     }
 
     #[must_use]

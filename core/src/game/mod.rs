@@ -70,6 +70,7 @@ pub(crate) use oil::OilState;
 pub use oil::{MAX_OIL_BARRELS, OilBarrelState};
 pub use pickups::{Pickup, PickupKind, PickupLayer, PickupPlacementError};
 pub use rules::RulesConfig;
+pub(crate) use simulation::stationary_contact_entry;
 pub use simulation::{
     Actor, ActorInit, DrawReason, InputAction, RoundResult, SeatInput, State, StateError,
     StepError, StepReport,

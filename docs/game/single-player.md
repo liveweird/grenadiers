@@ -84,6 +84,13 @@ Ordinary navigation aligns within its current cell before attempting a turn outs
 turn tolerance. It keeps the chosen next cell, then decides the turn from a fresh stopped pose.
 Alignment uses the normal movement speed and collision rules.
 
+With Bracelet already held, the CPU can attempt a contact shove into visible existing fire.
+It checks a straight approach and an open victim sweep, then certifies its own movement and
+stopped suffix. This narrow tactic requires visible empty bombs, no exposed pickups and a
+visible rival without Bracelet; changed facts withdraw the tactic. It uses ordinary movement
+without a manual action. The rival may move away, and private cooldown or contact history may
+prevent a shove. The CPU does not seek Bracelet specifically or relocate bombs for this tactic.
+
 The [CPU contracts](cpu-contracts.md) explain execution and privacy; the
 [accepted design](single-player-cpu.md) specifies the broader model. Remaining work and tuning
 belong only in the [backlog](../../BACKLOG.md#single-player).

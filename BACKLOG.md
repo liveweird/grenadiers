@@ -17,8 +17,7 @@ repeated approval for routine implementation choices. Entries are not delivery-d
   difficulty. Preserve ordinary rules/input, restricted
   observations, bounded work and accepted-input replay. Follow the
   [accepted design](docs/game/single-player-cpu.md).
-  - **CPU4 — stronger play:** bounded hazard responsiveness, remaining weapon/equipment tactics,
-    difficulty tuning, tactical
+  - **CPU4 — stronger play:** remaining weapon/equipment tactics, difficulty tuning, tactical
     look-ahead and measured performance
     from deterministic tournaments and human feedback.
 - [parked] **More seats and campaign mobs.** Revisit after the two-seat CPU mode is stable;

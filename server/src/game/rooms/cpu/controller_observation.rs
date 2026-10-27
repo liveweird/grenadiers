@@ -7,6 +7,10 @@ use grenadiers_core::game::{SeatId, Tick};
 use super::{CpuController, StopAdmission, derive_round_seed};
 
 impl CpuController {
+    pub(in crate::game::rooms) const fn seat(&self) -> SeatId {
+        self.cpu_seat
+    }
+
     pub(in crate::game::rooms) fn reset_world(&mut self, physical_round: u64) {
         self.cancel();
         let world = WorldId {
@@ -15,7 +19,7 @@ impl CpuController {
         };
         let key = MemoryKey {
             world,
-            cpu_seat: SeatId::Two,
+            cpu_seat: self.cpu_seat,
         };
         self.world = Some(world);
         self.admission_memory = CpuMemory::new(key, 64).ok();
@@ -39,6 +43,9 @@ impl CpuController {
     }
 
     pub(in crate::game::rooms) fn accept_observation(&mut self, observation: &Observation) -> bool {
+        if observation.parts().recipient != self.cpu_seat {
+            return false;
+        }
         if self.world != Some(observation.parts().world) {
             self.reset_world(observation.parts().world.physical_round);
         }
@@ -128,4 +135,68 @@ fn cpu_actor(observation: &Observation) -> Option<&grenadiers_core::cpu::Visible
             }
             _ => None,
         })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::game::rooms::cpu::{tests::observation_for, worker::CpuPlanner};
+
+    fn controller_for(cpu_seat: SeatId) -> CpuController {
+        let mut controller = CpuController::new(
+            CpuPlanner::without_workers(),
+            cpu_seat,
+            7,
+            [5; 32],
+            grenadiers_core::room::CpuProfile::CURRENT,
+        );
+        controller.reset_world(3);
+        controller
+    }
+
+    #[test]
+    fn controller_identity_keys_world_memory_for_either_existing_seat() {
+        for seat in SeatId::ALL {
+            let controller = controller_for(seat);
+            assert_eq!(controller.seat(), seat);
+            assert_eq!(controller.memory.as_ref().unwrap().key().cpu_seat, seat);
+            assert_eq!(
+                controller.admission_memory.as_ref().unwrap().key().cpu_seat,
+                seat
+            );
+            assert_eq!(controller.rng.as_ref().unwrap().key().cpu_seat, seat);
+        }
+    }
+
+    #[test]
+    fn foreign_recipient_cannot_mutate_or_submit_through_controller() {
+        let mut controller = CpuController::new(
+            CpuPlanner::without_workers(),
+            SeatId::One,
+            7,
+            [5; 32],
+            grenadiers_core::room::CpuProfile::CURRENT,
+        );
+        let own = observation_for(SeatId::One);
+        assert!(controller.accept_observation(&own));
+        assert_eq!(controller.world, Some(own.parts().world));
+        assert_eq!(
+            controller.memory.as_ref().unwrap().key().cpu_seat,
+            SeatId::One
+        );
+
+        let mut foreign_parts = observation_for(SeatId::Two).into_parts();
+        foreign_parts.world.physical_round += 1;
+        foreign_parts.tick = Tick(21);
+        let foreign = Observation::new(foreign_parts).unwrap();
+        assert!(!controller.accept_observation(&foreign));
+        assert_eq!(controller.world, Some(own.parts().world));
+        assert_eq!(
+            controller.latest_observation.as_ref().unwrap().parts().tick,
+            Tick(20)
+        );
+        assert!(!controller.submit(foreign, 4));
+        assert_eq!(controller.request_serial, 0);
+        assert_eq!(controller.rng_draws(), 0);
+    }
 }

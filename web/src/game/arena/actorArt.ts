@@ -1,5 +1,5 @@
 import { Container, Graphics } from 'pixi.js'
-import type { Direction, Seat } from './types'
+import type { ActorAppearance, Direction } from './types'
 import { PALETTE } from './palette'
 import { pixels } from './pixel'
 
@@ -63,29 +63,48 @@ function legs(drawing: Graphics, frame: number, side: boolean): void {
   pixels(drawing, 0x52606b, [[-9, 10 + left, 5, 4], [4, 10 + right, 5, 4]])
 }
 
-function helmetMark(drawing: Graphics, seat: Seat, direction: Direction): void {
-  if (seat === 'one') {
+function helmetMark(drawing: Graphics, appearance: ActorAppearance, direction: Direction): void {
+  if (appearance === 'one') {
     if (direction === 'east' || direction === 'west') pixels(drawing, PALETTE.white, [[-2, -19, 6, 8]])
     else pixels(drawing, PALETTE.white, [[-3, -20, 6, 9], [-6, -17, 12, 3]])
-  } else if (direction === 'east' || direction === 'west') {
+  } else if (appearance === 'two' && (direction === 'east' || direction === 'west')) {
     pixels(drawing, PALETTE.white, [[-4, -18, 8, 3], [1, -15, 6, 3]])
-  } else {
+  } else if (appearance === 'two') {
     pixels(drawing, PALETTE.white, [[-7, -18, 14, 3], [-4, -15, 8, 3]])
+  } else if (appearance === 'three') {
+    if (direction === 'east' || direction === 'west') {
+      pixels(drawing, PALETTE.silver, [[-5, -19, 3, 8], [1, -16, 6, 3]])
+    } else {
+      pixels(drawing, PALETTE.silver, [[-7, -19, 14, 3], [-2, -19, 4, 8]])
+    }
+  } else if (direction === 'east' || direction === 'west') {
+    pixels(drawing, PALETTE.gold, [[-5, -18, 10, 3], [-2, -21, 4, 9]])
+  } else {
+    pixels(drawing, PALETTE.gold, [[-7, -19, 14, 3], [-5, -16, 3, 5], [2, -16, 3, 5]])
   }
 }
 
-function frontOrBack(seat: Seat, direction: 'north' | 'south', frame: number): Graphics {
+function uniformColors(appearance: ActorAppearance): readonly [number, number] {
+  if (appearance === 'one') return [PALETTE.brass, PALETTE.brassLight]
+  if (appearance === 'two') return [PALETTE.blue, PALETTE.blueLight]
+  if (appearance === 'three') return [PALETTE.forest, PALETTE.forestLight]
+  return [PALETTE.plum, PALETTE.plumLight]
+}
+
+function frontOrBack(appearance: ActorAppearance, direction: 'north' | 'south', frame: number): Graphics {
   const drawing = new Graphics()
-  const uniform = seat === 'one' ? PALETTE.brass : PALETTE.blue
-  const light = seat === 'one' ? PALETTE.brassLight : PALETTE.blueLight
+  const [uniform, light] = uniformColors(appearance)
   legs(drawing, frame, false)
   pixels(drawing, PALETTE.deepInk, [[-11, -5, 22, 18], [-8, -11, 16, 27]])
   pixels(drawing, uniform, [[-8, -4, 16, 17], [-10, 0, 20, 9]])
   pixels(drawing, light, [[-7, -3, 4, 13], [-9, 1, 3, 6]])
+  if (appearance === 'three' || appearance === 'four') {
+    pixels(drawing, PALETTE.white, [[2, -3, 3, 13]])
+  }
   pixels(drawing, PALETTE.deepInk, [[-13, -14, 26, 12], [-10, -18, 20, 19], [-7, -21, 14, 22]])
   pixels(drawing, uniform, [[-10, -14, 20, 11], [-7, -18, 14, 17]])
   pixels(drawing, light, [[-7, -17, 8, 4], [-9, -13, 4, 7]])
-  helmetMark(drawing, seat, direction)
+  helmetMark(drawing, appearance, direction)
   if (direction === 'south') {
     pixels(drawing, PALETTE.skin, [[-7, -9, 14, 7]])
     pixels(drawing, PALETTE.deepInk, [[-5, -7, 3, 3], [3, -7, 3, 3]])
@@ -97,26 +116,28 @@ function frontOrBack(seat: Seat, direction: 'north' | 'south', frame: number): G
   return drawing
 }
 
-function sidePose(seat: Seat, direction: 'east' | 'west', frame: number): Graphics {
+function sidePose(appearance: ActorAppearance, direction: 'east' | 'west', frame: number): Graphics {
   const drawing = new Graphics()
-  const uniform = seat === 'one' ? PALETTE.brass : PALETTE.blue
-  const light = seat === 'one' ? PALETTE.brassLight : PALETTE.blueLight
+  const [uniform, light] = uniformColors(appearance)
   legs(drawing, frame, true)
   pixels(drawing, PALETTE.deepInk, [[-9, -5, 18, 18], [-7, -11, 16, 27]])
   pixels(drawing, uniform, [[-6, -4, 13, 17], [-8, 0, 18, 8]])
   pixels(drawing, light, [[-5, -3, 4, 13]])
+  if (appearance === 'three' || appearance === 'four') {
+    pixels(drawing, PALETTE.white, [[1, -3, 3, 13]])
+  }
   const front = direction === 'east' ? 1 : -1
   pixels(drawing, PALETTE.deepInk, [[-11, -14, 22, 12], [-8, -19, 16, 19]])
   pixels(drawing, uniform, [[-8, -14, 16, 11], [-5, -18, 11, 16]])
   pixels(drawing, light, [[-5, -17, 5, 4]])
-  helmetMark(drawing, seat, direction)
+  helmetMark(drawing, appearance, direction)
   pixels(drawing, PALETTE.skin, [[front > 0 ? 3 : -8, -10, 7, 7]])
   pixels(drawing, PALETTE.visor, [[front > 0 ? 4 : -10, -12, 8, 3]])
   pixels(drawing, PALETTE.deepInk, [[front > 0 ? 7 : -8, -8, 3, 3]])
   return drawing
 }
 
-export function makeActor(seat: Seat): ActorDrawing {
+export function makeActor(appearance: ActorAppearance): ActorDrawing {
   const root = new Container()
   const shadow = new Graphics()
   pixels(shadow, PALETTE.deepInk, [[-13, 15, 26, 4], [-9, 19, 18, 2]])
@@ -227,10 +248,10 @@ export function makeActor(seat: Seat): ActorDrawing {
   pixels(cloak, PALETTE.blue, [[-12, -23, 24, 3], [-15, -20, 3, 9], [12, -20, 3, 9]])
   pixels(cloak, PALETTE.white, [[-9, -20, 6, 3], [6, -20, 3, 3]])
   const poses = {
-    north: [frontOrBack(seat, 'north', 0), frontOrBack(seat, 'north', 1)],
-    east: [sidePose(seat, 'east', 0), sidePose(seat, 'east', 1)],
-    south: [frontOrBack(seat, 'south', 0), frontOrBack(seat, 'south', 1)],
-    west: [sidePose(seat, 'west', 0), sidePose(seat, 'west', 1)],
+    north: [frontOrBack(appearance, 'north', 0), frontOrBack(appearance, 'north', 1)],
+    east: [sidePose(appearance, 'east', 0), sidePose(appearance, 'east', 1)],
+    south: [frontOrBack(appearance, 'south', 0), frontOrBack(appearance, 'south', 1)],
+    west: [sidePose(appearance, 'west', 0), sidePose(appearance, 'west', 1)],
   } satisfies Record<Direction, PoseFrames>
   return assembleActorDrawing({
     root, protection, shield, stopwatch, frozen, goldenFlame, shortFuse, shortFlame, longFuse, reverseControls,

@@ -2,7 +2,7 @@ import { Graphics, type Container } from 'pixi.js'
 import { makeActor } from '../actorArt'
 import { makeBomb, makeFlame, makeOilBarrel, makePickup } from '../entityArt'
 import { makeBlock, makeFloorVariant, makeWallVariant } from '../terrainArt'
-import { RENDERABLE_PICKUP_KINDS, type Direction, type Seat } from '../types'
+import { RENDERABLE_PICKUP_KINDS, type ActorAppearance, type Direction } from '../types'
 import { sourceFrame } from './layout'
 import type { ArtAnimation, ArtCatalog, ArtCatalogEntry, ArtFrame, ArtRect } from './types'
 
@@ -48,9 +48,9 @@ function entry(id: string, slot: number, factory: DrawingFactory, options: Frame
   }
 }
 
-function actorPart(seat: Seat, select: (actor: ReturnType<typeof makeActor>) => Container): DrawingFactory {
+function actorPart(appearance: ActorAppearance, select: (actor: ReturnType<typeof makeActor>) => Container): DrawingFactory {
   return () => {
-    const actor = makeActor(seat)
+    const actor = makeActor(appearance)
     return { drawing: select(actor), owner: actor.root }
   }
 }
@@ -158,12 +158,26 @@ function addPickupsAndReservations(entries: ArtCatalogEntry[]): void {
   }
 }
 
+function addAdditionalActorAppearances(entries: ArtCatalogEntry[]): void {
+  const directions: readonly Direction[] = ['north', 'east', 'south', 'west']
+  for (const appearance of ['three', 'four'] as const) {
+    for (const direction of directions) {
+      for (const frame of [0, 1] as const) {
+        entries.push(entry(`actor.${appearance}.${direction}.${frame}`, entries.length,
+          actorPart(appearance, (actor) => actor.poses[direction][frame]), {
+            size: 80, bounds: ACTOR_BOUNDS, pivot: ACTOR_PIVOT, footAnchor: { x: 40, y: 65 },
+          }))
+      }
+    }
+  }
+}
+
 function animations(): Readonly<Record<string, ArtAnimation>> {
   const result: Record<string, ArtAnimation> = {
     flame: { frameIds: ['effect.flame.0', 'effect.flame.1'], frameDurationMs: 80, reducedMotionFrame: 'effect.flame.0' },
     spark: { frameIds: ['bomb.spark'], frameDurationMs: 90, reducedMotionFrame: 'bomb.spark' },
   }
-  for (const seat of ['one', 'two'] as const) {
+  for (const seat of ['one', 'two', 'three', 'four'] as const) {
     for (const direction of ['north', 'east', 'south', 'west'] as const) {
       const prefix = `actor.${seat}.${direction}`
       result[`${prefix}.walk`] = {
@@ -180,6 +194,7 @@ export function createArtCatalog(): ArtCatalog {
   addActors(entries)
   addBombsAndEffects(entries)
   addPickupsAndReservations(entries)
+  addAdditionalActorAppearances(entries)
   return {
     entries,
     animations: animations(),

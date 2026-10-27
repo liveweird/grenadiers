@@ -11,7 +11,7 @@ use grenadiers_core::cpu::survival::{CommittedPulse, CommittedRoute, PlantEscape
 use grenadiers_core::cpu::{
     CpuMemory, CpuRng, DecisionId, Intent, Observation, WorldId, policy::UtilityMemory,
 };
-use grenadiers_core::game::Tick;
+use grenadiers_core::game::{SeatId, Tick};
 use grenadiers_core::room::CpuProfile;
 
 use self::cadence::CadenceState;
@@ -44,6 +44,7 @@ struct StopAdmission {
 
 pub(in crate::game::rooms) struct CpuController {
     planner: CpuPlanner,
+    cpu_seat: SeatId,
     room_instance: u64,
     private_seed: [u8; 32],
     world: Option<WorldId>,
@@ -84,12 +85,14 @@ impl fmt::Debug for CpuController {
 impl CpuController {
     pub(in crate::game::rooms) fn new(
         planner: CpuPlanner,
+        cpu_seat: SeatId,
         room_instance: u64,
         private_seed: [u8; 32],
         profile: CpuProfile,
     ) -> Self {
         Self {
             planner,
+            cpu_seat,
             room_instance,
             private_seed,
             world: None,
@@ -119,6 +122,9 @@ impl CpuController {
         observation: Observation,
         command_epoch: u64,
     ) -> bool {
+        if observation.parts().recipient != self.cpu_seat {
+            return false;
+        }
         self.validate_escape_epoch(command_epoch);
         if self.escaping
             || self.committed_pulse.is_some()
@@ -341,7 +347,6 @@ impl Drop for CpuController {
         self.cancel();
     }
 }
-
 #[path = "controller_observation.rs"]
 mod observation;
 

@@ -83,6 +83,7 @@ export interface SnapshotMessage {
   }
 }
 export type Seat = 'one' | 'two'
+export type ActorAppearance = Seat | 'three' | 'four'
 export type Direction = 'north' | 'east' | 'south' | 'west'
 
 export interface GameArenaProps {

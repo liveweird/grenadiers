@@ -17,16 +17,24 @@ use grenadiers_core::{
 use super::worker::{CpuPlanner, PlanJob, PlanResult};
 
 fn key() -> MemoryKey {
+    key_for(SeatId::Two)
+}
+
+fn key_for(cpu_seat: SeatId) -> MemoryKey {
     MemoryKey {
         world: WorldId {
             room_instance: 7,
             physical_round: 3,
         },
-        cpu_seat: SeatId::Two,
+        cpu_seat,
     }
 }
 
 pub(super) fn observation() -> Observation {
+    observation_for(SeatId::Two)
+}
+
+pub(super) fn observation_for(cpu_seat: SeatId) -> Observation {
     use grenadiers_core::game::arena::{ARENA_CELL_COUNT, ARENA_HEIGHT, ARENA_WIDTH};
     let mut terrain = vec![Terrain::Floor; ARENA_CELL_COUNT];
     for column in 0..ARENA_WIDTH {
@@ -40,9 +48,9 @@ pub(super) fn observation() -> Observation {
             Terrain::Wall;
     }
     Observation::new(ObservationParts {
-        world: key().world,
+        world: key_for(cpu_seat).world,
         tick: Tick(20),
-        recipient: SeatId::Two,
+        recipient: cpu_seat,
         rules: ObservedRules {
             version: 5,
             tick_rate: 60,
@@ -56,31 +64,34 @@ pub(super) fn observation() -> Observation {
             terrain,
             blocks: vec![CellId::new(8, 7)],
         },
-        actors: [
-            ObservedActor::Hidden {
-                id: EntityId(1),
-                seat: SeatId::One,
-                alive: true,
-            },
-            ObservedActor::Visible(VisibleActor {
-                id: EntityId(2),
-                seat: SeatId::Two,
-                position: Position::center(CellId::new(7, 7)),
-                heading: Direction::West,
-                speed: SpeedLevel::Base,
-                alive: true,
-                bomb_capacity: 1,
-                bomb_range: 2,
-                live_bomb_count: 0,
-                equipment: None,
-                weapon: None,
-                effects: Vec::new(),
-                damage_grace_remaining_ticks: 0,
-                voluntary_actions_frozen: false,
-                last_teleport_tick: None,
-                unknown: UnknownActorFacts::ALL,
-            }),
-        ],
+        actors: SeatId::ALL.map(|seat| {
+            if seat == cpu_seat {
+                ObservedActor::Visible(VisibleActor {
+                    id: EntityId(seat.index() as u32 + 1),
+                    seat,
+                    position: Position::center(CellId::new(7, 7)),
+                    heading: Direction::West,
+                    speed: SpeedLevel::Base,
+                    alive: true,
+                    bomb_capacity: 1,
+                    bomb_range: 2,
+                    live_bomb_count: 0,
+                    equipment: None,
+                    weapon: None,
+                    effects: Vec::new(),
+                    damage_grace_remaining_ticks: 0,
+                    voluntary_actions_frozen: false,
+                    last_teleport_tick: None,
+                    unknown: UnknownActorFacts::ALL,
+                })
+            } else {
+                ObservedActor::Hidden {
+                    id: EntityId(seat.index() as u32 + 1),
+                    seat,
+                    alive: true,
+                }
+            }
+        }),
         bombs: BombKnowledge::Visible(Vec::new()),
         flames: Vec::new(),
         oil: Vec::new(),

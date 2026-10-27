@@ -13,6 +13,10 @@ policy family. Named archive constants preserve historical Standard replay ident
 identity describes decision semantics, not measured strength; seeds stay private. Live owner
 construction accepts only the two exact current profiles. Retaining a historical replay identity
 does not re-enable that older policy for new matches.
+Controllers carry an explicit seat identity through memory, recipient validation and ordinary
+input submission. Foreign-recipient observations are rejected before state changes. Current
+solo construction still authorizes only seat Two; an explicit identity does not grant a human
+seat CPU input authority.
 
 `core::cpu` accepts neutral observations and emits movement or Stop, with at most one Bomb or
 Equipment intent. Intent carries no credentials, seat authority, readiness, settings mutation

@@ -82,6 +82,7 @@ pub(super) fn running_recording_driver(
     let planner = CpuPlanner::without_workers();
     let cpu = Some(CpuController::new(
         planner.clone(),
+        grenadiers_core::game::SeatId::Two,
         room.registry_serial,
         cpu_seed,
         profile,
@@ -113,7 +114,10 @@ pub(super) fn running_recording_driver(
             },
         )
         .unwrap();
-    driver.runtime.cpu_ready().unwrap();
+    driver
+        .runtime
+        .cpu_ready(grenadiers_core::game::SeatId::Two)
+        .unwrap();
     let settings_revision = driver.runtime.replay_inspection().settings_revision;
     driver
         .runtime

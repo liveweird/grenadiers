@@ -4,6 +4,38 @@
     "bomb.shell.contact.power": "bomb.shell.contact.standard"
   },
   "animations": {
+    "actor.four.east.walk": {
+      "frameDurationMs": 110,
+      "frameIds": [
+        "actor.four.east.0",
+        "actor.four.east.1"
+      ],
+      "reducedMotionFrame": "actor.four.east.0"
+    },
+    "actor.four.north.walk": {
+      "frameDurationMs": 110,
+      "frameIds": [
+        "actor.four.north.0",
+        "actor.four.north.1"
+      ],
+      "reducedMotionFrame": "actor.four.north.0"
+    },
+    "actor.four.south.walk": {
+      "frameDurationMs": 110,
+      "frameIds": [
+        "actor.four.south.0",
+        "actor.four.south.1"
+      ],
+      "reducedMotionFrame": "actor.four.south.0"
+    },
+    "actor.four.west.walk": {
+      "frameDurationMs": 110,
+      "frameIds": [
+        "actor.four.west.0",
+        "actor.four.west.1"
+      ],
+      "reducedMotionFrame": "actor.four.west.0"
+    },
     "actor.one.east.walk": {
       "frameDurationMs": 110,
       "frameIds": [
@@ -35,6 +67,38 @@
         "actor.one.west.1"
       ],
       "reducedMotionFrame": "actor.one.west.0"
+    },
+    "actor.three.east.walk": {
+      "frameDurationMs": 110,
+      "frameIds": [
+        "actor.three.east.0",
+        "actor.three.east.1"
+      ],
+      "reducedMotionFrame": "actor.three.east.0"
+    },
+    "actor.three.north.walk": {
+      "frameDurationMs": 110,
+      "frameIds": [
+        "actor.three.north.0",
+        "actor.three.north.1"
+      ],
+      "reducedMotionFrame": "actor.three.north.0"
+    },
+    "actor.three.south.walk": {
+      "frameDurationMs": 110,
+      "frameIds": [
+        "actor.three.south.0",
+        "actor.three.south.1"
+      ],
+      "reducedMotionFrame": "actor.three.south.0"
+    },
+    "actor.three.west.walk": {
+      "frameDurationMs": 110,
+      "frameIds": [
+        "actor.three.west.0",
+        "actor.three.west.1"
+      ],
+      "reducedMotionFrame": "actor.three.west.0"
     },
     "actor.two.east.walk": {
       "frameDurationMs": 110,
@@ -2060,12 +2124,140 @@
         "y": 1008
       },
       "status": "reserved"
+    },
+    {
+      "footAnchor": { "x": 40, "y": 65 },
+      "id": "actor.three.north.0",
+      "localBounds": { "height": 80, "width": 80, "x": -40, "y": -44 },
+      "pivot": { "x": 40, "y": 44 },
+      "sourceRect": { "height": 80, "width": 80, "x": 560, "y": 1008 },
+      "status": "baseline"
+    },
+    {
+      "footAnchor": { "x": 40, "y": 65 },
+      "id": "actor.three.north.1",
+      "localBounds": { "height": 80, "width": 80, "x": -40, "y": -44 },
+      "pivot": { "x": 40, "y": 44 },
+      "sourceRect": { "height": 80, "width": 80, "x": 672, "y": 1008 },
+      "status": "baseline"
+    },
+    {
+      "footAnchor": { "x": 40, "y": 65 },
+      "id": "actor.three.east.0",
+      "localBounds": { "height": 80, "width": 80, "x": -40, "y": -44 },
+      "pivot": { "x": 40, "y": 44 },
+      "sourceRect": { "height": 80, "width": 80, "x": 784, "y": 1008 },
+      "status": "baseline"
+    },
+    {
+      "footAnchor": { "x": 40, "y": 65 },
+      "id": "actor.three.east.1",
+      "localBounds": { "height": 80, "width": 80, "x": -40, "y": -44 },
+      "pivot": { "x": 40, "y": 44 },
+      "sourceRect": { "height": 80, "width": 80, "x": 896, "y": 1008 },
+      "status": "baseline"
+    },
+    {
+      "footAnchor": { "x": 40, "y": 65 },
+      "id": "actor.three.south.0",
+      "localBounds": { "height": 80, "width": 80, "x": -40, "y": -44 },
+      "pivot": { "x": 40, "y": 44 },
+      "sourceRect": { "height": 80, "width": 80, "x": 1008, "y": 1008 },
+      "status": "baseline"
+    },
+    {
+      "footAnchor": { "x": 40, "y": 65 },
+      "id": "actor.three.south.1",
+      "localBounds": { "height": 80, "width": 80, "x": -40, "y": -44 },
+      "pivot": { "x": 40, "y": 44 },
+      "sourceRect": { "height": 80, "width": 80, "x": 0, "y": 1120 },
+      "status": "baseline"
+    },
+    {
+      "footAnchor": { "x": 40, "y": 65 },
+      "id": "actor.three.west.0",
+      "localBounds": { "height": 80, "width": 80, "x": -40, "y": -44 },
+      "pivot": { "x": 40, "y": 44 },
+      "sourceRect": { "height": 80, "width": 80, "x": 112, "y": 1120 },
+      "status": "baseline"
+    },
+    {
+      "footAnchor": { "x": 40, "y": 65 },
+      "id": "actor.three.west.1",
+      "localBounds": { "height": 80, "width": 80, "x": -40, "y": -44 },
+      "pivot": { "x": 40, "y": 44 },
+      "sourceRect": { "height": 80, "width": 80, "x": 224, "y": 1120 },
+      "status": "baseline"
+    },
+    {
+      "footAnchor": { "x": 40, "y": 65 },
+      "id": "actor.four.north.0",
+      "localBounds": { "height": 80, "width": 80, "x": -40, "y": -44 },
+      "pivot": { "x": 40, "y": 44 },
+      "sourceRect": { "height": 80, "width": 80, "x": 336, "y": 1120 },
+      "status": "baseline"
+    },
+    {
+      "footAnchor": { "x": 40, "y": 65 },
+      "id": "actor.four.north.1",
+      "localBounds": { "height": 80, "width": 80, "x": -40, "y": -44 },
+      "pivot": { "x": 40, "y": 44 },
+      "sourceRect": { "height": 80, "width": 80, "x": 448, "y": 1120 },
+      "status": "baseline"
+    },
+    {
+      "footAnchor": { "x": 40, "y": 65 },
+      "id": "actor.four.east.0",
+      "localBounds": { "height": 80, "width": 80, "x": -40, "y": -44 },
+      "pivot": { "x": 40, "y": 44 },
+      "sourceRect": { "height": 80, "width": 80, "x": 560, "y": 1120 },
+      "status": "baseline"
+    },
+    {
+      "footAnchor": { "x": 40, "y": 65 },
+      "id": "actor.four.east.1",
+      "localBounds": { "height": 80, "width": 80, "x": -40, "y": -44 },
+      "pivot": { "x": 40, "y": 44 },
+      "sourceRect": { "height": 80, "width": 80, "x": 672, "y": 1120 },
+      "status": "baseline"
+    },
+    {
+      "footAnchor": { "x": 40, "y": 65 },
+      "id": "actor.four.south.0",
+      "localBounds": { "height": 80, "width": 80, "x": -40, "y": -44 },
+      "pivot": { "x": 40, "y": 44 },
+      "sourceRect": { "height": 80, "width": 80, "x": 784, "y": 1120 },
+      "status": "baseline"
+    },
+    {
+      "footAnchor": { "x": 40, "y": 65 },
+      "id": "actor.four.south.1",
+      "localBounds": { "height": 80, "width": 80, "x": -40, "y": -44 },
+      "pivot": { "x": 40, "y": 44 },
+      "sourceRect": { "height": 80, "width": 80, "x": 896, "y": 1120 },
+      "status": "baseline"
+    },
+    {
+      "footAnchor": { "x": 40, "y": 65 },
+      "id": "actor.four.west.0",
+      "localBounds": { "height": 80, "width": 80, "x": -40, "y": -44 },
+      "pivot": { "x": 40, "y": 44 },
+      "sourceRect": { "height": 80, "width": 80, "x": 1008, "y": 1120 },
+      "status": "baseline"
+    },
+    {
+      "footAnchor": { "x": 40, "y": 65 },
+      "id": "actor.four.west.1",
+      "localBounds": { "height": 80, "width": 80, "x": -40, "y": -44 },
+      "pivot": { "x": 40, "y": 44 },
+      "sourceRect": { "height": 80, "width": 80, "x": 0, "y": 1232 },
+      "status": "baseline"
     }
   ],
   "schemaVersion": 1,
   "sheet": {
     "columns": 10,
-    "height": 1120,
+    "height": 1344,
     "slotSize": 112,
     "width": 1120
   },

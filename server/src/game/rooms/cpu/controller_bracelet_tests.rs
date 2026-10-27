@@ -128,6 +128,7 @@ fn execution_observation(basis: &Observation, cpu_position: Position) -> Observa
 fn controller(basis: &Observation, current: &Observation) -> CpuController {
     let mut controller = CpuController::new(
         CpuPlanner::without_workers(),
+        grenadiers_core::game::SeatId::Two,
         7,
         [5; 32],
         grenadiers_core::room::CpuProfile::CURRENT,

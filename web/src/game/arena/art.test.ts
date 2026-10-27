@@ -73,10 +73,12 @@ describe('original pixel-art geometry', () => {
     expect(rectangles.some(({ color }) => color === PALETTE.moss)).toBe(true)
   })
 
-  it('gives both uniforms eight bounded directional walking poses with one visible frame', () => {
+  it('gives all four distinct uniforms eight directional walking poses with one visible frame', () => {
     const gold = makeActor('one')
     const blue = makeActor('two')
-    for (const actor of [gold, blue]) {
+    const green = makeActor('three')
+    const plum = makeActor('four')
+    for (const actor of [gold, blue, green, plum]) {
       expect(actor.root.children).toHaveLength(26)
       expect(Object.values(actor.poses).flat()).toHaveLength(8)
       expect(Object.values(actor.poses).flat().filter(({ visible }) => visible)).toHaveLength(1)
@@ -88,8 +90,19 @@ describe('original pixel-art geometry', () => {
       .flatMap(({ rectangles = [] }) => rectangles.map(({ color }) => color))
     const blueColors = descendants(blue.root as unknown as Drawing)
       .flatMap(({ rectangles = [] }) => rectangles.map(({ color }) => color))
+    const greenColors = descendants(green.root as unknown as Drawing)
+      .flatMap(({ rectangles = [] }) => rectangles.map(({ color }) => color))
+    const plumColors = descendants(plum.root as unknown as Drawing)
+      .flatMap(({ rectangles = [] }) => rectangles.map(({ color }) => color))
     expect(goldColors).toContain(PALETTE.brass)
     expect(blueColors).toContain(PALETTE.blue)
+    expect(greenColors).toEqual(expect.arrayContaining([
+      PALETTE.forest, PALETTE.forestLight, PALETTE.white, PALETTE.silver,
+    ]))
+    expect(plumColors).toEqual(expect.arrayContaining([
+      PALETTE.plum, PALETTE.plumLight, PALETTE.white, PALETTE.gold,
+    ]))
+    expect(new Set([goldColors, blueColors, greenColors, plumColors].map((colors) => colors.join(','))).size).toBe(4)
   })
 
   it('keeps hazards and beveled pickups detailed with a fixed resource bound', () => {

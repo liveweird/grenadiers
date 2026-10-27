@@ -30,8 +30,8 @@ files:
 - `arena-guides.png` — raster copy of the separate guide/label layer;
 - `arena-overview.png` — labelled visual inventory on a checkerboard background.
 
-The fixed 1120×1120 authoring sheet has 100 physical cells: 95 assigned entries (91 baseline
-drawings and four blank reserved entries) followed by five unassigned cells. Cells are 112×112
+The 1120×1344 authoring sheet has 120 physical cells: 111 assigned entries (107 baseline
+drawings and four blank reserved entries) followed by nine unassigned cells. Cells are 112×112
 pixels in ten columns. Logical arena tiles remain 48×48 pixels. Reserved and unassigned cells must
 stay transparent. Do not move or rename assigned entries; new catalogue IDs must be added in code
 before a source revision can use them.
@@ -43,7 +43,8 @@ outputs rather than canonical inputs.
 
 ## Edit and export
 
-Edit `arena-source.png` in a pixel-art editor without resizing the sheet or frames. Then export a
+Edit `arena-source.png` in a pixel-art editor without resizing the sheet or frames. The sheet
+includes all four uniform appearances; current two-player matches use the first two. Then export a
 validated runtime pack:
 
 ```sh
@@ -56,7 +57,7 @@ npm --prefix e2e run art:export -- \
 Add `--slices` to emit optional named files under `target/art-atlas/slices/`. Runtime output is
 generated and ignored rather than an artist source. Its main files are `arena-atlas.png`,
 `arena-atlas.json`, `arena-overview.png` and `arena-preview.png`. The runtime texture contains the
-91 baseline frames, unrotated and untrimmed, with two-pixel extrusion and two-pixel transparent
+107 baseline frames, unrotated and untrimmed, with two-pixel extrusion and two-pixel transparent
 padding. Labels and guides never enter the runtime texture.
 
 Both commands refuse an existing output directory, so an artist source or earlier review cannot
@@ -72,7 +73,7 @@ target after review.
 - Paint only inside each baseline frame rectangle. Slot gutters and reserved frames must remain
   transparent.
 - A frame pivot preserves its drawing origin and must equal `(-localBounds.x,
-  -localBounds.y)`. All 16 directional actor poses retain the shared `(40, 65)` foot anchor.
+  -localBounds.y)`. All 32 directional actor poses retain the shared `(40, 65)` foot anchor.
 - Keep IDs path-safe and stable. The exporter rejects missing, duplicate, unexpected or path-like
   IDs, changed required animations, invalid dimensions and texture-budget overflow.
 - Flame frames must reach all four edges so adjacent rays join. The procedural template's
@@ -89,9 +90,17 @@ and adjacent flames. It is not linked from the gameplay or product flow.
 The adopted source is a Napoleonic redraw, AI-generated with ChatGPT (OpenAI) and supplied by
 the repository owner. Player one wears an orange-and-white uniform with a plumed shako, player
 two a blue uniform with a cockaded bicorne; terrain, bombs, flames, Oil, pickups and status cues
-are repainted inside the previous silhouettes. It keeps the v0.3.48 manifest unchanged, every frame rectangle, pivot and anchor,
-binary alpha and the flame edge bands. Its new Oil palette is pinned by the Oil Barrel browser
+are repainted inside the previous silhouettes. The original redraw preserved the original 95 frame contracts, pivots, anchors,
+binary alpha and flame edge bands; the appended variants below extend that inventory. Its new Oil palette is pinned by the Oil Barrel browser
 scenario. Repository licensing applies.
+
+Players three and four add forest-green/cream/silver and plum-purple/cream/gold uniform variants,
+with a pale-plumed shako and rounded fur busby respectively. They were generated with OpenAI's
+built-in image generation tool using the adopted sprites as references; the
+[prompts](player-variants-prompts.md) are retained. Import uses nearest-neighbour fitting to the
+existing 33-pixel character height, a shared foot baseline, binary alpha and bounded 28-color palettes. Their 16 frames
+append after the original 95 entries; the original frame metadata and pixels are preserved.
+These appearances prepare multiplayer artwork without enabling additional live seats by themselves.
 
 It replaces the v0.3.53 redraw, which was AI-generated: Claude (Anthropic, via Claude Code) wrote
 a procedural Python/Pillow script that painted every frame, directed and reviewed by the

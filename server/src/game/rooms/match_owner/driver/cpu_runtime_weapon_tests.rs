@@ -38,7 +38,7 @@ fn acquired_timed_weapons_are_consumed_once_and_escape_without_workers() {
         );
         settle_to_admission(&mut driver, admission);
         driver.poll_cpu_result().unwrap();
-        let manual_after = driver.runtime.next_cpu_manual_action();
+        let manual_after = driver.runtime.next_cpu_manual_action(SeatId::Two);
 
         let expected_blast = match weapon {
             SpecialWeapon::Piercing => BlastKind::Piercing,
@@ -104,7 +104,10 @@ fn acquired_timed_weapons_are_consumed_once_and_escape_without_workers() {
         assert!(confirmed, "{weapon:?} placement was never confirmed");
         assert!(saw_flame, "{weapon:?} blast was never published");
         assert!(alive_after_clear, "{weapon:?} route survives flame expiry");
-        assert_eq!(driver.runtime.next_cpu_manual_action(), manual_after);
+        assert_eq!(
+            driver.runtime.next_cpu_manual_action(SeatId::Two),
+            manual_after
+        );
     }
 }
 
@@ -127,7 +130,7 @@ fn timed_weapon_same_cell_veto_retains_charge_and_never_retries() {
             .action(SeatId::One, epoch, MatchAction::Bomb(1))
             .unwrap();
         driver.poll_cpu_result().unwrap();
-        let manual_after = driver.runtime.next_cpu_manual_action();
+        let manual_after = driver.runtime.next_cpu_manual_action(SeatId::Two);
 
         let observation = first_placement_observation(&mut driver, placement.placed_at);
         assert!(
@@ -142,7 +145,10 @@ fn timed_weapon_same_cell_veto_retains_charge_and_never_retries() {
         for _ in 0..3 {
             driver.tick(Instant::now()).unwrap();
         }
-        assert_eq!(driver.runtime.next_cpu_manual_action(), manual_after);
+        assert_eq!(
+            driver.runtime.next_cpu_manual_action(SeatId::Two),
+            manual_after
+        );
     }
 }
 
@@ -166,10 +172,13 @@ fn timed_weapon_api_rejection_retains_charge_selects_absent_and_never_retries() 
                 .action(SeatId::Two, epoch, MatchAction::Movement(None))
                 .unwrap();
         }
-        let manual_before = driver.runtime.next_cpu_manual_action();
+        let manual_before = driver.runtime.next_cpu_manual_action(SeatId::Two);
         driver.poll_cpu_result().unwrap();
 
-        assert_eq!(driver.runtime.next_cpu_manual_action(), manual_before);
+        assert_eq!(
+            driver.runtime.next_cpu_manual_action(SeatId::Two),
+            manual_before
+        );
         assert_eq!(
             driver.cpu.as_ref().unwrap().plant_presence(),
             Some(PlantPresence::Absent)
@@ -182,7 +191,10 @@ fn timed_weapon_api_rejection_retains_charge_selects_absent_and_never_retries() 
         for _ in 0..3 {
             driver.tick(Instant::now()).unwrap();
         }
-        assert_eq!(driver.runtime.next_cpu_manual_action(), manual_before);
+        assert_eq!(
+            driver.runtime.next_cpu_manual_action(SeatId::Two),
+            manual_before
+        );
     }
 }
 

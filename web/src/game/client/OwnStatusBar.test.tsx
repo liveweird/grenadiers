@@ -45,7 +45,7 @@ describe('own status bar', () => {
       'Invisible bombs (0:09)', 'Frozen by Stopwatch', 'Damage grace0:02',
     ]) expect(bar).toHaveTextContent(text)
     expect(bar.closest('[aria-live]')).toBeNull()
-    expect(bar.querySelector('.item-icon')).toHaveStyle({ backgroundSize: '560px 560px' })
+    expect(bar.querySelector('.item-icon')).toHaveStyle({ backgroundSize: '560px 672px' })
     expect(screen.getByLabelText('Protected from damage, 0:02 remaining')).toHaveTextContent('0:02')
   })
 

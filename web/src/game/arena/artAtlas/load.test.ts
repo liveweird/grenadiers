@@ -32,8 +32,8 @@ vi.mock('./validate', () => ({
 
 import { createArenaAtlas, loadArenaAtlas } from './load'
 
-const sourcePixels = { width: 1120, height: 1120, data: new Uint8Array() }
-const runtimePixels = { width: 2040, height: 320, data: new Uint8Array() }
+const sourcePixels = { width: 1120, height: 1344, data: new Uint8Array() }
+const runtimePixels = { width: 2040, height: 440, data: new Uint8Array() }
 
 afterEach(() => vi.unstubAllGlobals())
 

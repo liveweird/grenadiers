@@ -12,7 +12,7 @@ repeated approval for routine implementation choices. Entries are not delivery-d
 
 ## Single-player
 
-- [next] **SOLO-CPU — validate and tune the staged hybrid.** Compare the
+- [todo] **SOLO-CPU — validate and tune the staged hybrid.** Compare the
   [private Solo opponent](docs/game/single-player.md) on Easy and Standard with all items enabled.
   Follow the [accepted design](docs/game/single-player-cpu.md).
   - **CPU4 — human difficulty and playability validation:** collect feedback on pressure,
@@ -20,8 +20,28 @@ repeated approval for routine implementation choices. Entries are not delivery-d
     reproducible weaknesses into bounded tuning or further combat/equipment tactics. Preserve
     real queued-driver progress regressions, both reference matrices, bounded planning work
     and exact accepted-input replay; measure trajectory and cost alongside survival/outcomes.
-- [parked] **More seats and campaign mobs.** Revisit after the two-seat CPU mode is stable;
-  neither is part of the initial solo duel.
+- [parked] **Campaign mobs.** Revisit after the two-seat CPU mode is stable;
+  campaign content remains outside the initial solo duel.
+
+## Multiplayer and arenas
+
+- [next] **MULTIPLAYER — three- and four-player matches.** Support human and/or CPU-controlled
+  seats, including mixed lineups, with at least one human in every match. Give players three
+  and four distinct uniform variants and contrasting palettes, preserving readable identity
+  alongside the existing players. Extend lobby/seat configuration, spawning, round outcomes,
+  readiness/rematch and disconnect handling. Adapt CPU observations/tactics, transport/replay
+  contracts and the HUD to the selected player count; preserve two-player behavior.
+  Follow the [multiplayer design](docs/game/multiplayer-design.md).
+  - **MP0 — foundations:** explicit CPU seat identity and the four-uniform artist atlas;
+    retain two-seat production until the new roster is supported end to end.
+  - **MP1 — headless rules:** validated three/four-seat simulation, fair corner spawning,
+    multi-survivor outcomes, item interactions and replayable random Teleporter selection.
+  - **MP2 — live activation:** new transport/replay contracts, room lifecycle, per-seat CPU
+    execution, lobby/HUD and recipient privacy; verify the existing 15×13 board first.
+- [todo] **BOARD-SIZE — variable board dimensions.** Allow the game board size to be configured;
+  define supported sizes and bounds during design. Adapt terrain/item generation, fair spawn
+  placement, CPU navigation, rendering and transport/replay limits. Verify supported board sizes
+  with two-, three- and four-player lineups.
 
 ## Engineering follow-ups
 

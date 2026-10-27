@@ -19,8 +19,8 @@ the build. The separate diagnostic pages are excluded from the production applic
 ## Runtime ownership
 
 Each arena renderer loads and validates the bundled source, decodes it within the PNG budget,
-and packs the 91 active frames into one padded and extruded texture. The current pack is
-2040×320 pixels: 2,611,200 decoded RGBA bytes, below the 2048px/16MiB budget. Nearest sampling,
+and packs the 107 active frames into one padded and extruded texture. The current pack is
+2040×440 pixels: 3,590,400 decoded RGBA bytes, below the 2048px/16MiB budget. Nearest sampling,
 integer pivots and single-application shadow opacity preserve the existing pixel art.
 
 The scene uses the same animation, interpolation, status visibility and entity-removal logic
@@ -33,8 +33,9 @@ localized renderer-error flow rather than substituting different artwork.
 Procedural drawings remain available for template extraction and reference comparisons.
 v0.3.53 replaced the adopted source with a redrawn, AI-generated sheet; the current source is
 a Napoleonic redraw (shako and bicorne actors, repainted terrain, bombs, flames, pickups and
-cues; see the [provenance](../../assets/art/README.md#provenance)). The manifest, frame rectangles, pivots,
-foot anchors and texture budget are unchanged, so gameplay positions and collisions do not move.
+cues; see the [provenance](../../assets/art/README.md#provenance)). The original 95 frame contracts and pixels are preserved. Sixteen appended player-three/four
+poses extend the authoring sheet to 1120×1344 with matching pivots/foot anchors; the texture
+budget and gameplay collision geometry are unchanged. Current live rooms still use two seats.
 v0.3.49 adopted the baseline artwork, with one explicit compositing change: status pulses
 fade each completed icon once. The old procedural renderer faded every overlapping paint
 stroke separately, exposing underlying colors during a pulse. A flat artist PNG retains the

@@ -1,6 +1,7 @@
 use std::collections::{BTreeSet, VecDeque};
 
 use crate::cpu::forecast::HazardForecast;
+use crate::cpu::policy::ControlPlan;
 use crate::cpu::{Observation, WorkBudget};
 use crate::game::geometry::position_overlaps_cell;
 use crate::game::{CellId, Position, Terrain};
@@ -10,9 +11,10 @@ use crate::game::{CellId, Position, Terrain};
 pub(super) fn target(
     observation: &Observation,
     forecast: &HazardForecast,
-    position: Position,
+    ordinary: &ControlPlan,
     work: &mut WorkBudget,
 ) -> Option<CellId> {
+    let position = super::compatibility::actor(observation)?.position;
     let current = position.cell()?;
     work.try_take(crate::game::arena::ARENA_CELL_COUNT as u32)
         .ok()?;
@@ -21,16 +23,21 @@ pub(super) fn target(
         let cell = CellId::new((index % width) as u16, (index / width) as u16);
         position_overlaps_cell(position, cell) && !hazards.lethal.is_empty()
     });
-    let goal = crate::cpu::policy::goal(observation, current);
+    if !threatened {
+        return ordinary
+            .next_memory
+            .route()
+            .iter()
+            .flatten()
+            .copied()
+            .find(|cell| *cell != current)
+            .or(Some(current));
+    }
     let mut queue = VecDeque::from([(current, current)]);
     let mut visited = BTreeSet::from([current]);
     while let Some((cell, first)) = queue.pop_front() {
         work.try_take(1).ok()?;
-        let reached = if threatened {
-            cell != current && forecast.cell(cell)?.lethal.is_empty()
-        } else {
-            cell == goal
-        };
+        let reached = cell != current && forecast.cell(cell)?.lethal.is_empty();
         if reached {
             return Some(first);
         }
@@ -41,7 +48,7 @@ pub(super) fn target(
             }
         }
     }
-    Some(goal)
+    None
 }
 
 fn adjacent(cell: CellId) -> impl Iterator<Item = CellId> {

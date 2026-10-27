@@ -28,7 +28,10 @@ an empty room. Restarting the server ends solo and human-duel matches alike.
 
 ## Initial opponent behavior
 
-The CPU pursues exposed pickups, useful block-opening positions and visible rival pressure. It
+The CPU scores reachable useful upgrades, Heart, beneficial buffs, block-opening positions and
+visible rival pressure. It can take a detour rather than chase an unreachable nearer item, and
+avoids deliberate travel through known curses or unsupported weapons. Capped upgrades and
+harmless duplicates can still be crossed; held Heart is protected against equipment replacement. It
 avoids known hazards and plants an ordinary bomb only when its restricted observation supports
 a checked escape. Accepted movement and manual actions use the same validation as humans.
 This is an initial opponent, with conservative tactics rather than tuned difficulty levels.

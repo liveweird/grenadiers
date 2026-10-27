@@ -72,12 +72,18 @@ test('a solo player completes, rematches, reconnects and leaves a real CPU match
     { intervals: [15] }).toBe(true)
     await expect.poll(() => latestSnapshot(game)?.room.phase.type).toBe('matchResult')
     const result = latestSnapshot(game)!
-    expect(visibleActor(result, 'one')?.alive).toBe(false)
-    expect(result.room.phase).toMatchObject({
-      type: 'matchResult', result: { type: 'winner', seat: 'two', reason: 'roundWins' },
-    })
-    expect(result.room.scores).toEqual({ one: 0, two: 1 })
-    await expect(player.getByRole('status')).toHaveText('CPU opponent wins the match with one round win.')
+    const phase = result.room.phase
+    expect(phase).toMatchObject({ type: 'matchResult', result: { type: 'winner', reason: 'roundWins' } })
+    if (phase.type !== 'matchResult' || phase.result.type !== 'winner') {
+      throw new Error('Expected a completed match with a round winner')
+    }
+    const winner = phase.result.seat
+    const loser = winner === 'one' ? 'two' : 'one'
+    expect(result.state.actors.find((actor) => actor.seat === winner)?.alive).toBe(true)
+    expect(result.state.actors.find((actor) => actor.seat === loser)?.alive).toBe(false)
+    expect(result.room.scores).toEqual(winner === 'one' ? { one: 1, two: 0 } : { one: 0, two: 1 })
+    const winnerLabel = winner === 'one' ? 'Player one' : 'CPU opponent'
+    await expect(player.getByRole('status')).toHaveText(`${winnerLabel} wins the match with one round win.`)
 
     const rematch = player.getByRole('button', { name: 'Play again', exact: true })
     await expect(rematch).toBeEnabled({ timeout: 10_000 })

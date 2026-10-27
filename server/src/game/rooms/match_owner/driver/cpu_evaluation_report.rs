@@ -1,18 +1,24 @@
 use grenadiers_core::cpu::survival::WORK_ALLOWANCE;
 use grenadiers_core::game::{DrawReason, RoundResult};
+use grenadiers_core::room::CpuProfile;
 use serde_json::{Value, json};
 
 use super::super::evaluation_support::{EvaluationCase, EvaluationRun, run};
 use crate::game::rooms::measurement;
 
-pub(super) fn emit_matrix(kind: &str, cases: Vec<EvaluationCase>, tick_cap: u64) {
+pub(super) fn emit_matrix(
+    kind: &str,
+    cases: Vec<EvaluationCase>,
+    tick_cap: u64,
+    profile: CpuProfile,
+) {
     measurement::require_release();
     let source_identity = required_metadata("GRENADIERS_MEASUREMENT_SOURCE");
     let toolchain = required_metadata("GRENADIERS_MEASUREMENT_TOOLCHAIN");
     let mut planner_times = Vec::new();
     let mut results = Vec::new();
     for case in cases {
-        let evaluation = run(case).unwrap();
+        let evaluation = run(case, profile).unwrap();
         assert!(evaluation.trace.replay_verified);
         assert!(
             evaluation

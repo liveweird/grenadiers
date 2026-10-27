@@ -69,7 +69,7 @@ async fn fresh_unseated_semantic_errors_consume_sequences_before_retry() {
     let mut socket = connect(&url).await;
     assert_eq!(
         authenticate(&mut socket, &token, 12).await,
-        json!({"type":"authenticated", "protocolVersion":12})
+        json!({"type":"authenticated", "protocolVersion":13})
     );
 
     let room_id = "00000000000000000000000000000001";

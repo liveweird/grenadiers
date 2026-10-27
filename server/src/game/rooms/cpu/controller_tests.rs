@@ -17,7 +17,12 @@ use super::{CpuController, Pending};
 use crate::game::rooms::cpu::worker::{CpuPlanner, PlanResult};
 
 fn controller() -> CpuController {
-    let mut controller = CpuController::new(CpuPlanner::without_workers(), 7, [5; 32]);
+    let mut controller = CpuController::new(
+        CpuPlanner::without_workers(),
+        7,
+        [5; 32],
+        grenadiers_core::room::CpuProfile::CURRENT,
+    );
     controller.reset_world(3);
     controller
 }
@@ -186,6 +191,7 @@ fn rejected_bomb_clears_prospective_escape_but_commits_rng() {
         committed_route: None,
         certified_manual: None,
         escape_origin: false,
+        ordinary_navigation: false,
     };
 
     controller.commit(

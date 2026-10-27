@@ -1,4 +1,4 @@
-use grenadiers_core::protocol::v12::{
+use grenadiers_core::protocol::v13::{
     GameClientMessage, GameSettings, ManualActionKind, ResumeToken,
 };
 use grenadiers_core::protocol::{
@@ -89,13 +89,19 @@ impl From<GameClientMessage> for InboundMessage {
                 sequence,
                 Command::CreateRoom {
                     mode: match mode {
-                        grenadiers_core::protocol::v12::RoomMode::HumanDuel => {
+                        grenadiers_core::protocol::v13::RoomMode::HumanDuel => {
                             grenadiers_core::room::RoomMode::HumanDuel
                         }
-                        grenadiers_core::protocol::v12::RoomMode::Solo { .. } => {
-                            grenadiers_core::room::RoomMode::Solo(
-                                grenadiers_core::room::CpuProfile::CURRENT,
-                            )
+                        grenadiers_core::protocol::v13::RoomMode::Solo { difficulty } => {
+                            let profile = match difficulty {
+                                grenadiers_core::protocol::v13::Difficulty::Easy => {
+                                    grenadiers_core::room::CpuProfile::CURRENT_EASY
+                                }
+                                grenadiers_core::protocol::v13::Difficulty::Standard => {
+                                    grenadiers_core::room::CpuProfile::CURRENT
+                                }
+                            };
+                            grenadiers_core::room::RoomMode::Solo(profile)
                         }
                     },
                 },
@@ -198,30 +204,28 @@ impl From<GameClientMessage> for InboundMessage {
 
 #[cfg(test)]
 mod tests {
-    use grenadiers_core::protocol::v12::parse_client_message;
+    use grenadiers_core::protocol::v13::parse_client_message;
 
     use super::{Command, InboundMessage};
 
     #[test]
-    fn solo_creation_maps_only_to_the_fixed_server_cpu_profile() {
-        let message = parse_client_message(
-            r#"{"type":"createRoom","sequence":1,"mode":{"type":"solo","difficulty":"standard"}}"#,
-        )
-        .unwrap();
-        let InboundMessage::Command(command) = InboundMessage::from(message) else {
-            panic!("create is sequenced");
-        };
-        assert!(matches!(
-            command.into_parts(),
-            (
-                _,
-                Command::CreateRoom {
-                    mode: grenadiers_core::room::RoomMode::Solo(
-                        grenadiers_core::room::CpuProfile::CURRENT
-                    )
-                }
-            )
-        ));
+    fn solo_creation_maps_each_validated_difficulty_to_its_exact_server_profile() {
+        for (difficulty, expected) in [
+            ("easy", grenadiers_core::room::CpuProfile::CURRENT_EASY),
+            ("standard", grenadiers_core::room::CpuProfile::CURRENT),
+        ] {
+            let message = parse_client_message(&format!(
+                r#"{{"type":"createRoom","sequence":1,"mode":{{"type":"solo","difficulty":"{difficulty}"}}}}"#
+            ))
+            .unwrap();
+            let InboundMessage::Command(command) = InboundMessage::from(message) else {
+                panic!("create is sequenced");
+            };
+            let (_, Command::CreateRoom { mode }) = command.into_parts() else {
+                panic!("create body is retained");
+            };
+            assert_eq!(mode, grenadiers_core::room::RoomMode::Solo(expected));
+        }
     }
 
     #[test]

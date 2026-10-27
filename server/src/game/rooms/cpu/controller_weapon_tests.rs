@@ -158,7 +158,12 @@ fn fixture(weapon: SpecialWeapon) -> (Observation, SurvivalPlan, Fixture) {
 }
 
 fn prepared(basis: &Observation) -> CpuController {
-    let mut controller = CpuController::new(CpuPlanner::without_workers(), 7, [5; 32]);
+    let mut controller = CpuController::new(
+        CpuPlanner::without_workers(),
+        7,
+        [5; 32],
+        grenadiers_core::room::CpuProfile::CURRENT,
+    );
     controller.reset_world(3);
     assert!(controller.accept_observation(basis));
     controller.settled_stop_tick = Some(basis.parts().tick);

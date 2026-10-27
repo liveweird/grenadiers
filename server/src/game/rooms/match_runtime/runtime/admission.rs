@@ -2,7 +2,7 @@ use grenadiers_core::{
     game::SeatId,
     protocol::{
         Counter,
-        v12::{ExpandedCapture, RoomView, capture_expanded},
+        v13::{ExpandedCapture, RoomView, capture_expanded},
     },
     room::{MatchLifecycle, reconnect::ReservationState},
 };

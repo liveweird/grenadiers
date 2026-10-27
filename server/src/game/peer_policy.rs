@@ -1,5 +1,5 @@
 use axum::extract::ws::WebSocket;
-use grenadiers_core::protocol::{Counter, v12::V11ErrorCode as ErrorCode};
+use grenadiers_core::protocol::{Counter, v13::V11ErrorCode as ErrorCode};
 
 use super::{
     connection::ConnectionState,

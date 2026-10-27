@@ -1,6 +1,7 @@
 use std::collections::BTreeSet;
 
 use grenadiers_core::cpu::survival::WORK_ALLOWANCE;
+use grenadiers_core::room::CpuProfile;
 
 #[path = "cpu_evaluation_report.rs"]
 mod report;
@@ -11,9 +12,9 @@ use super::evaluation_support::{
 
 #[test]
 fn cpu_evaluation_exact_repeat_is_bounded_and_censored() {
-    let first = run(routine_case("repeat", [11; 32], [17; 32], 80)).unwrap();
-    let second = run(routine_case("repeat", [11; 32], [17; 32], 80)).unwrap();
-    let bounded = run(routine_case("bounded", [11; 32], [17; 32], 1)).unwrap();
+    let first = run_standard(routine_case("repeat", [11; 32], [17; 32], 80)).unwrap();
+    let second = run_standard(routine_case("repeat", [11; 32], [17; 32], 80)).unwrap();
+    let bounded = run_standard(routine_case("bounded", [11; 32], [17; 32], 1)).unwrap();
 
     assert_eq!(first.trace, second.trace);
     assert!(first.trace.replay_verified);
@@ -48,9 +49,9 @@ fn cpu_evaluation_exact_repeat_is_bounded_and_censored() {
 
 #[test]
 fn cpu_evaluation_separates_seed_axes_and_makes_generated_progress() {
-    let arena_a = run(routine_case("arena-a", [11; 32], [17; 32], 120)).unwrap();
-    let arena_b = run(routine_case("arena-b", [37; 32], [17; 32], 120)).unwrap();
-    let cpu_b = run(EvaluationCase::new(
+    let arena_a = run_standard(routine_case("arena-a", [11; 32], [17; 32], 120)).unwrap();
+    let arena_b = run_standard(routine_case("arena-b", [37; 32], [17; 32], 120)).unwrap();
+    let cpu_b = run_standard(EvaluationCase::new(
         "cpu-b",
         "arena-a",
         [11; 32],
@@ -90,8 +91,63 @@ fn cpu_evaluation_separates_seed_axes_and_makes_generated_progress() {
 }
 
 #[test]
+fn easy_evaluation_is_separately_labeled_and_exactly_repeatable() {
+    let case = routine_case("easy-repeat", [11; 32], [17; 32], 120);
+    let first = run(case, CpuProfile::CURRENT_EASY).unwrap();
+    let second = run(case, CpuProfile::CURRENT_EASY).unwrap();
+
+    assert_eq!(first.trace.profile, CpuProfile::CURRENT_EASY);
+    assert_eq!(first.trace, second.trace);
+    assert!(first.trace.replay_verified);
+    assert!(first.trace.accepted_movement_actions > 0);
+}
+
+#[test]
+fn standard_opening_is_identical_to_the_archived_v15_policy() {
+    let case = routine_case("standard-v15", [11; 32], [17; 32], 120);
+    let mut current = run(case, CpuProfile::CURRENT).unwrap().trace;
+    let archived = run(case, CpuProfile::EQUIPMENT_GOALS_V15).unwrap().trace;
+
+    current.profile = CpuProfile::EQUIPMENT_GOALS_V15;
+    assert_eq!(current, archived);
+}
+
+#[test]
+#[ignore = "isolated release acceptance for the complete Standard parity matrices"]
+fn cpu_standard_v15_matrix_parity_acceptance() {
+    for case in default_cases().into_iter().chain(full_round_cases()) {
+        let mut current = run(case, CpuProfile::CURRENT).unwrap().trace;
+        let archived = run(case, CpuProfile::EQUIPMENT_GOALS_V15).unwrap().trace;
+        current.profile = CpuProfile::EQUIPMENT_GOALS_V15;
+        assert_eq!(
+            current, archived,
+            "case={} tick_cap={}",
+            case.id, case.tick_cap
+        );
+    }
+}
+
+#[test]
+fn easy_keeps_the_initial_decision_immediate() {
+    let case = routine_case("initial-immediate", [11; 32], [17; 32], 80);
+    let standard = run(case, CpuProfile::CURRENT).unwrap();
+    let easy = run(case, CpuProfile::CURRENT_EASY).unwrap();
+    let first_cpu_action = |evaluation: &super::evaluation_support::EvaluationRun| {
+        evaluation
+            .trace
+            .accepted_actions
+            .iter()
+            .find(|(_, seat, _)| *seat == grenadiers_core::game::SeatId::Two)
+            .copied()
+    };
+
+    assert_eq!(first_cpu_action(&easy), first_cpu_action(&standard));
+    assert!(first_cpu_action(&easy).is_some());
+}
+
+#[test]
 fn bomb_retreat_script_uses_reserved_spawn_cells() {
-    let evaluation = run(EvaluationCase::new(
+    let evaluation = run_standard(EvaluationCase::new(
         "bomb-retreat-reserved-opening",
         "arena-a",
         [11; 32],
@@ -194,13 +250,54 @@ fn full_round_matrix_changes_only_the_declared_tick_cap() {
 #[test]
 #[ignore = "isolated release evaluation; run through scripts/measure-game.sh --cpu"]
 fn cpu_scripted_evaluation_measurement() {
-    report::emit_matrix("solo-scripted-evaluation", default_cases(), 1_800);
+    report::emit_matrix(
+        "solo-scripted-evaluation",
+        default_cases(),
+        1_800,
+        CpuProfile::CURRENT,
+    );
 }
 
 #[test]
 #[ignore = "isolated full-round evaluation; run through scripts/measure-game.sh --cpu-rounds"]
 fn cpu_full_round_evaluation_measurement() {
-    report::emit_matrix("solo-full-round-evaluation", full_round_cases(), 10_800);
+    report::emit_matrix(
+        "solo-full-round-evaluation",
+        full_round_cases(),
+        10_800,
+        CpuProfile::CURRENT,
+    );
+}
+
+#[test]
+#[ignore = "isolated Easy release evaluation; run through scripts/measure-game.sh --cpu-easy"]
+fn cpu_easy_scripted_evaluation_measurement() {
+    report::emit_matrix(
+        "solo-easy-scripted-evaluation",
+        default_cases(),
+        1_800,
+        CpuProfile::CURRENT_EASY,
+    );
+}
+
+#[test]
+#[ignore = "isolated Easy full-round evaluation; run through scripts/measure-game.sh --cpu-easy-rounds"]
+fn cpu_easy_full_round_evaluation_measurement() {
+    report::emit_matrix(
+        "solo-easy-full-round-evaluation",
+        full_round_cases(),
+        10_800,
+        CpuProfile::CURRENT_EASY,
+    );
+}
+
+fn run_standard(
+    case: EvaluationCase,
+) -> Result<
+    super::evaluation_support::EvaluationRun,
+    crate::game::rooms::match_runtime::MatchRuntimeError,
+> {
+    run(case, CpuProfile::CURRENT)
 }
 
 fn routine_case(

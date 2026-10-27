@@ -73,6 +73,11 @@ impl CpuController {
     fn admit_completed(&mut self, current_tick: Tick, command_epoch: u64) -> Option<AcceptedPlan> {
         let pending = self.pending.take()?;
         let result = pending.completed?;
+        let ordinary_navigation = result.plan.lease.is_none()
+            && result.plan.execution.is_none()
+            && result.plan.control.intent.manual.is_none()
+            && result.plan.control.intent.movement != grenadiers_core::cpu::MovementIntent::Stop
+            && super::cadence::is_clear_for_easy(&result.basis);
         let latest = self.latest_observation.as_ref()?;
         let escape_origin = match (&result.escape_origin, &self.escape_origin) {
             (None, None) => false,
@@ -152,6 +157,7 @@ impl CpuController {
             committed_route,
             certified_manual,
             escape_origin,
+            ordinary_navigation,
         })
     }
 }

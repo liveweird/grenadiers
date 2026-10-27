@@ -19,8 +19,12 @@ fn repeated_bomb_pressure_keeps_queued_cpu_progressing() {
             3_600,
         )
     };
-    let first = run(case()).unwrap().trace;
-    let repeat = run(case()).unwrap().trace;
+    let first = run(case(), grenadiers_core::room::CpuProfile::CURRENT)
+        .unwrap()
+        .trace;
+    let repeat = run(case(), grenadiers_core::room::CpuProfile::CURRENT)
+        .unwrap()
+        .trace;
 
     assert_eq!(first, repeat, "fixed seeds must replay an exact CPU trace");
     assert!(first.replay_verified);

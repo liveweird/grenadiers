@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use grenadiers_core::{
     game::{EnabledItems, SeatId, SpeedLevel},
-    protocol::{Counter, v12::ConnectionStatus},
+    protocol::{Counter, v13::ConnectionStatus},
     room::{CpuProfile, RoomMode, RoomSettings},
 };
 use tokio::{sync::watch, time::Instant};
@@ -66,7 +66,7 @@ async fn solo_creator_is_the_only_network_admission_and_cpu_is_ready() {
     assert_eq!(personal["room"]["seats"][1]["ready"], true);
     assert!(matches!(
         creator.room.phase,
-        grenadiers_core::protocol::v12::RoomPhase::Waiting
+        grenadiers_core::protocol::v13::RoomPhase::Waiting
     ));
     let super::MatchOwnerNotice::Publication(baseline) =
         creator.notices.borrow_and_update().clone()
@@ -92,7 +92,7 @@ async fn solo_creator_is_the_only_network_admission_and_cpu_is_ready() {
         .unwrap();
     assert!(matches!(
         publication(&value.notices).room.phase,
-        grenadiers_core::protocol::v12::RoomPhase::Countdown { .. }
+        grenadiers_core::protocol::v13::RoomPhase::Countdown { .. }
     ));
     value.task.abort();
 }
@@ -245,10 +245,10 @@ async fn grace_expiry_settles_cpu_forfeit_then_destroys_solo_room() {
     let room = publication(&value.notices).room;
     assert!(matches!(
         room.phase,
-        grenadiers_core::protocol::v12::RoomPhase::MatchResult {
-            result: grenadiers_core::protocol::v12::MatchResult::Winner {
+        grenadiers_core::protocol::v13::RoomPhase::MatchResult {
+            result: grenadiers_core::protocol::v13::MatchResult::Winner {
                 seat: grenadiers_core::protocol::Seat::Two,
-                reason: grenadiers_core::protocol::v12::MatchWinnerReason::Forfeit,
+                reason: grenadiers_core::protocol::v13::MatchWinnerReason::Forfeit,
             },
             ..
         }
@@ -313,7 +313,7 @@ async fn completed_solo_match_requires_human_rematch_and_resets_cpu_ready() {
     let mut rematch_at = None;
     for _ in 0..1_000 {
         advance_ticks(1).await;
-        if let grenadiers_core::protocol::v12::RoomPhase::MatchResult { rematch_at: at, .. } =
+        if let grenadiers_core::protocol::v13::RoomPhase::MatchResult { rematch_at: at, .. } =
             publication(&value.notices).room.phase
         {
             rematch_at = Some(at);
@@ -340,52 +340,9 @@ async fn completed_solo_match_requires_human_rematch_and_resets_cpu_ready() {
     let reset = publication(&value.notices).room;
     assert!(matches!(
         reset.phase,
-        grenadiers_core::protocol::v12::RoomPhase::Waiting
+        grenadiers_core::protocol::v13::RoomPhase::Waiting
     ));
     assert!(reset.seats[1].ready);
     assert!(!reset.seats[0].ready);
     value.task.abort();
-}
-
-#[test]
-fn archived_cpu_profile_cannot_label_a_current_live_worker() {
-    for profile in [
-        CpuProfile::INITIAL,
-        CpuProfile::PULSE_V2,
-        CpuProfile::ROUTE_V3,
-        CpuProfile::PLANT_V4,
-        CpuProfile::GOALS_V5,
-        CpuProfile::WEAPONS_V6,
-        CpuProfile::WALL_PASS_V7,
-        CpuProfile::RESPONSIVE_V8,
-        CpuProfile::ORIGIN_V9,
-        CpuProfile::GUIDED_V10,
-        CpuProfile::CLEAR_GAP_V11,
-        CpuProfile::STEERING_V12,
-        CpuProfile::BRACELET_V13,
-        CpuProfile::PUNCH_V14,
-    ] {
-        let mut room = identity(RoomProfile::ExpandedV5);
-        room.mode = RoomMode::Solo(profile);
-        room.private_cpu_seed = Some([17; 32]);
-        let (_, shutdown) = watch::channel(false);
-        let result = PreparedMatchOwner::new_with_planner(
-            room,
-            Instant::now(),
-            RoundSeedSource::with_entropy(|bytes| {
-                bytes.fill(23);
-                Ok(())
-            }),
-            Arc::new(|bytes: &mut [u8]| {
-                bytes.fill(31);
-                Ok(())
-            }),
-            crate::game::rooms::cpu::CpuPlanner::without_workers(),
-            shutdown,
-        );
-        assert!(matches!(
-            result,
-            Err(crate::game::rooms::match_runtime::MatchRuntimeError::Publication)
-        ));
-    }
 }

@@ -1,6 +1,6 @@
 use grenadiers_core::{
     game::SeatId,
-    protocol::{Counter, Seat, v12::ResumeToken},
+    protocol::{Counter, Seat, v13::ResumeToken},
     room::DepartureReason,
 };
 

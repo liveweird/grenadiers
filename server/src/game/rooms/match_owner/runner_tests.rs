@@ -1,6 +1,6 @@
 use std::{sync::atomic::Ordering, time::Duration};
 
-use grenadiers_core::protocol::v12::{MatchInterruptReason, MatchResult, RoomPhase};
+use grenadiers_core::protocol::v13::{MatchInterruptReason, MatchResult, RoomPhase};
 use tokio::time::advance;
 
 use super::{ClosingReason, MatchOwnerNotice, test_support::*};

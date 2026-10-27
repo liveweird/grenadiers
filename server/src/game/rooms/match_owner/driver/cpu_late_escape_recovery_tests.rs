@@ -38,15 +38,18 @@ fn scene_change_at_second_plant_recovers_both_generated_cases() {
 }
 
 fn assert_recovery(case: RecoveryCase) {
-    let trace = run(EvaluationCase::new(
-        case.id,
-        case.arena_id,
-        case.arena_seed,
-        "c0",
-        [17; 32],
-        HumanScript::BombRetreat,
-        480,
-    ))
+    let trace = run(
+        EvaluationCase::new(
+            case.id,
+            case.arena_id,
+            case.arena_seed,
+            "c0",
+            [17; 32],
+            HumanScript::BombRetreat,
+            480,
+        ),
+        grenadiers_core::room::CpuProfile::CURRENT,
+    )
     .unwrap()
     .trace;
     assert!(

@@ -146,7 +146,7 @@ async fn authenticates_and_consumes_fresh_sequences_before_semantics() {
     let mut socket = connect(&url).await;
     assert_eq!(
         authenticate(&mut socket, &token, 12).await,
-        json!({"type":"authenticated", "protocolVersion":12})
+        json!({"type":"authenticated", "protocolVersion":13})
     );
 
     send_json(
@@ -166,7 +166,7 @@ async fn authenticates_and_consumes_fresh_sequences_before_semantics() {
     );
     send_json(
         &mut socket,
-        json!({"type":"authenticate", "protocolVersion":12, "token":token}),
+        json!({"type":"authenticate", "protocolVersion":13, "token":token}),
     )
     .await;
     assert_eq!(

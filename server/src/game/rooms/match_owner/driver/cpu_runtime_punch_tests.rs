@@ -25,12 +25,14 @@ use crate::{
 
 #[test]
 fn queued_driver_punches_the_same_bomb_id_and_survives_both_manual_outcomes() {
-    run_punch_case(false);
-    run_punch_case(true);
+    for profile in [CpuProfile::CURRENT, CpuProfile::CURRENT_EASY] {
+        run_punch_case(profile, false);
+        run_punch_case(profile, true);
+    }
 }
 
-fn run_punch_case(reject_manual: bool) {
-    let (mut driver, planner, basis) = prepared_driver();
+fn run_punch_case(profile: CpuProfile, reject_manual: bool) {
+    let (mut driver, planner, basis) = prepared_driver(profile);
     let bomb = sole_bomb(&basis);
     let source = bomb.cell;
     let bomb_id = bomb.id;
@@ -144,7 +146,7 @@ fn run_punch_case(reject_manual: bool) {
     assert_eq!(driver.runtime.next_cpu_manual_action(), manual_after);
 }
 
-fn prepared_driver() -> (Driver, CpuPlanner, Observation) {
+fn prepared_driver(profile: CpuProfile) -> (Driver, CpuPlanner, Observation) {
     let enabled = EnabledItems::from_bits(
         EnabledItems::PUNCH.bits() | EnabledItems::KICK.bits() | EnabledItems::TELEPORTER.bits(),
     )
@@ -152,7 +154,7 @@ fn prepared_driver() -> (Driver, CpuPlanner, Observation) {
     let settings = RoomSettings::new(SpeedLevel::Four, 64, 1, 180)
         .unwrap()
         .with_enabled_items(enabled);
-    let (mut driver, planner) = running_driver(settings);
+    let (mut driver, planner) = running_driver(settings, profile);
     let tick = driver.runtime.lifecycle().tick();
     driver
         .runtime
@@ -186,10 +188,10 @@ fn visible_actor(observation: &Observation, seat: SeatId) -> &grenadiers_core::c
     }
 }
 
-fn running_driver(settings: RoomSettings) -> (Driver, CpuPlanner) {
+fn running_driver(settings: RoomSettings, profile: CpuProfile) -> (Driver, CpuPlanner) {
     let (_, shutdown) = watch::channel(false);
     let mut room = identity(RoomProfile::ExpandedV5);
-    room.mode = RoomMode::Solo(CpuProfile::CURRENT);
+    room.mode = RoomMode::Solo(profile);
     room.private_cpu_seed = Some([17; 32]);
     let planner = CpuPlanner::without_workers();
     let (_, owner) = PreparedMatchOwner::new_with_planner(

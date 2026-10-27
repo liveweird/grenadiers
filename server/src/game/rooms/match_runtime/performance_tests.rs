@@ -2,7 +2,7 @@ use std::time::Instant;
 
 use grenadiers_core::{
     game::{Direction, SeatId},
-    protocol::v12::RoomPhase,
+    protocol::v13::RoomPhase,
     room::MatchPhase,
 };
 use serde_json::json;

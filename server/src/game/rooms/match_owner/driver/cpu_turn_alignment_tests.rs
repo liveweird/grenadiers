@@ -44,8 +44,18 @@ fn assert_post_stall_progress(case: TurnAlignmentCase) {
             TICK_CAP,
         )
     };
-    let first = run(evaluation_case()).unwrap().trace;
-    let repeat = run(evaluation_case()).unwrap().trace;
+    let first = run(
+        evaluation_case(),
+        grenadiers_core::room::CpuProfile::CURRENT,
+    )
+    .unwrap()
+    .trace;
+    let repeat = run(
+        evaluation_case(),
+        grenadiers_core::room::CpuProfile::CURRENT,
+    )
+    .unwrap()
+    .trace;
 
     assert!(first.replay_verified && repeat.replay_verified);
     assert_eq!(

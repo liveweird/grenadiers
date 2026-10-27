@@ -1,5 +1,6 @@
 //! Deterministic, bounded UtilityV1 policy.
 
+mod equipment;
 mod execution;
 mod goals;
 mod hazards;
@@ -14,6 +15,8 @@ pub use types::{ControlPlan, MAX_HOLD_TICKS, MAX_ROUTE_CELLS, PolicyError, Utili
 
 #[cfg(test)]
 mod committed_execution_sim_tests;
+#[cfg(test)]
+mod equipment_goal_tests;
 #[cfg(test)]
 mod execution_tests;
 #[cfg(test)]

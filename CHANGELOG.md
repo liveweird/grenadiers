@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+## 0.3.97 — 2026-10-27
+
+- Let the CPU seek Punch or Bracelet when unequipped or holding Kick, below useful upgrades
+  and buffs in its goal priorities.
+- Retain held tactical equipment through deliberate navigation, allowing duplicates and
+  preserving Heart and Wall Pass protections.
+- Identify the policy as UtilityV15; retain V1–V14 accepted-input replay and wire v12.
+
 ## 0.3.96 — 2026-10-27
 
 - Add a checked held-Punch tactic with one common escape for successful relocation and

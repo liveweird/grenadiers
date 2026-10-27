@@ -310,6 +310,10 @@ mod bracelet_tactic_tests;
 mod punch_tests;
 
 #[cfg(test)]
+#[path = "cpu_runtime_equipment_goal_tests.rs"]
+mod equipment_goal_tests;
+
+#[cfg(test)]
 #[path = "cpu_runtime_responsiveness_tests.rs"]
 mod responsiveness_tests;
 

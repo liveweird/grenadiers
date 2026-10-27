@@ -21,6 +21,7 @@ pub enum CpuPolicy {
     UtilityV12,
     UtilityV13,
     UtilityV14,
+    UtilityV15,
 }
 
 impl CpuPolicy {
@@ -41,6 +42,7 @@ impl CpuPolicy {
             Self::UtilityV12 => 12,
             Self::UtilityV13 => 13,
             Self::UtilityV14 => 14,
+            Self::UtilityV15 => 15,
         }
     }
 }
@@ -136,9 +138,15 @@ impl CpuProfile {
         difficulty: CpuDifficulty::Standard,
     };
 
+    /// First guarded Punch tactic, retained for archived replays.
+    pub const PUNCH_V14: Self = Self {
+        policy: CpuPolicy::UtilityV14,
+        difficulty: CpuDifficulty::Standard,
+    };
+
     /// The only policy profile used to create a new live CPU controller.
     pub const CURRENT: Self = Self {
-        policy: CpuPolicy::UtilityV14,
+        policy: CpuPolicy::UtilityV15,
         difficulty: CpuDifficulty::Standard,
     };
 }
@@ -205,7 +213,8 @@ mod tests {
         assert_eq!(CpuProfile::CLEAR_GAP_V11.policy.version(), 11);
         assert_eq!(CpuProfile::STEERING_V12.policy.version(), 12);
         assert_eq!(CpuProfile::BRACELET_V13.policy.version(), 13);
-        assert_eq!(CpuProfile::CURRENT.policy.version(), 14);
+        assert_eq!(CpuProfile::PUNCH_V14.policy.version(), 14);
+        assert_eq!(CpuProfile::CURRENT.policy.version(), 15);
         assert_eq!(
             RoomMode::Solo(CpuProfile::CURRENT).controller(SeatId::Two),
             ControllerKind::Cpu(CpuProfile::CURRENT)

@@ -39,10 +39,18 @@ pub(super) fn running_driver_with_fuse(round_seed: u8, fuse_ticks: u64) -> Drive
 }
 
 pub(super) fn running_driver_with_settings(round_seed: u8, settings: RoomSettings) -> Driver {
+    running_driver_and_planner_with_settings(round_seed, settings).0
+}
+
+pub(super) fn running_driver_and_planner_with_settings(
+    round_seed: u8,
+    settings: RoomSettings,
+) -> (Driver, CpuPlanner) {
     let (_, shutdown) = watch::channel(false);
     let mut room = identity(RoomProfile::ExpandedV5);
     room.mode = RoomMode::Solo(CpuProfile::CURRENT);
     room.private_cpu_seed = Some([17; 32]);
+    let planner = CpuPlanner::without_workers();
     let (_, owner) = PreparedMatchOwner::new_with_planner(
         room,
         Instant::now(),
@@ -54,7 +62,7 @@ pub(super) fn running_driver_with_settings(round_seed: u8, settings: RoomSetting
             bytes.fill(31);
             Ok(())
         }),
-        CpuPlanner::without_workers(),
+        planner.clone(),
         shutdown,
     )
     .unwrap();
@@ -94,7 +102,7 @@ pub(super) fn running_driver_with_settings(round_seed: u8, settings: RoomSetting
     while driver.runtime.lifecycle().phase() != MatchPhase::Running {
         driver.runtime.settle_boundary([None; 2]).unwrap();
     }
-    driver
+    (driver, planner)
 }
 
 #[test]

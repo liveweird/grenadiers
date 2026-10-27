@@ -158,7 +158,7 @@ test('source validation rejects path-like IDs and painting in authoring gutters'
   })
   expect(result.unsafeMessage).toContain('invalid stable ID ../terrain')
   expect(result.gutterMessage).toContain('paint exists in a gutter or reserved slot')
-  expect(result.inventory).toEqual({ frameCount: 95, pickupCount: 24 })
+  expect(result.inventory).toEqual({ frameCount: 111, pickupCount: 24 })
 })
 
 test('repeated preview reset and WebGL context restoration do not accumulate canvases or sprites', async ({ page }) => {
@@ -209,7 +209,7 @@ test('independent exports match decoded runtime pixels and canonical JSON', asyn
   const secondJson = output(second, 'arena-atlas.json').text
   if (!firstPng || !secondPng || !firstJson || !secondJson) throw new Error('Runtime export contents are incomplete')
   expect(await compareDecodedPng(page, firstPng, secondPng))
-    .toEqual({ width: 2040, height: 320, differentBytes: 0 })
+    .toEqual({ width: 2040, height: 440, differentBytes: 0 })
   expect(secondJson).toBe(firstJson)
   expect(firstJson).toBe(canonicalJson(JSON.parse(firstJson)))
 })
@@ -221,14 +221,70 @@ test('committed artist source validates and exports through the browser pipeline
   const result = await page.evaluate(
     (request) => window.grenadiersArtAtlas.exportSource(request), source,
   )
-  expect(sourceManifest.frames).toHaveLength(95)
-  expect(sourceManifest.frames.filter(({ status }) => status === 'baseline')).toHaveLength(91)
+  expect(sourceManifest.frames).toHaveLength(111)
+  expect(sourceManifest.frames.filter(({ status }) => status === 'baseline')).toHaveLength(107)
   expect(sourceManifest.frames.filter(({ status }) => status === 'reserved')).toHaveLength(4)
-  expect(result.runtimeManifest.frames).toHaveLength(91)
-  expect(result.rgbaBytes).toBe(2_611_200)
+  expect(result.runtimeManifest.frames).toHaveLength(107)
+  expect(result.rgbaBytes).toBe(3_590_400)
   expect(result.files.map(({ name }) => name)).toEqual([
     'arena-atlas.png', 'arena-atlas.json', 'arena-overview.png', 'arena-preview.png',
   ])
+})
+
+test('adopted third and fourth uniforms retain bounded opaque coat palettes', async ({ page }) => {
+  await page.goto('/art-atlas.html?cli=1')
+  const metrics = await page.evaluate(async (source) => {
+    const binary = atob(source.pngBase64)
+    const bytes = Uint8Array.from(binary, (value) => value.charCodeAt(0))
+    const bitmap = await createImageBitmap(new Blob([bytes], { type: 'image/png' }))
+    const canvas = document.createElement('canvas')
+    canvas.width = bitmap.width
+    canvas.height = bitmap.height
+    const context = canvas.getContext('2d', { willReadFrequently: true })
+    if (!context) throw new Error('Canvas 2D unavailable while inspecting adopted uniforms')
+    context.drawImage(bitmap, 0, 0)
+    bitmap.close()
+    const manifest = JSON.parse(source.manifestJson) as {
+      frames: Array<{ id: string; sourceRect: { x: number; y: number; width: number; height: number } }>
+    }
+    return ['three', 'four'].map((appearance) => {
+      const frames = manifest.frames.filter(({ id }) => id.startsWith(`actor.${appearance}.`))
+      const colors = new Set<string>()
+      let invalidAlpha = 0
+      let coatPixels = 0
+      const opaquePixels = frames.map(({ sourceRect }) => {
+        const data = context.getImageData(
+          sourceRect.x, sourceRect.y, sourceRect.width, sourceRect.height,
+        ).data
+        let opaque = 0
+        for (let offset = 0; offset < data.length; offset += 4) {
+          const [red, green, blue, alpha] = data.slice(offset, offset + 4)
+          if (alpha !== 0 && alpha !== 255) invalidAlpha += 1
+          if (alpha === 0) continue
+          opaque += 1
+          colors.add(`${red},${green},${blue}`)
+          const forest = green >= red + 12 && green >= blue + 6
+          const plum = red >= green + 12 && blue >= green + 8
+          if (appearance === 'three' ? forest : plum) coatPixels += 1
+        }
+        return opaque
+      })
+      return { appearance, frameCount: frames.length, opaquePixels, invalidAlpha, colors: colors.size, coatPixels }
+    })
+  }, await committedSource())
+
+  expect(metrics.map(({ appearance, frameCount, invalidAlpha }) =>
+    ({ appearance, frameCount, invalidAlpha })), JSON.stringify(metrics)).toEqual([
+    { appearance: 'three', frameCount: 8, invalidAlpha: 0 },
+    { appearance: 'four', frameCount: 8, invalidAlpha: 0 },
+  ])
+  for (const appearance of metrics) {
+    expect(appearance.opaquePixels).toHaveLength(8)
+    expect(appearance.opaquePixels.every((pixels) => pixels > 0), JSON.stringify(appearance)).toBe(true)
+    expect(appearance.colors, JSON.stringify(appearance)).toBeGreaterThanOrEqual(8)
+    expect(appearance.colors, JSON.stringify(appearance)).toBeLessThanOrEqual(32)
+    expect(appearance.coatPixels, JSON.stringify(appearance)).toBeGreaterThan(100)
+  }
 })
 
 test('workbench Export button downloads the validated runtime pack', async ({ page }) => {

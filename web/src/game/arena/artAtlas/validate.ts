@@ -206,9 +206,9 @@ export function validateSourceManifest(manifest: ArtManifest, pixels?: PixelBuff
   for (const frame of manifest.frames) {
     if (!canonicalById.has(frame.id)) issues.push({ code: 'unexpected_frame', path: `frames.${frame.id}`, message: 'append new IDs to the catalogue first' })
   }
-  const feet = manifest.frames.filter(({ id }) => /^actor\.(one|two)\.(north|east|south|west)\.[01]$/.test(id))
-  if (feet.length !== 16 || feet.some(({ footAnchor }) => footAnchor?.x !== 40 || footAnchor?.y !== 65)) {
-    issues.push({ code: 'foot_anchor', path: 'frames', message: 'all 16 actor poses require the same 40,65 foot anchor' })
+  const feet = manifest.frames.filter(({ id }) => /^actor\.(one|two|three|four)\.(north|east|south|west)\.[01]$/.test(id))
+  if (feet.length !== 32 || feet.some(({ footAnchor }) => footAnchor?.x !== 40 || footAnchor?.y !== 65)) {
+    issues.push({ code: 'foot_anchor', path: 'frames', message: 'all 32 actor poses require the same 40,65 foot anchor' })
   }
   const baselineIds = new Set(manifest.frames.filter(({ status }) => status === 'baseline').map(({ id }) => id))
   validateReferences(baselineIds, manifest.animations, manifest.aliases, manifest.compositions, issues)

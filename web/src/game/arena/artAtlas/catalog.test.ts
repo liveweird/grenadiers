@@ -1,5 +1,6 @@
 import { Container } from 'pixi.js'
 import { describe, expect, it } from 'vitest'
+import adoptedSource from '../../../../../assets/art/arena-source.json'
 import { makeActor } from '../actorArt'
 import { makeFlame } from '../entityArt'
 import { RENDERABLE_PICKUP_KINDS } from '../types'
@@ -7,6 +8,10 @@ import { createArtCatalog } from './catalog'
 import { createSourceManifest } from './manifest'
 
 describe('art atlas catalogue', () => {
+  it('keeps the adopted artist manifest synchronized with the generated catalogue', () => {
+    expect(adoptedSource).toEqual(createSourceManifest())
+  })
+
   it('covers every renderable pickup while keeping Oil separate', () => {
     const manifest = createSourceManifest()
     const pickupIds = manifest.frames
@@ -19,15 +24,41 @@ describe('art atlas catalogue', () => {
 
   it('provides the complete baseline and only the planned transparent reservations', () => {
     const manifest = createSourceManifest()
+    const actorFrames = manifest.frames.filter(({ id }) =>
+      /^actor\.(one|two|three|four)\.(north|east|south|west)\.[01]$/.test(id))
     expect(manifest.frames.filter(({ id }) => id.startsWith('terrain.floor.'))).toHaveLength(8)
     expect(manifest.frames.filter(({ id }) => /^terrain\.wall\.\d$/.test(id))).toHaveLength(2)
-    expect(manifest.frames.filter(({ id }) => /^actor\.(one|two)\.(north|east|south|west)\.[01]$/.test(id)))
-      .toHaveLength(16)
+    expect(actorFrames).toHaveLength(32)
     expect(manifest.frames.filter(({ id }) => id.startsWith('actor.cue.slowMarker.'))).toHaveLength(6)
     expect(manifest.frames.filter(({ status }) => status === 'reserved').map(({ id }) => id)).toEqual([
       'reserved.actor.one.death', 'reserved.actor.two.death',
       'reserved.terrain.block.destruction', 'reserved.pickup.collection',
     ])
+    expect(manifest.frames).toHaveLength(111)
+    expect(manifest.frames.filter(({ status }) => status === 'baseline')).toHaveLength(107)
+    expect(manifest.sheet).toEqual({ width: 1120, height: 1344, slotSize: 112, columns: 10 })
+    expect(Object.keys(manifest.animations).filter((id) => id.endsWith('.walk'))).toHaveLength(16)
+  })
+
+  it('appends appearances three and four without moving any legacy atlas slot', () => {
+    const frames = createSourceManifest().frames
+    expect(frames.slice(0, 95).map(({ sourceRect }) => sourceRect)).toEqual(
+      frames.slice(0, 95).map(({ sourceRect }, slot) => ({
+        ...sourceRect, x: (slot % 10) * 112, y: Math.floor(slot / 10) * 112,
+      })),
+    )
+    expect(frames[94].id).toBe('reserved.pickup.collection')
+    expect(frames.slice(95).map(({ id }) => id)).toEqual(
+      ['three', 'four'].flatMap((appearance) =>
+        ['north', 'east', 'south', 'west'].flatMap((direction) =>
+          [0, 1].map((frame) => `actor.${appearance}.${direction}.${frame}`))),
+    )
+    expect(frames.slice(95).every(({ sourceRect, localBounds, pivot, footAnchor }) =>
+      sourceRect.width === 80 && sourceRect.height === 80
+      && localBounds.x === -40 && localBounds.y === -44
+      && localBounds.width === 80 && localBounds.height === 80
+      && pivot.x === 40 && pivot.y === 44
+      && footAnchor?.x === 40 && footAnchor.y === 65)).toBe(true)
   })
 
   it('leases named parts without depending on child indexes or changing gameplay alpha', () => {

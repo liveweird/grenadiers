@@ -10,3 +10,5 @@ terrain, reset, and context restoration. The same run initializes the production
 the bundled artist source, retains one canvas and atlas across suspend/resume and reduced-motion
 changes, restores its context, measures cold startup and a bounded retained-frame sample, and
 releases each comparison and production texture owner on final destruction.
+The retained production texture also includes the two appended, art-only actor appearances while
+the live gameplay protocol continues to render its existing two seats.

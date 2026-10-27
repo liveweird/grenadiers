@@ -3,8 +3,8 @@
 A browser-based multiplayer game inspired by classic Bomberman/Dynablaster.
 Play a two-human duel or a private solo match against the server CPU. Larger matches follow later.
 
-**[v0.3.96 guarded CPU Punch tactics](https://github.com/liveweird/grenadiers/releases/tag/v0.3.96).**
-All 22 requested item types shipped in v0.3.47. See the [release record](docs/releases.md#v0396--2026-10-27)
+**[v0.3.97 CPU equipment acquisition and retention](https://github.com/liveweird/grenadiers/releases/tag/v0.3.97).**
+All 22 requested item types shipped in v0.3.47. See the [release record](docs/releases.md#v0397--2026-10-27)
 for verification, the exact deployed image and rollback. Reload browser tabs after upgrading the paired server/web image.
 
 The [artist sprite-sheet handoff](assets/art/README.md) includes editable PNG/JSON, labelled

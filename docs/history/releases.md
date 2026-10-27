@@ -4,6 +4,47 @@ This archive preserves the older release records originally maintained in
 [`docs/releases.md`](../releases.md). Records remain in their original order; the current
 release procedure and current release record stay in the [release guide](../releases.md).
 
+## v0.3.82 — 2026-10-26
+
+[v0.3.82](https://github.com/liveweird/grenadiers/releases/tag/v0.3.82) improves the
+[private Solo opponent](../game/single-player.md) with shared blast forecasting and one checked
+movement/waiting pulse at a time. Forecasts retain separate burn windows, timed chains,
+persistent Oil and explicit motion/trigger/pause uncertainty. Checked actions include swept
+footprints, modifier expiry and a stopped safety lease. Fresh observations invalidate unsafe
+leased execution; stopped-input provenance and invalidated bomb escapes permit replanning.
+
+The opponent is UtilityV2; live controllers reject older profile labels. Recorded UtilityV1
+inputs remain replayable and the v12 wire shape, rules 5, generator 2 and all 22 default items stay
+unchanged. Clear-board goals and restricted CPU1 planting remain separate. Ordinary clear-board
+movement retains its hold without a hazard lease. Conditional motion assumptions never justify
+planting; complete multi-leg survival and broader planting remain in the
+[backlog](../../BACKLOG.md#single-player). This release does not claim those guarantees.
+
+Tested source is `ded10b58fba4bae0c7d1e1c31b49b5534be6c672`. Independent forecast, movement and
+integration reviews are clear after fixing reported chain-provenance and Stop-scheduling issues.
+Full local Rust acceptance passes in 468.227s with all 4,194,304 masks in each of debug,
+release and official coverage, 32 partitions/four workers and zero retries. Official coverage is
+22,143/24,125 lines (91.78%). The distinct
+[Linux debug/release run](https://github.com/liveweird/grenadiers/actions/runs/40413774406) passes.
+Workspace formatting/Clippy, repository/tooling, API/generated-contract/E2E static checks and
+security audits pass; npm audits have zero vulnerabilities.
+
+Web, API, artwork, E2E and deployment inputs are unchanged from the accepted v0.3.81 baseline.
+Reuse its 6,874-test/97-file web result and coverage (91.31/90.03/90.44/93.71% statements/branches/
+functions/lines). The candidate rebuild and native acceptance confirm identical served HTML,
+JS, CSS and PNG. Exact accepted image is
+`sha256:48e830f6d2533dc4a1c6fff271571c28fb52ea8492cced60f82936b110dc8a28`.
+Pinned Trivy 0.74.0 reports zero fixable HIGH/CRITICAL findings. Ten Compose browser cases pass in
+49.9s and ten Kubernetes cases in 51.2s, including real Solo result/rematch/reconnect/leave,
+two-human play and Polish 320px accessibility. Strict lobby/create, resource/security/probe and
+served-asset checks pass; temporary runtime resources are removed. The exact image is promoted
+to localhost:8085, with v0.3.81 retained for rollback. Restart ends in-memory matches. Policy-version 2 journals require the updated reader;
+production recording remains disabled.
+
+Evidence is retained locally under `target/quality-review/cpu2-v0382-*`; dependency/build caches
+remain reusable. Distribution is a source prerelease and local accepted image, without a
+production registry or hosted-service claim.
+
 ## v0.3.81 — 2026-10-26
 
 [v0.3.81](https://github.com/liveweird/grenadiers/releases/tag/v0.3.81) adds the first playable

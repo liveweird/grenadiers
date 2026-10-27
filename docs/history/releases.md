@@ -4,6 +4,52 @@ This archive preserves the older release records originally maintained in
 [`docs/releases.md`](../releases.md). Records remain in their original order; the current
 release procedure and current release record stay in the [release guide](../releases.md).
 
+## v0.3.94 — 2026-10-27
+
+[v0.3.94](https://github.com/liveweird/grenadiers/releases/tag/v0.3.94) fixes ordinary CPU
+navigation that kept requesting a perpendicular turn outside configured tolerance. The CPU
+first aligns along its current heading axis, retains the chosen next cell, then turns from a
+fresh stopped pose. Existing pulse arithmetic bounds both residual endpoints within the center
+window; an unjustified correction yields Stop. Normal movement, settings, planting and hazard
+certification retain authority. UtilityV12 preserves V1–V11 accepted-input replay identities
+and the unchanged v12 room shape.
+
+Both recorded a0/c0 and a2/c0 queued-driver cases require physical movement and a new cell after
+running tick 2200, survival, deterministic repetition and exact replay. Focused tests cover both
+poses, signs/headings, supported speeds/tolerances and residual boundaries; an authoritative
+alignment→Stop→turn sweep covers all five speeds and four tolerances. Independent review is
+clear. Rust arithmetic tests sample boundary offsets; the separate exhaustive design calculation
+covers the full offset domain. The authoritative sweep uses one axis/sign.
+
+The unchanged opening and full-round matrices each replay all 16 episodes exactly. Full rounds
+retain 15 timeout draws and the same CPU win, with no CPU loss or censoring. The four formerly
+stalled retreat cases visit 33–39 cells rather than 6–7; retreat totals rise from 133 to 252 cells
+and 114 to 208 manual actions. Full calls fall 4,118→4,010 while logical work rises
+61,017,649→89,659,046 (+46.9%); the per-job maximum stays 65,536. Host elapsed rises
+11.15→12.23s, with p95/max planner observations 3.724/4.951ms. Most added work belongs to the
+restored cases, but a1/c0 retreat also costs more for 37→38 cells and the same safe draw. These
+scripted workloads and timings do not establish tuned difficulty or performance thresholds.
+
+One exhaustive local server gate passes on tested source
+`63db5126b868db66f1473e280b6753f41319fad5` (tree
+`4fa6e9663254f1f2ac26eb3dee0c489d4ab8491c`): 487.449s,
+26,089/28,323 lines (**92.1124%**), all 4,194,304 item masks separately in debug,
+release and official coverage, 32 partitions/four workers/zero hidden retries and 37 raw
+profiles. Official LCOV was copied before releasing the source/target freeze. Unique Linux
+[run 40546313960](https://github.com/liveweird/grenadiers/actions/runs/40546313960) passes.
+
+Exact local image
+`sha256:f26653fc40e26616639324e5dbc99f99928672485b54097fc09471def96227da`
+passes pinned Trivy 0.74.0 with zero fixable HIGH/CRITICAL findings, Compose 10 cases/49.9s,
+Kubernetes 10 cases/51.1s, CPU-item collection 1 case/16.5s, Polish 320px, served-asset identity
+and runtime security/resources/probes. Temporary projects/namespaces were removed. Unchanged
+frontend/API/art/E2E/tooling inputs preserve the accepted full-web 6,874 tests/97 files and
+static/audit evidence; no duplicate full web run was required.
+
+This is a source prerelease with a verified local image, not a container-registry publication.
+Localhost uses this exact image; v0.3.93 is retained for rollback. Further CPU tactics, difficulty
+and human validation remain in the [backlog](../../BACKLOG.md#single-player).
+
 ## v0.3.93 — 2026-10-27
 
 [v0.3.93](https://github.com/liveweird/grenadiers/releases/tag/v0.3.93) resumes CPU goals after a

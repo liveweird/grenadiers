@@ -4,6 +4,50 @@ This archive preserves the older release records originally maintained in
 [`docs/releases.md`](../releases.md). Records remain in their original order; the current
 release procedure and current release record stay in the [release guide](../releases.md).
 
+## v0.3.86 — 2026-10-27
+
+[v0.3.86](https://github.com/liveweird/grenadiers/releases/tag/v0.3.86) adds
+[certified timed weapons](../game/cpu-contracts.md#certified-timed-weapons) to the CPU. Enabled
+Piercing and Power charges reuse the ordinary planting proof, with one escape checked against
+both placed and absent outcomes. Confirmation binds the actual blast and charge consumption;
+rejection or physical placement veto preserves the weapon and continues the absent route.
+Confirmed placement cannot be reinterpreted as absence.
+
+Useful targets use the shared blast geometry, including Power diagonals and Piercing
+continuation, with charged field construction and full traversal. Supported weapon pickups
+have explicit acquisition, duplicate and replacement behavior. Neutral swaps remain ordinary
+transit options; Heart uses an independent equipment slot. Certified paths still reject all
+pickup-changing contact. Remote, Landmine and live owned Remote remain outside timed placement.
+
+Independent review is clear. Actual-State and Driver cases cover both weapons through full
+flame expiry without another worker, real same-cell placement veto, rejected input, one-time
+consumption and changed loadouts. A bounded identical corridor certifies a diagonal refuge for
+Standard but rejects it for Power. UtilityV6 retains V1–V5 accepted-input replay; the v12 wire
+shape, rules 5, generator 2 and all 22 default items remain unchanged. Unknown facts and new
+enemy actions can still invalidate execution. Injected-State driver and generation-journal
+replay remain separate test oracles.
+
+Tested source is `acd2e4e621cedc521ffad3ed2b8873512d40a936`. Full local Rust acceptance passes
+in 463.484s with all 4,194,304 masks in each of debug, release and official coverage,
+32 partitions/four workers, zero retries and 37 raw profiles. Coverage is 24,715/26,876 lines
+(91.96%). The distinct [Linux run](https://github.com/liveweird/grenadiers/actions/runs/40432433005)
+passes, along with formatting, workspace Clippy and repository/source-size checks. Exact unchanged
+external Cargo/npm dependencies and frontend/API/artwork/E2E/tooling inputs retain accepted
+audits, static checks and full web evidence (6,874 tests/97 files). The image is rebuilt and its
+native runtime acceptance runs independently, including the corrected authoritative-winner test.
+
+Accepted image is
+`sha256:f08979eed37e1d78091cc8847272a7de7f7887e2a160ee21bf9bae19cb8ead31`.
+Pinned Trivy 0.74.0 reports zero fixable HIGH/CRITICAL findings. Compose passes ten browser cases
+in 50.5s and Kubernetes ten in 51.1s. Solo lifecycle, human duel, Polish 320px accessibility,
+strict lobby/create, security/resources/probes and unchanged served assets pass. Temporary
+projects and namespaces are removed. The exact image is promoted to localhost:8085 with v0.3.85
+retained for rollback; restarting ends in-memory matches.
+
+Evidence remains under `target/quality-review/cpu3-v0386-*`. Distribution remains a source
+prerelease and local image, without a production registry or hosted-service claim. Wall Pass
+routing and public-preview item acceptance remain in the [backlog](../../BACKLOG.md#single-player).
+
 ## v0.3.85 — 2026-10-27
 
 [v0.3.85](https://github.com/liveweird/grenadiers/releases/tag/v0.3.85) improves

@@ -11,7 +11,7 @@ use crate::room::RoomSettings;
 
 use super::*;
 
-pub(super) fn key() -> MemoryKey {
+pub(crate) fn key() -> MemoryKey {
     MemoryKey {
         world: WorldId {
             room_instance: 8,

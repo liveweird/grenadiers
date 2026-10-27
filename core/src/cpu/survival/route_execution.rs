@@ -46,19 +46,19 @@ struct Transition {
 
 #[derive(Clone, Debug)]
 pub struct CommittedRoute {
-    certificate: RouteCertificate,
-    plant: Option<CommittedPlant>,
-    basis: Observation,
-    first_update: Tick,
+    pub(super) certificate: RouteCertificate,
+    pub(super) plant: Option<CommittedPlant>,
+    pub(super) basis: Observation,
+    pub(super) first_update: Tick,
     transitions: Vec<Transition>,
     next_transition: usize,
-    last_observation_tick: Tick,
+    pub(super) last_observation_tick: Tick,
     movement: MovementIntent,
 }
 #[derive(Clone, Debug)]
-struct CommittedPlant {
-    certificate: PlantCertificate,
-    presence: PlantPresence,
+pub(super) struct CommittedPlant {
+    pub(super) certificate: PlantCertificate,
+    pub(super) presence: PlantPresence,
 }
 
 impl CommittedRoute {

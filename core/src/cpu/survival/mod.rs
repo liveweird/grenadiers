@@ -6,6 +6,8 @@
 mod compatibility;
 mod deadline;
 mod execution;
+mod origin;
+mod origin_planner;
 mod planner;
 mod plant_value;
 mod route_execution;
@@ -13,7 +15,8 @@ mod steering;
 
 pub use compatibility::can_admit_ordinary;
 pub use execution::{CommittedPulse, PulseStatus};
-pub use planner::{ExecutionCertificate, SurvivalPlan, plan};
+pub use origin::PlantEscapeOrigin;
+pub use planner::{ExecutionCertificate, SurvivalPlan, plan, plan_with_origin};
 pub use route_execution::{CommittedRoute, RouteCommand, RouteStatus};
 
 pub const MAX_PLAN_AGE_TICKS: u64 = 6;
@@ -27,3 +30,6 @@ mod tests;
 
 #[cfg(test)]
 mod route_tests;
+
+#[cfg(test)]
+mod origin_tests;

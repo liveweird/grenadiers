@@ -38,7 +38,7 @@ fn plan(first_movement: MovementIntent) -> (Observation, super::PlantCertificate
     (observed, certificate)
 }
 
-pub(super) fn current_scene(
+pub(crate) fn current_scene(
     basis: &Observation,
     certificate: &super::PlantCertificate,
     tick: Tick,

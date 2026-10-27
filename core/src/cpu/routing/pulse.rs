@@ -3,11 +3,12 @@ use std::collections::BTreeSet;
 use crate::cpu::forecast::{HazardForecast, TickWindow};
 use crate::cpu::{MovementIntent, Observation, WorkBudget};
 use crate::game::geometry::MovementSegment;
-use crate::game::{EntityId, Tick};
+use crate::game::geometry::position_overlaps_cell;
+use crate::game::{CellId, EntityId, Tick};
 
 use super::motion::{Motion, advance};
 use super::pulse_geometry::direction_bit;
-use super::safety::{check_segments, footprint_cells, static_segment_clear, stationary_segment};
+use super::safety::{footprint_cells, static_segment_clear, stationary_segment};
 use super::types::{PoseBounds, PulseLease, PulseRequest};
 use super::validation::{self, Context};
 use super::{RouteAssurance, RouteFailure};
@@ -17,10 +18,37 @@ const MAX_CONDITIONAL_TICKS: u8 = 3;
 const MAX_ACCEPTED_AGE: u64 = 6;
 const STOPPED_PUBLICATION_TICKS: u64 = 3;
 
+#[derive(Clone, Copy)]
+pub(crate) struct PulseOriginGrace {
+    pub(crate) cell: CellId,
+    pub(crate) bomb_id: EntityId,
+}
+
 pub fn certify_pulse(
     observation: &Observation,
     forecast: &HazardForecast,
     request: PulseRequest,
+    work: &mut WorkBudget,
+) -> Result<PulseLease, RouteFailure> {
+    certify_pulse_inner(observation, forecast, request, None, work)
+}
+
+pub(crate) fn certify_escape_pulse(
+    observation: &Observation,
+    forecast: &HazardForecast,
+    request: PulseRequest,
+    origin: PulseOriginGrace,
+    work: &mut WorkBudget,
+) -> Result<PulseLease, RouteFailure> {
+    validate_origin_forecast(forecast, origin)?;
+    certify_pulse_inner(observation, forecast, request, Some(origin), work)
+}
+
+fn certify_pulse_inner(
+    observation: &Observation,
+    forecast: &HazardForecast,
+    request: PulseRequest,
+    origin: Option<PulseOriginGrace>,
     work: &mut WorkBudget,
 ) -> Result<PulseLease, RouteFailure> {
     let context = validation::validate(
@@ -35,13 +63,13 @@ pub fn certify_pulse(
     let mut scenarios = Vec::new();
     let mut assumptions = BTreeSet::new();
 
-    certify_wait_before_start(&context, forecast, request, work, &mut assumptions)?;
+    certify_wait_before_start(&context, forecast, request, origin, work, &mut assumptions)?;
     for start in request.start_window.start.0..request.start_window.end.0 {
-        scenarios.push((Tick(start), initial.clone()));
+        scenarios.push((Tick(start), initial.clone(), origin.is_some()));
     }
     for completed in 0..request.hold_ticks {
         let mut next = Vec::with_capacity(scenarios.len());
-        for (start, mut motion) in scenarios {
+        for (start, mut motion, mut origin_active) in scenarios {
             let tick = Tick(
                 start
                     .0
@@ -54,18 +82,27 @@ pub fn certify_pulse(
             if !static_segment_clear(observation, &segments) {
                 return Err(RouteFailure::NoRoute);
             }
-            assumptions.extend(check_segments(
+            assumptions.extend(super::safety::check_segments_with_grace(
                 forecast,
                 &segments,
                 one_tick(tick)?,
                 request.mode,
+                origin.filter(|_| origin_active).map(|value| value.cell),
             )?);
-            next.push((start, motion));
+            update_origin(origin, &segments, &mut origin_active)?;
+            next.push((start, motion, origin_active));
         }
         poses.push(aggregate_motion(&next)?);
         scenarios = next;
     }
-    certify_stopped_suffix(forecast, request, work, &scenarios, &mut assumptions)?;
+    certify_stopped_suffix(
+        forecast,
+        request,
+        origin,
+        work,
+        &scenarios,
+        &mut assumptions,
+    )?;
     if !assumptions.is_empty() && request.hold_ticks > MAX_CONDITIONAL_TICKS {
         return Err(RouteFailure::NoRoute);
     }
@@ -127,6 +164,7 @@ fn certify_wait_before_start(
     context: &Context<'_>,
     forecast: &HazardForecast,
     request: PulseRequest,
+    origin: Option<PulseOriginGrace>,
     work: &mut WorkBudget,
     assumptions: &mut BTreeSet<EntityId>,
 ) -> Result<(), RouteFailure> {
@@ -138,11 +176,12 @@ fn certify_wait_before_start(
     let segment = stationary_segment(context.actor.position);
     take_segments(work, &segment)?;
     reject_pickups(context.observation, &segment)?;
-    assumptions.extend(check_segments(
+    assumptions.extend(super::safety::check_segments_with_grace(
         forecast,
         &segment,
         TickWindow { start, end },
         request.mode,
+        origin.map(|value| value.cell),
     )?);
     Ok(())
 }
@@ -150,11 +189,12 @@ fn certify_wait_before_start(
 fn certify_stopped_suffix(
     forecast: &HazardForecast,
     request: PulseRequest,
+    origin: Option<PulseOriginGrace>,
     work: &mut WorkBudget,
-    scenarios: &[(Tick, Motion)],
+    scenarios: &[(Tick, Motion, bool)],
     assumptions: &mut BTreeSet<EntityId>,
 ) -> Result<(), RouteFailure> {
-    for (start, motion) in scenarios {
+    for (start, motion, origin_active) in scenarios {
         let stopped = Tick(
             start
                 .0
@@ -166,7 +206,7 @@ fn certify_stopped_suffix(
         }
         let segment = stationary_segment(motion.position);
         take_segments(work, &segment)?;
-        assumptions.extend(check_segments(
+        assumptions.extend(super::safety::check_segments_with_grace(
             forecast,
             &segment,
             TickWindow {
@@ -174,6 +214,7 @@ fn certify_stopped_suffix(
                 end: request.stopped_safe_until,
             },
             request.mode,
+            origin.filter(|_| *origin_active).map(|value| value.cell),
         )?);
     }
     Ok(())
@@ -194,12 +235,54 @@ fn reject_pickups(
     }
 }
 
-fn aggregate_motion(values: &[(Tick, Motion)]) -> Result<PoseBounds, RouteFailure> {
+fn aggregate_motion(values: &[(Tick, Motion, bool)]) -> Result<PoseBounds, RouteFailure> {
     let motions = values
         .iter()
-        .map(|(_, motion)| motion.clone())
+        .map(|(_, motion, _)| motion.clone())
         .collect::<Vec<_>>();
     aggregate(&motions)
+}
+
+fn validate_origin_forecast(
+    forecast: &HazardForecast,
+    origin: PulseOriginGrace,
+) -> Result<(), RouteFailure> {
+    let cell = forecast
+        .cell(origin.cell)
+        .ok_or(RouteFailure::InvalidRequest)?;
+    if cell.uncertainty.iter().any(|uncertain| {
+        matches!(uncertain.kind, crate::cpu::forecast::HazardKind::Blocking)
+            && !matches!(
+                uncertain.reason,
+                crate::cpu::forecast::UncertaintyReason::BombMotion(id) if id == origin.bomb_id
+            )
+    }) {
+        return Err(RouteFailure::NoRoute);
+    }
+    Ok(())
+}
+
+fn update_origin(
+    origin: Option<PulseOriginGrace>,
+    segments: &[MovementSegment],
+    active: &mut bool,
+) -> Result<(), RouteFailure> {
+    let Some(origin) = origin else {
+        return Ok(());
+    };
+    for segment in segments {
+        let start_inside = position_overlaps_cell(segment.start(), origin.cell);
+        if *active && !start_inside {
+            *active = false;
+        }
+        if !*active && segment.overlaps_cell(origin.cell) {
+            return Err(RouteFailure::NoRoute);
+        }
+        if *active && !position_overlaps_cell(segment.end(), origin.cell) {
+            *active = false;
+        }
+    }
+    Ok(())
 }
 
 fn aggregate(values: &[Motion]) -> Result<PoseBounds, RouteFailure> {
@@ -229,4 +312,36 @@ fn one_tick(tick: Tick) -> Result<TickWindow, RouteFailure> {
         start: tick,
         end: Tick(tick.0.checked_add(1).ok_or(RouteFailure::InvalidRequest)?),
     })
+}
+
+#[cfg(test)]
+mod origin_tests {
+    use super::*;
+    use crate::game::Position;
+
+    #[test]
+    fn origin_grace_is_consumed_on_exit_and_cannot_be_reentered() {
+        let origin = PulseOriginGrace {
+            cell: CellId::new(2, 1),
+            bomb_id: EntityId(7),
+        };
+        let inside = Position::center(origin.cell);
+        let outside = Position::center(CellId::new(3, 1));
+        let mut active = true;
+        update_origin(
+            Some(origin),
+            &[MovementSegment::new(inside, outside)],
+            &mut active,
+        )
+        .unwrap();
+        assert!(!active);
+        assert_eq!(
+            update_origin(
+                Some(origin),
+                &[MovementSegment::new(outside, inside)],
+                &mut active,
+            ),
+            Err(RouteFailure::NoRoute)
+        );
+    }
 }

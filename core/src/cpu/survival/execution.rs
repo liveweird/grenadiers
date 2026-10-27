@@ -5,6 +5,7 @@ use crate::game::Tick;
 
 use super::MAX_PLAN_AGE_TICKS;
 use super::compatibility::{actor, compatible};
+use super::origin::{PlantEscapeOrigin, valid_origin};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum PulseStatus {
@@ -105,5 +106,40 @@ impl CommittedPulse {
     #[must_use]
     pub const fn lease(&self) -> &PulseLease {
         &self.lease
+    }
+
+    #[must_use]
+    pub fn retain_escape_origin(
+        &self,
+        origin: &PlantEscapeOrigin,
+        current: &Observation,
+        current_tick: Tick,
+    ) -> Option<PlantEscapeOrigin> {
+        let next_update = current_tick.0.checked_add(1)?;
+        let origin_key = MemoryKey {
+            world: origin.basis.parts().world,
+            cpu_seat: origin.basis.parts().recipient,
+        };
+        if current.parts().tick > current_tick
+            || next_update >= self.lease.safe_until().0
+            || self.lease.key() != origin_key
+            || self.basis.parts().world != origin_key.world
+            || self.basis.parts().recipient != origin_key.cpu_seat
+            || !valid_origin(origin, current)
+        {
+            return None;
+        }
+        let current_actor = actor(current)?;
+        let completed = current
+            .parts()
+            .tick
+            .0
+            .checked_sub(self.first_execution.0)
+            .map_or(0, |ticks| ticks.saturating_add(1))
+            .min(u64::from(self.lease.hold_ticks())) as u8;
+        self.lease
+            .pose_after(completed)
+            .contains(current_actor.position, current_actor.heading)
+            .then(|| origin.with_checkpoint(current))
     }
 }

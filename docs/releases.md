@@ -96,43 +96,53 @@ retain the previous immutable image reference for rollback. The runtime stage in
 rolling Debian package updates, so a later build may resolve newer packages and is not expected to
 be byte-identical; treat it as a new candidate with new evidence rather than reusing acceptance.
 
-## v0.3.92 — 2026-10-27
+## v0.3.93 — 2026-10-27
 
-[v0.3.92](https://github.com/liveweird/grenadiers/releases/tag/v0.3.92) adds a separate
-[full-round CPU reference workload](game/performance.md) while preserving the existing
-1,800-tick opening matrix. `scripts/measure-game.sh --cpu-rounds` runs the same 16 independent
-arena/CPU seed and human-script combinations to the existing 10,800-tick round limit. Reports
-distinguish natural outcomes from censored episodes. Both workloads replay every accepted-input
-journal through the existing engine to exact runtime inspection, outside planner timing; incomplete
-or truncated journals fail within the unchanged 60,000-event/4MiB recording bounds.
+[v0.3.93](https://github.com/liveweird/grenadiers/releases/tag/v0.3.93) resumes CPU goals after a
+[stationary hazard route](game/cpu-contracts.md#finite-hazard-responsiveness) observes a real clear
+gap. Full-horizon Wait routes previously remained installed after all bombs and flames disappeared,
+preventing ordinary pickup navigation during repeated rival bombing. Completion now requires an
+originally visible nonempty bomb set, a currently visible empty set, no flames or burning Oil,
+only Wait steps, consumed transitions, an executed Stop in bounds, and existing scene/actor/exact-pose
+validation. Planting, moving routes, legacy escape and origin/pulse recovery retain their paths.
+Completion grants no input: the existing controller requests a fresh ordinary decision.
 
-The clean-source opening matrix reproduces all v0.3.91 gameplay/work results exactly, apart from
-additive outcome/replay fields: 16 censored/alive opponents, 512 planning calls, 2.23s elapsed.
-The full-round matrix finishes in 9.38s: 15 natural timeout draws, one CPU win, no losses or censored
-rounds. All 32 episodes replay exactly. Full-round planner p95/max are 3.375/4.908ms over 2,294 calls
-on macOS/aarch64. These are deterministic reference observations, not difficulty or hardware limits.
-The retreat script exposes a persistent stationary-progress limitation, tracked only in the
-[backlog](../BACKLOG.md#single-player). Gameplay, UtilityV10, production recording and wire v12
-remain unchanged. Independent review is clear.
+The unchanged real queued-driver case records 64 directional inputs after tick 1,600, visits seven
+cells instead of five and remains alive through 3,600 ticks. Repeated traces and accepted-input replay
+match exactly. Core/public-API and controller tests cover Stop bounds, missing confirmation,
+finite-flame-only waits, active/hidden hazards, invalid pose, movement preservation and completion
+once. Independent source review is clear. UtilityV11 preserves V1–V10 replay identities and wire v12.
+Forecast horizons, pickup-changing pulse guards and the 65,536-unit work allowance are unchanged.
 
-Tested source is `5276a85c8baf15514ad483df6380ef6f10ff89d6`. Full local Rust acceptance passes in
-453.969s: all 4,194,304 item masks in debug, release and official coverage, 32 partitions/four workers,
-zero retries and 37 raw profiles. Coverage is 25,941/28,176 lines (92.07%). The distinct
-[Linux run](https://github.com/liveweird/grenadiers/actions/runs/40452719744) passes. Formatting,
-workspace Clippy, measurement CLI/source-identity and repository/source-size checks pass. A subsequent
-merge of preceding release documentation changes only five Markdown files; recorded input comparison
-proves all tested/build inputs unchanged. Its automatic Linux run also passed. Unchanged frontend,
+Clean-source opening/full-round matrices verify all 32 replays. Opening remains 16 censored/alive
+opponents; full rounds remain 15 natural timeout draws and one CPU win, with no losses or censoring.
+Every retreat case explores beyond its prior four/five-cell opening: six to 43 cells. Some still
+stall later; broader tactics and human feedback remain in the [backlog](../BACKLOG.md#single-player).
+Full-round planning rises from 2,294 to 4,118 calls, while elapsed time rises from 9.38s to 11.15s.
+Planner p95/max are 3.679/5.127ms on macOS/aarch64. These deterministic host observations do not
+establish balanced difficulty or hardware thresholds. A sandboxed measurement wrapper initially
+could not read macOS resource statistics after its successful test; the explicit permitted rerun
+produced the accepted clean-source artifacts.
+
+Tested source is `6936e18df5b2624b6fc796a755ef1f6ef5272e92`.
+Full local Rust acceptance passes in 470.886s: all 4,194,304 item masks in debug,
+release and official coverage, 32 partitions/four workers, zero retries and 37 raw profiles.
+Coverage is 25,999/28,234 lines (92.08%). The distinct
+[Linux run](https://github.com/liveweird/grenadiers/actions/runs/40456096514) passes. Formatting,
+workspace Clippy and repository/source-size/tooling checks pass. Proven unchanged frontend,
 API, artwork, E2E and external dependencies retain accepted static/audit/full-web evidence
 (6,874 tests/97 files).
-
 Accepted image is
-`sha256:4f71fb1c54f422fe333d61a87b1cd710465914eae7f6be6df53a85e7de484899`.
+`sha256:2001793700caa8a97032ce61a2ba1b4500cbe920b0e36737ca26db4fd643c6e2`.
 Pinned Trivy 0.74.0 reports zero fixable HIGH/CRITICAL findings. Compose passes ten browser cases
-in 49.5s, Kubernetes ten in 51.4s and dedicated all-items CPU pickup acceptance one in 16.4s.
+in 50.1s, Kubernetes ten in 51.1s and dedicated all-items CPU pickup acceptance one in 16.4s.
 Polish 320px, resources/security/probes and served assets pass; temporary projects/namespaces are
-removed. The exact image is promoted to localhost:8085 with v0.3.91 retained for rollback;
-restarting ends in-memory matches. Evidence is under `target/quality-review/cpu4-v0392-*`.
+removed. The exact image is promoted to localhost:8085 with v0.3.92 retained for rollback;
+restarting ends in-memory matches. Evidence is under `target/quality-review/cpu4-v0393-*`.
 Distribution remains a source prerelease and local image.
+
+<a id="v0392--2026-10-27"></a>
+The [v0.3.92 record](history/releases.md#v0392--2026-10-27) is preserved in release history.
 
 <a id="v0391--2026-10-27"></a>
 The [v0.3.91 record](history/releases.md#v0391--2026-10-27) is preserved in release history.

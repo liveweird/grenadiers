@@ -4,6 +4,44 @@ This archive preserves the older release records originally maintained in
 [`docs/releases.md`](../releases.md). Records remain in their original order; the current
 release procedure and current release record stay in the [release guide](../releases.md).
 
+## v0.3.92 — 2026-10-27
+
+[v0.3.92](https://github.com/liveweird/grenadiers/releases/tag/v0.3.92) adds a separate
+[full-round CPU reference workload](../game/performance.md) while preserving the existing
+1,800-tick opening matrix. `scripts/measure-game.sh --cpu-rounds` runs the same 16 independent
+arena/CPU seed and human-script combinations to the existing 10,800-tick round limit. Reports
+distinguish natural outcomes from censored episodes. Both workloads replay every accepted-input
+journal through the existing engine to exact runtime inspection, outside planner timing; incomplete
+or truncated journals fail within the unchanged 60,000-event/4MiB recording bounds.
+
+The clean-source opening matrix reproduces all v0.3.91 gameplay/work results exactly, apart from
+additive outcome/replay fields: 16 censored/alive opponents, 512 planning calls, 2.23s elapsed.
+The full-round matrix finishes in 9.38s: 15 natural timeout draws, one CPU win, no losses or censored
+rounds. All 32 episodes replay exactly. Full-round planner p95/max are 3.375/4.908ms over 2,294 calls
+on macOS/aarch64. These are deterministic reference observations, not difficulty or hardware limits.
+The retreat script exposes a persistent stationary-progress limitation, tracked only in the
+[backlog](../../BACKLOG.md#single-player). Gameplay, UtilityV10, production recording and wire v12
+remain unchanged. Independent review is clear.
+
+Tested source is `5276a85c8baf15514ad483df6380ef6f10ff89d6`. Full local Rust acceptance passes in
+453.969s: all 4,194,304 item masks in debug, release and official coverage, 32 partitions/four workers,
+zero retries and 37 raw profiles. Coverage is 25,941/28,176 lines (92.07%). The distinct
+[Linux run](https://github.com/liveweird/grenadiers/actions/runs/40452719744) passes. Formatting,
+workspace Clippy, measurement CLI/source-identity and repository/source-size checks pass. A subsequent
+merge of preceding release documentation changes only five Markdown files; recorded input comparison
+proves all tested/build inputs unchanged. Its automatic Linux run also passed. Unchanged frontend,
+API, artwork, E2E and external dependencies retain accepted static/audit/full-web evidence
+(6,874 tests/97 files).
+
+Accepted image is
+`sha256:4f71fb1c54f422fe333d61a87b1cd710465914eae7f6be6df53a85e7de484899`.
+Pinned Trivy 0.74.0 reports zero fixable HIGH/CRITICAL findings. Compose passes ten browser cases
+in 49.5s, Kubernetes ten in 51.4s and dedicated all-items CPU pickup acceptance one in 16.4s.
+Polish 320px, resources/security/probes and served assets pass; temporary projects/namespaces are
+removed. The exact image is promoted to localhost:8085 with v0.3.91 retained for rollback;
+restarting ends in-memory matches. Evidence is under `target/quality-review/cpu4-v0392-*`.
+Distribution remains a source prerelease and local image.
+
 ## v0.3.91 — 2026-10-27
 
 [v0.3.91](https://github.com/liveweird/grenadiers/releases/tag/v0.3.91) closes the observed

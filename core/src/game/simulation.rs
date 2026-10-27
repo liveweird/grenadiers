@@ -256,6 +256,8 @@ mod punch;
 mod shove;
 #[path = "shove_geometry.rs"]
 mod shove_geometry;
+
+pub(crate) use shove_geometry::stationary_contact_entry;
 #[path = "simulation_step.rs"]
 mod step;
 #[path = "simulation_stopwatch.rs"]

@@ -49,6 +49,8 @@ impl CommittedPulse {
                 })
             || !lease.start_window().contains(first_execution)
             || !compatible(&basis, current)
+            || !lease.bracelet_guard_allows(&basis)
+            || !lease.bracelet_guard_allows(current)
             || !lease.matches_initial_pose(current_actor.position, current_actor.heading)
         {
             return Err(PolicyError::InvalidObservation);
@@ -68,6 +70,7 @@ impl CommittedPulse {
         if current.parts().tick > current_tick
             || next_update >= self.lease.safe_until().0
             || !compatible(&self.basis, current)
+            || !self.lease.bracelet_guard_allows(current)
         {
             return PulseStatus::Invalidated;
         }

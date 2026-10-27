@@ -230,6 +230,16 @@ pub fn plan_with_origin(
             break;
         }
     }
+    if let Some(plan) = super::bracelet::plan(
+        observation,
+        &forecast,
+        settled_stop_tick,
+        memory,
+        &ordinary,
+        work,
+    ) {
+        return Ok(plan);
+    }
     for mode in [
         RouteMode::CertifiedOnly,
         RouteMode::AllowStationaryAssumptions,

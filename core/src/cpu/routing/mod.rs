@@ -1,5 +1,6 @@
 //! Bounded time-aware routing over recipient-visible hazard forecasts.
 
+mod bracelet_guard;
 mod motion;
 mod plant;
 mod plant_types;
@@ -22,6 +23,8 @@ pub use route_types::{
     RouteStep,
 };
 pub use types::{PoseBounds, PulseLease, PulseRequest, RouteAssurance, RouteFailure, RouteMode};
+
+pub(crate) use bracelet_guard::BraceletGuard;
 
 pub use plant::{plan_ordinary_plant, plan_timed_weapon_plant};
 pub use pulse::certify_pulse;

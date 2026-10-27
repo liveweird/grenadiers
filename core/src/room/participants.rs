@@ -19,6 +19,7 @@ pub enum CpuPolicy {
     UtilityV10,
     UtilityV11,
     UtilityV12,
+    UtilityV13,
 }
 
 impl CpuPolicy {
@@ -37,6 +38,7 @@ impl CpuPolicy {
             Self::UtilityV10 => 10,
             Self::UtilityV11 => 11,
             Self::UtilityV12 => 12,
+            Self::UtilityV13 => 13,
         }
     }
 }
@@ -120,9 +122,15 @@ impl CpuProfile {
         difficulty: CpuDifficulty::Standard,
     };
 
+    /// First ordinary turn-alignment policy, retained for archived replays.
+    pub const STEERING_V12: Self = Self {
+        policy: CpuPolicy::UtilityV12,
+        difficulty: CpuDifficulty::Standard,
+    };
+
     /// The only policy profile used to create a new live CPU controller.
     pub const CURRENT: Self = Self {
-        policy: CpuPolicy::UtilityV12,
+        policy: CpuPolicy::UtilityV13,
         difficulty: CpuDifficulty::Standard,
     };
 }
@@ -187,7 +195,8 @@ mod tests {
         assert_eq!(CpuProfile::ORIGIN_V9.policy.version(), 9);
         assert_eq!(CpuProfile::GUIDED_V10.policy.version(), 10);
         assert_eq!(CpuProfile::CLEAR_GAP_V11.policy.version(), 11);
-        assert_eq!(CpuProfile::CURRENT.policy.version(), 12);
+        assert_eq!(CpuProfile::STEERING_V12.policy.version(), 12);
+        assert_eq!(CpuProfile::CURRENT.policy.version(), 13);
         assert_eq!(
             RoomMode::Solo(CpuProfile::CURRENT).controller(SeatId::Two),
             ControllerKind::Cpu(CpuProfile::CURRENT)

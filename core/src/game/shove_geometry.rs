@@ -5,6 +5,28 @@ use crate::game::MovementSegment;
 use crate::game::movement::MovementOutcome;
 use crate::game::types::HALF_FOOTPRINT;
 
+pub(crate) fn stationary_contact_entry(holder: MovementSegment, rival: super::Position) -> bool {
+    let distance = segment_length(holder);
+    if distance <= 0 {
+        return false;
+    }
+    let mut holder_trace = super::MovementTrace::new(holder.start());
+    holder_trace.push(holder);
+    let holder = MovementOutcome {
+        trace: holder_trace,
+        kick: None,
+        original_budget: distance,
+        forward_segment: Some(holder),
+    };
+    let rival = MovementOutcome {
+        trace: super::MovementTrace::new(rival),
+        kick: None,
+        original_budget: 0,
+        forward_segment: None,
+    };
+    contact_entry_direction(SeatId::One, &[holder, rival]).is_some()
+}
+
 #[derive(Clone, Copy)]
 struct Velocity {
     axis: (i64, i64),

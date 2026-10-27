@@ -20,8 +20,8 @@ repeated approval for routine implementation choices. Entries are not delivery-d
     reproducible weaknesses into bounded tuning or further combat/equipment tactics. Preserve
     real queued-driver progress regressions, both reference matrices, bounded planning work
     and exact accepted-input replay; measure trajectory and cost alongside survival/outcomes.
-- [parked] **Campaign mobs.** Revisit after the two-seat CPU mode is stable;
-  campaign content remains outside the initial solo duel.
+- [parked] **Campaign stages and PvE progression.** Revisit after arena multiplayer and
+  lair mobs; a campaign remains separate from the confirmed arena environment features.
 
 ## Multiplayer and arenas
 
@@ -32,8 +32,6 @@ repeated approval for routine implementation choices. Entries are not delivery-d
   readiness/rematch and disconnect handling. Adapt CPU observations/tactics, transport/replay
   contracts and the HUD to the selected player count; preserve two-player behavior.
   Follow the [multiplayer design](docs/game/multiplayer-design.md).
-  - **MP0 — foundations:** explicit CPU seat identity and the four-uniform artist atlas;
-    retain two-seat production until the new roster is supported end to end.
   - **MP1 — headless rules:** validated three/four-seat simulation, fair corner spawning,
     multi-survivor outcomes, item interactions and replayable random Teleporter selection.
   - **MP2 — live activation:** new transport/replay contracts, room lifecycle, per-seat CPU
@@ -42,6 +40,24 @@ repeated approval for routine implementation choices. Entries are not delivery-d
   define supported sizes and bounds during design. Adapt terrain/item generation, fair spawn
   placement, CPU navigation, rendering and transport/replay limits. Verify supported board sizes
   with two-, three- and four-player lineups.
+
+## Animation and arena environment
+
+Implement after the current multiplayer and configurable-board work.
+
+- [todo] **ANIMATION — richer movement and bomb pulsation.** Add player walking frames and
+  bomb frames that communicate the approach to explosion. Extend the shared artist sheet and
+  catalog while preserving anchors, readable timing and reduced-motion behavior.
+- [todo] **STORM-CLOUD — roaming slowdown hazard.** A cloud moves slowly and randomly across
+  the board, including blocked tiles. It never blocks movement and bombs cannot harm it.
+  Player/cloud contact in either direction applies a three-second, 50% slowdown. Define contact
+  refresh and interaction with existing slow effects before implementation; avoid per-tick
+  compounding. Bound cloud count/speed and use replayable environment randomness.
+- [todo] **LAIRS — indestructible mob spawners.** Add a wall-like, indestructible lair tile.
+  Each lair spawns once every configurable N seconds, with a separate counter and the same
+  configurable limit M. Mobs chase players reachable through unblocked paths, avoid bombs and
+  never plant bombs. Before implementation settle whether M counts living or lifetime spawns,
+  blocked spawn behavior, mob contact/damage/death, targeting and resource bounds.
 
 ## Engineering follow-ups
 
@@ -64,9 +80,9 @@ repeated approval for routine implementation choices. Entries are not delivery-d
   item frequency/pools/weights and configurable effect durations. Existing numeric controls,
   item switches and creator/readiness/rematch policies are already implemented; see
   [settings](docs/game/settings.md). New cross-field combinations need explicit validation.
-- [new] **Further art and animation.** Build on the adopted Napoleonic sheet and artist pipeline:
-  directional/idle/death animation, environment detail, layered authoring sources, accessibility
-  and measured effects budgets. Follow the [artist handoff](assets/art/README.md).
+- [new] **Further art.** Beyond the confirmed walking and bomb frames, consider idle/death
+  animation, environment detail, layered authoring sources, accessibility and measured effects
+  budgets. Follow the [artist handoff](assets/art/README.md).
 - [new] **AUTO-PUNCH — consider automatic contact Punch.** The current idea is at most one
   activation per contact, reducing gameplay controls to movement and Bomb. The user has not approved this
   behavior; keep the existing manual Punch contract unless a product decision accepts it.

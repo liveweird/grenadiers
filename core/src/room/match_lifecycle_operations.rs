@@ -1,6 +1,16 @@
 use super::*;
 
 impl MatchLifecycle {
+    pub(super) fn transact<T>(
+        &mut self,
+        operation: impl FnOnce(&mut Self) -> Result<T, MatchError>,
+    ) -> Result<T, MatchError> {
+        let mut next = self.clone();
+        let result = operation(&mut next)?;
+        *self = next;
+        Ok(result)
+    }
+
     pub(super) fn ensure_duel_seat(seat: SeatId) -> Result<(), MatchError> {
         if SeatId::DUEL.contains(&seat) {
             Ok(())

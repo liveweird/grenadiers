@@ -4,6 +4,50 @@ This archive preserves the older release records originally maintained in
 [`docs/releases.md`](../releases.md). Records remain in their original order; the current
 release procedure and current release record stay in the [release guide](../releases.md).
 
+## v0.3.84 — 2026-10-27
+
+[v0.3.84](https://github.com/liveweird/grenadiers/releases/tag/v0.3.84) adds
+[certified ordinary planting](../game/cpu-contracts.md#certified-ordinary-planting). One complete
+escape is proved against both a placed bomb and no physical placement: absence can change
+blast shielding and chains. The same bounded route continues without another worker or Bomb
+retry. First movement precedes placement; future bomb occupancy, consumed origin grace and
+absolute range/fuse modifiers follow the shared game rules.
+
+Early results remain in the existing bounded slot until exact admission. Scene, pose, actor,
+effect, epoch and deadline checks fence execution. Public observations bind the actual bomb ID
+or the absent outcome. Actual Driver tests cover accepted inputs whose simultaneous placement
+veto creates neither bomb, rejected movement/manual input and workerless continuation.
+Independent review is clear after correcting temporal flame insertion, opponent-Stopwatch
+freeze handling and the shared actor-invariant guard. Regressions cover absent-shielding danger,
+partial work exhaustion, modifier expiry and changed actor facts at both execution boundaries.
+
+The policy is UtilityV4; V1–V3 recorded inputs remain readable. The v12 wire shape, rules 5,
+generator 2 and all 22 default items are unchanged. Conditional routes never authorize planting.
+Stored special weapons and a live own Remote remain outside ordinary placement. Existing narrow
+CPU1 planting remains a guarded fallback. New enemy actions and unknown facts can invalidate a
+route. Injected-State driver execution and generation-journal replay are separate test oracles.
+
+Final tested source is `af29f6a59e36c525379fb31534780b367fcfa48e`. Full local Rust acceptance
+passes in 481.898s: all 4,194,304 masks in each of debug, release and official coverage,
+32 partitions/four workers, zero retries and 37 raw profiles. Coverage is 24,331/26,509 lines
+(91.78%). The distinct [Linux run](https://github.com/liveweird/grenadiers/actions/runs/40426511318)
+passes, along with formatting, Clippy and repository/source-size checks. Exact unchanged external
+dependencies and frontend inputs reuse accepted audit, API/static and full web evidence
+(6,874 tests/97 files); the image is rebuilt and tested independently.
+
+Accepted image is
+`sha256:5ef2bca49de2ba8ae664077a9a14e6d58036d4b8530576e478206283e0ad35cf`.
+Pinned Trivy 0.74.0 reports zero fixable HIGH/CRITICAL findings. Compose passes ten native browser
+cases in 50.2s and Kubernetes ten in 51.8s. Solo lifecycle, human duel, Polish 320px accessibility,
+strict lobby/create, security/resources/probes and served-asset checks pass. Temporary projects
+and namespaces are removed. The exact image is promoted to localhost:8085 with v0.3.83 retained
+for rollback; restarting ends in-memory matches.
+
+Canonical source-bound summary, official LCOV and image/runtime evidence remain under
+`target/quality-review/cpu2-v0384-*`; the console capture is partial because verbose tool output
+was truncated. Distribution remains a source prerelease and local image, without a production
+registry or hosted-service claim. Item tactics are next in the [backlog](../../BACKLOG.md#single-player).
+
 ## v0.3.83 — 2026-10-27
 
 [v0.3.83](https://github.com/liveweird/grenadiers/releases/tag/v0.3.83) adds complete bounded

@@ -54,7 +54,14 @@ fn inject_plan(
     rng: CpuRng,
 ) {
     let (sender, receiver) = sync_channel(1);
-    sender.send(PlanResult { plan, basis, rng }).unwrap();
+    sender
+        .send(PlanResult {
+            plan,
+            basis,
+            rng,
+            escape_origin: None,
+        })
+        .unwrap();
     controller.pending = Some(Pending {
         decision,
         receiver,
@@ -178,6 +185,7 @@ fn rejected_bomb_clears_prospective_escape_but_commits_rng() {
         committed_pulse: None,
         committed_route: None,
         certified_plant: false,
+        escape_origin: false,
     };
 
     controller.commit(

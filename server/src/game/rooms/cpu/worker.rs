@@ -9,7 +9,7 @@ use grenadiers_core::cpu::{
     CpuRng, Observation, WorkBudget,
     forecast::ObservedHazardMemory,
     policy::UtilityMemory,
-    survival::{SurvivalPlan, WORK_ALLOWANCE, plan},
+    survival::{PlantEscapeOrigin, SurvivalPlan, WORK_ALLOWANCE, plan_with_origin},
 };
 use grenadiers_core::game::Tick;
 
@@ -41,6 +41,7 @@ pub(super) struct PlanResult {
     pub(super) plan: SurvivalPlan,
     pub(super) basis: Observation,
     pub(super) rng: CpuRng,
+    pub(super) escape_origin: Option<PlantEscapeOrigin>,
 }
 
 pub(super) struct PlanJob {
@@ -49,6 +50,7 @@ pub(super) struct PlanJob {
     pub(super) hazard_memory: ObservedHazardMemory,
     pub(super) settled_stop_tick: Tick,
     pub(super) rng: CpuRng,
+    pub(super) escape_origin: Option<PlantEscapeOrigin>,
     pub(super) live: Arc<AtomicBool>,
     pub(super) result: SyncSender<PlanResult>,
 }
@@ -189,11 +191,12 @@ fn execute_job(
     }
     let mut work = WorkBudget::new(WORK_ALLOWANCE);
     let started = measure.then(std::time::Instant::now);
-    let Ok(plan) = plan(
+    let Ok(plan) = plan_with_origin(
         &job.observation,
         &job.memory,
         &job.hazard_memory,
         job.settled_stop_tick,
+        job.escape_origin.as_ref(),
         &mut job.rng,
         &mut work,
     ) else {
@@ -206,6 +209,7 @@ fn execute_job(
     };
     let planner_time = started.map(|value| value.elapsed());
     let intent = plan.control.intent;
+    let escape_origin = job.escape_origin;
     if !job.live.load(Ordering::Acquire) {
         return (
             JobStatus::Cancelled,
@@ -220,6 +224,7 @@ fn execute_job(
             plan,
             basis: job.observation,
             rng: job.rng,
+            escape_origin,
         })
         .is_ok()
     {

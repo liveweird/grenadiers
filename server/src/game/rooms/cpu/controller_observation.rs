@@ -33,6 +33,8 @@ impl CpuController {
         self.committed_pulse = None;
         self.committed_route = None;
         self.committed_route_epoch = None;
+        self.escape_origin = None;
+        self.escape_origin_epoch = None;
     }
 
     pub(in crate::game::rooms) fn accept_observation(&mut self, observation: &Observation) -> bool {
@@ -52,6 +54,7 @@ impl CpuController {
             .observe(observation);
         self.last_observation_tick = Some(observation.parts().tick);
         self.confirm_stop(observation);
+        self.retain_escape_origin(observation);
         self.latest_observation = Some(observation.clone());
         true
     }
@@ -89,6 +92,25 @@ impl CpuController {
         if actor.alive && !actor.voluntary_actions_frozen {
             self.settled_stop_tick = Some(observation.parts().tick);
             self.stop_admission = None;
+        }
+    }
+
+    fn retain_escape_origin(&mut self, observation: &Observation) {
+        let Some(origin) = self.escape_origin.as_ref() else {
+            return;
+        };
+        let retained = if let Some(pulse) = self.committed_pulse.as_ref() {
+            pulse.retain_escape_origin(origin, observation, observation.parts().tick)
+        } else if self.settled_stop_tick.is_some() {
+            origin.retain_stopped(observation)
+        } else {
+            None
+        };
+        if retained.is_some() {
+            self.escape_origin = retained;
+        } else {
+            self.clear_escape_origin();
+            self.cancel();
         }
     }
 }

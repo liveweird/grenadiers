@@ -55,6 +55,11 @@ then confirms the actual visible bomb or the absent outcome. The same committed 
 without another worker. A rejected Bomb action is not retried. Conservative limits can still
 refuse a useful bomb; the earlier restricted planting fallback remains available.
 
+If another observed bomb interrupts a confirmed planting escape while the CPU still overlaps
+its own origin, it stops the old route and checks fresh short escape movements. The original
+placement record lasts only while its bomb, pose and player state remain valid; leaving the origin
+ends that exception. Recovery uses ordinary movement without planting another bomb.
+
 Bomb motion remains partially unknown. Short conditional pulses may explicitly assume a bomb
 has stayed stationary; observing it move withdraws that assumption. Complete conditional routes
 retain the same explicit assumptions. Pauses and remote/contact

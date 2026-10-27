@@ -27,6 +27,7 @@ impl CpuController {
                 plan,
                 basis,
                 rng: self.rng.as_ref().expect("world rng initialized").clone(),
+                escape_origin: None,
             })
             .expect("test result receiver is live");
         self.pending = Some(Pending {

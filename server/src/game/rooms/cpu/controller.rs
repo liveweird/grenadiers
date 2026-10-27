@@ -7,7 +7,7 @@ use std::sync::{
 
 use grenadiers_core::cpu::forecast::ObservedHazardMemory;
 use grenadiers_core::cpu::policy::{ControlPlan, EscapeExecution, MAX_HOLD_TICKS, PolicyError};
-use grenadiers_core::cpu::survival::{CommittedPulse, CommittedRoute};
+use grenadiers_core::cpu::survival::{CommittedPulse, CommittedRoute, PlantEscapeOrigin};
 use grenadiers_core::cpu::{
     CpuMemory, CpuRng, DecisionId, Intent, Observation, WorldId, policy::UtilityMemory,
 };
@@ -31,6 +31,7 @@ pub(in crate::game::rooms) struct AcceptedPlan {
     committed_pulse: Option<CommittedPulse>,
     committed_route: Option<CommittedRoute>,
     certified_plant: bool,
+    escape_origin: bool,
 }
 
 #[derive(Clone, Copy)]
@@ -57,6 +58,8 @@ pub(in crate::game::rooms) struct CpuController {
     committed_pulse: Option<CommittedPulse>,
     committed_route: Option<CommittedRoute>,
     committed_route_epoch: Option<u64>,
+    escape_origin: Option<PlantEscapeOrigin>,
+    escape_origin_epoch: Option<u64>,
 }
 
 impl fmt::Debug for CpuController {
@@ -98,6 +101,8 @@ impl CpuController {
             committed_pulse: None,
             committed_route: None,
             committed_route_epoch: None,
+            escape_origin: None,
+            escape_origin_epoch: None,
         }
     }
 
@@ -106,6 +111,7 @@ impl CpuController {
         observation: Observation,
         command_epoch: u64,
     ) -> bool {
+        self.validate_escape_epoch(command_epoch);
         if self.escaping
             || self.committed_pulse.is_some()
             || self.committed_route.is_some()
@@ -138,6 +144,7 @@ impl CpuController {
                 .clone(),
             settled_stop_tick,
             rng: self.rng.as_ref().expect("world rng initialized").clone(),
+            escape_origin: self.escape_origin.clone(),
             live: Arc::clone(&live),
             result: sender,
         };
@@ -171,6 +178,12 @@ impl CpuController {
         self.rng = Some(accepted.next_rng);
         self.escaping = !accepted.certified_plant && planted_input;
         self.committed_pulse = accepted.committed_pulse;
+        if accepted.escape_origin
+            && actual_intent.movement != grenadiers_core::cpu::MovementIntent::Stop
+            && self.committed_pulse.is_none()
+        {
+            self.clear_escape_origin();
+        }
         self.committed_route_epoch = accepted
             .committed_route
             .as_ref()
@@ -235,6 +248,26 @@ impl CpuController {
         self.pending.is_some()
     }
 
+    pub(in crate::game::rooms) fn clear_escape_origin(&mut self) {
+        self.escape_origin = None;
+        self.escape_origin_epoch = None;
+    }
+
+    #[cfg(test)]
+    pub(in crate::game::rooms) const fn recovery_state(&self) -> (bool, bool) {
+        (
+            self.escape_origin.is_some(),
+            self.escape_origin.is_some() && self.committed_pulse.is_some(),
+        )
+    }
+
+    pub(in crate::game::rooms) fn validate_escape_epoch(&mut self, command_epoch: u64) {
+        if self.escape_origin.is_some() && self.escape_origin_epoch != Some(command_epoch) {
+            self.clear_escape_origin();
+            self.cancel();
+        }
+    }
+
     #[cfg(test)]
     pub(in crate::game::rooms) fn plan_now_for_test(
         &mut self,
@@ -268,6 +301,7 @@ impl CpuController {
             committed_pulse: None,
             committed_route: None,
             certified_plant: false,
+            escape_origin: false,
         }
     }
 
@@ -319,6 +353,10 @@ mod route_tests;
 #[cfg(test)]
 #[path = "controller_plant_tests.rs"]
 mod plant_tests;
+
+#[cfg(test)]
+#[path = "controller_recovery_tests.rs"]
+mod recovery_tests;
 
 #[cfg(test)]
 #[path = "controller_weapon_tests.rs"]

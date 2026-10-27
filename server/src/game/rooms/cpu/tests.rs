@@ -101,6 +101,7 @@ fn job(live: Arc<AtomicBool>) -> (PlanJob, Receiver<PlanResult>) {
             memory: UtilityMemory::new(key()),
             hazard_memory,
             rng: CpuRng::from_seed(key(), [4; 32]),
+            escape_origin: None,
             live,
             result: sender,
         },

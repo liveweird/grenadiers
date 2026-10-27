@@ -15,6 +15,7 @@ pub enum CpuPolicy {
     UtilityV6,
     UtilityV7,
     UtilityV8,
+    UtilityV9,
 }
 
 impl CpuPolicy {
@@ -29,6 +30,7 @@ impl CpuPolicy {
             Self::UtilityV6 => 6,
             Self::UtilityV7 => 7,
             Self::UtilityV8 => 8,
+            Self::UtilityV9 => 9,
         }
     }
 }
@@ -88,9 +90,15 @@ impl CpuProfile {
         difficulty: CpuDifficulty::Standard,
     };
 
+    /// First finite-hazard responsiveness policy, retained for archived projections and replays.
+    pub const RESPONSIVE_V8: Self = Self {
+        policy: CpuPolicy::UtilityV8,
+        difficulty: CpuDifficulty::Standard,
+    };
+
     /// The only policy profile used to create a new live CPU controller.
     pub const CURRENT: Self = Self {
-        policy: CpuPolicy::UtilityV8,
+        policy: CpuPolicy::UtilityV9,
         difficulty: CpuDifficulty::Standard,
     };
 }
@@ -151,7 +159,8 @@ mod tests {
         assert_eq!(CpuProfile::GOALS_V5.policy.version(), 5);
         assert_eq!(CpuProfile::WEAPONS_V6.policy.version(), 6);
         assert_eq!(CpuProfile::WALL_PASS_V7.policy.version(), 7);
-        assert_eq!(CpuProfile::CURRENT.policy.version(), 8);
+        assert_eq!(CpuProfile::RESPONSIVE_V8.policy.version(), 8);
+        assert_eq!(CpuProfile::CURRENT.policy.version(), 9);
         assert_eq!(
             RoomMode::Solo(CpuProfile::CURRENT).controller(SeatId::Two),
             ControllerKind::Cpu(CpuProfile::CURRENT)

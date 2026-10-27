@@ -81,6 +81,8 @@ pub(super) struct EvaluationFrame {
     pub(super) exposed_pickups: usize,
     pub(super) blocks: usize,
     pub(super) rng_draws: u64,
+    pub(super) recovery_origin: bool,
+    pub(super) recovery_pulse: bool,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -270,6 +272,14 @@ impl Accumulator {
             exposed_pickups: state.world().exposed_pickups().len(),
             blocks: state.world().arena().blocks().len(),
             rng_draws: driver.cpu.as_ref().map_or(0, |cpu| cpu.rng_draws()),
+            recovery_origin: driver
+                .cpu
+                .as_ref()
+                .is_some_and(|cpu| cpu.recovery_state().0),
+            recovery_pulse: driver
+                .cpu
+                .as_ref()
+                .is_some_and(|cpu| cpu.recovery_state().1),
         });
     }
 

@@ -4,6 +4,46 @@ This archive preserves the older release records originally maintained in
 [`docs/releases.md`](../releases.md). Records remain in their original order; the current
 release procedure and current release record stay in the [release guide](../releases.md).
 
+## v0.3.91 — 2026-10-27
+
+[v0.3.91](https://github.com/liveweird/grenadiers/releases/tag/v0.3.91) closes the observed
+[late-placement escape failures](../game/cpu-contracts.md#interrupted-confirmed-planting).
+A unique exact newly observed birth can establish origin provenance even when an unrelated pickup
+appears in that publication. Full-scene confirmation still fails and the old route still stops;
+only fresh checked pulses can recover. Signature validation is shared with normal confirmation.
+Absent, ambiguous, mismatched, paused or expired placement, wrong pose and actor changes still decline.
+
+Recovery guidance reuses the static refuge search from a fixed origin and requires strict
+worst-case progress toward a legal exit. This permits necessary turn alignment without the
+reproduced East/North oscillation. Hazard proofs, uncertainty, timing, work, one-way grace and
+ordinary navigation remain unchanged. The real unchanged a1/a2 cases now recover after second
+placements at 424/412 and survive full own-flame expiries at 634/622, without recovery manual actions
+or restored old origins. Independent review is clear. UtilityV10 retains V1–V9 accepted-input replay
+and the unchanged v12 wire shape.
+
+The same clean-source 16-case matrix completes in 2.07s with all 16 CPU opponents alive at the
+1,800-tick bound: 16 censored outcomes, zero losses and no wins. This compares with four losses in v0.3.90
+and six in v0.3.89. Across 512 planning calls, p95/max are 3.895/4.857ms on macOS/aarch64. These are reference
+workloads and host observations, not balanced-difficulty or hardware-threshold claims. Broader
+round evaluation, tactics and human feedback remain in the [backlog](../../BACKLOG.md#single-player).
+
+Tested source is `dc551c7d3116a1d0c8be98e577f435e96fe30982`. Full local Rust acceptance passes
+in 470.822s: all 4,194,304 masks in debug, release and official coverage, 32 partitions/four
+workers, zero retries and 37 raw profiles. Coverage is 25,913/28,034 lines (92.43%).
+The distinct [Linux run](https://github.com/liveweird/grenadiers/actions/runs/40450868513) passes.
+Formatting, workspace Clippy and repository/source-size checks pass. Proven unchanged frontend,
+API, artwork, E2E, tooling and external dependencies retain accepted static/audit/full-web evidence
+(6,874 tests/97 files).
+
+Accepted image is
+`sha256:287b976ad207dd50a63ba7e574201c1e9c2760adb3c4db9c0ca08c7ba8521c6e`.
+Pinned Trivy 0.74.0 reports zero fixable HIGH/CRITICAL findings. Compose passes ten browser cases
+in 49.5s, Kubernetes ten in 50.0s and dedicated all-items CPU pickup acceptance one in 16.4s.
+Polish 320px, strict lobby/create, resources/security/probes and served assets pass. Temporary
+projects/namespaces are removed. The exact image is promoted to localhost:8085 with v0.3.90 retained
+for rollback; restarting ends in-memory matches. Evidence is under `target/quality-review/cpu4-v0391-*`.
+Distribution remains a source prerelease and local image.
+
 ## v0.3.90 — 2026-10-27
 
 [v0.3.90](https://github.com/liveweird/grenadiers/releases/tag/v0.3.90) fixes

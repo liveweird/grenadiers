@@ -481,6 +481,17 @@ jobs:
           done
           curl --fail --silent http://127.0.0.1:8085/api/v1/ready
           E2E_WALL_PASS_FIXTURE=arena-v2-wall-pass npm --prefix e2e run test:wall-pass
+      - name: Verify all-on CPU item acquisition using the same built image
+        if: matrix.shard == 'items'
+        run: |
+          chmod 444 core/tests/fixtures/arena-v2-cpu-wall-pass.seed
+          GRENADIERS_FIXTURE_SEED_FILE=./core/tests/fixtures/arena-v2-cpu-wall-pass.seed docker compose -f docker-compose.yaml -f e2e/compose/fixture.yaml up -d --no-build --force-recreate app
+          for _attempt in $(seq 1 60); do
+            if curl --fail --silent http://127.0.0.1:8085/api/v1/ready; then break; fi
+            sleep 1
+          done
+          curl --fail --silent http://127.0.0.1:8085/api/v1/ready
+          E2E_CPU_ITEM_FIXTURE=arena-v2-cpu-wall-pass npm --prefix e2e run test:cpu-item
       - name: Verify opt-in Kick motion and fuse preservation using the same built image
         if: matrix.shard == 'items'
         run: |
@@ -576,6 +587,8 @@ jobs:
             e2e/playwright-invisible-bombs-report/
             e2e/playwright-teleporter-report/
             e2e/playwright-wall-pass-report/
+            e2e/playwright-cpu-item-report/
+            e2e/cpu-item-test-results/
             e2e/playwright-kick-report/
             e2e/playwright-punch-report/
             e2e/punch-test-results/

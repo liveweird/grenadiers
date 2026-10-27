@@ -110,7 +110,8 @@ pub(super) fn transit_allowed(
         return false;
     };
     parts.arena.terrain.get(index) == Some(&Terrain::Floor)
-        && !parts.arena.blocks.contains(&cell)
+        && (crate::cpu::capabilities::can_pass_known_soft_blocks(observation)
+            || !parts.arena.blocks.contains(&cell))
         && !parts.oil.iter().any(|oil| oil.cell == cell)
         && parts
             .pickups
@@ -130,6 +131,7 @@ fn search_map(
         .pickups
         .len()
         .checked_add(parts.arena.blocks.len())?
+        .checked_add(parts.arena.blocks.len())?
         .checked_add(parts.oil.len())?
         .checked_add(parts.actors.len())?;
     work.try_take(u32::try_from(scan_work).ok()?).ok()?;
@@ -139,6 +141,9 @@ fn search_map(
         forbidden: [false; ARENA_CELL_COUNT],
         highest_value: 0,
     };
+    for &block in &parts.arena.blocks {
+        map.blocked[cell_index(observation, block)?] = true;
+    }
     for pickup in &parts.pickups {
         let index = cell_index(observation, pickup.cell)?;
         map.forbidden[index] = !pickup_transitable(actor, pickup.kind);
@@ -147,11 +152,11 @@ fn search_map(
         }
     }
     for &block in &parts.arena.blocks {
-        map.blocked[cell_index(observation, block)?] = true;
         for (_, dc, dr) in STEPS {
             if let Some(cell) = offset(block, dc, dr)
                 && cell != current
                 && let Some(index) = cell_index(observation, cell)
+                && legal_opening(observation, cell)
             {
                 map.add_goal(index, 2);
             }
@@ -241,7 +246,8 @@ impl SearchMap {
             return false;
         };
         observation.parts().arena.terrain.get(index) == Some(&Terrain::Floor)
-            && !self.blocked[index]
+            && (crate::cpu::capabilities::can_pass_known_soft_blocks(observation)
+                || !self.blocked[index])
             && !self.forbidden[index]
     }
 }
@@ -249,6 +255,9 @@ impl SearchMap {
 fn pickup_value(observation: &Observation, actor: &VisibleActor, kind: PickupKind) -> Option<u8> {
     let rules = RulesConfig::expanded_v5(observation.parts().rules.settings);
     if let Some((value, _)) = supported_weapon(actor, kind) {
+        return value;
+    }
+    if let Some((value, _)) = equipment_pickup(actor, kind) {
         return value;
     }
     match kind {
@@ -293,6 +302,9 @@ fn pickup_transitable(actor: &VisibleActor, kind: PickupKind) -> bool {
     if let Some((_, transitable)) = supported_weapon(actor, kind) {
         return transitable;
     }
+    if let Some((_, transitable)) = equipment_pickup(actor, kind) {
+        return transitable;
+    }
     match kind {
         PickupKind::RemoteBomb
         | PickupKind::PiercingBomb
@@ -319,6 +331,38 @@ fn pickup_transitable(actor: &VisibleActor, kind: PickupKind) -> bool {
         | PickupKind::GoldenFlame
         | PickupKind::ShortFuse => true,
     }
+}
+
+fn equipment_pickup(actor: &VisibleActor, kind: PickupKind) -> Option<(Option<u8>, bool)> {
+    let incoming = match kind {
+        PickupKind::Kick => Equipment::Kick,
+        PickupKind::Punch => Equipment::Punch,
+        PickupKind::Bracelet => Equipment::Bracelet,
+        PickupKind::WallPass => Equipment::WallPass,
+        PickupKind::Heart => Equipment::Heart,
+        _ => return None,
+    };
+    Some(match (actor.equipment, incoming) {
+        (Some(Equipment::WallPass), Equipment::WallPass) => (None, true),
+        (Some(Equipment::WallPass), _) => (None, false),
+        (Some(Equipment::Heart), Equipment::WallPass) => (None, false),
+        (
+            None | Some(Equipment::Kick | Equipment::Punch | Equipment::Bracelet),
+            Equipment::WallPass,
+        ) => (Some(7), true),
+        (_, Equipment::Heart) if actor.equipment != Some(Equipment::Heart) => (Some(9), true),
+        (Some(current), candidate) if current == candidate => (None, true),
+        _ => (None, actor.equipment != Some(Equipment::Heart)),
+    })
+}
+
+pub(super) fn legal_opening(observation: &Observation, cell: CellId) -> bool {
+    let Some(index) = cell_index(observation, cell) else {
+        return false;
+    };
+    observation.parts().arena.terrain.get(index) == Some(&Terrain::Floor)
+        && !observation.parts().arena.blocks.contains(&cell)
+        && !observation.parts().oil.iter().any(|oil| oil.cell == cell)
 }
 
 pub(super) fn supported_weapon(

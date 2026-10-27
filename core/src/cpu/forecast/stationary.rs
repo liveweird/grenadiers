@@ -114,6 +114,7 @@ pub(super) fn simulate_stationary(
         horizon_end,
         &removals,
         &oil_ignitions,
+        evolution,
         limits,
         work,
         cells,
@@ -234,11 +235,20 @@ fn add_blocking_windows(
     horizon_end: Tick,
     removals: &BTreeMap<EntityId, Tick>,
     oil_ignitions: &BTreeMap<CellId, Tick>,
+    evolution: &ForecastEvolution,
     limits: ForecastLimits,
     work: &mut WorkBudget,
     cells: &mut [CellForecast],
 ) -> Result<(), ForecastFailure> {
     let basis = observation.parts().tick;
+    let pass_blocks = crate::cpu::capabilities::can_pass_known_soft_blocks(observation);
+    let mut block_removals = BTreeMap::new();
+    if pass_blocks {
+        for (cell, tick) in evolution.block_removals() {
+            take(work, 1)?;
+            block_removals.entry(cell).or_insert(tick);
+        }
+    }
     for bomb in bombs {
         if !matches!(bomb.trigger, Trigger::Contact) {
             add_window(
@@ -262,10 +272,18 @@ fn add_blocking_windows(
         }
     }
     for cell in &observation.parts().arena.blocks {
+        let start = if pass_blocks {
+            let Some(at) = block_removals.get(cell).copied() else {
+                continue;
+            };
+            at
+        } else {
+            basis
+        };
         add_window(
             &mut cells[index(*cell)].blocking,
             TickWindow {
-                start: basis,
+                start,
                 // A destroyed block can reveal concealed Oil. Recipient facts
                 // cannot certify this cell traversable until another snapshot.
                 end: horizon_end,

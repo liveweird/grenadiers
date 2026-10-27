@@ -69,7 +69,8 @@ fn traversable(observation: &Observation, cell: CellId) -> bool {
     }
     let index = usize::from(cell.row) * usize::from(parts.arena.width) + usize::from(cell.column);
     parts.arena.terrain.get(index) == Some(&Terrain::Floor)
-        && !parts.arena.blocks.contains(&cell)
+        && (crate::cpu::capabilities::can_pass_known_soft_blocks(observation)
+            || !parts.arena.blocks.contains(&cell))
         && !parts.oil.iter().any(|oil| oil.cell == cell)
         && !parts.pickups.iter().any(|pickup| pickup.cell == cell)
 }

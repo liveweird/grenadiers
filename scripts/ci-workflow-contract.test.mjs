@@ -32,6 +32,8 @@ const failureArtifactPaths = [
   "e2e/playwright-invisible-bombs-report/",
   "e2e/playwright-teleporter-report/",
   "e2e/playwright-wall-pass-report/",
+  "e2e/playwright-cpu-item-report/",
+  "e2e/cpu-item-test-results/",
   "e2e/playwright-kick-report/",
   "e2e/playwright-punch-report/",
   "e2e/punch-test-results/",
@@ -72,6 +74,7 @@ const fixtures = {
   "stopwatch": "arena-v2-stopwatch.seed",
   "teleporter": "arena-v2-teleporter.seed",
   "wall-pass": "arena-v2-wall-pass.seed",
+  "cpu-item": "arena-v2-cpu-wall-pass.seed",
 };
 
 function trigger(workflow) {
@@ -109,7 +112,7 @@ export function validateFullWorkflow(workflow) {
   const artifactPaths = artifactPathBlock[1].trim().split("\n")
     .map((line) => line.trim());
   assert.deepEqual(artifactPaths, failureArtifactPaths);
-  assert.equal((workflow.match(/for _attempt in \$\(seq 1 60\); do/g) ?? []).length, 25);
+  assert.equal((workflow.match(/for _attempt in \$\(seq 1 60\); do/g) ?? []).length, 26);
   assert.doesNotMatch(workflow, /for attempt in \$\(seq 1 60\); do/);
 }
 

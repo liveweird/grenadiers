@@ -24,6 +24,12 @@ const OBSTACLE: CellId = CellId::new(3, 1);
 
 fn observed_with(block: bool, oil: bool, wall_pass: bool, bomb: bool) -> Observation {
     let mut parts = observation(Vec::new(), Vec::new()).into_parts();
+    if wall_pass {
+        parts.rules.settings = parts
+            .rules
+            .settings
+            .with_enabled_items(EnabledItems::WALL_PASS);
+    }
     if block {
         parts.arena.blocks.push(OBSTACLE);
     }
@@ -101,7 +107,7 @@ fn arena(blocks: BTreeSet<CellId>, internal_wall: bool) -> Arena {
     Arena::new(terrain, blocks, [CellId::new(1, 1), CellId::new(13, 11)]).unwrap()
 }
 
-fn actors() -> [ActorInit; 2] {
+fn actors(speed: SpeedLevel, position: Position) -> [ActorInit; 2] {
     [
         ActorInit {
             id: EntityId(1),
@@ -113,14 +119,34 @@ fn actors() -> [ActorInit; 2] {
         ActorInit {
             id: EntityId(2),
             seat: SeatId::Two,
-            position: Position::center(START),
+            position,
             heading: Direction::East,
-            speed: SpeedLevel::Base,
+            speed,
         },
     ]
 }
 
 fn state(block: bool, oil: bool, wall_pass: bool, bomb: bool, internal_wall: bool) -> State {
+    state_at_speed(
+        block,
+        oil,
+        wall_pass,
+        bomb,
+        internal_wall,
+        SpeedLevel::Base,
+        Position::center(START),
+    )
+}
+
+fn state_at_speed(
+    block: bool,
+    oil: bool,
+    wall_pass: bool,
+    bomb: bool,
+    internal_wall: bool,
+    speed: SpeedLevel,
+    position: Position,
+) -> State {
     let arena = arena(
         block.then_some(OBSTACLE).into_iter().collect(),
         internal_wall,
@@ -166,7 +192,12 @@ fn state(block: bool, oil: bool, wall_pass: bool, bomb: bool, internal_wall: boo
     )
     .unwrap();
     let settings = RoomSettings::DEFAULT.with_enabled_items(enabled);
-    let mut state = State::new(RulesConfig::expanded_v5(settings), world, actors()).unwrap();
+    let mut state = State::new(
+        RulesConfig::expanded_v5(settings),
+        world,
+        actors(speed, position),
+    )
+    .unwrap();
     if wall_pass {
         state.step(&[]).unwrap();
         assert_eq!(
@@ -207,37 +238,110 @@ fn assert_pulse_rejected(observed: &Observation) {
 }
 
 #[test]
-fn wall_pass_motion_ignores_soft_blocks_and_unlit_oil_but_certification_rejects_them() {
-    for (block, oil) in [(true, false), (false, true)] {
-        let observed = observed_with(block, oil, true, false);
-        let modeled = modeled_endpoint(&observed, 12);
-        let actual = held_endpoint(state(block, oil, true, false, false), 12);
-        assert_eq!(modeled, actual);
-        assert!(modeled.x > Position::center(START).x);
-        assert_pulse_rejected(&observed);
-    }
+fn enabled_wall_pass_certifies_actual_motion_through_only_soft_blocks() {
+    let actual_start = held_state(
+        state_at_speed(
+            true,
+            false,
+            true,
+            false,
+            false,
+            SpeedLevel::Four,
+            Position::center(START),
+        ),
+        11,
+    );
+    let start = actual_start.actors()[SeatId::Two.index()].position();
+    let mut parts = observed_with(true, false, true, false).into_parts();
+    let ObservedActor::Visible(actor) = &mut parts.actors[1] else {
+        unreachable!()
+    };
+    actor.position = start;
+    actor.speed = SpeedLevel::Four;
+    let observed = Observation::new(parts).unwrap();
+    let modeled = modeled_endpoint(&observed, 12);
+    let actual = held_endpoint(actual_start, 12);
+    assert_eq!(modeled, actual);
+    assert!(
+        modeled.x > (i32::from(OBSTACLE.column) + 1) * UNITS_PER_CELL,
+        "{modeled:?}"
+    );
+    assert!(
+        certify_pulse(
+            &observed,
+            &forecast_for(&observed),
+            request(MovementIntent::Direction(Direction::East), 12),
+            &mut WorkBudget::new(65_536),
+        )
+        .is_ok()
+    );
+
+    let oil = observed_with(false, true, true, false);
+    assert_eq!(
+        modeled_endpoint(&oil, 12),
+        held_endpoint(state(false, true, true, false, false), 12)
+    );
+    assert_pulse_rejected(&oil);
 }
 
 #[test]
 fn known_occupied_starts_remain_rejected() {
-    for (block, oil) in [(true, false), (false, true)] {
+    for (block, oil, enabled, should_succeed) in [
+        (true, false, true, true),
+        (true, false, false, false),
+        (false, true, true, false),
+    ] {
         let mut parts = observed_with(block, oil, true, false).into_parts();
+        if !enabled {
+            parts.rules.settings = parts.rules.settings.with_enabled_items(EnabledItems::EMPTY);
+        }
         let ObservedActor::Visible(actor) = &mut parts.actors[1] else {
             unreachable!()
         };
         actor.position = Position::center(OBSTACLE);
         let observed = Observation::new(parts).unwrap();
         let forecast = forecast_for(&observed);
-        assert_eq!(
-            certify_pulse(
-                &observed,
-                &forecast,
-                request(MovementIntent::Direction(Direction::East), 1),
-                &mut WorkBudget::new(65_536),
-            ),
-            Err(RouteFailure::Unsupported)
+        let result = certify_pulse(
+            &observed,
+            &forecast,
+            request(MovementIntent::Direction(Direction::East), 1),
+            &mut WorkBudget::new(65_536),
         );
+        assert_eq!(result.is_ok(), should_succeed);
     }
+}
+
+#[test]
+fn predicted_destruction_fences_the_known_block_from_its_blast_tick() {
+    let observed = observed_with(true, false, true, true);
+    let forecast = forecast_for(&observed);
+    assert!(
+        forecast
+            .cell(OBSTACLE)
+            .unwrap()
+            .blocking
+            .iter()
+            .any(|window| { window.start == Tick(8) && window.end == forecast.horizon_end() })
+    );
+}
+
+#[test]
+fn dynamic_bomb_on_a_soft_block_remains_blocking() {
+    let mut parts = observed_with(true, false, true, false).into_parts();
+    parts.bombs = BombKnowledge::Visible(vec![ObservedBomb {
+        id: EntityId(91),
+        placed_at: Tick(0),
+        cell: OBSTACLE,
+        owner: EntityId(1),
+        range: 1,
+        trigger: ObservedBombTrigger::Timed {
+            remaining_ticks: 180,
+            paused: false,
+        },
+        blast: crate::game::BlastKind::Standard,
+        unknown: UnknownBombFacts::ALL,
+    }]);
+    assert_pulse_rejected(&Observation::new(parts).unwrap());
 }
 
 #[test]

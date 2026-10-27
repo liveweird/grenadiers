@@ -2,6 +2,19 @@
 
 ## [Unreleased]
 
+## 0.3.87 — 2026-10-27
+
+### Added
+
+- Use enabled held Wall Pass for intact soft-block navigation and certified starts/traversal,
+  retaining unknown-content fences after predicted destruction and strict dynamic hazards.
+- Preserve useful Wall Pass equipment, legal planting openings and private concealed contents.
+- Add native all-items CPU pickup/gear acceptance through the existing host-only seed fixture.
+
+### Changed
+
+- Identify known-block phasing as UtilityV7 while retaining V1–V6 input replay and wire v12.
+
 ## 0.3.86 — 2026-10-27
 
 ### Added

@@ -279,3 +279,7 @@ mod plant_tests;
 #[cfg(test)]
 #[path = "cpu_runtime_weapon_tests.rs"]
 mod weapon_tests;
+
+#[cfg(test)]
+#[path = "cpu_runtime_wall_pass_tests.rs"]
+mod wall_pass_tests;

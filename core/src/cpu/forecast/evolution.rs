@@ -183,6 +183,10 @@ impl ForecastEvolution {
         self.removed(id, tick)
     }
 
+    pub(super) fn block_removals(&self) -> impl Iterator<Item = (CellId, Tick)> + '_ {
+        self.block_removals.iter().copied()
+    }
+
     fn blocks_match(&self, basis: &Observation, current: &Observation) -> bool {
         let expected = basis
             .parts()

@@ -96,61 +96,24 @@ retain the previous immutable image reference for rollback. The runtime stage in
 rolling Debian package updates, so a later build may resolve newer packages and is not expected to
 be byte-identical; treat it as a new candidate with new evidence rather than reusing acceptance.
 
-## v0.3.95 — 2026-10-27
+## v0.3.96 — 2026-10-27
 
-[v0.3.95](https://github.com/liveweird/grenadiers/releases/tag/v0.3.95) adds an opportunistic
-held-Bracelet tactic. A certified straight movement pulse can push a visible rival into current
-fire, using the existing automatic contact rule without a manual action. The tactic requires
-visible empty bombs, zero exposed pickups, a non-Bracelet rival and an unobstructed victim
-sweep. Contact scoring reuses the authoritative kernel; fire must remain active at the latest
-possible contact. The stationary rival is guidance for effectiveness, not a prediction of input.
+[v0.3.96](https://github.com/liveweird/grenadiers/releases/tag/v0.3.96) adds a guarded held-Punch tactic. One stopped Equipment action has a common certified escape for relocation and a no-op, preserving the original bomb identity and absolute fuse. The narrow scene requires a centered CPU, one adjacent Standard timed bomb, no exposed pickups/Oil/flames and a visible rival without bomb-moving equipment. New incompatible observations withdraw the route. Manual player controls remain unchanged.
 
-The normal seven-start pulse certificate and stopped margin protect the CPU path. An optional
-lease guard rechecks the public prerequisites at admission and during execution; ordinary leases
-are unchanged. Private cooldown/contact history may prevent a shove. Existing escape/origin
-precedence, fallback, movement rules, acquisition priorities and planning limits remain in force.
-UtilityV13 retains V1–V12 accepted-input replay identities and wire v12.
+A recipient-footprint barrier follows the authoritative bomb collision rule: only the named bomb’s motion uncertainty at the continuously occupied origin is waived; lethal checks remain and leaving the cell consumes the exception. Exact basis+6 admission/basis+7 execution and typed manual rejection preserve the checked schedule without retry or legacy Bomb escape. Optional proof work uses at most half of the remaining global allowance. UtilityV14 retains V1–V13 replay identities and wire v12.
 
-Focused verification includes six tactic tests, five guard tests, 164 CPU tests, 35 controller
-tests and five replay contracts. The crafted queued Driver fixture collects Bracelet and creates
-finite fire through ordinary actions. Equal public observations with ready/cooling private
-histories produce identical queued movement: the ready shove kills the rival, while cooldown
-failure keeps both actors safe. This crafted replacement-state fixture does not claim
-replay from a generated-world header. Independent review is clear; source files remain at most
-400 lines.
+Focused tests cover geometry, timing, branch identity and complete physical routes through fuse/flame expiry. A core-private fixture compares ready/cooling histories with identical observations; a queued Driver fixture covers accepted/rejected Equipment in a Kick-enabled ruleset. These compose cooldown and queue coverage; the Driver fixture does not create bomb motion or combine accepted input with private cooldown. Crafted replacement-state fixtures do not claim generated-world replay. Independent review, formatting, Clippy, repository/tooling checks and the 400-line ceiling pass.
 
-Both unchanged 16-case reference matrices replay exactly. Opening cases remain alive/censored;
-full rounds retain 15 timeout draws and the same CPU win with no loss/censoring. Per-case outcome,
-progress, call and logical-work metrics are unchanged from v0.3.94: 594/4,010 calls and
-17,958,825/89,659,046 work units; the maximum remains 65,536. The targeted fixtures provide the
-new tactic evidence rather than claiming stronger play from unchanged matrix results.
+Both 16-case matrices replay exactly with unchanged per-case trajectories, outcomes, calls and work versus v0.3.95: 594/4,010 calls, 17,958,825/89,659,046 work units and a 65,536 maximum. Opening cases remain alive/censored; full rounds retain 15 timeout draws and the same CPU win. Isolated host observations were 2.38s opening and 12.13s full; planner p95/max were 3.995/5.248ms and 3.756/4.973ms. These are reference observations, not a strength or performance guarantee.
 
-Initial host observations were 2.59s opening and 18.17s full, with a full planner max of 48.145ms.
-Because work/results were unchanged, one explicitly declared isolated old/new timing comparison
-followed: preserved v0.3.94 took 13.817s and v0.3.95 13.518s, with p95/max 4.242/5.850ms versus
-4.178/6.082ms. This comparison suggests host variability in the initial measurement; it does not
-establish performance thresholds. Original and comparison artifacts are retained; no correctness
-failure was retried.
+One exhaustive server gate passes on source `27d074ca5c83544a12b5a31cd97ae410b036b6f5` (tree `a6d3e77e7c95118583b4a75dc2ecb1356222e065`): 521.69s, 27,100/29,389 lines (**92.2114%**), all 4,194,304 masks separately in debug/release/official coverage, 32 partitions/four workers/zero hidden retries and 37 raw profiles. Official LCOV was preserved before releasing the source/target freeze. Unique Linux [run 40583437112](https://github.com/liveweird/grenadiers/actions/runs/40583437112) passes.
 
-One exhaustive local server gate passes on tested source
-`64f25c964fab26a13fd453a1e949ed57b7578afc` (tree
-`826e1a643afe2d7b29de53b6409f93ca6156d241`): 528.544s,
-26,423/28,665 lines (**92.1786%**), all 4,194,304 item masks separately in debug,
-release and official coverage, 32 partitions/four workers/zero hidden retries and 37 raw
-profiles. Official LCOV was copied before releasing the source/target freeze. Unique Linux
-[run 40553481595](https://github.com/liveweird/grenadiers/actions/runs/40553481595) passes.
+Exact image `sha256:5d967f51f91aaea9361cea8dc0878fb7332d37e980c2aeb3ff0ccf38b0f32b15` passes pinned Trivy 0.74.0 with zero fixable HIGH/CRITICAL findings, Compose 10 cases/51.4s, Kubernetes 10 cases/53.0s, CPU-item collection 1 case/15.6s, Polish 320px, served-asset identity and runtime security/resources/probes. The initial scanner configuration-digest lookup failed; the corrected immutable-image scan is retained separately. Temporary stacks were removed. Unchanged frontend/API/art/E2E/tooling/external dependency inputs retain accepted full-web 6,874 tests/97 files and static/audit checks.
 
-Exact image
-`sha256:fd6a9d634fc1f69abc46e5fe272de74f924a023bf10c40556e14b4d33db3ed81`
-passes pinned Trivy 0.74.0 with zero fixable HIGH/CRITICAL findings, Compose 10 cases/50.5s,
-Kubernetes 10 cases/52.8s, CPU-item collection 1 case/16.6s, Polish 320px, served-asset identity
-and runtime security/resources/probes. Temporary projects/namespaces were removed. Unchanged
-frontend/API/art/E2E/tooling/dependency inputs preserve accepted full-web 6,874 tests/97 files
-and static/audit evidence; no duplicate full web run was needed.
+This source prerelease has a verified local image; no production registry publication is claimed. Localhost runs the accepted image with v0.3.95 retained for rollback. CPU4 difficulty, broader tactics and human validation remain in the [backlog](../BACKLOG.md#single-player).
 
-This is a source prerelease with a verified local image, not a container-registry publication.
-Localhost runs this image; v0.3.94 is retained for rollback. Further CPU tactics, difficulty
-and human validation remain in the [backlog](../BACKLOG.md#single-player).
+<a id="v0395--2026-10-27"></a>
+The [v0.3.95 record](history/releases.md#v0395--2026-10-27) is preserved in release history.
 
 <a id="v0394--2026-10-27"></a>
 The [v0.3.94 record](history/releases.md#v0394--2026-10-27) is preserved in release history.

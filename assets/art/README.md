@@ -67,6 +67,8 @@ target after review.
 ## Pixel and anchor rules
 
 - Keep pixels on integer coordinates with nearest-neighbour sampling and no antialiasing.
+- Keep each player appearance within 48 opaque RGB colors across its eight directional frames;
+  use deliberate shading ramps rather than diffuse generated color noise.
 - Source alpha is binary: every pixel is either fully transparent (`0`) or fully opaque (`255`).
   Do not bake translucent shadows into the PNG. Shadow opacity remains manifest metadata (actor
   shadow `0.3`, bomb shadow `0.28`) and is applied exactly once by the region importer.
@@ -94,13 +96,17 @@ are repainted inside the previous silhouettes. The original redraw preserved the
 binary alpha and flame edge bands; the appended variants below extend that inventory. Its new Oil palette is pinned by the Oil Barrel browser
 scenario. Repository licensing applies.
 
-Players three and four add forest-green/cream/silver and plum-purple/cream/gold uniform variants,
-with a pale-plumed shako and rounded fur busby respectively. They were generated with OpenAI's
-built-in image generation tool using the adopted sprites as references; the
-[prompts](player-variants-prompts.md) are retained. Import uses nearest-neighbour fitting to the
-existing 33-pixel character height, a shared foot baseline, binary alpha and bounded 28-color palettes. Their 16 frames
-append after the original 95 entries; the original frame metadata and pixels are preserved.
-These appearances prepare multiplayer artwork without enabling additional live seats by themselves.
+Players three and four use forest-green/cream/silver and plum-purple/cream/gold uniform
+variants with distinct headgear. Their current drawings were created in a separate ChatGPT
+(OpenAI) session and supplied by the repository owner. They replace the initial generated
+variants with pixel silhouettes and shading closer to the first two players. The supplied PNG
+is adopted without resampling or repainting; its 16 directional frames retain 33-pixel character
+height, the shared `(40, 65)` foot baseline, binary alpha and bounded palettes. The original 95
+frame pixels and manifest are unchanged. These appearances prepare multiplayer artwork without
+enabling additional live seats by themselves.
+
+The [earlier variant prompts](player-variants-prompts.md) document the superseded generation,
+not the owner-supplied revision; the prompt for the latter was not provided.
 
 It replaces the v0.3.53 redraw, which was AI-generated: Claude (Anthropic, via Claude Code) wrote
 a procedural Python/Pillow script that painted every frame, directed and reviewed by the

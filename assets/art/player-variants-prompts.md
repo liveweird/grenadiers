@@ -1,6 +1,11 @@
-# Player three and four uniform prompts
+# Earlier player three and four uniform prompts
 
-The new variants were generated with OpenAI's built-in image generation tool using the existing atlas and player slices as style references. Existing artist pixels remain unchanged; new frames are mechanically sliced, scaled with nearest-neighbour sampling, anchored and packed into appended catalogue slots. Import standardizes character height to 33 pixels and the existing `(40, 65)` foot baseline using nearest-neighbour sampling, normalizes cutout alpha to the required binary mask, and maps only the new frames to bounded 28-color pixel-art palettes with forest/plum luminance ramps. Repository licensing applies.
+These prompts document the initial variants, superseded by the owner-supplied ChatGPT sheet
+described in the [current provenance](README.md#provenance). They are retained as historical
+authoring context and do not describe the current sprite pixels. Current appearances follow
+the documented 48-color ceiling.
+
+The initial variants were generated with OpenAI's built-in image generation tool using the existing atlas and player slices as style references. Existing artist pixels remain unchanged; new frames are mechanically sliced, scaled with nearest-neighbour sampling, anchored and packed into appended catalogue slots. Import standardizes character height to 33 pixels and the existing `(40, 65)` foot baseline using nearest-neighbour sampling, normalizes cutout alpha to the required binary mask, and maps only the new frames to bounded 28-color pixel-art palettes with forest/plum luminance ramps. Repository licensing applies.
 
 ## Player three
 

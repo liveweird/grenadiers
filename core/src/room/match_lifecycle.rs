@@ -354,16 +354,6 @@ impl MatchLifecycle {
         }
     }
 
-    fn transact<T>(
-        &mut self,
-        operation: impl FnOnce(&mut Self) -> Result<T, MatchError>,
-    ) -> Result<T, MatchError> {
-        let mut next = self.clone();
-        let result = operation(&mut next)?;
-        *self = next;
-        Ok(result)
-    }
-
     fn clear_readiness(&mut self) {
         self.seats.iter_mut().for_each(|seat| seat.ready = false);
     }

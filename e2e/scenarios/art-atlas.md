@@ -31,7 +31,7 @@ four reserved entries. The 16 new walking frames are appended without moving the
 ## Scenario: adopted third and fourth uniforms retain bounded opaque coat palettes
 
 Decode the canonical artist sheet and discover all eight directional frames for each new
-uniform. Require nonempty frames, binary alpha, bounded 8–32-color palettes and recognizable
+uniform. Require nonempty frames, binary alpha, bounded 8–48-color palettes and recognizable
 forest/plum coat families without pinning image hashes or historical pixels.
 
 ## Scenario: workbench Export button downloads the validated runtime pack

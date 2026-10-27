@@ -2,7 +2,7 @@
 
 ## [Unreleased]
 
-## 0.3.100 — 2026-10-28
+## 0.3.101 — 2026-10-28
 
 - Add checked two-/three-/four-participant headless state, canonical seat ordering,
   participant-sized simulation storage and survivor-based outcomes under dormant rules v6.
@@ -10,6 +10,13 @@
   before mutation and publish event audiences to the configured headless roster.
 - Keep historical two-seat protocol/lifecycle entry points closed, rejecting unsupported
   seats and reports explicitly; additional live rooms and optional-item activation are separate.
+
+## 0.3.100 — 2026-10-28
+
+- Adopt the owner-supplied third/fourth-player uniform redraw, preserving all existing atlas
+  geometry and the original 95 frame pixels while matching the established character style.
+- Document a bounded 48-color artist palette and retain transparency, frame and color-family
+  regressions; remove the duplicate source PNG from the repository root.
 
 ## 0.3.99 — 2026-10-28
 

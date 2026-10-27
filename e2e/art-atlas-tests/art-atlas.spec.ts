@@ -282,7 +282,8 @@ test('adopted third and fourth uniforms retain bounded opaque coat palettes', as
     expect(appearance.opaquePixels).toHaveLength(8)
     expect(appearance.opaquePixels.every((pixels) => pixels > 0), JSON.stringify(appearance)).toBe(true)
     expect(appearance.colors, JSON.stringify(appearance)).toBeGreaterThanOrEqual(8)
-    expect(appearance.colors, JSON.stringify(appearance)).toBeLessThanOrEqual(32)
+    // Allow deliberate artist shading while rejecting unbounded generated color noise.
+    expect(appearance.colors, JSON.stringify(appearance)).toBeLessThanOrEqual(48)
     expect(appearance.coatPixels, JSON.stringify(appearance)).toBeGreaterThan(100)
   }
 })

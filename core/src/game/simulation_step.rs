@@ -7,7 +7,7 @@ use crate::game::movement::MovementOutcome;
 use crate::game::simulation::DrawReason;
 #[cfg(test)]
 use crate::game::types::CellId;
-use crate::game::types::{SeatId, Tick};
+use crate::game::types::Tick;
 #[cfg(test)]
 use std::collections::BTreeMap;
 use std::collections::BTreeSet;
@@ -19,6 +19,12 @@ impl State {
                 count: inputs.len(),
                 maximum: super::MAX_INPUTS_PER_TICK,
             });
+        }
+        if let Some(input) = inputs
+            .iter()
+            .find(|input| !self.player_count.contains(input.seat))
+        {
+            return Err(StepError::SeatNotParticipating(input.seat));
         }
         let next_tick = Tick(self.tick.0.checked_add(1).ok_or(StepError::TickOverflow)?);
         if let Some(id) = super::validation::unsupported_trigger(self.rules, &self.world) {
@@ -57,7 +63,7 @@ impl State {
         }
 
         let stopwatch = self.stopwatch_context(next_tick);
-        self.preflight_timed_pause(stopwatch)?;
+        self.preflight_timed_pause(&stopwatch)?;
 
         // Timed-pause overflow is preflight before mutation. Timed pickup collection remains
         // the only later fallible mutation, so retain a transaction snapshot only when that
@@ -70,10 +76,10 @@ impl State {
             .any(|effect| next_tick.0.checked_add(effect.duration_ticks()).is_none())
             .then(|| self.clone());
         let mut events = Vec::new();
-        let mut shield_prevented = [false; 2];
+        let mut shield_prevented = vec![false; self.actors.len()];
         self.expire_flames(next_tick);
         self.expire_actor_effects(self.tick, next_tick);
-        self.apply_timed_pause(stopwatch);
+        self.apply_timed_pause(&stopwatch);
         self.world.expose_flame_free_pickups(next_tick);
         self.reveal_safe_oil(next_tick);
         let motion = crate::game::bomb_motion::advance(&mut self.world, &self.actors, next_tick);
@@ -81,19 +87,26 @@ impl State {
             actor.bomb_grace.retain(|id| !motion.moved.contains(id));
         }
         let manual_actions = self.apply_inputs(inputs);
-        self.clear_frozen_movement(stopwatch.frozen);
-        let alive_at_movement_start = self.actors.each_ref().map(|actor| actor.alive);
-        let grace_at_movement_start = self.actors.each_ref().map(|actor| actor.bomb_grace.clone());
+        self.clear_frozen_movement(&stopwatch.frozen);
+        let alive_at_movement_start: Vec<_> = self.actors.iter().map(|actor| actor.alive).collect();
+        let grace_at_movement_start: Vec<_> = self
+            .actors
+            .iter()
+            .map(|actor| actor.bomb_grace.clone())
+            .collect();
         let (outcomes, kick_requests) =
-            self.move_living(next_tick, stopwatch.frozen, &motion.moving_at_start);
-        let traces = outcomes.each_ref().map(|outcome| outcome.trace.clone());
+            self.move_living(next_tick, &stopwatch.frozen, &motion.moving_at_start);
+        let traces: Vec<_> = outcomes
+            .iter()
+            .map(|outcome| outcome.trace.clone())
+            .collect();
         self.resolve_kick_requests(kick_requests);
         let forced_movement = self.resolve_shove(&outcomes, next_tick);
         let contact_targets = super::contacts::accepted_contact_ids(
             &self.world,
             &traces,
             forced_movement,
-            alive_at_movement_start,
+            &alive_at_movement_start,
             &grace_at_movement_start,
         );
         self.kill_on_existing_flames(
@@ -104,10 +117,10 @@ impl State {
             &mut shield_prevented,
         );
         let remote_targets =
-            self.resolve_manual_actions(&manual_actions, next_tick, stopwatch, &mut events);
+            self.resolve_manual_actions(&manual_actions, next_tick, &stopwatch, &mut events);
         self.resolve_explosions(
             next_tick,
-            remote_targets,
+            &remote_targets,
             contact_targets,
             stopwatch.pause_timed,
             &mut events,
@@ -128,7 +141,7 @@ impl State {
         if let Some(result) = self.decide_result() {
             events.push(StepEvent::new(
                 next_tick,
-                EventAudience::Both,
+                EventAudience::all(self.player_count),
                 StepEventKind::RoundEnded(result),
             ));
         }
@@ -144,59 +157,58 @@ impl State {
     fn move_living(
         &mut self,
         tick: Tick,
-        frozen: [bool; 2],
+        frozen: &[bool],
         moving_at_start: &BTreeSet<crate::game::EntityId>,
     ) -> (
-        [MovementOutcome; 2],
-        [Option<(crate::game::EntityId, crate::game::Direction)>; 2],
+        Vec<MovementOutcome>,
+        Vec<Option<(crate::game::EntityId, crate::game::Direction)>>,
     ) {
         let turn_assist = self.rules.turn_assist();
         let slow_foot_enabled = self.rules.enabled_items().contains_slow_foot();
         let wall_pass_enabled = self.rules.enabled_items().contains_wall_pass();
         let kick_rule_enabled = self.rules.enabled_items().contains_kick();
-        let mut requests = [None; 2];
-        let mut index = 0;
-        let outcomes = self.actors.each_mut().map(|actor| {
-            let current = index;
-            index += 1;
-            if actor.alive && !frozen[current] {
-                let can_kick = kick_rule_enabled && actor.inventory().can_kick();
-                let config = movement::AdvanceConfig {
-                    turn_assist,
-                    tick,
-                    slow_foot_enabled,
-                    wall_pass_enabled,
-                    kick_enabled: can_kick,
-                    moving_at_start,
-                };
-                let outcome = movement::advance_actor(&self.world, actor, &config);
-                requests[current] = outcome.kick;
-                outcome
-            } else {
-                MovementOutcome {
-                    trace: MovementTrace::new(actor.position),
-                    kick: None,
-                    original_budget: 0,
-                    forward_segment: None,
+        let mut requests = vec![None; self.actors.len()];
+        let outcomes = self
+            .actors
+            .iter_mut()
+            .enumerate()
+            .map(|(current, actor)| {
+                if actor.alive && !frozen[current] {
+                    let can_kick = kick_rule_enabled && actor.inventory().can_kick();
+                    let config = movement::AdvanceConfig {
+                        turn_assist,
+                        tick,
+                        slow_foot_enabled,
+                        wall_pass_enabled,
+                        kick_enabled: can_kick,
+                        moving_at_start,
+                    };
+                    let outcome = movement::advance_actor(&self.world, actor, &config);
+                    requests[current] = outcome.kick;
+                    outcome
+                } else {
+                    MovementOutcome {
+                        trace: MovementTrace::new(actor.position),
+                        kick: None,
+                        original_budget: 0,
+                        forward_segment: None,
+                    }
                 }
-            }
-        });
+            })
+            .collect();
         (outcomes, requests)
     }
 
     fn resolve_kick_requests(
         &mut self,
-        requests: [Option<(crate::game::EntityId, crate::game::Direction)>; 2],
+        requests: Vec<Option<(crate::game::EntityId, crate::game::Direction)>>,
     ) {
-        let contested = requests[0]
-            .zip(requests[1])
-            .filter(|(left, right)| left.0 == right.0)
-            .map(|(left, _)| left.0);
-        for seat in SeatId::ALL {
+        let mut accepted = BTreeSet::new();
+        for seat in self.assignment.priority_order(self.player_count) {
             let Some((id, direction)) = requests[seat.index()] else {
                 continue;
             };
-            if contested == Some(id) && seat != self.assignment.priority_seat() {
+            if !accepted.insert(id) {
                 continue;
             }
             let Some(bomb) = self.world.bombs.get_mut(&id) else {
@@ -212,11 +224,11 @@ impl State {
 
     fn kill_on_existing_flames(
         &mut self,
-        traces: &[MovementTrace; 2],
+        traces: &[MovementTrace],
         forced_movement: Option<super::contract::ForcedMovement>,
         tick: Tick,
         events: &mut Vec<StepEvent>,
-        shield_prevented: &mut [bool; 2],
+        shield_prevented: &mut [bool],
     ) {
         for (index, trace) in traces.iter().enumerate() {
             let forced_hit = forced_movement.is_some_and(|forced| {
@@ -242,7 +254,7 @@ impl State {
         &mut self,
         tick: Tick,
         events: &mut Vec<StepEvent>,
-        shield_prevented: &mut [bool; 2],
+        shield_prevented: &mut [bool],
     ) {
         for index in 0..self.actors.len() {
             if self.actors[index].alive
@@ -278,8 +290,9 @@ impl State {
         index: usize,
         tick: Tick,
         events: &mut Vec<StepEvent>,
-        shield_prevented: &mut [bool; 2],
+        shield_prevented: &mut [bool],
     ) {
+        let broadcast = EventAudience::all(self.player_count);
         let actor = &mut self.actors[index];
         let outcome = apply_damage(
             &mut actor.inventory,
@@ -294,7 +307,7 @@ impl State {
                     let audience = if actor.effects.hidden_from_opponents(tick) {
                         EventAudience::only(actor.seat)
                     } else {
-                        EventAudience::Both
+                        broadcast
                     };
                     events.push(StepEvent::new(
                         tick,
@@ -313,7 +326,7 @@ impl State {
                 let audience = if actor.effects.hidden_from_opponents(tick) {
                     EventAudience::only(actor.seat)
                 } else {
-                    EventAudience::Both
+                    broadcast
                 };
                 events.push(StepEvent::new(
                     tick,
@@ -331,7 +344,7 @@ impl State {
         actor.kill();
         events.push(StepEvent::new(
             tick,
-            EventAudience::Both,
+            broadcast,
             StepEventKind::ActorEliminated {
                 id: actor.id,
                 seat: actor.seat,
@@ -340,22 +353,25 @@ impl State {
     }
 
     fn decide_result(&mut self) -> Option<RoundResult> {
-        self.result = match [self.actors[0].alive, self.actors[1].alive] {
-            [true, false] => Some(RoundResult::Winner(SeatId::One)),
-            [false, true] => Some(RoundResult::Winner(SeatId::Two)),
-            [false, false] => Some(RoundResult::Draw(DrawReason::MutualElimination)),
-            [true, true] if self.running_updates >= self.rules.round_ticks() => {
+        let mut living = self.actors.iter().filter(|actor| actor.alive);
+        let first = living.next().map(|actor| actor.seat);
+        let second = living.next();
+        self.result = match (first, second) {
+            (None, _) => Some(RoundResult::Draw(DrawReason::MutualElimination)),
+            (Some(winner), None) => Some(RoundResult::Winner(winner)),
+            (Some(_), Some(_)) if self.running_updates >= self.rules.round_ticks() => {
                 Some(RoundResult::Draw(DrawReason::Timeout))
             }
-            [true, true] => None,
+            (Some(_), Some(_)) => None,
         };
         self.result
     }
 
-    fn stationary_traces(&self) -> [MovementTrace; 2] {
+    fn stationary_traces(&self) -> Vec<MovementTrace> {
         self.actors
-            .each_ref()
+            .iter()
             .map(|actor| MovementTrace::new(actor.position))
+            .collect()
     }
 }
 

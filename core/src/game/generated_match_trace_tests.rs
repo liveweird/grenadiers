@@ -19,9 +19,9 @@ fn match_fixture_has_a_walkable_corridor_and_one_bomb_can_draw_both_players() {
     }
     let generated = generate_arena(seed);
     assert!(!generated.record().fallback_used());
-    let spawns = generated.arena().spawns();
+    let spawns = generated.arena().spawns().to_vec();
     let (world, _) = World::from_generated(generated).unwrap();
-    let actors = SeatId::ALL.map(|seat| ActorInit {
+    let actors = SeatId::DUEL.map(|seat| ActorInit {
         id: EntityId(seat.index() as u32 + 1),
         seat,
         position: Position::center(spawns[seat.index()]),

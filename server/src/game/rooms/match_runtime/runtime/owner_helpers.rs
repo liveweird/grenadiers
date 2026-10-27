@@ -131,7 +131,7 @@ impl MatchRuntime {
             .depart_batch(departures)
             .map_err(map_lifecycle_error)?;
         self.release_departed_editor(departures);
-        for (seat, departure) in SeatId::ALL.into_iter().zip(departures) {
+        for (seat, departure) in SeatId::DUEL.into_iter().zip(departures) {
             if departure.is_some() {
                 self.inputs.stop(seat);
             }
@@ -155,7 +155,7 @@ impl MatchRuntime {
             .depart_batch(departures)
             .map_err(map_lifecycle_error)?;
         self.release_departed_editor(departures);
-        for (seat, departure) in SeatId::ALL.into_iter().zip(departures) {
+        for (seat, departure) in SeatId::DUEL.into_iter().zip(departures) {
             if departure.is_some() {
                 self.inputs.stop(seat);
             }

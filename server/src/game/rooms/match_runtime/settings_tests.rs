@@ -159,7 +159,7 @@ fn ready_fence_and_configured_round_use_the_authoritative_settings() {
         ),
         Err(MatchRuntimeError::StaleSettings)
     );
-    for seat in SeatId::ALL {
+    for seat in SeatId::DUEL {
         runtime
             .action(
                 seat,
@@ -222,7 +222,7 @@ fn rematch_retains_settings_and_reopens_editing_for_the_original_creator() {
             },
         )
         .unwrap();
-    for seat in SeatId::ALL {
+    for seat in SeatId::DUEL {
         runtime
             .action(
                 seat,

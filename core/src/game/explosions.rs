@@ -28,9 +28,10 @@ pub(crate) fn plan(
 pub(crate) fn plan_with_contacts(
     world: &World,
     tick: Tick,
-    remote_targets: [Option<EntityId>; 2],
+    remote_targets: impl AsRef<[Option<EntityId>]>,
     contact_targets: &BTreeSet<EntityId>,
 ) -> ExplosionPlan {
+    let remote_targets = remote_targets.as_ref();
     let bombs_by_cell: BTreeMap<_, _> = world
         .bombs
         .values()

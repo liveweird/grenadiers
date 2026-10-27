@@ -36,6 +36,8 @@ mod landmine_acceptance_tests;
 mod landmine_route_tests;
 #[path = "simulation/landmine_tests.rs"]
 mod landmine_tests;
+#[path = "multiplayer_headless_tests.rs"]
+mod multiplayer_headless_tests;
 #[path = "oil_proof_tests.rs"]
 mod oil_proof_tests;
 #[path = "pickup_tests.rs"]

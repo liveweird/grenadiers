@@ -78,6 +78,7 @@ pub enum RematchStatus {
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum SeriesError {
+    UnsupportedSeat(SeatId),
     ZeroCommandEpoch,
     StaleCommandEpoch { received: u64, last: u64 },
     RoundAlreadyActive,
@@ -247,6 +248,11 @@ impl MatchSeries {
         result: RoundResult,
         ended_at: Tick,
     ) -> Result<Option<MatchOutcome>, SeriesError> {
+        if let RoundResult::Winner(seat) = result
+            && !SeatId::DUEL.contains(&seat)
+        {
+            return Err(SeriesError::UnsupportedSeat(seat));
+        }
         let active = self.active.ok_or(SeriesError::NoActiveRound)?;
         if command_epoch != active.epoch {
             return Err(SeriesError::WrongRoundEpoch {
@@ -295,6 +301,9 @@ impl MatchSeries {
         ready: bool,
         now: Tick,
     ) -> Result<RematchStatus, SeriesError> {
+        if !SeatId::DUEL.contains(&seat) {
+            return Err(SeriesError::UnsupportedSeat(seat));
+        }
         if self.outcome.is_none() {
             return Err(SeriesError::RematchUnavailable);
         }
@@ -369,6 +378,10 @@ mod terminal;
 #[cfg(test)]
 #[path = "series_tests.rs"]
 mod tests;
+
+#[cfg(test)]
+#[path = "series_guard_tests.rs"]
+mod guard_tests;
 
 #[cfg(test)]
 #[path = "series_terminal_tests.rs"]

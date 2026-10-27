@@ -1,10 +1,9 @@
 //! Dormant pure match-level room lifecycle.
 
-use crate::game::{RoundAssignment, RoundResult, SeatId, Tick};
-
 use super::reconnect::{ReconnectError, ReconnectGrace};
 use super::series::{MatchOutcome, MatchSeries, RematchStatus, SeriesError};
 use super::{COUNTDOWN_TICKS, DepartureReason, InterruptReason, RoomSettings, SeatState};
+use crate::game::{RoundAssignment, RoundResult, SeatId, Tick};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum CountdownKind {
@@ -47,6 +46,7 @@ pub enum MatchChange {
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum MatchError {
     InvalidPhase,
+    UnsupportedSeat(SeatId),
     SeatOccupied(SeatId),
     SeatVacant(SeatId),
     InvalidInterruptReason,
@@ -146,10 +146,12 @@ impl MatchLifecycle {
     }
 
     pub fn occupy(&mut self, seat: SeatId) -> Result<MatchChange, MatchError> {
+        Self::ensure_duel_seat(seat)?;
         self.transact(|next| next.occupy_inner(seat))
     }
 
     pub fn set_ready(&mut self, seat: SeatId, ready: bool) -> Result<MatchChange, MatchError> {
+        Self::ensure_duel_seat(seat)?;
         self.transact(|next| next.set_ready_inner(seat, ready))
     }
 
@@ -165,6 +167,9 @@ impl MatchLifecycle {
         &mut self,
         result: Option<RoundResult>,
     ) -> Result<MatchChange, MatchError> {
+        if let Some(RoundResult::Winner(seat)) = result {
+            Self::ensure_duel_seat(seat)?;
+        }
         self.transact(|next| next.complete_running_tick_inner(result))
     }
 
@@ -183,6 +188,7 @@ impl MatchLifecycle {
     }
 
     pub fn resume_connection(&mut self, seat: SeatId) -> Result<MatchChange, MatchError> {
+        Self::ensure_duel_seat(seat)?;
         self.transact(|next| next.resume_connection_inner(seat))
     }
 
@@ -199,6 +205,7 @@ impl MatchLifecycle {
         seat: SeatId,
         ready: bool,
     ) -> Result<MatchChange, MatchError> {
+        Self::ensure_duel_seat(seat)?;
         self.transact(|next| next.set_rematch_vote_inner(seat, ready))
     }
 
@@ -230,7 +237,11 @@ impl MatchLifecycle {
         if !self.seats[index].occupied {
             return Err(MatchError::SeatVacant(seat));
         }
-        if !self.reconnect.seat(seat).connected() {
+        if !self
+            .reconnect
+            .seat(seat)
+            .is_some_and(crate::room::reconnect::ReservationState::connected)
+        {
             return Err(MatchError::Reconnect(ReconnectError::SeatNotConnected(
                 seat,
             )));
@@ -247,8 +258,10 @@ impl MatchLifecycle {
         }
 
         let starts = ready
-            && SeatId::ALL.into_iter().all(|candidate| {
-                self.reconnect.seat(candidate).connected()
+            && SeatId::DUEL.into_iter().all(|candidate| {
+                self.reconnect
+                    .seat(candidate)
+                    .is_some_and(crate::room::reconnect::ReservationState::connected)
                     && (candidate == seat || self.seats[candidate.index()].ready)
             });
         let ends_at = starts.then(|| self.deadline(COUNTDOWN_TICKS)).transpose()?;
@@ -339,16 +352,6 @@ impl MatchLifecycle {
             self.phase = MatchPhase::Result { next_countdown_at };
             Ok(MatchChange::RoundFinished)
         }
-    }
-
-    fn transact<T>(
-        &mut self,
-        operation: impl FnOnce(&mut Self) -> Result<T, MatchError>,
-    ) -> Result<T, MatchError> {
-        let mut next = self.clone();
-        let result = operation(&mut next)?;
-        *self = next;
-        Ok(result)
     }
 
     fn clear_readiness(&mut self) {

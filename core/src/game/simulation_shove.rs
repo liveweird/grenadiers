@@ -15,13 +15,15 @@ struct ShoveClaim {
 impl State {
     pub(super) fn resolve_shove(
         &mut self,
-        outcomes: &[MovementOutcome; 2],
+        outcomes: &[MovementOutcome],
         tick: Tick,
     ) -> Option<ForcedMovement> {
         if !self.rules.enabled_items().contains_bracelet() {
             return None;
         }
-        let claims = SeatId::ALL.map(|seat| self.shove_claim(seat, outcomes, tick));
+        // Multiplayer construction rejects Bracelet until pair interactions are generalized.
+        let outcomes = <&[MovementOutcome; 2]>::try_from(outcomes).ok()?;
+        let claims = SeatId::DUEL.map(|seat| self.shove_claim(seat, outcomes, tick));
         let claim = match claims {
             [Some(one), Some(two)] => {
                 if self.assignment.priority_seat() == SeatId::One {

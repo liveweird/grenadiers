@@ -50,7 +50,7 @@ fn concealed_differences_are_observation_and_decision_inert_for_both_seats() {
     )
     .unwrap();
     let mut state = state(settings, world);
-    for seat in SeatId::ALL {
+    for seat in SeatId::DUEL {
         state.apply_test_effect(seat, EffectKind::InvisibilityCloak, Tick(0));
         state.apply_test_effect(seat, EffectKind::InvisibleBombs, Tick(0));
     }

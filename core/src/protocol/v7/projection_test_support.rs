@@ -91,7 +91,7 @@ pub(super) fn classic_state() -> State {
 
 pub(super) fn classic_state_at(tick: u64) -> State {
     let arena = fixed_arena();
-    let spawns = arena.spawns();
+    let spawns = arena.spawns().to_vec();
     State::new_at_tick(
         RulesConfig::classic_v1(),
         World::new(arena),

@@ -67,6 +67,7 @@ impl ExpiryFacts {
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum ReconnectError {
+    UnsupportedSeat(SeatId),
     NonMonotonicTick { received: Tick, earliest: Tick },
     SeatAlreadyReserved(SeatId),
     SeatVacant(SeatId),
@@ -117,13 +118,18 @@ impl ReconnectGrace {
     }
 
     #[must_use]
-    pub const fn seat(&self, seat: SeatId) -> ReservationState {
-        self.seats[seat.index()]
+    pub const fn seat(&self, seat: SeatId) -> Option<ReservationState> {
+        match seat {
+            SeatId::One => Some(self.seats[0]),
+            SeatId::Two => Some(self.seats[1]),
+            SeatId::Three | SeatId::Four => None,
+        }
     }
 
     pub fn occupy(&mut self, seat: SeatId, at: Tick) -> Result<(), ReconnectError> {
+        ensure_duel_seat(seat)?;
         self.check_tick(at)?;
-        if self.seat(seat) != ReservationState::Vacant {
+        if self.seat(seat) != Some(ReservationState::Vacant) {
             return Err(ReconnectError::SeatAlreadyReserved(seat));
         }
         self.latest_tick = at;
@@ -136,9 +142,10 @@ impl ReconnectGrace {
         seat: SeatId,
         at: Tick,
     ) -> Result<DisconnectStatus, ReconnectError> {
+        ensure_duel_seat(seat)?;
         self.check_tick(at)?;
         match self.seat(seat) {
-            ReservationState::Connected => {
+            Some(ReservationState::Connected) => {
                 let expires_at = Tick(
                     at.0.checked_add(RECONNECT_GRACE_TICKS)
                         .ok_or(ReconnectError::TickOverflow)?,
@@ -147,29 +154,32 @@ impl ReconnectGrace {
                 self.seats[seat.index()] = ReservationState::Disconnected { expires_at };
                 Ok(DisconnectStatus::Started { expires_at })
             }
-            ReservationState::Disconnected { expires_at } => {
+            Some(ReservationState::Disconnected { expires_at }) => {
                 self.latest_tick = at;
                 Ok(DisconnectStatus::AlreadyDisconnected { expires_at })
             }
-            ReservationState::Vacant => Err(ReconnectError::SeatVacant(seat)),
-            ReservationState::Expired => Err(ReconnectError::SeatNotConnected(seat)),
+            Some(ReservationState::Vacant) => Err(ReconnectError::SeatVacant(seat)),
+            Some(ReservationState::Expired) => Err(ReconnectError::SeatNotConnected(seat)),
+            None => Err(ReconnectError::UnsupportedSeat(seat)),
         }
     }
 
     pub fn resume(&mut self, seat: SeatId, at: Tick) -> Result<(), ReconnectError> {
+        ensure_duel_seat(seat)?;
         self.check_tick(at)?;
         match self.seat(seat) {
-            ReservationState::Disconnected { expires_at } if at < expires_at => {
+            Some(ReservationState::Disconnected { expires_at }) if at < expires_at => {
                 self.latest_tick = at;
                 self.seats[seat.index()] = ReservationState::Connected;
                 Ok(())
             }
-            ReservationState::Disconnected { expires_at } => {
+            Some(ReservationState::Disconnected { expires_at }) => {
                 Err(ReconnectError::GraceExpired { seat, expires_at })
             }
-            ReservationState::Expired => Err(ReconnectError::SeatExpired(seat)),
-            ReservationState::Vacant => Err(ReconnectError::SeatVacant(seat)),
-            ReservationState::Connected => Err(ReconnectError::SeatNotDisconnected(seat)),
+            Some(ReservationState::Expired) => Err(ReconnectError::SeatExpired(seat)),
+            Some(ReservationState::Vacant) => Err(ReconnectError::SeatVacant(seat)),
+            Some(ReservationState::Connected) => Err(ReconnectError::SeatNotDisconnected(seat)),
+            None => Err(ReconnectError::UnsupportedSeat(seat)),
         }
     }
 
@@ -192,8 +202,9 @@ impl ReconnectGrace {
     }
 
     pub fn release(&mut self, seat: SeatId, at: Tick) -> Result<bool, ReconnectError> {
+        ensure_duel_seat(seat)?;
         self.check_tick(at)?;
-        let changed = self.seat(seat) != ReservationState::Vacant;
+        let changed = self.seat(seat) != Some(ReservationState::Vacant);
         self.latest_tick = at;
         self.seats[seat.index()] = ReservationState::Vacant;
         Ok(changed)
@@ -207,6 +218,14 @@ impl ReconnectGrace {
             });
         }
         Ok(())
+    }
+}
+
+fn ensure_duel_seat(seat: SeatId) -> Result<(), ReconnectError> {
+    if SeatId::DUEL.contains(&seat) {
+        Ok(())
+    } else {
+        Err(ReconnectError::UnsupportedSeat(seat))
     }
 }
 

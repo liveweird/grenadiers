@@ -14,7 +14,7 @@ impl State {
     pub(super) fn resolve_explosions(
         &mut self,
         tick: Tick,
-        remote_targets: [Option<EntityId>; 2],
+        remote_targets: &[Option<EntityId>],
         contact_targets: BTreeSet<EntityId>,
         timed_paused: bool,
         events: &mut Vec<StepEvent>,

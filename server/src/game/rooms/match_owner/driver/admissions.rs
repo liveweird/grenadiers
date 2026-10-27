@@ -46,7 +46,7 @@ impl Driver {
             let _ = reply.send(Err(RoomError::RoomFull));
             return Ok(());
         };
-        let seat = SeatId::ALL[index];
+        let seat = SeatId::DUEL[index];
         if matches!(
             self.runtime.mode(),
             grenadiers_core::room::RoomMode::Solo(_)
@@ -90,7 +90,7 @@ impl Driver {
         let admission = MatchAdmission {
             room_id: self.room_id.clone(),
             round_id: u64::from(prepared.room.round_id.get()),
-            seat: wire_seat(seat),
+            seat: wire_seat(seat)?,
             room: prepared.room.clone(),
             resume_token: credential.token(),
             last_bomb_action_id: prepared.last_bomb_action_id,
@@ -138,7 +138,7 @@ impl Driver {
             let _ = reply.send(Err(RoomError::ResumeRejected));
             return Ok(());
         };
-        let seat = SeatId::ALL[index];
+        let seat = SeatId::DUEL[index];
         let prepared = match self.runtime.prepare_resume(seat) {
             Ok(prepared) => prepared,
             Err(_) => {
@@ -162,7 +162,7 @@ impl Driver {
         let admission = MatchAdmission {
             room_id: self.room_id.clone(),
             round_id: u64::from(prepared.room.round_id.get()),
-            seat: wire_seat(seat),
+            seat: wire_seat(seat)?,
             room: prepared.room.clone(),
             resume_token: credential.token(),
             last_bomb_action_id: prepared.last_bomb_action_id,
@@ -217,7 +217,7 @@ fn admission_frame(
             generation: prepared.generation,
         },
         grenadiers_core::protocol::v13::PersonalAdmission {
-            recipient: wire_seat(seat),
+            recipient: wire_seat(seat)?,
             last_action_id: prepared.last_bomb_action_id,
             sequence,
             resume_token: token,

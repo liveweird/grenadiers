@@ -7,7 +7,7 @@ use super::super::*;
 
 fn state() -> State {
     let arena = game::fixed_arena();
-    let spawns = arena.spawns();
+    let spawns = arena.spawns().to_vec();
     let world = World::with_pickups(
         arena,
         BTreeMap::new(),
@@ -20,7 +20,7 @@ fn state() -> State {
             RoomSettings::DEFAULT.with_enabled_items(EnabledItems::REVERSE_CONTROLS),
         ),
         world,
-        SeatId::ALL.map(|seat| ActorInit {
+        SeatId::DUEL.map(|seat| ActorInit {
             id: game::EntityId(seat.index() as u32 + 1),
             seat,
             position: game::Position::center(spawns[seat.index()]),

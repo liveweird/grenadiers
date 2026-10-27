@@ -8,6 +8,12 @@ pub const ARENA_CELL_COUNT: usize = ARENA_WIDTH as usize * ARENA_HEIGHT as usize
 
 const FIRST_CORNER: CellId = CellId::new(1, 1);
 const SECOND_CORNER: CellId = CellId::new(13, 11);
+const INTERIOR_CORNERS: [CellId; 4] = [
+    FIRST_CORNER,
+    CellId::new(13, 1),
+    CellId::new(1, 11),
+    SECOND_CORNER,
+];
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Terrain {
@@ -19,6 +25,8 @@ pub enum Terrain {
 pub enum ArenaError {
     BorderMustBeWall(CellId),
     SpawnsMustBeOppositeCorners,
+    InvalidSpawnCount(usize),
+    SpawnMustBeInteriorCorner(CellId),
     DuplicateSpawn(CellId),
     SpawnMustBeFloor(CellId),
     ReservedCellMustBeFloor(CellId),
@@ -33,19 +41,19 @@ pub enum ArenaError {
 pub struct Arena {
     terrain: [Terrain; ARENA_CELL_COUNT],
     blocks: BTreeSet<CellId>,
-    spawns: [CellId; 2],
+    spawns: Vec<CellId>,
 }
 
 impl Arena {
     pub fn new(
         terrain: [Terrain; ARENA_CELL_COUNT],
         blocks: BTreeSet<CellId>,
-        spawns: [CellId; 2],
+        spawns: impl Into<Vec<CellId>>,
     ) -> Result<Self, ArenaError> {
         let arena = Self {
             terrain,
             blocks,
-            spawns,
+            spawns: spawns.into(),
         };
         arena.validate()?;
         Ok(arena)
@@ -67,8 +75,8 @@ impl Arena {
     }
 
     #[must_use]
-    pub const fn spawns(&self) -> [CellId; 2] {
-        self.spawns
+    pub fn spawns(&self) -> &[CellId] {
+        &self.spawns
     }
 
     pub(crate) fn remove_blocks(&mut self, removed: &BTreeSet<CellId>) {
@@ -85,19 +93,37 @@ impl Arena {
             self.require_border_wall(CellId::new(ARENA_WIDTH - 1, row))?;
         }
 
-        if self.spawns[0] == self.spawns[1] {
-            return Err(ArenaError::DuplicateSpawn(self.spawns[0]));
+        let count = self.spawns.len();
+        if !(2..=4).contains(&count) {
+            return Err(ArenaError::InvalidSpawnCount(count));
         }
-        if !self.spawns.contains(&FIRST_CORNER) || !self.spawns.contains(&SECOND_CORNER) {
+        let mut unique = BTreeSet::new();
+        for &spawn in &self.spawns {
+            if !unique.insert(spawn) {
+                return Err(ArenaError::DuplicateSpawn(spawn));
+            }
+        }
+        if count == 2
+            && (!self.spawns.contains(&FIRST_CORNER) || !self.spawns.contains(&SECOND_CORNER))
+        {
             return Err(ArenaError::SpawnsMustBeOppositeCorners);
         }
-        for spawn in self.spawns {
+        if count > 2 {
+            for &spawn in &self.spawns {
+                if !INTERIOR_CORNERS.contains(&spawn) {
+                    return Err(ArenaError::SpawnMustBeInteriorCorner(spawn));
+                }
+            }
+        }
+        for &spawn in &self.spawns {
             if self.terrain(spawn) != Some(Terrain::Floor) {
                 return Err(ArenaError::SpawnMustBeFloor(spawn));
             }
         }
 
-        for cell in reserved_spawn_cells() {
+        let mut reserved_spawns = self.spawns.clone();
+        reserved_spawns.sort();
+        for cell in reserved_spawns.into_iter().flat_map(reserved_spawn_cells) {
             if self.terrain(cell) != Some(Terrain::Floor) {
                 return Err(ArenaError::ReservedCellMustBeFloor(cell));
             }
@@ -179,15 +205,18 @@ fn neighbors(cell: CellId) -> impl Iterator<Item = CellId> {
     neighbors.into_iter().flatten()
 }
 
-fn reserved_spawn_cells() -> [CellId; 6] {
-    [
-        FIRST_CORNER,
-        CellId::new(2, 1),
-        CellId::new(1, 2),
-        SECOND_CORNER,
-        CellId::new(12, 11),
-        CellId::new(13, 10),
-    ]
+fn reserved_spawn_cells(spawn: CellId) -> [CellId; 3] {
+    let horizontal = if spawn.column == 1 {
+        CellId::new(spawn.column + 1, spawn.row)
+    } else {
+        CellId::new(spawn.column - 1, spawn.row)
+    };
+    let vertical = if spawn.row == 1 {
+        CellId::new(spawn.column, spawn.row + 1)
+    } else {
+        CellId::new(spawn.column, spawn.row - 1)
+    };
+    [spawn, horizontal, vertical]
 }
 
 #[cfg(test)]

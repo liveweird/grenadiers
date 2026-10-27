@@ -33,7 +33,7 @@ fn disabled_and_recorded_runtimes_match_through_cancellation_and_real_start() {
     assert!(!disabled.recording_enabled_for_test());
     assert!(recorded.recording_enabled_for_test());
     assert_eq!(disabled.initial_notice(), recorded.initial_notice());
-    for seat in SeatId::ALL {
+    for seat in SeatId::DUEL {
         assert_eq!(disabled.occupy(seat), recorded.occupy(seat));
         assert_eq!(
             disabled.action(
@@ -85,7 +85,7 @@ fn disabled_and_recorded_runtimes_match_through_cancellation_and_real_start() {
 
     let epoch = disabled.lifecycle().round_attempt();
     assert_eq!(recorded.lifecycle().round_attempt(), epoch);
-    for seat in SeatId::ALL {
+    for seat in SeatId::DUEL {
         assert_eq!(
             disabled.action(
                 seat,
@@ -139,7 +139,7 @@ fn entropy_failure_matches_without_recording_and_recorded_evidence_is_incomplete
     );
 
     assert_eq!(disabled.initial_notice(), recorded.initial_notice());
-    for seat in SeatId::ALL {
+    for seat in SeatId::DUEL {
         assert_eq!(disabled.occupy(seat), recorded.occupy(seat));
         assert_eq!(
             disabled.action(

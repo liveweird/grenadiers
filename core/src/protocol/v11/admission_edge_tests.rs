@@ -128,11 +128,11 @@ fn archived_body() -> (RoomView, ExpandedCapture, game::GenerationRecord, Counte
     let generated = game::generate_expanded_arena([51; 32], EnabledItems::EMPTY);
     let (world, generation) = World::from_generated(generated).unwrap();
     let spawn = world.arena().spawns()[0];
-    let spawns = world.arena().spawns();
+    let spawns = world.arena().spawns().to_vec();
     let mut state = State::new_at_tick(
         RulesConfig::expanded_v5(RoomSettings::DEFAULT),
         world,
-        SeatId::ALL.map(|seat| ActorInit {
+        SeatId::DUEL.map(|seat| ActorInit {
             id: EntityId(seat.index() as u32 + 1),
             seat,
             position: game::Position::center(spawns[seat.index()]),

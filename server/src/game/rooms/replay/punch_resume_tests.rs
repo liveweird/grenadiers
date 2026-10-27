@@ -153,7 +153,7 @@ fn successful_punch_survives_replacement_restore_and_cooldown_without_replaying_
         .unwrap();
     assert!(matches!(
         runtime.lifecycle().reconnect_grace().seat(SeatId::One),
-        ReservationState::Disconnected { .. }
+        Some(ReservationState::Disconnected { .. })
     ));
     let restoration = runtime.prepare_resume(SeatId::One).unwrap();
     assert_eq!(

@@ -88,7 +88,7 @@ fn observed(state: &State, settings: RoomSettings) -> crate::cpu::Observation {
 fn committed_escape_finishes_without_another_worker_result_before_shortest_fuse() {
     let settings = RoomSettings::new(SpeedLevel::Four, 64, 3, 60).unwrap();
     let arena = open_arena();
-    let spawns = arena.spawns();
+    let spawns = arena.spawns().to_vec();
     let actors = [SeatId::One, SeatId::Two].map(|seat| ActorInit {
         id: EntityId(seat.index() as u32 + 1),
         seat,

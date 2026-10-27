@@ -33,7 +33,6 @@ fn open_world() -> World {
         .unwrap(),
     )
 }
-
 fn state_at(one: CellId, two: CellId) -> State {
     let actor = |id, seat, cell| ActorInit {
         id: EntityId(id),

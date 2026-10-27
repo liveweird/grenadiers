@@ -3,7 +3,10 @@ mod event_projection;
 mod events;
 #[cfg(test)]
 mod expanded_frame_test_support;
+#[cfg(test)]
+mod forced_movement_test_support;
 mod item_foundation;
+mod legacy_seat;
 mod projection;
 mod scalar_input;
 mod scalars;
@@ -24,6 +27,7 @@ use std::fmt;
 pub use client::GameClientMessage;
 pub use event_projection::project_events;
 pub use events::{EventKind, MAX_EVENT_INDEX, MAX_SNAPSHOT_EVENTS, WireEvent};
+pub use legacy_seat::UnsupportedLegacySeat;
 pub use projection::{ProjectedRound, ProjectionError, project_state};
 pub use scalars::{
     Cell, Counter, Direction, EntityId, GAMEPLAY_PROTOCOL_VERSION, GameplayVersion, InvalidScalar,

@@ -26,8 +26,9 @@ fn bomb_report(
     };
     crate::game::StepReport {
         tick,
-        traces: crate::game::SeatId::ALL
-            .map(|seat| crate::game::MovementTrace::new(state.actors()[seat.index()].position())),
+        traces: crate::game::SeatId::DUEL
+            .map(|seat| crate::game::MovementTrace::new(state.actors()[seat.index()].position()))
+            .to_vec(),
         forced_movement: None,
         events: vec![StepEvent::new(
             tick,
@@ -141,7 +142,7 @@ fn classic_binding_rejects_wrong_fuse_in_placement_detonation_and_world_records(
 #[test]
 fn classic_binding_rejects_overdue_frozen_world_bombs_but_accepts_exact_boundary() {
     let mut finished = classic_state_at(180);
-    for seat in crate::game::SeatId::ALL {
+    for seat in crate::game::SeatId::DUEL {
         let cell = finished.actors()[seat.index()].position().cell().unwrap();
         finished.insert_test_flame(cell, crate::game::Tick(182));
     }

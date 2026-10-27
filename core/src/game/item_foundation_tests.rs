@@ -9,11 +9,11 @@ use crate::game::{DamagePreventionSource, StepError, StepEventKind, World, fixed
 
 fn state_at(tick: Tick) -> State {
     let arena = fixed_arena();
-    let spawns = arena.spawns();
+    let spawns = arena.spawns().to_vec();
     State::new_at_tick(
         RulesConfig::classic_v1(),
         World::new(arena),
-        SeatId::ALL.map(|seat| ActorInit {
+        SeatId::DUEL.map(|seat| ActorInit {
             id: EntityId(seat.index() as u32 + 1),
             seat,
             position: Position::center(spawns[seat.index()]),

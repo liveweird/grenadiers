@@ -97,7 +97,7 @@ fn same_bomb_claims_use_each_round_priority_independent_of_input_order_and_id() 
                 state.step(&inputs).unwrap();
 
                 assert_eq!(state.world.bombs[&EntityId(id)].cell(), landing);
-                for seat in SeatId::ALL {
+                for seat in SeatId::DUEL {
                     assert_eq!(
                         state.actors[seat.index()].last_successful_punch_tick(),
                         (seat == winner).then_some(Tick(1))

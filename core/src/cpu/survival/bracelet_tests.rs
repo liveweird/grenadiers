@@ -246,7 +246,7 @@ fn ready_copy(cooldown: &State, settings: RoomSettings) -> State {
         BTreeMap::from([(CellId::new(7, 4), OilState::Burning)]),
     )
     .unwrap();
-    let actors = SeatId::ALL.map(|seat| {
+    let actors = SeatId::DUEL.map(|seat| {
         let actor = &cooldown.actors()[seat.index()];
         ActorInit {
             id: actor.id(),

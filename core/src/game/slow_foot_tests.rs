@@ -276,12 +276,19 @@ fn two_capped_actors_retain_pickup_without_event_or_refresh() {
     );
     add_stacks(&mut game, SeatId::One, 6, Tick(0));
     add_stacks(&mut game, SeatId::Two, 6, Tick(0));
-    let before = game.actors.each_ref().map(|actor| actor.effects.clone());
+    let before = game
+        .actors
+        .iter()
+        .map(|actor| actor.effects.clone())
+        .collect::<Vec<_>>();
     let report = game.step(&[]).unwrap();
     assert!(game.world.pickups.exposed.contains_key(&CENTER));
     assert!(report.events.is_empty());
     assert_eq!(
-        game.actors.each_ref().map(|actor| actor.effects.clone()),
+        game.actors
+            .iter()
+            .map(|actor| actor.effects.clone())
+            .collect::<Vec<_>>(),
         before
     );
 }

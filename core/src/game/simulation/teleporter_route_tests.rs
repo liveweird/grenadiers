@@ -56,13 +56,13 @@ fn generated_state() -> State {
     );
     let generated = generate_expanded_arena([31; 32], EnabledItems::TELEPORTER);
     let (arena, concealed, _) = generated.into_parts();
-    let spawns = arena.spawns();
+    let spawns = arena.spawns().to_vec();
     State::new(
         RulesConfig::expanded_v5(
             RoomSettings::DEFAULT.with_enabled_items(EnabledItems::TELEPORTER),
         ),
         World::with_pickups(arena, concealed, BTreeMap::new(), BTreeMap::new()).unwrap(),
-        SeatId::ALL.map(|seat| ActorInit {
+        SeatId::DUEL.map(|seat| ActorInit {
             id: EntityId(seat.index() as u32 + 10),
             seat,
             position: Position::center(spawns[seat.index()]),

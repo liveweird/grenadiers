@@ -17,10 +17,7 @@ fn personal_state(runtime: &MatchRuntime, seat: SeatId) -> serde_json::Value {
         prepared.state_epoch,
         prepared.capture.as_ref(),
         prepared.generation,
-        match seat {
-            SeatId::One => Seat::One,
-            SeatId::Two => Seat::Two,
-        },
+        Seat::try_from(seat).unwrap(),
         prepared.last_bomb_action_id,
         Counter::new(1).unwrap(),
         ResumeToken::new("c".repeat(64)).unwrap(),

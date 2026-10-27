@@ -364,5 +364,22 @@ fn rejects_results_that_disagree_with_life_and_running_clock() {
     assert_eq!(project_state(&view), Err(ProjectionError::InvalidResult));
 }
 
+#[test]
+fn rejects_multiplayer_rosters_and_extra_seat_winners_without_truncation() {
+    let mut expanded = initial_view();
+    let mut third = expanded.actors[1];
+    third.id = EntityId(30);
+    third.seat = SeatId::Three;
+    expanded.actors.push(third);
+    assert_eq!(
+        project_state(&expanded),
+        Err(ProjectionError::InvalidActors)
+    );
+
+    let mut duel = initial_view();
+    duel.result = Some(RoundResult::Winner(SeatId::Three));
+    assert_eq!(project_state(&duel), Err(ProjectionError::InvalidResult));
+}
+
 #[path = "pickup_projection_tests.rs"]
 mod pickups;

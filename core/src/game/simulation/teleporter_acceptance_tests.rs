@@ -60,7 +60,10 @@ fn same_tick_source_bomb_makes_only_the_second_destination_unsafe() {
         .unwrap();
 
     assert_eq!(
-        game.actors.each_ref().map(|actor| actor.position),
+        game.actors
+            .iter()
+            .map(|actor| actor.position)
+            .collect::<Vec<_>>(),
         positions
     );
     assert_eq!(game.last_teleport_tick(), None);
@@ -114,7 +117,10 @@ fn same_tick_final_fire_rejects_even_when_shield_keeps_the_target_alive() {
     assert!(game.actors[1].alive);
     assert!(game.world.hazards.contains_key(&two));
     assert_eq!(
-        game.actors.each_ref().map(|actor| actor.position),
+        game.actors
+            .iter()
+            .map(|actor| actor.position)
+            .collect::<Vec<_>>(),
         positions
     );
     assert_eq!(game.last_teleport_tick(), None);
@@ -146,7 +152,10 @@ fn tangency_is_safe_and_intermediate_mines_and_fire_are_not_swept() {
     game.step(&[]).unwrap();
 
     assert_eq!(
-        game.actors.each_ref().map(|actor| actor.position),
+        game.actors
+            .iter()
+            .map(|actor| actor.position)
+            .collect::<Vec<_>>(),
         [tangent, centered(one_cell)]
     );
     assert_eq!(game.last_teleport_tick(), Some(Tick(1)));
@@ -209,7 +218,10 @@ fn simultaneous_pickups_use_both_assignment_parities_and_one_attempt() {
         );
         let report = game.step(&[]).unwrap();
         assert_eq!(
-            game.actors.each_ref().map(|actor| actor.position),
+            game.actors
+                .iter()
+                .map(|actor| actor.position)
+                .collect::<Vec<_>>(),
             [positions[1], positions[0]]
         );
         assert_eq!(game.last_teleport_tick(), Some(Tick(1)));

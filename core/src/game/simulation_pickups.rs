@@ -10,11 +10,11 @@ impl State {
         &mut self,
         tick: Tick,
         events: &mut Vec<StepEvent>,
-    ) -> Result<[bool; 2], StepError> {
+    ) -> Result<Vec<bool>, StepError> {
         if !self.rules.pickup_collection() {
-            return Ok([false; 2]);
+            return Ok(vec![false; self.actors.len()]);
         }
-        let mut teleport_requests = [false; 2];
+        let mut teleport_requests = vec![false; self.actors.len()];
         let cells: Vec<_> = self.world.pickups.exposed.keys().copied().collect();
         for cell in cells {
             let kind = self.world.pickups.exposed[&cell].kind();
@@ -29,7 +29,7 @@ impl State {
                 let audience = if actor.effects.hidden_from_opponents(tick) {
                     EventAudience::only(seat)
                 } else {
-                    EventAudience::Both
+                    EventAudience::all(self.player_count)
                 };
                 events.push(StepEvent::new(
                     tick,
@@ -74,7 +74,7 @@ impl State {
             let audience = if actor.effects.hidden_from_opponents(tick) {
                 EventAudience::only(seat)
             } else {
-                EventAudience::Both
+                EventAudience::all(self.player_count)
             };
             events.push(StepEvent::new(
                 tick,
@@ -102,16 +102,11 @@ impl State {
                 dx * dx + dy * dy
             })
         };
-        let one = distance(SeatId::One);
-        let two = distance(SeatId::Two);
-        match (one, two) {
-            (Some(left), Some(right)) if left < right => Some(SeatId::One),
-            (Some(left), Some(right)) if right < left => Some(SeatId::Two),
-            (Some(_), Some(_)) => Some(self.assignment.priority_seat()),
-            (Some(_), None) => Some(SeatId::One),
-            (None, Some(_)) => Some(SeatId::Two),
-            (None, None) => None,
-        }
+        self.assignment
+            .priority_order(self.player_count)
+            .filter_map(|seat| distance(seat).map(|distance| (distance, seat)))
+            .min_by_key(|&(distance, _)| distance)
+            .map(|(_, seat)| seat)
     }
 }
 

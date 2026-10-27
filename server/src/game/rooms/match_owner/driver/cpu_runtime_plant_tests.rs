@@ -312,7 +312,7 @@ fn shared_cell_fixture(tick: Tick) -> State {
         [CellId::new(1, 1), CellId::new(13, 11)],
     )
     .unwrap();
-    let actors = SeatId::ALL.map(|seat| ActorInit {
+    let actors = SeatId::DUEL.map(|seat| ActorInit {
         id: EntityId(seat.index() as u32 + 1),
         seat,
         position: Position::center(shared),

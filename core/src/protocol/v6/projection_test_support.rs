@@ -77,8 +77,8 @@ pub(super) fn running_with_wins(wins: u8) -> MatchLifecycle {
 
 pub(super) fn state_at(tick: u64) -> State {
     let arena = crate::game::fixtures::fixed_arena();
-    let spawns = arena.spawns();
-    let actors = SeatId::ALL.map(|seat| ActorInit {
+    let spawns = arena.spawns().to_vec();
+    let actors = SeatId::DUEL.map(|seat| ActorInit {
         id: EntityId(seat.index() as u32 + 1),
         seat,
         position: Position::center(spawns[seat.index()]),

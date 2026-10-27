@@ -18,6 +18,10 @@ pub fn capture_classic(
     state: &game::State,
     reports: &[game::StepReport],
 ) -> Result<ClassicCapture, ProjectionError> {
+    if state.actors().len() != game::SeatId::DUEL.len() {
+        return Err(ProjectionError::InvalidActors);
+    }
+    validate_legacy_reports(reports)?;
     let public = state.public_view();
     let physical_tick = wire_tick(public.tick)?;
     let actors = [
@@ -32,7 +36,7 @@ pub fn capture_classic(
             .map_err(|_| ProjectionError::InvalidClock)?,
         remaining_ticks: u16::try_from(public.remaining_ticks)
             .map_err(|_| ProjectionError::InvalidClock)?,
-        result: wire_result(public.result),
+        result: wire_result(public.result)?,
         arena: capture_arena(&public.arena)?,
         actors,
         bombs: public
@@ -84,7 +88,7 @@ fn capture_actor(
     seat: game::SeatId,
     physical_tick: Tick,
 ) -> Result<VisibleActorView, ProjectionError> {
-    let actor = &state.actors()[seat.index()];
+    let actor = state.actor(seat).ok_or(ProjectionError::InvalidActors)?;
     let effects = actor
         .effect_observations()
         .map(|(kind, expires_at)| {
@@ -113,7 +117,7 @@ fn capture_actor(
     let inventory = *actor.inventory();
     Ok(VisibleActorView {
         id: EntityId::new(actor.id().0),
-        seat: wire_seat(actor.seat()),
+        seat: wire_seat(actor.seat())?,
         position: wire_position(actor.position())?,
         heading: wire_direction(actor.heading()),
         speed_level: wire_speed(actor.speed()),
@@ -219,7 +223,7 @@ fn capture_report(report: &game::StepReport) -> Result<ReportFacts, ProjectionEr
                     game::StepEventKind::ActorEliminated { id, seat } => {
                         EventKind::ActorEliminated {
                             id: EntityId::new(id.0),
-                            seat: wire_seat(seat),
+                            seat: wire_seat(seat).map_err(|_| ProjectionError::InvalidEvent)?,
                         }
                     }
                     game::StepEventKind::PickupCollected {
@@ -229,17 +233,17 @@ fn capture_report(report: &game::StepReport) -> Result<ReportFacts, ProjectionEr
                         kind,
                     } => EventKind::PickupCollected {
                         id: EntityId::new(id.0),
-                        seat: wire_seat(seat),
+                        seat: wire_seat(seat).map_err(|_| ProjectionError::InvalidEvent)?,
                         cell: wire_cell(cell)?,
                         kind: wire_pickup(kind),
                     },
                     game::StepEventKind::RoundEnded(result) => EventKind::RoundEnded {
-                        result: wire_result(Some(result)).ok_or(ProjectionError::InvalidEvent)?,
+                        result: wire_result(Some(result))?.ok_or(ProjectionError::InvalidEvent)?,
                     },
                     game::StepEventKind::DamagePrevented { id, seat, source } => {
                         EventKind::DamagePrevented {
                             id: EntityId::new(id.0),
-                            seat: wire_seat(seat),
+                            seat: wire_seat(seat).map_err(|_| ProjectionError::InvalidEvent)?,
                             source: match source {
                                 game::DamagePreventionSource::Heart => {
                                     DamagePreventionSource::Heart
@@ -278,11 +282,8 @@ fn wire_position(value: game::Position) -> Result<Position, ProjectionError> {
     )
     .map_err(|_| ProjectionError::InvalidActors)
 }
-fn wire_seat(value: game::SeatId) -> Seat {
-    match value {
-        game::SeatId::One => Seat::One,
-        game::SeatId::Two => Seat::Two,
-    }
+fn wire_seat(value: game::SeatId) -> Result<Seat, ProjectionError> {
+    Seat::try_from(value).map_err(|_| ProjectionError::InvalidActors)
 }
 fn wire_direction(value: game::Direction) -> Direction {
     match value {
@@ -301,18 +302,42 @@ fn wire_speed(value: game::SpeedLevel) -> u8 {
         game::SpeedLevel::Four => 4,
     }
 }
-fn wire_result(value: Option<game::RoundResult>) -> Option<WireRoundResult> {
-    value.map(|result| match result {
-        game::RoundResult::Winner(seat) => WireRoundResult::Winner {
-            seat: wire_seat(seat),
-        },
-        game::RoundResult::Draw(game::DrawReason::MutualElimination) => WireRoundResult::Draw {
-            reason: crate::protocol::DrawReason::MutualElimination,
-        },
-        game::RoundResult::Draw(game::DrawReason::Timeout) => WireRoundResult::Draw {
-            reason: crate::protocol::DrawReason::Timeout,
-        },
-    })
+fn wire_result(
+    value: Option<game::RoundResult>,
+) -> Result<Option<WireRoundResult>, ProjectionError> {
+    match value {
+        Some(game::RoundResult::Winner(seat)) => Ok(Some(WireRoundResult::Winner {
+            seat: wire_seat(seat).map_err(|_| ProjectionError::InvalidResult)?,
+        })),
+        Some(game::RoundResult::Draw(game::DrawReason::MutualElimination)) => {
+            Ok(Some(WireRoundResult::Draw {
+                reason: crate::protocol::DrawReason::MutualElimination,
+            }))
+        }
+        Some(game::RoundResult::Draw(game::DrawReason::Timeout)) => {
+            Ok(Some(WireRoundResult::Draw {
+                reason: crate::protocol::DrawReason::Timeout,
+            }))
+        }
+        None => Ok(None),
+    }
+}
+
+fn validate_legacy_reports(reports: &[game::StepReport]) -> Result<(), ProjectionError> {
+    if reports.iter().any(|report| {
+        report.traces.len() != game::SeatId::DUEL.len()
+            || report
+                .events
+                .iter()
+                .any(|event| !event.audience.is_subset_of(game::EventAudience::Both))
+            || report
+                .forced_movement
+                .is_some_and(|forced| !game::SeatId::DUEL.contains(&forced.seat))
+    }) {
+        Err(ProjectionError::InvalidReports)
+    } else {
+        Ok(())
+    }
 }
 fn wire_equipment(value: game::Equipment) -> EquipmentId {
     match value {

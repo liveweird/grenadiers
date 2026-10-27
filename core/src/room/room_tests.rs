@@ -13,6 +13,7 @@ fn countdown(last_ready: SeatId) -> RoomLifecycle {
     let first = match last_ready {
         SeatId::One => SeatId::Two,
         SeatId::Two => SeatId::One,
+        SeatId::Three | SeatId::Four => unreachable!("legacy room seat"),
     };
     room.set_ready(first, true).unwrap();
     room.set_ready(last_ready, true).unwrap();
@@ -43,7 +44,7 @@ fn defaults_to_canonical_vacant_waiting_room() {
 
 #[test]
 fn either_seat_can_finish_countdown_at_the_exact_boundary() {
-    for last_ready in SeatId::ALL {
+    for last_ready in SeatId::DUEL {
         let mut room = countdown(last_ready);
         assert_eq!(room.phase(), Phase::Countdown { ends_at: Tick(180) });
         for _ in 0..179 {
@@ -298,4 +299,23 @@ fn identical_action_logs_replay_to_equal_state() {
     }
 
     assert_eq!(replay(), replay());
+}
+
+#[test]
+fn unsupported_seats_and_winners_do_not_mutate_two_seat_rooms() {
+    let mut waiting = RoomLifecycle::new();
+    let before = waiting.clone();
+    assert_eq!(
+        waiting.occupy(SeatId::Three),
+        Err(LifecycleError::UnsupportedSeat(SeatId::Three))
+    );
+    assert_eq!(waiting, before);
+
+    let mut running = running_room();
+    let before = running.clone();
+    assert_eq!(
+        running.complete_running_tick(Some(RoundResult::Winner(SeatId::Four))),
+        Err(LifecycleError::UnsupportedSeat(SeatId::Four))
+    );
+    assert_eq!(running, before);
 }

@@ -10,11 +10,11 @@ use crate::room::RoomSettings;
 
 fn state() -> State {
     let arena = fixed_arena();
-    let spawns = arena.spawns();
+    let spawns = arena.spawns().to_vec();
     State::new(
         RulesConfig::classic_v1(),
         World::new(arena),
-        SeatId::ALL.map(|seat| ActorInit {
+        SeatId::DUEL.map(|seat| ActorInit {
             id: EntityId(seat.index() as u32 + 10),
             seat,
             position: Position::center(spawns[seat.index()]),
@@ -27,7 +27,7 @@ fn state() -> State {
 
 fn oil_state() -> State {
     let arena = fixed_arena();
-    let spawns = arena.spawns();
+    let spawns = arena.spawns().to_vec();
     let oil = CellId::new(3, 1);
     State::new(
         RulesConfig::expanded_v5(
@@ -41,7 +41,7 @@ fn oil_state() -> State {
             BTreeMap::from([(oil, OilState::Unlit)]),
         )
         .unwrap(),
-        SeatId::ALL.map(|seat| ActorInit {
+        SeatId::DUEL.map(|seat| ActorInit {
             id: EntityId(seat.index() as u32 + 10),
             seat,
             position: Position::center(spawns[seat.index()]),

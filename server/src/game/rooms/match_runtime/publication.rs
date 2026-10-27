@@ -28,7 +28,7 @@ pub(super) fn room_view(
             settings: wire_settings(lifecycle.settings())?,
             settings_revision: grenadiers_core::protocol::Counter::new(settings_revision)
                 .map_err(|_| MatchRuntimeError::CapacityReached)?,
-            settings_editor: settings_editor.map(wire_seat),
+            settings_editor: settings_editor.map(wire_seat).transpose()?,
             room_id: identity.id.clone(),
             room_code: identity.code.clone(),
             revision,
@@ -41,13 +41,10 @@ pub(super) fn room_view(
     .map_err(|_| MatchRuntimeError::Publication)
 }
 
-pub(super) const fn wire_seat(
+pub(super) fn wire_seat(
     seat: grenadiers_core::game::SeatId,
-) -> grenadiers_core::protocol::Seat {
-    match seat {
-        grenadiers_core::game::SeatId::One => grenadiers_core::protocol::Seat::One,
-        grenadiers_core::game::SeatId::Two => grenadiers_core::protocol::Seat::Two,
-    }
+) -> Result<grenadiers_core::protocol::Seat, MatchRuntimeError> {
+    grenadiers_core::protocol::Seat::try_from(seat).map_err(|_| MatchRuntimeError::Publication)
 }
 
 pub(super) const fn phase_has_body(phase: &RoomPhase) -> bool {
@@ -104,7 +101,7 @@ pub(super) fn snapshot(
         Some(
             grenadiers_core::protocol::v13::observe_cpu_recipient(
                 &bound,
-                wire_seat(cpu_seat),
+                wire_seat(cpu_seat)?,
                 grenadiers_core::cpu::WorldId {
                     room_instance: identity.registry_serial,
                     physical_round: sim.epoch,

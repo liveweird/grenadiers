@@ -184,27 +184,30 @@ fn room_from_common(
     };
     let mut index = 0;
     let seats = common.seats.map(|seat| {
-        let domain_seat = SeatId::ALL[index];
+        let domain_seat = SeatId::DUEL[index];
         index += 1;
         let controller = match mode.controller(domain_seat) {
-            ControllerKind::Human => Controller::Human,
-            ControllerKind::Cpu(_) => Controller::Cpu {
+            Some(ControllerKind::Human) => Controller::Human,
+            Some(ControllerKind::Cpu(_)) => Controller::Cpu {
                 difficulty: Difficulty::Standard,
             },
+            None => return Err(ProjectionError::InvalidExpandedBinding),
         };
         let connection = match controller {
             Controller::Cpu { .. } => ConnectionStatus::ServerControlled,
             Controller::Human => human_connection(seat.connection),
         };
-        SeatStatus {
+        Ok(SeatStatus {
             seat: seat.seat,
             occupied: seat.occupied,
             ready: seat.ready,
             rematch_ready: seat.rematch_ready,
             controller,
             connection,
-        }
+        })
     });
+    let [one, two] = seats;
+    let seats = [one?, two?];
     Ok(RoomView {
         settings: common.settings,
         settings_revision: common.settings_revision,

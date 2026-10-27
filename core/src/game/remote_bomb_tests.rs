@@ -9,7 +9,7 @@ use crate::room::RoomSettings;
 
 fn state(enabled: EnabledItems, pickup: Option<PickupKind>, tick: Tick) -> State {
     let arena = fixed_arena();
-    let spawns = arena.spawns();
+    let spawns = arena.spawns().to_vec();
     State::new_at_tick(
         RulesConfig::expanded_v5(RoomSettings::DEFAULT.with_enabled_items(enabled)),
         World::with_pickups(
@@ -21,7 +21,7 @@ fn state(enabled: EnabledItems, pickup: Option<PickupKind>, tick: Tick) -> State
                 .unwrap_or_default(),
         )
         .unwrap(),
-        SeatId::ALL.map(|seat| ActorInit {
+        SeatId::DUEL.map(|seat| ActorInit {
             id: EntityId(seat.index() as u32 + 10),
             seat,
             position: Position::center(spawns[seat.index()]),
@@ -82,8 +82,8 @@ fn remote_and_power_replace_each_other_in_the_single_weapon_slot() {
 
 fn actors() -> [ActorInit; 2] {
     let arena = fixed_arena();
-    let spawns = arena.spawns();
-    SeatId::ALL.map(|seat| ActorInit {
+    let spawns = arena.spawns().to_vec();
+    SeatId::DUEL.map(|seat| ActorInit {
         id: EntityId(seat.index() as u32 + 10),
         seat,
         position: Position::center(spawns[seat.index()]),

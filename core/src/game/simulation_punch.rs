@@ -16,10 +16,14 @@ struct PunchClaim {
 impl State {
     pub(super) fn resolve_punch_requests(
         &mut self,
-        requests: [Option<SeatId>; 2],
+        requests: &[Option<SeatId>],
         tick: Tick,
         remote_reservations: &BTreeSet<EntityId>,
     ) {
+        // Multiplayer construction rejects Punch until pair conflict semantics are generalized.
+        let Ok(requests) = <&[Option<SeatId>; 2]>::try_from(requests) else {
+            return;
+        };
         let claims = requests.map(|request| {
             request.and_then(|seat| self.punch_claim(seat, tick, remote_reservations))
         });

@@ -125,11 +125,11 @@ fn whole_same_tick_loss_batch_is_applied_before_expiry() {
         assert_eq!(lifecycle.series().outcome(), None);
         assert_eq!(
             lifecycle.reconnect_grace().seat(due),
-            ReservationState::Expired
+            Some(ReservationState::Expired)
         );
         assert!(matches!(
             lifecycle.reconnect_grace().seat(later),
-            ReservationState::Disconnected { .. }
+            Some(ReservationState::Disconnected { .. })
         ));
     }
 }
@@ -246,7 +246,7 @@ fn terminal_reservation_can_resume_but_new_terminal_loss_releases_immediately() 
     );
     assert_eq!(
         lifecycle.reconnect_grace().seat(SeatId::Two),
-        ReservationState::Vacant
+        Some(ReservationState::Vacant)
     );
     assert_eq!(lifecycle.series().outcome(), outcome);
     assert_eq!(
@@ -293,7 +293,7 @@ fn votes_require_connection_and_rematch_retains_grace_clock() {
     );
     assert_eq!(
         rematch.reconnect_grace().seat(SeatId::One),
-        ReservationState::Vacant
+        Some(ReservationState::Vacant)
     );
 }
 

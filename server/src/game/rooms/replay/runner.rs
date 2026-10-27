@@ -75,7 +75,7 @@ pub(super) fn replay(journal: &Journal) -> Result<RuntimeInspection, ReplayError
         journal.header.initial_settings_revision,
         journal.header.initial_settings_editor,
     );
-    for seat in SeatId::ALL {
+    for seat in SeatId::DUEL {
         if journal.header.initial_seats[seat.index()]
             && !runtime.lifecycle().seats()[seat.index()].occupied()
         {

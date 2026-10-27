@@ -75,7 +75,11 @@ impl MatchRuntime {
         seat: SeatId,
     ) -> Result<PreparedRuntimeAdmission, MatchRuntimeError> {
         let mut lifecycle = self.lifecycle.clone();
-        let kind = match lifecycle.reconnect_grace().seat(seat) {
+        let kind = match lifecycle
+            .reconnect_grace()
+            .seat(seat)
+            .ok_or(MatchRuntimeError::InvalidPhase)?
+        {
             ReservationState::Disconnected { .. } => {
                 lifecycle
                     .resume_connection(seat)

@@ -235,7 +235,7 @@ fn supported_alignment_pulses_stop_then_turn_in_authoritative_game() {
         for tolerance in [64, 128, 192, 256] {
             let settings = RoomSettings::new(speed, tolerance, 3, 180).unwrap();
             let arena = fixed_arena();
-            let spawns = arena.spawns();
+            let spawns = arena.spawns().to_vec();
             let cell = spawns[0];
             let mut position = Position::center(cell);
             position.x += tolerance + 1;

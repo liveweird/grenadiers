@@ -59,7 +59,7 @@ fn concealed_reveal_resume_and_materialized_oil_replay_deterministically() {
             .any(|oil| { oil.cell == CellId::new(3, 1) && oil.state == OilBarrelState::Unlit })
     );
 
-    for seat in SeatId::ALL {
+    for seat in SeatId::DUEL {
         let admission = runtime.prepare_resume(seat).unwrap();
         let frame = admission.notice.frame(seat).expect("running Oil snapshot");
         let value: serde_json::Value = serde_json::from_str(&frame).unwrap();

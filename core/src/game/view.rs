@@ -13,7 +13,7 @@ pub struct PublicState {
     pub running_updates: u64,
     pub remaining_ticks: u64,
     pub arena: ArenaView,
-    pub actors: [ActorView; 2],
+    pub actors: Vec<ActorView>,
     pub bombs: Vec<BombView>,
     pub flames: Vec<FlameView>,
     pub oil_barrels: Vec<OilBarrelView>,
@@ -114,20 +114,25 @@ impl State {
                 terrain,
                 blocks: arena.blocks().iter().copied().collect(),
             },
-            actors: SeatId::ALL.map(|seat| {
-                let actor = &self.actors()[seat.index()];
-                ActorView {
-                    id: actor.id(),
-                    seat: actor.seat(),
-                    position: actor.position(),
-                    heading: actor.heading(),
-                    speed: actor.speed(),
-                    alive: actor.alive(),
-                    bomb_capacity: actor.bomb_capacity(),
-                    bomb_range: actor.bomb_range(),
-                    live_bomb_count: self.live_bomb_count(seat),
-                }
-            }),
+            actors: self
+                .player_count()
+                .seats()
+                .iter()
+                .map(|&seat| {
+                    let actor = &self.actors()[seat.index()];
+                    ActorView {
+                        id: actor.id(),
+                        seat: actor.seat(),
+                        position: actor.position(),
+                        heading: actor.heading(),
+                        speed: actor.speed(),
+                        alive: actor.alive(),
+                        bomb_capacity: actor.bomb_capacity(),
+                        bomb_range: actor.bomb_range(),
+                        live_bomb_count: self.live_bomb_count(seat),
+                    }
+                })
+                .collect(),
             bombs: self
                 .world()
                 .bombs()

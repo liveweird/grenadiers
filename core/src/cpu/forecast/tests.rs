@@ -139,7 +139,7 @@ fn stationary_bombs_preserve_two_burns_and_the_safe_gap() {
 fn stationary_timeline_matches_state_steps_at_window_boundaries() {
     let target = CellId::new(7, 6);
     let arena = open_arena();
-    let spawns = arena.spawns();
+    let spawns = arena.spawns().to_vec();
     let mut world = World::new(arena);
     for (id, cell, deadline) in [(1, CellId::new(7, 3), 2), (2, CellId::new(4, 6), 40)] {
         world.bombs.insert(

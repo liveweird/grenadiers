@@ -156,7 +156,7 @@ mod tests {
 
     #[test]
     fn controller_identity_keys_world_memory_for_either_existing_seat() {
-        for seat in SeatId::ALL {
+        for seat in SeatId::DUEL {
             let controller = controller_for(seat);
             assert_eq!(controller.seat(), seat);
             assert_eq!(controller.memory.as_ref().unwrap().key().cpu_seat, seat);

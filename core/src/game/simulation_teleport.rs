@@ -4,12 +4,18 @@ use super::State;
 use crate::game::{BombTrigger, CellId, EntityId, Position, SeatId, Tick, movement};
 
 impl State {
-    pub(super) fn commit_teleport(&mut self, requests: [bool; 2], tick: Tick) {
-        let requester = match requests {
+    pub(super) fn commit_teleport(&mut self, requests: impl Into<Vec<bool>>, tick: Tick) {
+        let requests = requests.into();
+        // Multiplayer construction rejects Teleporter until pair semantics are generalized.
+        if self.player_count.get() != 2 {
+            return;
+        }
+        let requester = match requests.as_slice() {
             [true, true] => self.assignment.priority_seat(),
             [true, false] => SeatId::One,
             [false, true] => SeatId::Two,
             [false, false] => return,
+            _ => return,
         };
         let other = if requester == SeatId::One {
             SeatId::Two

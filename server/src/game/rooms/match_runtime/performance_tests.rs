@@ -21,7 +21,7 @@ fn runtime_reference_measurement() {
     let mut runtime = generated_runtime(source);
     start_first_round(&mut runtime);
     let epoch = runtime.lifecycle().round_attempt();
-    for seat in SeatId::ALL {
+    for seat in SeatId::DUEL {
         runtime
             .action(seat, epoch, MatchAction::Movement(Some(wallward(seat))))
             .unwrap();
@@ -32,7 +32,7 @@ fn runtime_reference_measurement() {
         }
         runtime.settle_boundary([None; 2]).unwrap();
     }
-    for seat in SeatId::ALL {
+    for seat in SeatId::DUEL {
         runtime.action(seat, epoch, MatchAction::Bomb(1)).unwrap();
     }
 
@@ -110,12 +110,13 @@ fn wallward(seat: SeatId) -> Direction {
     match seat {
         SeatId::One => Direction::North,
         SeatId::Two => Direction::South,
+        SeatId::Three | SeatId::Four => unreachable!("legacy runtime seat"),
     }
 }
 
 fn refresh_wallward(runtime: &mut super::MatchRuntime) {
     let epoch = runtime.lifecycle().round_attempt();
-    for seat in SeatId::ALL {
+    for seat in SeatId::DUEL {
         runtime
             .action(seat, epoch, MatchAction::Movement(Some(wallward(seat))))
             .unwrap();

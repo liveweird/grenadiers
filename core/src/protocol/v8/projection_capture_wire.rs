@@ -22,11 +22,8 @@ pub(super) fn wire_position(value: game::Position) -> Result<Position, Projectio
     )
     .map_err(|_| ProjectionError::InvalidActors)
 }
-pub(super) fn wire_seat(value: game::SeatId) -> Seat {
-    match value {
-        game::SeatId::One => Seat::One,
-        game::SeatId::Two => Seat::Two,
-    }
+pub(super) fn wire_seat(value: game::SeatId) -> Result<Seat, ProjectionError> {
+    Seat::try_from(value).map_err(|_| ProjectionError::InvalidActors)
 }
 pub(super) fn wire_direction(value: game::Direction) -> Direction {
     match value {
@@ -45,18 +42,25 @@ pub(super) fn wire_speed(value: game::SpeedLevel) -> u8 {
         game::SpeedLevel::Four => 4,
     }
 }
-pub(super) fn wire_result(value: Option<game::RoundResult>) -> Option<WireRoundResult> {
-    value.map(|result| match result {
-        game::RoundResult::Winner(seat) => WireRoundResult::Winner {
-            seat: wire_seat(seat),
-        },
-        game::RoundResult::Draw(game::DrawReason::MutualElimination) => WireRoundResult::Draw {
-            reason: crate::protocol::DrawReason::MutualElimination,
-        },
-        game::RoundResult::Draw(game::DrawReason::Timeout) => WireRoundResult::Draw {
-            reason: crate::protocol::DrawReason::Timeout,
-        },
-    })
+pub(super) fn wire_result(
+    value: Option<game::RoundResult>,
+) -> Result<Option<WireRoundResult>, ProjectionError> {
+    match value {
+        Some(game::RoundResult::Winner(seat)) => Ok(Some(WireRoundResult::Winner {
+            seat: wire_seat(seat).map_err(|_| ProjectionError::InvalidResult)?,
+        })),
+        Some(game::RoundResult::Draw(game::DrawReason::MutualElimination)) => {
+            Ok(Some(WireRoundResult::Draw {
+                reason: crate::protocol::DrawReason::MutualElimination,
+            }))
+        }
+        Some(game::RoundResult::Draw(game::DrawReason::Timeout)) => {
+            Ok(Some(WireRoundResult::Draw {
+                reason: crate::protocol::DrawReason::Timeout,
+            }))
+        }
+        None => Ok(None),
+    }
 }
 pub(super) fn item_set(enabled: game::EnabledItems) -> Result<ItemSet, ProjectionError> {
     let mask = super::ItemMask::new(enabled.bits()).map_err(|_| ProjectionError::InvalidItems)?;

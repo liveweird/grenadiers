@@ -10,7 +10,7 @@ use super::super::*;
 
 fn cloak_state(both: bool) -> State {
     let arena = game::fixed_arena();
-    let spawns = arena.spawns();
+    let spawns = arena.spawns().to_vec();
     let exposed = if both {
         BTreeMap::from([
             (spawns[0], PickupKind::InvisibilityCloak),
@@ -25,7 +25,7 @@ fn cloak_state(both: bool) -> State {
             RoomSettings::DEFAULT.with_enabled_items(EnabledItems::INVISIBILITY_CLOAK),
         ),
         world,
-        SeatId::ALL.map(|seat| ActorInit {
+        SeatId::DUEL.map(|seat| ActorInit {
             id: game::EntityId(seat.index() as u32 + 1),
             seat,
             position: game::Position::center(spawns[seat.index()]),
@@ -38,7 +38,7 @@ fn cloak_state(both: bool) -> State {
 
 fn publication_window_state() -> State {
     let arena = game::fixed_arena();
-    let spawns = arena.spawns();
+    let spawns = arena.spawns().to_vec();
     let exposed = BTreeMap::from([
         (spawns[0], PickupKind::InvisibilityCloak),
         (game::CellId::new(3, 1), PickupKind::BombCapacity),
@@ -49,7 +49,7 @@ fn publication_window_state() -> State {
             RoomSettings::DEFAULT.with_enabled_items(EnabledItems::INVISIBILITY_CLOAK),
         ),
         world,
-        SeatId::ALL.map(|seat| ActorInit {
+        SeatId::DUEL.map(|seat| ActorInit {
             id: game::EntityId(seat.index() as u32 + 1),
             seat,
             position: game::Position::center(spawns[seat.index()]),
@@ -74,10 +74,7 @@ fn publication(state: &State, reports: &[game::StepReport]) -> BoundPublication 
     if let Some(result) = state.result() {
         let result = match result {
             game::RoundResult::Winner(seat) => crate::protocol::WireRoundResult::Winner {
-                seat: match seat {
-                    SeatId::One => crate::protocol::Seat::One,
-                    SeatId::Two => crate::protocol::Seat::Two,
-                },
+                seat: crate::protocol::Seat::try_from(seat).unwrap(),
             },
             game::RoundResult::Draw(game::DrawReason::MutualElimination) => {
                 crate::protocol::WireRoundResult::Draw {

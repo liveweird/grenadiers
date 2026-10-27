@@ -39,14 +39,22 @@ fn result_after_one_win() -> MatchLifecycle {
 }
 
 fn assert_invariants(lifecycle: &MatchLifecycle) {
-    for seat in SeatId::ALL {
+    for seat in SeatId::DUEL {
         let index = seat.index();
         assert_eq!(
             lifecycle.seats()[index].occupied(),
-            lifecycle.reconnect_grace().seat(seat).reserved()
+            lifecycle
+                .reconnect_grace()
+                .seat(seat)
+                .is_some_and(ReservationState::reserved)
         );
         if lifecycle.seats()[index].ready() {
-            assert!(lifecycle.reconnect_grace().seat(seat).connected());
+            assert!(
+                lifecycle
+                    .reconnect_grace()
+                    .seat(seat)
+                    .is_some_and(ReservationState::connected)
+            );
         }
     }
     assert!(lifecycle.reconnect_grace().latest_tick() <= lifecycle.tick());
@@ -68,7 +76,7 @@ fn prematch_losses_release_and_cancel_before_the_start_boundary() {
         assert_eq!(lifecycle.series().actual_round_number(), 0);
         assert_eq!(
             lifecycle.reconnect_grace().seat(SeatId::One),
-            ReservationState::Vacant
+            Some(ReservationState::Vacant)
         );
         assert_eq!(lifecycle.advance_idle_tick(), Ok(MatchChange::Changed));
         assert_eq!(lifecycle.phase(), MatchPhase::Waiting);
@@ -98,9 +106,9 @@ fn held_result_waits_for_connection_then_starts_a_fresh_full_countdown() {
         .unwrap();
     assert_eq!(
         lifecycle.reconnect_grace().seat(SeatId::Two),
-        ReservationState::Disconnected {
+        Some(ReservationState::Disconnected {
             expires_at: Tick(loss_at.0 + 600)
-        }
+        })
     );
     assert_eq!(
         lifecycle.depart_with_grace([None, Some(DepartureReason::TransportLoss)]),
@@ -108,9 +116,9 @@ fn held_result_waits_for_connection_then_starts_a_fresh_full_countdown() {
     );
     assert_eq!(
         lifecycle.reconnect_grace().seat(SeatId::Two),
-        ReservationState::Disconnected {
+        Some(ReservationState::Disconnected {
             expires_at: Tick(loss_at.0 + 600)
-        }
+        })
     );
     let mut early_return = lifecycle.clone();
     advance_idle(&mut early_return, 100);
@@ -155,8 +163,8 @@ fn held_result_waits_for_connection_then_starts_a_fresh_full_countdown() {
 
 #[test]
 fn single_expiry_forfeits_to_the_connected_opponent_in_both_orientations() {
-    for expired in SeatId::ALL {
-        let winner = SeatId::ALL[1 - expired.index()];
+    for expired in SeatId::DUEL {
+        let winner = SeatId::DUEL[1 - expired.index()];
         let mut lifecycle = occupied();
         start(&mut lifecycle);
         let mut loss = [None; 2];
@@ -170,7 +178,7 @@ fn single_expiry_forfeits_to_the_connected_opponent_in_both_orientations() {
         assert_eq!(outcome.result(), MatchResult::ForfeitWinner(winner));
         assert_eq!(
             lifecycle.reconnect_grace().seat(expired),
-            ReservationState::Expired
+            Some(ReservationState::Expired)
         );
     }
 }

@@ -4,7 +4,7 @@ use super::{Actor, EntityId, MovementTrace, World};
 use crate::game::simulation::contract::ForcedMovement;
 use crate::game::{BombTrigger, movement};
 
-pub(super) fn initialize_grace(world: &World, actors: &mut [Actor; 2]) {
+pub(super) fn initialize_grace(world: &World, actors: &mut [Actor]) {
     for actor in actors {
         for bomb in world.bombs.values().filter(|bomb| {
             matches!(bomb.trigger(), BombTrigger::Contact)
@@ -17,11 +17,12 @@ pub(super) fn initialize_grace(world: &World, actors: &mut [Actor; 2]) {
 
 pub(super) fn accepted_contact_ids(
     world: &World,
-    traces: &[MovementTrace; 2],
+    traces: &[MovementTrace],
     forced_movement: Option<ForcedMovement>,
-    alive_at_movement_start: [bool; 2],
-    grace_at_movement_start: &[BTreeSet<EntityId>; 2],
+    alive_at_movement_start: impl AsRef<[bool]>,
+    grace_at_movement_start: &[BTreeSet<EntityId>],
 ) -> BTreeSet<EntityId> {
+    let alive_at_movement_start = alive_at_movement_start.as_ref();
     let mines: Vec<_> = world
         .bombs
         .values()

@@ -24,6 +24,15 @@ pub fn project_events(reports: &[game::StepReport]) -> Result<Vec<WireEvent>, Pr
 
     let mut projected = Vec::with_capacity(event_count.unwrap_or(0));
     for report in reports {
+        if report.traces.len() != game::SeatId::DUEL.len() {
+            return Err(ProjectionError::InvalidReportWindow);
+        }
+        if report
+            .forced_movement
+            .is_some_and(|forced| !game::SeatId::DUEL.contains(&forced.seat))
+        {
+            return Err(ProjectionError::InvalidEvent);
+        }
         let tick = wire_tick(report.tick)?;
         for (index, event) in report.events.iter().enumerate() {
             if event.tick != report.tick
@@ -53,7 +62,7 @@ pub fn project_events(reports: &[game::StepReport]) -> Result<Vec<WireEvent>, Pr
                 }
                 game::StepEventKind::ActorEliminated { id, seat } => EventKind::ActorEliminated {
                     id: EntityId::new(id.0),
-                    seat: wire_seat(seat),
+                    seat: wire_seat(seat).map_err(|_| ProjectionError::InvalidEvent)?,
                 },
                 game::StepEventKind::PickupCollected {
                     id,
@@ -62,12 +71,12 @@ pub fn project_events(reports: &[game::StepReport]) -> Result<Vec<WireEvent>, Pr
                     kind,
                 } => EventKind::PickupCollected {
                     id: EntityId::new(id.0),
-                    seat: wire_seat(seat),
+                    seat: wire_seat(seat).map_err(|_| ProjectionError::InvalidEvent)?,
                     cell: wire_cell(cell).map_err(|_| ProjectionError::InvalidEvent)?,
                     kind: wire_pickup_kind(kind).ok_or(ProjectionError::InvalidEvent)?,
                 },
                 game::StepEventKind::RoundEnded(result) => EventKind::RoundEnded {
-                    result: project_result(Some(result)).ok_or(ProjectionError::InvalidEvent)?,
+                    result: project_result(Some(result))?.ok_or(ProjectionError::InvalidEvent)?,
                 },
                 game::StepEventKind::DamagePrevented { .. } => {
                     return Err(ProjectionError::InvalidEvent);

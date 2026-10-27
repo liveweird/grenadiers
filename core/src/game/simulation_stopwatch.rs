@@ -1,28 +1,41 @@
 use super::{State, StepError};
-use crate::game::{BombTrigger, SeatId, Tick};
+use crate::game::{BombTrigger, Tick};
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub(super) struct StopwatchContext {
-    pub(super) frozen: [bool; 2],
+    pub(super) frozen: Vec<bool>,
     pub(super) pause_timed: bool,
 }
 
 impl State {
     pub(super) fn stopwatch_context(&self, at: Tick) -> StopwatchContext {
-        let holders = SeatId::ALL.map(|seat| {
-            let actor = &self.actors[seat.index()];
-            actor.alive && actor.effects.stopwatch_active(at)
-        });
+        let holders: Vec<_> = self
+            .player_count
+            .seats()
+            .iter()
+            .map(|&seat| {
+                let actor = &self.actors[seat.index()];
+                actor.alive && actor.effects.stopwatch_active(at)
+            })
+            .collect();
         StopwatchContext {
-            frozen: [
-                holders[1] && self.actors[0].alive,
-                holders[0] && self.actors[1].alive,
-            ],
-            pause_timed: holders.into_iter().any(|active| active),
+            frozen: (0..self.actors.len())
+                .map(|index| {
+                    holders
+                        .iter()
+                        .enumerate()
+                        .any(|(holder, &active)| holder != index && active)
+                        && self.actors[index].alive
+                })
+                .collect(),
+            pause_timed: holders.iter().any(|&active| active),
         }
     }
 
-    pub(super) fn preflight_timed_pause(&self, context: StopwatchContext) -> Result<(), StepError> {
+    pub(super) fn preflight_timed_pause(
+        &self,
+        context: &StopwatchContext,
+    ) -> Result<(), StepError> {
         if !context.pause_timed {
             return Ok(());
         }
@@ -37,7 +50,7 @@ impl State {
         Ok(())
     }
 
-    pub(super) fn apply_timed_pause(&mut self, context: StopwatchContext) {
+    pub(super) fn apply_timed_pause(&mut self, context: &StopwatchContext) {
         if !context.pause_timed {
             return;
         }
@@ -49,8 +62,8 @@ impl State {
         }
     }
 
-    pub(super) fn clear_frozen_movement(&mut self, frozen: [bool; 2]) {
-        for seat in SeatId::ALL {
+    pub(super) fn clear_frozen_movement(&mut self, frozen: &[bool]) {
+        for &seat in self.player_count.seats() {
             if frozen[seat.index()] {
                 let actor = &mut self.actors[seat.index()];
                 actor.pending_turn = None;

@@ -58,6 +58,9 @@ impl fmt::Display for ProjectionError {
 impl std::error::Error for ProjectionError {}
 
 pub fn project_state(view: &game::PublicState) -> Result<ProjectedRound, ProjectionError> {
+    if view.actors.len() != game::SeatId::DUEL.len() {
+        return Err(ProjectionError::InvalidActors);
+    }
     let rules_version = RulesVersion::try_from(view.rules_version)
         .map_err(|_| ProjectionError::UnsupportedRulesVersion)?;
     let tick = wire_tick(view.tick)?;
@@ -77,7 +80,7 @@ pub fn project_state(view: &game::PublicState) -> Result<ProjectedRound, Project
     let bombs = project_bombs(view, &actors)?;
     let flames = project_flames(view)?;
     let pickups = project_pickups(view)?;
-    let result = project_result(view.result);
+    let result = project_result(view.result)?;
     validate_result(view, result)?;
 
     Ok(ProjectedRound {
@@ -153,7 +156,7 @@ fn project_actor(actor: game::ActorView) -> Result<ActorView, ProjectionError> {
     let y = u16::try_from(actor.position.y).map_err(|_| ProjectionError::InvalidActors)?;
     Ok(ActorView {
         id: EntityId::new(actor.id.0),
-        seat: wire_seat(actor.seat),
+        seat: wire_seat(actor.seat).map_err(|_| ProjectionError::InvalidActors)?,
         position: Position::new(x, y).map_err(|_| ProjectionError::InvalidActors)?,
         heading: wire_direction(actor.heading),
         speed_level: match actor.speed {
@@ -280,18 +283,25 @@ pub(super) fn project_bomb_record(bomb: game::BombView) -> Result<BombView, Proj
     })
 }
 
-pub(super) fn project_result(result: Option<game::RoundResult>) -> Option<WireRoundResult> {
-    result.map(|result| match result {
-        game::RoundResult::Winner(seat) => WireRoundResult::Winner {
-            seat: wire_seat(seat),
-        },
-        game::RoundResult::Draw(game::DrawReason::MutualElimination) => WireRoundResult::Draw {
-            reason: DrawReason::MutualElimination,
-        },
-        game::RoundResult::Draw(game::DrawReason::Timeout) => WireRoundResult::Draw {
-            reason: DrawReason::Timeout,
-        },
-    })
+pub(super) fn project_result(
+    result: Option<game::RoundResult>,
+) -> Result<Option<WireRoundResult>, ProjectionError> {
+    match result {
+        Some(game::RoundResult::Winner(seat)) => Ok(Some(WireRoundResult::Winner {
+            seat: wire_seat(seat).map_err(|_| ProjectionError::InvalidResult)?,
+        })),
+        Some(game::RoundResult::Draw(game::DrawReason::MutualElimination)) => {
+            Ok(Some(WireRoundResult::Draw {
+                reason: DrawReason::MutualElimination,
+            }))
+        }
+        Some(game::RoundResult::Draw(game::DrawReason::Timeout)) => {
+            Ok(Some(WireRoundResult::Draw {
+                reason: DrawReason::Timeout,
+            }))
+        }
+        None => Ok(None),
+    }
 }
 
 pub(super) fn wire_tick(tick: game::Tick) -> Result<Tick, ProjectionError> {
@@ -304,11 +314,8 @@ pub(super) fn wire_cell(cell: game::CellId) -> Result<Cell, ProjectionError> {
     Cell::new(column, row).map_err(|_| ProjectionError::InvalidArena)
 }
 
-pub(super) const fn wire_seat(seat: game::SeatId) -> Seat {
-    match seat {
-        game::SeatId::One => Seat::One,
-        game::SeatId::Two => Seat::Two,
-    }
+pub(super) fn wire_seat(seat: game::SeatId) -> Result<Seat, super::UnsupportedLegacySeat> {
+    Seat::try_from(seat)
 }
 
 fn wire_direction(direction: game::Direction) -> Direction {

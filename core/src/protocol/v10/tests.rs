@@ -176,7 +176,7 @@ fn visible_actor_serializes_null_position_epoch_as_a_required_field() {
 
 fn teleporter_state(enabled: EnabledItems) -> State {
     let arena = game::fixed_arena();
-    let spawns = arena.spawns();
+    let spawns = arena.spawns().to_vec();
     State::new(
         RulesConfig::expanded_v5(RoomSettings::DEFAULT.with_enabled_items(enabled)),
         World::with_pickups(
@@ -186,7 +186,7 @@ fn teleporter_state(enabled: EnabledItems) -> State {
             BTreeMap::from([(spawns[0], game::PickupKind::Teleporter)]),
         )
         .unwrap(),
-        SeatId::ALL.map(|seat| ActorInit {
+        SeatId::DUEL.map(|seat| ActorInit {
             id: game::EntityId(seat.index() as u32 + 10),
             seat,
             position: game::Position::center(spawns[seat.index()]),

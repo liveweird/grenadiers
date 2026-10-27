@@ -48,14 +48,14 @@ fn generated_state() -> State {
     assert!(generated.arena().blocks().contains(&CellId::new(3, 2)));
     assert!(generated.arena().blocks().contains(&CellId::new(4, 1)));
     let (arena, concealed, _) = generated.into_parts();
-    let spawns = arena.spawns();
+    let spawns = arena.spawns().to_vec();
     let settings = RoomSettings::new(SpeedLevel::Base, 256, 3, 300)
         .unwrap()
         .with_enabled_items(EnabledItems::KICK);
     State::new(
         RulesConfig::expanded_v5(settings),
         World::with_pickups(arena, concealed, BTreeMap::new(), BTreeMap::new()).unwrap(),
-        SeatId::ALL.map(|seat| ActorInit {
+        SeatId::DUEL.map(|seat| ActorInit {
             id: EntityId(seat.index() as u32 + 10),
             seat,
             position: Position::center(spawns[seat.index()]),

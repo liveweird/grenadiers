@@ -10,7 +10,7 @@ use super::super::*;
 
 fn remote_state() -> State {
     let arena = game::fixed_arena();
-    let spawns = arena.spawns();
+    let spawns = arena.spawns().to_vec();
     let world = World::with_pickups(
         arena,
         BTreeMap::new(),
@@ -23,7 +23,7 @@ fn remote_state() -> State {
             RoomSettings::DEFAULT.with_enabled_items(EnabledItems::REMOTE_BOMB),
         ),
         world,
-        SeatId::ALL.map(|seat| ActorInit {
+        SeatId::DUEL.map(|seat| ActorInit {
             id: game::EntityId(seat.index() as u32 + 1),
             seat,
             position: game::Position::center(spawns[seat.index()]),
@@ -108,7 +108,7 @@ fn enabled_remote_inventory_live_bomb_and_detonation_event_publish_to_both_recip
 #[test]
 fn historical_remote_detonation_and_new_live_remote_share_one_valid_publication_window() {
     let arena = game::fixed_arena();
-    let spawns = arena.spawns();
+    let spawns = arena.spawns().to_vec();
     let world = World::with_pickups(
         arena,
         BTreeMap::new(),
@@ -121,7 +121,7 @@ fn historical_remote_detonation_and_new_live_remote_share_one_valid_publication_
             RoomSettings::DEFAULT.with_enabled_items(EnabledItems::REMOTE_BOMB),
         ),
         world,
-        SeatId::ALL.map(|seat| ActorInit {
+        SeatId::DUEL.map(|seat| ActorInit {
             id: game::EntityId(seat.index() as u32 + 1),
             seat,
             position: game::Position::center(spawns[seat.index()]),

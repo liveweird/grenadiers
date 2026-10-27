@@ -8,7 +8,7 @@ use grenadiers_core::{
 
 fn running() -> RoomLifecycle {
     let mut lifecycle = RoomLifecycle::new();
-    for seat in SeatId::ALL {
+    for seat in SeatId::DUEL {
         lifecycle.occupy(seat).unwrap();
         lifecycle.set_ready(seat, true).unwrap();
     }

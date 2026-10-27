@@ -13,13 +13,10 @@ repeated approval for routine implementation choices. Entries are not delivery-d
 ## Single-player
 
 - [next] **SOLO-CPU — complete the approved staged hybrid.** Improve the
-  [private Solo opponent](docs/game/single-player.md) with interval forecasts, timed survival,
-  broader item tactics and measured difficulty. Preserve ordinary rules/input, restricted
+  [private Solo opponent](docs/game/single-player.md) with broader item tactics and measured
+  difficulty. Preserve ordinary rules/input, restricted
   observations, bounded work and accepted-input replay. Follow the
   [accepted design](docs/game/single-player-cpu.md).
-  - **CPU2 — survival:** complete broader ordinary planting with certified escapes and
-    stronger survival selection. Prove both placed and absent-bomb outcomes, preserve exact
-    timing/uncertainty/work limits, and check actual rule and driver fixtures.
   - **CPU3 — public preview:** stronger scored goals and all-features-on item tactics beyond
     the initial conservative controls, with browser acceptance of the expanded interactions.
   - **CPU4 — stronger play:** difficulty tuning, tactical look-ahead and measured performance

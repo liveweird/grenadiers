@@ -12,15 +12,14 @@ repeated approval for routine implementation choices. Entries are not delivery-d
 
 ## Single-player
 
-- [next] **SOLO-CPU — complete the approved staged hybrid.** Improve the
-  [private Solo opponent](docs/game/single-player.md) with broader item tactics and measured
-  difficulty. Preserve ordinary rules/input, restricted
-  observations, bounded work and accepted-input replay. Follow the
-  [accepted design](docs/game/single-player-cpu.md).
-  - **CPU4 — stronger play:** extend weapon/equipment tactics, difficulty tuning and tactical
-    look-ahead, then validate with human feedback. Preserve real queued-driver physical-progress
-    regressions, both evaluation matrices, bounded planning work and exact accepted-input replay;
-    measure trajectory and cost changes alongside survival and outcomes.
+- [next] **SOLO-CPU — validate and tune the staged hybrid.** Compare the
+  [private Solo opponent](docs/game/single-player.md) on Easy and Standard with all items enabled.
+  Follow the [accepted design](docs/game/single-player-cpu.md).
+  - **CPU4 — human difficulty and playability validation:** collect feedback on pressure,
+    stalls, fairness, unexpected item/death behavior and the difference between levels. Turn
+    reproducible weaknesses into bounded tuning or further combat/equipment tactics. Preserve
+    real queued-driver progress regressions, both reference matrices, bounded planning work
+    and exact accepted-input replay; measure trajectory and cost alongside survival/outcomes.
 - [parked] **More seats and campaign mobs.** Revisit after the two-seat CPU mode is stable;
   neither is part of the initial solo duel.
 

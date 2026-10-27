@@ -4,6 +4,20 @@ This archive preserves the older release records originally maintained in
 [`docs/releases.md`](../releases.md). Records remain in their original order; the current
 release procedure and current release record stay in the [release guide](../releases.md).
 
+## v0.3.97 — 2026-10-27
+
+[v0.3.97](https://github.com/liveweird/grenadiers/releases/tag/v0.3.97) lets an empty-slot or Kick-holding CPU deliberately collect Punch and Bracelet. Their equal provisional goal value remains below useful buffs/upgrades and above block openings/rival pressure. Held tactical equipment permits duplicate transit while avoiding Kick or cross-tactical replacement; existing Heart/Wall Pass protections remain unchanged. Equipment classification is shared by goal selection and remembered-step validation. UtilityV15 retains V1–V14 replay identities and wire v12.
+
+Independent review is clear after correcting a stale replay-version test. Focused acceptance includes 57 policy/182 CPU core tests, five replay contracts and three queued Driver regressions covering physical empty/Kick acquisition, duplicate transit and detours preserving tactical equipment, Heart and Wall Pass. A shared zero-worker Driver setup preserves existing helper behavior. Crafted open-world fixtures do not claim generated-world replay; formatting, Clippy, repository/tooling checks and the 400-line ceiling pass.
+
+Both 16-case matrices survive and replay exactly. Four arena-a2 cases change trajectories; both idle seeds collect their first item at tick 850 rather than 1306. Their opening stationary time increases by 40 ticks, while full-round stationary time decreases by 151/85 ticks. Full rounds retain 15 timeout draws and the same CPU win. Opening calls/work change from 594/17,958,825 to 588/17,828,381; full calls/work from 4,010/89,659,046 to 4,062/90,375,728 (about 0.8% more work), with the 65,536 maximum retained. Isolated host observations were 3.38s/14.12s; planner p95/max were 5.468/6.885ms opening and 4.568/7.122ms full. These fixtures do not establish human-level strength or a timing guarantee.
+
+The exhaustive server gate passes on source `f59dcd342411d2b8c999e9e923b09337674f5ba0` (tree `3cd46bb3d82a17564ab69b2c9ac02475299a35bb`): 544.006s, 27,108/29,393 lines (**92.2260%**), all 4,194,304 masks in each of debug/release/official coverage, 32 partitions/four workers/zero hidden retries and 37 raw profiles. Official LCOV was preserved before releasing the source/target freeze. Unique Linux [run 40585859344](https://github.com/liveweird/grenadiers/actions/runs/40585859344) passes.
+
+Exact image `sha256:12a09e67661ef3679169d20ebf283a9271e451e0d379bff4b680e7f57dbcc548` passes pinned Trivy 0.74.0 with zero fixable HIGH/CRITICAL findings, Compose 10 cases/51.6s, Kubernetes 10 cases/52.9s, CPU-item collection 1 case/16.5s, Polish 320px, served-asset identity and runtime security/resources/probes. Temporary stacks were removed. Unchanged frontend/API/art/E2E/tooling/external dependency inputs retain accepted full-web 6,874 tests/97 files and static/audit checks.
+
+This source prerelease has a verified local image; no production registry publication is claimed. Localhost runs the accepted image with v0.3.96 retained for rollback. Broader CPU4 tactics, measured difficulty and human validation remain in the [backlog](../../BACKLOG.md#single-player).
+
 ## v0.3.96 — 2026-10-27
 
 [v0.3.96](https://github.com/liveweird/grenadiers/releases/tag/v0.3.96) adds a guarded held-Punch tactic. One stopped Equipment action has a common certified escape for relocation and a no-op, preserving the original bomb identity and absolute fuse. The narrow scene requires a centered CPU, one adjacent Standard timed bomb, no exposed pickups/Oil/flames and a visible rival without bomb-moving equipment. New incompatible observations withdraw the route. Manual player controls remain unchanged.

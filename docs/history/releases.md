@@ -4,6 +4,24 @@ This archive preserves the older release records originally maintained in
 [`docs/releases.md`](../releases.md). Records remain in their original order; the current
 release procedure and current release record stay in the [release guide](../releases.md).
 
+## v0.3.98 — 2026-10-27
+
+[v0.3.98](https://github.com/liveweird/grenadiers/releases/tag/v0.3.98) adds Easy/Standard solo selection, defaulting to Standard, with English/Polish labels and server-authoritative difficulty retained through reconnect/rematch. Easy adds a provisional 12-tick pause after confirmed Stop ending ordinary clear-board navigation. Unknown bombs, new hazards or unsupported control effects bypass that pause. Committed escapes, Stops, manual confirmation, work limits and Standard cadence remain unchanged.
+
+Gameplay v13 adds the closed difficulty metadata while preserving v12’s Standard-only archive and the checked v11 physical/privacy projection. Clients choose only difficulty; policy, seed and seat authority remain server-owned. UtilityV16 admits two exact current profiles; V1–V15 remain Standard-only replay identities. Deploy server/browser together and reload older clients; replay format 3 and simulation rules are unchanged.
+
+Independent contract/runtime/frontend review is clear. Focused tests exercise actual queued pause/progress/danger bypass, both-profile Plant/Punch timing/rejection/stale handling, profile authority, lifecycle and replay. Full web passes 6,890 tests/98 files with 93.63% lines, 91.28% statements, 90.53% functions and 89.87% branches. Compressed JS is 368,673/400,000 bytes; CSS 15,092/20,000. Formatting, warnings-denied Clippy, E2E static/scenario checks, source caps and tooling pass.
+
+A separate 32-case Standard/profile comparison proves exact accepted-action/frame/RNG/work trace equality. Four isolated 16-case matrices survive and replay exactly. Standard preserves every v0.3.97 case metric: opening 588 calls/17,828,381 work; full 4,062/90,375,728 with 15 timeout draws and one CPU win. Easy uses 525/3,307 calls and 14,600,204/60,072,846 work, with 16 full-round timeout draws and more stationary time. All attempts remain within 65,536 work. Observed opening/full times were 2.50s/13.45s Standard and 2.22s/11.30s Easy. These scripted results do not establish balanced human difficulty. Matrix source `ba0619c8f6846aeb407fe4b5ccaa1295d9f831cf` differs from final acceptance only in corrected socket/browser test fixtures; gameplay, evaluation and full-web inputs are unchanged.
+
+One complete exhaustive server gate passes on final source `f020733b9b81a2d135c577df90a2b8817d6d4131` (tree `005bd71e9d34ed241d6c108ccdef472e5eb0d2f7`): 468.64s, 27,543/29,915 lines (**92.0709%**), all 4,194,304 masks in each debug/release/official coverage profile, 32 partitions/four workers/zero hidden retries and 37 raw profiles. Official LCOV was preserved before releasing the source/target freeze. Unique final Linux [run 40591108533](https://github.com/liveweird/grenadiers/actions/runs/40591108533) passes.
+
+Exact image `sha256:11966d7f74f519c491a901ed72df107fbd9496487f4a2ce445692817bbf7beda` passes pinned Trivy 0.74.0 with zero fixable HIGH/CRITICAL findings, Compose 10 cases/49.5s, Kubernetes 10 cases/51.5s, CPU-item collection 1 case/16.5s, Polish 320px, keyboard focus/activation, asset identity and runtime security/resources/probes. The new UI was visually inspected. Temporary stacks were removed; unchanged external dependencies retain prior audit acceptance.
+
+Development failures remain recorded: sandbox listeners required native permissions; a third-validator drift build needed a bounded 15-second timeout; initial socket/browser fixtures retained stale protocol arguments and an unsuitable native-select key assumption. Option values use Playwright’s native select operation; real Tab/Shift+Tab focus and Enter activation are checked separately because this Mac Chromium setup does not apply keyboard option-selection defaults. Those fixtures were corrected without lowering assertions or coverage floors before final acceptance.
+
+This is a source prerelease with a verified local image, not a registry publication. Localhost runs the accepted image; v0.3.97 is retained for rollback. Broader CPU tactics and human balance validation remain in the [backlog](../../BACKLOG.md#single-player).
+
 ## v0.3.97 — 2026-10-27
 
 [v0.3.97](https://github.com/liveweird/grenadiers/releases/tag/v0.3.97) lets an empty-slot or Kick-holding CPU deliberately collect Punch and Bracelet. Their equal provisional goal value remains below useful buffs/upgrades and above block openings/rival pressure. Held tactical equipment permits duplicate transit while avoiding Kick or cross-tactical replacement; existing Heart/Wall Pass protections remain unchanged. Equipment classification is shared by goal selection and remembered-step validation. UtilityV15 retains V1–V14 replay identities and wire v12.

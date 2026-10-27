@@ -17,9 +17,10 @@ repeated approval for routine implementation choices. Entries are not delivery-d
   difficulty. Preserve ordinary rules/input, restricted
   observations, bounded work and accepted-input replay. Follow the
   [accepted design](docs/game/single-player-cpu.md).
-  - **CPU3 — public preview:** expand timed-weapon and equipment tactics beyond the initial
-    conservative controls, with browser acceptance of the expanded interactions under all-on rules.
-  - **CPU4 — stronger play:** difficulty tuning, tactical look-ahead and measured performance
+  - **CPU3 — public preview:** use held Wall Pass for known soft-block traversal and complete
+    native browser acceptance of a CPU item interaction under all-on rules.
+  - **CPU4 — stronger play:** remaining weapon/equipment tactics, difficulty tuning, tactical
+    look-ahead and measured performance
     from deterministic tournaments and human feedback.
 - [parked] **More seats and campaign mobs.** Revisit after the two-seat CPU mode is stable;
   neither is part of the initial solo duel.

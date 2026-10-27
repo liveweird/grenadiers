@@ -96,49 +96,52 @@ retain the previous immutable image reference for rollback. The runtime stage in
 rolling Debian package updates, so a later build may resolve newer packages and is not expected to
 be byte-identical; treat it as a new candidate with new evidence rather than reusing acceptance.
 
-## v0.3.85 — 2026-10-27
+## v0.3.86 — 2026-10-27
 
-[v0.3.85](https://github.com/liveweird/grenadiers/releases/tag/v0.3.85) improves
-[CPU goal guidance](game/cpu-contracts.md#goal-guidance). One bounded static flood-fill selects
-reachable useful pickups, block openings and visible-rival goals. It avoids known curses,
-unsupported weapons and harmful equipment replacement, while harmless duplicates and capped
-upgrades remain transitable. The CPU can detour instead of chasing an unreachable nearest item.
-Timed survival and planting certificates retain authority; this guidance does not certify safety.
+[v0.3.86](https://github.com/liveweird/grenadiers/releases/tag/v0.3.86) adds
+[certified timed weapons](game/cpu-contracts.md#certified-timed-weapons) to the CPU. Enabled
+Piercing and Power charges reuse the ordinary planting proof, with one escape checked against
+both placed and absent outcomes. Confirmation binds the actual blast and charge consumption;
+rejection or physical placement veto preserves the weapon and continues the absent route.
+Confirmed placement cannot be reinterpreted as absence.
 
-Independent review is clear after fixing unreachable fallback, preprocessing work accounting,
-capped Golden Flame value and stationary guidance for planting after temporary effects expire.
-Two actual-State tests use the checked recipient projection and ordinary inputs to collect a
-useful item while leaving a curse or unsupported weapon untouched. UtilityV5 retains V1–V4
-accepted-input replay. The v12 wire shape, rules 5, generator 2 and all 22 default items remain
-unchanged. Stored weapons are still held; their tactics are separate work in the
-[backlog](../BACKLOG.md#single-player).
+Useful targets use the shared blast geometry, including Power diagonals and Piercing
+continuation, with charged field construction and full traversal. Supported weapon pickups
+have explicit acquisition, duplicate and replacement behavior. Neutral swaps remain ordinary
+transit options; Heart uses an independent equipment slot. Certified paths still reject all
+pickup-changing contact. Remote, Landmine and live owned Remote remain outside timed placement.
 
-Rust/image source is `e7820d0aced959c66a7823aef7e70e353a1ecaac`. Full local Rust acceptance
-passes in 466.722s: all 4,194,304 masks in each of debug, release and official coverage,
-32 partitions/four workers, zero retries and 37 raw profiles. Coverage is 24,480/26,680 lines
-(91.75%). The distinct [Linux run](https://github.com/liveweird/grenadiers/actions/runs/40428726013)
-passes. Formatting, workspace Clippy and repository/source-size checks pass. Unchanged external
-dependencies, frontend/API/artwork inputs reuse their accepted audit/static and full web evidence
-(6,874 tests/97 files). E2E static checks run again for the correction below.
+Independent review is clear. Actual-State and Driver cases cover both weapons through full
+flame expiry without another worker, real same-cell placement veto, rejected input, one-time
+consumption and changed loadouts. A bounded identical corridor certifies a diagonal refuge for
+Standard but rejects it for Power. UtilityV6 retains V1–V5 accepted-input replay; the v12 wire
+shape, rules 5, generator 2 and all 22 default items remain unchanged. Unknown facts and new
+enemy actions can still invalidate execution. Injected-State driver and generation-journal
+replay remain separate test oracles.
 
-Compose initially passes all ten browser cases in 49.9s. Kubernetes passes nine and exposes one
-invalid lifecycle-test assumption: an independently seeded CPU need not win. Test correction
-`9b713cddbf2084b7446581e443a44cfa896ce796` verifies the authoritative winner, both survivor states,
-exact score and rendered status while preserving observed Bomb, rematch, reconnect and leave
-assertions. The affected case passes on the same image in Compose (13.3s) and Kubernetes (13.5s);
-the other nine unchanged cases retain their results. Original failure artifacts are preserved.
-No cause of the CPU's elimination is inferred from the screenshot. All Rust/image inputs are
-verified unchanged by this E2E/scenario/changelog-only correction, so full Rust/Linux results
-and the accepted image are reused rather than repeated.
+Tested source is `acd2e4e621cedc521ffad3ed2b8873512d40a936`. Full local Rust acceptance passes
+in 463.484s with all 4,194,304 masks in each of debug, release and official coverage,
+32 partitions/four workers, zero retries and 37 raw profiles. Coverage is 24,715/26,876 lines
+(91.96%). The distinct [Linux run](https://github.com/liveweird/grenadiers/actions/runs/40432433005)
+passes, along with formatting, workspace Clippy and repository/source-size checks. Exact unchanged
+external Cargo/npm dependencies and frontend/API/artwork/E2E/tooling inputs retain accepted
+audits, static checks and full web evidence (6,874 tests/97 files). The image is rebuilt and its
+native runtime acceptance runs independently, including the corrected authoritative-winner test.
 
 Accepted image is
-`sha256:bb35c41627b83f94465105a05a264b1bda094a1936372bbd5f17788eb95d92a3`.
-Pinned Trivy 0.74.0 reports zero fixable HIGH/CRITICAL findings. Polish 320px, strict lobby/create,
-security/resources/probes and byte-identical served assets pass. Temporary Compose projects and
-Kubernetes namespaces are removed. The exact image is promoted to localhost:8085 with v0.3.84
-retained for rollback; restarting ends in-memory matches. Evidence remains under
-`target/quality-review/cpu3-v0385-*`. Distribution remains a source prerelease and local image,
-without a production registry or hosted-service claim.
+`sha256:f08979eed37e1d78091cc8847272a7de7f7887e2a160ee21bf9bae19cb8ead31`.
+Pinned Trivy 0.74.0 reports zero fixable HIGH/CRITICAL findings. Compose passes ten browser cases
+in 50.5s and Kubernetes ten in 51.1s. Solo lifecycle, human duel, Polish 320px accessibility,
+strict lobby/create, security/resources/probes and unchanged served assets pass. Temporary
+projects and namespaces are removed. The exact image is promoted to localhost:8085 with v0.3.85
+retained for rollback; restarting ends in-memory matches.
+
+Evidence remains under `target/quality-review/cpu3-v0386-*`. Distribution remains a source
+prerelease and local image, without a production registry or hosted-service claim. Wall Pass
+routing and public-preview item acceptance remain in the [backlog](../BACKLOG.md#single-player).
+
+<a id="v0385--2026-10-27"></a>
+The [v0.3.85 record](history/releases.md#v0385--2026-10-27) is preserved in release history.
 
 <a id="v0384--2026-10-27"></a>
 The [v0.3.84 record](history/releases.md#v0384--2026-10-27) is preserved in release history.

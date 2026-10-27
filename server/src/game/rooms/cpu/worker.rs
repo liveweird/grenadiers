@@ -15,6 +15,28 @@ use grenadiers_core::game::Tick;
 
 const WORKERS: usize = 2;
 const QUEUE_CAPACITY: usize = 32;
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum JobStatus {
+    Delivered,
+    Cancelled,
+    Failed,
+    Dropped,
+}
+
+#[cfg(test)]
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
+pub(in crate::game::rooms) struct PumpReport {
+    pub(in crate::game::rooms) dequeued: usize,
+    pub(in crate::game::rooms) delivered: usize,
+    pub(in crate::game::rooms) cancelled: usize,
+    pub(in crate::game::rooms) failed: usize,
+    pub(in crate::game::rooms) dropped: usize,
+    pub(in crate::game::rooms) work: Vec<u32>,
+    pub(in crate::game::rooms) planned_intents: Vec<grenadiers_core::cpu::Intent>,
+    pub(in crate::game::rooms) planner_times: Vec<std::time::Duration>,
+}
+
 pub(super) struct PlanResult {
     pub(super) plan: SurvivalPlan,
     pub(super) basis: Observation,
@@ -98,6 +120,46 @@ impl CpuPlanner {
             Err(TrySendError::Full(_) | TrySendError::Disconnected(_)) => false,
         }
     }
+
+    #[cfg(test)]
+    pub(in crate::game::rooms) fn pump_for_test(&self, limit: usize) -> PumpReport {
+        assert!(
+            self.inner
+                .workers
+                .lock()
+                .unwrap_or_else(|error| error.into_inner())
+                .is_empty(),
+            "only a zero-worker planner may be pumped"
+        );
+        let mut report = PumpReport::default();
+        for _ in 0..limit.min(QUEUE_CAPACITY) {
+            let job = self
+                .inner
+                ._receiver
+                .lock()
+                .unwrap_or_else(|error| error.into_inner())
+                .try_recv();
+            let job = match job {
+                Ok(job) => job,
+                Err(
+                    std::sync::mpsc::TryRecvError::Empty
+                    | std::sync::mpsc::TryRecvError::Disconnected,
+                ) => break,
+            };
+            report.dequeued += 1;
+            let (status, spent, intent, planner_time) = execute_job(job, true);
+            report.planner_times.extend(planner_time);
+            match status {
+                JobStatus::Delivered => report.delivered += 1,
+                JobStatus::Cancelled => report.cancelled += 1,
+                JobStatus::Failed => report.failed += 1,
+                JobStatus::Dropped => report.dropped += 1,
+            }
+            report.work.push(spent);
+            report.planned_intents.extend(intent);
+        }
+        report
+    }
 }
 
 fn worker_loop(receiver: &Arc<Mutex<Receiver<PlanJob>>>) {
@@ -106,29 +168,64 @@ fn worker_loop(receiver: &Arc<Mutex<Receiver<PlanJob>>>) {
             .lock()
             .unwrap_or_else(|error| error.into_inner())
             .recv();
-        let Ok(mut job) = job else {
+        let Ok(job) = job else {
             return;
         };
-        if !job.live.load(Ordering::Acquire) {
-            continue;
-        }
-        let mut work = WorkBudget::new(WORK_ALLOWANCE);
-        let Ok(plan) = plan(
-            &job.observation,
-            &job.memory,
-            &job.hazard_memory,
-            job.settled_stop_tick,
-            &mut job.rng,
-            &mut work,
-        ) else {
-            continue;
-        };
-        if job.live.load(Ordering::Acquire) {
-            let _ = job.result.try_send(PlanResult {
-                plan,
-                basis: job.observation,
-                rng: job.rng,
-            });
-        }
+        let _ = execute_job(job, false);
     }
+}
+
+fn execute_job(
+    mut job: PlanJob,
+    measure: bool,
+) -> (
+    JobStatus,
+    u32,
+    Option<grenadiers_core::cpu::Intent>,
+    Option<std::time::Duration>,
+) {
+    if !job.live.load(Ordering::Acquire) {
+        return (JobStatus::Cancelled, 0, None, None);
+    }
+    let mut work = WorkBudget::new(WORK_ALLOWANCE);
+    let started = measure.then(std::time::Instant::now);
+    let Ok(plan) = plan(
+        &job.observation,
+        &job.memory,
+        &job.hazard_memory,
+        job.settled_stop_tick,
+        &mut job.rng,
+        &mut work,
+    ) else {
+        return (
+            JobStatus::Failed,
+            work.spent(),
+            None,
+            started.map(|value| value.elapsed()),
+        );
+    };
+    let planner_time = started.map(|value| value.elapsed());
+    let intent = plan.control.intent;
+    if !job.live.load(Ordering::Acquire) {
+        return (
+            JobStatus::Cancelled,
+            work.spent(),
+            Some(intent),
+            planner_time,
+        );
+    }
+    let status = if job
+        .result
+        .try_send(PlanResult {
+            plan,
+            basis: job.observation,
+            rng: job.rng,
+        })
+        .is_ok()
+    {
+        JobStatus::Delivered
+    } else {
+        JobStatus::Dropped
+    };
+    (status, work.spent(), Some(intent), planner_time)
 }

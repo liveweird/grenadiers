@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+## 0.3.89 — 2026-10-27
+
+### Added
+
+- Add deterministic Solo evaluation against fixed human input scripts through actual queued
+  planning, ordinary admission and generated arenas, with bounded work and independent seeds.
+- Add an isolated release evaluation command reporting reproducible progress and work separately
+  from planner timings; retain human playtesting and measured difficulty as follow-up work.
+
 ## 0.3.88 — 2026-10-27
 
 ### Fixed

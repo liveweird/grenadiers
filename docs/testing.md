@@ -49,6 +49,16 @@ that hide failures. Avoid repeated evidence packaging and review of unchanged re
 The historical verification records below describe the workflow used at the time; they do not
 make repeated remote runs a current release requirement.
 
+### Deterministic Solo evaluation
+
+The [CPU evaluation guide](game/cpu-evaluation.md) describes the test-only reference workloads.
+Routine Rust tests cover deterministic queued planning and ordinary admission. For isolated
+release measurements, run `scripts/measure-game.sh --cpu`; it writes environment, source/binary
+identity and structured results under `target/cpu-measurements/`. This mode runs only the CPU
+reference matrix, keeping the existing runtime/owner measurements available through the default
+command. Fixed input scripts provide regression evidence; they do not replace human playtesting
+or establish balanced difficulty. Keep timing runs separate from other checks.
+
 ### Hosted workflows
 
 The full `checks` workflow is manual: `gh workflow run ci.yml --ref <branch>`. It remains available

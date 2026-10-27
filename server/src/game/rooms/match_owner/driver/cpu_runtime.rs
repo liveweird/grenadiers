@@ -287,3 +287,11 @@ mod wall_pass_tests;
 #[cfg(test)]
 #[path = "cpu_runtime_responsiveness_tests.rs"]
 mod responsiveness_tests;
+
+#[cfg(test)]
+#[path = "cpu_evaluation_support.rs"]
+pub(super) mod evaluation_support;
+
+#[cfg(test)]
+#[path = "cpu_evaluation_tests.rs"]
+mod evaluation_tests;

@@ -7,10 +7,10 @@ use std::sync::{
 use grenadiers_core::{
     cpu::{
         BombKnowledge, CpuRng, ManualIntent, MemoryKey, Observation, ObservationParts,
-        ObservedActor, ObservedArena, ObservedRules, UnknownActorFacts, VisibleActor, WorldId,
-        forecast::ObservedHazardMemory, policy::UtilityMemory,
+        ObservedActor, ObservedArena, ObservedPickup, ObservedRules, UnknownActorFacts,
+        VisibleActor, WorldId, forecast::ObservedHazardMemory, policy::UtilityMemory,
     },
-    game::{CellId, Direction, EntityId, Position, SeatId, SpeedLevel, Terrain, Tick},
+    game::{CellId, Direction, EntityId, PickupKind, Position, SeatId, SpeedLevel, Terrain, Tick},
     room::RoomSettings,
 };
 
@@ -144,4 +144,116 @@ fn canceled_job_cannot_publish_a_result() {
     assert!(planner.try_submit(job));
     drop(planner);
     assert!(result.recv().is_err());
+}
+
+#[test]
+fn zero_worker_pump_is_bounded_and_limit_zero_preserves_the_queue() {
+    let planner = CpuPlanner::without_workers();
+    let mut results = Vec::new();
+    for _ in 0..32 {
+        let (job, result) = job(Arc::new(AtomicBool::new(true)));
+        assert!(planner.try_submit(job));
+        results.push(result);
+    }
+    assert_eq!(planner.pump_for_test(0).dequeued, 0);
+    let report = planner.pump_for_test(usize::MAX);
+    assert_eq!(report.dequeued, 32);
+    assert_eq!(report.delivered, 32);
+    assert!(report.work.iter().all(|spent| *spent <= 65_536));
+    assert_eq!(report.planner_times.len(), 32);
+    assert!(results.into_iter().all(|result| result.recv().is_ok()));
+}
+
+#[test]
+#[should_panic(expected = "only a zero-worker planner may be pumped")]
+fn pump_rejects_a_real_worker_pool() {
+    CpuPlanner::new().unwrap().pump_for_test(0);
+}
+
+#[test]
+fn pump_separates_cancel_failure_and_delivery_drop_without_blocking() {
+    let planner = CpuPlanner::without_workers();
+
+    let (cancelled, cancelled_result) = job(Arc::new(AtomicBool::new(false)));
+    assert!(planner.try_submit(cancelled));
+    let report = planner.pump_for_test(1);
+    assert_eq!((report.cancelled, report.work.as_slice()), (1, &[0][..]));
+    assert!(report.planner_times.is_empty());
+    assert!(cancelled_result.recv().is_err());
+
+    let (mut failed, failed_result) = job(Arc::new(AtomicBool::new(true)));
+    let mut wrong = key();
+    wrong.world.physical_round += 1;
+    failed.memory = UtilityMemory::new(wrong);
+    assert!(planner.try_submit(failed));
+    let report = planner.pump_for_test(1);
+    assert_eq!(report.failed, 1);
+    assert_eq!(report.planner_times.len(), 1);
+    assert!(failed_result.recv().is_err());
+
+    let (disconnected, disconnected_receiver) = job(Arc::new(AtomicBool::new(true)));
+    drop(disconnected_receiver);
+    assert!(planner.try_submit(disconnected));
+    let report = planner.pump_for_test(1);
+    assert_eq!(report.dropped, 1);
+
+    let (mut dropped, original_receiver) = job(Arc::new(AtomicBool::new(true)));
+    drop(original_receiver);
+    let (full_sender, full_receiver) = sync_channel(0);
+    dropped.result = full_sender;
+    assert!(planner.try_submit(dropped));
+    let report = planner.pump_for_test(1);
+    assert_eq!(report.dropped, 1);
+    assert_eq!(report.planner_times.len(), 1);
+    drop(full_receiver);
+}
+
+#[test]
+fn delivered_job_carries_the_actual_advanced_rng() {
+    let planner = CpuPlanner::without_workers();
+    let (mut submitted, result) = job(Arc::new(AtomicBool::new(true)));
+    let mut parts = submitted.observation.into_parts();
+    parts.arena.blocks.clear();
+    parts.pickups = vec![
+        ObservedPickup {
+            cell: CellId::new(8, 7),
+            kind: PickupKind::BombCapacity,
+        },
+        ObservedPickup {
+            cell: CellId::new(7, 6),
+            kind: PickupKind::BombCapacity,
+        },
+    ];
+    submitted.observation = Observation::new(parts).unwrap();
+    submitted.hazard_memory = ObservedHazardMemory::new(key());
+    submitted
+        .hazard_memory
+        .observe(&submitted.observation)
+        .unwrap();
+    let submitted_draws = submitted.rng.draws();
+    let mut expected_rng = submitted.rng.clone();
+    let mut expected_work =
+        grenadiers_core::cpu::WorkBudget::new(grenadiers_core::cpu::survival::WORK_ALLOWANCE);
+    let expected = grenadiers_core::cpu::survival::plan(
+        &submitted.observation,
+        &submitted.memory,
+        &submitted.hazard_memory,
+        submitted.settled_stop_tick,
+        &mut expected_rng,
+        &mut expected_work,
+    )
+    .unwrap();
+    assert!(expected_rng.draws() > submitted_draws);
+    assert!(planner.try_submit(submitted));
+    let report = planner.pump_for_test(1);
+    assert_eq!(report.delivered, 1);
+    assert_eq!(report.work, vec![expected_work.spent()]);
+    let mut actual = result.recv().unwrap();
+    assert_eq!(actual.plan, expected);
+    assert_eq!(actual.rng.key(), expected_rng.key());
+    assert_eq!(actual.rng.draws(), expected_rng.draws());
+    assert_eq!(
+        actual.rng.bounded_u32(1_000).unwrap(),
+        expected_rng.bounded_u32(1_000).unwrap()
+    );
 }

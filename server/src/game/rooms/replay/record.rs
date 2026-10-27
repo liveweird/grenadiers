@@ -281,6 +281,18 @@ impl Journal {
         true
     }
 
+    #[cfg(test)]
+    pub(in crate::game::rooms) fn accepted_actions(
+        &self,
+    ) -> impl Iterator<Item = (Tick, SeatId, ReplayAction)> + '_ {
+        self.records
+            .iter()
+            .filter_map(|record| match record.operation {
+                Operation::Action { seat, action, .. } => Some((record.tick, seat, action)),
+                _ => None,
+            })
+    }
+
     pub(in crate::game::rooms) fn mark_round_construction_incomplete(&mut self) {
         if self.status == ReplayStatus::Complete {
             self.status = ReplayStatus::Incomplete {

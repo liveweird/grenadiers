@@ -4,6 +4,22 @@ This archive preserves the older release records originally maintained in
 [`docs/releases.md`](../releases.md). Records remain in their original order; the current
 release procedure and current release record stay in the [release guide](../releases.md).
 
+## v0.3.102 — 2026-10-28
+
+[v0.3.102](https://github.com/liveweird/grenadiers/releases/tag/v0.3.102) enables 19 shared optional-item mechanics for three-/four-player headless states. Higher-seat regressions exercise equipment and timed effects, Wall Pass traversal, weapon placement, Oil collision/ignition, damage, remote bombs/mines, contention and recipient privacy. Punch, Bracelet and Teleporter remain explicitly gated in this release. See the [headless guide](../game/multiplayer-core.md).
+
+[Generator v3](../game/multiplayer-generation.md) adds horizontal/vertical terrain/item symmetry, four protected corner exits, actual-round three-player corner omission and bounded fallback retaining the requested roster. Twelve-round coverage gives each three-player seat every corner three times. Historical generator sampling moved into a private helper without changing function bodies, draw order or v1/v2 golden results.
+
+Checked immutable room configuration describes canonical 2–4 human/CPU seats, requires a human creator and pairs difficulty exactly with CPU presence. The domain recognizes 11×9, 13×11 and 15×13, but current generation explicitly rejects smaller boards. Live rooms, gameplay v13, CPU observations and replay remain two-player; no multiplayer or board selector is exposed yet.
+
+Independent item, configuration and generation reviews are clear. Generation tests pass 93 cases, including legacy goldens; full core tests and additional higher-seat behavior regressions pass. Formatting, warnings-denied Clippy, source caps and repository checks pass. Unchanged two-player CPU behavior reuses the v0.3.101 64-case reference/replay acceptance; unchanged web/art/contracts/dependencies reuse their existing complete acceptance. No browser code or artwork changed.
+
+Complete Rust acceptance passes on source `a8484ae0f051bb3c4ff340bc930f3e474bb50bc3`, tree `19a8229c76cd2fb05d3c90ee9e88be0fe3d69f43`: 645.624s, 28,207/30,614 lines (**92.1376%**), all 4,194,304 masks separately in debug/release/official coverage, 32 partitions, four workers, zero hidden retries and 37 raw profiles. Official LCOV was preserved before ending the source/target freeze. Unique Linux [run 40605790929](https://github.com/liveweird/grenadiers/actions/runs/40605790929) passes.
+
+Exact image `sha256:08f8f136cb85681db7e882032522a502a1f7ab7d69dcefb6ea7a297b34120ced` passes pinned Trivy 0.74.0 with zero fixable HIGH/CRITICAL findings; Compose 10 browser cases/53.5s; Kubernetes 10/54.8s; CPU-item collection one/16.6s. Runtime security/resources, health/readiness/probes, Polish 320px controls and exact served HTML/JS/CSS/PNG identity pass. Temporary acceptance stacks were removed.
+
+This is a source prerelease with a verified local image. Localhost runs the accepted image; v0.3.101 is retained for rollback. Deploy paired server/browser normally; no wire or replay migration is introduced. Outstanding work remains in the [backlog](../../BACKLOG.md).
+
 ## v0.3.101 — 2026-10-28
 
 [v0.3.101](https://github.com/liveweird/grenadiers/releases/tag/v0.3.101) adds checked two-/three-/four-participant headless simulation on the fixed 15×13 arena. Canonical actor storage, traces, action priority, placement contention, event audiences and survivor outcomes follow actual participants. Invalid input seats fail before mutation. The [headless guide](../game/multiplayer-core.md) defines the supported construction boundary.

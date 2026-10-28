@@ -66,7 +66,7 @@ impl RosterMatchLifecycle {
         editor: SeatId,
         settings: RoomSettings,
     ) -> Result<RosterUpdate, RosterError> {
-        self.ensure_seat(editor)?;
+        self.ensure_connected_human(editor)?;
         if self.settings_editor() != Some(editor) {
             return Err(RosterError::UnauthorizedSettingsEditor(editor));
         }

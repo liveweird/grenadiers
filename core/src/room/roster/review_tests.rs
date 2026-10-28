@@ -232,3 +232,32 @@ fn inter_round_disconnect_preserves_completed_round_hold_and_delays_restart() {
         }
     ));
 }
+
+#[test]
+fn reserved_creator_keeps_authority_but_cannot_change_settings_until_connected() {
+    let mut room = RosterMatchLifecycle::new(
+        configuration(&[SeatControl::Human, SeatControl::Human, SeatControl::Human]),
+        settings(3),
+    );
+    room.occupy(SeatId::One).unwrap();
+    room.occupy(SeatId::Two).unwrap();
+    room.depart_with_grace([Some(DepartureReason::TransportLoss), None, None, None])
+        .unwrap();
+    assert_eq!(room.settings_editor(), Some(SeatId::One));
+    let before = room.clone();
+    assert_eq!(
+        room.set_settings(SeatId::One, settings(2)),
+        Err(RosterError::SeatNotConnected(SeatId::One))
+    );
+    assert_eq!(
+        room.set_settings(SeatId::Two, settings(2)),
+        Err(RosterError::UnauthorizedSettingsEditor(SeatId::Two))
+    );
+    assert_eq!(room, before);
+    room.resume_connection(SeatId::One).unwrap();
+    room.set_settings(SeatId::One, settings(2)).unwrap();
+    assert_eq!(room.settings(), settings(2));
+    room.depart_with_grace([Some(DepartureReason::Explicit), None, None, None])
+        .unwrap();
+    assert_eq!(room.settings_editor(), None);
+}

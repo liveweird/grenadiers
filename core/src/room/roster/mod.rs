@@ -222,9 +222,7 @@ impl RosterMatchLifecycle {
     }
     #[must_use]
     pub fn settings_editor(&self) -> Option<SeatId> {
-        self.participants[0]
-            .connected_human()
-            .then_some(SeatId::One)
+        self.participants[0].retained_human().then_some(SeatId::One)
     }
 
     pub fn occupy(&mut self, seat: SeatId) -> Result<RosterUpdate, RosterError> {

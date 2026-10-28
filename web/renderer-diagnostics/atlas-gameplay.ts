@@ -5,12 +5,16 @@ import { createAtlasArtwork } from '../src/game/arena/artAtlas/artwork'
 import { arenaSourceManifest, createArenaAtlas } from '../src/game/arena/artAtlas/load'
 import type { ArenaArtwork } from '../src/game/arena/artwork'
 import { GROUND, TILE } from '../src/game/arena/drawing'
+import type { BombDrawing } from '../src/game/arena/entityArt'
 import { graphicsArtwork } from '../src/game/arena/graphicsArtwork'
 import { createArenaRenderer, type ArenaRenderer } from '../src/game/arena/renderer'
 import { ArenaScene } from '../src/game/arena/scene'
 import type { SnapshotMessage } from '../src/game/arena/types'
 import { renderBaselineSource } from './art-atlas-render'
 import { diagnosticSnapshot } from './snapshot'
+import {
+  captureBombStages, representativeSnapshot, renderScenes, setReducedMotion, updateScenes,
+} from './atlas-gameplay-bombs'
 
 type Pixels = { pixels: Uint8Array | Uint8ClampedArray; width: number; height: number }
 type Comparison = {
@@ -29,6 +33,7 @@ type AtlasGameplayResult = {
   resolution: number
   comparisons: Comparison[]
   historicalDeltas: Comparison[]
+  bombFingerprints: Array<{ stage: string; atlas: string; historical: string }>
   lifecycle: Lifecycle
   performance: Performance
   resources: {
@@ -37,14 +42,37 @@ type AtlasGameplayResult = {
   }
 }
 
+async function pixelFingerprint(pixels: Pixels['pixels']): Promise<string> {
+  const digest = await crypto.subtle.digest('SHA-256', new Uint8Array(pixels).buffer)
+  return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, '0')).join('')
+}
+
 const pulsedCues = [
   'protection', 'shield', 'stopwatch', 'goldenFlame', 'shortFuse', 'shortFlame',
   'longFuse', 'reverseControls', 'diarrhea', 'cloak',
 ] as const satisfies ReadonlyArray<keyof ActorDrawing>
 
-function normalizedGraphicsArtwork(): ArenaArtwork {
+function normalizedGraphicsArtwork(
+  normalizeShell: (
+    shell: Container, blast: 'standard' | 'piercing' | 'power',
+    trigger: 'timed' | 'remote' | 'contact',
+  ) => Container,
+  onBomb?: (bomb: BombDrawing) => void,
+): ArenaArtwork {
   return {
     ...graphicsArtwork,
+    makeBomb(blast, trigger) {
+      const bomb = graphicsArtwork.makeBomb(blast, trigger)
+      // Compare the same raster transform on both backends, as with actor cue caches below.
+      const shell = bomb.shell
+      const index = bomb.root.getChildIndex(shell)
+      bomb.root.removeChild(shell)
+      bomb.shell = normalizeShell(shell, blast ?? 'standard', trigger ?? 'timed')
+      bomb.root.addChildAt(bomb.shell, index)
+      shell.destroy({ children: true, context: true })
+      onBomb?.(bomb)
+      return bomb
+    },
     makeActor(seat) {
       const actor = graphicsArtwork.makeActor(seat)
       for (const cue of pulsedCues) {
@@ -70,28 +98,6 @@ declare global {
     grenadiersAtlasGameplay: { run: () => Promise<AtlasGameplayResult> }
   }
 }
-
-function representativeSnapshot(): SnapshotMessage {
-  const snapshot = diagnosticSnapshot(1)
-  snapshot.state.pickups = [
-    { cell: { column: 2, row: 3 }, kind: 'shield' },
-    { cell: { column: 4, row: 3 }, kind: 'remoteBomb' },
-    { cell: { column: 6, row: 3 }, kind: 'slowFoot' },
-  ]
-  snapshot.state.bombs = [{
-    id: 31, owner: 10, range: 4, placedAt: 1, cell: { column: 5, row: 5 },
-    blast: 'power', trigger: { type: 'timed', remainingTicks: 100, paused: false },
-  }]
-  snapshot.state.flames = [{ cell: { column: 6, row: 5 }, expiresAt: 20 }]
-  snapshot.state.oilBarrels = [{ cell: { column: 8, row: 5 }, state: 'burning' }]
-  Object.assign(snapshot.state.actors[0], {
-    damageGraceRemainingTicks: 30, shieldRemainingTicks: 40,
-    goldenFlameRemainingTicks: 50, shortFuseRemainingTicks: 60,
-    slowFootRemainingTicks: [70, 80], kickEquipped: true,
-  })
-  return snapshot
-}
-
 const cueCases = [
   ['protection', 'damageGraceRemainingTicks', 120],
   ['shield', 'shieldRemainingTicks', 160],
@@ -183,6 +189,17 @@ async function frames(count: number): Promise<number> {
   return performance.now() - startedAt
 }
 
+function scenePixels(app: Application, resolution: number, scene: ArenaScene): Pixels {
+  app.stage.removeChildren()
+  app.stage.addChild(scene.root)
+  app.render()
+  return app.renderer.extract.pixels({ target: scene.root, resolution })
+}
+
+function resetScenes(scenes: readonly ArenaScene[]): void {
+  scenes.forEach((scene) => scene.reset())
+}
+
 async function run(): Promise<AtlasGameplayResult> {
   const resolution = Math.min(devicePixelRatio || 1, 2)
   const app = new Application()
@@ -196,83 +213,104 @@ async function run(): Promise<AtlasGameplayResult> {
   // adopted artist pixels; the renderer lifecycle below still loads the bundled source.
   const regions = createArenaAtlas(await renderBaselineSource(arenaSourceManifest))
   const atlas = new ArenaScene(resolution, createAtlasArtwork(regions))
-  const graphics = new ArenaScene(resolution, normalizedGraphicsArtwork())
+  let normalizedBomb: BombDrawing | undefined
+  const normalizeShell = (
+    _shell: Container, blast: 'standard' | 'piercing' | 'power',
+    trigger: 'timed' | 'remote' | 'contact',
+  ): Container => regions.createSprite(`bomb.shell.${trigger}.${blast}`)
+  const artwork = normalizedGraphicsArtwork(normalizeShell, (bomb) => { normalizedBomb = bomb })
+  const graphics = new ArenaScene(resolution, artwork)
   const historicalGraphics = new ArenaScene(resolution, graphicsArtwork)
+  const scenes = [atlas, graphics, historicalGraphics] as const
   const comparisons: Comparison[] = []
   const historicalDeltas: Comparison[] = []
+  const bombSamples: Array<{ stage: string; atlas: Pixels['pixels']; historical: Pixels['pixels'] }> = []
   let renderer: ArenaRenderer | undefined
   let regionsDestroyed = false
   let appDestroyed = false
   const host = document.querySelector<HTMLElement>('#diagnostic-host')!
 
-  const pixels = (scene: ArenaScene): Pixels => {
-    app.stage.removeChildren()
-    app.stage.addChild(scene.root)
-    app.render()
-    return app.renderer.extract.pixels({ target: scene.root, resolution })
-  }
   const primeNormalizedCaches = (): void => {
     const cached = descendants(graphics.root).filter((node) => node.isCachedAsTexture)
     const alphas = cached.map((node) => node.alpha)
-    cached.forEach((node) => { node.alpha = 1; node.updateCacheTexture() })
-    app.stage.removeChildren(); app.stage.addChild(graphics.root); app.render()
-    cached.forEach((node, index) => { node.alpha = alphas[index] })
+    const scales = cached.map((node) => node.scale.clone())
+    cached.forEach((node) => {
+      node.alpha = 1
+      node.scale.set(1)
+      node.updateCacheTexture()
+    })
+    app.stage.removeChildren()
+    app.stage.addChild(graphics.root)
+    app.render()
+    cached.forEach((node, index) => {
+      node.alpha = alphas[index]
+      node.scale.set(scales[index].x, scales[index].y)
+    })
   }
   const capture = (stage: string): void => {
-    const atlasPixels = pixels(atlas)
-    const graphicsPixels = pixels(graphics)
+    const atlasPixels = scenePixels(app, resolution, atlas)
+    const graphicsPixels = scenePixels(app, resolution, graphics)
+    const historicalPixels = scenePixels(app, resolution, historicalGraphics)
     comparisons.push(compare(stage, atlasPixels, graphicsPixels))
-    historicalDeltas.push(compare(stage, atlasPixels, pixels(historicalGraphics)))
+    historicalDeltas.push(compare(stage, atlasPixels, historicalPixels))
+    if (stage.startsWith('bomb-pulse-')) {
+      bombSamples.push({ stage, atlas: atlasPixels.pixels.slice(), historical: historicalPixels.pixels.slice() })
+    }
   }
-
   try {
     const baseline = representativeSnapshot()
-    atlas.update(baseline, 0); graphics.update(baseline, 0)
-    historicalGraphics.update(baseline, 0); primeNormalizedCaches(); capture('running')
+    updateScenes(scenes, baseline, 0)
+    primeNormalizedCaches()
+    capture('running')
     const moving = structuredClone(baseline)
     moving.state.physicalTick = 4
     moving.state.actors[0].position.x += 1024
-    atlas.update(moving, 100); graphics.update(moving, 100); historicalGraphics.update(moving, 100)
-    atlas.render(117); graphics.render(117); historicalGraphics.render(117)
+    updateScenes(scenes, moving, 100)
+    renderScenes(scenes, 117)
     capture('interpolated-fractional')
-    atlas.render(180); graphics.render(180); historicalGraphics.render(180); capture('animation-80ms')
-    atlas.render(190); graphics.render(190); historicalGraphics.render(190); capture('animation-90ms')
-    atlas.render(210); graphics.render(210); historicalGraphics.render(210); capture('animation-110ms')
-    atlas.setReducedMotion(true); graphics.setReducedMotion(true); historicalGraphics.setReducedMotion(true)
-    atlas.render(180); graphics.render(180); historicalGraphics.render(180); capture('reduced-motion')
+    renderScenes(scenes, 180)
+    capture('animation-80ms')
+    renderScenes(scenes, 190)
+    capture('animation-90ms')
+    renderScenes(scenes, 210)
+    capture('animation-110ms')
+    setReducedMotion(scenes, true)
+    renderScenes(scenes, 180)
+    capture('reduced-motion')
     const result = structuredClone(moving)
     result.room.phase = { type: 'result' }
     result.state.actors[1].alive = false
-    atlas.update(result, 200); graphics.update(result, 200); historicalGraphics.update(result, 200)
+    updateScenes(scenes, result, 200)
     capture('result-hidden-actor')
-    atlas.reset(); graphics.reset(); historicalGraphics.reset()
-    atlas.update(baseline, 250); graphics.update(baseline, 250)
-    historicalGraphics.update(baseline, 250); primeNormalizedCaches(); capture('reset')
+    resetScenes(scenes)
+    updateScenes(scenes, baseline, 250)
+    primeNormalizedCaches()
+    capture('reset')
     const changedTerrain = structuredClone(baseline)
     changedTerrain.state.physicalTick = 2
     changedTerrain.state.arena.terrain[changedTerrain.state.arena.width + 1] = 'wall'
-    atlas.update(changedTerrain, 300); graphics.update(changedTerrain, 300)
-    historicalGraphics.update(changedTerrain, 300)
+    updateScenes(scenes, changedTerrain, 300)
     capture('changed-terrain')
 
-    app.stage.removeChildren(); app.stage.addChild(atlas.root)
+    app.stage.removeChildren()
+    app.stage.addChild(atlas.root)
     const restore = (): void => atlas.restoreContext()
     app.canvas.addEventListener('webglcontextrestored', restore)
     const comparisonRenderer = app.renderer
     if (!('context' in comparisonRenderer)) throw new Error('Comparison renderer is not WebGL')
     await restoreContext(app.canvas, () => comparisonRenderer.context.forceContextLoss())
     app.canvas.removeEventListener('webglcontextrestored', restore)
-    atlas.restoreContext(); graphics.restoreContext(); historicalGraphics.restoreContext()
+    scenes.forEach((scene) => scene.restoreContext())
     primeNormalizedCaches()
     capture('context-restored')
 
-    atlas.setReducedMotion(false); graphics.setReducedMotion(false)
-    historicalGraphics.setReducedMotion(false)
+    captureBombStages(scenes, () => normalizedBomb, primeNormalizedCaches, capture)
     cueCases.forEach(([name, field, period], index) => {
       const cue = isolatedCueSnapshot(field, index + 2)
-      atlas.update(cue, 0); graphics.update(cue, 0); historicalGraphics.update(cue, 0)
-      primeNormalizedCaches(); capture(`cue-${name}-low`)
-      atlas.render(period); graphics.render(period); historicalGraphics.render(period)
+      updateScenes(scenes, cue, 0)
+      primeNormalizedCaches()
+      capture(`cue-${name}-low`)
+      renderScenes(scenes, period)
       capture(`cue-${name}-high`)
     })
 
@@ -297,7 +335,7 @@ async function run(): Promise<AtlasGameplayResult> {
     const retainedFramesMs = await frames(retainedFrames)
     const canvasStable = host.querySelector('canvas') === canvas
 
-    atlas.reset(); graphics.reset(); historicalGraphics.reset()
+    resetScenes(scenes)
     app.stage.removeChildren()
     atlas.root.destroy({ children: true, context: true })
     graphics.root.destroy({ children: true, context: true })
@@ -310,6 +348,9 @@ async function run(): Promise<AtlasGameplayResult> {
     renderer = undefined
     return {
       resolution, comparisons, historicalDeltas,
+      bombFingerprints: await Promise.all(bombSamples.map(async ({ stage, atlas, historical }) => ({
+        stage, atlas: await pixelFingerprint(atlas), historical: await pixelFingerprint(historical),
+      }))),
       lifecycle: {
         canvasStable, hiddenBeforeUpdate, visibleAfterUpdate, hiddenAfterSuspend,
         visibleAfterResume, removedAfterDestroy: host.querySelector('canvas') === null,
@@ -328,7 +369,7 @@ async function run(): Promise<AtlasGameplayResult> {
   } finally {
     if (renderer) renderer.destroy()
     if (!appDestroyed) {
-      atlas.reset(); graphics.reset(); historicalGraphics.reset()
+      resetScenes(scenes)
       app.destroy({ removeView: true }, { children: true, context: true })
     }
     if (!regionsDestroyed) regions.destroy()

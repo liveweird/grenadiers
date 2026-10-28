@@ -35,12 +35,25 @@ v0.3.53 replaced the adopted source with a redrawn, AI-generated sheet; the curr
 a Napoleonic redraw (shako and bicorne actors, repainted terrain, bombs, flames, pickups and
 cues; see the [provenance](../../assets/art/README.md#provenance)). The original 95 frame contracts and pixels are preserved. Sixteen appended player-three/four
 poses extend the authoring sheet to 1120×1344 with matching pivots/foot anchors; the texture
-budget and gameplay collision geometry are unchanged. Current live rooms still use two seats.
+budget and gameplay collision geometry are unchanged. Live rooms support two to four human/CPU seats.
 v0.3.49 adopted the baseline artwork, with one explicit compositing change: status pulses
 fade each completed icon once. The old procedural renderer faded every overlapping paint
 stroke separately, exposing underlying colors during a pulse. A flat artist PNG retains the
 finished icon rather than those hidden strokes. Pulse timing and status visibility stay shared;
 this normalization affects only those decorative overlap pixels.
+
+## Bomb animation
+
+Timed bombs pulse their shell and spark from the server's remaining fuse ticks (60 ticks per
+second). The pulse period is one second above two seconds remaining, half a second above one
+second, and 0.2 seconds in the final second. Each pulse briefly enlarges the shell by 12.5%; its
+shadow, pause icon, position and gameplay collision stay fixed. Short Fuse and Long Fuse use
+their actual remaining time rather than a separate visual countdown.
+
+Stopwatch-paused bombs retain a neutral shell and visible pause mark. Remote bombs and landmines
+remain neutral because neither has an automatic countdown. Reduced motion and non-running
+rounds also use a stable shell. Re-rendering an unchanged snapshot does not advance the fuse,
+predict an explosion or remove a bomb. These states reuse the existing artist drawing.
 
 ## Verification
 
@@ -49,8 +62,10 @@ Run `scripts/gates.sh web`, `scripts/gates.sh e2e`, `scripts/gates.sh art-atlas`
 Pixi/WebGL comparisons. Its parity scenes pack the procedural baseline sheet through the same
 atlas pipeline, so they verify the renderer independently of the adopted artist pixels; its
 production-renderer lifecycle checks load the bundled source. Comparisons include a
-flattened-opaque reference for pulsing icons and separately reported differences from the
-historical per-stroke reference. Keep the required Playwright Chromium installation for browser
+flattened-opaque reference for pulsing icons and the same procedural-baseline atlas shell for
+scaled-bomb smoke checks. Fixed procedural pixel fingerprints independently guard all three
+pulsed bomb appearances; they do not depend on artist redraws. Differences from the historical
+per-stroke reference remain explicit. Keep the required Playwright Chromium installation for browser
 checks; `scripts/gates.sh all` retains its existing source/static scope.
 
 Before release, also exercise the production image through two-player gameplay and privacy

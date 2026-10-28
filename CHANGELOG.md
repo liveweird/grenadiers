@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## 0.3.111 — 2026-10-28
+
+- Pulse timed bomb shells faster as their authoritative fuse approaches detonation, including
+  Short Fuse and Long Fuse; preserve static paused, remote, landmine and reduced-motion states.
+- Keep shell motion independent of shadows, pause cues and collision, with real WebGL
+  comparisons at both device pixel ratios and unchanged canonical sprite-sheet pixels.
+
 ## 0.3.110 — 2026-10-28
 
 - Enable custom 11×9, 13×11 and 15×13 boards for two-to-four-player human/CPU lineups;

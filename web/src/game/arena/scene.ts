@@ -1,6 +1,7 @@
 import { Container } from 'pixi.js'
 import { setActorPose, type ActorDrawing } from './actorArt'
 import type { ArenaArtwork } from './artwork'
+import { selectBombAnimation } from './bombAnimation'
 import { TILE } from './drawing'
 import type { BombDrawing, FlameDrawing, OilBarrelDrawing } from './entityArt'
 import { graphicsArtwork } from './graphicsArtwork'
@@ -191,9 +192,14 @@ export class ArenaScene {
       )
     }
     const effects = this.running && !this.reducedMotion
-    for (const [id, bomb] of this.bombs) {
+    for (const bomb of this.bombs.values()) {
+      const animation = selectBombAnimation(
+        bomb.remainingTicks,
+        effects && !bomb.paused && !bomb.remote && !bomb.contact,
+      )
+      bomb.shell.scale.set(animation.shellScale)
       bomb.spark.visible = !bomb.remote && !bomb.contact && !bomb.paused
-        && (!effects || (Math.floor(now / 90) + id) % 2 === 0)
+        && animation.sparkVisible
       bomb.pause.visible = bomb.paused
     }
     for (const flame of this.flames.values()) {
@@ -240,6 +246,7 @@ export class ArenaScene {
       }
       drawing.root.position.set((bomb.cell.column + 0.5) * TILE, (bomb.cell.row + 0.5) * TILE)
       drawing.paused = bomb.trigger?.type === 'timed' && bomb.trigger.paused
+      drawing.remainingTicks = bomb.trigger?.type === 'timed' ? bomb.trigger.remainingTicks : null
     }
   }
 

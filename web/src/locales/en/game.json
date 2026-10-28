@@ -1,10 +1,12 @@
 {
-  "label": "Two-player match",
+  "label": "Multiplayer match",
   "timer": "Phase time remaining",
   "you": "(you)",
   "player": {
     "one": "Player one",
-    "two": "Player two"
+    "two": "Player two",
+    "three": "Player three",
+    "four": "Player four"
   },
   "scoreLabel": "Round wins for {{player}}",
   "lobby": {
@@ -15,6 +17,16 @@
     "code": "Room code",
     "codeHint": "Use eight letters or digits from the invitation.",
     "join": "Join room"
+  },
+  "multiplayer": {
+    "title": "Custom match",
+    "playerCount": "Players",
+    "controller": "Player {{player}} controller",
+    "human": "Human",
+    "cpu": "CPU",
+    "cpuPlayer": "{{player}} (CPU)",
+    "cpuDifficulty": "CPU difficulty: {{difficulty}}",
+    "create": "Create custom match"
   },
   "room": {
     "invitation": "Room invitation",

@@ -1,16 +1,16 @@
 use std::sync::Arc;
 
 use axum::extract::ws::{Message, WebSocket};
-use grenadiers_core::protocol::v13::{
-    GameServerMessage, ManualActionKind, V11ErrorCode as ErrorCode,
-};
+use grenadiers_core::protocol::v14::{ErrorCode, GameServerMessage, ManualActionKind};
 use grenadiers_core::protocol::{Counter, Direction as WireDirection, RoomId};
 use tokio::time::Instant;
 
 use super::{
     command::{Command, SequencedCommand},
     connection::{ConnectionState, Membership},
-    rooms::{Admission, BindingKey, GameRooms, RoomAction, RoomError},
+    rooms::{
+        BindingKey, GameRooms, LiveAdmission as Admission, RoomError, RosterAction as RoomAction,
+    },
     socket::{send_error, send_game, send_raw},
 };
 use crate::admission::{DenialOperation, GameplayOperation};
@@ -23,7 +23,7 @@ pub(super) async fn dispatch(
 ) -> bool {
     let (sequence, body) = command.into_parts();
     match body {
-        Command::CreateRoom { mode } => {
+        Command::CreateRoom { configuration } => {
             if state.membership.is_some() {
                 return reply_error(socket, ErrorCode::AlreadyInRoom, sequence).await;
             }
@@ -47,7 +47,7 @@ pub(super) async fn dispatch(
                 Err(alive) => return alive,
             };
             let result = rooms
-                .create_sequenced_mode(binding, sequence, std::time::Instant::now(), mode)
+                .create_live(binding, sequence, std::time::Instant::now(), configuration)
                 .await;
             admit(
                 socket,
@@ -78,7 +78,7 @@ pub(super) async fn dispatch(
                     Err(alive) => return alive,
                 };
             let result = rooms
-                .join_sequenced(&room_code, binding, sequence, std::time::Instant::now())
+                .join_live(&room_code, binding, sequence, std::time::Instant::now())
                 .await;
             admit(
                 socket,
@@ -116,7 +116,7 @@ pub(super) async fn dispatch(
                 Err(alive) => return alive,
             };
             let result = rooms
-                .resume(
+                .resume_live(
                     room_id,
                     binding,
                     sequence,
@@ -156,7 +156,7 @@ pub(super) async fn dispatch(
                 rooms,
                 room_id,
                 u64::from(round_id.get()),
-                RoomAction::ReadyChecked {
+                RoomAction::Ready {
                     ready,
                     settings_revision: settings_revision.get(),
                 },
@@ -263,10 +263,9 @@ async fn admit(
     super::peer_policy::record_room_result(state, operation, &result);
     match result {
         Ok(admission) => {
-            debug_assert_eq!(admission.round_id, u64::from(admission.room.round_id.get()));
             if send_raw(
                 socket,
-                Message::Text(admission.personal_frame.to_string().into()),
+                Message::Text(admission.personal_frame().to_string().into()),
             )
             .await
             .is_err()
@@ -296,19 +295,19 @@ async fn leave(
     let Some(member) = state.membership.as_ref() else {
         return reply_error(socket, ErrorCode::NotInRoom, sequence).await;
     };
-    if member.admission.room_id != room_id {
+    if *member.admission.room_id() != room_id {
         return reply_error(socket, ErrorCode::StaleRoom, sequence).await;
     }
     let Some(next_generation) = state.generation.checked_add(1) else {
         return reply_error(socket, ErrorCode::CapacityReached, sequence).await;
     };
     match rooms
-        .leave(&member.admission, member.binding, room_id.clone(), round_id)
+        .leave_live(&member.admission, member.binding, room_id.clone(), round_id)
         .await
     {
         Ok(()) => {
             let mut member = state.membership.take().expect("membership exists");
-            member.admission.guard.disarm();
+            member.admission.disarm();
             state.generation = next_generation;
             state.deadlines.restart_unseated(Instant::now());
             send_game(socket, &GameServerMessage::LeftRoom { room_id, sequence })
@@ -332,7 +331,7 @@ async fn action(
         return reply_error(socket, ErrorCode::NotInRoom, sequence).await;
     };
     match rooms
-        .action(&member.admission, member.binding, room_id, round_id, action)
+        .action_live(&member.admission, member.binding, room_id, round_id, action)
         .await
     {
         Ok(()) => true,
@@ -352,6 +351,7 @@ async fn room_error(socket: &mut WebSocket, error: RoomError, sequence: Counter)
         RoomError::InvalidPhase => ErrorCode::InvalidPhase,
         RoomError::DuplicateAction => ErrorCode::DuplicateAction,
         RoomError::ResumeRejected => ErrorCode::ResumeRejected,
+        RoomError::UnsupportedConfiguration => ErrorCode::UnsupportedConfiguration,
     };
     reply_error(socket, code, sequence).await
 }

@@ -1,8 +1,8 @@
 import { performance } from 'node:perf_hooks'
 import { expect, type Page } from '@playwright/test'
 import type {
-  ArenaView, Cell, Direction, GameServerMessage, Position, Terrain,
-} from '../../../web/src/game/v13/schema'
+  Cell, Direction, GameServerMessage, Position, Terrain,
+} from '../../../web/src/game/v14/schema'
 import type {
   DelayBridgeObserver, DelayBridgeSummary, RoutedFrameSummary, SanitizedSnapshot,
 } from './delayed-websocket'
@@ -145,7 +145,7 @@ export class LatencyObserver implements DelayBridgeObserver {
                 if (!actor || actor.type !== 'visible') return
                 const bombIds: number[] = []
                 for (const bomb of message.state.bombs) bombIds.push(bomb.id)
-                let arena: ArenaView | undefined
+                let arena: SanitizedArena | undefined
                 if (!arenaSent) {
                   const blocks: Cell[] = []
                   for (const cell of message.state.arena.blocks) blocks.push({ ...cell })

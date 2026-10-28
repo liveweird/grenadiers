@@ -94,12 +94,9 @@ impl MatchRuntime {
             self.settings_revision,
             None,
         )?;
+        let notice = self.view_notice(room)?;
         self.revision = next;
-        Ok(MatchNotice {
-            room,
-            frames: None,
-            cpu_observation: None,
-        })
+        Ok(notice)
     }
 
     pub(in crate::game::rooms) fn current_notice(

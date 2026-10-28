@@ -141,11 +141,13 @@ function supportedEvents(
 
 export function expandedProfileSemanticErrorFor(
   room: SemanticRoom, state: SemanticState | null, events: readonly SemanticEvent[],
-  catalog: readonly string[], allowPausedTimed: boolean,
+  catalog: readonly string[], profile: boolean | { allowPausedTimed: boolean; rulesVersions: readonly number[] },
 ): GameplayProfileSemanticError | null {
+  const allowPausedTimed = typeof profile === 'boolean' ? profile : profile.allowPausedTimed
+  const rulesVersions = typeof profile === 'boolean' ? [5] : profile.rulesVersions
   const enabled = new Set(room.settings.enabledItems)
   const canonicalEnabled = catalog.filter((item) => enabled.has(item))
-  if (room.rulesVersion !== 5 || room.mapId !== 'generated_v2'
+  if (!rulesVersions.includes(room.rulesVersion) || room.mapId !== 'generated_v2'
     || room.availableItems.length !== catalog.length
     || room.availableItems.some((item, index) => item !== catalog[index])
     || room.settings.enabledItems.length !== canonicalEnabled.length

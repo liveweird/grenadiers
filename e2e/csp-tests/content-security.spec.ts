@@ -27,7 +27,7 @@ test('enforced policy permits live diagnostics and gameplay admission', async ({
   await page.getByText('Connection diagnostics', { exact: true }).click()
   await expect(page.getByText('Available', { exact: true })).toBeVisible()
   await page.getByRole('button', { name: 'Connect' }).click()
-  await expect(page.getByText('Protocol v1 · up to 2 players')).toBeVisible()
+  await expect(page.getByText('Protocol v2 · up to 4 players')).toBeVisible()
   await page.getByRole('button', { name: 'Send ping' }).click()
   await expect(page.getByText('Pong 1 received')).toBeVisible()
 

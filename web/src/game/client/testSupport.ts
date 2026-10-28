@@ -1,6 +1,6 @@
 import { vi } from 'vitest'
 import { GameClient, type AdmissionIntent, type GameClientState } from './client'
-import type { Admitted, GameServerMessage, GameState, RoomPhase, RoomView, Snapshot } from '../v13/schema'
+import type { Admitted, GameServerMessage, GameState, RoomPhase, RoomView, Snapshot } from '../v14/schema'
 
 export const sessionToken = 'a'.repeat(64)
 export const resumeToken = 'c'.repeat(64)
@@ -150,15 +150,16 @@ export async function authenticate(value: Harness, intent: AdmissionIntent = { t
   await vi.waitFor(() => expect(value.sockets).toHaveLength(1))
   const socket = value.sockets.at(-1)!
   socket.emit('open')
-  socket.message({ type: 'authenticated', protocolVersion: 13 })
+  socket.message({ type: 'authenticated', protocolVersion: 14 })
   return socket
 }
 
 export function room(revision: number, phase: RoomPhase = { type: 'waiting' }, roundId = 1): RoomView {
   return {
-    roomId, roomCode: 'ABCDEFGH', roundId, revision, tick: revision, mode: { type: 'humanDuel' },
+    roomId, roomCode: 'ABCDEFGH', roundId, revision, tick: revision,
+    configuration: { controllers: ['human', 'human'], cpuDifficulty: null, board: { width: 15, height: 13 } },
     rulesVersion: 5, mapId: 'generated_v2', roundNumber: phase.type === 'running' ? 1 : 0,
-    scores: { one: 0, two: 0 }, lastRound: null,
+    scores: [{ seat: 'one', wins: 0 }, { seat: 'two', wins: 0 }], lastRound: null,
     settings: {
       startingSpeedLevel: 0, turnAssistUnits: 256, winsToFinish: 3, bombFuseTicks: 180,
       enabledItems: ['heart'],

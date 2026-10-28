@@ -1,15 +1,15 @@
 # Gameplay protocol
 
 Status: gameplay contracts, checked domain conversion, HTTP session issuance, and authenticated
-gameplay WebSockets with authoritative configurable two-seat matches are implemented.
-`api/gameplay-v13.schema.json`, Rust `core::protocol::v13`, and generated
-`web/src/game/v13/schema.ts` define active socket messages. V2 through v12 remain historical.
-V13 retains Expanded v5/generator v2 and the v11 physical/privacy model, extending immutable
-solo controller metadata with Easy and Standard difficulty. See [compatibility](protocol-v13.md).
+gameplay WebSockets with authoritative configurable two-to-four-seat matches are implemented.
+`api/gameplay-v14.schema.json`, Rust `core::protocol::v14`, and generated
+`web/src/game/v14/schema.ts` define active socket messages. V2 through v13 remain historical.
+V14 retains the v11 physical/privacy model while adding a checked two-to-four-controller room
+configuration. See the [v14 contract](protocol-v14.md) and [v13 compatibility](protocol-v13.md).
 See [ADR 0021](../decisions/0021-gameplay-retention.md) for the distinction between live support,
 archived wire contracts and private replay retention.
-The browser validates these messages and drives the playable generated-map match. Diagnostic `/api/v1/ws` and
-`api/realtime.schema.json` remain unchanged.
+The browser validates these messages and drives the playable generated-map match. Diagnostic
+`/api/v1/ws` separately uses diagnostic protocol v2 in `api/realtime.schema.json`.
 
 ## Protocol version guide
 
@@ -26,8 +26,8 @@ The browser validates these messages and drives the playable generated-map match
 | v10 | [Historical guide](../history/protocols/protocol-v10.md) | Archived contract |
 | v11 | [Physical compatibility guide](protocol-v11.md) | Archived contract |
 | v12 | [Standard-only solo guide](protocol-v12.md) | Archived contract |
-| v13 | [Live compatibility guide](protocol-v13.md) | Supported |
-| v14 | [Multiplayer contract](protocol-v14.md) | Dormant; paired activation pending |
+| v13 | [Compatibility guide](protocol-v13.md) | Archived contract |
+| v14 | [Live multiplayer contract](protocol-v14.md) | Supported |
 
 ## Authentication and compatibility
 
@@ -47,20 +47,21 @@ Connect to `/api/v1/game/ws` with one configured non-null Origin and no query pa
 Its first application frame must be:
 
 ```json
-{"type":"authenticate","protocolVersion":13,"token":"0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"}
+{"type":"authenticate","protocolVersion":14,"token":"0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"}
 ```
 
 The token is a secret 64-character lowercase hexadecimal credential, held only in tab memory.
 It never belongs in a URL or log. A syntactically valid unsupported version is parsed so the
 server can return `incompatibleProtocol` before credential binding. Supported gameplay version
-is 13, independently of the product release and diagnostic protocol. Parser failures expose
+is 14, independently of the product release and diagnostic protocol. Parser failures expose
 only a generic error; token Debug formatting is redacted.
 
 A successful claim atomically binds one connection. Duplicate claims receive `connectionInUse`
 and cannot displace the owner. Unknown/expired/revoked credentials receive `authenticationFailed`.
 Closing or canceling the owner revokes its credential; issue a new token for a new connection.
-Claimed credentials do not expire under the unclaimed-token timer. Gameplay and diagnostic
-sockets share one 128-connection semaphore, including sockets awaiting authentication.
+Claimed credentials do not expire under the unclaimed-token timer. Gameplay sockets have their
+own 128-connection budget, including sockets awaiting authentication; diagnostic connections use
+an independent 16-connection budget.
 
 The resume token is a separate 32-byte seat capability encoded as 64 lowercase hexadecimal
 characters. It stays only in the owner and admitted tab memory, never in URLs, shared messages,
@@ -70,12 +71,13 @@ sending `resumeRoom`; the stable seat capability is not an authentication-sessio
 Authentication has an absolute five-second deadline; Ping/Pong cannot extend it. Upgrades use
 a global 32-token burst with eight-per-second refill. Each socket admits a burst of 30 inbound
 messages with 60-per-second refill, including control frames. Client frames/messages are at
-most 4 KiB; encoded server messages are at most 64 KiB with finite write buffering. Sends have
+most 4 KiB; encoded v14 server messages are at most 96 KiB with finite write buffering. Sends have
 a five-second deadline. Server Ping runs every ten seconds, no inbound activity for 30 seconds
 closes the socket, and unseated authentication expires after an absolute five minutes.
 
 Malformed/binary input, failed authentication, repeated authentication, or rate exhaustion
-closes the offending socket with fixed reasons. Create/join now bind one of two room seats;
+closes the offending socket with fixed reasons. Create/join bind a configured human seat in a
+two-to-four-seat room; CPU seats remain server-owned and at least one human is required.
 already-bound admission returns `alreadyInRoom`, full rooms return `roomFull`, and unknown
 codes return `roomNotFound`. Unbound room commands return `notInRoom`; mismatched ownership
 or attempts return `staleRoom`. Ready applies in Waiting/initial Countdown; movement/bombs require
@@ -90,7 +92,7 @@ All listed fields are required; objects reject extra fields. Counter values are 
 | Client type | Additional fields |
 | --- | --- |
 | `authenticate` | `protocolVersion` (0–65,535), `token` |
-| `createRoom` | `sequence`, `mode` (`humanDuel` or `solo` with `easy` or `standard` difficulty) |
+| `createRoom` | `sequence`, complete `configuration` (two to four controllers, creator human, CPU difficulty or null, board) |
 | `joinRoom` | `sequence`, `roomCode` |
 | `resumeRoom` | `sequence`, `roomId`, private `resumeToken` |
 | `ready` | `sequence`, `roomId`, `roundId`, `settingsRevision`, `ready` |
@@ -102,8 +104,8 @@ All listed fields are required; objects reject extra fields. Counter values are 
 
 | Server type | Additional fields |
 | --- | --- |
-| `authenticated` | `protocolVersion: 13` |
-| `incompatibleProtocol` | `supportedVersion` (0–65,535; this server emits 13) |
+| `authenticated` | `protocolVersion: 14` |
+| `incompatibleProtocol` | `supportedVersion` (0–65,535; this server emits 14) |
 | `admitted` | acknowledged `sequence`, shared `room`, `youSeat`, private `resumeToken`, nullable `lastActionId`, nullable `state` |
 | `roomState` | shared `room` only |
 | `seatReplaced` | `roomId`; old binding closes with code 4001 |
@@ -119,8 +121,8 @@ Room metadata is shared; physical snapshots are prepared separately for each aut
 The default all-items enabled set still uses recipient-specific projections. Personal
 `admitted` carries seat identity, capability, action floor and an optional recipient baseline,
 without historical events. `state` contains `physicalTick`, `runningUpdates` and `remainingTicks`
-(each running counter 0–10,800), the arena, exactly two
-actors, up to 16 bombs, up to 195 finite flames, and up to 195 exposed pickups. Finite flames and
+(each running counter 0–10,800), the arena, exactly the configured two to four actors, up to 32
+bombs, up to 195 finite flames, and up to 195 exposed pickups. Finite flames and
 burning Oil together occupy at most 195 distinct cells. The arena has width 15, height 13, exactly 195
 row-major floor/wall terrain entries, and up to 195 unique soft-block cells.
 
@@ -148,7 +150,7 @@ are excluded. The checked domain adapter enforces canonical ordering and cross-f
 runtime publication. Pickups must be unique, row-major, on floor without blocks or flames;
 bomb and actor overlap is permitted.
 
-Each snapshot carries 0–96 events with absolute `tick`, per-tick `index` (0–95), and tagged
+Each snapshot carries 0–192 events with absolute `tick`, per-tick `index` (0–191), and tagged
 `kind`: `bombPlaced`/`bombDetonated` carry a full bomb record; `actorEliminated` carries ID/seat;
 `pickupCollected` carries collector ID/seat, cell, and kind; `roundEnded` carries the result.
 `damagePrevented` reports a consumed Heart with source `heart`. Identity is
@@ -159,17 +161,17 @@ completed 60 Hz updates per normal snapshot.
 
 ## Checked domain conversion
 
-Use `core::protocol::v11::capture_expanded` to observe the complete State and reports, then
-`bind_expanded` to certify the room profile, settings, lifecycle epoch, physical tick and
+Use `core::protocol::v14::capture_expanded` to observe the complete State and reports, then
+`bind_expanded` to certify the room profile, configuration, settings, lifecycle epoch, physical tick and
 trusted round generation record.
 Opaque captures cannot be serialized directly. Raw server DTO fields alone do not establish
 canonical validity. Validate every actor, bomb, ownership count, effect and event before filtering;
 a malformed hidden record fails the whole operation. Binding rejects unsupported optional state
 even when a caller provides matching enabled/available arrays. Archived Classic binding remains strict.
 
-`prepare_snapshot_pair` builds both recipient encodings before either can be published. Only
+`prepare_snapshots` builds every recipient encoding before any can be published. Only
 then may the runtime advance revision, record one report flush and clear reports once. Report
-windows contain at most three consecutive updates and 96 unfiltered events. Capture audiences
+windows contain at most three consecutive updates and 192 unfiltered events. Capture audiences
 at emission, filter before assigning contiguous recipient-local indexes per tick, and never
 truncate. Historical event records need not exist in the final world. Admission prepares a
 recipient-specific event-free body before ownership/replacement commit.
@@ -177,8 +179,8 @@ recipient-specific event-free body before ownership/replacement commit.
 Running physical time equals room time. Result and MatchResult bodies remain frozen at their
 own completed-round epoch/result/end tick while room time advances; unfinished terminal bodies
 bind to the independent match outcome. A later forfeit cannot replace the earlier completed
-physics tick. Inter-round countdowns publish room views without an old world. Encoders retain
-the 64 KiB ceiling. Conversion neither clamps invalid timestamps nor advances simulation.
+physics tick. Inter-round countdowns publish room views without an old world. V14 encoders retain
+the 96 KiB ceiling. Conversion neither clamps invalid timestamps nor advances simulation.
 
 ## Identity, ordering, and lifecycle
 
@@ -195,8 +197,9 @@ for that epoch. Unsupported equipment commands consume only the connection seque
 not the manual high-water, mailbox budget or journal; a later bomb may reuse that action ID.
 
 `RoomView` carries identity/code, independent command epoch `roundId`, revision, global tick,
-rules/map versions, actual `roundNumber`, scores (0..9 per seat, bounded by the selected target), nullable `lastRound`, two
-canonical seat statuses (connection, occupancy/readiness/rematch consent), and a tagged phase. A
+rules/map versions, actual `roundNumber`, canonical per-seat scores (0..9, bounded by the selected
+target), nullable `lastRound`, the configured two to four canonical seat statuses (connection,
+occupancy/readiness/rematch consent), the immutable room configuration, and a tagged phase. A
 connection is vacant, connected, disconnected with exclusive `expiresAt`, or expired. Actual
 round count increases only on starts, remains on the preceding round during inter-round
 countdown, and resets on rematch. Epochs also advance across cancellation and rematch, so
@@ -204,7 +207,7 @@ spawn/tie assignment uses actual round count rather than command epoch.
 
 Shared room views and snapshot metadata also carry the complete checked `settings`,
 `settingsRevision`, nullable original `settingsEditor`, and `availableItems`. Settings also
-carry `enabledItems`; v10 remains pinned to its 21-item Bracelet catalog while active v13
+carry `enabledItems`; v10 remains pinned to its 21-item Bracelet catalog while active v14
 has the unchanged 22-item catalog beginning with Kick, Punch, Bracelet and Wall Pass, with Oil Barrel immediately
 before Teleporter. New live rooms enable the full available catalog and every supported subset is allowed.
 Only actual changes increment
@@ -219,7 +222,7 @@ inter-round countdown. Draws award no score. Last-round records persist across l
 forfeits, and interruptions; rematch clears them. See the
 [v4 field reference](../history/protocols/protocol-v4.md).
 
-Two occupied players may set/withdraw rematch votes after the final hold. Consensus advances
+Eligible human players may set or withdraw rematch votes after the final hold. Consensus advances
 one epoch and returns occupied, unready Waiting without changing transport sequence or room
 revision ownership. Countdown cancellation advances epoch without consuming an actual round
 or seed. A newer-epoch snapshot can be accepted directly when an intermediate room view is
@@ -229,23 +232,25 @@ Leaving acknowledges removal while retaining an authenticated unseated socket. A
 retains the seat capability; acknowledged leave clears it. If transport is lost while leave is
 pending, the browser honors the explicit local departure instead of retrying. Running
 boundaries commit physics/scoring before batched departures; idle phases apply departure
-before automatic transitions. Explicit leave forfeits and two explicit leaves abandon. Eligible
-transport loss reserves the seat for 600 global ticks; one expiry forfeits to an eligible opponent,
-both expiry abandons, and a disconnected opponent delays the decision until settled. Reaching the
+before automatic transitions. Departure and grace expiry settle elimination, forfeit, or
+abandonment against the complete eligible roster; CPUs cannot keep a room alive after its last
+retained human leaves. Eligible transport loss reserves the seat for 600 global ticks. Reaching the
 configured win target and already final outcomes take precedence. Ownership is bound to connection generation and private
 capability, never to invitation code. See [bounded owner](match-owner.md).
 
 ## Profile and version evolution
 
 An immutable server room profile owns state construction and its rules/map labels. Publication
-rejects state whose checked rules version disagrees with that profile. Production uses Expanded-v5
-rules and generated-v2 arenas. Snapshots initially have an
+rejects state whose checked rules version disagrees with that profile. Live two-seat rooms use
+Expanded-v5 rules, generator v2, and CPU policy 16. Live three- and four-seat rooms use rules 6,
+generator v3, and CPU policy 17. Every live configuration currently uses a 15×13 board; smaller
+schema-valid boards are rejected before construction. Snapshots initially have an
 empty pickup array because contents are concealed; only exposed items become public.
 Fixed-classic-v1 remains an explicit unit fixture, not a production selector.
 
-Gameplay v11 is incompatible with earlier versions. Reload clients when upgrading the single server. Both
+Gameplay v14 is incompatible with earlier versions. Reload clients when upgrading the single server. Both
 old and future versions are rejected before credential lookup, so rejection cannot claim or
-revoke a token. `supportedVersion` accepts the bounded input range rather than only v11,
+revoke a token. `supportedVersion` accepts the bounded input range rather than only v14,
 allowing a new client to understand an older server's incompatibility response.
 See [ADR 0013](../decisions/0013-gameplay-v2-and-room-profiles.md).
 
@@ -256,8 +261,8 @@ without writing. The shared web gate runs this alongside existing diagnostic che
 validation tests. Rust conformance tests compare strict parsing and serialization with the same
 schema, including missing/null fields, scalar boundaries, integer-valued number forms, version
 rejection responses, credential redaction, all event variants, nested bounds, and real
-frame-size enforcement. A serialization-based conservative v7 proof bounds Snapshot at
-61,586 bytes and Admitted at 36,472 bytes, below the inclusive 65,536-byte ceiling. Separate
+frame-size enforcement. Conservative v14 schema-recursive proofs keep Snapshot and Admitted at
+or below the inclusive 98,304-byte ceiling. Separate
 schema-valid representatives and oversize rejection tests remain. These are structural bounds,
 not reachable gameplay claims. TypeScript types do not enforce string patterns
 or numeric/array bounds at runtime; AJV and Rust validation do.
@@ -283,5 +288,5 @@ failure does not advance revision or discard reports. Current Expanded rules als
 and Contact bombs when their corresponding items are enabled; archived v6 continues to reject
 untimed live and event-only records.
 
-Room mode and per-seat controller/connection metadata follow the [v13 contract](protocol-v13.md).
-Solo admits only its human creator; its server-controlled seat has no network capability.
+Room configuration and per-seat controller/connection metadata follow the [v14 contract](protocol-v14.md).
+CPU seats are server-controlled and have no network capability.

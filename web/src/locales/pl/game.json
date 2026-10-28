@@ -1,10 +1,12 @@
 {
-  "label": "Mecz dla dwóch graczy",
+  "label": "Mecz wieloosobowy",
   "timer": "Czas pozostały w bieżącej fazie",
   "you": "(ty)",
   "player": {
     "one": "Gracz pierwszy",
-    "two": "Gracz drugi"
+    "two": "Gracz drugi",
+    "three": "Gracz trzeci",
+    "four": "Gracz czwarty"
   },
   "scoreLabel": "Wygrane rundy: {{player}}",
   "lobby": {
@@ -15,6 +17,16 @@
     "code": "Kod pokoju",
     "codeHint": "Wpisz osiem liter lub cyfr z zaproszenia.",
     "join": "Dołącz do pokoju"
+  },
+  "multiplayer": {
+    "title": "Mecz niestandardowy",
+    "playerCount": "Gracze",
+    "controller": "Sterowanie gracza {{player}}",
+    "human": "Człowiek",
+    "cpu": "Komputer",
+    "cpuPlayer": "{{player}} (komputer)",
+    "cpuDifficulty": "Poziom trudności komputera: {{difficulty}}",
+    "create": "Utwórz mecz niestandardowy"
   },
   "room": {
     "invitation": "Zaproszenie do pokoju",

@@ -20,8 +20,9 @@ function soloState(difficulty: 'easy' | 'standard' = 'standard'): GameClientStat
     type: 'matchResult', endedAt: 20, rematchAt: 200,
     result: { type: 'winner', seat: 'two', reason: 'roundWins' },
   })
-  current.mode = { type: 'solo', difficulty }
-  current.scores.two = 3
+  current.configuration = { controllers: ['human', 'cpu'], cpuDifficulty: difficulty,
+    board: { width: 15, height: 13 } }
+  current.scores[1]!.wins = 3
   current.roundNumber = 3
   current.seats[1] = {
     seat: 'two', controller: { type: 'cpu', difficulty }, occupied: true,

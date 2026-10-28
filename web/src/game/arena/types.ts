@@ -67,8 +67,8 @@ export interface SnapshotMessage {
     physicalTick?: number
     runningUpdates?: number
     arena: {
-      width: 15
-      height: 13
+      width: 11 | 13 | 15
+      height: 9 | 11 | 13
       terrain: Array<'floor' | 'wall'>
       blocks: Array<{ column: number; row: number }>
     }
@@ -82,8 +82,7 @@ export interface SnapshotMessage {
     }>
   }
 }
-export type Seat = 'one' | 'two'
-export type ActorAppearance = Seat | 'three' | 'four'
+export type Seat = 'one' | 'two' | 'three' | 'four'
 export type Direction = 'north' | 'east' | 'south' | 'west'
 
 export interface GameArenaProps {

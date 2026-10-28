@@ -1,5 +1,5 @@
 import { Container, Graphics } from 'pixi.js'
-import type { ActorAppearance, Direction } from './types'
+import type { Direction, Seat } from './types'
 import { PALETTE } from './palette'
 import { pixels } from './pixel'
 
@@ -63,7 +63,7 @@ function legs(drawing: Graphics, frame: number, side: boolean): void {
   pixels(drawing, 0x52606b, [[-9, 10 + left, 5, 4], [4, 10 + right, 5, 4]])
 }
 
-function helmetMark(drawing: Graphics, appearance: ActorAppearance, direction: Direction): void {
+function helmetMark(drawing: Graphics, appearance: Seat, direction: Direction): void {
   if (appearance === 'one') {
     if (direction === 'east' || direction === 'west') pixels(drawing, PALETTE.white, [[-2, -19, 6, 8]])
     else pixels(drawing, PALETTE.white, [[-3, -20, 6, 9], [-6, -17, 12, 3]])
@@ -84,14 +84,14 @@ function helmetMark(drawing: Graphics, appearance: ActorAppearance, direction: D
   }
 }
 
-function uniformColors(appearance: ActorAppearance): readonly [number, number] {
+function uniformColors(appearance: Seat): readonly [number, number] {
   if (appearance === 'one') return [PALETTE.brass, PALETTE.brassLight]
   if (appearance === 'two') return [PALETTE.blue, PALETTE.blueLight]
   if (appearance === 'three') return [PALETTE.forest, PALETTE.forestLight]
   return [PALETTE.plum, PALETTE.plumLight]
 }
 
-function frontOrBack(appearance: ActorAppearance, direction: 'north' | 'south', frame: number): Graphics {
+function frontOrBack(appearance: Seat, direction: 'north' | 'south', frame: number): Graphics {
   const drawing = new Graphics()
   const [uniform, light] = uniformColors(appearance)
   legs(drawing, frame, false)
@@ -116,7 +116,7 @@ function frontOrBack(appearance: ActorAppearance, direction: 'north' | 'south', 
   return drawing
 }
 
-function sidePose(appearance: ActorAppearance, direction: 'east' | 'west', frame: number): Graphics {
+function sidePose(appearance: Seat, direction: 'east' | 'west', frame: number): Graphics {
   const drawing = new Graphics()
   const [uniform, light] = uniformColors(appearance)
   legs(drawing, frame, true)
@@ -137,7 +137,7 @@ function sidePose(appearance: ActorAppearance, direction: 'east' | 'west', frame
   return drawing
 }
 
-export function makeActor(appearance: ActorAppearance): ActorDrawing {
+export function makeActor(appearance: Seat): ActorDrawing {
   const root = new Container()
   const shadow = new Graphics()
   pixels(shadow, PALETTE.deepInk, [[-13, 15, 26, 4], [-9, 19, 18, 2]])

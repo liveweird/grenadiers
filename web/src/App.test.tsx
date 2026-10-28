@@ -3,7 +3,7 @@ import { act, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { GameArenaProps } from './game/arena/types'
-import type { GameState, RoomPhase, RoomView, Snapshot } from './game/v13/schema'
+import type { GameState, RoomPhase, RoomView, Snapshot } from './game/v14/schema'
 import i18n from './i18n'
 import { App } from './App'
 
@@ -46,7 +46,7 @@ const appSockets: AppSocketStub[] = []
 function room(revision: number, phase: RoomPhase = { type: 'waiting' }): RoomView {
   return {
     roomId,
-    mode: { type: 'humanDuel' },
+    configuration: { controllers: ['human', 'human'], cpuDifficulty: null, board: { width: 15, height: 13 } },
     roomCode: 'ABCDEFGH',
     roundId: 1,
     revision,
@@ -54,7 +54,7 @@ function room(revision: number, phase: RoomPhase = { type: 'waiting' }): RoomVie
     rulesVersion: 5,
     mapId: 'generated_v2',
     roundNumber: ['running', 'result', 'matchResult'].includes(phase.type) ? 1 : 0,
-    scores: { one: 0, two: phase.type === 'result' ? 1 : 0 },
+    scores: [{ seat: 'one', wins: 0 }, { seat: 'two', wins: phase.type === 'result' ? 1 : 0 }],
     lastRound: phase.type === 'result' ? {
       roundId: 1, roundNumber: 1, endedAt: phase.holdUntil - 180,
       result: { type: 'winner', seat: 'two' },
@@ -128,8 +128,8 @@ async function beginRoom(user: ReturnType<typeof userEvent.setup>, action: 'crea
   await waitFor(() => expect(appSockets.filter((socket) => socket.url.endsWith('/api/v1/game/ws'))).toHaveLength(1))
   const socket = appSockets.find((candidate) => candidate.url.endsWith('/api/v1/game/ws'))!
   act(() => socket.emit('open'))
-  expect(JSON.parse(socket.sent[0])).toEqual({ type: 'authenticate', protocolVersion: 13, token })
-  act(() => socket.message({ type: 'authenticated', protocolVersion: 13 }))
+  expect(JSON.parse(socket.sent[0])).toEqual({ type: 'authenticate', protocolVersion: 14, token })
+  act(() => socket.message({ type: 'authenticated', protocolVersion: 14 }))
   return socket
 }
 
@@ -150,7 +150,10 @@ describe('App game flow', () => {
     expect(screen.getByRole('heading', { name: 'Grenadiers' })).toBeVisible()
     expect(screen.getByText('Clear a path. Survive the round.')).toBeVisible()
     const socket = await beginRoom(user)
-    expect(JSON.parse(socket.sent[1])).toEqual({ type: 'createRoom', sequence: 1, mode: { type: 'humanDuel' } })
+    expect(JSON.parse(socket.sent[1])).toEqual({
+      type: 'createRoom', sequence: 1,
+      configuration: { controllers: ['human', 'human'], cpuDifficulty: null, board: { width: 15, height: 13 } },
+    })
 
     act(() => admit(socket, room(1)))
     expect(await screen.findByLabelText('Room invitation code')).toHaveTextContent('ABCDEFGH')
@@ -224,7 +227,7 @@ describe('App game flow', () => {
 
     const draw = snapshot(3, { type: 'result', holdUntil: 183 })
     draw.room.lastRound!.result = { type: 'draw', reason: 'timeout' }
-    draw.room.scores.two = 0
+    draw.room.scores[1]!.wins = 0
     act(() => socket.message(draw))
     expect(await screen.findByText('Draw: time ran out.')).toBeVisible()
   })
@@ -285,8 +288,8 @@ describe('App game flow', () => {
     await user.click(screen.getByRole('button', { name: 'Connect' }))
     const socket = appSockets.find((candidate) => candidate.url.endsWith('/api/v1/ws'))!
     act(() => socket.emit('open'))
-    act(() => socket.message({ type: 'welcome', protocolVersion: 1, maxPlayers: 2 }))
-    expect(await screen.findByText('Protocol v1 · up to 2 players')).toBeVisible()
+    act(() => socket.message({ type: 'welcome', protocolVersion: 2, maxPlayers: 4 }))
+    expect(await screen.findByText('Protocol v2 · up to 4 players')).toBeVisible()
     await user.click(screen.getByRole('button', { name: 'Send ping' }))
     expect(socket.sent).toEqual(['{"type":"ping","sequence":1}'])
     act(() => socket.message({ type: 'pong', sequence: 1 }))

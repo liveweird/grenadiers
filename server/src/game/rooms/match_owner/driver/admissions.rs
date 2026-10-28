@@ -89,8 +89,10 @@ impl Driver {
         };
         let admission = MatchAdmission {
             room_id: self.room_id.clone(),
+            #[cfg(test)]
             round_id: u64::from(prepared.room.round_id.get()),
             seat: wire_seat(seat)?,
+            #[cfg(test)]
             room: prepared.room.clone(),
             resume_token: credential.token(),
             last_bomb_action_id: prepared.last_bomb_action_id,
@@ -161,8 +163,10 @@ impl Driver {
         };
         let admission = MatchAdmission {
             room_id: self.room_id.clone(),
+            #[cfg(test)]
             round_id: u64::from(prepared.room.round_id.get()),
             seat: wire_seat(seat)?,
+            #[cfg(test)]
             room: prepared.room.clone(),
             resume_token: credential.token(),
             last_bomb_action_id: prepared.last_bomb_action_id,
@@ -209,22 +213,7 @@ fn admission_frame(
     if FAIL_NEXT_ADMISSION_ENCODING.with(|fail| fail.replace(false)) {
         return Err(MatchRuntimeError::Publication);
     }
-    grenadiers_core::protocol::v13::prepare_admission(
-        grenadiers_core::protocol::v13::AdmissionProjection {
-            room: &prepared.room,
-            state_epoch: prepared.state_epoch,
-            capture: prepared.capture.as_ref(),
-            generation: prepared.generation,
-        },
-        grenadiers_core::protocol::v13::PersonalAdmission {
-            recipient: wire_seat(seat)?,
-            last_action_id: prepared.last_bomb_action_id,
-            sequence,
-            resume_token: token,
-        },
-    )
-    .map(std::sync::Arc::from)
-    .map_err(|_| MatchRuntimeError::Publication)
+    prepared.encode(seat, sequence, token)
 }
 
 #[cfg(test)]

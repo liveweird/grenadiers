@@ -3,10 +3,12 @@ import { describe, expect, it } from 'vitest'
 import gameplayV11Schema from '../../../../api/gameplay-v11.schema.json'
 import gameplayV12Schema from '../../../../api/gameplay-v12.schema.json'
 import gameplayV13Schema from '../../../../api/gameplay-v13.schema.json'
+import realtimeV1Schema from '../../../../api/realtime-v1.schema.json'
 import realtimeSchema from '../../../../api/realtime.schema.json'
+import { roomId } from '../../game/client/testSupport'
 import {
-  admitted as liveAdmitted, room as liveRoom, roomId, snapshot as liveSnapshot,
-} from '../../game/client/testSupport'
+  admitted as liveAdmitted, room as liveRoom, snapshot as liveSnapshot,
+} from '../../game/v13/testSupport'
 import {
   admitted as archivedAdmitted, room as archivedRoom, snapshot as archivedSnapshot,
 } from '../../game/validation/archived-v11-fixtures'
@@ -14,6 +16,7 @@ import generatedGameplayV11 from './gameplay-v11.mjs'
 import generatedGameplayV12 from './gameplay-v12.mjs'
 import generatedGameplayV13 from './gameplay-v13.mjs'
 import generatedRealtime from './realtime.mjs'
+import { archivedV1Welcome } from '../../realtime/archived-v1-fixtures'
 
 type GeneratedValidator = ((value: unknown) => boolean) & { errors?: ErrorObject[] | null }
 type SnapshotFixture = {
@@ -62,7 +65,7 @@ const gameplayRoutes = [
 ] as const
 
 const realtimeVariants = [
-  ['welcome', { type: 'welcome', protocolVersion: 1, maxPlayers: 2 }],
+  ['welcome', { type: 'welcome', protocolVersion: 2, maxPlayers: 4 }],
   ['pong', { type: 'pong', sequence: 0 }],
   ['error', { type: 'error', code: 'invalidMessage', message: 'Invalid client message' }],
 ] as const
@@ -89,7 +92,10 @@ function realtimeBoundaryCases(): unknown[] {
     { type: 'pong', sequence: 1, unexpected: true },
     { type: 'pong', sequence: 2_147_483_648 },
     { type: 'error', code: 'invalidMessage', message: 'Nieprawidłowa wiadomość 🐢' },
-    { type: 'welcome', protocolVersion: 1, maxPlayers: { nested: 2 } },
+    archivedV1Welcome,
+    { type: 'welcome', protocolVersion: 2, maxPlayers: 2 },
+    { type: 'welcome', protocolVersion: 1, maxPlayers: 4 },
+    { type: 'welcome', protocolVersion: 2, maxPlayers: { nested: 4 } },
   ]
 }
 
@@ -133,6 +139,14 @@ describe('standalone validator parity', () => {
     const original = new Ajv({ allErrors: true }).compile(realtimeSchema)
     expectValidParity(generatedRealtime, original, realtimeVariants)
     expectParity(generatedRealtime, original, realtimeBoundaryCases())
+  })
+
+  it('keeps the archived v1 welcome closed while the current validator requires v2', () => {
+    const archived = new Ajv({ allErrors: true }).compile(realtimeV1Schema)
+    expect(archived(archivedV1Welcome)).toBe(true)
+    expect(archived({ ...archivedV1Welcome, unexpected: true })).toBe(false)
+    expect(archived(realtimeVariants[0][1])).toBe(false)
+    expect(generatedRealtime(archivedV1Welcome)).toBe(false)
   })
 
   it.each([

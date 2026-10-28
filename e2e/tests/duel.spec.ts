@@ -110,7 +110,9 @@ test('two players complete a rendered keyboard duel with shared authoritative re
       const result = latestSnapshot(games[index])!
       expect(result.room.phase.type).toBe('result')
       expect(result.room.lastRound?.result).toEqual({ type: 'winner', seat: 'two' })
-      expect(result.room.scores).toEqual({ one: 0, two: 1 })
+      expect(result.room.scores).toEqual([
+        { seat: 'one', wins: 0 }, { seat: 'two', wins: 1 },
+      ])
       expect(result.state.actors.find((candidate) => candidate.seat === 'one')?.alive).toBe(false)
       await expect(page.getByLabel('Phase time remaining')).toHaveText(/^0:0[123]$/)
       await expect(page.getByRole('status')).toContainText('Player two wins the round.')

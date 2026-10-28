@@ -1,4 +1,4 @@
-//! Dormant, transport-independent runtime for configured two-to-four-seat rooms.
+//! Transport-independent runtime for configured two-to-four-seat rooms.
 
 mod admission;
 mod error;
@@ -16,11 +16,12 @@ pub(in crate::game::rooms) use error::RosterRuntimeError;
 #[cfg(test)]
 pub(in crate::game::rooms) use replay_inspection::RosterRuntimeInspection;
 pub(in crate::game::rooms) use runtime::RosterRuntime;
-pub(in crate::game::rooms) use types::{
-    RosterAction, RosterIdentity, RosterNotice, RosterSeatFrames,
-};
+pub(in crate::game::rooms) use types::RosterIdentity;
+pub(crate) use types::{RosterAction, RosterNotice};
 
 #[cfg(test)]
 mod boundary_tests;
+#[cfg(test)]
+mod replacement_tests;
 #[cfg(test)]
 mod tests;

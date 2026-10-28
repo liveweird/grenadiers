@@ -1,8 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://grenadiers.local/schemas/realtime-v1.json",
-  "title": "Grenadiers realtime protocol v1",
-  "description": "Diagnostic transport only. Capacity describes the initial future per-match limit, not a reservation or connection limit.",
+  "$id": "https://grenadiers.local/schemas/realtime-v2.json",
+  "title": "Grenadiers realtime protocol v2",
+  "description": "Diagnostic transport only. Capacity describes the live maximum match size, not a reservation or connection limit.",
   "$ref": "#/$defs/ServerMessage",
   "$defs": {
     "ClientMessage": {
@@ -56,10 +56,10 @@
           "const": "welcome"
         },
         "protocolVersion": {
-          "const": 1
+          "const": 2
         },
         "maxPlayers": {
-          "const": 2
+          "const": 4
         }
       }
     },

@@ -54,7 +54,7 @@ async fn connect(url: &str, token: &str) -> ClientSocket {
     send(
         &mut socket,
         json!({
-            "type":"authenticate", "protocolVersion":13, "token":token
+            "type":"authenticate", "protocolVersion":14, "token":token
         }),
     )
     .await;
@@ -94,14 +94,17 @@ async fn two_members_receive_personalized_admission_and_live_waiting_updates() {
 
     send(
         &mut one,
-        json!({"type":"createRoom", "sequence":1, "mode":{"type":"humanDuel"}}),
+        json!({"type":"createRoom", "sequence":1, "configuration":{"controllers":["human","human"],"cpuDifficulty":null,"board":{"width":15,"height":13}}}),
     )
     .await;
     let created = next(&mut one).await;
     assert_eq!(created["youSeat"], "one");
     assert_eq!(created["room"]["revision"], 2);
     assert_eq!(created["room"]["roundNumber"], 0);
-    assert_eq!(created["room"]["scores"], json!({"one":0,"two":0}));
+    assert_eq!(
+        created["room"]["scores"],
+        json!([{"seat":"one","wins":0},{"seat":"two","wins":0}])
+    );
     assert!(created["room"]["lastRound"].is_null());
     assert_eq!(created["room"]["phase"]["type"], "waiting");
     assert_eq!(created["room"]["seats"][0]["occupied"], true);
@@ -263,7 +266,7 @@ async fn binding_checks_precede_placeholder_phase_and_leave_allows_rejoin() {
 
     send(
         &mut owner,
-        json!({"type":"createRoom", "sequence":1, "mode":{"type":"humanDuel"}}),
+        json!({"type":"createRoom", "sequence":1, "configuration":{"controllers":["human","human"],"cpuDifficulty":null,"board":{"width":15,"height":13}}}),
     )
     .await;
     let created = next(&mut owner).await;
@@ -315,40 +318,10 @@ async fn binding_checks_precede_placeholder_phase_and_leave_allows_rejoin() {
     assert_eq!(next(&mut unbound).await["room"]["revision"], 5);
     send(
         &mut owner,
-        json!({"type":"createRoom", "sequence":5, "mode":{"type":"humanDuel"}}),
+        json!({"type":"createRoom", "sequence":5, "configuration":{"controllers":["human","human"],"cpuDifficulty":null,"board":{"width":15,"height":13}}}),
     )
     .await;
     assert_eq!(next(&mut owner).await["code"], "alreadyInRoom");
-    server.abort();
-}
-
-#[tokio::test]
-async fn disconnect_removes_seat_even_when_no_more_commands_arrive() {
-    let state = AppState::without_database([ORIGIN.to_owned()]);
-    let tokens = [issue_token(&state), issue_token(&state)];
-    let (url, server) = start_server(state).await;
-    let mut one = connect(&url, &tokens[0]).await;
-    let mut two = connect(&url, &tokens[1]).await;
-    send(
-        &mut one,
-        json!({"type":"createRoom", "sequence":1, "mode":{"type":"humanDuel"}}),
-    )
-    .await;
-    let created = next(&mut one).await;
-    send(
-        &mut two,
-        json!({
-            "type":"joinRoom", "sequence":1, "roomCode":created["room"]["roomCode"]
-        }),
-    )
-    .await;
-    next(&mut two).await;
-    next(&mut one).await;
-
-    two.close(None).await.unwrap();
-    let update = next(&mut one).await;
-    assert_eq!(update["room"]["seats"][1]["occupied"], false);
-    assert_eq!(update["room"]["revision"], 4);
     server.abort();
 }
 
@@ -360,7 +333,7 @@ async fn connected_resume_replaces_old_socket_with_private_admission_and_close_4
     let mut original = connect(&url, &tokens[0]).await;
     send(
         &mut original,
-        json!({"type":"createRoom", "sequence":1, "mode":{"type":"humanDuel"}}),
+        json!({"type":"createRoom", "sequence":1, "configuration":{"controllers":["human","human"],"cpuDifficulty":null,"board":{"width":15,"height":13}}}),
     )
     .await;
     let created = next(&mut original).await;
@@ -397,3 +370,6 @@ mod resume_race_tests;
 #[cfg(test)]
 #[path = "room_socket_tests/unavailable_resume_tests.rs"]
 mod unavailable_resume_tests;
+
+#[path = "room_socket_tests/disconnect_tests.rs"]
+mod disconnect_tests;

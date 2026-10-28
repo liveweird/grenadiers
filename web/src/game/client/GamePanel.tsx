@@ -6,8 +6,9 @@ import type { Direction } from '../arena/types'
 import type { AdmissionIntent, GameClientState } from './client'
 import { format, useGameCopy, type GameCopy } from './locale'
 import type {
-  Difficulty, GameSettings, MatchInterruptReason, MatchResult, RoomPhase, RoundResult, Seat, VisibleActorView,
-} from '../v13/schema'
+  Difficulty, GameSettings, MatchInterruptReason, MatchResult, RoomConfiguration, RoomPhase, RoundResult,
+  Seat, VisibleActorView,
+} from '../v14/schema'
 import { useGameClient } from './useGameClient'
 import { ControlsDialog } from './ControlsDialog'
 import { bindingsSummary, keyLabel } from './controlLabels'
@@ -17,7 +18,7 @@ import { GameplaySettingsPanel } from './GameplaySettingsPanel'
 import { presentSnapshot } from './presentation'
 import { ActorDetails, OwnStatusBar } from './OwnStatusBar'
 import { OwnPickupNotice } from './OwnPickupNotice'
-import { controllersAvailable, roomCopy } from './roomControllers'
+import { controllersAvailable, isLegacySolo, roomCopy } from './roomControllers'
 
 const CODE_PATTERN = /^[A-HJ-NP-Z2-9]{8}$/
 
@@ -135,10 +136,27 @@ function SeatLine({ state, seat, copy }: { state: GameClientState; seat: Seat; c
 function LobbyControls({ state, actions, copy }: { state: GameClientState; actions: GameActions; copy: GameCopy }) {
   const [code, setCode] = useState('')
   const [difficulty, setDifficulty] = useState<Difficulty>('standard')
+  const [playerCount, setPlayerCount] = useState(2)
+  const [controllers, setControllers] = useState<Array<'human' | 'cpu'>>(['human', 'human'])
   const busy = state.admissionPending
     || ['connecting', 'authenticating', 'reconnecting'].includes(state.connection)
   const selectDifficulty = (value: string): void => {
     if (value === 'easy' || value === 'standard') setDifficulty(value)
+  }
+  const resizeControllers = (count: number): void => {
+    if (count < 2 || count > 4) return
+    setPlayerCount(count)
+    setControllers((current) => Array.from({ length: count }, (_, index) => current[index] ?? 'human'))
+  }
+  const setController = (index: number, value: string): void => {
+    if (index === 0 || (value !== 'human' && value !== 'cpu')) return
+    setControllers((current) => current.map((controller, position) => position === index ? value : controller))
+  }
+  const customConfiguration = (): RoomConfiguration => {
+    const hasCpu = controllers.includes('cpu')
+    return {
+      controllers, cpuDifficulty: hasCpu ? difficulty : null, board: { width: 15, height: 13 },
+    } as RoomConfiguration
   }
   return (
     <div className="lobby-controls">
@@ -154,6 +172,24 @@ function LobbyControls({ state, actions, copy }: { state: GameClientState; actio
         onClick={() => actions.admit({ type: 'create', mode: { type: 'solo', difficulty } })}>
         {copy.solo.play}
       </Button>
+      <fieldset className="custom-match">
+        <legend>{copy.multiplayer.title}</legend>
+        <NativeSelect label={copy.multiplayer.playerCount} value={String(playerCount)} disabled={busy}
+          onChange={(event) => resizeControllers(Number(event.currentTarget.value))}
+          data={['2', '3', '4']} />
+        {controllers.slice(1).map((controller, index) => <NativeSelect
+          key={index + 1} label={format(copy.multiplayer.controller, { player: index + 2 })}
+          value={controller} disabled={busy} onChange={(event) => setController(index + 1, event.currentTarget.value)}
+          data={[{ value: 'human', label: copy.multiplayer.human }, { value: 'cpu', label: copy.multiplayer.cpu }]} />)}
+        {controllers.includes('cpu') && <NativeSelect label={copy.solo.difficultyLabel} value={difficulty}
+          disabled={busy} onChange={(event) => selectDifficulty(event.currentTarget.value)} data={[
+            { value: 'easy', label: copy.solo.easy }, { value: 'standard', label: copy.solo.standard },
+          ]} />}
+        <Button size="lg" variant="light" disabled={busy}
+          onClick={() => actions.admit({ type: 'create', configuration: customConfiguration() })}>
+          {copy.multiplayer.create}
+        </Button>
+      </fieldset>
       <div className="join-rule"><span>{copy.lobby.or}</span></div>
       <TextInput
         label={copy.lobby.code} value={code} maxLength={8} autoComplete="off" spellCheck={false}
@@ -189,16 +225,21 @@ function RoomControls({ state, actions, copy }: { state: GameClientState; action
     || (room.phase.type === 'countdown' && room.phase.kind === 'initial')
   const held = room.phase.type === 'result' && room.tick >= room.phase.holdUntil
     && !controllersAvailable(room)
+  const humanVacancy = room.seats.some(({ controller, occupied }) => controller.type === 'human' && !occupied)
   return (
     <div className="room-controls">
-      {room.mode.type === 'solo' ? <Text>{copy.solo.roomDifficulty[room.mode.difficulty]}</Text>
-        : <div><Text size="sm">{copy.room.invitation}</Text>
+      {room.configuration.cpuDifficulty && <Text>{isLegacySolo(room)
+        ? copy.solo.roomDifficulty[room.configuration.cpuDifficulty]
+        : format(copy.multiplayer.cpuDifficulty, {
+          difficulty: copy.solo[room.configuration.cpuDifficulty],
+        })}</Text>}
+      {(!room.configuration.cpuDifficulty || humanVacancy) &&
+        <div><Text size="sm">{copy.room.invitation}</Text>
           <Text className="room-code" aria-label={copy.room.codeLabel}>{room.roomCode}</Text></div>}
       <Text className="phase-line" aria-live="polite">{phaseText(copy, room.phase)}</Text>
       {held && <Text role="status">{copy.reconnect.resultHeld}</Text>}
       <ol className="seat-list" aria-label={copy.room.players}>
-        <SeatLine state={state} seat="one" copy={copy} />
-        <SeatLine state={state} seat="two" copy={copy} />
+        {room.seats.map(({ seat }) => <SeatLine key={seat} state={state} seat={seat} copy={copy} />)}
       </ol>
       <AuthoritativeOutcome state={state} copy={copy} />
       <GameplaySettingsPanel key={room.settingsRevision} room={room} youSeat={state.youSeat}
@@ -266,12 +307,16 @@ export function GamePanelView({ state, actions }: { state: GameClientState; acti
     <section className="game-shell" aria-label={copy.label}>
       <div className="arena-column">
         <div className="match-strip">
-          <span className="match-score" role="group" aria-label={format(copy.scoreLabel, { player: copy.player.one })}>
-            <span>{copy.player.one}</span><strong>{state.room?.scores.one ?? 0}</strong></span>
+          {state.room?.scores.slice(0, Math.ceil(state.room.scores.length / 2)).map(({ seat, wins }) =>
+            <span key={seat} className={`match-score seat-${seat}`} role="group"
+              aria-label={format(copy.scoreLabel, { player: copy.player[seat] })}>
+              <span>{copy.player[seat]}</span><strong>{wins}</strong></span>)}
           <span className="match-clock"><time aria-label={copy.timer}>{clock(timerTicks(state))}</time>
             <small>{round ? format(copy.room.round, { round }) : copy.room.beforeFirstRound}</small></span>
-          <span className="match-score" role="group" aria-label={format(copy.scoreLabel, { player: copy.player.two })}>
-            <span>{copy.player.two}</span><strong>{state.room?.scores.two ?? 0}</strong></span>
+          {state.room?.scores.slice(Math.ceil(state.room.scores.length / 2)).map(({ seat, wins }) =>
+            <span key={seat} className={`match-score seat-${seat}`} role="group"
+              aria-label={format(copy.scoreLabel, { player: copy.player[seat] })}>
+              <span>{copy.player[seat]}</span><strong>{wins}</strong></span>)}
         </div>
         <GameArena label={copy.arena.label} waitingText={waitingText} failureText={copy.arena.failure}
           focusHint={focusHint} instructionsId="game-instructions" snapshot={arenaSnapshot}

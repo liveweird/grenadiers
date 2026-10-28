@@ -4,16 +4,20 @@ import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { fileURLToPath, pathToFileURL, URL } from 'node:url'
 import { test } from 'vitest'
+import { discoverRealtimeContracts } from './realtime-contract-inventory.mjs'
 import { generateRealtime } from './realtime-generator.mjs'
 
 const scriptsUrl = pathToFileURL(`${import.meta.dirname}/`)
 const schemaUrl = new URL('../../api/realtime.schema.json', scriptsUrl)
-const generatedUrl = new URL('../src/realtime/schema.ts', scriptsUrl)
 const tscUrl = new URL('../node_modules/typescript/bin/tsc', scriptsUrl)
 
-test('current realtime contract remains byte-for-byte reproducible', async () => {
-  const schema = JSON.parse(await readFile(schemaUrl, 'utf8'))
-  assert.equal(generateRealtime(schema), await readFile(generatedUrl, 'utf8'))
+test('current and archived realtime contracts remain byte-for-byte reproducible', async () => {
+  const contracts = await discoverRealtimeContracts()
+  assert.deepEqual(contracts.map(({ version }) => version), [2, 1])
+  for (const { spec, target, sourceLabel } of contracts) {
+    const schema = JSON.parse(await readFile(spec, 'utf8'))
+    assert.equal(generateRealtime(schema, sourceLabel), await readFile(target, 'utf8'))
+  }
 })
 
 test('a source label changes only the generated provenance header', async () => {

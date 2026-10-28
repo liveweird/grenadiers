@@ -1,16 +1,49 @@
-use grenadiers_core::{
-    protocol::{RoomCode, RoomId},
-    room::RoomMode,
-};
+use grenadiers_core::protocol::{RoomCode, RoomId};
+#[cfg(test)]
+use grenadiers_core::room::RoomMode;
 
-use super::{CODE_ALPHABET, COLLISION_RETRIES, GameRooms, Registry, RoomError, RoomIdentity};
+use super::{CODE_ALPHABET, COLLISION_RETRIES, GameRooms, Registry, RoomError};
+
+#[cfg(test)]
+use super::RoomIdentity;
+
+pub(super) struct RegistryIdentityParts {
+    pub(super) id: RoomId,
+    pub(super) code: RoomCode,
+    pub(super) serial: u64,
+    next_serial: u64,
+}
 
 impl GameRooms {
+    #[cfg(test)]
     pub(super) fn generate_identity(
         &self,
         registry: &mut Registry,
         mode: RoomMode,
     ) -> Result<RoomIdentity, RoomError> {
+        let parts = self.generate_identity_parts(registry)?;
+        let private_cpu_seed = if matches!(mode, RoomMode::Solo(_)) {
+            let mut seed = [0; 32];
+            (self.random_fill)(&mut seed).map_err(|_| RoomError::CapacityReached)?;
+            Some(seed)
+        } else {
+            None
+        };
+        self.commit_identity(registry, &parts);
+        Ok(RoomIdentity {
+            id: parts.id,
+            code: parts.code,
+            profile: self.profile,
+            mode,
+            registry_serial: parts.serial,
+            private_cpu_seed,
+        })
+    }
+
+    pub(super) fn generate_identity_parts(
+        &self,
+        registry: &mut Registry,
+    ) -> Result<RegistryIdentityParts, RoomError> {
         let prefix = match registry.prefix {
             Some(prefix) => prefix,
             None => {
@@ -28,25 +61,19 @@ impl GameRooms {
             if !registry.codes.contains_key(&code) {
                 let id = RoomId::new(&format!("{prefix:016x}{serial:016x}"))
                     .map_err(|_| RoomError::CapacityReached)?;
-                let private_cpu_seed = if matches!(mode, RoomMode::Solo(_)) {
-                    let mut seed = [0; 32];
-                    (self.random_fill)(&mut seed).map_err(|_| RoomError::CapacityReached)?;
-                    Some(seed)
-                } else {
-                    None
-                };
-                registry.next_serial = next_serial;
-                return Ok(RoomIdentity {
+                return Ok(RegistryIdentityParts {
+                    serial,
+                    next_serial,
                     id,
                     code,
-                    profile: self.profile,
-                    mode,
-                    registry_serial: serial,
-                    private_cpu_seed,
                 });
             }
         }
         Err(RoomError::CapacityReached)
+    }
+
+    pub(super) fn commit_identity(&self, registry: &mut Registry, parts: &RegistryIdentityParts) {
+        registry.next_serial = parts.next_serial;
     }
 
     fn generate_code(&self) -> Result<RoomCode, RoomError> {

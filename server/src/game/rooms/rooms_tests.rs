@@ -110,7 +110,11 @@ async fn canceled_join_before_mutation_does_not_claim_the_last_seat() {
     let rooms = deterministic_rooms(now);
     let owner = rooms.create(binding(1, 1), now).await.unwrap();
     let handle = rooms.lock().rooms.get(&owner.room_id).unwrap().clone();
-    handle.owner.submit_canceled_join(binding(2, 1));
+    handle
+        .owner
+        .legacy()
+        .unwrap()
+        .submit_canceled_join(binding(2, 1));
     tokio::task::yield_now().await;
 
     let joined = rooms
@@ -129,7 +133,7 @@ async fn dropped_admission_cleans_an_empty_room_even_with_a_full_command_queue()
     let admission = rooms.create(binding(1, 1), now).await.unwrap();
     let handle = rooms.lock().rooms.get(&admission.room_id).unwrap().clone();
     for connection in 2..=33 {
-        drop(handle.owner.join(binding(connection, 1)));
+        drop(handle.owner.legacy().unwrap().join(binding(connection, 1)));
     }
 
     drop(admission);

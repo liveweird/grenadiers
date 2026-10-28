@@ -39,7 +39,7 @@ async fn throttled_resume_is_correlated_and_retryable_on_the_same_socket() {
     let mut original = connect(&url, &tokens[0]).await;
     send(
         &mut original,
-        json!({"type":"createRoom", "sequence":1, "mode":{"type":"humanDuel"}}),
+        json!({"type":"createRoom", "sequence":1, "configuration":{"controllers":["human","human"],"cpuDifficulty":null,"board":{"width":15,"height":13}}}),
     )
     .await;
     let created = next(&mut original).await;
@@ -166,7 +166,7 @@ async fn peer_room_throttle_is_correlated_and_keeps_the_socket_open() {
     );
     send(
         &mut socket,
-        json!({"type":"createRoom", "sequence":10, "mode":{"type":"humanDuel"}}),
+        json!({"type":"createRoom", "sequence":10, "configuration":{"controllers":["human","human"],"cpuDifficulty":null,"board":{"width":15,"height":13}}}),
     )
     .await;
     assert_eq!(next(&mut socket).await["type"], "admitted");

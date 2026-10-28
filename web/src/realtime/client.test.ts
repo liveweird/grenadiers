@@ -38,8 +38,8 @@ describe('RealtimeClient', () => {
     const client = new RealtimeClient(messages, failures)
     expect(client.ping(1)).toBe(false)
     client.connect('ws://example.test/api/v1/ws')
-    sockets[0].emit('message', JSON.stringify({ type: 'welcome', protocolVersion: 1, maxPlayers: 2 }))
-    expect(messages).toHaveBeenCalledWith({ type: 'welcome', protocolVersion: 1, maxPlayers: 2 })
+    sockets[0].emit('message', JSON.stringify({ type: 'welcome', protocolVersion: 2, maxPlayers: 4 }))
+    expect(messages).toHaveBeenCalledWith({ type: 'welcome', protocolVersion: 2, maxPlayers: 4 })
     sockets[0].emit('message', JSON.stringify({ type: 'error', code: 'invalidMessage', message: 'Invalid client message' }))
     expect(messages).toHaveBeenLastCalledWith({ type: 'error', code: 'invalidMessage', message: 'Invalid client message' })
     expect(client.ping(7)).toBe(true)
@@ -80,11 +80,32 @@ describe('RealtimeClient', () => {
     const client = new RealtimeClient(messages, failures)
     client.connect('ws://example.test/first')
     client.connect('ws://example.test/second')
-    sockets[0].emit('message', JSON.stringify({ type: 'welcome', protocolVersion: 1, maxPlayers: 2 }))
+    sockets[0].emit('message', JSON.stringify({ type: 'welcome', protocolVersion: 2, maxPlayers: 4 }))
     sockets[0].emit('close')
     expect(messages).not.toHaveBeenCalled()
     expect(failures).not.toHaveBeenCalled()
     sockets[1].emit('close')
     expect(failures).toHaveBeenCalledWith('connection')
+  })
+
+  it('rejects archived and mismatched welcome fields', () => {
+    const failures = vi.fn()
+    const sockets: SocketStub[] = []
+    vi.stubGlobal('WebSocket', class extends SocketStub {
+      constructor(url: string) { super(url); sockets.push(this) }
+    })
+    const client = new RealtimeClient(vi.fn(), failures)
+
+    for (const welcome of [
+      { type: 'welcome', protocolVersion: 1, maxPlayers: 2 },
+      { type: 'welcome', protocolVersion: 2, maxPlayers: 2 },
+      { type: 'welcome', protocolVersion: 1, maxPlayers: 4 },
+    ]) {
+      client.connect('ws://example.test/api/v1/ws')
+      sockets.at(-1)?.emit('message', JSON.stringify(welcome))
+    }
+
+    expect(failures).toHaveBeenCalledTimes(3)
+    expect(sockets.every((socket) => socket.closed)).toBe(true)
   })
 })

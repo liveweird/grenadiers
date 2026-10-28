@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import type { GameServerMessage } from '../../web/src/game/v13/schema'
+import type { GameServerMessage } from '../../web/src/game/v14/schema'
 import { gameFrames, openGame, roomFrame, sendGame } from './support/game'
 import { visibleActor } from './support/duel'
 
@@ -101,7 +101,9 @@ test('two native gameplay sockets finish one authoritative generated classic rou
     if (!firstResult) throw new Error('No result snapshot was received for the active round')
     const first = firstResult
     expect(first.room.lastRound?.result).toEqual({ type: 'winner', seat: 'two' })
-    expect(first.room.scores).toEqual({ one: 0, two: 1 })
+    expect(first.room.scores).toEqual([
+      { seat: 'one', wins: 0 }, { seat: 'two', wins: 1 },
+    ])
     expect(first.state.actors[0].alive).toBe(false)
     let laterResult: Snapshot | undefined
     await expect.poll(async () => {

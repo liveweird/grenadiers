@@ -2,6 +2,17 @@
 
 ## [Unreleased]
 
+## 0.3.108 — 2026-10-28
+
+- Activate live two-to-four-player human/CPU lineups on gameplay v14, with at least one
+  human, per-seat private admissions, CPU policies, reservations, results and rematch.
+- Preserve two-player rules/policy behavior through checked v14 encoding and one shared
+  capacity-limited registry; keep legacy live entrypoints test-only.
+- Add configurable lobby controllers, distinct four-player HUD/uniforms and real browser
+  tests for higher-seat movement, reconnect, canonical scoring and consensual rematch.
+- Version diagnostics to v2 with a truthful four-player match ceiling while preserving
+  the exact closed v1 archive and the separate 16-connection diagnostic limit.
+
 ## 0.3.107 — 2026-10-28
 
 - Add a test-only format-4 recorder/replayer for configured multiplayer accepted inputs,

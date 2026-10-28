@@ -1,7 +1,7 @@
 use grenadiers_core::{
     game::{GenerationRecord, SeatId},
     protocol::{Counter, v14},
-    room::{MatchPhase, RosterMatchLifecycle},
+    room::{MatchPhase, RosterMatchLifecycle, RosterParticipant},
 };
 
 use super::{
@@ -15,6 +15,7 @@ pub(in crate::game::rooms) struct PreparedRosterAdmission {
     lifecycle: RosterMatchLifecycle,
     revision: u32,
     seat: SeatId,
+    pub(in crate::game::rooms) is_replacement: bool,
     pub(in crate::game::rooms) room: v14::RoomView,
     pub(in crate::game::rooms) state_epoch: Option<Counter>,
     pub(in crate::game::rooms) capture: Option<v14::ExpandedCapture>,
@@ -54,7 +55,7 @@ impl RosterRuntime {
     ) -> Result<PreparedRosterAdmission, RosterRuntimeError> {
         let mut lifecycle = self.lifecycle.clone();
         lifecycle.occupy(seat).map_err(lifecycle_error)?;
-        self.prepare_admission(seat, lifecycle)
+        self.prepare_admission(seat, lifecycle, false)
     }
 
     pub(in crate::game::rooms) fn prepare_resume(
@@ -62,14 +63,24 @@ impl RosterRuntime {
         seat: SeatId,
     ) -> Result<PreparedRosterAdmission, RosterRuntimeError> {
         let mut lifecycle = self.lifecycle.clone();
-        lifecycle.resume_connection(seat).map_err(lifecycle_error)?;
-        self.prepare_admission(seat, lifecycle)
+        let is_replacement = match lifecycle.participant(seat).map_err(lifecycle_error)? {
+            RosterParticipant::Reserved { .. } => {
+                lifecycle.resume_connection(seat).map_err(lifecycle_error)?;
+                false
+            }
+            RosterParticipant::Connected => true,
+            RosterParticipant::NeverAdmitted
+            | RosterParticipant::Departed
+            | RosterParticipant::Cpu => return Err(RosterRuntimeError::StaleEpoch),
+        };
+        self.prepare_admission(seat, lifecycle, is_replacement)
     }
 
     fn prepare_admission(
         &self,
         seat: SeatId,
         lifecycle: RosterMatchLifecycle,
+        is_replacement: bool,
     ) -> Result<PreparedRosterAdmission, RosterRuntimeError> {
         let revision = self.next_revision()?;
         let room =
@@ -106,6 +117,7 @@ impl RosterRuntime {
             lifecycle,
             revision,
             seat,
+            is_replacement,
             room,
             state_epoch,
             capture,
@@ -116,6 +128,9 @@ impl RosterRuntime {
     }
 
     pub(in crate::game::rooms) fn commit_admission(&mut self, prepared: PreparedRosterAdmission) {
+        if prepared.is_replacement {
+            self.stop_seat_inputs(prepared.seat);
+        }
         self.cpu_publication = prepared.notice.cpu_publication.clone();
         self.lifecycle = prepared.lifecycle;
         self.revision = prepared.revision;

@@ -77,6 +77,7 @@ impl MatchRuntime {
             sim: None,
             reports: Vec::new(),
             journal,
+            wire_profile: super::InternalWireProfile::Legacy13,
         }
     }
 

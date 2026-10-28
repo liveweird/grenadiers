@@ -14,7 +14,7 @@ test('two browsers complete independent realtime roundtrips', async ({ browser }
     expect(disconnectedAccessibility.violations).toEqual([])
 
     await Promise.all(pages.map((page) => page.getByRole('button', { name: 'Connect' }).click()))
-    await Promise.all(pages.map((page) => expect(page.getByText('Protocol v1 · up to 2 players')).toBeVisible()))
+    await Promise.all(pages.map((page) => expect(page.getByText('Protocol v2 · up to 4 players')).toBeVisible()))
     await Promise.all(pages.map((page) => page.getByRole('button', { name: 'Send ping' }).click()))
     await Promise.all(pages.map((page) => expect(page.getByText('Pong 1 received')).toBeVisible()))
 

@@ -4,7 +4,7 @@ import serverFixtures from '../../../../api/fixtures/gameplay-expanded-server-co
 import clientFixtures from '../../../../api/fixtures/gameplay-v13-client-conformance.json'
 import gameplayV12Schema from '../../../../api/gameplay-v12.schema.json'
 import gameplayV13Schema from '../../../../api/gameplay-v13.schema.json'
-import { snapshot } from '../client/testSupport'
+import { snapshot } from './testSupport'
 import type { Difficulty, GameServerMessage } from './schema'
 import { validateGameplayV13ServerMessage } from './validation'
 

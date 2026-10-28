@@ -76,12 +76,12 @@ var require_realtime = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 				}
 			}
 			if (data.protocolVersion !== void 0) {
-				if (1 !== data.protocolVersion) {
+				if (2 !== data.protocolVersion) {
 					const err5 = {
 						instancePath: instancePath + "/protocolVersion",
 						schemaPath: "#/$defs/Welcome/properties/protocolVersion/const",
 						keyword: "const",
-						params: { allowedValue: 1 },
+						params: { allowedValue: 2 },
 						message: "must be equal to constant"
 					};
 					if (vErrors === null) vErrors = [err5];
@@ -90,12 +90,12 @@ var require_realtime = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 				}
 			}
 			if (data.maxPlayers !== void 0) {
-				if (2 !== data.maxPlayers) {
+				if (4 !== data.maxPlayers) {
 					const err6 = {
 						instancePath: instancePath + "/maxPlayers",
 						schemaPath: "#/$defs/Welcome/properties/maxPlayers/const",
 						keyword: "const",
-						params: { allowedValue: 2 },
+						params: { allowedValue: 4 },
 						message: "must be equal to constant"
 					};
 					if (vErrors === null) vErrors = [err6];

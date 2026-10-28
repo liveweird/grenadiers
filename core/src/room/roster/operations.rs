@@ -34,6 +34,14 @@ impl RosterMatchLifecycle {
         }
         let index = seat.index();
         if self.ready[index] == ready {
+            if ready && self.initial_ready() {
+                let ends_at = self.deadline(COUNTDOWN_TICKS)?;
+                self.phase = MatchPhase::Countdown {
+                    kind: super::super::CountdownKind::Initial,
+                    ends_at,
+                };
+                return Ok(RosterUpdate::new(MatchChange::CountdownStarted));
+            }
             return Ok(RosterUpdate::new(MatchChange::Unchanged));
         }
         if matches!(self.phase, MatchPhase::Countdown { .. }) {
@@ -145,6 +153,9 @@ impl RosterMatchLifecycle {
     fn finish_round(&mut self, result: RoundResult) -> Result<RosterUpdate, RosterError> {
         if let RoundResult::Winner(seat) = result {
             self.ensure_seat(seat)?;
+            if !self.participants[seat.index()].eligible() {
+                return Err(RosterError::IneligibleWinner(seat));
+            }
         }
         let active = self.active.ok_or(RosterError::InvalidPhase)?;
         let hold = self.deadline(RESULT_HOLD_TICKS)?;
@@ -209,6 +220,7 @@ impl RosterMatchLifecycle {
             self.cancel_countdown()?;
         }
         self.resolve_terminal(&mut update)?;
+        self.reevaluate_consensus(&mut update)?;
         Ok(update)
     }
 
@@ -245,6 +257,7 @@ impl RosterMatchLifecycle {
             self.cancel_countdown()?;
         }
         self.resolve_terminal(&mut update)?;
+        self.reevaluate_consensus(&mut update)?;
         Ok(update)
     }
 
@@ -287,30 +300,13 @@ impl RosterMatchLifecycle {
         }
         let index = seat.index();
         if self.rematch_votes[index] == ready {
-            return Ok(RosterUpdate::new(MatchChange::Unchanged));
+            let mut update = RosterUpdate::new(MatchChange::Unchanged);
+            self.reevaluate_consensus(&mut update)?;
+            return Ok(update);
         }
         self.rematch_votes[index] = ready;
-        let all =
-            self.configuration
-                .human_seats()
-                .all(|human| match self.participants[human.index()] {
-                    RosterParticipant::Connected => self.rematch_votes[human.index()],
-                    RosterParticipant::Reserved { .. } | RosterParticipant::NeverAdmitted => false,
-                    RosterParticipant::Departed | RosterParticipant::Cpu => true,
-                });
-        if all {
-            self.round_attempt = self.next_attempt()?;
-            self.scores = [0; 4];
-            self.actual_round_number = 0;
-            self.active = None;
-            self.latest_completed = None;
-            self.outcome = None;
-            self.rematch_votes = [false; 4];
-            self.clear_readiness();
-            self.phase = MatchPhase::Waiting;
-            Ok(RosterUpdate::new(MatchChange::RematchStarted))
-        } else {
-            Ok(RosterUpdate::new(MatchChange::Changed))
-        }
+        let mut update = RosterUpdate::new(MatchChange::Changed);
+        self.reevaluate_consensus(&mut update)?;
+        Ok(update)
     }
 }

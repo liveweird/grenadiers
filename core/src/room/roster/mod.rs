@@ -36,6 +36,7 @@ impl RosterParticipant {
 pub enum RosterError {
     InvalidPhase,
     UnsupportedSeat(SeatId),
+    IneligibleWinner(SeatId),
     CpuTarget(SeatId),
     SeatAlreadyAdmitted(SeatId),
     SeatNeverAdmitted(SeatId),
@@ -246,12 +247,18 @@ impl RosterMatchLifecycle {
         &mut self,
         result: Option<RoundResult>,
     ) -> Result<RosterUpdate, RosterError> {
+        if let Some(RoundResult::Winner(seat)) = result {
+            self.ensure_eligible_winner(seat)?;
+        }
         self.transact(|next| next.complete_running_tick_inner(result))
     }
     pub fn complete_current_tick(
         &mut self,
         result: RoundResult,
     ) -> Result<RosterUpdate, RosterError> {
+        if let RoundResult::Winner(seat) = result {
+            self.ensure_eligible_winner(seat)?;
+        }
         self.transact(|next| next.complete_current_tick_inner(result))
     }
     pub fn depart_with_grace(
@@ -305,3 +312,7 @@ mod policy;
 #[cfg(test)]
 #[path = "tests.rs"]
 mod tests;
+
+#[cfg(test)]
+#[path = "review_tests.rs"]
+mod review_tests;

@@ -21,6 +21,15 @@ impl RosterMatchLifecycle {
         }
     }
 
+    pub(super) fn ensure_eligible_winner(&self, seat: SeatId) -> Result<(), RosterError> {
+        self.ensure_seat(seat)?;
+        if self.participants[seat.index()].eligible() {
+            Ok(())
+        } else {
+            Err(RosterError::IneligibleWinner(seat))
+        }
+    }
+
     pub(super) fn next_tick(&self) -> Result<Tick, RosterError> {
         self.tick
             .0
@@ -184,5 +193,57 @@ impl RosterMatchLifecycle {
             rematch_at,
         };
         Ok(RosterUpdate::new(MatchChange::MatchFinished(outcome)))
+    }
+
+    pub(super) fn reevaluate_consensus(
+        &mut self,
+        update: &mut RosterUpdate,
+    ) -> Result<(), RosterError> {
+        if self.phase == MatchPhase::Waiting
+            && self.actual_round_number == 0
+            && self.initial_ready()
+        {
+            self.phase = MatchPhase::Countdown {
+                kind: super::super::CountdownKind::Initial,
+                ends_at: self.deadline(super::super::COUNTDOWN_TICKS)?,
+            };
+            update.change = MatchChange::CountdownStarted;
+            return Ok(());
+        }
+        let MatchPhase::MatchResult { rematch_at, .. } = self.phase else {
+            return Ok(());
+        };
+        if self.tick < rematch_at
+            || self.eligible_seats().count() < 2
+            || !self
+                .participants()
+                .iter()
+                .any(|participant| participant.connected_human())
+        {
+            return Ok(());
+        }
+        let all =
+            self.configuration
+                .human_seats()
+                .all(|human| match self.participants[human.index()] {
+                    RosterParticipant::Connected => self.rematch_votes[human.index()],
+                    RosterParticipant::Reserved { .. } | RosterParticipant::NeverAdmitted => false,
+                    RosterParticipant::Departed => true,
+                    RosterParticipant::Cpu => unreachable!(),
+                });
+        if !all {
+            return Ok(());
+        }
+        self.round_attempt = self.next_attempt()?;
+        self.scores = [0; 4];
+        self.actual_round_number = 0;
+        self.active = None;
+        self.latest_completed = None;
+        self.outcome = None;
+        self.rematch_votes = [false; 4];
+        self.clear_readiness();
+        self.phase = MatchPhase::Waiting;
+        update.change = MatchChange::RematchStarted;
+        Ok(())
     }
 }

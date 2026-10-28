@@ -23,6 +23,9 @@ mod rate_limit;
 mod registry_identity;
 mod registry_lookup;
 mod replay;
+#[cfg(test)]
+#[allow(dead_code)] // Replay4 is exercised through its test-only recording facade.
+mod replay_v4;
 mod resume;
 mod roster_owner;
 mod roster_runtime;

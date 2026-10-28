@@ -96,19 +96,24 @@ retain the previous immutable image reference for rollback. The runtime stage in
 rolling Debian package updates, so a later build may resolve newer packages and is not expected to
 be byte-identical; treat it as a new candidate with new evidence rather than reusing acceptance.
 
-## v0.3.104 — 2026-10-28
+## v0.3.107 — 2026-10-28
 
-[v0.3.104](https://github.com/liveweird/grenadiers/releases/tag/v0.3.104) introduces the dormant [gameplay v14 contract](game/protocol-v14.md): checked two-/three-/four-seat human/CPU configuration, explicit human creator, canonical seat/scores arrays, closed board dimensions and generated browser types/validators. Live gameplay remains v13 until paired runtime/browser activation.
+[v0.3.107](https://github.com/liveweird/grenadiers/releases/tag/v0.3.107) adds the test-only [multiplayer replay format](game/multiplayer-replay.md). Format 4 records checked configured-room identity, policy-17 provenance, accepted CPU/human inputs, lifecycle transitions and independently derived per-round simulation randomness. Playback drives the actual roster runtime without invoking planners and compares exact state, reports, revisions and RNG progress. Production recording/export remains disabled; historical formats 1–3 remain closed and unchanged.
 
-The v14 publication pipeline certifies complete private simulation facts before recipient filtering, covering concealed pickups and Oil, fuse/pause and grace histories, enabled items, forced movements, roster consensus and physical outcomes. Individual Teleporter markers prevent an unrelated hidden pair from leaking timing to another recipient. Mixed rooms can become abandoned after their last human leaves while retaining server-controlled CPU rows. All recipient frames must encode before a publication commits.
+Eight focused regressions cover actual Teleporter randomness, reservation expiry, rematch, physical-round markers, flush/interruption and incomplete construction. Independent review identified and verified corrections to rematch cleanup and lifecycle-version binding. Strict Clippy, formatting, source caps and repository checks pass. Full Rust acceptance on source `bec260484d04d067e7c2214c1ca437e9c827b532`, tree `c755380082a5e06216e845cd76fdcc1531297c6d` passes in 524.723s: 32,963/35,963 lines (**91.6581%**), every 4,194,304-mask combination separately in debug/release/official coverage, 32 partitions, four workers, zero hidden retries and 37 raw profiles. Official LCOV was preserved. Distinct Linux [run 40756679033](https://github.com/liveweird/grenadiers/actions/runs/40756679033) passes. Unchanged production CPU/browser/art/dependency inputs reuse v0.3.106 acceptance, including its 64 exact reference/replay cases.
 
-Independent contract, privacy and physical-proof reviews are clear after their fixes. All 37 focused v14 cases and three participant-marker regressions pass. Typed and independently computed recursive maximum frames fit the 98,304-byte limit: Snapshot 93,911 and Admitted 43,359. Generated type/validator drift, schema parity, formatting, warnings-denied Clippy, source caps and repository checks pass; archived contracts remain closed.
+Exact image `sha256:4fe38c9f403040ca43492ecc449f8e60ce09f253e25165deef427f665d129a89` passes pinned Trivy 0.74.0 with zero HIGH/CRITICAL findings; Compose 10 browser cases/50.4s; Kubernetes 10/50.3s; CPU-item collection one/16.5s. Both runtime security/resource/probe checks pass. A digest-form Kubernetes helper assertion was incompatible with the runtime's equivalent imageID spelling; the tag-form rerun verified the same immutable image. Initial CPU-item setup omitted the isolated port's allowed origin, producing a proven session HTTP 403; explicit origin configuration restored HTTP 201 and the complete passing test. Temporary stacks were removed.
 
-Complete Rust acceptance passes on source `c5040e70ad195441ba20c6fc47b087714d4b6a29`, tree `bdb80493318722dea95d34deaf6e5a107f74cb78`: 585.055s, 30,597/33,380 lines (**91.6627%**), all 4,194,304 masks separately in debug/release/official coverage, 32 partitions, four workers, zero hidden retries and 37 raw profiles. Official LCOV was retained before ending the source/target freeze. An initial sandbox run could not bind local test listeners; the authorized complete run above passes. Distinct Linux [run 40745468803](https://github.com/liveweird/grenadiers/actions/runs/40745468803) passes. Web acceptance passes 6,894 cases/99 files at 93.61% line coverage and builds within bundle limits. Legacy CPU/reference behavior reuses v0.3.103 acceptance because its observation and decision inputs are unchanged.
+This source prerelease includes a verified local image. Localhost runs that image, with v0.3.106 retained for rollback. Live gameplay remains v13/two-player pending paired multiplayer activation in the [backlog](../BACKLOG.md).
 
-Exact image `sha256:231ea120182d41c9f68fbeff98021ef8d03c14b98b0c8f304aa5285111924dae` passes pinned Trivy 0.74.0 with zero HIGH/CRITICAL findings; Compose 10 browser cases/50.1s; Kubernetes 10/51.3s; CPU-item collection one/16.5s. Security/resource/probe settings, health/readiness, Polish 320px and served HTML/JS/CSS/PNG checks pass. Temporary stacks were removed.
+<a id="v03106--2026-10-28"></a>
+The [v0.3.106 record](history/releases.md#v03106--2026-10-28) is preserved in release history.
 
-This source prerelease includes a verified local image. Localhost runs the accepted image; v0.3.103 is retained for rollback. No live wire or replay migration is introduced. Remaining multiplayer activation and variable-board work stays in the [backlog](../BACKLOG.md).
+<a id="v03105--2026-10-28"></a>
+The [v0.3.105 record](history/releases.md#v03105--2026-10-28) is preserved in release history.
+
+<a id="v03104--2026-10-28"></a>
+The [v0.3.104 record](history/releases.md#v03104--2026-10-28) is preserved in release history.
 
 <a id="v03103--2026-10-28"></a>
 The [v0.3.103 record](history/releases.md#v03103--2026-10-28) is preserved in release history.

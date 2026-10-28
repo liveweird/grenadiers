@@ -99,6 +99,31 @@ fn departure_and_idempotent_ready_reevaluate_remaining_consensus() {
 }
 
 #[test]
+fn duplicate_ready_during_countdown_preserves_original_deadline_and_state() {
+    let mut room = RosterMatchLifecycle::new(
+        configuration(&[SeatControl::Human, SeatControl::Cpu]),
+        settings(3),
+    );
+    room.occupy(SeatId::One).unwrap();
+    room.set_ready(SeatId::One, true).unwrap();
+    let MatchPhase::Countdown { ends_at, .. } = room.phase() else {
+        panic!("ready consensus must start countdown");
+    };
+    advance(&mut room, 30);
+    let before = room.clone();
+    assert_eq!(
+        room.set_ready(SeatId::One, true).unwrap().change(),
+        MatchChange::Unchanged
+    );
+    assert_eq!(room, before);
+    assert!(
+        matches!(room.phase(), MatchPhase::Countdown { ends_at: actual, .. } if actual == ends_at)
+    );
+    advance(&mut room, COUNTDOWN_TICKS - 30);
+    assert_eq!(room.phase(), MatchPhase::Running);
+}
+
+#[test]
 fn explicit_and_expired_departures_reevaluate_rematch_consensus() {
     let mut explicit = final_three_seat_room();
     explicit.set_rematch_vote(SeatId::One, true).unwrap();

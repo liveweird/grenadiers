@@ -34,7 +34,7 @@ impl RosterMatchLifecycle {
         }
         let index = seat.index();
         if self.ready[index] == ready {
-            if ready && self.initial_ready() {
+            if ready && self.phase == MatchPhase::Waiting && self.initial_ready() {
                 let ends_at = self.deadline(COUNTDOWN_TICKS)?;
                 self.phase = MatchPhase::Countdown {
                     kind: super::super::CountdownKind::Initial,

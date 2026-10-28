@@ -11,6 +11,14 @@ impl CpuController {
         self.cpu_seat
     }
 
+    pub(in crate::game::rooms) const fn profile(&self) -> grenadiers_core::room::CpuProfile {
+        self.profile
+    }
+
+    pub(in crate::game::rooms) const fn room_instance(&self) -> u64 {
+        self.room_instance
+    }
+
     pub(in crate::game::rooms) fn reset_world(&mut self, physical_round: u64) {
         self.cancel();
         let world = WorldId {

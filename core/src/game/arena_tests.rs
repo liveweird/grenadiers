@@ -167,3 +167,45 @@ fn rejects_disconnected_floor_regions() {
         Err(ArenaError::FloorIsDisconnected(CellId::new(7, 5)))
     );
 }
+
+#[test]
+fn smaller_checked_board_validates_both_axes_before_indexing() {
+    let board = crate::room::BoardSize::ElevenByNine;
+    let mut terrain = vec![Terrain::Floor; board.cell_count()];
+    for row in 0..board.height() {
+        for column in 0..board.width() {
+            if row == 0 || column == 0 || row == board.height() - 1 || column == board.width() - 1 {
+                terrain[usize::from(row) * usize::from(board.width()) + usize::from(column)] =
+                    Terrain::Wall;
+            }
+        }
+    }
+    let arena = Arena::new_for_board(
+        board,
+        terrain,
+        BTreeSet::new(),
+        [CellId::new(1, 1), CellId::new(9, 7)],
+    )
+    .unwrap();
+
+    assert_eq!(arena.terrain(CellId::new(10, 8)), Some(Terrain::Wall));
+    assert_eq!(arena.terrain(CellId::new(11, 0)), None);
+    assert_eq!(arena.terrain(CellId::new(0, 9)), None);
+    assert_eq!(arena.terrain(CellId::new(12, 1)), None);
+}
+
+#[test]
+fn checked_board_rejects_wrong_terrain_length() {
+    assert_eq!(
+        Arena::new_for_board(
+            crate::room::BoardSize::ElevenByNine,
+            vec![Terrain::Floor; 98],
+            BTreeSet::new(),
+            [CellId::new(1, 1), CellId::new(9, 7)],
+        ),
+        Err(ArenaError::InvalidTerrainLength {
+            expected: 99,
+            actual: 98,
+        })
+    );
+}

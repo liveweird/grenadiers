@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+## 0.3.109 — 2026-10-28
+
+- Add checked arena geometry for the existing 11×9, 13×11 and 15×13 board presets while
+  preserving the legacy 15×13 constructor and historical simulation profiles.
+- Apply board dimensions to authoritative movement, public views, Power blasts and wrapped
+  Punch landings; introduce generator 4 without changing generators 1–3.
+- Keep live room creation on 15×13 until CPU, checked publications and clients are paired.
+
 ## 0.3.108 — 2026-10-28
 
 - Activate live two-to-four-player human/CPU lineups on gameplay v14, with at least one

@@ -54,6 +54,8 @@ for current defaults and behavior, rather than treating design proposals as deli
 
 [Room settings](settings.md) covers shared starting speed, turn tolerance, match target and fuse.
 
+[Board geometry](board-sizes.md) defines checked presets, spawn reservations and versioned generation.
+
 [Gameplay v14](protocol-v14.md) defines the live two-to-four-seat wire contract. The retained
 [Gameplay v13 compatibility guide](protocol-v13.md) documents its closed two-seat contract,
 including the authoritative teleport position epoch. [Gameplay v10](../history/protocols/protocol-v10.md) and

@@ -1,6 +1,7 @@
-//! Dormant multiplayer room configuration contracts.
+//! Checked, immutable multiplayer room configuration contracts.
 //!
-//! This module does not activate larger rooms or add a wire representation.
+//! Configurations support two to four seats and the three preset board sizes;
+//! transport and live-room activation remain separate concerns.
 
 use crate::game::{PlayerCount, SeatId};
 
@@ -28,6 +29,21 @@ impl BoardSize {
             Self::ThirteenByEleven => (13, 11),
             Self::FifteenByThirteen => (15, 13),
         }
+    }
+
+    #[must_use]
+    pub const fn width(self) -> u16 {
+        self.dimensions().0
+    }
+
+    #[must_use]
+    pub const fn height(self) -> u16 {
+        self.dimensions().1
+    }
+
+    #[must_use]
+    pub const fn cell_count(self) -> usize {
+        self.width() as usize * self.height() as usize
     }
 }
 

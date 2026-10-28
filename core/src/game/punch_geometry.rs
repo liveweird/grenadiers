@@ -1,5 +1,6 @@
-use super::arena::{ARENA_HEIGHT, ARENA_WIDTH, Terrain};
+use super::arena::Terrain;
 use super::{CellId, Direction};
+use crate::room::BoardSize;
 
 pub(crate) fn adjacent_cell(cell: CellId, direction: Direction) -> Option<CellId> {
     match direction {
@@ -26,11 +27,20 @@ pub(crate) fn landing_candidates(
     source: CellId,
     direction: Direction,
 ) -> impl Iterator<Item = CellId> {
+    landing_candidates_for_board(source, direction, BoardSize::FifteenByThirteen)
+}
+
+pub(crate) fn landing_candidates_for_board(
+    source: CellId,
+    direction: Direction,
+    board: BoardSize,
+) -> impl Iterator<Item = CellId> {
+    let (width, height) = board.dimensions();
     let (coordinate, length, delta) = match direction {
-        Direction::East => (source.column, ARENA_WIDTH - 2, 3_i32),
-        Direction::West => (source.column, ARENA_WIDTH - 2, -3_i32),
-        Direction::South => (source.row, ARENA_HEIGHT - 2, 3_i32),
-        Direction::North => (source.row, ARENA_HEIGHT - 2, -3_i32),
+        Direction::East => (source.column, width - 2, 3_i32),
+        Direction::West => (source.column, width - 2, -3_i32),
+        Direction::South => (source.row, height - 2, 3_i32),
+        Direction::North => (source.row, height - 2, -3_i32),
     };
     (1..=length)
         .map(move |ordinal| {
@@ -84,6 +94,18 @@ mod tests {
             north[..3],
             [CellId::new(4, 9), CellId::new(4, 6), CellId::new(4, 3)]
         );
+    }
+
+    #[test]
+    fn nine_cell_interior_preserves_two_other_stride_candidates() {
+        let candidates = landing_candidates_for_board(
+            CellId::new(1, 5),
+            Direction::East,
+            BoardSize::ElevenByNine,
+        )
+        .collect::<Vec<_>>();
+
+        assert_eq!(candidates, [CellId::new(4, 5), CellId::new(7, 5)]);
     }
 
     #[test]

@@ -199,6 +199,12 @@ impl State {
                 count: player_count,
             });
         }
+        if rules.version() < 6 && world.arena.board() != crate::room::BoardSize::FifteenByThirteen {
+            return Err(StateError::UnsupportedBoardSize {
+                version: rules.version(),
+                board: world.arena.board(),
+            });
+        }
         let enabled = rules.enabled_items();
         if rules.version() >= 6 && enabled.contains_teleporter() && randomness.is_none() {
             return Err(StateError::MissingSimulationRandomness);

@@ -9,12 +9,14 @@ use super::pickups::PickupKind;
 use super::types::CellId;
 use random_words::{ChaChaWords, RandomWords};
 mod generated_v3;
+mod generated_v4;
 mod random_words;
 mod sampling;
 pub use generated_v3::{
     ArenaGenerationConfig, GenerationError, MULTIPLAYER_GENERATOR_VERSION,
     generate_multiplayer_arena,
 };
+pub use generated_v4::{VARIABLE_GENERATOR_VERSION, generate_variable_multiplayer_arena};
 use sampling::{sample_percent, sample_pickup};
 
 pub const GENERATOR_VERSION: u16 = 1;

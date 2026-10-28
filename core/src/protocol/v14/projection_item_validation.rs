@@ -47,7 +47,7 @@ pub(crate) fn validate(world: &WorldFacts, rules: &RulesConfig) -> Result<(), Pr
             required.push(ItemId::Punch);
         }
     }
-    for pickup in &world.pickups {
+    for pickup in &world.private_pickups {
         if let Some(item) = pickup_item(pickup.kind) {
             required.push(item);
         }

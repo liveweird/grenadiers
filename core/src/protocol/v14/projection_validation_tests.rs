@@ -1,13 +1,13 @@
 use super::*;
 use crate::protocol::{Cell, EntityId, Tick};
 
-fn valid_capture(count: crate::game::PlayerCount) -> projection_facts::ExpandedCapture {
+pub(super) fn valid_capture(count: crate::game::PlayerCount) -> projection_facts::ExpandedCapture {
     let mut state = tests::multiplayer_state(count);
     let report = state.step(&[]).unwrap();
     capture_expanded(&state, &[report]).unwrap()
 }
 
-fn assert_valid(capture: &projection_facts::ExpandedCapture) {
+pub(super) fn assert_valid(capture: &projection_facts::ExpandedCapture) {
     projection_validation::validate(&capture.world, &capture.reports, &capture.rules).unwrap();
 }
 
@@ -43,7 +43,7 @@ fn round_state(
     .unwrap()
 }
 
-fn generation(
+pub(super) fn generation(
     count: crate::game::PlayerCount,
     enabled: crate::game::EnabledItems,
 ) -> crate::game::GenerationRecord {

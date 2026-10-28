@@ -96,17 +96,31 @@ retain the previous immutable image reference for rollback. The runtime stage in
 rolling Debian package updates, so a later build may resolve newer packages and is not expected to
 be byte-identical; treat it as a new candidate with new evidence rather than reusing acceptance.
 
-## v0.3.100 — 2026-10-28
+## v0.3.104 — 2026-10-28
 
-[v0.3.100](https://github.com/liveweird/grenadiers/releases/tag/v0.3.100) adopts the owner-supplied third/fourth-player uniform redraw. Green and plum appearances now match the first two characters' outlines, shading and detail more closely. The supplied PNG is adopted byte-for-byte; its original 95 frames remain decoded-pixel identical, and all 16 revised poses retain the existing 33-pixel height, `(40, 65)` foot anchor and manifest geometry. The duplicate PNG is removed from the repository root. See [artist provenance](../assets/art/README.md#provenance).
+[v0.3.104](https://github.com/liveweird/grenadiers/releases/tag/v0.3.104) introduces the dormant [gameplay v14 contract](game/protocol-v14.md): checked two-/three-/four-seat human/CPU configuration, explicit human creator, canonical seat/scores arrays, closed board dimensions and generated browser types/validators. Live gameplay remains v13 until paired runtime/browser activation.
 
-Independent art review found no asset defects. The 37/33-color uniforms follow a documented 48-color ceiling; nonempty-frame, coat-family, binary-alpha, gutter/reserved-slot, geometry and texture-budget checks remain enforced. The real exporter passes with 107 active frames and 3,590,400 RGBA bytes. Atlas browser checks pass 10 cases/16.5s, gameplay-atlas checks two cases/11.3s, and 37 affected web tests pass. Production build, E2E static/scenario, source-cap and repository checks pass; compressed JS is 369,330/400,000 bytes and CSS 15,092/20,000.
+The v14 publication pipeline certifies complete private simulation facts before recipient filtering, covering concealed pickups and Oil, fuse/pause and grace histories, enabled items, forced movements, roster consensus and physical outcomes. Individual Teleporter markers prevent an unrelated hidden pair from leaking timing to another recipient. Mixed rooms can become abandoned after their last human leaves while retaining server-controlled CPU rows. All recipient frames must encode before a publication commits.
 
-Rust implementation, web application/test code, API contracts, gameplay and external dependencies are unchanged from v0.3.99. Its full Rust/web coverage, exhaustive masks, CPU reference/replay and dependency-audit acceptance are reused for those unchanged inputs rather than rerun for an artwork-only change. Product metadata advances to 0.3.100; live rooms remain two-player and the new appearances are prepared for multiplayer activation.
+Independent contract, privacy and physical-proof reviews are clear after their fixes. All 37 focused v14 cases and three participant-marker regressions pass. Typed and independently computed recursive maximum frames fit the 98,304-byte limit: Snapshot 93,911 and Admitted 43,359. Generated type/validator drift, schema parity, formatting, warnings-denied Clippy, source caps and repository checks pass; archived contracts remain closed.
 
-Source `4f71a196f95f5c66e5ab89860d893cd10061cc21`, tree `547470030cc70162f3d37262511dd96b2dc75c78`, produces accepted image `sha256:6516eb10e76ac25cba7be3dcb6e2fec8d80c995fe3eee526ccc49111b27642d9`. Pinned Trivy 0.74.0 finds zero fixable HIGH/CRITICAL vulnerabilities. Compose passes 10 browser cases/49.4s; Kubernetes passes 10/50.6s; native CPU-item collection passes one/16.5s. Served HTML/JS/CSS/PNG identity, Polish 320px controls, runtime security/resources, readiness and probes pass. The preview was visually inspected and temporary acceptance stacks removed.
+Complete Rust acceptance passes on source `c5040e70ad195441ba20c6fc47b087714d4b6a29`, tree `bdb80493318722dea95d34deaf6e5a107f74cb78`: 585.055s, 30,597/33,380 lines (**91.6627%**), all 4,194,304 masks separately in debug/release/official coverage, 32 partitions, four workers, zero hidden retries and 37 raw profiles. Official LCOV was retained before ending the source/target freeze. An initial sandbox run could not bind local test listeners; the authorized complete run above passes. Distinct Linux [run 40745468803](https://github.com/liveweird/grenadiers/actions/runs/40745468803) passes. Web acceptance passes 6,894 cases/99 files at 93.61% line coverage and builds within bundle limits. Legacy CPU/reference behavior reuses v0.3.103 acceptance because its observation and decision inputs are unchanged.
 
-This source prerelease retains gameplay v13 and replay format 3. Deploy the paired browser/server and reload for the new atlas. Localhost runs the exact accepted image with v0.3.99 retained for rollback; no production registry publication is claimed. The [backlog](../BACKLOG.md) owns outstanding multiplayer work.
+Exact image `sha256:231ea120182d41c9f68fbeff98021ef8d03c14b98b0c8f304aa5285111924dae` passes pinned Trivy 0.74.0 with zero HIGH/CRITICAL findings; Compose 10 browser cases/50.1s; Kubernetes 10/51.3s; CPU-item collection one/16.5s. Security/resource/probe settings, health/readiness, Polish 320px and served HTML/JS/CSS/PNG checks pass. Temporary stacks were removed.
+
+This source prerelease includes a verified local image. Localhost runs the accepted image; v0.3.103 is retained for rollback. No live wire or replay migration is introduced. Remaining multiplayer activation and variable-board work stays in the [backlog](../BACKLOG.md).
+
+<a id="v03103--2026-10-28"></a>
+The [v0.3.103 record](history/releases.md#v03103--2026-10-28) is preserved in release history.
+
+<a id="v03102--2026-10-28"></a>
+The [v0.3.102 record](history/releases.md#v03102--2026-10-28) is preserved in release history.
+
+<a id="v03101--2026-10-28"></a>
+The [v0.3.101 record](history/releases.md#v03101--2026-10-28) is preserved in release history.
+
+<a id="v03100--2026-10-28"></a>
+The [v0.3.100 record](history/releases.md#v03100--2026-10-28) is preserved in release history.
 
 <a id="v0399--2026-10-28"></a>
 The [v0.3.99 record](history/releases.md#v0399--2026-10-28) is preserved in release history.

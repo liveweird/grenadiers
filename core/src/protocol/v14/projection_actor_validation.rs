@@ -15,6 +15,15 @@ pub(crate) fn validate(world: &WorldFacts) -> Result<(), ProjectionError> {
         .collect::<BTreeSet<_>>();
     if ids.len() != count
         || world.actors.iter().enumerate().any(|(index, actor)| {
+            let grace_remaining = u64::from(actor.view.damage_grace_remaining_ticks.get());
+            let valid_grace = match actor.damage_grace_received_at {
+                None => grace_remaining == 0,
+                Some(received) => world
+                    .physical_tick
+                    .get()
+                    .checked_sub(received.get())
+                    .is_some_and(|elapsed| 60_u64.saturating_sub(elapsed) == grace_remaining),
+            };
             actor.view.seat != seat_at(index)
                 || actor.view.speed_level > 4
                 || !(1..=8).contains(&actor.view.bomb_capacity)
@@ -24,11 +33,13 @@ pub(crate) fn validate(world: &WorldFacts) -> Result<(), ProjectionError> {
                 || actor.view.position.x() >= u16::from(world.arena.width) * 1_024
                 || actor.view.position.y() >= u16::from(world.arena.height) * 1_024
                 || actor.view.voluntary_actions_frozen
+                || !valid_grace
                 || (!actor.view.alive
                     && (actor.view.inventory.equipment.is_some()
                         || actor.view.inventory.weapon.is_some()
                         || !actor.view.effects.as_slice().is_empty()
-                        || actor.view.damage_grace_remaining_ticks.get() != 0))
+                        || actor.view.damage_grace_remaining_ticks.get() != 0
+                        || actor.damage_grace_received_at.is_some()))
         })
     {
         return Err(ProjectionError::InvalidActors);

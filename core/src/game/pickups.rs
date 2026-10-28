@@ -112,6 +112,24 @@ impl PickupLayers {
             .map(|(&cell, pickup)| (cell, pickup.kind()))
     }
 
+    pub(crate) fn observations(
+        &self,
+    ) -> impl Iterator<Item = (CellId, PickupKind, PickupLayer)> + '_ {
+        self.concealed
+            .iter()
+            .map(|(&cell, pickup)| (cell, pickup.kind(), PickupLayer::Concealed))
+            .chain(
+                self.pending
+                    .iter()
+                    .map(|(&cell, pickup)| (cell, pickup.kind(), PickupLayer::Pending)),
+            )
+            .chain(
+                self.exposed
+                    .iter()
+                    .map(|(&cell, pickup)| (cell, pickup.kind(), PickupLayer::Exposed)),
+            )
+    }
+
     pub(crate) fn try_new(
         arena: &Arena,
         concealed: BTreeMap<CellId, PickupKind>,

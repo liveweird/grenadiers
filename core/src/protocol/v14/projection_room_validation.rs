@@ -248,10 +248,11 @@ fn non_score_terminal(room: &RoomView, abandoned: bool) -> Result<(), Projection
     if !scores_below(room)
         || abandoned
             && room.seats.iter().any(|seat| {
-                !matches!(
-                    seat.connection,
-                    ConnectionStatus::Vacant | ConnectionStatus::Expired
-                )
+                matches!(seat.controller, Controller::Human)
+                    && !matches!(
+                        seat.connection,
+                        ConnectionStatus::Vacant | ConnectionStatus::Expired
+                    )
             })
     {
         return invalid();
@@ -317,15 +318,17 @@ fn nonfinal_reservations(room: &RoomView) -> bool {
 }
 fn readiness_consensus(room: &RoomView) -> bool {
     let mut eligible = 0;
+    let mut connected_human = false;
     let complete = room.seats.iter().all(|seat| match seat.connection {
         ConnectionStatus::Connected | ConnectionStatus::ServerControlled => {
             eligible += 1;
+            connected_human |= seat.controller == Controller::Human;
             seat.ready
         }
         ConnectionStatus::Expired => true,
         ConnectionStatus::Vacant | ConnectionStatus::Disconnected { .. } => false,
     });
-    complete && eligible >= 2
+    complete && eligible >= 2 && connected_human
 }
 fn countdown_participants(room: &RoomView) -> bool {
     let eligible = room
@@ -333,7 +336,12 @@ fn countdown_participants(room: &RoomView) -> bool {
         .iter()
         .filter(|seat| connected(seat.connection))
         .count();
+    let connected_human = room
+        .seats
+        .iter()
+        .any(|seat| seat.controller == Controller::Human && connected(seat.connection));
     eligible >= 2
+        && connected_human
         && room.seats.iter().all(|seat| {
             connected(seat.connection) || matches!(seat.connection, ConnectionStatus::Expired)
         })
@@ -344,12 +352,21 @@ fn any_human_ready(room: &RoomView) -> bool {
         .any(|seat| seat.controller == Controller::Human && seat.ready)
 }
 fn rematch_consensus(room: &RoomView) -> bool {
-    matches!(room.phase, RoomPhase::MatchResult { .. })
-        && room.seats.iter().all(|seat| match seat.connection {
-            ConnectionStatus::Connected | ConnectionStatus::ServerControlled => seat.rematch_ready,
-            ConnectionStatus::Expired => true,
-            ConnectionStatus::Vacant | ConnectionStatus::Disconnected { .. } => false,
-        })
+    if !matches!(room.phase, RoomPhase::MatchResult { .. }) {
+        return false;
+    }
+    let mut eligible = 0;
+    let mut connected_human = false;
+    let complete = room.seats.iter().all(|seat| match seat.connection {
+        ConnectionStatus::Connected | ConnectionStatus::ServerControlled => {
+            eligible += 1;
+            connected_human |= seat.controller == Controller::Human;
+            seat.rematch_ready
+        }
+        ConnectionStatus::Expired => true,
+        ConnectionStatus::Vacant | ConnectionStatus::Disconnected { .. } => false,
+    });
+    complete && eligible >= 2 && connected_human
 }
 fn valid_disconnect(room: &RoomView, value: ConnectionStatus) -> bool {
     let ConnectionStatus::Disconnected { expires_at } = value else {

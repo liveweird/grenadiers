@@ -123,6 +123,14 @@ pub(super) fn multiplayer_state_with_items(
     count: crate::game::PlayerCount,
     enabled: crate::game::EnabledItems,
 ) -> crate::game::State {
+    multiplayer_state_with_items_and_seed(count, enabled, [14; 32])
+}
+
+pub(super) fn multiplayer_state_with_items_and_seed(
+    count: crate::game::PlayerCount,
+    enabled: crate::game::EnabledItems,
+    seed: [u8; 32],
+) -> crate::game::State {
     use crate::game::arena::{ARENA_CELL_COUNT, ARENA_HEIGHT, ARENA_WIDTH};
     use crate::game::{
         ActorInit, Arena, CellId, Direction, EntityId, Position, RulesConfig, SeatId, SpeedLevel,
@@ -172,7 +180,7 @@ pub(super) fn multiplayer_state_with_items(
             actors,
             crate::game::Tick(0),
             crate::game::RoundAssignment::first(),
-            crate::game::SimulationSeed::new([14; 32]),
+            crate::game::SimulationSeed::new(seed),
         )
         .unwrap()
     } else {

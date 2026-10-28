@@ -60,6 +60,7 @@ fn validate_grace(world: &WorldFacts) -> Result<(), ProjectionError> {
         if actor.soft_wall_grace.len() + actor.unlit_oil_grace.len() > 4
             || !strict_cells(&actor.soft_wall_grace)
             || !strict_cells(&actor.unlit_oil_grace)
+            || !actor.soft_wall_grace.is_empty() && !world.enabled_items.contains(ItemId::WallPass)
             || (!actor.view.alive
                 && (!actor.soft_wall_grace.is_empty() || !actor.unlit_oil_grace.is_empty()))
             || (holder && (!actor.soft_wall_grace.is_empty() || !actor.unlit_oil_grace.is_empty()))

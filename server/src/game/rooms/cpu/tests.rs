@@ -64,34 +64,36 @@ pub(super) fn observation_for(cpu_seat: SeatId) -> Observation {
             terrain,
             blocks: vec![CellId::new(8, 7)],
         },
-        actors: SeatId::DUEL.map(|seat| {
-            if seat == cpu_seat {
-                ObservedActor::Visible(VisibleActor {
-                    id: EntityId(seat.index() as u32 + 1),
-                    seat,
-                    position: Position::center(CellId::new(7, 7)),
-                    heading: Direction::West,
-                    speed: SpeedLevel::Base,
-                    alive: true,
-                    bomb_capacity: 1,
-                    bomb_range: 2,
-                    live_bomb_count: 0,
-                    equipment: None,
-                    weapon: None,
-                    effects: Vec::new(),
-                    damage_grace_remaining_ticks: 0,
-                    voluntary_actions_frozen: false,
-                    last_teleport_tick: None,
-                    unknown: UnknownActorFacts::ALL,
-                })
-            } else {
-                ObservedActor::Hidden {
-                    id: EntityId(seat.index() as u32 + 1),
-                    seat,
-                    alive: true,
+        actors: SeatId::DUEL
+            .map(|seat| {
+                if seat == cpu_seat {
+                    ObservedActor::Visible(VisibleActor {
+                        id: EntityId(seat.index() as u32 + 1),
+                        seat,
+                        position: Position::center(CellId::new(7, 7)),
+                        heading: Direction::West,
+                        speed: SpeedLevel::Base,
+                        alive: true,
+                        bomb_capacity: 1,
+                        bomb_range: 2,
+                        live_bomb_count: 0,
+                        equipment: None,
+                        weapon: None,
+                        effects: Vec::new(),
+                        damage_grace_remaining_ticks: 0,
+                        voluntary_actions_frozen: false,
+                        last_teleport_tick: None,
+                        unknown: UnknownActorFacts::ALL,
+                    })
+                } else {
+                    ObservedActor::Hidden {
+                        id: EntityId(seat.index() as u32 + 1),
+                        seat,
+                        alive: true,
+                    }
                 }
-            }
-        }),
+            })
+            .into(),
         bombs: BombKnowledge::Visible(Vec::new()),
         flames: Vec::new(),
         oil: Vec::new(),

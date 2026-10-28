@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+## 0.3.105 — 2026-10-28
+
+- Add a dormant roster lifecycle and server runtime with two-to-four-seat inputs, checked
+  v14 publications, personal admissions, creator authority and per-seat CPU intent fences.
+- Preserve truthful reservations, original participants, physics-first departure settlement,
+  three-update snapshot batching, atomic CPU/human publication and frozen shutdown outcomes.
+- Derive private per-round simulation seeds from an independent, redacted OS root with
+  pinned versioned ChaCha20 vectors; live two-player routing remains unchanged.
+
 ## 0.3.104 — 2026-10-28
 
 - Define dormant gameplay v14 with checked two-/three-/four-seat room configuration,

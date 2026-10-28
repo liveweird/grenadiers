@@ -31,7 +31,7 @@ pub(super) fn validate<'a>(
         return Err(RouteFailure::IdentityMismatch);
     }
     validate_request(parts.tick, forecast.horizon_end(), start_window, safe_until)?;
-    if parts.rules.version != 5
+    if !matches!(parts.rules.version, 5 | 6)
         || parts.arena.width != ARENA_WIDTH
         || parts.arena.height != ARENA_HEIGHT
     {

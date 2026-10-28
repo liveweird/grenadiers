@@ -1,11 +1,14 @@
-use grenadiers_core::game::{Direction, InputAction, SeatId, SeatInput, Tick};
+use grenadiers_core::{
+    game::{Direction, InputAction, SeatId, SeatInput, Tick},
+    room::RoomConfiguration,
+};
 
 pub(super) const COMMANDS_PER_UPDATE: u8 = 8;
 pub(super) const MOVEMENT_TTL_TICKS: u64 = 15;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug)]
 pub(super) struct InputMailbox {
-    seats: [SeatMailbox; 2],
+    seats: Vec<SeatMailbox>,
 }
 
 #[derive(Clone, Debug, Default)]
@@ -29,11 +32,26 @@ pub(super) enum InputError {
     RateLimited,
     DuplicateAction,
     TickOverflow,
+    UnknownSeat,
+}
+
+impl Default for InputMailbox {
+    fn default() -> Self {
+        Self::for_configuration(RoomConfiguration::human_duel())
+    }
 }
 
 impl InputMailbox {
+    pub(super) fn for_configuration(configuration: RoomConfiguration) -> Self {
+        Self {
+            seats: vec![SeatMailbox::default(); configuration.controllers().len()],
+        }
+    }
+
     pub(super) fn last_manual_action(&self, seat: SeatId) -> Option<u32> {
-        self.seats[seat.index()].manual_action_high_water
+        self.seats
+            .get(seat.index())
+            .and_then(|seat| seat.manual_action_high_water)
     }
 
     pub(super) fn movement(
@@ -86,7 +104,10 @@ impl InputMailbox {
         action_id: u32,
         action: ManualAction,
     ) -> Result<(), InputError> {
-        if self.seats[seat.index()]
+        if self
+            .seats
+            .get(seat.index())
+            .ok_or(InputError::UnknownSeat)?
             .manual_action_high_water
             .is_some_and(|previous| action_id <= previous)
         {
@@ -100,7 +121,7 @@ impl InputMailbox {
 
     pub(super) fn take(&mut self, tick: Tick) -> Vec<SeatInput> {
         let mut inputs = Vec::new();
-        for seat in SeatId::DUEL {
+        for &seat in &SeatId::ALL[..self.seats.len()] {
             let mailbox = &mut self.seats[seat.index()];
             if mailbox
                 .direction
@@ -116,7 +137,7 @@ impl InputMailbox {
             inputs.append(&mut mailbox.inputs);
             mailbox.admitted = 0;
         }
-        for seat in SeatId::DUEL {
+        for &seat in &SeatId::ALL[..self.seats.len()] {
             for action in self.seats[seat.index()].manual_actions.drain(..) {
                 let action = match action {
                     ManualAction::PlaceBomb => InputAction::PlaceBomb,
@@ -139,7 +160,9 @@ impl InputMailbox {
     }
 
     pub(super) fn stop(&mut self, seat: SeatId) {
-        let mailbox = &mut self.seats[seat.index()];
+        let Some(mailbox) = self.seats.get_mut(seat.index()) else {
+            return;
+        };
         mailbox.direction = None;
         mailbox.expires_at = None;
         mailbox.inputs.clear();
@@ -159,7 +182,10 @@ impl InputMailbox {
     }
 
     fn admit(&mut self, seat: SeatId) -> Result<&mut SeatMailbox, InputError> {
-        let mailbox = &mut self.seats[seat.index()];
+        let mailbox = self
+            .seats
+            .get_mut(seat.index())
+            .ok_or(InputError::UnknownSeat)?;
         if mailbox.admitted >= COMMANDS_PER_UPDATE {
             return Err(InputError::RateLimited);
         }
@@ -171,3 +197,7 @@ impl InputMailbox {
 #[cfg(test)]
 #[path = "input_tests.rs"]
 mod tests;
+
+#[cfg(test)]
+#[path = "input_multiplayer_tests.rs"]
+mod multiplayer_tests;

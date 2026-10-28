@@ -1,6 +1,6 @@
 use std::collections::BTreeMap;
 
-use crate::cpu::{BombKnowledge, MAX_OBSERVED_BOMBS, MemoryKey, Observation};
+use crate::cpu::{BombKnowledge, MemoryKey, Observation};
 use crate::game::{CellId, EntityId, Tick};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -57,7 +57,7 @@ impl ObservedHazardMemory {
         let BombKnowledge::Visible(observed) = &parts.bombs else {
             return Err(HazardMemoryError::BombKnowledgeUnavailable);
         };
-        debug_assert!(observed.len() <= MAX_OBSERVED_BOMBS);
+        debug_assert!(observed.len() <= crate::cpu::observed_bomb_capacity(parts.rules.version));
         if self
             .bombs
             .values()

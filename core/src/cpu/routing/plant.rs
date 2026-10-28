@@ -133,7 +133,7 @@ fn plan_timed_plant(
         return Err(PlantFailure::Unsupported);
     }
 
-    let rules = RulesConfig::expanded_v5(parts.rules.settings);
+    let rules = crate::cpu::rules_config(observation).ok_or(PlantFailure::Unsupported)?;
     let (range, fuse) = derive_bomb_modifiers(actor, parts.tick, request.execution_tick, rules)?;
     let detonates_at = add_tick(request.execution_tick, fuse)?;
     let survive_until = add_tick(detonates_at, rules.flame_ticks())?;

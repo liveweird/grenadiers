@@ -4,7 +4,7 @@ use crate::game::Equipment;
 #[must_use]
 pub(crate) fn can_pass_known_soft_blocks(observation: &Observation) -> bool {
     let parts = observation.parts();
-    parts.rules.version == 5
+    matches!(parts.rules.version, 5 | 6)
         && parts.rules.settings.enabled_items().contains_wall_pass()
         && parts.actors.iter().any(|actor| {
             matches!(actor, ObservedActor::Visible(actor)

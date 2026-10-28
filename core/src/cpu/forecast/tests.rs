@@ -68,7 +68,7 @@ pub(super) fn observation(tick: u64, bombs: BombKnowledge) -> Observation {
             terrain,
             blocks: Vec::new(),
         },
-        actors: [actor(SeatId::One, 10), actor(SeatId::Two, 20)],
+        actors: vec![actor(SeatId::One, 10), actor(SeatId::Two, 20)],
         bombs,
         flames: Vec::new(),
         oil: Vec::new(),

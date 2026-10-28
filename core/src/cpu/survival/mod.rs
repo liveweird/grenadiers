@@ -46,3 +46,6 @@ mod bracelet_tests;
 
 #[cfg(test)]
 mod origin_tests;
+
+#[cfg(test)]
+mod multiplayer_rival_tests;

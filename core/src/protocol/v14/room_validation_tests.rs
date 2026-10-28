@@ -324,3 +324,22 @@ fn cpu_terminal_room(two_cpus: bool) -> RoomView {
     }
     room
 }
+
+#[test]
+fn waiting_creator_reservation_keeps_truthful_connection_and_editor_metadata() {
+    let tick = crate::protocol::Tick::new(10).unwrap();
+    let mut room = super::tests::running_room(crate::game::PlayerCount::Three, tick);
+    room.phase = RoomPhase::Waiting;
+    room.round_number = RoundCount::new(0).unwrap();
+    room.seats[0].connection = ConnectionStatus::Disconnected {
+        expires_at: crate::protocol::Tick::new(70).unwrap(),
+    };
+    assert_eq!(room.settings_editor, Some(Seat::One));
+    assert!(room.seats[0].occupied);
+    assert!(validate_room_view(&room).is_ok());
+    room.seats[0].connection = ConnectionStatus::Disconnected { expires_at: tick };
+    assert_eq!(
+        validate_room_view(&room),
+        Err(ProjectionError::InvalidExpandedBinding)
+    );
+}

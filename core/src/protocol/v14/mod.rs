@@ -1,5 +1,7 @@
 mod client;
 mod configuration;
+mod cpu_observation;
+mod cpu_observation_types;
 mod events;
 mod identity;
 mod projection;
@@ -33,6 +35,7 @@ pub use crate::protocol::v11::{
 };
 pub use client::{GameClientMessage, ManualActionKind};
 pub use configuration::{BoardSize, ConfigurationController, Difficulty, RoomConfiguration};
+pub use cpu_observation::observe_cpu_recipient;
 pub use events::{
     DamagePreventionSource, EventIndex, EventKind, MAX_EVENT_INDEX, MAX_SNAPSHOT_EVENTS,
     SnapshotEvents, WireEvent,
@@ -95,6 +98,8 @@ fn enforce_server_message_size(encoded: String) -> Result<String, super::EncodeS
 
 #[cfg(test)]
 mod capture_tests;
+#[cfg(test)]
+mod cpu_observation_tests;
 #[cfg(test)]
 mod frame_bound_tests;
 #[cfg(test)]

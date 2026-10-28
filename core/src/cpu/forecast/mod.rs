@@ -129,7 +129,7 @@ impl HazardForecast {
     ) -> Result<Self, ForecastFailure> {
         if horizon_end.0 <= basis_tick.0
             || cells.len() != crate::game::arena::ARENA_CELL_COUNT
-            || stationary_assumptions.len() > crate::cpu::MAX_OBSERVED_BOMBS
+            || stationary_assumptions.len() > crate::cpu::MAX_MULTIPLAYER_OBSERVED_BOMBS
             || cells.iter().any(|cell| {
                 cell.lethal.len() > usize::from(limits.max_intervals_per_cell)
                     || cell.blocking.len() > usize::from(limits.max_intervals_per_cell)
@@ -211,3 +211,6 @@ mod temporal_placement_tests;
 #[cfg(test)]
 #[path = "punch_tests.rs"]
 mod punch_tests;
+
+#[cfg(test)]
+mod multiplayer_capacity_tests;

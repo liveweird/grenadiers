@@ -146,6 +146,47 @@ impl PreparedMatchOwner {
         cpu_planner: crate::game::rooms::cpu::CpuPlanner,
         shutdown: watch::Receiver<ShutdownState>,
     ) -> Result<(MatchOwnerHandle, Self), MatchRuntimeError> {
+        Self::new_with_wire_profile(
+            identity,
+            created_at,
+            seeds,
+            random_fill,
+            cpu_planner,
+            shutdown,
+            false,
+        )
+    }
+
+    #[allow(dead_code)] // Activated by the pending live-v14 registry wiring.
+    pub(in crate::game::rooms) fn new_live14_with_planner(
+        identity: RoomIdentity,
+        created_at: Instant,
+        seeds: RoundSeedSource,
+        random_fill: Arc<RandomFill>,
+        cpu_planner: crate::game::rooms::cpu::CpuPlanner,
+        shutdown: watch::Receiver<ShutdownState>,
+    ) -> Result<(MatchOwnerHandle, Self), MatchRuntimeError> {
+        Self::new_with_wire_profile(
+            identity,
+            created_at,
+            seeds,
+            random_fill,
+            cpu_planner,
+            shutdown,
+            true,
+        )
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    fn new_with_wire_profile(
+        identity: RoomIdentity,
+        created_at: Instant,
+        seeds: RoundSeedSource,
+        random_fill: Arc<RandomFill>,
+        cpu_planner: crate::game::rooms::cpu::CpuPlanner,
+        shutdown: watch::Receiver<ShutdownState>,
+        live14: bool,
+    ) -> Result<(MatchOwnerHandle, Self), MatchRuntimeError> {
         // Retained profiles identify archived projections/replays. A live
         // worker must never execute today's policy under an older identity.
         if matches!(identity.mode, grenadiers_core::room::RoomMode::Solo(profile)
@@ -168,8 +209,11 @@ impl PreparedMatchOwner {
                 cpu_profile.expect("private CPU seed belongs to a solo room"),
             )
         });
-        let mut runtime =
-            super::super::match_runtime::MatchRuntime::new(identity.clone(), seeds.clone());
+        let mut runtime = if live14 {
+            super::super::match_runtime::MatchRuntime::new_live14(identity.clone(), seeds.clone())
+        } else {
+            super::super::match_runtime::MatchRuntime::new(identity.clone(), seeds.clone())
+        };
         let initial = runtime.initial_notice()?;
         let (notices, receiver) = watch::channel(MatchOwnerNotice::Publication(initial.clone()));
         drop(receiver);

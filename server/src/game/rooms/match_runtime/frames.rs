@@ -10,6 +10,11 @@ impl SeatFrames {
         Self(frames.map(Arc::from))
     }
 
+    pub(super) fn shared(frame: String) -> Self {
+        let frame: Arc<str> = Arc::from(frame);
+        Self([Arc::clone(&frame), frame])
+    }
+
     pub(crate) fn select(&self, seat: SeatId) -> Arc<str> {
         Arc::clone(&self.0[seat.index()])
     }

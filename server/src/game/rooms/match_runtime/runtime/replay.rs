@@ -45,6 +45,16 @@ impl MatchRuntime {
         self.reports = reports;
     }
 
+    pub(in crate::game::rooms) fn replace_generation_for_test(
+        &mut self,
+        generation: Option<GenerationRecord>,
+    ) {
+        self.sim
+            .as_mut()
+            .expect("running simulation")
+            .generation_record = generation;
+    }
+
     pub(in crate::game::rooms) const fn publication_revision_for_test(&self) -> u32 {
         self.revision
     }

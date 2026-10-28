@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use grenadiers_core::{
     game::{Direction, GenerationRecord, SeatId, State, StepReport, Tick},
     protocol::v13::RoomView,
@@ -9,19 +11,27 @@ use grenadiers_core::{
 use super::super::{input::InputMailbox, types::RoomIdentity};
 use super::SeatFrames;
 use super::error::{MatchRuntimeError, map_lifecycle_error};
-use super::publication;
 use crate::round_seed::RoundSeedSource;
 
 pub(super) mod admission;
 mod capture;
 mod input_action;
+mod live_v14;
 mod maintenance;
 mod owner_helpers;
 #[cfg(test)]
 pub(super) mod replay;
 mod settings;
+mod wire;
 
 const REPORTS_PER_SNAPSHOT: usize = 3;
+
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub(in crate::game::rooms) enum InternalWireProfile {
+    #[default]
+    Legacy13,
+    Live14,
+}
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) enum MatchAction {
@@ -70,8 +80,10 @@ pub(in crate::game::rooms) struct MatchRuntime {
     sim: Option<SimRound>,
     reports: Vec<StepReport>,
     journal: Option<super::super::replay::Journal>,
+    wire_profile: InternalWireProfile,
 }
 
+#[derive(Clone)]
 pub(in crate::game::rooms) struct SimRound {
     pub(in crate::game::rooms) epoch: u64,
     pub(in crate::game::rooms) state: State,
@@ -104,6 +116,16 @@ impl MatchRuntime {
         )
     }
 
+    pub(in crate::game::rooms) fn new_live14(
+        identity: RoomIdentity,
+        round_seed_source: RoundSeedSource,
+    ) -> Self {
+        let mut runtime = Self::new(identity, round_seed_source);
+        runtime.wire_profile = InternalWireProfile::Live14;
+        runtime.initialize_live_cpu_consensus();
+        runtime
+    }
+
     #[cfg(test)]
     pub(in crate::game::rooms) fn occupy(
         &mut self,
@@ -125,6 +147,23 @@ impl MatchRuntime {
     }
 
     pub(in crate::game::rooms) fn settle_boundary(
+        &mut self,
+        departures: [Option<DepartureReason>; 2],
+    ) -> Result<Option<MatchNotice>, MatchRuntimeError> {
+        if self.wire_profile == InternalWireProfile::Live14 {
+            let stage = self.live_stage();
+            return match self.settle_boundary_inner(departures) {
+                Ok(notice) => Ok(notice),
+                Err(error) => {
+                    self.restore_live_stage(stage);
+                    Err(error)
+                }
+            };
+        }
+        self.settle_boundary_inner(departures)
+    }
+
+    fn settle_boundary_inner(
         &mut self,
         departures: [Option<DepartureReason>; 2],
     ) -> Result<Option<MatchNotice>, MatchRuntimeError> {
@@ -154,6 +193,7 @@ impl MatchRuntime {
             super::super::replay::Operation::Expiry,
         );
         publish |= expiry != MatchChange::Unchanged || has_departures;
+        publish |= self.settle_live_cpu_consensus()?;
         if publish {
             self.publish_current().map(Some)
         } else {
@@ -306,72 +346,4 @@ impl MatchRuntime {
             .then_some(())
             .ok_or(MatchRuntimeError::InvalidPhase)
     }
-
-    fn notice_for_change(
-        &mut self,
-        change: MatchChange,
-        include_state: bool,
-    ) -> Result<Option<MatchNotice>, MatchRuntimeError> {
-        if change == MatchChange::Unchanged {
-            Ok(None)
-        } else if include_state && self.sim.is_some() {
-            self.publish_snapshot().map(Some)
-        } else {
-            self.publish_view().map(Some)
-        }
-    }
-
-    fn publish_current(&mut self) -> Result<MatchNotice, MatchRuntimeError> {
-        if self.sim.is_some()
-            && matches!(
-                self.lifecycle.phase(),
-                MatchPhase::Running | MatchPhase::Result { .. } | MatchPhase::MatchResult { .. }
-            )
-        {
-            self.publish_snapshot()
-        } else {
-            self.publish_view()
-        }
-    }
-
-    fn publish_view(&mut self) -> Result<MatchNotice, MatchRuntimeError> {
-        let next = self.next_revision()?;
-        let room = publication::room_view(
-            &self.identity,
-            &self.lifecycle,
-            next,
-            self.settings_revision,
-            self.settings_editor,
-        )?;
-        self.revision = next;
-        Ok(MatchNotice {
-            room,
-            frames: None,
-            cpu_observation: None,
-        })
-    }
-
-    fn publish_snapshot(&mut self) -> Result<MatchNotice, MatchRuntimeError> {
-        let next = self.next_revision()?;
-        let sim = self.sim.as_ref().ok_or(MatchRuntimeError::Publication)?;
-        let notice = publication::snapshot(
-            &self.identity,
-            &self.lifecycle,
-            next,
-            self.settings_revision,
-            self.settings_editor,
-            sim,
-            &self.reports,
-        )?;
-        self.revision = next;
-        if !self.reports.is_empty() {
-            self.capture(
-                self.lifecycle.tick(),
-                super::super::replay::Operation::ReportFlush,
-            );
-        }
-        self.reports.clear();
-        Ok(notice)
-    }
 }
-use std::sync::Arc;

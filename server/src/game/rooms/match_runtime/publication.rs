@@ -86,10 +86,7 @@ pub(super) fn snapshot(
     }
     let capture =
         capture_expanded(&sim.state, reports).map_err(|_| MatchRuntimeError::Publication)?;
-    let epoch = grenadiers_core::protocol::Counter::new(
-        u32::try_from(sim.epoch).map_err(|_| MatchRuntimeError::CapacityReached)?,
-    )
-    .map_err(|_| MatchRuntimeError::CapacityReached)?;
+    let epoch = wire_counter(sim.epoch)?;
     let bound = grenadiers_core::protocol::v13::bind_expanded(
         &room,
         epoch,
@@ -97,27 +94,60 @@ pub(super) fn snapshot(
         sim.generation_record,
     )
     .map_err(|_| MatchRuntimeError::Publication)?;
-    let cpu_observation = if let Some(cpu_seat) = super::cpu_seat_for_mode(identity.mode) {
-        Some(
-            grenadiers_core::protocol::v13::observe_cpu_recipient(
-                &bound,
-                wire_seat(cpu_seat)?,
-                grenadiers_core::cpu::WorldId {
-                    room_instance: identity.registry_serial,
-                    physical_round: sim.epoch,
-                },
-            )
-            .map_err(|_| MatchRuntimeError::Publication)?,
-        )
-    } else {
-        None
-    };
+    let cpu_observation = observe_bound_cpu(identity, sim, &bound)?;
     let encoded = prepare_snapshot_pair(&bound).map_err(|_| MatchRuntimeError::Publication)?;
     Ok(MatchNotice {
         room,
         frames: Some(SeatFrames::new(encoded)),
         cpu_observation,
     })
+}
+
+pub(super) fn cpu_observation(
+    identity: &RoomIdentity,
+    room: &RoomView,
+    sim: &SimRound,
+    reports: &[StepReport],
+) -> Result<Option<grenadiers_core::cpu::Observation>, MatchRuntimeError> {
+    let capture =
+        capture_expanded(&sim.state, reports).map_err(|_| MatchRuntimeError::Publication)?;
+    let bound = grenadiers_core::protocol::v13::bind_expanded(
+        room,
+        wire_counter(sim.epoch)?,
+        &capture,
+        sim.generation_record,
+    )
+    .map_err(|_| MatchRuntimeError::Publication)?;
+    observe_bound_cpu(identity, sim, &bound)
+}
+
+fn observe_bound_cpu(
+    identity: &RoomIdentity,
+    sim: &SimRound,
+    bound: &grenadiers_core::protocol::v13::BoundPublication,
+) -> Result<Option<grenadiers_core::cpu::Observation>, MatchRuntimeError> {
+    super::cpu_seat_for_mode(identity.mode)
+        .map(|cpu_seat| {
+            grenadiers_core::protocol::v13::observe_cpu_recipient(
+                bound,
+                wire_seat(cpu_seat)?,
+                grenadiers_core::cpu::WorldId {
+                    room_instance: identity.registry_serial,
+                    physical_round: sim.epoch,
+                },
+            )
+            .map_err(|_| MatchRuntimeError::Publication)
+        })
+        .transpose()
+}
+
+pub(super) fn wire_counter(
+    value: u64,
+) -> Result<grenadiers_core::protocol::Counter, MatchRuntimeError> {
+    u32::try_from(value)
+        .ok()
+        .and_then(|value| grenadiers_core::protocol::Counter::new(value).ok())
+        .ok_or(MatchRuntimeError::CapacityReached)
 }
 
 fn wire_settings(

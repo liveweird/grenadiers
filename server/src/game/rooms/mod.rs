@@ -15,6 +15,8 @@ use tokio::{
 
 mod cpu;
 mod input;
+#[allow(dead_code)] // Pure compatibility bridge; socket routing is activated separately.
+mod legacy_v14;
 mod match_owner;
 mod match_runtime;
 #[cfg(test)]

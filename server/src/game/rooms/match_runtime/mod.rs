@@ -29,6 +29,9 @@ mod invisible_bombs_tests;
 #[path = "lifecycle_tests.rs"]
 mod lifecycle_tests;
 #[cfg(test)]
+#[path = "live_v14_tests.rs"]
+mod live_v14_tests;
+#[cfg(test)]
 #[path = "performance_tests.rs"]
 mod performance_tests;
 #[cfg(test)]

@@ -10,6 +10,39 @@ impl MatchRuntime {
         expected_epoch: u64,
         action: MatchAction,
     ) -> Result<Option<MatchNotice>, MatchRuntimeError> {
+        if self.is_live14() {
+            let stage = self.live_stage();
+            let result = (|| {
+                self.validate_actor(seat, expected_epoch)?;
+                let before = self.settle_live_cpu_consensus()?;
+                let notice = self.action_inner(seat, expected_epoch, action)?;
+                let after = self.settle_live_cpu_consensus()?;
+                match (notice, before || after) {
+                    (Some(notice), changed) => {
+                        if changed {
+                            self.refresh_live_notice(notice).map(Some)
+                        } else {
+                            Ok(Some(notice))
+                        }
+                    }
+                    (None, true) => self.publish_current().map(Some),
+                    (None, false) => Ok(None),
+                }
+            })();
+            if result.is_err() {
+                self.restore_live_stage(stage);
+            }
+            return result;
+        }
+        self.action_inner(seat, expected_epoch, action)
+    }
+
+    fn action_inner(
+        &mut self,
+        seat: SeatId,
+        expected_epoch: u64,
+        action: MatchAction,
+    ) -> Result<Option<MatchNotice>, MatchRuntimeError> {
         self.validate_actor(seat, expected_epoch)?;
         if matches!(action, MatchAction::Bomb(id) | MatchAction::Equipment(id)
             if grenadiers_core::protocol::Counter::new(id).is_err())

@@ -68,11 +68,7 @@ impl MatchRuntime {
                 self.settings_revision,
                 self.settings_editor,
             )?;
-            return Ok(Some(MatchNotice {
-                room,
-                frames: None,
-                cpu_observation: None,
-            }));
+            return self.view_notice(room).map(Some);
         }
         self.ensure_revision()?;
         let next_settings_revision = self

@@ -2,6 +2,17 @@
 
 ## [Unreleased]
 
+## 0.3.110 — 2026-10-28
+
+- Enable custom 11×9, 13×11 and 15×13 boards for two-to-four-player human/CPU lineups;
+  retain 15×13 defaults for quick duel and Solo, with immutable room geometry.
+- Route smaller rooms through rules6, generator4 and policy17 while preserving existing
+  15×13 profiles and exact historical behavior.
+- Adapt CPU forecasts, routing, Power/Punch geometry and work accounting to board size;
+  certify complete private/world/event coordinates before recipient filtering.
+- Add strict private replay format5 through shared replay machinery, preserving literal
+  format4/5 version identities and keeping production recording/export disabled.
+
 ## 0.3.109 — 2026-10-28
 
 - Add checked arena geometry for the existing 11×9, 13×11 and 15×13 board presets while

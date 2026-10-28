@@ -19,6 +19,7 @@ export const scenarioSpecMap = {
   'scenarios/landmine.md': ['landmine-tests/landmine.spec.ts'],
   'scenarios/long-fuse.md': ['long-fuse-tests/long-fuse.spec.ts'],
   'scenarios/matches.md': ['match-tests/matches.spec.ts'],
+  'scenarios/multiplayer.md': ['tests/multiplayer.spec.ts'],
   'scenarios/oil-barrel.md': ['oil-barrel-tests/oil-barrel.spec.ts'],
   'scenarios/pickups.md': ['pickup-tests/pickups.spec.ts'],
   'scenarios/piercing-bomb.md': ['piercing-bomb-tests/piercing-bomb.spec.ts'],

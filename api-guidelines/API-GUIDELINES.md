@@ -29,8 +29,9 @@ contracts, generated TypeScript, conformance tests, and docs change together.
   frames remain distinct from application ping/pong envelopes. Do not expose credentials in URLs.
 - **API-STATE-001:** Sockets do not reserve player slots. Matches configure two to four seats and
   at least one human controller; the diagnostic welcome advertises the four-player capacity ceiling.
-  Two-seat matches use CPU policy 16 with rules 5, while three- and four-seat matches use CPU
-  policy 17 with rules 6. Gameplay clients submit inputs, never authoritative outcomes; see
+  Two-seat 15×13 matches use CPU policy 16 with rules 5. Three/four-seat 15×13 matches and every
+  11×9/13×11 match use CPU policy 17 with rules 6. Gameplay clients submit inputs, never
+  authoritative outcomes; see
   [live gameplay protocol](../docs/game/protocol.md).
 
 Spectral checks the machine-verifiable OpenAPI subset: explicit errors use

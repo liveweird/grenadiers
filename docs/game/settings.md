@@ -3,11 +3,14 @@
 See [ADR 0020](../decisions/0020-shared-gameplay-settings.md) for the shared configuration model.
 Historical activation details are in the [release record](../history/configuration-activation.md#room-settings-activation).
 
-The creator can configure these rules before either starts the match:
+The creator can configure these rules before the match starts. Custom room creation separately
+selects an immutable **Board size** / **Rozmiar planszy** of 11×9, 13×11 or 15×13 (default);
+it is not an editable gameplay setting. Quick duel and Solo always use 15×13. See
+[board geometry](board-sizes.md).
 
 | Control | Choices | Effect |
 | --- | --- | --- |
-| Starting speed | 3–5 cells/second, steps of 0.5 | Sets both players' starting speed; speed pickups still cap at 5. |
+| Starting speed | 3–5 cells/second, steps of 0.5 | Sets every player's starting speed; speed pickups still cap at 5. |
 | Corner tolerance | 1/16–¼ tile, steps of 1/16 | Controls how far from a corridor center a perpendicular turn may align. |
 | Wins to finish | 1–9 | Sets round wins needed for match victory. Draws award no point. |
 | Bomb fuse | 1–5 seconds, steps of 0.5 | Sets the delay for successfully planted ordinary bombs. |
@@ -29,19 +32,19 @@ The creator can configure these rules before either starts the match:
 | Invisibility Cloak | Enabled or disabled; enabled by default | Hides the actor's position and gameplay details from the opponent for ten seconds. |
 | Invisible Bombs | Enabled or disabled; enabled by default | Hides every bomb and its placement or detonation cue from the affected player for ten seconds. |
 | Oil Barrel | Enabled or disabled; enabled by default | Adds at most eight arena objects that reveal solid and become passable fire until round end. |
-| Teleporter | Enabled or disabled; enabled by default | Atomically swaps both living players when both destination footprints are safe; an unsafe pickup is consumed without movement. |
+| Teleporter | Enabled or disabled; enabled by default | Atomically swaps its collector with a randomly selected living rival when both destination footprints are safe; an unsafe pickup is consumed without movement. |
 | Short Flame | Enabled or disabled; enabled by default | Adds ten-second curses that limit new bombs to range one, overriding Golden Flame. |
 | Long Fuse | Enabled or disabled; enabled by default | Adds ten-second curses that double new ordinary timed bomb fuses. Short and Long Fuse cancel while both are active. |
 | Reverse Controls | Enabled or disabled; enabled by default | Adds ten-second curses that reverse held movement directions. |
 
-Both players see accepted values. Editing requires the original creator to be connected,
+All players see accepted values. Editing requires the original creator to be connected,
 unready and in the waiting lobby. Apply changes to update the shared rules; a genuine change
-clears both players' readiness. **All on** and **All off** change only the item switches in the
+clears every human's readiness. **All on** and **All off** change only the item switches in the
 draft; they do not reset numeric rules or submit automatically. Restore defaults prepares the
 numeric Expanded defaults with every currently available item enabled. Classic settings prepares
 the original four values with optional items disabled. Every draft change requires **Apply rules**
 before it changes the shared configuration.
-Once a match starts, settings stay locked through all automatic rounds. Both players can
+Once a match starts, settings stay locked through all automatic rounds. The retained humans can
 consent to a rematch and then edit in the unready lobby again.
 
 Reconnect preserves creator authority while the seat remains reserved. If the creator leaves
@@ -49,8 +52,8 @@ permanently or the reservation expires, the last accepted configuration remains;
 room to edit again. A replacement occupant does not become creator.
 
 Local keyboard and sound preferences are independent. Turn assistance still uses the normal
-movement budget and swept collision/fire checks. Extra configuration for arena generation,
-round/flame duration, loadouts and additional item pools is tracked in the [backlog](../../BACKLOG.md).
+movement budget and swept collision/fire checks. Round/flame duration and loadouts are not
+configurable here.
 
 Expanded rooms retain immutable rules version 5/map `generated_v2` when Heart is disabled,
 including after preset changes. All 22 item switches preserve one another.

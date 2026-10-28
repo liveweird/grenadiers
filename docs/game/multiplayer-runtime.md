@@ -1,8 +1,8 @@
 # Roster runtime
 
 `server/src/game/rooms/roster_runtime/` provides the transport-independent runtime used by live
-three- and four-seat configurations. The live registry retains the established two-seat path and
-selects the roster runtime for larger rooms. The [v14 contract](protocol-v14.md) owns wire shape
+three- and four-seat configurations and by two-seat rooms on smaller boards. The live registry
+retains the established two-seat path only for 15×13. The [v14 contract](protocol-v14.md) owns wire shape
 and recipient privacy; the [multiplayer design](multiplayer-design.md) records its integration.
 
 ## Lifecycle and participation
@@ -25,11 +25,11 @@ are derived from the same certified physical facts before revisions or report fl
 Admissions prepare a prospective lifecycle and all recipient frames, encode the private response,
 and commit only after the owner delivers it. Resume retains the exact new CPU publication.
 
-Round construction uses rules 6, generation 3 and the actual physical-round assignment. The
-configured roster remains intact, with departed participants initially inactive. Only 15×13 is
-accepted; smaller boards fail before entropy or construction. Live two-player routing retains
-rules 5, generation 2 and CPU policy 16; three- and four-seat routing uses rules 6, generation 3
-and CPU policy 17.
+Round construction uses rules 6 and the actual physical-round assignment. It selects generator 3
+for 15×13 and generator 4 for 11×9/13×11. The configured roster remains intact, with departed
+participants initially inactive. Live two-player 15×13 routing retains rules 5, generator 2 and
+CPU policy 16. Every smaller-board room and every three/four-seat room uses the roster runtime and
+CPU policy 17. The exact profile table is in [board geometry](board-sizes.md).
 
 ## Boundaries and randomness
 
@@ -43,5 +43,5 @@ Simulation randomness uses an independent OS-generated private room root. Deriva
 uses ChaCha20 with the root key, the nonzero physical epoch as its 64-bit stream, and the first
 32 bytes as the round seed. Derivation does not advance shared state or depend on request order;
 arena fixtures and CPU streams cannot alter it. Roots and derived seeds redact debug output.
-The derivation is retained for replay-format-4 fixtures, but production recording and export stay
-disabled.
+The derivation remains version 1 for private replay formats 4 and 5, but production recording and
+export stay disabled.

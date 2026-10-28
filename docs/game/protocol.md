@@ -241,10 +241,10 @@ capability, never to invitation code. See [bounded owner](match-owner.md).
 ## Profile and version evolution
 
 An immutable server room profile owns state construction and its rules/map labels. Publication
-rejects state whose checked rules version disagrees with that profile. Live two-seat rooms use
-Expanded-v5 rules, generator v2, and CPU policy 16. Live three- and four-seat rooms use rules 6,
-generator v3, and CPU policy 17. Every live configuration currently uses a 15×13 board; smaller
-schema-valid boards are rejected before construction. Snapshots initially have an
+rejects state whose checked rules version disagrees with that profile. Live two-seat 15×13 rooms
+use Expanded-v5 rules, generator v2, and CPU policy 16. Three/four-seat 15×13 rooms use rules 6,
+generator v3, and CPU policy 17. Every 11×9/13×11 room uses rules 6, generator v4, and CPU policy
+17; see [board geometry](board-sizes.md). Snapshots initially have an
 empty pickup array because contents are concealed; only exposed items become public.
 Fixed-classic-v1 remains an explicit unit fixture, not a production selector.
 

@@ -1,7 +1,8 @@
 # Multiplayer CPU foundation
 
 The shared CPU implementation uses multiplayer policy v17 on rules 6 for live three- and
-four-seat rooms. Live two-player rooms retain policy v16 and rules 5. The
+four-seat rooms and for two-seat rooms on 11×9/13×11. Only two-seat 15×13 rooms retain policy
+v16 and rules 5. See the [board profile table](board-sizes.md). The
 [CPU contract guide](cpu-contracts.md) describes planner boundaries; the
 [roster runtime](multiplayer-runtime.md) supplies the certified publication seam.
 
@@ -25,7 +26,9 @@ the established utility and bounded forecasting machinery with explicit rules-6 
 Each controller owns its participant/world identity, memory, RNG, pending work, route and
 cadence. Cross-seat results cannot commit plans or random draws. Cancellation of one controller
 does not cancel another. The shared planner retains two workers, a 32-job queue and the
-existing per-job work allowance.
+existing per-job work allowance. Forecast identity includes board dimensions, and movement,
+hazards, Power traversal and Punch routes use the selected board without changing 15×13 policy
+ordering or cadence.
 
 Punch and Bracelet proofs inspect all relevant visible rivals and third-party blockers.
 Unknown hidden rivals withdraw proofs that cannot be certified. Bracelet also rejects

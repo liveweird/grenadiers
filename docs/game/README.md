@@ -53,8 +53,9 @@ for current defaults and behavior, rather than treating design proposals as deli
 
 [Room settings](settings.md) covers shared starting speed, turn tolerance, match target and fuse.
 
-[Gameplay v11 compatibility](protocol-v11.md) defines the paired live wire contract, including the
-authoritative teleport position epoch. [Gameplay v10](../history/protocols/protocol-v10.md) and
+[Gameplay v13 compatibility](protocol-v13.md) defines the paired live wire contract, including the
+authoritative teleport position epoch. [Gameplay v14](protocol-v14.md) defines the dormant
+multiplayer contract; its presence does not enable larger live rooms. [Gameplay v10](../history/protocols/protocol-v10.md) and
 [v9](../history/protocols/protocol-v9.md) are archived; the
 [protocol history index](../history/protocols/README.md) links every standalone historical guide.
 

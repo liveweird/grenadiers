@@ -27,6 +27,7 @@ The browser validates these messages and drives the playable generated-map match
 | v11 | [Physical compatibility guide](protocol-v11.md) | Archived contract |
 | v12 | [Standard-only solo guide](protocol-v12.md) | Archived contract |
 | v13 | [Live compatibility guide](protocol-v13.md) | Supported |
+| v14 | [Multiplayer contract](protocol-v14.md) | Dormant; paired activation pending |
 
 ## Authentication and compatibility
 

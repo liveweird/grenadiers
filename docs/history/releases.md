@@ -4,6 +4,20 @@ This archive preserves the older release records originally maintained in
 [`docs/releases.md`](../releases.md). Records remain in their original order; the current
 release procedure and current release record stay in the [release guide](../releases.md).
 
+## v0.3.105 — 2026-10-28
+
+[v0.3.105](https://github.com/liveweird/grenadiers/releases/tag/v0.3.105) adds the dormant [roster runtime](../game/multiplayer-runtime.md) and lifecycle for checked two-to-four-seat matches. It provides personal admissions, creator-only settings, per-seat human/CPU input fences, rules 6/generation 3 construction and original-roster participation. Live sockets still use the two-player implementation.
+
+Reservations remain truthfully occupied and disconnected before the first round. Creator authority persists through grace while settings mutations require a connected creator. All human frames and CPU facts share one certified publication before revision/report-flush commit. Ordinary snapshots batch three 60 Hz updates at 20 Hz. Physics precedes running departure/expiry settlement without advancing twice; idle departures precede countdown advancement. Closing cleanup preserves completed bodies and outcomes without accidentally starting rematches.
+
+An independent OS-generated private simulation root derives per-epoch round seeds using pinned ChaCha20 derivation version 1. Root and derived seed debug output are redacted. Independent OpenSSL vectors, request-order tests and entropy-failure tests pass. No arena fixture or CPU stream controls simulation randomness.
+
+Independent lifecycle/runtime/privacy reviews are clear after their fixes. Sixteen focused runtime cases and roster, input, creator-reservation and seed regressions pass. Complete Rust acceptance passes on source `11e2bc3ba772cb6d99c92fb743962f911c1f2af2`, tree `98bb8a440b50589b50d2a7ec5f49de6099065f2c`: 633.108s, 32,154/35,041 lines (**91.7611%**), all 4,194,304 masks separately in debug/release/official coverage, 32 partitions, four workers, zero hidden retries and 37 raw profiles. Official LCOV was preserved. Distinct Linux [run 40750262726](https://github.com/liveweird/grenadiers/actions/runs/40750262726) passes. Formatting, Clippy, source caps and repository checks pass. Browser/art/dependencies and legacy CPU acceptance reuse v0.3.104/v0.3.103 evidence; their inputs are unchanged.
+
+Exact image `sha256:9aab389265ca9a8cc0b0461e55843a553a0d91ed25b69ccd5cf776a893e7d14d` passes pinned Trivy 0.74.0 with zero HIGH/CRITICAL findings; Compose 10 browser cases/52.2s; Kubernetes 10/54.4s; CPU-item collection one/16.7s. Assets, CSP/cache, security/resource/probe settings, health/readiness and Polish 320px checks pass. Temporary stacks were removed.
+
+This source prerelease includes a verified local image. Localhost runs the accepted image; v0.3.104 remains available for rollback. No live wire/replay migration is introduced. Live multiplayer, variable boards and later arena work remain in the [backlog](../../BACKLOG.md).
+
 ## v0.3.104 — 2026-10-28
 
 [v0.3.104](https://github.com/liveweird/grenadiers/releases/tag/v0.3.104) introduces the dormant [gameplay v14 contract](../game/protocol-v14.md): checked two-/three-/four-seat human/CPU configuration, explicit human creator, canonical seat/scores arrays, closed board dimensions and generated browser types/validators. Live gameplay remains v13 until paired runtime/browser activation.

@@ -72,11 +72,7 @@ impl CpuController {
 
     fn profile_supports(&self, rules_version: u16) -> bool {
         match rules_version {
-            5 => matches!(
-                self.profile,
-                grenadiers_core::room::CpuProfile::CURRENT
-                    | grenadiers_core::room::CpuProfile::CURRENT_EASY
-            ),
+            5 => self.profile.policy.version() <= 16,
             6 => matches!(
                 self.profile,
                 grenadiers_core::room::CpuProfile::MULTIPLAYER_STANDARD

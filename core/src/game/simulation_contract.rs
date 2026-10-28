@@ -2,6 +2,7 @@ use crate::game::geometry::{MovementSegment, MovementTrace};
 use crate::game::input::Direction;
 use crate::game::types::{CellId, EntityId, PlayerCount, Position, SeatId, SpeedLevel, Tick};
 use crate::game::{EffectKind, EnabledItems, PickupKind, StepEvent};
+use crate::room::BoardSize;
 
 pub const MAX_INPUTS_PER_TICK: usize = 64;
 
@@ -35,6 +36,7 @@ pub enum StateError {
     InsufficientParticipants(usize),
     InvalidPlayerCount(usize),
     UnsupportedPlayerCount { version: u16, count: PlayerCount },
+    UnsupportedBoardSize { version: u16, board: BoardSize },
     NonCanonicalSeats,
     SpawnCountMismatch { actors: usize, spawns: usize },
     DuplicateActorId(EntityId),

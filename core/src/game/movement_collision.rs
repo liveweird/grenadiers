@@ -1,6 +1,6 @@
 use std::collections::BTreeSet;
 
-use super::arena::{ARENA_HEIGHT, ARENA_WIDTH, Terrain};
+use super::arena::Terrain;
 use super::geometry::{boundary_distance, distance_to_blocking_cell, position_overlaps_cell};
 use super::input::Direction;
 use super::types::{CellId, EntityId, HALF_FOOTPRINT, Position, UNITS_PER_CELL};
@@ -33,8 +33,8 @@ pub(crate) fn position_is_free(
     let half = i64::from(HALF_FOOTPRINT);
     if x - half < 0
         || y - half < 0
-        || x + half > i64::from(ARENA_WIDTH) * i64::from(UNITS_PER_CELL)
-        || y + half > i64::from(ARENA_HEIGHT) * i64::from(UNITS_PER_CELL)
+        || x + half > i64::from(world.arena.width()) * i64::from(UNITS_PER_CELL)
+        || y + half > i64::from(world.arena.height()) * i64::from(UNITS_PER_CELL)
     {
         return false;
     }
@@ -67,7 +67,13 @@ pub(crate) fn allowed_distance_with_blocker(
     access: ObstacleAccess<'_>,
 ) -> Collision {
     let mut allowed = requested.max(0);
-    let boundary = boundary_distance(position, direction, allowed, ARENA_WIDTH, ARENA_HEIGHT);
+    let boundary = boundary_distance(
+        position,
+        direction,
+        allowed,
+        world.arena.width(),
+        world.arena.height(),
+    );
     let mut bomb = None;
     let mut ambiguous = boundary < allowed;
     allowed = allowed.min(boundary);
@@ -99,8 +105,8 @@ pub(crate) fn allowed_distance_with_blocker(
 fn blocking_cells(
     world: &World,
 ) -> impl Iterator<Item = (CellId, Option<EntityId>, bool, bool)> + '_ {
-    let terrain = (0..ARENA_HEIGHT).flat_map(move |row| {
-        (0..ARENA_WIDTH).filter_map(move |column| {
+    let terrain = (0..world.arena.height()).flat_map(move |row| {
+        (0..world.arena.width()).filter_map(move |column| {
             let cell = CellId::new(column, row);
             if world.arena.terrain(cell) == Some(Terrain::Wall) {
                 Some((cell, None, false, false))

@@ -109,7 +109,11 @@ impl State {
     }
 
     fn punch_landing(&self, id: EntityId, source: CellId, direction: Direction) -> Option<CellId> {
-        for candidate in crate::game::punch_landing_candidates(source, direction) {
+        for candidate in crate::game::punch_landing_candidates_for_board(
+            source,
+            direction,
+            self.world.arena.board(),
+        ) {
             let open = crate::game::punch_landing_is_open(
                 self.world.arena.terrain(candidate),
                 self.world.arena.blocks().contains(&candidate),

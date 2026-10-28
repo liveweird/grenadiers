@@ -62,8 +62,9 @@ pub use events::{EventAudience, StepEvent, StepEventKind};
 pub use fixtures::fixed_arena;
 pub use generation::{
     ArenaGenerationConfig, EXPANDED_GENERATOR_VERSION, GENERATOR_VERSION, GeneratedArena,
-    GenerationError, GenerationRecord, MULTIPLAYER_GENERATOR_VERSION, generate_arena,
-    generate_expanded_arena, generate_multiplayer_arena,
+    GenerationError, GenerationRecord, MULTIPLAYER_GENERATOR_VERSION, VARIABLE_GENERATOR_VERSION,
+    generate_arena, generate_expanded_arena, generate_multiplayer_arena,
+    generate_variable_multiplayer_arena,
 };
 pub use geometry::{MovementSegment, MovementTrace};
 pub use input::{Direction, HeldDirections};
@@ -73,6 +74,7 @@ pub use oil::{MAX_OIL_BARRELS, OilBarrelState};
 pub use pickups::{Pickup, PickupKind, PickupLayer, PickupPlacementError};
 pub(crate) use punch_geometry::{
     adjacent_cell as punch_adjacent_cell, landing_candidates as punch_landing_candidates,
+    landing_candidates_for_board as punch_landing_candidates_for_board,
     landing_is_open as punch_landing_is_open,
 };
 pub use rules::RulesConfig;
@@ -91,6 +93,9 @@ mod generated_upgrade_trace_tests;
 
 #[cfg(test)]
 mod generated_match_trace_tests;
+
+#[cfg(test)]
+mod variable_board_tests;
 
 #[cfg(test)]
 mod invisibility_cloak_tests;

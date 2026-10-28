@@ -1,4 +1,4 @@
-use super::arena::{ARENA_CELL_COUNT, ARENA_HEIGHT, ARENA_WIDTH, Terrain};
+use super::arena::Terrain;
 use super::bombs::{BlastKind, Bomb, BombTrigger};
 use super::input::Direction;
 use super::oil::{OilBarrelState, OilState};
@@ -89,16 +89,16 @@ impl State {
     #[must_use]
     pub fn public_view(&self) -> PublicState {
         let arena = self.world().arena();
-        let terrain = (0..ARENA_HEIGHT)
+        let terrain = (0..arena.height())
             .flat_map(|row| {
-                (0..ARENA_WIDTH).map(move |column| {
+                (0..arena.width()).map(move |column| {
                     arena
                         .terrain(CellId::new(column, row))
                         .expect("arena dimensions contain every projected cell")
                 })
             })
             .collect();
-        debug_assert_eq!(Vec::<Terrain>::len(&terrain), ARENA_CELL_COUNT);
+        debug_assert_eq!(Vec::<Terrain>::len(&terrain), arena.cell_count());
 
         PublicState {
             rules_version: self.rules().version(),
@@ -109,8 +109,8 @@ impl State {
                 .round_ticks()
                 .saturating_sub(self.running_updates()),
             arena: ArenaView {
-                width: ARENA_WIDTH,
-                height: ARENA_HEIGHT,
+                width: arena.width(),
+                height: arena.height(),
                 terrain,
                 blocks: arena.blocks().iter().copied().collect(),
             },

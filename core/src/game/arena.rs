@@ -1,19 +1,11 @@
 use std::collections::{BTreeSet, VecDeque};
 
 use super::types::CellId;
+use crate::room::BoardSize;
 
 pub const ARENA_WIDTH: u16 = 15;
 pub const ARENA_HEIGHT: u16 = 13;
 pub const ARENA_CELL_COUNT: usize = ARENA_WIDTH as usize * ARENA_HEIGHT as usize;
-
-const FIRST_CORNER: CellId = CellId::new(1, 1);
-const SECOND_CORNER: CellId = CellId::new(13, 11);
-const INTERIOR_CORNERS: [CellId; 4] = [
-    FIRST_CORNER,
-    CellId::new(13, 1),
-    CellId::new(1, 11),
-    SECOND_CORNER,
-];
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Terrain {
@@ -23,6 +15,7 @@ pub enum Terrain {
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum ArenaError {
+    InvalidTerrainLength { expected: usize, actual: usize },
     BorderMustBeWall(CellId),
     SpawnsMustBeOppositeCorners,
     InvalidSpawnCount(usize),
@@ -36,10 +29,11 @@ pub enum ArenaError {
     FloorIsDisconnected(CellId),
 }
 
-/// The fixed-size terrain, soft-block layer, and spawn metadata for one round.
+/// The checked terrain, soft-block layer, and spawn metadata for one round.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Arena {
-    terrain: [Terrain; ARENA_CELL_COUNT],
+    board: BoardSize,
+    terrain: Vec<Terrain>,
     blocks: BTreeSet<CellId>,
     spawns: Vec<CellId>,
 }
@@ -50,7 +44,28 @@ impl Arena {
         blocks: BTreeSet<CellId>,
         spawns: impl Into<Vec<CellId>>,
     ) -> Result<Self, ArenaError> {
+        Self::new_for_board(
+            BoardSize::FifteenByThirteen,
+            terrain.to_vec(),
+            blocks,
+            spawns,
+        )
+    }
+
+    pub fn new_for_board(
+        board: BoardSize,
+        terrain: Vec<Terrain>,
+        blocks: BTreeSet<CellId>,
+        spawns: impl Into<Vec<CellId>>,
+    ) -> Result<Self, ArenaError> {
+        if terrain.len() != board.cell_count() {
+            return Err(ArenaError::InvalidTerrainLength {
+                expected: board.cell_count(),
+                actual: terrain.len(),
+            });
+        }
         let arena = Self {
+            board,
             terrain,
             blocks,
             spawns: spawns.into(),
@@ -61,7 +76,27 @@ impl Arena {
 
     #[must_use]
     pub const fn contains(&self, cell: CellId) -> bool {
-        cell.column < ARENA_WIDTH && cell.row < ARENA_HEIGHT
+        cell.column < self.width() && cell.row < self.height()
+    }
+
+    #[must_use]
+    pub const fn board(&self) -> BoardSize {
+        self.board
+    }
+
+    #[must_use]
+    pub const fn width(&self) -> u16 {
+        self.board.width()
+    }
+
+    #[must_use]
+    pub const fn height(&self) -> u16 {
+        self.board.height()
+    }
+
+    #[must_use]
+    pub const fn cell_count(&self) -> usize {
+        self.board.cell_count()
     }
 
     #[must_use]
@@ -84,13 +119,13 @@ impl Arena {
     }
 
     fn validate(&self) -> Result<(), ArenaError> {
-        for column in 0..ARENA_WIDTH {
+        for column in 0..self.width() {
             self.require_border_wall(CellId::new(column, 0))?;
-            self.require_border_wall(CellId::new(column, ARENA_HEIGHT - 1))?;
+            self.require_border_wall(CellId::new(column, self.height() - 1))?;
         }
-        for row in 1..ARENA_HEIGHT - 1 {
+        for row in 1..self.height() - 1 {
             self.require_border_wall(CellId::new(0, row))?;
-            self.require_border_wall(CellId::new(ARENA_WIDTH - 1, row))?;
+            self.require_border_wall(CellId::new(self.width() - 1, row))?;
         }
 
         let count = self.spawns.len();
@@ -103,14 +138,14 @@ impl Arena {
                 return Err(ArenaError::DuplicateSpawn(spawn));
             }
         }
-        if count == 2
-            && (!self.spawns.contains(&FIRST_CORNER) || !self.spawns.contains(&SECOND_CORNER))
+        let corners = self.interior_corners();
+        if count == 2 && (!self.spawns.contains(&corners[0]) || !self.spawns.contains(&corners[3]))
         {
             return Err(ArenaError::SpawnsMustBeOppositeCorners);
         }
         if count > 2 {
             for &spawn in &self.spawns {
-                if !INTERIOR_CORNERS.contains(&spawn) {
+                if !corners.contains(&spawn) {
                     return Err(ArenaError::SpawnMustBeInteriorCorner(spawn));
                 }
             }
@@ -167,8 +202,8 @@ impl Arena {
             }
         }
 
-        for row in 0..ARENA_HEIGHT {
-            for column in 0..ARENA_WIDTH {
+        for row in 0..self.height() {
+            for column in 0..self.width() {
                 let cell = CellId::new(column, row);
                 if self.terrain(cell) == Some(Terrain::Floor) && !visited.contains(&cell) {
                     return Err(ArenaError::FloorIsDisconnected(cell));
@@ -180,7 +215,18 @@ impl Arena {
 
     fn index(&self, cell: CellId) -> Option<usize> {
         self.contains(cell)
-            .then_some(usize::from(cell.row) * usize::from(ARENA_WIDTH) + usize::from(cell.column))
+            .then_some(usize::from(cell.row) * usize::from(self.width()) + usize::from(cell.column))
+    }
+
+    const fn interior_corners(&self) -> [CellId; 4] {
+        let right = self.width() - 2;
+        let bottom = self.height() - 2;
+        [
+            CellId::new(1, 1),
+            CellId::new(right, 1),
+            CellId::new(1, bottom),
+            CellId::new(right, bottom),
+        ]
     }
 }
 

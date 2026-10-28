@@ -125,6 +125,10 @@ struct WorldBlastField<'a> {
 }
 
 impl BlastField for WorldBlastField<'_> {
+    fn dimensions(&self) -> (u16, u16) {
+        (self.world.arena.width(), self.world.arena.height())
+    }
+
     fn is_floor(&self, cell: CellId) -> bool {
         self.world.arena.terrain(cell) == Some(Terrain::Floor)
     }

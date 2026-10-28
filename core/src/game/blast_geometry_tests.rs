@@ -123,3 +123,48 @@ fn visitor_can_end_geometry_work_without_hidden_follow_on_visits() {
     assert_eq!(result, ControlFlow::Break("exhausted"));
     assert_eq!(count, 3);
 }
+
+#[test]
+fn power_traversal_uses_the_fields_actual_dimensions() {
+    struct SmallField;
+    impl BlastField for SmallField {
+        fn dimensions(&self) -> (u16, u16) {
+            (11, 9)
+        }
+
+        fn is_floor(&self, cell: CellId) -> bool {
+            cell.column < 11 && cell.row < 9
+        }
+
+        fn has_soft_block(&self, _cell: CellId) -> bool {
+            false
+        }
+
+        fn has_unlit_oil(&self, _cell: CellId) -> bool {
+            false
+        }
+
+        fn bomb_at(&self, _cell: CellId) -> Option<BlastBomb> {
+            None
+        }
+    }
+
+    let mut cells = Vec::new();
+    let completed = visit_blast(
+        &SmallField,
+        BlastSource {
+            cell: CellId::new(5, 4),
+            range: 32,
+            kind: BlastKind::Power,
+        },
+        |visit| {
+            cells.push(visit.cell);
+            ControlFlow::<()>::Continue(())
+        },
+    );
+
+    assert!(completed.is_continue());
+    assert_eq!(cells.len(), 99);
+    assert!(cells.contains(&CellId::new(10, 8)));
+    assert!(!cells.contains(&CellId::new(11, 0)));
+}

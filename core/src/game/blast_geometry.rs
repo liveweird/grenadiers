@@ -30,6 +30,10 @@ pub(crate) struct BlastVisit {
 /// same explosion phase. That preserves blockers until all same-tick chains
 /// have been planned.
 pub(crate) trait BlastField {
+    fn dimensions(&self) -> (u16, u16) {
+        (ARENA_WIDTH, ARENA_HEIGHT)
+    }
+
     fn is_floor(&self, cell: CellId) -> bool;
     fn has_soft_block(&self, cell: CellId) -> bool;
     fn has_unlit_oil(&self, cell: CellId) -> bool;
@@ -71,8 +75,9 @@ where
     F: BlastField,
     V: FnMut(BlastVisit) -> ControlFlow<B>,
 {
-    for row in 0..ARENA_HEIGHT {
-        for column in 0..ARENA_WIDTH {
+    let (width, height) = field.dimensions();
+    for row in 0..height {
+        for column in 0..width {
             let cell = CellId::new(column, row);
             let distance = u32::from(column.abs_diff(source.cell.column))
                 + u32::from(row.abs_diff(source.cell.row));

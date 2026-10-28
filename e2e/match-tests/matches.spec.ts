@@ -2,7 +2,7 @@ import { createResponsiveBrowserContexts } from '../tests/support/browser-contex
 import { selectClassicSettings } from '../tests/support/settings'
 import AxeBuilder from '@axe-core/playwright'
 import { expect, test, type Page } from '@playwright/test'
-import type { RoomView } from '../../web/src/game/v13/schema'
+import type { RoomView } from '../../web/src/game/v14/schema'
 import { expectPaintedCanvas, latestSnapshot, observeGame, type ObservedGame } from '../tests/support/duel'
 import { moveTo } from '../tests/support/movement'
 import { expectActorStatGeometry } from '../tests/support/actor-stats'
@@ -84,7 +84,7 @@ test('two browsers finish a drawn round, first-to-three match, and consensual re
     await plant(one, games[0])
     const drawn = await finished(games, 1, false)
     expect(drawn[0].lastRound?.result).toEqual({ type: 'draw', reason: 'mutualElimination' })
-    expect(drawn[0].scores).toEqual({ one: 0, two: 0 })
+    expect(drawn[0].scores).toEqual([{ seat: 'one', wins: 0 }, { seat: 'two', wins: 0 }])
     for (const game of games) expect(latestSnapshot(game)!.state.actors.every((actor) => !actor.alive)).toBe(true)
     await Promise.all(pages.map((page, index) =>
       page.screenshot({ path: testInfo.outputPath(`draw-${index}.png`), fullPage: true }),
@@ -101,7 +101,9 @@ test('two browsers finish a drawn round, first-to-three match, and consensual re
       await plant(one, games[0])
       const rooms = await finished(games, roundNumber, roundNumber === 4)
       expect(rooms[0].lastRound?.result).toEqual({ type: 'winner', seat: 'two' })
-      expect(rooms[0].scores).toEqual({ one: 0, two: roundNumber - 1 })
+      expect(rooms[0].scores).toEqual([
+        { seat: 'one', wins: 0 }, { seat: 'two', wins: roundNumber - 1 },
+      ])
       previousEpoch = started.roundId
     }
 
@@ -138,7 +140,10 @@ test('two browsers finish a drawn round, first-to-three match, and consensual re
     await Promise.all(games.map((game) => expect.poll(() => latestRoom(game)?.phase.type).toBe('waiting')))
     for (const [index, page] of pages.entries()) {
       const reset = latestRoom(games[index])!
-      expect(reset).toMatchObject({ roundId: previousEpoch + 1, roundNumber: 0, scores: { one: 0, two: 0 }, lastRound: null })
+      expect(reset).toMatchObject({
+        roundId: previousEpoch + 1, roundNumber: 0,
+        scores: [{ seat: 'one', wins: 0 }, { seat: 'two', wins: 0 }], lastRound: null,
+      })
       expect(reset.tick).toBeGreaterThan(final.tick)
       expect(reset.seats.every((seat) => seat.occupied && !seat.ready && !seat.rematchReady)).toBe(true)
       await expect(page.locator('.game-arena canvas')).not.toBeVisible()

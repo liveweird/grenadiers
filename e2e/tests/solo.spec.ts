@@ -22,7 +22,9 @@ test('an Easy solo player completes, rematches, reconnects and leaves a real CPU
     await player.getByRole('button', { name: 'Play solo against CPU', exact: true }).click()
     await expect.poll(() => latestRoom(game)).toBeTruthy()
     const created = latestRoom(game)!
-    expect(created.mode).toEqual({ type: 'solo', difficulty: 'easy' })
+    expect(created.configuration).toEqual({
+      controllers: ['human', 'cpu'], cpuDifficulty: 'easy', board: { width: 15, height: 13 },
+    })
     expect(created.seats).toEqual([
       expect.objectContaining({
         seat: 'one', occupied: true, controller: { type: 'human' }, connection: { type: 'connected' },
@@ -84,7 +86,9 @@ test('an Easy solo player completes, rematches, reconnects and leaves a real CPU
     const loser = winner === 'one' ? 'two' : 'one'
     expect(result.state.actors.find((actor) => actor.seat === winner)?.alive).toBe(true)
     expect(result.state.actors.find((actor) => actor.seat === loser)?.alive).toBe(false)
-    expect(result.room.scores).toEqual(winner === 'one' ? { one: 1, two: 0 } : { one: 0, two: 1 })
+    expect(result.room.scores).toEqual(winner === 'one'
+      ? [{ seat: 'one', wins: 1 }, { seat: 'two', wins: 0 }]
+      : [{ seat: 'one', wins: 0 }, { seat: 'two', wins: 1 }])
     const winnerLabel = winner === 'one' ? 'Player one' : 'CPU opponent'
     await expect(player.getByRole('status')).toHaveText(`${winnerLabel} wins the match with one round win.`)
 

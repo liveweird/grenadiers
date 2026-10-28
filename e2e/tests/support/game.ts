@@ -1,5 +1,5 @@
 import { expect, type Page } from '@playwright/test'
-import type { GameServerMessage } from '../../../web/src/game/v13/schema'
+import type { GameServerMessage } from '../../../web/src/game/v14/schema'
 
 type RoomFrame = Extract<GameServerMessage, { type: 'roomState' | 'admitted' }>
 type AdmissionFrame = Extract<GameServerMessage, { type: 'admitted' }>
@@ -27,7 +27,7 @@ export async function openGame(page: Page): Promise<void> {
     const first = new Promise<GameServerMessage>((resolve, reject) => {
       const timer = setTimeout(() => reject(new Error('Authentication timed out')), 10_000)
       socket.addEventListener('open', () => {
-        socket.send(JSON.stringify({ type: 'authenticate', protocolVersion: 13, token: session.token }))
+        socket.send(JSON.stringify({ type: 'authenticate', protocolVersion: 14, token: session.token }))
       }, { once: true })
       socket.addEventListener('error', () => {
         clearTimeout(timer)
@@ -56,13 +56,27 @@ export async function openGame(page: Page): Promise<void> {
     }
     return first
   })
-  expect(authenticated).toEqual({ type: 'authenticated', protocolVersion: 13 })
+  expect(authenticated).toEqual({ type: 'authenticated', protocolVersion: 14 })
 }
 
 export async function sendGame(page: Page, command: Record<string, unknown>): Promise<number> {
-  const message = command.type === 'createRoom' && command.mode === undefined
-    ? { ...command, mode: { type: 'humanDuel' } }
+  const message = command.type === 'createRoom' && command.configuration === undefined
+    ? {
+        ...command,
+        configuration: command.mode && typeof command.mode === 'object'
+          && 'type' in command.mode && command.mode.type === 'solo'
+          ? {
+              controllers: ['human', 'cpu'],
+              cpuDifficulty: 'difficulty' in command.mode ? command.mode.difficulty : 'standard',
+              board: { width: 15, height: 13 },
+            }
+          : {
+              controllers: ['human', 'human'], cpuDifficulty: null,
+              board: { width: 15, height: 13 },
+            },
+      }
     : command
+  if ('mode' in message) delete message.mode
   return page.evaluate((message) => {
     const driver = (window as GameWindow).grenadiersTestGame
     if (!driver) throw new Error('Game socket is not installed')

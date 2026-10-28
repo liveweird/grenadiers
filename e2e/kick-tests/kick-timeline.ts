@@ -1,4 +1,4 @@
-import type { GameServerMessage } from '../../web/src/game/v13/schema'
+import type { GameServerMessage } from '../../web/src/game/v14/schema'
 
 type Snapshot = Extract<GameServerMessage, { type: 'snapshot' }>
 export type KickBombIdentity = Snapshot['state']['bombs'][number]

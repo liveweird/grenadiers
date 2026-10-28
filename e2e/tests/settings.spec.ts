@@ -57,7 +57,9 @@ test('two browsers share configured rules that drive speed, fuse and match targe
     if (bomb.trigger.type !== 'timed') throw new Error('Configured Classic bomb must have a timed fuse')
     expect(planted.state.physicalTick - bomb.placedAt + bomb.trigger.remainingTicks).toBe(60)
     await Promise.all(games.map((game) => expect.poll(() => latestRoom(game)?.phase.type).toBe('matchResult')))
-    expect(latestRoom(games[0])?.scores).toEqual({ one: 0, two: 1 })
+    expect(latestRoom(games[0])?.scores).toEqual([
+      { seat: 'one', wins: 0 }, { seat: 'two', wins: 1 },
+    ])
     expect(latestRoom(games[0])?.settings).toEqual(expected)
     await Promise.all([one, two].map((page) => expect(page.getByRole('status'))
       .toHaveText('Player two wins the match with one round win.')))

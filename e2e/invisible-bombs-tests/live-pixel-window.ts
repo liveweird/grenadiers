@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto'
 import { expect, type BrowserContext, type Page, type TestInfo } from '@playwright/test'
-import type { GameServerMessage, Seat } from '../../web/src/game/v13/schema'
+import type { GameServerMessage, Seat } from '../../web/src/game/v14/schema'
 import { expectPaintedCanvas, latestSnapshot, observeGame, type ObservedGame } from '../tests/support/duel'
 import { moveSeatTo } from '../tests/support/movement'
 import { installTransportProbe } from '../tests/support/reconnect'

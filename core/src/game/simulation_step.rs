@@ -352,7 +352,7 @@ impl State {
         ));
     }
 
-    fn decide_result(&mut self) -> Option<RoundResult> {
+    pub(super) fn decide_result(&mut self) -> Option<RoundResult> {
         let mut living = self.actors.iter().filter(|actor| actor.alive);
         let first = living.next().map(|actor| actor.seat);
         let second = living.next();
@@ -381,7 +381,7 @@ pub(crate) fn trace_hits_hazards(trace: &MovementTrace, hazards: &BTreeMap<CellI
 }
 
 impl super::Actor {
-    fn kill(&mut self) {
+    pub(super) fn kill(&mut self) {
         self.alive = false;
         self.held.clear();
         self.residual = 0;

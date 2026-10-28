@@ -46,6 +46,8 @@ mod multiplayer_item_tests;
 mod multiplayer_interaction_tests;
 #[path = "multiplayer_teleporter_tests.rs"]
 mod multiplayer_teleporter_tests;
+#[path = "participation_tests.rs"]
+mod participation_tests;
 #[path = "multiplayer_kick_tests.rs"]
 mod multiplayer_kick_tests;
 #[path = "oil_proof_tests.rs"]

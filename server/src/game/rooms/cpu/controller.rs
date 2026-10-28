@@ -1,4 +1,3 @@
-use std::fmt;
 use std::sync::{
     Arc,
     atomic::{AtomicBool, Ordering},
@@ -66,20 +65,6 @@ pub(in crate::game::rooms) struct CpuController {
     escape_origin_epoch: Option<u64>,
     profile: CpuProfile,
     cadence: CadenceState,
-}
-
-impl fmt::Debug for CpuController {
-    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
-        formatter
-            .debug_struct("CpuController")
-            .field("room_instance", &self.room_instance)
-            .field("private_seed", &"<redacted>")
-            .field("world", &self.world)
-            .field("request_serial", &self.request_serial)
-            .field("pending", &self.pending.is_some())
-            .field("escaping", &self.escaping)
-            .finish()
-    }
 }
 
 impl CpuController {
@@ -347,6 +332,9 @@ impl Drop for CpuController {
         self.cancel();
     }
 }
+#[path = "controller_debug.rs"]
+mod debug;
+
 #[path = "controller_observation.rs"]
 mod observation;
 

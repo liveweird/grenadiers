@@ -52,4 +52,6 @@ pub use random::{CpuRng, RandomError};
 pub use work::{WorkBudget, WorkError};
 
 #[cfg(test)]
+mod observation_multiplayer_tests;
+#[cfg(test)]
 mod tests;

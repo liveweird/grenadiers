@@ -31,6 +31,7 @@ pub struct SeatInput {
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum StateError {
+    MissingSimulationRandomness,
     InvalidPlayerCount(usize),
     UnsupportedPlayerCount { version: u16, count: PlayerCount },
     NonCanonicalSeats,

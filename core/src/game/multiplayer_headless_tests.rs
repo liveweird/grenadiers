@@ -317,7 +317,7 @@ fn construction_enforces_profile_item_count_spawn_and_canonical_seat_boundaries(
             World::new(arena(3)),
             actors(PlayerCount::Three),
         ),
-        Err(StateError::UnsupportedEnabledItems(enabled))
+        Err(StateError::MissingSimulationRandomness)
     );
     assert!(matches!(
         State::new(

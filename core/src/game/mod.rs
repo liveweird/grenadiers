@@ -78,8 +78,8 @@ pub(crate) use punch_geometry::{
 pub use rules::RulesConfig;
 pub(crate) use simulation::stationary_contact_entry;
 pub use simulation::{
-    Actor, ActorInit, DrawReason, InputAction, RoundResult, SeatInput, State, StateError,
-    StepError, StepReport,
+    Actor, ActorInit, DrawReason, InputAction, RoundResult, SIMULATION_RANDOMNESS_VERSION,
+    SeatInput, SimulationSeed, State, StateError, StepError, StepReport,
 };
 pub use types::{CellId, EntityId, PlayerCount, Position, SeatId, SpeedLevel, Tick};
 pub use view::{ActorView, ArenaView, BombView, FlameView, OilBarrelView, PickupView, PublicState};

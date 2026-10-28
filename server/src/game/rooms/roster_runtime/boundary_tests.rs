@@ -150,7 +150,7 @@ fn controller_roles_are_checked_on_both_action_paths() {
 
 #[test]
 fn expiry_consensus_resets_stale_round_state_on_rematch() {
-    let mut runtime = tests::runtime(3);
+    let mut runtime = tests::runtime_for(3, BoardSize::ElevenByNine);
     tests::start(&mut runtime, 3);
     runtime
         .settle_boundary([None, None, Some(DepartureReason::TransportLoss), None])
@@ -173,6 +173,10 @@ fn expiry_consensus_resets_stale_round_state_on_rematch() {
         notice.room.phase,
         grenadiers_core::protocol::v14::RoomPhase::Waiting
     ));
+    assert_eq!(
+        notice.room.configuration.domain().board(),
+        BoardSize::ElevenByNine
+    );
     assert!(runtime.sim.is_none());
     assert!(runtime.reports.is_empty());
     assert!(runtime.prepare_cpu_publication().unwrap().is_none());

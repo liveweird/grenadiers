@@ -143,7 +143,9 @@ impl GameRooms {
         configuration: RoomConfiguration,
         parts: &super::registry_identity::RegistryIdentityParts,
     ) -> Result<(LiveOwner, PreparedLiveOwner), RoomError> {
-        if configuration.player_count().get() == 2 {
+        if configuration.player_count().get() == 2
+            && configuration.board() == BoardSize::FifteenByThirteen
+        {
             return self.prepare_legacy_live_owner(configuration, parts);
         }
         self.prepare_roster_live_owner(configuration, parts)
@@ -244,9 +246,7 @@ impl GameRooms {
 }
 
 fn validate_configuration(configuration: RoomConfiguration) -> Result<(), RoomError> {
-    if configuration.board() != BoardSize::FifteenByThirteen
-        || configuration.human_seats().next().is_none()
-    {
+    if configuration.human_seats().next().is_none() {
         return Err(RoomError::UnsupportedConfiguration);
     }
     Ok(())

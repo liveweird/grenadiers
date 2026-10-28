@@ -374,3 +374,6 @@ async fn command_queue_pressure_rejects_the_thirty_third_admission() {
     ));
     drop(queued);
 }
+
+#[path = "variable_board_tests.rs"]
+mod variable_board_tests;

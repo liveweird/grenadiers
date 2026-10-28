@@ -4,7 +4,7 @@ use grenadiers_core::{
     game::{GenerationRecord, SeatId, SimulationSeed, State, StepReport, Tick},
     protocol::v14,
     room::{
-        BoardSize, DepartureReason, MatchChange, MatchPhase, RoomSettings, RosterMatchLifecycle,
+        DepartureReason, MatchChange, MatchPhase, RoomSettings, RosterMatchLifecycle,
         RosterParticipant,
     },
 };
@@ -48,9 +48,6 @@ impl RosterRuntime {
         round_seed_source: RoundSeedSource,
         simulation_seed: Arc<SimulationSeedDerivation>,
     ) -> Result<Self, RosterRuntimeError> {
-        if identity.configuration.board() != BoardSize::FifteenByThirteen {
-            return Err(RosterRuntimeError::UnsupportedConfiguration);
-        }
         Ok(Self {
             lifecycle: RosterMatchLifecycle::new(identity.configuration, settings),
             inputs: InputMailbox::for_configuration(identity.configuration),

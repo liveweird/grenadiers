@@ -25,17 +25,7 @@ repeated approval for routine implementation choices. Entries are not delivery-d
 
 ## Multiplayer and arenas
 
-- [next] **MULTIPLAYER — three- and four-player matches.** Support human and/or CPU-controlled
-  seats, including mixed lineups, with at least one human in every match. Give players three
-  and four distinct uniform variants and contrasting palettes, preserving readable identity
-  alongside the existing players. Extend lobby/seat configuration, spawning, round outcomes,
-  readiness/rematch and disconnect handling. Adapt CPU observations/tactics, transport/replay
-  contracts and the HUD to the selected player count; preserve two-player behavior.
-  Follow the [multiplayer design](docs/game/multiplayer-design.md).
-  - **MP2 — live activation:** connect the roster runtime and prepared lobby/HUD through
-    the socket/owner adapter, per-seat CPU execution and truthful diagnostics;
-    verify complete human/mixed matches, reconnect and recipient privacy on 15×13 first.
-- [todo] **BOARD-SIZE — variable board dimensions.** Allow the game board size to be configured;
+- [next] **BOARD-SIZE — variable board dimensions.** Allow the game board size to be configured;
   define supported sizes and bounds during design. Adapt terrain/item generation, fair spawn
   placement, CPU navigation, rendering and transport/replay limits. Verify supported board sizes
   with two-, three- and four-player lineups.

@@ -3,13 +3,13 @@
 A browser-based multiplayer game inspired by classic Bomberman/Dynablaster.
 Play a two-human duel or a private solo match against the server CPU. Larger matches follow later.
 
-**[v0.3.107 multiplayer replay foundation](https://github.com/liveweird/grenadiers/releases/tag/v0.3.107).**
-All 22 requested item types shipped in v0.3.47. See the [release record](docs/releases.md#v03107--2026-10-28)
+**[v0.3.108 live multiplayer](https://github.com/liveweird/grenadiers/releases/tag/v0.3.108).**
+All 22 requested item types shipped in v0.3.47. See the [release record](docs/releases.md#v03108--2026-10-28)
 for verification, the exact deployed image and rollback. Reload browser tabs after upgrading the paired server/web image.
 
 The [artist sprite-sheet handoff](assets/art/README.md) includes editable PNG/JSON, labelled
 guides, validated runtime export and a separate Pixi preview. Download the artist bundle from
-[the release](https://github.com/liveweird/grenadiers/releases/tag/v0.3.48).
+[the release](https://github.com/liveweird/grenadiers/releases/tag/v0.3.108).
 Gameplay now uses those canonical inputs; see the [renderer guide](docs/game/art-atlas.md).
 The current sheet is a Napoleonic redraw generated with ChatGPT; see its
 [provenance](assets/art/README.md#provenance).
@@ -30,9 +30,9 @@ Default rooms allow turns within a quarter tile of a corridor centerline, includ
 wall stops. The creator can adjust starting speed, turning tolerance, wins needed and fuse
 time in the lobby's shared [gameplay settings](docs/game/settings.md). All 22 optional items
 start enabled; use the all-on/all-off buttons or individual switches to customize them. The
-[Heart pickup](docs/game/heart.md), which absorbs one lethal blast. Choose the
+[Heart pickup](docs/game/heart.md) absorbs one lethal blast. Choose the
 Classic settings preset for the original loadout. The [Shield](docs/game/shield.md)
-for five seconds of immunity; its timer refreshes on collection. The optional
+grants five seconds of immunity; its timer refreshes on collection. The optional
 [Golden Flame](docs/game/golden-flame.md) gives newly planted bombs maximum range for ten seconds. Optional
 [Short Fuse](docs/game/short-fuse.md) halves newly planted bomb fuses for ten seconds. The optional
 [Short Flame curse](docs/game/short-flame.md) limits new bombs to one adjacent cell for ten seconds. The optional

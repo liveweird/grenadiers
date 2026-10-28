@@ -2,13 +2,15 @@ use crate::game::{EventAudience, GenerationRecord, RulesConfig};
 use crate::protocol::{Cell, Counter, Position, Tick};
 
 use super::{
-    ArenaView, BombView, EventKind, FlameView, ItemSet, PickupView, RoomView, Seat,
+    ArenaView, BombView, EventKind, FlameView, ItemSet, PickupKind, PickupView, RoomView, Seat,
     VisibleActorView,
 };
 
 #[derive(Clone, PartialEq, Eq)]
 pub(crate) struct ActorFacts {
     pub view: VisibleActorView,
+    pub damage_grace_received_at: Option<Tick>,
+    pub last_teleport_tick: Option<Tick>,
     pub last_successful_punch_tick: Option<Tick>,
     pub last_successful_shove_tick: Option<Tick>,
     pub soft_wall_grace: Vec<Cell>,
@@ -29,6 +31,20 @@ pub(crate) struct OilFacts {
     pub phase: OilPhase,
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) enum PrivatePickupPhase {
+    Concealed,
+    Pending,
+    Exposed,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) struct PrivatePickupFacts {
+    pub cell: Cell,
+    pub kind: PickupKind,
+    pub phase: PrivatePickupPhase,
+}
+
 #[derive(Clone, PartialEq, Eq)]
 pub(crate) struct WorldFacts {
     pub rules_version: super::RulesVersion,
@@ -44,6 +60,7 @@ pub(crate) struct WorldFacts {
     pub flames: Vec<FlameView>,
     pub pickups: Vec<PickupView>,
     pub private_pickup_cells: Vec<Cell>,
+    pub private_pickups: Vec<PrivatePickupFacts>,
     pub oil: Vec<OilFacts>,
     pub available_items: ItemSet,
     pub enabled_items: ItemSet,

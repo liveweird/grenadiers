@@ -6,7 +6,7 @@ use crate::protocol::EntityId;
 use super::projection_capture_wire as wire;
 use super::projection_facts::{
     ActorFacts, BombHistory, EventFacts, ExpandedCapture, ForcedMovementFacts, OilFacts, OilPhase,
-    ReportFacts, TriggerHistory, WorldFacts,
+    PrivatePickupFacts, PrivatePickupPhase, ReportFacts, TriggerHistory, WorldFacts,
 };
 use super::{
     ArenaView, DamageGraceTicks, EffectView, EffectViews, FlameView, InventoryView, ItemMask,
@@ -94,6 +94,25 @@ pub fn capture_expanded(
             cells.sort_by_key(|cell| (cell.row(), cell.column()));
             cells
         },
+        private_pickups: {
+            let mut pickups = state
+                .world()
+                .pickup_observations()
+                .map(|(cell, kind, phase)| {
+                    Ok(PrivatePickupFacts {
+                        cell: wire::cell(cell)?,
+                        kind: wire::pickup(kind),
+                        phase: match phase {
+                            game::PickupLayer::Concealed => PrivatePickupPhase::Concealed,
+                            game::PickupLayer::Pending => PrivatePickupPhase::Pending,
+                            game::PickupLayer::Exposed => PrivatePickupPhase::Exposed,
+                        },
+                    })
+                })
+                .collect::<Result<Vec<_>, ProjectionError>>()?;
+            pickups.sort_by_key(|pickup| (pickup.cell.row(), pickup.cell.column()));
+            pickups
+        },
         oil: state
             .world()
             .oil_barrels()
@@ -141,10 +160,18 @@ fn capture_actor(
             .map_err(|_| ProjectionError::InvalidEffects)
         })
         .collect::<Result<Vec<_>, _>>()?;
-    let grace = actor.damage_grace_observation().map_or(Ok(0), |grace| {
-        u8::try_from(grace.remaining_ticks(game::Tick(physical_tick.get())))
-            .map_err(|_| ProjectionError::InvalidEffects)
-    })?;
+    let (grace, grace_received_at) = match actor.damage_grace_observation() {
+        Some(grace) => {
+            physical_tick
+                .get()
+                .checked_sub(grace.received_at().0)
+                .ok_or(ProjectionError::InvalidEffects)?;
+            let remaining = u8::try_from(grace.remaining_ticks(game::Tick(physical_tick.get())))
+                .map_err(|_| ProjectionError::InvalidEffects)?;
+            (remaining, Some(wire::tick(grace.received_at())?))
+        }
+        None => (0, None),
+    };
     let inventory = *actor.inventory();
     let view = VisibleActorView {
         id: EntityId::new(actor.id().0),
@@ -166,10 +193,12 @@ fn capture_actor(
         damage_grace_remaining_ticks: DamageGraceTicks::new(grace)
             .map_err(|_| ProjectionError::InvalidEffects)?,
         voluntary_actions_frozen: false,
-        last_teleport_tick: state.last_teleport_tick().map(wire::tick).transpose()?,
+        last_teleport_tick: actor.last_teleport_tick().map(wire::tick).transpose()?,
     };
     Ok(ActorFacts {
         view,
+        damage_grace_received_at: grace_received_at,
+        last_teleport_tick: actor.last_teleport_tick().map(wire::tick).transpose()?,
         last_successful_punch_tick: actor
             .last_successful_punch_tick()
             .map(wire::tick)

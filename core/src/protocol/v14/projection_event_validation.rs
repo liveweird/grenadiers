@@ -15,6 +15,7 @@ pub(crate) fn validate(
         || !event
             .audience
             .is_subset_of(EventAudience::all(player_count))
+        || !canonical_audience(world, event, rules, player_count)
     {
         return Err(ProjectionError::InvalidEvent);
     }
@@ -87,11 +88,57 @@ fn validate_event_bomb(
         || world.arena.blocks.contains(&bomb.cell)
         || world.actors.iter().any(|actor| actor.view.id == bomb.id)
         || !world.actors.iter().any(|actor| actor.view.id == bomb.owner)
+        || match bomb.blast {
+            super::BlastKind::Standard => false,
+            super::BlastKind::Piercing => !world.enabled_items.contains(ItemId::PiercingBomb),
+            super::BlastKind::Power => !world.enabled_items.contains(ItemId::PowerBomb),
+        }
     {
         return Err(ProjectionError::InvalidEvent);
     }
     super::projection_history::validate_bomb(world, bomb, history, tick, rules, placement)
         .map_err(|()| ProjectionError::InvalidEvent)
+}
+
+fn canonical_audience(
+    world: &WorldFacts,
+    event: &EventFacts,
+    rules: &RulesConfig,
+    player_count: PlayerCount,
+) -> bool {
+    let all = EventAudience::all(player_count);
+    if rules.version() < 5 {
+        return event.audience == all;
+    }
+    if matches!(
+        event.kind,
+        EventKind::BombPlaced { .. } | EventKind::BombDetonated { .. }
+    ) && world.enabled_items.contains(ItemId::InvisibleBombs)
+    {
+        // Historical bomb-blind audiences cannot be recomputed from current effects.
+        return true;
+    }
+    if !world.enabled_items.contains(ItemId::InvisibilityCloak) {
+        return event.audience == all;
+    }
+    let seat = match event.kind {
+        EventKind::BombPlaced { bomb } | EventKind::BombDetonated { bomb } => world
+            .actors
+            .iter()
+            .find(|actor| actor.view.id == bomb.owner)
+            .map(|actor| actor.view.seat),
+        EventKind::PickupCollected { seat, .. } | EventKind::DamagePrevented { seat, .. } => {
+            Some(seat)
+        }
+        EventKind::ActorEliminated { .. } | EventKind::RoundEnded { .. } => {
+            return event.audience == all;
+        }
+    };
+    seat.is_some_and(|seat| {
+        event.audience == all
+            || event.audience
+                == EventAudience::only(super::projection_capture_wire::domain_seat(seat))
+    })
 }
 
 fn reject_history(event: &EventFacts) -> Result<(), ProjectionError> {

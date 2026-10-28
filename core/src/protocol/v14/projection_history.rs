@@ -29,15 +29,32 @@ fn validate_actor_history(world: &WorldFacts) -> Result<(), ProjectionError> {
                 return Err(ProjectionError::InvalidActors);
             }
         }
-        if actor.view.last_teleport_tick != world.last_teleport_tick {
+        let teleport = actor.last_teleport_tick;
+        if actor.view.last_teleport_tick != teleport
+            || teleport.is_some_and(|tick| {
+                !world.enabled_items.contains(ItemId::Teleporter)
+                    || tick.get() <= round_start
+                    || tick > world.physical_tick
+            })
+        {
             return Err(ProjectionError::InvalidActors);
         }
     }
-    if world.last_teleport_tick.is_some_and(|tick| {
-        !world.enabled_items.contains(ItemId::Teleporter)
-            || tick.get() <= round_start
-            || tick > world.physical_tick
-    }) {
+    let latest = world
+        .actors
+        .iter()
+        .filter_map(|actor| actor.last_teleport_tick)
+        .max();
+    if latest != world.last_teleport_tick
+        || latest.is_some_and(|tick| {
+            world
+                .actors
+                .iter()
+                .filter(|actor| actor.last_teleport_tick == Some(tick))
+                .count()
+                != 2
+        })
+    {
         return Err(ProjectionError::InvalidClock);
     }
     Ok(())
@@ -47,7 +64,22 @@ fn validate_bomb_history(world: &WorldFacts, rules: &RulesConfig) -> Result<(), 
     if world.bomb_history.len() != world.bombs.len() {
         return Err(ProjectionError::InvalidBombs);
     }
+    let paused_now = world.actors.iter().any(|actor| {
+        actor.view.alive
+            && actor
+                .view
+                .effects
+                .as_slice()
+                .iter()
+                .any(|effect| effect.kind() == super::EffectKind::Stopwatch)
+    });
     for (bomb, history) in world.bombs.iter().zip(&world.bomb_history) {
+        if matches!(
+            history.trigger,
+            TriggerHistory::Timed { paused, .. } if paused != paused_now
+        ) {
+            return Err(ProjectionError::InvalidBombs);
+        }
         validate_bomb(world, *bomb, *history, world.physical_tick, rules, false)
             .map_err(|()| ProjectionError::InvalidBombs)?;
     }
@@ -170,10 +202,10 @@ fn validate_forced_movements(
     report: &ReportFacts,
 ) -> Result<(), ProjectionError> {
     let start = round_start(world)?;
-    if report.forced_movements.len() > world.actors.len() {
+    if report.forced_movements.len() > world.actors.len() / 2 {
         return Err(ProjectionError::InvalidReports);
     }
-    let mut victims = std::collections::BTreeSet::new();
+    let mut participants = std::collections::BTreeSet::new();
     for forced in &report.forced_movements {
         let Some(pusher) = world.actors.get(forced.pusher.index()) else {
             return Err(ProjectionError::InvalidReports);
@@ -185,7 +217,8 @@ fn validate_forced_movements(
         let dy = i32::from(forced.end.y()) - i32::from(forced.start.y());
         let distance = dx.unsigned_abs().max(dy.unsigned_abs());
         if forced.pusher == forced.victim
-            || !victims.insert(forced.victim.index())
+            || !participants.insert(forced.pusher.index())
+            || !participants.insert(forced.victim.index())
             || !world.enabled_items.contains(ItemId::Bracelet)
             || report.tick.get() <= start
             || distance == 0
@@ -195,7 +228,7 @@ fn validate_forced_movements(
                 .last_successful_shove_tick
                 .is_none_or(|tick| tick < report.tick)
             || report.tick == world.physical_tick
-                && world.last_teleport_tick != Some(report.tick)
+                && victim.last_teleport_tick != Some(report.tick)
                 && victim.view.position != forced.end
         {
             return Err(ProjectionError::InvalidReports);

@@ -214,3 +214,113 @@ fn cpu_ready_is_derived_for_eligible_countdown_pair() {
         Err(ProjectionError::InvalidExpandedBinding)
     );
 }
+
+fn terminal_room() -> RoomView {
+    let ended_at = crate::protocol::Tick::new(10).unwrap();
+    let rematch_at = crate::protocol::Tick::new(190).unwrap();
+    let mut room = super::tests::running_room(crate::game::PlayerCount::Three, rematch_at);
+    room.phase = RoomPhase::MatchResult {
+        ended_at,
+        result: MatchResult::Interrupted {
+            reason: MatchInterruptReason::InternalError,
+        },
+        rematch_at,
+    };
+    room
+}
+
+#[test]
+fn terminal_rematch_consensus_requires_two_eligible_and_a_connected_human() {
+    let mut abandoned = terminal_room();
+    abandoned.settings_editor = None;
+    for seat in &mut abandoned.seats {
+        seat.connection = ConnectionStatus::Expired;
+    }
+    abandoned.phase = RoomPhase::MatchResult {
+        ended_at: crate::protocol::Tick::new(10).unwrap(),
+        result: MatchResult::Abandoned,
+        rematch_at: crate::protocol::Tick::new(190).unwrap(),
+    };
+    assert!(validate_room_view(&abandoned).is_ok());
+
+    let mut sole_human = terminal_room();
+    sole_human.seats[0].rematch_ready = true;
+    sole_human.seats[1].connection = ConnectionStatus::Expired;
+    sole_human.seats[2].connection = ConnectionStatus::Expired;
+    sole_human.phase = RoomPhase::MatchResult {
+        ended_at: crate::protocol::Tick::new(10).unwrap(),
+        result: MatchResult::Winner {
+            seat: Seat::One,
+            reason: MatchWinnerReason::Forfeit,
+        },
+        rematch_at: crate::protocol::Tick::new(190).unwrap(),
+    };
+    assert!(validate_room_view(&sole_human).is_ok());
+
+    let mut sole_cpu = cpu_terminal_room(false);
+    sole_cpu.seats[1].rematch_ready = true;
+    sole_cpu.phase = RoomPhase::MatchResult {
+        ended_at: crate::protocol::Tick::new(10).unwrap(),
+        result: MatchResult::Winner {
+            seat: Seat::Two,
+            reason: MatchWinnerReason::Forfeit,
+        },
+        rematch_at: crate::protocol::Tick::new(190).unwrap(),
+    };
+    assert!(validate_room_view(&sole_cpu).is_ok());
+
+    let two_cpus = cpu_terminal_room(true);
+    assert!(validate_room_view(&two_cpus).is_ok());
+
+    let mut cpu_only_countdown = cpu_terminal_room(true);
+    cpu_only_countdown.round_number = RoundCount::new(0).unwrap();
+    for seat in &mut cpu_only_countdown.seats[1..] {
+        seat.ready = true;
+        seat.rematch_ready = false;
+    }
+    cpu_only_countdown.phase = RoomPhase::Countdown {
+        kind: CountdownKind::Initial,
+        ends_at: crate::protocol::Tick::new(cpu_only_countdown.tick.get() + 180).unwrap(),
+    };
+    assert_eq!(
+        validate_room_view(&cpu_only_countdown),
+        Err(ProjectionError::InvalidExpandedBinding)
+    );
+}
+
+fn cpu_terminal_room(two_cpus: bool) -> RoomView {
+    let mut room = terminal_room();
+    let controls = if two_cpus {
+        vec![
+            crate::room::SeatControl::Human,
+            crate::room::SeatControl::Cpu,
+            crate::room::SeatControl::Cpu,
+        ]
+    } else {
+        vec![
+            crate::room::SeatControl::Human,
+            crate::room::SeatControl::Cpu,
+            crate::room::SeatControl::Human,
+        ]
+    };
+    let configuration = crate::room::RoomConfiguration::new(
+        &controls,
+        Some(crate::room::CpuDifficulty::Standard),
+        crate::room::BoardSize::FifteenByThirteen,
+    )
+    .unwrap();
+    room.configuration = RoomConfiguration::from_domain(configuration);
+    room.settings_editor = None;
+    room.seats[0].connection = ConnectionStatus::Expired;
+    for index in 1..=(if two_cpus { 2 } else { 1 }) {
+        room.seats[index].controller = Controller::Cpu {
+            difficulty: Difficulty::Standard,
+        };
+        room.seats[index].connection = ConnectionStatus::ServerControlled;
+        room.seats[index].rematch_ready = true;
+    }
+    if !two_cpus {
+        room.seats[2].connection = ConnectionStatus::Expired;
+    }
+    room
+}

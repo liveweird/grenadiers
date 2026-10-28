@@ -1,4 +1,5 @@
 use super::*;
+use crate::protocol::Cell;
 
 #[test]
 fn message_collection_limits_are_independent_and_exact() {
@@ -78,7 +79,7 @@ fn mixed_private_pickup_layers_capture_in_global_cell_order() {
         heading: Direction::East,
         speed: SpeedLevel::Base,
     });
-    let state = State::new(
+    let mut state = State::new(
         RulesConfig::expanded_v5(
             crate::room::RoomSettings::DEFAULT.with_enabled_items(EnabledItems::HEART),
         ),
@@ -86,6 +87,7 @@ fn mixed_private_pickup_layers_capture_in_global_cell_order() {
         actors,
     )
     .unwrap();
+    state.insert_test_flame(CellId::new(3, 1), crate::game::Tick(1));
     let capture = capture_expanded(&state, &[]).unwrap();
     let coordinates: Vec<_> = capture
         .world
@@ -94,4 +96,57 @@ fn mixed_private_pickup_layers_capture_in_global_cell_order() {
         .map(|cell| (cell.row(), cell.column()))
         .collect();
     assert_eq!(coordinates, vec![(1, 1), (1, 3), (1, 5)]);
+    let phases: Vec<_> = capture
+        .world
+        .private_pickups
+        .iter()
+        .map(|pickup| (pickup.cell, pickup.kind, pickup.phase))
+        .collect();
+    assert_eq!(
+        phases,
+        vec![
+            (
+                Cell::new(1, 1).unwrap(),
+                super::PickupKind::Heart,
+                super::projection_facts::PrivatePickupPhase::Exposed,
+            ),
+            (
+                Cell::new(3, 1).unwrap(),
+                super::PickupKind::Heart,
+                super::projection_facts::PrivatePickupPhase::Pending,
+            ),
+            (
+                Cell::new(5, 1).unwrap(),
+                super::PickupKind::Heart,
+                super::projection_facts::PrivatePickupPhase::Concealed,
+            ),
+        ]
+    );
+}
+
+#[test]
+fn damage_grace_receipt_must_not_be_in_the_future() {
+    let mut state = super::tests::multiplayer_state_with_items(
+        crate::game::PlayerCount::Three,
+        crate::game::EnabledItems::HEART,
+    );
+    state.set_test_damage_grace(crate::game::SeatId::One, crate::game::Tick(1));
+    assert_eq!(
+        capture_expanded(&state, &[]),
+        Err(ProjectionError::InvalidEffects)
+    );
+
+    state.set_test_damage_grace(crate::game::SeatId::One, crate::game::Tick(0));
+    let capture = capture_expanded(&state, &[]).unwrap();
+    assert_eq!(
+        capture.world.actors[0].damage_grace_received_at,
+        Some(crate::protocol::Tick::new(0).unwrap())
+    );
+    assert_eq!(
+        capture.world.actors[0]
+            .view
+            .damage_grace_remaining_ticks
+            .get(),
+        60
+    );
 }

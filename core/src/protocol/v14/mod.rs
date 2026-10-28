@@ -102,8 +102,17 @@ mod max_frame_tests;
 #[cfg(test)]
 mod oil_validation_tests;
 #[cfg(test)]
+mod projection_certification_tests;
+#[cfg(test)]
+mod projection_private_facts_tests;
+#[cfg(test)]
 mod projection_validation_tests;
 #[cfg(test)]
 mod room_validation_tests;
 #[cfg(test)]
+mod teleport_privacy_tests;
+#[cfg(test)]
 mod tests;
+
+#[cfg(test)]
+mod abandonment_tests;

@@ -21,6 +21,11 @@ impl DamageGrace {
         self.received_at
     }
 
+    #[cfg(test)]
+    pub(crate) const fn for_test(received_at: Tick) -> Self {
+        Self { received_at }
+    }
+
     const fn received(at: Tick) -> Self {
         Self { received_at: at }
     }

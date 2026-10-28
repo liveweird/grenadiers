@@ -1,6 +1,6 @@
 use std::collections::BTreeSet;
 
-use super::projection_facts::WorldFacts;
+use super::projection_facts::{PrivatePickupPhase, WorldFacts};
 use super::{DrawReason, ProjectionError, RoundResult, Terrain};
 
 pub(crate) fn validate(world: &WorldFacts) -> Result<(), ProjectionError> {
@@ -60,12 +60,47 @@ fn validate_pickups(world: &WorldFacts) -> Result<(), ProjectionError> {
         .iter()
         .map(|flame| cell_key(flame.cell))
         .collect::<BTreeSet<_>>();
+    let exposed = world
+        .private_pickups
+        .iter()
+        .filter(|facts| facts.phase == PrivatePickupPhase::Exposed)
+        .map(|facts| (facts.cell, facts.kind))
+        .collect::<Vec<_>>();
     if world.pickups.len() > crate::protocol::MAX_PICKUPS
+        || world.private_pickups.len() > crate::protocol::MAX_PICKUPS
         || !world
             .pickups
             .windows(2)
             .all(|pair| cell_key(pair[0].cell) < cell_key(pair[1].cell))
         || !strict_cells(&world.private_pickup_cells)
+        || !world
+            .private_pickups
+            .windows(2)
+            .all(|pair| cell_key(pair[0].cell) < cell_key(pair[1].cell))
+        || world.private_pickup_cells
+            != world
+                .private_pickups
+                .iter()
+                .map(|facts| facts.cell)
+                .collect::<Vec<_>>()
+        || exposed
+            != world
+                .pickups
+                .iter()
+                .map(|pickup| (pickup.cell, pickup.kind))
+                .collect::<Vec<_>>()
+        || world.private_pickups.iter().any(|facts| {
+            let cell = cell_key(facts.cell);
+            terrain_at(world, facts.cell) != Some(Terrain::Floor)
+                || facts.kind == super::PickupKind::OilBarrel
+                || match facts.phase {
+                    PrivatePickupPhase::Concealed => !blocks.contains(&cell),
+                    PrivatePickupPhase::Pending => {
+                        blocks.contains(&cell) || !flames.contains(&cell)
+                    }
+                    PrivatePickupPhase::Exposed => blocks.contains(&cell) || flames.contains(&cell),
+                }
+        })
         || world.pickups.iter().any(|pickup| {
             terrain_at(world, pickup.cell) != Some(Terrain::Floor)
                 || blocks.contains(&cell_key(pickup.cell))

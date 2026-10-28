@@ -109,4 +109,17 @@ fn oil_phase_and_per_actor_grace_corruption_is_rejected() {
         super::projection_oil::validate(&holder),
         Err(ProjectionError::InvalidActors)
     );
+
+    let mut disabled_wall_pass = capture.world;
+    let block = disabled_wall_pass.arena.blocks[0];
+    disabled_wall_pass.actors[1].view.position = crate::protocol::Position::new(
+        u16::from(block.column()) * 1_024 + 512,
+        u16::from(block.row()) * 1_024 + 512,
+    )
+    .unwrap();
+    disabled_wall_pass.actors[1].soft_wall_grace = vec![block];
+    assert_eq!(
+        super::projection_oil::validate(&disabled_wall_pass),
+        Err(ProjectionError::InvalidActors)
+    );
 }

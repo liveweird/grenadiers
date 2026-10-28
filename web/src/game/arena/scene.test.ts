@@ -140,7 +140,7 @@ describe('retained public arena scene', () => {
     const spark = bombs.children[0].children[2]
     const firstSparkFrame = spark.visible
     scene.render(115)
-    expect(spark.visible).not.toBe(firstSparkFrame)
+    expect(spark.visible).toBe(firstSparkFrame)
     snapshot.room.phase = { type: 'result' }
     snapshot.state.actors[0].position.x += 1024
     snapshot.state.actors[1].alive = false

@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test'
 import { observeBrowserPolicy, type BrowserPolicyObservation } from '../tests/support/browser-policy'
+import bombPulseFingerprints from './bomb-pulse-fingerprints'
 
 let browserPolicy: BrowserPolicyObservation
 test.beforeEach(async ({ context }) => { browserPolicy = await observeBrowserPolicy(context) })
@@ -14,6 +15,7 @@ type Result = {
     samples: Array<{ x: number; y: number; atlas: number[]; graphics: number[] }>
   }>
   historicalDeltas: Result['comparisons']
+  bombFingerprints: Array<{ stage: string; atlas: string; historical: string }>
   lifecycle: Record<string, boolean>
   performance: { coldStartupMs: number; retainedFrames: number; retainedFramesMs: number }
   resources: {
@@ -21,6 +23,14 @@ type Result = {
     textureWidth: number; textureHeight: number; rgbaBytes: number
   }
 }
+
+const bombStages = [
+  ...[180, 165, 120, 112, 60, 57, 3].map((ticks) => `bomb-fuse-${ticks}`),
+  'bomb-paused', 'bomb-remote', 'bomb-contact',
+  ...['standard', 'piercing', 'power'].map((blast) => `bomb-pulse-${blast}`),
+  ...['paused', 'resumed', 'stale-render', 'reduced-motion', 'moved-same-id', 'terminal']
+    .map((state) => `bomb-animation-${state}`),
+]
 
 test('atlas gameplay matches procedural pixels and retains renderer resources through lifecycle changes',
   async ({ page }, testInfo) => {
@@ -40,10 +50,14 @@ test('atlas gameplay matches procedural pixels and retains renderer resources th
     })
     const expectedResolution = Number(testInfo.project.name.at(-1))
     expect(result.resolution).toBe(expectedResolution)
+    expect(result.bombFingerprints).toEqual(
+      bombPulseFingerprints[String(expectedResolution) as keyof typeof bombPulseFingerprints],
+    )
     expect(result.comparisons.map(({ stage }) => stage)).toEqual([
       'running', 'interpolated-fractional', 'animation-80ms', 'animation-90ms',
       'animation-110ms', 'reduced-motion', 'result-hidden-actor', 'reset',
       'changed-terrain', 'context-restored',
+      ...bombStages,
       ...[
         'protection', 'shield', 'stopwatch', 'goldenFlame', 'shortFuse', 'shortFlame',
         'longFuse', 'reverseControls', 'diarrhea', 'cloak',
@@ -99,6 +113,7 @@ test('atlas gameplay matches procedural pixels and retains renderer resources th
       'cue-stopwatch-low', 'cue-goldenFlame-low', 'cue-shortFuse-low',
       'cue-shortFlame-low', 'cue-longFuse-low', 'cue-reverseControls-low',
       'cue-diarrhea-low',
+      ...bombStages,
     ]
     expect(result.historicalDeltas.filter(({ stage }) => !intentionalRawDeltas.includes(stage))
       .every(({ differentBytes }) => differentBytes === 0), JSON.stringify(result.historicalDeltas))

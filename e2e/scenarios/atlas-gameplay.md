@@ -6,9 +6,15 @@ The isolated actual-WebGL fixture packs the procedural baseline sheet through th
 pipeline and compares those scene pixels with the procedural reference at device pixel ratios one
 and two, independently of the adopted artist source. It covers fractional interpolation, the actor,
 bomb, Flame and Oil animation phases, reduced motion, a result with a hidden actor, changed
-terrain, reset, and context restoration. The same run initializes the production renderer with
+terrain, reset, and context restoration. Timed bomb shells and sparks use authoritative remaining
+ticks at all three urgency bands; paused, remote and contact shells retain their neutral pose.
+The normalized comparison uses a procedural-baseline atlas shell before applying its scale,
+without relaxing the zero-difference assertion at either device pixel ratio. Separate fixed
+pixel fingerprints cover pulsed Standard, Piercing and Power fixtures and the independent raw
+procedural renderer. They detect a shared atlas frame/pivot/transform error; the artist's PNG
+does not participate in these fixtures.
+The same run initializes the production renderer with
 the bundled artist source, retains one canvas and atlas across suspend/resume and reduced-motion
 changes, restores its context, measures cold startup and a bounded retained-frame sample, and
 releases each comparison and production texture owner on final destruction.
-The retained production texture also includes the two appended, art-only actor appearances while
-the live gameplay protocol continues to render its existing two seats.
+The retained production texture includes all four player appearances used by live matches.

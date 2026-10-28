@@ -5,7 +5,7 @@ import { pixels } from './pixel'
 
 export interface BombDrawing {
   root: Container; shadow: Container; shell: Container; spark: Container; pause: Container
-  remote: boolean; contact: boolean; paused: boolean
+  remote: boolean; contact: boolean; paused: boolean; remainingTicks: number | null
 }
 export interface FlameDrawing { root: Container; frames: readonly [Container, Container] }
 
@@ -18,6 +18,7 @@ export function assembleBombDrawing(
   nodes.root.addChild(nodes.shadow, nodes.shell, nodes.spark, nodes.pause)
   return {
     ...nodes, remote: trigger === 'remote', contact: trigger === 'contact', paused: false,
+    remainingTicks: null,
   }
 }
 

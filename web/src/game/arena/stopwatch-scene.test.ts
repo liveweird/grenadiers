@@ -45,6 +45,9 @@ describe('Stopwatch arena presentation', () => {
     scene.render(190)
     const firstFrame = bomb.children[2].visible
     scene.render(280)
+    expect(bomb.children[2].visible).toBe(firstFrame)
+    snapshot.state.bombs[0].trigger = { type: 'timed', remainingTicks: 180, paused: false }
+    scene.update(snapshot, 290)
     expect(bomb.children[2].visible).not.toBe(firstFrame)
   })
 })

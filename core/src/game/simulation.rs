@@ -319,6 +319,8 @@ mod explosion_step;
 mod observations;
 #[path = "simulation_oil.rs"]
 mod oil_step;
+#[path = "simulation_participation.rs"]
+mod participation;
 #[path = "simulation_pickups.rs"]
 mod pickup_step;
 #[path = "simulation_punch.rs"]
@@ -330,6 +332,7 @@ mod shove;
 #[path = "shove_geometry.rs"]
 mod shove_geometry;
 
+pub use participation::RoundActorInit;
 pub use random::{SIMULATION_RANDOMNESS_VERSION, SimulationSeed};
 pub(crate) use shove_geometry::stationary_contact_entry;
 #[path = "simulation_step.rs"]

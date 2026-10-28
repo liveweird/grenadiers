@@ -18,7 +18,7 @@ use crate::room::RoomSettings;
 
 use super::{SurvivalPlan, WORK_ALLOWANCE};
 
-fn bracelet_observation(flame_ticks: u16) -> Observation {
+pub(super) fn bracelet_observation(flame_ticks: u16) -> Observation {
     let mut parts = observation(CellId::new(7, 7)).into_parts();
     parts.rules.settings = parts
         .rules
@@ -54,7 +54,7 @@ fn bracelet_observation(flame_ticks: u16) -> Observation {
     Observation::new(parts).unwrap()
 }
 
-fn tactic(observation: &Observation) -> Option<SurvivalPlan> {
+pub(super) fn tactic(observation: &Observation) -> Option<SurvivalPlan> {
     let memory = UtilityMemory::new(key());
     let mut work = WorkBudget::new(WORK_ALLOWANCE);
     let hazards = forecast(

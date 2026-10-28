@@ -1,8 +1,8 @@
 use std::collections::{BTreeMap, BTreeSet};
 
 use crate::cpu::{
-    BombKnowledge, MAX_OBSERVED_BOMBS, MemoryKey, Observation, ObservedBomb, ObservedBombTrigger,
-    WorkBudget,
+    BombKnowledge, MAX_MULTIPLAYER_OBSERVED_BOMBS, MemoryKey, Observation, ObservedBomb,
+    ObservedBombTrigger, WorkBudget,
 };
 use crate::game::arena::ARENA_CELL_COUNT;
 use crate::game::{CellId, EntityId, MAX_OIL_BARRELS, OilBarrelState, Tick};
@@ -10,7 +10,7 @@ use crate::game::{CellId, EntityId, MAX_OIL_BARRELS, OilBarrelState, Tick};
 use super::ForecastFailure;
 use super::intervals::take;
 
-const MAX_FLAME_CHANGES: usize = MAX_OBSERVED_BOMBS * ARENA_CELL_COUNT;
+const MAX_FLAME_CHANGES: usize = MAX_MULTIPLAYER_OBSERVED_BOMBS * ARENA_CELL_COUNT;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(super) struct FlameChange {
@@ -24,6 +24,7 @@ pub struct ForecastEvolution {
     key: MemoryKey,
     basis_tick: Tick,
     horizon_end: Tick,
+    max_bombs: usize,
     bomb_owners: Vec<(EntityId, EntityId)>,
     bomb_removals: Vec<(EntityId, Tick)>,
     block_removals: Vec<(CellId, Tick)>,
@@ -40,7 +41,7 @@ impl ForecastEvolution {
         let BombKnowledge::Visible(bombs) = &parts.bombs else {
             return Err(ForecastFailure::BombKnowledgeUnavailable);
         };
-        if bombs.len() > MAX_OBSERVED_BOMBS {
+        if bombs.len() > crate::cpu::observed_bomb_capacity(parts.rules.version) {
             return Err(ForecastFailure::IntervalCapacity);
         }
         Ok(Self {
@@ -50,6 +51,7 @@ impl ForecastEvolution {
             },
             basis_tick: parts.tick,
             horizon_end,
+            max_bombs: crate::cpu::observed_bomb_capacity(parts.rules.version),
             bomb_owners: bombs.iter().map(|bomb| (bomb.id, bomb.owner)).collect(),
             bomb_removals: Vec::new(),
             block_removals: Vec::new(),
@@ -74,7 +76,7 @@ impl ForecastEvolution {
         let blocks = destroyed_blocks.into_iter().collect::<Vec<_>>();
         let oil = ignited_oil.into_iter().collect::<Vec<_>>();
         let flames = flames.into_iter().collect::<Vec<_>>();
-        if self.bomb_removals.len() + removed.len() > MAX_OBSERVED_BOMBS
+        if self.bomb_removals.len() + removed.len() > self.max_bombs
             || self.block_removals.len() + blocks.len() > ARENA_CELL_COUNT
             || self.oil_ignitions.len() + oil.len() > MAX_OIL_BARRELS
             || self.flame_changes.len() + flames.len() > MAX_FLAME_CHANGES
@@ -101,7 +103,7 @@ impl ForecastEvolution {
         id: EntityId,
         owner: EntityId,
     ) -> Result<(), ForecastFailure> {
-        if self.bomb_owners.len() >= MAX_OBSERVED_BOMBS
+        if self.bomb_owners.len() >= self.max_bombs
             || self.bomb_owners.iter().any(|(known, _)| *known == id)
         {
             return Err(ForecastFailure::IntervalCapacity);
@@ -365,4 +367,4 @@ fn trigger_matches(before: ObservedBombTrigger, after: ObservedBombTrigger, elap
     }
 }
 
-const _: () = assert!(MAX_FLAME_CHANGES == 3_120);
+const _: () = assert!(MAX_FLAME_CHANGES == 6_240);

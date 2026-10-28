@@ -34,7 +34,7 @@ pub fn observe_cpu_recipient(
             settings,
         },
         arena: arena(&state),
-        actors: state.actors.map(actor),
+        actors: state.actors.map(actor).into(),
         bombs: if bombs_unavailable {
             BombKnowledge::Unavailable
         } else {

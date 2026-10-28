@@ -4,7 +4,7 @@ use crate::cpu::forecast::{
 use crate::cpu::{BombKnowledge, Observation, ObservedActor, ObservedBomb, WorkBudget};
 use crate::game::arena::{ARENA_CELL_COUNT, ARENA_WIDTH};
 use crate::game::types::{HALF_FOOTPRINT, TICKS_PER_SECOND, UNITS_PER_CELL};
-use crate::game::{BlastKind, CellId, Equipment, Position, RulesConfig, SpeedLevel, Terrain, Tick};
+use crate::game::{BlastKind, CellId, Equipment, Position, SpeedLevel, Terrain, Tick};
 
 use super::punch_types::BombSignature;
 use super::route::plan_route_seeded;
@@ -32,9 +32,9 @@ pub fn plan_punch(
     {
         return Err(PunchFailure::InvalidRequest);
     }
-    let (actor, rival, actor_cell, bomb, signature) = planning_facts(observation)?;
+    let (actor, _rival, actor_cell, bomb, signature) = planning_facts(observation)?;
     let landing = select_landing(observation, bomb, actor.position, work)?;
-    if reachable_footprint_intersects(rival.position, landing, 7) {
+    if !all_rivals_support_landing(observation, landing, 7) {
         return Err(PunchFailure::Unsupported);
     }
     let unchanged = forecast(observation, history, None, ForecastLimits::default(), work)?;
@@ -47,7 +47,7 @@ pub fn plan_punch(
         ForecastLimits::default(),
         work,
     )?;
-    let rules = RulesConfig::expanded_v5(parts.rules.settings);
+    let rules = crate::cpu::rules_config(observation).ok_or(PunchFailure::Unsupported)?;
     let survive_until = Tick(
         signature
             .detonates_at
@@ -126,6 +126,7 @@ pub(super) fn can_admit(
         || after.voluntary_actions_frozen
         || before_rival.id != rival.id
         || before_rival.seat != rival.seat
+        || (current.parts().rules.version == 6 && !rivals_unchanged(basis, current))
         || !rival_supported(rival)
         || !current.parts().pickups.is_empty()
         || !current.parts().oil.is_empty()
@@ -144,7 +145,7 @@ pub(super) fn can_admit(
     };
     landing == certificate.landing()
         && certificate.bomb().id == bomb.id
-        && !reachable_footprint_intersects(rival.position, landing, 1)
+        && all_rivals_support_landing(current, landing, 1)
 }
 
 fn planning_facts(
@@ -163,7 +164,7 @@ fn planning_facts(
     let actor = recipient(observation).ok_or(PunchFailure::InvalidRequest)?;
     let rival = visible_rival(observation).ok_or(PunchFailure::Unsupported)?;
     let actor_cell = centered_cell(actor.position).ok_or(PunchFailure::Unsupported)?;
-    if parts.rules.version != 5
+    if !matches!(parts.rules.version, 5 | 6)
         || !parts.rules.settings.enabled_items().contains_punch()
         || actor.equipment != Some(Equipment::Punch)
         || !actor.alive
@@ -294,16 +295,49 @@ fn recipient(observation: &Observation) -> Option<&crate::cpu::VisibleActor> {
 }
 
 fn visible_rival(observation: &Observation) -> Option<&crate::cpu::VisibleActor> {
-    observation
-        .parts()
-        .actors
-        .iter()
-        .find_map(|actor| match actor {
-            ObservedActor::Visible(actor) if actor.seat != observation.parts().recipient => {
-                Some(actor)
+    let parts = observation.parts();
+    if parts.actors.iter().any(|actor| {
+        matches!(actor,
+        ObservedActor::Hidden { seat, .. } if *seat != parts.recipient)
+    }) {
+        return None;
+    }
+    parts.actors.iter().find_map(|actor| match actor {
+        ObservedActor::Visible(actor) if actor.seat != parts.recipient => Some(actor),
+        _ => None,
+    })
+}
+
+fn all_rivals_support_landing(observation: &Observation, landing: CellId, updates: u64) -> bool {
+    let parts = observation.parts();
+    parts.actors.iter().all(|actor| match actor {
+        ObservedActor::Visible(actor) if actor.seat != parts.recipient => {
+            rival_supported(actor)
+                && !reachable_footprint_intersects(actor.position, landing, updates)
+        }
+        ObservedActor::Hidden { seat, .. } if *seat != parts.recipient => false,
+        _ => true,
+    })
+}
+
+fn rivals_unchanged(basis: &Observation, current: &Observation) -> bool {
+    let old = basis.parts();
+    let new = current.parts();
+    old.actors.iter().all(|before| {
+        if before.seat() == old.recipient {
+            return true;
+        }
+        new.actors.iter().any(|after| match (before, after) {
+            (ObservedActor::Visible(before), ObservedActor::Visible(after)) => {
+                before.id == after.id
+                    && before.seat == after.seat
+                    && before.position == after.position
+                    && before.alive == after.alive
+                    && before.equipment == after.equipment
             }
-            _ => None,
+            _ => false,
         })
+    })
 }
 
 fn rival_supported(rival: &crate::cpu::VisibleActor) -> bool {

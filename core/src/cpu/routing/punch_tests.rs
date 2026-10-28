@@ -16,7 +16,7 @@ use super::{
     RouteStep, plan_punch,
 };
 
-fn punch_observation() -> Observation {
+pub(super) fn punch_observation() -> Observation {
     let mut parts = observation(Vec::new(), Vec::new()).into_parts();
     parts.rules.settings = parts.rules.settings.with_enabled_items(EnabledItems::PUNCH);
     let ObservedActor::Visible(rival) = &mut parts.actors[0] else {
@@ -46,7 +46,7 @@ fn punch_observation() -> Observation {
     Observation::new(parts).unwrap()
 }
 
-fn request() -> PunchRequest {
+pub(super) fn request() -> PunchRequest {
     PunchRequest {
         execution_tick: Tick(7),
         settled_stop_tick: Tick(0),
@@ -67,7 +67,7 @@ fn plan() -> (Observation, super::PunchCertificate) {
     (basis, certificate)
 }
 
-fn scene(
+pub(super) fn scene(
     basis: &Observation,
     certificate: &super::PunchCertificate,
     tick: Tick,
@@ -166,6 +166,17 @@ fn admission_rechecks_the_rival_envelope_and_work_exhaustion_fails_closed() {
         ),
         Err(PunchFailure::Route(RouteFailure::WorkExhausted))
     ));
+}
+
+#[test]
+fn legacy_admission_preserves_the_supported_clear_rival_movement_path() {
+    let (basis, certificate) = plan();
+    let mut current = scene(&basis, &certificate, Tick(6), certificate.bomb().source).into_parts();
+    let ObservedActor::Visible(rival) = &mut current.actors[0] else {
+        unreachable!()
+    };
+    rival.position = Position::center(CellId::new(2, 2));
+    assert!(certificate.can_admit(&basis, &Observation::new(current).unwrap(), Tick(6)));
 }
 
 #[test]

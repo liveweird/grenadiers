@@ -26,8 +26,10 @@ pub(super) struct CadenceState {
 
 impl CpuController {
     pub(super) fn arm_cadence_after(&mut self, accepted: &AcceptedPlan, actual: Intent) {
-        if self.profile != CpuProfile::CURRENT_EASY
-            || !accepted.ordinary_navigation
+        if !matches!(
+            self.profile,
+            CpuProfile::CURRENT_EASY | CpuProfile::MULTIPLAYER_EASY
+        ) || !accepted.ordinary_navigation
             || actual.manual.is_some()
             || actual.movement == grenadiers_core::cpu::MovementIntent::Stop
         {
@@ -41,7 +43,11 @@ impl CpuController {
     }
 
     pub(super) fn observe_cadence(&mut self, observation: &Observation) {
-        if self.profile != CpuProfile::CURRENT_EASY || !is_clear_for_easy(observation) {
+        if !matches!(
+            self.profile,
+            CpuProfile::CURRENT_EASY | CpuProfile::MULTIPLAYER_EASY
+        ) || !is_clear_for_easy(observation)
+        {
             self.cadence = CadenceState::default();
             return;
         }

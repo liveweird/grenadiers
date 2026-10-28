@@ -38,3 +38,7 @@ Generators 1–3 keep their existing outputs and accepted geometry. Live two-pla
 retain generator 2, and three/four-player 15×13 rooms retain generator 3. New geometry does not
 change item durations, movement speeds, the 32-bomb rules-6 limit, range/item bounds or
 historical replay identities.
+
+The [desktop selector](../screenshots/board-sizes-desktop.png) and
+[Polish mobile arena](../screenshots/board-sizes-mobile-pl.png) illustrate the creation controls
+and an 11×9 running match.

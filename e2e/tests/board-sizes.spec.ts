@@ -62,6 +62,14 @@ async function join(page: Page, code: string): Promise<void> {
   await expect(page.getByRole('list', { name: 'Players', exact: true })).toContainText('(you)')
 }
 
+async function joinInSeatOrder(group: Group, code: string): Promise<void> {
+  for (const [index, page] of group.pages.slice(1).entries()) {
+    await join(page, code)
+    await expect.poll(() => group.games[index + 1].frames
+      .filter((frame) => frame.type === 'admitted').at(-1)?.youSeat).toBe(SEATS[index + 1])
+  }
+}
+
 async function startRound(pages: readonly Page[], games: readonly ObservedGame[]): Promise<void> {
   await Promise.all(pages.map((page) => page.getByRole('button', { name: 'Ready', exact: true }).click()))
   await Promise.all(games.map((game) =>
@@ -77,17 +85,33 @@ function expectBoard(game: ObservedGame, board: BoardSize, count: number): void 
 }
 
 async function moveOwnSeat(page: Page, game: ObservedGame, seat: Seat, board: BoardSize): Promise<void> {
-  const before = visibleActor(latestSnapshot(game), seat)?.position.x
+  const actualSeat = game.frames.filter((frame) => frame.type === 'admitted').at(-1)?.youSeat
+  expect(actualSeat).toBe(seat)
+  const snapshot = latestSnapshot(game)!
+  const actor = visibleActor(snapshot, seat)
+  const before = actor?.position.x
   expect(before).toBeDefined()
   const east = before! < board.width * 512
-  await page.getByRole('region', { name: 'Grenadiers courtyard' }).click()
-  await page.keyboard.down(east ? 'ArrowRight' : 'ArrowLeft')
+  const actorCell = { column: Math.floor(before! / 1024), row: Math.floor(actor!.position.y / 1024) }
+  const neighbor = { column: actorCell.column + (east ? 1 : -1), row: actorCell.row }
+  expect(snapshot.state.arena.terrain[neighbor.row * board.width + neighbor.column]).toBe('floor')
+  expect(snapshot.state.arena.blocks).not.toContainEqual(neighbor)
+  const courtyard = page.getByRole('region', { name: 'Grenadiers courtyard' })
+  await expect(page.locator('.game-arena canvas')).toBeVisible()
+  await expect(courtyard).toHaveAttribute('tabindex', '0')
+  await courtyard.click()
+  const commandCount = game.commands.length
+  const key = east ? 'ArrowRight' : 'ArrowLeft'
+  const direction = east ? 'east' : 'west'
+  await page.keyboard.down(key)
   try {
+    await expect.poll(() => game.commands.slice(commandCount).some((command) =>
+      command.type === 'movement' && command.direction === direction), { intervals: [20] }).toBe(true)
     await expect.poll(() => {
       const current = visibleActor(latestSnapshot(game), seat)?.position.x
       return current !== undefined && (east ? current > before! + 128 : current < before! - 128)
     }, { intervals: [20] }).toBe(true)
-  } finally { await page.keyboard.up(east ? 'ArrowRight' : 'ArrowLeft') }
+  } finally { await page.keyboard.up(key) }
 }
 
 async function expectCpuProgress(game: ObservedGame): Promise<void> {
@@ -96,13 +120,15 @@ async function expectCpuProgress(game: ObservedGame): Promise<void> {
     .filter(({ controller }) => controller.type === 'cpu')
     .map(({ seat }) => visibleActor(initial, seat)?.id)
     .filter((id): id is number => id !== undefined))
+  expect(cpuIds.size).toBe(initial.room.seats.filter(({ controller }) => controller.type === 'cpu').length)
   const positions = new Map(initial.state.actors.filter((actor) => cpuIds.has(actor.id))
     .map((actor) => [actor.id, actor.type === 'visible' ? `${actor.position.x},${actor.position.y}` : 'hidden']))
   const snapshots = () => game.frames.filter((frame) => frame.type === 'snapshot')
-  await expect.poll(() => snapshots().some((frame) => frame.state.actors.some((actor) => {
-    if (!cpuIds.has(actor.id) || actor.type !== 'visible') return false
-    return positions.get(actor.id) !== `${actor.position.x},${actor.position.y}`
-  })), { timeout: 12_000 }).toBe(true)
+  await expect.poll(() => [...cpuIds].every((id) => snapshots().some((frame) =>
+    frame.state.bombs.some(({ owner }) => owner === id)
+      || frame.state.actors.some((actor) => actor.id === id && actor.type === 'visible'
+        && positions.get(id) !== `${actor.position.x},${actor.position.y}`))),
+  { timeout: 12_000 }).toBe(true)
   await expect.poll(() => snapshots().some((frame) =>
     frame.state.bombs.some(({ owner }) => cpuIds.has(owner))), { timeout: 12_000 }).toBe(true)
 }
@@ -118,7 +144,7 @@ test('all human controller counts run on every board preset', async ({ browser }
         expect(code).not.toBeNull()
         await expect(group.pages[0].getByText(`Board: ${board.width} × ${board.height}`, { exact: true }))
           .toBeVisible()
-        await Promise.all(group.pages.slice(1).map((page) => join(page, code!)))
+        await joinInSeatOrder(group, code!)
         await startRound(group.pages, group.games)
         for (const game of group.games) expectBoard(game, board, count)
         await moveOwnSeat(group.pages.at(-1)!, group.games.at(-1)!, SEATS[count - 1], board)
@@ -151,10 +177,18 @@ test('quick duel and solo retain the default board', async ({ browser }) => {
     await group.pages[0].getByRole('combobox', { name: 'Board size', exact: true }).selectOption('11x9')
     await group.pages[0].getByRole('button', { name: 'Create room', exact: true }).click()
     await expect.poll(() => latestRoom(group.games[0])?.configuration.board).toEqual({ width: 15, height: 13 })
+    const duelRoomId = latestRoom(group.games[0])!.roomId
     await group.pages[0].getByRole('button', { name: 'Leave room', exact: true }).click()
     await expect(group.pages[0].getByRole('button', { name: 'Play solo against CPU', exact: true })).toBeVisible()
+    await group.pages[0].getByRole('combobox', { name: 'Board size', exact: true }).selectOption('11x9')
+    const admissionCount = group.games[0].frames.filter((frame) => frame.type === 'admitted').length
     await group.pages[0].getByRole('button', { name: 'Play solo against CPU', exact: true }).click()
-    await expect.poll(() => latestRoom(group.games[0])?.configuration.board).toEqual({ width: 15, height: 13 })
+    await expect.poll(() => group.games[0].frames.filter((frame) => frame.type === 'admitted').length)
+      .toBeGreaterThan(admissionCount)
+    const solo = group.games[0].frames.findLast((frame) => frame.type === 'admitted')!
+    expect(solo.room.roomId).not.toBe(duelRoomId)
+    expect(solo.room.configuration.controllers).toEqual(['human', 'cpu'])
+    expect(solo.room.configuration.board).toEqual({ width: 15, height: 13 })
   } finally { await group.close() }
 })
 
@@ -166,7 +200,7 @@ test('a small four-human room reconnects and rematches without changing geometry
   }, true)
   try {
     const code = await createCustom(group.pages[0], board, ['human', 'human', 'human', 'human'])
-    await Promise.all(group.pages.slice(1).map((page) => join(page, code!)))
+    await joinInSeatOrder(group, code!)
     await group.pages[0].getByLabel('Round wins needed').selectOption('1')
     await group.pages[0].getByLabel('Bomb fuse').selectOption('120')
     await group.pages[0].getByRole('button', { name: 'Apply rules', exact: true }).click()
@@ -193,6 +227,9 @@ test('a small four-human room reconnects and rematches without changing geometry
       .toBeGreaterThan(admission!.index)
     await expect.poll(() => latestSnapshot(group.games[3])?.room.revision ?? 0)
       .toBeGreaterThan(revisionBeforeReconnect)
+    expect(await admissionBaseline(group.pages[3])).toMatchObject({
+      roomId: admission!.roomId, seat: 'four', hasState: true, stableCapability: true,
+    })
     expectBoard(group.games[3], board, 4)
 
     await Promise.all(group.pages.slice(0, 3).map(async (page) => {

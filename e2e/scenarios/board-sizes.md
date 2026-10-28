@@ -9,8 +9,9 @@ terrain capacity, complete roster, and authoritative movement from the highest o
 ## Scenario: CPU controller counts and difficulties make authoritative progress on every board preset
 
 For every board, controller count, and Easy or Standard difficulty, one human starts a match with
-the remaining seats server-controlled. Real snapshots must show CPU movement and a bomb owned by
-a CPU actor; configured controller metadata alone is not accepted as evidence of progress.
+the remaining seats server-controlled. Real snapshots must show each configured CPU moving or
+owning a live bomb, and at least one CPU-owned bomb in the room. Configured controller metadata
+alone is not accepted as evidence of progress.
 
 ## Scenario: quick duel and solo retain the default board
 

@@ -4,6 +4,18 @@ This archive preserves the older release records originally maintained in
 [`docs/releases.md`](../releases.md). Records remain in their original order; the current
 release procedure and current release record stay in the [release guide](../releases.md).
 
+## v0.3.109 — 2026-10-28
+
+[v0.3.109](https://github.com/liveweird/grenadiers/releases/tag/v0.3.109) adds [checked board geometry](../game/board-sizes.md) for 11×9, 13×11 and 15×13 arenas. The legacy 195-entry constructor remains 15×13. Movement footprints, public terrain, Power blasts and Punch wrapping follow actual arena dimensions; historical rules reject smaller worlds. This is a headless foundation: live room admission remains 15×13 while the remaining CPU/publication/runtime/browser changes are paired.
+
+Generator 4 preserves raw seeds and produces reflected terrain/items with protected corner exits, rotated assignments, whole-orbit Oil placement within eight sites, and a dimension-correct empty fallback. Generators 1–3 retain their original outputs and geometry rejection. New tests pin all three preset outputs, exact repeatability/raw-seed records, three-player corner omission and four-player rotation. Independent geometry review is clear; focused arena, movement, blast, Punch, generation and historical-trace checks pass.
+
+Full Rust acceptance on source `a0908bc3d1fa13dc5f95c3e516bf9ea621a65ddb`, tree `67f058b196be4786315781fe0573b6c46514a357`, passes in **669.571s**: 35,129/38,359 lines (**91.5796%**), every 4,194,304-mask combination separately in debug/release/official coverage, 32 partitions, four workers, zero hidden retries and 37 raw profiles. Official LCOV was preserved. Distinct Linux [run 40769703386](https://github.com/liveweird/grenadiers/actions/runs/40769703386) passes. All **64 isolated CPU reference cases** exactly match v0.3.106, including planning work, RNG, trajectories and outcomes; every accepted-input replay verifies. Maximum group planning p99 is 4.64ms; maximum observed decision is 5.93ms. Formatting, strict Clippy, source caps and repository checks pass. Unchanged web, contract and dependency inputs reuse v0.3.108's accepted full gates.
+
+Exact image `sha256:be4ef7dfc73ac3a4cb9428b27dfa257055bdc1a7bd1c4c636126341e2934c9d7` passes Compose and Kubernetes **14 browser cases each**, CPU-item collection and a pinned Trivy 0.74.0 scan with zero HIGH/CRITICAL findings. Runtime image identity, UID/capabilities/read-only root, resource limits, probes, origins, health/readiness and served assets pass. Isolated stacks were removed.
+
+This source prerelease includes a verified local image. Localhost runs that image; v0.3.108 is retained for rollback. The [backlog](../../BACKLOG.md) owns remaining board activation and environment work.
+
 ## v0.3.108 — 2026-10-28
 
 [v0.3.108](https://github.com/liveweird/grenadiers/releases/tag/v0.3.108) activates **two-to-four-player matches** with human and CPU-controlled seats. Custom lobbies require at least one human, configure Easy/Standard CPUs and show four distinct uniforms, player identities and scores. Human seats join by invitation and retain private reconnect capabilities. All 22 optional items start enabled; boards remain 15×13.

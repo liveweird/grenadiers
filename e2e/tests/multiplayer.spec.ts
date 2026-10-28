@@ -157,6 +157,18 @@ test('four humans share the four-seat lobby at 320 pixels', async ({ browser }) 
       board: { width: 15, height: 13 },
     })
     expect(running.state.actors.map(({ seat }) => seat)).toEqual(['one', 'two', 'three', 'four'])
+    const initialCells = running.state.actors.map((actor) => {
+      expect(actor.type).toBe('visible')
+      if (actor.type !== 'visible') throw new Error(`Initial actor ${actor.seat} is not visible`)
+      return {
+        column: Math.floor(actor.position.x / 1024),
+        row: Math.floor(actor.position.y / 1024),
+      }
+    }).sort((left, right) => left.row - right.row || left.column - right.column)
+    expect(initialCells).toEqual([
+      { column: 1, row: 1 }, { column: 13, row: 1 },
+      { column: 1, row: 11 }, { column: 13, row: 11 },
+    ])
     await moveOwnSeat(group.pages[3], group.games[3], 'four', 'ArrowRight', 'east')
     expect(await group.pages[3].evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false)
 

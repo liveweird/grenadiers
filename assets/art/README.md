@@ -44,7 +44,7 @@ outputs rather than canonical inputs.
 ## Edit and export
 
 Edit `arena-source.png` in a pixel-art editor without resizing the sheet or frames. The sheet
-includes all four uniform appearances; current two-player matches use the first two. Then export a
+includes all four uniform appearances, mapped to the configured player seats. Then export a
 validated runtime pack:
 
 ```sh

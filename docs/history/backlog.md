@@ -5,6 +5,13 @@
 > current status. Use the [current backlog](../game/backlog.md), [releases](../releases.md), and
 > [verification](../verification.md) for current work.
 
+## Completed 2026-10-28
+
+- **MULTIPLAYER:** [v0.3.108](../releases.md#v03108--2026-10-28) ships live two-to-four-player
+  human/CPU lineups, distinct uniforms, per-seat reconnect, canonical scores and consensual
+  rematch on 15×13 boards. Remaining board-size and environment work lives only in
+  [BACKLOG.md](../../BACKLOG.md).
+
 # Gameplay and presentation backlog
 
 TURN, CONFIG and the first ART slice are implemented. Published [v0.3.47](https://github.com/liveweird/grenadiers/releases/tag/v0.3.47)

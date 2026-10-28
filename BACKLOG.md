@@ -30,8 +30,6 @@ repeated approval for routine implementation choices. Entries are not delivery-d
   placement, CPU navigation, rendering and transport/replay limits. Activate the existing 11×9,
   13×11 and 15×13 presets, keeping 15×13 as the default and size immutable after room creation.
   Verify each preset with two-, three- and four-player lineups.
-  - **BS1 — simulation geometry:** checked arena dimensions, dimension-aware movement/blasts/Punch
-    and generator 4; retain historical generators and existing 15×13 behavior.
   - **BS2 — CPU and publication:** dimension-aware observations, forecasts and routes; checked
     private/world/event bounds before recipient filtering; preserve historical replay profiles.
   - **BS3 — live boards:** creation controls, runtime/generator selection, shared private replay

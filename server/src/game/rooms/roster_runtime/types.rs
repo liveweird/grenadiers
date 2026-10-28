@@ -15,7 +15,7 @@ pub(in crate::game::rooms) struct RosterIdentity {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub(in crate::game::rooms) enum RosterAction {
+pub(crate) enum RosterAction {
     Ready {
         ready: bool,
         settings_revision: u32,
@@ -51,7 +51,7 @@ impl RosterSeatFrames {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub(in crate::game::rooms) struct RosterNotice {
+pub(crate) struct RosterNotice {
     pub(in crate::game::rooms) room: v14::RoomView,
     pub(in crate::game::rooms) frames: Option<RosterSeatFrames>,
     pub(in crate::game::rooms) cpu_publication: Option<v14::BoundPublication>,

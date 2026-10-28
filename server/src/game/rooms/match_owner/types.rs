@@ -40,8 +40,10 @@ pub(crate) enum MatchOwnerNotice {
 
 pub(crate) struct MatchAdmission {
     pub(crate) room_id: RoomId,
+    #[cfg(test)]
     pub(crate) round_id: u64,
     pub(crate) seat: Seat,
+    #[cfg(test)]
     pub(crate) room: grenadiers_core::protocol::v13::RoomView,
     #[cfg_attr(not(test), allow(dead_code))]
     pub(crate) resume_token: ResumeToken,
@@ -138,6 +140,7 @@ impl PreparedMatchOwner {
         Self::new_with_planner(identity, created_at, seeds, random_fill, planner, shutdown)
     }
 
+    #[cfg(test)]
     pub(in crate::game::rooms) fn new_with_planner(
         identity: RoomIdentity,
         created_at: Instant,
@@ -157,7 +160,6 @@ impl PreparedMatchOwner {
         )
     }
 
-    #[allow(dead_code)] // Activated by the pending live-v14 registry wiring.
     pub(in crate::game::rooms) fn new_live14_with_planner(
         identity: RoomIdentity,
         created_at: Instant,

@@ -263,5 +263,6 @@ pub(super) const fn error_name(error: RoomError) -> &'static str {
         RoomError::InvalidPhase => "InvalidPhase",
         RoomError::DuplicateAction => "DuplicateAction",
         RoomError::ResumeRejected => "ResumeRejected",
+        RoomError::UnsupportedConfiguration => "UnsupportedConfiguration",
     }
 }

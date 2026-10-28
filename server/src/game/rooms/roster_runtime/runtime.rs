@@ -270,6 +270,7 @@ impl RosterRuntime {
         Ok(update.change() != MatchChange::Unchanged && self.lifecycle.tick().0.is_multiple_of(3))
     }
 
+    #[cfg(test)]
     pub(in crate::game::rooms) fn prepare_cpu_publication(
         &self,
     ) -> Result<Option<v14::BoundPublication>, RosterRuntimeError> {

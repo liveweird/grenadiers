@@ -33,11 +33,13 @@ pub(crate) enum RosterOwnerNotice {
 
 pub(crate) struct RosterAdmission {
     pub(crate) room_id: RoomId,
+    #[cfg(test)]
     pub(crate) round_id: u64,
     pub(crate) seat: SeatId,
+    #[cfg(test)]
     pub(crate) room: v14::RoomView,
+    #[cfg(test)]
     pub(crate) resume_token: v14::ResumeToken,
-    pub(crate) last_action_id: Option<Counter>,
     pub(crate) personal_frame: Arc<str>,
     pub(crate) notices: watch::Receiver<RosterOwnerNotice>,
     pub(crate) guard: DepartureGuard,

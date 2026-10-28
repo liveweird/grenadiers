@@ -192,7 +192,7 @@ impl Driver {
 fn admission(
     prepared: &PreparedRosterAdmission,
     seat: SeatId,
-    resume_token: ResumeToken,
+    #[cfg_attr(not(test), expect(unused_variables))] resume_token: ResumeToken,
     personal_frame: Arc<str>,
     notices: tokio::sync::watch::Receiver<super::types::RosterOwnerNotice>,
     guard: DepartureGuard,
@@ -200,11 +200,13 @@ fn admission(
 ) -> RosterAdmission {
     RosterAdmission {
         room_id: prepared.room.room_id.clone(),
+        #[cfg(test)]
         round_id: u64::from(prepared.room.round_id.get()),
         seat,
+        #[cfg(test)]
         room: prepared.room.clone(),
+        #[cfg(test)]
         resume_token,
-        last_action_id: prepared.last_action_id,
         personal_frame,
         notices,
         guard,

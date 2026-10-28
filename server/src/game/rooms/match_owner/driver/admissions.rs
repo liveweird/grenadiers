@@ -89,8 +89,10 @@ impl Driver {
         };
         let admission = MatchAdmission {
             room_id: self.room_id.clone(),
+            #[cfg(test)]
             round_id: u64::from(prepared.room.round_id.get()),
             seat: wire_seat(seat)?,
+            #[cfg(test)]
             room: prepared.room.clone(),
             resume_token: credential.token(),
             last_bomb_action_id: prepared.last_bomb_action_id,
@@ -161,8 +163,10 @@ impl Driver {
         };
         let admission = MatchAdmission {
             room_id: self.room_id.clone(),
+            #[cfg(test)]
             round_id: u64::from(prepared.room.round_id.get()),
             seat: wire_seat(seat)?,
+            #[cfg(test)]
             room: prepared.room.clone(),
             resume_token: credential.token(),
             last_bomb_action_id: prepared.last_bomb_action_id,

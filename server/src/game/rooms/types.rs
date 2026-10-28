@@ -48,6 +48,7 @@ pub(super) struct RoomIdentity {
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) enum RoomError {
+    UnsupportedConfiguration,
     RateLimited,
     CapacityReached,
     RoomNotFound,

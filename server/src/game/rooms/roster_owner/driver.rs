@@ -20,7 +20,7 @@ use super::super::{
     types::{BindingKey, RoomError},
 };
 use super::types::{
-    LiveBinding, OwnerCommand, PendingDeparture, RosterOwnerNotice, SeatSlot, map_runtime_error,
+    OwnerCommand, PendingDeparture, RosterOwnerNotice, SeatSlot, map_runtime_error,
 };
 
 pub(super) struct Driver {

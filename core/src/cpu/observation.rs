@@ -1,10 +1,11 @@
 use std::collections::BTreeSet;
 
-use crate::game::arena::{ARENA_CELL_COUNT, ARENA_HEIGHT, ARENA_WIDTH};
+use crate::game::arena::ARENA_CELL_COUNT;
 use crate::game::{
     BlastKind, CellId, Direction, EffectKind, EntityId, Equipment, MAX_OIL_BARRELS, OilBarrelState,
     PickupKind, Position, SeatId, SpecialWeapon, SpeedLevel, Terrain, Tick,
 };
+use crate::room::BoardSize;
 use crate::room::RoomSettings;
 
 use super::WorldId;
@@ -48,6 +49,29 @@ pub struct ObservedArena {
     pub height: u16,
     pub terrain: Vec<Terrain>,
     pub blocks: Vec<CellId>,
+}
+
+impl ObservedArena {
+    #[must_use]
+    pub fn board(&self) -> Option<BoardSize> {
+        BoardSize::try_from((self.width, self.height)).ok()
+    }
+
+    #[must_use]
+    pub const fn cell_count(&self) -> usize {
+        self.width as usize * self.height as usize
+    }
+
+    #[must_use]
+    pub const fn contains(&self, cell: CellId) -> bool {
+        cell.column < self.width && cell.row < self.height
+    }
+
+    #[must_use]
+    pub fn index(&self, cell: CellId) -> Option<usize> {
+        self.contains(cell)
+            .then(|| usize::from(cell.row) * usize::from(self.width) + usize::from(cell.column))
+    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -195,8 +219,13 @@ pub enum ObservationError {
 impl Observation {
     pub fn new(parts: ObservationParts) -> Result<Self, ObservationError> {
         validate_clock(parts.tick, parts.rules)?;
-        validate_arena(&parts.arena)?;
-        validate_actors(parts.rules.version, parts.recipient, &parts.actors)?;
+        validate_arena(parts.rules.version, &parts.arena)?;
+        validate_actors(
+            parts.rules.version,
+            parts.recipient,
+            &parts.arena,
+            &parts.actors,
+        )?;
         validate_bombs(parts.tick, parts.rules.version, &parts.arena, &parts.bombs)?;
         if parts.flames.len() > ARENA_CELL_COUNT {
             return Err(ObservationError::InvalidFlames);
@@ -239,12 +268,13 @@ fn validate_clock(tick: Tick, rules: ObservedRules) -> Result<(), ObservationErr
     }
     Ok(())
 }
-
-fn validate_arena(arena: &ObservedArena) -> Result<(), ObservationError> {
-    if arena.width != ARENA_WIDTH
-        || arena.height != ARENA_HEIGHT
-        || arena.terrain.len() != ARENA_CELL_COUNT
-        || arena.blocks.len() > ARENA_CELL_COUNT
+fn validate_arena(rules_version: u16, arena: &ObservedArena) -> Result<(), ObservationError> {
+    let Some(board) = arena.board() else {
+        return Err(ObservationError::InvalidArena);
+    };
+    if (rules_version < 6 && board != BoardSize::FifteenByThirteen)
+        || arena.terrain.len() != board.cell_count()
+        || arena.blocks.len() > board.cell_count()
     {
         return Err(ObservationError::InvalidArena);
     }
@@ -254,6 +284,7 @@ fn validate_arena(arena: &ObservedArena) -> Result<(), ObservationError> {
 fn validate_actors(
     rules_version: u16,
     recipient: SeatId,
+    arena: &ObservedArena,
     actors: &[ObservedActor],
 ) -> Result<(), ObservationError> {
     if !(1..=6).contains(&rules_version)
@@ -283,7 +314,12 @@ fn validate_actors(
     for actor in actors {
         if let ObservedActor::Visible(actor) = actor {
             validate_effects(&actor.effects)?;
-            if actor.unknown != UnknownActorFacts::ALL {
+            if actor.unknown != UnknownActorFacts::ALL
+                || actor.position.x < 0
+                || actor.position.y < 0
+                || actor.position.x >= i32::from(arena.width) * crate::game::types::UNITS_PER_CELL
+                || actor.position.y >= i32::from(arena.height) * crate::game::types::UNITS_PER_CELL
+            {
                 return Err(ObservationError::InvalidActors);
             }
         }
@@ -333,7 +369,7 @@ fn validate_bombs(
     if bombs.iter().any(|bomb| {
         bomb.unknown != UnknownBombFacts::ALL
             || bomb.placed_at > tick
-            || !contains(arena, bomb.cell)
+            || !arena.contains(bomb.cell)
             || !ids.insert(bomb.id)
     }) {
         return Err(ObservationError::InvalidBombs);
@@ -350,13 +386,9 @@ fn validate_cells<T>(
     if values
         .iter()
         .map(cell)
-        .any(|cell| !contains(arena, cell) || !occupied.insert(cell))
+        .any(|cell| !arena.contains(cell) || !occupied.insert(cell))
     {
         return Err(());
     }
     Ok(())
-}
-
-fn contains(arena: &ObservedArena, cell: CellId) -> bool {
-    cell.column < arena.width && cell.row < arena.height
 }

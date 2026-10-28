@@ -77,7 +77,7 @@ fn certify_pulse_inner(
                     .ok_or(RouteFailure::InvalidRequest)?,
             );
             let segments = advance(&context, &mut motion, request.movement, tick)?;
-            take_segments(work, &segments)?;
+            take_segments(work, &segments, forecast.dimensions())?;
             reject_pickups(observation, &segments)?;
             if !static_segment_clear(observation, &segments) {
                 return Err(RouteFailure::NoRoute);
@@ -175,7 +175,7 @@ fn certify_wait_before_start(
         return Ok(());
     }
     let segment = stationary_segment(context.actor.position);
-    take_segments(work, &segment)?;
+    take_segments(work, &segment, forecast.dimensions())?;
     reject_pickups(context.observation, &segment)?;
     assumptions.extend(super::safety::check_segments_with_grace(
         forecast,
@@ -207,7 +207,7 @@ fn certify_stopped_suffix(
             continue;
         }
         let segment = stationary_segment(motion.position);
-        take_segments(work, &segment)?;
+        take_segments(work, &segment, forecast.dimensions())?;
         assumptions.extend(super::safety::check_segments_with_grace(
             forecast,
             &segment,
@@ -303,9 +303,13 @@ fn aggregate(values: &[Motion]) -> Result<PoseBounds, RouteFailure> {
     PoseBounds::new(min, max, mask).ok_or(RouteFailure::Capacity)
 }
 
-fn take_segments(work: &mut WorkBudget, segments: &[MovementSegment]) -> Result<(), RouteFailure> {
-    let units =
-        u32::try_from(footprint_cells(segments).len()).map_err(|_| RouteFailure::Capacity)?;
+fn take_segments(
+    work: &mut WorkBudget,
+    segments: &[MovementSegment],
+    dimensions: (u16, u16),
+) -> Result<(), RouteFailure> {
+    let units = u32::try_from(footprint_cells(segments, dimensions).len())
+        .map_err(|_| RouteFailure::Capacity)?;
     work.try_take(units.max(1))
         .map_err(|_| RouteFailure::WorkExhausted)
 }

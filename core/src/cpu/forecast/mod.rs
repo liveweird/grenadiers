@@ -10,6 +10,7 @@ mod stationary;
 mod uncertainty;
 
 use crate::game::{BlastKind, CellId, EntityId, Tick};
+use crate::room::BoardSize;
 
 use super::MemoryKey;
 
@@ -64,6 +65,7 @@ pub struct CellForecast {
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct HazardForecast {
     key: MemoryKey,
+    board: BoardSize,
     basis_tick: Tick,
     horizon_end: Tick,
     cells: Vec<CellForecast>,
@@ -89,9 +91,18 @@ impl HazardForecast {
     }
 
     #[must_use]
+    pub const fn dimensions(&self) -> (u16, u16) {
+        self.board.dimensions()
+    }
+
+    #[must_use]
     pub fn cell(&self, cell: CellId) -> Option<&CellForecast> {
+        let (width, height) = self.dimensions();
+        if cell.column >= width || cell.row >= height {
+            return None;
+        }
         let index = usize::from(cell.row)
-            .checked_mul(usize::from(crate::game::arena::ARENA_WIDTH))?
+            .checked_mul(usize::from(width))?
             .checked_add(usize::from(cell.column))?;
         self.cells.get(index)
     }
@@ -119,6 +130,7 @@ impl HazardForecast {
     #[allow(clippy::too_many_arguments)]
     pub(super) fn from_parts(
         key: MemoryKey,
+        board: BoardSize,
         basis_tick: Tick,
         horizon_end: Tick,
         cells: Vec<CellForecast>,
@@ -128,7 +140,7 @@ impl HazardForecast {
         limits: ForecastLimits,
     ) -> Result<Self, ForecastFailure> {
         if horizon_end.0 <= basis_tick.0
-            || cells.len() != crate::game::arena::ARENA_CELL_COUNT
+            || cells.len() != board.cell_count()
             || stationary_assumptions.len() > crate::cpu::MAX_MULTIPLAYER_OBSERVED_BOMBS
             || cells.iter().any(|cell| {
                 cell.lethal.len() > usize::from(limits.max_intervals_per_cell)
@@ -140,6 +152,7 @@ impl HazardForecast {
         }
         Ok(Self {
             key,
+            board,
             basis_tick,
             horizon_end,
             cells,
@@ -214,3 +227,6 @@ mod punch_tests;
 
 #[cfg(test)]
 mod multiplayer_capacity_tests;
+
+#[cfg(test)]
+mod dimension_tests;

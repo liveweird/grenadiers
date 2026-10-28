@@ -14,9 +14,17 @@ pub(super) fn target(
     ordinary: &ControlPlan,
     work: &mut WorkBudget,
 ) -> Option<CellId> {
+    if forecast.dimensions()
+        != (
+            observation.parts().arena.width,
+            observation.parts().arena.height,
+        )
+    {
+        return None;
+    }
     let position = super::compatibility::actor(observation)?.position;
     let current = position.cell()?;
-    work.try_take(crate::game::arena::ARENA_CELL_COUNT as u32)
+    work.try_take(u32::try_from(observation.parts().arena.cell_count()).ok()?)
         .ok()?;
     let threatened = forecast.cells().iter().enumerate().any(|(index, hazards)| {
         let width = usize::from(observation.parts().arena.width);
@@ -42,6 +50,14 @@ pub(super) fn origin_target(
     origin: CellId,
     work: &mut WorkBudget,
 ) -> Option<CellId> {
+    if forecast.dimensions()
+        != (
+            observation.parts().arena.width,
+            observation.parts().arena.height,
+        )
+    {
+        return None;
+    }
     let BombKnowledge::Visible(bombs) = &observation.parts().bombs else {
         return None;
     };

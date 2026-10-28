@@ -1,6 +1,5 @@
 use crate::cpu::forecast::{HazardForecast, TickWindow};
 use crate::cpu::{MemoryKey, Observation, ObservedActor, VisibleActor};
-use crate::game::arena::{ARENA_HEIGHT, ARENA_WIDTH};
 use crate::game::geometry::position_overlaps_cell;
 use crate::game::{EffectKind, Position, Terrain, Tick};
 
@@ -27,14 +26,14 @@ pub(super) fn validate<'a>(
         world: parts.world,
         cpu_seat: parts.recipient,
     };
-    if forecast.key() != key || forecast.basis_tick() != parts.tick {
+    if forecast.key() != key
+        || forecast.basis_tick() != parts.tick
+        || forecast.dimensions() != (parts.arena.width, parts.arena.height)
+    {
         return Err(RouteFailure::IdentityMismatch);
     }
     validate_request(parts.tick, forecast.horizon_end(), start_window, safe_until)?;
-    if !matches!(parts.rules.version, 5 | 6)
-        || parts.arena.width != ARENA_WIDTH
-        || parts.arena.height != ARENA_HEIGHT
-    {
+    if !matches!(parts.rules.version, 5 | 6) {
         return Err(RouteFailure::Unsupported);
     }
     let actor = parts
@@ -58,7 +57,7 @@ pub(super) fn validate<'a>(
     if !actor.alive
         || actor.voluntary_actions_frozen
         || active_at_start(EffectKind::Diarrhea)
-        || !position_in_arena(actor.position)
+        || !position_in_arena(actor.position, parts.arena.width, parts.arena.height)
         || overlaps_static_blocker(observation, actor.position)
     {
         return Err(RouteFailure::Unsupported);
@@ -116,20 +115,20 @@ fn validate_request(
     Ok(())
 }
 
-fn position_in_arena(position: Position) -> bool {
+fn position_in_arena(position: Position, width: u16, height: u16) -> bool {
     position.x >= 0
         && position.y >= 0
-        && position.x < i32::from(ARENA_WIDTH) * crate::game::types::UNITS_PER_CELL
-        && position.y < i32::from(ARENA_HEIGHT) * crate::game::types::UNITS_PER_CELL
+        && position.x < i32::from(width) * crate::game::types::UNITS_PER_CELL
+        && position.y < i32::from(height) * crate::game::types::UNITS_PER_CELL
 }
 
 fn overlaps_static_blocker(observation: &Observation, position: Position) -> bool {
     let parts = observation.parts();
     let pass_blocks = crate::cpu::capabilities::can_pass_known_soft_blocks(observation);
-    (0..ARENA_HEIGHT).any(|row| {
-        (0..ARENA_WIDTH).any(|column| {
+    (0..parts.arena.height).any(|row| {
+        (0..parts.arena.width).any(|column| {
             let cell = crate::game::CellId::new(column, row);
-            let index = usize::from(row) * usize::from(ARENA_WIDTH) + usize::from(column);
+            let index = usize::from(row) * usize::from(parts.arena.width) + usize::from(column);
             (parts.arena.terrain[index] == Terrain::Wall
                 || (!pass_blocks && parts.arena.blocks.contains(&cell)))
                 && position_overlaps_cell(position, cell)

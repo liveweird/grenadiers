@@ -136,6 +136,9 @@ pub(super) fn valid_origin(origin: &PlantEscapeOrigin, current: &Observation) ->
         || parts.rules.version != origin.basis.parts().rules.version
         || parts.rules.tick_rate != origin.basis.parts().rules.tick_rate
         || parts.rules.settings != origin.basis.parts().rules.settings
+        || parts.arena.width != origin.basis.parts().arena.width
+        || parts.arena.height != origin.basis.parts().arena.height
+        || parts.arena.terrain != origin.basis.parts().arena.terrain
         || !plant_actor_compatible(
             &origin.basis,
             current,
@@ -149,8 +152,11 @@ pub(super) fn valid_origin(origin: &PlantEscapeOrigin, current: &Observation) ->
         return false;
     };
     let cell = placement.cell;
-    let index = usize::from(cell.row) * usize::from(parts.arena.width) + usize::from(cell.column);
-    let valid_floor = parts.arena.terrain.get(index) == Some(&Terrain::Floor)
+    let valid_floor = parts
+        .arena
+        .index(cell)
+        .and_then(|index| parts.arena.terrain.get(index))
+        == Some(&Terrain::Floor)
         && !parts.arena.blocks.contains(&cell)
         && !parts.oil.iter().any(|oil| oil.cell == cell);
     let BombKnowledge::Visible(bombs) = &parts.bombs else {

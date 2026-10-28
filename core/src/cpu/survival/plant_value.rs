@@ -1,7 +1,7 @@
 use std::ops::ControlFlow;
 
 use crate::cpu::{BombKnowledge, Observation, ObservedActor, ObservedBombTrigger, WorkBudget};
-use crate::game::arena::{ARENA_CELL_COUNT, ARENA_WIDTH};
+use crate::game::arena::ARENA_CELL_COUNT;
 use crate::game::blast_geometry::{BlastBomb, BlastField, BlastSource, BlastVisit, visit_blast};
 use crate::game::geometry::position_overlaps_cell;
 use crate::game::{BlastKind, CellId, OilBarrelState, Terrain};
@@ -46,7 +46,8 @@ pub(super) fn useful_plant(
 ) -> Option<bool> {
     let field = ObservationBlastField::new(observation, work)?;
     if bomb.blast == BlastKind::Power {
-        work.try_take(u32::try_from(ARENA_CELL_COUNT).ok()?).ok()?;
+        work.try_take(u32::try_from(observation.parts().arena.cell_count()).ok()?)
+            .ok()?;
     }
     let mut useful = false;
     let result = visit_blast(
@@ -84,7 +85,8 @@ struct ObservationBlastField<'a> {
 
 impl<'a> ObservationBlastField<'a> {
     fn new(observation: &'a Observation, work: &mut WorkBudget) -> Option<Self> {
-        work.try_take(u32::try_from(ARENA_CELL_COUNT).ok()?).ok()?;
+        work.try_take(u32::try_from(observation.parts().arena.cell_count()).ok()?)
+            .ok()?;
         let mut value = Self {
             observation,
             soft_blocks: [false; ARENA_CELL_COUNT],
@@ -92,18 +94,18 @@ impl<'a> ObservationBlastField<'a> {
             bombs: [None; ARENA_CELL_COUNT],
         };
         for &cell in &observation.parts().arena.blocks {
-            value.soft_blocks[index(cell)?] = true;
+            value.soft_blocks[observation.parts().arena.index(cell)?] = true;
         }
         for oil in &observation.parts().oil {
             if oil.state == OilBarrelState::Unlit {
-                value.unlit_oil[index(oil.cell)?] = true;
+                value.unlit_oil[observation.parts().arena.index(oil.cell)?] = true;
             }
         }
         let BombKnowledge::Visible(bombs) = &observation.parts().bombs else {
             return None;
         };
         for bomb in bombs {
-            value.bombs[index(bomb.cell)?] = Some(BlastBomb {
+            value.bombs[observation.parts().arena.index(bomb.cell)?] = Some(BlastBomb {
                 id: bomb.id,
                 contact: bomb.trigger == ObservedBombTrigger::Contact,
             });
@@ -128,22 +130,45 @@ impl<'a> ObservationBlastField<'a> {
 }
 
 impl BlastField for ObservationBlastField<'_> {
+    fn dimensions(&self) -> (u16, u16) {
+        (
+            self.observation.parts().arena.width,
+            self.observation.parts().arena.height,
+        )
+    }
+
     fn is_floor(&self, cell: CellId) -> bool {
-        index(cell).is_some_and(|index| {
-            self.observation.parts().arena.terrain.get(index) == Some(&Terrain::Floor)
-        })
+        self.observation
+            .parts()
+            .arena
+            .index(cell)
+            .is_some_and(|index| {
+                self.observation.parts().arena.terrain.get(index) == Some(&Terrain::Floor)
+            })
     }
 
     fn has_soft_block(&self, cell: CellId) -> bool {
-        index(cell).is_some_and(|index| self.soft_blocks[index])
+        self.observation
+            .parts()
+            .arena
+            .index(cell)
+            .is_some_and(|index| self.soft_blocks[index])
     }
 
     fn has_unlit_oil(&self, cell: CellId) -> bool {
-        index(cell).is_some_and(|index| self.unlit_oil[index])
+        self.observation
+            .parts()
+            .arena
+            .index(cell)
+            .is_some_and(|index| self.unlit_oil[index])
     }
 
     fn bomb_at(&self, cell: CellId) -> Option<BlastBomb> {
-        index(cell).and_then(|index| self.bombs[index])
+        self.observation
+            .parts()
+            .arena
+            .index(cell)
+            .and_then(|index| self.bombs[index])
     }
 }
 
@@ -163,13 +188,6 @@ fn possible_origins(cell: CellId) -> [Option<CellId>; 5] {
             .checked_sub(1)
             .map(|column| CellId::new(column, cell.row)),
     ]
-}
-
-fn index(cell: CellId) -> Option<usize> {
-    let index = usize::from(cell.row)
-        .checked_mul(usize::from(ARENA_WIDTH))?
-        .checked_add(usize::from(cell.column))?;
-    (index < ARENA_CELL_COUNT).then_some(index)
 }
 
 #[cfg(test)]

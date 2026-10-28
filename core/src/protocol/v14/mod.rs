@@ -13,6 +13,7 @@ mod projection_capture;
 mod projection_capture_wire;
 mod projection_event_validation;
 mod projection_facts;
+mod projection_geometry;
 mod projection_history;
 mod projection_item_validation;
 mod projection_oil;
@@ -121,3 +122,6 @@ mod tests;
 
 #[cfg(test)]
 mod abandonment_tests;
+
+#[cfg(test)]
+mod board_geometry_tests;

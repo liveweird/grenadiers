@@ -216,7 +216,9 @@ fn validate_forced_movements(
         let dx = i32::from(forced.end.x()) - i32::from(forced.start.x());
         let dy = i32::from(forced.end.y()) - i32::from(forced.start.y());
         let distance = dx.unsigned_abs().max(dy.unsigned_abs());
-        if forced.pusher == forced.victim
+        if !super::projection_geometry::position_in_bounds(world, forced.start)
+            || !super::projection_geometry::position_in_bounds(world, forced.end)
+            || forced.pusher == forced.victim
             || !participants.insert(forced.pusher.index())
             || !participants.insert(forced.victim.index())
             || !world.enabled_items.contains(ItemId::Bracelet)

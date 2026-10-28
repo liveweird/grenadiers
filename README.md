@@ -1,7 +1,7 @@
 # Grenadiers
 
 A browser-based multiplayer game inspired by classic Bomberman/Dynablaster.
-Play a two-human duel or a private solo match against the server CPU. Larger matches follow later.
+Play two-to-four-seat human/CPU matches, a quick two-human duel, or a private solo match.
 
 **[v0.3.109 checked board geometry](https://github.com/liveweird/grenadiers/releases/tag/v0.3.109).**
 All 22 requested item types shipped in v0.3.47. See the [release record](docs/releases.md#v03109--2026-10-28)
@@ -53,7 +53,8 @@ Reach the configured win target (three by default) to take the match. Draws awar
 world between rounds, and the retained humans can consent to a rematch. A dropped tab can restore its
 reserved seat for 600 server ticks using a private in-memory capability; a connected takeover
 fences the old tab. The match requires a keyboard and keeps active state and capabilities in
-one server process and browser memory. Boards currently use 15×13 tiles. Matchmaking and
+one server process and browser memory. Custom rooms select 11×9, 13×11 or the default 15×13;
+Quick duel and Solo remain 15×13. See [board geometry](docs/game/board-sizes.md). Matchmaking and
 durable stats remain future work. Read the [browser guide](docs/game/browser.md), [game specification](docs/game/README.md),
 and [product backlog](BACKLOG.md) for behavior and planned work.
 

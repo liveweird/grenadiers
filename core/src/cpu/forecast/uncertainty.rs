@@ -27,6 +27,7 @@ pub(super) fn add_uncertainties(
     cells: &mut [CellForecast],
 ) -> Result<(), ForecastFailure> {
     let basis = observation.parts().tick;
+    let width = observation.parts().arena.width;
     let flame_ticks = crate::cpu::rules_config(observation)
         .ok_or(ForecastFailure::UnsupportedRules)?
         .flame_ticks();
@@ -43,7 +44,7 @@ pub(super) fn add_uncertainties(
         };
         for cell in positions {
             add_uncertain(
-                &mut cells[index(*cell)].uncertainty,
+                &mut cells[index(*cell, width)].uncertainty,
                 UncertainWindow {
                     window: TickWindow {
                         start: basis,
@@ -101,7 +102,7 @@ pub(super) fn add_uncertainties(
 
         if !matches!(bomb.trigger, Trigger::Contact)
             && basis.0 < horizon_end.0.saturating_sub(1)
-            && let Some(ignition) = earliest_fire(positions, cells)
+            && let Some(ignition) = earliest_fire(positions, cells, width)
         {
             add_blast_closure(
                 observation,
@@ -171,6 +172,7 @@ fn add_blast_closure(
     motion_positions: &BTreeMap<EntityId, BTreeSet<CellId>>,
     possible_occupants: &BTreeMap<CellId, Vec<EntityId>>,
 ) -> Result<(), ForecastFailure> {
+    let width = observation.parts().arena.width;
     take(
         work,
         u32::try_from(bombs.len() + observation.parts().oil.len())
@@ -222,7 +224,7 @@ fn add_blast_closure(
             |visit| {
                 if let Err(error) = take(work, 1).and_then(|()| {
                     add_uncertain(
-                        &mut cells[index(visit.cell)].uncertainty,
+                        &mut cells[index(visit.cell, width)].uncertainty,
                         UncertainWindow {
                             window: source_window,
                             kind: HazardKind::Lethal,
@@ -237,7 +239,7 @@ fn add_blast_closure(
                 }
                 if unlit_oil.contains(&visit.cell)
                     && let Err(error) = add_uncertain(
-                        &mut cells[index(visit.cell)].uncertainty,
+                        &mut cells[index(visit.cell, width)].uncertainty,
                         UncertainWindow {
                             window: source_window,
                             kind: HazardKind::Lethal,
@@ -335,10 +337,10 @@ fn build_motion_index(
     })
 }
 
-fn earliest_fire(positions: &BTreeSet<CellId>, cells: &[CellForecast]) -> Option<Tick> {
+fn earliest_fire(positions: &BTreeSet<CellId>, cells: &[CellForecast], width: u16) -> Option<Tick> {
     positions
         .iter()
-        .flat_map(|cell| cells[index(*cell)].lethal.iter())
+        .flat_map(|cell| cells[index(*cell, width)].lethal.iter())
         .map(|window| window.start)
         .min()
 }

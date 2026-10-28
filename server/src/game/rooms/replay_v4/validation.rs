@@ -1,32 +1,37 @@
-use grenadiers_core::{
-    game::{
-        MULTIPLAYER_GENERATOR_VERSION, SIMULATION_RANDOMNESS_VERSION,
-        SIMULATION_SEED_DERIVATION_VERSION,
-    },
-    room::{BoardSize, SeatControl},
-};
+use grenadiers_core::room::SeatControl;
 
 use super::record::{
-    CPU_POLICY_VERSION, FORMAT_VERSION, GENERATOR_VERSION, LIFECYCLE_PROFILE, RULES_VERSION,
-    ReplayV4Header,
+    CPU_POLICY_VERSION, LIFECYCLE_PROFILE, RULES_VERSION, ReplayV4Header,
+    SIMULATION_RANDOMNESS_VERSION, SIMULATION_SEED_DERIVATION_VERSION,
 };
 
 pub(super) fn validate_header(header: &ReplayV4Header) -> Result<(), ()> {
-    if header.format_version != FORMAT_VERSION
+    validate_header_for_profile(super::profile::ReplayProfile::V4, header)
+}
+
+pub(super) fn validate_header_v5(header: &ReplayV4Header) -> Result<(), ()> {
+    validate_header_for_profile(super::profile::ReplayProfile::V5, header)
+}
+
+pub(super) fn validate_header_for_profile(
+    profile: super::profile::ReplayProfile,
+    header: &ReplayV4Header,
+) -> Result<(), ()> {
+    if header.format_version != profile.format()
         || header.lifecycle_profile != LIFECYCLE_PROFILE
         || header.lifecycle_profile != grenadiers_core::room::ROSTER_LIFECYCLE_PROFILE
         || header.rules_version != RULES_VERSION
-        || header.generator_version != GENERATOR_VERSION
-        || header.generator_version != MULTIPLAYER_GENERATOR_VERSION
+        || header.generator_version != profile.generator()
         || header.simulation_randomness_version != SIMULATION_RANDOMNESS_VERSION
         || header.simulation_seed_derivation_version != SIMULATION_SEED_DERIVATION_VERSION
         || header.initial_settings_revision != 1
-        || header.configuration.board() != BoardSize::FifteenByThirteen
+        || !profile.accepts_board(header.configuration.board())
     {
         return Err(());
     }
 
     validate_configuration(
+        profile,
         header.configuration,
         header.initially_occupied_humans,
         &header.cpus,
@@ -34,11 +39,12 @@ pub(super) fn validate_header(header: &ReplayV4Header) -> Result<(), ()> {
 }
 
 pub(super) fn validate_configuration(
+    profile: super::profile::ReplayProfile,
     configuration: grenadiers_core::room::RoomConfiguration,
     initially_occupied_humans: [bool; 4],
     cpus: &[super::record::CpuProvenance],
 ) -> Result<(), ()> {
-    if configuration.board() != BoardSize::FifteenByThirteen {
+    if !profile.accepts_board(configuration.board()) {
         return Err(());
     }
     let expected_difficulty = configuration.cpu_difficulty();

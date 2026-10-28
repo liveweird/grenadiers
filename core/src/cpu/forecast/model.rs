@@ -1,7 +1,7 @@
 use std::collections::{BTreeMap, BTreeSet};
 
 use crate::cpu::{Observation, ObservationParts};
-use crate::game::arena::{ARENA_WIDTH, Terrain};
+use crate::game::arena::Terrain;
 use crate::game::blast_geometry::{BlastBomb, BlastField};
 use crate::game::{BlastKind, CellId, EntityId, Tick};
 
@@ -32,6 +32,13 @@ pub(super) struct ForecastField<'a> {
 }
 
 impl BlastField for ForecastField<'_> {
+    fn dimensions(&self) -> (u16, u16) {
+        (
+            self.observation.parts().arena.width,
+            self.observation.parts().arena.height,
+        )
+    }
+
     fn is_floor(&self, cell: CellId) -> bool {
         terrain(self.observation.parts(), cell) == Some(Terrain::Floor)
     }
@@ -57,11 +64,15 @@ pub(super) fn terrain(parts: &ObservationParts, cell: CellId) -> Option<Terrain>
     if cell.column >= parts.arena.width || cell.row >= parts.arena.height {
         return None;
     }
-    parts.arena.terrain.get(index(cell)).copied()
+    parts
+        .arena
+        .terrain
+        .get(index(cell, parts.arena.width))
+        .copied()
 }
 
-pub(super) fn index(cell: CellId) -> usize {
-    usize::from(cell.row) * usize::from(ARENA_WIDTH) + usize::from(cell.column)
+pub(super) fn index(cell: CellId, width: u16) -> usize {
+    usize::from(cell.row) * usize::from(width) + usize::from(cell.column)
 }
 
 pub(super) fn unused_id(bombs: &[ForecastBomb]) -> EntityId {

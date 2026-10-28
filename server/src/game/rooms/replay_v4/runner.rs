@@ -12,6 +12,7 @@ use crate::{
     round_seed::RoundSeedSource,
 };
 
+use super::profile::ReplayProfile;
 use super::record::{ActionSource, Journal, Operation, ReplayAction, ReplayStatus, ReplayV4Header};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -33,7 +34,23 @@ pub(in crate::game::rooms) fn verify_exact(
     journal: &Journal,
     expected: &RosterRuntimeInspection,
 ) -> Result<(), String> {
-    let actual = replay(journal).map_err(|error| format!("replay failed: {error:?}"))?;
+    verify_exact_for_profile(ReplayProfile::V4, journal, expected)
+}
+
+pub(in crate::game::rooms) fn verify_exact_v5(
+    journal: &Journal,
+    expected: &RosterRuntimeInspection,
+) -> Result<(), String> {
+    verify_exact_for_profile(ReplayProfile::V5, journal, expected)
+}
+
+fn verify_exact_for_profile(
+    profile: ReplayProfile,
+    journal: &Journal,
+    expected: &RosterRuntimeInspection,
+) -> Result<(), String> {
+    let actual = replay_for_profile(profile, journal)
+        .map_err(|error| format!("replay failed: {error:?}"))?;
     (actual == *expected)
         .then_some(())
         .ok_or_else(|| format!("replay mismatch: actual={actual:?} expected={expected:?}"))
@@ -42,7 +59,21 @@ pub(in crate::game::rooms) fn verify_exact(
 pub(in crate::game::rooms) fn replay(
     journal: &Journal,
 ) -> Result<RosterRuntimeInspection, ReplayError> {
-    super::validation::validate_header(&journal.header).map_err(|()| ReplayError::InvalidHeader)?;
+    replay_for_profile(ReplayProfile::V4, journal)
+}
+
+pub(in crate::game::rooms) fn replay_v5(
+    journal: &Journal,
+) -> Result<RosterRuntimeInspection, ReplayError> {
+    replay_for_profile(ReplayProfile::V5, journal)
+}
+
+fn replay_for_profile(
+    profile: ReplayProfile,
+    journal: &Journal,
+) -> Result<RosterRuntimeInspection, ReplayError> {
+    super::validation::validate_header_for_profile(profile, &journal.header)
+        .map_err(|()| ReplayError::InvalidHeader)?;
     match journal.status {
         ReplayStatus::Complete => {}
         ReplayStatus::Truncated => return Err(ReplayError::Truncated),

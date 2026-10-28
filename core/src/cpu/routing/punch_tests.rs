@@ -8,6 +8,7 @@ use crate::game::{
     Tick,
 };
 
+use super::punch::{select_landing, select_landing_unmetered};
 use super::route_expand::retain_recipient_barrier;
 use super::safety::{RecipientBarrier, check_segments_with_grace, stationary_segment};
 use super::tests::{key, observation};
@@ -65,6 +66,69 @@ fn plan() -> (Observation, super::PunchCertificate) {
     )
     .unwrap_or_else(|error| panic!("punch failed after {} work: {error:?}", work.spent()));
     (basis, certificate)
+}
+
+fn small_punch_observation() -> Observation {
+    let mut parts = punch_observation().into_parts();
+    parts.rules.version = 6;
+    parts.arena.width = 11;
+    parts.arena.height = 9;
+    parts.arena.terrain = vec![crate::game::Terrain::Floor; 99];
+    for row in 0..9 {
+        for column in 0..11 {
+            if row == 0 || column == 0 || row == 8 || column == 10 {
+                parts.arena.terrain[row * 11 + column] = crate::game::Terrain::Wall;
+            }
+        }
+    }
+    let ObservedActor::Visible(rival) = &mut parts.actors[0] else {
+        unreachable!()
+    };
+    rival.position = Position::center(CellId::new(9, 7));
+    Observation::new(parts).unwrap()
+}
+
+#[test]
+fn small_board_punch_uses_the_authoritative_short_axis_cycle() {
+    let observed = small_punch_observation();
+    let BombKnowledge::Visible(bombs) = &observed.parts().bombs else {
+        unreachable!()
+    };
+    assert_eq!(
+        select_landing_unmetered(&observed, &bombs[0], Position::center(CellId::new(7, 7)),),
+        Ok(CellId::new(2, 7))
+    );
+}
+
+#[test]
+fn small_board_punch_charges_actual_geometry_before_landing_search() {
+    let observed = small_punch_observation();
+    let BombKnowledge::Visible(bombs) = &observed.parts().bombs else {
+        unreachable!()
+    };
+    let actor = Position::center(CellId::new(7, 7));
+    let mut exact = WorkBudget::new(99);
+    assert_eq!(
+        select_landing(&observed, &bombs[0], actor, &mut exact),
+        Ok(CellId::new(2, 7))
+    );
+    assert_eq!(exact.spent(), 99);
+
+    let mut short = WorkBudget::new(98);
+    assert_eq!(
+        select_landing(&observed, &bombs[0], actor, &mut short),
+        Err(PunchFailure::Route(RouteFailure::WorkExhausted))
+    );
+    assert_eq!(short.spent(), 0);
+    assert_eq!(short.remaining(), 98);
+
+    let large = punch_observation();
+    let BombKnowledge::Visible(large_bombs) = &large.parts().bombs else {
+        unreachable!()
+    };
+    let mut legacy = WorkBudget::new(195);
+    assert!(select_landing(&large, &large_bombs[0], actor, &mut legacy).is_ok());
+    assert_eq!(legacy.spent(), 195);
 }
 
 pub(super) fn scene(

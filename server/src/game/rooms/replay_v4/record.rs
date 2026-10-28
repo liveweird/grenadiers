@@ -7,13 +7,19 @@ use grenadiers_core::{
 
 use crate::game::rooms::roster_seed::SimulationRoot;
 
-pub(super) const FORMAT_VERSION: u16 = 4;
 pub(super) const LIFECYCLE_PROFILE: u16 = 3;
 const _: () = assert!(LIFECYCLE_PROFILE == grenadiers_core::room::ROSTER_LIFECYCLE_PROFILE);
 pub(super) const RULES_VERSION: u16 = 6;
-pub(super) const GENERATOR_VERSION: u16 = 3;
 pub(super) const CPU_POLICY_VERSION: u16 = 17;
+pub(super) const SIMULATION_RANDOMNESS_VERSION: u16 = 1;
+pub(super) const SIMULATION_SEED_DERIVATION_VERSION: u16 = 1;
 pub(super) const MAX_RECORDS: usize = 60_000;
+
+const _: () =
+    assert!(SIMULATION_RANDOMNESS_VERSION == grenadiers_core::game::SIMULATION_RANDOMNESS_VERSION);
+const _: () = assert!(
+    SIMULATION_SEED_DERIVATION_VERSION == grenadiers_core::game::SIMULATION_SEED_DERIVATION_VERSION
+);
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub(in crate::game::rooms) struct PrivateCpuSeed([u8; 32]);
@@ -54,7 +60,7 @@ impl CpuProvenance {
 }
 
 #[derive(Clone, Debug)]
-pub(in crate::game::rooms) struct ReplayV4Header {
+pub(in crate::game::rooms) struct ReplayHeader {
     pub(super) format_version: u16,
     pub(super) lifecycle_profile: u16,
     pub(super) rules_version: u16,
@@ -69,22 +75,60 @@ pub(in crate::game::rooms) struct ReplayV4Header {
     pub(super) cpus: Box<[CpuProvenance]>,
 }
 
-impl ReplayV4Header {
+pub(in crate::game::rooms) type ReplayV4Header = ReplayHeader;
+pub(in crate::game::rooms) type ReplayV5Header = ReplayHeader;
+
+impl ReplayHeader {
     pub(in crate::game::rooms) fn new(
         configuration: RoomConfiguration,
         settings: RoomSettings,
         initially_occupied_humans: [bool; 4],
         cpus: Vec<CpuProvenance>,
     ) -> Result<Self, ()> {
-        super::validation::validate_configuration(configuration, initially_occupied_humans, &cpus)?;
+        Self::new_for_profile(
+            super::profile::ReplayProfile::V4,
+            configuration,
+            settings,
+            initially_occupied_humans,
+            cpus,
+        )
+    }
+
+    pub(in crate::game::rooms) fn new_v5(
+        configuration: RoomConfiguration,
+        settings: RoomSettings,
+        initially_occupied_humans: [bool; 4],
+        cpus: Vec<CpuProvenance>,
+    ) -> Result<Self, ()> {
+        Self::new_for_profile(
+            super::profile::ReplayProfile::V5,
+            configuration,
+            settings,
+            initially_occupied_humans,
+            cpus,
+        )
+    }
+
+    fn new_for_profile(
+        profile: super::profile::ReplayProfile,
+        configuration: RoomConfiguration,
+        settings: RoomSettings,
+        initially_occupied_humans: [bool; 4],
+        cpus: Vec<CpuProvenance>,
+    ) -> Result<Self, ()> {
+        super::validation::validate_configuration(
+            profile,
+            configuration,
+            initially_occupied_humans,
+            &cpus,
+        )?;
         let header = Self {
-            format_version: FORMAT_VERSION,
+            format_version: profile.format(),
             lifecycle_profile: LIFECYCLE_PROFILE,
             rules_version: RULES_VERSION,
-            generator_version: GENERATOR_VERSION,
-            simulation_randomness_version: grenadiers_core::game::SIMULATION_RANDOMNESS_VERSION,
-            simulation_seed_derivation_version:
-                grenadiers_core::game::SIMULATION_SEED_DERIVATION_VERSION,
+            generator_version: profile.generator(),
+            simulation_randomness_version: SIMULATION_RANDOMNESS_VERSION,
+            simulation_seed_derivation_version: SIMULATION_SEED_DERIVATION_VERSION,
             configuration,
             initial_settings: settings,
             initial_settings_revision: 1,
@@ -93,7 +137,7 @@ impl ReplayV4Header {
             simulation_root: SimulationRoot::generate()?,
             cpus: cpus.into_boxed_slice(),
         };
-        super::validation::validate_header(&header)?;
+        super::validation::validate_header_for_profile(profile, &header)?;
         Ok(header)
     }
 }

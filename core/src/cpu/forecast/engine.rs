@@ -1,7 +1,7 @@
 use std::collections::BTreeSet;
 
 use crate::cpu::{BombKnowledge, MemoryKey, Observation, ObservedBombTrigger, WorkBudget};
-use crate::game::arena::{ARENA_CELL_COUNT, Terrain};
+use crate::game::arena::Terrain;
 use crate::game::{OilBarrelState, RulesConfig, Tick};
 
 use super::intervals::{add_window, take};
@@ -22,6 +22,11 @@ pub fn forecast(
 ) -> Result<HazardForecast, ForecastFailure> {
     validate_limits(limits)?;
     let parts = observation.parts();
+    let board = parts
+        .arena
+        .board()
+        .ok_or(ForecastFailure::UnsupportedRules)?;
+    let cell_count = board.cell_count();
     let key = MemoryKey {
         world: parts.world,
         cpu_seat: parts.recipient,
@@ -41,9 +46,9 @@ pub fn forecast(
         return Err(ForecastFailure::BombKnowledgeUnavailable);
     };
     validate_observed(observation, rules, hypothetical, horizon_end)?;
-    take(work, ARENA_CELL_COUNT as u32)?;
+    take(work, cell_count as u32)?;
 
-    let mut cells = vec![CellForecast::default(); ARENA_CELL_COUNT];
+    let mut cells = vec![CellForecast::default(); cell_count];
     let mut evolution = ForecastEvolution::new(observation, horizon_end)?;
     let mut bombs = observed_bombs
         .iter()
@@ -115,6 +120,7 @@ pub fn forecast(
     add_uncertainties(observation, &bombs, horizon_end, limits, work, &mut cells)?;
     HazardForecast::from_parts(
         key,
+        board,
         parts.tick,
         horizon_end,
         cells,
@@ -190,6 +196,7 @@ fn add_existing_hazards(
     cells: &mut [CellForecast],
 ) -> Result<(), ForecastFailure> {
     let basis = observation.parts().tick;
+    let width = observation.parts().arena.width;
     for flame in &observation.parts().flames {
         let end = Tick(
             basis
@@ -199,7 +206,7 @@ fn add_existing_hazards(
         )
         .min(horizon_end);
         add_window(
-            &mut cells[index(flame.cell)].lethal,
+            &mut cells[index(flame.cell, width)].lethal,
             TickWindow { start: basis, end },
             limits,
             work,
@@ -208,7 +215,7 @@ fn add_existing_hazards(
     for oil in &observation.parts().oil {
         if oil.state == OilBarrelState::Burning {
             add_window(
-                &mut cells[index(oil.cell)].lethal,
+                &mut cells[index(oil.cell, width)].lethal,
                 TickWindow {
                     start: basis,
                     end: horizon_end,

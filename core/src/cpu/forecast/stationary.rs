@@ -22,6 +22,7 @@ pub(super) fn simulate_stationary(
     evolution: &mut ForecastEvolution,
 ) -> Result<(), ForecastFailure> {
     let parts = observation.parts();
+    let width = parts.arena.width;
     let mut blocks = parts.arena.blocks.iter().copied().collect::<BTreeSet<_>>();
     let mut oil = parts
         .oil
@@ -94,7 +95,7 @@ pub(super) fn simulate_stationary(
         )?;
         for cell in phase.flames {
             add_window(
-                &mut cells[index(cell)].lethal,
+                &mut cells[index(cell, width)].lethal,
                 TickWindow {
                     start: tick,
                     end: if phase.ignited_oil.contains(&cell) {
@@ -241,6 +242,7 @@ fn add_blocking_windows(
     cells: &mut [CellForecast],
 ) -> Result<(), ForecastFailure> {
     let basis = observation.parts().tick;
+    let width = observation.parts().arena.width;
     let pass_blocks = crate::cpu::capabilities::can_pass_known_soft_blocks(observation);
     let mut block_removals = BTreeMap::new();
     if pass_blocks {
@@ -252,7 +254,7 @@ fn add_blocking_windows(
     for bomb in bombs {
         if !matches!(bomb.trigger, Trigger::Contact) {
             add_window(
-                &mut cells[index(bomb.cell)].blocking,
+                &mut cells[index(bomb.cell, width)].blocking,
                 TickWindow {
                     start: if bomb.hypothetical {
                         Tick(
@@ -281,7 +283,7 @@ fn add_blocking_windows(
             basis
         };
         add_window(
-            &mut cells[index(*cell)].blocking,
+            &mut cells[index(*cell, width)].blocking,
             TickWindow {
                 start,
                 // A destroyed block can reveal concealed Oil. Recipient facts
@@ -299,7 +301,7 @@ fn add_blocking_windows(
         .filter_map(|oil| (oil.state == OilBarrelState::Unlit).then_some(oil.cell))
     {
         add_window(
-            &mut cells[index(cell)].blocking,
+            &mut cells[index(cell, width)].blocking,
             TickWindow {
                 start: basis,
                 end: oil_ignitions.get(&cell).copied().unwrap_or(horizon_end),

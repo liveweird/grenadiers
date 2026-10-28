@@ -6,18 +6,21 @@ never advances the simulation or predicts a different outcome.
 
 ## Join and play
 
-1. Open the application, choose **Create room**, and share its eight-character invitation.
-2. The second player enters that code and chooses **Join room** in another browser/tab.
-3. The creator can [configure gameplay](settings.md) while unready. Both choose **Ready**;
-   either can cancel readiness during the three-second countdown.
+1. Open the application, choose **Create room**, select the custom **Board size** / **Rozmiar
+   planszy** if desired, and share its eight-character invitation. The default is 15×13; Quick
+   duel and Solo always use 15×13.
+2. Each other configured human enters that code and chooses **Join room** in another browser/tab.
+3. The creator can [configure gameplay](settings.md) while unready. All connected humans choose
+   **Ready**; any of them can cancel readiness during the three-second countdown.
 4. When the round starts, select the courtyard to give it keyboard focus. Move with arrows
    or W/A/S/D; press Space once per bomb. Hold a direction to keep moving.
 5. A surviving player wins the round; simultaneous elimination or the round timeout draws.
    Reach the selected win target (three by default) to take the match. Nonfinal rounds hold their result for three seconds,
    then start a three-second automatic countdown with a fresh world and base upgrades.
 6. After the final three-second hold, **Play again** records rematch consent. Either player
-   can withdraw it. Both votes return the same connected players to an unready lobby with
-   zero scores; both choose **Ready** to start a new match. **Leave room** returns to admission.
+   can withdraw it. Consensus among the retained humans returns the same connected players to an
+   unready lobby with zero scores; they choose **Ready** to start a new match. **Leave room**
+   returns to admission.
 
 The invitation discovers a room; it is not a secret credential. Each tab requests a separate
 anonymous session. Personal `admitted` state gives that tab a distinct resume capability kept only
@@ -38,12 +41,11 @@ carry no position or clock authority.
 Pixi retains terrain, block, bomb, flame, and actor layers. Public actor positions interpolate
 over the 50 ms publication interval without extrapolation. Terminal states snap to the
 accepted final position; reduced motion disables interpolation and pulsing effects. Player
-colors, headgear (plumed shako or cockaded bicorne), and HTML seat names distinguish the
-two players. The canvas itself
+colors, headgear, and HTML seat names distinguish the configured players. The canvas itself
 is decorative to assistive technology; room controls, countdown/timer, and result remain HTML.
 
-The canvas resizes to the fixed 15:13 arena aspect ratio, with device pixel ratio capped at
-two. The fixed logical surface uses crisp pixelated CSS scaling. Initialization, ticker ownership, listeners, and graphics contexts
+The canvas resizes to the authoritative arena aspect ratio (11:9, 13:11 or 15:13), with device
+pixel ratio capped at two. The board-relative logical surface uses crisp pixelated CSS scaling. Initialization, ticker ownership, listeners, and graphics contexts
 are released on teardown, including React development StrictMode setup/cleanup. Rendering
 failure produces a localized explanation and disables game input.
 
@@ -105,7 +107,7 @@ distinct bomb, cross/range, speed, Heart and Shield marks above blocks and below
 bombs/flames/actors; it never guesses concealed contents. Retained drawings are reused while unchanged and destroyed when removed,
 replaced, or reset. The UI performs no collection simulation.
 
-Both player rows show available bombs (capacity minus live bombs), capacity, range, and speed
+All player rows show available bombs (capacity minus live bombs), capacity, range, and speed
 levels 1–5 from authoritative actors. Running/nonfinal-result rows show alive or eliminated; pre-start rows show readiness. Final
 match rows show rematch consent, and authoritative vacant seats remain open despite frozen actors. Labels are localized in English and Polish. Player cards stack at narrow widths, with two columns inside each
 stat grid. Expanded-v5 rooms also show current equipment

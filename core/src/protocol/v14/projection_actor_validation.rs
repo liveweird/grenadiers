@@ -30,8 +30,7 @@ pub(crate) fn validate(world: &WorldFacts) -> Result<(), ProjectionError> {
                 || !(1..=8).contains(&actor.view.bomb_range)
                 || actor.view.live_bomb_count > actor.view.bomb_capacity
                 || super::validate_effects(&actor.view.effects).is_err()
-                || actor.view.position.x() >= u16::from(world.arena.width) * 1_024
-                || actor.view.position.y() >= u16::from(world.arena.height) * 1_024
+                || !super::projection_geometry::position_in_bounds(world, actor.view.position)
                 || actor.view.voluntary_actions_frozen
                 || !valid_grace
                 || (!actor.view.alive

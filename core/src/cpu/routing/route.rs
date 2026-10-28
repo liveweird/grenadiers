@@ -59,6 +59,7 @@ pub(super) fn plan_route_seeded(
         candidate.key() != forecast.key()
             || candidate.basis_tick() != forecast.basis_tick()
             || candidate.horizon_end() != forecast.horizon_end()
+            || candidate.dimensions() != forecast.dimensions()
     }) {
         return Err(RouteFailure::IdentityMismatch);
     }

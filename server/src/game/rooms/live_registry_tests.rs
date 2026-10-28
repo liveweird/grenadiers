@@ -46,7 +46,15 @@ fn sequence(value: u32) -> Counter {
 }
 
 fn configuration(controls: &[SeatControl], difficulty: Option<CpuDifficulty>) -> RoomConfiguration {
-    RoomConfiguration::new(controls, difficulty, BoardSize::FifteenByThirteen).unwrap()
+    configuration_on(controls, difficulty, BoardSize::FifteenByThirteen)
+}
+
+fn configuration_on(
+    controls: &[SeatControl],
+    difficulty: Option<CpuDifficulty>,
+    board: BoardSize,
+) -> RoomConfiguration {
+    RoomConfiguration::new(controls, difficulty, board).unwrap()
 }
 
 fn personal(admission: &LiveAdmission) -> serde_json::Value {
@@ -225,31 +233,6 @@ async fn three_and_four_player_rosters_admit_only_human_seats_and_resume_private
 }
 
 #[tokio::test]
-async fn unsupported_board_is_rejected_before_registry_identity_entropy() {
-    let now = std::time::Instant::now();
-    let calls = Arc::new(AtomicU64::new(0));
-    let observed = Arc::clone(&calls);
-    let rooms = GameRooms::with_random_fill(now, move |_| {
-        observed.fetch_add(1, Ordering::Relaxed);
-        Ok(())
-    });
-    let unsupported =
-        RoomConfiguration::new(&[SeatControl::Human; 3], None, BoardSize::ThirteenByEleven)
-            .unwrap();
-    assert!(matches!(
-        rooms
-            .create_live(binding(1), sequence(1), now, unsupported)
-            .await,
-        Err(RoomError::UnsupportedConfiguration)
-    ));
-    assert_eq!(calls.load(Ordering::Relaxed), 0);
-    let registry = rooms.lock();
-    assert_eq!(registry.next_serial, 1);
-    assert!(registry.prefix.is_none());
-    assert!(registry.rooms.is_empty());
-}
-
-#[tokio::test]
 async fn failed_roster_cpu_entropy_does_not_insert_or_consume_serial() {
     let now = std::time::Instant::now();
     let calls = Arc::new(AtomicU64::new(0));
@@ -370,3 +353,6 @@ async fn legacy_and_roster_owners_share_the_single_room_capacity() {
         Err(RoomError::CapacityReached)
     ));
 }
+
+#[path = "live_registry_variable_board_tests.rs"]
+mod variable_board_tests;

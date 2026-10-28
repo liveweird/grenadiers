@@ -48,7 +48,7 @@ pub(crate) fn validate(world: &WorldFacts) -> Result<(), ProjectionError> {
             return Err(ProjectionError::InvalidItems);
         }
     }
-    if flames.union(&burning).count() > 195 {
+    if flames.union(&burning).count() > world.arena.terrain.len() {
         return Err(ProjectionError::InvalidFlames);
     }
     validate_grace(world)
@@ -95,11 +95,7 @@ fn validate_grace(world: &WorldFacts) -> Result<(), ProjectionError> {
 }
 
 fn terrain_at(world: &WorldFacts, cell: crate::protocol::Cell) -> Option<Terrain> {
-    world
-        .arena
-        .terrain
-        .get(usize::from(cell.row()) * usize::from(world.arena.width) + usize::from(cell.column()))
-        .copied()
+    super::projection_geometry::terrain_at(world, cell)
 }
 
 fn position_overlaps(position: crate::protocol::Position, cell: crate::protocol::Cell) -> bool {

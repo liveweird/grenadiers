@@ -1,7 +1,9 @@
 use grenadiers_core::game::{
     ActorInit, ArenaGenerationConfig, Direction, EntityId, Position, RoundActorInit,
     RoundAssignment, SeatId, State, World, generate_multiplayer_arena,
+    generate_variable_multiplayer_arena,
 };
+use grenadiers_core::room::BoardSize;
 
 use super::{
     error::RosterRuntimeError,
@@ -17,15 +19,24 @@ impl RosterRuntime {
             .round_seed_source
             .next_seed()
             .map_err(|_| RosterRuntimeError::SeedUnavailable)?;
-        let generated = generate_multiplayer_arena(
-            generation_seed,
-            self.lifecycle.settings().enabled_items(),
-            ArenaGenerationConfig {
-                player_count: self.identity.configuration.player_count(),
-                board: self.identity.configuration.board(),
-                assignment,
-            },
-        )
+        let config = ArenaGenerationConfig {
+            player_count: self.identity.configuration.player_count(),
+            board: self.identity.configuration.board(),
+            assignment,
+        };
+        let generated = if config.board == BoardSize::FifteenByThirteen {
+            generate_multiplayer_arena(
+                generation_seed,
+                self.lifecycle.settings().enabled_items(),
+                config,
+            )
+        } else {
+            generate_variable_multiplayer_arena(
+                generation_seed,
+                self.lifecycle.settings().enabled_items(),
+                config,
+            )
+        }
         .map_err(|_| RosterRuntimeError::UnsupportedConfiguration)?;
         let spawns = assignment.spawns(generated.arena());
         let actors = self

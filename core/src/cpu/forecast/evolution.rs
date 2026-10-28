@@ -6,6 +6,7 @@ use crate::cpu::{
 };
 use crate::game::arena::ARENA_CELL_COUNT;
 use crate::game::{CellId, EntityId, MAX_OIL_BARRELS, OilBarrelState, Tick};
+use crate::room::BoardSize;
 
 use super::ForecastFailure;
 use super::intervals::take;
@@ -22,6 +23,7 @@ pub(super) struct FlameChange {
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct ForecastEvolution {
     key: MemoryKey,
+    board: BoardSize,
     basis_tick: Tick,
     horizon_end: Tick,
     max_bombs: usize,
@@ -49,6 +51,10 @@ impl ForecastEvolution {
                 world: parts.world,
                 cpu_seat: parts.recipient,
             },
+            board: parts
+                .arena
+                .board()
+                .ok_or(ForecastFailure::UnsupportedRules)?,
             basis_tick: parts.tick,
             horizon_end,
             max_bombs: crate::cpu::observed_bomb_capacity(parts.rules.version),
@@ -147,6 +153,7 @@ impl ForecastEvolution {
                 world: old.world,
                 cpu_seat: old.recipient,
             }) != self.key
+            || old.arena.board() != Some(self.board)
             || old.world != new.world
             || old.recipient != new.recipient
             || old.rules.version != new.rules.version

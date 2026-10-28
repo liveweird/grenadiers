@@ -20,17 +20,20 @@ pub(super) fn identity(configuration: RoomConfiguration) -> RosterIdentity {
 }
 
 pub(super) fn configuration(count: usize) -> RoomConfiguration {
-    RoomConfiguration::new(
-        &vec![SeatControl::Human; count],
-        None,
-        BoardSize::FifteenByThirteen,
-    )
-    .unwrap()
+    configuration_for(count, BoardSize::FifteenByThirteen)
+}
+
+pub(super) fn configuration_for(count: usize, board: BoardSize) -> RoomConfiguration {
+    RoomConfiguration::new(&vec![SeatControl::Human; count], None, board).unwrap()
 }
 
 pub(super) fn runtime(count: usize) -> RosterRuntime {
+    runtime_for(count, BoardSize::FifteenByThirteen)
+}
+
+pub(super) fn runtime_for(count: usize, board: BoardSize) -> RosterRuntime {
     RosterRuntime::new(
-        identity(configuration(count)),
+        identity(configuration_for(count, board)),
         RoomSettings::DEFAULT,
         RoundSeedSource::with_entropy(|bytes| {
             bytes.fill(3);
@@ -70,16 +73,33 @@ pub(super) fn start(runtime: &mut RosterRuntime, count: usize) {
 
 #[test]
 fn two_three_and_four_seat_rooms_start_with_checked_recipient_frames() {
-    for count in 2..=4 {
-        let mut runtime = runtime(count);
-        start(&mut runtime, count);
-        assert!(runtime.settle_boundary([None; 4]).unwrap().is_none());
-        assert!(runtime.settle_boundary([None; 4]).unwrap().is_none());
-        let notice = runtime.settle_boundary([None; 4]).unwrap().unwrap();
-        for &seat in &SeatId::ALL[..count] {
-            assert!(notice.frame(seat).is_some());
+    for board in [
+        BoardSize::ElevenByNine,
+        BoardSize::ThirteenByEleven,
+        BoardSize::FifteenByThirteen,
+    ] {
+        for count in 2..=4 {
+            let mut runtime = runtime_for(count, board);
+            start(&mut runtime, count);
+            let sim = runtime.sim.as_ref().unwrap();
+            assert_eq!(sim.state.world().arena().board(), board);
+            assert_eq!(
+                sim.generation.version(),
+                if board == BoardSize::FifteenByThirteen {
+                    grenadiers_core::game::MULTIPLAYER_GENERATOR_VERSION
+                } else {
+                    grenadiers_core::game::VARIABLE_GENERATOR_VERSION
+                }
+            );
+            assert!(runtime.settle_boundary([None; 4]).unwrap().is_none());
+            assert!(runtime.settle_boundary([None; 4]).unwrap().is_none());
+            let notice = runtime.settle_boundary([None; 4]).unwrap().unwrap();
+            assert_eq!(notice.room.configuration.domain().board(), board);
+            for &seat in &SeatId::ALL[..count] {
+                assert!(notice.frame(seat).is_some());
+            }
+            assert!(notice.frame(SeatId::ALL[count.min(3)]).is_none() || count == 4);
         }
-        assert!(notice.frame(SeatId::ALL[count.min(3)]).is_none() || count == 4);
     }
 }
 
@@ -155,20 +175,22 @@ fn creator_authority_does_not_transfer_after_departure() {
 }
 
 #[test]
-fn unsupported_board_and_cpu_human_admission_are_rejected() {
-    let unsupported =
-        RoomConfiguration::new(&[SeatControl::Human; 3], None, BoardSize::ThirteenByEleven)
-            .unwrap();
-    assert!(matches!(
-        RosterRuntime::new(
-            identity(unsupported),
-            RoomSettings::DEFAULT,
-            RoundSeedSource::with_entropy(|_| Ok(())),
-            Arc::new(|_| Ok(SimulationSeed::new([0; 32]))),
-        ),
-        Err(RosterRuntimeError::UnsupportedConfiguration)
-    ));
-
+fn checked_boards_are_accepted_and_cpu_human_admission_is_rejected() {
+    for board in [
+        BoardSize::ElevenByNine,
+        BoardSize::ThirteenByEleven,
+        BoardSize::FifteenByThirteen,
+    ] {
+        assert!(
+            RosterRuntime::new(
+                identity(configuration_for(3, board)),
+                RoomSettings::DEFAULT,
+                RoundSeedSource::with_entropy(|_| Ok(())),
+                Arc::new(|_| Ok(SimulationSeed::new([0; 32]))),
+            )
+            .is_ok()
+        );
+    }
     let cpu = RoomConfiguration::new(
         &[SeatControl::Human, SeatControl::Cpu, SeatControl::Human],
         Some(grenadiers_core::room::CpuDifficulty::Standard),

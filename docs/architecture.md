@@ -31,9 +31,10 @@ The owner executes bounded logical intentions; public snapshots carry the accept
 
 Matches configure two to four seats and require at least one human controller. Transport sockets
 are not player seats; the diagnostic v2 welcome's `maxPlayers: 4` describes the live match-capacity
-ceiling, not a connection limit. Two-seat matches retain CPU policy 16 and rules 5; three- and
-four-seat matches use CPU policy 17 and rules 6. Match configuration, rather than global
-connections, determines the participant roster.
+ceiling, not a connection limit. Two-seat 15×13 matches retain CPU policy 16 and rules 5;
+three/four-seat 15×13 matches and every 11×9/13×11 match use CPU policy 17 and rules 6. The board
+choice is immutable, defaults to 15×13 and is documented in [board geometry](game/board-sizes.md).
+Match configuration, rather than global connections, determines the participant roster.
 
 Active state belongs in memory. Process restarts will end active matches until recovery is
 explicitly designed. PostgreSQL can later store identities, completed results, or replays;

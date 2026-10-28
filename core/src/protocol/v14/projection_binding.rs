@@ -1,5 +1,6 @@
 use crate::game::{
     EXPANDED_GENERATOR_VERSION, GENERATOR_VERSION, GenerationRecord, MULTIPLAYER_GENERATOR_VERSION,
+    VARIABLE_GENERATOR_VERSION,
 };
 use crate::protocol::Counter;
 use crate::room::RoomSettings;
@@ -24,7 +25,7 @@ pub fn bind_expanded(
         || u16::from(world.arena.height) != height
         || world.enabled_items != room.settings.enabled_items()
         || world.available_items != room.available_items
-        || !generation_matches(room.map_id, room.rules_version.get(), generation)
+        || !generation_matches(room, generation)
         || !state_binding(room, state_epoch, capture)
         || !validate_rebound(room, capture)
     {
@@ -259,9 +260,18 @@ const fn effect_item(kind: super::EffectKind) -> super::ItemId {
     }
 }
 
-fn generation_matches(map: MapId, rules: u8, generation: Option<GenerationRecord>) -> bool {
-    match (map, rules, generation) {
-        (MapId::GeneratedV2, 6, Some(record)) => record.version() == MULTIPLAYER_GENERATOR_VERSION,
+fn generation_matches(room: &RoomView, generation: Option<GenerationRecord>) -> bool {
+    match (room.map_id, room.rules_version.get(), generation) {
+        (MapId::GeneratedV2, 6, Some(record)) => {
+            let version = if room.configuration.domain().board()
+                == crate::room::BoardSize::FifteenByThirteen
+            {
+                MULTIPLAYER_GENERATOR_VERSION
+            } else {
+                VARIABLE_GENERATOR_VERSION
+            };
+            record.version() == version
+        }
         (MapId::FixedV1, _, None) => true,
         (MapId::GeneratedV1, _, Some(record)) => record.version() == GENERATOR_VERSION,
         (MapId::GeneratedV2, _, Some(record)) => record.version() == EXPANDED_GENERATOR_VERSION,

@@ -250,8 +250,11 @@ pub(super) fn derive_bomb_modifiers(
 
 fn origin_is_free(observation: &Observation, cell: crate::game::CellId) -> bool {
     let parts = observation.parts();
-    let index = usize::from(cell.row) * usize::from(parts.arena.width) + usize::from(cell.column);
-    parts.arena.terrain.get(index) == Some(&Terrain::Floor)
+    parts
+        .arena
+        .index(cell)
+        .and_then(|index| parts.arena.terrain.get(index))
+        == Some(&Terrain::Floor)
         && !parts.arena.blocks.contains(&cell)
         && !parts
             .oil

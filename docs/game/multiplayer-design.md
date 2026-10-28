@@ -54,11 +54,10 @@ Preserve the existing orange/white and blue uniforms. Players three/four use dis
 forest-green/cream/silver and plum-purple/cream/gold variants with different headgear. Keep
 stable anchors, readable HUD identity and the single [artist source](../../assets/art/README.md).
 
-Activate multiplayer on the existing 15×13 board before exposing size selection. Then introduce
-checked dimensions, bounded supported sizes and dimension-aware indexing, generation, spawn
-reservations, blasts, Punch wrapping, CPU routing and rendering. Preserve 15×13 as the default.
-Select the initial size allowlist through frame-bound and CPU measurements; arbitrary unbounded
-dimensions are outside this design.
+Custom creation exposes the checked 11×9, 13×11 and 15×13 presets, with 15×13 as the default.
+The immutable choice drives indexing, generation, spawn reservations, blasts, Punch wrapping,
+CPU routing and rendering. Quick duel and Solo remain 15×13. Arbitrary dimensions are outside
+this design; the normative profile mapping is in [board geometry](board-sizes.md).
 
 ## Acceptance
 

@@ -2,6 +2,7 @@ export const scenarioSpecMap = {
   'scenarios/art-atlas.md': ['art-atlas-tests/art-atlas.spec.ts'],
   'scenarios/atlas-gameplay.md': ['atlas-gameplay-tests/atlas-gameplay.spec.ts'],
   'scenarios/audio.md': ['audio-tests/audio.spec.ts'],
+  'scenarios/board-sizes.md': ['tests/board-sizes.spec.ts'],
   'scenarios/bracelet.md': ['bracelet-tests/bracelet.spec.ts'],
   'scenarios/browser-hardening.md': ['hardening-tests/visibility.spec.ts'],
   'scenarios/controls.md': ['controls-tests/controls.spec.ts'],

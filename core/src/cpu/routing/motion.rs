@@ -1,5 +1,4 @@
 use crate::cpu::MovementIntent;
-use crate::game::arena::{ARENA_HEIGHT, ARENA_WIDTH};
 use crate::game::effects::EffectiveSpeed;
 use crate::game::geometry::{MovementSegment, boundary_distance, distance_to_blocking_cell};
 use crate::game::{Direction, Position, Tick};
@@ -130,10 +129,16 @@ fn clipped_static(
     direction: Direction,
     requested: i32,
 ) -> i32 {
-    let mut allowed = boundary_distance(position, direction, requested, ARENA_WIDTH, ARENA_HEIGHT);
+    let arena = &context.observation.parts().arena;
+    let mut allowed = boundary_distance(position, direction, requested, arena.width, arena.height);
     let end = translated(position, direction, allowed);
-    for cell in footprint_cells(&[MovementSegment::new(position, end)]) {
-        let index = usize::from(cell.row) * usize::from(ARENA_WIDTH) + usize::from(cell.column);
+    for cell in footprint_cells(
+        &[MovementSegment::new(position, end)],
+        (arena.width, arena.height),
+    ) {
+        let Some(index) = arena.index(cell) else {
+            continue;
+        };
         if context.observation.parts().arena.terrain[index] == crate::game::Terrain::Wall
             && let Some(distance) = distance_to_blocking_cell(position, direction, cell)
         {

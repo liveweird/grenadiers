@@ -2,7 +2,6 @@ use std::collections::BTreeSet;
 
 use crate::cpu::Observation;
 use crate::cpu::forecast::{HazardForecast, HazardKind, TickWindow, UncertaintyReason};
-use crate::game::arena::{ARENA_HEIGHT, ARENA_WIDTH};
 use crate::game::geometry::MovementSegment;
 use crate::game::types::{HALF_FOOTPRINT, UNITS_PER_CELL};
 use crate::game::{CellId, EntityId, OilBarrelState, Position, Terrain};
@@ -19,9 +18,15 @@ pub(super) fn static_segment_clear(
     observation: &Observation,
     segments: &[MovementSegment],
 ) -> bool {
-    footprint_cells(segments)
-        .into_iter()
-        .all(|cell| !static_blocked(observation, cell))
+    footprint_cells(
+        segments,
+        (
+            observation.parts().arena.width,
+            observation.parts().arena.height,
+        ),
+    )
+    .into_iter()
+    .all(|cell| !static_blocked(observation, cell))
 }
 
 pub(super) fn check_segments_with_grace(
@@ -33,7 +38,7 @@ pub(super) fn check_segments_with_grace(
     recipient_barrier: Option<RecipientBarrier>,
 ) -> Result<BTreeSet<EntityId>, RouteFailure> {
     let mut assumptions = BTreeSet::new();
-    for cell_id in footprint_cells(segments) {
+    for cell_id in footprint_cells(segments, forecast.dimensions()) {
         let cell = forecast.cell(cell_id).ok_or(RouteFailure::InvalidRequest)?;
         if cell.lethal.iter().any(|window| intersects(*window, time))
             || (blocking_grace != Some(cell_id)
@@ -68,7 +73,8 @@ pub(super) fn check_segments_with_grace(
     Ok(assumptions)
 }
 
-pub(super) fn footprint_cells(segments: &[MovementSegment]) -> Vec<CellId> {
+pub(super) fn footprint_cells(segments: &[MovementSegment], dimensions: (u16, u16)) -> Vec<CellId> {
+    let (width, height) = dimensions;
     let mut cells = BTreeSet::new();
     for segment in segments {
         let min_x = segment.start().x.min(segment.end().x) - HALF_FOOTPRINT;
@@ -77,16 +83,16 @@ pub(super) fn footprint_cells(segments: &[MovementSegment]) -> Vec<CellId> {
         let max_y = segment.start().y.max(segment.end().y) + HALF_FOOTPRINT - 1;
         let first_column = min_x
             .div_euclid(UNITS_PER_CELL)
-            .clamp(0, i32::from(ARENA_WIDTH) - 1);
+            .clamp(0, i32::from(width) - 1);
         let last_column = max_x
             .div_euclid(UNITS_PER_CELL)
-            .clamp(0, i32::from(ARENA_WIDTH) - 1);
+            .clamp(0, i32::from(width) - 1);
         let first_row = min_y
             .div_euclid(UNITS_PER_CELL)
-            .clamp(0, i32::from(ARENA_HEIGHT) - 1);
+            .clamp(0, i32::from(height) - 1);
         let last_row = max_y
             .div_euclid(UNITS_PER_CELL)
-            .clamp(0, i32::from(ARENA_HEIGHT) - 1);
+            .clamp(0, i32::from(height) - 1);
         for row in first_row..=last_row {
             for column in first_column..=last_column {
                 let cell = CellId::new(column as u16, row as u16);
@@ -105,7 +111,9 @@ pub(super) fn stationary_segment(position: Position) -> [MovementSegment; 1] {
 
 pub(super) fn static_blocked(observation: &Observation, cell: CellId) -> bool {
     let parts = observation.parts();
-    let index = usize::from(cell.row) * usize::from(ARENA_WIDTH) + usize::from(cell.column);
+    let Some(index) = parts.arena.index(cell) else {
+        return true;
+    };
     parts.arena.terrain[index] == Terrain::Wall
         || (!crate::cpu::capabilities::can_pass_known_soft_blocks(observation)
             && parts.arena.blocks.contains(&cell))

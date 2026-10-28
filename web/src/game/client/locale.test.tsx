@@ -87,7 +87,7 @@ describe('game locale access', () => {
 
   it('matches the legacy formatter for every current English and Polish catalog template', () => {
     const currentTemplates = [...templates(en), ...templates(pl)]
-    expect(currentTemplates).toHaveLength(50)
+    expect(currentTemplates).toHaveLength(54)
     for (const template of currentTemplates) {
       const values = interpolationValues(template)
       expect(format(template, values)).toBe(legacyFormat(template, values))

@@ -1,12 +1,48 @@
 use crate::cpu::forecast::{ForecastLimits, ObservedHazardMemory, TickWindow, forecast};
 use crate::cpu::*;
 use crate::game::{
-    Direction, EffectKind, EnabledItems, InputAction, SeatId, SeatInput, SpeedLevel, Tick,
+    CellId, Direction, EffectKind, EnabledItems, InputAction, Position, SeatId, SeatInput,
+    SpeedLevel, Terrain, Tick,
 };
 use crate::room::RoomSettings;
 
 use super::tests::{actual_state, forecast_for, key, observation, request, with_bomb};
 use super::*;
+
+fn small_observation() -> Observation {
+    let mut parts = observation(Vec::new(), Vec::new()).into_parts();
+    parts.rules.version = 6;
+    parts.arena.width = 11;
+    parts.arena.height = 9;
+    parts.arena.terrain = vec![Terrain::Floor; 99];
+    for row in 0..9 {
+        for column in 0..11 {
+            if row == 0 || column == 0 || row == 8 || column == 10 {
+                parts.arena.terrain[row * 11 + column] = Terrain::Wall;
+            }
+        }
+    }
+    let ObservedActor::Visible(rival) = &mut parts.actors[0] else {
+        unreachable!()
+    };
+    rival.position = Position::center(CellId::new(9, 7));
+    Observation::new(parts).unwrap()
+}
+
+#[test]
+fn small_board_route_uses_its_bounds_and_rejects_cross_dimension_forecast() {
+    let large = observation(Vec::new(), Vec::new());
+    let small = small_observation();
+    let small_hazards = forecast_for(&small);
+    let pulse = request(MovementIntent::Direction(Direction::East), 3);
+    assert!(certify_pulse(&small, &small_hazards, pulse, &mut WorkBudget::new(65_536),).is_ok());
+
+    let large_hazards = forecast_for(&large);
+    assert_eq!(
+        certify_pulse(&small, &large_hazards, pulse, &mut WorkBudget::new(65_536),),
+        Err(RouteFailure::IdentityMismatch)
+    );
+}
 
 #[test]
 fn multistart_slow_and_reverse_expiry_matches_actual_state() {

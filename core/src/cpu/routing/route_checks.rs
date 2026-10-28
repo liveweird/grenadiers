@@ -27,7 +27,7 @@ pub(super) fn stationary_risk(
     let mut risk = 0_u32;
     for (position, start) in lanes {
         let window = TickWindow { start: *start, end };
-        for cell_id in footprint_cells(&stationary_segment(*position)) {
+        for cell_id in footprint_cells(&stationary_segment(*position), forecast.dimensions()) {
             work.try_take(1).map_err(|_| RouteFailure::WorkExhausted)?;
             let cell = forecast.cell(cell_id).ok_or(RouteFailure::InvalidRequest)?;
             let exact = cell
@@ -73,7 +73,11 @@ pub(super) fn check_transition_all(
     proofs: CollisionProofs,
     work: &mut WorkBudget,
 ) -> Result<BTreeSet<EntityId>, RouteFailure> {
-    let units = footprint_cells(segments)
+    let dimensions = (
+        context.observation.parts().arena.width,
+        context.observation.parts().arena.height,
+    );
+    let units = footprint_cells(segments, dimensions)
         .len()
         .checked_mul(forecasts.len())
         .and_then(|count| u32::try_from(count).ok())
@@ -115,7 +119,11 @@ pub(super) fn check_stationary_all(
         return Ok(BTreeSet::new());
     }
     let segment = stationary_segment(position);
-    let units = footprint_cells(&segment)
+    let dimensions = forecasts
+        .first()
+        .map(|forecast| forecast.dimensions())
+        .ok_or(RouteFailure::InvalidRequest)?;
+    let units = footprint_cells(&segment, dimensions)
         .len()
         .checked_mul(forecasts.len())
         .and_then(|count| u32::try_from(count).ok())

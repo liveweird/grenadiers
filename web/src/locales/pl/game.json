@@ -21,6 +21,8 @@
   "multiplayer": {
     "title": "Mecz niestandardowy",
     "playerCount": "Gracze",
+    "boardSize": "Rozmiar planszy",
+    "boardDimensions": "{{width}} × {{height}}",
     "controller": "Sterowanie gracza {{player}}",
     "human": "Człowiek",
     "cpu": "Komputer",
@@ -32,6 +34,7 @@
     "invitation": "Zaproszenie do pokoju",
     "codeLabel": "Kod zaproszenia do pokoju",
     "players": "Gracze",
+    "boardSize": "Plansza: {{width}} × {{height}}",
     "ready": "Gotowy",
     "cancelReady": "Jeszcze nie",
     "leave": "Opuść pokój",

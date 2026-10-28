@@ -7,7 +7,8 @@ use crate::{game::rooms::roster_runtime::RosterRuntime, round_seed::RoundSeedSou
 
 use super::{
     record::{
-        ActionSource, CpuProvenance, Journal, Operation, ReplayAction, ReplayStatus, ReplayV4Header,
+        ActionSource, CpuProvenance, Journal, Operation, ReplayAction, ReplayStatus,
+        ReplayV4Header, ReplayV5Header,
     },
     runner::{ReplayError, domain_action, runtime_from_header},
 };
@@ -26,6 +27,24 @@ impl RecordingRosterRuntime {
     ) -> Result<Self, ReplayError> {
         let header = ReplayV4Header::new(configuration, settings, [false; 4], cpus)
             .map_err(|()| ReplayError::InvalidHeader)?;
+        Self::new_with_header(header, generation_seeds)
+    }
+
+    pub(in crate::game::rooms) fn new_v5(
+        configuration: RoomConfiguration,
+        settings: RoomSettings,
+        generation_seeds: RoundSeedSource,
+        cpus: Vec<CpuProvenance>,
+    ) -> Result<Self, ReplayError> {
+        let header = ReplayV5Header::new_v5(configuration, settings, [false; 4], cpus)
+            .map_err(|()| ReplayError::InvalidHeader)?;
+        Self::new_with_header(header, generation_seeds)
+    }
+
+    fn new_with_header(
+        header: ReplayV4Header,
+        generation_seeds: RoundSeedSource,
+    ) -> Result<Self, ReplayError> {
         let runtime = runtime_from_header(&header, generation_seeds)?;
         Ok(Self {
             runtime,

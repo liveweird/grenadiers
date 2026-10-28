@@ -1,8 +1,14 @@
 # Board geometry
 
-Live rooms use 15×13 tiles. The deterministic core also supports checked 11×9 and 13×11
-arenas; room admission rejects those sizes until the full runtime and client profile supports them.
-The [backlog](../../BACKLOG.md) owns activation work and status.
+Live custom rooms support exactly 11×9, 13×11 and 15×13 tiles. The creation choice is immutable
+through rounds, reconnect and rematch; 15×13 is the default. **Create room** and **Play solo against CPU** always
+create 15×13 rooms regardless of the custom form's selected **Board size** / **Rozmiar planszy**.
+
+| Configuration | Runtime profile | Rules | Generator | CPU policy |
+| --- | --- | --- | --- | --- |
+| Two seats, 15×13 | Legacy owner | 5 | 2 | 16 |
+| Three or four seats, 15×13 | Roster owner | 6 | 3 | 17 |
+| Two to four seats, 11×9 or 13×11 | Roster owner | 6 | 4 | 17 |
 
 ## Checked presets
 
@@ -28,10 +34,11 @@ board preset, player count and round assignment. Soft blocks and concealed items
 reflection orbits; Oil retains the global eight-site cap. Exhausted bounded random sampling
 produces an empty fallback with the same dimensions and spawn assignment.
 
-Generators 1–3 keep their existing outputs and accepted geometry. Existing live two-player
-15×13 rooms retain generator 2, and larger rooms retain generator 3. New geometry does not
-change item durations, movement speeds, bomb limits or historical replay identities.
+Generators 1–3 keep their existing outputs and accepted geometry. Live two-player 15×13 rooms
+retain generator 2, and three/four-player 15×13 rooms retain generator 3. New geometry does not
+change item durations, movement speeds, the 32-bomb rules-6 limit, range/item bounds or
+historical replay identities.
 
-Run focused geometry checks with `cargo test -p grenadiers-core variable_board` and
-`cargo test -p grenadiers-core generated_v4`. Release evidence belongs in the
-[release record](../releases.md).
+The [desktop selector](../screenshots/board-sizes-desktop.png) and
+[Polish mobile arena](../screenshots/board-sizes-mobile-pl.png) illustrate the creation controls
+and an 11×9 running match.

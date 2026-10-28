@@ -2,7 +2,6 @@ use crate::cpu::forecast::{
     ForecastLimits, ObservedHazardMemory, TickWindow, forecast, forecast_punch_branch,
 };
 use crate::cpu::{BombKnowledge, Observation, ObservedActor, ObservedBomb, WorkBudget};
-use crate::game::arena::{ARENA_CELL_COUNT, ARENA_WIDTH};
 use crate::game::types::{HALF_FOOTPRINT, TICKS_PER_SECOND, UNITS_PER_CELL};
 use crate::game::{BlastKind, CellId, Equipment, Position, SpeedLevel, Terrain, Tick};
 
@@ -221,18 +220,21 @@ fn planning_facts(
     ))
 }
 
-fn select_landing(
+pub(super) fn select_landing(
     observation: &Observation,
     bomb: &ObservedBomb,
     actor: Position,
     work: &mut WorkBudget,
 ) -> Result<CellId, PunchFailure> {
-    work.try_take(ARENA_CELL_COUNT as u32)
-        .map_err(|_| PunchFailure::Route(super::RouteFailure::WorkExhausted))?;
+    work.try_take(
+        u32::try_from(observation.parts().arena.cell_count())
+            .map_err(|_| PunchFailure::Route(super::RouteFailure::Capacity))?,
+    )
+    .map_err(|_| PunchFailure::Route(super::RouteFailure::WorkExhausted))?;
     select_landing_unmetered(observation, bomb, actor)
 }
 
-fn select_landing_unmetered(
+pub(super) fn select_landing_unmetered(
     observation: &Observation,
     bomb: &ObservedBomb,
     actor: Position,
@@ -240,7 +242,12 @@ fn select_landing_unmetered(
     let direction = recipient(observation)
         .map(|actor| actor.heading)
         .ok_or(PunchFailure::InvalidRequest)?;
-    crate::game::punch_landing_candidates(bomb.cell, direction)
+    let board = observation
+        .parts()
+        .arena
+        .board()
+        .ok_or(PunchFailure::InvalidRequest)?;
+    crate::game::punch_landing_candidates_for_board(bomb.cell, direction, board)
         .find(|candidate| landing_open(observation, bomb.id, actor, *candidate))
         .ok_or(PunchFailure::Unsupported)
 }
@@ -252,7 +259,9 @@ fn landing_open(
     cell: CellId,
 ) -> bool {
     let parts = observation.parts();
-    let index = usize::from(cell.row) * usize::from(ARENA_WIDTH) + usize::from(cell.column);
+    let Some(index) = parts.arena.index(cell) else {
+        return false;
+    };
     crate::game::punch_landing_is_open(
         parts.arena.terrain.get(index).copied(),
         parts.arena.blocks.contains(&cell),
@@ -268,7 +277,9 @@ fn landing_open(
 
 fn barrier_cell_open(observation: &Observation, cell: CellId) -> bool {
     let parts = observation.parts();
-    let index = usize::from(cell.row) * usize::from(ARENA_WIDTH) + usize::from(cell.column);
+    let Some(index) = parts.arena.index(cell) else {
+        return false;
+    };
     parts.arena.terrain.get(index) == Some(&Terrain::Floor)
         && !parts.arena.blocks.contains(&cell)
         && !parts.oil.iter().any(|oil| oil.cell == cell)

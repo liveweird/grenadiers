@@ -1,9 +1,9 @@
 use axum::extract::ws::WebSocket;
-use grenadiers_core::protocol::{Counter, v13::V11ErrorCode as ErrorCode};
+use grenadiers_core::protocol::{Counter, v14::ErrorCode};
 
 use super::{
     connection::ConnectionState,
-    rooms::{Admission, RoomError},
+    rooms::{LiveAdmission as Admission, RoomError},
     socket::send_error,
 };
 use crate::admission::{DenialOperation, DenialReason, GameplayOperation, RoomAdmissionPermit};

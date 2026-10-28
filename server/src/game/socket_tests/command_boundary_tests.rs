@@ -10,7 +10,7 @@ fn sequenced_commands() -> [Value; 9] {
         "enabledItems": []
     });
     [
-        json!({"type":"createRoom", "sequence":11, "mode":{"type":"humanDuel"}}),
+        json!({"type":"createRoom", "sequence":11, "configuration":{"controllers":["human","human"],"cpuDifficulty":null,"board":{"width":15,"height":13}}}),
         json!({"type":"joinRoom", "sequence":12, "roomCode":"ABCDEFGH"}),
         json!({
             "type":"resumeRoom", "sequence":13, "roomId":room_id,
@@ -68,8 +68,8 @@ async fn fresh_unseated_semantic_errors_consume_sequences_before_retry() {
     let (url, server) = start_server(state).await;
     let mut socket = connect(&url).await;
     assert_eq!(
-        authenticate(&mut socket, &token, 13).await,
-        json!({"type":"authenticated", "protocolVersion":13})
+        authenticate(&mut socket, &token, 14).await,
+        json!({"type":"authenticated", "protocolVersion":14})
     );
 
     let room_id = "00000000000000000000000000000001";
@@ -92,7 +92,7 @@ async fn fresh_unseated_semantic_errors_consume_sequences_before_retry() {
     for sequence in [19, 18] {
         send_json(
             &mut socket,
-            json!({"type":"createRoom", "sequence":sequence, "mode":{"type":"humanDuel"}}),
+            json!({"type":"createRoom", "sequence":sequence, "configuration":{"controllers":["human","human"],"cpuDifficulty":null,"board":{"width":15,"height":13}}}),
         )
         .await;
         assert_eq!(
@@ -103,7 +103,7 @@ async fn fresh_unseated_semantic_errors_consume_sequences_before_retry() {
 
     send_json(
         &mut socket,
-        json!({"type":"createRoom", "sequence":20, "mode":{"type":"humanDuel"}}),
+        json!({"type":"createRoom", "sequence":20, "configuration":{"controllers":["human","human"],"cpuDifficulty":null,"board":{"width":15,"height":13}}}),
     )
     .await;
     assert_eq!(next_json(&mut socket).await["type"], "admitted");

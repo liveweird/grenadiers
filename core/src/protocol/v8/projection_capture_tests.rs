@@ -42,12 +42,27 @@ fn remote_trigger_is_captured_without_inventing_a_fuse() {
 }
 
 #[test]
-fn expanded_capture_rejects_an_unsupported_forced_movement_victim() {
+fn expanded_capture_rejects_non_legacy_forced_movement_facts() {
     let (state, report) = crate::protocol::forced_movement_test_support::bracelet_shove();
+    let mut multiple = report.clone();
+    let second = multiple.forced_movements[0];
+    multiple.forced_movements.push(second);
+    assert_eq!(
+        capture_expanded(&state, &[multiple]),
+        Err(ProjectionError::InvalidReports)
+    );
+
     let mut malicious = report;
-    malicious.forced_movement.as_mut().unwrap().seat = game::SeatId::Four;
+    malicious.forced_movements[0].seat = game::SeatId::Four;
     assert_eq!(
         capture_expanded(&state, &[malicious]),
+        Err(ProjectionError::InvalidReports)
+    );
+
+    let (_, mut self_shove) = crate::protocol::forced_movement_test_support::bracelet_shove();
+    self_shove.forced_movements[0].pusher = self_shove.forced_movements[0].seat;
+    assert_eq!(
+        capture_expanded(&state, &[self_shove]),
         Err(ProjectionError::InvalidReports)
     );
 }

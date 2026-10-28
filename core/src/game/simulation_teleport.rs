@@ -6,21 +6,13 @@ use crate::game::{BombTrigger, CellId, EntityId, Position, SeatId, Tick, movemen
 impl State {
     pub(super) fn commit_teleport(&mut self, requests: impl Into<Vec<bool>>, tick: Tick) {
         let requests = requests.into();
-        // Multiplayer construction rejects Teleporter until pair semantics are generalized.
-        if self.player_count.get() != 2 {
-            return;
-        }
-        let requester = match requests.as_slice() {
-            [true, true] => self.assignment.priority_seat(),
-            [true, false] => SeatId::One,
-            [false, true] => SeatId::Two,
-            [false, false] => return,
-            _ => return,
-        };
-        let other = if requester == SeatId::One {
-            SeatId::Two
+        let pair = if self.rules.version() < 6 {
+            self.legacy_teleport_pair(&requests)
         } else {
-            SeatId::One
+            self.seeded_teleport_pair(&requests)
+        };
+        let Some((requester, other)) = pair else {
+            return;
         };
         let from = self.actors[requester.index()].position;
         let to = self.actors[other.index()].position;
@@ -64,6 +56,48 @@ impl State {
         self.actors[other.index()].soft_wall_grace = other_soft_grace;
         self.actors[other.index()].unlit_oil_grace = other_oil_grace;
         self.last_teleport_tick = Some(tick);
+    }
+
+    fn legacy_teleport_pair(&self, requests: &[bool]) -> Option<(SeatId, SeatId)> {
+        let requester = match requests {
+            [true, true] => self.assignment.priority_seat(),
+            [true, false] => SeatId::One,
+            [false, true] => SeatId::Two,
+            [false, false] => return None,
+            _ => return None,
+        };
+        let other = if requester == SeatId::One {
+            SeatId::Two
+        } else {
+            SeatId::One
+        };
+        Some((requester, other))
+    }
+
+    fn seeded_teleport_pair(&mut self, requests: &[bool]) -> Option<(SeatId, SeatId)> {
+        let requester = self
+            .assignment
+            .priority_order(self.player_count)
+            .find(|seat| requests.get(seat.index()).copied().unwrap_or(false))?;
+        if !self.actors[requester.index()].alive {
+            return None;
+        }
+        let candidates: Vec<_> = self
+            .player_count
+            .seats()
+            .iter()
+            .copied()
+            .filter(|&seat| seat != requester && self.actors[seat.index()].alive)
+            .collect();
+        let target = match candidates.as_slice() {
+            [] => return None,
+            [only] => *only,
+            _ => {
+                let index = self.randomness.as_mut()?.bounded_index(candidates.len())?;
+                candidates[index]
+            }
+        };
+        Some((requester, target))
     }
 
     fn retained_soft_grace(&self, seat: SeatId, destination: Position) -> BTreeSet<CellId> {

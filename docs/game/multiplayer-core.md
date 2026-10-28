@@ -12,11 +12,12 @@ validate unique actor IDs and seats, and store the canonical prefix One through 
 selected count. Arena spawn count must match actor count. `actors()` returns a slice;
 `actor(seat)` returns `None` for a nonparticipant.
 
-Rules versions 1–5 accept only two actors. `RulesConfig::multiplayer_v6(settings)` is a
-headless construction profile. With three/four actors it accepts the 19 shared optional-item mechanics, but rejects masks
-containing Punch, Bracelet or Teleporter until their pair interactions are generalized. Basic
-bomb capacity, flame range and speed pickups remain available.
-Unsupported items and world facts are rejected rather than running pair-only abilities.
+Rules versions 1–5 accept only two actors. `RulesConfig::multiplayer_v6(settings)` supports
+all 22 optional-item bits with two, three or four actors. Basic bomb capacity, flame range
+and speed pickups remain available. A v6 profile containing Teleporter requires an explicit
+`SimulationSeed`, through `State::new_at_tick_with_assignment_and_seed` or `State::new_round`.
+Other profiles can use the existing seedless constructors; historical rules consume no
+simulation randomness.
 
 ## Per-round arena and actions
 
@@ -36,6 +37,38 @@ at a shared cell rejects every contender; independent placements use canonical o
 Pickup ties use the rotated participant priority. Zero survivors draw, one wins, and multiple
 survivors continue until the configured timeout. Actor-sized traces and event audiences
 contain only actual participants; legacy `EventAudience::Both` still means One and Two.
+
+## Equipment and Teleporter
+
+Punch collects requests from one pre-mutation world. Contenders for the same bomb use rotated
+round priority; different bombs sharing a landing cell are all rejected. Accepted relocations
+commit together and clear moved-bomb grace from every actor.
+
+Bracelet chooses each pusher's earliest contact, using round priority for ties. Only disjoint
+pusher/victim pairs can succeed in one phase; this prevents recursive shove chains. Displacement
+respects terrain, bombs, Oil and other living actors. Conflicting victim sweeps use the same
+priority. Fire and mines inspect every accepted forced segment, including both independent shoves.
+
+Teleporter resolves one collected request per tick in round priority and chooses among canonical
+living opponents, including cloaked opponents. Zero/one candidates need no random draw; multiple
+candidates use the independently seeded ChaCha20 stream with unbiased, bounded rejection sampling.
+Unsafe or equal-position selections consume the pickup without retrying; draw exhaustion also
+produces no swap. Whole-step rollback preserves the stream. Seeds and RNG internals are redacted
+from debugging and never appear in public state.
+
+## Participation across rounds
+
+`RoundActorInit` pairs an ordinary actor initializer with a participation flag. `State::new_round`
+validates the complete original roster and requires at least two participating actors. Inactive
+participants remain canonical dead actors with empty controls, effects, inventory and grace. Use
+lifecycle eligibility for this flag: ordinary deaths may respawn next round; permanent departures
+must remain inactive.
+
+`State::eliminate_departed([bool; 4])` validates unused mask entries before mutation, bypasses
+damage protection, retains owned bombs and emits elimination/result events at the current tick.
+It does not advance the clock, running updates, world or RNG. Append its events to the already
+completed report for that tick. Already-final physical states remain frozen. Runtime must settle
+physics/scoring before departures and complete any departure-driven result without a second tick.
 
 ## Archived compatibility
 

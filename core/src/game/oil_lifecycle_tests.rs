@@ -220,8 +220,7 @@ fn bracelet_forced_segment_through_burning_oil_causes_damage() {
 
     assert!(
         report
-            .forced_movement
-            .unwrap()
+            .forced_movements.into_iter().next().unwrap()
             .segment
             .overlaps_cell(burning)
     );

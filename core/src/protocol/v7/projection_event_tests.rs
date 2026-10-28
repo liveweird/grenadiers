@@ -12,7 +12,7 @@ fn pickup_report(state: &crate::game::State, cell: crate::game::CellId) -> crate
         traces: crate::game::SeatId::DUEL
             .map(|seat| crate::game::MovementTrace::new(state.actors()[seat.index()].position()))
             .to_vec(),
-        forced_movement: None,
+        forced_movements: Vec::new(),
         events: vec![StepEvent::new(
             tick,
             EventAudience::Both,
@@ -74,7 +74,7 @@ fn classic_capture_rejects_expanded_item_only_event_records() {
                     crate::game::MovementTrace::new(state.actors()[seat.index()].position())
                 })
                 .to_vec(),
-            forced_movement: None,
+            forced_movements: Vec::new(),
             events: vec![StepEvent::new(
                 tick,
                 EventAudience::Both,
@@ -130,13 +130,21 @@ fn classic_capture_rejects_extra_seat_collector_audience_and_winner_facts() {
 }
 
 #[test]
-fn classic_capture_rejects_only_unsupported_forced_movement_victims() {
+fn classic_capture_rejects_non_legacy_forced_movement_facts() {
     let report = crate::protocol::forced_movement_test_support::bracelet_shove_report();
     let state = classic_state_at(report.tick.0);
     assert!(capture_classic(&state, std::slice::from_ref(&report)).is_ok());
 
+    let mut multiple = report.clone();
+    let second = multiple.forced_movements[0];
+    multiple.forced_movements.push(second);
+    assert_eq!(
+        capture_classic(&state, &[multiple]),
+        Err(ProjectionError::InvalidReports)
+    );
+
     let mut malicious = report;
-    malicious.forced_movement.as_mut().unwrap().seat = crate::game::SeatId::Four;
+    malicious.forced_movements[0].seat = crate::game::SeatId::Four;
     assert_eq!(
         capture_classic(&state, &[malicious]),
         Err(ProjectionError::InvalidReports)

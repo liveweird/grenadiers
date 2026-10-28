@@ -310,14 +310,14 @@ fn construction_enforces_profile_item_count_spawn_and_canonical_seat_boundaries(
             count: PlayerCount::Three,
         })
     );
-    let enabled = EnabledItems::PUNCH;
+    let enabled = EnabledItems::TELEPORTER;
     assert_eq!(
         State::new(
             RulesConfig::multiplayer_v6(RoomSettings::DEFAULT.with_enabled_items(enabled)),
             World::new(arena(3)),
             actors(PlayerCount::Three),
         ),
-        Err(StateError::UnsupportedEnabledItems(enabled))
+        Err(StateError::MissingSimulationRandomness)
     );
     assert!(matches!(
         State::new(

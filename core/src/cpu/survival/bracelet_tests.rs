@@ -217,7 +217,7 @@ fn cooldown_state() -> (State, RoomSettings) {
     let shove = state
         .step(&[input(SeatId::Two, InputAction::Press(Direction::East))])
         .unwrap();
-    assert!(shove.forced_movement.is_some());
+    assert!(!shove.forced_movements.is_empty());
     state
         .step(&[input(SeatId::Two, InputAction::Clear)])
         .unwrap();
@@ -277,8 +277,8 @@ fn private_cooldown_is_publicly_inert_and_no_shove_keeps_the_cpu_safe() {
             .then_some(input(SeatId::Two, InputAction::Press(Direction::East)))
             .into_iter()
             .collect::<Vec<_>>();
-        ready_shoved |= ready.step(&inputs).unwrap().forced_movement.is_some();
-        cooldown_shoved |= cooldown.step(&inputs).unwrap().forced_movement.is_some();
+        ready_shoved |= !ready.step(&inputs).unwrap().forced_movements.is_empty();
+        cooldown_shoved |= !cooldown.step(&inputs).unwrap().forced_movements.is_empty();
     }
     assert!(ready_shoved);
     assert!(!cooldown_shoved);

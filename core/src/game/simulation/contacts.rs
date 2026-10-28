@@ -18,7 +18,7 @@ pub(super) fn initialize_grace(world: &World, actors: &mut [Actor]) {
 pub(super) fn accepted_contact_ids(
     world: &World,
     traces: &[MovementTrace],
-    forced_movement: Option<ForcedMovement>,
+    forced_movements: &[ForcedMovement],
     alive_at_movement_start: impl AsRef<[bool]>,
     grace_at_movement_start: &[BTreeSet<EntityId>],
 ) -> BTreeSet<EntityId> {
@@ -33,7 +33,9 @@ pub(super) fn accepted_contact_ids(
     for index in 0..traces.len() {
         if !alive_at_movement_start[index]
             || (traces[index].is_empty()
-                && forced_movement.is_none_or(|forced| forced.seat.index() != index))
+                && !forced_movements
+                    .iter()
+                    .any(|forced| forced.seat.index() == index))
         {
             continue;
         }
@@ -52,9 +54,10 @@ pub(super) fn accepted_contact_ids(
                 }
             }
             if !accepted.contains(&mine.id())
-                && let Some(forced) = forced_movement.filter(|forced| forced.seat.index() == index)
                 && !exempt
-                && forced.segment.overlaps_cell(mine.cell())
+                && forced_movements.iter().any(|forced| {
+                    forced.seat.index() == index && forced.segment.overlaps_cell(mine.cell())
+                })
             {
                 accepted.insert(mine.id());
             }
@@ -98,7 +101,7 @@ mod tests {
             accepted_contact_ids(
                 &world,
                 &traces(MovementTrace::new(center)),
-                None,
+                &[],
                 [true, true],
                 &[BTreeSet::new(), BTreeSet::new()]
             )
@@ -121,7 +124,7 @@ mod tests {
             accepted_contact_ids(
                 &world,
                 &traces(trace.clone()),
-                None,
+                &[],
                 [true, true],
                 &[BTreeSet::new(), BTreeSet::new()]
             )
@@ -131,7 +134,7 @@ mod tests {
             accepted_contact_ids(
                 &world,
                 &traces(trace),
-                None,
+                &[],
                 [false, true],
                 &[BTreeSet::new(), BTreeSet::new()]
             )
@@ -148,14 +151,14 @@ mod tests {
         exit_only.push(MovementSegment::new(center, outside));
         let grace = [BTreeSet::from([EntityId(30)]), BTreeSet::new()];
         assert!(
-            accepted_contact_ids(&world, &traces(exit_only), None, [true, true], &grace).is_empty()
+            accepted_contact_ids(&world, &traces(exit_only), &[], [true, true], &grace).is_empty()
         );
 
         let mut exit_reenter = MovementTrace::new(center);
         exit_reenter.push(MovementSegment::new(center, outside));
         exit_reenter.push(MovementSegment::new(outside, center));
         assert_eq!(
-            accepted_contact_ids(&world, &traces(exit_reenter), None, [true, true], &grace),
+            accepted_contact_ids(&world, &traces(exit_reenter), &[], [true, true], &grace),
             BTreeSet::from([EntityId(30)])
         );
     }
@@ -171,7 +174,7 @@ mod tests {
             accepted_contact_ids(
                 &world,
                 &traces(trace),
-                None,
+                &[],
                 [true, true],
                 &[BTreeSet::new(), BTreeSet::new()]
             ),
@@ -196,7 +199,7 @@ mod tests {
             accepted_contact_ids(
                 &world,
                 &traces(entering),
-                None,
+                &[],
                 [true, true],
                 &[BTreeSet::new(), BTreeSet::new()]
             ),
@@ -224,11 +227,53 @@ mod tests {
             accepted_contact_ids(
                 &world,
                 &traces(around_corner),
-                None,
+                &[],
                 [true, true],
                 &[BTreeSet::new(), BTreeSet::new()]
             )
             .is_empty()
+        );
+    }
+
+    #[test]
+    fn independent_forced_segments_each_trigger_their_contact_bomb() {
+        let mut world = world_with_mine();
+        let second = Bomb::new(
+            EntityId(31),
+            CellId::new(7, 1),
+            EntityId(11),
+            2,
+            Tick(0),
+            BombTrigger::Contact,
+        )
+        .unwrap();
+        world.bombs.insert(second.id(), second);
+        let starts = [
+            Position::center(CellId::new(2, 1)),
+            Position::center(CellId::new(6, 1)),
+        ];
+        let traces = starts.map(MovementTrace::new);
+        let forced = [
+            ForcedMovement {
+                pusher: crate::game::SeatId::Three,
+                seat: crate::game::SeatId::One,
+                segment: MovementSegment::new(starts[0], Position::center(CellId::new(4, 1))),
+            },
+            ForcedMovement {
+                pusher: crate::game::SeatId::Four,
+                seat: crate::game::SeatId::Two,
+                segment: MovementSegment::new(starts[1], Position::center(CellId::new(8, 1))),
+            },
+        ];
+        assert_eq!(
+            accepted_contact_ids(
+                &world,
+                &traces,
+                &forced,
+                [true, true],
+                &[BTreeSet::new(), BTreeSet::new()]
+            ),
+            BTreeSet::from([EntityId(30), EntityId(31)])
         );
     }
 }

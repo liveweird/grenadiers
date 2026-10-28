@@ -31,6 +31,8 @@ pub struct SeatInput {
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum StateError {
+    MissingSimulationRandomness,
+    InsufficientParticipants(usize),
     InvalidPlayerCount(usize),
     UnsupportedPlayerCount { version: u16, count: PlayerCount },
     NonCanonicalSeats,
@@ -76,11 +78,12 @@ pub struct StepReport {
     pub tick: Tick,
     pub traces: Vec<MovementTrace>,
     pub events: Vec<StepEvent>,
-    pub(crate) forced_movement: Option<ForcedMovement>,
+    pub(crate) forced_movements: Vec<ForcedMovement>,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) struct ForcedMovement {
+    pub(crate) pusher: SeatId,
     pub(crate) seat: SeatId,
     pub(crate) segment: MovementSegment,
 }

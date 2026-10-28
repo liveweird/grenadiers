@@ -161,7 +161,7 @@ fn generated_bracelet_shove_and_private_history_replay_exactly() {
     let inspection = runtime.replay_inspection();
     let private = format!("{inspection:?}");
     assert_eq!(inspection.reports.len(), 1);
-    assert!(private.contains("forced_movement: Some(ForcedMovement { seat: Two"));
+    assert!(private.contains("forced_movements: [ForcedMovement { pusher: One, seat: Two"));
     assert_eq!(
         private.matches("last_successful_shove_tick: Some").count(),
         1

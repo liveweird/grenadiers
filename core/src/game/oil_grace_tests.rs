@@ -158,7 +158,7 @@ fn forced_exit_prunes_real_unlit_grace_and_cannot_be_used_for_reentry() {
         }])
         .unwrap();
 
-    assert!(report.forced_movement.is_some());
+    assert!(report.forced_movements.len() == 1);
     assert!(state.actors[1].unlit_oil_grace.is_empty());
     assert!(!crate::game::movement::position_overlaps_cell(
         state.actors[1].position,

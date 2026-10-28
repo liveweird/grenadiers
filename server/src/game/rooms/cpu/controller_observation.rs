@@ -43,7 +43,9 @@ impl CpuController {
     }
 
     pub(in crate::game::rooms) fn accept_observation(&mut self, observation: &Observation) -> bool {
-        if observation.parts().recipient != self.cpu_seat {
+        if observation.parts().recipient != self.cpu_seat
+            || !self.profile_supports(observation.parts().rules.version)
+        {
             return false;
         }
         if self.world != Some(observation.parts().world) {
@@ -66,6 +68,18 @@ impl CpuController {
         self.retain_escape_origin(observation);
         self.latest_observation = Some(observation.clone());
         true
+    }
+
+    fn profile_supports(&self, rules_version: u16) -> bool {
+        match rules_version {
+            5 => self.profile.policy.version() <= 16,
+            6 => matches!(
+                self.profile,
+                grenadiers_core::room::CpuProfile::MULTIPLAYER_STANDARD
+                    | grenadiers_core::room::CpuProfile::MULTIPLAYER_EASY
+            ),
+            _ => false,
+        }
     }
 
     pub(in crate::game::rooms) const fn needs_stop_confirmation(&self) -> bool {

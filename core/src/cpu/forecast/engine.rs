@@ -29,9 +29,7 @@ pub fn forecast(
     if memory.key() != key {
         return Err(ForecastFailure::WrongWorld);
     }
-    if parts.rules.version != 5 {
-        return Err(ForecastFailure::UnsupportedRules);
-    }
+    let rules = crate::cpu::rules_config(observation).ok_or(ForecastFailure::UnsupportedRules)?;
     let horizon_end = Tick(
         parts
             .tick
@@ -39,7 +37,6 @@ pub fn forecast(
             .checked_add(u64::from(limits.horizon_ticks))
             .ok_or(ForecastFailure::ClockOverflow)?,
     );
-    let rules = RulesConfig::expanded_v5(parts.rules.settings);
     let BombKnowledge::Visible(observed_bombs) = &parts.bombs else {
         return Err(ForecastFailure::BombKnowledgeUnavailable);
     };

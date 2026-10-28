@@ -73,7 +73,7 @@ pub(crate) fn observation(flames: Vec<ObservedFlame>, pickups: Vec<ObservedPicku
             terrain: terrain(),
             blocks: Vec::new(),
         },
-        actors: [
+        actors: vec![
             actor(SeatId::One, 1, CellId::new(13, 11)),
             actor(SeatId::Two, 2, CellId::new(2, 1)),
         ],

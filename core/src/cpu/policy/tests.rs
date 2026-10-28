@@ -51,7 +51,7 @@ pub(crate) fn observation(position: CellId) -> Observation {
             terrain,
             blocks: Vec::new(),
         },
-        actors: [
+        actors: vec![
             ObservedActor::Hidden {
                 id: EntityId(1),
                 seat: SeatId::One,

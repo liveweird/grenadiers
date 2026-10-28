@@ -52,7 +52,7 @@ fn visible(seat: SeatId, id: u32) -> ObservedActor {
     })
 }
 
-fn observation(bombs: BombKnowledge) -> Observation {
+pub(super) fn observation(bombs: BombKnowledge) -> Observation {
     Observation::new(ObservationParts {
         world: world(1),
         tick: Tick(4),
@@ -70,7 +70,7 @@ fn observation(bombs: BombKnowledge) -> Observation {
             terrain: vec![Terrain::Floor; ARENA_CELL_COUNT],
             blocks: Vec::new(),
         },
-        actors: [
+        actors: vec![
             ObservedActor::Hidden {
                 id: EntityId(1),
                 seat: SeatId::One,

@@ -112,8 +112,8 @@ impl PulseLease {
 
     /// Restricts this lease to the public facts used by the Bracelet tactic.
     #[must_use]
-    pub(crate) fn with_bracelet_guard(mut self, rival: EntityId) -> Self {
-        self.bracelet_guard = Some(BraceletGuard::new(rival));
+    pub(crate) fn with_bracelet_guard(mut self, rival: EntityId, direction: Direction) -> Self {
+        self.bracelet_guard = Some(BraceletGuard::new(rival, direction));
         self
     }
 

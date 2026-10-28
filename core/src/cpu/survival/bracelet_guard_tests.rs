@@ -6,7 +6,7 @@ use crate::game::{CellId, Direction, EnabledItems, EntityId, Equipment, Tick};
 
 use super::{CommittedPulse, PulseStatus, WORK_ALLOWANCE};
 
-fn bracelet_observation() -> Observation {
+pub(super) fn bracelet_observation() -> Observation {
     let mut parts = observation(CellId::new(7, 7)).into_parts();
     parts.rules.settings = parts
         .rules
@@ -37,7 +37,7 @@ fn bracelet_observation() -> Observation {
     Observation::new(parts).unwrap()
 }
 
-fn lease(basis: &Observation, guarded: bool) -> crate::cpu::routing::PulseLease {
+pub(super) fn lease(basis: &Observation, guarded: bool) -> crate::cpu::routing::PulseLease {
     let hazards = forecast(
         basis,
         &ObservedHazardMemory::new(key()),
@@ -64,7 +64,7 @@ fn lease(basis: &Observation, guarded: bool) -> crate::cpu::routing::PulseLease 
     )
     .unwrap();
     if guarded {
-        lease.with_bracelet_guard(EntityId(1))
+        lease.with_bracelet_guard(EntityId(1), Direction::East)
     } else {
         lease
     }

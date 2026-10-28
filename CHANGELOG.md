@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+## 0.3.106 — 2026-10-28
+
+- Add rules-aware private CPU observations for two-to-four actors and up to 32 bombs,
+  preserving historical two-actor/16-bomb behavior and archived observation contracts.
+- Add explicit multiplayer policy v17 Easy/Standard controllers with isolated planning,
+  cancellation, memory and RNG; keep live policy v16 profiles and semantics unchanged.
+- Certify multiplayer Punch and Bracelet tactics against every relevant rival, hidden
+  uncertainty, third-party blockers and counter-shoves, with participant-four regressions.
+
 ## 0.3.105 — 2026-10-28
 
 - Add a dormant roster lifecycle and server runtime with two-to-four-seat inputs, checked

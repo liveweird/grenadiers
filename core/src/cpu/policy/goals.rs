@@ -4,9 +4,7 @@ use std::collections::VecDeque;
 use crate::cpu::{CpuRng, Observation, ObservedActor, VisibleActor, WorkBudget};
 use crate::game::arena::ARENA_CELL_COUNT;
 use crate::game::effects::GOLDEN_FLAME_RANGE;
-use crate::game::{
-    CellId, EffectKind, Equipment, PickupKind, RulesConfig, SpecialWeapon, SpeedLevel, Terrain,
-};
+use crate::game::{CellId, EffectKind, Equipment, PickupKind, SpecialWeapon, SpeedLevel, Terrain};
 
 use super::equipment::classify as equipment_pickup;
 use super::movement::{STEPS, offset};
@@ -254,7 +252,7 @@ impl SearchMap {
 }
 
 fn pickup_value(observation: &Observation, actor: &VisibleActor, kind: PickupKind) -> Option<u8> {
-    let rules = RulesConfig::expanded_v5(observation.parts().rules.settings);
+    let rules = crate::cpu::rules_config(observation)?;
     if let Some((value, _)) = supported_weapon(actor, kind) {
         return value;
     }

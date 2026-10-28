@@ -23,6 +23,7 @@ pub enum CpuPolicy {
     UtilityV14,
     UtilityV15,
     UtilityV16,
+    UtilityV17,
 }
 
 impl CpuPolicy {
@@ -45,6 +46,7 @@ impl CpuPolicy {
             Self::UtilityV14 => 14,
             Self::UtilityV15 => 15,
             Self::UtilityV16 => 16,
+            Self::UtilityV17 => 17,
         }
     }
 }
@@ -165,6 +167,18 @@ impl CpuProfile {
         difficulty: CpuDifficulty::Easy,
     };
 
+    /// Multiplayer Standard profile. Legacy current profiles remain replay-stable v16.
+    pub const MULTIPLAYER_STANDARD: Self = Self {
+        policy: CpuPolicy::UtilityV17,
+        difficulty: CpuDifficulty::Standard,
+    };
+
+    /// Multiplayer Easy profile. Legacy current profiles remain replay-stable v16.
+    pub const MULTIPLAYER_EASY: Self = Self {
+        policy: CpuPolicy::UtilityV17,
+        difficulty: CpuDifficulty::Easy,
+    };
+
     /// Only the two current profiles may be selected for a new live controller.
     #[must_use]
     pub const fn is_current(self) -> bool {
@@ -246,8 +260,12 @@ mod tests {
         assert_eq!(CpuProfile::EQUIPMENT_GOALS_V15.policy.version(), 15);
         assert_eq!(CpuProfile::CURRENT.policy.version(), 16);
         assert_eq!(CpuProfile::CURRENT_EASY.policy.version(), 16);
+        assert_eq!(CpuProfile::MULTIPLAYER_STANDARD.policy.version(), 17);
+        assert_eq!(CpuProfile::MULTIPLAYER_EASY.policy.version(), 17);
         assert!(CpuProfile::CURRENT.is_current());
         assert!(CpuProfile::CURRENT_EASY.is_current());
+        assert!(!CpuProfile::MULTIPLAYER_STANDARD.is_current());
+        assert!(!CpuProfile::MULTIPLAYER_EASY.is_current());
         assert!(!CpuProfile::EQUIPMENT_GOALS_V15.is_current());
         assert!(
             !CpuProfile {

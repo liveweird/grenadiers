@@ -4,7 +4,7 @@ use std::ops::ControlFlow;
 use crate::cpu::{Observation, WorkBudget};
 use crate::game::arena::Terrain;
 use crate::game::blast_geometry::{BlastSource, visit_blast};
-use crate::game::{CellId, EntityId, OilBarrelState, RulesConfig, Tick};
+use crate::game::{CellId, EntityId, OilBarrelState, Tick};
 
 use super::intervals::{add_uncertain, take};
 use super::model::{ForecastBomb, ForecastField, Trigger, index, offset, terrain};
@@ -27,7 +27,9 @@ pub(super) fn add_uncertainties(
     cells: &mut [CellForecast],
 ) -> Result<(), ForecastFailure> {
     let basis = observation.parts().tick;
-    let flame_ticks = RulesConfig::expanded_v5(observation.parts().rules.settings).flame_ticks();
+    let flame_ticks = crate::cpu::rules_config(observation)
+        .ok_or(ForecastFailure::UnsupportedRules)?
+        .flame_ticks();
     let MotionIndex {
         positions: motion_positions,
         occupants: possible_occupants,

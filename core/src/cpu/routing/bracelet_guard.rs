@@ -1,14 +1,17 @@
 use crate::cpu::{BombKnowledge, Observation, ObservedActor};
-use crate::game::{EntityId, Equipment};
+use crate::game::geometry::MovementSegment;
+use crate::game::types::{HALF_FOOTPRINT, UNITS_PER_CELL};
+use crate::game::{Direction, EntityId, Equipment, Position};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) struct BraceletGuard {
     rival: EntityId,
+    direction: Direction,
 }
 
 impl BraceletGuard {
-    pub(crate) const fn new(rival: EntityId) -> Self {
-        Self { rival }
+    pub(crate) const fn new(rival: EntityId, direction: Direction) -> Self {
+        Self { rival, direction }
     }
 
     pub(crate) fn allows(self, observation: &Observation) -> bool {
@@ -25,15 +28,77 @@ impl BraceletGuard {
                     && actor.alive
                     && actor.equipment == Some(Equipment::Bracelet))
         });
-        let rival_is_shoveable = parts.actors.iter().any(|actor| {
-            matches!(actor, ObservedActor::Visible(actor)
+        let rival = parts.actors.iter().find_map(|actor| match actor {
+            ObservedActor::Visible(actor)
                 if actor.id == self.rival
                     && actor.seat != parts.recipient
                     && actor.alive
-                    && actor.equipment != Some(Equipment::Bracelet))
+                    && actor.equipment != Some(Equipment::Bracelet) =>
+            {
+                Some(actor)
+            }
+            _ => None,
         });
-        recipient_has_bracelet && rival_is_shoveable
+        let all_rivals_visible = parts.actors.iter().all(|actor| {
+            actor.seat() == parts.recipient || matches!(actor, ObservedActor::Visible(_))
+        });
+        let third_party_countershove = parts.rules.version == 6
+            && parts.actors.iter().any(|actor| {
+                matches!(actor, ObservedActor::Visible(actor)
+                    if actor.seat != parts.recipient && actor.id != self.rival && actor.alive
+                        && actor.equipment == Some(Equipment::Bracelet))
+            });
+        let third_party_clear = rival.is_some_and(|rival| {
+            victim_sweep(rival.position, self.direction).is_some_and(|sweep| {
+                parts.actors.iter().all(|actor| match actor {
+                    ObservedActor::Visible(actor)
+                        if actor.seat != parts.recipient && actor.id != rival.id && actor.alive =>
+                    {
+                        !sweep_overlaps_actor(sweep, actor.position)
+                    }
+                    _ => true,
+                })
+            })
+        });
+        recipient_has_bracelet
+            && rival.is_some()
+            && all_rivals_visible
+            && !third_party_countershove
+            && third_party_clear
     }
+}
+
+fn victim_sweep(position: Position, direction: Direction) -> Option<MovementSegment> {
+    let end = match direction {
+        Direction::North => Position {
+            y: position.y.checked_sub(UNITS_PER_CELL)?,
+            ..position
+        },
+        Direction::East => Position {
+            x: position.x.checked_add(UNITS_PER_CELL)?,
+            ..position
+        },
+        Direction::South => Position {
+            y: position.y.checked_add(UNITS_PER_CELL)?,
+            ..position
+        },
+        Direction::West => Position {
+            x: position.x.checked_sub(UNITS_PER_CELL)?,
+            ..position
+        },
+    };
+    Some(MovementSegment::new(position, end))
+}
+
+fn sweep_overlaps_actor(sweep: MovementSegment, position: Position) -> bool {
+    let left = i64::from(sweep.start().x.min(sweep.end().x)) - i64::from(HALF_FOOTPRINT);
+    let right = i64::from(sweep.start().x.max(sweep.end().x)) + i64::from(HALF_FOOTPRINT);
+    let top = i64::from(sweep.start().y.min(sweep.end().y)) - i64::from(HALF_FOOTPRINT);
+    let bottom = i64::from(sweep.start().y.max(sweep.end().y)) + i64::from(HALF_FOOTPRINT);
+    i64::from(position.x) > left
+        && i64::from(position.x) < right
+        && i64::from(position.y) > top
+        && i64::from(position.y) < bottom
 }
 
 #[cfg(test)]
@@ -84,7 +149,7 @@ mod tests {
     #[test]
     fn guard_requires_bracelet_holder_and_enabled_rule() {
         let valid = guarded_observation();
-        let guard = BraceletGuard::new(EntityId(1));
+        let guard = BraceletGuard::new(EntityId(1), Direction::East);
         assert!(guard.allows(&valid));
 
         let mut no_holder = valid.clone().into_parts();
@@ -105,7 +170,7 @@ mod tests {
     #[test]
     fn guard_rejects_new_bombs_and_exposed_pickups() {
         let valid = guarded_observation();
-        let guard = BraceletGuard::new(EntityId(1));
+        let guard = BraceletGuard::new(EntityId(1), Direction::East);
         let mut bomb = valid.clone().into_parts();
         bomb.bombs = BombKnowledge::Visible(vec![ObservedBomb {
             id: EntityId(9),

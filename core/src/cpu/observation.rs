@@ -10,6 +10,7 @@ use crate::room::RoomSettings;
 use super::WorldId;
 
 pub const MAX_OBSERVED_BOMBS: usize = 16;
+pub const MAX_MULTIPLAYER_OBSERVED_BOMBS: usize = 32;
 pub const MAX_OBSERVED_EFFECTS: usize = 16;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -169,7 +170,7 @@ pub struct ObservationParts {
     pub recipient: SeatId,
     pub rules: ObservedRules,
     pub arena: ObservedArena,
-    pub actors: [ObservedActor; 2],
+    pub actors: Vec<ObservedActor>,
     pub bombs: BombKnowledge,
     pub flames: Vec<ObservedFlame>,
     pub oil: Vec<ObservedOil>,
@@ -195,8 +196,8 @@ impl Observation {
     pub fn new(parts: ObservationParts) -> Result<Self, ObservationError> {
         validate_clock(parts.tick, parts.rules)?;
         validate_arena(&parts.arena)?;
-        validate_actors(parts.recipient, &parts.actors)?;
-        validate_bombs(parts.tick, &parts.arena, &parts.bombs)?;
+        validate_actors(parts.rules.version, parts.recipient, &parts.actors)?;
+        validate_bombs(parts.tick, parts.rules.version, &parts.arena, &parts.bombs)?;
         if parts.flames.len() > ARENA_CELL_COUNT {
             return Err(ObservationError::InvalidFlames);
         }
@@ -250,8 +251,27 @@ fn validate_arena(arena: &ObservedArena) -> Result<(), ObservationError> {
     validate_cells(arena, &arena.blocks, |cell| *cell).map_err(|()| ObservationError::InvalidArena)
 }
 
-fn validate_actors(recipient: SeatId, actors: &[ObservedActor; 2]) -> Result<(), ObservationError> {
-    if actors[0].seat() == actors[1].seat() || actors[0].id() == actors[1].id() {
+fn validate_actors(
+    rules_version: u16,
+    recipient: SeatId,
+    actors: &[ObservedActor],
+) -> Result<(), ObservationError> {
+    if !(1..=6).contains(&rules_version)
+        || (rules_version < 6 && actors.len() != 2)
+        || (rules_version == 6 && !(2..=4).contains(&actors.len()))
+        || actors
+            .iter()
+            .enumerate()
+            .any(|(index, actor)| actor.seat().index() != index)
+    {
+        return Err(ObservationError::InvalidActors);
+    }
+    let mut seats = BTreeSet::new();
+    let mut ids = BTreeSet::new();
+    if actors
+        .iter()
+        .any(|actor| !seats.insert(actor.seat()) || !ids.insert(actor.id()))
+    {
         return Err(ObservationError::InvalidActors);
     }
     let Some(actor) = actors.iter().find(|actor| actor.seat() == recipient) else {
@@ -294,13 +314,19 @@ fn validate_effects(effects: &[ObservedEffect]) -> Result<(), ObservationError> 
 
 fn validate_bombs(
     tick: Tick,
+    rules_version: u16,
     arena: &ObservedArena,
     bombs: &BombKnowledge,
 ) -> Result<(), ObservationError> {
     let BombKnowledge::Visible(bombs) = bombs else {
         return Ok(());
     };
-    if bombs.len() > MAX_OBSERVED_BOMBS {
+    let max_bombs = if rules_version == 6 {
+        MAX_MULTIPLAYER_OBSERVED_BOMBS
+    } else {
+        MAX_OBSERVED_BOMBS
+    };
+    if bombs.len() > max_bombs {
         return Err(ObservationError::InvalidBombs);
     }
     let mut ids = BTreeSet::new();

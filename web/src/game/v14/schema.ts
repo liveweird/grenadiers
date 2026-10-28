@@ -279,7 +279,7 @@ export interface LeftRoom {
 
 export interface Error {
   "type": "error";
-  "code": V11ErrorCode;
+  "code": V14ErrorCode;
   "sequence": Counter | null;
 }
 
@@ -528,8 +528,6 @@ export interface OilBarrelView {
   "state": OilBarrelState;
 }
 
-export type V11ErrorCode = "invalidMessage" | "authenticationFailed" | "connectionInUse" | "notAuthenticated" | "alreadyAuthenticated" | "alreadyInRoom" | "notInRoom" | "roomNotFound" | "roomFull" | "staleRoom" | "invalidPhase" | "staleSequence" | "duplicateAction" | "rateLimited" | "capacityReached" | "resumeRejected" | "staleSettings" | "settingsLocked"
-
 export interface Score {
   "seat": Seat;
   "wins": Wins;
@@ -590,6 +588,8 @@ export interface Board15x13 {
   "width": 15;
   "height": 13;
 }
+
+export type V14ErrorCode = "invalidMessage" | "authenticationFailed" | "connectionInUse" | "notAuthenticated" | "alreadyAuthenticated" | "alreadyInRoom" | "notInRoom" | "roomNotFound" | "roomFull" | "staleRoom" | "invalidPhase" | "staleSequence" | "duplicateAction" | "rateLimited" | "capacityReached" | "resumeRejected" | "staleSettings" | "settingsLocked" | "unsupportedConfiguration"
 
 export const ITEM_IDS = [
   "kick",

@@ -3,6 +3,7 @@ use crate::room::{BoardSize as DomainBoardSize, CpuDifficulty, SeatControl};
 use jsonschema::validator_for;
 use serde::Deserialize;
 use serde_json::Value;
+use std::collections::BTreeSet;
 
 #[test]
 fn checked_configuration_requires_explicit_null_and_domain_invariants() {
@@ -136,4 +137,282 @@ fn v14_event_and_bomb_bounds_do_not_widen_archived_contracts() {
     assert!(EventIndex::new(192).is_err());
     assert_eq!(crate::protocol::v11::MAX_BOMBS, 16);
     assert_eq!(MAX_BOMBS, 32);
+}
+
+pub(super) fn multiplayer_state(count: crate::game::PlayerCount) -> crate::game::State {
+    multiplayer_state_with_items(count, crate::game::EnabledItems::EMPTY)
+}
+
+fn multiplayer_state_with_items(
+    count: crate::game::PlayerCount,
+    enabled: crate::game::EnabledItems,
+) -> crate::game::State {
+    use crate::game::arena::{ARENA_CELL_COUNT, ARENA_HEIGHT, ARENA_WIDTH};
+    use crate::game::{
+        ActorInit, Arena, CellId, Direction, EntityId, Position, RulesConfig, SeatId, SpeedLevel,
+        Terrain, World,
+    };
+    let corners = [
+        CellId::new(1, 1),
+        CellId::new(13, 1),
+        CellId::new(1, 11),
+        CellId::new(13, 11),
+    ];
+    let mut terrain = [Terrain::Floor; ARENA_CELL_COUNT];
+    for row in 0..ARENA_HEIGHT {
+        for column in 0..ARENA_WIDTH {
+            if column == 0 || row == 0 || column == ARENA_WIDTH - 1 || row == ARENA_HEIGHT - 1 {
+                terrain[usize::from(row * ARENA_WIDTH + column)] = Terrain::Wall;
+            }
+        }
+    }
+    let spawns = if count == crate::game::PlayerCount::Two {
+        vec![corners[0], corners[3]]
+    } else {
+        corners[..count.get()].to_vec()
+    };
+    let arena = Arena::new(terrain, BTreeSet::new(), spawns).unwrap();
+    let actors = count
+        .seats()
+        .iter()
+        .map(|&seat| ActorInit {
+            id: EntityId(10 + seat.index() as u32),
+            seat,
+            position: Position::center(corners[seat.index()]),
+            heading: if matches!(seat, SeatId::One | SeatId::Three) {
+                Direction::East
+            } else {
+                Direction::West
+            },
+            speed: SpeedLevel::Base,
+        })
+        .collect::<Vec<_>>();
+    crate::game::State::new(
+        RulesConfig::multiplayer_v6(crate::room::RoomSettings::DEFAULT.with_enabled_items(enabled)),
+        World::new(arena),
+        actors,
+    )
+    .unwrap()
+}
+
+#[test]
+fn capture_preserves_two_three_and_four_canonical_actors() {
+    for count in [
+        crate::game::PlayerCount::Two,
+        crate::game::PlayerCount::Three,
+        crate::game::PlayerCount::Four,
+    ] {
+        let mut state = multiplayer_state(count);
+        let report = state.step(&[]).unwrap();
+        let capture = capture_expanded(&state, &[report]).unwrap();
+        assert_eq!(capture.world.actors.len(), count.get());
+        for (&seat, actor) in count.seats().iter().zip(&capture.world.actors) {
+            assert_eq!(actor.view.seat, super::projection_capture_wire::seat(seat));
+        }
+    }
+}
+
+pub(super) fn running_room(
+    count: crate::game::PlayerCount,
+    tick: crate::protocol::Tick,
+) -> RoomView {
+    use crate::protocol::{Counter, RoomCode, RoomId};
+    let configuration = crate::room::RoomConfiguration::new(
+        &vec![crate::room::SeatControl::Human; count.get()],
+        None,
+        crate::room::BoardSize::FifteenByThirteen,
+    )
+    .unwrap();
+    let seats = [Seat::One, Seat::Two, Seat::Three, Seat::Four];
+    RoomView {
+        settings: GameSettings::new(0, 256, 3, 180, ItemSet::empty()).unwrap(),
+        settings_revision: Counter::new(1).unwrap(),
+        settings_editor: Some(Seat::One),
+        available_items: ItemSet::new([
+            ItemId::Kick,
+            ItemId::Punch,
+            ItemId::Bracelet,
+            ItemId::WallPass,
+            ItemId::Heart,
+            ItemId::RemoteBomb,
+            ItemId::PiercingBomb,
+            ItemId::PowerBomb,
+            ItemId::Landmine,
+            ItemId::Shield,
+            ItemId::Stopwatch,
+            ItemId::InvisibilityCloak,
+            ItemId::InvisibleBombs,
+            ItemId::GoldenFlame,
+            ItemId::ShortFuse,
+            ItemId::Diarrhea,
+            ItemId::SlowFoot,
+            ItemId::ShortFlame,
+            ItemId::LongFuse,
+            ItemId::ReverseControls,
+            ItemId::OilBarrel,
+            ItemId::Teleporter,
+        ])
+        .unwrap(),
+        configuration: RoomConfiguration::from_domain(configuration),
+        room_id: RoomId::new("0123456789abcdef0123456789abcdef").unwrap(),
+        room_code: RoomCode::new("ABCDEFGH").unwrap(),
+        round_id: Counter::new(1).unwrap(),
+        revision: Counter::new(1).unwrap(),
+        tick,
+        rules_version: RulesVersion::MULTIPLAYER_V6,
+        map_id: MapId::GeneratedV2,
+        round_number: RoundCount::new(1).unwrap(),
+        scores: seats
+            .into_iter()
+            .take(count.get())
+            .map(|seat| Score {
+                seat,
+                wins: Wins::new(0).unwrap(),
+            })
+            .collect(),
+        last_round: None,
+        seats: seats
+            .into_iter()
+            .take(count.get())
+            .map(|seat| SeatStatus {
+                seat,
+                occupied: true,
+                ready: false,
+                rematch_ready: false,
+                controller: Controller::Human,
+                connection: ConnectionStatus::Connected,
+            })
+            .collect(),
+        phase: RoomPhase::Running,
+    }
+}
+
+#[test]
+fn cloak_privacy_and_fourth_human_admission_use_checked_publication() {
+    use crate::game::{
+        ArenaGenerationConfig, EffectKind as DomainEffect, EnabledItems, RoundAssignment,
+    };
+    let enabled = EnabledItems::from_bits(
+        EnabledItems::INVISIBILITY_CLOAK.bits() | EnabledItems::INVISIBLE_BOMBS.bits(),
+    )
+    .unwrap();
+    let mut state = multiplayer_state_with_items(crate::game::PlayerCount::Four, enabled);
+    state.apply_test_effect(
+        crate::game::SeatId::Two,
+        DomainEffect::InvisibilityCloak,
+        crate::game::Tick(0),
+    );
+    state.apply_test_effect(
+        crate::game::SeatId::One,
+        DomainEffect::InvisibleBombs,
+        crate::game::Tick(0),
+    );
+    state
+        .insert_test_bomb(
+            crate::game::EntityId(100),
+            crate::game::CellId::new(7, 7),
+            crate::game::EntityId(10),
+            2,
+            crate::game::Tick(0),
+            crate::game::BombTrigger::Timed {
+                detonates_at: crate::game::Tick(180),
+            },
+        )
+        .unwrap();
+    let report = state.step(&[]).unwrap();
+    let capture = capture_expanded(&state, &[report]).unwrap();
+    let mut room = running_room(crate::game::PlayerCount::Four, capture.world.physical_tick);
+    room.settings = GameSettings::new(
+        0,
+        256,
+        3,
+        180,
+        ItemSet::new([ItemId::InvisibilityCloak, ItemId::InvisibleBombs]).unwrap(),
+    )
+    .unwrap();
+    let mut noncanonical = room.clone();
+    noncanonical.seats.swap(0, 1);
+    assert_eq!(
+        validate_room_view(&noncanonical),
+        Err(ProjectionError::InvalidExpandedBinding)
+    );
+    let generation = crate::game::generate_multiplayer_arena(
+        [7; 32],
+        enabled,
+        ArenaGenerationConfig {
+            player_count: crate::game::PlayerCount::Four,
+            board: crate::room::BoardSize::FifteenByThirteen,
+            assignment: RoundAssignment::first(),
+        },
+    )
+    .unwrap()
+    .record();
+    let publication = bind_expanded(&room, room.round_id, &capture, Some(generation)).unwrap();
+    let snapshots = prepare_snapshots(&publication).unwrap();
+    assert_eq!(
+        snapshots.iter().map(|(seat, _)| *seat).collect::<Vec<_>>(),
+        vec![Seat::One, Seat::Two, Seat::Three, Seat::Four]
+    );
+    for recipient in [Seat::One, Seat::Three, Seat::Four] {
+        assert!(matches!(
+            project_recipient(&publication, recipient)
+                .unwrap()
+                .state
+                .actors[1],
+            ActorView::Hidden {
+                seat: Seat::Two,
+                ..
+            }
+        ));
+    }
+    assert!(matches!(
+        project_recipient(&publication, Seat::Two)
+            .unwrap()
+            .state
+            .actors[1],
+        ActorView::Visible {
+            seat: Seat::Two,
+            ..
+        }
+    ));
+    assert!(
+        project_recipient(&publication, Seat::One)
+            .unwrap()
+            .state
+            .bombs
+            .is_empty()
+    );
+    assert_eq!(
+        project_recipient(&publication, Seat::Two)
+            .unwrap()
+            .state
+            .bombs
+            .len(),
+        1
+    );
+    let admission = prepare_admission(
+        AdmissionProjection {
+            room: &room,
+            state_epoch: Some(room.round_id),
+            capture: Some(&capture),
+            generation: Some(generation),
+        },
+        PersonalAdmission {
+            recipient: Seat::Four,
+            last_action_id: None,
+            sequence: crate::protocol::Counter::new(1).unwrap(),
+            resume_token: ResumeToken::new("a".repeat(64)).unwrap(),
+        },
+    )
+    .unwrap();
+    assert_eq!(
+        serde_json::from_str::<Value>(&admission).unwrap()["youSeat"],
+        "four"
+    );
+    let mut corrupt = capture.clone();
+    corrupt.world.actors[0].view.seat = Seat::Two;
+    assert_eq!(
+        bind_expanded(&room, room.round_id, &corrupt, Some(generation)),
+        Err(ProjectionError::InvalidExpandedBinding),
+    );
 }

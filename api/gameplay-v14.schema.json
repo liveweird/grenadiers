@@ -1168,7 +1168,7 @@
           "const": "error"
         },
         "code": {
-          "$ref": "#/$defs/V11ErrorCode"
+          "$ref": "#/$defs/V14ErrorCode"
         },
         "sequence": {
           "oneOf": [
@@ -2199,28 +2199,6 @@
         }
       }
     },
-    "V11ErrorCode": {
-      "enum": [
-        "invalidMessage",
-        "authenticationFailed",
-        "connectionInUse",
-        "notAuthenticated",
-        "alreadyAuthenticated",
-        "alreadyInRoom",
-        "notInRoom",
-        "roomNotFound",
-        "roomFull",
-        "staleRoom",
-        "invalidPhase",
-        "staleSequence",
-        "duplicateAction",
-        "rateLimited",
-        "capacityReached",
-        "resumeRejected",
-        "staleSettings",
-        "settingsLocked"
-      ]
-    },
     "Score": {
       "type": "object",
       "additionalProperties": false,
@@ -2536,6 +2514,29 @@
           "const": 13
         }
       }
+    },
+    "V14ErrorCode": {
+      "enum": [
+        "invalidMessage",
+        "authenticationFailed",
+        "connectionInUse",
+        "notAuthenticated",
+        "alreadyAuthenticated",
+        "alreadyInRoom",
+        "notInRoom",
+        "roomNotFound",
+        "roomFull",
+        "staleRoom",
+        "invalidPhase",
+        "staleSequence",
+        "duplicateAction",
+        "rateLimited",
+        "capacityReached",
+        "resumeRejected",
+        "staleSettings",
+        "settingsLocked",
+        "unsupportedConfiguration"
+      ]
     }
   }
 }

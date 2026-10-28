@@ -3,6 +3,12 @@ mod configuration;
 mod events;
 mod identity;
 mod projection;
+mod projection_admission;
+mod projection_binding;
+mod projection_capture;
+mod projection_capture_wire;
+mod projection_facts;
+mod projection_recipient;
 mod scalars;
 mod server;
 mod state;
@@ -13,7 +19,7 @@ pub use crate::protocol::v11::{
     ArenaView, BlastKind, BombTrigger, BombView, DamageGraceTicks, EffectKind, EffectView,
     EffectViews, EquipmentId, FlameView, GameSettings, InventoryView, ItemId, ItemMask, ItemSet,
     OilBarrelState, OilBarrelView, PickupKind, PickupView, ResumeToken, RoundCount, Terrain,
-    V11ErrorCode, WeaponId, Wins,
+    WeaponId, Wins, validate_effects,
 };
 pub use client::{GameClientMessage, ManualActionKind};
 pub use configuration::{BoardSize, ConfigurationController, Difficulty, RoomConfiguration};
@@ -23,11 +29,16 @@ pub use events::{
 };
 pub use identity::{MapId, RulesVersion};
 pub use projection::{ProjectionError, validate_room_view};
+pub use projection_admission::{AdmissionProjection, PersonalAdmission, prepare_admission};
+pub use projection_binding::bind_expanded;
+pub use projection_capture::capture_expanded;
+pub use projection_facts::{BoundPublication, ExpandedCapture};
+pub use projection_recipient::{RecipientProjection, prepare_snapshots, project_recipient};
 pub use scalars::{GameplayVersion, Seat};
 pub use server::{
-    CompletedRound, ConnectionStatus, Controller, CountdownKind, DrawReason, GameServerMessage,
-    MatchInterruptReason, MatchResult, MatchWinnerReason, RoomPhase, RoomView, RoundResult, Score,
-    Scores, SeatStatus,
+    CompletedRound, ConnectionStatus, Controller, CountdownKind, DrawReason, ErrorCode,
+    GameServerMessage, MatchInterruptReason, MatchResult, MatchWinnerReason, RoomPhase, RoomView,
+    RoundResult, Score, Scores, SeatStatus,
 };
 pub use state::{ActorView, GameState, VisibleActorView};
 
@@ -72,5 +83,7 @@ fn enforce_server_message_size(encoded: String) -> Result<String, super::EncodeS
     }
 }
 
+#[cfg(test)]
+mod max_frame_tests;
 #[cfg(test)]
 mod tests;

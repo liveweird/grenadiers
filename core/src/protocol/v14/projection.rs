@@ -1,5 +1,3 @@
-use std::collections::BTreeSet;
-
 use super::{ConnectionStatus, Controller, MatchResult, RoomPhase, RoomView, RoundResult, Seat};
 use crate::room::SeatControl;
 
@@ -40,9 +38,9 @@ impl Seat {
     }
 }
 
-fn valid_result(result: RoundResult, seats: &BTreeSet<usize>) -> bool {
+fn valid_result(result: RoundResult, count: usize) -> bool {
     match result {
-        RoundResult::Winner { seat } => seats.contains(&seat.index()),
+        RoundResult::Winner { seat } => seat.index() < count,
         RoundResult::Draw { .. } => true,
     }
 }
@@ -59,14 +57,17 @@ pub fn validate_room_view(room: &RoomView) -> Result<(), ProjectionError> {
     if room.settings_editor.is_some_and(|seat| seat != Seat::One) {
         return Err(ProjectionError::InvalidExpandedBinding);
     }
-    let expected: BTreeSet<_> = (0..count).collect();
-    let status_seats: BTreeSet<_> = room
+    if room
         .seats
         .iter()
-        .map(|status| status.seat.index())
-        .collect();
-    let score_seats: BTreeSet<_> = room.scores.iter().map(|score| score.seat.index()).collect();
-    if status_seats != expected || score_seats != expected {
+        .enumerate()
+        .any(|(index, status)| status.seat.index() != index)
+        || room
+            .scores
+            .iter()
+            .enumerate()
+            .any(|(index, score)| score.seat.index() != index)
+    {
         return Err(ProjectionError::InvalidExpandedBinding);
     }
     for status in &room.seats {
@@ -100,6 +101,12 @@ pub fn validate_room_view(room: &RoomView) -> Result<(), ProjectionError> {
         if !valid {
             return Err(ProjectionError::InvalidExpandedBinding);
         }
+        let reserved = !matches!(status.connection, ConnectionStatus::Vacant);
+        if status.occupied != reserved
+            || (!status.occupied && (status.ready || status.rematch_ready))
+        {
+            return Err(ProjectionError::InvalidExpandedBinding);
+        }
     }
     if room
         .scores
@@ -110,7 +117,7 @@ pub fn validate_room_view(room: &RoomView) -> Result<(), ProjectionError> {
     }
     if room
         .last_round
-        .is_some_and(|round| !valid_result(round.result, &expected))
+        .is_some_and(|round| !valid_result(round.result, count))
     {
         return Err(ProjectionError::InvalidResult);
     }
@@ -118,7 +125,7 @@ pub fn validate_room_view(room: &RoomView) -> Result<(), ProjectionError> {
         result: MatchResult::Winner { seat, .. },
         ..
     } = room.phase
-        && !expected.contains(&seat.index())
+        && seat.index() >= count
     {
         return Err(ProjectionError::InvalidResult);
     }

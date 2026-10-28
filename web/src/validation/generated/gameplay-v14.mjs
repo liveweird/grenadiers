@@ -13037,7 +13037,8 @@ var require_gameplay_v14 = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 		"capacityReached",
 		"resumeRejected",
 		"staleSettings",
-		"settingsLocked"
+		"settingsLocked",
+		"unsupportedConfiguration"
 	] };
 	function validate127(data, { instancePath = "", parentData, parentDataProperty, rootData = data } = {}) {
 		let vErrors = null;
@@ -13107,10 +13108,10 @@ var require_gameplay_v14 = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 			}
 			if (data.code !== void 0) {
 				let data1 = data.code;
-				if (!(data1 === "invalidMessage" || data1 === "authenticationFailed" || data1 === "connectionInUse" || data1 === "notAuthenticated" || data1 === "alreadyAuthenticated" || data1 === "alreadyInRoom" || data1 === "notInRoom" || data1 === "roomNotFound" || data1 === "roomFull" || data1 === "staleRoom" || data1 === "invalidPhase" || data1 === "staleSequence" || data1 === "duplicateAction" || data1 === "rateLimited" || data1 === "capacityReached" || data1 === "resumeRejected" || data1 === "staleSettings" || data1 === "settingsLocked")) {
+				if (!(data1 === "invalidMessage" || data1 === "authenticationFailed" || data1 === "connectionInUse" || data1 === "notAuthenticated" || data1 === "alreadyAuthenticated" || data1 === "alreadyInRoom" || data1 === "notInRoom" || data1 === "roomNotFound" || data1 === "roomFull" || data1 === "staleRoom" || data1 === "invalidPhase" || data1 === "staleSequence" || data1 === "duplicateAction" || data1 === "rateLimited" || data1 === "capacityReached" || data1 === "resumeRejected" || data1 === "staleSettings" || data1 === "settingsLocked" || data1 === "unsupportedConfiguration")) {
 					const err5 = {
 						instancePath: instancePath + "/code",
-						schemaPath: "#/$defs/V11ErrorCode/enum",
+						schemaPath: "#/$defs/V14ErrorCode/enum",
 						keyword: "enum",
 						params: { allowedValues: schema170.enum },
 						message: "must be equal to one of the allowed values"

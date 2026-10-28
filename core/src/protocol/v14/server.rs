@@ -7,6 +7,30 @@ use super::{
 };
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub enum ErrorCode {
+    StaleSettings,
+    SettingsLocked,
+    InvalidMessage,
+    AuthenticationFailed,
+    ConnectionInUse,
+    NotAuthenticated,
+    AlreadyAuthenticated,
+    AlreadyInRoom,
+    NotInRoom,
+    RoomNotFound,
+    RoomFull,
+    StaleRoom,
+    InvalidPhase,
+    StaleSequence,
+    DuplicateAction,
+    RateLimited,
+    CapacityReached,
+    ResumeRejected,
+    UnsupportedConfiguration,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize)]
 #[serde(tag = "type", rename_all = "camelCase", deny_unknown_fields)]
 pub enum Controller {
     Human,
@@ -202,7 +226,7 @@ pub enum GameServerMessage {
         room_id: RoomId,
     },
     Error {
-        code: super::V11ErrorCode,
+        code: ErrorCode,
         sequence: Option<Counter>,
     },
 }

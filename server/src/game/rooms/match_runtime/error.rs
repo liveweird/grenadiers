@@ -18,6 +18,7 @@ pub(in crate::game::rooms) enum MatchRuntimeError {
 
 pub(super) fn map_input_error(error: InputError) -> MatchRuntimeError {
     match error {
+        InputError::UnknownSeat => MatchRuntimeError::VacantSeat,
         InputError::RateLimited => MatchRuntimeError::RateLimited,
         InputError::DuplicateAction => MatchRuntimeError::DuplicateAction,
         InputError::TickOverflow => MatchRuntimeError::CapacityReached,

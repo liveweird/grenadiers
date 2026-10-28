@@ -310,7 +310,7 @@ fn construction_enforces_profile_item_count_spawn_and_canonical_seat_boundaries(
             count: PlayerCount::Three,
         })
     );
-    let enabled = EnabledItems::HEART;
+    let enabled = EnabledItems::PUNCH;
     assert_eq!(
         State::new(
             RulesConfig::multiplayer_v6(RoomSettings::DEFAULT.with_enabled_items(enabled)),

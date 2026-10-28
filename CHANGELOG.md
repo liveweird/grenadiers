@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+## 0.3.102 — 2026-10-28
+
+- Enable 19 shared optional-item mechanics in three-/four-player headless states, with direct
+  higher-seat action, effect, damage, contention and recipient-privacy regressions.
+- Add deterministic generator v3 with reflected terrain/items, four protected corner exits,
+  round-based three-player corner omission and bounded same-roster fallback.
+- Add checked immutable human/CPU roster and board-size domain contracts while preserving
+  two-player live rooms and explicitly rejecting unavailable generation sizes.
+
 ## 0.3.101 — 2026-10-28
 
 - Add checked two-/three-/four-participant headless state, canonical seat ordering,

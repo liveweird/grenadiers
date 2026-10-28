@@ -166,8 +166,12 @@ impl State {
                 count: player_count,
             });
         }
-        if player_count != PlayerCount::Two && rules.enabled_items() != super::EnabledItems::EMPTY {
-            return Err(StateError::UnsupportedEnabledItems(rules.enabled_items()));
+        let enabled = rules.enabled_items();
+        let unsupported_multiplayer_items = enabled.contains_punch()
+            || enabled.contains_bracelet()
+            || enabled.contains_teleporter();
+        if player_count != PlayerCount::Two && unsupported_multiplayer_items {
+            return Err(StateError::UnsupportedEnabledItems(enabled));
         }
         let mut ids = BTreeSet::new();
         for actor in &actors {

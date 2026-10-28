@@ -32,8 +32,8 @@ repeated approval for routine implementation choices. Entries are not delivery-d
   readiness/rematch and disconnect handling. Adapt CPU observations/tactics, transport/replay
   contracts and the HUD to the selected player count; preserve two-player behavior.
   Follow the [multiplayer design](docs/game/multiplayer-design.md).
-  - **MP1 — headless rules:** validated three/four-seat simulation, fair corner spawning,
-    multi-survivor outcomes, item interactions and replayable random Teleporter selection.
+  - **MP1 — remaining headless interactions:** generalize Punch/Bracelet conflict handling and
+    add replayable random Teleporter selection before enabling the complete multiplayer item mask.
   - **MP2 — live activation:** new transport/replay contracts, room lifecycle, per-seat CPU
     execution, lobby/HUD and recipient privacy; verify the existing 15×13 board first.
 - [todo] **BOARD-SIZE — variable board dimensions.** Allow the game board size to be configured;

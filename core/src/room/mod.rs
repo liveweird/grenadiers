@@ -19,12 +19,14 @@
 //! );
 //! ```
 
+pub mod configuration;
 pub mod match_lifecycle;
 pub mod participants;
 pub mod reconnect;
 pub mod series;
 pub mod settings;
 
+pub use configuration::{BoardSize, RoomConfiguration, RoomConfigurationError, SeatControl};
 pub use match_lifecycle::{CountdownKind, MatchChange, MatchError, MatchLifecycle, MatchPhase};
 pub use participants::{ControllerKind, CpuDifficulty, CpuPolicy, CpuProfile, RoomMode};
 pub use settings::{RoomSettings, SettingsError};

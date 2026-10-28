@@ -13,8 +13,9 @@ selected count. Arena spawn count must match actor count. `actors()` returns a s
 `actor(seat)` returns `None` for a nonparticipant.
 
 Rules versions 1–5 accept only two actors. `RulesConfig::multiplayer_v6(settings)` is a
-headless construction profile. With three/four actors it currently requires an empty
-optional-item mask; basic bomb capacity, flame range and speed pickups remain available.
+headless construction profile. With three/four actors it accepts the 19 shared optional-item mechanics, but rejects masks
+containing Punch, Bracelet or Teleporter until their pair interactions are generalized. Basic
+bomb capacity, flame range and speed pickups remain available.
 Unsupported items and world facts are rejected rather than running pair-only abilities.
 
 ## Per-round arena and actions
@@ -26,8 +27,9 @@ priority across participants. `spawn_for` returns `None` for a seat absent from 
 
 A three-player series must construct its arena metadata anew for each round to rotate the
 unused fourth corner. Reusing the same three spawn cells does not perform that rotation.
-Generation owns this choice; the state constructor does not rewrite caller terrain or spawns.
-Historical generators retain their two-player behavior.
+The [version 3 generator](multiplayer-generation.md) makes this choice from the actual round
+and reserves every corner escape. The state constructor does not rewrite caller terrain or
+spawns. Historical generators retain their two-player behavior.
 
 All input seats are validated before tick advancement or mutation. Simultaneous placement
 at a shared cell rejects every contender; independent placements use canonical ordering.
@@ -42,3 +44,11 @@ Projection entry points reject larger states and unsupported report facts, inclu
 movement victims, instead of truncating them. Legacy room, score, reconnect and publication
 boundaries reject additional seats before mutation. No new network or replay identity is
 advertised by this headless profile. See the [release record](../releases.md) for acceptance.
+
+## Immutable room configuration
+
+`RoomConfiguration` describes 2–4 canonical human/CPU controls. Seat One must be human;
+Easy/Standard difficulty is present exactly when at least one CPU is configured. Accessors
+expose only actual seats, even though private fixed-capacity storage reserves four entries.
+`BoardSize` recognizes 11×9, 13×11 and 15×13; current generation explicitly accepts only
+15×13. These domain values do not change live room creation or transport contracts.

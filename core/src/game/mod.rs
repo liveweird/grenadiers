@@ -61,8 +61,9 @@ pub use enabled_items::EnabledItems;
 pub use events::{EventAudience, StepEvent, StepEventKind};
 pub use fixtures::fixed_arena;
 pub use generation::{
-    EXPANDED_GENERATOR_VERSION, GENERATOR_VERSION, GeneratedArena, GenerationRecord,
-    generate_arena, generate_expanded_arena,
+    ArenaGenerationConfig, EXPANDED_GENERATOR_VERSION, GENERATOR_VERSION, GeneratedArena,
+    GenerationError, GenerationRecord, MULTIPLAYER_GENERATOR_VERSION, generate_arena,
+    generate_expanded_arena, generate_multiplayer_arena,
 };
 pub use geometry::{MovementSegment, MovementTrace};
 pub use input::{Direction, HeldDirections};

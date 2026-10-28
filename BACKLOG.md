@@ -32,8 +32,9 @@ repeated approval for routine implementation choices. Entries are not delivery-d
   readiness/rematch and disconnect handling. Adapt CPU observations/tactics, transport/replay
   contracts and the HUD to the selected player count; preserve two-player behavior.
   Follow the [multiplayer design](docs/game/multiplayer-design.md).
-  - **MP2 — live activation:** new transport/replay contracts, room lifecycle, per-seat CPU
-    execution, lobby/HUD and recipient privacy; verify the existing 15×13 board first.
+  - **MP2 — live activation:** connect the roster runtime and prepared lobby/HUD through
+    the socket/owner adapter, per-seat CPU execution, replay format 4 and truthful diagnostics;
+    verify complete human/mixed matches, reconnect and recipient privacy on 15×13 first.
 - [todo] **BOARD-SIZE — variable board dimensions.** Allow the game board size to be configured;
   define supported sizes and bounds during design. Adapt terrain/item generation, fair spawn
   placement, CPU navigation, rendering and transport/replay limits. Verify supported board sizes

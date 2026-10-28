@@ -24,6 +24,10 @@ mod rate_limit;
 mod registry_identity;
 mod replay;
 mod resume;
+#[allow(dead_code, unused_imports)] // Built and tested before socket activation.
+mod roster_runtime;
+#[allow(dead_code)] // Private root is wired by the pending roster owner.
+mod roster_seed;
 mod types;
 use crate::round_seed::RoundSeedSource;
 pub(crate) use match_owner::{

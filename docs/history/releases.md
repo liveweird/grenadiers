@@ -4,6 +4,18 @@ This archive preserves the older release records originally maintained in
 [`docs/releases.md`](../releases.md). Records remain in their original order; the current
 release procedure and current release record stay in the [release guide](../releases.md).
 
+## v0.3.103 — 2026-10-28
+
+[v0.3.103](https://github.com/liveweird/grenadiers/releases/tag/v0.3.103) completes all 22 optional-item mechanics in three-/four-player headless states. Punch resolves common-world claims before committing independent kicks; Bracelet resolves disjoint pusher/victim pairs with shared blockers and swept-contact arbitration. Teleporter chooses another living participant using an independent simulation stream with bounded, unbiased selection and transactional rollback. Historical rules 1–5 retain their duel semantics. See the [headless guide](../game/multiplayer-core.md).
+
+Round construction retains the original roster and marks departed participants inactive. Atomic same-tick departure elimination bypasses protection, retains owned bombs and preserves completed physics; callers settle scoring first and append departures without advancing the clock twice. Archived two-seat projections explicitly reject unsupported forced-movement facts.
+
+Independent interaction, legacy-compatibility, randomness and physical-boundary reviews are clear. Full Rust acceptance passes on source `4e404fb8d949b2d6819bf5d09df298b18274d56f`, tree `70698978c9b10201a6108b3ea35445672e816ed3`: 515.207s, 28,561/30,970 lines (**92.2215%**), all 4,194,304 item masks separately in debug/release/official coverage, 32 partitions, four workers, zero hidden retries and 35 raw profiles. Official LCOV was retained before ending the source/target freeze. Distinct Linux [run 40613820552](https://github.com/liveweird/grenadiers/actions/runs/40613820552) passes. All 64 Standard/Easy opening/full-round reference cases match v0.3.101 exactly and verify accepted-input replay; measured maximum planner work stays bounded. Unchanged browser/art/contracts/dependencies reuse their existing complete acceptance.
+
+Exact image `sha256:a4ff956e4ca6c4180508dc7ea93b26825a31d18bd2a7d24d4029eefcf5a5667e` passes pinned Trivy 0.74.0 with zero HIGH/CRITICAL findings; Compose 10 browser cases/49.6s; Kubernetes 10/50.9s; CPU-item collection one/16.5s. Runtime security/resources, health/readiness/probes, Polish 320px controls and served HTML/JS/CSS/PNG identity pass. The first Kubernetes helper invocation rejected the digest-form image field despite a matching immutable image; using the existing tag passed the unchanged identity/security checks. Temporary acceptance stacks were removed.
+
+This is a source prerelease with a verified local image. Live rooms, gameplay v13, CPU observations and replay remain two-player; live multiplayer and variable boards are separate backlog work. No wire or replay migration is introduced. Localhost runs the accepted image; v0.3.102 is retained for rollback. Outstanding work remains in the [backlog](../../BACKLOG.md).
+
 ## v0.3.102 — 2026-10-28
 
 [v0.3.102](https://github.com/liveweird/grenadiers/releases/tag/v0.3.102) enables 19 shared optional-item mechanics for three-/four-player headless states. Higher-seat regressions exercise equipment and timed effects, Wall Pass traversal, weapon placement, Oil collision/ignition, damage, remote bombs/mines, contention and recipient privacy. Punch, Bracelet and Teleporter remain explicitly gated in this release. See the [headless guide](../game/multiplayer-core.md).

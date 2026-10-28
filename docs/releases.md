@@ -96,17 +96,26 @@ retain the previous immutable image reference for rollback. The runtime stage in
 rolling Debian package updates, so a later build may resolve newer packages and is not expected to
 be byte-identical; treat it as a new candidate with new evidence rather than reusing acceptance.
 
-## v0.3.100 — 2026-10-28
+## v0.3.103 — 2026-10-28
 
-[v0.3.100](https://github.com/liveweird/grenadiers/releases/tag/v0.3.100) adopts the owner-supplied third/fourth-player uniform redraw. Green and plum appearances now match the first two characters' outlines, shading and detail more closely. The supplied PNG is adopted byte-for-byte; its original 95 frames remain decoded-pixel identical, and all 16 revised poses retain the existing 33-pixel height, `(40, 65)` foot anchor and manifest geometry. The duplicate PNG is removed from the repository root. See [artist provenance](../assets/art/README.md#provenance).
+[v0.3.103](https://github.com/liveweird/grenadiers/releases/tag/v0.3.103) completes all 22 optional-item mechanics in three-/four-player headless states. Punch resolves common-world claims before committing independent kicks; Bracelet resolves disjoint pusher/victim pairs with shared blockers and swept-contact arbitration. Teleporter chooses another living participant using an independent simulation stream with bounded, unbiased selection and transactional rollback. Historical rules 1–5 retain their duel semantics. See the [headless guide](game/multiplayer-core.md).
 
-Independent art review found no asset defects. The 37/33-color uniforms follow a documented 48-color ceiling; nonempty-frame, coat-family, binary-alpha, gutter/reserved-slot, geometry and texture-budget checks remain enforced. The real exporter passes with 107 active frames and 3,590,400 RGBA bytes. Atlas browser checks pass 10 cases/16.5s, gameplay-atlas checks two cases/11.3s, and 37 affected web tests pass. Production build, E2E static/scenario, source-cap and repository checks pass; compressed JS is 369,330/400,000 bytes and CSS 15,092/20,000.
+Round construction retains the original roster and marks departed participants inactive. Atomic same-tick departure elimination bypasses protection, retains owned bombs and preserves completed physics; callers settle scoring first and append departures without advancing the clock twice. Archived two-seat projections explicitly reject unsupported forced-movement facts.
 
-Rust implementation, web application/test code, API contracts, gameplay and external dependencies are unchanged from v0.3.99. Its full Rust/web coverage, exhaustive masks, CPU reference/replay and dependency-audit acceptance are reused for those unchanged inputs rather than rerun for an artwork-only change. Product metadata advances to 0.3.100; live rooms remain two-player and the new appearances are prepared for multiplayer activation.
+Independent interaction, legacy-compatibility, randomness and physical-boundary reviews are clear. Full Rust acceptance passes on source `4e404fb8d949b2d6819bf5d09df298b18274d56f`, tree `70698978c9b10201a6108b3ea35445672e816ed3`: 515.207s, 28,561/30,970 lines (**92.2215%**), all 4,194,304 item masks separately in debug/release/official coverage, 32 partitions, four workers, zero hidden retries and 35 raw profiles. Official LCOV was retained before ending the source/target freeze. Distinct Linux [run 40613820552](https://github.com/liveweird/grenadiers/actions/runs/40613820552) passes. All 64 Standard/Easy opening/full-round reference cases match v0.3.101 exactly and verify accepted-input replay; measured maximum planner work stays bounded. Unchanged browser/art/contracts/dependencies reuse their existing complete acceptance.
 
-Source `4f71a196f95f5c66e5ab89860d893cd10061cc21`, tree `547470030cc70162f3d37262511dd96b2dc75c78`, produces accepted image `sha256:6516eb10e76ac25cba7be3dcb6e2fec8d80c995fe3eee526ccc49111b27642d9`. Pinned Trivy 0.74.0 finds zero fixable HIGH/CRITICAL vulnerabilities. Compose passes 10 browser cases/49.4s; Kubernetes passes 10/50.6s; native CPU-item collection passes one/16.5s. Served HTML/JS/CSS/PNG identity, Polish 320px controls, runtime security/resources, readiness and probes pass. The preview was visually inspected and temporary acceptance stacks removed.
+Exact image `sha256:a4ff956e4ca6c4180508dc7ea93b26825a31d18bd2a7d24d4029eefcf5a5667e` passes pinned Trivy 0.74.0 with zero HIGH/CRITICAL findings; Compose 10 browser cases/49.6s; Kubernetes 10/50.9s; CPU-item collection one/16.5s. Runtime security/resources, health/readiness/probes, Polish 320px controls and served HTML/JS/CSS/PNG identity pass. The first Kubernetes helper invocation rejected the digest-form image field despite a matching immutable image; using the existing tag passed the unchanged identity/security checks. Temporary acceptance stacks were removed.
 
-This source prerelease retains gameplay v13 and replay format 3. Deploy the paired browser/server and reload for the new atlas. Localhost runs the exact accepted image with v0.3.99 retained for rollback; no production registry publication is claimed. The [backlog](../BACKLOG.md) owns outstanding multiplayer work.
+This is a source prerelease with a verified local image. Live rooms, gameplay v13, CPU observations and replay remain two-player; live multiplayer and variable boards are separate backlog work. No wire or replay migration is introduced. Localhost runs the accepted image; v0.3.102 is retained for rollback. Outstanding work remains in the [backlog](../BACKLOG.md).
+
+<a id="v03102--2026-10-28"></a>
+The [v0.3.102 record](history/releases.md#v03102--2026-10-28) is preserved in release history.
+
+<a id="v03101--2026-10-28"></a>
+The [v0.3.101 record](history/releases.md#v03101--2026-10-28) is preserved in release history.
+
+<a id="v03100--2026-10-28"></a>
+The [v0.3.100 record](history/releases.md#v03100--2026-10-28) is preserved in release history.
 
 <a id="v0399--2026-10-28"></a>
 The [v0.3.99 record](history/releases.md#v0399--2026-10-28) is preserved in release history.

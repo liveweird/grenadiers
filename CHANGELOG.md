@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+## 0.3.103 — 2026-10-28
+
+- Enable multiplayer Punch and disjoint Bracelet shoves with common-world arbitration,
+  explicit pusher/victim reports and strict archived-capture compatibility.
+- Complete the 22-item headless multiplayer profile with independently seeded, replayable
+  Teleporter selection, bounded unbiased sampling and redacted private randomness.
+- Add canonical inactive-participant round construction and atomic same-tick departure
+  elimination while preserving completed physics, owned bombs and historical duel behavior.
+
 ## 0.3.102 — 2026-10-28
 
 - Enable 19 shared optional-item mechanics in three-/four-player headless states, with direct

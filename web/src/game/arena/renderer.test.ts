@@ -94,6 +94,28 @@ beforeEach(() => {
 })
 
 describe('Pixi application lifetime', () => {
+  it('resizes once for each non-native board preset and retains the size for later frames', async () => {
+    const renderer = await createArenaRenderer(document.createElement('div'))
+    const app = hooks.applications[0]
+    const snapshot = gameSnapshot()
+    renderer.update(snapshot)
+    expect(app.renderer?.resize).not.toHaveBeenCalled()
+
+    Object.assign(snapshot.state.arena, {
+      width: 13, height: 11, terrain: Array.from({ length: 143 }, () => 'floor' as const),
+    })
+    renderer.update(snapshot)
+    renderer.update(snapshot)
+    Object.assign(snapshot.state.arena, {
+      width: 11, height: 9, terrain: Array.from({ length: 99 }, () => 'floor' as const),
+    })
+    renderer.update(snapshot)
+
+    expect(app.renderer?.resize.mock.calls).toEqual([[624, 528], [528, 432]])
+    expect(hooks.scenes[0].update).toHaveBeenCalledTimes(4)
+    renderer.destroy()
+  })
+
   it('suspends and resumes one hidden canvas before releasing it on final destroy', async () => {
     const host = document.createElement('div')
     const renderer = await createArenaRenderer(host)

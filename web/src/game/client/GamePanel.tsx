@@ -6,7 +6,7 @@ import type { Direction } from '../arena/types'
 import type { AdmissionIntent, GameClientState } from './client'
 import { format, useGameCopy, type GameCopy } from './locale'
 import type {
-  Difficulty, GameSettings, MatchInterruptReason, MatchResult, RoomConfiguration, RoomPhase, RoundResult,
+  BoardSize, Difficulty, GameSettings, MatchInterruptReason, MatchResult, RoomConfiguration, RoomPhase, RoundResult,
   Seat, VisibleActorView,
 } from '../v14/schema'
 import { useGameClient } from './useGameClient'
@@ -21,6 +21,10 @@ import { OwnPickupNotice } from './OwnPickupNotice'
 import { controllersAvailable, isLegacySolo, roomCopy } from './roomControllers'
 
 const CODE_PATTERN = /^[A-HJ-NP-Z2-9]{8}$/
+const BOARD_PRESETS = [
+  { width: 15, height: 13 }, { width: 13, height: 11 }, { width: 11, height: 9 },
+] as const satisfies readonly BoardSize[]
+const boardKey = ({ width, height }: BoardSize): string => `${width}x${height}`
 
 export interface GameActions {
   admit(intent: AdmissionIntent): boolean
@@ -137,6 +141,7 @@ function LobbyControls({ state, actions, copy }: { state: GameClientState; actio
   const [code, setCode] = useState('')
   const [difficulty, setDifficulty] = useState<Difficulty>('standard')
   const [playerCount, setPlayerCount] = useState(2)
+  const [board, setBoard] = useState<BoardSize>(BOARD_PRESETS[0])
   const [controllers, setControllers] = useState<Array<'human' | 'cpu'>>(['human', 'human'])
   const busy = state.admissionPending
     || ['connecting', 'authenticating', 'reconnecting'].includes(state.connection)
@@ -152,10 +157,14 @@ function LobbyControls({ state, actions, copy }: { state: GameClientState; actio
     if (index === 0 || (value !== 'human' && value !== 'cpu')) return
     setControllers((current) => current.map((controller, position) => position === index ? value : controller))
   }
+  const selectBoard = (value: string): void => {
+    const selected = BOARD_PRESETS.find((preset) => boardKey(preset) === value)
+    if (selected) setBoard(selected)
+  }
   const customConfiguration = (): RoomConfiguration => {
     const hasCpu = controllers.includes('cpu')
     return {
-      controllers, cpuDifficulty: hasCpu ? difficulty : null, board: { width: 15, height: 13 },
+      controllers, cpuDifficulty: hasCpu ? difficulty : null, board,
     } as RoomConfiguration
   }
   return (
@@ -177,6 +186,12 @@ function LobbyControls({ state, actions, copy }: { state: GameClientState; actio
         <NativeSelect label={copy.multiplayer.playerCount} value={String(playerCount)} disabled={busy}
           onChange={(event) => resizeControllers(Number(event.currentTarget.value))}
           data={['2', '3', '4']} />
+        <NativeSelect label={copy.multiplayer.boardSize} value={boardKey(board)} disabled={busy}
+          onChange={(event) => selectBoard(event.currentTarget.value)}
+          data={BOARD_PRESETS.map((preset) => ({
+            value: boardKey(preset),
+            label: format(copy.multiplayer.boardDimensions, preset),
+          }))} />
         {controllers.slice(1).map((controller, index) => <NativeSelect
           key={index + 1} label={format(copy.multiplayer.controller, { player: index + 2 })}
           value={controller} disabled={busy} onChange={(event) => setController(index + 1, event.currentTarget.value)}
@@ -219,6 +234,9 @@ function RematchControl({ state, actions, copy }: { state: GameClientState; acti
 
 function RoomControls({ state, actions, copy }: { state: GameClientState; actions: GameActions; copy: GameCopy }) {
   const room = state.room!
+  const boardDimensions = {
+    width: room.configuration.board.width, height: room.configuration.board.height,
+  }
   const own = room.seats.find((seat) => seat.seat === state.youSeat)
   const connected = own?.connection.type === 'connected' && state.connection === 'authenticated'
   const canReady = room.phase.type === 'waiting'
@@ -228,6 +246,7 @@ function RoomControls({ state, actions, copy }: { state: GameClientState; action
   const humanVacancy = room.seats.some(({ controller, occupied }) => controller.type === 'human' && !occupied)
   return (
     <div className="room-controls">
+      <Text>{format(copy.room.boardSize, boardDimensions)}</Text>
       {room.configuration.cpuDifficulty && <Text>{isLegacySolo(room)
         ? copy.solo.roomDifficulty[room.configuration.cpuDifficulty]
         : format(copy.multiplayer.cpuDifficulty, {

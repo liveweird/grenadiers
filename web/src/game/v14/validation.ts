@@ -15,7 +15,45 @@ export type GameplayV14ValidationResult =
   | { valid: false; source: 'semantics'; error: SemanticError }
 
 const SEATS: readonly Seat[] = ['one', 'two', 'three', 'four']
+const UNITS_PER_CELL = 1024
+const HALF_ACTOR_FOOTPRINT = 320
 const cellKey = ({ column, row }: { column: number; row: number }): string => `${column},${row}`
+
+function supportedRoomProfile(room: RoomView): boolean {
+  const { width, height } = room.configuration.board
+  const supportedBoard = (width === 11 && height === 9)
+    || (width === 13 && height === 11) || (width === 15 && height === 13)
+  if (!supportedBoard) return false
+  if (room.rulesVersion === 5) {
+    return room.configuration.controllers.length === 2 && width === 15 && height === 13
+  }
+  return room.rulesVersion === 6
+    && room.configuration.controllers.length >= 2 && room.configuration.controllers.length <= 4
+}
+
+function cellOutsideBoard(value: unknown, width: number, height: number): boolean {
+  if (Array.isArray(value)) return value.some((child) => cellOutsideBoard(child, width, height))
+  if (typeof value !== 'object' || value === null) return false
+  const record = value as Record<string, unknown>
+  if (typeof record.column === 'number' && typeof record.row === 'number'
+    && (record.column < 0 || record.column >= width || record.row < 0 || record.row >= height)) return true
+  return Object.values(record).some((child) => cellOutsideBoard(child, width, height))
+}
+
+function boardRelativeWorldInvalid(state: GameState): boolean {
+  const { width, height } = state.arena
+  if (cellOutsideBoard(state, width, height)) return true
+  return state.actors.some((actor) => actor.type === 'visible'
+    && (actor.position.x - HALF_ACTOR_FOOTPRINT < 0
+      || actor.position.x + HALF_ACTOR_FOOTPRINT > width * UNITS_PER_CELL
+      || actor.position.y - HALF_ACTOR_FOOTPRINT < 0
+      || actor.position.y + HALF_ACTOR_FOOTPRINT > height * UNITS_PER_CELL))
+}
+
+function boardRelativeEventsInvalid(state: GameState, events: WireEvent[]): boolean {
+  const { width, height } = state.arena
+  return cellOutsideBoard(events, width, height)
+}
 
 function configurationError(room: RoomView): SemanticError | null {
   const { controllers, cpuDifficulty } = room.configuration
@@ -127,6 +165,7 @@ function worldError(state: GameState, room: RoomView, events: WireEvent[]): Sema
     || state.arena.terrain.length !== state.arena.width * state.arena.height
     || state.actors.length !== expectedSeats.length
     || state.actors.some(({ seat }, index) => seat !== expectedSeats[index])) return 'invalidRoster'
+  if (boardRelativeWorldInvalid(state) || boardRelativeEventsInvalid(state, events)) return 'invalidWorldState'
   return actorError(state, room) ?? eventError(state, events) ?? oilError(state, room)
 }
 
@@ -135,10 +174,7 @@ function semanticError(message: GameServerMessage): SemanticError | null {
   const room = message.room
   const metadata = metadataError(room)
   if (metadata) return metadata
-  if (room.rulesVersion !== 6
-    && (room.rulesVersion !== 5 || room.configuration.controllers.length !== 2)) {
-    return 'unsupportedProfile'
-  }
+  if (!supportedRoomProfile(room)) return 'unsupportedProfile'
   if (message.type === 'admitted') {
     const own = room.seats.find(({ seat }) => seat === message.youSeat)
     if (own?.controller.type !== 'human' || own.connection.type !== 'connected') return 'invalidPersonalAdmission'

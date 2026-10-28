@@ -24,7 +24,13 @@ impl Actor {
             damage_grace: None,
             last_successful_punch_tick: None,
             last_successful_shove_tick: None,
+            last_teleport_tick: None,
         }
+    }
+
+    #[must_use]
+    pub const fn last_teleport_tick(&self) -> Option<crate::game::Tick> {
+        self.last_teleport_tick
     }
 }
 

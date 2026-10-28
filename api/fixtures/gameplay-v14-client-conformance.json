@@ -1,0 +1,65 @@
+{
+  "validCreateRooms": [
+    {
+      "caseId": "four-seat-mixed-standard-15x13",
+      "value": {
+        "type": "createRoom",
+        "sequence": 1,
+        "configuration": {
+          "controllers": ["human", "cpu", "human", "cpu"],
+          "cpuDifficulty": "standard",
+          "board": { "width": 15, "height": 13 }
+        }
+      }
+    },
+    {
+      "caseId": "three-seat-human-11x9",
+      "value": {
+        "type": "createRoom",
+        "sequence": 1,
+        "configuration": {
+          "controllers": ["human", "human", "human"],
+          "cpuDifficulty": null,
+          "board": { "width": 11, "height": 9 }
+        }
+      }
+    }
+  ],
+  "invalidCreateRooms": [
+    {
+      "caseId": "missing-difficulty",
+      "value": {
+        "type": "createRoom",
+        "sequence": 1,
+        "configuration": {
+          "controllers": ["human", "human"],
+          "board": { "width": 15, "height": 13 }
+        }
+      }
+    },
+    {
+      "caseId": "cpu-with-null-difficulty",
+      "value": {
+        "type": "createRoom",
+        "sequence": 1,
+        "configuration": {
+          "controllers": ["human", "cpu"],
+          "cpuDifficulty": null,
+          "board": { "width": 15, "height": 13 }
+        }
+      }
+    },
+    {
+      "caseId": "unsupported-board-pair",
+      "value": {
+        "type": "createRoom",
+        "sequence": 1,
+        "configuration": {
+          "controllers": ["human", "human"],
+          "cpuDifficulty": null,
+          "board": { "width": 11, "height": 13 }
+        }
+      }
+    }
+  ]
+}

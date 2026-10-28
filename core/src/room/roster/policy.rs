@@ -63,7 +63,14 @@ impl RosterMatchLifecycle {
             MatchPhase::Waiting
         } else {
             MatchPhase::Result {
-                next_countdown_at: self.tick,
+                next_countdown_at: Tick(
+                    self.latest_completed
+                        .expect("inter-round countdown follows a completed round")
+                        .ended_at()
+                        .0
+                        .checked_add(RESULT_HOLD_TICKS)
+                        .ok_or(RosterError::TickOverflow)?,
+                ),
             }
         };
         Ok(())

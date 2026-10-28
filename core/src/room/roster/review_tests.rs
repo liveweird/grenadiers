@@ -1,7 +1,7 @@
 use super::*;
 use crate::game::SpeedLevel;
 use crate::room::series::RESULT_HOLD_TICKS;
-use crate::room::{BoardSize, COUNTDOWN_TICKS, CpuDifficulty};
+use crate::room::{BoardSize, COUNTDOWN_TICKS, CountdownKind, CpuDifficulty};
 
 fn configuration(controls: &[SeatControl]) -> RoomConfiguration {
     RoomConfiguration::new(
@@ -184,4 +184,51 @@ fn cancellation_and_rematch_epoch_overflow_are_atomic() {
         Err(RosterError::RoundAttemptOverflow)
     );
     assert_eq!(rematch, before);
+}
+
+#[test]
+fn inter_round_disconnect_preserves_completed_round_hold_and_delays_restart() {
+    let mut room = RosterMatchLifecycle::new(
+        configuration(&[SeatControl::Human, SeatControl::Human, SeatControl::Cpu]),
+        settings(3),
+    );
+    start(&mut room, &[SeatId::One, SeatId::Two]);
+    room.complete_running_tick(Some(RoundResult::Winner(SeatId::One)))
+        .unwrap();
+    let completed = room.latest_completed().unwrap();
+    let original_hold = Tick(completed.ended_at().0 + RESULT_HOLD_TICKS);
+    advance(&mut room, RESULT_HOLD_TICKS);
+    assert!(matches!(
+        room.phase(),
+        MatchPhase::Countdown {
+            kind: CountdownKind::InterRound,
+            ..
+        }
+    ));
+    advance(&mut room, 30);
+    room.depart_with_grace([None, Some(DepartureReason::TransportLoss), None, None])
+        .unwrap();
+    assert_eq!(
+        room.phase(),
+        MatchPhase::Result {
+            next_countdown_at: original_hold
+        }
+    );
+    assert_eq!(room.latest_completed(), Some(completed));
+    advance(&mut room, 20);
+    assert_eq!(
+        room.phase(),
+        MatchPhase::Result {
+            next_countdown_at: original_hold
+        }
+    );
+    room.resume_connection(SeatId::Two).unwrap();
+    room.advance_idle_tick().unwrap();
+    assert!(matches!(
+        room.phase(),
+        MatchPhase::Countdown {
+            kind: CountdownKind::InterRound,
+            ..
+        }
+    ));
 }

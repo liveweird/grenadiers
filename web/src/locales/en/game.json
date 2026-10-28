@@ -21,6 +21,8 @@
   "multiplayer": {
     "title": "Custom match",
     "playerCount": "Players",
+    "boardSize": "Board size",
+    "boardDimensions": "{{width}} × {{height}}",
     "controller": "Player {{player}} controller",
     "human": "Human",
     "cpu": "CPU",
@@ -32,6 +34,7 @@
     "invitation": "Room invitation",
     "codeLabel": "Room invitation code",
     "players": "Players",
+    "boardSize": "Board: {{width}} × {{height}}",
     "ready": "Ready",
     "cancelReady": "Not ready",
     "leave": "Leave room",

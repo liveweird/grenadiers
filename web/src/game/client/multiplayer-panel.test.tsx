@@ -25,6 +25,7 @@ it('creates an explicit four-controller mixed configuration while keeping player
     <GamePanelView state={initialGameClientState()} actions={controls} />
   </MantineProvider>)
   fireEvent.change(screen.getByRole('combobox', { name: 'Players' }), { target: { value: '4' } })
+  fireEvent.change(screen.getByRole('combobox', { name: 'Board size' }), { target: { value: '11x9' } })
   fireEvent.change(screen.getByRole('combobox', { name: 'Player 2 controller' }), { target: { value: 'cpu' } })
   fireEvent.change(screen.getByRole('combobox', { name: 'Player 4 controller' }), { target: { value: 'cpu' } })
   const difficulties = screen.getAllByRole('combobox', { name: 'CPU difficulty' })
@@ -33,8 +34,40 @@ it('creates an explicit four-controller mixed configuration while keeping player
   expect(controls.admit).toHaveBeenCalledWith({
     type: 'create', configuration: {
       controllers: ['human', 'cpu', 'human', 'cpu'], cpuDifficulty: 'easy',
-      board: { width: 15, height: 13 },
+      board: { width: 11, height: 9 },
     },
+  })
+})
+
+it.each([
+  ['2', '15x13'], ['2', '13x11'], ['2', '11x9'],
+  ['3', '15x13'], ['3', '13x11'], ['3', '11x9'],
+  ['4', '15x13'], ['4', '13x11'], ['4', '11x9'],
+] as const)('creates a %s-player custom match on the %s board preset', (players, board) => {
+  const controls = actions()
+  render(<MantineProvider env="test">
+    <GamePanelView state={initialGameClientState()} actions={controls} />
+  </MantineProvider>)
+  fireEvent.change(screen.getByRole('combobox', { name: 'Players' }), { target: { value: players } })
+  fireEvent.change(screen.getByRole('combobox', { name: 'Board size' }), { target: { value: board } })
+  fireEvent.click(screen.getByRole('button', { name: 'Create custom match' }))
+  const [width, height] = board.split('x').map(Number)
+  expect(controls.admit).toHaveBeenCalledWith(expect.objectContaining({
+    configuration: expect.objectContaining({ board: { width, height } }),
+  }))
+})
+
+it('keeps quick duel and solo on their server-default 15 × 13 profile after changing the custom preset', () => {
+  const controls = actions()
+  render(<MantineProvider env="test">
+    <GamePanelView state={initialGameClientState()} actions={controls} />
+  </MantineProvider>)
+  fireEvent.change(screen.getByRole('combobox', { name: 'Board size' }), { target: { value: '11x9' } })
+  fireEvent.click(screen.getByRole('button', { name: 'Create room' }))
+  fireEvent.click(screen.getByRole('button', { name: 'Play solo against CPU' }))
+  expect(controls.admit).toHaveBeenNthCalledWith(1, { type: 'create' })
+  expect(controls.admit).toHaveBeenNthCalledWith(2, {
+    type: 'create', mode: { type: 'solo', difficulty: 'standard' },
   })
 })
 
@@ -115,6 +148,8 @@ it('keeps the invitation and distinct CPU identity while a mixed room has a huma
 
   expect(screen.getByRole('region', { name: 'Multiplayer match' })).toBeVisible()
   expect(screen.getByText('CPU difficulty: Standard')).toBeVisible()
+  expect(screen.getByText('Board: 15 × 13')).toBeVisible()
+  expect(screen.queryByRole('combobox', { name: 'Board size' })).not.toBeInTheDocument()
   expect(screen.getByLabelText('Room invitation code')).toHaveTextContent('ABCDEFGH')
   expect(screen.getByRole('group', { name: 'Round wins for Player two (CPU)' })).toBeVisible()
   expect(screen.getByRole('group', { name: 'Round wins for Player three' })).toBeVisible()

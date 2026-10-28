@@ -126,6 +126,7 @@ pub struct State {
     assignment: RoundAssignment,
     last_teleport_tick: Option<Tick>,
     construction_tick: Tick,
+    randomness: Option<Box<random::SimulationRandomness>>,
 }
 
 impl State {
@@ -151,6 +152,37 @@ impl State {
         tick: Tick,
         assignment: RoundAssignment,
     ) -> Result<Self, StateError> {
+        Self::new_at_tick_with_assignment_and_randomness(
+            rules, world, actors, tick, assignment, None,
+        )
+    }
+
+    pub fn new_at_tick_with_assignment_and_seed(
+        rules: RulesConfig,
+        world: World,
+        actors: impl Into<Vec<ActorInit>>,
+        tick: Tick,
+        assignment: RoundAssignment,
+        seed: SimulationSeed,
+    ) -> Result<Self, StateError> {
+        Self::new_at_tick_with_assignment_and_randomness(
+            rules,
+            world,
+            actors,
+            tick,
+            assignment,
+            Some(Box::new(random::SimulationRandomness::new(seed))),
+        )
+    }
+
+    fn new_at_tick_with_assignment_and_randomness(
+        rules: RulesConfig,
+        world: World,
+        actors: impl Into<Vec<ActorInit>>,
+        tick: Tick,
+        assignment: RoundAssignment,
+        randomness: Option<Box<random::SimulationRandomness>>,
+    ) -> Result<Self, StateError> {
         let mut actors = actors.into();
         let player_count = PlayerCount::try_from(actors.len())
             .map_err(|()| StateError::InvalidPlayerCount(actors.len()))?;
@@ -167,9 +199,8 @@ impl State {
             });
         }
         let enabled = rules.enabled_items();
-        let unsupported_multiplayer_items = enabled.contains_teleporter();
-        if player_count != PlayerCount::Two && unsupported_multiplayer_items {
-            return Err(StateError::UnsupportedEnabledItems(enabled));
+        if rules.version() >= 6 && enabled.contains_teleporter() && randomness.is_none() {
+            return Err(StateError::MissingSimulationRandomness);
         }
         let mut ids = BTreeSet::new();
         for actor in &actors {
@@ -268,6 +299,7 @@ impl State {
             assignment,
             last_teleport_tick: None,
             construction_tick: tick,
+            randomness: (rules.version() >= 6).then_some(randomness).flatten(),
         })
     }
 }
@@ -291,11 +323,14 @@ mod oil_step;
 mod pickup_step;
 #[path = "simulation_punch.rs"]
 mod punch;
+#[path = "simulation_random.rs"]
+mod random;
 #[path = "simulation_shove.rs"]
 mod shove;
 #[path = "shove_geometry.rs"]
 mod shove_geometry;
 
+pub use random::{SIMULATION_RANDOMNESS_VERSION, SimulationSeed};
 pub(crate) use shove_geometry::stationary_contact_entry;
 #[path = "simulation_step.rs"]
 mod step;

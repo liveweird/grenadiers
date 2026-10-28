@@ -111,7 +111,7 @@ fn every_supported_item_and_the_combined_mask_construct_and_step_for_three_and_f
 }
 
 #[test]
-fn punch_and_bracelet_are_multiplayer_enabled_while_teleporter_remains_blocked() {
+fn punch_and_bracelet_need_no_seed_while_teleporter_requires_one() {
     for count in [PlayerCount::Three, PlayerCount::Four] {
         for enabled in [EnabledItems::PUNCH, EnabledItems::BRACELET] {
             let mut game = state(count, enabled);
@@ -123,10 +123,28 @@ fn punch_and_bracelet_are_multiplayer_enabled_while_teleporter_remains_blocked()
                 World::new(arena(count)),
                 actors(count)
             ),
-            Err(StateError::UnsupportedEnabledItems(
-                EnabledItems::TELEPORTER
-            ))
+            Err(StateError::MissingSimulationRandomness)
         );
+        let mut seeded = State::new_at_tick_with_assignment_and_seed(
+            rules(EnabledItems::TELEPORTER),
+            World::new(arena(count)),
+            actors(count),
+            Tick(0),
+            RoundAssignment::first(),
+            crate::game::SimulationSeed::new([7; 32]),
+        )
+        .unwrap();
+        assert_eq!(seeded.step(&[]).unwrap().traces.len(), count.get());
+        let mut all_items = State::new_at_tick_with_assignment_and_seed(
+            rules(EnabledItems::ALL),
+            World::new(arena(count)),
+            actors(count),
+            Tick(0),
+            RoundAssignment::first(),
+            crate::game::SimulationSeed::new([8; 32]),
+        )
+        .unwrap();
+        assert_eq!(all_items.step(&[]).unwrap().traces.len(), count.get());
     }
 }
 

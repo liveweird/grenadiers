@@ -1,14 +1,15 @@
 use std::collections::BTreeSet;
+use std::num::NonZeroU32;
 
 use super::{ActorInit, InputAction, SeatInput, State};
 use crate::game::arena::{ARENA_CELL_COUNT, ARENA_HEIGHT, ARENA_WIDTH, Arena, Terrain};
 use crate::game::{
-    Bomb, BombTrigger, CellId, Direction, EnabledItems, EntityId, Equipment, Position, RulesConfig,
-    SeatId, SpeedLevel, Tick, World,
+    Bomb, BombTrigger, CellId, Direction, EnabledItems, EntityId, Equipment, PlayerCount, Position,
+    RoundAssignment, RulesConfig, SeatId, SpeedLevel, Tick, World,
 };
 use crate::room::RoomSettings;
 
-fn arena() -> Arena {
+fn arena(count: PlayerCount) -> Arena {
     let mut terrain = [Terrain::Floor; ARENA_CELL_COUNT];
     for row in 0..ARENA_HEIGHT {
         for column in 0..ARENA_WIDTH {
@@ -17,24 +18,48 @@ fn arena() -> Arena {
             }
         }
     }
-    Arena::new(
-        terrain,
-        BTreeSet::new(),
-        [
-            CellId::new(1, 1), CellId::new(13, 1),
-            CellId::new(1, 11), CellId::new(13, 11),
-        ],
-    ).unwrap()
+    let corners = [
+        CellId::new(1, 1), CellId::new(13, 1),
+        CellId::new(1, 11), CellId::new(13, 11),
+    ];
+    Arena::new(terrain, BTreeSet::new(), corners[..count.get()].to_vec()).unwrap()
 }
 
 fn state(enabled: EnabledItems, placements: [(Position, Direction); 4]) -> State {
+    state_with_round(enabled, placements, 1)
+}
+
+fn state_with_round(
+    enabled: EnabledItems,
+    placements: [(Position, Direction); 4],
+    round: u32,
+) -> State {
     let actors: Vec<_> = SeatId::ALL.into_iter().enumerate().map(|(index, seat)| ActorInit {
         id: EntityId(10 + index as u32), seat,
         position: placements[index].0, heading: placements[index].1, speed: SpeedLevel::Base,
     }).collect();
-    State::new(
+    State::new_at_tick_with_assignment(
         RulesConfig::multiplayer_v6(RoomSettings::DEFAULT.with_enabled_items(enabled)),
-        World::new(arena()), actors,
+        World::new(arena(PlayerCount::Four)), actors, Tick(0),
+        RoundAssignment::new(NonZeroU32::new(round).unwrap()),
+    ).unwrap()
+}
+
+fn state_three(
+    enabled: EnabledItems,
+    placements: [(Position, Direction); 3],
+    round: u32,
+) -> State {
+    let actors: Vec<_> = PlayerCount::Three.seats().iter().enumerate().map(|(index, &seat)| {
+        ActorInit {
+            id: EntityId(10 + index as u32), seat, position: placements[index].0,
+            heading: placements[index].1, speed: SpeedLevel::Base,
+        }
+    }).collect();
+    State::new_at_tick_with_assignment(
+        RulesConfig::multiplayer_v6(RoomSettings::DEFAULT.with_enabled_items(enabled)),
+        World::new(arena(PlayerCount::Three)), actors, Tick(0),
+        RoundAssignment::new(NonZeroU32::new(round).unwrap()),
     ).unwrap()
 }
 
@@ -210,4 +235,74 @@ fn three_distinct_punches_with_one_common_landing_are_all_rejected() {
     assert_eq!(game.world.bombs[&EntityId(91)].cell(), CellId::new(8, 5));
     assert_eq!(game.world.bombs[&EntityId(92)].cell(), CellId::new(5, 2));
     assert!(game.actors.iter().all(|actor| actor.last_successful_punch_tick().is_none()));
+}
+
+#[test]
+fn three_player_step_integrates_punch_and_bracelet_in_one_update() {
+    let enabled = EnabledItems::from_bits(
+        EnabledItems::PUNCH.bits() | EnabledItems::BRACELET.bits(),
+    ).unwrap();
+    let mut game = state_three(enabled, [
+        (Position::center(CellId::new(4, 5)), Direction::East),
+        (Position { x: 4_096, y: 7_168 }, Direction::East),
+        (Position { x: 4_736, y: 7_168 }, Direction::West),
+    ], 1);
+    game.world.bombs.insert(EntityId(90), bomb(90, CellId::new(5, 5)));
+    game.replace_actor_equipment(SeatId::One, Equipment::Punch);
+    game.replace_actor_equipment(SeatId::Two, Equipment::Bracelet);
+
+    let report = game.step(&[
+        use_equipment(SeatId::One), press(SeatId::Two, Direction::East),
+    ]).unwrap();
+
+    assert_eq!(game.world.bombs[&EntityId(90)].cell(), CellId::new(8, 5));
+    assert_eq!(report.forced_movements.len(), 1);
+    assert_eq!(report.forced_movements[0].pusher, SeatId::Two);
+    assert_eq!(report.forced_movements[0].seat, SeatId::Three);
+}
+
+#[test]
+fn nonfirst_round_priority_controls_three_player_punch_and_bracelet_claims() {
+    let mut punch = state_three(EnabledItems::PUNCH, [
+        (Position::center(CellId::new(4, 5)), Direction::East),
+        (Position::center(CellId::new(6, 5)), Direction::West),
+        (Position::center(CellId::new(5, 4)), Direction::South),
+    ], 2);
+    punch.world.bombs.insert(EntityId(90), bomb(90, CellId::new(5, 5)));
+    for seat in PlayerCount::Three.seats() {
+        punch.replace_actor_equipment(*seat, Equipment::Punch);
+    }
+    punch.step(&[
+        use_equipment(SeatId::One), use_equipment(SeatId::Two), use_equipment(SeatId::Three),
+    ]).unwrap();
+    assert_eq!(punch.world.bombs[&EntityId(90)].cell(), CellId::new(2, 5));
+    assert_eq!(punch.actors[1].last_successful_punch_tick(), Some(Tick(1)));
+
+    let mut bracelet = state_three(EnabledItems::BRACELET, [
+        (Position { x: 4_096, y: 4_096 }, Direction::East),
+        (Position { x: 4_736, y: 4_096 }, Direction::West),
+        (Position { x: 4_096, y: 4_096 }, Direction::East),
+    ], 3);
+    bracelet.replace_actor_equipment(SeatId::One, Equipment::Bracelet);
+    bracelet.replace_actor_equipment(SeatId::Three, Equipment::Bracelet);
+    let report = bracelet.step(&[
+        press(SeatId::One, Direction::East), press(SeatId::Three, Direction::East),
+    ]).unwrap();
+    assert_eq!(report.forced_movements.len(), 1);
+    assert_eq!(report.forced_movements[0].pusher, SeatId::Three);
+}
+
+#[test]
+fn unequal_contact_times_choose_earliest_victim_before_round_priority() {
+    let mut game = state_three(EnabledItems::BRACELET, [
+        (Position { x: 4_096, y: 4_096 }, Direction::East),
+        (Position { x: 4_736, y: 3_696 }, Direction::West),
+        (Position { x: 4_766, y: 4_496 }, Direction::West),
+    ], 3);
+    game.replace_actor_equipment(SeatId::One, Equipment::Bracelet);
+
+    let report = game.step(&[press(SeatId::One, Direction::East)]).unwrap();
+
+    assert_eq!(report.forced_movements.len(), 1);
+    assert_eq!(report.forced_movements[0].seat, SeatId::Two);
 }

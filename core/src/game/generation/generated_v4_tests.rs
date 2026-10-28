@@ -53,6 +53,106 @@ fn all_presets_and_participant_counts_generate_checked_arenas() {
 }
 
 #[test]
+fn seeded_generation_is_reproducible_and_records_the_raw_seed() {
+    let seed = [31; 32];
+    let generation_config = config(BoardSize::ThirteenByEleven, PlayerCount::Three, 7);
+    let first =
+        generate_variable_multiplayer_arena(seed, EnabledItems::ALL, generation_config).unwrap();
+    let second =
+        generate_variable_multiplayer_arena(seed, EnabledItems::ALL, generation_config).unwrap();
+
+    assert_eq!(first, second);
+    assert_eq!(first.record().seed(), seed);
+    assert_eq!(first.record().version(), VARIABLE_GENERATOR_VERSION);
+    assert!(!first.record().fallback_used());
+}
+
+#[test]
+fn seeded_outputs_match_version_four_goldens_for_each_preset() {
+    let eleven = generate_variable_multiplayer_arena(
+        [0; 32],
+        EnabledItems::EMPTY,
+        config(BoardSize::ElevenByNine, PlayerCount::Two, 1),
+    )
+    .unwrap();
+    let thirteen = generate_variable_multiplayer_arena(
+        [1; 32],
+        EnabledItems::ALL,
+        config(BoardSize::ThirteenByEleven, PlayerCount::Three, 2),
+    )
+    .unwrap();
+    let fifteen = generate_variable_multiplayer_arena(
+        [2; 32],
+        EnabledItems::OIL_BARREL,
+        config(BoardSize::FifteenByThirteen, PlayerCount::Four, 3),
+    )
+    .unwrap();
+
+    assert_eq!(
+        signature(&eleven),
+        "..##.##../.X#X#X#X./C.#.#.#.C/.X#X#X#X./C.#.#.#.C/.X#X#X#X./..##.##.."
+    );
+    assert_eq!(
+        signature(&thirteen),
+        "..#..#..#../.X.X#X#X.X./.#.II#II.#./OX#X.X.X#XO/##I##I##I##/OX#X.X.X#XO/.#.II#II.#./.X.X#X#X.X./..#..#..#.."
+    );
+    assert_eq!(
+        signature(&fifteen),
+        "..#R#####R#../.X#X#X.X#X#X./####S...S####/.X#X.X#X.X#X./O###.#.#.###O/#X#X.XSX.X#X#/O###.#.#.###O/.X#X.X#X.X#X./####S...S####/.X#X#X.X#X#X./..#R#####R#.."
+    );
+}
+
+#[test]
+fn three_players_omit_each_corner_in_order_on_every_preset() {
+    for board in [
+        BoardSize::ElevenByNine,
+        BoardSize::ThirteenByEleven,
+        BoardSize::FifteenByThirteen,
+    ] {
+        let corners = interior_corners(board);
+        for round in 1..=4 {
+            let generated = generate_variable_multiplayer_arena(
+                [round as u8; 32],
+                EnabledItems::EMPTY,
+                config(board, PlayerCount::Three, round),
+            )
+            .unwrap();
+            let omitted = ((round - 1) as usize + 3) % 4;
+            let expected = corners
+                .into_iter()
+                .enumerate()
+                .filter_map(|(index, corner)| (index != omitted).then_some(corner))
+                .collect::<Vec<_>>();
+            assert_eq!(generated.arena().spawns(), expected);
+        }
+    }
+}
+
+#[test]
+fn four_player_assignment_rotates_seats_across_every_corner() {
+    let board = BoardSize::ElevenByNine;
+    let corners = interior_corners(board);
+    for round in 1..=4 {
+        let generation_config = config(board, PlayerCount::Four, round);
+        let generated = generate_variable_multiplayer_arena(
+            [round as u8; 32],
+            EnabledItems::EMPTY,
+            generation_config,
+        )
+        .unwrap();
+        for seat in PlayerCount::Four.seats() {
+            let expected = corners[(seat.index() + (round - 1) as usize) % 4];
+            assert_eq!(
+                generation_config
+                    .assignment
+                    .spawn_for(generated.arena(), *seat),
+                Some(expected)
+            );
+        }
+    }
+}
+
+#[test]
 fn generated_board_has_borders_pillars_reserved_floors_and_reflections() {
     let board = BoardSize::ElevenByNine;
     let generated = generate_variable_multiplayer_arena(
@@ -144,4 +244,27 @@ fn exhausted_draw_source_uses_dimension_correct_empty_fallback() {
             .spawns()
             .contains(&CellId::new(board.width() - 2, board.height() - 2))
     );
+}
+
+fn signature(generated: &GeneratedArena) -> String {
+    let arena = generated.arena();
+    let mut rows = Vec::new();
+    for row in 1..arena.height() - 1 {
+        let mut encoded = String::new();
+        for column in 1..arena.width() - 1 {
+            let cell = CellId::new(column, row);
+            encoded.push(match generated.concealed_pickups().get(&cell) {
+                Some(PickupKind::BombCapacity) => 'C',
+                Some(PickupKind::BlastRange) => 'R',
+                Some(PickupKind::MovementSpeed) => 'S',
+                Some(PickupKind::OilBarrel) => 'O',
+                Some(_) => 'I',
+                None if arena.blocks().contains(&cell) => '#',
+                None if arena.terrain(cell) == Some(Terrain::Wall) => 'X',
+                None => '.',
+            });
+        }
+        rows.push(encoded);
+    }
+    rows.join("/")
 }

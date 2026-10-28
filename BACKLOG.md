@@ -27,8 +27,13 @@ repeated approval for routine implementation choices. Entries are not delivery-d
 
 - [next] **BOARD-SIZE — variable board dimensions.** Allow the game board size to be configured;
   define supported sizes and bounds during design. Adapt terrain/item generation, fair spawn
-  placement, CPU navigation, rendering and transport/replay limits. Verify supported board sizes
-  with two-, three- and four-player lineups.
+  placement, CPU navigation, rendering and transport/replay limits. Activate the existing 11×9,
+  13×11 and 15×13 presets, keeping 15×13 as the default and size immutable after room creation.
+  Verify each preset with two-, three- and four-player lineups.
+  - **BS2 — CPU and publication:** dimension-aware observations, forecasts and routes; checked
+    private/world/event bounds before recipient filtering; preserve historical replay profiles.
+  - **BS3 — live boards:** creation controls, runtime/generator selection, shared private replay
+    profile and native human/CPU, reconnect, rematch and rendering acceptance for every preset.
 
 ## Animation and arena environment
 

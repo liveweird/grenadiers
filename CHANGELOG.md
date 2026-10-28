@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+## 0.3.107 — 2026-10-28
+
+- Add a test-only format-4 recorder/replayer for configured multiplayer accepted inputs,
+  checked policy-17 provenance and independently derived per-round simulation randomness.
+- Verify exact 2–4-player state/RNG replay, departures, grace/rematch transitions, admission
+  and input fencing, physical-round markers, memory bounds and incomplete construction.
+- Keep production replay recording/export disabled and historical formats 1–3 unchanged.
+
 ## 0.3.106 — 2026-10-28
 
 - Add rules-aware private CPU observations for two-to-four actors and up to 32 bombs,

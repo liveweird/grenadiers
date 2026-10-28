@@ -51,7 +51,10 @@ pub fn validate_room_view(room: &RoomView) -> Result<(), ProjectionError> {
     if room.seats.len() != count || room.scores.len() != count || !(2..=4).contains(&count) {
         return Err(ProjectionError::InvalidExpandedBinding);
     }
-    if room.rules_version.get() < 6 && count != 2 {
+    if room.rules_version.get() < 6
+        && (count != 2
+            || room.configuration.domain().board() != crate::room::BoardSize::FifteenByThirteen)
+    {
         return Err(ProjectionError::InvalidRules);
     }
     validate_identity_and_settings(room)?;

@@ -22,10 +22,8 @@ fn validate_clock(world: &WorldFacts) -> Result<(), ProjectionError> {
 
 fn validate_arena(world: &WorldFacts) -> Result<(), ProjectionError> {
     let arena = &world.arena;
-    if arena.width != 15
-        || arena.height != 13
-        || arena.terrain.len() != crate::protocol::ARENA_TERRAIN_CELLS
-        || arena.blocks.len() > crate::protocol::MAX_BLOCKS
+    super::projection_geometry::validate_dimensions(world)?;
+    if arena.blocks.len() > crate::protocol::MAX_BLOCKS
         || !strict_cells(&arena.blocks)
         || arena
             .blocks
@@ -136,11 +134,7 @@ fn validate_result(world: &WorldFacts) -> Result<(), ProjectionError> {
 }
 
 pub(super) fn terrain_at(world: &WorldFacts, cell: crate::protocol::Cell) -> Option<Terrain> {
-    world
-        .arena
-        .terrain
-        .get(usize::from(cell.row()) * usize::from(world.arena.width) + usize::from(cell.column()))
-        .copied()
+    super::projection_geometry::terrain_at(world, cell)
 }
 
 pub(super) fn cell_key(cell: crate::protocol::Cell) -> (u8, u8) {

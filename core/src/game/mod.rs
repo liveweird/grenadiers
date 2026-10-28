@@ -73,7 +73,7 @@ pub(crate) use oil::OilState;
 pub use oil::{MAX_OIL_BARRELS, OilBarrelState};
 pub use pickups::{Pickup, PickupKind, PickupLayer, PickupPlacementError};
 pub(crate) use punch_geometry::{
-    adjacent_cell as punch_adjacent_cell, landing_candidates as punch_landing_candidates,
+    adjacent_cell as punch_adjacent_cell,
     landing_candidates_for_board as punch_landing_candidates_for_board,
     landing_is_open as punch_landing_is_open,
 };

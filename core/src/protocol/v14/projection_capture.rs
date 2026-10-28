@@ -351,11 +351,8 @@ fn validate_capture(world: &WorldFacts, reports: &[ReportFacts]) -> Result<(), P
     let player_count =
         game::PlayerCount::try_from(count).map_err(|()| ProjectionError::InvalidActors)?;
     let audience = game::EventAudience::all(player_count);
-    if world.arena.width != 15
-        || world.arena.height != 13
-        || world.arena.terrain.len() != 195
-        || world.bombs.len() > super::MAX_BOMBS
-    {
+    super::projection_geometry::validate_dimensions(world)?;
+    if world.bombs.len() > super::MAX_BOMBS {
         return Err(ProjectionError::InvalidArena);
     }
     if world

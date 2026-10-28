@@ -23,6 +23,7 @@ pub(crate) fn adjacent_cell(cell: CellId, direction: Direction) -> Option<CellId
     }
 }
 
+#[cfg(test)]
 pub(crate) fn landing_candidates(
     source: CellId,
     direction: Direction,

@@ -1,0 +1,105 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://grenadiers.local/schemas/realtime-v1.json",
+  "title": "Grenadiers realtime protocol v1",
+  "description": "Diagnostic transport only. Capacity describes the initial future per-match limit, not a reservation or connection limit.",
+  "$ref": "#/$defs/ServerMessage",
+  "$defs": {
+    "ClientMessage": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/Ping"
+        }
+      ]
+    },
+    "ServerMessage": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/Welcome"
+        },
+        {
+          "$ref": "#/$defs/Pong"
+        },
+        {
+          "$ref": "#/$defs/Error"
+        }
+      ]
+    },
+    "Ping": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "sequence"
+      ],
+      "properties": {
+        "type": {
+          "const": "ping"
+        },
+        "sequence": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647
+        }
+      }
+    },
+    "Welcome": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "protocolVersion",
+        "maxPlayers"
+      ],
+      "properties": {
+        "type": {
+          "const": "welcome"
+        },
+        "protocolVersion": {
+          "const": 1
+        },
+        "maxPlayers": {
+          "const": 2
+        }
+      }
+    },
+    "Pong": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "sequence"
+      ],
+      "properties": {
+        "type": {
+          "const": "pong"
+        },
+        "sequence": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647
+        }
+      }
+    },
+    "Error": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "code",
+        "message"
+      ],
+      "properties": {
+        "type": {
+          "const": "error"
+        },
+        "code": {
+          "const": "invalidMessage"
+        },
+        "message": {
+          "const": "Invalid client message"
+        }
+      }
+    }
+  }
+}

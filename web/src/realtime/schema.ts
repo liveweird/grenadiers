@@ -11,8 +11,8 @@ export interface Ping {
 
 export interface Welcome {
   "type": "welcome";
-  "protocolVersion": 1;
-  "maxPlayers": 2;
+  "protocolVersion": 2;
+  "maxPlayers": 4;
 }
 
 export interface Pong {

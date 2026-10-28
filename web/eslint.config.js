@@ -12,6 +12,7 @@ export default defineConfig([
     'coverage',
     'src/api/schema.ts',
     'src/realtime/schema.ts',
+    'src/realtime/v1/schema.ts',
     'src/game/schema.ts',
     'src/game/v3/schema.ts',
     'src/game/v4/schema.ts',

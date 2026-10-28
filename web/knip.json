@@ -4,6 +4,14 @@
     "src/validation/generated/*.d.mts"
   ],
   "ignoreIssues": {
+    "src/realtime/schema.ts": [
+      "exports",
+      "types"
+    ],
+    "src/realtime/v1/schema.ts": [
+      "exports",
+      "types"
+    ],
     "src/game/schema.ts": [
       "exports",
       "types"

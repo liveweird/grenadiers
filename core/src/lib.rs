@@ -10,10 +10,10 @@ pub mod room;
 use serde::{Deserialize, Deserializer, Serialize, de::Error as _};
 
 /// Protocol version understood by this server.
-pub const PROTOCOL_VERSION: u16 = 1;
+pub const PROTOCOL_VERSION: u16 = 2;
 
 /// Initial game capacity. This does not limit transport connections.
-pub const MAX_PLAYERS: u8 = 2;
+pub const MAX_PLAYERS: u8 = 4;
 
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
 #[serde(tag = "type", rename_all = "camelCase", deny_unknown_fields)]
@@ -86,7 +86,7 @@ mod tests {
     fn serializes_protocol_messages() {
         assert_eq!(
             serde_json::to_value(ServerMessage::welcome()).unwrap(),
-            serde_json::json!({"type": "welcome", "protocolVersion": 1, "maxPlayers": 2})
+            serde_json::json!({"type": "welcome", "protocolVersion": 2, "maxPlayers": 4})
         );
         assert_eq!(
             serde_json::to_value(ServerMessage::Pong { sequence: 7 }).unwrap(),

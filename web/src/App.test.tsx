@@ -288,8 +288,8 @@ describe('App game flow', () => {
     await user.click(screen.getByRole('button', { name: 'Connect' }))
     const socket = appSockets.find((candidate) => candidate.url.endsWith('/api/v1/ws'))!
     act(() => socket.emit('open'))
-    act(() => socket.message({ type: 'welcome', protocolVersion: 1, maxPlayers: 2 }))
-    expect(await screen.findByText('Protocol v1 · up to 2 players')).toBeVisible()
+    act(() => socket.message({ type: 'welcome', protocolVersion: 2, maxPlayers: 4 }))
+    expect(await screen.findByText('Protocol v2 · up to 4 players')).toBeVisible()
     await user.click(screen.getByRole('button', { name: 'Send ping' }))
     expect(socket.sent).toEqual(['{"type":"ping","sequence":1}'])
     act(() => socket.message({ type: 'pong', sequence: 1 }))

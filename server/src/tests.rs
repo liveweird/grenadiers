@@ -41,6 +41,10 @@ fn realtime_contract() -> Value {
     serde_json::from_str(include_str!("../../api/realtime.schema.json")).unwrap()
 }
 
+fn archived_realtime_contract() -> Value {
+    serde_json::from_str(include_str!("../../api/realtime-v1.schema.json")).unwrap()
+}
+
 fn assert_valid(schema: &Value, instance: &Value) {
     let validator = validator_for(schema).unwrap();
     let errors = validator
@@ -48,6 +52,25 @@ fn assert_valid(schema: &Value, instance: &Value) {
         .map(|error| error.to_string())
         .collect::<Vec<_>>();
     assert!(errors.is_empty(), "schema errors: {errors:?}");
+}
+
+#[test]
+fn diagnostic_contract_versions_are_closed_and_distinct() {
+    let current = validator_for(&realtime_contract()).unwrap();
+    let archived = validator_for(&archived_realtime_contract()).unwrap();
+    let v2 = json!({"type": "welcome", "protocolVersion": 2, "maxPlayers": 4});
+    let v1 = json!({"type": "welcome", "protocolVersion": 1, "maxPlayers": 2});
+
+    assert!(current.is_valid(&v2));
+    assert!(!current.is_valid(&v1));
+    assert!(archived.is_valid(&v1));
+    assert!(!archived.is_valid(&v2));
+    assert!(!archived.is_valid(&json!({
+        "type": "welcome",
+        "protocolVersion": 1,
+        "maxPlayers": 2,
+        "unexpected": true
+    })));
 }
 
 async fn within<T>(future: impl Future<Output = T>) -> T {
@@ -273,7 +296,12 @@ async fn live_sockets_are_concurrent_and_enforce_the_protocol() {
     let contract = realtime_contract();
 
     for socket in [&mut first, &mut second] {
-        assert_valid(&contract, &next_json(socket).await);
+        let welcome = next_json(socket).await;
+        assert_eq!(
+            welcome,
+            json!({"type": "welcome", "protocolVersion": 2, "maxPlayers": 4})
+        );
+        assert_valid(&contract, &welcome);
     }
 
     within(first.send(TungsteniteMessage::Text(

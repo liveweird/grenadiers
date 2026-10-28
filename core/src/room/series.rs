@@ -375,6 +375,9 @@ impl MatchSeries {
 #[path = "series_terminal.rs"]
 mod terminal;
 
+#[path = "series_facts.rs"]
+pub(in crate::room) mod facts;
+
 #[cfg(test)]
 #[path = "series_tests.rs"]
 mod tests;

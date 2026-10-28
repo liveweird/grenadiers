@@ -44,10 +44,6 @@ fn validate_seats(room: &RoomView) -> Result<(), ProjectionError> {
         RoomPhase::MatchResult { rematch_at, .. } => Some(rematch_at),
         _ => None,
     };
-    let prematch = matches!(
-        room.phase,
-        RoomPhase::Waiting | RoomPhase::Countdown { .. } | RoomPhase::Interrupted { .. }
-    );
     if room.seats.iter().any(|seat| {
         let cpu = matches!(seat.controller, Controller::Cpu { .. });
         let expected_cpu_ready =
@@ -63,14 +59,6 @@ fn validate_seats(room: &RoomView) -> Result<(), ProjectionError> {
                             || rematch_at.is_none()
                             || rematch_at.is_some_and(|at| room.tick < at))
             }
-            || prematch
-                && !matches!(
-                    seat.connection,
-                    ConnectionStatus::Vacant
-                        | ConnectionStatus::Connected
-                        | ConnectionStatus::Expired
-                        | ConnectionStatus::ServerControlled
-                )
             || !valid_disconnect(room, seat.connection)
     }) || rematch_consensus(room)
     {

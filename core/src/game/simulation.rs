@@ -334,7 +334,9 @@ mod shove;
 mod shove_geometry;
 
 pub use participation::RoundActorInit;
-pub use random::{SIMULATION_RANDOMNESS_VERSION, SimulationSeed};
+pub use random::{
+    SIMULATION_RANDOMNESS_VERSION, SIMULATION_SEED_DERIVATION_VERSION, SimulationSeed,
+};
 pub(crate) use shove_geometry::stationary_contact_entry;
 #[path = "simulation_step.rs"]
 mod step;

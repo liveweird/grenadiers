@@ -23,12 +23,16 @@ pub mod configuration;
 pub mod match_lifecycle;
 pub mod participants;
 pub mod reconnect;
+pub mod roster;
 pub mod series;
 pub mod settings;
 
 pub use configuration::{BoardSize, RoomConfiguration, RoomConfigurationError, SeatControl};
 pub use match_lifecycle::{CountdownKind, MatchChange, MatchError, MatchLifecycle, MatchPhase};
 pub use participants::{ControllerKind, CpuDifficulty, CpuPolicy, CpuProfile, RoomMode};
+pub use roster::{
+    ROSTER_LIFECYCLE_PROFILE, RosterError, RosterMatchLifecycle, RosterParticipant, RosterUpdate,
+};
 pub use settings::{RoomSettings, SettingsError};
 
 use crate::game::{RoundResult, SeatId, Tick};

@@ -17,8 +17,9 @@ The current sheet is a Napoleonic redraw generated with ChatGPT; see its
 Artists can use `npm --prefix e2e run art:template -- --out target/art-template` and
 `scripts/gates.sh art-atlas` after installing the documented Playwright Chromium prerequisite.
 
-The **two-player arena match is playable**. Create a room, share its invitation,
-join from another browser, and both choose Ready. Select the courtyard to move with arrows
+The **two-to-four-player arena match is playable** with human and CPU-controlled seats.
+Create a custom lineup, share its invitation with the other humans, and choose Ready.
+Every match includes at least one human; CPUs join and ready automatically. Select the courtyard to move with arrows
 or W/A/S/D and plant bombs with Space. Rust owns the 60 Hz simulation; PixiJS draws public
 20 Hz snapshots while React/Mantine provides the room controls, scores, phase timers, results, and rematch.
 
@@ -27,16 +28,17 @@ characters, animated grenades/flames and distinct item symbols, with reduced-mot
 
 Default rooms allow turns within a quarter tile of a corridor centerline, including natural
 wall stops. The creator can adjust starting speed, turning tolerance, wins needed and fuse
-time in the lobby's shared [gameplay settings](docs/game/settings.md). New rooms enable the
-[Heart pickup](docs/game/heart.md), which absorbs one lethal blast. Disable it or choose the
-Classic settings preset for the original loadout. Enable the optional [Shield](docs/game/shield.md)
+time in the lobby's shared [gameplay settings](docs/game/settings.md). All 22 optional items
+start enabled; use the all-on/all-off buttons or individual switches to customize them. The
+[Heart pickup](docs/game/heart.md), which absorbs one lethal blast. Choose the
+Classic settings preset for the original loadout. The [Shield](docs/game/shield.md)
 for five seconds of immunity; its timer refreshes on collection. The optional
 [Golden Flame](docs/game/golden-flame.md) gives newly planted bombs maximum range for ten seconds. Optional
-[Short Fuse](docs/game/short-fuse.md) halves newly planted bomb fuses for ten seconds. The opt-in
-[Short Flame curse](docs/game/short-flame.md) limits new bombs to one adjacent cell for ten seconds. The opt-in
+[Short Fuse](docs/game/short-fuse.md) halves newly planted bomb fuses for ten seconds. The optional
+[Short Flame curse](docs/game/short-flame.md) limits new bombs to one adjacent cell for ten seconds. The optional
 [Long Fuse curse](docs/game/long-fuse.md) doubles newly planted bomb fuses for ten seconds. Optional
-[Reverse Controls](docs/game/reverse-controls.md) reverses held movement directions for ten seconds. The opt-in [Diarrhea curse](docs/game/diarrhea.md) automatically drops ordinary bombs when placement is possible for ten seconds. [Slow foot](docs/game/slow-foot.md) halves movement speed for ten seconds per independently timed stack. [Bracelet](docs/game/bracelet.md) is permanent equipment that shoves a contacted rival up to one tile after movement collision checks. [Punch](docs/game/punch.md) is permanent equipment that moves an adjacent facing bomb to the next open three-cell wrapped landing through a remappable Equipment action. [Kick](docs/game/kick.md) is permanent equipment that pushes stationary Timed and Remote bombs on a fixed cadence while preserving their fuse and ownership. [Wall Pass](docs/game/wall-pass.md) is permanent equipment for crossing breakable blocks while hard walls, bombs and hazards remain effective. [Remote Bomb](docs/game/remote-bomb.md) stores one manual bomb that waits for its owner's next bomb action. [Piercing Bomb](docs/game/piercing-bomb.md) stores one manual bomb whose blast crosses breakable blocks. [Power Bomb](docs/game/power-bomb.md) stores one manual bomb whose diamond-shaped blast ignores obstruction while preserving hard walls. [Landmine](docs/game/landmine.md) stores one passable contact mine with initial exit grace. [Invisibility Cloak](docs/game/invisibility-cloak.md) hides an active actor's spatial and loadout details from the opponent for ten seconds. [Stopwatch](docs/game/stopwatch.md) freezes the opponent's voluntary actions and pauses Timed bombs for three seconds. [Invisible Bombs](docs/game/invisible-bombs.md) hides every live bomb and its cues from the afflicted player for ten seconds. [Oil Barrel](docs/game/oil-barrel.md) reveals as a solid arena object and becomes passable fire for the rest of the round when ignited. [Teleporter](docs/game/teleporter.md) consumes an immediate pickup and swaps both living players only when both destinations are safe. Gameplay v12 requires reloading older browser
-clients after an upgrade; see the [compatibility note](docs/game/protocol-v11.md).
+[Reverse Controls](docs/game/reverse-controls.md) reverses held movement directions for ten seconds. The optional [Diarrhea curse](docs/game/diarrhea.md) automatically drops ordinary bombs when placement is possible for ten seconds. [Slow foot](docs/game/slow-foot.md) halves movement speed for ten seconds per independently timed stack. [Bracelet](docs/game/bracelet.md) is permanent equipment that shoves a contacted rival up to one tile after movement collision checks. [Punch](docs/game/punch.md) is permanent equipment that moves an adjacent facing bomb to the next open three-cell wrapped landing through a remappable Equipment action. [Kick](docs/game/kick.md) is permanent equipment that pushes stationary Timed and Remote bombs on a fixed cadence while preserving their fuse and ownership. [Wall Pass](docs/game/wall-pass.md) is permanent equipment for crossing breakable blocks while hard walls, bombs and hazards remain effective. [Remote Bomb](docs/game/remote-bomb.md) stores one manual bomb that waits for its owner's next bomb action. [Piercing Bomb](docs/game/piercing-bomb.md) stores one manual bomb whose blast crosses breakable blocks. [Power Bomb](docs/game/power-bomb.md) stores one manual bomb whose diamond-shaped blast ignores obstruction while preserving hard walls. [Landmine](docs/game/landmine.md) stores one passable contact mine with initial exit grace. [Invisibility Cloak](docs/game/invisibility-cloak.md) hides an active actor's spatial and loadout details from rivals for ten seconds. [Stopwatch](docs/game/stopwatch.md) freezes rivals' voluntary actions and pauses Timed bombs for three seconds. [Invisible Bombs](docs/game/invisible-bombs.md) hides every live bomb and its cues from the afflicted player for ten seconds. [Oil Barrel](docs/game/oil-barrel.md) reveals as a solid arena object and becomes passable fire for the rest of the round when ignited. [Teleporter](docs/game/teleporter.md) consumes an immediate pickup and swaps its collector with a living rival only when both destinations are safe. Gameplay v14 requires reloading older browser
+clients after an upgrade; see the [compatibility note](docs/game/protocol-v14.md).
 Reviewed pre-collection examples show [English desktop](docs/screenshots/invisible-bombs-desktop.png) and
 [Polish 320px reduced-motion](docs/screenshots/invisible-bombs-mobile-pl.png) presentation.
 
@@ -48,11 +50,11 @@ Optional [sound cues](docs/game/audio.md) start muted. Select **Enable sound** b
 returning from a hidden tab requires **Resume sound**. Essential game information stays visual.
 
 Reach the configured win target (three by default) to take the match. Draws award no score; automatic countdowns reset the
-world between rounds, and both players can consent to a rematch. A dropped tab can restore its
+world between rounds, and the retained humans can consent to a rematch. A dropped tab can restore its
 reserved seat for 600 server ticks using a private in-memory capability; a connected takeover
 fences the old tab. The match requires a keyboard and keeps active state and capabilities in
-one server process and browser memory. Matchmaking, durable stats, bots, and larger matches
-follow later. Read the [browser guide](docs/game/browser.md), [game specification](docs/game/README.md),
+one server process and browser memory. Boards currently use 15×13 tiles. Matchmaking and
+durable stats remain future work. Read the [browser guide](docs/game/browser.md), [game specification](docs/game/README.md),
 and [product backlog](BACKLOG.md) for behavior and planned work.
 
 ## Stack and layout

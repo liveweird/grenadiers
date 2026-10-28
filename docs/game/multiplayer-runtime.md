@@ -1,9 +1,9 @@
 # Roster runtime
 
-`server/src/game/rooms/roster_runtime/` provides a transport-independent runtime for checked
-2–4-seat configurations. It is dormant: live sockets still use the existing two-player runtime.
-The [v14 contract](protocol-v14.md) owns wire shape and recipient privacy; the
-[multiplayer design](multiplayer-design.md) owns the intended live integration.
+`server/src/game/rooms/roster_runtime/` provides the transport-independent runtime used by live
+three- and four-seat configurations. The live registry retains the established two-seat path and
+selects the roster runtime for larger rooms. The [v14 contract](protocol-v14.md) owns wire shape
+and recipient privacy; the [multiplayer design](multiplayer-design.md) records its integration.
 
 ## Lifecycle and participation
 
@@ -27,8 +27,9 @@ and commit only after the owner delivers it. Resume retains the exact new CPU pu
 
 Round construction uses rules 6, generation 3 and the actual physical-round assignment. The
 configured roster remains intact, with departed participants initially inactive. Only 15×13 is
-accepted; smaller boards fail before entropy or construction. Legacy two-player routing,
-rules 5, generation 2 and CPU policy 16 are unaffected.
+accepted; smaller boards fail before entropy or construction. Live two-player routing retains
+rules 5, generation 2 and CPU policy 16; three- and four-seat routing uses rules 6, generation 3
+and CPU policy 17.
 
 ## Boundaries and randomness
 
@@ -42,3 +43,5 @@ Simulation randomness uses an independent OS-generated private room root. Deriva
 uses ChaCha20 with the root key, the nonzero physical epoch as its 64-bit stream, and the first
 32 bytes as the round seed. Derivation does not advance shared state or depend on request order;
 arena fixtures and CPU streams cannot alter it. Roots and derived seeds redact debug output.
+The derivation is retained for replay-format-4 fixtures, but production recording and export stay
+disabled.

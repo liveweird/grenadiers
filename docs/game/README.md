@@ -4,9 +4,10 @@ This guide describes the classic Bomberman-style game loop and the Grenadiers ru
 player abilities, arena contents, bombs, damage, power-ups, enemies, bots, modes, timing and
 acceptance scenarios. Numerical tuning remains subject to playtesting.
 
-The implemented human-duel and [solo game](single-player.md) use the [headless world and movement model](movement.md),
+The implemented two-to-four-seat human/CPU configurations, including the [solo game](single-player.md),
+use the [headless world and movement model](movement.md),
 [combat](combat.md), versioned [gameplay contracts](protocol.md), authenticated [rooms](rooms.md),
-authoritative scheduling and the [browser duel](browser.md). Generated Expanded-v5 matches are
+authoritative scheduling and the [browser duel](browser.md). Generated matches are
 first-to-three by default, with upgrades, automatic round resets, consensual rematch and
 process-local reserved-seat reconnect. The [product backlog](../../BACKLOG.md) is the sole source
 for planned work and delivery status.
@@ -53,9 +54,9 @@ for current defaults and behavior, rather than treating design proposals as deli
 
 [Room settings](settings.md) covers shared starting speed, turn tolerance, match target and fuse.
 
-[Gameplay v13 compatibility](protocol-v13.md) defines the paired live wire contract, including the
-authoritative teleport position epoch. [Gameplay v14](protocol-v14.md) defines the dormant
-multiplayer contract; its presence does not enable larger live rooms. [Gameplay v10](../history/protocols/protocol-v10.md) and
+[Gameplay v14](protocol-v14.md) defines the live two-to-four-seat wire contract. The retained
+[Gameplay v13 compatibility guide](protocol-v13.md) documents its closed two-seat contract,
+including the authoritative teleport position epoch. [Gameplay v10](../history/protocols/protocol-v10.md) and
 [v9](../history/protocols/protocol-v9.md) are archived; the
 [protocol history index](../history/protocols/README.md) links every standalone historical guide.
 

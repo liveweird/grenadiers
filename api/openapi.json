@@ -322,8 +322,8 @@
     "/api/v1/ws": {
       "get": {
         "operationId": "connectRealtime",
-        "summary": "Upgrade to the version 1 diagnostic WebSocket",
-        "description": "Browser Origin must match the configured allowlist. Messages follow api/realtime.schema.json; this scaffold does not create rooms or reserve player seats. Invalid upgrades are rejected by Axum. Peer and process-global admission budgets apply independently; ordinary headers from untrusted peers cannot override transport identity.",
+        "summary": "Upgrade to the version 2 diagnostic WebSocket",
+        "description": "Browser Origin must match the configured allowlist. Messages follow api/realtime.schema.json; the welcome advertises a four-player match-capacity ceiling but does not create rooms or reserve player seats. Invalid upgrades are rejected by Axum. Peer and process-global admission budgets apply independently; ordinary headers from untrusted peers cannot override transport identity.",
         "tags": [
           "realtime"
         ],

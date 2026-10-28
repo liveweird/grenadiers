@@ -1,11 +1,13 @@
 # API guidelines
 
 These stable IDs adapt Flow's rules to Grenadiers. `api/openapi.json` is authoritative for HTTP;
-`api/realtime.schema.json` is authoritative for realtime envelopes. Implementation, contracts,
-generated TypeScript, conformance tests, and docs change together.
+`api/realtime.schema.json` is authoritative for diagnostic envelopes, and
+`api/gameplay-v14.schema.json` is authoritative for gameplay envelopes. Implementation,
+contracts, generated TypeScript, conformance tests, and docs change together.
 
-- **API-VER-001:** HTTP operations live under `/api/v<major>/`. Welcome announces protocol
-  version 1. A breaking realtime change requires an explicit version/migration decision.
+- **API-VER-001:** HTTP operations remain under `/api/v<major>/`. The diagnostic welcome announces
+  protocol version 2; authenticated gameplay accepts protocol version 14. A breaking realtime
+  change requires an explicit version/migration decision.
 - **API-STRUCT-001:** HTTP JSON success bodies are objects, with camelCase properties.
   Error responses use problem details (`type`, `title`, `status`, `detail`) and
   `application/problem+json`. Malformed upgrades can produce framework plain-text 400s;
@@ -25,8 +27,10 @@ generated TypeScript, conformance tests, and docs change together.
   the connection at the WebSocket transport boundary and need not produce an application error.
 - **API-WS-003:** Bound socket count, frames, messages, inactivity, and sends. Control ping/pong
   frames remain distinct from application ping/pong envelopes. Do not expose credentials in URLs.
-- **API-STATE-001:** Sockets do not reserve player slots. Matches are two-seat (`maxPlayers: 2`).
-  Gameplay clients submit inputs, never authoritative outcomes; see
+- **API-STATE-001:** Sockets do not reserve player slots. Matches configure two to four seats and
+  at least one human controller; the diagnostic welcome advertises the four-player capacity ceiling.
+  Two-seat matches use CPU policy 16 with rules 5, while three- and four-seat matches use CPU
+  policy 17 with rules 6. Gameplay clients submit inputs, never authoritative outcomes; see
   [live gameplay protocol](../docs/game/protocol.md).
 
 Spectral checks the machine-verifiable OpenAPI subset: explicit errors use

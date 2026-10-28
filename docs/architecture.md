@@ -1,8 +1,8 @@
 # Architecture
 
 The server provides HTTP liveness/readiness, diagnostic WebSockets, anonymous credentials,
-and authenticated authoritative two-seat matches with a configurable win target (three by
-default). React/Mantine provides room admission and
+and authenticated authoritative two-to-four-seat matches with at least one human controller
+and a configurable win target (three by default). React/Mantine provides room admission and
 the HUD; PixiJS renders public game snapshots.
 A separate deterministic simulation in `core::game` implements movement, owned bombs,
 flames, damage, and one-round outcomes. Room owners advance that simulation at a fixed
@@ -22,16 +22,18 @@ readiness checks optional PostgreSQL only when configured.
 
 ## Match-state decision
 
-One in-process task owns each room and advances a server-controlled fixed tick. Human inputs
-arrive through bounded queues; future bot adapters must use the same command boundary.
+One in-process task owns each room and advances a server-controlled fixed tick. Human inputs and
+server-owned CPU intentions arrive through the same bounded command boundary.
 The pure [CPU contracts](game/cpu-contracts.md) define controller identity, restricted
 observations, ordinary intentions and bounded decision state for that integration.
 Clients do not submit authoritative positions, damage, or outcomes.
 The owner executes bounded logical intentions; public snapshots carry the accepted results.
 
-Start with two players per match. Transport sockets are not player seats; the diagnostic
-welcome's `maxPlayers: 2` describes the initial match capacity. Support for more
-players and AI must be designed around match configuration rather than global connections.
+Matches configure two to four seats and require at least one human controller. Transport sockets
+are not player seats; the diagnostic v2 welcome's `maxPlayers: 4` describes the live match-capacity
+ceiling, not a connection limit. Two-seat matches retain CPU policy 16 and rules 5; three- and
+four-seat matches use CPU policy 17 and rules 6. Match configuration, rather than global
+connections, determines the participant roster.
 
 Active state belongs in memory. Process restarts will end active matches until recovery is
 explicitly designed. PostgreSQL can later store identities, completed results, or replays;
@@ -100,14 +102,14 @@ V4 checked room projection derives facts directly from `MatchLifecycle`; its pub
 rejects semantically impossible bounded DTOs before server adapters publish them.
 
 The active `match_runtime` server adapter owns real per-round physics, assignment-aware
-generation, epoch-fenced input, settled reconnect grace, and checked v13 publication. Result
+generation, epoch-fenced input, settled reconnect grace, and checked v14 publication. Result
 physics freezes while the global lifecycle clock and reservation deadlines advance.
 
-The active v13 client/panel shares the Pixi presentation boundary, validates v13 messages, keeps
+The active v14 client/panel shares the Pixi presentation boundary, validates v14 messages, keeps
 the resume capability only in tab memory, and renders scores, recovery, grace, and rematch from
-authoritative facts. Production routing uses v13 on the existing endpoint. Gameplay v7–v11 added
+authoritative facts. Production routing uses v14 on the existing endpoint. Gameplay v7–v11 added
 the expanded item inventory and recipient-private projections; the live contract is
-[protocol v13](game/protocol-v13.md). See [reconnect browser](game/reconnect-browser.md).
+[protocol v14](game/protocol-v14.md). See [reconnect browser](game/reconnect-browser.md).
 
 The active [bounded match owner](game/match-owner.md) adds generation-fenced admission,
 scheduled departure batches, absolute deadlines, retention, and sticky shutdown. Its closing

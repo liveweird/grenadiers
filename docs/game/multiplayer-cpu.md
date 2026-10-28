@@ -1,7 +1,7 @@
 # Multiplayer CPU foundation
 
-The shared CPU implementation supports explicit multiplayer policy v17 on rules 6. This
-foundation is dormant: live two-player rooms still select policy v16 and rules 5. The
+The shared CPU implementation uses multiplayer policy v17 on rules 6 for live three- and
+four-seat rooms. Live two-player rooms retain policy v16 and rules 5. The
 [CPU contract guide](cpu-contracts.md) describes planner boundaries; the
 [roster runtime](multiplayer-runtime.md) supplies the certified publication seam.
 
@@ -38,4 +38,5 @@ Run `cargo test -p grenadiers-core cpu:: --lib` and
 `cargo test -p grenadiers-server game::rooms::cpu:: --lib` for planner/controller regressions.
 The v14 adapter tests compare CPU facts with human recipient projections. Additional cases
 cover forecast capacity, rival interference, both difficulties, independent controllers and
-player four. Live multi-CPU scheduling belongs to the owner/socket integration, not this API.
+player four. Live multi-CPU scheduling is owned by the room owner/socket integration rather than
+this projection API.

@@ -151,6 +151,7 @@ export function GameArena(props: GameArenaProps) {
   return (
     <div
       className="game-arena"
+      style={snapshot ? { aspectRatio: `${snapshot.state.arena.width} / ${snapshot.state.arena.height}` } : undefined}
       role="region"
       aria-label={props.label}
       aria-describedby={props.instructionsId}

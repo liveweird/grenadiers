@@ -1,11 +1,11 @@
 import { controllersAvailable } from './roomControllers'
-import type { Direction, GameClientMessage, GameServerMessage, GameSettings, RoomView, Snapshot, V11ErrorCode } from '../v13/schema'
+import type { Direction, GameClientMessage, GameServerMessage, GameSettings, RoomView, Snapshot, V14ErrorCode } from '../v14/schema'
 import { initialGameClientState, type AdmissionIntent, type GameClientState, type GameFailure } from './clientTypes'
 import { ClientRecovery } from './clientRecovery'
 import { preservesTeleportHistory } from './teleportHistory'
 export { initialGameClientState, type AdmissionIntent, type GameClientState, type GameFailure } from './clientTypes'
-import { acceptableBaseline, canControl, controlIsObsolete, dependenciesWithDefaults, gameplayUrl,
-  isCurrentConnection, MAX_COUNTER, MAX_RECONNECT_ATTEMPTS, newerRoom, sessionToken,
+import { acceptableBaseline, canControl, controlIsObsolete, createConfiguration, dependenciesWithDefaults,
+  gameplayUrl, isCurrentConnection, MAX_COUNTER, MAX_RECONNECT_ATTEMPTS, newerRoom, sessionToken,
   ownSeatConnected, settlesPendingSettings, validateServerMessage, type Capability, type ControlCommand,
   type ControlFailure, type Dependencies, type PendingSettings, type RoomCommand } from './clientProtocol'
 export { gameplayUrl } from './clientProtocol'
@@ -14,10 +14,8 @@ export class GameClient {
   private generation = 0; private controller: AbortController | null = null
   private socket: WebSocket | null = null
   private nextSequence = 1; private nextAction = 1
-  private admission: AdmissionIntent | null = null
-  private capability: Capability | null = null
-  private admissionSequence: number | null = null
-  private leaveSequence: number | null = null
+  private admission: AdmissionIntent | null = null; private capability: Capability | null = null
+  private admissionSequence: number | null = null; private leaveSequence: number | null = null
   private settingsSequence: number | null = null
   private pendingSettings: PendingSettings | null = null
   private sentControls: ControlCommand[] = []
@@ -148,7 +146,7 @@ export class GameClient {
     socket.addEventListener('open', () => {
       if (!isCurrentConnection(generation, socket, this.generation, this.socket)) return
       this.update({ connection: 'authenticating' })
-      socket.send(JSON.stringify({ type: 'authenticate', protocolVersion: 13, token: credential }))
+      socket.send(JSON.stringify({ type: 'authenticate', protocolVersion: 14, token: credential }))
       credential = ''
     })
     socket.addEventListener('message', (event) => this.receive(generation, socket, event.data))
@@ -248,7 +246,7 @@ export class GameClient {
     this.update({ room: null, snapshot: null, youSeat: null, admissionBaseline: null,
       leavePending: false, settingsPending: false, failure: null })
   }
-  private acceptError(code: V11ErrorCode, sequence: number | null): void {
+  private acceptError(code: V14ErrorCode, sequence: number | null): void {
     const admissionError = sequence !== null && sequence === this.admissionSequence
     if (admissionError && this.capability && this.state.admissionPending) {
       this.acceptAdmissionError(code)
@@ -284,7 +282,9 @@ export class GameClient {
     let message: GameClientMessage
     if (this.capability) {
       message = { type: 'resumeRoom', sequence, roomId: this.capability.roomId, resumeToken: this.capability.token }
-    } else if (this.admission?.type === 'create') message = { type: 'createRoom', sequence, mode: this.admission.mode ?? { type: 'humanDuel' } }
+    } else if (this.admission?.type === 'create') {
+      message = { type: 'createRoom', sequence, configuration: createConfiguration(this.admission) }
+    }
     else if (this.admission?.type === 'join') message = { type: 'joinRoom', sequence, roomCode: this.admission.roomCode }
     else return false
     if (!this.send(message)) return false
@@ -348,7 +348,7 @@ export class GameClient {
         && this.admissionSequence === null && this.leaveSequence === null && this.capability) this.sendAdmission()
     })) this.terminal(this.recovery.hasTime() ? 'rateLimited' : 'connectionFailed', true)
   }
-  private acceptAdmissionError(code: V11ErrorCode): void {
+  private acceptAdmissionError(code: V14ErrorCode): void {
     this.admissionSequence = null
     if (code === 'rateLimited' && this.recovery.hasTime()) { this.retryThrottledResume(); return }
     this.terminal(code === 'rateLimited' ? 'connectionFailed' : code, true)

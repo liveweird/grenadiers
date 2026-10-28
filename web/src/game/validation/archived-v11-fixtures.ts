@@ -2,7 +2,7 @@
 import type { Admitted, RoomView, Snapshot } from '../v11/schema'
 import {
   admitted as liveAdmission, room as liveRoom, snapshot as liveSnapshot,
-} from '../client/testSupport'
+} from '../v13/testSupport'
 
 function archivedRoom(value: ReturnType<typeof liveRoom>): RoomView {
   const { mode, seats, ...room } = value

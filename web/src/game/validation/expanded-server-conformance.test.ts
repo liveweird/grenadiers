@@ -31,7 +31,12 @@ function frame(caseId: string): RecordValue {
 function liveMetadata(value: RecordValue): RecordValue {
   const result = structuredClone(value)
   const room = record(result.room)
-  room.mode = { type: 'humanDuel' }
+  const scores = room.scores as { one: number; two: number }
+  room.scores = [{ seat: 'one', wins: scores.one }, { seat: 'two', wins: scores.two }]
+  room.configuration = {
+    controllers: ['human', 'human'], cpuDifficulty: null, board: { width: 15, height: 13 },
+  }
+  room.settingsEditor = 'one'
   for (const seat of room.seats as RecordValue[]) seat.controller = { type: 'human' }
   return result
 }

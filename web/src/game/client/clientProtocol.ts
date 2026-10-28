@@ -1,5 +1,6 @@
-import type { Direction, GameServerMessage, GameSettings, RoomView, Seat, V11ErrorCode } from '../v13/schema'
-import { validateGameplayV13ServerMessage } from '../v13/validation'
+import type { Difficulty, Direction, GameServerMessage, GameSettings, RoomConfiguration,
+  RoomView, Seat, V14ErrorCode } from '../v14/schema'
+import { validateGameplayV14ServerMessage } from '../v14/validation'
 import type { GameClientState } from './clientTypes'
 
 export const MAX_COUNTER = 2_147_483_647
@@ -27,9 +28,20 @@ export type PendingSettings = {
   settingsRevision: number
   settings: GameSettings
 }
-export type ControlFailure = ControlCommand & { code: V11ErrorCode }
+export type ControlFailure = ControlCommand & { code: V14ErrorCode }
+type ConfigurationIntent = { configuration?: RoomConfiguration; mode?: {
+  type: 'humanDuel'
+} | { type: 'solo'; difficulty: Difficulty } }
 
 const TOKEN_PATTERN = /^[0-9a-f]{64}$/
+
+export function createConfiguration(intent: ConfigurationIntent): RoomConfiguration {
+  if (intent.configuration) return intent.configuration
+  const difficulty = intent.mode?.type === 'solo' ? intent.mode.difficulty : null
+  return difficulty === null
+    ? { controllers: ['human', 'human'], cpuDifficulty: null, board: { width: 15, height: 13 } }
+    : { controllers: ['human', 'cpu'], cpuDifficulty: difficulty, board: { width: 15, height: 13 } }
+}
 function unique<T>(values: readonly T[]): boolean {
   return new Set(values).size === values.length
 }
@@ -61,7 +73,7 @@ function roomRecipientValid(message: GameServerMessage): boolean {
 }
 
 export function validateServerMessage(value: unknown, expectedSeat: Seat | null): value is GameServerMessage {
-  const result = validateGameplayV13ServerMessage(value)
+  const result = validateGameplayV14ServerMessage(value)
   return result.valid && roomRecipientValid(result.value) && stateRecipientValid(result.value, expectedSeat)
 }
 
@@ -111,11 +123,21 @@ export function settlesPendingSettings(
 
 export function acceptableBaseline(next: RoomView, current: RoomView | null): boolean {
   return !current || (next.roomId === current.roomId && next.revision >= current.revision
-    && next.roundId >= current.roundId)
+    && next.roundId >= current.roundId && sameConfiguration(next, current))
 }
 
 export function newerRoom(next: RoomView, current: RoomView): boolean {
   return next.roomId === current.roomId && next.revision > current.revision && next.roundId >= current.roundId
+    && sameConfiguration(next, current)
+}
+
+function sameConfiguration(left: RoomView, right: RoomView): boolean {
+  return left.configuration.cpuDifficulty === right.configuration.cpuDifficulty
+    && left.configuration.board.width === right.configuration.board.width
+    && left.configuration.board.height === right.configuration.board.height
+    && left.configuration.controllers.length === right.configuration.controllers.length
+    && left.configuration.controllers.every((controller, index) =>
+      controller === right.configuration.controllers[index])
 }
 
 export function controlIsObsolete(control: ControlCommand, room: RoomView | null): boolean {

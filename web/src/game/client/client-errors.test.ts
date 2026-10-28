@@ -39,8 +39,8 @@ describe('v12 session and admission failures', () => {
     await vi.waitFor(() => expect(value.sockets).toHaveLength(1))
     const socket = value.sockets[0]
     socket.emit('open')
-    socket.message({ type: 'authenticated', protocolVersion: 13 })
-    socket.message({ type: 'authenticated', protocolVersion: 13 })
+    socket.message({ type: 'authenticated', protocolVersion: 14 })
+    socket.message({ type: 'authenticated', protocolVersion: 14 })
     expect(messages(socket).filter((message) => message.type === 'createRoom')).toHaveLength(1)
     socket.message({ ...admitted(), sequence: 2 })
     expect(value.client.getState().room).toBeNull()
@@ -171,7 +171,10 @@ describe('v12 authoritative updates and controls', () => {
     socket.message({ type: 'error', code: 'roomFull', sequence: 1 })
     expect(value.client.getState()).toMatchObject({ admissionPending: false, failure: 'roomFull' })
     expect(value.client.admit({ type: 'create' })).toBe(true)
-    expect(messages(socket).at(-1)).toEqual({ type: 'createRoom', sequence: 2, mode: { type: 'humanDuel' } })
+    expect(messages(socket).at(-1)).toEqual({
+      type: 'createRoom', sequence: 2,
+      configuration: { controllers: ['human', 'human'], cpuDifficulty: null, board: { width: 15, height: 13 } },
+    })
   })
 
   it('clears a correlated obsolete movement error after authoritative progress', async () => {

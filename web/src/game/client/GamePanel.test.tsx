@@ -284,7 +284,7 @@ describe('v12 room controls', () => {
     current.room = room(400, { type: 'result', holdUntil: 300 }, 3)
     current.room.tick = 400
     current.room.roundNumber = 2
-    current.room.scores.one = 1
+    current.room.scores[0]!.wins = 1
     current.room.lastRound = {
       roundId: 3, roundNumber: 2, endedAt: 120, result: { type: 'winner', seat: 'one' },
     }
@@ -338,7 +338,7 @@ describe('v12 room controls', () => {
       result: { type: 'winner', seat: 'one', reason: 'roundWins' },
     }, wins)
     current.room.settings.winsToFinish = wins
-    current.room.scores.one = wins
+    current.room.scores[0]!.wins = wins
     current.snapshot!.room = current.room
     renderPanel(current)
     expect(screen.getByRole('status')).toHaveTextContent(text)

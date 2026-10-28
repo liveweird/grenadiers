@@ -43,6 +43,7 @@ export async function createArenaRenderer(host: HTMLElement): Promise<ArenaRende
   let destroyed = false
   let suspended = true
   let released = false
+  let dimensions = '15x13'
   const restoreContext = (): void => {
     scene.restoreContext()
     if (!destroyed && !suspended) app.render()
@@ -82,6 +83,11 @@ export async function createArenaRenderer(host: HTMLElement): Promise<ArenaRende
   return {
     update(snapshot) {
       if (destroyed) return
+      const nextDimensions = `${snapshot.state.arena.width}x${snapshot.state.arena.height}`
+      if (nextDimensions !== dimensions) {
+        app.renderer.resize(snapshot.state.arena.width * TILE, snapshot.state.arena.height * TILE)
+        dimensions = nextDimensions
+      }
       scene.update(snapshot, performance.now())
       if (!suspended) return
       app.render()

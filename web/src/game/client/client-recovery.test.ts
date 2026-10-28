@@ -10,7 +10,7 @@ async function beginResume() {
   await vi.waitFor(() => expect(value.sockets).toHaveLength(2))
   const socket = value.sockets[1]
   socket.emit('open')
-  socket.message({ type: 'authenticated', protocolVersion: 13 })
+  socket.message({ type: 'authenticated', protocolVersion: 14 })
   return { value, socket }
 }
 
@@ -105,7 +105,7 @@ describe('v12 coordinated resume recovery', () => {
         await vi.waitFor(() => expect(value.sockets).toHaveLength(2))
         if (phase === 'admission') {
           value.sockets[1].emit('open')
-          value.sockets[1].message({ type: 'authenticated', protocolVersion: 13 })
+          value.sockets[1].message({ type: 'authenticated', protocolVersion: 14 })
         }
       }
       value.clock.advanceBy(10_000 - value.clock.now)

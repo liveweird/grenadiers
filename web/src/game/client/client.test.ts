@@ -5,6 +5,33 @@ import {
 } from './testSupport'
 import { gameplayUrl } from './client'
 
+function multiplayerAdmission(seat: 'three' | 'four', revision: number) {
+  const message = admitted(revision)
+  message.youSeat = seat
+  message.room.rulesVersion = 6
+  message.room.configuration = {
+    controllers: ['human', 'human', 'human', 'human'], cpuDifficulty: null,
+    board: { width: 15, height: 13 },
+  }
+  message.room.seats.push(
+    { seat: 'three', controller: { type: 'human' }, occupied: true, ready: false,
+      rematchReady: false, connection: { type: 'connected' } },
+    { seat: 'four', controller: { type: 'human' }, occupied: true, ready: false,
+      rematchReady: false, connection: { type: 'connected' } },
+  )
+  message.room.scores.push({ seat: 'three', wins: 0 }, { seat: 'four', wins: 0 })
+  const one = message.state?.actors[0]
+  const two = message.state?.actors[1]
+  if (!message.state || one?.type !== 'visible' || two?.type !== 'visible') {
+    throw new Error('admission fixture actors must be visible')
+  }
+  message.state.actors.push(
+    { ...one, id: 3, seat: 'three', position: { x: 512, y: 12_800 } },
+    { ...two, id: 4, seat: 'four', position: { x: 14_848, y: 512 } },
+  )
+  return message
+}
+
 describe('v12 admission and authoritative baselines', () => {
   beforeEach(() => {
     vi.stubGlobal('WebSocket', { OPEN: SocketStub.OPEN })
@@ -23,7 +50,7 @@ describe('v12 admission and authoritative baselines', () => {
     const value = harness()
     const socket = await authenticate(value, { type: 'join', roomCode: 'ABCDEFGH' })
     expect(messages(socket)).toEqual([
-      { type: 'authenticate', protocolVersion: 13, token: sessionToken },
+      { type: 'authenticate', protocolVersion: 14, token: sessionToken },
       { type: 'joinRoom', sequence: 1, roomCode: 'ABCDEFGH' },
     ])
     socket.message(admitted())
@@ -32,6 +59,40 @@ describe('v12 admission and authoritative baselines', () => {
     expect(socket.sent.join()).not.toContain(resumeToken)
     expect(localStorage).toHaveLength(0)
     expect(sessionStorage).toHaveLength(0)
+  })
+
+  it.each(['three', 'four'] as const)('admits and resumes own seat %s with controls intact', async (seat) => {
+    const value = harness()
+    const socket = await authenticate(value, { type: 'join', roomCode: 'ABCDEFGH' })
+    const initial = multiplayerAdmission(seat, 1)
+    initial.room.settings.enabledItems = ['teleporter']
+    socket.message(initial)
+    expect(value.client.getState()).toMatchObject({ youSeat: seat, connection: 'authenticated' })
+    expect(value.client.movement('east')).toBe(true)
+
+    socket.emit('close')
+    value.scheduled.shift()!()
+    await vi.waitFor(() => expect(value.sockets).toHaveLength(2))
+    const resumed = value.sockets[1]
+    resumed.emit('open')
+    resumed.message({ type: 'authenticated', protocolVersion: 14 })
+    const baseline = multiplayerAdmission(seat, 2)
+    baseline.room.settings.enabledItems = ['teleporter']
+    if (!baseline.state) throw new Error('resume fixture must contain state')
+    baseline.state.physicalTick = 8
+    baseline.state.runningUpdates = 8
+    const partner = seat === 'three' ? 2 : 3
+    Object.assign(baseline.state.actors[0]!, {
+      position: { x: 900, y: 12_000 }, lastTeleportTick: 5,
+    })
+    Object.assign(baseline.state.actors[partner]!, {
+      position: { x: 2_000, y: 700 }, lastTeleportTick: 5,
+    })
+    resumed.message(baseline)
+    expect(value.client.getState()).toMatchObject({
+      youSeat: seat, connection: 'authenticated', admissionPending: false, failure: null,
+    })
+    expect(value.client.movement('west')).toBe(true)
   })
 
   it('installs an admitted full baseline with no replayed events and continues bomb IDs', async () => {
@@ -92,9 +153,9 @@ describe('v12 admission and authoritative baselines', () => {
     await vi.waitFor(() => expect(value.sockets).toHaveLength(2))
     const resumed = value.sockets[1]
     resumed.emit('open')
-    resumed.message({ type: 'authenticated', protocolVersion: 13 })
+    resumed.message({ type: 'authenticated', protocolVersion: 14 })
     expect(messages(resumed)).toEqual([
-      { type: 'authenticate', protocolVersion: 13, token: sessionToken },
+      { type: 'authenticate', protocolVersion: 14, token: sessionToken },
       { type: 'resumeRoom', sequence: 1, roomId, resumeToken },
     ])
     expect(messages(resumed).some((message) => message.type === 'manualAction')).toBe(false)
@@ -111,7 +172,7 @@ describe('v12 admission and authoritative baselines', () => {
     await vi.waitFor(() => expect(value.sockets).toHaveLength(2))
     const resumed = value.sockets[1]
     resumed.emit('open')
-    resumed.message({ type: 'authenticated', protocolVersion: 13 })
+    resumed.message({ type: 'authenticated', protocolVersion: 14 })
     resumed.message({ type: 'roomState', room: room(6, { type: 'running' }) })
     resumed.message(snapshot(7))
     expect(value.client.getState().snapshot).toBe(retained)
@@ -197,7 +258,7 @@ describe('v12 recovery lifecycle', () => {
     await vi.waitFor(() => expect(value.sockets).toHaveLength(2))
     const resumed = value.sockets[1]
     resumed.emit('open')
-    resumed.message({ type: 'authenticated', protocolVersion: 13 })
+    resumed.message({ type: 'authenticated', protocolVersion: 14 })
     stop(resumed)
     expect(value.client.getState()).toMatchObject({
       connection: 'disconnected', room: null, snapshot: null, youSeat: null,

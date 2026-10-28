@@ -72,6 +72,7 @@ main { min-height: 100vh; }
   color: var(--color-text-primary);
   font-weight: 800;
 }
+.match-strip:has(.seat-three) { grid-template-columns: repeat(2, minmax(0, 1fr)) auto repeat(2, minmax(0, 1fr)); }
 .match-strip > span:last-child { text-align: right; }
 .match-score { display: grid; min-width: 0; font-size: .85rem; line-height: 1.15; }
 .match-score strong { font-size: 1.7rem; font-variant-numeric: tabular-nums; }
@@ -162,6 +163,8 @@ main { min-height: 100vh; }
 .lobby-controls .mantine-Button-label { white-space: normal; line-height: 1.25; }
 .lobby-controls h2 { color: var(--color-text-primary); font-size: 1.55rem; line-height: 1.1; }
 .lobby-controls > p { color: var(--color-text-secondary); line-height: 1.55; }
+.custom-match { display: grid; gap: .75rem; margin: 0; border: 1px solid var(--color-border-subtle); padding: .8rem; }
+.custom-match legend { padding-inline: .35rem; color: var(--color-text-primary); font-weight: 800; }
 .join-rule { display: flex; align-items: center; gap: .75rem; color: var(--color-text-muted); font-size: .9rem; }
 .join-rule::before, .join-rule::after { content: ""; height: 1px; flex: 1; background: var(--color-border-subtle); }
 .room-code { color: var(--color-text-primary); font-size: clamp(1.75rem, 5vw, 2.35rem); font-weight: 900; letter-spacing: .1em; }
@@ -201,6 +204,8 @@ main { min-height: 100vh; }
 .player-mark { width: 1rem; height: 1rem; border: 2px solid var(--color-border-strong); border-radius: 50%; }
 .seat-one .player-mark { background: #edb94b; }
 .seat-two .player-mark { border-radius: .15rem; background: var(--color-accent-primary); }
+.seat-three .player-mark { border-radius: .15rem 50% 50%; background: #356044; }
+.seat-four .player-mark { border-radius: 0; background: #704269; }
 .connection-note { margin-top: 1rem; color: var(--color-text-muted); }
 .connection-dot { width: .55rem; height: .55rem; border-radius: 50%; background: var(--color-accent-primary); }
 .diagnostics { margin-top: clamp(2rem, 5vw, 4rem); border-top: 1px solid #9cafb8; padding-block: 1.25rem 2rem; color: var(--color-text-secondary); }
@@ -213,6 +218,10 @@ main { min-height: 100vh; }
   .site-header > div:last-child { align-self: flex-start; }
   .game-shell { grid-template-columns: 1fr; }
   .control-column { min-height: 0; box-shadow: .3rem .3rem 0 var(--color-panel-shadow); }
+}
+@media (max-width: 360px) {
+  .match-strip, .match-strip:has(.seat-three) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .match-clock { grid-column: 1 / -1; grid-row: 1; }
 }
 @media (max-width: 420px) {
   .actor-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }

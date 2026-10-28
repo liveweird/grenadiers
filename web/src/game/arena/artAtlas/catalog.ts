@@ -2,7 +2,7 @@ import { Graphics, type Container } from 'pixi.js'
 import { makeActor } from '../actorArt'
 import { makeBomb, makeFlame, makeOilBarrel, makePickup } from '../entityArt'
 import { makeBlock, makeFloorVariant, makeWallVariant } from '../terrainArt'
-import { RENDERABLE_PICKUP_KINDS, type ActorAppearance, type Direction } from '../types'
+import { RENDERABLE_PICKUP_KINDS, type Direction, type Seat } from '../types'
 import { sourceFrame } from './layout'
 import type { ArtAnimation, ArtCatalog, ArtCatalogEntry, ArtFrame, ArtRect } from './types'
 
@@ -48,7 +48,7 @@ function entry(id: string, slot: number, factory: DrawingFactory, options: Frame
   }
 }
 
-function actorPart(appearance: ActorAppearance, select: (actor: ReturnType<typeof makeActor>) => Container): DrawingFactory {
+function actorPart(appearance: Seat, select: (actor: ReturnType<typeof makeActor>) => Container): DrawingFactory {
   return () => {
     const actor = makeActor(appearance)
     return { drawing: select(actor), owner: actor.root }

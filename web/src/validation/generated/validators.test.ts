@@ -4,9 +4,10 @@ import gameplayV11Schema from '../../../../api/gameplay-v11.schema.json'
 import gameplayV12Schema from '../../../../api/gameplay-v12.schema.json'
 import gameplayV13Schema from '../../../../api/gameplay-v13.schema.json'
 import realtimeSchema from '../../../../api/realtime.schema.json'
+import { roomId } from '../../game/client/testSupport'
 import {
-  admitted as liveAdmitted, room as liveRoom, roomId, snapshot as liveSnapshot,
-} from '../../game/client/testSupport'
+  admitted as liveAdmitted, room as liveRoom, snapshot as liveSnapshot,
+} from '../../game/v13/testSupport'
 import {
   admitted as archivedAdmitted, room as archivedRoom, snapshot as archivedSnapshot,
 } from '../../game/validation/archived-v11-fixtures'

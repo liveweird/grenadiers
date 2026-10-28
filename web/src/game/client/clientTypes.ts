@@ -1,5 +1,4 @@
-import type { RoomMode, RoomView, Seat, V11ErrorCode } from '../v13/schema'
-import type { Snapshot } from '../v13/schema'
+import type { Difficulty, RoomConfiguration, RoomView, Seat, Snapshot, V14ErrorCode } from '../v14/schema'
 
 type GameConnection =
   | 'disconnected'
@@ -14,8 +13,10 @@ type LocalFailure =
   | 'sessionFailed'
   | 'sequenceExhausted'
 
-export type GameFailure = V11ErrorCode | LocalFailure | 'incompatibleProtocol' | 'seatReplaced'
-export type AdmissionIntent = { type: 'create'; mode?: RoomMode } | { type: 'join'; roomCode: string }
+export type GameFailure = V14ErrorCode | LocalFailure | 'incompatibleProtocol' | 'seatReplaced'
+type CreatePreset = { type: 'humanDuel' } | { type: 'solo'; difficulty: Difficulty }
+export type AdmissionIntent = { type: 'create'; mode?: CreatePreset; configuration?: RoomConfiguration }
+  | { type: 'join'; roomCode: string }
 type AdmissionBaseline = { roomId: string; revision: number; tick: number; physicalTick: number | null }
 
 export interface GameClientState {

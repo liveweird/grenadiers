@@ -49,11 +49,11 @@ describe('game locale access', () => {
   it('resolves Polish and unsupported-language fallback through i18next', async () => {
     await i18n.changeLanguage('pl-PL')
     const view = render(<CopyLabel />)
-    expect(screen.getByText('Mecz dla dwóch graczy')).toBeInTheDocument()
+    expect(screen.getByText('Mecz wieloosobowy')).toBeInTheDocument()
 
     await i18n.changeLanguage('de')
     view.rerender(<CopyLabel />)
-    expect(screen.getByText('Two-player match')).toBeInTheDocument()
+    expect(screen.getByText('Multiplayer match')).toBeInTheDocument()
   })
 
   it('keeps copy identity stable until a language change replaces its content', async () => {
@@ -68,7 +68,7 @@ describe('game locale access', () => {
     const polish = copies.at(-1)
     expect(polish).not.toBe(english)
     expect(polish).toBe(resources.pl.translation.game)
-    expect(polish?.label).toBe('Mecz dla dwóch graczy')
+    expect(polish?.label).toBe('Mecz wieloosobowy')
     view.rerender(<CopyCapture capture={(copy) => copies.push(copy)} />)
     expect(copies.at(-1)).toBe(polish)
   })
@@ -87,7 +87,7 @@ describe('game locale access', () => {
 
   it('matches the legacy formatter for every current English and Polish catalog template', () => {
     const currentTemplates = [...templates(en), ...templates(pl)]
-    expect(currentTemplates).toHaveLength(44)
+    expect(currentTemplates).toHaveLength(50)
     for (const template of currentTemplates) {
       const values = interpolationValues(template)
       expect(format(template, values)).toBe(legacyFormat(template, values))

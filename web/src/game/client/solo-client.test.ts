@@ -8,10 +8,13 @@ it.each(['easy', 'standard'] as const)(
   const value = harness()
   const socket = await authenticate(value, { type: 'create', mode: { type: 'solo', difficulty } })
   expect(messages(socket).at(-1)).toEqual({
-    type: 'createRoom', sequence: 1, mode: { type: 'solo', difficulty },
+    type: 'createRoom', sequence: 1, configuration: {
+      controllers: ['human', 'cpu'], cpuDifficulty: difficulty, board: { width: 15, height: 13 },
+    },
   })
   const current = room(2)
-  current.mode = { type: 'solo', difficulty }
+  current.configuration = { controllers: ['human', 'cpu'], cpuDifficulty: difficulty,
+    board: { width: 15, height: 13 } }
   current.seats[1] = {
     seat: 'two', controller: { type: 'cpu', difficulty },
     occupied: true, ready: true, rematchReady: false, connection: { type: 'serverControlled' },
@@ -32,7 +35,8 @@ it('rejects personal admission to the CPU seat before exposing controls or retai
   const value = harness()
   const socket = await authenticate(value)
   const frame = admitted()
-  frame.room.mode = { type: 'solo', difficulty: 'standard' }
+  frame.room.configuration = { controllers: ['human', 'cpu'], cpuDifficulty: 'standard',
+    board: { width: 15, height: 13 } }
   frame.room.seats[1] = {
     seat: 'two', controller: { type: 'cpu', difficulty: 'standard' },
     occupied: true, ready: false, rematchReady: false, connection: { type: 'serverControlled' },

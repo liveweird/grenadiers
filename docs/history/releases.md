@@ -4,6 +4,22 @@ This archive preserves the older release records originally maintained in
 [`docs/releases.md`](../releases.md). Records remain in their original order; the current
 release procedure and current release record stay in the [release guide](../releases.md).
 
+## v0.3.101 — 2026-10-28
+
+[v0.3.101](https://github.com/liveweird/grenadiers/releases/tag/v0.3.101) adds checked two-/three-/four-participant headless simulation on the fixed 15×13 arena. Canonical actor storage, traces, action priority, placement contention, event audiences and survivor outcomes follow actual participants. Invalid input seats fail before mutation. The [headless guide](../game/multiplayer-core.md) defines the supported construction boundary.
+
+Live rooms, CPU observations, archived gameplay v2–13 and replay identities remain two-player. Larger headless states require dormant rules v6 with optional items disabled. A supplied arena describes one round; three-player omitted-corner rotation belongs to the per-round generator. This release does not advertise playable three-/four-player rooms or configurable boards.
+
+Independent simulation/compatibility review is clear after fixes to nonparticipant spawn/reconnect lookups and unsupported forced-movement facts. Legacy conversions and room/series/reconnect boundaries reject extra seats before mutation rather than truncating or panicking. Real Bracelet report regressions cover base/v7/v8 projection. Formatting, warnings-denied workspace Clippy, source caps and repository checks pass. The lifecycle transaction helper moved without behavioral changes to retain the source-size ceiling.
+
+Complete Rust acceptance passes on source `310a52a1ee54ed098c5ec9e70d3aebe09150ad23`, tree `2c4190f4562d8c5f8a9895e85a29698270b00110`: 593.391s, 27,973/30,368 lines (**92.1134%**), all 4,194,304 masks separately in debug/release/official coverage, 32 partitions, four workers, zero hidden retries and 37 raw profiles. Official LCOV was copied before releasing the source/target freeze. Unique Linux [run 40603808867](https://github.com/liveweird/grenadiers/actions/runs/40603808867) passes.
+
+All 64 CPU reference cases retain exact prior case metrics and accepted-input replay, including planner work and RNG consumption. Isolated Standard opening/full runs take 2.53s/13.07s; Easy 2.19s/11.26s. Observed costs increased modestly relative to the previous measurements while work limits and outcomes remain unchanged; these scripted comparisons do not establish human balance. Unchanged web/art/contracts/dependencies reuse the prior full web, atlas, static and dependency-audit acceptance; the exact image serves identical browser artifacts to v0.3.100.
+
+Image `sha256:0d306c8159440c644be9e0dc3a79a6f5d6e023b529f41afda31b9e7dc6d37ece` passes pinned Trivy 0.74.0 with zero fixable HIGH/CRITICAL findings. Compose passes 10 browser cases/50.9s, Kubernetes 10/53.2s and CPU item collection one/16.5s. Runtime security/resources, health/readiness/probes, Polish 320px controls and exact HTML/JS/CSS/PNG identity pass. Temporary acceptance stacks were removed.
+
+This is a source prerelease with a verified local image. Localhost runs the accepted image; v0.3.100 remains available for rollback. Deploy paired server/browser as usual; no wire or replay migration is introduced. Work priorities remain in the [backlog](../../BACKLOG.md).
+
 ## v0.3.100 — 2026-10-28
 
 [v0.3.100](https://github.com/liveweird/grenadiers/releases/tag/v0.3.100) adopts the owner-supplied third/fourth-player uniform redraw. Green and plum appearances now match the first two characters' outlines, shading and detail more closely. The supplied PNG is adopted byte-for-byte; its original 95 frames remain decoded-pixel identical, and all 16 revised poses retain the existing 33-pixel height, `(40, 65)` foot anchor and manifest geometry. The duplicate PNG is removed from the repository root. See [artist provenance](../../assets/art/README.md#provenance).

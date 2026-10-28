@@ -115,35 +115,11 @@ fn parser_and_schema_agree_on_v14_configuration_fixture() {
     }
 }
 
-#[test]
-fn v14_message_limits_are_independent_and_exact() {
-    assert_eq!(MAX_CLIENT_MESSAGE_BYTES, 4_096);
-    assert_eq!(MAX_SERVER_MESSAGE_BYTES, 98_304);
-    assert_eq!(super::super::MAX_SERVER_MESSAGE_BYTES, 65_536);
-    let exact = "x".repeat(MAX_SERVER_MESSAGE_BYTES);
-    assert_eq!(enforce_server_message_size(exact.clone()), Ok(exact));
-    assert_eq!(
-        enforce_server_message_size("x".repeat(MAX_SERVER_MESSAGE_BYTES + 1)),
-        Err(super::super::EncodeServerMessageError::MessageTooLarge),
-    );
-    assert!(parse_client_message(&"x".repeat(MAX_CLIENT_MESSAGE_BYTES + 1)).is_err());
-}
-
-#[test]
-fn v14_event_and_bomb_bounds_do_not_widen_archived_contracts() {
-    assert_eq!(MAX_SNAPSHOT_EVENTS, 192);
-    assert_eq!(MAX_EVENT_INDEX, 191);
-    assert!(EventIndex::new(191).is_ok());
-    assert!(EventIndex::new(192).is_err());
-    assert_eq!(crate::protocol::v11::MAX_BOMBS, 16);
-    assert_eq!(MAX_BOMBS, 32);
-}
-
 pub(super) fn multiplayer_state(count: crate::game::PlayerCount) -> crate::game::State {
     multiplayer_state_with_items(count, crate::game::EnabledItems::EMPTY)
 }
 
-fn multiplayer_state_with_items(
+pub(super) fn multiplayer_state_with_items(
     count: crate::game::PlayerCount,
     enabled: crate::game::EnabledItems,
 ) -> crate::game::State {
@@ -187,28 +163,20 @@ fn multiplayer_state_with_items(
             speed: SpeedLevel::Base,
         })
         .collect::<Vec<_>>();
-    crate::game::State::new(
-        RulesConfig::multiplayer_v6(crate::room::RoomSettings::DEFAULT.with_enabled_items(enabled)),
-        World::new(arena),
-        actors,
-    )
-    .unwrap()
-}
-
-#[test]
-fn capture_preserves_two_three_and_four_canonical_actors() {
-    for count in [
-        crate::game::PlayerCount::Two,
-        crate::game::PlayerCount::Three,
-        crate::game::PlayerCount::Four,
-    ] {
-        let mut state = multiplayer_state(count);
-        let report = state.step(&[]).unwrap();
-        let capture = capture_expanded(&state, &[report]).unwrap();
-        assert_eq!(capture.world.actors.len(), count.get());
-        for (&seat, actor) in count.seats().iter().zip(&capture.world.actors) {
-            assert_eq!(actor.view.seat, super::projection_capture_wire::seat(seat));
-        }
+    let rules =
+        RulesConfig::multiplayer_v6(crate::room::RoomSettings::DEFAULT.with_enabled_items(enabled));
+    if enabled.contains_teleporter() {
+        crate::game::State::new_at_tick_with_assignment_and_seed(
+            rules,
+            World::new(arena),
+            actors,
+            crate::game::Tick(0),
+            crate::game::RoundAssignment::first(),
+            crate::game::SimulationSeed::new([14; 32]),
+        )
+        .unwrap()
+    } else {
+        crate::game::State::new(rules, World::new(arena), actors).unwrap()
     }
 }
 

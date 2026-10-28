@@ -87,13 +87,48 @@ fn validate_rebound(room: &RoomView, capture: &ExpandedCapture) -> bool {
         .iter()
         .map(|bomb| (bomb.cell.column(), bomb.cell.row()))
         .collect();
+    let block_cells: BTreeSet<_> = world
+        .arena
+        .blocks
+        .iter()
+        .map(|cell| (cell.row(), cell.column()))
+        .collect();
+    let flame_cells: BTreeSet<_> = world
+        .flames
+        .iter()
+        .map(|flame| (flame.cell.row(), flame.cell.column()))
+        .collect();
+    let private_pickups: BTreeSet<_> = world
+        .private_pickup_cells
+        .iter()
+        .map(|cell| (cell.row(), cell.column()))
+        .collect();
+    let exposed_pickups: BTreeSet<_> = world
+        .pickups
+        .iter()
+        .map(|pickup| (pickup.cell.row(), pickup.cell.column()))
+        .collect();
+    let valid_pickups = private_pickups.len() == world.private_pickup_cells.len()
+        && exposed_pickups.len() == world.pickups.len()
+        && exposed_pickups.is_subset(&private_pickups)
+        && exposed_pickups.is_disjoint(&block_cells)
+        && exposed_pickups.is_disjoint(&flame_cells)
+        && world
+            .private_pickup_cells
+            .windows(2)
+            .all(|pair| (pair[0].row(), pair[0].column()) < (pair[1].row(), pair[1].column()))
+        && world.pickups.windows(2).all(|pair| {
+            (pair[0].cell.row(), pair[0].cell.column())
+                < (pair[1].cell.row(), pair[1].cell.column())
+        });
     let valid_history = world.bomb_history.len() == world.bombs.len()
         && world
             .bombs
             .iter()
             .zip(&world.bomb_history)
             .all(|(bomb, history)| valid_bomb_history(*bomb, *history, room));
-    actor_ids.len() == world.actors.len()
+    super::projection_validation::validate(world, &capture.reports, &capture.rules).is_ok()
+        && actor_ids.len() == world.actors.len()
         && world
             .actors
             .iter()
@@ -101,6 +136,7 @@ fn validate_rebound(room: &RoomView, capture: &ExpandedCapture) -> bool {
             .all(|(index, actor)| actor.view.seat.index() == index)
         && bomb_ids.len() == world.bombs.len()
         && bomb_cells.len() == world.bombs.len()
+        && valid_pickups
         && valid_history
         && world.arena.blocks.iter().all(|&cell| valid_cell(cell))
         && world.flames.iter().all(|flame| valid_cell(flame.cell))
@@ -161,7 +197,7 @@ fn validate_rebound(room: &RoomView, capture: &ExpandedCapture) -> bool {
             .is_subset_of(room.available_items)
 }
 
-fn valid_bomb_history(
+pub(crate) fn valid_bomb_history(
     bomb: super::BombView,
     history: super::projection_facts::BombHistory,
     room: &RoomView,
@@ -268,5 +304,13 @@ pub(crate) fn phase_allows_null_body(phase: &RoomPhase) -> bool {
     matches!(
         phase,
         RoomPhase::Waiting | RoomPhase::Countdown { .. } | RoomPhase::Interrupted { .. }
+    ) || matches!(
+        phase,
+        RoomPhase::MatchResult {
+            result: super::MatchResult::Interrupted {
+                reason: super::MatchInterruptReason::InternalError
+            },
+            ..
+        }
     )
 }

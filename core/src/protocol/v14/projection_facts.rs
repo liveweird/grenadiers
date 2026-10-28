@@ -89,6 +89,7 @@ pub(crate) struct ForcedMovementFacts {
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub(crate) struct ReportFacts {
     pub tick: Tick,
+    pub trace_count: usize,
     pub events: Vec<EventFacts>,
     pub forced_movements: Vec<ForcedMovementFacts>,
 }

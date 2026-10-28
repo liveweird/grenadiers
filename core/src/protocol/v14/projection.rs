@@ -54,8 +54,20 @@ pub fn validate_room_view(room: &RoomView) -> Result<(), ProjectionError> {
     if room.rules_version.get() < 6 && count != 2 {
         return Err(ProjectionError::InvalidRules);
     }
-    if room.settings_editor.is_some_and(|seat| seat != Seat::One) {
-        return Err(ProjectionError::InvalidExpandedBinding);
+    validate_identity_and_settings(room)?;
+    if let Some(editor) = room.settings_editor {
+        let creator = &room.seats[Seat::One.index()];
+        if editor != Seat::One
+            || creator.controller != Controller::Human
+            || matches!(
+                creator.connection,
+                ConnectionStatus::Vacant
+                    | ConnectionStatus::Expired
+                    | ConnectionStatus::ServerControlled
+            )
+        {
+            return Err(ProjectionError::InvalidExpandedBinding);
+        }
     }
     if room
         .seats
@@ -128,6 +140,35 @@ pub fn validate_room_view(room: &RoomView) -> Result<(), ProjectionError> {
         && seat.index() >= count
     {
         return Err(ProjectionError::InvalidResult);
+    }
+    super::projection_room_validation::validate(room)
+}
+
+fn validate_identity_and_settings(room: &RoomView) -> Result<(), ProjectionError> {
+    let expected_map = match room.rules_version.get() {
+        1 => super::MapId::FixedV1,
+        2..=4 => super::MapId::GeneratedV1,
+        5..=6 => super::MapId::GeneratedV2,
+        _ => return Err(ProjectionError::InvalidRules),
+    };
+    if room.map_id != expected_map
+        || room.available_items
+            != super::projection_supported_items::available_items_for(room.rules_version)
+        || !room
+            .settings
+            .enabled_items()
+            .is_subset_of(room.available_items)
+    {
+        return Err(ProjectionError::InvalidExpandedBinding);
+    }
+    let legacy = match room.rules_version.get() {
+        1 => Some(crate::protocol::v8::RulesVersion::ClassicV1),
+        2 => Some(crate::protocol::v8::RulesVersion::ClassicV2),
+        3 => Some(crate::protocol::v8::RulesVersion::ClassicV3),
+        _ => None,
+    };
+    if legacy.is_some_and(|version| room.settings != super::GameSettings::for_rules(version)) {
+        return Err(ProjectionError::InvalidExpandedBinding);
     }
     Ok(())
 }

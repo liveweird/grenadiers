@@ -9,8 +9,8 @@ use super::projection_facts::{
     ReportFacts, TriggerHistory, WorldFacts,
 };
 use super::{
-    ArenaView, DamageGraceTicks, EffectView, EffectViews, FlameView, InventoryView, ItemId,
-    ItemMask, ItemSet, PickupView, ProjectionError, RulesVersion, Terrain, VisibleActorView,
+    ArenaView, DamageGraceTicks, EffectView, EffectViews, FlameView, InventoryView, ItemMask,
+    ItemSet, PickupView, ProjectionError, RulesVersion, Terrain, VisibleActorView,
 };
 
 const MAX_REPORTS: usize = 3;
@@ -30,7 +30,7 @@ pub fn capture_expanded(
         u8::try_from(public.rules_version).map_err(|_| ProjectionError::InvalidRules)?,
     )
     .map_err(|_| ProjectionError::InvalidRules)?;
-    let available_items = all_items();
+    let available_items = super::projection_supported_items::available_items_for(rules_version);
     let enabled_items = item_set(state.rules().enabled_items())?;
     if !enabled_items.is_subset_of(available_items) {
         return Err(ProjectionError::InvalidItems);
@@ -84,12 +84,16 @@ pub fn capture_expanded(
                 })
             })
             .collect::<Result<_, ProjectionError>>()?,
-        private_pickup_cells: state
-            .world()
-            .pickups
-            .iter()
-            .map(|(cell, _)| wire::cell(cell))
-            .collect::<Result<_, _>>()?,
+        private_pickup_cells: {
+            let mut cells = state
+                .world()
+                .pickups
+                .iter()
+                .map(|(cell, _)| wire::cell(cell))
+                .collect::<Result<Vec<_>, _>>()?;
+            cells.sort_by_key(|cell| (cell.row(), cell.column()));
+            cells
+        },
         oil: state
             .world()
             .oil_barrels()
@@ -110,6 +114,7 @@ pub fn capture_expanded(
     };
     let captured_reports = capture_reports(state, reports)?;
     validate_capture(&world, &captured_reports)?;
+    super::projection_validation::validate(&world, &captured_reports, state.rules())?;
     Ok(ExpandedCapture {
         rules: *state.rules(),
         world,
@@ -203,6 +208,7 @@ fn capture_reports(
             }
             Ok(ReportFacts {
                 tick: wire::tick(report.tick)?,
+                trace_count: report.traces.len(),
                 events: report
                     .events
                     .iter()
@@ -357,32 +363,4 @@ fn item_set(value: game::EnabledItems) -> Result<ItemSet, ProjectionError> {
     Ok(ItemSet::from_mask(
         ItemMask::new(value.bits()).map_err(|_| ProjectionError::InvalidItems)?,
     ))
-}
-
-fn all_items() -> ItemSet {
-    ItemSet::new([
-        ItemId::Kick,
-        ItemId::Punch,
-        ItemId::Bracelet,
-        ItemId::WallPass,
-        ItemId::Heart,
-        ItemId::RemoteBomb,
-        ItemId::PiercingBomb,
-        ItemId::PowerBomb,
-        ItemId::Landmine,
-        ItemId::Shield,
-        ItemId::Stopwatch,
-        ItemId::InvisibilityCloak,
-        ItemId::InvisibleBombs,
-        ItemId::GoldenFlame,
-        ItemId::ShortFuse,
-        ItemId::Diarrhea,
-        ItemId::SlowFoot,
-        ItemId::ShortFlame,
-        ItemId::LongFuse,
-        ItemId::ReverseControls,
-        ItemId::OilBarrel,
-        ItemId::Teleporter,
-    ])
-    .expect("v14 item set is canonical")
 }

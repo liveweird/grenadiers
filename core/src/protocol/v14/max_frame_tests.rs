@@ -5,7 +5,7 @@ use super::*;
 use crate::game::{ArenaGenerationConfig, EnabledItems, RoundAssignment};
 use crate::protocol::{Cell, Counter, EntityId, MAX_COUNTER, MAX_SAFE_TICK, Tick};
 
-fn maximal_state() -> (RoomView, GameState, BombView) {
+pub(super) fn maximal_state() -> (RoomView, GameState, BombView) {
     let mut domain = super::tests::multiplayer_state(crate::game::PlayerCount::Four);
     let report = domain.step(&[]).unwrap();
     let capture = capture_expanded(&domain, &[report]).unwrap();

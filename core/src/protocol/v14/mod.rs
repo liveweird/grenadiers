@@ -3,12 +3,22 @@ mod configuration;
 mod events;
 mod identity;
 mod projection;
+mod projection_actor_validation;
 mod projection_admission;
 mod projection_binding;
+mod projection_bomb_validation;
 mod projection_capture;
 mod projection_capture_wire;
+mod projection_event_validation;
 mod projection_facts;
+mod projection_history;
+mod projection_item_validation;
+mod projection_oil;
 mod projection_recipient;
+mod projection_room_validation;
+mod projection_supported_items;
+mod projection_validation;
+mod projection_world_validation;
 mod scalars;
 mod server;
 mod state;
@@ -84,6 +94,16 @@ fn enforce_server_message_size(encoded: String) -> Result<String, super::EncodeS
 }
 
 #[cfg(test)]
+mod capture_tests;
+#[cfg(test)]
+mod frame_bound_tests;
+#[cfg(test)]
 mod max_frame_tests;
+#[cfg(test)]
+mod oil_validation_tests;
+#[cfg(test)]
+mod projection_validation_tests;
+#[cfg(test)]
+mod room_validation_tests;
 #[cfg(test)]
 mod tests;

@@ -69,6 +69,27 @@ fn collision_attempts_are_bounded_and_success_can_follow_collisions() {
 }
 
 #[test]
+fn unique_mint_checks_every_retained_credential_not_only_an_adjacent_seat() {
+    let first = ResumeCredential::mint(&fixed(1), None).unwrap();
+    let middle = ResumeCredential::mint(&fixed(2), Some(&first)).unwrap();
+    let last = ResumeCredential::mint(&fixed(3), Some(&middle)).unwrap();
+    let calls = AtomicUsize::new(0);
+    let minted = ResumeCredential::mint_unique(
+        &|output| {
+            let call = calls.fetch_add(1, Ordering::Relaxed);
+            output.fill([1, 3, 4][call]);
+            Ok(())
+        },
+        &[&first, &middle, &last],
+    )
+    .unwrap();
+    assert_eq!(calls.load(Ordering::Relaxed), 3);
+    assert_ne!(minted, first);
+    assert_ne!(minted, middle);
+    assert_ne!(minted, last);
+}
+
+#[test]
 fn capabilities_are_independent_stable_matchable_and_redacted() {
     let first = ResumeCredential::mint(&fixed(3), None).unwrap();
     let second = ResumeCredential::mint(&fixed(4), Some(&first)).unwrap();

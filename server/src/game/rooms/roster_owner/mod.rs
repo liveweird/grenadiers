@@ -1,0 +1,95 @@
+mod admissions;
+mod driver;
+mod handle;
+mod runner;
+mod types;
+
+use std::sync::Arc;
+
+use grenadiers_core::room::{CpuDifficulty, CpuProfile};
+use tokio::{sync::watch, task::JoinHandle, time::Instant};
+
+use super::{RandomFill, cpu::CpuController, roster_runtime::RosterRuntime};
+pub(in crate::game::rooms) use types::{PreparedRosterOwner, RosterOwnerHandle};
+pub(crate) use types::{RosterAdmission, RosterOwnerNotice};
+
+impl PreparedRosterOwner {
+    pub(in crate::game::rooms) fn new(
+        mut runtime: RosterRuntime,
+        cpus: Vec<CpuController>,
+        created_at: Instant,
+        random_fill: Arc<RandomFill>,
+        shutdown: watch::Receiver<bool>,
+    ) -> Result<(RosterOwnerHandle, Self), super::roster_runtime::RosterRuntimeError> {
+        validate_cpus(&runtime, &cpus)?;
+        let initial = runtime.current_notice()?;
+        let (notices, receiver) = watch::channel(RosterOwnerNotice::Publication(initial.clone()));
+        drop(receiver);
+        let (commands, command_receiver) = tokio::sync::mpsc::channel(types::COMMAND_CAPACITY);
+        Ok((
+            RosterOwnerHandle { commands },
+            Self {
+                created_at,
+                receiver: command_receiver,
+                notices,
+                initial,
+                runtime,
+                random_fill,
+                cpus,
+                shutdown,
+            },
+        ))
+    }
+
+    pub(in crate::game::rooms) fn start(
+        self,
+        on_exit: impl FnOnce() + Send + 'static,
+    ) -> JoinHandle<()> {
+        let cleanup = CleanupGuard(Some(Box::new(on_exit)));
+        tokio::spawn(async move {
+            let _cleanup = cleanup;
+            runner::run(self).await;
+        })
+    }
+}
+
+fn validate_cpus(
+    runtime: &RosterRuntime,
+    cpus: &[CpuController],
+) -> Result<(), super::roster_runtime::RosterRuntimeError> {
+    let identity = runtime.identity();
+    let configured: Vec<_> = identity.configuration.cpu_seats().collect();
+    if configured.len() != cpus.len() {
+        return Err(super::roster_runtime::RosterRuntimeError::UnsupportedConfiguration);
+    }
+    let expected_profile = match identity.configuration.cpu_difficulty() {
+        Some(CpuDifficulty::Easy) => Some(CpuProfile::MULTIPLAYER_EASY),
+        Some(CpuDifficulty::Standard) => Some(CpuProfile::MULTIPLAYER_STANDARD),
+        None => None,
+    };
+    for (index, cpu) in cpus.iter().enumerate() {
+        if cpu.seat() != configured[index]
+            || cpus[..index].iter().any(|other| other.seat() == cpu.seat())
+            || cpu.room_instance() != identity.registry_serial
+            || Some(cpu.profile()) != expected_profile
+        {
+            return Err(super::roster_runtime::RosterRuntimeError::UnsupportedConfiguration);
+        }
+    }
+    Ok(())
+}
+
+struct CleanupGuard(Option<Box<dyn FnOnce() + Send>>);
+
+impl Drop for CleanupGuard {
+    fn drop(&mut self) {
+        if let Some(cleanup) = self.0.take() {
+            cleanup();
+        }
+    }
+}
+
+#[cfg(test)]
+mod lifecycle_tests;
+#[cfg(test)]
+mod tests;

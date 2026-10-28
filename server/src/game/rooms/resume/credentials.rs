@@ -21,13 +21,23 @@ impl ResumeCredential {
         entropy_fill: &(impl Fn(&mut [u8]) -> Result<(), ()> + Send + Sync + ?Sized),
         other_seat: Option<&Self>,
     ) -> Result<Self, ResumeCredentialError> {
+        match other_seat {
+            Some(other) => Self::mint_unique(entropy_fill, &[other]),
+            None => Self::mint_unique(entropy_fill, &[]),
+        }
+    }
+
+    pub(in crate::game::rooms) fn mint_unique(
+        entropy_fill: &(impl Fn(&mut [u8]) -> Result<(), ()> + Send + Sync + ?Sized),
+        retained: &[&Self],
+    ) -> Result<Self, ResumeCredentialError> {
         for _ in 0..MAX_COLLISION_ATTEMPTS {
             let mut bytes = [0_u8; CREDENTIAL_BYTES];
             entropy_fill(&mut bytes).map_err(|()| ResumeCredentialError::EntropyUnavailable)?;
             let candidate = Self {
                 token: encode(bytes)?,
             };
-            if other_seat.is_none_or(|other| candidate != *other) {
+            if retained.iter().all(|other| candidate != **other) {
                 return Ok(candidate);
             }
         }

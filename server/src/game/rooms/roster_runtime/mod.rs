@@ -18,4 +18,6 @@ pub(in crate::game::rooms) use types::{
 #[cfg(test)]
 mod boundary_tests;
 #[cfg(test)]
+mod replacement_tests;
+#[cfg(test)]
 mod tests;

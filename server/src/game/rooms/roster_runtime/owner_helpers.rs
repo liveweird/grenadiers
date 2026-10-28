@@ -1,15 +1,23 @@
 use grenadiers_core::{
     game::SeatId,
-    room::{DepartureReason, InterruptReason, MatchChange, SeatControl},
+    room::{DepartureReason, InterruptReason, MatchChange, RosterMatchLifecycle, SeatControl},
 };
 
 use super::{
     error::{RosterRuntimeError, lifecycle},
     runtime::RosterRuntime,
-    types::{RosterAction, RosterNotice},
+    types::{RosterAction, RosterIdentity, RosterNotice},
 };
 
 impl RosterRuntime {
+    pub(in crate::game::rooms) const fn lifecycle(&self) -> &RosterMatchLifecycle {
+        &self.lifecycle
+    }
+
+    pub(in crate::game::rooms) const fn identity(&self) -> &RosterIdentity {
+        &self.identity
+    }
+
     pub(in crate::game::rooms) fn submit_cpu_intent(
         &mut self,
         seat: SeatId,

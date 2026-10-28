@@ -1,8 +1,9 @@
-use super::{State, StateError};
+use super::{Direction, State, StateError};
 use crate::game::arena::Terrain;
 use crate::game::bombs::{Bomb, BombTrigger};
 use crate::game::effects::EffectKind;
-use crate::game::types::{CellId, EntityId, SeatId, Tick};
+use crate::game::pickups::{Pickup, PickupKind};
+use crate::game::types::{CellId, EntityId, Position, SeatId, Tick};
 
 impl State {
     pub(crate) fn apply_test_effect(&mut self, seat: SeatId, kind: EffectKind, at: Tick) {
@@ -15,6 +16,37 @@ impl State {
 
     pub(crate) fn insert_test_flame(&mut self, cell: CellId, expires_at: Tick) {
         self.world.hazards.insert(cell, expires_at);
+    }
+
+    pub(crate) fn insert_test_pickup(&mut self, cell: CellId, kind: PickupKind) {
+        self.world.pickups.exposed.insert(cell, Pickup::new(kind));
+    }
+
+    pub(crate) fn set_test_damage_grace(&mut self, seat: SeatId, received_at: Tick) {
+        self.actors[seat.index()].damage_grace =
+            Some(crate::game::DamageGrace::for_test(received_at));
+    }
+
+    pub(crate) fn set_test_actor_pose(
+        &mut self,
+        seat: SeatId,
+        position: Position,
+        heading: Direction,
+    ) {
+        self.actors[seat.index()].position = position;
+        self.actors[seat.index()].heading = heading;
+    }
+
+    pub(crate) fn replace_test_actor_equipment(
+        &mut self,
+        seat: SeatId,
+        equipment: crate::game::Equipment,
+    ) {
+        self.replace_actor_equipment(seat, equipment);
+    }
+
+    pub(crate) fn commit_test_teleport(&mut self, requests: impl Into<Vec<bool>>, tick: Tick) {
+        self.commit_teleport(requests, tick);
     }
 
     pub(crate) fn insert_test_bomb(

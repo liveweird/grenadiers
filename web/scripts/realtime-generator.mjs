@@ -127,7 +127,15 @@ function literalType(value, path) {
   if (value === null || ['string', 'number', 'boolean'].includes(typeof value)) {
     return JSON.stringify(value)
   }
-  fail(path, 'const and enum values must be string, number, boolean, or null literals')
+  if (Array.isArray(value)) {
+    return `[${value.map((item, index) => {
+      if (Array.isArray(item) || (item !== null && typeof item === 'object')) {
+        fail(`${path}[${index}]`, 'array literals may contain only scalar literals')
+      }
+      return literalType(item, `${path}[${index}]`)
+    }).join(', ')}]`
+  }
+  fail(path, 'const and enum values must be scalar literals or arrays of scalar literals')
 }
 
 function refName(ref, definitions, path) {

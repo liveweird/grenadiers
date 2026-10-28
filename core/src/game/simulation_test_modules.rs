@@ -106,3 +106,6 @@ mod wall_pass_contract_tests;
 mod wall_pass_route_tests;
 #[path = "wall_pass_tests.rs"]
 mod wall_pass_tests;
+
+#[path = "teleport_marker_tests.rs"]
+mod teleport_marker_tests;

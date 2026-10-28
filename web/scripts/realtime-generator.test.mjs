@@ -229,3 +229,14 @@ test('unguarded alias cycles fail before emitting uncompilable TypeScript', () =
     /unguarded alias cycle: First -> Second -> First/,
   )
 })
+
+test('scalar array literals generate tuple types while object members stay unsupported', () => {
+  const generated = generateRealtime({
+    $defs: { Lineup: { enum: [['human', 'cpu'], ['human', 'human', 'cpu']] } },
+  })
+  assert.match(generated, /\["human", "cpu"\] \| \["human", "human", "cpu"\]/)
+  assert.throws(
+    () => generateRealtime({ $defs: { Bad: { const: ['human', { type: 'cpu' }] } } }),
+    /array literals may contain only scalar literals/,
+  )
+})

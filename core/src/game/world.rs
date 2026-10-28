@@ -94,6 +94,12 @@ impl World {
         &self.pickups.exposed
     }
 
+    pub(crate) fn pickup_observations(
+        &self,
+    ) -> impl Iterator<Item = (CellId, PickupKind, super::PickupLayer)> + '_ {
+        self.pickups.observations()
+    }
+
     #[must_use]
     pub const fn hazards(&self) -> &BTreeMap<CellId, Tick> {
         &self.hazards

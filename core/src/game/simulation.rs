@@ -44,6 +44,7 @@ pub struct Actor {
     damage_grace: Option<DamageGrace>,
     last_successful_punch_tick: Option<Tick>,
     last_successful_shove_tick: Option<Tick>,
+    last_teleport_tick: Option<Tick>,
 }
 
 impl Actor {

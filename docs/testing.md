@@ -46,6 +46,14 @@ Keep latency tests isolated from competing workloads. Scheduling and caching mus
 assertions, exhaustive mask coverage, coverage floors or failure visibility, or introduce retries
 that hide failures. Avoid repeated evidence packaging and review of unchanged results.
 
+Concurrent native stacks must use distinct host ports as well as distinct projects/namespaces.
+Refuse an occupied port. Bind `kubectl port-forward --address=127.0.0.1` when browser URLs use
+IPv4 loopback, and confirm that the intended forwarding process reports that exact listener
+before checking HTTP readiness. An IPv6-only forward cannot validate traffic sent to IPv4;
+otherwise a test can accidentally exercise another running stack. Preserve pod state and logs
+before failure cleanup so routing failures can be distinguished from application failures.
+Keep helper scripts unchanged while their acceptance command is running.
+
 The historical verification records below describe the workflow used at the time; they do not
 make repeated remote runs a current release requirement.
 
@@ -317,7 +325,7 @@ assertions and evidence for each suite.
 
 | Suite or command | Fixture or deployment | Unique scope |
 | --- | --- | --- |
-| `npm --prefix e2e test` | [Default Compose stack](deployment.md#docker-compose) | Default generated-map smoke plus session, room, realtime, gameplay, settings, turning, and rendered-duel contracts; see the mapped [scenario index](../e2e/scenarios/). |
+| `npm --prefix e2e test` | [Default Compose stack](deployment.md#docker-compose) | [Board presets](../e2e/scenarios/board-sizes.md), default generated-map smoke, session, room, realtime, gameplay, settings, turning, and rendered-duel contracts; see the mapped [scenario index](../e2e/scenarios/). |
 | `npm --prefix e2e run test:csp` | [Isolated HTTP/HTTPS relay setup](../e2e/README.md#content-security-policy-acceptance) | Enforced server CSP over HTTP/WS and HTTPS/WSS, including blocked execution, connections, and framing. |
 | <a id="generated-pickup-acceptance"></a>`npm --prefix e2e run test:pickups` | [Generated pickup fixture](deployment.md#reproduce-a-generated-pickup-round) | Native collection, both HUDs, and captured old/new bomb ranges; retains the [pickup scenario's](../e2e/scenarios/pickups.md) timing-safe redacted evidence. |
 | <a id="expanded-pickup-acceptance"></a>`npm --prefix e2e run test:heart` | [Heart fixture](deployment.md#reproduce-heart-collection-and-protection) | Natural collection, one protected hit, later lethal damage, and both localized perspectives. |

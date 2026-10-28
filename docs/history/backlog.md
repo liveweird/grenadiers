@@ -7,6 +7,10 @@
 
 ## Completed 2026-10-28
 
+- **BOARD-SIZE:** [v0.3.110](../releases.md#v03110--2026-10-28) ships immutable 11×9,
+  13×11 and 15×13 custom matches for two to four human/CPU players, including recovery,
+  rematch, board-relative planning/publication and closed private replay profiles.
+
 - **MULTIPLAYER:** [v0.3.108](../releases.md#v03108--2026-10-28) ships live two-to-four-player
   human/CPU lineups, distinct uniforms, per-seat reconnect, canonical scores and consensual
   rematch on 15×13 boards. Remaining board-size and environment work lives only in

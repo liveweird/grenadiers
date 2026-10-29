@@ -7,6 +7,10 @@
 
 ## Completed 2026-10-29
 
+- **LAIRS core:** [v0.3.116](../releases.md#v03116--2026-10-29) supplies dormant rules8
+  spawning, navigation, combat interactions and rollback. User-visible activation remains in
+  [BACKLOG.md](../../BACKLOG.md).
+
 - **STORM-CLOUD:** [v0.3.115](../releases.md#v03115--2026-10-29) enables authoritative
   weather, independent slowdown timers, default-on presets, recipient privacy and recovery on
   every supported board and controller lineup. Rules remain locked through rematches.

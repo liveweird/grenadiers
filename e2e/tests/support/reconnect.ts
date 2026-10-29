@@ -16,6 +16,8 @@ export type PublicAdmission = {
   bombIds: number[]
   oilBarrels: { column: number; row: number; state: 'unlit' | 'burning' }[]
   stormCloud: { position: { x: number; y: number }; direction: Direction; legRemainingTicks: number } | null
+  lairs: { id: number; cell: { column: number; row: number }; spawnRemainingTicks: number; livingMobs: number }[]
+  mobs: { id: number; lairId: number; position: { x: number; y: number }; heading: Direction; frozen: boolean }[]
   stableCapability: boolean
 }
 
@@ -48,6 +50,7 @@ export async function installTransportProbe(page: Page): Promise<void> {
         visibleActors: state?.actors.flatMap((actor) => actor.type === 'visible' ? [{ seat: actor.seat, ...actor.position, lastTeleportTick: actor.lastTeleportTick }] : []) ?? [],
         equipment: state?.actors.flatMap((actor) => actor.type === 'visible' ? [{ seat: actor.seat, equipment: actor.inventory.equipment }] : []) ?? [],
         bombIds: state?.bombs.map((bomb) => bomb.id) ?? [], stormCloud: state?.stormCloud ?? null,
+        lairs: state?.lairs ?? [], mobs: state?.mobs ?? [],
         oilBarrels: state?.oilBarrels.map(({ cell, state: barrelState }) => ({ ...cell, state: barrelState })) ?? [] }
     }
     window.WebSocket = class extends NativeSocket {

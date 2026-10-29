@@ -1,8 +1,8 @@
 import { expect, test, type Browser, type Page } from '@playwright/test'
 import type { GameServerMessage, MobView } from '../../web/src/game/v16/schema'
-import { createResponsiveBrowserContexts } from './support/browser-contexts'
-import { expectPaintedCanvas, latestSnapshot, observeGame, type ObservedGame } from './support/duel'
-import { admissionBaseline, disconnectTransport, installTransportProbe } from './support/reconnect'
+import { createResponsiveBrowserContexts } from '../tests/support/browser-contexts'
+import { expectPaintedCanvas, latestSnapshot, observeGame, type ObservedGame } from '../tests/support/duel'
+import { admissionBaseline, disconnectTransport, installTransportProbe } from '../tests/support/reconnect'
 
 type Snapshot = Extract<GameServerMessage, { type: 'snapshot' }>
 type Group = { pages: [Page, Page]; games: [ObservedGame, ObservedGame]; close: () => Promise<void> }
@@ -12,6 +12,10 @@ const latestRoom = (game: ObservedGame) => game.frames.filter((frame) =>
 const snapshots = (game: ObservedGame): Snapshot[] => game.frames.filter(
   (frame): frame is Snapshot => frame.type === 'snapshot')
 
+test.beforeAll(() => {
+  expect(process.env.E2E_LAIRS_FIXTURE).toBe('arena-v3-lairs')
+})
+
 async function createGroup(browser: Browser, responsive = true): Promise<Group> {
   const contexts = responsive
     ? await createResponsiveBrowserContexts(browser)
@@ -20,7 +24,7 @@ async function createGroup(browser: Browser, responsive = true): Promise<Group> 
   await installTransportProbe(pages[1])
   const games = pages.map(observeGame) as [ObservedGame, ObservedGame]
   await Promise.all(pages.map((page) => page.goto('/')))
-  return { pages, games, close: async () => { await Promise.all(contexts.map((context) => context.close())) } }
+  return { pages, games, close: async () => { await Promise.allSettled(contexts.map((context) => context.close())) } }
 }
 
 async function joinRoom(group: Group, polishPeer: boolean): Promise<void> {
@@ -35,10 +39,12 @@ async function joinRoom(group: Group, polishPeer: boolean): Promise<void> {
 }
 
 async function startRound(group: Group, polishPeer: boolean): Promise<void> {
-  await Promise.all([
-    group.pages[0].getByRole('button', { name: 'Ready', exact: true }).click(),
-    group.pages[1].getByRole('button', { name: polishPeer ? 'Gotowy' : 'Ready', exact: true }).click(),
-  ])
+  const buttons = [
+    group.pages[0].getByRole('button', { name: 'Ready', exact: true }),
+    group.pages[1].getByRole('button', { name: polishPeer ? 'Gotowy' : 'Ready', exact: true }),
+  ]
+  await Promise.all(buttons.map((button) => expect(button).toBeEnabled()))
+  await Promise.all(buttons.map((button) => button.click({ timeout: 10_000 })))
   await Promise.all(group.games.map((game) =>
     expect.poll(() => latestSnapshot(game)?.room.phase.type).toBe('running')))
 }
@@ -130,8 +136,8 @@ test('enabled lairs spawn capped private moving mobs, render on both clients, re
       await joinRoom(group, true)
       const [one, two] = group.pages
       await one.getByRole('checkbox', { name: 'Storm cloud', exact: true }).uncheck()
-      await one.getByLabel('Spawn interval (seconds)', { exact: true }).fill('5')
-      await one.getByLabel('Living monsters per lair', { exact: true }).fill('1')
+      await one.getByRole('textbox', { name: 'Spawn interval (seconds)', exact: true }).fill('5')
+      await one.getByRole('textbox', { name: 'Living monsters per lair', exact: true }).fill('1')
       await one.getByLabel('Round wins needed').selectOption('1')
       await one.getByLabel('Bomb fuse').selectOption('60')
       await one.getByRole('button', { name: 'Apply rules', exact: true }).click()
@@ -141,8 +147,10 @@ test('enabled lairs spawn capped private moving mobs, render on both clients, re
       await Promise.all(group.games.map((game) =>
         expect.poll(() => latestRoom(game)?.settings.environment).toEqual(environment)))
       await expect(two.getByRole('checkbox', { name: 'Legowiska potworów', exact: true })).toBeChecked()
-      await expect(two.getByLabel('Czas odrodzenia (sekundy)', { exact: true })).toHaveValue('5')
-      await expect(two.getByLabel('Żywe potwory na legowisko', { exact: true })).toHaveValue('1')
+      await expect(two.getByRole('textbox', { name: 'Czas odrodzenia (sekundy)', exact: true }))
+        .toHaveValue('5')
+      await expect(two.getByRole('textbox', { name: 'Żywe potwory na legowisko', exact: true }))
+        .toHaveValue('1')
       await startRound(group, true)
 
       for (const game of group.games) {
@@ -154,8 +162,30 @@ test('enabled lairs spawn capped private moving mobs, render on both clients, re
         ])
         expect(running.state.lairs.every(({ livingMobs }) => livingMobs === 0)).toBe(true)
       }
-      await Promise.all(group.games.map((game) =>
-        expect.poll(() => latestSnapshot(game)?.state.mobs.length, { timeout: 10_000 }).toBe(2)))
+      try {
+        await Promise.all(group.games.map((game) =>
+          expect.poll(() => latestSnapshot(game)?.state.mobs.length, { timeout: 10_000 }).toBe(2)))
+      } catch (error) {
+        const frame = latestSnapshot(group.games[0])
+        const nearLairs = frame?.state.lairs.flatMap(({ cell }) => [
+          { column: cell.column, row: cell.row - 1 }, { column: cell.column + 1, row: cell.row },
+          { column: cell.column, row: cell.row + 1 }, { column: cell.column - 1, row: cell.row },
+        ]) ?? []
+        const blocked = nearLairs.filter((cell) => frame?.state.arena.blocks.some((block) =>
+          block.column === cell.column && block.row === cell.row))
+        await testInfo.attach('lair-spawn-failure', {
+          contentType: 'application/json',
+          body: JSON.stringify(frame && {
+            physicalTick: frame.state.physicalTick, phase: frame.room.phase,
+            lairs: frame.state.lairs, mobs: frame.state.mobs, actors: frame.state.actors,
+            blocks: frame.state.arena.blocks,
+          }),
+        })
+        throw new Error(`No mobs spawned: ${JSON.stringify({
+          physicalTick: frame?.state.physicalTick, phase: frame?.room.phase,
+          lairs: frame?.state.lairs, nearLairs, blocked,
+        })}`, { cause: error })
+      }
       const spawned = latestSnapshot(group.games[0])!
       const mob = spawned.state.mobs[0]!
       for (const game of group.games) latestSnapshot(game)!.state.mobs.forEach(expectPrivateNavigation)
@@ -183,10 +213,12 @@ test('enabled lairs spawn capped private moving mobs, render on both clients, re
       await Promise.all(group.pages.map(expectPaintedCanvas))
 
       const firstSpawnTick = spawned.state.physicalTick
+      const nextSpawnTick = firstSpawnTick
+        + Math.max(...spawned.state.lairs.map(({ spawnRemainingTicks }) => spawnRemainingTicks))
       await expect.poll(() => latestSnapshot(group.games[0])?.state.physicalTick ?? 0,
-        { timeout: 10_000 }).toBeGreaterThanOrEqual(firstSpawnTick + 310)
+        { timeout: 10_000 }).toBeGreaterThanOrEqual(nextSpawnTick + 10)
       const capped = snapshots(group.games[0]).filter((frame) =>
-        frame.state.physicalTick >= firstSpawnTick && frame.state.physicalTick <= firstSpawnTick + 310)
+        frame.state.physicalTick >= firstSpawnTick && frame.state.physicalTick <= nextSpawnTick + 10)
       expect(capped.length).toBeGreaterThan(1)
       expect(capped.every((frame) => frame.state.mobs.length <= 2
         && frame.state.lairs.every(({ livingMobs }) => livingMobs <= 1))).toBe(true)
@@ -199,9 +231,13 @@ test('enabled lairs spawn capped private moving mobs, render on both clients, re
       await disconnectTransport(two)
       await expect.poll(async () => (await admissionBaseline(two))?.index ?? 0)
         .toBeGreaterThan(admission!.index)
-      expect(await admissionBaseline(two)).toMatchObject({
+      const restored = (await admissionBaseline(two))!
+      expect(restored).toMatchObject({
         roomId: admission!.roomId, seat: 'two', hasState: true, stableCapability: true,
       })
+      expect(restored.lairs).toHaveLength(2)
+      expect(restored.mobs.length).toBeGreaterThan(0)
+      restored.mobs.forEach(expectPrivateNavigation)
       await expect.poll(() => group.games[1].frames.length).toBeGreaterThan(framesBeforeReconnect)
       expect(latestSnapshot(group.games[1])!.state.mobs.length).toBeGreaterThan(0)
 

@@ -45,6 +45,7 @@
     "test:power-bomb": "playwright test --config playwright.power-bomb.config.ts",
     "test:remote-bomb": "playwright test --config playwright.remote-bomb.config.ts",
     "test:landmine": "playwright test --config playwright.landmine.config.ts",
+    "test:lairs": "playwright test --config playwright.lairs.config.ts",
     "test:invisibility-cloak": "playwright test --config playwright.invisibility-cloak.config.ts",
     "test:stopwatch": "playwright test --config playwright.stopwatch.config.ts",
     "test:invisible-bombs": "playwright test --config playwright.invisible-bombs.config.ts",

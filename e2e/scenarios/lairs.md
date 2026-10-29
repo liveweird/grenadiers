@@ -2,7 +2,8 @@
 
 ## Scenario: enabled lairs spawn capped private moving mobs, render on both clients, reconnect and rematch
 
-English desktop and Polish 320-pixel reduced-motion clients join one real two-human room. The creator disables
+The dedicated suite requires the published `arena-v3-lairs` fixture acknowledgement. English desktop and Polish
+320-pixel reduced-motion clients join one real two-human room. The creator disables
 the storm cloud, sets lairs to the five-second interval and one living mob per lair, then both players start a
 rules8 round. Both public streams expose the two fixed lair pillars and the same two mobs without target or path
 internals. The mobs move authoritatively, remain capped through another spawn deadline, and change pixels in the

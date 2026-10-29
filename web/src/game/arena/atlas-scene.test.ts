@@ -30,6 +30,8 @@ function trackedArtwork() {
     makeFlame: vi.fn(graphicsArtwork.makeFlame),
     makeOilBarrel: vi.fn(graphicsArtwork.makeOilBarrel),
     makeStormCloud: vi.fn(graphicsArtwork.makeStormCloud),
+    makeLair: vi.fn(graphicsArtwork.makeLair),
+    makeMob: vi.fn(graphicsArtwork.makeMob),
   }
   return { artwork, terrain, terrainRoot: terrainRoot as unknown as NodeView }
 }

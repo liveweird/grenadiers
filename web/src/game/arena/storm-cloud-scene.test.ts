@@ -16,10 +16,10 @@ describe('storm cloud arena entity', () => {
     }
     scene.update(snapshot, 0)
     expect(layers(scene)).toHaveLength(7)
-    const weather = layers(scene)[5]
+    const weather = layers(scene)[6]
     const cloud = weather.children[0]
     expect(cloud).toMatchObject({ x: 360, y: 312 })
-    expect(layers(scene)[6].children).toHaveLength(2)
+    expect(layers(scene)[5].children).toHaveLength(2)
 
     snapshot.state.physicalTick = 103
     snapshot.state.stormCloud.position.x += 1_024
@@ -44,7 +44,7 @@ describe('storm cloud arena entity', () => {
       position: { x: 7_680, y: 6_656 }, direction: 'north', legRemainingTicks: 64,
     }
     scene.update(snapshot, 0)
-    const firstWeather = layers(scene)[5]
+    const firstWeather = layers(scene)[6]
     const firstCloud = firstWeather.children[0]
 
     scene.setReducedMotion(true)
@@ -58,9 +58,9 @@ describe('storm cloud arena entity', () => {
     snapshot.state.stormCloud.position = { x: 6_656, y: 5_632 }
     scene.update(snapshot, 200)
     expect(firstWeather.destroyed).toBe(true)
-    expect(layers(scene)[5].children[0]).toMatchObject({ x: 312, y: 264 })
+    expect(layers(scene)[6].children[0]).toMatchObject({ x: 312, y: 264 })
 
-    const replacement = layers(scene)[5]
+    const replacement = layers(scene)[6]
     scene.reset()
     expect(replacement.destroyed).toBe(true)
     expect(layers(scene)).toHaveLength(6)

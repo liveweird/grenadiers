@@ -2,25 +2,12 @@ import Ajv from 'ajv'
 import { describe, expect, it } from 'vitest'
 import gameplayV15Schema from '../../../../api/gameplay-v15.schema.json'
 import clientFixtures from '../../../../api/fixtures/gameplay-v15-client-conformance.json'
-import { snapshot } from '../client/testSupport'
+import { snapshot as archivedSnapshot } from '../validation/archived-v15-fixtures'
 import type { Snapshot } from './schema'
 import { validateGameplayV15ServerMessage } from './validation'
 import { validateGameplayV14ServerMessage } from '../v14/validation'
 
-function v15Snapshot(stormCloud = true): Snapshot {
-  const message = structuredClone(snapshot(2)) as unknown as Snapshot
-  message.room.rulesVersion = 7
-  message.room.configuration.environment = { stormCloud }
-  message.room.settings.environment = { stormCloud }
-  message.state.physicalTick = message.room.tick
-  message.state.stormCloud = stormCloud ? {
-    position: { x: 7_680, y: 6_656 }, direction: 'east', legRemainingTicks: 128,
-  } : null
-  for (const actor of message.state.actors) {
-    if (actor.type === 'visible') actor.stormSlowRemainingTicks = 0
-  }
-  return message
-}
+const v15Snapshot = (stormCloud = true): Snapshot => archivedSnapshot(2, stormCloud)
 
 describe('gameplay v15 storm environment validation', () => {
   it('keeps browser client-schema admission aligned with the Rust parser corpus', () => {

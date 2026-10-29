@@ -1,4 +1,4 @@
-import type { Difficulty, RoomConfiguration, RoomView, Seat, Snapshot, V14ErrorCode } from '../v15/schema'
+import type { Difficulty, RoomConfiguration, RoomView, Seat, Snapshot, V14ErrorCode } from '../v16/schema'
 
 type GameConnection =
   | 'disconnected'

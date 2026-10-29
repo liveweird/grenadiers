@@ -1,5 +1,5 @@
 import { controllersAvailable } from './roomControllers'
-import type { Direction, GameClientMessage, GameServerMessage, GameSettings, RoomView, Snapshot, V14ErrorCode } from '../v15/schema'
+import type { Direction, GameClientMessage, GameServerMessage, GameSettings, RoomView, Snapshot, V14ErrorCode } from '../v16/schema'
 import { initialGameClientState, type AdmissionIntent, type GameClientState, type GameFailure } from './clientTypes'
 import { ClientRecovery } from './clientRecovery'
 import { preservesTeleportHistory } from './teleportHistory'
@@ -7,7 +7,7 @@ export { initialGameClientState, type AdmissionIntent, type GameClientState, typ
 import { acceptableBaseline, canControl, controlIsObsolete, createConfiguration, dependenciesWithDefaults,
   gameplayUrl, isCurrentConnection, MAX_COUNTER, MAX_RECONNECT_ATTEMPTS, newerRoom, sessionToken,
   ownSeatConnected, settlesPendingSettings, validateServerMessage, type Capability, type ControlCommand,
-  type ControlFailure, type Dependencies, type PendingSettings, type RoomCommand } from './clientProtocol'
+  validGameSettings, type ControlFailure, type Dependencies, type PendingSettings, type RoomCommand } from './clientProtocol'
 export { gameplayUrl } from './clientProtocol'
 export class GameClient {
   private state = initialGameClientState()
@@ -51,7 +51,7 @@ export class GameClient {
     const room = this.state.room
     const own = room?.seats.find((seat) => seat.seat === this.state.youSeat)
     const canonicalItems = room?.availableItems.filter((item) => settings.enabledItems.includes(item))
-    if (!room || settings.enabledItems.length > room.availableItems.length
+    if (!room || !validGameSettings(settings) || settings.enabledItems.length > room.availableItems.length
       || new Set(settings.enabledItems).size !== settings.enabledItems.length
       || settings.enabledItems.some((item, index) => item !== canonicalItems?.[index])
       || settings.enabledItems.some((item) => !room.availableItems.includes(item))
@@ -146,7 +146,7 @@ export class GameClient {
     socket.addEventListener('open', () => {
       if (!isCurrentConnection(generation, socket, this.generation, this.socket)) return
       this.update({ connection: 'authenticating' })
-      socket.send(JSON.stringify({ type: 'authenticate', protocolVersion: 15, token: credential }))
+      socket.send(JSON.stringify({ type: 'authenticate', protocolVersion: 16, token: credential }))
       credential = ''
     })
     socket.addEventListener('message', (event) => this.receive(generation, socket, event.data))

@@ -68,6 +68,8 @@ export function presentSnapshot(state: GameClientState): SnapshotMessage | null 
       flames: snapshot.state.flames,
       oilBarrels: snapshot.state.oilBarrels,
       stormCloud: snapshot.state.stormCloud,
+      lairs: snapshot.state.lairs,
+      mobs: snapshot.state.mobs,
       pickups: snapshot.state.pickups.filter(
         (pickup): pickup is typeof pickup & {
           kind: 'bombCapacity' | 'blastRange' | 'movementSpeed' | 'kick' | 'punch' | 'bracelet' | 'wallPass' | 'heart' | 'remoteBomb' | 'piercingBomb' | 'powerBomb' | 'landmine' | 'shield' | 'stopwatch' | 'invisibilityCloak'

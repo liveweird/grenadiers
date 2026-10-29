@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import fixtures from '../../../../api/fixtures/gameplay-expanded-server-conformance.json'
 import { validateServerMessage } from '../client/clientProtocol'
 import { snapshot as liveSnapshot } from '../client/testSupport'
+import { snapshot as v15Snapshot } from './archived-v15-fixtures'
 import { validateGameplayV10ServerMessage } from '../v10/validation'
 import { validateGameplayV11ServerMessage } from '../v11/validation'
 import { validateGameplayV15ServerMessage } from '../v15/validation'
@@ -93,19 +94,27 @@ describe('expanded gameplay server conformance', () => {
   })
 
   it('exercises live v15 generic and recipient privacy and identity checks', () => {
+    const archivedForOne = v15Snapshot(2)
+    archivedForOne.room.settings.enabledItems = ['invisibilityCloak']
+    archivedForOne.state.actors[1] = { type: 'hidden', id: 2, seat: 'two', alive: true }
+    expect(validateGameplayV15ServerMessage(archivedForOne).valid).toBe(true)
     const forOne = liveSnapshot(2)
     forOne.room.settings.enabledItems = ['invisibilityCloak']
     forOne.state.actors[1] = { type: 'hidden', id: 2, seat: 'two', alive: true }
-    expect(validateGameplayV15ServerMessage(forOne).valid).toBe(true)
     expect(validateServerMessage(forOne, 'one')).toBe(true)
     expect(validateServerMessage(forOne, 'two')).toBe(false)
 
+    const archivedForTwo = v15Snapshot(2)
+    archivedForTwo.room.settings.enabledItems = ['invisibilityCloak']
+    const archivedCloaked = archivedForTwo.state.actors[1]
+    if (archivedCloaked?.type !== 'visible') throw new Error('expected visible actor')
+    archivedCloaked.effects = [{ kind: 'invisibilityCloak', remainingTicks: 600 }]
+    expect(validateGameplayV15ServerMessage(archivedForTwo).valid).toBe(true)
     const forTwo = liveSnapshot(2)
     forTwo.room.settings.enabledItems = ['invisibilityCloak']
     const cloaked = forTwo.state.actors[1]
     if (cloaked?.type !== 'visible') throw new Error('expected visible actor')
     cloaked.effects = [{ kind: 'invisibilityCloak', remainingTicks: 600 }]
-    expect(validateGameplayV15ServerMessage(forTwo).valid).toBe(true)
     expect(validateServerMessage(forTwo, 'two')).toBe(true)
     expect(validateServerMessage(forTwo, 'one')).toBe(false)
 

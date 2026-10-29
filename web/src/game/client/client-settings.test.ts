@@ -7,7 +7,7 @@ const changed = {
   winsToFinish: 1,
   bombFuseTicks: 60 as const,
   enabledItems: [],
-  environment: { stormCloud: false },
+  environment: { stormCloud: false, lairs: { enabled: false, spawnSeconds: 24, maxLivingMobs: 6 } },
 }
 
 describe('v12 authoritative gameplay settings', () => {
@@ -144,5 +144,28 @@ describe('v12 authoritative gameplay settings', () => {
       ...baseline.room.settings, enabledItems: ['teleporter'],
     })).toBe(true)
     expect(socket.sent).toHaveLength(sent + 4)
+  })
+
+  it('rejects invalid lair numeric drafts before sending an authoritative transaction', async () => {
+    const value = harness()
+    const socket = await authenticate(value)
+    const baseline = admitted()
+    baseline.room = room(1)
+    baseline.state = null
+    socket.message(baseline)
+    const sent = socket.sent.length
+    const settings = baseline.room.settings
+
+    for (const lairs of [
+      { enabled: true, spawnSeconds: 4, maxLivingMobs: 3 },
+      { enabled: true, spawnSeconds: 61, maxLivingMobs: 3 },
+      { enabled: true, spawnSeconds: 10, maxLivingMobs: 0 },
+      { enabled: true, spawnSeconds: 10, maxLivingMobs: 9 },
+    ]) {
+      expect(value.client.updateSettings({
+        ...settings, environment: { ...settings.environment, lairs },
+      })).toBe(false)
+    }
+    expect(socket.sent).toHaveLength(sent)
   })
 })

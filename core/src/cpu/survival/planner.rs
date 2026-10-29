@@ -1,8 +1,8 @@
 use crate::cpu::forecast::{ForecastLimits, ObservedHazardMemory, TickWindow, forecast};
 use crate::cpu::policy::{ControlPlan, PolicyError, UtilityMemory};
 use crate::cpu::routing::{
-    PlantRequest, PulseLease, PulseRequest, PunchRequest, RouteLimits, RouteMode, RouteRequest,
-    RouteStep, certify_pulse, plan_ordinary_plant, plan_punch, plan_route, plan_timed_weapon_plant,
+    PulseLease, PulseRequest, PunchRequest, RouteLimits, RouteMode, RouteRequest, RouteStep,
+    certify_pulse, plan_punch, plan_route,
 };
 use crate::cpu::{CpuRng, Intent, ManualIntent, MovementIntent, Observation, WorkBudget};
 use crate::game::{Direction, Tick};
@@ -89,22 +89,22 @@ pub fn plan_with_origin(
         ordinary.intent.movement != MovementIntent::Stop,
         work,
     );
+    let bounded_plant_attempted =
+        storm_enabled && (ordinary.intent.manual.is_some() || clear_movement);
     if (ordinary.intent.manual.is_some() || clear_movement)
-        && let Some(plan) = certified_plant(
+        && let Some(plan) = super::plant_tactic::certified_plant(
             observation,
             history,
             settled_stop_tick,
             memory,
             &ordinary,
+            storm_enabled,
             work,
         )
     {
         return Ok(plan);
     }
-    if ordinary.intent.manual.is_some() {
-        if storm_enabled {
-            return Ok(stop());
-        }
+    if ordinary.intent.manual.is_some() && !storm_enabled {
         return Ok(SurvivalPlan {
             control: ordinary,
             lease: None,
@@ -114,7 +114,7 @@ pub fn plan_with_origin(
     // Preserve the existing clear-board goals and pickup collection. Hazard
     // leases deliberately withhold item-changing paths until item tactics are
     // modeled; they must not replace the already legal clear-board behavior.
-    if clear_movement && !storm_enabled {
+    if clear_movement && ordinary.intent.manual.is_none() {
         return Ok(SurvivalPlan {
             control: ordinary,
             lease: None,
@@ -197,7 +197,9 @@ pub fn plan_with_origin(
                             manual: None,
                         },
                         hold_ticks,
-                        next_memory: if *movement == ordinary.intent.movement {
+                        next_memory: if *movement == ordinary.intent.movement
+                            && ordinary.intent.manual.is_none()
+                        {
                             ordinary.next_memory
                         } else {
                             UtilityMemory::new(memory.key())
@@ -261,60 +263,45 @@ pub fn plan_with_origin(
         });
         break;
     }
-    if let Some(plan) = certified_plant(
-        observation,
-        history,
-        settled_stop_tick,
-        memory,
-        &ordinary,
-        work,
-    ) {
+    if (!bounded_plant_attempted || !storm_enabled)
+        && let Some(plan) = super::plant_tactic::certified_plant(
+            observation,
+            history,
+            settled_stop_tick,
+            memory,
+            &ordinary,
+            storm_enabled,
+            work,
+        )
+    {
         return Ok(plan);
+    }
+    if storm_enabled
+        && clear_movement
+        && fallback.as_ref().is_some_and(|plan| {
+            certified_pulse_progresses(plan, actor.position)
+                && route_fallback
+                    .as_ref()
+                    .is_some_and(|route| route.control.intent.movement == MovementIntent::Stop)
+        })
+    {
+        return Ok(fallback.expect("progressing fallback was checked"));
     }
     Ok(route_fallback.or(fallback).unwrap_or_else(stop))
 }
 
-fn certified_plant(
-    observation: &Observation,
-    history: &ObservedHazardMemory,
-    settled_stop_tick: Tick,
-    memory: &UtilityMemory,
-    ordinary: &ControlPlan,
-    work: &mut WorkBudget,
-) -> Option<SurvivalPlan> {
-    if ordinary.intent.manual == Some(ManualIntent::Equipment) {
-        return None;
-    }
-    if !super::plant_value::could_be_useful(observation, work) {
-        return None;
-    }
-    let execution_tick = observation.parts().tick.0.checked_add(7).map(Tick)?;
-    let request = PlantRequest {
-        execution_tick,
-        settled_stop_tick,
-        first_movement: ordinary.intent.movement,
-        limits: RouteLimits::default(),
+fn certified_pulse_progresses(
+    plan: &SurvivalPlan,
+    initial_position: crate::game::Position,
+) -> bool {
+    let Some(lease) = &plan.lease else {
+        return false;
     };
-    let certificate = if actor(observation)?.weapon.is_some() {
-        plan_timed_weapon_plant(observation, history, request, work)
-    } else {
-        plan_ordinary_plant(observation, history, request, work)
+    if lease.movement() == MovementIntent::Stop {
+        return false;
     }
-    .ok()?;
-    super::plant_value::useful_plant(observation, certificate.placement(), work)?.then(|| {
-        SurvivalPlan {
-            control: ControlPlan {
-                intent: Intent {
-                    movement: ordinary.intent.movement,
-                    manual: Some(ManualIntent::Bomb),
-                },
-                hold_ticks: 1,
-                next_memory: UtilityMemory::new(memory.key()),
-            },
-            lease: None,
-            execution: Some(ExecutionCertificate::Plant(Box::new(certificate))),
-        }
-    })
+    let end = lease.pose_after(lease.hold_ticks());
+    end.min() != initial_position || end.max() != initial_position
 }
 
 fn certified_punch(

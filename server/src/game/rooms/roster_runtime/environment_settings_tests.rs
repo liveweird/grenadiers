@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use grenadiers_core::{
     game::{EnabledItems, SeatId, SimulationSeed, SpeedLevel, StormCloudConfig},
-    room::{MatchPhase, RoomSettings},
+    room::{DepartureReason, MatchPhase, RoomSettings},
 };
 
 use super::{RosterAction, RosterRuntime, RosterRuntimeError};
@@ -108,14 +108,54 @@ fn environment_only_mixed_noop_and_stale_updates_are_atomic() {
 }
 
 #[test]
+fn disconnected_initial_editor_is_designated_but_cannot_act() {
+    let mut runtime = runtime();
+    let creator = runtime.prepare_join(SeatId::One).unwrap();
+    runtime.commit_admission(creator);
+    let notice = runtime
+        .settle_boundary([Some(DepartureReason::TransportLoss), None, None, None])
+        .unwrap()
+        .unwrap();
+    assert_eq!(
+        notice.environment_room().unwrap().settings_editor,
+        Some(grenadiers_core::protocol::v15::Seat::One)
+    );
+    assert_eq!(
+        runtime.update_environment_settings(
+            SeatId::One,
+            1,
+            1,
+            runtime.lifecycle.settings(),
+            StormCloudConfig::Disabled,
+        ),
+        Err(RosterRuntimeError::VacantSeat)
+    );
+}
+
+#[test]
 fn settings_lock_at_first_start_survives_environment_changes_and_rematches() {
     let mut runtime = runtime();
+    let initial = runtime.prepare_join(SeatId::One).unwrap();
+    assert_eq!(
+        initial.environment_room().unwrap().settings_editor,
+        Some(grenadiers_core::protocol::v15::Seat::One)
+    );
+    runtime.commit_admission(initial);
     admit_and_ready(&mut runtime, 1);
     for _ in 0..grenadiers_core::room::COUNTDOWN_TICKS {
         runtime.settle_boundary([None; 4]).unwrap();
     }
     assert_eq!(runtime.lifecycle.phase(), MatchPhase::Running);
     assert!(runtime.settings_locked);
+    assert_eq!(
+        runtime
+            .publish_current()
+            .unwrap()
+            .environment_room()
+            .unwrap()
+            .settings_editor,
+        None
+    );
     assert_eq!(
         runtime.update_environment_settings(
             SeatId::One,
@@ -128,6 +168,24 @@ fn settings_lock_at_first_start_survives_environment_changes_and_rematches() {
     );
     runtime.reset_for_rematch();
     assert!(runtime.settings_locked);
+    assert_eq!(
+        runtime
+            .publish_view()
+            .unwrap()
+            .environment_room()
+            .unwrap()
+            .settings_editor,
+        None
+    );
+    assert_eq!(
+        runtime
+            .prepare_resume(SeatId::One)
+            .unwrap()
+            .environment_room()
+            .unwrap()
+            .settings_editor,
+        None
+    );
     assert_eq!(
         runtime.update_environment_settings(
             SeatId::One,

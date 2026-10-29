@@ -483,6 +483,7 @@
           "$ref": "#/$defs/Counter"
         },
         "settingsEditor": {
+          "description": "The seat currently granted permission to edit match settings, or null when settings are read-only.",
           "oneOf": [
             {
               "$ref": "#/$defs/Seat"

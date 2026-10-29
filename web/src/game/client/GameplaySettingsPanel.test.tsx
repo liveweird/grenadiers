@@ -308,6 +308,22 @@ describe('gameplay settings Oil locale', () => {
 })
 
 describe('gameplay settings locks', () => {
+  it('explains a null edit grant and disables every settings control', () => {
+    const locked = room(3)
+    locked.settingsEditor = null
+    render(<MantineProvider env="test"><GameplaySettingsPanel room={locked} youSeat="one"
+      pending={false} copy={en} onApply={() => true} /></MantineProvider>)
+    expect(screen.getByText('These match rules are read-only.')).toBeVisible()
+    expect(screen.getByLabelText('Starting speed')).toBeDisabled()
+    expect(screen.getByLabelText('Turning tolerance')).toBeDisabled()
+    expect(screen.getByLabelText('Round wins needed')).toBeDisabled()
+    expect(screen.getByLabelText('Bomb fuse')).toBeDisabled()
+    expect(screen.getAllByRole('checkbox').every((control) => control.hasAttribute('disabled'))).toBe(true)
+    for (const name of ['All on', 'All off', 'Restore match defaults', 'Classic settings', 'Apply rules']) {
+      expect(screen.getByRole('button', { name })).toBeDisabled()
+    }
+  })
+
   it.each(['editor', 'disconnected', 'match', 'pending'] as const)(
     'locks bulk actions when blocked by %s state', (lock) => {
       const locked = room(3)

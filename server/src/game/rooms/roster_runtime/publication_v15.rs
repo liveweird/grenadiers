@@ -16,6 +16,7 @@ pub(super) fn room_view(
     environment: StormCloudConfig,
     revision: u32,
     settings_revision: u32,
+    settings_locked: bool,
 ) -> Result<v15::RoomView, RosterRuntimeError> {
     let room = v15::RoomView {
         settings: v15::RoomSettings::new(
@@ -25,7 +26,10 @@ pub(super) fn room_view(
             },
         ),
         settings_revision: publication::counter(settings_revision)?,
-        settings_editor: lifecycle.settings_editor().map(super::types::wire_seat),
+        settings_editor: (!settings_locked)
+            .then(|| lifecycle.settings_editor())
+            .flatten()
+            .map(super::types::wire_seat),
         available_items: publication::available_items()?,
         configuration: v15::RoomConfiguration::from_domain(EnvironmentRoomConfiguration::new(
             identity.configuration,

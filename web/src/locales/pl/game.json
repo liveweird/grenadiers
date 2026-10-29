@@ -143,7 +143,7 @@
   },
   "settings": {
     "title": "Zasady meczu",
-    "explanation": "Te zasady obowiązują obu graczy we wszystkich rundach meczu.",
+    "explanation": "Te zasady obowiązują wszystkich graczy we wszystkich rundach meczu.",
     "speed": "Prędkość początkowa",
     "turnAssist": "Tolerancja skrętu",
     "wins": "Wygrane rundy do zwycięstwa",
@@ -184,6 +184,7 @@
     "apply": "Zastosuj zasady",
     "editor": "{{player}} może edytować przed zgłoszeniem gotowości.",
     "noEditor": "Brak gracza",
+    "readOnly": "Nie można zmienić zasad tego meczu.",
     "lockedReady": "Wycofaj gotowość, aby edytować zasady.",
     "lockedMatch": "Po rozpoczęciu meczu zasady są zablokowane."
   },

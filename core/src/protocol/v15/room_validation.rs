@@ -30,12 +30,15 @@ pub fn validate_room_view(room: &RoomView) -> Result<(), ProjectionError> {
             .iter()
             .enumerate()
             .any(|(index, score)| score.seat.index() != index)
-        || room.settings_editor
-            != matches!(
-                room.seats[0].connection,
-                super::ConnectionStatus::Connected | super::ConnectionStatus::Disconnected { .. }
-            )
-            .then_some(Seat::One)
+        || room.settings_editor.is_some_and(|editor| {
+            editor != Seat::One
+                || base.controllers()[0] != crate::room::SeatControl::Human
+                || !matches!(
+                    room.seats[0].connection,
+                    super::ConnectionStatus::Connected
+                        | super::ConnectionStatus::Disconnected { .. }
+                )
+        })
         || room
             .scores
             .iter()

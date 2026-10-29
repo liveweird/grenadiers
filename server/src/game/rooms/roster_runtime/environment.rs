@@ -73,6 +73,7 @@ impl RosterRuntime {
                 current,
                 self.revision,
                 self.settings_revision,
+                self.settings_locked,
             )?;
             return Ok(Some(publication_v15::view_notice(room)));
         }

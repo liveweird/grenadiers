@@ -143,7 +143,7 @@
   },
   "settings": {
     "title": "Match rules",
-    "explanation": "These rules apply to both players and every round in this match.",
+    "explanation": "These rules apply to all players and every round in this match.",
     "speed": "Starting speed",
     "turnAssist": "Turning tolerance",
     "wins": "Round wins needed",
@@ -184,6 +184,7 @@
     "apply": "Apply rules",
     "editor": "{{player}} can edit while unready.",
     "noEditor": "No player",
+    "readOnly": "These match rules are read-only.",
     "lockedReady": "Become not ready to edit the rules.",
     "lockedMatch": "Rules are locked after the match starts."
   },

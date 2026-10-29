@@ -79,4 +79,6 @@ mod server_conformance_lifecycle_cases;
 #[cfg(test)]
 mod server_conformance_tests;
 #[cfg(test)]
+mod settings_editor_tests;
+#[cfg(test)]
 mod tests;

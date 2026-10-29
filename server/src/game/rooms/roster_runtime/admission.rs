@@ -93,6 +93,14 @@ impl PreparedRosterAdmission {
         }
     }
 
+    #[cfg(test)]
+    pub(in crate::game::rooms) fn environment_room(&self) -> Option<&v15::RoomView> {
+        match &self.projection {
+            PreparedProjection::Environment { room, .. } => Some(room),
+            PreparedProjection::Legacy { .. } => None,
+        }
+    }
+
     pub(in crate::game::rooms) fn room_metadata(
         &self,
     ) -> (&grenadiers_core::protocol::RoomId, u64) {
@@ -186,6 +194,7 @@ impl RosterRuntime {
                 environment,
                 revision,
                 self.settings_revision,
+                self.settings_locked,
             )?;
             let capture = body
                 .map(|sim| {

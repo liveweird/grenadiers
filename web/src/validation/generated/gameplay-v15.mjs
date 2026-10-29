@@ -312,7 +312,10 @@ var require_gameplay_v15 = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 			"phase": { "$ref": "#/$defs/RoomPhase" },
 			"settings": { "$ref": "#/$defs/GameSettings" },
 			"settingsRevision": { "$ref": "#/$defs/Counter" },
-			"settingsEditor": { "oneOf": [{ "$ref": "#/$defs/Seat" }, { "type": "null" }] },
+			"settingsEditor": {
+				"description": "The seat currently granted permission to edit match settings, or null when settings are read-only.",
+				"oneOf": [{ "$ref": "#/$defs/Seat" }, { "type": "null" }]
+			},
 			"availableItems": {
 				"type": "array",
 				"minItems": 0,

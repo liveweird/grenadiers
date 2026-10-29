@@ -46,7 +46,8 @@ function editLockText(room: RoomView, youSeat: Seat | null, ownReady: boolean, c
   if (room.phase.type !== 'waiting') return copy.settings.lockedMatch
   if (ownReady) return copy.settings.lockedReady
   if (room.settingsEditor === youSeat) return null
-  const editor = room.settingsEditor ? copy.player[room.settingsEditor] : copy.settings.noEditor
+  if (room.settingsEditor === null) return copy.settings.readOnly
+  const editor = copy.player[room.settingsEditor]
   return copy.settings.editor.replace('{{player}}', editor)
 }
 

@@ -94,8 +94,10 @@ function metadataError(room: RoomView): SemanticError | null {
   for (const index of room.seats.keys()) {
     if (statusError(room, index)) return 'invalidControllerMetadata'
   }
-  const ownerEligible = ['connected', 'disconnected'].includes(room.seats[0]?.connection.type ?? '')
-  return room.settingsEditor === (ownerEligible ? 'one' : null) ? null : 'invalidControllerMetadata'
+  if (room.settingsEditor === null) return null
+  const ownerEligible = room.configuration.controllers[0] === 'human'
+    && ['connected', 'disconnected'].includes(room.seats[0]?.connection.type ?? '')
+  return room.settingsEditor === 'one' && ownerEligible ? null : 'invalidControllerMetadata'
 }
 
 function oilError(state: GameState, room: RoomView): SemanticError | null {

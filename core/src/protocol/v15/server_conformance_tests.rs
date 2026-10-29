@@ -116,7 +116,7 @@ fn world_case(
     }
     let capture = capture_expanded(&state, &reports).unwrap();
     WorldCase {
-        room: super::server_conformance_lifecycle::room_view(&lifecycle, cloud),
+        room: super::server_conformance_lifecycle::room_view(&lifecycle, cloud, true),
         capture,
         generation,
     }
@@ -178,6 +178,7 @@ fn actual_corpus() -> Corpus {
     let waiting = super::server_conformance_lifecycle::room_view(
         &waiting_lifecycle,
         StormCloudConfig::Disabled,
+        false,
     );
     let admission = prepare_admission(
         AdmissionProjection {
@@ -270,11 +271,17 @@ fn checked_room_validation_rejects_false_cpu_readiness_before_start() {
         EnabledItems::EMPTY,
         false,
     );
-    let waiting =
-        super::server_conformance_lifecycle::room_view(&lifecycle, StormCloudConfig::Disabled);
+    let waiting = super::server_conformance_lifecycle::room_view(
+        &lifecycle,
+        StormCloudConfig::Disabled,
+        false,
+    );
     lifecycle.set_ready(SeatId::One, true).unwrap();
-    let countdown =
-        super::server_conformance_lifecycle::room_view(&lifecycle, StormCloudConfig::Disabled);
+    let countdown = super::server_conformance_lifecycle::room_view(
+        &lifecycle,
+        StormCloudConfig::Disabled,
+        false,
+    );
     for mut candidate in [waiting, countdown] {
         assert!(super::projection::validate_room(&candidate).is_ok());
         candidate.seats[1].ready = false;
@@ -292,7 +299,7 @@ fn running_room() -> RoomView {
         EnabledItems::EMPTY,
         true,
     );
-    super::server_conformance_lifecycle::room_view(&lifecycle, StormCloudConfig::Disabled)
+    super::server_conformance_lifecycle::room_view(&lifecycle, StormCloudConfig::Disabled, true)
 }
 
 fn waiting_room() -> RoomView {
@@ -302,7 +309,7 @@ fn waiting_room() -> RoomView {
         EnabledItems::EMPTY,
         false,
     );
-    super::server_conformance_lifecycle::room_view(&lifecycle, StormCloudConfig::Disabled)
+    super::server_conformance_lifecycle::room_view(&lifecycle, StormCloudConfig::Disabled, false)
 }
 
 #[test]
@@ -373,8 +380,11 @@ fn checked_room_validation_rejects_terminal_deadline_mutation() {
             }
         }
     }
-    let mut terminal =
-        super::server_conformance_lifecycle::room_view(&lifecycle, StormCloudConfig::Disabled);
+    let mut terminal = super::server_conformance_lifecycle::room_view(
+        &lifecycle,
+        StormCloudConfig::Disabled,
+        true,
+    );
     assert!(super::projection::validate_room(&terminal).is_ok());
     let RoomPhase::MatchResult { rematch_at, .. } = &mut terminal.phase else {
         panic!("expected terminal room");

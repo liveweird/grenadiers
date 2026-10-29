@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## 0.3.116 — 2026-10-29
+
+- Add dormant rules8 lairs with configurable spawn intervals and living-mob caps, deterministic
+  layouts, bounded pursuit, shared bomb avoidance and fixed-point collision.
+- Compose NPC contact with Shield/Heart, Bracelet, teleportation, mines, Stopwatch, fire and Oil;
+  preserve old profiles and rollback the full state on timer/entity exhaustion.
+
 ## 0.3.115 — 2026-10-29
 
 - Enable gameplay15 and rules7 for every supported human/CPU lineup and board, with the

@@ -74,7 +74,7 @@ impl LairState {
         let LairConfig::Enabled(settings) = config else {
             return Ok(None);
         };
-        let cells = layout(board);
+        let cells = lair_layout_v1(board);
         for cell in cells {
             if arena.terrain(cell) != Some(Terrain::Wall) {
                 return Err(StateError::InvalidLairCell(cell));
@@ -252,7 +252,9 @@ impl LairState {
     }
 }
 
-fn layout(board: BoardSize) -> [CellId; MAX_LAIRS] {
+/// Fixed pillar overlay for rules8, independent of arena-generation randomness.
+#[must_use]
+pub fn lair_layout_v1(board: BoardSize) -> [CellId; MAX_LAIRS] {
     match board {
         BoardSize::FifteenByThirteen => [CellId::new(6, 6), CellId::new(8, 6)],
         BoardSize::ThirteenByEleven => [CellId::new(6, 4), CellId::new(6, 6)],

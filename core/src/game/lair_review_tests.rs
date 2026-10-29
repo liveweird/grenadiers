@@ -59,7 +59,81 @@ fn insert_mob(state: &mut State, position: Position, heading: Direction) {
 }
 
 #[test]
-fn forced_sweep_contact_eliminates_before_the_victim_can_plant() {
+fn generated_boards_and_rosters_share_the_checked_v1_lair_layout() {
+    let layouts = [
+        (
+            BoardSize::FifteenByThirteen,
+            [CellId::new(6, 6), CellId::new(8, 6)],
+        ),
+        (
+            BoardSize::ThirteenByEleven,
+            [CellId::new(6, 4), CellId::new(6, 6)],
+        ),
+        (
+            BoardSize::ElevenByNine,
+            [CellId::new(4, 4), CellId::new(6, 4)],
+        ),
+    ];
+    for (board, expected) in layouts {
+        assert_eq!(crate::game::lair_layout_v1(board), expected);
+        for (player_count, count) in [
+            (PlayerCount::Two, 2),
+            (PlayerCount::Three, 3),
+            (PlayerCount::Four, 4),
+        ] {
+            let assignment = RoundAssignment::first();
+            let config = ArenaGenerationConfig {
+                player_count,
+                board,
+                assignment,
+            };
+            let generated = if board == BoardSize::FifteenByThirteen {
+                crate::game::generate_multiplayer_arena([41; 32], EnabledItems::EMPTY, config)
+            } else {
+                generate_variable_multiplayer_arena([41; 32], EnabledItems::EMPTY, config)
+            }
+            .unwrap();
+            let (mut world, _) = World::from_generated(generated).unwrap();
+            for cell in expected {
+                assert_eq!(world.arena.terrain(cell), Some(crate::game::Terrain::Wall));
+            }
+            let blocks = world.arena.blocks().clone();
+            world.arena.remove_blocks(&blocks);
+            let inits = SeatId::ALL[..count]
+                .iter()
+                .map(|&seat| ActorInit {
+                    id: EntityId(10 + seat.index() as u32),
+                    seat,
+                    position: Position::center(world.arena.spawns()[seat.index()]),
+                    heading: Direction::East,
+                    speed: SpeedLevel::Base,
+                })
+                .collect::<Vec<_>>();
+            let mut game = State::new_at_tick_with_assignment_and_seed(
+                RulesConfig::environment_v8(
+                    RoomSettings::DEFAULT,
+                    StormCloudConfig::Disabled,
+                    LairConfig::Enabled(LairSettings::new(5, 1).unwrap()),
+                ),
+                world,
+                inits,
+                Tick(0),
+                assignment,
+                SimulationSeed::new([73; 32]),
+            )
+            .unwrap();
+            assert_eq!(game.lairs().unwrap().map(|lair| lair.cell), expected);
+            game.tick = Tick(299);
+            game.step(&[]).unwrap();
+            let lairs = game.lairs().unwrap();
+            assert_eq!(lairs.map(|lair| lair.living_mobs), [1, 1]);
+            assert_eq!(lairs.map(|lair| lair.next_spawn_at), [Tick(600); 2]);
+        }
+    }
+}
+
+#[test]
+fn initial_mob_contact_eliminates_before_the_victim_can_plant() {
     let y = Position::center(CellId::new(4, 3)).y;
     let mut state = State::new(
         rules(EnabledItems::BRACELET),
@@ -97,10 +171,10 @@ fn forced_sweep_contact_eliminates_before_the_victim_can_plant() {
 fn forced_endpoint_contact_eliminates_before_heart_collection() {
     let y = Position::center(CellId::new(4, 3)).y;
     let mut state = State::new(
-        rules(EnabledItems::from_bits(
-            EnabledItems::BRACELET.bits() | EnabledItems::HEART.bits(),
-        )
-        .unwrap()),
+        rules(
+            EnabledItems::from_bits(EnabledItems::BRACELET.bits() | EnabledItems::HEART.bits())
+                .unwrap(),
+        ),
         clear_world([]),
         actors(Position { x: 4_096, y }, Position { x: 4_736, y }),
     )
@@ -117,8 +191,16 @@ fn forced_endpoint_contact_eliminates_before_heart_collection() {
         .unwrap();
 
     assert!(!state.actor(SeatId::Two).unwrap().alive());
-    assert_eq!(state.actor(SeatId::Two).unwrap().inventory().equipment(), None);
-    assert!(state.world().exposed_pickups().contains_key(&CellId::new(5, 3)));
+    assert_eq!(
+        state.actor(SeatId::Two).unwrap().inventory().equipment(),
+        None
+    );
+    assert!(
+        state
+            .world()
+            .exposed_pickups()
+            .contains_key(&CellId::new(5, 3))
+    );
 }
 
 #[test]
@@ -127,7 +209,10 @@ fn voluntary_sweep_and_teleport_use_only_their_actual_contact_geometry() {
     let mut voluntary = State::new(
         rules(EnabledItems::EMPTY),
         clear_world([]),
-        actors(Position { x: 3_520, y }, Position::center(CellId::new(13, 11))),
+        actors(
+            Position { x: 3_520, y },
+            Position::center(CellId::new(13, 11)),
+        ),
     )
     .unwrap();
     insert_mob(&mut voluntary, Position { x: 4_200, y }, Direction::West);
@@ -225,7 +310,10 @@ fn pending_oil_waits_for_mob_exit_and_unlit_oil_is_a_real_collision() {
     }
     let mob = collision.mobs()[0];
     assert_eq!(mob.position.x, 3_776);
-    assert!(!crate::game::movement::position_overlaps_cell(mob.position, solid));
+    assert!(!crate::game::movement::position_overlaps_cell(
+        mob.position,
+        solid
+    ));
 }
 
 #[test]

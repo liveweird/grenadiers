@@ -2,8 +2,8 @@
 
 Status: gameplay contracts, checked domain conversion, HTTP session issuance, and authenticated
 gameplay WebSockets with authoritative configurable two-to-four-seat matches are implemented.
-`api/gameplay-v15.schema.json`, Rust `core::protocol::v15`, and generated
-`web/src/game/v15/schema.ts` define active socket messages. V2 through v14 remain historical
+`api/gameplay-v16.schema.json`, Rust `core::protocol::v16`, and generated
+`web/src/game/v16/schema.ts` define active socket messages. V2 through v15 remain historical
 or archived compatibility contracts.
 V14 retains the v11 physical/privacy model while adding a checked two-to-four-controller room
 configuration. See the [v14 contract](protocol-v14.md) and [v13 compatibility](protocol-v13.md).
@@ -29,8 +29,8 @@ The browser validates these messages and drives the playable generated-map match
 | v12 | [Standard-only solo guide](protocol-v12.md) | Archived contract |
 | v13 | [Compatibility guide](protocol-v13.md) | Archived contract |
 | v14 | [Archived multiplayer contract](protocol-v14.md) | Archived/rejected before credential claim |
-| v15 | [Environment contract](protocol-v15.md) | Live multiplayer contract |
-| v16 | [Lair contract](protocol-v16.md) | Checked core contract; endpoint remains v15 |
+| v15 | [Environment contract](protocol-v15.md) | Archived compatibility contract |
+| v16 | [Lair contract](protocol-v16.md) | Live multiplayer contract |
 
 ## Authentication and compatibility
 
@@ -210,7 +210,7 @@ spawn/tie assignment uses actual round count rather than command epoch.
 
 Shared room views and snapshot metadata also carry the complete checked `settings`,
 `settingsRevision`, nullable original `settingsEditor`, and `availableItems`. Settings also
-carry `enabledItems`; v10 remains pinned to its 21-item Bracelet catalog while active v15
+carry `enabledItems`; v10 remains pinned to its 21-item Bracelet catalog while live v16
 has the unchanged 22-item catalog beginning with Kick, Punch, Bracelet and Wall Pass, with Oil Barrel immediately
 before Teleporter. New live rooms enable the full available catalog and every supported subset is allowed.
 Only actual changes increment
@@ -244,17 +244,14 @@ capability, never to invitation code. See [bounded owner](match-owner.md).
 ## Profile and version evolution
 
 An immutable server room profile owns state construction and its rules/map labels. Publication
-rejects state whose checked rules version disagrees with that profile. Live two-seat 15×13 rooms
-use Expanded-v5 rules, generator v2, and CPU policy 16. Three/four-seat 15×13 rooms use rules 6,
-generator v3, and CPU policy 17. Every 11×9/13×11 room uses rules 6, generator v4, and CPU policy
-17; see [board geometry](board-sizes.md). Snapshots initially have an
-empty pickup array because contents are concealed; only exposed items become public.
-Fixed-classic-v1 remains an explicit unit fixture, not a production selector.
+rejects state whose checked rules version disagrees with that profile. Every live two-to-four-seat
+room uses rules8 and CPU19, with generator3 on 15×13 and generator4 on 11×9/13×11; see
+[board geometry](board-sizes.md). Snapshot pickup arrays begin empty because contents remain
+concealed until exposed. Fixed-classic and earlier expanded profiles remain retained fixtures.
 
-Gameplay v14 is incompatible with earlier versions. Reload clients when upgrading the single server. Both
-old and future versions are rejected before credential lookup, so rejection cannot claim or
-revoke a token. `supportedVersion` accepts the bounded input range rather than only v14,
-allowing a new client to understand an older server's incompatibility response.
+Gameplay16 requires paired server/client upgrades. Versions1–15 and future versions are rejected
+before credential lookup, so rejection cannot claim or revoke a token. `supportedVersion`
+accepts the bounded input range, allowing a new client to understand an older server's response.
 See [ADR 0013](../decisions/0013-gameplay-v2-and-room-profiles.md).
 
 ## Contract checks

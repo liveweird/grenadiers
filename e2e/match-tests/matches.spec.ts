@@ -2,7 +2,7 @@ import { createResponsiveBrowserContexts } from '../tests/support/browser-contex
 import { selectClassicSettings } from '../tests/support/settings'
 import AxeBuilder from '@axe-core/playwright'
 import { expect, test, type Page } from '@playwright/test'
-import type { RoomView } from '../../web/src/game/v15/schema'
+import type { RoomView } from '../../web/src/game/v16/schema'
 import { expectPaintedCanvas, latestSnapshot, observeGame, type ObservedGame } from '../tests/support/duel'
 import { moveTo } from '../tests/support/movement'
 import { expectActorStatGeometry } from '../tests/support/actor-stats'
@@ -24,7 +24,7 @@ async function running(games: ObservedGame[], roundNumber: number) {
   }).toBe(roundNumber)))
   for (const game of games) {
     const frame = latestSnapshot(game)!
-    expect(frame.room).toMatchObject({ rulesVersion: 7, mapId: 'generated_v2' })
+    expect(frame.room).toMatchObject({ rulesVersion: 8, mapId: 'generated_v2' })
     expect(frame.state.bombs).toEqual([])
     expect(frame.state.flames).toEqual([])
     expect(frame.state.pickups).toEqual([])

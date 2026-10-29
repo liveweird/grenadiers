@@ -2,6 +2,18 @@
 
 ## [Unreleased]
 
+## 0.3.118 — 2026-10-29
+
+- Activate gameplay16/rules8/CPU19 across all supported boards and human/CPU lineups, with
+  lairs enabled by default alongside the storm cloud and complete item catalogue.
+- Add atomic lobby lair interval/cap controls and integrate all-on/off, restore and classic
+  presets while retaining disabled choices and the first-start editing lock.
+- Render indestructible lairs and authoritative moving/frozen mobs with directional sprites,
+  recipient privacy, reconnect/rematch cleanup and reduced-motion support.
+- Bind client rule changes and reconnect baselines to monotonic settings revisions.
+- Retire new post-result transport losses without extending reconnect grace or invalidating
+  the remaining players' room; preserve reservations established before the final result.
+
 ## 0.3.117 — 2026-10-29
 
 - Add checked gameplay16 lair configuration, publication, recipient observations and native

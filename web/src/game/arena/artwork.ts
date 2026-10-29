@@ -1,7 +1,12 @@
 import type { Container } from 'pixi.js'
 import type { ActorDrawing } from './actorArt'
 import type { BombDrawing, FlameDrawing, OilBarrelDrawing } from './entityArt'
-import type { RenderablePickupKind, Seat, SnapshotMessage } from './types'
+import type { Direction, RenderablePickupKind, Seat, SnapshotMessage } from './types'
+
+export interface MobDrawing {
+  root: Container
+  poses: Record<Direction, Container>
+}
 
 export interface TerrainDrawing {
   root: Container
@@ -21,4 +26,6 @@ export interface ArenaArtwork {
   makeFlame(): FlameDrawing
   makeOilBarrel(): OilBarrelDrawing
   makeStormCloud(): Container
+  makeLair(): Container
+  makeMob(): MobDrawing
 }

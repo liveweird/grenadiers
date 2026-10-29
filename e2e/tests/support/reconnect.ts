@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test'
-import type { Direction, EquipmentId, GameServerMessage, Seat } from '../../../web/src/game/v15/schema'
+import type { Direction, EquipmentId, GameServerMessage, Seat } from '../../../web/src/game/v16/schema'
 
 type Admission = Extract<GameServerMessage, { type: 'admitted' }>
 export type PublicAdmission = {
@@ -16,6 +16,8 @@ export type PublicAdmission = {
   bombIds: number[]
   oilBarrels: { column: number; row: number; state: 'unlit' | 'burning' }[]
   stormCloud: { position: { x: number; y: number }; direction: Direction; legRemainingTicks: number } | null
+  lairs: { id: number; cell: { column: number; row: number }; spawnRemainingTicks: number; livingMobs: number }[]
+  mobs: { id: number; lairId: number; position: { x: number; y: number }; heading: Direction; frozen: boolean }[]
   stableCapability: boolean
 }
 
@@ -27,43 +29,55 @@ type TransportProbe = {
   stopTakeover: () => void
   invalidResume: (kind: 'wrongRoom' | 'wrongCapability') => Promise<string>
   leakedSharedFields: () => boolean
+  diagnostics: () => TransportDiagnostics
 }
 type ProbeWindow = Window & { grenadiersAcceptanceTransport?: TransportProbe }
+
+export type TransportDiagnostics = {
+  admissionIndex: number
+  hasCredential: boolean
+  appSocketReadyState: number | null
+  socketCount: number
+  receivedTypes: string[]
+  lastErrorCode: string | null
+  closeCodes: number[]
+  online: boolean
+}
 
 export async function installTransportProbe(page: Page): Promise<void> {
   await page.addInitScript(() => {
     const NativeSocket = window.WebSocket
-    let appSocket: WebSocket | null = null
+    let appSocket: WebSocket | null = null, admitted: PublicAdmission | null = null
     let credential: { roomId: string; seat: Seat; token: string } | null = null
-    let admitted: PublicAdmission | null = null
-    let admissionIndex = 0
+    let admissionIndex = 0, socketCount = 0
+    const receivedTypes: string[] = [], closeCodes: number[] = []
+    let lastErrorCode: string | null = null, sharedLeak = false
     let takeoverBinding: { socket: WebSocket; roomId: string; roundId: number; sequence: number } | null = null
-    let sharedLeak = false
     function publicAdmission(message: Admission, stable: boolean, index: number): PublicAdmission {
-      const state = message.state
-      return { index, roomId: message.room.roomId, seat: message.youSeat,
+      const state = message.state; return { index, roomId: message.room.roomId, seat: message.youSeat,
         actionFloor: message.lastActionId, tick: message.room.tick, physicalTick: state?.physicalTick ?? null,
         hasState: state !== null, stableCapability: stable,
         positions: state?.actors.flatMap((actor) => actor.type === 'visible' ? [{ seat: actor.seat, ...actor.position }] : []) ?? [],
         visibleActors: state?.actors.flatMap((actor) => actor.type === 'visible' ? [{ seat: actor.seat, ...actor.position, lastTeleportTick: actor.lastTeleportTick }] : []) ?? [],
         equipment: state?.actors.flatMap((actor) => actor.type === 'visible' ? [{ seat: actor.seat, equipment: actor.inventory.equipment }] : []) ?? [],
         bombIds: state?.bombs.map((bomb) => bomb.id) ?? [], stormCloud: state?.stormCloud ?? null,
+        lairs: state?.lairs ?? [], mobs: state?.mobs ?? [],
         oilBarrels: state?.oilBarrels.map(({ cell, state: barrelState }) => ({ ...cell, state: barrelState })) ?? [] }
     }
     window.WebSocket = class extends NativeSocket {
       constructor(url: string | URL, protocols?: string | string[]) {
-        super(url, protocols)
-        if (!new URL(String(url), location.href).pathname.endsWith('/game/ws')) return
-        this.addEventListener('open', (event) => { appSocket = event.currentTarget as WebSocket }, { once: true })
+        super(url, protocols); if (!new URL(String(url), location.href).pathname.endsWith('/game/ws')) return
+        socketCount += 1; this.addEventListener('open', (event) => { appSocket = event.currentTarget as WebSocket })
+        this.addEventListener('close', (event) => { closeCodes.push(event.code); closeCodes.splice(0, closeCodes.length - 16) })
         this.addEventListener('message', (event: MessageEvent) => {
           if (typeof event.data !== 'string') return
-          const message = JSON.parse(event.data) as GameServerMessage
+          const message = JSON.parse(event.data) as GameServerMessage; receivedTypes.push(message.type); receivedTypes.splice(0, receivedTypes.length - 24)
+          if (message.type === 'error') lastErrorCode = message.code
           if (message.type === 'admitted') {
             const stable = credential === null || credential.roomId !== message.room.roomId
               || credential.token === message.resumeToken
             credential = { roomId: message.room.roomId, seat: message.youSeat, token: message.resumeToken }
-            admissionIndex += 1
-            admitted = publicAdmission(message, stable, admissionIndex)
+            admissionIndex += 1; admitted = publicAdmission(message, stable, admissionIndex)
           }
           if (message.type === 'roomState' || message.type === 'snapshot') {
             const encoded = JSON.stringify(message)
@@ -114,7 +128,7 @@ export async function installTransportProbe(page: Page): Promise<void> {
         socket.addEventListener('close', fail, { once: true })
         socket.addEventListener('open', () => {
           stage = 'open'
-          socket.send(JSON.stringify({ type: 'authenticate', protocolVersion: 15, token: session.token }))
+          socket.send(JSON.stringify({ type: 'authenticate', protocolVersion: 16, token: session.token }))
         }, { once: true })
         const onMessage = (event: MessageEvent): void => {
           const message = JSON.parse(String(event.data)) as GameServerMessage
@@ -184,6 +198,11 @@ export async function installTransportProbe(page: Page): Promise<void> {
         return result
       },
       leakedSharedFields() { return sharedLeak },
+      diagnostics: () => ({
+        admissionIndex, hasCredential: credential !== null, socketCount,
+        appSocketReadyState: appSocket?.readyState ?? null,
+        receivedTypes: [...receivedTypes], lastErrorCode, closeCodes: [...closeCodes], online: navigator.onLine,
+      }),
     }
   })
 }
@@ -237,5 +256,13 @@ export async function sharedFieldsArePrivate(page: Page): Promise<boolean> {
     const probe = (window as ProbeWindow).grenadiersAcceptanceTransport
     if (!probe) throw new Error('Transport probe is not installed')
     return !probe.leakedSharedFields()
+  })
+}
+
+export async function transportDiagnostics(page: Page): Promise<TransportDiagnostics> {
+  return page.evaluate(() => {
+    const probe = (window as ProbeWindow).grenadiersAcceptanceTransport
+    if (!probe) throw new Error('Transport probe is not installed')
+    return probe.diagnostics()
   })
 }

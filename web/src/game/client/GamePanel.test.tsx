@@ -257,8 +257,8 @@ describe('v12 room controls', () => {
     fireEvent.change(screen.getByLabelText('Round wins needed'), { target: { value: '1' } })
     fireEvent.click(screen.getByRole('button', { name: 'Apply rules' }))
     expect(received).toEqual([[currentActions, {
+      ...current.room.settings,
       startingSpeedLevel: 0, turnAssistUnits: 256, winsToFinish: 1, bombFuseTicks: 180,
-      enabledItems: ['heart'], environment: { stormCloud: true },
     }]])
   })
 

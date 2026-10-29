@@ -3,7 +3,7 @@ import { expect, test, type Page } from '@playwright/test'
 import { latestSnapshot, observeGame, visibleActor, type ObservedGame } from '../tests/support/duel'
 import { moveTo } from '../tests/support/movement'
 import { applyItemSettings } from '../tests/support/settings'
-import type { BombView, GameServerMessage } from '../../web/src/game/v15/schema'
+import type { BombView, GameServerMessage } from '../../web/src/game/v16/schema'
 
 test.beforeAll(() => {
   expect(process.env.E2E_SHIELD_FIXTURE, 'Configure the documented production Shield seed')
@@ -67,8 +67,10 @@ test('two browsers enable a generated Shield and observe immunity end before a l
     await Promise.all([one, two].map((page) => page.getByRole('button', { name: 'Ready', exact: true }).click()))
     await Promise.all(games.map((game) => expect.poll(() => latestSnapshot(game)?.room.phase.type).toBe('running')))
     expect(latestSnapshot(games[0])!.room).toMatchObject({
-      rulesVersion: 7, mapId: 'generated_v2', availableItems: ['kick', 'punch', 'bracelet', 'wallPass', 'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch', 'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls', 'invisibleBombs', 'oilBarrel', 'teleporter'],
-      settings: { enabledItems: ['shield'], environment: { stormCloud: false } },
+      rulesVersion: 8, mapId: 'generated_v2', availableItems: ['kick', 'punch', 'bracelet', 'wallPass', 'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch', 'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls', 'invisibleBombs', 'oilBarrel', 'teleporter'],
+      settings: { enabledItems: ['shield'], environment: {
+        stormCloud: false, lairs: { enabled: false, spawnSeconds: 10, maxLivingMobs: 3 },
+      } },
     })
     await one.getByRole('region', { name: 'Grenadiers courtyard' }).click()
     await moveTo(one, games[0], { column: 2, row: 1 })

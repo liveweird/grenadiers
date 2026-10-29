@@ -3,7 +3,7 @@ import { act, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { GameArenaProps } from './game/arena/types'
-import type { GameState, RoomPhase, RoomView, Snapshot } from './game/v15/schema'
+import type { GameState, RoomPhase, RoomView, Snapshot } from './game/v16/schema'
 import i18n from './i18n'
 import { App } from './App'
 
@@ -47,12 +47,13 @@ function room(revision: number, phase: RoomPhase = { type: 'waiting' }): RoomVie
   return {
     roomId,
     configuration: { controllers: ['human', 'human'], cpuDifficulty: null,
-      board: { width: 15, height: 13 }, environment: { stormCloud: true } },
+      board: { width: 15, height: 13 },
+      environment: { stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 3 } } },
     roomCode: 'ABCDEFGH',
     roundId: 1,
     revision,
     tick: revision,
-    rulesVersion: 7,
+    rulesVersion: 8,
     mapId: 'generated_v2',
     roundNumber: ['running', 'result', 'matchResult'].includes(phase.type) ? 1 : 0,
     scores: [{ seat: 'one', wins: 0 }, { seat: 'two', wins: phase.type === 'result' ? 1 : 0 }],
@@ -62,7 +63,8 @@ function room(revision: number, phase: RoomPhase = { type: 'waiting' }): RoomVie
     } : null,
     settings: {
       startingSpeedLevel: 0, turnAssistUnits: 256, winsToFinish: 3, bombFuseTicks: 180,
-      enabledItems: ['heart'], environment: { stormCloud: true },
+      enabledItems: ['heart'],
+      environment: { stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 3 } },
     },
     availableItems: ['kick', 'punch', 'bracelet', 'wallPass', 'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch', 'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls', 'invisibleBombs', 'oilBarrel', 'teleporter'],
     settingsRevision: 1,
@@ -83,7 +85,9 @@ function snapshot(revision: number, phase: RoomPhase = { type: 'running' }): Sna
       runningUpdates: 1,
       remainingTicks: 10_800,
       physicalTick: revision,
-      arena: { width: 15, height: 13, terrain: Array.from({ length: 195 }, () => 'floor'), blocks: [] },
+      arena: { width: 15, height: 13,
+        terrain: Array.from({ length: 195 }, (_, index) => index === 96 || index === 98 ? 'wall' : 'floor'),
+        blocks: [] },
       actors: [
         {
           type: 'visible',
@@ -105,6 +109,11 @@ function snapshot(revision: number, phase: RoomPhase = { type: 'running' }): Sna
       pickups: [],
       oilBarrels: [],
       stormCloud: { position: { x: 7_680, y: 6_656 }, direction: 'east', legRemainingTicks: 128 },
+      lairs: [
+        { id: 0, cell: { column: 6, row: 6 }, spawnRemainingTicks: 600, livingMobs: 0 },
+        { id: 1, cell: { column: 8, row: 6 }, spawnRemainingTicks: 600, livingMobs: 0 },
+      ],
+      mobs: [],
     },
     events: [],
   }
@@ -130,8 +139,8 @@ async function beginRoom(user: ReturnType<typeof userEvent.setup>, action: 'crea
   await waitFor(() => expect(appSockets.filter((socket) => socket.url.endsWith('/api/v1/game/ws'))).toHaveLength(1))
   const socket = appSockets.find((candidate) => candidate.url.endsWith('/api/v1/game/ws'))!
   act(() => socket.emit('open'))
-  expect(JSON.parse(socket.sent[0])).toEqual({ type: 'authenticate', protocolVersion: 15, token })
-  act(() => socket.message({ type: 'authenticated', protocolVersion: 15 }))
+  expect(JSON.parse(socket.sent[0])).toEqual({ type: 'authenticate', protocolVersion: 16, token })
+  act(() => socket.message({ type: 'authenticated', protocolVersion: 16 }))
   return socket
 }
 
@@ -155,7 +164,8 @@ describe('App game flow', () => {
     expect(JSON.parse(socket.sent[1])).toEqual({
       type: 'createRoom', sequence: 1,
       configuration: { controllers: ['human', 'human'], cpuDifficulty: null,
-        board: { width: 15, height: 13 }, environment: { stormCloud: true } },
+        board: { width: 15, height: 13 },
+        environment: { stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 3 } } },
     })
 
     act(() => admit(socket, room(1)))

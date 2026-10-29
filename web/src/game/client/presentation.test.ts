@@ -18,6 +18,20 @@ function state(): GameClientState {
 }
 
 describe('v12 arena presentation', () => {
+  it('projects typed v16 lairs and public mob facts without inventing private navigation', () => {
+    const current = state()
+    current.snapshot!.state.mobs = [{
+      id: 90, lairId: 0, position: { x: 6_656, y: 6_656 }, heading: 'north', frozen: false,
+    }]
+    current.snapshot!.state.lairs[0]!.livingMobs = 1
+    const presented = presentSnapshot(current)!
+    expect(presented.state.lairs).toEqual(current.snapshot!.state.lairs)
+    expect(presented.state.mobs).toEqual(current.snapshot!.state.mobs)
+    expect(presented.state.mobs[0]).toEqual({
+      id: 90, lairId: 0, position: { x: 6_656, y: 6_656 }, heading: 'north', frozen: false,
+    })
+  })
+
   it('keeps the storm slowdown timer on the own presented actor only', () => {
     const current = state()
     const [own, rival] = current.snapshot!.state.actors

@@ -1,9 +1,8 @@
-# Gameplay v15 environment contract
+# Gameplay v15 compatibility contract
 
 `api/gameplay-v15.schema.json`, `core::protocol::v15` and generated
-`web/src/game/v15/schema.ts` define the live environment profile. The WebSocket endpoint is
-`/api/v1/game/ws` and accepts only protocol 15; protocol 14 and older versions are rejected
-before credential claim.
+`web/src/game/v15/schema.ts` define the archived environment profile. The live WebSocket endpoint
+uses gameplay16; protocol 15 and older versions are rejected before credential claim.
 
 ## Configuration and state
 

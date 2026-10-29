@@ -46,7 +46,7 @@ mod types;
 use crate::round_seed::RoundSeedSource;
 pub(crate) use closing::ClosingReason;
 pub(crate) use live::{LiveAdmission, LiveDelivery, LiveMemberEvent};
-pub(crate) use live_registry::EnvironmentSettingsAction;
+pub(crate) use live_registry::LairSettingsAction;
 #[cfg(test)]
 pub(crate) use match_owner::{MatchAdmission as Admission, MatchOwnerNotice as RoomNotice};
 #[cfg(test)]

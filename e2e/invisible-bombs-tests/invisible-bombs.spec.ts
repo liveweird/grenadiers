@@ -3,7 +3,7 @@ import { expect, test, type Page } from '@playwright/test'
 import { latestSnapshot, visibleActor, type ObservedGame } from '../tests/support/duel'
 import { moveSeatTo } from '../tests/support/movement'
 import { admissionBaseline, disconnectTransport } from '../tests/support/reconnect'
-import type { GameServerMessage, Seat } from '../../web/src/game/v15/schema'
+import type { GameServerMessage, Seat } from '../../web/src/game/v16/schema'
 import { attachLiveWindowEvidence, capturePreparedTilePng, markStage, prepareInvisibleBombsMatch,
   prepareTileCapture, requireSuccessfulTasks, trackTask, validateLiveGuard,
   recordDetonatedBomb, recordPixelComparison, recordPlacedBomb, retainPng, settleAll,

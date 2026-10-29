@@ -7,7 +7,7 @@ const changed = {
   winsToFinish: 1,
   bombFuseTicks: 60 as const,
   enabledItems: [],
-  environment: { stormCloud: false },
+  environment: { stormCloud: false, lairs: { enabled: false, spawnSeconds: 24, maxLivingMobs: 6 } },
 }
 
 describe('v12 authoritative gameplay settings', () => {
@@ -144,5 +144,67 @@ describe('v12 authoritative gameplay settings', () => {
       ...baseline.room.settings, enabledItems: ['teleporter'],
     })).toBe(true)
     expect(socket.sent).toHaveLength(sent + 4)
+  })
+
+  it('rejects invalid lair numeric drafts before sending an authoritative transaction', async () => {
+    const value = harness()
+    const socket = await authenticate(value)
+    const baseline = admitted()
+    baseline.room = room(1)
+    baseline.state = null
+    socket.message(baseline)
+    const sent = socket.sent.length
+    const settings = baseline.room.settings
+
+    for (const lairs of [
+      { enabled: true, spawnSeconds: 4, maxLivingMobs: 3 },
+      { enabled: true, spawnSeconds: 61, maxLivingMobs: 3 },
+      { enabled: true, spawnSeconds: 10, maxLivingMobs: 0 },
+      { enabled: true, spawnSeconds: 10, maxLivingMobs: 9 },
+    ]) {
+      expect(value.client.updateSettings({
+        ...settings, environment: { ...settings.environment, lairs },
+      })).toBe(false)
+    }
+    expect(socket.sent).toHaveLength(sent)
+  })
+
+  it('requires settings revision progress for changed room-state rules', async () => {
+    const value = harness()
+    const socket = await authenticate(value)
+    socket.message(admitted(1))
+    const invalid = room(2, { type: 'running' })
+    invalid.settings.environment.lairs.spawnSeconds = 24
+    invalid.configuration.environment.lairs.spawnSeconds = 24
+    socket.message({ type: 'roomState', room: invalid })
+    expect(value.client.getState().room?.revision).toBe(1)
+
+    const accepted = structuredClone(invalid)
+    accepted.revision = 3
+    accepted.tick = 3
+    accepted.settingsRevision = 4
+    socket.message({ type: 'roomState', room: accepted })
+    expect(value.client.getState().room).toEqual(accepted)
+    socket.message({ type: 'roomState', room: {
+      ...accepted, revision: 4, tick: 4, settingsRevision: 3,
+    } })
+    expect(value.client.getState().room).toEqual(accepted)
+  })
+
+  it('requires settings revision progress for changed snapshot rules', async () => {
+    const value = harness()
+    const socket = await authenticate(value)
+    socket.message(admitted(1))
+    const invalid = admitted(2).state!
+    const invalidRoom = room(2, { type: 'running' })
+    invalidRoom.settings.winsToFinish = 4
+    socket.message({ type: 'snapshot', room: invalidRoom, state: invalid, events: [] })
+    expect(value.client.getState().snapshot?.room.revision).toBe(1)
+
+    const acceptedRoom = room(3, { type: 'running' })
+    acceptedRoom.settings.winsToFinish = 4
+    acceptedRoom.settingsRevision = 2
+    socket.message({ type: 'snapshot', room: acceptedRoom, state: admitted(3).state!, events: [] })
+    expect(value.client.getState().snapshot?.room).toEqual(acceptedRoom)
   })
 })

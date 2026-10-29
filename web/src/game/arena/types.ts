@@ -86,6 +86,19 @@ export interface SnapshotMessage {
       direction: Direction
       legRemainingTicks: number
     } | null
+    lairs: Array<{
+      id: number
+      cell: { column: number; row: number }
+      spawnRemainingTicks: number
+      livingMobs: number
+    }>
+    mobs: Array<{
+      id: number
+      lairId: number
+      position: { x: number; y: number }
+      heading: Direction
+      frozen: boolean
+    }>
   }
 }
 export type Seat = 'one' | 'two' | 'three' | 'four'

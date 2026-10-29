@@ -5,6 +5,7 @@ import type { ArenaArtwork } from './artwork'
 import { selectBombAnimation } from './bombAnimation'
 import { TILE } from './drawing'
 import type { BombDrawing, FlameDrawing, OilBarrelDrawing } from './entityArt'
+import { EnvironmentScene } from './environmentScene'
 import { graphicsArtwork } from './graphicsArtwork'
 import type { RenderablePickupKind, SnapshotMessage } from './types'
 
@@ -103,9 +104,7 @@ export class ArenaScene {
   private readonly bombsLayer = new Container()
   private readonly flamesLayer = new Container()
   private readonly actorsLayer = new Container()
-  private weatherLayer: Container | null = null
-  private stormCloud: Container | null = null
-  private stormMotion: Omit<Motion, 'lastTeleportTick'> | null = null
+  private readonly environment: EnvironmentScene
   private readonly blocks = new Map<string, Container>()
   private readonly pickups = new Map<string, PickupDrawing>()
   private readonly bombs = new Map<number, BombDrawing>()
@@ -123,10 +122,12 @@ export class ArenaScene {
 
   constructor(resolution: number, artwork: ArenaArtwork = graphicsArtwork) {
     this.artwork = artwork
+    this.environment = new EnvironmentScene(artwork, this.root, this.blocksLayer, this.actorsLayer)
     this.terrain = artwork.makeTerrain()
     this.terrainCacheOptions = { resolution, antialias: false, scaleMode: 'nearest' as const }
     this.root.addChild(
-      this.terrain.root, this.blocksLayer, this.pickupsLayer, this.bombsLayer, this.flamesLayer, this.actorsLayer,
+      this.terrain.root, this.blocksLayer, this.pickupsLayer, this.bombsLayer,
+      this.flamesLayer, this.actorsLayer,
     )
   }
 
@@ -155,7 +156,7 @@ export class ArenaScene {
     this.updateBombs(snapshot.state.bombs)
     const burningOil = this.updateOilBarrels(snapshot.state.oilBarrels ?? [])
     this.updateFlames(snapshot.state.flames, burningOil)
-    this.updateStormCloud(snapshot.state.stormCloud ?? null, reset)
+    this.environment.update(snapshot.state, reset)
     this.updateActors(snapshot.state.actors, reset)
     this.render(now)
   }
@@ -169,10 +170,9 @@ export class ArenaScene {
     for (const drawing of this.flames.values()) drawing.root.destroy({ children: true, context: true })
     for (const drawing of this.oilBarrels.values()) drawing.root.destroy({ children: true, context: true })
     for (const drawing of this.actors.values()) drawing.root.destroy({ children: true, context: true })
-    this.weatherLayer?.destroy({ children: true, context: true })
+    this.environment.reset()
     this.blocks.clear(); this.pickups.clear(); this.bombs.clear(); this.flames.clear()
     this.oilBarrels.clear(); this.actors.clear()
-    this.weatherLayer = null; this.stormCloud = null; this.stormMotion = null
     this.motions.clear()
     if (this.terrain.root.isCachedAsTexture) this.terrain.root.cacheAsTexture(false)
     this.terrain.clear()
@@ -198,7 +198,7 @@ export class ArenaScene {
         motion.fromY + (motion.toY - motion.fromY) * progress,
       )
     }
-    this.renderStormCloud(progress)
+    this.environment.render(progress)
     const effects = this.running && !this.reducedMotion
     for (const bomb of this.bombs.values()) {
       const animation = selectBombAnimation(
@@ -355,34 +355,4 @@ export class ArenaScene {
     }
   }
 
-  private updateStormCloud(row: SnapshotMessage['state']['stormCloud'], reset: boolean): void {
-    if (!row) {
-      this.weatherLayer?.destroy({ children: true, context: true })
-      this.weatherLayer = null; this.stormCloud = null; this.stormMotion = null
-      return
-    }
-    const toX = unitsToPixels(row.position.x)
-    const toY = unitsToPixels(row.position.y)
-    if (!this.stormCloud) {
-      this.weatherLayer = new Container()
-      this.stormCloud = this.artwork.makeStormCloud()
-      this.stormCloud.position.set(toX, toY)
-      this.weatherLayer.addChild(this.stormCloud)
-      this.root.addChildAt(this.weatherLayer, this.root.children.indexOf(this.actorsLayer))
-    }
-    this.stormMotion = {
-      fromX: reset || !this.stormMotion ? toX : this.stormCloud.x,
-      fromY: reset || !this.stormMotion ? toY : this.stormCloud.y,
-      toX, toY,
-    }
-  }
-
-  private renderStormCloud(progress: number): void {
-    if (!this.stormCloud || !this.stormMotion) return
-    const motion = this.stormMotion
-    this.stormCloud.position.set(
-      motion.fromX + (motion.toX - motion.fromX) * progress,
-      motion.fromY + (motion.toY - motion.fromY) * progress,
-    )
-  }
 }

@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use axum::extract::ws::{Message, WebSocket};
-use grenadiers_core::protocol::v15::{ErrorCode, GameServerMessage, ManualActionKind};
+use grenadiers_core::protocol::v16::{ErrorCode, GameServerMessage, ManualActionKind};
 use grenadiers_core::protocol::{Counter, Direction as WireDirection, RoomId};
 use tokio::time::Instant;
 
@@ -9,7 +9,7 @@ use super::{
     command::{Command, SequencedCommand},
     connection::{ConnectionState, Membership},
     rooms::{
-        BindingKey, EnvironmentSettingsAction, GameRooms, LiveAdmission as Admission, RoomError,
+        BindingKey, GameRooms, LairSettingsAction, LiveAdmission as Admission, RoomError,
         RosterAction as RoomAction,
     },
     socket::{send_error, send_game, send_raw},
@@ -179,7 +179,7 @@ pub(super) async fn dispatch(
                 rooms,
                 room_id,
                 u64::from(round_id.get()),
-                EnvironmentSettingsAction {
+                LairSettingsAction {
                     settings_revision: settings_revision.get(),
                     settings: match grenadiers_core::protocol::v13::expanded_settings(settings.base)
                     {
@@ -188,11 +188,19 @@ pub(super) async fn dispatch(
                             return reply_error(socket, ErrorCode::InvalidMessage, sequence).await;
                         }
                     },
-                    environment: if settings.environment.storm_cloud {
+                    cloud: if settings.environment.storm_cloud {
                         grenadiers_core::game::StormCloudConfig::Single
                     } else {
                         grenadiers_core::game::StormCloudConfig::Disabled
                     },
+                    tuning: grenadiers_core::room::LairTuning::new(
+                        settings.environment.lairs.enabled,
+                        grenadiers_core::room::LairSettings::new(
+                            settings.environment.lairs.spawn_seconds,
+                            settings.environment.lairs.max_living_mobs,
+                        )
+                        .expect("v16 parser validates lair settings"),
+                    ),
                 },
                 state,
                 sequence,

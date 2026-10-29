@@ -134,4 +134,20 @@ describe('atlas gameplay artwork', () => {
     expect(cloud.label).toBe('environment.stormCloud')
     cloud.destroy()
   })
+
+  it('creates typed lair and four-heading mob artwork from canonical frames', () => {
+    const created: string[] = []
+    const artwork = createAtlasArtwork(recordingRegions(created))
+    const lair = artwork.makeLair()
+    const mob = artwork.makeMob()
+    expect(created).toEqual([
+      'terrain.lair', 'mob.north', 'mob.east', 'mob.south', 'mob.west',
+    ])
+    expect(lair.label).toBe('terrain.lair')
+    expect(Object.values(mob.poses).map(({ label }) => label)).toEqual([
+      'mob.north', 'mob.east', 'mob.south', 'mob.west',
+    ])
+    lair.destroy()
+    mob.root.destroy({ children: true })
+  })
 })

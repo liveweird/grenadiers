@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 import { latestSnapshot, observeGame, visibleActor } from '../tests/support/duel'
-import type { GameServerMessage } from '../../web/src/game/v15/schema'
+import type { GameServerMessage } from '../../web/src/game/v16/schema'
 
 test.beforeAll(() => {
   expect(process.env.E2E_CPU_ITEM_FIXTURE).toBe('arena-v3-cpu-wall-pass')
@@ -19,10 +19,14 @@ test('native CPU collects Wall Pass with all items enabled and renders its publi
     frame.type === 'admitted' || frame.type === 'roomState' || frame.type === 'snapshot')!.room
   expect(room.availableItems).toHaveLength(22)
   expect(room.settings.enabledItems).toEqual(room.availableItems)
-  expect(room.settings.environment).toEqual({ stormCloud: true })
+  expect(room.settings.environment).toEqual({
+    stormCloud: true,
+    lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 3 },
+  })
 
   const revision = room.settingsRevision
   await page.getByRole('checkbox', { name: 'Storm cloud', exact: true }).uncheck()
+  await page.getByRole('checkbox', { name: 'Monster lairs', exact: true }).uncheck()
   await page.getByLabel('Bomb fuse').selectOption('300')
   await page.getByRole('button', { name: 'Apply rules', exact: true }).click()
   await expect.poll(() => game.frames.findLast((frame) =>
@@ -32,8 +36,12 @@ test('native CPU collects Wall Pass with all items enabled and renders its publi
     frame.type === 'admitted' || frame.type === 'roomState' || frame.type === 'snapshot')
     ?.room
   await expect.poll(() => updatedRoom()?.settings.enabledItems).toEqual(room.availableItems)
-  await expect.poll(() => updatedRoom()?.settings.environment).toEqual({ stormCloud: false })
-  expect(updatedRoom()?.configuration.environment).toEqual({ stormCloud: false })
+  const environment = {
+    stormCloud: false,
+    lairs: { enabled: false, spawnSeconds: 10, maxLivingMobs: 3 },
+  }
+  await expect.poll(() => updatedRoom()?.settings.environment).toEqual(environment)
+  expect(updatedRoom()?.configuration.environment).toEqual(environment)
 
   await page.getByRole('button', { name: 'Ready', exact: true }).click()
   await expect.poll(() => latestSnapshot(game)?.room.phase.type).toBe('running')

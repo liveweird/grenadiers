@@ -1,7 +1,7 @@
 # Gameplay protocol v14
 
 Gameplay v14 is the archived transport contract for closed two-to-four-seat rooms. It is rejected
-before credential claim; the live server and web client use gameplay v15. The canonical JSON Schema is
+before credential claim; the live server and web client use gameplay v16. The canonical JSON Schema is
 [`api/gameplay-v14.schema.json`](../../api/gameplay-v14.schema.json).
 
 ## Room configuration

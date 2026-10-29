@@ -11,7 +11,7 @@ import { startBrowserStallDiagnostics } from '../tests/support/browser-stall-dia
 import { startCaptureWorkloadProfile } from '../tests/support/capture-workload-profile'
 import {
   admissionBaseline, disconnectTransport, installTransportProbe, invalidResume,
-  moveTakeover, sharedFieldsArePrivate, stopTakeover, takeover,
+  moveTakeover, sharedFieldsArePrivate, stopTakeover, takeover, transportDiagnostics,
 } from '../tests/support/reconnect'
 
 test.beforeAll(() => {
@@ -44,6 +44,9 @@ async function holdSessions(page: Page): Promise<() => void> {
 async function assertPublicOnly(pages: Page[]) {
   for (const page of pages) expect(await sharedFieldsArePrivate(page)).toBe(true)
 }
+
+const latestRoom = (game: ObservedGame) => game.frames.filter((frame) =>
+  frame.type === 'admitted' || frame.type === 'roomState' || frame.type === 'snapshot').at(-1)?.room
 
 async function attachPublicSummary(testInfo: TestInfo, games: ObservedGame[]) {
   await testInfo.attach('reconnect-public-summary', {
@@ -276,3 +279,113 @@ test('two offline tabs stop at the recovery deadline while session requests are 
     await Promise.all(contexts.map((context) => context.close()))
   }
 })
+
+test('a terminal transport loss retires the seat without changing the result or blocking rematch',
+  async ({ browser }, testInfo) => {
+    const contexts = await Promise.all(Array.from({ length: 3 }, () => browser.newContext()))
+    const games: ObservedGame[] = []
+    let terminalEvidence: unknown
+    try {
+      const pages = await Promise.all(contexts.map((context) => context.newPage()))
+      const [one, two, three] = pages
+      await installTransportProbe(two)
+      games.push(...pages.map(observeGame))
+      await Promise.all(pages.map((page) => page.goto('/')))
+      await one.getByRole('combobox', { name: 'Players', exact: true }).selectOption('3')
+      await one.getByRole('button', { name: 'Create custom match', exact: true }).click()
+      const invitation = one.getByLabel('Room invitation code', { exact: true })
+      await expect(invitation).toHaveText(/^[A-HJ-NP-Z2-9]{8}$/)
+      const roomCode = await invitation.innerText()
+      for (const page of [two, three]) {
+        await page.getByRole('textbox', { name: 'Room code', exact: true }).fill(roomCode)
+        await page.getByRole('button', { name: 'Join room', exact: true }).click()
+      }
+      const settingsRevision = latestRoom(games[0])!.settingsRevision
+      await one.getByRole('button', { name: 'Classic settings', exact: true }).click()
+      await one.getByLabel('Round wins needed').selectOption('1')
+      await one.getByLabel('Bomb fuse').selectOption('60')
+      await one.getByRole('button', { name: 'Apply rules', exact: true }).click()
+      await expect.poll(() => {
+        const rooms = games.map(latestRoom)
+        if (rooms.some((room) => !room)
+          || new Set(rooms.map((room) => room!.settingsRevision)).size !== 1
+          || rooms.some((room) => room!.settings.winsToFinish !== 1
+            || room!.settings.bombFuseTicks !== 60
+            || room!.settings.enabledItems.length !== 0
+            || room!.settings.environment.stormCloud
+            || room!.settings.environment.lairs.enabled)) return null
+        return rooms[0]!.settingsRevision
+      }).toBeGreaterThan(settingsRevision)
+      await Promise.all(pages.map((page) => page.getByRole('button', { name: 'Ready', exact: true }).click()))
+      await Promise.all(games.map((game) =>
+        expect.poll(() => latestSnapshot(game)?.room.phase.type).toBe('running')))
+
+      await one.getByRole('region', { name: 'Grenadiers courtyard', exact: true }).click()
+      await one.keyboard.press('Space')
+      await expect.poll(() => visibleActor(latestSnapshot(games[0]), 'one')?.alive).toBe(false)
+      expect(latestSnapshot(games[0])?.room.phase.type).toBe('running')
+      await two.getByRole('region', { name: 'Grenadiers courtyard', exact: true }).click()
+      await two.keyboard.press('Space')
+      await Promise.all(games.map((game) =>
+        expect.poll(() => latestSnapshot(game)?.room.phase.type).toBe('matchResult')))
+      const finalRoom = latestSnapshot(games[2])!.room
+      expect(finalRoom.phase).toMatchObject({
+        type: 'matchResult', result: { type: 'winner', seat: 'three', reason: 'roundWins' },
+      })
+      if (finalRoom.phase.type !== 'matchResult') throw new Error('Expected terminal match result')
+      await expect.poll(() => latestRoom(games[2])?.tick ?? 0)
+        .toBeGreaterThanOrEqual(finalRoom.phase.endedAt + 10)
+
+      const admission = await admissionBaseline(two)
+      expect(admission).not.toBeNull()
+      const revisionBeforeLoss = latestRoom(games[2])!.revision
+      await disconnectTransport(two)
+      await expect(two.getByText('This reserved seat is no longer available.', { exact: true })).toBeVisible()
+      await expect.poll(async () => (await transportDiagnostics(two)).lastErrorCode).toBe('resumeRejected')
+      expect((await admissionBaseline(two))?.index).toBe(admission!.index)
+      terminalEvidence = {
+        admissionIndex: admission!.index,
+        transport: await transportDiagnostics(two),
+        peers: [games[0], games[2]].map((game) => {
+          const room = latestRoom(game)
+          return room && {
+            revision: room.revision, tick: room.tick, phase: room.phase,
+            seats: room.seats.map(({ seat, occupied, connection }) =>
+              ({ seat, occupied, connection })),
+          }
+        }),
+      }
+
+      await expect.poll(() => {
+        const room = latestRoom(games[2])
+        if (!room || room.revision <= revisionBeforeLoss) return null
+        return room.seats.find(({ seat }) => seat === 'two')?.connection.type
+      }).toBe('expired')
+      const retired = latestRoom(games[2])!
+      expect(retired.seats.find(({ seat }) => seat === 'two')).toMatchObject({
+        occupied: true, connection: { type: 'expired' },
+      })
+      expect(retired.phase).toEqual(finalRoom.phase)
+      expect(retired.scores).toEqual(finalRoom.scores)
+      expect(retired.lastRound).toEqual(finalRoom.lastRound)
+      await expect(three.getByRole('list', { name: 'Players', exact: true }))
+        .toContainText('Reconnect window ended')
+      await Promise.all([one, three].map((page) =>
+        expect(page.getByRole('button', { name: 'Play again', exact: true })).toBeVisible()))
+      await Promise.all([one, three].map((page) =>
+        page.getByRole('button', { name: 'Play again', exact: true }).click()))
+      await Promise.all([games[0], games[2]].map((game) =>
+        expect.poll(() => latestRoom(game)?.phase.type).toBe('waiting')))
+      expect(latestRoom(games[2])?.seats.find(({ seat }) => seat === 'two')?.connection.type)
+        .toBe('expired')
+      await assertPublicOnly([two])
+    } catch (error) {
+      if (terminalEvidence) await testInfo.attach('terminal-loss-public-evidence', {
+        contentType: 'application/json', body: JSON.stringify(terminalEvidence),
+      })
+      await attachPublicSummary(testInfo, games)
+      throw error
+    } finally {
+      await Promise.all(contexts.map((context) => context.close()))
+    }
+  })

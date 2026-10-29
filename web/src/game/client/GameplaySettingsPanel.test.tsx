@@ -1,5 +1,5 @@
 import { MantineProvider } from '@mantine/core'
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import en from '../../locales/en/game.json'
@@ -27,8 +27,8 @@ describe('gameplay settings panel', () => {
     await user.click(screen.getByRole('button', { name: 'Apply rules' }))
 
     expect(apply).toHaveBeenCalledWith({
+      ...room(1).settings,
       startingSpeedLevel: 4, turnAssistUnits: 64, winsToFinish: 1, bombFuseTicks: 60,
-      enabledItems: ['heart'], environment: { stormCloud: true },
     })
   })
 
@@ -52,7 +52,7 @@ describe('gameplay settings panel', () => {
     const custom = room(2)
     custom.settings = {
       startingSpeedLevel: 4, turnAssistUnits: 64, winsToFinish: 1, bombFuseTicks: 60, enabledItems: [],
-      environment: { stormCloud: false },
+      environment: { stormCloud: false, lairs: { enabled: false, spawnSeconds: 24, maxLivingMobs: 6 } },
     }
     render(<MantineProvider env="test"><GameplaySettingsPanel room={custom} youSeat="one"
       pending={false} copy={en} onApply={apply} /></MantineProvider>)
@@ -62,7 +62,8 @@ describe('gameplay settings panel', () => {
     await user.click(screen.getByRole('button', { name: 'Apply rules' }))
     expect(apply).toHaveBeenCalledWith({
       startingSpeedLevel: 0, turnAssistUnits: 256, winsToFinish: 3, bombFuseTicks: 180,
-      enabledItems: custom.availableItems, environment: { stormCloud: true },
+      enabledItems: custom.availableItems,
+      environment: { stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 3 } },
     })
   })
 })
@@ -71,7 +72,9 @@ describe('gameplay settings items', () => {
   it('toggles all optional items independently and keeps defaults distinct from Classic', async () => {
     const apply = vi.fn(() => true)
     const user = userEvent.setup()
-    render(<MantineProvider env="test"><GameplaySettingsPanel room={room(1)} youSeat="one"
+    const current = room(1)
+    current.settings.enabledItems = ['heart']
+    render(<MantineProvider env="test"><GameplaySettingsPanel room={current} youSeat="one"
       pending={false} copy={en} onApply={apply} /></MantineProvider>)
 
     expect(screen.getByRole('checkbox', { name: 'Kick' })).not.toBeChecked()
@@ -206,7 +209,8 @@ describe('gameplay settings items', () => {
     await user.click(screen.getByRole('button', { name: 'Apply rules' }))
     expect(apply).toHaveBeenLastCalledWith({
       startingSpeedLevel: 0, turnAssistUnits: 256, winsToFinish: 3,
-      bombFuseTicks: 180, enabledItems: [], environment: { stormCloud: false },
+      bombFuseTicks: 180, enabledItems: [],
+      environment: { stormCloud: false, lairs: { enabled: false, spawnSeconds: 10, maxLivingMobs: 3 } },
     })
     await user.click(screen.getByRole('checkbox', { name: 'Shield' }))
     await user.click(screen.getByRole('checkbox', { name: 'Short flame' }))
@@ -218,6 +222,27 @@ describe('gameplay settings items', () => {
 })
 
 describe('gameplay settings bulk actions', () => {
+  it('retains lair numeric choices while bulk actions toggle the environment', async () => {
+    const apply = vi.fn(() => true)
+    const user = userEvent.setup()
+    render(<MantineProvider env="test"><GameplaySettingsPanel room={room(1)} youSeat="one"
+      pending={false} copy={en} onApply={apply} /></MantineProvider>)
+    const seconds = screen.getByRole('textbox', { name: 'Spawn interval (seconds)' })
+    const living = screen.getByRole('textbox', { name: 'Living monsters per lair' })
+    fireEvent.change(seconds, { target: { value: '4' } })
+    expect(screen.getByRole('button', { name: 'Apply rules' })).toBeDisabled()
+    fireEvent.change(seconds, { target: { value: '24' } })
+    fireEvent.change(living, { target: { value: '6' } })
+    await user.click(screen.getByRole('button', { name: 'All off' }))
+    await user.click(screen.getByRole('button', { name: 'All on' }))
+    expect(seconds).toHaveValue('24')
+    expect(living).toHaveValue('6')
+    await user.click(screen.getByRole('button', { name: 'Apply rules' }))
+    expect(apply).toHaveBeenCalledWith(expect.objectContaining({ environment: {
+      stormCloud: true, lairs: { enabled: true, spawnSeconds: 24, maxLivingMobs: 6 },
+    } }))
+  })
+
   it('selects only canonical available items without changing numeric drafts or applying', async () => {
     const apply = vi.fn(() => true)
     const user = userEvent.setup()
@@ -225,7 +250,8 @@ describe('gameplay settings bulk actions', () => {
     partial.availableItems = ['teleporter', 'heart', 'shield']
     partial.settings = {
       startingSpeedLevel: 3, turnAssistUnits: 128, winsToFinish: 7,
-      bombFuseTicks: 270, enabledItems: ['heart'], environment: { stormCloud: false },
+      bombFuseTicks: 270, enabledItems: ['heart'],
+      environment: { stormCloud: false, lairs: { enabled: false, spawnSeconds: 24, maxLivingMobs: 6 } },
     }
     render(<MantineProvider env="test"><GameplaySettingsPanel room={partial} youSeat="one"
       pending={false} copy={en} onApply={apply} /></MantineProvider>)
@@ -234,14 +260,16 @@ describe('gameplay settings bulk actions', () => {
     await user.click(screen.getByRole('button', { name: 'Apply rules' }))
     expect(apply).toHaveBeenCalledWith({
       startingSpeedLevel: 3, turnAssistUnits: 128, winsToFinish: 7, bombFuseTicks: 270,
-      enabledItems: ['heart', 'shield', 'teleporter'], environment: { stormCloud: true },
+      enabledItems: ['heart', 'shield', 'teleporter'],
+      environment: { stormCloud: true, lairs: { enabled: true, spawnSeconds: 24, maxLivingMobs: 6 } },
     })
     await user.click(screen.getByRole('button', { name: 'All off' }))
     expect(screen.getByRole('checkbox', { name: 'Heart' })).not.toBeChecked()
     await user.click(screen.getByRole('button', { name: 'Apply rules' }))
     expect(apply).toHaveBeenLastCalledWith(expect.objectContaining({
       startingSpeedLevel: 3, turnAssistUnits: 128, winsToFinish: 7,
-      bombFuseTicks: 270, enabledItems: [], environment: { stormCloud: false },
+      bombFuseTicks: 270, enabledItems: [],
+      environment: { stormCloud: false, lairs: { enabled: false, spawnSeconds: 24, maxLivingMobs: 6 } },
     }))
   })
 

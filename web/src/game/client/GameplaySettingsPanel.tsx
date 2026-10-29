@@ -1,8 +1,8 @@
-import { Button, Checkbox, Group, NativeSelect, SimpleGrid, Text, Title } from '@mantine/core'
+import { Button, Checkbox, Group, NativeSelect, NumberInput, SimpleGrid, Text, Title } from '@mantine/core'
 import { useMemo, useState } from 'react'
 import { sameGameSettings } from './clientProtocol'
 import type { GameCopy } from './locale'
-import { ITEM_IDS, type GameSettings, type RoomView, type Seat } from '../v15/schema'
+import { ITEM_IDS, type GameSettings, type RoomView, type Seat } from '../v16/schema'
 
 const SPEEDS = [0, 1, 2, 3, 4] as const
 const TURN_ASSISTS = [64, 128, 192, 256] as const
@@ -12,10 +12,15 @@ type AvailableItem = typeof ITEM_IDS[number]
 const DEFAULT_NUMERICS = {
   startingSpeedLevel: 0, turnAssistUnits: 256, winsToFinish: 3, bombFuseTicks: 180,
 } satisfies Omit<GameSettings, 'enabledItems' | 'environment'>
+const DEFAULT_LAIRS = { enabled: true, spawnSeconds: 10, maxLivingMobs: 3 } as const
 
 const speedText = (level: number): string => `${3 + level * 0.5}`
 const turnText = (units: number): string => {
   return ({ 64: '1/16', 128: '1/8', 192: '3/16', 256: '1/4' } as Record<number, string>)[units]
+}
+const validLairs = (lairs: GameSettings['environment']['lairs']): boolean => {
+  return Number.isInteger(lairs.spawnSeconds) && lairs.spawnSeconds >= 5 && lairs.spawnSeconds <= 60
+    && Number.isInteger(lairs.maxLivingMobs) && lairs.maxLivingMobs >= 1 && lairs.maxLivingMobs <= 8
 }
 
 interface Props {
@@ -63,7 +68,9 @@ export function GameplaySettingsPanel({ room, youSeat, pending, copy, onApply }:
   const own = room.seats.find((seat) => seat.seat === youSeat)
   const editable = room.phase.type === 'waiting' && room.settingsEditor === youSeat
     && own?.connection.type === 'connected' && !own.ready
+  const controlsDisabled = !editable || pending
   const dirty = useMemo(() => !sameGameSettings(draft, room.settings), [draft, room.settings])
+  const lairsValid = validLairs(draft.environment.lairs)
   const update = <K extends keyof GameSettings>(field: K, value: GameSettings[K]): void => {
     setDraft((current) => ({ ...current, [field]: value }))
   }
@@ -83,13 +90,13 @@ export function GameplaySettingsPanel({ room, youSeat, pending, copy, onApply }:
         <Text size="sm">{copy.settings.explanation}</Text>
       </div>
       <SimpleGrid cols={{ base: 1, xs: 2 }} spacing="sm">
-        <NativeSelect label={copy.settings.speed} disabled={!editable || pending}
+        <NativeSelect label={copy.settings.speed} disabled={controlsDisabled}
           value={draft.startingSpeedLevel}
           onChange={(event) => update('startingSpeedLevel', Number(event.currentTarget.value))}
           data={SPEEDS.map((level) => ({
             value: String(level), label: `${speedText(level)} ${copy.settings.cellsPerSecond}`,
           }))} />
-        <NativeSelect label={copy.settings.turnAssist} disabled={!editable || pending}
+        <NativeSelect label={copy.settings.turnAssist} disabled={controlsDisabled}
           value={draft.turnAssistUnits}
           onChange={(event) => update(
             'turnAssistUnits', Number(event.currentTarget.value) as GameSettings['turnAssistUnits'],
@@ -97,11 +104,11 @@ export function GameplaySettingsPanel({ room, youSeat, pending, copy, onApply }:
           data={TURN_ASSISTS.map((units) => ({
             value: String(units), label: `${turnText(units)} ${copy.settings.tile}`,
           }))} />
-        <NativeSelect label={copy.settings.wins} disabled={!editable || pending}
+        <NativeSelect label={copy.settings.wins} disabled={controlsDisabled}
           value={draft.winsToFinish}
           onChange={(event) => update('winsToFinish', Number(event.currentTarget.value))}
           data={WINS.map((wins) => ({ value: String(wins), label: String(wins) }))} />
-        <NativeSelect label={copy.settings.fuse} disabled={!editable || pending}
+        <NativeSelect label={copy.settings.fuse} disabled={controlsDisabled}
           value={draft.bombFuseTicks}
           onChange={(event) => update(
             'bombFuseTicks', Number(event.currentTarget.value) as GameSettings['bombFuseTicks'],
@@ -113,31 +120,62 @@ export function GameplaySettingsPanel({ room, youSeat, pending, copy, onApply }:
       <Text className="settings-note" size="xs">{copy.settings.speedCap}</Text>
       {ITEM_IDS.map((item) => <ItemSetting key={item} item={item}
         visible={room.availableItems.includes(item)} checked={draft.enabledItems.includes(item)}
-        disabled={!editable || pending} copy={copy}
+        disabled={controlsDisabled} copy={copy}
         onChange={(enabled) => toggleItem(item, enabled)} />)}
       <div className="item-setting">
         <Checkbox label={copy.settings.stormCloud} checked={draft.environment.stormCloud}
-          disabled={!editable || pending}
-          onChange={(event) => update('environment', { stormCloud: event.currentTarget.checked })} />
+          disabled={controlsDisabled}
+          onChange={(event) => update('environment', {
+            ...draft.environment, stormCloud: event.currentTarget.checked,
+          })} />
         <Text size="xs">{copy.settings.stormCloudDescription}</Text>
+      </div>
+      <div className="item-setting">
+        <Checkbox label={copy.settings.lairs} checked={draft.environment.lairs.enabled}
+          disabled={controlsDisabled}
+          onChange={(event) => update('environment', { ...draft.environment,
+            lairs: { ...draft.environment.lairs, enabled: event.currentTarget.checked } })} />
+        <Text size="xs">{copy.settings.lairsDescription}</Text>
+        <SimpleGrid cols={{ base: 1, xs: 2 }} spacing="sm">
+          <NumberInput label={copy.settings.lairSpawnSeconds} min={5} max={60} step={1}
+            required allowDecimal={false} clampBehavior="none" disabled={controlsDisabled}
+            value={draft.environment.lairs.spawnSeconds}
+            onChange={(value) => update('environment', {
+              ...draft.environment, lairs: {
+                ...draft.environment.lairs, spawnSeconds: Number(value),
+              },
+            })} />
+          <NumberInput label={copy.settings.lairMaxLivingMobs} min={1} max={8} step={1}
+            required allowDecimal={false} clampBehavior="none" disabled={controlsDisabled}
+            value={draft.environment.lairs.maxLivingMobs}
+            onChange={(value) => update('environment', {
+              ...draft.environment, lairs: {
+                ...draft.environment.lairs, maxLivingMobs: Number(value),
+              },
+            })} />
+        </SimpleGrid>
       </div>
       {dirty && <Text className="settings-lock" size="sm">{copy.settings.unapplied}</Text>}
       {lockText && <Text className="settings-lock" size="sm">{lockText}</Text>}
       <Group gap="sm">
-        <Button size="sm" variant="outline" disabled={!editable || pending}
+        <Button size="sm" variant="outline" disabled={controlsDisabled}
           onClick={() => setDraft((current) => ({ ...current, enabledItems: availableItems,
-            environment: { stormCloud: true } }))}>{copy.settings.allOn}</Button>
-        <Button size="sm" variant="outline" disabled={!editable || pending}
+            environment: { ...current.environment, stormCloud: true,
+              lairs: { ...current.environment.lairs, enabled: true } } }))}>{copy.settings.allOn}</Button>
+        <Button size="sm" variant="outline" disabled={controlsDisabled}
           onClick={() => setDraft((current) => ({ ...current, enabledItems: [],
-            environment: { stormCloud: false } }))}>{copy.settings.allOff}</Button>
-        <Button size="sm" variant="subtle" color="dark" disabled={!editable || pending}
+            environment: { ...current.environment, stormCloud: false,
+              lairs: { ...current.environment.lairs, enabled: false } } }))}>{copy.settings.allOff}</Button>
+        <Button size="sm" variant="subtle" color="dark" disabled={controlsDisabled}
           onClick={() => setDraft({ ...DEFAULT_NUMERICS, enabledItems: availableItems,
-            environment: { stormCloud: true } })}>
+            environment: { stormCloud: true, lairs: { ...DEFAULT_LAIRS } } })}>
           {copy.settings.restore}</Button>
-        <Button size="sm" variant="subtle" color="dark" disabled={!editable || pending}
+        <Button size="sm" variant="subtle" color="dark" disabled={controlsDisabled}
           onClick={() => setDraft({ ...DEFAULT_NUMERICS, enabledItems: [],
-            environment: { stormCloud: false } })}>{copy.settings.classic}</Button>
-        <Button size="sm" variant="outline" loading={pending} disabled={!editable || !dirty || pending}
+            environment: { stormCloud: false, lairs: { ...DEFAULT_LAIRS, enabled: false } } })}>
+          {copy.settings.classic}</Button>
+        <Button size="sm" variant="outline" loading={pending}
+          disabled={!editable || !dirty || !lairsValid || pending}
           onClick={() => onApply(draft)}>{copy.settings.apply}</Button>
       </Group>
     </section>

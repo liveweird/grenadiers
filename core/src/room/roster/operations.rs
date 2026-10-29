@@ -199,6 +199,7 @@ impl RosterMatchLifecycle {
     ) -> Result<RosterUpdate, RosterError> {
         self.validate_departures(departures)?;
         let mut update = RosterUpdate::new(MatchChange::Unchanged);
+        let terminal_on_entry = self.outcome.is_some();
         let was_countdown = matches!(self.phase, MatchPhase::Countdown { .. });
         let reopen_forming_seats = reopen_forming_seats && self.initial_forming_phase();
         for (index, departure) in departures.into_iter().enumerate() {
@@ -213,8 +214,13 @@ impl RosterMatchLifecycle {
                     };
                 }
                 DepartureReason::TransportLoss => {
-                    self.participants[index] = RosterParticipant::Reserved {
-                        expires_at: self.deadline(RECONNECT_GRACE_TICKS)?,
+                    self.participants[index] = if terminal_on_entry {
+                        update.newly_ineligible[index] = true;
+                        RosterParticipant::Departed
+                    } else {
+                        RosterParticipant::Reserved {
+                            expires_at: self.deadline(RECONNECT_GRACE_TICKS)?,
+                        }
                     };
                 }
             }

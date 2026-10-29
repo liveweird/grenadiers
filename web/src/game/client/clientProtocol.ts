@@ -1,6 +1,6 @@
 import type { Difficulty, Direction, GameServerMessage, GameSettings, RoomConfiguration,
-  RoomView, Seat, V14ErrorCode } from '../v15/schema'
-import { validateGameplayV15ServerMessage } from '../v15/validation'
+  RoomView, Seat, V14ErrorCode } from '../v16/schema'
+import { validateGameplayV16ServerMessage } from '../v16/validation'
 import type { GameClientState } from './clientTypes'
 
 export const MAX_COUNTER = 2_147_483_647
@@ -40,9 +40,9 @@ export function createConfiguration(intent: ConfigurationIntent): RoomConfigurat
   const difficulty = intent.mode?.type === 'solo' ? intent.mode.difficulty : null
   return difficulty === null
     ? { controllers: ['human', 'human'], cpuDifficulty: null, board: { width: 15, height: 13 },
-      environment: { stormCloud: true } }
+      environment: { stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 3 } } }
     : { controllers: ['human', 'cpu'], cpuDifficulty: difficulty, board: { width: 15, height: 13 },
-      environment: { stormCloud: true } }
+      environment: { stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 3 } } }
 }
 function unique<T>(values: readonly T[]): boolean {
   return new Set(values).size === values.length
@@ -75,7 +75,7 @@ function roomRecipientValid(message: GameServerMessage): boolean {
 }
 
 export function validateServerMessage(value: unknown, expectedSeat: Seat | null): value is GameServerMessage {
-  const result = validateGameplayV15ServerMessage(value)
+  const result = validateGameplayV16ServerMessage(value)
   return result.valid && roomRecipientValid(result.value) && stateRecipientValid(result.value, expectedSeat)
 }
 
@@ -110,6 +110,33 @@ export function sameGameSettings(left: GameSettings, right: GameSettings): boole
     && left.enabledItems.length === right.enabledItems.length
     && left.enabledItems.every((item, index) => item === right.enabledItems[index])
     && left.environment.stormCloud === right.environment.stormCloud
+    && left.environment.lairs.enabled === right.environment.lairs.enabled
+    && left.environment.lairs.spawnSeconds === right.environment.lairs.spawnSeconds
+    && left.environment.lairs.maxLivingMobs === right.environment.lairs.maxLivingMobs
+}
+
+function validBaseSettings(settings: GameSettings): boolean {
+  return Number.isInteger(settings.startingSpeedLevel)
+    && settings.startingSpeedLevel >= 0 && settings.startingSpeedLevel <= 4
+    && [64, 128, 192, 256].includes(settings.turnAssistUnits)
+    && Number.isInteger(settings.winsToFinish)
+    && settings.winsToFinish >= 1 && settings.winsToFinish <= 9
+    && [60, 90, 120, 150, 180, 210, 240, 270, 300].includes(settings.bombFuseTicks)
+}
+
+function validLairSettings(lairs: GameSettings['environment']['lairs']): boolean {
+  return Object.keys(lairs ?? {}).length === 3 && typeof lairs?.enabled === 'boolean'
+    && Number.isInteger(lairs.spawnSeconds) && lairs.spawnSeconds >= 5 && lairs.spawnSeconds <= 60
+    && Number.isInteger(lairs.maxLivingMobs) && lairs.maxLivingMobs >= 1 && lairs.maxLivingMobs <= 8
+}
+
+export function validGameSettings(settings: GameSettings): boolean {
+  const environment = settings.environment
+  const lairs = environment?.lairs
+  return Object.keys(settings).length === 6
+    && Object.keys(environment ?? {}).length === 2
+    && typeof environment?.stormCloud === 'boolean'
+    && lairs !== undefined && validBaseSettings(settings) && validLairSettings(lairs)
 }
 
 export function settlesPendingSettings(
@@ -126,12 +153,19 @@ export function settlesPendingSettings(
 
 export function acceptableBaseline(next: RoomView, current: RoomView | null): boolean {
   return !current || (next.roomId === current.roomId && next.revision >= current.revision
-    && next.roundId >= current.roundId && sameConfiguration(next, current))
+    && next.roundId >= current.roundId && settingsRevisionValid(next, current)
+    && sameConfiguration(next, current))
 }
 
 export function newerRoom(next: RoomView, current: RoomView): boolean {
   return next.roomId === current.roomId && next.revision > current.revision && next.roundId >= current.roundId
-    && sameConfiguration(next, current)
+    && settingsRevisionValid(next, current) && sameConfiguration(next, current)
+}
+
+function settingsRevisionValid(next: RoomView, current: RoomView): boolean {
+  return next.settingsRevision > current.settingsRevision
+    || (next.settingsRevision === current.settingsRevision
+      && sameGameSettings(next.settings, current.settings))
 }
 
 function sameConfiguration(left: RoomView, right: RoomView): boolean {

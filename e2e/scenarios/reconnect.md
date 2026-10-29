@@ -34,6 +34,15 @@ opening another socket or sending a resume command. Releasing the held requests 
 not revive recovery. No browser/game clock or authoritative state is replaced. Exact599/600
 reservation expiry and abandonment precedence belong to deterministic core/server tests.
 
+## Scenario: a terminal transport loss retires the seat without changing the result or blocking rematch
+
+Three actual UI clients finish a one-win match, then wait beyond the result tick before the
+second client's native transport closes. Its stored terminal capability is rejected without a
+new admission. Both connected peers receive a newer valid room state that marks Player two's
+connection expired rather than starting a new grace period. The authoritative winner, scores,
+and last-round result remain unchanged, the survivor UI identifies the ended reconnect window,
+and Players one and three can consensually reset the room while the retired seat stays expired.
+
 The safe second-bomb route ends in cell(5,1) using the movement helper's documented
 128-unit center tolerance. Connected takeover must preserve the exact stationary position
 from that route; no artificial one-sided center bound is imposed.

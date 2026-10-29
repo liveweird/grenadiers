@@ -68,11 +68,11 @@ pub(super) enum OwnerCommand {
         action: RosterAction,
         reply: oneshot::Sender<Result<(), RoomError>>,
     },
-    EnvironmentSettings {
+    LairSettings {
         binding: BindingKey,
         room_id: RoomId,
         round_id: u64,
-        action: super::super::live_registry::EnvironmentSettingsAction,
+        action: super::super::live_registry::LairSettingsAction,
         reply: oneshot::Sender<Result<(), RoomError>>,
     },
     Leave {
@@ -94,7 +94,7 @@ impl OwnerCommand {
                 let _ = reply.send(Err(error));
             }
             Self::Action { reply, .. }
-            | Self::EnvironmentSettings { reply, .. }
+            | Self::LairSettings { reply, .. }
             | Self::Leave { reply, .. } => {
                 let _ = reply.send(Err(error));
             }

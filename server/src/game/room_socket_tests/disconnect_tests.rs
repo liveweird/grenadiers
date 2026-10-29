@@ -9,7 +9,7 @@ async fn disconnect_reserves_seat_even_when_no_more_commands_arrive() {
     let mut two = connect(&url, &tokens[1]).await;
     send(
         &mut one,
-        json!({"type":"createRoom", "sequence":1, "configuration":{"controllers":["human","human"],"cpuDifficulty":null,"board":{"width":15,"height":13},"environment":{"stormCloud":true}}}),
+        json!({"type":"createRoom", "sequence":1, "configuration":{"controllers":["human","human"],"cpuDifficulty":null,"board":{"width":15,"height":13},"environment":{"stormCloud":true,"lairs":{"enabled":false,"spawnSeconds":10,"maxLivingMobs":3}}}}),
     )
     .await;
     let created = next(&mut one).await;

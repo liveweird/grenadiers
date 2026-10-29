@@ -18,6 +18,7 @@ export const scenarioSpecMap = {
   'scenarios/invisible-bombs.md': ['invisible-bombs-tests/invisible-bombs.spec.ts'],
   'scenarios/kick.md': ['kick-tests/kick.spec.ts'],
   'scenarios/landmine.md': ['landmine-tests/landmine.spec.ts'],
+  'scenarios/lairs.md': ['lairs-tests/lairs.spec.ts'],
   'scenarios/long-fuse.md': ['long-fuse-tests/long-fuse.spec.ts'],
   'scenarios/matches.md': ['match-tests/matches.spec.ts'],
   'scenarios/multiplayer.md': ['tests/multiplayer.spec.ts'],

@@ -1,6 +1,6 @@
 # Lair and mob simulation
 
-Rules8 supplies a headless lair overlay. The live gameplay15 endpoint constructs rules7;
+Rules8 supplies a headless lair overlay. The live gameplay16 endpoint constructs rules8;
 its wire messages, CPU profiles and rendering remain governed by that contract. Delivery status
 lives in the [backlog](../../BACKLOG.md).
 

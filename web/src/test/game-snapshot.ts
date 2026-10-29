@@ -30,6 +30,8 @@ export function gameSnapshot(): SnapshotMessage {
       pickups: [],
       oilBarrels: [],
       stormCloud: null,
+      lairs: [],
+      mobs: [],
     },
   }
 }

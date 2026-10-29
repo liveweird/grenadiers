@@ -1,7 +1,7 @@
 # Roster runtime
 
 `server/src/game/rooms/roster_runtime/` provides the transport-independent runtime used by every
-live two-to-four-seat configuration and board. The [v15 contract](protocol-v15.md) owns wire shape
+live two-to-four-seat configuration and board. The [v16 contract](protocol-v16.md) owns wire shape
 and recipient privacy; the [multiplayer design](multiplayer-design.md) records its integration.
 
 ## Lifecycle and participation
@@ -15,6 +15,10 @@ reserved and permanently departed states; CPU slots remain
 server controlled and cannot accept human admissions. At least two eligible participants and
 a connected human are required to start. A reserved human blocks readiness; a departed human
 does not. CPUs cannot keep a room alive after its last retained human leaves.
+
+After the final result, new transport losses permanently depart the affected seat. Reservations
+established before that result retain their original deadlines and remain resumable; see
+[reconnect behavior](reconnect-server.md).
 
 Creator authority remains assigned during reconnect grace, but only the connected creator can
 change settings. Permanent departure releases authority without transferring it. Readiness,
@@ -31,9 +35,9 @@ Released credentials remain retired and cannot resume or be minted for replaceme
 rooms accept at most 256 lifetime human admissions, bounding the retired-credential set. A
 replacement cannot inherit the departed creator's settings authority.
 
-Round construction uses rules 7 and the actual physical-round assignment. It selects generator 3
+Round construction uses rules 8 and the actual physical-round assignment. It selects generator 3
 for 15×13 and generator 4 for 11×9/13×11. The configured roster remains intact, with departed
-participants initially inactive. Every live room uses CPU policy 18. The exact profile table is in
+participants initially inactive. Every live room uses CPU policy 19. The exact profile table is in
 [board geometry](board-sizes.md).
 
 ## Boundaries and randomness
@@ -55,7 +59,7 @@ export stay disabled.
 
 `RosterRuntime::new_lairs` selects a separate rules8 environment profile, including when lairs
 or clouds are disabled. It publishes checked gameplay16 admissions and snapshots; the ordinary
-live registry remains on rules7/gameplay15. Profile-specific settings entry points reject
+live registry uses rules8/gameplay16. Profile-specific settings entry points reject
 cross-profile updates and share the same atomic authority, revision and readiness transaction.
 Disabled lairs retain their numeric settings. Creator revocation, forming-seat replacement and
 the first-start lock retain the lifecycle rules above.

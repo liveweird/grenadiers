@@ -13,6 +13,8 @@ const failureArtifactPaths = [
   "e2e/.playwright/art-atlas-test-results/",
   "e2e/.playwright/atlas-gameplay-test-results/",
   "e2e/.playwright/terrain-pixel-test-results/",
+  "e2e/playwright-lairs-report/",
+  "e2e/lairs-test-results/",
   "e2e/playwright-pickup-report/",
   "e2e/playwright-heart-report/",
   "e2e/playwright-shield-report/",
@@ -58,10 +60,11 @@ const fixtures = {
   "invisible-bombs": "arena-v2-invisible-bombs.seed",
   "kick": "arena-v2-kick.seed",
   "landmine": "arena-v2-landmine.seed",
+  "lairs": "arena-v3-lairs.seed",
   "long-fuse": "arena-v2-long-fuse.seed",
   "matches": "arena-v1-matches.seed",
   "oil-barrel": "arena-v2-oil-barrel.seed",
-  "pickups": "arena-v1-pickups.seed",
+  "pickups": "arena-v3-pickups.seed",
   "piercing-bomb": "arena-v2-piercing-bomb.seed",
   "power-bomb": "arena-v2-power-bomb.seed",
   "punch": "arena-v2-punch.seed",
@@ -112,7 +115,7 @@ export function validateFullWorkflow(workflow) {
   const artifactPaths = artifactPathBlock[1].trim().split("\n")
     .map((line) => line.trim());
   assert.deepEqual(artifactPaths, failureArtifactPaths);
-  assert.equal((workflow.match(/for _attempt in \$\(seq 1 60\); do/g) ?? []).length, 26);
+  assert.equal((workflow.match(/for _attempt in \$\(seq 1 60\); do/g) ?? []).length, Object.keys(fixtures).length + 1);
   assert.doesNotMatch(workflow, /for attempt in \$\(seq 1 60\); do/);
 }
 
@@ -173,6 +176,8 @@ services:
   }
   assert.equal(workflow.split("-f e2e/compose/fixture.yaml up").length - 1,
     Object.keys(fixtures).length);
+  // Seed filenames retain their historical names; live item selectors bind generator3.
+  assert.doesNotMatch(workflow, /E2E_[A-Z_]+_FIXTURE=arena-v2-/);
   assert.doesNotMatch(workflow, /docker compose -f docker-compose\.yaml -f docker-compose\.[\w-]+\.yaml/);
   assert.match(workflow, /name: Tear down isolated stack\n        if: always\(\)\n        run: docker compose down --volumes --remove-orphans/);
 }
@@ -239,7 +244,11 @@ test("fixture contracts reject missing selectors, reversed files, and selector-d
   const workflow = fs.readFileSync(fullPath, "utf8");
   const fixture = fs.readFileSync(fixturePath, "utf8");
   assert.throws(() => validateSharedFixture(
-    workflow.replace("GRENADIERS_FIXTURE_SEED_FILE=./core/tests/fixtures/arena-v1-pickups.seed ", ""),
+    workflow.replace("E2E_SHIELD_FIXTURE=arena-v3-shield", "E2E_SHIELD_FIXTURE=arena-v2-shield"),
+    fixture,
+  ));
+  assert.throws(() => validateSharedFixture(
+    workflow.replace("GRENADIERS_FIXTURE_SEED_FILE=./core/tests/fixtures/arena-v3-pickups.seed ", ""),
     fixture,
   ));
   assert.throws(() => validateSharedFixture(

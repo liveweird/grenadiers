@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 import en from '../../locales/en/game.json'
 import pl from '../../locales/pl/game.json'
-import type { VisibleActorView } from '../v15/schema'
+import type { VisibleActorView } from '../v16/schema'
 import { OwnStatusBar } from './OwnStatusBar'
 
 function actor(): VisibleActorView {

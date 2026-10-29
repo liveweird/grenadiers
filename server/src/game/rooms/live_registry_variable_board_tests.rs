@@ -27,7 +27,7 @@ async fn all_board_and_count_profiles_dispatch_to_the_required_owner() {
                     .await
                     .unwrap();
                 assert!(matches!(admission, LiveAdmission::Roster(_)));
-                assert_eq!(personal(&admission)["room"]["rulesVersion"], 7);
+                assert_eq!(personal(&admission)["room"]["rulesVersion"], 8);
                 assert_eq!(
                     personal(&admission)["room"]["settings"]["environment"]["stormCloud"],
                     environment == StormCloudConfig::Single
@@ -44,7 +44,7 @@ async fn all_board_and_count_profiles_dispatch_to_the_required_owner() {
 }
 
 #[tokio::test]
-async fn every_cpu_board_and_count_uses_policy_eighteen_for_both_environments() {
+async fn every_cpu_board_and_count_uses_policy_nineteen_for_both_environments() {
     let now = std::time::Instant::now();
     let mut index = 0_u64;
     for board in [
@@ -73,7 +73,7 @@ async fn every_cpu_board_and_count_uses_policy_eighteen_for_both_environments() 
                         .await
                         .unwrap();
                     assert!(matches!(admission, LiveAdmission::Roster(_)));
-                    assert_eq!(personal(&admission)["room"]["rulesVersion"], 7);
+                    assert_eq!(personal(&admission)["room"]["rulesVersion"], 8);
                     assert_eq!(
                         personal(&admission)["room"]["configuration"]["cpuDifficulty"],
                         match difficulty {

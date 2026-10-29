@@ -80,5 +80,15 @@ export function createAtlasArtwork(regions: AtlasRegions): ArenaArtwork {
     makeFlame: () => createFlame(regions),
     makeOilBarrel: () => createOilBarrel(regions),
     makeStormCloud: () => regions.createSprite('environment.stormCloud'),
+    makeLair: () => regions.createSprite('terrain.lair'),
+    makeMob: () => {
+      const poses = {
+        north: regions.createSprite('mob.north'), east: regions.createSprite('mob.east'),
+        south: regions.createSprite('mob.south'), west: regions.createSprite('mob.west'),
+      }
+      const root = new Container()
+      root.addChild(poses.north, poses.east, poses.south, poses.west)
+      return { root, poses }
+    },
   }
 }

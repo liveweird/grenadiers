@@ -39,8 +39,8 @@ describe('v12 session and admission failures', () => {
     await vi.waitFor(() => expect(value.sockets).toHaveLength(1))
     const socket = value.sockets[0]
     socket.emit('open')
-    socket.message({ type: 'authenticated', protocolVersion: 15 })
-    socket.message({ type: 'authenticated', protocolVersion: 15 })
+    socket.message({ type: 'authenticated', protocolVersion: 16 })
+    socket.message({ type: 'authenticated', protocolVersion: 16 })
     expect(messages(socket).filter((message) => message.type === 'createRoom')).toHaveLength(1)
     socket.message({ ...admitted(), sequence: 2 })
     expect(value.client.getState().room).toBeNull()
@@ -120,7 +120,7 @@ describe('v12 authoritative updates and controls', () => {
       type: 'matchResult', endedAt: 1, rematchAt: 181,
       result: { type: 'winner', seat: 'one', reason: 'roundWins' },
     }, 1)
-    terminal.tick = 180
+    terminal.tick = 180; terminal.settingsRevision = 2
     socket.message({ type: 'roomState', room: terminal })
     expect(value.client.rematch(true)).toBe(false)
     terminal.revision = 3
@@ -174,7 +174,8 @@ describe('v12 authoritative updates and controls', () => {
     expect(messages(socket).at(-1)).toEqual({
       type: 'createRoom', sequence: 2,
       configuration: { controllers: ['human', 'human'], cpuDifficulty: null,
-        board: { width: 15, height: 13 }, environment: { stormCloud: true } },
+        board: { width: 15, height: 13 },
+        environment: { stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 3 } } },
     })
   })
 
@@ -198,6 +199,10 @@ describe('v12 authoritative updates and controls', () => {
     expect(value.client.movement('north')).toBe(false)
     expect(value.client.getState().failure).toBe('sequenceExhausted')
   })
+})
+
+describe('v16 strict recipient validation', () => {
+  beforeEach(() => vi.stubGlobal('WebSocket', { OPEN: SocketStub.OPEN }))
 
   it.each([
     ['hidden own actor', (next: ReturnType<typeof snapshot>) => {
@@ -232,6 +237,8 @@ describe('v12 authoritative updates and controls', () => {
       next.room.availableItems = ['teleporter']
     }],
     ['unsupported item pickup', (next: ReturnType<typeof snapshot>) => {
+      next.room.settings.enabledItems = next.room.settings.enabledItems
+        .filter((item) => item !== 'stopwatch')
       next.state.pickups = [{ cell: { column: 1, row: 1 }, kind: 'stopwatch' }]
     }],
     ['heart pickup while disabled', (next: ReturnType<typeof snapshot>) => {
@@ -239,18 +246,26 @@ describe('v12 authoritative updates and controls', () => {
       next.state.pickups = [{ cell: { column: 1, row: 1 }, kind: 'heart' }]
     }],
     ['Golden Flame effect while disabled', (next: ReturnType<typeof snapshot>) => {
+      next.room.settings.enabledItems = next.room.settings.enabledItems
+        .filter((item) => item !== 'goldenFlame')
       const actor = next.state.actors[0]
       if (actor.type === 'visible') actor.effects = [{ kind: 'goldenFlame', remainingTicks: 600 }]
     }],
     ['Short Fuse effect while disabled', (next: ReturnType<typeof snapshot>) => {
+      next.room.settings.enabledItems = next.room.settings.enabledItems
+        .filter((item) => item !== 'shortFuse')
       const actor = next.state.actors[0]
       if (actor.type === 'visible') actor.effects = [{ kind: 'shortFuse', remainingTicks: 600 }]
     }],
     ['Short Flame effect while disabled', (next: ReturnType<typeof snapshot>) => {
+      next.room.settings.enabledItems = next.room.settings.enabledItems
+        .filter((item) => item !== 'shortFlame')
       const actor = next.state.actors[0]
       if (actor.type === 'visible') actor.effects = [{ kind: 'shortFlame', remainingTicks: 600 }]
     }],
     ['Invisible Bombs effect while disabled', (next: ReturnType<typeof snapshot>) => {
+      next.room.settings.enabledItems = next.room.settings.enabledItems
+        .filter((item) => item !== 'invisibleBombs')
       const actor = next.state.actors[0]
       if (actor.type === 'visible') actor.effects = [{ kind: 'invisibleBombs', remainingTicks: 600 }]
     }],
@@ -304,6 +319,7 @@ describe('v12 live Timed bomb validation', () => {
     socket.message(admitted())
     const next = snapshot(99)
     next.room.settings.enabledItems = ['stopwatch']
+    next.room.settingsRevision = 2
     next.state.bombs = [{
       id: 3, cell: { column: 1, row: 1 }, owner: 1, range: 2, placedAt: 1,
       trigger: { type: 'timed', remainingTicks: 0, paused }, blast: 'standard',

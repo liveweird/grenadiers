@@ -1,7 +1,7 @@
 # Storm-cloud simulation
 
-Rules profile 7 adds a seeded, nonblocking weather hazard to the headless simulation. Live
-gameplay v15 publishes this profile on the live WebSocket contract. Older protocols remain
+Rules7 introduced seeded, nonblocking weather. Live rules8/gameplay16 includes the same cloud
+alongside lairs. Older protocols remain
 archived and cannot publish it.
 
 New rooms enable the cloud by default. Forming-lobby All on/Restore defaults enable it;

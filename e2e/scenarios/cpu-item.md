@@ -4,7 +4,8 @@
 
 Run the production stack with the pinned bytes from the archive-named read-only
 `arena-v2-cpu-wall-pass.seed` file through generator3 and acknowledge them with
-`E2E_CPU_ITEM_FIXTURE=arena-v3-cpu-wall-pass`. A real Solo room retains all 22 available items,
+`E2E_CPU_ITEM_FIXTURE=arena-v3-cpu-wall-pass`. A real Solo room retains all 22 available items, explicitly
+disables the cloud and lairs for deterministic seeded play,
 uses a supported 300-tick fuse, and leaves the human at its spawn. The server-controlled CPU uses
 its private operating-system-seeded policy normally. Public snapshots must report the CPU's real
 Wall Pass collection, its visible inventory must retain `wallPass`, and the browser must render

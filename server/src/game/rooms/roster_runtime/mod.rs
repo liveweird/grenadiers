@@ -34,4 +34,6 @@ mod lair_settings_tests;
 #[cfg(test)]
 mod replacement_tests;
 #[cfg(test)]
+mod terminal_transport_tests;
+#[cfg(test)]
 mod tests;

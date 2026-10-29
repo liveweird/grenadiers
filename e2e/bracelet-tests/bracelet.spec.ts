@@ -51,34 +51,40 @@ async function collectAndStagePusher(page: Page, game: ObservedGame): Promise<vo
   await moveSeatTo(page, game, 'one', { column: 3, row: 1 })
   await moveSeatTo(page, game, 'one', { column: 5, row: 1 })
   for (const [plant, escape, stage] of [
-    [{ column: 5, row: 1 }, { column: 2, row: 1 }, { column: 8, row: 1 }],
+    [{ column: 5, row: 1 }, { column: 2, row: 1 }, { column: 7, row: 1 }],
+    [{ column: 7, row: 1 }, { column: 4, row: 1 }, { column: 8, row: 1 }],
     [{ column: 8, row: 1 }, { column: 5, row: 1 }, { column: 9, row: 1 }],
     [{ column: 9, row: 1 }, { column: 6, row: 1 }, { column: 10, row: 1 }],
   ] as const) {
-    await moveSeatTo(page, game, 'one', plant)
-    await plantAndEscape(page, game, 'one', escape)
-    await moveSeatTo(page, game, 'one', stage)
+    await test.step(`clear pusher corridor through ${stage.column},${stage.row}`, async () => {
+      await moveSeatTo(page, game, 'one', plant)
+      await plantAndEscape(page, game, 'one', escape)
+      await moveSeatTo(page, game, 'one', stage)
+    })
   }
 }
 
 async function clearAndStageVictim(page: Page, game: ObservedGame): Promise<void> {
-  await moveSeatTo(page, game, 'two', { column: 13, row: 10 })
+  await moveSeatTo(page, game, 'two', { column: 13, row: 9 })
   await page.keyboard.press('Space')
   await moveSeatTo(page, game, 'two', { column: 13, row: 11 })
   await moveSeatTo(page, game, 'two', { column: 12, row: 11 })
   await waitClear(game)
   await moveSeatTo(page, game, 'two', { column: 13, row: 11 })
-  await moveSeatTo(page, game, 'two', { column: 13, row: 7 })
+  await moveSeatTo(page, game, 'two', { column: 13, row: 8 })
   for (const [plant, escape, stage] of [
-    [{ column: 13, row: 7 }, { column: 13, row: 10 }, { column: 13, row: 4 }],
-    [{ column: 13, row: 4 }, { column: 13, row: 7 }, { column: 13, row: 3 }],
-    [{ column: 13, row: 3 }, { column: 13, row: 6 }, { column: 13, row: 2 }],
-    [{ column: 13, row: 2 }, { column: 13, row: 5 }, { column: 13, row: 1 }],
+    [{ column: 13, row: 8 }, { column: 13, row: 11 }, { column: 13, row: 7 }],
+    [{ column: 13, row: 7 }, { column: 13, row: 10 }, { column: 13, row: 6 }],
+    [{ column: 13, row: 6 }, { column: 13, row: 9 }, { column: 13, row: 5 }],
+    [{ column: 13, row: 5 }, { column: 13, row: 8 }, { column: 13, row: 4 }],
   ] as const) {
-    await moveSeatTo(page, game, 'two', plant)
-    await plantAndEscape(page, game, 'two', escape)
-    await moveSeatTo(page, game, 'two', stage)
+    await test.step(`clear victim corridor through ${stage.column},${stage.row}`, async () => {
+      await moveSeatTo(page, game, 'two', plant)
+      await plantAndEscape(page, game, 'two', escape)
+      await moveSeatTo(page, game, 'two', stage)
+    })
   }
+  await moveSeatTo(page, game, 'two', { column: 13, row: 1 })
   await page.keyboard.press('Space')
   await moveSeatTo(page, game, 'two', { column: 13, row: 4 })
   await waitClear(game)

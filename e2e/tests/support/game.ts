@@ -90,12 +90,47 @@ export async function gameFrames(page: Page): Promise<GameServerMessage[]> {
   return page.evaluate(() => (window as GameWindow).grenadiersTestGame?.frames ?? [])
 }
 
-export async function roomFrame(page: Page, afterRevision = 0): Promise<RoomFrame> {
+export async function roomFrame(
+  page: Page,
+  afterRevision = 0,
+  matches: (frame: RoomFrame) => boolean = () => true,
+): Promise<RoomFrame> {
   const latest = async (): Promise<RoomFrame | undefined> =>
-    (await gameFrames(page)).filter((message) => message.type === 'roomState' || message.type === 'admitted').at(-1)
-  await expect.poll(async () => (await latest())?.room.revision ?? 0).toBeGreaterThan(afterRevision)
+    (await gameFrames(page)).filter((message): message is RoomFrame =>
+      (message.type === 'roomState' || message.type === 'admitted')
+      && message.room.revision > afterRevision && matches(message)).at(-1)
+  await expect.poll(async () => Boolean(await latest())).toBe(true)
   const frame = await latest()
   if (!frame) throw new Error('No room state was received')
+  return frame
+}
+
+export async function roomFrameAfter(
+  page: Page,
+  frameIndex: number,
+  matches: (frame: RoomFrame) => boolean,
+): Promise<RoomFrame> {
+  const latest = async (): Promise<RoomFrame | undefined> =>
+    (await gameFrames(page)).slice(frameIndex).filter((message): message is RoomFrame =>
+      (message.type === 'roomState' || message.type === 'admitted') && matches(message)).at(-1)
+  try {
+    await expect.poll(async () => Boolean(await latest())).toBe(true)
+  } catch (error) {
+    const summaries = (await gameFrames(page)).slice(frameIndex).slice(-12).map((message) => {
+      if (message.type !== 'roomState' && message.type !== 'admitted') return { type: message.type }
+      return {
+        type: message.type,
+        revision: message.room.revision,
+        tick: message.room.tick,
+        phase: message.room.phase.type,
+        seats: message.room.seats.map(({ occupied, connection }) => ({ occupied, connection })),
+      }
+    })
+    throw new Error(`No matching room state after frame ${frameIndex}; observed ${JSON.stringify(summaries)}`,
+      { cause: error })
+  }
+  const frame = await latest()
+  if (!frame) throw new Error('No matching room state was received')
   return frame
 }
 

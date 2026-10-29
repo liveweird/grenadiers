@@ -19,16 +19,21 @@ test('native CPU collects Wall Pass with all items enabled and renders its publi
     frame.type === 'admitted' || frame.type === 'roomState' || frame.type === 'snapshot')!.room
   expect(room.availableItems).toHaveLength(22)
   expect(room.settings.enabledItems).toEqual(room.availableItems)
+  expect(room.settings.environment).toEqual({ stormCloud: true })
 
   const revision = room.settingsRevision
+  await page.getByRole('checkbox', { name: 'Storm cloud', exact: true }).uncheck()
   await page.getByLabel('Bomb fuse').selectOption('300')
   await page.getByRole('button', { name: 'Apply rules', exact: true }).click()
   await expect.poll(() => game.frames.findLast((frame) =>
     frame.type === 'admitted' || frame.type === 'roomState' || frame.type === 'snapshot')
     ?.room.settingsRevision).toBeGreaterThan(revision)
-  await expect.poll(() => game.frames.findLast((frame) =>
+  const updatedRoom = () => game.frames.findLast((frame) =>
     frame.type === 'admitted' || frame.type === 'roomState' || frame.type === 'snapshot')
-    ?.room.settings.enabledItems).toEqual(room.availableItems)
+    ?.room
+  await expect.poll(() => updatedRoom()?.settings.enabledItems).toEqual(room.availableItems)
+  await expect.poll(() => updatedRoom()?.settings.environment).toEqual({ stormCloud: false })
+  expect(updatedRoom()?.configuration.environment).toEqual({ stormCloud: false })
 
   await page.getByRole('button', { name: 'Ready', exact: true }).click()
   await expect.poll(() => latestSnapshot(game)?.room.phase.type).toBe('running')

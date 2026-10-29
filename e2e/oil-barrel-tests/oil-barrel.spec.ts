@@ -110,7 +110,7 @@ test('Oil Barrel reveals, blocks, burns persistently, and resumes without synthe
       })
       expect(actor(games[0], 'one').inventory).toEqual(originalInventory)
       expect(hasBlock(games[0], 4, 1)).toBe(true)
-      expect(hasBlock(games[0], 3, 2)).toBe(true)
+      expect(hasBlock(games[0], 5, 2)).toBe(true)
       const unlitPixels = await Promise.all([one, two].map((page) => arenaTilePixels(page, 3, 1)))
       unlitPixels.forEach((pixels, index) => {
         expect(pixels).not.toEqual(concealedPixels[index])
@@ -149,7 +149,7 @@ test('Oil Barrel reveals, blocks, burns persistently, and resumes without synthe
         expectBurningOilArt(pixels)
       })
       expect(hasBlock(games[0], 4, 1)).toBe(true)
-      expect(hasBlock(games[0], 3, 2)).toBe(true)
+      expect(hasBlock(games[0], 5, 2)).toBe(true)
       expect(latestSnapshot(games[0])!.state.oilBarrels).toHaveLength(1)
 
       await Promise.all(games.map((game, index) => expect.poll(() => {

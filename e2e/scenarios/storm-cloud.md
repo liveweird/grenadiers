@@ -4,8 +4,9 @@
 
 Two independent browser contexts create and join a default gameplay v15 room. The English desktop
 and Polish 320-pixel reduced-motion clients verify the localized cloud setting, all 22 item defaults,
-and matching enabled environment wrappers. The forming lobby keeps the cloud editor while the
-precreation player-count, board, and CPU selectors are gone. In the running rules7/generator3 round, both clients
+default-enabled lairs at 10 seconds and three living mobs per lair, and matching enabled environment wrappers.
+The forming lobby keeps the environment editor while the precreation player-count, board, and CPU selectors are
+gone. In the running rules8/generator3 round, both clients
 receive the same public cloud at a common physical tick, observe it move authoritatively, render the
 arena, and capture the two layouts. The Polish client reconnects with its stable private capability
 and restores the current public cloud. After a real bomb ends the one-win match, consensual rematch

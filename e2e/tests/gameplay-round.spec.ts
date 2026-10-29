@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import type { GameServerMessage } from '../../web/src/game/v15/schema'
+import type { GameServerMessage } from '../../web/src/game/v16/schema'
 import { gameFrames, openGame, roomFrame, sendGame } from './support/game'
 import { visibleActor } from './support/duel'
 
@@ -51,25 +51,38 @@ test('two native gameplay sockets finish one authoritative cloud-disabled genera
     await sendGame(one, {
       type: 'updateSettings', ...binding, settingsRevision: joined.room.settingsRevision,
       settings: {
-        ...joined.room.settings, enabledItems: [], environment: { stormCloud: false },
+        ...joined.room.settings,
+        enabledItems: [],
+        environment: {
+          stormCloud: false,
+          lairs: { enabled: false, spawnSeconds: 10, maxLivingMobs: 3 },
+        },
       },
     })
     const configured = await roomFrame(one, joined.room.revision)
     expect(configured.room.settings.enabledItems).toEqual([])
-    expect(configured.room.configuration.environment).toEqual({ stormCloud: false })
+    expect(configured.room.configuration.environment).toEqual({
+      stormCloud: false,
+      lairs: { enabled: false, spawnSeconds: 10, maxLivingMobs: 3 },
+    })
     await sendGame(one, { type: 'ready', ...binding, ready: true, settingsRevision: configured.room.settingsRevision })
     await sendGame(two, { type: 'ready', ...binding, ready: true, settingsRevision: configured.room.settingsRevision })
     await expect.poll(async () => snapshot(await gameFrames(one))?.room.phase.type).toBe('running')
     await expect.poll(async () => snapshot(await gameFrames(two))?.room.phase.type).toBe('running')
     const firstRunning = snapshot(await gameFrames(one))!
-    expect(firstRunning.room).toMatchObject({ rulesVersion: 7, mapId: 'generated_v2' })
+    expect(firstRunning.room).toMatchObject({ rulesVersion: 8, mapId: 'generated_v2' })
     expect(firstRunning.room.availableItems).toEqual([
       'kick', 'punch', 'bracelet', 'wallPass', 'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch', 'invisibilityCloak', 'goldenFlame', 'shortFuse',
       'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls', 'invisibleBombs', 'oilBarrel', 'teleporter',
     ])
     expect(firstRunning.room.settings.enabledItems).toEqual([])
-    expect(firstRunning.room.settings.environment).toEqual({ stormCloud: false })
+    expect(firstRunning.room.settings.environment).toEqual({
+      stormCloud: false,
+      lairs: { enabled: false, spawnSeconds: 10, maxLivingMobs: 3 },
+    })
     expect(firstRunning.state.stormCloud).toBeNull()
+    expect(firstRunning.state.lairs).toEqual([])
+    expect(firstRunning.state.mobs).toEqual([])
     for (const actor of firstRunning.state.actors) {
       expect(actor).toMatchObject({
         type: 'visible', inventory: { equipment: null, weapon: null },

@@ -6,7 +6,6 @@ export function makeStormCloud(): Container {
   const root = new Container()
   const shadow = new Graphics()
   pixels(shadow, PALETTE.deepInk, [[-31, -11, 62, 24], [-23, -22, 46, 45], [-13, -29, 25, 52]])
-  shadow.alpha = 0.82
   const body = new Graphics()
   pixels(body, 0x536272, [[-27, -9, 54, 18], [-20, -19, 40, 35], [-10, -25, 20, 43]])
   pixels(body, 0x8796a0, [[-20, -14, 30, 8], [-9, -21, 16, 7], [-23, -5, 12, 6]])

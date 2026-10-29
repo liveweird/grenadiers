@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use grenadiers_core::{
     game::{EnabledItems, SeatId, SimulationSeed, SpeedLevel, StormCloudConfig},
-    room::{DepartureReason, MatchPhase, RoomSettings},
+    room::{DepartureReason, MatchPhase, RoomSettings, RosterParticipant},
 };
 
 use super::{RosterAction, RosterRuntime, RosterRuntimeError};
@@ -12,9 +12,13 @@ use crate::{
 };
 
 fn runtime() -> RosterRuntime {
+    runtime_with_settings(RoomSettings::DEFAULT.with_enabled_items(EnabledItems::ALL))
+}
+
+fn runtime_with_settings(settings: RoomSettings) -> RosterRuntime {
     RosterRuntime::new_environment(
         identity(configuration(2)),
-        RoomSettings::DEFAULT.with_enabled_items(EnabledItems::ALL),
+        settings,
         StormCloudConfig::Single,
         RoundSeedSource::with_entropy(|bytes| {
             bytes.fill(19);
@@ -130,6 +134,143 @@ fn disconnected_initial_editor_is_designated_but_cannot_act() {
         ),
         Err(RosterRuntimeError::VacantSeat)
     );
+}
+
+#[test]
+fn forming_environment_departure_reopens_seat_and_preserves_settings() {
+    let mut runtime = runtime();
+    for seat in SeatId::DUEL {
+        let prepared = runtime.prepare_join(seat).unwrap();
+        runtime.commit_admission(prepared);
+    }
+    let settings = runtime.lifecycle.settings();
+    let settings_revision = runtime.settings_revision;
+    admit_and_ready(&mut runtime, settings_revision);
+    let revision = runtime.revision;
+    let notice = runtime
+        .settle_boundary([None, Some(DepartureReason::Explicit), None, None])
+        .unwrap()
+        .unwrap();
+    assert_eq!(runtime.lifecycle.phase(), MatchPhase::Waiting);
+    assert_eq!(runtime.lifecycle.settings(), settings);
+    assert_eq!(runtime.settings_revision, settings_revision);
+    assert_eq!(runtime.revision, revision + 1);
+    assert_eq!(notice.environment_room().unwrap().round_id.get(), 2);
+    assert_eq!(
+        runtime.lifecycle.participant(SeatId::Two),
+        Ok(RosterParticipant::NeverAdmitted)
+    );
+    assert!(!runtime.lifecycle.ready(SeatId::One).unwrap());
+    assert!(!notice.environment_room().unwrap().seats[1].occupied);
+
+    let replacement = runtime.prepare_join(SeatId::Two).unwrap();
+    assert!(replacement.environment_room().unwrap().seats[1].occupied);
+    assert_eq!(replacement.environment_room().unwrap().round_id.get(), 2);
+    runtime.commit_admission(replacement);
+}
+
+#[test]
+fn forming_creator_replacement_is_playable_but_settings_authority_stays_revoked() {
+    let mut runtime = runtime();
+    for seat in SeatId::DUEL {
+        let prepared = runtime.prepare_join(seat).unwrap();
+        runtime.commit_admission(prepared);
+    }
+    runtime
+        .settle_boundary([Some(DepartureReason::Explicit), None, None, None])
+        .unwrap();
+    assert_eq!(
+        runtime.lifecycle.participant(SeatId::One),
+        Ok(RosterParticipant::NeverAdmitted)
+    );
+    let replacement = runtime.prepare_join(SeatId::One).unwrap();
+    assert_eq!(
+        replacement.environment_room().unwrap().settings_editor,
+        None
+    );
+    runtime.commit_admission(replacement);
+    assert_eq!(
+        runtime.update_environment_settings(
+            SeatId::One,
+            1,
+            1,
+            runtime.lifecycle.settings(),
+            StormCloudConfig::Disabled,
+        ),
+        Err(RosterRuntimeError::SettingsLocked)
+    );
+    assert!(
+        runtime
+            .action(
+                SeatId::One,
+                1,
+                RosterAction::Ready {
+                    ready: true,
+                    settings_revision: 1,
+                },
+            )
+            .is_ok()
+    );
+}
+
+#[test]
+fn expired_forming_creator_can_be_replaced_without_restoring_settings_authority() {
+    let mut runtime = runtime();
+    for seat in SeatId::DUEL {
+        let prepared = runtime.prepare_join(seat).unwrap();
+        runtime.commit_admission(prepared);
+    }
+    runtime
+        .settle_boundary([Some(DepartureReason::TransportLoss), None, None, None])
+        .unwrap();
+    for _ in 1..grenadiers_core::room::reconnect::RECONNECT_GRACE_TICKS {
+        runtime.settle_boundary([None; 4]).unwrap();
+    }
+    assert_eq!(
+        runtime.lifecycle.participant(SeatId::One),
+        Ok(RosterParticipant::NeverAdmitted)
+    );
+    let replacement = runtime.prepare_join(SeatId::One).unwrap();
+    assert_eq!(
+        replacement.environment_room().unwrap().settings_editor,
+        None
+    );
+}
+
+#[test]
+fn completed_match_rematch_does_not_reopen_departed_environment_seats() {
+    let mut runtime = runtime_with_settings(
+        RoomSettings::new(SpeedLevel::Base, 256, 1, 180)
+            .unwrap()
+            .with_enabled_items(EnabledItems::ALL),
+    );
+    admit_and_ready(&mut runtime, 1);
+    for _ in 0..grenadiers_core::room::COUNTDOWN_TICKS {
+        runtime.settle_boundary([None; 4]).unwrap();
+    }
+    runtime
+        .lifecycle
+        .complete_current_tick(grenadiers_core::game::RoundResult::Winner(SeatId::One))
+        .unwrap();
+    runtime.reset_for_rematch();
+    for _ in 0..grenadiers_core::room::series::RESULT_HOLD_TICKS {
+        runtime.lifecycle.advance_idle_tick().unwrap();
+    }
+    runtime
+        .action(SeatId::One, 1, RosterAction::Rematch(true))
+        .unwrap();
+    runtime
+        .action(SeatId::Two, 1, RosterAction::Rematch(true))
+        .unwrap();
+    assert_eq!(runtime.lifecycle.phase(), MatchPhase::Waiting);
+    runtime
+        .settle_boundary([None, Some(DepartureReason::Explicit), None, None])
+        .unwrap();
+    assert_eq!(
+        runtime.lifecycle.participant(SeatId::Two),
+        Ok(RosterParticipant::Departed)
+    );
+    assert!(runtime.prepare_join(SeatId::Two).is_err());
 }
 
 #[test]

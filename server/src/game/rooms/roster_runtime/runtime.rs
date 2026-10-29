@@ -27,6 +27,7 @@ pub(in crate::game::rooms) struct RosterRuntime {
     pub(super) revision: u32,
     pub(super) settings_revision: u32,
     pub(super) settings_locked: bool,
+    pub(super) creator_settings_revoked: bool,
     pub(super) round_seed_source: RoundSeedSource,
     pub(super) simulation_seed: Arc<SimulationSeedDerivation>,
     pub(super) inputs: InputMailbox,
@@ -58,6 +59,7 @@ impl RosterRuntime {
             revision: 1,
             settings_revision: 1,
             settings_locked: false,
+            creator_settings_revoked: false,
             round_seed_source,
             simulation_seed,
             sim: None,
@@ -186,9 +188,7 @@ impl RosterRuntime {
             publish = true;
         }
         if departures.iter().any(Option::is_some) {
-            self.lifecycle
-                .depart_with_grace(departures)
-                .map_err(lifecycle)?;
+            self.apply_departures(departures)?;
             for (index, departure) in departures.into_iter().enumerate() {
                 if departure.is_some() {
                     self.inputs.stop(SeatId::ALL[index]);
@@ -196,7 +196,7 @@ impl RosterRuntime {
             }
             publish = true;
         }
-        let expiry = self.lifecycle.expire_reconnect_grace().map_err(lifecycle)?;
+        let expiry = self.expire_departures()?;
         publish |= expiry.change() != MatchChange::Unchanged;
         if publish {
             self.publish_current().map(Some)
@@ -212,10 +212,7 @@ impl RosterRuntime {
         let mut publish = false;
         let mut rematch_started = false;
         if departures.iter().any(Option::is_some) {
-            let update = self
-                .lifecycle
-                .depart_with_grace(departures)
-                .map_err(lifecycle)?;
+            let update = self.apply_departures(departures)?;
             rematch_started |= update.change() == MatchChange::RematchStarted;
             for (index, departure) in departures.into_iter().enumerate() {
                 if departure.is_some() {
@@ -227,7 +224,7 @@ impl RosterRuntime {
         if !rematch_started && !matches!(self.lifecycle.phase(), MatchPhase::Interrupted { .. }) {
             publish |= self.idle_tick()?;
         }
-        let expiry = self.lifecycle.expire_reconnect_grace().map_err(lifecycle)?;
+        let expiry = self.expire_departures()?;
         rematch_started |= expiry.change() == MatchChange::RematchStarted;
         publish |= expiry.change() != MatchChange::Unchanged;
         if rematch_started {

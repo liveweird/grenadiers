@@ -13,6 +13,7 @@ pub(in crate::game::rooms) struct RosterRuntimeInspection {
     pub(in crate::game::rooms) reports: Vec<StepReport>,
     pub(in crate::game::rooms) revision: u32,
     pub(in crate::game::rooms) settings_revision: u32,
+    pub(in crate::game::rooms) creator_settings_revoked: bool,
     pub(in crate::game::rooms) environment: Option<StormCloudConfig>,
 }
 
@@ -36,6 +37,7 @@ impl RosterRuntime {
             reports: self.reports.clone(),
             revision: self.revision,
             settings_revision: self.settings_revision,
+            creator_settings_revoked: self.creator_settings_revoked,
             environment: self.environment,
         }
     }

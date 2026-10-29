@@ -28,6 +28,7 @@ pub(super) struct Driver {
     pub(super) notices: watch::Sender<RosterOwnerNotice>,
     last: RosterNotice,
     pub(super) seats: [Option<SeatSlot>; 4],
+    pub(super) retired_credentials: Vec<super::super::resume::ResumeCredential>,
     pub(super) terminal_at: Option<Instant>,
     pub(super) lobby_deadline: Option<Instant>,
     pub(super) random_fill: Arc<RandomFill>,
@@ -57,6 +58,7 @@ impl Driver {
             notices,
             last: initial,
             seats: [None, None, None, None],
+            retired_credentials: Vec::new(),
             terminal_at: None,
             lobby_deadline: Some(lobby_deadline),
             random_fill,
@@ -268,9 +270,6 @@ impl Driver {
             if let Some(reply) = pending.reply.take() {
                 let _ = reply.send(Ok(()));
             }
-            // Keep the credential as a room-lifetime tombstone. Reusing an
-            // explicitly departed participant's token would let stale resume
-            // authority alias a later human admission.
         }
     }
 
@@ -280,6 +279,7 @@ impl Driver {
             self.publish(notice);
         }
         self.finish_pending();
+        self.retire_released_credentials();
         self.drop_expired_credentials();
         self.observe_phase(now);
         Ok(())

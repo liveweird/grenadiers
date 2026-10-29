@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use grenadiers_core::{
     game::{SeatId, StormCloudConfig},
-    room::{MatchChange, RoomSettings},
+    room::{DepartureReason, MatchChange, RoomSettings, RosterParticipant, RosterUpdate},
 };
 
 use crate::round_seed::RoundSeedSource;
@@ -15,6 +15,57 @@ use super::{
 };
 
 impl RosterRuntime {
+    pub(in crate::game::rooms) const fn forming_replacements(&self) -> bool {
+        self.environment.is_some() && !self.settings_locked
+    }
+
+    pub(super) const fn settings_authority_locked(&self) -> bool {
+        self.settings_locked || self.creator_settings_revoked
+    }
+
+    pub(super) fn apply_departures(
+        &mut self,
+        departures: [Option<DepartureReason>; 4],
+    ) -> Result<RosterUpdate, RosterRuntimeError> {
+        let forming = self.forming_replacements();
+        let update = if forming {
+            self.lifecycle.depart_forming_with_grace(departures)
+        } else {
+            self.lifecycle.depart_with_grace(departures)
+        }
+        .map_err(lifecycle)?;
+        if forming
+            && departures[SeatId::One.index()] == Some(DepartureReason::Explicit)
+            && self.lifecycle.participant(SeatId::One).map_err(lifecycle)?
+                == RosterParticipant::NeverAdmitted
+        {
+            self.creator_settings_revoked = true;
+        }
+        Ok(update)
+    }
+
+    pub(super) fn expire_departures(&mut self) -> Result<RosterUpdate, RosterRuntimeError> {
+        let forming = self.forming_replacements();
+        let creator_was_reserved = matches!(
+            self.lifecycle.participant(SeatId::One).map_err(lifecycle)?,
+            RosterParticipant::Reserved { .. }
+        );
+        let update = if forming {
+            self.lifecycle.expire_forming_reconnect_grace()
+        } else {
+            self.lifecycle.expire_reconnect_grace()
+        }
+        .map_err(lifecycle)?;
+        if forming
+            && creator_was_reserved
+            && self.lifecycle.participant(SeatId::One).map_err(lifecycle)?
+                == RosterParticipant::NeverAdmitted
+        {
+            self.creator_settings_revoked = true;
+        }
+        Ok(update)
+    }
+
     pub(in crate::game::rooms) const fn environment(&self) -> Option<StormCloudConfig> {
         self.environment
     }
@@ -60,7 +111,7 @@ impl RosterRuntime {
         let current = self
             .environment
             .ok_or(RosterRuntimeError::UnsupportedConfiguration)?;
-        if self.settings_locked || self.lifecycle.settings_editor() != Some(seat) {
+        if self.settings_authority_locked() || self.lifecycle.settings_editor() != Some(seat) {
             return Err(RosterRuntimeError::SettingsLocked);
         }
         if expected != self.settings_revision {
@@ -73,7 +124,7 @@ impl RosterRuntime {
                 current,
                 self.revision,
                 self.settings_revision,
-                self.settings_locked,
+                self.settings_authority_locked(),
             )?;
             return Ok(Some(publication_v15::view_notice(room)));
         }

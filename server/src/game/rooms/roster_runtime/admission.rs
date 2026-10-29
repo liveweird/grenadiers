@@ -194,7 +194,7 @@ impl RosterRuntime {
                 environment,
                 revision,
                 self.settings_revision,
-                self.settings_locked,
+                self.settings_authority_locked(),
             )?;
             let capture = body
                 .map(|sim| {

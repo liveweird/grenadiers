@@ -214,7 +214,9 @@ async fn two_members_receive_personalized_admission_and_live_waiting_updates() {
     assert_eq!(configured["room"]["seats"][1]["ready"], false);
     let configured_revision = configured["room"]["revision"].as_u64().unwrap();
     waiting_reply::expect_waiting_update(&mut two, &room_id, configured_revision, |room| {
-        room["settingsRevision"] == 2 && room["seats"][1]["ready"] == false
+        room["settingsRevision"] == 2
+            && room["settings"] == settings
+            && room["seats"][1]["ready"] == false
     })
     .await;
     send(

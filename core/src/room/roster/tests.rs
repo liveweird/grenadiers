@@ -75,6 +75,63 @@ fn countdown_cancel_is_transactional_and_advances_attempt() {
 }
 
 #[test]
+fn forming_departure_reopens_seat_and_cancels_countdown_without_changing_legacy_policy() {
+    let mut forming = RosterMatchLifecycle::new(
+        configuration(&[SeatControl::Human, SeatControl::Human]),
+        settings(3),
+    );
+    for seat in SeatId::DUEL {
+        forming.occupy(seat).unwrap();
+        forming.set_ready(seat, true).unwrap();
+    }
+    forming
+        .depart_forming_with_grace([None, Some(DepartureReason::Explicit), None, None])
+        .unwrap();
+    assert_eq!(forming.phase(), MatchPhase::Waiting);
+    assert_eq!(forming.ready(SeatId::One), Ok(false));
+    assert_eq!(
+        forming.participant(SeatId::Two),
+        Ok(RosterParticipant::NeverAdmitted)
+    );
+
+    let mut legacy = RosterMatchLifecycle::new(
+        configuration(&[SeatControl::Human, SeatControl::Human]),
+        settings(3),
+    );
+    legacy.occupy(SeatId::One).unwrap();
+    legacy.occupy(SeatId::Two).unwrap();
+    legacy
+        .depart_with_grace([None, Some(DepartureReason::Explicit), None, None])
+        .unwrap();
+    assert_eq!(
+        legacy.participant(SeatId::Two),
+        Ok(RosterParticipant::Departed)
+    );
+}
+
+#[test]
+fn forming_transport_reserves_until_exact_expiry_then_reopens() {
+    let mut room = RosterMatchLifecycle::new(
+        configuration(&[SeatControl::Human, SeatControl::Human]),
+        settings(3),
+    );
+    room.occupy(SeatId::One).unwrap();
+    room.occupy(SeatId::Two).unwrap();
+    room.depart_forming_with_grace([None, Some(DepartureReason::TransportLoss), None, None])
+        .unwrap();
+    assert!(matches!(
+        room.participant(SeatId::Two),
+        Ok(RosterParticipant::Reserved { .. })
+    ));
+    advance(&mut room, RECONNECT_GRACE_TICKS);
+    room.expire_forming_reconnect_grace().unwrap();
+    assert_eq!(
+        room.participant(SeatId::Two),
+        Ok(RosterParticipant::NeverAdmitted)
+    );
+}
+
+#[test]
 fn permanently_departed_human_does_not_block_remaining_eligible_humans() {
     let mut room = RosterMatchLifecycle::new(
         configuration(&[SeatControl::Human, SeatControl::Human, SeatControl::Human]),

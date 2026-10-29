@@ -1,8 +1,8 @@
 use grenadiers_core::{
     game::{Direction, SeatId, StormCloudConfig},
     room::{
-        BoardSize, CpuDifficulty, EnvironmentRoomConfiguration, RoomConfiguration, RoomSettings,
-        SeatControl,
+        BoardSize, CpuDifficulty, DepartureReason, EnvironmentRoomConfiguration, RoomConfiguration,
+        RoomSettings, RosterParticipant, SeatControl,
     },
 };
 
@@ -227,4 +227,42 @@ fn rejected_stale_and_locked_commands_leave_full_private_state_and_journal_uncha
     );
     assert_eq!(recorder.runtime().replay_inspection(), before_locked);
     assert_eq!(recorder.journal().records.len(), records_before_locked);
+}
+
+#[test]
+fn environment_replacement_replays_with_the_reopened_seat_and_revoked_creator_authority() {
+    let base = RoomConfiguration::new(
+        &[SeatControl::Human, SeatControl::Human],
+        None,
+        BoardSize::FifteenByThirteen,
+    )
+    .unwrap();
+    let mut recorder = RecordingRosterRuntime::new(
+        EnvironmentRoomConfiguration::new(base, StormCloudConfig::Single),
+        RoomSettings::DEFAULT,
+        RoundSeedSource::with_entropy(|bytes| {
+            bytes.fill(74);
+            Ok(())
+        }),
+        vec![],
+    )
+    .unwrap();
+    recorder.admit(SeatId::One, false).unwrap();
+    recorder.admit(SeatId::Two, false).unwrap();
+    recorder
+        .settle([None, Some(DepartureReason::Explicit), None, None])
+        .unwrap();
+    assert_eq!(
+        recorder.runtime().lifecycle().participant(SeatId::Two),
+        Ok(RosterParticipant::NeverAdmitted)
+    );
+    recorder.admit(SeatId::Two, false).unwrap();
+    recorder
+        .settle([Some(DepartureReason::Explicit), None, None, None])
+        .unwrap();
+    recorder.admit(SeatId::One, false).unwrap();
+    let expected = recorder.runtime().replay_inspection();
+    assert!(expected.creator_settings_revoked);
+    let (_, journal) = recorder.into_parts();
+    assert_eq!(replay(&journal).unwrap(), expected);
 }

@@ -99,6 +99,8 @@ mod environment_acceptance_tests;
 #[cfg(test)]
 mod environment_cpu_tests;
 #[cfg(test)]
+mod forming_replacement_tests;
+#[cfg(test)]
 mod lifecycle_tests;
 #[cfg(test)]
 mod tests;

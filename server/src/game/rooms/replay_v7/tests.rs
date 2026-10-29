@@ -8,7 +8,7 @@ use grenadiers_core::{
 
 use crate::round_seed::RoundSeedSource;
 
-use super::{RecordingRosterRuntime, ReplayAction, replay, verify_exact};
+use super::{CpuProvenance, RecordingRosterRuntime, ReplayAction, replay, verify_exact};
 
 fn recorder(board: BoardSize, tuning: LairTuning) -> RecordingRosterRuntime {
     let base =
@@ -134,4 +134,85 @@ fn replay7_header_is_closed_to_exact_profile_versions() {
     malformed = journal;
     malformed.header.lair_layout_version = 2;
     assert!(replay(&malformed).is_err());
+}
+
+#[test]
+fn pending_departure_and_interrupt_are_recorded_as_one_exact_operation() {
+    let mut recorder = recorder(
+        BoardSize::ElevenByNine,
+        LairTuning::new(true, LairSettings::DEFAULT),
+    );
+    start(&mut recorder, 1);
+    recorder
+        .interrupt_and_depart(
+            grenadiers_core::room::InterruptReason::InternalError,
+            [
+                None,
+                Some(grenadiers_core::room::DepartureReason::TransportLoss),
+                None,
+                None,
+            ],
+        )
+        .unwrap();
+    let expected = recorder.runtime().replay_inspection();
+    let (_, journal) = recorder.into_parts();
+    assert!(matches!(
+        journal.records.last().unwrap().operation,
+        super::record::Operation::InterruptAndDepart { .. }
+    ));
+    verify_exact(&journal, &expected).unwrap();
+}
+
+#[test]
+fn replay7_rejects_source_order_marker_and_terminal_status_mutations() {
+    let mut recorder = recorder(
+        BoardSize::FifteenByThirteen,
+        LairTuning::new(true, LairSettings::DEFAULT),
+    );
+    start(&mut recorder, 1);
+    let (_, journal) = recorder.into_parts();
+
+    let mut wrong_source = journal.clone();
+    let action = wrong_source
+        .records
+        .iter_mut()
+        .find(|record| matches!(record.operation, super::record::Operation::Action { .. }))
+        .unwrap();
+    let super::record::Operation::Action { source, .. } = &mut action.operation else {
+        unreachable!()
+    };
+    *source = super::record::ActionSource::Cpu;
+    assert!(replay(&wrong_source).is_err());
+
+    let mut wrong_order = journal.clone();
+    wrong_order.records[1].order += 1;
+    assert!(replay(&wrong_order).is_err());
+
+    let mut missing_marker = journal.clone();
+    missing_marker.records.retain(|record| {
+        !matches!(
+            record.operation,
+            super::record::Operation::RoundStarted { .. }
+        )
+    });
+    assert!(replay(&missing_marker).is_err());
+
+    let mut truncated = journal.clone();
+    truncated.status = super::ReplayStatus::Truncated;
+    assert!(replay(&truncated).is_err());
+    let mut incomplete = journal;
+    incomplete.status = super::ReplayStatus::IncompleteRoundConstruction;
+    assert!(replay(&incomplete).is_err());
+}
+
+#[test]
+fn replay7_debug_redacts_private_cpu_seed() {
+    let provenance = CpuProvenance::new(
+        SeatId::Two,
+        grenadiers_core::room::CpuDifficulty::Standard,
+        [173; 32],
+    );
+    let debug = format!("{provenance:?}");
+    assert!(debug.contains("<redacted>"));
+    assert!(!debug.contains("173"));
 }

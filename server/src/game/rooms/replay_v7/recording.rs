@@ -173,6 +173,18 @@ impl RecordingRosterRuntime {
         Ok(())
     }
 
+    pub(in crate::game::rooms) fn interrupt_and_depart(
+        &mut self,
+        reason: InterruptReason,
+        departures: [Option<DepartureReason>; 4],
+    ) -> Result<(), ReplayError> {
+        self.runtime
+            .interrupt_and_depart(reason, departures)
+            .map_err(|_| ReplayError::Runtime)?;
+        self.record(Operation::InterruptAndDepart { reason, departures });
+        Ok(())
+    }
+
     fn record(&mut self, operation: Operation) {
         self.journal
             .record(self.runtime.replay_inspection().lifecycle.tick(), operation);

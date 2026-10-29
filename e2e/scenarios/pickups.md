@@ -2,8 +2,8 @@
 
 ## Scenario: two browsers collect generated upgrades while old bombs keep their captured range
 
-Run separately with the documented read-only arena-v1-pickups operator seed file and the
-same release image used for random-play smoke checks. The command fails without explicit
+Run separately with the documented read-only `arena-v3-pickups` generator3 operator seed file and
+the same release image used for random-play smoke checks. The command fails without explicit
 fixture setup. Both actual browsers create/join and ready through the UI. Native keyboard
 controls reveal and collect capacity, then range; public positions guide the route without
 injecting authority or sending a seed to the browser. Both HUDs and snapshots show increased

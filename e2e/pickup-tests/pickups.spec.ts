@@ -9,7 +9,7 @@ import { visibleActor, expectPaintedCanvas, latestSnapshot, observeGame, type Ob
 
 test.beforeAll(() => {
   expect(process.env.E2E_PICKUP_FIXTURE, 'Configure the documented server seed fixture before pickup acceptance')
-    .toBe('arena-v1-pickups')
+    .toBe('arena-v3-pickups')
 })
 
 type Cell = { column: number; row: number }
@@ -179,6 +179,18 @@ test('two browsers collect generated upgrades while old bombs keep their capture
       expect.objectContaining({ type: 'pickupCollected', kind: 'blastRange' }),
     ]))
   } catch (error) {
+    const latest = games[0] && latestSnapshot(games[0])
+    const target = { column: 1, row: 3 }
+    const publicSummary = latest && {
+      physicalTick: latest.state.physicalTick,
+      phase: latest.room.phase,
+      actor: visibleActor(latest, 'one'),
+      targetBlockPresent: latest.state.arena.blocks.some((cell) =>
+        cell.column === target.column && cell.row === target.row),
+      pickups: latest.state.pickups,
+      bombs: latest.state.bombs,
+      lastEvents: games[0].frames.flatMap((frame) => frame.type === 'snapshot' ? frame.events : []).slice(-12),
+    }
     // Trace DOM snapshots are disabled for real-time input. Preserve bounded,
     // redacted transport evidence after failure, without authentication frames.
     await testInfo.attach('pickup-websocket-summary', {
@@ -200,7 +212,7 @@ test('two browsers collect generated upgrades while old bombs keep their capture
           })),
       }))),
     })
-    throw error
+    throw new Error(`Pickup route failed: ${JSON.stringify(publicSummary)}`, { cause: error })
   } finally {
     await Promise.all(contexts.map((context) => context.close()))
   }

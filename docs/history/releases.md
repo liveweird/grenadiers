@@ -4,6 +4,44 @@ This archive preserves the older release records originally maintained in
 [`docs/releases.md`](../releases.md). Records remain in their original order; the current
 release procedure and current release record stay in the [release guide](../releases.md).
 
+## v0.3.115 — 2026-10-29 — Storm cloud gameplay
+
+The roaming storm cloud is live: it crosses terrain and bombs, and contact refreshes a
+three-second, 50% slowdown shown in the player's effect bar. New rooms enable all items and
+weather. Forming-lobby presets update both atomically; rules lock at first start and stay
+locked through rematches. Pre-match departures and expired reservations free human seats while
+retiring old capabilities. Replacements never inherit the departed creator's editing grant.
+
+All supported boards and two-to-four-player human/CPU lineups now use gameplay15, rules7 and
+CPU18. Large boards use generator3, smaller boards generator4; the wire map identity remains
+`generated_v2`. Upgrade client/server together and reload old tabs. See the
+[weather guide](../game/storm-cloud.md), [contract](../game/protocol-v15.md),
+[English desktop](../screenshots/storm-cloud-desktop.png) and
+[Polish reduced-motion mobile](../screenshots/storm-cloud-mobile-pl-reduced.png).
+
+The [artist bundle](https://github.com/liveweird/grenadiers/releases/download/v0.3.115/grenadiers-storm-art-v0.3.115.zip)
+adds the cloud while preserving every earlier frame: 150 entries, 146 drawings and four reserved
+slots on 1120×1680. Runtime packing remains 2040×528 / 4,308,480 RGBA bytes.
+[Prompts and provenance](../../assets/art/storm-cloud-prompts.md) document the extension.
+
+Accepted source `1f372a4699a734db252529edd5a4a30d54a257fe`, tree
+`9511900910e57dfb31be004a0051daf9762e91ee`, image
+`sha256:c7ae99065f75d33ef7da004204ef881e9fedaceb97d78f8d221c236067040b76`.
+Fresh Rust debug/release tests, fmt, warnings-denied Clippy, build and coverage pass in 309.453s:
+38,643/42,019 lines (**91.9655%**). Independent coverage contains no earlier profiles. Only the
+unchanged historical exhaustive mask test reuses v0.3.114's 4,194,304-mask acceptance in each
+profile, following dependency review. Web acceptance passes 7,037 tests at 93.81% lines/89.14%
+branches; exact final-image frontend bytes match that accepted build. Linux
+[run 40941263408](https://github.com/liveweird/grenadiers/actions/runs/40941263408) covers the
+distinct platform. All 24 seeded item/CPU scenarios and ten atlas cases pass. Compose and
+restricted Kubernetes each pass 19 native cases in 3.8m on separate ports, with probes/resources,
+zero restarts and scoped cleanup. Pinned Trivy 0.74.0 reports zero fixable HIGH/CRITICAL findings.
+Independent contract, client and lobby-security reviews are clear.
+
+This source prerelease has an accepted local image. Promotion retains v0.3.114 for rollback;
+restarting or rolling back ends process-local matches. Production replay recording/export remains
+disabled. Lairs are next in the [backlog](../../BACKLOG.md).
+
 ## v0.3.114 — 2026-10-29
 
 [v0.3.114](https://github.com/liveweird/grenadiers/releases/tag/v0.3.114) pairs the dormant storm simulation with **gameplay15, CPU18 and private replay6**. Checked publication binds actual rules7, room lifecycle, physical epoch, configuration and recipient privacy. The shared Rust/browser corpus derives from real roster transitions and physical results. Hidden actors expose no storm timer or position; CPU observations use the same checked publication. The [environment contract](../game/protocol-v15.md), [CPU guide](../game/multiplayer-cpu.md) and [replay guide](../game/multiplayer-replay.md) describe these internal boundaries.

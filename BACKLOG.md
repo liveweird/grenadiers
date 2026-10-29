@@ -28,7 +28,8 @@ repeated approval for routine implementation choices. Entries are not delivery-d
 - [next] **LAIRS — indestructible mob spawners.** Add a wall-like, indestructible lair tile.
   Each lair spawns once every configurable N seconds, with a separate counter and the same
   configurable limit M. Mobs chase players reachable through unblocked paths, avoid bombs and
-  never plant bombs. Deliver a dormant core foundation before paired server/client activation.
+  never plant bombs. The [headless core](docs/game/lairs.md) supplies simulation; complete the
+  paired wire16 contract, CPU19 and server/replay7 integration, then controls, art and rendering.
   - Initial defaults: N = 10 seconds (configurable 5–60), M = 3 living mobs per lair (1–8).
     Two mirrored existing pillars bound the arena to 16 mobs. Full/blocked attempts wait one
     interval; deaths release capacity, and rounds reset counters.

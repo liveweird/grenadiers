@@ -278,6 +278,18 @@ floor; active Wall Pass uses complete timed planting proof rather than the legac
 
 ## Focused verification
 
+Rules8 planning additionally requires the finite mob-contact lease described in
+[multiplayer CPU boundaries](multiplayer-cpu.md#lair-profile-boundaries). A lease binds the
+recipient/world and Teleporter marker, models public spawn deadlines and treats frozen mobs as
+capable of moving without a disclosed thaw deadline. Ordinary movement and a plant's longer
+escape retain separate horizons; speculative tactic exhaustion cannot discard the precomputed
+movement fallback. Teleporter guards include full landing cells and maximum retained travel,
+with work charged to the same fixed allowance. A changed marker withdraws execution authority.
+
+Future rival bombs, Bracelet actions and other unexpected scene changes remain reasons to
+invalidate and reobserve. Finite contact certification does not claim universal survival against
+unobserved future enemy inputs.
+
 Run `cargo test -p grenadiers-core cpu:: --lib` for bounded contracts,
 `cargo test -p grenadiers-core cpu_observation --lib` for recipient privacy and public facts,
 and `cargo test -p grenadiers-server cpu_contract --lib` for accepted-input replay. These

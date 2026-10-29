@@ -1,6 +1,8 @@
 use std::collections::BTreeSet;
 
+use crate::cpu::MobContactLease;
 use crate::cpu::forecast::{HazardForecast, TickWindow};
+use crate::cpu::lair_contact::{ContactEnvelopeError, MobContactEnvelope};
 use crate::cpu::{MovementIntent, Observation, WorkBudget};
 use crate::game::geometry::MovementSegment;
 use crate::game::geometry::position_overlaps_cell;
@@ -30,7 +32,48 @@ pub fn certify_pulse(
     request: PulseRequest,
     work: &mut WorkBudget,
 ) -> Result<PulseLease, RouteFailure> {
-    certify_pulse_inner(observation, forecast, request, None, work)
+    certify_pulse_inner(observation, forecast, request, None, false, None, work)
+}
+
+pub fn certify_lair_pulse(
+    observation: &Observation,
+    forecast: &HazardForecast,
+    request: PulseRequest,
+    work: &mut WorkBudget,
+) -> Result<(PulseLease, MobContactLease), RouteFailure> {
+    let envelope = MobContactEnvelope::new(observation, work).map_err(contact_failure)?;
+    let lease = certify_pulse_inner(
+        observation,
+        forecast,
+        request,
+        None,
+        false,
+        Some(&envelope),
+        work,
+    )?;
+    Ok((
+        lease,
+        MobContactLease::new(envelope, request.stopped_safe_until),
+    ))
+}
+
+pub(crate) fn certify_lair_contact_pulse(
+    observation: &Observation,
+    forecast: &HazardForecast,
+    request: PulseRequest,
+    work: &mut WorkBudget,
+) -> Result<MobContactLease, RouteFailure> {
+    let envelope = MobContactEnvelope::new(observation, work).map_err(contact_failure)?;
+    let _ = certify_pulse_inner(
+        observation,
+        forecast,
+        request,
+        None,
+        true,
+        Some(&envelope),
+        work,
+    )?;
+    Ok(MobContactLease::new(envelope, request.stopped_safe_until))
 }
 
 pub(crate) fn certify_escape_pulse(
@@ -41,7 +84,15 @@ pub(crate) fn certify_escape_pulse(
     work: &mut WorkBudget,
 ) -> Result<PulseLease, RouteFailure> {
     validate_origin_forecast(forecast, origin)?;
-    certify_pulse_inner(observation, forecast, request, Some(origin), work)
+    certify_pulse_inner(
+        observation,
+        forecast,
+        request,
+        Some(origin),
+        false,
+        None,
+        work,
+    )
 }
 
 fn certify_pulse_inner(
@@ -49,6 +100,8 @@ fn certify_pulse_inner(
     forecast: &HazardForecast,
     request: PulseRequest,
     origin: Option<PulseOriginGrace>,
+    allow_pickups: bool,
+    contact: Option<&MobContactEnvelope>,
     work: &mut WorkBudget,
 ) -> Result<PulseLease, RouteFailure> {
     let context = validation::validate(
@@ -63,7 +116,30 @@ fn certify_pulse_inner(
     let mut scenarios = Vec::new();
     let mut assumptions = BTreeSet::new();
 
-    certify_wait_before_start(&context, forecast, request, origin, work, &mut assumptions)?;
+    certify_wait_before_start(
+        &context,
+        forecast,
+        request,
+        origin,
+        allow_pickups,
+        work,
+        &mut assumptions,
+    )?;
+    if let Some(contact) = contact {
+        let last_start = request
+            .start_window
+            .end
+            .0
+            .checked_sub(1)
+            .map(Tick)
+            .ok_or(RouteFailure::InvalidRequest)?;
+        if !contact
+            .stationary_is_clear_until(context.actor.position, last_start, work)
+            .map_err(contact_failure)?
+        {
+            return Err(RouteFailure::NoRoute);
+        }
+    }
     for start in request.start_window.start.0..request.start_window.end.0 {
         let start = Tick(start);
         let mut motion = initial.clone();
@@ -89,7 +165,16 @@ fn certify_pulse_inner(
             super::storm::charge_tick(context.storm, work)?;
             let segments = advance(&context, &mut motion, request.movement, tick)?;
             take_segments(work, &segments, forecast.dimensions())?;
-            reject_pickups(observation, &segments)?;
+            if !allow_pickups {
+                reject_pickups(observation, &segments)?;
+            }
+            if let Some(contact) = contact
+                && !contact
+                    .sweep_is_clear(tick, &segments, work)
+                    .map_err(contact_failure)?
+            {
+                return Err(RouteFailure::NoRoute);
+            }
             if !static_segment_clear(observation, &segments) {
                 return Err(RouteFailure::NoRoute);
             }
@@ -122,6 +207,22 @@ fn certify_pulse_inner(
             assumptions: &mut assumptions,
         },
     )?;
+    if let Some(contact) = contact {
+        let last_safe_update = request
+            .stopped_safe_until
+            .0
+            .checked_sub(1)
+            .map(Tick)
+            .ok_or(RouteFailure::InvalidRequest)?;
+        for (_, motion, _) in &scenarios {
+            if !contact
+                .stationary_is_clear_until(motion.position, last_safe_update, work)
+                .map_err(contact_failure)?
+            {
+                return Err(RouteFailure::NoRoute);
+            }
+        }
+    }
     if !assumptions.is_empty() && request.hold_ticks > MAX_CONDITIONAL_TICKS {
         return Err(RouteFailure::NoRoute);
     }
@@ -185,6 +286,7 @@ fn certify_wait_before_start(
     forecast: &HazardForecast,
     request: PulseRequest,
     origin: Option<PulseOriginGrace>,
+    allow_pickups: bool,
     work: &mut WorkBudget,
     assumptions: &mut BTreeSet<EntityId>,
 ) -> Result<(), RouteFailure> {
@@ -195,7 +297,9 @@ fn certify_wait_before_start(
     }
     let segment = stationary_segment(context.actor.position);
     take_segments(work, &segment, forecast.dimensions())?;
-    reject_pickups(context.observation, &segment)?;
+    if !allow_pickups {
+        reject_pickups(context.observation, &segment)?;
+    }
     assumptions.extend(super::safety::check_segments_with_grace(
         forecast,
         &segment,
@@ -205,6 +309,16 @@ fn certify_wait_before_start(
         None,
     )?);
     Ok(())
+}
+
+fn contact_failure(error: ContactEnvelopeError) -> RouteFailure {
+    match error {
+        ContactEnvelopeError::WorkExhausted => RouteFailure::WorkExhausted,
+        ContactEnvelopeError::Capacity => RouteFailure::Capacity,
+        ContactEnvelopeError::Unsupported | ContactEnvelopeError::InvalidTime => {
+            RouteFailure::InvalidRequest
+        }
+    }
 }
 
 struct SuffixEvidence<'a> {

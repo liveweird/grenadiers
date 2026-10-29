@@ -11,7 +11,7 @@ use crate::room::{BoardSize, LairConfig, LairSettings, RoomSettings};
 
 use super::*;
 
-fn observation(mobs: Vec<MobView>, next_spawn_at: Tick) -> Observation {
+pub(crate) fn observation(mobs: Vec<MobView>, next_spawn_at: Tick) -> Observation {
     let board = BoardSize::FifteenByThirteen;
     let cells = lair_layout_v1(board);
     let mut terrain = vec![Terrain::Floor; board.cell_count()];
@@ -94,7 +94,7 @@ fn observation(mobs: Vec<MobView>, next_spawn_at: Tick) -> Observation {
     .unwrap()
 }
 
-fn mob(id: u32, position: Position) -> MobView {
+pub(crate) fn mob(id: u32, position: Position) -> MobView {
     MobView {
         id: EntityId(id),
         lair: 0,

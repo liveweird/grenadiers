@@ -52,7 +52,7 @@ pub use identity::{
     AdmissionContext, DecisionAdmission, DecisionId, RejectionReason, WorldId, admit_decision,
 };
 pub use intent::{Intent, ManualIntent, MovementIntent};
-pub use lair_contact::has_urgent_lair_threat;
+pub use lair_contact::{MobContactLease, has_urgent_lair_threat};
 pub use memory::{
     CpuMemory, MAX_MEMORY_HISTORY, MemoryEntry, MemoryError, MemoryKey, MemoryUpdate,
 };

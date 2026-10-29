@@ -34,7 +34,7 @@ pub(super) fn validate<'a>(
         return Err(RouteFailure::IdentityMismatch);
     }
     validate_request(parts.tick, forecast.horizon_end(), start_window, safe_until)?;
-    if !matches!(parts.rules.version, 5..=7) {
+    if !matches!(parts.rules.version, 5..=8) {
         return Err(RouteFailure::Unsupported);
     }
     let actor = parts

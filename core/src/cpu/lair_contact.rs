@@ -3,6 +3,7 @@ use crate::game::types::{HALF_FOOTPRINT, TICKS_PER_SECOND};
 use crate::game::{EntityId, MOB_UNITS_PER_SECOND, Position, Tick};
 use crate::room::LairConfig;
 
+use super::routing::{RouteCertificate, RouteFailure};
 use super::{Observation, WorkBudget};
 
 const SPAWN_DIRECTIONS: [(i16, i16); 4] = [(0, -1), (1, 0), (0, 1), (-1, 0)];
@@ -17,8 +18,8 @@ pub(crate) enum ContactEnvelopeError {
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum SourceKind {
-    Existing(EntityId),
-    PossibleSpawn,
+    Existing { id: EntityId, lair: u8 },
+    PossibleSpawn { lair: u8 },
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -37,6 +38,95 @@ pub(crate) struct MobContactEnvelope {
     sources: Vec<Source>,
 }
 
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct MobContactLease {
+    envelope: MobContactEnvelope,
+    safe_until: Tick,
+}
+
+impl MobContactLease {
+    pub(crate) const fn new(envelope: MobContactEnvelope, safe_until: Tick) -> Self {
+        Self {
+            envelope,
+            safe_until,
+        }
+    }
+
+    pub(crate) fn certify_route(
+        observation: &Observation,
+        route: &RouteCertificate,
+        work: &mut WorkBudget,
+    ) -> Result<Self, RouteFailure> {
+        let envelope = MobContactEnvelope::new(observation, work).map_err(route_failure)?;
+        let basis = route.basis_tick();
+        let last = route
+            .survive_until()
+            .0
+            .checked_sub(1)
+            .ok_or(RouteFailure::InvalidRequest)?;
+        let first_route_tick = basis.0.checked_add(1).ok_or(RouteFailure::InvalidRequest)?;
+        for first in route.start_window().start.0..route.start_window().end.0 {
+            let lane = route
+                .lane(Tick(first))
+                .ok_or(RouteFailure::InvalidRequest)?;
+            let mut previous = lane.pose_at(basis).ok_or(RouteFailure::InvalidRequest)?.0;
+            let mut stationary_end = None;
+            for tick in first_route_tick..=last {
+                let tick = Tick(tick);
+                let current = lane.pose_at(tick).ok_or(RouteFailure::InvalidRequest)?.0;
+                if current == previous {
+                    stationary_end = Some(tick);
+                } else {
+                    if let Some(end) = stationary_end.take()
+                        && !envelope
+                            .stationary_is_clear_until(previous, end, work)
+                            .map_err(route_failure)?
+                    {
+                        return Err(RouteFailure::NoRoute);
+                    }
+                    if !envelope
+                        .sweep_is_clear(tick, &[MovementSegment::new(previous, current)], work)
+                        .map_err(route_failure)?
+                    {
+                        return Err(RouteFailure::NoRoute);
+                    }
+                }
+                previous = current;
+            }
+            if let Some(end) = stationary_end
+                && !envelope
+                    .stationary_is_clear_until(previous, end, work)
+                    .map_err(route_failure)?
+            {
+                return Err(RouteFailure::NoRoute);
+            }
+        }
+        Ok(Self::new(envelope, route.survive_until()))
+    }
+
+    #[must_use]
+    pub const fn safe_until(&self) -> Tick {
+        self.safe_until
+    }
+
+    pub fn observation_fits(&self, current: &Observation, work: &mut WorkBudget) -> bool {
+        matches!(
+            self.envelope.contains(current, self.safe_until, work),
+            Ok(true)
+        )
+    }
+}
+
+fn route_failure(error: ContactEnvelopeError) -> RouteFailure {
+    match error {
+        ContactEnvelopeError::WorkExhausted => RouteFailure::WorkExhausted,
+        ContactEnvelopeError::Capacity => RouteFailure::Capacity,
+        ContactEnvelopeError::Unsupported | ContactEnvelopeError::InvalidTime => {
+            RouteFailure::InvalidRequest
+        }
+    }
+}
+
 impl MobContactEnvelope {
     pub(crate) fn new(
         observation: &Observation,
@@ -53,11 +143,14 @@ impl MobContactEnvelope {
         take_work(work, source_count)?;
         let mut sources = Vec::with_capacity(source_count);
         sources.extend(observed.mobs().iter().map(|mob| Source {
-            kind: SourceKind::Existing(mob.id),
+            kind: SourceKind::Existing {
+                id: mob.id,
+                lair: mob.lair,
+            },
             origin: mob.position,
             begins_at: observation.parts().tick,
         }));
-        for lair in observed.lairs() {
+        for (lair_index, lair) in observed.lairs().iter().enumerate() {
             for (dc, dr) in SPAWN_DIRECTIONS {
                 let column = i32::from(lair.cell.column)
                     .checked_add(i32::from(dc))
@@ -68,7 +161,10 @@ impl MobContactEnvelope {
                     .and_then(|value| u16::try_from(value).ok())
                     .ok_or(ContactEnvelopeError::Capacity)?;
                 sources.push(Source {
-                    kind: SourceKind::PossibleSpawn,
+                    kind: SourceKind::PossibleSpawn {
+                        lair: u8::try_from(lair_index)
+                            .map_err(|_| ContactEnvelopeError::Capacity)?,
+                    },
                     origin: Position::center(crate::game::CellId::new(column, row)),
                     begins_at: lair.next_spawn_at,
                 });
@@ -126,7 +222,6 @@ impl MobContactEnvelope {
 
     /// Allows ordinary motion/death and predicted births while rejecting facts
     /// outside the original finite envelope or beyond the lease deadline.
-    #[allow(dead_code, reason = "consumed by the following CPU19 lease milestone")]
     pub(crate) fn contains(
         &self,
         current: &Observation,
@@ -154,20 +249,24 @@ impl MobContactEnvelope {
                 .ok_or(ContactEnvelopeError::Capacity)?,
         )?;
         for mob in lairs.mobs() {
-            let existing = self
-                .sources
-                .iter()
-                .find(|source| matches!(source.kind, SourceKind::Existing(id) if id == mob.id));
+            let existing = self.sources.iter().find(
+                |source| matches!(source.kind, SourceKind::Existing { id, .. } if id == mob.id),
+            );
             let fits = existing.map_or_else(
                 || {
                     self.sources.iter().any(|source| {
-                        source.kind == SourceKind::PossibleSpawn
-                            && position_fits(*source, current.parts().tick, mob.position)
-                                .unwrap_or(false)
+                        matches!(
+                            source.kind,
+                            SourceKind::PossibleSpawn { lair } if lair == mob.lair
+                        ) && position_fits(*source, current.parts().tick, mob.position)
+                            .unwrap_or(false)
                     })
                 },
                 |source| {
-                    position_fits(*source, current.parts().tick, mob.position).unwrap_or(false)
+                    matches!(
+                        source.kind,
+                        SourceKind::Existing { lair, .. } if lair == mob.lair
+                    ) && position_fits(*source, current.parts().tick, mob.position).unwrap_or(false)
                 },
             );
             if !fits {
@@ -235,7 +334,6 @@ fn source_reaches_segment(source: Source, travel: i64, segment: MovementSegment)
     ) <= travel
 }
 
-#[allow(dead_code, reason = "consumed by the following CPU19 lease milestone")]
 fn position_fits(
     source: Source,
     tick: Tick,
@@ -265,4 +363,4 @@ fn distance_to_interval(value: i64, min: i64, max: i64) -> i64 {
 
 #[cfg(test)]
 #[path = "lair_contact_tests.rs"]
-mod tests;
+pub(crate) mod tests;

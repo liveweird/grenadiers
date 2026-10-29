@@ -254,6 +254,9 @@ impl Observation {
         })
     }
 
+    /// Constructs the rules-v8 recipient view. Overlay identity/count failures
+    /// use `InvalidActors` so every older exhaustive transport mapping remains
+    /// closed while v8 adds mob entity facts outside `ObservationParts`.
     pub fn new_rules_v8(
         parts: ObservationParts,
         environment: ObservedEnvironment,

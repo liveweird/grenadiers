@@ -264,9 +264,7 @@ impl Driver {
             if self.cpus[index].validate_contact(observation, observation.parts().tick)
                 == Some(ContactStatus::Invalidated)
             {
-                if !self.cpu_stationary[seat.index()] {
-                    self.cpu_stop_at[seat.index()] = Some(self.runtime.lifecycle().tick());
-                }
+                self.cpu_stop_at[seat.index()] = Some(self.runtime.lifecycle().tick());
                 continue;
             }
             let route = self.cpus[index].observe_route(observation);
@@ -310,6 +308,24 @@ impl Driver {
                 let _ = self.cpus[index].submit(observation.clone(), epoch);
             }
         }
+    }
+
+    #[cfg(test)]
+    pub(in crate::game::rooms::roster_owner) fn expire_contact_for_test(
+        &mut self,
+        index: usize,
+    ) -> bool {
+        let Some(observation) = self.cpus[index].latest_observation_for_test() else {
+            return false;
+        };
+        if self.cpus[index].validate_contact(&observation, Tick(u64::MAX - 1))
+            != Some(ContactStatus::Invalidated)
+        {
+            return false;
+        }
+        let seat = self.cpus[index].seat();
+        self.cpu_stop_at[seat.index()] = Some(self.runtime.lifecycle().tick());
+        true
     }
 }
 

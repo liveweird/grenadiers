@@ -301,3 +301,35 @@ fn queued_cpu19_keeps_progressing_after_real_mobs_spawn() {
         }
     }
 }
+
+#[test]
+fn invalid_contact_on_a_stopped_waiting_route_holds_stop_and_cannot_submit_a_leg() {
+    let mut episode = Episode::new(Case {
+        board: BoardSize::ElevenByNine,
+        count: 2,
+        difficulty: CpuDifficulty::Standard,
+        cloud: StormCloudConfig::Disabled,
+        lairs: true,
+    });
+    let mut found = None;
+    for _ in 0..2_400 {
+        episode.tick();
+        if episode.driver.cpus[0].has_committed_route()
+            && episode.driver.cpus[0].has_committed_contact()
+            && episode.driver.cpu_stationary[SeatId::Two.index()]
+        {
+            found = Some(0);
+            break;
+        }
+    }
+    let index = found.expect("real CPU19 plant route reaches a stopped wait");
+    assert!(episode.driver.expire_contact_for_test(index));
+    assert!(!episode.driver.cpus[index].has_committed_route());
+    assert_eq!(
+        episode.driver.cpu_stop_at[SeatId::Two.index()],
+        Some(episode.driver.runtime.lifecycle().tick())
+    );
+    episode.driver.service_cpu().unwrap();
+    assert!(episode.driver.cpu_stationary[SeatId::Two.index()]);
+    assert!(!episode.driver.cpus[index].has_committed_route());
+}

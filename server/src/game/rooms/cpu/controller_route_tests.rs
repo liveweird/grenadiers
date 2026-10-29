@@ -96,7 +96,7 @@ fn clear_gap_requires_an_unencumbered_settled_stop() {
     assert!(legacy.has_committed_route());
 }
 
-fn committed_wait_controller() -> (CpuController, grenadiers_core::cpu::Observation) {
+pub(super) fn committed_wait_controller() -> (CpuController, grenadiers_core::cpu::Observation) {
     let (basis, current, route, key) = detonation_fixture();
     let mut controller = CpuController::new(
         CpuPlanner::without_workers(),

@@ -1,4 +1,4 @@
-use super::{ActorInit, State, StateError, StepError};
+use super::{ActorInit, DrawReason, RoundResult, State, StateError, StepError};
 use crate::game::{
     EventAudience, RoundAssignment, RulesConfig, SeatId, SimulationSeed, StepEvent, StepEventKind,
     Tick, World,
@@ -11,6 +11,24 @@ pub struct RoundActorInit {
 }
 
 impl State {
+    pub(super) fn decide_result(&mut self) -> Option<RoundResult> {
+        let mut living = self.actors.iter().filter(|actor| actor.alive);
+        let first = living.next().map(|actor| actor.seat);
+        let second = living.next();
+        self.result = match (first, second) {
+            (None, _) => Some(RoundResult::Draw(DrawReason::MutualElimination)),
+            (Some(winner), None) => Some(RoundResult::Winner(winner)),
+            (Some(_), Some(_)) if self.running_updates >= self.rules.round_ticks() => {
+                Some(RoundResult::Draw(DrawReason::Timeout))
+            }
+            (Some(_), Some(_)) => None,
+        };
+        if self.result.is_some() {
+            self.clear_storm_slow();
+        }
+        self.result
+    }
+
     pub fn new_round(
         rules: RulesConfig,
         world: World,

@@ -30,6 +30,8 @@ mod invisibility_cloak_acceptance_tests;
 mod item_foundation_tests;
 #[path = "kick_validation_tests.rs"]
 mod kick_validation_tests;
+#[path = "lair_foundation_tests.rs"]
+mod lair_foundation_tests;
 #[path = "simulation/landmine_acceptance_tests.rs"]
 mod landmine_acceptance_tests;
 #[path = "simulation/landmine_route_tests.rs"]

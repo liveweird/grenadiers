@@ -1,10 +1,9 @@
-use super::{RoundResult, SeatInput, State, StepError, StepReport};
+use super::{SeatInput, State, StepError, StepReport};
 use crate::game::damage::{DamageOutcome, DamagePreventionSource, apply_damage};
 use crate::game::events::{EventAudience, StepEvent, StepEventKind};
 use crate::game::geometry::MovementTrace;
 use crate::game::movement;
 use crate::game::movement::MovementOutcome;
-use crate::game::simulation::DrawReason;
 #[cfg(test)]
 use crate::game::types::CellId;
 use crate::game::types::Tick;
@@ -66,16 +65,20 @@ impl State {
         self.preflight_timed_pause(&stopwatch)?;
         let storm_expiry = self.preflight_storm_slow(next_tick)?;
 
-        // Timed-pause overflow is preflight before mutation. Timed pickup collection remains
-        // the only later fallible mutation, so retain a transaction snapshot only when that
-        // failure is possible rather than cloning every deterministic update.
-        let rollback = self
-            .world
-            .pickups
-            .iter()
-            .filter_map(|(_, kind)| kind.timed_effect())
-            .any(|effect| next_tick.0.checked_add(effect.duration_ticks()).is_none())
-            .then(|| self.clone());
+        let lair_due = self.preflight_lair_attempt(next_tick)?;
+
+        // Rules 8 adds a fallible post-settlement entity allocation, so it retains a transaction
+        // snapshot. Closed profiles keep the narrower timed-pickup rollback condition.
+        let rollback = (self.rules.version() >= 8)
+            .then(|| self.clone())
+            .or_else(|| {
+                self.world
+                    .pickups
+                    .iter()
+                    .filter_map(|(_, kind)| kind.timed_effect())
+                    .any(|effect| next_tick.0.checked_add(effect.duration_ticks()).is_none())
+                    .then(|| self.clone())
+            });
         let cloud_movement = self.advance_storm_cloud();
         let mut storm_contacts = self.storm_contacts_at_start(cloud_movement);
         let mut events = Vec::new();
@@ -92,6 +95,12 @@ impl State {
         }
         let manual_actions = self.apply_inputs(inputs);
         self.clear_frozen_movement(&stopwatch.frozen);
+        let (mob_contact_targets, mut contact_damaged) = self.advance_lair_phase(
+            next_tick,
+            stopwatch.pause_timed,
+            &mut events,
+            &mut shield_prevented,
+        );
         let alive_at_movement_start: Vec<_> = self.actors.iter().map(|actor| actor.alive).collect();
         let grace_at_movement_start: Vec<_> = self
             .actors
@@ -107,12 +116,20 @@ impl State {
         self.resolve_kick_requests(kick_requests);
         let forced_movements = self.resolve_shove(&outcomes, next_tick);
         self.include_storm_movement_contacts(&mut storm_contacts, &traces, &forced_movements);
-        let contact_targets = super::contacts::accepted_contact_ids(
+        let mut contact_targets = super::contacts::accepted_contact_ids(
             &self.world,
             &traces,
             &forced_movements,
             &alive_at_movement_start,
             &grace_at_movement_start,
+        );
+        contact_targets.extend(mob_contact_targets);
+        self.apply_lair_trace_contacts(
+            &traces,
+            &mut contact_damaged,
+            next_tick,
+            &mut events,
+            &mut shield_prevented,
         );
         self.kill_on_existing_flames(
             &traces,
@@ -130,6 +147,7 @@ impl State {
             stopwatch.pause_timed,
             &mut events,
         )?;
+        self.kill_lairs_on_fire();
         self.kill_on_final_flames(next_tick, &mut events, &mut shield_prevented);
         let teleport_requests = match self.collect_pickups(next_tick, &mut events) {
             Ok(requests) => requests,
@@ -142,6 +160,12 @@ impl State {
             }
         };
         self.commit_teleport(teleport_requests, next_tick);
+        self.apply_lair_endpoint_contacts(
+            &mut contact_damaged,
+            next_tick,
+            &mut events,
+            &mut shield_prevented,
+        );
         self.include_storm_endpoint_contacts(&mut storm_contacts);
         self.apply_storm_contacts(&storm_contacts, storm_expiry);
         self.running_updates += 1;
@@ -151,6 +175,24 @@ impl State {
                 EventAudience::all(self.player_count),
                 StepEventKind::RoundEnded(result),
             ));
+        }
+        if lair_due && self.result.is_none() {
+            let allocator_before = self.next_entity_id;
+            let ids = self.available_lair_entity_ids(crate::game::MAX_LAIRS);
+            let spawned = match self.spawn_from_lairs(next_tick, &ids) {
+                Ok(spawned) => spawned,
+                Err(error) => {
+                    if let Some(snapshot) = rollback {
+                        *self = snapshot;
+                    }
+                    return Err(error);
+                }
+            };
+            self.next_entity_id = if spawned == 0 {
+                allocator_before
+            } else {
+                u64::from(ids[spawned - 1].0) + 1
+            };
         }
         self.tick = next_tick;
         Ok(StepReport {
@@ -229,7 +271,7 @@ impl State {
         }
     }
 
-    fn kill_on_existing_flames(
+    pub(super) fn kill_on_existing_flames(
         &mut self,
         traces: &[MovementTrace],
         forced_movements: &[super::contract::ForcedMovement],
@@ -275,7 +317,7 @@ impl State {
         }
     }
 
-    fn damage_actor(
+    pub(super) fn damage_actor(
         &mut self,
         index: usize,
         tick: Tick,
@@ -342,25 +384,7 @@ impl State {
         ));
     }
 
-    pub(super) fn decide_result(&mut self) -> Option<RoundResult> {
-        let mut living = self.actors.iter().filter(|actor| actor.alive);
-        let first = living.next().map(|actor| actor.seat);
-        let second = living.next();
-        self.result = match (first, second) {
-            (None, _) => Some(RoundResult::Draw(DrawReason::MutualElimination)),
-            (Some(winner), None) => Some(RoundResult::Winner(winner)),
-            (Some(_), Some(_)) if self.running_updates >= self.rules.round_ticks() => {
-                Some(RoundResult::Draw(DrawReason::Timeout))
-            }
-            (Some(_), Some(_)) => None,
-        };
-        if self.result.is_some() {
-            self.clear_storm_slow();
-        }
-        self.result
-    }
-
-    fn stationary_traces(&self) -> Vec<MovementTrace> {
+    pub(super) fn stationary_traces(&self) -> Vec<MovementTrace> {
         self.actors
             .iter()
             .map(|actor| MovementTrace::new(actor.position))

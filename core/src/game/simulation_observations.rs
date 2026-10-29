@@ -63,6 +63,19 @@ impl State {
         self.storm_cloud.as_deref().map(|cloud| cloud.view())
     }
 
+    #[must_use]
+    pub fn lairs(&self) -> Option<[crate::game::LairView; crate::game::MAX_LAIRS]> {
+        self.lairs.as_ref().map(|lairs| lairs.views())
+    }
+
+    #[must_use]
+    pub fn mobs(&self) -> Vec<crate::game::MobView> {
+        let frozen = self.stopwatch_context(self.tick).pause_timed;
+        self.lairs
+            .as_ref()
+            .map_or_else(Vec::new, |lairs| lairs.mob_views(frozen))
+    }
+
     pub(super) fn bomb_event_audience_for(&self, id: EntityId, at: Tick) -> EventAudience {
         let mut audience = self
             .actors

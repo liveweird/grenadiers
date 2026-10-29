@@ -39,6 +39,7 @@ pub mod generation;
 pub mod geometry;
 pub mod input;
 pub mod inventory;
+mod lairs;
 mod movement;
 mod movement_collision;
 pub mod oil;
@@ -71,6 +72,7 @@ pub use generation::{
 pub use geometry::{MovementSegment, MovementTrace};
 pub use input::{Direction, HeldDirections};
 pub use inventory::{Equipment, Inventory, SpecialWeapon};
+pub use lairs::{LAIR_LAYOUT_VERSION, LairView, MAX_LAIRS, MAX_MOBS, MobView};
 pub(crate) use oil::OilState;
 pub use oil::{MAX_OIL_BARRELS, OilBarrelState};
 pub use pickups::{Pickup, PickupKind, PickupLayer, PickupPlacementError};

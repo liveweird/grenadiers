@@ -93,6 +93,38 @@ pub(crate) fn plan_with_contacts(
     result
 }
 
+/// Cells a mob must avoid while any current bomb can still project a blast.
+/// This deliberately uses the same immutable occupancy and blast visitor as
+/// explosion planning, including piercing and power geometry.
+pub(crate) fn bomb_danger_cells(world: &World) -> BTreeSet<CellId> {
+    let bombs_by_cell: BTreeMap<_, _> = world
+        .bombs
+        .values()
+        .map(|bomb| (bomb.cell(), bomb.id()))
+        .collect();
+    let field = WorldBlastField {
+        world,
+        bombs_by_cell: &bombs_by_cell,
+    };
+    let mut danger = BTreeSet::new();
+    for bomb in world.bombs.values() {
+        let completed = visit_blast(
+            &field,
+            BlastSource {
+                cell: bomb.cell(),
+                range: bomb.range(),
+                kind: bomb.blast(),
+            },
+            |visit| {
+                danger.insert(visit.cell);
+                ControlFlow::<()>::Continue(())
+            },
+        );
+        debug_assert!(completed.is_continue());
+    }
+    danger
+}
+
 fn apply_visit(
     visit: BlastVisit,
     contact_targets: &BTreeSet<EntityId>,

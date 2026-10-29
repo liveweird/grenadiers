@@ -6,11 +6,10 @@ use super::effects::{EffectiveSpeed, TimedEffects};
 use super::geometry::MovementTrace;
 use super::input::{Direction, HeldDirections};
 use super::inventory::Inventory;
-use super::movement;
-use super::rules::RulesConfig;
 use super::storm_cloud::StormCloudState;
 use super::types::{CellId, EntityId, PlayerCount, Position, SeatId, SpeedLevel, Tick};
 use super::world::World;
+use super::{lairs::LairState, movement, rules::RulesConfig};
 
 #[path = "simulation_contract.rs"]
 mod contract;
@@ -145,6 +144,7 @@ pub struct State {
     construction_tick: Tick,
     randomness: Option<Box<random::SimulationRandomness>>,
     storm_cloud: Option<Box<StormCloudState>>,
+    lairs: Option<LairState>,
 }
 
 impl State {
@@ -329,6 +329,7 @@ impl State {
                 world.arena.height(),
             ))
         });
+        let lairs = LairState::new(rules.lair_config(), world.arena.board(), &world.arena, tick)?;
         Ok(Self {
             rules,
             world,
@@ -343,6 +344,7 @@ impl State {
             construction_tick: tick,
             randomness: (rules.version() >= 6).then_some(randomness).flatten(),
             storm_cloud,
+            lairs,
         })
     }
 }
@@ -351,6 +353,8 @@ impl State {
 mod actions;
 #[path = "simulation_actor.rs"]
 mod actor_state;
+#[path = "simulation_lairs.rs"]
+mod lair_step;
 #[path = "simulation_manual_actions.rs"]
 mod manual_actions;
 #[cfg(test)]

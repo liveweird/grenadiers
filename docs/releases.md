@@ -96,17 +96,46 @@ retain the previous immutable image reference for rollback. The runtime stage in
 rolling Debian package updates, so a later build may resolve newer packages and is not expected to
 be byte-identical; treat it as a new candidate with new evidence rather than reusing acceptance.
 
-## v0.3.114 — 2026-10-29
+## v0.3.115 — 2026-10-29 — Storm cloud gameplay
 
-[v0.3.114](https://github.com/liveweird/grenadiers/releases/tag/v0.3.114) pairs the dormant storm simulation with **gameplay15, CPU18 and private replay6**. Checked publication binds actual rules7, room lifecycle, physical epoch, configuration and recipient privacy. The shared Rust/browser corpus derives from real roster transitions and physical results. Hidden actors expose no storm timer or position; CPU observations use the same checked publication. The [environment contract](game/protocol-v15.md), [CPU guide](game/multiplayer-cpu.md) and [replay guide](game/multiplayer-replay.md) describe these internal boundaries.
+The roaming storm cloud is live: it crosses terrain and bombs, and contact refreshes a
+three-second, 50% slowdown shown in the player's effect bar. New rooms enable all items and
+weather. Forming-lobby presets update both atomically; rules lock at first start and stay
+locked through rematches. Pre-match departures and expired reservations free human seats while
+retiring old capabilities. Replacements never inherit the departed creator's editing grant.
 
-CPU18 retains ordinary manual-free clear-board navigation and pickup goals, while storm-aware planting and survival use bounded certificates. Optional planting cannot consume the whole movement budget; failed attempts retain no hypothetical bomb memory. Easy cadence remains intact. Real queued-driver checks cover 18 board/count/difficulty/environment cases, planting and own-detonation survival, cloud contact refresh/expiry and stale-work recovery. CPU18 accepted-input replay compares complete private state/RNG. Running-seat replacement baselines are verified across all six board/environment combinations.
+All supported boards and two-to-four-player human/CPU lineups now use gameplay15, rules7 and
+CPU18. Large boards use generator3, smaller boards generator4; the wire map identity remains
+`generated_v2`. Upgrade client/server together and reload old tabs. See the
+[weather guide](game/storm-cloud.md), [contract](game/protocol-v15.md),
+[English desktop](screenshots/storm-cloud-desktop.png) and
+[Polish reduced-motion mobile](screenshots/storm-cloud-mobile-pl-reduced.png).
 
-Independent CPU, protocol, privacy, lifecycle, adapter and replay reviews are clear. Full local Rust debug/release/coverage passes with **92.09% lines** (38,403/41,703), including all 4,194,304 item masks in each profile, 32 partitions/four workers/no retries. Linux debug/release unit [run 40926054382](https://github.com/liveweird/grenadiers/actions/runs/40926054382) passes. **7,027 web tests** across 108 files pass with **93.81% lines and 89.04% branches**, plus contract drift/lint/dead-code/build checks. Resolved dependencies and artwork are unchanged; v0.3.113 dependency-security and v0.3.112 graphics acceptance are reused.
+The [artist bundle](https://github.com/liveweird/grenadiers/releases/download/v0.3.115/grenadiers-storm-art-v0.3.115.zip)
+adds the cloud while preserving every earlier frame: 150 entries, 146 drawings and four reserved
+slots on 1120×1680. Runtime packing remains 2040×528 / 4,308,480 RGBA bytes.
+[Prompts and provenance](../assets/art/storm-cloud-prompts.md) document the extension.
 
-Tested source `b7f07bdef0c3e019e7ccf552a9faefff9dafa498`, tree `ec2919db8e824a932a4826ae1509d1bc4deb399f`, [PR #269](https://github.com/liveweird/grenadiers/pull/269). Exact image `sha256:d1b764d06f734344fce76723aea45d07ccbaf1c027a5cc6549f93e285c635a59` passes **18 browser scenarios each in Compose and Kubernetes**, 3.7m/3.8m on distinct IPv4 ports. Security/resources/probes, zero-restart postflight and cleanup pass. Pinned Trivy0.74.0 reports zero fixable HIGH/CRITICAL findings.
+Accepted source `1f372a4699a734db252529edd5a4a30d54a257fe`, tree
+`9511900910e57dfb31be004a0051daf9762e91ee`, image
+`sha256:c7ae99065f75d33ef7da004204ef881e9fedaceb97d78f8d221c236067040b76`.
+Fresh Rust debug/release tests, fmt, warnings-denied Clippy, build and coverage pass in 309.453s:
+38,643/42,019 lines (**91.9655%**). Independent coverage contains no earlier profiles. Only the
+unchanged historical exhaustive mask test reuses v0.3.114's 4,194,304-mask acceptance in each
+profile, following dependency review. Web acceptance passes 7,037 tests at 93.81% lines/89.14%
+branches; exact final-image frontend bytes match that accepted build. Linux
+[run 40941263408](https://github.com/liveweird/grenadiers/actions/runs/40941263408) covers the
+distinct platform. All 24 seeded item/CPU scenarios and ten atlas cases pass. Compose and
+restricted Kubernetes each pass 19 native cases in 3.8m on separate ports, with probes/resources,
+zero restarts and scoped cleanup. Pinned Trivy 0.74.0 reports zero fixable HIGH/CRITICAL findings.
+Independent contract, client and lobby-security reviews are clear.
 
-Live gameplay remains **v14**: this release does not enable the cloud in the application. Live server/client/rendering activation is tracked in the [backlog](../BACKLOG.md). Production recording/export remains disabled. This is a source prerelease with an accepted local image; promotion retains v0.3.113 for rollback. The current artist bundle remains [v0.3.112](https://github.com/liveweird/grenadiers/releases/download/v0.3.112/grenadiers-animation-art-v0.3.112.zip).
+This source prerelease has an accepted local image. Promotion retains v0.3.114 for rollback;
+restarting or rolling back ends process-local matches. Production replay recording/export remains
+disabled. Lairs are next in the [backlog](../BACKLOG.md).
+
+<a id="v03114--2026-10-29"></a>
+The [v0.3.114 record](history/releases.md#v03114--2026-10-29) is preserved in release history.
 
 <a id="v03113--2026-10-29"></a>
 The [v0.3.113 record](history/releases.md#v03113--2026-10-29) is preserved in release history.

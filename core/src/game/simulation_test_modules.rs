@@ -88,6 +88,14 @@ mod stopwatch_interaction_tests;
 mod stopwatch_route_tests;
 #[path = "stopwatch_tests.rs"]
 mod stopwatch_tests;
+#[path = "storm_cloud_tests.rs"]
+mod storm_cloud_tests;
+#[path = "storm_contact_tests.rs"]
+mod storm_contact_tests;
+#[path = "storm_golden_tests.rs"]
+mod storm_golden_tests;
+#[path = "storm_test_support.rs"]
+mod storm_test_support;
 #[path = "simulation/teleporter_acceptance_tests.rs"]
 mod teleporter_acceptance_tests;
 #[path = "simulation/teleporter_route_tests.rs"]

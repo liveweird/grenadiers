@@ -8,6 +8,7 @@ use super::input::{Direction, HeldDirections};
 use super::inventory::Inventory;
 use super::movement;
 use super::rules::RulesConfig;
+use super::storm_cloud::StormCloudState;
 use super::types::{CellId, EntityId, PlayerCount, Position, SeatId, SpeedLevel, Tick};
 use super::world::World;
 
@@ -45,6 +46,7 @@ pub struct Actor {
     last_successful_punch_tick: Option<Tick>,
     last_successful_shove_tick: Option<Tick>,
     last_teleport_tick: Option<Tick>,
+    storm_slow_until: Option<Tick>,
 }
 
 impl Actor {
@@ -93,7 +95,21 @@ impl Actor {
 
     #[must_use]
     pub fn effective_speed(&self, at: Tick) -> EffectiveSpeed {
-        self.effects.effective_speed(self.speed, at)
+        EffectiveSpeed::from_modifiers(
+            self.speed,
+            self.effects.slow_foot_stacks(at),
+            self.storm_slow_active(at),
+        )
+    }
+
+    #[must_use]
+    pub const fn storm_slow_until(&self) -> Option<Tick> {
+        self.storm_slow_until
+    }
+
+    #[must_use]
+    pub fn storm_slow_active(&self, at: Tick) -> bool {
+        self.storm_slow_until.is_some_and(|expiry| at < expiry)
     }
 
     #[must_use]
@@ -128,6 +144,7 @@ pub struct State {
     last_teleport_tick: Option<Tick>,
     construction_tick: Tick,
     randomness: Option<Box<random::SimulationRandomness>>,
+    storm_cloud: Option<Box<StormCloudState>>,
 }
 
 impl State {
@@ -206,7 +223,14 @@ impl State {
             });
         }
         let enabled = rules.enabled_items();
-        if rules.version() >= 6 && enabled.contains_teleporter() && randomness.is_none() {
+        let cloud_enabled = matches!(
+            rules.storm_cloud_config(),
+            super::rules::StormCloudConfig::Single
+        );
+        if rules.version() >= 6
+            && (enabled.contains_teleporter() || cloud_enabled)
+            && randomness.is_none()
+        {
             return Err(StateError::MissingSimulationRandomness);
         }
         let mut ids = BTreeSet::new();
@@ -294,6 +318,17 @@ impl State {
             .map(|actor| Actor::new(actor, rules))
             .collect();
         contacts::initialize_grace(&world, &mut initialized);
+        let storm_cloud = cloud_enabled.then(|| {
+            let seed = randomness
+                .as_ref()
+                .expect("cloud randomness was validated")
+                .seed();
+            Box::new(StormCloudState::new(
+                seed,
+                world.arena.width(),
+                world.arena.height(),
+            ))
+        });
         Ok(Self {
             rules,
             world,
@@ -307,6 +342,7 @@ impl State {
             last_teleport_tick: None,
             construction_tick: tick,
             randomness: (rules.version() >= 6).then_some(randomness).flatten(),
+            storm_cloud,
         })
     }
 }
@@ -338,7 +374,13 @@ mod random;
 mod shove;
 #[path = "shove_geometry.rs"]
 mod shove_geometry;
+#[path = "simulation_storm.rs"]
+mod storm_step;
 
+pub use super::storm_cloud::{
+    STORM_CLOUD_HALF_EXTENT, STORM_CLOUD_LEG_TICKS, STORM_CLOUD_RANDOMNESS_VERSION,
+    STORM_CLOUD_SPEED_PER_TICK, STORM_SLOW_TICKS, StormCloudView,
+};
 pub use participation::RoundActorInit;
 pub use random::{
     SIMULATION_RANDOMNESS_VERSION, SIMULATION_SEED_DERIVATION_VERSION, SimulationSeed,

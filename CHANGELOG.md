@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+## 0.3.113 — 2026-10-29
+
+- Add dormant rules7 storm-cloud simulation with deterministic nonblocking motion, independent
+  randomness and swept contact that refreshes a three-second, nonstacking half-speed effect.
+- Compose cloud slow with existing curses while preserving residual movement, overflow
+  atomicity, rollback and all legacy live/protocol/replay profiles.
+- Expose headless environment getters and shared physics for paired consumers; keep live
+  activation disabled until the new contract, CPU certificate and presentation are ready.
+
 ## 0.3.112 — 2026-10-29
 
 - Add four-pose walking cycles for every direction and uniform, retaining the established

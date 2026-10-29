@@ -7,7 +7,7 @@ the time; they do not add approval steps to the current workflow.
 | --- | --- |
 | Install, run and contribute | [Project README](../README.md), [conventions](../CONTRIBUTING.md) |
 | Understand the boundaries | [Architecture](architecture.md), [design decisions](decisions/README.md) |
-| Change gameplay | [Rules](game/rules.md), [headless participants](game/multiplayer-core.md), [multiplayer generation](game/multiplayer-generation.md), [board geometry](game/board-sizes.md), [roster runtime](game/multiplayer-runtime.md), [multiplayer replay checks](game/multiplayer-replay.md), [multiplayer CPU foundation](game/multiplayer-cpu.md), [adding an item](game/adding-items.md), [future-track boundaries](game/implementation-plan.md#expansion-tracks-after-the-two-player-baseline) |
+| Change gameplay | [Rules](game/rules.md), [headless participants](game/multiplayer-core.md), [multiplayer generation](game/multiplayer-generation.md), [board geometry](game/board-sizes.md), [storm simulation](game/storm-cloud.md), [roster runtime](game/multiplayer-runtime.md), [multiplayer replay checks](game/multiplayer-replay.md), [multiplayer CPU foundation](game/multiplayer-cpu.md), [adding an item](game/adding-items.md), [future-track boundaries](game/implementation-plan.md#expansion-tracks-after-the-two-player-baseline) |
 | Change a transport contract | [API guidelines](../api-guidelines/API-GUIDELINES.md), [gameplay protocol](game/protocol.md), [protocol consumer inventory](game/protocol-consumers.md) |
 | Change sprites or tiles | [Artist handoff](../assets/art/README.md), [atlas renderer](game/art-atlas.md) |
 | Choose and run checks | [Testing](testing.md) |

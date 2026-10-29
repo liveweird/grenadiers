@@ -47,7 +47,6 @@ pub enum EffectError {
     ExpiryOverflow,
 }
 
-/// Exact fixed-point speed ratio. Consumers retain the numerator until division.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct EffectiveSpeed {
     numerator: u16,
@@ -56,16 +55,22 @@ pub struct EffectiveSpeed {
 
 impl EffectiveSpeed {
     #[must_use]
-    pub const fn from_slow_foot_stacks(base: SpeedLevel, stacks: usize) -> Self {
+    pub const fn from_modifiers(base: SpeedLevel, stacks: usize, storm_active: bool) -> Self {
         let bounded = if stacks > MAX_SLOW_FOOT_STACKS {
             MAX_SLOW_FOOT_STACKS
         } else {
             stacks
         };
+        let storm_shift = if storm_active { 1 } else { 0 };
         Self {
             numerator: base.units_per_second(),
-            denominator: 1_u16 << bounded,
+            denominator: 1_u16 << (bounded + storm_shift),
         }
+    }
+
+    #[must_use]
+    pub const fn from_slow_foot_stacks(base: SpeedLevel, stacks: usize) -> Self {
+        Self::from_modifiers(base, stacks, false)
     }
 
     #[must_use]
@@ -83,7 +88,6 @@ impl EffectiveSpeed {
         self.numerator / self.denominator
     }
 
-    /// Advances the authoritative coordinate-unit remainder by one 60 Hz update.
     #[must_use]
     pub const fn advance(self, residual: u16) -> (i32, u16) {
         let total = residual as u32 + self.units_per_second() as u32;
@@ -206,7 +210,6 @@ impl TimedEffects {
     }
 }
 
-/// Applies the authoritative range modifiers to any exact effect snapshot.
 #[must_use]
 pub fn effective_bomb_range(base: u16, active: impl Fn(EffectKind) -> bool) -> u16 {
     if active(EffectKind::ShortFlame) {

@@ -7,7 +7,7 @@ use super::projection_facts::{TriggerHistory, WorldFacts};
 use super::{BlastKind, ItemId, ProjectionError};
 
 pub(crate) fn validate(world: &WorldFacts, rules: &RulesConfig) -> Result<(), ProjectionError> {
-    if world.rules_version.get() != rules.version() as u8
+    if world.rules_version != rules.version() as u8
         || world.enabled_items.mask().bits() != rules.enabled_items().bits()
         || !world.enabled_items.is_subset_of(world.available_items)
     {

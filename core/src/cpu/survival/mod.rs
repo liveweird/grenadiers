@@ -12,6 +12,7 @@ mod manual_execution;
 mod origin;
 mod origin_planner;
 mod planner;
+mod plant_tactic;
 mod plant_value;
 mod route_execution;
 mod steering;
@@ -49,3 +50,6 @@ mod origin_tests;
 
 #[cfg(test)]
 mod multiplayer_rival_tests;
+
+#[cfg(test)]
+mod storm_planner_tests;

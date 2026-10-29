@@ -48,14 +48,24 @@ pub(super) struct StepTiming {
 pub struct RouteLane {
     first_update: Tick,
     timings: Vec<StepTiming>,
-    poses: Vec<(Tick, Position, Direction)>,
+    poses: Vec<(
+        Tick,
+        Position,
+        Direction,
+        Option<super::storm::DeadlineBounds>,
+    )>,
 }
 
 impl RouteLane {
     pub(super) fn new(
         first_update: Tick,
         timings: Vec<StepTiming>,
-        poses: Vec<(Tick, Position, Direction)>,
+        poses: Vec<(
+            Tick,
+            Position,
+            Direction,
+            Option<super::storm::DeadlineBounds>,
+        )>,
     ) -> Result<Self, RouteFailure> {
         if timings.len() > usize::from(MAX_ROUTE_STEPS)
             || poses.is_empty()
@@ -91,6 +101,16 @@ impl RouteLane {
             .binary_search_by_key(&snapshot_tick, |pose| pose.0)
             .ok()
             .map(|index| (self.poses[index].1, self.poses[index].2))
+    }
+
+    pub(crate) fn storm_deadlines_at(
+        &self,
+        snapshot_tick: Tick,
+    ) -> Option<super::storm::DeadlineBounds> {
+        self.poses
+            .binary_search_by_key(&snapshot_tick, |pose| pose.0)
+            .ok()
+            .and_then(|index| self.poses[index].3)
     }
 }
 

@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use grenadiers_core::{
-    game::{SeatId, SimulationSeed},
+    game::{SeatId, SimulationSeed, StormCloudConfig},
     protocol::{Counter, RoomCode, RoomId, v14},
     room::{BoardSize, DepartureReason, MatchPhase, RoomConfiguration, RoomSettings, SeatControl},
 };
@@ -94,7 +94,10 @@ fn two_three_and_four_seat_rooms_start_with_checked_recipient_frames() {
             assert!(runtime.settle_boundary([None; 4]).unwrap().is_none());
             assert!(runtime.settle_boundary([None; 4]).unwrap().is_none());
             let notice = runtime.settle_boundary([None; 4]).unwrap().unwrap();
-            assert_eq!(notice.room.configuration.domain().board(), board);
+            assert_eq!(
+                notice.legacy_room().unwrap().configuration.domain().board(),
+                board
+            );
             for &seat in &SeatId::ALL[..count] {
                 assert!(notice.frame(seat).is_some());
             }
@@ -214,7 +217,8 @@ fn checked_boards_are_accepted_and_cpu_human_admission_is_rejected() {
 fn failed_admission_encoding_and_failed_publication_leave_runtime_unchanged() {
     let mut runtime = runtime(4);
     let mut prepared = runtime.prepare_join(SeatId::Four).unwrap();
-    prepared.room.configuration = v14::RoomConfiguration::from_domain(configuration(3));
+    prepared.legacy_room_mut().unwrap().configuration =
+        v14::RoomConfiguration::from_domain(configuration(3));
     assert_eq!(
         prepared
             .encode(
@@ -301,6 +305,44 @@ fn running_actions_and_cpu_publication_use_the_current_round_epoch() {
             .err(),
         Some(RosterRuntimeError::StaleEpoch)
     );
+}
+
+#[test]
+fn environment_runtime_publishes_checked_v15_state_for_disabled_and_single() {
+    for environment in [StormCloudConfig::Disabled, StormCloudConfig::Single] {
+        let mut runtime = RosterRuntime::new_environment(
+            identity(configuration(2)),
+            RoomSettings::DEFAULT,
+            environment,
+            RoundSeedSource::with_entropy(|bytes| {
+                bytes.fill(17);
+                Ok(())
+            }),
+            Arc::new(|epoch| Ok(SimulationSeed::new([epoch as u8; 32]))),
+        )
+        .unwrap();
+        start(&mut runtime, 2);
+        let notice = runtime.current_notice().unwrap();
+        let room = notice.environment_room().unwrap();
+        assert_eq!(
+            room.rules_version,
+            grenadiers_core::protocol::v15::RulesVersion::ENVIRONMENT_V7
+        );
+        assert_eq!(
+            room.settings.environment.storm_cloud,
+            environment == StormCloudConfig::Single
+        );
+        let publication = notice.environment_cpu_publication().unwrap();
+        let projected = grenadiers_core::protocol::v15::project_recipient(
+            publication,
+            grenadiers_core::protocol::v15::Seat::One,
+        )
+        .unwrap();
+        assert_eq!(
+            projected.state.storm_cloud.is_some(),
+            environment == StormCloudConfig::Single
+        );
+    }
 }
 
 #[test]

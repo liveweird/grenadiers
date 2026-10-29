@@ -14,20 +14,39 @@ pub fn observe_cpu_recipient(
 ) -> Result<Observation, ProjectionError> {
     let projected = super::project_recipient(publication, recipient)?;
     let state = projected.state;
-    let tick = game::Tick(state.physical_tick.get());
-    let bombs_unavailable = hides_bombs(&state, recipient)?;
     let settings = crate::protocol::v11::expanded_settings(publication.room.settings)
         .map_err(|_| ProjectionError::InvalidRules)?;
     let rules = match publication.room.rules_version.get() {
         6 => game::RulesConfig::multiplayer_v6(settings),
         _ => game::RulesConfig::expanded_v5(settings),
     };
-    Observation::new(ObservationParts {
+    Observation::new(observation_parts(
+        state,
+        recipient,
+        world,
+        publication.room.rules_version.get().into(),
+        rules,
+        settings,
+    )?)
+    .map_err(observation_error)
+}
+
+pub(crate) fn observation_parts(
+    state: GameState,
+    recipient: Seat,
+    world: WorldId,
+    rules_version: u16,
+    rules: game::RulesConfig,
+    settings: crate::room::RoomSettings,
+) -> Result<ObservationParts, ProjectionError> {
+    let tick = game::Tick(state.physical_tick.get());
+    let bombs_unavailable = hides_bombs(&state, recipient)?;
+    Ok(ObservationParts {
         world,
         tick,
         recipient: domain_seat(recipient),
         rules: ObservedRules {
-            version: publication.room.rules_version.get().into(),
+            version: rules_version,
             tick_rate: rules.tick_rate(),
             running_updates: state.running_updates,
             remaining_ticks: state.remaining_ticks,
@@ -71,7 +90,6 @@ pub fn observe_cpu_recipient(
             })
             .collect(),
     })
-    .map_err(observation_error)
 }
 
 fn hides_bombs(state: &GameState, recipient: Seat) -> Result<bool, ProjectionError> {
@@ -234,7 +252,7 @@ const fn domain_seat(value: Seat) -> game::SeatId {
         Seat::Four => game::SeatId::Four,
     }
 }
-const fn observation_error(value: ObservationError) -> ProjectionError {
+pub(crate) const fn observation_error(value: ObservationError) -> ProjectionError {
     match value {
         ObservationError::InvalidClock => ProjectionError::InvalidClock,
         ObservationError::InvalidArena => ProjectionError::InvalidArena,

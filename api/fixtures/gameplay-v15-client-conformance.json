@@ -1,0 +1,62 @@
+{
+  "validMessages": [
+    {
+      "caseId": "single-cloud-four-seat-room",
+      "value": {
+        "type": "createRoom",
+        "sequence": 1,
+        "configuration": {
+          "controllers": ["human", "cpu", "human", "cpu"],
+          "cpuDifficulty": "standard",
+          "board": { "width": 15, "height": 13 },
+          "environment": { "stormCloud": true }
+        }
+      }
+    },
+    {
+      "caseId": "disabled-cloud-settings",
+      "value": {
+        "type": "updateSettings",
+        "sequence": 1,
+        "roomId": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "roundId": 1,
+        "settingsRevision": 1,
+        "settings": {
+          "startingSpeedLevel": 0,
+          "turnAssistUnits": 256,
+          "winsToFinish": 3,
+          "bombFuseTicks": 180,
+          "enabledItems": [],
+          "environment": { "stormCloud": false }
+        }
+      }
+    }
+  ],
+  "invalidMessages": [
+    {
+      "caseId": "missing-environment",
+      "value": {
+        "type": "createRoom",
+        "sequence": 1,
+        "configuration": {
+          "controllers": ["human", "human"],
+          "cpuDifficulty": null,
+          "board": { "width": 15, "height": 13 }
+        }
+      }
+    },
+    {
+      "caseId": "private-environment-seed",
+      "value": {
+        "type": "createRoom",
+        "sequence": 1,
+        "configuration": {
+          "controllers": ["human", "human"],
+          "cpuDifficulty": null,
+          "board": { "width": 15, "height": 13 },
+          "environment": { "stormCloud": true, "seed": 7 }
+        }
+      }
+    }
+  ]
+}

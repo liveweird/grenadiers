@@ -30,6 +30,25 @@ pub(in crate::game::rooms) enum ReplayError {
     Runtime,
 }
 
+#[derive(Clone, Copy)]
+pub(in crate::game::rooms) struct NormalizedRecord {
+    pub(in crate::game::rooms) tick: grenadiers_core::game::Tick,
+    pub(in crate::game::rooms) order: u32,
+    pub(in crate::game::rooms) operation: NormalizedOperation,
+}
+
+#[derive(Clone, Copy)]
+pub(in crate::game::rooms) enum NormalizedOperation {
+    Legacy(Operation),
+    EnvironmentSettings {
+        seat: grenadiers_core::game::SeatId,
+        epoch: u64,
+        settings_revision: u32,
+        settings: grenadiers_core::room::RoomSettings,
+        environment: grenadiers_core::game::StormCloudConfig,
+    },
+}
+
 pub(in crate::game::rooms) fn verify_exact(
     journal: &Journal,
     expected: &RosterRuntimeInspection,
@@ -80,6 +99,18 @@ fn replay_for_profile(
         ReplayStatus::IncompleteRoundConstruction => return Err(ReplayError::Incomplete),
     }
     validate_order(&journal.records)?;
+    for record in &journal.records {
+        validate_operation(&journal.header, record.operation)?;
+    }
+    let normalized = journal
+        .records
+        .iter()
+        .map(|record| NormalizedRecord {
+            tick: record.tick,
+            order: record.order,
+            operation: NormalizedOperation::Legacy(record.operation),
+        })
+        .collect::<Vec<_>>();
     let seeds = journal
         .records
         .iter()
@@ -95,17 +126,26 @@ fn replay_for_profile(
         bytes.copy_from_slice(&seed);
         Ok(())
     });
-    let mut runtime = runtime_from_header(&journal.header, source)?;
+    let runtime = runtime_from_header(&journal.header, source)?;
+    execute_normalized(runtime, &normalized, seeds)
+}
+
+pub(in crate::game::rooms) fn execute_normalized(
+    mut runtime: RosterRuntime,
+    records: &[NormalizedRecord],
+    seeds: Arc<Mutex<VecDeque<[u8; 32]>>>,
+) -> Result<RosterRuntimeInspection, ReplayError> {
+    validate_normalized_order(records)?;
     let mut marker_due = false;
-    for record in &journal.records {
+    for record in records {
         if record.tick != runtime.replay_inspection().lifecycle.tick() {
             return Err(ReplayError::WrongTick);
         }
-        if let Operation::RoundStarted {
+        if let NormalizedOperation::Legacy(Operation::RoundStarted {
             epoch,
             assignment,
             generation,
-        } = record.operation
+        }) = record.operation
         {
             if !marker_due {
                 return Err(ReplayError::ExtraRoundMarker);
@@ -126,9 +166,20 @@ fn replay_for_profile(
         if marker_due {
             return Err(ReplayError::MissingRoundMarker);
         }
-        validate_operation(&journal.header, record.operation)?;
         let before = runtime.replay_inspection().simulation.map(|sim| sim.epoch);
-        apply(&mut runtime, record.operation)?;
+        match record.operation {
+            NormalizedOperation::Legacy(operation) => apply(&mut runtime, operation)?,
+            NormalizedOperation::EnvironmentSettings {
+                seat,
+                epoch,
+                settings_revision,
+                settings,
+                environment,
+            } => runtime
+                .update_environment_settings(seat, epoch, settings_revision, settings, environment)
+                .map(|_| ())
+                .map_err(|_| ReplayError::Runtime)?,
+        }
         marker_due = runtime
             .replay_inspection()
             .simulation
@@ -141,6 +192,25 @@ fn replay_for_profile(
         return Err(ReplayError::ExtraRoundMarker);
     }
     Ok(runtime.replay_inspection())
+}
+
+fn validate_normalized_order(records: &[NormalizedRecord]) -> Result<(), ReplayError> {
+    for (index, record) in records.iter().enumerate() {
+        let expected = match records
+            .get(index.wrapping_sub(1))
+            .filter(|previous| previous.tick == record.tick)
+        {
+            Some(previous) => previous
+                .order
+                .checked_add(1)
+                .ok_or(ReplayError::InvalidOrder)?,
+            None => 0,
+        };
+        if record.order != expected || index > 0 && records[index - 1].tick.0 > record.tick.0 {
+            return Err(ReplayError::InvalidOrder);
+        }
+    }
+    Ok(())
 }
 
 pub(super) fn runtime_from_header(
@@ -171,7 +241,10 @@ pub(super) fn runtime_from_header(
     Ok(runtime)
 }
 
-fn apply(runtime: &mut RosterRuntime, operation: Operation) -> Result<(), ReplayError> {
+pub(in crate::game::rooms) fn apply(
+    runtime: &mut RosterRuntime,
+    operation: Operation,
+) -> Result<(), ReplayError> {
     match operation {
         Operation::Admit { seat, resume } => {
             let prepared = if resume {
@@ -282,7 +355,7 @@ fn validate_operation(header: &ReplayV4Header, operation: Operation) -> Result<(
     Ok(())
 }
 
-pub(super) fn domain_action(action: ReplayAction) -> RosterAction {
+pub(in crate::game::rooms) fn domain_action(action: ReplayAction) -> RosterAction {
     match action {
         ReplayAction::Ready {
             ready,

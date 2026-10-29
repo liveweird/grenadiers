@@ -1,11 +1,14 @@
 //! Transport-independent runtime for configured two-to-four-seat rooms.
 
 mod admission;
+mod environment;
 mod error;
 mod owner_helpers;
 mod publication;
+mod publication_v15;
 mod round;
 mod runtime;
+mod runtime_publication;
 mod types;
 
 #[cfg(test)]
@@ -21,6 +24,8 @@ pub(crate) use types::{RosterAction, RosterNotice};
 
 #[cfg(test)]
 mod boundary_tests;
+#[cfg(test)]
+mod environment_recovery_tests;
 #[cfg(test)]
 mod replacement_tests;
 #[cfg(test)]

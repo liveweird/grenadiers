@@ -1,5 +1,3 @@
-use std::collections::BTreeSet;
-
 use crate::game::arena::ARENA_CELL_COUNT;
 use crate::game::{
     BlastKind, CellId, Direction, EffectKind, EntityId, Equipment, MAX_OIL_BARRELS, OilBarrelState,
@@ -9,6 +7,11 @@ use crate::room::BoardSize;
 use crate::room::RoomSettings;
 
 use super::WorldId;
+pub use super::observation_environment::ObservedEnvironment;
+use super::observation_environment::validate_environment;
+use super::observation_validation::{
+    validate_actors, validate_arena, validate_bombs, validate_cells, validate_clock,
+};
 
 pub const MAX_OBSERVED_BOMBS: usize = 16;
 pub const MAX_MULTIPLAYER_OBSERVED_BOMBS: usize = 32;
@@ -202,7 +205,10 @@ pub struct ObservationParts {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub struct Observation(ObservationParts);
+pub struct Observation {
+    parts: ObservationParts,
+    environment: Option<ObservedEnvironment>,
+}
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum ObservationError {
@@ -218,6 +224,9 @@ pub enum ObservationError {
 
 impl Observation {
     pub fn new(parts: ObservationParts) -> Result<Self, ObservationError> {
+        if !(1..=6).contains(&parts.rules.version) {
+            return Err(ObservationError::InvalidActors);
+        }
         validate_clock(parts.tick, parts.rules)?;
         validate_arena(parts.rules.version, &parts.arena)?;
         validate_actors(
@@ -242,153 +251,77 @@ impl Observation {
         }
         validate_cells(&parts.arena, &parts.pickups, |value| value.cell)
             .map_err(|()| ObservationError::InvalidPickups)?;
-        Ok(Self(parts))
+        Ok(Self {
+            parts,
+            environment: None,
+        })
+    }
+
+    pub fn new_rules_v7(
+        parts: ObservationParts,
+        environment: ObservedEnvironment,
+    ) -> Result<Self, ObservationError> {
+        if parts.rules.version != 7 {
+            return Err(ObservationError::InvalidActors);
+        }
+        validate_clock(parts.tick, parts.rules)?;
+        validate_arena(parts.rules.version, &parts.arena)?;
+        validate_actors(
+            parts.rules.version,
+            parts.recipient,
+            &parts.arena,
+            &parts.actors,
+        )?;
+        validate_bombs(parts.tick, parts.rules.version, &parts.arena, &parts.bombs)?;
+        if parts.flames.len() > ARENA_CELL_COUNT {
+            return Err(ObservationError::InvalidFlames);
+        }
+        validate_cells(&parts.arena, &parts.flames, |value| value.cell)
+            .map_err(|()| ObservationError::InvalidFlames)?;
+        if parts.oil.len() > MAX_OIL_BARRELS {
+            return Err(ObservationError::InvalidOil);
+        }
+        validate_cells(&parts.arena, &parts.oil, |value| value.cell)
+            .map_err(|()| ObservationError::InvalidOil)?;
+        if parts.pickups.len() > ARENA_CELL_COUNT {
+            return Err(ObservationError::InvalidPickups);
+        }
+        validate_cells(&parts.arena, &parts.pickups, |value| value.cell)
+            .map_err(|()| ObservationError::InvalidPickups)?;
+        validate_environment(&parts, &environment)?;
+        Ok(Self {
+            parts,
+            environment: Some(environment),
+        })
     }
 
     #[must_use]
     pub const fn parts(&self) -> &ObservationParts {
-        &self.0
+        &self.parts
+    }
+
+    #[must_use]
+    pub const fn environment(&self) -> Option<&ObservedEnvironment> {
+        self.environment.as_ref()
     }
 
     #[must_use]
     pub fn into_parts(self) -> ObservationParts {
-        self.0
+        self.parts
     }
-}
 
-fn validate_clock(tick: Tick, rules: ObservedRules) -> Result<(), ObservationError> {
-    if rules.tick_rate == 0
-        || u64::from(rules.running_updates) > tick.0
-        || rules
-            .running_updates
-            .checked_add(rules.remaining_ticks)
-            .is_none()
-    {
-        return Err(ObservationError::InvalidClock);
-    }
-    Ok(())
-}
-fn validate_arena(rules_version: u16, arena: &ObservedArena) -> Result<(), ObservationError> {
-    let Some(board) = arena.board() else {
-        return Err(ObservationError::InvalidArena);
-    };
-    if (rules_version < 6 && board != BoardSize::FifteenByThirteen)
-        || arena.terrain.len() != board.cell_count()
-        || arena.blocks.len() > board.cell_count()
-    {
-        return Err(ObservationError::InvalidArena);
-    }
-    validate_cells(arena, &arena.blocks, |cell| *cell).map_err(|()| ObservationError::InvalidArena)
-}
-
-fn validate_actors(
-    rules_version: u16,
-    recipient: SeatId,
-    arena: &ObservedArena,
-    actors: &[ObservedActor],
-) -> Result<(), ObservationError> {
-    if !(1..=6).contains(&rules_version)
-        || (rules_version < 6 && actors.len() != 2)
-        || (rules_version == 6 && !(2..=4).contains(&actors.len()))
-        || actors
-            .iter()
-            .enumerate()
-            .any(|(index, actor)| actor.seat().index() != index)
-    {
-        return Err(ObservationError::InvalidActors);
-    }
-    let mut seats = BTreeSet::new();
-    let mut ids = BTreeSet::new();
-    if actors
-        .iter()
-        .any(|actor| !seats.insert(actor.seat()) || !ids.insert(actor.id()))
-    {
-        return Err(ObservationError::InvalidActors);
-    }
-    let Some(actor) = actors.iter().find(|actor| actor.seat() == recipient) else {
-        return Err(ObservationError::InvalidActors);
-    };
-    if !matches!(actor, ObservedActor::Visible(_)) {
-        return Err(ObservationError::InvalidActors);
-    }
-    for actor in actors {
-        if let ObservedActor::Visible(actor) = actor {
-            validate_effects(&actor.effects)?;
-            if actor.unknown != UnknownActorFacts::ALL
-                || actor.position.x < 0
-                || actor.position.y < 0
-                || actor.position.x >= i32::from(arena.width) * crate::game::types::UNITS_PER_CELL
-                || actor.position.y >= i32::from(arena.height) * crate::game::types::UNITS_PER_CELL
-            {
-                return Err(ObservationError::InvalidActors);
-            }
+    pub fn map_parts(
+        self,
+        map: impl FnOnce(&mut ObservationParts),
+    ) -> Result<Self, ObservationError> {
+        let Self {
+            mut parts,
+            environment,
+        } = self;
+        map(&mut parts);
+        match environment {
+            Some(environment) => Self::new_rules_v7(parts, environment),
+            None => Self::new(parts),
         }
     }
-    Ok(())
-}
-
-fn validate_effects(effects: &[ObservedEffect]) -> Result<(), ObservationError> {
-    if effects.len() > MAX_OBSERVED_EFFECTS
-        || effects.iter().any(|effect| effect.remaining_ticks == 0)
-    {
-        return Err(ObservationError::InvalidEffects);
-    }
-    let mut ordinary = BTreeSet::new();
-    let mut slow_foot = 0;
-    for effect in effects {
-        if effect.kind == EffectKind::SlowFoot {
-            slow_foot += 1;
-            if slow_foot > crate::game::effects::MAX_SLOW_FOOT_STACKS {
-                return Err(ObservationError::InvalidEffects);
-            }
-        } else if !ordinary.insert(effect.kind) {
-            return Err(ObservationError::InvalidEffects);
-        }
-    }
-    Ok(())
-}
-
-fn validate_bombs(
-    tick: Tick,
-    rules_version: u16,
-    arena: &ObservedArena,
-    bombs: &BombKnowledge,
-) -> Result<(), ObservationError> {
-    let BombKnowledge::Visible(bombs) = bombs else {
-        return Ok(());
-    };
-    let max_bombs = if rules_version == 6 {
-        MAX_MULTIPLAYER_OBSERVED_BOMBS
-    } else {
-        MAX_OBSERVED_BOMBS
-    };
-    if bombs.len() > max_bombs {
-        return Err(ObservationError::InvalidBombs);
-    }
-    let mut ids = BTreeSet::new();
-    if bombs.iter().any(|bomb| {
-        bomb.unknown != UnknownBombFacts::ALL
-            || bomb.placed_at > tick
-            || !arena.contains(bomb.cell)
-            || !ids.insert(bomb.id)
-    }) {
-        return Err(ObservationError::InvalidBombs);
-    }
-    Ok(())
-}
-
-fn validate_cells<T>(
-    arena: &ObservedArena,
-    values: &[T],
-    cell: impl Fn(&T) -> CellId,
-) -> Result<(), ()> {
-    let mut occupied = BTreeSet::new();
-    if values
-        .iter()
-        .map(cell)
-        .any(|cell| !arena.contains(cell) || !occupied.insert(cell))
-    {
-        return Err(());
-    }
-    Ok(())
 }

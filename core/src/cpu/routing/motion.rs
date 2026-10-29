@@ -17,6 +17,7 @@ pub(super) struct Motion {
     residual: u16,
     pending: Option<(Direction, i32)>,
     reversed: bool,
+    storm_deadlines: Option<super::storm::DeadlineBounds>,
 }
 
 impl Motion {
@@ -27,12 +28,19 @@ impl Motion {
             residual: 0,
             pending: None,
             reversed: reverse_active(context, tick),
+            storm_deadlines: context
+                .storm
+                .map(super::storm::StormContext::initial_deadline),
         }
     }
 
     pub(super) fn stop(&mut self) {
         self.residual = 0;
         self.pending = None;
+    }
+
+    pub(super) const fn storm_deadlines(&self) -> Option<super::storm::DeadlineBounds> {
+        self.storm_deadlines
     }
 }
 
@@ -42,9 +50,12 @@ pub(super) fn advance(
     movement: MovementIntent,
     tick: Tick,
 ) -> Result<Vec<MovementSegment>, RouteFailure> {
+    let actor_start = motion.position;
     let MovementIntent::Direction(input) = movement else {
         motion.stop();
-        return Ok(vec![MovementSegment::new(motion.position, motion.position)]);
+        let segments = vec![MovementSegment::new(motion.position, motion.position)];
+        apply_storm(context, motion, tick, actor_start, &segments)?;
+        return Ok(segments);
     };
     let reversed = reverse_active(context, tick);
     if reversed != motion.reversed {
@@ -60,14 +71,23 @@ pub(super) fn advance(
         .iter()
         .filter(|expiry| **expiry > tick)
         .count();
+    let storm_active = match motion.storm_deadlines {
+        Some(bounds) if tick < bounds.lower => true,
+        Some(bounds) if tick >= bounds.upper => false,
+        Some(_) => return Err(RouteFailure::NoRoute),
+        None => false,
+    };
     let (mut budget, residual) =
-        EffectiveSpeed::from_slow_foot_stacks(context.actor.speed, stacks).advance(motion.residual);
+        EffectiveSpeed::from_modifiers(context.actor.speed, stacks, storm_active)
+            .advance(motion.residual);
     motion.residual = residual;
     let mut segments = Vec::with_capacity(2);
     if same_axis(motion.heading, desired) {
         motion.heading = desired;
         move_axis(context, motion, desired, budget, &mut segments);
-        return Ok(stationary_if_empty(motion, segments));
+        let segments = stationary_if_empty(motion, segments);
+        apply_storm(context, motion, tick, actor_start, &segments)?;
+        return Ok(segments);
     }
     let target = motion.pending.map_or_else(
         || nearest_center(alignment_coordinate(desired, motion.position)),
@@ -82,7 +102,9 @@ pub(super) fn advance(
             .settings
             .turn_assist_units() as u32
     {
-        return Ok(stationary_if_empty(motion, segments));
+        let segments = stationary_if_empty(motion, segments);
+        apply_storm(context, motion, tick, actor_start, &segments)?;
+        return Ok(segments);
     }
     if correction != 0 {
         let correction_direction = correction_direction(desired, correction);
@@ -97,13 +119,30 @@ pub(super) fn advance(
         budget -= moved;
         if moved != requested || alignment_coordinate(desired, motion.position) != target {
             motion.pending = Some((desired, target));
-            return Ok(stationary_if_empty(motion, segments));
+            let segments = stationary_if_empty(motion, segments);
+            apply_storm(context, motion, tick, actor_start, &segments)?;
+            return Ok(segments);
         }
     }
     motion.pending = None;
     motion.heading = desired;
     move_axis(context, motion, desired, budget, &mut segments);
-    Ok(stationary_if_empty(motion, segments))
+    let segments = stationary_if_empty(motion, segments);
+    apply_storm(context, motion, tick, actor_start, &segments)?;
+    Ok(segments)
+}
+
+fn apply_storm(
+    context: &Context<'_>,
+    motion: &mut Motion,
+    tick: Tick,
+    actor_start: Position,
+    segments: &[MovementSegment],
+) -> Result<(), RouteFailure> {
+    if let (Some(storm), Some(deadlines)) = (context.storm, motion.storm_deadlines.as_mut()) {
+        storm.apply_tick(tick, actor_start, segments, deadlines)?;
+    }
+    Ok(())
 }
 
 fn move_axis(

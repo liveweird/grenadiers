@@ -18,7 +18,7 @@ pub fn bind_expanded(
     validate_room_view(room)?;
     let world = &capture.world;
     let (width, height) = room.configuration.domain().board().dimensions();
-    if world.rules_version != room.rules_version
+    if world.rules_version != room.rules_version.get()
         || capture.rules != expected_rules(room)?
         || world.actors.len() != room.configuration.domain().controllers().len()
         || u16::from(world.arena.width) != width

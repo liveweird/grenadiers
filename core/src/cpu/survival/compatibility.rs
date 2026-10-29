@@ -36,7 +36,8 @@ pub(super) fn compatible(basis: &Observation, current: &Observation) -> bool {
     let Some(elapsed) = new.tick.0.checked_sub(old.tick.0) else {
         return false;
     };
-    if old.world != new.world
+    if !crate::cpu::routing::storm::observation_fits(basis, current, None)
+        || old.world != new.world
         || old.recipient != new.recipient
         || old.rules.version != new.rules.version
         || old.rules.tick_rate != new.rules.tick_rate

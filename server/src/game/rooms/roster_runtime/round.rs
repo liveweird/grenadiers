@@ -65,8 +65,17 @@ impl RosterRuntime {
         let epoch = self.lifecycle.round_attempt();
         let simulation_seed =
             (self.simulation_seed)(epoch).map_err(|()| RosterRuntimeError::SeedUnavailable)?;
+        let rules = self.environment.map_or_else(
+            || grenadiers_core::game::RulesConfig::multiplayer_v6(self.lifecycle.settings()),
+            |environment| {
+                grenadiers_core::game::RulesConfig::environment_v7(
+                    self.lifecycle.settings(),
+                    environment,
+                )
+            },
+        );
         let state = State::new_round(
-            grenadiers_core::game::RulesConfig::multiplayer_v6(self.lifecycle.settings()),
+            rules,
             world,
             actors,
             self.lifecycle.tick(),
@@ -77,6 +86,7 @@ impl RosterRuntime {
         self.inputs.reset_round();
         self.reports.clear();
         self.cpu_publication = None;
+        self.environment_cpu_publication = None;
         self.sim = Some(SimRound {
             epoch,
             state,

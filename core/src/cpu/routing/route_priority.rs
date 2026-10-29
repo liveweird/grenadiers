@@ -17,6 +17,7 @@ pub(super) type StateKey = (
         Option<u64>,
         Option<CellId>,
         Option<(CellId, u32)>,
+        Option<(u64, u64)>,
     )>,
     Vec<u32>,
 );
@@ -78,6 +79,9 @@ pub(super) fn state_key(node: &SearchNode) -> StateKey {
                 lane.origin_grace,
                 lane.recipient_barrier
                     .map(|barrier| (barrier.cell, barrier.bomb_id.0)),
+                lane.motion
+                    .storm_deadlines()
+                    .map(|bounds| (bounds.lower.0, bounds.upper.0)),
             )
         })
         .collect();
@@ -113,10 +117,25 @@ mod tests {
 
     #[test]
     fn shallower_converging_wait_state_is_not_suppressed() {
-        let key = (vec![(1, 2, 0, 10, None, None, None)], Vec::new());
+        let key = (vec![(1, 2, 0, 10, None, None, None, None)], Vec::new());
         let mut visited = BTreeMap::new();
         assert!(!dominated(&mut visited, key.clone(), 2));
         assert!(!dominated(&mut visited, key.clone(), 1));
         assert!(dominated(&mut visited, key, 2));
+    }
+
+    #[test]
+    fn distinct_storm_deadlines_do_not_dominate_each_other() {
+        let first = (
+            vec![(1, 2, 0, 10, None, None, None, Some((20, 40)))],
+            Vec::new(),
+        );
+        let second = (
+            vec![(1, 2, 0, 10, None, None, None, Some((30, 50)))],
+            Vec::new(),
+        );
+        let mut visited = BTreeMap::new();
+        assert!(!dominated(&mut visited, first, 1));
+        assert!(!dominated(&mut visited, second, 1));
     }
 }

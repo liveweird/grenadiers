@@ -144,7 +144,7 @@ pub fn validate_room_view(room: &RoomView) -> Result<(), ProjectionError> {
     {
         return Err(ProjectionError::InvalidResult);
     }
-    super::projection_room_validation::validate(room)
+    super::projection_room_validation::validate_v14(room)
 }
 
 fn validate_identity_and_settings(room: &RoomView) -> Result<(), ProjectionError> {

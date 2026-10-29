@@ -1,5 +1,5 @@
 use crate::game::{EventAudience, GenerationRecord, RulesConfig};
-use crate::protocol::{Cell, Counter, Position, Tick};
+use crate::protocol::{Cell, Counter, Direction, Position, Tick};
 
 use super::{
     ArenaView, BombView, EventKind, FlameView, ItemSet, PickupKind, PickupView, RoomView, Seat,
@@ -15,6 +15,14 @@ pub(crate) struct ActorFacts {
     pub last_successful_shove_tick: Option<Tick>,
     pub soft_wall_grace: Vec<Cell>,
     pub unlit_oil_grace: Vec<Cell>,
+    pub storm_slow_remaining_ticks: u16,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) struct StormCloudFacts {
+    pub position: Position,
+    pub direction: Direction,
+    pub leg_remaining_ticks: u16,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -47,7 +55,7 @@ pub(crate) struct PrivatePickupFacts {
 
 #[derive(Clone, PartialEq, Eq)]
 pub(crate) struct WorldFacts {
-    pub rules_version: super::RulesVersion,
+    pub rules_version: u8,
     pub physical_tick: Tick,
     pub last_teleport_tick: Option<Tick>,
     pub running_updates: u16,
@@ -64,6 +72,7 @@ pub(crate) struct WorldFacts {
     pub oil: Vec<OilFacts>,
     pub available_items: ItemSet,
     pub enabled_items: ItemSet,
+    pub storm_cloud: Option<StormCloudFacts>,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -116,6 +125,13 @@ pub struct ExpandedCapture {
     pub(crate) rules: RulesConfig,
     pub(crate) world: WorldFacts,
     pub(crate) reports: Vec<ReportFacts>,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) struct ProjectionProfile {
+    pub rules: RulesConfig,
+    pub available_items: ItemSet,
+    pub storm_cloud: crate::game::StormCloudConfig,
 }
 
 #[derive(Clone, PartialEq, Eq)]

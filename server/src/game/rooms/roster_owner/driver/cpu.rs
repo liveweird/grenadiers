@@ -5,7 +5,7 @@ use grenadiers_core::{
         survival::{PulseStatus, RouteStatus},
     },
     game::{SeatId, Tick},
-    protocol::v14,
+    protocol::{v14, v15},
     room::MatchPhase,
 };
 
@@ -220,26 +220,30 @@ impl Driver {
             }
             return;
         }
-        let Some(publication) = notice.cpu_publication.as_ref() else {
-            return;
-        };
         let physical_round = self.runtime.lifecycle().round_attempt();
         let room_instance = self.runtime.identity().registry_serial;
-        let observations: Option<Vec<_>> = self
-            .cpus
-            .iter()
-            .map(|cpu| {
-                v14::observe_cpu_recipient(
-                    publication,
-                    wire_seat(cpu.seat()),
-                    WorldId {
-                        room_instance,
-                        physical_round,
-                    },
-                )
-                .ok()
-            })
-            .collect();
+        let world = WorldId {
+            room_instance,
+            physical_round,
+        };
+        let observations: Option<Vec<_>> =
+            if let Some(publication) = notice.environment_cpu_publication() {
+                self.cpus
+                    .iter()
+                    .map(|cpu| {
+                        v15::observe_cpu_recipient(publication, wire_seat(cpu.seat()), world).ok()
+                    })
+                    .collect()
+            } else if let Some(publication) = notice.legacy_cpu_publication() {
+                self.cpus
+                    .iter()
+                    .map(|cpu| {
+                        v14::observe_cpu_recipient(publication, wire_seat(cpu.seat()), world).ok()
+                    })
+                    .collect()
+            } else {
+                return;
+            };
         let Some(observations) = observations else {
             return;
         };

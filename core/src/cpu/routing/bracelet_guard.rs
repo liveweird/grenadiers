@@ -42,7 +42,7 @@ impl BraceletGuard {
         let all_rivals_visible = parts.actors.iter().all(|actor| {
             actor.seat() == parts.recipient || matches!(actor, ObservedActor::Visible(_))
         });
-        let third_party_countershove = parts.rules.version == 6
+        let third_party_countershove = parts.rules.version >= 6
             && parts.actors.iter().any(|actor| {
                 matches!(actor, ObservedActor::Visible(actor)
                     if actor.seat != parts.recipient && actor.id != self.rival && actor.alive

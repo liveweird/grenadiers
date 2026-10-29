@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+## 0.3.114 — 2026-10-29
+
+- Add dormant gameplay15 environment contracts with checked lifecycle, recipient privacy,
+  physical-world binding and shared Rust/browser conformance fixtures.
+- Pair rules7 with bounded CPU18 observations, storm-aware movement and escape certificates,
+  ordinary clear-board pickup navigation, and the established Easy cadence.
+- Add private replay6 and atomic environment settings/recovery adapters while retaining closed
+  historical profiles. Live gameplay remains v14 until paired presentation activation.
+
 ## 0.3.113 — 2026-10-29
 
 - Add dormant rules7 storm-cloud simulation with deterministic nonblocking motion, independent

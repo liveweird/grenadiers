@@ -13,6 +13,7 @@ pub(super) struct Context<'a> {
     pub(super) key: MemoryKey,
     pub(super) reverse_expiry: Option<Tick>,
     pub(super) slow_expiries: Vec<Tick>,
+    pub(super) storm: Option<super::storm::StormContext>,
 }
 
 pub(super) fn validate<'a>(
@@ -33,7 +34,7 @@ pub(super) fn validate<'a>(
         return Err(RouteFailure::IdentityMismatch);
     }
     validate_request(parts.tick, forecast.horizon_end(), start_window, safe_until)?;
-    if !matches!(parts.rules.version, 5 | 6) {
+    if !matches!(parts.rules.version, 5..=7) {
         return Err(RouteFailure::Unsupported);
     }
     let actor = parts
@@ -76,18 +77,22 @@ pub(super) fn validate<'a>(
         .find(|effect| effect.kind == EffectKind::ReverseControls)
         .map(|effect| expiry(effect.remaining_ticks))
         .transpose()?;
+    let slow_foot_applies =
+        parts.rules.version < 7 || parts.rules.settings.enabled_items().contains_slow_foot();
     let slow_expiries = actor
         .effects
         .iter()
-        .filter(|effect| effect.kind == EffectKind::SlowFoot)
+        .filter(|effect| slow_foot_applies && effect.kind == EffectKind::SlowFoot)
         .map(|effect| expiry(effect.remaining_ticks))
         .collect::<Result<Vec<_>, _>>()?;
+    let storm = super::storm::context(observation)?;
     Ok(Context {
         observation,
         actor,
         key,
         reverse_expiry,
         slow_expiries,
+        storm,
     })
 }
 

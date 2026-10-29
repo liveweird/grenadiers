@@ -10,7 +10,7 @@ use grenadiers_core::{
 
 use super::{
     error::RosterRuntimeError,
-    types::{RosterIdentity, RosterNotice, RosterSeatFrames, wire_seat},
+    types::{RosterIdentity, RosterNotice, RosterPublication, RosterSeatFrames, wire_seat},
 };
 
 pub(super) fn room_view(
@@ -68,17 +68,15 @@ pub(super) fn snapshot(
         v14::prepare_snapshots(&publication).map_err(|_| RosterRuntimeError::Publication)?;
     let frames = RosterSeatFrames::new(encoded).ok_or(RosterRuntimeError::Publication)?;
     Ok(RosterNotice {
-        room,
+        publication: RosterPublication::Legacy(room, Some(std::sync::Arc::new(publication))),
         frames: Some(frames),
-        cpu_publication: Some(publication),
     })
 }
 
 pub(super) fn view_notice(room: v14::RoomView) -> RosterNotice {
     RosterNotice {
-        room,
+        publication: RosterPublication::Legacy(room, None),
         frames: None,
-        cpu_publication: None,
     }
 }
 
@@ -217,7 +215,7 @@ fn round_result(value: grenadiers_core::game::RoundResult) -> v14::RoundResult {
     }
 }
 
-fn phase(value: MatchPhase) -> Result<v14::RoomPhase, RosterRuntimeError> {
+pub(super) fn phase(value: MatchPhase) -> Result<v14::RoomPhase, RosterRuntimeError> {
     Ok(match value {
         MatchPhase::Waiting => v14::RoomPhase::Waiting,
         MatchPhase::Countdown { kind, ends_at } => v14::RoomPhase::Countdown {

@@ -28,6 +28,7 @@ The browser validates these messages and drives the playable generated-map match
 | v12 | [Standard-only solo guide](protocol-v12.md) | Archived contract |
 | v13 | [Compatibility guide](protocol-v13.md) | Archived contract |
 | v14 | [Live multiplayer contract](protocol-v14.md) | Supported |
+| v15 | [Environment contract](protocol-v15.md) | Checked adapters; endpoint remains v14 |
 
 ## Authentication and compatibility
 

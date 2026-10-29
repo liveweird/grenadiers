@@ -129,6 +129,11 @@ impl CommittedRoute {
             || certificate.basis_tick() != basis.parts().tick
             || !certificate.start_window().contains(first_update)
             || !scene_matches
+            || !crate::cpu::routing::storm::observation_fits(
+                &basis,
+                current,
+                lane.storm_deadlines_at(current.parts().tick),
+            )
             || expected_pose != (current_actor.position, current_actor.heading)
         {
             return Err(PolicyError::InvalidObservation);
@@ -195,6 +200,13 @@ impl CommittedRoute {
         else {
             return RouteStatus::Invalidated;
         };
+        let deadlines = self
+            .certificate
+            .lane(self.first_update)
+            .and_then(|lane| lane.storm_deadlines_at(tick));
+        if !crate::cpu::routing::storm::observation_fits(&self.basis, current, deadlines) {
+            return RouteStatus::Invalidated;
+        }
         let Some(current_actor) = actor(current) else {
             return RouteStatus::Invalidated;
         };

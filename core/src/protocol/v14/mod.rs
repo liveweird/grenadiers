@@ -9,18 +9,19 @@ mod projection_actor_validation;
 mod projection_admission;
 mod projection_binding;
 mod projection_bomb_validation;
-mod projection_capture;
+pub(crate) mod projection_capture;
 mod projection_capture_wire;
 mod projection_event_validation;
-mod projection_facts;
+pub(crate) mod projection_facts;
 mod projection_geometry;
 mod projection_history;
 mod projection_item_validation;
+pub(crate) mod projection_lifecycle_facts;
 mod projection_oil;
-mod projection_recipient;
-mod projection_room_validation;
-mod projection_supported_items;
-mod projection_validation;
+pub(crate) mod projection_recipient;
+pub(crate) mod projection_room_validation;
+pub(crate) mod projection_supported_items;
+pub(crate) mod projection_validation;
 mod projection_world_validation;
 mod scalars;
 mod server;
@@ -37,6 +38,7 @@ pub use crate::protocol::v11::{
 pub use client::{GameClientMessage, ManualActionKind};
 pub use configuration::{BoardSize, ConfigurationController, Difficulty, RoomConfiguration};
 pub use cpu_observation::observe_cpu_recipient;
+pub(crate) use cpu_observation::{observation_error, observation_parts};
 pub use events::{
     DamagePreventionSource, EventIndex, EventKind, MAX_EVENT_INDEX, MAX_SNAPSHOT_EVENTS,
     SnapshotEvents, WireEvent,

@@ -52,6 +52,7 @@ impl CpuController {
 
     pub(in crate::game::rooms) fn accept_observation(&mut self, observation: &Observation) -> bool {
         if observation.parts().recipient != self.cpu_seat
+            || observation.parts().world.room_instance != self.room_instance
             || !self.profile_supports(observation.parts().rules.version)
         {
             return false;
@@ -85,6 +86,11 @@ impl CpuController {
                 self.profile,
                 grenadiers_core::room::CpuProfile::MULTIPLAYER_STANDARD
                     | grenadiers_core::room::CpuProfile::MULTIPLAYER_EASY
+            ),
+            7 => matches!(
+                self.profile,
+                grenadiers_core::room::CpuProfile::ENVIRONMENT_STANDARD
+                    | grenadiers_core::room::CpuProfile::ENVIRONMENT_EASY
             ),
             _ => false,
         }
@@ -220,5 +226,61 @@ mod tests {
         assert!(!controller.submit(foreign, 4));
         assert_eq!(controller.request_serial, 0);
         assert_eq!(controller.rng_draws(), 0);
+    }
+
+    #[test]
+    fn foreign_room_world_cannot_replace_controller_memory() {
+        let mut controller = controller_for(SeatId::One);
+        let own = observation_for(SeatId::One);
+        assert!(controller.accept_observation(&own));
+        let mut foreign_parts = own.clone().into_parts();
+        foreign_parts.world.room_instance = 8;
+        foreign_parts.world.physical_round += 1;
+        foreign_parts.tick = Tick(21);
+        let foreign = Observation::new(foreign_parts).unwrap();
+
+        assert!(!controller.accept_observation(&foreign));
+        assert_eq!(controller.world, Some(own.parts().world));
+        assert_eq!(
+            controller.latest_observation.as_ref().unwrap().parts().tick,
+            Tick(20)
+        );
+    }
+
+    #[test]
+    fn only_cpu18_profiles_accept_rules_seven_observations() {
+        let mut parts = observation_for(SeatId::One).into_parts();
+        parts.rules.version = 7;
+        let timers = parts
+            .actors
+            .iter()
+            .map(|actor| match actor {
+                ObservedActor::Visible(_) => Some(0),
+                ObservedActor::Hidden { .. } => None,
+            })
+            .collect();
+        let observed = Observation::new_rules_v7(
+            parts,
+            grenadiers_core::cpu::ObservedEnvironment::new(
+                grenadiers_core::game::StormCloudConfig::Disabled,
+                None,
+                timers,
+            ),
+        )
+        .unwrap();
+        let controller = |profile| {
+            CpuController::new(
+                CpuPlanner::without_workers(),
+                SeatId::One,
+                7,
+                [5; 32],
+                profile,
+            )
+        };
+
+        let mut environment = controller(grenadiers_core::room::CpuProfile::ENVIRONMENT_STANDARD);
+        assert!(environment.accept_observation(&observed));
+        let mut legacy = controller(grenadiers_core::room::CpuProfile::MULTIPLAYER_STANDARD);
+        assert!(!legacy.accept_observation(&observed));
     }
 }

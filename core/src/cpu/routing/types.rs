@@ -75,6 +75,7 @@ pub struct PulseLease {
     initial_position: Position,
     initial_heading: Direction,
     poses: Vec<PoseBounds>,
+    storm_deadlines: Vec<(Tick, Vec<Option<super::storm::DeadlineBounds>>)>,
     bracelet_guard: Option<BraceletGuard>,
 }
 
@@ -88,10 +89,25 @@ impl PulseLease {
         initial_position: Position,
         initial_heading: Direction,
         poses: Vec<PoseBounds>,
+        storm_deadlines: Vec<(Tick, Vec<Option<super::storm::DeadlineBounds>>)>,
     ) -> Result<Self, RouteFailure> {
+        let expected_lanes = request
+            .start_window
+            .end
+            .0
+            .checked_sub(request.start_window.start.0)
+            .and_then(|lanes| usize::try_from(lanes).ok())
+            .ok_or(RouteFailure::Capacity)?;
         if poses.is_empty()
             || poses.len() != usize::from(request.hold_ticks) + 1
             || poses.len() > 13
+            || storm_deadlines.len() != expected_lanes
+            || storm_deadlines
+                .iter()
+                .zip(request.start_window.start.0..request.start_window.end.0)
+                .any(|((start, deadlines), expected)| {
+                    *start != Tick(expected) || deadlines.len() < poses.len()
+                })
         {
             return Err(RouteFailure::Capacity);
         }
@@ -106,6 +122,7 @@ impl PulseLease {
             initial_position,
             initial_heading,
             poses,
+            storm_deadlines,
             bracelet_guard: None,
         })
     }
@@ -158,6 +175,26 @@ impl PulseLease {
     #[must_use]
     pub fn pose_after(&self, completed: u8) -> PoseBounds {
         self.poses[usize::from(completed.min(self.hold_ticks))]
+    }
+
+    pub(crate) fn storm_deadlines_at(
+        &self,
+        first_execution: Tick,
+        observation_tick: Tick,
+    ) -> Option<super::storm::DeadlineBounds> {
+        let index = first_execution
+            .0
+            .checked_sub(self.start_window.start.0)
+            .and_then(|index| usize::try_from(index).ok())?;
+        let admission_tick = first_execution.0.checked_sub(1)?;
+        let snapshot = observation_tick
+            .0
+            .checked_sub(admission_tick)
+            .and_then(|index| usize::try_from(index).ok())?;
+        self.storm_deadlines
+            .get(index)
+            .filter(|(start, _)| *start == first_execution)
+            .and_then(|(_, deadlines)| deadlines.get(snapshot).copied().flatten())
     }
 }
 

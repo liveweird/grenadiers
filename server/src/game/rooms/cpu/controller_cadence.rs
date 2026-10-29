@@ -28,7 +28,7 @@ impl CpuController {
     pub(super) fn arm_cadence_after(&mut self, accepted: &AcceptedPlan, actual: Intent) {
         if !matches!(
             self.profile,
-            CpuProfile::CURRENT_EASY | CpuProfile::MULTIPLAYER_EASY
+            CpuProfile::CURRENT_EASY | CpuProfile::MULTIPLAYER_EASY | CpuProfile::ENVIRONMENT_EASY
         ) || !accepted.ordinary_navigation
             || actual.manual.is_some()
             || actual.movement == grenadiers_core::cpu::MovementIntent::Stop
@@ -45,7 +45,7 @@ impl CpuController {
     pub(super) fn observe_cadence(&mut self, observation: &Observation) {
         if !matches!(
             self.profile,
-            CpuProfile::CURRENT_EASY | CpuProfile::MULTIPLAYER_EASY
+            CpuProfile::CURRENT_EASY | CpuProfile::MULTIPLAYER_EASY | CpuProfile::ENVIRONMENT_EASY
         ) || !is_clear_for_easy(observation)
         {
             self.cadence = CadenceState::default();
@@ -185,6 +185,48 @@ mod tests {
     }
 
     #[test]
+    fn rules_seven_easy_pause_is_bounded_after_confirmed_clear_stop() {
+        let mut controller = armed_controller(CpuProfile::ENVIRONMENT_EASY);
+        controller.on_stop_admitted(Tick(20));
+
+        for tick in 21..33 {
+            let observation = environment_observation_at(tick);
+            assert!(controller.accept_observation(&observation));
+            assert!(!controller.submit(observation, 4));
+            assert!(!controller.has_pending());
+        }
+
+        let due = environment_observation_at(33);
+        assert!(controller.accept_observation(&due));
+        assert!(controller.submit(due, 4));
+    }
+
+    #[test]
+    fn rules_seven_hazard_interrupts_environment_easy_pause() {
+        let mut controller = armed_controller(CpuProfile::ENVIRONMENT_EASY);
+        controller.on_stop_admitted(Tick(20));
+        let stopped = environment_observation_at(21);
+        assert!(controller.accept_observation(&stopped));
+        assert!(!controller.submit(stopped, 4));
+
+        let danger = environment_observation_with_flame(22);
+        assert!(controller.accept_observation(&danger));
+        assert!(controller.submit(danger, 4));
+    }
+
+    #[test]
+    fn rules_seven_single_cloud_environment_easy_uses_the_same_pause() {
+        let basis = environment_observation(20, false, true);
+        let mut controller = armed_controller_with_basis(CpuProfile::ENVIRONMENT_EASY, basis);
+        controller.on_stop_admitted(Tick(20));
+        let stopped = environment_observation(21, false, true);
+
+        assert!(controller.accept_observation(&stopped));
+        assert!(!controller.submit(stopped, 4));
+        assert!(!controller.has_pending());
+    }
+
+    #[test]
     fn unsupported_control_effects_bypass_and_clear_the_easy_pause() {
         for kind in [EffectKind::SlowFoot, EffectKind::ReverseControls] {
             let mut controller = armed_controller(CpuProfile::CURRENT_EASY);
@@ -208,6 +250,15 @@ mod tests {
     }
 
     fn armed_controller(profile: CpuProfile) -> CpuController {
+        let basis = if profile == CpuProfile::ENVIRONMENT_EASY {
+            environment_observation_at(20)
+        } else {
+            observation_at(20)
+        };
+        armed_controller_with_basis(profile, basis)
+    }
+
+    fn armed_controller_with_basis(profile: CpuProfile, basis: Observation) -> CpuController {
         let mut controller = CpuController::new(
             CpuPlanner::without_workers(),
             grenadiers_core::game::SeatId::Two,
@@ -215,7 +266,6 @@ mod tests {
             [5; 32],
             profile,
         );
-        let basis = observation_at(20);
         assert!(controller.accept_observation(&basis));
         controller.settled_stop_tick = Some(basis.parts().tick);
         let key = controller.memory.as_ref().unwrap().key();
@@ -247,5 +297,50 @@ mod tests {
         let mut parts = crate::game::rooms::cpu::tests::observation().into_parts();
         parts.tick = Tick(tick);
         Observation::new(parts).unwrap()
+    }
+
+    fn environment_observation_at(tick: u64) -> Observation {
+        environment_observation(tick, false, false)
+    }
+
+    fn environment_observation_with_flame(tick: u64) -> Observation {
+        environment_observation(tick, true, false)
+    }
+
+    fn environment_observation(tick: u64, flame: bool, single_cloud: bool) -> Observation {
+        let mut parts = crate::game::rooms::cpu::tests::observation().into_parts();
+        parts.tick = Tick(tick);
+        parts.rules.version = 7;
+        if flame {
+            parts.flames.push(grenadiers_core::cpu::ObservedFlame {
+                cell: CellId::new(6, 6),
+                remaining_ticks: 2,
+            });
+        }
+        let timers = parts
+            .actors
+            .iter()
+            .map(|actor| match actor {
+                ObservedActor::Visible(_) => Some(0),
+                ObservedActor::Hidden { .. } => None,
+            })
+            .collect();
+        Observation::new_rules_v7(
+            parts,
+            grenadiers_core::cpu::ObservedEnvironment::new(
+                if single_cloud {
+                    grenadiers_core::game::StormCloudConfig::Single
+                } else {
+                    grenadiers_core::game::StormCloudConfig::Disabled
+                },
+                single_cloud.then_some(grenadiers_core::game::StormCloudView {
+                    position: grenadiers_core::game::Position::center(CellId::new(7, 6)),
+                    direction: Direction::East,
+                    leg_remaining_ticks: 64,
+                }),
+                timers,
+            ),
+        )
+        .unwrap()
     }
 }

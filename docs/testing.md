@@ -226,12 +226,15 @@ the largest contributors on failure; Vite's existing per-chunk warning remains v
 `api-guidelines/spectral.yaml`; it retains the standard and custom rules without the CLI's
 glob dependency. Parser/load errors and error-severity diagnostics fail the command.
 `check:api`, `check:realtime`, and `check:gameplay` compare generated
-contracts without modifying them. Gameplay generation/drift checks cover active v14 and historical
-v2–v13; parity tests compare unchanged physical definitions. AJV validates runtime WebSocket payloads. EN/PL locale
+contracts without modifying them. Gameplay generation/drift checks cover active v14, historical
+v2–v13 and dormant v15; parity tests compare unchanged physical definitions. AJV validates runtime WebSocket payloads. EN/PL locale
 parity is tested. ESLint/SonarJS and Knip must report no findings.
 
 Live gameplay-v14 and realtime browser consumers use generated standalone Ajv validators;
-archived validators retain their own compiler/schema checks. Run
+dormant v15 has its own generated validator and actual server-projection corpus. Its room
+fixtures derive from the roster lifecycle, and mutations check phase/history/readiness,
+physical tick binding, metadata and recipient privacy. Archived validators retain their own
+compiler/schema checks. Run
 `npm --prefix web run gen:validators` after changing a live schema or its generation tools.
 `check:validators` regenerates in memory and checks both ESM and declarations before production
 builds. Parity tests compare complete ordered errors with the original compilation routes;

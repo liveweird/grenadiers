@@ -58,7 +58,7 @@ fn countdown_boundary_applies_departures_before_round_construction() {
         .unwrap()
         .unwrap();
     assert!(matches!(
-        notice.room.phase,
+        notice.legacy_room().unwrap().phase,
         grenadiers_core::protocol::v14::RoomPhase::Waiting
     ));
     assert_eq!(canceled_entropy.load(Ordering::SeqCst), 0);
@@ -72,7 +72,7 @@ fn countdown_boundary_applies_departures_before_round_construction() {
         .unwrap()
         .unwrap();
     assert!(matches!(
-        notice.room.phase,
+        notice.legacy_room().unwrap().phase,
         grenadiers_core::protocol::v14::RoomPhase::Running
     ));
     assert_eq!(started_entropy.load(Ordering::SeqCst), 1);
@@ -89,10 +89,10 @@ fn running_snapshots_and_cpu_publications_share_three_report_cadence() {
     assert!(runtime.settle_boundary([None; 4]).unwrap().is_none());
     assert!(runtime.prepare_cpu_publication().unwrap().is_none());
     let notice = runtime.settle_boundary([None; 4]).unwrap().unwrap();
-    assert!(notice.cpu_publication.is_some());
+    assert!(notice.legacy_cpu_publication().is_some());
     assert_eq!(
         runtime.prepare_cpu_publication().unwrap(),
-        notice.cpu_publication
+        notice.legacy_cpu_publication().cloned()
     );
 }
 
@@ -170,11 +170,11 @@ fn expiry_consensus_resets_stale_round_state_on_rematch() {
     let notice = runtime.settle_boundary([None; 4]).unwrap().unwrap();
     assert_eq!(runtime.lifecycle.phase(), MatchPhase::Waiting);
     assert!(matches!(
-        notice.room.phase,
+        notice.legacy_room().unwrap().phase,
         grenadiers_core::protocol::v14::RoomPhase::Waiting
     ));
     assert_eq!(
-        notice.room.configuration.domain().board(),
+        notice.legacy_room().unwrap().configuration.domain().board(),
         BoardSize::ElevenByNine
     );
     assert!(runtime.sim.is_none());
@@ -202,14 +202,14 @@ fn prematch_reservation_is_truthful_resumable_and_does_not_fill_vacancies() {
         .settle_boundary([Some(DepartureReason::TransportLoss), None, None, None])
         .unwrap()
         .unwrap();
-    let creator = &notice.room.seats[0];
+    let creator = &notice.legacy_room().unwrap().seats[0];
     assert!(creator.occupied);
     assert!(matches!(
         creator.connection,
         grenadiers_core::protocol::v14::ConnectionStatus::Disconnected { .. }
     ));
     assert_eq!(
-        notice.room.settings_editor,
+        notice.legacy_room().unwrap().settings_editor,
         Some(grenadiers_core::protocol::v14::Seat::One)
     );
     assert_eq!(
@@ -220,8 +220,8 @@ fn prematch_reservation_is_truthful_resumable_and_does_not_fill_vacancies() {
     let vacant = runtime.prepare_join(SeatId::Two).unwrap();
     runtime.commit_admission(vacant);
     let resumed = runtime.prepare_resume(SeatId::One).unwrap();
-    assert_eq!(resumed.room.settings.wins_to_finish(), 4);
-    assert_eq!(resumed.room.round_id.get(), 1);
+    assert_eq!(resumed.legacy_room().unwrap().settings.wins_to_finish(), 4);
+    assert_eq!(resumed.legacy_room().unwrap().round_id.get(), 1);
     runtime.commit_admission(resumed);
     assert_eq!(runtime.lifecycle.settings(), settings);
     assert_eq!(runtime.lifecycle.round_attempt(), 1);
@@ -236,9 +236,9 @@ fn running_resume_commits_the_exact_prepared_cpu_publication() {
         .settle_boundary([None, None, Some(DepartureReason::TransportLoss), None])
         .unwrap()
         .unwrap();
-    let disconnected_publication = disconnected.cpu_publication.unwrap();
+    let disconnected_publication = disconnected.legacy_cpu_publication().cloned().unwrap();
     let prepared = runtime.prepare_resume(SeatId::Three).unwrap();
-    let prepared_publication = prepared.notice.cpu_publication.clone().unwrap();
+    let prepared_publication = prepared.notice.legacy_cpu_publication().cloned().unwrap();
     assert_ne!(prepared_publication, disconnected_publication);
     runtime.commit_admission(prepared);
     assert_eq!(

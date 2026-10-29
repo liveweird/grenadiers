@@ -48,7 +48,12 @@ impl Driver {
         cpus: Vec<CpuController>,
     ) -> Self {
         Self {
-            room_id: initial.room.room_id.clone(),
+            room_id: initial
+                .legacy_room()
+                .map(|room| &room.room_id)
+                .or_else(|| initial.environment_room().map(|room| &room.room_id))
+                .expect("owner requires a checked room publication")
+                .clone(),
             runtime,
             notices,
             last: initial,

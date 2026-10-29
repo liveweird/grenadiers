@@ -69,10 +69,10 @@ pub(crate) fn forecast_punch_branch(
         return Err(ForecastFailure::InvalidHypothetical);
     }
 
-    let mut scenario_parts = original.clone().into_parts();
-    scenario_parts.bombs = BombKnowledge::Visible(Vec::new());
-    let scenario_basis =
-        Observation::new(scenario_parts).map_err(|_| ForecastFailure::InvalidObservedHazards)?;
+    let scenario_basis = original
+        .clone()
+        .map_parts(|parts| parts.bombs = BombKnowledge::Visible(Vec::new()))
+        .map_err(|_| ForecastFailure::InvalidObservedHazards)?;
     let forecast = forecast(
         &scenario_basis,
         history,

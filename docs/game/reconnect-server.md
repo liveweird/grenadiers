@@ -1,7 +1,7 @@
 # Reconnect server behavior
 
-The gameplay endpoint (live contract [v11](protocol-v11.md)) keeps one private resume capability
-for each occupied seat. A transport loss changes that seat to `disconnected` and reserves it through the published
+The gameplay endpoint (live contract [v16](protocol-v16.md)) keeps one private resume capability
+for each occupied seat. Before the match ends, a transport loss changes that seat to `disconnected` and reserves it through the published
 `expiresAt` tick. The capability stays stable across restore, connected takeover, and rematch. An
 explicit leave releases the seat immediately. Capabilities are independently generated, redacted
 from logs and debug output, and never appear in shared room publications or replay records.
@@ -29,8 +29,11 @@ existing bounds.
 
 Completed physics remains private during an inter-round countdown and can be restored if that
 countdown is canceled. Shared countdown publications contain no stale physics body. Terminal rooms
-keep only eligible reservations and their original deadlines; they do not extend grace on another
-loss. Shutdown interrupts and settles accepted departures before the final closing publication,
+keep only reservations created before the final result and their original deadlines. A new loss
+after the final result permanently departs that seat; resume is rejected while the remaining
+players retain the result and connection. Departed seats do not block rematch consensus, but a
+rematch still requires at least two eligible participants and a connected human. Shutdown
+interrupts and settles accepted departures before the final closing publication,
 within the process-wide five-second drain budget.
 
 Explicitly recorded test fixtures use semantic replay profile 2 for grace departures, restore or replacement, expiry, and

@@ -16,6 +16,10 @@ server controlled and cannot accept human admissions. At least two eligible part
 a connected human are required to start. A reserved human blocks readiness; a departed human
 does not. CPUs cannot keep a room alive after its last retained human leaves.
 
+After the final result, new transport losses permanently depart the affected seat. Reservations
+established before that result retain their original deadlines and remain resumable; see
+[reconnect behavior](reconnect-server.md).
+
 Creator authority remains assigned during reconnect grace, but only the connected creator can
 change settings. Permanent departure releases authority without transferring it. Readiness,
 settings revisions, round epochs and manual-action high-water marks fence stale commands.

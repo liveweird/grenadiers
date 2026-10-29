@@ -11,6 +11,8 @@
 - Render indestructible lairs and authoritative moving/frozen mobs with directional sprites,
   recipient privacy, reconnect/rematch cleanup and reduced-motion support.
 - Bind client rule changes and reconnect baselines to monotonic settings revisions.
+- Retire new post-result transport losses without extending reconnect grace or invalidating
+  the remaining players' room; preserve reservations established before the final result.
 
 ## 0.3.117 — 2026-10-29
 

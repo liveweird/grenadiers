@@ -300,10 +300,22 @@ test('a terminal transport loss retires the seat without changing the result or 
         await page.getByRole('textbox', { name: 'Room code', exact: true }).fill(roomCode)
         await page.getByRole('button', { name: 'Join room', exact: true }).click()
       }
+      const settingsRevision = latestRoom(games[0])!.settingsRevision
       await one.getByRole('button', { name: 'Classic settings', exact: true }).click()
       await one.getByLabel('Round wins needed').selectOption('1')
       await one.getByLabel('Bomb fuse').selectOption('60')
       await one.getByRole('button', { name: 'Apply rules', exact: true }).click()
+      await expect.poll(() => {
+        const rooms = games.map(latestRoom)
+        if (rooms.some((room) => !room)
+          || new Set(rooms.map((room) => room!.settingsRevision)).size !== 1
+          || rooms.some((room) => room!.settings.winsToFinish !== 1
+            || room!.settings.bombFuseTicks !== 60
+            || room!.settings.enabledItems.length !== 0
+            || room!.settings.environment.stormCloud
+            || room!.settings.environment.lairs.enabled)) return null
+        return rooms[0]!.settingsRevision
+      }).toBeGreaterThan(settingsRevision)
       await Promise.all(pages.map((page) => page.getByRole('button', { name: 'Ready', exact: true }).click()))
       await Promise.all(games.map((game) =>
         expect.poll(() => latestSnapshot(game)?.room.phase.type).toBe('running')))

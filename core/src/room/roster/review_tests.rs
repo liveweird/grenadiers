@@ -124,7 +124,7 @@ fn duplicate_ready_during_countdown_preserves_original_deadline_and_state() {
 }
 
 #[test]
-fn explicit_and_expired_departures_reevaluate_rematch_consensus() {
+fn terminal_departures_retire_immediately_and_reevaluate_rematch_consensus() {
     let mut explicit = final_three_seat_room();
     explicit.set_rematch_vote(SeatId::One, true).unwrap();
     assert_eq!(
@@ -135,18 +135,119 @@ fn explicit_and_expired_departures_reevaluate_rematch_consensus() {
         MatchChange::RematchStarted
     );
 
-    let mut expired = final_three_seat_room();
-    expired.set_rematch_vote(SeatId::One, true).unwrap();
-    expired
+    let mut disconnected = final_three_seat_room();
+    let outcome = disconnected.outcome().unwrap();
+    let update = disconnected
         .depart_with_grace([None, Some(DepartureReason::TransportLoss), None, None])
         .unwrap();
-    advance(&mut expired, crate::room::reconnect::RECONNECT_GRACE_TICKS);
+    assert_eq!(update.change(), MatchChange::Changed);
     assert_eq!(
-        expired.expire_reconnect_grace().unwrap().change(),
-        MatchChange::RematchStarted
+        update.newly_ineligible_seats().collect::<Vec<_>>(),
+        vec![SeatId::Two]
+    );
+    assert_eq!(disconnected.outcome(), Some(outcome));
+    assert_eq!(
+        disconnected.participant(SeatId::Two),
+        Ok(RosterParticipant::Departed)
     );
     assert_eq!(
-        expired.participant(SeatId::Two),
+        disconnected
+            .set_rematch_vote(SeatId::One, true)
+            .unwrap()
+            .change(),
+        MatchChange::RematchStarted
+    );
+}
+
+#[test]
+fn terminal_transport_loss_at_end_tick_or_later_never_starts_fresh_grace() {
+    for delay in [0, 1, 37] {
+        let mut room = RosterMatchLifecycle::new(
+            configuration(&[SeatControl::Human, SeatControl::Human, SeatControl::Cpu]),
+            settings(1),
+        );
+        start(&mut room, &[SeatId::One, SeatId::Two]);
+        room.complete_running_tick(Some(RoundResult::Winner(SeatId::One)))
+            .unwrap();
+        let outcome = room.outcome().unwrap();
+        advance(&mut room, delay);
+
+        let update = room
+            .depart_with_grace([None, Some(DepartureReason::TransportLoss), None, None])
+            .unwrap();
+
+        assert_eq!(room.outcome(), Some(outcome));
+        assert_eq!(
+            update.newly_ineligible_seats().collect::<Vec<_>>(),
+            vec![SeatId::Two]
+        );
+        assert_eq!(
+            room.participant(SeatId::Two),
+            Ok(RosterParticipant::Departed)
+        );
+        assert_eq!(
+            room.resume_connection(SeatId::Two),
+            Err(RosterError::SeatNotReserved(SeatId::Two))
+        );
+    }
+}
+
+#[test]
+fn reservation_created_before_terminal_keeps_its_deadline_and_resume_policy() {
+    let mut room = RosterMatchLifecycle::new(
+        configuration(&[SeatControl::Human, SeatControl::Human, SeatControl::Cpu]),
+        settings(1),
+    );
+    start(&mut room, &[SeatId::One, SeatId::Two]);
+    room.depart_with_grace([None, Some(DepartureReason::TransportLoss), None, None])
+        .unwrap();
+    let RosterParticipant::Reserved { expires_at } = room.participant(SeatId::Two).unwrap() else {
+        panic!("transport loss before the final outcome must reserve the seat");
+    };
+    room.complete_running_tick(Some(RoundResult::Winner(SeatId::One)))
+        .unwrap();
+    let outcome = room.outcome().unwrap();
+
+    let mut resumed = room.clone();
+    resumed.resume_connection(SeatId::Two).unwrap();
+    assert_eq!(
+        resumed.participant(SeatId::Two),
+        Ok(RosterParticipant::Connected)
+    );
+    assert_eq!(resumed.outcome(), Some(outcome));
+    let second_loss = resumed
+        .depart_with_grace([None, Some(DepartureReason::TransportLoss), None, None])
+        .unwrap();
+    assert_eq!(resumed.outcome(), Some(outcome));
+    assert_eq!(
+        second_loss.newly_ineligible_seats().collect::<Vec<_>>(),
+        vec![SeatId::Two]
+    );
+    assert_eq!(
+        resumed.participant(SeatId::Two),
+        Ok(RosterParticipant::Departed)
+    );
+
+    advance(&mut room, RESULT_HOLD_TICKS);
+    room.set_rematch_vote(SeatId::One, true).unwrap();
+    let ticks_until_expiry = expires_at.0 - room.tick().0;
+    advance(&mut room, ticks_until_expiry);
+    assert!(matches!(
+        room.resume_connection(SeatId::Two),
+        Err(RosterError::GraceExpired {
+            seat: SeatId::Two,
+            expires_at: actual,
+        }) if actual == expires_at
+    ));
+    let update = room.expire_reconnect_grace().unwrap();
+    assert_eq!(update.change(), MatchChange::RematchStarted);
+    assert_eq!(room.outcome(), None);
+    assert_eq!(
+        update.newly_ineligible_seats().collect::<Vec<_>>(),
+        vec![SeatId::Two]
+    );
+    assert_eq!(
+        room.participant(SeatId::Two),
         Ok(RosterParticipant::Departed)
     );
 }

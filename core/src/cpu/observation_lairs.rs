@@ -60,6 +60,10 @@ pub(super) fn validate_lairs(
         .ok_or_else(invalid)?;
     if observed.lairs.len() != MAX_LAIRS
         || observed.mobs.len() > MAX_MOBS
+        || observed
+            .lairs
+            .windows(2)
+            .any(|pair| pair[0].next_spawn_at != pair[1].next_spawn_at)
         || observed.lairs.iter().zip(expected).any(|(lair, cell)| {
             lair.cell != cell
                 || parts

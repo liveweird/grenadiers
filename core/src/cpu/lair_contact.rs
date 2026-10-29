@@ -31,6 +31,7 @@ struct Source {
 /// Finite wall-agnostic envelopes for at most 16 mobs and eight spawn origins.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub(crate) struct MobContactEnvelope {
+    world: super::WorldId,
     basis_tick: Tick,
     config: LairConfig,
     sources: Vec<Source>,
@@ -74,6 +75,7 @@ impl MobContactEnvelope {
             }
         }
         Ok(Self {
+            world: observation.parts().world,
             basis_tick: observation.parts().tick,
             config: observed.config(),
             sources,
@@ -131,7 +133,10 @@ impl MobContactEnvelope {
         valid_until: Tick,
         work: &mut WorkBudget,
     ) -> Result<bool, ContactEnvelopeError> {
-        if current.parts().tick < self.basis_tick || current.parts().tick >= valid_until {
+        if current.parts().world != self.world
+            || current.parts().tick < self.basis_tick
+            || current.parts().tick >= valid_until
+        {
             return Ok(false);
         }
         let Some(lairs) = current.lairs() else {

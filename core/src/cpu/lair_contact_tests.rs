@@ -138,7 +138,15 @@ fn rules_v8_overlay_checks_layout_counts_ids_positions_and_due_zero() {
     lairs[0].living_mobs = 0;
     let wrong_count = ObservedLairs::new(overlay.config(), lairs, overlay.mobs().to_vec());
     assert_eq!(
-        Observation::new_rules_v8(valid.into_parts(), environment, wrong_count),
+        Observation::new_rules_v8(valid.clone().into_parts(), environment.clone(), wrong_count),
+        Err(ObservationError::InvalidActors)
+    );
+
+    let mut lairs = overlay.lairs().to_vec();
+    lairs[1].next_spawn_at = Tick(101);
+    let unequal_timers = ObservedLairs::new(overlay.config(), lairs, overlay.mobs().to_vec());
+    assert_eq!(
+        Observation::new_rules_v8(valid.into_parts(), environment, unequal_timers),
         Err(ObservationError::InvalidActors)
     );
 }
@@ -284,6 +292,21 @@ fn containment_allows_motion_death_and_predicted_birth_but_rejects_escape_and_ex
         envelope.contains(&current, Tick(101), &mut WorkBudget::new(100)),
         Ok(false)
     );
+    for (room_instance, physical_round) in [(2, 1), (1, 2)] {
+        let other_world = current
+            .clone()
+            .map_parts(|parts| {
+                parts.world = WorldId {
+                    room_instance,
+                    physical_round,
+                };
+            })
+            .unwrap();
+        assert_eq!(
+            envelope.contains(&other_world, Tick(110), &mut WorkBudget::new(100)),
+            Ok(false)
+        );
+    }
 }
 
 #[test]

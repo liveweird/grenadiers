@@ -27,9 +27,11 @@ repeated approval for routine implementation choices. Entries are not delivery-d
 
 - [next] **STORM-CLOUD — roaming slowdown hazard.** A cloud moves slowly and randomly across
   the board, including blocked tiles. It never blocks movement and bombs cannot harm it.
-  Player/cloud contact in either direction applies a three-second, 50% slowdown. Define contact
-  refresh and interaction with existing slow effects before implementation; avoid per-tick
-  compounding. Bound cloud count/speed and use replayable environment randomness.
+  Player/cloud contact in either direction applies a three-second, 50% slowdown. Pair the
+  [headless rules](docs/game/storm-cloud.md) with checked gameplay v15, CPU18 and replay6, then
+  enable the paired client/server with authoritative cloud rendering and an own-effect timer.
+  Default all features ON; include cloud in forming-lobby bulk ON/OFF and lock settings at
+  first start. Validate all boards/controller counts, privacy, refresh, replay and recovery.
 - [todo] **LAIRS — indestructible mob spawners.** Add a wall-like, indestructible lair tile.
   Each lair spawns once every configurable N seconds, with a separate counter and the same
   configurable limit M. Mobs chase players reachable through unblocked paths, avoid bombs and

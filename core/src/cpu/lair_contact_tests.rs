@@ -122,6 +122,28 @@ fn contact_lease_rejects_a_changed_cpu_teleport_marker() {
 }
 
 #[test]
+fn contact_lease_rejects_a_foreign_recipient_even_when_cpu_is_visible() {
+    let basis = observation(Vec::new(), Tick(200));
+    let envelope = MobContactEnvelope::new(&basis, &mut WorkBudget::new(100)).unwrap();
+    let lease = MobContactLease::new(envelope, Tick(150));
+    let overlay = basis.lairs().unwrap().clone();
+    let mut parts = basis.into_parts();
+    parts.recipient = SeatId::One;
+    let ObservedActor::Visible(mut rival) = parts.actors[1].clone() else {
+        unreachable!()
+    };
+    rival.id = EntityId(1);
+    rival.seat = SeatId::One;
+    rival.position = Position::center(CellId::new(13, 11));
+    parts.actors[0] = ObservedActor::Visible(rival);
+    let environment =
+        ObservedEnvironment::new(StormCloudConfig::Disabled, None, vec![Some(0), Some(0)]);
+    let foreign = Observation::new_rules_v8(parts, environment, overlay).unwrap();
+
+    assert!(!lease.observation_fits(&foreign, &mut WorkBudget::new(100)));
+}
+
+#[test]
 fn rules_v8_overlay_checks_layout_counts_ids_positions_and_due_zero() {
     let valid = observation(
         vec![mob(10, Position::center(CellId::new(4, 4)))],

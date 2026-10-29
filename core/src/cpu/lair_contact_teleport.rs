@@ -1,6 +1,8 @@
-use std::collections::BTreeSet;
+use std::collections::BTreeMap;
 
+use crate::cpu::forecast::TickWindow;
 use crate::cpu::{BombKnowledge, Observation, WorkBudget};
+use crate::game::MovementSegment;
 use crate::game::types::{HALF_FOOTPRINT, TICKS_PER_SECOND, UNITS_PER_CELL};
 use crate::game::{CellId, PickupKind, SpeedLevel, Tick};
 
@@ -46,9 +48,9 @@ pub(crate) fn is_clear(
         .ok_or(ContactEnvelopeError::Capacity)?;
     take_work(work, pair_count)?;
     let residual = residual_travel(hold_ticks)?;
-    if candidates.iter().any(|&from| {
+    if candidates.keys().any(|&from| {
         candidates
-            .iter()
+            .keys()
             .any(|&to| from != to && cells_within(from, to, residual))
     }) {
         return Ok(false);
@@ -59,7 +61,7 @@ pub(crate) fn is_clear(
             .checked_sub(1)
             .ok_or(ContactEnvelopeError::InvalidTime)?,
     );
-    for &cell in &candidates {
+    for &cell in candidates.keys() {
         for &source in &envelope.sources {
             if source.begins_at > last {
                 continue;
@@ -75,16 +77,46 @@ pub(crate) fn is_clear(
     early_reveal_is_clear(observation, safe_until)
 }
 
+pub(crate) fn motion_is_clear(
+    observation: &Observation,
+    window: TickWindow,
+    segments: &[MovementSegment],
+    work: &mut WorkBudget,
+) -> Result<bool, ContactEnvelopeError> {
+    if !observation
+        .parts()
+        .rules
+        .settings
+        .enabled_items()
+        .contains_teleporter()
+    {
+        return Ok(true);
+    }
+    let candidates = candidate_cells(observation, window.end)?;
+    take_work(
+        work,
+        candidates
+            .len()
+            .checked_mul(segments.len())
+            .ok_or(ContactEnvelopeError::Capacity)?,
+    )?;
+    Ok(!candidates.iter().any(|(&cell, &exposed_at)| {
+        exposed_at < window.end && segments.iter().any(|segment| segment.overlaps_cell(cell))
+    }))
+}
+
 fn candidate_cells(
     observation: &Observation,
     safe_until: Tick,
-) -> Result<BTreeSet<CellId>, ContactEnvelopeError> {
+) -> Result<BTreeMap<CellId, Tick>, ContactEnvelopeError> {
     let parts = observation.parts();
     let mut cells = parts
         .pickups
         .iter()
-        .filter_map(|pickup| (pickup.kind == PickupKind::Teleporter).then_some(pickup.cell))
-        .collect::<BTreeSet<_>>();
+        .filter_map(|pickup| {
+            (pickup.kind == PickupKind::Teleporter).then_some((pickup.cell, parts.tick))
+        })
+        .collect::<BTreeMap<_, _>>();
     for flame in &parts.flames {
         let expiry = parts
             .tick
@@ -92,7 +124,10 @@ fn candidate_cells(
             .checked_add(u64::from(flame.remaining_ticks))
             .ok_or(ContactEnvelopeError::Capacity)?;
         if expiry < safe_until.0 {
-            cells.insert(flame.cell);
+            cells
+                .entry(flame.cell)
+                .and_modify(|current| *current = (*current).min(Tick(expiry)))
+                .or_insert(Tick(expiry));
         }
     }
     Ok(cells)

@@ -22,6 +22,14 @@ fn legacy_public_policies_reject_rules_v8_before_emitting_control() {
     let key = key(&observed);
     let memory = UtilityMemory::new(key);
     let history = ObservedHazardMemory::new(key);
+    let committed = UtilityMemory::from_route(
+        key,
+        &[
+            crate::game::CellId::new(1, 1),
+            crate::game::CellId::new(2, 1),
+        ],
+        true,
+    );
 
     assert_eq!(
         crate::cpu::policy::plan(
@@ -53,6 +61,14 @@ fn legacy_public_policies_reject_rules_v8_before_emitting_control() {
             &mut CpuRng::from_seed(key, [33; 32]),
             &mut WorkBudget::new(65_536),
         ),
+        Err(PolicyError::InvalidObservation)
+    );
+    assert_eq!(
+        crate::cpu::policy::follow_committed_escape(&observed, &committed),
+        Err(PolicyError::InvalidObservation)
+    );
+    assert_eq!(
+        crate::cpu::policy::follow_checked_escape(&observed, &committed),
         Err(PolicyError::InvalidObservation)
     );
 }

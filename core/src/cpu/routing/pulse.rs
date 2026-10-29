@@ -8,8 +8,9 @@ use crate::game::{CellId, EntityId, Tick};
 
 use super::motion::{Motion, advance};
 use super::pulse_support::{
-    aggregate, aggregate_motion, contact_envelope, contact_failure, one_tick, reject_pickups,
-    reject_teleporter_pickups, take_segments, update_origin, validate_origin_forecast,
+    aggregate, aggregate_motion, certify_wait_before_start, contact_envelope, contact_failure,
+    guard_teleporter_collection, one_tick, reject_pickups, reject_teleporter_pickups,
+    take_segments, update_origin, validate_origin_forecast,
 };
 use super::safety::{static_segment_clear, stationary_segment};
 use super::types::{PulseLease, PulseRequest};
@@ -126,6 +127,7 @@ fn certify_pulse_inner(
         request,
         origin,
         allow_pickups,
+        contact.is_some(),
         work,
         &mut assumptions,
     )?;
@@ -169,6 +171,9 @@ fn certify_pulse_inner(
             super::storm::charge_tick(context.storm, work)?;
             let segments = advance(&context, &mut motion, request.movement, tick)?;
             take_segments(work, &segments, forecast.dimensions())?;
+            if contact.is_some() {
+                guard_teleporter_collection(observation, one_tick(tick)?, &segments, work)?;
+            }
             if !allow_pickups {
                 reject_pickups(observation, &segments)?;
             } else {
@@ -211,6 +216,7 @@ fn certify_pulse_inner(
             work,
             storm_deadlines: &mut storm_deadlines,
             assumptions: &mut assumptions,
+            guard_teleport: contact.is_some(),
         },
     )?;
     if let Some(contact) = contact {
@@ -287,42 +293,11 @@ fn validate_request(
     Ok(())
 }
 
-fn certify_wait_before_start(
-    context: &Context<'_>,
-    forecast: &HazardForecast,
-    request: PulseRequest,
-    origin: Option<PulseOriginGrace>,
-    allow_pickups: bool,
-    work: &mut WorkBudget,
-    assumptions: &mut BTreeSet<EntityId>,
-) -> Result<(), RouteFailure> {
-    let end = request.start_window.end;
-    let start = Tick(forecast.basis_tick().0 + 1);
-    if start >= end {
-        return Ok(());
-    }
-    let segment = stationary_segment(context.actor.position);
-    take_segments(work, &segment, forecast.dimensions())?;
-    if !allow_pickups {
-        reject_pickups(context.observation, &segment)?;
-    } else {
-        reject_teleporter_pickups(context.observation, &segment)?;
-    }
-    assumptions.extend(super::safety::check_segments_with_grace(
-        forecast,
-        &segment,
-        TickWindow { start, end },
-        request.mode,
-        origin.map(|value| value.cell),
-        None,
-    )?);
-    Ok(())
-}
-
 struct SuffixEvidence<'a> {
     work: &'a mut WorkBudget,
     storm_deadlines: &'a mut [(Tick, Vec<Option<super::storm::DeadlineBounds>>)],
     assumptions: &'a mut BTreeSet<EntityId>,
+    guard_teleport: bool,
 }
 
 fn certify_stopped_suffix(
@@ -344,6 +319,17 @@ fn certify_stopped_suffix(
         );
         if stopped >= request.stopped_safe_until {
             continue;
+        }
+        if evidence.guard_teleport {
+            guard_teleporter_collection(
+                context.observation,
+                TickWindow {
+                    start: stopped,
+                    end: request.stopped_safe_until,
+                },
+                &stationary_segment(motion.position),
+                evidence.work,
+            )?;
         }
         if context.storm.is_none() {
             let segment = stationary_segment(motion.position);

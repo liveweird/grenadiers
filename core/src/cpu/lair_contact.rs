@@ -251,6 +251,7 @@ impl MobContactEnvelope {
         work: &mut WorkBudget,
     ) -> Result<bool, ContactEnvelopeError> {
         if current.parts().world != self.world
+            || current.parts().recipient != self.cpu_seat
             || current.parts().tick < self.basis_tick
             || current.parts().tick >= valid_until
         {

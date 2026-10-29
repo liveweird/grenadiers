@@ -1,13 +1,16 @@
+use std::collections::BTreeSet;
+
 use crate::cpu::forecast::{HazardForecast, TickWindow};
 use crate::cpu::lair_contact::{ContactEnvelopeError, MobContactEnvelope};
 use crate::cpu::{Observation, WorkBudget};
-use crate::game::Tick;
 use crate::game::geometry::{MovementSegment, position_overlaps_cell};
+use crate::game::{EntityId, Tick};
 
 use super::motion::Motion;
 use super::pulse::PulseOriginGrace;
 use super::pulse_geometry::direction_bit;
 use super::safety::footprint_cells;
+use super::validation::Context;
 use super::{PoseBounds, PulseRequest, RouteFailure};
 
 pub(super) fn contact_envelope(
@@ -31,6 +34,48 @@ pub(super) fn contact_envelope(
     }
 }
 
+#[allow(clippy::too_many_arguments)]
+pub(super) fn certify_wait_before_start(
+    context: &Context<'_>,
+    forecast: &HazardForecast,
+    request: PulseRequest,
+    origin: Option<PulseOriginGrace>,
+    allow_pickups: bool,
+    guard_teleport: bool,
+    work: &mut WorkBudget,
+    assumptions: &mut BTreeSet<EntityId>,
+) -> Result<(), RouteFailure> {
+    let end = request.start_window.end;
+    let start = Tick(forecast.basis_tick().0 + 1);
+    if start >= end {
+        return Ok(());
+    }
+    let segment = super::safety::stationary_segment(context.actor.position);
+    take_segments(work, &segment, forecast.dimensions())?;
+    if guard_teleport {
+        guard_teleporter_collection(
+            context.observation,
+            TickWindow { start, end },
+            &segment,
+            work,
+        )?;
+    }
+    if !allow_pickups {
+        reject_pickups(context.observation, &segment)?;
+    } else {
+        reject_teleporter_pickups(context.observation, &segment)?;
+    }
+    assumptions.extend(super::safety::check_segments_with_grace(
+        forecast,
+        &segment,
+        TickWindow { start, end },
+        request.mode,
+        origin.map(|value| value.cell),
+        None,
+    )?);
+    Ok(())
+}
+
 pub(super) fn contact_failure(error: ContactEnvelopeError) -> RouteFailure {
     match error {
         ContactEnvelopeError::WorkExhausted => RouteFailure::WorkExhausted,
@@ -38,6 +83,21 @@ pub(super) fn contact_failure(error: ContactEnvelopeError) -> RouteFailure {
         ContactEnvelopeError::Unsupported | ContactEnvelopeError::InvalidTime => {
             RouteFailure::InvalidRequest
         }
+    }
+}
+
+pub(super) fn guard_teleporter_collection(
+    observation: &Observation,
+    window: TickWindow,
+    segments: &[MovementSegment],
+    work: &mut WorkBudget,
+) -> Result<(), RouteFailure> {
+    if crate::cpu::lair_contact::teleport::motion_is_clear(observation, window, segments, work)
+        .map_err(contact_failure)?
+    {
+        Ok(())
+    } else {
+        Err(RouteFailure::NoRoute)
     }
 }
 

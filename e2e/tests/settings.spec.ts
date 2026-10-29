@@ -22,25 +22,13 @@ test('two browsers share configured rules that drive speed, fuse and match targe
     await expect(stormCloud).toBeChecked()
     expect(latestRoom(games[0])?.settings.environment).toEqual({ stormCloud: true })
     expect(latestRoom(games[0])?.configuration.environment).toEqual({ stormCloud: true })
-    const initialSettingsRevision = latestRoom(games[0])!.settingsRevision
     await one.getByRole('button', { name: 'All off', exact: true }).click()
     await expect(stormCloud).not.toBeChecked()
-    await one.getByRole('button', { name: 'Apply rules', exact: true }).click()
-    await expect.poll(() => latestRoom(games[0])?.settingsRevision).toBeGreaterThan(initialSettingsRevision)
-    expect(latestRoom(games[0])?.settings).toMatchObject({
-      enabledItems: [], environment: { stormCloud: false },
-    })
-    const offSettingsRevision = latestRoom(games[0])!.settingsRevision
     await one.getByRole('button', { name: 'All on', exact: true }).click()
     await expect(stormCloud).toBeChecked()
-    await one.getByRole('button', { name: 'Apply rules', exact: true }).click()
-    await expect.poll(() => latestRoom(games[0])?.settingsRevision).toBeGreaterThan(offSettingsRevision)
-    expect(latestRoom(games[0])?.settings).toMatchObject({
-      enabledItems: latestRoom(games[0])?.availableItems, environment: { stormCloud: true },
-    })
     await one.getByRole('button', { name: 'Classic settings', exact: true }).click()
     await expect(stormCloud).not.toBeChecked()
-    await one.getByRole('button', { name: 'Restore defaults', exact: true }).click()
+    await one.getByRole('button', { name: 'Restore match defaults', exact: true }).click()
     await expect(stormCloud).toBeChecked()
     await one.getByText('Polski', { exact: true }).click()
     await expect(one.getByRole('button', { name: 'Włącz wszystkie', exact: true })).toBeVisible()

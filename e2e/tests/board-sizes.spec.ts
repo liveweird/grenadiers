@@ -80,7 +80,7 @@ function expectBoard(game: ObservedGame, board: BoardSize, count: number): void 
   const snapshot = latestSnapshot(game)
   expect(snapshot?.room).toMatchObject({
     rulesVersion: 7,
-    mapId: board.width === 15 ? 'generated_v3' : 'generated_v4',
+    mapId: 'generated_v2',
     configuration: { environment: { stormCloud: true } },
     settings: { environment: { stormCloud: true } },
   })

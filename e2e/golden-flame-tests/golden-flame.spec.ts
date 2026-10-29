@@ -34,7 +34,7 @@ test('two browsers collect Golden Flame and restore base bomb range after its ex
     await Promise.all([one, two].map((page) => page.getByRole('button', { name: 'Ready', exact: true }).click()))
     await Promise.all(games.map((game) => expect.poll(() => latestSnapshot(game)?.room.phase.type).toBe('running')))
     expect(latestSnapshot(games[0])!.room).toMatchObject({
-      rulesVersion: 7, mapId: 'generated_v3', availableItems: ['kick', 'punch', 'bracelet', 'wallPass', 'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch', 'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls', 'invisibleBombs', 'oilBarrel', 'teleporter'],
+      rulesVersion: 7, mapId: 'generated_v2', availableItems: ['kick', 'punch', 'bracelet', 'wallPass', 'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch', 'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls', 'invisibleBombs', 'oilBarrel', 'teleporter'],
       settings: { enabledItems: ['goldenFlame'], environment: { stormCloud: false } },
     })
     await one.getByRole('region', { name: 'Grenadiers courtyard' }).click()

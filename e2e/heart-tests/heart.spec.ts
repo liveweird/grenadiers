@@ -42,7 +42,7 @@ test('two browsers reveal a generated Heart and observe one charge protect its c
       expect.poll(() => latestSnapshot(game)?.room.phase.type).toBe('running')))
     const initial = latestSnapshot(games[0])!
     expect(initial.room).toMatchObject({
-      rulesVersion: 7, mapId: 'generated_v3', availableItems: ['kick', 'punch', 'bracelet', 'wallPass', 'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch', 'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls', 'invisibleBombs', 'oilBarrel', 'teleporter'],
+      rulesVersion: 7, mapId: 'generated_v2', availableItems: ['kick', 'punch', 'bracelet', 'wallPass', 'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch', 'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls', 'invisibleBombs', 'oilBarrel', 'teleporter'],
       settings: { enabledItems: ['heart'], environment: { stormCloud: false } },
     })
     expect(initial.state.arena.blocks).toContainEqual({ column: 3, row: 1 })

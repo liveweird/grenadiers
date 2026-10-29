@@ -1,7 +1,7 @@
 ## Scenario: two browsers share configured rules that drive speed, fuse and match target
 
 The creator first observes a fresh room with all 22 items and the storm cloud enabled, then verifies
-that **All on**, **All off**, **Restore defaults**, and **Classic settings** include the cloud. The
+that **All on**, **All off**, **Restore match defaults**, and **Classic settings** include the cloud. The
 Polish **Włącz wszystkie** / **Wyłącz wszystkie** controls and **Chmura burzowa** label are also
 visible. Two browser contexts then join one room after the creator selects the cloud-disabled
 Classic preset. The second player becomes ready before the settings editor chooses maximum starting speed, a narrow

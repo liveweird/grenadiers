@@ -95,7 +95,7 @@ test('enabled storm cloud moves in one shared rendered world and survives reconn
       for (const game of group.games) {
         const frame = latestSnapshot(game)!
         expect(frame.room).toMatchObject({
-          rulesVersion: 7, mapId: 'generated_v3',
+          rulesVersion: 7, mapId: 'generated_v2',
           configuration: { environment: { stormCloud: true } },
           settings: { environment: { stormCloud: true } },
         })

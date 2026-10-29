@@ -6,7 +6,8 @@ Two independent browser contexts authenticate on gameplay v15, create/join one r
 and the storm cloud atomically
 through revision-fenced settings after confirming a fresh room enables every available item,
 ready, and receive live public snapshots with
-generator3/rules7 metadata, a null cloud, mirrored blocks, safe spawn
+the actual generator3/rules7 runtime profile (while retaining the public `generated_v2` map ID),
+a null cloud, mirrored blocks, safe spawn
 openings, and no initially exposed pickups. Refreshed logical movement moves the first actor through its spawn
 opening. Equipment with Punch disabled is rejected with `invalidPhase` without consuming its manual action ID;
 a fresh bomb reuses that ID and is accepted and a repeated action ID is rejected. Its explosion

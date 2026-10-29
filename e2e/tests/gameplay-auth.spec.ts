@@ -60,7 +60,7 @@ test('gameplay authentication preserves credentials and connection ownership', a
     }
 
     try {
-      const incompatible = await connect(14, 'not-a-session-token')
+      const incompatible = await connect(14, '0'.repeat(64))
       const owner = await connect(15)
       const duplicate = await connect(15)
       const command = {

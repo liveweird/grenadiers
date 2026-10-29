@@ -110,7 +110,7 @@ test('two browsers collect generated upgrades while old bombs keep their capture
     await two.getByRole('button', { name: 'Ready', exact: true }).click()
     await expect.poll(() => latestSnapshot(games[0])?.room.phase.type).toBe('running')
     await expect.poll(() => latestSnapshot(games[1])?.room.phase.type).toBe('running')
-    expect(latestSnapshot(games[0])!.room).toMatchObject({ rulesVersion: 7, mapId: 'generated_v3' })
+    expect(latestSnapshot(games[0])!.room).toMatchObject({ rulesVersion: 7, mapId: 'generated_v2' })
     expect(latestSnapshot(games[0])!.state.pickups).toEqual([])
     await Promise.all(pages.map(expectPaintedCanvas))
     await one.getByRole('region', { name: 'Grenadiers courtyard' }).click()

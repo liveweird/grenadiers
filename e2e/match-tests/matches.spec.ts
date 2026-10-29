@@ -24,7 +24,7 @@ async function running(games: ObservedGame[], roundNumber: number) {
   }).toBe(roundNumber)))
   for (const game of games) {
     const frame = latestSnapshot(game)!
-    expect(frame.room).toMatchObject({ rulesVersion: 7, mapId: 'generated_v3' })
+    expect(frame.room).toMatchObject({ rulesVersion: 7, mapId: 'generated_v2' })
     expect(frame.state.bombs).toEqual([])
     expect(frame.state.flames).toEqual([])
     expect(frame.state.pickups).toEqual([])

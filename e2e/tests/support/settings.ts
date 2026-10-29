@@ -35,6 +35,6 @@ export async function selectClassicSettings(page: Page, game: ObservedGame): Pro
   await expect.poll(() => latestRoom(game)?.settingsRevision).toBeGreaterThan(before)
   expect(latestRoom(game)?.settings.enabledItems).toEqual([])
   expect(latestRoom(game)).toMatchObject({
-    rulesVersion: 7, mapId: 'generated_v3', settings: { environment: { stormCloud: false } },
+    rulesVersion: 7, mapId: 'generated_v2', settings: { environment: { stormCloud: false } },
   })
 }

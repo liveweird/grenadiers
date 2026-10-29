@@ -1,9 +1,10 @@
 import type { ErrorObject } from 'ajv'
 import validateServer from '../../validation/generated/gameplay-v16.mjs'
-import { validateGameplayV15ServerMessage } from '../v15/validation'
+import { validateGameplayV15ServerMessage, type GameplayV15ValidationResult } from '../v15/validation'
 import type { GameServerMessage, GameState, RoomView } from './schema'
 
-type SemanticError = 'invalidLairEnvironment' | 'invalidLairState' | 'invalidWorldState'
+type LegacySemanticError = Extract<GameplayV15ValidationResult, { source: 'semantics' }>['error']
+type SemanticError = LegacySemanticError | 'invalidLairEnvironment' | 'invalidLairState' | 'invalidWorldState'
   | 'invalidLegacyProfile'
 
 export type GameplayV16ValidationResult =
@@ -38,6 +39,7 @@ function lairFactsInvalid(state: GameState, room: RoomView): boolean {
   const layout = lairLayout(room)
   const counts = [0, 1].map((id) => state.mobs.filter((mob) => mob.lairId === id).length)
   if (state.lairs.length !== 2) return true
+  if (state.lairs[0]!.spawnRemainingTicks !== state.lairs[1]!.spawnRemainingTicks) return true
   for (const [index, lair] of state.lairs.entries()) {
     const [column, row] = layout[index]!
     const terrain = state.arena.terrain[row * state.arena.width + column]
@@ -97,7 +99,10 @@ export function validateGameplayV16ServerMessage(value: unknown): GameplayV16Val
     return { valid: false, source: 'schema', errors: [...(validateServer.errors ?? [])] }
   }
   const legacy = validateGameplayV15ServerMessage(legacyProjection(value))
-  if (!legacy.valid) return { valid: false, source: 'semantics', error: 'invalidLegacyProfile' }
+  if (!legacy.valid) {
+    const error = legacy.source === 'semantics' ? legacy.error : 'invalidLegacyProfile'
+    return { valid: false, source: 'semantics', error }
+  }
   if (value.type !== 'admitted' && value.type !== 'snapshot') return { valid: true, value }
   const error = value.state && lairError(value.state, value.room)
   return error ? { valid: false, source: 'semantics', error } : { valid: true, value }

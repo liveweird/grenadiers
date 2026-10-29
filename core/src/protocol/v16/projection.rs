@@ -6,6 +6,7 @@ use super::{
     StormCloudView,
 };
 
+#[derive(Clone)]
 pub struct ExpandedCapture {
     pub(crate) base: crate::protocol::v14::ExpandedCapture,
     pub(crate) lairs: Vec<LairView>,
@@ -281,6 +282,23 @@ fn valid_lairs(room: &RoomView, capture: &ExpandedCapture) -> bool {
     }
     let expected = crate::game::lair_layout_v1(room.configuration.domain().base().board());
     if capture.lairs.len() != 2 || capture.mobs.len() > crate::game::MAX_MOBS {
+        return false;
+    }
+    if capture.lairs[0].spawn_remaining_ticks != capture.lairs[1].spawn_remaining_ticks {
+        return false;
+    }
+    if capture
+        .mobs
+        .iter()
+        .any(|mob| mob.frozen != capture.mobs[0].frozen)
+    {
+        return false;
+    }
+    let (width, height) = room.configuration.domain().base().board().dimensions();
+    if capture.mobs.iter().any(|mob| {
+        u32::from(mob.position.x()) > u32::from(width) * 1_024
+            || u32::from(mob.position.y()) > u32::from(height) * 1_024
+    }) {
         return false;
     }
     let mut ids = capture

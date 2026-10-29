@@ -304,8 +304,11 @@ fn valid_lairs(room: &RoomView, capture: &ExpandedCapture) -> bool {
     }
     let (width, height) = room.configuration.domain().base().board().dimensions();
     if capture.mobs.iter().any(|mob| {
-        u32::from(mob.position.x()) > u32::from(width) * 1_024
-            || u32::from(mob.position.y()) > u32::from(height) * 1_024
+        let half = crate::game::types::HALF_FOOTPRINT as u32;
+        u32::from(mob.position.x()) < half
+            || u32::from(mob.position.x()) + half > u32::from(width) * 1_024
+            || u32::from(mob.position.y()) < half
+            || u32::from(mob.position.y()) + half > u32::from(height) * 1_024
     }) {
         return false;
     }
@@ -321,8 +324,12 @@ fn valid_lairs(room: &RoomView, capture: &ExpandedCapture) -> bool {
         return false;
     }
     capture.lairs.iter().enumerate().all(|(index, lair)| {
+        let terrain_index =
+            usize::from(lair.cell.row()) * usize::from(width) + usize::from(lair.cell.column());
         lair.id as usize == index
             && lair.cell == cell(expected[index]).ok().unwrap()
+            && capture.base.world.arena.terrain.get(terrain_index)
+                == Some(&crate::protocol::v14::Terrain::Wall)
             && lair.spawn_remaining_ticks <= u16::from(tuning.settings().spawn_seconds()) * 60
             && lair.living_mobs <= tuning.settings().mobs_per_lair()
             && usize::from(lair.living_mobs)

@@ -1,8 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://grenadiers.local/schemas/gameplay-v16.json",
-  "title": "Grenadiers Gameplay WebSocket Protocol v15",
-  "description": "Dormant rules-v7 environment contract with storm cloud state and visibility-safe actor slowdown timers.",
+  "title": "Grenadiers Gameplay WebSocket Protocol v16",
+  "description": "Rules-v8 lair environment contract with storm clouds, mobs, and visibility-safe actor state.",
   "$ref": "#/$defs/GameServerMessage",
   "$defs": {
     "ProtocolVersionInput": {

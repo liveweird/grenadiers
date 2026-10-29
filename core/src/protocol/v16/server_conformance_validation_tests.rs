@@ -140,3 +140,34 @@ fn checked_room_validation_rejects_terminal_deadline_mutation() {
         Err(ProjectionError::InvalidExpandedBinding)
     );
 }
+
+#[test]
+fn checked_room_validation_rejects_out_of_roster_round_and_match_winners() {
+    let mut room = running_room();
+    room.last_round = Some(CompletedRound {
+        round_id: room.round_id,
+        round_number: counter(room.round_number.get()),
+        ended_at: room.tick,
+        result: RoundResult::Winner { seat: Seat::Four },
+    });
+    assert_eq!(
+        super::room_validation::validate_room_view(&room),
+        Err(ProjectionError::InvalidExpandedBinding)
+    );
+
+    for reason in [MatchWinnerReason::RoundWins, MatchWinnerReason::Forfeit] {
+        let mut room = running_room();
+        room.phase = RoomPhase::MatchResult {
+            ended_at: room.tick,
+            result: MatchResult::Winner {
+                seat: Seat::Four,
+                reason,
+            },
+            rematch_at: Tick::new(room.tick.get() + 180).unwrap(),
+        };
+        assert_eq!(
+            super::room_validation::validate_room_view(&room),
+            Err(ProjectionError::InvalidExpandedBinding)
+        );
+    }
+}

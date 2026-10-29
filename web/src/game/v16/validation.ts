@@ -1,11 +1,10 @@
 import type { ErrorObject } from 'ajv'
 import validateServer from '../../validation/generated/gameplay-v16.mjs'
-import { validateGameplayV15ServerMessage, type GameplayV15ValidationResult } from '../v15/validation'
+import { baseSemanticError, type BaseSemanticError } from './baseSemantics'
 import type { GameServerMessage, GameState, RoomView } from './schema'
 
-type LegacySemanticError = Extract<GameplayV15ValidationResult, { source: 'semantics' }>['error']
-type SemanticError = LegacySemanticError | 'invalidLairEnvironment' | 'invalidLairState' | 'invalidWorldState'
-  | 'invalidLegacyProfile'
+type SemanticError = BaseSemanticError
+  | 'invalidLairEnvironment' | 'invalidLairState' | 'invalidWorldState'
 
 export type GameplayV16ValidationResult =
   | { valid: true; value: GameServerMessage }
@@ -27,8 +26,8 @@ function entityError(state: GameState): SemanticError | null {
   }
   for (const mob of state.mobs) {
     if (ids.has(mob.id) || mob.lairId > 1
-      || mob.position.x < 0 || mob.position.x > state.arena.width * 1024
-      || mob.position.y < 0 || mob.position.y > state.arena.height * 1024) return 'invalidWorldState'
+      || mob.position.x < 320 || mob.position.x > state.arena.width * 1024 - 320
+      || mob.position.y < 320 || mob.position.y > state.arena.height * 1024 - 320) return 'invalidWorldState'
     ids.add(mob.id)
   }
   return null
@@ -63,7 +62,9 @@ function frozenStateInvalid(state: GameState): boolean {
 function lairError(state: GameState, room: RoomView): SemanticError | null {
   const configured = room.configuration.environment.lairs
   const selected = room.settings.environment.lairs
-  if (JSON.stringify(configured) !== JSON.stringify(selected)) return 'invalidLairEnvironment'
+  if (configured.enabled !== selected.enabled
+    || configured.spawnSeconds !== selected.spawnSeconds
+    || configured.maxLivingMobs !== selected.maxLivingMobs) return 'invalidLairEnvironment'
   if (!configured.enabled) {
     return state.lairs.length === 0 && state.mobs.length === 0 ? null : 'invalidLairState'
   }
@@ -73,36 +74,12 @@ function lairError(state: GameState, room: RoomView): SemanticError | null {
   return null
 }
 
-function removeV16Fields(projected: Record<string, unknown>): void {
-  if (!['admitted', 'roomState', 'snapshot'].includes(String(projected.type))) return
-  const room = projected.room as Record<string, unknown>
-  room.rulesVersion = 7
-  for (const owner of [room.configuration, room.settings] as Record<string, unknown>[]) {
-    const environment = (owner.environment as Record<string, unknown>)
-    delete environment.lairs
-  }
-  const state = projected.type === 'roomState' ? null : projected.state
-  if (state) {
-    delete (state as Record<string, unknown>).lairs
-    delete (state as Record<string, unknown>).mobs
-  }
-}
-
-function legacyProjection(message: GameServerMessage): unknown {
-  const projected = structuredClone(message) as Record<string, unknown>
-  removeV16Fields(projected)
-  return projected
-}
-
 export function validateGameplayV16ServerMessage(value: unknown): GameplayV16ValidationResult {
   if (!validateServer(value)) {
     return { valid: false, source: 'schema', errors: [...(validateServer.errors ?? [])] }
   }
-  const legacy = validateGameplayV15ServerMessage(legacyProjection(value))
-  if (!legacy.valid) {
-    const error = legacy.source === 'semantics' ? legacy.error : 'invalidLegacyProfile'
-    return { valid: false, source: 'semantics', error }
-  }
+  const baseError = baseSemanticError(value)
+  if (baseError) return { valid: false, source: 'semantics', error: baseError }
   if (value.type !== 'admitted' && value.type !== 'snapshot') return { valid: true, value }
   const error = value.state && lairError(value.state, value.room)
   return error ? { valid: false, source: 'semantics', error } : { valid: true, value }

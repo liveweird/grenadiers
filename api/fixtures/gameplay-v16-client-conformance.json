@@ -31,6 +31,31 @@
           }
         }
       }
+    },
+    {
+      "caseId": "update-settings-disabled-values-retained",
+      "value": {
+        "type": "updateSettings",
+        "sequence": 6,
+        "roomId": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "roundId": 1,
+        "settingsRevision": 1,
+        "settings": {
+          "startingSpeedLevel": 0,
+          "turnAssistUnits": 128,
+          "winsToFinish": 3,
+          "bombFuseTicks": 180,
+          "enabledItems": [],
+          "environment": {
+            "stormCloud": false,
+            "lairs": {
+              "enabled": false,
+              "spawnSeconds": 37,
+              "maxLivingMobs": 6
+            }
+          }
+        }
+      }
     }
   ],
   "invalidMessages": [
@@ -75,6 +100,31 @@
           "environment": {
             "stormCloud": false,
             "lairs": { "enabled": true, "spawnSeconds": 10, "maxLivingMobs": 9 }
+          }
+        }
+      }
+    },
+    {
+      "caseId": "update-settings-invalid-lair-tuning",
+      "value": {
+        "type": "updateSettings",
+        "sequence": 7,
+        "roomId": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "roundId": 1,
+        "settingsRevision": 1,
+        "settings": {
+          "startingSpeedLevel": 0,
+          "turnAssistUnits": 128,
+          "winsToFinish": 3,
+          "bombFuseTicks": 180,
+          "enabledItems": [],
+          "environment": {
+            "stormCloud": false,
+            "lairs": {
+              "enabled": true,
+              "spawnSeconds": 4,
+              "maxLivingMobs": 2
+            }
           }
         }
       }

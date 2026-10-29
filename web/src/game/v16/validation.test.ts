@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 import gameplayV16Schema from '../../../../api/gameplay-v16.schema.json'
 import clientFixtures from '../../../../api/fixtures/gameplay-v16-client-conformance.json'
 import { snapshot } from '../client/testSupport'
-import type { Snapshot } from './schema'
+import type { GameServerMessage, Snapshot } from './schema'
 import { validateGameplayV16ServerMessage } from './validation'
 
 function v16Snapshot(enabled = false): Snapshot {
@@ -44,6 +44,42 @@ describe('gameplay v16 lair validation', () => {
     expect(validateGameplayV16ServerMessage(v16Snapshot(true))).toMatchObject({ valid: true })
   })
 
+  it('compares lair fields independent of member order only when state is present', () => {
+    const snapshot = v16Snapshot(true)
+    const selected = snapshot.room.settings.environment.lairs
+    snapshot.room.settings.environment.lairs = {
+      maxLivingMobs: selected.maxLivingMobs,
+      enabled: selected.enabled,
+      spawnSeconds: selected.spawnSeconds,
+    }
+    expect(validateGameplayV16ServerMessage(snapshot)).toMatchObject({ valid: true })
+
+    const mismatch = { enabled: false, spawnSeconds: 60, maxLivingMobs: 8 }
+    const roomState: GameServerMessage = { type: 'roomState', room: snapshot.room }
+    roomState.room.settings.environment.lairs = mismatch
+    expect(validateGameplayV16ServerMessage(roomState)).toMatchObject({ valid: true })
+
+    const admitted: Extract<GameServerMessage, { type: 'admitted' }> = {
+      type: 'admitted', sequence: 1, youSeat: 'one', resumeToken: 'c'.repeat(64),
+      lastActionId: null, state: null, room: structuredClone(snapshot.room),
+    }
+    admitted.room.phase = { type: 'waiting' }
+    admitted.room.roundNumber = 0
+    admitted.room.scores.forEach((score) => { score.wins = 0 })
+    admitted.room.lastRound = null
+    admitted.room.seats.forEach((seat) => { seat.ready = seat.controller.type === 'cpu' })
+    admitted.room.settings.environment.lairs = mismatch
+    expect(validateGameplayV16ServerMessage(admitted)).toMatchObject({ valid: true })
+
+    const running = v16Snapshot(true)
+    running.room.settings.environment.lairs = mismatch
+    const admittedWithState: Extract<GameServerMessage, { type: 'admitted' }> = {
+      type: 'admitted', sequence: 1, room: running.room, youSeat: 'one',
+      resumeToken: 'c'.repeat(64), lastActionId: null, state: running.state,
+    }
+    expect(validateGameplayV16ServerMessage(admittedWithState)).toMatchObject({ valid: false })
+  })
+
   it.each([
     ['environment mismatch', (message: Snapshot) => { message.room.settings.environment.lairs.spawnSeconds = 6 }],
     ['nonempty disabled state', (message: Snapshot) => { message.state.lairs.push({ id: 0, cell: { column: 6, row: 6 }, spawnRemainingTicks: 0, livingMobs: 0 }) }],
@@ -68,6 +104,20 @@ describe('gameplay v16 lair validation', () => {
     message.state.mobs[0]!.id = 100
     message.state.mobs.push({ id: 101, lairId: 1, position: { x: 8704, y: 6656 }, heading: 'west', frozen: true })
     message.state.lairs[1]!.livingMobs = 1
+    expect(validateGameplayV16ServerMessage(message)).toMatchObject({ valid: false })
+  })
+
+  it.each([
+    ['x below footprint', 319, 4_608],
+    ['x above footprint', 15_041, 4_608],
+    ['x at board extent', 15_360, 4_608],
+    ['y below footprint', 3_584, 319],
+    ['y above footprint', 3_584, 12_993],
+    ['y at board extent', 3_584, 13_312],
+  ] as const)('rejects mob footprint outside the board: %s', (_label, x, y) => {
+    const message = v16Snapshot(true)
+    message.state.mobs = [{ id: 100, lairId: 0, position: { x, y }, heading: 'east', frozen: false }]
+    message.state.lairs[0]!.livingMobs = 1
     expect(validateGameplayV16ServerMessage(message)).toMatchObject({ valid: false })
   })
 })

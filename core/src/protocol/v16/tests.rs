@@ -38,7 +38,10 @@ fn state(lairs: LairConfig) -> State {
 fn parser_retains_lair_numbers_while_disabled_and_is_strict() {
     let valid = r#"{"type":"createRoom","sequence":1,"configuration":{"controllers":["human","human"],"cpuDifficulty":null,"board":{"width":15,"height":13},"environment":{"stormCloud":false,"lairs":{"enabled":false,"spawnSeconds":37,"maxLivingMobs":6}}}}"#;
     let parsed = parse_client_message(valid).unwrap();
-    let GameClientMessage::CreateRoom { configuration, .. } = parsed else {
+    let GameClientMessage::CreateRoom {
+        ref configuration, ..
+    } = parsed
+    else {
         panic!("expected create room")
     };
     assert!(!configuration.domain().lairs().enabled());
@@ -46,6 +49,10 @@ fn parser_retains_lair_numbers_while_disabled_and_is_strict() {
         configuration.domain().lairs().settings().spawn_seconds(),
         37
     );
+    let encoded = serde_json::to_string(configuration).unwrap();
+    assert!(encoded.contains(r#""lairs":{"enabled":false,"spawnSeconds":37,"maxLivingMobs":6}"#));
+    let round_trip: RoomConfiguration = serde_json::from_str(&encoded).unwrap();
+    assert_eq!(round_trip.domain(), configuration.domain());
     assert!(parse_client_message(&valid.replace("37", "4")).is_err());
     assert!(parse_client_message(&valid.replace("\"lairs\":{", "\"seed\":7,\"lairs\":{")).is_err());
 }

@@ -51,6 +51,16 @@ pub fn validate_room_view(room: &RoomView) -> Result<(), ProjectionError> {
             .scores
             .iter()
             .any(|score| score.wins.get() > room.settings.base.wins_to_finish())
+        || room
+            .last_round
+            .is_some_and(|round| !valid_result(round.result, count))
+        || matches!(
+            room.phase,
+            RoomPhase::MatchResult {
+                result: super::MatchResult::Winner { seat, .. },
+                ..
+            } if seat.index() >= count
+        )
     {
         return Err(ProjectionError::InvalidExpandedBinding);
     }
@@ -105,6 +115,13 @@ pub fn validate_room_view(room: &RoomView) -> Result<(), ProjectionError> {
             phase,
         },
     )
+}
+
+fn valid_result(result: super::RoundResult, count: usize) -> bool {
+    match result {
+        super::RoundResult::Winner { seat } => seat.index() < count,
+        super::RoundResult::Draw { .. } => true,
+    }
 }
 
 fn valid_controller(room: &RoomView, index: usize) -> bool {

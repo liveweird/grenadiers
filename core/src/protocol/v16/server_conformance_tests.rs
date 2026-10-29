@@ -28,10 +28,10 @@ struct Corpus {
     cases: Vec<FrameCase>,
 }
 
-struct WorldCase {
-    room: RoomView,
-    capture: ExpandedCapture,
-    generation: crate::game::GenerationRecord,
+pub(super) struct WorldCase {
+    pub(super) room: RoomView,
+    pub(super) capture: ExpandedCapture,
+    pub(super) generation: crate::game::GenerationRecord,
 }
 
 fn counter(value: u32) -> Counter {
@@ -56,7 +56,7 @@ fn generated(
     }
 }
 
-fn world_case(
+pub(super) fn world_case(
     board: DomainBoard,
     count: PlayerCount,
     cloud: StormCloudConfig,
@@ -333,6 +333,7 @@ fn checked_publication_rejects_impossible_lair_facts() {
         |capture| capture.mobs[0].id = capture.base.world.actors[0].view.id,
         |capture| capture.mobs[0].lair_id = 1,
         |capture| capture.mobs[0].frozen = true,
+        |capture| capture.base.world.arena.terrain[48] = Terrain::Floor,
     ];
     for mutate in mutations {
         let mut capture = case.capture.clone();

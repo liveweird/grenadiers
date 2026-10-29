@@ -101,14 +101,14 @@ impl Driver {
                 let _ = reply.send(result.map_err(map_runtime_error));
                 fatal_error.map_or(Ok(()), Err)
             }
-            OwnerCommand::EnvironmentSettings {
+            OwnerCommand::LairSettings {
                 binding,
                 room_id,
                 round_id,
                 action,
                 reply,
             } => {
-                let result = self.environment_settings(binding, &room_id, round_id, action, now);
+                let result = self.lair_settings(binding, &room_id, round_id, action, now);
                 let fatal_error = result.err().filter(|error| fatal(*error));
                 let _ = reply.send(result.map_err(map_runtime_error));
                 fatal_error.map_or(Ok(()), Err)
@@ -154,23 +154,24 @@ impl Driver {
         Ok(())
     }
 
-    fn environment_settings(
+    fn lair_settings(
         &mut self,
         binding: BindingKey,
         room_id: &RoomId,
         round_id: u64,
-        action: super::super::live_registry::EnvironmentSettingsAction,
+        action: super::super::live_registry::LairSettingsAction,
         now: Instant,
     ) -> Result<(), RosterRuntimeError> {
         let seat = self
             .validate(binding, room_id, round_id)
             .map_err(|_| RosterRuntimeError::StaleEpoch)?;
-        if let Some(notice) = self.runtime.update_environment_settings(
+        if let Some(notice) = self.runtime.update_lair_settings(
             seat,
             round_id,
             action.settings_revision,
             action.settings,
-            action.environment,
+            action.cloud,
+            action.tuning,
         )? {
             self.publish(notice);
         }

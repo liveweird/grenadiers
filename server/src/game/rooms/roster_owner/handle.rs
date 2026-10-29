@@ -66,14 +66,14 @@ impl RosterOwnerHandle {
         })
     }
 
-    pub(in crate::game::rooms) fn environment_settings(
+    pub(in crate::game::rooms) fn lair_settings(
         &self,
         binding: BindingKey,
         room_id: RoomId,
         round_id: u64,
-        action: super::super::live_registry::EnvironmentSettingsAction,
+        action: super::super::live_registry::LairSettingsAction,
     ) -> Reply<()> {
-        self.submit(|reply| OwnerCommand::EnvironmentSettings {
+        self.submit(|reply| OwnerCommand::LairSettings {
             binding,
             room_id,
             round_id,

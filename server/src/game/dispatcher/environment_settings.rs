@@ -1,10 +1,10 @@
 use axum::extract::ws::WebSocket;
-use grenadiers_core::protocol::{Counter, RoomId, v15::ErrorCode};
+use grenadiers_core::protocol::{Counter, RoomId, v16::ErrorCode};
 
 use super::{reply_error, room_error};
 use crate::game::{
     connection::ConnectionState,
-    rooms::{EnvironmentSettingsAction, GameRooms},
+    rooms::{GameRooms, LairSettingsAction},
 };
 
 pub(super) async fn dispatch(
@@ -12,7 +12,7 @@ pub(super) async fn dispatch(
     rooms: &GameRooms,
     room_id: RoomId,
     round_id: u64,
-    action: EnvironmentSettingsAction,
+    action: LairSettingsAction,
     state: &ConnectionState,
     sequence: Counter,
 ) -> bool {
@@ -20,7 +20,7 @@ pub(super) async fn dispatch(
         return reply_error(socket, ErrorCode::NotInRoom, sequence).await;
     };
     match rooms
-        .environment_settings_live(&member.admission, member.binding, room_id, round_id, action)
+        .lair_settings_live(&member.admission, member.binding, room_id, round_id, action)
         .await
     {
         Ok(()) => true,

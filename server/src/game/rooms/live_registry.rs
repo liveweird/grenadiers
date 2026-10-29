@@ -3,7 +3,7 @@ use std::{sync::Arc, time::Instant as StdInstant};
 use grenadiers_core::{
     game::{EnabledItems, SimulationSeed, StormCloudConfig},
     protocol::{Counter, RoomCode, RoomId, v14},
-    room::{CpuDifficulty, CpuProfile, EnvironmentRoomConfiguration, RoomSettings},
+    room::{CpuDifficulty, CpuProfile, LairRoomConfiguration, LairTuning, RoomSettings},
 };
 use tokio::time::Instant;
 
@@ -22,10 +22,11 @@ enum PreparedLiveOwner {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub(crate) struct EnvironmentSettingsAction {
+pub(crate) struct LairSettingsAction {
     pub(crate) settings_revision: u32,
     pub(crate) settings: RoomSettings,
-    pub(crate) environment: StormCloudConfig,
+    pub(crate) cloud: StormCloudConfig,
+    pub(crate) tuning: LairTuning,
 }
 
 impl GameRooms {
@@ -34,7 +35,7 @@ impl GameRooms {
         binding: BindingKey,
         sequence: Counter,
         now: StdInstant,
-        configuration: EnvironmentRoomConfiguration,
+        configuration: LairRoomConfiguration,
     ) -> Result<LiveAdmission, RoomError> {
         validate_configuration(&configuration)?;
         let (handle, prepared, id, code) = {
@@ -121,17 +122,17 @@ impl GameRooms {
             .await
     }
 
-    pub(crate) async fn environment_settings_live(
+    pub(crate) async fn lair_settings_live(
         &self,
         admission: &LiveAdmission,
         binding: BindingKey,
         room_id: RoomId,
         round_id: u64,
-        action: EnvironmentSettingsAction,
+        action: LairSettingsAction,
     ) -> Result<(), RoomError> {
         self.handle_for(admission.room_id())?
             .owner
-            .environment_settings(binding, room_id, round_id, action)
+            .lair_settings(binding, room_id, round_id, action)
             .await
     }
 
@@ -150,7 +151,7 @@ impl GameRooms {
 
     fn prepare_live_owner(
         &self,
-        configuration: EnvironmentRoomConfiguration,
+        configuration: LairRoomConfiguration,
         parts: &super::registry_identity::RegistryIdentityParts,
     ) -> Result<(LiveOwner, PreparedLiveOwner), RoomError> {
         self.prepare_roster_live_owner(configuration, parts)
@@ -158,11 +159,12 @@ impl GameRooms {
 
     fn prepare_roster_live_owner(
         &self,
-        configuration: EnvironmentRoomConfiguration,
+        configuration: LairRoomConfiguration,
         parts: &super::registry_identity::RegistryIdentityParts,
     ) -> Result<(LiveOwner, PreparedLiveOwner), RoomError> {
         let base = *configuration.base();
-        let environment = configuration.storm_cloud();
+        let cloud = configuration.storm_cloud();
+        let tuning = configuration.lairs();
         let root = SimulationRoot::generate().map_err(|_| RoomError::CapacityReached)?;
         let simulation_seed = Arc::new(move |epoch| root.for_round(epoch));
         let identity = RosterIdentity {
@@ -171,18 +173,19 @@ impl GameRooms {
             registry_serial: parts.serial,
             configuration: base,
         };
-        let runtime = RosterRuntime::new_environment(
+        let runtime = RosterRuntime::new_lairs(
             identity,
             RoomSettings::DEFAULT.with_enabled_items(EnabledItems::ALL),
-            environment,
+            cloud,
+            tuning,
             self.round_seed_source.clone(),
             simulation_seed as Arc<dyn Fn(u64) -> Result<SimulationSeed, ()> + Send + Sync>,
         )
         .map_err(|_| RoomError::CapacityReached)?;
         let profile = match base.cpu_difficulty() {
-            Some(CpuDifficulty::Easy) => CpuProfile::ENVIRONMENT_EASY,
-            Some(CpuDifficulty::Standard) => CpuProfile::ENVIRONMENT_STANDARD,
-            None => CpuProfile::ENVIRONMENT_STANDARD,
+            Some(CpuDifficulty::Easy) => CpuProfile::LAIRS_EASY,
+            Some(CpuDifficulty::Standard) => CpuProfile::LAIRS_STANDARD,
+            None => CpuProfile::LAIRS_STANDARD,
         };
         let mut cpus = Vec::new();
         for seat in base.cpu_seats() {
@@ -211,7 +214,7 @@ impl GameRooms {
     }
 }
 
-fn validate_configuration(configuration: &EnvironmentRoomConfiguration) -> Result<(), RoomError> {
+fn validate_configuration(configuration: &LairRoomConfiguration) -> Result<(), RoomError> {
     if configuration.base().human_seats().next().is_none() {
         return Err(RoomError::UnsupportedConfiguration);
     }

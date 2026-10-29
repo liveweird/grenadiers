@@ -99,18 +99,18 @@ impl LiveOwner {
         }
     }
 
-    pub(in crate::game::rooms) async fn environment_settings(
+    pub(in crate::game::rooms) async fn lair_settings(
         &self,
         binding: BindingKey,
         room_id: RoomId,
         round_id: u64,
-        action: super::super::live_registry::EnvironmentSettingsAction,
+        action: super::super::live_registry::LairSettingsAction,
     ) -> Result<(), RoomError> {
         match self {
             #[cfg(test)]
             Self::Legacy(_) => Err(RoomError::UnsupportedConfiguration),
             Self::Roster(value) => value
-                .environment_settings(binding, room_id, round_id, action)
+                .lair_settings(binding, room_id, round_id, action)
                 .await
                 .unwrap_or(Err(RoomError::RoomNotFound)),
         }

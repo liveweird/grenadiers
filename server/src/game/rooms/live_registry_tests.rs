@@ -7,7 +7,8 @@ use grenadiers_core::{
     game::{SeatId, StormCloudConfig},
     protocol::{Counter, v14},
     room::{
-        BoardSize, CpuDifficulty, EnvironmentRoomConfiguration, RoomConfiguration, SeatControl,
+        BoardSize, CpuDifficulty, LairRoomConfiguration, LairSettings, LairTuning,
+        RoomConfiguration, SeatControl,
     },
 };
 
@@ -50,7 +51,7 @@ fn sequence(value: u32) -> Counter {
 fn configuration(
     controls: &[SeatControl],
     difficulty: Option<CpuDifficulty>,
-) -> EnvironmentRoomConfiguration {
+) -> LairRoomConfiguration {
     configuration_on(controls, difficulty, BoardSize::FifteenByThirteen)
 }
 
@@ -58,7 +59,7 @@ fn configuration_on(
     controls: &[SeatControl],
     difficulty: Option<CpuDifficulty>,
     board: BoardSize,
-) -> EnvironmentRoomConfiguration {
+) -> LairRoomConfiguration {
     configuration_on_environment(controls, difficulty, board, StormCloudConfig::Single)
 }
 
@@ -67,10 +68,11 @@ fn configuration_on_environment(
     difficulty: Option<CpuDifficulty>,
     board: BoardSize,
     environment: StormCloudConfig,
-) -> EnvironmentRoomConfiguration {
-    EnvironmentRoomConfiguration::new(
+) -> LairRoomConfiguration {
+    LairRoomConfiguration::new(
         RoomConfiguration::new(controls, difficulty, board).unwrap(),
         environment,
+        LairTuning::new(false, LairSettings::DEFAULT),
     )
 }
 
@@ -89,7 +91,7 @@ fn token(admission: &LiveAdmission) -> v14::ResumeToken {
 }
 
 #[tokio::test]
-async fn two_player_live_rooms_use_v15_environment_roster_for_duel_and_solo() {
+async fn two_player_live_rooms_use_v16_lair_roster_for_duel_and_solo() {
     let now = std::time::Instant::now();
     let rooms = rooms(now);
     let duel = rooms
@@ -104,7 +106,7 @@ async fn two_player_live_rooms_use_v15_environment_roster_for_duel_and_solo() {
     assert_eq!(duel.seat(), SeatId::One);
     assert_eq!(duel.room_id().as_str(), "123456789abcdef00000000000000001");
     assert!(matches!(duel, LiveAdmission::Roster(_)));
-    assert_eq!(personal(&duel)["room"]["rulesVersion"], 7);
+    assert_eq!(personal(&duel)["room"]["rulesVersion"], 8);
     assert_eq!(
         personal(&duel)["room"]["settings"]["enabledItems"]
             .as_array()
@@ -115,6 +117,14 @@ async fn two_player_live_rooms_use_v15_environment_roster_for_duel_and_solo() {
     assert_eq!(
         personal(&duel)["room"]["settings"]["environment"]["stormCloud"],
         true
+    );
+    assert_eq!(
+        personal(&duel)["room"]["settings"]["environment"]["lairs"],
+        serde_json::json!({
+            "enabled": false,
+            "spawnSeconds": 10,
+            "maxLivingMobs": 3
+        })
     );
     assert_eq!(
         personal(&duel)["room"]["configuration"]["controllers"]
@@ -383,5 +393,7 @@ async fn environment_roster_owners_share_the_single_room_capacity() {
     ));
 }
 
+#[path = "live_registry_lair_activation_tests.rs"]
+mod lair_activation_tests;
 #[path = "live_registry_variable_board_tests.rs"]
 mod variable_board_tests;

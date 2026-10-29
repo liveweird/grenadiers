@@ -17,7 +17,7 @@ test('native keyboard turns recover from a wall stop outside the legacy alignmen
     await one.getByRole('button', { name: 'Ready', exact: true }).click()
     await two.getByRole('button', { name: 'Ready', exact: true }).click()
     await expect.poll(() => latestSnapshot(games[0])?.room.phase.type).toBe('running')
-    expect(latestSnapshot(games[0])!.room.rulesVersion).toBe(7)
+    expect(latestSnapshot(games[0])!.room.rulesVersion).toBe(8)
 
     const actor = (index: number) => visibleActor(latestSnapshot(games[index]), 'one')
     await one.getByRole('region', { name: 'Grenadiers courtyard' }).click()

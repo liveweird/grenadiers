@@ -64,7 +64,7 @@ const fixtures = {
   "long-fuse": "arena-v2-long-fuse.seed",
   "matches": "arena-v1-matches.seed",
   "oil-barrel": "arena-v2-oil-barrel.seed",
-  "pickups": "arena-v1-pickups.seed",
+  "pickups": "arena-v3-pickups.seed",
   "piercing-bomb": "arena-v2-piercing-bomb.seed",
   "power-bomb": "arena-v2-power-bomb.seed",
   "punch": "arena-v2-punch.seed",
@@ -248,7 +248,7 @@ test("fixture contracts reject missing selectors, reversed files, and selector-d
     fixture,
   ));
   assert.throws(() => validateSharedFixture(
-    workflow.replace("GRENADIERS_FIXTURE_SEED_FILE=./core/tests/fixtures/arena-v1-pickups.seed ", ""),
+    workflow.replace("GRENADIERS_FIXTURE_SEED_FILE=./core/tests/fixtures/arena-v3-pickups.seed ", ""),
     fixture,
   ));
   assert.throws(() => validateSharedFixture(

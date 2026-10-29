@@ -99,6 +99,15 @@ already be installed. It installs nothing and checks the repository Bash entry p
 GitHub workflows. It intentionally remains outside `all`, `repository`, server, and automatic
 platform checks so these developer tools do not become application or platform prerequisites.
 
+## Lair fixture
+
+Use `arena-v3-lairs.seed` with the shared read-only Compose fixture override, then run
+`E2E_LAIRS_FIXTURE=arena-v3-lairs npm --prefix e2e run test:lairs`. It exercises actual spawns,
+pursuit, per-lair caps, rendering, recipient privacy and reconnect/rematch. A random arena may
+legitimately block every spawn exit, so this suite requires its explicit generation3 fixture.
+The native base-upgrade suite separately uses `arena-v3-pickups.seed`; the retained generation1
+trace keeps its original seed and expectations.
+
 ## Artist atlas
 
 `scripts/gates.sh art-atlas` runs CLI resource/path checks and the actual Chromium artist
@@ -361,7 +370,7 @@ assertions and evidence for each suite.
 | <a id="invisible-bombs-production-seed-scenario"></a>`npm --prefix e2e run test:invisible-bombs` | [Invisible Bombs fixture](deployment.md#reproduce-opt-in-invisible-bombs-privacy) | Recipient-local live-bomb/event privacy, truthful capacity/flames, reconnect without replay, expiry, and reveal. |
 | <a id="teleporter-production-seed-scenario"></a>`npm --prefix e2e run test:teleporter` | [Teleporter fixture](deployment.md#reproduce-opt-in-teleporter-swaps) | Safe atomic swap, shared marker, newer reconnect admission, and unsafe consumption without movement. |
 | <a id="wall-pass-production-seed-scenario"></a>`npm --prefix e2e run test:wall-pass` | [Wall Pass fixture](deployment.md#reproduce-opt-in-wall-pass-movement) | Intact-block traversal/rendering, rejected planting without allocation, reconnect inside, legal exit/placement, and localized captures. |
-| <a id="cpu-item-source-scenario"></a>`npm --prefix e2e run test:cpu-item` | [Shared Compose fixture](../e2e/compose/fixture.yaml), [`arena-v2-cpu-wall-pass.seed`](../core/tests/fixtures/arena-v2-cpu-wall-pass.seed), `E2E_CPU_ITEM_FIXTURE=arena-v2-cpu-wall-pass`, and [scenario](../e2e/scenarios/cpu-item.md) | Real CPU Wall Pass collection with all items enabled, public inventory and rendered gear; private AI randomness stays independent. |
+| <a id="cpu-item-source-scenario"></a>`npm --prefix e2e run test:cpu-item` | [Shared Compose fixture](../e2e/compose/fixture.yaml), [`arena-v2-cpu-wall-pass.seed`](../core/tests/fixtures/arena-v2-cpu-wall-pass.seed), `E2E_CPU_ITEM_FIXTURE=arena-v3-cpu-wall-pass`, and [scenario](../e2e/scenarios/cpu-item.md) | Real CPU Wall Pass collection with all items enabled, public inventory and rendered gear; private AI randomness stays independent. |
 | <a id="kick-source-scenario"></a>`npm --prefix e2e run test:kick` | [Shared Compose fixture](../e2e/compose/fixture.yaml), exact [`arena-v2-kick.seed`](../core/tests/fixtures/arena-v2-kick.seed), and [scenario](../e2e/scenarios/kick.md) | Same bomb identity/fuse across native kick movement and the retained pre-input timeline. |
 | <a id="punch-source-scenario"></a>`npm --prefix e2e run test:punch` | [Shared Compose fixture](../e2e/compose/fixture.yaml), exact [`arena-v2-punch.seed`](../core/tests/fixtures/arena-v2-punch.seed), and [scenario](../e2e/scenarios/punch.md) | Remapped Equipment input, wrapped bomb movement, action-ID successor, public parity, and natural detonation. |
 | <a id="bracelet-source-scenario"></a>`npm --prefix e2e run test:bracelet` | [Shared Compose fixture](../e2e/compose/fixture.yaml), exact [`arena-v2-bracelet.seed`](../core/tests/fixtures/arena-v2-bracelet.seed), and [scenario](../e2e/scenarios/bracelet.md) | One-tile stationary-rival shove with no victim command, equipment action, public event, or private marker. |

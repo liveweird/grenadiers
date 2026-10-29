@@ -78,7 +78,7 @@ Use Heart/Shield tests for ordinary collection or Oil tests for materialized obj
 tests must use a documented deterministic fixture, native controls and read-only observations.
 Add the spec to `e2e/scripts/scenario-map.mjs` and a document with exact `## Scenario:` titles;
 run `scripts/gates.sh e2e`. For example, the existing Heart route uses
-`E2E_HEART_FIXTURE=arena-v2-heart npm --prefix e2e run test:heart` against the separately started
+`E2E_HEART_FIXTURE=arena-v3-heart npm --prefix e2e run test:heart` against the separately started
 Heart stack.
 
 Run affected focused tests while iterating, then the applicable [gates](../testing.md) and

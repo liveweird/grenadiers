@@ -176,6 +176,8 @@ services:
   }
   assert.equal(workflow.split("-f e2e/compose/fixture.yaml up").length - 1,
     Object.keys(fixtures).length);
+  // Seed filenames retain their historical names; live item selectors bind generator3.
+  assert.doesNotMatch(workflow, /E2E_[A-Z_]+_FIXTURE=arena-v2-/);
   assert.doesNotMatch(workflow, /docker compose -f docker-compose\.yaml -f docker-compose\.[\w-]+\.yaml/);
   assert.match(workflow, /name: Tear down isolated stack\n        if: always\(\)\n        run: docker compose down --volumes --remove-orphans/);
 }
@@ -241,6 +243,10 @@ test("failure artifact paths reject broad parents and hidden subtree patterns", 
 test("fixture contracts reject missing selectors, reversed files, and selector-dependent cleanup", () => {
   const workflow = fs.readFileSync(fullPath, "utf8");
   const fixture = fs.readFileSync(fixturePath, "utf8");
+  assert.throws(() => validateSharedFixture(
+    workflow.replace("E2E_SHIELD_FIXTURE=arena-v3-shield", "E2E_SHIELD_FIXTURE=arena-v2-shield"),
+    fixture,
+  ));
   assert.throws(() => validateSharedFixture(
     workflow.replace("GRENADIERS_FIXTURE_SEED_FILE=./core/tests/fixtures/arena-v1-pickups.seed ", ""),
     fixture,

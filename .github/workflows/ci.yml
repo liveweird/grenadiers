@@ -293,7 +293,7 @@ jobs:
             sleep 1
           done
           curl --fail --silent http://127.0.0.1:8085/api/v1/ready
-          E2E_HEART_FIXTURE=arena-v2-heart npm --prefix e2e run test:heart
+          E2E_HEART_FIXTURE=arena-v3-heart npm --prefix e2e run test:heart
       - name: Verify opt-in Shield pickup and exact expiry using the same built image
         if: matrix.shard == 'items'
         run: |
@@ -304,7 +304,7 @@ jobs:
             sleep 1
           done
           curl --fail --silent http://127.0.0.1:8085/api/v1/ready
-          E2E_SHIELD_FIXTURE=arena-v2-shield npm --prefix e2e run test:shield
+          E2E_SHIELD_FIXTURE=arena-v3-shield npm --prefix e2e run test:shield
       - name: Verify opt-in Golden Flame range and exact expiry using the same built image
         if: matrix.shard == 'items'
         run: |
@@ -315,7 +315,7 @@ jobs:
             sleep 1
           done
           curl --fail --silent http://127.0.0.1:8085/api/v1/ready
-          E2E_GOLDEN_FLAME_FIXTURE=arena-v2-golden-flame npm --prefix e2e run test:golden-flame
+          E2E_GOLDEN_FLAME_FIXTURE=arena-v3-golden-flame npm --prefix e2e run test:golden-flame
       - name: Verify opt-in Short Fuse timing and exact expiry using the same built image
         if: matrix.shard == 'items'
         run: |
@@ -326,7 +326,7 @@ jobs:
             sleep 1
           done
           curl --fail --silent http://127.0.0.1:8085/api/v1/ready
-          E2E_SHORT_FUSE_FIXTURE=arena-v2-short-fuse npm --prefix e2e run test:short-fuse
+          E2E_SHORT_FUSE_FIXTURE=arena-v3-short-fuse npm --prefix e2e run test:short-fuse
       - name: Verify opt-in Short Flame range and exact expiry using the same built image
         if: matrix.shard == 'items'
         run: |
@@ -337,7 +337,7 @@ jobs:
             sleep 1
           done
           curl --fail --silent http://127.0.0.1:8085/api/v1/ready
-          E2E_SHORT_FLAME_FIXTURE=arena-v2-short-flame npm --prefix e2e run test:short-flame
+          E2E_SHORT_FLAME_FIXTURE=arena-v3-short-flame npm --prefix e2e run test:short-flame
       - name: Verify opt-in Long Fuse timing and exact expiry using the same built image
         if: matrix.shard == 'items'
         run: |
@@ -348,7 +348,7 @@ jobs:
             sleep 1
           done
           curl --fail --silent http://127.0.0.1:8085/api/v1/ready
-          E2E_LONG_FUSE_FIXTURE=arena-v2-long-fuse npm --prefix e2e run test:long-fuse
+          E2E_LONG_FUSE_FIXTURE=arena-v3-long-fuse npm --prefix e2e run test:long-fuse
       - name: Verify opt-in Reverse Controls inversion and exact expiry using the same built image
         if: matrix.shard == 'items'
         run: |
@@ -359,7 +359,7 @@ jobs:
             sleep 1
           done
           curl --fail --silent http://127.0.0.1:8085/api/v1/ready
-          E2E_REVERSE_CONTROLS_FIXTURE=arena-v2-reverse-controls npm --prefix e2e run test:reverse-controls
+          E2E_REVERSE_CONTROLS_FIXTURE=arena-v3-reverse-controls npm --prefix e2e run test:reverse-controls
       - name: Verify opt-in Diarrhea automatic bomb placement using the same built image
         if: matrix.shard == 'items'
         run: |
@@ -370,7 +370,7 @@ jobs:
             sleep 1
           done
           curl --fail --silent http://127.0.0.1:8085/api/v1/ready
-          E2E_DIARRHEA_FIXTURE=arena-v2-diarrhea npm --prefix e2e run test:diarrhea
+          E2E_DIARRHEA_FIXTURE=arena-v3-diarrhea npm --prefix e2e run test:diarrhea
       - name: Verify opt-in Slow foot movement and exact expiry using the same built image
         if: matrix.shard == 'items'
         run: |
@@ -381,7 +381,7 @@ jobs:
             sleep 1
           done
           curl --fail --silent http://127.0.0.1:8085/api/v1/ready
-          E2E_SLOW_FOOT_FIXTURE=arena-v2-slow-foot npm --prefix e2e run test:slow-foot
+          E2E_SLOW_FOOT_FIXTURE=arena-v3-slow-foot npm --prefix e2e run test:slow-foot
       - name: Verify opt-in Piercing Bomb penetration using the same built image
         if: matrix.shard == 'items'
         run: |
@@ -392,7 +392,7 @@ jobs:
             sleep 1
           done
           curl --fail --silent http://127.0.0.1:8085/api/v1/ready
-          E2E_PIERCING_BOMB_FIXTURE=arena-v2-piercing-bomb npm --prefix e2e run test:piercing-bomb
+          E2E_PIERCING_BOMB_FIXTURE=arena-v3-piercing-bomb npm --prefix e2e run test:piercing-bomb
       - name: Verify opt-in Power Bomb hard-wall traversal using the same built image
         if: matrix.shard == 'items'
         run: |
@@ -403,7 +403,7 @@ jobs:
             sleep 1
           done
           curl --fail --silent http://127.0.0.1:8085/api/v1/ready
-          E2E_POWER_BOMB_FIXTURE=arena-v2-power-bomb npm --prefix e2e run test:power-bomb
+          E2E_POWER_BOMB_FIXTURE=arena-v3-power-bomb npm --prefix e2e run test:power-bomb
       - name: Verify opt-in Remote Bomb command detonation using the same built image
         if: matrix.shard == 'items'
         run: |
@@ -414,7 +414,7 @@ jobs:
             sleep 1
           done
           curl --fail --silent http://127.0.0.1:8085/api/v1/ready
-          E2E_REMOTE_BOMB_FIXTURE=arena-v2-remote-bomb npm --prefix e2e run test:remote-bomb
+          E2E_REMOTE_BOMB_FIXTURE=arena-v3-remote-bomb npm --prefix e2e run test:remote-bomb
       - name: Verify opt-in Landmine contact detonation using the same built image
         if: matrix.shard == 'items'
         run: |
@@ -425,7 +425,7 @@ jobs:
             sleep 1
           done
           curl --fail --silent http://127.0.0.1:8085/api/v1/ready
-          E2E_LANDMINE_FIXTURE=arena-v2-landmine npm --prefix e2e run test:landmine
+          E2E_LANDMINE_FIXTURE=arena-v3-landmine npm --prefix e2e run test:landmine
       - name: Verify opt-in Invisibility Cloak recipient privacy using the same built image
         if: matrix.shard == 'items'
         run: |
@@ -436,7 +436,7 @@ jobs:
             sleep 1
           done
           curl --fail --silent http://127.0.0.1:8085/api/v1/ready
-          E2E_INVISIBILITY_CLOAK_FIXTURE=arena-v2-invisibility-cloak npm --prefix e2e run test:invisibility-cloak
+          E2E_INVISIBILITY_CLOAK_FIXTURE=arena-v3-invisibility-cloak npm --prefix e2e run test:invisibility-cloak
       - name: Verify opt-in Stopwatch action and fuse pausing using the same built image
         if: matrix.shard == 'items'
         run: |
@@ -447,7 +447,7 @@ jobs:
             sleep 1
           done
           curl --fail --silent http://127.0.0.1:8085/api/v1/ready
-          E2E_STOPWATCH_FIXTURE=arena-v2-stopwatch npm --prefix e2e run test:stopwatch
+          E2E_STOPWATCH_FIXTURE=arena-v3-stopwatch npm --prefix e2e run test:stopwatch
       - name: Verify opt-in Invisible Bombs recipient privacy using the same built image
         if: matrix.shard == 'items'
         run: |
@@ -458,7 +458,7 @@ jobs:
             sleep 1
           done
           curl --fail --silent http://127.0.0.1:8085/api/v1/ready
-          E2E_INVISIBLE_BOMBS_FIXTURE=arena-v2-invisible-bombs npm --prefix e2e run test:invisible-bombs
+          E2E_INVISIBLE_BOMBS_FIXTURE=arena-v3-invisible-bombs npm --prefix e2e run test:invisible-bombs
       - name: Verify opt-in Teleporter swaps and unsafe consumption using the same built image
         if: matrix.shard == 'items'
         run: |
@@ -469,7 +469,7 @@ jobs:
             sleep 1
           done
           curl --fail --silent http://127.0.0.1:8085/api/v1/ready
-          E2E_TELEPORTER_FIXTURE=arena-v2-teleporter npm --prefix e2e run test:teleporter
+          E2E_TELEPORTER_FIXTURE=arena-v3-teleporter npm --prefix e2e run test:teleporter
       - name: Verify opt-in Wall Pass collision and reconnect behavior using the same built image
         if: matrix.shard == 'items'
         run: |
@@ -480,7 +480,7 @@ jobs:
             sleep 1
           done
           curl --fail --silent http://127.0.0.1:8085/api/v1/ready
-          E2E_WALL_PASS_FIXTURE=arena-v2-wall-pass npm --prefix e2e run test:wall-pass
+          E2E_WALL_PASS_FIXTURE=arena-v3-wall-pass npm --prefix e2e run test:wall-pass
       - name: Verify all-on CPU item acquisition using the same built image
         if: matrix.shard == 'items'
         run: |
@@ -491,7 +491,7 @@ jobs:
             sleep 1
           done
           curl --fail --silent http://127.0.0.1:8085/api/v1/ready
-          E2E_CPU_ITEM_FIXTURE=arena-v2-cpu-wall-pass npm --prefix e2e run test:cpu-item
+          E2E_CPU_ITEM_FIXTURE=arena-v3-cpu-wall-pass npm --prefix e2e run test:cpu-item
       - name: Verify opt-in Kick motion and fuse preservation using the same built image
         if: matrix.shard == 'items'
         run: |
@@ -502,7 +502,7 @@ jobs:
             sleep 1
           done
           curl --fail --silent http://127.0.0.1:8085/api/v1/ready
-          E2E_KICK_FIXTURE=arena-v2-kick npm --prefix e2e run test:kick
+          E2E_KICK_FIXTURE=arena-v3-kick npm --prefix e2e run test:kick
       - name: Verify opt-in Punch wrapping and fuse preservation using the same built image
         if: matrix.shard == 'items'
         run: |
@@ -513,7 +513,7 @@ jobs:
             sleep 1
           done
           curl --fail --silent http://127.0.0.1:8085/api/v1/ready
-          E2E_PUNCH_FIXTURE=arena-v2-punch npm --prefix e2e run test:punch
+          E2E_PUNCH_FIXTURE=arena-v3-punch npm --prefix e2e run test:punch
       - name: Verify opt-in Bracelet contact shoves using the same built image
         if: matrix.shard == 'items'
         run: |
@@ -524,7 +524,7 @@ jobs:
             sleep 1
           done
           curl --fail --silent http://127.0.0.1:8085/api/v1/ready
-          E2E_BRACELET_FIXTURE=arena-v2-bracelet npm --prefix e2e run test:bracelet
+          E2E_BRACELET_FIXTURE=arena-v3-bracelet npm --prefix e2e run test:bracelet
       - name: Verify opt-in Oil Barrel reveal, ignition, and persistent fire using the same built image
         if: matrix.shard == 'items'
         run: |
@@ -535,7 +535,7 @@ jobs:
             sleep 1
           done
           curl --fail --silent http://127.0.0.1:8085/api/v1/ready
-          E2E_OIL_BARREL_FIXTURE=arena-v2-oil-barrel npm --prefix e2e run test:oil-barrel
+          E2E_OIL_BARREL_FIXTURE=arena-v3-oil-barrel npm --prefix e2e run test:oil-barrel
       - name: Verify lair spawning and pursuit using the same built image
         if: matrix.shard == 'items'
         run: |

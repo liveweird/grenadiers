@@ -96,38 +96,65 @@ retain the previous immutable image reference for rollback. The runtime stage in
 rolling Debian package updates, so a later build may resolve newer packages and is not expected to
 be byte-identical; treat it as a new candidate with new evidence rather than reusing acceptance.
 
-## v0.3.116 — 2026-10-29 — Dormant lair core
+## v0.3.117 — 2026-10-29
 
-Rules8 adds a headless lair/mob simulation: two indestructible pillar overlays, configurable
-spawn intervals and living caps, deterministic bounded pursuit and shared bomb avoidance.
-NPC contact composes with Shield/Heart, Bracelet and teleport destinations. Mines, flames,
-Oil and Stopwatch use the established physics; checked exhaustion rolls back the whole state.
-Public layout/speed facts support later consumers. See the [core guide](game/lairs.md).
+[v0.3.117](https://github.com/liveweird/grenadiers/releases/tag/v0.3.117) adds the checked lair
+foundation around rules8: gameplay16 configuration/publication, CPU19 finite mob-contact proofs,
+atomic roster settings and private replay7. Live rooms continue to use gameplay15/rules7/CPU18;
+the paired controls and rendering are delivered separately. See the [contract](game/protocol-v16.md),
+[CPU boundaries](game/multiplayer-cpu.md#lair-profile-boundaries) and [replay guide](game/multiplayer-replay.md).
 
-This release keeps live gameplay15/rules7/CPU18. Lairs do not appear in the running application;
-paired contracts, CPU19, server integration and rendering remain in the [backlog](../BACKLOG.md).
-Old rules constructors, public actor/state DTOs, generation streams and replay contracts remain
-closed. The canonical artwork and [v0.3.115 artist bundle](https://github.com/liveweird/grenadiers/releases/download/v0.3.115/grenadiers-storm-art-v0.3.115.zip)
-are unchanged.
+CPU movement and bomb escape retain separate certificates. Guards cover current mobs, possible
+births, pickup handoffs, hidden Teleporter collectors, pending pickup revelation and retained
+movement. Invalid contact revokes the paired route and queues Stop. Historical profiles stay closed.
+Replay7 reconstructs mobs from accepted inputs and checks complete private state, including timers,
+retreat anchors and randomness; production recording/export remains disabled.
 
-Accepted source `568dbd643916379d48172c1e1a0c2d2219416c17`, tree
-`682b7e33ba0276b1c10de8c8bb80c8b855436c50`, image
-`sha256:421c64ff0f614f5d37c2a595dda50d8c3baf4c0211390fad877c7d48b41bc7da`.
-The complete parallel Rust gate passes in 543.855s: **39,447/42,814 lines (92.1357%)**.
-All 4,194,304 item masks ran separately in debug, release and fresh coverage across 32 partitions
-with four workers, zero retries and 37 raw profiles. Official LCOV was preserved before releasing
-the source/cache freeze. Navigation and damage reviews are clear after regressions for crossed
-cell retreat, Oil reveal, forced-contact ordering, teleport geometry and seeded rollback.
+The artist sheet appends `terrain.lair` and four `mob.<direction>` poses. All 150 preceding
+entries retain their pixels and metadata. The source is 1120×1792 with 155 entries, 151 drawings
+and four reservations. The runtime texture remains 2040×528 / 4,308,480 RGBA bytes. The
+[artist bundle](https://github.com/liveweird/grenadiers/releases/download/v0.3.117/grenadiers-lairs-art-v0.3.117.zip)
+contains the editable source, manifest, labelled guides, previews and prompts. Bundle SHA-256:
+`dc204420c01b05a98906686f19e923b2364b330a838068b3f3009d46b3df95c1`.
 
-Unchanged frontend acceptance reuses v0.3.115's full web/atlas checks; exact final-image
-HTML/JS/CSS/PNG bytes match that accepted source. Compose and restricted Kubernetes each pass
-19 native regression cases (3.7m/3.8m) on distinct ports, including all board/controller presets,
-cloud gameplay, recovery, rematch and seat replacement. Security/probes/resources, zero restarts
-and scoped cleanup pass. Pinned Trivy 0.74.0 reports zero fixable HIGH/CRITICAL findings. Distinct
-Linux [run 40949621106](https://github.com/liveweird/grenadiers/actions/runs/40949621106) passes.
+### Verification and source identity
 
-This source prerelease has an accepted local image. Promotion retains v0.3.115 for rollback;
-restarting ends process-local matches. Production replay recording/export remains disabled.
+Accepted source: `927049c1f6e403f3308ffd98d300fc302fd511b3`, tree
+`27adfe0e0bbcab7166d57a7d7de7a2a0a01c2960`; source PR
+[#275](https://github.com/liveweird/grenadiers/pull/275) merged as
+`0e6f09cb0302df95c1f455d430a474c32e7bad5b`.
+
+- Fresh workspace debug/release, fmt, Clippy with warnings denied, build and independent Rust
+  coverage pass in 384.909 seconds: 42,445/46,093 lines, **92.09%** against the unchanged 90% floor.
+  Retained LCOV SHA-256: `bec23b1b7da7c376168dad2bfff5155be8e5892e957576e95795a5d198c944c8`.
+- Only the unchanged ExpandedV5 exhaustive-mask test reuses v0.3.116 acceptance: all 4,194,304 masks
+  in debug/release/coverage, after an exact legacy execution-dependency audit. Current coverage
+  uses fresh profiles; old counts are not merged. Default gates remain exhaustive.
+- Web: **7,128 tests / 116 files**, 269.47 seconds; 92.72% lines, 88.42% branches, 89.84% statements
+  and 89.68% functions. All unchanged floors pass. Final bundle: JS 348,176/400,000 bytes,
+  CSS 15,226/20,000. The final palette-only cleanup preserves all prior pixels and alpha;
+  its export and production build pass.
+- Atlas: ten browser checks pass; final source exports 151 drawings within the same texture budget.
+- Real queued CPU checks cover 72 configurations, six post-spawn board/difficulty cases with all
+  items, own-bomb escape and stopped-route invalidation. Replay7 checks exact reconstruction,
+  atomic interruption/departure, malformed journals and seed redaction.
+- Native Compose and Kubernetes each pass **19 tests** in 3.8/3.9 minutes. Restricted deployment,
+  probes/resources, exact image, zero restarts, IPv4 forwarding and scoped cleanup pass.
+- Dependency audits and pinned Trivy0.74.0 report zero vulnerabilities at the required thresholds.
+  Distinct [Linux debug/release checks](https://github.com/liveweird/grenadiers/actions/runs/40960573851)
+  pass on the accepted source. Protocol, CPU and server/replay reviews are clear after fixes.
+
+### Local deployment and rollback
+
+The promoted image is
+`sha256:ba7c4c1ff5f53e871d175b1a06be597f9d29bd7ddda494026108cf92865a39ad`, labelled version0.3.117
+and accepted source927049c1. Localhost8085 passes exact-image/security/cgroup/health/readiness,
+CSP/cache and served HTML/JS/CSS/PNG byte checks. The application remains non-root, read-only,
+with dropped capabilities, 256MiB memory and PID128 limits. The retained v0.3.116 override/image
+provides local rollback; reload browser tabs after paired upgrades.
+
+<a id="v03116--2026-10-29"></a>
+The [v0.3.116 record](history/releases.md#v03116--2026-10-29) is preserved in release history.
 
 <a id="v03115--2026-10-29"></a>
 The [v0.3.115 record](history/releases.md#v03115--2026-10-29) is preserved in release history.

@@ -266,8 +266,7 @@ impl RosterRuntime {
                 let room = publication_v16::room_view(
                     &self.identity,
                     &lifecycle,
-                    cloud,
-                    tuning,
+                    EnvironmentProfile::LairsV8 { cloud, tuning },
                     revision,
                     self.settings_revision,
                     self.settings_authority_locked(),

@@ -7,18 +7,21 @@ use grenadiers_core::{
 use super::{
     error::RosterRuntimeError,
     publication,
+    runtime::EnvironmentProfile,
     types::{RosterIdentity, RosterNotice, RosterPublication, RosterSeatFrames},
 };
 
 pub(super) fn room_view(
     identity: &RosterIdentity,
     lifecycle: &RosterMatchLifecycle,
-    cloud: StormCloudConfig,
-    tuning: LairTuning,
+    profile: EnvironmentProfile,
     revision: u32,
     settings_revision: u32,
     settings_locked: bool,
 ) -> Result<v16::RoomView, RosterRuntimeError> {
+    let EnvironmentProfile::LairsV8 { cloud, tuning } = profile else {
+        return Err(RosterRuntimeError::UnsupportedConfiguration);
+    };
     let room = v16::RoomView {
         settings: v16::RoomSettings::new(
             publication::settings(lifecycle.settings())?,

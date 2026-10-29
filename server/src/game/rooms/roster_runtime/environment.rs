@@ -251,8 +251,7 @@ impl RosterRuntime {
             Some(EnvironmentProfile::LairsV8 { cloud, tuning }) => publication_v16::room_view(
                 &self.identity,
                 &self.lifecycle,
-                cloud,
-                tuning,
+                EnvironmentProfile::LairsV8 { cloud, tuning },
                 self.revision,
                 self.settings_revision,
                 self.settings_authority_locked(),

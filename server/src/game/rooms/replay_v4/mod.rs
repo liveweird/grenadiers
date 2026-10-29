@@ -1,3 +1,4 @@
+pub(super) mod normalized_settings;
 mod profile;
 pub(super) mod record;
 mod recording;

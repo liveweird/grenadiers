@@ -42,8 +42,7 @@ impl RosterRuntime {
                 let room = publication_v16::room_view(
                     &self.identity,
                     &self.lifecycle,
-                    cloud,
-                    tuning,
+                    EnvironmentProfile::LairsV8 { cloud, tuning },
                     next,
                     self.settings_revision,
                     self.settings_authority_locked(),
@@ -112,8 +111,7 @@ impl RosterRuntime {
                 publication_v16::view_notice(publication_v16::room_view(
                     &self.identity,
                     &self.lifecycle,
-                    cloud,
-                    tuning,
+                    EnvironmentProfile::LairsV8 { cloud, tuning },
                     next,
                     self.settings_revision,
                     self.settings_authority_locked(),

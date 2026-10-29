@@ -27,10 +27,10 @@ fn checked_publication_rejects_mob_footprints_outside_every_board() {
         for (x, y) in [
             (0, 320),
             (319, 320),
-            (u16::from(width) * 1_024 - 319, 320),
+            (width * 1_024 - 319, 320),
             (320, 0),
             (320, 319),
-            (320, u16::from(height) * 1_024 - 319),
+            (320, height * 1_024 - 319),
         ] {
             let mut capture = original.capture.clone();
             capture.mobs[0].position = crate::protocol::Position::new(x, y).unwrap();

@@ -7,8 +7,9 @@ The dedicated suite requires the published `arena-v3-lairs` fixture acknowledgem
 the storm cloud, sets lairs to the five-second interval and one living mob per lair, then both players start a
 rules8 round. Both public streams expose the two fixed lair pillars and the same two mobs without target or path
 internals. The mobs move authoritatively, remain capped through another spawn deadline, and change pixels in the
-live Pixi canvas while the lair artwork differs from an ordinary wall pillar. Both localized clients capture the
-rendered state. The mobile transport reconnects normally with state, then a native bomb finishes the one-win
+live Pixi canvas while the lair artwork differs from an ordinary wall pillar. While the phase is still Running,
+the mobile transport reconnects normally with populated state. The clients then cross the next capped spawn
+deadline and capture both localized rendered views before a native bomb finishes the one-win
 match. A consensual rematch retains the lair tuning and creates the two lairs again.
 
 ## Scenario: disabled lairs publish empty lair and mob arrays

@@ -2,7 +2,9 @@ import { expect, test, type Browser, type Page } from '@playwright/test'
 import type { GameServerMessage, MobView } from '../../web/src/game/v16/schema'
 import { createResponsiveBrowserContexts } from '../tests/support/browser-contexts'
 import { expectPaintedCanvas, latestSnapshot, observeGame, type ObservedGame } from '../tests/support/duel'
-import { admissionBaseline, disconnectTransport, installTransportProbe } from '../tests/support/reconnect'
+import {
+  admissionBaseline, disconnectTransport, installTransportProbe, transportDiagnostics,
+} from '../tests/support/reconnect'
 
 type Snapshot = Extract<GameServerMessage, { type: 'snapshot' }>
 type Group = { pages: [Page, Page]; games: [ObservedGame, ObservedGame]; close: () => Promise<void> }
@@ -212,6 +214,58 @@ test('enabled lairs spawn capped private moving mobs, render on both clients, re
         .toBeGreaterThan(20)
       await Promise.all(group.pages.map(expectPaintedCanvas))
 
+      expect(latestSnapshot(group.games[1])?.room.phase.type).toBe('running')
+      const admission = await admissionBaseline(two)
+      expect(admission).not.toBeNull()
+      const framesBeforeReconnect = group.games[1].frames.length
+      await disconnectTransport(two)
+      try {
+        await expect.poll(async () => (await admissionBaseline(two))?.index ?? 0)
+          .toBeGreaterThan(admission!.index)
+      } catch (error) {
+        const frame = latestSnapshot(group.games[1])
+        const reconnectEvidence = {
+          admissionIndex: admission!.index,
+          transport: await transportDiagnostics(two),
+          room: frame && {
+            revision: frame.room.revision, tick: frame.room.tick, phase: frame.room.phase,
+            seats: frame.room.seats.map(({ seat, occupied, connection }) =>
+              ({ seat, occupied, connection })),
+          },
+          state: frame && {
+            physicalTick: frame.state.physicalTick,
+            actors: frame.state.actors.map((actor) => ({
+              id: actor.id, seat: actor.seat, type: actor.type, alive: actor.alive,
+              position: actor.type === 'visible' ? actor.position : undefined,
+            })),
+            lairs: frame.state.lairs, mobs: frame.state.mobs,
+          },
+          control: group.games[1].control.events.slice(-24),
+          frameTypes: group.games[1].frames.slice(-24).map((value) => value.type),
+          page: await two.evaluate(() => ({
+            visibility: document.visibilityState,
+            alerts: [...document.querySelectorAll('[role="alert"], [role="status"], [aria-live]')]
+              .map((element) => element.textContent?.trim()).filter(Boolean).slice(-12),
+            details: [...document.querySelectorAll('details')]
+              .map((element) => element.textContent?.trim()).filter(Boolean).slice(-4),
+          })),
+        }
+        await testInfo.attach('lair-reconnect-failure', {
+          contentType: 'application/json', body: JSON.stringify(reconnectEvidence),
+        })
+        throw new Error(`Lair reconnect failed: ${JSON.stringify(reconnectEvidence)}`, { cause: error })
+      }
+      const restored = (await admissionBaseline(two))!
+      expect(restored).toMatchObject({
+        roomId: admission!.roomId, seat: 'two', hasState: true, stableCapability: true,
+      })
+      expect(restored.lairs).toHaveLength(2)
+      expect(restored.mobs.length).toBeGreaterThan(0)
+      restored.mobs.forEach(expectPrivateNavigation)
+      await expect.poll(() => group.games[1].frames.length).toBeGreaterThan(framesBeforeReconnect)
+      expect(latestSnapshot(group.games[1])!.room.phase.type).toBe('running')
+      expect(latestSnapshot(group.games[1])!.state.mobs.length).toBeGreaterThan(0)
+
       const firstSpawnTick = spawned.state.physicalTick
       const nextSpawnTick = firstSpawnTick
         + Math.max(...spawned.state.lairs.map(({ spawnRemainingTicks }) => spawnRemainingTicks))
@@ -225,21 +279,6 @@ test('enabled lairs spawn capped private moving mobs, render on both clients, re
 
       await one.screenshot({ path: testInfo.outputPath('lairs-running-desktop-en.png'), fullPage: true })
       await two.screenshot({ path: testInfo.outputPath('lairs-running-polish-320-reduced.png'), fullPage: true })
-      const admission = await admissionBaseline(two)
-      expect(admission).not.toBeNull()
-      const framesBeforeReconnect = group.games[1].frames.length
-      await disconnectTransport(two)
-      await expect.poll(async () => (await admissionBaseline(two))?.index ?? 0)
-        .toBeGreaterThan(admission!.index)
-      const restored = (await admissionBaseline(two))!
-      expect(restored).toMatchObject({
-        roomId: admission!.roomId, seat: 'two', hasState: true, stableCapability: true,
-      })
-      expect(restored.lairs).toHaveLength(2)
-      expect(restored.mobs.length).toBeGreaterThan(0)
-      restored.mobs.forEach(expectPrivateNavigation)
-      await expect.poll(() => group.games[1].frames.length).toBeGreaterThan(framesBeforeReconnect)
-      expect(latestSnapshot(group.games[1])!.state.mobs.length).toBeGreaterThan(0)
 
       await one.getByRole('region', { name: 'Grenadiers courtyard' }).click()
       await one.keyboard.press('Space')

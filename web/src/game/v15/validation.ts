@@ -3,6 +3,7 @@ import validateServer from '../../validation/generated/gameplay-v15.mjs'
 import { effectSemanticError, expandedProfileSemanticErrorFor, itemSetSemanticError,
   type GameplayProfileSemanticError } from '../validation/profileSemantics'
 import { roomLifecycleSemanticError } from '../validation/roomLifecycleSemantics'
+import { messageStateBindingError } from './messageStateBinding'
 import { ITEM_IDS, type GameServerMessage, type GameState, type RoomView, type Seat,
   type WireEvent } from './schema'
 
@@ -10,7 +11,7 @@ type SemanticError = GameplayProfileSemanticError
   | 'invalidConfiguration' | 'invalidControllerMetadata' | 'invalidFrozenState'
   | 'invalidLifecycle'
   | 'invalidOilBarrels' | 'invalidPersonalAdmission' | 'invalidRoster'
-  | 'invalidStormEnvironment' | 'invalidTeleportMarker' | 'invalidWorldState'
+  | 'invalidStateBinding' | 'invalidStormEnvironment' | 'invalidTeleportMarker' | 'invalidWorldState'
 export type GameplayV15ValidationResult =
   | { valid: true; value: GameServerMessage }
   | { valid: false; source: 'schema'; errors: ErrorObject[] }
@@ -211,6 +212,8 @@ function semanticError(message: GameServerMessage): SemanticError | null {
   if (!supportedRoomProfile(room)) return 'unsupportedProfile'
   const lifecycle = roomLifecycleSemanticError(room)
   if (lifecycle) return lifecycle
+  const binding = messageStateBindingError(message)
+  if (binding) return binding
   if (message.type === 'admitted') {
     const own = room.seats.find(({ seat }) => seat === message.youSeat)
     if (own?.controller.type !== 'human' || own.connection.type !== 'connected') return 'invalidPersonalAdmission'

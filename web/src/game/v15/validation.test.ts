@@ -12,6 +12,7 @@ function v15Snapshot(stormCloud = true): Snapshot {
   message.room.rulesVersion = 7
   message.room.configuration.environment = { stormCloud }
   message.room.settings.environment = { stormCloud }
+  message.state.physicalTick = message.room.tick
   message.state.stormCloud = stormCloud ? {
     position: { x: 7_680, y: 6_656 }, direction: 'east', legRemainingTicks: 128,
   } : null

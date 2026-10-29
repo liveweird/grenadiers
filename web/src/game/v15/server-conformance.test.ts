@@ -144,7 +144,14 @@ describe('Rust-produced gameplay v15 server conformance', () => {
       type: 'matchResult', endedAt: 181,
       result: { type: 'winner', seat: 'one', reason: 'roundWins' }, rematchAt: 361,
     }
+    frame.state.physicalTick = 181
     expect(validateGameplayV15ServerMessage(frame)).toMatchObject({ valid: true })
+
+    const wrongPhysicalTick = structuredClone(frame)
+    wrongPhysicalTick.state.physicalTick = 180
+    expect(validateGameplayV15ServerMessage(wrongPhysicalTick)).toEqual({
+      valid: false, source: 'semantics', error: 'invalidStateBinding',
+    })
 
     const badWinner = structuredClone(frame)
     if (badWinner.room.phase.type !== 'matchResult') throw new Error('expected terminal phase')
@@ -155,7 +162,98 @@ describe('Rust-produced gameplay v15 server conformance', () => {
     frame.room.phase.rematchAt += 1
     expect(validateGameplayV15ServerMessage(frame)).toMatchObject({ valid: false })
   })
+})
 
+describe('gameplay v15 message-state binding', () => {
+  it('binds snapshot and admission bodies to phases and retained-state boundaries', () => {
+    const waiting = structuredClone(frames.get('disabled-11x9-cpu18-admission'))
+    const running = snapshot('disabled11x9Cpu18-one')
+    if (waiting?.type !== 'admitted') throw new Error('missing waiting admission fixture')
+
+    const waitingSnapshot: Snapshot = {
+      type: 'snapshot', room: waiting.room, state: running.state, events: [],
+    }
+    expect(validateGameplayV15ServerMessage(waitingSnapshot)).toEqual({
+      valid: false, source: 'semantics', error: 'invalidStateBinding',
+    })
+
+    const waitingWithAction = structuredClone(waiting)
+    waitingWithAction.lastActionId = 1
+    expect(validateGameplayV15ServerMessage(waitingWithAction)).toEqual({
+      valid: false, source: 'semantics', error: 'invalidStateBinding',
+    })
+
+    const waitingWithBody = structuredClone(waiting)
+    waitingWithBody.state = running.state
+    expect(validateGameplayV15ServerMessage(waitingWithBody)).toMatchObject({
+      valid: false, source: 'semantics', error: 'invalidStateBinding',
+    })
+
+    const runningWithoutBody: GameServerMessage = {
+      type: 'admitted', sequence: 1, room: running.room, youSeat: 'one',
+      resumeToken: 'c'.repeat(64), lastActionId: null, state: null,
+    }
+    expect(validateGameplayV15ServerMessage(runningWithoutBody)).toMatchObject({
+      valid: false, source: 'semantics', error: 'invalidStateBinding',
+    })
+
+    const wrongRunningTick = structuredClone(running)
+    wrongRunningTick.state.physicalTick += 1
+    expect(validateGameplayV15ServerMessage(wrongRunningTick)).toMatchObject({
+      valid: false, source: 'semantics', error: 'invalidStateBinding',
+    })
+
+    const interruptedSnapshot = structuredClone(waitingSnapshot)
+    interruptedSnapshot.room.seats[1]!.ready = false
+    interruptedSnapshot.room.phase = { type: 'interrupted', endedAt: 0, reason: 'internalError' }
+    expect(validateGameplayV15ServerMessage(interruptedSnapshot)).toMatchObject({
+      valid: false, source: 'semantics', error: 'invalidStateBinding',
+    })
+  })
+
+  it('allows only explicit null-admission phases and binds lastActionId to the current epoch', () => {
+    const waiting = structuredClone(frames.get('disabled-11x9-cpu18-admission'))
+    if (waiting?.type !== 'admitted') throw new Error('missing waiting admission fixture')
+    waiting.room.tick = 180
+    waiting.room.roundNumber = 1
+    waiting.room.seats[1]!.ready = false
+    waiting.room.phase = {
+      type: 'matchResult', endedAt: 180,
+      result: { type: 'interrupted', reason: 'internalError' }, rematchAt: 360,
+    }
+    expect(validateGameplayV15ServerMessage(waiting)).toMatchObject({ valid: true })
+    waiting.room.phase.result = { type: 'interrupted', reason: 'serverStopped' }
+    expect(validateGameplayV15ServerMessage(waiting)).toMatchObject({
+      valid: false, source: 'semantics', error: 'invalidStateBinding',
+    })
+
+    const retained = snapshot('disabled11x9Cpu18-one')
+    retained.room.tick = 181
+    retained.room.roundId = 2
+    retained.room.scores[0]!.wins = 1
+    retained.room.lastRound = {
+      roundId: 1, roundNumber: 1, endedAt: 180, result: { type: 'winner', seat: 'one' },
+    }
+    retained.room.phase = { type: 'result', holdUntil: 360 }
+    expect(validateGameplayV15ServerMessage(retained)).toMatchObject({ valid: true })
+    const wrongRetainedTick = structuredClone(retained)
+    wrongRetainedTick.state.physicalTick = retained.room.tick
+    expect(validateGameplayV15ServerMessage(wrongRetainedTick)).toMatchObject({
+      valid: false, source: 'semantics', error: 'invalidStateBinding',
+    })
+    const admission: GameServerMessage = {
+      type: 'admitted', sequence: 1, room: retained.room, youSeat: 'one',
+      resumeToken: 'c'.repeat(64), lastActionId: null, state: retained.state,
+    }
+    expect(validateGameplayV15ServerMessage(admission)).toMatchObject({ valid: true })
+    admission.lastActionId = 1
+    expect(validateGameplayV15ServerMessage(admission)).toMatchObject({
+      valid: false, source: 'semantics', error: 'invalidStateBinding',
+    })
+  })
+})
+
+describe('gameplay v15 environment mutation rejection', () => {
   it.each([
     ['environment mismatch', (frame: Snapshot) => {
       frame.room.configuration.environment.stormCloud = false

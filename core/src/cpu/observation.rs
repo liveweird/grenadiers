@@ -9,6 +9,8 @@ use crate::room::RoomSettings;
 use super::WorldId;
 pub use super::observation_environment::ObservedEnvironment;
 use super::observation_environment::validate_environment;
+pub use super::observation_lairs::ObservedLairs;
+use super::observation_lairs::validate_lairs;
 use super::observation_validation::{
     validate_actors, validate_arena, validate_bombs, validate_cells, validate_clock,
 };
@@ -208,6 +210,7 @@ pub struct ObservationParts {
 pub struct Observation {
     parts: ObservationParts,
     environment: Option<ObservedEnvironment>,
+    lairs: Option<ObservedLairs>,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -227,33 +230,11 @@ impl Observation {
         if !(1..=6).contains(&parts.rules.version) {
             return Err(ObservationError::InvalidActors);
         }
-        validate_clock(parts.tick, parts.rules)?;
-        validate_arena(parts.rules.version, &parts.arena)?;
-        validate_actors(
-            parts.rules.version,
-            parts.recipient,
-            &parts.arena,
-            &parts.actors,
-        )?;
-        validate_bombs(parts.tick, parts.rules.version, &parts.arena, &parts.bombs)?;
-        if parts.flames.len() > ARENA_CELL_COUNT {
-            return Err(ObservationError::InvalidFlames);
-        }
-        validate_cells(&parts.arena, &parts.flames, |value| value.cell)
-            .map_err(|()| ObservationError::InvalidFlames)?;
-        if parts.oil.len() > MAX_OIL_BARRELS {
-            return Err(ObservationError::InvalidOil);
-        }
-        validate_cells(&parts.arena, &parts.oil, |value| value.cell)
-            .map_err(|()| ObservationError::InvalidOil)?;
-        if parts.pickups.len() > ARENA_CELL_COUNT {
-            return Err(ObservationError::InvalidPickups);
-        }
-        validate_cells(&parts.arena, &parts.pickups, |value| value.cell)
-            .map_err(|()| ObservationError::InvalidPickups)?;
+        validate_common(&parts)?;
         Ok(Self {
             parts,
             environment: None,
+            lairs: None,
         })
     }
 
@@ -264,34 +245,33 @@ impl Observation {
         if parts.rules.version != 7 {
             return Err(ObservationError::InvalidActors);
         }
-        validate_clock(parts.tick, parts.rules)?;
-        validate_arena(parts.rules.version, &parts.arena)?;
-        validate_actors(
-            parts.rules.version,
-            parts.recipient,
-            &parts.arena,
-            &parts.actors,
-        )?;
-        validate_bombs(parts.tick, parts.rules.version, &parts.arena, &parts.bombs)?;
-        if parts.flames.len() > ARENA_CELL_COUNT {
-            return Err(ObservationError::InvalidFlames);
-        }
-        validate_cells(&parts.arena, &parts.flames, |value| value.cell)
-            .map_err(|()| ObservationError::InvalidFlames)?;
-        if parts.oil.len() > MAX_OIL_BARRELS {
-            return Err(ObservationError::InvalidOil);
-        }
-        validate_cells(&parts.arena, &parts.oil, |value| value.cell)
-            .map_err(|()| ObservationError::InvalidOil)?;
-        if parts.pickups.len() > ARENA_CELL_COUNT {
-            return Err(ObservationError::InvalidPickups);
-        }
-        validate_cells(&parts.arena, &parts.pickups, |value| value.cell)
-            .map_err(|()| ObservationError::InvalidPickups)?;
+        validate_common(&parts)?;
         validate_environment(&parts, &environment)?;
         Ok(Self {
             parts,
             environment: Some(environment),
+            lairs: None,
+        })
+    }
+
+    /// Constructs the rules-v8 recipient view. Overlay identity/count failures
+    /// use `InvalidActors` so every older exhaustive transport mapping remains
+    /// closed while v8 adds mob entity facts outside `ObservationParts`.
+    pub fn new_rules_v8(
+        parts: ObservationParts,
+        environment: ObservedEnvironment,
+        lairs: ObservedLairs,
+    ) -> Result<Self, ObservationError> {
+        if parts.rules.version != 8 {
+            return Err(ObservationError::InvalidActors);
+        }
+        validate_common(&parts)?;
+        validate_environment(&parts, &environment)?;
+        validate_lairs(&parts, &lairs)?;
+        Ok(Self {
+            parts,
+            environment: Some(environment),
+            lairs: Some(lairs),
         })
     }
 
@@ -306,6 +286,11 @@ impl Observation {
     }
 
     #[must_use]
+    pub const fn lairs(&self) -> Option<&ObservedLairs> {
+        self.lairs.as_ref()
+    }
+
+    #[must_use]
     pub fn into_parts(self) -> ObservationParts {
         self.parts
     }
@@ -317,11 +302,41 @@ impl Observation {
         let Self {
             mut parts,
             environment,
+            lairs,
         } = self;
         map(&mut parts);
-        match environment {
-            Some(environment) => Self::new_rules_v7(parts, environment),
-            None => Self::new(parts),
+        match (environment, lairs) {
+            (Some(environment), Some(lairs)) => Self::new_rules_v8(parts, environment, lairs),
+            (Some(environment), None) => Self::new_rules_v7(parts, environment),
+            (None, None) => Self::new(parts),
+            (None, Some(_)) => Err(ObservationError::InvalidActors),
         }
     }
+}
+
+fn validate_common(parts: &ObservationParts) -> Result<(), ObservationError> {
+    validate_clock(parts.tick, parts.rules)?;
+    validate_arena(parts.rules.version, &parts.arena)?;
+    validate_actors(
+        parts.rules.version,
+        parts.recipient,
+        &parts.arena,
+        &parts.actors,
+    )?;
+    validate_bombs(parts.tick, parts.rules.version, &parts.arena, &parts.bombs)?;
+    if parts.flames.len() > ARENA_CELL_COUNT {
+        return Err(ObservationError::InvalidFlames);
+    }
+    validate_cells(&parts.arena, &parts.flames, |value| value.cell)
+        .map_err(|()| ObservationError::InvalidFlames)?;
+    if parts.oil.len() > MAX_OIL_BARRELS {
+        return Err(ObservationError::InvalidOil);
+    }
+    validate_cells(&parts.arena, &parts.oil, |value| value.cell)
+        .map_err(|()| ObservationError::InvalidOil)?;
+    if parts.pickups.len() > ARENA_CELL_COUNT {
+        return Err(ObservationError::InvalidPickups);
+    }
+    validate_cells(&parts.arena, &parts.pickups, |value| value.cell)
+        .map_err(|()| ObservationError::InvalidPickups)
 }

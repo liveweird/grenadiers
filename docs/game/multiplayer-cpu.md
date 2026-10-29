@@ -57,6 +57,31 @@ lease validation. Legacy policies retain their original bulk checks and work acc
 
 Live controller selection follows the profile table above.
 
+## Lair profile boundaries
+
+`LAIRS_STANDARD` and `LAIRS_EASY` identify Utility19 on rules8. Its checked v16 observation
+adds public lair attempt timers and mob poses without targets, paths or hidden freeze deadlines.
+Use `survival::plan_lairs`; historical public policy, routing and survival entry points reject
+rules8 rather than returning movement without a mob-contact proof.
+
+The planner returns a separate finite contact lease beside the existing bomb/escape proof.
+Navigation covers movement and a stopped handoff; an optional plant must also cover its complete
+fuse/flame escape. It computes useful movement before trying optional tactics, charges failed
+work to the same allowance and returns that fallback when a plant cannot be certified. Pickups
+on the actual path shorten authorization to the collection update; unrelated pickups do not
+slow every command to one update. Changed movement physics require a fresh stopped observation.
+
+Mob envelopes conservatively include current mobs and earliest possible births, without assuming
+walls, future freezing or deaths make contact impossible. Teleporter landing checks cover full
+pickup-cell destinations and retained movement, including pending contents exposed by expiring
+fire. Unresolved Teleporter scenes can withhold optional planting. These are bounded proofs of
+the observed scene, rather than guarantees against arbitrary later rival actions.
+
+Lair controller integration must preserve ordinary admission identity, age, pose, effects,
+command epoch and stopped authority. Contact checks supplement those fences; they do not replace
+them or rebase a result to a newer observation. Hold deadlines remain unconditional even when
+workers or observations are late. See [CPU contracts](cpu-contracts.md).
+
 ## Focused checks
 
 Run `cargo test -p grenadiers-core cpu:: --lib` and

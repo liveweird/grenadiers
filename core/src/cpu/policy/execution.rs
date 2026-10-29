@@ -21,7 +21,8 @@ pub fn follow_committed_escape(
     observation: &Observation,
     memory: &UtilityMemory,
 ) -> Result<Option<ControlPlan>, PolicyError> {
-    Ok(match follow_checked_escape(observation, memory)? {
+    reject_rules_v8(observation)?;
+    Ok(match follow_checked_escape_inner(observation, memory)? {
         EscapeExecution::Continue(plan) | EscapeExecution::Wait(plan) => Some(plan),
         EscapeExecution::Completed => None,
         EscapeExecution::Invalidated => Some(ControlPlan::stop(*memory)),
@@ -30,6 +31,20 @@ pub fn follow_committed_escape(
 
 /// Distinguishes refuge waiting from an invalid route so a controller can replan.
 pub fn follow_checked_escape(
+    observation: &Observation,
+    memory: &UtilityMemory,
+) -> Result<EscapeExecution, PolicyError> {
+    reject_rules_v8(observation)?;
+    follow_checked_escape_inner(observation, memory)
+}
+
+fn reject_rules_v8(observation: &Observation) -> Result<(), PolicyError> {
+    (observation.parts().rules.version != 8)
+        .then_some(())
+        .ok_or(PolicyError::InvalidObservation)
+}
+
+fn follow_checked_escape_inner(
     observation: &Observation,
     memory: &UtilityMemory,
 ) -> Result<EscapeExecution, PolicyError> {

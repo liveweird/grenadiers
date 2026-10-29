@@ -12,6 +12,7 @@ use crate::{
     round_seed::RoundSeedSource,
 };
 
+use super::normalized_settings::NormalizedSettings;
 use super::profile::ReplayProfile;
 use super::record::{ActionSource, Journal, Operation, ReplayAction, ReplayStatus, ReplayV4Header};
 
@@ -40,13 +41,7 @@ pub(in crate::game::rooms) struct NormalizedRecord {
 #[derive(Clone, Copy)]
 pub(in crate::game::rooms) enum NormalizedOperation {
     Legacy(Operation),
-    EnvironmentSettings {
-        seat: grenadiers_core::game::SeatId,
-        epoch: u64,
-        settings_revision: u32,
-        settings: grenadiers_core::room::RoomSettings,
-        environment: grenadiers_core::game::StormCloudConfig,
-    },
+    Settings(NormalizedSettings),
 }
 
 pub(in crate::game::rooms) fn verify_exact(
@@ -169,16 +164,7 @@ pub(in crate::game::rooms) fn execute_normalized(
         let before = runtime.replay_inspection().simulation.map(|sim| sim.epoch);
         match record.operation {
             NormalizedOperation::Legacy(operation) => apply(&mut runtime, operation)?,
-            NormalizedOperation::EnvironmentSettings {
-                seat,
-                epoch,
-                settings_revision,
-                settings,
-                environment,
-            } => runtime
-                .update_environment_settings(seat, epoch, settings_revision, settings, environment)
-                .map(|_| ())
-                .map_err(|_| ReplayError::Runtime)?,
+            NormalizedOperation::Settings(settings) => settings.apply(&mut runtime)?,
         }
         marker_due = runtime
             .replay_inspection()

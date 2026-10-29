@@ -24,6 +24,7 @@ separate compatibility axes. In particular, rules profile 5 is not a gameplay-v5
 | v13 | Retained Rust/browser adapter, schema, conformance fixtures and compatibility guide. | Easy/Standard selection, consistent two-seat controller metadata and inherited physical/privacy semantics. No server runtime accepts v13. |
 | v14 | Retained Rust/browser adapter, standalone validator and archived E2E fixtures. | Checked two-to-four-seat configuration, canonical seat/score arrays, rules-6 projection and inherited recipient privacy; rejected before credential claim. |
 | v15 | Rust `core::protocol::v15`; live server connection/socket/command/dispatcher, browser client, standalone validator and E2E suites. | Actual rules7 binding, cloud/timer privacy, lifecycle and room/state binding, and rejection of older versions before credential claim. This is the sole live network contract. |
+| v16 | Rust `core::protocol::v16`, generated schema, standalone browser validator and shared conformance corpus. | Exact rules8 binding, canonical lairs, bounded mob counts/footprints, private Stopwatch freeze facts and checked CPU observations. The network endpoint remains v15. |
 
 The shared client corpus exercises the closed client-message union across retained v8-v11 Rust
 parsers, schemas and browser validators. The server corpus checks actual Rust-produced

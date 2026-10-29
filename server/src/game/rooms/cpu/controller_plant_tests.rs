@@ -295,6 +295,7 @@ fn inject(controller: &mut CpuController, basis: Observation, plan: SurvivalPlan
     sender
         .send(PlanResult {
             plan,
+            contact: None,
             basis,
             rng,
             escape_origin: None,

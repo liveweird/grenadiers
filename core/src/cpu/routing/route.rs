@@ -42,6 +42,9 @@ pub fn plan_route(
     request: RouteRequest,
     work: &mut WorkBudget,
 ) -> Result<RouteCertificate, RouteFailure> {
+    if observation.parts().rules.version == 8 {
+        return Err(RouteFailure::InvalidRequest);
+    }
     plan_route_seeded(observation, &[forecast], request, None, None, None, work)
 }
 

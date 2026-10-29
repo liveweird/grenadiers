@@ -22,10 +22,45 @@ pub fn plan_ordinary_plant(
     request: PlantRequest,
     work: &mut WorkBudget,
 ) -> Result<PlantCertificate, PlantFailure> {
+    if observation.parts().rules.version == 8 {
+        return Err(PlantFailure::Unsupported);
+    }
+    plan_timed_plant(observation, memory, request, work, None)
+}
+
+pub(crate) fn plan_lair_ordinary_plant(
+    observation: &Observation,
+    memory: &ObservedHazardMemory,
+    request: PlantRequest,
+    work: &mut WorkBudget,
+) -> Result<PlantCertificate, PlantFailure> {
+    validate_lair_observation(observation)?;
     plan_timed_plant(observation, memory, request, work, None)
 }
 
 pub fn plan_timed_weapon_plant(
+    observation: &Observation,
+    memory: &ObservedHazardMemory,
+    request: PlantRequest,
+    work: &mut WorkBudget,
+) -> Result<PlantCertificate, PlantFailure> {
+    if observation.parts().rules.version == 8 {
+        return Err(PlantFailure::Unsupported);
+    }
+    plan_lair_or_legacy_weapon_plant(observation, memory, request, work)
+}
+
+pub(crate) fn plan_lair_timed_weapon_plant(
+    observation: &Observation,
+    memory: &ObservedHazardMemory,
+    request: PlantRequest,
+    work: &mut WorkBudget,
+) -> Result<PlantCertificate, PlantFailure> {
+    validate_lair_observation(observation)?;
+    plan_lair_or_legacy_weapon_plant(observation, memory, request, work)
+}
+
+fn plan_lair_or_legacy_weapon_plant(
     observation: &Observation,
     memory: &ObservedHazardMemory,
     request: PlantRequest,
@@ -42,6 +77,12 @@ pub fn plan_timed_weapon_plant(
         | SpecialWeapon::Power => return Err(PlantFailure::Unsupported),
     };
     plan_timed_plant(observation, memory, request, work, Some((weapon, blast)))
+}
+
+fn validate_lair_observation(observation: &Observation) -> Result<(), PlantFailure> {
+    (observation.parts().rules.version == 8 && observation.lairs().is_some())
+        .then_some(())
+        .ok_or(PlantFailure::Unsupported)
 }
 
 fn plan_timed_plant(

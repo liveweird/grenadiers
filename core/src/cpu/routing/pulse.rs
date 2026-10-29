@@ -1,15 +1,19 @@
 use std::collections::BTreeSet;
 
+use crate::cpu::MobContactLease;
 use crate::cpu::forecast::{HazardForecast, TickWindow};
+use crate::cpu::lair_contact::MobContactEnvelope;
 use crate::cpu::{MovementIntent, Observation, WorkBudget};
-use crate::game::geometry::MovementSegment;
-use crate::game::geometry::position_overlaps_cell;
 use crate::game::{CellId, EntityId, Tick};
 
 use super::motion::{Motion, advance};
-use super::pulse_geometry::direction_bit;
-use super::safety::{footprint_cells, static_segment_clear, stationary_segment};
-use super::types::{PoseBounds, PulseLease, PulseRequest};
+use super::pulse_support::{
+    aggregate, aggregate_motion, certify_wait_before_start, contact_envelope, contact_failure,
+    guard_teleporter_collection, one_tick, reject_pickups, reject_teleporter_pickups,
+    take_segments, update_origin, validate_origin_forecast,
+};
+use super::safety::{static_segment_clear, stationary_segment};
+use super::types::{PulseLease, PulseRequest};
 use super::validation::{self, Context};
 use super::{RouteAssurance, RouteFailure};
 
@@ -30,7 +34,51 @@ pub fn certify_pulse(
     request: PulseRequest,
     work: &mut WorkBudget,
 ) -> Result<PulseLease, RouteFailure> {
-    certify_pulse_inner(observation, forecast, request, None, work)
+    if observation.parts().rules.version == 8 {
+        return Err(RouteFailure::InvalidRequest);
+    }
+    certify_pulse_inner(observation, forecast, request, None, false, None, work)
+}
+
+pub fn certify_lair_pulse(
+    observation: &Observation,
+    forecast: &HazardForecast,
+    request: PulseRequest,
+    work: &mut WorkBudget,
+) -> Result<(PulseLease, MobContactLease), RouteFailure> {
+    let envelope = contact_envelope(observation, request, work)?;
+    let lease = certify_pulse_inner(
+        observation,
+        forecast,
+        request,
+        None,
+        false,
+        Some(&envelope),
+        work,
+    )?;
+    Ok((
+        lease,
+        MobContactLease::new(envelope, request.stopped_safe_until),
+    ))
+}
+
+pub(crate) fn certify_lair_contact_pulse(
+    observation: &Observation,
+    forecast: &HazardForecast,
+    request: PulseRequest,
+    work: &mut WorkBudget,
+) -> Result<MobContactLease, RouteFailure> {
+    let envelope = contact_envelope(observation, request, work)?;
+    let _ = certify_pulse_inner(
+        observation,
+        forecast,
+        request,
+        None,
+        true,
+        Some(&envelope),
+        work,
+    )?;
+    Ok(MobContactLease::new(envelope, request.stopped_safe_until))
 }
 
 pub(crate) fn certify_escape_pulse(
@@ -41,7 +89,15 @@ pub(crate) fn certify_escape_pulse(
     work: &mut WorkBudget,
 ) -> Result<PulseLease, RouteFailure> {
     validate_origin_forecast(forecast, origin)?;
-    certify_pulse_inner(observation, forecast, request, Some(origin), work)
+    certify_pulse_inner(
+        observation,
+        forecast,
+        request,
+        Some(origin),
+        false,
+        None,
+        work,
+    )
 }
 
 fn certify_pulse_inner(
@@ -49,6 +105,8 @@ fn certify_pulse_inner(
     forecast: &HazardForecast,
     request: PulseRequest,
     origin: Option<PulseOriginGrace>,
+    allow_pickups: bool,
+    contact: Option<&MobContactEnvelope>,
     work: &mut WorkBudget,
 ) -> Result<PulseLease, RouteFailure> {
     let context = validation::validate(
@@ -63,7 +121,31 @@ fn certify_pulse_inner(
     let mut scenarios = Vec::new();
     let mut assumptions = BTreeSet::new();
 
-    certify_wait_before_start(&context, forecast, request, origin, work, &mut assumptions)?;
+    certify_wait_before_start(
+        &context,
+        forecast,
+        request,
+        origin,
+        allow_pickups,
+        contact.is_some(),
+        work,
+        &mut assumptions,
+    )?;
+    if let Some(contact) = contact {
+        let last_start = request
+            .start_window
+            .end
+            .0
+            .checked_sub(1)
+            .map(Tick)
+            .ok_or(RouteFailure::InvalidRequest)?;
+        if !contact
+            .stationary_is_clear_until(context.actor.position, last_start, work)
+            .map_err(contact_failure)?
+        {
+            return Err(RouteFailure::NoRoute);
+        }
+    }
     for start in request.start_window.start.0..request.start_window.end.0 {
         let start = Tick(start);
         let mut motion = initial.clone();
@@ -89,7 +171,21 @@ fn certify_pulse_inner(
             super::storm::charge_tick(context.storm, work)?;
             let segments = advance(&context, &mut motion, request.movement, tick)?;
             take_segments(work, &segments, forecast.dimensions())?;
-            reject_pickups(observation, &segments)?;
+            if contact.is_some() {
+                guard_teleporter_collection(observation, one_tick(tick)?, &segments, work)?;
+            }
+            if !allow_pickups {
+                reject_pickups(observation, &segments)?;
+            } else {
+                reject_teleporter_pickups(observation, &segments)?;
+            }
+            if let Some(contact) = contact
+                && !contact
+                    .sweep_is_clear(tick, &segments, work)
+                    .map_err(contact_failure)?
+            {
+                return Err(RouteFailure::NoRoute);
+            }
             if !static_segment_clear(observation, &segments) {
                 return Err(RouteFailure::NoRoute);
             }
@@ -120,8 +216,25 @@ fn certify_pulse_inner(
             work,
             storm_deadlines: &mut storm_deadlines,
             assumptions: &mut assumptions,
+            guard_teleport: contact.is_some(),
         },
     )?;
+    if let Some(contact) = contact {
+        let last_safe_update = request
+            .stopped_safe_until
+            .0
+            .checked_sub(1)
+            .map(Tick)
+            .ok_or(RouteFailure::InvalidRequest)?;
+        for (_, motion, _) in &scenarios {
+            if !contact
+                .stationary_is_clear_until(motion.position, last_safe_update, work)
+                .map_err(contact_failure)?
+            {
+                return Err(RouteFailure::NoRoute);
+            }
+        }
+    }
     if !assumptions.is_empty() && request.hold_ticks > MAX_CONDITIONAL_TICKS {
         return Err(RouteFailure::NoRoute);
     }
@@ -180,37 +293,11 @@ fn validate_request(
     Ok(())
 }
 
-fn certify_wait_before_start(
-    context: &Context<'_>,
-    forecast: &HazardForecast,
-    request: PulseRequest,
-    origin: Option<PulseOriginGrace>,
-    work: &mut WorkBudget,
-    assumptions: &mut BTreeSet<EntityId>,
-) -> Result<(), RouteFailure> {
-    let end = request.start_window.end;
-    let start = Tick(forecast.basis_tick().0 + 1);
-    if start >= end {
-        return Ok(());
-    }
-    let segment = stationary_segment(context.actor.position);
-    take_segments(work, &segment, forecast.dimensions())?;
-    reject_pickups(context.observation, &segment)?;
-    assumptions.extend(super::safety::check_segments_with_grace(
-        forecast,
-        &segment,
-        TickWindow { start, end },
-        request.mode,
-        origin.map(|value| value.cell),
-        None,
-    )?);
-    Ok(())
-}
-
 struct SuffixEvidence<'a> {
     work: &'a mut WorkBudget,
     storm_deadlines: &'a mut [(Tick, Vec<Option<super::storm::DeadlineBounds>>)],
     assumptions: &'a mut BTreeSet<EntityId>,
+    guard_teleport: bool,
 }
 
 fn certify_stopped_suffix(
@@ -232,6 +319,17 @@ fn certify_stopped_suffix(
         );
         if stopped >= request.stopped_safe_until {
             continue;
+        }
+        if evidence.guard_teleport {
+            guard_teleporter_collection(
+                context.observation,
+                TickWindow {
+                    start: stopped,
+                    end: request.stopped_safe_until,
+                },
+                &stationary_segment(motion.position),
+                evidence.work,
+            )?;
         }
         if context.storm.is_none() {
             let segment = stationary_segment(motion.position);
@@ -271,104 +369,6 @@ fn certify_stopped_suffix(
         }
     }
     Ok(())
-}
-
-fn reject_pickups(
-    observation: &Observation,
-    segments: &[MovementSegment],
-) -> Result<(), RouteFailure> {
-    if observation.parts().pickups.iter().any(|pickup| {
-        segments
-            .iter()
-            .any(|segment| segment.overlaps_cell(pickup.cell))
-    }) {
-        Err(RouteFailure::Unsupported)
-    } else {
-        Ok(())
-    }
-}
-
-fn aggregate_motion(values: &[(Tick, Motion, bool)]) -> Result<PoseBounds, RouteFailure> {
-    let motions = values
-        .iter()
-        .map(|(_, motion, _)| motion.clone())
-        .collect::<Vec<_>>();
-    aggregate(&motions)
-}
-
-fn validate_origin_forecast(
-    forecast: &HazardForecast,
-    origin: PulseOriginGrace,
-) -> Result<(), RouteFailure> {
-    let cell = forecast
-        .cell(origin.cell)
-        .ok_or(RouteFailure::InvalidRequest)?;
-    if cell.uncertainty.iter().any(|uncertain| {
-        matches!(uncertain.kind, crate::cpu::forecast::HazardKind::Blocking)
-            && !matches!(
-                uncertain.reason,
-                crate::cpu::forecast::UncertaintyReason::BombMotion(id) if id == origin.bomb_id
-            )
-    }) {
-        return Err(RouteFailure::NoRoute);
-    }
-    Ok(())
-}
-
-fn update_origin(
-    origin: Option<PulseOriginGrace>,
-    segments: &[MovementSegment],
-    active: &mut bool,
-) -> Result<(), RouteFailure> {
-    let Some(origin) = origin else {
-        return Ok(());
-    };
-    for segment in segments {
-        let start_inside = position_overlaps_cell(segment.start(), origin.cell);
-        if *active && !start_inside {
-            *active = false;
-        }
-        if !*active && segment.overlaps_cell(origin.cell) {
-            return Err(RouteFailure::NoRoute);
-        }
-        if *active && !position_overlaps_cell(segment.end(), origin.cell) {
-            *active = false;
-        }
-    }
-    Ok(())
-}
-
-fn aggregate(values: &[Motion]) -> Result<PoseBounds, RouteFailure> {
-    let first = values.first().ok_or(RouteFailure::Capacity)?;
-    let mut min = first.position;
-    let mut max = first.position;
-    let mut mask = 0;
-    for value in values {
-        min.x = min.x.min(value.position.x);
-        min.y = min.y.min(value.position.y);
-        max.x = max.x.max(value.position.x);
-        max.y = max.y.max(value.position.y);
-        mask |= direction_bit(value.heading);
-    }
-    PoseBounds::new(min, max, mask).ok_or(RouteFailure::Capacity)
-}
-
-fn take_segments(
-    work: &mut WorkBudget,
-    segments: &[MovementSegment],
-    dimensions: (u16, u16),
-) -> Result<(), RouteFailure> {
-    let units = u32::try_from(footprint_cells(segments, dimensions).len())
-        .map_err(|_| RouteFailure::Capacity)?;
-    work.try_take(units.max(1))
-        .map_err(|_| RouteFailure::WorkExhausted)
-}
-
-fn one_tick(tick: Tick) -> Result<TickWindow, RouteFailure> {
-    Ok(TickWindow {
-        start: tick,
-        end: Tick(tick.0.checked_add(1).ok_or(RouteFailure::InvalidRequest)?),
-    })
 }
 
 #[cfg(test)]

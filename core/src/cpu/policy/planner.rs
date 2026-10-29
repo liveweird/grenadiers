@@ -28,6 +28,31 @@ pub fn plan(
     rng: &mut CpuRng,
     work: &mut WorkBudget,
 ) -> Result<ControlPlan, PolicyError> {
+    if observation.parts().rules.version == 8 {
+        return Err(PolicyError::InvalidObservation);
+    }
+    plan_inner(observation, memory, rng, work, true)
+}
+
+pub(crate) fn plan_lairs(
+    observation: &Observation,
+    memory: &UtilityMemory,
+    rng: &mut CpuRng,
+    work: &mut WorkBudget,
+) -> Result<ControlPlan, PolicyError> {
+    if observation.parts().rules.version != 8 || observation.lairs().is_none() {
+        return Err(PolicyError::InvalidObservation);
+    }
+    plan_inner(observation, memory, rng, work, false)
+}
+
+fn plan_inner(
+    observation: &Observation,
+    memory: &UtilityMemory,
+    rng: &mut CpuRng,
+    work: &mut WorkBudget,
+    follow_committed: bool,
+) -> Result<ControlPlan, PolicyError> {
     let parts = observation.parts();
     let key = MemoryKey {
         world: parts.world,
@@ -36,7 +61,7 @@ pub fn plan(
     if memory.key() != key || rng.key() != key {
         return Err(PolicyError::IdentityMismatch);
     }
-    if let Some(committed) = follow_committed_escape(observation, memory)? {
+    if follow_committed && let Some(committed) = follow_committed_escape(observation, memory)? {
         return Ok(committed);
     }
     let actor = parts

@@ -41,5 +41,11 @@ motion and timers. Checked timer/ID failures roll back the complete simulation a
 exposes IDs, lair indices, positions, headings and a frozen boolean, without pursuit targets or
 Stopwatch deadlines. These getters do not change existing public-state or actor DTO layouts.
 
+The [gameplay16 contract](protocol-v16.md) checks canonical overlays and recipient privacy.
+Its [CPU19 boundary](multiplayer-cpu.md#lair-profile-boundaries) adds finite NPC/spawn contact
+proofs; the explicit roster runtime and private replay7 regenerate the same simulation from
+accepted inputs. The artist sheet includes `terrain.lair` and four `mob.<direction>` poses;
+see the [artist handoff](../../assets/art/README.md).
+
 Run `cargo test --locked -p grenadiers-core lair --lib` and repeat with `--release` for focused
 movement, layout, interaction and rollback regressions.

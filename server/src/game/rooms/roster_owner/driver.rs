@@ -52,6 +52,7 @@ impl Driver {
                 .legacy_room()
                 .map(|room| &room.room_id)
                 .or_else(|| initial.environment_room().map(|room| &room.room_id))
+                .or_else(|| initial.lair_room().map(|room| &room.room_id))
                 .expect("owner requires a checked room publication")
                 .clone(),
             runtime,

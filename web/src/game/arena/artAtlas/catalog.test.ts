@@ -34,9 +34,9 @@ describe('art atlas catalogue', () => {
       'reserved.actor.one.death', 'reserved.actor.two.death',
       'reserved.terrain.block.destruction', 'reserved.pickup.collection',
     ])
-    expect(manifest.frames).toHaveLength(150)
-    expect(manifest.frames.filter(({ status }) => status === 'baseline')).toHaveLength(146)
-    expect(manifest.sheet).toEqual({ width: 1120, height: 1680, slotSize: 112, columns: 10 })
+    expect(manifest.frames).toHaveLength(155)
+    expect(manifest.frames.filter(({ status }) => status === 'baseline')).toHaveLength(151)
+    expect(manifest.sheet).toEqual({ width: 1120, height: 1792, slotSize: 112, columns: 10 })
     expect(Object.keys(manifest.animations).filter((id) => id.endsWith('.walk'))).toHaveLength(16)
   })
 
@@ -49,7 +49,7 @@ describe('art atlas catalogue', () => {
       [1, 2].map((frame) => `bomb.shell.timed.${blast}.${frame}`))
 
     expect(manifest.frames.slice(0, 111)).toEqual(adoptedSource.frames.slice(0, 111))
-    expect(manifest.frames.slice(111).map(({ id }) => id)).toEqual([
+    expect(manifest.frames.slice(111, 150).map(({ id }) => id)).toEqual([
       ...walking, ...bombs, 'environment.stormCloud',
     ])
     expect(manifest.animations['actor.one.north.walk']).toEqual({
@@ -74,6 +74,20 @@ describe('art atlas catalogue', () => {
       localBounds: { x: -40, y: -40, width: 80, height: 80 },
       pivot: { x: 40, y: 40 },
     })
+  })
+
+  it('appends lairs and four mob directions in a new row with shared foot anchors', () => {
+    const frames = createSourceManifest().frames
+    expect(frames.slice(0, 150)).toEqual(adoptedSource.frames.slice(0, 150))
+    expect(frames.slice(150).map(({ id }) => id)).toEqual([
+      'terrain.lair', 'mob.north', 'mob.east', 'mob.south', 'mob.west',
+    ])
+    expect(frames[150].sourceRect).toEqual({ x: 0, y: 1680, width: 48, height: 48 })
+    for (const [index, frame] of frames.slice(151).entries()) {
+      expect(frame.sourceRect).toEqual({ x: (index + 1) * 112, y: 1680, width: 80, height: 80 })
+      expect(frame.pivot).toEqual({ x: 40, y: 44 })
+      expect(frame.footAnchor).toEqual({ x: 40, y: 65 })
+    }
   })
 
   it('appends appearances three and four without moving any legacy atlas slot', () => {

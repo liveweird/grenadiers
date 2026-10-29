@@ -25,6 +25,7 @@ impl CpuController {
         sender
             .send(PlanResult {
                 plan,
+                contact: None,
                 basis,
                 rng: self.rng.as_ref().expect("world rng initialized").clone(),
                 escape_origin: None,

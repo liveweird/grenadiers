@@ -1,10 +1,11 @@
 use crate::cpu::forecast::ObservedHazardMemory;
 use crate::cpu::policy::{ControlPlan, UtilityMemory};
 use crate::cpu::routing::{
-    PlantRequest, RouteLimits, plan_ordinary_plant, plan_timed_weapon_plant,
+    PlantRequest, RouteLimits, plan_lair_ordinary_plant, plan_lair_timed_weapon_plant,
+    plan_ordinary_plant, plan_timed_weapon_plant,
 };
-use crate::cpu::{Intent, ManualIntent, Observation, WorkBudget};
-use crate::game::Tick;
+use crate::cpu::{BombKnowledge, Intent, ManualIntent, Observation, WorkBudget};
+use crate::game::{OilBarrelState, PickupKind, Tick};
 
 use super::compatibility::actor;
 use super::{ExecutionCertificate, SurvivalPlan};
@@ -55,6 +56,9 @@ fn certified_plant_inner(
     if ordinary.intent.manual == Some(ManualIntent::Equipment) {
         return None;
     }
+    if observation.parts().rules.version == 8 && !teleporter_plant_supported(observation) {
+        return None;
+    }
     if !super::plant_value::could_be_useful(observation, work) {
         return None;
     }
@@ -65,8 +69,13 @@ fn certified_plant_inner(
         first_movement: ordinary.intent.movement,
         limits: RouteLimits::default(),
     };
-    let certificate = if actor(observation)?.weapon.is_some() {
+    let lairs = observation.parts().rules.version == 8;
+    let certificate = if actor(observation)?.weapon.is_some() && lairs {
+        plan_lair_timed_weapon_plant(observation, history, request, work)
+    } else if actor(observation)?.weapon.is_some() {
         plan_timed_weapon_plant(observation, history, request, work)
+    } else if lairs {
+        plan_lair_ordinary_plant(observation, history, request, work)
     } else {
         plan_ordinary_plant(observation, history, request, work)
     }
@@ -85,4 +94,19 @@ fn certified_plant_inner(
             execution: Some(ExecutionCertificate::Plant(Box::new(certificate))),
         }
     })
+}
+
+fn teleporter_plant_supported(observation: &Observation) -> bool {
+    let parts = observation.parts();
+    !parts.rules.settings.enabled_items().contains_teleporter()
+        || (parts
+            .pickups
+            .iter()
+            .all(|pickup| pickup.kind != PickupKind::Teleporter)
+            && parts.flames.is_empty()
+            && matches!(&parts.bombs, BombKnowledge::Visible(bombs) if bombs.is_empty())
+            && parts
+                .oil
+                .iter()
+                .all(|oil| oil.state != OilBarrelState::Burning))
 }

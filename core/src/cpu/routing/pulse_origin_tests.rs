@@ -1,5 +1,5 @@
 use super::*;
-use crate::game::Position;
+use crate::game::{MovementSegment, Position};
 
 #[test]
 fn origin_grace_is_consumed_on_exit_and_cannot_be_reentered() {

@@ -30,6 +30,7 @@ The browser validates these messages and drives the playable generated-map match
 | v13 | [Compatibility guide](protocol-v13.md) | Archived contract |
 | v14 | [Archived multiplayer contract](protocol-v14.md) | Archived/rejected before credential claim |
 | v15 | [Environment contract](protocol-v15.md) | Live multiplayer contract |
+| v16 | [Lair contract](protocol-v16.md) | Checked core contract; endpoint remains v15 |
 
 ## Authentication and compatibility
 

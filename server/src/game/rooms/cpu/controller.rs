@@ -5,7 +5,6 @@ use std::sync::{
 };
 
 use grenadiers_core::cpu::forecast::ObservedHazardMemory;
-use grenadiers_core::cpu::policy::{ControlPlan, EscapeExecution, MAX_HOLD_TICKS, PolicyError};
 use grenadiers_core::cpu::survival::{CommittedPulse, CommittedRoute, PlantEscapeOrigin};
 use grenadiers_core::cpu::{
     CpuMemory, CpuRng, DecisionId, Intent, Observation, WorldId, policy::UtilityMemory,
@@ -31,6 +30,7 @@ pub(in crate::game::rooms) struct AcceptedPlan {
     next_rng: CpuRng,
     committed_pulse: Option<CommittedPulse>,
     committed_route: Option<CommittedRoute>,
+    contact: Option<grenadiers_core::cpu::MobContactLease>,
     certified_manual: Option<grenadiers_core::cpu::ManualIntent>,
     escape_origin: bool,
     ordinary_navigation: bool,
@@ -60,6 +60,7 @@ pub(in crate::game::rooms) struct CpuController {
     settled_stop_tick: Option<Tick>,
     committed_pulse: Option<CommittedPulse>,
     committed_route: Option<CommittedRoute>,
+    committed_contact: Option<grenadiers_core::cpu::MobContactLease>,
     committed_route_epoch: Option<u64>,
     escape_origin: Option<PlantEscapeOrigin>,
     escape_origin_epoch: Option<u64>,
@@ -94,6 +95,7 @@ impl CpuController {
             settled_stop_tick: None,
             committed_pulse: None,
             committed_route: None,
+            committed_contact: None,
             committed_route_epoch: None,
             escape_origin: None,
             escape_origin_epoch: None,
@@ -193,6 +195,7 @@ impl CpuController {
             .as_ref()
             .map(|_| accepted.decision.command_epoch);
         self.committed_route = accepted.committed_route;
+        self.committed_contact = accepted.contact;
         if !manual_admitted {
             match accepted.certified_manual {
                 Some(grenadiers_core::cpu::ManualIntent::Bomb) => {
@@ -220,37 +223,6 @@ impl CpuController {
 
     pub(in crate::game::rooms) const fn is_escaping(&self) -> bool {
         self.escaping
-    }
-
-    pub(in crate::game::rooms) fn follow_escape(
-        &mut self,
-        observation: &Observation,
-    ) -> Result<EscapeExecution, PolicyError> {
-        if !self.escaping {
-            return Ok(EscapeExecution::Completed);
-        }
-        let execution = grenadiers_core::cpu::policy::follow_checked_escape(
-            observation,
-            self.memory.as_ref().expect("world memory initialized"),
-        )?;
-        if let EscapeExecution::Continue(plan) | EscapeExecution::Wait(plan) = execution {
-            if !(1..=MAX_HOLD_TICKS).contains(&plan.hold_ticks) || plan.intent.manual.is_some() {
-                return Err(PolicyError::InvalidObservation);
-            }
-            return Ok(execution);
-        }
-        self.escaping = false;
-        self.memory = Some(UtilityMemory::new(
-            self.memory
-                .as_ref()
-                .expect("world memory initialized")
-                .key(),
-        ));
-        Ok(execution)
-    }
-
-    pub(in crate::game::rooms) fn commit_escape(&mut self, plan: ControlPlan) {
-        self.memory = Some(plan.next_memory);
     }
 
     pub(in crate::game::rooms) fn cancel(&mut self) {
@@ -315,6 +287,7 @@ impl CpuController {
             next_rng: rng,
             committed_pulse: None,
             committed_route: None,
+            contact: None,
             certified_manual: None,
             escape_origin: false,
             ordinary_navigation: false,
@@ -349,6 +322,12 @@ mod pulse;
 
 #[path = "controller_cadence.rs"]
 mod cadence;
+
+#[path = "controller_contact.rs"]
+pub(in crate::game::rooms) mod contact;
+
+#[path = "controller_escape.rs"]
+mod escape;
 
 #[cfg(test)]
 #[path = "controller_test_support.rs"]

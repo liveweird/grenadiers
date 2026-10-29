@@ -8,6 +8,7 @@ mod clear_gap;
 mod compatibility;
 mod deadline;
 mod execution;
+mod lair_planner;
 mod manual_execution;
 mod origin;
 mod origin_planner;
@@ -19,6 +20,7 @@ mod steering;
 
 pub use compatibility::can_admit_ordinary;
 pub use execution::{CommittedPulse, PulseStatus};
+pub use lair_planner::{LairSurvivalPlan, plan_lairs};
 pub use manual_execution::ExecutionCertificate;
 pub use origin::PlantEscapeOrigin;
 pub use planner::{SurvivalPlan, plan, plan_with_origin};
@@ -53,3 +55,9 @@ mod multiplayer_rival_tests;
 
 #[cfg(test)]
 mod storm_planner_tests;
+
+#[cfg(test)]
+mod lair_planner_tests;
+
+#[cfg(test)]
+mod lair_pickup_execution_tests;

@@ -48,5 +48,21 @@ Simulation randomness uses an independent OS-generated private room root. Deriva
 uses ChaCha20 with the root key, the nonzero physical epoch as its 64-bit stream, and the first
 32 bytes as the round seed. Derivation does not advance shared state or depend on request order;
 arena fixtures and CPU streams cannot alter it. Roots and derived seeds redact debug output.
-The derivation remains version 1 for private replay formats 4–6, but production recording and
+The derivation remains version 1 for private replay formats 4–7, but production recording and
 export stay disabled.
+
+## Explicit lair runtime
+
+`RosterRuntime::new_lairs` selects a separate rules8 environment profile, including when lairs
+or clouds are disabled. It publishes checked gameplay16 admissions and snapshots; the ordinary
+live registry remains on rules7/gameplay15. Profile-specific settings entry points reject
+cross-profile updates and share the same atomic authority, revision and readiness transaction.
+Disabled lairs retain their numeric settings. Creator revocation, forming-seat replacement and
+the first-start lock retain the lifecycle rules above.
+
+Rules8 controllers require `LAIRS_STANDARD` or `LAIRS_EASY`. The worker returns its finite
+mob-contact lease with the bomb/escape proof and original observation. Admission keeps world,
+seat, pose, effects, command epoch, age and confirmed-stop fences. Continuing movement checks
+both proofs; a changed Teleporter marker or failed contact check withdraws authority. A timed
+hold still ends when observations or worker results are missing. See
+[CPU boundaries](multiplayer-cpu.md#lair-profile-boundaries).

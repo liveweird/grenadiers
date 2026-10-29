@@ -9,6 +9,7 @@ use crate::{
     game::rooms::{
         replay_v4::{
             Operation as LegacyOperation, ReplayAction as LegacyAction,
+            normalized_settings::NormalizedSettings,
             runner::{NormalizedOperation, NormalizedRecord, ReplayError, execute_normalized},
         },
         roster_runtime::{RosterAction, RosterIdentity, RosterRuntime, RosterRuntimeInspection},
@@ -77,13 +78,13 @@ fn normalize(record: &super::record::Record) -> Result<NormalizedRecord, ReplayE
                     settings,
                     environment,
                 },
-        } => NormalizedOperation::EnvironmentSettings {
+        } => NormalizedOperation::Settings(NormalizedSettings::StormV7 {
             seat,
             epoch,
-            settings_revision,
+            revision: settings_revision,
             settings,
-            environment,
-        },
+            cloud: environment,
+        }),
         Operation::Action {
             seat: _,
             epoch: _,

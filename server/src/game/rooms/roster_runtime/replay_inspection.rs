@@ -38,7 +38,7 @@ impl RosterRuntime {
             revision: self.revision,
             settings_revision: self.settings_revision,
             creator_settings_revoked: self.creator_settings_revoked,
-            environment: self.environment,
+            environment: self.environment(),
         }
     }
 }

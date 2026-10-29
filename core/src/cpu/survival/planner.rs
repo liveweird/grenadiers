@@ -26,6 +26,9 @@ pub fn plan(
     rng: &mut CpuRng,
     work: &mut WorkBudget,
 ) -> Result<SurvivalPlan, PolicyError> {
+    if observation.parts().rules.version == 8 {
+        return Err(PolicyError::InvalidObservation);
+    }
     plan_with_origin(
         observation,
         memory,
@@ -47,6 +50,9 @@ pub fn plan_with_origin(
     rng: &mut CpuRng,
     work: &mut WorkBudget,
 ) -> Result<SurvivalPlan, PolicyError> {
+    if observation.parts().rules.version == 8 {
+        return Err(PolicyError::InvalidObservation);
+    }
     let parts = observation.parts();
     if memory.key().world != parts.world
         || memory.key().cpu_seat != parts.recipient

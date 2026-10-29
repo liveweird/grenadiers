@@ -126,6 +126,7 @@ impl State {
         contact_targets.extend(mob_contact_targets);
         self.apply_lair_trace_contacts(
             &traces,
+            &forced_movements,
             &mut contact_damaged,
             next_tick,
             &mut events,

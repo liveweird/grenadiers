@@ -72,7 +72,9 @@ pub use generation::{
 pub use geometry::{MovementSegment, MovementTrace};
 pub use input::{Direction, HeldDirections};
 pub use inventory::{Equipment, Inventory, SpecialWeapon};
-pub use lairs::{LAIR_LAYOUT_VERSION, LairView, MAX_LAIRS, MAX_MOBS, MobView};
+pub use lairs::{
+    LAIR_LAYOUT_VERSION, LairView, MAX_LAIRS, MAX_MOBS, MOB_UNITS_PER_SECOND, MobView,
+};
 pub(crate) use oil::OilState;
 pub use oil::{MAX_OIL_BARRELS, OilBarrelState};
 pub use pickups::{Pickup, PickupKind, PickupLayer, PickupPlacementError};
@@ -82,7 +84,6 @@ pub(crate) use punch_geometry::{
     landing_is_open as punch_landing_is_open,
 };
 pub use rules::{RulesConfig, StormCloudConfig};
-pub(crate) use simulation::stationary_contact_entry;
 pub use simulation::{
     Actor, ActorInit, DrawReason, InputAction, RoundActorInit, RoundResult,
     SIMULATION_RANDOMNESS_VERSION, SIMULATION_SEED_DERIVATION_VERSION, STORM_CLOUD_HALF_EXTENT,
@@ -90,6 +91,7 @@ pub use simulation::{
     STORM_SLOW_TICKS, SeatInput, SimulationSeed, State, StateError, StepError, StepReport,
     StormCloudView,
 };
+pub(crate) use simulation::{stationary_contact_entry, stationary_sweep_contact};
 pub use types::{CellId, EntityId, PlayerCount, Position, SeatId, SpeedLevel, Tick};
 pub use view::{ActorView, ArenaView, BombView, FlameView, OilBarrelView, PickupView, PublicState};
 pub use world::World;

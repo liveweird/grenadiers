@@ -3,6 +3,7 @@ use std::collections::BTreeSet;
 use super::{State, StepError};
 use crate::game::events::StepEvent;
 use crate::game::geometry::MovementTrace;
+use crate::game::simulation::contract::ForcedMovement;
 use crate::game::types::{EntityId, Tick};
 
 impl State {
@@ -95,6 +96,7 @@ impl State {
     pub(super) fn apply_lair_trace_contacts(
         &mut self,
         traces: &[MovementTrace],
+        forced_movements: &[ForcedMovement],
         damaged: &mut [bool],
         tick: Tick,
         events: &mut Vec<StepEvent>,
@@ -105,7 +107,14 @@ impl State {
             .map(|index| {
                 !damaged[index]
                     && self.actors[index].alive
-                    && crate::game::lairs::actor_trace_contacts_mobs(&traces[index], lairs.mobs())
+                    && (crate::game::lairs::actor_trace_contacts_mobs(&traces[index], lairs.mobs())
+                        || forced_movements.iter().any(|forced| {
+                            forced.seat.index() == index
+                                && crate::game::lairs::actor_segment_contacts_mobs(
+                                    forced.segment,
+                                    lairs.mobs(),
+                                )
+                        }))
             })
             .collect();
         self.apply_lair_damage(contacts, damaged, tick, events, shield_prevented);

@@ -3,6 +3,7 @@ use std::collections::{BTreeSet, VecDeque};
 use super::Mob;
 use crate::game::geometry::{MovementSegment, MovementTrace};
 use crate::game::input::Direction;
+use crate::game::movement_collision::{ObstacleAccess, allowed_distance};
 use crate::game::simulation::Actor;
 use crate::game::types::{CellId, Position, TICKS_PER_SECOND, Tick};
 use crate::game::world::World;
@@ -71,8 +72,11 @@ pub(super) fn advance_mob(
         return trace;
     };
     let center = Position::center(cell);
-    if mob.position == center {
-        mob.escaping = false;
+    if mob.retreat_anchor == Some(mob.position) {
+        mob.retreat_anchor = None;
+        mob.leg_origin = mob.position;
+    } else if mob.retreat_anchor.is_none() && mob.position == center {
+        mob.leg_origin = center;
     }
     let direction = choose_direction(mob, world, danger, searches, tick, cell, center);
     let Some(direction) = direction else {
@@ -83,9 +87,21 @@ pub(super) fn advance_mob(
     let numerator = mob.residual + super::MOB_UNITS_PER_SECOND;
     let mut distance = i32::from(numerator / TICKS_PER_SECOND);
     mob.residual = numerator % TICKS_PER_SECOND;
-    if mob.escaping {
-        distance = distance.min(distance_to_center(mob.position, center, direction));
+    if let Some(anchor) = mob.retreat_anchor {
+        distance = distance.min(distance_to_target(mob.position, anchor, direction));
     }
+    distance = allowed_distance(
+        world,
+        mob.position,
+        direction,
+        distance,
+        &BTreeSet::new(),
+        ObstacleAccess {
+            can_pass: false,
+            soft_grace: &BTreeSet::new(),
+            oil_grace: &BTreeSet::new(),
+        },
+    );
     let start = mob.position;
     match direction {
         Direction::North => mob.position.y -= distance,
@@ -94,7 +110,9 @@ pub(super) fn advance_mob(
         Direction::West => mob.position.x -= distance,
     }
     mob.heading = direction;
-    trace.push(MovementSegment::new(start, mob.position));
+    if mob.position != start {
+        trace.push(MovementSegment::new(start, mob.position));
+    }
     trace
 }
 
@@ -107,11 +125,11 @@ fn choose_direction(
     cell: CellId,
     center: Position,
 ) -> Option<u8> {
-    if mob.position != center && mob.escaping {
+    if mob.retreat_anchor.is_some() {
         return Some(direction_index(mob.heading));
     }
-    if mob.position != center && danger.contains(&cell) {
-        mob.escaping = true;
+    if mob.position != mob.leg_origin && danger.contains(&cell) {
+        mob.retreat_anchor = Some(mob.leg_origin);
         return Some(direction_index(opposite(mob.heading)));
     }
     if mob.position != center {
@@ -163,12 +181,12 @@ const fn opposite(direction: Direction) -> Direction {
     }
 }
 
-fn distance_to_center(position: Position, center: Position, direction: Direction) -> i32 {
+fn distance_to_target(position: Position, target: Position, direction: Direction) -> i32 {
     match direction {
-        Direction::North => position.y.saturating_sub(center.y),
-        Direction::East => center.x.saturating_sub(position.x),
-        Direction::South => center.y.saturating_sub(position.y),
-        Direction::West => position.x.saturating_sub(center.x),
+        Direction::North => position.y.saturating_sub(target.y),
+        Direction::East => target.x.saturating_sub(position.x),
+        Direction::South => target.y.saturating_sub(position.y),
+        Direction::West => position.x.saturating_sub(target.x),
     }
     .max(0)
 }
@@ -189,6 +207,11 @@ pub(crate) fn actor_trace_contacts_mobs(trace: &MovementTrace, mobs: &[Mob]) -> 
     })
 }
 
+pub(crate) fn actor_segment_contacts_mobs(segment: MovementSegment, mobs: &[Mob]) -> bool {
+    mobs.iter()
+        .any(|mob| crate::game::stationary_sweep_contact(segment, mob.position))
+}
+
 pub(crate) fn actor_position_contacts_mobs(position: Position, mobs: &[Mob]) -> bool {
     mobs.iter().any(|mob| {
         (i64::from(position.x) - i64::from(mob.position.x)).abs()
@@ -196,4 +219,75 @@ pub(crate) fn actor_position_contacts_mobs(position: Position, mobs: &[Mob]) -> 
             && (i64::from(position.y) - i64::from(mob.position.y)).abs()
                 < i64::from(crate::game::types::HALF_FOOTPRINT) * 2
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::game::{EntityId, fixed_arena};
+
+    fn clear_world() -> World {
+        let mut world = World::new(fixed_arena());
+        let blocks = world.arena.blocks().clone();
+        world.arena.remove_blocks(&blocks);
+        world
+    }
+
+    #[test]
+    fn danger_after_crossing_a_boundary_retreats_to_the_true_leg_origin_on_every_axis() {
+        let world = clear_world();
+        let cases = [
+            (
+                Position::center(CellId::new(3, 3)),
+                Position { x: 4_200, y: 3_584 },
+                Direction::East,
+            ),
+            (
+                Position::center(CellId::new(5, 3)),
+                Position { x: 5_000, y: 3_584 },
+                Direction::West,
+            ),
+            (
+                Position::center(CellId::new(3, 3)),
+                Position { x: 3_584, y: 4_200 },
+                Direction::South,
+            ),
+            (
+                Position::center(CellId::new(3, 5)),
+                Position { x: 3_584, y: 5_000 },
+                Direction::North,
+            ),
+        ];
+        for (origin, position, heading) in cases {
+            let danger = BTreeSet::from([position.cell().unwrap()]);
+            let mut mob = Mob {
+                id: EntityId(90),
+                lair: 0,
+                position,
+                heading,
+                residual: 0,
+                leg_origin: origin,
+                retreat_anchor: None,
+            };
+            let before = manhattan(mob.position, origin);
+            advance_mob(&mut mob, &world, &danger, &[], false, Tick(1));
+            assert!(manhattan(mob.position, origin) < before);
+            assert_eq!(mob.retreat_anchor, Some(origin));
+
+            for tick in 2..80 {
+                advance_mob(&mut mob, &world, &BTreeSet::new(), &[], false, Tick(tick));
+                if mob.position == origin {
+                    break;
+                }
+            }
+            assert_eq!(mob.position, origin);
+            advance_mob(&mut mob, &world, &BTreeSet::new(), &[], false, Tick(80));
+            assert_eq!(mob.retreat_anchor, None);
+        }
+    }
+
+    fn manhattan(left: Position, right: Position) -> u64 {
+        i64::from(left.x).abs_diff(i64::from(right.x))
+            + i64::from(left.y).abs_diff(i64::from(right.y))
+    }
 }

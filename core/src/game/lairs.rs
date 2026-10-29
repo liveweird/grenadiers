@@ -14,12 +14,13 @@ use super::world::World;
 pub const LAIR_LAYOUT_VERSION: u16 = 1;
 pub const MAX_LAIRS: usize = 2;
 pub const MAX_MOBS: usize = 16;
-const MOB_UNITS_PER_SECOND: u16 = 1_536;
+pub const MOB_UNITS_PER_SECOND: u16 = 1_536;
 
 #[path = "lair_navigation.rs"]
 mod navigation;
 pub(crate) use navigation::{
-    actor_position_contacts_mobs, actor_trace_contacts_mobs, traces_contact_actor,
+    actor_position_contacts_mobs, actor_segment_contacts_mobs, actor_trace_contacts_mobs,
+    traces_contact_actor,
 };
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -45,7 +46,8 @@ pub(crate) struct Mob {
     pub(crate) position: Position,
     pub(crate) heading: Direction,
     pub(super) residual: u16,
-    pub(super) escaping: bool,
+    pub(super) leg_origin: Position,
+    pub(super) retreat_anchor: Option<Position>,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -212,7 +214,8 @@ impl LairState {
                 position: Position::center(cell),
                 heading: Direction::South,
                 residual: 0,
-                escaping: false,
+                leg_origin: Position::center(cell),
+                retreat_anchor: None,
             });
             spawned += 1;
         }
@@ -221,6 +224,31 @@ impl LairState {
 
     pub(crate) fn mobs(&self) -> &[Mob] {
         &self.mobs
+    }
+
+    pub(crate) fn overlaps_cell(&self, cell: CellId) -> bool {
+        self.mobs
+            .iter()
+            .any(|mob| movement::position_overlaps_cell(mob.position, cell))
+    }
+
+    #[cfg(test)]
+    pub(crate) fn insert_test_mob(
+        &mut self,
+        id: EntityId,
+        lair: u8,
+        position: Position,
+        heading: Direction,
+    ) {
+        self.mobs.push(Mob {
+            id,
+            lair,
+            position,
+            heading,
+            residual: 0,
+            leg_origin: Position::center(position.cell().expect("test mob is on the board")),
+            retreat_anchor: None,
+        });
     }
 }
 
@@ -243,6 +271,7 @@ fn adjacent(cell: CellId, direction: u8) -> CellId {
 
 fn spawn_is_clear(cell: CellId, world: &World, actors: &[Actor], mobs: &[Mob], tick: Tick) -> bool {
     traversable(cell, world, &BTreeSet::new(), tick)
+        && world.oil.state(cell).is_none()
         && !actors
             .iter()
             .any(|actor| actor.alive() && movement::position_overlaps_cell(actor.position(), cell))

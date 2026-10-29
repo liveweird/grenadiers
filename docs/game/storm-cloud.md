@@ -8,6 +8,8 @@ New rooms enable the cloud by default. Forming-lobby All on/Restore defaults ena
 All off/Classic disable it. The cloud has its own setting and is not an item pickup. The arena
 renders the authoritative cloud above terrain, and the local player's effect bar shows the
 remaining slowdown time. Reduced motion snaps between published positions.
+See the [English desktop](../screenshots/storm-cloud-desktop.png) and
+[Polish reduced-motion mobile](../screenshots/storm-cloud-mobile-pl-reduced.png) presentation.
 
 ## Construction and movement
 

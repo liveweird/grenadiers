@@ -66,13 +66,22 @@ impl RosterRuntime {
         let epoch = self.lifecycle.round_attempt();
         let simulation_seed =
             (self.simulation_seed)(epoch).map_err(|()| RosterRuntimeError::SeedUnavailable)?;
-        let rules = self.environment.map_or_else(
+        let rules = self.environment_profile.map_or_else(
             || grenadiers_core::game::RulesConfig::multiplayer_v6(self.lifecycle.settings()),
-            |environment| {
-                grenadiers_core::game::RulesConfig::environment_v7(
-                    self.lifecycle.settings(),
-                    environment,
-                )
+            |profile| match profile {
+                super::runtime::EnvironmentProfile::StormV7(environment) => {
+                    grenadiers_core::game::RulesConfig::environment_v7(
+                        self.lifecycle.settings(),
+                        environment,
+                    )
+                }
+                super::runtime::EnvironmentProfile::LairsV8 { cloud, tuning } => {
+                    grenadiers_core::game::RulesConfig::environment_v8(
+                        self.lifecycle.settings(),
+                        cloud,
+                        tuning.config(),
+                    )
+                }
             },
         );
         let state = State::new_round(
@@ -88,6 +97,7 @@ impl RosterRuntime {
         self.reports.clear();
         self.cpu_publication = None;
         self.environment_cpu_publication = None;
+        self.lair_cpu_publication = None;
         self.sim = Some(SimRound {
             epoch,
             state,

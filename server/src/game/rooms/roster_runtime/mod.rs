@@ -6,6 +6,7 @@ mod error;
 mod owner_helpers;
 mod publication;
 mod publication_v15;
+mod publication_v16;
 mod round;
 mod runtime;
 mod runtime_publication;
@@ -28,6 +29,8 @@ mod boundary_tests;
 mod environment_recovery_tests;
 #[cfg(test)]
 mod environment_settings_tests;
+#[cfg(test)]
+mod lair_settings_tests;
 #[cfg(test)]
 mod replacement_tests;
 #[cfg(test)]

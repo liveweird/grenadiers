@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use grenadiers_core::{
     game::{GenerationRecord, SeatId, SimulationSeed, State, StepReport, StormCloudConfig, Tick},
-    protocol::{v14, v15},
+    protocol::{v14, v15, v16},
     room::{
         DepartureReason, MatchChange, MatchPhase, RoomSettings, RosterMatchLifecycle,
         RosterParticipant,
@@ -35,7 +35,25 @@ pub(in crate::game::rooms) struct RosterRuntime {
     pub(super) reports: Vec<StepReport>,
     pub(super) cpu_publication: Option<v14::BoundPublication>,
     pub(super) environment_cpu_publication: Option<Arc<v15::BoundPublication>>,
-    pub(super) environment: Option<StormCloudConfig>,
+    pub(super) lair_cpu_publication: Option<Arc<v16::BoundPublication>>,
+    pub(super) environment_profile: Option<EnvironmentProfile>,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(super) enum EnvironmentProfile {
+    StormV7(StormCloudConfig),
+    LairsV8 {
+        cloud: StormCloudConfig,
+        tuning: grenadiers_core::room::LairTuning,
+    },
+}
+
+impl EnvironmentProfile {
+    pub(super) const fn cloud(self) -> StormCloudConfig {
+        match self {
+            Self::StormV7(cloud) | Self::LairsV8 { cloud, .. } => cloud,
+        }
+    }
 }
 
 #[derive(Clone)]
@@ -66,7 +84,8 @@ impl RosterRuntime {
             reports: Vec::new(),
             cpu_publication: None,
             environment_cpu_publication: None,
-            environment: None,
+            lair_cpu_publication: None,
+            environment_profile: None,
         })
     }
 
@@ -351,6 +370,7 @@ impl RosterRuntime {
         self.reports.clear();
         self.cpu_publication = None;
         self.environment_cpu_publication = None;
+        self.lair_cpu_publication = None;
         self.inputs.reset_round();
     }
 }

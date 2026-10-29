@@ -2,8 +2,8 @@ use grenadiers_core::room::{MatchChange, MatchPhase};
 
 use super::{
     error::RosterRuntimeError,
-    publication, publication_v15,
-    runtime::RosterRuntime,
+    publication, publication_v15, publication_v16,
+    runtime::{EnvironmentProfile, RosterRuntime},
     types::{RosterNotice, RosterPublication},
 };
 
@@ -16,43 +16,79 @@ impl RosterRuntime {
                 MatchPhase::Running | MatchPhase::Result { .. } | MatchPhase::MatchResult { .. }
             )
         });
-        let notice = if let Some(environment) = self.environment {
-            let room = publication_v15::room_view(
-                &self.identity,
-                &self.lifecycle,
-                environment,
-                next,
-                self.settings_revision,
-                self.settings_authority_locked(),
-            )?;
-            if let Some(sim) = body {
-                publication_v15::snapshot(
-                    room,
-                    sim.epoch,
-                    &sim.state,
-                    &self.reports,
-                    sim.generation,
-                )?
-            } else {
-                publication_v15::view_notice(room)
+        let notice = match self.environment_profile {
+            Some(EnvironmentProfile::StormV7(environment)) => {
+                let room = publication_v15::room_view(
+                    &self.identity,
+                    &self.lifecycle,
+                    environment,
+                    next,
+                    self.settings_revision,
+                    self.settings_authority_locked(),
+                )?;
+                if let Some(sim) = body {
+                    publication_v15::snapshot(
+                        room,
+                        sim.epoch,
+                        &sim.state,
+                        &self.reports,
+                        sim.generation,
+                    )?
+                } else {
+                    publication_v15::view_notice(room)
+                }
             }
-        } else {
-            let room = publication::room_view(
-                &self.identity,
-                &self.lifecycle,
-                next,
-                self.settings_revision,
-            )?;
-            if let Some(sim) = body {
-                publication::snapshot(room, sim.epoch, &sim.state, &self.reports, sim.generation)?
-            } else {
-                publication::view_notice(room)
+            Some(EnvironmentProfile::LairsV8 { cloud, tuning }) => {
+                let room = publication_v16::room_view(
+                    &self.identity,
+                    &self.lifecycle,
+                    cloud,
+                    tuning,
+                    next,
+                    self.settings_revision,
+                    self.settings_authority_locked(),
+                )?;
+                if let Some(sim) = body {
+                    publication_v16::snapshot(
+                        room,
+                        sim.epoch,
+                        &sim.state,
+                        &self.reports,
+                        sim.generation,
+                    )?
+                } else {
+                    publication_v16::view_notice(room)
+                }
+            }
+            None => {
+                let room = publication::room_view(
+                    &self.identity,
+                    &self.lifecycle,
+                    next,
+                    self.settings_revision,
+                )?;
+                if let Some(sim) = body {
+                    publication::snapshot(
+                        room,
+                        sim.epoch,
+                        &sim.state,
+                        &self.reports,
+                        sim.generation,
+                    )?
+                } else {
+                    publication::view_notice(room)
+                }
             }
         };
         self.cpu_publication = notice.legacy_cpu_publication().cloned();
         self.environment_cpu_publication = match &notice.publication {
             RosterPublication::Environment(_, publication) => publication.clone(),
             RosterPublication::Legacy(_, _) => None,
+            RosterPublication::Lairs(_, _) => None,
+        };
+        self.lair_cpu_publication = match &notice.publication {
+            RosterPublication::Lairs(_, publication) => publication.clone(),
+            RosterPublication::Legacy(_, _) | RosterPublication::Environment(_, _) => None,
         };
         self.revision = next;
         self.reports.clear();
@@ -61,26 +97,39 @@ impl RosterRuntime {
 
     pub(super) fn publish_view(&mut self) -> Result<RosterNotice, RosterRuntimeError> {
         let next = self.next_revision()?;
-        let notice = if let Some(environment) = self.environment {
-            publication_v15::view_notice(publication_v15::room_view(
+        let notice = match self.environment_profile {
+            Some(EnvironmentProfile::StormV7(environment)) => {
+                publication_v15::view_notice(publication_v15::room_view(
+                    &self.identity,
+                    &self.lifecycle,
+                    environment,
+                    next,
+                    self.settings_revision,
+                    self.settings_authority_locked(),
+                )?)
+            }
+            Some(EnvironmentProfile::LairsV8 { cloud, tuning }) => {
+                publication_v16::view_notice(publication_v16::room_view(
+                    &self.identity,
+                    &self.lifecycle,
+                    cloud,
+                    tuning,
+                    next,
+                    self.settings_revision,
+                    self.settings_authority_locked(),
+                )?)
+            }
+            None => publication::view_notice(publication::room_view(
                 &self.identity,
                 &self.lifecycle,
-                environment,
                 next,
                 self.settings_revision,
-                self.settings_authority_locked(),
-            )?)
-        } else {
-            publication::view_notice(publication::room_view(
-                &self.identity,
-                &self.lifecycle,
-                next,
-                self.settings_revision,
-            )?)
+            )?),
         };
         self.revision = next;
         self.cpu_publication = None;
         self.environment_cpu_publication = None;
+        self.lair_cpu_publication = None;
         Ok(notice)
     }
 

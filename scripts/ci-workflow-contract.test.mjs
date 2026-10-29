@@ -115,7 +115,7 @@ export function validateFullWorkflow(workflow) {
   const artifactPaths = artifactPathBlock[1].trim().split("\n")
     .map((line) => line.trim());
   assert.deepEqual(artifactPaths, failureArtifactPaths);
-  assert.equal((workflow.match(/for _attempt in \$\(seq 1 60\); do/g) ?? []).length, 26);
+  assert.equal((workflow.match(/for _attempt in \$\(seq 1 60\); do/g) ?? []).length, Object.keys(fixtures).length + 1);
   assert.doesNotMatch(workflow, /for attempt in \$\(seq 1 60\); do/);
 }
 

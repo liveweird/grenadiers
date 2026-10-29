@@ -20,16 +20,27 @@ pub(super) async fn expect_waiting_update(
     .await
 }
 
-pub(super) async fn expect_invalid_phase(
+pub(super) async fn expect_error(
     socket: &mut ClientSocket,
     room_id: &Value,
+    code: &str,
     sequence: u64,
     minimum_revision: u64,
+) {
+    let expected = json!({"type":"error", "code":code, "sequence":sequence});
+    expect_reply(socket, room_id, minimum_revision, expected).await;
+}
+
+pub(super) async fn expect_reply(
+    socket: &mut ClientSocket,
+    room_id: &Value,
+    minimum_revision: u64,
+    expected: Value,
 ) {
     within(async {
         loop {
             let message = next(socket).await;
-            if inspect(&message, room_id, sequence, minimum_revision) {
+            if inspect(&message, room_id, minimum_revision, &expected) {
                 return;
             }
         }
@@ -37,12 +48,8 @@ pub(super) async fn expect_invalid_phase(
     .await;
 }
 
-fn inspect(message: &Value, room_id: &Value, sequence: u64, minimum_revision: u64) -> bool {
-    if message["type"] == "error" {
-        assert_eq!(
-            *message,
-            json!({"type":"error", "code":"invalidPhase", "sequence":sequence})
-        );
+fn inspect(message: &Value, room_id: &Value, minimum_revision: u64, expected: &Value) -> bool {
+    if message == expected {
         return true;
     }
     let revision = assert_waiting_update(message, room_id);
@@ -85,6 +92,6 @@ fn queued_waiting_updates_are_strictly_validated_before_the_correlated_error() {
     ];
     let terminal = frames
         .iter()
-        .position(|frame| inspect(frame, &room_id, 4, 7));
+        .position(|frame| inspect(frame, &room_id, 7, &frames[1]));
     assert_eq!(terminal, Some(1));
 }

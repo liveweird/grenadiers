@@ -179,7 +179,7 @@ async fn two_members_receive_personalized_admission_and_live_waiting_updates() {
         }),
     )
     .await;
-    assert_eq!(next(&mut two).await["code"], "settingsLocked");
+    waiting_reply::expect_error(&mut two, &room_id, "settingsLocked", 2, joined_revision).await;
     send(
         &mut two,
         json!({
@@ -252,7 +252,7 @@ async fn two_members_receive_personalized_admission_and_live_waiting_updates() {
         }),
     )
     .await;
-    waiting_reply::expect_invalid_phase(&mut one, &room_id, 4, ready_revision).await;
+    waiting_reply::expect_error(&mut one, &room_id, "invalidPhase", 4, ready_revision).await;
     send(
         &mut one,
         json!({
@@ -261,7 +261,7 @@ async fn two_members_receive_personalized_admission_and_live_waiting_updates() {
         }),
     )
     .await;
-    waiting_reply::expect_invalid_phase(&mut one, &room_id, 5, ready_revision).await;
+    waiting_reply::expect_error(&mut one, &room_id, "invalidPhase", 5, ready_revision).await;
     send(
         &mut one,
         json!({
@@ -270,7 +270,7 @@ async fn two_members_receive_personalized_admission_and_live_waiting_updates() {
         }),
     )
     .await;
-    waiting_reply::expect_invalid_phase(&mut one, &room_id, 6, ready_revision).await;
+    waiting_reply::expect_error(&mut one, &room_id, "invalidPhase", 6, ready_revision).await;
     send(
         &mut one,
         json!({
@@ -279,75 +279,7 @@ async fn two_members_receive_personalized_admission_and_live_waiting_updates() {
         }),
     )
     .await;
-    waiting_reply::expect_invalid_phase(&mut one, &room_id, 7, ready_revision).await;
-    server.abort();
-}
-
-#[tokio::test]
-async fn binding_checks_precede_phase_and_leave_fences_departed_credentials() {
-    let state = AppState::without_database([ORIGIN.to_owned()]);
-    let tokens = [issue_token(&state), issue_token(&state)];
-    let (url, server) = start_server(state).await;
-    let mut owner = connect(&url, &tokens[0]).await;
-    let mut unbound = connect(&url, &tokens[1]).await;
-
-    send(
-        &mut owner,
-        json!({"type":"createRoom", "sequence":1, "configuration":{"controllers":["human","human"],"cpuDifficulty":null,"board":{"width":15,"height":13},"environment":{"stormCloud":true}}}),
-    )
-    .await;
-    let created = next(&mut owner).await;
-    let room_id = created["room"]["roomId"].clone();
-    let code = created["room"]["roomCode"].clone();
-    send(
-        &mut unbound,
-        json!({
-            "type":"ready", "sequence":1, "roomId":room_id,
-            "roundId":1, "ready":true, "settingsRevision":1
-        }),
-    )
-    .await;
-    assert_eq!(next(&mut unbound).await["code"], "notInRoom");
-
-    send(
-        &mut unbound,
-        json!({"type":"joinRoom", "sequence":2, "roomCode":code}),
-    )
-    .await;
-    assert_eq!(next(&mut unbound).await["youSeat"], "two");
-    assert_eq!(next(&mut owner).await["room"]["revision"], 4);
-
-    send(
-        &mut owner,
-        json!({
-            "type":"movement", "sequence":2, "roomId":room_id,
-            "roundId":2, "direction":"east"
-        }),
-    )
-    .await;
-    assert_eq!(next(&mut owner).await["code"], "staleRoom");
-    send(
-        &mut owner,
-        json!({
-            "type":"leaveRoom", "sequence":3, "roomId":room_id, "roundId":1
-        }),
-    )
-    .await;
-    assert_eq!(next(&mut owner).await["type"], "leftRoom");
-    assert_eq!(next(&mut unbound).await["room"]["revision"], 5);
-
-    send(
-        &mut owner,
-        json!({"type":"joinRoom", "sequence":4, "roomCode":code}),
-    )
-    .await;
-    assert_eq!(next(&mut owner).await["code"], "roomFull");
-    send(
-        &mut owner,
-        json!({"type":"createRoom", "sequence":5, "configuration":{"controllers":["human","human"],"cpuDifficulty":null,"board":{"width":15,"height":13},"environment":{"stormCloud":true}}}),
-    )
-    .await;
-    assert_eq!(next(&mut owner).await["type"], "admitted");
+    waiting_reply::expect_error(&mut one, &room_id, "invalidPhase", 7, ready_revision).await;
     server.abort();
 }
 
@@ -387,6 +319,8 @@ async fn connected_resume_replaces_old_socket_with_private_admission_and_close_4
     server.abort();
 }
 
+#[path = "room_socket_tests/binding_tests.rs"]
+mod binding_tests;
 #[path = "room_socket_tests/rate_limit_tests.rs"]
 mod rate_limit_tests;
 #[path = "room_socket_tests/resume_race_tests.rs"]

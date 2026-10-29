@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use grenadiers_core::{
     cpu::survival::WORK_ALLOWANCE,
-    game::{Position, SeatId, SimulationSeed, StormCloudConfig},
+    game::{EnabledItems, Position, SeatId, SimulationSeed, StormCloudConfig},
     protocol::{RoomCode, RoomId},
     room::{
         BoardSize, CpuDifficulty, CpuProfile, LairSettings, LairTuning, MatchPhase,
@@ -58,7 +58,7 @@ impl Episode {
                 registry_serial: 3117,
                 configuration,
             },
-            RoomSettings::DEFAULT,
+            RoomSettings::DEFAULT.with_enabled_items(EnabledItems::ALL),
             case.cloud,
             tuning,
             RoundSeedSource::with_entropy(move |bytes| {
@@ -176,6 +176,32 @@ impl Episode {
             self.tick();
         }
     }
+
+    fn advance_without_worker(&mut self, ticks: usize) {
+        for _ in 0..ticks {
+            self.driver.tick(Instant::now()).unwrap();
+        }
+    }
+
+    fn positions(&self) -> Vec<Position> {
+        let inspection = self.driver.runtime.replay_inspection();
+        let state = &inspection.simulation.as_ref().unwrap().state;
+        self.seats
+            .iter()
+            .map(|seat| state.actors()[seat.index()].position())
+            .collect()
+    }
+
+    fn mob_count(&self) -> usize {
+        self.driver
+            .runtime
+            .replay_inspection()
+            .simulation
+            .unwrap()
+            .state
+            .mobs()
+            .len()
+    }
 }
 
 #[test]
@@ -222,4 +248,56 @@ fn clear_rules8_scene_plants_and_exits_its_own_blast() {
     assert!(episode.planted);
     assert!(episode.survived_detonation);
     assert!(episode.max_work <= WORK_ALLOWANCE);
+}
+
+#[test]
+fn queued_cpu19_keeps_progressing_after_real_mobs_spawn() {
+    for board in [
+        BoardSize::ElevenByNine,
+        BoardSize::ThirteenByEleven,
+        BoardSize::FifteenByThirteen,
+    ] {
+        for difficulty in [CpuDifficulty::Easy, CpuDifficulty::Standard] {
+            let case = Case {
+                board,
+                count: if board == BoardSize::ThirteenByEleven {
+                    3
+                } else {
+                    2
+                },
+                difficulty,
+                cloud: StormCloudConfig::Disabled,
+                lairs: true,
+            };
+            let mut episode = Episode::new(case);
+            for _ in 0..900 {
+                episode.advance_without_worker(1);
+                if episode.mob_count() > 0 {
+                    break;
+                }
+            }
+            assert!(episode.mob_count() > 0, "{case:?}");
+            let before = episode.positions();
+            let plans_before = episode.moving_plans;
+            let mut saw_stopped_handoff = false;
+            for _ in 0..180 {
+                episode.tick();
+                saw_stopped_handoff |= episode
+                    .seats
+                    .iter()
+                    .any(|seat| episode.driver.cpu_stationary[seat.index()]);
+            }
+            let after = episode.positions();
+            assert!(
+                before
+                    .iter()
+                    .zip(&after)
+                    .any(|(before, after)| before != after),
+                "no post-spawn physical progress for {case:?}"
+            );
+            assert!(episode.moving_plans > plans_before, "{case:?}");
+            assert!(saw_stopped_handoff, "{case:?}");
+            assert!(episode.max_work <= WORK_ALLOWANCE, "{case:?}");
+        }
+    }
 }

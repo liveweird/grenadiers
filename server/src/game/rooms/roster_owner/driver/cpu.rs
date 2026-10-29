@@ -220,7 +220,7 @@ impl Driver {
             }
             return;
         }
-        let Some(publication) = notice.cpu_publication.as_ref() else {
+        let Some(publication) = notice.legacy_cpu_publication() else {
             return;
         };
         let physical_round = self.runtime.lifecycle().round_attempt();

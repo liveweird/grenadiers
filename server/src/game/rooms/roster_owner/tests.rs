@@ -320,7 +320,7 @@ async fn abort_before_first_poll_and_normal_shutdown_each_run_cleanup_once() {
             last,
             reason: super::super::match_owner::ClosingReason::ServerStopped,
         } if matches!(
-            last.room.phase,
+            last.legacy_room().unwrap().phase,
             grenadiers_core::protocol::v14::RoomPhase::Interrupted {
                 reason: grenadiers_core::protocol::v14::MatchInterruptReason::ServerStopped,
                 ..

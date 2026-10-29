@@ -122,24 +122,17 @@ fn legacy_frame(
 }
 
 fn roster_frame(notice: &RosterNotice, seat: SeatId) -> Result<Arc<str>, RoomError> {
-    if !notice
-        .room
-        .configuration
-        .domain()
-        .player_count()
-        .contains(seat)
-    {
+    let room = notice.legacy_room().ok_or(RoomError::CapacityReached)?;
+    if !room.configuration.domain().player_count().contains(seat) {
         return Err(RoomError::CapacityReached);
     }
     if let Some(frame) = notice.frame(seat) {
         return Ok(frame);
     }
-    v14::validate_room_view(&notice.room).map_err(|_| RoomError::CapacityReached)?;
-    v14::encode_server_message(&v14::GameServerMessage::RoomState {
-        room: notice.room.clone(),
-    })
-    .map(Arc::from)
-    .map_err(|_| RoomError::CapacityReached)
+    v14::validate_room_view(room).map_err(|_| RoomError::CapacityReached)?;
+    v14::encode_server_message(&v14::GameServerMessage::RoomState { room: room.clone() })
+        .map(Arc::from)
+        .map_err(|_| RoomError::CapacityReached)
 }
 
 async fn next_event<T>(

@@ -1,7 +1,7 @@
 mod profile;
-mod record;
+pub(super) mod record;
 mod recording;
-mod runner;
+pub(super) mod runner;
 mod validation;
 
 #[allow(unused_imports)]

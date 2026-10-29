@@ -132,7 +132,7 @@ async fn overload_interrupts_with_a_frozen_publication_after_large_clock_jump() 
         &*notices.borrow(),
         super::RosterOwnerNotice::Publication(notice)
             if matches!(
-                notice.room.phase,
+                notice.legacy_room().unwrap().phase,
                 v14::RoomPhase::Interrupted {
                     reason: v14::MatchInterruptReason::ServerOverloaded,
                     ..

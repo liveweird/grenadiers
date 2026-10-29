@@ -1,8 +1,8 @@
 use std::sync::Arc;
 
 use grenadiers_core::{
-    game::{GenerationRecord, SeatId, SimulationSeed, State, StepReport, Tick},
-    protocol::v14,
+    game::{GenerationRecord, SeatId, SimulationSeed, State, StepReport, StormCloudConfig, Tick},
+    protocol::{v14, v15},
     room::{
         DepartureReason, MatchChange, MatchPhase, RoomSettings, RosterMatchLifecycle,
         RosterParticipant,
@@ -18,7 +18,7 @@ use super::{
     types::{RosterAction, RosterIdentity, RosterNotice},
 };
 
-type SimulationSeedDerivation = dyn Fn(u64) -> Result<SimulationSeed, ()> + Send + Sync;
+pub(super) type SimulationSeedDerivation = dyn Fn(u64) -> Result<SimulationSeed, ()> + Send + Sync;
 
 #[derive(Clone)]
 pub(in crate::game::rooms) struct RosterRuntime {
@@ -32,6 +32,8 @@ pub(in crate::game::rooms) struct RosterRuntime {
     pub(super) sim: Option<SimRound>,
     pub(super) reports: Vec<StepReport>,
     pub(super) cpu_publication: Option<v14::BoundPublication>,
+    pub(super) environment_cpu_publication: Option<Arc<v15::BoundPublication>>,
+    pub(super) environment: Option<StormCloudConfig>,
 }
 
 #[derive(Clone)]
@@ -59,6 +61,8 @@ impl RosterRuntime {
             sim: None,
             reports: Vec::new(),
             cpu_publication: None,
+            environment_cpu_publication: None,
+            environment: None,
         })
     }
 
@@ -278,57 +282,6 @@ impl RosterRuntime {
             .flatten())
     }
 
-    pub(super) fn publish_current(&mut self) -> Result<RosterNotice, RosterRuntimeError> {
-        let next = self.next_revision()?;
-        let room = publication::room_view(
-            &self.identity,
-            &self.lifecycle,
-            next,
-            self.settings_revision,
-        )?;
-        let notice = if let Some(sim) = self.sim.as_ref().filter(|_| {
-            matches!(
-                self.lifecycle.phase(),
-                MatchPhase::Running | MatchPhase::Result { .. } | MatchPhase::MatchResult { .. }
-            )
-        }) {
-            publication::snapshot(room, sim.epoch, &sim.state, &self.reports, sim.generation)?
-        } else {
-            publication::view_notice(room)
-        };
-        self.cpu_publication = notice.cpu_publication.clone();
-        self.revision = next;
-        self.reports.clear();
-        Ok(notice)
-    }
-
-    fn publish_view(&mut self) -> Result<RosterNotice, RosterRuntimeError> {
-        let next = self.next_revision()?;
-        let room = publication::room_view(
-            &self.identity,
-            &self.lifecycle,
-            next,
-            self.settings_revision,
-        )?;
-        self.revision = next;
-        self.cpu_publication = None;
-        Ok(publication::view_notice(room))
-    }
-
-    fn notice_for(
-        &mut self,
-        change: MatchChange,
-        include_state: bool,
-    ) -> Result<Option<RosterNotice>, RosterRuntimeError> {
-        if change == MatchChange::Unchanged {
-            Ok(None)
-        } else if include_state {
-            self.publish_current().map(Some)
-        } else {
-            self.publish_view().map(Some)
-        }
-    }
-
     fn update_settings(
         &mut self,
         seat: SeatId,
@@ -361,7 +314,11 @@ impl RosterRuntime {
         self.notice_for(change.change(), false)
     }
 
-    fn validate_actor(&self, seat: SeatId, epoch: u64) -> Result<(), RosterRuntimeError> {
+    pub(super) fn validate_actor(
+        &self,
+        seat: SeatId,
+        epoch: u64,
+    ) -> Result<(), RosterRuntimeError> {
         if epoch != self.lifecycle.round_attempt() {
             return Err(RosterRuntimeError::StaleEpoch);
         }
@@ -392,6 +349,7 @@ impl RosterRuntime {
         self.sim = None;
         self.reports.clear();
         self.cpu_publication = None;
+        self.environment_cpu_publication = None;
         self.inputs.reset_round();
     }
 }

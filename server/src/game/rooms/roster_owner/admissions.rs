@@ -198,13 +198,16 @@ fn admission(
     guard: DepartureGuard,
     replaced: oneshot::Receiver<()>,
 ) -> RosterAdmission {
+    let room = prepared
+        .legacy_room()
+        .expect("legacy owner requires a legacy admission");
     RosterAdmission {
-        room_id: prepared.room.room_id.clone(),
+        room_id: room.room_id.clone(),
         #[cfg(test)]
-        round_id: u64::from(prepared.room.round_id.get()),
+        round_id: u64::from(room.round_id.get()),
         seat,
         #[cfg(test)]
-        room: prepared.room.clone(),
+        room: room.clone(),
         #[cfg(test)]
         resume_token: _resume_token,
         personal_frame,

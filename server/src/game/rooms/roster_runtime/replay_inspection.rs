@@ -1,5 +1,5 @@
 use grenadiers_core::{
-    game::{GenerationRecord, State, StepReport},
+    game::{GenerationRecord, State, StepReport, StormCloudConfig},
     room::RosterMatchLifecycle,
 };
 
@@ -13,6 +13,7 @@ pub(in crate::game::rooms) struct RosterRuntimeInspection {
     pub(in crate::game::rooms) reports: Vec<StepReport>,
     pub(in crate::game::rooms) revision: u32,
     pub(in crate::game::rooms) settings_revision: u32,
+    pub(in crate::game::rooms) environment: Option<StormCloudConfig>,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -35,6 +36,7 @@ impl RosterRuntime {
             reports: self.reports.clone(),
             revision: self.revision,
             settings_revision: self.settings_revision,
+            environment: self.environment,
         }
     }
 }

@@ -48,7 +48,11 @@ impl Driver {
         cpus: Vec<CpuController>,
     ) -> Self {
         Self {
-            room_id: initial.room.room_id.clone(),
+            room_id: initial
+                .legacy_room()
+                .expect("legacy owner requires a legacy runtime")
+                .room_id
+                .clone(),
             runtime,
             notices,
             last: initial,

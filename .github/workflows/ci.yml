@@ -536,6 +536,17 @@ jobs:
           done
           curl --fail --silent http://127.0.0.1:8085/api/v1/ready
           E2E_OIL_BARREL_FIXTURE=arena-v2-oil-barrel npm --prefix e2e run test:oil-barrel
+      - name: Verify lair spawning and pursuit using the same built image
+        if: matrix.shard == 'items'
+        run: |
+          chmod 444 core/tests/fixtures/arena-v3-lairs.seed
+          GRENADIERS_FIXTURE_SEED_FILE=./core/tests/fixtures/arena-v3-lairs.seed docker compose -f docker-compose.yaml -f e2e/compose/fixture.yaml up -d --no-build --force-recreate app
+          for _attempt in $(seq 1 60); do
+            if curl --fail --silent http://127.0.0.1:8085/api/v1/ready; then break; fi
+            sleep 1
+          done
+          curl --fail --silent http://127.0.0.1:8085/api/v1/ready
+          E2E_LAIRS_FIXTURE=arena-v3-lairs npm --prefix e2e run test:lairs
       - name: Verify a full classic match and rematch using the same image
         if: matrix.shard == 'classic'
         run: |
@@ -568,6 +579,8 @@ jobs:
             e2e/.playwright/art-atlas-test-results/
             e2e/.playwright/atlas-gameplay-test-results/
             e2e/.playwright/terrain-pixel-test-results/
+            e2e/playwright-lairs-report/
+            e2e/lairs-test-results/
             e2e/playwright-pickup-report/
             e2e/playwright-heart-report/
             e2e/playwright-shield-report/

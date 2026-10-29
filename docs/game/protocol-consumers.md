@@ -1,6 +1,6 @@
 # Gameplay protocol consumer inventory
 
-This inventory applies [ADR 0021](../decisions/0021-gameplay-retention.md): gameplay v15 is the
+This inventory applies [ADR 0021](../decisions/0021-gameplay-retention.md): gameplay v16 is the
 only live network version, while archived schemas, compatibility exports, shared implementation
 and regression corpora remain repository consumers. Retention does not mean an old client can
 connect, and no complete historical Rust version directory is selected for deletion.
@@ -23,8 +23,8 @@ separate compatibility axes. In particular, rules profile 5 is not a gameplay-v5
 | v12 | Archived Rust/browser adapter, schema and conformance fixtures. | Standard-only solo controller metadata/authority, human-duel compatibility and inherited physical/privacy semantics. |
 | v13 | Retained Rust/browser adapter, schema, conformance fixtures and compatibility guide. | Easy/Standard selection, consistent two-seat controller metadata and inherited physical/privacy semantics. No server runtime accepts v13. |
 | v14 | Retained Rust/browser adapter, standalone validator and archived E2E fixtures. | Checked two-to-four-seat configuration, canonical seat/score arrays, rules-6 projection and inherited recipient privacy; rejected before credential claim. |
-| v15 | Rust `core::protocol::v15`; live server connection/socket/command/dispatcher, browser client, standalone validator and E2E suites. | Actual rules7 binding, cloud/timer privacy, lifecycle and room/state binding, and rejection of older versions before credential claim. This is the sole live network contract. |
-| v16 | Rust `core::protocol::v16`, generated schema, standalone browser validator and shared conformance corpus. | Exact rules8 binding, canonical lairs, bounded mob counts/footprints, private Stopwatch freeze facts and checked CPU observations. The network endpoint remains v15. |
+| v15 | Rust `core::protocol::v15`; archived server/browser validators and E2E fixtures. | Actual rules7 binding and cloud/timer privacy retained for compatibility; rejected before credential claim. |
+| v16 | Rust `core::protocol::v16`, live server connection/socket/command/dispatcher, generated schema, browser client, standalone validator and shared conformance/E2E corpus. | Exact rules8 binding, canonical lairs, bounded mob counts/footprints, private Stopwatch freeze facts and checked CPU observations. This is the sole live network contract. |
 
 The shared client corpus exercises the closed client-message union across retained v8-v11 Rust
 parsers, schemas and browser validators. The server corpus checks actual Rust-produced
@@ -32,7 +32,7 @@ admissions/snapshot pairs with frozen actors, Teleporter epochs, empty/materiali
 recipient identity and concealment controls. Existing control/error-frame conformance remains.
 V12 adds its closed client corpus and checks inherited server fixtures with controller metadata.
 A typed fixture bridge preserves archived v11 metadata without cloning physical data; standalone
-validator parity retains v11–v14 and covers live v15.
+validator parity retains v11–v15 and covers live v16.
 See [Testing](../testing.md) for commands and the release/history records for executed results.
 
 ## Diagnostic coverage disposition

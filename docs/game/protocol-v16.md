@@ -2,8 +2,8 @@
 
 `api/gameplay-v16.schema.json`, `core::protocol::v16` and generated
 `web/src/game/v16/schema.ts` define the checked rules8 profile. The production WebSocket
-endpoint continues to require [gameplay15](protocol-v15.md); version16 does not independently
-enable lairs. Delivery priorities belong in the [backlog](../../BACKLOG.md).
+endpoint is `/api/v1/game/ws` and requires gameplay16; versions 1 through 15 are rejected before
+credential claim. New-room defaults enable cloud and lairs; either environment feature may be disabled.
 
 ## Configuration
 

@@ -3,9 +3,9 @@
 See [ADR 0020](../decisions/0020-shared-gameplay-settings.md) for the shared configuration model.
 Historical activation details are in the [release record](../history/configuration-activation.md#room-settings-activation).
 
-The creator can configure these rules before the match starts. New rooms use rules 7 and include
-the environment setting `stormCloud` (enabled by default). All on and Restore enable the cloud;
-All off and Classic disable it. Custom room creation separately
+The creator can configure these rules before the match starts. New rooms use rules 8 and include
+the environment settings `stormCloud` and `lairs` (both enabled by default). All on and Restore enable the cloud and lairs;
+All off and Classic disable both. Custom room creation separately
 selects an immutable **Board size** / **Rozmiar planszy** of 11×9, 13×11 or 15×13 (default);
 it is not an editable gameplay setting. Quick duel and Solo always use 15×13. See
 [board geometry](board-sizes.md).
@@ -16,6 +16,8 @@ it is not an editable gameplay setting. Quick duel and Solo always use 15×13. S
 | Corner tolerance | 1/16–¼ tile, steps of 1/16 | Controls how far from a corridor center a perpendicular turn may align. |
 | Wins to finish | 1–9 | Sets round wins needed for match victory. Draws award no point. |
 | Bomb fuse | 1–5 seconds, steps of 0.5 | Sets the delay for successfully planted ordinary bombs. |
+| Lair spawn interval | 5–60 whole seconds, default 10 | Schedules each lair’s spawn attempts. |
+| Living mobs per lair | 1–8, default 3 | Caps each lair independently; deaths free capacity. |
 | Heart | Enabled or disabled; enabled by default | Adds the one-hit protection pickup to generated soft blocks. |
 | Bracelet | Enabled or disabled; enabled by default | Adds passive equipment that shoves a contacted rival up to one tile. |
 | Punch | Enabled or disabled; enabled by default | Adds permanent equipment for moving the adjacent facing bomb to the next open three-cell wrapped landing. |
@@ -46,6 +48,10 @@ setting in the draft; they do not reset numeric rules or submit automatically. R
 numeric Expanded defaults with every currently available item enabled. Classic settings prepares
 the original four values with optional items disabled. Every draft change requires **Apply rules**
 before it changes the shared configuration.
+Lair controls use a 5–60 second spawn interval (default 10) and a 1–8 living-mob cap per lair
+(default 3). All on enables lairs; All off and Classic disable them. See the [lair guide](lairs.md)
+for fixed pillars, mob behavior and privacy. Disabling and reenabling lairs retains both numeric
+choices; Restore resets them to 10 seconds and three living mobs.
 Settings lock at first start and remain locked through automatic rounds and rematches. Create a
 new room to change them.
 

@@ -1,6 +1,6 @@
 # Multiplayer CPU foundation
 
-The live environment CPU implementation uses policy 18 on rules 7 for every live two-to-four-seat
+The live environment CPU implementation uses policy 19 on rules 8 for every live two-to-four-seat
 room. The legacy multiplayer profiles remain policy 17 for archived/reference paths. See the
 [board profile table](board-sizes.md). The
 [CPU contract guide](cpu-contracts.md) describes planner boundaries; the
@@ -12,17 +12,17 @@ Rules 1–5 require two canonical actors and retain the 16-bomb observation/fore
 Rules 6 accepts two to four canonical actors and 32 bombs. Forecast evolution, history and
 hypothetical placement use the selected rules' limit rather than raising a global legacy cap.
 
-`protocol::v15::observe_cpu_recipient` derives observations from the same checked recipient
+`protocol::v16::observe_cpu_recipient` derives observations from the same checked recipient
 projection used by humans. Cloaked actors, unavailable bomb knowledge, timed effects and
 individual Teleporter markers remain private. Planning never receives the complete simulation
 or a private arena/simulation random stream.
 
 ## Policies and controller ownership
 
-`CpuProfile::ENVIRONMENT_STANDARD` and `ENVIRONMENT_EASY` select Utility v18. Existing
-`MULTIPLAYER_STANDARD`, `MULTIPLAYER_EASY`, `CURRENT`, `CURRENT_EASY` and historical replay
-profile checks retain their legacy behavior. The live environment uses
-the established utility and bounded forecasting machinery with explicit rules-7 branches.
+`CpuProfile::LAIRS_STANDARD` and `LAIRS_EASY` select Utility19 for live rules8 rooms.
+`ENVIRONMENT_STANDARD`/`ENVIRONMENT_EASY` retain Utility18 on rules7; multiplayer, current
+legacy and historical replay profiles keep their previous identities. Planning uses the shared
+utility and bounded forecasting machinery with explicit profile boundaries.
 
 Each controller owns its participant/world identity, memory, RNG, pending work, route and
 cadence. Cross-seat results cannot commit plans or random draws. Cancellation of one controller
@@ -36,12 +36,12 @@ Unknown hidden rivals withdraw proofs that cannot be certified. Bracelet also re
 third-party Bracelet threats that could counter-shove the CPU off its certified approach.
 These additional multiplayer guards do not change rules-5 admission semantics.
 
-## Environment profile
+## Retained storm profile
 
-Rules7 has an explicit `ENVIRONMENT_STANDARD`/`ENVIRONMENT_EASY` pair selecting policy18,
+Rules7 retains its `ENVIRONMENT_STANDARD`/`ENVIRONMENT_EASY` pair selecting policy18,
 including when the cloud is disabled. Its observation overlay carries only the published
 cloud leg and recipient-visible storm timers. Legacy observation layouts and constructors
-remain unchanged; the checked v15 adapter creates the new profile.
+remain unchanged; the checked v15 adapter constructs this retained profile.
 
 Ordinary manual-free navigation retains the existing clear-board path, including supported
 pickups. It carries no escape certificate: known bombs, flames, burning Oil and unsupported
@@ -55,7 +55,7 @@ impossible or an existing guaranteed slowdown to cover the remaining movement; u
 speed changes cannot be assumed safe. Deadline intervals participate in route dominance and
 lease validation. Legacy policies retain their original bulk checks and work accounting.
 
-Live controller selection follows the profile table above.
+Live controller selection uses the lair profile below, including when both environment features are disabled.
 
 ## Lair profile boundaries
 
@@ -86,7 +86,7 @@ workers or observations are late. See [CPU contracts](cpu-contracts.md).
 
 Run `cargo test -p grenadiers-core cpu:: --lib` and
 `cargo test -p grenadiers-server game::rooms::cpu:: --lib` for planner/controller regressions.
-The v15 adapter tests compare CPU facts with human recipient projections. Additional cases
+The v16 adapter tests compare CPU facts with human recipient projections. Additional cases
 cover forecast capacity, rival interference, both difficulties, independent controllers and
 player four. Live multi-CPU scheduling is owned by the room owner/socket integration rather than
 this projection API.

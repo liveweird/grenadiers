@@ -113,6 +113,7 @@ describe('v12 admission and authoritative baselines', () => {
     expect(messages(socket).at(-1)).toMatchObject({ type: 'manualAction', action: 'bomb', actionId: 42 })
     const punchEnabled = snapshot(5)
     punchEnabled.room.settings.enabledItems = ['punch']
+    punchEnabled.room.settingsRevision = 2
     socket.message(punchEnabled)
     expect(value.client.useEquipment()).toBe(true)
     expect(messages(socket).at(-1)).toMatchObject({
@@ -132,12 +133,14 @@ describe('v12 admission and authoritative baselines', () => {
 
     const passive = snapshot(2)
     passive.room.settings.enabledItems = ['bracelet']
+    passive.room.settingsRevision = 2
     socket.message(passive)
     expect(value.client.useEquipment()).toBe(false)
     expect(messages(socket).some((message) => message.action === 'equipment')).toBe(false)
 
     const enabled = snapshot(3)
     enabled.room.settings.enabledItems = ['punch']
+    enabled.room.settingsRevision = 3
     socket.message(enabled)
     expect(value.client.useEquipment()).toBe(true)
     expect(messages(socket).at(-1)).toMatchObject({ action: 'equipment', actionId: 9 })

@@ -153,12 +153,19 @@ export function settlesPendingSettings(
 
 export function acceptableBaseline(next: RoomView, current: RoomView | null): boolean {
   return !current || (next.roomId === current.roomId && next.revision >= current.revision
-    && next.roundId >= current.roundId && sameConfiguration(next, current))
+    && next.roundId >= current.roundId && settingsRevisionValid(next, current)
+    && sameConfiguration(next, current))
 }
 
 export function newerRoom(next: RoomView, current: RoomView): boolean {
   return next.roomId === current.roomId && next.revision > current.revision && next.roundId >= current.roundId
-    && sameConfiguration(next, current)
+    && settingsRevisionValid(next, current) && sameConfiguration(next, current)
+}
+
+function settingsRevisionValid(next: RoomView, current: RoomView): boolean {
+  return next.settingsRevision > current.settingsRevision
+    || (next.settingsRevision === current.settingsRevision
+      && sameGameSettings(next.settings, current.settings))
 }
 
 function sameConfiguration(left: RoomView, right: RoomView): boolean {

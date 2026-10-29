@@ -120,7 +120,7 @@ describe('v12 authoritative updates and controls', () => {
       type: 'matchResult', endedAt: 1, rematchAt: 181,
       result: { type: 'winner', seat: 'one', reason: 'roundWins' },
     }, 1)
-    terminal.tick = 180
+    terminal.tick = 180; terminal.settingsRevision = 2
     socket.message({ type: 'roomState', room: terminal })
     expect(value.client.rematch(true)).toBe(false)
     terminal.revision = 3
@@ -319,6 +319,7 @@ describe('v12 live Timed bomb validation', () => {
     socket.message(admitted())
     const next = snapshot(99)
     next.room.settings.enabledItems = ['stopwatch']
+    next.room.settingsRevision = 2
     next.state.bombs = [{
       id: 3, cell: { column: 1, row: 1 }, owner: 1, range: 2, placedAt: 1,
       trigger: { type: 'timed', remainingTicks: 0, paused }, blast: 'standard',

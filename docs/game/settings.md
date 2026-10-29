@@ -3,7 +3,9 @@
 See [ADR 0020](../decisions/0020-shared-gameplay-settings.md) for the shared configuration model.
 Historical activation details are in the [release record](../history/configuration-activation.md#room-settings-activation).
 
-The creator can configure these rules before the match starts. Custom room creation separately
+The creator can configure these rules before the match starts. New rooms use rules 7 and include
+the environment setting `stormCloud` (enabled by default). All on and Restore enable the cloud;
+All off and Classic disable it. Custom room creation separately
 selects an immutable **Board size** / **Rozmiar planszy** of 11×9, 13×11 or 15×13 (default);
 it is not an editable gameplay setting. Quick duel and Solo always use 15×13. See
 [board geometry](board-sizes.md).
@@ -44,8 +46,8 @@ draft; they do not reset numeric rules or submit automatically. Restore defaults
 numeric Expanded defaults with every currently available item enabled. Classic settings prepares
 the original four values with optional items disabled. Every draft change requires **Apply rules**
 before it changes the shared configuration.
-Once a match starts, settings stay locked through all automatic rounds. The retained humans can
-consent to a rematch and then edit in the unready lobby again.
+Settings lock at first start and remain locked through automatic rounds and rematches. Create a
+new room to change them.
 
 Reconnect preserves creator authority while the seat remains reserved. If the creator leaves
 permanently or the reservation expires, the last accepted configuration remains; create a new
@@ -55,6 +57,5 @@ Local keyboard and sound preferences are independent. Turn assistance still uses
 movement budget and swept collision/fire checks. Round/flame duration and loadouts are not
 configurable here.
 
-Expanded rooms retain immutable rules version 5/map `generated_v2` when Heart is disabled,
-including after preset changes. All 22 item switches preserve one another.
+The map identity remains `generated_v2`. All 22 item switches preserve one another.
 See [Oil Barrel](oil-barrel.md), [Heart behavior](heart.md), [Bracelet](bracelet.md), [Punch](punch.md), [Kick](kick.md), [Wall Pass](wall-pass.md), [Remote Bomb](remote-bomb.md), [Piercing Bomb](piercing-bomb.md), [Power Bomb](power-bomb.md), [Landmine](landmine.md), [Stopwatch](stopwatch.md), [Invisibility Cloak](invisibility-cloak.md), [Invisible Bombs](invisible-bombs.md), [Teleporter](teleporter.md), [Shield behavior](shield.md), [Golden Flame](golden-flame.md), [Short Fuse](short-fuse.md), [Short Flame](short-flame.md), [Long Fuse](long-fuse.md), [Reverse Controls](reverse-controls.md), [Diarrhea](diarrhea.md), [Slow foot](slow-foot.md), and [protocol compatibility](protocol-v11.md).

@@ -1,7 +1,7 @@
 # Gameplay protocol v14
 
-Gameplay v14 is the live transport contract for closed two-to-four-seat rooms. The server and web
-client route it on the existing gameplay endpoint. The canonical JSON Schema is
+Gameplay v14 is the archived transport contract for closed two-to-four-seat rooms. It is rejected
+before credential claim; the live server and web client use gameplay v15. The canonical JSON Schema is
 [`api/gameplay-v14.schema.json`](../../api/gameplay-v14.schema.json).
 
 ## Room configuration

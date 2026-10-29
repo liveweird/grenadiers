@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+## 0.3.115 — 2026-10-29
+
+- Enable gameplay15 and rules7 for every supported human/CPU lineup and board, with the
+  roaming storm cloud enabled by default and controlled by forming-lobby feature presets.
+- Render authoritative weather with an independent slowdown timer, recipient privacy and
+  reduced-motion support; append the cloud to the artist sheet without changing earlier frames.
+- Publish explicit settings-editing grants and preserve the first-start lock across rematches;
+  reject archived protocol clients before credential claim.
+
 ## 0.3.114 — 2026-10-29
 
 - Add dormant gameplay15 environment contracts with checked lifecycle, recipient privacy,

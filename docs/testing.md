@@ -23,6 +23,12 @@ Reuse successful results only while their tested inputs remain applicable; rerun
 after relevant changes or failures. Documentation-only changes do not require repeating gameplay
 acceptance when application inputs are unchanged.
 
+An unchanged expensive test may reuse earlier acceptance when a reviewed dependency diff proves
+its implementation, transitive inputs, toolchain and assertions unchanged. Record the exact
+test, prior source/result, dependency check and fresh-suite exclusion in the release record.
+Keep the normal gates exhaustive. Changed behavior still needs fresh tests and independently
+generated coverage at the existing floor; never combine old coverage counts with new source.
+
 ### Focused gameplay feedback
 
 For cached, focused feedback while editing the gameplay client or shared contract corpora, run:
@@ -226,12 +232,12 @@ the largest contributors on failure; Vite's existing per-chunk warning remains v
 `api-guidelines/spectral.yaml`; it retains the standard and custom rules without the CLI's
 glob dependency. Parser/load errors and error-severity diagnostics fail the command.
 `check:api`, `check:realtime`, and `check:gameplay` compare generated
-contracts without modifying them. Gameplay generation/drift checks cover active v14, historical
-v2–v13 and dormant v15; parity tests compare unchanged physical definitions. AJV validates runtime WebSocket payloads. EN/PL locale
+contracts without modifying them. Gameplay generation/drift checks cover active v15, historical
+v2–v14; parity tests compare unchanged physical definitions. AJV validates runtime WebSocket payloads. EN/PL locale
 parity is tested. ESLint/SonarJS and Knip must report no findings.
 
-Live gameplay-v14 and realtime browser consumers use generated standalone Ajv validators;
-dormant v15 has its own generated validator and actual server-projection corpus. Its room
+Live gameplay-v15 and realtime browser consumers use generated standalone Ajv validators and
+the actual server-projection corpus. Its room
 fixtures derive from the roster lifecycle, and mutations check phase/history/readiness,
 physical tick binding, metadata and recipient privacy. Archived validators retain their own
 compiler/schema checks. Run

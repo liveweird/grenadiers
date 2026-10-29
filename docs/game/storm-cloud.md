@@ -1,8 +1,13 @@
 # Storm-cloud simulation
 
 Rules profile 7 adds a seeded, nonblocking weather hazard to the headless simulation. Live
-gameplay v14 cannot publish this profile; existing room construction and wire contracts remain
-unchanged. Use the [backlog](../../BACKLOG.md) for activation and delivery status.
+gameplay v15 publishes this profile on the live WebSocket contract. Older protocols remain
+archived and cannot publish it.
+
+New rooms enable the cloud by default. Forming-lobby All on/Restore defaults enable it;
+All off/Classic disable it. The cloud has its own setting and is not an item pickup. The arena
+renders the authoritative cloud above terrain, and the local player's effect bar shows the
+remaining slowdown time. Reduced motion snaps between published positions.
 
 ## Construction and movement
 

@@ -1,8 +1,8 @@
 # Multiplayer CPU foundation
 
-The shared CPU implementation uses multiplayer policy v17 on rules 6 for live three- and
-four-seat rooms and for two-seat rooms on 11×9/13×11. Only two-seat 15×13 rooms retain policy
-v16 and rules 5. See the [board profile table](board-sizes.md). The
+The live environment CPU implementation uses policy 18 on rules 7 for every live two-to-four-seat
+room. The legacy multiplayer profiles remain policy 17 for archived/reference paths. See the
+[board profile table](board-sizes.md). The
 [CPU contract guide](cpu-contracts.md) describes planner boundaries; the
 [roster runtime](multiplayer-runtime.md) supplies the certified publication seam.
 
@@ -12,16 +12,17 @@ Rules 1–5 require two canonical actors and retain the 16-bomb observation/fore
 Rules 6 accepts two to four canonical actors and 32 bombs. Forecast evolution, history and
 hypothetical placement use the selected rules' limit rather than raising a global legacy cap.
 
-`protocol::v14::observe_cpu_recipient` derives observations from the same checked recipient
+`protocol::v15::observe_cpu_recipient` derives observations from the same checked recipient
 projection used by humans. Cloaked actors, unavailable bomb knowledge, timed effects and
 individual Teleporter markers remain private. Planning never receives the complete simulation
 or a private arena/simulation random stream.
 
 ## Policies and controller ownership
 
-`CpuProfile::MULTIPLAYER_STANDARD` and `MULTIPLAYER_EASY` select Utility v17. Existing
-`CURRENT`, `CURRENT_EASY` and historical replay profile checks remain v16. Multiplayer uses
-the established utility and bounded forecasting machinery with explicit rules-6 branches.
+`CpuProfile::ENVIRONMENT_STANDARD` and `ENVIRONMENT_EASY` select Utility v18. Existing
+`MULTIPLAYER_STANDARD`, `MULTIPLAYER_EASY`, `CURRENT`, `CURRENT_EASY` and historical replay
+profile checks retain their legacy behavior. The live environment uses
+the established utility and bounded forecasting machinery with explicit rules-7 branches.
 
 Each controller owns its participant/world identity, memory, RNG, pending work, route and
 cadence. Cross-seat results cannot commit plans or random draws. Cancellation of one controller
@@ -54,13 +55,13 @@ impossible or an existing guaranteed slowdown to cover the remaining movement; u
 speed changes cannot be assumed safe. Deadline intervals participate in route dominance and
 lease validation. Legacy policies retain their original bulk checks and work accounting.
 
-Live controller selection remains the profile table above until paired network activation.
+Live controller selection follows the profile table above.
 
 ## Focused checks
 
 Run `cargo test -p grenadiers-core cpu:: --lib` and
 `cargo test -p grenadiers-server game::rooms::cpu:: --lib` for planner/controller regressions.
-The v14 adapter tests compare CPU facts with human recipient projections. Additional cases
+The v15 adapter tests compare CPU facts with human recipient projections. Additional cases
 cover forecast capacity, rival interference, both difficulties, independent controllers and
 player four. Live multi-CPU scheduling is owned by the room owner/socket integration rather than
 this projection API.

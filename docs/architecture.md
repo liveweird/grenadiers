@@ -31,8 +31,8 @@ The owner executes bounded logical intentions; public snapshots carry the accept
 
 Matches configure two to four seats and require at least one human controller. Transport sockets
 are not player seats; the diagnostic v2 welcome's `maxPlayers: 4` describes the live match-capacity
-ceiling, not a connection limit. Two-seat 15×13 matches retain CPU policy 16 and rules 5;
-three/four-seat 15×13 matches and every 11×9/13×11 match use CPU policy 17 and rules 6. The board
+ceiling, not a connection limit. All live two-to-four-seat matches use CPU policy 18 and rules 7.
+Archived profiles retain their historical policies and rules. The board
 choice is immutable, defaults to 15×13 and is documented in [board geometry](game/board-sizes.md).
 Match configuration, rather than global connections, determines the participant roster.
 
@@ -102,15 +102,16 @@ that physical contract with resumable admissions; generated types never fabricat
 V4 checked room projection derives facts directly from `MatchLifecycle`; its public validator
 rejects semantically impossible bounded DTOs before server adapters publish them.
 
-The active `match_runtime` server adapter owns real per-round physics, assignment-aware
-generation, epoch-fenced input, settled reconnect grace, and checked v14 publication. Result
+The active `roster_runtime` server adapter owns real per-round physics, assignment-aware
+generation, epoch-fenced input, settled reconnect grace, and checked v15 publication. Result
 physics freezes while the global lifecycle clock and reservation deadlines advance.
 
-The active v14 client/panel shares the Pixi presentation boundary, validates v14 messages, keeps
+The active v15 client/panel shares the Pixi presentation boundary, validates v15 messages, keeps
 the resume capability only in tab memory, and renders scores, recovery, grace, and rematch from
-authoritative facts. Production routing uses v14 on the existing endpoint. Gameplay v7–v11 added
+authoritative facts. Production routing uses v15 on `/api/v1/game/ws`; versions 14 and older are
+rejected before credential claim. Gameplay v7–v11 added
 the expanded item inventory and recipient-private projections; the live contract is
-[protocol v14](game/protocol-v14.md). See [reconnect browser](game/reconnect-browser.md).
+[protocol v15](game/protocol-v15.md). See [reconnect browser](game/reconnect-browser.md).
 
 The active [bounded match owner](game/match-owner.md) adds generation-fenced admission,
 scheduled departure batches, absolute deadlines, retention, and sticky shutdown. Its closing

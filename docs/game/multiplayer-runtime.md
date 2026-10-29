@@ -1,8 +1,7 @@
 # Roster runtime
 
-`server/src/game/rooms/roster_runtime/` provides the transport-independent runtime used by live
-three- and four-seat configurations and by two-seat rooms on smaller boards. The live registry
-retains the established two-seat path only for 15×13. The [v14 contract](protocol-v14.md) owns wire shape
+`server/src/game/rooms/roster_runtime/` provides the transport-independent runtime used by every
+live two-to-four-seat configuration and board. The [v15 contract](protocol-v15.md) owns wire shape
 and recipient privacy; the [multiplayer design](multiplayer-design.md) records its integration.
 
 ## Lifecycle and participation
@@ -25,11 +24,10 @@ are derived from the same certified physical facts before revisions or report fl
 Admissions prepare a prospective lifecycle and all recipient frames, encode the private response,
 and commit only after the owner delivers it. Resume retains the exact new CPU publication.
 
-Round construction uses rules 6 and the actual physical-round assignment. It selects generator 3
+Round construction uses rules 7 and the actual physical-round assignment. It selects generator 3
 for 15×13 and generator 4 for 11×9/13×11. The configured roster remains intact, with departed
-participants initially inactive. Live two-player 15×13 routing retains rules 5, generator 2 and
-CPU policy 16. Every smaller-board room and every three/four-seat room uses the roster runtime and
-CPU policy 17. The exact profile table is in [board geometry](board-sizes.md).
+participants initially inactive. Every live room uses CPU policy 18. The exact profile table is in
+[board geometry](board-sizes.md).
 
 ## Boundaries and randomness
 

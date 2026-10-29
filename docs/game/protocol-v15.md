@@ -1,16 +1,22 @@
 # Gameplay v15 environment contract
 
 `api/gameplay-v15.schema.json`, `core::protocol::v15` and generated
-`web/src/game/v15/schema.ts` define the environment profile. These checked adapters are
-independent of network activation: the current endpoint still accepts
-[gameplay v14](protocol-v14.md). Sending authentication version 15 does not enable a cloud.
+`web/src/game/v15/schema.ts` define the live environment profile. The WebSocket endpoint is
+`/api/v1/game/ws` and accepts only protocol 15; protocol 14 and older versions are rejected
+before credential claim.
 
 ## Configuration and state
 
 V15 uses rules7 for every supported board and controller count, including cloud-disabled
 matches. Configuration and complete lobby settings each require
 `environment: { stormCloud: boolean }`; their values must agree. Two to four controllers,
-at least one human and the existing three board presets remain supported.
+at least one human and the existing three board presets remain supported. All new rooms use
+generator 3 on 15×13 and generator 4 on 13×11/11×9.
+
+`room.settingsEditor` is an explicit editing grant. A null grant makes the controls read-only;
+clients must not infer editability from lobby phase or readiness. The creator can edit only
+before the first start. That lock survives rematches; changing rules afterward requires a new
+room. Base rules and environment changes share one atomic revision and readiness reset.
 
 Snapshots add nullable `state.stormCloud`. An enabled cloud reports fixed-point `position`,
 cardinal `direction` and `legRemainingTicks` from 0 through 128. Position and leg progress must
@@ -27,7 +33,7 @@ cloaked opponents. Item effects and the dedicated environment timer remain separ
 Capture validates actual rules7 state. Binding checks configuration, settings, lifecycle,
 generation, physical epoch and recipient facts before preparing admission or snapshot frames.
 It reuses the physical projection boundary without relabelling rules7 as an older profile.
-Rules5/6 publication through v14 remains closed to rules7.
+Rules5/6 publication through archived protocols remains closed to rules7.
 
 The CPU adapter consumes this same checked recipient publication. Policy18 handles either
 Disabled or Single, models the published leg and timer, and bounds uncertainty after future

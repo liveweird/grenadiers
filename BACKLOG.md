@@ -31,10 +31,10 @@ repeated approval for routine implementation choices. Entries are not delivery-d
 
 ## Playtesting and extensions
 
-- [todo] **BASELINE — close the two-player release scope.** Complete human playtesting, decide
-  supported browser/network conditions and publish the stable baseline with explicit limits and
-  upgrade/rollback guidance. Archived M7/M8 criteria define acceptance, not completion; CPU and
-  campaign content are separate tracks.
+- [todo] **BASELINE — broaden browser/network validation.** Complete human playtesting and decide
+  supported browser/network conditions. The 1.0 release records the current limits and
+  upgrade/rollback guidance; remaining archived M7/M8 validation criteria stay open. CPU difficulty
+  and campaign content remain separate tracks.
 - [todo] **TURN — tune with human evidence.** Tolerance is already configurable. Evaluate early/
   late turns, speed levels, collision/fire contact and network delay; preserve fixed-point safety.
 - [todo] **Expanded interactions.** Exercise item combinations, replacement/stacking, reconnect,

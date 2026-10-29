@@ -1,6 +1,6 @@
 import type { Difficulty, Direction, GameServerMessage, GameSettings, RoomConfiguration,
-  RoomView, Seat, V14ErrorCode } from '../v14/schema'
-import { validateGameplayV14ServerMessage } from '../v14/validation'
+  RoomView, Seat, V14ErrorCode } from '../v15/schema'
+import { validateGameplayV15ServerMessage } from '../v15/validation'
 import type { GameClientState } from './clientTypes'
 
 export const MAX_COUNTER = 2_147_483_647
@@ -39,8 +39,10 @@ export function createConfiguration(intent: ConfigurationIntent): RoomConfigurat
   if (intent.configuration) return intent.configuration
   const difficulty = intent.mode?.type === 'solo' ? intent.mode.difficulty : null
   return difficulty === null
-    ? { controllers: ['human', 'human'], cpuDifficulty: null, board: { width: 15, height: 13 } }
-    : { controllers: ['human', 'cpu'], cpuDifficulty: difficulty, board: { width: 15, height: 13 } }
+    ? { controllers: ['human', 'human'], cpuDifficulty: null, board: { width: 15, height: 13 },
+      environment: { stormCloud: true } }
+    : { controllers: ['human', 'cpu'], cpuDifficulty: difficulty, board: { width: 15, height: 13 },
+      environment: { stormCloud: true } }
 }
 function unique<T>(values: readonly T[]): boolean {
   return new Set(values).size === values.length
@@ -73,7 +75,7 @@ function roomRecipientValid(message: GameServerMessage): boolean {
 }
 
 export function validateServerMessage(value: unknown, expectedSeat: Seat | null): value is GameServerMessage {
-  const result = validateGameplayV14ServerMessage(value)
+  const result = validateGameplayV15ServerMessage(value)
   return result.valid && roomRecipientValid(result.value) && stateRecipientValid(result.value, expectedSeat)
 }
 
@@ -107,6 +109,7 @@ export function sameGameSettings(left: GameSettings, right: GameSettings): boole
     && left.bombFuseTicks === right.bombFuseTicks
     && left.enabledItems.length === right.enabledItems.length
     && left.enabledItems.every((item, index) => item === right.enabledItems[index])
+    && left.environment.stormCloud === right.environment.stormCloud
 }
 
 export function settlesPendingSettings(

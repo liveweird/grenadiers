@@ -23,6 +23,7 @@ impl RosterRuntime {
                 environment,
                 next,
                 self.settings_revision,
+                self.settings_authority_locked(),
             )?;
             if let Some(sim) = body {
                 publication_v15::snapshot(
@@ -67,6 +68,7 @@ impl RosterRuntime {
                 environment,
                 next,
                 self.settings_revision,
+                self.settings_authority_locked(),
             )?)
         } else {
             publication::view_notice(publication::room_view(

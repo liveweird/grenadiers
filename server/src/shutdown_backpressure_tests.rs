@@ -77,7 +77,7 @@ async fn next_json(socket: &mut Client) -> Value {
 async fn authenticate(socket: &mut Client, token: &str) {
     send(
         socket,
-        json!({"type":"authenticate", "protocolVersion":14, "token":token}),
+        json!({"type":"authenticate", "protocolVersion":15, "token":token}),
     )
     .await;
     assert_eq!(next_json(socket).await["type"], "authenticated");
@@ -146,7 +146,7 @@ async fn running_fixture() -> RunningFixture {
     authenticate(&mut healthy, &token(&server.state)).await;
     send(
         &mut blocked,
-        json!({"type":"createRoom", "sequence":1, "configuration":{"controllers":["human","human"],"cpuDifficulty":null,"board":{"width":15,"height":13}}}),
+        json!({"type":"createRoom", "sequence":1, "configuration":{"controllers":["human","human"],"cpuDifficulty":null,"board":{"width":15,"height":13},"environment":{"stormCloud":true}}}),
     )
     .await;
     let created = next_json(&mut blocked).await;

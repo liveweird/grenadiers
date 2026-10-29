@@ -40,6 +40,7 @@ export const scenarioSpecMap = {
   'scenarios/slow-foot.md': ['slow-foot-tests/slow-foot.spec.ts'],
   'scenarios/solo.md': ['tests/solo.spec.ts'],
   'scenarios/stopwatch.md': ['stopwatch-tests/stopwatch.spec.ts'],
+  'scenarios/storm-cloud.md': ['tests/storm-cloud.spec.ts'],
   'scenarios/teleporter.md': ['teleporter-tests/teleporter.spec.ts'],
   'scenarios/terrain-pixels.md': ['terrain-pixel-tests/terrain.spec.ts'],
   'scenarios/turning.md': ['tests/turning.spec.ts'],

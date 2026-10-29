@@ -1,6 +1,6 @@
 import { selectClassicSettings } from './support/settings'
 import { expect, test } from '@playwright/test'
-import { latestSnapshot, observeGame, type ObservedGame } from './support/duel'
+import { expectPaintedCanvas, latestSnapshot, observeGame, type ObservedGame } from './support/duel'
 
 function latestRoom(game: ObservedGame) {
   return game.frames.filter((frame) =>
@@ -18,15 +18,31 @@ test('two browsers share configured rules that drive speed, fuse and match targe
     expect(latestRoom(games[0])?.settings.enabledItems).toEqual(latestRoom(games[0])?.availableItems)
     await expect(one.getByRole('button', { name: 'All on', exact: true })).toBeVisible()
     await expect(one.getByRole('button', { name: 'All off', exact: true })).toBeVisible()
+    const stormCloud = one.getByRole('checkbox', { name: 'Storm cloud', exact: true })
+    await expect(stormCloud).toBeChecked()
+    expect(latestRoom(games[0])?.settings.environment).toEqual({ stormCloud: true })
+    expect(latestRoom(games[0])?.configuration.environment).toEqual({ stormCloud: true })
+    await one.getByRole('button', { name: 'All off', exact: true }).click()
+    await expect(stormCloud).not.toBeChecked()
+    await one.getByRole('button', { name: 'All on', exact: true }).click()
+    await expect(stormCloud).toBeChecked()
+    await one.getByRole('button', { name: 'Classic settings', exact: true }).click()
+    await expect(stormCloud).not.toBeChecked()
+    await one.getByRole('button', { name: 'Restore match defaults', exact: true }).click()
+    await expect(stormCloud).toBeChecked()
     await one.getByText('Polski', { exact: true }).click()
     await expect(one.getByRole('button', { name: 'Włącz wszystkie', exact: true })).toBeVisible()
     await expect(one.getByRole('button', { name: 'Wyłącz wszystkie', exact: true })).toBeVisible()
+    await expect(one.getByRole('checkbox', { name: 'Chmura burzowa', exact: true })).toBeChecked()
     await one.getByText('English', { exact: true }).click()
     await selectClassicSettings(one, games[0])
     const invitation = one.getByLabel('Room invitation code', { exact: true })
     await expect(invitation).toHaveText(/^[A-HJ-NP-Z2-9]{8}$/)
     await two.getByRole('textbox', { name: 'Room code', exact: true }).fill(await invitation.innerText())
     await two.getByRole('button', { name: 'Join room', exact: true }).click()
+
+    await two.getByRole('button', { name: 'Ready', exact: true }).click()
+    await expect.poll(() => latestRoom(games[0])?.seats[1]?.ready).toBe(true)
 
     await one.getByLabel('Starting speed').selectOption('4')
     await one.getByLabel('Turning tolerance').selectOption('64')
@@ -35,18 +51,25 @@ test('two browsers share configured rules that drive speed, fuse and match targe
     await one.getByRole('button', { name: 'Apply rules', exact: true }).click()
     const expected = {
       startingSpeedLevel: 4, turnAssistUnits: 64, winsToFinish: 1, bombFuseTicks: 60, enabledItems: [],
+      environment: { stormCloud: false },
     }
     await Promise.all(games.map((game) => expect.poll(() => latestRoom(game)?.settings).toEqual(expected)))
+    await Promise.all(games.map((game) => expect.poll(() => latestRoom(game)?.configuration.environment)
+      .toEqual({ stormCloud: false })))
+    await Promise.all(games.map((game) => expect.poll(() => latestRoom(game)?.seats[1]?.ready).toBe(false)))
     await expect(two.getByLabel('Starting speed')).toHaveValue('4')
     await expect(two.getByLabel('Bomb fuse')).toHaveValue('60')
 
     await Promise.all([one, two].map((page) => page.getByRole('button', { name: 'Ready', exact: true }).click()))
     await Promise.all(games.map((game) => expect.poll(() => latestSnapshot(game)?.room.phase.type).toBe('running')))
     for (const game of games) {
-      expect(latestSnapshot(game)!.room).toMatchObject({ rulesVersion: 5, settings: expected })
+      expect(latestSnapshot(game)!.room).toMatchObject({ rulesVersion: 7, settings: expected })
       expect(latestSnapshot(game)!.state.actors.map((actor) => actor.type === 'visible' ? actor.speedLevel : null))
         .toEqual([4, 4])
+      expect(latestSnapshot(game)!.state.stormCloud).toBeNull()
     }
+    await Promise.all([one, two].map(expectPaintedCanvas))
+    await expect(stormCloud).toBeDisabled()
 
     await one.getByRole('region', { name: 'Grenadiers courtyard' }).click()
     await one.keyboard.press('Space')
@@ -69,6 +92,7 @@ test('two browsers share configured rules that drive speed, fuse and match targe
     await Promise.all([one, two].map((page) => page.getByRole('button', { name: 'Play again', exact: true }).click()))
     await Promise.all(games.map((game) => expect.poll(() => latestRoom(game)?.phase.type).toBe('waiting')))
     expect(latestRoom(games[0])?.settings).toEqual(expected)
+    await expect(stormCloud).toBeDisabled()
   } finally {
     await Promise.all(contexts.map((context) => context.close()))
   }

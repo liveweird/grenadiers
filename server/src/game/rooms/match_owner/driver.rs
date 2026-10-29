@@ -16,8 +16,9 @@ pub(super) mod admissions;
 mod cpu_runtime;
 mod cpu_runtime_route;
 
-use super::types::{
-    ClosingReason, MatchOwnerNotice, OwnerCommand, PendingDeparture, SeatSlot, map_runtime_error,
+use super::{
+    ClosingReason,
+    types::{MatchOwnerNotice, OwnerCommand, PendingDeparture, SeatSlot, map_runtime_error},
 };
 
 pub(super) struct Driver {

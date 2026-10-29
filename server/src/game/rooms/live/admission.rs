@@ -1,19 +1,23 @@
 use std::sync::Arc;
 
+#[cfg(test)]
+use grenadiers_core::protocol::Seat;
 use grenadiers_core::{
     game::SeatId,
-    protocol::{RoomId, Seat, v14},
+    protocol::{RoomId, v14, v15},
 };
 use tokio::sync::{oneshot, watch};
 
+#[cfg(test)]
+use super::super::match_owner::{MatchAdmission, MatchOwnerNotice};
 use super::super::{
     ClosingReason, RoomError,
-    match_owner::{MatchAdmission, MatchOwnerNotice},
     roster_owner::{RosterAdmission, RosterOwnerNotice},
     roster_runtime::RosterNotice,
 };
 
 pub(crate) enum LiveAdmission {
+    #[cfg(test)]
     Legacy(MatchAdmission),
     Roster(RosterAdmission),
 }
@@ -35,6 +39,7 @@ pub(crate) enum LiveMemberEvent {
 impl LiveAdmission {
     pub(crate) fn room_id(&self) -> &RoomId {
         match self {
+            #[cfg(test)]
             Self::Legacy(value) => &value.room_id,
             Self::Roster(value) => &value.room_id,
         }
@@ -42,6 +47,7 @@ impl LiveAdmission {
 
     pub(crate) fn seat(&self) -> SeatId {
         match self {
+            #[cfg(test)]
             Self::Legacy(value) => match value.seat {
                 Seat::One => SeatId::One,
                 Seat::Two => SeatId::Two,
@@ -52,6 +58,7 @@ impl LiveAdmission {
 
     pub(crate) fn personal_frame(&self) -> &Arc<str> {
         match self {
+            #[cfg(test)]
             Self::Legacy(value) => &value.personal_frame,
             Self::Roster(value) => &value.personal_frame,
         }
@@ -59,6 +66,7 @@ impl LiveAdmission {
 
     pub(crate) fn disarm(&mut self) {
         match self {
+            #[cfg(test)]
             Self::Legacy(value) => value.guard.disarm(),
             Self::Roster(value) => value.guard.disarm(),
         }
@@ -66,6 +74,7 @@ impl LiveAdmission {
 
     pub(crate) fn acknowledge_notices(&mut self) {
         match self {
+            #[cfg(test)]
             Self::Legacy(value) => {
                 value.notices.borrow_and_update();
             }
@@ -78,6 +87,7 @@ impl LiveAdmission {
     pub(crate) fn latest_delivery(&mut self) -> Result<LiveDelivery, RoomError> {
         let seat = self.seat();
         match self {
+            #[cfg(test)]
             Self::Legacy(value) => match value.notices.borrow_and_update().clone() {
                 MatchOwnerNotice::Publication(notice) => {
                     Ok(LiveDelivery::Publication(legacy_frame(&notice, seat)?))
@@ -101,6 +111,7 @@ impl LiveAdmission {
 
     pub(crate) async fn next_event(&mut self, replacement_closed: &mut bool) -> LiveMemberEvent {
         match self {
+            #[cfg(test)]
             Self::Legacy(value) => {
                 next_event(&mut value.notices, &mut value.replaced, replacement_closed).await
             }
@@ -111,6 +122,7 @@ impl LiveAdmission {
     }
 }
 
+#[cfg(test)]
 fn legacy_frame(
     notice: &super::super::match_runtime::MatchNotice,
     seat: SeatId,
@@ -122,13 +134,34 @@ fn legacy_frame(
 }
 
 fn roster_frame(notice: &RosterNotice, seat: SeatId) -> Result<Arc<str>, RoomError> {
-    let room = notice.legacy_room().ok_or(RoomError::CapacityReached)?;
-    if !room.configuration.domain().player_count().contains(seat) {
+    let contains_seat = notice
+        .legacy_room()
+        .map(|room| room.configuration.domain().player_count().contains(seat))
+        .or_else(|| {
+            notice.environment_room().map(|room| {
+                room.configuration
+                    .domain()
+                    .base()
+                    .player_count()
+                    .contains(seat)
+            })
+        })
+        .ok_or(RoomError::CapacityReached)?;
+    if !contains_seat {
         return Err(RoomError::CapacityReached);
     }
     if let Some(frame) = notice.frame(seat) {
         return Ok(frame);
     }
+    if let Some(room) = notice.environment_room() {
+        v15::validate_room_view(room).map_err(|_| RoomError::CapacityReached)?;
+        return v15::encode_server_message(&v15::GameServerMessage::RoomState {
+            room: room.clone(),
+        })
+        .map(Arc::from)
+        .map_err(|_| RoomError::CapacityReached);
+    }
+    let room = notice.legacy_room().ok_or(RoomError::CapacityReached)?;
     v14::validate_room_view(room).map_err(|_| RoomError::CapacityReached)?;
     v14::encode_server_message(&v14::GameServerMessage::RoomState { room: room.clone() })
         .map(Arc::from)

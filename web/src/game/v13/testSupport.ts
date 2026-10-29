@@ -1,5 +1,5 @@
 import type { Admitted, RoomPhase, RoomView, Snapshot } from './schema'
-import { admitted as currentAdmission, room as currentRoom, snapshot as currentSnapshot } from '../client/testSupport'
+import { admitted as currentAdmission, room as currentRoom, snapshot as currentSnapshot } from '../v14/testSupport'
 
 function legacyRoom(value: ReturnType<typeof currentRoom>): RoomView {
   const { configuration, scores, ...rest } = value

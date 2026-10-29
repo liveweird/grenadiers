@@ -4,14 +4,16 @@
 
 Independent browser contexts create, join, and start every combination of two through four human
 controllers on 11×9, 13×11, and 15×13. Each running world has the selected dimensions, exact
-terrain capacity, complete roster, and authoritative movement from the highest occupied seat.
+terrain capacity, complete roster, rules7, the matching generator3/generator4 profile, one enabled
+cloud, and authoritative movement from the highest occupied seat.
 
 ## Scenario: CPU controller counts and difficulties make authoritative progress on every board preset
 
 For every board, controller count, and Easy or Standard difficulty, one human starts a match with
 the remaining seats server-controlled. Real snapshots must show each configured CPU moving or
 owning a live bomb, and at least one CPU-owned bomb in the room. Configured controller metadata
-alone is not accepted as evidence of progress.
+alone is not accepted as evidence of progress. Every combination also verifies the rules7 cloud
+environment independently of controller count and difficulty.
 
 ## Scenario: quick duel and solo retain the default board
 

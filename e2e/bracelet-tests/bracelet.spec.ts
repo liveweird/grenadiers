@@ -4,9 +4,9 @@ import { arenaTilePixels } from '../tests/support/compositor'
 import { latestSnapshot, observeGame, visibleActor, type ObservedGame } from '../tests/support/duel'
 import { moveSeatTo } from '../tests/support/movement'
 import { applyItemSettings } from '../tests/support/settings'
-import type { GameServerMessage, Seat } from '../../web/src/game/v14/schema'
+import type { GameServerMessage, Seat } from '../../web/src/game/v15/schema'
 
-test.beforeAll(() => expect(process.env.E2E_BRACELET_FIXTURE).toBe('arena-v2-bracelet'))
+test.beforeAll(() => expect(process.env.E2E_BRACELET_FIXTURE).toBe('arena-v3-bracelet'))
 type Snapshot = Extract<GameServerMessage, { type: 'snapshot' }>
 const snapshots = (game: ObservedGame): Snapshot[] => game.frames.filter(
   (frame): frame is Snapshot => frame.type === 'snapshot')
@@ -51,34 +51,40 @@ async function collectAndStagePusher(page: Page, game: ObservedGame): Promise<vo
   await moveSeatTo(page, game, 'one', { column: 3, row: 1 })
   await moveSeatTo(page, game, 'one', { column: 5, row: 1 })
   for (const [plant, escape, stage] of [
-    [{ column: 5, row: 1 }, { column: 2, row: 1 }, { column: 8, row: 1 }],
+    [{ column: 5, row: 1 }, { column: 2, row: 1 }, { column: 7, row: 1 }],
+    [{ column: 7, row: 1 }, { column: 4, row: 1 }, { column: 8, row: 1 }],
     [{ column: 8, row: 1 }, { column: 5, row: 1 }, { column: 9, row: 1 }],
     [{ column: 9, row: 1 }, { column: 6, row: 1 }, { column: 10, row: 1 }],
   ] as const) {
-    await moveSeatTo(page, game, 'one', plant)
-    await plantAndEscape(page, game, 'one', escape)
-    await moveSeatTo(page, game, 'one', stage)
+    await test.step(`clear pusher corridor through ${stage.column},${stage.row}`, async () => {
+      await moveSeatTo(page, game, 'one', plant)
+      await plantAndEscape(page, game, 'one', escape)
+      await moveSeatTo(page, game, 'one', stage)
+    })
   }
 }
 
 async function clearAndStageVictim(page: Page, game: ObservedGame): Promise<void> {
-  await moveSeatTo(page, game, 'two', { column: 13, row: 10 })
+  await moveSeatTo(page, game, 'two', { column: 13, row: 9 })
   await page.keyboard.press('Space')
   await moveSeatTo(page, game, 'two', { column: 13, row: 11 })
   await moveSeatTo(page, game, 'two', { column: 12, row: 11 })
   await waitClear(game)
   await moveSeatTo(page, game, 'two', { column: 13, row: 11 })
-  await moveSeatTo(page, game, 'two', { column: 13, row: 7 })
+  await moveSeatTo(page, game, 'two', { column: 13, row: 8 })
   for (const [plant, escape, stage] of [
-    [{ column: 13, row: 7 }, { column: 13, row: 10 }, { column: 13, row: 4 }],
-    [{ column: 13, row: 4 }, { column: 13, row: 7 }, { column: 13, row: 3 }],
-    [{ column: 13, row: 3 }, { column: 13, row: 6 }, { column: 13, row: 2 }],
-    [{ column: 13, row: 2 }, { column: 13, row: 5 }, { column: 13, row: 1 }],
+    [{ column: 13, row: 8 }, { column: 13, row: 11 }, { column: 13, row: 7 }],
+    [{ column: 13, row: 7 }, { column: 13, row: 10 }, { column: 13, row: 6 }],
+    [{ column: 13, row: 6 }, { column: 13, row: 9 }, { column: 13, row: 5 }],
+    [{ column: 13, row: 5 }, { column: 13, row: 8 }, { column: 13, row: 4 }],
   ] as const) {
-    await moveSeatTo(page, game, 'two', plant)
-    await plantAndEscape(page, game, 'two', escape)
-    await moveSeatTo(page, game, 'two', stage)
+    await test.step(`clear victim corridor through ${stage.column},${stage.row}`, async () => {
+      await moveSeatTo(page, game, 'two', plant)
+      await plantAndEscape(page, game, 'two', escape)
+      await moveSeatTo(page, game, 'two', stage)
+    })
   }
+  await moveSeatTo(page, game, 'two', { column: 13, row: 1 })
   await page.keyboard.press('Space')
   await moveSeatTo(page, game, 'two', { column: 13, row: 4 })
   await waitClear(game)

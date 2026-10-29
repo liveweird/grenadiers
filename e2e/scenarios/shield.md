@@ -2,10 +2,11 @@
 
 ## Scenario: two browsers enable a generated Shield and observe immunity end before a later blast
 
-Run the production image with external mode-0444 `core/tests/fixtures/arena-v2-shield.seed`
-(repeating byte 31) and `E2E_SHIELD_FIXTURE=arena-v2-shield`. The creator turns off all items,
-turns on Shield, applies the rules, and waits for authoritative settings acceptance.
-Both players ready into rules 5 / generator 2. No state or inventory is injected.
+Run the production image with the pinned bytes from the archive-named mode-0444
+`core/tests/fixtures/arena-v2-shield.seed` file (repeating byte 31) through generator3 and
+acknowledge them with `E2E_SHIELD_FIXTURE=arena-v3-shield`. The creator turns
+off all items, turns on Shield, applies the rules, and waits for authoritative settings acceptance.
+Both players ready into rules7/generator3. No state or inventory is injected.
 
 Player One bombs from (2,1), escapes through (1,1) to (1,2), and returns after fire clears
 to collect the generated Shield at (3,1). Both perspectives observe its timed effect. The

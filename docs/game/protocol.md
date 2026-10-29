@@ -2,8 +2,9 @@
 
 Status: gameplay contracts, checked domain conversion, HTTP session issuance, and authenticated
 gameplay WebSockets with authoritative configurable two-to-four-seat matches are implemented.
-`api/gameplay-v14.schema.json`, Rust `core::protocol::v14`, and generated
-`web/src/game/v14/schema.ts` define active socket messages. V2 through v13 remain historical.
+`api/gameplay-v15.schema.json`, Rust `core::protocol::v15`, and generated
+`web/src/game/v15/schema.ts` define active socket messages. V2 through v14 remain historical
+or archived compatibility contracts.
 V14 retains the v11 physical/privacy model while adding a checked two-to-four-controller room
 configuration. See the [v14 contract](protocol-v14.md) and [v13 compatibility](protocol-v13.md).
 See [ADR 0021](../decisions/0021-gameplay-retention.md) for the distinction between live support,
@@ -27,8 +28,8 @@ The browser validates these messages and drives the playable generated-map match
 | v11 | [Physical compatibility guide](protocol-v11.md) | Archived contract |
 | v12 | [Standard-only solo guide](protocol-v12.md) | Archived contract |
 | v13 | [Compatibility guide](protocol-v13.md) | Archived contract |
-| v14 | [Live multiplayer contract](protocol-v14.md) | Supported |
-| v15 | [Environment contract](protocol-v15.md) | Checked adapters; endpoint remains v14 |
+| v14 | [Archived multiplayer contract](protocol-v14.md) | Archived/rejected before credential claim |
+| v15 | [Environment contract](protocol-v15.md) | Live multiplayer contract |
 
 ## Authentication and compatibility
 
@@ -208,7 +209,7 @@ spawn/tie assignment uses actual round count rather than command epoch.
 
 Shared room views and snapshot metadata also carry the complete checked `settings`,
 `settingsRevision`, nullable original `settingsEditor`, and `availableItems`. Settings also
-carry `enabledItems`; v10 remains pinned to its 21-item Bracelet catalog while active v14
+carry `enabledItems`; v10 remains pinned to its 21-item Bracelet catalog while active v15
 has the unchanged 22-item catalog beginning with Kick, Punch, Bracelet and Wall Pass, with Oil Barrel immediately
 before Teleporter. New live rooms enable the full available catalog and every supported subset is allowed.
 Only actual changes increment

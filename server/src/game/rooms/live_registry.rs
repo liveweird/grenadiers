@@ -1,12 +1,9 @@
 use std::{sync::Arc, time::Instant as StdInstant};
 
 use grenadiers_core::{
-    game::SimulationSeed,
+    game::{EnabledItems, SimulationSeed, StormCloudConfig},
     protocol::{Counter, RoomCode, RoomId, v14},
-    room::{
-        BoardSize, CpuDifficulty, CpuProfile, RoomConfiguration, RoomMode, RoomSettings,
-        SeatControl,
-    },
+    room::{CpuDifficulty, CpuProfile, EnvironmentRoomConfiguration, RoomSettings},
 };
 use tokio::time::Instant;
 
@@ -14,17 +11,21 @@ use super::{
     BindingKey, GameRooms, LiveAdmission, RoomError, RoomHandle,
     cpu::CpuController,
     live::LiveOwner,
-    match_owner::PreparedMatchOwner,
     registry_lookup::RegistryOperation,
     roster_owner::PreparedRosterOwner,
     roster_runtime::{RosterAction, RosterIdentity, RosterRuntime},
     roster_seed::SimulationRoot,
-    types::RoomIdentity,
 };
 
 enum PreparedLiveOwner {
-    Legacy(Box<PreparedMatchOwner>),
     Roster(Box<PreparedRosterOwner>),
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) struct EnvironmentSettingsAction {
+    pub(crate) settings_revision: u32,
+    pub(crate) settings: RoomSettings,
+    pub(crate) environment: StormCloudConfig,
 }
 
 impl GameRooms {
@@ -33,9 +34,9 @@ impl GameRooms {
         binding: BindingKey,
         sequence: Counter,
         now: StdInstant,
-        configuration: RoomConfiguration,
+        configuration: EnvironmentRoomConfiguration,
     ) -> Result<LiveAdmission, RoomError> {
-        validate_configuration(configuration)?;
+        validate_configuration(&configuration)?;
         let (handle, prepared, id, code) = {
             let mut registry = self.lock();
             if self.is_stopping() {
@@ -62,11 +63,6 @@ impl GameRooms {
         let exit_id = id.clone();
         let exit_code = code.clone();
         match prepared {
-            PreparedLiveOwner::Legacy(owner) => drop((*owner).start(move || {
-                if let Some(rooms) = weak.upgrade() {
-                    rooms.cleanup(&exit_id, &exit_code);
-                }
-            })),
             PreparedLiveOwner::Roster(owner) => drop((*owner).start(move || {
                 if let Some(rooms) = weak.upgrade() {
                     rooms.cleanup(&exit_id, &exit_code);
@@ -125,6 +121,20 @@ impl GameRooms {
             .await
     }
 
+    pub(crate) async fn environment_settings_live(
+        &self,
+        admission: &LiveAdmission,
+        binding: BindingKey,
+        room_id: RoomId,
+        round_id: u64,
+        action: EnvironmentSettingsAction,
+    ) -> Result<(), RoomError> {
+        self.handle_for(admission.room_id())?
+            .owner
+            .environment_settings(binding, room_id, round_id, action)
+            .await
+    }
+
     pub(crate) async fn leave_live(
         &self,
         admission: &LiveAdmission,
@@ -140,86 +150,42 @@ impl GameRooms {
 
     fn prepare_live_owner(
         &self,
-        configuration: RoomConfiguration,
+        configuration: EnvironmentRoomConfiguration,
         parts: &super::registry_identity::RegistryIdentityParts,
     ) -> Result<(LiveOwner, PreparedLiveOwner), RoomError> {
-        if configuration.player_count().get() == 2
-            && configuration.board() == BoardSize::FifteenByThirteen
-        {
-            return self.prepare_legacy_live_owner(configuration, parts);
-        }
         self.prepare_roster_live_owner(configuration, parts)
-    }
-
-    fn prepare_legacy_live_owner(
-        &self,
-        configuration: RoomConfiguration,
-        parts: &super::registry_identity::RegistryIdentityParts,
-    ) -> Result<(LiveOwner, PreparedLiveOwner), RoomError> {
-        let (mode, private_cpu_seed) = match configuration.controllers() {
-            [SeatControl::Human, SeatControl::Human] => (RoomMode::HumanDuel, None),
-            [SeatControl::Human, SeatControl::Cpu] => {
-                let profile = match configuration.cpu_difficulty() {
-                    Some(CpuDifficulty::Easy) => CpuProfile::CURRENT_EASY,
-                    Some(CpuDifficulty::Standard) => CpuProfile::CURRENT,
-                    None => return Err(RoomError::UnsupportedConfiguration),
-                };
-                let mut seed = [0; 32];
-                (self.random_fill)(&mut seed).map_err(|_| RoomError::CapacityReached)?;
-                (RoomMode::Solo(profile), Some(seed))
-            }
-            _ => return Err(RoomError::UnsupportedConfiguration),
-        };
-        let identity = RoomIdentity {
-            id: parts.id.clone(),
-            code: parts.code.clone(),
-            profile: self.profile,
-            mode,
-            registry_serial: parts.serial,
-            private_cpu_seed,
-        };
-        let (handle, owner) = PreparedMatchOwner::new_live14_with_planner(
-            identity,
-            Instant::now(),
-            self.round_seed_source.clone(),
-            Arc::clone(&self.random_fill),
-            self.cpu_planner.clone(),
-            self.shutdown(),
-        )
-        .map_err(|_| RoomError::CapacityReached)?;
-        Ok((
-            LiveOwner::Legacy(handle),
-            PreparedLiveOwner::Legacy(Box::new(owner)),
-        ))
     }
 
     fn prepare_roster_live_owner(
         &self,
-        configuration: RoomConfiguration,
+        configuration: EnvironmentRoomConfiguration,
         parts: &super::registry_identity::RegistryIdentityParts,
     ) -> Result<(LiveOwner, PreparedLiveOwner), RoomError> {
+        let base = *configuration.base();
+        let environment = configuration.storm_cloud();
         let root = SimulationRoot::generate().map_err(|_| RoomError::CapacityReached)?;
         let simulation_seed = Arc::new(move |epoch| root.for_round(epoch));
         let identity = RosterIdentity {
             id: parts.id.clone(),
             code: parts.code.clone(),
             registry_serial: parts.serial,
-            configuration,
+            configuration: base,
         };
-        let runtime = RosterRuntime::new(
+        let runtime = RosterRuntime::new_environment(
             identity,
-            RoomSettings::DEFAULT,
+            RoomSettings::DEFAULT.with_enabled_items(EnabledItems::ALL),
+            environment,
             self.round_seed_source.clone(),
             simulation_seed as Arc<dyn Fn(u64) -> Result<SimulationSeed, ()> + Send + Sync>,
         )
         .map_err(|_| RoomError::CapacityReached)?;
-        let profile = match configuration.cpu_difficulty() {
-            Some(CpuDifficulty::Easy) => CpuProfile::MULTIPLAYER_EASY,
-            Some(CpuDifficulty::Standard) => CpuProfile::MULTIPLAYER_STANDARD,
-            None => CpuProfile::MULTIPLAYER_STANDARD,
+        let profile = match base.cpu_difficulty() {
+            Some(CpuDifficulty::Easy) => CpuProfile::ENVIRONMENT_EASY,
+            Some(CpuDifficulty::Standard) => CpuProfile::ENVIRONMENT_STANDARD,
+            None => CpuProfile::ENVIRONMENT_STANDARD,
         };
         let mut cpus = Vec::new();
-        for seat in configuration.cpu_seats() {
+        for seat in base.cpu_seats() {
             let mut seed = [0; 32];
             (self.random_fill)(&mut seed).map_err(|_| RoomError::CapacityReached)?;
             cpus.push(CpuController::new(
@@ -245,8 +211,8 @@ impl GameRooms {
     }
 }
 
-fn validate_configuration(configuration: RoomConfiguration) -> Result<(), RoomError> {
-    if configuration.human_seats().next().is_none() {
+fn validate_configuration(configuration: &EnvironmentRoomConfiguration) -> Result<(), RoomError> {
+    if configuration.base().human_seats().next().is_none() {
         return Err(RoomError::UnsupportedConfiguration);
     }
     Ok(())

@@ -4,7 +4,10 @@ use grenadiers_core::room::MatchPhase;
 use tokio::time::{Instant, sleep_until};
 
 use super::driver::Driver;
-use super::types::{COMMAND_CAPACITY, ClosingReason, OwnerCommand, PreparedMatchOwner};
+use super::{
+    ClosingReason,
+    types::{COMMAND_CAPACITY, OwnerCommand, PreparedMatchOwner},
+};
 
 pub(super) const LOBBY_LIFETIME: Duration = Duration::from_secs(300);
 const TERMINAL_LIFETIME: Duration = Duration::from_secs(30);

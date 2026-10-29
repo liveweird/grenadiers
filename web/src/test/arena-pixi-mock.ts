@@ -29,8 +29,17 @@ export function arenaPixiMock() {
     }
     updateCacheTexture(): void { this.cacheUpdates += 1 }
     addChild(...nodes: Node[]): Node {
-      for (const node of nodes) { node.parent = this; this.children.push(node) }
+      for (const node of nodes) {
+        if (node.parent) node.parent.children = node.parent.children.filter((child) => child !== node)
+        node.parent = this; this.children.push(node)
+      }
       return nodes[0]
+    }
+    addChildAt(node: Node, index: number): Node {
+      if (node.parent) node.parent.children = node.parent.children.filter((child) => child !== node)
+      node.parent = this
+      this.children.splice(index, 0, node)
+      return node
     }
     destroy(options?: { children?: boolean; context?: boolean }): void {
       this.destroyed = true

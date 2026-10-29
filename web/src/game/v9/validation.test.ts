@@ -10,11 +10,13 @@ import type { Snapshot as V9Snapshot } from './schema'
 function archivedValue(value: unknown): V9Snapshot {
   const archived = structuredClone(value) as {
     room: { availableItems: string[]; mode?: unknown; configuration?: unknown; scores: unknown;
+      settings: { environment?: unknown };
       seats: Array<{ controller?: unknown }> }
-    state: { actors: Array<Record<string, unknown>>; oilBarrels?: unknown }
+    state: { actors: Array<Record<string, unknown>>; oilBarrels?: unknown; stormCloud?: unknown }
   }
   delete archived.room.mode
   delete archived.room.configuration
+  delete archived.room.settings.environment
   Object.assign(archived.room, { rulesVersion: 5 })
   if (Array.isArray(archived.room.scores)) {
     archived.room.scores = Object.fromEntries(archived.room.scores.map((score) => {
@@ -26,8 +28,12 @@ function archivedValue(value: unknown): V9Snapshot {
   archived.room.availableItems = archived.room.availableItems
     .filter((item) => item !== 'kick' && item !== 'punch' && item !== 'bracelet'
       && item !== 'wallPass' && item !== 'oilBarrel' && item !== 'teleporter')
-  for (const actor of archived.state.actors) delete actor.lastTeleportTick
+  for (const actor of archived.state.actors) {
+    delete actor.lastTeleportTick
+    delete actor.stormSlowRemainingTicks
+  }
   delete archived.state.oilBarrels
+  delete archived.state.stormCloud
   return archived as unknown as V9Snapshot
 }
 const archivedSnapshot = (revision: number): V9Snapshot => archivedValue(v11Snapshot(revision))

@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import fixtures from '../../../../api/fixtures/gameplay-expanded-server-conformance.json'
 import { validateServerMessage } from '../client/clientProtocol'
+import { snapshot as liveSnapshot } from '../client/testSupport'
 import { validateGameplayV10ServerMessage } from '../v10/validation'
 import { validateGameplayV11ServerMessage } from '../v11/validation'
+import { validateGameplayV15ServerMessage } from '../v15/validation'
 import { validateGameplayV8ServerMessage } from '../v8/validation'
 import { validateGameplayV9ServerMessage } from '../v9/validation'
 
@@ -27,20 +29,6 @@ function frame(caseId: string): RecordValue {
   return JSON.parse(fixture.frame) as RecordValue
 }
 
-// The retained corpus stays byte-for-byte v11; only the live metadata layer is added here.
-function liveMetadata(value: RecordValue): RecordValue {
-  const result = structuredClone(value)
-  const room = record(result.room)
-  const scores = room.scores as { one: number; two: number }
-  room.scores = [{ seat: 'one', wins: scores.one }, { seat: 'two', wins: scores.two }]
-  room.configuration = {
-    controllers: ['human', 'human'], cpuDifficulty: null, board: { width: 15, height: 13 },
-  }
-  room.settingsEditor = 'one'
-  for (const seat of room.seats as RecordValue[]) seat.controller = { type: 'human' }
-  return result
-}
-
 describe('expanded gameplay server conformance', () => {
   it('accepts actual Rust-produced frames through each retained validator', () => {
     for (const fixture of fixtures.cases) {
@@ -49,11 +37,6 @@ describe('expanded gameplay server conformance', () => {
       expect(validate(JSON.parse(fixture.frame)), fixture.caseId).toEqual(expect.objectContaining({
         valid: true,
       }))
-      if (fixture.version === 11) {
-        const recipient = fixture.recipient === 'one' || fixture.recipient === 'two'
-          ? fixture.recipient : null
-        expect(validateServerMessage(liveMetadata(JSON.parse(fixture.frame) as RecordValue), recipient), fixture.caseId).toBe(true)
-      }
     }
   })
 
@@ -78,10 +61,11 @@ describe('expanded gameplay server conformance', () => {
     expect(JSON.stringify(oilFrame)).not.toContain('concealed')
   })
 
-  it('pins archived recipient privacy for v8 and v10 projection pairs', () => {
+  it('pins archived recipient privacy for v8, v10 and v11 projection pairs', () => {
     for (const [oneId, twoId] of [
       ['v8-runningPrivacy-one', 'v8-runningPrivacy-two'],
       ['v10-runningTeleported-one', 'v10-runningTeleported-two'],
+      ['v11-runningOilMaterialized-one', 'v11-runningOilMaterialized-two'],
     ] as const) {
       const oneActors = record(frame(oneId).state).actors as RecordValue[]
       const twoActors = record(frame(twoId).state).actors as RecordValue[]
@@ -108,22 +92,27 @@ describe('expanded gameplay server conformance', () => {
     })
   })
 
-  it('exercises live v12 recipient privacy and identity checks after generic validation', () => {
-    const forOne = frame('v11-runningOilMaterialized-one')
-    const forTwo = frame('v11-runningOilMaterialized-two')
-    expect(validateGameplayV11ServerMessage(forOne).valid).toBe(true)
-    expect(validateServerMessage(liveMetadata(forOne), 'one')).toBe(true)
-    expect(validateServerMessage(liveMetadata(forOne), 'two')).toBe(false)
-    const oneActors = record(forOne.state).actors as RecordValue[]
-    const twoActors = record(forTwo.state).actors as RecordValue[]
-    expect(oneActors[1]?.type).toBe('hidden')
-    expect(twoActors[1]?.type).toBe('visible')
+  it('exercises live v15 generic and recipient privacy and identity checks', () => {
+    const forOne = liveSnapshot(2)
+    forOne.room.settings.enabledItems = ['invisibilityCloak']
+    forOne.state.actors[1] = { type: 'hidden', id: 2, seat: 'two', alive: true }
+    expect(validateGameplayV15ServerMessage(forOne).valid).toBe(true)
+    expect(validateServerMessage(forOne, 'one')).toBe(true)
+    expect(validateServerMessage(forOne, 'two')).toBe(false)
 
-    const duplicateIdentity = structuredClone(forTwo)
-    const actors = record(duplicateIdentity.state).actors as RecordValue[]
+    const forTwo = liveSnapshot(2)
+    forTwo.room.settings.enabledItems = ['invisibilityCloak']
+    const cloaked = forTwo.state.actors[1]
+    if (cloaked?.type !== 'visible') throw new Error('expected visible actor')
+    cloaked.effects = [{ kind: 'invisibilityCloak', remainingTicks: 600 }]
+    expect(validateGameplayV15ServerMessage(forTwo).valid).toBe(true)
+    expect(validateServerMessage(forTwo, 'two')).toBe(true)
+    expect(validateServerMessage(forTwo, 'one')).toBe(false)
+
+    const duplicateIdentity = liveSnapshot(2)
+    const actors = duplicateIdentity.state.actors
     actors[1]!.id = actors[0]!.id
-    expect(validateGameplayV11ServerMessage(duplicateIdentity).valid).toBe(true)
-    expect(validateServerMessage(liveMetadata(duplicateIdentity), 'two')).toBe(false)
+    expect(validateServerMessage(duplicateIdentity, 'two')).toBe(false)
   })
 
   it('rejects changed physical state in the preceding retained version', () => {

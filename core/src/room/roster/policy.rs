@@ -3,6 +3,18 @@ use crate::room::series::{MatchResult, RESULT_HOLD_TICKS};
 use std::num::NonZeroU32;
 
 impl RosterMatchLifecycle {
+    pub(super) fn initial_forming_phase(&self) -> bool {
+        self.actual_round_number == 0
+            && matches!(
+                self.phase,
+                MatchPhase::Waiting
+                    | MatchPhase::Countdown {
+                        kind: super::super::CountdownKind::Initial,
+                        ..
+                    }
+            )
+    }
+
     pub(super) fn ensure_human(&self, seat: SeatId) -> Result<(), RosterError> {
         self.ensure_seat(seat)?;
         if self.configuration.controller(seat) == Some(SeatControl::Cpu) {

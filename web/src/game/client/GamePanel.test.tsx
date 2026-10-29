@@ -86,7 +86,7 @@ describe('v12 private-state presentation', () => {
       type: 'visible', id: 2, seat: 'two', position: { x: 4096, y: 3072 }, heading: 'north',
       speedLevel: 2, alive: true, bombCapacity: 3, bombRange: 4, liveBombCount: 1,
       inventory: { equipment: null, weapon: null }, effects: [], damageGraceRemainingTicks: 0,
-      voluntaryActionsFrozen: false, lastTeleportTick: null,
+      voluntaryActionsFrozen: false, lastTeleportTick: null, stormSlowRemainingTicks: 0,
     }
     view.rerender(<MantineProvider env="test">
       <GamePanelView state={{ ...current }} actions={actions()} />
@@ -258,7 +258,7 @@ describe('v12 room controls', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Apply rules' }))
     expect(received).toEqual([[currentActions, {
       startingSpeedLevel: 0, turnAssistUnits: 256, winsToFinish: 1, bombFuseTicks: 180,
-      enabledItems: ['heart'],
+      enabledItems: ['heart'], environment: { stormCloud: true },
     }]])
   })
 

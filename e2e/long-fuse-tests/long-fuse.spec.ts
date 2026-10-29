@@ -4,9 +4,9 @@ import { latestSnapshot, observeGame, visibleActor, type ObservedGame } from '..
 import { moveTo } from '../tests/support/movement'
 import { admissionBaseline, disconnectTransport, installTransportProbe } from '../tests/support/reconnect'
 import { applyItemSettings } from '../tests/support/settings'
-import type { GameServerMessage } from '../../web/src/game/v14/schema'
+import type { GameServerMessage } from '../../web/src/game/v15/schema'
 
-test.beforeAll(() => expect(process.env.E2E_LONG_FUSE_FIXTURE).toBe('arena-v2-long-fuse'))
+test.beforeAll(() => expect(process.env.E2E_LONG_FUSE_FIXTURE).toBe('arena-v3-long-fuse'))
 
 const ticks = (game: ObservedGame) => visibleActor(latestSnapshot(game), 'one')?.effects
   .find((effect) => effect.kind === 'longFuse')?.remainingTicks ?? 0

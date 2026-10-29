@@ -1,5 +1,5 @@
 import { expect, type Page } from '@playwright/test'
-import type { GameServerMessage } from '../../../web/src/game/v14/schema'
+import type { GameServerMessage } from '../../../web/src/game/v15/schema'
 
 type RoomFrame = Extract<GameServerMessage, { type: 'roomState' | 'admitted' }>
 type AdmissionFrame = Extract<GameServerMessage, { type: 'admitted' }>
@@ -27,7 +27,7 @@ export async function openGame(page: Page): Promise<void> {
     const first = new Promise<GameServerMessage>((resolve, reject) => {
       const timer = setTimeout(() => reject(new Error('Authentication timed out')), 10_000)
       socket.addEventListener('open', () => {
-        socket.send(JSON.stringify({ type: 'authenticate', protocolVersion: 14, token: session.token }))
+        socket.send(JSON.stringify({ type: 'authenticate', protocolVersion: 15, token: session.token }))
       }, { once: true })
       socket.addEventListener('error', () => {
         clearTimeout(timer)
@@ -56,7 +56,7 @@ export async function openGame(page: Page): Promise<void> {
     }
     return first
   })
-  expect(authenticated).toEqual({ type: 'authenticated', protocolVersion: 14 })
+  expect(authenticated).toEqual({ type: 'authenticated', protocolVersion: 15 })
 }
 
 export async function sendGame(page: Page, command: Record<string, unknown>): Promise<number> {
@@ -69,10 +69,12 @@ export async function sendGame(page: Page, command: Record<string, unknown>): Pr
               controllers: ['human', 'cpu'],
               cpuDifficulty: 'difficulty' in command.mode ? command.mode.difficulty : 'standard',
               board: { width: 15, height: 13 },
+              environment: { stormCloud: true },
             }
           : {
               controllers: ['human', 'human'], cpuDifficulty: null,
               board: { width: 15, height: 13 },
+              environment: { stormCloud: true },
             },
       }
     : command
@@ -88,12 +90,47 @@ export async function gameFrames(page: Page): Promise<GameServerMessage[]> {
   return page.evaluate(() => (window as GameWindow).grenadiersTestGame?.frames ?? [])
 }
 
-export async function roomFrame(page: Page, afterRevision = 0): Promise<RoomFrame> {
+export async function roomFrame(
+  page: Page,
+  afterRevision = 0,
+  matches: (frame: RoomFrame) => boolean = () => true,
+): Promise<RoomFrame> {
   const latest = async (): Promise<RoomFrame | undefined> =>
-    (await gameFrames(page)).filter((message) => message.type === 'roomState' || message.type === 'admitted').at(-1)
-  await expect.poll(async () => (await latest())?.room.revision ?? 0).toBeGreaterThan(afterRevision)
+    (await gameFrames(page)).filter((message): message is RoomFrame =>
+      (message.type === 'roomState' || message.type === 'admitted')
+      && message.room.revision > afterRevision && matches(message)).at(-1)
+  await expect.poll(async () => Boolean(await latest())).toBe(true)
   const frame = await latest()
   if (!frame) throw new Error('No room state was received')
+  return frame
+}
+
+export async function roomFrameAfter(
+  page: Page,
+  frameIndex: number,
+  matches: (frame: RoomFrame) => boolean,
+): Promise<RoomFrame> {
+  const latest = async (): Promise<RoomFrame | undefined> =>
+    (await gameFrames(page)).slice(frameIndex).filter((message): message is RoomFrame =>
+      (message.type === 'roomState' || message.type === 'admitted') && matches(message)).at(-1)
+  try {
+    await expect.poll(async () => Boolean(await latest())).toBe(true)
+  } catch (error) {
+    const summaries = (await gameFrames(page)).slice(frameIndex).slice(-12).map((message) => {
+      if (message.type !== 'roomState' && message.type !== 'admitted') return { type: message.type }
+      return {
+        type: message.type,
+        revision: message.room.revision,
+        tick: message.room.tick,
+        phase: message.room.phase.type,
+        seats: message.room.seats.map(({ occupied, connection }) => ({ occupied, connection })),
+      }
+    })
+    throw new Error(`No matching room state after frame ${frameIndex}; observed ${JSON.stringify(summaries)}`,
+      { cause: error })
+  }
+  const frame = await latest()
+  if (!frame) throw new Error('No matching room state was received')
   return frame
 }
 

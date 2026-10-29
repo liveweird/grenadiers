@@ -2,7 +2,7 @@
 
 ## Scenario: Stopwatch freezes voluntary actions while Timed bombs pause
 
-Two real Chromium contexts use the repeating-byte-31 generated-v2 fixture. Both players reveal the
+Two real Chromium contexts use pinned seed bytes through generator3. Both players reveal the
 mirrored Stopwatch pickups with ordinary bombs, escape, and wait for fire to clear. English desktop
 and Polish 320-pixel reduced-motion views capture the exposed pickups before collection.
 

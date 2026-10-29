@@ -7,7 +7,7 @@ use super::{
     driver::Driver,
     types::{COMMAND_CAPACITY, OwnerCommand, PreparedRosterOwner},
 };
-use crate::game::rooms::{match_owner::ClosingReason, types::RoomError};
+use crate::game::rooms::{ClosingReason, types::RoomError};
 
 pub(super) const LOBBY_LIFETIME: Duration = Duration::from_secs(300);
 const TERMINAL_LIFETIME: Duration = Duration::from_secs(30);

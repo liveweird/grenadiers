@@ -5,9 +5,9 @@ import { expectPaintedCanvas, latestSnapshot, observeGame, visibleActor, type Ob
 import { moveSeatTo } from '../tests/support/movement'
 import { admissionBaseline, disconnectTransport, installTransportProbe } from '../tests/support/reconnect'
 import { applyItemSettings } from '../tests/support/settings'
-import type { GameServerMessage, Seat } from '../../web/src/game/v14/schema'
+import type { GameServerMessage, Seat } from '../../web/src/game/v15/schema'
 
-test.beforeAll(() => expect(process.env.E2E_WALL_PASS_FIXTURE).toBe('arena-v2-wall-pass'))
+test.beforeAll(() => expect(process.env.E2E_WALL_PASS_FIXTURE).toBe('arena-v3-wall-pass'))
 
 type Snapshot = Extract<GameServerMessage, { type: 'snapshot' }>
 const snapshots = (game: ObservedGame): Snapshot[] => game.frames.filter(
@@ -83,17 +83,18 @@ test('Wall Pass crosses one intact block, rejects planting and hard walls, and r
       await Promise.all(games.map((game) => expect.poll(() =>
         actor(game, 'one').inventory.equipment).toBe('wallPass')))
       expect(collections(games[0])).toHaveLength(1)
-      const blockOnly = await Promise.all([one, two].map((page) => arenaTilePixels(page, 3, 2)))
+      const blockOnly = await Promise.all([one, two].map((page) => arenaTilePixels(page, 5, 2)))
 
-      await moveSeatTo(one, games[0], 'one', { column: 3, row: 2 })
+      await moveSeatTo(one, games[0], 'one', { column: 5, row: 1 })
+      await moveSeatTo(one, games[0], 'one', { column: 5, row: 2 })
       const insidePosition = actor(games[0], 'one').position
-      expect(Math.floor(insidePosition.x / 1024)).toBe(3)
+      expect(Math.floor(insidePosition.x / 1024)).toBe(5)
       expect(Math.floor(insidePosition.y / 1024)).toBe(2)
       for (const game of games) {
         const snapshot = latestSnapshot(game)!
-        expect(snapshot.state.arena.blocks).toContainEqual({ column: 3, row: 2 })
+        expect(snapshot.state.arena.blocks).toContainEqual({ column: 5, row: 2 })
         expect(snapshot.state.pickups).not.toContainEqual(expect.objectContaining({
-          cell: { column: 3, row: 2 },
+          cell: { column: 5, row: 2 },
         }))
         expect(actor(game, 'one')).toMatchObject({
           position: insidePosition, inventory: { equipment: 'wallPass', weapon: null },
@@ -102,7 +103,7 @@ test('Wall Pass crosses one intact block, rejects planting and hard walls, and r
       await expect(one.getByRole('region', { name: 'Your items' })).toContainText('GearWall pass')
       await expect(two.getByLabel('Ulepszenia: Gracz pierwszy'))
         .toContainText('WyposażeniePrzejście przez ściany')
-      const occupied = await Promise.all([one, two].map((page) => arenaTilePixels(page, 3, 2)))
+      const occupied = await Promise.all([one, two].map((page) => arenaTilePixels(page, 5, 2)))
       for (const [index, pixels] of occupied.entries()) {
         expect(pixels).not.toEqual(blockOnly[index])
         const oldColors = new Set(blockOnly[index])
@@ -128,14 +129,14 @@ test('Wall Pass crosses one intact block, rejects planting and hard walls, and r
 
       await one.keyboard.down('ArrowLeft')
       try {
-        await expect.poll(() => actor(games[0], 'one').position.x).toBe(3392)
+        await expect.poll(() => actor(games[0], 'one').position.x).toBe(5440)
       } finally {
         await one.keyboard.up('ArrowLeft')
       }
       await expectStationary(games[0], 'one')
-      expect(actor(games[0], 'one').position).toEqual({ x: 3392, y: 2560 })
-      expect(latestSnapshot(games[0])!.state.arena.terrain[2 * 15 + 2]).toBe('wall')
-      await moveSeatTo(one, games[0], 'one', { column: 3, row: 2 })
+      expect(actor(games[0], 'one').position).toEqual({ x: 5440, y: 2560 })
+      expect(latestSnapshot(games[0])!.state.arena.terrain[2 * 15 + 4]).toBe('wall')
+      await moveSeatTo(one, games[0], 'one', { column: 5, row: 2 })
       const resumePosition = actor(games[0], 'one').position
 
       const baseline = (await admissionBaseline(one))!
@@ -151,13 +152,14 @@ test('Wall Pass crosses one intact block, rejects planting and hard walls, and r
       expect(resumed.equipment.find(({ seat }) => seat === 'one'))
         .toEqual({ seat: 'one', equipment: 'wallPass' })
 
-      await moveSeatTo(one, games[0], 'one', { column: 3, row: 1 })
+      await moveSeatTo(one, games[0], 'one', { column: 5, row: 1 })
+      await moveSeatTo(one, games[0], 'one', { column: 7, row: 1 })
       const exited = actor(games[0], 'one')
-      expect(Math.floor(exited.position.x / 1024)).toBe(3)
+      expect(Math.floor(exited.position.x / 1024)).toBe(7)
       expect(Math.floor(exited.position.y / 1024)).toBe(1)
       expect(exited.inventory.equipment).toBe('wallPass')
       expect(latestSnapshot(games[0])!.state.arena.blocks)
-        .toContainEqual({ column: 3, row: 2 })
+        .toContainEqual({ column: 5, row: 2 })
 
       const afterExit = latestSnapshot(games[0])!
       await one.keyboard.press('Space')
@@ -174,7 +176,7 @@ test('Wall Pass crosses one intact block, rejects planting and hard walls, and r
         expect(bombPlacementsAfter(game, afterExit.room.revision).map(({ id }) => id))
           .toEqual([postExitBombId])
         expect(latestSnapshot(game)!.state.bombs).toContainEqual(expect.objectContaining({
-          id: postExitBombId, owner: exited.id, cell: { column: 3, row: 1 },
+          id: postExitBombId, owner: exited.id, cell: { column: 7, row: 1 },
           blast: 'standard', trigger: expect.objectContaining({ type: 'timed', paused: false }),
         }))
       }

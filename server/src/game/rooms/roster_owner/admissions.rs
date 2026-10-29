@@ -17,6 +17,9 @@ use crate::game::rooms::{
     types::{BindingKey, DepartureGuard, RoomError},
 };
 
+/// Bounds room-lifetime credentials for the environment lobby refill policy.
+const MAX_FORMING_ADMISSIONS: usize = 256;
+
 impl Driver {
     pub(super) fn join(
         &mut self,
@@ -45,11 +48,19 @@ impl Driver {
             let _ = reply.send(Err(RoomError::RoomFull));
             return Ok(());
         };
+        if self.runtime.forming_replacements()
+            && self.seats.iter().flatten().count() + self.retired_credentials.len()
+                >= MAX_FORMING_ADMISSIONS
+        {
+            let _ = reply.send(Err(RoomError::CapacityReached));
+            return Ok(());
+        }
         let retained: Vec<_> = self
             .seats
             .iter()
             .flatten()
             .map(|slot| &slot.credential)
+            .chain(self.retired_credentials.iter())
             .collect();
         let credential = match ResumeCredential::mint_unique(self.random_fill.as_ref(), &retained) {
             Ok(value) => value,
@@ -179,6 +190,25 @@ impl Driver {
         })
     }
 
+    pub(super) fn retire_released_credentials(&mut self) {
+        for (index, slot) in self.seats.iter_mut().enumerate() {
+            if self
+                .runtime
+                .lifecycle()
+                .participant(SeatId::ALL[index])
+                .ok()
+                == Some(RosterParticipant::NeverAdmitted)
+                && slot.as_ref().is_some_and(|slot| slot.live.is_none())
+            {
+                self.retired_credentials.push(
+                    slot.take()
+                        .expect("released seat retains a credential")
+                        .credential,
+                );
+            }
+        }
+    }
+
     fn reject_runtime<T>(
         &self,
         reply: oneshot::Sender<Result<T, RoomError>>,
@@ -198,16 +228,18 @@ fn admission(
     guard: DepartureGuard,
     replaced: oneshot::Receiver<()>,
 ) -> RosterAdmission {
-    let room = prepared
-        .legacy_room()
-        .expect("legacy owner requires a legacy admission");
+    let (room_id, _round_id) = prepared.room_metadata();
+    #[cfg(test)]
+    let (room_code, revision) = prepared.test_metadata();
     RosterAdmission {
-        room_id: room.room_id.clone(),
+        room_id: room_id.clone(),
         #[cfg(test)]
-        round_id: u64::from(room.round_id.get()),
+        round_id: _round_id,
         seat,
         #[cfg(test)]
-        room: room.clone(),
+        room_code: room_code.clone(),
+        #[cfg(test)]
+        revision,
         #[cfg(test)]
         resume_token: _resume_token,
         personal_frame,

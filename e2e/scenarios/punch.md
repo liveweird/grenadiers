@@ -2,7 +2,7 @@
 
 ## Scenario: Punch wraps one retained bomb three cells without extra cues and preserves its fuse
 
-Two Chromium contexts use the repeating-byte-31 generated-v2 fixture with only Punch enabled and a
+Two Chromium contexts use pinned seed bytes through generator3 with only Punch enabled and a
 300-tick fuse. Before joining, the English desktop client remaps Equipment from E to F and uses that
 actual key throughout play. The English desktop and Polish 320-pixel reduced-motion clients ready,
 reveal and collect Punch with an ordinary bomb, then use two more ordinary bombs to clear the route.

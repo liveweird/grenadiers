@@ -195,16 +195,22 @@ impl RosterMatchLifecycle {
     pub(super) fn depart_with_grace_inner(
         &mut self,
         departures: [Option<DepartureReason>; 4],
+        reopen_forming_seats: bool,
     ) -> Result<RosterUpdate, RosterError> {
         self.validate_departures(departures)?;
         let mut update = RosterUpdate::new(MatchChange::Unchanged);
         let was_countdown = matches!(self.phase, MatchPhase::Countdown { .. });
+        let reopen_forming_seats = reopen_forming_seats && self.initial_forming_phase();
         for (index, departure) in departures.into_iter().enumerate() {
             let Some(reason) = departure else { continue };
             match reason {
                 DepartureReason::Explicit => {
-                    self.participants[index] = RosterParticipant::Departed;
-                    update.newly_ineligible[index] = true;
+                    self.participants[index] = if reopen_forming_seats {
+                        RosterParticipant::NeverAdmitted
+                    } else {
+                        update.newly_ineligible[index] = true;
+                        RosterParticipant::Departed
+                    };
                 }
                 DepartureReason::TransportLoss => {
                     self.participants[index] = RosterParticipant::Reserved {
@@ -239,14 +245,22 @@ impl RosterMatchLifecycle {
         Ok(RosterUpdate::new(MatchChange::Changed))
     }
 
-    pub(super) fn expire_reconnect_grace_inner(&mut self) -> Result<RosterUpdate, RosterError> {
+    pub(super) fn expire_reconnect_grace_inner(
+        &mut self,
+        reopen_forming_seats: bool,
+    ) -> Result<RosterUpdate, RosterError> {
         let mut update = RosterUpdate::new(MatchChange::Unchanged);
+        let reopen_forming_seats = reopen_forming_seats && self.initial_forming_phase();
         for index in 0..self.configuration.player_count().get() {
             if matches!(self.participants[index], RosterParticipant::Reserved { expires_at } if self.tick >= expires_at)
             {
-                self.participants[index] = RosterParticipant::Departed;
+                self.participants[index] = if reopen_forming_seats {
+                    RosterParticipant::NeverAdmitted
+                } else {
+                    update.newly_ineligible[index] = true;
+                    RosterParticipant::Departed
+                };
                 self.rematch_votes[index] = false;
-                update.newly_ineligible[index] = true;
                 update.change = MatchChange::Changed;
             }
         }

@@ -2,7 +2,7 @@
 
 ## Scenario: Teleporter swaps safe players, survives reconnect, and is consumed when unsafe
 
-Two Chromium contexts use the repeating-byte-31 generated-v2 fixture with only Teleporter enabled.
+Two Chromium contexts use pinned seed bytes through generator3 with only Teleporter enabled.
 Player One reveals the pickup at 3,1 with ordinary movement and a real bomb, escapes, and collects it
 while moving east. Both views must publish the same new teleport marker, Player One lands at Player
 Two's authoritative position, and Player Two lands on the collection cell.

@@ -1,5 +1,5 @@
 import { expect, test, type Browser, type BrowserContextOptions, type Page } from '@playwright/test'
-import type { BoardSize, Seat } from '../../web/src/game/v14/schema'
+import type { BoardSize, Seat } from '../../web/src/game/v15/schema'
 import { expectPaintedCanvas, latestSnapshot, observeGame, visibleActor,
   type ObservedGame } from './support/duel'
 import { admissionBaseline, disconnectTransport, installTransportProbe } from './support/reconnect'
@@ -78,10 +78,19 @@ async function startRound(pages: readonly Page[], games: readonly ObservedGame[]
 
 function expectBoard(game: ObservedGame, board: BoardSize, count: number): void {
   const snapshot = latestSnapshot(game)
+  expect(snapshot?.room).toMatchObject({
+    rulesVersion: 7,
+    mapId: 'generated_v2',
+    configuration: { environment: { stormCloud: true } },
+    settings: { environment: { stormCloud: true } },
+  })
   expect(snapshot?.room.configuration.board).toEqual(board)
   expect(snapshot?.state.arena).toMatchObject({ width: board.width, height: board.height })
   expect(snapshot?.state.arena.terrain).toHaveLength(board.width * board.height)
   expect(snapshot?.state.actors).toHaveLength(count)
+  expect(snapshot?.state.stormCloud).not.toBeNull()
+  expect(snapshot?.room.availableItems).toHaveLength(22)
+  expect(snapshot?.room.settings.enabledItems).toEqual(snapshot?.room.availableItems)
 }
 
 async function moveOwnSeat(page: Page, game: ObservedGame, seat: Seat, board: BoardSize): Promise<void> {

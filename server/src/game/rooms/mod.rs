@@ -7,21 +7,27 @@ use std::{
 use grenadiers_core::protocol::{RoomCode, RoomId};
 use tokio::sync::{Notify, watch};
 
+mod closing;
 mod cpu;
 mod input;
 #[cfg(test)]
 mod legacy_registry;
+#[cfg(test)]
 mod legacy_v14;
 mod live;
 mod live_registry;
+#[cfg(test)]
 mod match_owner;
+#[cfg(test)]
 mod match_runtime;
 #[cfg(test)]
 mod measurement;
+#[cfg(test)]
 mod profile;
 mod rate_limit;
 mod registry_identity;
 mod registry_lookup;
+#[cfg(test)]
 mod replay;
 #[cfg(test)]
 #[allow(dead_code)] // Replay4 is exercised through its test-only recording facade.
@@ -35,12 +41,14 @@ mod roster_runtime;
 mod roster_seed;
 mod types;
 use crate::round_seed::RoundSeedSource;
+pub(crate) use closing::ClosingReason;
 pub(crate) use live::{LiveAdmission, LiveDelivery, LiveMemberEvent};
-pub(crate) use match_owner::ClosingReason;
+pub(crate) use live_registry::EnvironmentSettingsAction;
 #[cfg(test)]
 pub(crate) use match_owner::{MatchAdmission as Admission, MatchOwnerNotice as RoomNotice};
 #[cfg(test)]
 pub(crate) use match_runtime::MatchAction as RoomAction;
+#[cfg(test)]
 pub(crate) use match_runtime::MatchNotice;
 use rate_limit::OperationBudgets;
 pub(crate) use roster_runtime::RosterAction;
@@ -59,6 +67,7 @@ pub(crate) struct GameRooms {
     random_fill: Arc<RandomFill>,
     round_seed_source: RoundSeedSource,
     cpu_planner: cpu::CpuPlanner,
+    #[cfg(test)]
     profile: profile::RoomProfile,
     shutdown: watch::Sender<bool>,
     empty: Notify,
@@ -91,6 +100,7 @@ impl GameRooms {
             random_fill: Arc::new(|bytes| getrandom::fill(bytes).map_err(|_| ())),
             round_seed_source,
             cpu_planner: cpu::CpuPlanner::new().expect("CPU planner workers must start"),
+            #[cfg(test)]
             profile: profile::RoomProfile::ExpandedV5,
             shutdown,
             empty: Notify::new(),

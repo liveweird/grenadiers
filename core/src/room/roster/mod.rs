@@ -263,13 +263,22 @@ impl RosterMatchLifecycle {
         &mut self,
         departures: [Option<DepartureReason>; 4],
     ) -> Result<RosterUpdate, RosterError> {
-        self.transact(|next| next.depart_with_grace_inner(departures))
+        self.transact(|next| next.depart_with_grace_inner(departures, false))
+    }
+    pub fn depart_forming_with_grace(
+        &mut self,
+        departures: [Option<DepartureReason>; 4],
+    ) -> Result<RosterUpdate, RosterError> {
+        self.transact(|next| next.depart_with_grace_inner(departures, true))
     }
     pub fn resume_connection(&mut self, seat: SeatId) -> Result<RosterUpdate, RosterError> {
         self.transact(|next| next.resume_connection_inner(seat))
     }
     pub fn expire_reconnect_grace(&mut self) -> Result<RosterUpdate, RosterError> {
-        self.transact(Self::expire_reconnect_grace_inner)
+        self.transact(|next| next.expire_reconnect_grace_inner(false))
+    }
+    pub fn expire_forming_reconnect_grace(&mut self) -> Result<RosterUpdate, RosterError> {
+        self.transact(|next| next.expire_reconnect_grace_inner(true))
     }
     pub fn interrupt(&mut self, reason: InterruptReason) -> Result<RosterUpdate, RosterError> {
         self.transact(|next| next.interrupt_inner(reason))

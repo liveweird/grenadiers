@@ -3,9 +3,10 @@ mod driver;
 mod runner;
 mod types;
 
+pub(super) use super::ClosingReason;
 #[cfg(test)]
 pub(super) use types::ShutdownState;
-pub(crate) use types::{ClosingReason, MatchAdmission, MatchOwnerNotice};
+pub(crate) use types::{MatchAdmission, MatchOwnerNotice};
 pub(super) use types::{MatchOwnerHandle, PreparedMatchOwner};
 
 #[cfg(test)]

@@ -107,7 +107,7 @@ async fn next(socket: &mut ClientSocket) -> Message {
 async fn authenticate(socket: &mut ClientSocket, token: &str) {
     send(
         socket,
-        json!({"type":"authenticate", "protocolVersion":14, "token":token}),
+        json!({"type":"authenticate", "protocolVersion":15, "token":token}),
     )
     .await;
     let Message::Text(text) = next(socket).await else {
@@ -173,7 +173,7 @@ async fn shutdown_delivers_member_finality_and_closes_every_socket_before_drain_
     authenticate(&mut member, &tokens[0]).await;
     send(
         &mut member,
-        json!({"type":"createRoom", "sequence":1, "configuration":{"controllers":["human","human"],"cpuDifficulty":null,"board":{"width":15,"height":13}}}),
+        json!({"type":"createRoom", "sequence":1, "configuration":{"controllers":["human","human"],"cpuDifficulty":null,"board":{"width":15,"height":13},"environment":{"stormCloud":true}}}),
     )
     .await;
     assert!(matches!(next(&mut member).await, Message::Text(_)));

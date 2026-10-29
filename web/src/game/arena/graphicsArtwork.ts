@@ -3,6 +3,7 @@ import type { ArenaArtwork, TerrainDrawing } from './artwork'
 import {
   makeActor, makeBlock, makeBomb, makeFlame, makeOilBarrel, makePickup, paintTerrain,
 } from './drawing'
+import { makeStormCloud } from './weatherArt'
 
 function makeTerrain(): TerrainDrawing {
   const root = new Graphics()
@@ -21,4 +22,5 @@ export const graphicsArtwork: ArenaArtwork = {
   makeBomb,
   makeFlame,
   makeOilBarrel,
+  makeStormCloud,
 }

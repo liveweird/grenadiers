@@ -176,7 +176,7 @@ async fn authentication_denial_events_do_not_capture_frame_credentials() {
         .send(Message::Text(
             json!({
                 "type":"authenticate",
-                "protocolVersion":14,
+                "protocolVersion":15,
                 "token":SENTINEL_TOKEN
             })
             .to_string()

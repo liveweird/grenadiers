@@ -18,6 +18,17 @@ function state(): GameClientState {
 }
 
 describe('v12 arena presentation', () => {
+  it('keeps the storm slowdown timer on the own presented actor only', () => {
+    const current = state()
+    const [own, rival] = current.snapshot!.state.actors
+    if (own?.type !== 'visible' || rival?.type !== 'visible') throw new Error('expected visible actors')
+    own.stormSlowRemainingTicks = 180
+    rival.stormSlowRemainingTicks = 120
+    const actors = presentSnapshot(current)!.state.actors
+    expect(actors[0].stormSlowRemainingTicks).toBe(180)
+    expect(actors[1]).not.toHaveProperty('stormSlowRemainingTicks')
+  })
+
   it('removes hidden actors and reveals them only at their new public position', () => {
     const current = state()
     expect(presentSnapshot(current)?.state.actors.map((actor) => actor.seat)).toEqual(['one', 'two'])
@@ -27,7 +38,7 @@ describe('v12 arena presentation', () => {
       type: 'visible', id: 2, seat: 'two', position: { x: 4096, y: 3072 }, heading: 'north',
       speedLevel: 0, alive: true, bombCapacity: 1, bombRange: 1, liveBombCount: 0,
       inventory: { equipment: null, weapon: null }, effects: [], damageGraceRemainingTicks: 0,
-      voluntaryActionsFrozen: false, lastTeleportTick: null,
+      voluntaryActionsFrozen: false, lastTeleportTick: null, stormSlowRemainingTicks: 0,
     }
     expect(presentSnapshot(current)?.state.actors[1]).toMatchObject({
       seat: 'two', position: { x: 4096, y: 3072 }, heading: 'north',

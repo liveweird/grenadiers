@@ -2,7 +2,7 @@ import { Button, Checkbox, Group, NativeSelect, SimpleGrid, Text, Title } from '
 import { useMemo, useState } from 'react'
 import { sameGameSettings } from './clientProtocol'
 import type { GameCopy } from './locale'
-import { ITEM_IDS, type GameSettings, type RoomView, type Seat } from '../v14/schema'
+import { ITEM_IDS, type GameSettings, type RoomView, type Seat } from '../v15/schema'
 
 const SPEEDS = [0, 1, 2, 3, 4] as const
 const TURN_ASSISTS = [64, 128, 192, 256] as const
@@ -11,7 +11,7 @@ const FUSES = [60, 90, 120, 150, 180, 210, 240, 270, 300] as const
 type AvailableItem = typeof ITEM_IDS[number]
 const DEFAULT_NUMERICS = {
   startingSpeedLevel: 0, turnAssistUnits: 256, winsToFinish: 3, bombFuseTicks: 180,
-} satisfies Omit<GameSettings, 'enabledItems'>
+} satisfies Omit<GameSettings, 'enabledItems' | 'environment'>
 
 const speedText = (level: number): string => `${3 + level * 0.5}`
 const turnText = (units: number): string => {
@@ -44,9 +44,10 @@ function ItemSetting({ item, visible, checked, disabled, copy, onChange }: {
 
 function editLockText(room: RoomView, youSeat: Seat | null, ownReady: boolean, copy: GameCopy): string | null {
   if (room.phase.type !== 'waiting') return copy.settings.lockedMatch
+  if (room.settingsEditor === null) return copy.settings.readOnly
   if (ownReady) return copy.settings.lockedReady
   if (room.settingsEditor === youSeat) return null
-  const editor = room.settingsEditor ? copy.player[room.settingsEditor] : copy.settings.noEditor
+  const editor = copy.player[room.settingsEditor]
   return copy.settings.editor.replace('{{player}}', editor)
 }
 
@@ -114,18 +115,28 @@ export function GameplaySettingsPanel({ room, youSeat, pending, copy, onApply }:
         visible={room.availableItems.includes(item)} checked={draft.enabledItems.includes(item)}
         disabled={!editable || pending} copy={copy}
         onChange={(enabled) => toggleItem(item, enabled)} />)}
+      <div className="item-setting">
+        <Checkbox label={copy.settings.stormCloud} checked={draft.environment.stormCloud}
+          disabled={!editable || pending}
+          onChange={(event) => update('environment', { stormCloud: event.currentTarget.checked })} />
+        <Text size="xs">{copy.settings.stormCloudDescription}</Text>
+      </div>
       {dirty && <Text className="settings-lock" size="sm">{copy.settings.unapplied}</Text>}
       {lockText && <Text className="settings-lock" size="sm">{lockText}</Text>}
       <Group gap="sm">
         <Button size="sm" variant="outline" disabled={!editable || pending}
-          onClick={() => update('enabledItems', availableItems)}>{copy.settings.allOn}</Button>
+          onClick={() => setDraft((current) => ({ ...current, enabledItems: availableItems,
+            environment: { stormCloud: true } }))}>{copy.settings.allOn}</Button>
         <Button size="sm" variant="outline" disabled={!editable || pending}
-          onClick={() => update('enabledItems', [])}>{copy.settings.allOff}</Button>
+          onClick={() => setDraft((current) => ({ ...current, enabledItems: [],
+            environment: { stormCloud: false } }))}>{copy.settings.allOff}</Button>
         <Button size="sm" variant="subtle" color="dark" disabled={!editable || pending}
-          onClick={() => setDraft({ ...DEFAULT_NUMERICS, enabledItems: availableItems })}>
+          onClick={() => setDraft({ ...DEFAULT_NUMERICS, enabledItems: availableItems,
+            environment: { stormCloud: true } })}>
           {copy.settings.restore}</Button>
         <Button size="sm" variant="subtle" color="dark" disabled={!editable || pending}
-          onClick={() => setDraft({ ...DEFAULT_NUMERICS, enabledItems: [] })}>{copy.settings.classic}</Button>
+          onClick={() => setDraft({ ...DEFAULT_NUMERICS, enabledItems: [],
+            environment: { stormCloud: false } })}>{copy.settings.classic}</Button>
         <Button size="sm" variant="outline" loading={pending} disabled={!editable || !dirty || pending}
           onClick={() => onApply(draft)}>{copy.settings.apply}</Button>
       </Group>

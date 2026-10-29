@@ -3,7 +3,7 @@ import { act, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { GameArenaProps } from './game/arena/types'
-import type { GameState, RoomPhase, RoomView, Snapshot } from './game/v14/schema'
+import type { GameState, RoomPhase, RoomView, Snapshot } from './game/v15/schema'
 import i18n from './i18n'
 import { App } from './App'
 
@@ -46,12 +46,13 @@ const appSockets: AppSocketStub[] = []
 function room(revision: number, phase: RoomPhase = { type: 'waiting' }): RoomView {
   return {
     roomId,
-    configuration: { controllers: ['human', 'human'], cpuDifficulty: null, board: { width: 15, height: 13 } },
+    configuration: { controllers: ['human', 'human'], cpuDifficulty: null,
+      board: { width: 15, height: 13 }, environment: { stormCloud: true } },
     roomCode: 'ABCDEFGH',
     roundId: 1,
     revision,
     tick: revision,
-    rulesVersion: 5,
+    rulesVersion: 7,
     mapId: 'generated_v2',
     roundNumber: ['running', 'result', 'matchResult'].includes(phase.type) ? 1 : 0,
     scores: [{ seat: 'one', wins: 0 }, { seat: 'two', wins: phase.type === 'result' ? 1 : 0 }],
@@ -61,7 +62,7 @@ function room(revision: number, phase: RoomPhase = { type: 'waiting' }): RoomVie
     } : null,
     settings: {
       startingSpeedLevel: 0, turnAssistUnits: 256, winsToFinish: 3, bombFuseTicks: 180,
-      enabledItems: ['heart'],
+      enabledItems: ['heart'], environment: { stormCloud: true },
     },
     availableItems: ['kick', 'punch', 'bracelet', 'wallPass', 'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch', 'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls', 'invisibleBombs', 'oilBarrel', 'teleporter'],
     settingsRevision: 1,
@@ -89,20 +90,21 @@ function snapshot(revision: number, phase: RoomPhase = { type: 'running' }): Sna
           id: 1, seat: 'one', position: { x: 512, y: 512 }, heading: 'east', speedLevel: 0,
           alive: true, bombCapacity: 1, bombRange: 1, liveBombCount: 0,
           inventory: { equipment: null, weapon: null }, effects: [], damageGraceRemainingTicks: 0,
-          voluntaryActionsFrozen: false, lastTeleportTick: null,
+          voluntaryActionsFrozen: false, lastTeleportTick: null, stormSlowRemainingTicks: 0,
         },
         {
           type: 'visible',
           id: 2, seat: 'two', position: { x: 14_848, y: 12_800 }, heading: 'west', speedLevel: 0,
           alive: true, bombCapacity: 1, bombRange: 1, liveBombCount: 0,
           inventory: { equipment: null, weapon: null }, effects: [], damageGraceRemainingTicks: 0,
-          voluntaryActionsFrozen: false, lastTeleportTick: null,
+          voluntaryActionsFrozen: false, lastTeleportTick: null, stormSlowRemainingTicks: 0,
         },
       ],
       bombs: [],
       flames: [],
       pickups: [],
       oilBarrels: [],
+      stormCloud: { position: { x: 7_680, y: 6_656 }, direction: 'east', legRemainingTicks: 128 },
     },
     events: [],
   }
@@ -128,8 +130,8 @@ async function beginRoom(user: ReturnType<typeof userEvent.setup>, action: 'crea
   await waitFor(() => expect(appSockets.filter((socket) => socket.url.endsWith('/api/v1/game/ws'))).toHaveLength(1))
   const socket = appSockets.find((candidate) => candidate.url.endsWith('/api/v1/game/ws'))!
   act(() => socket.emit('open'))
-  expect(JSON.parse(socket.sent[0])).toEqual({ type: 'authenticate', protocolVersion: 14, token })
-  act(() => socket.message({ type: 'authenticated', protocolVersion: 14 }))
+  expect(JSON.parse(socket.sent[0])).toEqual({ type: 'authenticate', protocolVersion: 15, token })
+  act(() => socket.message({ type: 'authenticated', protocolVersion: 15 }))
   return socket
 }
 
@@ -152,7 +154,8 @@ describe('App game flow', () => {
     const socket = await beginRoom(user)
     expect(JSON.parse(socket.sent[1])).toEqual({
       type: 'createRoom', sequence: 1,
-      configuration: { controllers: ['human', 'human'], cpuDifficulty: null, board: { width: 15, height: 13 } },
+      configuration: { controllers: ['human', 'human'], cpuDifficulty: null,
+        board: { width: 15, height: 13 }, environment: { stormCloud: true } },
     })
 
     act(() => admit(socket, room(1)))

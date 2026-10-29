@@ -54,7 +54,7 @@ async fn connect(url: &str, token: &str) -> ClientSocket {
     send(
         &mut socket,
         json!({
-            "type":"authenticate", "protocolVersion":14, "token":token
+            "type":"authenticate", "protocolVersion":15, "token":token
         }),
     )
     .await;
@@ -94,12 +94,12 @@ async fn two_members_receive_personalized_admission_and_live_waiting_updates() {
 
     send(
         &mut one,
-        json!({"type":"createRoom", "sequence":1, "configuration":{"controllers":["human","human"],"cpuDifficulty":null,"board":{"width":15,"height":13}}}),
+        json!({"type":"createRoom", "sequence":1, "configuration":{"controllers":["human","human"],"cpuDifficulty":null,"board":{"width":15,"height":13},"environment":{"stormCloud":true}}}),
     )
     .await;
     let created = next(&mut one).await;
     assert_eq!(created["youSeat"], "one");
-    assert_eq!(created["room"]["revision"], 2);
+    assert_eq!(created["room"]["revision"], 3);
     assert_eq!(created["room"]["roundNumber"], 0);
     assert_eq!(
         created["room"]["scores"],
@@ -108,7 +108,7 @@ async fn two_members_receive_personalized_admission_and_live_waiting_updates() {
     assert!(created["room"]["lastRound"].is_null());
     assert_eq!(created["room"]["phase"]["type"], "waiting");
     assert_eq!(created["room"]["seats"][0]["occupied"], true);
-    assert_eq!(created["room"]["rulesVersion"], 5);
+    assert_eq!(created["room"]["rulesVersion"], 7);
     assert_eq!(created["room"]["settingsRevision"], 1);
     assert_eq!(created["room"]["settingsEditor"], "one");
     let available_items = created["room"]["availableItems"].clone();
@@ -116,7 +116,8 @@ async fn two_members_receive_personalized_admission_and_live_waiting_updates() {
         created["room"]["settings"],
         json!({
             "startingSpeedLevel":0, "turnAssistUnits":256,
-            "winsToFinish":3, "bombFuseTicks":180, "enabledItems":available_items.clone()
+            "winsToFinish":3, "bombFuseTicks":180, "enabledItems":available_items.clone(),
+            "environment":{"stormCloud":true}
         })
     );
     assert_eq!(
@@ -157,16 +158,18 @@ async fn two_members_receive_personalized_admission_and_live_waiting_updates() {
     .await;
     let joined = next(&mut two).await;
     assert_eq!(joined["youSeat"], "two");
-    assert_eq!(joined["room"]["revision"], 3);
+    let joined_revision = joined["room"]["revision"].as_u64().unwrap();
+    assert!(joined_revision >= 4);
     assert_eq!(joined["room"]["seats"][0]["occupied"], true);
     assert_eq!(joined["room"]["seats"][1]["occupied"], true);
-    let update = next(&mut one).await;
-    assert!(update.get("youSeat").is_none());
-    assert_eq!(update["room"], joined["room"]);
-
+    waiting_reply::expect_waiting_update(&mut one, &room_id, 4, |room| {
+        room["seats"][0]["occupied"] == true && room["seats"][1]["occupied"] == true
+    })
+    .await;
     let settings = json!({
         "startingSpeedLevel":2, "turnAssistUnits":64,
-        "winsToFinish":2, "bombFuseTicks":90, "enabledItems":[]
+        "winsToFinish":2, "bombFuseTicks":90, "enabledItems":[],
+        "environment":{"stormCloud":false}
     });
     send(
         &mut two,
@@ -176,7 +179,7 @@ async fn two_members_receive_personalized_admission_and_live_waiting_updates() {
         }),
     )
     .await;
-    assert_eq!(next(&mut two).await["code"], "settingsLocked");
+    waiting_reply::expect_error(&mut two, &room_id, "settingsLocked", 2, joined_revision).await;
     send(
         &mut two,
         json!({
@@ -185,21 +188,37 @@ async fn two_members_receive_personalized_admission_and_live_waiting_updates() {
         }),
     )
     .await;
-    assert_eq!(next(&mut two).await["type"], "roomState");
-    next(&mut one).await;
+    let two_ready =
+        waiting_reply::expect_waiting_update(&mut two, &room_id, joined_revision, |room| {
+            room["seats"][1]["ready"] == true
+        })
+        .await;
+    let two_ready_revision = two_ready["room"]["revision"].as_u64().unwrap();
+    waiting_reply::expect_waiting_update(&mut one, &room_id, joined_revision, |room| {
+        room["seats"][1]["ready"] == true
+    })
+    .await;
     send(
         &mut one,
         json!({
             "type":"updateSettings", "sequence":2, "roomId":room_id.clone(),
-            "roundId":1, "settingsRevision":1, "settings":settings
+            "roundId":1, "settingsRevision":1, "settings":settings.clone()
         }),
     )
     .await;
-    let configured = next(&mut one).await;
-    assert_eq!(configured["room"]["settingsRevision"], 2);
+    let configured =
+        waiting_reply::expect_waiting_update(&mut one, &room_id, two_ready_revision, |room| {
+            room["settingsRevision"] == 2 && room["settings"] == settings
+        })
+        .await;
     assert_eq!(configured["room"]["seats"][1]["ready"], false);
-    assert_eq!(next(&mut two).await["room"], configured["room"]);
-
+    let configured_revision = configured["room"]["revision"].as_u64().unwrap();
+    waiting_reply::expect_waiting_update(&mut two, &room_id, configured_revision, |room| {
+        room["settingsRevision"] == 2
+            && room["settings"] == settings
+            && room["seats"][1]["ready"] == false
+    })
+    .await;
     send(
         &mut third,
         json!({"type":"joinRoom", "sequence":1, "roomCode":code}),
@@ -215,8 +234,16 @@ async fn two_members_receive_personalized_admission_and_live_waiting_updates() {
         }),
     )
     .await;
-    assert_eq!(next(&mut one).await["type"], "roomState");
-    assert_eq!(next(&mut two).await["type"], "roomState");
+    let ready =
+        waiting_reply::expect_waiting_update(&mut one, &room_id, configured_revision, |room| {
+            room["seats"][0]["ready"] == true && room["seats"][1]["ready"] == false
+        })
+        .await;
+    let ready_revision = ready["room"]["revision"].as_u64().unwrap();
+    waiting_reply::expect_waiting_update(&mut two, &room_id, ready_revision, |room| {
+        room["seats"][0]["ready"] == true && room["seats"][1]["ready"] == false
+    })
+    .await;
     send(
         &mut one,
         json!({
@@ -225,7 +252,7 @@ async fn two_members_receive_personalized_admission_and_live_waiting_updates() {
         }),
     )
     .await;
-    assert_eq!(next(&mut one).await["code"], "invalidPhase");
+    waiting_reply::expect_error(&mut one, &room_id, "invalidPhase", 4, ready_revision).await;
     send(
         &mut one,
         json!({
@@ -234,94 +261,25 @@ async fn two_members_receive_personalized_admission_and_live_waiting_updates() {
         }),
     )
     .await;
-    assert_eq!(next(&mut one).await["code"], "invalidPhase");
+    waiting_reply::expect_error(&mut one, &room_id, "invalidPhase", 5, ready_revision).await;
     send(
         &mut one,
         json!({
-            "type":"manualAction", "sequence":6, "roomId":room_id,
+            "type":"manualAction", "sequence":6, "roomId":room_id.clone(),
             "roundId":1, "actionId":1, "action":"bomb"
         }),
     )
     .await;
-    assert_eq!(next(&mut one).await["code"], "invalidPhase");
+    waiting_reply::expect_error(&mut one, &room_id, "invalidPhase", 6, ready_revision).await;
     send(
         &mut one,
         json!({
-            "type":"rematch", "sequence":7, "roomId":room_id,
+            "type":"rematch", "sequence":7, "roomId":room_id.clone(),
             "roundId":1, "ready":true
         }),
     )
     .await;
-    assert_eq!(next(&mut one).await["code"], "invalidPhase");
-    server.abort();
-}
-
-#[tokio::test]
-async fn binding_checks_precede_placeholder_phase_and_leave_allows_rejoin() {
-    let state = AppState::without_database([ORIGIN.to_owned()]);
-    let tokens = [issue_token(&state), issue_token(&state)];
-    let (url, server) = start_server(state).await;
-    let mut owner = connect(&url, &tokens[0]).await;
-    let mut unbound = connect(&url, &tokens[1]).await;
-
-    send(
-        &mut owner,
-        json!({"type":"createRoom", "sequence":1, "configuration":{"controllers":["human","human"],"cpuDifficulty":null,"board":{"width":15,"height":13}}}),
-    )
-    .await;
-    let created = next(&mut owner).await;
-    let room_id = created["room"]["roomId"].clone();
-    let code = created["room"]["roomCode"].clone();
-    send(
-        &mut unbound,
-        json!({
-            "type":"ready", "sequence":1, "roomId":room_id,
-            "roundId":1, "ready":true, "settingsRevision":1
-        }),
-    )
-    .await;
-    assert_eq!(next(&mut unbound).await["code"], "notInRoom");
-
-    send(
-        &mut unbound,
-        json!({"type":"joinRoom", "sequence":2, "roomCode":code}),
-    )
-    .await;
-    assert_eq!(next(&mut unbound).await["youSeat"], "two");
-    assert_eq!(next(&mut owner).await["room"]["revision"], 3);
-
-    send(
-        &mut owner,
-        json!({
-            "type":"movement", "sequence":2, "roomId":room_id,
-            "roundId":2, "direction":"east"
-        }),
-    )
-    .await;
-    assert_eq!(next(&mut owner).await["code"], "staleRoom");
-    send(
-        &mut owner,
-        json!({
-            "type":"leaveRoom", "sequence":3, "roomId":room_id, "roundId":1
-        }),
-    )
-    .await;
-    assert_eq!(next(&mut owner).await["type"], "leftRoom");
-    assert_eq!(next(&mut unbound).await["room"]["revision"], 4);
-
-    send(
-        &mut owner,
-        json!({"type":"joinRoom", "sequence":4, "roomCode":code}),
-    )
-    .await;
-    assert_eq!(next(&mut owner).await["youSeat"], "one");
-    assert_eq!(next(&mut unbound).await["room"]["revision"], 5);
-    send(
-        &mut owner,
-        json!({"type":"createRoom", "sequence":5, "configuration":{"controllers":["human","human"],"cpuDifficulty":null,"board":{"width":15,"height":13}}}),
-    )
-    .await;
-    assert_eq!(next(&mut owner).await["code"], "alreadyInRoom");
+    waiting_reply::expect_error(&mut one, &room_id, "invalidPhase", 7, ready_revision).await;
     server.abort();
 }
 
@@ -333,7 +291,7 @@ async fn connected_resume_replaces_old_socket_with_private_admission_and_close_4
     let mut original = connect(&url, &tokens[0]).await;
     send(
         &mut original,
-        json!({"type":"createRoom", "sequence":1, "configuration":{"controllers":["human","human"],"cpuDifficulty":null,"board":{"width":15,"height":13}}}),
+        json!({"type":"createRoom", "sequence":1, "configuration":{"controllers":["human","human"],"cpuDifficulty":null,"board":{"width":15,"height":13},"environment":{"stormCloud":true}}}),
     )
     .await;
     let created = next(&mut original).await;
@@ -361,15 +319,16 @@ async fn connected_resume_replaces_old_socket_with_private_admission_and_close_4
     server.abort();
 }
 
-#[cfg(test)]
+#[path = "room_socket_tests/binding_tests.rs"]
+mod binding_tests;
 #[path = "room_socket_tests/rate_limit_tests.rs"]
 mod rate_limit_tests;
-#[cfg(test)]
 #[path = "room_socket_tests/resume_race_tests.rs"]
 mod resume_race_tests;
-#[cfg(test)]
 #[path = "room_socket_tests/unavailable_resume_tests.rs"]
 mod unavailable_resume_tests;
+#[path = "room_socket_tests/waiting_reply.rs"]
+mod waiting_reply;
 
 #[path = "room_socket_tests/disconnect_tests.rs"]
 mod disconnect_tests;

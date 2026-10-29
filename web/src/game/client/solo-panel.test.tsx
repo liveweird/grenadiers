@@ -21,8 +21,9 @@ function soloState(difficulty: 'easy' | 'standard' = 'standard'): GameClientStat
     result: { type: 'winner', seat: 'two', reason: 'roundWins' },
   })
   current.configuration = { controllers: ['human', 'cpu'], cpuDifficulty: difficulty,
-    board: { width: 15, height: 13 } }
+    board: { width: 15, height: 13 }, environment: { stormCloud: true } }
   current.scores[1]!.wins = 3
+  current.settings.winsToFinish = 3
   current.roundNumber = 3
   current.seats[1] = {
     seat: 'two', controller: { type: 'cpu', difficulty }, occupied: true,

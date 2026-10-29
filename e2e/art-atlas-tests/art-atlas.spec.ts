@@ -159,7 +159,7 @@ test('source validation rejects path-like IDs and painting in authoring gutters'
   })
   expect(result.unsafeMessage).toContain('invalid stable ID ../terrain')
   expect(result.gutterMessage).toContain('paint exists in a gutter or reserved slot')
-  expect(result.inventory).toEqual({ frameCount: 149, pickupCount: 24 })
+  expect(result.inventory).toEqual({ frameCount: 150, pickupCount: 24 })
 })
 
 test('repeated preview reset and WebGL context restoration do not accumulate canvases or sprites', async ({ page }) => {
@@ -223,25 +223,32 @@ test('committed artist source validates and exports through the browser pipeline
     frames: Array<{
       id: string; status: string
       footAnchor?: { x: number; y: number }
+      localBounds: { x: number; y: number; width: number; height: number }
+      pivot: { x: number; y: number }
     }>
   }
   const result = await page.evaluate(
     (request) => window.grenadiersArtAtlas.exportSource(request), source,
   )
   expect(sourceManifest.sheet).toMatchObject({ width: 1120, height: 1680 })
-  expect(sourceManifest.frames).toHaveLength(149)
-  expect(sourceManifest.frames.filter(({ status }) => status === 'baseline')).toHaveLength(145)
+  expect(sourceManifest.frames).toHaveLength(150)
+  expect(sourceManifest.frames.filter(({ status }) => status === 'baseline')).toHaveLength(146)
   expect(sourceManifest.frames.filter(({ status }) => status === 'reserved')).toHaveLength(4)
-  expect(result.runtimeManifest.frames).toHaveLength(145)
+  expect(result.runtimeManifest.frames).toHaveLength(146)
   expect(result.rgbaBytes).toBe(4_308_480)
   const appendedWalkingIds = (['one', 'two', 'three', 'four'] as const).flatMap((appearance) =>
     (['north', 'east', 'south', 'west'] as const).flatMap((direction) =>
       [2, 3].map((pose) => `actor.${appearance}.${direction}.${pose}`)))
   expect(sourceManifest.frames.slice(111, 143).map(({ id }) => id)).toEqual(appendedWalkingIds)
-  expect(sourceManifest.frames.slice(143).map(({ id }) => id)).toEqual(
+  expect(sourceManifest.frames.slice(143, 149).map(({ id }) => id)).toEqual(
     (['standard', 'piercing', 'power'] as const).flatMap((blast) =>
       [1, 2].map((pose) => `bomb.shell.timed.${blast}.${pose}`)),
   )
+  expect(sourceManifest.frames[149]).toMatchObject({
+    id: 'environment.stormCloud', status: 'baseline',
+    localBounds: { x: -40, y: -40, width: 80, height: 80 },
+    pivot: { x: 40, y: 40 },
+  })
   const actorFrames = sourceManifest.frames.filter(({ id }) => id.startsWith('actor.')
     && /^actor\.(one|two|three|four)\.(north|east|south|west)\.[0-3]$/.test(id))
   expect(actorFrames).toHaveLength(64)

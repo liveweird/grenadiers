@@ -1,6 +1,6 @@
 use super::{ProjectionError, RoomPhase, RoomView, Seat};
 
-pub(crate) fn validate_room(room: &RoomView) -> Result<(), ProjectionError> {
+pub fn validate_room_view(room: &RoomView) -> Result<(), ProjectionError> {
     let base = room.configuration.domain().base();
     let count = base.controllers().len();
     if room.rules_version.get() != 7
@@ -30,12 +30,15 @@ pub(crate) fn validate_room(room: &RoomView) -> Result<(), ProjectionError> {
             .iter()
             .enumerate()
             .any(|(index, score)| score.seat.index() != index)
-        || room.settings_editor
-            != matches!(
-                room.seats[0].connection,
-                super::ConnectionStatus::Connected | super::ConnectionStatus::Disconnected { .. }
-            )
-            .then_some(Seat::One)
+        || room.settings_editor.is_some_and(|editor| {
+            editor != Seat::One
+                || base.controllers()[0] != crate::room::SeatControl::Human
+                || !matches!(
+                    room.seats[0].connection,
+                    super::ConnectionStatus::Connected
+                        | super::ConnectionStatus::Disconnected { .. }
+                )
+        })
         || room
             .scores
             .iter()
@@ -105,6 +108,8 @@ pub(crate) fn validate_room(room: &RoomView) -> Result<(), ProjectionError> {
         },
     )
 }
+
+pub(crate) use validate_room_view as validate_room;
 
 fn valid_result(result: super::RoundResult, count: usize) -> bool {
     match result {

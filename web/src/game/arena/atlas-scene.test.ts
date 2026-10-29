@@ -29,6 +29,7 @@ function trackedArtwork() {
     makeBomb: vi.fn(graphicsArtwork.makeBomb),
     makeFlame: vi.fn(graphicsArtwork.makeFlame),
     makeOilBarrel: vi.fn(graphicsArtwork.makeOilBarrel),
+    makeStormCloud: vi.fn(graphicsArtwork.makeStormCloud),
   }
   return { artwork, terrain, terrainRoot: terrainRoot as unknown as NodeView }
 }
@@ -48,6 +49,7 @@ describe('arena artwork injection', () => {
     expect(artwork.makeBomb).toHaveBeenCalledExactlyOnceWith('standard', 'timed')
     expect(artwork.makeFlame).toHaveBeenCalledOnce()
     expect(artwork.makeOilBarrel).toHaveBeenCalledOnce()
+    expect(artwork.makeStormCloud).not.toHaveBeenCalled()
     expect(artwork.makeActor).toHaveBeenCalledTimes(2)
     expect(terrain.paint).toHaveBeenCalledExactlyOnceWith(snapshot.state.arena)
     const bomb = vi.mocked(artwork.makeBomb).mock.results[0].value
@@ -63,6 +65,17 @@ describe('arena artwork injection', () => {
     expect(artwork.makePickup).toHaveBeenCalledOnce()
     expect(artwork.makeActor).toHaveBeenCalledTimes(2)
     expect(terrain.paint).toHaveBeenCalledOnce()
+  })
+
+  it('allocates a cloud through the injected artwork factory', () => {
+    const { artwork } = trackedArtwork()
+    const scene = new ArenaScene(1, artwork)
+    const snapshot = gameSnapshot()
+    snapshot.state.stormCloud = {
+      position: { x: 7_680, y: 6_656 }, direction: 'east', legRemainingTicks: 128,
+    }
+    scene.update(snapshot, 0)
+    expect(artwork.makeStormCloud).toHaveBeenCalledOnce()
   })
 
   it('rebuilds only the terrain cache on context restoration and retains artwork ownership', () => {

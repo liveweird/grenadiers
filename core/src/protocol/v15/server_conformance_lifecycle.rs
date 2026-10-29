@@ -91,7 +91,11 @@ fn configured_lifecycle(
     lifecycle
 }
 
-pub(super) fn room_view(lifecycle: &RosterMatchLifecycle, cloud: StormCloudConfig) -> RoomView {
+pub(super) fn room_view(
+    lifecycle: &RosterMatchLifecycle,
+    cloud: StormCloudConfig,
+    settings_locked: bool,
+) -> RoomView {
     let environment = Environment {
         storm_cloud: cloud == StormCloudConfig::Single,
     };
@@ -109,7 +113,10 @@ pub(super) fn room_view(lifecycle: &RosterMatchLifecycle, cloud: StormCloudConfi
             environment,
         ),
         settings_revision: Counter::new(1).unwrap(),
-        settings_editor: lifecycle.settings_editor().map(seat),
+        settings_editor: (!settings_locked)
+            .then(|| lifecycle.settings_editor())
+            .flatten()
+            .map(seat),
         available_items: ItemSet::from_mask(ItemMask::new(EnabledItems::ALL.bits()).unwrap()),
         configuration: RoomConfiguration::from_domain(EnvironmentRoomConfiguration::new(
             lifecycle.configuration(),

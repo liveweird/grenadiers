@@ -16,6 +16,7 @@ impl AcceptedPlan {
 }
 
 impl CpuController {
+    #[cfg(test)]
     pub(in crate::game::rooms) const fn has_committed_route(&self) -> bool {
         self.committed_route.is_some()
     }

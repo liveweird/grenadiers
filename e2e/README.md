@@ -92,7 +92,7 @@ reconnect probe closes real native transports and authenticates normally without
 the authoritative simulation clock, state, or outcomes.
 
 The Wall Pass production route runs separately with the mode-0444 seed fixture:
-`E2E_WALL_PASS_FIXTURE=arena-v2-wall-pass npm run test:wall-pass`. Start the same application image
+`E2E_WALL_PASS_FIXTURE=arena-v3-wall-pass npm run test:wall-pass`. Start the same application image
 with the shared override and `core/tests/fixtures/arena-v2-wall-pass.seed` first. The route uses only
 browser controls and read-only socket observations; it does not inject state or send gameplay
 commands over the probe.
@@ -107,24 +107,24 @@ Owned processes/profiles have bounded cleanup; private CDP endpoints and capabil
 
 The Kick source route uses the shared override with the mode-0444
 `core/tests/fixtures/arena-v2-kick.seed`:
-`E2E_KICK_FIXTURE=arena-v2-kick npm run test:kick`. It uses native controls and read-only public
+`E2E_KICK_FIXTURE=arena-v3-kick npm run test:kick`. It uses native controls and read-only public
 observations; source checks do not claim native acceptance.
 
 The Punch source route uses the shared override with the mode-0444
 `core/tests/fixtures/arena-v2-punch.seed`:
-`E2E_PUNCH_FIXTURE=arena-v2-punch npm run test:punch`. It remaps and uses the actual Equipment key,
+`E2E_PUNCH_FIXTURE=arena-v3-punch npm run test:punch`. It remaps and uses the actual Equipment key,
 uses native movement/Bomb input and observes both public recipient streams without injection or
 direct gameplay messages. Source checks do not claim native acceptance.
 
 The Bracelet source route uses the shared override with the mode-0444
 `core/tests/fixtures/arena-v2-bracelet.seed`:
-`E2E_BRACELET_FIXTURE=arena-v2-bracelet npm run test:bracelet`. Two browsers clear opposite
+`E2E_BRACELET_FIXTURE=arena-v3-bracelet npm run test:bracelet`. Two browsers clear opposite
 perimeters with ordinary Bomb and movement input, then prove the stationary rival moves exactly
 one tile in both recipient streams without an Equipment action, public event or private marker.
 Source checks do not claim native acceptance.
 
 The Oil Barrel source route uses the shared override with the read-only
 `core/tests/fixtures/arena-v2-oil-barrel.seed`:
-`E2E_OIL_BARREL_FIXTURE=arena-v2-oil-barrel npm run test:oil-barrel`. Ordinary Bomb and movement
+`E2E_OIL_BARREL_FIXTURE=arena-v3-oil-barrel npm run test:oil-barrel`. Ordinary Bomb and movement
 input proves delayed reveal, the unlit collision edge, safe ignition and persistent burning in both
 recipient streams, then reconnects normally. Source checks do not claim native acceptance.

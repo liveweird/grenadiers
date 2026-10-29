@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use axum::extract::ws::{Message, WebSocket};
-use grenadiers_core::protocol::v14::{ErrorCode, GameServerMessage, ManualActionKind};
+use grenadiers_core::protocol::v15::{ErrorCode, GameServerMessage, ManualActionKind};
 use grenadiers_core::protocol::{Counter, Direction as WireDirection, RoomId};
 use tokio::time::Instant;
 
@@ -9,11 +9,14 @@ use super::{
     command::{Command, SequencedCommand},
     connection::{ConnectionState, Membership},
     rooms::{
-        BindingKey, GameRooms, LiveAdmission as Admission, RoomError, RosterAction as RoomAction,
+        BindingKey, EnvironmentSettingsAction, GameRooms, LiveAdmission as Admission, RoomError,
+        RosterAction as RoomAction,
     },
     socket::{send_error, send_game, send_raw},
 };
 use crate::admission::{DenialOperation, GameplayOperation};
+
+mod environment_settings;
 
 pub(super) async fn dispatch(
     socket: &mut WebSocket,
@@ -171,18 +174,24 @@ pub(super) async fn dispatch(
             settings_revision,
             settings,
         } => {
-            action(
+            environment_settings::dispatch(
                 socket,
                 rooms,
                 room_id,
                 u64::from(round_id.get()),
-                RoomAction::UpdateSettings {
+                EnvironmentSettingsAction {
                     settings_revision: settings_revision.get(),
-                    settings: match grenadiers_core::protocol::v13::expanded_settings(settings) {
+                    settings: match grenadiers_core::protocol::v13::expanded_settings(settings.base)
+                    {
                         Ok(settings) => settings,
                         Err(_) => {
                             return reply_error(socket, ErrorCode::InvalidMessage, sequence).await;
                         }
+                    },
+                    environment: if settings.environment.storm_cloud {
+                        grenadiers_core::game::StormCloudConfig::Single
+                    } else {
+                        grenadiers_core::game::StormCloudConfig::Disabled
                     },
                 },
                 state,
@@ -339,7 +348,11 @@ async fn action(
     }
 }
 
-async fn room_error(socket: &mut WebSocket, error: RoomError, sequence: Counter) -> bool {
+pub(super) async fn room_error(
+    socket: &mut WebSocket,
+    error: RoomError,
+    sequence: Counter,
+) -> bool {
     let code = match error {
         RoomError::RateLimited => ErrorCode::RateLimited,
         RoomError::CapacityReached => ErrorCode::CapacityReached,
@@ -365,24 +378,13 @@ const fn domain_direction(direction: WireDirection) -> grenadiers_core::game::Di
     }
 }
 
-async fn reply_error(socket: &mut WebSocket, code: ErrorCode, sequence: Counter) -> bool {
+pub(super) async fn reply_error(
+    socket: &mut WebSocket,
+    code: ErrorCode,
+    sequence: Counter,
+) -> bool {
     send_error(socket, code, Some(sequence)).await.is_ok()
 }
 
 #[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn equipment_reaches_the_shared_room_action_path() {
-        let id = Counter::new(7).unwrap();
-        assert_eq!(
-            manual_room_action(ManualActionKind::Equipment, id),
-            Some(RoomAction::Equipment(7))
-        );
-        assert_eq!(
-            manual_room_action(ManualActionKind::Bomb, id),
-            Some(RoomAction::Bomb(7))
-        );
-    }
-}
+mod tests;

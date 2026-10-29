@@ -17,6 +17,7 @@ pub(in crate::game::rooms) enum ResumeCredentialError {
 }
 
 impl ResumeCredential {
+    #[cfg(test)]
     pub(in crate::game::rooms) fn mint(
         entropy_fill: &(impl Fn(&mut [u8]) -> Result<(), ()> + Send + Sync + ?Sized),
         other_seat: Option<&Self>,

@@ -13,9 +13,8 @@ use tokio::{
 };
 
 use super::super::{
-    RandomFill,
+    ClosingReason, RandomFill,
     cpu::CpuController,
-    match_owner::ClosingReason,
     roster_runtime::{RosterAction, RosterNotice, RosterRuntime, RosterRuntimeError},
     types::{BindingKey, RoomError},
 };
@@ -29,6 +28,7 @@ pub(super) struct Driver {
     pub(super) notices: watch::Sender<RosterOwnerNotice>,
     last: RosterNotice,
     pub(super) seats: [Option<SeatSlot>; 4],
+    pub(super) retired_credentials: Vec<super::super::resume::ResumeCredential>,
     pub(super) terminal_at: Option<Instant>,
     pub(super) lobby_deadline: Option<Instant>,
     pub(super) random_fill: Arc<RandomFill>,
@@ -58,6 +58,7 @@ impl Driver {
             notices,
             last: initial,
             seats: [None, None, None, None],
+            retired_credentials: Vec::new(),
             terminal_at: None,
             lobby_deadline: Some(lobby_deadline),
             random_fill,
@@ -99,6 +100,18 @@ impl Driver {
                 let _ = reply.send(result.map_err(map_runtime_error));
                 fatal_error.map_or(Ok(()), Err)
             }
+            OwnerCommand::EnvironmentSettings {
+                binding,
+                room_id,
+                round_id,
+                action,
+                reply,
+            } => {
+                let result = self.environment_settings(binding, &room_id, round_id, action, now);
+                let fatal_error = result.err().filter(|error| fatal(*error));
+                let _ = reply.send(result.map_err(map_runtime_error));
+                fatal_error.map_or(Ok(()), Err)
+            }
             OwnerCommand::Leave {
                 binding,
                 room_id,
@@ -135,6 +148,30 @@ impl Driver {
         if was_terminal && self.runtime.lifecycle().phase() == MatchPhase::Waiting {
             self.terminal_at = None;
             self.lobby_deadline = Some(now + super::runner::LOBBY_LIFETIME);
+        }
+        self.observe_phase(now);
+        Ok(())
+    }
+
+    fn environment_settings(
+        &mut self,
+        binding: BindingKey,
+        room_id: &RoomId,
+        round_id: u64,
+        action: super::super::live_registry::EnvironmentSettingsAction,
+        now: Instant,
+    ) -> Result<(), RosterRuntimeError> {
+        let seat = self
+            .validate(binding, room_id, round_id)
+            .map_err(|_| RosterRuntimeError::StaleEpoch)?;
+        if let Some(notice) = self.runtime.update_environment_settings(
+            seat,
+            round_id,
+            action.settings_revision,
+            action.settings,
+            action.environment,
+        )? {
+            self.publish(notice);
         }
         self.observe_phase(now);
         Ok(())
@@ -233,9 +270,6 @@ impl Driver {
             if let Some(reply) = pending.reply.take() {
                 let _ = reply.send(Ok(()));
             }
-            // Keep the credential as a room-lifetime tombstone. Reusing an
-            // explicitly departed participant's token would let stale resume
-            // authority alias a later human admission.
         }
     }
 
@@ -245,6 +279,7 @@ impl Driver {
             self.publish(notice);
         }
         self.finish_pending();
+        self.retire_released_credentials();
         self.drop_expired_credentials();
         self.observe_phase(now);
         Ok(())

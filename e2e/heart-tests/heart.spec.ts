@@ -8,7 +8,7 @@ import { applyItemSettings } from '../tests/support/settings'
 
 test.beforeAll(() => {
   expect(process.env.E2E_HEART_FIXTURE, 'Configure the documented production Heart seed')
-    .toBe('arena-v2-heart')
+    .toBe('arena-v3-heart')
 })
 
 async function plant(page: Page, game: ObservedGame): Promise<void> {
@@ -42,8 +42,8 @@ test('two browsers reveal a generated Heart and observe one charge protect its c
       expect.poll(() => latestSnapshot(game)?.room.phase.type).toBe('running')))
     const initial = latestSnapshot(games[0])!
     expect(initial.room).toMatchObject({
-      rulesVersion: 5, mapId: 'generated_v2', availableItems: ['kick', 'punch', 'bracelet', 'wallPass', 'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch', 'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls', 'invisibleBombs', 'oilBarrel', 'teleporter'],
-      settings: { enabledItems: ['heart'] },
+      rulesVersion: 7, mapId: 'generated_v2', availableItems: ['kick', 'punch', 'bracelet', 'wallPass', 'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch', 'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls', 'invisibleBombs', 'oilBarrel', 'teleporter'],
+      settings: { enabledItems: ['heart'], environment: { stormCloud: false } },
     })
     expect(initial.state.arena.blocks).toContainEqual({ column: 3, row: 1 })
     expect(visibleActor(initial, 'one')?.inventory.equipment).toBeNull()

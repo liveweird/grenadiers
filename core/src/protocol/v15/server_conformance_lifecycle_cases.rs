@@ -37,11 +37,16 @@ fn score_winner(count: PlayerCount, winner: SeatId) -> RosterMatchLifecycle {
     lifecycle
 }
 
-fn case(id: &'static str, scenario: &'static str, lifecycle: &RosterMatchLifecycle) -> RoomCase {
+fn case(
+    id: &'static str,
+    scenario: &'static str,
+    lifecycle: &RosterMatchLifecycle,
+    settings_locked: bool,
+) -> RoomCase {
     (
         id,
         scenario,
-        support::room_view(lifecycle, StormCloudConfig::Disabled),
+        support::room_view(lifecycle, StormCloudConfig::Disabled, settings_locked),
     )
 }
 
@@ -104,16 +109,36 @@ pub(super) fn room_cases() -> Vec<RoomCase> {
         .unwrap();
 
     vec![
-        case("lifecycle-initial-countdown", "initialCountdown", &initial),
-        case("lifecycle-round-result", "roundResult", &result),
-        case("lifecycle-inter-round", "interRoundCountdown", &inter_round),
-        case("lifecycle-next-running", "nextRunning", &next_running),
-        case("lifecycle-score-winner", "scoreWinner", &terminal),
-        case("lifecycle-forfeit", "forfeit", &forfeit),
-        case("lifecycle-interrupted", "interrupted", &interrupted),
-        case("lifecycle-rematch-eligible", "rematchEligible", &rematch),
-        case("lifecycle-disconnected", "disconnected", &disconnected),
-        case("lifecycle-abandoned", "abandoned", &abandoned),
+        case(
+            "lifecycle-initial-countdown",
+            "initialCountdown",
+            &initial,
+            false,
+        ),
+        case("lifecycle-round-result", "roundResult", &result, true),
+        case(
+            "lifecycle-inter-round",
+            "interRoundCountdown",
+            &inter_round,
+            true,
+        ),
+        case("lifecycle-next-running", "nextRunning", &next_running, true),
+        case("lifecycle-score-winner", "scoreWinner", &terminal, true),
+        case("lifecycle-forfeit", "forfeit", &forfeit, true),
+        case("lifecycle-interrupted", "interrupted", &interrupted, false),
+        case(
+            "lifecycle-rematch-eligible",
+            "rematchEligible",
+            &rematch,
+            true,
+        ),
+        case(
+            "lifecycle-disconnected",
+            "disconnected",
+            &disconnected,
+            true,
+        ),
+        case("lifecycle-abandoned", "abandoned", &abandoned, true),
     ]
 }
 
@@ -167,7 +192,7 @@ fn admission(
     generation: crate::game::GenerationRecord,
     recipient: Seat,
 ) -> String {
-    let room = support::room_view(lifecycle, StormCloudConfig::Disabled);
+    let room = support::room_view(lifecycle, StormCloudConfig::Disabled, true);
     let capture = capture_expanded(state, &[]).unwrap();
     prepare_admission(
         AdmissionProjection {

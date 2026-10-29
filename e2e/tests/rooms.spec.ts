@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { admissionFrame, gameFrames, openGame, roomFrame, sendGame } from './support/game'
+import { admissionFrame, gameFrames, openGame, roomFrame, roomFrameAfter, sendGame } from './support/game'
 
 test('rooms bind two independent players and preserve authentication after leaving', async ({ browser }) => {
   const contexts = await Promise.all(Array.from({ length: 3 }, () => browser.newContext()))
@@ -21,20 +21,29 @@ test('rooms bind two independent players and preserve authentication after leavi
     expect(shared.type).toBe('roomState')
     expect(shared).not.toHaveProperty('youSeat')
     expect(shared).not.toHaveProperty('resumeToken')
-    expect(joined.room).toEqual(shared.room)
+    const { revision: joinedRevision, tick: joinedTick, ...joinedFacts } = joined.room
+    const { revision: sharedRevision, tick: sharedTick, ...sharedFacts } = shared.room
+    expect(joinedFacts).toEqual(sharedFacts)
+    expect(joinedRevision).toBeGreaterThan(created.room.revision)
+    expect(sharedRevision).toBeGreaterThan(created.room.revision)
+    expect(joinedTick).toBeGreaterThanOrEqual(created.room.tick)
+    expect(sharedTick).toBeGreaterThanOrEqual(created.room.tick)
     expect(joined.room.seats.map((seat) => seat.occupied)).toEqual([true, true])
 
     const deniedSequence = await sendGame(third, { type: 'joinRoom', roomCode: created.room.roomCode })
     await expect.poll(() => gameFrames(third)).toContainEqual({
       type: 'error', code: 'roomFull', sequence: deniedSequence,
     })
+    const vacancyFloor = (await gameFrames(one)).length
     const leftSequence = await sendGame(two, {
       type: 'leaveRoom', roomId: joined.room.roomId, roundId: joined.room.roundId,
     })
     await expect.poll(() => gameFrames(two)).toContainEqual({
       type: 'leftRoom', roomId: joined.room.roomId, sequence: leftSequence,
     })
-    const vacancy = await roomFrame(one, joined.room.revision)
+    const vacancy = await roomFrameAfter(one, vacancyFloor, ({ room }) =>
+      room.seats.length === 2
+      && room.seats[0]?.occupied === true && room.seats[1]?.occupied === false)
     expect(vacancy.room.seats.map((seat) => seat.occupied)).toEqual([true, false])
     await sendGame(third, { type: 'joinRoom', roomCode: created.room.roomCode })
     const replacement = await admissionFrame(third)

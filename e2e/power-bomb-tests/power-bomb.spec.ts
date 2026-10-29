@@ -3,9 +3,9 @@ import { expect, test } from '@playwright/test'
 import { latestSnapshot, observeGame, visibleActor, type ObservedGame } from '../tests/support/duel'
 import { moveTo } from '../tests/support/movement'
 import { applyItemSettings } from '../tests/support/settings'
-import type { GameServerMessage } from '../../web/src/game/v14/schema'
+import type { GameServerMessage } from '../../web/src/game/v15/schema'
 
-test.beforeAll(() => expect(process.env.E2E_POWER_BOMB_FIXTURE).toBe('arena-v2-power-bomb'))
+test.beforeAll(() => expect(process.env.E2E_POWER_BOMB_FIXTURE).toBe('arena-v3-power-bomb'))
 
 const snapshots = (game: ObservedGame) => game.frames.filter(
   (frame): frame is Extract<GameServerMessage, { type: 'snapshot' }> => frame.type === 'snapshot',
@@ -44,7 +44,7 @@ test('two browsers observe one Power Bomb cross a hard wall and the next bomb st
       cell: { column: 3, row: 1 }, kind: 'powerBomb',
     })
     for (const game of games) expect(latestSnapshot(game)!.state.arena.blocks)
-      .toContainEqual({ column: 3, row: 2 })
+      .toContainEqual({ column: 5, row: 2 })
     await moveTo(one, games[0], { column: 1, row: 1 })
     await moveTo(one, games[0], { column: 2, row: 1 })
     await moveTo(one, games[0], { column: 3, row: 1 })
@@ -59,13 +59,11 @@ test('two browsers observe one Power Bomb cross a hard wall and the next bomb st
       path: info.outputPath('power-armed-polish-320-reduced.png'), fullPage: true,
     })
 
-    await moveTo(one, games[0], { column: 2, row: 1 })
-    await moveTo(one, games[0], { column: 1, row: 1 })
-    await moveTo(one, games[0], { column: 1, row: 2 })
+    await moveTo(one, games[0], { column: 3, row: 2 })
     await one.keyboard.press('Space')
-    await moveTo(one, games[0], { column: 1, row: 1 })
-    await moveTo(one, games[0], { column: 2, row: 1 })
     await moveTo(one, games[0], { column: 3, row: 1 })
+    await moveTo(one, games[0], { column: 2, row: 1 })
+    await moveTo(one, games[0], { column: 1, row: 1 })
     await Promise.all(games.map((game) => expect.poll(() => events(game).find(({ kind }) =>
       kind.type === 'bombPlaced' && kind.bomb.blast === 'power')).toBeDefined()))
     const placements = games.map((game) => events(game).find(({ kind }) =>
@@ -77,7 +75,7 @@ test('two browsers observe one Power Bomb cross a hard wall and the next bomb st
     if (!powerBomb) throw new Error('Power placement expected')
     expect(placements[1]).toEqual(placements[0])
     expect(powerBomb).toMatchObject({
-      cell: { column: 1, row: 2 }, owner: collectorId, range: 2, blast: 'power',
+      cell: { column: 3, row: 2 }, owner: collectorId, range: 2, blast: 'power',
       trigger: { type: 'timed', remainingTicks: 180, paused: false },
     })
     const powerBombId = powerBomb.id
@@ -90,14 +88,14 @@ test('two browsers observe one Power Bomb cross a hard wall and the next bomb st
     await Promise.all(games.map((game) => expect.poll(() => snapshots(game).some(({ state }) => {
       const hasFlame = (column: number, row: number) => state.flames.some((flame) =>
         flame.cell.column === column && flame.cell.row === row)
-      return hasFlame(3, 2) && !hasFlame(2, 2) && !hasFlame(3, 1)
+      return hasFlame(5, 2) && !hasFlame(4, 2) && !hasFlame(5, 1)
     })).toBe(true)))
     await expect.poll(() => latestSnapshot(games[0])!.state.bombs.length
       + latestSnapshot(games[0])!.state.flames.length).toBe(0)
     for (const game of games) {
       const blocks = latestSnapshot(game)!.state.arena.blocks
-      expect(blocks).not.toContainEqual({ column: 3, row: 2 })
-      expect(latestSnapshot(game)!.state.arena.terrain[2 * 15 + 2]).toBe('wall')
+      expect(blocks).not.toContainEqual({ column: 5, row: 2 })
+      expect(latestSnapshot(game)!.state.arena.terrain[2 * 15 + 4]).toBe('wall')
     }
 
     await moveTo(one, games[0], { column: 3, row: 1 })

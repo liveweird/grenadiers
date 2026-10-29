@@ -252,7 +252,7 @@ async fn canceled_admission_delivery_does_not_commit_or_fence_the_next_creator()
     let task = prepared.start(|| {});
     let admission = accepted.await.unwrap().unwrap();
     assert_eq!(admission.seat, SeatId::One);
-    assert_eq!(admission.room.revision.get(), 3);
+    assert_eq!(admission.revision, 3);
     assert!(matches!(
         handle
             .action(

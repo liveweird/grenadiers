@@ -91,11 +91,11 @@ pub(super) fn counter64(value: u64) -> Result<Counter, RosterRuntimeError> {
         .ok_or(RosterRuntimeError::CapacityReached)
 }
 
-fn tick(value: grenadiers_core::game::Tick) -> Result<WireTick, RosterRuntimeError> {
+pub(super) fn tick(value: grenadiers_core::game::Tick) -> Result<WireTick, RosterRuntimeError> {
     WireTick::new(value.0).map_err(|_| RosterRuntimeError::CapacityReached)
 }
 
-fn settings(value: RoomSettings) -> Result<v14::GameSettings, RosterRuntimeError> {
+pub(super) fn settings(value: RoomSettings) -> Result<v14::GameSettings, RosterRuntimeError> {
     v14::GameSettings::new(
         value.starting_speed() as u8,
         value.turn_assist_units(),
@@ -109,7 +109,7 @@ fn settings(value: RoomSettings) -> Result<v14::GameSettings, RosterRuntimeError
     .map_err(|_| RosterRuntimeError::Publication)
 }
 
-fn available_items() -> Result<v14::ItemSet, RosterRuntimeError> {
+pub(super) fn available_items() -> Result<v14::ItemSet, RosterRuntimeError> {
     use v14::ItemId::*;
     v14::ItemSet::new([
         Kick,
@@ -138,7 +138,7 @@ fn available_items() -> Result<v14::ItemSet, RosterRuntimeError> {
     .map_err(|_| RosterRuntimeError::Publication)
 }
 
-fn scores(lifecycle: &RosterMatchLifecycle) -> Result<v14::Scores, RosterRuntimeError> {
+pub(super) fn scores(lifecycle: &RosterMatchLifecycle) -> Result<v14::Scores, RosterRuntimeError> {
     lifecycle
         .scores()
         .iter()
@@ -152,7 +152,9 @@ fn scores(lifecycle: &RosterMatchLifecycle) -> Result<v14::Scores, RosterRuntime
         .collect()
 }
 
-fn seats(lifecycle: &RosterMatchLifecycle) -> Result<Vec<v14::SeatStatus>, RosterRuntimeError> {
+pub(super) fn seats(
+    lifecycle: &RosterMatchLifecycle,
+) -> Result<Vec<v14::SeatStatus>, RosterRuntimeError> {
     lifecycle
         .participants()
         .iter()
@@ -192,7 +194,7 @@ fn seats(lifecycle: &RosterMatchLifecycle) -> Result<Vec<v14::SeatStatus>, Roste
         .collect()
 }
 
-fn completed(value: CompletedRound) -> Result<v14::CompletedRound, RosterRuntimeError> {
+pub(super) fn completed(value: CompletedRound) -> Result<v14::CompletedRound, RosterRuntimeError> {
     Ok(v14::CompletedRound {
         round_id: counter64(value.epoch())?,
         round_number: counter(value.assignment().round_number().get())?,

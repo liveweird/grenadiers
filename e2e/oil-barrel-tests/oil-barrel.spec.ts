@@ -6,9 +6,9 @@ import { latestSnapshot, observeGame, visibleActor, type ObservedGame } from '..
 import { moveSeatTo } from '../tests/support/movement'
 import { admissionBaseline, disconnectTransport, installTransportProbe } from '../tests/support/reconnect'
 import { applyItemSettings } from '../tests/support/settings'
-import type { GameServerMessage, Seat } from '../../web/src/game/v14/schema'
+import type { GameServerMessage, Seat } from '../../web/src/game/v15/schema'
 
-test.beforeAll(() => expect(process.env.E2E_OIL_BARREL_FIXTURE).toBe('arena-v2-oil-barrel'))
+test.beforeAll(() => expect(process.env.E2E_OIL_BARREL_FIXTURE).toBe('arena-v3-oil-barrel'))
 type Snapshot = Extract<GameServerMessage, { type: 'snapshot' }>
 const snapshots = (game: ObservedGame): Snapshot[] => game.frames.filter(
   (frame): frame is Snapshot => frame.type === 'snapshot')
@@ -110,7 +110,7 @@ test('Oil Barrel reveals, blocks, burns persistently, and resumes without synthe
       })
       expect(actor(games[0], 'one').inventory).toEqual(originalInventory)
       expect(hasBlock(games[0], 4, 1)).toBe(true)
-      expect(hasBlock(games[0], 3, 2)).toBe(true)
+      expect(hasBlock(games[0], 5, 2)).toBe(true)
       const unlitPixels = await Promise.all([one, two].map((page) => arenaTilePixels(page, 3, 1)))
       unlitPixels.forEach((pixels, index) => {
         expect(pixels).not.toEqual(concealedPixels[index])
@@ -149,7 +149,7 @@ test('Oil Barrel reveals, blocks, burns persistently, and resumes without synthe
         expectBurningOilArt(pixels)
       })
       expect(hasBlock(games[0], 4, 1)).toBe(true)
-      expect(hasBlock(games[0], 3, 2)).toBe(true)
+      expect(hasBlock(games[0], 5, 2)).toBe(true)
       expect(latestSnapshot(games[0])!.state.oilBarrels).toHaveLength(1)
 
       await Promise.all(games.map((game, index) => expect.poll(() => {

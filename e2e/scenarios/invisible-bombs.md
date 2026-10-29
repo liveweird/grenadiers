@@ -2,7 +2,7 @@
 
 ## Scenario: Invisible Bombs hides live bombs and cues until exact expiry
 
-Two real Chromium contexts use the repeating-byte-31 generated-v2 fixture. Player One reveals the
+Two real Chromium contexts use pinned seed bytes through generator3. Player One reveals the
 pickup at 3,1 with ordinary movement and a 300-tick bomb, escapes, and waits for fire to clear.
 English desktop and Polish 320-pixel reduced-motion screenshots capture the exposed pickup before
 collection.

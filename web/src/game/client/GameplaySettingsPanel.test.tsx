@@ -28,7 +28,7 @@ describe('gameplay settings panel', () => {
 
     expect(apply).toHaveBeenCalledWith({
       startingSpeedLevel: 4, turnAssistUnits: 64, winsToFinish: 1, bombFuseTicks: 60,
-      enabledItems: ['heart'],
+      enabledItems: ['heart'], environment: { stormCloud: true },
     })
   })
 
@@ -52,6 +52,7 @@ describe('gameplay settings panel', () => {
     const custom = room(2)
     custom.settings = {
       startingSpeedLevel: 4, turnAssistUnits: 64, winsToFinish: 1, bombFuseTicks: 60, enabledItems: [],
+      environment: { stormCloud: false },
     }
     render(<MantineProvider env="test"><GameplaySettingsPanel room={custom} youSeat="one"
       pending={false} copy={en} onApply={apply} /></MantineProvider>)
@@ -61,7 +62,7 @@ describe('gameplay settings panel', () => {
     await user.click(screen.getByRole('button', { name: 'Apply rules' }))
     expect(apply).toHaveBeenCalledWith({
       startingSpeedLevel: 0, turnAssistUnits: 256, winsToFinish: 3, bombFuseTicks: 180,
-      enabledItems: custom.availableItems,
+      enabledItems: custom.availableItems, environment: { stormCloud: true },
     })
   })
 })
@@ -77,6 +78,8 @@ describe('gameplay settings items', () => {
     expect(screen.getByRole('checkbox', { name: 'Bracelet' })).not.toBeChecked()
     expect(screen.getByRole('checkbox', { name: 'Wall pass' })).not.toBeChecked()
     expect(screen.getByRole('checkbox', { name: 'Heart' })).toBeChecked()
+    expect(screen.getByRole('checkbox', { name: 'Storm cloud' })).toBeChecked()
+    expect(screen.getByText(/roaming cloud slows players by 50%/)).toBeVisible()
     expect(screen.getByRole('checkbox', { name: 'Remote bomb' })).not.toBeChecked()
     expect(screen.getByRole('checkbox', { name: 'Piercing bomb' })).not.toBeChecked()
     expect(screen.getByRole('checkbox', { name: 'Power bomb' })).not.toBeChecked()
@@ -158,6 +161,7 @@ describe('gameplay settings items', () => {
     expect(screen.getByRole('checkbox', { name: 'Diarrhea' })).toBeChecked()
     expect(screen.getByRole('checkbox', { name: 'Slow foot' })).toBeChecked()
     expect(screen.getByRole('checkbox', { name: 'Short flame' })).toBeChecked()
+    expect(screen.getByRole('checkbox', { name: 'Storm cloud' })).toBeChecked()
     expect(screen.getByRole('checkbox', { name: 'Long fuse' })).toBeChecked()
     expect(screen.getByRole('checkbox', { name: 'Reverse controls' })).toBeChecked()
     expect(screen.getByRole('checkbox', { name: 'Oil barrel' })).toBeChecked()
@@ -198,10 +202,11 @@ describe('gameplay settings items', () => {
     expect(screen.getByRole('checkbox', { name: 'Reverse controls' })).not.toBeChecked()
     expect(screen.getByRole('checkbox', { name: 'Oil barrel' })).not.toBeChecked()
     expect(screen.getByRole('checkbox', { name: 'Teleporter' })).not.toBeChecked()
+    expect(screen.getByRole('checkbox', { name: 'Storm cloud' })).not.toBeChecked()
     await user.click(screen.getByRole('button', { name: 'Apply rules' }))
     expect(apply).toHaveBeenLastCalledWith({
       startingSpeedLevel: 0, turnAssistUnits: 256, winsToFinish: 3,
-      bombFuseTicks: 180, enabledItems: [],
+      bombFuseTicks: 180, enabledItems: [], environment: { stormCloud: false },
     })
     await user.click(screen.getByRole('checkbox', { name: 'Shield' }))
     await user.click(screen.getByRole('checkbox', { name: 'Short flame' }))
@@ -220,7 +225,7 @@ describe('gameplay settings bulk actions', () => {
     partial.availableItems = ['teleporter', 'heart', 'shield']
     partial.settings = {
       startingSpeedLevel: 3, turnAssistUnits: 128, winsToFinish: 7,
-      bombFuseTicks: 270, enabledItems: ['heart'],
+      bombFuseTicks: 270, enabledItems: ['heart'], environment: { stormCloud: false },
     }
     render(<MantineProvider env="test"><GameplaySettingsPanel room={partial} youSeat="one"
       pending={false} copy={en} onApply={apply} /></MantineProvider>)
@@ -229,14 +234,14 @@ describe('gameplay settings bulk actions', () => {
     await user.click(screen.getByRole('button', { name: 'Apply rules' }))
     expect(apply).toHaveBeenCalledWith({
       startingSpeedLevel: 3, turnAssistUnits: 128, winsToFinish: 7, bombFuseTicks: 270,
-      enabledItems: ['heart', 'shield', 'teleporter'],
+      enabledItems: ['heart', 'shield', 'teleporter'], environment: { stormCloud: true },
     })
     await user.click(screen.getByRole('button', { name: 'All off' }))
     expect(screen.getByRole('checkbox', { name: 'Heart' })).not.toBeChecked()
     await user.click(screen.getByRole('button', { name: 'Apply rules' }))
     expect(apply).toHaveBeenLastCalledWith(expect.objectContaining({
       startingSpeedLevel: 3, turnAssistUnits: 128, winsToFinish: 7,
-      bombFuseTicks: 270, enabledItems: [],
+      bombFuseTicks: 270, enabledItems: [], environment: { stormCloud: false },
     }))
   })
 
@@ -248,8 +253,10 @@ describe('gameplay settings bulk actions', () => {
     render(<MantineProvider env="test"><GameplaySettingsPanel room={empty} youSeat="one"
       pending={false} copy={pl} onApply={() => true} /></MantineProvider>)
     await user.click(screen.getByRole('button', { name: 'Włącz wszystkie' }))
+    expect(screen.getByRole('checkbox', { name: 'Chmura burzowa' })).toBeChecked()
     await user.click(screen.getByRole('button', { name: 'Wyłącz wszystkie' }))
-    expect(screen.getByRole('button', { name: 'Zastosuj zasady' })).toBeDisabled()
+    expect(screen.getByRole('checkbox', { name: 'Chmura burzowa' })).not.toBeChecked()
+    expect(screen.getByRole('button', { name: 'Zastosuj zasady' })).toBeEnabled()
   })
 })
 
@@ -301,6 +308,23 @@ describe('gameplay settings Oil locale', () => {
 })
 
 describe('gameplay settings locks', () => {
+  it.each([false, true])('explains a null grant and disables controls when ready=%s', (ready) => {
+    const locked = room(3)
+    locked.settingsEditor = null
+    locked.seats[0].ready = ready
+    render(<MantineProvider env="test"><GameplaySettingsPanel room={locked} youSeat="one"
+      pending={false} copy={en} onApply={() => true} /></MantineProvider>)
+    expect(screen.getByText('These match rules are read-only.')).toBeVisible()
+    expect(screen.getByLabelText('Starting speed')).toBeDisabled()
+    expect(screen.getByLabelText('Turning tolerance')).toBeDisabled()
+    expect(screen.getByLabelText('Round wins needed')).toBeDisabled()
+    expect(screen.getByLabelText('Bomb fuse')).toBeDisabled()
+    expect(screen.getAllByRole('checkbox').every((control) => control.hasAttribute('disabled'))).toBe(true)
+    for (const name of ['All on', 'All off', 'Restore match defaults', 'Classic settings', 'Apply rules']) {
+      expect(screen.getByRole('button', { name })).toBeDisabled()
+    }
+  })
+
   it.each(['editor', 'disconnected', 'match', 'pending'] as const)(
     'locks bulk actions when blocked by %s state', (lock) => {
       const locked = room(3)

@@ -3455,6 +3455,26 @@
         "y": 1568
       },
       "status": "baseline"
+    },
+    {
+      "id": "environment.stormCloud",
+      "localBounds": {
+        "height": 80,
+        "width": 80,
+        "x": -40,
+        "y": -40
+      },
+      "pivot": {
+        "x": 40,
+        "y": 40
+      },
+      "sourceRect": {
+        "height": 80,
+        "width": 80,
+        "x": 1008,
+        "y": 1568
+      },
+      "status": "baseline"
     }
   ],
   "schemaVersion": 1,

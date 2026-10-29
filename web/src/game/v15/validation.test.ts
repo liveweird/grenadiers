@@ -47,6 +47,30 @@ describe('gameplay v15 storm environment validation', () => {
     expect(validateGameplayV15ServerMessage(message)).toEqual({ valid: true, value: message })
   })
 
+  it('accepts a null settings grant and rejects ineligible editors', () => {
+    const message = v15Snapshot(false)
+    message.room.settingsEditor = null
+    expect(validateGameplayV15ServerMessage(message)).toMatchObject({ valid: true })
+
+    for (const editor of ['two', 'three', 'four'] as const) {
+      const invalid = structuredClone(message)
+      invalid.room.settingsEditor = editor
+      expect(validateGameplayV15ServerMessage(invalid)).toEqual({
+        valid: false, source: 'semantics', error: 'invalidControllerMetadata',
+      })
+    }
+
+    for (const connection of [{ type: 'vacant' }, { type: 'expired' }] as const) {
+      const invalid = structuredClone(message)
+      invalid.room.settingsEditor = 'one'
+      invalid.room.seats[0]!.occupied = false
+      invalid.room.seats[0]!.connection = connection
+      expect(validateGameplayV15ServerMessage(invalid)).toMatchObject({
+        valid: false, source: 'semantics', error: 'invalidControllerMetadata',
+      })
+    }
+  })
+
   it.each([
     ['configuration mismatch', (message: Snapshot) => { message.room.configuration.environment.stormCloud = false }],
     ['missing enabled cloud', (message: Snapshot) => { message.state.stormCloud = null }],

@@ -8,7 +8,7 @@ import { format, useGameCopy, type GameCopy } from './locale'
 import type {
   BoardSize, Difficulty, GameSettings, MatchInterruptReason, MatchResult, RoomConfiguration, RoomPhase, RoundResult,
   Seat, VisibleActorView,
-} from '../v14/schema'
+} from '../v15/schema'
 import { useGameClient } from './useGameClient'
 import { ControlsDialog } from './ControlsDialog'
 import { bindingsSummary, keyLabel } from './controlLabels'
@@ -164,7 +164,7 @@ function LobbyControls({ state, actions, copy }: { state: GameClientState; actio
   const customConfiguration = (): RoomConfiguration => {
     const hasCpu = controllers.includes('cpu')
     return {
-      controllers, cpuDifficulty: hasCpu ? difficulty : null, board,
+      controllers, cpuDifficulty: hasCpu ? difficulty : null, board, environment: { stormCloud: true },
     } as RoomConfiguration
   }
   return (

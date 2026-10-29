@@ -3,9 +3,9 @@ import { expect, test } from '@playwright/test'
 import { latestSnapshot, observeGame, visibleActor, type ObservedGame } from '../tests/support/duel'
 import { moveTo } from '../tests/support/movement'
 import { applyItemSettings } from '../tests/support/settings'
-import type { GameServerMessage } from '../../web/src/game/v14/schema'
+import type { GameServerMessage } from '../../web/src/game/v15/schema'
 
-test.beforeAll(() => expect(process.env.E2E_DIARRHEA_FIXTURE).toBe('arena-v2-diarrhea'))
+test.beforeAll(() => expect(process.env.E2E_DIARRHEA_FIXTURE).toBe('arena-v3-diarrhea'))
 
 const ticks = (game: ObservedGame) => visibleActor(latestSnapshot(game), 'one')?.effects
   .find((effect) => effect.kind === 'diarrhea')?.remainingTicks ?? 0

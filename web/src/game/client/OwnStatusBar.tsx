@@ -1,6 +1,6 @@
-import type { EffectKind, VisibleActorView } from '../v14/schema'
+import type { EffectKind, VisibleActorView } from '../v15/schema'
 import type { RenderablePickupKind } from '../arena/types'
-import { ItemIcon } from './ItemIcon'
+import { ItemIcon, StormCloudIcon } from './ItemIcon'
 import { format, type GameCopy } from './locale'
 
 const time = (ticks: number): string => {
@@ -70,6 +70,18 @@ function StatusItem({ icon, label, value, active = false, valueLabel }: {
   </div>
 }
 
+function StormStatus({ ticks, copy }: { ticks: number; copy: GameCopy }) {
+  if (ticks <= 0) return null
+  const remaining = time(ticks)
+  return <div className="own-status-item is-active storm-status">
+    <StormCloudIcon />
+    <span><small>{copy.stats.stormCloud}</small>
+      <strong aria-label={format(copy.stats.stormSlowTime, { time: remaining })}>
+        {format(copy.stats.stormSlow, { time: remaining })}
+      </strong></span>
+  </div>
+}
+
 export function OwnStatusBar({ actor, copy }: { actor: VisibleActorView; copy: GameCopy }) {
   const activeEffects = effects(actor, copy)
   return <section className="own-status-bar" aria-label={copy.ownItems.label}>
@@ -89,6 +101,7 @@ export function OwnStatusBar({ actor, copy }: { actor: VisibleActorView; copy: G
       {activeEffects.map(({ kind, label }) =>
         <StatusItem key={kind} icon={kind} label={copy.stats.effects} value={label} active />)}
       {activeEffects.length === 0 && <StatusItem label={copy.stats.effects} value={copy.stats.none} />}
+      <StormStatus ticks={actor.stormSlowRemainingTicks} copy={copy} />
       {actor.voluntaryActionsFrozen && <StatusItem icon="stopwatch" label={copy.stats.actions}
         value={copy.stats.frozen} active />}
       <StatusItem icon="heart" label={copy.stats.damageGrace}

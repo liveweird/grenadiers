@@ -2,7 +2,7 @@
 
 ## Scenario: Oil Barrel reveals, blocks, burns persistently, and resumes without synthetic cues
 
-Two Chromium contexts use the repeating-byte-31 generated-v2 fixture with only Oil Barrel enabled.
+Two Chromium contexts use pinned seed bytes through generator3 with only Oil Barrel enabled.
 Ordinary Bomb and movement input reveals the private pending site at `(3,1)`, proves its unlit
 collision edge, and ignites it without collecting an item or changing inventory. Both recipients
 observe the same burning object while finite flames expire and adjacent soft blocks remain intact.

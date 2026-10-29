@@ -105,6 +105,23 @@ pub(crate) fn mob(id: u32, position: Position) -> MobView {
 }
 
 #[test]
+fn contact_lease_rejects_a_changed_cpu_teleport_marker() {
+    let basis = observation(Vec::new(), Tick(200));
+    let envelope = MobContactEnvelope::new(&basis, &mut WorkBudget::new(100)).unwrap();
+    let lease = MobContactLease::new(envelope, Tick(150));
+    let overlay = basis.lairs().unwrap().clone();
+    let environment = basis.environment().unwrap().clone();
+    let mut parts = basis.into_parts();
+    let ObservedActor::Visible(actor) = &mut parts.actors[1] else {
+        unreachable!()
+    };
+    actor.last_teleport_tick = Some(Tick(100));
+    let changed = Observation::new_rules_v8(parts, environment, overlay).unwrap();
+
+    assert!(!lease.observation_fits(&changed, &mut WorkBudget::new(100)));
+}
+
+#[test]
 fn rules_v8_overlay_checks_layout_counts_ids_positions_and_due_zero() {
     let valid = observation(
         vec![mob(10, Position::center(CellId::new(4, 4)))],

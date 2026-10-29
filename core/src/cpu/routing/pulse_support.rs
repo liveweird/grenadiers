@@ -1,4 +1,5 @@
 use crate::cpu::forecast::{HazardForecast, TickWindow};
+use crate::cpu::lair_contact::{ContactEnvelopeError, MobContactEnvelope};
 use crate::cpu::{Observation, WorkBudget};
 use crate::game::Tick;
 use crate::game::geometry::{MovementSegment, position_overlaps_cell};
@@ -7,7 +8,38 @@ use super::motion::Motion;
 use super::pulse::PulseOriginGrace;
 use super::pulse_geometry::direction_bit;
 use super::safety::footprint_cells;
-use super::{PoseBounds, RouteFailure};
+use super::{PoseBounds, PulseRequest, RouteFailure};
+
+pub(super) fn contact_envelope(
+    observation: &Observation,
+    request: PulseRequest,
+    work: &mut WorkBudget,
+) -> Result<MobContactEnvelope, RouteFailure> {
+    let envelope = MobContactEnvelope::new(observation, work).map_err(contact_failure)?;
+    if crate::cpu::lair_contact::teleport::is_clear(
+        &envelope,
+        observation,
+        request.stopped_safe_until,
+        request.hold_ticks,
+        work,
+    )
+    .map_err(contact_failure)?
+    {
+        Ok(envelope)
+    } else {
+        Err(RouteFailure::NoRoute)
+    }
+}
+
+pub(super) fn contact_failure(error: ContactEnvelopeError) -> RouteFailure {
+    match error {
+        ContactEnvelopeError::WorkExhausted => RouteFailure::WorkExhausted,
+        ContactEnvelopeError::Capacity => RouteFailure::Capacity,
+        ContactEnvelopeError::Unsupported | ContactEnvelopeError::InvalidTime => {
+            RouteFailure::InvalidRequest
+        }
+    }
+}
 
 pub(super) fn reject_pickups(
     observation: &Observation,
@@ -17,6 +49,22 @@ pub(super) fn reject_pickups(
         segments
             .iter()
             .any(|segment| segment.overlaps_cell(pickup.cell))
+    }) {
+        Err(RouteFailure::Unsupported)
+    } else {
+        Ok(())
+    }
+}
+
+pub(super) fn reject_teleporter_pickups(
+    observation: &Observation,
+    segments: &[MovementSegment],
+) -> Result<(), RouteFailure> {
+    if observation.parts().pickups.iter().any(|pickup| {
+        pickup.kind == crate::game::PickupKind::Teleporter
+            && segments
+                .iter()
+                .any(|segment| segment.overlaps_cell(pickup.cell))
     }) {
         Err(RouteFailure::Unsupported)
     } else {

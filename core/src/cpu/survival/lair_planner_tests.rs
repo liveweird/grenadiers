@@ -2,9 +2,10 @@ use crate::cpu::forecast::ObservedHazardMemory;
 use crate::cpu::lair_contact::tests::{mob, observation};
 use crate::cpu::policy::UtilityMemory;
 use crate::cpu::{
-    CpuRng, ManualIntent, MemoryKey, MovementIntent, ObservedActor, ObservedPickup, WorkBudget,
+    CpuRng, ManualIntent, MemoryKey, MovementIntent, ObservedActor, ObservedFlame, ObservedPickup,
+    WorkBudget,
 };
-use crate::game::{CellId, PickupKind, Position, Tick};
+use crate::game::{CellId, EnabledItems, PickupKind, Position, Tick};
 
 use super::plan_lairs;
 
@@ -64,6 +65,78 @@ fn distant_pickup_does_not_throttle_a_clear_ordinary_pulse() {
     assert!(plan.survival.control.hold_ticks > 1);
     assert!(plan.survival.lease.is_some());
     assert!(plan.contact.is_some());
+}
+
+fn with_teleporter(mobs: Vec<crate::game::MobView>, cell: CellId) -> crate::cpu::Observation {
+    observation(mobs, Tick(200))
+        .map_parts(|parts| {
+            parts.rules.settings = parts
+                .rules
+                .settings
+                .with_enabled_items(EnabledItems::TELEPORTER);
+            parts.pickups.push(ObservedPickup {
+                cell,
+                kind: PickupKind::Teleporter,
+            });
+        })
+        .unwrap()
+}
+
+#[test]
+fn remote_teleporter_landing_near_a_mob_is_not_authorized() {
+    let landing = CellId::new(10, 10);
+    let observed = with_teleporter(vec![mob(10, Position::center(landing))], landing);
+    let plan = planned(&observed);
+
+    assert_eq!(plan.survival.control.intent, crate::cpu::Intent::STOP);
+    assert!(plan.contact.is_none());
+}
+
+#[test]
+fn remote_teleporter_without_reachable_mobs_keeps_playable_movement() {
+    let observed = with_teleporter(Vec::new(), CellId::new(10, 10));
+    let plan = planned(&observed);
+
+    assert_ne!(plan.survival.control.intent.movement, MovementIntent::Stop);
+    assert!(plan.contact.is_some());
+}
+
+#[test]
+fn expiring_flame_is_treated_as_a_possible_hidden_teleporter() {
+    let landing = CellId::new(10, 10);
+    let observed = observation(vec![mob(10, Position::center(landing))], Tick(200))
+        .map_parts(|parts| {
+            parts.rules.settings = parts
+                .rules
+                .settings
+                .with_enabled_items(EnabledItems::TELEPORTER);
+            parts.flames.push(ObservedFlame {
+                cell: landing,
+                remaining_ticks: 1,
+            });
+        })
+        .unwrap();
+    let plan = planned(&observed);
+
+    assert_eq!(plan.survival.control.intent, crate::cpu::Intent::STOP);
+    assert!(plan.contact.is_none());
+}
+
+#[test]
+fn adjacent_possible_teleporters_reject_unknown_chained_collection() {
+    let mut observed = with_teleporter(Vec::new(), CellId::new(10, 10));
+    observed = observed
+        .map_parts(|parts| {
+            parts.pickups.push(ObservedPickup {
+                cell: CellId::new(11, 10),
+                kind: PickupKind::Teleporter,
+            });
+        })
+        .unwrap();
+    let plan = planned(&observed);
+
+    assert_eq!(plan.survival.control.intent, crate::cpu::Intent::STOP);
+    assert!(plan.contact.is_none());
 }
 
 #[test]
@@ -156,6 +229,27 @@ fn unsafe_optional_plant_is_withheld_while_safe_movement_continues() {
     let plan = planned(&observed);
     assert_eq!(plan.survival.control.intent.manual, None);
     assert_ne!(plan.survival.control.intent.movement, MovementIntent::Stop);
+}
+
+#[test]
+fn uncertain_teleporter_reveal_withholds_plant_but_keeps_certified_movement() {
+    let observed = plant_scene(None)
+        .map_parts(|parts| {
+            parts.rules.settings = parts
+                .rules
+                .settings
+                .with_enabled_items(EnabledItems::TELEPORTER);
+            parts.flames.push(ObservedFlame {
+                cell: CellId::new(10, 10),
+                remaining_ticks: 100,
+            });
+        })
+        .unwrap();
+    let plan = planned(&observed);
+
+    assert_eq!(plan.survival.control.intent.manual, None);
+    assert_ne!(plan.survival.control.intent.movement, MovementIntent::Stop);
+    assert!(plan.contact.is_some());
 }
 
 #[test]

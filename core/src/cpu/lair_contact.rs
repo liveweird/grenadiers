@@ -6,6 +6,9 @@ use crate::room::LairConfig;
 use super::routing::{RouteCertificate, RouteFailure};
 use super::{Observation, WorkBudget};
 
+#[path = "lair_contact_teleport.rs"]
+pub(crate) mod teleport;
+
 const SPAWN_DIRECTIONS: [(i16, i16); 4] = [(0, -1), (1, 0), (0, 1), (-1, 0)];
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -33,6 +36,9 @@ struct Source {
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub(crate) struct MobContactEnvelope {
     world: super::WorldId,
+    cpu_seat: crate::game::SeatId,
+    cpu_id: EntityId,
+    last_teleport_tick: Option<Tick>,
     basis_tick: Tick,
     config: LairConfig,
     sources: Vec<Source>,
@@ -135,6 +141,19 @@ impl MobContactEnvelope {
         let observed = observation
             .lairs()
             .ok_or(ContactEnvelopeError::Unsupported)?;
+        let actor = observation
+            .parts()
+            .actors
+            .iter()
+            .find_map(|actor| match actor {
+                super::ObservedActor::Visible(actor)
+                    if actor.seat == observation.parts().recipient =>
+                {
+                    Some(actor)
+                }
+                _ => None,
+            })
+            .ok_or(ContactEnvelopeError::Unsupported)?;
         let source_count = observed
             .mobs()
             .len()
@@ -172,6 +191,9 @@ impl MobContactEnvelope {
         }
         Ok(Self {
             world: observation.parts().world,
+            cpu_seat: actor.seat,
+            cpu_id: actor.id,
+            last_teleport_tick: actor.last_teleport_tick,
             basis_tick: observation.parts().tick,
             config: observed.config(),
             sources,
@@ -232,6 +254,14 @@ impl MobContactEnvelope {
             || current.parts().tick < self.basis_tick
             || current.parts().tick >= valid_until
         {
+            return Ok(false);
+        }
+        let actor_matches = current.parts().actors.iter().any(|actor| {
+            matches!(actor, super::ObservedActor::Visible(actor)
+                if actor.seat == self.cpu_seat && actor.id == self.cpu_id
+                    && actor.last_teleport_tick == self.last_teleport_tick)
+        });
+        if !actor_matches {
             return Ok(false);
         }
         let Some(lairs) = current.lairs() else {

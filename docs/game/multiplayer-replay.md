@@ -38,6 +38,17 @@ Replay submits accepted CPU inputs without rerunning planning. Inspection includ
 environment configuration, actor timers and complete simulation RNG progress. These recorders
 remain test-only; this adds no production recording or export path.
 
+Format7 separately binds rules8, CPU19 and lair layout1, alongside the same lifecycle,
+generator selection and randomness versions. Its header retains complete lair tuning, including
+numeric choices while disabled. Atomic settings records carry base rules, clouds and tuning
+together. Mob actions are not journal entries: deterministic simulation regenerates births,
+pursuit, contacts and deaths from accepted player inputs. Exact state inspection includes mob
+positions, retreat anchors, lair deadlines, living counts and simulation randomness.
+
+Formats6/7 normalize their closed operations into the shared executor rather than duplicating
+lifecycle mechanics. Their headers and accepted source/controller identities remain distinct;
+older formats cannot claim the new rules or CPU policy.
+
 ## Exactness and resource limits
 
 Runtime inspection compares lifecycle, complete simulation state including RNG progress, pending

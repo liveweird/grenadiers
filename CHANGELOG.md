@@ -8,6 +8,8 @@
   Rust/browser conformance while keeping the live endpoint on gameplay15.
 - Add bounded CPU19 mob/spawn contact leases beside bomb escape proofs, pickup handoffs and
   conservative Teleporter landing guards, retaining closed historical policies.
+- Add atomic rules8 roster settings and private replay7 with deterministic mob reconstruction
+  from accepted player inputs, retaining closed historical replay formats.
 - Append a lair tile and four directional mob sprites without changing prior source pixels or
   atlas metadata; include validated artist guides and provenance.
 

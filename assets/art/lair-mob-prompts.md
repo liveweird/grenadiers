@@ -35,7 +35,8 @@ Use case: identity-preserve. Asset type: ONE game-ready EAST/right-facing direct
 The owner explicitly authorized Python/Canvas size, palette and transparency cleanup. Pillow
 thresholds alpha at 128, crops opaque bounds and resizes with nearest-neighbor sampling. The
 lair is normalized to 48×48 with at most 32 colors. Mob drawings retain their aspect ratios at
-33 pixels high, use a shared palette of at most 48 colors without dithering, and sit inside
+33 pixels high, use a shared palette of at most 48 colors without dithering, reserving three amber/ivory eye
+colors so rare identifying highlights survive quantization, and sit inside
 80×80 frames on foot baseline `(40, 65)`. West is a horizontal reflection of East. All source
 alpha is binary; runtime shadows and translucency are separate.
 

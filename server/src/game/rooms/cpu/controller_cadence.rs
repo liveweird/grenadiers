@@ -1,4 +1,6 @@
-use grenadiers_core::cpu::{BombKnowledge, Intent, Observation, ObservedActor, WorldId};
+use grenadiers_core::cpu::{
+    BombKnowledge, Intent, Observation, ObservedActor, WorkBudget, WorldId,
+};
 use grenadiers_core::game::{EffectKind, OilBarrelState, Tick};
 use grenadiers_core::room::CpuProfile;
 
@@ -28,7 +30,10 @@ impl CpuController {
     pub(super) fn arm_cadence_after(&mut self, accepted: &AcceptedPlan, actual: Intent) {
         if !matches!(
             self.profile,
-            CpuProfile::CURRENT_EASY | CpuProfile::MULTIPLAYER_EASY | CpuProfile::ENVIRONMENT_EASY
+            CpuProfile::CURRENT_EASY
+                | CpuProfile::MULTIPLAYER_EASY
+                | CpuProfile::ENVIRONMENT_EASY
+                | CpuProfile::LAIRS_EASY
         ) || !accepted.ordinary_navigation
             || actual.manual.is_some()
             || actual.movement == grenadiers_core::cpu::MovementIntent::Stop
@@ -45,7 +50,10 @@ impl CpuController {
     pub(super) fn observe_cadence(&mut self, observation: &Observation) {
         if !matches!(
             self.profile,
-            CpuProfile::CURRENT_EASY | CpuProfile::MULTIPLAYER_EASY | CpuProfile::ENVIRONMENT_EASY
+            CpuProfile::CURRENT_EASY
+                | CpuProfile::MULTIPLAYER_EASY
+                | CpuProfile::ENVIRONMENT_EASY
+                | CpuProfile::LAIRS_EASY
         ) || !is_clear_for_easy(observation)
         {
             self.cadence = CadenceState::default();
@@ -112,6 +120,22 @@ pub(super) fn is_clear_for_easy(observation: &Observation) -> bool {
             .oil
             .iter()
             .any(|oil| oil.state == OilBarrelState::Burning)
+    {
+        return false;
+    }
+    if observation.lairs().is_some()
+        && parts
+            .tick
+            .0
+            .checked_add(EASY_PAUSE_TICKS)
+            .map(Tick)
+            .is_none_or(|through| {
+                grenadiers_core::cpu::has_urgent_lair_threat(
+                    observation,
+                    through,
+                    &mut WorkBudget::new(65_536),
+                )
+            })
     {
         return false;
     }
@@ -283,6 +307,7 @@ mod tests {
             next_rng: controller.rng.as_ref().unwrap().clone(),
             committed_pulse: None,
             committed_route: None,
+            contact: None,
             certified_manual: None,
             escape_origin: false,
             ordinary_navigation: true,

@@ -1,14 +1,18 @@
 use std::sync::Arc;
 
 use grenadiers_core::{
+    cpu::WorldId,
     game::{EnabledItems, SeatId, SimulationSeed, StormCloudConfig},
-    protocol::{Counter, v16::ResumeToken},
-    room::{LairSettings, LairTuning, MatchPhase, RoomSettings},
+    protocol::{Counter, v16, v16::ResumeToken},
+    room::{CpuProfile, LairSettings, LairTuning, MatchPhase, RoomSettings},
 };
 
 use super::{RosterAction, RosterRuntime, RosterRuntimeError};
 use crate::{
-    game::rooms::roster_runtime::tests::{configuration, identity},
+    game::rooms::{
+        cpu::{CpuController, CpuPlanner},
+        roster_runtime::tests::{configuration, identity},
+    },
     round_seed::RoundSeedSource,
 };
 
@@ -124,4 +128,60 @@ fn lair_running_publication_and_admission_stay_rules_v8() {
     assert_eq!(value["room"]["rulesVersion"], 8);
     assert!(value["state"]["lairs"].is_array());
     assert!(value["state"]["mobs"].is_array());
+}
+
+#[test]
+fn queued_cpu19_worker_plans_the_native_v16_observation() {
+    let mut runtime = runtime(tuning(true, 5, 2));
+    admit(&mut runtime);
+    for seat in SeatId::DUEL {
+        runtime
+            .action(
+                seat,
+                1,
+                RosterAction::Ready {
+                    ready: true,
+                    settings_revision: 1,
+                },
+            )
+            .unwrap();
+    }
+    let mut notice = None;
+    for _ in 0..grenadiers_core::room::COUNTDOWN_TICKS {
+        notice = runtime.settle_boundary([None; 4]).unwrap().or(notice);
+    }
+    let planner = CpuPlanner::without_workers();
+    let mut controller = CpuController::new(
+        planner.clone(),
+        SeatId::Two,
+        7,
+        [19; 32],
+        CpuProfile::LAIRS_STANDARD,
+    );
+    let world = WorldId {
+        room_instance: 7,
+        physical_round: 1,
+    };
+    let first = v16::observe_cpu_recipient(
+        notice.unwrap().lair_cpu_publication().unwrap(),
+        v16::Seat::Two,
+        world,
+    )
+    .unwrap();
+    assert!(controller.accept_observation(&first));
+    controller.on_stop_admitted(first.parts().tick);
+
+    runtime.settle_boundary([None; 4]).unwrap();
+    let fresh_notice = runtime.publish_current().unwrap();
+    let fresh = v16::observe_cpu_recipient(
+        fresh_notice.lair_cpu_publication().unwrap(),
+        v16::Seat::Two,
+        world,
+    )
+    .unwrap();
+    assert!(controller.accept_observation(&fresh));
+    assert!(controller.submit(fresh, 1));
+    let report = planner.pump_for_test(1);
+    assert_eq!((report.delivered, report.failed), (1, 0));
+    assert!(report.work[0] <= 65_536);
 }

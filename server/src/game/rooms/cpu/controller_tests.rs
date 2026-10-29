@@ -63,6 +63,7 @@ fn inject_plan(
     sender
         .send(PlanResult {
             plan,
+            contact: None,
             basis,
             rng,
             escape_origin: None,
@@ -190,6 +191,7 @@ fn rejected_bomb_clears_prospective_escape_but_commits_rng() {
         next_rng: rng.clone(),
         committed_pulse: None,
         committed_route: None,
+        contact: None,
         certified_manual: None,
         escape_origin: false,
         ordinary_navigation: false,

@@ -44,6 +44,7 @@ impl CpuController {
         self.settled_stop_tick = None;
         self.committed_pulse = None;
         self.committed_route = None;
+        self.committed_contact = None;
         self.committed_route_epoch = None;
         self.escape_origin = None;
         self.escape_origin_epoch = None;
@@ -92,6 +93,11 @@ impl CpuController {
                 grenadiers_core::room::CpuProfile::ENVIRONMENT_STANDARD
                     | grenadiers_core::room::CpuProfile::ENVIRONMENT_EASY
             ),
+            8 => matches!(
+                self.profile,
+                grenadiers_core::room::CpuProfile::LAIRS_STANDARD
+                    | grenadiers_core::room::CpuProfile::LAIRS_EASY
+            ),
             _ => false,
         }
     }
@@ -129,6 +135,7 @@ impl CpuController {
         if actor.alive && !actor.voluntary_actions_frozen {
             self.settled_stop_tick = Some(observation.parts().tick);
             self.stop_admission = None;
+            self.committed_contact = None;
         }
     }
 

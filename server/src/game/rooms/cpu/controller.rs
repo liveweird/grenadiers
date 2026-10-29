@@ -31,6 +31,7 @@ pub(in crate::game::rooms) struct AcceptedPlan {
     next_rng: CpuRng,
     committed_pulse: Option<CommittedPulse>,
     committed_route: Option<CommittedRoute>,
+    contact: Option<grenadiers_core::cpu::MobContactLease>,
     certified_manual: Option<grenadiers_core::cpu::ManualIntent>,
     escape_origin: bool,
     ordinary_navigation: bool,
@@ -60,6 +61,7 @@ pub(in crate::game::rooms) struct CpuController {
     settled_stop_tick: Option<Tick>,
     committed_pulse: Option<CommittedPulse>,
     committed_route: Option<CommittedRoute>,
+    committed_contact: Option<grenadiers_core::cpu::MobContactLease>,
     committed_route_epoch: Option<u64>,
     escape_origin: Option<PlantEscapeOrigin>,
     escape_origin_epoch: Option<u64>,
@@ -94,6 +96,7 @@ impl CpuController {
             settled_stop_tick: None,
             committed_pulse: None,
             committed_route: None,
+            committed_contact: None,
             committed_route_epoch: None,
             escape_origin: None,
             escape_origin_epoch: None,
@@ -193,6 +196,7 @@ impl CpuController {
             .as_ref()
             .map(|_| accepted.decision.command_epoch);
         self.committed_route = accepted.committed_route;
+        self.committed_contact = accepted.contact;
         if !manual_admitted {
             match accepted.certified_manual {
                 Some(grenadiers_core::cpu::ManualIntent::Bomb) => {
@@ -315,6 +319,7 @@ impl CpuController {
             next_rng: rng,
             committed_pulse: None,
             committed_route: None,
+            contact: None,
             certified_manual: None,
             escape_origin: false,
             ordinary_navigation: false,
@@ -349,6 +354,9 @@ mod pulse;
 
 #[path = "controller_cadence.rs"]
 mod cadence;
+
+#[path = "controller_contact.rs"]
+pub(in crate::game::rooms) mod contact;
 
 #[cfg(test)]
 #[path = "controller_test_support.rs"]

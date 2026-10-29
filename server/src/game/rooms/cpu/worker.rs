@@ -9,7 +9,7 @@ use grenadiers_core::cpu::{
     CpuRng, Observation, WorkBudget,
     forecast::ObservedHazardMemory,
     policy::UtilityMemory,
-    survival::{PlantEscapeOrigin, SurvivalPlan, WORK_ALLOWANCE, plan_with_origin},
+    survival::{PlantEscapeOrigin, SurvivalPlan, WORK_ALLOWANCE, plan_lairs, plan_with_origin},
 };
 use grenadiers_core::game::Tick;
 
@@ -39,6 +39,7 @@ pub(in crate::game::rooms) struct PumpReport {
 
 pub(super) struct PlanResult {
     pub(super) plan: SurvivalPlan,
+    pub(super) contact: Option<grenadiers_core::cpu::MobContactLease>,
     pub(super) basis: Observation,
     pub(super) rng: CpuRng,
     pub(super) escape_origin: Option<PlantEscapeOrigin>,
@@ -191,15 +192,29 @@ fn execute_job(
     }
     let mut work = WorkBudget::new(WORK_ALLOWANCE);
     let started = measure.then(std::time::Instant::now);
-    let Ok(plan) = plan_with_origin(
-        &job.observation,
-        &job.memory,
-        &job.hazard_memory,
-        job.settled_stop_tick,
-        job.escape_origin.as_ref(),
-        &mut job.rng,
-        &mut work,
-    ) else {
+    let planned = if job.observation.parts().rules.version == 8 {
+        plan_lairs(
+            &job.observation,
+            &job.memory,
+            &job.hazard_memory,
+            job.settled_stop_tick,
+            &mut job.rng,
+            &mut work,
+        )
+        .map(|plan| (plan.survival, plan.contact))
+    } else {
+        plan_with_origin(
+            &job.observation,
+            &job.memory,
+            &job.hazard_memory,
+            job.settled_stop_tick,
+            job.escape_origin.as_ref(),
+            &mut job.rng,
+            &mut work,
+        )
+        .map(|plan| (plan, None))
+    };
+    let Ok((plan, contact)) = planned else {
         return (
             JobStatus::Failed,
             work.spent(),
@@ -222,6 +237,7 @@ fn execute_job(
         .result
         .try_send(PlanResult {
             plan,
+            contact,
             basis: job.observation,
             rng: job.rng,
             escape_origin,

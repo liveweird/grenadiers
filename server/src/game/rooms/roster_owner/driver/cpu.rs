@@ -5,13 +5,13 @@ use grenadiers_core::{
         survival::{PulseStatus, RouteStatus},
     },
     game::{SeatId, Tick},
-    protocol::{v14, v15},
+    protocol::{v14, v15, v16},
     room::MatchPhase,
 };
 
 use super::{Driver, fatal};
 use crate::game::rooms::{
-    cpu::AcceptedPlan,
+    cpu::{AcceptedPlan, ContactStatus},
     roster_runtime::{RosterAction, RosterRuntimeError},
 };
 
@@ -226,24 +226,31 @@ impl Driver {
             room_instance,
             physical_round,
         };
-        let observations: Option<Vec<_>> =
-            if let Some(publication) = notice.environment_cpu_publication() {
-                self.cpus
-                    .iter()
-                    .map(|cpu| {
-                        v15::observe_cpu_recipient(publication, wire_seat(cpu.seat()), world).ok()
-                    })
-                    .collect()
-            } else if let Some(publication) = notice.legacy_cpu_publication() {
-                self.cpus
-                    .iter()
-                    .map(|cpu| {
-                        v14::observe_cpu_recipient(publication, wire_seat(cpu.seat()), world).ok()
-                    })
-                    .collect()
-            } else {
-                return;
-            };
+        let observations: Option<Vec<_>> = if let Some(publication) = notice.lair_cpu_publication()
+        {
+            self.cpus
+                .iter()
+                .map(|cpu| {
+                    v16::observe_cpu_recipient(publication, wire_seat(cpu.seat()), world).ok()
+                })
+                .collect()
+        } else if let Some(publication) = notice.environment_cpu_publication() {
+            self.cpus
+                .iter()
+                .map(|cpu| {
+                    v15::observe_cpu_recipient(publication, wire_seat(cpu.seat()), world).ok()
+                })
+                .collect()
+        } else if let Some(publication) = notice.legacy_cpu_publication() {
+            self.cpus
+                .iter()
+                .map(|cpu| {
+                    v14::observe_cpu_recipient(publication, wire_seat(cpu.seat()), world).ok()
+                })
+                .collect()
+        } else {
+            return;
+        };
         let Some(observations) = observations else {
             return;
         };
@@ -252,6 +259,14 @@ impl Driver {
             let seat = self.cpus[index].seat();
             self.cpus[index].validate_escape_epoch(epoch);
             if !self.cpus[index].accept_observation(observation) {
+                continue;
+            }
+            if self.cpus[index].validate_contact(observation, observation.parts().tick)
+                == Some(ContactStatus::Invalidated)
+            {
+                if !self.cpu_stationary[seat.index()] {
+                    self.cpu_stop_at[seat.index()] = Some(self.runtime.lifecycle().tick());
+                }
                 continue;
             }
             let route = self.cpus[index].observe_route(observation);

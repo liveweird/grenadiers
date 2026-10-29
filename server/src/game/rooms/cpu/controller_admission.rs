@@ -85,7 +85,7 @@ impl CpuController {
             _ => return None,
         };
         if self.settled_stop_tick.is_none()
-            || (result.plan.execution.is_none()
+            || ((result.basis.parts().rules.version == 8 || result.plan.execution.is_none())
                 && !grenadiers_core::cpu::survival::can_admit_ordinary(&result.basis, latest))
         {
             return None;
@@ -98,6 +98,22 @@ impl CpuController {
             lease,
             execution,
         } = result.plan;
+        let contact = match result.contact {
+            Some(contact)
+                if contact.safe_until() > current_tick
+                    && contact.observation_fits(latest, &mut WorkBudget::new(65_536)) =>
+            {
+                Some(contact)
+            }
+            Some(_) => return None,
+            None if result.basis.parts().rules.version == 8
+                && (control.intent.manual.is_some()
+                    || control.intent.movement != grenadiers_core::cpu::MovementIntent::Stop) =>
+            {
+                return None;
+            }
+            None => None,
+        };
         let certified_manual = execution
             .as_ref()
             .and_then(ExecutionCertificate::manual_intent);
@@ -155,6 +171,7 @@ impl CpuController {
             next_rng: result.rng,
             committed_pulse,
             committed_route,
+            contact,
             certified_manual,
             escape_origin,
             ordinary_navigation,

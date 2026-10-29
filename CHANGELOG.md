@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+## 0.3.117 — 2026-10-29
+
+- Add checked gameplay16 lair configuration, publication, recipient observations and native
+  Rust/browser conformance while keeping the live endpoint on gameplay15.
+- Add bounded CPU19 mob/spawn contact leases beside bomb escape proofs, pickup handoffs and
+  conservative Teleporter landing guards, retaining closed historical policies.
+- Append a lair tile and four directional mob sprites without changing prior source pixels or
+  atlas metadata; include validated artist guides and provenance.
+
 ## 0.3.116 — 2026-10-29
 
 - Add dormant rules8 lairs with configurable spawn intervals and living-mob caps, deterministic

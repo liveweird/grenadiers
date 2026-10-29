@@ -16,10 +16,26 @@ pub fn project_recipient(
     recipient: Seat,
 ) -> Result<RecipientProjection, ProjectionError> {
     validate_publication(publication, recipient)?;
-    let recipient_actor = &publication.world.actors[recipient.index()].view;
+    project_facts(&publication.world, &publication.reports, recipient)
+}
+
+pub(crate) fn project_facts(
+    world: &super::projection_facts::WorldFacts,
+    reports: &[super::projection_facts::ReportFacts],
+    recipient: Seat,
+) -> Result<RecipientProjection, ProjectionError> {
+    if recipient.index() >= world.actors.len()
+        || world
+            .actors
+            .iter()
+            .enumerate()
+            .any(|(index, actor)| actor.view.seat.index() != index)
+    {
+        return Err(ProjectionError::InvalidExpandedBinding);
+    }
+    let recipient_actor = &world.actors[recipient.index()].view;
     let hides_bombs = has_effect(recipient_actor, EffectKind::InvisibleBombs);
-    let actors = publication
-        .world
+    let actors = world
         .actors
         .iter()
         .map(|facts| {
@@ -32,26 +48,24 @@ pub fn project_recipient(
                 }
             } else {
                 let mut visible = actor.clone();
-                visible.voluntary_actions_frozen =
-                    frozen_by_other(&publication.world.actors, actor.seat);
+                visible.voluntary_actions_frozen = frozen_by_other(&world.actors, actor.seat);
                 visible.clone().into()
             }
         })
         .collect();
     let state = GameState {
-        running_updates: publication.world.running_updates,
-        remaining_ticks: publication.world.remaining_ticks,
-        physical_tick: publication.world.physical_tick,
-        arena: publication.world.arena.clone(),
+        running_updates: world.running_updates,
+        remaining_ticks: world.remaining_ticks,
+        physical_tick: world.physical_tick,
+        arena: world.arena.clone(),
         actors,
         bombs: if hides_bombs {
             Vec::new()
         } else {
-            publication.world.bombs.clone()
+            world.bombs.clone()
         },
-        flames: publication.world.flames.clone(),
-        oil_barrels: publication
-            .world
+        flames: world.flames.clone(),
+        oil_barrels: world
             .oil
             .iter()
             .filter_map(|oil| {
@@ -66,10 +80,9 @@ pub fn project_recipient(
                 })
             })
             .collect(),
-        pickups: publication.world.pickups.clone(),
+        pickups: world.pickups.clone(),
     };
-    let events = publication
-        .reports
+    let events = reports
         .iter()
         .flat_map(|report| {
             report

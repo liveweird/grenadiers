@@ -25,6 +25,7 @@ async function temporaryCheckout(nested = false) {
     cp(join(import.meta.dirname, '..', '..', 'api', 'gameplay-v12.schema.json'), join(checkout, 'api', 'gameplay-v12.schema.json')),
     cp(join(import.meta.dirname, '..', '..', 'api', 'gameplay-v13.schema.json'), join(checkout, 'api', 'gameplay-v13.schema.json')),
     cp(join(import.meta.dirname, '..', '..', 'api', 'gameplay-v14.schema.json'), join(checkout, 'api', 'gameplay-v14.schema.json')),
+    cp(join(import.meta.dirname, '..', '..', 'api', 'gameplay-v15.schema.json'), join(checkout, 'api', 'gameplay-v15.schema.json')),
     cp(join(import.meta.dirname, '..', '..', 'api', 'realtime.schema.json'), join(checkout, 'api', 'realtime.schema.json')),
     cp(join(import.meta.dirname, 'validator-generator.mjs'), join(checkout, 'web', 'scripts', 'validator-generator.mjs')),
   ])
@@ -44,7 +45,7 @@ function standaloneCallWithModule(cwd, modulePath, expression, ...arguments_) {
 const result = await (${expression})(generator, ...JSON.parse(process.argv[1]));
 process.stdout.write(JSON.stringify(result));`
   const output = execFileSync(process.execPath, ['--input-type=module', '--eval', source, JSON.stringify(arguments_)], {
-    cwd, encoding: 'utf8', maxBuffer: 2 * 1024 * 1024,
+    cwd, encoding: 'utf8', maxBuffer: 4 * 1024 * 1024,
   })
   return JSON.parse(output)
 }

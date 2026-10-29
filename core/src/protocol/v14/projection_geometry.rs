@@ -8,7 +8,7 @@ pub(super) fn validate_dimensions(world: &WorldFacts) -> Result<(), ProjectionEr
     let board = BoardSize::try_from((u16::from(world.arena.width), u16::from(world.arena.height)))
         .map_err(|()| ProjectionError::InvalidArena)?;
     if world.arena.terrain.len() != board.cell_count()
-        || (world.rules_version.get() < 6 && board != BoardSize::FifteenByThirteen)
+        || (world.rules_version < 6 && board != BoardSize::FifteenByThirteen)
     {
         return Err(ProjectionError::InvalidArena);
     }

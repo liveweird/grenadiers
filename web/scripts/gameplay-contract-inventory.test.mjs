@@ -7,7 +7,7 @@ import { discoverGameplayContracts } from './gameplay-contract-inventory.mjs'
 
 const supportedFilenames = [
   'gameplay.schema.json',
-  ...Array.from({ length: 12 }, (_, index) => `gameplay-v${index + 3}.schema.json`),
+  ...Array.from({ length: 13 }, (_, index) => `gameplay-v${index + 3}.schema.json`),
 ]
 
 function metadata(filename) {
@@ -29,10 +29,10 @@ async function withContractFiles(filenames, assertion) {
   }
 }
 
-test('the repository inventory is exactly gameplay v2 through v14 in version order', async () => {
+test('the repository inventory is exactly gameplay v2 through v15 in version order', async () => {
   const contracts = await discoverGameplayContracts()
 
-  expect(contracts.map(({ version }) => version)).toEqual([2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14])
+  expect(contracts.map(({ version }) => version)).toEqual([2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15])
   expect(contracts.map(({ sourceLabel }) => sourceLabel)).toEqual(
     supportedFilenames.map((filename) => `api/${filename}`),
   )
@@ -51,10 +51,10 @@ test('a malformed gameplay contract filename is rejected', async () => {
 
 test('an unsupported gameplay contract version is rejected', async () => {
   await withContractFiles(
-    [...supportedFilenames, 'gameplay-v15.schema.json'],
+    [...supportedFilenames, 'gameplay-v16.schema.json'],
     async (apiDirectory) => {
       await expect(discoverGameplayContracts({ apiDirectory })).rejects.toThrow(
-        'Unsupported gameplay contract version 15: gameplay-v15.schema.json',
+        'Unsupported gameplay contract version 16: gameplay-v16.schema.json',
       )
     },
   )

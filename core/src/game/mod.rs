@@ -46,6 +46,7 @@ pub mod pickups;
 mod punch_geometry;
 pub mod rules;
 pub mod simulation;
+mod storm_cloud;
 #[cfg(test)]
 pub(crate) mod test_support;
 pub mod types;
@@ -77,12 +78,13 @@ pub(crate) use punch_geometry::{
     landing_candidates_for_board as punch_landing_candidates_for_board,
     landing_is_open as punch_landing_is_open,
 };
-pub use rules::RulesConfig;
+pub use rules::{RulesConfig, StormCloudConfig};
 pub(crate) use simulation::stationary_contact_entry;
 pub use simulation::{
     Actor, ActorInit, DrawReason, InputAction, RoundActorInit, RoundResult,
-    SIMULATION_RANDOMNESS_VERSION, SIMULATION_SEED_DERIVATION_VERSION, SeatInput, SimulationSeed,
-    State, StateError, StepError, StepReport,
+    SIMULATION_RANDOMNESS_VERSION, SIMULATION_SEED_DERIVATION_VERSION,
+    STORM_CLOUD_RANDOMNESS_VERSION, SeatInput, SimulationSeed, State, StateError, StepError,
+    StepReport, StormCloudView,
 };
 pub use types::{CellId, EntityId, PlayerCount, Position, SeatId, SpeedLevel, Tick};
 pub use view::{ActorView, ArenaView, BombView, FlameView, OilBarrelView, PickupView, PublicState};

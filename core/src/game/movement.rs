@@ -1,11 +1,11 @@
 pub(crate) use super::geometry::position_overlaps_cell;
 use super::geometry::{MovementSegment, MovementTrace};
-use super::input::Direction;
 pub(crate) use super::movement_collision::position_is_free;
 use super::movement_collision::{ObstacleAccess, allowed_distance, allowed_distance_with_blocker};
 use super::simulation::{Actor, TurnAssist};
 use super::types::{CellId, EntityId, Position, TICKS_PER_SECOND, UNITS_PER_CELL};
 use super::world::World;
+use super::{effects::EffectiveSpeed, input::Direction};
 use std::collections::BTreeSet;
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub(crate) struct MovementOutcome {
@@ -66,14 +66,14 @@ pub(crate) fn advance_actor(
     {
         actor.pending_turn = None;
     }
-    // Every supported base rate is divisible by 64, so all six halvings remain exact while the
-    // existing remainder continues to represent coordinate-unit sixtieths.
-    let speed = if config.slow_foot_enabled {
-        let effective = actor.effects().effective_speed(actor.speed, config.tick);
-        effective.units_per_second()
+    let slow_stacks = if config.slow_foot_enabled {
+        actor.effects().slow_foot_stacks(config.tick)
     } else {
-        actor.speed.units_per_second()
+        0
     };
+    let storm_active = actor.storm_slow_active(config.tick);
+    let speed =
+        EffectiveSpeed::from_modifiers(actor.speed, slow_stacks, storm_active).units_per_second();
     let numerator = actor.residual + speed;
     let mut budget = i32::from(numerator / TICKS_PER_SECOND);
     let original_budget = budget;

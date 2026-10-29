@@ -25,6 +25,7 @@ impl Actor {
             last_successful_punch_tick: None,
             last_successful_shove_tick: None,
             last_teleport_tick: None,
+            storm_slow_until: None,
         }
     }
 
@@ -34,7 +35,43 @@ impl Actor {
     }
 }
 
+impl Actor {
+    pub(super) fn kill(&mut self) {
+        self.alive = false;
+        self.held.clear();
+        self.residual = 0;
+        self.pending_turn = None;
+        self.inventory.clear();
+        self.soft_wall_grace.clear();
+        self.unlit_oil_grace.clear();
+        self.effects.clear();
+        self.damage_grace = None;
+        self.storm_slow_until = None;
+    }
+}
+
 impl State {
+    pub(super) fn expire_actor_effects(
+        &mut self,
+        previous_tick: crate::game::Tick,
+        tick: crate::game::Tick,
+    ) {
+        for actor in &mut self.actors {
+            let reversed_before = actor.effects.reverses_controls(previous_tick);
+            let reversed_after = actor.effects.reverses_controls(tick);
+            actor.effects.expire(tick);
+            if reversed_before != reversed_after {
+                actor.pending_turn = None;
+            }
+            if actor
+                .damage_grace
+                .is_some_and(|grace| !grace.is_active(tick))
+            {
+                actor.damage_grace = None;
+            }
+        }
+    }
+
     pub(super) fn replace_actor_equipment(&mut self, seat: SeatId, equipment: Equipment) {
         let actor = &mut self.actors[seat.index()];
         let previous = actor.inventory.equipment();

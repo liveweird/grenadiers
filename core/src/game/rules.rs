@@ -3,6 +3,12 @@ use crate::room::RoomSettings;
 
 const FORGIVING_TURN_ASSIST: i32 = 256;
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum StormCloudConfig {
+    Disabled,
+    Single,
+}
+
 /// Immutable parameters for the initial deterministic rules profile.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct RulesConfig {
@@ -20,6 +26,7 @@ pub struct RulesConfig {
     bomb_fuse_ticks: u64,
     flame_ticks: u64,
     round_ticks: u64,
+    storm_cloud_config: StormCloudConfig,
 }
 
 impl RulesConfig {
@@ -40,6 +47,7 @@ impl RulesConfig {
             bomb_fuse_ticks: 180,
             flame_ticks: 30,
             round_ticks: 10_800,
+            storm_cloud_config: StormCloudConfig::Disabled,
         }
     }
 
@@ -93,6 +101,20 @@ impl RulesConfig {
             version: 6,
             ..Self::expanded_v5(settings)
         }
+    }
+
+    #[must_use]
+    pub const fn environment_v7(settings: RoomSettings, clouds: StormCloudConfig) -> Self {
+        Self {
+            version: 7,
+            storm_cloud_config: clouds,
+            ..Self::multiplayer_v6(settings)
+        }
+    }
+
+    #[must_use]
+    pub const fn storm_cloud_config(self) -> StormCloudConfig {
+        self.storm_cloud_config
     }
 
     #[must_use]

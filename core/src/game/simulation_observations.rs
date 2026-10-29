@@ -58,6 +58,11 @@ impl Actor {
 }
 
 impl State {
+    #[must_use]
+    pub fn storm_cloud(&self) -> Option<super::StormCloudView> {
+        self.storm_cloud.as_deref().map(|cloud| cloud.view())
+    }
+
     pub(super) fn bomb_event_audience_for(&self, id: EntityId, at: Tick) -> EventAudience {
         let mut audience = self
             .actors

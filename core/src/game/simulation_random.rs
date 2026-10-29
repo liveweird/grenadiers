@@ -29,6 +29,10 @@ impl SimulationSeed {
         rng.fill_bytes(&mut bytes);
         Self(bytes)
     }
+
+    pub(crate) const fn bytes(self) -> [u8; 32] {
+        self.0
+    }
 }
 
 impl fmt::Debug for SimulationSeed {
@@ -51,6 +55,10 @@ impl SimulationRandomness {
             inner: ChaCha20Rng::from_seed(seed.0),
             words_consumed: 0,
         }
+    }
+
+    pub(super) const fn seed(&self) -> SimulationSeed {
+        self.seed
     }
 
     pub(super) fn bounded_index(&mut self, upper: usize) -> Option<usize> {

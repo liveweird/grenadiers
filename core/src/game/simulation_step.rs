@@ -64,6 +64,7 @@ impl State {
 
         let stopwatch = self.stopwatch_context(next_tick);
         self.preflight_timed_pause(&stopwatch)?;
+        let storm_expiry = self.preflight_storm_slow(next_tick)?;
 
         // Timed-pause overflow is preflight before mutation. Timed pickup collection remains
         // the only later fallible mutation, so retain a transaction snapshot only when that
@@ -75,10 +76,13 @@ impl State {
             .filter_map(|(_, kind)| kind.timed_effect())
             .any(|effect| next_tick.0.checked_add(effect.duration_ticks()).is_none())
             .then(|| self.clone());
+        let cloud_movement = self.advance_storm_cloud();
+        let mut storm_contacts = self.storm_contacts_at_start(cloud_movement);
         let mut events = Vec::new();
         let mut shield_prevented = vec![false; self.actors.len()];
         self.expire_flames(next_tick);
         self.expire_actor_effects(self.tick, next_tick);
+        self.expire_storm_slow(next_tick);
         self.apply_timed_pause(&stopwatch);
         self.world.expose_flame_free_pickups(next_tick);
         self.reveal_safe_oil(next_tick);
@@ -102,6 +106,7 @@ impl State {
             .collect();
         self.resolve_kick_requests(kick_requests);
         let forced_movements = self.resolve_shove(&outcomes, next_tick);
+        self.include_storm_movement_contacts(&mut storm_contacts, &traces, &forced_movements);
         let contact_targets = super::contacts::accepted_contact_ids(
             &self.world,
             &traces,
@@ -137,6 +142,8 @@ impl State {
             }
         };
         self.commit_teleport(teleport_requests, next_tick);
+        self.include_storm_endpoint_contacts(&mut storm_contacts);
+        self.apply_storm_contacts(&storm_contacts, storm_expiry);
         self.running_updates += 1;
         if let Some(result) = self.decide_result() {
             events.push(StepEvent::new(
@@ -268,23 +275,6 @@ impl State {
         }
     }
 
-    fn expire_actor_effects(&mut self, previous_tick: Tick, tick: Tick) {
-        for actor in &mut self.actors {
-            let reversed_before = actor.effects.reverses_controls(previous_tick);
-            let reversed_after = actor.effects.reverses_controls(tick);
-            actor.effects.expire(tick);
-            if reversed_before != reversed_after {
-                actor.pending_turn = None;
-            }
-            if actor
-                .damage_grace
-                .is_some_and(|grace| !grace.is_active(tick))
-            {
-                actor.damage_grace = None;
-            }
-        }
-    }
-
     fn damage_actor(
         &mut self,
         index: usize,
@@ -364,6 +354,9 @@ impl State {
             }
             (Some(_), Some(_)) => None,
         };
+        if self.result.is_some() {
+            self.clear_storm_slow();
+        }
         self.result
     }
 
@@ -378,18 +371,4 @@ impl State {
 #[cfg(test)]
 pub(crate) fn trace_hits_hazards(trace: &MovementTrace, hazards: &BTreeMap<CellId, Tick>) -> bool {
     hazards.keys().any(|cell| trace.overlaps_cell(*cell))
-}
-
-impl super::Actor {
-    pub(super) fn kill(&mut self) {
-        self.alive = false;
-        self.held.clear();
-        self.residual = 0;
-        self.pending_turn = None;
-        self.inventory.clear();
-        self.soft_wall_grace.clear();
-        self.unlit_oil_grace.clear();
-        self.effects.clear();
-        self.damage_grace = None;
-    }
 }

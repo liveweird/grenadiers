@@ -73,6 +73,7 @@ pub enum StepError {
     UnsupportedEquipmentAction,
     EffectExpiryOverflow(EffectKind),
     BombPauseOverflow(EntityId),
+    StormSlowExpiryOverflow,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]

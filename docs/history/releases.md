@@ -4,6 +4,39 @@ This archive preserves the older release records originally maintained in
 [`docs/releases.md`](../releases.md). Records remain in their original order; the current
 release procedure and current release record stay in the [release guide](../releases.md).
 
+## v0.3.116 — 2026-10-29 — Dormant lair core
+
+Rules8 adds a headless lair/mob simulation: two indestructible pillar overlays, configurable
+spawn intervals and living caps, deterministic bounded pursuit and shared bomb avoidance.
+NPC contact composes with Shield/Heart, Bracelet and teleport destinations. Mines, flames,
+Oil and Stopwatch use the established physics; checked exhaustion rolls back the whole state.
+Public layout/speed facts support later consumers. See the [core guide](../game/lairs.md).
+
+This release keeps live gameplay15/rules7/CPU18. Lairs do not appear in the running application;
+paired contracts, CPU19, server integration and rendering remain in the [backlog](../../BACKLOG.md).
+Old rules constructors, public actor/state DTOs, generation streams and replay contracts remain
+closed. The canonical artwork and [v0.3.115 artist bundle](https://github.com/liveweird/grenadiers/releases/download/v0.3.115/grenadiers-storm-art-v0.3.115.zip)
+are unchanged.
+
+Accepted source `568dbd643916379d48172c1e1a0c2d2219416c17`, tree
+`682b7e33ba0276b1c10de8c8bb80c8b855436c50`, image
+`sha256:421c64ff0f614f5d37c2a595dda50d8c3baf4c0211390fad877c7d48b41bc7da`.
+The complete parallel Rust gate passes in 543.855s: **39,447/42,814 lines (92.1357%)**.
+All 4,194,304 item masks ran separately in debug, release and fresh coverage across 32 partitions
+with four workers, zero retries and 37 raw profiles. Official LCOV was preserved before releasing
+the source/cache freeze. Navigation and damage reviews are clear after regressions for crossed
+cell retreat, Oil reveal, forced-contact ordering, teleport geometry and seeded rollback.
+
+Unchanged frontend acceptance reuses v0.3.115's full web/atlas checks; exact final-image
+HTML/JS/CSS/PNG bytes match that accepted source. Compose and restricted Kubernetes each pass
+19 native regression cases (3.7m/3.8m) on distinct ports, including all board/controller presets,
+cloud gameplay, recovery, rematch and seat replacement. Security/probes/resources, zero restarts
+and scoped cleanup pass. Pinned Trivy 0.74.0 reports zero fixable HIGH/CRITICAL findings. Distinct
+Linux [run 40949621106](https://github.com/liveweird/grenadiers/actions/runs/40949621106) passes.
+
+This source prerelease has an accepted local image. Promotion retains v0.3.115 for rollback;
+restarting ends process-local matches. Production replay recording/export remains disabled.
+
 ## v0.3.115 — 2026-10-29 — Storm cloud gameplay
 
 The roaming storm cloud is live: it crosses terrain and bombs, and contact refreshes a

@@ -2,6 +2,7 @@ mod admission;
 mod client;
 mod configuration;
 mod projection;
+mod room_validation;
 mod server;
 mod settings;
 mod state;

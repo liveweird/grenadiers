@@ -60,7 +60,7 @@ impl RosterRuntime {
         let current = self
             .environment
             .ok_or(RosterRuntimeError::UnsupportedConfiguration)?;
-        if self.lifecycle.settings_editor() != Some(seat) {
+        if self.settings_locked || self.lifecycle.settings_editor() != Some(seat) {
             return Err(RosterRuntimeError::SettingsLocked);
         }
         if expected != self.settings_revision {

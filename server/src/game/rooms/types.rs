@@ -1,7 +1,7 @@
-use grenadiers_core::{
-    protocol::{RoomCode, RoomId},
-    room::RoomMode,
-};
+#[cfg(test)]
+use grenadiers_core::protocol::{RoomCode, RoomId};
+#[cfg(test)]
+use grenadiers_core::room::RoomMode;
 use tokio::sync::oneshot;
 
 use super::super::sessions::ConnectionId;
@@ -37,6 +37,7 @@ impl Drop for DepartureGuard {
 }
 
 #[derive(Clone)]
+#[cfg(test)]
 pub(super) struct RoomIdentity {
     pub(super) id: RoomId,
     pub(super) code: RoomCode,

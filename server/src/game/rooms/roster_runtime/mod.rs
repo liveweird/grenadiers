@@ -27,6 +27,8 @@ mod boundary_tests;
 #[cfg(test)]
 mod environment_recovery_tests;
 #[cfg(test)]
+mod environment_settings_tests;
+#[cfg(test)]
 mod replacement_tests;
 #[cfg(test)]
 mod tests;

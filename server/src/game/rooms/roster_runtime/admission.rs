@@ -85,10 +85,34 @@ impl PreparedRosterAdmission {
         .map_err(|_| RosterRuntimeError::Publication)
     }
 
+    #[cfg(test)]
     pub(in crate::game::rooms) fn legacy_room(&self) -> Option<&v14::RoomView> {
         match &self.projection {
             PreparedProjection::Legacy { room, .. } => Some(room),
             PreparedProjection::Environment { .. } => None,
+        }
+    }
+
+    pub(in crate::game::rooms) fn room_metadata(
+        &self,
+    ) -> (&grenadiers_core::protocol::RoomId, u64) {
+        match &self.projection {
+            PreparedProjection::Legacy { room, .. } => {
+                (&room.room_id, u64::from(room.round_id.get()))
+            }
+            PreparedProjection::Environment { room, .. } => {
+                (&room.room_id, u64::from(room.round_id.get()))
+            }
+        }
+    }
+
+    #[cfg(test)]
+    pub(in crate::game::rooms) fn test_metadata(
+        &self,
+    ) -> (&grenadiers_core::protocol::RoomCode, u32) {
+        match &self.projection {
+            PreparedProjection::Legacy { room, .. } => (&room.room_code, room.revision.get()),
+            PreparedProjection::Environment { room, .. } => (&room.room_code, room.revision.get()),
         }
     }
 

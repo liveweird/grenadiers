@@ -1,9 +1,11 @@
 use std::sync::Arc;
 
+#[cfg(test)]
+use grenadiers_core::room::RoomSettings;
 use grenadiers_core::{
     game::{Direction, SeatId},
     protocol::{RoomCode, RoomId, v14, v15},
-    room::{RoomConfiguration, RoomSettings},
+    room::RoomConfiguration,
 };
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -20,6 +22,7 @@ pub(crate) enum RosterAction {
         ready: bool,
         settings_revision: u32,
     },
+    #[cfg(test)]
     UpdateSettings {
         settings_revision: u32,
         settings: RoomSettings,

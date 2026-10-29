@@ -1,15 +1,16 @@
 use grenadiers_core::protocol::{Counter, RoomId, v14::ResumeToken};
 
+#[cfg(test)]
+use super::super::{match_owner::MatchOwnerHandle, match_runtime::MatchAction};
+
 use super::{
-    super::{
-        BindingKey, RoomError, match_owner::MatchOwnerHandle, match_runtime::MatchAction,
-        roster_owner::RosterOwnerHandle, roster_runtime::RosterAction,
-    },
+    super::{BindingKey, RoomError, roster_owner::RosterOwnerHandle, roster_runtime::RosterAction},
     LiveAdmission,
 };
 
 #[derive(Clone)]
 pub(in crate::game::rooms) enum LiveOwner {
+    #[cfg(test)]
     Legacy(MatchOwnerHandle),
     Roster(RosterOwnerHandle),
 }
@@ -30,6 +31,7 @@ impl LiveOwner {
         sequence: Counter,
     ) -> Result<LiveAdmission, RoomError> {
         match self {
+            #[cfg(test)]
             Self::Legacy(value) => {
                 let response = if creator {
                     value.admit_creator(binding, sequence)
@@ -63,6 +65,7 @@ impl LiveOwner {
         token: ResumeToken,
     ) -> Result<LiveAdmission, RoomError> {
         match self {
+            #[cfg(test)]
             Self::Legacy(value) => value
                 .resume(binding, sequence, room_id, token)
                 .await
@@ -84,12 +87,30 @@ impl LiveOwner {
         action: RosterAction,
     ) -> Result<(), RoomError> {
         match self {
+            #[cfg(test)]
             Self::Legacy(value) => value
                 .action(binding, room_id, round_id, legacy_action(action))
                 .await
                 .unwrap_or(Err(RoomError::RoomNotFound)),
             Self::Roster(value) => value
                 .action(binding, room_id, round_id, action)
+                .await
+                .unwrap_or(Err(RoomError::RoomNotFound)),
+        }
+    }
+
+    pub(in crate::game::rooms) async fn environment_settings(
+        &self,
+        binding: BindingKey,
+        room_id: RoomId,
+        round_id: u64,
+        action: super::super::live_registry::EnvironmentSettingsAction,
+    ) -> Result<(), RoomError> {
+        match self {
+            #[cfg(test)]
+            Self::Legacy(_) => Err(RoomError::UnsupportedConfiguration),
+            Self::Roster(value) => value
+                .environment_settings(binding, room_id, round_id, action)
                 .await
                 .unwrap_or(Err(RoomError::RoomNotFound)),
         }
@@ -102,6 +123,7 @@ impl LiveOwner {
         round_id: u64,
     ) -> Result<(), RoomError> {
         match self {
+            #[cfg(test)]
             Self::Legacy(value) => value
                 .leave(binding, room_id, round_id)
                 .await
@@ -114,6 +136,7 @@ impl LiveOwner {
     }
 }
 
+#[cfg(test)]
 fn legacy_action(action: RosterAction) -> MatchAction {
     match action {
         RosterAction::Ready {

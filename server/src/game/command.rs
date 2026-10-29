@@ -1,5 +1,5 @@
-use grenadiers_core::protocol::v14::{
-    GameClientMessage, GameSettings, ManualActionKind, ResumeToken,
+use grenadiers_core::protocol::v15::{
+    GameClientMessage, ManualActionKind, ResumeToken, RoomSettings,
 };
 use grenadiers_core::protocol::{
     Counter, Direction, ProtocolVersionInput, RoomCode, RoomId, SessionToken,
@@ -30,7 +30,7 @@ impl SequencedCommand {
 
 pub(super) enum Command {
     CreateRoom {
-        configuration: grenadiers_core::room::RoomConfiguration,
+        configuration: grenadiers_core::room::EnvironmentRoomConfiguration,
     },
     JoinRoom {
         room_code: RoomCode,
@@ -49,7 +49,7 @@ pub(super) enum Command {
         room_id: RoomId,
         round_id: Counter,
         settings_revision: Counter,
-        settings: GameSettings,
+        settings: RoomSettings,
     },
     Movement {
         room_id: RoomId,
@@ -91,7 +91,7 @@ impl From<GameClientMessage> for InboundMessage {
             } => (
                 sequence,
                 Command::CreateRoom {
-                    configuration: *configuration.domain(),
+                    configuration: configuration.domain().clone(),
                 },
             ),
             GameClientMessage::JoinRoom {
@@ -192,7 +192,7 @@ impl From<GameClientMessage> for InboundMessage {
 
 #[cfg(test)]
 mod tests {
-    use grenadiers_core::protocol::v14::parse_client_message;
+    use grenadiers_core::protocol::v15::parse_client_message;
 
     use super::{Command, InboundMessage};
 
@@ -203,7 +203,7 @@ mod tests {
             ("standard", grenadiers_core::room::CpuDifficulty::Standard),
         ] {
             let message = parse_client_message(&format!(
-                r#"{{"type":"createRoom","sequence":1,"configuration":{{"controllers":["human","cpu"],"cpuDifficulty":"{difficulty}","board":{{"width":15,"height":13}}}}}}"#
+                r#"{{"type":"createRoom","sequence":1,"configuration":{{"controllers":["human","cpu"],"cpuDifficulty":"{difficulty}","board":{{"width":15,"height":13}},"environment":{{"stormCloud":true}}}}}}"#
             ))
             .unwrap();
             let InboundMessage::Command(command) = InboundMessage::from(message) else {
@@ -214,7 +214,10 @@ mod tests {
             };
             assert_eq!(
                 configuration,
-                grenadiers_core::room::RoomConfiguration::solo(expected)
+                grenadiers_core::room::EnvironmentRoomConfiguration::new(
+                    grenadiers_core::room::RoomConfiguration::solo(expected),
+                    grenadiers_core::game::StormCloudConfig::Single,
+                )
             );
         }
     }

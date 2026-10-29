@@ -11,61 +11,80 @@ async fn all_board_and_count_profiles_dispatch_to_the_required_owner() {
         BoardSize::FifteenByThirteen,
     ] {
         for count in 2..=4 {
-            let admission = rooms
-                .create_live(
-                    binding(connection),
-                    sequence(1),
-                    now + std::time::Duration::from_millis((connection - 100) * 125),
-                    configuration_on(&vec![SeatControl::Human; count], None, board),
-                )
-                .await
-                .unwrap();
-            let legacy = count == 2 && board == BoardSize::FifteenByThirteen;
-            assert_eq!(matches!(admission, LiveAdmission::Legacy(_)), legacy);
-            assert_eq!(
-                personal(&admission)["room"]["rulesVersion"],
-                if legacy { 5 } else { 6 }
-            );
-            let (width, height) = board.dimensions();
-            assert_eq!(
-                personal(&admission)["room"]["configuration"]["board"],
-                serde_json::json!({ "width": width, "height": height })
-            );
-            connection += 1;
+            for environment in [StormCloudConfig::Disabled, StormCloudConfig::Single] {
+                let admission = rooms
+                    .create_live(
+                        binding(connection),
+                        sequence(1),
+                        now + std::time::Duration::from_millis((connection - 100) * 125),
+                        configuration_on_environment(
+                            &vec![SeatControl::Human; count],
+                            None,
+                            board,
+                            environment,
+                        ),
+                    )
+                    .await
+                    .unwrap();
+                assert!(matches!(admission, LiveAdmission::Roster(_)));
+                assert_eq!(personal(&admission)["room"]["rulesVersion"], 7);
+                assert_eq!(
+                    personal(&admission)["room"]["settings"]["environment"]["stormCloud"],
+                    environment == StormCloudConfig::Single
+                );
+                let (width, height) = board.dimensions();
+                assert_eq!(
+                    personal(&admission)["room"]["configuration"]["board"],
+                    serde_json::json!({ "width": width, "height": height })
+                );
+                connection += 1;
+            }
         }
     }
 }
 
 #[tokio::test]
-async fn small_two_player_cpu_rooms_use_policy_seventeen_roster_for_both_difficulties() {
+async fn every_cpu_board_and_count_uses_policy_eighteen_for_both_environments() {
     let now = std::time::Instant::now();
-    let rooms = rooms(now);
-    for (index, difficulty) in [CpuDifficulty::Easy, CpuDifficulty::Standard]
-        .into_iter()
-        .enumerate()
-    {
-        let admission = rooms
-            .create_live(
-                binding(index as u64 + 1),
-                sequence(1),
-                now + std::time::Duration::from_millis(index as u64 * 125),
-                configuration_on(
-                    &[SeatControl::Human, SeatControl::Cpu],
-                    Some(difficulty),
-                    BoardSize::ElevenByNine,
-                ),
-            )
-            .await
-            .unwrap();
-        assert!(matches!(admission, LiveAdmission::Roster(_)));
-        assert_eq!(personal(&admission)["room"]["rulesVersion"], 6);
-        assert_eq!(
-            personal(&admission)["room"]["configuration"]["cpuDifficulty"],
-            match difficulty {
-                CpuDifficulty::Easy => "easy",
-                CpuDifficulty::Standard => "standard",
+    let mut index = 0_u64;
+    for board in [
+        BoardSize::ElevenByNine,
+        BoardSize::ThirteenByEleven,
+        BoardSize::FifteenByThirteen,
+    ] {
+        let rooms = rooms(now);
+        for count in 2..=4 {
+            for environment in [StormCloudConfig::Disabled, StormCloudConfig::Single] {
+                for difficulty in [CpuDifficulty::Easy, CpuDifficulty::Standard] {
+                    let mut controllers = vec![SeatControl::Human; count];
+                    controllers[count - 1] = SeatControl::Cpu;
+                    let admission = rooms
+                        .create_live(
+                            binding(index + 1),
+                            sequence(1),
+                            now + std::time::Duration::from_millis(index * 125),
+                            configuration_on_environment(
+                                &controllers,
+                                Some(difficulty),
+                                board,
+                                environment,
+                            ),
+                        )
+                        .await
+                        .unwrap();
+                    assert!(matches!(admission, LiveAdmission::Roster(_)));
+                    assert_eq!(personal(&admission)["room"]["rulesVersion"], 7);
+                    assert_eq!(
+                        personal(&admission)["room"]["configuration"]["cpuDifficulty"],
+                        match difficulty {
+                            CpuDifficulty::Easy => "easy",
+                            CpuDifficulty::Standard => "standard",
+                        }
+                    );
+                    index += 1;
+                }
             }
-        );
+        }
     }
 }
 

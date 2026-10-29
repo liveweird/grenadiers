@@ -10,6 +10,7 @@ use tokio::{
 };
 
 use super::super::{
+    ClosingReason,
     match_runtime::{MatchAction, MatchNotice, MatchRuntimeError},
     resume::{BindingFence, ResumeCredential},
     types::{BindingKey, DepartureGuard, RoomError, RoomIdentity},
@@ -20,14 +21,6 @@ use std::sync::Arc;
 pub(super) const COMMAND_CAPACITY: usize = 32;
 pub(in crate::game::rooms) type ShutdownState = bool;
 pub(super) type Reply<T> = oneshot::Receiver<Result<T, RoomError>>;
-
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub(crate) enum ClosingReason {
-    Expired,
-    Retired,
-    ServerStopped,
-    InternalFailure,
-}
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub(crate) enum MatchOwnerNotice {
@@ -160,6 +153,8 @@ impl PreparedMatchOwner {
         )
     }
 
+    #[cfg(test)]
+    #[allow(dead_code)]
     pub(in crate::game::rooms) fn new_live14_with_planner(
         identity: RoomIdentity,
         created_at: Instant,

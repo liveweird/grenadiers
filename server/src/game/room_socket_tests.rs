@@ -54,7 +54,7 @@ async fn connect(url: &str, token: &str) -> ClientSocket {
     send(
         &mut socket,
         json!({
-            "type":"authenticate", "protocolVersion":14, "token":token
+            "type":"authenticate", "protocolVersion":15, "token":token
         }),
     )
     .await;
@@ -94,12 +94,12 @@ async fn two_members_receive_personalized_admission_and_live_waiting_updates() {
 
     send(
         &mut one,
-        json!({"type":"createRoom", "sequence":1, "configuration":{"controllers":["human","human"],"cpuDifficulty":null,"board":{"width":15,"height":13}}}),
+        json!({"type":"createRoom", "sequence":1, "configuration":{"controllers":["human","human"],"cpuDifficulty":null,"board":{"width":15,"height":13},"environment":{"stormCloud":true}}}),
     )
     .await;
     let created = next(&mut one).await;
     assert_eq!(created["youSeat"], "one");
-    assert_eq!(created["room"]["revision"], 2);
+    assert_eq!(created["room"]["revision"], 3);
     assert_eq!(created["room"]["roundNumber"], 0);
     assert_eq!(
         created["room"]["scores"],
@@ -108,7 +108,7 @@ async fn two_members_receive_personalized_admission_and_live_waiting_updates() {
     assert!(created["room"]["lastRound"].is_null());
     assert_eq!(created["room"]["phase"]["type"], "waiting");
     assert_eq!(created["room"]["seats"][0]["occupied"], true);
-    assert_eq!(created["room"]["rulesVersion"], 5);
+    assert_eq!(created["room"]["rulesVersion"], 7);
     assert_eq!(created["room"]["settingsRevision"], 1);
     assert_eq!(created["room"]["settingsEditor"], "one");
     let available_items = created["room"]["availableItems"].clone();
@@ -116,7 +116,8 @@ async fn two_members_receive_personalized_admission_and_live_waiting_updates() {
         created["room"]["settings"],
         json!({
             "startingSpeedLevel":0, "turnAssistUnits":256,
-            "winsToFinish":3, "bombFuseTicks":180, "enabledItems":available_items.clone()
+            "winsToFinish":3, "bombFuseTicks":180, "enabledItems":available_items.clone(),
+            "environment":{"stormCloud":true}
         })
     );
     assert_eq!(
@@ -157,7 +158,7 @@ async fn two_members_receive_personalized_admission_and_live_waiting_updates() {
     .await;
     let joined = next(&mut two).await;
     assert_eq!(joined["youSeat"], "two");
-    assert_eq!(joined["room"]["revision"], 3);
+    assert_eq!(joined["room"]["revision"], 4);
     assert_eq!(joined["room"]["seats"][0]["occupied"], true);
     assert_eq!(joined["room"]["seats"][1]["occupied"], true);
     let update = next(&mut one).await;
@@ -166,7 +167,8 @@ async fn two_members_receive_personalized_admission_and_live_waiting_updates() {
 
     let settings = json!({
         "startingSpeedLevel":2, "turnAssistUnits":64,
-        "winsToFinish":2, "bombFuseTicks":90, "enabledItems":[]
+        "winsToFinish":2, "bombFuseTicks":90, "enabledItems":[],
+        "environment":{"stormCloud":false}
     });
     send(
         &mut two,
@@ -257,7 +259,7 @@ async fn two_members_receive_personalized_admission_and_live_waiting_updates() {
 }
 
 #[tokio::test]
-async fn binding_checks_precede_placeholder_phase_and_leave_allows_rejoin() {
+async fn binding_checks_precede_phase_and_leave_fences_departed_credentials() {
     let state = AppState::without_database([ORIGIN.to_owned()]);
     let tokens = [issue_token(&state), issue_token(&state)];
     let (url, server) = start_server(state).await;
@@ -266,7 +268,7 @@ async fn binding_checks_precede_placeholder_phase_and_leave_allows_rejoin() {
 
     send(
         &mut owner,
-        json!({"type":"createRoom", "sequence":1, "configuration":{"controllers":["human","human"],"cpuDifficulty":null,"board":{"width":15,"height":13}}}),
+        json!({"type":"createRoom", "sequence":1, "configuration":{"controllers":["human","human"],"cpuDifficulty":null,"board":{"width":15,"height":13},"environment":{"stormCloud":true}}}),
     )
     .await;
     let created = next(&mut owner).await;
@@ -288,7 +290,7 @@ async fn binding_checks_precede_placeholder_phase_and_leave_allows_rejoin() {
     )
     .await;
     assert_eq!(next(&mut unbound).await["youSeat"], "two");
-    assert_eq!(next(&mut owner).await["room"]["revision"], 3);
+    assert_eq!(next(&mut owner).await["room"]["revision"], 4);
 
     send(
         &mut owner,
@@ -307,21 +309,20 @@ async fn binding_checks_precede_placeholder_phase_and_leave_allows_rejoin() {
     )
     .await;
     assert_eq!(next(&mut owner).await["type"], "leftRoom");
-    assert_eq!(next(&mut unbound).await["room"]["revision"], 4);
+    assert_eq!(next(&mut unbound).await["room"]["revision"], 5);
 
     send(
         &mut owner,
         json!({"type":"joinRoom", "sequence":4, "roomCode":code}),
     )
     .await;
-    assert_eq!(next(&mut owner).await["youSeat"], "one");
-    assert_eq!(next(&mut unbound).await["room"]["revision"], 5);
+    assert_eq!(next(&mut owner).await["code"], "roomFull");
     send(
         &mut owner,
-        json!({"type":"createRoom", "sequence":5, "configuration":{"controllers":["human","human"],"cpuDifficulty":null,"board":{"width":15,"height":13}}}),
+        json!({"type":"createRoom", "sequence":5, "configuration":{"controllers":["human","human"],"cpuDifficulty":null,"board":{"width":15,"height":13},"environment":{"stormCloud":true}}}),
     )
     .await;
-    assert_eq!(next(&mut owner).await["code"], "alreadyInRoom");
+    assert_eq!(next(&mut owner).await["type"], "admitted");
     server.abort();
 }
 
@@ -333,7 +334,7 @@ async fn connected_resume_replaces_old_socket_with_private_admission_and_close_4
     let mut original = connect(&url, &tokens[0]).await;
     send(
         &mut original,
-        json!({"type":"createRoom", "sequence":1, "configuration":{"controllers":["human","human"],"cpuDifficulty":null,"board":{"width":15,"height":13}}}),
+        json!({"type":"createRoom", "sequence":1, "configuration":{"controllers":["human","human"],"cpuDifficulty":null,"board":{"width":15,"height":13},"environment":{"stormCloud":true}}}),
     )
     .await;
     let created = next(&mut original).await;

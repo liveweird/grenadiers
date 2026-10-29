@@ -26,6 +26,7 @@ pub(in crate::game::rooms) struct RosterRuntime {
     pub(super) lifecycle: RosterMatchLifecycle,
     pub(super) revision: u32,
     pub(super) settings_revision: u32,
+    pub(super) settings_locked: bool,
     pub(super) round_seed_source: RoundSeedSource,
     pub(super) simulation_seed: Arc<SimulationSeedDerivation>,
     pub(super) inputs: InputMailbox,
@@ -56,6 +57,7 @@ impl RosterRuntime {
             identity,
             revision: 1,
             settings_revision: 1,
+            settings_locked: false,
             round_seed_source,
             simulation_seed,
             sim: None,
@@ -101,6 +103,7 @@ impl RosterRuntime {
                 let change = self.lifecycle.set_ready(seat, ready).map_err(lifecycle)?;
                 self.notice_for(change.change(), false)
             }
+            #[cfg(test)]
             RosterAction::UpdateSettings {
                 settings_revision,
                 settings,
@@ -282,13 +285,14 @@ impl RosterRuntime {
             .flatten())
     }
 
+    #[cfg(test)]
     fn update_settings(
         &mut self,
         seat: SeatId,
         expected: u32,
         settings: RoomSettings,
     ) -> Result<Option<RosterNotice>, RosterRuntimeError> {
-        if self.lifecycle.settings_editor() != Some(seat) {
+        if self.settings_locked || self.lifecycle.settings_editor() != Some(seat) {
             return Err(RosterRuntimeError::SettingsLocked);
         }
         if expected != self.settings_revision {

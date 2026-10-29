@@ -15,6 +15,7 @@ impl RosterRuntime {
         &mut self,
         assignment: RoundAssignment,
     ) -> Result<(), RosterRuntimeError> {
+        self.settings_locked = true;
         let generation_seed = self
             .round_seed_source
             .next_seed()

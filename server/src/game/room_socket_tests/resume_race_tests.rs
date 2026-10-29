@@ -45,7 +45,7 @@ async fn concurrent_wire_resumes_commit_serially_and_the_last_admission_owns_the
     let mut replacement_b = connect(&url, &tokens[2]).await;
     send(
         &mut original,
-        json!({"type":"createRoom", "sequence":1, "configuration":{"controllers":["human","human"],"cpuDifficulty":null,"board":{"width":15,"height":13}}}),
+        json!({"type":"createRoom", "sequence":1, "configuration":{"controllers":["human","human"],"cpuDifficulty":null,"board":{"width":15,"height":13},"environment":{"stormCloud":true}}}),
     )
     .await;
     let created = next(&mut original).await;

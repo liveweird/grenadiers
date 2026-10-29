@@ -4,9 +4,11 @@ use std::sync::{
 };
 
 use grenadiers_core::{
-    game::SeatId,
+    game::{SeatId, StormCloudConfig},
     protocol::{Counter, v14},
-    room::{BoardSize, CpuDifficulty, RoomConfiguration, SeatControl},
+    room::{
+        BoardSize, CpuDifficulty, EnvironmentRoomConfiguration, RoomConfiguration, SeatControl,
+    },
 };
 
 use super::{BindingKey, GameRooms, LiveAdmission, LiveDelivery, RoomError};
@@ -45,7 +47,10 @@ fn sequence(value: u32) -> Counter {
     Counter::new(value).unwrap()
 }
 
-fn configuration(controls: &[SeatControl], difficulty: Option<CpuDifficulty>) -> RoomConfiguration {
+fn configuration(
+    controls: &[SeatControl],
+    difficulty: Option<CpuDifficulty>,
+) -> EnvironmentRoomConfiguration {
     configuration_on(controls, difficulty, BoardSize::FifteenByThirteen)
 }
 
@@ -53,8 +58,20 @@ fn configuration_on(
     controls: &[SeatControl],
     difficulty: Option<CpuDifficulty>,
     board: BoardSize,
-) -> RoomConfiguration {
-    RoomConfiguration::new(controls, difficulty, board).unwrap()
+) -> EnvironmentRoomConfiguration {
+    configuration_on_environment(controls, difficulty, board, StormCloudConfig::Single)
+}
+
+fn configuration_on_environment(
+    controls: &[SeatControl],
+    difficulty: Option<CpuDifficulty>,
+    board: BoardSize,
+    environment: StormCloudConfig,
+) -> EnvironmentRoomConfiguration {
+    EnvironmentRoomConfiguration::new(
+        RoomConfiguration::new(controls, difficulty, board).unwrap(),
+        environment,
+    )
 }
 
 fn personal(admission: &LiveAdmission) -> serde_json::Value {
@@ -72,7 +89,7 @@ fn token(admission: &LiveAdmission) -> v14::ResumeToken {
 }
 
 #[tokio::test]
-async fn two_player_live_rooms_use_v14_legacy_owner_for_duel_and_solo() {
+async fn two_player_live_rooms_use_v15_environment_roster_for_duel_and_solo() {
     let now = std::time::Instant::now();
     let rooms = rooms(now);
     let duel = rooms
@@ -86,7 +103,19 @@ async fn two_player_live_rooms_use_v14_legacy_owner_for_duel_and_solo() {
         .unwrap();
     assert_eq!(duel.seat(), SeatId::One);
     assert_eq!(duel.room_id().as_str(), "123456789abcdef00000000000000001");
-    assert_eq!(personal(&duel)["room"]["rulesVersion"], 5);
+    assert!(matches!(duel, LiveAdmission::Roster(_)));
+    assert_eq!(personal(&duel)["room"]["rulesVersion"], 7);
+    assert_eq!(
+        personal(&duel)["room"]["settings"]["enabledItems"]
+            .as_array()
+            .unwrap()
+            .len(),
+        22
+    );
+    assert_eq!(
+        personal(&duel)["room"]["settings"]["environment"]["stormCloud"],
+        true
+    );
     assert_eq!(
         personal(&duel)["room"]["configuration"]["controllers"]
             .as_array()
@@ -146,7 +175,7 @@ async fn three_and_four_player_rosters_admit_only_human_seats_and_resume_private
         .await
         .unwrap();
     let code = match &first {
-        LiveAdmission::Roster(value) => value.room.room_code.clone(),
+        LiveAdmission::Roster(value) => value.room_code.clone(),
         LiveAdmission::Legacy(_) => panic!("three-player room used legacy owner"),
     };
     let third = rooms
@@ -177,7 +206,7 @@ async fn three_and_four_player_rosters_admit_only_human_seats_and_resume_private
         .await
         .unwrap();
     let code = match &four {
-        LiveAdmission::Roster(value) => value.room.room_code.clone(),
+        LiveAdmission::Roster(value) => value.room_code.clone(),
         LiveAdmission::Legacy(_) => panic!("four-player room used legacy owner"),
     };
     let mut fourth = None;
@@ -223,7 +252,7 @@ async fn three_and_four_player_rosters_admit_only_human_seats_and_resume_private
         .await
         .unwrap();
     let code = match &cpu_roster {
-        LiveAdmission::Roster(value) => value.room.room_code.clone(),
+        LiveAdmission::Roster(value) => value.room_code.clone(),
         LiveAdmission::Legacy(_) => panic!("four-player CPU room used legacy owner"),
     };
     assert!(matches!(
@@ -313,7 +342,7 @@ async fn bodyless_roster_notice_is_encoded_for_the_actual_recipient() {
 }
 
 #[tokio::test]
-async fn legacy_and_roster_owners_share_the_single_room_capacity() {
+async fn environment_roster_owners_share_the_single_room_capacity() {
     let now = std::time::Instant::now();
     let rooms = rooms(now);
     let mut admissions = Vec::new();

@@ -66,6 +66,22 @@ impl RosterOwnerHandle {
         })
     }
 
+    pub(in crate::game::rooms) fn environment_settings(
+        &self,
+        binding: BindingKey,
+        room_id: RoomId,
+        round_id: u64,
+        action: super::super::live_registry::EnvironmentSettingsAction,
+    ) -> Reply<()> {
+        self.submit(|reply| OwnerCommand::EnvironmentSettings {
+            binding,
+            room_id,
+            round_id,
+            action,
+            reply,
+        })
+    }
+
     pub(in crate::game::rooms) fn leave(
         &self,
         binding: BindingKey,

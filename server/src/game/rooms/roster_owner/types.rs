@@ -11,9 +11,8 @@ use tokio::{
 };
 
 use super::super::{
-    RandomFill,
+    ClosingReason, RandomFill,
     cpu::CpuController,
-    match_owner::ClosingReason,
     resume::{BindingFence, ResumeCredential},
     roster_runtime::{RosterAction, RosterNotice, RosterRuntime, RosterRuntimeError},
     types::{BindingKey, DepartureGuard, RoomError},
@@ -37,7 +36,9 @@ pub(crate) struct RosterAdmission {
     pub(crate) round_id: u64,
     pub(crate) seat: SeatId,
     #[cfg(test)]
-    pub(crate) room: v14::RoomView,
+    pub(crate) room_code: grenadiers_core::protocol::RoomCode,
+    #[cfg(test)]
+    pub(crate) revision: u32,
     #[cfg(test)]
     pub(crate) resume_token: v14::ResumeToken,
     pub(crate) personal_frame: Arc<str>,
@@ -67,6 +68,13 @@ pub(super) enum OwnerCommand {
         action: RosterAction,
         reply: oneshot::Sender<Result<(), RoomError>>,
     },
+    EnvironmentSettings {
+        binding: BindingKey,
+        room_id: RoomId,
+        round_id: u64,
+        action: super::super::live_registry::EnvironmentSettingsAction,
+        reply: oneshot::Sender<Result<(), RoomError>>,
+    },
     Leave {
         binding: BindingKey,
         room_id: RoomId,
@@ -85,7 +93,9 @@ impl OwnerCommand {
             Self::Join { reply, .. } | Self::Resume { reply, .. } => {
                 let _ = reply.send(Err(error));
             }
-            Self::Action { reply, .. } | Self::Leave { reply, .. } => {
+            Self::Action { reply, .. }
+            | Self::EnvironmentSettings { reply, .. }
+            | Self::Leave { reply, .. } => {
                 let _ = reply.send(Err(error));
             }
         }

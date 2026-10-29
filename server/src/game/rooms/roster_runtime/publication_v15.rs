@@ -17,34 +17,38 @@ pub(super) fn room_view(
     revision: u32,
     settings_revision: u32,
 ) -> Result<v15::RoomView, RosterRuntimeError> {
-    let legacy = publication::room_view(identity, lifecycle, revision, settings_revision)?;
     let room = v15::RoomView {
         settings: v15::RoomSettings::new(
-            legacy.settings,
+            publication::settings(lifecycle.settings())?,
             v15::Environment {
                 storm_cloud: environment == StormCloudConfig::Single,
             },
         ),
-        settings_revision: legacy.settings_revision,
-        settings_editor: legacy.settings_editor,
-        available_items: legacy.available_items,
+        settings_revision: publication::counter(settings_revision)?,
+        settings_editor: lifecycle.settings_editor().map(super::types::wire_seat),
+        available_items: publication::available_items()?,
         configuration: v15::RoomConfiguration::from_domain(EnvironmentRoomConfiguration::new(
             identity.configuration,
             environment,
         )),
-        room_id: legacy.room_id,
-        room_code: legacy.room_code,
-        round_id: legacy.round_id,
-        revision: legacy.revision,
-        tick: legacy.tick,
+        room_id: identity.id.clone(),
+        room_code: identity.code.clone(),
+        round_id: publication::counter64(lifecycle.round_attempt())?,
+        revision: publication::counter(revision)?,
+        tick: publication::tick(lifecycle.tick())?,
         rules_version: v15::RulesVersion::ENVIRONMENT_V7,
-        map_id: legacy.map_id,
-        round_number: legacy.round_number,
-        scores: legacy.scores,
-        last_round: legacy.last_round,
-        seats: legacy.seats,
+        map_id: v15::MapId::GeneratedV2,
+        round_number: v15::RoundCount::new(lifecycle.actual_round_number())
+            .map_err(|_| RosterRuntimeError::CapacityReached)?,
+        scores: publication::scores(lifecycle)?,
+        last_round: lifecycle
+            .latest_completed()
+            .map(publication::completed)
+            .transpose()?,
+        seats: publication::seats(lifecycle)?,
         phase: phase(lifecycle.phase())?,
     };
+    v15::validate_room_view(&room).map_err(|_| RosterRuntimeError::Publication)?;
     Ok(room)
 }
 

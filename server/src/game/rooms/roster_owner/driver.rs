@@ -13,9 +13,8 @@ use tokio::{
 };
 
 use super::super::{
-    RandomFill,
+    ClosingReason, RandomFill,
     cpu::CpuController,
-    match_owner::ClosingReason,
     roster_runtime::{RosterAction, RosterNotice, RosterRuntime, RosterRuntimeError},
     types::{BindingKey, RoomError},
 };
@@ -99,6 +98,18 @@ impl Driver {
                 let _ = reply.send(result.map_err(map_runtime_error));
                 fatal_error.map_or(Ok(()), Err)
             }
+            OwnerCommand::EnvironmentSettings {
+                binding,
+                room_id,
+                round_id,
+                action,
+                reply,
+            } => {
+                let result = self.environment_settings(binding, &room_id, round_id, action, now);
+                let fatal_error = result.err().filter(|error| fatal(*error));
+                let _ = reply.send(result.map_err(map_runtime_error));
+                fatal_error.map_or(Ok(()), Err)
+            }
             OwnerCommand::Leave {
                 binding,
                 room_id,
@@ -135,6 +146,30 @@ impl Driver {
         if was_terminal && self.runtime.lifecycle().phase() == MatchPhase::Waiting {
             self.terminal_at = None;
             self.lobby_deadline = Some(now + super::runner::LOBBY_LIFETIME);
+        }
+        self.observe_phase(now);
+        Ok(())
+    }
+
+    fn environment_settings(
+        &mut self,
+        binding: BindingKey,
+        room_id: &RoomId,
+        round_id: u64,
+        action: super::super::live_registry::EnvironmentSettingsAction,
+        now: Instant,
+    ) -> Result<(), RosterRuntimeError> {
+        let seat = self
+            .validate(binding, room_id, round_id)
+            .map_err(|_| RosterRuntimeError::StaleEpoch)?;
+        if let Some(notice) = self.runtime.update_environment_settings(
+            seat,
+            round_id,
+            action.settings_revision,
+            action.settings,
+            action.environment,
+        )? {
+            self.publish(notice);
         }
         self.observe_phase(now);
         Ok(())

@@ -62,7 +62,7 @@ async fn failed_authentication_releases_the_peer_socket_permit() {
     }
     let mut failed = sockets.pop().expect("eight sockets");
     assert_eq!(
-        authenticate(&mut failed, &"0".repeat(64), 14).await["code"],
+        authenticate(&mut failed, &"0".repeat(64), 15).await["code"],
         "authenticationFailed"
     );
     let _ = within(failed.next()).await;

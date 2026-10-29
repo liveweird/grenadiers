@@ -240,6 +240,11 @@ pub(crate) fn validate_room(room: &RoomView) -> Result<(), ProjectionError> {
         || room.scores.len() != count
         || base.controllers().first() != Some(&crate::room::SeatControl::Human)
         || room.configuration.domain().storm_cloud() != room.settings.environment.domain()
+        || room.available_items
+            != super::ItemSet::from_mask(
+                super::ItemMask::new(crate::game::EnabledItems::ALL.bits())
+                    .map_err(|_| ProjectionError::InvalidItems)?,
+            )
         || !room
             .settings
             .base
@@ -255,20 +260,87 @@ pub(crate) fn validate_room(room: &RoomView) -> Result<(), ProjectionError> {
             .iter()
             .enumerate()
             .any(|(index, score)| score.seat.index() != index)
-        || room.settings_editor.is_some_and(|editor| {
-            editor != Seat::One
-                || !matches!(room.seats[0].controller, super::Controller::Human)
-                || matches!(
-                    room.seats[0].connection,
-                    super::ConnectionStatus::Vacant
-                        | super::ConnectionStatus::Expired
-                        | super::ConnectionStatus::ServerControlled
-                )
-        })
+        || room.settings_editor
+            != matches!(
+                room.seats[0].connection,
+                super::ConnectionStatus::Connected | super::ConnectionStatus::Disconnected { .. }
+            )
+            .then_some(Seat::One)
+        || room
+            .scores
+            .iter()
+            .any(|score| score.wins.get() > room.settings.base.wins_to_finish())
+        || room
+            .last_round
+            .is_some_and(|round| !valid_result(round.result, count))
+        || matches!(
+            room.phase,
+            RoomPhase::MatchResult {
+                result: super::MatchResult::Winner { seat, .. },
+                ..
+            } if seat.index() >= count
+        )
     {
         return Err(ProjectionError::InvalidExpandedBinding);
     }
-    Ok(())
+    let phase = match room.phase {
+        RoomPhase::Waiting => {
+            crate::protocol::v14::projection_lifecycle_facts::LifecyclePhase::Waiting
+        }
+        RoomPhase::Countdown {
+            kind: super::CountdownKind::Initial,
+            ends_at,
+        } => crate::protocol::v14::projection_lifecycle_facts::LifecyclePhase::CountdownInitial {
+            ends_at,
+        },
+        RoomPhase::Countdown {
+            kind: super::CountdownKind::InterRound,
+            ends_at,
+        } => {
+            crate::protocol::v14::projection_lifecycle_facts::LifecyclePhase::CountdownInterRound {
+                ends_at,
+            }
+        }
+        RoomPhase::Running => {
+            crate::protocol::v14::projection_lifecycle_facts::LifecyclePhase::Running
+        }
+        RoomPhase::Result { hold_until } => {
+            crate::protocol::v14::projection_lifecycle_facts::LifecyclePhase::Result { hold_until }
+        }
+        RoomPhase::MatchResult {
+            ended_at,
+            result,
+            rematch_at,
+        } => crate::protocol::v14::projection_lifecycle_facts::LifecyclePhase::MatchResult {
+            ended_at,
+            result,
+            rematch_at,
+        },
+        RoomPhase::Interrupted { ended_at, .. } => {
+            crate::protocol::v14::projection_lifecycle_facts::LifecyclePhase::Interrupted {
+                ended_at,
+            }
+        }
+    };
+    crate::protocol::v14::projection_room_validation::validate(
+        &crate::protocol::v14::projection_lifecycle_facts::LifecycleRoom {
+            tick: room.tick,
+            round_id: room.round_id.get(),
+            round_number: room.round_number.get(),
+            wins_to_finish: room.settings.base.wins_to_finish(),
+            scores: &room.scores,
+            last_round: room.last_round,
+            seats: &room.seats,
+            phase,
+        },
+    )
+}
+
+fn valid_result(result: super::RoundResult, count: usize) -> bool {
+    match result {
+        super::RoundResult::Winner { seat } => seat.index() < count,
+        super::RoundResult::Draw { .. } => true,
+    }
 }
 
 fn valid_controller(room: &RoomView, index: usize) -> bool {

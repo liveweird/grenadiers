@@ -71,6 +71,91 @@ describe('Rust-produced gameplay v15 server conformance', () => {
     })
   })
 
+  it('rejects scores and history in the actual waiting lifecycle fixture', () => {
+    const score = structuredClone(frames.get('disabled-11x9-cpu18-admission'))
+    if (score?.type !== 'admitted') throw new Error('missing waiting admission fixture')
+    score.room.scores[0]!.wins = 1
+    expect(validateGameplayV15ServerMessage(score)).toMatchObject({ valid: false })
+
+    const history = structuredClone(frames.get('disabled-11x9-cpu18-admission'))
+    if (history?.type !== 'admitted') throw new Error('missing waiting admission fixture')
+    history.room.lastRound = {
+      roundId: 1, roundNumber: 1, endedAt: 0, result: { type: 'winner', seat: 'one' },
+    }
+    expect(validateGameplayV15ServerMessage(history)).toMatchObject({ valid: false })
+  })
+
+  it('accepts only a future bounded initial countdown with readiness consensus', () => {
+    const frame = structuredClone(frames.get('disabled-11x9-cpu18-admission'))
+    if (frame?.type !== 'admitted') throw new Error('missing waiting admission fixture')
+    frame.room.seats[0]!.ready = true
+    frame.room.phase = { type: 'countdown', kind: 'initial', endsAt: 180 }
+    expect(validateGameplayV15ServerMessage(frame)).toMatchObject({ valid: true })
+    frame.room.phase.endsAt = 0
+    expect(validateGameplayV15ServerMessage(frame)).toMatchObject({ valid: false })
+  })
+
+  it.each([
+    ['waiting round one', (frame: GameServerMessage) => {
+      if (!('room' in frame)) return
+      frame.room.phase = { type: 'waiting' }
+    }],
+    ['score above finish', (frame: GameServerMessage) => {
+      if ('room' in frame) frame.room.scores[0]!.wins = 4
+    }],
+    ['empty item availability', (frame: GameServerMessage) => {
+      if ('room' in frame) frame.room.availableItems = []
+    }],
+    ['connected unoccupied seat', (frame: GameServerMessage) => {
+      if ('room' in frame) frame.room.seats[0]!.occupied = false
+    }],
+    ['human ready while running', (frame: GameServerMessage) => {
+      if ('room' in frame) frame.room.seats[0]!.ready = true
+    }],
+    ['CPU ready while running', (frame: GameServerMessage) => {
+      if ('room' in frame) frame.room.seats[1]!.ready = true
+    }],
+    ['human rematch vote while running', (frame: GameServerMessage) => {
+      if ('room' in frame) frame.room.seats[0]!.rematchReady = true
+    }],
+    ['disconnect beyond TTL', (frame: GameServerMessage) => {
+      if ('room' in frame) frame.room.seats[0]!.connection = {
+        type: 'disconnected', expiresAt: frame.room.tick + 601,
+      }
+    }],
+  ] as const)('rejects lifecycle mutation: %s', (_label, mutate) => {
+    const frame = structuredClone(frames.get('disabled11x9Cpu18-one'))
+    if (!frame) throw new Error('missing running fixture')
+    mutate(frame)
+    expect(validateGameplayV15ServerMessage(frame)).toMatchObject({ valid: false })
+  })
+
+  it('rejects terminal winners outside the roster and an invalid rematch deadline', () => {
+    const frame = snapshot('disabled11x9Cpu18-one')
+    const room = frame.room
+    room.tick = 181
+    room.roundId = 3
+    room.roundNumber = 3
+    room.scores[0]!.wins = 3
+    room.lastRound = {
+      roundId: 3, roundNumber: 3, endedAt: 181, result: { type: 'winner', seat: 'one' },
+    }
+    room.phase = {
+      type: 'matchResult', endedAt: 181,
+      result: { type: 'winner', seat: 'one', reason: 'roundWins' }, rematchAt: 361,
+    }
+    expect(validateGameplayV15ServerMessage(frame)).toMatchObject({ valid: true })
+
+    const badWinner = structuredClone(frame)
+    if (badWinner.room.phase.type !== 'matchResult') throw new Error('expected terminal phase')
+    badWinner.room.phase.result = { type: 'winner', seat: 'four', reason: 'roundWins' }
+    expect(validateGameplayV15ServerMessage(badWinner)).toMatchObject({ valid: false })
+
+    if (frame.room.phase.type !== 'matchResult') throw new Error('expected terminal phase')
+    frame.room.phase.rematchAt += 1
+    expect(validateGameplayV15ServerMessage(frame)).toMatchObject({ valid: false })
+  })
+
   it.each([
     ['environment mismatch', (frame: Snapshot) => {
       frame.room.configuration.environment.stormCloud = false

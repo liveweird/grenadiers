@@ -2,11 +2,13 @@ import type { ErrorObject } from 'ajv'
 import validateServer from '../../validation/generated/gameplay-v15.mjs'
 import { effectSemanticError, expandedProfileSemanticErrorFor, itemSetSemanticError,
   type GameplayProfileSemanticError } from '../validation/profileSemantics'
+import { roomLifecycleSemanticError } from '../validation/roomLifecycleSemantics'
 import { ITEM_IDS, type GameServerMessage, type GameState, type RoomView, type Seat,
   type WireEvent } from './schema'
 
 type SemanticError = GameplayProfileSemanticError
   | 'invalidConfiguration' | 'invalidControllerMetadata' | 'invalidFrozenState'
+  | 'invalidLifecycle'
   | 'invalidOilBarrels' | 'invalidPersonalAdmission' | 'invalidRoster'
   | 'invalidStormEnvironment' | 'invalidTeleportMarker' | 'invalidWorldState'
 export type GameplayV15ValidationResult =
@@ -68,6 +70,10 @@ function configurationError(room: RoomView): SemanticError | null {
 function statusError(room: RoomView, index: number): SemanticError | null {
   const status = room.seats[index]!
   const configured = room.configuration.controllers[index]
+  const reserved = status.connection.type !== 'vacant'
+  if (status.occupied !== reserved || (!status.occupied && (status.ready || status.rematchReady))) {
+    return 'invalidControllerMetadata'
+  }
   if (configured === 'cpu') {
     const ready = room.phase.type === 'waiting' || room.phase.type === 'countdown'
     const rematchReady = room.phase.type === 'matchResult' && room.tick >= room.phase.rematchAt
@@ -203,6 +209,8 @@ function semanticError(message: GameServerMessage): SemanticError | null {
   const metadata = metadataError(room)
   if (metadata) return metadata
   if (!supportedRoomProfile(room)) return 'unsupportedProfile'
+  const lifecycle = roomLifecycleSemanticError(room)
+  if (lifecycle) return lifecycle
   if (message.type === 'admitted') {
     const own = room.seats.find(({ seat }) => seat === message.youSeat)
     if (own?.controller.type !== 'human' || own.connection.type !== 'connected') return 'invalidPersonalAdmission'

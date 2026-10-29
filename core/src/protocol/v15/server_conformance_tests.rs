@@ -5,11 +5,8 @@ use crate::game::{
     RoundAssignment, RulesConfig, SeatId, SimulationSeed, SpeedLevel, State, StormCloudConfig,
     World, generate_multiplayer_arena, generate_variable_multiplayer_arena,
 };
-use crate::protocol::{Counter, RoomCode, RoomId, Tick};
-use crate::room::{
-    BoardSize as DomainBoard, CpuDifficulty, CpuProfile, EnvironmentRoomConfiguration,
-    RoomConfiguration as DomainConfiguration, SeatControl,
-};
+use crate::protocol::{Counter, Tick};
+use crate::room::BoardSize as DomainBoard;
 
 use super::*;
 
@@ -38,136 +35,6 @@ struct WorldCase {
 
 fn counter(value: u32) -> Counter {
     Counter::new(value).unwrap()
-}
-
-fn seat(value: SeatId) -> Seat {
-    match value {
-        SeatId::One => Seat::One,
-        SeatId::Two => Seat::Two,
-        SeatId::Three => Seat::Three,
-        SeatId::Four => Seat::Four,
-    }
-}
-
-fn environment(value: StormCloudConfig) -> Environment {
-    Environment {
-        storm_cloud: value == StormCloudConfig::Single,
-    }
-}
-
-fn available_items() -> ItemSet {
-    ItemSet::from_mask(ItemMask::new(EnabledItems::ALL.bits()).unwrap())
-}
-
-fn settings(enabled: EnabledItems, cloud: StormCloudConfig) -> RoomSettings {
-    RoomSettings::new(
-        GameSettings::new(
-            0,
-            256,
-            3,
-            180,
-            ItemSet::from_mask(ItemMask::new(enabled.bits()).unwrap()),
-        )
-        .unwrap(),
-        environment(cloud),
-    )
-}
-
-fn controls(count: PlayerCount) -> Vec<SeatControl> {
-    match count {
-        PlayerCount::Two => vec![SeatControl::Human, SeatControl::Cpu],
-        PlayerCount::Three => vec![SeatControl::Human, SeatControl::Cpu, SeatControl::Human],
-        PlayerCount::Four => vec![
-            SeatControl::Human,
-            SeatControl::Cpu,
-            SeatControl::Human,
-            SeatControl::Cpu,
-        ],
-    }
-}
-
-fn difficulty(count: PlayerCount) -> CpuDifficulty {
-    if count == PlayerCount::Three {
-        assert_eq!(CpuProfile::ENVIRONMENT_EASY.policy.version(), 18);
-        CpuProfile::ENVIRONMENT_EASY.difficulty
-    } else {
-        assert_eq!(CpuProfile::ENVIRONMENT_STANDARD.policy.version(), 18);
-        CpuProfile::ENVIRONMENT_STANDARD.difficulty
-    }
-}
-
-fn wire_difficulty(value: CpuDifficulty) -> Difficulty {
-    match value {
-        CpuDifficulty::Easy => Difficulty::Easy,
-        CpuDifficulty::Standard => Difficulty::Standard,
-    }
-}
-
-fn room(
-    count: PlayerCount,
-    board: DomainBoard,
-    enabled: EnabledItems,
-    cloud: StormCloudConfig,
-    tick: Tick,
-    phase: RoomPhase,
-) -> RoomView {
-    let controls = controls(count);
-    let cpu_difficulty = difficulty(count);
-    let cpu_ready = matches!(&phase, RoomPhase::Waiting | RoomPhase::Countdown { .. });
-    let domain = DomainConfiguration::new(&controls, Some(cpu_difficulty), board).unwrap();
-    RoomView {
-        settings: settings(enabled, cloud),
-        settings_revision: counter(1),
-        settings_editor: Some(Seat::One),
-        available_items: available_items(),
-        configuration: RoomConfiguration::from_domain(EnvironmentRoomConfiguration::new(
-            domain, cloud,
-        )),
-        room_id: RoomId::new("0123456789abcdef0123456789abcdef").unwrap(),
-        room_code: RoomCode::new("ABCDEFGH").unwrap(),
-        round_id: counter(1),
-        revision: counter(1),
-        tick,
-        rules_version: RulesVersion::ENVIRONMENT_V7,
-        map_id: MapId::GeneratedV2,
-        round_number: RoundCount::new(1).unwrap(),
-        scores: count
-            .seats()
-            .iter()
-            .map(|&value| Score {
-                seat: seat(value),
-                wins: Wins::new(0).unwrap(),
-            })
-            .collect(),
-        last_round: None,
-        seats: count
-            .seats()
-            .iter()
-            .enumerate()
-            .map(|(index, &value)| {
-                let cpu = controls[index] == SeatControl::Cpu;
-                SeatStatus {
-                    seat: seat(value),
-                    occupied: true,
-                    ready: cpu && cpu_ready,
-                    rematch_ready: false,
-                    controller: if cpu {
-                        Controller::Cpu {
-                            difficulty: wire_difficulty(cpu_difficulty),
-                        }
-                    } else {
-                        Controller::Human
-                    },
-                    connection: if cpu {
-                        ConnectionStatus::ServerControlled
-                    } else {
-                        ConnectionStatus::Connected
-                    },
-                }
-            })
-            .collect(),
-        phase,
-    }
 }
 
 fn generated(
@@ -218,11 +85,12 @@ fn world_case(
         crate::room::RoomSettings::DEFAULT.with_enabled_items(enabled),
         cloud,
     );
+    let mut lifecycle = super::server_conformance_lifecycle::lifecycle(count, board, enabled, true);
     let mut state = State::new_at_tick_with_assignment_and_seed(
         rules,
         world,
         actors,
-        crate::game::Tick(0),
+        lifecycle.tick(),
         RoundAssignment::first(),
         SimulationSeed::new(seed),
     )
@@ -244,11 +112,11 @@ fn world_case(
             );
         }
         reports.push(state.step(&[]).unwrap());
+        lifecycle.complete_running_tick(None).unwrap();
     }
     let capture = capture_expanded(&state, &reports).unwrap();
-    let tick = Tick::new(state.tick().0).unwrap();
     WorldCase {
-        room: room(count, board, enabled, cloud, tick, RoomPhase::Running),
+        room: super::server_conformance_lifecycle::room_view(&lifecycle, cloud),
         capture,
         generation,
     }
@@ -301,13 +169,15 @@ fn actual_corpus() -> Corpus {
         true,
         [15; 32],
     );
-    let waiting = room(
+    let waiting_lifecycle = super::server_conformance_lifecycle::lifecycle(
         PlayerCount::Two,
         DomainBoard::ElevenByNine,
         EnabledItems::EMPTY,
+        false,
+    );
+    let waiting = super::server_conformance_lifecycle::room_view(
+        &waiting_lifecycle,
         StormCloudConfig::Disabled,
-        Tick::new(0).unwrap(),
-        RoomPhase::Waiting,
     );
     let admission = prepare_admission(
         AdmissionProjection {
@@ -374,21 +244,18 @@ fn checked_frames_satisfy_the_v15_server_schema() {
 
 #[test]
 fn checked_room_validation_rejects_false_cpu_readiness_before_start() {
-    for phase in [
-        RoomPhase::Waiting,
-        RoomPhase::Countdown {
-            kind: CountdownKind::Initial,
-            ends_at: Tick::new(180).unwrap(),
-        },
-    ] {
-        let mut candidate = room(
-            PlayerCount::Two,
-            DomainBoard::ElevenByNine,
-            EnabledItems::EMPTY,
-            StormCloudConfig::Disabled,
-            Tick::new(0).unwrap(),
-            phase,
-        );
+    let mut lifecycle = super::server_conformance_lifecycle::lifecycle(
+        PlayerCount::Two,
+        DomainBoard::ElevenByNine,
+        EnabledItems::EMPTY,
+        false,
+    );
+    let waiting =
+        super::server_conformance_lifecycle::room_view(&lifecycle, StormCloudConfig::Disabled);
+    lifecycle.set_ready(SeatId::One, true).unwrap();
+    let countdown =
+        super::server_conformance_lifecycle::room_view(&lifecycle, StormCloudConfig::Disabled);
+    for mut candidate in [waiting, countdown] {
         assert!(super::projection::validate_room(&candidate).is_ok());
         candidate.seats[1].ready = false;
         assert_eq!(
@@ -396,4 +263,105 @@ fn checked_room_validation_rejects_false_cpu_readiness_before_start() {
             Err(ProjectionError::InvalidExpandedBinding)
         );
     }
+}
+
+fn running_room() -> RoomView {
+    let lifecycle = super::server_conformance_lifecycle::lifecycle(
+        PlayerCount::Two,
+        DomainBoard::ElevenByNine,
+        EnabledItems::EMPTY,
+        true,
+    );
+    super::server_conformance_lifecycle::room_view(&lifecycle, StormCloudConfig::Disabled)
+}
+
+fn waiting_room() -> RoomView {
+    let lifecycle = super::server_conformance_lifecycle::lifecycle(
+        PlayerCount::Two,
+        DomainBoard::ElevenByNine,
+        EnabledItems::EMPTY,
+        false,
+    );
+    super::server_conformance_lifecycle::room_view(&lifecycle, StormCloudConfig::Disabled)
+}
+
+#[test]
+fn checked_room_validation_rejects_reviewed_metadata_and_history_mutations() {
+    let mutations: &[fn(&mut RoomView)] = &[
+        |room| room.available_items = ItemSet::empty(),
+        |room| room.seats[0].occupied = false,
+        |room| room.seats[0].ready = true,
+        |room| room.seats[1].ready = true,
+        |room| room.seats[0].rematch_ready = true,
+        |room| room.scores[0].wins = Wins::new(4).unwrap(),
+        |room| {
+            room.seats[0].connection = ConnectionStatus::Disconnected {
+                expires_at: Tick::new(room.tick.get() + 601).unwrap(),
+            };
+        },
+        |room| {
+            room.phase = RoomPhase::MatchResult {
+                ended_at: room.tick,
+                result: MatchResult::Winner {
+                    seat: Seat::Four,
+                    reason: MatchWinnerReason::Forfeit,
+                },
+                rematch_at: Tick::new(room.tick.get() + 180).unwrap(),
+            };
+        },
+    ];
+    for mutate in mutations {
+        let mut room = running_room();
+        mutate(&mut room);
+        assert_eq!(
+            super::projection::validate_room(&room),
+            Err(ProjectionError::InvalidExpandedBinding)
+        );
+    }
+
+    let mut waiting = waiting_room();
+    waiting.round_number = RoundCount::new(1).unwrap();
+    assert!(super::projection::validate_room(&waiting).is_err());
+    let mut waiting = waiting_room();
+    waiting.scores[0].wins = Wins::new(1).unwrap();
+    assert!(super::projection::validate_room(&waiting).is_err());
+    let mut waiting = waiting_room();
+    waiting.last_round = Some(CompletedRound {
+        round_id: counter(1),
+        round_number: counter(1),
+        ended_at: waiting.tick,
+        result: RoundResult::Winner { seat: Seat::One },
+    });
+    assert!(super::projection::validate_room(&waiting).is_err());
+}
+
+#[test]
+fn checked_room_validation_rejects_terminal_deadline_mutation() {
+    let mut lifecycle = super::server_conformance_lifecycle::lifecycle(
+        PlayerCount::Two,
+        DomainBoard::ElevenByNine,
+        EnabledItems::EMPTY,
+        true,
+    );
+    for round in 0..3 {
+        lifecycle
+            .complete_current_tick(crate::game::RoundResult::Winner(SeatId::One))
+            .unwrap();
+        if round < 2 {
+            for _ in 0..crate::room::COUNTDOWN_TICKS * 2 {
+                lifecycle.advance_idle_tick().unwrap();
+            }
+        }
+    }
+    let mut terminal =
+        super::server_conformance_lifecycle::room_view(&lifecycle, StormCloudConfig::Disabled);
+    assert!(super::projection::validate_room(&terminal).is_ok());
+    let RoomPhase::MatchResult { rematch_at, .. } = &mut terminal.phase else {
+        panic!("expected terminal room");
+    };
+    *rematch_at = Tick::new(rematch_at.get() + 1).unwrap();
+    assert_eq!(
+        super::projection::validate_room(&terminal),
+        Err(ProjectionError::InvalidExpandedBinding)
+    );
 }

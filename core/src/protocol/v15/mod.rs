@@ -67,6 +67,8 @@ pub fn encode_server_message(
 }
 
 #[cfg(test)]
+mod server_conformance_lifecycle;
+#[cfg(test)]
 mod server_conformance_tests;
 #[cfg(test)]
 mod tests;

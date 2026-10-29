@@ -25,18 +25,19 @@ repeated approval for routine implementation choices. Entries are not delivery-d
 
 ## Animation and arena environment
 
-- [next] **STORM-CLOUD — roaming slowdown hazard.** A cloud moves slowly and randomly across
-  the board, including blocked tiles. It never blocks movement and bombs cannot harm it.
-  Player/cloud contact in either direction applies a three-second, 50% slowdown. Enable the
-  paired client/server using the [checked environment foundation](docs/game/protocol-v15.md),
-  with authoritative cloud rendering and an own-effect timer.
-  Default all features ON; include cloud in forming-lobby bulk ON/OFF and lock settings at
-  first start. Validate all boards/controller counts, privacy, refresh, replay and recovery.
-- [todo] **LAIRS — indestructible mob spawners.** Add a wall-like, indestructible lair tile.
+- [next] **LAIRS — indestructible mob spawners.** Add a wall-like, indestructible lair tile.
   Each lair spawns once every configurable N seconds, with a separate counter and the same
   configurable limit M. Mobs chase players reachable through unblocked paths, avoid bombs and
-  never plant bombs. Before implementation settle whether M counts living or lifetime spawns,
-  blocked spawn behavior, mob contact/damage/death, targeting and resource bounds.
+  never plant bombs. Deliver a dormant core foundation before paired server/client activation.
+  - Initial defaults: N = 10 seconds (configurable 5–60), M = 3 living mobs per lair (1–8).
+    Two mirrored existing pillars bound the arena to 16 mobs. Full/blocked attempts wait one
+    interval; deaths release capacity, and rounds reset counters.
+  - Mobs move at 1.5 cells/second toward the nearest reachable living, uncloaked player.
+    Contact uses Shield/Heart/grace; flames and Oil kill mobs. No drops or scoring.
+    Stopwatch freezes existing and newly spawned mobs while lair timers continue.
+  - Keep mobs separate from player seats and reuse geometry, damage and blast rules. Introduce
+    rules8/wire16/CPU19/replay7 with bounded planning, private targets, recovery and replay checks.
+    Append lair/mob art without changing existing sprite rectangles or reserved entries.
 
 ## Engineering follow-ups
 

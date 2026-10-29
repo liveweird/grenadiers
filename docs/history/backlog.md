@@ -5,6 +5,12 @@
 > current status. Use the [current backlog](../game/backlog.md), [releases](../releases.md), and
 > [verification](../verification.md) for current work.
 
+## Completed 2026-10-29
+
+- **STORM-CLOUD:** [v0.3.115](../releases.md#v03115--2026-10-29) enables authoritative
+  weather, independent slowdown timers, default-on presets, recipient privacy and recovery on
+  every supported board and controller lineup. Rules remain locked through rematches.
+
 ## Completed 2026-10-28
 
 - **BOARD-SIZE:** [v0.3.110](../releases.md#v03110--2026-10-28) ships immutable 11×9,

@@ -20,6 +20,10 @@ impl State {
                     || self.actors.iter().any(|actor| {
                         actor.alive && movement::position_overlaps_cell(actor.position, cell)
                     })
+                    || self
+                        .lairs
+                        .as_ref()
+                        .is_some_and(|lairs| lairs.overlaps_cell(cell))
                 {
                     None
                 } else {

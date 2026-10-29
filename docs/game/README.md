@@ -56,6 +56,9 @@ for current defaults and behavior, rather than treating design proposals as deli
 
 [Board geometry](board-sizes.md) defines checked presets, spawn reservations and versioned generation.
 
+[Weather](storm-cloud.md) and [headless lairs](lairs.md) describe environment physics and checked
+simulation boundaries.
+
 [Gameplay v15](protocol-v15.md) defines the live two-to-four-seat wire contract. The retained
 [Gameplay v13 compatibility guide](protocol-v13.md) documents its closed two-seat contract,
 including the authoritative teleport position epoch. [Gameplay v10](../history/protocols/protocol-v10.md) and

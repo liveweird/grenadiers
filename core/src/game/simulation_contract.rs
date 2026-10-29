@@ -57,6 +57,8 @@ pub enum StateError {
     UnsupportedPickup { cell: CellId, kind: PickupKind },
     UnsupportedOilBarrels,
     InvalidOilBarrel(CellId),
+    InvalidLairCell(CellId),
+    LairTimerOverflow,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -74,6 +76,8 @@ pub enum StepError {
     EffectExpiryOverflow(EffectKind),
     BombPauseOverflow(EntityId),
     StormSlowExpiryOverflow,
+    LairTimerOverflow,
+    EntityIdOverflow,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]

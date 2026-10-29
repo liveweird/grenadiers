@@ -1,5 +1,5 @@
 use super::types::{HALF_FOOTPRINT, TICKS_PER_SECOND, TURN_ASSIST, UNITS_PER_CELL};
-use crate::room::RoomSettings;
+use crate::room::{LairConfig, RoomSettings};
 
 const FORGIVING_TURN_ASSIST: i32 = 256;
 
@@ -27,6 +27,7 @@ pub struct RulesConfig {
     flame_ticks: u64,
     round_ticks: u64,
     storm_cloud_config: StormCloudConfig,
+    lair_config: LairConfig,
 }
 
 impl RulesConfig {
@@ -48,6 +49,7 @@ impl RulesConfig {
             flame_ticks: 30,
             round_ticks: 10_800,
             storm_cloud_config: StormCloudConfig::Disabled,
+            lair_config: LairConfig::Disabled,
         }
     }
 
@@ -110,6 +112,25 @@ impl RulesConfig {
             storm_cloud_config: clouds,
             ..Self::multiplayer_v6(settings)
         }
+    }
+
+    /// Dormant environment profile with deterministic lairs and mobs.
+    #[must_use]
+    pub const fn environment_v8(
+        settings: RoomSettings,
+        clouds: StormCloudConfig,
+        lairs: LairConfig,
+    ) -> Self {
+        Self {
+            version: 8,
+            lair_config: lairs,
+            ..Self::environment_v7(settings, clouds)
+        }
+    }
+
+    #[must_use]
+    pub const fn lair_config(self) -> LairConfig {
+        self.lair_config
     }
 
     #[must_use]

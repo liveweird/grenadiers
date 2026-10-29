@@ -330,6 +330,10 @@ impl State {
             let id = EntityId(raw);
             if !self.actors.iter().any(|actor| actor.id == id)
                 && !self.world.bombs.contains_key(&id)
+                && !self
+                    .lairs
+                    .as_ref()
+                    .is_some_and(|lairs| lairs.contains_id(id))
             {
                 return Some(id);
             }

@@ -27,6 +27,27 @@ pub(crate) fn stationary_contact_entry(holder: MovementSegment, rival: super::Po
     contact_entry(&holder, &rival).is_some()
 }
 
+/// Positive-area contact between an arbitrary axis-aligned actor sweep and a
+/// stationary actor-sized footprint. Unlike shove entry timing, forced travel
+/// is not bounded by one voluntary movement budget.
+pub(crate) fn stationary_sweep_contact(
+    segment: MovementSegment,
+    position: super::Position,
+) -> bool {
+    let extent = i64::from(HALF_FOOTPRINT) * 2;
+    let start = segment.start();
+    let end = segment.end();
+    if start.x == end.x {
+        (i64::from(start.x) - i64::from(position.x)).abs() < extent
+            && i64::from(position.y) > i64::from(start.y.min(end.y)) - extent
+            && i64::from(position.y) < i64::from(start.y.max(end.y)) + extent
+    } else {
+        (i64::from(start.y) - i64::from(position.y)).abs() < extent
+            && i64::from(position.x) > i64::from(start.x.min(end.x)) - extent
+            && i64::from(position.x) < i64::from(start.x.max(end.x)) + extent
+    }
+}
+
 #[derive(Clone, Copy)]
 struct Velocity {
     axis: (i64, i64),

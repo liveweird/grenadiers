@@ -21,6 +21,7 @@
 
 pub mod configuration;
 pub mod environment;
+pub mod lairs;
 pub mod match_lifecycle;
 pub mod participants;
 pub mod reconnect;
@@ -30,6 +31,7 @@ pub mod settings;
 
 pub use configuration::{BoardSize, RoomConfiguration, RoomConfigurationError, SeatControl};
 pub use environment::EnvironmentRoomConfiguration;
+pub use lairs::{LairConfig, LairSettings, LairSettingsError};
 pub use match_lifecycle::{CountdownKind, MatchChange, MatchError, MatchLifecycle, MatchPhase};
 pub use participants::{ControllerKind, CpuDifficulty, CpuPolicy, CpuProfile, RoomMode};
 pub use roster::{

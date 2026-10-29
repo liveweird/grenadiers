@@ -54,7 +54,7 @@ pub fn plan_lairs(
         return Ok(stop());
     }
 
-    let ordinary = crate::cpu::policy::plan(observation, memory, rng, work)?;
+    let ordinary = crate::cpu::policy::plan_lairs(observation, memory, rng, work)?;
     let Ok(hazards) = forecast(observation, history, None, ForecastLimits::default(), work) else {
         return Ok(stop());
     };
@@ -68,14 +68,47 @@ pub fn plan_lairs(
         start: Tick(first),
         end: Tick(end),
     };
-    // Item collection can change movement physics. Authorize only the next
-    // ordinary update, then require a fresh observation before continuing.
+    // Keep the ordinary pulse when its complete swept path avoids every item.
+    // Item collection can change movement physics, so a path that can collect
+    // gets only one update before a fresh observation is required.
     const PICKUP_HOLD_TICKS: u8 = 1;
+    let ordinary_hold = ordinary.hold_ticks.clamp(1, 12);
     let ordinary_clear = super::deadline::ordinary_movement_is_clear(
         observation,
         ordinary.intent.movement != MovementIntent::Stop,
         work,
     );
+    if ordinary.intent.manual.is_none()
+        && ordinary_clear
+        && !parts.pickups.is_empty()
+        && let Some(stopped_safe_until) = end.checked_add(u64::from(ordinary_hold) + 9).map(Tick)
+        && let Ok((lease, contact)) = certify_lair_pulse(
+            observation,
+            &hazards,
+            PulseRequest {
+                movement: ordinary.intent.movement,
+                hold_ticks: ordinary_hold,
+                start_window,
+                stopped_safe_until,
+                mode: RouteMode::CertifiedOnly,
+                settled_stop_tick,
+            },
+            work,
+        )
+    {
+        return Ok(LairSurvivalPlan {
+            survival: SurvivalPlan {
+                control: ControlPlan {
+                    intent: ordinary.intent,
+                    hold_ticks: ordinary_hold,
+                    next_memory: ordinary.next_memory,
+                },
+                lease: Some(lease),
+                execution: None,
+            },
+            contact: Some(contact),
+        });
+    }
     if ordinary.intent.manual.is_none()
         && ordinary_clear
         && !parts.pickups.is_empty()

@@ -1,7 +1,8 @@
 use crate::cpu::forecast::ObservedHazardMemory;
 use crate::cpu::policy::{ControlPlan, UtilityMemory};
 use crate::cpu::routing::{
-    PlantRequest, RouteLimits, plan_ordinary_plant, plan_timed_weapon_plant,
+    PlantRequest, RouteLimits, plan_lair_ordinary_plant, plan_lair_timed_weapon_plant,
+    plan_ordinary_plant, plan_timed_weapon_plant,
 };
 use crate::cpu::{Intent, ManualIntent, Observation, WorkBudget};
 use crate::game::Tick;
@@ -65,8 +66,13 @@ fn certified_plant_inner(
         first_movement: ordinary.intent.movement,
         limits: RouteLimits::default(),
     };
-    let certificate = if actor(observation)?.weapon.is_some() {
+    let lairs = observation.parts().rules.version == 8;
+    let certificate = if actor(observation)?.weapon.is_some() && lairs {
+        plan_lair_timed_weapon_plant(observation, history, request, work)
+    } else if actor(observation)?.weapon.is_some() {
         plan_timed_weapon_plant(observation, history, request, work)
+    } else if lairs {
+        plan_lair_ordinary_plant(observation, history, request, work)
     } else {
         plan_ordinary_plant(observation, history, request, work)
     }

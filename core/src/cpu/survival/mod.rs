@@ -58,3 +58,6 @@ mod storm_planner_tests;
 
 #[cfg(test)]
 mod lair_planner_tests;
+
+#[cfg(test)]
+mod lair_pickup_execution_tests;

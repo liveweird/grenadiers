@@ -49,6 +49,24 @@ fn clear_pickup_navigation_keeps_ordinary_collection_with_a_contact_lease() {
 }
 
 #[test]
+fn distant_pickup_does_not_throttle_a_clear_ordinary_pulse() {
+    let observed = observation(Vec::new(), Tick(200))
+        .map_parts(|parts| {
+            parts.pickups.push(ObservedPickup {
+                cell: CellId::new(13, 11),
+                kind: PickupKind::MovementSpeed,
+            });
+        })
+        .unwrap();
+    let plan = planned(&observed);
+
+    assert_ne!(plan.survival.control.intent.movement, MovementIntent::Stop);
+    assert!(plan.survival.control.hold_ticks > 1);
+    assert!(plan.survival.lease.is_some());
+    assert!(plan.contact.is_some());
+}
+
+#[test]
 fn imminent_stationary_contact_selects_safe_movement_instead_of_waiting() {
     let actor_position = Position::center(CellId::new(3, 3));
     let mob_position = Position {

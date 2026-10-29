@@ -69,4 +69,6 @@ pub use work::{WorkBudget, WorkError};
 #[cfg(test)]
 mod observation_multiplayer_tests;
 #[cfg(test)]
+mod rules_v8_boundary_tests;
+#[cfg(test)]
 mod tests;

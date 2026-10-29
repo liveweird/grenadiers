@@ -11,6 +11,7 @@ mod types;
 
 pub use execution::{EscapeExecution, follow_checked_escape, follow_committed_escape};
 pub use planner::plan;
+pub(crate) use planner::plan_lairs;
 pub use types::{ControlPlan, MAX_HOLD_TICKS, MAX_ROUTE_CELLS, PolicyError, UtilityMemory};
 
 #[cfg(test)]

@@ -1,14 +1,19 @@
-import type { GameState, RoomView, Snapshot } from './schema'
+import type { Admitted, GameState, RoomPhase, RoomView, Snapshot } from './schema'
 
 const roomId = 'b'.repeat(32)
+const resumeToken = 'c'.repeat(64)
 
-function room(revision: number): RoomView {
+export function room(
+  revision: number,
+  phase: RoomPhase = { type: 'waiting' },
+  roundId = 1,
+): RoomView {
   return {
-    roomId, roomCode: 'ABCDEFGH', roundId: 1, revision, tick: revision,
+    roomId, roomCode: 'ABCDEFGH', roundId, revision, tick: revision,
     configuration: {
       controllers: ['human', 'human'], cpuDifficulty: null, board: { width: 15, height: 13 },
     },
-    rulesVersion: 5, mapId: 'generated_v2', roundNumber: 1,
+    rulesVersion: 5, mapId: 'generated_v2', roundNumber: phase.type === 'running' ? 1 : 0,
     scores: [{ seat: 'one', wins: 0 }, { seat: 'two', wins: 0 }], lastRound: null,
     settings: {
       startingSpeedLevel: 0, turnAssistUnits: 256, winsToFinish: 3, bombFuseTicks: 180,
@@ -27,7 +32,7 @@ function room(revision: number): RoomView {
       { seat: 'two', controller: { type: 'human' }, occupied: true, ready: false,
         rematchReady: false, connection: { type: 'connected' } },
     ],
-    phase: { type: 'running' },
+    phase,
   }
 }
 
@@ -47,6 +52,16 @@ function gameState(): GameState {
   }
 }
 
-export function snapshot(revision: number): Snapshot {
-  return { type: 'snapshot', room: room(revision), state: gameState(), events: [] }
+export function snapshot(revision: number, roundId = 1): Snapshot {
+  return {
+    type: 'snapshot', room: room(revision, { type: 'running' }, roundId), state: gameState(),
+    events: [],
+  }
+}
+
+export function admitted(revision = 1, lastActionId: number | null = null): Admitted {
+  return {
+    type: 'admitted', sequence: 1, room: room(revision, { type: 'running' }),
+    youSeat: 'one', resumeToken, lastActionId, state: gameState(),
+  }
 }

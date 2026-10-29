@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## 1.0.0 — 2026-10-30
+
+- Publish the first 1.0 milestone: two-to-four-player human/CPU arena matches, three board
+  sizes, all 22 requested items, animated pixel art, storm clouds and pursuing lair mobs.
+- Promote the verified v0.3.118 gameplay as the 1.0 baseline, retaining gameplay16/rules8/CPU19
+  compatibility and the existing in-memory session, upgrade and rollback limits.
+
 ## 0.3.118 — 2026-10-29
 
 - Activate gameplay16/rules8/CPU19 across all supported boards and human/CPU lineups, with

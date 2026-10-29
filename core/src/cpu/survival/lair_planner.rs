@@ -68,7 +68,9 @@ pub fn plan_lairs(
         start: Tick(first),
         end: Tick(end),
     };
-    let ordinary_hold = ordinary.hold_ticks.clamp(1, 12);
+    // Item collection can change movement physics. Authorize only the next
+    // ordinary update, then require a fresh observation before continuing.
+    const PICKUP_HOLD_TICKS: u8 = 1;
     let ordinary_clear = super::deadline::ordinary_movement_is_clear(
         observation,
         ordinary.intent.movement != MovementIntent::Stop,
@@ -77,13 +79,14 @@ pub fn plan_lairs(
     if ordinary.intent.manual.is_none()
         && ordinary_clear
         && !parts.pickups.is_empty()
-        && let Some(stopped_safe_until) = end.checked_add(u64::from(ordinary_hold) + 9).map(Tick)
+        && let Some(stopped_safe_until) =
+            end.checked_add(u64::from(PICKUP_HOLD_TICKS) + 9).map(Tick)
         && let Ok(contact) = certify_lair_contact_pulse(
             observation,
             &hazards,
             PulseRequest {
                 movement: ordinary.intent.movement,
-                hold_ticks: ordinary_hold,
+                hold_ticks: PICKUP_HOLD_TICKS,
                 start_window,
                 stopped_safe_until,
                 mode: RouteMode::CertifiedOnly,
@@ -96,7 +99,7 @@ pub fn plan_lairs(
             survival: SurvivalPlan {
                 control: ControlPlan {
                     intent: ordinary.intent,
-                    hold_ticks: ordinary_hold,
+                    hold_ticks: PICKUP_HOLD_TICKS,
                     next_memory: ordinary.next_memory,
                 },
                 lease: None,

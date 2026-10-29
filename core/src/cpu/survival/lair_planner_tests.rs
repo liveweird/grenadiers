@@ -43,6 +43,7 @@ fn clear_pickup_navigation_keeps_ordinary_collection_with_a_contact_lease() {
         work.spent()
     );
     assert_eq!(plan.survival.control.intent.manual, None);
+    assert_eq!(plan.survival.control.hold_ticks, 1);
     assert!(plan.survival.lease.is_none());
     assert!(plan.contact.is_some());
 }

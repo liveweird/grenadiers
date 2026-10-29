@@ -50,8 +50,9 @@ impl Driver {
         Self {
             room_id: initial
                 .legacy_room()
-                .expect("legacy owner requires a legacy runtime")
-                .room_id
+                .map(|room| &room.room_id)
+                .or_else(|| initial.environment_room().map(|room| &room.room_id))
+                .expect("owner requires a checked room publication")
                 .clone(),
             runtime,
             notices,

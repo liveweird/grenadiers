@@ -15,6 +15,10 @@ use super::{
 };
 
 impl RosterRuntime {
+    pub(in crate::game::rooms) const fn environment(&self) -> Option<StormCloudConfig> {
+        self.environment
+    }
+
     #[cfg_attr(not(test), allow(dead_code))]
     pub(in crate::game::rooms) fn new_environment(
         identity: RosterIdentity,

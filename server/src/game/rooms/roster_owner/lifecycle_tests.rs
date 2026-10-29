@@ -1,7 +1,10 @@
 use grenadiers_core::{
-    game::SeatId,
-    protocol::{Counter, v14},
-    room::{CpuDifficulty, MatchPhase, SeatControl},
+    game::{SeatId, SimulationSeed, StormCloudConfig},
+    protocol::{Counter, RoomCode, RoomId, v14},
+    room::{
+        BoardSize, CpuDifficulty, CpuProfile, MatchPhase, RoomConfiguration, RoomSettings,
+        SeatControl,
+    },
 };
 use std::sync::{
     Arc,
@@ -9,11 +12,16 @@ use std::sync::{
 };
 
 use super::{
-    super::{roster_runtime::RosterAction, types::RoomError},
+    super::{
+        cpu::{CpuController, CpuPlanner},
+        roster_runtime::{RosterAction, RosterIdentity, RosterRuntime},
+        types::RoomError,
+    },
     RosterOwnerNotice,
     driver::Driver,
     tests::{advance_tick, binding, owner},
 };
+use crate::round_seed::RoundSeedSource;
 
 #[tokio::test(flavor = "current_thread", start_paused = true)]
 async fn seat_three_and_four_restore_then_replace_with_exact_binding_fences() {
@@ -195,6 +203,76 @@ fn three_cpu_observations_apply_as_a_batch_and_service_rotates_first_seat() {
     assert_eq!(driver.next_cpu, 1);
     driver.service_cpu().unwrap();
     assert_eq!(driver.next_cpu, 2);
+}
+
+#[test]
+fn disabled_environment_runtime_queues_cpu18_from_checked_publication() {
+    let configuration = RoomConfiguration::new(
+        &[SeatControl::Human, SeatControl::Cpu],
+        Some(CpuDifficulty::Standard),
+        BoardSize::FifteenByThirteen,
+    )
+    .unwrap();
+    let mut runtime = RosterRuntime::new_environment(
+        RosterIdentity {
+            id: RoomId::new("0123456789abcdef0123456789abcdef").unwrap(),
+            code: RoomCode::new("ABCDEFGH").unwrap(),
+            registry_serial: 19,
+            configuration,
+        },
+        RoomSettings::DEFAULT,
+        StormCloudConfig::Disabled,
+        RoundSeedSource::with_entropy(|bytes| {
+            bytes.fill(7);
+            Ok(())
+        }),
+        Arc::new(|epoch| Ok(SimulationSeed::new([epoch as u8; 32]))),
+    )
+    .unwrap();
+    let creator = runtime.prepare_join(SeatId::One).unwrap();
+    runtime.commit_admission(creator);
+    runtime
+        .action(
+            SeatId::One,
+            1,
+            RosterAction::Ready {
+                ready: true,
+                settings_revision: 1,
+            },
+        )
+        .unwrap();
+    for _ in 0..grenadiers_core::room::COUNTDOWN_TICKS {
+        runtime.settle_boundary([None; 4]).unwrap();
+    }
+    let notice = runtime.current_notice().unwrap();
+    assert!(notice.environment_cpu_publication().is_some());
+    let (notices, receiver) =
+        tokio::sync::watch::channel(RosterOwnerNotice::Publication(notice.clone()));
+    drop(receiver);
+    let cpu = CpuController::new(
+        CpuPlanner::without_workers(),
+        SeatId::Two,
+        19,
+        [4; 32],
+        CpuProfile::ENVIRONMENT_STANDARD,
+    );
+    let mut driver = Driver::new(
+        runtime,
+        notice.clone(),
+        notices,
+        tokio::time::Instant::now() + std::time::Duration::from_secs(300),
+        Arc::new(|bytes| {
+            bytes.fill(9);
+            Ok(())
+        }),
+        vec![cpu],
+    );
+
+    driver.publish(notice);
+    assert_eq!(
+        driver.cpu_stop_at[SeatId::Two.index()],
+        Some(driver.runtime.lifecycle().tick())
+    );
 }
 
 #[tokio::test(flavor = "current_thread", start_paused = true)]

@@ -62,10 +62,15 @@ fn validate_cpus(
     if configured.len() != cpus.len() {
         return Err(super::roster_runtime::RosterRuntimeError::UnsupportedConfiguration);
     }
-    let expected_profile = match identity.configuration.cpu_difficulty() {
-        Some(CpuDifficulty::Easy) => Some(CpuProfile::MULTIPLAYER_EASY),
-        Some(CpuDifficulty::Standard) => Some(CpuProfile::MULTIPLAYER_STANDARD),
-        None => None,
+    let expected_profile = match (
+        runtime.environment(),
+        identity.configuration.cpu_difficulty(),
+    ) {
+        (Some(_), Some(CpuDifficulty::Easy)) => Some(CpuProfile::ENVIRONMENT_EASY),
+        (Some(_), Some(CpuDifficulty::Standard)) => Some(CpuProfile::ENVIRONMENT_STANDARD),
+        (None, Some(CpuDifficulty::Easy)) => Some(CpuProfile::MULTIPLAYER_EASY),
+        (None, Some(CpuDifficulty::Standard)) => Some(CpuProfile::MULTIPLAYER_STANDARD),
+        (_, None) => None,
     };
     for (index, cpu) in cpus.iter().enumerate() {
         if cpu.seat() != configured[index]
@@ -89,6 +94,8 @@ impl Drop for CleanupGuard {
     }
 }
 
+#[cfg(test)]
+mod environment_cpu_tests;
 #[cfg(test)]
 mod lifecycle_tests;
 #[cfg(test)]

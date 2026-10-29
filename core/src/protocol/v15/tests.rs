@@ -5,7 +5,14 @@ use crate::game::{
 
 use super::*;
 
-fn state(cloud: StormCloudConfig) -> State {
+pub(super) fn state(cloud: StormCloudConfig) -> State {
+    state_with_enabled_items(cloud, crate::game::EnabledItems::EMPTY)
+}
+
+pub(super) fn state_with_enabled_items(
+    cloud: StormCloudConfig,
+    enabled: crate::game::EnabledItems,
+) -> State {
     let actors = [
         ActorInit {
             id: EntityId(1),
@@ -23,7 +30,10 @@ fn state(cloud: StormCloudConfig) -> State {
         },
     ];
     State::new_at_tick_with_assignment_and_seed(
-        RulesConfig::environment_v7(crate::room::RoomSettings::DEFAULT, cloud),
+        RulesConfig::environment_v7(
+            crate::room::RoomSettings::DEFAULT.with_enabled_items(enabled),
+            cloud,
+        ),
         World::new(fixed_arena()),
         actors,
         Tick(0),

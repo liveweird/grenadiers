@@ -1,6 +1,7 @@
 mod admission;
 mod client;
 mod configuration;
+mod cpu_observation;
 mod projection;
 mod room_validation;
 mod server;
@@ -19,6 +20,7 @@ pub use crate::protocol::v14::{
 pub use admission::{AdmissionProjection, PersonalAdmission, prepare_admission};
 pub use client::{GameClientMessage, ManualActionKind};
 pub use configuration::{Environment, RoomConfiguration};
+pub use cpu_observation::observe_cpu_recipient;
 pub use projection::{
     BoundPublication, ExpandedCapture, RecipientProjection, bind_expanded, capture_expanded,
     prepare_snapshots, project_recipient,
@@ -67,6 +69,8 @@ pub fn encode_server_message(
     }
 }
 
+#[cfg(test)]
+mod cpu_observation_tests;
 #[cfg(test)]
 mod server_conformance_lifecycle;
 #[cfg(test)]

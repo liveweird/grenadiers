@@ -9,6 +9,23 @@ pub struct ExpandedCapture(pub(crate) crate::protocol::v14::ExpandedCapture);
 pub struct BoundPublication {
     room: RoomView,
     capture: crate::protocol::v14::ExpandedCapture,
+    physical_round: u64,
+}
+
+impl BoundPublication {
+    pub(crate) const fn cpu_context(
+        &self,
+    ) -> (super::RoomSettings, crate::game::StormCloudConfig, u16) {
+        (
+            self.room.settings,
+            self.room.settings.environment.domain(),
+            self.room.rules_version.get() as u16,
+        )
+    }
+
+    pub(crate) const fn physical_round(&self) -> u64 {
+        self.physical_round
+    }
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -102,6 +119,7 @@ pub fn bind_expanded(
     Ok(BoundPublication {
         room: room.clone(),
         capture: facts.clone(),
+        physical_round: state_epoch.get() as u64,
     })
 }
 

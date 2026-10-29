@@ -1,0 +1,83 @@
+{
+  "validMessages": [
+    {
+      "caseId": "create-room-lairs-enabled",
+      "value": {
+        "type": "createRoom",
+        "sequence": 1,
+        "configuration": {
+          "controllers": ["human", "human"],
+          "cpuDifficulty": null,
+          "board": { "width": 15, "height": 13 },
+          "environment": {
+            "stormCloud": true,
+            "lairs": { "enabled": true, "spawnSeconds": 5, "maxLivingMobs": 1 }
+          }
+        }
+      }
+    },
+    {
+      "caseId": "create-room-disabled-values-retained",
+      "value": {
+        "type": "createRoom",
+        "sequence": 2,
+        "configuration": {
+          "controllers": ["human", "cpu"],
+          "cpuDifficulty": "standard",
+          "board": { "width": 11, "height": 9 },
+          "environment": {
+            "stormCloud": false,
+            "lairs": { "enabled": false, "spawnSeconds": 60, "maxLivingMobs": 8 }
+          }
+        }
+      }
+    }
+  ],
+  "invalidMessages": [
+    {
+      "caseId": "missing-lairs",
+      "value": {
+        "type": "createRoom",
+        "sequence": 3,
+        "configuration": {
+          "controllers": ["human", "human"],
+          "cpuDifficulty": null,
+          "board": { "width": 15, "height": 13 },
+          "environment": { "stormCloud": false }
+        }
+      }
+    },
+    {
+      "caseId": "spawn-seconds-underflow",
+      "value": {
+        "type": "createRoom",
+        "sequence": 4,
+        "configuration": {
+          "controllers": ["human", "human"],
+          "cpuDifficulty": null,
+          "board": { "width": 15, "height": 13 },
+          "environment": {
+            "stormCloud": false,
+            "lairs": { "enabled": false, "spawnSeconds": 4, "maxLivingMobs": 3 }
+          }
+        }
+      }
+    },
+    {
+      "caseId": "mob-cap-overflow",
+      "value": {
+        "type": "createRoom",
+        "sequence": 5,
+        "configuration": {
+          "controllers": ["human", "human"],
+          "cpuDifficulty": null,
+          "board": { "width": 15, "height": 13 },
+          "environment": {
+            "stormCloud": false,
+            "lairs": { "enabled": true, "spawnSeconds": 10, "maxLivingMobs": 9 }
+          }
+        }
+      }
+    }
+  ]
+}

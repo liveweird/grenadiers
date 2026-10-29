@@ -26,6 +26,7 @@ async function temporaryCheckout(nested = false) {
     cp(join(import.meta.dirname, '..', '..', 'api', 'gameplay-v13.schema.json'), join(checkout, 'api', 'gameplay-v13.schema.json')),
     cp(join(import.meta.dirname, '..', '..', 'api', 'gameplay-v14.schema.json'), join(checkout, 'api', 'gameplay-v14.schema.json')),
     cp(join(import.meta.dirname, '..', '..', 'api', 'gameplay-v15.schema.json'), join(checkout, 'api', 'gameplay-v15.schema.json')),
+    cp(join(import.meta.dirname, '..', '..', 'api', 'gameplay-v16.schema.json'), join(checkout, 'api', 'gameplay-v16.schema.json')),
     cp(join(import.meta.dirname, '..', '..', 'api', 'realtime.schema.json'), join(checkout, 'api', 'realtime.schema.json')),
     cp(join(import.meta.dirname, 'validator-generator.mjs'), join(checkout, 'web', 'scripts', 'validator-generator.mjs')),
   ])

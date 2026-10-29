@@ -6,9 +6,10 @@ use rand_chacha::rand_core::{RngCore, SeedableRng};
 use super::{Direction, MovementSegment, Position, SimulationSeed};
 
 pub const STORM_CLOUD_RANDOMNESS_VERSION: u16 = 1;
-pub(crate) const STORM_CLOUD_HALF_EXTENT: i32 = 512;
-const SPEED_PER_TICK: i32 = 8;
-const LEG_TICKS: u16 = 128;
+pub const STORM_CLOUD_HALF_EXTENT: i32 = 512;
+pub const STORM_CLOUD_SPEED_PER_TICK: i32 = 8;
+pub const STORM_CLOUD_LEG_TICKS: u16 = 128;
+pub const STORM_SLOW_TICKS: u64 = 180;
 const STORM_STREAM: u64 = 1;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -37,7 +38,7 @@ impl StormCloudState {
             view: StormCloudView {
                 position: Position::center(super::CellId::new(width / 2, height / 2)),
                 direction,
-                leg_remaining_ticks: LEG_TICKS,
+                leg_remaining_ticks: STORM_CLOUD_LEG_TICKS,
             },
             rng,
             seed,
@@ -59,14 +60,14 @@ impl StormCloudState {
                 .checked_add(1)
                 .expect("a storm cloud cannot consume u64::MAX random words");
             self.view.direction = self.reflect_outward(chosen);
-            self.view.leg_remaining_ticks = LEG_TICKS;
+            self.view.leg_remaining_ticks = STORM_CLOUD_LEG_TICKS;
         }
         let start = self.view.position;
         match self.view.direction {
-            Direction::North => self.view.position.y -= SPEED_PER_TICK,
-            Direction::East => self.view.position.x += SPEED_PER_TICK,
-            Direction::South => self.view.position.y += SPEED_PER_TICK,
-            Direction::West => self.view.position.x -= SPEED_PER_TICK,
+            Direction::North => self.view.position.y -= STORM_CLOUD_SPEED_PER_TICK,
+            Direction::East => self.view.position.x += STORM_CLOUD_SPEED_PER_TICK,
+            Direction::South => self.view.position.y += STORM_CLOUD_SPEED_PER_TICK,
+            Direction::West => self.view.position.x -= STORM_CLOUD_SPEED_PER_TICK,
         }
         self.view.leg_remaining_ticks -= 1;
         MovementSegment::new(start, self.view.position)

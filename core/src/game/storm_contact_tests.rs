@@ -2,10 +2,11 @@ use super::contract::ForcedMovement;
 use std::collections::{BTreeMap, BTreeSet};
 
 use super::State;
-use super::storm_test_support::{actors, arena_with_blocks, rules, state};
+use super::storm_test_support::{actors, arena_with_blocks, rules, state, state_with};
 use crate::game::{
-    CellId, EnabledItems, EntityId, MovementSegment, MovementTrace, OilState, PlayerCount,
-    Position, SeatId, SimulationSeed, StormCloudConfig, Tick, World,
+    CellId, Direction, EnabledItems, EntityId, Equipment, InputAction, MovementSegment,
+    MovementTrace, OilState, PlayerCount, Position, SeatId, SeatInput, SimulationSeed,
+    StormCloudConfig, Tick, World,
 };
 use crate::room::BoardSize;
 
@@ -133,4 +134,75 @@ fn final_endpoint_contact_is_included_without_a_path_sweep() {
     let mut contacts = vec![false; 2];
     game.include_storm_endpoint_contacts(&mut contacts);
     assert_eq!(contacts, [true, false]);
+}
+
+#[test]
+fn step_acquires_slow_from_an_accepted_bracelet_shove_crossing_the_cloud() {
+    let mut game = state_with(
+        BoardSize::FifteenByThirteen,
+        PlayerCount::Two,
+        EnabledItems::BRACELET,
+        [0; 32],
+    );
+    let pickup = game.actors[0].position.cell().unwrap();
+    game.insert_test_pickup(pickup, crate::game::PickupKind::Bracelet);
+    game.step(&[]).unwrap();
+    assert_eq!(
+        game.actors[0].inventory().equipment(),
+        Some(Equipment::Bracelet)
+    );
+
+    let cloud = game.storm_cloud().unwrap().position;
+    game.actors[1].position = Position {
+        x: cloud.x - 1_000,
+        y: cloud.y,
+    };
+    game.actors[0].position = Position {
+        x: game.actors[1].position.x - 640,
+        y: cloud.y,
+    };
+    game.actors[0].heading = Direction::East;
+    let report = game
+        .step(&[SeatInput {
+            seat: SeatId::One,
+            action: InputAction::Press(Direction::East),
+        }])
+        .unwrap();
+
+    assert_eq!(report.forced_movements.len(), 1);
+    assert_eq!(report.forced_movements[0].seat, SeatId::Two);
+    assert_eq!(game.actors[0].storm_slow_until(), None);
+    assert_eq!(game.actors[1].storm_slow_until(), Some(Tick(182)));
+}
+
+#[test]
+fn step_teleport_checks_destinations_but_never_the_connecting_path() {
+    let mut crossing = state_with(
+        BoardSize::FifteenByThirteen,
+        PlayerCount::Two,
+        EnabledItems::TELEPORTER,
+        [0; 32],
+    );
+    crossing.actors[0].position = Position::center(CellId::new(3, 6));
+    crossing.actors[1].position = Position::center(CellId::new(11, 6));
+    crossing.insert_test_pickup(CellId::new(3, 6), crate::game::PickupKind::Teleporter);
+    crossing.step(&[]).unwrap();
+    assert_eq!(crossing.actors[0].storm_slow_until(), None);
+    assert_eq!(crossing.actors[1].storm_slow_until(), None);
+
+    let mut endpoint = state_with(
+        BoardSize::FifteenByThirteen,
+        PlayerCount::Two,
+        EnabledItems::TELEPORTER,
+        [0; 32],
+    );
+    endpoint.actors[0].position = Position::center(CellId::new(3, 6));
+    endpoint.actors[1].position = endpoint.storm_cloud().unwrap().position;
+    endpoint.insert_test_pickup(CellId::new(3, 6), crate::game::PickupKind::Teleporter);
+    endpoint.step(&[]).unwrap();
+    assert_eq!(
+        endpoint.actors[0].position,
+        Position::center(CellId::new(7, 6))
+    );
+    assert_eq!(endpoint.actors[0].storm_slow_until(), Some(Tick(181)));
 }

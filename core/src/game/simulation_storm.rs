@@ -1,10 +1,8 @@
 use super::{State, StepError};
 use crate::game::geometry::{MovementSegment, MovementTrace};
-use crate::game::storm_cloud::STORM_CLOUD_HALF_EXTENT;
+use crate::game::storm_geometry::{footprints_overlap, swept_hits_position};
 use crate::game::types::HALF_FOOTPRINT;
-use crate::game::{Position, Tick};
-
-pub(super) const STORM_SLOW_TICKS: u64 = 180;
+use crate::game::{STORM_CLOUD_HALF_EXTENT, STORM_SLOW_TICKS, Tick};
 
 impl State {
     pub(super) fn expire_storm_slow(&mut self, tick: Tick) {
@@ -117,27 +115,4 @@ impl State {
             actor.storm_slow_until = None;
         }
     }
-}
-
-fn swept_hits_position(
-    segment: MovementSegment,
-    moving_half: i32,
-    stationary: Position,
-    stationary_half: i32,
-) -> bool {
-    let sum = i64::from(moving_half) + i64::from(stationary_half);
-    let left = i64::from(segment.start().x.min(segment.end().x));
-    let right = i64::from(segment.start().x.max(segment.end().x));
-    let top = i64::from(segment.start().y.min(segment.end().y));
-    let bottom = i64::from(segment.start().y.max(segment.end().y));
-    left < i64::from(stationary.x) + sum
-        && right > i64::from(stationary.x) - sum
-        && top < i64::from(stationary.y) + sum
-        && bottom > i64::from(stationary.y) - sum
-}
-
-fn footprints_overlap(left: Position, left_half: i32, right: Position, right_half: i32) -> bool {
-    let sum = i64::from(left_half) + i64::from(right_half);
-    (i64::from(left.x) - i64::from(right.x)).abs() < sum
-        && (i64::from(left.y) - i64::from(right.y)).abs() < sum
 }

@@ -92,6 +92,8 @@ mod stopwatch_tests;
 mod storm_cloud_tests;
 #[path = "storm_contact_tests.rs"]
 mod storm_contact_tests;
+#[path = "storm_golden_tests.rs"]
+mod storm_golden_tests;
 #[path = "storm_test_support.rs"]
 mod storm_test_support;
 #[path = "simulation/teleporter_acceptance_tests.rs"]

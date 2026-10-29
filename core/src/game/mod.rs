@@ -47,6 +47,7 @@ mod punch_geometry;
 pub mod rules;
 pub mod simulation;
 mod storm_cloud;
+pub(crate) mod storm_geometry;
 #[cfg(test)]
 pub(crate) mod test_support;
 pub mod types;
@@ -82,9 +83,10 @@ pub use rules::{RulesConfig, StormCloudConfig};
 pub(crate) use simulation::stationary_contact_entry;
 pub use simulation::{
     Actor, ActorInit, DrawReason, InputAction, RoundActorInit, RoundResult,
-    SIMULATION_RANDOMNESS_VERSION, SIMULATION_SEED_DERIVATION_VERSION,
-    STORM_CLOUD_RANDOMNESS_VERSION, SeatInput, SimulationSeed, State, StateError, StepError,
-    StepReport, StormCloudView,
+    SIMULATION_RANDOMNESS_VERSION, SIMULATION_SEED_DERIVATION_VERSION, STORM_CLOUD_HALF_EXTENT,
+    STORM_CLOUD_LEG_TICKS, STORM_CLOUD_RANDOMNESS_VERSION, STORM_CLOUD_SPEED_PER_TICK,
+    STORM_SLOW_TICKS, SeatInput, SimulationSeed, State, StateError, StepError, StepReport,
+    StormCloudView,
 };
 pub use types::{CellId, EntityId, PlayerCount, Position, SeatId, SpeedLevel, Tick};
 pub use view::{ActorView, ArenaView, BombView, FlameView, OilBarrelView, PickupView, PublicState};

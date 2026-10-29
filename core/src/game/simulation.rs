@@ -377,7 +377,10 @@ mod shove_geometry;
 #[path = "simulation_storm.rs"]
 mod storm_step;
 
-pub use super::storm_cloud::{STORM_CLOUD_RANDOMNESS_VERSION, StormCloudView};
+pub use super::storm_cloud::{
+    STORM_CLOUD_HALF_EXTENT, STORM_CLOUD_LEG_TICKS, STORM_CLOUD_RANDOMNESS_VERSION,
+    STORM_CLOUD_SPEED_PER_TICK, STORM_SLOW_TICKS, StormCloudView,
+};
 pub use participation::RoundActorInit;
 pub use random::{
     SIMULATION_RANDOMNESS_VERSION, SIMULATION_SEED_DERIVATION_VERSION, SimulationSeed,

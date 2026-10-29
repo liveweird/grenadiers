@@ -214,9 +214,9 @@ fn shield_and_heart_do_not_prevent_storm_slow() {
 }
 
 #[test]
-fn expiry_overflow_is_preflight_and_leaves_complete_state_unchanged() {
+fn storm_overflow_precedes_later_pickup_overflow_and_leaves_state_unchanged() {
     let mut game = State::new_at_tick_with_assignment_and_seed(
-        rules(EnabledItems::EMPTY, StormCloudConfig::Single),
+        rules(EnabledItems::INVISIBILITY_CLOAK, StormCloudConfig::Single),
         World::new(arena(BoardSize::FifteenByThirteen, PlayerCount::Two)),
         actors(BoardSize::FifteenByThirteen, PlayerCount::Two),
         Tick(u64::MAX - 180),
@@ -224,6 +224,8 @@ fn expiry_overflow_is_preflight_and_leaves_complete_state_unchanged() {
         SimulationSeed::new([0; 32]),
     )
     .unwrap();
+    let pickup = game.actors[0].position.cell().unwrap();
+    game.insert_test_pickup(pickup, crate::game::PickupKind::InvisibilityCloak);
     let before = game.clone();
     assert_eq!(game.step(&[]), Err(StepError::StormSlowExpiryOverflow));
     assert_eq!(game, before);

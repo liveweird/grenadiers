@@ -1,8 +1,8 @@
 use crate::game::{GenerationRecord, RulesConfig};
 use crate::protocol::Counter;
 
-use super::{ActorView, GameState, ProjectionError, RoomPhase, RoomView, Seat, StormCloudView};
 pub(crate) use super::room_validation::validate_room;
+use super::{ActorView, GameState, ProjectionError, RoomPhase, RoomView, Seat, StormCloudView};
 
 pub struct ExpandedCapture(pub(crate) crate::protocol::v14::ExpandedCapture);
 

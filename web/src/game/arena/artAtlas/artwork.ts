@@ -79,5 +79,6 @@ export function createAtlasArtwork(regions: AtlasRegions): ArenaArtwork {
     makeBomb: (blast, trigger) => createBomb(regions, blast, trigger),
     makeFlame: () => createFlame(regions),
     makeOilBarrel: () => createOilBarrel(regions),
+    makeStormCloud: () => regions.createSprite('environment.stormCloud'),
   }
 }

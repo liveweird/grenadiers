@@ -7,6 +7,7 @@ const changed = {
   winsToFinish: 1,
   bombFuseTicks: 60 as const,
   enabledItems: [],
+  environment: { stormCloud: false },
 }
 
 describe('v12 authoritative gameplay settings', () => {
@@ -30,6 +31,7 @@ describe('v12 authoritative gameplay settings', () => {
 
     const accepted = room(2)
     accepted.settings = changed
+    accepted.configuration.environment = changed.environment
     accepted.settingsRevision = 2
     socket.message({ type: 'roomState', room: accepted })
     expect(value.client.getState()).toMatchObject({ settingsPending: false, room: accepted })
@@ -88,7 +90,10 @@ describe('v12 authoritative gameplay settings', () => {
     const accepted = value.client.getState().room
 
     value.client.updateSettings(changed)
-    socket.message({ type: 'roomState', room: { ...baseline.room, settings: changed } })
+    socket.message({ type: 'roomState', room: {
+      ...baseline.room, settings: changed,
+      configuration: { ...baseline.room.configuration, environment: changed.environment },
+    } })
     expect(value.client.getState().settingsPending).toBe(true)
     expect(value.client.getState().room).toBe(accepted)
     socket.message({ type: 'error', code: 'staleSettings', sequence: 2 })

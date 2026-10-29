@@ -30,8 +30,8 @@ files:
 - `arena-guides.png` — raster copy of the separate guide/label layer;
 - `arena-overview.png` — labelled visual inventory on a checkerboard background.
 
-The 1120×1680 authoring sheet has 150 physical cells: 149 assigned entries (145 baseline
-drawings and four blank reserved entries) followed by one unassigned cell. Cells are 112×112
+The 1120×1680 authoring sheet has 150 physical cells: 150 assigned entries (146 baseline
+drawings and four blank reserved entries). Cells are 112×112
 pixels in ten columns. Logical arena tiles remain 48×48 pixels. Reserved and unassigned cells must
 stay transparent. Do not move or rename assigned entries; new catalogue IDs must be added in code
 before a source revision can use them.
@@ -57,7 +57,7 @@ npm --prefix e2e run art:export -- \
 Add `--slices` to emit optional named files under `target/art-atlas/slices/`. Runtime output is
 generated and ignored rather than an artist source. Its main files are `arena-atlas.png`,
 `arena-atlas.json`, `arena-overview.png` and `arena-preview.png`. The runtime texture contains the
-145 baseline frames, unrotated and untrimmed, with two-pixel extrusion and two-pixel transparent
+146 baseline frames, unrotated and untrimmed, with two-pixel extrusion and two-pixel transparent
 padding. Labels and guides never enter the runtime texture.
 
 Both commands refuse an existing output directory, so an artist source or earlier review cannot
@@ -140,3 +140,10 @@ AI-generated art, external artwork, external font download or new visual style. 
 guide and preview files derive from those same repository sources. Record the author, tool and
 license/provenance of future artist revisions alongside the adopted source; repository licensing
 remains authoritative for distribution.
+
+The roaming storm cloud occupies the final authoring slot as `environment.stormCloud`. Its
+80×80 frame uses a centered `(40, 40)` pivot and contains a 48×37 drawing with a bounded
+blue-gray palette and binary alpha. All preceding frame pixels and metadata remain unchanged.
+The cloud was generated with OpenAI built-in imagegen using the atlas as a style reference,
+then normalized with owner-authorized Pillow processing. See the [prompt and processing
+notes](storm-cloud-prompts.md). Cloud opacity and authoritative movement belong to the renderer.

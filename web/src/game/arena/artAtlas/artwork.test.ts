@@ -126,4 +126,12 @@ describe('atlas gameplay artwork', () => {
     regions.destroy()
     expect(source.destroyed).toBe(true)
   })
+
+  it('creates the environment cloud from its single atlas frame', () => {
+    const created: string[] = []
+    const cloud = createAtlasArtwork(recordingRegions(created)).makeStormCloud()
+    expect(created).toEqual(['environment.stormCloud'])
+    expect(cloud.label).toBe('environment.stormCloud')
+    cloud.destroy()
+  })
 })

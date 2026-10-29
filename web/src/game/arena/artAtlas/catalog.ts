@@ -3,6 +3,7 @@ import { makeActor } from '../actorArt'
 import { WALK_CYCLE, WALK_FRAME_DURATION_MS } from '../actorAnimation'
 import { makeBomb, makeFlame, makeOilBarrel, makePickup } from '../entityArt'
 import { makeBlock, makeFloorVariant, makeWallVariant } from '../terrainArt'
+import { makeStormCloud } from '../weatherArt'
 import { RENDERABLE_PICKUP_KINDS, type Direction, type Seat } from '../types'
 import { sourceFrame } from './layout'
 import type { ArtAnimation, ArtCatalog, ArtCatalogEntry, ArtFrame, ArtRect } from './types'
@@ -235,6 +236,10 @@ export function createArtCatalog(): ArtCatalog {
   addAdditionalActorAppearances(entries)
   addWalkingFrames(entries)
   addTimedBombPoses(entries)
+  entries.push(entry('environment.stormCloud', entries.length,
+    () => ({ drawing: makeStormCloud() }), {
+      size: 80, bounds: { x: -40, y: -40, width: 80, height: 80 }, pivot: { x: 40, y: 40 },
+    }))
   return {
     entries,
     animations: animations(),

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { snapshot } from '../client/testSupport'
+import { snapshot } from './testSupport'
 import type { ArenaView, BoardSize, Snapshot } from './schema'
 import { validateGameplayV14ServerMessage } from './validation'
 

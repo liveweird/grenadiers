@@ -34,8 +34,8 @@ describe('art atlas catalogue', () => {
       'reserved.actor.one.death', 'reserved.actor.two.death',
       'reserved.terrain.block.destruction', 'reserved.pickup.collection',
     ])
-    expect(manifest.frames).toHaveLength(149)
-    expect(manifest.frames.filter(({ status }) => status === 'baseline')).toHaveLength(145)
+    expect(manifest.frames).toHaveLength(150)
+    expect(manifest.frames.filter(({ status }) => status === 'baseline')).toHaveLength(146)
     expect(manifest.sheet).toEqual({ width: 1120, height: 1680, slotSize: 112, columns: 10 })
     expect(Object.keys(manifest.animations).filter((id) => id.endsWith('.walk'))).toHaveLength(16)
   })
@@ -49,7 +49,9 @@ describe('art atlas catalogue', () => {
       [1, 2].map((frame) => `bomb.shell.timed.${blast}.${frame}`))
 
     expect(manifest.frames.slice(0, 111)).toEqual(adoptedSource.frames.slice(0, 111))
-    expect(manifest.frames.slice(111).map(({ id }) => id)).toEqual([...walking, ...bombs])
+    expect(manifest.frames.slice(111).map(({ id }) => id)).toEqual([
+      ...walking, ...bombs, 'environment.stormCloud',
+    ])
     expect(manifest.animations['actor.one.north.walk']).toEqual({
       frameIds: [
         'actor.one.north.0', 'actor.one.north.2',
@@ -61,6 +63,17 @@ describe('art atlas catalogue', () => {
     expect(manifest.animations['bomb.timed.power.pulse'].frameIds).toEqual([
       'bomb.shell.timed.power', 'bomb.shell.timed.power.1', 'bomb.shell.timed.power.2',
     ])
+  })
+
+  it('appends the storm cloud in the last physical slot without moving earlier frames', () => {
+    const frames = createSourceManifest().frames
+    expect(frames.slice(0, 149)).toEqual(adoptedSource.frames.slice(0, 149))
+    expect(frames[149]).toEqual({
+      id: 'environment.stormCloud', status: 'baseline',
+      sourceRect: { x: 1008, y: 1568, width: 80, height: 80 },
+      localBounds: { x: -40, y: -40, width: 80, height: 80 },
+      pivot: { x: 40, y: 40 },
+    })
   })
 
   it('appends appearances three and four without moving any legacy atlas slot', () => {

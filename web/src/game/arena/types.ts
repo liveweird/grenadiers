@@ -29,6 +29,7 @@ interface PresentedActor {
   shortFuseRemainingTicks?: number
   diarrheaRemainingTicks?: number
   slowFootRemainingTicks?: number[]
+  stormSlowRemainingTicks?: number
   shortFlameRemainingTicks?: number
   longFuseRemainingTicks?: number
   reverseControlsRemainingTicks?: number
@@ -80,6 +81,11 @@ export interface SnapshotMessage {
       cell: { column: number; row: number }
       state: 'unlit' | 'burning'
     }>
+    stormCloud?: {
+      position: { x: number; y: number }
+      direction: Direction
+      legRemainingTicks: number
+    } | null
   }
 }
 export type Seat = 'one' | 'two' | 'three' | 'four'

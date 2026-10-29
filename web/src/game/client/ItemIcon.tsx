@@ -7,8 +7,8 @@ const manifest = sourceManifestJson
 const frames = new Map(manifest.frames.map((frame) => [frame.id, frame.sourceRect]))
 const ICON_SIZE = 24
 
-export function ItemIcon({ kind }: { kind: RenderablePickupKind }) {
-  const rect = frames.get(`pickup.${kind}`)
+function AtlasIcon({ frameId }: { frameId: string }) {
+  const rect = frames.get(frameId)
   if (!rect) return null
   const scale = ICON_SIZE / rect.width
   const style: CSSProperties = {
@@ -17,4 +17,12 @@ export function ItemIcon({ kind }: { kind: RenderablePickupKind }) {
     backgroundSize: `${manifest.sheet.width * scale}px ${manifest.sheet.height * scale}px`,
   }
   return <span className="item-icon" style={style} aria-hidden="true" />
+}
+
+export function ItemIcon({ kind }: { kind: RenderablePickupKind }) {
+  return <AtlasIcon frameId={`pickup.${kind}`} />
+}
+
+export function StormCloudIcon() {
+  return <AtlasIcon frameId="environment.stormCloud" />
 }

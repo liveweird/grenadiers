@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 import en from '../../locales/en/game.json'
 import pl from '../../locales/pl/game.json'
-import type { VisibleActorView } from '../v13/schema'
+import type { VisibleActorView } from '../v15/schema'
 import { OwnStatusBar } from './OwnStatusBar'
 
 function actor(): VisibleActorView {
@@ -11,6 +11,7 @@ function actor(): VisibleActorView {
     speedLevel: 4, bombCapacity: 5, bombRange: 6, liveBombCount: 2,
     inventory: { equipment: 'heart', weapon: 'powerBomb' }, damageGraceRemainingTicks: 61,
     voluntaryActionsFrozen: true, lastTeleportTick: null,
+    stormSlowRemainingTicks: 0,
     effects: [
       { kind: 'shield', remainingTicks: 1 },
       { kind: 'stopwatch', remainingTicks: 60 },
@@ -69,5 +70,16 @@ describe('own status bar', () => {
     render(<OwnStatusBar actor={actor()} copy={pl} />)
     expect(screen.getByLabelText('Ochrona przed obrażeniami aktywna, pozostało 0:02'))
       .toHaveTextContent('0:02')
+  })
+
+  it('shows the own cloud slowdown separately and clears it at zero', () => {
+    const current = { ...actor(), effects: [], stormSlowRemainingTicks: 180 }
+    const view = render(<OwnStatusBar actor={current} copy={en} />)
+    expect(screen.getByText('Storm cloud')).toBeVisible()
+    expect(screen.getByLabelText('Storm cloud slowdown, 0:03 remaining'))
+      .toHaveTextContent('0:03 · 50% slowdown')
+
+    view.rerender(<OwnStatusBar actor={{ ...current, stormSlowRemainingTicks: 0 }} copy={en} />)
+    expect(screen.queryByText('Storm cloud')).not.toBeInTheDocument()
   })
 })

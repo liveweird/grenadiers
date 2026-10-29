@@ -39,8 +39,8 @@ describe('v12 session and admission failures', () => {
     await vi.waitFor(() => expect(value.sockets).toHaveLength(1))
     const socket = value.sockets[0]
     socket.emit('open')
-    socket.message({ type: 'authenticated', protocolVersion: 14 })
-    socket.message({ type: 'authenticated', protocolVersion: 14 })
+    socket.message({ type: 'authenticated', protocolVersion: 15 })
+    socket.message({ type: 'authenticated', protocolVersion: 15 })
     expect(messages(socket).filter((message) => message.type === 'createRoom')).toHaveLength(1)
     socket.message({ ...admitted(), sequence: 2 })
     expect(value.client.getState().room).toBeNull()
@@ -117,15 +117,15 @@ describe('v12 authoritative updates and controls', () => {
     expect(value.client.movement('east')).toBe(false)
 
     const terminal = room(2, {
-      type: 'matchResult', endedAt: 1, rematchAt: 3,
+      type: 'matchResult', endedAt: 1, rematchAt: 181,
       result: { type: 'winner', seat: 'one', reason: 'roundWins' },
     }, 1)
-    terminal.tick = 2
+    terminal.tick = 180
     socket.message({ type: 'roomState', room: terminal })
     expect(value.client.rematch(true)).toBe(false)
     terminal.revision = 3
-    terminal.tick = 3
-    terminal.seats[1].connection = { type: 'disconnected', expiresAt: 10 }
+    terminal.tick = 181
+    terminal.seats[1].connection = { type: 'disconnected', expiresAt: 200 }
     socket.message({ type: 'roomState', room: terminal })
     expect(value.client.rematch(true)).toBe(false)
     terminal.revision = 4
@@ -173,7 +173,8 @@ describe('v12 authoritative updates and controls', () => {
     expect(value.client.admit({ type: 'create' })).toBe(true)
     expect(messages(socket).at(-1)).toEqual({
       type: 'createRoom', sequence: 2,
-      configuration: { controllers: ['human', 'human'], cpuDifficulty: null, board: { width: 15, height: 13 } },
+      configuration: { controllers: ['human', 'human'], cpuDifficulty: null,
+        board: { width: 15, height: 13 }, environment: { stormCloud: true } },
     })
   })
 

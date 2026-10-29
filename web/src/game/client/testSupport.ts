@@ -1,6 +1,6 @@
 import { vi } from 'vitest'
 import { GameClient, type AdmissionIntent, type GameClientState } from './client'
-import type { Admitted, GameServerMessage, GameState, RoomPhase, RoomView, Snapshot } from '../v14/schema'
+import type { Admitted, GameServerMessage, GameState, RoomPhase, RoomView, Snapshot } from '../v15/schema'
 
 export const sessionToken = 'a'.repeat(64)
 export const resumeToken = 'c'.repeat(64)
@@ -150,19 +150,32 @@ export async function authenticate(value: Harness, intent: AdmissionIntent = { t
   await vi.waitFor(() => expect(value.sockets).toHaveLength(1))
   const socket = value.sockets.at(-1)!
   socket.emit('open')
-  socket.message({ type: 'authenticated', protocolVersion: 14 })
+  socket.message({ type: 'authenticated', protocolVersion: 15 })
   return socket
 }
 
 export function room(revision: number, phase: RoomPhase = { type: 'waiting' }, roundId = 1): RoomView {
+  const completed = phase.type === 'result'
+    ? { roundId, roundNumber: 1, endedAt: phase.holdUntil - 180,
+      result: { type: 'draw' as const, reason: 'mutualElimination' as const } }
+    : phase.type === 'matchResult' && phase.result.type === 'winner'
+      ? { roundId, roundNumber: 1, endedAt: phase.endedAt,
+        result: { type: 'winner' as const, seat: phase.result.seat } }
+      : null
+  const roundNumber = ['running', 'result', 'matchResult'].includes(phase.type) ? 1 : 0
+  const terminalWinner = phase.type === 'matchResult' && phase.result.type === 'winner'
+    ? phase.result.seat : null
   return {
     roomId, roomCode: 'ABCDEFGH', roundId, revision, tick: revision,
-    configuration: { controllers: ['human', 'human'], cpuDifficulty: null, board: { width: 15, height: 13 } },
-    rulesVersion: 5, mapId: 'generated_v2', roundNumber: phase.type === 'running' ? 1 : 0,
-    scores: [{ seat: 'one', wins: 0 }, { seat: 'two', wins: 0 }], lastRound: null,
+    configuration: { controllers: ['human', 'human'], cpuDifficulty: null, board: { width: 15, height: 13 },
+      environment: { stormCloud: true } },
+    rulesVersion: 7, mapId: 'generated_v2', roundNumber,
+    scores: [{ seat: 'one', wins: terminalWinner === 'one' ? 1 : 0 },
+      { seat: 'two', wins: terminalWinner === 'two' ? 1 : 0 }], lastRound: completed,
     settings: {
-      startingSpeedLevel: 0, turnAssistUnits: 256, winsToFinish: 3, bombFuseTicks: 180,
-      enabledItems: ['heart'],
+      startingSpeedLevel: 0, turnAssistUnits: 256,
+      winsToFinish: terminalWinner ? 1 : 3, bombFuseTicks: 180,
+      enabledItems: ['heart'], environment: { stormCloud: true },
     },
     availableItems: ['kick', 'punch', 'bracelet', 'wallPass', 'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch', 'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls', 'invisibleBombs', 'oilBarrel', 'teleporter'],
     settingsRevision: 1, settingsEditor: 'one',
@@ -174,9 +187,9 @@ export function room(revision: number, phase: RoomPhase = { type: 'waiting' }, r
   }
 }
 
-function gameState(alive = true): GameState {
+function gameState(physicalTick: number, alive = true): GameState {
   return {
-    runningUpdates: 1, remainingTicks: 10_799, physicalTick: 1,
+    runningUpdates: physicalTick, remainingTicks: 10_800 - physicalTick, physicalTick,
     arena: { width: 15 as const, height: 13 as const, terrain: Array.from({ length: 195 }, () => 'floor' as const), blocks: [] },
     actors: [
       {
@@ -184,29 +197,33 @@ function gameState(alive = true): GameState {
         id: 1, seat: 'one' as const, position: { x: 512, y: 512 }, heading: 'east' as const,
         speedLevel: 0, alive, bombCapacity: 1, bombRange: 1, liveBombCount: 0,
         inventory: { equipment: null, weapon: null }, effects: [], damageGraceRemainingTicks: 0,
-        voluntaryActionsFrozen: false, lastTeleportTick: null,
+        voluntaryActionsFrozen: false, lastTeleportTick: null, stormSlowRemainingTicks: 0,
       },
       {
         type: 'visible',
         id: 2, seat: 'two' as const, position: { x: 14_848, y: 12_800 }, heading: 'west' as const,
         speedLevel: 0, alive: true, bombCapacity: 1, bombRange: 1, liveBombCount: 0,
         inventory: { equipment: null, weapon: null }, effects: [], damageGraceRemainingTicks: 0,
-        voluntaryActionsFrozen: false, lastTeleportTick: null,
+        voluntaryActionsFrozen: false, lastTeleportTick: null, stormSlowRemainingTicks: 0,
       },
     ],
     bombs: [], flames: [], pickups: [], oilBarrels: [],
+    stormCloud: { position: { x: 7_680, y: 6_656 }, direction: 'east', legRemainingTicks: 128 },
   }
 }
 
 export function admitted(revision = 1, lastActionId: number | null = null): Admitted {
   return {
     type: 'admitted' as const, sequence: 1, room: room(revision, { type: 'running' }),
-    youSeat: 'one' as const, resumeToken, lastActionId, state: gameState(),
+    youSeat: 'one' as const, resumeToken, lastActionId, state: gameState(revision),
   }
 }
 
 export function snapshot(revision: number, roundId = 1): Snapshot {
-  return { type: 'snapshot', room: room(revision, { type: 'running' }, roundId), state: gameState(), events: [] }
+  return {
+    type: 'snapshot', room: room(revision, { type: 'running' }, roundId),
+    state: gameState(revision), events: [],
+  }
 }
 
 export function messages(socket: SocketStub): Array<Record<string, unknown>> {

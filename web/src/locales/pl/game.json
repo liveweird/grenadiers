@@ -68,7 +68,10 @@
     "protectedTime": "Ochrona przed obrażeniami aktywna, pozostało {{time}}",
     "none": "Brak",
     "effectTimer": "{{item}} ({{time}})",
-    "slowFootGroup": "{{item}} ×{{count}} (prędkość {{multiplier}}; {{timers}})"
+    "slowFootGroup": "{{item}} ×{{count}} (prędkość {{multiplier}}; {{timers}})",
+    "stormCloud": "Chmura burzowa",
+    "stormSlow": "{{time}} · spowolnienie 50%",
+    "stormSlowTime": "Spowolnienie przez chmurę burzową, pozostało {{time}}"
   },
   "ownItems": {
     "label": "Twoje przedmioty",
@@ -149,6 +152,8 @@
     "tile": "pola",
     "seconds": "sekundy",
     "speedCap": "Premie prędkości dodają po jednym poziomie, maksymalnie do 5 pól/s.",
+    "stormCloud": "Chmura burzowa",
+    "stormCloudDescription": "Wędrująca chmura spowalnia graczy o 50% na 3 sekundy. Kontakt odnawia czas działania.",
     "kickDescription": "Stałe wyposażenie, które kopie nieruchomą bombę czasową lub zdalną, gdy na nią wejdziesz. Bomba przesuwa się o jedno pole w następnej aktualizacji, a potem co 10 aktualizacji aż do zablokowania; właściciel i lont się nie zmieniają. Min nie można kopać, a inny przedmiot wyposażenia zastępuje Kopnięcie.",
     "punchDescription": "Stałe wyposażenie. Naciśnij klawisz Wyposażenia, aby uderzyć bombę bezpośrednio przed sobą do następnego wolnego pola na trasie co trzy pola. Po udanym uderzeniu Uderzenie ma stałe 0,2 sekundy odnowienia; inny przedmiot wyposażenia zastępuje Uderzenie.",
     "braceletDescription": "Stałe wyposażenie. Ruch do przodu w drugiego gracza odpycha go najwyżej o 1 pole. Po udanym odepchnięciu Bransoleta ma 0,5 sekundy odnowienia i wymaga rozdzielenia graczy przed kolejnym odepchnięciem; inny przedmiot wyposażenia zastępuje Bransoletę.",

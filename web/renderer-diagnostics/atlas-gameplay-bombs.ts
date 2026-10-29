@@ -33,6 +33,9 @@ export function representativeSnapshot(): SnapshotMessage {
   }]
   snapshot.state.flames = [{ cell: { column: 6, row: 5 }, expiresAt: 20 }]
   snapshot.state.oilBarrels = [{ cell: { column: 8, row: 5 }, state: 'burning' }]
+  snapshot.state.stormCloud = {
+    position: { x: 7_680, y: 6_656 }, direction: 'east', legRemainingTicks: 128,
+  }
   Object.assign(snapshot.state.actors[0], {
     damageGraceRemainingTicks: 30, shieldRemainingTicks: 40,
     goldenFlameRemainingTicks: 50, shortFuseRemainingTicks: 60,

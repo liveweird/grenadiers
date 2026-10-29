@@ -20,4 +20,5 @@ export interface ArenaArtwork {
   ): BombDrawing
   makeFlame(): FlameDrawing
   makeOilBarrel(): OilBarrelDrawing
+  makeStormCloud(): Container
 }

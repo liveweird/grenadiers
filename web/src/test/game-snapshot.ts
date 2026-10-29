@@ -29,6 +29,7 @@ export function gameSnapshot(): SnapshotMessage {
       flames: [{ cell: { column: 3, row: 3 }, expiresAt: 130 }],
       pickups: [],
       oilBarrels: [],
+      stormCloud: null,
     },
   }
 }

@@ -4,6 +4,18 @@ This archive preserves the older release records originally maintained in
 [`docs/releases.md`](../releases.md). Records remain in their original order; the current
 release procedure and current release record stay in the [release guide](../releases.md).
 
+## v0.3.111 — 2026-10-28
+
+[v0.3.111](https://github.com/liveweird/grenadiers/releases/tag/v0.3.111) adds **fuse-driven bomb pulsation**. Timed shells briefly enlarge and their sparks pulse faster as the authoritative fuse approaches explosion, including Short Fuse and Long Fuse. Paused, remote/contact, legacy, reduced-motion and non-running states retain a neutral shell. Shadows, pause marks, positions, collision and server timing remain independent. No new artwork or protocol/archive identity is introduced; additional walking and artist-drawn bomb poses remain in the [backlog](../../BACKLOG.md).
+
+Independent runtime and diagnostic review is clear. All **6,963 web tests** pass across 103 files with **93.74% line coverage**; frontend/contract/static/scenario checks, production and renderer builds, tooling, strict Kubernetes schemas and dependency audits pass. Actual Chromium WebGL checks pass at DPR 1/2 over 49 states, including all timed blast appearances, remote/contact triggers, pause/resume, stale renders, movement, reduced motion and terminal rounds. Fixed procedural pixel fingerprints separately guard the atlas and independent historical renderer; canonical artist PNG/JSON are unchanged. These fingerprints are verified on the local browser/driver; the optional Linux/SwiftShader graphics suite was not executed.
+
+Tested source `3544259a70b17192904d6ec7d6c7c53d7d244caf`, tree `e859ac462a0ffceaae8e6e7a528eb1f00420e3e8`, merged through [PR #263](https://github.com/liveweird/grenadiers/pull/263). Core/server/API sources and resolved dependencies are byte-for-byte unchanged from v0.3.110, so its exhaustive Rust/coverage, replay and CPU acceptance is reused; Cargo metadata advances to this release. The distinct Linux debug/release unit [run 40784321407](https://github.com/liveweird/grenadiers/actions/runs/40784321407) also passes.
+
+Exact image `sha256:dc2d019f30576885b1b4b18bd95e67500c218f72e79cb79e73175ac3819545bf` passes **18 browser scenarios each in Compose and Kubernetes**, run concurrently on distinct IPv4 ports in approximately 3.5 minutes per stack. Kubernetes forward ownership, restricted security/resources/probes and zero-restart postflight pass. Temporary stacks were removed. Pinned Trivy 0.74.0 reports zero fixable HIGH/CRITICAL findings. This source prerelease publishes no production registry image.
+
+Localhost now runs the exact accepted image; health, readiness, CSP/cache headers and served HTML/JS/CSS/PNG bytes match its extracted reference. Keep v0.3.110 for rollback and reload existing tabs after upgrading. Classic-duel captures from that image: [desktop](../screenshots/bomb-pulse-desktop.png), [320px reduced motion](../screenshots/bomb-pulse-mobile-reduced.png). The [rendering guide](../game/art-atlas.md#bomb-animation) defines current animation behavior.
+
 ## v0.3.110 — 2026-10-28
 
 [v0.3.110](https://github.com/liveweird/grenadiers/releases/tag/v0.3.110) activates **11×9, 13×11 and 15×13 custom matches** for two to four human/CPU players. Select **Board size** when creating a custom match; it stays fixed through rounds, reconnect and rematch. **Create room** and **Play solo against CPU** retain the 15×13 default. All 22 optional items remain enabled by default. The [board guide](../game/board-sizes.md) includes desktop and Polish 320px screenshots.

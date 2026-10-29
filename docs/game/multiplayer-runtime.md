@@ -6,8 +6,12 @@ and recipient privacy; the [multiplayer design](multiplayer-design.md) records i
 
 ## Lifecycle and participation
 
-The roster lifecycle retains every original seat, score and actor after departure. Humans move
-between never admitted, connected, reserved and permanently departed states; CPU slots remain
+Before the first start, an explicit human departure or expired reconnect reservation frees that
+configured seat for a new admission. A vacancy cancels an initial countdown and clears readiness;
+unexpired reservations remain held. Accepted settings stay unchanged. After the first start,
+including rematch lobbies, departure remains permanent and seats cannot accept replacements.
+The roster retains original scores and actors. Humans move between available, connected,
+reserved and permanently departed states; CPU slots remain
 server controlled and cannot accept human admissions. At least two eligible participants and
 a connected human are required to start. A reserved human blocks readiness; a departed human
 does not. CPUs cannot keep a room alive after its last retained human leaves.
@@ -23,6 +27,9 @@ and important lifecycle changes publish immediately. Human frames and the opaque
 are derived from the same certified physical facts before revisions or report flushing commit.
 Admissions prepare a prospective lifecycle and all recipient frames, encode the private response,
 and commit only after the owner delivers it. Resume retains the exact new CPU publication.
+Released credentials remain retired and cannot resume or be minted for replacements. Forming
+rooms accept at most 256 lifetime human admissions, bounding the retired-credential set. A
+replacement cannot inherit the departed creator's settings authority.
 
 Round construction uses rules 7 and the actual physical-round assignment. It selects generator 3
 for 15×13 and generator 4 for 11×9/13×11. The configured roster remains intact, with departed
@@ -41,5 +48,5 @@ Simulation randomness uses an independent OS-generated private room root. Deriva
 uses ChaCha20 with the root key, the nonzero physical epoch as its 64-bit stream, and the first
 32 bytes as the round seed. Derivation does not advance shared state or depend on request order;
 arena fixtures and CPU streams cannot alter it. Roots and derived seeds redact debug output.
-The derivation remains version 1 for private replay formats 4 and 5, but production recording and
+The derivation remains version 1 for private replay formats 4–6, but production recording and
 export stay disabled.

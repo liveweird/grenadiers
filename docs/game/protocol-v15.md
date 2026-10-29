@@ -18,6 +18,11 @@ clients must not infer editability from lobby phase or readiness. The creator ca
 before the first start. That lock survives rematches; changing rules afterward requires a new
 room. Base rules and environment changes share one atomic revision and readiness reset.
 
+Before the first start, explicit leave and reconnect-grace expiry release human slots as
+unoccupied/Vacant. A new admission can fill the same configured seat; retired capabilities stay
+invalid. Creator authority is never transferred. After first start, departures remain permanent
+through rematches and their slots cannot be refilled.
+
 Snapshots add nullable `state.stormCloud`. An enabled cloud reports fixed-point `position`,
 cardinal `direction` and `legRemainingTicks` from 0 through 128. Position and leg progress must
 agree with the board bounds and eight-unit movement rate. Disabled environments require null.

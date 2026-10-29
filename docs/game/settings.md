@@ -41,8 +41,8 @@ it is not an editable gameplay setting. Quick duel and Solo always use 15×13. S
 
 All players see accepted values. Editing requires the original creator to be connected,
 unready and in the waiting lobby. Apply changes to update the shared rules; a genuine change
-clears every human's readiness. **All on** and **All off** change only the item switches in the
-draft; they do not reset numeric rules or submit automatically. Restore defaults prepares the
+clears every human's readiness. **All on** and **All off** change the item switches and cloud
+setting in the draft; they do not reset numeric rules or submit automatically. Restore defaults prepares the
 numeric Expanded defaults with every currently available item enabled. Classic settings prepares
 the original four values with optional items disabled. Every draft change requires **Apply rules**
 before it changes the shared configuration.

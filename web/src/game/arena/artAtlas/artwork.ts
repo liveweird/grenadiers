@@ -41,12 +41,19 @@ function createBomb(
   blast: 'standard' | 'piercing' | 'power' = 'standard',
   trigger: 'timed' | 'remote' | 'contact' = 'timed',
 ): BombDrawing {
+  const shell = regions.createSprite(`bomb.shell.${trigger}.${blast}`)
+  const shellFrames = trigger === 'timed' ? [
+    shell,
+    regions.createSprite(`bomb.shell.timed.${blast}.1`),
+    regions.createSprite(`bomb.shell.timed.${blast}.2`),
+  ] as const : undefined
   return assembleBombDrawing({
     root: new Container(),
     shadow: regions.createSprite('bomb.shadow'),
-    shell: regions.createSprite(`bomb.shell.${trigger}.${blast}`),
+    shell,
     spark: regions.createSprite('bomb.spark'),
     pause: regions.createSprite('bomb.pause'),
+    ...(shellFrames ? { shellFrames } : {}),
   }, trigger)
 }
 

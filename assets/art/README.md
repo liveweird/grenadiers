@@ -30,8 +30,8 @@ files:
 - `arena-guides.png` — raster copy of the separate guide/label layer;
 - `arena-overview.png` — labelled visual inventory on a checkerboard background.
 
-The 1120×1344 authoring sheet has 120 physical cells: 111 assigned entries (107 baseline
-drawings and four blank reserved entries) followed by nine unassigned cells. Cells are 112×112
+The 1120×1680 authoring sheet has 150 physical cells: 149 assigned entries (145 baseline
+drawings and four blank reserved entries) followed by one unassigned cell. Cells are 112×112
 pixels in ten columns. Logical arena tiles remain 48×48 pixels. Reserved and unassigned cells must
 stay transparent. Do not move or rename assigned entries; new catalogue IDs must be added in code
 before a source revision can use them.
@@ -57,7 +57,7 @@ npm --prefix e2e run art:export -- \
 Add `--slices` to emit optional named files under `target/art-atlas/slices/`. Runtime output is
 generated and ignored rather than an artist source. Its main files are `arena-atlas.png`,
 `arena-atlas.json`, `arena-overview.png` and `arena-preview.png`. The runtime texture contains the
-107 baseline frames, unrotated and untrimmed, with two-pixel extrusion and two-pixel transparent
+145 baseline frames, unrotated and untrimmed, with two-pixel extrusion and two-pixel transparent
 padding. Labels and guides never enter the runtime texture.
 
 Both commands refuse an existing output directory, so an artist source or earlier review cannot
@@ -67,7 +67,7 @@ target after review.
 ## Pixel and anchor rules
 
 - Keep pixels on integer coordinates with nearest-neighbour sampling and no antialiasing.
-- Keep each player appearance within 48 opaque RGB colors across its eight directional frames;
+- Keep each player appearance within 48 opaque RGB colors across its sixteen directional frames;
   use deliberate shading ramps rather than diffuse generated color noise.
 - Source alpha is binary: every pixel is either fully transparent (`0`) or fully opaque (`255`).
   Do not bake translucent shadows into the PNG. Shadow opacity remains manifest metadata (actor
@@ -75,7 +75,7 @@ target after review.
 - Paint only inside each baseline frame rectangle. Slot gutters and reserved frames must remain
   transparent.
 - A frame pivot preserves its drawing origin and must equal `(-localBounds.x,
-  -localBounds.y)`. All 32 directional actor poses retain the shared `(40, 65)` foot anchor.
+  -localBounds.y)`. All 64 directional actor poses retain the shared `(40, 65)` foot anchor.
 - Keep IDs path-safe and stable. The exporter rejects missing, duplicate, unexpected or path-like
   IDs, changed required animations, invalid dimensions and texture-budget overflow.
 - Flame frames must reach all four edges so adjacent rays join. The procedural template's
@@ -86,6 +86,21 @@ Use the standalone `art-atlas.html` renderer diagnostic to load a source PNG and
 all labelled drawings, and see the representative arena rebuilt from actual Pixi atlas regions.
 The diagnostic shows pickups, actor/cue compositions, bomb shells, spark, pause mark, Oil states
 and adjacent flames. It is not linked from the gameplay or product flow.
+
+## Animation editing
+
+Each player/direction has poses `0`, `1`, `2` and `3`; the walking sequence is `0 → 2 → 1 → 3`
+at 110ms per pose. Original poses retain their original slots; poses `2`/`3` are appended after
+the four-player inventory. Use the manifest and guide labels rather than assuming adjacent
+cells contain the entire cycle. Keep head size, central torso and the foot baseline stable.
+
+Timed bombs use the original `bomb.shell.timed.<blast>` drawing plus appended `.1` and `.2`
+poses. Keep their fuse attachment aligned with the separate spark. Gameplay selects these
+poses from remaining fuse ticks; fixed manifest timing is an authoring preview. Remote bombs
+and landmines retain their original single drawing. Reduced motion uses original pose zero.
+
+Start an art revision from the canonical pair or the published artist bundle. `art:template`
+produces the procedural reference; it does not reproduce or overwrite the adopted redraw.
 
 ## Provenance
 
@@ -107,6 +122,13 @@ enabling additional live seats by themselves.
 
 The [earlier variant prompts](player-variants-prompts.md) document the superseded generation,
 not the owner-supplied revision; the prompt for the latter was not provided.
+
+The additional walking and timed-bomb poses were generated with OpenAI's built-in imagegen
+tool from the existing drawings, then processed with Pillow with the owner's explicit approval.
+New actor poses retain the original heads and central torsos, combine generated passing-leg
+phases with small counter-swinging arm edits, and use each uniform's existing palette. Bomb
+poses retain the established fuse attachment. Every original frame rectangle is unchanged.
+The [animation prompts and processing rules](animation-prompts.md) document this extension.
 
 It replaces the v0.3.53 redraw, which was AI-generated: Claude (Anthropic, via Claude Code) wrote
 a procedural Python/Pillow script that painted every frame, directed and reviewed by the

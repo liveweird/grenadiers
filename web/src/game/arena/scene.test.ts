@@ -11,6 +11,9 @@ type NodeView = {
 function layers(scene: ArenaScene): NodeView[] {
   return scene.root.children as unknown as NodeView[]
 }
+const actorPoses = (actor: NodeView): NodeView[] => actor.children.slice(14, 30)
+const visibleIndexes = (nodes: NodeView[]): number[] => nodes
+  .flatMap((node, index) => node.visible ? [index] : [])
 describe('retained public arena scene', () => {
   it('draws every public layer and retains unchanged objects between snapshots', () => {
     const scene = new ArenaScene(2)
@@ -48,11 +51,9 @@ describe('retained public arena scene', () => {
     expect([
       blocks.children[0], ...pickups.children, bombs.children[0], flames.children[0], ...actors.children,
     ]).toEqual(retained)
-    expect(actors.children.map((actor) => actor.children.length)).toEqual([26, 26])
-    expect(actors.children[0].children.map(({ visible }) => visible))
-      .toEqual([true, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false])
-    expect(actors.children[1].children.map(({ visible }) => visible))
-      .toEqual([true, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, true, false, false, false, false, false])
+    expect(actors.children.map((actor) => actor.children.length)).toEqual([34, 34])
+    expect(visibleIndexes(actors.children[0].children)).toEqual([0, 10, 18])
+    expect(visibleIndexes(actors.children[1].children)).toEqual([0, 11, 26])
   })
   it('interpolates only between public positions and never extrapolates past the target', () => {
     const scene = new ArenaScene(1); const snapshot = gameSnapshot()
@@ -64,8 +65,7 @@ describe('retained public arena scene', () => {
     expect(actor.x).toBe(72)
     scene.render(125)
     expect(actor.x).toBe(96)
-    expect(actor.children.map(({ visible }) => visible))
-      .toEqual([true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false])
+    expect(visibleIndexes(actorPoses(actor))).toEqual([7])
     scene.render(150)
     expect(actor.x).toBe(120)
     scene.render(100_000)
@@ -74,8 +74,7 @@ describe('retained public arena scene', () => {
     expect(actor.x).toBe(72)
     scene.update(snapshot, 200)
     scene.render(325)
-    expect(actor.children.map(({ visible }) => visible))
-      .toEqual([true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false])
+    expect(visibleIndexes(actorPoses(actor))).toEqual([4])
   })
 
   it('keeps a selected frame stable when another moving snapshot arrives in that frame', () => {
@@ -94,7 +93,7 @@ describe('retained public arena scene', () => {
     scene.render(120)
     const actor = layers(scene)[5].children[0]
     const cues = actor.children.slice(1, 6)
-    const poses = actor.children.slice(6)
+    const poses = actorPoses(actor)
     for (const cue of cues) cue.visibleChanges = 0
     for (const pose of poses) pose.visibleChanges = 0
     snapshot.state.physicalTick = (snapshot.state.physicalTick ?? 0) + 1
@@ -192,6 +191,7 @@ describe('arena scene transitions and optional-item presentation', () => {
     const oldActors = [...layers(scene)[5].children]
     const oldPickup = layers(scene)[2].children[0]
     expect(oldActors[0].y).toBe(120)
+    expect(visibleIndexes(actorPoses(oldActors[0]))).toEqual([4])
     expect(layers(scene)[3].children[0].children[2].visible).toBe(true)
     scene.setReducedMotion(false)
     snapshot.room.roundId += 1
@@ -206,8 +206,7 @@ describe('arena scene transitions and optional-item presentation', () => {
     expect(oldPickup.destroyed).toBe(true)
     expect(layers(scene)[2].children[0]).not.toBe(oldPickup)
     expect(layers(scene)[5].children[0]).toMatchObject({ x: 72, y: 120 })
-    expect(layers(scene)[5].children[0].children.map(({ visible }) => visible))
-      .toEqual([true, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false])
+    expect(visibleIndexes(actorPoses(layers(scene)[5].children[0]))).toEqual([0])
   })
   it('deletes hidden actor motion and snaps a later reveal to its current position', () => {
     const scene = new ArenaScene(1)
@@ -236,7 +235,7 @@ describe('arena scene transitions and optional-item presentation', () => {
     const snapshot = gameSnapshot()
     scene.update(snapshot, 0)
     const actors = layers(scene)[5]
-    const poses = actors.children.map((actor) => actor.children.slice(6).map(({ visible }) => visible))
+    const poses = actors.children.map((actor) => visibleIndexes(actorPoses(actor)))
     snapshot.state.physicalTick = 103
     snapshot.state.actors[0].position = { x: 13_824, y: 11_776 }
     snapshot.state.actors[1].position = { x: 1536, y: 1536 }
@@ -246,7 +245,7 @@ describe('arena scene transitions and optional-item presentation', () => {
     expect(actors.children.map(({ x, y }) => [x, y])).toEqual([[648, 552], [72, 72]])
     scene.render(125)
     expect(actors.children.map(({ x, y }) => [x, y])).toEqual([[648, 552], [72, 72]])
-    expect(actors.children.map((actor) => actor.children.slice(6).map(({ visible }) => visible)))
+    expect(actors.children.map((actor) => visibleIndexes(actorPoses(actor))))
       .toEqual(poses)
   })
 })

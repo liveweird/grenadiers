@@ -25,11 +25,7 @@ repeated approval for routine implementation choices. Entries are not delivery-d
 
 ## Animation and arena environment
 
-- [next] **ANIMATION — richer sprite frames.** Add player walking frames and additional
-  artist-drawn bomb poses to the shared sheet and catalog. Preserve the existing drawings,
-  anchors, [fuse-driven pulse](docs/game/art-atlas.md#bomb-animation), readable timing and
-  reduced-motion behavior. Deliver code/catalog/source changes together when adopting new poses.
-- [todo] **STORM-CLOUD — roaming slowdown hazard.** A cloud moves slowly and randomly across
+- [next] **STORM-CLOUD — roaming slowdown hazard.** A cloud moves slowly and randomly across
   the board, including blocked tiles. It never blocks movement and bombs cannot harm it.
   Player/cloud contact in either direction applies a three-second, 50% slowdown. Define contact
   refresh and interaction with existing slow effects before implementation; avoid per-tick

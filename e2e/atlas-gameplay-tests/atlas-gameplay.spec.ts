@@ -16,6 +16,16 @@ type Result = {
   }>
   historicalDeltas: Result['comparisons']
   bombFingerprints: Array<{ stage: string; atlas: string; historical: string }>
+  animationCoverage: {
+    actors: Array<{
+      stage: string; appearance: string; direction: string; pose: number
+      atlasVisible: number[]; referenceVisible: number[]; differentBytes: number
+    }>
+    bombs: Array<{
+      stage: string; expectedPose: number
+      atlasVisible: number[]; referenceVisible: number[]; differentBytes: number
+    }>
+  }
   lifecycle: Record<string, boolean>
   performance: { coldStartupMs: number; retainedFrames: number; retainedFramesMs: number }
   resources: {
@@ -31,6 +41,9 @@ const bombStages = [
   ...['paused', 'resumed', 'stale-render', 'reduced-motion', 'moved-same-id', 'terminal']
     .map((state) => `bomb-animation-${state}`),
 ]
+const actorStages = (['north', 'east', 'south', 'west'] as const).flatMap((direction) =>
+  [0, 2, 1, 3].map((pose) => `actor-walk-${direction}-${pose}`))
+const staticActorStages = ['actor-reduced-motion', 'actor-paused', 'actor-non-running']
 
 test('atlas gameplay matches procedural pixels and retains renderer resources through lifecycle changes',
   async ({ page }, testInfo) => {
@@ -57,6 +70,8 @@ test('atlas gameplay matches procedural pixels and retains renderer resources th
       'running', 'interpolated-fractional', 'animation-80ms', 'animation-90ms',
       'animation-110ms', 'reduced-motion', 'result-hidden-actor', 'reset',
       'changed-terrain', 'context-restored',
+      ...actorStages,
+      ...staticActorStages,
       ...bombStages,
       ...[
         'protection', 'shield', 'stopwatch', 'goldenFlame', 'shortFuse', 'shortFlame',
@@ -67,6 +82,20 @@ test('atlas gameplay matches procedural pixels and retains renderer resources th
       width === 720 * expectedResolution && height === 624 * expectedResolution)).toBe(true)
     expect(result.comparisons.every(({ differentBytes }) => differentBytes === 0),
       JSON.stringify(result.comparisons)).toBe(true)
+    expect(result.animationCoverage.actors).toHaveLength(76)
+    expect(new Set(result.animationCoverage.actors.map(({ appearance }) => appearance)))
+      .toEqual(new Set(['one', 'two', 'three', 'four']))
+    expect(result.animationCoverage.actors.every(({ pose, atlasVisible, referenceVisible, differentBytes }) =>
+      atlasVisible.length === 1 && atlasVisible[0] === pose
+      && referenceVisible.length === 1 && referenceVisible[0] === pose
+      && differentBytes === 0), JSON.stringify(result.animationCoverage.actors)).toBe(true)
+    expect(new Set(result.animationCoverage.bombs.map(({ expectedPose }) => expectedPose)))
+      .toEqual(new Set([0, 1, 2]))
+    expect(result.animationCoverage.bombs.every(({
+      expectedPose, atlasVisible, referenceVisible, differentBytes,
+    }) => atlasVisible.length === 1 && atlasVisible[0] === expectedPose
+      && referenceVisible.length === 1 && referenceVisible[0] === expectedPose
+      && differentBytes === 0), JSON.stringify(result.animationCoverage.bombs)).toBe(true)
     const historicalByStage = new Map(result.historicalDeltas.map((value) => [value.stage, value]))
     expect(historicalByStage.get('running')?.differentPixels).toBe(105 * expectedResolution ** 2)
     expect(historicalByStage.get('animation-80ms')?.differentPixels)
@@ -114,6 +143,8 @@ test('atlas gameplay matches procedural pixels and retains renderer resources th
       'cue-shortFlame-low', 'cue-longFuse-low', 'cue-reverseControls-low',
       'cue-diarrhea-low',
       ...bombStages,
+      ...actorStages,
+      ...staticActorStages,
     ]
     expect(result.historicalDeltas.filter(({ stage }) => !intentionalRawDeltas.includes(stage))
       .every(({ differentBytes }) => differentBytes === 0), JSON.stringify(result.historicalDeltas))
@@ -122,7 +153,7 @@ test('atlas gameplay matches procedural pixels and retains renderer resources th
     expect(result.resources.atlasSprites).toBeGreaterThan(195)
     expect(result.resources.atlasNodes).toBeLessThan(400)
     expect(result.resources).toMatchObject({
-      textureSources: 1, textureWidth: 2040, textureHeight: 440, rgbaBytes: 3_590_400,
+      textureSources: 1, textureWidth: 2040, textureHeight: 528, rgbaBytes: 4_308_480,
     })
     expect(result.performance.retainedFrames).toBe(30)
     expect(result.performance.coldStartupMs).toBeLessThan(10_000)

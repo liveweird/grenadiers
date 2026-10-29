@@ -3,33 +3,39 @@ import type { RenderablePickupKind } from './types'
 import { PALETTE } from './palette'
 import { pixels } from './pixel'
 
+type BombTrigger = 'timed' | 'remote' | 'contact'
+type BombBlast = 'standard' | 'piercing' | 'power'
+
 export interface BombDrawing {
   root: Container; shadow: Container; shell: Container; spark: Container; pause: Container
+  shellFrames?: readonly [Container, Container, Container]
   remote: boolean; contact: boolean; paused: boolean; remainingTicks: number | null
 }
 export interface FlameDrawing { root: Container; frames: readonly [Container, Container] }
 
 export function assembleBombDrawing(
-  nodes: Pick<BombDrawing, 'root' | 'shadow' | 'shell' | 'spark' | 'pause'>,
-  trigger: 'timed' | 'remote' | 'contact',
+  nodes: Pick<BombDrawing, 'root' | 'shadow' | 'shell' | 'spark' | 'pause' | 'shellFrames'>,
+  trigger: BombTrigger,
 ): BombDrawing {
   nodes.spark.visible = trigger === 'timed'
   nodes.pause.visible = false
   nodes.root.addChild(nodes.shadow, nodes.shell, nodes.spark, nodes.pause)
+  if (nodes.shellFrames) {
+    nodes.shellFrames[1].visible = false
+    nodes.shellFrames[2].visible = false
+    nodes.root.addChild(nodes.shellFrames[1], nodes.shellFrames[2])
+  }
   return {
     ...nodes, remote: trigger === 'remote', contact: trigger === 'contact', paused: false,
     remainingTicks: null,
   }
 }
 
-export function makeBomb(
-  blast: 'standard' | 'piercing' | 'power' = 'standard',
-  trigger: 'timed' | 'remote' | 'contact' = 'timed',
-): BombDrawing {
-  const root = new Container()
-  const shadow = new Graphics()
-  pixels(shadow, PALETTE.deepInk, [[-15, 12, 30, 5], [-10, 17, 20, 2]])
-  shadow.alpha = 0.28
+function makeBombShell(
+  blast: BombBlast,
+  trigger: BombTrigger,
+  pose: 0 | 1 | 2,
+): Graphics {
   const shell = new Graphics()
   pixels(shell, PALETTE.deepInk, [[-12, -9, 24, 21], [-9, -13, 18, 29], [-15, -3, 30, 12]])
   pixels(shell, PALETTE.ink, [[-9, -9, 18, 21], [-12, -3, 24, 12]])
@@ -53,13 +59,39 @@ export function makeBomb(
     pixels(shell, PALETTE.brick, [[9, -29, 7, 4]])
   } else {
     pixels(shell, PALETTE.brass, [[4, -15, 7, 5], [8, -19, 4, 7], [11, -21, 7, 3]])
+    if (pose === 1) {
+      pixels(shell, PALETTE.deepInk, [[-15, -6, 3, 15], [12, -6, 3, 15], [5, -18, 3, 5]])
+      pixels(shell, 0x536272, [[-12, 6, 3, 4]])
+      pixels(shell, PALETTE.brassLight, [[11, -20, 5, 2]])
+    } else if (pose === 2) {
+      pixels(shell, PALETTE.deepInk, [[-12, 12, 24, 3], [-9, -16, 18, 3], [7, -22, 3, 5]])
+      pixels(shell, 0x8796a0, [[-9, 9, 5, 3]])
+      pixels(shell, PALETTE.brassLight, [[13, -22, 5, 2]])
+    }
   }
+  return shell
+}
+
+export function makeBomb(
+  blast: BombBlast = 'standard',
+  trigger: BombTrigger = 'timed',
+): BombDrawing {
+  const root = new Container()
+  const shadow = new Graphics()
+  pixels(shadow, PALETTE.deepInk, [[-15, 12, 30, 5], [-10, 17, 20, 2]])
+  shadow.alpha = 0.28
+  const shell = makeBombShell(blast, trigger, 0)
+  const shellFrames = trigger === 'timed'
+    ? [shell, makeBombShell(blast, trigger, 1), makeBombShell(blast, trigger, 2)] as const
+    : undefined
   const spark = new Graphics()
   pixels(spark, PALETTE.flameCore, [[16, -25, 4, 4], [21, -21, 4, 4], [12, -21, 4, 4]])
   pixels(spark, PALETTE.flame, [[18, -29, 3, 4], [24, -24, 3, 3]])
   const pause = new Graphics()
   pixels(pause, PALETTE.blueLight, [[-8, -7, 5, 15], [3, -7, 5, 15]])
-  return assembleBombDrawing({ root, shadow, shell, spark, pause }, trigger)
+  return assembleBombDrawing({
+    root, shadow, shell, spark, pause, ...(shellFrames ? { shellFrames } : {}),
+  }, trigger)
 }
 
 function flameFrame(alternate: boolean): Graphics {

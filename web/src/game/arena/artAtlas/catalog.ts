@@ -1,5 +1,6 @@
 import { Graphics, type Container } from 'pixi.js'
 import { makeActor } from '../actorArt'
+import { WALK_CYCLE, WALK_FRAME_DURATION_MS } from '../actorAnimation'
 import { makeBomb, makeFlame, makeOilBarrel, makePickup } from '../entityArt'
 import { makeBlock, makeFloorVariant, makeWallVariant } from '../terrainArt'
 import { RENDERABLE_PICKUP_KINDS, type Direction, type Seat } from '../types'
@@ -172,6 +173,33 @@ function addAdditionalActorAppearances(entries: ArtCatalogEntry[]): void {
   }
 }
 
+function addWalkingFrames(entries: ArtCatalogEntry[]): void {
+  const directions: readonly Direction[] = ['north', 'east', 'south', 'west']
+  for (const appearance of ['one', 'two', 'three', 'four'] as const) {
+    for (const direction of directions) {
+      for (const frame of [2, 3] as const) {
+        entries.push(entry(`actor.${appearance}.${direction}.${frame}`, entries.length,
+          actorPart(appearance, (actor) => actor.poses[direction][frame]), {
+            size: 80, bounds: ACTOR_BOUNDS, pivot: ACTOR_PIVOT, footAnchor: { x: 40, y: 65 },
+          }))
+      }
+    }
+  }
+}
+
+function addTimedBombPoses(entries: ArtCatalogEntry[]): void {
+  const options = {
+    size: 80 as const, bounds: { x: -40, y: -40, width: 80, height: 80 },
+    pivot: { x: 40, y: 40 },
+  }
+  for (const blast of ['standard', 'piercing', 'power'] as const) {
+    for (const frame of [1, 2] as const) {
+      entries.push(entry(`bomb.shell.timed.${blast}.${frame}`, entries.length,
+        bombPart(blast, 'timed', (bomb) => bomb.shellFrames![frame]), options))
+    }
+  }
+}
+
 function animations(): Readonly<Record<string, ArtAnimation>> {
   const result: Record<string, ArtAnimation> = {
     flame: { frameIds: ['effect.flame.0', 'effect.flame.1'], frameDurationMs: 80, reducedMotionFrame: 'effect.flame.0' },
@@ -181,8 +209,18 @@ function animations(): Readonly<Record<string, ArtAnimation>> {
     for (const direction of ['north', 'east', 'south', 'west'] as const) {
       const prefix = `actor.${seat}.${direction}`
       result[`${prefix}.walk`] = {
-        frameIds: [`${prefix}.0`, `${prefix}.1`], frameDurationMs: 110, reducedMotionFrame: `${prefix}.0`,
+        frameIds: WALK_CYCLE.map((frame) => `${prefix}.${frame}`),
+        frameDurationMs: WALK_FRAME_DURATION_MS, reducedMotionFrame: `${prefix}.0`,
       }
+    }
+  }
+  for (const blast of ['standard', 'piercing', 'power'] as const) {
+    result[`bomb.timed.${blast}.pulse`] = {
+      frameIds: [
+        `bomb.shell.timed.${blast}`, `bomb.shell.timed.${blast}.1`, `bomb.shell.timed.${blast}.2`,
+      ],
+      frameDurationMs: 110,
+      reducedMotionFrame: `bomb.shell.timed.${blast}`,
     }
   }
   return result
@@ -195,6 +233,8 @@ export function createArtCatalog(): ArtCatalog {
   addBombsAndEffects(entries)
   addPickupsAndReservations(entries)
   addAdditionalActorAppearances(entries)
+  addWalkingFrames(entries)
+  addTimedBombPoses(entries)
   return {
     entries,
     animations: animations(),

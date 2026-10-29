@@ -1,5 +1,6 @@
 import { Container } from 'pixi.js'
 import { setActorPose, type ActorDrawing } from './actorArt'
+import { selectActorPose } from './actorAnimation'
 import type { ArenaArtwork } from './artwork'
 import { selectBombAnimation } from './bombAnimation'
 import { TILE } from './drawing'
@@ -22,7 +23,7 @@ function renderCloak(drawing: ActorDrawing, effects: boolean, now: number): void
   drawing.cloak.alpha = effects && drawing.cloaked ? 0.7 + (Math.floor(now / 140) % 2) * 0.3 : 1
 }
 function renderActor(drawing: ActorDrawing, id: number, effects: boolean, now: number): void {
-  const frame = effects && drawing.moving && (Math.floor(now / 110) + id) % 2 === 1 ? 1 : 0
+  const frame = selectActorPose(now, id, drawing.moving, effects)
   setActorPose(drawing, drawing.direction, frame)
   renderActorProtection(drawing, effects, now)
   renderActorModifiers(drawing, effects, now)
@@ -197,7 +198,11 @@ export class ArenaScene {
         bomb.remainingTicks,
         effects && !bomb.paused && !bomb.remote && !bomb.contact,
       )
-      bomb.shell.scale.set(animation.shellScale)
+      const shells = bomb.shellFrames ?? [bomb.shell]
+      shells.forEach((shell, index) => {
+        shell.visible = index === (bomb.shellFrames ? animation.pose : 0)
+        shell.scale.set(animation.shellScale)
+      })
       bomb.spark.visible = !bomb.remote && !bomb.contact && !bomb.paused
         && animation.sparkVisible
       bomb.pause.visible = bomb.paused

@@ -6,6 +6,8 @@ vi.mock('pixi.js', async () => (await import('../../test/arena-pixi-mock')).aren
 
 type NodeView = { children: NodeView[]; x: number; visible: boolean; alpha: number; shapes: string[] }
 const layers = (scene: ArenaScene): NodeView[] => scene.root.children as unknown as NodeView[]
+const visiblePose = (actor: NodeView): number =>
+  actor.children.slice(14, 30).findIndex(({ visible }) => visible)
 
 describe('Stopwatch arena presentation', () => {
   it('draws holder, frozen victim, and snaps the victim on the authoritative freeze edge', () => {
@@ -16,7 +18,7 @@ describe('Stopwatch arena presentation', () => {
     scene.update(snapshot, 0)
     const [, , pickups, , , actors] = layers(scene)
     expect(pickups.children[0].shapes.length).toBeGreaterThan(12)
-    expect(actors.children[0].children[23]).toMatchObject({ visible: true, alpha: 0.7 })
+    expect(actors.children[0].children[31]).toMatchObject({ visible: true, alpha: 0.7 })
 
     snapshot.state.physicalTick = (snapshot.state.physicalTick ?? 0) + 1
     snapshot.state.actors[1].position.x -= 1024
@@ -24,9 +26,12 @@ describe('Stopwatch arena presentation', () => {
     scene.update(snapshot, 20)
     const victim = actors.children[1]
     expect(victim.x).toBe(600)
-    expect(victim.children[24]).toMatchObject({ visible: true })
+    expect(victim.children[32]).toMatchObject({ visible: true })
+    expect(visiblePose(victim)).toBe(12)
     scene.render(21)
     expect(victim.x).toBe(600)
+    scene.render(10_000)
+    expect(visiblePose(victim)).toBe(12)
   })
 
   it('shows a stable pause mark and never re-enables a paused timed-bomb spark', () => {

@@ -79,11 +79,11 @@ describe('original pixel-art geometry', () => {
     const green = makeActor('three')
     const plum = makeActor('four')
     for (const actor of [gold, blue, green, plum]) {
-      expect(actor.root.children).toHaveLength(26)
-      expect(Object.values(actor.poses).flat()).toHaveLength(8)
+      expect(actor.root.children).toHaveLength(34)
+      expect(Object.values(actor.poses).flat()).toHaveLength(16)
       expect(Object.values(actor.poses).flat().filter(({ visible }) => visible)).toHaveLength(1)
       setActorPose(actor, 'north', 1)
-      expect(actor.poses.north.map(({ visible }) => visible)).toEqual([false, true])
+      expect(actor.poses.north.map(({ visible }) => visible)).toEqual([false, true, false, false])
       expect(Object.values(actor.poses).flat().filter(({ visible }) => visible)).toHaveLength(1)
     }
     const goldColors = descendants(gold.root as unknown as Drawing)
@@ -108,7 +108,7 @@ describe('original pixel-art geometry', () => {
   it('keeps hazards and beveled pickups detailed with a fixed resource bound', () => {
     const bomb = makeBomb()
     const flame = makeFlame()
-    expect(bomb.root.children).toHaveLength(4)
+    expect(bomb.root.children).toHaveLength(6)
     expect(flame.root.children).toHaveLength(2)
     expect(flame.frames.map(({ visible }) => visible)).toEqual([true, false])
     const pickups = [

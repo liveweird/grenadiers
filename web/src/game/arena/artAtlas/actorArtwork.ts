@@ -19,6 +19,7 @@ export function createAtlasActor(regions: AtlasRegions, seat: Seat): ActorDrawin
 
   const pose = (direction: Direction): ActorDrawing['poses'][Direction] => [
     sprite(`actor.${seat}.${direction}.0`), sprite(`actor.${seat}.${direction}.1`),
+    sprite(`actor.${seat}.${direction}.2`), sprite(`actor.${seat}.${direction}.3`),
   ]
   const poses: ActorDrawing['poses'] = {
     north: pose('north'), east: pose('east'), south: pose('south'), west: pose('west'),

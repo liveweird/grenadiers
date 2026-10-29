@@ -1,9 +1,7 @@
 import '../src/game/arena/pixiCompatibility'
-import { Application, Container, Sprite } from 'pixi.js'
-import type { ActorDrawing } from '../src/game/arena/actorArt'
+import { Application, Sprite } from 'pixi.js'
 import { createAtlasArtwork } from '../src/game/arena/artAtlas/artwork'
 import { arenaSourceManifest, createArenaAtlas } from '../src/game/arena/artAtlas/load'
-import type { ArenaArtwork } from '../src/game/arena/artwork'
 import { GROUND, TILE } from '../src/game/arena/drawing'
 import type { BombDrawing } from '../src/game/arena/entityArt'
 import { graphicsArtwork } from '../src/game/arena/graphicsArtwork'
@@ -15,6 +13,10 @@ import { diagnosticSnapshot } from './snapshot'
 import {
   captureBombStages, representativeSnapshot, renderScenes, setReducedMotion, updateScenes,
 } from './atlas-gameplay-bombs'
+import {
+  bombCoverage, captureActorStages, proceduralReferenceArtwork, trackedArtwork, withPixelEvidence,
+  type ActorCoverage, type ArtworkTracker, type BombCoverage,
+} from './atlas-gameplay-coverage'
 
 type Pixels = { pixels: Uint8Array | Uint8ClampedArray; width: number; height: number }
 type Comparison = {
@@ -34,6 +36,7 @@ type AtlasGameplayResult = {
   comparisons: Comparison[]
   historicalDeltas: Comparison[]
   bombFingerprints: Array<{ stage: string; atlas: string; historical: string }>
+  animationCoverage: { actors: ActorCoverage[]; bombs: BombCoverage[] }
   lifecycle: Lifecycle
   performance: Performance
   resources: {
@@ -45,52 +48,6 @@ type AtlasGameplayResult = {
 async function pixelFingerprint(pixels: Pixels['pixels']): Promise<string> {
   const digest = await crypto.subtle.digest('SHA-256', new Uint8Array(pixels).buffer)
   return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, '0')).join('')
-}
-
-const pulsedCues = [
-  'protection', 'shield', 'stopwatch', 'goldenFlame', 'shortFuse', 'shortFlame',
-  'longFuse', 'reverseControls', 'diarrhea', 'cloak',
-] as const satisfies ReadonlyArray<keyof ActorDrawing>
-
-function normalizedGraphicsArtwork(
-  normalizeShell: (
-    shell: Container, blast: 'standard' | 'piercing' | 'power',
-    trigger: 'timed' | 'remote' | 'contact',
-  ) => Container,
-  onBomb?: (bomb: BombDrawing) => void,
-): ArenaArtwork {
-  return {
-    ...graphicsArtwork,
-    makeBomb(blast, trigger) {
-      const bomb = graphicsArtwork.makeBomb(blast, trigger)
-      // Compare the same raster transform on both backends, as with actor cue caches below.
-      const shell = bomb.shell
-      const index = bomb.root.getChildIndex(shell)
-      bomb.root.removeChild(shell)
-      bomb.shell = normalizeShell(shell, blast ?? 'standard', trigger ?? 'timed')
-      bomb.root.addChildAt(bomb.shell, index)
-      shell.destroy({ children: true, context: true })
-      onBomb?.(bomb)
-      return bomb
-    },
-    makeActor(seat) {
-      const actor = graphicsArtwork.makeActor(seat)
-      for (const cue of pulsedCues) {
-        const drawing = actor[cue]
-        const index = actor.root.getChildIndex(drawing)
-        const wrapper = new Container()
-        wrapper.visible = drawing.visible
-        drawing.visible = true
-        drawing.alpha = 1
-        actor.root.removeChild(drawing)
-        wrapper.addChild(drawing)
-        actor.root.addChildAt(wrapper, index)
-        wrapper.cacheAsTexture({ resolution: 1, antialias: false, scaleMode: 'nearest' })
-        actor[cue] = wrapper
-      }
-      return actor
-    },
-  }
 }
 
 declare global {
@@ -212,19 +169,21 @@ async function run(): Promise<AtlasGameplayResult> {
   // Parity packs the procedural baseline, so it checks the atlas pipeline independently of the
   // adopted artist pixels; the renderer lifecycle below still loads the bundled source.
   const regions = createArenaAtlas(await renderBaselineSource(arenaSourceManifest))
-  const atlas = new ArenaScene(resolution, createAtlasArtwork(regions))
+  const atlasTracker: ArtworkTracker = { actors: new Map(), bomb: undefined }
+  const referenceTracker: ArtworkTracker = { actors: new Map(), bomb: undefined }
+  const atlas = new ArenaScene(
+    resolution, trackedArtwork(createAtlasArtwork(regions), atlasTracker),
+  )
   let normalizedBomb: BombDrawing | undefined
-  const normalizeShell = (
-    _shell: Container, blast: 'standard' | 'piercing' | 'power',
-    trigger: 'timed' | 'remote' | 'contact',
-  ): Container => regions.createSprite(`bomb.shell.${trigger}.${blast}`)
-  const artwork = normalizedGraphicsArtwork(normalizeShell, (bomb) => { normalizedBomb = bomb })
-  const graphics = new ArenaScene(resolution, artwork)
+  const artwork = proceduralReferenceArtwork(regions, (bomb) => { normalizedBomb = bomb })
+  const graphics = new ArenaScene(resolution, trackedArtwork(artwork, referenceTracker))
   const historicalGraphics = new ArenaScene(resolution, graphicsArtwork)
   const scenes = [atlas, graphics, historicalGraphics] as const
   const comparisons: Comparison[] = []
   const historicalDeltas: Comparison[] = []
   const bombSamples: Array<{ stage: string; atlas: Pixels['pixels']; historical: Pixels['pixels'] }> = []
+  const actorEvidence: Array<Omit<ActorCoverage, 'differentBytes'>> = []
+  const bombEvidence: Array<Omit<BombCoverage, 'differentBytes'>> = []
   let renderer: ArenaRenderer | undefined
   let regionsDestroyed = false
   let appDestroyed = false
@@ -303,8 +262,14 @@ async function run(): Promise<AtlasGameplayResult> {
     scenes.forEach((scene) => scene.restoreContext())
     primeNormalizedCaches()
     capture('context-restored')
+    actorEvidence.push(...captureActorStages(scenes, atlasTracker, referenceTracker, capture))
 
-    captureBombStages(scenes, () => normalizedBomb, primeNormalizedCaches, capture)
+    captureBombStages(
+      scenes, () => [atlasTracker.bomb, normalizedBomb], primeNormalizedCaches, capture,
+      (stage, pose) => bombEvidence.push(bombCoverage(
+        stage, atlasTracker, referenceTracker, pose,
+      )),
+    )
     cueCases.forEach(([name, field, period], index) => {
       const cue = isolatedCueSnapshot(field, index + 2)
       updateScenes(scenes, cue, 0)
@@ -348,6 +313,10 @@ async function run(): Promise<AtlasGameplayResult> {
     renderer = undefined
     return {
       resolution, comparisons, historicalDeltas,
+      animationCoverage: {
+        actors: withPixelEvidence(actorEvidence, comparisons),
+        bombs: withPixelEvidence(bombEvidence, comparisons),
+      },
       bombFingerprints: await Promise.all(bombSamples.map(async ({ stage, atlas, historical }) => ({
         stage, atlas: await pixelFingerprint(atlas), historical: await pixelFingerprint(historical),
       }))),

@@ -1,6 +1,7 @@
 import { readFile } from 'node:fs/promises'
 import { expect, test, type Download, type Page } from '@playwright/test'
 import { observeBrowserPolicy, type BrowserPolicyObservation } from '../tests/support/browser-policy'
+import { inspectActorInventory } from './actor-animation-inventory'
 
 let browserPolicy: BrowserPolicyObservation
 test.beforeEach(async ({ context }) => { browserPolicy = await observeBrowserPolicy(context) })
@@ -158,7 +159,7 @@ test('source validation rejects path-like IDs and painting in authoring gutters'
   })
   expect(result.unsafeMessage).toContain('invalid stable ID ../terrain')
   expect(result.gutterMessage).toContain('paint exists in a gutter or reserved slot')
-  expect(result.inventory).toEqual({ frameCount: 111, pickupCount: 24 })
+  expect(result.inventory).toEqual({ frameCount: 149, pickupCount: 24 })
 })
 
 test('repeated preview reset and WebGL context restoration do not accumulate canvases or sprites', async ({ page }) => {
@@ -209,7 +210,7 @@ test('independent exports match decoded runtime pixels and canonical JSON', asyn
   const secondJson = output(second, 'arena-atlas.json').text
   if (!firstPng || !secondPng || !firstJson || !secondJson) throw new Error('Runtime export contents are incomplete')
   expect(await compareDecodedPng(page, firstPng, secondPng))
-    .toEqual({ width: 2040, height: 440, differentBytes: 0 })
+    .toEqual({ width: 2040, height: 528, differentBytes: 0 })
   expect(secondJson).toBe(firstJson)
   expect(firstJson).toBe(canonicalJson(JSON.parse(firstJson)))
 })
@@ -217,74 +218,59 @@ test('independent exports match decoded runtime pixels and canonical JSON', asyn
 test('committed artist source validates and exports through the browser pipeline', async ({ page }) => {
   await page.goto('/art-atlas.html?cli=1')
   const source = await committedSource()
-  const sourceManifest = JSON.parse(source.manifestJson) as { frames: Array<{ id: string; status: string }> }
+  const sourceManifest = JSON.parse(source.manifestJson) as {
+    sheet: { width: number; height: number }
+    frames: Array<{
+      id: string; status: string
+      footAnchor?: { x: number; y: number }
+    }>
+  }
   const result = await page.evaluate(
     (request) => window.grenadiersArtAtlas.exportSource(request), source,
   )
-  expect(sourceManifest.frames).toHaveLength(111)
-  expect(sourceManifest.frames.filter(({ status }) => status === 'baseline')).toHaveLength(107)
+  expect(sourceManifest.sheet).toMatchObject({ width: 1120, height: 1680 })
+  expect(sourceManifest.frames).toHaveLength(149)
+  expect(sourceManifest.frames.filter(({ status }) => status === 'baseline')).toHaveLength(145)
   expect(sourceManifest.frames.filter(({ status }) => status === 'reserved')).toHaveLength(4)
-  expect(result.runtimeManifest.frames).toHaveLength(107)
-  expect(result.rgbaBytes).toBe(3_590_400)
+  expect(result.runtimeManifest.frames).toHaveLength(145)
+  expect(result.rgbaBytes).toBe(4_308_480)
+  const appendedWalkingIds = (['one', 'two', 'three', 'four'] as const).flatMap((appearance) =>
+    (['north', 'east', 'south', 'west'] as const).flatMap((direction) =>
+      [2, 3].map((pose) => `actor.${appearance}.${direction}.${pose}`)))
+  expect(sourceManifest.frames.slice(111, 143).map(({ id }) => id)).toEqual(appendedWalkingIds)
+  expect(sourceManifest.frames.slice(143).map(({ id }) => id)).toEqual(
+    (['standard', 'piercing', 'power'] as const).flatMap((blast) =>
+      [1, 2].map((pose) => `bomb.shell.timed.${blast}.${pose}`)),
+  )
+  const actorFrames = sourceManifest.frames.filter(({ id }) => id.startsWith('actor.')
+    && /^actor\.(one|two|three|four)\.(north|east|south|west)\.[0-3]$/.test(id))
+  expect(actorFrames).toHaveLength(64)
+  expect(actorFrames.every(({ footAnchor }) => footAnchor?.x === 40 && footAnchor.y === 65)).toBe(true)
   expect(result.files.map(({ name }) => name)).toEqual([
     'arena-atlas.png', 'arena-atlas.json', 'arena-overview.png', 'arena-preview.png',
   ])
 })
 
-test('adopted third and fourth uniforms retain bounded opaque coat palettes', async ({ page }) => {
+test('all adopted directional actors retain binary alpha and bounded opaque palettes', async ({ page }) => {
   await page.goto('/art-atlas.html?cli=1')
-  const metrics = await page.evaluate(async (source) => {
-    const binary = atob(source.pngBase64)
-    const bytes = Uint8Array.from(binary, (value) => value.charCodeAt(0))
-    const bitmap = await createImageBitmap(new Blob([bytes], { type: 'image/png' }))
-    const canvas = document.createElement('canvas')
-    canvas.width = bitmap.width
-    canvas.height = bitmap.height
-    const context = canvas.getContext('2d', { willReadFrequently: true })
-    if (!context) throw new Error('Canvas 2D unavailable while inspecting adopted uniforms')
-    context.drawImage(bitmap, 0, 0)
-    bitmap.close()
-    const manifest = JSON.parse(source.manifestJson) as {
-      frames: Array<{ id: string; sourceRect: { x: number; y: number; width: number; height: number } }>
-    }
-    return ['three', 'four'].map((appearance) => {
-      const frames = manifest.frames.filter(({ id }) => id.startsWith(`actor.${appearance}.`))
-      const colors = new Set<string>()
-      let invalidAlpha = 0
-      let coatPixels = 0
-      const opaquePixels = frames.map(({ sourceRect }) => {
-        const data = context.getImageData(
-          sourceRect.x, sourceRect.y, sourceRect.width, sourceRect.height,
-        ).data
-        let opaque = 0
-        for (let offset = 0; offset < data.length; offset += 4) {
-          const [red, green, blue, alpha] = data.slice(offset, offset + 4)
-          if (alpha !== 0 && alpha !== 255) invalidAlpha += 1
-          if (alpha === 0) continue
-          opaque += 1
-          colors.add(`${red},${green},${blue}`)
-          const forest = green >= red + 12 && green >= blue + 6
-          const plum = red >= green + 12 && blue >= green + 8
-          if (appearance === 'three' ? forest : plum) coatPixels += 1
-        }
-        return opaque
-      })
-      return { appearance, frameCount: frames.length, opaquePixels, invalidAlpha, colors: colors.size, coatPixels }
-    })
-  }, await committedSource())
-
+  const metrics = await inspectActorInventory(page, await committedSource())
   expect(metrics.map(({ appearance, frameCount, invalidAlpha }) =>
     ({ appearance, frameCount, invalidAlpha })), JSON.stringify(metrics)).toEqual([
-    { appearance: 'three', frameCount: 8, invalidAlpha: 0 },
-    { appearance: 'four', frameCount: 8, invalidAlpha: 0 },
+    { appearance: 'one', frameCount: 16, invalidAlpha: 0 },
+    { appearance: 'two', frameCount: 16, invalidAlpha: 0 },
+    { appearance: 'three', frameCount: 16, invalidAlpha: 0 },
+    { appearance: 'four', frameCount: 16, invalidAlpha: 0 },
   ])
   for (const appearance of metrics) {
-    expect(appearance.opaquePixels).toHaveLength(8)
+    expect(appearance.opaquePixels).toHaveLength(16)
     expect(appearance.opaquePixels.every((pixels) => pixels > 0), JSON.stringify(appearance)).toBe(true)
+    expect(appearance.distinctFamilies.every(({ unique }) => unique),
+      JSON.stringify(appearance.distinctFamilies)).toBe(true)
     expect(appearance.colors, JSON.stringify(appearance)).toBeGreaterThanOrEqual(8)
-    // Allow deliberate artist shading while rejecting unbounded generated color noise.
     expect(appearance.colors, JSON.stringify(appearance)).toBeLessThanOrEqual(48)
-    expect(appearance.coatPixels, JSON.stringify(appearance)).toBeGreaterThan(100)
+    if (appearance.appearance === 'three' || appearance.appearance === 'four') {
+      expect(appearance.coatPixels, JSON.stringify(appearance)).toBeGreaterThan(100)
+    }
   }
 })
 

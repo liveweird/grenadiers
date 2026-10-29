@@ -19,8 +19,8 @@ the build. The separate diagnostic pages are excluded from the production applic
 ## Runtime ownership
 
 Each arena renderer loads and validates the bundled source, decodes it within the PNG budget,
-and packs the 107 active frames into one padded and extruded texture. The current pack is
-2040×440 pixels: 3,590,400 decoded RGBA bytes, below the 2048px/16MiB budget. Nearest sampling,
+and packs the 145 active frames into one padded and extruded texture. The current pack is
+2040×528 pixels: 4,308,480 decoded RGBA bytes, below the 2048px/16MiB budget. Nearest sampling,
 integer pivots and single-application shadow opacity preserve the existing pixel art.
 
 The scene uses the same animation, interpolation, status visibility and entity-removal logic
@@ -34,7 +34,7 @@ Procedural drawings remain available for template extraction and reference compa
 v0.3.53 replaced the adopted source with a redrawn, AI-generated sheet; the current source is
 a Napoleonic redraw (shako and bicorne actors, repainted terrain, bombs, flames, pickups and
 cues; see the [provenance](../../assets/art/README.md#provenance)). The original 95 frame contracts and pixels are preserved. Sixteen appended player-three/four
-poses extend the authoring sheet to 1120×1344 with matching pivots/foot anchors; the texture
+poses and additional animation frames extend the authoring sheet to 1120×1680 with matching pivots/foot anchors; the texture
 budget and gameplay collision geometry are unchanged. Live rooms support two to four human/CPU seats.
 v0.3.49 adopted the baseline artwork, with one explicit compositing change: status pulses
 fade each completed icon once. The old procedural renderer faded every overlapping paint
@@ -42,18 +42,29 @@ stroke separately, exposing underlying colors during a pulse. A flat artist PNG 
 finished icon rather than those hidden strokes. Pulse timing and status visibility stay shared;
 this normalization affects only those decorative overlap pixels.
 
+## Walking animation
+
+Every appearance and direction has four poses. Moving actors cycle through `0 → 2 → 1 → 3`
+at 110ms per pose, sharing the catalog's timing and ordering. Standing, frozen, teleported and
+reduced-motion actors use pose zero; interpolated positions still come from server snapshots.
+The added poses retain the existing heads, uniforms and foot baseline while articulating the
+legs and arms. All four uniforms keep their established colors and headgear.
+
 ## Bomb animation
 
 Timed bombs pulse their shell and spark from the server's remaining fuse ticks (60 ticks per
 second). The pulse period is one second above two seconds remaining, half a second above one
 second, and 0.2 seconds in the final second. Each pulse briefly enlarges the shell by 12.5%; its
-shadow, pause icon, position and gameplay collision stay fixed. Short Fuse and Long Fuse use
+shadow, pause icon, position and gameplay collision stay fixed. Three timed-shell drawings
+show neutral, compressed and expanded phases. Short Fuse and Long Fuse use
 their actual remaining time rather than a separate visual countdown.
 
 Stopwatch-paused bombs retain a neutral shell and visible pause mark. Remote bombs and landmines
 remain neutral because neither has an automatic countdown. Reduced motion and non-running
 rounds also use a stable shell. Re-rendering an unchanged snapshot does not advance the fuse,
-predict an explosion or remove a bomb. These states reuse the existing artist drawing.
+predict an explosion or remove a bomb. Neutral states use the original drawing. Bomb animation
+metadata provides an authoring preview; gameplay selects poses from the authoritative fuse
+phase rather than that fixed preview interval.
 
 ## Verification
 

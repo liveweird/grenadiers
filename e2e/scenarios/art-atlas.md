@@ -25,14 +25,15 @@ canonical JSON is identical; the test deliberately makes no promise about compre
 ## Scenario: committed artist source validates and exports through the browser pipeline
 
 The checked-in transparent PNG and stable-ID JSON pair passes source and runtime validation in the
-actual browser pipeline, retaining 107 baseline frames across four actor appearances and excluding
-four reserved entries. The 16 new walking frames are appended without moving the original 95 slots.
+actual browser pipeline, retaining 145 baseline frames and excluding four reserved entries. The 32
+new walking frames and six timed-bomb poses are appended after the frozen 111-entry inventory,
+without moving any existing slot. The packed runtime remains within budget at 2040 × 528.
 
-## Scenario: adopted third and fourth uniforms retain bounded opaque coat palettes
+## Scenario: all adopted directional actors retain binary alpha and bounded opaque palettes
 
-Decode the canonical artist sheet and discover all eight directional frames for each new
-uniform. Require nonempty frames, binary alpha, bounded 8–48-color palettes and recognizable
-forest/plum coat families without pinning image hashes or historical pixels.
+Decode the canonical artist sheet and discover all 16 directional poses for each of four uniforms.
+Require nonempty frames, binary alpha, shared 40,65 foot anchors, bounded 8–48-color palettes and
+recognizable forest/plum coat families without pinning image hashes or historical pixels.
 
 ## Scenario: workbench Export button downloads the validated runtime pack
 

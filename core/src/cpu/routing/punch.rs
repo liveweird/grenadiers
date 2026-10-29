@@ -125,7 +125,7 @@ pub(super) fn can_admit(
         || after.voluntary_actions_frozen
         || before_rival.id != rival.id
         || before_rival.seat != rival.seat
-        || (current.parts().rules.version == 6 && !rivals_unchanged(basis, current))
+        || (current.parts().rules.version >= 6 && !rivals_unchanged(basis, current))
         || !rival_supported(rival)
         || !current.parts().pickups.is_empty()
         || !current.parts().oil.is_empty()
@@ -163,7 +163,7 @@ fn planning_facts(
     let actor = recipient(observation).ok_or(PunchFailure::InvalidRequest)?;
     let rival = visible_rival(observation).ok_or(PunchFailure::Unsupported)?;
     let actor_cell = centered_cell(actor.position).ok_or(PunchFailure::Unsupported)?;
-    if !matches!(parts.rules.version, 5 | 6)
+    if !matches!(parts.rules.version, 5..=7)
         || !parts.rules.settings.enabled_items().contains_punch()
         || actor.equipment != Some(Equipment::Punch)
         || !actor.alive

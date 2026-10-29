@@ -1,15 +1,14 @@
 use std::collections::BTreeSet;
 
-use crate::cpu::forecast::{HazardForecast, TickWindow};
+use crate::cpu::forecast::HazardForecast;
 use crate::cpu::{MovementIntent, WorkBudget};
 use crate::game::Direction;
 
 use super::motion::advance;
 use super::route::{CONDITIONAL_MOVE_UPDATES, SearchNode};
-use super::route_checks::{CollisionProofs, check_stationary_all, check_transition_all, one_tick};
+use super::route_checks::{CollisionProofs, check_transition_all, one_tick};
 use super::route_replay::build_lanes;
 use super::route_time::add_tick;
-use super::safety::stationary_segment;
 use super::validation::Context;
 use super::{
     MIN_FINAL_STOP_UPDATES, RouteAssurance, RouteCertificate, RouteFailure, RouteMode,
@@ -34,6 +33,7 @@ pub(super) fn apply_move(
         .collect::<Vec<_>>();
     for lane in &mut node.lanes {
         for offset in 0..updates {
+            super::storm::charge_tick(context.storm, work)?;
             let tick = add_tick(lane.ready, u64::from(offset))?;
             let segments = advance(
                 context,
@@ -61,23 +61,23 @@ pub(super) fn apply_move(
             lane.recipient_barrier = retain_recipient_barrier(lane.recipient_barrier, &segments);
         }
         let stop = add_tick(lane.ready, u64::from(updates))?;
-        lane.motion.stop();
-        let segment = stationary_segment(lane.motion.position);
-        node.assumptions.extend(check_transition_all(
-            context,
-            forecasts,
-            &segment,
-            TickWindow {
-                start: stop,
-                end: add_tick(stop, 3)?,
-            },
-            mode,
-            CollisionProofs {
-                placement_origin: lane.origin_grace,
-                recipient_barrier: lane.recipient_barrier,
-            },
-            work,
-        )?);
+        for offset in 0..3 {
+            super::storm::charge_tick(context.storm, work)?;
+            let tick = add_tick(stop, offset)?;
+            let segment = advance(context, &mut lane.motion, MovementIntent::Stop, tick)?;
+            node.assumptions.extend(check_transition_all(
+                context,
+                forecasts,
+                &segment,
+                one_tick(tick)?,
+                mode,
+                CollisionProofs {
+                    placement_origin: lane.origin_grace,
+                    recipient_barrier: lane.recipient_barrier,
+                },
+                work,
+            )?);
+        }
         lane.ready = add_tick(stop, 3)?;
         lane.last_stop = Some(stop);
     }
@@ -109,6 +109,7 @@ pub(super) fn retain_recipient_barrier(
 }
 
 pub(super) fn apply_wait(
+    context: &Context<'_>,
     forecasts: &[&HazardForecast],
     mode: RouteMode,
     updates: u16,
@@ -117,34 +118,37 @@ pub(super) fn apply_wait(
 ) -> Result<(), RouteFailure> {
     for lane in &mut node.lanes {
         let end = add_tick(lane.ready, u64::from(updates))?;
-        node.assumptions.extend(check_stationary_all(
-            forecasts,
-            lane.motion.position,
-            TickWindow {
-                start: lane.ready,
-                end,
-            },
-            mode,
-            CollisionProofs {
-                placement_origin: lane.origin_grace,
-                recipient_barrier: lane.recipient_barrier,
-            },
-            work,
-        )?);
-        lane.motion.stop();
+        for tick in lane.ready.0..end.0 {
+            super::storm::charge_tick(context.storm, work)?;
+            let tick = crate::game::Tick(tick);
+            let segment = advance(context, &mut lane.motion, MovementIntent::Stop, tick)?;
+            node.assumptions.extend(check_transition_all(
+                context,
+                forecasts,
+                &segment,
+                one_tick(tick)?,
+                mode,
+                CollisionProofs {
+                    placement_origin: lane.origin_grace,
+                    recipient_barrier: lane.recipient_barrier,
+                },
+                work,
+            )?);
+        }
         lane.ready = end;
     }
     Ok(())
 }
 
 pub(super) fn terminal(
+    context: &Context<'_>,
     forecasts: &[&HazardForecast],
     request: RouteRequest,
     node: &mut SearchNode,
     work: &mut WorkBudget,
 ) -> Result<bool, RouteFailure> {
     let mut assumptions = BTreeSet::new();
-    for lane in &node.lanes {
+    for lane in &mut node.lanes {
         if lane.ready > request.survive_until {
             return Ok(false);
         }
@@ -153,23 +157,27 @@ pub(super) fn terminal(
         {
             return Ok(false);
         }
-        match check_stationary_all(
-            forecasts,
-            lane.motion.position,
-            TickWindow {
-                start: lane.ready,
-                end: request.survive_until,
-            },
-            request.mode,
-            CollisionProofs {
-                placement_origin: lane.origin_grace,
-                recipient_barrier: lane.recipient_barrier,
-            },
-            work,
-        ) {
-            Ok(found) => assumptions.extend(found),
-            Err(RouteFailure::NoRoute) => return Ok(false),
-            Err(error) => return Err(error),
+        let mut simulation = lane.motion.clone();
+        for tick in lane.ready.0..request.survive_until.0 {
+            super::storm::charge_tick(context.storm, work)?;
+            let tick = crate::game::Tick(tick);
+            let segment = advance(context, &mut simulation, MovementIntent::Stop, tick)?;
+            match check_transition_all(
+                context,
+                forecasts,
+                &segment,
+                one_tick(tick)?,
+                request.mode,
+                CollisionProofs {
+                    placement_origin: lane.origin_grace,
+                    recipient_barrier: lane.recipient_barrier,
+                },
+                work,
+            ) {
+                Ok(found) => assumptions.extend(found),
+                Err(RouteFailure::NoRoute) => return Ok(false),
+                Err(error) => return Err(error),
+            }
         }
     }
     if !assumptions.is_empty()

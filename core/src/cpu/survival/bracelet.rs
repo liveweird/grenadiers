@@ -19,7 +19,7 @@ pub(super) fn plan(
     let parts = observation.parts();
     let actor = super::compatibility::actor(observation)?;
     let rivals = visible_rivals(observation)?;
-    if !matches!(parts.rules.version, 5 | 6)
+    if !matches!(parts.rules.version, 5..=7)
         || !parts.rules.settings.enabled_items().contains_bracelet()
         || actor.equipment != Some(Equipment::Bracelet)
         || !actor.alive
@@ -46,7 +46,7 @@ pub(super) fn plan(
         if rival.equipment == Some(Equipment::Bracelet)
             || !rival.alive
             || footprints_overlap(actor.position, rival.position)
-            || (parts.rules.version == 6
+            || (parts.rules.version >= 6
                 && rivals.iter().any(|third| {
                     third.id != rival.id
                         && third.alive

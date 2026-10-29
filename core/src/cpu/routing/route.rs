@@ -11,7 +11,6 @@ use super::route_expand::{apply_move, apply_wait, finish, terminal};
 use super::route_priority::{dominated, risk, state_key};
 use super::route_time::add_tick;
 use super::safety::RecipientBarrier;
-use super::safety::stationary_segment;
 use super::validation::{self, Context};
 use super::{
     CERTIFIED_MOVE_UPDATES, MAX_ROUTE_EXPANSIONS, MAX_ROUTE_STEPS, RouteCertificate, RouteFailure,
@@ -102,19 +101,19 @@ pub(super) fn plan_route_seeded(
                 work,
             )?,
             RouteStep::Wait { updates } => {
-                apply_wait(forecasts, request.mode, updates, &mut root, work)?
+                apply_wait(&context, forecasts, request.mode, updates, &mut root, work)?
             }
         }
         root.steps.push(step);
-        if terminal(forecasts, request, &mut root, work)? {
+        if terminal(&context, forecasts, request, &mut root, work)? {
             return finish(&context, forecast, request, root, work);
         }
     }
-    if terminal(forecasts, request, &mut root, work)? {
+    if terminal(&context, forecasts, request, &mut root, work)? {
         let mut stopped = root.clone();
-        apply_wait(forecasts, request.mode, 1, &mut stopped, work)?;
+        apply_wait(&context, forecasts, request.mode, 1, &mut stopped, work)?;
         stopped.steps.push(RouteStep::Wait { updates: 1 });
-        if terminal(forecasts, request, &mut stopped, work)? {
+        if terminal(&context, forecasts, request, &mut stopped, work)? {
             return finish(&context, forecast, request, stopped, work);
         }
     }
@@ -168,7 +167,7 @@ pub(super) fn plan_route_seeded(
                     Err(error) => return Err(error),
                 }
                 next.steps.push(RouteStep::Move { direction, updates });
-                if terminal(forecasts, request, &mut next, work)? {
+                if terminal(&context, forecasts, request, &mut next, work)? {
                     return finish(&context, forecast, request, next, work);
                 }
                 let candidate_risk = risk(forecasts, request, &next, origin_grace, work)?;
@@ -179,13 +178,13 @@ pub(super) fn plan_route_seeded(
         let ready_ticks = node.lanes.iter().map(|lane| lane.ready).collect::<Vec<_>>();
         for updates in wait_lengths(&boundaries, request, &ready_ticks)? {
             let mut next = node.clone();
-            match apply_wait(forecasts, request.mode, updates, &mut next, work) {
+            match apply_wait(&context, forecasts, request.mode, updates, &mut next, work) {
                 Ok(()) => {}
                 Err(RouteFailure::NoRoute) => continue,
                 Err(error) => return Err(error),
             }
             next.steps.push(RouteStep::Wait { updates });
-            if terminal(forecasts, request, &mut next, work)? {
+            if terminal(&context, forecasts, request, &mut next, work)? {
                 return finish(&context, forecast, request, next, work);
             }
             let candidate_risk = risk(forecasts, request, &next, origin_grace, work)?;
@@ -240,24 +239,29 @@ fn initial_lanes(
     let mut assumptions = BTreeSet::new();
     for value in request.start_window.start.0..request.start_window.end.0 {
         let first = Tick(value);
-        let segment = stationary_segment(context.actor.position);
-        assumptions.extend(check_transition_all(
-            context,
-            forecasts,
-            &segment,
-            TickWindow {
-                start: add_tick(context.observation.parts().tick, 1)?,
-                end: first,
-            },
-            request.mode,
-            CollisionProofs {
-                placement_origin: None,
-                recipient_barrier,
-            },
-            work,
-        )?);
+        let mut motion = Motion::stopped(context, first);
+        for tick in add_tick(context.observation.parts().tick, 1)?.0..first.0 {
+            super::storm::charge_tick(context.storm, work)?;
+            let tick = Tick(tick);
+            let segment = advance(context, &mut motion, MovementIntent::Stop, tick)?;
+            assumptions.extend(check_transition_all(
+                context,
+                forecasts,
+                &segment,
+                TickWindow {
+                    start: tick,
+                    end: add_tick(tick, 1)?,
+                },
+                request.mode,
+                CollisionProofs {
+                    placement_origin: None,
+                    recipient_barrier,
+                },
+                work,
+            )?);
+        }
         lanes.push(LaneState {
-            motion: Motion::stopped(context, first),
+            motion,
             ready: first,
             last_stop: None,
             origin_grace,
@@ -284,6 +288,7 @@ fn move_lengths(
     for completed in 1..=cap {
         for lane in &mut simulations {
             work.try_take(1).map_err(|_| RouteFailure::WorkExhausted)?;
+            super::storm::charge_tick(context.storm, work)?;
             let _ = advance(
                 context,
                 &mut lane.motion,

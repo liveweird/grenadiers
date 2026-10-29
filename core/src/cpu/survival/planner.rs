@@ -81,6 +81,9 @@ pub fn plan_with_origin(
         .unwrap_or_else(stop));
     }
     let ordinary = crate::cpu::policy::plan(observation, memory, rng, work)?;
+    let storm_enabled = observation.environment().is_some_and(|environment| {
+        environment.storm_cloud_config() == crate::game::StormCloudConfig::Single
+    });
     let clear_movement = super::deadline::ordinary_movement_is_clear(
         observation,
         ordinary.intent.movement != MovementIntent::Stop,
@@ -99,6 +102,9 @@ pub fn plan_with_origin(
         return Ok(plan);
     }
     if ordinary.intent.manual.is_some() {
+        if storm_enabled {
+            return Ok(stop());
+        }
         return Ok(SurvivalPlan {
             control: ordinary,
             lease: None,
@@ -108,7 +114,7 @@ pub fn plan_with_origin(
     // Preserve the existing clear-board goals and pickup collection. Hazard
     // leases deliberately withhold item-changing paths until item tactics are
     // modeled; they must not replace the already legal clear-board behavior.
-    if clear_movement {
+    if clear_movement && !storm_enabled {
         return Ok(SurvivalPlan {
             control: ordinary,
             lease: None,

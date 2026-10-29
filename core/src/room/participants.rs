@@ -24,6 +24,7 @@ pub enum CpuPolicy {
     UtilityV15,
     UtilityV16,
     UtilityV17,
+    UtilityV18,
 }
 
 impl CpuPolicy {
@@ -47,6 +48,7 @@ impl CpuPolicy {
             Self::UtilityV15 => 15,
             Self::UtilityV16 => 16,
             Self::UtilityV17 => 17,
+            Self::UtilityV18 => 18,
         }
     }
 }
@@ -179,6 +181,18 @@ impl CpuProfile {
         difficulty: CpuDifficulty::Easy,
     };
 
+    /// Rules-v7 Standard profile, with either disabled or single-cloud environment.
+    pub const ENVIRONMENT_STANDARD: Self = Self {
+        policy: CpuPolicy::UtilityV18,
+        difficulty: CpuDifficulty::Standard,
+    };
+
+    /// Rules-v7 Easy profile, with either disabled or single-cloud environment.
+    pub const ENVIRONMENT_EASY: Self = Self {
+        policy: CpuPolicy::UtilityV18,
+        difficulty: CpuDifficulty::Easy,
+    };
+
     /// Only the two current profiles may be selected for a new live controller.
     #[must_use]
     pub const fn is_current(self) -> bool {
@@ -262,6 +276,8 @@ mod tests {
         assert_eq!(CpuProfile::CURRENT_EASY.policy.version(), 16);
         assert_eq!(CpuProfile::MULTIPLAYER_STANDARD.policy.version(), 17);
         assert_eq!(CpuProfile::MULTIPLAYER_EASY.policy.version(), 17);
+        assert_eq!(CpuProfile::ENVIRONMENT_STANDARD.policy.version(), 18);
+        assert_eq!(CpuProfile::ENVIRONMENT_EASY.policy.version(), 18);
         assert!(CpuProfile::CURRENT.is_current());
         assert!(CpuProfile::CURRENT_EASY.is_current());
         assert!(!CpuProfile::MULTIPLAYER_STANDARD.is_current());

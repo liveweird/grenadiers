@@ -16,6 +16,7 @@ mod route_replay;
 mod route_time;
 mod route_types;
 mod safety;
+pub(crate) mod storm;
 mod types;
 mod validation;
 
@@ -76,3 +77,6 @@ mod weapon_plant_tests;
 #[cfg(test)]
 #[path = "wall_pass_plant_tests.rs"]
 mod wall_pass_plant_tests;
+
+#[cfg(test)]
+mod storm_tests;

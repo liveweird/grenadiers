@@ -65,8 +65,18 @@ fn certify_pulse_inner(
 
     certify_wait_before_start(&context, forecast, request, origin, work, &mut assumptions)?;
     for start in request.start_window.start.0..request.start_window.end.0 {
-        scenarios.push((Tick(start), initial.clone(), origin.is_some()));
+        let start = Tick(start);
+        let mut motion = initial.clone();
+        for tick in super::route_time::add_tick(forecast.basis_tick(), 1)?.0..start.0 {
+            super::storm::charge_tick(context.storm, work)?;
+            let _ = advance(&context, &mut motion, MovementIntent::Stop, Tick(tick))?;
+        }
+        scenarios.push((start, motion, origin.is_some()));
     }
+    let mut storm_deadlines = scenarios
+        .iter()
+        .map(|(start, motion, _)| (*start, vec![motion.storm_deadlines()]))
+        .collect::<Vec<_>>();
     for completed in 0..request.hold_ticks {
         let mut next = Vec::with_capacity(scenarios.len());
         for (start, mut motion, mut origin_active) in scenarios {
@@ -76,6 +86,7 @@ fn certify_pulse_inner(
                     .checked_add(u64::from(completed))
                     .ok_or(RouteFailure::InvalidRequest)?,
             );
+            super::storm::charge_tick(context.storm, work)?;
             let segments = advance(&context, &mut motion, request.movement, tick)?;
             take_segments(work, &segments, forecast.dimensions())?;
             reject_pickups(observation, &segments)?;
@@ -94,9 +105,13 @@ fn certify_pulse_inner(
             next.push((start, motion, origin_active));
         }
         poses.push(aggregate_motion(&next)?);
+        for ((_, deadlines), (_, motion, _)) in storm_deadlines.iter_mut().zip(&next) {
+            deadlines.push(motion.storm_deadlines());
+        }
         scenarios = next;
     }
     certify_stopped_suffix(
+        &context,
         forecast,
         request,
         origin,
@@ -122,6 +137,7 @@ fn certify_pulse_inner(
         context.actor.position,
         context.actor.heading,
         poses,
+        storm_deadlines,
     )
 }
 
@@ -189,6 +205,7 @@ fn certify_wait_before_start(
 }
 
 fn certify_stopped_suffix(
+    context: &Context<'_>,
     forecast: &HazardForecast,
     request: PulseRequest,
     origin: Option<PulseOriginGrace>,
@@ -206,19 +223,21 @@ fn certify_stopped_suffix(
         if stopped >= request.stopped_safe_until {
             continue;
         }
-        let segment = stationary_segment(motion.position);
-        take_segments(work, &segment, forecast.dimensions())?;
-        assumptions.extend(super::safety::check_segments_with_grace(
-            forecast,
-            &segment,
-            TickWindow {
-                start: stopped,
-                end: request.stopped_safe_until,
-            },
-            request.mode,
-            origin.filter(|_| *origin_active).map(|value| value.cell),
-            None,
-        )?);
+        let mut simulation = motion.clone();
+        for tick in stopped.0..request.stopped_safe_until.0 {
+            super::storm::charge_tick(context.storm, work)?;
+            let tick = Tick(tick);
+            let segment = advance(context, &mut simulation, MovementIntent::Stop, tick)?;
+            take_segments(work, &segment, forecast.dimensions())?;
+            assumptions.extend(super::safety::check_segments_with_grace(
+                forecast,
+                &segment,
+                one_tick(tick)?,
+                request.mode,
+                origin.filter(|_| *origin_active).map(|value| value.cell),
+                None,
+            )?);
+        }
     }
     Ok(())
 }

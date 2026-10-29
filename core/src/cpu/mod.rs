@@ -9,6 +9,8 @@ mod identity;
 mod intent;
 mod memory;
 mod observation;
+mod observation_environment;
+mod observation_validation;
 pub mod policy;
 mod random;
 pub mod routing;
@@ -23,12 +25,16 @@ pub(crate) fn rules_config(observation: &Observation) -> Option<crate::game::Rul
         6 => Some(crate::game::RulesConfig::multiplayer_v6(
             observation.parts().rules.settings,
         )),
+        7 => Some(crate::game::RulesConfig::environment_v7(
+            observation.parts().rules.settings,
+            observation.environment()?.storm_cloud_config(),
+        )),
         _ => None,
     }
 }
 
 pub(crate) const fn observed_bomb_capacity(rules_version: u16) -> usize {
-    if rules_version == 6 {
+    if rules_version >= 6 {
         MAX_MULTIPLAYER_OBSERVED_BOMBS
     } else {
         MAX_OBSERVED_BOMBS
@@ -45,8 +51,8 @@ pub use memory::{
 pub use observation::{
     BombKnowledge, MAX_MULTIPLAYER_OBSERVED_BOMBS, MAX_OBSERVED_BOMBS, MAX_OBSERVED_EFFECTS,
     Observation, ObservationError, ObservationParts, ObservedActor, ObservedArena, ObservedBomb,
-    ObservedBombTrigger, ObservedEffect, ObservedFlame, ObservedOil, ObservedPickup, ObservedRules,
-    Unknown, UnknownActorFacts, UnknownBombFacts, VisibleActor,
+    ObservedBombTrigger, ObservedEffect, ObservedEnvironment, ObservedFlame, ObservedOil,
+    ObservedPickup, ObservedRules, Unknown, UnknownActorFacts, UnknownBombFacts, VisibleActor,
 };
 pub use random::{CpuRng, RandomError};
 pub use work::{WorkBudget, WorkError};

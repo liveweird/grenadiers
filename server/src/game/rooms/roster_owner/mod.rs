@@ -95,6 +95,8 @@ impl Drop for CleanupGuard {
 }
 
 #[cfg(test)]
+mod environment_acceptance_tests;
+#[cfg(test)]
 mod environment_cpu_tests;
 #[cfg(test)]
 mod lifecycle_tests;

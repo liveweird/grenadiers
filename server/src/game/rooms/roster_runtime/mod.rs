@@ -25,6 +25,8 @@ pub(crate) use types::{RosterAction, RosterNotice};
 #[cfg(test)]
 mod boundary_tests;
 #[cfg(test)]
+mod environment_recovery_tests;
+#[cfg(test)]
 mod replacement_tests;
 #[cfg(test)]
 mod tests;

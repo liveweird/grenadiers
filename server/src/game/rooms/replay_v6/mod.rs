@@ -13,4 +13,6 @@ pub(in crate::game::rooms) use recording::RecordingRosterRuntime;
 pub(in crate::game::rooms) use runner::{replay, verify_exact};
 
 #[cfg(test)]
+mod environment_acceptance_tests;
+#[cfg(test)]
 mod tests;

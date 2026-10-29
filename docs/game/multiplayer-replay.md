@@ -24,6 +24,20 @@ generation record. The replayer queues the recorded arena seeds and derives simu
 from the private root and recorded epoch. Missing, extra or mismatched markers are rejected.
 Removing an old simulation during rematch cleanup never creates a round marker.
 
+## Environment recordings
+
+Format6 binds rules7, CPU18 and environment randomness version1 in addition to lifecycle3,
+simulation randomness1 and derivation1. It chooses generator3 for 15×13 or generator4 for
+smaller boards. The header records the initial environment configuration; accepted lobby
+settings operations record each subsequent base-settings and environment change together.
+Cloud-disabled recordings still use this explicit new profile.
+
+The closed format6 operations normalize into the shared deterministic executor. Older
+format4/5 headers and operation parsers retain their original rules and policy identities.
+Replay submits accepted CPU inputs without rerunning planning. Inspection includes the
+environment configuration, actor timers and complete simulation RNG progress. These recorders
+remain test-only; this adds no production recording or export path.
+
 ## Exactness and resource limits
 
 Runtime inspection compares lifecycle, complete simulation state including RNG progress, pending
@@ -32,8 +46,10 @@ Easy/Standard CPU actions, real Teleporter collection, cancellation, departures,
 expiry, rematch consensus, publication and interruption ordering.
 
 Readers reject cross-profile headers: format 4 cannot claim a small board or generator 4, and
-format 5 cannot claim 15×13 or generator 3. Records remain at most 64 bytes with a 60,000-record cap. Memory accounting includes header-owned
-allocations and stays below 4 MiB. Truncated or incomplete journals are rejected. A failed round
+format 5 cannot claim 15×13 or generator 3. Formats4/5 keep their 64-byte record ceiling and
+4 MiB resident limit; format6 permits 72-byte records within 5 MiB. Every profile retains the
+60,000-record cap, and memory accounting includes header-owned allocations. Truncated or
+incomplete journals are rejected. A failed round
 construction records the attempted boundary as incomplete rather than fabricating a seed or round.
 The lifecycle profile is pinned to the core implementation at compile time and checked at replay.
 

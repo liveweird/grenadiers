@@ -35,6 +35,27 @@ Unknown hidden rivals withdraw proofs that cannot be certified. Bracelet also re
 third-party Bracelet threats that could counter-shove the CPU off its certified approach.
 These additional multiplayer guards do not change rules-5 admission semantics.
 
+## Environment profile
+
+Rules7 has an explicit `ENVIRONMENT_STANDARD`/`ENVIRONMENT_EASY` pair selecting policy18,
+including when the cloud is disabled. Its observation overlay carries only the published
+cloud leg and recipient-visible storm timers. Legacy observation layouts and constructors
+remain unchanged; the checked v15 adapter creates the new profile.
+
+Ordinary manual-free navigation retains the existing clear-board path, including supported
+pickups. It carries no escape certificate: known bombs, flames, burning Oil and unsupported
+control effects prevent this path. Cloud contact alone is nonlethal, and the driver retains
+bounded holds and confirmed stops. Planting and survival never use this navigation shortcut.
+
+Each certified execution lane tracks its own slowdown deadline interval. Routing models movement,
+delayed starts and stopped suffixes at physical ticks. After the published straight leg,
+planning uses a bounded possible-contact envelope. A certificate requires contact to be
+impossible or an existing guaranteed slowdown to cover the remaining movement; uncertain
+speed changes cannot be assumed safe. Deadline intervals participate in route dominance and
+lease validation. Legacy policies retain their original bulk checks and work accounting.
+
+Live controller selection remains the profile table above until paired network activation.
+
 ## Focused checks
 
 Run `cargo test -p grenadiers-core cpu:: --lib` and

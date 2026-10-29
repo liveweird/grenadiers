@@ -32,8 +32,10 @@ describe('atlas gameplay artwork', () => {
       'actor.cue.shortFuse', 'actor.cue.shortFlame', 'actor.cue.longFuse',
       'actor.cue.reverseControls', 'actor.cue.diarrhea', null, 'actor.cue.piercing',
       'actor.cue.power', 'actor.cue.landmine', null,
-      'actor.two.north.0', 'actor.two.north.1', 'actor.two.east.0', 'actor.two.east.1',
-      'actor.two.south.0', 'actor.two.south.1', 'actor.two.west.0', 'actor.two.west.1',
+      'actor.two.north.0', 'actor.two.north.1', 'actor.two.north.2', 'actor.two.north.3',
+      'actor.two.east.0', 'actor.two.east.1', 'actor.two.east.2', 'actor.two.east.3',
+      'actor.two.south.0', 'actor.two.south.1', 'actor.two.south.2', 'actor.two.south.3',
+      'actor.two.west.0', 'actor.two.west.1', 'actor.two.west.2', 'actor.two.west.3',
       'actor.cue.cloak', 'actor.cue.stopwatch', 'actor.cue.frozen', 'actor.cue.wallPass',
     ])
     expect(actor.slowFoot.children.map(({ label }) => label)).toEqual([
@@ -48,6 +50,21 @@ describe('atlas gameplay artwork', () => {
     expect(Object.values(actor.poses).flat().filter(({ visible }) => visible)).toHaveLength(1)
     expect(actor.shadow.alpha).toBeCloseTo(0.3)
     actor.root.destroy({ children: true })
+  })
+
+  it('assembles three timed shell sprites after the stable bomb children', () => {
+    const bomb = createAtlasArtwork(recordingRegions([])).makeBomb('piercing', 'timed')
+
+    expect(bomb.shellFrames?.map(({ label, visible }) => ({ label, visible }))).toEqual([
+      { label: 'bomb.shell.timed.piercing', visible: true },
+      { label: 'bomb.shell.timed.piercing.1', visible: false },
+      { label: 'bomb.shell.timed.piercing.2', visible: false },
+    ])
+    expect(bomb.root.children.slice(0, 4)).toEqual([
+      bomb.shadow, bomb.shell, bomb.spark, bomb.pause,
+    ])
+    expect(bomb.root.children.slice(4)).toEqual(bomb.shellFrames?.slice(1))
+    bomb.root.destroy({ children: true })
   })
 
   it('retains deterministic terrain variants and clears only owned sprites', () => {

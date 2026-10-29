@@ -42,4 +42,16 @@ describe('real Pixi actor pose visibility', () => {
     expect(cues.every(({ visible }) => visible)).toBe(true)
     expect(Object.values(actor.poses).flat().filter(({ visible }) => visible)).toEqual([actor.poses.west[1]])
   })
+
+  it('selects either appended walking pose without disturbing effect cues', () => {
+    const actor = makeActor('four')
+    actor.shield.visible = true
+
+    setActorPose(actor, 'east', 2)
+    expect(actor.poses.east.map(({ visible }) => visible)).toEqual([false, false, true, false])
+    setActorPose(actor, 'east', 3)
+    expect(actor.poses.east.map(({ visible }) => visible)).toEqual([false, false, false, true])
+    expect(actor.shield.visible).toBe(true)
+    expect(Object.values(actor.poses).flat().filter(({ visible }) => visible)).toHaveLength(1)
+  })
 })

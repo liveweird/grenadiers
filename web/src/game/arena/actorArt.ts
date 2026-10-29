@@ -3,7 +3,12 @@ import type { Direction, Seat } from './types'
 import { PALETTE } from './palette'
 import { pixels } from './pixel'
 
-type PoseFrames = readonly [Container, Container]
+export type ActorPoseFrame = 0 | 1 | 2 | 3
+type PoseFrames = readonly [Container, Container, Container, Container]
+
+function fourPoses(create: (frame: ActorPoseFrame) => Container): PoseFrames {
+  return [create(0), create(1), create(2), create(3)]
+}
 export interface ActorNodes {
   root: Container
   shadow: Container
@@ -56,11 +61,37 @@ export interface ActorDrawing extends ActorNodes {
 }
 
 function legs(drawing: Graphics, frame: number, side: boolean): void {
-  const offset = frame === 0 ? 0 : 3
-  const left = side ? 0 : offset
-  const right = side ? offset : 0
+  const offsets: readonly [number, number] = frame === 0 ? [0, 0]
+    : frame === 1 ? (side ? [0, 3] : [3, 0])
+    : frame === 2 ? (side ? [3, 0] : [0, 3])
+    : side ? [1, 3] : [3, 1]
+  const [left, right] = offsets
   pixels(drawing, PALETTE.deepInk, [[-10, 10 + left, 7, 10 - left], [3, 10 + right, 7, 10 - right]])
   pixels(drawing, 0x52606b, [[-9, 10 + left, 5, 4], [4, 10 + right, 5, 4]])
+}
+
+function walkingArms(
+  drawing: Graphics, appearance: Seat, direction: Direction, frame: number,
+): void {
+  if (frame < 2) return
+  const [uniform, light] = uniformColors(appearance)
+  if (direction === 'north' || direction === 'south') {
+    const leftY = frame === 2 ? -1 : 3
+    const rightY = frame === 2 ? 3 : -1
+    pixels(drawing, PALETTE.deepInk, [[-13, leftY, 5, 12], [8, rightY, 5, 12]])
+    pixels(drawing, uniform, [[-12, leftY + 1, 3, 8], [9, rightY + 1, 3, 8]])
+    pixels(drawing, light, [[-12, leftY + 1, 2, 4]])
+    return
+  }
+  const front = direction === 'east' ? 1 : -1
+  const frontY = frame === 2 ? -2 : 3
+  const rearY = frame === 2 ? 3 : -2
+  pixels(drawing, PALETTE.deepInk, [
+    [front > 0 ? 7 : -12, frontY, 5, 12], [front > 0 ? -10 : 5, rearY, 5, 11],
+  ])
+  pixels(drawing, uniform, [
+    [front > 0 ? 8 : -11, frontY + 1, 3, 8], [front > 0 ? -9 : 6, rearY + 1, 3, 7],
+  ])
 }
 
 function helmetMark(drawing: Graphics, appearance: Seat, direction: Direction): void {
@@ -98,6 +129,7 @@ function frontOrBack(appearance: Seat, direction: 'north' | 'south', frame: numb
   pixels(drawing, PALETTE.deepInk, [[-11, -5, 22, 18], [-8, -11, 16, 27]])
   pixels(drawing, uniform, [[-8, -4, 16, 17], [-10, 0, 20, 9]])
   pixels(drawing, light, [[-7, -3, 4, 13], [-9, 1, 3, 6]])
+  walkingArms(drawing, appearance, direction, frame)
   if (appearance === 'three' || appearance === 'four') {
     pixels(drawing, PALETTE.white, [[2, -3, 3, 13]])
   }
@@ -123,6 +155,7 @@ function sidePose(appearance: Seat, direction: 'east' | 'west', frame: number): 
   pixels(drawing, PALETTE.deepInk, [[-9, -5, 18, 18], [-7, -11, 16, 27]])
   pixels(drawing, uniform, [[-6, -4, 13, 17], [-8, 0, 18, 8]])
   pixels(drawing, light, [[-5, -3, 4, 13]])
+  walkingArms(drawing, appearance, direction, frame)
   if (appearance === 'three' || appearance === 'four') {
     pixels(drawing, PALETTE.white, [[1, -3, 3, 13]])
   }
@@ -248,10 +281,10 @@ export function makeActor(appearance: Seat): ActorDrawing {
   pixels(cloak, PALETTE.blue, [[-12, -23, 24, 3], [-15, -20, 3, 9], [12, -20, 3, 9]])
   pixels(cloak, PALETTE.white, [[-9, -20, 6, 3], [6, -20, 3, 3]])
   const poses = {
-    north: [frontOrBack(appearance, 'north', 0), frontOrBack(appearance, 'north', 1)],
-    east: [sidePose(appearance, 'east', 0), sidePose(appearance, 'east', 1)],
-    south: [frontOrBack(appearance, 'south', 0), frontOrBack(appearance, 'south', 1)],
-    west: [sidePose(appearance, 'west', 0), sidePose(appearance, 'west', 1)],
+    north: fourPoses((frame) => frontOrBack(appearance, 'north', frame)),
+    east: fourPoses((frame) => sidePose(appearance, 'east', frame)),
+    south: fourPoses((frame) => frontOrBack(appearance, 'south', frame)),
+    west: fourPoses((frame) => sidePose(appearance, 'west', frame)),
   } satisfies Record<Direction, PoseFrames>
   return assembleActorDrawing({
     root, protection, shield, stopwatch, frozen, goldenFlame, shortFuse, shortFlame, longFuse, reverseControls,
@@ -288,10 +321,11 @@ export function assembleActorDrawing(nodes: ActorNodes): ActorDrawing {
   return drawing
 }
 
-export function setActorPose(drawing: ActorDrawing, direction: Direction, frame: 0 | 1): void {
+export function setActorPose(drawing: ActorDrawing, direction: Direction, frame: ActorPoseFrame): void {
   drawing.direction = direction
   for (const [poseDirection, poses] of Object.entries(drawing.poses)) {
-    poses[0].visible = poseDirection === direction && frame === 0
-    poses[1].visible = poseDirection === direction && frame === 1
+    poses.forEach((pose, poseFrame) => {
+      pose.visible = poseDirection === direction && poseFrame === frame
+    })
   }
 }

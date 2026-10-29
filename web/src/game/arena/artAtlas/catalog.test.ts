@@ -25,19 +25,42 @@ describe('art atlas catalogue', () => {
   it('provides the complete baseline and only the planned transparent reservations', () => {
     const manifest = createSourceManifest()
     const actorFrames = manifest.frames.filter(({ id }) =>
-      /^actor\.(one|two|three|four)\.(north|east|south|west)\.[01]$/.test(id))
+      /^actor\.(one|two|three|four)\.(north|east|south|west)\.[0-3]$/.test(id))
     expect(manifest.frames.filter(({ id }) => id.startsWith('terrain.floor.'))).toHaveLength(8)
     expect(manifest.frames.filter(({ id }) => /^terrain\.wall\.\d$/.test(id))).toHaveLength(2)
-    expect(actorFrames).toHaveLength(32)
+    expect(actorFrames).toHaveLength(64)
     expect(manifest.frames.filter(({ id }) => id.startsWith('actor.cue.slowMarker.'))).toHaveLength(6)
     expect(manifest.frames.filter(({ status }) => status === 'reserved').map(({ id }) => id)).toEqual([
       'reserved.actor.one.death', 'reserved.actor.two.death',
       'reserved.terrain.block.destruction', 'reserved.pickup.collection',
     ])
-    expect(manifest.frames).toHaveLength(111)
-    expect(manifest.frames.filter(({ status }) => status === 'baseline')).toHaveLength(107)
-    expect(manifest.sheet).toEqual({ width: 1120, height: 1344, slotSize: 112, columns: 10 })
+    expect(manifest.frames).toHaveLength(149)
+    expect(manifest.frames.filter(({ status }) => status === 'baseline')).toHaveLength(145)
+    expect(manifest.sheet).toEqual({ width: 1120, height: 1680, slotSize: 112, columns: 10 })
     expect(Object.keys(manifest.animations).filter((id) => id.endsWith('.walk'))).toHaveLength(16)
+  })
+
+  it('appends four-frame walking and timed bomb poses after the frozen v111 slots', () => {
+    const manifest = createSourceManifest()
+    const walking = ['one', 'two', 'three', 'four'].flatMap((appearance) =>
+      ['north', 'east', 'south', 'west'].flatMap((direction) =>
+        [2, 3].map((frame) => `actor.${appearance}.${direction}.${frame}`)))
+    const bombs = ['standard', 'piercing', 'power'].flatMap((blast) =>
+      [1, 2].map((frame) => `bomb.shell.timed.${blast}.${frame}`))
+
+    expect(manifest.frames.slice(0, 111)).toEqual(adoptedSource.frames.slice(0, 111))
+    expect(manifest.frames.slice(111).map(({ id }) => id)).toEqual([...walking, ...bombs])
+    expect(manifest.animations['actor.one.north.walk']).toEqual({
+      frameIds: [
+        'actor.one.north.0', 'actor.one.north.2',
+        'actor.one.north.1', 'actor.one.north.3',
+      ],
+      frameDurationMs: 110,
+      reducedMotionFrame: 'actor.one.north.0',
+    })
+    expect(manifest.animations['bomb.timed.power.pulse'].frameIds).toEqual([
+      'bomb.shell.timed.power', 'bomb.shell.timed.power.1', 'bomb.shell.timed.power.2',
+    ])
   })
 
   it('appends appearances three and four without moving any legacy atlas slot', () => {
@@ -48,12 +71,12 @@ describe('art atlas catalogue', () => {
       })),
     )
     expect(frames[94].id).toBe('reserved.pickup.collection')
-    expect(frames.slice(95).map(({ id }) => id)).toEqual(
+    expect(frames.slice(95, 111).map(({ id }) => id)).toEqual(
       ['three', 'four'].flatMap((appearance) =>
         ['north', 'east', 'south', 'west'].flatMap((direction) =>
           [0, 1].map((frame) => `actor.${appearance}.${direction}.${frame}`))),
     )
-    expect(frames.slice(95).every(({ sourceRect, localBounds, pivot, footAnchor }) =>
+    expect(frames.slice(95, 111).every(({ sourceRect, localBounds, pivot, footAnchor }) =>
       sourceRect.width === 80 && sourceRect.height === 80
       && localBounds.x === -40 && localBounds.y === -44
       && localBounds.width === 80 && localBounds.height === 80

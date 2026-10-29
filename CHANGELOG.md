@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+## 0.3.112 — 2026-10-29
+
+- Add four-pose walking cycles for every direction and uniform, retaining the established
+  heads, colors and foot anchors while animating passing legs and counter-swinging arms.
+- Add three timed-bomb shell drawings selected from the authoritative fuse phase, with
+  neutral paused/reduced-motion states and unchanged remote/contact handling.
+- Extend the shared artist sheet with 38 append-only frames; preserve all 111 previous frame
+  rectangles and keep generated runtime artwork within the existing texture budget.
+
 ## 0.3.111 — 2026-10-28
 
 - Pulse timed bomb shells faster as their authoritative fuse approaches detonation, including

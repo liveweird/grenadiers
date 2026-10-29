@@ -1,5 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import { gameSnapshot } from '../../test/game-snapshot'
+import type { ActorDrawing } from './actorArt'
+import { graphicsArtwork } from './graphicsArtwork'
 import { ArenaScene } from './scene'
 
 vi.mock('pixi.js', async () => (await import('../../test/arena-pixi-mock')).arenaPixiMock())
@@ -15,7 +17,15 @@ const layers = (scene: ArenaScene): NodeView[] => scene.root.children as unknown
 
 describe('Wall Pass arena presentation', () => {
   it('keeps blocks opaque while showing the cue only on the current holder', () => {
-    const scene = new ArenaScene(1)
+    let holder: ActorDrawing | undefined
+    const scene = new ArenaScene(1, {
+      ...graphicsArtwork,
+      makeActor(seat) {
+        const drawing = graphicsArtwork.makeActor(seat)
+        if (seat === 'one') holder = drawing
+        return drawing
+      },
+    })
     const snapshot = gameSnapshot()
     snapshot.state.pickups = [{ cell: { column: 2, row: 2 }, kind: 'wallPass' }]
     snapshot.state.actors[0].wallPassEquipped = true
@@ -25,16 +35,16 @@ describe('Wall Pass arena presentation', () => {
     const [, blocks, pickups, , , actors] = layers(scene)
     expect(blocks.children[0]).toMatchObject({ visible: true, alpha: 1 })
     expect(pickups.children[0].shapes).toHaveLength(19)
-    expect(actors.children[0].children[25]).toMatchObject({ visible: true, alpha: 1 })
+    expect(holder!.wallPass).toMatchObject({ visible: true, alpha: 1 })
     expect(layers(scene).indexOf(blocks)).toBeLessThan(layers(scene).indexOf(actors))
     scene.setReducedMotion(true)
     scene.render(500)
-    expect(actors.children[0].children[25]).toMatchObject({ visible: true, alpha: 1 })
+    expect(holder!.wallPass).toMatchObject({ visible: true, alpha: 1 })
 
     snapshot.state.actors[0].wallPassEquipped = false
     snapshot.room.presentationBaseline = 'heart-replaced-wall-pass'
     scene.update(snapshot, 100)
     expect(blocks.children[0]).toMatchObject({ visible: true, alpha: 1 })
-    expect(actors.children[0].children[25]).toMatchObject({ visible: false })
+    expect(holder!.wallPass).toMatchObject({ visible: false })
   })
 })

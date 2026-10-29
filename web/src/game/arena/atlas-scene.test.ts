@@ -50,6 +50,13 @@ describe('arena artwork injection', () => {
     expect(artwork.makeOilBarrel).toHaveBeenCalledOnce()
     expect(artwork.makeActor).toHaveBeenCalledTimes(2)
     expect(terrain.paint).toHaveBeenCalledExactlyOnceWith(snapshot.state.arena)
+    const bomb = vi.mocked(artwork.makeBomb).mock.results[0].value
+    expect(bomb.shellFrames).toHaveLength(3)
+    expect(bomb.shellFrames?.[0]).toBe(bomb.shell)
+    expect(bomb.root.children.slice(0, 4)).toEqual([
+      bomb.shadow, bomb.shell, bomb.spark, bomb.pause,
+    ])
+    expect(bomb.root.children.slice(4)).toEqual(bomb.shellFrames?.slice(1))
 
     scene.update(snapshot, 50)
     expect(artwork.makeBlock).toHaveBeenCalledOnce()

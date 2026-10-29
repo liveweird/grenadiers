@@ -4,6 +4,16 @@ This archive preserves the older release records originally maintained in
 [`docs/releases.md`](../releases.md). Records remain in their original order; the current
 release procedure and current release record stay in the [release guide](../releases.md).
 
+## v0.3.113 — 2026-10-29
+
+[v0.3.113](https://github.com/liveweird/grenadiers/releases/tag/v0.3.113) adds the **dormant headless storm-cloud simulation**. Rules7 explicitly chooses Disabled or Single. A seeded cloud crosses terrain at eight coordinate units per tick; swept contact applies a refreshable three-second half-speed modifier independent of Slow Foot. Forced movement, teleport endpoints, terminal behavior, overflow rollback and independent RNG streams are covered. Existing live gameplay14 is unchanged: the cloud is not enabled in the application. See the [simulation guide](../game/storm-cloud.md) and [backlog](../../BACKLOG.md).
+
+Independent core review is clear. Linux debug/release unit [run 40917417210](https://github.com/liveweird/grenadiers/actions/runs/40917417210) also passes. The full local server gate passes debug, release, strict Clippy, formatting and coverage: **91.68% lines** (35,665/38,900), including all 4,194,304 item masks per profile with 32 partitions/four workers and no retries. Repository/tooling, rendered Kubernetes schemas and dependency policies pass; npm audits report zero vulnerabilities. Web, API and art inputs are unchanged, so the v0.3.112 web/graphics acceptance is reused.
+
+Tested source `6329f62958e3c17799b424a2bdaa69dccd8dc5e7`, tree `cdfab1d0de392d24c77d02fd596b8d0065e7d710`, [PR #267](https://github.com/liveweird/grenadiers/pull/267). Exact image `sha256:285d94eb64924dccd92c82582106d35c721e91918ab5e43dfd7d5505a20a87e3` passes **18 browser scenarios each in Compose and Kubernetes**, 3.5m each on distinct IPv4 ports. Security/resources/probes and zero-restart checks pass; temporary stacks are removed. Pinned Trivy0.74.0 reports zero fixable HIGH/CRITICAL findings.
+
+This is a source prerelease with an accepted local image. The current artist bundle remains [v0.3.112](https://github.com/liveweird/grenadiers/releases/download/v0.3.112/grenadiers-animation-art-v0.3.112.zip). Promotion retains v0.3.112 for rollback; restarting interrupts process-local matches.
+
 ## v0.3.112 — 2026-10-29
 
 [v0.3.112](https://github.com/liveweird/grenadiers/releases/tag/v0.3.112) completes the **walking and bomb sprite animation** milestone. Every uniform/direction has a four-pose `0 → 2 → 1 → 3` gait. Timed bombs have neutral, compressed and expanded drawings driven by their authoritative fuse; pause, reduced motion, remote/contact and terminal behavior remain stable. All 111 original frame rectangles are unchanged. The 38 appended drawings keep the established anchors; actor poses retain their heads, central torsos and colors, with new passing legs and counter-swinging arms.

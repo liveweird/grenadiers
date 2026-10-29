@@ -106,6 +106,7 @@ test('three humans join an explicit three-seat match', async ({ browser }) => {
     expect(running.room.configuration).toEqual({
       controllers: ['human', 'human', 'human'], cpuDifficulty: null,
       board: { width: 15, height: 13 },
+      environment: { stormCloud: true },
     })
     expect(running.room.seats.map(({ seat, controller, occupied }) =>
       ({ seat, controller, occupied }))).toEqual([
@@ -155,6 +156,7 @@ test('four humans share the four-seat lobby at 320 pixels', async ({ browser }) 
     expect(running.room.configuration).toEqual({
       controllers: ['human', 'human', 'human', 'human'], cpuDifficulty: null,
       board: { width: 15, height: 13 },
+      environment: { stormCloud: true },
     })
     expect(running.state.actors.map(({ seat }) => seat)).toEqual(['one', 'two', 'three', 'four'])
     const initialCells = running.state.actors.map((actor) => {
@@ -240,6 +242,7 @@ test('human CPU human assigns both human seats without exposing a CPU join', asy
     expect(running.room.configuration).toEqual({
       controllers: ['human', 'cpu', 'human'], cpuDifficulty: 'easy',
       board: { width: 15, height: 13 },
+      environment: { stormCloud: true },
     })
     expect(running.room.seats[1]).toMatchObject({
       seat: 'two', occupied: true, ready: false,
@@ -266,6 +269,7 @@ test('one human and three CPUs creates a ready four-controller lobby', async ({ 
     expect(running.room.configuration).toEqual({
       controllers: ['human', 'cpu', 'cpu', 'cpu'], cpuDifficulty: 'standard',
       board: { width: 15, height: 13 },
+      environment: { stormCloud: true },
     })
     expect(running.room.seats.slice(1).map(({ ready, controller, connection }) =>
       ({ ready, controller, connection }))).toEqual([

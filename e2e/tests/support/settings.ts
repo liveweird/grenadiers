@@ -22,6 +22,8 @@ export async function applyItemSettings(
   await page.getByRole('button', { name: 'Apply rules', exact: true }).click()
   await expect.poll(() => latestRoom(game)?.settingsRevision).toBeGreaterThan(before)
   expect(latestRoom(game)?.settings.enabledItems).toEqual(items.map(({ id }) => id))
+  expect(latestRoom(game)?.settings.environment).toEqual({ stormCloud: false })
+  expect(latestRoom(game)?.configuration.environment).toEqual({ stormCloud: false })
 }
 
 /** Preserve the original seeded scenarios while exercising the real settings UI. */
@@ -32,5 +34,7 @@ export async function selectClassicSettings(page: Page, game: ObservedGame): Pro
   await page.getByRole('button', { name: 'Apply rules', exact: true }).click()
   await expect.poll(() => latestRoom(game)?.settingsRevision).toBeGreaterThan(before)
   expect(latestRoom(game)?.settings.enabledItems).toEqual([])
-  expect(latestRoom(game)).toMatchObject({ rulesVersion: 5, mapId: 'generated_v2' })
+  expect(latestRoom(game)).toMatchObject({
+    rulesVersion: 7, mapId: 'generated_v3', settings: { environment: { stormCloud: false } },
+  })
 }

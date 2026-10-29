@@ -4,8 +4,8 @@ import { expectPaintedCanvas, latestSnapshot, observeGame, visibleActor,
   type ObservedGame } from '../tests/support/duel'
 import { moveSeatTo } from '../tests/support/movement'
 import { applyItemSettings } from '../tests/support/settings'
-import type { GameServerMessage, Seat } from '../../web/src/game/v14/schema'
-test.beforeAll(() => expect(process.env.E2E_STOPWATCH_FIXTURE).toBe('arena-v2-stopwatch'))
+import type { GameServerMessage, Seat } from '../../web/src/game/v15/schema'
+test.beforeAll(() => expect(process.env.E2E_STOPWATCH_FIXTURE).toBe('arena-v3-stopwatch'))
 const snapshots = (game: ObservedGame) => game.frames.filter(
   (frame): frame is Extract<GameServerMessage, { type: 'snapshot' }> => frame.type === 'snapshot',
 )

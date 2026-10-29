@@ -5,9 +5,9 @@ import { latestSnapshot, observeGame, visibleActor, type ObservedGame } from '..
 import { moveSeatTo } from '../tests/support/movement'
 import { admissionBaseline, disconnectTransport, installTransportProbe } from '../tests/support/reconnect'
 import { applyItemSettings } from '../tests/support/settings'
-import type { GameServerMessage } from '../../web/src/game/v14/schema'
+import type { GameServerMessage } from '../../web/src/game/v15/schema'
 
-test.beforeAll(() => expect(process.env.E2E_PUNCH_FIXTURE).toBe('arena-v2-punch'))
+test.beforeAll(() => expect(process.env.E2E_PUNCH_FIXTURE).toBe('arena-v3-punch'))
 type Snapshot = Extract<GameServerMessage, { type: 'snapshot' }>
 type Admission = Extract<GameServerMessage, { type: 'admitted' }>
 type StatefulAdmission = Admission & { state: NonNullable<Admission['state']> }

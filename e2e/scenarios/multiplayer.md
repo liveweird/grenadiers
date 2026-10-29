@@ -21,4 +21,4 @@ The creator submits Human/CPU/CPU/CPU with explicit Standard difficulty. All fou
 are visible, no invitation is offered without a human vacancy, and the sole human can ready
 without any spectator or replacement flow.
 
-These cases require a gameplay v14 endpoint. They must not run against a v13 deployment.
+These cases require the active gameplay v15 endpoint. They must not run against an archived v14 deployment.

@@ -5,9 +5,9 @@ import { expectPaintedCanvas, latestSnapshot, observeGame, visibleActor, type Ob
 import { moveSeatTo } from '../tests/support/movement'
 import { admissionBaseline, disconnectTransport, installTransportProbe } from '../tests/support/reconnect'
 import { applyItemSettings } from '../tests/support/settings'
-import type { GameServerMessage, Seat } from '../../web/src/game/v14/schema'
+import type { GameServerMessage, Seat } from '../../web/src/game/v15/schema'
 
-test.beforeAll(() => expect(process.env.E2E_WALL_PASS_FIXTURE).toBe('arena-v2-wall-pass'))
+test.beforeAll(() => expect(process.env.E2E_WALL_PASS_FIXTURE).toBe('arena-v3-wall-pass'))
 
 type Snapshot = Extract<GameServerMessage, { type: 'snapshot' }>
 const snapshots = (game: ObservedGame): Snapshot[] => game.frames.filter(

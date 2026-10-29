@@ -1,11 +1,12 @@
 # Authoritative round transport
 
-## Scenario: two native gameplay sockets finish one authoritative generated classic round
+## Scenario: two native gameplay sockets finish one authoritative cloud-disabled generated round
 
-Two independent browser contexts authenticate, create/join one room, disable optional items
+Two independent browser contexts authenticate on gameplay v15, create/join one room, disable optional items
+and the storm cloud atomically
 through revision-fenced settings after confirming a fresh room enables every available item,
 ready, and receive live public snapshots with
-generated-v2/Expanded-v5 metadata, the original Classic layouts, mirrored blocks, safe spawn
+generator3/rules7 metadata, a null cloud, mirrored blocks, safe spawn
 openings, and no initially exposed pickups. Refreshed logical movement moves the first actor through its spawn
 opening. Equipment with Punch disabled is rejected with `invalidPhase` without consuming its manual action ID;
 a fresh bomb reuses that ID and is accepted and a repeated action ID is rejected. Its explosion

@@ -2,7 +2,7 @@
 
 ## Scenario: Wall Pass crosses one intact block, rejects planting and hard walls, and resumes inside
 
-Two Chromium contexts use the repeating-byte-31 generated-v2 fixture with only Wall Pass enabled.
+Two Chromium contexts use pinned seed bytes through generator3 with only Wall Pass enabled.
 The English desktop and Polish 320-pixel reduced-motion clients ready before play and reveal the
 pickup with an ordinary bomb. After the bomb and flames clear, both painted canvases provide
 localized pre-collection captures while both actors are idle; the mobile view has no horizontal

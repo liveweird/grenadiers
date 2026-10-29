@@ -24,6 +24,7 @@ test('an Easy solo player completes, rematches, reconnects and leaves a real CPU
     const created = latestRoom(game)!
     expect(created.configuration).toEqual({
       controllers: ['human', 'cpu'], cpuDifficulty: 'easy', board: { width: 15, height: 13 },
+      environment: { stormCloud: true },
     })
     expect(created.seats).toEqual([
       expect.objectContaining({
@@ -35,6 +36,7 @@ test('an Easy solo player completes, rematches, reconnects and leaves a real CPU
       }),
     ])
     expect(created.settings.enabledItems).toEqual(created.availableItems)
+    expect(created.settings.environment).toEqual({ stormCloud: true })
     await expect(player.getByText('Private solo match · Easy CPU', { exact: true })).toBeVisible()
     await expect(player.getByRole('list', { name: 'Players' })).toContainText('CPU opponent')
     await expect(player.getByLabel('Room invitation code', { exact: true })).toHaveCount(0)

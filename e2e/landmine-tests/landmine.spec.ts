@@ -3,9 +3,9 @@ import { expect, test } from '@playwright/test'
 import { latestSnapshot, observeGame, visibleActor, type ObservedGame } from '../tests/support/duel'
 import { moveTo } from '../tests/support/movement'
 import { applyItemSettings } from '../tests/support/settings'
-import type { GameServerMessage } from '../../web/src/game/v14/schema'
+import type { GameServerMessage } from '../../web/src/game/v15/schema'
 
-test.beforeAll(() => expect(process.env.E2E_LANDMINE_FIXTURE).toBe('arena-v2-landmine'))
+test.beforeAll(() => expect(process.env.E2E_LANDMINE_FIXTURE).toBe('arena-v3-landmine'))
 
 const snapshots = (game: ObservedGame) => game.frames.filter(
   (frame): frame is Extract<GameServerMessage, { type: 'snapshot' }> => frame.type === 'snapshot',

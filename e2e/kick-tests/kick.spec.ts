@@ -4,10 +4,10 @@ import { arenaTilePixels } from '../tests/support/compositor'
 import { latestSnapshot, observeGame, visibleActor, type ObservedGame } from '../tests/support/duel'
 import { moveSeatTo } from '../tests/support/movement'
 import { applyItemSettings } from '../tests/support/settings'
-import type { GameServerMessage } from '../../web/src/game/v14/schema'
+import type { GameServerMessage } from '../../web/src/game/v15/schema'
 import { retainedKickTimeline } from './kick-timeline'
 
-test.beforeAll(() => expect(process.env.E2E_KICK_FIXTURE).toBe('arena-v2-kick'))
+test.beforeAll(() => expect(process.env.E2E_KICK_FIXTURE).toBe('arena-v3-kick'))
 type Snapshot = Extract<GameServerMessage, { type: 'snapshot' }>
 const snapshots = (game: ObservedGame): Snapshot[] => game.frames.filter(
   (frame): frame is Snapshot => frame.type === 'snapshot')
@@ -75,7 +75,7 @@ test('Kick moves one retained bomb through authoritative cells without extra cue
       await prepareEscape(one, games[0])
       await Promise.all(games.map((game) => expect.poll(() => actor(game).inventory.equipment)
         .toBe('kick')))
-      // Expanded-v5 starts at range two; the sole Kick route must not change that baseline.
+      // Rules7 starts at range two; the sole Kick route must not change that baseline.
       await Promise.all(games.map((game) => expect.poll(() => actor(game).bombRange).toBe(2)))
       await expect(one.getByRole('region', { name: 'Your items' })).toContainText('GearKick')
       await expect(two.getByLabel('Ulepszenia: Gracz pierwszy')).toContainText('WyposażenieKopnięcie')

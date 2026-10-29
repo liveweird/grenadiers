@@ -2,7 +2,7 @@
 
 ## Scenario: Kick moves one retained bomb through authoritative cells without extra cues and preserves its fuse
 
-Two Chromium contexts use the repeating-byte-31 generated-v2 fixture with only Kick enabled and a
+Two Chromium contexts use pinned seed bytes through generator3 with only Kick enabled and a
 300-tick fuse. The English desktop and Polish 320-pixel reduced-motion clients ready before play,
 reveal and collect Kick with an ordinary bomb, then use a second ordinary bomb to clear the escape
 corridor. A demo bomb is planted at `(3,1)` and the holder walks west into it using real keyboard

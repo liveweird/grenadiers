@@ -1,9 +1,9 @@
 import { expect, test } from '@playwright/test'
 import { latestSnapshot, observeGame, visibleActor } from '../tests/support/duel'
-import type { GameServerMessage } from '../../web/src/game/v14/schema'
+import type { GameServerMessage } from '../../web/src/game/v15/schema'
 
 test.beforeAll(() => {
-  expect(process.env.E2E_CPU_ITEM_FIXTURE).toBe('arena-v2-cpu-wall-pass')
+  expect(process.env.E2E_CPU_ITEM_FIXTURE).toBe('arena-v3-cpu-wall-pass')
 })
 
 type Snapshot = Extract<GameServerMessage, { type: 'snapshot' }>

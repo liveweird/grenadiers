@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test'
-import type { Direction, EquipmentId, GameServerMessage, Seat } from '../../../web/src/game/v14/schema'
+import type { Direction, EquipmentId, GameServerMessage, Seat } from '../../../web/src/game/v15/schema'
 
 type Admission = Extract<GameServerMessage, { type: 'admitted' }>
 export type PublicAdmission = {
@@ -8,12 +8,14 @@ export type PublicAdmission = {
   seat: Seat
   actionFloor: number | null
   tick: number
+  physicalTick: number | null
   hasState: boolean
   positions: { seat: Seat; x: number; y: number }[]
   visibleActors: { seat: Seat; x: number; y: number; lastTeleportTick: number | null }[]
   equipment: { seat: Seat; equipment: EquipmentId | null }[]
   bombIds: number[]
   oilBarrels: { column: number; row: number; state: 'unlit' | 'burning' }[]
+  stormCloud: { position: { x: number; y: number }; direction: Direction; legRemainingTicks: number } | null
   stableCapability: boolean
 }
 
@@ -37,23 +39,17 @@ export async function installTransportProbe(page: Page): Promise<void> {
     let admissionIndex = 0
     let takeoverBinding: { socket: WebSocket; roomId: string; roundId: number; sequence: number } | null = null
     let sharedLeak = false
-    function publicAdmission(
-      message: Admission, stableCapability: boolean, index: number,
-    ): PublicAdmission {
-      return {
-        index,
-        roomId: message.room.roomId, seat: message.youSeat,
-        actionFloor: message.lastActionId, tick: message.room.tick,
-        hasState: message.state !== null,
-        positions: message.state?.actors.flatMap((actor) => actor.type === 'visible' ? [{ seat: actor.seat, ...actor.position }] : []) ?? [],
-        visibleActors: message.state?.actors.flatMap((actor) => actor.type === 'visible'
-          ? [{ seat: actor.seat, ...actor.position, lastTeleportTick: actor.lastTeleportTick }]
-          : []) ?? [],
-        equipment: message.state?.actors.flatMap((actor) => actor.type === 'visible' ? [{ seat: actor.seat, equipment: actor.inventory.equipment }] : []) ?? [],
-        bombIds: message.state?.bombs.map((bomb) => bomb.id) ?? [], stableCapability,
-        oilBarrels: message.state?.oilBarrels.map(({ cell, state }) => ({ ...cell, state })) ?? [] }
+    function publicAdmission(message: Admission, stable: boolean, index: number): PublicAdmission {
+      const state = message.state
+      return { index, roomId: message.room.roomId, seat: message.youSeat,
+        actionFloor: message.lastActionId, tick: message.room.tick, physicalTick: state?.physicalTick ?? null,
+        hasState: state !== null, stableCapability: stable,
+        positions: state?.actors.flatMap((actor) => actor.type === 'visible' ? [{ seat: actor.seat, ...actor.position }] : []) ?? [],
+        visibleActors: state?.actors.flatMap((actor) => actor.type === 'visible' ? [{ seat: actor.seat, ...actor.position, lastTeleportTick: actor.lastTeleportTick }] : []) ?? [],
+        equipment: state?.actors.flatMap((actor) => actor.type === 'visible' ? [{ seat: actor.seat, equipment: actor.inventory.equipment }] : []) ?? [],
+        bombIds: state?.bombs.map((bomb) => bomb.id) ?? [], stormCloud: state?.stormCloud ?? null,
+        oilBarrels: state?.oilBarrels.map(({ cell, state: barrelState }) => ({ ...cell, state: barrelState })) ?? [] }
     }
-
     window.WebSocket = class extends NativeSocket {
       constructor(url: string | URL, protocols?: string | string[]) {
         super(url, protocols)
@@ -118,7 +114,7 @@ export async function installTransportProbe(page: Page): Promise<void> {
         socket.addEventListener('close', fail, { once: true })
         socket.addEventListener('open', () => {
           stage = 'open'
-          socket.send(JSON.stringify({ type: 'authenticate', protocolVersion: 14, token: session.token }))
+          socket.send(JSON.stringify({ type: 'authenticate', protocolVersion: 15, token: session.token }))
         }, { once: true })
         const onMessage = (event: MessageEvent): void => {
           const message = JSON.parse(String(event.data)) as GameServerMessage

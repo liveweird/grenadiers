@@ -11,7 +11,7 @@ import { applyItemSettings } from '../tests/support/settings'
 
 test.beforeAll(() => {
   expect(process.env.E2E_SHORT_FLAME_FIXTURE, 'Configure the documented production Short Flame seed')
-    .toBe('arena-v2-short-flame')
+    .toBe('arena-v3-short-flame')
 })
 
 const shortTicks = (game: ObservedGame) => effectTicks(game, 'shortFlame')
@@ -34,8 +34,8 @@ test('two browsers collect Short Flame and restore base bomb range after its exa
     await Promise.all([one, two].map((page) => page.getByRole('button', { name: 'Ready', exact: true }).click()))
     await Promise.all(games.map((game) => expect.poll(() => latestSnapshot(game)?.room.phase.type).toBe('running')))
     expect(latestSnapshot(games[0])!.room).toMatchObject({
-      rulesVersion: 5, mapId: 'generated_v2', availableItems: ['kick', 'punch', 'bracelet', 'wallPass', 'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch', 'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls', 'invisibleBombs', 'oilBarrel', 'teleporter'],
-      settings: { enabledItems: ['shortFlame'] },
+      rulesVersion: 7, mapId: 'generated_v3', availableItems: ['kick', 'punch', 'bracelet', 'wallPass', 'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch', 'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls', 'invisibleBombs', 'oilBarrel', 'teleporter'],
+      settings: { enabledItems: ['shortFlame'], environment: { stormCloud: false } },
     })
     await one.getByRole('region', { name: 'Grenadiers courtyard' }).click()
     await moveTo(one, games[0], { column: 2, row: 1 })

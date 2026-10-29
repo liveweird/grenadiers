@@ -3,14 +3,14 @@ import { expect, test, type Page } from '@playwright/test'
 import { latestSnapshot, visibleActor, type ObservedGame } from '../tests/support/duel'
 import { moveSeatTo } from '../tests/support/movement'
 import { admissionBaseline, disconnectTransport } from '../tests/support/reconnect'
-import type { GameServerMessage, Seat } from '../../web/src/game/v14/schema'
+import type { GameServerMessage, Seat } from '../../web/src/game/v15/schema'
 import { attachLiveWindowEvidence, capturePreparedTilePng, markStage, prepareInvisibleBombsMatch,
   prepareTileCapture, requireSuccessfulTasks, trackTask, validateLiveGuard,
   recordDetonatedBomb, recordPixelComparison, recordPlacedBomb, retainPng, settleAll,
   type LivePng, type LiveWindowDiagnostics, type PixelComparison,
   type PreparedTileCapture, type TaskOutcome } from './live-pixel-window'
 
-test.beforeAll(() => expect(process.env.E2E_INVISIBLE_BOMBS_FIXTURE).toBe('arena-v2-invisible-bombs'))
+test.beforeAll(() => expect(process.env.E2E_INVISIBLE_BOMBS_FIXTURE).toBe('arena-v3-invisible-bombs'))
 
 type Snapshot = Extract<GameServerMessage, { type: 'snapshot' }>
 type Admission = Extract<GameServerMessage, { type: 'admitted' }>

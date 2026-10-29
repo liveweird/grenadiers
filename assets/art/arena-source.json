@@ -3475,12 +3475,128 @@
         "y": 1568
       },
       "status": "baseline"
+    },
+    {
+      "id": "terrain.lair",
+      "localBounds": {
+        "height": 48,
+        "width": 48,
+        "x": 0,
+        "y": 0
+      },
+      "pivot": {
+        "x": 0,
+        "y": 0
+      },
+      "sourceRect": {
+        "height": 48,
+        "width": 48,
+        "x": 0,
+        "y": 1680
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "mob.north",
+      "localBounds": {
+        "height": 80,
+        "width": 80,
+        "x": -40,
+        "y": -44
+      },
+      "pivot": {
+        "x": 40,
+        "y": 44
+      },
+      "sourceRect": {
+        "height": 80,
+        "width": 80,
+        "x": 112,
+        "y": 1680
+      },
+      "status": "baseline",
+      "footAnchor": {
+        "x": 40,
+        "y": 65
+      }
+    },
+    {
+      "id": "mob.east",
+      "localBounds": {
+        "height": 80,
+        "width": 80,
+        "x": -40,
+        "y": -44
+      },
+      "pivot": {
+        "x": 40,
+        "y": 44
+      },
+      "sourceRect": {
+        "height": 80,
+        "width": 80,
+        "x": 224,
+        "y": 1680
+      },
+      "status": "baseline",
+      "footAnchor": {
+        "x": 40,
+        "y": 65
+      }
+    },
+    {
+      "id": "mob.south",
+      "localBounds": {
+        "height": 80,
+        "width": 80,
+        "x": -40,
+        "y": -44
+      },
+      "pivot": {
+        "x": 40,
+        "y": 44
+      },
+      "sourceRect": {
+        "height": 80,
+        "width": 80,
+        "x": 336,
+        "y": 1680
+      },
+      "status": "baseline",
+      "footAnchor": {
+        "x": 40,
+        "y": 65
+      }
+    },
+    {
+      "id": "mob.west",
+      "localBounds": {
+        "height": 80,
+        "width": 80,
+        "x": -40,
+        "y": -44
+      },
+      "pivot": {
+        "x": 40,
+        "y": 44
+      },
+      "sourceRect": {
+        "height": 80,
+        "width": 80,
+        "x": 448,
+        "y": 1680
+      },
+      "status": "baseline",
+      "footAnchor": {
+        "x": 40,
+        "y": 65
+      }
     }
   ],
   "schemaVersion": 1,
   "sheet": {
     "columns": 10,
-    "height": 1680,
+    "height": 1792,
     "slotSize": 112,
     "width": 1120
   },

@@ -159,7 +159,7 @@ test('source validation rejects path-like IDs and painting in authoring gutters'
   })
   expect(result.unsafeMessage).toContain('invalid stable ID ../terrain')
   expect(result.gutterMessage).toContain('paint exists in a gutter or reserved slot')
-  expect(result.inventory).toEqual({ frameCount: 150, pickupCount: 24 })
+  expect(result.inventory).toEqual({ frameCount: 155, pickupCount: 24 })
 })
 
 test('repeated preview reset and WebGL context restoration do not accumulate canvases or sprites', async ({ page }) => {
@@ -230,11 +230,11 @@ test('committed artist source validates and exports through the browser pipeline
   const result = await page.evaluate(
     (request) => window.grenadiersArtAtlas.exportSource(request), source,
   )
-  expect(sourceManifest.sheet).toMatchObject({ width: 1120, height: 1680 })
-  expect(sourceManifest.frames).toHaveLength(150)
-  expect(sourceManifest.frames.filter(({ status }) => status === 'baseline')).toHaveLength(146)
+  expect(sourceManifest.sheet).toMatchObject({ width: 1120, height: 1792 })
+  expect(sourceManifest.frames).toHaveLength(155)
+  expect(sourceManifest.frames.filter(({ status }) => status === 'baseline')).toHaveLength(151)
   expect(sourceManifest.frames.filter(({ status }) => status === 'reserved')).toHaveLength(4)
-  expect(result.runtimeManifest.frames).toHaveLength(146)
+  expect(result.runtimeManifest.frames).toHaveLength(151)
   expect(result.rgbaBytes).toBe(4_308_480)
   const appendedWalkingIds = (['one', 'two', 'three', 'four'] as const).flatMap((appearance) =>
     (['north', 'east', 'south', 'west'] as const).flatMap((direction) =>

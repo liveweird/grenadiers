@@ -34,7 +34,7 @@ Procedural drawings remain available for template extraction and reference compa
 v0.3.53 replaced the adopted source with a redrawn, AI-generated sheet; the current source is
 a Napoleonic redraw (shako and bicorne actors, repainted terrain, bombs, flames, pickups and
 cues; see the [provenance](../../assets/art/README.md#provenance)). The original 95 frame contracts and pixels are preserved. Sixteen appended player-three/four
-poses and additional animation frames extend the authoring sheet to 1120×1680 with matching pivots/foot anchors; the texture
+poses and additional animation frames and lair/mob sprites extend the authoring sheet to 1120×1792 with matching pivots/foot anchors; the texture
 budget and gameplay collision geometry are unchanged. Live rooms support two to four human/CPU seats.
 v0.3.49 adopted the baseline artwork, with one explicit compositing change: status pulses
 fade each completed icon once. The old procedural renderer faded every overlapping paint

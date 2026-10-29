@@ -30,8 +30,8 @@ files:
 - `arena-guides.png` — raster copy of the separate guide/label layer;
 - `arena-overview.png` — labelled visual inventory on a checkerboard background.
 
-The 1120×1680 authoring sheet has 150 physical cells: 150 assigned entries (146 baseline
-drawings and four blank reserved entries). Cells are 112×112
+The 1120×1792 authoring sheet has 160 physical cells: 155 assigned entries (151 baseline
+drawings and four blank reserved entries), plus five unassigned transparent cells. Cells are 112×112
 pixels in ten columns. Logical arena tiles remain 48×48 pixels. Reserved and unassigned cells must
 stay transparent. Do not move or rename assigned entries; new catalogue IDs must be added in code
 before a source revision can use them.
@@ -57,7 +57,7 @@ npm --prefix e2e run art:export -- \
 Add `--slices` to emit optional named files under `target/art-atlas/slices/`. Runtime output is
 generated and ignored rather than an artist source. Its main files are `arena-atlas.png`,
 `arena-atlas.json`, `arena-overview.png` and `arena-preview.png`. The runtime texture contains the
-146 baseline frames, unrotated and untrimmed, with two-pixel extrusion and two-pixel transparent
+151 baseline frames, unrotated and untrimmed, with two-pixel extrusion and two-pixel transparent
 padding. Labels and guides never enter the runtime texture.
 
 Both commands refuse an existing output directory, so an artist source or earlier review cannot
@@ -147,3 +147,11 @@ blue-gray palette and binary alpha. All preceding frame pixels and metadata rema
 The cloud was generated with OpenAI built-in imagegen using the atlas as a style reference,
 then normalized with owner-authorized Pillow processing. See the [prompt and processing
 notes](storm-cloud-prompts.md). Cloud opacity and authoritative movement belong to the renderer.
+
+The lair and mob extension occupies the next row: `terrain.lair` is a 48×48 tile, followed by
+`mob.north`, `mob.east`, `mob.south` and `mob.west` in 80×80 frames. Mobs share the actors’
+`(40, 65)` foot anchor and `(40, 44)` frame pivot; their 33-pixel drawings use one bounded
+48-color palette. The stone-gray imp has amber eyes and a brick-red scarf, distinct from
+player uniforms. All preceding frame pixels, rectangles and reserved entries are preserved.
+These sprites were generated with OpenAI built-in imagegen and normalized with owner-approved
+Pillow processing; see the [lair/mob prompts and processing rules](lair-mob-prompts.md).

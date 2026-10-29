@@ -4,6 +4,7 @@ import { WALK_CYCLE, WALK_FRAME_DURATION_MS } from '../actorAnimation'
 import { makeBomb, makeFlame, makeOilBarrel, makePickup } from '../entityArt'
 import { makeBlock, makeFloorVariant, makeWallVariant } from '../terrainArt'
 import { makeStormCloud } from '../weatherArt'
+import { makeLair, makeMob } from '../lairArt'
 import { RENDERABLE_PICKUP_KINDS, type Direction, type Seat } from '../types'
 import { sourceFrame } from './layout'
 import type { ArtAnimation, ArtCatalog, ArtCatalogEntry, ArtFrame, ArtRect } from './types'
@@ -240,6 +241,13 @@ export function createArtCatalog(): ArtCatalog {
     () => ({ drawing: makeStormCloud() }), {
       size: 80, bounds: { x: -40, y: -40, width: 80, height: 80 }, pivot: { x: 40, y: 40 },
     }))
+  entries.push(entry('terrain.lair', entries.length, () => ({ drawing: makeLair() })))
+  for (const direction of ['north', 'east', 'south', 'west'] as const) {
+    entries.push(entry(`mob.${direction}`, entries.length,
+      () => ({ drawing: makeMob(direction) }), {
+        size: 80, bounds: ACTOR_BOUNDS, pivot: ACTOR_PIVOT, footAnchor: { x: 40, y: 65 },
+      }))
+  }
   return {
     entries,
     animations: animations(),

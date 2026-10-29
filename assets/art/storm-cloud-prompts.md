@@ -19,7 +19,7 @@ dithering, then centers the drawing in an 80×80 frame. The adopted drawing has 
 RGB colors and binary alpha.
 
 Only the previously unassigned final slot is painted. Every earlier frame rectangle retains
-its exact RGBA pixels and manifest metadata. The source remains 1120×1680. The new stable ID
+its exact RGBA pixels and manifest metadata. The cloud occupies row 15 of the sheet. Its stable ID
 is `environment.stormCloud`, with local bounds `(-40, -40, 80, 80)` and pivot `(40, 40)`.
 
 Edit the cloud in the canonical PNG and export it through the normal atlas workflow. Do not

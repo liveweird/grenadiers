@@ -61,10 +61,11 @@ describe('expanded gameplay server conformance', () => {
     expect(JSON.stringify(oilFrame)).not.toContain('concealed')
   })
 
-  it('pins archived recipient privacy for v8 and v10 projection pairs', () => {
+  it('pins archived recipient privacy for v8, v10 and v11 projection pairs', () => {
     for (const [oneId, twoId] of [
       ['v8-runningPrivacy-one', 'v8-runningPrivacy-two'],
       ['v10-runningTeleported-one', 'v10-runningTeleported-two'],
+      ['v11-runningOilMaterialized-one', 'v11-runningOilMaterialized-two'],
     ] as const) {
       const oneActors = record(frame(oneId).state).actors as RecordValue[]
       const twoActors = record(frame(twoId).state).actors as RecordValue[]

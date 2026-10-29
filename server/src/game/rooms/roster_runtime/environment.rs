@@ -136,62 +136,19 @@ impl RosterRuntime {
         cloud: StormCloudConfig,
         tuning: LairTuning,
     ) -> Result<Option<RosterNotice>, RosterRuntimeError> {
-        self.validate_actor(seat, expected_epoch)?;
-        let Some(EnvironmentProfile::LairsV8 {
-            cloud: current_cloud,
-            tuning: current_tuning,
-        }) = self.environment_profile
-        else {
+        if !matches!(
+            self.environment_profile,
+            Some(EnvironmentProfile::LairsV8 { .. })
+        ) {
             return Err(RosterRuntimeError::UnsupportedConfiguration);
-        };
-        if self.settings_authority_locked() || self.lifecycle.settings_editor() != Some(seat) {
-            return Err(RosterRuntimeError::SettingsLocked);
         }
-        if expected != self.settings_revision {
-            return Err(RosterRuntimeError::StaleSettings);
-        }
-        if settings == self.lifecycle.settings()
-            && cloud == current_cloud
-            && tuning == current_tuning
-        {
-            let room = publication_v16::room_view(
-                &self.identity,
-                &self.lifecycle,
-                current_cloud,
-                current_tuning,
-                self.revision,
-                self.settings_revision,
-                self.settings_authority_locked(),
-            )?;
-            return Ok(Some(publication_v16::view_notice(room)));
-        }
-        let mut change = self
-            .lifecycle
-            .set_settings(seat, settings)
-            .map_err(lifecycle)?;
-        let environment_changed = cloud != current_cloud || tuning != current_tuning;
-        if environment_changed && change.change() == MatchChange::Unchanged {
-            for human in self
-                .identity
-                .configuration
-                .human_seats()
-                .collect::<Vec<_>>()
-            {
-                if self.lifecycle.ready(human).map_err(lifecycle)? {
-                    change = self.lifecycle.set_ready(human, false).map_err(lifecycle)?;
-                }
-            }
-        }
-        self.environment_profile = Some(EnvironmentProfile::LairsV8 { cloud, tuning });
-        self.settings_revision = self
-            .settings_revision
-            .checked_add(1)
-            .ok_or(RosterRuntimeError::CapacityReached)?;
-        if environment_changed && change.change() == MatchChange::Unchanged {
-            self.publish_view().map(Some)
-        } else {
-            self.notice_for(change.change(), false)
-        }
+        self.apply_profile_settings(
+            seat,
+            expected_epoch,
+            expected,
+            settings,
+            EnvironmentProfile::LairsV8 { cloud, tuning },
+        )
     }
 
     #[cfg_attr(not(test), allow(dead_code))]
@@ -218,32 +175,44 @@ impl RosterRuntime {
         settings: RoomSettings,
         environment: StormCloudConfig,
     ) -> Result<Option<RosterNotice>, RosterRuntimeError> {
-        self.validate_actor(seat, expected_epoch)?;
-        let Some(EnvironmentProfile::StormV7(current)) = self.environment_profile else {
+        if !matches!(
+            self.environment_profile,
+            Some(EnvironmentProfile::StormV7(_))
+        ) {
             return Err(RosterRuntimeError::UnsupportedConfiguration);
-        };
+        }
+        self.apply_profile_settings(
+            seat,
+            expected_epoch,
+            expected,
+            settings,
+            EnvironmentProfile::StormV7(environment),
+        )
+    }
+
+    fn apply_profile_settings(
+        &mut self,
+        seat: SeatId,
+        expected_epoch: u64,
+        expected: u32,
+        settings: RoomSettings,
+        profile: EnvironmentProfile,
+    ) -> Result<Option<RosterNotice>, RosterRuntimeError> {
+        self.validate_actor(seat, expected_epoch)?;
         if self.settings_authority_locked() || self.lifecycle.settings_editor() != Some(seat) {
             return Err(RosterRuntimeError::SettingsLocked);
         }
         if expected != self.settings_revision {
             return Err(RosterRuntimeError::StaleSettings);
         }
-        if settings == self.lifecycle.settings() && environment == current {
-            let room = publication_v15::room_view(
-                &self.identity,
-                &self.lifecycle,
-                current,
-                self.revision,
-                self.settings_revision,
-                self.settings_authority_locked(),
-            )?;
-            return Ok(Some(publication_v15::view_notice(room)));
+        if settings == self.lifecycle.settings() && Some(profile) == self.environment_profile {
+            return self.profile_view_notice().map(Some);
         }
         let mut change = self
             .lifecycle
             .set_settings(seat, settings)
             .map_err(lifecycle)?;
-        let environment_changed = environment != current;
+        let environment_changed = Some(profile) != self.environment_profile;
         if environment_changed && change.change() == MatchChange::Unchanged {
             for human in self
                 .identity
@@ -256,7 +225,7 @@ impl RosterRuntime {
                 }
             }
         }
-        self.environment_profile = Some(EnvironmentProfile::StormV7(environment));
+        self.environment_profile = Some(profile);
         self.settings_revision = self
             .settings_revision
             .checked_add(1)
@@ -265,6 +234,31 @@ impl RosterRuntime {
             self.publish_view().map(Some)
         } else {
             self.notice_for(change.change(), false)
+        }
+    }
+
+    fn profile_view_notice(&self) -> Result<RosterNotice, RosterRuntimeError> {
+        match self.environment_profile {
+            Some(EnvironmentProfile::StormV7(cloud)) => publication_v15::room_view(
+                &self.identity,
+                &self.lifecycle,
+                cloud,
+                self.revision,
+                self.settings_revision,
+                self.settings_authority_locked(),
+            )
+            .map(publication_v15::view_notice),
+            Some(EnvironmentProfile::LairsV8 { cloud, tuning }) => publication_v16::room_view(
+                &self.identity,
+                &self.lifecycle,
+                cloud,
+                tuning,
+                self.revision,
+                self.settings_revision,
+                self.settings_authority_locked(),
+            )
+            .map(publication_v16::view_notice),
+            None => Err(RosterRuntimeError::UnsupportedConfiguration),
         }
     }
 }

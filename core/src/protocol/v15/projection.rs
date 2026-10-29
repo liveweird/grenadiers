@@ -294,7 +294,17 @@ fn valid_controller(room: &RoomView, index: usize) -> bool {
             Controller::Cpu { difficulty },
             ConnectionStatus::ServerControlled,
         ) => {
+            let ready = matches!(
+                &room.phase,
+                RoomPhase::Waiting | RoomPhase::Countdown { .. }
+            );
+            let rematch_ready = matches!(
+                &room.phase,
+                RoomPhase::MatchResult { rematch_at, .. } if room.tick >= *rematch_at
+            );
             status.occupied
+                && status.ready == ready
+                && status.rematch_ready == rematch_ready
                 && room
                     .configuration
                     .domain()

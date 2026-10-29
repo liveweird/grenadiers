@@ -7,6 +7,11 @@
 
 ## Completed 2026-10-29
 
+- **LAIRS:** [v0.3.118](../releases.md#v03118--2026-10-29) activates configurable,
+  indestructible spawners and capped pursuing mobs on every supported board and human/CPU
+  lineup, with shared damage/bomb avoidance, private targets, finite CPU guards, directional
+  artwork, EN/PL controls, recovery and rematch. Foundations remain recorded in v0.3.116–117.
+
 - **LAIRS core:** [v0.3.116](../releases.md#v03116--2026-10-29) supplies dormant rules8
   spawning, navigation, combat interactions and rollback. User-visible activation remains in
   [BACKLOG.md](../../BACKLOG.md).

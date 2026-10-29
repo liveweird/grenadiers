@@ -96,62 +96,74 @@ retain the previous immutable image reference for rollback. The runtime stage in
 rolling Debian package updates, so a later build may resolve newer packages and is not expected to
 be byte-identical; treat it as a new candidate with new evidence rather than reusing acceptance.
 
-## v0.3.117 — 2026-10-29
+## v0.3.118 — 2026-10-29
 
-[v0.3.117](https://github.com/liveweird/grenadiers/releases/tag/v0.3.117) adds the checked lair
-foundation around rules8: gameplay16 configuration/publication, CPU19 finite mob-contact proofs,
-atomic roster settings and private replay7. Live rooms continue to use gameplay15/rules7/CPU18;
-the paired controls and rendering are delivered separately. See the [contract](game/protocol-v16.md),
-[CPU boundaries](game/multiplayer-cpu.md#lair-profile-boundaries) and [replay guide](game/multiplayer-replay.md).
+Activates lairs and pursuing mobs for all supported two-to-four-player human/CPU arenas.
+Creators can change the spawn interval (5–60 seconds) and living-mob cap (1–8 per lair),
+with defaults of ten seconds and three mobs. New rooms enable all items, cloud and lairs;
+feature presets and the first-start editing lock apply to the complete configuration.
+Directional sprites, authoritative interpolation, private targets, reduced motion and EN/PL
+controls accompany the shared simulation and finite CPU contact guards.
 
-CPU movement and bomb escape retain separate certificates. Guards cover current mobs, possible
-births, pickup handoffs, hidden Teleporter collectors, pending pickup revelation and retained
-movement. Invalid contact revokes the paired route and queues Stop. Historical profiles stay closed.
-Replay7 reconstructs mobs from accepted inputs and checks complete private state, including timers,
-retreat anchors and randomness; production recording/export remains disabled.
+Corrects a terminal roster mismatch: a new transport loss after the final result retires that
+seat without invalidating the surviving peers' publication. Reservations created before the
+final result retain their original deadlines. Running reconnect still restores the same seat,
+state and stable capability; retired terminal seats reject resume.
 
-The artist sheet appends `terrain.lair` and four `mob.<direction>` poses. All 150 preceding
-entries retain their pixels and metadata. The source is 1120×1792 with 155 entries, 151 drawings
-and four reservations. The runtime texture remains 2040×528 / 4,308,480 RGBA bytes. The
-[artist bundle](https://github.com/liveweird/grenadiers/releases/download/v0.3.117/grenadiers-lairs-art-v0.3.117.zip)
-contains the editable source, manifest, labelled guides, previews and prompts. Bundle SHA-256:
-`dc204420c01b05a98906686f19e923b2364b330a838068b3f3009d46b3df95c1`.
+The paired endpoint requires gameplay16/rules8/CPU19. Versions 1–15 reject before credential
+claim; archived adapters remain closed. Restart discards process-local matches and credentials.
+Upgrade server/browser together and reload existing tabs. Use the retained v0.3.117 image for
+rollback; a source prerelease does not claim a hosted production service or durable sessions.
+
+The [lair guide](game/lairs.md), [settings](game/settings.md),
+[reconnect policy](game/reconnect-server.md) and [artist handoff](../assets/art/README.md)
+are the current behavioral references. The unchanged lair/mob artist bundle is published with
+[v0.3.117](https://github.com/liveweird/grenadiers/releases/download/v0.3.117/grenadiers-lairs-art-v0.3.117.zip).
 
 ### Verification and source identity
 
-Accepted source: `927049c1f6e403f3308ffd98d300fc302fd511b3`, tree
-`27adfe0e0bbcab7166d57a7d7de7a2a0a01c2960`; source PR
-[#275](https://github.com/liveweird/grenadiers/pull/275) merged as
-`0e6f09cb0302df95c1f455d430a474c32e7bad5b`.
+Accepted source: `91c5e9280af2e61c212de6d52f1301bb81fbbaed`, tree
+`be5408e1ff7f8c57c07c3b013d2f0ac26b0c013a`. Source PR
+[#277](https://github.com/liveweird/grenadiers/pull/277) merged as
+`b11ca40921d40c06b37151ffff0eb3c6bd93ed40` with the identical tree.
 
-- Fresh workspace debug/release, fmt, Clippy with warnings denied, build and independent Rust
-  coverage pass in 384.909 seconds: 42,445/46,093 lines, **92.09%** against the unchanged 90% floor.
-  Retained LCOV SHA-256: `bec23b1b7da7c376168dad2bfff5155be8e5892e957576e95795a5d198c944c8`.
-- Only the unchanged ExpandedV5 exhaustive-mask test reuses v0.3.116 acceptance: all 4,194,304 masks
-  in debug/release/coverage, after an exact legacy execution-dependency audit. Current coverage
-  uses fresh profiles; old counts are not merged. Default gates remain exhaustive.
-- Web: **7,128 tests / 116 files**, 269.47 seconds; 92.72% lines, 88.42% branches, 89.84% statements
-  and 89.68% functions. All unchanged floors pass. Final bundle: JS 348,176/400,000 bytes,
-  CSS 15,226/20,000. The final palette-only cleanup preserves all prior pixels and alpha;
-  its export and production build pass.
-- Atlas: ten browser checks pass; final source exports 151 drawings within the same texture budget.
-- Real queued CPU checks cover 72 configurations, six post-spawn board/difficulty cases with all
-  items, own-bomb escape and stopped-route invalidation. Replay7 checks exact reconstruction,
-  atomic interruption/departure, malformed journals and seed redaction.
-- Native Compose and Kubernetes each pass **19 tests** in 3.8/3.9 minutes. Restricted deployment,
-  probes/resources, exact image, zero restarts, IPv4 forwarding and scoped cleanup pass.
-- Dependency audits and pinned Trivy0.74.0 report zero vulnerabilities at the required thresholds.
-  Distinct [Linux debug/release checks](https://github.com/liveweird/grenadiers/actions/runs/40960573851)
-  pass on the accepted source. Protocol, CPU and server/replay reviews are clear after fixes.
+- Fresh Rust workspace debug/release, fmt, Clippy, build and independent coverage pass in
+  311.032 seconds: 42,475/46,125 lines (**92.09%**), retaining the 90% floor.
+  LCOV SHA-256: `f51d9e1945c9cf271b34fa957436076574c445dc97a8d32fd294d95a12a81f3e`.
+- Only the unchanged historical ExpandedV5 exhaustive-mask execution reuses v0.3.116's
+  all-4,194,304-mask debug/release/coverage acceptance. Its legacy lifecycle dependency closure
+  excludes the corrected roster. Current coverage is fresh; no old profiles/counts are merged.
+- Full web acceptance: **7,139 tests / 118 files**, 280.07 seconds; lines 93.90%, branches 88.80%,
+  statements 90.86%, functions 89.91%. JS 358,943/400,000 bytes and CSS 15,226/20,000. Reused after
+  byte-identical web/API/art/dependency input checks; later changes affect Rust lifecycle and
+  browser tests only. Repository/tooling/E2E static gates pass.
+- All 22 requested item suites, CPU Wall Pass and generation3 base upgrades pass on paired v16
+  application inputs. The terminal correction changes none of their effect paths. The new
+  generation3 pickup seed does not replace the archived generation1 trace.
+- Corrected-image Compose: **19/19** in 3.8 minutes. Lairs: **2/2** in 26.3 seconds; reconnect:
+  **3/3** in 44.0 seconds. Each fixture suite mounts its documented seed. Desktop EN and Polish 320px
+  reduced-motion rendering pass. The terminal regression fails on the original candidate and
+  passes on the corrected image; earlier failure/configuration logs remain separate evidence.
+- Corrected-image Kubernetes: native authentication/turning **2/2** in 5.5 seconds, plus restricted
+  security, exact image, resources/probes, zero restarts and scoped cleanup. The earlier 17 unchanged
+  Kubernetes cases are retained; the affected terminal behavior is exercised freshly
+  in Compose and runtime tests without repeating unchanged cases.
+- Pinned Trivy 0.74.0: zero fixable HIGH/CRITICAL vulnerabilities. Dependency audits are reused
+  after unchanged lockfile checks. Distinct [Linux debug/release units](https://github.com/liveweird/grenadiers/actions/runs/40969060566)
+  pass on accepted source 91c5e928. Independent simulation/CPU/protocol/client/server/runtime
+  reviews are clear after fixes.
 
 ### Local deployment and rollback
 
-The promoted image is
-`sha256:ba7c4c1ff5f53e871d175b1a06be597f9d29bd7ddda494026108cf92865a39ad`, labelled version0.3.117
-and accepted source927049c1. Localhost8085 passes exact-image/security/cgroup/health/readiness,
-CSP/cache and served HTML/JS/CSS/PNG byte checks. The application remains non-root, read-only,
-with dropped capabilities, 256MiB memory and PID128 limits. The retained v0.3.116 override/image
-provides local rollback; reload browser tabs after paired upgrades.
+Promoted image:
+`sha256:1aee8c309815b99c3ef9135e7373e803f48b0cf8727f7d9126b6cf8fb519f516`, labelled version 0.3.118
+and source 91c5e928. Localhost:8085 passes exact-image/security/cgroup/health/readiness, CSP/cache,
+and served HTML/JS/CSS/PNG equality with the accepted image. The non-root, read-only app retains
+256 MiB memory/PID 128 limits. The immutable v0.3.117 override/image remains available for rollback.
+Human difficulty, interaction and network/browser playtesting remain in [BACKLOG.md](../BACKLOG.md).
+
+<a id="v03117--2026-10-29"></a>
+The [v0.3.117 record](history/releases.md#v03117--2026-10-29) is preserved in release history.
 
 <a id="v03116--2026-10-29"></a>
 The [v0.3.116 record](history/releases.md#v03116--2026-10-29) is preserved in release history.

@@ -4,6 +4,63 @@ This archive preserves the older release records originally maintained in
 [`docs/releases.md`](../releases.md). Records remain in their original order; the current
 release procedure and current release record stay in the [release guide](../releases.md).
 
+## v0.3.117 — 2026-10-29
+
+[v0.3.117](https://github.com/liveweird/grenadiers/releases/tag/v0.3.117) adds the checked lair
+foundation around rules8: gameplay16 configuration/publication, CPU19 finite mob-contact proofs,
+atomic roster settings and private replay7. Live rooms continue to use gameplay15/rules7/CPU18;
+the paired controls and rendering are delivered separately. See the [contract](../game/protocol-v16.md),
+[CPU boundaries](../game/multiplayer-cpu.md#lair-profile-boundaries) and [replay guide](../game/multiplayer-replay.md).
+
+CPU movement and bomb escape retain separate certificates. Guards cover current mobs, possible
+births, pickup handoffs, hidden Teleporter collectors, pending pickup revelation and retained
+movement. Invalid contact revokes the paired route and queues Stop. Historical profiles stay closed.
+Replay7 reconstructs mobs from accepted inputs and checks complete private state, including timers,
+retreat anchors and randomness; production recording/export remains disabled.
+
+The artist sheet appends `terrain.lair` and four `mob.<direction>` poses. All 150 preceding
+entries retain their pixels and metadata. The source is 1120×1792 with 155 entries, 151 drawings
+and four reservations. The runtime texture remains 2040×528 / 4,308,480 RGBA bytes. The
+[artist bundle](https://github.com/liveweird/grenadiers/releases/download/v0.3.117/grenadiers-lairs-art-v0.3.117.zip)
+contains the editable source, manifest, labelled guides, previews and prompts. Bundle SHA-256:
+`dc204420c01b05a98906686f19e923b2364b330a838068b3f3009d46b3df95c1`.
+
+### Verification and source identity
+
+Accepted source: `927049c1f6e403f3308ffd98d300fc302fd511b3`, tree
+`27adfe0e0bbcab7166d57a7d7de7a2a0a01c2960`; source PR
+[#275](https://github.com/liveweird/grenadiers/pull/275) merged as
+`0e6f09cb0302df95c1f455d430a474c32e7bad5b`.
+
+- Fresh workspace debug/release, fmt, Clippy with warnings denied, build and independent Rust
+  coverage pass in 384.909 seconds: 42,445/46,093 lines, **92.09%** against the unchanged 90% floor.
+  Retained LCOV SHA-256: `bec23b1b7da7c376168dad2bfff5155be8e5892e957576e95795a5d198c944c8`.
+- Only the unchanged ExpandedV5 exhaustive-mask test reuses v0.3.116 acceptance: all 4,194,304 masks
+  in debug/release/coverage, after an exact legacy execution-dependency audit. Current coverage
+  uses fresh profiles; old counts are not merged. Default gates remain exhaustive.
+- Web: **7,128 tests / 116 files**, 269.47 seconds; 92.72% lines, 88.42% branches, 89.84% statements
+  and 89.68% functions. All unchanged floors pass. Final bundle: JS 348,176/400,000 bytes,
+  CSS 15,226/20,000. The final palette-only cleanup preserves all prior pixels and alpha;
+  its export and production build pass.
+- Atlas: ten browser checks pass; final source exports 151 drawings within the same texture budget.
+- Real queued CPU checks cover 72 configurations, six post-spawn board/difficulty cases with all
+  items, own-bomb escape and stopped-route invalidation. Replay7 checks exact reconstruction,
+  atomic interruption/departure, malformed journals and seed redaction.
+- Native Compose and Kubernetes each pass **19 tests** in 3.8/3.9 minutes. Restricted deployment,
+  probes/resources, exact image, zero restarts, IPv4 forwarding and scoped cleanup pass.
+- Dependency audits and pinned Trivy0.74.0 report zero vulnerabilities at the required thresholds.
+  Distinct [Linux debug/release checks](https://github.com/liveweird/grenadiers/actions/runs/40960573851)
+  pass on the accepted source. Protocol, CPU and server/replay reviews are clear after fixes.
+
+### Local deployment and rollback
+
+The promoted image is
+`sha256:ba7c4c1ff5f53e871d175b1a06be597f9d29bd7ddda494026108cf92865a39ad`, labelled version0.3.117
+and accepted source927049c1. Localhost8085 passes exact-image/security/cgroup/health/readiness,
+CSP/cache and served HTML/JS/CSS/PNG byte checks. The application remains non-root, read-only,
+with dropped capabilities, 256MiB memory and PID128 limits. The retained v0.3.116 override/image
+provides local rollback; reload browser tabs after paired upgrades.
+
 ## v0.3.116 — 2026-10-29 — Dormant lair core
 
 Rules8 adds a headless lair/mob simulation: two indestructible pillar overlays, configurable

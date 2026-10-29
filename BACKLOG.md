@@ -23,24 +23,6 @@ repeated approval for routine implementation choices. Entries are not delivery-d
 - [parked] **Campaign stages and PvE progression.** Revisit after arena multiplayer and
   lair mobs; a campaign remains separate from the confirmed arena environment features.
 
-## Animation and arena environment
-
-- [next] **LAIRS — indestructible mob spawners.** Add a wall-like, indestructible lair tile.
-  Each lair spawns once every configurable N seconds, with a separate counter and the same
-  configurable limit M. Mobs chase players reachable through unblocked paths, avoid bombs and
-  never plant bombs. The [lair foundation](docs/game/lairs.md) supplies simulation, checked wire16, CPU19,
-  server/replay7 integration and sprites. The foundation is published in v0.3.117. Pair the
-  live controls/rendering, finish native browser checks and deploy activation.
-  - Initial defaults: N = 10 seconds (configurable 5–60), M = 3 living mobs per lair (1–8).
-    Two mirrored existing pillars bound the arena to 16 mobs. Full/blocked attempts wait one
-    interval; deaths release capacity, and rounds reset counters.
-  - Mobs move at 1.5 cells/second toward the nearest reachable living, uncloaked player.
-    Contact uses Shield/Heart/grace; flames and Oil kill mobs. No drops or scoring.
-    Stopwatch freezes existing and newly spawned mobs while lair timers continue.
-  - Keep mobs separate from player seats and reuse geometry, damage and blast rules. Introduce
-    rules8/wire16/CPU19/replay7 with bounded planning, private targets, recovery and replay checks.
-    Append lair/mob art without changing existing sprite rectangles or reserved entries.
-
 ## Engineering follow-ups
 
 - [new] **Capability rotation and production replay export.** Establish recovery/consumer needs

@@ -343,3 +343,47 @@ fn checked_publication_rejects_impossible_lair_facts() {
         ));
     }
 }
+
+#[test]
+fn cpu_observation_uses_checked_rules_eight_lair_facts() {
+    let case = world_case(
+        DomainBoard::ElevenByNine,
+        PlayerCount::Two,
+        StormCloudConfig::Disabled,
+        LairConfig::Enabled(LairSettings::new(5, 2).unwrap()),
+        300,
+        (false, true),
+        [17; 32],
+    );
+    let publication = bind_expanded(
+        &case.room,
+        case.room.round_id,
+        &case.capture,
+        case.generation,
+    )
+    .unwrap();
+    let world = crate::cpu::WorldId {
+        room_instance: 7,
+        physical_round: u64::from(case.room.round_id.get()),
+    };
+    let observed = observe_cpu_recipient(&publication, Seat::One, world).unwrap();
+    assert_eq!(observed.parts().rules.version, 8);
+    let lairs = observed.lairs().unwrap();
+    assert_eq!(
+        lairs.config(),
+        LairConfig::Enabled(LairSettings::new(5, 2).unwrap())
+    );
+    assert_eq!(lairs.lairs().len(), 2);
+    assert_eq!(lairs.lairs()[0].next_spawn_at.0, case.room.tick.get() + 300);
+    assert_eq!(lairs.mobs().len(), 2);
+    assert!(lairs.mobs().iter().all(|mob| mob.frozen));
+
+    let wrong = crate::cpu::WorldId {
+        physical_round: 2,
+        ..world
+    };
+    assert_eq!(
+        observe_cpu_recipient(&publication, Seat::One, wrong),
+        Err(ProjectionError::InvalidExpandedBinding)
+    );
+}

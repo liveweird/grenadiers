@@ -14,8 +14,15 @@ pub struct ExpandedCapture {
 }
 
 pub struct BoundPublication {
-    room: RoomView,
-    capture: ExpandedCapture,
+    pub(crate) room: RoomView,
+    pub(crate) capture: ExpandedCapture,
+    physical_round: u64,
+}
+
+impl BoundPublication {
+    pub(crate) const fn physical_round(&self) -> u64 {
+        self.physical_round
+    }
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -144,6 +151,7 @@ pub fn bind_expanded(
             lairs: capture.lairs.clone(),
             mobs: capture.mobs.clone(),
         },
+        physical_round: state_epoch.get() as u64,
     })
 }
 

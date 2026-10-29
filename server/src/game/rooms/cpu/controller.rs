@@ -5,7 +5,6 @@ use std::sync::{
 };
 
 use grenadiers_core::cpu::forecast::ObservedHazardMemory;
-use grenadiers_core::cpu::policy::{ControlPlan, EscapeExecution, MAX_HOLD_TICKS, PolicyError};
 use grenadiers_core::cpu::survival::{CommittedPulse, CommittedRoute, PlantEscapeOrigin};
 use grenadiers_core::cpu::{
     CpuMemory, CpuRng, DecisionId, Intent, Observation, WorldId, policy::UtilityMemory,
@@ -226,37 +225,6 @@ impl CpuController {
         self.escaping
     }
 
-    pub(in crate::game::rooms) fn follow_escape(
-        &mut self,
-        observation: &Observation,
-    ) -> Result<EscapeExecution, PolicyError> {
-        if !self.escaping {
-            return Ok(EscapeExecution::Completed);
-        }
-        let execution = grenadiers_core::cpu::policy::follow_checked_escape(
-            observation,
-            self.memory.as_ref().expect("world memory initialized"),
-        )?;
-        if let EscapeExecution::Continue(plan) | EscapeExecution::Wait(plan) = execution {
-            if !(1..=MAX_HOLD_TICKS).contains(&plan.hold_ticks) || plan.intent.manual.is_some() {
-                return Err(PolicyError::InvalidObservation);
-            }
-            return Ok(execution);
-        }
-        self.escaping = false;
-        self.memory = Some(UtilityMemory::new(
-            self.memory
-                .as_ref()
-                .expect("world memory initialized")
-                .key(),
-        ));
-        Ok(execution)
-    }
-
-    pub(in crate::game::rooms) fn commit_escape(&mut self, plan: ControlPlan) {
-        self.memory = Some(plan.next_memory);
-    }
-
     pub(in crate::game::rooms) fn cancel(&mut self) {
         if let Some(pending) = self.pending.take() {
             pending.live.store(false, Ordering::Release);
@@ -357,6 +325,9 @@ mod cadence;
 
 #[path = "controller_contact.rs"]
 pub(in crate::game::rooms) mod contact;
+
+#[path = "controller_escape.rs"]
+mod escape;
 
 #[cfg(test)]
 #[path = "controller_test_support.rs"]

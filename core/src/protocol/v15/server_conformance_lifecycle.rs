@@ -53,6 +53,24 @@ pub(super) fn lifecycle(
     let controls = controls(count);
     let configuration =
         DomainConfiguration::new(&controls, Some(difficulty(count)), board).unwrap();
+    configured_lifecycle(configuration, enabled, running)
+}
+
+pub(super) fn human_lifecycle(
+    board: BoardSize,
+    enabled: EnabledItems,
+    running: bool,
+) -> RosterMatchLifecycle {
+    let configuration =
+        DomainConfiguration::new(&[SeatControl::Human, SeatControl::Human], None, board).unwrap();
+    configured_lifecycle(configuration, enabled, running)
+}
+
+fn configured_lifecycle(
+    configuration: DomainConfiguration,
+    enabled: EnabledItems,
+    running: bool,
+) -> RosterMatchLifecycle {
     let settings = DomainSettings::new(SpeedLevel::Base, 256, 3, 180)
         .unwrap()
         .with_enabled_items(enabled);

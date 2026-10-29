@@ -74,6 +74,8 @@ mod cpu_observation_tests;
 #[cfg(test)]
 mod server_conformance_lifecycle;
 #[cfg(test)]
+mod server_conformance_lifecycle_cases;
+#[cfg(test)]
 mod server_conformance_tests;
 #[cfg(test)]
 mod tests;

@@ -220,6 +220,26 @@ fn actual_corpus() -> Corpus {
         "single15x13Cpu18Cloak",
         &[Seat::One, Seat::Two],
     ));
+    cases.extend(
+        super::server_conformance_lifecycle_cases::room_cases()
+            .into_iter()
+            .map(|(case_id, scenario, room)| FrameCase {
+                case_id: case_id.into(),
+                scenario: scenario.into(),
+                recipient: None,
+                frame: encode_server_message(&GameServerMessage::RoomState { room }).unwrap(),
+            }),
+    );
+    cases.extend(
+        super::server_conformance_lifecycle_cases::admission_cases()
+            .into_iter()
+            .map(|(case_id, scenario, recipient, frame)| FrameCase {
+                case_id: case_id.into(),
+                scenario: scenario.into(),
+                recipient: Some(recipient),
+                frame,
+            }),
+    );
     Corpus { cases }
 }
 

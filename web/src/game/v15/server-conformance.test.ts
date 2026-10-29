@@ -31,7 +31,7 @@ describe('Rust-produced gameplay v15 server conformance', () => {
     const rooms = messages.flatMap((frame) => 'room' in frame ? [frame.room] : [])
     expect(new Set(rooms.map(({ configuration }) =>
       `${configuration.board.width}x${configuration.board.height}:${configuration.controllers.length}`,
-    ))).toEqual(new Set(['11x9:2', '13x11:3', '15x13:4']))
+    ))).toEqual(new Set(['11x9:2', '11x9:3', '13x11:3', '15x13:4']))
     expect(new Set(rooms.map(({ settings }) => settings.environment.stormCloud))).toEqual(
       new Set([false, true]),
     )
@@ -163,7 +163,6 @@ describe('Rust-produced gameplay v15 server conformance', () => {
     expect(validateGameplayV15ServerMessage(frame)).toMatchObject({ valid: false })
   })
 })
-
 describe('gameplay v15 message-state binding', () => {
   it('binds snapshot and admission bodies to phases and retained-state boundaries', () => {
     const waiting = structuredClone(frames.get('disabled-11x9-cpu18-admission'))
@@ -202,6 +201,12 @@ describe('gameplay v15 message-state binding', () => {
     expect(validateGameplayV15ServerMessage(wrongRunningTick)).toMatchObject({
       valid: false, source: 'semantics', error: 'invalidStateBinding',
     })
+
+    const runningWithAction: GameServerMessage = {
+      type: 'admitted', sequence: 1, room: running.room, youSeat: 'one',
+      resumeToken: 'c'.repeat(64), lastActionId: 1, state: running.state,
+    }
+    expect(validateGameplayV15ServerMessage(runningWithAction)).toMatchObject({ valid: true })
 
     const interruptedSnapshot = structuredClone(waitingSnapshot)
     interruptedSnapshot.room.seats[1]!.ready = false

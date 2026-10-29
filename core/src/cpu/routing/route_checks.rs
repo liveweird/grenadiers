@@ -107,6 +107,43 @@ pub(super) fn check_transition_all(
     Ok(assumptions)
 }
 
+pub(super) fn check_stationary_all(
+    forecasts: &[&HazardForecast],
+    position: Position,
+    window: TickWindow,
+    mode: RouteMode,
+    proofs: CollisionProofs,
+    work: &mut WorkBudget,
+) -> Result<BTreeSet<EntityId>, RouteFailure> {
+    if window.start >= window.end {
+        return Ok(BTreeSet::new());
+    }
+    let segment = stationary_segment(position);
+    let dimensions = forecasts
+        .first()
+        .map(|forecast| forecast.dimensions())
+        .ok_or(RouteFailure::InvalidRequest)?;
+    let units = footprint_cells(&segment, dimensions)
+        .len()
+        .checked_mul(forecasts.len())
+        .and_then(|count| u32::try_from(count).ok())
+        .ok_or(RouteFailure::Capacity)?;
+    work.try_take(units)
+        .map_err(|_| RouteFailure::WorkExhausted)?;
+    let mut assumptions = BTreeSet::new();
+    for forecast in forecasts {
+        assumptions.extend(check_segments_with_grace(
+            forecast,
+            &segment,
+            window,
+            mode,
+            proofs.placement_origin,
+            proofs.recipient_barrier,
+        )?);
+    }
+    Ok(assumptions)
+}
+
 pub(super) fn wait_boundaries(
     context: &Context<'_>,
     forecast: &HazardForecast,

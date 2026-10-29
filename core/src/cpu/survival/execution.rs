@@ -40,7 +40,7 @@ impl CommittedPulse {
             .ok_or(PolicyError::InvalidObservation)?;
         let current_actor = actor(current).ok_or(PolicyError::InvalidObservation)?;
         let storm_deadlines = if current.parts().tick == admission_tick {
-            lease.storm_deadlines_after(first_execution, 0)
+            lease.storm_deadlines_at(first_execution, current.parts().tick)
         } else {
             crate::cpu::routing::storm::stationary_deadlines_at(&basis, current.parts().tick)
         };
@@ -79,16 +79,8 @@ impl CommittedPulse {
             || !crate::cpu::routing::storm::observation_fits(
                 &self.basis,
                 current,
-                self.lease.storm_deadlines_after(
-                    self.first_execution,
-                    current
-                        .parts()
-                        .tick
-                        .0
-                        .checked_sub(self.first_execution.0)
-                        .map_or(0, |ticks| ticks.saturating_add(1))
-                        .min(u64::from(self.lease.hold_ticks())) as u8,
-                ),
+                self.lease
+                    .storm_deadlines_at(self.first_execution, current.parts().tick),
             )
             || !self.lease.bracelet_guard_allows(current)
         {

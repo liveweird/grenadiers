@@ -11,6 +11,7 @@ use super::route_expand::{apply_move, apply_wait, finish, terminal};
 use super::route_priority::{dominated, risk, state_key};
 use super::route_time::add_tick;
 use super::safety::RecipientBarrier;
+use super::safety::stationary_segment;
 use super::validation::{self, Context};
 use super::{
     CERTIFIED_MOVE_UPDATES, MAX_ROUTE_EXPANSIONS, MAX_ROUTE_STEPS, RouteCertificate, RouteFailure,
@@ -240,17 +241,15 @@ fn initial_lanes(
     for value in request.start_window.start.0..request.start_window.end.0 {
         let first = Tick(value);
         let mut motion = Motion::stopped(context, first);
-        for tick in add_tick(context.observation.parts().tick, 1)?.0..first.0 {
-            super::storm::charge_tick(context.storm, work)?;
-            let tick = Tick(tick);
-            let segment = advance(context, &mut motion, MovementIntent::Stop, tick)?;
+        if context.storm.is_none() {
+            let segment = stationary_segment(context.actor.position);
             assumptions.extend(check_transition_all(
                 context,
                 forecasts,
                 &segment,
                 TickWindow {
-                    start: tick,
-                    end: add_tick(tick, 1)?,
+                    start: add_tick(context.observation.parts().tick, 1)?,
+                    end: first,
                 },
                 request.mode,
                 CollisionProofs {
@@ -259,6 +258,28 @@ fn initial_lanes(
                 },
                 work,
             )?);
+        }
+        if context.storm.is_some() {
+            for tick in add_tick(context.observation.parts().tick, 1)?.0..first.0 {
+                super::storm::charge_tick(context.storm, work)?;
+                let tick = Tick(tick);
+                let segment = advance(context, &mut motion, MovementIntent::Stop, tick)?;
+                assumptions.extend(check_transition_all(
+                    context,
+                    forecasts,
+                    &segment,
+                    TickWindow {
+                        start: tick,
+                        end: add_tick(tick, 1)?,
+                    },
+                    request.mode,
+                    CollisionProofs {
+                        placement_origin: None,
+                        recipient_barrier,
+                    },
+                    work,
+                )?);
+            }
         }
         lanes.push(LaneState {
             motion,

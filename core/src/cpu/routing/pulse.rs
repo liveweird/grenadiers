@@ -115,9 +115,12 @@ fn certify_pulse_inner(
         forecast,
         request,
         origin,
-        work,
         &scenarios,
-        &mut assumptions,
+        SuffixEvidence {
+            work,
+            storm_deadlines: &mut storm_deadlines,
+            assumptions: &mut assumptions,
+        },
     )?;
     if !assumptions.is_empty() && request.hold_ticks > MAX_CONDITIONAL_TICKS {
         return Err(RouteFailure::NoRoute);
@@ -204,16 +207,23 @@ fn certify_wait_before_start(
     Ok(())
 }
 
+struct SuffixEvidence<'a> {
+    work: &'a mut WorkBudget,
+    storm_deadlines: &'a mut [(Tick, Vec<Option<super::storm::DeadlineBounds>>)],
+    assumptions: &'a mut BTreeSet<EntityId>,
+}
+
 fn certify_stopped_suffix(
     context: &Context<'_>,
     forecast: &HazardForecast,
     request: PulseRequest,
     origin: Option<PulseOriginGrace>,
-    work: &mut WorkBudget,
     scenarios: &[(Tick, Motion, bool)],
-    assumptions: &mut BTreeSet<EntityId>,
+    evidence: SuffixEvidence<'_>,
 ) -> Result<(), RouteFailure> {
-    for (start, motion, origin_active) in scenarios {
+    for ((start, motion, origin_active), (_, deadlines)) in
+        scenarios.iter().zip(evidence.storm_deadlines.iter_mut())
+    {
         let stopped = Tick(
             start
                 .0
@@ -223,20 +233,41 @@ fn certify_stopped_suffix(
         if stopped >= request.stopped_safe_until {
             continue;
         }
+        if context.storm.is_none() {
+            let segment = stationary_segment(motion.position);
+            take_segments(evidence.work, &segment, forecast.dimensions())?;
+            evidence
+                .assumptions
+                .extend(super::safety::check_segments_with_grace(
+                    forecast,
+                    &segment,
+                    TickWindow {
+                        start: stopped,
+                        end: request.stopped_safe_until,
+                    },
+                    request.mode,
+                    origin.filter(|_| *origin_active).map(|value| value.cell),
+                    None,
+                )?);
+            continue;
+        }
         let mut simulation = motion.clone();
         for tick in stopped.0..request.stopped_safe_until.0 {
-            super::storm::charge_tick(context.storm, work)?;
+            super::storm::charge_tick(context.storm, evidence.work)?;
             let tick = Tick(tick);
             let segment = advance(context, &mut simulation, MovementIntent::Stop, tick)?;
-            take_segments(work, &segment, forecast.dimensions())?;
-            assumptions.extend(super::safety::check_segments_with_grace(
-                forecast,
-                &segment,
-                one_tick(tick)?,
-                request.mode,
-                origin.filter(|_| *origin_active).map(|value| value.cell),
-                None,
-            )?);
+            deadlines.push(simulation.storm_deadlines());
+            take_segments(evidence.work, &segment, forecast.dimensions())?;
+            evidence
+                .assumptions
+                .extend(super::safety::check_segments_with_grace(
+                    forecast,
+                    &segment,
+                    one_tick(tick)?,
+                    request.mode,
+                    origin.filter(|_| *origin_active).map(|value| value.cell),
+                    None,
+                )?);
         }
     }
     Ok(())

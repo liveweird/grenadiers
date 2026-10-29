@@ -106,7 +106,7 @@ impl PulseLease {
                 .iter()
                 .zip(request.start_window.start.0..request.start_window.end.0)
                 .any(|((start, deadlines), expected)| {
-                    *start != Tick(expected) || deadlines.len() != poses.len()
+                    *start != Tick(expected) || deadlines.len() < poses.len()
                 })
         {
             return Err(RouteFailure::Capacity);
@@ -177,19 +177,24 @@ impl PulseLease {
         self.poses[usize::from(completed.min(self.hold_ticks))]
     }
 
-    pub(crate) fn storm_deadlines_after(
+    pub(crate) fn storm_deadlines_at(
         &self,
         first_execution: Tick,
-        completed: u8,
+        observation_tick: Tick,
     ) -> Option<super::storm::DeadlineBounds> {
         let index = first_execution
             .0
             .checked_sub(self.start_window.start.0)
             .and_then(|index| usize::try_from(index).ok())?;
+        let admission_tick = first_execution.0.checked_sub(1)?;
+        let snapshot = observation_tick
+            .0
+            .checked_sub(admission_tick)
+            .and_then(|index| usize::try_from(index).ok())?;
         self.storm_deadlines
             .get(index)
             .filter(|(start, _)| *start == first_execution)
-            .and_then(|(_, deadlines)| deadlines[usize::from(completed.min(self.hold_ticks))])
+            .and_then(|(_, deadlines)| deadlines.get(snapshot).copied().flatten())
     }
 }
 

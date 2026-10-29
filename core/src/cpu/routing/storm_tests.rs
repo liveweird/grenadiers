@@ -30,7 +30,7 @@ fn environment_observation(config: StormCloudConfig) -> Observation {
     .unwrap()
 }
 
-fn custom_environment_observation(
+pub(super) fn custom_environment_observation(
     cloud: crate::game::StormCloudView,
     actor_position: Position,
     remaining: u16,
@@ -99,6 +99,7 @@ fn disabled_environment_keeps_legacy_motion_and_work_accounting() {
     )
     .unwrap();
     assert_eq!(legacy_work.spent(), disabled_work.spent());
+    assert_eq!(legacy_work.spent(), 24);
     assert_eq!(legacy_lease.pose_after(12), disabled_lease.pose_after(12));
 }
 

@@ -6,9 +6,10 @@ use crate::game::Direction;
 
 use super::motion::advance;
 use super::route::{CONDITIONAL_MOVE_UPDATES, SearchNode};
-use super::route_checks::{CollisionProofs, check_transition_all, one_tick};
+use super::route_checks::{CollisionProofs, check_stationary_all, check_transition_all, one_tick};
 use super::route_replay::build_lanes;
 use super::route_time::add_tick;
+use super::safety::stationary_segment;
 use super::validation::Context;
 use super::{
     MIN_FINAL_STOP_UPDATES, RouteAssurance, RouteCertificate, RouteFailure, RouteMode,
@@ -61,15 +62,17 @@ pub(super) fn apply_move(
             lane.recipient_barrier = retain_recipient_barrier(lane.recipient_barrier, &segments);
         }
         let stop = add_tick(lane.ready, u64::from(updates))?;
-        for offset in 0..3 {
-            super::storm::charge_tick(context.storm, work)?;
-            let tick = add_tick(stop, offset)?;
-            let segment = advance(context, &mut lane.motion, MovementIntent::Stop, tick)?;
+        if context.storm.is_none() {
+            lane.motion.stop();
+            let segment = stationary_segment(lane.motion.position);
             node.assumptions.extend(check_transition_all(
                 context,
                 forecasts,
                 &segment,
-                one_tick(tick)?,
+                crate::cpu::forecast::TickWindow {
+                    start: stop,
+                    end: add_tick(stop, 3)?,
+                },
                 mode,
                 CollisionProofs {
                     placement_origin: lane.origin_grace,
@@ -77,6 +80,25 @@ pub(super) fn apply_move(
                 },
                 work,
             )?);
+        }
+        if context.storm.is_some() {
+            for offset in 0..3 {
+                super::storm::charge_tick(context.storm, work)?;
+                let tick = add_tick(stop, offset)?;
+                let segment = advance(context, &mut lane.motion, MovementIntent::Stop, tick)?;
+                node.assumptions.extend(check_transition_all(
+                    context,
+                    forecasts,
+                    &segment,
+                    one_tick(tick)?,
+                    mode,
+                    CollisionProofs {
+                        placement_origin: lane.origin_grace,
+                        recipient_barrier: lane.recipient_barrier,
+                    },
+                    work,
+                )?);
+            }
         }
         lane.ready = add_tick(stop, 3)?;
         lane.last_stop = Some(stop);
@@ -118,15 +140,14 @@ pub(super) fn apply_wait(
 ) -> Result<(), RouteFailure> {
     for lane in &mut node.lanes {
         let end = add_tick(lane.ready, u64::from(updates))?;
-        for tick in lane.ready.0..end.0 {
-            super::storm::charge_tick(context.storm, work)?;
-            let tick = crate::game::Tick(tick);
-            let segment = advance(context, &mut lane.motion, MovementIntent::Stop, tick)?;
-            node.assumptions.extend(check_transition_all(
-                context,
+        if context.storm.is_none() {
+            node.assumptions.extend(check_stationary_all(
                 forecasts,
-                &segment,
-                one_tick(tick)?,
+                lane.motion.position,
+                crate::cpu::forecast::TickWindow {
+                    start: lane.ready,
+                    end,
+                },
                 mode,
                 CollisionProofs {
                     placement_origin: lane.origin_grace,
@@ -134,6 +155,26 @@ pub(super) fn apply_wait(
                 },
                 work,
             )?);
+            lane.motion.stop();
+        }
+        if context.storm.is_some() {
+            for tick in lane.ready.0..end.0 {
+                super::storm::charge_tick(context.storm, work)?;
+                let tick = crate::game::Tick(tick);
+                let segment = advance(context, &mut lane.motion, MovementIntent::Stop, tick)?;
+                node.assumptions.extend(check_transition_all(
+                    context,
+                    forecasts,
+                    &segment,
+                    one_tick(tick)?,
+                    mode,
+                    CollisionProofs {
+                        placement_origin: lane.origin_grace,
+                        recipient_barrier: lane.recipient_barrier,
+                    },
+                    work,
+                )?);
+            }
         }
         lane.ready = end;
     }
@@ -156,6 +197,27 @@ pub(super) fn terminal(
             && add_tick(stop, MIN_FINAL_STOP_UPDATES)? > request.survive_until
         {
             return Ok(false);
+        }
+        if context.storm.is_none() {
+            match check_stationary_all(
+                forecasts,
+                lane.motion.position,
+                crate::cpu::forecast::TickWindow {
+                    start: lane.ready,
+                    end: request.survive_until,
+                },
+                request.mode,
+                CollisionProofs {
+                    placement_origin: lane.origin_grace,
+                    recipient_barrier: lane.recipient_barrier,
+                },
+                work,
+            ) {
+                Ok(found) => assumptions.extend(found),
+                Err(RouteFailure::NoRoute) => return Ok(false),
+                Err(error) => return Err(error),
+            }
+            continue;
         }
         let mut simulation = lane.motion.clone();
         for tick in lane.ready.0..request.survive_until.0 {

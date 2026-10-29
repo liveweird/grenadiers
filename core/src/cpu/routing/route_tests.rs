@@ -61,6 +61,15 @@ fn safe_stopped_route_is_explicit_wait_with_all_exact_start_lanes() {
 }
 
 #[test]
+fn legacy_stationary_route_work_is_pinned() {
+    let observed = observation(Vec::new(), Vec::new());
+    let forecast = forecast_for(&observed);
+    let mut work = WorkBudget::new(65_536);
+    plan_route(&observed, &forecast, request(), &mut work).unwrap();
+    assert_eq!(work.spent(), 363);
+}
+
+#[test]
 fn delayed_singleton_start_lane_is_certified_exactly() {
     let observed = observation(Vec::new(), Vec::new());
     let forecast = forecast_for(&observed);
@@ -132,6 +141,7 @@ fn multi_leg_escape_matches_actual_motion_and_stop_three_schedule() {
     route_request.mode = RouteMode::AllowStationaryAssumptions;
     let mut work = WorkBudget::new(65_536);
     let certificate = plan_route(&observed, &forecast, route_request, &mut work).unwrap();
+    assert_eq!(work.spent(), 4_355);
     assert!(work.spent() < 65_536);
     assert!(
         certificate

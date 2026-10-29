@@ -308,9 +308,10 @@ describe('gameplay settings Oil locale', () => {
 })
 
 describe('gameplay settings locks', () => {
-  it('explains a null edit grant and disables every settings control', () => {
+  it.each([false, true])('explains a null grant and disables controls when ready=%s', (ready) => {
     const locked = room(3)
     locked.settingsEditor = null
+    locked.seats[0].ready = ready
     render(<MantineProvider env="test"><GameplaySettingsPanel room={locked} youSeat="one"
       pending={false} copy={en} onApply={() => true} /></MantineProvider>)
     expect(screen.getByText('These match rules are read-only.')).toBeVisible()

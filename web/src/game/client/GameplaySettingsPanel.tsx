@@ -44,9 +44,9 @@ function ItemSetting({ item, visible, checked, disabled, copy, onChange }: {
 
 function editLockText(room: RoomView, youSeat: Seat | null, ownReady: boolean, copy: GameCopy): string | null {
   if (room.phase.type !== 'waiting') return copy.settings.lockedMatch
+  if (room.settingsEditor === null) return copy.settings.readOnly
   if (ownReady) return copy.settings.lockedReady
   if (room.settingsEditor === youSeat) return null
-  if (room.settingsEditor === null) return copy.settings.readOnly
   const editor = copy.player[room.settingsEditor]
   return copy.settings.editor.replace('{{player}}', editor)
 }

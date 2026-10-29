@@ -61,10 +61,6 @@ function frozenStateInvalid(state: GameState): boolean {
 
 function lairError(state: GameState, room: RoomView): SemanticError | null {
   const configured = room.configuration.environment.lairs
-  const selected = room.settings.environment.lairs
-  if (configured.enabled !== selected.enabled
-    || configured.spawnSeconds !== selected.spawnSeconds
-    || configured.maxLivingMobs !== selected.maxLivingMobs) return 'invalidLairEnvironment'
   if (!configured.enabled) {
     return state.lairs.length === 0 && state.mobs.length === 0 ? null : 'invalidLairState'
   }

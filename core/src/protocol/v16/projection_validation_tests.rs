@@ -67,3 +67,56 @@ fn eleven_by_nine_rejects_reported_edge_centers() {
         );
     }
 }
+
+#[test]
+fn checked_publication_binds_mob_freeze_to_a_living_stopwatch_holder() {
+    let frozen = super::server_conformance_tests::world_case(
+        BoardSize::ElevenByNine,
+        PlayerCount::Two,
+        StormCloudConfig::Disabled,
+        LairConfig::Enabled(LairSettings::new(5, 2).unwrap()),
+        300,
+        (false, true),
+        [30; 32],
+    );
+    assert!(
+        bind_expanded(
+            &frozen.room,
+            frozen.room.round_id,
+            &frozen.capture,
+            frozen.generation,
+        )
+        .is_ok()
+    );
+
+    let mut expired = frozen.capture.clone();
+    expired.base.world.actors[0].view.effects = EffectViews::default();
+    assert!(
+        bind_expanded(
+            &frozen.room,
+            frozen.room.round_id,
+            &expired,
+            frozen.generation,
+        )
+        .is_err()
+    );
+
+    let mut dead = frozen.capture.clone();
+    dead.base.world.actors[0].view.alive = false;
+    dead.base.world.actors[0].view.effects = EffectViews::default();
+    assert!(bind_expanded(&frozen.room, frozen.room.round_id, &dead, frozen.generation,).is_err());
+
+    let mut unfrozen = frozen.capture.clone();
+    for mob in &mut unfrozen.mobs {
+        mob.frozen = false;
+    }
+    assert!(
+        bind_expanded(
+            &frozen.room,
+            frozen.room.round_id,
+            &unfrozen,
+            frozen.generation,
+        )
+        .is_err()
+    );
+}

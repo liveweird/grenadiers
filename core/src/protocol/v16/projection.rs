@@ -302,6 +302,22 @@ fn valid_lairs(room: &RoomView, capture: &ExpandedCapture) -> bool {
     {
         return false;
     }
+    let active_stopwatch = capture.base.world.actors.iter().any(|actor| {
+        actor.view.alive
+            && actor
+                .view
+                .effects
+                .as_slice()
+                .iter()
+                .any(|effect| effect.kind() == super::EffectKind::Stopwatch)
+    });
+    if capture
+        .mobs
+        .first()
+        .is_some_and(|mob| mob.frozen != active_stopwatch)
+    {
+        return false;
+    }
     let (width, height) = room.configuration.domain().base().board().dimensions();
     if capture.mobs.iter().any(|mob| {
         let half = crate::game::types::HALF_FOOTPRINT as u32;

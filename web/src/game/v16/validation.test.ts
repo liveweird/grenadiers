@@ -44,7 +44,7 @@ describe('gameplay v16 lair validation', () => {
     expect(validateGameplayV16ServerMessage(v16Snapshot(true))).toMatchObject({ valid: true })
   })
 
-  it('compares lair fields independent of member order only when state is present', () => {
+  it('compares lair fields independent of member order for every room message', () => {
     const snapshot = v16Snapshot(true)
     const selected = snapshot.room.settings.environment.lairs
     snapshot.room.settings.environment.lairs = {
@@ -57,7 +57,9 @@ describe('gameplay v16 lair validation', () => {
     const mismatch = { enabled: false, spawnSeconds: 60, maxLivingMobs: 8 }
     const roomState: GameServerMessage = { type: 'roomState', room: snapshot.room }
     roomState.room.settings.environment.lairs = mismatch
-    expect(validateGameplayV16ServerMessage(roomState)).toMatchObject({ valid: true })
+    expect(validateGameplayV16ServerMessage(roomState)).toEqual({
+      valid: false, source: 'semantics', error: 'invalidLairEnvironment',
+    })
 
     const admitted: Extract<GameServerMessage, { type: 'admitted' }> = {
       type: 'admitted', sequence: 1, youSeat: 'one', resumeToken: 'c'.repeat(64),
@@ -69,7 +71,9 @@ describe('gameplay v16 lair validation', () => {
     admitted.room.lastRound = null
     admitted.room.seats.forEach((seat) => { seat.ready = seat.controller.type === 'cpu' })
     admitted.room.settings.environment.lairs = mismatch
-    expect(validateGameplayV16ServerMessage(admitted)).toMatchObject({ valid: true })
+    expect(validateGameplayV16ServerMessage(admitted)).toEqual({
+      valid: false, source: 'semantics', error: 'invalidLairEnvironment',
+    })
 
     const running = v16Snapshot(true)
     running.room.settings.environment.lairs = mismatch

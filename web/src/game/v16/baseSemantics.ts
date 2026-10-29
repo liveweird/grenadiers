@@ -6,6 +6,7 @@ import { ITEM_IDS, type GameServerMessage, type GameState, type RoomView, type S
 
 export type BaseSemanticError = GameplayProfileSemanticError
   | 'invalidConfiguration' | 'invalidControllerMetadata' | 'invalidFrozenState'
+  | 'invalidLairEnvironment'
   | 'invalidLifecycle' | 'invalidOilBarrels' | 'invalidPersonalAdmission' | 'invalidRoster'
   | 'invalidStateBinding' | 'invalidStormEnvironment' | 'invalidTeleportMarker' | 'invalidWorldState'
 
@@ -21,6 +22,14 @@ function supportedRoomProfile(room: RoomView): boolean {
     && room.rulesVersion === 8
     && room.configuration.controllers.length >= 2 && room.configuration.controllers.length <= 4
     && room.configuration.environment.stormCloud === room.settings.environment.stormCloud
+}
+
+function lairEnvironmentMismatch(room: RoomView): boolean {
+  const configured = room.configuration.environment.lairs
+  const selected = room.settings.environment.lairs
+  return configured.enabled !== selected.enabled
+    || configured.spawnSeconds !== selected.spawnSeconds
+    || configured.maxLivingMobs !== selected.maxLivingMobs
 }
 
 function cellOutsideBoard(value: unknown, width: number, height: number): boolean {
@@ -234,6 +243,7 @@ export function baseSemanticError(message: GameServerMessage): BaseSemanticError
   const { room } = message
   const metadata = metadataError(room)
   if (metadata) return metadata
+  if (lairEnvironmentMismatch(room)) return 'invalidLairEnvironment'
   if (!supportedRoomProfile(room)) return 'unsupportedProfile'
   const lifecycle = roomLifecycleSemanticError(room)
   if (lifecycle) return lifecycle

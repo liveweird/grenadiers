@@ -21,4 +21,11 @@ The creator submits Human/CPU/CPU/CPU with explicit Standard difficulty. All fou
 are visible, no invitation is offered without a human vacancy, and the sole human can ready
 without any spectator or replacement flow.
 
-These cases require the active gameplay v15 endpoint. They must not run against an archived v14 deployment.
+## Scenario: three CPUs escape their first bombs in a default four-player match
+
+One human creates a default Human/CPU/CPU/CPU match through the UI. Real planner workers
+place each CPU's first bomb. Public placement/detonation events identify ownership, and every
+CPU must survive its first detonation and the following flame interval. The test uses ordinary
+room controls with no injected game state, fixed private AI seed or direct CPU input.
+
+These cases require the active gameplay v16 endpoint. They must not run against an archived deployment.

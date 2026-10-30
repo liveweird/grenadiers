@@ -106,6 +106,8 @@ mod forming_replacement_tests;
 #[cfg(test)]
 mod lair_cpu_acceptance_tests;
 #[cfg(test)]
+mod lair_cpu_opening_tests;
+#[cfg(test)]
 mod lifecycle_tests;
 #[cfg(test)]
 mod tests;

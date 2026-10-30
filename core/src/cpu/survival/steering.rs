@@ -41,7 +41,16 @@ pub(super) fn target(
             .find(|cell| *cell != current)
             .or(Some(current));
     }
-    refuge_step(observation, forecast, current, &BTreeSet::new(), work)
+    let occupied = if observation.parts().rules.version == 8 {
+        let BombKnowledge::Visible(bombs) = &observation.parts().bombs else {
+            return None;
+        };
+        work.try_take(u32::try_from(bombs.len()).ok()?).ok()?;
+        bombs.iter().map(|bomb| bomb.cell).collect()
+    } else {
+        BTreeSet::new()
+    };
+    refuge_step(observation, forecast, current, &occupied, work)
 }
 
 pub(super) fn origin_target(
@@ -169,6 +178,46 @@ mod origin_tests {
             CellId::new(2, 1),
             &mut WorkBudget::new(work),
         )
+    }
+
+    #[test]
+    fn rules_v8_threatened_guidance_never_routes_through_a_visible_bomb() {
+        let observed = crate::cpu::lair_contact::tests::observation(Vec::new(), Tick(300))
+            .map_parts(|parts| {
+                parts.arena.blocks.push(CellId::new(1, 2));
+                parts.bombs = BombKnowledge::Visible(vec![ObservedBomb {
+                    id: EntityId(91),
+                    placed_at: Tick(90),
+                    cell: CellId::new(2, 1),
+                    owner: EntityId(1),
+                    range: 1,
+                    trigger: ObservedBombTrigger::Timed {
+                        remaining_ticks: 60,
+                        paused: false,
+                    },
+                    blast: BlastKind::Standard,
+                    unknown: UnknownBombFacts::ALL,
+                }]);
+            })
+            .unwrap();
+        let key = crate::cpu::MemoryKey {
+            world: observed.parts().world,
+            cpu_seat: observed.parts().recipient,
+        };
+        let hazards = forecast(
+            &observed,
+            &ObservedHazardMemory::new(key),
+            None,
+            ForecastLimits::default(),
+            &mut WorkBudget::new(65_536),
+        )
+        .unwrap();
+        let ordinary = ControlPlan::stop(crate::cpu::policy::UtilityMemory::new(key));
+
+        assert_eq!(
+            target(&observed, &hazards, &ordinary, &mut WorkBudget::new(128)),
+            None
+        );
     }
 
     #[test]

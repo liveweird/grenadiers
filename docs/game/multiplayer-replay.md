@@ -38,7 +38,7 @@ Replay submits accepted CPU inputs without rerunning planning. Inspection includ
 environment configuration, actor timers and complete simulation RNG progress. These recorders
 remain test-only; this adds no production recording or export path.
 
-Format7 separately binds rules8, CPU19 and lair layout1, alongside the same lifecycle,
+Format7 separately binds rules8, CPU20 (or archived CPU19) and lair layout1, alongside the same lifecycle,
 generator selection and randomness versions. Its header retains complete lair tuning, including
 numeric choices while disabled. Atomic settings records carry base rules, clouds and tuning
 together. Mob actions are not journal entries: deterministic simulation regenerates births,

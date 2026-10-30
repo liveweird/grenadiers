@@ -333,3 +333,50 @@ fn invalid_contact_on_a_stopped_waiting_route_holds_stop_and_cannot_submit_a_leg
     assert!(episode.driver.cpu_stationary[SeatId::Two.index()]);
     assert!(!episode.driver.cpus[index].has_committed_route());
 }
+
+#[test]
+fn scheduled_route_stop_confirmation_retains_its_contact_lease() {
+    let mut episode = Episode::new(Case {
+        board: BoardSize::ElevenByNine,
+        count: 2,
+        difficulty: CpuDifficulty::Standard,
+        cloud: StormCloudConfig::Disabled,
+        lairs: true,
+    });
+    let mut confirmed = false;
+    let mut awaiting_confirmation = None;
+    for _ in 0..2_400 {
+        episode.planner.pump_for_test(usize::MAX);
+        let was_stationary = episode.driver.cpu_stationary[SeatId::Two.index()];
+        episode.driver.service_cpu().unwrap();
+        let cpu = &episode.driver.cpus[0];
+        if awaiting_confirmation.is_none()
+            && !was_stationary
+            && episode.driver.cpu_stationary[SeatId::Two.index()]
+            && cpu.has_committed_route()
+            && cpu.has_committed_contact()
+        {
+            awaiting_confirmation = cpu
+                .latest_observation_for_test()
+                .map(|observation| observation.parts().tick)
+        }
+        if let Some(notice) = episode.driver.runtime.settle_boundary([None; 4]).unwrap() {
+            episode.driver.publish(notice);
+        }
+        if awaiting_confirmation.is_some_and(|before| {
+            episode.driver.cpus[0]
+                .latest_observation_for_test()
+                .is_some_and(|observation| observation.parts().tick > before)
+        }) {
+            assert!(episode.driver.cpus[0].has_committed_route());
+            assert!(episode.driver.cpus[0].has_committed_contact());
+            assert!(episode.driver.cpu_stationary[SeatId::Two.index()]);
+            confirmed = true;
+            break;
+        }
+    }
+    assert!(
+        confirmed,
+        "real rules8 route reaches a confirmed scheduled stop"
+    );
+}

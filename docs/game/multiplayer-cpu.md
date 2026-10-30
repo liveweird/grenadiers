@@ -1,6 +1,6 @@
 # Multiplayer CPU foundation
 
-The live environment CPU implementation uses policy 19 on rules 8 for every live two-to-four-seat
+The live environment CPU implementation uses policy 20 on rules 8 for every live two-to-four-seat
 room. The legacy multiplayer profiles remain policy 17 for archived/reference paths. See the
 [board profile table](board-sizes.md). The
 [CPU contract guide](cpu-contracts.md) describes planner boundaries; the
@@ -19,7 +19,7 @@ or a private arena/simulation random stream.
 
 ## Policies and controller ownership
 
-`CpuProfile::LAIRS_STANDARD` and `LAIRS_EASY` select Utility19 for live rules8 rooms.
+`CpuProfile::LAIRS_STANDARD` and `LAIRS_EASY` select Utility20 for live rules8 rooms.
 `ENVIRONMENT_STANDARD`/`ENVIRONMENT_EASY` retain Utility18 on rules7; multiplayer, current
 legacy and historical replay profiles keep their previous identities. Planning uses the shared
 utility and bounded forecasting machinery with explicit profile boundaries.
@@ -59,7 +59,7 @@ Live controller selection uses the lair profile below, including when both envir
 
 ## Lair profile boundaries
 
-`LAIRS_STANDARD` and `LAIRS_EASY` identify Utility19 on rules8. Its checked v16 observation
+`LAIRS_STANDARD` and `LAIRS_EASY` identify Utility20 on rules8. Its checked v16 observation
 adds public lair attempt timers and mob poses without targets, paths or hidden freeze deadlines.
 Use `survival::plan_lairs`; historical public policy, routing and survival entry points reject
 rules8 rather than returning movement without a mob-contact proof.
@@ -81,6 +81,22 @@ Lair controller integration must preserve ordinary admission identity, age, pose
 command epoch and stopped authority. Contact checks supplement those fences; they do not replace
 them or rebase a result to a newer observation. Hold deadlines remain unconditional even when
 workers or observations are late. See [CPU contracts](cpu-contracts.md).
+
+## Interrupted planting
+
+A rival bomb can invalidate a CPU's certified escape, including when several CPUs plant on
+one update. The controller stops and retains only independently checked origin-exit grace for
+its own matching bomb. After a confirmed Stop, fresh planning uses the complete current bomb
+scene and certifies a new movement pulse together with its mob-contact lease. The old route
+never authorizes further movement. Origin grace ends when the footprint leaves the bomb cell.
+Escape guidance excludes visible bomb cells. Foreign bomb-motion uncertainty uses only named
+stationary assumptions on checked pulses of at most three updates, so distant bombs do not
+force waiting until the CPU's own fuse is almost spent.
+
+Scheduled stops between route legs retain their contact lease. Contact invalidation stops the
+route or pulse while preserving valid origin provenance for a fresh proof; completed commitments
+release their leases. New rules8 controllers use policy20; archived policy19 replay records
+remain readable without rerunning their planner.
 
 ## Focused checks
 

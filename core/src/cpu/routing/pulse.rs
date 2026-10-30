@@ -15,7 +15,7 @@ use super::pulse_support::{
 use super::safety::{static_segment_clear, stationary_segment};
 use super::types::{PulseLease, PulseRequest};
 use super::validation::{self, Context};
-use super::{RouteAssurance, RouteFailure};
+use super::{RouteAssurance, RouteFailure, RouteMode};
 
 const MAX_PULSE_TICKS: u8 = 12;
 const MAX_CONDITIONAL_TICKS: u8 = 3;
@@ -88,7 +88,7 @@ pub(crate) fn certify_escape_pulse(
     origin: PulseOriginGrace,
     work: &mut WorkBudget,
 ) -> Result<PulseLease, RouteFailure> {
-    validate_origin_forecast(forecast, origin)?;
+    validate_origin_forecast(forecast, observation, origin, RouteMode::CertifiedOnly)?;
     certify_pulse_inner(
         observation,
         forecast,
@@ -98,6 +98,30 @@ pub(crate) fn certify_escape_pulse(
         None,
         work,
     )
+}
+
+pub(crate) fn certify_lair_escape_pulse(
+    observation: &Observation,
+    forecast: &HazardForecast,
+    request: PulseRequest,
+    origin: PulseOriginGrace,
+    work: &mut WorkBudget,
+) -> Result<(PulseLease, MobContactLease), RouteFailure> {
+    validate_origin_forecast(forecast, observation, origin, request.mode)?;
+    let envelope = contact_envelope(observation, request, work)?;
+    let lease = certify_pulse_inner(
+        observation,
+        forecast,
+        request,
+        Some(origin),
+        false,
+        Some(&envelope),
+        work,
+    )?;
+    Ok((
+        lease,
+        MobContactLease::new(envelope, request.stopped_safe_until),
+    ))
 }
 
 fn certify_pulse_inner(

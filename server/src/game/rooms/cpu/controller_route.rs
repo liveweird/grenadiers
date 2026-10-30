@@ -85,6 +85,7 @@ impl CpuController {
     fn clear_route(&mut self, reset_memory: bool) {
         self.committed_route = None;
         self.committed_route_epoch = None;
+        self.committed_contact = None;
         self.cancel();
         self.clear_escape_origin();
         if reset_memory {

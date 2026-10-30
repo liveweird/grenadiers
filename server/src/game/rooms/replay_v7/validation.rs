@@ -13,7 +13,10 @@ pub(super) fn validate_header(header: &ReplayHeader) -> Result<(), ()> {
         || header.lifecycle_profile != LIFECYCLE_PROFILE
         || header.lifecycle_profile != grenadiers_core::room::ROSTER_LIFECYCLE_PROFILE
         || header.rules_version != RULES_VERSION
-        || header.cpu_policy_version != CPU_POLICY_VERSION
+        || !matches!(
+            header.cpu_policy_version,
+            ARCHIVED_CPU_POLICY_VERSION | CPU_POLICY_VERSION
+        )
         || header.generator_version != expected_generator
         || header.simulation_randomness_version != SIMULATION_RANDOMNESS_VERSION
         || header.simulation_seed_derivation_version != SIMULATION_SEED_DERIVATION_VERSION
@@ -45,7 +48,7 @@ fn validate_configuration(header: &ReplayHeader) -> Result<(), ()> {
                 let entry = provenance.next().ok_or(())?;
                 if entry.seat != seat
                     || Some(entry.difficulty) != expected_difficulty
-                    || entry.policy_version != CPU_POLICY_VERSION
+                    || entry.policy_version != header.cpu_policy_version
                     || header.initially_occupied_humans[seat.index()]
                 {
                     return Err(());

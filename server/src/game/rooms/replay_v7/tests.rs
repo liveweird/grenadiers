@@ -216,3 +216,77 @@ fn replay7_debug_redacts_private_cpu_seed() {
     assert!(debug.contains("<redacted>"));
     assert!(!debug.contains("173"));
 }
+
+#[test]
+fn replay7_preserves_archived_cpu19_and_records_cpu20_without_mixed_provenance() {
+    let base = RoomConfiguration::new(
+        &[SeatControl::Human, SeatControl::Cpu],
+        Some(grenadiers_core::room::CpuDifficulty::Standard),
+        BoardSize::FifteenByThirteen,
+    )
+    .unwrap();
+    let mut recorder = RecordingRosterRuntime::new(
+        LairRoomConfiguration::new(
+            base,
+            StormCloudConfig::Disabled,
+            LairTuning::new(false, LairSettings::DEFAULT),
+        ),
+        RoomSettings::DEFAULT,
+        RoundSeedSource::with_entropy(|bytes| {
+            bytes.fill(37);
+            Ok(())
+        }),
+        vec![CpuProvenance::new(
+            SeatId::Two,
+            grenadiers_core::room::CpuDifficulty::Standard,
+            [173; 32],
+        )],
+    )
+    .unwrap();
+    recorder.admit(SeatId::One, false).unwrap();
+    recorder
+        .human_action(
+            SeatId::One,
+            1,
+            ReplayAction::Ready {
+                ready: true,
+                settings_revision: 1,
+            },
+        )
+        .unwrap();
+    for _ in 0..grenadiers_core::room::COUNTDOWN_TICKS + 30 {
+        recorder.settle([None; 4]).unwrap();
+    }
+    recorder
+        .cpu_action(SeatId::Two, 1, ReplayAction::Bomb(1))
+        .unwrap();
+    recorder.settle([None; 4]).unwrap();
+    recorder
+        .cpu_action(
+            SeatId::Two,
+            1,
+            ReplayAction::Movement(Some(grenadiers_core::game::Direction::West)),
+        )
+        .unwrap();
+    for _ in 0..12 {
+        recorder.settle([None; 4]).unwrap();
+    }
+    let expected = recorder.runtime().replay_inspection();
+    let (_, journal) = recorder.into_parts();
+    assert_eq!(journal.header.cpu_policy_version, 20);
+    assert_eq!(journal.header.cpus[0].policy_version, 20);
+    verify_exact(&journal, &expected).unwrap();
+
+    let mut archived = journal.clone();
+    archived.header.cpu_policy_version = 19;
+    archived.header.cpus[0].policy_version = 19;
+    verify_exact(&archived, &expected).unwrap();
+    for header_policy in [18, 19, 21] {
+        let mut malformed = journal.clone();
+        malformed.header.cpu_policy_version = header_policy;
+        assert!(replay(&malformed).is_err());
+    }
+    let mut mixed = archived;
+    mixed.header.cpus[0].policy_version = 20;
+    assert!(replay(&mixed).is_err());
+}

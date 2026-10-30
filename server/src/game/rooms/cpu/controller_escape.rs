@@ -13,7 +13,7 @@ impl CpuController {
         if !self.escaping {
             return Ok(EscapeExecution::Completed);
         }
-        if self.profile.policy.version() == 19 {
+        if matches!(self.profile.policy.version(), 19 | 20) {
             self.escaping = false;
             self.reset_escape_memory();
             return Ok(EscapeExecution::Invalidated);

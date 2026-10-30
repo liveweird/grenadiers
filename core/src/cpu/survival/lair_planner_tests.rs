@@ -9,7 +9,7 @@ use crate::game::{CellId, EnabledItems, PickupKind, Position, Tick};
 
 use super::plan_lairs;
 
-fn key(observation: &crate::cpu::Observation) -> MemoryKey {
+pub(super) fn key(observation: &crate::cpu::Observation) -> MemoryKey {
     MemoryKey {
         world: observation.parts().world,
         cpu_seat: observation.parts().recipient,
@@ -190,7 +190,7 @@ fn exhausted_lair_planning_never_emits_manual_input() {
     assert_eq!(plan.survival.control.intent.manual, None);
 }
 
-fn plant_scene(mob_position: Option<Position>) -> crate::cpu::Observation {
+pub(super) fn plant_scene(mob_position: Option<Position>) -> crate::cpu::Observation {
     let mobs = mob_position
         .into_iter()
         .map(|position| mob(10, position))
@@ -206,7 +206,7 @@ fn plant_scene(mob_position: Option<Position>) -> crate::cpu::Observation {
         .unwrap()
 }
 
-fn planned(observed: &crate::cpu::Observation) -> super::LairSurvivalPlan {
+pub(super) fn planned(observed: &crate::cpu::Observation) -> super::LairSurvivalPlan {
     let key = key(observed);
     plan_lairs(
         observed,

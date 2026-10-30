@@ -42,7 +42,7 @@ exposes IDs, lair indices, positions, headings and a frozen boolean, without pur
 Stopwatch deadlines. These getters do not change existing public-state or actor DTO layouts.
 
 The [gameplay16 contract](protocol-v16.md) checks canonical overlays and recipient privacy.
-Its [CPU19 boundary](multiplayer-cpu.md#lair-profile-boundaries) adds finite NPC/spawn contact
+Its [CPU20 boundary](multiplayer-cpu.md#lair-profile-boundaries) adds finite NPC/spawn contact
 proofs; the explicit roster runtime and private replay7 regenerate the same simulation from
 accepted inputs. The artist sheet includes `terrain.lair` and four `mob.<direction>` poses;
 see the [artist handoff](../../assets/art/README.md).

@@ -35,13 +35,37 @@ impl CpuController {
         if valid {
             return Some(ContactStatus::Continue);
         }
+        // Contact invalidation revokes movement, but not independently proven
+        // origin-exit grace. Fresh planning must certify both hazards again.
+        let origin = self
+            .committed_route
+            .as_ref()
+            .and_then(|route| route.escape_origin(observation))
+            .or_else(|| {
+                self.escape_origin.as_ref().and_then(|origin| {
+                    self.committed_pulse.as_ref().map_or_else(
+                        || origin.retain_stopped(observation),
+                        |pulse| {
+                            pulse.retain_escape_origin(
+                                origin,
+                                observation,
+                                observation.parts().tick,
+                            )
+                        },
+                    )
+                })
+            });
+        let origin_epoch = origin
+            .as_ref()
+            .and(self.committed_route_epoch.or(self.escape_origin_epoch));
         self.committed_contact = None;
         self.committed_pulse = None;
         self.invalidate_route();
         self.escaping = false;
         self.stop_admission = None;
         self.settled_stop_tick = None;
-        self.clear_escape_origin();
+        self.escape_origin = origin;
+        self.escape_origin_epoch = origin_epoch;
         self.cancel();
         Some(ContactStatus::Invalidated)
     }

@@ -26,6 +26,7 @@ pub enum CpuPolicy {
     UtilityV17,
     UtilityV18,
     UtilityV19,
+    UtilityV20,
 }
 
 impl CpuPolicy {
@@ -51,6 +52,7 @@ impl CpuPolicy {
             Self::UtilityV17 => 17,
             Self::UtilityV18 => 18,
             Self::UtilityV19 => 19,
+            Self::UtilityV20 => 20,
         }
     }
 }
@@ -195,15 +197,27 @@ impl CpuProfile {
         difficulty: CpuDifficulty::Easy,
     };
 
-    /// Rules-v8 Standard profile with finite NPC/spawn contact leases.
-    pub const LAIRS_STANDARD: Self = Self {
+    /// Original rules-v8 Standard identity, retained for archived records.
+    pub const LAIRS_V19_STANDARD: Self = Self {
         policy: CpuPolicy::UtilityV19,
         difficulty: CpuDifficulty::Standard,
     };
 
-    /// Rules-v8 Easy profile with finite NPC/spawn contact leases.
-    pub const LAIRS_EASY: Self = Self {
+    /// Original rules-v8 Easy identity, retained for archived records.
+    pub const LAIRS_V19_EASY: Self = Self {
         policy: CpuPolicy::UtilityV19,
+        difficulty: CpuDifficulty::Easy,
+    };
+
+    /// Rules-v8 Standard profile with contact-certified interrupted-plant recovery.
+    pub const LAIRS_STANDARD: Self = Self {
+        policy: CpuPolicy::UtilityV20,
+        difficulty: CpuDifficulty::Standard,
+    };
+
+    /// Rules-v8 Easy profile with contact-certified interrupted-plant recovery.
+    pub const LAIRS_EASY: Self = Self {
+        policy: CpuPolicy::UtilityV20,
         difficulty: CpuDifficulty::Easy,
     };
 
@@ -292,8 +306,10 @@ mod tests {
         assert_eq!(CpuProfile::MULTIPLAYER_EASY.policy.version(), 17);
         assert_eq!(CpuProfile::ENVIRONMENT_STANDARD.policy.version(), 18);
         assert_eq!(CpuProfile::ENVIRONMENT_EASY.policy.version(), 18);
-        assert_eq!(CpuProfile::LAIRS_STANDARD.policy.version(), 19);
-        assert_eq!(CpuProfile::LAIRS_EASY.policy.version(), 19);
+        assert_eq!(CpuProfile::LAIRS_V19_STANDARD.policy.version(), 19);
+        assert_eq!(CpuProfile::LAIRS_V19_EASY.policy.version(), 19);
+        assert_eq!(CpuProfile::LAIRS_STANDARD.policy.version(), 20);
+        assert_eq!(CpuProfile::LAIRS_EASY.policy.version(), 20);
         assert!(CpuProfile::CURRENT.is_current());
         assert!(CpuProfile::CURRENT_EASY.is_current());
         assert!(!CpuProfile::MULTIPLAYER_STANDARD.is_current());

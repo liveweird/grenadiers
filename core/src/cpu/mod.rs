@@ -82,5 +82,8 @@ mod observation_multiplayer_tests;
 mod rules_v8_boundary_tests;
 #[cfg(test)]
 mod rules_v9_episode_tests;
+
+#[cfg(test)]
+mod rules_v9_generated_tests;
 #[cfg(test)]
 mod tests;

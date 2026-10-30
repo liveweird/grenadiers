@@ -70,6 +70,10 @@ fn state() -> (State, RoomSettings) {
 }
 
 fn observe(state: &State, settings: RoomSettings) -> Observation {
+    observe_for(state, settings, ATTACKER)
+}
+
+pub(super) fn observe_for(state: &State, settings: RoomSettings, recipient: SeatId) -> Observation {
     let view = state.public_view();
     let actors = view
         .actors
@@ -119,7 +123,7 @@ fn observe(state: &State, settings: RoomSettings) -> Observation {
     let parts = ObservationParts {
         world: WORLD_ID,
         tick: view.tick,
-        recipient: ATTACKER,
+        recipient,
         rules: ObservedRules {
             version: 9,
             tick_rate: 60,

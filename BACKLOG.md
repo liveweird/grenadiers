@@ -21,6 +21,8 @@ repeated approval for routine implementation choices. Entries are not delivery-d
 - [todo] **CPU combat pressure.** Make CPUs pursue reachable attack positions against all
   visible rivals, including other CPUs, while retaining checked bomb escape and mob safety.
   Add real multiplayer progress/combat regressions rather than only utility-score assertions.
+- [todo] **Extra landmines.** Consume the single-use mine item when planting without using a
+  regular bomb slot. Triggering the mine must not increase or refund regular bomb capacity.
 
 ## Single-player
 

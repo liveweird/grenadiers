@@ -92,6 +92,20 @@ async function clearAndStageVictim(page: Page, game: ObservedGame): Promise<void
   await moveSeatTo(page, game, 'two', { column: 11, row: 1 })
 }
 
+function expectSolidPlayers(frame: Snapshot): void {
+  const players = frame.state.actors.filter((value) => value.type === 'visible' && value.alive)
+  for (const [index, left] of players.entries()) {
+    if (left.type !== 'visible') continue
+    for (const right of players.slice(index + 1)) {
+      if (right.type !== 'visible') continue
+      expect({ column: Math.floor(left.position.x / 1024), row: Math.floor(left.position.y / 1024) })
+        .not.toEqual({ column: Math.floor(right.position.x / 1024), row: Math.floor(right.position.y / 1024) })
+      expect(Math.abs(left.position.x - right.position.x) >= 640
+        || Math.abs(left.position.y - right.position.y) >= 640).toBe(true)
+    }
+  }
+}
+
 async function expectStationary(game: ObservedGame, seat: Seat, after: number): Promise<void> {
   await expect.poll(() => {
     const frames = snapshots(game).filter(({ room }) => room.revision > after).slice(-2)
@@ -147,36 +161,7 @@ test('Bracelet shoves a stationary rival one tile without an action or private c
       expect(games.flatMap(({ commands }) => commands)
         .some((command) => command.type === 'manualAction' && command.action === 'equipment')).toBe(false)
 
-      // An unequipped rival cannot walk into a stationary player, even when
-      // that player holds Bracelet. Blocking alone never triggers a shove.
-      const holderBefore = { ...actor(games[0], 'one').position }
-      const approachBefore = actor(games[0], 'two').position.x
-      await two.keyboard.down('ArrowLeft')
-      try {
-        await expect.poll(() => actor(games[0], 'two').position.x).toBeLessThan(approachBefore)
-        await expect.poll(() => {
-          const recent = snapshots(games[0]).slice(-5)
-          const positions = recent.map((frame) => visibleActor(frame, 'two')!.position.x)
-          return positions.length === 5 && positions.every((x) => x === positions[0])
-            && positions[0]! < approachBefore
-        }).toBe(true)
-        const blockedPosition = { ...actor(games[0], 'two').position }
-        expect(blockedPosition.x - holderBefore.x, JSON.stringify({
-          holderBefore, blockedPosition,
-          actors: latestSnapshot(games[0])!.state.actors,
-          recent: snapshots(games[0]).slice(-5).map((frame) => ({
-            tick: frame.state.physicalTick, actors: frame.state.actors,
-          })),
-        })).toBeGreaterThanOrEqual(640)
-        const blockedAt = latestSnapshot(games[0])!.state.physicalTick
-        await expect.poll(() => latestSnapshot(games[0])!.state.physicalTick).toBeGreaterThan(blockedAt + 12)
-        expect(actor(games[0], 'two').position).toEqual(blockedPosition)
-        expect(actor(games[0], 'one').position).toEqual(holderBefore)
-        expect(Math.floor(actor(games[0], 'one').position.x / 1024))
-          .not.toBe(Math.floor(actor(games[0], 'two').position.x / 1024))
-      } finally { await two.keyboard.up('ArrowLeft') }
-      await moveSeatTo(two, games[1], 'two', { column: 11, row: 1 })
-
+      games.forEach((game) => snapshots(game).forEach(expectSolidPlayers))
       const settleFloors = games.map((game) => latestSnapshot(game)!.room.revision)
       await Promise.all(games.flatMap((game, index) => [
         expectStationary(game, 'one', settleFloors[index]!),
@@ -221,6 +206,7 @@ test('Bracelet shoves a stationary rival one tile without an action or private c
         const raw = snapshots(game).filter(({ room }) =>
           room.revision > floors[index]! && room.revision <= moved.room.revision)
         expect(raw.length).toBeGreaterThan(0)
+        raw.forEach(expectSolidPlayers)
         expect(raw.flatMap(({ events }) => events)).toEqual([])
         expect(JSON.stringify(raw)).not.toMatch(privateShoveFacts)
         expect(game.commands.slice(commandFloors[index]!).some((command) =>

@@ -127,6 +127,7 @@ fn an_actual_internal_correction_collision_never_surfaces_a_kick_request() {
         wall_pass_enabled: true,
         kick_enabled: true,
         moving_at_start: &moving_at_start,
+        player_obstacles: None,
     };
 
     for _ in 0..4 {

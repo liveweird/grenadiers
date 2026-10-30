@@ -31,6 +31,13 @@ pub struct LairView {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct LairStatusView {
+    pub cell: CellId,
+    pub next_spawn_at: Option<Tick>,
+    pub living_mobs: u8,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct MobView {
     pub id: EntityId,
     pub lair: u8,
@@ -53,13 +60,20 @@ pub(crate) struct Mob {
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub(crate) struct Lair {
     cell: CellId,
-    next_spawn_at: Tick,
+    next_spawn_at: Option<Tick>,
     priority: u8,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum LairLifecycle {
+    Periodic,
+    ReplaceOnDeath,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub(crate) struct LairState {
     settings: LairSettings,
+    lifecycle: LairLifecycle,
     lairs: [Lair; MAX_LAIRS],
     mobs: Vec<Mob>,
 }
@@ -67,6 +81,7 @@ pub(crate) struct LairState {
 impl LairState {
     pub(crate) fn new(
         config: LairConfig,
+        rules_version: u16,
         board: BoardSize,
         arena: &super::Arena,
         at: Tick,
@@ -86,9 +101,14 @@ impl LairState {
         );
         Ok(Some(Self {
             settings,
+            lifecycle: if rules_version >= 9 {
+                LairLifecycle::ReplaceOnDeath
+            } else {
+                LairLifecycle::Periodic
+            },
             lairs: cells.map(|cell| Lair {
                 cell,
-                next_spawn_at: next,
+                next_spawn_at: Some(next),
                 priority: 0,
             }),
             mobs: Vec::new(),
@@ -98,12 +118,18 @@ impl LairState {
     pub(crate) fn views(&self) -> [LairView; MAX_LAIRS] {
         std::array::from_fn(|index| LairView {
             cell: self.lairs[index].cell,
+            next_spawn_at: self.lairs[index]
+                .next_spawn_at
+                .expect("periodic lairs always have a next attempt"),
+            living_mobs: self.living_mobs(index) as u8,
+        })
+    }
+
+    pub(crate) fn status_views(&self) -> [LairStatusView; MAX_LAIRS] {
+        std::array::from_fn(|index| LairStatusView {
+            cell: self.lairs[index].cell,
             next_spawn_at: self.lairs[index].next_spawn_at,
-            living_mobs: self
-                .mobs
-                .iter()
-                .filter(|mob| usize::from(mob.lair) == index)
-                .count() as u8,
+            living_mobs: self.living_mobs(index) as u8,
         })
     }
 
@@ -121,7 +147,9 @@ impl LairState {
     }
 
     pub(crate) fn due(&self, tick: Tick) -> bool {
-        self.lairs.iter().any(|lair| lair.next_spawn_at <= tick)
+        self.lairs
+            .iter()
+            .any(|lair| lair.next_spawn_at.is_some_and(|at| at <= tick))
     }
 
     pub(crate) fn contains_id(&self, id: EntityId) -> bool {
@@ -144,12 +172,37 @@ impl LairState {
             .collect()
     }
 
-    pub(crate) fn kill_on_fire(&mut self, world: &World) {
+    pub(crate) fn kill_on_fire(&mut self, world: &World, tick: Tick) -> Result<(), ()> {
+        let mut killed_lairs = BTreeSet::new();
+        for mob in &self.mobs {
+            if world
+                .committed_fire_cells()
+                .any(|cell| movement::position_overlaps_cell(mob.position, cell))
+            {
+                killed_lairs.insert(usize::from(mob.lair));
+            }
+        }
+        let replacement =
+            if self.lifecycle == LairLifecycle::ReplaceOnDeath && !killed_lairs.is_empty() {
+                Some(Tick(
+                    tick.0.checked_add(self.settings.spawn_ticks()).ok_or(())?,
+                ))
+            } else {
+                None
+            };
         self.mobs.retain(|mob| {
             !world
                 .committed_fire_cells()
                 .any(|cell| movement::position_overlaps_cell(mob.position, cell))
         });
+        if let Some(next_spawn_at) = replacement {
+            for index in killed_lairs {
+                if self.living_mobs(index) == 0 {
+                    self.lairs[index].next_spawn_at = Some(next_spawn_at);
+                }
+            }
+        }
+        Ok(())
     }
 
     pub(crate) fn mine_contacts(
@@ -181,23 +234,20 @@ impl LairState {
     ) -> Result<usize, ()> {
         let mut spawned = 0;
         for index in 0..MAX_LAIRS {
-            if self.lairs[index].next_spawn_at > tick {
+            if !self.lairs[index].next_spawn_at.is_some_and(|at| at <= tick) {
                 continue;
             }
-            self.lairs[index].next_spawn_at = Tick(
-                tick.0
-                    .checked_add(self.settings.spawn_ticks())
-                    .expect("lair interval was preflight before mutation"),
-            );
             let start = self.lairs[index].priority;
-            self.lairs[index].priority = (start + 1) % 4;
+            if self.lifecycle == LairLifecycle::Periodic {
+                self.lairs[index].next_spawn_at = Some(Tick(
+                    tick.0
+                        .checked_add(self.settings.spawn_ticks())
+                        .expect("lair interval was preflight before mutation"),
+                ));
+                self.lairs[index].priority = (start + 1) % 4;
+            }
             if self.mobs.len() >= MAX_MOBS
-                || self
-                    .mobs
-                    .iter()
-                    .filter(|mob| usize::from(mob.lair) == index)
-                    .count()
-                    >= usize::from(self.settings.mobs_per_lair())
+                || self.living_mobs(index) >= usize::from(self.settings.mobs_per_lair())
             {
                 continue;
             }
@@ -217,6 +267,10 @@ impl LairState {
                 leg_origin: Position::center(cell),
                 retreat_anchor: None,
             });
+            if self.lifecycle == LairLifecycle::ReplaceOnDeath {
+                self.lairs[index].next_spawn_at = None;
+                self.lairs[index].priority = (start + 1) % 4;
+            }
             spawned += 1;
         }
         Ok(spawned)
@@ -230,6 +284,13 @@ impl LairState {
         self.mobs
             .iter()
             .any(|mob| movement::position_overlaps_cell(mob.position, cell))
+    }
+
+    fn living_mobs(&self, index: usize) -> usize {
+        self.mobs
+            .iter()
+            .filter(|mob| usize::from(mob.lair) == index)
+            .count()
     }
 
     #[cfg(test)]

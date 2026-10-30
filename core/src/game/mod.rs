@@ -44,6 +44,7 @@ mod movement;
 mod movement_collision;
 pub mod oil;
 pub mod pickups;
+pub mod player_collision;
 mod punch_geometry;
 pub mod rules;
 pub mod simulation;
@@ -73,8 +74,8 @@ pub use geometry::{MovementSegment, MovementTrace};
 pub use input::{Direction, HeldDirections};
 pub use inventory::{Equipment, Inventory, SpecialWeapon};
 pub use lairs::{
-    LAIR_LAYOUT_VERSION, LairView, MAX_LAIRS, MAX_MOBS, MOB_UNITS_PER_SECOND, MobView,
-    lair_layout_v1,
+    LAIR_LAYOUT_VERSION, LairStatusView, LairView, MAX_LAIRS, MAX_MOBS, MOB_UNITS_PER_SECOND,
+    MobView, lair_layout_v1,
 };
 pub(crate) use oil::OilState;
 pub use oil::{MAX_OIL_BARRELS, OilBarrelState};

@@ -4,7 +4,7 @@ use crate::cpu::{MemoryKey, MovementIntent, Observation};
 use crate::game::Tick;
 
 use super::MAX_PLAN_AGE_TICKS;
-use super::compatibility::{actor, compatible};
+use super::compatibility::{actor, compatible, visible_rivals_allow_bounds};
 use super::origin::{PlantEscapeOrigin, valid_origin};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -58,6 +58,7 @@ impl CommittedPulse {
             || !lease.bracelet_guard_allows(&basis)
             || !lease.bracelet_guard_allows(current)
             || !lease.matches_initial_pose(current_actor.position, current_actor.heading)
+            || !visible_rivals_allow_bounds(current, current_actor.position, lease.pose_after(1))
         {
             return Err(PolicyError::InvalidObservation);
         }
@@ -100,6 +101,15 @@ impl CommittedPulse {
             .lease
             .pose_after(completed)
             .contains(actor.position, actor.heading)
+        {
+            return PulseStatus::Invalidated;
+        }
+        if completed < self.lease.hold_ticks()
+            && !visible_rivals_allow_bounds(
+                current,
+                actor.position,
+                self.lease.pose_after(completed.saturating_add(1)),
+            )
         {
             return PulseStatus::Invalidated;
         }

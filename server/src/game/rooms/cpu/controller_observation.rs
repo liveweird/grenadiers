@@ -98,6 +98,11 @@ impl CpuController {
                 grenadiers_core::room::CpuProfile::LAIRS_STANDARD
                     | grenadiers_core::room::CpuProfile::LAIRS_EASY
             ),
+            9 => matches!(
+                self.profile,
+                grenadiers_core::room::CpuProfile::RESPAWN_LAIRS_STANDARD
+                    | grenadiers_core::room::CpuProfile::RESPAWN_LAIRS_EASY
+            ),
             _ => false,
         }
     }
@@ -292,6 +297,43 @@ mod tests {
         let mut environment = controller(grenadiers_core::room::CpuProfile::ENVIRONMENT_STANDARD);
         assert!(environment.accept_observation(&observed));
         let mut legacy = controller(grenadiers_core::room::CpuProfile::MULTIPLAYER_STANDARD);
+        assert!(!legacy.accept_observation(&observed));
+    }
+
+    #[test]
+    fn only_cpu21_profiles_accept_rules_nine_observations() {
+        let mut parts = observation_for(SeatId::One).into_parts();
+        parts.rules.version = 9;
+        let timers = parts
+            .actors
+            .iter()
+            .map(|actor| match actor {
+                ObservedActor::Visible(_) => Some(0),
+                ObservedActor::Hidden { .. } => None,
+            })
+            .collect();
+        let observed = Observation::new_rules_v9(
+            parts,
+            grenadiers_core::cpu::ObservedEnvironment::new(
+                grenadiers_core::game::StormCloudConfig::Disabled,
+                None,
+                timers,
+            ),
+            None,
+        )
+        .unwrap();
+        let controller = |profile| {
+            CpuController::new(
+                CpuPlanner::without_workers(),
+                SeatId::One,
+                7,
+                [5; 32],
+                profile,
+            )
+        };
+        let mut respawn = controller(grenadiers_core::room::CpuProfile::RESPAWN_LAIRS_STANDARD);
+        assert!(respawn.accept_observation(&observed));
+        let mut legacy = controller(grenadiers_core::room::CpuProfile::LAIRS_STANDARD);
         assert!(!legacy.accept_observation(&observed));
     }
 }

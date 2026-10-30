@@ -42,6 +42,7 @@ fn outcome(
         kick: None,
         original_budget: budget,
         forward_segment,
+        blocking_player: None,
     }
 }
 

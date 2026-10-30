@@ -3,6 +3,77 @@ use crate::cpu::routing::{PlantCertificate, PlantPresence};
 use crate::cpu::{BombKnowledge, Observation, ObservedActor, ObservedBombTrigger, VisibleActor};
 use crate::game::Tick;
 
+pub(super) fn visible_rivals_allow_segment(
+    observation: &Observation,
+    start: crate::game::Position,
+    end: crate::game::Position,
+) -> bool {
+    if observation.parts().rules.version != 9 || start == end {
+        return true;
+    }
+    let (direction, requested) = if end.x > start.x && end.y == start.y {
+        (crate::game::Direction::East, end.x - start.x)
+    } else if end.x < start.x && end.y == start.y {
+        (crate::game::Direction::West, start.x - end.x)
+    } else if end.y > start.y && end.x == start.x {
+        (crate::game::Direction::South, end.y - start.y)
+    } else if end.y < start.y && end.x == start.x {
+        (crate::game::Direction::North, start.y - end.y)
+    } else if end.x != start.x && end.y != start.y {
+        // A cornering tick can contain an alignment segment followed by forward
+        // motion. The certificate exposes only the endpoints, so require both
+        // possible axis orderings to be clear against the same public rivals.
+        let horizontal_first = crate::game::Position {
+            x: end.x,
+            y: start.y,
+        };
+        let vertical_first = crate::game::Position {
+            x: start.x,
+            y: end.y,
+        };
+        return visible_rivals_allow_segment(observation, start, horizontal_first)
+            && visible_rivals_allow_segment(observation, horizontal_first, end)
+            && visible_rivals_allow_segment(observation, start, vertical_first)
+            && visible_rivals_allow_segment(observation, vertical_first, end);
+    } else {
+        return true;
+    };
+    let obstacles = observation
+        .parts()
+        .actors
+        .iter()
+        .filter_map(|candidate| match candidate {
+            ObservedActor::Visible(rival)
+                if rival.alive && rival.seat != observation.parts().recipient =>
+            {
+                Some(crate::game::player_collision::PlayerObstacle::stationary(
+                    rival.seat,
+                    rival.position,
+                ))
+            }
+            _ => None,
+        })
+        .collect::<Vec<_>>();
+    crate::game::player_collision::clip_player_segment(
+        observation.parts().recipient,
+        start,
+        direction,
+        requested,
+        &obstacles,
+    )
+    .distance
+        == requested
+}
+
+pub(super) fn visible_rivals_allow_bounds(
+    observation: &Observation,
+    start: crate::game::Position,
+    bounds: crate::cpu::routing::PoseBounds,
+) -> bool {
+    visible_rivals_allow_segment(observation, start, bounds.min())
+        && visible_rivals_allow_segment(observation, start, bounds.max())
+}
+
 pub(super) fn actor(observation: &Observation) -> Option<&VisibleActor> {
     observation
         .parts()

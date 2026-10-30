@@ -12,6 +12,7 @@ mod memory;
 mod observation;
 mod observation_environment;
 mod observation_lairs;
+mod observation_respawn_lairs;
 mod observation_validation;
 pub mod policy;
 mod random;
@@ -35,6 +36,15 @@ pub(crate) fn rules_config(observation: &Observation) -> Option<crate::game::Rul
             observation.parts().rules.settings,
             observation.environment()?.storm_cloud_config(),
             observation.lairs()?.config(),
+        )),
+        9 => Some(crate::game::RulesConfig::environment_v9(
+            observation.parts().rules.settings,
+            observation.environment()?.storm_cloud_config(),
+            observation
+                .respawn_lairs()
+                .map_or(crate::room::RespawnLairConfig::Disabled, |lairs| {
+                    lairs.config()
+                }),
         )),
         _ => None,
     }
@@ -60,8 +70,8 @@ pub use observation::{
     BombKnowledge, MAX_MULTIPLAYER_OBSERVED_BOMBS, MAX_OBSERVED_BOMBS, MAX_OBSERVED_EFFECTS,
     Observation, ObservationError, ObservationParts, ObservedActor, ObservedArena, ObservedBomb,
     ObservedBombTrigger, ObservedEffect, ObservedEnvironment, ObservedFlame, ObservedLairs,
-    ObservedOil, ObservedPickup, ObservedRules, Unknown, UnknownActorFacts, UnknownBombFacts,
-    VisibleActor,
+    ObservedOil, ObservedPickup, ObservedRespawnLairs, ObservedRules, Unknown, UnknownActorFacts,
+    UnknownBombFacts, VisibleActor,
 };
 pub use random::{CpuRng, RandomError};
 pub use work::{WorkBudget, WorkError};
@@ -70,5 +80,7 @@ pub use work::{WorkBudget, WorkError};
 mod observation_multiplayer_tests;
 #[cfg(test)]
 mod rules_v8_boundary_tests;
+#[cfg(test)]
+mod rules_v9_episode_tests;
 #[cfg(test)]
 mod tests;

@@ -28,7 +28,7 @@ pub fn plan(
     rng: &mut CpuRng,
     work: &mut WorkBudget,
 ) -> Result<ControlPlan, PolicyError> {
-    if observation.parts().rules.version == 8 {
+    if observation.parts().rules.version >= 8 {
         return Err(PolicyError::InvalidObservation);
     }
     plan_inner(observation, memory, rng, work, true)
@@ -41,6 +41,18 @@ pub(crate) fn plan_lairs(
     work: &mut WorkBudget,
 ) -> Result<ControlPlan, PolicyError> {
     if observation.parts().rules.version != 8 || observation.lairs().is_none() {
+        return Err(PolicyError::InvalidObservation);
+    }
+    plan_inner(observation, memory, rng, work, false)
+}
+
+pub(crate) fn plan_respawn(
+    observation: &Observation,
+    memory: &UtilityMemory,
+    rng: &mut CpuRng,
+    work: &mut WorkBudget,
+) -> Result<ControlPlan, PolicyError> {
+    if observation.parts().rules.version != 9 {
         return Err(PolicyError::InvalidObservation);
     }
     plan_inner(observation, memory, rng, work, false)

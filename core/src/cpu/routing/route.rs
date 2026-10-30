@@ -42,7 +42,19 @@ pub fn plan_route(
     request: RouteRequest,
     work: &mut WorkBudget,
 ) -> Result<RouteCertificate, RouteFailure> {
-    if observation.parts().rules.version == 8 {
+    if observation.parts().rules.version >= 8 {
+        return Err(RouteFailure::InvalidRequest);
+    }
+    plan_route_seeded(observation, &[forecast], request, None, None, None, work)
+}
+
+pub(crate) fn plan_respawn_route(
+    observation: &Observation,
+    forecast: &HazardForecast,
+    request: RouteRequest,
+    work: &mut WorkBudget,
+) -> Result<RouteCertificate, RouteFailure> {
+    if observation.parts().rules.version != 9 {
         return Err(RouteFailure::InvalidRequest);
     }
     plan_route_seeded(observation, &[forecast], request, None, None, None, work)

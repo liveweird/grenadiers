@@ -22,7 +22,7 @@ pub fn plan_ordinary_plant(
     request: PlantRequest,
     work: &mut WorkBudget,
 ) -> Result<PlantCertificate, PlantFailure> {
-    if observation.parts().rules.version == 8 {
+    if observation.parts().rules.version >= 8 {
         return Err(PlantFailure::Unsupported);
     }
     plan_timed_plant(observation, memory, request, work, None)
@@ -44,7 +44,7 @@ pub fn plan_timed_weapon_plant(
     request: PlantRequest,
     work: &mut WorkBudget,
 ) -> Result<PlantCertificate, PlantFailure> {
-    if observation.parts().rules.version == 8 {
+    if observation.parts().rules.version >= 8 {
         return Err(PlantFailure::Unsupported);
     }
     plan_lair_or_legacy_weapon_plant(observation, memory, request, work)
@@ -80,7 +80,8 @@ fn plan_lair_or_legacy_weapon_plant(
 }
 
 fn validate_lair_observation(observation: &Observation) -> Result<(), PlantFailure> {
-    (observation.parts().rules.version == 8 && observation.lairs().is_some())
+    ((observation.parts().rules.version == 8 && observation.lairs().is_some())
+        || observation.parts().rules.version == 9)
         .then_some(())
         .ok_or(PlantFailure::Unsupported)
 }
@@ -266,7 +267,7 @@ fn effect_active(
         })
 }
 
-pub(super) fn derive_bomb_modifiers(
+pub(crate) fn derive_bomb_modifiers(
     actor: &crate::cpu::VisibleActor,
     basis: Tick,
     at: Tick,

@@ -152,7 +152,12 @@ fn move_axis(
     requested: i32,
     segments: &mut Vec<MovementSegment>,
 ) -> i32 {
-    let allowed = clipped_static(context, motion.position, direction, requested);
+    let allowed = clipped_players(
+        context,
+        direction,
+        clipped_static(context, motion.position, direction, requested),
+        motion.position,
+    );
     if allowed == 0 {
         return 0;
     }
@@ -160,6 +165,42 @@ fn move_axis(
     motion.position = translated(start, direction, allowed);
     segments.push(MovementSegment::new(start, motion.position));
     allowed
+}
+
+fn clipped_players(
+    context: &Context<'_>,
+    direction: Direction,
+    requested: i32,
+    start: Position,
+) -> i32 {
+    if context.observation.parts().rules.version != 9 {
+        return requested;
+    }
+    let obstacles = context
+        .observation
+        .parts()
+        .actors
+        .iter()
+        .filter_map(|actor| match actor {
+            crate::cpu::ObservedActor::Visible(actor)
+                if actor.alive && actor.seat != context.observation.parts().recipient =>
+            {
+                Some(crate::game::player_collision::PlayerObstacle::stationary(
+                    actor.seat,
+                    actor.position,
+                ))
+            }
+            _ => None,
+        })
+        .collect::<Vec<_>>();
+    crate::game::player_collision::clip_player_segment(
+        context.observation.parts().recipient,
+        start,
+        direction,
+        requested,
+        &obstacles,
+    )
+    .distance
 }
 
 fn clipped_static(

@@ -56,7 +56,9 @@ fn certified_plant_inner(
     if ordinary.intent.manual == Some(ManualIntent::Equipment) {
         return None;
     }
-    if observation.parts().rules.version == 8 && !teleporter_plant_supported(observation) {
+    if matches!(observation.parts().rules.version, 8 | 9)
+        && !teleporter_plant_supported(observation)
+    {
         return None;
     }
     if !super::plant_value::could_be_useful(observation, work) {
@@ -69,7 +71,7 @@ fn certified_plant_inner(
         first_movement: ordinary.intent.movement,
         limits: RouteLimits::default(),
     };
-    let lairs = observation.parts().rules.version == 8;
+    let lairs = matches!(observation.parts().rules.version, 8 | 9);
     let certificate = if actor(observation)?.weapon.is_some() && lairs {
         plan_lair_timed_weapon_plant(observation, history, request, work)
     } else if actor(observation)?.weapon.is_some() {

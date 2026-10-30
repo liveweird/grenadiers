@@ -65,7 +65,16 @@ impl State {
 
     #[must_use]
     pub fn lairs(&self) -> Option<[crate::game::LairView; crate::game::MAX_LAIRS]> {
-        self.lairs.as_ref().map(|lairs| lairs.views())
+        (self.rules.version() == 8)
+            .then(|| self.lairs.as_ref().map(|lairs| lairs.views()))
+            .flatten()
+    }
+
+    #[must_use]
+    pub fn lair_statuses(&self) -> Option<[crate::game::LairStatusView; crate::game::MAX_LAIRS]> {
+        (self.rules.version() >= 9)
+            .then(|| self.lairs.as_ref().map(|lairs| lairs.status_views()))
+            .flatten()
     }
 
     #[must_use]

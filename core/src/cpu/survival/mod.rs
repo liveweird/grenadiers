@@ -15,15 +15,19 @@ mod origin_planner;
 mod planner;
 mod plant_tactic;
 mod plant_value;
+mod respawn_disabled;
 mod route_execution;
 mod steering;
 
 pub use compatibility::can_admit_ordinary;
 pub use execution::{CommittedPulse, PulseStatus};
-pub use lair_planner::{LairSurvivalPlan, plan_lairs, plan_lairs_with_origin};
+pub use lair_planner::{
+    LairSurvivalPlan, plan_lairs, plan_lairs_with_origin, plan_respawn, plan_respawn_with_origin,
+};
 pub use manual_execution::ExecutionCertificate;
 pub use origin::PlantEscapeOrigin;
 pub use planner::{SurvivalPlan, plan, plan_with_origin};
+pub(crate) use plant_value::ObservedBlastGeometry;
 pub use route_execution::{CommittedRoute, RouteCommand, RouteStatus};
 
 pub const MAX_PLAN_AGE_TICKS: u64 = 6;
@@ -64,3 +68,6 @@ mod lair_origin_tests;
 
 #[cfg(test)]
 mod lair_pickup_execution_tests;
+
+#[cfg(test)]
+mod rules_v9_occupancy_tests;

@@ -1,6 +1,6 @@
 use super::RulesConfig;
 use crate::game::{EnabledItems, SpeedLevel};
-use crate::room::RoomSettings;
+use crate::room::{RespawnLairConfig, RespawnLairSettings, RoomSettings};
 
 #[test]
 fn classic_v1_exposes_the_fixed_geometry_and_tick_parameters() {
@@ -30,6 +30,22 @@ fn expanded_profile_binds_enabled_items_at_version_five() {
     assert_eq!(classic.enabled_items(), EnabledItems::EMPTY);
     assert_eq!(expanded.version(), 5);
     assert_eq!(expanded.enabled_items(), EnabledItems::HEART);
+}
+
+#[test]
+fn environment_v9_uses_fixed_one_respawn_lairs() {
+    let rules = RulesConfig::environment_v9(
+        RoomSettings::DEFAULT,
+        super::StormCloudConfig::Disabled,
+        RespawnLairConfig::Enabled(RespawnLairSettings::new(5).unwrap()),
+    );
+
+    assert_eq!(rules.version(), 9);
+    let crate::room::LairConfig::Enabled(settings) = rules.lair_config() else {
+        panic!("rules9 lairs should be enabled");
+    };
+    assert_eq!(settings.spawn_ticks(), 300);
+    assert_eq!(settings.mobs_per_lair(), 1);
 }
 
 #[test]

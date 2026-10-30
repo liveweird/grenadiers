@@ -44,7 +44,7 @@ pub(super) fn validate_actors(
     arena: &ObservedArena,
     actors: &[ObservedActor],
 ) -> Result<(), ObservationError> {
-    if !(1..=8).contains(&rules_version)
+    if !(1..=9).contains(&rules_version)
         || (rules_version < 6 && actors.len() != 2)
         || (rules_version >= 6 && !(2..=4).contains(&actors.len()))
         || actors

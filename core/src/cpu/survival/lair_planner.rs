@@ -36,6 +36,67 @@ pub fn plan_lairs(
     )
 }
 
+/// Rules-v9 policy. Disabled lairs use the shared survival planner; enabled
+/// lairs add replacement-mob contact certification.
+pub fn plan_respawn(
+    observation: &Observation,
+    memory: &UtilityMemory,
+    history: &ObservedHazardMemory,
+    settled_stop_tick: Tick,
+    rng: &mut CpuRng,
+    work: &mut WorkBudget,
+) -> Result<LairSurvivalPlan, PolicyError> {
+    plan_respawn_with_origin(
+        observation,
+        memory,
+        history,
+        settled_stop_tick,
+        None,
+        rng,
+        work,
+    )
+}
+
+#[allow(clippy::too_many_arguments)]
+pub fn plan_respawn_with_origin(
+    observation: &Observation,
+    memory: &UtilityMemory,
+    history: &ObservedHazardMemory,
+    settled_stop_tick: Tick,
+    origin: Option<&PlantEscapeOrigin>,
+    rng: &mut CpuRng,
+    work: &mut WorkBudget,
+) -> Result<LairSurvivalPlan, PolicyError> {
+    if observation.parts().rules.version != 9 {
+        return Err(PolicyError::InvalidObservation);
+    }
+    if observation.respawn_lairs().is_none() {
+        return super::respawn_disabled::plan(
+            observation,
+            memory,
+            history,
+            settled_stop_tick,
+            origin,
+            rng,
+            work,
+        )
+        .map(|survival| LairSurvivalPlan {
+            survival,
+            contact: None,
+        });
+    }
+    plan_lairs_inner(
+        observation,
+        memory,
+        history,
+        settled_stop_tick,
+        origin,
+        rng,
+        work,
+        9,
+    )
+}
+
 #[allow(clippy::too_many_arguments)]
 pub fn plan_lairs_with_origin(
     observation: &Observation,
@@ -46,8 +107,34 @@ pub fn plan_lairs_with_origin(
     rng: &mut CpuRng,
     work: &mut WorkBudget,
 ) -> Result<LairSurvivalPlan, PolicyError> {
+    plan_lairs_inner(
+        observation,
+        memory,
+        history,
+        settled_stop_tick,
+        origin,
+        rng,
+        work,
+        8,
+    )
+}
+
+#[allow(clippy::too_many_arguments)]
+fn plan_lairs_inner(
+    observation: &Observation,
+    memory: &UtilityMemory,
+    history: &ObservedHazardMemory,
+    settled_stop_tick: Tick,
+    origin: Option<&PlantEscapeOrigin>,
+    rng: &mut CpuRng,
+    work: &mut WorkBudget,
+    rules_version: u16,
+) -> Result<LairSurvivalPlan, PolicyError> {
     let parts = observation.parts();
-    if parts.rules.version != 8 || observation.lairs().is_none() {
+    if parts.rules.version != rules_version
+        || (rules_version == 8 && observation.lairs().is_none())
+        || (rules_version == 9 && observation.respawn_lairs().is_none())
+    {
         return Err(PolicyError::InvalidObservation);
     }
     if memory.key().world != parts.world
@@ -86,7 +173,11 @@ pub fn plan_lairs_with_origin(
         .unwrap_or_else(stop));
     }
 
-    let ordinary = crate::cpu::policy::plan_lairs(observation, memory, rng, work)?;
+    let ordinary = if rules_version == 8 {
+        crate::cpu::policy::plan_lairs(observation, memory, rng, work)?
+    } else {
+        crate::cpu::policy::plan_respawn(observation, memory, rng, work)?
+    };
     let Ok(hazards) = forecast(observation, history, None, ForecastLimits::default(), work) else {
         return Ok(stop());
     };
@@ -198,18 +289,18 @@ pub fn plan_lairs_with_origin(
         RouteMode::AllowStationaryAssumptions,
     ] {
         let mut best: Option<(u32, bool, LairSurvivalPlan)> = None;
-        for movement in &choices {
+        for &movement in &choices {
             let hold_ticks = match (movement, mode) {
                 (MovementIntent::Stop, _) => 1,
                 (_, RouteMode::AllowStationaryAssumptions) => 3,
-                _ if *movement == ordinary.intent.movement => ordinary.hold_ticks.clamp(1, 12),
+                _ if movement == ordinary.intent.movement => ordinary.hold_ticks.clamp(1, 12),
                 _ => 12,
             };
             let Some(until) = end.checked_add(u64::from(hold_ticks) + 9) else {
                 return Ok(stop());
             };
             let request = PulseRequest {
-                movement: *movement,
+                movement,
                 hold_ticks,
                 start_window,
                 stopped_safe_until: Tick(until),
@@ -222,18 +313,18 @@ pub fn plan_lairs_with_origin(
             };
             let score = target.map_or(0, |target| super::steering::score(&lease, target));
             let end_pose = lease.pose_after(lease.hold_ticks());
-            let progresses = *movement != MovementIntent::Stop
+            let progresses = movement != MovementIntent::Stop
                 && (end_pose.min() != actor.position || end_pose.max() != actor.position);
             let candidate = LairSurvivalPlan {
                 survival: SurvivalPlan {
                     control: ControlPlan {
                         intent: Intent {
-                            movement: *movement,
+                            movement,
                             manual: None,
                         },
                         hold_ticks,
                         next_memory: if ordinary.intent.manual.is_none()
-                            && *movement == ordinary.intent.movement
+                            && movement == ordinary.intent.movement
                         {
                             ordinary.next_memory
                         } else {

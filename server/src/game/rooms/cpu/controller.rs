@@ -373,3 +373,7 @@ mod weapon_tests;
 #[cfg(test)]
 #[path = "controller_multiplayer_tests.rs"]
 mod multiplayer_tests;
+
+#[cfg(test)]
+#[path = "controller_respawn_tests.rs"]
+mod respawn_tests;

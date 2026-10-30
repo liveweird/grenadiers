@@ -1,9 +1,13 @@
 pub(crate) use super::geometry::position_overlaps_cell;
 use super::geometry::{MovementSegment, MovementTrace};
-pub(crate) use super::movement_collision::position_is_free;
-use super::movement_collision::{ObstacleAccess, allowed_distance, allowed_distance_with_blocker};
+use super::movement_collision::{ObstacleAccess, allowed_distance};
+pub(crate) use super::movement_collision::{
+    overlapping_soft_blocks, overlapping_unlit_oil, position_is_free, prune_bomb_grace,
+    prune_soft_wall_grace, prune_unlit_oil_grace,
+};
+use super::player_collision::PlayerObstacle;
 use super::simulation::{Actor, TurnAssist};
-use super::types::{CellId, EntityId, Position, TICKS_PER_SECOND, UNITS_PER_CELL};
+use super::types::{EntityId, Position, TICKS_PER_SECOND, UNITS_PER_CELL};
 use super::world::World;
 use super::{effects::EffectiveSpeed, input::Direction};
 use std::collections::BTreeSet;
@@ -13,12 +17,14 @@ pub(crate) struct MovementOutcome {
     pub(crate) kick: Option<(EntityId, Direction)>,
     pub(crate) original_budget: i32,
     pub(crate) forward_segment: Option<MovementSegment>,
+    pub(crate) blocking_player: Option<(super::SeatId, Direction)>,
 }
 
 #[derive(Default)]
 struct MovementCapture {
     kick: Option<(EntityId, Direction)>,
     forward_segment: Option<MovementSegment>,
+    blocking_player: Option<(super::SeatId, Direction)>,
 }
 
 #[derive(Clone, Copy)]
@@ -35,6 +41,7 @@ pub(crate) struct AdvanceConfig<'a> {
     pub(crate) wall_pass_enabled: bool,
     pub(crate) kick_enabled: bool,
     pub(crate) moving_at_start: &'a BTreeSet<EntityId>,
+    pub(crate) player_obstacles: Option<&'a [PlayerObstacle]>,
 }
 
 pub(crate) fn advance_actor(
@@ -52,6 +59,7 @@ pub(crate) fn advance_actor(
             kick: capture.kick,
             original_budget: 0,
             forward_segment: capture.forward_segment,
+            blocking_player: capture.blocking_player,
         };
     };
     let direction = if actor.effects().reverses_controls(config.tick) {
@@ -94,6 +102,7 @@ pub(crate) fn advance_actor(
             kick: capture.kick,
             original_budget,
             forward_segment: capture.forward_segment,
+            blocking_player: capture.blocking_player,
         };
     }
     if same_axis(actor.heading, direction) {
@@ -115,6 +124,7 @@ pub(crate) fn advance_actor(
             kick: capture.kick,
             original_budget,
             forward_segment: capture.forward_segment,
+            blocking_player: capture.blocking_player,
         };
     }
 
@@ -126,6 +136,7 @@ pub(crate) fn advance_actor(
             kick: capture.kick,
             original_budget,
             forward_segment: capture.forward_segment,
+            blocking_player: capture.blocking_player,
         };
     }
     let correction = target - coordinate;
@@ -149,6 +160,7 @@ pub(crate) fn advance_actor(
                 kick: capture.kick,
                 original_budget,
                 forward_segment: capture.forward_segment,
+                blocking_player: capture.blocking_player,
             };
         }
         let turn = TurnAssist { direction, target };
@@ -182,6 +194,7 @@ pub(crate) fn advance_actor(
         kick: capture.kick,
         original_budget,
         forward_segment: capture.forward_segment,
+        blocking_player: capture.blocking_player,
     }
 }
 
@@ -255,7 +268,7 @@ fn move_actor(
     config: &AdvanceConfig<'_>,
     capture: &mut MovementCapture,
 ) {
-    let collision = allowed_distance_with_blocker(
+    let collision = super::movement_collision::allowed_distance_with_players(
         world,
         actor.position,
         request.direction,
@@ -266,6 +279,9 @@ fn move_actor(
             soft_grace: &actor.soft_wall_grace,
             oil_grace: &actor.unlit_oil_grace,
         },
+        config
+            .player_obstacles
+            .map(|obstacles| (actor.seat, obstacles)),
     );
     let distance = collision.distance;
     let kick =
@@ -279,6 +295,9 @@ fn move_actor(
         };
     if request.forward {
         capture.kick = kick;
+        capture.blocking_player = collision
+            .physical_contact
+            .map(|seat| (seat, request.direction));
     }
     if distance == 0 {
         return;
@@ -293,48 +312,6 @@ fn move_actor(
     prune_bomb_grace(world, actor);
     prune_soft_wall_grace(world, actor);
     prune_unlit_oil_grace(world, actor);
-}
-
-pub(crate) fn overlapping_soft_blocks(world: &World, position: Position) -> BTreeSet<CellId> {
-    world
-        .arena
-        .blocks()
-        .iter()
-        .filter(|cell| position_overlaps_cell(position, **cell))
-        .copied()
-        .collect()
-}
-
-pub(crate) fn prune_soft_wall_grace(world: &World, actor: &mut Actor) {
-    actor.soft_wall_grace.retain(|cell| {
-        world.arena.blocks().contains(cell) && position_overlaps_cell(actor.position, *cell)
-    });
-}
-
-pub(crate) fn overlapping_unlit_oil(world: &World, position: Position) -> BTreeSet<CellId> {
-    world
-        .oil
-        .iter()
-        .filter_map(|(cell, state)| {
-            (state == crate::game::OilState::Unlit && position_overlaps_cell(position, cell))
-                .then_some(cell)
-        })
-        .collect()
-}
-
-pub(crate) fn prune_unlit_oil_grace(world: &World, actor: &mut Actor) {
-    actor
-        .unlit_oil_grace
-        .retain(|cell| world.oil.unlit(*cell) && position_overlaps_cell(actor.position, *cell));
-}
-
-pub(crate) fn prune_bomb_grace(world: &World, actor: &mut Actor) {
-    actor.bomb_grace.retain(|id| {
-        world
-            .bombs
-            .get(id)
-            .is_some_and(|bomb| position_overlaps_cell(actor.position, bomb.cell()))
-    });
 }
 
 pub(crate) fn translated(position: Position, direction: Direction, distance: i32) -> Position {

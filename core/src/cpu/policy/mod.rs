@@ -11,7 +11,7 @@ mod types;
 
 pub use execution::{EscapeExecution, follow_checked_escape, follow_committed_escape};
 pub use planner::plan;
-pub(crate) use planner::plan_lairs;
+pub(crate) use planner::{plan_lairs, plan_respawn};
 pub use types::{ControlPlan, MAX_HOLD_TICKS, MAX_ROUTE_CELLS, PolicyError, UtilityMemory};
 
 #[cfg(test)]
@@ -26,6 +26,8 @@ mod goal_game_tests;
 mod goal_tests;
 #[cfg(test)]
 mod ordinary_turn_tests;
+#[cfg(test)]
+mod rules_v9_goal_tests;
 #[cfg(test)]
 mod simulation_tests;
 #[cfg(test)]

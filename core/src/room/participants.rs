@@ -27,6 +27,7 @@ pub enum CpuPolicy {
     UtilityV18,
     UtilityV19,
     UtilityV20,
+    UtilityV21,
 }
 
 impl CpuPolicy {
@@ -53,6 +54,7 @@ impl CpuPolicy {
             Self::UtilityV18 => 18,
             Self::UtilityV19 => 19,
             Self::UtilityV20 => 20,
+            Self::UtilityV21 => 21,
         }
     }
 }
@@ -221,6 +223,18 @@ impl CpuProfile {
         difficulty: CpuDifficulty::Easy,
     };
 
+    /// Rules-v9 Standard profile with respawning lairs and solid-player tactics.
+    pub const RESPAWN_LAIRS_STANDARD: Self = Self {
+        policy: CpuPolicy::UtilityV21,
+        difficulty: CpuDifficulty::Standard,
+    };
+
+    /// Rules-v9 Easy profile with respawning lairs and solid-player tactics.
+    pub const RESPAWN_LAIRS_EASY: Self = Self {
+        policy: CpuPolicy::UtilityV21,
+        difficulty: CpuDifficulty::Easy,
+    };
+
     /// Only the two current profiles may be selected for a new live controller.
     #[must_use]
     pub const fn is_current(self) -> bool {
@@ -310,6 +324,8 @@ mod tests {
         assert_eq!(CpuProfile::LAIRS_V19_EASY.policy.version(), 19);
         assert_eq!(CpuProfile::LAIRS_STANDARD.policy.version(), 20);
         assert_eq!(CpuProfile::LAIRS_EASY.policy.version(), 20);
+        assert_eq!(CpuProfile::RESPAWN_LAIRS_STANDARD.policy.version(), 21);
+        assert_eq!(CpuProfile::RESPAWN_LAIRS_EASY.policy.version(), 21);
         assert!(CpuProfile::CURRENT.is_current());
         assert!(CpuProfile::CURRENT_EASY.is_current());
         assert!(!CpuProfile::MULTIPLAYER_STANDARD.is_current());

@@ -89,7 +89,7 @@ one update. The controller stops and retains only independently checked origin-e
 its own matching bomb. After a confirmed Stop, fresh planning uses the complete current bomb
 scene and certifies a new movement pulse together with its mob-contact lease. The old route
 never authorizes further movement. Origin grace ends when the footprint leaves the bomb cell.
-Escape guidance excludes visible bomb cells. Foreign bomb-motion uncertainty uses only named
+Escape guidance excludes visible bomb cells. Foreign unpaused timed-bomb motion uses only named
 stationary assumptions on checked pulses of at most three updates, so distant bombs do not
 force waiting until the CPU's own fuse is almost spent.
 

@@ -161,7 +161,13 @@ test('Bracelet shoves a stationary rival one tile without an action or private c
             && positions[0]! < approachBefore
         }).toBe(true)
         const blockedPosition = { ...actor(games[0], 'two').position }
-        expect(blockedPosition.x - holderBefore.x).toBeGreaterThanOrEqual(640)
+        expect(blockedPosition.x - holderBefore.x, JSON.stringify({
+          holderBefore, blockedPosition,
+          actors: latestSnapshot(games[0])!.state.actors,
+          recent: snapshots(games[0]).slice(-5).map((frame) => ({
+            tick: frame.state.physicalTick, actors: frame.state.actors,
+          })),
+        })).toBeGreaterThanOrEqual(640)
         const blockedAt = latestSnapshot(games[0])!.state.physicalTick
         await expect.poll(() => latestSnapshot(games[0])!.state.physicalTick).toBeGreaterThan(blockedAt + 12)
         expect(actor(games[0], 'two').position).toEqual(blockedPosition)

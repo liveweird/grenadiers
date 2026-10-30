@@ -363,6 +363,10 @@ mod plant_tests;
 mod recovery_tests;
 
 #[cfg(test)]
+#[path = "controller_lair_recovery_tests.rs"]
+mod lair_recovery_tests;
+
+#[cfg(test)]
 #[path = "controller_weapon_tests.rs"]
 mod weapon_tests;
 

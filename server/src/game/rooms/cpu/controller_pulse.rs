@@ -17,6 +17,7 @@ impl CpuController {
             .validate(observation, current_tick);
         if matches!(status, PulseStatus::Completed | PulseStatus::Invalidated) {
             self.committed_pulse = None;
+            self.committed_contact = None;
         }
         if status == PulseStatus::Invalidated {
             self.cancel();

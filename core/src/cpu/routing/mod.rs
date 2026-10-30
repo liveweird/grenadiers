@@ -33,7 +33,9 @@ pub(crate) use bracelet_guard::BraceletGuard;
 
 pub(crate) use plant::{plan_lair_ordinary_plant, plan_lair_timed_weapon_plant};
 pub use plant::{plan_ordinary_plant, plan_timed_weapon_plant};
-pub(crate) use pulse::{PulseOriginGrace, certify_escape_pulse, certify_lair_contact_pulse};
+pub(crate) use pulse::{
+    PulseOriginGrace, certify_escape_pulse, certify_lair_contact_pulse, certify_lair_escape_pulse,
+};
 pub use pulse::{certify_lair_pulse, certify_pulse};
 pub use punch::plan_punch;
 pub use route::plan_route;

@@ -287,3 +287,37 @@ test('one human and three CPUs creates a ready four-controller lobby', async ({ 
     ])
   } finally { await group.close() }
 })
+
+test('three CPUs escape their first bombs in a default four-player match', async ({ browser }) => {
+  const group = await createPages(browser, 1)
+  try {
+    await createCustom(group.pages[0], ['human', 'cpu', 'cpu', 'cpu'])
+    await startRound(group.pages, group.games)
+    const game = group.games[0]!
+    const roundId = latestSnapshot(game)!.room.roundId
+    for (const seat of ['two', 'three', 'four'] as const) {
+      const owner = visibleActor(latestSnapshot(game), seat)!.id
+      const firstPlacement = () => game.frames
+        .flatMap((frame) => frame.type === 'snapshot' && frame.room.roundId === roundId ? frame.events : [])
+        .find((event) => event.kind.type === 'bombPlaced' && event.kind.bomb.owner === owner)
+      await expect.poll(firstPlacement, { timeout: 10_000 }).toBeTruthy()
+      const placed = firstPlacement()!
+      if (placed.kind.type !== 'bombPlaced') throw new Error('Expected a CPU bomb placement')
+      const bombId = placed.kind.bomb.id
+      const detonation = () => game.frames.find((frame) =>
+        frame.type === 'snapshot' && frame.room.roundId === roundId
+          && frame.events.some((event) =>
+            event.kind.type === 'bombDetonated' && event.kind.bomb.id === bombId))
+      await expect.poll(detonation, { timeout: 10_000 }).toBeTruthy()
+      const exploded = detonation()!
+      if (exploded.type !== 'snapshot') throw new Error('Expected the detonation snapshot')
+      expect(visibleActor(exploded, seat)?.alive).toBe(true)
+      await expect.poll(() => latestSnapshot(game)?.room.tick).toBeGreaterThan(exploded.room.tick + 30)
+      const eliminatedDuringBlast = game.frames.some((frame) =>
+        frame.type === 'snapshot' && frame.room.roundId === roundId
+          && frame.events.some((event) => event.kind.type === 'actorEliminated'
+            && event.kind.seat === seat && event.tick <= exploded.room.tick + 30))
+      expect(eliminatedDuringBlast).toBe(false)
+    }
+  } finally { await group.close() }
+})

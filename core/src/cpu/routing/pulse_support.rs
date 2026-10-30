@@ -144,21 +144,47 @@ pub(super) fn aggregate_motion(
 
 pub(super) fn validate_origin_forecast(
     forecast: &HazardForecast,
+    observation: &Observation,
     origin: PulseOriginGrace,
+    mode: super::RouteMode,
 ) -> Result<(), RouteFailure> {
     let cell = forecast
         .cell(origin.cell)
         .ok_or(RouteFailure::InvalidRequest)?;
     if cell.uncertainty.iter().any(|uncertain| {
-        matches!(uncertain.kind, crate::cpu::forecast::HazardKind::Blocking)
-            && !matches!(
-                uncertain.reason,
-                crate::cpu::forecast::UncertaintyReason::BombMotion(id) if id == origin.bomb_id
-            )
+        if uncertain.kind != crate::cpu::forecast::HazardKind::Blocking {
+            return false;
+        }
+        // Provenance proves the planted bomb is the sole actual origin occupant.
+        // Conditional foreign motion remains a named assumption checked by the pulse kernel.
+        match uncertain.reason {
+            crate::cpu::forecast::UncertaintyReason::BombMotion(id) if id == origin.bomb_id => {
+                false
+            }
+            crate::cpu::forecast::UncertaintyReason::BombMotion(id) => {
+                mode != super::RouteMode::AllowStationaryAssumptions
+                    || !forecast.stationary_assumptions().contains(&id)
+                    || !is_unpaused_timed(observation, id)
+            }
+            _ => true,
+        }
     }) {
         return Err(RouteFailure::NoRoute);
     }
     Ok(())
+}
+
+fn is_unpaused_timed(observation: &Observation, id: EntityId) -> bool {
+    let crate::cpu::BombKnowledge::Visible(bombs) = &observation.parts().bombs else {
+        return false;
+    };
+    bombs.iter().any(|bomb| {
+        bomb.id == id
+            && matches!(
+                bomb.trigger,
+                crate::cpu::ObservedBombTrigger::Timed { paused: false, .. }
+            )
+    })
 }
 
 pub(super) fn update_origin(

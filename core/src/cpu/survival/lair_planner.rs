@@ -7,7 +7,7 @@ use crate::cpu::{CpuRng, Intent, MobContactLease, MovementIntent, Observation, W
 use crate::game::{Direction, Tick};
 
 use super::compatibility::actor;
-use super::{ExecutionCertificate, MAX_PLAN_AGE_TICKS, SurvivalPlan};
+use super::{ExecutionCertificate, MAX_PLAN_AGE_TICKS, PlantEscapeOrigin, SurvivalPlan};
 
 #[derive(Clone, Debug)]
 pub struct LairSurvivalPlan {
@@ -22,6 +22,27 @@ pub fn plan_lairs(
     memory: &UtilityMemory,
     history: &ObservedHazardMemory,
     settled_stop_tick: Tick,
+    rng: &mut CpuRng,
+    work: &mut WorkBudget,
+) -> Result<LairSurvivalPlan, PolicyError> {
+    plan_lairs_with_origin(
+        observation,
+        memory,
+        history,
+        settled_stop_tick,
+        None,
+        rng,
+        work,
+    )
+}
+
+#[allow(clippy::too_many_arguments)]
+pub fn plan_lairs_with_origin(
+    observation: &Observation,
+    memory: &UtilityMemory,
+    history: &ObservedHazardMemory,
+    settled_stop_tick: Tick,
+    origin: Option<&PlantEscapeOrigin>,
     rng: &mut CpuRng,
     work: &mut WorkBudget,
 ) -> Result<LairSurvivalPlan, PolicyError> {
@@ -52,6 +73,17 @@ pub fn plan_lairs(
     };
     if !actor.alive || actor.voluntary_actions_frozen {
         return Ok(stop());
+    }
+    if let Some(origin) = origin {
+        return Ok(super::origin_planner::plan_lairs(
+            observation,
+            history,
+            settled_stop_tick,
+            memory,
+            origin,
+            work,
+        )
+        .unwrap_or_else(stop));
     }
 
     let ordinary = crate::cpu::policy::plan_lairs(observation, memory, rng, work)?;

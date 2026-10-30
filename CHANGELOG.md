@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+## 1.0.1 — 2026-10-30
+
+- Fix CPUs becoming stranded on their own bombs when concurrent rival planting invalidates
+  their escape routes; replan movement with fresh bomb, storm and mob-contact checks, including
+  prompt short escapes on compact boards and guidance that avoids occupied bomb cells.
+- Retain contact leases across scheduled CPU stops and preserve valid bomb-origin recovery
+  when contact checks invalidate movement. Identify the corrected live CPU as policy20 while
+  retaining accepted-input replay compatibility with archived policy19 records.
+
 ## 1.0.0 — 2026-10-30
 
 - Publish the first 1.0 milestone: two-to-four-player human/CPU arena matches, three board

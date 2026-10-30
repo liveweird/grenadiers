@@ -135,7 +135,11 @@ impl CpuController {
         if actor.alive && !actor.voluntary_actions_frozen {
             self.settled_stop_tick = Some(observation.parts().tick);
             self.stop_admission = None;
-            self.committed_contact = None;
+            // A scheduled route Stop is an intermediate handoff, not the
+            // end of the proof that guards its remaining movement.
+            if self.committed_route.is_none() && self.committed_pulse.is_none() {
+                self.committed_contact = None;
+            }
         }
     }
 

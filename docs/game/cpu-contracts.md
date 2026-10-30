@@ -251,6 +251,14 @@ unique newly observed bomb matches its exact certified birth, actor and pose. Mi
 mismatched or explicitly absent placement grants no record. Whole-scene confirmation and route
 invalidation remain strict even when that independent birth check succeeds.
 
+Rules8 uses the same recovery with a fresh combined bomb-hazard and mob-contact pulse proof.
+Concurrent rival planting does not strand a CPU on its own bomb. Scheduled route stops retain
+contact validation, and an invalidated contact lease cannot authorize the old route or pulse.
+Foreign bomb-motion uncertainty may use the existing named stationary assumptions for short
+recovery pulses. Every intersecting assumption is retained in the certificate, movement stays
+capped at three updates, and observed displacement invalidates execution. This does not extend
+origin grace beyond footprint exit or waive a rival bomb's actual collision.
+
 The controller retains the record only through checked pulse or settled Stop observations.
 Worker results must match its still-active origin before input or RNG can commit; late or cancelled
 results cannot restore a cleared record. Queue lateness alone does not withdraw valid stopped

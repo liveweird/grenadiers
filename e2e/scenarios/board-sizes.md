@@ -4,8 +4,8 @@
 
 Independent browser contexts create, join, and start every combination of two through four human
 controllers on 11×9, 13×11, and 15×13. Each running world has the selected dimensions, exact
-terrain capacity, complete roster, rules8, the matching generator3/generator4 profile, one enabled
-cloud, two enabled lairs at the 10-second / three-mob defaults, and authoritative movement from the highest
+terrain capacity, complete roster, rules9, the matching generator3/generator4 profile, one enabled
+cloud, two enabled lairs at the 10-second / one-mob defaults, and authoritative movement from the highest
 occupied seat.
 
 ## Scenario: CPU controller counts and difficulties make authoritative progress on every board preset
@@ -13,7 +13,7 @@ occupied seat.
 For every board, controller count, and Easy or Standard difficulty, one human starts a match with
 the remaining seats server-controlled. Real snapshots must show each configured CPU moving or
 owning a live bomb, and at least one CPU-owned bomb in the room. Configured controller metadata
-alone is not accepted as evidence of progress. Every combination also verifies the rules8 cloud and lair
+alone is not accepted as evidence of progress. Every combination also verifies the rules9 cloud and lair
 environment independently of controller count and difficulty.
 
 ## Scenario: quick duel and solo retain the default board

@@ -207,7 +207,7 @@ test('enabled lairs keep one mob each, render on both clients, reconnect and rem
           lairs: frame?.state.lairs, nearLairs, blocked,
         })}`, { cause: error })
       }
-      const spawned = latestSnapshot(group.games[0])!
+      const spawned = snapshots(group.games[0]).find((frame) => frame.state.mobs.length === 2)!
       const mob = spawned.state.mobs[0]!
       for (const game of group.games) latestSnapshot(game)!.state.mobs.forEach(expectPrivateNavigation)
       let peerAtSpawn: Snapshot | undefined

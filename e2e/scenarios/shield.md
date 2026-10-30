@@ -6,7 +6,7 @@ Run the production image with the pinned bytes from the archive-named mode-0444
 `core/tests/fixtures/arena-v2-shield.seed` file (repeating byte 31) through generator3 and
 acknowledge them with `E2E_SHIELD_FIXTURE=arena-v3-shield`. The creator turns
 off all items, turns on Shield, applies the rules, and waits for authoritative settings acceptance.
-Both players ready into rules8/generator3 with lairs explicitly disabled. No state or inventory is injected.
+Both players ready into rules9/generator3 with lairs explicitly disabled. No state or inventory is injected.
 
 Player One bombs from (2,1), escapes through (1,1) to (1,2), and returns after fire clears
 to collect the generated Shield at (3,1). Both perspectives observe its timed effect. The

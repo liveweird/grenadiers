@@ -22,7 +22,7 @@ function trackedScene() {
 
 function populate(snapshot: ReturnType<typeof gameSnapshot>): void {
   snapshot.state.lairs = [
-    { id: 0, cell: { column: 6, row: 6 }, spawnRemainingTicks: 300, livingMobs: 1 },
+    { id: 0, cell: { column: 6, row: 6 }, spawnRemainingTicks: null, livingMobs: 1 },
     { id: 1, cell: { column: 8, row: 6 }, spawnRemainingTicks: 300, livingMobs: 0 },
   ]
   snapshot.state.mobs = [{

@@ -4,7 +4,7 @@ import { expectPaintedCanvas, latestSnapshot, observeGame, visibleActor, type Ob
 import { moveTo } from '../tests/support/movement'
 import { admissionBaseline, disconnectTransport, installTransportProbe } from '../tests/support/reconnect'
 import { applyItemSettings } from '../tests/support/settings'
-import type { GameServerMessage } from '../../web/src/game/v16/schema'
+import type { GameServerMessage } from '../../web/src/game/v17/schema'
 
 test.beforeAll(() => expect(process.env.E2E_INVISIBILITY_CLOAK_FIXTURE)
   .toBe('arena-v3-invisibility-cloak'))

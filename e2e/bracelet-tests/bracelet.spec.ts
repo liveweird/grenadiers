@@ -4,7 +4,7 @@ import { arenaTilePixels } from '../tests/support/compositor'
 import { latestSnapshot, observeGame, visibleActor, type ObservedGame } from '../tests/support/duel'
 import { moveSeatTo } from '../tests/support/movement'
 import { applyItemSettings } from '../tests/support/settings'
-import type { GameServerMessage, Seat } from '../../web/src/game/v16/schema'
+import type { GameServerMessage, Seat } from '../../web/src/game/v17/schema'
 
 test.beforeAll(() => expect(process.env.E2E_BRACELET_FIXTURE).toBe('arena-v3-bracelet'))
 type Snapshot = Extract<GameServerMessage, { type: 'snapshot' }>
@@ -146,6 +146,24 @@ test('Bracelet shoves a stationary rival one tile without an action or private c
       await expect(two.getByLabel('Ulepszenia: Gracz pierwszy')).toContainText('WyposażenieBransoleta')
       expect(games.flatMap(({ commands }) => commands)
         .some((command) => command.type === 'manualAction' && command.action === 'equipment')).toBe(false)
+
+      // An unequipped rival cannot walk into a stationary player, even when
+      // that player holds Bracelet. Blocking alone never triggers a shove.
+      const holderBefore = { ...actor(games[0], 'one').position }
+      const approachBefore = actor(games[0], 'two').position.x
+      await two.keyboard.down('ArrowLeft')
+      try {
+        await expect.poll(() => actor(games[0], 'two').position.x).toBeLessThan(approachBefore)
+        await expect.poll(() => actor(games[0], 'two').position.x - actor(games[0], 'one').position.x)
+          .toBe(640)
+        const blockedAt = latestSnapshot(games[0])!.state.physicalTick
+        await expect.poll(() => latestSnapshot(games[0])!.state.physicalTick).toBeGreaterThan(blockedAt + 12)
+        expect(actor(games[0], 'two').position.x - actor(games[0], 'one').position.x).toBe(640)
+        expect(actor(games[0], 'one').position).toEqual(holderBefore)
+        expect(Math.floor(actor(games[0], 'one').position.x / 1024))
+          .not.toBe(Math.floor(actor(games[0], 'two').position.x / 1024))
+      } finally { await two.keyboard.up('ArrowLeft') }
+      await moveSeatTo(two, games[1], 'two', { column: 11, row: 1 })
 
       const settleFloors = games.map((game) => latestSnapshot(game)!.room.revision)
       await Promise.all(games.flatMap((game, index) => [

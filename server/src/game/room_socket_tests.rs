@@ -54,7 +54,7 @@ async fn connect(url: &str, token: &str) -> ClientSocket {
     send(
         &mut socket,
         json!({
-            "type":"authenticate", "protocolVersion":16, "token":token
+            "type":"authenticate", "protocolVersion":17, "token":token
         }),
     )
     .await;
@@ -94,7 +94,7 @@ async fn two_members_receive_personalized_admission_and_live_waiting_updates() {
 
     send(
         &mut one,
-        json!({"type":"createRoom", "sequence":1, "configuration":{"controllers":["human","human"],"cpuDifficulty":null,"board":{"width":15,"height":13},"environment":{"stormCloud":true,"lairs":{"enabled":false,"spawnSeconds":10,"maxLivingMobs":3}}}}),
+        json!({"type":"createRoom", "sequence":1, "configuration":{"controllers":["human","human"],"cpuDifficulty":null,"board":{"width":15,"height":13},"environment":{"stormCloud":true,"lairs":{"enabled":false,"spawnSeconds":10,"maxLivingMobs":1}}}}),
     )
     .await;
     let created = next(&mut one).await;
@@ -108,7 +108,7 @@ async fn two_members_receive_personalized_admission_and_live_waiting_updates() {
     assert!(created["room"]["lastRound"].is_null());
     assert_eq!(created["room"]["phase"]["type"], "waiting");
     assert_eq!(created["room"]["seats"][0]["occupied"], true);
-    assert_eq!(created["room"]["rulesVersion"], 8);
+    assert_eq!(created["room"]["rulesVersion"], 9);
     assert_eq!(created["room"]["settingsRevision"], 1);
     assert_eq!(created["room"]["settingsEditor"], "one");
     let available_items = created["room"]["availableItems"].clone();
@@ -119,7 +119,7 @@ async fn two_members_receive_personalized_admission_and_live_waiting_updates() {
             "winsToFinish":3, "bombFuseTicks":180, "enabledItems":available_items.clone(),
             "environment":{
                 "stormCloud":true,
-                "lairs":{"enabled":false,"spawnSeconds":10,"maxLivingMobs":3}
+                "lairs":{"enabled":false,"spawnSeconds":10,"maxLivingMobs":1}
             }
         })
     );
@@ -174,7 +174,7 @@ async fn two_members_receive_personalized_admission_and_live_waiting_updates() {
         "winsToFinish":2, "bombFuseTicks":90, "enabledItems":[],
         "environment":{
             "stormCloud":false,
-            "lairs":{"enabled":false,"spawnSeconds":42,"maxLivingMobs":7}
+            "lairs":{"enabled":false,"spawnSeconds":42,"maxLivingMobs":1}
         }
     });
     send(
@@ -297,7 +297,7 @@ async fn connected_resume_replaces_old_socket_with_private_admission_and_close_4
     let mut original = connect(&url, &tokens[0]).await;
     send(
         &mut original,
-        json!({"type":"createRoom", "sequence":1, "configuration":{"controllers":["human","human"],"cpuDifficulty":null,"board":{"width":15,"height":13},"environment":{"stormCloud":true,"lairs":{"enabled":false,"spawnSeconds":10,"maxLivingMobs":3}}}}),
+        json!({"type":"createRoom", "sequence":1, "configuration":{"controllers":["human","human"],"cpuDifficulty":null,"board":{"width":15,"height":13},"environment":{"stormCloud":true,"lairs":{"enabled":false,"spawnSeconds":10,"maxLivingMobs":1}}}}),
     )
     .await;
     let created = next(&mut original).await;

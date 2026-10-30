@@ -3,7 +3,8 @@ use std::sync::Arc;
 use grenadiers_core::{
     game::{SeatId, StormCloudConfig},
     room::{
-        DepartureReason, LairTuning, MatchChange, RoomSettings, RosterParticipant, RosterUpdate,
+        DepartureReason, LairTuning, MatchChange, RespawnLairTuning, RoomSettings,
+        RosterParticipant, RosterUpdate,
     },
 };
 
@@ -11,7 +12,7 @@ use crate::round_seed::RoundSeedSource;
 
 use super::{
     error::{RosterRuntimeError, lifecycle},
-    publication_v15, publication_v16,
+    publication_v15, publication_v16, publication_v17,
     runtime::{EnvironmentProfile, RosterRuntime, SimulationSeedDerivation},
     types::{RosterIdentity, RosterNotice},
 };
@@ -102,12 +103,77 @@ impl RosterRuntime {
         Ok(runtime)
     }
 
+    pub(in crate::game::rooms) fn new_respawn(
+        identity: RosterIdentity,
+        settings: RoomSettings,
+        cloud: StormCloudConfig,
+        tuning: RespawnLairTuning,
+        round_seed_source: RoundSeedSource,
+        simulation_seed: Arc<SimulationSeedDerivation>,
+    ) -> Result<Self, RosterRuntimeError> {
+        let mut runtime = Self::new(identity, settings, round_seed_source, simulation_seed)?;
+        runtime.environment_profile = Some(EnvironmentProfile::RespawnV9 { cloud, tuning });
+        Ok(runtime)
+    }
+
     #[cfg_attr(not(test), allow(dead_code))]
     pub(in crate::game::rooms) const fn lair_tuning(&self) -> Option<LairTuning> {
         match self.environment_profile {
             Some(EnvironmentProfile::LairsV8 { tuning, .. }) => Some(tuning),
-            Some(EnvironmentProfile::StormV7(_)) | None => None,
+            Some(EnvironmentProfile::StormV7(_) | EnvironmentProfile::RespawnV9 { .. }) | None => {
+                None
+            }
         }
+    }
+
+    #[cfg_attr(not(test), allow(dead_code))]
+    pub(in crate::game::rooms) const fn respawn_tuning(&self) -> Option<RespawnLairTuning> {
+        match self.environment_profile {
+            Some(EnvironmentProfile::RespawnV9 { tuning, .. }) => Some(tuning),
+            Some(EnvironmentProfile::StormV7(_) | EnvironmentProfile::LairsV8 { .. }) | None => {
+                None
+            }
+        }
+    }
+
+    pub(in crate::game::rooms) fn update_respawn_settings(
+        &mut self,
+        seat: SeatId,
+        expected_epoch: u64,
+        expected: u32,
+        settings: RoomSettings,
+        cloud: StormCloudConfig,
+        tuning: RespawnLairTuning,
+    ) -> Result<Option<RosterNotice>, RosterRuntimeError> {
+        let mut next = self.clone();
+        let notice =
+            next.apply_respawn_settings(seat, expected_epoch, expected, settings, cloud, tuning)?;
+        *self = next;
+        Ok(notice)
+    }
+
+    fn apply_respawn_settings(
+        &mut self,
+        seat: SeatId,
+        expected_epoch: u64,
+        expected: u32,
+        settings: RoomSettings,
+        cloud: StormCloudConfig,
+        tuning: RespawnLairTuning,
+    ) -> Result<Option<RosterNotice>, RosterRuntimeError> {
+        if !matches!(
+            self.environment_profile,
+            Some(EnvironmentProfile::RespawnV9 { .. })
+        ) {
+            return Err(RosterRuntimeError::UnsupportedConfiguration);
+        }
+        self.apply_profile_settings(
+            seat,
+            expected_epoch,
+            expected,
+            settings,
+            EnvironmentProfile::RespawnV9 { cloud, tuning },
+        )
     }
 
     #[cfg_attr(not(test), allow(dead_code))]
@@ -257,6 +323,15 @@ impl RosterRuntime {
                 self.settings_authority_locked(),
             )
             .map(publication_v16::view_notice),
+            Some(EnvironmentProfile::RespawnV9 { cloud, tuning }) => publication_v17::room_view(
+                &self.identity,
+                &self.lifecycle,
+                EnvironmentProfile::RespawnV9 { cloud, tuning },
+                self.revision,
+                self.settings_revision,
+                self.settings_authority_locked(),
+            )
+            .map(publication_v17::view_notice),
             None => Err(RosterRuntimeError::UnsupportedConfiguration),
         }
     }

@@ -5,7 +5,7 @@ use grenadiers_core::{
         survival::{PulseStatus, RouteStatus},
     },
     game::{SeatId, Tick},
-    protocol::{v14, v15, v16},
+    protocol::{v14, v15, v16, v17},
     room::MatchPhase,
 };
 
@@ -226,31 +226,38 @@ impl Driver {
             room_instance,
             physical_round,
         };
-        let observations: Option<Vec<_>> = if let Some(publication) = notice.lair_cpu_publication()
-        {
-            self.cpus
-                .iter()
-                .map(|cpu| {
-                    v16::observe_cpu_recipient(publication, wire_seat(cpu.seat()), world).ok()
-                })
-                .collect()
-        } else if let Some(publication) = notice.environment_cpu_publication() {
-            self.cpus
-                .iter()
-                .map(|cpu| {
-                    v15::observe_cpu_recipient(publication, wire_seat(cpu.seat()), world).ok()
-                })
-                .collect()
-        } else if let Some(publication) = notice.legacy_cpu_publication() {
-            self.cpus
-                .iter()
-                .map(|cpu| {
-                    v14::observe_cpu_recipient(publication, wire_seat(cpu.seat()), world).ok()
-                })
-                .collect()
-        } else {
-            return;
-        };
+        let observations: Option<Vec<_>> =
+            if let Some(publication) = notice.respawn_cpu_publication() {
+                self.cpus
+                    .iter()
+                    .map(|cpu| {
+                        v17::observe_cpu_recipient(publication, wire_seat(cpu.seat()), world).ok()
+                    })
+                    .collect()
+            } else if let Some(publication) = notice.lair_cpu_publication() {
+                self.cpus
+                    .iter()
+                    .map(|cpu| {
+                        v16::observe_cpu_recipient(publication, wire_seat(cpu.seat()), world).ok()
+                    })
+                    .collect()
+            } else if let Some(publication) = notice.environment_cpu_publication() {
+                self.cpus
+                    .iter()
+                    .map(|cpu| {
+                        v15::observe_cpu_recipient(publication, wire_seat(cpu.seat()), world).ok()
+                    })
+                    .collect()
+            } else if let Some(publication) = notice.legacy_cpu_publication() {
+                self.cpus
+                    .iter()
+                    .map(|cpu| {
+                        v14::observe_cpu_recipient(publication, wire_seat(cpu.seat()), world).ok()
+                    })
+                    .collect()
+            } else {
+                return;
+            };
         let Some(observations) = observations else {
             return;
         };

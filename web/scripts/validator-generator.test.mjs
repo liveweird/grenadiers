@@ -27,6 +27,7 @@ async function temporaryCheckout(nested = false) {
     cp(join(import.meta.dirname, '..', '..', 'api', 'gameplay-v14.schema.json'), join(checkout, 'api', 'gameplay-v14.schema.json')),
     cp(join(import.meta.dirname, '..', '..', 'api', 'gameplay-v15.schema.json'), join(checkout, 'api', 'gameplay-v15.schema.json')),
     cp(join(import.meta.dirname, '..', '..', 'api', 'gameplay-v16.schema.json'), join(checkout, 'api', 'gameplay-v16.schema.json')),
+    cp(join(import.meta.dirname, '..', '..', 'api', 'gameplay-v17.schema.json'), join(checkout, 'api', 'gameplay-v17.schema.json')),
     cp(join(import.meta.dirname, '..', '..', 'api', 'realtime.schema.json'), join(checkout, 'api', 'realtime.schema.json')),
     cp(join(import.meta.dirname, 'validator-generator.mjs'), join(checkout, 'web', 'scripts', 'validator-generator.mjs')),
   ])
@@ -104,7 +105,7 @@ test('the real bundling path rejects dynamic imports and indirect code generatio
   }
 })
 
-test('validator artifacts are independent of checkout depth', async () => {
+test('validator artifacts are independent of checkout depth', { timeout: 15_000 }, async () => {
   const firstCheckout = await temporaryCheckout()
   const secondCheckout = await temporaryCheckout(true)
   const generate = `(generator, web) => generator.generateValidators(web).then((value) => Object.fromEntries(value))`

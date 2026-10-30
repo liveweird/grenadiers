@@ -1,6 +1,6 @@
 import { performance } from 'node:perf_hooks'
 import type { Page, TestInfo } from '@playwright/test'
-import type { GameServerMessage } from '../../../web/src/game/v16/schema'
+import type { GameServerMessage } from '../../../web/src/game/v17/schema'
 import { CaptureBrowserTrace, type CaptureBrowserTraceSummary } from './capture-browser-trace'
 import {
   preparePageRenderCounters, removeRenderCounters, resetRenderCounters, stopAndReadRenderCounters,

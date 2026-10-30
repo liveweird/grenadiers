@@ -1,14 +1,15 @@
 use grenadiers_core::{
-    game::{GenerationRecord, SeatId},
-    protocol::{Counter, v14, v15, v16},
+    game::SeatId,
+    protocol::{Counter, v14, v15, v16, v17},
     room::{MatchPhase, RosterMatchLifecycle, RosterParticipant},
 };
 
 use super::{
+    admission_projection::PreparedProjection,
     error::{RosterRuntimeError, lifecycle as lifecycle_error},
-    publication, publication_v15, publication_v16,
+    publication, publication_v15, publication_v16, publication_v17,
     runtime::{EnvironmentProfile, RosterRuntime},
-    types::{RosterNotice, wire_seat},
+    types::RosterNotice,
 };
 
 pub(in crate::game::rooms) struct PreparedRosterAdmission {
@@ -21,100 +22,24 @@ pub(in crate::game::rooms) struct PreparedRosterAdmission {
     pub(in crate::game::rooms) notice: RosterNotice,
 }
 
-enum PreparedProjection {
-    Legacy {
-        room: v14::RoomView,
-        state_epoch: Option<Counter>,
-        capture: Option<v14::ExpandedCapture>,
-        generation: Option<GenerationRecord>,
-    },
-    Environment {
-        room: v15::RoomView,
-        state_epoch: Option<Counter>,
-        capture: Option<v15::ExpandedCapture>,
-        generation: Option<GenerationRecord>,
-    },
-    Lairs {
-        room: v16::RoomView,
-        state_epoch: Option<Counter>,
-        capture: Option<v16::ExpandedCapture>,
-        generation: Option<GenerationRecord>,
-    },
-}
-
 impl PreparedRosterAdmission {
     pub(in crate::game::rooms) fn encode(
         &self,
         sequence: Counter,
         resume_token: v14::ResumeToken,
     ) -> Result<String, RosterRuntimeError> {
-        match &self.projection {
-            PreparedProjection::Legacy {
-                room,
-                state_epoch,
-                capture,
-                generation,
-            } => v14::prepare_admission(
-                v14::AdmissionProjection {
-                    room,
-                    state_epoch: *state_epoch,
-                    capture: capture.as_ref(),
-                    generation: *generation,
-                },
-                v14::PersonalAdmission {
-                    recipient: wire_seat(self.seat),
-                    last_action_id: self.last_action_id,
-                    sequence,
-                    resume_token,
-                },
-            ),
-            PreparedProjection::Environment {
-                room,
-                state_epoch,
-                capture,
-                generation,
-            } => v15::prepare_admission(
-                v15::AdmissionProjection {
-                    room,
-                    state_epoch: *state_epoch,
-                    capture: capture.as_ref(),
-                    generation: *generation,
-                },
-                v15::PersonalAdmission {
-                    recipient: wire_seat(self.seat),
-                    last_action_id: self.last_action_id,
-                    sequence,
-                    resume_token,
-                },
-            ),
-            PreparedProjection::Lairs {
-                room,
-                state_epoch,
-                capture,
-                generation,
-            } => v16::prepare_admission(
-                v16::AdmissionProjection {
-                    room,
-                    state_epoch: *state_epoch,
-                    capture: capture.as_ref(),
-                    generation: *generation,
-                },
-                v16::PersonalAdmission {
-                    recipient: super::types::wire_seat_v16(self.seat),
-                    last_action_id: self.last_action_id,
-                    sequence,
-                    resume_token,
-                },
-            ),
-        }
-        .map_err(|_| RosterRuntimeError::Publication)
+        self.projection
+            .encode(self.seat, self.last_action_id, sequence, resume_token)
+            .map_err(|_| RosterRuntimeError::Publication)
     }
 
     #[cfg(test)]
     pub(in crate::game::rooms) fn legacy_room(&self) -> Option<&v14::RoomView> {
         match &self.projection {
             PreparedProjection::Legacy { room, .. } => Some(room),
-            PreparedProjection::Environment { .. } | PreparedProjection::Lairs { .. } => None,
+            PreparedProjection::Environment { .. }
+            | PreparedProjection::Lairs { .. }
+            | PreparedProjection::Respawn { .. } => None,
         }
     }
 
@@ -123,7 +48,7 @@ impl PreparedRosterAdmission {
         match &self.projection {
             PreparedProjection::Environment { room, .. } => Some(room),
             PreparedProjection::Legacy { .. } => None,
-            PreparedProjection::Lairs { .. } => None,
+            PreparedProjection::Lairs { .. } | PreparedProjection::Respawn { .. } => None,
         }
     }
 
@@ -131,7 +56,19 @@ impl PreparedRosterAdmission {
     pub(in crate::game::rooms) fn lair_room(&self) -> Option<&v16::RoomView> {
         match &self.projection {
             PreparedProjection::Lairs { room, .. } => Some(room),
-            PreparedProjection::Legacy { .. } | PreparedProjection::Environment { .. } => None,
+            PreparedProjection::Legacy { .. }
+            | PreparedProjection::Environment { .. }
+            | PreparedProjection::Respawn { .. } => None,
+        }
+    }
+
+    #[cfg(test)]
+    pub(in crate::game::rooms) fn respawn_room(&self) -> Option<&v17::RoomView> {
+        match &self.projection {
+            PreparedProjection::Respawn { room, .. } => Some(room),
+            PreparedProjection::Legacy { .. }
+            | PreparedProjection::Environment { .. }
+            | PreparedProjection::Lairs { .. } => None,
         }
     }
 
@@ -148,6 +85,9 @@ impl PreparedRosterAdmission {
             PreparedProjection::Lairs { room, .. } => {
                 (&room.room_id, u64::from(room.round_id.get()))
             }
+            PreparedProjection::Respawn { room, .. } => {
+                (&room.room_id, u64::from(room.round_id.get()))
+            }
         }
     }
 
@@ -159,6 +99,7 @@ impl PreparedRosterAdmission {
             PreparedProjection::Legacy { room, .. } => (&room.room_code, room.revision.get()),
             PreparedProjection::Environment { room, .. } => (&room.room_code, room.revision.get()),
             PreparedProjection::Lairs { room, .. } => (&room.room_code, room.revision.get()),
+            PreparedProjection::Respawn { room, .. } => (&room.room_code, room.revision.get()),
         }
     }
 
@@ -166,7 +107,9 @@ impl PreparedRosterAdmission {
     pub(in crate::game::rooms) fn legacy_room_mut(&mut self) -> Option<&mut v14::RoomView> {
         match &mut self.projection {
             PreparedProjection::Legacy { room, .. } => Some(room),
-            PreparedProjection::Environment { .. } | PreparedProjection::Lairs { .. } => None,
+            PreparedProjection::Environment { .. }
+            | PreparedProjection::Lairs { .. }
+            | PreparedProjection::Respawn { .. } => None,
         }
     }
 }
@@ -298,6 +241,42 @@ impl RosterRuntime {
                     notice,
                 )
             }
+            Some(EnvironmentProfile::RespawnV9 { cloud, tuning }) => {
+                let room = publication_v17::room_view(
+                    &self.identity,
+                    &lifecycle,
+                    EnvironmentProfile::RespawnV9 { cloud, tuning },
+                    revision,
+                    self.settings_revision,
+                    self.settings_authority_locked(),
+                )?;
+                let capture = body
+                    .map(|sim| {
+                        v17::capture_expanded(&sim.state, &[])
+                            .map_err(|_| RosterRuntimeError::Publication)
+                    })
+                    .transpose()?;
+                let notice = if let Some(sim) = body {
+                    publication_v17::snapshot(
+                        room.clone(),
+                        sim.epoch,
+                        &sim.state,
+                        &[],
+                        sim.generation,
+                    )?
+                } else {
+                    publication_v17::view_notice(room.clone())
+                };
+                (
+                    PreparedProjection::Respawn {
+                        room,
+                        state_epoch,
+                        capture,
+                        generation,
+                    },
+                    notice,
+                )
+            }
             None => {
                 let room = publication::room_view(
                     &self.identity,
@@ -346,12 +325,20 @@ impl RosterRuntime {
         self.environment_cpu_publication = match &prepared.notice.publication {
             super::types::RosterPublication::Environment(_, publication) => publication.clone(),
             super::types::RosterPublication::Legacy(_, _)
-            | super::types::RosterPublication::Lairs(_, _) => None,
+            | super::types::RosterPublication::Lairs(_, _)
+            | super::types::RosterPublication::Respawn(_, _) => None,
         };
         self.lair_cpu_publication = match &prepared.notice.publication {
             super::types::RosterPublication::Lairs(_, publication) => publication.clone(),
             super::types::RosterPublication::Legacy(_, _)
-            | super::types::RosterPublication::Environment(_, _) => None,
+            | super::types::RosterPublication::Environment(_, _)
+            | super::types::RosterPublication::Respawn(_, _) => None,
+        };
+        self.respawn_cpu_publication = match &prepared.notice.publication {
+            super::types::RosterPublication::Respawn(_, publication) => publication.clone(),
+            super::types::RosterPublication::Legacy(_, _)
+            | super::types::RosterPublication::Environment(_, _)
+            | super::types::RosterPublication::Lairs(_, _) => None,
         };
         self.lifecycle = prepared.lifecycle;
         self.revision = prepared.revision;

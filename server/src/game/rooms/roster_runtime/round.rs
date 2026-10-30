@@ -82,6 +82,13 @@ impl RosterRuntime {
                         tuning.config(),
                     )
                 }
+                super::runtime::EnvironmentProfile::RespawnV9 { cloud, tuning } => {
+                    grenadiers_core::game::RulesConfig::environment_v9(
+                        self.lifecycle.settings(),
+                        cloud,
+                        tuning.config(),
+                    )
+                }
             },
         );
         let state = State::new_round(
@@ -98,6 +105,7 @@ impl RosterRuntime {
         self.cpu_publication = None;
         self.environment_cpu_publication = None;
         self.lair_cpu_publication = None;
+        self.respawn_cpu_publication = None;
         self.sim = Some(SimRound {
             epoch,
             state,

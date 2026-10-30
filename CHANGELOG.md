@@ -2,6 +2,17 @@
 
 ## [Unreleased]
 
+## 1.0.2 — 2026-10-31
+
+- Limit each lair to one living mob; start its replacement delay after that mob dies and
+  display occupied versus waiting lairs without a multi-mob capacity setting.
+- Make living players solid across movement, turns, Bracelet shoves and Teleporter swaps,
+  with deterministic contention and CPU navigation that respects visible player blockers.
+- Make CPUs seek safe firing positions against every visible rival, including other CPUs,
+  using the equipped bomb geometry while preserving checked escape routes and bounded work.
+- Activate gameplay17/rules9/CPU21 together, with private replay8 and closed historical
+  contracts retained for deterministic compatibility.
+
 ## 1.0.1 — 2026-10-30
 
 - Fix CPUs becoming stranded on their own bombs when concurrent rival planting invalidates

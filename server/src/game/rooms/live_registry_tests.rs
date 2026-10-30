@@ -72,7 +72,7 @@ fn configuration_on_environment(
     LairRoomConfiguration::new(
         RoomConfiguration::new(controls, difficulty, board).unwrap(),
         environment,
-        LairTuning::new(false, LairSettings::DEFAULT),
+        LairTuning::new(false, LairSettings::new(10, 1).unwrap()),
     )
 }
 
@@ -91,7 +91,7 @@ fn token(admission: &LiveAdmission) -> v14::ResumeToken {
 }
 
 #[tokio::test]
-async fn two_player_live_rooms_use_v16_lair_roster_for_duel_and_solo() {
+async fn two_player_live_rooms_use_v17_respawn_roster_for_duel_and_solo() {
     let now = std::time::Instant::now();
     let rooms = rooms(now);
     let duel = rooms
@@ -106,7 +106,7 @@ async fn two_player_live_rooms_use_v16_lair_roster_for_duel_and_solo() {
     assert_eq!(duel.seat(), SeatId::One);
     assert_eq!(duel.room_id().as_str(), "123456789abcdef00000000000000001");
     assert!(matches!(duel, LiveAdmission::Roster(_)));
-    assert_eq!(personal(&duel)["room"]["rulesVersion"], 8);
+    assert_eq!(personal(&duel)["room"]["rulesVersion"], 9);
     assert_eq!(
         personal(&duel)["room"]["settings"]["enabledItems"]
             .as_array()
@@ -123,7 +123,7 @@ async fn two_player_live_rooms_use_v16_lair_roster_for_duel_and_solo() {
         serde_json::json!({
             "enabled": false,
             "spawnSeconds": 10,
-            "maxLivingMobs": 3
+            "maxLivingMobs": 1
         })
     );
     assert_eq!(

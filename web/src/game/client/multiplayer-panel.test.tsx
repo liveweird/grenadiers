@@ -35,7 +35,7 @@ it('creates an explicit four-controller mixed configuration while keeping player
     type: 'create', configuration: {
       controllers: ['human', 'cpu', 'human', 'cpu'], cpuDifficulty: 'easy',
       board: { width: 11, height: 9 },
-      environment: { stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 3 } },
+      environment: { stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 } },
     },
   })
 })
@@ -124,13 +124,13 @@ it('uses seat four for the local HUD while keeping creator-only settings authori
 
 it('keeps the invitation and distinct CPU identity while a mixed room has a human vacancy', () => {
   const current = snapshot(2)
-  current.room.rulesVersion = 8
+  current.room.rulesVersion = 9
   current.room.phase = { type: 'waiting' }
   current.room.roundNumber = 0
   current.room.configuration = {
     controllers: ['human', 'cpu', 'human', 'cpu'], cpuDifficulty: 'standard',
     board: { width: 15, height: 13 },
-    environment: { stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 3 } },
+    environment: { stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 } },
   }
   current.room.seats[1] = {
     seat: 'two', controller: { type: 'cpu', difficulty: 'standard' }, occupied: true,

@@ -8,11 +8,12 @@ use axum::{
     http::{HeaderMap, StatusCode, Uri, header::RETRY_AFTER},
     response::Response,
 };
-use grenadiers_core::protocol::v16::{
+use grenadiers_core::protocol::v17::MAX_CLIENT_MESSAGE_BYTES;
+use grenadiers_core::protocol::v17::{
     ErrorCode, GAMEPLAY_PROTOCOL_VERSION, GameServerMessage, GameplayVersion,
     encode_server_message, parse_client_message,
 };
-use grenadiers_core::protocol::{Counter, MAX_CLIENT_MESSAGE_BYTES, ProtocolVersionInput};
+use grenadiers_core::protocol::{Counter, ProtocolVersionInput};
 use tokio::{
     sync::OwnedSemaphorePermit,
     time::{Instant, timeout, timeout_at},

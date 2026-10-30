@@ -1,4 +1,4 @@
-import type { EffectKind, VisibleActorView } from '../v16/schema'
+import type { EffectKind, VisibleActorView } from '../v17/schema'
 import type { RenderablePickupKind } from '../arena/types'
 import { ItemIcon, StormCloudIcon } from './ItemIcon'
 import { format, type GameCopy } from './locale'

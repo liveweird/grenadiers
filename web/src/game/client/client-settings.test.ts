@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import type { GameSettings } from '../v17/schema'
 import { admitted, authenticate, harness, messages, room, SocketStub } from './testSupport'
 
 const changed = {
@@ -7,8 +8,8 @@ const changed = {
   winsToFinish: 1,
   bombFuseTicks: 60 as const,
   enabledItems: [],
-  environment: { stormCloud: false, lairs: { enabled: false, spawnSeconds: 24, maxLivingMobs: 6 } },
-}
+  environment: { stormCloud: false, lairs: { enabled: false, spawnSeconds: 24, maxLivingMobs: 1 } },
+} satisfies GameSettings
 
 describe('v12 authoritative gameplay settings', () => {
   beforeEach(() => vi.stubGlobal('WebSocket', { OPEN: SocketStub.OPEN }))
@@ -153,17 +154,16 @@ describe('v12 authoritative gameplay settings', () => {
     baseline.room = room(1)
     baseline.state = null
     socket.message(baseline)
-    const sent = socket.sent.length
-    const settings = baseline.room.settings
-
+    const sent = socket.sent.length; const settings = baseline.room.settings
     for (const lairs of [
-      { enabled: true, spawnSeconds: 4, maxLivingMobs: 3 },
-      { enabled: true, spawnSeconds: 61, maxLivingMobs: 3 },
+      { enabled: true, spawnSeconds: 4, maxLivingMobs: 1 },
+      { enabled: true, spawnSeconds: 61, maxLivingMobs: 1 },
       { enabled: true, spawnSeconds: 10, maxLivingMobs: 0 },
       { enabled: true, spawnSeconds: 10, maxLivingMobs: 9 },
     ]) {
       expect(value.client.updateSettings({
-        ...settings, environment: { ...settings.environment, lairs },
+        ...settings, environment: { ...settings.environment, lairs:
+          lairs as unknown as GameSettings['environment']['lairs'] },
       })).toBe(false)
     }
     expect(socket.sent).toHaveLength(sent)

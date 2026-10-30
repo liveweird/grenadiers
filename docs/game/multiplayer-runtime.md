@@ -1,7 +1,7 @@
 # Roster runtime
 
 `server/src/game/rooms/roster_runtime/` provides the transport-independent runtime used by every
-live two-to-four-seat configuration and board. The [v16 contract](protocol-v16.md) owns wire shape
+live two-to-four-seat configuration and board. The [v17 contract](protocol-v17.md) owns wire shape
 and recipient privacy; the [multiplayer design](multiplayer-design.md) records its integration.
 
 ## Lifecycle and participation
@@ -35,9 +35,9 @@ Released credentials remain retired and cannot resume or be minted for replaceme
 rooms accept at most 256 lifetime human admissions, bounding the retired-credential set. A
 replacement cannot inherit the departed creator's settings authority.
 
-Round construction uses rules 8 and the actual physical-round assignment. It selects generator 3
+Round construction uses rules 9 and the actual physical-round assignment. It selects generator 3
 for 15×13 and generator 4 for 11×9/13×11. The configured roster remains intact, with departed
-participants initially inactive. Every live room uses CPU policy 20. The exact profile table is in
+participants initially inactive. Every live room uses CPU policy 21. The exact profile table is in
 [board geometry](board-sizes.md).
 
 ## Boundaries and randomness
@@ -57,15 +57,15 @@ export stay disabled.
 
 ## Explicit lair runtime
 
-`RosterRuntime::new_lairs` selects a separate rules8 environment profile, including when lairs
-or clouds are disabled. It publishes checked gameplay16 admissions and snapshots; the ordinary
-live registry uses rules8/gameplay16. Profile-specific settings entry points reject
+`RosterRuntime::new_respawn` selects a separate rules9 environment profile, including when lairs
+or clouds are disabled. It publishes checked gameplay17 admissions and snapshots; the ordinary
+live registry uses rules9/gameplay17. Profile-specific settings entry points reject
 cross-profile updates and share the same atomic authority, revision and readiness transaction.
 Disabled lairs retain their numeric settings. Creator revocation, forming-seat replacement and
 the first-start lock retain the lifecycle rules above.
 
-Rules8 controllers require `LAIRS_STANDARD` or `LAIRS_EASY`. The worker returns its finite
-mob-contact lease with the bomb/escape proof and original observation. Admission keeps world,
+RespawnV9 controllers require `RESPAWN_LAIRS_STANDARD` or `RESPAWN_LAIRS_EASY`. The worker returns its finite
+mob-contact lease with the bomb/escape proof and original observationv17. Admission keeps world,
 seat, pose, effects, command epoch, age and confirmed-stop fences. Continuing movement checks
 both proofs; a changed Teleporter marker or failed contact check withdraws authority. A timed
 hold still ends when observations or worker results are missing. See

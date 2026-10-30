@@ -4,7 +4,7 @@ import { latestSnapshot, observeGame, visibleActor, type ObservedGame } from '..
 import { moveTo } from '../tests/support/movement'
 import { admissionBaseline, disconnectTransport, installTransportProbe } from '../tests/support/reconnect'
 import { applyItemSettings } from '../tests/support/settings'
-import type { GameServerMessage } from '../../web/src/game/v16/schema'
+import type { GameServerMessage } from '../../web/src/game/v17/schema'
 
 test.beforeAll(() => expect(process.env.E2E_LONG_FUSE_FIXTURE).toBe('arena-v3-long-fuse'))
 

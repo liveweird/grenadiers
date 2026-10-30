@@ -2,8 +2,8 @@
 
 Status: gameplay contracts, checked domain conversion, HTTP session issuance, and authenticated
 gameplay WebSockets with authoritative configurable two-to-four-seat matches are implemented.
-`api/gameplay-v16.schema.json`, Rust `core::protocol::v16`, and generated
-`web/src/game/v16/schema.ts` define active socket messages. V2 through v15 remain historical
+`api/gameplay-v17.schema.json`, Rust `core::protocol::v17`, and generated
+`web/src/game/v17/schema.ts` define active socket messages. V2 through v16 remain historical
 or archived compatibility contracts.
 V14 retains the v11 physical/privacy model while adding a checked two-to-four-controller room
 configuration. See the [v14 contract](protocol-v14.md) and [v13 compatibility](protocol-v13.md).
@@ -30,7 +30,8 @@ The browser validates these messages and drives the playable generated-map match
 | v13 | [Compatibility guide](protocol-v13.md) | Archived contract |
 | v14 | [Archived multiplayer contract](protocol-v14.md) | Archived/rejected before credential claim |
 | v15 | [Environment contract](protocol-v15.md) | Archived compatibility contract |
-| v16 | [Lair contract](protocol-v16.md) | Live multiplayer contract |
+| v16 | [Lair contract](protocol-v16.md) | Historical contract |
+| v17 | [Respawn contract](protocol-v17.md) | Live multiplayer contract |
 
 ## Authentication and compatibility
 
@@ -50,13 +51,13 @@ Connect to `/api/v1/game/ws` with one configured non-null Origin and no query pa
 Its first application frame must be:
 
 ```json
-{"type":"authenticate","protocolVersion":14,"token":"0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"}
+{"type":"authenticate","protocolVersion":17,"token":"0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"}
 ```
 
 The token is a secret 64-character lowercase hexadecimal credential, held only in tab memory.
 It never belongs in a URL or log. A syntactically valid unsupported version is parsed so the
 server can return `incompatibleProtocol` before credential binding. Supported gameplay version
-is 14, independently of the product release and diagnostic protocol. Parser failures expose
+is 17, independently of the product release and diagnostic protocol. Parser failures expose
 only a generic error; token Debug formatting is redacted.
 
 A successful claim atomically binds one connection. Duplicate claims receive `connectionInUse`
@@ -210,7 +211,7 @@ spawn/tie assignment uses actual round count rather than command epoch.
 
 Shared room views and snapshot metadata also carry the complete checked `settings`,
 `settingsRevision`, nullable original `settingsEditor`, and `availableItems`. Settings also
-carry `enabledItems`; v10 remains pinned to its 21-item Bracelet catalog while live v16
+carry `enabledItems`; v10 remains pinned to its 21-item Bracelet catalog while live v17
 has the unchanged 22-item catalog beginning with Kick, Punch, Bracelet and Wall Pass, with Oil Barrel immediately
 before Teleporter. New live rooms enable the full available catalog and every supported subset is allowed.
 Only actual changes increment
@@ -245,11 +246,11 @@ capability, never to invitation code. See [bounded owner](match-owner.md).
 
 An immutable server room profile owns state construction and its rules/map labels. Publication
 rejects state whose checked rules version disagrees with that profile. Every live two-to-four-seat
-room uses rules8 and CPU20, with generator3 on 15×13 and generator4 on 11×9/13×11; see
+room uses rules9 and CPU21, with generator3 on 15×13 and generator4 on 11×9/13×11; see
 [board geometry](board-sizes.md). Snapshot pickup arrays begin empty because contents remain
 concealed until exposed. Fixed-classic and earlier expanded profiles remain retained fixtures.
 
-Gameplay16 requires paired server/client upgrades. Versions1–15 and future versions are rejected
+Gameplay17 requires paired server/client upgrades. Versions1–16 and future versions are rejected
 before credential lookup, so rejection cannot claim or revoke a token. `supportedVersion`
 accepts the bounded input range, allowing a new client to understand an older server's response.
 See [ADR 0013](../decisions/0013-gameplay-v2-and-room-profiles.md).

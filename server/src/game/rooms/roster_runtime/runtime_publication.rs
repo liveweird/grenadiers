@@ -2,7 +2,7 @@ use grenadiers_core::room::{MatchChange, MatchPhase};
 
 use super::{
     error::RosterRuntimeError,
-    publication, publication_v15, publication_v16,
+    publication, publication_v15, publication_v16, publication_v17,
     runtime::{EnvironmentProfile, RosterRuntime},
     types::{RosterNotice, RosterPublication},
 };
@@ -59,6 +59,27 @@ impl RosterRuntime {
                     publication_v16::view_notice(room)
                 }
             }
+            Some(EnvironmentProfile::RespawnV9 { cloud, tuning }) => {
+                let room = publication_v17::room_view(
+                    &self.identity,
+                    &self.lifecycle,
+                    EnvironmentProfile::RespawnV9 { cloud, tuning },
+                    next,
+                    self.settings_revision,
+                    self.settings_authority_locked(),
+                )?;
+                if let Some(sim) = body {
+                    publication_v17::snapshot(
+                        room,
+                        sim.epoch,
+                        &sim.state,
+                        &self.reports,
+                        sim.generation,
+                    )?
+                } else {
+                    publication_v17::view_notice(room)
+                }
+            }
             None => {
                 let room = publication::room_view(
                     &self.identity,
@@ -83,11 +104,19 @@ impl RosterRuntime {
         self.environment_cpu_publication = match &notice.publication {
             RosterPublication::Environment(_, publication) => publication.clone(),
             RosterPublication::Legacy(_, _) => None,
-            RosterPublication::Lairs(_, _) => None,
+            RosterPublication::Lairs(_, _) | RosterPublication::Respawn(_, _) => None,
         };
         self.lair_cpu_publication = match &notice.publication {
             RosterPublication::Lairs(_, publication) => publication.clone(),
-            RosterPublication::Legacy(_, _) | RosterPublication::Environment(_, _) => None,
+            RosterPublication::Legacy(_, _)
+            | RosterPublication::Environment(_, _)
+            | RosterPublication::Respawn(_, _) => None,
+        };
+        self.respawn_cpu_publication = match &notice.publication {
+            RosterPublication::Respawn(_, publication) => publication.clone(),
+            RosterPublication::Legacy(_, _)
+            | RosterPublication::Environment(_, _)
+            | RosterPublication::Lairs(_, _) => None,
         };
         self.revision = next;
         self.reports.clear();
@@ -117,6 +146,16 @@ impl RosterRuntime {
                     self.settings_authority_locked(),
                 )?)
             }
+            Some(EnvironmentProfile::RespawnV9 { cloud, tuning }) => {
+                publication_v17::view_notice(publication_v17::room_view(
+                    &self.identity,
+                    &self.lifecycle,
+                    EnvironmentProfile::RespawnV9 { cloud, tuning },
+                    next,
+                    self.settings_revision,
+                    self.settings_authority_locked(),
+                )?)
+            }
             None => publication::view_notice(publication::room_view(
                 &self.identity,
                 &self.lifecycle,
@@ -128,6 +167,7 @@ impl RosterRuntime {
         self.cpu_publication = None;
         self.environment_cpu_publication = None;
         self.lair_cpu_publication = None;
+        self.respawn_cpu_publication = None;
         Ok(notice)
     }
 

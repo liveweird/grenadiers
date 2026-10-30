@@ -107,7 +107,7 @@ test('three humans join an explicit three-seat match', async ({ browser }) => {
       controllers: ['human', 'human', 'human'], cpuDifficulty: null,
       board: { width: 15, height: 13 },
       environment: {
-        stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 3 },
+        stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 },
       },
     })
     expect(running.room.seats.map(({ seat, controller, occupied }) =>
@@ -159,7 +159,7 @@ test('four humans share the four-seat lobby at 320 pixels', async ({ browser }) 
       controllers: ['human', 'human', 'human', 'human'], cpuDifficulty: null,
       board: { width: 15, height: 13 },
       environment: {
-        stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 3 },
+        stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 },
       },
     })
     expect(running.state.actors.map(({ seat }) => seat)).toEqual(['one', 'two', 'three', 'four'])
@@ -247,7 +247,7 @@ test('human CPU human assigns both human seats without exposing a CPU join', asy
       controllers: ['human', 'cpu', 'human'], cpuDifficulty: 'easy',
       board: { width: 15, height: 13 },
       environment: {
-        stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 3 },
+        stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 },
       },
     })
     expect(running.room.seats[1]).toMatchObject({
@@ -276,7 +276,7 @@ test('one human and three CPUs creates a ready four-controller lobby', async ({ 
       controllers: ['human', 'cpu', 'cpu', 'cpu'], cpuDifficulty: 'standard',
       board: { width: 15, height: 13 },
       environment: {
-        stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 3 },
+        stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 },
       },
     })
     expect(running.room.seats.slice(1).map(({ ready, controller, connection }) =>
@@ -319,5 +319,31 @@ test('three CPUs escape their first bombs in a default four-player match', async
             && event.kind.seat === seat && event.tick <= exploded.room.tick + 30))
       expect(eliminatedDuringBlast).toBe(false)
     }
+  } finally { await group.close() }
+})
+
+test('three CPUs keep moving with all optional features disabled', async ({ browser }) => {
+  const group = await createPages(browser, 1)
+  try {
+    await createCustom(group.pages[0], ['human', 'cpu', 'cpu', 'cpu'])
+    const game = group.games[0]!
+    const revision = latestRoom(game)!.settingsRevision
+    await group.pages[0].getByRole('button', { name: 'All off', exact: true }).click()
+    await group.pages[0].getByRole('button', { name: 'Apply rules', exact: true }).click()
+    await expect.poll(() => latestRoom(game)?.settingsRevision).toBeGreaterThan(revision)
+    expect(latestRoom(game)?.settings.environment).toMatchObject({
+      stormCloud: false, lairs: { enabled: false, maxLivingMobs: 1 },
+    })
+    await startRound(group.pages, group.games)
+    const running = latestSnapshot(game)!
+    const seats = ['two', 'three', 'four'] as const
+    const initial = seats.map((seat) => ({ ...visibleActor(running, seat)!.position }))
+    await expect.poll(() => seats.every((seat, index) => game.frames.some((frame) => {
+      if (frame.type !== 'snapshot' || frame.room.roundId !== running.room.roundId) return false
+      const current = visibleActor(frame, seat)
+      return current && (current.position.x !== initial[index]!.x || current.position.y !== initial[index]!.y)
+    }))).toBe(true)
+    expect(latestSnapshot(game)?.state.lairs).toEqual([])
+    expect(latestSnapshot(game)?.state.mobs).toEqual([])
   } finally { await group.close() }
 })

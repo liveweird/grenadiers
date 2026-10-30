@@ -8,3 +8,7 @@
   `(12,1)` without a Player Two command, Equipment action, public event, or private history field.
 - Capture the stable English desktop and Polish 320-pixel reduced-motion views and verify the
   destination tile is visibly occupied without horizontal overflow.
+
+Before the shove, the unequipped rival walks into the stationary holder and is blocked at
+footprint contact. Holding movement cannot overlap them or share a tile, and it does not cause
+a reverse shove. The rival then returns to its staging cell for the existing Bracelet proof.

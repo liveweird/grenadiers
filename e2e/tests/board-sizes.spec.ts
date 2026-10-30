@@ -1,5 +1,5 @@
 import { expect, test, type Browser, type BrowserContextOptions, type Page } from '@playwright/test'
-import type { BoardSize, Seat } from '../../web/src/game/v16/schema'
+import type { BoardSize, Seat } from '../../web/src/game/v17/schema'
 import { expectPaintedCanvas, latestSnapshot, observeGame, visibleActor,
   type ObservedGame } from './support/duel'
 import { admissionBaseline, disconnectTransport, installTransportProbe } from './support/reconnect'
@@ -79,13 +79,13 @@ async function startRound(pages: readonly Page[], games: readonly ObservedGame[]
 function expectBoard(game: ObservedGame, board: BoardSize, count: number): void {
   const snapshot = latestSnapshot(game)
   expect(snapshot?.room).toMatchObject({
-    rulesVersion: 8,
+    rulesVersion: 9,
     mapId: 'generated_v2',
     configuration: { environment: {
-      stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 3 },
+      stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 },
     } },
     settings: { environment: {
-      stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 3 },
+      stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 },
     } },
   })
   expect(snapshot?.room.configuration.board).toEqual(board)

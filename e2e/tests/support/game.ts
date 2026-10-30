@@ -1,5 +1,5 @@
 import { expect, type Page } from '@playwright/test'
-import type { GameServerMessage } from '../../../web/src/game/v16/schema'
+import type { GameServerMessage } from '../../../web/src/game/v17/schema'
 
 type RoomFrame = Extract<GameServerMessage, { type: 'roomState' | 'admitted' }>
 type AdmissionFrame = Extract<GameServerMessage, { type: 'admitted' }>
@@ -27,7 +27,7 @@ export async function openGame(page: Page): Promise<void> {
     const first = new Promise<GameServerMessage>((resolve, reject) => {
       const timer = setTimeout(() => reject(new Error('Authentication timed out')), 10_000)
       socket.addEventListener('open', () => {
-        socket.send(JSON.stringify({ type: 'authenticate', protocolVersion: 16, token: session.token }))
+        socket.send(JSON.stringify({ type: 'authenticate', protocolVersion: 17, token: session.token }))
       }, { once: true })
       socket.addEventListener('error', () => {
         clearTimeout(timer)
@@ -56,7 +56,7 @@ export async function openGame(page: Page): Promise<void> {
     }
     return first
   })
-  expect(authenticated).toEqual({ type: 'authenticated', protocolVersion: 16 })
+  expect(authenticated).toEqual({ type: 'authenticated', protocolVersion: 17 })
 }
 
 export async function sendGame(page: Page, command: Record<string, unknown>): Promise<number> {
@@ -71,7 +71,7 @@ export async function sendGame(page: Page, command: Record<string, unknown>): Pr
               board: { width: 15, height: 13 },
               environment: {
                 stormCloud: true,
-                lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 3 },
+                lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 },
               },
             }
           : {
@@ -79,7 +79,7 @@ export async function sendGame(page: Page, command: Record<string, unknown>): Pr
               board: { width: 15, height: 13 },
               environment: {
                 stormCloud: true,
-                lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 3 },
+                lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 },
               },
             },
       }

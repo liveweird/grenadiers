@@ -6,8 +6,8 @@ create 15×13 rooms regardless of the custom form's selected **Board size** / **
 
 | Configuration | Runtime profile | Rules | Generator | CPU policy |
 | --- | --- | --- | --- | --- |
-| Two to four seats, 15×13 | Roster owner | 8 | 3 | 20 |
-| Two to four seats, 11×9 or 13×11 | Roster owner | 8 | 4 | 20 |
+| Two to four seats, 15×13 | Roster owner | 9 | 3 | 21 |
+| Two to four seats, 11×9 or 13×11 | Roster owner | 9 | 4 | 21 |
 
 ## Checked presets
 
@@ -23,7 +23,7 @@ connectivity validation ignores soft blocks, while spawn escape reservations are
 
 ## Simulation and generation
 
-Live arenas require rules8. Retained rules6/CPU17 and rules7/CPU18 support the same presets
+Live arenas require rules9. Retained rules6/CPU17, rules7/CPU18 and rules8/CPU20 support the same presets
 without being selected for current rooms.
 Movement footprints, public terrain, Power blast traversal and Punch landings use the arena's
 actual dimensions. Punch retains its three-cell wrapping stride: an interior axis of nine

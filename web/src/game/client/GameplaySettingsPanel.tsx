@@ -2,7 +2,7 @@ import { Button, Checkbox, Group, NativeSelect, NumberInput, SimpleGrid, Text, T
 import { useMemo, useState } from 'react'
 import { sameGameSettings } from './clientProtocol'
 import type { GameCopy } from './locale'
-import { ITEM_IDS, type GameSettings, type RoomView, type Seat } from '../v16/schema'
+import { ITEM_IDS, type GameSettings, type RoomView, type Seat } from '../v17/schema'
 
 const SPEEDS = [0, 1, 2, 3, 4] as const
 const TURN_ASSISTS = [64, 128, 192, 256] as const
@@ -12,7 +12,7 @@ type AvailableItem = typeof ITEM_IDS[number]
 const DEFAULT_NUMERICS = {
   startingSpeedLevel: 0, turnAssistUnits: 256, winsToFinish: 3, bombFuseTicks: 180,
 } satisfies Omit<GameSettings, 'enabledItems' | 'environment'>
-const DEFAULT_LAIRS = { enabled: true, spawnSeconds: 10, maxLivingMobs: 3 } as const
+const DEFAULT_LAIRS = { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 } as const
 
 const speedText = (level: number): string => `${3 + level * 0.5}`
 const turnText = (units: number): string => {
@@ -20,7 +20,7 @@ const turnText = (units: number): string => {
 }
 const validLairs = (lairs: GameSettings['environment']['lairs']): boolean => {
   return Number.isInteger(lairs.spawnSeconds) && lairs.spawnSeconds >= 5 && lairs.spawnSeconds <= 60
-    && Number.isInteger(lairs.maxLivingMobs) && lairs.maxLivingMobs >= 1 && lairs.maxLivingMobs <= 8
+    && lairs.maxLivingMobs === 1
 }
 
 interface Props {
@@ -136,21 +136,13 @@ export function GameplaySettingsPanel({ room, youSeat, pending, copy, onApply }:
           onChange={(event) => update('environment', { ...draft.environment,
             lairs: { ...draft.environment.lairs, enabled: event.currentTarget.checked } })} />
         <Text size="xs">{copy.settings.lairsDescription}</Text>
-        <SimpleGrid cols={{ base: 1, xs: 2 }} spacing="sm">
+        <SimpleGrid cols={1} spacing="sm">
           <NumberInput label={copy.settings.lairSpawnSeconds} min={5} max={60} step={1}
             required allowDecimal={false} clampBehavior="none" disabled={controlsDisabled}
             value={draft.environment.lairs.spawnSeconds}
             onChange={(value) => update('environment', {
               ...draft.environment, lairs: {
                 ...draft.environment.lairs, spawnSeconds: Number(value),
-              },
-            })} />
-          <NumberInput label={copy.settings.lairMaxLivingMobs} min={1} max={8} step={1}
-            required allowDecimal={false} clampBehavior="none" disabled={controlsDisabled}
-            value={draft.environment.lairs.maxLivingMobs}
-            onChange={(value) => update('environment', {
-              ...draft.environment, lairs: {
-                ...draft.environment.lairs, maxLivingMobs: Number(value),
               },
             })} />
         </SimpleGrid>

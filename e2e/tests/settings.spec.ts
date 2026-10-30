@@ -28,7 +28,7 @@ test('two browsers share configured rules that drive speed, fuse and match targe
     await expect(maxLivingMobs).toHaveValue('3')
     const defaultEnvironment = {
       stormCloud: true,
-      lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 3 },
+      lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 },
     }
     expect(latestRoom(games[0])?.settings.environment).toEqual(defaultEnvironment)
     expect(latestRoom(games[0])?.configuration.environment).toEqual(defaultEnvironment)
@@ -78,14 +78,14 @@ test('two browsers share configured rules that drive speed, fuse and match targe
       startingSpeedLevel: 4, turnAssistUnits: 64, winsToFinish: 1, bombFuseTicks: 60, enabledItems: [],
       environment: {
         stormCloud: false,
-        lairs: { enabled: false, spawnSeconds: 10, maxLivingMobs: 3 },
+        lairs: { enabled: false, spawnSeconds: 10, maxLivingMobs: 1 },
       },
     }
     await Promise.all(games.map((game) => expect.poll(() => latestRoom(game)?.settings).toEqual(expected)))
     await Promise.all(games.map((game) => expect.poll(() => latestRoom(game)?.configuration.environment)
       .toEqual({
         stormCloud: false,
-        lairs: { enabled: false, spawnSeconds: 10, maxLivingMobs: 3 },
+        lairs: { enabled: false, spawnSeconds: 10, maxLivingMobs: 1 },
       })))
     await Promise.all(games.map((game) => expect.poll(() => latestRoom(game)?.seats[1]?.ready).toBe(false)))
     await expect(two.getByLabel('Starting speed')).toHaveValue('4')
@@ -94,7 +94,7 @@ test('two browsers share configured rules that drive speed, fuse and match targe
     await Promise.all([one, two].map((page) => page.getByRole('button', { name: 'Ready', exact: true }).click()))
     await Promise.all(games.map((game) => expect.poll(() => latestSnapshot(game)?.room.phase.type).toBe('running')))
     for (const game of games) {
-      expect(latestSnapshot(game)!.room).toMatchObject({ rulesVersion: 8, settings: expected })
+      expect(latestSnapshot(game)!.room).toMatchObject({ rulesVersion: 9, settings: expected })
       expect(latestSnapshot(game)!.state.actors.map((actor) => actor.type === 'visible' ? actor.speedLevel : null))
         .toEqual([4, 4])
       expect(latestSnapshot(game)!.state.stormCloud).toBeNull()

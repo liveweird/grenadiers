@@ -3,7 +3,7 @@ use std::{sync::Arc, time::Instant as StdInstant};
 use grenadiers_core::{
     game::{EnabledItems, SimulationSeed, StormCloudConfig},
     protocol::{Counter, RoomCode, RoomId, v14},
-    room::{CpuDifficulty, CpuProfile, LairRoomConfiguration, LairTuning, RoomSettings},
+    room::{CpuDifficulty, CpuProfile, LairRoomConfiguration, RespawnLairTuning, RoomSettings},
 };
 use tokio::time::Instant;
 
@@ -26,7 +26,7 @@ pub(crate) struct LairSettingsAction {
     pub(crate) settings_revision: u32,
     pub(crate) settings: RoomSettings,
     pub(crate) cloud: StormCloudConfig,
-    pub(crate) tuning: LairTuning,
+    pub(crate) tuning: RespawnLairTuning,
 }
 
 impl GameRooms {
@@ -164,7 +164,8 @@ impl GameRooms {
     ) -> Result<(LiveOwner, PreparedLiveOwner), RoomError> {
         let base = *configuration.base();
         let cloud = configuration.storm_cloud();
-        let tuning = configuration.lairs();
+        let tuning = RespawnLairTuning::try_from(configuration.lairs())
+            .map_err(|_| RoomError::UnsupportedConfiguration)?;
         let root = SimulationRoot::generate().map_err(|_| RoomError::CapacityReached)?;
         let simulation_seed = Arc::new(move |epoch| root.for_round(epoch));
         let identity = RosterIdentity {
@@ -173,7 +174,7 @@ impl GameRooms {
             registry_serial: parts.serial,
             configuration: base,
         };
-        let runtime = RosterRuntime::new_lairs(
+        let runtime = RosterRuntime::new_respawn(
             identity,
             RoomSettings::DEFAULT.with_enabled_items(EnabledItems::ALL),
             cloud,
@@ -183,9 +184,9 @@ impl GameRooms {
         )
         .map_err(|_| RoomError::CapacityReached)?;
         let profile = match base.cpu_difficulty() {
-            Some(CpuDifficulty::Easy) => CpuProfile::LAIRS_EASY,
-            Some(CpuDifficulty::Standard) => CpuProfile::LAIRS_STANDARD,
-            None => CpuProfile::LAIRS_STANDARD,
+            Some(CpuDifficulty::Easy) => CpuProfile::RESPAWN_LAIRS_EASY,
+            Some(CpuDifficulty::Standard) => CpuProfile::RESPAWN_LAIRS_STANDARD,
+            None => CpuProfile::RESPAWN_LAIRS_STANDARD,
         };
         let mut cpus = Vec::new();
         for seat in base.cpu_seats() {

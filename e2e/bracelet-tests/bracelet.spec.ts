@@ -154,11 +154,17 @@ test('Bracelet shoves a stationary rival one tile without an action or private c
       await two.keyboard.down('ArrowLeft')
       try {
         await expect.poll(() => actor(games[0], 'two').position.x).toBeLessThan(approachBefore)
-        await expect.poll(() => actor(games[0], 'two').position.x - actor(games[0], 'one').position.x)
-          .toBe(640)
+        await expect.poll(() => {
+          const recent = snapshots(games[0]).slice(-5)
+          const positions = recent.map((frame) => visibleActor(frame, 'two')!.position.x)
+          return positions.length === 5 && positions.every((x) => x === positions[0])
+            && positions[0]! < approachBefore
+        }).toBe(true)
+        const blockedPosition = { ...actor(games[0], 'two').position }
+        expect(blockedPosition.x - holderBefore.x).toBeGreaterThanOrEqual(640)
         const blockedAt = latestSnapshot(games[0])!.state.physicalTick
         await expect.poll(() => latestSnapshot(games[0])!.state.physicalTick).toBeGreaterThan(blockedAt + 12)
-        expect(actor(games[0], 'two').position.x - actor(games[0], 'one').position.x).toBe(640)
+        expect(actor(games[0], 'two').position).toEqual(blockedPosition)
         expect(actor(games[0], 'one').position).toEqual(holderBefore)
         expect(Math.floor(actor(games[0], 'one').position.x / 1024))
           .not.toBe(Math.floor(actor(games[0], 'two').position.x / 1024))

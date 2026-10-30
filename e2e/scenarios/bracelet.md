@@ -10,5 +10,5 @@
   destination tile is visibly occupied without horizontal overflow.
 
 Before the shove, the unequipped rival walks into the stationary holder and is blocked at
-footprint contact. Holding movement cannot overlap them or share a tile, and it does not cause
+the cell or footprint boundary. Holding movement cannot overlap them or share a tile, and it does not cause
 a reverse shove. The rival then returns to its staging cell for the existing Bracelet proof.

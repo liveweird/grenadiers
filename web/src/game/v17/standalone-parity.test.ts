@@ -21,7 +21,7 @@ function expectParity(value: unknown, valid: boolean): void {
 }
 
 describe('gameplay v17 standalone validator parity', () => {
-  it('matches AJV for all 27 authoritative Rust frames', () => {
+  it('matches AJV for all 30 authoritative Rust frames', () => {
     for (const [index, frame] of frames.entries()) {
       expectParity(frame, true)
       expect(standalone.errors, corpus.cases[index]!.caseId).toBeNull()

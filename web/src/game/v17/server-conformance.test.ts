@@ -19,7 +19,7 @@ function visible(frame: Snapshot): VisibleActorView[] {
 
 describe('Rust-produced gameplay v17 server conformance', () => {
   it('accepts every authoritative Rust projection frame', () => {
-    expect(cases).toHaveLength(27)
+    expect(cases).toHaveLength(30)
     for (const entry of cases) {
       const frame = frames.get(entry.caseId)
       expect(validateGameplayV17ServerMessage(frame), entry.caseId).toEqual({ valid: true, value: frame })
@@ -76,6 +76,18 @@ describe('Rust-produced gameplay v17 server conformance', () => {
     const two = snapshot('single15x13Cpu21Cloak-two')
     expect(one.state.actors.find(({ seat }) => seat === 'two')).toMatchObject({ type: 'hidden', alive: true })
     expect(two.state.actors.find(({ seat }) => seat === 'two')).toMatchObject({ type: 'visible' })
+  })
+
+  it('proves dense mines are extra to a full ordinary slot and privacy-safe per recipient', () => {
+    const visible = snapshot('denseMinesMixedVisibility-two')
+    expect(visible.state.bombs).toHaveLength(34)
+    expect(visible.state.bombs.filter(({ trigger }) => trigger.type === 'contact')).toHaveLength(33)
+    expect(visible.state.bombs.filter(({ trigger }) => trigger.type !== 'contact')).toHaveLength(1)
+    expect(visible.state.actors.find(({ seat }) => seat === 'two')).toMatchObject({
+      type: 'visible', bombCapacity: 1, liveBombCount: 1,
+    })
+    expect(snapshot('denseMinesMixedVisibility-one').state.bombs).toEqual([])
+    expect(snapshot('denseMinesCloakedOwner-one').state.bombs).toEqual([])
   })
 
   it.each([

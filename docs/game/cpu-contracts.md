@@ -316,3 +316,10 @@ lairs disabled. Occupied lairs contribute possible replacement envelopes after e
 plus grace; empty lairs use independent due times. Combat goals seek reachable firing positions
 against all visible rivals with shared weapon/effect blast geometry. The real-State regression
 includes a human elimination, CPU-versus-CPU lethal planting and the planter's escape.
+
+## Extra mine observations
+
+Rules9 ordinary-slot counts exclude Contact mines, while forecast ownership/removal history keeps
+all visible mines. Distinct bomb cells bound observations to the board (at most 195). Work budgets
+and per-cell interval limits are unchanged: an excessively uncertain scene fails closed rather
+than accepting an unproved route. Archived observations and slot accounting remain closed.

@@ -10,6 +10,8 @@
   with deterministic contention and CPU navigation that respects visible player blockers.
 - Make CPUs seek safe firing positions against every visible rival, including other CPUs,
   using the equipped bomb geometry while preserving checked escape routes and bounded work.
+- Make mines extra single-use weapons that occupy no ordinary bomb slot and cannot refund or
+  increase ordinary capacity when triggered or destroyed.
 - Activate gameplay17/rules9/CPU21 together, with private replay8 and closed historical
   contracts retained for deterministic compatibility.
 

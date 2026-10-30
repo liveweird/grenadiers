@@ -149,6 +149,8 @@ function frozenActorInvalid(
 function actorError(state: GameState, room: RoomView): BaseSemanticError | null {
   const ids = new Set<number>()
   const roundStart = state.physicalTick - state.runningUpdates
+  const incompleteBombVisibility = state.actors.some((actor) => actor.type === 'visible'
+    && actor.effects.some(({ kind }) => kind === 'invisibleBombs'))
   if (roundStart < 0) return 'invalidTeleportMarker'
   for (const actor of state.actors) {
     if (ids.has(actor.id)) return 'invalidRoster'
@@ -157,6 +159,12 @@ function actorError(state: GameState, room: RoomView): BaseSemanticError | null 
     const error = effectSemanticError(actor.effects)
     if (error) return error
     if (frozenActorInvalid(actor, state, room)) return 'invalidFrozenState'
+    const visibleRegularBombs = state.bombs.filter((bomb) =>
+      bomb.owner === actor.id && bomb.trigger.type !== 'contact').length
+    if (actor.liveBombCount < visibleRegularBombs || actor.liveBombCount > actor.bombCapacity
+      || (!incompleteBombVisibility && actor.liveBombCount !== visibleRegularBombs)) {
+      return 'invalidWorldState'
+    }
     const marker = actor.lastTeleportTick
     if (marker !== null && (!room.settings.enabledItems.includes('teleporter')
       || marker <= roundStart || marker > state.physicalTick)) return 'invalidTeleportMarker'

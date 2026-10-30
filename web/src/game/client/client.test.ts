@@ -105,6 +105,9 @@ describe('v12 admission and authoritative baselines', () => {
       id: 9, cell: { column: 1, row: 1 }, owner: 1, range: 2, placedAt: 1,
       trigger: { type: 'timed', remainingTicks: 180, paused: false }, blast: 'standard',
     })
+    const owner = baseline.state!.actors[0]
+    if (owner.type !== 'visible') throw new Error('expected visible bomb owner')
+    owner.liveBombCount = 1
     socket.message(baseline)
     expect(value.client.getState().snapshot).toEqual({
       type: 'snapshot', room: baseline.room, state: baseline.state, events: [],

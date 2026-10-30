@@ -9,3 +9,6 @@ peers retain the same visible Contact Standard bomb past its placement tick plus
 180-tick fuse and three more ticks, with no detonation or extra manual action. A normal held-right
 movement re-enters the footprint and both peers observe the same ID detonate, actual flames, one
 elimination, and the round result without any new placement action.
+
+Both recipients retain the original regular bomb capacity and zero occupied regular slots while
+the mine is armed and after contact detonation; the consumed weapon item is not restored.

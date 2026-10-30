@@ -43,6 +43,13 @@ class AppSocketStub {
 
 const appSockets: AppSocketStub[] = []
 
+function regularBombs(count: number): GameState['bombs'] {
+  return Array.from({ length: count }, (_, index) => ({
+    id: 10 + index, owner: 1, cell: { column: 1 + index, row: 1 }, range: 8, placedAt: 1,
+    trigger: { type: 'timed', remainingTicks: 180, paused: false }, blast: 'standard',
+  }))
+}
+
 function room(revision: number, phase: RoomPhase = { type: 'waiting' }): RoomView {
   return {
     roomId,
@@ -217,6 +224,7 @@ describe('App game flow', () => {
     act(() => admit(socket, room(1)))
     const live = snapshot(2)
     Object.assign(live.state.actors[0], { bombCapacity: 8, bombRange: 8, liveBombCount: 3, speedLevel: 4 })
+    live.state.bombs = regularBombs(3)
     act(() => socket.message(live))
     expect(await screen.findByLabelText('Phase time remaining')).toHaveTextContent('3:00')
     expect(screen.getByRole('region', { name: 'Grenadiers courtyard' })).toHaveAttribute('data-enabled', 'true')

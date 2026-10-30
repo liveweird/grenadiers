@@ -165,7 +165,7 @@
     "remoteBombDescription": "Przechowuje jedną zdalnie odpaloną bombę. Podłóż ją klawiszem bomby, a później naciśnij ten sam klawisz, aby ją zdetonować.",
     "piercingBombDescription": "Przechowuje jedną specjalną bombę, której wybuch przechodzi przez zniszczalne bloki. Ładunek znika dopiero po udanym podłożeniu.",
     "powerBombDescription": "Przechowuje jedną specjalną bombę, której wybuch wypełnia obszar w kształcie rombu, ignoruje przeszkody i nie niszczy twardych ścian. Ładunek znika dopiero po udanym podłożeniu.",
-    "landmineDescription": "Przechowuje jedną widoczną minę naciskową. Każdy, kto stoi na niej podczas podłożenia, może bezpiecznie zejść; późniejsze wejście ją odpala. Ogień i inne wybuchy niszczą ją bez eksplozji.",
+    "landmineDescription": "Przechowuje jedną widoczną minę naciskową jako dodatkowy przedmiot jednorazowy. Podłożenie jej nie zajmuje zwykłego miejsca na bombę, a usunięcie lub wybuch miny nie zwraca ani nie zwiększa pojemności zwykłych bomb. Każdy, kto stoi na niej podczas podłożenia, może bezpiecznie zejść; późniejsze wejście ją odpala. Ogień i inne wybuchy niszczą ją bez eksplozji.",
     "shieldDescription": "Zapewnia 5 sekund odporności na obrażenia. Kolejna Tarcza odnawia ten czas.",
     "stopwatchDescription": "Zatrzymuje ruch i ręczne podkładanie bomb przeciwnika oraz lonty wszystkich bomb czasowych na 3 sekundy. Kolejny Stoper odnawia ten czas.",
     "invisibilityCloakDescription": "Ukrywa postać i przypisane jej sygnały przed przeciwnikiem na 10 sekund. Bomby i płomienie pozostają widoczne.",

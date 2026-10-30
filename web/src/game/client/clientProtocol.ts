@@ -5,6 +5,14 @@ import type { GameClientState } from './clientTypes'
 
 export const MAX_COUNTER = 2_147_483_647
 export const MAX_RECONNECT_ATTEMPTS = 3
+export const MAX_SERVER_FRAME_BYTES = 196_608
+
+export function parseServerFrame(raw: unknown): unknown {
+  if (typeof raw !== 'string' || new TextEncoder().encode(raw).byteLength > MAX_SERVER_FRAME_BYTES) {
+    throw new Error('invalid server frame')
+  }
+  return JSON.parse(raw) as unknown
+}
 
 export interface Dependencies {
   fetch: typeof fetch

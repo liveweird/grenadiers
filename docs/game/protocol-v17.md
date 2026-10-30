@@ -45,3 +45,15 @@ cooldowns, occupied/null timers, blocked-zero eligibility, lifecycle and privacy
 Rules8/gameplay16/replay7 remain closed historical profiles. Test-only replay8 records accepted
 rules9/CPU21 inputs and reconstructs lair births/deaths, player collision and randomness exactly;
 production replay recording stays disabled. Upgrade/restart ends process-local matches.
+
+## Mines and bounded publication
+
+`liveBombCount` counts ordinary capacity slots; Contact mines are additional consumables. All
+physical bombs remain in the recipient-visible list, bounded by distinct board cells (at most 195).
+Authoritative capture checks exact owned ordinary counts before privacy filtering. Bomb-blind
+recipients receive no bomb list and gain no separate mine-count metadata.
+
+Gameplay17 allows up to 216 events per simulation report, 256 per snapshot and event indices 0–215.
+Its bounded outgoing frame is 196,608 UTF-8 bytes; incoming commands retain the 4,096-byte cap.
+Latest-value publication prevents a slow client from accumulating snapshot queues. Archived
+protocol bounds remain unchanged.

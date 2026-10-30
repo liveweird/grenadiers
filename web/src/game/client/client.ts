@@ -5,8 +5,8 @@ import { ClientRecovery } from './clientRecovery'
 import { preservesTeleportHistory } from './teleportHistory'
 export { initialGameClientState, type AdmissionIntent, type GameClientState, type GameFailure } from './clientTypes'
 import { acceptableBaseline, canControl, controlIsObsolete, createConfiguration, dependenciesWithDefaults,
-  gameplayUrl, isCurrentConnection, MAX_COUNTER, MAX_RECONNECT_ATTEMPTS, newerRoom, sessionToken,
-  ownSeatConnected, settlesPendingSettings, validateServerMessage, type Capability, type ControlCommand,
+  gameplayUrl, isCurrentConnection, MAX_COUNTER, MAX_RECONNECT_ATTEMPTS, newerRoom, parseServerFrame,
+  sessionToken, ownSeatConnected, settlesPendingSettings, validateServerMessage, type Capability, type ControlCommand,
   validGameSettings, type ControlFailure, type Dependencies, type PendingSettings, type RoomCommand } from './clientProtocol'
 export { gameplayUrl } from './clientProtocol'
 export class GameClient {
@@ -156,7 +156,7 @@ export class GameClient {
   private receive(generation: number, socket: WebSocket, raw: unknown): void {
     if (!isCurrentConnection(generation, socket, this.generation, this.socket)) return
     try {
-      const parsed: unknown = typeof raw === 'string' ? JSON.parse(raw) : undefined
+      const parsed = parseServerFrame(raw)
       if (!validateServerMessage(parsed, this.capability?.seat ?? null)) {
         this.terminal('invalidServerMessage', true); return
       }

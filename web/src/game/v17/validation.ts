@@ -20,9 +20,12 @@ function lairLayout(room: RoomView): readonly [number, number][] {
 
 function entityError(state: GameState): SemanticError | null {
   const ids = new Set(state.actors.map(({ id }) => id))
+  const bombCells = new Set<string>()
   for (const bomb of state.bombs) {
-    if (ids.has(bomb.id)) return 'invalidWorldState'
+    const key = `${bomb.cell.column},${bomb.cell.row}`
+    if (ids.has(bomb.id) || bombCells.has(key)) return 'invalidWorldState'
     ids.add(bomb.id)
+    bombCells.add(key)
   }
   for (const mob of state.mobs) {
     if (ids.has(mob.id) || mob.lairId > 1

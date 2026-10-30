@@ -1,52 +1,37 @@
 # Landmine
 
-## Current verification
+## Availability and placement
 
-Remote and Landmine use fresh placement-ID checks across rolling observer history. The release
-record is in [item acceptance history](../history/game-acceptance.md#landmine-v0337).
+Landmine is a configurable single-use weapon, enabled in new rooms. A successful manual Bomb
+action consumes the stored item and places a visible, passable Standard bomb with a Contact
+trigger. It has no fuse.
 
-## Availability and rules
+In current rules9, a mine is additional to ordinary bomb capacity. You can plant it while all
+regular slots are occupied, and it never blocks the next ordinary bomb. Detonating or destroying
+it neither refunds a regular slot nor increases capacity. A later mine pickup can place another
+mine while the first remains armed; each placement consumes its own item. One bomb occupies each
+cell. Automatic Diarrhea placements remain ordinary Timed bombs and retain the mine item.
+An existing Remote bomb is triggered before a new mine is placed.
 
-Landmine is a configurable Expanded-v5 one-charge weapon enabled in new rooms. A successful manual bomb action consumes
-the stored charge and places a visible, passable, capacity-counted Standard bomb with a Contact
-trigger. It has no fuse. Automatic Diarrhea placements remain ordinary Timed bombs and do not
-consume the charge.
+## Contact and destruction
 
-## State and contact
+Actors initially overlapping a mine receive exit grace. Reconnect preserves existing grace
+without granting more. Standing still or touching the boundary does not trigger contact. Grace
+ends once the actor is fully outside; later swept entry, including the owner's, detonates it.
+A mine cannot trigger itself during its placement tick.
 
-Every actor overlapping a mine during initial State construction receives exit grace, and newly
-placed mines grant grace to actors overlapping their cell. Reconnect and resume preserve the
-existing simulation grace state; they do not grant fresh grace.
-Standing still and boundary tangency do not trigger contact. Grace ends only after the actor is
-fully outside; any later swept entry, including the owner's, detonates the mine. Only mines that
-existed before movement are eligible, so placement cannot trigger itself in the same tick.
-Contact accepted during movement remains authoritative if the actor subsequently dies in existing
-fire during that tick.
+Fire and other blasts destroy an untriggered mine without detonating it or extending flames;
+blast rays continue through it. Contact already accepted in that tick takes precedence. Kick and
+Punch do not move mines. Ordinary bomb and damage rules apply to the mine's explosion.
 
-Fire and other bomb blasts destroy an untriggered mine without detonating it, publishing a
-`BombDetonated` event, or extending flames. Blast rays continue through the destroyed mine. An
-accepted contact wins over destruction in the same immutable explosion plan. Timed and Remote
-bombs retain their original obstruction snapshot and chain behavior.
+## Compatibility and accounting
 
-## Compatibility
+Current [gameplay17](protocol-v17.md) reports `liveBombCount` as occupied ordinary slots, excluding
+Contact mines. Visible mines remain in the bomb list; Invisible Bombs and cloak privacy still
+apply. Rules1–8 retain historical capacity-counted mines. Arena generation and pickup weight 15
+remain unchanged. Reload browsers after upgrading the paired server/web image.
 
-Landmine uses generator weight 15 after Remote Bomb.
-Rules version 5, generator version 2 and journal format 2 remain unchanged. Current deployments
-use [gameplay-v11](protocol-v11.md); reload older browsers with the paired server/web upgrade.
-
-<a id="historical-v0337-native-acceptance"></a>
-
-## Verification and examples
-
-
-
-Both clients observe the single consumed charge, Contact/Standard bomb, persistence beyond
-183 ticks, exact-ID contact detonation with a live origin flame, no extra placement, owner
-elimination and seat Two's round win. The following fresh Timed Standard bomb is covered by
-`consumed_landmine_is_followed_by_a_fresh_standard_timed_bomb_in_the_same_state` in the
-[core tests](../../core/src/game/simulation/landmine_tests.rs), rather than a separate browser
-assertion.
-
-The [English desktop](../screenshots/landmine-desktop.png) and
-[Polish 320px reduced-motion](../screenshots/landmine-polish-320.png) captures show the planted
-pressure plate before detonation and normal HUD layout.
+Actual simulation tests cover placement at full capacity, repeated pickups, contact detonation,
+Remote priority and archived accounting. The browser scenario covers collection, exit grace,
+ordinary-slot counters, same-ID persistence and native contact detonation. Earlier release
+acceptance is retained in [item history](../history/game-acceptance.md#landmine-v0337).

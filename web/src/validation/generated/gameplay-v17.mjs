@@ -5119,7 +5119,7 @@ var require_gameplay_v17 = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 			"bombs": {
 				"type": "array",
 				"minItems": 0,
-				"maxItems": 32,
+				"maxItems": 195,
 				"items": { "$ref": "#/$defs/BombView" }
 			},
 			"flames": {
@@ -12041,13 +12041,13 @@ var require_gameplay_v17 = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 			if (data.bombs !== void 0) {
 				let data6 = data.bombs;
 				if (Array.isArray(data6)) {
-					if (data6.length > 32) {
+					if (data6.length > 195) {
 						const err25 = {
 							instancePath: instancePath + "/bombs",
 							schemaPath: "#/properties/bombs/maxItems",
 							keyword: "maxItems",
-							params: { limit: 32 },
-							message: "must NOT have more than 32 items"
+							params: { limit: 195 },
+							message: "must NOT have more than 195 items"
 						};
 						if (vErrors === null) vErrors = [err25];
 						else vErrors.push(err25);
@@ -14094,16 +14094,16 @@ var require_gameplay_v17 = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 					errors++;
 				}
 				if (typeof data1 == "number" && isFinite(data1)) {
-					if (data1 > 191 || isNaN(data1)) {
+					if (data1 > 215 || isNaN(data1)) {
 						const err8 = {
 							instancePath: instancePath + "/index",
 							schemaPath: "#/properties/index/maximum",
 							keyword: "maximum",
 							params: {
 								comparison: "<=",
-								limit: 191
+								limit: 215
 							},
-							message: "must be <= 191"
+							message: "must be <= 215"
 						};
 						if (vErrors === null) vErrors = [err8];
 						else vErrors.push(err8);
@@ -14255,13 +14255,13 @@ var require_gameplay_v17 = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 			if (data.events !== void 0) {
 				let data3 = data.events;
 				if (Array.isArray(data3)) {
-					if (data3.length > 192) {
+					if (data3.length > 256) {
 						const err6 = {
 							instancePath: instancePath + "/events",
 							schemaPath: "#/properties/events/maxItems",
 							keyword: "maxItems",
-							params: { limit: 192 },
-							message: "must NOT have more than 192 items"
+							params: { limit: 256 },
+							message: "must NOT have more than 256 items"
 						};
 						if (vErrors === null) vErrors = [err6];
 						else vErrors.push(err6);

@@ -23,6 +23,15 @@ enum PlacementOrigin {
 }
 
 impl State {
+    fn placement_has_capacity(&self, seat: crate::game::SeatId, origin: PlacementOrigin) -> bool {
+        let actor = &self.actors[seat.index()];
+        let exempt_landmine = self.rules.version() >= 9
+            && origin == PlacementOrigin::Manual
+            && self.rules.enabled_items().contains_landmine()
+            && actor.inventory.weapon() == Some(SpecialWeapon::Landmine);
+        exempt_landmine || self.live_bomb_count(seat) < usize::from(actor.capacity)
+    }
+
     pub(super) fn apply_inputs(&mut self, inputs: &[SeatInput]) -> ManualActionQueues {
         let mut manual_actions = ManualActionQueues::new(self.actors.len());
         for input in inputs {
@@ -184,9 +193,9 @@ impl State {
             .map(|&seat| {
                 let actor = &self.actors[seat.index()];
                 let cell = actor.position.cell()?;
-                let eligible = requests[seat.index()].is_some()
+                let eligible = requests[seat.index()]
+                    .is_some_and(|origin| self.placement_has_capacity(seat, origin))
                     && actor.alive
-                    && self.live_bomb_count(seat) < usize::from(actor.capacity)
                     && self.world.arena.terrain(cell) == Some(Terrain::Floor)
                     && !self.world.arena.blocks().contains(&cell);
                 let eligible = eligible && !self.world.oil.unlit(cell);
@@ -220,7 +229,8 @@ impl State {
             let Some(cell) = actor.position.cell() else {
                 continue;
             };
-            let has_capacity = self.live_bomb_count(seat) < usize::from(actor.capacity);
+            let has_capacity = requests[seat.index()]
+                .is_some_and(|origin| self.placement_has_capacity(seat, origin));
             let cell_is_free = self.world.arena.terrain(cell) == Some(Terrain::Floor)
                 && !self.world.arena.blocks().contains(&cell)
                 && !self.world.oil.unlit(cell)

@@ -28,6 +28,8 @@ pub struct ForecastEvolution {
     horizon_end: Tick,
     max_bombs: usize,
     bomb_owners: Vec<(EntityId, EntityId)>,
+    capacity_ids: BTreeSet<EntityId>,
+    max_flame_changes: usize,
     bomb_removals: Vec<(EntityId, Tick)>,
     block_removals: Vec<(CellId, Tick)>,
     oil_ignitions: Vec<(CellId, Tick)>,
@@ -35,6 +37,10 @@ pub struct ForecastEvolution {
 }
 
 impl ForecastEvolution {
+    pub(crate) const fn bomb_limit(&self) -> usize {
+        self.max_bombs
+    }
+
     pub(super) fn new(
         observation: &Observation,
         horizon_end: Tick,
@@ -59,6 +65,18 @@ impl ForecastEvolution {
             horizon_end,
             max_bombs: crate::cpu::observed_bomb_capacity(parts.rules.version),
             bomb_owners: bombs.iter().map(|bomb| (bomb.id, bomb.owner)).collect(),
+            capacity_ids: bombs
+                .iter()
+                .filter(|bomb| {
+                    parts.rules.version != 9 || bomb.trigger != ObservedBombTrigger::Contact
+                })
+                .map(|bomb| bomb.id)
+                .collect(),
+            max_flame_changes: if parts.rules.version == 9 {
+                ARENA_CELL_COUNT * ARENA_CELL_COUNT
+            } else {
+                MAX_FLAME_CHANGES
+            },
             bomb_removals: Vec::new(),
             block_removals: Vec::new(),
             oil_ignitions: Vec::new(),
@@ -85,7 +103,7 @@ impl ForecastEvolution {
         if self.bomb_removals.len() + removed.len() > self.max_bombs
             || self.block_removals.len() + blocks.len() > ARENA_CELL_COUNT
             || self.oil_ignitions.len() + oil.len() > MAX_OIL_BARRELS
-            || self.flame_changes.len() + flames.len() > MAX_FLAME_CHANGES
+            || self.flame_changes.len() + flames.len() > self.max_flame_changes
         {
             return Err(ForecastFailure::IntervalCapacity);
         }
@@ -115,6 +133,7 @@ impl ForecastEvolution {
             return Err(ForecastFailure::IntervalCapacity);
         }
         self.bomb_owners.push((id, owner));
+        self.capacity_ids.insert(id);
         Ok(())
     }
 
@@ -181,7 +200,11 @@ impl ForecastEvolution {
         u16::try_from(
             self.bomb_owners
                 .iter()
-                .filter(|(id, bomb_owner)| *bomb_owner == owner && !self.removed(*id, tick))
+                .filter(|(id, bomb_owner)| {
+                    *bomb_owner == owner
+                        && self.capacity_ids.contains(id)
+                        && !self.removed(*id, tick)
+                })
                 .count(),
         )
         .ok()

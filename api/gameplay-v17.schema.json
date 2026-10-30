@@ -558,7 +558,7 @@
         "bombs": {
           "type": "array",
           "minItems": 0,
-          "maxItems": 32,
+          "maxItems": 195,
           "items": {
             "$ref": "#/$defs/BombView"
           }
@@ -729,7 +729,7 @@
         "index": {
           "type": "integer",
           "minimum": 0,
-          "maximum": 191
+          "maximum": 215
         },
         "kind": {
           "$ref": "#/$defs/EventKind"
@@ -1149,7 +1149,7 @@
         "events": {
           "type": "array",
           "minItems": 0,
-          "maxItems": 192,
+          "maxItems": 256,
           "items": {
             "$ref": "#/$defs/WireEvent"
           }

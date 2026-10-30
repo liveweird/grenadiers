@@ -38,7 +38,7 @@ pub use state::{ActorView, GameState, LairView, MobView, StormCloudView};
 
 pub const GAMEPLAY_PROTOCOL_VERSION: u16 = 17;
 pub const MAX_CLIENT_MESSAGE_BYTES: usize = 4_096;
-pub const MAX_SERVER_MESSAGE_BYTES: usize = 98_304;
+pub const MAX_SERVER_MESSAGE_BYTES: usize = 196_608;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum ParseClientMessageError {
@@ -84,3 +84,11 @@ mod server_test_support;
 
 #[cfg(test)]
 mod tests;
+
+#[cfg(test)]
+mod mine_contract_tests;
+#[cfg(test)]
+mod mine_corpus_cases;
+
+#[cfg(test)]
+mod frame_bound_tests;

@@ -176,12 +176,14 @@ fn validate_reports(
         || reports
             .iter()
             .any(|report| report.tick > world.physical_tick)
-        || reports.iter().any(|report| report.events.len() > 49)
+        || reports.iter().any(|report| {
+            report.events.len() > super::projection_limits::report_events(world.rules_version)
+        })
         || reports
             .iter()
             .map(|report| report.events.len())
             .sum::<usize>()
-            > super::MAX_SNAPSHOT_EVENTS
+            > super::projection_limits::snapshot_events(world.rules_version)
     {
         return Err(ProjectionError::InvalidReports);
     }

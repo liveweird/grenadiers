@@ -14,7 +14,6 @@ use super::{
 };
 
 const MAX_REPORTS: usize = 3;
-const MAX_EVENTS_PER_REPORT: usize = 49;
 
 pub fn capture_expanded(
     state: &game::State,
@@ -185,7 +184,8 @@ fn capture_reports(
         .iter()
         .map(|report| {
             if report.traces.len() != state.player_count().get()
-                || report.events.len() > MAX_EVENTS_PER_REPORT
+                || report.events.len()
+                    > super::projection_limits::report_events(state.rules().version() as u8)
             {
                 return Err(ProjectionError::InvalidReports);
             }
@@ -306,7 +306,7 @@ fn validate_capture(world: &WorldFacts, reports: &[ReportFacts]) -> Result<(), P
         game::PlayerCount::try_from(count).map_err(|()| ProjectionError::InvalidActors)?;
     let audience = game::EventAudience::all(player_count);
     super::projection_geometry::validate_dimensions(world)?;
-    if world.bombs.len() > super::MAX_BOMBS {
+    if world.bombs.len() > super::projection_limits::bombs(world) {
         return Err(ProjectionError::InvalidArena);
     }
     if world

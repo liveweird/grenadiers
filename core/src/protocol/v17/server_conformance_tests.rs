@@ -178,6 +178,7 @@ fn actual_corpus() -> Corpus {
             }),
     );
     cases.extend(super::respawn_corpus_cases::cases());
+    cases.extend(super::mine_corpus_cases::cases());
     Corpus { cases }
 }
 

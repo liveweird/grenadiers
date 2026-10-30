@@ -4,9 +4,8 @@ use crate::game::{CellId, EffectKind, SeatId, Tick};
 use crate::room::BoardSize;
 
 use super::observation::{
-    BombKnowledge, MAX_MULTIPLAYER_OBSERVED_BOMBS, MAX_OBSERVED_BOMBS, MAX_OBSERVED_EFFECTS,
-    ObservationError, ObservedActor, ObservedArena, ObservedEffect, ObservedRules,
-    UnknownActorFacts, UnknownBombFacts,
+    BombKnowledge, MAX_OBSERVED_EFFECTS, ObservationError, ObservedActor, ObservedArena,
+    ObservedEffect, ObservedRules, UnknownActorFacts, UnknownBombFacts,
 };
 
 pub(super) fn validate_clock(tick: Tick, rules: ObservedRules) -> Result<(), ObservationError> {
@@ -114,13 +113,13 @@ pub(super) fn validate_bombs(
     let BombKnowledge::Visible(bombs) = bombs else {
         return Ok(());
     };
-    let max_bombs = if rules_version >= 6 {
-        MAX_MULTIPLAYER_OBSERVED_BOMBS
-    } else {
-        MAX_OBSERVED_BOMBS
-    };
-    if bombs.len() > max_bombs {
+    let max_bombs = crate::cpu::observed_bomb_capacity(rules_version);
+    if bombs.len() > max_bombs || rules_version == 9 && bombs.len() > arena.terrain.len() {
         return Err(ObservationError::InvalidBombs);
+    }
+    if rules_version == 9 {
+        validate_cells(arena, bombs, |bomb| bomb.cell)
+            .map_err(|()| ObservationError::InvalidBombs)?;
     }
     let mut ids = BTreeSet::new();
     if bombs.iter().any(|bomb| {

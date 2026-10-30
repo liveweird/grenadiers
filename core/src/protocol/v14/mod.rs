@@ -17,6 +17,7 @@ mod projection_geometry;
 mod projection_history;
 mod projection_item_validation;
 pub(crate) mod projection_lifecycle_facts;
+pub(crate) mod projection_limits;
 mod projection_oil;
 pub(crate) mod projection_recipient;
 pub(crate) mod projection_room_validation;

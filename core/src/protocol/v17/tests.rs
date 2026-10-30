@@ -54,7 +54,9 @@ fn parser_retains_lair_numbers_while_disabled_and_is_strict() {
     let round_trip: RoomConfiguration = serde_json::from_str(&encoded).unwrap();
     assert_eq!(round_trip.domain(), configuration.domain());
     assert!(parse_client_message(&valid.replace("37", "4")).is_err());
-    assert!(parse_client_message(&valid.replace("maxLivingMobs\":1", "maxLivingMobs\":2")).is_err());
+    assert!(
+        parse_client_message(&valid.replace("maxLivingMobs\":1", "maxLivingMobs\":2")).is_err()
+    );
     assert!(parse_client_message(&valid.replace("\"lairs\":{", "\"seed\":7,\"lairs\":{")).is_err());
 }
 
@@ -69,7 +71,9 @@ fn capture_uses_real_rules_nine_lair_state_without_widening_v16() {
         Err(ProjectionError::InvalidRules)
     ));
 
-    let enabled = state(RespawnLairConfig::Enabled(RespawnLairSettings::new(5).unwrap()));
+    let enabled = state(RespawnLairConfig::Enabled(
+        RespawnLairSettings::new(5).unwrap(),
+    ));
     let capture = capture_expanded(&enabled, &[]).unwrap();
     assert_eq!(capture.lairs.len(), 2);
     assert_eq!(capture.lairs[0].id, 0);

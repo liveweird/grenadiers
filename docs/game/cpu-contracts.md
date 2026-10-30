@@ -254,7 +254,7 @@ invalidation remain strict even when that independent birth check succeeds.
 Rules8 uses the same recovery with a fresh combined bomb-hazard and mob-contact pulse proof.
 Concurrent rival planting does not strand a CPU on its own bomb. Scheduled route stops retain
 contact validation, and an invalidated contact lease cannot authorize the old route or pulse.
-Foreign bomb-motion uncertainty may use the existing named stationary assumptions for short
+Foreign unpaused timed-bomb motion may use the existing named stationary assumptions for short
 recovery pulses. Every intersecting assumption is retained in the certificate, movement stays
 capped at three updates, and observed displacement invalidates execution. This does not extend
 origin grace beyond footprint exit or waive a rival bomb's actual collision.

@@ -97,49 +97,53 @@ retain the previous immutable image reference for rollback. The runtime stage in
 rolling Debian package updates, so a later build may resolve newer packages and is not expected to
 be byte-identical; treat it as a new candidate with new evidence rather than reusing acceptance.
 
-## v1.0.0 — 2026-10-30
+## v1.0.1 — 2026-10-30
 
-The first stable Grenadiers milestone promotes the verified v0.3.118 game to 1.0.0:
-two-to-four-player human/CPU matches, private Solo with Easy/Standard opponents, three board
-sizes, all 22 requested items, animated pixel art, storm clouds and pursuing lair mobs.
-Shared settings, per-seat reconnect, authoritative results and consensual rematches are included.
+Fix CPUs dying beside their own bombs in multi-CPU openings. Concurrent bomb placements still
+invalidate obsolete escape routes, but fresh rules 8 planning now uses retained origin proof and
+certifies movement against the current bomb, storm and mob scene. Short conditional movement
+keeps named stationary-bomb assumptions and the three-update limit. Escape guidance avoids
+visible bombs; origin grace still ends at footprint exit.
 
-Product versions in the Cargo workspace, local dependency and lockfile advance together.
-Gameplay16/rules8/CPU19 and all application behavior remain compatible with v0.3.118.
-The [artist bundle](https://github.com/liveweird/grenadiers/releases/download/v0.3.117/grenadiers-lairs-art-v0.3.117.zip)
-remains current; see the [artist handoff](../assets/art/README.md).
+Scheduled route stops retain contact checks, and contact invalidation preserves independently
+valid recovery provenance while revoking old movement. Live CPU policy advances to 20; archived
+CPU 19 accepted-input replay remains supported. Gameplay16/rules 8, artwork and web/API contracts
+are unchanged.
 
 ### Verification and source identity
 
-Accepted source: `c6a8c33fcf528be0245a874efb678d6027e94bbc`; source PR
-[#279](https://github.com/liveweird/grenadiers/pull/279) merged as
-`8fc7dde2ea38d92fcffd9193f320b276ff3c63f2` with an identical tree.
+Accepted source: `114b9ce484a62f1dea8f2f0e0d76af26e4770315`; source PR
+[#282](https://github.com/liveweird/grenadiers/pull/282) merged as
+`b754d6c68639e0754d42b1a5b80f00c5385b8566` with an identical source tree.
+Independent production review is clear.
 
-- Fresh release-helper/repository checks, locked Cargo metadata and workspace check pass.
-  Source, contracts, web/art, toolchain, build profiles and third-party dependencies match
-  v0.3.118 exactly; only internal product versions and release documentation change.
-- Reuse [v0.3.118 acceptance](history/releases.md#v03118--2026-10-29): full Rust debug/release
-  and independent coverage (92.09%), 7,139 web tests, item/CPU checks, native lifecycle suites,
-  audits and distinct Linux checks. No coverage floor or assertion is lowered.
-- The fresh labelled release image builds. Trivy 0.74.0 reports zero fixable HIGH/CRITICAL
-  vulnerabilities. Fresh native Compose **2/2** (5.3 seconds) and Kubernetes **2/2** (5.4 seconds)
-  pass authentication, keyboard turning, exact image, restricted security, resources/probes,
-  readiness and zero restarts, with scoped cleanup.
-- HTML, JavaScript, CSS and source-atlas bytes in the new image equal v0.3.118. Local promotion
-  verifies those served bytes, CSP/cache policy, health/readiness and runtime limits again.
+- The regression reproduces all three CPUs planting at tick 205 and dying at tick 385 before
+  the fix. Four default maps and all three boards with Easy/Standard now survive the first
+  owned detonations and full flame interval. Controller, uncertainty and replay regressions pass.
+- Fresh full Rust debug/release suites, formatting/Clippy/build and independent coverage pass:
+  42,708/46,311 lines (92.22%) in 242.627 seconds.
+- Only the unchanged historical ExpandedV5 exhaustive-mask execution reuses v0.3.116 acceptance
+  after a reviewed dependency-closure comparison. Default gates remain exhaustive; no old
+  coverage counts are combined. Web/art/API/dependency inputs retain v1.0.0 full-web acceptance.
+- Fresh repository/tooling/E2E-static checks, Rust dependency policy and both npm audits pass.
+  The exact-image Trivy 0.74 scan reports zero fixable HIGH/CRITICAL vulnerabilities.
+- Compose native acceptance passes 5/5, including real three-CPU bomb/flame survival and Easy
+  Solo completion/rematch/reconnect; Kubernetes native smoke passes 2/2 with exact digest,
+  restricted security, resource limits, probes/readiness, zero restarts and scoped cleanup.
 
 ### Distribution, operation and rollback
 
-Published as a stable source tag and GitHub release. Localhost:8085 runs the accepted image
-`sha256:cd80414005c2daa806853c491dc94c8c452065dcae13b7dbe088581bb03e1751`, labelled version 1.0.0
-and source c6a8c33f. The app remains non-root and read-only, with 256 MiB memory and PID 128 limits.
-The immutable v0.3.118 override/image is retained for rollback. Reload browser tabs after upgrading.
+Stable source release. The accepted local image is
+`sha256:8c024abfc87055df9b4f62dd4aa54a35e17eda40a4a2d4e233895b3c13870bf1`, labelled 1.0.1
+and source 114b9ce4. Localhost:8085 runs that exact image; fresh promotion verifies health/readiness,
+served HTML/JS/CSS/PNG equality, CSP/cache policy and runtime limits.
+The immutable v1.0.0 image/override is retained for rollback. Restart or rollback ends
+process-local matches and resume credentials. No hosted deployment, durable accounts/statistics
+or production replay export is added. Human difficulty and interaction tuning remain in
+[BACKLOG.md](../BACKLOG.md).
 
-Matches and resume credentials remain process-local: restart or rollback ends active matches.
-Accounts, durable statistics and production replay export are outside this release. No hosted
-production service or image registry is configured. Human difficulty, item-interaction and
-browser/network validation continue in [BACKLOG.md](../BACKLOG.md); the release does not close
-those playtesting tasks.
+<a id="v100--2026-10-30"></a>
+The [v1.0.0 record](history/releases.md#v100--2026-10-30) is preserved in release history.
 
 <a id="v03118--2026-10-29"></a>
 The [v0.3.118 record](history/releases.md#v03118--2026-10-29) is preserved in release history.

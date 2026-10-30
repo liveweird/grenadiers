@@ -4,6 +4,50 @@ This archive preserves the older release records originally maintained in
 [`docs/releases.md`](../releases.md). Records remain in their original order; the current
 release procedure and current release record stay in the [release guide](../releases.md).
 
+## v1.0.0 — 2026-10-30
+
+The first stable Grenadiers milestone promotes the verified v0.3.118 game to 1.0.0:
+two-to-four-player human/CPU matches, private Solo with Easy/Standard opponents, three board
+sizes, all 22 requested items, animated pixel art, storm clouds and pursuing lair mobs.
+Shared settings, per-seat reconnect, authoritative results and consensual rematches are included.
+
+Product versions in the Cargo workspace, local dependency and lockfile advance together.
+Gameplay16/rules8/CPU19 and all application behavior remain compatible with v0.3.118.
+The [artist bundle](https://github.com/liveweird/grenadiers/releases/download/v0.3.117/grenadiers-lairs-art-v0.3.117.zip)
+remains current; see the [artist handoff](../../assets/art/README.md).
+
+### Verification and source identity
+
+Accepted source: `c6a8c33fcf528be0245a874efb678d6027e94bbc`; source PR
+[#279](https://github.com/liveweird/grenadiers/pull/279) merged as
+`8fc7dde2ea38d92fcffd9193f320b276ff3c63f2` with an identical tree.
+
+- Fresh release-helper/repository checks, locked Cargo metadata and workspace check pass.
+  Source, contracts, web/art, toolchain, build profiles and third-party dependencies match
+  v0.3.118 exactly; only internal product versions and release documentation change.
+- Reuse [v0.3.118 acceptance](releases.md#v03118--2026-10-29): full Rust debug/release
+  and independent coverage (92.09%), 7,139 web tests, item/CPU checks, native lifecycle suites,
+  audits and distinct Linux checks. No coverage floor or assertion is lowered.
+- The fresh labelled release image builds. Trivy 0.74.0 reports zero fixable HIGH/CRITICAL
+  vulnerabilities. Fresh native Compose **2/2** (5.3 seconds) and Kubernetes **2/2** (5.4 seconds)
+  pass authentication, keyboard turning, exact image, restricted security, resources/probes,
+  readiness and zero restarts, with scoped cleanup.
+- HTML, JavaScript, CSS and source-atlas bytes in the new image equal v0.3.118. Local promotion
+  verifies those served bytes, CSP/cache policy, health/readiness and runtime limits again.
+
+### Distribution, operation and rollback
+
+Published as a stable source tag and GitHub release. Localhost:8085 runs the accepted image
+`sha256:cd80414005c2daa806853c491dc94c8c452065dcae13b7dbe088581bb03e1751`, labelled version 1.0.0
+and source c6a8c33f. The app remains non-root and read-only, with 256 MiB memory and PID 128 limits.
+The immutable v0.3.118 override/image is retained for rollback. Reload browser tabs after upgrading.
+
+Matches and resume credentials remain process-local: restart or rollback ends active matches.
+Accounts, durable statistics and production replay export are outside this release. No hosted
+production service or image registry is configured. Human difficulty, item-interaction and
+browser/network validation continue in [BACKLOG.md](../../BACKLOG.md); the release does not close
+those playtesting tasks.
+
 ## v0.3.118 — 2026-10-29
 
 Activates lairs and pursuing mobs for all supported two-to-four-player human/CPU arenas.

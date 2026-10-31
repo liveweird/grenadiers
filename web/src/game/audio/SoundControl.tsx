@@ -8,7 +8,7 @@ import { GameAudio } from './engine'
 import { loadAudioPreference, saveAudioPreference } from './preferences'
 
 export function SoundControl({ state, copy, presentationDeaths }: {
-  state: GameClientState; copy: GameCopy; presentationDeaths?: PresentationDeaths
+  state: GameClientState; copy: GameCopy; presentationDeaths?: PresentationDeaths | undefined
 }) {
   const [preference, setPreference] = useState(loadAudioPreference)
   const [engineRunning, setEngineRunning] = useState(false)
@@ -106,8 +106,8 @@ export function SoundControl({ state, copy, presentationDeaths }: {
       <Text component="span" size="xs" aria-live="polite">{status}</Text>
       <label htmlFor={volumeId}>{copy.audio.volume}</label>
       <input id={volumeId} type="range" min="0" max="100" step="5" value={preference.volume}
-        aria-label={copy.audio.volume} onChange={(event) => changeVolume(Number(event.currentTarget.value))} />
-      <output htmlFor={volumeId}>{preference.volume}%</output>
+        aria-label={copy.audio.volume} aria-valuetext={`${preference.volume}%`} onChange={(event) => changeVolume(Number(event.currentTarget.value))} />
+      <span aria-hidden="true">{preference.volume}%</span>
     </div>
   )
 }

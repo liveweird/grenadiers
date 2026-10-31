@@ -131,7 +131,7 @@ main { min-height: 100vh; }
 .local-controls { display: flex; flex-wrap: wrap; align-items: center; gap: .25rem 1rem; }
 .sound-control { display: flex; flex-wrap: wrap; align-items: center; gap: .35rem; }
 .sound-control button { padding-inline: 0; }
-.sound-control span, .sound-control label, .sound-control output { color: var(--color-text-secondary); font-size: .75rem; }
+.sound-control span, .sound-control label { color: var(--color-text-secondary); font-size: .75rem; }
 .sound-control input[type="range"] { width: clamp(5rem, 18vw, 8rem); accent-color: var(--color-accent-primary); }
 .controls-description { color: var(--color-text-secondary); }
 .control-bindings { margin-top: 1.15rem; }

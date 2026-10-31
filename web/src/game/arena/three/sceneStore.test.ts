@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import { gameSnapshot } from '../../../test/game-snapshot'
-import { createArenaSceneStore, readSceneTiming } from './sceneStore'
+import { createArenaSceneStore, DEATH_ANIMATION_MS, readSceneTiming } from './sceneStore'
 import type { PresentationDeathCue } from '../types'
 
 const death = (key: string, bornAt: number): PresentationDeathCue => ({
@@ -158,5 +158,20 @@ describe('arena scene store', () => {
     store.update(snapshot, 101)
     expect(store.read().deaths).toEqual([])
     vi.restoreAllMocks()
+  })
+
+  it('retains blood pools after body expiry and across reduced-motion changes', () => {
+    const store = createArenaSceneStore()
+    const snapshot = gameSnapshot()
+    snapshot.presentationDeaths = { epoch: 1, sequence: 0, cues: [] }
+    store.update(snapshot, 0)
+    snapshot.presentationDeaths = { epoch: 1, sequence: 1, cues: [death('pool', 0)] }
+    store.update(snapshot, 0)
+    expect(store.read()).toMatchObject({ deaths: [{ key: 'pool' }], bloodPools: [{ key: 'blood:0:0' }] })
+    store.update(snapshot, DEATH_ANIMATION_MS)
+    expect(store.read().deaths).toEqual([])
+    expect(store.read().bloodPools).toHaveLength(1)
+    store.setReducedMotion(true)
+    expect(store.read().bloodPools).toHaveLength(1)
   })
 })

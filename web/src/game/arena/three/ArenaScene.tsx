@@ -5,6 +5,7 @@ import { Entities } from './Entities'
 import { FinishPass } from './finishPass'
 import { readSceneTiming } from './sceneStore'
 import { Deaths } from './Deaths'
+import { BloodPools } from './BloodPools'
 
 interface ArenaSceneProps {
   store: ArenaSceneStore
@@ -24,6 +25,7 @@ export function ArenaScene({ store, atlas }: ArenaSceneProps) {
         timing={timing}
         reducedMotion={revision.reducedMotion}
       />
+      <BloodPools pools={revision.bloodPools ?? []} atlas={atlas} />
       <Deaths cues={revision.deaths} atlas={atlas} reducedMotion={revision.reducedMotion} />
     </ArenaWorld>
     <FinishPass />

@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## 1.1.6 — 2026-10-31
+
+- Leave small cosmetic blood pools at visible player and mob deaths after knockout sprites
+  disappear; retain bounded per-round decals without changing gameplay or hidden-position privacy.
+
 ## 1.1.5 — 2026-10-31
 
 - Adopt the owner-supplied retro arena textures: tan sandstone floors, bolder stone and brick

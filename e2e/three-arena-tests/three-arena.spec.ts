@@ -1,7 +1,8 @@
 import { expect, test } from '@playwright/test'
 import {
   assertCleanAudit, beginAudit, canvasScreenshot, expectDifferent, openFixture, pixelRetention,
-  show, showDeath, showDeathOverlap, settleDeathAge,
+  replayDeath, resetDeathPresentation, show, showBloodLayers, showDeath, showDeathOverlap,
+  showPoolOnly, settleDeathAge,
   type BoardName, type BrowserAudit, type DeathAppearance, type DeathOverlay,
 } from './three-arena-api'
 
@@ -91,12 +92,15 @@ test('native death artwork advances every appearance and expires without lingeri
     const final = await canvasScreenshot(page, testInfo, `${appearance}-death-final-frame-3`)
     await settleDeathAge(page, bornAt, 650)
     const expired = await canvasScreenshot(page, testInfo, `${appearance}-death-expired`)
+    await showPoolOnly(page, appearance, index)
+    const poolOnly = await canvasScreenshot(page, testInfo, `${appearance}-blood-pool-only`)
 
     expectDifferent(before, baseline, `${appearance} death frame zero must alter native pixels`)
     expectDifferent(middleOne, before, `${appearance} death animation must advance to frame one`)
     expectDifferent(middleTwo, middleOne, `${appearance} death animation must advance to frame two`)
     expectDifferent(final, middleTwo, `${appearance} death animation must advance to frame three`)
-    expect(expired.equals(baseline), `${appearance} death must leave no corpse or shadow`).toBe(true)
+    expectDifferent(poolOnly, baseline, `${appearance} death must leave a visible blood pool`)
+    expect(expired.equals(poolOnly), `${appearance} body and shadow must expire above its pool`).toBe(true)
   }
 })
 
@@ -114,10 +118,13 @@ test('reduced motion holds every death on frame three then expires from the same
     const staticEnd = await canvasScreenshot(page, testInfo, `${appearance}-reduced-frame-3-held`)
     await settleDeathAge(page, bornAt, 225)
     const expired = await canvasScreenshot(page, testInfo, `${appearance}-reduced-expired`)
+    await showPoolOnly(page, appearance, index)
+    const poolOnly = await canvasScreenshot(page, testInfo, `${appearance}-reduced-blood-pool-only`)
 
     expectDifferent(staticStart, baseline, `${appearance} reduced death must show frame three`)
     expect(staticEnd.equals(staticStart), `${appearance} reduced death must remain static`).toBe(true)
-    expect(expired.equals(baseline), `${appearance} reduced death must expire without residue`).toBe(true)
+    expectDifferent(poolOnly, baseline, `${appearance} reduced death must leave a visible blood pool`)
+    expect(expired.equals(poolOnly), `${appearance} reduced body must expire above its pool`).toBe(true)
   }
 })
 
@@ -175,6 +182,62 @@ test('native isolated lair entrance is visible for visual review', async ({ page
   await show(page, 'large', 'lairOnly')
   const lair = await canvasScreenshot(page, testInfo, 'lair-upright-entrance')
   expect(lair.equals(baseline), 'isolated public lair must alter native world pixels').toBe(false)
+})
+
+test('native blood pools remain beneath living actors and flames', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name.includes('reduced'), 'desktop ground-layer pixels')
+  await openFixture(page)
+  await show(page, 'large', 'empty')
+  const baseline = await canvasScreenshot(page, testInfo, 'blood-layer-empty-baseline')
+  await showBloodLayers(page, 'subjectOnly', 0, null)
+  const subjectOnly = await canvasScreenshot(page, testInfo, 'blood-layer-actor-flame-only')
+  const bornAt = await showBloodLayers(page, 'poolOnly', 0, null)
+  const poolOnly = await canvasScreenshot(page, testInfo, 'blood-layer-pools-only')
+  await showBloodLayers(page, 'combined', 0, bornAt)
+  const combined = await canvasScreenshot(page, testInfo, 'blood-layer-combined')
+  const retention = await pixelRetention(page, baseline, subjectOnly, combined)
+
+  expectDifferent(poolOnly, baseline, 'player and mob cues must add native pool pixels')
+  expectDifferent(subjectOnly, baseline, 'living actor and flame controls must alter pixels')
+  expectDifferent(combined, poolOnly, 'living actor and flame must remain visible over pools')
+  expectDifferent(combined, subjectOnly, 'ground pools must remain visible around foreground rows')
+  expect(retention.subjectPixels, JSON.stringify(retention)).toBeGreaterThan(100)
+  expect(retention.ratio, JSON.stringify(retention)).toBeGreaterThanOrEqual(0.8)
+  expect(retention.addedPixels, JSON.stringify(retention)).toBeGreaterThan(10)
+})
+
+test('duplicate death cues do not darken blood pools and lifecycle resets leave no ghosts', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name.includes('reduced'), 'desktop lifecycle pixels')
+  await openFixture(page)
+  await show(page, 'large', 'empty')
+  const baseline = await canvasScreenshot(page, testInfo, 'blood-lifecycle-empty-baseline')
+
+  const bornAt = await showPoolOnly(page, 'one', 20)
+  const first = await canvasScreenshot(page, testInfo, 'blood-lifecycle-first-pool')
+  await replayDeath(page, 'one', 20, bornAt)
+  const duplicate = await canvasScreenshot(page, testInfo, 'blood-lifecycle-duplicate-cue')
+  expectDifferent(first, baseline, 'fresh death cue must add its pool')
+  expect(duplicate.equals(first), 'duplicate cue must not darken or duplicate its pool').toBe(true)
+
+  await resetDeathPresentation(page, 20)
+  const reset = await canvasScreenshot(page, testInfo, 'blood-lifecycle-reset')
+  expect(reset.equals(baseline), 'presentation reset must clear retained pools').toBe(true)
+
+  const suspendedBornAt = await showPoolOnly(page, 'mob', 21)
+  await page.evaluate(() => window.grenadiersThreeArena.suspend())
+  await replayDeath(page, 'mob', 21, suspendedBornAt)
+  const afterReplay = await canvasScreenshot(page, testInfo, 'blood-lifecycle-suspend-replay')
+  expect(afterReplay.equals(baseline), 'suspension must clear pools and fence retained cues').toBe(true)
+
+  await showPoolOnly(page, 'one', 22)
+  await show(page, 'large', 'newRoom')
+  const newRoom = await canvasScreenshot(page, testInfo, 'blood-lifecycle-new-room')
+  expect(newRoom.equals(baseline), 'room replacement must not carry pools forward').toBe(true)
+
+  await showPoolOnly(page, 'mob', 23)
+  await show(page, 'large', 'empty')
+  const admission = await canvasScreenshot(page, testInfo, 'blood-lifecycle-admission')
+  expect(admission.equals(baseline), 'fresh admission snapshot must not reconstruct pools').toBe(true)
 })
 
 test('teleport, suspend, room replacement, context restoration, and destroy leave no ghosts', async ({ page }, testInfo) => {

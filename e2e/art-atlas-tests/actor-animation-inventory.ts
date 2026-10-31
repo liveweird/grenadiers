@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test'
+import { expect, type Page } from '@playwright/test'
 
 type Source = { pngBase64: string; manifestJson: string }
 
@@ -132,4 +132,29 @@ export function inspectActorInventory(
     })
     return { actors, deaths }
   }, source)
+}
+
+/** Stable append-only death and cosmetic frame contracts in the artist manifest. */
+export function expectDeathAndPoolFrames(manifestJson: string): void {
+  const manifest = JSON.parse(manifestJson) as {
+    frames: Array<{ id: string }>
+    animations: Record<string, { frameIds: string[]; frameDurationMs: number; reducedMotionFrame: string }>
+  }
+  const deathAnimations = ['actor.one.death', 'actor.two.death', 'actor.three.death', 'actor.four.death', 'mob.death']
+  expect(manifest.frames.slice(165, 185).map(({ id }) => id)).toEqual(
+    deathAnimations.flatMap((animation) =>
+      [0, 1, 2, 3].map((frame) => `${animation}.${frame}`)),
+  )
+  expect(manifest.frames[185]).toMatchObject({
+    id: 'effect.bloodPool', status: 'baseline',
+    sourceRect: { x: 560, y: 2016, width: 48, height: 48 },
+    localBounds: { x: 0, y: 0, width: 48, height: 48 }, pivot: { x: 0, y: 0 },
+  })
+  for (const animation of deathAnimations) {
+    expect(manifest.animations[animation]).toEqual({
+      frameIds: [0, 1, 2, 3].map((frame) => `${animation}.${frame}`),
+      frameDurationMs: 150,
+      reducedMotionFrame: `${animation}.3`,
+    })
+  }
 }

@@ -79,6 +79,9 @@ still animates when the authoritative phase changes directly to a round or match
 Use `actor.<seat>.death.0` through `.3` and `mob.death.0` through `.3` for artist revisions;
 keep their common `(40,65)` foot anchor and per-appearance palettes.
 
+Small [blood pools](blood-pools.md) remain on the floor after visible player and mob bodies
+disappear. They are cosmetic, bounded per tile and cleared with round/admission history.
+
 ## Renderer and artist checks
 
 The production build verifies its emitted module graph excludes Pixi reference drawing code.

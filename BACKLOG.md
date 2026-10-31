@@ -12,11 +12,6 @@ repeated approval for routine implementation choices. Entries are not delivery-d
 
 ## Arena presentation
 
-- [todo] **DEATH-POOLS — persistent cosmetic blood pools.** Leave a small floor stain at a
-  visible player or mob death after its knockout sprite disappears. No collision, damage,
-  slowdown or other gameplay effect. Reuse recipient-safe death positions, bound retained
-  decals and clear them for a new round or presentation reset. Keep the pool artist-editable
-  in the shared sheet. See the [design](docs/game/blood-pools.md).
 - [todo] **ARENA3D — human visual feedback.** Evaluate camera/depth, sprite detail, readability,
   texture revisions and filter strength after the first playable version.
 - [new] **Full 3D character models.** Consider after the billboard trial; retain the actor-view
@@ -24,7 +19,7 @@ repeated approval for routine implementation choices. Entries are not delivery-d
 
 ## Arena hazards
 
-- [todo] **SPIKE-PITS — contact-triggered spike tiles.** A player or mob touching a dormant
+- [next] **SPIKE-PITS — contact-triggered spike tiles.** A player or mob touching a dormant
   pit starts a brief visible warning. Spikes then rise, damage occupants and anyone entering
   while raised, and retract after a few seconds to reset. Keep movement traversable and
   activation server-owned; cover swept/forced movement, Teleporter destinations, exact timer

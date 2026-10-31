@@ -59,8 +59,7 @@ respawn delay as other mob deaths. This escape behavior does not promise aggress
 
 The Three.js arena renders `terrain.spikePit.idle`, `terrain.spikePit.warning` and
 `terrain.spikePit.raised` as floor-aligned billboards. Warning pulses only when reduced motion is
-off; reduced motion keeps the same immediately readable static phase artwork. Blood pools remain
-below hazards and have no simulation role.
+off; reduced motion keeps the same immediately readable static phase artwork. Blood pools remain cosmetic and do not change trap timing or contact.
 
 The checked clock, geometry and placement APIs are documented in
 [spike-pit core primitives](spike-pit-core.md). CPU and renderer checks belong to the normal

@@ -26,6 +26,9 @@ or W/A/S/D and plant bombs with Space. Rust owns the 60 Hz simulation; Three.js/
 The [modern retro 3D arena](docs/game/arena-3d.md) adds textured, chamfered terrain, detailed
 billboard characters, animated grenades/flames and a restrained final colour pass. The shared
 artist sheet owns both sprite artwork and 3D surface maps; reduced motion remains supported.
+[Spike pits](docs/game/spike-pits.md) warn after contact, raise lethal spikes, then reset.
+They start enabled; the creator can adjust warning and raised durations in the lobby.
+CPU opponents and lair mobs account for pits, while small cosmetic blood pools mark deaths.
 
 Default rooms allow turns within a quarter tile of a corridor centerline, including natural
 wall stops. The creator can adjust starting speed, turning tolerance, wins needed and fuse

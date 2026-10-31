@@ -70,5 +70,8 @@ pair the renderer/lobby with coordinated live activation. Dormant internal found
 not silently change an existing live ruleset. Preserve closed historical contracts and identify
 the new physics explicitly before enabling it.
 
+The [core primitives](spike-pit-core.md) define checked clocks, contact geometry and placement;
+they do not activate traps in the live ruleset.
+
 Three pit frames and one blood-pool frame fit the five currently unassigned artist-sheet cells.
 Append their stable IDs without changing existing sprite pixels or filling reserved entries.

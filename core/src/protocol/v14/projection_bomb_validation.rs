@@ -40,7 +40,7 @@ pub(crate) fn validate(world: &WorldFacts) -> Result<(), ProjectionError> {
         {
             return Err(ProjectionError::InvalidBombs);
         }
-        if world.rules_version != 9 || bomb.trigger != BombTrigger::contact() {
+        if !matches!(world.rules_version, 9 | 10) || bomb.trigger != BombTrigger::contact() {
             *counts.entry(bomb.owner).or_insert(0_u8) += 1;
         }
         if bomb.trigger == BombTrigger::remote() {

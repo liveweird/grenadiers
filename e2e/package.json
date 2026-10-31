@@ -20,10 +20,11 @@
     "test:ui": "playwright test --ui",
     "install:browsers": "playwright install chromium",
     "typecheck": "tsc --noEmit",
-    "check:scenarios": "node --test scripts/scenario-contract.test.mjs && node scripts/check-scenarios.mjs && npm run check:live-pixel-window && npm run check:visibility-startup && npm run check:kick-timeline && npm run check:browser-contexts && npm run check:gameplay-config",
+    "check:scenarios": "node --test scripts/scenario-contract.test.mjs && node scripts/check-scenarios.mjs && npm run check:live-pixel-window && npm run check:visibility-startup && npm run check:kick-timeline && npm run check:arena-projection && npm run check:browser-contexts && npm run check:gameplay-config",
     "check:live-pixel-window": "node --experimental-strip-types invisible-bombs-tests/live-pixel-window.check.ts",
     "check:visibility-startup": "node --experimental-strip-types tests/support/visibility-startup.check.ts",
     "check:kick-timeline": "node --experimental-strip-types kick-tests/kick-timeline.check.ts",
+    "check:arena-projection": "node --experimental-strip-types tests/support/arena-projection.check.ts",
     "check:browser-contexts": "node --experimental-strip-types scripts/browser-contexts.check.ts",
     "check:gameplay-config": "node --experimental-strip-types scripts/playwright-gameplay-suite.check.ts",
     "lint": "eslint . --max-warnings 0",
@@ -63,7 +64,8 @@
     "test:atlas-gameplay": "playwright test --config playwright.atlas-gameplay.config.ts",
     "test:cpu-pickup": "playwright test --config playwright.cpu-pickup.config.ts",
     "test:cpu-debug": "playwright test --config playwright.cpu-debug.config.ts",
-    "test:cpu-debug-disabled": "playwright test --config playwright.cpu-debug-disabled.config.ts"
+    "test:cpu-debug-disabled": "playwright test --config playwright.cpu-debug-disabled.config.ts",
+    "test:three-arena": "playwright test --config playwright.three-arena.config.ts"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.13.0",

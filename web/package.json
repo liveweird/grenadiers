@@ -27,21 +27,25 @@
     "build:renderer-diagnostics": "tsc --project tsconfig.renderer-diagnostics.json && vite build --config vite.renderer-diagnostics.config.ts",
     "preview:renderer-diagnostics": "vite preview --config vite.renderer-diagnostics.config.ts --host 0.0.0.0 --port 5188 --strictPort",
     "preview:art-atlas": "vite preview --config vite.renderer-diagnostics.config.ts --host 127.0.0.1 --port 5188 --strictPort --open /art-atlas.html",
-    "serve:art-atlas-test": "npm run build:renderer-diagnostics && npm run preview:renderer-diagnostics"
+    "serve:art-atlas-test": "npm run build:renderer-diagnostics && npm run preview:renderer-diagnostics",
+    "serve:three-arena-test": "npm run build:renderer-diagnostics && npm run preview:renderer-diagnostics"
   },
   "dependencies": {
     "@mantine/core": "9.6.2",
     "@mantine/hooks": "9.6.2",
+    "@react-three/fiber": "9.8.2",
     "ajv": "8.20.0",
     "i18next": "26.4.2",
     "i18next-browser-languagedetector": "8.2.1",
     "pixi.js": "8.22.0",
     "react": "19.3.0",
     "react-dom": "19.3.0",
-    "react-i18next": "17.0.15"
+    "react-i18next": "17.0.15",
+    "three": "0.187.0"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
+    "@react-three/test-renderer": "9.1.1",
     "@stoplight/spectral-core": "1.23.1",
     "@stoplight/spectral-parsers": "1.0.5",
     "@stoplight/spectral-ruleset-bundler": "1.7.0",
@@ -52,6 +56,7 @@
     "@types/node": "24.13.6",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
+    "@types/three": "0.187.0",
     "@vitejs/plugin-react": "6.1.1",
     "@vitest/coverage-v8": "5.0.5",
     "eslint": "10.11.0",

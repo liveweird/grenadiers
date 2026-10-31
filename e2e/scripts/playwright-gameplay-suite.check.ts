@@ -2,6 +2,10 @@ import assert from 'node:assert/strict'
 import base from '../playwright.config.ts'
 import { gameplaySuiteConfig } from '../playwright-gameplay-suite.ts'
 
+if (base.use?.launchOptions?.args?.includes('--use-angle=swiftshader') && !process.env.E2E_WORKERS) {
+  assert.equal(base.workers, 1, 'the shared software renderer must default to one native worker')
+}
+
 const standard = gameplaySuiteConfig({
   testDir: './landmine-tests', artifactStem: 'landmine',
 })

@@ -23,6 +23,7 @@
     "remote-bomb-tests/**/*.spec.ts",
     "wall-pass-tests/**/*.spec.ts",
     "art-atlas-tests/**/*.spec.ts",
-    "atlas-gameplay-tests/**/*.spec.ts"
+    "atlas-gameplay-tests/**/*.spec.ts",
+    "three-arena-tests/**/*.spec.ts"
   ]
 }

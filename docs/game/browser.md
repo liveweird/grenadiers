@@ -1,6 +1,6 @@
 # Browser matches
 
-The browser combines a React/Mantine room interface with a PixiJS 8.22 WebGL arena.
+The browser combines a React/Mantine room interface with a Three.js/React Three Fiber WebGL arena.
 Rust owns movement, collision, bomb placement, explosions, damage, and results. Rendering
 never advances the simulation or predicts a different outcome.
 
@@ -38,18 +38,18 @@ longer play. Inputs in room forms retain their ordinary behavior. Key auto-repea
 create additional bomb actions. Direction refreshes keep server-held input current; they
 carry no position or clock authority.
 
-Pixi retains terrain, block, bomb, flame, and actor layers. Public actor positions interpolate
-over the 50 ms publication interval without extrapolation. Terminal states snap to the
+The renderer retains instanced terrain and shared-atlas billboard objects. Public actor positions
+interpolate over the observed publication interval, clamped to 16.7–100 ms, without extrapolation. Terminal states snap to the
 accepted final position; reduced motion disables interpolation and pulsing effects. Player
 colors, headgear, and HTML seat names distinguish the configured players. The canvas itself
 is decorative to assistive technology; room controls, countdown/timer, and result remain HTML.
 
 The canvas resizes to the authoritative arena aspect ratio (11:9, 13:11 or 15:13), with device
-pixel ratio capped at two. The board-relative logical surface uses crisp pixelated CSS scaling. Initialization, ticker ownership, listeners, and graphics contexts
+pixel ratio capped at two. The board-relative logical surface uses crisp pixelated CSS scaling. Initialization, frame-loop ownership, listeners, and graphics contexts
 are released on teardown, including React development StrictMode setup/cleanup. Rendering
 failure produces a localized explanation and disables game input.
 
-The [pixel-art courtyard](pixel-art.md) uses weathered terrain, original directional player
+The [modern retro courtyard](arena-3d.md) uses weathered terrain, original directional player
 poses, grenades, connected flame cells and distinct pickup symbols. Reduced motion fixes
 decorative animation frames while preserving authoritative position and hazard information.
 
@@ -102,7 +102,7 @@ voices. Returning from a hidden tab requires **Resume sound**; old events are di
 
 ## Exposed items and player upgrades
 
-Live gameplay snapshots supply visible pickup cells and kinds under Expanded-v5 rules. Pixi draws
+Live gameplay snapshots supply visible pickup cells and kinds under Expanded-v5 rules. The renderer draws
 distinct bomb, cross/range, speed, Heart and Shield marks above blocks and below
 bombs/flames/actors; it never guesses concealed contents. Retained drawings are reused while unchanged and destroyed when removed,
 replaced, or reset. The UI performs no collection simulation.
@@ -134,10 +134,10 @@ interface. The active shared settings panel retains the revision fencing introdu
 
 ## Arena renderer ownership
 
-One Pixi application is initialized lazily for the mounted arena. Room transitions suspend its
-ticker, hide the canvas and clear the scene; the next authoritative baseline is painted before
-the same canvas is revealed. Room changes keep one renderer rather than destroying and
-recreating its WebGL context. Final component unmount releases its resources synchronously.
+One manual Fiber root is initialized lazily for the mounted arena. Room transitions stop its
+frame loop, hide the canvas and clear the scene; the next authoritative baseline is painted
+before the same canvas is revealed. Room changes retain the renderer and graphics context.
+Final unmount hides/removes the canvas synchronously and releases the owned Fiber/GPU resources.
 
 Initialization uses the latest snapshot. A result arriving after final unmount is destroyed;
 a result arriving while waiting stays suspended. Failed initialization disables controls and

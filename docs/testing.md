@@ -48,7 +48,10 @@ measured environment, cache conditions and fault-detection evidence.
 
 Parallelize independent checks and gameplay groups using isolated processes, build directories,
 Compose projects, ports and Kubernetes namespaces. Reuse compiled dependencies and tooling.
-Keep latency tests isolated from competing workloads. Scheduling and caching must not reduce
+Keep latency tests isolated from competing workloads. Run native WebGL suites serially when
+they share Chromium's software renderer; parallelize their static, unit and dependency checks
+instead. Competing graphics suites can exhaust the same GPU/CPU backend and invalidate native
+input timing even when their servers are isolated. Scheduling and caching must not reduce
 assertions, exhaustive mask coverage, coverage floors or failure visibility, or introduce retries
 that hide failures. Avoid repeated evidence packaging and review of unchanged results.
 
@@ -123,14 +126,16 @@ EN/PL errors and desktop/320px reduced-motion layouts. Core unit tests cover fra
 metadata, every extrusion edge/corner, padding, gutters, transparency and texture disposal.
 Generated browser proofs live under ignored `e2e/.playwright/art-atlas-test-results/`. The
 [artist handoff](../assets/art/README.md) documents template/export commands. The dedicated
-`scripts/gates.sh atlas-gameplay` checks the gameplay atlas backend against procedural reference
+`scripts/gates.sh atlas-gameplay` checks the retained Pixi atlas reference against procedural
 pixels, by packing the procedural baseline sheet rather than the adopted artist source, and real
 WebGL lifecycle behavior with the bundled source. It uses the same fresh diagnostics build and
 stores proofs in `e2e/.playwright/atlas-gameplay-test-results/`. See the
 [rendering guide](game/art-atlas.md). Artist redraws therefore change no parity expectation.
 The same item-shard step runs the DPR 1/2 terrain-pixel suite and retains failures under
 `e2e/.playwright/terrain-pixel-test-results/`; the separate six-cell renderer lifecycle suite
-remains opt-in.
+remains opt-in. `npm --prefix e2e run test:three-arena` checks the production Three renderer in
+a separate credential-free diagnostic: final GPU colour, board fit, billboard visibility,
+reset/context recovery and teardown. The manual full CI runs it serially after the atlas checks.
 
 ## Rust
 
@@ -282,7 +287,8 @@ with `npm --prefix e2e run install:browsers`, start Compose, then run
 and spec titles must agree verbatim. Run E2E static checks locally before release. The optional manual full workflow also runs
 those checks and Compose scenarios; automatic PR checks add distinct Linux Rust coverage.
 
-The default suite uses one worker in CI and two locally; `E2E_WORKERS` explicitly overrides
+The default suite uses one worker in CI and on macOS, where headless graphics explicitly use
+the shared SwiftShader backend; other local runs use two. `E2E_WORKERS` explicitly overrides
 that choice. `E2E_CAPTURE_PROFILE=1` enables the opt-in capture workload profiler and turns off
 the default configuration's failure screenshots; see the
 [capture profile](game/renderer-diagnostics.md#original-reconnect-capture-profile). Each multiplayer case already owns two browser contexts. Serial CI execution
@@ -381,3 +387,4 @@ assertions and evidence for each suite.
 | `npm --prefix e2e run test:terrain-pixels` | [Terrain pixel scenario](../e2e/scenarios/terrain-pixels.md) | Exact cached/uncached Pixi terrain parity across DPRs, repaint/reset, and context restoration. |
 | `scripts/gates.sh art-atlas` / `npm --prefix e2e run test:art-atlas` | [Artist atlas](#artist-atlas) | Canonical import/export, decoded pixels, texture lifecycle/budgets, localization, and responsive reduced-motion layouts. |
 | `scripts/gates.sh atlas-gameplay` / `npm --prefix e2e run test:atlas-gameplay` | [Atlas gameplay scenario](../e2e/scenarios/atlas-gameplay.md) | Procedural-reference atlas parity and real bundled WebGL lifecycle behavior. |
+| `npm --prefix e2e run test:three-arena` | [Three arena scenario](../e2e/scenarios/three-arena.md) | Production GPU colour, three board sizes, billboards, privacy resets, reduced motion, context recovery and bounded teardown. |

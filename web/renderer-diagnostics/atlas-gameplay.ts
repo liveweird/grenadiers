@@ -5,7 +5,8 @@ import { arenaSourceManifest, createArenaAtlas } from '../src/game/arena/artAtla
 import { GROUND, TILE } from '../src/game/arena/drawing'
 import type { BombDrawing } from '../src/game/arena/entityArt'
 import { graphicsArtwork } from '../src/game/arena/graphicsArtwork'
-import { createArenaRenderer, type ArenaRenderer } from '../src/game/arena/renderer'
+import { createPixiArenaRenderer as createArenaRenderer } from '../src/game/arena/pixiRenderer'
+import type { ArenaRenderer } from '../src/game/arena/rendererTypes'
 import { ArenaScene } from '../src/game/arena/scene'
 import type { SnapshotMessage } from '../src/game/arena/types'
 import { renderBaselineSource } from './art-atlas-render'
@@ -283,6 +284,8 @@ async function run(): Promise<AtlasGameplayResult> {
     const sprites = nodes.filter((node) => node instanceof Sprite) as Sprite[]
     const sources = new Set(sprites.map((sprite) => sprite.texture.source))
     const source = sprites[0]?.texture.source
+    // Keep this historical 2D parity diagnostic on Pixi; native Three lifecycle and pixels have
+    // their own acceptance fixture and cannot be compared to the procedural 2D reference here.
     const startupAt = performance.now()
     renderer = await createArenaRenderer(host)
     const coldStartupMs = performance.now() - startupAt

@@ -222,15 +222,22 @@ test('a small four-human room reconnects and rematches without changing geometry
     await startRound(group.pages, group.games)
     await moveOwnSeat(group.pages[3], group.games[3], 'four', board)
     await expectPaintedCanvas(group.pages[3])
-    const tileGeometry = await group.pages[3].locator('.game-arena canvas').evaluate((canvas) => ({
-      width: (canvas as HTMLCanvasElement).width, height: (canvas as HTMLCanvasElement).height,
-      tileWidth: (canvas as HTMLCanvasElement).width / 11,
-      tileHeight: (canvas as HTMLCanvasElement).height / 9,
-      overflow: document.documentElement.scrollWidth > innerWidth,
-    }))
-    expect(tileGeometry.width / tileGeometry.height).toBeCloseTo(11 / 9, 8)
-    expect(tileGeometry.tileWidth).toBeCloseTo(tileGeometry.tileHeight, 8)
-    expect(tileGeometry.tileWidth).toBeGreaterThan(0)
+    const readGeometry = () => group.pages[3].locator('.game-arena canvas').evaluate((canvas) => {
+      const bounds = canvas.getBoundingClientRect()
+      return {
+        width: (canvas as HTMLCanvasElement).width, height: (canvas as HTMLCanvasElement).height,
+        cssWidth: bounds.width, cssHeight: bounds.height, dpr: devicePixelRatio,
+        overflow: document.documentElement.scrollWidth > innerWidth,
+      }
+    })
+    const tileGeometry = await readGeometry()
+    // The 3D camera fits the board inside the viewport; its ground tiles are foreshortened.
+    // Check backing-store/CSS agreement, rather than the old flat-board tile aspect ratio.
+    expect(tileGeometry.width).toBeGreaterThan(0)
+    expect(Math.abs(tileGeometry.width - Math.round(tileGeometry.cssWidth) * tileGeometry.dpr))
+      .toBeLessThanOrEqual(1)
+    expect(Math.abs(tileGeometry.height - Math.round(tileGeometry.cssHeight) * tileGeometry.dpr))
+      .toBeLessThanOrEqual(1)
     expect(tileGeometry.overflow).toBe(false)
 
     const admission = await admissionBaseline(group.pages[3])
@@ -280,5 +287,6 @@ test('a small four-human room reconnects and rematches without changing geometry
     }
     await startRound(group.pages, group.games)
     for (const game of group.games) expectBoard(game, board, 4)
+    await expect.poll(readGeometry).toEqual(tileGeometry)
   } finally { await group.close() }
 })

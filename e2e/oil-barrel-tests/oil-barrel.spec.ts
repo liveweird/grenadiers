@@ -18,24 +18,34 @@ const oilAt = (game: ObservedGame, column: number, row: number) =>
     oil.cell.column === column && oil.cell.row === row)
 const hasBlock = (game: ObservedGame, column: number, row: number) =>
   latestSnapshot(game)!.state.arena.blocks.some((cell) => cell.column === column && cell.row === row)
-const oilArt = {
-  hoop: '79,86,105,255', hoopShade: '57,60,76,255', stave: '203,109,40,255',
-  staveShade: '183,94,35,255', char: '26,22,24,255', flame: '239,112,25,255',
-  flameLight: '255,221,118,255', flameCore: '255,246,209,255',
-} as const
+type Rgb = readonly [number, number, number]
+
+const rgb = (pixel: string): Rgb => {
+  const values = pixel.split(',').map(Number)
+  return [values[0]!, values[1]!, values[2]!]
+}
+const someColor = (pixels: string[], predicate: (color: Rgb) => boolean) =>
+  pixels.some((pixel) => predicate(rgb(pixel)))
 
 function expectUnlitOilArt(pixels: string[]): void {
-  const colors = new Set(pixels)
-  expect([...colors]).toEqual(expect.arrayContaining([
-    oilArt.hoop, oilArt.hoopShade, oilArt.stave, oilArt.staveShade,
-  ]))
+  const hasCoolHoop = someColor(pixels, ([red, green, blue]) =>
+    red >= 35 && red <= 125 && green >= 40 && green <= 135 && blue > red)
+  const hasOrangeStave = someColor(pixels, ([red, green, blue]) =>
+    red >= 135 && red > green * 1.35 && green > blue * 1.35 && blue < 105)
+  expect({ hasCoolHoop, hasOrangeStave }).toEqual({ hasCoolHoop: true, hasOrangeStave: true })
 }
 
 function expectBurningOilArt(pixels: string[]): void {
-  const colors = new Set(pixels)
-  expect([...colors]).toEqual(expect.arrayContaining([
-    oilArt.char, oilArt.flame, oilArt.flameLight, oilArt.flameCore,
-  ]))
+  const hasChar = someColor(pixels, ([red, green, blue]) => Math.max(red, green, blue) < 75)
+  const hasFlame = someColor(pixels, ([red, green, blue]) =>
+    red >= 185 && red > green * 1.3 && green > blue * 1.25)
+  const hasFlameLight = someColor(pixels, ([red, green, blue]) =>
+    red >= 220 && green >= 155 && blue >= 65 && red > blue * 1.2)
+  const hasFlameCore = someColor(pixels, ([red, green, blue]) =>
+    red >= 235 && green >= 210 && blue >= 175)
+  expect({ hasChar, hasFlame, hasFlameLight, hasFlameCore }).toEqual({
+    hasChar: true, hasFlame: true, hasFlameLight: true, hasFlameCore: true,
+  })
 }
 
 async function plantAndObserve(page: Page, game: ObservedGame): Promise<number> {

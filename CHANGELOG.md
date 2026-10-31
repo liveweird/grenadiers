@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+## 1.1.0 — 2026-10-31
+
+- Replace production arena drawing with Three.js/React Three Fiber: textured, chamfered 3D
+  terrain, grounded pixel-art billboard characters, lighting and restrained retro finishing.
+- Add ten artist-editable material texture slots to the shared sheet while preserving all
+  previous frame pixels and contracts; retain Pixi as an isolated artwork/reference tool.
+- Preserve recipient visibility, snapshot-only timing, controls, reduced motion and graphics
+  lifecycle; add native 3D colour, removal, reset and context-recovery acceptance.
+
 ## 1.0.6 — 2026-10-31
 
 - Fix CPUs remaining at a farming approach tile when a safe bomb cannot currently be

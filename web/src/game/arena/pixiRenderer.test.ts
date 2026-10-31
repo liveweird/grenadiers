@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { gameSnapshot } from '../../test/game-snapshot'
-import { createArenaRenderer } from './renderer'
+import { createPixiArenaRenderer as createArenaRenderer } from './pixiRenderer'
 
 const hooks = vi.hoisted(() => ({
   fail: false,

@@ -18,29 +18,18 @@ the build. The separate diagnostic pages are excluded from the production applic
 
 ## Runtime ownership
 
-Each arena renderer loads and validates the bundled source, decodes it within the PNG budget,
-and packs the 145 active frames into one padded and extruded texture. The current pack is
-2040×528 pixels: 4,308,480 decoded RGBA bytes, below the 2048px/16MiB budget. Nearest sampling,
-integer pivots and single-application shadow opacity preserve the existing pixel art.
+Each production renderer loads and validates the bundled source, decodes it within the PNG
+budget, and packs active frames into one padded and extruded texture. The 2048px/16MiB limits,
+nearest sampling, integer anchors and single-application opacity remain enforced. Canonical
+metadata is independent of the Pixi drawing factories, so production Three rendering does not
+load the reference engine.
 
-The scene uses the same animation, interpolation, status visibility and entity-removal logic
-with atlas-backed drawing factories. Terrain retains its cache and deterministic variants.
-Suspending or resetting a scene destroys its display nodes while retaining the atlas. Final
-renderer destruction releases all region textures and their shared source. Context restoration
-reuses that source and refreshes the terrain cache. Failed initialization follows the existing
-localized renderer-error flow rather than substituting different artwork.
-
-Procedural drawings remain available for template extraction and reference comparisons.
-v0.3.53 replaced the adopted source with a redrawn, AI-generated sheet; the current source is
-a Napoleonic redraw (shako and bicorne actors, repainted terrain, bombs, flames, pickups and
-cues; see the [provenance](../../assets/art/README.md#provenance)). The original 95 frame contracts and pixels are preserved. Sixteen appended player-three/four
-poses and additional animation frames and lair/mob sprites extend the authoring sheet to 1120×1792 with matching pivots/foot anchors; the texture
-budget and gameplay collision geometry are unchanged. Live rooms support two to four human/CPU seats.
-v0.3.49 adopted the baseline artwork, with one explicit compositing change: status pulses
-fade each completed icon once. The old procedural renderer faded every overlapping paint
-stroke separately, exposing underlying colors during a pulse. A flat artist PNG retains the
-finished icon rather than those hidden strokes. Pulse timing and status visibility stay shared;
-this normalization affects only those decorative overlap pixels.
+The [3D arena](arena-3d.md) uses named material maps for floor, wall/block/lair tops and sides,
+and trim. The same texture supplies billboard characters and effects. Suspending removes
+entities and their private presentation history while retaining the owned atlas; final renderer
+teardown releases geometry, materials, texture and render targets. Context restoration repaints
+the current baseline. The isolated Pixi workbench retains atlas/procedural pixel parity as a
+source-art integrity check rather than a comparison with the 3D perspective.
 
 ## Walking animation
 

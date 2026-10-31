@@ -1,5 +1,9 @@
 # Retro pixel-art courtyard
 
+Production presentation now uses the [3D miniature arena](arena-3d.md), with the same canonical
+billboard artwork and additional shared surface textures. The Pixi implementation remains an
+isolated reference for the art workflow.
+
 [Actual application captures](../screenshots/pixel-art.md) illustrate the current presentation.
 Dated capture and release evidence is preserved in
 [game acceptance history](../history/game-acceptance.md#pixel-art-and-screenshot-provenance).

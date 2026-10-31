@@ -71,7 +71,12 @@ Historical measurements and environment identities are preserved in
 
 ## Static arena terrain
 
-The Pixi scene caches only terrain as a texture at the initialized renderer's actual resolution
+The production [3D arena](arena-3d.md) uses instanced terrain faces, a shared atlas, bounded
+pixel ratio and a manual frame loop. The production module graph excludes Pixi reference code.
+Renderer resource and scheduling checks cover suspension, resizing, repeated scenes and context
+restoration. Animation-frame observations measure scheduling, not completed GPU frame time.
+
+The isolated Pixi reference scene caches only terrain as a texture at the initialized renderer's actual resolution
 (DPR capped at two), with nearest sampling and antialiasing disabled. Blocks, pickups, bombs,
 flames and actors remain live. The cache rebuilds when terrain dimensions/cells change, on a
 new room/round or reset, and after WebGL context restoration. Identical snapshots and animation

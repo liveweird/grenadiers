@@ -26,9 +26,9 @@ describe('art atlas validation', () => {
     expect(validateRuntimeManifest(first)).toEqual([])
     expect(first.frames.some(({ id }) => id.startsWith('reserved.'))).toBe(false)
     expect(first.texture).toEqual({
-      width: 2040, height: 528, padding: 2, extrusion: 2,
+      width: 2040, height: 584, padding: 2, extrusion: 2,
     })
-    expect(first.texture.width * first.texture.height * 4).toBe(4_308_480)
+    expect(first.texture.width * first.texture.height * 4).toBe(4_765_440)
   })
 
   it('accepts JSON round trips that reorder object keys but retain array order', () => {

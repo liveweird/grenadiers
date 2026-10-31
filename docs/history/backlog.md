@@ -404,3 +404,11 @@ scope and intentional dispositions. Every exhaustive mask profile and coverage f
 no React subscription rewrite was justified by the measured workload. Single-player is the next
 confirmed delivery track in the root backlog. See the [assessment archive](quality-review-assessment.md),
 [release records](../releases.md), and [focused-feedback evidence](fast-feedback.md).
+
+## Modern retro 3D arena — 2026-10-31
+
+ARENA3D ships in v1.1.0 with Three.js/React Three Fiber, detailed billboard characters, shared
+artist-sheet material maps and restrained lighting/colour/dither finishing. Existing gameplay,
+recipient privacy and artwork contracts remain intact. The [release record](../releases.md)
+contains acceptance evidence. Human visual feedback and the unapproved full-model proposal
+remain in the root backlog.

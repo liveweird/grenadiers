@@ -1,8 +1,8 @@
 # Grenadiers arena art handoff
 
-This directory contains the reviewed, artist-editable arena source: `arena-source.png` and its
-paired `arena-source.json` manifest. ART-ATLAS v0.3.48 supplies the extraction, validation and
-preview workflow. Published v0.3.49 adopts these same inputs in gameplay; see the
+This directory contains the artist-editable arena source: `arena-source.png` and its
+paired `arena-source.json` manifest. The extraction, validation and
+preview workflow shares this artwork with the production 3D renderer; see the
 [rendering guide](../../docs/game/art-atlas.md) for the build/runtime ownership and checks.
 
 ## Prerequisites
@@ -30,7 +30,7 @@ files:
 - `arena-guides.png` — raster copy of the separate guide/label layer;
 - `arena-overview.png` — labelled visual inventory on a checkerboard background.
 
-The 1120×1792 authoring sheet has 160 physical cells: 155 assigned entries (151 baseline
+The 1120×1904 authoring sheet has 170 physical cells: 165 assigned entries (161 baseline
 drawings and four blank reserved entries), plus five unassigned transparent cells. Cells are 112×112
 pixels in ten columns. Logical arena tiles remain 48×48 pixels. Reserved and unassigned cells must
 stay transparent. Do not move or rename assigned entries; new catalogue IDs must be added in code
@@ -57,7 +57,7 @@ npm --prefix e2e run art:export -- \
 Add `--slices` to emit optional named files under `target/art-atlas/slices/`. Runtime output is
 generated and ignored rather than an artist source. Its main files are `arena-atlas.png`,
 `arena-atlas.json`, `arena-overview.png` and `arena-preview.png`. The runtime texture contains the
-151 baseline frames, unrotated and untrimmed, with two-pixel extrusion and two-pixel transparent
+161 baseline frames, unrotated and untrimmed, with two-pixel extrusion and two-pixel transparent
 padding. Labels and guides never enter the runtime texture.
 
 Both commands refuse an existing output directory, so an artist source or earlier review cannot
@@ -160,3 +160,35 @@ The owner-supplied stone-wall revision replaces the two solid-wall frames with g
 masonry. It also retouches appended walking and timed-bomb poses, the cloud, lair and mobs
 inside their existing rectangles. The PNG is adopted without resampling or repainting;
 frame IDs, dimensions, pivots, anchors and animation metadata remain unchanged.
+
+## 3D material maps
+
+The final ten assigned slots are shared, artist-editable 48×48 maps for the Three.js arena:
+
+- `material.floor.top.0` and `material.floor.top.1`;
+- `material.wall.top` and `material.wall.side`;
+- `material.block.top` and `material.block.side`;
+- `material.lair.top` and `material.lair.side`;
+- `material.rim.top` and `material.rim.side`.
+
+They use opaque, hard-edged retro patterns based on sandstone `#d8c69d`, field green `#879b76`,
+brick `#b55336`, slate `#3e4e59`, flame gold `#ffc462` and ink `#263445`. The 3D renderer keeps
+the material color white so edits to these atlas rectangles remain the authoritative texture
+colors. Top and side maps are intentionally distinct; do not derive private recolored copies in
+renderer code.
+
+The repository-only extension helper documents and reproduces how these slots were added to the
+previous 1120×1792 source without resampling its assigned frames:
+
+```sh
+node e2e/scripts/art-atlas-materials.mjs \
+  --source path/to/previous-arena-source.png \
+  --manifest path/to/previous-arena-source.json \
+  --out target/material-extension
+```
+
+It renders the ten placeholders through the existing Pixi/browser Canvas pipeline, copies only
+their canonical rectangles, and writes `pixel-proof.json`. The previous assigned drawings stay
+unchanged; acceptance evidence lives in the [release record](../../docs/releases.md). Use the normal
+`art:template` and `art:export` commands for ongoing artist work; this helper is only for auditing
+or reproducing the one-time append operation.

@@ -1,7 +1,7 @@
 import { defineConfig, devices } from '@playwright/test'
 
 export const BASE_URL = process.env.E2E_BASE_URL ?? 'http://127.0.0.1:8085'
-const defaultWorkers = process.env.CI ? 1 : 2
+const defaultWorkers = process.env.CI || process.platform === 'darwin' ? 1 : 2
 
 export default defineConfig({
   testDir: './tests',
@@ -14,10 +14,10 @@ export default defineConfig({
   expect: { timeout: 10_000 },
   use: {
     baseURL: BASE_URL,
-    // Keep headless Linux WebGL and compositing on the same ANGLE backend.
+    // Keep headless macOS and CI WebGL/compositing on the same ANGLE backend.
     // Hybrid software compositing synchronously reads back each canvas frame
     // and can delay native key events beyond the real game's turn window.
-    launchOptions: process.env.CI && process.platform === 'linux'
+    launchOptions: process.platform === 'darwin' || process.env.CI
       ? { args: ['--enable-gpu', '--use-gl=angle', '--use-angle=swiftshader'] }
       : undefined,
     // Personal gameplay frames contain stable seat capabilities. Native trace capture

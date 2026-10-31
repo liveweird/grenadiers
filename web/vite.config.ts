@@ -1,8 +1,9 @@
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vitest/config'
+import { productionArenaBoundary } from './scripts/renderer-boundary'
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), productionArenaBoundary()],
   server: {
     host: '127.0.0.1',
     port: 5177,

@@ -1,0 +1,104 @@
+import { expect, test } from '@playwright/test'
+import {
+  assertCleanAudit, beginAudit, canvasScreenshot, expectDifferent, openFixture, show,
+  type BoardName, type BrowserAudit,
+} from './three-arena-api'
+
+let audit: BrowserAudit | undefined
+test.beforeEach(async ({ context, page }) => {
+  audit = undefined
+  audit = await beginAudit(context, page)
+})
+test.afterEach(() => { if (audit) assertCleanAudit(audit) })
+
+test('production GPU finish pass preserves sRGB midtones and separates primary colors', async ({ page }, testInfo) => {
+  await openFixture(page)
+  const samples = await page.evaluate(() => window.grenadiersThreeArena.calibrateColors())
+  const screenshotPath = testInfo.outputPath('production-gpu-color-calibration.png')
+  await page.locator('[data-calibration="production-finish-pass"]').screenshot({ path: screenshotPath })
+  await testInfo.attach('production-gpu-color-calibration', {
+    path: screenshotPath, contentType: 'image/png',
+  })
+
+  expect(samples.gray.alpha).toBe(255)
+  for (const channel of [samples.gray.red, samples.gray.green, samples.gray.blue]) {
+    expect(channel, JSON.stringify(samples)).toBeGreaterThanOrEqual(110)
+    expect(channel, JSON.stringify(samples)).toBeLessThanOrEqual(155)
+  }
+  expect(Math.max(samples.gray.red, samples.gray.green, samples.gray.blue)
+    - Math.min(samples.gray.red, samples.gray.green, samples.gray.blue)).toBeLessThanOrEqual(16)
+  expect(samples.red.red).toBeGreaterThan(samples.red.green * 2)
+  expect(samples.red.red).toBeGreaterThan(samples.red.blue * 2)
+  expect(samples.green.green).toBeGreaterThan(samples.green.red * 2)
+  expect(samples.green.green).toBeGreaterThan(samples.green.blue * 2)
+  expect(samples.blue.blue).toBeGreaterThan(samples.blue.red * 2)
+  expect(samples.blue.blue).toBeGreaterThan(samples.blue.green * 2)
+})
+
+test('native camera frames all board sizes and the complete public entity showcase', async ({ page }, testInfo) => {
+  const initial = await openFixture(page)
+  expect(initial).toMatchObject({ canvasCount: 1, canvasVisible: false, destroyed: false })
+
+  for (const board of ['small', 'medium', 'large'] satisfies BoardName[]) {
+    const baselineState = await show(page, board, 'empty')
+    expect(baselineState.reducedMotion).toBe(testInfo.project.name.includes('reduced'))
+    const baseline = await canvasScreenshot(page, testInfo, `${board}-baseline`)
+    await show(page, board, 'showcase')
+    const showcase = await canvasScreenshot(page, testInfo, `${board}-showcase`)
+    expectDifferent(showcase, baseline, `${board} showcase must alter production WebGL pixels`)
+  }
+})
+
+test('projected actor and bomb pixels revert exactly when public rows are removed', async ({ page }, testInfo) => {
+  await openFixture(page)
+  await show(page, 'large', 'empty')
+  const baseline = await canvasScreenshot(page, testInfo, 'entity-removal-baseline')
+  const projected = await page.evaluate(() => ({
+    actor: window.grenadiersThreeArena.projectCell('large', 1, 1),
+    bomb: window.grenadiersThreeArena.projectCell('large', 3, 1),
+  }))
+  expect(projected.actor.x).toBeGreaterThan(0)
+  expect(projected.actor.y).toBeGreaterThan(0)
+  expect(projected.bomb.x).toBeGreaterThan(projected.actor.x)
+
+  await show(page, 'large', 'actorBomb')
+  const populated = await canvasScreenshot(page, testInfo, 'projected-actor-bomb')
+  expectDifferent(populated, baseline, 'canonical actor/bomb atlas cards must change projected pixels')
+
+  await show(page, 'large', 'empty')
+  const removed = await canvasScreenshot(page, testInfo, 'entity-removal-restored')
+  expect(removed.equals(baseline), 'removed entities must leave no pixels or shadows').toBe(true)
+})
+
+test('teleport, suspend, room replacement, context restoration, and destroy leave no ghosts', async ({ page }, testInfo) => {
+  await openFixture(page)
+  await show(page, 'large', 'empty')
+  const baseline = await canvasScreenshot(page, testInfo, 'lifecycle-baseline')
+
+  await show(page, 'large', 'teleportA')
+  const beforeTeleport = await canvasScreenshot(page, testInfo, 'teleport-before')
+  await show(page, 'large', 'teleportB')
+  const afterTeleport = await canvasScreenshot(page, testInfo, 'teleport-after')
+  expectDifferent(beforeTeleport, afterTeleport, 'teleport must reappear at the new projected position')
+
+  const suspended = await page.evaluate(() => window.grenadiersThreeArena.suspend())
+  expect(suspended).toMatchObject({ scene: null, canvasCount: 1, canvasVisible: false })
+  await show(page, 'large', 'newRoom')
+  const newRoom = await canvasScreenshot(page, testInfo, 'new-room-after-suspend')
+  expect(newRoom.equals(baseline), 'new room must resume without prior actor history').toBe(true)
+
+  await show(page, 'large', 'showcase')
+  const beforeContextLoss = await canvasScreenshot(page, testInfo, 'context-before')
+  const context = await page.evaluate(() => window.grenadiersThreeArena.loseAndRestoreContext())
+  if (context.supported) {
+    expect(context.lost.canvasVisible).toBe(false)
+    expect(context.restored).toMatchObject({ canvasCount: 1, canvasVisible: true })
+    const afterContextRestore = await canvasScreenshot(page, testInfo, 'context-restored')
+    expectDifferent(afterContextRestore, baseline, 'restored context must redraw the nonempty showcase')
+    expect(beforeContextLoss.equals(baseline), 'pre-loss showcase must not equal its empty baseline').toBe(false)
+  }
+
+  const destroyed = await page.evaluate(() => window.grenadiersThreeArena.destroy())
+  expect(destroyed).toMatchObject({ destroyed: true, scene: null, canvasCount: 0 })
+  expect(destroyed.pendingAnimationFrames, 'renderer-owned animation frame must be cancelled').toBe(0)
+})

@@ -10,6 +10,13 @@ waiting on a stated dependency. Explicit user requests and accepted plans are co
 new assistant suggestions start as `[new]`. Existing authorization carries forward without
 repeated approval for routine implementation choices. Entries are not delivery-date promises.
 
+## Arena presentation
+
+- [todo] **ARENA3D — human visual feedback.** Evaluate camera/depth, sprite detail, readability,
+  texture revisions and filter strength after the first playable version.
+- [new] **Full 3D character models.** Consider after the billboard trial; retain the actor-view
+  boundary while commissioning any required models, rigs and animation.
+
 ## Single-player
 
 - [todo] **SOLO-CPU — validate and tune the staged hybrid.** Compare the

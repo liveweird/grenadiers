@@ -1,5 +1,6 @@
 import { createResponsiveBrowserContexts } from '../tests/support/browser-contexts'
-import { expect, test, type Page } from '@playwright/test'
+import { expect, test } from '@playwright/test'
+import { arenaTilePixels } from '../tests/support/compositor'
 import { expectPaintedCanvas, latestSnapshot, observeGame, visibleActor, type ObservedGame } from '../tests/support/duel'
 import { moveTo } from '../tests/support/movement'
 import { admissionBaseline, disconnectTransport, installTransportProbe } from '../tests/support/reconnect'
@@ -19,30 +20,6 @@ const collections = (game: ObservedGame) => snapshots(game).flatMap(({ events })
 
 const cloakTicks = (game: ObservedGame) => visibleActor(latestSnapshot(game), 'one')?.effects
   .find(({ kind }) => kind === 'invisibilityCloak')?.remainingTicks ?? 0
-
-async function tilePixels(page: Page, column: number, row: number): Promise<string[]> {
-  const png = (await page.locator('.game-arena canvas').screenshot()).toString('base64')
-  return page.evaluate(async ({ encoded, column: x, row: y }) => {
-    const image = new Image()
-    image.src = `data:image/png;base64,${encoded}`
-    await image.decode()
-    const canvas = document.createElement('canvas')
-    canvas.width = image.width
-    canvas.height = image.height
-    const context = canvas.getContext('2d')
-    if (!context) throw new Error('Screenshot decoder unavailable')
-    context.drawImage(image, 0, 0)
-    const width = image.width / 15
-    const height = image.height / 13
-    const pixels = context.getImageData(Math.floor(x * width), Math.floor(y * height),
-      Math.ceil(width), Math.ceil(height)).data
-    const result: string[] = []
-    for (let index = 0; index < pixels.length; index += 16) {
-      result.push(`${pixels[index]},${pixels[index + 1]},${pixels[index + 2]},${pixels[index + 3]}`)
-    }
-    return result
-  }, { encoded: png, column, row })
-}
 
 test('two browsers observe recipient-private Cloak through reconnect and exact expiry', async ({ browser }, info) => {
   const contexts = await createResponsiveBrowserContexts(browser)
@@ -79,8 +56,8 @@ test('two browsers observe recipient-private Cloak through reconnect and exact e
     })
     await moveTo(one, games[0], { column: 1, row: 1 })
     await Promise.all([one, two].map(expectPaintedCanvas))
-    const ownerFloor = await tilePixels(one, 2, 1)
-    const emptyFloor = await tilePixels(two, 2, 1)
+    const ownerFloor = await arenaTilePixels(one, 2, 1)
+    const emptyFloor = await arenaTilePixels(two, 2, 1)
     await one.screenshot({ path: info.outputPath('cloak-before-collection-desktop-en.png'), fullPage: true })
     expect(await two.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false)
     await two.screenshot({ path: info.outputPath('cloak-before-collection-polish-320-reduced.png'), fullPage: true })
@@ -99,8 +76,8 @@ test('two browsers observe recipient-private Cloak through reconnect and exact e
     const settledOwner = visibleActor(latestSnapshot(games[0]), 'one')
     if (!settledOwner) throw new Error('Cloak owner must remain visible to its own client')
     const settledOwnerPosition = { ...settledOwner.position }
-    expect(await tilePixels(one, 2, 1)).not.toEqual(ownerFloor)
-    expect(await tilePixels(two, 2, 1)).toEqual(emptyFloor)
+    expect(await arenaTilePixels(one, 2, 1)).not.toEqual(ownerFloor)
+    expect(await arenaTilePixels(two, 2, 1)).toEqual(emptyFloor)
 
     const collectedAt = collections(games[0])[0].tick
     const deadline = collectedAt + 600
@@ -121,7 +98,7 @@ test('two browsers observe recipient-private Cloak through reconnect and exact e
     expect(visibleActor(latestSnapshot(games[0]), 'one')?.position).toEqual(settledOwnerPosition)
     await expect.poll(() => visibleActor(latestSnapshot(games[1]), 'one')?.position)
       .toEqual(settledOwnerPosition)
-    expect(await tilePixels(two, 2, 1)).not.toEqual(emptyFloor)
+    expect(await arenaTilePixels(two, 2, 1)).not.toEqual(emptyFloor)
   } finally {
     await Promise.all(contexts.map((context) => context.close()))
   }

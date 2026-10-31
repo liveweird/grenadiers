@@ -1,8 +1,13 @@
 import type { Page } from '@playwright/test'
+import { projectedCellFootprint } from './arena-projection'
 
 export async function arenaTilePixels(page: Page, column: number, row: number): Promise<string[]> {
-  const encoded = (await page.locator('.game-arena canvas').screenshot()).toString('base64')
-  return page.evaluate(async ({ encoded: png, column: x, row: y }) => {
+  const canvas = page.locator('.game-arena canvas')
+  const box = await canvas.boundingBox()
+  if (!box) throw new Error('Arena canvas is not visible')
+  const rectangle = projectedCellFootprint({ width: box.width, height: box.height }, column, row)
+  const encoded = (await canvas.screenshot()).toString('base64')
+  return page.evaluate(async ({ encoded: png, bounds, requested }) => {
     const image = new Image()
     image.src = `data:image/png;base64,${png}`
     await image.decode()
@@ -12,16 +17,18 @@ export async function arenaTilePixels(page: Page, column: number, row: number): 
     const context = canvas.getContext('2d')
     if (!context) throw new Error('Screenshot decoder unavailable')
     context.drawImage(image, 0, 0)
-    const width = image.width / 15
-    const height = image.height / 13
-    const pixels = context.getImageData(Math.floor(x * width), Math.floor(y * height),
-      Math.ceil(width), Math.ceil(height)).data
+    const scale = image.width / bounds.width
+    const data = context.getImageData(
+      Math.floor(requested.x * scale), Math.floor(requested.y * scale),
+      Math.max(1, Math.ceil(requested.width * scale)),
+      Math.max(1, Math.ceil(requested.height * scale)),
+    ).data
     const result: string[] = []
-    for (let index = 0; index < pixels.length; index += 16) {
-      result.push(`${pixels[index]},${pixels[index + 1]},${pixels[index + 2]},${pixels[index + 3]}`)
+    for (let index = 0; index < data.length; index += 4) {
+      result.push(`${data[index]},${data[index + 1]},${data[index + 2]},${data[index + 3]}`)
     }
     return result
-  }, { encoded, column, row })
+  }, { encoded, bounds: box, requested: rectangle })
 }
 
 export async function captureArenaTiles(
@@ -51,19 +58,25 @@ export async function captureArenaTiles(
     const scale = image.width / geometry.width
     const arenaX = (bounds.x + geometry.scrollX) * scale
     const arenaY = (bounds.y + geometry.scrollY) * scale
-    const tileWidth = bounds.width * scale / 15
-    const tileHeight = bounds.height * scale / 13
-    return requested.map(({ column, row }) => {
+    return requested.map(({ rectangle }) => {
       const data = context.getImageData(
-        Math.floor(arenaX + column * tileWidth), Math.floor(arenaY + row * tileHeight),
-        Math.ceil(tileWidth), Math.ceil(tileHeight),
+        Math.floor(arenaX + rectangle.x * scale), Math.floor(arenaY + rectangle.y * scale),
+        Math.max(1, Math.ceil(rectangle.width * scale)),
+        Math.max(1, Math.ceil(rectangle.height * scale)),
       ).data
       const result: string[] = []
-      for (let index = 0; index < data.length; index += 16) {
+      for (let index = 0; index < data.length; index += 4) {
         result.push(`${data[index]},${data[index + 1]},${data[index + 2]},${data[index + 3]}`)
       }
       return result
     })
-  }, { png: encoded, bounds: box, geometry: pageGeometry, requested: cells })
+  }, {
+    png: encoded, bounds: box, geometry: pageGeometry,
+    requested: cells.map(({ column, row }) => ({
+      rectangle: projectedCellFootprint({
+        width: box.width, height: box.height,
+      }, column, row),
+    })),
+  })
   return { screenshot, pixels }
 }

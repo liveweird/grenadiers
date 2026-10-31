@@ -13,6 +13,7 @@ export default defineConfig({
         terrainPixel: resolve(import.meta.dirname, 'renderer-diagnostics/terrain-pixel.html'),
         artAtlas: resolve(import.meta.dirname, 'renderer-diagnostics/art-atlas.html'),
         atlasGameplay: resolve(import.meta.dirname, 'renderer-diagnostics/atlas-gameplay.html'),
+        threeArena: resolve(import.meta.dirname, 'renderer-diagnostics/three-arena.html'),
       },
     },
   },

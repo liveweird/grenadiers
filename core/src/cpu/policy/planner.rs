@@ -15,7 +15,8 @@ use super::movement::{
 };
 pub(super) use super::placement::alignment_direction;
 use super::placement::{
-    TurnAlignment, centered_for_placement, ordinary_turn_alignment, placement_center_threshold,
+    TurnAlignment, adjacent_block, centered_for_placement, ordinary_turn_alignment,
+    placement_center_threshold,
 };
 use super::{ControlPlan, MAX_HOLD_TICKS, MAX_ROUTE_CELLS, PolicyError, UtilityMemory};
 
@@ -98,6 +99,18 @@ pub(crate) fn plan_respawn_v25(
     plan_inner(observation, memory, rng, work, PlannerVersion::RespawnV25)
 }
 
+pub(crate) fn plan_spike_pits_v26(
+    observation: &Observation,
+    memory: &UtilityMemory,
+    rng: &mut CpuRng,
+    work: &mut WorkBudget,
+) -> Result<ControlPlan, PolicyError> {
+    if observation.parts().rules.version != 10 {
+        return Err(PolicyError::InvalidObservation);
+    }
+    plan_inner(observation, memory, rng, work, PlannerVersion::SpikePitsV26)
+}
+
 fn plan_inner(
     observation: &Observation,
     memory: &UtilityMemory,
@@ -178,7 +191,7 @@ fn plan_inner(
     if can_prepare_bomb
         && centered_for_placement(observation, actor, current)
         && !parts.pickups.iter().any(|pickup| pickup.cell == current)
-        && let Some(route) = escape_route(observation, current, actor.bomb_range, work)
+        && let Some(route) = escape_route(observation, current, work)
         && escape_before_fuse(
             actor,
             route.len().saturating_sub(1),
@@ -309,7 +322,6 @@ fn navigate(
 fn escape_route(
     observation: &Observation,
     origin: CellId,
-    range: u16,
     work: &mut WorkBudget,
 ) -> Option<Vec<CellId>> {
     let mut queue = VecDeque::from([vec![origin]]);
@@ -318,7 +330,7 @@ fn escape_route(
             return None;
         }
         let cell = *path.last()?;
-        if path.len() >= 3 && refuge_outside_cross(origin, cell, range) {
+        if path.len() >= 3 && cell.column != origin.column && cell.row != origin.row {
             return Some(path);
         }
         if path.len() == MAX_ROUTE_CELLS {
@@ -344,10 +356,6 @@ fn escape_route(
         }
     }
     None
-}
-
-fn refuge_outside_cross(origin: CellId, refuge: CellId, _range: u16) -> bool {
-    refuge.column != origin.column && refuge.row != origin.row
 }
 
 fn escape_before_fuse(actor: &crate::cpu::VisibleActor, steps: usize, fuse: u64) -> bool {
@@ -387,11 +395,4 @@ fn movement_plan(
         hold_ticks: hold_ticks(actor, next, desired),
         next_memory: memory,
     }
-}
-
-fn adjacent_block(observation: &Observation, cell: CellId) -> bool {
-    STEPS
-        .iter()
-        .filter_map(|(_, dc, dr)| offset(cell, *dc, *dr))
-        .any(|next| observation.parts().arena.blocks.contains(&next))
 }

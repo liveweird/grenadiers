@@ -38,7 +38,7 @@ pub(super) fn plan_lairs_inner(
     let parts = observation.parts();
     if parts.rules.version != rules_version
         || (rules_version == 8 && observation.lairs().is_none())
-        || (rules_version == 9 && observation.respawn_lairs().is_none())
+        || (matches!(rules_version, 9 | 10) && observation.respawn_lairs().is_none())
     {
         return Err(PolicyError::InvalidObservation);
     }

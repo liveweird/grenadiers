@@ -186,6 +186,55 @@ pub fn plan_respawn_v25_with_origin(
 }
 
 #[allow(clippy::too_many_arguments)]
+pub fn plan_spike_pits_v26_with_origin(
+    observation: &Observation,
+    memory: &UtilityMemory,
+    history: &ObservedHazardMemory,
+    settled_stop_tick: Tick,
+    origin: Option<&PlantEscapeOrigin>,
+    rng: &mut CpuRng,
+    work: &mut WorkBudget,
+) -> Result<LairSurvivalPlan, PolicyError> {
+    if observation.parts().rules.version != 10 {
+        return Err(PolicyError::InvalidObservation);
+    }
+    if observation.respawn_lairs().is_none() {
+        return super::planner::plan_inner(
+            observation,
+            memory,
+            history,
+            settled_stop_tick,
+            origin,
+            rng,
+            work,
+            true,
+            true,
+            true,
+            true,
+            true,
+        )
+        .map(|survival| LairSurvivalPlan {
+            survival,
+            contact: None,
+        });
+    }
+    super::lair_planner::plan_lairs_inner(
+        observation,
+        memory,
+        history,
+        settled_stop_tick,
+        origin,
+        rng,
+        work,
+        10,
+        true,
+        true,
+        true,
+        true,
+    )
+}
+
+#[allow(clippy::too_many_arguments)]
 fn plan_respawn_policy(
     observation: &Observation,
     memory: &UtilityMemory,

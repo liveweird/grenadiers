@@ -1,6 +1,6 @@
 use crate::cpu::policy::PolicyError;
 use crate::cpu::routing::PulseLease;
-use crate::cpu::{MemoryKey, MovementIntent, Observation};
+use crate::cpu::{MemoryKey, MovementIntent, Observation, WorkBudget};
 use crate::game::Tick;
 
 use super::MAX_PLAN_AGE_TICKS;
@@ -44,6 +44,14 @@ impl CommittedPulse {
         } else {
             crate::cpu::routing::storm::stationary_deadlines_at(&basis, current.parts().tick)
         };
+        let spike_pits_match = current.parts().rules.version != 10
+            || lease
+                .spike_pits_match_at(
+                    first_execution,
+                    current,
+                    &mut WorkBudget::new(crate::cpu::survival::WORK_ALLOWANCE),
+                )
+                .unwrap_or(false);
         if age > MAX_PLAN_AGE_TICKS
             || current.parts().tick > admission_tick
             || lease.basis_tick() != basis.parts().tick
@@ -55,6 +63,7 @@ impl CommittedPulse {
             || !lease.start_window().contains(first_execution)
             || !compatible(&basis, current)
             || !crate::cpu::routing::storm::observation_fits(&basis, current, storm_deadlines)
+            || !spike_pits_match
             || !lease.bracelet_guard_allows(&basis)
             || !lease.bracelet_guard_allows(current)
             || !lease.matches_initial_pose(current_actor.position, current_actor.heading)
@@ -74,6 +83,15 @@ impl CommittedPulse {
         let Some(next_update) = current_tick.0.checked_add(1) else {
             return PulseStatus::Invalidated;
         };
+        let spike_pits_match = current.parts().rules.version != 10
+            || self
+                .lease
+                .spike_pits_match_at(
+                    self.first_execution,
+                    current,
+                    &mut WorkBudget::new(crate::cpu::survival::WORK_ALLOWANCE),
+                )
+                .unwrap_or(false);
         if current.parts().tick > current_tick
             || next_update >= self.lease.safe_until().0
             || !compatible(&self.basis, current)
@@ -83,6 +101,7 @@ impl CommittedPulse {
                 self.lease
                     .storm_deadlines_at(self.first_execution, current.parts().tick),
             )
+            || !spike_pits_match
             || !self.lease.bracelet_guard_allows(current)
         {
             return PulseStatus::Invalidated;
@@ -151,6 +170,15 @@ impl CommittedPulse {
             || self.basis.parts().world != origin_key.world
             || self.basis.parts().recipient != origin_key.cpu_seat
             || !valid_origin(origin, current)
+            || (current.parts().rules.version == 10
+                && !self
+                    .lease
+                    .spike_pits_match_at(
+                        self.first_execution,
+                        current,
+                        &mut WorkBudget::new(crate::cpu::survival::WORK_ALLOWANCE),
+                    )
+                    .unwrap_or(false))
         {
             return None;
         }

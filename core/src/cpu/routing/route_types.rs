@@ -1,5 +1,5 @@
-use crate::cpu::MemoryKey;
 use crate::cpu::forecast::{ForecastEvolution, TickWindow};
+use crate::cpu::{MemoryKey, Observation, WorkBudget};
 use crate::game::{Direction, Position, Tick};
 
 use super::{RouteAssurance, RouteFailure, RouteMode};
@@ -53,6 +53,7 @@ pub struct RouteLane {
         Position,
         Direction,
         Option<super::storm::DeadlineBounds>,
+        super::SpikePitGuard,
     )>,
 }
 
@@ -65,6 +66,7 @@ impl RouteLane {
             Position,
             Direction,
             Option<super::storm::DeadlineBounds>,
+            super::SpikePitGuard,
         )>,
     ) -> Result<Self, RouteFailure> {
         if timings.len() > usize::from(MAX_ROUTE_STEPS)
@@ -111,6 +113,26 @@ impl RouteLane {
             .binary_search_by_key(&snapshot_tick, |pose| pose.0)
             .ok()
             .and_then(|index| self.poses[index].3)
+    }
+
+    #[must_use]
+    pub fn spike_pit_guard_at(&self, snapshot_tick: Tick) -> Option<&super::SpikePitGuard> {
+        self.poses
+            .binary_search_by_key(&snapshot_tick, |pose| pose.0)
+            .ok()
+            .map(|index| &self.poses[index].4)
+    }
+
+    pub fn spike_pits_match_at(
+        &self,
+        observation: &Observation,
+        work: &mut WorkBudget,
+    ) -> Result<bool, RouteFailure> {
+        let Some(guard) = self.spike_pit_guard_at(observation.parts().tick) else {
+            work.try_take(1).map_err(|_| RouteFailure::WorkExhausted)?;
+            return Ok(false);
+        };
+        guard.matches(observation, work)
     }
 }
 

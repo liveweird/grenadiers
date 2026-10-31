@@ -140,6 +140,11 @@ fn traversable(observation: &Observation, cell: CellId) -> bool {
             || !parts.arena.blocks.contains(&cell))
         && !parts.oil.iter().any(|oil| oil.cell == cell)
         && !parts.pickups.iter().any(|pickup| pickup.cell == cell)
+        && !observation.spike_pits().is_some_and(|pits| {
+            pits.pits()
+                .iter()
+                .any(|pit| pit.cell == cell && pit.phase != crate::game::SpikePitPhase::Idle)
+        })
 }
 
 pub(super) fn score(lease: &crate::cpu::routing::PulseLease, target: CellId) -> u32 {

@@ -42,6 +42,8 @@ pub(super) fn apply_move(
                 MovementIntent::Direction(direction),
                 tick,
             )?;
+            lane.pits
+                .advance(tick, segments[0].start(), &segments, work)?;
             node.assumptions.extend(check_transition_all(
                 context,
                 forecasts,
@@ -80,12 +82,16 @@ pub(super) fn apply_move(
                 },
                 work,
             )?);
+            lane.pits
+                .stationary_until(add_tick(stop, 3)?, lane.motion.position, work)?;
         }
         if context.storm.is_some() {
             for offset in 0..3 {
                 super::storm::charge_tick(context.storm, work)?;
                 let tick = add_tick(stop, offset)?;
                 let segment = advance(context, &mut lane.motion, MovementIntent::Stop, tick)?;
+                lane.pits
+                    .advance(tick, segment[0].start(), &segment, work)?;
                 node.assumptions.extend(check_transition_all(
                     context,
                     forecasts,
@@ -156,12 +162,16 @@ pub(super) fn apply_wait(
                 work,
             )?);
             lane.motion.stop();
+            lane.pits
+                .stationary_until(end, lane.motion.position, work)?;
         }
         if context.storm.is_some() {
             for tick in lane.ready.0..end.0 {
                 super::storm::charge_tick(context.storm, work)?;
                 let tick = crate::game::Tick(tick);
                 let segment = advance(context, &mut lane.motion, MovementIntent::Stop, tick)?;
+                lane.pits
+                    .advance(tick, segment[0].start(), &segment, work)?;
                 node.assumptions.extend(check_transition_all(
                     context,
                     forecasts,
@@ -198,7 +208,13 @@ pub(super) fn terminal(
         {
             return Ok(false);
         }
+        let mut pits = lane.pits.clone();
         if context.storm.is_none() {
+            match pits.stationary_until(request.survive_until, lane.motion.position, work) {
+                Ok(()) => {}
+                Err(RouteFailure::NoRoute) => return Ok(false),
+                Err(error) => return Err(error),
+            }
             match check_stationary_all(
                 forecasts,
                 lane.motion.position,
@@ -224,6 +240,11 @@ pub(super) fn terminal(
             super::storm::charge_tick(context.storm, work)?;
             let tick = crate::game::Tick(tick);
             let segment = advance(context, &mut simulation, MovementIntent::Stop, tick)?;
+            match pits.advance(tick, segment[0].start(), &segment, work) {
+                Ok(()) => {}
+                Err(RouteFailure::NoRoute) => return Ok(false),
+                Err(error) => return Err(error),
+            }
             match check_transition_all(
                 context,
                 forecasts,

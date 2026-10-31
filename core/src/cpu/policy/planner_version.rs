@@ -6,6 +6,7 @@ pub(super) enum PlannerVersion {
     RespawnV23,
     RespawnV24,
     RespawnV25,
+    SpikePitsV26,
 }
 
 impl PlannerVersion {
@@ -14,14 +15,20 @@ impl PlannerVersion {
     }
 
     pub(super) const fn persistent_goals(self) -> bool {
-        matches!(self, Self::RespawnV23 | Self::RespawnV24 | Self::RespawnV25)
+        matches!(
+            self,
+            Self::RespawnV23 | Self::RespawnV24 | Self::RespawnV25 | Self::SpikePitsV26
+        )
     }
 
     pub(super) const fn strategic_goals(self) -> bool {
-        matches!(self, Self::RespawnV24 | Self::RespawnV25)
+        matches!(
+            self,
+            Self::RespawnV24 | Self::RespawnV25 | Self::SpikePitsV26
+        )
     }
 
     pub(super) const fn failed_plant_recovery(self) -> bool {
-        matches!(self, Self::RespawnV25)
+        matches!(self, Self::RespawnV25 | Self::SpikePitsV26)
     }
 }

@@ -8,7 +8,7 @@ pub(super) fn visible_rivals_allow_segment(
     start: crate::game::Position,
     end: crate::game::Position,
 ) -> bool {
-    if observation.parts().rules.version != 9 || start == end {
+    if !matches!(observation.parts().rules.version, 9 | 10) || start == end {
         return true;
     }
     let (direction, requested) = if end.x > start.x && end.y == start.y {

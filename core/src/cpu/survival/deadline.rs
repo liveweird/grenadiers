@@ -13,6 +13,9 @@ pub(super) fn ordinary_route_end(
     work: &mut WorkBudget,
 ) -> Option<Tick> {
     let parts = observation.parts();
+    if parts.rules.version == 10 {
+        return Some(horizon_end);
+    }
     if !matches!(&parts.bombs, BombKnowledge::Visible(bombs) if bombs.is_empty()) {
         return Some(horizon_end);
     }
@@ -40,7 +43,8 @@ pub(super) fn ordinary_movement_is_clear(
     work: &mut WorkBudget,
 ) -> bool {
     let parts = observation.parts();
-    if !movement_is_nonstop
+    if parts.rules.version == 10
+        || !movement_is_nonstop
         || !matches!(&parts.bombs, BombKnowledge::Visible(bombs) if bombs.is_empty())
         || !parts.flames.is_empty()
     {

@@ -1,5 +1,5 @@
-use crate::cpu::MemoryKey;
 use crate::cpu::forecast::TickWindow;
+use crate::cpu::{MemoryKey, Observation, WorkBudget};
 use crate::game::{Direction, EntityId, Position, Tick};
 
 use super::super::MovementIntent;
@@ -76,6 +76,7 @@ pub struct PulseLease {
     initial_heading: Direction,
     poses: Vec<PoseBounds>,
     storm_deadlines: Vec<(Tick, Vec<Option<super::storm::DeadlineBounds>>)>,
+    spike_pit_guards: Vec<(Tick, Vec<super::SpikePitGuard>)>,
     bracelet_guard: Option<BraceletGuard>,
 }
 
@@ -90,6 +91,7 @@ impl PulseLease {
         initial_heading: Direction,
         poses: Vec<PoseBounds>,
         storm_deadlines: Vec<(Tick, Vec<Option<super::storm::DeadlineBounds>>)>,
+        spike_pit_guards: Vec<(Tick, Vec<super::SpikePitGuard>)>,
     ) -> Result<Self, RouteFailure> {
         let expected_lanes = request
             .start_window
@@ -102,11 +104,18 @@ impl PulseLease {
             || poses.len() != usize::from(request.hold_ticks) + 1
             || poses.len() > 13
             || storm_deadlines.len() != expected_lanes
+            || spike_pit_guards.len() != expected_lanes
             || storm_deadlines
                 .iter()
                 .zip(request.start_window.start.0..request.start_window.end.0)
                 .any(|((start, deadlines), expected)| {
                     *start != Tick(expected) || deadlines.len() < poses.len()
+                })
+            || spike_pit_guards
+                .iter()
+                .zip(request.start_window.start.0..request.start_window.end.0)
+                .any(|((start, guards), expected)| {
+                    *start != Tick(expected) || guards.len() < poses.len()
                 })
         {
             return Err(RouteFailure::Capacity);
@@ -123,6 +132,7 @@ impl PulseLease {
             initial_heading,
             poses,
             storm_deadlines,
+            spike_pit_guards,
             bracelet_guard: None,
         })
     }
@@ -195,6 +205,40 @@ impl PulseLease {
             .get(index)
             .filter(|(start, _)| *start == first_execution)
             .and_then(|(_, deadlines)| deadlines.get(snapshot).copied().flatten())
+    }
+
+    #[must_use]
+    pub fn spike_pit_guard_at(
+        &self,
+        first_execution: Tick,
+        observation_tick: Tick,
+    ) -> Option<&super::SpikePitGuard> {
+        let index = first_execution
+            .0
+            .checked_sub(self.start_window.start.0)
+            .and_then(|index| usize::try_from(index).ok())?;
+        let admission_tick = first_execution.0.checked_sub(1)?;
+        let snapshot = observation_tick
+            .0
+            .checked_sub(admission_tick)
+            .and_then(|index| usize::try_from(index).ok())?;
+        self.spike_pit_guards
+            .get(index)
+            .filter(|(start, _)| *start == first_execution)
+            .and_then(|(_, guards)| guards.get(snapshot))
+    }
+
+    pub fn spike_pits_match_at(
+        &self,
+        first_execution: Tick,
+        observation: &Observation,
+        work: &mut WorkBudget,
+    ) -> Result<bool, RouteFailure> {
+        let Some(guard) = self.spike_pit_guard_at(first_execution, observation.parts().tick) else {
+            work.try_take(1).map_err(|_| RouteFailure::WorkExhausted)?;
+            return Ok(false);
+        };
+        guard.matches(observation, work)
     }
 }
 

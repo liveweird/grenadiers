@@ -15,13 +15,11 @@ use super::pulse_support::{
 };
 use super::safety::{static_segment_clear, stationary_segment};
 use super::types::{PulseLease, PulseRequest};
-use super::validation::{self, Context};
+use super::validation::{self as routing_validation, Context};
 use super::{RouteAssurance, RouteFailure, RouteMode};
 
-const MAX_PULSE_TICKS: u8 = 12;
-const MAX_CONDITIONAL_TICKS: u8 = 3;
-const MAX_ACCEPTED_AGE: u64 = 6;
-const STOPPED_PUBLICATION_TICKS: u64 = 3;
+mod validation;
+use validation::{MAX_CONDITIONAL_TICKS, validate_request};
 
 #[derive(Clone, Copy)]
 pub(crate) struct PulseOriginGrace {
@@ -123,7 +121,7 @@ pub(super) fn certify_pulse_inner(
     contact: Option<&MobContactEnvelope>,
     work: &mut WorkBudget,
 ) -> Result<PulseLease, RouteFailure> {
-    let context = validation::validate(
+    let context = routing_validation::validate(
         observation,
         forecast,
         request.start_window,
@@ -131,8 +129,10 @@ pub(super) fn certify_pulse_inner(
     )?;
     validate_request(&context, forecast, request)?;
     let initial = Motion::stopped(&context, request.start_window.start);
+    let initial_pits = super::spike_pits::PitTrajectory::from_observation(observation, work)?;
     let mut poses = vec![aggregate(std::slice::from_ref(&initial))?];
     let mut scenarios = Vec::new();
+    let mut pit_scenarios = Vec::new();
     let mut assumptions = BTreeSet::new();
 
     certify_wait_before_start(
@@ -166,19 +166,31 @@ pub(super) fn certify_pulse_inner(
     for start in request.start_window.start.0..request.start_window.end.0 {
         let start = Tick(start);
         let mut motion = initial.clone();
+        let mut pits = initial_pits.clone();
         for tick in super::route_time::add_tick(forecast.basis_tick(), 1)?.0..start.0 {
             super::storm::charge_tick(context.storm, work)?;
-            let _ = advance(&context, &mut motion, MovementIntent::Stop, Tick(tick))?;
+            let tick = Tick(tick);
+            let segments = advance(&context, &mut motion, MovementIntent::Stop, tick)?;
+            pits.advance(tick, segments[0].start(), &segments, work)?;
         }
         scenarios.push((start, motion, origin.is_some()));
+        pit_scenarios.push(pits);
     }
     let mut storm_deadlines = scenarios
         .iter()
         .map(|(start, motion, _)| (*start, vec![motion.storm_deadlines()]))
         .collect::<Vec<_>>();
+    let mut spike_pit_guards = scenarios
+        .iter()
+        .zip(&pit_scenarios)
+        .map(|((start, _, _), pits)| Ok((*start, vec![pits.guard()?])))
+        .collect::<Result<Vec<_>, RouteFailure>>()?;
     for completed in 0..request.hold_ticks {
         let mut next = Vec::with_capacity(scenarios.len());
-        for (start, mut motion, mut origin_active) in scenarios {
+        let mut next_pits = Vec::with_capacity(pit_scenarios.len());
+        for ((start, mut motion, mut origin_active), mut pits) in
+            scenarios.into_iter().zip(pit_scenarios)
+        {
             let tick = Tick(
                 start
                     .0
@@ -187,6 +199,7 @@ pub(super) fn certify_pulse_inner(
             );
             super::storm::charge_tick(context.storm, work)?;
             let segments = advance(&context, &mut motion, request.movement, tick)?;
+            pits.advance(tick, segments[0].start(), &segments, work)?;
             take_segments(work, &segments, forecast.dimensions())?;
             if contact.is_some() {
                 guard_teleporter_collection(observation, one_tick(tick)?, &segments, work)?;
@@ -220,12 +233,17 @@ pub(super) fn certify_pulse_inner(
             )?);
             update_origin(origin, &segments, &mut origin_active)?;
             next.push((start, motion, origin_active));
+            next_pits.push(pits);
         }
         poses.push(aggregate_motion(&next)?);
         for ((_, deadlines), (_, motion, _)) in storm_deadlines.iter_mut().zip(&next) {
             deadlines.push(motion.storm_deadlines());
         }
+        for ((_, guards), pits) in spike_pit_guards.iter_mut().zip(&next_pits) {
+            guards.push(pits.guard()?);
+        }
         scenarios = next;
+        pit_scenarios = next_pits;
     }
     certify_stopped_suffix(
         &context,
@@ -233,9 +251,11 @@ pub(super) fn certify_pulse_inner(
         request,
         origin,
         &scenarios,
+        &pit_scenarios,
         SuffixEvidence {
             work,
             storm_deadlines: &mut storm_deadlines,
+            spike_pit_guards: &mut spike_pit_guards,
             assumptions: &mut assumptions,
             guard_teleport: contact.is_some(),
         },
@@ -275,48 +295,14 @@ pub(super) fn certify_pulse_inner(
         context.actor.heading,
         poses,
         storm_deadlines,
+        spike_pit_guards,
     )
-}
-
-fn validate_request(
-    context: &Context<'_>,
-    forecast: &HazardForecast,
-    request: PulseRequest,
-) -> Result<(), RouteFailure> {
-    let basis = forecast.basis_tick().0;
-    let latest_start_end = basis
-        .checked_add(MAX_ACCEPTED_AGE + 2)
-        .ok_or(RouteFailure::InvalidRequest)?;
-    let latest_stop = request
-        .start_window
-        .end
-        .0
-        .checked_sub(1)
-        .and_then(|tick| tick.checked_add(u64::from(request.hold_ticks)))
-        .ok_or(RouteFailure::InvalidRequest)?;
-    let required_lease = latest_stop
-        .checked_add(STOPPED_PUBLICATION_TICKS + MAX_ACCEPTED_AGE + 1)
-        .ok_or(RouteFailure::InvalidRequest)?;
-    if request.hold_ticks == 0
-        || request.hold_ticks > MAX_PULSE_TICKS
-        || request.start_window.start.0 <= basis
-        || request.start_window.end.0 > latest_start_end
-        || request.settled_stop_tick > forecast.basis_tick()
-        || request.stopped_safe_until.0 < required_lease
-        || request.stopped_safe_until > forecast.horizon_end()
-        || (request.movement == MovementIntent::Stop && request.hold_ticks != 1)
-    {
-        return Err(RouteFailure::InvalidRequest);
-    }
-    if request.settled_stop_tick.0 > context.observation.parts().tick.0 {
-        return Err(RouteFailure::InvalidRequest);
-    }
-    Ok(())
 }
 
 struct SuffixEvidence<'a> {
     work: &'a mut WorkBudget,
     storm_deadlines: &'a mut [(Tick, Vec<Option<super::storm::DeadlineBounds>>)],
+    spike_pit_guards: &'a mut [(Tick, Vec<super::SpikePitGuard>)],
     assumptions: &'a mut BTreeSet<EntityId>,
     guard_teleport: bool,
 }
@@ -327,10 +313,14 @@ fn certify_stopped_suffix(
     request: PulseRequest,
     origin: Option<PulseOriginGrace>,
     scenarios: &[(Tick, Motion, bool)],
+    pit_scenarios: &[super::spike_pits::PitTrajectory],
     evidence: SuffixEvidence<'_>,
 ) -> Result<(), RouteFailure> {
-    for ((start, motion, origin_active), (_, deadlines)) in
-        scenarios.iter().zip(evidence.storm_deadlines.iter_mut())
+    for ((((start, motion, origin_active), pits), (_, deadlines)), (_, guards)) in scenarios
+        .iter()
+        .zip(pit_scenarios)
+        .zip(evidence.storm_deadlines.iter_mut())
+        .zip(evidence.spike_pit_guards.iter_mut())
     {
         let stopped = Tick(
             start
@@ -353,6 +343,13 @@ fn certify_stopped_suffix(
             )?;
         }
         if context.storm.is_none() {
+            let mut pits = pits.clone();
+            for value in stopped.0..request.stopped_safe_until.0 {
+                let tick = Tick(value);
+                let segment = stationary_segment(motion.position);
+                pits.advance(tick, motion.position, &segment, evidence.work)?;
+                guards.push(pits.guard()?);
+            }
             let segment = stationary_segment(motion.position);
             take_segments(evidence.work, &segment, forecast.dimensions())?;
             evidence
@@ -371,11 +368,14 @@ fn certify_stopped_suffix(
             continue;
         }
         let mut simulation = motion.clone();
+        let mut pits = pits.clone();
         for tick in stopped.0..request.stopped_safe_until.0 {
             super::storm::charge_tick(context.storm, evidence.work)?;
             let tick = Tick(tick);
             let segment = advance(context, &mut simulation, MovementIntent::Stop, tick)?;
+            pits.advance(tick, segment[0].start(), &segment, evidence.work)?;
             deadlines.push(simulation.storm_deadlines());
+            guards.push(pits.guard()?);
             take_segments(evidence.work, &segment, forecast.dimensions())?;
             evidence
                 .assumptions

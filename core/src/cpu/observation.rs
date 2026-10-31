@@ -1,18 +1,23 @@
 use crate::game::arena::ARENA_CELL_COUNT;
 use crate::game::{
-    BlastKind, CellId, Direction, EffectKind, EntityId, Equipment, MAX_OIL_BARRELS, OilBarrelState,
+    CellId, Direction, EffectKind, EntityId, Equipment, MAX_OIL_BARRELS, OilBarrelState,
     PickupKind, Position, SeatId, SpecialWeapon, SpeedLevel, Terrain, Tick,
 };
 use crate::room::BoardSize;
 use crate::room::RoomSettings;
 
 use super::WorldId;
+pub use super::observation_bombs::{
+    BombKnowledge, ObservedBomb, ObservedBombTrigger, UnknownBombFacts,
+};
 pub use super::observation_environment::ObservedEnvironment;
 use super::observation_environment::validate_environment;
 pub use super::observation_lairs::ObservedLairs;
 use super::observation_lairs::validate_lairs;
 pub use super::observation_respawn_lairs::ObservedRespawnLairs;
 use super::observation_respawn_lairs::validate_respawn_lairs;
+pub use super::observation_spike_pits::ObservedSpikePits;
+use super::observation_spike_pits::validate_spike_pits;
 use super::observation_validation::{
     validate_actors, validate_arena, validate_bombs, validate_cells, validate_clock,
 };
@@ -136,47 +141,6 @@ impl ObservedActor {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum ObservedBombTrigger {
-    Timed { remaining_ticks: u16, paused: bool },
-    Remote,
-    Contact,
-}
-
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub struct ObservedBomb {
-    pub id: EntityId,
-    pub placed_at: Tick,
-    pub cell: CellId,
-    pub owner: EntityId,
-    pub range: u16,
-    pub trigger: ObservedBombTrigger,
-    pub blast: BlastKind,
-    pub unknown: UnknownBombFacts,
-}
-
-/// Authoritative bomb bookkeeping intentionally absent from recipient views.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub struct UnknownBombFacts {
-    pub motion: Unknown,
-    pub interaction_history: Unknown,
-}
-
-impl UnknownBombFacts {
-    pub const ALL: Self = Self {
-        motion: Unknown::Unknown,
-        interaction_history: Unknown::Unknown,
-    };
-}
-
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub enum BombKnowledge {
-    /// The recipient is not allowed to know whether any bombs exist.
-    Unavailable,
-    /// Complete recipient-visible bomb information, which may be empty.
-    Visible(Vec<ObservedBomb>),
-}
-
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct ObservedFlame {
     pub cell: CellId,
     pub remaining_ticks: u16,
@@ -214,6 +178,7 @@ pub struct Observation {
     environment: Option<ObservedEnvironment>,
     lairs: Option<ObservedLairs>,
     respawn_lairs: Option<ObservedRespawnLairs>,
+    spike_pits: Option<ObservedSpikePits>,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -239,6 +204,7 @@ impl Observation {
             environment: None,
             lairs: None,
             respawn_lairs: None,
+            spike_pits: None,
         })
     }
 
@@ -256,6 +222,7 @@ impl Observation {
             environment: Some(environment),
             lairs: None,
             respawn_lairs: None,
+            spike_pits: None,
         })
     }
 
@@ -278,6 +245,7 @@ impl Observation {
             environment: Some(environment),
             lairs: Some(lairs),
             respawn_lairs: None,
+            spike_pits: None,
         })
     }
 
@@ -301,6 +269,35 @@ impl Observation {
             environment: Some(environment),
             lairs: None,
             respawn_lairs,
+            spike_pits: None,
+        })
+    }
+
+    /// Constructs the dormant rules-v10 recipient view. An absent spike-pit
+    /// overlay means disabled; an enabled overlay may contain no placed sites.
+    pub fn new_rules_v10(
+        parts: ObservationParts,
+        environment: ObservedEnvironment,
+        respawn_lairs: Option<ObservedRespawnLairs>,
+        spike_pits: Option<ObservedSpikePits>,
+    ) -> Result<Self, ObservationError> {
+        if parts.rules.version != 10 {
+            return Err(ObservationError::InvalidActors);
+        }
+        validate_common(&parts)?;
+        validate_environment(&parts, &environment)?;
+        if let Some(lairs) = &respawn_lairs {
+            validate_respawn_lairs(&parts, lairs)?;
+        }
+        if let Some(pits) = &spike_pits {
+            validate_spike_pits(&parts, respawn_lairs.as_ref(), pits)?;
+        }
+        Ok(Self {
+            parts,
+            environment: Some(environment),
+            lairs: None,
+            respawn_lairs,
+            spike_pits,
         })
     }
 
@@ -325,6 +322,11 @@ impl Observation {
     }
 
     #[must_use]
+    pub const fn spike_pits(&self) -> Option<&ObservedSpikePits> {
+        self.spike_pits.as_ref()
+    }
+
+    #[must_use]
     pub fn into_parts(self) -> ObservationParts {
         self.parts
     }
@@ -338,17 +340,27 @@ impl Observation {
             environment,
             lairs,
             respawn_lairs,
+            spike_pits,
         } = self;
         map(&mut parts);
-        match (environment, lairs, respawn_lairs, parts.rules.version) {
-            (Some(environment), Some(lairs), None, 8) => {
+        match (
+            environment,
+            lairs,
+            respawn_lairs,
+            spike_pits,
+            parts.rules.version,
+        ) {
+            (Some(environment), Some(lairs), None, None, 8) => {
                 Self::new_rules_v8(parts, environment, lairs)
             }
-            (Some(environment), None, respawn_lairs, 9) => {
+            (Some(environment), None, respawn_lairs, None, 9) => {
                 Self::new_rules_v9(parts, environment, respawn_lairs)
             }
-            (Some(environment), None, None, 7) => Self::new_rules_v7(parts, environment),
-            (None, None, None, 1..=6) => Self::new(parts),
+            (Some(environment), None, respawn_lairs, spike_pits, 10) => {
+                Self::new_rules_v10(parts, environment, respawn_lairs, spike_pits)
+            }
+            (Some(environment), None, None, None, 7) => Self::new_rules_v7(parts, environment),
+            (None, None, None, None, 1..=6) => Self::new(parts),
             _ => Err(ObservationError::InvalidActors),
         }
     }

@@ -203,7 +203,7 @@ fn certified_plant_inner(
     if ordinary.intent.manual == Some(ManualIntent::Equipment) {
         return None;
     }
-    if matches!(observation.parts().rules.version, 8 | 9)
+    if matches!(observation.parts().rules.version, 8..=10)
         && !teleporter_plant_supported(observation)
     {
         return None;
@@ -232,7 +232,7 @@ fn certified_plant_inner_prefiltered(
     if ordinary.intent.manual == Some(ManualIntent::Equipment) {
         return None;
     }
-    if matches!(observation.parts().rules.version, 8 | 9)
+    if matches!(observation.parts().rules.version, 8..=10)
         && !teleporter_plant_supported(observation)
     {
         return None;
@@ -244,7 +244,7 @@ fn certified_plant_inner_prefiltered(
         first_movement: ordinary.intent.movement,
         limits: RouteLimits::default(),
     };
-    let lairs = matches!(observation.parts().rules.version, 8 | 9);
+    let lairs = matches!(observation.parts().rules.version, 8..=10);
     let certificate = if actor(observation)?.weapon.is_some() && lairs {
         plan_lair_timed_weapon_plant(observation, history, request, work)
     } else if actor(observation)?.weapon.is_some() {

@@ -81,9 +81,9 @@ fn plan_lair_or_legacy_weapon_plant(
 
 fn validate_lair_observation(observation: &Observation) -> Result<(), PlantFailure> {
     ((observation.parts().rules.version == 8 && observation.lairs().is_some())
-        || observation.parts().rules.version == 9)
-        .then_some(())
-        .ok_or(PlantFailure::Unsupported)
+        || matches!(observation.parts().rules.version, 9 | 10))
+    .then_some(())
+    .ok_or(PlantFailure::Unsupported)
 }
 
 fn plan_timed_plant(

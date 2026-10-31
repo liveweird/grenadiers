@@ -173,7 +173,7 @@ fn clipped_players(
     requested: i32,
     start: Position,
 ) -> i32 {
-    if context.observation.parts().rules.version != 9 {
+    if !matches!(context.observation.parts().rules.version, 9 | 10) {
         return requested;
     }
     let obstacles = context

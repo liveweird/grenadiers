@@ -43,21 +43,25 @@ fn build_lane(
     work: &mut WorkBudget,
 ) -> Result<RouteLane, RouteFailure> {
     let mut motion = Motion::stopped(context, first);
+    let mut pits = super::spike_pits::PitTrajectory::from_observation(context.observation, work)?;
     let mut poses = vec![(
         context.observation.parts().tick,
         motion.position,
         motion.heading,
         motion.storm_deadlines(),
+        pits.guard()?,
     )];
     for tick in add_tick(context.observation.parts().tick, 1)?.0..first.0 {
         let tick = Tick(tick);
         super::storm::charge_tick(context.storm, work)?;
-        let _ = advance(context, &mut motion, MovementIntent::Stop, tick)?;
+        let segments = advance(context, &mut motion, MovementIntent::Stop, tick)?;
+        pits.advance(tick, segments[0].start(), &segments, work)?;
         poses.push((
             tick,
             motion.position,
             motion.heading,
             motion.storm_deadlines(),
+            pits.guard()?,
         ));
     }
     let mut timings = Vec::with_capacity(steps.len());
@@ -69,29 +73,33 @@ fn build_lane(
                 for offset in 0..updates {
                     let tick = add_tick(start, u64::from(offset))?;
                     super::storm::charge_tick(context.storm, work)?;
-                    let _ = advance(
+                    let segments = advance(
                         context,
                         &mut motion,
                         MovementIntent::Direction(direction),
                         tick,
                     )?;
+                    pits.advance(tick, segments[0].start(), &segments, work)?;
                     poses.push((
                         tick,
                         motion.position,
                         motion.heading,
                         motion.storm_deadlines(),
+                        pits.guard()?,
                     ));
                 }
                 let stop = add_tick(start, u64::from(updates))?;
                 for offset in 0..3 {
                     let tick = add_tick(stop, offset)?;
                     super::storm::charge_tick(context.storm, work)?;
-                    let _ = advance(context, &mut motion, MovementIntent::Stop, tick)?;
+                    let segments = advance(context, &mut motion, MovementIntent::Stop, tick)?;
+                    pits.advance(tick, segments[0].start(), &segments, work)?;
                     poses.push((
                         tick,
                         motion.position,
                         motion.heading,
                         motion.storm_deadlines(),
+                        pits.guard()?,
                     ));
                 }
                 ready = add_tick(stop, 3)?;
@@ -101,12 +109,14 @@ fn build_lane(
                 for offset in 0..updates {
                     let tick = add_tick(start, u64::from(offset))?;
                     super::storm::charge_tick(context.storm, work)?;
-                    let _ = advance(context, &mut motion, MovementIntent::Stop, tick)?;
+                    let segments = advance(context, &mut motion, MovementIntent::Stop, tick)?;
+                    pits.advance(tick, segments[0].start(), &segments, work)?;
                     poses.push((
                         tick,
                         motion.position,
                         motion.heading,
                         motion.storm_deadlines(),
+                        pits.guard()?,
                     ));
                 }
                 ready = add_tick(start, u64::from(updates))?;
@@ -121,12 +131,14 @@ fn build_lane(
     for tick in ready.0..request.survive_until.0 {
         let tick = Tick(tick);
         super::storm::charge_tick(context.storm, work)?;
-        let _ = advance(context, &mut motion, MovementIntent::Stop, tick)?;
+        let segments = advance(context, &mut motion, MovementIntent::Stop, tick)?;
+        pits.advance(tick, segments[0].start(), &segments, work)?;
         poses.push((
             tick,
             motion.position,
             motion.heading,
             motion.storm_deadlines(),
+            pits.guard()?,
         ));
     }
     RouteLane::new(first, timings, poses)

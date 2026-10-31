@@ -26,7 +26,12 @@ pub(crate) enum DebugSeat {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize)]
-#[serde(tag = "status", rename_all = "camelCase", deny_unknown_fields)]
+#[serde(
+    tag = "status",
+    rename_all = "camelCase",
+    rename_all_fields = "camelCase",
+    deny_unknown_fields
+)]
 pub(crate) enum CpuDebugRow {
     Unavailable {
         seat: DebugSeat,

@@ -130,14 +130,20 @@ async fn enabled_route_has_independent_fixed_size_and_rate_bounds() {
 
 #[tokio::test(flavor = "current_thread", start_paused = true)]
 async fn connected_forming_room_stays_200_then_publishes_available_cpu_intent() {
-    let state = state(true);
+    let mut state = state(true);
+    state.game_rooms = crate::game::GameRooms::for_cpu_debug_test(Instant::now());
     let binding = crate::game::BindingKey {
         connection_id: crate::game::ConnectionId(701),
         generation: 1,
     };
     let configuration = LairRoomConfiguration::new(
         RoomConfiguration::new(
-            &[SeatControl::Human, SeatControl::Cpu],
+            &[
+                SeatControl::Human,
+                SeatControl::Cpu,
+                SeatControl::Cpu,
+                SeatControl::Cpu,
+            ],
             Some(CpuDifficulty::Standard),
             BoardSize::FifteenByThirteen,
         )
@@ -163,6 +169,7 @@ async fn connected_forming_room_stays_200_then_publishes_available_cpu_intent() 
         lobby["cpus"][0],
         json!({"seat": "two", "status": "unavailable"})
     );
+    assert_eq!(lobby["cpus"].as_array().unwrap().len(), 3);
 
     state
         .game_rooms
@@ -180,10 +187,10 @@ async fn connected_forming_room_stays_200_then_publishes_available_cpu_intent() 
         .unwrap();
 
     let mut available = None;
-    for _ in 0..(grenadiers_core::room::COUNTDOWN_TICKS + 420) {
+    for _ in 0..(grenadiers_core::room::COUNTDOWN_TICKS + 240) {
         tokio::time::advance(std::time::Duration::from_millis(17)).await;
         tokio::task::yield_now().await;
-        std::thread::sleep(std::time::Duration::from_millis(1));
+        state.game_rooms.pump_cpu_debug_test_jobs();
         tokio::task::yield_now().await;
         let snapshot = state
             .game_rooms
@@ -242,22 +249,35 @@ fn standalone_response_contract_is_closed_and_versioned() {
     assert!(!validator.is_valid(&wrong_version));
     assert!(!openapi_validator.is_valid(&wrong_version));
 
-    for objective in ["wait", "survive"] {
-        let available = json!({
-            "protocolVersion": 1, "roomId": ROOM, "roundId": 1, "tick": 4, "revision": 2,
-            "youSeat": "one", "cpus": [{
-                "seat": "two", "status": "available", "observedTick": 4,
-                "objective": objective, "target": null, "approach": null,
-                "phase": "waiting", "switchReason": "noTargets"
-            }]
-        });
+    for objective in [
+        cpu_debug::DebugObjective::Wait,
+        cpu_debug::DebugObjective::Survive,
+    ] {
+        let available = serde_json::to_value(cpu_debug::CpuDebugResponse {
+            protocol_version: 1,
+            room_id: grenadiers_core::protocol::RoomId::new(ROOM).unwrap(),
+            round_id: 1,
+            tick: 4,
+            revision: 2,
+            you_seat: cpu_debug::DebugSeat::One,
+            cpus: vec![cpu_debug::CpuDebugRow::Available {
+                seat: cpu_debug::DebugSeat::Two,
+                observed_tick: 4,
+                objective,
+                target: None,
+                approach: None,
+                phase: cpu_debug::DebugPhase::Waiting,
+                switch_reason: cpu_debug::DebugSwitchReason::NoTargets,
+            }],
+        })
+        .unwrap();
         assert!(
             validator.is_valid(&available),
-            "standalone rejected {objective}"
+            "standalone rejected serialized {objective:?}: {available}"
         );
         assert!(
             openapi_validator.is_valid(&available),
-            "OpenAPI rejected {objective}"
+            "OpenAPI rejected serialized {objective:?}: {available}"
         );
     }
 }

@@ -10,7 +10,7 @@ describe('art atlas metadata dependency boundary', () => {
     const source = createSourceManifest()
     const runtime = buildRuntimeManifest(source)
 
-    expect(source.frames).toHaveLength(189)
+    expect(source.frames).toHaveLength(196)
     expect(validators.validateSourceManifest(source)).toEqual([])
     expect(validators.validateRuntimeManifest(runtime)).toEqual([])
   })

@@ -6,30 +6,19 @@ function templateFile(template, name, field) {
   return value
 }
 
-/**
- * Copy an append-only frame prefix from a generated template into an adopted sheet.
- * The returned proof compares decoded RGBA bytes, including transparent RGB bytes,
- * everywhere outside the explicitly appended frame rectangles.
- */
-export async function appendArtworkFrames({
-  source, manifestJson, template, originalFrameCount, appendedIds,
-  expectedWidth = 1120, expectedHeight = 2128,
-}) {
-  const templateBase64 = templateFile(template, 'arena-source.png', 'base64')
-  const templateJson = templateFile(template, 'arena-source.json', 'text')
-  const browser = await chromium.launch({ headless: true })
-  try {
-    const page = await browser.newPage()
-    return await page.evaluate(async (request) => {
+async function appendInBrowser(request) {
       const originalManifest = JSON.parse(request.manifestJson)
       const generatedManifest = JSON.parse(request.templateJson)
       const targetFrameCount = request.originalFrameCount + request.appendedIds.length
-      if (originalManifest.frames.length !== request.originalFrameCount) {
-        throw new Error(`Original manifest must contain ${request.originalFrameCount} frames`)
-      }
-      if (generatedManifest.frames.length < targetFrameCount) {
-        throw new Error(`Generated manifest must contain at least ${targetFrameCount} frames`)
-      }
+      const outputWidth = generatedManifest.sheet.width
+      const outputHeight = Math.ceil(targetFrameCount / generatedManifest.sheet.columns)
+        * generatedManifest.sheet.slotSize
+      if (originalManifest.frames.length !== request.originalFrameCount) throw new Error(
+        `Original manifest must contain ${request.originalFrameCount} frames`,
+      )
+      if (generatedManifest.frames.length < targetFrameCount) throw new Error(
+        `Generated manifest must contain at least ${targetFrameCount} frames`,
+      )
       if (JSON.stringify(originalManifest.frames)
         !== JSON.stringify(generatedManifest.frames.slice(0, request.originalFrameCount))) {
         throw new Error('Generated manifest moved or changed an established frame')
@@ -57,8 +46,7 @@ export async function appendArtworkFrames({
       const changedChannels = (before, after, offset) => [0, 1, 2, 3]
         .filter((channel) => before[offset + channel] !== after[offset + channel]).length
       const compareOutside = (before, after, width, height, rectangles) => {
-        let comparedBytes = 0
-        let differentBytes = 0
+        let comparedBytes = 0; let differentBytes = 0
         for (let y = 0; y < height; y += 1) {
           for (let x = 0; x < width; x += 1) {
             if (inside(x, y, rectangles)) continue
@@ -70,8 +58,7 @@ export async function appendArtworkFrames({
         return { comparedBytes, differentBytes }
       }
       const inspectFrame = (after, sheetWidth, { id, sourceRect }) => {
-        let opaquePixels = 0
-        let invalidAlpha = 0
+        let opaquePixels = 0; let invalidAlpha = 0
         const colors = new Set()
         for (let y = sourceRect.y; y < sourceRect.y + sourceRect.height; y += 1) {
           for (let x = sourceRect.x; x < sourceRect.x + sourceRect.width; x += 1) {
@@ -86,10 +73,27 @@ export async function appendArtworkFrames({
         }
         return { id, opaquePixels, invalidAlpha, opaqueColors: colors.size, sourceRect }
       }
-      const inspect = (before, after, width, height, frames) => {
+      const inspectNewGutter = (after, width, originalHeight, outputHeight, rectangles) => {
+        let comparedBytes = 0; let nonzeroBytes = 0
+        for (let y = originalHeight; y < outputHeight; y += 1) {
+          for (let x = 0; x < width; x += 1) {
+            if (inside(x, y, rectangles)) continue
+            const offset = (y * width + x) * 4
+            for (let channel = 0; channel < 4; channel += 1) {
+              comparedBytes += 1
+              if (after[offset + channel] !== 0) nonzeroBytes += 1
+            }
+          }
+        }
+        return { comparedBytes, nonzeroBytes }
+      }
+      const inspect = ({ before, after, width, oldHeight, finalHeight, frames }) => {
         const rectangles = frames.map(({ sourceRect }) => sourceRect)
+        const oldRgbaOutsideAppended = compareOutside(before, after, width, oldHeight, rectangles)
         return {
-          ...compareOutside(before, after, width, height, rectangles),
+          ...oldRgbaOutsideAppended,
+          oldRgbaOutsideAppended,
+          newRowGutter: inspectNewGutter(after, width, oldHeight, finalHeight, rectangles),
           frames: frames.map((frame) => inspectFrame(after, width, frame)),
         }
       }
@@ -101,12 +105,13 @@ export async function appendArtworkFrames({
         if (original.width !== request.expectedWidth || original.height !== request.expectedHeight) {
           throw new Error(`Original source must be ${request.expectedWidth} x ${request.expectedHeight}`)
         }
-        if (generated.width !== original.width || generated.height !== original.height) {
-          throw new Error('Generated template changed the physical canvas')
+        if (outputWidth !== original.width || outputHeight < original.height
+          || generated.width !== outputWidth || generated.height < outputHeight) {
+          throw new Error('Generated template cannot provide the required append-only canvas')
         }
         const canvas = globalThis.document.createElement('canvas')
-        canvas.width = original.width
-        canvas.height = original.height
+        canvas.width = outputWidth
+        canvas.height = outputHeight
         const context = canvas.getContext('2d', { willReadFrequently: true })
         if (!context) throw new Error('Canvas 2D is unavailable')
         context.imageSmoothingEnabled = false
@@ -124,7 +129,7 @@ export async function appendArtworkFrames({
         const result = await decode(pngBase64)
         try {
           const beforeCanvas = globalThis.document.createElement('canvas')
-          beforeCanvas.width = original.width
+          beforeCanvas.width = outputWidth
           beforeCanvas.height = original.height
           const beforeContext = beforeCanvas.getContext('2d', { willReadFrequently: true })
           if (!beforeContext) throw new Error('Canvas 2D is unavailable')
@@ -133,14 +138,24 @@ export async function appendArtworkFrames({
           context.clearRect(0, 0, canvas.width, canvas.height)
           context.drawImage(result, 0, 0)
           const after = context.getImageData(0, 0, canvas.width, canvas.height).data
-          const comparison = inspect(before, after, canvas.width, canvas.height, appendedFrames)
-          const outputManifest = { ...generatedManifest, frames: generatedManifest.frames.slice(0, targetFrameCount) }
+          const comparison = inspect({
+            before, after, width: canvas.width, oldHeight: original.height,
+            finalHeight: canvas.height, frames: appendedFrames,
+          })
+          const metadata = request.useGeneratedMetadata ? generatedManifest : originalManifest
+          const outputManifest = {
+            ...metadata,
+            sheet: { ...generatedManifest.sheet, width: outputWidth, height: outputHeight },
+            frames: generatedManifest.frames.slice(0, targetFrameCount),
+          }
           return {
             pngBase64,
             manifestJson: `${JSON.stringify(outputManifest, null, 2)}\n`,
             proof: {
               originalFrames: originalManifest.frames.length,
               generatedFrames: outputManifest.frames.length,
+              outputDimensions: { width: outputWidth, height: outputHeight },
+              manifestPrefix: { frames: request.originalFrameCount, identical: true },
               ...comparison,
             },
           }
@@ -149,10 +164,26 @@ export async function appendArtworkFrames({
         original.close()
         generated.close()
       }
-    }, {
+}
+
+/**
+ * Copy append-only frames from a generated template into an adopted sheet.
+ * The proof covers decoded RGBA bytes, including transparent RGB channels.
+ */
+export async function appendArtworkFrames({
+  source, manifestJson, template, originalFrameCount, appendedIds,
+  expectedWidth = 1120, expectedHeight = 2128, useGeneratedMetadata = false,
+}) {
+  const templateBase64 = templateFile(template, 'arena-source.png', 'base64')
+  const templateJson = templateFile(template, 'arena-source.json', 'text')
+  const browser = await chromium.launch({ headless: true })
+  try {
+    const page = await browser.newPage()
+    return await page.evaluate(appendInBrowser, {
       sourceBase64: source.toString('base64'), manifestJson,
       templateBase64, templateJson, originalFrameCount, appendedIds,
       expectedWidth, expectedHeight,
+      useGeneratedMetadata,
     })
   } finally {
     await browser.close()

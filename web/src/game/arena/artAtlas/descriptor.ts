@@ -137,9 +137,20 @@ function addDeathFrames(frames: ArtFrame[]): void {
   }
 }
 
+function addFireArtworkFrames(frames: ArtFrame[]): void {
+  for (const pose of [2, 3, 4, 5] as const) addFrame(frames, `effect.flame.${pose}`)
+  for (const id of ['effect.ember', 'effect.smoke', 'effect.ignition'] as const) {
+    addFrame(frames, id)
+  }
+}
+
 function animations(): Readonly<Record<string, ArtAnimation>> {
   const result: Record<string, ArtAnimation> = {
-    flame: { frameIds: ['effect.flame.0', 'effect.flame.1'], frameDurationMs: 80, reducedMotionFrame: 'effect.flame.0' },
+    flame: {
+      frameIds: [0, 2, 1, 3, 4, 5].map((pose) => `effect.flame.${pose}`),
+      frameDurationMs: 80,
+      reducedMotionFrame: 'effect.flame.0',
+    },
     spark: { frameIds: ['bomb.spark'], frameDurationMs: 90, reducedMotionFrame: 'bomb.spark' },
   }
   for (const appearance of APPEARANCES) {
@@ -178,6 +189,7 @@ export function createArtDescriptor(): ArtDescriptor {
   for (const phase of ['idle', 'warning', 'raised'] as const) {
     addFrame(frames, `terrain.spikePit.${phase}`)
   }
+  addFireArtworkFrames(frames)
   return {
     frames,
     animations: animations(),

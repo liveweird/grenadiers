@@ -27,20 +27,20 @@ describe('atlas PNG input budgets', () => {
     expect(createBitmap).not.toHaveBeenCalled()
   })
 
-  it('accepts the canonical 2128px authoring extent before browser decoding', async () => {
+  it('accepts the canonical 2240px authoring extent before browser decoding', async () => {
     const createBitmap = vi.fn().mockRejectedValue(new Error('stub decoder reached'))
     vi.stubGlobal('createImageBitmap', createBitmap)
 
-    await expect(decodePng(pngHeader(1120, 2128), manifest(1120, 2128)))
+    await expect(decodePng(pngHeader(1120, 2240), manifest(1120, 2240)))
       .rejects.toThrow('stub decoder reached')
     expect(createBitmap).toHaveBeenCalledOnce()
   })
 
   it.each([
-    { name: 'zero width', png: [0, 2128], sheet: [0, 2128], message: '2128px authoring' },
-    { name: 'authoring extent overflow', png: [1120, 2129], sheet: [1120, 2129], message: '2128px authoring' },
-    { name: 'decoded RGBA overflow', png: [2128, 2128], sheet: [2128, 2128], message: '16MiB RGBA' },
-    { name: 'declared sheet mismatch', png: [1120, 2128], sheet: [1120, 1904], message: '1120 × 1904' },
+    { name: 'zero width', png: [0, 2240], sheet: [0, 2240], message: '2240px authoring' },
+    { name: 'authoring extent overflow', png: [1120, 2241], sheet: [1120, 2241], message: '2240px authoring' },
+    { name: 'decoded RGBA overflow', png: [2240, 2240], sheet: [2240, 2240], message: '16MiB RGBA' },
+    { name: 'declared sheet mismatch', png: [1120, 2240], sheet: [1120, 2128], message: '1120 × 2128' },
   ])('rejects $name before browser decoding', async ({ png, sheet, message }) => {
     const createBitmap = vi.fn()
     vi.stubGlobal('createImageBitmap', createBitmap)

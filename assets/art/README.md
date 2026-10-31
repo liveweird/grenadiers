@@ -30,8 +30,8 @@ files:
 - `arena-guides.png` — raster copy of the separate guide/label layer;
 - `arena-overview.png` — labelled visual inventory on a checkerboard background.
 
-The 1120×2128 authoring sheet has 190 physical cells: 189 assigned entries (185 baseline
-drawings and four blank reserved entries), plus one unassigned transparent cell. Cells are 112×112
+The 1120×2240 authoring sheet has 200 physical cells: 196 assigned entries (192 baseline
+drawings and four blank reserved entries), plus four unassigned transparent cells. Cells are 112×112
 pixels in ten columns. Logical arena tiles remain 48×48 pixels. Reserved and unassigned cells must
 stay transparent. Do not move or rename assigned entries; new catalogue IDs must be added in code
 before a source revision can use them.
@@ -139,6 +139,19 @@ IDs and rectangles correspond directly to the authoritative gameplay phases. All
 assigned pixels, the four historical reserved entries and the final unassigned cell remain
 unchanged. The repository append helper is used by the atlas acceptance scripts; ongoing artist
 work continues through the normal template/export commands above.
+
+The fire-artwork extension appends seven 48×48 effect frames at slots 189–195:
+`effect.flame.2` through `.5`, `effect.ember`, `effect.smoke` and `effect.ignition`. The four
+flame poses retain a continuous 22-pixel edge band so orthogonal rays join. The ember, smoke and
+ignition drawings use binary alpha; runtime animation and opacity remain code-owned. Reproduce
+the append-only source change and its decoded-RGBA proof with:
+
+```sh
+node e2e/scripts/art-atlas-fire-artwork.mjs \
+  --source path/to/previous/arena-source.png \
+  --manifest path/to/previous/arena-source.json \
+  --out target/fire-artwork-extension
+```
 
 The owner-supplied retro-texture revision replaces all ten 3D material maps with tan sandstone,
 gray masonry and red brick patterns. All other sprites and the paired manifest remain unchanged.

@@ -35,9 +35,9 @@ describe('art atlas catalogue', () => {
       'reserved.actor.one.death', 'reserved.actor.two.death',
       'reserved.terrain.block.destruction', 'reserved.pickup.collection',
     ])
-    expect(manifest.frames).toHaveLength(189)
-    expect(manifest.frames.filter(({ status }) => status === 'baseline')).toHaveLength(185)
-    expect(manifest.sheet).toEqual({ width: 1120, height: 2128, slotSize: 112, columns: 10 })
+    expect(manifest.frames).toHaveLength(196)
+    expect(manifest.frames.filter(({ status }) => status === 'baseline')).toHaveLength(192)
+    expect(manifest.sheet).toEqual({ width: 1120, height: 2240, slotSize: 112, columns: 10 })
     expect(Object.keys(manifest.animations).filter((id) => id.endsWith('.walk'))).toHaveLength(16)
   })
 
@@ -216,16 +216,45 @@ describe('spike-pit art atlas extension', () => {
   it('appends three tile frames without moving any established artwork', () => {
     const frames = createSourceManifest().frames
     expect(frames.slice(0, 186)).toEqual(adoptedSource.frames.slice(0, 186))
-    expect(frames.slice(186).map(({ id }) => id)).toEqual([
+    expect(frames.slice(186, 189).map(({ id }) => id)).toEqual([
       'terrain.spikePit.idle', 'terrain.spikePit.warning', 'terrain.spikePit.raised',
     ])
-    expect(frames.slice(186).map(({ sourceRect }) => sourceRect)).toEqual([
+    expect(frames.slice(186, 189).map(({ sourceRect }) => sourceRect)).toEqual([
       { x: 672, y: 2016, width: 48, height: 48 },
       { x: 784, y: 2016, width: 48, height: 48 },
       { x: 896, y: 2016, width: 48, height: 48 },
     ])
-    expect(frames.slice(186).every(({ localBounds, pivot }) =>
+    expect(frames.slice(186, 189).every(({ localBounds, pivot }) =>
       JSON.stringify(localBounds) === JSON.stringify(TILE_BOUNDS)
       && pivot.x === 0 && pivot.y === 0)).toBe(true)
+  })
+})
+
+describe('fire artwork atlas extension', () => {
+  it('appends seven tile frames without moving the complete adopted prefix', () => {
+    const manifest = createSourceManifest()
+    const frames = manifest.frames
+    expect(frames.slice(0, 189)).toEqual(adoptedSource.frames.slice(0, 189))
+    expect(frames.slice(189).map(({ id }) => id)).toEqual([
+      'effect.flame.2', 'effect.flame.3', 'effect.flame.4', 'effect.flame.5',
+      'effect.ember', 'effect.smoke', 'effect.ignition',
+    ])
+    expect(frames.slice(189).map(({ sourceRect }) => sourceRect)).toEqual([
+      { x: 1008, y: 2016, width: 48, height: 48 },
+      { x: 0, y: 2128, width: 48, height: 48 },
+      { x: 112, y: 2128, width: 48, height: 48 },
+      { x: 224, y: 2128, width: 48, height: 48 },
+      { x: 336, y: 2128, width: 48, height: 48 },
+      { x: 448, y: 2128, width: 48, height: 48 },
+      { x: 560, y: 2128, width: 48, height: 48 },
+    ])
+    expect(manifest.animations.flame).toEqual({
+      frameIds: [
+        'effect.flame.0', 'effect.flame.2', 'effect.flame.1',
+        'effect.flame.3', 'effect.flame.4', 'effect.flame.5',
+      ],
+      frameDurationMs: 80,
+      reducedMotionFrame: 'effect.flame.0',
+    })
   })
 })

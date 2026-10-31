@@ -2,8 +2,8 @@ import type { ArenaRenderer } from '../src/game/arena/rendererTypes'
 import type { SnapshotMessage } from '../src/game/arena/types'
 import { threeArenaSnapshot, type BoardName } from './three-arena-snapshots'
 
-export type RoundCameraVariant = 'zoomIn' | 'zoomOut' | 'rotateLeft' | 'rotateRight'
-export type RoundCameraBoundary = 'start' | 'end'
+type RoundCameraVariant = 'zoomIn' | 'zoomOut' | 'rotateLeft' | 'rotateRight'
+type RoundCameraBoundary = 'start' | 'end'
 const variants: RoundCameraVariant[] = ['zoomIn', 'zoomOut', 'rotateLeft', 'rotateRight']
 let selected = 0
 export const roundCameraRandom = (): number => (selected + .5) / variants.length

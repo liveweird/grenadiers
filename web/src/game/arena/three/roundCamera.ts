@@ -6,7 +6,7 @@ export const ROUND_CAMERA_DURATION_MS = 900
 const MAX_OBSERVATION_GAP_MS = 1_000
 const YAW_RADIANS = 7 * Math.PI / 180
 
-export type RoundCameraVariant = 'zoomIn' | 'zoomOut' | 'rotateLeft' | 'rotateRight'
+type RoundCameraVariant = 'zoomIn' | 'zoomOut' | 'rotateLeft' | 'rotateRight'
 type EffectKind = 'opening' | 'ending'
 interface ActiveEffect { variant: RoundCameraVariant; kind: EffectKind; startedAt: number }
 interface Observation {
@@ -16,7 +16,7 @@ interface Observation {
   tick: number
   receivedAt: number
 }
-export interface RoundCameraSample { zoom: number; yaw: number }
+interface RoundCameraSample { zoom: number; yaw: number }
 
 const VARIANTS: readonly RoundCameraVariant[] = [
   'zoomIn', 'zoomOut', 'rotateLeft', 'rotateRight',

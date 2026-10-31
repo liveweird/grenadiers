@@ -1,7 +1,8 @@
 # Spike-pit core primitives
 
-The core library provides checked timing, contact and placement primitives for the
-[spike-pit design](spike-pits.md). These APIs do not enable a trap in existing game profiles.
+The core library provides checked timing, contact, placement and opt-in rules10 simulation for
+the [spike-pit design](spike-pits.md). Existing profiles remain unchanged; the live game does
+not select rules10 until its paired contract, AI and presentation are activated.
 Work status remains in the [backlog](../../BACKLOG.md).
 
 ## Timing and settings
@@ -36,6 +37,32 @@ row-major; at most four cells are returned. No eligible orbit means an empty res
 Every chosen cell must already be unblocked floor, outside the supplied overlay exclusions
 and the protected escape cells of all four potential corner spawns. The helper neither carves
 blocks nor samples randomness, so it cannot change base generation or RNG progress.
+
+## Opt-in simulation
+
+`RulesConfig::environment_v10` and its explicit mob-navigation variant accept the existing
+settings, cloud/lair configuration and a `SpikePitConfig`. `State::spike_pits()` returns `None`
+when disabled, or `Some(views)` when enabled, including an empty vector if no layout fits.
+Each view contains only a cell, phase and remaining ticks. Result phases freeze these facts
+even if headless callers advance the room clock; a new state begins with retracted pits.
+
+Warnings rise before movement on their deadline, so departure during that update cannot undo
+a standing hit. Contact includes ordinary and mob movement traces, each Bracelet segment and
+Teleporter destinations without a connecting sweep. Raised spikes use existing player damage
+protection. Mobs killed by a pit cannot harm players later on their trace, while genuine mine
+contacts remain effective. Each dead mob schedules its lair's replacement delay once.
+
+Warning or raised pits cannot receive a newly spawned mob. A newborn on a dormant pit activates
+its warning at birth. Stopwatch does not pause trap timers. Rules10 stages the complete tick,
+so an overflow or later fallible operation rolls back clocks, actors, mobs, allocator and RNG.
+
+## Public observation clocks
+
+`SpikePitClock::from_observation(phase, remaining_ticks, observed_at, settings)` reconstructs
+future timing from public facts. It validates phase-specific remaining-time bounds and checked
+deadlines, without inferring an activator or historical position. An idle observation fences
+same-tick rearming; a raised observation supplies a future-clipped harmful interval starting
+at `observed_at`. Forecast execution begins on the following physical tick.
 
 ## Verification
 

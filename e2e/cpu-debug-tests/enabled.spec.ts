@@ -22,10 +22,13 @@ test('normal gameplay makes no CPU diagnostic requests without URL opt-in', asyn
 
 test('opted-in CPU intents transition from lobby to play and render in English and Polish without blocking controls', async ({ browser }, testInfo) => {
   const context = await browser.newContext()
+  const debugHistory: { statuses: number[]; responses: unknown[] } = { statuses: [], responses: [] }
   try {
     const page = await context.newPage()
     const game = observeGame(page)
     const debug = observeDebug(page)
+    debugHistory.statuses = debug.statuses
+    debugHistory.responses = debug.responses
     await page.goto('/?cpuDebug=1')
     await createCpuMatch(page, game, false)
     await page.getByRole('button', { name: englishTitle, exact: true }).click()
@@ -61,5 +64,11 @@ test('opted-in CPU intents transition from lobby to play and render in English a
     await testInfo.attach('cpu-intent-pl', { body: await polish.screenshot(), contentType: 'image/png' })
     await page.getByRole('button', { name: polishTitle, exact: true }).click()
     await expect(page.getByRole('button', { name: polishTitle, exact: true })).toHaveAttribute('aria-expanded', 'false')
-  } finally { await context.close() }
+  } finally {
+    await testInfo.attach('cpu-intent-public-responses', {
+      body: JSON.stringify({ statuses: debugHistory.statuses, responses: debugHistory.responses.slice(-4) }),
+      contentType: 'application/json',
+    })
+    await context.close()
+  }
 })

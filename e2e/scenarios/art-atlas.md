@@ -25,9 +25,9 @@ canonical JSON is identical; the test deliberately makes no promise about compre
 ## Scenario: committed artist source validates and exports through the browser pipeline
 
 The checked-in transparent PNG and stable-ID JSON pair passes source and runtime validation in the
-actual browser pipeline, retaining 145 baseline frames and excluding four reserved entries. The 32
-new walking frames and six timed-bomb poses are appended after the frozen 111-entry inventory,
-without moving any existing slot. The packed runtime remains within budget at 2040 × 528.
+actual browser pipeline, retaining 192 baseline frames and excluding four reserved entries. Walking, death, terrain and
+fire extensions preserve assigned IDs and rectangles. The packed runtime remains within budget
+at 2040 × 704.
 
 ## Scenario: all adopted directional actors retain binary alpha and bounded opaque palettes
 
@@ -60,3 +60,8 @@ does not replace that error with a ready message. The selected asset facts are r
 
 Load the committed source through the browser pipeline. Check all three 48px pit frames
 have opaque binary alpha, bounded palettes and distinct decoded pixel signatures.
+
+## Scenario: adopted flame poses join across both tile axes without edge seams
+
+Decode all six adopted flame poses. Opposing horizontal and vertical RGBA edge pixels must
+match, with a nonempty opaque connector, so animated adjacent tiles have no boundary gaps.

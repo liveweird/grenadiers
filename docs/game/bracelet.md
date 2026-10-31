@@ -22,7 +22,7 @@ claims use the round's alternating seat priority.
 
 The browser shows a collected Bracelet in public inventory views for visible players. English describes
 “up to 1 tile” and a “0.5 second cooldown”; Polish describes “najwyżej o 1 pole” and “0,5 sekundy
-odnowienia”. There is no Bracelet key, shove event, sound, countdown, destination hint or blocked
+odnowienia”. There is no Bracelet key, shove event, dedicated shove sound, countdown, destination hint or blocked
 reason. The private cooldown marker and forced-movement report do not appear in recipient frames.
 
 ## Compatibility and verification
@@ -32,3 +32,6 @@ and earlier reject Bracelet settings, equipment, pickups, cooldown and forced-mo
 See [English desktop](../screenshots/bracelet-desktop.png) and
 [Polish 320px](../screenshots/bracelet-mobile-pl.png). The release record is in
 [item acceptance history](../history/game-acceptance.md#bracelet-v0346).
+
+Optional local movement audio may include short contact displacements indistinguishable from walking.
+It provides no shove attribution or opponent-position cue; see [audio](audio.md).

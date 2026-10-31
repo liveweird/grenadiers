@@ -57,7 +57,7 @@ npm --prefix e2e run art:export -- \
 Add `--slices` to emit optional named files under `target/art-atlas/slices/`. Runtime output is
 generated and ignored rather than an artist source. Its main files are `arena-atlas.png`,
 `arena-atlas.json`, `arena-overview.png` and `arena-preview.png`. The runtime texture contains the
-185 baseline frames, unrotated and untrimmed, with two-pixel extrusion and two-pixel transparent
+192 baseline frames, unrotated and untrimmed, with two-pixel extrusion and two-pixel transparent
 padding. Labels and guides never enter the runtime texture.
 
 Both commands refuse an existing output directory, so an artist source or earlier review cannot
@@ -79,9 +79,9 @@ target after review.
   anchor.
 - Keep IDs path-safe and stable. The exporter rejects missing, duplicate, unexpected or path-like
   IDs, changed required animations, invalid dimensions and texture-budget overflow.
-- Flame frames must reach all four edges so adjacent rays join. The procedural template's
-  `effect.flame.1` keeps its historical vertical two-pixel gap; the adopted source fills a
-  continuous 22-pixel band on every edge of both frames.
+- Flame frames must reach all four edges so adjacent rays join. Opposing RGBA edge pixels must match,
+  with a nonempty opaque connector. The adopted six poses use a narrow four-pixel connector;
+  the procedural template retains its historical artwork.
 
 Use the standalone `art-atlas.html` renderer diagnostic to load a source PNG and manifest, inspect
 all labelled drawings, and see the representative arena rebuilt from actual Pixi atlas regions.
@@ -141,8 +141,8 @@ unchanged. The repository append helper is used by the atlas acceptance scripts;
 work continues through the normal template/export commands above.
 
 The fire-artwork extension appends seven 48×48 effect frames at slots 189–195:
-`effect.flame.2` through `.5`, `effect.ember`, `effect.smoke` and `effect.ignition`. The four
-flame poses retain a continuous 22-pixel edge band so orthogonal rays join. The ember, smoke and
+`effect.flame.2` through `.5`, `effect.ember`, `effect.smoke` and `effect.ignition`. The appended
+flame poses share the same edge-join requirements as the original pair. The ember, smoke and
 ignition drawings use binary alpha; runtime animation and opacity remain code-owned. Reproduce
 the append-only source change and its decoded-RGBA proof with:
 
@@ -255,3 +255,13 @@ their canonical rectangles, and writes `pixel-proof.json`. The previous assigned
 unchanged; acceptance evidence lives in the [release record](../../docs/releases.md). Use the normal
 `art:template` and `art:export` commands for ongoing artist work; this helper is only for auditing
 or reproducing the one-time append operation.
+
+## Owner-supplied spikes and fire refresh
+
+The owner supplied `arena-napoleonic-spikes-fire.png`, created in a separate ChatGPT session.
+It repaints the fire family and related icons, three spike-pit phases and the cosmetic blood pool.
+The adopted 1120×2240 sheet retains every stable rectangle, ID, pivot, anchor and animation.
+Import processing reduces each pit to twelve existing colors without dithering and aligns only
+the outer flame connectors for seamless neighboring tiles. All other supplied pixels are preserved;
+no character or material textures change. Runtime animation and illumination remain code-owned.
+See the [release record](../../docs/releases.md) for validation and the artist bundle.

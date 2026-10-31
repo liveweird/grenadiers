@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## 1.2.2 — 2026-10-31
+
+- Adopt the owner-supplied spike-pit and fire artwork with bounded palettes and seamless
+  flame joins, preserving the sprite layout and character art.
+- Add quiet retro footsteps and special-bomb cues, reduce overlapping sound volume and
+  provide a persistent sound-effects volume control.
+
 ## 1.2.1 — 2026-10-31
 
 - Light nearby terrain and characters from public fire, with a bounded pool and static

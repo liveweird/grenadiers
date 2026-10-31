@@ -9,9 +9,11 @@ const baseline = { roomId: 'b'.repeat(32), revision: 20, tick: 20, physicalTick:
 type AudibleEventType = 'bombPlaced' | 'bombDetonated' | 'pickupCollected' | 'actorEliminated'
 
 function event(tick: number, index: number, type: AudibleEventType): WireEvent {
+  const bomb = { id: 1, cell: { column: 1, row: 1 }, owner: 1, range: 1, placedAt: tick,
+    trigger: { type: 'timed', remainingTicks: 10, paused: false }, blast: 'standard' }
   const kinds = {
-    bombPlaced: { type: 'bombPlaced', bomb: {} }, bombDetonated: { type: 'bombDetonated', bomb: {} },
-    pickupCollected: { type: 'pickupCollected', actor: 1, pickup: 'bombCapacity' },
+    bombPlaced: { type: 'bombPlaced', bomb }, bombDetonated: { type: 'bombDetonated', bomb },
+    pickupCollected: { type: 'pickupCollected', id: 1, seat: 'one', cell: { column: 1, row: 1 }, kind: 'bombCapacity' },
     actorEliminated: { type: 'actorEliminated', id: 1, seat: 'one' },
     roundEnded: { type: 'roundEnded', result: { type: 'timeout' } },
   }
@@ -101,6 +103,105 @@ describe('accepted-event audio cursor', () => {
     expect(cursor.consume(state(21, [collected]), true)).toEqual(['pickup'])
   })
 
+  it('distinguishes accepted special weapon pickups and bomb events', () => {
+    const cursor = new AudioCursor()
+    cursor.consume(state(20), true)
+    const pickup = event(21, 0, 'pickupCollected')
+    if (pickup.kind.type !== 'pickupCollected') throw new Error('pickup event expected')
+    pickup.kind.kind = 'remoteBomb'
+    const placed = event(21, 1, 'bombPlaced')
+    if (placed.kind.type !== 'bombPlaced') throw new Error('placement event expected')
+    placed.kind.bomb.trigger = { type: 'contact' }
+    const detonated = event(21, 2, 'bombDetonated')
+    if (detonated.kind.type !== 'bombDetonated') throw new Error('detonation event expected')
+    detonated.kind.bomb.blast = 'power'
+    expect(cursor.consume(state(21, [pickup, placed, detonated]), true))
+      .toEqual(['specialDetonation', 'specialPickup', 'specialPlacement'])
+  })
+
+  it('paces accepted local walking and suppresses teleport, admission, and opponents', () => {
+    const cursor = new AudioCursor()
+    cursor.consume(state(20), true)
+    const moved = state(21)
+    const local = moved.snapshot!.state.actors[0]
+    const opponent = moved.snapshot!.state.actors[1]
+    if (local.type !== 'visible' || opponent.type !== 'visible') throw new Error('visible actors expected')
+    local.position.x += 64
+    opponent.position.x -= 64
+    expect(cursor.consume(moved, true)).toEqual([])
+
+    const tooSoon = state(24)
+    const localAgain = tooSoon.snapshot!.state.actors[0]
+    if (localAgain.type !== 'visible') throw new Error('visible local actor expected')
+    localAgain.position.x += 192
+    expect(cursor.consume(tooSoon, true)).toEqual(['step'])
+
+    const opponentOnly = state(28)
+    const stillLocal = opponentOnly.snapshot!.state.actors[0]
+    const movedOpponent = opponentOnly.snapshot!.state.actors[1]
+    if (stillLocal.type !== 'visible' || movedOpponent.type !== 'visible') throw new Error('visible actors expected')
+    stillLocal.position.x += 128
+    movedOpponent.position.x -= 256
+    expect(cursor.consume(opponentOnly, true)).toEqual([])
+
+    const teleported = state(29)
+    const teleporter = teleported.snapshot!.state.actors[0]
+    if (teleporter.type !== 'visible') throw new Error('visible local actor expected')
+    teleporter.position.x = 8_000
+    teleporter.lastTeleportTick = 29
+    expect(cursor.consume(teleported, true)).toEqual([])
+
+    const admitted = state(40)
+    admitted.admissionBaseline = { roomId: admitted.room!.roomId, revision: 39, tick: 39, physicalTick: 39 }
+    expect(cursor.consume(admitted, true)).toEqual([])
+  })
+
+  it('ignores sub-step jitter and does not catch up after a stale snapshot gap', () => {
+    const cursor = new AudioCursor()
+    cursor.consume(state(20), true)
+    const jitter = state(21)
+    const jittering = jitter.snapshot!.state.actors[0]
+    if (jittering.type !== 'visible') throw new Error('visible local actor expected')
+    jittering.position.x += 1
+    expect(cursor.consume(jitter, true)).toEqual([])
+    const moreJitter = state(27)
+    const stillJittering = moreJitter.snapshot!.state.actors[0]
+    if (stillJittering.type !== 'visible') throw new Error('visible local actor expected')
+    stillJittering.position.x += 2
+    expect(cursor.consume(moreJitter, true)).toEqual([])
+    const stale = state(40)
+    const staleActor = stale.snapshot!.state.actors[0]
+    if (staleActor.type !== 'visible') throw new Error('visible local actor expected')
+    staleActor.position.x += 400
+    expect(cursor.consume(stale, true)).toEqual([])
+  })
+
+  it.each([4, 6, 12])('does not mistake a 1024-unit forced shove over %s ticks for walking', (gap) => {
+    const cursor = new AudioCursor()
+    cursor.consume(state(20), true)
+    const shoved = state(20 + gap)
+    const local = shoved.snapshot!.state.actors[0]
+    if (local.type !== 'visible') throw new Error('visible local actor expected')
+    local.position.x += 1024
+    expect(cursor.consume(shoved, true)).toEqual([])
+  })
+
+  it.each([
+    ['remoteBomb', { type: 'remote' }, 'standard'], ['landmine', { type: 'contact' }, 'standard'],
+    ['piercingBomb', { type: 'timed', remainingTicks: 10, paused: false }, 'piercing'],
+    ['powerBomb', { type: 'timed', remainingTicks: 10, paused: false }, 'power'],
+  ] as const)('classifies accepted %s detonations as special', (_weapon, trigger, blast) => {
+    const cursor = new AudioCursor()
+    cursor.consume(state(20), true)
+    const detonated = event(21, 0, 'bombDetonated')
+    if (detonated.kind.type !== 'bombDetonated') throw new Error('detonation event expected')
+    detonated.kind.bomb.trigger = trigger
+    detonated.kind.bomb.blast = blast
+    expect(cursor.consume(state(21, [detonated]), true)).toEqual(['specialDetonation'])
+  })
+})
+
+describe('audio cursor presentation privacy', () => {
   it('keeps public sounds while blind bomb cues, admission, and reveal stay quiet', () => {
     const cursor = new AudioCursor()
     cursor.consume(state(20), true)
@@ -139,5 +240,23 @@ describe('accepted-event audio cursor', () => {
     if (moved.type !== 'visible') throw new Error('visible victim expected')
     moved.position = { x: moved.position.x - 1024, y: moved.position.y }
     expect(cursor.consume(after, true)).toEqual([])
+  })
+
+  it('plays only newly accepted mob death presentations without replaying epochs or actor poses', () => {
+    const cursor = new AudioCursor()
+    const cue = (key: string, appearance: 'mob' | 'two' = 'mob') => ({
+      key, appearance, entityId: 90, position: { x: 4096, y: 5120 }, heading: 'north' as const,
+      tick: 20, index: 90, bornAt: 0,
+    })
+    const initial = { epoch: 0, sequence: 1, cues: [cue('old'), cue('hidden-actor', 'two')] }
+    expect(cursor.consume(state(20), true, initial)).toEqual([])
+    const added = { epoch: 0, sequence: 2, cues: [...initial.cues, cue('new')] }
+    expect(cursor.consume(state(21), true, added)).toEqual(['elimination'])
+    expect(cursor.consume(state(22), true, added)).toEqual([])
+
+    const reset = { epoch: 1, sequence: 3, cues: [cue('epoch-history')] }
+    expect(cursor.consume(state(23), true, reset)).toEqual([])
+    const afterReset = { epoch: 1, sequence: 4, cues: [...reset.cues, cue('epoch-new')] }
+    expect(cursor.consume(state(24), true, afterReset)).toEqual(['elimination'])
   })
 })

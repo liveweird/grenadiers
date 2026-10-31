@@ -37,12 +37,13 @@ function audioContext() {
     suspend: vi.fn(async () => { raw.state = 'suspended' }),
     close: vi.fn(async () => { raw.state = 'closed' }),
     createGain: vi.fn(() => ({
-      gain: { setValueAtTime: vi.fn(), exponentialRampToValueAtTime: vi.fn() },
+      gain: { setValueAtTime: vi.fn(), cancelAndHoldAtTime: vi.fn(), linearRampToValueAtTime: vi.fn(),
+        exponentialRampToValueAtTime: vi.fn() },
       connect: vi.fn(), disconnect: vi.fn(),
     })),
     createOscillator: oscillator,
   }
-  return { raw: raw as unknown as AudioContext, oscillator }
+  return { raw: raw as unknown as AudioContext, internal: raw, oscillator }
 }
 
 describe('sound control gesture and localization', () => {
@@ -142,5 +143,43 @@ describe('sound control gesture and localization', () => {
     view()
     expect(screen.getByRole('button', { name: 'Włącz dźwięk' })).toBeVisible()
     expect(screen.getByText('Dźwięk wyłączony')).toBeVisible()
+    expect(screen.getByRole('slider', { name: 'Głośność dźwięku' })).toHaveValue('60')
+  })
+
+  it('restores, bounds, and persists the accessible volume without creating a context', () => {
+    localStorage.setItem('grenadiers.audio.v1', '{"version":2,"enabled":false,"volume":35}')
+    const Context = vi.fn()
+    vi.stubGlobal('AudioContext', Context)
+    view()
+    const slider = screen.getByRole('slider', { name: 'Sound volume' })
+    expect(slider).toHaveValue('35')
+    fireEvent.change(slider, { target: { value: '85' } })
+    expect(slider).toHaveValue('85')
+    expect(localStorage.getItem('grenadiers.audio.v1'))
+      .toBe('{"version":2,"enabled":false,"volume":85}')
+    expect(Context).not.toHaveBeenCalled()
+  })
+
+  it('pauses for pagehide, resumes from a later gesture, and removes the lifecycle listener', async () => {
+    localStorage.setItem('grenadiers.audio.v1', '{"version":1,"enabled":true}')
+    const fake = audioContext()
+    const Context = vi.fn(function AudioContextStub() { return fake.raw })
+    vi.stubGlobal('AudioContext', Context)
+    const rendered = view()
+    await userEvent.setup().click(screen.getByRole('button', { name: 'Resume sound' }))
+    await vi.waitFor(() => expect(screen.getByText('Sound on')).toBeVisible())
+    window.dispatchEvent(new Event('pagehide'))
+    await vi.waitFor(() => expect(screen.getByText('Sound paused')).toBeVisible())
+    window.dispatchEvent(new Event('pageshow'))
+    await userEvent.setup().click(screen.getByRole('button', { name: 'Resume sound' }))
+    await vi.waitFor(() => expect(screen.getByText('Sound on')).toBeVisible())
+    expect(Context).toHaveBeenCalledOnce()
+    expect(fake.internal.resume).toHaveBeenCalledTimes(2)
+    expect(localStorage.getItem('grenadiers.audio.v1')).toContain('"enabled":true')
+
+    rendered.unmount()
+    const suspends = fake.internal.suspend.mock.calls.length
+    window.dispatchEvent(new Event('pagehide'))
+    expect(fake.internal.suspend).toHaveBeenCalledTimes(suspends)
   })
 })

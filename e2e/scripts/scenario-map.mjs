@@ -1,5 +1,5 @@
 export const scenarioSpecMap = {
-  'scenarios/art-atlas.md': ['art-atlas-tests/art-atlas.spec.ts', 'art-atlas-tests/spike-pits.spec.ts'],
+  'scenarios/art-atlas.md': ['art-atlas-tests/art-atlas.spec.ts', 'art-atlas-tests/spike-pits.spec.ts', 'art-atlas-tests/fire-edges.spec.ts'],
   'scenarios/atlas-gameplay.md': ['atlas-gameplay-tests/atlas-gameplay.spec.ts'],
   'scenarios/audio.md': ['audio-tests/audio.spec.ts'],
   'scenarios/board-sizes.md': ['tests/board-sizes.spec.ts'],

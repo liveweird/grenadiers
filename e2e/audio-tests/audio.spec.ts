@@ -35,8 +35,15 @@ test('native sound gesture creates Web Audio cues and mute prevents later playba
     })
     cdp.on('WebAudio.audioNodeCreated', ({ node }) => nodes.push(node))
     await cdp.send('WebAudio.enable')
+    const oscillatorCount = (): number => nodes.filter((node) => node.nodeType.includes('Oscillator')).length
     const baseUrl = process.env.E2E_BASE_URL ?? 'http://127.0.0.1:8085'
     await Promise.all([one, two].map((page) => page.goto(new URL('/', baseUrl).href)))
+    expect(contexts).toEqual([])
+    const volume = one.getByRole('slider', { name: 'Sound volume', exact: true })
+    await expect(volume).toHaveValue('60')
+    await volume.press('ArrowLeft')
+    await expect(volume).toHaveValue('55')
+    expect(await one.evaluate(() => JSON.parse(localStorage.getItem('grenadiers.audio.v1')!).volume)).toBe(55)
     expect(contexts).toEqual([])
 
     await expect(one.getByRole('button', { name: 'Enable sound', exact: true })).toBeVisible()
@@ -44,6 +51,7 @@ test('native sound gesture creates Web Audio cues and mute prevents later playba
     await one.screenshot({ path: testInfo.outputPath('sound-control-desktop.png'), fullPage: true })
     await two.getByText('Polski', { exact: true }).click()
     await expect(two.getByRole('button', { name: 'Włącz dźwięk', exact: true })).toBeVisible()
+    await expect(two.getByRole('slider', { name: 'Głośność dźwięku', exact: true })).toHaveValue('60')
     expect(await two.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false)
     expect((await new AxeBuilder({ page: two }).analyze()).violations).toEqual([])
     await two.screenshot({ path: testInfo.outputPath('sound-control-polish-320.png'), fullPage: true })
@@ -63,9 +71,11 @@ test('native sound gesture creates Web Audio cues and mute prevents later playba
       .map((game) => expect.poll(() => latestSnapshot(game)?.room.phase.type).toBe('running')))
     await one.getByRole('region', { name: 'Grenadiers courtyard' }).click()
     const movementStart = firstGame.commands.length
+    const beforeWalking = oscillatorCount()
     await one.keyboard.down('ArrowRight')
     await expect.poll(() => firstGame.commands.slice(movementStart)
       .some((command) => command.type === 'movement' && command.direction === 'east')).toBe(true)
+    await expect.poll(oscillatorCount).toBeGreaterThan(beforeWalking)
     await one.getByRole('button', { name: 'Mute sound', exact: true }).click()
     await one.keyboard.up('ArrowRight')
     await expect.poll(() => firstGame.commands.slice(movementStart)
@@ -75,7 +85,6 @@ test('native sound gesture creates Web Audio cues and mute prevents later playba
     await expect.poll(() => contexts.find((context) => context.contextId === contextId)?.contextState)
       .toBe('running')
     await one.getByRole('region', { name: 'Grenadiers courtyard' }).click()
-    const oscillatorCount = (): number => nodes.filter((node) => node.nodeType.includes('Oscillator')).length
     const beforeBomb = oscillatorCount()
     await one.keyboard.press('Space')
     await expect.poll(() => firstGame.commands.filter((command) => command.type === 'manualAction').length).toBe(1)

@@ -1,28 +1,38 @@
 import { Button, Text } from '@mantine/core'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import type { GameClientState } from '../client/client'
 import type { GameCopy } from '../client/locale'
+import type { PresentationDeaths } from '../arena/types'
 import { AudioCursor } from './cursor'
 import { GameAudio } from './engine'
 import { loadAudioPreference, saveAudioPreference } from './preferences'
 
-export function SoundControl({ state, copy }: { state: GameClientState; copy: GameCopy }) {
-  const [preferred, setPreferred] = useState(loadAudioPreference)
+export function SoundControl({ state, copy, presentationDeaths }: {
+  state: GameClientState; copy: GameCopy; presentationDeaths?: PresentationDeaths
+}) {
+  const [preference, setPreference] = useState(loadAudioPreference)
   const [engineRunning, setEngineRunning] = useState(false)
   const [visible, setVisible] = useState(() => document.visibilityState === 'visible')
   const [failed, setFailed] = useState(false)
   const [cursor] = useState(() => new AudioCursor())
+  const initialVolume = useRef(preference.volume)
   const audio = useRef<GameAudio | null>(null)
   const latest = useRef(state)
+  const latestDeaths = useRef(presentationDeaths)
   const previousRoom = useRef(state.room?.roomId ?? null)
-  const playing = preferred && visible && engineRunning
+  const volumeId = useId()
+  const playing = preference.enabled && visible && engineRunning
 
-  useEffect(() => { latest.current = state }, [state])
+  useEffect(() => {
+    latest.current = state
+    latestDeaths.current = presentationDeaths
+  }, [presentationDeaths, state])
 
   useEffect(() => {
     const engine = new GameAudio(undefined, () => {
       if (audio.current === engine) setEngineRunning(engine.isEnabled())
     })
+    engine.setVolume(initialVolume.current)
     audio.current = engine
     return () => {
       if (audio.current === engine) audio.current = null
@@ -34,7 +44,7 @@ export function SoundControl({ state, copy }: { state: GameClientState; copy: Ga
     const visibility = (): void => {
       const nextVisible = document.visibilityState === 'visible'
       setVisible(nextVisible)
-      cursor.consume(latest.current, false)
+      cursor.consume(latest.current, false, latestDeaths.current)
       if (!nextVisible) audio.current?.silence()
     }
     document.addEventListener('visibilitychange', visibility)
@@ -48,43 +58,56 @@ export function SoundControl({ state, copy }: { state: GameClientState; copy: Ga
     const engine = audio.current
     if (lostRoom || (state.room && state.connection !== 'authenticated')) engine?.silence()
     const audible = visible && state.connection === 'authenticated' && Boolean(engine?.isEnabled())
-    engine?.play(cursor.consume(state, audible))
-  }, [cursor, state, visible])
+    engine?.play(cursor.consume(state, audible, presentationDeaths))
+  }, [cursor, presentationDeaths, state, visible])
 
   useEffect(() => {
-    const dispose = (): void => audio.current?.dispose()
-    window.addEventListener('pagehide', dispose)
-    return () => window.removeEventListener('pagehide', dispose)
+    const pause = (): void => audio.current?.silence()
+    window.addEventListener('pagehide', pause)
+    return () => window.removeEventListener('pagehide', pause)
   }, [])
 
   const toggle = async (): Promise<void> => {
     const engine = audio.current
     if (!engine) return
     if (engine.isEnabled()) {
-      saveAudioPreference(false)
-      setPreferred(false)
+      const next = { ...preference, enabled: false }
+      saveAudioPreference(next)
+      setPreference(next)
       setFailed(false)
       engine.silence()
       return
     }
-    saveAudioPreference(true)
-    setPreferred(true)
+    const next = { ...preference, enabled: true }
+    saveAudioPreference(next)
+    setPreference(next)
     setFailed(false)
-    cursor.consume(latest.current, false)
+    cursor.consume(latest.current, false, latestDeaths.current)
     const enabled = await engine.enableFromGesture()
     if (audio.current !== engine) return
-    if (enabled) cursor.consume(latest.current, true)
+    if (enabled) cursor.consume(latest.current, true, latestDeaths.current)
     else setFailed(true)
   }
 
+  const changeVolume = (value: number): void => {
+    const next = { ...preference, volume: value }
+    setPreference(next)
+    saveAudioPreference(next)
+    audio.current?.setVolume(value)
+  }
+
   const status = failed ? copy.audio.unavailable : playing ? copy.audio.on
-    : preferred ? copy.audio.paused : copy.audio.off
-  const label = playing ? copy.audio.mute : preferred ? copy.audio.resume : copy.audio.enable
+    : preference.enabled ? copy.audio.paused : copy.audio.off
+  const label = playing ? copy.audio.mute : preference.enabled ? copy.audio.resume : copy.audio.enable
   return (
     <div className="sound-control">
       <Button variant="subtle" color="dark" size="compact-sm" aria-label={label}
         onClick={() => { void toggle() }}>{label}</Button>
       <Text component="span" size="xs" aria-live="polite">{status}</Text>
+      <label htmlFor={volumeId}>{copy.audio.volume}</label>
+      <input id={volumeId} type="range" min="0" max="100" step="5" value={preference.volume}
+        aria-label={copy.audio.volume} aria-valuetext={`${preference.volume}%`} onChange={(event) => changeVolume(Number(event.currentTarget.value))} />
+      <span aria-hidden="true">{preference.volume}%</span>
     </div>
   )
 }

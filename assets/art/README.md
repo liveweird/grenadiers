@@ -119,6 +119,10 @@ produces the procedural reference; it does not reproduce or overwrite the adopte
 
 ## Provenance
 
+The owner-supplied polished 3D revision refines all ten material maps and the twenty death
+poses within their existing rectangles. Directional player/mob artwork and all other sprites
+remain unchanged. The PNG is adopted directly, without resizing, recoloring or metadata edits.
+
 The twenty death poses were generated with OpenAI's built-in `image_gen`, using the existing
 four uniforms and mob as identity references, then normalized with owner-authorized Canvas
 processing. They retain each appearance's palette and the shared ground anchor. Existing
@@ -192,8 +196,8 @@ The ten `material.*` slots are shared, artist-editable 48×48 maps for the Three
 - `material.lair.top` and `material.lair.side`;
 - `material.rim.top` and `material.rim.side`.
 
-They use opaque, hard-edged retro patterns based on sandstone `#d8c69d`, field green `#879b76`,
-brick `#b55336`, slate `#3e4e59`, flame gold `#ffc462` and ink `#263445`. The 3D renderer keeps
+Use opaque, hard-edged pixel patterns and deliberate shading. The current maps combine field
+green, gray stone, red brick and brass accents. The 3D renderer keeps
 the material color white so edits to these atlas rectangles remain the authoritative texture
 colors. Top and side maps are intentionally distinct; do not derive private recolored copies in
 renderer code.

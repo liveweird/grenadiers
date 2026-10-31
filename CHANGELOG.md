@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## 1.1.3 — 2026-10-31
+
+- Adopt the owner-supplied polished arena sheet: refined 3D surface maps and death poses,
+  preserving dimensions, anchors, animation contracts and directional character artwork.
+
 ## 1.1.2 — 2026-10-31
 
 - Keep knockout sprites readable over ordinary blast flames and burning Oil while preserving

@@ -97,47 +97,54 @@ retain the previous immutable image reference for rollback. The runtime stage in
 rolling Debian package updates, so a later build may resolve newer packages and is not expected to
 be byte-identical; treat it as a new candidate with new evidence rather than reusing acceptance.
 
-## v1.1.2 — 2026-10-31
+## v1.1.3 — 2026-10-31
 
-Keep knockout sprites readable during ordinary explosions and persistent Oil fire. The death
-body now uses the minimum layer above world hazard overlays; its grounded shadow stays
-unchanged and higher actor status cues remain visible. Artwork, animation timing and gameplay
-are unchanged. The [v1.1.1 artist bundle](https://github.com/liveweird/grenadiers/releases/download/v1.1.1/grenadiers-artist-v1.1.1.zip)
-remains current, including the wall maps and all twenty death poses.
+Adopt the owner-supplied polished arena PNG directly, without resizing, recoloring or metadata
+changes. It refines all ten 3D material maps and lightly retouches twenty death poses. All
+64 directional player poses, four mob directions and other sprite drawings remain unchanged.
+The sheet retains 1120×2128 RGBA dimensions, 185 assigned slots, anchors and animation contracts.
+The redundant root `arena-napoleonic-3d-polished.png` is removed only after verifying its adopted
+copy is byte-identical.
+
+Use the [updated artist bundle](https://github.com/liveweird/grenadiers/releases/download/v1.1.3/grenadiers-artist-v1.1.3.zip)
+for the current PNG/JSON, labelled guides, slices and actual 3D preview. The canonical source
+remains [assets/art/arena-source.png](../assets/art/arena-source.png).
 
 ### Verification
 
-Accepted source: `dbf17457781ace59fce4ba7ac18cf48f70b5db67`,
-[PR #292](https://github.com/liveweird/grenadiers/pull/292). Independent review confirms the
-transparent-depth ordering cause and the minimal replacement layer. The pre-fix native
-regression retains only 124/889 death-mask pixels (13.95%). The correction passes ≥75% body
-retention for both ordinary and burning-Oil flames, while separate comparisons prove the
-surrounding hazard is still visible.
+Accepted source: `e005b4228ac0f6bf76ccb4a6af794efc9e57f5c8`,
+[PR #293](https://github.com/liveweird/grenadiers/pull/293). Independent decoded-pixel review
+finds no structural defects: binary alpha, clean gutters/reservations, compatible death
+palettes and ground alignment, four distinct poses per death family. Exactly 30 frames change;
+151 baseline frames and all pixels outside allowed rectangles remain unchanged.
 
-- Fresh focused Three/client tests: 57 pass. Full native graphics: 11 executed cases pass;
-  three intentional cross-project skips select the appropriate desktop/reduced-motion cases.
-  Lint, Knip, types, repository/tooling, static E2E and 103 scenario mappings pass.
-- Fresh production build: 394,348/400,000 gzip JS bytes; 15,430/20,000 CSS bytes. All five
-  container web files equal the verified build. The sole production behavior change is a
-  death-body draw-order value, exercised by the focused tests and native red/green proof.
-- Reuse [v1.1.1](history/releases.md#v111--2026-10-31) full 7,290-test/coverage acceptance and
-  unchanged artwork, dependencies and Rust acceptance. Existing floors remain intact. Rust
-  package metadata changes only; the exact image supplies a fresh Linux release build and
-  runtime checks. Duplicate unchanged Rust CI is deliberately cancelled.
-- Exact-image Compose acceptance passes four duel/auth/CPU cases (37.7s) and disabled
-  diagnostics (11.3s). Kubernetes passes duel/auth (23.7s), configured probes/resources,
-  restricted runtime and zero restarts. Owned stacks and namespace are removed.
-- Pinned Trivy 0.74 finds zero fixable HIGH/CRITICAL vulnerabilities in the exact accepted image.
-  Dependency/security inputs are unchanged from the accepted v1.1.1 checks.
+- Raw input exports through the native validator without adaptation. Focused atlas/Three/UI
+  tests pass: 101 tests in 24 files. Artist workbench passes ten cases. Native 3D passes eleven
+  cases, with three intentional project skips, including all death frames, reduced motion,
+  expiry, flame overlap, board sizes, context recovery and removal privacy.
+- Fresh production build passes at 394,351/400,000 gzip JS bytes and 15,430/20,000 CSS bytes.
+  Runtime pack remains 2040×704 / 181 frames / 5,744,640 RGBA bytes. All five container web
+  files equal the verified build. Exact canonical file bytes equal the supplied input.
+- Exact-image Compose passes four duel/auth/CPU cases (36.8s), disabled diagnostics (10.3s)
+  and a native four-player visual smoke with zero page errors. Kubernetes duel/auth passes
+  (23.6s), alongside runtime restrictions, configured probes/resources and zero restarts.
+  Owned stacks and namespace are removed. Pinned Trivy 0.74 finds zero fixable HIGH/CRITICAL.
+- Application/rules/contracts/dependencies and Kubernetes configuration are unchanged. Reuse
+  the recorded full web/coverage/security/Rust and E2E-static acceptance; no floors or assertions
+  are weakened. Only duplicate unchanged Rust CI is cancelled. Cargo product versions change
+  to 1.1.3; the image supplies a fresh Linux release build and runtime acceptance.
 
 ### Operation
 
-Localhost:8085 runs accepted image
-`sha256:aa2a199cddf9e8369a4058aa3e7782ad267f4d1f1ef53da98fd3b6e118a2f90d`,
-labelled 1.1.2/source dbf17457. The local CPU-diagnostic flag remains enabled; base deployments
-still default to disabled. Promotion verifies image/runtime restrictions, health/readiness,
-CSP/cache and served bytes. Immutable v1.1.1 remains available for rollback. Refresh the browser
-and create a new match after restart.
+Localhost:8085 runs exact accepted image
+`sha256:0c553e5c95b1a558608e8b9fcab2cfe1cb1d8dda510dba6ce1f3a37e3f73cc95`,
+labelled 1.1.3/source e005b422. The operator keeps CPU diagnostics enabled; base deployments
+default to disabled. Promotion checks image/runtime identity, health/readiness, CSP/cache and
+served bytes. Immutable v1.1.2 remains available for rollback. Refresh old tabs and create a
+new match after restart to see the polished material maps.
+
+<a id="v112--2026-10-31"></a>
+The [v1.1.2 record](history/releases.md#v112--2026-10-31) is preserved in release history.
 
 <a id="v111--2026-10-31"></a>
 The [v1.1.1 record](history/releases.md#v111--2026-10-31) is preserved in release history.

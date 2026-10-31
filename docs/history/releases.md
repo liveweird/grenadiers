@@ -4,6 +4,48 @@ This archive preserves the older release records originally maintained in
 [`docs/releases.md`](../releases.md). Records remain in their original order; the current
 release procedure and current release record stay in the [release guide](../releases.md).
 
+## v1.1.2 — 2026-10-31
+
+Keep knockout sprites readable during ordinary explosions and persistent Oil fire. The death
+body now uses the minimum layer above world hazard overlays; its grounded shadow stays
+unchanged and higher actor status cues remain visible. Artwork, animation timing and gameplay
+are unchanged. The [v1.1.1 artist bundle](https://github.com/liveweird/grenadiers/releases/download/v1.1.1/grenadiers-artist-v1.1.1.zip)
+remains current, including the wall maps and all twenty death poses.
+
+### Verification
+
+Accepted source: `dbf17457781ace59fce4ba7ac18cf48f70b5db67`,
+[PR #292](https://github.com/liveweird/grenadiers/pull/292). Independent review confirms the
+transparent-depth ordering cause and the minimal replacement layer. The pre-fix native
+regression retains only 124/889 death-mask pixels (13.95%). The correction passes ≥75% body
+retention for both ordinary and burning-Oil flames, while separate comparisons prove the
+surrounding hazard is still visible.
+
+- Fresh focused Three/client tests: 57 pass. Full native graphics: 11 executed cases pass;
+  three intentional cross-project skips select the appropriate desktop/reduced-motion cases.
+  Lint, Knip, types, repository/tooling, static E2E and 103 scenario mappings pass.
+- Fresh production build: 394,348/400,000 gzip JS bytes; 15,430/20,000 CSS bytes. All five
+  container web files equal the verified build. The sole production behavior change is a
+  death-body draw-order value, exercised by the focused tests and native red/green proof.
+- Reuse [v1.1.1](releases.md#v111--2026-10-31) full 7,290-test/coverage acceptance and
+  unchanged artwork, dependencies and Rust acceptance. Existing floors remain intact. Rust
+  package metadata changes only; the exact image supplies a fresh Linux release build and
+  runtime checks. Duplicate unchanged Rust CI is deliberately cancelled.
+- Exact-image Compose acceptance passes four duel/auth/CPU cases (37.7s) and disabled
+  diagnostics (11.3s). Kubernetes passes duel/auth (23.7s), configured probes/resources,
+  restricted runtime and zero restarts. Owned stacks and namespace are removed.
+- Pinned Trivy 0.74 finds zero fixable HIGH/CRITICAL vulnerabilities in the exact accepted image.
+  Dependency/security inputs are unchanged from the accepted v1.1.1 checks.
+
+### Operation
+
+Localhost:8085 runs accepted image
+`sha256:aa2a199cddf9e8369a4058aa3e7782ad267f4d1f1ef53da98fd3b6e118a2f90d`,
+labelled 1.1.2/source dbf17457. The local CPU-diagnostic flag remains enabled; base deployments
+still default to disabled. Promotion verifies image/runtime restrictions, health/readiness,
+CSP/cache and served bytes. Immutable v1.1.1 remains available for rollback. Refresh the browser
+and create a new match after restart.
+
 ## v1.1.1 — 2026-10-31
 
 Add short, non-gory knockout animations for all four player uniforms and mobs. Each appearance

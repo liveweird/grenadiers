@@ -605,8 +605,8 @@
               "status": { "type": "string", "enum": ["available"] },
               "observedTick": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
               "objective": { "type": "string", "enum": ["collect", "farm", "attack", "explore", "survive", "wait"] },
-              "target": { "type": "object", "nullable": true, "oneOf": [{ "$ref": "#/components/schemas/CpuDebugTarget" }, { "type": "object", "nullable": true, "enum": [null] }] },
-              "approach": { "type": "object", "nullable": true, "oneOf": [{ "$ref": "#/components/schemas/CpuDebugCell" }, { "type": "object", "nullable": true, "enum": [null] }] },
+              "target": { "oneOf": [{ "$ref": "#/components/schemas/CpuDebugTarget" }, { "type": "object", "nullable": true, "enum": [null], "additionalProperties": false }] },
+              "approach": { "oneOf": [{ "$ref": "#/components/schemas/CpuDebugCell" }, { "type": "object", "nullable": true, "enum": [null], "additionalProperties": false }] },
               "phase": { "type": "string", "enum": ["approach", "plant", "escape", "reengage", "evade", "waiting"] },
               "switchReason": { "type": "string", "enum": ["initial", "completed", "targetInvalid", "visibilityLost", "betterOpportunity", "stalled", "noTargets", "safetyInterrupt", "resumed"] }
             }

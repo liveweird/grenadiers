@@ -170,8 +170,8 @@ export interface components {
             observedTick: number;
             /** @enum {string} */
             objective: "collect" | "farm" | "attack" | "explore" | "survive" | "wait";
-            target: (components["schemas"]["CpuDebugTarget"] | (never | null)) | null;
-            approach: (components["schemas"]["CpuDebugCell"] | (never | null)) | null;
+            target: components["schemas"]["CpuDebugTarget"] | (never | null);
+            approach: components["schemas"]["CpuDebugCell"] | (never | null);
             /** @enum {string} */
             phase: "approach" | "plant" | "escape" | "reengage" | "evade" | "waiting";
             /** @enum {string} */

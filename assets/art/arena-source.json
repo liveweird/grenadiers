@@ -4341,6 +4341,66 @@
         "y": 2016
       },
       "status": "baseline"
+    },
+    {
+      "id": "terrain.spikePit.idle",
+      "localBounds": {
+        "height": 48,
+        "width": 48,
+        "x": 0,
+        "y": 0
+      },
+      "pivot": {
+        "x": 0,
+        "y": 0
+      },
+      "sourceRect": {
+        "height": 48,
+        "width": 48,
+        "x": 672,
+        "y": 2016
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "terrain.spikePit.warning",
+      "localBounds": {
+        "height": 48,
+        "width": 48,
+        "x": 0,
+        "y": 0
+      },
+      "pivot": {
+        "x": 0,
+        "y": 0
+      },
+      "sourceRect": {
+        "height": 48,
+        "width": 48,
+        "x": 784,
+        "y": 2016
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "terrain.spikePit.raised",
+      "localBounds": {
+        "height": 48,
+        "width": 48,
+        "x": 0,
+        "y": 0
+      },
+      "pivot": {
+        "x": 0,
+        "y": 0
+      },
+      "sourceRect": {
+        "height": 48,
+        "width": 48,
+        "x": 896,
+        "y": 2016
+      },
+      "status": "baseline"
     }
   ],
   "schemaVersion": 1,

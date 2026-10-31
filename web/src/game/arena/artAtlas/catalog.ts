@@ -9,6 +9,7 @@ import { createArtDescriptor, MATERIAL_FRAME_IDS } from './descriptor'
 import { makeMaterialFrame } from './materialArtwork'
 import { poseDeathArtwork } from './deathArtwork'
 import { makeBloodPool } from './bloodArtwork'
+import { makeSpikePit } from './spikePitArtwork'
 import type { ArtCatalog, ArtCatalogEntry } from './types'
 
 type DrawingFactory = () => { drawing: Container; owner?: Container }
@@ -209,6 +210,10 @@ export function createArtCatalog(): ArtCatalog {
   }
   addDeathArtwork(entries)
   entries.push(entry('effect.bloodPool', entries.length, () => ({ drawing: makeBloodPool() })))
+  for (const phase of ['idle', 'warning', 'raised'] as const) {
+    entries.push(entry(`terrain.spikePit.${phase}`, entries.length,
+      () => ({ drawing: makeSpikePit(phase) })))
+  }
   if (entries.length !== DESCRIPTOR.frames.length) {
     throw new Error(`Drawing catalogue supplies ${entries.length} of ${DESCRIPTOR.frames.length} canonical frames`)
   }

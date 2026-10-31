@@ -21,6 +21,55 @@ export type DeathInventoryMetric = {
   unexpectedColors: string[]
 }
 
+export type SpikePitInventoryMetric = {
+  id: string
+  opaquePixels: number
+  invalidAlpha: number
+  colors: number
+  pixelSignature: string
+}
+
+export function inspectSpikePitInventory(
+  page: Page,
+  source: Source,
+): Promise<SpikePitInventoryMetric[]> {
+  return page.evaluate(async (request) => {
+    const binary = atob(request.pngBase64)
+    const bytes = Uint8Array.from(binary, (value) => value.charCodeAt(0))
+    const bitmap = await createImageBitmap(new Blob([bytes], { type: 'image/png' }))
+    const canvas = document.createElement('canvas')
+    canvas.width = bitmap.width
+    canvas.height = bitmap.height
+    const context = canvas.getContext('2d', { willReadFrequently: true })
+    if (!context) throw new Error('Canvas 2D unavailable while inspecting spike pits')
+    context.drawImage(bitmap, 0, 0)
+    bitmap.close()
+    const manifest = JSON.parse(request.manifestJson) as {
+      frames: Array<{ id: string; sourceRect: { x: number; y: number; width: number; height: number } }>
+    }
+    return manifest.frames.filter(({ id }) => id.startsWith('terrain.spikePit.'))
+      .map(({ id, sourceRect }) => {
+        const data = context.getImageData(
+          sourceRect.x, sourceRect.y, sourceRect.width, sourceRect.height,
+        ).data
+        const colors = new Set<string>()
+        let opaquePixels = 0
+        let invalidAlpha = 0
+        let hash = 2166136261
+        for (let offset = 0; offset < data.length; offset += 1) {
+          hash = Math.imul(hash ^ data[offset], 16777619) >>> 0
+          if (offset % 4 !== 3) continue
+          const alpha = data[offset]
+          if (alpha !== 0 && alpha !== 255) invalidAlpha += 1
+          if (alpha !== 255) continue
+          opaquePixels += 1
+          colors.add(`${data[offset - 3]},${data[offset - 2]},${data[offset - 1]}`)
+        }
+        return { id, opaquePixels, invalidAlpha, colors: colors.size, pixelSignature: hash.toString(16) }
+      })
+  }, source)
+}
+
 export function inspectActorInventory(
   page: Page,
   source: Source,
@@ -150,6 +199,13 @@ export function expectDeathAndPoolFrames(manifestJson: string): void {
     sourceRect: { x: 560, y: 2016, width: 48, height: 48 },
     localBounds: { x: 0, y: 0, width: 48, height: 48 }, pivot: { x: 0, y: 0 },
   })
+  expect(manifest.frames.slice(186, 189)).toEqual([
+    'idle', 'warning', 'raised',
+  ].map((phase, index) => ({
+    id: `terrain.spikePit.${phase}`, status: 'baseline',
+    sourceRect: { x: (index + 6) * 112, y: 2016, width: 48, height: 48 },
+    localBounds: { x: 0, y: 0, width: 48, height: 48 }, pivot: { x: 0, y: 0 },
+  })))
   for (const animation of deathAnimations) {
     expect(manifest.animations[animation]).toEqual({
       frameIds: [0, 1, 2, 3].map((frame) => `${animation}.${frame}`),

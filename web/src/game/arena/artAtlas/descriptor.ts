@@ -18,7 +18,7 @@ export const MATERIAL_FRAME_IDS = [
   'material.rim.top', 'material.rim.side',
 ] as const
 
-const TILE_BOUNDS = { x: 0, y: 0, width: 48, height: 48 }
+export const TILE_BOUNDS = { x: 0, y: 0, width: 48, height: 48 }
 const ACTOR_BOUNDS = { x: -40, y: -44, width: 80, height: 80 }
 const ACTOR_PIVOT = { x: 40, y: 44 }
 const DIRECTIONS = ['north', 'east', 'south', 'west'] as const
@@ -175,6 +175,9 @@ export function createArtDescriptor(): ArtDescriptor {
   addExtensions(frames)
   addDeathFrames(frames)
   addFrame(frames, 'effect.bloodPool')
+  for (const phase of ['idle', 'warning', 'raised'] as const) {
+    addFrame(frames, `terrain.spikePit.${phase}`)
+  }
   return {
     frames,
     animations: animations(),

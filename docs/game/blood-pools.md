@@ -7,7 +7,7 @@ Open work and priority live only in the [backlog](../../BACKLOG.md).
 
 Player and mob knockout sprites disappear after their short animation. A small blood pool
 remains at the death position. It is purely aesthetic: it never changes collision, movement,
-damage, bomb behavior, pickups, visibility rules or AI decisions.
+damage, bomb or spike-pit behavior, pickups, visibility rules or AI decisions.
 
 ## Presentation
 

@@ -1,6 +1,6 @@
 # Gameplay protocol consumer inventory
 
-This inventory applies [ADR 0021](../decisions/0021-gameplay-retention.md): gameplay v17 is the
+This inventory applies [ADR 0021](../decisions/0021-gameplay-retention.md): gameplay v18 is the
 only live network version, while archived schemas, compatibility exports, shared implementation
 and regression corpora remain repository consumers. Retention does not mean an old client can
 connect, and no complete historical Rust version directory is selected for deletion.
@@ -25,7 +25,8 @@ separate compatibility axes. In particular, rules profile 5 is not a gameplay-v5
 | v14 | Retained Rust/browser adapter, standalone validator and archived E2E fixtures. | Checked two-to-four-seat configuration, canonical seat/score arrays, rules-6 projection and inherited recipient privacy; rejected before credential claim. |
 | v15 | Rust `core::protocol::v15`; archived server/browser validators and E2E fixtures. | Actual rules7 binding and cloud/timer privacy retained for compatibility; rejected before credential claim. |
 | v16 | Rust `core::protocol::v16`, archived server/browser validators and retained conformance/E2E corpus. | Exact historical rules8 binding, canonical lairs, bounded mob counts/footprints, private Stopwatch freeze facts and checked CPU observations. |
-| v17 | Native Rust `core::protocol::v17`, `api/gameplay-v17.schema.json`, generated `web/src/game/v17/schema.ts`, live server connection/socket/command/dispatcher, browser client, standalone validator and shared conformance/E2E corpus. | Exact rules9/CPU25 binding, one-living-mob-per-lair respawn/death-delay facts, solid-player collisions and the authoritative server corpus. This is the sole live network contract. |
+| v17 | Native Rust `core::protocol::v17`, `api/gameplay-v17.schema.json`, generated `web/src/game/v17/schema.ts`, retained standalone validator and conformance corpus. | Exact historical rules9/CPU25 binding, one-living-mob-per-lair respawn/death-delay facts, solid-player collisions and archived server fixtures. No server runtime accepts v17. |
+| v18 | Native Rust `core::protocol::v18`, `api/gameplay-v18.schema.json`, generated `web/src/game/v18/schema.ts`, live server connection/socket/command/dispatcher, browser client, standalone validator and shared conformance/E2E corpus. | Exact rules10/CPU26 binding, required checked spike settings and authoritative 0/2/4-cell phase projection, while retaining v17 lair, collision and privacy behavior. This is the sole live network contract. |
 
 The shared client corpus exercises the closed client-message union across retained v8-v11 Rust
 parsers, schemas and browser validators. The server corpus checks actual Rust-produced

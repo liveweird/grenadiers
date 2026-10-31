@@ -3,9 +3,9 @@
 See [ADR 0020](../decisions/0020-shared-gameplay-settings.md) for the shared configuration model.
 Historical activation details are in the [release record](../history/configuration-activation.md#room-settings-activation).
 
-The creator can configure these rules before the match starts. New rooms use rules 9 and include
-the environment settings `stormCloud` and `lairs` (both enabled by default). All on and Restore enable the cloud and lairs;
-All off and Classic disable both. Custom room creation separately
+The creator can configure these rules before the match starts. New rooms use rules 10 and include
+the environment settings `stormCloud`, `lairs` and `spikePits` (all enabled by default). All on
+and Restore enable all three; All off and Classic disable them. Custom room creation separately
 selects an immutable **Board size** / **Rozmiar planszy** of 11×9, 13×11 or 15×13 (default);
 it is not an editable gameplay setting. Quick duel and Solo always use 15×13. See
 [board geometry](board-sizes.md).
@@ -17,6 +17,8 @@ it is not an editable gameplay setting. Quick duel and Solo always use 15×13. S
 | Wins to finish | 1–9 | Sets round wins needed for match victory. Draws award no point. |
 | Bomb fuse | 1–5 seconds, steps of 0.5 | Sets the delay for successfully planted ordinary bombs. |
 | Lair respawn delay | 5–60 whole seconds, default 10 | Delays the first mob and each replacement after death. |
+| Spike warning | 0.1–2 seconds (6–120 ticks), default 0.6 | Sets the visible interval before contacted spikes rise. |
+| Spike raised | 1–10 seconds (60–600 ticks), default 3 | Sets how long raised spikes remain harmful. |
 | Heart | Enabled or disabled; enabled by default | Adds the one-hit protection pickup to generated soft blocks. |
 | Bracelet | Enabled or disabled; enabled by default | Adds passive equipment that shoves a contacted rival up to one tile. |
 | Punch | Enabled or disabled; enabled by default | Adds permanent equipment for moving the adjacent facing bomb to the next open three-cell wrapped landing. |
@@ -42,7 +44,7 @@ it is not an editable gameplay setting. Quick duel and Solo always use 15×13. S
 
 All players see accepted values. Editing requires the original creator to be connected,
 unready and in the waiting lobby. Apply changes to update the shared rules; a genuine change
-clears every human's readiness. **All on** and **All off** change the item switches and cloud
+clears every human's readiness. **All on** and **All off** change the item switches and environment
 setting in the draft; they do not reset numeric rules or submit automatically. Restore defaults prepares the
 numeric Expanded defaults with every currently available item enabled. Classic settings prepares
 the original four values with optional items disabled. Every draft change requires **Apply rules**
@@ -51,6 +53,8 @@ Each lair has exactly one living mob. Its 5–60 second respawn delay (default 1
 that mob dies and also delays the first spawn; there is no capacity editor. All on enables
 lairs; All off and Classic disable them. Disabling/re-enabling retains the delay; Restore resets
 it to ten seconds. See the [lair guide](lairs.md) for independent timers and blocked spawning.
+Spike timing is retained while pits are disabled. Restore returns it to 36 warning ticks and
+180 raised ticks. See the [spike-pit guide](spike-pits.md) for phases, placement and damage.
 Settings lock at first start and remain locked through automatic rounds and rematches. Create a
 new room to change them.
 
@@ -63,4 +67,4 @@ movement budget and swept collision/fire checks. Round/flame duration and loadou
 configurable here.
 
 The map identity remains `generated_v2`. All 22 item switches preserve one another.
-See [Oil Barrel](oil-barrel.md), [Heart behavior](heart.md), [Bracelet](bracelet.md), [Punch](punch.md), [Kick](kick.md), [Wall Pass](wall-pass.md), [Remote Bomb](remote-bomb.md), [Piercing Bomb](piercing-bomb.md), [Power Bomb](power-bomb.md), [Landmine](landmine.md), [Stopwatch](stopwatch.md), [Invisibility Cloak](invisibility-cloak.md), [Invisible Bombs](invisible-bombs.md), [Teleporter](teleporter.md), [Shield behavior](shield.md), [Golden Flame](golden-flame.md), [Short Fuse](short-fuse.md), [Short Flame](short-flame.md), [Long Fuse](long-fuse.md), [Reverse Controls](reverse-controls.md), [Diarrhea](diarrhea.md), [Slow foot](slow-foot.md), and [protocol compatibility](protocol-v17.md).
+See [Oil Barrel](oil-barrel.md), [Heart behavior](heart.md), [Bracelet](bracelet.md), [Punch](punch.md), [Kick](kick.md), [Wall Pass](wall-pass.md), [Remote Bomb](remote-bomb.md), [Piercing Bomb](piercing-bomb.md), [Power Bomb](power-bomb.md), [Landmine](landmine.md), [Stopwatch](stopwatch.md), [Invisibility Cloak](invisibility-cloak.md), [Invisible Bombs](invisible-bombs.md), [Teleporter](teleporter.md), [Shield behavior](shield.md), [Golden Flame](golden-flame.md), [Short Fuse](short-fuse.md), [Short Flame](short-flame.md), [Long Fuse](long-fuse.md), [Reverse Controls](reverse-controls.md), [Diarrhea](diarrhea.md), [Slow foot](slow-foot.md), and [protocol compatibility](protocol-v18.md).

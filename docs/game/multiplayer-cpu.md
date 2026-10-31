@@ -1,7 +1,7 @@
 # Multiplayer CPU foundation
 
-The live environment CPU implementation uses policy 24 on rules 9 for every live two-to-four-seat
-room. The legacy multiplayer profiles remain policy 17 for archived/reference paths. See the
+The live environment CPU implementation uses policy26 on rules10 for every live two-to-four-seat
+room. The legacy multiplayer profiles remain policy17 for archived/reference paths. See the
 [board profile table](board-sizes.md). The
 [CPU contract guide](cpu-contracts.md) describes planner boundaries; the
 [roster runtime](multiplayer-runtime.md) supplies the certified publication seam.
@@ -12,14 +12,15 @@ Rules 1–5 require two canonical actors and retain the 16-bomb observation/fore
 Rules 6 accepts two to four canonical actors and 32 bombs. Forecast evolution, history and
 hypothetical placement use the selected rules' limit rather than raising a global legacy cap.
 
-`protocol::v17::observe_cpu_recipient` derives observations from the same checked recipient
+`protocol::v18::observe_cpu_recipient` derives observations from the same checked recipient
 projection used by humans. Cloaked actors, unavailable bomb knowledge, timed effects and
 individual Teleporter markers remain private. Planning never receives the complete simulation
 or a private arena/simulation random stream.
 
 ## Policies and controller ownership
 
-`CpuProfile::RESPAWN_LAIRS_STANDARD` and `RESPAWN_LAIRS_EASY` select Utility24 for live rules9 rooms.
+`CpuProfile::SPIKE_PITS_STANDARD` and `SPIKE_PITS_EASY` select Utility26 for live rules10 rooms.
+`RESPAWN_LAIRS_STANDARD` and `RESPAWN_LAIRS_EASY` retain Utility25 for archived rules9 rooms.
 `RESPAWN_V23_STANDARD`/`RESPAWN_V23_EASY` retain Utility23 with goal-cell persistence.
 `RESPAWN_V22_STANDARD`/`RESPAWN_V22_EASY` retain Utility22 with certified pickup handoffs.
 `RESPAWN_V21_STANDARD`/`RESPAWN_V21_EASY` retain Utility21 for archived rules9 planning.
@@ -59,14 +60,20 @@ impossible or an existing guaranteed slowdown to cover the remaining movement; u
 speed changes cannot be assumed safe. Deadline intervals participate in route dominance and
 lease validation. Legacy policies retain their original bulk checks and work accounting.
 
-Live controller selection uses the lair profile below, including when both environment features are disabled.
+Live controller selection uses the spike-pit profile below, including when every environment
+feature is disabled.
 
 ## Lair profile boundaries
 
-`RESPAWN_LAIRS_STANDARD` and `RESPAWN_LAIRS_EASY` identify Utility24 on rules9. The checked
-v17 observation adds independent nullable lair deadlines and mob poses without targets, paths
+`RESPAWN_LAIRS_STANDARD` and `RESPAWN_LAIRS_EASY` identify archived Utility25 on rules9. The
+checked v17 observation adds independent nullable lair deadlines and mob poses without targets, paths
 or hidden thaw deadlines. Use `survival::plan_respawn_v24_with_origin`; historical entry points
 remain closed to rules9. Disabled lairs use the same solid-player profile.
+
+Gameplay18/CPU26 inherits these lair facts and adds the checked public spike-pit overlay. Its
+route forecast advances idle contacts and warning/raised deadlines, then guards execution against
+the exact observed phase state. Ordinary published damage protection is modeled; work limits and
+the existing movement, planting and stopped-suffix safety budgets are unchanged.
 
 The planner returns a separate finite contact lease beside the existing bomb/escape proof.
 Navigation covers movement and a stopped handoff; an optional plant must also cover its complete
@@ -88,7 +95,7 @@ workers or observations are late. See [CPU contracts](cpu-contracts.md).
 
 ## Combat pressure and player blocking
 
-Every visible living rival is an enemy, whether human or CPU. CPU25 seeks reachable firing
+Every visible living rival is an enemy, whether human or CPU. CPU26 retains CPU25's reachable firing
 positions whose actual blast can threaten a rival instead of walking into its occupied cell.
 Useful pickups remain valuable; combat pressure outranks routine crate clearing. Planting still
 requires a complete escape certificate, so increased aggression does not authorize suicide.
@@ -137,7 +144,7 @@ binds CPU23/24/25 and mob navigation2. Neither reruns the planner.
 
 ## Persistent strategic intent
 
-CPU25 keeps an exact item, block or opponent separate from its approach cell and execution route.
+CPU26 retains CPU25's exact item, block or opponent separately from its approach cell and execution route.
 Commitment, material utility differences and observed progress govern switching. Safety overrides
 revoke execution authority while retaining the subject for resumption. Optional bombing serves
 that subject; pickup pursuit does not opportunistically bomb unrelated objects. Explicit phases
@@ -149,7 +156,7 @@ CPU21–24 retain their historical selection and memory-reset paths.
 
 Run `cargo test -p grenadiers-core cpu:: --lib` and
 `cargo test -p grenadiers-server game::rooms::cpu:: --lib` for planner/controller regressions.
-The v17 adapter tests compare CPU facts with human recipient projections. Additional cases
+The v18 adapter tests compare CPU facts with human recipient projections. Additional cases
 cover forecast capacity, rival interference, both difficulties, independent controllers and
 player four. Live multi-CPU scheduling is owned by the room owner/socket integration rather than
 this projection API.

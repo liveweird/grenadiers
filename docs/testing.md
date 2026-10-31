@@ -134,8 +134,9 @@ stores proofs in `e2e/.playwright/atlas-gameplay-test-results/`. See the
 The same item-shard step runs the DPR 1/2 terrain-pixel suite and retains failures under
 `e2e/.playwright/terrain-pixel-test-results/`; the separate six-cell renderer lifecycle suite
 remains opt-in. `npm --prefix e2e run test:three-arena` checks the production Three renderer in
-a separate credential-free diagnostic: final GPU colour, board fit, billboard visibility,
-reset/context recovery and teardown. The manual full CI runs it serially after the atlas checks.
+a separate credential-free diagnostic: final GPU colour, all three board sizes, billboard
+visibility, static/reduced-motion spike phases, reset/context recovery and teardown. The manual
+full CI runs it serially after the atlas checks.
 
 ## Rust
 
@@ -246,11 +247,11 @@ the largest contributors on failure; Vite's existing per-chunk warning remains v
 `api-guidelines/spectral.yaml`; it retains the standard and custom rules without the CLI's
 glob dependency. Parser/load errors and error-severity diagnostics fail the command.
 `check:api`, `check:realtime`, and `check:gameplay` compare generated
-contracts without modifying them. Gameplay generation/drift checks cover live v17
-and historical v2–v16; parity tests compare unchanged physical definitions. AJV validates runtime WebSocket payloads. EN/PL locale
+contracts without modifying them. Gameplay generation/drift checks cover live v18
+and historical v2–v17; parity tests compare unchanged physical definitions. AJV validates runtime WebSocket payloads. EN/PL locale
 parity is tested. ESLint/SonarJS and Knip must report no findings.
 
-Live gameplay-v17 and realtime browser consumers use generated standalone Ajv validators and
+Live gameplay-v18 and realtime browser consumers use generated standalone Ajv validators and
 the actual server-projection corpus. Its room
 fixtures derive from the roster lifecycle, and mutations check phase/history/readiness,
 physical tick binding, metadata and recipient privacy. Archived validators retain their own
@@ -387,4 +388,4 @@ assertions and evidence for each suite.
 | `npm --prefix e2e run test:terrain-pixels` | [Terrain pixel scenario](../e2e/scenarios/terrain-pixels.md) | Exact cached/uncached Pixi terrain parity across DPRs, repaint/reset, and context restoration. |
 | `scripts/gates.sh art-atlas` / `npm --prefix e2e run test:art-atlas` | [Artist atlas](#artist-atlas) | Canonical import/export, decoded pixels, texture lifecycle/budgets, localization, and responsive reduced-motion layouts. |
 | `scripts/gates.sh atlas-gameplay` / `npm --prefix e2e run test:atlas-gameplay` | [Atlas gameplay scenario](../e2e/scenarios/atlas-gameplay.md) | Procedural-reference atlas parity and real bundled WebGL lifecycle behavior. |
-| `npm --prefix e2e run test:three-arena` | [Three arena scenario](../e2e/scenarios/three-arena.md) | Production GPU colour, three board sizes, billboards, privacy resets, reduced motion, context recovery and bounded teardown. |
+| `npm --prefix e2e run test:three-arena` | [Three arena scenario](../e2e/scenarios/three-arena.md) | Production GPU colour, three board sizes, authoritative spike phases, billboards, privacy resets, reduced motion, context recovery and bounded teardown. |

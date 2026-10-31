@@ -1,6 +1,6 @@
 # Bracelet
 
-In live rules9, contact stops players before overlap. Walking into a rival's physical blocking
+In live rules10, contact stops players before overlap. Walking into a rival's physical blocking
 face can shove even when the holder's accepted movement is zero. Tile reservations without
 physical contact do not trigger it; forced travel respects every player's starts and sweeps.
 

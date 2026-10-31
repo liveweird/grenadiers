@@ -41,7 +41,7 @@ fn rejected_mid_leg_escape_remains_pending_across_updates() {
         let trace = advance_mob(
             &mut mob,
             &world,
-            &danger,
+            NavigationHazards::new(&danger, None),
             &[],
             false,
             Tick(tick),
@@ -70,7 +70,7 @@ fn safe_current_center_on_either_side_clamps_then_resumes_perpendicularly() {
             advance_mob(
                 &mut mob,
                 &world,
-                &danger,
+                NavigationHazards::new(&danger, None),
                 &[],
                 false,
                 Tick(tick),
@@ -91,7 +91,7 @@ fn safe_current_center_on_either_side_clamps_then_resumes_perpendicularly() {
         advance_mob(
             &mut mob,
             &world,
-            &danger,
+            NavigationHazards::new(&danger, None),
             &[(0, distances)],
             false,
             Tick(11),

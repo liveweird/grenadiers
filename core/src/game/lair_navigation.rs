@@ -11,12 +11,28 @@ use crate::game::world::World;
 
 type Distances = Vec<Option<u16>>;
 
+#[derive(Clone, Copy)]
+pub(super) struct NavigationHazards<'a> {
+    danger: &'a BTreeSet<CellId>,
+    spike_pits: Option<&'a BTreeSet<CellId>>,
+}
+
+impl<'a> NavigationHazards<'a> {
+    pub(super) const fn new(
+        danger: &'a BTreeSet<CellId>,
+        spike_pits: Option<&'a BTreeSet<CellId>>,
+    ) -> Self {
+        Self { danger, spike_pits }
+    }
+}
+
 pub(super) fn target_searches(
     world: &World,
     actors: &[Actor],
     target_order: &[usize],
     tick: Tick,
     danger: &BTreeSet<CellId>,
+    spike_pits: Option<&BTreeSet<CellId>>,
 ) -> Vec<(usize, Distances)> {
     target_order
         .iter()
@@ -27,14 +43,20 @@ pub(super) fn target_searches(
         })
         .filter_map(|(rank, actor)| {
             actor.position().cell().and_then(|cell| {
-                super::traversable(cell, world, danger, tick)
-                    .then(|| (rank, bfs(world, cell, danger, tick)))
+                super::spike_navigation::traversable(cell, world, danger, spike_pits, tick)
+                    .then(|| (rank, bfs(world, cell, danger, spike_pits, tick)))
             })
         })
         .collect()
 }
 
-fn bfs(world: &World, start: CellId, danger: &BTreeSet<CellId>, tick: Tick) -> Distances {
+fn bfs(
+    world: &World,
+    start: CellId,
+    danger: &BTreeSet<CellId>,
+    spike_pits: Option<&BTreeSet<CellId>>,
+    tick: Tick,
+) -> Distances {
     let mut distances = vec![None; world.arena.cell_count()];
     let mut pending = VecDeque::from([start]);
     distances[cell_index(world, start)] = Some(0);
@@ -43,7 +65,9 @@ fn bfs(world: &World, start: CellId, danger: &BTreeSet<CellId>, tick: Tick) -> D
         for direction in 0..4 {
             let next = super::adjacent(cell, direction);
             let index = cell_index(world, next);
-            if distances[index].is_none() && super::traversable(next, world, danger, tick) {
+            if distances[index].is_none()
+                && super::spike_navigation::traversable(next, world, danger, spike_pits, tick)
+            {
                 distances[index] = Some(distance + 1);
                 pending.push_back(next);
             }
@@ -59,7 +83,7 @@ fn cell_index(world: &World, cell: CellId) -> usize {
 pub(super) fn advance_mob(
     mob: &mut Mob,
     world: &World,
-    danger: &BTreeSet<CellId>,
+    hazards: NavigationHazards<'_>,
     searches: &[(usize, Distances)],
     frozen: bool,
     tick: Tick,
@@ -80,7 +104,7 @@ pub(super) fn advance_mob(
     } else if mob.retreat_anchor.is_none() && mob.position == center {
         mob.leg_origin = center;
     }
-    let direction = choose_direction(mob, world, danger, searches, tick, cell, policy);
+    let direction = choose_direction(mob, world, hazards, searches, tick, cell, policy);
     let Some(direction) = direction else {
         mob.residual = 0;
         return trace;
@@ -104,6 +128,12 @@ pub(super) fn advance_mob(
             oil_grace: &BTreeSet::new(),
         },
     );
+    distance = super::spike_navigation::allowed_distance(
+        mob.position,
+        direction,
+        distance,
+        hazards.spike_pits,
+    );
     let start = mob.position;
     match direction {
         Direction::North => mob.position.y -= distance,
@@ -121,42 +151,66 @@ pub(super) fn advance_mob(
 fn choose_direction(
     mob: &mut Mob,
     world: &World,
-    danger: &BTreeSet<CellId>,
+    hazards: NavigationHazards<'_>,
     searches: &[(usize, Distances)],
     tick: Tick,
     cell: CellId,
     policy: MobNavigationPolicy,
 ) -> Option<u8> {
+    if policy == MobNavigationPolicy::EscapeV2
+        && let Some(pits) = hazards.spike_pits
+        && let Some(direction) =
+            super::spike_navigation::escape_direction(mob, world, hazards.danger, pits, tick)
+    {
+        return direction;
+    }
     if let Some(anchor) = mob.retreat_anchor {
         if policy == MobNavigationPolicy::LegacyV1
-            || anchor.cell().is_some_and(|cell| !danger.contains(&cell))
+            || anchor.cell().is_some_and(|cell| {
+                !hazards.danger.contains(&cell)
+                    && !hazards
+                        .spike_pits
+                        .is_some_and(|pits| super::spike_navigation::overlaps(anchor, pits))
+            })
         {
             return Some(direction_index(mob.heading));
         }
         let center = Position::center(cell);
-        let (heading, anchor) =
-            if super::traversable(cell, world, danger, tick) && mob.position != center {
-                (super::direction_toward(mob.position, center), center)
-            } else {
-                let heading = opposite(mob.heading);
-                let direction = direction_index(heading);
-                let next = super::adjacent(cell, direction);
-                if !super::traversable(next, world, danger, tick) {
-                    return None;
-                }
-                (heading, Position::center(next))
-            };
+        let (heading, anchor) = if super::spike_navigation::traversable(
+            cell,
+            world,
+            hazards.danger,
+            hazards.spike_pits,
+            tick,
+        ) && mob.position != center
+        {
+            (super::direction_toward(mob.position, center), center)
+        } else {
+            let heading = opposite(mob.heading);
+            let direction = direction_index(heading);
+            let next = super::adjacent(cell, direction);
+            if !super::spike_navigation::traversable(
+                next,
+                world,
+                hazards.danger,
+                hazards.spike_pits,
+                tick,
+            ) {
+                return None;
+            }
+            (heading, Position::center(next))
+        };
         mob.heading = heading;
         mob.retreat_anchor = Some(anchor);
         return Some(direction_index(heading));
     }
     if mob.position != mob.leg_origin
-        && danger.contains(&cell)
+        && hazards.danger.contains(&cell)
         && (policy == MobNavigationPolicy::LegacyV1
             || mob
                 .leg_origin
                 .cell()
-                .is_some_and(|origin| !danger.contains(&origin)))
+                .is_some_and(|origin| !hazards.danger.contains(&origin)))
     {
         mob.retreat_anchor = Some(mob.leg_origin);
         return Some(direction_index(opposite(mob.heading)));
@@ -164,9 +218,16 @@ fn choose_direction(
     if mob.position != Position::center(cell) {
         return Some(direction_index(mob.heading));
     }
-    if danger.contains(&cell) {
-        return (0..4)
-            .find(|&dir| super::traversable(super::adjacent(cell, dir), world, danger, tick));
+    if hazards.danger.contains(&cell) {
+        return (0..4).find(|&dir| {
+            super::spike_navigation::traversable(
+                super::adjacent(cell, dir),
+                world,
+                hazards.danger,
+                hazards.spike_pits,
+                tick,
+            )
+        });
     }
     searches
         .iter()
@@ -251,144 +312,8 @@ pub(crate) fn actor_position_contacts_mobs(position: Position, mobs: &[Mob]) -> 
 }
 
 #[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::game::{EntityId, fixed_arena};
-    use MobNavigationPolicy::{EscapeV2, LegacyV1};
-
-    fn clear_world() -> World {
-        let mut world = World::new(fixed_arena());
-        let blocks = world.arena.blocks().clone();
-        world.arena.remove_blocks(&blocks);
-        world
-    }
-
-    fn mob(position: Position, heading: Direction, leg_origin: Position) -> Mob {
-        Mob {
-            id: EntityId(90),
-            lair: 0,
-            position,
-            heading,
-            residual: 36,
-            leg_origin,
-            retreat_anchor: None,
-        }
-    }
-
-    fn advance(
-        mob: &mut Mob,
-        world: &World,
-        danger: &BTreeSet<CellId>,
-        tick: u64,
-        policy: MobNavigationPolicy,
-    ) {
-        advance_mob(mob, world, danger, &[], false, Tick(tick), policy);
-    }
-
-    fn departed(origin: Position, heading: Direction) -> Position {
-        let mut departed = origin;
-        match heading {
-            Direction::North => departed.y -= 25,
-            Direction::East => departed.x += 25,
-            Direction::South => departed.y += 25,
-            Direction::West => departed.x -= 25,
-        }
-        departed
-    }
-
-    #[test]
-    fn escape_navigation_completes_the_exit_from_a_dangerous_origin_on_every_axis() {
-        let world = clear_world();
-        let origin = Position::center(CellId::new(3, 3));
-        let danger = BTreeSet::from([origin.cell().unwrap()]);
-        for heading in directions() {
-            let position = departed(origin, heading);
-            let mut mob = mob(position, heading, origin);
-            for tick in 2..=80 {
-                advance(&mut mob, &world, &danger, tick, EscapeV2);
-                if mob.position.cell() != origin.cell() {
-                    break;
-                }
-            }
-            assert_ne!(
-                mob.position.cell(),
-                origin.cell(),
-                "failed heading {heading:?}"
-            );
-            assert_eq!(mob.heading, heading);
-            assert_eq!(mob.retreat_anchor, None);
-        }
-    }
-
-    #[test]
-    fn legacy_navigation_retains_the_dangerous_origin_oscillation() {
-        let world = clear_world();
-        let origin = Position::center(CellId::new(3, 3));
-        let danger = BTreeSet::from([origin.cell().unwrap()]);
-        let departed = departed(origin, Direction::North);
-        let mut mob = mob(departed, Direction::North, origin);
-
-        advance(&mut mob, &world, &danger, 2, LegacyV1);
-        assert_eq!(mob.position, origin);
-        assert_eq!(mob.retreat_anchor, Some(origin));
-
-        advance(&mut mob, &world, &danger, 3, LegacyV1);
-        assert_eq!(mob.position, departed);
-        assert_eq!(mob.heading, Direction::North);
-    }
-
-    #[test]
-    fn danger_after_crossing_a_boundary_retreats_to_the_true_leg_origin_on_every_axis() {
-        let world = clear_world();
-        let cases = [
-            (
-                Position::center(CellId::new(3, 3)),
-                Position { x: 4_200, y: 3_584 },
-                Direction::East,
-            ),
-            (
-                Position::center(CellId::new(5, 3)),
-                Position { x: 5_000, y: 3_584 },
-                Direction::West,
-            ),
-            (
-                Position::center(CellId::new(3, 3)),
-                Position { x: 3_584, y: 4_200 },
-                Direction::South,
-            ),
-            (
-                Position::center(CellId::new(3, 5)),
-                Position { x: 3_584, y: 5_000 },
-                Direction::North,
-            ),
-        ];
-        for (origin, position, heading) in cases {
-            let danger = BTreeSet::from([position.cell().unwrap()]);
-            let clear = BTreeSet::new();
-            let mut mob = mob(position, heading, origin);
-            mob.residual = 0;
-            let before = manhattan(mob.position, origin);
-            advance(&mut mob, &world, &danger, 1, EscapeV2);
-            assert!(manhattan(mob.position, origin) < before);
-            assert_eq!(mob.retreat_anchor, Some(origin));
-
-            for tick in 2..80 {
-                advance(&mut mob, &world, &clear, tick, EscapeV2);
-                if mob.position == origin {
-                    break;
-                }
-            }
-            assert_eq!(mob.position, origin);
-            advance(&mut mob, &world, &clear, 80, EscapeV2);
-            assert_eq!(mob.retreat_anchor, None);
-        }
-    }
-
-    fn manhattan(left: Position, right: Position) -> u64 {
-        i64::from(left.x).abs_diff(i64::from(right.x))
-            + i64::from(left.y).abs_diff(i64::from(right.y))
-    }
-}
+#[path = "lair_navigation_tests.rs"]
+mod tests;
 
 #[cfg(test)]
 #[path = "lair_navigation_policy_tests.rs"]

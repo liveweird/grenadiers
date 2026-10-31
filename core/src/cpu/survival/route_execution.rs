@@ -4,7 +4,9 @@ use crate::cpu::{MemoryKey, MovementIntent, Observation};
 use crate::game::Tick;
 
 use super::MAX_PLAN_AGE_TICKS;
-use super::compatibility::{actor, plant_actor_compatible, route_compatible};
+use super::compatibility::{
+    actor, plant_actor_compatible, route_compatible, visible_rivals_allow_segment,
+};
 use super::manual_execution::CommittedPunch;
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum RouteStatus {
@@ -135,6 +137,9 @@ impl CommittedRoute {
                 lane.storm_deadlines_at(current.parts().tick),
             )
             || expected_pose != (current_actor.position, current_actor.heading)
+            || lane.pose_at(first_update).is_none_or(|next| {
+                !visible_rivals_allow_segment(current, current_actor.position, next.0)
+            })
         {
             return Err(PolicyError::InvalidObservation);
         }
@@ -211,6 +216,15 @@ impl CommittedRoute {
             return RouteStatus::Invalidated;
         };
         if expected != (current_actor.position, current_actor.heading) {
+            return RouteStatus::Invalidated;
+        }
+        if let Some(next_tick) = tick.0.checked_add(1).map(Tick)
+            && let Some(next) = self
+                .certificate
+                .lane(self.first_update)
+                .and_then(|lane| lane.pose_at(next_tick))
+            && !visible_rivals_allow_segment(current, current_actor.position, next.0)
+        {
             return RouteStatus::Invalidated;
         }
         if super::clear_gap::can_complete(super::clear_gap::Input {

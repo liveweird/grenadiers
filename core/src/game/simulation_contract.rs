@@ -42,6 +42,7 @@ pub enum StateError {
     DuplicateActorId(EntityId),
     DuplicateSeat(SeatId),
     IllegalActorPosition(EntityId),
+    ConflictingActorPositions { first: SeatId, second: SeatId },
     DuplicateEntityId(EntityId),
     IllegalBombCell(CellId),
     OccupiedBombCell(CellId),

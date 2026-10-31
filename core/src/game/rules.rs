@@ -1,5 +1,5 @@
 use super::types::{HALF_FOOTPRINT, TICKS_PER_SECOND, TURN_ASSIST, UNITS_PER_CELL};
-use crate::room::{LairConfig, RoomSettings};
+use crate::room::{LairConfig, RespawnLairConfig, RoomSettings};
 
 const FORGIVING_TURN_ASSIST: i32 = 256;
 
@@ -125,6 +125,20 @@ impl RulesConfig {
             version: 8,
             lair_config: lairs,
             ..Self::environment_v7(settings, clouds)
+        }
+    }
+
+    /// Environment profile with one independently replaced mob per lair.
+    #[must_use]
+    pub const fn environment_v9(
+        settings: RoomSettings,
+        clouds: StormCloudConfig,
+        lairs: RespawnLairConfig,
+    ) -> Self {
+        Self {
+            version: 9,
+            lair_config: lairs.as_legacy(),
+            ..Self::environment_v8(settings, clouds, LairConfig::Disabled)
         }
     }
 

@@ -10,7 +10,8 @@ use grenadiers_core::cpu::{
     forecast::ObservedHazardMemory,
     policy::UtilityMemory,
     survival::{
-        PlantEscapeOrigin, SurvivalPlan, WORK_ALLOWANCE, plan_lairs_with_origin, plan_with_origin,
+        PlantEscapeOrigin, SurvivalPlan, WORK_ALLOWANCE, plan_lairs_with_origin,
+        plan_respawn_with_origin, plan_with_origin,
     },
 };
 use grenadiers_core::game::Tick;
@@ -194,7 +195,18 @@ fn execute_job(
     }
     let mut work = WorkBudget::new(WORK_ALLOWANCE);
     let started = measure.then(std::time::Instant::now);
-    let planned = if job.observation.parts().rules.version == 8 {
+    let planned = if job.observation.parts().rules.version == 9 {
+        plan_respawn_with_origin(
+            &job.observation,
+            &job.memory,
+            &job.hazard_memory,
+            job.settled_stop_tick,
+            job.escape_origin.as_ref(),
+            &mut job.rng,
+            &mut work,
+        )
+        .map(|plan| (plan.survival, plan.contact))
+    } else if job.observation.parts().rules.version == 8 {
         plan_lairs_with_origin(
             &job.observation,
             &job.memory,

@@ -26,6 +26,7 @@ pub mod lairs;
 pub mod match_lifecycle;
 pub mod participants;
 pub mod reconnect;
+pub mod respawn_lairs;
 pub mod roster;
 pub mod series;
 pub mod settings;
@@ -36,6 +37,7 @@ pub use lair_environment::{LairRoomConfiguration, LairTuning};
 pub use lairs::{LairConfig, LairSettings, LairSettingsError};
 pub use match_lifecycle::{CountdownKind, MatchChange, MatchError, MatchLifecycle, MatchPhase};
 pub use participants::{ControllerKind, CpuDifficulty, CpuPolicy, CpuProfile, RoomMode};
+pub use respawn_lairs::{RespawnLairConfig, RespawnLairSettings};
 pub use roster::{
     ROSTER_LIFECYCLE_PROFILE, RosterError, RosterMatchLifecycle, RosterParticipant, RosterUpdate,
 };
@@ -363,3 +365,6 @@ fn ensure_duel_seat(seat: SeatId) -> Result<(), LifecycleError> {
 #[cfg(test)]
 #[path = "room_tests.rs"]
 mod tests;
+
+mod respawn_environment;
+pub use respawn_environment::RespawnLairTuning;

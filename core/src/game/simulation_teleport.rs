@@ -1,6 +1,7 @@
 use std::collections::BTreeSet;
 
 use super::State;
+use crate::game::player_collision::player_positions_conflict;
 use crate::game::{BombTrigger, CellId, EntityId, Position, SeatId, Tick, movement};
 
 impl State {
@@ -17,6 +18,17 @@ impl State {
         let from = self.actors[requester.index()].position;
         let to = self.actors[other.index()].position;
         if !self.actors[requester.index()].alive || !self.actors[other.index()].alive || from == to
+        {
+            return;
+        }
+        if self.rules.version() >= 9
+            && self.actors.iter().any(|actor| {
+                actor.alive
+                    && actor.seat != requester
+                    && actor.seat != other
+                    && (player_positions_conflict(to, actor.position)
+                        || player_positions_conflict(from, actor.position))
+            })
         {
             return;
         }

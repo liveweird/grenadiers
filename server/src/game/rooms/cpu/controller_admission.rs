@@ -85,7 +85,13 @@ impl CpuController {
             _ => return None,
         };
         if self.settled_stop_tick.is_none()
-            || ((result.basis.parts().rules.version == 8 || result.plan.execution.is_none())
+            || (result.basis.parts().rules.version == 9
+                && result.plan.control.intent.movement
+                    != grenadiers_core::cpu::MovementIntent::Stop
+                && result.plan.lease.is_none()
+                && result.plan.execution.is_none())
+            || ((matches!(result.basis.parts().rules.version, 8 | 9)
+                || result.plan.execution.is_none())
                 && !grenadiers_core::cpu::survival::can_admit_ordinary(&result.basis, latest))
         {
             return None;
@@ -106,7 +112,9 @@ impl CpuController {
                 Some(contact)
             }
             Some(_) => return None,
-            None if result.basis.parts().rules.version == 8
+            None if (result.basis.parts().rules.version == 8
+                || (result.basis.parts().rules.version == 9
+                    && result.basis.respawn_lairs().is_some()))
                 && (control.intent.manual.is_some()
                     || control.intent.movement != grenadiers_core::cpu::MovementIntent::Stop) =>
             {

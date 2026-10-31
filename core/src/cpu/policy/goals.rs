@@ -9,6 +9,9 @@ use crate::game::{CellId, EffectKind, Equipment, PickupKind, SpecialWeapon, Spee
 use super::equipment::classify as equipment_pickup;
 use super::movement::{STEPS, offset};
 
+#[path = "goal_pressure.rs"]
+mod pressure;
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(super) struct Guidance {
     pub first_step: CellId,
@@ -126,13 +129,15 @@ fn search_map(
     work: &mut WorkBudget,
 ) -> Option<SearchMap> {
     let parts = observation.parts();
+    let actor_scans = if parts.rules.version == 9 { 2 } else { 1 };
+    let actor_scan = parts.actors.len().checked_mul(actor_scans)?;
     let scan_work = parts
         .pickups
         .len()
         .checked_add(parts.arena.blocks.len())?
         .checked_add(parts.arena.blocks.len())?
         .checked_add(parts.oil.len())?
-        .checked_add(parts.actors.len())?;
+        .checked_add(actor_scan)?;
     work.try_take(u32::try_from(scan_work).ok()?).ok()?;
     let mut map = SearchMap {
         values: [0; ARENA_CELL_COUNT],
@@ -170,7 +175,30 @@ fn search_map(
             && rival.alive
             && let Some(cell) = rival.position.cell()
         {
-            map.add_goal(cell_index(observation, cell)?, 1);
+            let index = cell_index(observation, cell)?;
+            if parts.rules.version == 9 {
+                map.forbidden[index] = true;
+            } else {
+                map.add_goal(index, 1);
+            }
+        }
+    }
+    if parts.rules.version == 9 {
+        for observed in &parts.actors {
+            if let ObservedActor::Visible(rival) = observed
+                && rival.seat != parts.recipient
+                && rival.alive
+            {
+                let mut pressure_work = WorkBudget::new(work.remaining() / 2);
+                let _ = pressure::add(
+                    observation,
+                    actor,
+                    rival.position,
+                    &mut map,
+                    &mut pressure_work,
+                );
+                work.try_take(pressure_work.spent()).ok()?;
+            }
         }
     }
     Some(map)

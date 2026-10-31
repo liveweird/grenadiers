@@ -4,7 +4,7 @@ use crate::cpu::{BombKnowledge, Observation, ObservedActor, ObservedBombTrigger,
 use crate::game::arena::ARENA_CELL_COUNT;
 use crate::game::blast_geometry::{BlastBomb, BlastField, BlastSource, BlastVisit, visit_blast};
 use crate::game::geometry::position_overlaps_cell;
-use crate::game::{BlastKind, CellId, OilBarrelState, Terrain};
+use crate::game::{BlastKind, CellId, OilBarrelState, Position, Terrain};
 
 use crate::cpu::routing::PlannedBomb;
 
@@ -44,7 +44,7 @@ pub(super) fn useful_plant(
     bomb: &PlannedBomb,
     work: &mut WorkBudget,
 ) -> Option<bool> {
-    let field = ObservationBlastField::new(observation, work)?;
+    let field = ObservedBlastGeometry::new(observation, work)?;
     if bomb.blast == BlastKind::Power {
         work.try_take(u32::try_from(observation.parts().arena.cell_count()).ok()?)
             .ok()?;
@@ -76,15 +76,15 @@ pub(super) fn useful_plant(
     }
 }
 
-struct ObservationBlastField<'a> {
+pub(crate) struct ObservedBlastGeometry<'a> {
     observation: &'a Observation,
     soft_blocks: [bool; ARENA_CELL_COUNT],
     unlit_oil: [bool; ARENA_CELL_COUNT],
     bombs: [Option<BlastBomb>; ARENA_CELL_COUNT],
 }
 
-impl<'a> ObservationBlastField<'a> {
-    fn new(observation: &'a Observation, work: &mut WorkBudget) -> Option<Self> {
+impl<'a> ObservedBlastGeometry<'a> {
+    pub(crate) fn new(observation: &'a Observation, work: &mut WorkBudget) -> Option<Self> {
         work.try_take(u32::try_from(observation.parts().arena.cell_count()).ok()?)
             .ok()?;
         let mut value = Self {
@@ -113,6 +113,45 @@ impl<'a> ObservationBlastField<'a> {
         Some(value)
     }
 
+    pub(crate) fn threatens_position(
+        &self,
+        firing: CellId,
+        range: u16,
+        kind: BlastKind,
+        target: Position,
+        work: &mut WorkBudget,
+    ) -> Option<bool> {
+        if kind == BlastKind::Power {
+            work.try_take(u32::try_from(self.observation.parts().arena.cell_count()).ok()?)
+                .ok()?;
+        }
+        let mut hit = false;
+        let result = visit_blast(
+            self,
+            BlastSource {
+                cell: firing,
+                range,
+                kind,
+            },
+            |visit| {
+                if work.try_take(1).is_err() {
+                    return ControlFlow::Break(());
+                }
+                hit = position_overlaps_cell(target, visit.cell);
+                if hit {
+                    ControlFlow::Break(())
+                } else {
+                    ControlFlow::Continue(())
+                }
+            },
+        );
+        if result.is_break() && !hit {
+            None
+        } else {
+            Some(hit)
+        }
+    }
+
     fn hits_rival(&self, visit: BlastVisit) -> bool {
         let owner = self
             .observation
@@ -129,7 +168,7 @@ impl<'a> ObservationBlastField<'a> {
     }
 }
 
-impl BlastField for ObservationBlastField<'_> {
+impl BlastField for ObservedBlastGeometry<'_> {
     fn dimensions(&self) -> (u16, u16) {
         (
             self.observation.parts().arena.width,

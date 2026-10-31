@@ -11,6 +11,8 @@ pub use super::observation_environment::ObservedEnvironment;
 use super::observation_environment::validate_environment;
 pub use super::observation_lairs::ObservedLairs;
 use super::observation_lairs::validate_lairs;
+pub use super::observation_respawn_lairs::ObservedRespawnLairs;
+use super::observation_respawn_lairs::validate_respawn_lairs;
 use super::observation_validation::{
     validate_actors, validate_arena, validate_bombs, validate_cells, validate_clock,
 };
@@ -211,6 +213,7 @@ pub struct Observation {
     parts: ObservationParts,
     environment: Option<ObservedEnvironment>,
     lairs: Option<ObservedLairs>,
+    respawn_lairs: Option<ObservedRespawnLairs>,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -235,6 +238,7 @@ impl Observation {
             parts,
             environment: None,
             lairs: None,
+            respawn_lairs: None,
         })
     }
 
@@ -251,6 +255,7 @@ impl Observation {
             parts,
             environment: Some(environment),
             lairs: None,
+            respawn_lairs: None,
         })
     }
 
@@ -272,6 +277,30 @@ impl Observation {
             parts,
             environment: Some(environment),
             lairs: Some(lairs),
+            respawn_lairs: None,
+        })
+    }
+
+    /// Constructs a rules-v9 recipient view. `None` is the disabled-lair overlay;
+    /// an enabled overlay carries independently nullable replacement deadlines.
+    pub fn new_rules_v9(
+        parts: ObservationParts,
+        environment: ObservedEnvironment,
+        respawn_lairs: Option<ObservedRespawnLairs>,
+    ) -> Result<Self, ObservationError> {
+        if parts.rules.version != 9 {
+            return Err(ObservationError::InvalidActors);
+        }
+        validate_common(&parts)?;
+        validate_environment(&parts, &environment)?;
+        if let Some(lairs) = &respawn_lairs {
+            validate_respawn_lairs(&parts, lairs)?;
+        }
+        Ok(Self {
+            parts,
+            environment: Some(environment),
+            lairs: None,
+            respawn_lairs,
         })
     }
 
@@ -291,6 +320,11 @@ impl Observation {
     }
 
     #[must_use]
+    pub const fn respawn_lairs(&self) -> Option<&ObservedRespawnLairs> {
+        self.respawn_lairs.as_ref()
+    }
+
+    #[must_use]
     pub fn into_parts(self) -> ObservationParts {
         self.parts
     }
@@ -303,13 +337,19 @@ impl Observation {
             mut parts,
             environment,
             lairs,
+            respawn_lairs,
         } = self;
         map(&mut parts);
-        match (environment, lairs) {
-            (Some(environment), Some(lairs)) => Self::new_rules_v8(parts, environment, lairs),
-            (Some(environment), None) => Self::new_rules_v7(parts, environment),
-            (None, None) => Self::new(parts),
-            (None, Some(_)) => Err(ObservationError::InvalidActors),
+        match (environment, lairs, respawn_lairs, parts.rules.version) {
+            (Some(environment), Some(lairs), None, 8) => {
+                Self::new_rules_v8(parts, environment, lairs)
+            }
+            (Some(environment), None, respawn_lairs, 9) => {
+                Self::new_rules_v9(parts, environment, respawn_lairs)
+            }
+            (Some(environment), None, None, 7) => Self::new_rules_v7(parts, environment),
+            (None, None, None, 1..=6) => Self::new(parts),
+            _ => Err(ObservationError::InvalidActors),
         }
     }
 }

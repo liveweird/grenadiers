@@ -34,6 +34,8 @@ mod kick_validation_tests;
 mod lair_foundation_tests;
 #[path = "lair_review_tests.rs"]
 mod lair_review_tests;
+#[path = "lair_respawn_tests.rs"]
+mod lair_respawn_tests;
 #[path = "simulation/landmine_acceptance_tests.rs"]
 mod landmine_acceptance_tests;
 #[path = "simulation/landmine_route_tests.rs"]
@@ -121,3 +123,5 @@ mod wall_pass_tests;
 
 #[path = "teleport_marker_tests.rs"]
 mod teleport_marker_tests;
+#[path = "rules9_player_collision_tests.rs"]
+mod rules9_player_collision_tests;

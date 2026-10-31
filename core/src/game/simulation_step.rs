@@ -3,7 +3,6 @@ use crate::game::damage::{DamageOutcome, DamagePreventionSource, apply_damage};
 use crate::game::events::{EventAudience, StepEvent, StepEventKind};
 use crate::game::geometry::MovementTrace;
 use crate::game::movement;
-use crate::game::movement::MovementOutcome;
 #[cfg(test)]
 use crate::game::types::CellId;
 use crate::game::types::Tick;
@@ -95,12 +94,20 @@ impl State {
         }
         let manual_actions = self.apply_inputs(inputs);
         self.clear_frozen_movement(&stopwatch.frozen);
-        let (mob_contact_targets, mut contact_damaged) = self.advance_lair_phase(
+        let (mob_contact_targets, mut contact_damaged) = match self.advance_lair_phase(
             next_tick,
             stopwatch.pause_timed,
             &mut events,
             &mut shield_prevented,
-        );
+        ) {
+            Ok(phase) => phase,
+            Err(error) => {
+                if let Some(snapshot) = rollback {
+                    *self = snapshot;
+                }
+                return Err(error);
+            }
+        };
         let alive_at_movement_start: Vec<_> = self.actors.iter().map(|actor| actor.alive).collect();
         let grace_at_movement_start: Vec<_> = self
             .actors
@@ -148,7 +155,12 @@ impl State {
             stopwatch.pause_timed,
             &mut events,
         )?;
-        self.kill_lairs_on_fire();
+        if let Err(error) = self.kill_lairs_on_fire(next_tick) {
+            if let Some(snapshot) = rollback {
+                *self = snapshot;
+            }
+            return Err(error);
+        }
         self.kill_on_final_flames(next_tick, &mut events, &mut shield_prevented);
         let teleport_requests = match self.collect_pickups(next_tick, &mut events) {
             Ok(requests) => requests,
@@ -202,51 +214,6 @@ impl State {
             events,
             forced_movements,
         })
-    }
-
-    fn move_living(
-        &mut self,
-        tick: Tick,
-        frozen: &[bool],
-        moving_at_start: &BTreeSet<crate::game::EntityId>,
-    ) -> (
-        Vec<MovementOutcome>,
-        Vec<Option<(crate::game::EntityId, crate::game::Direction)>>,
-    ) {
-        let turn_assist = self.rules.turn_assist();
-        let slow_foot_enabled = self.rules.enabled_items().contains_slow_foot();
-        let wall_pass_enabled = self.rules.enabled_items().contains_wall_pass();
-        let kick_rule_enabled = self.rules.enabled_items().contains_kick();
-        let mut requests = vec![None; self.actors.len()];
-        let outcomes = self
-            .actors
-            .iter_mut()
-            .enumerate()
-            .map(|(current, actor)| {
-                if actor.alive && !frozen[current] {
-                    let can_kick = kick_rule_enabled && actor.inventory().can_kick();
-                    let config = movement::AdvanceConfig {
-                        turn_assist,
-                        tick,
-                        slow_foot_enabled,
-                        wall_pass_enabled,
-                        kick_enabled: can_kick,
-                        moving_at_start,
-                    };
-                    let outcome = movement::advance_actor(&self.world, actor, &config);
-                    requests[current] = outcome.kick;
-                    outcome
-                } else {
-                    MovementOutcome {
-                        trace: MovementTrace::new(actor.position),
-                        kick: None,
-                        original_budget: 0,
-                        forward_segment: None,
-                    }
-                }
-            })
-            .collect();
-        (outcomes, requests)
     }
 
     fn resolve_kick_requests(

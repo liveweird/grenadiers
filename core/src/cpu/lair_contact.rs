@@ -1,15 +1,15 @@
 use crate::game::geometry::MovementSegment;
 use crate::game::types::{HALF_FOOTPRINT, TICKS_PER_SECOND};
 use crate::game::{EntityId, MOB_UNITS_PER_SECOND, Position, Tick};
-use crate::room::LairConfig;
+use crate::room::{LairConfig, RespawnLairConfig};
 
 use super::routing::{RouteCertificate, RouteFailure};
 use super::{Observation, WorkBudget};
 
+#[path = "lair_contact_sources.rs"]
+mod contact_sources;
 #[path = "lair_contact_teleport.rs"]
 pub(crate) mod teleport;
-
-const SPAWN_DIRECTIONS: [(i16, i16); 4] = [(0, -1), (1, 0), (0, 1), (-1, 0)];
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) enum ContactEnvelopeError {
@@ -40,8 +40,14 @@ pub(crate) struct MobContactEnvelope {
     cpu_id: EntityId,
     last_teleport_tick: Option<Tick>,
     basis_tick: Tick,
-    config: LairConfig,
+    config: LairIdentity,
     sources: Vec<Source>,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum LairIdentity {
+    Legacy(LairConfig),
+    Respawn(RespawnLairConfig),
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -138,9 +144,7 @@ impl MobContactEnvelope {
         observation: &Observation,
         work: &mut WorkBudget,
     ) -> Result<Self, ContactEnvelopeError> {
-        let observed = observation
-            .lairs()
-            .ok_or(ContactEnvelopeError::Unsupported)?;
+        let (config, sources) = contact_sources::build(observation, work)?;
         let actor = observation
             .parts()
             .actors
@@ -154,48 +158,13 @@ impl MobContactEnvelope {
                 _ => None,
             })
             .ok_or(ContactEnvelopeError::Unsupported)?;
-        let source_count = observed
-            .mobs()
-            .len()
-            .checked_add(observed.lairs().len().saturating_mul(4))
-            .ok_or(ContactEnvelopeError::Capacity)?;
-        take_work(work, source_count)?;
-        let mut sources = Vec::with_capacity(source_count);
-        sources.extend(observed.mobs().iter().map(|mob| Source {
-            kind: SourceKind::Existing {
-                id: mob.id,
-                lair: mob.lair,
-            },
-            origin: mob.position,
-            begins_at: observation.parts().tick,
-        }));
-        for (lair_index, lair) in observed.lairs().iter().enumerate() {
-            for (dc, dr) in SPAWN_DIRECTIONS {
-                let column = i32::from(lair.cell.column)
-                    .checked_add(i32::from(dc))
-                    .and_then(|value| u16::try_from(value).ok())
-                    .ok_or(ContactEnvelopeError::Capacity)?;
-                let row = i32::from(lair.cell.row)
-                    .checked_add(i32::from(dr))
-                    .and_then(|value| u16::try_from(value).ok())
-                    .ok_or(ContactEnvelopeError::Capacity)?;
-                sources.push(Source {
-                    kind: SourceKind::PossibleSpawn {
-                        lair: u8::try_from(lair_index)
-                            .map_err(|_| ContactEnvelopeError::Capacity)?,
-                    },
-                    origin: Position::center(crate::game::CellId::new(column, row)),
-                    begins_at: lair.next_spawn_at,
-                });
-            }
-        }
         Ok(Self {
             world: observation.parts().world,
             cpu_seat: actor.seat,
             cpu_id: actor.id,
             last_teleport_tick: actor.last_teleport_tick,
             basis_tick: observation.parts().tick,
-            config: observed.config(),
+            config,
             sources,
         })
     }
@@ -265,21 +234,36 @@ impl MobContactEnvelope {
         if !actor_matches {
             return Ok(false);
         }
-        let Some(lairs) = current.lairs() else {
-            return Ok(false);
+        let (config, mobs) = match self.config {
+            LairIdentity::Legacy(expected) => {
+                let Some(lairs) = current.lairs() else {
+                    return Ok(false);
+                };
+                if lairs.config() != expected {
+                    return Ok(false);
+                }
+                (LairIdentity::Legacy(lairs.config()), lairs.mobs())
+            }
+            LairIdentity::Respawn(expected) => {
+                let Some(lairs) = current.respawn_lairs() else {
+                    return Ok(false);
+                };
+                if lairs.config() != expected {
+                    return Ok(false);
+                }
+                (LairIdentity::Respawn(lairs.config()), lairs.mobs())
+            }
         };
-        if lairs.config() != self.config {
+        if config != self.config {
             return Ok(false);
         }
         take_work(
             work,
-            lairs
-                .mobs()
-                .len()
+            mobs.len()
                 .checked_mul(self.sources.len())
                 .ok_or(ContactEnvelopeError::Capacity)?,
         )?;
-        for mob in lairs.mobs() {
+        for mob in mobs {
             let existing = self.sources.iter().find(
                 |source| matches!(source.kind, SourceKind::Existing { id, .. } if id == mob.id),
             );
@@ -395,3 +379,7 @@ fn distance_to_interval(value: i64, min: i64, max: i64) -> i64 {
 #[cfg(test)]
 #[path = "lair_contact_tests.rs"]
 pub(crate) mod tests;
+
+#[cfg(test)]
+#[path = "lair_contact_rules_v9_tests.rs"]
+mod rules_v9_tests;

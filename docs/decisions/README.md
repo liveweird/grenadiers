@@ -34,6 +34,7 @@ identifies the active network contract. Check a record's status and later decisi
 | [0025](0025-production-replay-recording.md) | Production journal allocation and explicit test recording |
 | [0026](0026-solo-controllers.md) | Server-owned solo controllers and bounded planning |
 | [0027](0027-solo-difficulty.md) | Selectable solo difficulty and hazard-safe reaction cadence |
+| [0028](0028-solid-players-and-respawn-lairs.md) | Solid player occupancy, one-mob respawn lairs and CPU combat pressure |
 
 For a new decision, use the next numeric prefix and a descriptive filename. State the context,
 decision, consequences and acceptance requirements. When replacing an earlier decision, link

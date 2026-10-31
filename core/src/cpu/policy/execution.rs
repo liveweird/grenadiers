@@ -39,7 +39,7 @@ pub fn follow_checked_escape(
 }
 
 fn reject_rules_v8(observation: &Observation) -> Result<(), PolicyError> {
-    (observation.parts().rules.version != 8)
+    (observation.parts().rules.version < 8)
         .then_some(())
         .ok_or(PolicyError::InvalidObservation)
 }

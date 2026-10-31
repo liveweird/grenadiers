@@ -3,6 +3,9 @@ use super::shove_geometry::ContactEntry;
 use super::{Direction, SeatId, State, Tick};
 use crate::game::geometry::MovementSegment;
 use crate::game::movement::{self, MovementOutcome};
+use crate::game::player_collision::{
+    PlayerObstacle, clip_player_segment, player_positions_conflict,
+};
 use crate::game::types::{HALF_FOOTPRINT, Position, UNITS_PER_CELL};
 use std::cmp::Ordering;
 
@@ -24,6 +27,25 @@ impl State {
         if !self.rules.enabled_items().contains_bracelet() {
             return Vec::new();
         }
+        let mut player_reservations = (self.rules.version() >= 9).then(|| {
+            self.actors
+                .iter()
+                .zip(outcomes)
+                .filter(|(actor, _)| actor.alive)
+                .flat_map(|(actor, outcome)| {
+                    std::iter::once(PlayerObstacle::stationary(
+                        actor.seat,
+                        outcome.trace.start(),
+                    ))
+                    .chain(outcome.trace.segments().map(|segment| {
+                        PlayerObstacle {
+                            seat: actor.seat,
+                            segment,
+                        }
+                    }))
+                })
+                .collect::<Vec<_>>()
+        });
         let priority: Vec<_> = self.assignment.priority_order(self.player_count).collect();
         let claims: Vec<_> = priority
             .iter()
@@ -32,14 +54,21 @@ impl State {
         let paired = disjoint_claims(claims);
         let mut accepted: Vec<(ShoveClaim, ForcedMovement)> = Vec::new();
         for claim in paired {
-            let Some(forced) = self.shove_proposal(claim) else {
+            let Some(forced) = self.shove_proposal(claim, player_reservations.as_deref()) else {
                 continue;
             };
-            if accepted
-                .iter()
-                .any(|(_, prior)| sweeps_conflict(prior.segment, forced.segment))
-            {
+            if accepted.iter().any(|(_, prior)| {
+                sweeps_conflict(prior.segment, forced.segment)
+                    || (self.rules.version() >= 9
+                        && player_positions_conflict(prior.segment.end(), forced.segment.end()))
+            }) {
                 continue;
+            }
+            if let Some(reservations) = &mut player_reservations {
+                reservations.push(PlayerObstacle {
+                    seat: claim.victim,
+                    segment: forced.segment,
+                });
             }
             accepted.push((claim, forced));
         }
@@ -72,6 +101,14 @@ impl State {
         if !actor.alive || !actor.inventory().can_shove() || !ready {
             return None;
         }
+        if self.rules.version() >= 9 {
+            let (victim, direction) = outcomes[pusher.index()].blocking_player?;
+            return self.actors[victim.index()].alive.then_some(ShoveClaim {
+                pusher,
+                victim,
+                direction,
+            });
+        }
         let mut best: Option<(SeatId, ContactEntry)> = None;
         for &victim in priority {
             if victim == pusher || !self.actors[victim.index()].alive {
@@ -95,7 +132,11 @@ impl State {
         })
     }
 
-    fn shove_proposal(&self, claim: ShoveClaim) -> Option<ForcedMovement> {
+    fn shove_proposal(
+        &self,
+        claim: ShoveClaim,
+        player_reservations: Option<&[PlayerObstacle]>,
+    ) -> Option<ForcedMovement> {
         let victim = &self.actors[claim.victim.index()];
         let mut distance = crate::game::movement_collision::allowed_distance(
             &self.world,
@@ -125,6 +166,16 @@ impl State {
                 claim.direction,
                 distance,
             ));
+        }
+        if let Some(blockers) = player_reservations {
+            distance = clip_player_segment(
+                claim.victim,
+                victim.position,
+                claim.direction,
+                distance,
+                blockers,
+            )
+            .distance;
         }
         if distance <= 0 {
             return None;

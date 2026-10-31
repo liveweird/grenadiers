@@ -2,7 +2,7 @@ use crate::cpu::forecast::{ForecastLimits, ObservedHazardMemory, TickWindow, for
 use crate::cpu::policy::{ControlPlan, PolicyError, UtilityMemory};
 use crate::cpu::routing::{
     PulseLease, PulseRequest, PunchRequest, RouteLimits, RouteMode, RouteRequest, RouteStep,
-    certify_pulse, plan_punch, plan_route,
+    certify_pulse, certify_respawn_pulse, plan_punch, plan_respawn_route, plan_route,
 };
 use crate::cpu::{CpuRng, Intent, ManualIntent, MovementIntent, Observation, WorkBudget};
 use crate::game::{Direction, Tick};
@@ -26,7 +26,7 @@ pub fn plan(
     rng: &mut CpuRng,
     work: &mut WorkBudget,
 ) -> Result<SurvivalPlan, PolicyError> {
-    if observation.parts().rules.version == 8 {
+    if observation.parts().rules.version >= 8 {
         return Err(PolicyError::InvalidObservation);
     }
     plan_with_origin(
@@ -50,9 +50,32 @@ pub fn plan_with_origin(
     rng: &mut CpuRng,
     work: &mut WorkBudget,
 ) -> Result<SurvivalPlan, PolicyError> {
-    if observation.parts().rules.version == 8 {
+    if observation.parts().rules.version >= 8 {
         return Err(PolicyError::InvalidObservation);
     }
+    plan_inner(
+        observation,
+        memory,
+        history,
+        settled_stop_tick,
+        origin,
+        rng,
+        work,
+        false,
+    )
+}
+
+#[allow(clippy::too_many_arguments)]
+pub(super) fn plan_inner(
+    observation: &Observation,
+    memory: &UtilityMemory,
+    history: &ObservedHazardMemory,
+    settled_stop_tick: Tick,
+    origin: Option<&PlantEscapeOrigin>,
+    rng: &mut CpuRng,
+    work: &mut WorkBudget,
+    respawn: bool,
+) -> Result<SurvivalPlan, PolicyError> {
     let parts = observation.parts();
     if memory.key().world != parts.world
         || memory.key().cpu_seat != parts.recipient
@@ -86,7 +109,11 @@ pub fn plan_with_origin(
         )
         .unwrap_or_else(stop));
     }
-    let ordinary = crate::cpu::policy::plan(observation, memory, rng, work)?;
+    let ordinary = if respawn {
+        crate::cpu::policy::plan_respawn(observation, memory, rng, work)?
+    } else {
+        crate::cpu::policy::plan(observation, memory, rng, work)?
+    };
     let storm_enabled = observation.environment().is_some_and(|environment| {
         environment.storm_cloud_config() == crate::game::StormCloudConfig::Single
     });
@@ -110,7 +137,7 @@ pub fn plan_with_origin(
     {
         return Ok(plan);
     }
-    if ordinary.intent.manual.is_some() && !storm_enabled {
+    if ordinary.intent.manual.is_some() && !storm_enabled && !respawn {
         return Ok(SurvivalPlan {
             control: ordinary,
             lease: None,
@@ -120,7 +147,7 @@ pub fn plan_with_origin(
     // Preserve the existing clear-board goals and pickup collection. Hazard
     // leases deliberately withhold item-changing paths until item tactics are
     // modeled; they must not replace the already legal clear-board behavior.
-    if clear_movement && ordinary.intent.manual.is_none() {
+    if clear_movement && ordinary.intent.manual.is_none() && !respawn {
         return Ok(SurvivalPlan {
             control: ordinary,
             lease: None,
@@ -194,7 +221,12 @@ pub fn plan_with_origin(
                 mode,
                 settled_stop_tick,
             };
-            if let Ok(lease) = certify_pulse(observation, &forecast, request, work) {
+            let certified = if respawn {
+                certify_respawn_pulse(observation, &forecast, request, work)
+            } else {
+                certify_pulse(observation, &forecast, request, work)
+            };
+            if let Ok(lease) = certified {
                 let score = super::steering::score(&lease, target);
                 let candidate = SurvivalPlan {
                     control: ControlPlan {
@@ -245,7 +277,12 @@ pub fn plan_with_origin(
             mode,
             limits: RouteLimits::default(),
         };
-        let Ok(route) = plan_route(observation, &forecast, request, work) else {
+        let routed = if respawn {
+            plan_respawn_route(observation, &forecast, request, work)
+        } else {
+            plan_route(observation, &forecast, request, work)
+        };
+        let Ok(route) = routed else {
             continue;
         };
         let (movement, hold_ticks) = match route.steps().first() {
@@ -282,7 +319,7 @@ pub fn plan_with_origin(
     {
         return Ok(plan);
     }
-    if storm_enabled
+    if (storm_enabled || respawn)
         && clear_movement
         && fallback.as_ref().is_some_and(|plan| {
             certified_pulse_progresses(plan, actor.position)

@@ -9,6 +9,7 @@ mod pulse_geometry;
 mod pulse_support;
 mod punch;
 mod punch_types;
+mod respawn_pulse;
 mod route;
 mod route_checks;
 mod route_expand;
@@ -31,13 +32,17 @@ pub use types::{PoseBounds, PulseLease, PulseRequest, RouteAssurance, RouteFailu
 
 pub(crate) use bracelet_guard::BraceletGuard;
 
-pub(crate) use plant::{plan_lair_ordinary_plant, plan_lair_timed_weapon_plant};
+pub(crate) use plant::{
+    derive_bomb_modifiers, plan_lair_ordinary_plant, plan_lair_timed_weapon_plant,
+};
 pub use plant::{plan_ordinary_plant, plan_timed_weapon_plant};
 pub(crate) use pulse::{
     PulseOriginGrace, certify_escape_pulse, certify_lair_contact_pulse, certify_lair_escape_pulse,
 };
 pub use pulse::{certify_lair_pulse, certify_pulse};
 pub use punch::plan_punch;
+pub(crate) use respawn_pulse::certify_respawn_pulse;
+pub(crate) use route::plan_respawn_route;
 pub use route::plan_route;
 
 pub(crate) const CERTIFIED_MOVE_UPDATES: u8 = 12;

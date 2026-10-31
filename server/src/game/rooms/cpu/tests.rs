@@ -122,6 +122,61 @@ fn job(live: Arc<AtomicBool>) -> (PlanJob, Receiver<PlanResult>) {
     )
 }
 
+fn respawn_job(live: Arc<AtomicBool>) -> (PlanJob, Receiver<PlanResult>) {
+    let observation = respawn_observation();
+    let mut hazards = ObservedHazardMemory::new(key());
+    hazards.observe(&observation).unwrap();
+    let (result, receiver) = sync_channel(1);
+    (
+        PlanJob {
+            settled_stop_tick: observation.parts().tick,
+            observation,
+            memory: UtilityMemory::new(key()),
+            hazard_memory: hazards,
+            rng: CpuRng::from_seed(key(), [21; 32]),
+            escape_origin: None,
+            live,
+            result,
+        },
+        receiver,
+    )
+}
+
+pub(super) fn respawn_observation() -> Observation {
+    let base = observation();
+    let mut parts = base.into_parts();
+    parts.rules.version = 9;
+    let timers = parts
+        .actors
+        .iter()
+        .map(|actor| match actor {
+            ObservedActor::Visible(_) => Some(0),
+            ObservedActor::Hidden { .. } => None,
+        })
+        .collect();
+    Observation::new_rules_v9(
+        parts,
+        grenadiers_core::cpu::ObservedEnvironment::new(
+            grenadiers_core::game::StormCloudConfig::Disabled,
+            None,
+            timers,
+        ),
+        None,
+    )
+    .unwrap()
+}
+
+#[test]
+fn bounded_worker_dispatches_rules_nine_only_through_the_respawn_planner() {
+    let planner = CpuPlanner::without_workers();
+    let (job, _receiver) = respawn_job(Arc::new(AtomicBool::new(true)));
+    assert!(planner.try_submit(job));
+    let report = planner.pump_for_test(1);
+    assert_eq!(report.delivered, 1);
+    assert_eq!(report.failed, 0);
+    assert!(report.work[0] <= grenadiers_core::cpu::survival::WORK_ALLOWANCE);
+}
+
 #[test]
 fn bounded_worker_returns_a_legal_moving_bomb_plan() {
     let planner = CpuPlanner::new().unwrap();

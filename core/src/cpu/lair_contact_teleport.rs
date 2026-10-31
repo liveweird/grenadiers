@@ -143,18 +143,9 @@ fn early_reveal_is_clear(
             .tick
             .0
             .checked_add(
-                crate::game::RulesConfig::environment_v8(
-                    parts.rules.settings,
-                    observation
-                        .environment()
-                        .ok_or(ContactEnvelopeError::Unsupported)?
-                        .storm_cloud_config(),
-                    observation
-                        .lairs()
-                        .ok_or(ContactEnvelopeError::Unsupported)?
-                        .config(),
-                )
-                .flame_ticks(),
+                crate::cpu::rules_config(observation)
+                    .ok_or(ContactEnvelopeError::Unsupported)?
+                    .flame_ticks(),
             )
             .ok_or(ContactEnvelopeError::Capacity)?;
     if !long_lease || parts.arena.blocks.is_empty() {

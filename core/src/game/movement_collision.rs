@@ -3,7 +3,9 @@ use std::collections::BTreeSet;
 use super::arena::Terrain;
 use super::geometry::{boundary_distance, distance_to_blocking_cell, position_overlaps_cell};
 use super::input::Direction;
-use super::types::{CellId, EntityId, HALF_FOOTPRINT, Position, UNITS_PER_CELL};
+use super::player_collision::{PlayerObstacle, clip_player_segment};
+use super::simulation::Actor;
+use super::types::{CellId, EntityId, HALF_FOOTPRINT, Position, SeatId, UNITS_PER_CELL};
 use super::world::World;
 
 #[derive(Clone, Copy, Debug)]
@@ -11,6 +13,7 @@ pub(crate) struct Collision {
     pub(crate) distance: i32,
     pub(crate) bomb: Option<EntityId>,
     pub(crate) ambiguous: bool,
+    pub(crate) physical_contact: Option<SeatId>,
 }
 
 #[derive(Clone, Copy)]
@@ -66,6 +69,20 @@ pub(crate) fn allowed_distance_with_blocker(
     bomb_grace: &BTreeSet<EntityId>,
     access: ObstacleAccess<'_>,
 ) -> Collision {
+    allowed_distance_with_players(
+        world, position, direction, requested, bomb_grace, access, None,
+    )
+}
+
+pub(crate) fn allowed_distance_with_players(
+    world: &World,
+    position: Position,
+    direction: Direction,
+    requested: i32,
+    bomb_grace: &BTreeSet<EntityId>,
+    access: ObstacleAccess<'_>,
+    players: Option<(SeatId, &[PlayerObstacle])>,
+) -> Collision {
     let mut allowed = requested.max(0);
     let boundary = boundary_distance(
         position,
@@ -76,6 +93,7 @@ pub(crate) fn allowed_distance_with_blocker(
     );
     let mut bomb = None;
     let mut ambiguous = boundary < allowed;
+    let mut physical_contact = None;
     allowed = allowed.min(boundary);
     for (cell, bomb_id, soft, oil) in blocking_cells(world) {
         if bomb_id.is_some_and(|id| bomb_grace.contains(&id))
@@ -95,11 +113,67 @@ pub(crate) fn allowed_distance_with_blocker(
             ambiguous = true;
         }
     }
+    if let Some((seat, obstacles)) = players {
+        let player = clip_player_segment(seat, position, direction, requested, obstacles);
+        if player.distance < allowed {
+            allowed = player.distance;
+            bomb = None;
+            ambiguous = false;
+            physical_contact = player.physical_contact;
+        } else if player.distance == allowed && player.distance < requested.max(0) {
+            bomb = None;
+            ambiguous = true;
+            physical_contact = player.physical_contact;
+        }
+    }
     Collision {
         distance: allowed.max(0),
         bomb,
         ambiguous,
+        physical_contact,
     }
+}
+
+pub(crate) fn overlapping_soft_blocks(world: &World, position: Position) -> BTreeSet<CellId> {
+    world
+        .arena
+        .blocks()
+        .iter()
+        .filter(|cell| position_overlaps_cell(position, **cell))
+        .copied()
+        .collect()
+}
+
+pub(crate) fn prune_soft_wall_grace(world: &World, actor: &mut Actor) {
+    actor.soft_wall_grace.retain(|cell| {
+        world.arena.blocks().contains(cell) && position_overlaps_cell(actor.position, *cell)
+    });
+}
+
+pub(crate) fn overlapping_unlit_oil(world: &World, position: Position) -> BTreeSet<CellId> {
+    world
+        .oil
+        .iter()
+        .filter_map(|(cell, state)| {
+            (state == crate::game::OilState::Unlit && position_overlaps_cell(position, cell))
+                .then_some(cell)
+        })
+        .collect()
+}
+
+pub(crate) fn prune_unlit_oil_grace(world: &World, actor: &mut Actor) {
+    actor
+        .unlit_oil_grace
+        .retain(|cell| world.oil.unlit(*cell) && position_overlaps_cell(actor.position, *cell));
+}
+
+pub(crate) fn prune_bomb_grace(world: &World, actor: &mut Actor) {
+    actor.bomb_grace.retain(|id| {
+        world
+            .bombs
+            .get(id)
+            .is_some_and(|bomb| position_overlaps_cell(actor.position, bomb.cell()))
+    });
 }
 
 fn blocking_cells(

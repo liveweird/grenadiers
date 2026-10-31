@@ -34,7 +34,7 @@ pub fn certify_pulse(
     request: PulseRequest,
     work: &mut WorkBudget,
 ) -> Result<PulseLease, RouteFailure> {
-    if observation.parts().rules.version == 8 {
+    if observation.parts().rules.version >= 8 {
         return Err(RouteFailure::InvalidRequest);
     }
     certify_pulse_inner(observation, forecast, request, None, false, None, work)
@@ -124,7 +124,7 @@ pub(crate) fn certify_lair_escape_pulse(
     ))
 }
 
-fn certify_pulse_inner(
+pub(super) fn certify_pulse_inner(
     observation: &Observation,
     forecast: &HazardForecast,
     request: PulseRequest,

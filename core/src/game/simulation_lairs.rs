@@ -12,13 +12,15 @@ impl State {
         if !due {
             return Ok(false);
         }
-        let interval = match self.rules.lair_config() {
-            crate::room::LairConfig::Enabled(settings) => settings.spawn_ticks(),
-            crate::room::LairConfig::Disabled => 0,
-        };
-        tick.0
-            .checked_add(interval)
-            .ok_or(StepError::LairTimerOverflow)?;
+        if self.rules.version() == 8 {
+            let interval = match self.rules.lair_config() {
+                crate::room::LairConfig::Enabled(settings) => settings.spawn_ticks(),
+                crate::room::LairConfig::Disabled => 0,
+            };
+            tick.0
+                .checked_add(interval)
+                .ok_or(StepError::LairTimerOverflow)?;
+        }
         Ok(true)
     }
 
@@ -51,10 +53,10 @@ impl State {
         frozen: bool,
         events: &mut Vec<StepEvent>,
         shield_prevented: &mut [bool],
-    ) -> (BTreeSet<EntityId>, Vec<bool>) {
+    ) -> Result<(BTreeSet<EntityId>, Vec<bool>), StepError> {
         let mut damaged = vec![false; self.actors.len()];
         if self.lairs.is_none() {
-            return (BTreeSet::new(), damaged);
+            return Ok((BTreeSet::new(), damaged));
         }
         self.kill_on_existing_flames(
             &self.stationary_traces(),
@@ -69,7 +71,9 @@ impl State {
             .map(|seat| seat.index())
             .collect();
         let lairs = self.lairs.as_mut().expect("checked above");
-        lairs.kill_on_fire(&self.world);
+        lairs
+            .kill_on_fire(&self.world, tick)
+            .map_err(|()| StepError::LairTimerOverflow)?;
         let traces = lairs.advance(&self.world, &self.actors, &target_order, frozen, tick);
         let mine_targets = lairs.mine_contacts(&self.world, &traces);
         let contacts: Vec<_> = (0..self.actors.len())
@@ -90,7 +94,7 @@ impl State {
                 damaged[index] = true;
             }
         }
-        (mine_targets, damaged)
+        Ok((mine_targets, damaged))
     }
 
     pub(super) fn apply_lair_trace_contacts(
@@ -157,10 +161,13 @@ impl State {
         }
     }
 
-    pub(super) fn kill_lairs_on_fire(&mut self) {
+    pub(super) fn kill_lairs_on_fire(&mut self, tick: Tick) -> Result<(), StepError> {
         if let Some(lairs) = &mut self.lairs {
-            lairs.kill_on_fire(&self.world);
+            lairs
+                .kill_on_fire(&self.world, tick)
+                .map_err(|()| StepError::LairTimerOverflow)?;
         }
+        Ok(())
     }
 
     pub(super) fn spawn_from_lairs(

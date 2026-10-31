@@ -1,4 +1,5 @@
 import { Vector3 } from 'three'
+import { createRoundCameraDiagnostic, roundCameraRandom, type RoundCameraDiagnosticApi } from './three-arena-round-camera'
 import type { ArenaRenderer } from '../src/game/arena/rendererTypes'
 import { createThreeArenaRenderer } from '../src/game/arena/three/renderer'
 import { createArenaCamera, fitArenaCamera } from '../src/game/arena/three/camera'
@@ -24,7 +25,7 @@ type FixtureState = {
   contextLossSupported: boolean
 }
 
-export type ThreeArenaDiagnosticApi = {
+export type ThreeArenaDiagnosticApi = RoundCameraDiagnosticApi & {
   initialize(): Promise<FixtureState>
   show(board: BoardName, scene: SceneName): Promise<FixtureState>
   showDeath(board: BoardName, appearance: DeathAppearance, index: number): Promise<{
@@ -91,7 +92,7 @@ window.requestAnimationFrame = (callback: FrameRequestCallback): number => {
     rescheduledInsideCallback = false
     const startedAt = nativePerformanceNow()
     try {
-      callback(timestamp)
+      callback(fixtureNow ?? timestamp)
     } finally {
       const rendererLoop = rescheduledInsideCallback
       insideCallback = false
@@ -158,7 +159,7 @@ async function settle(frameCount = 3): Promise<void> {
 async function initialize(): Promise<FixtureState> {
   if (destroyed) throw new Error('Three arena diagnostic was destroyed')
   if (!renderer) {
-    renderer = await createThreeArenaRenderer(host)
+    renderer = await createThreeArenaRenderer(host, roundCameraRandom)
     renderer.setReducedMotion(reducedMotion)
   }
   return readState()
@@ -395,4 +396,5 @@ window.grenadiersThreeArena = {
   settleDeathAge, showDeathOverlap, showBloodLayers, suspend, destroy, readState, projectCell,
   loseAndRestoreContext, calibrateColors, showFire, beginFireTransition, settleFireAge,
   resetFire, measureFireCost, projectPoint,
+  ...createRoundCameraDiagnostic({ initialize, renderer: () => renderer, setNow: (now) => { fixtureNow = now }, now: nativePerformanceNow, setBoard: (next) => { board = next; scene = null }, settle }),
 }

@@ -1,10 +1,26 @@
 # Modern retro 3D arena
 
-The production arena uses Three.js and React Three Fiber. A fixed, elevated orthographic camera
+The production arena uses Three.js and React Three Fiber. An elevated orthographic camera
 shows a miniature courtyard with shallow chamfered walls, textured brick blocks and a raised rim.
-The camera has no yaw: keyboard directions still correspond to the board's rows and columns.
+The normal view has no yaw: keyboard directions correspond to the board's rows and columns.
 Rust retains movement, collisions, visibility, fuses, damage and victory; rendering never advances
 gameplay time or introduces a second physics simulation.
+
+## Round camera transitions
+
+When the first arena arrives after an observed countdown, and at an observed round or match result,
+each browser randomly picks one
+short cosmetic transition: zoom in, zoom out, rotate from the left or rotate from the right.
+Opening motion eases into the normal view; ending motion moves out and back. Each lasts 900ms,
+with at most 7° yaw and restrained zoom. Every effect returns exactly to the canonical camera.
+The arena is first published when play begins, so the intro occupies its first 900ms. Controls
+remain active throughout; server timing, gameplay state and player visibility do not change.
+
+Reduced motion keeps a stationary camera. Admission into an ongoing round/result, reconnect,
+suspension, WebGL recovery and stale observations do not replay camera history. Resize retains
+the current sampled pose without accumulating rotations. The existing render loop owns the
+animation; it adds no timers, animation loops or GPU resources. See the
+[native camera examples](../screenshots/round-camera.md).
 
 ## Characters and artwork
 

@@ -4,6 +4,56 @@ This archive preserves the older release records originally maintained in
 [`docs/releases.md`](../releases.md). Records remain in their original order; the current
 release procedure and current release record stay in the [release guide](../releases.md).
 
+## v1.2.2 — 2026-10-31
+
+Optional retro sound now includes quiet local footsteps, ordinary and special-bomb placement and
+explosions, pickups, and player/mob deaths. Sound starts muted; the EN/PL volume slider persists
+without autoplay. A quiet master, four-voice limit, event coalescing and per-cue rate limits prevent
+crowded matches from stacking excessive volume. Footsteps yield to important cues. See
+[audio](../game/audio.md) for the accepted-event and cosmetic local-movement boundaries.
+
+The owner-supplied sprite refresh updates fire, spike pits, related icons and the cosmetic blood
+pool. All stable rectangles and character/material pixels are preserved. Import processing uses
+a shared twelve-color pit palette and matching flame edges; the root upload is removed after
+validation. See the [artist handoff](../../assets/art/README.md).
+
+### Verification
+
+Accepted source: `afa8f5a98005cf6e599d14090984b5d2bc989b14`,
+[PR #302](https://github.com/liveweird/grenadiers/pull/302).
+Independent art and audio reviews have no unresolved findings. Review caught and corrected
+phase-to-phase palette flicker, browser-history sound resumption, and interrupted volume ramps.
+
+- Full web gate: 7,377 tests in 164 files; coverage 95.47% lines, 92.38% statements,
+  91.55% functions and 88.71% branches. All existing floors remain unchanged. Types,
+  lint, Knip, generated-contract/validator checks and 116 documented browser scenarios pass.
+- Production bundle: JavaScript 398,331/400,000 gzip bytes; CSS 15,474/20,000.
+- Native artist workbench: 12 passed; final shared-palette/seam recheck: two passed.
+  Native Three fire, reduced-motion, restoration and terrain coverage: 14 passed with
+  ten project-specific skips; final spike-phase checks: two passed.
+- Exact-image Compose and Kubernetes duel/authentication: two passed each. Fresh all-on
+  three-CPU motion/bomb smoke passes. Native Web Audio, mute/resume, visibility,
+  movement, volume persistence, EN/PL layout and Axe scenario passes.
+- Pinned Trivy 0.74: zero fixable HIGH/CRITICAL findings. All five image web files equal
+  the verified production build. Owned acceptance stacks and Kubernetes namespace are removed.
+
+Backend logic, contracts and dependencies are unchanged. Reuse v1.2.0/v1.2.1 Rust debug/release,
+coverage, dependency and distinct Linux acceptance; the candidate image also compiles the release
+server for Linux. Native browser checks verify Web Audio processing and lifecycle; hardware
+listening and subjective mix preference require playtesting.
+
+### Operation and artist handoff
+
+Accepted local image:
+`sha256:9f5c91b028424b1a3bafa50058f1f729ead6424b37b6f4c924809557e5d52242`.
+The exact accepted image is promoted to localhost:8085; v1.2.1 remains available for rollback.
+This remains a source/local-runtime release without a hosted service or production registry.
+
+The artist source remains `assets/art/arena-source.png` plus `arena-source.json`: 1120×2240,
+192 runtime drawings, four reserved slots and four unused cells. The
+[shareable artist ZIP](https://github.com/liveweird/grenadiers/releases/download/v1.2.2/grenadiers-artist-v1.2.2.zip)
+contains the paired source, guides, named slices, runtime pack and native previews.
+
 ## v1.2.1 — 2026-10-31
 
 Public fire now warms nearby terrain and characters. A persistent four-light pool, six-frame

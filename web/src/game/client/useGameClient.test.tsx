@@ -1,7 +1,7 @@
 import { act, renderHook } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { GameClientState } from './clientTypes'
-import { snapshot } from './testSupport'
+import { room, snapshot } from './testSupport'
 import { useGameClient } from './useGameClient'
 
 const hook = vi.hoisted(() => ({
@@ -59,5 +59,29 @@ describe('useGameClient death latch', () => {
     expect(result.result.current[2].cues[0]).toMatchObject({ entityId: actor.id, bornAt: 20 })
     result.unmount()
     expect(hook.dispose).toHaveBeenCalledOnce()
+  })
+
+  it('retains a real snapshot-free countdown opening across coalesced callbacks', () => {
+    let now = 0
+    vi.spyOn(performance, 'now').mockImplementation(() => now)
+    const result = renderHook(() => useGameClient())
+    const waiting = state(0)
+    waiting.room = room(0)
+    waiting.snapshot = null
+    act(() => hook.publish?.(waiting))
+    const countdown = state(1)
+    countdown.room = room(1, { type: 'countdown', kind: 'initial', endsAt: 181 })
+    countdown.snapshot = null
+    act(() => hook.publish?.(countdown))
+    act(() => {
+      now = 20
+      hook.publish?.(state(2))
+      now = 40
+      hook.publish?.(state(3))
+    })
+    expect(result.result.current[0].room?.revision).toBe(3)
+    expect(result.result.current[3]).toEqual({
+      key: `${countdown.room.roomId}:1:1:1:1`, bornAt: 20,
+    })
   })
 })

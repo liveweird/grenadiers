@@ -127,3 +127,19 @@ A teleport changes the rendered position, suspension hides the canvas immediatel
 replacement room reproduces the empty baseline without presentation history. When
 `WEBGL_lose_context` is available, a real loss hides the canvas and restoration redraws the
 nonempty static showcase. Destroy removes the canvas and cancels its animation frame.
+
+## Scenario: round camera openings and endings animate every variant and settle to identical native pixels
+
+Drive certified live-round opening cues and result edges with an injected cosmetic random source.
+All four zoom/yaw variants change real WebGL pixels, then reproduce the canonical static arena
+exactly after 900ms. The production renderer, camera, billboards and finish pass are used.
+
+## Scenario: round camera openings survive live snapshots and clear on suspension and WebGL recovery
+
+An opening survives further running snapshots and returns to the canonical view after 900ms. A real WebGL loss during a result effect restores a neutral view, and suspend
+plus resume retains one canvas without replaying the effect.
+
+## Scenario: reduced motion keeps all round camera variants static on every board
+
+On the 320px reduced-motion project, both round boundaries and all four choices preserve identical
+camera pixels for every supported board size. No camera movement is required to understand play.

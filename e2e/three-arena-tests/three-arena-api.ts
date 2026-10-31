@@ -32,6 +32,10 @@ type CalibrationSamples = {
   gray: ColorSample
 }
 type FixtureApi = {
+  prepareRoundCamera(board: BoardName, boundary: 'start' | 'end'): Promise<void>
+  beginRoundCamera(variant: 'zoomIn' | 'zoomOut' | 'rotateLeft' | 'rotateRight'): Promise<number>
+  sampleRoundCamera(ageMs: number): Promise<void>
+  enterRoundCameraRunning(): Promise<void>
   initialize(): Promise<FixtureState>
   show(board: BoardName, scene: SceneName): Promise<FixtureState>
   showDeath(board: BoardName, appearance: DeathAppearance, index: number): Promise<{

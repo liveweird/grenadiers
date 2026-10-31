@@ -18,6 +18,15 @@ function state(): GameClientState {
 }
 
 describe('v12 arena presentation', () => {
+  it('attaches a certified opening cue without changing wire-derived room state', () => {
+    const current = state()
+    const opening = { key: 'opening:1', bornAt: 42 }
+    const presented = presentSnapshot(current, undefined, opening)!
+    expect(presented.presentationOpening).toEqual(opening)
+    expect(presented.room.roundId).toBe(current.snapshot!.room.roundId)
+    expect(presentSnapshot(current)).not.toHaveProperty('presentationOpening')
+  })
+
   it('projects typed v16 lairs and public mob facts without inventing private navigation', () => {
     const current = state()
     current.snapshot!.state.mobs = [{

@@ -19,6 +19,22 @@ repeated approval for routine implementation choices. Entries are not delivery-d
 
 ## Single-player
 
+- [next] **CPU-RELIABILITY — improve current CPU and mob liveness.** Reproduce reported stalls,
+  passive farming/pickup behavior and waiting beside lethal bombs under current rules and CPU policy.
+  Expose action-refusal/queue reasons; test bomb-blocked escape guidance, alternate firing positions
+  and sustained per-CPU progress in complete seeded matches. Give mobs a bounded time-aware escape
+  search for routes crossing multiple future blast cells. Keep safety certificates and replay/privacy
+  guarantees. Tune purposeful farming, pickup collection and safe bombing pressure after fixing liveness.
+
+- [todo] **CPU-PRESSURE — improve purposeful, safe aggression.** Build on reliable execution:
+  pursue useful drops, farm destructible blocks and choose productive bombing approaches. Preserve
+  escape certification and try alternative firing positions before abandoning a useful target.
+- [todo] **HARD-CPU — add a fair Hard tier.** Use the same architecture with stronger exit prediction,
+  pickup contention and bomb combinations. Use only permitted observations; preserve deterministic
+  replay and bounded planning/queue latency. Introduce a new current contract without widening
+  archived difficulty enums. Validate every tier through complete seeded episodes, including stalls,
+  avoidable deaths, useful pickups and productive bomb placements.
+
 - [todo] **SOLO-CPU — validate and tune the staged hybrid.** Compare the
   [private Solo opponent](docs/game/single-player.md) on Easy and Standard with all items enabled.
   Follow the [accepted design](docs/game/single-player-cpu.md).

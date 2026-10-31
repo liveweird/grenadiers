@@ -30,6 +30,7 @@ export interface PresentationDeaths {
   sequence: number
   cues: readonly PresentationDeathCue[]
 }
+export interface PresentationOpening { key: string; bornAt: number }
 interface PresentedActor {
   id: number
   seat: Seat
@@ -75,6 +76,7 @@ interface PresentedBomb {
 
 export interface SnapshotMessage {
   presentationDeaths?: PresentationDeaths
+  presentationOpening?: PresentationOpening
   room: {
     roomId: string
     roundId: number

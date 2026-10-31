@@ -97,55 +97,57 @@ retain the previous immutable image reference for rollback. The runtime stage in
 rolling Debian package updates, so a later build may resolve newer packages and is not expected to
 be byte-identical; treat it as a new candidate with new evidence rather than reusing acceptance.
 
-## v1.2.2 — 2026-10-31
+## v1.2.3 — 2026-11-01
 
-Optional retro sound now includes quiet local footsteps, ordinary and special-bomb placement and
-explosions, pickups, and player/mob deaths. Sound starts muted; the EN/PL volume slider persists
-without autoplay. A quiet master, four-voice limit, event coalescing and per-cue rate limits prevent
-crowded matches from stacking excessive volume. Footsteps yield to important cues. See
-[audio](game/audio.md) for the accepted-event and cosmetic local-movement boundaries.
+Each browser randomly chooses a short zoom-in, zoom-out, left-rotation or right-rotation cue at
+fresh round openings and observed round/match results. The 900ms effects return exactly to the
+normal view; reduced motion stays stationary. The full tray remains framed on every board and
+viewport. See the [native camera examples](screenshots/round-camera.md).
 
-The owner-supplied sprite refresh updates fire, spike pits, related icons and the cosmetic blood
-pool. All stable rectangles and character/material pixels are preserved. Import processing uses
-a shared twelve-color pit palette and matching flame edges; the root upload is removed after
-validation. See the [artist handoff](../assets/art/README.md).
+A client presentation latch observes genuine snapshot-free countdowns before React coalescing,
+then starts the intro when the first running arena arrives. Controls remain active. Late admission,
+repeated reconnect countdowns, suspension and context recovery cannot replay consumed cues.
+Animation uses the existing frame loop and adds no timers or GPU resources. See
+[arena rendering](game/arena-3d.md#round-camera-transitions).
 
 ### Verification
 
-Accepted source: `afa8f5a98005cf6e599d14090984b5d2bc989b14`,
-[PR #302](https://github.com/liveweird/grenadiers/pull/302).
-Independent art and audio reviews have no unresolved findings. Review caught and corrected
-phase-to-phase palette flicker, browser-history sound resumption, and interrupted volume ramps.
+Accepted image source: `7153ffd877556fb5e9344cb7780f56fb24e95216`,
+[PR #303](https://github.com/liveweird/grenadiers/pull/303). Independent cross-component review is clear.
+Later changes contain only browser-test corrections, documentation and screenshots; image build
+inputs remain unchanged.
 
-- Full web gate: 7,377 tests in 164 files; coverage 95.47% lines, 92.38% statements,
-  91.55% functions and 88.71% branches. All existing floors remain unchanged. Types,
-  lint, Knip, generated-contract/validator checks and 116 documented browser scenarios pass.
-- Production bundle: JavaScript 398,331/400,000 gzip bytes; CSS 15,474/20,000.
-- Native artist workbench: 12 passed; final shared-palette/seam recheck: two passed.
-  Native Three fire, reduced-motion, restoration and terrain coverage: 14 passed with
-  ten project-specific skips; final spike-phase checks: two passed.
-- Exact-image Compose and Kubernetes duel/authentication: two passed each. Fresh all-on
-  three-CPU motion/bomb smoke passes. Native Web Audio, mute/resume, visibility,
-  movement, volume persistence, EN/PL layout and Axe scenario passes.
-- Pinned Trivy 0.74: zero fixable HIGH/CRITICAL findings. All five image web files equal
-  the verified production build. Owned acceptance stacks and Kubernetes namespace are removed.
+- Full web gate: 7,407 tests in 167 files; coverage 95.59% lines, 92.54% statements,
+  91.69% functions and 88.82% branches. All existing floors remain unchanged. Types, lint,
+  Knip, generated-contract/validator drift and 120 documented browser scenarios pass.
+- Production bundle: JavaScript 399,557/400,000 gzip bytes; CSS 15,474/20,000.
+- Native renderer regression: 25 passed, 13 project-specific skips. All four opening/ending
+  variants change native pixels and settle to byte-identical canonical pixels; reduced motion,
+  billboard/death/fire layering, board sizes and WebGL recovery pass.
+- Isolated warmed callback submission cost, 40 frames each: empty median/p95/max
+  0.20/0.30/0.30ms; worst public fire 1.70/1.80/2.10ms. This is not a hardware FPS claim.
+- Exact-image Compose duel/authentication: two passed. The real two-client browser scenario
+  verifies intros across first and subsequent rounds without fabricating countdown snapshots;
+  both clients use isolated contexts and close cleanly. Fresh three-CPU motion/bomb smoke passes.
+- Exact-image Kubernetes duel/authentication and restricted runtime pass. Owned acceptance
+  stacks and namespace are removed. Pinned Trivy 0.74 reports zero fixable HIGH/CRITICAL findings.
+  All five image web files equal the verified production build.
 
-Backend logic, contracts and dependencies are unchanged. Reuse v1.2.0/v1.2.1 Rust debug/release,
-coverage, dependency and distinct Linux acceptance; the candidate image also compiles the release
-server for Linux. Native browser checks verify Web Audio processing and lifecycle; hardware
-listening and subjective mix preference require playtesting.
+Backend logic, contracts, dependencies and artwork are unchanged. Reuse v1.2.2 artwork/audio
+and v1.2.0/v1.2.1 Rust debug/release, coverage, dependency and distinct Linux acceptance.
+The release image also compiles the server for Linux.
 
-### Operation and artist handoff
+### Operation
 
 Accepted local image:
-`sha256:9f5c91b028424b1a3bafa50058f1f729ead6424b37b6f4c924809557e5d52242`.
-The exact accepted image is promoted to localhost:8085; v1.2.1 remains available for rollback.
-This remains a source/local-runtime release without a hosted service or production registry.
+`sha256:aea9ced2c51dbbeecc8dba9a22783c77d12d1a279932d6f05c04be47c41be8de`.
+The exact accepted image is promoted to localhost:8085; v1.2.2 remains available for rollback.
+This is a source/local-runtime release without a hosted service or production registry.
+The unchanged artwork remains available in the
+[v1.2.2 artist ZIP](https://github.com/liveweird/grenadiers/releases/download/v1.2.2/grenadiers-artist-v1.2.2.zip).
 
-The artist source remains `assets/art/arena-source.png` plus `arena-source.json`: 1120×2240,
-192 runtime drawings, four reserved slots and four unused cells. The
-[shareable artist ZIP](https://github.com/liveweird/grenadiers/releases/download/v1.2.2/grenadiers-artist-v1.2.2.zip)
-contains the paired source, guides, named slices, runtime pack and native previews.
+<a id="v122--2026-10-31"></a>
+The [v1.2.2 record](history/releases.md#v122--2026-10-31) is preserved in release history.
 
 <a id="v121--2026-10-31"></a>
 The [v1.2.1 record](history/releases.md#v121--2026-10-31) is preserved in release history.

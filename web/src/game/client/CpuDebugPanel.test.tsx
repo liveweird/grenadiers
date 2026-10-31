@@ -70,4 +70,40 @@ describe('CPU intent developer panel', () => {
     expect(region).not.toHaveTextContent('Attack')
     expect(region).not.toHaveTextContent('Better opportunity')
   })
+
+  it.each([
+    ['waiting', 'Waiting for CPU diagnostics…'],
+    ['disabled', 'CPU diagnostics are disabled on this server.'],
+    ['error', 'CPU diagnostics are temporarily unavailable.'],
+  ] as const)('shows the %s diagnostic state without stale intent details', (type, message) => {
+    render(<CpuDebugPanel state={state()} debug={{ type }} />)
+    fireEvent.click(screen.getByRole('button', { name: 'CPU intent diagnostics' }))
+    const region = screen.getByRole('region', { name: 'CPU intent diagnostics' })
+    expect(region).toHaveTextContent(message)
+    expect(region).not.toHaveTextContent('Better opportunity')
+  })
+
+  it('distinguishes a ready room without CPU seats from unavailable CPU intent', () => {
+    const current = state()
+    current.room!.configuration.controllers[1] = 'human'
+    current.room!.configuration.cpuDifficulty = null
+    current.room!.seats[1].controller = { type: 'human' }
+    render(<CpuDebugPanel state={current} debug={{ type: 'ready', response: { ...response, cpus: [] } }} />)
+    fireEvent.click(screen.getByRole('button', { name: 'CPU intent diagnostics' }))
+    const region = screen.getByRole('region', { name: 'CPU intent diagnostics' })
+    expect(region).toHaveTextContent('This match has no CPU players.')
+    expect(region).not.toHaveTextContent('Intent unavailable for the current view.')
+  })
+
+  it('renders explicit no-target and no-approach values for a waiting CPU', () => {
+    const waitingResponse: CpuDebugResponse = { ...response, cpus: [{
+      seat: 'two', status: 'available', observedTick: 20, objective: 'wait', target: null,
+      approach: null, phase: 'waiting', switchReason: 'noTargets',
+    }] }
+    render(<CpuDebugPanel state={state()} debug={{ type: 'ready', response: waitingResponse }} />)
+    fireEvent.click(screen.getByRole('button', { name: 'CPU intent diagnostics' }))
+    const region = screen.getByRole('region', { name: 'CPU intent diagnostics' })
+    expect(region).toHaveTextContent('TargetNo target')
+    expect(region).toHaveTextContent('ApproachNo approach cell')
+  })
 })

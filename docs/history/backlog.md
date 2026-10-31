@@ -7,6 +7,11 @@
 
 ## Completed 2026-10-31
 
+- **CPU intent and diagnostics:** [v1.0.5](../releases.md#v105--2026-10-31) retains exact
+  pickup/block/opponent subjects through safe replanning, adds commitment/progress bounds and
+  target-directed bombing, and provides a bounded, recipient-safe EN/PL developer view.
+
+
 - **Arena intelligence:** [v1.0.4](../releases.md#v104--2026-10-31) adds persistent reachable
   goals, bounded cycle avoidance and retry, crate farming and more certified CPU bomb choices;
   mobs complete danger exits and re-center interrupted retreats before resuming pursuit.

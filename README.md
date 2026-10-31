@@ -3,8 +3,8 @@
 A browser-based multiplayer game inspired by classic Bomberman/Dynablaster.
 Play two-to-four-seat human/CPU matches, a quick two-human duel, or a private solo match.
 
-**[v1.0.4 Smarter arena AI](https://github.com/liveweird/grenadiers/releases/tag/v1.0.4).**
-All 22 requested item types shipped in v0.3.47. See the [release record](docs/releases.md#v104--2026-10-31)
+**[v1.0.5 persistent CPU intent and diagnostics](https://github.com/liveweird/grenadiers/releases/tag/v1.0.5).**
+All 22 requested item types shipped in v0.3.47. See the [release record](docs/releases.md#v105--2026-10-31)
 for verification, the exact deployed image and rollback. Reload browser tabs after upgrading the paired server/web image.
 
 The [artist sprite-sheet handoff](assets/art/README.md) includes editable PNG/JSON, labelled

@@ -412,3 +412,10 @@ artist-sheet material maps and restrained lighting/colour/dither finishing. Exis
 recipient privacy and artwork contracts remain intact. The [release record](../releases.md)
 contains acceptance evidence. Human visual feedback and the unapproved full-model proposal
 remain in the root backlog.
+
+## Player and mob death animation — 2026-10-31
+
+DEATH-ANIM ships in v1.1.1: four artist-owned knockout poses for each uniform and the mob,
+short one-shot or static reduced-motion playback, recipient-safe positions and reset/replay
+fences. The existing sprites and material maps remain intact. See the
+[death presentation guide](../game/arena-3d.md#death-animation) and [release record](../releases.md).

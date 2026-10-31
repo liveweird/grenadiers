@@ -12,9 +12,6 @@ repeated approval for routine implementation choices. Entries are not delivery-d
 
 ## Arena presentation
 
-- [next] **DEATH-ANIM — player and mob knockout sprites.** Append four artist-editable death
-  poses for each uniform and the mob; play short, recipient-safe animations with reduced-motion
-  support, bounded lifetime and no replay across admission or round resets.
 - [todo] **ARENA3D — human visual feedback.** Evaluate camera/depth, sprite detail, readability,
   texture revisions and filter strength after the first playable version.
 - [new] **Full 3D character models.** Consider after the billboard trial; retain the actor-view
@@ -54,7 +51,7 @@ repeated approval for routine implementation choices. Entries are not delivery-d
   item frequency/pools/weights and configurable effect durations. Existing numeric controls,
   item switches and creator/readiness/rematch policies are already implemented; see
   [settings](docs/game/settings.md). New cross-field combinations need explicit validation.
-- [new] **Further art.** Beyond the confirmed walking and bomb frames, consider idle/death
+- [new] **Further art.** Beyond the walking, bomb and death frames, consider idle
   animation, environment detail, layered authoring sources, accessibility and measured effects
   budgets. Follow the [artist handoff](assets/art/README.md).
 - [new] **AUTO-PUNCH — consider automatic contact Punch.** The current idea is at most one

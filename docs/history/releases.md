@@ -4,6 +4,65 @@ This archive preserves the older release records originally maintained in
 [`docs/releases.md`](../releases.md). Records remain in their original order; the current
 release procedure and current release record stay in the [release guide](../releases.md).
 
+## v1.1.0 — 2026-10-31
+
+The arena now uses Three.js and React Three Fiber: a miniature textured courtyard with shallow
+chamfered walls, directional lighting, grounded shadows and a restrained warm colour/dither
+finish. Detailed billboard sprites retain all four uniforms and existing animation. The fixed
+orthographic camera preserves keyboard directions. Rust simulation, controls, contracts and
+recipient visibility rules are unchanged. Future character models remain a separate proposal.
+
+The artist sheet adds ten named 48×48 material maps and preserves every existing sprite pixel.
+Use the [artist workflow](../../assets/art/README.md) and the downloadable
+[artist bundle](https://github.com/liveweird/grenadiers/releases/download/v1.1.0/grenadiers-artist-v1.1.0.zip),
+including canonical inputs, guides, labelled inventory, optional slices and a 3D preview.
+
+### Verification
+
+Accepted production source: `4a9259ec7057ff9ca8595f0fa8423f9e5a124634`,
+[PR #290](https://github.com/liveweird/grenadiers/pull/290). Independent renderer and presentation
+reviews are clear, including GPU normals/lighting, resource ownership, concealed-history resets,
+interpolation, painted shadow anchors and a grounded cloud shadow throughout bobbing.
+
+- Web coverage: 7,268 tests pass in 264.29 seconds; statements 91.70%, branches 88.49%, functions
+  91.16%, lines 94.83%. Existing floors remain unchanged. Production bundle is 392,505/400,000
+  gzip JS bytes and 15,430/20,000 CSS bytes. The actual emitted module graph excludes the Pixi
+  reference renderer and authoring factories.
+- Native graphics: eight Three cases, ten source-atlas cases and both DPR1/DPR2 reference
+  comparisons pass. Checks cover all three boards, four uniforms, item/entity variants,
+  narrow/reduced-motion views, final framebuffer colour calibration, removal/concealment resets,
+  suspend/resume, context recovery and teardown. No page, shader or CSP errors are observed.
+- Atlas extension: all 155 original assigned rectangles, 3,247,104 RGBA bytes, compare unchanged.
+  The source is 1120×1904 with 165 frames; the runtime pack is 2040×584 with 161 frames and
+  4,765,440 RGBA bytes, within unchanged texture limits. The artist export and guides validate.
+- E2E static checks pass, including 100 scenario mappings and camera-projection checks. Four
+  Compose duel/auth/CPU cases and disabled diagnostics pass. All 21 general Kubernetes cases
+  are accepted: 18 passed initially; the three affected geometry/cloud/turning cases pass after
+  correcting the flat-board assertion and the macOS graphics backend. Runtime probes,
+  restrictions and zero restarts are checked; owned namespaces are removed.
+- Five focused item/privacy suites pass with unchanged deadlines: Oil Barrel, Cloak, Kick,
+  Wall Pass and Bracelet. Projection-aware compositor sampling preserves concealment and
+  reconnect assertions; graded colour-family checks retain Oil state evidence. macOS and CI
+  explicitly align ANGLE WebGL/compositing and default to one shared-backend worker.
+- Fresh dependency policy/audits pass at the HIGH/CRITICAL threshold; existing upstream tooling
+  advisories remain 20 moderate web and 12 moderate E2E entries. Pinned Trivy 0.74 finds zero
+  fixable HIGH/CRITICAL vulnerabilities in the exact accepted image.
+- Rust implementation, contracts and deterministic fixtures are unchanged from v1.0.6; only local
+  package-version metadata changes. Reuse that release's full macOS debug/release/coverage
+  acceptance rather than repeat the simulation matrix. The image compiles the Linux release
+  target; [fresh Linux debug/release units](https://github.com/liveweird/grenadiers/actions/runs/41196323616)
+  pass for the new package versions. Final docs/tests preserve production inputs.
+
+### Operation
+
+Localhost:8085 runs the exact accepted image
+`sha256:832ab2e4c96db7f6498a5a49a72645d48b585c451edf1944245bdf6986133b43`,
+labelled 1.1.0/source 4a9259ec. The local operator keeps CPU diagnostics enabled at
+`http://localhost:8085/?cpuDebug=1`; base Compose and Kubernetes default to disabled. Promotion
+checks image identity, runtime restrictions, health/readiness, CSP/cache policy and served bytes.
+Immutable v1.0.6 remains available for rollback. Restart ends in-memory matches; refresh and
+create a new match. Human visual/difficulty feedback and proposals live in [BACKLOG.md](../../BACKLOG.md).
+
 ## v1.0.6 — 2026-10-31
 
 Fix CPUs repeatedly stopping at an attained farming/combat approach when no safe bomb can be

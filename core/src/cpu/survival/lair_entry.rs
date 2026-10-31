@@ -49,6 +49,7 @@ pub fn plan_lairs_with_origin(
         false,
         false,
         false,
+        false,
     )
 }
 
@@ -74,6 +75,7 @@ pub(in crate::cpu::survival) fn plan_lairs_v23(
         true,
         true,
         false,
+        false,
     )
 }
 
@@ -96,6 +98,33 @@ pub(in crate::cpu::survival) fn plan_lairs_v24(
         rng,
         work,
         9,
+        true,
+        true,
+        true,
+        false,
+    )
+}
+
+#[allow(clippy::too_many_arguments)]
+pub(in crate::cpu::survival) fn plan_lairs_v25(
+    observation: &Observation,
+    memory: &UtilityMemory,
+    history: &ObservedHazardMemory,
+    settled_stop_tick: Tick,
+    origin: Option<&PlantEscapeOrigin>,
+    rng: &mut CpuRng,
+    work: &mut WorkBudget,
+) -> Result<LairSurvivalPlan, PolicyError> {
+    plan_lairs_inner(
+        observation,
+        memory,
+        history,
+        settled_stop_tick,
+        origin,
+        rng,
+        work,
+        9,
+        true,
         true,
         true,
         true,

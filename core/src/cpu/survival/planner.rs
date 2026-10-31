@@ -10,9 +10,7 @@ use crate::game::{Direction, Tick};
 use super::compatibility::actor;
 use super::{ExecutionCertificate, MAX_PLAN_AGE_TICKS, PlantEscapeOrigin};
 
-#[path = "punch_tactic.rs"]
-mod punch_tactic;
-use punch_tactic::certified_punch;
+use super::punch_tactic::certified_punch;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct SurvivalPlan {
@@ -68,6 +66,7 @@ pub fn plan_with_origin(
         false,
         false,
         false,
+        false,
     )
 }
 
@@ -84,6 +83,7 @@ pub(super) fn plan_inner(
     pickup_handoff: bool,
     opportunistic_planting: bool,
     strategic_goals: bool,
+    failed_plant_recovery: bool,
 ) -> Result<SurvivalPlan, PolicyError> {
     let parts = observation.parts();
     if memory.key().world != parts.world
@@ -126,15 +126,16 @@ pub(super) fn plan_inner(
         }
         return Ok(plan);
     }
-    let ordinary = if strategic_goals {
-        crate::cpu::policy::plan_respawn_v24(observation, memory, rng, work)?
-    } else if opportunistic_planting {
-        crate::cpu::policy::plan_respawn_v23(observation, memory, rng, work)?
-    } else if respawn {
-        crate::cpu::policy::plan_respawn(observation, memory, rng, work)?
-    } else {
-        crate::cpu::policy::plan(observation, memory, rng, work)?
-    };
+    let ordinary = super::ordinary_planner::plan(
+        observation,
+        memory,
+        rng,
+        work,
+        respawn,
+        opportunistic_planting,
+        strategic_goals,
+        failed_plant_recovery,
+    )?;
     let storm_enabled = observation.environment().is_some_and(|environment| {
         environment.storm_cloud_config() == crate::game::StormCloudConfig::Single
     });
@@ -143,10 +144,12 @@ pub(super) fn plan_inner(
         ordinary.intent.movement != MovementIntent::Stop,
         work,
     );
+    let recovering_plant = failed_plant_recovery
+        && super::strategic_recovery::attained_firing_position(observation, &ordinary);
     let bounded_tactics = storm_enabled || respawn;
     let bounded_plant_attempted =
-        bounded_tactics && (ordinary.intent.manual.is_some() || clear_movement);
-    if (ordinary.intent.manual.is_some() || clear_movement)
+        bounded_tactics && (ordinary.intent.manual.is_some() || clear_movement || recovering_plant);
+    if (ordinary.intent.manual.is_some() || clear_movement || recovering_plant)
         && let Some(plan) = super::plant_tactic::certified_plant_for_policy(
             observation,
             history,
@@ -168,7 +171,6 @@ pub(super) fn plan_inner(
             execution: None,
         });
     }
-    // Keep legacy clear-board goals and pickup collection.
     if clear_movement && ordinary.intent.manual.is_none() && !respawn {
         return Ok(SurvivalPlan {
             control: ordinary,
@@ -286,7 +288,16 @@ pub(super) fn plan_inner(
                     lease: Some(lease),
                     execution: None,
                 };
-                if best.as_ref().is_none_or(|(previous, _)| score < *previous) {
+                if best.as_ref().is_none_or(|(previous, old)| {
+                    super::strategic_recovery::prefer_pulse(
+                        recovering_plant,
+                        &candidate,
+                        score,
+                        old,
+                        *previous,
+                        actor.position,
+                    )
+                }) {
                     best = Some((score, candidate));
                 }
             }
@@ -375,6 +386,14 @@ pub(super) fn plan_inner(
         })
     {
         return Ok(fallback.expect("progressing fallback was checked"));
+    }
+    if let Some(plan) = super::strategic_recovery::recover_progressing(
+        recovering_plant,
+        fallback.clone(),
+        actor.position,
+        observation.parts().tick,
+    ) {
+        return Ok(plan);
     }
     Ok(route_fallback.or(fallback).unwrap_or_else(stop))
 }

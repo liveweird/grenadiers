@@ -197,6 +197,18 @@ impl UtilityMemory {
         self
     }
 
+    pub(crate) fn defer_strategic_target(mut self, tick: Tick) -> Self {
+        if let Some(intent) = self.strategic_intent.as_mut() {
+            self.failed_target = Some((
+                intent.target,
+                Tick(tick.0.saturating_add(FAILED_TARGET_DEFER_TICKS)),
+            ));
+            intent.last_switch_reason = StrategicSwitchReason::Stalled;
+            intent.observation_tick = tick;
+        }
+        self
+    }
+
     pub fn mark_strategic_phase(
         mut self,
         phase: StrategicPhase,

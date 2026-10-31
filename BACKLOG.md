@@ -10,12 +10,6 @@ waiting on a stated dependency. Explicit user requests and accepted plans are co
 new assistant suggestions start as `[new]`. Existing authorization carries forward without
 repeated approval for routine implementation choices. Entries are not delivery-date promises.
 
-## CPU farming recovery
-
-- [next] **Recover from unavailable planting at an attained firing approach.** Retain bomb
-  safety proofs, use certified repositioning and bounded target retry, and cover default
-  Teleporter interactions with distant hazards both with lairs enabled and disabled.
-
 ## Single-player
 
 - [todo] **SOLO-CPU — validate and tune the staged hybrid.** Compare the

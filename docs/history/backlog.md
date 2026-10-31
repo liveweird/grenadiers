@@ -7,6 +7,11 @@
 
 ## Completed 2026-10-31
 
+- **CPU farming recovery:** [v1.0.6](../releases.md#v106--2026-10-31) replaces repeated
+  Stop at an unplantable approach with certified physical progress, bounded exact-target
+  retry and stale-route removal; preserves archived CPU24 behavior and all planting safety.
+
+
 - **CPU intent and diagnostics:** [v1.0.5](../releases.md#v105--2026-10-31) retains exact
   pickup/block/opponent subjects through safe replanning, adds commitment/progress bounds and
   target-directed bombing, and provides a bounded, recipient-safe EN/PL developer view.

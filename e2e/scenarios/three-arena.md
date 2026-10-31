@@ -1,5 +1,38 @@
 # Native Three arena acceptance
 
+## Scenario: native public fire warms nearby floor walls and actors without bomb inference
+
+The desktop credential-free fixture compares small projected floor, hard-wall, and actor regions
+before and after a public flame appears. Warm changes must extend outside the flame footprint and
+shift red more than blue. A bombs-only snapshot must leave the same floor and wall pixels unlit,
+and a concealed fact with no public row must reproduce the empty canvas byte-for-byte.
+
+## Scenario: native fire advances six poses with bounded ignition smoke and embers
+
+The normal-motion fixture clock holds each of the six production flame poses for a native closeup.
+All poses must produce distinct pixels. A newly published flame also captures its short ignition
+and later settled state, while the fixed four-anchor renderer bounds drifting smoke and embers.
+
+## Scenario: reduced motion keeps fire and illumination static without ignition smoke or embers
+
+The narrow reduced-motion project holds a newly published flame at three widely separated local
+ages. The closeups must remain byte-identical, proving the flame pose and warm light are static and
+that ignition, smoke, embers, and flicker are suppressed.
+
+## Scenario: fire state resets and context restoration leave bounded native resources without ghosts
+
+Public clear, round replacement, fresh admission baseline, backward tick, and preference reset each
+remove an active fire and reproduce the empty native canvas. A real WebGL context loss, when
+supported, must reproduce the frozen pre-loss terrain, flame sprite, and lighting byte-for-byte and
+remain distinct from a post-restore cleared control with one canvas. Destroy releases the canvas
+and cancels the renderer-owned animation frame.
+
+## Scenario: worst-case public fire keeps warmed native frame work bounded after warmup
+
+After an isolated warmup, the desktop fixture measures renderer-loop callback cost for empty and
+maximal public-fire boards. It retains at least forty samples per case, requires a bounded p95, and
+limits the worst-case median relative to the empty arena; raw measurements are attached as JSON.
+
 ## Scenario: production GPU finish pass preserves sRGB midtones and separates primary colors
 
 An isolated manual Fiber root renders red, green, blue, and mid-gray unlit swatches through the

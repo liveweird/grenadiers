@@ -63,7 +63,8 @@
     "test:atlas-gameplay": "playwright test --config playwright.atlas-gameplay.config.ts",
     "test:cpu-pickup": "playwright test --config playwright.cpu-pickup.config.ts",
     "test:cpu-debug": "playwright test --config playwright.cpu-debug.config.ts",
-    "test:cpu-debug-disabled": "playwright test --config playwright.cpu-debug-disabled.config.ts"
+    "test:cpu-debug-disabled": "playwright test --config playwright.cpu-debug-disabled.config.ts",
+    "test:three-arena": "playwright test --config playwright.three-arena.config.ts"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.13.0",

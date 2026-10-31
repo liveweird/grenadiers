@@ -254,12 +254,10 @@ pub(super) fn plan_inner(
                             manual: None,
                         },
                         hold_ticks,
-                        next_memory: if opportunistic_planting
-                            && ordinary.intent.movement == MovementIntent::Stop
-                        {
-                            ordinary.next_memory
-                        } else if *movement == ordinary.intent.movement
-                            && ordinary.intent.manual.is_none()
+                        next_memory: if (opportunistic_planting
+                            && ordinary.intent.movement == MovementIntent::Stop)
+                            || (ordinary.intent.manual.is_none()
+                                && *movement == ordinary.intent.movement)
                         {
                             ordinary.next_memory
                         } else if opportunistic_planting {

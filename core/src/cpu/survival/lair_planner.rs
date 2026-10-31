@@ -325,12 +325,10 @@ pub(super) fn plan_lairs_inner(
                             manual: None,
                         },
                         hold_ticks,
-                        next_memory: if opportunistic_planting
-                            && ordinary.intent.movement == MovementIntent::Stop
-                        {
-                            ordinary.next_memory
-                        } else if ordinary.intent.manual.is_none()
-                            && movement == ordinary.intent.movement
+                        next_memory: if (opportunistic_planting
+                            && ordinary.intent.movement == MovementIntent::Stop)
+                            || (ordinary.intent.manual.is_none()
+                                && movement == ordinary.intent.movement)
                         {
                             ordinary.next_memory
                         } else if opportunistic_planting {

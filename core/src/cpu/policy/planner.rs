@@ -168,7 +168,6 @@ fn plan_inner(
         observation,
         actor,
         current,
-        key,
         memory,
         rng,
         work,
@@ -180,12 +179,12 @@ fn navigate(
     observation: &Observation,
     actor: &crate::cpu::VisibleActor,
     current: CellId,
-    key: MemoryKey,
     memory: &UtilityMemory,
     rng: &mut CpuRng,
     work: &mut WorkBudget,
     persistent_goals: bool,
 ) -> Result<ControlPlan, PolicyError> {
+    let key = memory.key();
     let guidance = if persistent_goals {
         select_v23(observation, actor, current, memory, work)
     } else {

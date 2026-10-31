@@ -4,7 +4,7 @@ import { arenaTilePixels } from '../tests/support/compositor'
 import { latestSnapshot, observeGame, visibleActor, type ObservedGame } from '../tests/support/duel'
 import { moveSeatTo } from '../tests/support/movement'
 import { applyItemSettings } from '../tests/support/settings'
-import type { GameServerMessage, Seat } from '../../web/src/game/v17/schema'
+import type { GameServerMessage, Seat } from '../../web/src/game/v18/schema'
 
 test.beforeAll(() => expect(process.env.E2E_BRACELET_FIXTURE).toBe('arena-v3-bracelet'))
 type Snapshot = Extract<GameServerMessage, { type: 'snapshot' }>

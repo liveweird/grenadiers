@@ -107,7 +107,7 @@ test('three humans join an explicit three-seat match', async ({ browser }) => {
       controllers: ['human', 'human', 'human'], cpuDifficulty: null,
       board: { width: 15, height: 13 },
       environment: {
-        stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 },
+        stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 }, spikePits: { enabled: true, warningTicks: 36, raisedTicks: 180 },
       },
     })
     expect(running.room.seats.map(({ seat, controller, occupied }) =>
@@ -159,7 +159,7 @@ test('four humans share the four-seat lobby at 320 pixels', async ({ browser }) 
       controllers: ['human', 'human', 'human', 'human'], cpuDifficulty: null,
       board: { width: 15, height: 13 },
       environment: {
-        stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 },
+        stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 }, spikePits: { enabled: true, warningTicks: 36, raisedTicks: 180 },
       },
     })
     expect(running.state.actors.map(({ seat }) => seat)).toEqual(['one', 'two', 'three', 'four'])
@@ -247,7 +247,7 @@ test('human CPU human assigns both human seats without exposing a CPU join', asy
       controllers: ['human', 'cpu', 'human'], cpuDifficulty: 'easy',
       board: { width: 15, height: 13 },
       environment: {
-        stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 },
+        stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 }, spikePits: { enabled: true, warningTicks: 36, raisedTicks: 180 },
       },
     })
     expect(running.room.seats[1]).toMatchObject({
@@ -276,7 +276,7 @@ test('one human and three CPUs creates a ready four-controller lobby', async ({ 
       controllers: ['human', 'cpu', 'cpu', 'cpu'], cpuDifficulty: 'standard',
       board: { width: 15, height: 13 },
       environment: {
-        stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 },
+        stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 }, spikePits: { enabled: true, warningTicks: 36, raisedTicks: 180 },
       },
     })
     expect(running.room.seats.slice(1).map(({ ready, controller, connection }) =>

@@ -159,7 +159,7 @@ test('source validation rejects path-like IDs and painting in authoring gutters'
   })
   expect(result.unsafeMessage).toContain('invalid stable ID ../terrain')
   expect(result.gutterMessage).toContain('paint exists in a gutter or reserved slot')
-  expect(result.inventory).toEqual({ frameCount: 155, pickupCount: 24 })
+  expect(result.inventory).toEqual({ frameCount: 165, pickupCount: 24 })
 })
 
 test('repeated preview reset and WebGL context restoration do not accumulate canvases or sprites', async ({ page }) => {
@@ -210,7 +210,7 @@ test('independent exports match decoded runtime pixels and canonical JSON', asyn
   const secondJson = output(second, 'arena-atlas.json').text
   if (!firstPng || !secondPng || !firstJson || !secondJson) throw new Error('Runtime export contents are incomplete')
   expect(await compareDecodedPng(page, firstPng, secondPng))
-    .toEqual({ width: 2040, height: 528, differentBytes: 0 })
+    .toEqual({ width: 2040, height: 584, differentBytes: 0 })
   expect(secondJson).toBe(firstJson)
   expect(firstJson).toBe(canonicalJson(JSON.parse(firstJson)))
 })
@@ -230,12 +230,12 @@ test('committed artist source validates and exports through the browser pipeline
   const result = await page.evaluate(
     (request) => window.grenadiersArtAtlas.exportSource(request), source,
   )
-  expect(sourceManifest.sheet).toMatchObject({ width: 1120, height: 1792 })
-  expect(sourceManifest.frames).toHaveLength(155)
-  expect(sourceManifest.frames.filter(({ status }) => status === 'baseline')).toHaveLength(151)
+  expect(sourceManifest.sheet).toMatchObject({ width: 1120, height: 1904 })
+  expect(sourceManifest.frames).toHaveLength(165)
+  expect(sourceManifest.frames.filter(({ status }) => status === 'baseline')).toHaveLength(161)
   expect(sourceManifest.frames.filter(({ status }) => status === 'reserved')).toHaveLength(4)
-  expect(result.runtimeManifest.frames).toHaveLength(151)
-  expect(result.rgbaBytes).toBe(4_308_480)
+  expect(result.runtimeManifest.frames).toHaveLength(161)
+  expect(result.rgbaBytes).toBe(4_765_440)
   const appendedWalkingIds = (['one', 'two', 'three', 'four'] as const).flatMap((appearance) =>
     (['north', 'east', 'south', 'west'] as const).flatMap((direction) =>
       [2, 3].map((pose) => `actor.${appearance}.${direction}.${pose}`)))

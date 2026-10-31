@@ -97,51 +97,50 @@ retain the previous immutable image reference for rollback. The runtime stage in
 rolling Debian package updates, so a later build may resolve newer packages and is not expected to
 be byte-identical; treat it as a new candidate with new evidence rather than reusing acceptance.
 
-## v1.1.3 — 2026-10-31
+## v1.1.4 — 2026-10-31
 
-Adopt the owner-supplied polished arena PNG directly, without resizing, recoloring or metadata
-changes. It refines all ten 3D material maps and lightly retouches twenty death poses. All
-64 directional player poses, four mob directions and other sprite drawings remain unchanged.
-The sheet retains 1120×2128 RGBA dimensions, 185 assigned slots, anchors and animation contracts.
-The redundant root `arena-napoleonic-3d-polished.png` is removed only after verifying its adopted
-copy is byte-identical.
-
-Use the [updated artist bundle](https://github.com/liveweird/grenadiers/releases/download/v1.1.3/grenadiers-artist-v1.1.3.zip)
-for the current PNG/JSON, labelled guides, slices and actual 3D preview. The canonical source
-remains [assets/art/arena-source.png](../assets/art/arena-source.png).
+Fix two 3D presentation defects without changing artwork or gameplay. Remote-armed and Invisible
+Bombs indicators become compact, separate head badges, leaving player uniforms visible. Lairs
+have taller stone bodies with their existing barred-doorway sprite upright on the camera-facing
+side. Their ordinary pillar geometry is removed so it cannot obscure the entrance.
 
 ### Verification
 
-Accepted source: `e005b4228ac0f6bf76ccb4a6af794efc9e57f5c8`,
-[PR #293](https://github.com/liveweird/grenadiers/pull/293). Independent decoded-pixel review
-finds no structural defects: binary alpha, clean gutters/reservations, compatible death
-palettes and ground alignment, four distinct poses per death family. Exactly 30 frames change;
-151 baseline frames and all pixels outside allowed rectangles remain unchanged.
+Accepted source: `a8a5cd18e6c2b6918763fe6c682312aaa7ee42cd`. Independent review finds no remaining
+actionable defects after correcting overlapping badges, the underlying lair wall and invalid
+diagnostic terrain. Stored weapons, armed ownership and recipient visibility remain unchanged.
 
-- Raw input exports through the native validator without adaptation. Focused atlas/Three/UI
-  tests pass: 101 tests in 24 files. Artist workbench passes ten cases. Native 3D passes eleven
-  cases, with three intentional project skips, including all death frames, reduced motion,
-  expiry, flame overlap, board sizes, context recovery and removal privacy.
-- Fresh production build passes at 394,351/400,000 gzip JS bytes and 15,430/20,000 CSS bytes.
-  Runtime pack remains 2040×704 / 181 frames / 5,744,640 RGBA bytes. All five container web
-  files equal the verified build. Exact canonical file bytes equal the supplied input.
-- Exact-image Compose passes four duel/auth/CPU cases (36.8s), disabled diagnostics (10.3s)
-  and a native four-player visual smoke with zero page errors. Kubernetes duel/auth passes
-  (23.6s), alongside runtime restrictions, configured probes/resources and zero restarts.
-  Owned stacks and namespace are removed. Pinned Trivy 0.74 finds zero fixable HIGH/CRITICAL.
-- Application/rules/contracts/dependencies and Kubernetes configuration are unchanged. Reuse
-  the recorded full web/coverage/security/Rust and E2E-static acceptance; no floors or assertions
-  are weakened. Only duplicate unchanged Rust CI is cancelled. Cargo product versions change
-  to 1.1.3; the image supplies a fresh Linux release build and runtime acceptance.
+- `scripts/gates.sh web`: 7,294 tests in 150 files pass (288.72s), with 95.32% line and
+  88.86% branch coverage; compressed JS is 394,500/400,000 bytes. Lint, dependency reachability,
+  contract checks, coverage and production bundle limits pass without lowering any floor.
+- `scripts/gates.sh e2e`: lint, dependency reachability, types and all 105 scenario mappings pass.
+- Native Three acceptance passes 13 executed cases, with five intentional project skips. The
+  narrow remote-badge regression retains at least 85% of the actor-only pixel mask and proves
+  the badge adds visible pixels outside it. Lair matrix tests prove upright orientation, face
+  clearance and ordinary-wall exclusion; a hard-wall native fixture supplies the visual capture.
+- Exact-image Compose passes four duel/auth/CPU cases and disabled diagnostics; an all-on
+  four-player visual smoke has zero browser errors. The ad-hoc smoke helper initially attempted
+  to apply already-current defaults; correcting that helper required no application change or
+  repetition of the five passing runtime cases. Kubernetes duel/auth and runtime restrictions
+  pass. Owned test stacks and namespace are removed.
+- Pinned Trivy 0.74 reports zero fixable HIGH/CRITICAL findings. Backend implementation,
+  dependencies, contracts and artwork are unchanged; reuse their recorded acceptance, including
+  Linux Rust debug/release coverage. The image supplies a fresh production Linux release build.
+  All five container web files equal the verified local build.
 
 ### Operation
 
 Localhost:8085 runs exact accepted image
-`sha256:0c553e5c95b1a558608e8b9fcab2cfe1cb1d8dda510dba6ce1f3a37e3f73cc95`,
-labelled 1.1.3/source e005b422. The operator keeps CPU diagnostics enabled; base deployments
-default to disabled. Promotion checks image/runtime identity, health/readiness, CSP/cache and
-served bytes. Immutable v1.1.2 remains available for rollback. Refresh old tabs and create a
-new match after restart to see the polished material maps.
+`sha256:4cb3efaf0816ef6ac3184ff56cea679594cd6e034dcd5bafcb4a4299d1136c2e`,
+labelled 1.1.4/source a8a5cd18. Local CPU diagnostics remain enabled; deployment defaults remain
+disabled. Promotion checks image identity, runtime restrictions, probes, CSP/cache and served
+asset equality. Immutable v1.1.3 remains available for rollback. Refresh old tabs after restart.
+
+The [v1.1.3 artist bundle](https://github.com/liveweird/grenadiers/releases/download/v1.1.3/grenadiers-artist-v1.1.3.zip)
+still contains the current, unchanged PNG and manifest. No artist revision is needed for either fix.
+
+<a id="v113--2026-10-31"></a>
+The [v1.1.3 record](history/releases.md#v113--2026-10-31) is preserved in release history.
 
 <a id="v112--2026-10-31"></a>
 The [v1.1.2 record](history/releases.md#v112--2026-10-31) is preserved in release history.

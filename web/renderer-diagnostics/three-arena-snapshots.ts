@@ -9,6 +9,7 @@ export type SceneName =
   | 'empty' | 'actorBomb' | 'showcase' | 'teleportA' | 'teleportB' | 'newRoom'
   | 'actorOnly' | 'remoteActor' | 'lairOnly'
 export type DeathOverlay = 'none' | 'flame' | 'burningOil'
+export type BloodLayerMode = 'subjectOnly' | 'poolOnly' | 'combined'
 
 const BOARDS = {
   small: { width: 11 as const, height: 9 as const },
@@ -181,6 +182,58 @@ export function threeArenaDeathSnapshot(
       bornAt,
     }],
   }
+  return snapshot
+}
+
+export function threeArenaDeathBaselineSnapshot(
+  board: BoardName,
+  index: number,
+): SnapshotMessage {
+  const snapshot = base(board)
+  snapshot.presentationDeaths = { epoch: index + 1, sequence: 0, cues: [] }
+  return snapshot
+}
+
+function bloodLayerCues(bornAt: number, generation: number) {
+  return [
+    {
+      key: `diagnostic:blood:actor:${generation}`,
+      appearance: 'one' as const,
+      entityId: 300 + generation,
+      position: { x: 3.5 * 1024, y: 2.5 * 1024 },
+      heading: 'south' as const, tick: 1, index: 0, bornAt,
+    },
+    {
+      key: `diagnostic:blood:mob:${generation}`,
+      appearance: 'mob' as const,
+      entityId: 400 + generation,
+      position: { x: 7.5 * 1024, y: 2.5 * 1024 },
+      heading: 'south' as const, tick: 1, index: 1, bornAt,
+    },
+  ]
+}
+
+export function threeArenaBloodLayerSnapshot(
+  mode: BloodLayerMode,
+  bornAt: number,
+  generation: number,
+): SnapshotMessage {
+  const snapshot = base('large')
+  if (mode !== 'subjectOnly') {
+    snapshot.presentationDeaths = {
+      epoch: 300 + generation, sequence: 1, cues: bloodLayerCues(bornAt, generation),
+    }
+  }
+  if (mode !== 'poolOnly') {
+    snapshot.state.actors = [actor(10, 'one', 3, 2)]
+    snapshot.state.flames = [{ cell: { column: 7, row: 2 }, expiresAt: 999 }]
+  }
+  return snapshot
+}
+
+export function threeArenaBloodLayerBaseline(generation: number): SnapshotMessage {
+  const snapshot = base('large')
+  snapshot.presentationDeaths = { epoch: 300 + generation, sequence: 0, cues: [] }
   return snapshot
 }
 

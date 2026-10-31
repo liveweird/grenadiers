@@ -8,6 +8,7 @@ import { RENDERABLE_PICKUP_KINDS, type Direction, type Seat } from '../types'
 import { createArtDescriptor, MATERIAL_FRAME_IDS } from './descriptor'
 import { makeMaterialFrame } from './materialArtwork'
 import { poseDeathArtwork } from './deathArtwork'
+import { makeBloodPool } from './bloodArtwork'
 import type { ArtCatalog, ArtCatalogEntry } from './types'
 
 type DrawingFactory = () => { drawing: Container; owner?: Container }
@@ -207,6 +208,7 @@ export function createArtCatalog(): ArtCatalog {
     entries.push(entry(id, entries.length, () => ({ drawing: makeMaterialFrame(id) })))
   }
   addDeathArtwork(entries)
+  entries.push(entry('effect.bloodPool', entries.length, () => ({ drawing: makeBloodPool() })))
   if (entries.length !== DESCRIPTOR.frames.length) {
     throw new Error(`Drawing catalogue supplies ${entries.length} of ${DESCRIPTOR.frames.length} canonical frames`)
   }

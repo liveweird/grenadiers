@@ -18,8 +18,8 @@ has no special immunity. Dead bodies and cosmetic blood pools cannot activate a 
 
 ## Proposed settings and interactions
 
-Use configurable defaults of **0.6 seconds warning** and **3 seconds raised**. These values
-and whether protection applies are product choices. Prefer existing damage precedence:
+Use configurable defaults of **0.6 seconds warning** and **3 seconds raised**, with existing
+damage precedence:
 Shield prevents a hit, otherwise Heart absorbs one hit and grants normal damage grace.
 Unprotected players and mobs die. Protection does not disarm or reset the trap.
 

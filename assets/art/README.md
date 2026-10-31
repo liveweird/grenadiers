@@ -30,8 +30,8 @@ files:
 - `arena-guides.png` — raster copy of the separate guide/label layer;
 - `arena-overview.png` — labelled visual inventory on a checkerboard background.
 
-The 1120×2128 authoring sheet has 190 physical cells: 185 assigned entries (181 baseline
-drawings and four blank reserved entries), plus five unassigned transparent cells. Cells are 112×112
+The 1120×2128 authoring sheet has 190 physical cells: 186 assigned entries (182 baseline
+drawings and four blank reserved entries), plus four unassigned transparent cells. Cells are 112×112
 pixels in ten columns. Logical arena tiles remain 48×48 pixels. Reserved and unassigned cells must
 stay transparent. Do not move or rename assigned entries; new catalogue IDs must be added in code
 before a source revision can use them.
@@ -57,7 +57,7 @@ npm --prefix e2e run art:export -- \
 Add `--slices` to emit optional named files under `target/art-atlas/slices/`. Runtime output is
 generated and ignored rather than an artist source. Its main files are `arena-atlas.png`,
 `arena-atlas.json`, `arena-overview.png` and `arena-preview.png`. The runtime texture contains the
-181 baseline frames, unrotated and untrimmed, with two-pixel extrusion and two-pixel transparent
+182 baseline frames, unrotated and untrimmed, with two-pixel extrusion and two-pixel transparent
 padding. Labels and guides never enter the runtime texture.
 
 Both commands refuse an existing output directory, so an artist source or earlier review cannot
@@ -102,7 +102,7 @@ and landmines retain their original single drawing. Reduced motion uses original
 
 ### Death frame authoring
 
-The final twenty assigned slots contain `actor.<appearance>.death.0` through `.3` for all four
+The twenty death slots contain `actor.<appearance>.death.0` through `.3` for all four
 appearances, followed by `mob.death.0` through `.3`. Every death drawing stays inside its 80×80
 frame with local bounds `(-40, -44, 80, 80)`, pivot `(40, 44)` and foot anchor `(40, 65)`.
 Preserve all earlier frame rectangles and the four historical blank reservations; the new death
@@ -118,6 +118,20 @@ Start an art revision from the canonical pair or the published artist bundle. `a
 produces the procedural reference; it does not reproduce or overwrite the adopted redraw.
 
 ## Provenance
+
+The appended `effect.bloodPool` is a four-color procedural Pixi drawing for a small cosmetic
+floor stain. Its reproducible Canvas import preserves every preceding frame and all pixels
+outside the new rectangle; it introduces no generated character art. Reproduce the extension
+from the prior manifest and sheet with:
+
+```sh
+node e2e/scripts/art-atlas-blood-pool.mjs \
+  --source path/to/previous/arena-source.png \
+  --manifest path/to/previous/arena-source.json \
+  --out target/blood-pool-extension
+```
+
+Artists may repaint its 48×48 frame at slot 185, keeping the drawing centered and alpha binary.
 
 The owner-supplied retro-texture revision replaces all ten 3D material maps with tan sandstone,
 gray masonry and red brick patterns. All other sprites and the paired manifest remain unchanged.

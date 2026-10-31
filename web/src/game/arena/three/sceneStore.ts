@@ -2,6 +2,9 @@ import type { ArenaSceneStore, SceneRevision } from './contracts'
 import type { MotionTiming } from './motion'
 import { advanceResetEpoch, motionTiming } from './motion'
 import type { PresentationDeathCue, SnapshotMessage } from '../types'
+import {
+  advanceBloodPools, clearBloodPools, initialBloodPoolState,
+} from './bloodPoolState'
 
 export const DEATH_FRAME_MS = 150
 export const DEATH_ANIMATION_MS = DEATH_FRAME_MS * 4
@@ -18,6 +21,7 @@ export const readSceneTiming = (store: ArenaSceneStore): MotionTiming | null =>
 const initialRevision = (): SceneRevision => ({
   snapshot: null,
   deaths: [],
+  bloodPools: [],
   reducedMotion: false,
   receivedAt: 0,
   serial: 0,
@@ -31,6 +35,7 @@ export function createArenaSceneStore(): ArenaSceneStore {
   let deathSequence = -1
   let deathIdentity = ''
   let seenDeaths = new Set<string>()
+  let bloodPoolState = initialBloodPoolState()
   const listeners = new Set<() => void>()
   const timing = { current: null as MotionTiming | null }
   const publish = (next: SceneRevision): void => {
@@ -88,12 +93,20 @@ export function createArenaSceneStore(): ArenaSceneStore {
         : nextTiming
       resetEpochFloor = timing.current.resetEpoch
       const deaths = updateDeaths(snapshot, receivedAt)
-      publish({ ...revision, snapshot, deaths, receivedAt, serial: revision.serial + 1 })
+      bloodPoolState = advanceBloodPools(bloodPoolState, snapshot)
+      publish({
+        ...revision, snapshot, deaths, bloodPools: bloodPoolState.pools,
+        receivedAt, serial: revision.serial + 1,
+      })
     },
     clear() {
       resetEpochFloor += 1
       timing.current = null
-      publish({ ...revision, snapshot: null, deaths: [], receivedAt: 0, serial: revision.serial + 1 })
+      bloodPoolState = clearBloodPools(bloodPoolState)
+      publish({
+        ...revision, snapshot: null, deaths: [], bloodPools: [], receivedAt: 0,
+        serial: revision.serial + 1,
+      })
     },
     setReducedMotion(reducedMotion) {
       if (revision.reducedMotion === reducedMotion) return

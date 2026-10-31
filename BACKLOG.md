@@ -12,7 +12,7 @@ repeated approval for routine implementation choices. Entries are not delivery-d
 
 ## Arena presentation
 
-- [todo] **DEATH-POOLS — persistent cosmetic blood pools.** Leave a small floor stain at a
+- [next] **DEATH-POOLS — persistent cosmetic blood pools.** Leave a small floor stain at a
   visible player or mob death after its knockout sprite disappears. No collision, damage,
   slowdown or other gameplay effect. Reuse recipient-safe death positions, bound retained
   decals and clear them for a new round or presentation reset. Keep the pool artist-editable

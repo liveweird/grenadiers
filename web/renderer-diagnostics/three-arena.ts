@@ -4,8 +4,9 @@ import { createThreeArenaRenderer } from '../src/game/arena/three/renderer'
 import { createArenaCamera, fitArenaCamera } from '../src/game/arena/three/camera'
 import { cellToWorld } from '../src/game/arena/three/coordinates'
 import {
-  threeArenaDeathOverlapSnapshot, threeArenaDeathSnapshot, threeArenaSnapshot,
-  type BoardName, type DeathOverlay, type SceneName,
+  threeArenaBloodLayerBaseline, threeArenaBloodLayerSnapshot,
+  threeArenaDeathBaselineSnapshot, threeArenaDeathOverlapSnapshot, threeArenaDeathSnapshot,
+  threeArenaSnapshot, type BloodLayerMode, type BoardName, type DeathOverlay, type SceneName,
 } from './three-arena-snapshots'
 import type { DeathAppearance } from '../src/game/arena/types'
 import {
@@ -30,6 +31,22 @@ export type ThreeArenaDiagnosticApi = {
     state: FixtureState
     bornAt: number
   }>
+  showPoolOnly(board: BoardName, appearance: DeathAppearance, index: number): Promise<{
+    state: FixtureState
+    bornAt: number
+  }>
+  replayDeath(
+    board: BoardName,
+    appearance: DeathAppearance,
+    index: number,
+    bornAt: number,
+  ): Promise<FixtureState>
+  resetDeathPresentation(board: BoardName, index: number): Promise<FixtureState>
+  showBloodLayers(
+    mode: BloodLayerMode,
+    generation: number,
+    bornAt: number | null,
+  ): Promise<{ state: FixtureState; bornAt: number }>
   settleDeathAge(bornAt: number, ageMs: number): Promise<number>
   showDeathOverlap(
     overlay: DeathOverlay,
@@ -149,8 +166,63 @@ async function showDeath(
   scene = null
   fixtureNow = nativePerformanceNow()
   const bornAt = fixtureNow
+  renderer?.update(threeArenaDeathBaselineSnapshot(nextBoard, index))
+  await settle(1)
   renderer?.update(threeArenaDeathSnapshot(nextBoard, appearance, bornAt, index))
   await settle(1)
+  return { state: readState(), bornAt }
+}
+
+async function showPoolOnly(
+  nextBoard: BoardName,
+  appearance: DeathAppearance,
+  index: number,
+): Promise<{ state: FixtureState; bornAt: number }> {
+  await initialize()
+  board = nextBoard
+  scene = null
+  fixtureNow = nativePerformanceNow()
+  const bornAt = fixtureNow - 1_000
+  renderer?.update(threeArenaDeathBaselineSnapshot(nextBoard, index))
+  await settle(1)
+  renderer?.update(threeArenaDeathSnapshot(nextBoard, appearance, bornAt, index))
+  await settle(2)
+  return { state: readState(), bornAt }
+}
+
+async function replayDeath(
+  nextBoard: BoardName,
+  appearance: DeathAppearance,
+  index: number,
+  bornAt: number,
+): Promise<FixtureState> {
+  renderer?.update(threeArenaDeathSnapshot(nextBoard, appearance, bornAt, index))
+  await settle(2)
+  return readState()
+}
+
+async function resetDeathPresentation(nextBoard: BoardName, index: number): Promise<FixtureState> {
+  renderer?.update(threeArenaDeathBaselineSnapshot(nextBoard, index))
+  await settle(2)
+  return readState()
+}
+
+async function showBloodLayers(
+  mode: BloodLayerMode,
+  generation: number,
+  requestedBornAt: number | null,
+): Promise<{ state: FixtureState; bornAt: number }> {
+  await initialize()
+  board = 'large'
+  scene = null
+  fixtureNow = requestedBornAt ?? nativePerformanceNow()
+  const bornAt = requestedBornAt ?? fixtureNow - 1_000
+  if (mode === 'poolOnly') {
+    renderer?.update(threeArenaBloodLayerBaseline(generation))
+    await settle(1)
+  }
+  renderer?.update(threeArenaBloodLayerSnapshot(mode, bornAt, generation))
+  await settle(2)
   return { state: readState(), bornAt }
 }
 
@@ -234,6 +306,7 @@ window.addEventListener('pagehide', () => {
   disposeCalibration?.()
 }, { once: true })
 window.grenadiersThreeArena = {
-  initialize, show, showDeath, settleDeathAge, showDeathOverlap, suspend, destroy, readState,
-  projectCell, loseAndRestoreContext, calibrateColors,
+  initialize, show, showDeath, showPoolOnly, replayDeath, resetDeathPresentation,
+  settleDeathAge, showDeathOverlap, showBloodLayers, suspend, destroy, readState, projectCell,
+  loseAndRestoreContext, calibrateColors,
 }

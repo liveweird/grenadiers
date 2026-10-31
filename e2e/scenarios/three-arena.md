@@ -28,18 +28,19 @@ byte-for-byte, including shadows.
 The normal-motion desktop project injects one public presentation death cue at a time for actor
 appearances one through four and a mob. Native WebGL screenshots at all four frames and after the
 600-millisecond lifetime must show changing artwork for every appearance.
-The terminal screenshot is captured without another snapshot and must equal the original empty
-canvas byte-for-byte, proving that neither the corpse nor its shadow lingers. An isolated fixture
-clock holds each age during capture so software-renderer screenshot latency cannot skip frames.
+The terminal screenshot is captured without another snapshot and must equal an independently
+created pool-only reference byte-for-byte, proving that neither the corpse nor its shadow lingers
+while the cosmetic pool persists. An isolated fixture clock holds each age during capture so
+software-renderer screenshot latency cannot skip frames.
 
 ## Scenario: reduced motion holds every death on frame three then expires from the same birth time
 
 The narrow reduced-motion project injects the same five public death appearances. Two native WebGL
 screenshots before expiry must be byte-identical and distinct from the empty canvas, proving the
 static frame-three treatment. After 180 milliseconds from the cue's unchanged birth time, a
-screenshot captured without another snapshot must equal the empty canvas with no corpse or shadow.
-The isolated fixture clock changes presentation time only; native animation frames still drive the
-production renderer.
+screenshot captured without another snapshot must equal a pool-only reference with no corpse or
+shadow. The isolated fixture clock changes presentation time only; native animation frames still
+drive the production renderer.
 
 ## Scenario: native death body remains readable over ordinary and burning-oil flames
 
@@ -64,6 +65,21 @@ The desktop project renders a single public lair replacing a hard-wall cell at t
 otherwise empty arena and attaches both the empty baseline and lair canvas. The lair image must
 differ from empty, providing a focused visual-review artifact for the taller body and upright front
 entrance; production geometry unit tests retain the precise orientation assertions.
+
+## Scenario: native blood pools remain beneath living actors and flames
+
+The desktop project creates recipient-safe player and mob pools in separate cells, then places a
+living actor over one and an ordinary flame over the other through a later public snapshot. Native
+empty, foreground-only, pools-only, and combined canvases must retain at least 80 percent of the
+foreground mask while adding visible pool pixels. This supplies a visual ground-decal artifact and
+proves actors and hazards remain legible above the cosmetic stains.
+
+## Scenario: duplicate death cues do not darken blood pools and lifecycle resets leave no ghosts
+
+The desktop project creates a pool from a fresh public cue, replays the identical envelope, and
+requires byte-identical native pixels so duplicates cannot darken the stain. Presentation reset,
+suspension followed by retained-envelope replay, room replacement, and a fresh admission snapshot
+must each reproduce the empty baseline with no old or reconstructed pools.
 
 ## Scenario: teleport, suspend, room replacement, context restoration, and destroy leave no ghosts
 

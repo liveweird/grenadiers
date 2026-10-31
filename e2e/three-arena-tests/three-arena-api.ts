@@ -7,6 +7,7 @@ export type SceneName =
   | 'actorOnly' | 'remoteActor' | 'lairOnly'
 export type DeathAppearance = 'one' | 'two' | 'three' | 'four' | 'mob'
 export type DeathOverlay = 'none' | 'flame' | 'burningOil'
+export type BloodLayerMode = 'subjectOnly' | 'poolOnly' | 'combined'
 export type FixtureState = {
   board: BoardName
   scene: SceneName | null
@@ -32,6 +33,22 @@ type FixtureApi = {
     bornAt: number
   }>
   settleDeathAge(bornAt: number, ageMs: number): Promise<number>
+  showPoolOnly(board: BoardName, appearance: DeathAppearance, index: number): Promise<{
+    state: FixtureState
+    bornAt: number
+  }>
+  replayDeath(
+    board: BoardName,
+    appearance: DeathAppearance,
+    index: number,
+    bornAt: number,
+  ): Promise<FixtureState>
+  resetDeathPresentation(board: BoardName, index: number): Promise<FixtureState>
+  showBloodLayers(
+    mode: BloodLayerMode,
+    generation: number,
+    bornAt: number | null,
+  ): Promise<{ state: FixtureState; bornAt: number }>
   showDeathOverlap(
     overlay: DeathOverlay,
     includeDeath: boolean,
@@ -114,6 +131,55 @@ export async function settleDeathAge(page: Page, bornAt: number, ageMs: number):
     { cueBornAt: bornAt, targetAge: ageMs },
   )
   expect(age).toBeGreaterThanOrEqual(ageMs)
+}
+
+export async function showPoolOnly(
+  page: Page,
+  appearance: DeathAppearance,
+  index: number,
+): Promise<number> {
+  const result = await page.evaluate(
+    ({ cueAppearance, cueIndex }) => window.grenadiersThreeArena
+      .showPoolOnly('large', cueAppearance, cueIndex),
+    { cueAppearance: appearance, cueIndex: index },
+  )
+  expect(result.state).toMatchObject({ canvasCount: 1, canvasVisible: true, destroyed: false })
+  return result.bornAt
+}
+
+export async function replayDeath(
+  page: Page,
+  appearance: DeathAppearance,
+  index: number,
+  bornAt: number,
+): Promise<void> {
+  await page.evaluate(
+    (input) => window.grenadiersThreeArena
+      .replayDeath('large', input.appearance, input.index, input.bornAt),
+    { appearance, index, bornAt },
+  )
+}
+
+export async function resetDeathPresentation(page: Page, index: number): Promise<void> {
+  await page.evaluate(
+    (cueIndex) => window.grenadiersThreeArena.resetDeathPresentation('large', cueIndex),
+    index,
+  )
+}
+
+export async function showBloodLayers(
+  page: Page,
+  mode: BloodLayerMode,
+  generation: number,
+  bornAt: number | null,
+): Promise<number> {
+  const result = await page.evaluate(
+    (input) => window.grenadiersThreeArena
+      .showBloodLayers(input.mode, input.generation, input.bornAt),
+    { mode, generation, bornAt },
+  )
+  expect(result.state).toMatchObject({ canvasCount: 1, canvasVisible: true, destroyed: false })
+  return result.bornAt
 }
 
 export async function showDeathOverlap(

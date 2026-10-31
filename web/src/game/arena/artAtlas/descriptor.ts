@@ -174,6 +174,7 @@ export function createArtDescriptor(): ArtDescriptor {
   addOriginalFrames(frames)
   addExtensions(frames)
   addDeathFrames(frames)
+  addFrame(frames, 'effect.bloodPool')
   return {
     frames,
     animations: animations(),

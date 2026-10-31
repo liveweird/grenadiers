@@ -34,8 +34,8 @@ describe('art atlas catalogue', () => {
       'reserved.actor.one.death', 'reserved.actor.two.death',
       'reserved.terrain.block.destruction', 'reserved.pickup.collection',
     ])
-    expect(manifest.frames).toHaveLength(185)
-    expect(manifest.frames.filter(({ status }) => status === 'baseline')).toHaveLength(181)
+    expect(manifest.frames).toHaveLength(186)
+    expect(manifest.frames.filter(({ status }) => status === 'baseline')).toHaveLength(182)
     expect(manifest.sheet).toEqual({ width: 1120, height: 2128, slotSize: 112, columns: 10 })
     expect(Object.keys(manifest.animations).filter((id) => id.endsWith('.walk'))).toHaveLength(16)
   })
@@ -137,8 +137,8 @@ describe('art atlas catalogue', () => {
       .concat([0, 1, 2, 3].map((frame) => `mob.death.${frame}`))
 
     expect(manifest.frames.slice(0, 165)).toEqual(adoptedSource.frames.slice(0, 165))
-    expect(manifest.frames.slice(165).map(({ id }) => id)).toEqual(deathIds)
-    expect(manifest.frames.slice(165).every(({ sourceRect, localBounds, pivot, footAnchor }) =>
+    expect(manifest.frames.slice(165, 185).map(({ id }) => id)).toEqual(deathIds)
+    expect(manifest.frames.slice(165, 185).every(({ sourceRect, localBounds, pivot, footAnchor }) =>
       sourceRect.width === 80 && sourceRect.height === 80
       && localBounds.x === -40 && localBounds.y === -44
       && localBounds.width === 80 && localBounds.height === 80
@@ -195,5 +195,18 @@ describe('art atlas catalogue', () => {
     const bounds = flame.frames[1].getLocalBounds()
     expect(bounds.y).toBe(2)
     flame.root.destroy({ children: true })
+  })
+})
+
+describe('blood-pool art atlas extension', () => {
+  it('appends the blood pool in the next physical slot without moving established artwork', () => {
+    const frames = createSourceManifest().frames
+    expect(frames.slice(0, 185)).toEqual(adoptedSource.frames.slice(0, 185))
+    expect(frames[185]).toEqual({
+      id: 'effect.bloodPool', status: 'baseline',
+      sourceRect: { x: 560, y: 2016, width: 48, height: 48 },
+      localBounds: { x: 0, y: 0, width: 48, height: 48 },
+      pivot: { x: 0, y: 0 },
+    })
   })
 })
